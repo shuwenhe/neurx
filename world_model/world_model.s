@@ -11,14 +11,12 @@ struct world_state {
     string                 last_action
     string                 last_observation
 }
-
 struct world_model_state {
     world_state            current
     []world_state          history
     int                    max_history
     bool                   initialized
 }
-
 func new_world_model() world_model_state {
     world_state init = world_state{
         snapshot_id:      "init",
@@ -40,7 +38,6 @@ func new_world_model() world_model_state {
         initialized: true,
     }
 }
-
 func world_model_update(wm world_model_state, string action, string observation) world_model_state {
     world_state next = wm.current
     next.step             = wm.current.step + 1
@@ -59,7 +56,6 @@ func world_model_update(wm world_model_state, string action, string observation)
         initialized: wm.initialized,
     }
 }
-
 func world_model_predict(wm world_model_state, string hypothetical_action) world_state {
     world_state predicted = wm.current
     predicted.step             = wm.current.step + 1
@@ -68,7 +64,6 @@ func world_model_predict(wm world_model_state, string hypothetical_action) world
     predicted.snapshot_id      = "predicted_" + string(predicted.step)
     return predicted
 }
-
 func world_model_rollback(wm world_model_state, int target_step) world_model_state {
     for i = len(wm.history) - 1; i >= 0; i-- {
         if wm.history[i].step == target_step {

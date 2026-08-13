@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape, trim}
 use std.io.println
-
 func main() {
     string config = runtime_env_get("NEURX_ROBOTICS_CONFIG", "workflows/robotics/train/config/sample.yaml")
     string steps_override = runtime_env_get("NEURX_ROBOTICS_STEPS", "")
@@ -41,17 +40,14 @@ func main() {
     println("Compiled robotics workflow entrypoint with obs=" + obs_dim + ", latent=" + latent_dim + ", act=" + act_dim + ", steps=" + max_steps + ", samples=" + sample_count + ", eval_every=" + eval_every + ", save_every=" + save_every + ", lr=" + learning_rate + ", task=" + task_name)
     0
 }
-
 func usage() {
     println("Usage: run_with_config.s")
     println("Configure via NEURX_ROBOTICS_CONFIG and NEURX_ROBOTICS_STEPS.")
 }
-
 func yaml_value(string file, string key) string {
     string cmd = "awk -F\":\" '/^" + key + "[[:space:]]*:/ {gsub(/ /, \"\", $2); print $2; exit}' " + runtime_shell_escape(file)
     trim(runtime_run_command_output(cmd))
 }
-
 func default_if_empty(string value, string fallback) string {
     if value == "" {
         return fallback

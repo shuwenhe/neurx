@@ -1,7 +1,6 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/ppo/ppo.s"
-
 struct otb_config {
     learning_rate: f32
     num_epochs: i32
@@ -19,7 +18,6 @@ struct otb_config {
     clip_epsilon: f32
     entropy_coeff: f32
 }
-
 struct otb_trainer {
     config: otb_config
     policy_model: *model
@@ -31,7 +29,6 @@ struct otb_trainer {
     advantage_variance_after: f32
     step_count: i64
 }
-
 func new_otb_trainer(
     otb_config config,
     *model policy,
@@ -57,7 +54,6 @@ func new_otb_trainer(
         step_count: 0,
     }
 }
-
 func (trainer *otb_trainer) compute_token_baseline(
     Tensor tokens,
     Tensor rewards
@@ -114,7 +110,6 @@ func (trainer *otb_trainer) compute_token_baseline(
     }
     return baselines
 }
-
 func (trainer *otb_trainer) compute_advantages(
     Tensor tokens,
     Tensor rewards
@@ -135,7 +130,6 @@ func (trainer *otb_trainer) compute_advantages(
     }
     return advantages
 }
-
 func (trainer *otb_trainer) train_step(
     []tensor prompts,
     []tensor responses,
@@ -197,7 +191,6 @@ func (trainer *otb_trainer) train_step(
         total_entropy / f32(num_updates)
     )
 }
-
 func (trainer *otb_trainer) train(DataLoader train_data) -> []f32 {
     let policy_losses: []f32 = []
     for batch in train_data {
@@ -227,7 +220,6 @@ func (trainer *otb_trainer) train(DataLoader train_data) -> []f32 {
     }
     return policy_losses
 }
-
 func (trainer *otb_trainer) get_variance_reduction() -> f32 {
     if trainer.advantage_variance_before < 1e-8 {
         return 0.0
@@ -235,13 +227,11 @@ func (trainer *otb_trainer) get_variance_reduction() -> f32 {
     return (trainer.advantage_variance_before - trainer.advantage_variance_after) /
            trainer.advantage_variance_before
 }
-
 func compute_variance_tensor(Tensor x) -> f32 {
     let mean = x.mean()
     let variance = (x - mean).pow(2).mean()
     return variance.item()
 }
-
 func compute_mean([]f32 values) -> f32 {
     if values.len() == 0 {
         return 0.0
@@ -252,7 +242,6 @@ func compute_mean([]f32 values) -> f32 {
     }
     return sum / f32(values.len())
 }
-
 func compute_variance([]f32 values, f32 mean) -> f32 {
     if values.len() == 0 {
         return 0.0

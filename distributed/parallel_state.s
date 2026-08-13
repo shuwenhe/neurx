@@ -1,5 +1,4 @@
 package neurx.distributed.parallel_state
-
 func group_world() int { 0 }
 
 func group_tensor_parallel() int { 1 }
@@ -25,14 +24,12 @@ struct model_parallel_config {
     int decode_context_parallel_size
     string backend
 }
-
 struct parallel_coordinates {
     int data_parallel_rank
     int pipeline_parallel_rank
     int prefill_context_parallel_rank
     int tensor_parallel_rank
 }
-
 struct group_coordinator {
     string name
     string backend
@@ -43,7 +40,6 @@ struct group_coordinator {
     int local_rank
     bool initialized
 }
-
 struct parallel_state {
     model_parallel_config config
     parallel_coordinates coordinates
@@ -58,14 +54,12 @@ struct parallel_state {
     bool model_parallel_initialized
     string error_message
 }
-
 func parallel_remainder(int value, int divisor) int {
     if divisor <= 0 {
         return 0
     }
     value - (value / divisor) * divisor
 }
-
 func copy_parallel_ranks([]int ranks) []int {
     []int copied = []int{cap: len(ranks)}
     int i = 0
@@ -75,14 +69,12 @@ func copy_parallel_ranks([]int ranks) []int {
     }
     copied
 }
-
 func normalized_parallel_size(int value) int {
     if value > 0 {
         return value
     }
     1
 }
-
 func normalize_model_parallel_config(model_parallel_config requested) model_parallel_config {
     requested.tensor_parallel_size = normalized_parallel_size(requested.tensor_parallel_size)
     requested.pipeline_parallel_size = normalized_parallel_size(requested.pipeline_parallel_size)
@@ -100,7 +92,6 @@ func normalize_model_parallel_config(model_parallel_config requested) model_para
     }
     requested
 }
-
 func model_parallel_config_valid(model_parallel_config requested) bool {
     model_parallel_config config = normalize_model_parallel_config(requested)
     int expected_world_size = config.tensor_parallel_size * config.pipeline_parallel_size * config.data_parallel_size * config.prefill_context_parallel_size
@@ -119,7 +110,6 @@ func model_parallel_config_valid(model_parallel_config requested) bool {
     }
     config.backend == "nccl" || config.backend == "gloo" || config.backend == "hccl" || config.backend == "cpu"
 }
-
 func parallel_coordinates_for(model_parallel_config config) parallel_coordinates {
     int model_domain = 0
     int data_parallel_rank = 0
@@ -140,7 +130,6 @@ func parallel_coordinates_for(model_parallel_config config) parallel_coordinates
         tensor_parallel_rank: parallel_remainder(context_tensor_rank, config.tensor_parallel_size),
     }
 }
-
 func empty_group_coordinator(string name, string backend, int global_rank, int local_rank) group_coordinator {
     group_coordinator {
         name: name,
@@ -153,7 +142,6 @@ func empty_group_coordinator(string name, string backend, int global_rank, int l
         initialized: false,
     }
 }
-
 func make_group_coordinator(string name, string backend, []int ranks, int global_rank, int local_rank) group_coordinator {
     int rank_in_group = 0 - 1
     int i = 0
@@ -174,7 +162,6 @@ func make_group_coordinator(string name, string backend, []int ranks, int global
         initialized: rank_in_group >= 0,
     }
 }
-
 func build_world_group(model_parallel_config config) group_coordinator {
     []int ranks = []int{cap: config.world_size}
     int i = 0
@@ -184,7 +171,6 @@ func build_world_group(model_parallel_config config) group_coordinator {
     }
     make_group_coordinator("world", config.backend, ranks, config.rank, config.local_rank)
 }
-
 func build_tensor_parallel_group(model_parallel_config config, parallel_coordinates coordinates) group_coordinator {
     []int ranks = []int{cap: config.tensor_parallel_size}
     int base = coordinates.data_parallel_rank * config.pipeline_parallel_size * config.prefill_context_parallel_size * config.tensor_parallel_size
@@ -197,7 +183,6 @@ func build_tensor_parallel_group(model_parallel_config config, parallel_coordina
     }
     make_group_coordinator("tp", config.backend, ranks, config.rank, config.local_rank)
 }
-
 func build_pipeline_parallel_group(model_parallel_config config, parallel_coordinates coordinates) group_coordinator {
     []int ranks = []int{cap: config.pipeline_parallel_size}
     int data_base = coordinates.data_parallel_rank * config.pipeline_parallel_size * config.prefill_context_parallel_size * config.tensor_parallel_size
@@ -209,7 +194,6 @@ func build_pipeline_parallel_group(model_parallel_config config, parallel_coordi
     }
     make_group_coordinator("pp", config.backend, ranks, config.rank, config.local_rank)
 }
-
 func build_data_parallel_group(model_parallel_config config, parallel_coordinates coordinates) group_coordinator {
     []int ranks = []int{cap: config.data_parallel_size}
     int model_domain = config.pipeline_parallel_size * config.prefill_context_parallel_size * config.tensor_parallel_size
@@ -222,7 +206,6 @@ func build_data_parallel_group(model_parallel_config config, parallel_coordinate
     }
     make_group_coordinator("dp", config.backend, ranks, config.rank, config.local_rank)
 }
-
 func build_prefill_context_parallel_group(model_parallel_config config, parallel_coordinates coordinates) group_coordinator {
     []int ranks = []int{cap: config.prefill_context_parallel_size}
     int data_base = coordinates.data_parallel_rank * config.pipeline_parallel_size * config.prefill_context_parallel_size * config.tensor_parallel_size
@@ -234,7 +217,6 @@ func build_prefill_context_parallel_group(model_parallel_config config, parallel
     }
     make_group_coordinator("pcp", config.backend, ranks, config.rank, config.local_rank)
 }
-
 func build_decode_context_parallel_group(model_parallel_config config, parallel_coordinates coordinates) group_coordinator {
     int dcp_size = config.decode_context_parallel_size
     []int ranks = []int{cap: dcp_size}
@@ -252,7 +234,6 @@ func build_decode_context_parallel_group(model_parallel_config config, parallel_
     }
     make_group_coordinator("dcp", config.backend, ranks, config.rank, config.local_rank)
 }
-
 func build_expert_parallel_group(model_parallel_config config, parallel_coordinates coordinates) group_coordinator {
     int expert_world_size = config.data_parallel_size * config.prefill_context_parallel_size * config.tensor_parallel_size
     []int ranks = []int{cap: expert_world_size}
@@ -274,7 +255,6 @@ func build_expert_parallel_group(model_parallel_config config, parallel_coordina
     }
     make_group_coordinator("ep", config.backend, ranks, config.rank, config.local_rank)
 }
-
 func init_distributed_environment(model_parallel_config requested) parallel_state {
     model_parallel_config config = normalize_model_parallel_config(requested)
     parallel_coordinates coordinates = parallel_coordinates_for(config)
@@ -309,7 +289,6 @@ func init_distributed_environment(model_parallel_config requested) parallel_stat
         error_message: "",
     }
 }
-
 func get_parallel_group(parallel_state state, int kind) group_coordinator {
     if kind == group_tensor_parallel() {
         return state.tensor_parallel_group
@@ -331,47 +310,39 @@ func get_parallel_group(parallel_state state, int kind) group_coordinator {
     }
     state.world_group
 }
-
 func group_first_rank(group_coordinator group) int {
     if len(group.ranks) == 0 {
         return 0 - 1
     }
     group.ranks[0]
 }
-
 func group_last_rank(group_coordinator group) int {
     if len(group.ranks) == 0 {
         return 0 - 1
     }
     group.ranks[len(group.ranks) - 1]
 }
-
 func group_next_rank(group_coordinator group) int {
     if !group.initialized || group.world_size == 0 {
         return 0 - 1
     }
     group.ranks[parallel_remainder(group.rank_in_group + 1, group.world_size)]
 }
-
 func group_previous_rank(group_coordinator group) int {
     if !group.initialized || group.world_size == 0 {
         return 0 - 1
     }
     group.ranks[parallel_remainder(group.rank_in_group + group.world_size - 1, group.world_size)]
 }
-
 func group_is_first_rank(group_coordinator group) bool {
     group.initialized && group.rank_in_group == 0
 }
-
 func group_is_last_rank(group_coordinator group) bool {
     group.initialized && group.rank_in_group == group.world_size - 1
 }
-
 func model_parallel_is_initialized(parallel_state state) bool {
     state.distributed_initialized && state.model_parallel_initialized
 }
-
 func destroy_group_coordinator(group_coordinator group) group_coordinator {
     group_coordinator {
         name: group.name,
@@ -384,7 +355,6 @@ func destroy_group_coordinator(group_coordinator group) group_coordinator {
         initialized: false,
     }
 }
-
 func destroy_model_parallel(parallel_state state) parallel_state {
     parallel_state {
         config: state.config,
@@ -401,7 +371,6 @@ func destroy_model_parallel(parallel_state state) parallel_state {
         error_message: state.error_message,
     }
 }
-
 func destroy_distributed_environment(parallel_state state) parallel_state {
     parallel_state {
         config: state.config,

@@ -1,5 +1,4 @@
 package neurx.inference.runtime.worker_cluster
-
 func worker_starting_status() int { 1 }
 
 func worker_ready_status() int { 2 }
@@ -19,7 +18,6 @@ struct parallel_topology {
     int expert_parallel_size
     int world_size
 }
-
 struct inference_worker {
     string worker_id
     string node_id
@@ -37,7 +35,6 @@ struct inference_worker {
     []string request_ids
     string failure_reason
 }
-
 struct worker_cluster_state {
     parallel_topology topology
     []inference_worker workers
@@ -48,7 +45,6 @@ struct worker_cluster_state {
     bool initialized
     string error_message
 }
-
 struct worker_cluster_result {
     worker_cluster_state state
     inference_worker worker
@@ -56,7 +52,6 @@ struct worker_cluster_result {
     bool success
     string error_message
 }
-
 func worker_empty() inference_worker {
     inference_worker worker
     worker.worker_id = ""
@@ -76,7 +71,6 @@ func worker_empty() inference_worker {
     worker.failure_reason = ""
     worker
 }
-
 func worker_new_result(worker_cluster_state state, inference_worker worker, bool success, string error_message) worker_cluster_result {
     worker_cluster_result result
     result.state = state
@@ -86,7 +80,6 @@ func worker_new_result(worker_cluster_state state, inference_worker worker, bool
     result.error_message = error_message
     result
 }
-
 func worker_normalize_topology(parallel_topology topology) parallel_topology {
     if topology.tensor_parallel_size <= 0 { topology.tensor_parallel_size = 1 }
     if topology.pipeline_parallel_size <= 0 { topology.pipeline_parallel_size = 1 }
@@ -95,14 +88,12 @@ func worker_normalize_topology(parallel_topology topology) parallel_topology {
     topology.world_size = topology.tensor_parallel_size * topology.pipeline_parallel_size * topology.data_parallel_size
     topology
 }
-
 func worker_topology_valid(parallel_topology topology) bool {
     if topology.tensor_parallel_size <= 0 || topology.pipeline_parallel_size <= 0 || topology.data_parallel_size <= 0 || topology.expert_parallel_size <= 0 { return false }
     if topology.world_size != topology.tensor_parallel_size * topology.pipeline_parallel_size * topology.data_parallel_size { return false }
     int expert_domain = topology.tensor_parallel_size * topology.data_parallel_size
     expert_domain / topology.expert_parallel_size * topology.expert_parallel_size == expert_domain
 }
-
 func new_worker_cluster(parallel_topology topology, int heartbeat_timeout_ms, int max_restarts) worker_cluster_state {
     worker_cluster_state state
     state.topology = worker_normalize_topology(topology)
@@ -118,11 +109,9 @@ func new_worker_cluster(parallel_topology topology, int heartbeat_timeout_ms, in
     if !state.initialized { state.error_message = "invalid parallel topology" }
     state
 }
-
 func worker_at(worker_cluster_state state, int index) inference_worker {
     state.workers[index]
 }
-
 func worker_find(worker_cluster_state state, string worker_id) int {
     int i = 0
     while i < len(state.workers) {
@@ -131,7 +120,6 @@ func worker_find(worker_cluster_state state, string worker_id) int {
     }
     -1
 }
-
 func worker_find_rank(worker_cluster_state state, int global_rank) int {
     int i = 0
     while i < len(state.workers) {
@@ -140,7 +128,6 @@ func worker_find_rank(worker_cluster_state state, int global_rank) int {
     }
     -1
 }
-
 func worker_string_contains([]string values, string value) bool {
     int i = 0
     while i < len(values) {
@@ -149,11 +136,9 @@ func worker_string_contains([]string values, string value) bool {
     }
     false
 }
-
 func worker_string_at([]string values, int index) string {
     values[index]
 }
-
 func worker_string_remove([]string values, string value) []string {
     []string filtered = []string{cap: len(values)}
     int i = 0
@@ -163,7 +148,6 @@ func worker_string_remove([]string values, string value) []string {
     }
     filtered
 }
-
 func worker_build(string worker_id, string node_id, int global_rank, int local_rank, int device_id, parallel_topology topology, int now_ms) inference_worker {
     inference_worker worker
     int replica_width = topology.tensor_parallel_size * topology.pipeline_parallel_size
@@ -186,7 +170,6 @@ func worker_build(string worker_id, string node_id, int global_rank, int local_r
     worker.failure_reason = ""
     worker
 }
-
 func worker_register(worker_cluster_state state, string worker_id, string node_id, int global_rank, int local_rank, int device_id, int now_ms) worker_cluster_result {
     if !state.initialized { return worker_new_result(state, worker_empty(), false, state.error_message) }
     if worker_id == "" || node_id == "" || global_rank < 0 || global_rank >= state.topology.world_size || local_rank < 0 || device_id < 0 {
@@ -199,7 +182,6 @@ func worker_register(worker_cluster_state state, string worker_id, string node_i
     state.workers = append(state.workers, worker)
     worker_new_result(state, worker, true, "")
 }
-
 func worker_mark_ready(worker_cluster_state state, string worker_id, int generation, int now_ms) worker_cluster_result {
     int index = worker_find(state, worker_id)
     if index < 0 { return worker_new_result(state, worker_empty(), false, "worker not found") }
@@ -215,7 +197,6 @@ func worker_mark_ready(worker_cluster_state state, string worker_id, int generat
     state.workers[index] = worker
     worker_new_result(state, worker, true, "")
 }
-
 func worker_heartbeat(worker_cluster_state state, string worker_id, int generation, int now_ms) worker_cluster_result {
     int index = worker_find(state, worker_id)
     if index < 0 { return worker_new_result(state, worker_empty(), false, "worker not found") }
@@ -228,7 +209,6 @@ func worker_heartbeat(worker_cluster_state state, string worker_id, int generati
     state.workers[index] = worker
     worker_new_result(state, worker, true, "")
 }
-
 func worker_assign(worker_cluster_state state, string worker_id, string request_id) worker_cluster_result {
     int index = worker_find(state, worker_id)
     if index < 0 { return worker_new_result(state, worker_empty(), false, "worker not found") }
@@ -241,7 +221,6 @@ func worker_assign(worker_cluster_state state, string worker_id, string request_
     state.workers[index] = worker
     worker_new_result(state, worker, true, "")
 }
-
 func worker_release(worker_cluster_state state, string worker_id, string request_id) worker_cluster_result {
     int index = worker_find(state, worker_id)
     if index < 0 { return worker_new_result(state, worker_empty(), false, "worker not found") }
@@ -251,7 +230,6 @@ func worker_release(worker_cluster_state state, string worker_id, string request
     state.workers[index] = worker
     worker_new_result(state, worker, true, "")
 }
-
 func worker_fail(worker_cluster_state state, string worker_id, string reason) worker_cluster_result {
     int index = worker_find(state, worker_id)
     if index < 0 { return worker_new_result(state, worker_empty(), false, "worker not found") }
@@ -267,7 +245,6 @@ func worker_fail(worker_cluster_state state, string worker_id, string reason) wo
     result.worker = worker
     result
 }
-
 func worker_begin_recovery(worker_cluster_state state, string worker_id, int now_ms) worker_cluster_result {
     int index = worker_find(state, worker_id)
     if index < 0 { return worker_new_result(state, worker_empty(), false, "worker not found") }
@@ -286,7 +263,6 @@ func worker_begin_recovery(worker_cluster_state state, string worker_id, int now
     state.workers[index] = worker
     worker_new_result(state, worker, true, "")
 }
-
 func worker_expire_heartbeats(worker_cluster_state state, int now_ms) worker_cluster_result {
     worker_cluster_result result = worker_new_result(state, worker_empty(), true, "")
     int i = 0
@@ -313,7 +289,6 @@ func worker_expire_heartbeats(worker_cluster_state state, int now_ms) worker_clu
     result.state = state
     result
 }
-
 func worker_ready_count(worker_cluster_state state) int {
     int count = 0
     int i = 0
@@ -324,11 +299,9 @@ func worker_ready_count(worker_cluster_state state) int {
     }
     count
 }
-
 func worker_cluster_ready(worker_cluster_state state) bool {
     state.initialized && len(state.workers) == state.topology.world_size && worker_ready_count(state) == state.topology.world_size
 }
-
 func worker_replica_ready(worker_cluster_state state, int data_rank) bool {
     if data_rank < 0 || data_rank >= state.topology.data_parallel_size { return false }
     int expected = state.topology.tensor_parallel_size * state.topology.pipeline_parallel_size

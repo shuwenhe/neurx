@@ -1,5 +1,4 @@
 package neurx.inference.kv.kv_event_stream
-
 func kv_event_block_stored() int { 1 }
 
 func kv_event_block_removed() int { 2 }
@@ -18,7 +17,6 @@ struct kv_event_stream_config {
     int worker_count
     bool enabled
 }
-
 struct kv_event_stream_state {
     kv_event_stream_config config
     []int sequences
@@ -34,13 +32,11 @@ struct kv_event_stream_state {
     int acknowledged_sequence
     bool initialized
 }
-
 struct kv_event_publish_result {
     kv_event_stream_state state
     int sequence
     bool published
 }
-
 struct kv_event_poll_result {
     []int sequences
     []int event_types
@@ -50,19 +46,16 @@ struct kv_event_poll_result {
     int event_count
     int high_watermark
 }
-
 func kv_event_zero_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
     while i < capacity { values[i] = 0; i = i + 1 }
     values
 }
-
 func kv_event_config_valid(kv_event_stream_config config) bool {
     if !config.enabled { return true }
     config.capacity > 0 && config.data_parallel_rank >= 0 && config.worker_count > 0
 }
-
 func init_kv_event_stream(kv_event_stream_config config) kv_event_stream_state {
     bool initialized = kv_event_config_valid(config)
     kv_event_stream_state {
@@ -81,19 +74,16 @@ func init_kv_event_stream(kv_event_stream_config config) kv_event_stream_state {
         initialized: initialized,
     }
 }
-
 func kv_event_worker_marker(int worker_id) int {
     int marker = 1
     int i = 0
     while i < worker_id { marker = marker * 2; i = i + 1 }
     marker
 }
-
 func kv_event_marker_present(int mask, int marker) bool {
     int quotient = mask / marker
     quotient - (quotient / 2) * 2 == 1
 }
-
 func kv_event_worker_mask_complete(int mask, int worker_count) bool {
     int worker = 0
     while worker < worker_count {
@@ -102,7 +92,6 @@ func kv_event_worker_mask_complete(int mask, int worker_count) bool {
     }
     true
 }
-
 func kv_event_shift_left(kv_event_stream_state state) kv_event_stream_state {
     int i = 1
     while i < state.event_count {
@@ -119,7 +108,6 @@ func kv_event_shift_left(kv_event_stream_state state) kv_event_stream_state {
     state.dropped_events = state.dropped_events + 1
     state
 }
-
 func publish_kv_event(kv_event_stream_state state, int event_type, int block_hash, int parent_hash, int medium, int group_index, int worker_id) kv_event_publish_result {
     kv_event_stream_state current = state
     if !current.initialized || !current.config.enabled || event_type < kv_event_block_stored() || event_type > kv_event_all_blocks_cleared() || worker_id < 0 || worker_id >= current.config.worker_count {
@@ -148,7 +136,6 @@ func publish_kv_event(kv_event_stream_state state, int event_type, int block_has
     current.next_sequence = sequence + 1
     kv_event_publish_result {state: current, sequence: sequence, published: true}
 }
-
 func poll_kv_events(kv_event_stream_state state, int after_sequence, bool common_only) kv_event_poll_result {
     []int sequences = kv_event_zero_array(state.event_count)
     []int types = kv_event_zero_array(state.event_count)
@@ -173,12 +160,10 @@ func poll_kv_events(kv_event_stream_state state, int after_sequence, bool common
     }
     kv_event_poll_result {sequences: sequences, event_types: types, block_hashes: hashes, mediums: mediums, group_indices: groups, event_count: count, high_watermark: high_watermark}
 }
-
 func acknowledge_kv_events(kv_event_stream_state state, int sequence) kv_event_stream_state {
     if sequence > state.acknowledged_sequence { state.acknowledged_sequence = sequence }
     state
 }
-
 func clear_kv_events(kv_event_stream_state state) kv_event_stream_state {
     state.event_count = 0
     state.acknowledged_sequence = state.next_sequence - 1

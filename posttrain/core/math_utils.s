@@ -1,6 +1,5 @@
 package neurx.posttrain.core.math_utils
 use std.io.println
-
 func exp_taylor_s(float x) float {
     float result = 1.0
     float term = 1.0
@@ -18,7 +17,6 @@ func exp_taylor_s(float x) float {
     }
     result
 }
-
 func exp_s(float x) float {
     if x > 100.0 {
         return 1.0e38
@@ -28,7 +26,6 @@ func exp_s(float x) float {
     }
     exp_taylor_s(x)
 }
-
 func ln_series_s(float x) float {
     if x <= 0.0 {
         println("[ERROR] ln: argument must be positive")
@@ -70,11 +67,9 @@ func ln_series_s(float x) float {
     result = ln_x + ln2 * float_from_int_math(exponent)
     result
 }
-
 func log_s(float x) float {
     ln_series_s(x)
 }
-
 func sqrt_s(float x) float {
     if x < 0.0 {
         println("[ERROR] sqrt: argument must be non-negative")
@@ -98,7 +93,6 @@ func sqrt_s(float x) float {
     }
     guess
 }
-
 func rsqrt_s(float x) float {
     if x <= 0.0 {
         println("[ERROR] rsqrt: argument must be positive")
@@ -110,7 +104,6 @@ func rsqrt_s(float x) float {
     }
     1.0 / sqrt_x
 }
-
 func sin_s(float x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
@@ -136,7 +129,6 @@ func sin_s(float x) float {
     }
     result
 }
-
 func cos_s(float x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
@@ -162,7 +154,6 @@ func cos_s(float x) float {
     }
     result
 }
-
 func tan_s(float x) float {
     float cos_x = cos_s(x)
     if cos_x == 0.0 {
@@ -171,34 +162,28 @@ func tan_s(float x) float {
     }
     sin_s(x) / cos_x
 }
-
 func abs_s(float x) float {
     if x < 0.0 {
         return 0.0 - x
     }
     x
 }
-
 func max_s(float a, float b) float {
     if a > b { a } else { b }
 }
-
 func min_s(float a, float b) float {
     if a < b { a } else { b }
 }
-
 func clamp_s(float x, float min_val, float max_val) float {
     if x < min_val { min_val }
     else if x > max_val { max_val }
     else { x }
 }
-
 func sign_s(float x) float {
     if x > 0.0 { 1.0 }
     else if x < 0.0 { -1.0 }
     else { 0.0 }
 }
-
 func pow_int_s(float x, int n) float {
     if n == 0 { return 1.0 }
     if n == 1 { return x }
@@ -211,28 +196,23 @@ func pow_int_s(float x, int n) float {
     }
     result
 }
-
 func relu_s(float x) float {
     if x > 0.0 { x } else { 0.0 }
 }
-
 func sigmoid_s(float x) float {
     1.0 / (1.0 + exp_s(0.0 - x))
 }
-
 func tanh_s(float x) float {
     float exp_pos = exp_s(x)
     float exp_neg = exp_s(0.0 - x)
     (exp_pos - exp_neg) / (exp_pos + exp_neg)
 }
-
 func softplus_s(float x) float {
     if x > 20.0 {
         return x
     }
     log_s(1.0 + exp_s(x))
 }
-
 func float_from_int_math(int n) float {
     float result = 0.0
     if n == 0 { return 0.0 }
@@ -246,7 +226,6 @@ func float_from_int_math(int n) float {
     if neg { return 0.0 - result }
     result
 }
-
 func test_math_utils_s() {
     println("Testing math utilities...")
     float exp_1 = exp_s(1.0)
@@ -260,7 +239,6 @@ func test_math_utils_s() {
     float cos_0 = cos_s(0.0)
     println("cos(0) = " + float_to_str_math(cos_0) + " (expect 1.0)")
 }
-
 func float_to_str_math(float x) string {
     string result = ""
     bool neg = false
@@ -270,7 +248,6 @@ func float_to_str_math(float x) string {
     result = if neg { "-" + result } else { result }
     result
 }
-
 func int_from_float_math(float x) int {
     int result = 0
     while float_from_int_math(result + 1) <= x {
@@ -278,7 +255,6 @@ func int_from_float_math(float x) int {
     }
     result
 }
-
 func int_to_str_math(int n) string {
     if n == 0 { return "0" }
     string result = ""

@@ -1,14 +1,11 @@
 package main
-
 struct inner {
     int value
 }
-
 struct outer {
     string name
     inner data
 }
-
 func main() {
     println("=== Test: Can we even SET nested fields? ===")
     outer obj

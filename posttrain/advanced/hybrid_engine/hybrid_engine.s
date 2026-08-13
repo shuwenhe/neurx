@@ -2,7 +2,6 @@ package neurx.posttrain.advanced.hybrid_engine
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
 use neurx.distributed.{distributed_context}
-
 struct hybrid_engine_config {
     int tensor_parallel_size_train
     int tensor_parallel_size_gen
@@ -13,7 +12,6 @@ struct hybrid_engine_config {
     bool use_zero_redundancy_optimizer
     int resharding_buffer_size
 }
-
 struct model_partition {
     []tensor params
     int tp_rank
@@ -21,7 +19,6 @@ struct model_partition {
     int dp_rank
     string mode
 }
-
 struct resharding_plan {
     []int src_ranks
     []int dst_ranks
@@ -29,7 +26,6 @@ struct resharding_plan {
     []int sizes
     bool use_alltoall
 }
-
 struct hybrid_engine {
     module model
     hybrid_engine_config config
@@ -38,7 +34,6 @@ struct hybrid_engine {
     distributed_context ctx
     resharding_plan plan
 }
-
 func new_hybrid_engine_config() hybrid_engine_config {
     hybrid_engine_config {
         tensor_parallel_size_train: 8,
@@ -51,7 +46,6 @@ func new_hybrid_engine_config() hybrid_engine_config {
         resharding_buffer_size: 1024 * 1024 * 1024,
     }
 }
-
 func compute_resharding_plan(
     model_partition src,
     model_partition dst,
@@ -85,7 +79,6 @@ func compute_resharding_plan(
         use_alltoall: use_alltoall,
     }
 }
-
 func execute_resharding(
     hybrid_engine engine,
     string target_mode
@@ -152,17 +145,14 @@ func execute_resharding(
         }
     }
 }
-
 func hybrid_engine_switch_to_generation(hybrid_engine engine) {
     execute_resharding(engine, "gen")
     engine.model.load_parameters(engine.gen_partition.params)
 }
-
 func hybrid_engine_switch_to_training(hybrid_engine engine) {
     execute_resharding(engine, "train")
     engine.model.load_parameters(engine.train_partition.params)
 }
-
 func new_hybrid_engine(
     module model,
     hybrid_engine_config config,

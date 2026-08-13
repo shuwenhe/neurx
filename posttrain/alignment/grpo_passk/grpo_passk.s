@@ -1,6 +1,5 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
-
 struct grpo_pass_k_config {
     learning_rate: f32
     num_epochs: i32
@@ -18,7 +17,6 @@ struct grpo_pass_k_config {
     use_value_loss: bool
     value_loss_coeff: f32
 }
-
 struct code_evaluation {
     compiles: bool
     passes_tests: bool
@@ -28,7 +26,6 @@ struct code_evaluation {
     execution_time: f32
     correctness_score: f32
 }
-
 struct grpo_pass_k_trainer {
     config: GRPOPassKConfig
     policy_model: *model
@@ -39,7 +36,6 @@ struct grpo_pass_k_trainer {
     success_rate: f32
     step_count: i64
 }
-
 func new_grpo_passk_trainer(
     GRPOPassKConfig config,
     *model policy,
@@ -62,7 +58,6 @@ func new_grpo_passk_trainer(
         step_count: 0,
     }
 }
-
 func evaluate_code(string code, []test_case test_cases) -> CodeEvaluation {
     return code_evaluation{
         compiles: true,
@@ -74,7 +69,6 @@ func evaluate_code(string code, []test_case test_cases) -> CodeEvaluation {
         correctness_score: 1.0,
     }
 }
-
 func compute_passk([]code_evaluation evaluations, i32 k) -> f32 {
     let num_passed = 0
     for eval in evaluations {
@@ -87,7 +81,6 @@ func compute_passk([]code_evaluation evaluations, i32 k) -> f32 {
     }
     return 0.0
 }
-
 func (trainer *grpo_pass_k_trainer) compute_code_reward(CodeEvaluation eval) -> f32 {
     let reward: f32 = 0.0
     if eval.compiles {
@@ -98,7 +91,6 @@ func (trainer *grpo_pass_k_trainer) compute_code_reward(CodeEvaluation eval) -> 
     reward += eval.style_score * trainer.config.style_weight
     return reward
 }
-
 func (trainer *grpo_pass_k_trainer) compute_passk_advantages(
     [][]code_evaluation evaluations,
     [][]f32 rewards
@@ -129,7 +121,6 @@ func (trainer *grpo_pass_k_trainer) compute_passk_advantages(
     }
     return advantages
 }
-
 func (trainer *grpo_pass_k_trainer) normalize_advantages(
     [][]f32 advantages
 ) -> [][]f32 {
@@ -158,7 +149,6 @@ func (trainer *grpo_pass_k_trainer) normalize_advantages(
     }
     return normalized
 }
-
 func (trainer *grpo_pass_k_trainer) train_step(
     []string prompts,
     [][]test_case test_cases
@@ -243,7 +233,6 @@ func (trainer *grpo_pass_k_trainer) train_step(
         avg_passk
     )
 }
-
 func compute_mean([]f32 values) -> f32 {
     if values.len() == 0 {
         return 0.0
@@ -254,7 +243,6 @@ func compute_mean([]f32 values) -> f32 {
     }
     return sum / f32(values.len())
 }
-
 func compute_std([]f32 values, f32 mean) -> f32 {
     if values.len() == 0 {
         return 1.0
@@ -265,7 +253,6 @@ func compute_std([]f32 values, f32 mean) -> f32 {
     }
     return sqrt(sum_sq / f32(values.len()))
 }
-
 func clamp_scalar(f32 x, f32 min_val, f32 max_val) -> f32 {
     if x < min_val {
         return min_val
@@ -275,15 +262,12 @@ func clamp_scalar(f32 x, f32 min_val, f32 max_val) -> f32 {
     }
     return x
 }
-
 func sort([]f32 values) -> []f32 {
     return values
 }
-
 func concat_prompt_code(string prompt, string code) -> Tensor {
     return tensor_zeros([1])
 }
-
 struct test_case {
     input: string
     expected_output: string

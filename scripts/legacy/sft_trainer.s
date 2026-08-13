@@ -54,7 +54,6 @@ type sft_metric struct {
     float64 throughput
     int64 timestamp
 }
-
 func (trainer *sft_trainer) load_instruction_data(data_path string) {
     fmt.Printf("[SFT] Loading instruction data from %s\n", data_path)
     categories := []string{"math", "writing", "coding", "qa", "reasoning"}
@@ -80,7 +79,6 @@ func (trainer *sft_trainer) load_instruction_data(data_path string) {
     fmt.Printf("  Loaded %d instruction examples\n", len(trainer.dataset.examples))
     fmt.Printf("  Total tokens: %d\n", trainer.dataset.total_tokens)
 }
-
 func (trainer *sft_trainer) tokenize(text string) []int {
     words := strings.Split(text, " ")
     tokens := []int{}
@@ -90,7 +88,6 @@ func (trainer *sft_trainer) tokenize(text string) []int {
     }
     return tokens
 }
-
 func (trainer *sft_trainer) causal_language_modeling_loss(logits [][]float64, []int labels) float64 {
     loss := 0.0
     for i := 0; i < len(labels)-1; i++ {
@@ -110,11 +107,9 @@ func (trainer *sft_trainer) causal_language_modeling_loss(logits [][]float64, []
     }
     return loss / float64(len(labels)-1)
 }
-
 func (trainer *sft_trainer) perplexity(loss float64) float64 {
     return math.Exp(loss)
 }
-
 func (trainer *sft_trainer) create_batch(examples []instruction_example) ([][]int, [][]int) {
     inputs := [][]int{}
     labels := [][]int{}
@@ -132,7 +127,6 @@ func (trainer *sft_trainer) create_batch(examples []instruction_example) ([][]in
     }
     return inputs, labels
 }
-
 func (trainer *sft_trainer) train_step(batch_inputs [][]int, [][]int batch_labels) float64 {
     total_loss := 0.0
     for i := 0; i < len(batch_inputs); i++ {
@@ -146,7 +140,6 @@ func (trainer *sft_trainer) train_step(batch_inputs [][]int, [][]int batch_label
     trainer.step_count += 1
     return total_loss / float64(len(batch_inputs))
 }
-
 func (trainer *sft_trainer) model_forward(tokens []int) [][]float64 {
     batch_size := 1
     vocab_size := 128000
@@ -161,7 +154,6 @@ func (trainer *sft_trainer) model_forward(tokens []int) [][]float64 {
     }
     return logits
 }
-
 func (trainer *sft_trainer) evaluate(dataset instruction_dataset) sft_metric {
     fmt.Printf("[SFT] Evaluating on %d examples\n", len(dataset.examples))
     total_loss := 0.0
@@ -186,7 +178,6 @@ func (trainer *sft_trainer) evaluate(dataset instruction_dataset) sft_metric {
     }
     return metric
 }
-
 func (trainer *sft_trainer) get_learning_rate() float64 {
     if trainer.step_count < trainer.config.warmup_steps {
         return trainer.config.learning_rate * float64(trainer.step_count) / float64(trainer.config.warmup_steps)
@@ -196,7 +187,6 @@ func (trainer *sft_trainer) get_learning_rate() float64 {
         return trainer.config.learning_rate * 0.5 * (1.0 + math.Cos(math.Pi*progress))
     }
 }
-
 func (trainer *sft_trainer) calculate_bleu(reference []int, []int generated, int n_gram) float64 {
     if len(generated) == 0 {
         return 0.0
@@ -225,7 +215,6 @@ func (trainer *sft_trainer) calculate_bleu(reference []int, []int generated, int
     }
     return float64(matches) / float64(total)
 }
-
 func (trainer *sft_trainer) calculate_rouge_l(reference []int, []int generated) float64 {
     if len(reference) == 0 || len(generated) == 0 {
         return 0.0
@@ -239,7 +228,6 @@ func (trainer *sft_trainer) calculate_rouge_l(reference []int, []int generated) 
     f1 := 2 * (recall * precision) / (recall + precision)
     return f1
 }
-
 func (trainer *sft_trainer) compute_lcs(a []int, []int b) int {
     dp := make([][]int, len(a)+1)
     for i := range dp {
@@ -260,7 +248,6 @@ func (trainer *sft_trainer) compute_lcs(a []int, []int b) int {
     }
     return dp[len(a)][len(b)]
 }
-
 func new_sft_trainer(config sft_config) *sft_trainer {
     return &sft_trainer{
         config: config,
@@ -290,7 +277,6 @@ func new_sft_trainer(config sft_config) *sft_trainer {
         training_history: []sft_metric{},
     }
 }
-
 func (trainer *sft_trainer) train() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Supervised Fine-Tuning (SFT) for Instruction Following║")
@@ -318,11 +304,9 @@ func (trainer *sft_trainer) train() {
     }
     trainer.print_summary()
 }
-
 func (trainer *sft_trainer) save_checkpoint(step int) {
     fmt.Printf("[SFT] Saving checkpoint at step %d\n", step)
 }
-
 func (trainer *sft_trainer) print_summary() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  SFT Training Summary                                 ║")

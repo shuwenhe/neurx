@@ -1,5 +1,4 @@
 package neurx.inference.sampling
-
 func greedy_decode(
     [][]float all_logits,
     sampling_config config,
@@ -20,7 +19,6 @@ func greedy_decode(
     }
     generated
 }
-
 func argmax([]float arr) int {
     if len(arr) == 0 { return -1 }
     int best_idx = 0
@@ -33,7 +31,6 @@ func argmax([]float arr) int {
     }
     best_idx
 }
-
 func argmin([]float arr) int {
     if len(arr) == 0 { return -1 }
     int best_idx = 0
@@ -46,7 +43,6 @@ func argmin([]float arr) int {
     }
     best_idx
 }
-
 func top_k_sample(
     []float logits,
     sampling_config config,

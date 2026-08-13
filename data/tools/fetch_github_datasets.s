@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape, trim}
 use std.io.println
-
 func main() {
     string root = dataset_root()
     bool force = runtime_env_get("NEURX_GITHUB_DATASETS_FORCE", "0") == "1"
@@ -48,7 +47,6 @@ func main() {
     println("All done. Data available under " + root)
     rc
 }
-
 func dataset_root() string {
     string root = runtime_run_command_output("cd dataset 2>/dev/null && pwd || pwd")
     if root == "" {
@@ -56,7 +54,6 @@ func dataset_root() string {
     }
     root
 }
-
 func clone_from_file(string root, string list_file, bool force) int {
     string list_text = runtime_run_command_output("cat " + runtime_shell_escape(list_file))
     []string lines = split_lines(list_text)
@@ -82,7 +79,6 @@ func clone_from_file(string root, string list_file, bool force) int {
     }
     0
 }
-
 func split_commas(string text) []string {
     []string out = []string{cap: 0}
     string current = ""
@@ -104,7 +100,6 @@ func split_commas(string text) []string {
     }
     out
 }
-
 func clone_repo(string url, string dest) bool {
     if runtime_run_command("test -d " + runtime_shell_escape(dest)).ok {
         println("Destination " + dest + " already exists - skipping")
@@ -116,7 +111,6 @@ func clone_repo(string url, string dest) bool {
     println("git clone failed for " + url + ", trying full clone")
     runtime_run_command("git clone " + runtime_shell_escape(url) + " " + runtime_shell_escape(dest)).ok
 }
-
 func known_repo(string key) string {
     if key == "human-eval" {
         return runtime_env_get("NEURX_HUMAN_EVAL_REPO_URL", "https:
@@ -138,14 +132,12 @@ func known_repo(string key) string {
     }
     ""
 }
-
 func handle_mbpp(string root, string dest) {
     if runtime_run_command("test -d " + runtime_shell_escape(dest + "/google-research/mbpp")).ok {
         _ = runtime_run_command("mv " + runtime_shell_escape(dest + "/google-research/mbpp") + " " + runtime_shell_escape(root + "/mbpp"))
         _ = runtime_run_command("rm -rf " + runtime_shell_escape(dest))
     }
 }
-
 func normalize_name(string key) string {
     int i = 0
     string out = ""
@@ -160,7 +152,6 @@ func normalize_name(string key) string {
     }
     out
 }
-
 func basename(string path) string {
     int last = last_index_of(path, "/")
     if last < 0 {
@@ -173,7 +164,6 @@ func basename(string path) string {
     }
     out
 }
-
 func split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current = ""
@@ -197,7 +187,6 @@ func split_lines(string text) []string {
     }
     lines
 }
-
 func first_token(string text) string {
     int i = 0
     while i < len(text) {
@@ -208,11 +197,9 @@ func first_token(string text) string {
     }
     text
 }
-
 func starts_with(string text, string prefix) bool {
     len(prefix) <= len(text) && slice(text, 0, len(prefix)) == prefix
 }
-
 func last_index_of(string text, string pattern) int {
     int last = -1
     int i = 0

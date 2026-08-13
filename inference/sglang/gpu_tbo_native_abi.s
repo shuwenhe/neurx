@@ -1,10 +1,8 @@
 package neurx.inference.sglang.gpu_tbo_native_abi
-
 extern func neurx_sglang_cuda_attention(int device_id, int stream_id, int input_ptr_low, int output_ptr_low, int token_count) int
 extern func neurx_sglang_cuda_moe(int operation_type, int device_id, int stream_id, int input_ptr_low, int output_ptr_low, int token_count) int
 extern func neurx_sglang_collective(int operation_type, int stream_id, int input_ptr_low, int output_ptr_low, int element_count, int world_size) int
 extern func neurx_sglang_stream_wait(int stream_id, int dependency_stream_id) int
-
 func gpu_tbo_native_dispatch(int operation_type, int device_id, int stream_id, int dependency_stream_id, int input_ptr_low, int output_ptr_low, int element_count, int world_size) int {
     if input_ptr_low == 0 || output_ptr_low == 0 || element_count <= 0 { return 400 }
     if dependency_stream_id != 0 && dependency_stream_id != stream_id {

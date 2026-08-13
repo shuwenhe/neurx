@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.io.println
-
 func main() {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let train_split = runtime_env_get("NEURX_TRAIN_SPLIT_PATH", project_root + "/dataset/pretrain/cleaned/train.jsonl")
@@ -27,7 +26,6 @@ func main() {
     println("Use make train / make run-s-pretrain-s for the compiled training backend.")
     0
 }
-
 func print_flag(string name, bool ok) {
     if ok {
         println("  - " + name + ": ready")

@@ -1,5 +1,4 @@
 package neurx.data
-
 struct collator_config {
     int max_length
     int pad_token_id
@@ -9,7 +8,6 @@ struct collator_config {
     bool truncation_strategy
     string padding_side
 }
-
 struct batch {
     []int input_ids
     []int attention_mask
@@ -20,7 +18,6 @@ struct batch {
     []int original_lengths
     map[string]any extra
 }
-
 func default_collator_config() collator_config {
     collator_config {
         max_length: 512,
@@ -31,7 +28,6 @@ func default_collator_config() collator_config {
         padding_side: "right",
     }
 }
-
 func collate_fn(
     []sample samples,
     collator_config cfg
@@ -78,7 +74,6 @@ func collate_fn(
         extra: {},
     }
 }
-
 func empty_batch() batch {
     batch {
         input_ids: [],
@@ -91,7 +86,6 @@ func empty_batch() batch {
         extra: {},
     }
 }
-
 func find_max_length([]sample samples) int {
     int max_len = 0
     for s in samples {
@@ -101,7 +95,6 @@ func find_max_length([]sample samples) int {
     }
     max_len
 }
-
 func determine_target_length(int batch_max, collator_config cfg) int {
     if cfg.pad_to_max_batch {
         min(batch_max, cfg.max_length)
@@ -109,7 +102,6 @@ func determine_target_length(int batch_max, collator_config cfg) int {
         cfg.max_length
     }
 }
-
 func create_2d_array(int rows, int cols, int fill_value) []int {
     []int arr = []int{cap: rows * cols}
     for i in 0..rows * cols {
@@ -117,7 +109,6 @@ func create_2d_array(int rows, int cols, int fill_value) []int {
     }
     arr
 }
-
 func ones(int n) []int {
     []int arr = []int{cap: n}
     for i in 0..n {
@@ -125,7 +116,6 @@ func ones(int n) []int {
     }
     arr
 }
-
 func apply_truncation([]int tokens, int max_len, string strategy) []int {
     if strategy == "only_first" || strategy == "" || len(tokens) <= max_len {
         return truncate(tokens, max_len)
@@ -146,7 +136,6 @@ func apply_truncation([]int tokens, int max_len, string strategy) []int {
         result
     }
 }
-
 func copy_with_padding(
     []int dst,
     []int src,

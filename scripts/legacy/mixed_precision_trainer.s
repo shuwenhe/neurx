@@ -20,14 +20,12 @@ type mixed_precision_trainer struct {
     overflow_counter: int
     steps_since_overflow: int
 }
-
 func (mpt *mixed_precision_trainer) init(mixed_precision_config config) {
     mpt.config = config
     mpt.current_loss_scale = config.loss_scale
     mpt.overflow_counter = 0
     mpt.steps_since_overflow = 0
 }
-
 func create_default_amp_config(): mixed_precision_config {
     return mixed_precision_config{
         enabled: true,
@@ -40,21 +38,18 @@ func create_default_amp_config(): mixed_precision_config {
         overflow_patience: 2000,
     }
 }
-
 func (mpt *mixed_precision_trainer) scale_loss(float loss): float {
     if !mpt.config.enabled {
         return loss
     }
     return loss * mpt.current_loss_scale
 }
-
 func (mpt *mixed_precision_trainer) unscale_gradients(float grad_norm): float {
     if !mpt.config.enabled {
         return grad_norm
     }
     return grad_norm / mpt.current_loss_scale
 }
-
 func (mpt *mixed_precision_trainer) check_overflow(float grad_norm): bool {
     if !(grad_norm == grad_norm) {
         return true
@@ -64,7 +59,6 @@ func (mpt *mixed_precision_trainer) check_overflow(float grad_norm): bool {
     }
     return false
 }
-
 func (mpt *mixed_precision_trainer) handle_overflow() {
     mpt.overflow_counter++
     mpt.steps_since_overflow = 0
@@ -74,7 +68,6 @@ func (mpt *mixed_precision_trainer) handle_overflow() {
     }
     mpt.current_loss_scale = new_scale
 }
-
 func (mpt *mixed_precision_trainer) step_success() {
     mpt.steps_since_overflow++
     if mpt.config.dynamics_loss_scale && mpt.steps_since_overflow > mpt.config.overflow_patience {
@@ -86,7 +79,6 @@ func (mpt *mixed_precision_trainer) step_success() {
         mpt.steps_since_overflow = 0
     }
 }
-
 func cast_to_fp16(float value): float {
     if value > 65504.0 {
         return 65504.0
@@ -102,7 +94,6 @@ func cast_to_fp16(float value): float {
     }
     return value
 }
-
 func cast_to_fp32(float value): float {
     return value
 }
@@ -112,7 +103,6 @@ type amp_step_result struct {
     loss_scale: float
     skipped: bool
 }
-
 func (mpt *mixed_precision_trainer) amp_step(
     float loss,
     float grad_norm): amp_step_result {
@@ -135,7 +125,6 @@ func (mpt *mixed_precision_trainer) amp_step(
     mpt.step_success()
     return result
 }
-
 func (mpt *mixed_precision_trainer) get_stats(): map[string]interface{} {
     return map[string]interface{}{
         "enabled": mpt.config.enabled,
@@ -169,7 +158,6 @@ type learning_rate_scheduler struct {
     gamma: float
     power: float
 }
-
 func (lrs *learning_rate_scheduler) cosine_annealing_warmup(int step): float {
     if step < lrs.warmup_steps {
         return lrs.base_lr * float(step) / float(lrs.warmup_steps)
@@ -181,7 +169,6 @@ func (lrs *learning_rate_scheduler) cosine_annealing_warmup(int step): float {
     min_lr := lrs.base_lr * lrs.min_lr_ratio
     return min_lr + (lrs.base_lr - min_lr) * (1.0 + math.Cos(progress*math.Pi)) / 2.0
 }
-
 func (lrs *learning_rate_scheduler) exponential_decay_warmup(int step): float {
     if step < lrs.warmup_steps {
         return lrs.base_lr * float(step) / float(lrs.warmup_steps)
@@ -190,7 +177,6 @@ func (lrs *learning_rate_scheduler) exponential_decay_warmup(int step): float {
     decay_rate := math.Pow(lrs.min_lr_ratio, float(decay_steps)/float(lrs.total_steps-lrs.warmup_steps))
     return lrs.base_lr * decay_rate
 }
-
 func (lrs *learning_rate_scheduler) step_decay(int step): float {
     if step < lrs.warmup_steps {
         return lrs.base_lr * float(step) / float(lrs.warmup_steps)
@@ -199,7 +185,6 @@ func (lrs *learning_rate_scheduler) step_decay(int step): float {
     num_decay := decayed_steps / lrs.step_size
     return lrs.base_lr * math.Pow(lrs.gamma, float(num_decay))
 }
-
 func (lrs *learning_rate_scheduler) polynomial_decay(int step): float {
     if step < lrs.warmup_steps {
         return lrs.base_lr * float(step) / float(lrs.warmup_steps)
@@ -212,7 +197,6 @@ func (lrs *learning_rate_scheduler) polynomial_decay(int step): float {
     decay := math.Pow(1.0 - progress, lrs.power)
     return min_lr + (lrs.base_lr - min_lr) * decay
 }
-
 func (lrs *learning_rate_scheduler) get_lr(int step): float {
     switch lrs.schedule_type {
     case LINEAR_WARMUP:
@@ -236,14 +220,12 @@ type gradient_clipper struct {
     max_grad_norm: float
     clip_type: string
 }
-
 func (gc *gradient_clipper) clip_by_norm(float grad_norm): float {
     if grad_norm <= gc.max_grad_norm {
         return 1.0
     }
     return gc.max_grad_norm / grad_norm
 }
-
 func (gc *gradient_clipper) clip_by_value(float gradient): float {
     if gradient > gc.max_grad_norm {
         return gc.max_grad_norm
@@ -265,7 +247,6 @@ type training_optimization_config struct {
     use_grad_clip: bool
     max_grad_norm: float
 }
-
 func create_default_optimization_config(): training_optimization_config {
     return training_optimization_config{
         use_amp: true,
@@ -280,7 +261,6 @@ func create_default_optimization_config(): training_optimization_config {
         max_grad_norm: 1.0,
     }
 }
-
 func main() {
     amp_trainer := &mixed_precision_trainer{}
     amp_trainer.init(create_default_amp_config())

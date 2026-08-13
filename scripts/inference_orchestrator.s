@@ -12,7 +12,6 @@ enum inference_backend {
     deep_speed,
     native,
 }
-
 struct inference_config {
     model_path    string
     backend      inference_backend
@@ -27,14 +26,12 @@ struct inference_config {
     port         int
     log_dir       string
 }
-
 struct inference_orchestrator {
     logger  logger_2
     config  inference_config
     s_compiler string
     neurx_root string
 }
-
 func new_inference_orchestrator(string model_path) (*inference_orchestrator, error) {
     logger := new_logger("inference_orchestrator")
     neurx_root := get_env("NEURX_ROOT", "")
@@ -70,7 +67,6 @@ func new_inference_orchestrator(string model_path) (*inference_orchestrator, err
         neurx_root: neurx_root,
     }, nil
 }
-
 func (i *inference_orchestrator) setup() error {
     i.logger.log("Setting up inference environment...")
     if err := mkdir(i.config.log_dir); err != nil {
@@ -79,7 +75,6 @@ func (i *inference_orchestrator) setup() error {
     i.log_config()
     return nil
 }
-
 func (i *inference_orchestrator) compile() error {
     i.logger.log("Compiling inference server...")
     build_dir := filepath.Join(i.neurx_root, ".build", "inference")
@@ -108,7 +103,6 @@ func (i *inference_orchestrator) compile() error {
     i.logger.success("Inference server compiled: %s", bin_file)
     return nil
 }
-
 func (i *inference_orchestrator) start_server() error {
     i.logger.log("Starting inference server...")
     bin_file := filepath.Join(i.neurx_root, ".build", "inference", "inference_server")
@@ -142,7 +136,6 @@ func (i *inference_orchestrator) start_server() error {
     }
     return fmt.Errorf("server failed to start within timeout")
 }
-
 func (i *inference_orchestrator) interactive() error {
     i.logger.log("Starting interactive inference session...")
     bin_file := filepath.Join(i.neurx_root, ".build", "inference", "inference_interactive")
@@ -156,7 +149,6 @@ func (i *inference_orchestrator) interactive() error {
     }
     return nil
 }
-
 func (i *inference_orchestrator) chat() error {
     i.logger.log("Starting chat interface...")
     source_file := filepath.Join(i.neurx_root, "tools", "chat.s")
@@ -189,7 +181,6 @@ func (i *inference_orchestrator) chat() error {
     }
     return nil
 }
-
 func (i *inference_orchestrator) benchmark() error {
     i.logger.log("Running inference benchmarks...")
     source_file := filepath.Join(i.neurx_root, "eval", "benchmark_eval.s")
@@ -224,12 +215,10 @@ func (i *inference_orchestrator) benchmark() error {
     i.logger.success("benchmark results saved to %s", log_file)
     return nil
 }
-
 func (i *inference_orchestrator) is_server_ready() bool {
     result := exec_command("curl", "-s", fmt.Sprintf("http:
     return result.ExitCode == 0
 }
-
 func (i *inference_orchestrator) log_config() {
     config := fmt.Sprintf(`Inference Configuration
 model: %s
@@ -250,7 +239,6 @@ Log Directory: %s
     log_file := filepath.Join(i.config.log_dir, "inference_config.txt")
     write_file(log_file, config)
 }
-
 func backend_string(backend InferenceBackend) string {
     switch backend {
     case InferenceBackend.ONNX:
@@ -267,7 +255,6 @@ func backend_string(backend InferenceBackend) string {
         return "native"
     }
 }
-
 func run_inference_server(string model_path) error {
     orchestrator, err := new_inference_orchestrator(model_path)
     if err != nil {
@@ -278,7 +265,6 @@ func run_inference_server(string model_path) error {
     }
     return orchestrator.start_server()
 }
-
 func run_interactive_inference(string model_path) error {
     orchestrator, err := new_inference_orchestrator(model_path)
     if err != nil {
@@ -289,7 +275,6 @@ func run_interactive_inference(string model_path) error {
     }
     return orchestrator.interactive()
 }
-
 func run_chat_interface(string model_path) error {
     orchestrator, err := new_inference_orchestrator(model_path)
     if err != nil {
@@ -300,7 +285,6 @@ func run_chat_interface(string model_path) error {
     }
     return orchestrator.chat()
 }
-
 func run_inference_benchmark(string model_path) error {
     orchestrator, err := new_inference_orchestrator(model_path)
     if err != nil {

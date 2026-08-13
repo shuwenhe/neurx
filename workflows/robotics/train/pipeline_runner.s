@@ -7,7 +7,6 @@ use neurx.model.robotics.train.{
     robotics_robot_train_run,
     robotics_robot_train_step,
 }
-
 func run_robotics_training_with_params(int obs_dim, int latent_dim, int act_dim, int max_steps, int sample_count, float learning_rate, int eval_every, int save_every, string task_name) int {
     robotics_trajectory_train_config cfg = robotics_robot_train_config(obs_dim, latent_dim, act_dim, max_steps, sample_count, learning_rate, task_name)
     robotics_trajectory_train_state state = robotics_robot_train_state(cfg)
@@ -26,7 +25,6 @@ func run_robotics_training_with_params(int obs_dim, int latent_dim, int act_dim,
     }
     0
 }
-
 struct robotics_workflow_tick_state {
     robotics_trajectory_train_state training
     int eval_every
@@ -36,7 +34,6 @@ struct robotics_workflow_tick_state {
     int last_eval_step
     int last_save_step
 }
-
 func robotics_workflow_tick_state_dict(robotics_workflow_tick_state state) robotics_workflow_tick_state {
     robotics_workflow_tick_state {
         training: state.training,
@@ -48,7 +45,6 @@ func robotics_workflow_tick_state_dict(robotics_workflow_tick_state state) robot
         last_save_step: state.last_save_step,
     }
 }
-
 func robotics_workflow_tick_load_state_dict(robotics_workflow_tick_state state, robotics_workflow_tick_state other) robotics_workflow_tick_state {
     robotics_workflow_tick_state {
         training: other.training,
@@ -60,35 +56,27 @@ func robotics_workflow_tick_load_state_dict(robotics_workflow_tick_state state, 
         last_save_step: other.last_save_step,
     }
 }
-
 func robotics_workflow_training_state(robotics_workflow_tick_state state) robotics_trajectory_train_state {
     state.training
 }
-
 func robotics_workflow_eval_count(robotics_workflow_tick_state state) int {
     state.eval_count
 }
-
 func robotics_workflow_save_count(robotics_workflow_tick_state state) int {
     state.save_count
 }
-
 func robotics_workflow_last_eval_step(robotics_workflow_tick_state state) int {
     state.last_eval_step
 }
-
 func robotics_workflow_last_save_step(robotics_workflow_tick_state state) int {
     state.last_save_step
 }
-
 func robotics_workflow_eval_interval(robotics_workflow_tick_state state) int {
     state.eval_every
 }
-
 func robotics_workflow_save_interval(robotics_workflow_tick_state state) int {
     state.save_every
 }
-
 func robotics_tick_due(int step, int interval, bool finished) bool {
     if interval <= 0 {
         return false
@@ -99,7 +87,6 @@ func robotics_tick_due(int step, int interval, bool finished) bool {
     }
     finished
 }
-
 func run_robotics_training_schedule_state(int obs_dim, int latent_dim, int act_dim, int max_steps, int sample_count, int eval_every, int save_every, float learning_rate, string task_name) robotics_workflow_tick_state {
     robotics_trajectory_train_config cfg = robotics_robot_train_config(obs_dim, latent_dim, act_dim, max_steps, sample_count, learning_rate, task_name)
     robotics_workflow_tick_state workflow = robotics_workflow_tick_state {
@@ -138,7 +125,6 @@ func run_robotics_training_schedule_state(int obs_dim, int latent_dim, int act_d
     }
     workflow
 }
-
 func run_robotics_training_with_schedule(int obs_dim, int latent_dim, int act_dim, int max_steps, int sample_count, int eval_every, int save_every, float learning_rate, string task_name) int {
     robotics_workflow_tick_state workflow = run_robotics_training_schedule_state(obs_dim, latent_dim, act_dim, max_steps, sample_count, eval_every, save_every, learning_rate, task_name)
     if !workflow.training.finished {

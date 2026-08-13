@@ -6,7 +6,6 @@ enum profiling_mode {
     memory_only
     time_only
 }
-
 struct kernel_profile {
     kernel_name: string
     device: device
@@ -18,7 +17,6 @@ struct kernel_profile {
     memory_allocated: i64
     memory_freed: i64
 }
-
 struct operator_profile {
     op_name: string
     call_count: i64
@@ -28,7 +26,6 @@ struct operator_profile {
     output_shapes: [][]i64
     memory_peak: i64
 }
-
 struct profiler_summary {
     total_time_us: i64
     kernel_profiles: map[string]kernel_profile

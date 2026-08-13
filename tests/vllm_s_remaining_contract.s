@@ -1,5 +1,4 @@
 package neurx.tests.vllm_s_remaining_contract
-
 use neurx.inference.kv.kv_event_stream.{kv_event_stream_config, kv_event_stream_state, kv_event_publish_result, kv_event_poll_result, kv_event_block_stored, kv_event_block_removed, kv_medium_gpu, init_kv_event_stream, publish_kv_event, poll_kv_events, acknowledge_kv_events}
 use neurx.inference.kv.tiered_kv_offload.{tiered_kv_offload_config, tiered_kv_offload_state, offload_prepare_result, offload_lookup_result, offload_medium_cpu, offload_lookup_hit, init_tiered_kv_offload, prepare_offload_store, complete_offload_store, lookup_offloaded_block, prepare_offload_load, complete_offload_load, tiered_offload_bytes}
 use neurx.inference.reasoning.reasoning_parser_registry.{reasoning_stream_state, reasoning_parser_qwen3, init_reasoning_stream, consume_reasoning_delta}
@@ -11,13 +10,11 @@ use neurx.inference.sampling.thinking_budget_state.{thinking_budget_config, thin
 use neurx.inference.runtime.engine_sentinel.{engine_sentinel_config, engine_sentinel_state, engine_recovery_result, engine_status_healthy, init_engine_sentinel, engine_sentinel_on_fault, retry_engine_recovery}
 use neurx.inference.runtime.sleep_mode_backend.{sleep_mode_state, sleep_transition_result, sleep_backend_cumem, sleep_state_running, init_sleep_mode, suspend_sleep_mode, resume_sleep_mode}
 use neurx.distributed.stateless_coordinator.{stateless_group_config, stateless_group_state, stateless_broadcast_result, init_stateless_group, stateless_broadcast, reinitialize_stateless_group, destroy_stateless_group}
-
 func remaining_expect(bool condition, string name) int {
     if condition { println("PASS " + name); return 0 }
     println("FAIL " + name)
     1
 }
-
 func test_kv_event_stream() int {
     int failures = 0
     kv_event_stream_state state = init_kv_event_stream(kv_event_stream_config {capacity: 2, data_parallel_rank: 0, worker_count: 2, enabled: true})
@@ -31,7 +28,6 @@ func test_kv_event_stream() int {
     failures = failures + remaining_expect(published.state.event_count == 2 && published.state.dropped_events == 1, "KV event replay capacity")
     failures
 }
-
 func test_tiered_offload() int {
     int failures = 0
     tiered_kv_offload_state state = init_tiered_kv_offload(tiered_kv_offload_config {capacity_blocks: 2, bytes_per_block: 128, medium: offload_medium_cpu(), locality: 1, enabled: true})
@@ -48,7 +44,6 @@ func test_tiered_offload() int {
     failures = failures + remaining_expect(state.evicted_blocks == 1 && state.loaded_blocks == 1 && tiered_offload_bytes(state) == 256, "tiered KV LRU and accounting")
     failures
 }
-
 func test_reasoning_and_rendering() int {
     int failures = 0
     reasoning_stream_state reasoning = init_reasoning_stream(reasoning_parser_qwen3())
@@ -61,7 +56,6 @@ func test_reasoning_and_rendering() int {
     failures = failures + remaining_expect(!invalid.supported && invalid.error_code == 2, "tokenizer mode validation")
     failures
 }
-
 func test_model_and_multimodal() int {
     int failures = 0
     model_capability_manifest manifest = model_capability_manifest {architecture: "QwenVL", model_family: "qwen", quantization: "fp8", task_mask: model_task_generate() + model_task_embed(), max_model_length: 32768, vocabulary_size: 151936, hidden_size: 4096, layer_count: 32, attention_head_count: 32, kv_head_count: 8, is_multimodal: true, is_moe: false, supports_lora: true, supports_prefix_cache: true}
@@ -78,7 +72,6 @@ func test_model_and_multimodal() int {
     failures = failures + remaining_expect(budget.supported && budget.encoder_budget == 3072 && budget.max_items_per_prompt == 3 && budget.max_items_per_batch == 6, "multimodal encoder budget")
     failures
 }
-
 func test_plugin_security() int {
     int failures = 0
     plugin_registry_state state = init_plugin_registry(plugin_registry_config {capacity: 4, supported_task_mask: model_task_generate(), endpoint_allowlist_configured: true})
@@ -93,7 +86,6 @@ func test_plugin_security() int {
     failures = failures + remaining_expect(state.statuses[io.slot] == plugin_status_skipped(), "plugin task compatibility gating")
     failures
 }
-
 func test_runtime_control() int {
     int failures = 0
     thinking_budget_state thinking = init_thinking_budget(thinking_budget_config {capacity: 2, start_token_id: 900, end_token_id: 901, speculative_width: 3, enabled: true})
@@ -120,7 +112,6 @@ func test_runtime_control() int {
     failures = failures + remaining_expect(group.destroyed && !group.store_group_initialized, "stateless coordinator teardown")
     failures
 }
-
 func main() {
     int failures = 0
     failures = failures + test_kv_event_stream()

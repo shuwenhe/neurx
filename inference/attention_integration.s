@@ -2,7 +2,6 @@ package neurx.inference.attention_integration
 use neurx.attention.paged_attention_core
 use neurx.attention.paged_attention_inference
 use neurx.attention.prefix_cache_radix
-
 struct integrated_attention_engine {
     paged_attention_runtime paged_runtime
     prefix_cached_attention_runtime prefix_runtime
@@ -10,14 +9,12 @@ struct integrated_attention_engine {
     string optimization_mode
     []float layer_scales
 }
-
 struct attention_input {
     []float queries
     []int token_ids
     string layer_name
     int layer_idx
 }
-
 struct attention_result {
     []float output
     float compute_time_ms
@@ -25,7 +22,6 @@ struct attention_result {
     int tokens_from_cache
     int cache_memory_saved_mb
 }
-
 func new_integrated_attention_engine(
     int num_heads,
     int num_kv_heads,
@@ -75,7 +71,6 @@ func new_integrated_attention_engine(
         layer_scales: layer_scales,
     }
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 1.0
@@ -88,14 +83,12 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
-
 func f(int n) float {
     if n <= 0 {
         return 0.0
     }
     return float(n)
 }
-
 func compute_layer_attention(
     engine integrated_attention_engine,
     attention_input input
@@ -147,7 +140,6 @@ func compute_layer_attention(
         cache_memory_saved_mb: f(memory_saved),
     }
 }
-
 func compute_batch_layer_attention(
     engine integrated_attention_engine,
     []attention_input batch_inputs
@@ -163,7 +155,6 @@ func compute_batch_layer_attention(
     }
     return results
 }
-
 struct transformer_with_paged_attention {
     integrated_attention_engine attention_engine
     int num_layers
@@ -173,7 +164,6 @@ struct transformer_with_paged_attention {
     int total_prefill_tokens
     int total_decode_tokens
 }
-
 func new_transformer_with_paged_attention(
     int num_layers,
     int num_heads,
@@ -202,7 +192,6 @@ func new_transformer_with_paged_attention(
         total_decode_tokens: 0,
     }
 }
-
 func forward_layer_stack(
     transformer transformer_with_paged_attention,
     []float embeddings,
@@ -230,7 +219,6 @@ func forward_layer_stack(
     }
     return transformer
 }
-
 func compute_multi_head_attention_optimized(
     []float queries,
     paged_kv_cache kv_cache,
@@ -248,14 +236,12 @@ func compute_multi_head_attention_optimized(
     }
     return output
 }
-
 struct attention_inference_pipeline {
     transformer_with_paged_attention transformer
     int max_new_tokens
     float temperature
     bool use_prefix_cache
 }
-
 func new_attention_inference_pipeline(
     int num_layers,
     int num_heads,
@@ -279,7 +265,6 @@ func new_attention_inference_pipeline(
         use_prefix_cache: true,
     }
 }
-
 func run_prefill_phase(
     pipeline attention_inference_pipeline,
     []float prompt_embeddings,
@@ -293,7 +278,6 @@ func run_prefill_phase(
     )
     return pipeline
 }
-
 func run_decode_phase(
     pipeline attention_inference_pipeline,
     []float token_embedding,
@@ -307,7 +291,6 @@ func run_decode_phase(
     )
     return pipeline
 }
-
 struct pipeline_stats {
     int total_prefill_tokens
     int total_decode_tokens
@@ -318,7 +301,6 @@ struct pipeline_stats {
     int prefix_cache_misses
     float cache_hit_rate
 }
-
 func get_pipeline_stats(pipeline attention_inference_pipeline) pipeline_stats {
     cache_stats = get_prefix_cache_stats(pipeline.transformer.attention_engine.prefix_runtime.prefix_cache)
     pipeline_stats{
@@ -332,7 +314,6 @@ func get_pipeline_stats(pipeline attention_inference_pipeline) pipeline_stats {
         cache_hit_rate: cache_stats.hit_rate,
     }
 }
-
 func print_pipeline_stats(pipeline attention_inference_pipeline) string {
     stats = get_pipeline_stats(pipeline)
     result = ""
@@ -344,19 +325,15 @@ func print_pipeline_stats(pipeline attention_inference_pipeline) string {
     result = result + "Cache Hit Rate: " + str_float(stats.cache_hit_rate) + "%\n"
     return result
 }
-
 func get_timestamp() long {
     return 0
 }
-
 func str(int n) string {
     return "0"
 }
-
 func str_float(float x) string {
     return "0.0"
 }
-
 func compute_prefix_hash([]int token_ids) string {
     if len(token_ids) == 0 {
         return ""

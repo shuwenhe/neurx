@@ -4,7 +4,6 @@ use std.os
 use std.path
 use std.exec
 use std.collections
-
 func main() {
     script_dir := path.Dir(os.Args[0])
     project_root := os.Getenv("NEURX_ROOT")

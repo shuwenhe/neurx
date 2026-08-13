@@ -1,5 +1,4 @@
 package neurx.model.robotics.perception
-
 struct robotics_perception_state {
     string perception_name
     int obs_dim
@@ -9,7 +8,6 @@ struct robotics_perception_state {
     bool normalized
     bool trained
 }
-
 func robotics_perception_copy_float([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}
@@ -20,7 +18,6 @@ func robotics_perception_copy_float([]float values) []float {
     }
     out
 }
-
 func robotics_perception_copy_int([]int values) []int {
     int n = len(values)
     []int out = []int{cap: n}
@@ -31,7 +28,6 @@ func robotics_perception_copy_int([]int values) []int {
     }
     out
 }
-
 func robotics_perception_ramp_values(int n, float scale) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -41,7 +37,6 @@ func robotics_perception_ramp_values(int n, float scale) []float {
     }
     out
 }
-
 func new_robotics_perception_state(string perception_name, int obs_dim, int latent_dim) robotics_perception_state {
     int weight_count = obs_dim * latent_dim
     robotics_perception_state {
@@ -54,7 +49,6 @@ func new_robotics_perception_state(string perception_name, int obs_dim, int late
         trained: false,
     }
 }
-
 func robotics_perception_state_dict(robotics_perception_state state) robotics_perception_state {
     robotics_perception_state {
         perception_name: state.perception_name,
@@ -66,7 +60,6 @@ func robotics_perception_state_dict(robotics_perception_state state) robotics_pe
         trained: state.trained,
     }
 }
-
 func robotics_perception_load_state_dict(robotics_perception_state state, robotics_perception_state other) robotics_perception_state {
     robotics_perception_state {
         perception_name: other.perception_name,
@@ -78,7 +71,6 @@ func robotics_perception_load_state_dict(robotics_perception_state state, roboti
         trained: other.trained,
     }
 }
-
 func robotics_perception_encode(robotics_perception_state state, []float observation) []float {
     []float latent = []float{cap: state.latent_dim}
     int j = 0
@@ -99,7 +91,6 @@ func robotics_perception_encode(robotics_perception_state state, []float observa
     }
     latent
 }
-
 func robotics_perception_mark_normalized(robotics_perception_state state) robotics_perception_state {
     robotics_perception_state {
         perception_name: state.perception_name,

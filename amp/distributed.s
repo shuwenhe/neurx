@@ -4,7 +4,6 @@ int PRECISION_BF16 = 1
 int PRECISION_FP16 = 2
 int PRECISION_FP8_E4M3 = 3
 int PRECISION_FP8_E5M2 = 4
-
 struct dtype_info {
     int id
     string name
@@ -13,7 +12,6 @@ struct dtype_info {
     double min_positive
     double epsilon
 }
-
 func get_dtype_info(int dtype_id) dtype_info {
     dtype_info info
     if dtype_id == PRECISION_FP32 {
@@ -47,7 +45,6 @@ func get_dtype_info(int dtype_id) dtype_info {
     }
     return info
 }
-
 struct mp_tensor {
     []double data
     []int shape
@@ -56,7 +53,6 @@ struct mp_tensor {
     int numel
     bool requires_grad
 }
-
 func make_mp_tensor([]double data, []int shape, int storage_dtype) mp_tensor {
     mp_tensor t
     t.data = data
@@ -75,7 +71,6 @@ func make_mp_tensor([]double data, []int shape, int storage_dtype) mp_tensor {
 }
 int LOSS_SCALE_STATIC = 0
 int LOSS_SCALE_DYNAMIC = 1
-
 struct loss_scaler_state {
     int scale_strategy
     double current_scale
@@ -89,7 +84,6 @@ struct loss_scaler_state {
     int total_inf_or_nan_grads
     bool found_overflow
 }
-
 func new_loss_scaler_static(double init_scale) loss_scaler_state {
     loss_scaler_state s
     s.scale_strategy = LOSS_SCALE_STATIC
@@ -105,7 +99,6 @@ func new_loss_scaler_static(double init_scale) loss_scaler_state {
     s.found_overflow = false
     return s
 }
-
 func new_loss_scaler_dynamic(double init_scale, double max_scale) loss_scaler_state {
     loss_scaler_state s
     s.scale_strategy = LOSS_SCALE_DYNAMIC
@@ -121,7 +114,6 @@ func new_loss_scaler_dynamic(double init_scale, double max_scale) loss_scaler_st
     s.found_overflow = false
     return s
 }
-
 func check_gradients_for_overflow(mp_tensor grad_tensor) bool {
     bool has_overflow = false
     int i = 0
@@ -137,11 +129,9 @@ func check_gradients_for_overflow(mp_tensor grad_tensor) bool {
     }
     return has_overflow
 }
-
 func scale_loss(loss_scaler_state scaler, double loss) double {
     return loss * scaler.current_scale
 }
-
 func unscale_gradients(loss_scaler_state scaler, ref mp_tensor grad_tensor) {
     int i = 0
     while i < grad_tensor.numel {
@@ -149,7 +139,6 @@ func unscale_gradients(loss_scaler_state scaler, ref mp_tensor grad_tensor) {
         i = i + 1
     }
 }
-
 func update_loss_scaler(ref loss_scaler_state scaler, bool had_overflow) {
     if scaler.scale_strategy != LOSS_SCALE_DYNAMIC { return }
     if had_overflow {
@@ -171,14 +160,12 @@ func update_loss_scaler(ref loss_scaler_state scaler, bool had_overflow) {
         }
     }
 }
-
 struct master_weight_state {
     []double fp32_weights
     []double low_precision_params
     int num_elements
     int storage_precision
 }
-
 func create_master_weights([]double initial_params, int storage_precision) master_weight_state {
     master_weight_state state
     state.num_elements = len(initial_params)
@@ -197,7 +184,6 @@ func create_master_weights([]double initial_params, int storage_precision) maste
     }
     return state
 }
-
 func cast_to_low_precision(double value, int target_dtype) double {
     if target_dtype == PRECISION_BF16 {
         return round_to_significant(value, 3)
@@ -208,7 +194,6 @@ func cast_to_low_precision(double value, int target_dtype) double {
     }
     return value
 }
-
 func round_to_significant(double value, int sig_digits) double {
     if value == 0.0 { return 0.0 }
     double magnitude = 1.0
@@ -233,7 +218,6 @@ func round_to_significant(double value, int sig_digits) double {
     rounded = rounded * magnitude / multiplier
     return rounded
 }
-
 func sync_master_from_lp(ref master_weight_state state) {
     int i = 0
     while i < state.num_elements {
@@ -241,11 +225,9 @@ func sync_master_from_lp(ref master_weight_state state) {
         i = i + 1
     }
 }
-
 func get_fp32_master(master_weight_state state) []double {
     return state.fp32_weights
 }
-
 func update_lp_from_master(ref master_weight_state state) {
     int i = 0
     while i < state.num_elements {
@@ -254,7 +236,6 @@ func update_lp_from_master(ref master_weight_state state) {
         i = i + 1
     }
 }
-
 struct mixed_precision_config {
     int param_storage_dtype
     int gradient_dtype
@@ -266,7 +247,6 @@ struct mixed_precision_config {
     bool use_master_weights
     bool enable_autocast
 }
-
 struct mixed_precision_training_state {
     mixed_precision_config config
     loss_scaler_state scaler
@@ -275,7 +255,6 @@ struct mixed_precision_training_state {
     double effective_loss_scale
     bool autocast_enabled
 }
-
 func new_mixed_precision_state(mixed_precision_config cfg, int total_param_count) mixed_precision_training_state {
     mixed_precision_training_state state
     state.config = cfg
@@ -289,7 +268,6 @@ func new_mixed_precision_state(mixed_precision_config cfg, int total_param_count
     }
     return state
 }
-
 func recommended_2t_mp_config() mixed_precision_config {
     mixed_precision_config cfg
     cfg.param_storage_dtype = PRECISION_BF16
@@ -303,7 +281,6 @@ func recommended_2t_mp_config() mixed_precision_config {
     cfg.enable_autocast = true
     return cfg
 }
-
 func recommended_2t_fp16_config() mixed_precision_config {
     mixed_precision_config cfg
     cfg.param_storage_dtype = PRECISION_FP16
@@ -317,7 +294,6 @@ func recommended_2t_fp16_config() mixed_precision_config {
     cfg.enable_autocast = true
     return cfg
 }
-
 struct memory_breakdown {
     double params_memory_gb
     double gradients_memory_gb
@@ -327,7 +303,6 @@ struct memory_breakdown {
     double total_per_gpu_gb
     double savings_vs_fp32_pct
 }
-
 func estimate_mp_memory_usage(
     int total_param_count,
     int batch_size,

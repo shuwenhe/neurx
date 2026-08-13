@@ -6,7 +6,6 @@ enum message_role {
     ASSISTANT,
     TOOL,
 }
-
 struct message {
     message_role role
     string content
@@ -15,7 +14,6 @@ struct message {
     string tool_name
     string tool_input
 }
-
 struct conversation_turn {
     int turn_id
     []message messages
@@ -24,7 +22,6 @@ struct conversation_turn {
     float reward
     bool is_valid
 }
-
 struct multiturn_conversation {
     int conversation_id
     []conversation_turn turns
@@ -34,7 +31,6 @@ struct multiturn_conversation {
     int start_step
     int end_step
 }
-
 struct multiturn_manager_state {
     []multiturn_conversation conversations
     int conversation_count
@@ -43,7 +39,6 @@ struct multiturn_manager_state {
     int max_turns_per_conversation
     bool enable_tool_calling
 }
-
 func new_multiturn_manager(int max_turns) multiturn_manager_state {
     multiturn_manager_state {
         conversations: []multiturn_conversation{cap: 1000},
@@ -54,13 +49,11 @@ func new_multiturn_manager(int max_turns) multiturn_manager_state {
         enable_tool_calling: true,
     }
 }
-
 func multiturn_enable_tool_calling(multiturn_manager_state state, bool enable) multiturn_manager_state {
     state.enable_tool_calling = enable
     eprintln("[MultiTurn] Tool calling: " + (if enable then "enabled" else "disabled"))
     state
 }
-
 func multiturn_start_conversation(multiturn_manager_state state, string task_type, int step) (multiturn_manager_state, int) {
     multiturn_conversation conv = multiturn_conversation {
         conversation_id: state.conversation_count,
@@ -76,7 +69,6 @@ func multiturn_start_conversation(multiturn_manager_state state, string task_typ
     eprintln("[MultiTurn] Started conversation #" + int_to_str(state.conversation_count - 1))
     state, state.conversation_count - 1
 }
-
 func multiturn_add_message(multiturn_manager_state state, int conv_id, message_role role, string content) multiturn_manager_state {
     if conv_id >= len(state.conversations) {
         eprintln("[MultiTurn] ERROR: Invalid conversation ID")
@@ -99,7 +91,6 @@ func multiturn_add_message(multiturn_manager_state state, int conv_id, message_r
     state.conversations[conv_id] = conv
     state
 }
-
 func multiturn_start_turn(multiturn_manager_state state, int conv_id, string query) multiturn_manager_state {
     if conv_id >= len(state.conversations) {
         return state
@@ -133,7 +124,6 @@ func multiturn_start_turn(multiturn_manager_state state, int conv_id, string que
     eprintln("[MultiTurn] Started turn #" + int_to_str(conv.total_turns) + " in conversation #" + int_to_str(conv_id))
     state
 }
-
 func multiturn_complete_turn(multiturn_manager_state state, int conv_id, string response, float reward) multiturn_manager_state {
     if conv_id >= len(state.conversations) {
         return state
@@ -160,7 +150,6 @@ func multiturn_complete_turn(multiturn_manager_state state, int conv_id, string 
     eprintln("[MultiTurn] Completed turn with reward: " + (if reward > 0.0 then "+" else "") + reward_to_str(reward))
     state
 }
-
 func multiturn_add_tool_call(multiturn_manager_state state, int conv_id, string tool_name, string tool_input) multiturn_manager_state {
     if !state.enable_tool_calling || conv_id >= len(state.conversations) {
         return state
@@ -185,7 +174,6 @@ func multiturn_add_tool_call(multiturn_manager_state state, int conv_id, string 
     eprintln("[MultiTurn] Added tool call: " + tool_name)
     state
 }
-
 func multiturn_finish_conversation(multiturn_manager_state state, int conv_id, int step) multiturn_manager_state {
     if conv_id >= len(state.conversations) {
         return state
@@ -200,7 +188,6 @@ func multiturn_finish_conversation(multiturn_manager_state state, int conv_id, i
     state.conversations[conv_id] = conv
     state
 }
-
 func multiturn_get_stats(multiturn_manager_state state) (int, int, float) {
     int total_convs = state.conversation_count
     int total_turns = state.total_turns
@@ -215,14 +202,12 @@ func multiturn_get_stats(multiturn_manager_state state) (int, int, float) {
     }
     total_convs, total_turns, avg_reward
 }
-
 func multiturn_get_conversation(multiturn_manager_state state, int conv_id) multiturn_conversation {
     if conv_id < len(state.conversations) {
         return state.conversations[conv_id]
     }
     multiturn_conversation{}
 }
-
 func multiturn_get_summary(multiturn_manager_state state) string {
     int convs, turns, avg_reward = multiturn_get_stats(state)
     string summary = "[MultiTurn] Conversation Summary\n"
@@ -232,7 +217,6 @@ func multiturn_get_summary(multiturn_manager_state state) string {
     summary = summary + "Tool Calling Enabled: " + (if state.enable_tool_calling then "yes" else "no") + "\n"
     summary
 }
-
 func reward_to_str(float reward) string {
     if reward > 0.1 {
         return "positive"
@@ -241,7 +225,6 @@ func reward_to_str(float reward) string {
     }
     return "neutral"
 }
-
 func int_to_str(int n) string {
     ""
 }

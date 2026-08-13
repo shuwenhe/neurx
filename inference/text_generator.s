@@ -1,6 +1,5 @@
 package neurx.inference
 use neurx.inference.sampling_strategies
-
 struct generator_config {
     sampling_config sampling
     int eos_token_id
@@ -13,7 +12,6 @@ struct generator_config {
     int num_return_sequences
     int top_logprobs_count
 }
-
 func default_generator_config() generator_config {
     generator_config {
         sampling: neurx.inference.sampling_strategies.new_sampling_config(),
@@ -28,12 +26,10 @@ func default_generator_config() generator_config {
         top_logprobs_count: 5,
     }
 }
-
 struct top_logprob_candidate {
     int token_id
     float logprob
 }
-
 struct generation_result {
     [][]int sequences
     []float scores
@@ -43,21 +39,18 @@ struct generation_result {
     bool finished
     float avg_score
 }
-
 func min(int a, int b) int {
     if a < b {
         return a
     }
     b
 }
-
 func max(int a, int b) int {
     if a > b {
         return a
     }
     b
 }
-
 func copy_ids([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
@@ -68,7 +61,6 @@ func copy_ids([]int data) []int {
     }
     out
 }
-
 func extract_generated_part([]int full_ids, int prompt_length) []int {
     int n = len(full_ids) - prompt_length
     if n <= 0 {
@@ -82,7 +74,6 @@ func extract_generated_part([]int full_ids, int prompt_length) []int {
     }
     out
 }
-
 func has_eos([]int seq, int eos_id) bool {
     int i = 0
     while i < len(seq) {
@@ -93,7 +84,6 @@ func has_eos([]int seq, int eos_id) bool {
     }
     false
 }
-
 func check_all_finished([][]int sequences, int eos_id) bool {
     if len(sequences) == 0 {
         return false
@@ -107,22 +97,18 @@ func check_all_finished([][]int sequences, int eos_id) bool {
     }
     true
 }
-
 func append_sequence_score([]float scores, float score) []float {
     scores.push(score)
     scores
 }
-
 func append_token_logprob_sequence([][]float all_logprobs, []float seq_logprobs) [][]float {
     all_logprobs.push(seq_logprobs)
     all_logprobs
 }
-
 func append_top_logprob_sequence([][][]top_logprob_candidate all_top_logprobs, [][]top_logprob_candidate seq_top_logprobs) [][][]top_logprob_candidate {
     all_top_logprobs.push(seq_top_logprobs)
     all_top_logprobs
 }
-
 func compute_avg_score([]float scores) float {
     if len(scores) == 0 {
         return 0.0
@@ -135,7 +121,6 @@ func compute_avg_score([]float scores) float {
     }
     total / float(len(scores))
 }
-
 func generator_vocab_size([]int prompt_ids, generator_config cfg) int {
     int vocab = max(cfg.eos_token_id + 4, 16)
     int i = 0
@@ -147,7 +132,6 @@ func generator_vocab_size([]int prompt_ids, generator_config cfg) int {
     }
     vocab
 }
-
 func stub_next_logits(
     []int current_ids,
     generator_config cfg,
@@ -201,7 +185,6 @@ func stub_next_logits(
     }
     logits
 }
-
 func take_generation_output([]int prompt_ids, []int generated_ids, bool return_full_text) []int {
     if return_full_text {
         []int full = copy_ids(prompt_ids)
@@ -214,7 +197,6 @@ func take_generation_output([]int prompt_ids, []int generated_ids, bool return_f
     }
     copy_ids(generated_ids)
 }
-
 func log_softmax([]float logits) []float {
     int n = len(logits)
     if n == 0 {
@@ -243,7 +225,6 @@ func log_softmax([]float logits) []float {
     }
     out
 }
-
 func collect_top_logprobs([]float log_probs, int top_n) []top_logprob_candidate {
     int n = len(log_probs)
     if n == 0 || top_n <= 0 {
@@ -265,7 +246,6 @@ func collect_top_logprobs([]float log_probs, int top_n) []top_logprob_candidate 
     }
     out
 }
-
 func generate_one_sequence(
     []int prompt_ids,
     generator_config cfg,
@@ -357,10 +337,8 @@ func generate_one_sequence(
         rng
     )
 }
-
 func generate_one_sequence_with_forward(
     []int prompt_ids,
-
     func forward_fn,
     generator_config cfg,
     uint64 rng
@@ -453,7 +431,6 @@ func generate_one_sequence_with_forward(
         rng
     )
 }
-
 func generate(
     []int prompt_ids,
     generator_config cfg
@@ -494,10 +471,8 @@ func generate(
         avg_score: compute_avg_score(all_scores),
     }
 }
-
 func generate_with_forward(
     []int prompt_ids,
-
     func forward_fn,
     generator_config cfg
 ) generation_result {
@@ -542,10 +517,8 @@ func generate_with_forward(
         avg_score: compute_avg_score(all_scores),
     }
 }
-
 func generate(
     []int prompt_ids,
-
     func forward_fn,
     generator_config cfg
 ) generation_result {

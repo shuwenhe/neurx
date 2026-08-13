@@ -1,5 +1,4 @@
 package neurx.tokenizer.real_bpe_tokenizer
-
 struct real_bpe_tokenizer {
     map[string]int vocab
     map[int]string id_to_token
@@ -17,17 +16,14 @@ struct real_bpe_tokenizer {
     bool add_bos
     bool add_eos
 }
-
 struct pair {
     string first
     string second
 }
-
 func new_real_bpe_tokenizer() real_bpe_tokenizer {
     map[string]int vocab = map[string]int{}
     map[int]string id_to_token = map[int]string{}
     []pair merges = []pair{}
-
     int id = 0
     int i = 0
     while i < 26 {
@@ -93,7 +89,6 @@ func new_real_bpe_tokenizer() real_bpe_tokenizer {
         pair{first: " wor", second: "l"},
         pair{first: " worl", second: "d"},
     }
-
     int bos_id = id
     vocab["<|bos|>"] = bos_id
     id_to_token[bos_id] = "<|bos|>"
@@ -110,7 +105,6 @@ func new_real_bpe_tokenizer() real_bpe_tokenizer {
     vocab["<|unk|>"] = unk_id
     id_to_token[unk_id] = "<|unk|>"
     id = id + 1
-
     map[int]string byte_tokens = map[int]string{}
     int b = 0
     while b < 256 {
@@ -123,7 +117,6 @@ func new_real_bpe_tokenizer() real_bpe_tokenizer {
         id = id + 1
         b = b + 1
     }
-
     real_bpe_tokenizer{
         vocab: vocab,
         id_to_token: id_to_token,
@@ -142,31 +135,25 @@ func new_real_bpe_tokenizer() real_bpe_tokenizer {
         add_eos: false,
     }
 }
-
 func string_from_code(int code) string {
     string(code)
 }
-
 func hex_byte(int b) string {
     string hex = "0123456789ABCDEF"
     int hi = b / 16
     int lo = b - (b / 16) * 16
     string_from_code(int(hex[hi])) + string_from_code(int(hex[lo]))
 }
-
 func map_has(map[string]int m, string key) bool {
     int v = m[key]
     v != 0 || m_contains_key(m, key)
 }
-
 func map_has_int(map[int]string m, int key) bool {
     string v = m[key]
     v != "" || m_contains_key_int(m, key)
 }
-
 extern "intrinsic" func m_contains_key(map[string]int m, string key) bool
 extern "intrinsic" func m_contains_key_int(map[int]string m, int key) bool
-
 func pre_tokenize(string text) []string {
     []string words = []string{}
     string cur = ""
@@ -195,7 +182,6 @@ func pre_tokenize(string text) []string {
     }
     words
 }
-
 func word_to_chars(string word) []string {
     []string chars = []string{}
     if word == "" {
@@ -208,15 +194,12 @@ func word_to_chars(string word) []string {
     }
     chars
 }
-
 func find_pair_rank([]string symbols, int idx) pair {
     pair{first: symbols[idx], second: symbols[idx + 1]}
 }
-
 func pair_equals(pair a, pair b) bool {
     a.first == b.first && a.second == b.second
 }
-
 func apply_bpe_merges(real_bpe_tokenizer tokenizer, []string words) []string {
     []string out = []string{}
     int w = 0
@@ -274,7 +257,6 @@ func apply_bpe_merges(real_bpe_tokenizer tokenizer, []string words) []string {
     }
     out
 }
-
 func encode(real_bpe_tokenizer tokenizer, string text) []int {
     []string words = pre_tokenize(text)
     []string tokens = apply_bpe_merges(tokenizer, words)
@@ -313,7 +295,6 @@ func encode(real_bpe_tokenizer tokenizer, string text) []int {
     }
     ids
 }
-
 func decode(real_bpe_tokenizer tokenizer, []int ids) string {
     string result = ""
     int i = 0
@@ -338,7 +319,6 @@ func decode(real_bpe_tokenizer tokenizer, []int ids) string {
     }
     result
 }
-
 func parse_hex_byte(string hex2) int {
     if len(hex2) < 2 {
         return 0
@@ -350,7 +330,6 @@ func parse_hex_byte(string hex2) int {
     }
     hi * 16 + lo
 }
-
 func hex_digit(int ch) int {
     if ch >= 48 && ch <= 57 {
         return ch - 48
@@ -363,14 +342,12 @@ func hex_digit(int ch) int {
     }
     -1
 }
-
 func vocab_lookup(real_bpe_tokenizer tokenizer, string token) int {
     if !map_has(tokenizer.vocab, token) {
         return tokenizer.unk_id
     }
     tokenizer.vocab[token]
 }
-
 func token_count(real_bpe_tokenizer tokenizer, string text) int {
     []int ids = encode(tokenizer, text)
     len(ids)

@@ -1,5 +1,4 @@
 package neurx.distributed.kv_transfer
-
 struct kv_transfer_config {
     string connector
     string engine_id
@@ -8,7 +7,6 @@ struct kv_transfer_config {
     int world_size
     bool enabled
 }
-
 struct kv_transfer_state {
     kv_transfer_config config
     bool initialized
@@ -21,7 +19,6 @@ struct kv_transfer_state {
     int bytes_received
     string error_message
 }
-
 struct kv_transfer_request {
     int request_id
     []int block_ids
@@ -34,14 +31,12 @@ struct kv_transfer_request {
     bool success
     string error_message
 }
-
 struct kv_transfer_begin_result {
     kv_transfer_state state
     kv_transfer_request request
     bool success
     string error_message
 }
-
 func copy_kv_block_ids([]int block_ids) []int {
     []int copied = []int{cap: len(block_ids)}
     int i = 0
@@ -51,7 +46,6 @@ func copy_kv_block_ids([]int block_ids) []int {
     }
     copied
 }
-
 func kv_transfer_config_valid(kv_transfer_config config) bool {
     if !config.enabled {
         return true
@@ -64,7 +58,6 @@ func kv_transfer_config_valid(kv_transfer_config config) bool {
     }
     config.world_size > 0 && config.rank >= 0 && config.rank < config.world_size
 }
-
 func ensure_kv_transfer_initialized(kv_transfer_config config) kv_transfer_state {
     bool initialized = config.enabled && kv_transfer_config_valid(config)
     string error_message = ""
@@ -84,11 +77,9 @@ func ensure_kv_transfer_initialized(kv_transfer_config config) kv_transfer_state
         error_message: error_message,
     }
 }
-
 func has_kv_transfer_group(kv_transfer_state state) bool {
     state.initialized && !state.shutdown
 }
-
 func kv_transfer_state_after_begin(kv_transfer_state state) kv_transfer_state {
     kv_transfer_state {
         config: state.config,
@@ -103,7 +94,6 @@ func kv_transfer_state_after_begin(kv_transfer_state state) kv_transfer_state {
         error_message: state.error_message,
     }
 }
-
 func empty_kv_transfer_request() kv_transfer_request {
     kv_transfer_request {
         request_id: 0,
@@ -118,7 +108,6 @@ func empty_kv_transfer_request() kv_transfer_request {
         error_message: "",
     }
 }
-
 func new_kv_transfer_request(int request_id, []int block_ids, int source_rank, int destination_rank, int token_count, int byte_count, bool is_sender) kv_transfer_request {
     kv_transfer_request {
         request_id: request_id,
@@ -133,7 +122,6 @@ func new_kv_transfer_request(int request_id, []int block_ids, int source_rank, i
         error_message: "",
     }
 }
-
 func begin_kv_transfer(kv_transfer_state state, []int block_ids, int peer_rank, int token_count, int byte_count) kv_transfer_begin_result {
     bool is_sender = state.config.role == "producer"
     if !has_kv_transfer_group(state) {
@@ -165,7 +153,6 @@ func begin_kv_transfer(kv_transfer_state state, []int block_ids, int peer_rank, 
         error_message: "",
     }
 }
-
 func finish_kv_transfer(kv_transfer_state state, kv_transfer_request request, bool success, string error_message) kv_transfer_state {
     int active = state.active_transfers
     if active > 0 {
@@ -198,7 +185,6 @@ func finish_kv_transfer(kv_transfer_state state, kv_transfer_request request, bo
         error_message: error_message,
     }
 }
-
 func ensure_kv_transfer_shutdown(kv_transfer_state state) kv_transfer_state {
     kv_transfer_state {
         config: state.config,

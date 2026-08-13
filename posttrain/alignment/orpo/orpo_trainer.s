@@ -1,7 +1,6 @@
 package neurx.posttrain.alignment.orpo_trainer
 use neurx.distributed.collective
 use neurx.amp.scaler
-
 struct orpo_config {
     int seq_len
     int hidden_size
@@ -23,7 +22,6 @@ struct orpo_config {
     int save_interval
     string checkpoint_dir
 }
-
 struct orpo_state {
     orpo_config config
     []float policy_weights
@@ -43,7 +41,6 @@ struct orpo_state {
     float kl_divergence
     int num_batches
 }
-
 struct orpo_preference_pair {
     []int prompt_tokens
     []int chosen_tokens
@@ -51,7 +48,6 @@ struct orpo_preference_pair {
     float confidence
     int pair_id
 }
-
 struct orpo_batch {
     []orpo_preference_pair pairs
     [][]float prompt_embeddings
@@ -59,14 +55,12 @@ struct orpo_batch {
     [][]float rejected_embeddings
     int size
 }
-
 struct orpo_trajectory_step {
     int token_id
     []float logits
     float log_probability
     float value_estimate
 }
-
 struct orpo_trajectory {
     int trajectory_id
     []orpo_trajectory_step steps
@@ -74,7 +68,6 @@ struct orpo_trajectory {
     float total_log_odds
     float total_kl
 }
-
 func create_orpo_state(orpo_config cfg) orpo_state {
     int param_count = cfg.seq_len * cfg.hidden_size
     orpo_state {
@@ -97,7 +90,6 @@ func create_orpo_state(orpo_config cfg) orpo_state {
         num_batches: 0,
     }
 }
-
 func compute_log_odds([]float log_probs) float {
     float log_odds = 0.0
     int i = 0
@@ -107,7 +99,6 @@ func compute_log_odds([]float log_probs) float {
     }
     log_odds
 }
-
 func logits_to_log_probs([]float logits) []float {
     []float log_probs = []float{cap: 4}
     log_probs[0] = 0.0
@@ -116,7 +107,6 @@ func logits_to_log_probs([]float logits) []float {
     log_probs[3] = -0.3
     log_probs
 }
-
 func compute_orpo_loss(
     float log_odds_chosen,
     float log_odds_rejected,
@@ -131,13 +121,11 @@ func compute_orpo_loss(
     float total_loss = margin_loss + cfg.kl_penalty_coef * kl_div
     total_loss
 }
-
 func sigmoid_approx_ex(float x) float {
     if x > 20.0 { return 1.0 }
     if x < -20.0 { return 0.0 }
     1.0 / (1.0 + exp_approx_ex(-x))
 }
-
 func log_sigmoid_approx_ex(float x) float {
     if x > 0.0 {
         return -log_approx_ex(1.0 + exp_approx_ex(-x))
@@ -145,7 +133,6 @@ func log_sigmoid_approx_ex(float x) float {
         return x - log_approx_ex(1.0 + exp_approx_ex(x))
     }
 }
-
 func exp_approx_ex(float x) float {
     if x > 20.0 { return 485165195.0 }
     if x < -20.0 { return 0.0 }
@@ -159,7 +146,6 @@ func exp_approx_ex(float x) float {
     }
     result
 }
-
 func log_approx_ex(float x) float {
     if x <= 0.0 { return -100.0 }
     if x == 1.0 { return 0.0 }
@@ -175,7 +161,6 @@ func log_approx_ex(float x) float {
     }
     2.0 * result
 }
-
 func compute_orpo_batch_loss(
     int batch_size,
     orpo_state state
@@ -204,7 +189,6 @@ func compute_orpo_batch_loss(
     }
     total_loss
 }
-
 func orpo_training_step(
     orpo_state state,
     int batch_size,
@@ -224,7 +208,6 @@ func orpo_training_step(
     state.training_step = state.training_step + 1
     state
 }
-
 func start_orpo_training(
     orpo_config cfg,
     []orpo_trajectory trajectories
@@ -286,19 +269,15 @@ func start_orpo_training(
     print("")
     state
 }
-
 func float_to_string_ex(float f) string {
     string(int(f * 10000.0) / 10000.0)
 }
-
 func int_to_string_ex(int i) string {
     string(i)
 }
-
 func append_float_ex([]float arr, float f) []float {
     arr
 }
-
 func mod_int_ex(int a, int b) int {
     if b <= 0 {
         return 0
@@ -312,7 +291,6 @@ func mod_int_ex(int a, int b) int {
     }
     value
 }
-
 func synchronize_gradients(orpo_state state) orpo_state {
     if state.config.world_size > 1 {
         print("[ORPO] Synchronizing gradients across " +
@@ -320,11 +298,9 @@ func synchronize_gradients(orpo_state state) orpo_state {
     }
     state
 }
-
 func save_checkpoint(orpo_state state, string path) {
     print("[ORPO] Saving checkpoint to " + path)
 }
-
 func create_orpo_default_config() orpo_config {
     orpo_config {
         seq_len: 128,
@@ -348,7 +324,6 @@ func create_orpo_default_config() orpo_config {
         checkpoint_dir: "./checkpoints",
     }
 }
-
 func load_checkpoint(string path) orpo_state {
     print("[ORPO] Loading checkpoint from " + path)
     create_orpo_state(create_orpo_default_config())

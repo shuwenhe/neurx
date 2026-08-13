@@ -5,12 +5,10 @@ use step2_embedding.{embed_tokens}
 use step3_transformer.{create_transformer_config, transformer_forward}
 use step5_sampling_step6_decode.{create_sampling_config, generate, decode_tokens}
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
 struct mean_std {
     float mean
     float std
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
@@ -21,7 +19,6 @@ func sqrt_approx(float x) float {
     }
     return y
 }
-
 func compute_mean_std([][]float mat) mean_std {
     int rows = len(mat)
     if rows == 0 {

@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape, trim}
 use std.io.println
-
 func main() {
     string config = runtime_env_get("NEURX_MEMORY_CONFIG", "workflows/agent/memory/config/sample.yaml")
     string steps_override = runtime_env_get("NEURX_MEMORY_STEPS", "")
@@ -40,17 +39,14 @@ func main() {
     println("Ran agent memory workflow with steps=" + max_steps + ", dataset=" + dataset_manifest + ", output=" + output_dir + ", s_bin=" + s_bin + ", root=" + root)
     0
 }
-
 func usage() {
     println("Usage: run_with_config.s")
     println("Configure via NEURX_MEMORY_CONFIG, NEURX_MEMORY_STEPS and S_BIN.")
 }
-
 func yaml_value(string file, string key) string {
     string cmd = "awk -F\":\" '/^" + key + "[[:space:]]*:/ {sub(/^[[:space:]]*/, \"\", $2); gsub(/^\"|\"$/, \"\", $2); print $2; exit}' " + runtime_shell_escape(file)
     trim(runtime_run_command_output(cmd))
 }
-
 func default_if_empty(string value, string fallback) string {
     if value == "" {
         return fallback

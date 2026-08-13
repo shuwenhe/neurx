@@ -1,5 +1,4 @@
 package neurx.tests.paged_attention_real_test
-
 use neurx.attention.paged_attention_core.{
     paged_attention_config,
     paged_kv_cache,
@@ -11,13 +10,11 @@ use neurx.attention.paged_attention_core.{
     compute_softmax,
     math_exp,
 }
-
 func approx(float a, float b, float tol) bool {
     float d = a - b
     if d < 0.0 { d = 0.0 - d }
     d < tol
 }
-
 func expect(bool cond, string name) int {
     if cond {
         println("PASS " + name)
@@ -26,7 +23,6 @@ func expect(bool cond, string name) int {
     println("FAIL " + name)
     1
 }
-
 func test_softmax_simple() int {
     float[] scores = []float{1.0, 2.0, 3.0}
     float[] probs = compute_softmax(scores)
@@ -41,7 +37,6 @@ func test_softmax_simple() int {
     fail = fail + expect(probs[2] > probs[1] && probs[1] > probs[0], "softmax monotone")
     fail
 }
-
 func test_exp_basic() int {
     int fail = 0
     fail = fail + expect(approx(math_exp(0.0), 1.0, 1.0e-4), "exp(0)=1")
@@ -49,7 +44,6 @@ func test_exp_basic() int {
     fail = fail + expect(approx(math_exp(-1.0), 0.3678794, 1.0e-3), "exp(-1)=1/e")
     fail
 }
-
 func test_paged_kv_write_and_attention() int {
     int block_size = 4
     int num_kv_heads = 2
@@ -72,7 +66,6 @@ func test_paged_kv_write_and_attention() int {
     fail = fail + expect(cache.allocated_blocks == 1, "allocated blocks after reserve")
     fail = fail + expect(cache.token_to_slot[0].block_id == 0 && cache.token_to_slot[0].offset_in_block == 0, "slot 0 maps to block 0 offset 0")
     fail = fail + expect(cache.token_to_slot[2].block_id == 0 && cache.token_to_slot[2].offset_in_block == 2, "slot 2 maps to block 0 offset 2")
-
     int kv_stride = num_kv_heads * head_size
     float[] keys = make([]float, seq_len * kv_stride)
     float[] values = make([]float, seq_len * kv_stride)
@@ -90,7 +83,6 @@ func test_paged_kv_write_and_attention() int {
     fail = fail + expect(cache.blocks[0].num_filled == seq_len, "block 0 num_filled equals seq_len")
     float first_k = cache.blocks[0].key_data[0]
     fail = fail + expect(approx(first_k, 0.1, 1.0e-6), "first key value written correctly")
-
     int q_stride = num_heads * head_size
     float[] queries = make([]float, seq_len * q_stride)
     int qi = 0
@@ -106,7 +98,6 @@ func test_paged_kv_write_and_attention() int {
     fail = fail + expect(approx(out0, 0.2, 0.05), "attention output at query 0 head 0 dim 0 reasonable")
     fail
 }
-
 func main() {
     int fail = 0
     fail = fail + test_softmax_simple()

@@ -7,14 +7,12 @@ enum allocator_strategy {
     async_alloc
     unified_alloc
 }
-
 struct allocation_info {
     device: device
     size: i64
     alignment: i64
     strategy: AllocatorStrategy
 }
-
 struct allocation_result {
     ptr: i64
     allocated_size: i64

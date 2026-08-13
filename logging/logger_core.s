@@ -1,5 +1,4 @@
 package neurx.logging
-
 struct logger_config {
     string experiment_name
     string run_name
@@ -19,7 +18,6 @@ struct logger_config {
     int global_step_offset
     float log_frequency
 }
-
 func default_logger_config() logger_config {
     logger_config {
         experiment_name: "neurx_experiment",
@@ -41,7 +39,6 @@ func default_logger_config() logger_config {
         log_frequency: 1.0,
     }
 }
-
 struct logger {
     logger_config config
     int current_step

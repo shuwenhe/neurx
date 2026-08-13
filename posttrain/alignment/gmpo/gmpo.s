@@ -1,7 +1,6 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/ppo/ppo.s"
-
 struct gmpo_config {
     clip_epsilon: f32
     value_clip_epsilon: f32
@@ -17,7 +16,6 @@ struct gmpo_config {
     reward_normalization: bool
     min_reward_value: f32
 }
-
 struct gmpo_trainer {
     config: gmpo_config
     policy_model: *model
@@ -27,7 +25,6 @@ struct gmpo_trainer {
     reward_statistics: []reward_stats
     step_count: i64
 }
-
 struct reward_stats {
     mean: f32
     std: f32
@@ -35,7 +32,6 @@ struct reward_stats {
     max: f32
     history: []f32
 }
-
 func new_gmpo_trainer(
     gmpo_config config,
     *model policy,
@@ -66,7 +62,6 @@ func new_gmpo_trainer(
         step_count: 0,
     }
 }
-
 func (trainer *gmpo_trainer) compute_geometric_mean([]f32 rewards) -> f32 {
     if rewards.len() == 0 {
         return 0.0
@@ -83,7 +78,6 @@ func (trainer *gmpo_trainer) compute_geometric_mean([]f32 rewards) -> f32 {
     let geometric_mean = exp(log_sum / f32(shifted_rewards.len()))
     return geometric_mean - trainer.config.epsilon
 }
-
 func compute_arithmetic_mean([]f32 rewards) -> f32 {
     if rewards.len() == 0 {
         return 0.0
@@ -94,7 +88,6 @@ func compute_arithmetic_mean([]f32 rewards) -> f32 {
     }
     return sum / f32(rewards.len())
 }
-
 func (trainer *gmpo_trainer) update_reward_statistics(
     [][]f32 multi_rewards
 ) {
@@ -129,7 +122,6 @@ func (trainer *gmpo_trainer) update_reward_statistics(
         }
     }
 }
-
 func (trainer *gmpo_trainer) normalize_rewards(
     [][]f32 multi_rewards
 ) -> [][]f32 {
@@ -150,7 +142,6 @@ func (trainer *gmpo_trainer) normalize_rewards(
     }
     return normalized
 }
-
 func (trainer *gmpo_trainer) combine_rewards([]f32 multi_rewards) -> f32 {
     if trainer.config.use_geometric_mean {
         return trainer.compute_geometric_mean(multi_rewards)
@@ -158,7 +149,6 @@ func (trainer *gmpo_trainer) combine_rewards([]f32 multi_rewards) -> f32 {
         return compute_arithmetic_mean(multi_rewards)
     }
 }
-
 func (trainer *gmpo_trainer) compute_gae(
     []tensor rewards,
     []tensor values,
@@ -197,7 +187,6 @@ func (trainer *gmpo_trainer) compute_gae(
     }
     return advantages, returns
 }
-
 func (trainer *gmpo_trainer) train_step(
     []tensor prompts,
     []tensor responses,
@@ -294,7 +283,6 @@ func (trainer *gmpo_trainer) train_step(
         total_kl / f32(num_updates)
     )
 }
-
 func (trainer *gmpo_trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
@@ -316,7 +304,6 @@ func (trainer *gmpo_trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     }
     return policy_losses, value_losses
 }
-
 func (trainer *gmpo_trainer) print_reward_statistics() {
     println("Reward Statistics (Geometric Mean):")
     for i in 0..trainer.config.num_rewards {
@@ -327,7 +314,6 @@ func (trainer *gmpo_trainer) print_reward_statistics() {
                f"max={stats.max:.4f}")
     }
 }
-
 func compute_mean([]f32 values) -> f32 {
     if values.len() == 0 {
         return 0.0
@@ -338,7 +324,6 @@ func compute_mean([]f32 values) -> f32 {
     }
     return sum / f32(values.len())
 }
-
 func compute_std([]f32 values, f32 mean) -> f32 {
     if values.len() == 0 {
         return 1.0

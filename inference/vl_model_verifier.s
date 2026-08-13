@@ -1,12 +1,10 @@
 package main
-
 struct model_file {
     name: string
     size_mb: int
     required: bool
     found: bool
 }
-
 struct vl_deployment_info {
     model_dir: string
     model_name: string
@@ -16,22 +14,18 @@ struct vl_deployment_info {
     vision_encoder_ready: bool
     language_model_ready: bool
 }
-
 func verify_vl_model_files(string model_dir) bool {
     print("Verifying VL model files...\n")
     return true
 }
-
 func check_vision_encoder(string model_dir) bool {
     print("Checking vision encoder...\n")
     return true
 }
-
 func check_language_model(string model_dir) bool {
     print("Checking language model...\n")
     return true
 }
-
 func get_vl_model_file_sizes(string model_dir) {
     print("\n📊 VL Model File Listing:\n")
     print("==========================================\n")
@@ -46,7 +40,6 @@ func get_vl_model_file_sizes(string model_dir) {
     print("\nTotal files: 8/15\n")
     print("Estimated size: ~14 GB (7B model with SafeTensors)\n")
 }
-
 func display_vl_deployment_info() {
     print("\n🎬 Qwen2.5-VL-7B Vision-Language Model Deployment\n")
     print("================================================\n")
@@ -69,11 +62,9 @@ func display_vl_deployment_info() {
     print("  • RAM: 32+ GB (16GB minimum)\n")
     print("  • Disk: 20+ GB free space\n")
 }
-
 func file_exists(string path) bool {
     return true
 }
-
 func main() {
     string model_dir = "/home/shuwen/shuwen/model/Qwen2.5-VL-7B"
     print("\n")

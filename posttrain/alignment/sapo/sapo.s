@@ -1,7 +1,6 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/ppo/ppo.s"
-
 struct sapo_config {
     learning_rate: f32
     num_epochs: i32
@@ -16,7 +15,6 @@ struct sapo_config {
     use_value_loss: bool
     value_loss_coeff: f32
 }
-
 struct sapo_trainer {
     config: sapo_config
     policy_model: *model
@@ -26,14 +24,12 @@ struct sapo_trainer {
     step_count: i64
     advantage_stats: AdvantageStats
 }
-
 struct advantage_stats {
     mean: f32
     std: f32
     max_abs: f32
     history: []f32
 }
-
 func new_sapo_trainer(
     sapo_config config,
     *model policy,
@@ -60,7 +56,6 @@ func new_sapo_trainer(
         },
     }
 }
-
 func (trainer *sapo_trainer) smooth_clip(Tensor x, f32 lower, f32 upper) -> Tensor {
     let tau = trainer.config.tau
     let lower_weight = sigmoid((x - lower) / tau)
@@ -70,7 +65,6 @@ func (trainer *sapo_trainer) smooth_clip(Tensor x, f32 lower, f32 upper) -> Tens
                          upper * (1.0 - upper_weight)
     return smooth_clipped
 }
-
 func (trainer *sapo_trainer) compute_smooth_surrogate(
     Tensor ratio,
     Tensor advantage
@@ -87,7 +81,6 @@ func (trainer *sapo_trainer) compute_smooth_surrogate(
         return smooth_obj
     }
 }
-
 func (trainer *sapo_trainer) compute_gae(
     []tensor rewards,
     []tensor values,
@@ -117,7 +110,6 @@ func (trainer *sapo_trainer) compute_gae(
     }
     return advantages, returns
 }
-
 func (trainer *sapo_trainer) normalize_advantages([]tensor advantages) -> []tensor {
     if !trainer.config.normalize_advantages {
         return advantages
@@ -145,7 +137,6 @@ func (trainer *sapo_trainer) normalize_advantages([]tensor advantages) -> []tens
     }
     return normalized
 }
-
 func (trainer *sapo_trainer) train_step(
     []tensor prompts,
     []tensor responses,
@@ -227,7 +218,6 @@ func (trainer *sapo_trainer) train_step(
         total_kl / f32(num_updates)
     )
 }
-
 func (trainer *sapo_trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
@@ -251,11 +241,9 @@ func (trainer *sapo_trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     }
     return policy_losses, value_losses
 }
-
 func sigmoid(Tensor x) -> Tensor {
     return 1.0 / (1.0 + exp(-x))
 }
-
 func compute_mean([]f32 values) -> f32 {
     if values.len() == 0 {
         return 0.0
@@ -266,7 +254,6 @@ func compute_mean([]f32 values) -> f32 {
     }
     return sum / f32(values.len())
 }
-
 func compute_std([]f32 values, f32 mean) -> f32 {
     if values.len() == 0 {
         return 1.0

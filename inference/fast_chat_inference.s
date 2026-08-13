@@ -1,11 +1,9 @@
 package fast_chat_inference
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
 extern "intrinsic" func __sys_read_string(int fd, int count) string
-
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
-
 func get_medical_response(string user_input) string {
     string lower = ""
     int i = 0
@@ -43,7 +41,6 @@ func get_medical_response(string user_input) string {
     }
     return "That's an important medical question. For specific medical advice, please consult with a qualified healthcare provider who can evaluate your individual situation."
 }
-
 func contains(string text, string substr) int {
     if len(substr) == 0 || len(substr) > len(text) {
         return 0
@@ -62,7 +59,6 @@ func contains(string text, string substr) int {
     return 0
 }
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
 func main() {
     print("Loaded model: /home/shuwen/shuwen/posttrain/model.safetensors\n")
     print("Type /exit or quit to stop.\n\n")

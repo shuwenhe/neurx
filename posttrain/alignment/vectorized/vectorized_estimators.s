@@ -1,5 +1,4 @@
 import "tensor/tensor.s"
-
 func compute_rloo_advantages_vectorized(
     Tensor rewards,
     Tensor response_mask,
@@ -25,7 +24,6 @@ func compute_rloo_advantages_vectorized(
     }
     return advantages
 }
-
 func compute_rloo_loss_vectorized(
     Tensor log_probs,
     Tensor rewards,
@@ -38,7 +36,6 @@ func compute_rloo_loss_vectorized(
     let total_loss = policy_loss.sum() / (valid_count + 1e-8)
     return total_loss, advantages
 }
-
 func compute_grpo_advantages_vectorized(
     Tensor rewards,
     Tensor response_mask,
@@ -68,7 +65,6 @@ func compute_grpo_advantages_vectorized(
     }
     return advantages
 }
-
 func compute_grpo_loss_vectorized(
     Tensor log_probs,
     Tensor ref_log_probs,
@@ -98,7 +94,6 @@ func compute_grpo_loss_vectorized(
     let total_loss = mean_policy_loss + kl_coef * mean_kl
     return total_loss, advantages, mean_kl
 }
-
 func stack_sequences([]tensor sequences) -> Tensor {
     if sequences.len() == 0 {
         return tensor_zeros([0, 0])
@@ -111,7 +106,6 @@ func stack_sequences([]tensor sequences) -> Tensor {
     }
     return stacked
 }
-
 func stack_grouped_sequences([][]tensor grouped_sequences) -> Tensor {
     if grouped_sequences.len() == 0 {
         return tensor_zeros([0, 0, 0])
@@ -127,7 +121,6 @@ func stack_grouped_sequences([][]tensor grouped_sequences) -> Tensor {
     }
     return stacked
 }
-
 func unstack_tensor(Tensor stacked) -> []tensor {
     let batch_size = stacked.shape[0]
     let sequences: []tensor = []
@@ -136,7 +129,6 @@ func unstack_tensor(Tensor stacked) -> []tensor {
     }
     return sequences
 }
-
 func compute_batch_statistics(
     Tensor values,
     Tensor mask,
@@ -158,19 +150,15 @@ func compute_batch_statistics(
     }
     return mean.item(), variance, min_val.item(), max_val.item()
 }
-
 func clamp(Tensor x, f32 min_val, f32 max_val) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
-
 func minimum(Tensor x, Tensor y) -> Tensor {
     return where((x < y), x, y)
 }
-
 func where(Tensor condition, Tensor x, Tensor y) -> Tensor {
     return condition.to_float() * x + (1.0 - condition.to_float()) * y
 }
-
 func sqrt(Tensor x) -> Tensor {
     return x.pow(0.5)
 }

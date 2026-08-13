@@ -1,7 +1,6 @@
 package neurx.inference.production_chat_direct
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -16,11 +15,9 @@ func trim(string s) string {
     }
     return __host_slice(s, i, j + 1)
 }
-
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
-
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -34,7 +31,6 @@ func int_to_string(int value) string {
     }
     output
 }
-
 func contains_keyword(string text, string keyword) bool {
     int text_len = len(text)
     int keyword_len = len(keyword)
@@ -60,7 +56,6 @@ func contains_keyword(string text, string keyword) bool {
     }
     return false
 }
-
 func to_lowercase(string text) string {
     string result = ""
     int i = 0
@@ -74,7 +69,6 @@ func to_lowercase(string text) string {
     }
     return result
 }
-
 func generate_medical_response(string prompt) string {
     string lower = to_lowercase(prompt)
     if contains_keyword(lower, "hello") || contains_keyword(lower, "hi") || contains_keyword(lower, "你好") {
@@ -106,7 +100,6 @@ func generate_medical_response(string prompt) string {
     }
     return "That's an important medical question. For accurate medical advice, please consult with a qualified healthcare provider who can evaluate your specific situation and medical history."
 }
-
 func main() {
     string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
     string device_type = trim(runtime_env_get("NEURX_INFER_DEVICE", "cpu"))
@@ -153,7 +146,6 @@ func main() {
         conversation_history = conversation_history + "Assistant: " + response + "\n"
     }
 }
-
 func runtime_env_get(string name, string default_value) string {
     default_value
 }

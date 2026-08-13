@@ -1,9 +1,7 @@
 package main
-
 struct data {
     int value
 }
-
 func main() {
     println("=== Test: Explicit struct field operations ===")
     data obj = data {

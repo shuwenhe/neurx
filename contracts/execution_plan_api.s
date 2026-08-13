@@ -3,7 +3,6 @@ struct fusion_info {
     fused_kernel_name: string
     expected_speedup: f64
 }
-
 struct kernel_launch_info {
     kernel_id: i64
     kernel_name: string
@@ -13,7 +12,6 @@ struct kernel_launch_info {
     shared_memory: i64
     stream: stream
 }
-
 struct memory_allocation_plan {
     tensor_id: i64
     offset: i64
@@ -21,7 +19,6 @@ struct memory_allocation_plan {
     lifetime_start: i64
     lifetime_end: i64
 }
-
 struct execution_plan {
     id: i64
     kernel_launches: []kernel_launch_info

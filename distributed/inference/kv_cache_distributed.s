@@ -1,5 +1,4 @@
 package neurx.distributed.inference
-
 struct distributed_kv_cache {
     int num_layers
     int num_kv_heads
@@ -12,7 +11,6 @@ struct distributed_kv_cache {
     int world_size
     string layout
 }
-
 struct cache_update_msg {
     int layer_idx
     int seq_pos
@@ -20,7 +18,6 @@ struct cache_update_msg {
     []float values
     int source_rank
 }
-
 func init_distributed_kv_cache(
     int num_layers,
     int num_kv_heads,
@@ -38,20 +35,16 @@ func init_distributed_kv_cache(
     cache.rank = rank
     cache.world_size = world_size
     cache.layout = layout
-
     cache.local_key_caches = [][]float{}
     cache.local_value_caches = [][]float{}
     cache.seq_lens = []int{}
-
     for i = 0; i < num_layers; i = i + 1 {
         cache.local_key_caches = append(cache.local_key_caches, []float{})
         cache.local_value_caches = append(cache.local_value_caches, []float{})
         cache.seq_lens = append(cache.seq_lens, 0)
     }
-
     cache
 }
-
 func append_kv_local(
     distributed_kv_cache cache,
     int layer_idx,
@@ -61,18 +54,14 @@ func append_kv_local(
     if layer_idx >= cache.num_layers {
         return
     }
-
     for i = 0; i < len(key); i = i + 1 {
         cache.local_key_caches[layer_idx] = append(cache.local_key_caches[layer_idx], key[i])
     }
-
     for i = 0; i < len(value); i = i + 1 {
         cache.local_value_caches[layer_idx] = append(cache.local_value_caches[layer_idx], value[i])
     }
-
     cache.seq_lens[layer_idx] = cache.seq_lens[layer_idx] + 1
 }
-
 func get_kv_local(
     distributed_kv_cache cache,
     int layer_idx
@@ -80,10 +69,8 @@ func get_kv_local(
     if layer_idx >= cache.num_layers {
         return []float{}, []float{}
     }
-
     (cache.local_key_caches[layer_idx], cache.local_value_caches[layer_idx])
 }
-
 func synchronize_kv_across_ranks(
     distributed_kv_cache cache,
     int layer_idx
@@ -98,43 +85,36 @@ func synchronize_kv_across_ranks(
         println("Sharding KV cache across ranks...")
     }
 }
-
 func get_remote_kv(
     distributed_kv_cache cache,
     int layer_idx,
     int remote_rank
 ) ([]float, []float) {
     println("Fetching KV from remote rank...")
-
     if remote_rank < cache.world_size {
         ([]float{}, []float{})
     } else {
         ([]float{}, []float{})
     }
 }
-
 func allgather_kv(
     distributed_kv_cache cache,
     int layer_idx
 ) [][]float {
     println("AllGather KV cache across ranks...")
-
     [][]float gathered = [][]float{}
     for rank = 0; rank < cache.world_size; rank = rank + 1 {
         (key, value) := get_kv_local(cache, layer_idx)
         gathered = append(gathered, key)
     }
-
     gathered
 }
-
 func reduce_kv_scatter(
     distributed_kv_cache cache,
     int layer_idx
 ) {
     println("Scatter KV cache to ranks...")
 }
-
 func get_memory_usage_bytes(
     distributed_kv_cache cache
 ) int {
@@ -146,14 +126,12 @@ func get_memory_usage_bytes(
     }
     total
 }
-
 func get_memory_usage_mb(
     distributed_kv_cache cache
 ) float {
     float bytes = float(get_memory_usage_bytes(cache))
     bytes / (1024.0 * 1024.0)
 }
-
 func clear_cache(
     distributed_kv_cache cache
 ) {
@@ -161,7 +139,6 @@ func clear_cache(
     cache.local_value_caches = [][]float{}
     cache.seq_lens = []int{}
 }
-
 func log_cache_state(
     distributed_kv_cache cache
 ) {
@@ -175,20 +152,14 @@ func log_cache_state(
         }
     }
 }
-
 func main() {
     println("Distributed KV Cache Manager")
     println("============================")
-
     distributed_kv_cache cache = init_distributed_kv_cache(24, 8, 64, 4096, 0, 4, "sharded")
-
     []float test_key = []float{0.1, 0.2, 0.3, 0.4}
     []float test_value = []float{0.5, 0.6, 0.7, 0.8}
-
     append_kv_local(cache, 0, test_key, test_value)
     append_kv_local(cache, 0, test_key, test_value)
-
     log_cache_state(cache)
-
     synchronize_kv_across_ranks(cache, 0)
 }

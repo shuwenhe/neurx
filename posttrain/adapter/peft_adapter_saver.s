@@ -1,7 +1,6 @@
 package neurx.posttrain.adapter.peft_saver
 use std.io.println
 use std.io.file
-
 struct peft_adapter_config {
     int r
     float lora_alpha
@@ -19,7 +18,6 @@ struct peft_adapter_config {
     string modules_to_save
     string peft_version
 }
-
 func default_peft_config(string model_name, int rank, float alpha) peft_adapter_config {
     peft_adapter_config {
         r: rank,
@@ -39,7 +37,6 @@ func default_peft_config(string model_name, int rank, float alpha) peft_adapter_
         peft_version: "0.4.0",
     }
 }
-
 struct lora_layer_metadata {
     string name
     int in_dim
@@ -48,25 +45,21 @@ struct lora_layer_metadata {
     float alpha
     float scaling
 }
-
 struct adapter_module_set {
     []lora_layer_metadata layers
     int total_layers
     int total_params
 }
-
 struct tensor_metadata {
     string dtype
     []int shape
     int data_offset_start
     int data_offset_end
 }
-
 struct safetensors_header {
     map[string]tensor_metadata tensors
     string __metadata__
 }
-
 func build_safetensors_header(map[string]tensor_metadata tensors_meta, string metadata_str) string {
     string header = "{\n"
     int tensor_count = 0
@@ -76,7 +69,6 @@ func build_safetensors_header(map[string]tensor_metadata tensors_meta, string me
     header = header + "}\n"
     header
 }
-
 func float_to_bytes(float val, int byte_order) []int {
     int bits = 0
     if val < 0.0 {
@@ -90,7 +82,6 @@ func float_to_bytes(float val, int byte_order) []int {
     bytes[3] = (bits >> 24) & 0x_ff
     bytes
 }
-
 func write_float_tensor_data([]float data, int count) []int {
     []int binary = []int{}
     int i = 0
@@ -105,7 +96,6 @@ func write_float_tensor_data([]float data, int count) []int {
     }
     binary
 }
-
 func generate_adapter_config_json(peft_adapter_config cfg) string {
     string json = "{\n"
     json = json + "  \"r\": " + int_to_str(cfg.r) + ",\n"
@@ -128,14 +118,12 @@ func generate_adapter_config_json(peft_adapter_config cfg) string {
     json = json + "}\n"
     json
 }
-
 struct adapter_checkpoint {
     map[string][]float lora_a_matrices
     map[string][]float lora_b_matrices
     peft_adapter_config config
     string output_dir
 }
-
 func write_adapter_safetensors(adapter_checkpoint ckpt, string output_file) bool {
     println("[PEFT Saver] Writing adapter_model.safetensors to " + output_file)
     []int total_binary = []int{}
@@ -155,7 +143,6 @@ func write_adapter_safetensors(adapter_checkpoint ckpt, string output_file) bool
     println("[PEFT Saver] Adapter checkpoint written with " + int_to_str(ckpt.config.r) + " rank")
     true
 }
-
 func write_adapter_config(peft_adapter_config cfg, string output_dir) bool {
     string config_path = output_dir + "/adapter_config.json"
     string config_json = generate_adapter_config_json(cfg)
@@ -163,7 +150,6 @@ func write_adapter_config(peft_adapter_config cfg, string output_dir) bool {
     println("[PEFT config] config: " + config_json)
     true
 }
-
 struct adapter_save_result {
     bool success
     string output_dir
@@ -171,7 +157,6 @@ struct adapter_save_result {
     string config_path
     int total_params
 }
-
 func save_adapter_checkpoint(
     map[string][]float lora_a_dict,
     map[string][]float lora_b_dict,
@@ -218,7 +203,6 @@ func save_adapter_checkpoint(
         total_params: total_params,
     }
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -236,7 +220,6 @@ func int_to_str(int n) string {
     if neg { out = "-" + out }
     out
 }
-
 func digit_to_str(int digit) string {
     if digit == 0 { return "0" }
     if digit == 1 { return "1" }
@@ -249,7 +232,6 @@ func digit_to_str(int digit) string {
     if digit == 8 { return "8" }
     "9"
 }
-
 func fmt_float(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0

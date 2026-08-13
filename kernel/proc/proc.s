@@ -3,7 +3,6 @@ int PROC_RUNNING = 1
 int PROC_WAITING = 2
 int PROC_ZOMBIE  = 3
 int PROC_REAPED  = 4
-
 struct proc_descriptor {
     int    pid
     int    ppid
@@ -17,16 +16,13 @@ struct proc_descriptor {
     int    exited_at_ms
     int    mem_region_id
 }
-
 struct proc_table {
     []proc_descriptor procs
     int               next_pid
 }
-
 func new_proc_table() proc_table {
     return proc_table{procs: [], next_pid: 1}
 }
-
 func proc_spawn(pt proc_table, int ppid, string name, string goal, int sched_class) (proc_table, int) {
     int pid = pt.next_pid
     proc_descriptor p = proc_descriptor{
@@ -46,7 +42,6 @@ func proc_spawn(pt proc_table, int ppid, string name, string goal, int sched_cla
     pt.next_pid = pt.next_pid + 1
     return (pt, pid)
 }
-
 func proc_exit(pt proc_table, int pid, int exit_code, string reason) proc_table {
     int i = 0
     while i < len(pt.procs) {
@@ -59,7 +54,6 @@ func proc_exit(pt proc_table, int pid, int exit_code, string reason) proc_table 
     }
     return pt
 }
-
 func proc_wait(pt proc_table, int ppid) (proc_table, proc_descriptor, bool) {
     int i = 0
     while i < len(pt.procs) {

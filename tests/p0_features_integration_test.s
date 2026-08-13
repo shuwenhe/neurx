@@ -1,5 +1,4 @@
 package main
-
 func test_sampling_complete() bool {
     []float logits = []float{2.0, 1.5, 1.0, 0.5, 0.1, -0.5, -1.0, -2.0}
     []float temp_scaled = apply_temperature(logits, 1.5)
@@ -47,7 +46,6 @@ func test_sampling_complete() bool {
     }
     return true
 }
-
 func test_advanced_scheduler() bool {
     []int req1 = new_request(1, 10, 100)
     []int req2 = new_request(2, 50, 200)
@@ -79,7 +77,6 @@ func test_advanced_scheduler() bool {
     }
     return true
 }
-
 func test_request_response_protocol() bool {
     []int req = new_request_protocol(1, 128, 256)
     if len(req) == 0 {
@@ -121,7 +118,6 @@ func test_request_response_protocol() bool {
     }
     return true
 }
-
 func test_bpe_tokenizer() bool {
     int vocab_size = get_vocab_size()
     if vocab_size <= 0 {
@@ -169,7 +165,6 @@ func test_bpe_tokenizer() bool {
     }
     return true
 }
-
 func test_integrated_pipeline() bool {
     []int input_tokens = tokenize_text("What is machine learning?", 256)
     if len(input_tokens) == 0 {
@@ -209,7 +204,6 @@ func test_integrated_pipeline() bool {
     }
     return true
 }
-
 func test_large_batch_handling() bool {
     [][]int large_batch = [][]int{}
     int i = 0
@@ -239,7 +233,6 @@ func test_large_batch_handling() bool {
     }
     return true
 }
-
 func test_error_handling() bool {
     []int empty_toks = tokenize_text("", 256)
     []float tiny_logits = []float{1.0}
@@ -257,7 +250,6 @@ func test_error_handling() bool {
     }
     return true
 }
-
 func main() {
     bool all_pass = true
     if test_sampling_complete() {

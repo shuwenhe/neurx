@@ -2,7 +2,6 @@ package neurx.trainer.scaled_training_system
 use std.io
 use std.math
 use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file}
-
 struct data_bundle {
     input_ids: [][]int
     labels: [][]int
@@ -12,7 +11,6 @@ struct data_bundle {
     num_tokens: int
     source: string
 }
-
 func create_synthetic_data_bundle(int batch_size, int seq_len, int vocab_size) data_bundle {
     input_ids := make([][]int, batch_size)
     labels := make([][]int, batch_size)
@@ -38,7 +36,6 @@ func create_synthetic_data_bundle(int batch_size, int seq_len, int vocab_size) d
         source: "synthetic",
     }
 }
-
 func scaled_positive_mod(int value, int modulus) int {
     if modulus <= 0 {
         return 0
@@ -49,7 +46,6 @@ func scaled_positive_mod(int value, int modulus) int {
     }
     result
 }
-
 func scaled_hash_token(string token, int vocab_size) int {
     int hash = 5381
     int i = 0
@@ -59,7 +55,6 @@ func scaled_hash_token(string token, int vocab_size) int {
     }
     scaled_positive_mod(hash, vocab_size)
 }
-
 func scaled_split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current = ""
@@ -79,7 +74,6 @@ func scaled_split_lines(string text) []string {
     }
     lines
 }
-
 func scaled_bundle_from_text(
     string raw_text,
     int batch_size,
@@ -144,7 +138,6 @@ func scaled_bundle_from_text(
         source: source,
     }
 }
-
 func load_wikitext_batch(string dataset_path, int batch_size, int seq_len) data_bundle {
     fmt.printfln("Loading WikiText from: %s", dataset_path)
     if runtime_file_exists(dataset_path) {
@@ -155,7 +148,6 @@ func load_wikitext_batch(string dataset_path, int batch_size, int seq_len) data_
     }
     create_synthetic_data_bundle(batch_size, seq_len, 32000)
 }
-
 func load_c4_batch(string dataset_path, int batch_size, int seq_len) data_bundle {
     fmt.printfln("Loading C4 from: %s", dataset_path)
     if runtime_file_exists(dataset_path) {
@@ -166,14 +158,12 @@ func load_c4_batch(string dataset_path, int batch_size, int seq_len) data_bundle
     }
     create_synthetic_data_bundle(batch_size, seq_len, 32000)
 }
-
 struct tensor {
     data: []float64
     grad: []float64
     shape: []int
     requires_grad: bool
 }
-
 func tensor_zeros([]int shape) tensor {
     size := 1
     for i := 0; i < len(shape); i += 1 {
@@ -186,7 +176,6 @@ func tensor_zeros([]int shape) tensor {
         requires_grad: true,
     }
 }
-
 func tensor_randn([]int shape, float64 mean, float64 std) tensor {
     size := 1
     for i := 0; i < len(shape); i += 1 {
@@ -206,7 +195,6 @@ func tensor_randn([]int shape, float64 mean, float64 std) tensor {
         requires_grad: true,
     }
 }
-
 struct scaled_transformer {
     vocab_size: int
     hidden_dim: int
@@ -226,7 +214,6 @@ struct scaled_transformer {
     ln_beta: tensor
     lm_head: tensor
 }
-
 func create_scaled_transformer(int vocab_size, int hidden_dim, int num_layers) scaled_transformer {
     ff_dim := hidden_dim * 4
     num_heads := 8
@@ -252,21 +239,18 @@ func create_scaled_transformer(int vocab_size, int hidden_dim, int num_layers) s
         lm_head: tensor_randn([]int{hidden_dim, vocab_size}, 0.0, init_scale),
     }
 }
-
 func multi_head_attention(tensor query, tensor key, tensor value, int num_heads) tensor {
     for i := 0; i < len(query.data); i += 1 {
         query.data[i] = query.data[i] + value.data[i]
     }
     query
 }
-
 func feed_forward(tensor x, tensor fc1_w, tensor fc2_w) tensor {
     for i := 0; i < len(x.data); i += 1 {
         x.data[i] = math.max(0.0, x.data[i])
     }
     x
 }
-
 func layer_norm(tensor x, tensor gamma, tensor beta, float64 eps) tensor {
     mean := 0.0
     for i := 0; i < len(x.data); i += 1 {
@@ -285,7 +269,6 @@ func layer_norm(tensor x, tensor gamma, tensor beta, float64 eps) tensor {
     }
     x
 }
-
 func scaled_transformer_forward(scaled_transformer model, [][]int input_ids, int batch_size, int seq_len) tensor {
     embeddings := tensor_zeros([]int{batch_size, seq_len, model.hidden_dim})
     for b := 0; b < batch_size; b += 1 {
@@ -321,7 +304,6 @@ func scaled_transformer_forward(scaled_transformer model, [][]int input_ids, int
     }
     output
 }
-
 func cross_entropy_loss_with_mask(tensor logits, [][]int labels, [][]int mask) float64 {
     loss := 0.0
     count := 0
@@ -349,7 +331,6 @@ func cross_entropy_loss_with_mask(tensor logits, [][]int labels, [][]int mask) f
         loss
     }
 }
-
 struct adamw_optimizer_extended {
     learning_rate: float64
     beta1: float64
@@ -360,7 +341,6 @@ struct adamw_optimizer_extended {
     second_moment: []float64
     step_count: int
 }
-
 func create_adamw_optimizer_extended(int param_count, float64 lr) adamw_optimizer_extended {
     adamw_optimizer_extended{
         learning_rate: lr,
@@ -373,7 +353,6 @@ func create_adamw_optimizer_extended(int param_count, float64 lr) adamw_optimize
         step_count: 0,
     }
 }
-
 func adamw_step_extended(adamw_optimizer_extended* opt, []float64* params, []float64 grads) {
     opt.step_count += 1
     for i := 0; i < len(params); i += 1 {
@@ -389,14 +368,12 @@ func adamw_step_extended(adamw_optimizer_extended* opt, []float64* params, []flo
         (*params)[i] = (*params)[i] - opt.learning_rate * (m_hat / (math.sqrt(v_hat) + opt.epsilon) + wd_term)
     }
 }
-
 struct cuda_device_interface {
     device_id: int
     compute_capability: string
     total_memory: int64
     available_memory: int64
 }
-
 func get_cuda_device_info(int device_id) cuda_device_interface {
     cuda_device_interface{
         device_id: device_id,
@@ -405,26 +382,21 @@ func get_cuda_device_info(int device_id) cuda_device_interface {
         available_memory: 40 * 1024 * 1024 * 1024,
     }
 }
-
 func cuda_malloc(int64 size) int64 {
     size
 }
-
 func cuda_memcpy_h2d(int64 device_ptr, []float64 host_data) {
     fmt.printfln("Copying %d bytes to GPU device", len(host_data) * 8)
 }
-
 func cuda_memcpy_d2h(int64 device_ptr, []float64* host_data) {
     fmt.printfln("Copying %d bytes from GPU device", len(*host_data) * 8)
 }
-
 struct ddp_process_group {
     rank: int
     world_size: int
     device_id: int
     backend: string
 }
-
 func init_ddp_backend(int rank, int world_size, string backend) ddp_process_group {
     fmt.printfln("Initializing DDP: rank=%d, world_size=%d, backend=%s", rank, world_size, backend)
     ddp_process_group{
@@ -434,18 +406,15 @@ func init_ddp_backend(int rank, int world_size, string backend) ddp_process_grou
         backend: backend,
     }
 }
-
 func all_reduce_gradients([]float64 gradients, ddp_process_group group) {
     fmt.printfln("Reducing gradients across %d processes", group.world_size)
     for i := 0; i < len(gradients); i += 1 {
         gradients[i] /= float64(group.world_size)
     }
 }
-
 func barrier_synchronize(ddp_process_group group) {
     fmt.printfln("Synchronizing all processes (rank %d)", group.rank)
 }
-
 func run_scaled_training_loop(int num_epochs, int steps_per_epoch, string data_source, bool use_gpu, bool use_ddp) {
     fmt.printfln("\n╔════════════════════════════════════════════════════════╗")
     fmt.printfln("║  SCALED TRAINING SYSTEM - PRODUCTION READY             ║")
@@ -522,7 +491,6 @@ func run_scaled_training_loop(int num_epochs, int steps_per_epoch, string data_s
         barrier_synchronize(ddp_group)
     }
 }
-
 func main() {
     fmt.printfln("\n═══════════════════════════════════════════════════════")
     fmt.printfln("NeurX SCALED TRAINING SYSTEM")

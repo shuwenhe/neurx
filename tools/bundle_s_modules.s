@@ -3,7 +3,6 @@ use std.io
 use std.os
 use std.path
 use std.strings
-
 func strip_package_and_imports(string content) string {
     lines := strings.Split(content, "\n")
     result := []string{}
@@ -22,7 +21,6 @@ func strip_package_and_imports(string content) string {
     }
     return strings.Join(result, "\n")
 }
-
 func main() {
     if len(os.Args) < 4 {
         os.Stderr.WriteString("usage: " + os.Args[0] + " <output.s> <entry.s> <dependency.s>...\n")

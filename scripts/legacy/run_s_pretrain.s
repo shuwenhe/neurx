@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.io.println
-
 func main() {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let output_dir = runtime_env_get("NEURX_S_PRETRAIN_OUTPUT_DIR", project_root + "/artifacts/checkpoints/llm_s_pretrain")
@@ -26,7 +25,6 @@ func main() {
     println("Backend compilation and checkpoint materialization remain delegated.")
     0
 }
-
 func resolve_source(string project_root) string {
     let candidate_a = project_root + "/train/train_llm_jsonl.s"
     if runtime_file_exists(candidate_a) {
@@ -46,7 +44,6 @@ func resolve_source(string project_root) string {
     }
     project_root + "/src/train_llm.s"
 }
-
 func print_flag(string name, bool ok) {
     if ok {
         println("  - " + name + ": ready")

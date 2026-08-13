@@ -6,20 +6,17 @@ const int JSON_NUMBER = 2
 const int JSON_STRING = 3
 const int JSON_ARRAY = 4
 const int JSON_OBJECT = 5
-
 struct json_value {
     int value_type
     string str_value
     float num_value
     int bool_value
 }
-
 struct json_object {
     []string keys
     []string values
     int count
 }
-
 func parse_json_string(string json_str) string {
     string str = trim_string(json_str)
     if len(str) < 2 {
@@ -38,7 +35,6 @@ func parse_json_string(string json_str) string {
     content = replace_string(content, "\\t", "\t")
     content
 }
-
 func parse_json_number(string num_str) float {
     string str = trim_string(num_str)
     if len(str) == 0 {
@@ -128,7 +124,6 @@ func parse_json_number(string num_str) float {
     }
     result
 }
-
 func extract_json_field(string json_line, string field_name) string {
     string trimmed = trim_string(json_line)
     if len(trimmed) < 2 {
@@ -201,7 +196,6 @@ func extract_json_field(string json_line, string field_name) string {
         return trim_string(trimmed[value_start : value_end])
     }
 }
-
 func find_substring(string text, string substr) int {
     if len(substr) == 0 || len(substr) > len(text) {
         return -1
@@ -226,7 +220,6 @@ func find_substring(string text, string substr) int {
     }
     -1
 }
-
 func find_char_at_or_after(string text, int start_pos, string ch) int {
     int i = start_pos
     while i < len(text) {
@@ -238,7 +231,6 @@ func find_char_at_or_after(string text, int start_pos, string ch) int {
     }
     -1
 }
-
 func extract_object_value(string json, int start_pos) string {
     int brace_count = 0
     int i = start_pos
@@ -256,7 +248,6 @@ func extract_object_value(string json, int start_pos) string {
     }
     ""
 }
-
 func extract_array_value(string json, int start_pos) string {
     int bracket_count = 0
     int i = start_pos
@@ -274,7 +265,6 @@ func extract_array_value(string json, int start_pos) string {
     }
     ""
 }
-
 func parse_jsonl_line(string line) json_object {
     json_object obj
     obj.count = 0
@@ -284,15 +274,12 @@ func parse_jsonl_line(string line) json_object {
     }
     obj
 }
-
 func json_string_to_string(string json_str) string {
     return parse_json_string(json_str)
 }
-
 func json_string_to_float(string json_str) float {
     return parse_json_number(json_str)
 }
-
 func json_string_to_int(string json_str) int {
     float f = parse_json_number(json_str)
     int result = 0

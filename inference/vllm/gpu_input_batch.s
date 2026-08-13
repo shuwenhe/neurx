@@ -1,5 +1,4 @@
 package neurx.inference.vllm.gpu_input_batch
-
 func input_batch_padding_slot() int { 0 - 1 }
 
 struct gpu_input_batch_config {
@@ -8,7 +7,6 @@ struct gpu_input_batch_config {
     int maximum_blocks_per_request
     int block_size
 }
-
 struct gpu_input_batch_state {
     gpu_input_batch_config config
     []int request_ids
@@ -20,7 +18,6 @@ struct gpu_input_batch_state {
     []int active
     int request_count
 }
-
 struct gpu_input_batch_view {
     gpu_input_batch_state state
     []int batch_request_ids
@@ -31,14 +28,12 @@ struct gpu_input_batch_view {
     int token_count
     bool valid
 }
-
 func input_batch_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
     while i < capacity { values[i] = 0; i = i + 1 }
     values
 }
-
 func new_gpu_input_batch(gpu_input_batch_config config) gpu_input_batch_state {
     if config.maximum_requests <= 0 { config.maximum_requests = 1 }
     if config.maximum_requests > 4096 { config.maximum_requests = 4096 }
@@ -47,7 +42,6 @@ func new_gpu_input_batch(gpu_input_batch_config config) gpu_input_batch_state {
     if config.block_size <= 0 { config.block_size = 1 }
     gpu_input_batch_state {config: config, request_ids: input_batch_int_array(config.maximum_requests), sequence_lengths: input_batch_int_array(config.maximum_requests), computed_tokens: input_batch_int_array(config.maximum_requests), scheduled_tokens: input_batch_int_array(config.maximum_requests), block_counts: input_batch_int_array(config.maximum_requests), block_ids: input_batch_int_array(config.maximum_requests * config.maximum_blocks_per_request), active: input_batch_int_array(config.maximum_requests), request_count: 0}
 }
-
 func input_batch_find(gpu_input_batch_state state, int request_id) int {
     int i = 0
     while i < state.config.maximum_requests {
@@ -56,7 +50,6 @@ func input_batch_find(gpu_input_batch_state state, int request_id) int {
     }
     0 - 1
 }
-
 func input_batch_add_request(gpu_input_batch_state state, int request_id, int sequence_length, int computed_tokens, int scheduled_tokens) gpu_input_batch_state {
     if request_id <= 0 || sequence_length < 0 || computed_tokens < 0 || computed_tokens > sequence_length || scheduled_tokens <= 0 || input_batch_find(state, request_id) >= 0 || state.request_count >= state.config.maximum_requests { return state }
     int slot = 0 - 1
@@ -74,7 +67,6 @@ func input_batch_add_request(gpu_input_batch_state state, int request_id, int se
     state.request_count = state.request_count + 1
     state
 }
-
 func input_batch_append_block(gpu_input_batch_state state, int request_id, int block_id, bool overwrite) gpu_input_batch_state {
     int slot = input_batch_find(state, request_id)
     if slot < 0 || block_id < 0 { return state }
@@ -86,12 +78,10 @@ func input_batch_append_block(gpu_input_batch_state state, int request_id, int b
     state.block_counts[slot] = count + 1
     state
 }
-
 func input_batch_block_id(gpu_input_batch_state state, int slot, int logical_block) int {
     if slot < 0 || slot >= state.config.maximum_requests || logical_block < 0 || logical_block >= state.block_counts[slot] { return input_batch_padding_slot() }
     state.block_ids[slot * state.config.maximum_blocks_per_request + logical_block]
 }
-
 func input_batch_build(gpu_input_batch_state state) gpu_input_batch_view {
     []int batch_ids = input_batch_int_array(state.config.maximum_requests)
     []int query_starts = input_batch_int_array(state.config.maximum_requests + 1)
@@ -131,7 +121,6 @@ func input_batch_build(gpu_input_batch_state state) gpu_input_batch_view {
     query_starts[request_index] = token_index
     gpu_input_batch_view {state: state, batch_request_ids: batch_ids, query_start_locations: query_starts, positions: positions, slot_mappings: mappings, request_count: request_index, token_count: token_index, valid: valid}
 }
-
 func input_batch_commit(gpu_input_batch_state state, int request_id, int processed_tokens) gpu_input_batch_state {
     int slot = input_batch_find(state, request_id)
     if slot < 0 || processed_tokens <= 0 { return state }
@@ -141,7 +130,6 @@ func input_batch_commit(gpu_input_batch_state state, int request_id, int process
     state.sequence_lengths[slot] = state.sequence_lengths[slot] + processed
     state
 }
-
 func input_batch_remove_request(gpu_input_batch_state state, int request_id) gpu_input_batch_state {
     int slot = input_batch_find(state, request_id)
     if slot < 0 { return state }

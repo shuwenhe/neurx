@@ -1,6 +1,5 @@
 package neurx.workers.rollout.sglang
 use neurx.tensor
-
 struct sglang_config {
     string model_path
     int tensor_parallel_size
@@ -12,20 +11,17 @@ struct sglang_config {
     bool enable_flashinfer
     bool enable_torch_compile
 }
-
 struct sglang_rollout_state {
     sglang_config config
     bool initialized
     int requests_completed
 }
-
 struct sglang_request {
     string text
     []int input_ids
     int max_new_tokens
     int request_id
 }
-
 struct sglang_response {
     string generated_text
     []int generated_ids
@@ -33,7 +29,6 @@ struct sglang_response {
     int request_id
     float generation_time
 }
-
 func default_sglang_config() sglang_config {
     sglang_config {
         model_path: "",
@@ -47,7 +42,6 @@ func default_sglang_config() sglang_config {
         enable_torch_compile: false,
     }
 }
-
 func init_sglang_engine(sglang_config config) sglang_rollout_state {
     sglang_rollout_state {
         config: config,
@@ -55,7 +49,6 @@ func init_sglang_engine(sglang_config config) sglang_rollout_state {
         requests_completed: 0,
     }
 }
-
 func sglang_generate_batch(
     sglang_rollout_state state,
     []sglang_request requests
@@ -80,6 +73,5 @@ func sglang_generate_batch(
     }
     return responses
 }
-
 func sglang_update_weights(sglang_rollout_state state, string new_model_path) {
 }

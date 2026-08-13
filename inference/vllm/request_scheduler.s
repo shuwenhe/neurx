@@ -1,5 +1,4 @@
 package neurx.inference.vllm.request_scheduler
-
 func scheduler_policy_fcfs() int { 1 }
 
 func scheduler_policy_priority() int { 2 }
@@ -21,7 +20,6 @@ struct vllm_scheduler_config {
     int maximum_batch_tokens
     int aging_interval_steps
 }
-
 struct vllm_scheduler_state {
     vllm_scheduler_config config
     []int request_ids
@@ -38,21 +36,18 @@ struct vllm_scheduler_state {
     int preemption_count
     int logical_step
 }
-
 struct vllm_schedule_result {
     vllm_scheduler_state state
     int request_id
     int scheduled_tokens
     bool scheduled
 }
-
 func scheduler_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
     while i < capacity { values[i] = 0; i = i + 1 }
     values
 }
-
 func new_vllm_scheduler(vllm_scheduler_config config) vllm_scheduler_state {
     if config.capacity <= 0 { config.capacity = 1 }
     if config.capacity > 8192 { config.capacity = 8192 }
@@ -62,7 +57,6 @@ func new_vllm_scheduler(vllm_scheduler_config config) vllm_scheduler_state {
     if config.aging_interval_steps <= 0 { config.aging_interval_steps = 1 }
     vllm_scheduler_state {config: config, request_ids: scheduler_int_array(config.capacity), priorities: scheduler_int_array(config.capacity), arrival_steps: scheduler_int_array(config.capacity), prompt_tokens: scheduler_int_array(config.capacity), remaining_tokens: scheduler_int_array(config.capacity), statuses: scheduler_int_array(config.capacity), active: scheduler_int_array(config.capacity), request_count: 0, running_count: 0, completed_count: 0, cancelled_count: 0, preemption_count: 0, logical_step: 0}
 }
-
 func scheduler_find(vllm_scheduler_state state, int request_id) int {
     int i = 0
     while i < state.config.capacity {
@@ -71,7 +65,6 @@ func scheduler_find(vllm_scheduler_state state, int request_id) int {
     }
     0 - 1
 }
-
 func scheduler_enqueue(vllm_scheduler_state state, int request_id, int priority, int prompt_tokens, int maximum_output_tokens) vllm_scheduler_state {
     if request_id <= 0 || prompt_tokens < 0 || maximum_output_tokens <= 0 || scheduler_find(state, request_id) >= 0 || state.request_count >= state.config.capacity { return state }
     int slot = 0 - 1
@@ -91,13 +84,11 @@ func scheduler_enqueue(vllm_scheduler_state state, int request_id, int priority,
     state.request_count = state.request_count + 1
     state
 }
-
 func scheduler_effective_priority(vllm_scheduler_state state, int slot) int {
     if state.config.policy == scheduler_policy_fcfs() { return state.arrival_steps[slot] }
     int age = state.logical_step - state.arrival_steps[slot]
     state.priorities[slot] - age / state.config.aging_interval_steps
 }
-
 func scheduler_next_slot(vllm_scheduler_state state) int {
     int selected = 0 - 1
     int i = 0
@@ -110,7 +101,6 @@ func scheduler_next_slot(vllm_scheduler_state state) int {
     }
     selected
 }
-
 func scheduler_schedule_next(vllm_scheduler_state state, int token_budget) vllm_schedule_result {
     state.logical_step = state.logical_step + 1
     int budget = token_budget
@@ -124,7 +114,6 @@ func scheduler_schedule_next(vllm_scheduler_state state, int token_budget) vllm_
     state.running_count = state.running_count + 1
     vllm_schedule_result {state: state, request_id: state.request_ids[slot], scheduled_tokens: scheduled_tokens, scheduled: true}
 }
-
 func scheduler_complete_step(vllm_scheduler_state state, int request_id, int processed_tokens, bool finished) vllm_scheduler_state {
     int slot = scheduler_find(state, request_id)
     if slot < 0 || state.statuses[slot] != scheduler_request_running() { return state }
@@ -141,7 +130,6 @@ func scheduler_complete_step(vllm_scheduler_state state, int request_id, int pro
     }
     state
 }
-
 func scheduler_preempt_lowest(vllm_scheduler_state state) vllm_scheduler_state {
     int selected = 0 - 1
     int i = 0
@@ -158,7 +146,6 @@ func scheduler_preempt_lowest(vllm_scheduler_state state) vllm_scheduler_state {
     }
     state
 }
-
 func scheduler_cancel(vllm_scheduler_state state, int request_id) vllm_scheduler_state {
     int slot = scheduler_find(state, request_id)
     if slot < 0 || state.statuses[slot] == scheduler_request_finished() || state.statuses[slot] == scheduler_request_cancelled() { return state }

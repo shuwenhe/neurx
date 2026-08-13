@@ -1,5 +1,4 @@
 module function_calling
-
 struct function_calling_config {
     execution_mode: string = "auto"
     max_tool_calls_per_turn: int = 5
@@ -17,7 +16,6 @@ struct function_calling_config {
     verbose_logging: bool = false
     log_all_intermediate_steps: bool = false
 }
-
 struct tool_definition {
     name: string
     description: string
@@ -30,7 +28,6 @@ struct tool_definition {
     timeout_seconds: float = 30.0
     metadata?: map<string, any>
 }
-
 struct parameter_schema {
     type: string
     properties?: map<string, property_definition>
@@ -42,7 +39,6 @@ struct parameter_schema {
     default?: any
     additional_properties?: bool | parameter_schema
 }
-
 struct property_definition {
     type: string
     description: string
@@ -55,14 +51,12 @@ struct property_definition {
     properties?: map<string, property_definition>
     required?: list<string>
 }
-
 struct rate_limit {
     calls_per_minute: int = 60
     calls_per_day: int = 1000
     current_calls_today: int = 0
     last_reset_date: string = ""
 }
-
 struct tool_call {
     id: string
     name: string
@@ -87,7 +81,6 @@ enum call_status {
     PERMISSION_REQUIRED
     CANCELLED
 }
-
 struct tool_call_result {
     success: bool
     content: any
@@ -96,7 +89,6 @@ struct tool_call_result {
     raw_output?: string
     metadata?: map<string, any>
 }
-
 struct tool_call_error {
     code: string
     message: string
@@ -104,7 +96,6 @@ struct tool_call_error {
     recoverable: bool = false
     suggestion?: string
 }
-
 struct function_calling_response {
     tool_calls: list<tool_call>
     final_text_response: string?
@@ -113,33 +104,28 @@ struct function_calling_response {
     intermediate_messages: list<assistant_message>
     execution_summary: execution_summary?
 }
-
 struct assistant_message {
     role: string = "assistant"
     content: string? | list<content_block>
     tool_calls?: list<tool_call>
     reasoning_content?: string
 }
-
 struct content_block {
     type: string
     text?: string
     id?: string
     name?: string
     input?: map<string, any>
-
 struct user_message {
     role: string = "user"
     content: string | list<content_block>
     tool_results?: list<tool_call_result_block>
 }
-
 struct tool_call_result_block {
     tool_call_id: string
     content: any
     is_error: bool = false
 }
-
 struct execution_summary {
     total_tool_calls_initiated: int
     total_tool_calls_completed: int
@@ -150,7 +136,6 @@ struct execution_summary {
     avg_duration_per_call_ms: float
     retry_count: int
 }
-
 class tool_registry {
     tools: map<string, tool_definition>
     executors: map<string, tool_executor>
@@ -241,7 +226,6 @@ class tool_registry {
         }
     }
 }
-
 struct registry_statistics {
     total_tools: int
     categories: map<string, int>
@@ -253,14 +237,12 @@ interface tool_executor {
     get_name()
     validate_arguments(map args<string, any>, schema: parameter_schema)
 }
-
 struct validation_report {
     is_valid: bool
     missing_params: list<string>
     invalid_params: list<map<string, string>>
     warnings: list<string>
 }
-
 class function_calling_engine {
     registry: tool_registry
     llm_client: any
@@ -549,7 +531,6 @@ class function_calling_engine {
         }
     }
 }
-
 struct conversation_summary {
     total_messages: int
     user_messages: int
@@ -558,7 +539,6 @@ struct conversation_summary {
     unique_tools_used: set<string>
     success_rate: float
 }
-
 class call_tracker {
     history: list<tool_call>
     total_calls: int = 0
@@ -681,7 +661,6 @@ function create_builtin_file_operations_tool() {
     executor = file_operations_executor()
     return (defn, executor)
 }
-
 class web_search_executor implements tool_executor {
     get_name() { return "web_search" }
     validate_arguments(args, schema) {
@@ -701,7 +680,6 @@ class web_search_executor implements tool_executor {
         }
     }
 }
-
 class code_interpreter_executor implements tool_executor {
     get_name() { return "code_interpreter" }
     validate_arguments(args, schema) {
@@ -717,7 +695,6 @@ class code_interpreter_executor implements tool_executor {
         }
     }
 }
-
 class file_operations_executor implements tool_executor {
     get_name() { return "file_operations" }
     validate_arguments(args, schema) {
@@ -811,7 +788,6 @@ async function test_function_calling() {
     print("\n✅ all function calling tests passed!")
     return true
 }
-
 class mock_llm_client_for_fc {
     call_count: int = 0
     async chat.completions.create(model, messages, tools, tool_choice, temperature, max_tokens) {
@@ -847,7 +823,6 @@ class mock_llm_client_for_fc {
         }
     }
 }
-
 struct llm_raw_response {
     finished_reason?: string
     choices: list<map<string, any>>

@@ -1,10 +1,8 @@
 package main
 use std.os.{command, getenv}
-
 func string_char(int c) string {
     string(c)
 }
-
 func trim(string s) string {
     int begin = 0
     while begin < len(s) {
@@ -32,7 +30,6 @@ func trim(string s) string {
     }
     out
 }
-
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
@@ -42,7 +39,6 @@ func substring(string s, int start, int end) string {
     }
     out
 }
-
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if len(text) == 0 {
@@ -67,7 +63,6 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -87,7 +82,6 @@ func int_to_str(int n) string {
     }
     out
 }
-
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
@@ -103,7 +97,6 @@ func shell_escape(string s) string {
     out = out + "'"
     out
 }
-
 func main() {
     string shard_dir = getenv("SHARD_DIR", getenv("ENWIKI_SHARD_DIR", "."))
     int max_samples_per_shard = parse_int(getenv("MAX_SAMPLES_PER_SHARD", "500"), 500)

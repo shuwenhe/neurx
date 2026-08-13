@@ -3,7 +3,6 @@ use neurx.inference.api.http_server.{create_http_server, close_http_server, serv
 use neurx.inference.api.rest_api.{route_request}
 extern "intrinsic" func __host_readline(string prompt) string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
 func main() {
     print("╔════════════════════════════════════════════╗\n")
     print("║    NeurX Production Inference Server       ║\n")
@@ -41,7 +40,6 @@ func main() {
     close_http_server(server)
     print("✅ Server shutdown complete\n")
 }
-
 func handle_requests(http_server server) {
     while server.running {
         string prompt = __host_readline("neurx> ")
@@ -61,7 +59,6 @@ func handle_requests(http_server server) {
         }
     }
 }
-
 func print_server_status() {
     print("\n📊 Server Status:\n")
     print("   Status: ✅ Running\n")
@@ -71,7 +68,6 @@ func print_server_status() {
     print("   Throughput: ~50 tok/s (estimated)\n")
     print("   Uptime: Running\n\n")
 }
-
 func print_help() {
     print("\n📖 Commands:\n")
     print("   status   - Show server status\n")
@@ -79,7 +75,6 @@ func print_help() {
     print("   quit     - Shutdown server\n")
     print("   exit     - Shutdown server\n\n")
 }
-
 func int_to_string(int val) string {
     if val == 0 { return "0" }
     string res = ""
@@ -92,7 +87,6 @@ func int_to_string(int val) string {
     }
     return res
 }
-
 func string_at_index(string s, int idx) string {
     if idx < 0 || idx >= len(s) { return "" }
     return __host_slice(s, idx, idx + 1)

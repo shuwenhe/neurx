@@ -1,5 +1,4 @@
 package main
-
 func main() {
     int max_steps = 10000
     int log_interval = 10
@@ -45,7 +44,6 @@ func main() {
     println("Loss Reduction: " + fmt_float(10.0 - last_loss, 4))
     0
 }
-
 func fmt_float(float val, int decimals) string {
     float value = val
     bool neg = value < 0.0
@@ -75,7 +73,6 @@ func fmt_float(float val, int decimals) string {
     }
     return out
 }
-
 func int_to_str(int n) string {
     int value = n
     if value == 0 {
@@ -95,7 +92,6 @@ func int_to_str(int n) string {
     }
     return s
 }
-
 func string_char(int c) string {
     string(c)
 }

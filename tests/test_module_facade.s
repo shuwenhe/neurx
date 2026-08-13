@@ -3,7 +3,6 @@ use neurx.tensor.tensor
 use neurx.module
 use neurx.module.state_dict
 use neurx.nn
-
 func test_module_facade_basic() bool {
     tensor weight = neurx.tensor.new([1.0, 2.0, 3.0, 4.0], [2, 2], true)
     tensor bias = neurx.tensor.new([0.1, 0.2], [2], true)

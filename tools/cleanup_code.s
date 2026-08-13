@@ -3,7 +3,6 @@ import io
 import strings
 import path
 import sys
-
 func remove_line_comments(string line) string {
 	idx := strings.index(line, "
 	if idx != -1 {
@@ -11,7 +10,6 @@ func remove_line_comments(string line) string {
 	}
 	return line
 }
-
 func remove_comments(string content) string {
 	lines := strings.split(content, "\n")
 	result := []string{}
@@ -41,7 +39,6 @@ func remove_comments(string content) string {
 	}
 	return strings.join(result, "\n")
 }
-
 func remove_extra_blank_lines(string content) string {
 	lines := strings.split(content, "\n")
 	result := []string{}
@@ -61,7 +58,6 @@ func remove_extra_blank_lines(string content) string {
 	}
 	return strings.join(result, "\n")
 }
-
 func ensure_spacing(string content) string {
 	lines := strings.split(content, "\n")
 	result := []string{}
@@ -84,7 +80,6 @@ func ensure_spacing(string content) string {
 	content = strings.join(result, "\n")
 	return remove_extra_blank_lines(content)
 }
-
 func clean_file(string fpath) {
 	content := io.read_file(fpath)
 	content = remove_comments(content)
@@ -93,7 +88,6 @@ func clean_file(string fpath) {
 	content = strings.trim_right(content, " \t\n") + "\n"
 	io.write_file(fpath, content, 0644)
 }
-
 func walk_dir(string dir) {
 	entries := os.list_dir(dir)
 	for i := 0; i < len(entries); i += 1 {
@@ -109,7 +103,6 @@ func walk_dir(string dir) {
 		}
 	}
 }
-
 func main() {
 	if len(sys.argv) < 2 {
 		sys.println("Usage: cleanup_code <directory>")

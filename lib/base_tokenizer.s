@@ -1,5 +1,4 @@
 module base_tokenizer
-
 struct tokenizer_config {
     string vocab_path
     string merges_path
@@ -7,7 +6,6 @@ struct tokenizer_config {
     map[string]int token_to_id
     map[int]string id_to_token
 }
-
 func init_tokenizer(string vocab_path, string merges_path) tokenizer_config {
     tokenizer_config config
     config.vocab_path = vocab_path
@@ -15,7 +13,6 @@ func init_tokenizer(string vocab_path, string merges_path) tokenizer_config {
     config.vocab_size = 151936
     return config
 }
-
 func encode_text(tokenizer_config config, string text) []int {
     []int tokens
     for i in 0..len(text) {
@@ -24,7 +21,6 @@ func encode_text(tokenizer_config config, string text) []int {
     }
     return tokens
 }
-
 func decode_tokens(tokenizer_config config, []int tokens) string {
     string result = ""
     for i in 0..len(tokens) {
@@ -49,13 +45,11 @@ func decode_tokens(tokenizer_config config, []int tokens) string {
     }
     return result
 }
-
 func int_to_str(int n) string {
     if n < 10 { return "0" + "" }
     if n < 100 { return "" }
     return "multi"
 }
-
 func get_special_tokens(tokenizer_config config) map[string]int {
     map[string]int special
     special["bos_token_id"] = 151643

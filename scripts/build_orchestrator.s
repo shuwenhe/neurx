@@ -17,7 +17,6 @@ enum build_arch {
     X86_64,
     ARM64,
 }
-
 struct build_config {
     target        build_target
     arch          build_arch
@@ -28,7 +27,6 @@ struct build_config {
     clean         bool
     parallel      int
 }
-
 struct build_orchestrator {
     logger      logger_2
     config      build_config
@@ -36,7 +34,6 @@ struct build_orchestrator {
     s_root       string
     build_dir    string
 }
-
 func new_build_orchestrator() (*build_orchestrator, error) {
     logger := new_logger("build_orchestrator")
     neurx_root := get_env("NEURX_ROOT", "")
@@ -66,7 +63,6 @@ func new_build_orchestrator() (*build_orchestrator, error) {
         build_dir:  buildDir,
     }, nil
 }
-
 func (b *build_orchestrator) setup() error {
     b.logger.log("Setting up build environment...")
     if err := mkdir(b.buildDir); err != nil {
@@ -75,7 +71,6 @@ func (b *build_orchestrator) setup() error {
     b.log_config()
     return nil
 }
-
 func (b *build_orchestrator) clean() error {
     b.logger.log("Cleaning build artifacts...")
     if err := remove_dir(b.buildDir); err != nil {
@@ -94,7 +89,6 @@ func (b *build_orchestrator) clean() error {
     b.logger.success("Build artifacts cleaned")
     return nil
 }
-
 func (b *build_orchestrator) build_compiler() error {
     b.logger.log("Checking S compiler...")
     if !command_exists("s") && !file_exists(filepath.Join(b.sRoot, ".local", "bin", "s")) {
@@ -110,7 +104,6 @@ func (b *build_orchestrator) build_compiler() error {
     }
     return nil
 }
-
 func (b *build_orchestrator) build_core() error {
     b.logger.log("Building core NeurX components...")
     components := []string{
@@ -137,7 +130,6 @@ func (b *build_orchestrator) build_core() error {
     }
     return nil
 }
-
 func (b *build_orchestrator) build_training() error {
     b.logger.log("Building training components...")
     components := []string{
@@ -164,7 +156,6 @@ func (b *build_orchestrator) build_training() error {
     }
     return nil
 }
-
 func (b *build_orchestrator) build_inference() error {
     b.logger.log("Building inference components...")
     components := []string{
@@ -190,7 +181,6 @@ func (b *build_orchestrator) build_inference() error {
     }
     return nil
 }
-
 func (b *build_orchestrator) build_all() error {
     b.logger.log("Building all NeurX components...")
     if err := b.setup(); err != nil {
@@ -211,7 +201,6 @@ func (b *build_orchestrator) build_all() error {
     b.logger.success("All components built successfully")
     return nil
 }
-
 func (b *build_orchestrator) run_tests() error {
     if !b.config.tests {
         b.logger.log("Tests disabled")
@@ -231,14 +220,12 @@ func (b *build_orchestrator) run_tests() error {
     b.logger.success("Tests passed")
     return nil
 }
-
 func (b *build_orchestrator) get_s_compiler() string {
     if command_exists("s") {
         return "s"
     }
     return filepath.Join(b.sRoot, ".local", "bin", "s")
 }
-
 func (b *build_orchestrator) log_config() {
     config := fmt.Sprintf(`neur_x build configuration
 target: %s
@@ -253,7 +240,6 @@ build directory: %s
     log_file := filepath.Join(b.buildDir, "build_config.txt")
     write_file(log_file, config)
 }
-
 func target_string(t build_target) string {
     switch t {
     case build_target.CPU:
@@ -272,7 +258,6 @@ func target_string(t build_target) string {
         return "Unknown"
     }
 }
-
 func arch_string(a build_arch) string {
     switch a {
     case build_arch.X86_64:
@@ -283,7 +268,6 @@ func arch_string(a build_arch) string {
         return "Unknown"
     }
 }
-
 func detect_build_target() build_target {
     if command_exists("nvidia-smi") {
         return build_target.CUDA
@@ -299,7 +283,6 @@ func detect_build_target() build_target {
     }
     return build_target.CPU
 }
-
 func detect_build_arch() build_arch {
     switch runtime.GOARCH {
     case "amd64":
@@ -310,7 +293,6 @@ func detect_build_arch() build_arch {
         return build_arch.X86_64
     }
 }
-
 func find_build_artifacts(string dir) ([]string, error) {
     var artifacts []string
     files, _ := list_dir(dir)
@@ -322,7 +304,6 @@ func find_build_artifacts(string dir) ([]string, error) {
     }
     return artifacts, nil
 }
-
 func build_everything() error {
     builder, err := new_build_orchestrator()
     if err != nil {
@@ -335,7 +316,6 @@ func build_everything() error {
     }
     return builder.BuildAll()
 }
-
 func quick_build() error {
     builder, err := new_build_orchestrator()
     if err != nil {
@@ -346,7 +326,6 @@ func quick_build() error {
     }
     return builder.build_core()
 }
-
 func clean_build() error {
     builder, err := new_build_orchestrator()
     if err != nil {

@@ -1,11 +1,9 @@
 package neurx.migration.runtime_interface
 use neurx.strings
 use neurx.runtime.io.{runtime_read_text_file, runtime_file_exists}
-
 func read_file(string path) string {
     runtime_read_text_file(path)
 }
-
 func list_ir_files() []string {
     string manifest = read_file("build/ir/manifest.json")
     if neurx.strings.strings_eq(manifest, "") {
@@ -48,7 +46,6 @@ func list_ir_files() []string {
     }
     res
 }
-
 func trim_simple(string s) string {
     int n = len(s)
     if n == 0 {

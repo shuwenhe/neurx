@@ -1,7 +1,6 @@
 int CPUFREQ_POWERSAVE    = 0
 int CPUFREQ_ONDEMAND     = 1
 int CPUFREQ_PERFORMANCE  = 2
-
 struct cpu_info {
     int    cpu_id
     int    numa_node
@@ -11,7 +10,6 @@ struct cpu_info {
     bool   online
     int    governor
 }
-
 struct worker {
     int    worker_id
     int    cpu_affinity
@@ -20,13 +18,11 @@ struct worker {
     string current_task
     int    tasks_completed
 }
-
 struct cpu_state {
     []cpu_info cpus
     []worker   workers
     int        next_worker_id
 }
-
 func new_cpu_state() cpu_state {
     return cpu_state{
         cpus:           [],
@@ -34,7 +30,6 @@ func new_cpu_state() cpu_state {
         next_worker_id: 0,
     }
 }
-
 func cpu_register(cs cpu_state, int cpu_id, int numa_node, int base_mhz, int max_mhz) cpu_state {
     cpu_info c = cpu_info{
         cpu_id:       cpu_id,
@@ -48,7 +43,6 @@ func cpu_register(cs cpu_state, int cpu_id, int numa_node, int base_mhz, int max
     cs.cpus = append(cs.cpus, c)
     return cs
 }
-
 func cpu_spawn_worker(cs cpu_state, int cpu_affinity, int numa_affinity) (cpu_state, int) {
     worker w = worker{
         worker_id:       cs.next_worker_id,
@@ -63,7 +57,6 @@ func cpu_spawn_worker(cs cpu_state, int cpu_affinity, int numa_affinity) (cpu_st
     cs.next_worker_id = cs.next_worker_id + 1
     return (cs, id)
 }
-
 func cpu_assign_task(cs cpu_state, int worker_id, string task_name) (cpu_state, bool) {
     int i = 0
     while i < len(cs.workers) {
@@ -76,7 +69,6 @@ func cpu_assign_task(cs cpu_state, int worker_id, string task_name) (cpu_state, 
     }
     return (cs, false)
 }
-
 func cpu_complete_task(cs cpu_state, int worker_id) cpu_state {
     int i = 0
     while i < len(cs.workers) {
@@ -89,7 +81,6 @@ func cpu_complete_task(cs cpu_state, int worker_id) cpu_state {
     }
     return cs
 }
-
 func cpu_pick_idle_worker(cs cpu_state, int prefer_cpu, int prefer_numa) (worker, bool) {
     int i = 0
     while i < len(cs.workers) {
@@ -116,7 +107,6 @@ func cpu_pick_idle_worker(cs cpu_state, int prefer_cpu, int prefer_numa) (worker
     }
     return (worker{}, false)
 }
-
 func cpu_set_governor(cs cpu_state, int cpu_id, int governor) cpu_state {
     int i = 0
     while i < len(cs.cpus) {

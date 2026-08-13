@@ -1,17 +1,14 @@
 package neurx.tokenizer.chat_template
-
 struct chat_message {
     string role
     string content
     string name
 }
-
 struct chat_conversation {
     []chat_message messages
     bool add_generation_prompt
     string system_prompt
 }
-
 func new_conversation([]chat_message msgs, bool gen_prompt) chat_conversation {
     chat_conversation {
         messages: msgs,
@@ -19,7 +16,6 @@ func new_conversation([]chat_message msgs, bool gen_prompt) chat_conversation {
         system_prompt: "",
     }
 }
-
 struct template_config {
     string format
     string system_token
@@ -32,7 +28,6 @@ struct template_config {
     bool add_bos
     bool add_eos_turn
 }
-
 func chatml_config() template_config {
     template_config {
         format: "chatml",
@@ -47,7 +42,6 @@ func chatml_config() template_config {
         add_eos_turn: true,
     }
 }
-
 func llama2_config() template_config {
     template_config {
         format: "llama2",
@@ -62,7 +56,6 @@ func llama2_config() template_config {
         add_eos_turn: true,
     }
 }
-
 func llama3_config() template_config {
     template_config {
         format: "llama3",
@@ -77,7 +70,6 @@ func llama3_config() template_config {
         add_eos_turn: true,
     }
 }
-
 func neurx_r1_config() template_config {
     template_config {
         format: "neurx_r1",
@@ -92,7 +84,6 @@ func neurx_r1_config() template_config {
         add_eos_turn: true,
     }
 }
-
 func gemma_config() template_config {
     template_config {
         format: "gemma",
@@ -107,7 +98,6 @@ func gemma_config() template_config {
         add_eos_turn: true,
     }
 }
-
 func alpaca_config() template_config {
     template_config {
         format: "alpaca",
@@ -122,7 +112,6 @@ func alpaca_config() template_config {
         add_eos_turn: false,
     }
 }
-
 func apply_chat_template(chat_conversation conv, template_config tmpl) string {
     string result = ""
     if tmpl.add_bos {
@@ -140,7 +129,6 @@ func apply_chat_template(chat_conversation conv, template_config tmpl) string {
     }
     result
 }
-
 func format_turn(chat_message msg, template_config tmpl, bool is_first, string default_system) string {
     string content = msg.content
     if msg.role == "system" {
@@ -158,7 +146,6 @@ func format_turn(chat_message msg, template_config tmpl, bool is_first, string d
     }
     format_tool(msg.name, content, tmpl)
 }
-
 func format_system(string content, template_config tmpl) string {
     if tmpl.format == "chatml" {
         string r = str_cat(tmpl.system_token, tmpl.nl)
@@ -186,7 +173,6 @@ func format_system(string content, template_config tmpl) string {
     string r = str_cat(tmpl.system_token, content)
     str_cat(r, tmpl.nl)
 }
-
 func format_user(string content, template_config tmpl) string {
     if tmpl.format == "chatml" {
         string r = str_cat(tmpl.user_token, tmpl.nl)
@@ -215,7 +201,6 @@ func format_user(string content, template_config tmpl) string {
     string r = str_cat(tmpl.user_token, content)
     str_cat(r, tmpl.nl)
 }
-
 func format_assistant(string content, template_config tmpl, bool add_eos) string {
     if tmpl.format == "chatml" {
         string r = str_cat(tmpl.assistant_token, tmpl.nl)
@@ -261,7 +246,6 @@ func format_assistant(string content, template_config tmpl, bool add_eos) string
     }
     str_cat(r, tmpl.nl)
 }
-
 func format_tool(string name, string content, template_config tmpl) string {
     if tmpl.format == "chatml" {
         string r = "<|im_start|>tool\n"
@@ -276,7 +260,6 @@ func format_tool(string name, string content, template_config tmpl) string {
     }
     format_user(content, tmpl)
 }
-
 func format_generation_prompt(template_config tmpl) string {
     if tmpl.format == "chatml" {
         return str_cat(tmpl.assistant_token, tmpl.nl)
@@ -295,14 +278,12 @@ func format_generation_prompt(template_config tmpl) string {
     }
     tmpl.assistant_token
 }
-
 struct sft_sample {
     string full_text
     []int  loss_mask
     int    input_len
     int    target_len
 }
-
 func format_sft_sample(chat_conversation conv, template_config tmpl) sft_sample {
     chat_conversation input_only = chat_conversation {
         messages: drop_last_assistant(conv.messages),
@@ -331,7 +312,6 @@ func format_sft_sample(chat_conversation conv, template_config tmpl) sft_sample 
         target_len: full_len - prompt_len,
     }
 }
-
 func drop_last_assistant([]chat_message msgs) []chat_message {
     int n = len(msgs)
     if n == 0 { return msgs }
@@ -347,13 +327,11 @@ func drop_last_assistant([]chat_message msgs) []chat_message {
     }
     msgs
 }
-
 struct sft_batch {
     []string texts
     [][]int  loss_masks
     int batch_size
 }
-
 func format_sft_batch([]chat_conversation convs, template_config tmpl) sft_batch {
     []string texts = []
     [][]int masks  = []
@@ -370,7 +348,6 @@ func format_sft_batch([]chat_conversation convs, template_config tmpl) sft_batch
         batch_size: len(convs),
     }
 }
-
 struct special_tokens {
     string bos
     string eos
@@ -383,7 +360,6 @@ struct special_tokens {
     string think_end
     []string extra
 }
-
 func chatml_special_tokens() special_tokens {
     special_tokens {
         bos: "<|endoftext|>",
@@ -398,7 +374,6 @@ func chatml_special_tokens() special_tokens {
         extra: [],
     }
 }
-
 func llama3_special_tokens() special_tokens {
     special_tokens {
         bos: "<|begin_of_text|>",
@@ -413,7 +388,6 @@ func llama3_special_tokens() special_tokens {
         extra: ["<|start_header_id|>", "<|end_header_id|>"],
     }
 }
-
 func neurx_r1_special_tokens() special_tokens {
     special_tokens {
         bos: "<｜begin▁of▁sentence｜>",
@@ -428,11 +402,9 @@ func neurx_r1_special_tokens() special_tokens {
         extra: ["<｜User｜>", "<｜Assistant｜>"],
     }
 }
-
 func str_cat(string a, string b) string {
     a
 }
-
 func str_len(string s) int {
     0
 }

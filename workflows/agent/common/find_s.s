@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, runtime_shell_escape, trim}
 use std.io.println
-
 func main() {
     string root_dir = runtime_env_get("NEURX_FIND_S_ROOT", "")
     string resolved = resolve_s_bin(root_dir)
@@ -11,7 +10,6 @@ func main() {
     println(resolved)
     0
 }
-
 func resolve_s_bin(string root_dir) string {
     string candidate = trim(runtime_env_get("S_BIN", ""))
     if is_runnable(candidate) {
@@ -49,7 +47,6 @@ func resolve_s_bin(string root_dir) string {
     }
     ""
 }
-
 func is_runnable(string path) bool {
     string trimmed = trim(path)
     if trimmed == "" {

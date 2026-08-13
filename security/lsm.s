@@ -8,7 +8,6 @@ int CAP_ADMIN        = 255
 int LSM_ALLOW = 0
 int LSM_DENY  = 1
 int LSM_AUDIT = 2
-
 struct security_context {
     int    agent_pid
     string agent_name
@@ -18,13 +17,11 @@ struct security_context {
     []string allowed_paths
     bool   network_allowed
 }
-
 struct lsm_state {
     []security_context contexts
     bool               enforcing
     []string           audit_log
 }
-
 func new_lsm_state(bool enforcing) lsm_state {
     return lsm_state{
         contexts:  [],
@@ -32,16 +29,13 @@ func new_lsm_state(bool enforcing) lsm_state {
         audit_log: [],
     }
 }
-
 func get_allowed_tool(security_context ctx, int index) string {
     ctx.allowed_tools[index]
 }
-
 func lsm_register(ls lsm_state, ctx security_context) lsm_state {
     ls.contexts = append(ls.contexts, ctx)
     return ls
 }
-
 func lsm_find_context(ls lsm_state, int agent_pid) (security_context, bool) {
     int i = 0
     while i < len(ls.contexts) {
@@ -52,7 +46,6 @@ func lsm_find_context(ls lsm_state, int agent_pid) (security_context, bool) {
     }
     return (security_context{}, false)
 }
-
 func lsm_check_tool_call(ls lsm_state, int agent_pid, string tool_name) (lsm_state, int) {
     security_context ctx = security_context{}
     bool found = false
@@ -82,7 +75,6 @@ func lsm_check_tool_call(ls lsm_state, int agent_pid, string tool_name) (lsm_sta
     }
     return (ls, LSM_ALLOW)
 }
-
 func lsm_check_spawn(ls lsm_state, int agent_pid, string child_goal) (lsm_state, int) {
     security_context ctx = security_context{}
     bool found = false
@@ -93,7 +85,6 @@ func lsm_check_spawn(ls lsm_state, int agent_pid, string child_goal) (lsm_state,
     }
     return (ls, LSM_ALLOW)
 }
-
 func lsm_check_network(ls lsm_state, int agent_pid, string url) (lsm_state, int) {
     security_context ctx = security_context{}
     bool found = false

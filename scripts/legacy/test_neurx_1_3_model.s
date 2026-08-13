@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command}
 use std.io.println
-
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/checkpoint/NeurX-1.3")
@@ -68,7 +67,6 @@ func main() {
     println("")
     0
 }
-
 func read_model_metadata(string checkpoint_dir) int {
     string metadata_file = checkpoint_dir + "/NeurX-1.3.neurx"
     string cmd = "head -20 \"" + metadata_file + "\""
@@ -77,7 +75,6 @@ func read_model_metadata(string checkpoint_dir) int {
     println("  ✓ model metadata loaded successfully")
     return 0
 }
-
 func print_checkpoint_size(string checkpoint_dir) int {
     string cmd = "du -sh \"" + checkpoint_dir + "\" | awk '{print $1}'"
     runtime_run_command(cmd)

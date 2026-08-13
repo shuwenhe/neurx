@@ -4,7 +4,6 @@ use std.os
 use std.exec
 use std.time
 use std.path
-
 func check_nvidia_smi() int {
     cmd := exec.command("nvidia-smi", "-L")
     output, err := cmd.Output()
@@ -22,7 +21,6 @@ func check_nvidia_smi() int {
     }
     return count
 }
-
 func check_cuda_binary(string bin) bool {
     stat, err := os.Stat(bin)
     if err != nil || stat.IsDir() {
@@ -32,7 +30,6 @@ func check_cuda_binary(string bin) bool {
     io.Println("   ✓ Binary exists: " + bin)
     return true
 }
-
 func check_required_files([]string files) {
     for _, file := range files {
         stat, err := os.Stat(file)
@@ -43,7 +40,6 @@ func check_required_files([]string files) {
         }
     }
 }
-
 func test_cuda_binary(string bin) {
     cmd := exec.command("timeout", "30s", bin)
     cmd.Env = append(os.Environ(),
@@ -71,7 +67,6 @@ func test_cuda_binary(string bin) {
         io.Println("   (No output received)")
     }
 }
-
 func main() {
     curdir := "/home/shuwen/shuwen/train/neurx"
     cuda_train_bin := curdir + "/artifacts/build/cuda_train/neurx_cuda_train_bridge"

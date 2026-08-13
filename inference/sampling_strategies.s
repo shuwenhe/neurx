@@ -1,5 +1,4 @@
 package neurx.inference.sampling_strategies
-
 struct sampling_config {
     string strategy
     float temperature
@@ -21,13 +20,11 @@ struct sampling_config {
     bool do_sample
     uint64 seed
 }
-
 struct beam_state {
     []int token_ids
     float score
     bool is_finished
 }
-
 struct generation_state {
     []int input_ids
     []int generated_ids
@@ -35,7 +32,6 @@ struct generation_state {
     bool is_finished
     []beam_state beams
 }
-
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
@@ -46,7 +42,6 @@ func copy_float([]float data) []float {
     }
     return out
 }
-
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
@@ -57,7 +52,6 @@ func copy_int([]int data) []int {
     }
     return out
 }
-
 func make_one_hot(int idx, int size) []float {
     []float out = []float{cap: size}
     int i = 0
@@ -70,18 +64,15 @@ func make_one_hot(int idx, int size) []float {
     }
     return out
 }
-
 func advance_rng(uint64 state) uint64 {
     state = state xor (state << 13)
     state = state xor (state >> 7)
     state = state xor (state << 17)
     return state
 }
-
 func random_float_01(uint64 rng) float {
     float(advance_rng(rng)) / 18446744073709551615.0
 }
-
 func exp_approx(float x) float {
     if x < -18.0 {
         return 0.0
@@ -99,7 +90,6 @@ func exp_approx(float x) float {
     }
     sum
 }
-
 func log_approx(float x) float {
     float v = x
     if v <= 0.0 {
@@ -112,14 +102,12 @@ func log_approx(float x) float {
     float y7 = y5 * y2
     2.0 * (y + (y3 / 3.0) + (y5 / 5.0) + (y7 / 7.0))
 }
-
 func abs_float(float x) float {
     if x < 0.0 {
         return 0.0 - x
     }
     x
 }
-
 func softmax([]float logits) []float {
     int n = len(logits)
     if n == 0 {
@@ -158,7 +146,6 @@ func softmax([]float logits) []float {
     }
     probs
 }
-
 func normalize([]float arr) []float {
     int n = len(arr)
     if n == 0 {
@@ -187,7 +174,6 @@ func normalize([]float arr) []float {
     }
     out
 }
-
 func argmax([]float arr) int {
     int n = len(arr)
     if n == 0 {
@@ -205,7 +191,6 @@ func argmax([]float arr) int {
     }
     best_idx
 }
-
 func argsort_descending([]float arr) []int {
     int n = len(arr)
     []int indices = []int{cap: n}
@@ -233,7 +218,6 @@ func argsort_descending([]float arr) []int {
     }
     indices
 }
-
 func argsort_ascending([]float arr) []int {
     int n = len(arr)
     []int indices = []int{cap: n}
@@ -261,7 +245,6 @@ func argsort_ascending([]float arr) []int {
     }
     indices
 }
-
 func new_sampling_config() sampling_config {
     sampling_config {
         strategy: "top_p",
@@ -285,7 +268,6 @@ func new_sampling_config() sampling_config {
         seed: 42,
     }
 }
-
 func greedy_config() sampling_config {
     sampling_config {
         strategy: "greedy",
@@ -309,7 +291,6 @@ func greedy_config() sampling_config {
         seed: 42,
     }
 }
-
 func creative_config() sampling_config {
     sampling_config {
         strategy: "top_p",
@@ -333,7 +314,6 @@ func creative_config() sampling_config {
         seed: 42,
     }
 }
-
 func apply_temperature([]float logits, float temperature) []float {
     int n = len(logits)
     if n == 0 {
@@ -354,7 +334,6 @@ func apply_temperature([]float logits, float temperature) []float {
     }
     out
 }
-
 func apply_repetition_penalty([]float logits, []int past_tokens, float penalty) []float {
     int n = len(logits)
     if penalty == 1.0 || n == 0 || len(past_tokens) == 0 {
@@ -375,7 +354,6 @@ func apply_repetition_penalty([]float logits, []int past_tokens, float penalty) 
     }
     out
 }
-
 func apply_presence_frequency_penalties(
     []float logits,
     []int past_tokens,
@@ -415,7 +393,6 @@ func apply_presence_frequency_penalties(
     }
     out
 }
-
 func get_blocked_tokens([]int past_tokens, int ngram_size, int vocab_size) []int {
     if ngram_size <= 1 || len(past_tokens) < ngram_size - 1 {
         return []
@@ -458,7 +435,6 @@ func get_blocked_tokens([]int past_tokens, int ngram_size, int vocab_size) []int
     }
     out
 }
-
 func apply_ngram_blocking([]float logits, []int past_tokens, int ngram_size) []float {
     int n = len(logits)
     if n == 0 || ngram_size <= 1 {
@@ -479,7 +455,6 @@ func apply_ngram_blocking([]float logits, []int past_tokens, int ngram_size) []f
     }
     out
 }
-
 func apply_top_k([]float logits, int k) []float {
     int n = len(logits)
     if n == 0 || k <= 0 || k >= n {
@@ -501,7 +476,6 @@ func apply_top_k([]float logits, int k) []float {
     }
     out
 }
-
 func apply_top_p([]float logits, float p) []float {
     int n = len(logits)
     if n == 0 || p <= 0.0 || p >= 1.0 {
@@ -528,7 +502,6 @@ func apply_top_p([]float logits, float p) []float {
     }
     out
 }
-
 func apply_typical_p([]float logits, float p) []float {
     int n = len(logits)
     if n == 0 || p <= 0.0 || p >= 1.0 {
@@ -569,7 +542,6 @@ func apply_typical_p([]float logits, float p) []float {
     }
     out
 }
-
 func contrastive_candidate_penalty(int token, []int past_tokens) float {
     if len(past_tokens) == 0 {
         return 0.0
@@ -587,7 +559,6 @@ func contrastive_candidate_penalty(int token, []int past_tokens) float {
     }
     penalty
 }
-
 func contrastive_search_token([]float logits, []int past_tokens, sampling_config config) int {
     int n = len(logits)
     if n == 0 {
@@ -617,7 +588,6 @@ func contrastive_search_token([]float logits, []int past_tokens, sampling_config
     }
     best_token
 }
-
 func process_logits([]float logits, []int past_tokens, sampling_config config) []float {
     []float out = copy_float(logits)
     if config.no_repeat_ngram_size > 1 {
@@ -646,7 +616,6 @@ func process_logits([]float logits, []int past_tokens, sampling_config config) [
     }
     out
 }
-
 func sample_from_distribution([]float probs, uint64 rng_state) (int, uint64) {
     int n = len(probs)
     if n == 0 {
@@ -664,7 +633,6 @@ func sample_from_distribution([]float probs, uint64 rng_state) (int, uint64) {
     }
     (n - 1, advance_rng(rng_state))
 }
-
 func sample_from_distribution_index([]float probs, uint64 rng_state) int {
     int n = len(probs)
     if n == 0 {
@@ -682,23 +650,19 @@ func sample_from_distribution_index([]float probs, uint64 rng_state) int {
     }
     n - 1
 }
-
 func sample_from_softmax([]float logits, float temperature, uint64 rng_state) (int, uint64) {
     []float scaled = apply_temperature(logits, temperature)
     []float probs = softmax(scaled)
     sample_from_distribution(probs, rng_state)
 }
-
 func sample_from_softmax_index([]float logits, float temperature, uint64 rng_state) int {
     []float scaled = apply_temperature(logits, temperature)
     []float probs = softmax(scaled)
     sample_from_distribution_index(probs, rng_state)
 }
-
 func greedy_sample([]float logits) int {
     argmax(logits)
 }
-
 func sample_next_token(
     []float logits,
     []int past_tokens,
@@ -715,7 +679,6 @@ func sample_next_token(
     []float probs = softmax(processed)
     sample_from_distribution(probs, rng_state)
 }
-
 func sample_next_token_index(
     []float logits,
     []int past_tokens,
@@ -732,7 +695,6 @@ func sample_next_token_index(
     []float probs = softmax(processed)
     sample_from_distribution_index(probs, rng_state)
 }
-
 func sample_token(
     []float logits,
     []int past_tokens,
@@ -741,7 +703,6 @@ func sample_token(
 ) int {
     return sample_next_token_index(logits, past_tokens, config, rng_state)
 }
-
 func select_top_beams([]beam_state candidates, int k) []beam_state {
     int n = len(candidates)
     if n == 0 {
@@ -775,7 +736,6 @@ func select_top_beams([]beam_state candidates, int k) []beam_state {
     }
     out
 }
-
 func best_beam([]beam_state beams) beam_state {
     if len(beams) == 0 {
         return beam_state {
@@ -796,7 +756,6 @@ func best_beam([]beam_state beams) beam_state {
     }
     beams[best]
 }
-
 func beam_search_decode(
     [][]float all_logits,
     sampling_config config,
@@ -897,7 +856,6 @@ func beam_search_decode(
     }
     best_beam(finished).token_ids
 }
-
 func beam_search_decode_two_steps(
     []float first_logits,
     []float second_logits,

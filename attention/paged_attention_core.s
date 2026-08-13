@@ -1,5 +1,4 @@
 package neurx.attention.paged_attention_core
-
 struct paged_block {
     []float key_data
     []float value_data
@@ -7,12 +6,10 @@ struct paged_block {
     int num_filled
     bool is_full
 }
-
 struct slot_mapping {
     int block_id
     int offset_in_block
 }
-
 struct paged_kv_cache {
     []paged_block blocks
     []slot_mapping token_to_slot
@@ -23,7 +20,6 @@ struct paged_kv_cache {
     int allocated_blocks
     int total_tokens
 }
-
 struct paged_attention_config {
     int block_size
     int num_kv_heads
@@ -31,7 +27,6 @@ struct paged_attention_config {
     int max_blocks
     float scale
 }
-
 func new_paged_kv_cache(config paged_attention_config) paged_kv_cache {
     int normalized_block = config.block_size
     if normalized_block <= 0 {
@@ -74,12 +69,10 @@ func new_paged_kv_cache(config paged_attention_config) paged_kv_cache {
         total_tokens: 0,
     }
 }
-
 func new_float_array(int size) []float {
     []float arr = make([]float, size)
     return arr
 }
-
 func reserve_tokens(cache paged_kv_cache, int num_new_tokens) paged_kv_cache {
     if num_new_tokens <= 0 {
         return cache
@@ -124,14 +117,12 @@ func reserve_tokens(cache paged_kv_cache, int num_new_tokens) paged_kv_cache {
         total_tokens: new_total,
     }
 }
-
 func mod_int(int a, int b) int {
     if b == 0 {
         return 0
     }
     a - (a / b) * b
 }
-
 func release_tokens(cache paged_kv_cache, int num_release) paged_kv_cache {
     if num_release <= 0 {
         return cache
@@ -159,7 +150,6 @@ func release_tokens(cache paged_kv_cache, int num_release) paged_kv_cache {
         total_tokens: new_total,
     }
 }
-
 func reset_cache(cache paged_kv_cache) paged_kv_cache {
     paged_kv_cache{
         blocks: cache.blocks,
@@ -172,7 +162,6 @@ func reset_cache(cache paged_kv_cache) paged_kv_cache {
         total_tokens: 0,
     }
 }
-
 func write_kv_to_cache(
     cache paged_kv_cache,
     []float keys,
@@ -217,7 +206,6 @@ func write_kv_to_cache(
     }
     return cache
 }
-
 func compute_paged_attention(
     cache paged_kv_cache,
     []float queries,
@@ -310,7 +298,6 @@ func compute_paged_attention(
     }
     return output
 }
-
 func apply_attention_mask(
     []float attention_scores,
     string mask_type,
@@ -325,7 +312,6 @@ func apply_attention_mask(
     }
     return attention_scores
 }
-
 func compute_softmax([]float scores) []float {
     if len(scores) == 0 {
         return scores
@@ -359,7 +345,6 @@ func compute_softmax([]float scores) []float {
     }
     return softmax_scores
 }
-
 func math_exp(float x) float {
     if x > 88.0 {
         return 6.5623733e37
@@ -383,7 +368,6 @@ func math_exp(float x) float {
     }
     return result
 }
-
 func factorial(int n) float {
     if n <= 1 {
         return 1.0
@@ -396,14 +380,12 @@ func factorial(int n) float {
     }
     return result
 }
-
 struct paged_cache_stats {
     int total_tokens
     int allocated_blocks
     int memory_used_mb
     float utilization_percent
 }
-
 func get_cache_stats(cache paged_kv_cache) paged_cache_stats {
     int bytes_per_token = cache.num_kv_heads * cache.head_size * 4 * 2
     int memory_used = cache.total_tokens * bytes_per_token
@@ -420,7 +402,6 @@ func get_cache_stats(cache paged_kv_cache) paged_cache_stats {
         utilization_percent: utilization,
     }
 }
-
 func debug_print_cache_state(cache paged_kv_cache) string {
     stats = get_cache_stats(cache)
     result = ""
@@ -430,4 +411,98 @@ func debug_print_cache_state(cache paged_kv_cache) string {
     result = result + "  Memory Used: " + str(stats.memory_used_mb) + " MB\n"
     result = result + "  Utilization: " + str(stats.utilization_percent) + "%\n"
     return result
+}
+func compute_paged_attention_gqa(
+    cache paged_kv_cache,
+    []float queries,
+    []float output,
+    []slot_mapping slot_mappings,
+    int num_heads,
+    int num_kv_heads,
+    int head_size,
+    float scale
+) []float {
+    if len(queries) == 0 {
+        return output
+    }
+    if num_kv_heads >= num_heads {
+        return compute_paged_attention(cache, queries, output, slot_mappings, num_heads, head_size, scale)
+    }
+    int group_size = num_heads / num_kv_heads
+    int q_stride = num_heads * head_size
+    int num_query_tokens = len(queries) / q_stride
+    int context_len = len(slot_mappings)
+    int kv_stride = num_kv_heads * head_size
+    int q_idx = 0
+    while q_idx < num_query_tokens {
+        int h = 0
+        while h < num_heads {
+            int kv_head = h / group_size
+            int q_head_base = q_idx * q_stride + h * head_size
+            float[] scores = make([]float, context_len)
+            int k_pos = 0
+            while k_pos < context_len {
+                if k_pos > q_idx {
+                    scores[k_pos] = -1.0e30
+                    k_pos = k_pos + 1
+                    continue
+                }
+                slot_mapping slot = slot_mappings[k_pos]
+                int block_id = slot.block_id
+                int offset_in_block = slot.offset_in_block
+                if block_id < 0 || block_id >= len(cache.blocks) {
+                    scores[k_pos] = -1.0e30
+                    k_pos = k_pos + 1
+                    continue
+                }
+                paged_block block = cache.blocks[block_id]
+                int kv_base = offset_in_block * kv_stride + kv_head * head_size
+                float qk = 0.0
+                int d = 0
+                while d < head_size {
+                    float q_val = queries[q_head_base + d]
+                    float k_val = 0.0
+                    if kv_base + d < len(block.key_data) {
+                        k_val = block.key_data[kv_base + d]
+                    }
+                    qk = qk + q_val * k_val
+                    d = d + 1
+                }
+                scores[k_pos] = qk * scale
+                k_pos = k_pos + 1
+            }
+            float[] probs = compute_softmax(scores)
+            int out_base = q_head_base
+            int d = 0
+            while d < head_size {
+                float acc = 0.0
+                int k_pos2 = 0
+                while k_pos2 < context_len {
+                    slot_mapping slot = slot_mappings[k_pos2]
+                    int block_id = slot.block_id
+                    int offset_in_block = slot.offset_in_block
+                    if block_id < 0 || block_id >= len(cache.blocks) {
+                        k_pos2 = k_pos2 + 1
+                        continue
+                    }
+                    paged_block block = cache.blocks[block_id]
+                    int kv_base = offset_in_block * kv_stride + kv_head * head_size
+                    float v_val = 0.0
+                    if kv_base + d < len(block.value_data) {
+                        v_val = block.value_data[kv_base + d]
+                    }
+                    acc = acc + probs[k_pos2] * v_val
+                    k_pos2 = k_pos2 + 1
+                }
+                while out_base + d >= len(output) {
+                    output = append(output, 0.0)
+                }
+                output[out_base + d] = acc
+                d = d + 1
+            }
+            h = h + 1
+        }
+        q_idx = q_idx + 1
+    }
+    output
 }

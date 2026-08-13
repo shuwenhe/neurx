@@ -1,5 +1,4 @@
 package main
-
 func test_training_config() {
     println("Test 1: Training configuration")
     let batch_size = 32
@@ -9,7 +8,6 @@ func test_training_config() {
         println("  ✓ Training config created")
     }
 }
-
 func test_batch_preparation() {
     println("Test 2: batch_2 preparation")
     [][]int data = [][]int{cap: 5}
@@ -28,7 +26,6 @@ func test_batch_preparation() {
         println("  ✓ batch_2 prepared correctly")
     }
 }
-
 func test_training_metrics() {
     println("Test 3: Training metrics")
     let loss1 = 0.5
@@ -39,7 +36,6 @@ func test_training_metrics() {
         println("  ✓ Metrics computed correctly")
     }
 }
-
 func test_lr_scheduling() {
     println("Test 4: Learning rate scheduling")
     let base_lr = 0.0001
@@ -50,7 +46,6 @@ func test_lr_scheduling() {
         println("  ✓ Learning rate scheduling works")
     }
 }
-
 func test_gradient_clipping() {
     println("Test 5: Gradient clipping")
     [][]float grads = [][]float{cap: 3}
@@ -70,7 +65,6 @@ func test_gradient_clipping() {
         println("  ✓ Gradient storage works")
     }
 }
-
 func test_checkpoint_creation() {
     println("Test 6: checkpoint creation")
     let model_name = "test_model"
@@ -82,7 +76,6 @@ func test_checkpoint_creation() {
         println("  ✓ checkpoint metadata valid")
     }
 }
-
 func test_checkpoint_paths() {
     println("Test 7: checkpoint file paths")
     let dir = "/tmp/checkpoints"
@@ -93,7 +86,6 @@ func test_checkpoint_paths() {
         println("  ✓ checkpoint path generation works")
     }
 }
-
 func test_validation_metrics() {
     println("Test 8: Validation metrics computation")
     let loss = 0.45
@@ -103,7 +95,6 @@ func test_validation_metrics() {
         println("  ✓ Validation metrics valid")
     }
 }
-
 func test_early_stopping() {
     println("Test 9: Early stopping logic")
     let patience = 5
@@ -113,7 +104,6 @@ func test_early_stopping() {
         println("  ✓ Early stopping logic works")
     }
 }
-
 func test_monitor_init() {
     println("Test 10: Monitor initialization")
     let log_interval = 10
@@ -123,7 +113,6 @@ func test_monitor_init() {
         println("  ✓ Monitor initialized")
     }
 }
-
 func test_loss_tracking() {
     println("Test 11: Loss tracking over steps")
     []float losses = []float{cap: 5}
@@ -144,7 +133,6 @@ func test_loss_tracking() {
         println("  ✓ Loss tracking shows improvement")
     }
 }
-
 func test_accuracy_tracking() {
     println("Test 12: Accuracy tracking over steps")
     []float accuracies = []float{cap: 4}
@@ -158,7 +146,6 @@ func test_accuracy_tracking() {
         println("  ✓ Accuracy tracking shows improvement")
     }
 }
-
 func test_integration_ready() {
     println("Test 13: Component integration readiness")
     let tokenizer_ready = true
@@ -169,7 +156,6 @@ func test_integration_ready() {
         println("  ✓ All components ready for integration")
     }
 }
-
 func test_data_pipeline() {
     println("Test 14: Data pipeline components")
     [][]int tokenized = [][]int{cap: 2}
@@ -187,7 +173,6 @@ func test_data_pipeline() {
         println("  ✓ Data pipeline format compatible")
     }
 }
-
 func test_training_loop() {
     println("Test 15: Training loop simulation")
     let num_epochs = 3
@@ -207,7 +192,6 @@ func test_training_loop() {
         println("  ✓ Training loop simulation correct")
     }
 }
-
 func test_checkpoint_resume() {
     println("Test 16: checkpoint and resume workflow")
     let saved_step = 500
@@ -220,12 +204,10 @@ func test_checkpoint_resume() {
         println("  ✓ checkpoint save/resume compatible")
     }
 }
-
 func float_divide(float a, float b) float {
     if b == 0.0 { return 0.0 }
     return a / b
 }
-
 func main() {
     println("============================================")
     println("Training Loop Integration Tests")

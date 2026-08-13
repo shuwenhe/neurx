@@ -1,19 +1,15 @@
 package neurx.posttrain.checkpoint.optimizer_state
-
 struct adamw_state {
     int step
     [][]float momentum
     [][]float variance
 }
-
 func init_adamw_state(int num_layers, int params_per_layer) {
     println("[AdamWState] Initialized")
 }
-
 func validate_optimizer_state_dims(int momentum_layers, int variance_layers) bool {
     return momentum_layers == variance_layers
 }
-
 func print_optimizer_state_fields(
     int step,
     int num_layers,
@@ -36,7 +32,6 @@ func print_optimizer_state_fields(
     println(float_to_str(sample_variance))
     println("====================================")
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -63,7 +58,6 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
-
 func float_to_str(float value) string {
     float current = value
     bool negative = current < 0.0

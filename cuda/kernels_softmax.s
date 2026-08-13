@@ -1,12 +1,10 @@
 package neurx.cuda
-
 struct softmax_config {
     int rows
     int cols
     bool is_log_softmax
     int block_size
 }
-
 func launch_softmax(
     cuda_context ctx,
     uint64 ptr_input,

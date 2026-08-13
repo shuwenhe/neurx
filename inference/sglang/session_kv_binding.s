@@ -1,5 +1,4 @@
 package neurx.inference.sglang.session_kv_binding
-
 func kv_owner_none() int { 0 }
 
 func kv_owner_request() int { 1 }
@@ -11,7 +10,6 @@ struct session_kv_binding_config {
     int page_size
     int maximum_pages_per_session
 }
-
 struct session_kv_binding_state {
     session_kv_binding_config config
     []int session_ids
@@ -30,7 +28,6 @@ struct session_kv_binding_state {
     int freed_tail_pages
     int released_pages
 }
-
 struct session_kv_result {
     session_kv_binding_state state
     int slot
@@ -39,14 +36,12 @@ struct session_kv_result {
     int page_count
     bool success
 }
-
 func session_kv_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
     while i < capacity { values[i] = 0; i = i + 1 }
     values
 }
-
 func new_session_kv_binding(session_kv_binding_config config) session_kv_binding_state {
     if config.capacity <= 0 { config.capacity = 1 }
     if config.capacity > 1024 { config.capacity = 1024 }
@@ -54,11 +49,9 @@ func new_session_kv_binding(session_kv_binding_config config) session_kv_binding
     if config.maximum_pages_per_session <= 0 { config.maximum_pages_per_session = 1 }
     session_kv_binding_state {config: config, session_ids: session_kv_int_array(config.capacity), request_ids: session_kv_int_array(config.capacity), request_pool_indices: session_kv_int_array(config.capacity), committed_tokens: session_kv_int_array(config.capacity), allocated_tokens: session_kv_int_array(config.capacity), page_counts: session_kv_int_array(config.capacity), first_page_ids: session_kv_int_array(config.capacity), page_ids: session_kv_int_array(config.capacity * config.maximum_pages_per_session), ownership: session_kv_int_array(config.capacity), active: session_kv_int_array(config.capacity), binding_count: 0, saved_count: 0, restored_count: 0, freed_tail_pages: 0, released_pages: 0}
 }
-
 func session_kv_page_offset(session_kv_binding_state state, int slot, int page_index) int {
     slot * state.config.maximum_pages_per_session + page_index
 }
-
 func session_kv_find(session_kv_binding_state state, int session_id) int {
     int i = 0
     while i < state.config.capacity {
@@ -67,12 +60,10 @@ func session_kv_find(session_kv_binding_state state, int session_id) int {
     }
     0 - 1
 }
-
 func session_kv_result_of(session_kv_binding_state state, int slot, bool success) session_kv_result {
     if slot < 0 { return session_kv_result {state: state, slot: slot, request_pool_index: 0, committed_tokens: 0, page_count: 0, success: success} }
     session_kv_result {state: state, slot: slot, request_pool_index: state.request_pool_indices[slot], committed_tokens: state.committed_tokens[slot], page_count: state.page_counts[slot], success: success}
 }
-
 func session_kv_save(session_kv_binding_state state, int session_id, int request_id, int request_pool_index, int committed_tokens, int allocated_tokens, int first_page_id) session_kv_result {
     if session_id <= 0 || request_id <= 0 || request_pool_index < 0 || committed_tokens < 0 || allocated_tokens < committed_tokens { return session_kv_result_of(state, -1, false) }
     int pages = (allocated_tokens + state.config.page_size - 1) / state.config.page_size
@@ -106,7 +97,6 @@ func session_kv_save(session_kv_binding_state state, int session_id, int request
     state.saved_count = state.saved_count + 1
     session_kv_result_of(state, slot, true)
 }
-
 func session_kv_restore(session_kv_binding_state state, int session_id, int request_id, int requested_prefix_tokens) session_kv_result {
     int slot = session_kv_find(state, session_id)
     if slot < 0 || state.ownership[slot] != kv_owner_session() { return session_kv_result_of(state, slot, false) }
@@ -129,7 +119,6 @@ func session_kv_restore(session_kv_binding_state state, int session_id, int requ
     state.restored_count = state.restored_count + 1
     session_kv_result_of(state, slot, true)
 }
-
 func session_kv_bind_page(session_kv_binding_state state, int session_id, int page_index, int page_id) session_kv_binding_state {
     int slot = session_kv_find(state, session_id)
     if slot < 0 || page_index < 0 || page_index >= state.page_counts[slot] || page_id < 0 { return state }
@@ -137,13 +126,11 @@ func session_kv_bind_page(session_kv_binding_state state, int session_id, int pa
     if page_index == 0 { state.first_page_ids[slot] = page_id }
     state
 }
-
 func session_kv_page_id(session_kv_binding_state state, int session_id, int page_index) int {
     int slot = session_kv_find(state, session_id)
     if slot < 0 || page_index < 0 || page_index >= state.page_counts[slot] { return 0 - 1 }
     state.page_ids[session_kv_page_offset(state, slot, page_index)]
 }
-
 func session_kv_return_to_session(session_kv_binding_state state, int session_id, int committed_tokens, int allocated_tokens) session_kv_binding_state {
     int slot = session_kv_find(state, session_id)
     if slot < 0 || state.ownership[slot] != kv_owner_request() { return state }
@@ -153,7 +140,6 @@ func session_kv_return_to_session(session_kv_binding_state state, int session_id
     state.ownership[slot] = kv_owner_session()
     state
 }
-
 func session_kv_release(session_kv_binding_state state, int session_id) session_kv_binding_state {
     int slot = session_kv_find(state, session_id)
     if slot < 0 { return state }

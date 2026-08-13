@@ -1,12 +1,10 @@
 package neurx.cuda
-
 struct layernorm_config {
     int batch_size
     int normalized_size
     float eps
     bool compute_stats_only
 }
-
 func launch_layernorm(
     cuda_context ctx,
     uint64 ptr_input,

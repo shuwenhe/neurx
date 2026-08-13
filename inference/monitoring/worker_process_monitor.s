@@ -1,8 +1,6 @@
 package neurx.inference.monitoring
-
 import "core"
 import "tensor"
-
 type worker_health_status struct {
     HEALTHY       int32
     DEGRADED      int32
@@ -10,7 +8,6 @@ type worker_health_status struct {
     OFFLINE       int32
     RECOVERING    int32
 }
-
 func WorkerHealthStatusValues() worker_health_status {
     return worker_health_status{
         HEALTHY:    0,
@@ -20,7 +17,6 @@ func WorkerHealthStatusValues() worker_health_status {
         RECOVERING: 4,
     }
 }
-
 type worker_process_info struct {
     worker_id           string
     process_id          int32
@@ -42,7 +38,6 @@ type worker_process_info struct {
     avg_latency_ms      float32
     throughput          float32
 }
-
 type worker_metrics struct {
     total_requests      int64
     successful_requests int64
@@ -56,7 +51,6 @@ type worker_metrics struct {
     memory_peak_mb      int32
     restart_count       int32
 }
-
 type health_check_result struct {
     worker_id       string
     healthy         bool
@@ -65,7 +59,6 @@ type health_check_result struct {
     error_message   string
     timestamp_ms    int64
 }
-
 type worker_process_monitor struct {
     workers             map[string]*worker_process_info
     metrics             map[string]*worker_metrics
@@ -74,7 +67,6 @@ type worker_process_monitor struct {
     recovery_enabled    bool
     failover_enabled    bool
 }
-
 func NewWorkerProcessMonitor() *worker_process_monitor {
     return &worker_process_monitor{
         workers:                   make(map[string]*worker_process_info),
@@ -91,7 +83,6 @@ func NewWorkerProcessMonitor() *worker_process_monitor {
         failover_enabled:  true,
     }
 }
-
 func (monitor *worker_process_monitor) RegisterWorker(
     worker_id string,
     host string,
@@ -119,9 +110,7 @@ func (monitor *worker_process_monitor) RegisterWorker(
         avg_latency_ms:      0.0,
         throughput:          0.0,
     }
-
     monitor.workers[worker_id] = info
-
     metrics := &worker_metrics{
         total_requests:      0,
         successful_requests: 0,
@@ -135,10 +124,8 @@ func (monitor *worker_process_monitor) RegisterWorker(
         memory_peak_mb:      512,
         restart_count:       0,
     }
-
     monitor.metrics[worker_id] = metrics
 }
-
 func (monitor *worker_process_monitor) UpdateWorkerStats(
     worker_id string,
     cpu_percent float32,
@@ -150,19 +137,15 @@ func (monitor *worker_process_monitor) UpdateWorkerStats(
     if !exists {
         return
     }
-
     info.cpu_percent = cpu_percent
     info.memory_mb = memory_mb
     info.gpu_percent = gpu_percent
     info.gpu_memory_mb = gpu_memory_mb
-
     metrics, _ := monitor.metrics[worker_id]
     if memory_mb > metrics.memory_peak_mb {
         metrics.memory_peak_mb = memory_mb
     }
-
     status := WorkerHealthStatusValues().HEALTHY
-
     if cpu_percent > monitor.alert_thresholds["cpu_percent"] {
         status = WorkerHealthStatusValues().DEGRADED
     }
@@ -172,11 +155,9 @@ func (monitor *worker_process_monitor) UpdateWorkerStats(
     if gpu_percent > monitor.alert_thresholds["gpu_percent"] {
         status = WorkerHealthStatusValues().DEGRADED
     }
-
     info.status = status
     info.last_heartbeat_ms = core.Now().UnixMilli()
 }
-
 func (monitor *worker_process_monitor) RecordRequest(
     worker_id string,
     success bool,
@@ -187,29 +168,23 @@ func (monitor *worker_process_monitor) RecordRequest(
     if !exists {
         return
     }
-
     metrics, _ := monitor.metrics[worker_id]
-
     info.request_count++
     metrics.total_requests++
     metrics.total_tokens = metrics.total_tokens + int64(tokens)
-
     if success {
         metrics.successful_requests++
     } else {
         info.error_count++
         metrics.failed_requests++
     }
-
     old_avg := metrics.avg_latency_ms
     new_count := float32(metrics.total_requests)
     metrics.avg_latency_ms = (old_avg*(new_count-1) + float32(latency_ms)) / new_count
-
     if latency_ms > int64(metrics.p99_latency_ms) {
         metrics.p99_latency_ms = float32(latency_ms)
     }
 }
-
 func (monitor *worker_process_monitor) PerformHealthCheck(
     worker_id string,
 ) health_check_result {
@@ -223,16 +198,12 @@ func (monitor *worker_process_monitor) PerformHealthCheck(
             timestamp_ms:   core.Now().UnixMilli(),
         }
     }
-
     now_ms := core.Now().UnixMilli()
     heartbeat_age_ms := now_ms - info.last_heartbeat_ms
-
     healthy := info.status == WorkerHealthStatusValues().HEALTHY
-
     if heartbeat_age_ms > monitor.health_check_interval_ms*3 {
         healthy = false
     }
-
     return health_check_result{
         worker_id:       worker_id,
         healthy:         healthy,
@@ -242,15 +213,12 @@ func (monitor *worker_process_monitor) PerformHealthCheck(
         timestamp_ms:    now_ms,
     }
 }
-
 func (monitor *worker_process_monitor) GetWorkerStatus(worker_id string) *worker_process_info {
     return monitor.workers[worker_id]
 }
-
 func (monitor *worker_process_monitor) GetWorkerMetrics(worker_id string) *worker_metrics {
     return monitor.metrics[worker_id]
 }
-
 func (monitor *worker_process_monitor) ListAllWorkers() []string {
     workers := make([]string, 0)
     for worker_id := range monitor.workers {
@@ -258,7 +226,6 @@ func (monitor *worker_process_monitor) ListAllWorkers() []string {
     }
     return workers
 }
-
 func (monitor *worker_process_monitor) GetHealthySummary() map[string]int32 {
     summary := make(map[string]int32)
     summary["total"] = 0
@@ -266,10 +233,8 @@ func (monitor *worker_process_monitor) GetHealthySummary() map[string]int32 {
     summary["degraded"] = 0
     summary["unhealthy"] = 0
     summary["offline"] = 0
-
     for _, info := range monitor.workers {
         summary["total"]++
-
         switch info.status {
         case WorkerHealthStatusValues().HEALTHY:
             summary["healthy"]++
@@ -281,43 +246,33 @@ func (monitor *worker_process_monitor) GetHealthySummary() map[string]int32 {
             summary["offline"]++
         }
     }
-
     return summary
 }
-
 func (monitor *worker_process_monitor) TriggerRecovery(worker_id string) bool {
     if !monitor.recovery_enabled {
         return false
     }
-
     info, exists := monitor.workers[worker_id]
     if !exists {
         return false
     }
-
     info.status = WorkerHealthStatusValues().RECOVERING
     core.Println("Recovery triggered for worker:", worker_id)
-
     return true
 }
-
 func (monitor *worker_process_monitor) PrintMonitoringSummary() {
     core.Println("=== Worker Process Monitor Summary ===")
-
     summary := monitor.GetHealthySummary()
     core.Println("Total workers:", summary["total"])
     core.Println("Healthy:", summary["healthy"])
     core.Println("Degraded:", summary["degraded"])
     core.Println("Unhealthy:", summary["unhealthy"])
     core.Println("Offline:", summary["offline"])
-
     core.Println("\nDetailed Status:")
     for _, worker_id := range monitor.ListAllWorkers() {
         info := monitor.GetWorkerStatus(worker_id)
         metrics := monitor.GetWorkerMetrics(worker_id)
-
         core.Print("  [", worker_id, "] ")
-
         switch info.status {
         case WorkerHealthStatusValues().HEALTHY:
             core.Print("HEALTHY")
@@ -328,24 +283,18 @@ func (monitor *worker_process_monitor) PrintMonitoringSummary() {
         case WorkerHealthStatusValues().OFFLINE:
             core.Print("OFFLINE")
         }
-
         core.Print(" - CPU:", info.cpu_percent, "% GPU:", info.gpu_percent, "%")
         core.Print(" - Requests:", info.request_count, " Errors:", info.error_count)
         core.Println(" - Latency:", metrics.avg_latency_ms, "ms")
     }
 }
-
 func main() {
     monitor := NewWorkerProcessMonitor()
-
     monitor.RegisterWorker("worker_0", "127.0.0.1", 8001, 0)
     monitor.RegisterWorker("worker_1", "127.0.0.1", 8002, 1)
-
     monitor.UpdateWorkerStats("worker_0", 45.0, 4096, 65.0, 8192)
     monitor.RecordRequest("worker_0", true, 50, 128)
-
     monitor.UpdateWorkerStats("worker_1", 70.0, 8192, 80.0, 12288)
     monitor.RecordRequest("worker_1", true, 60, 256)
-
     monitor.PrintMonitoringSummary()
 }

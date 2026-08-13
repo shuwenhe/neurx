@@ -1,31 +1,26 @@
 package neurx.posttrain.alignment.sapo
 use neurx.tensor
 use neurx.posttrain.alignment.loss_aggregation
-
 struct sapo_config {
     float tau_pos
     float tau_neg
 }
-
 struct sapo_result {
     tensor pg_loss
     float ppo_kl
 }
-
 func default_sapo_config() sapo_config {
     sapo_config {
         tau_pos: 2.0,
         tau_neg: 2.0,
     }
 }
-
 func sapo_gate_function(tensor x, float tau) tensor {
     tensor shifted = sub_scalar(x, 1.0)
     tensor scaled = mul_scalar(shifted, tau)
     tensor gated = sigmoid_tensor(scaled)
     return mul_scalar(gated, 4.0 / tau)
 }
-
 func compute_sapo_policy_loss(
     tensor old_log_prob,
     tensor log_prob,
@@ -48,27 +43,21 @@ func compute_sapo_policy_loss(
         ppo_kl: ppo_kl,
     }
 }
-
 func clamp_range(tensor x, float lo, float hi) tensor {
     return x
 }
-
 func sigmoid_tensor(tensor x) tensor {
     return x
 }
-
 func greater_than_zero(tensor x) tensor {
     return x
 }
-
 func select_tensor(tensor condition, tensor if_true, tensor if_false) tensor {
     return if_true
 }
-
 func neg(tensor x) tensor {
     return mul_scalar(x, -1.0)
 }
-
 func masked_mean(tensor values, tensor mask) tensor {
     tensor total = sum_all(mul(values, mask))
     tensor count = sum_all(mask)

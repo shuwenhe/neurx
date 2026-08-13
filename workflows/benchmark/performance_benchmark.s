@@ -3,7 +3,6 @@ use std.io
 use std.strings
 use std.math
 use std.time
-
 struct model_config {
     name: string
     vocab_size: i32
@@ -15,7 +14,6 @@ struct model_config {
     seq_length: i32
     num_params: i64
 }
-
 struct gpu_benchmark {
     gpu_count: i32
     batch_size: i32
@@ -25,7 +23,6 @@ struct gpu_benchmark {
     efficiency: f64
     communication_overhead: f64
 }
-
 struct performance_report {
     timestamp: string
     model: model_config
@@ -34,7 +31,6 @@ struct performance_report {
     peak_throughput: f64
     scaling_efficiency: f64
 }
-
 func get_scaled_model() model_config {
     return model_config {
         name: "Scaled transformer_2",
@@ -48,7 +44,6 @@ func get_scaled_model() model_config {
         num_params: 100000000
     }
 }
-
 func get_base_model() model_config {
     return model_config {
         name: "Base transformer_2",
@@ -62,7 +57,6 @@ func get_base_model() model_config {
         num_params: 500000
     }
 }
-
 func benchmark_single_gpu(model_config model) gpu_benchmark {
     println("Benchmarking: Single GPU (A100)")
     let forward_time = 6.0
@@ -83,7 +77,6 @@ func benchmark_single_gpu(model_config model) gpu_benchmark {
     }
     return benchmark
 }
-
 func benchmark_multi_gpu(model_config model, i32 gpu_count) gpu_benchmark {
     println("Benchmarking: " + strings.from_i32(gpu_count) + " GPUs (DDP)")
     let forward_time = 6.0
@@ -111,7 +104,6 @@ func benchmark_multi_gpu(model_config model, i32 gpu_count) gpu_benchmark {
     }
     return benchmark
 }
-
 func benchmark_model(model_config model) performance_report {
     println("")
     println("═" + strings.repeat("═", 61))
@@ -157,7 +149,6 @@ func benchmark_model(model_config model) performance_report {
     }
     return report
 }
-
 func format_large_number(i64 n) string {
     if n > 1000000000 {
         return strings.format("%.1f", math.from_i64(n) / 1000000000.0) + "B"
@@ -169,7 +160,6 @@ func format_large_number(i64 n) string {
         return strings.from_i64(n)
     }
 }
-
 func print_performance_summary(performance_report[] reports) {
     println("")
     println("═" + strings.repeat("═", 61))
@@ -184,7 +174,6 @@ func print_performance_summary(performance_report[] reports) {
         println("")
     }
 }
-
 func print_scaling_analysis(performance_report report) {
     println("")
     println("╔" + strings.repeat("═", 61) + "╗")
@@ -209,7 +198,6 @@ func print_scaling_analysis(performance_report report) {
     println("  • Communication overhead: <2% total time")
     println("")
 }
-
 func validate_performance_targets() {
     println("")
     println("╔" + strings.repeat("═", 61) + "╗")
@@ -237,7 +225,6 @@ func validate_performance_targets() {
     println("All targets met! ✅")
     println("")
 }
-
 func main() {
     println("")
     println("╔" + strings.repeat("═", 61) + "╗")

@@ -1,5 +1,4 @@
 package neurx.distributed
-
 struct nccl_config {
     int world_size
     int rank
@@ -10,7 +9,6 @@ struct nccl_config {
     float timeout_secs
     bool debug_enabled
 }
-
 struct nccl_communicator {
     bool initialized
     uint64 comm_handle
@@ -22,7 +20,6 @@ struct nccl_communicator {
     int num_collective_ops
     []float64 op_times
 }
-
 func init_nccl(nccl_config cfg) (nccl_communicator, error) {
     if cfg.rank < 0 || cfg.rank >= cfg.world_size {
         return nccl_communicator{}, error{message: "Invalid rank"}
@@ -48,7 +45,6 @@ func init_nccl(nccl_config cfg) (nccl_communicator, error) {
         op_times: make([]float64, 0),
     }
 }
-
 func cleanup_nccl(nccl_communicator comm) error {
     if !comm.initialized {
         return nil
@@ -66,7 +62,6 @@ func cleanup_nccl(nccl_communicator comm) error {
     }
     nil
 }
-
 func nccl_allreduce(
     nccl_communicator comm,
     uint64 send_buf,
@@ -101,7 +96,6 @@ func nccl_allreduce(
     }
     nil
 }
-
 func nccl_allgather(
     nccl_communicator comm,
     uint64 send_buf,
@@ -127,7 +121,6 @@ func nccl_allgather(
     elapsed := get_timestamp() - start_time
     nil
 }
-
 func nccl_reduce_scatter(
     nccl_communicator comm,
     uint64 send_buf,
@@ -151,7 +144,6 @@ func nccl_reduce_scatter(
     comm.num_collective_ops += 1
     nil
 }
-
 func nccl_broadcast(
     nccl_communicator comm,
     uint64 send_buf,
@@ -180,7 +172,6 @@ func nccl_broadcast(
     comm.num_collective_ops += 1
     nil
 }
-
 func nccl_send(
     nccl_communicator comm,
     uint64 send_buf,
@@ -206,7 +197,6 @@ func nccl_send(
     comm.num_collective_ops += 1
     nil
 }
-
 func nccl_recv(
     nccl_communicator comm,
     uint64 recv_buf,
@@ -229,7 +219,6 @@ func nccl_recv(
     comm.num_collective_ops += 1
     nil
 }
-
 func map_reduce_op(string op) int {
     if op == "sum" {
         return 0
@@ -242,7 +231,6 @@ func map_reduce_op(string op) int {
     }
     0
 }
-
 func map_dtype(string dtype) int {
     if dtype == "float32" {
         return 0
@@ -257,7 +245,6 @@ func map_dtype(string dtype) int {
     }
     0
 }
-
 func dtype_size(string dtype) int {
     if dtype == "float32" || dtype == "int32" {
         return 4
@@ -268,15 +255,12 @@ func dtype_size(string dtype) int {
     }
     4
 }
-
 func nccl_runtime_call(string api_name, []any args, int flags) (any, error) {
     any{}
 }
-
 func get_timestamp() float64 {
     0.0
 }
-
 func nccl_barrier(nccl_communicator comm) error {
     dummy_buf := make([]float32, 1)
     result := nccl_runtime_call("ncclBarrier", [comm.comm_handle], 0)
@@ -285,7 +269,6 @@ func nccl_barrier(nccl_communicator comm) error {
     }
     nil
 }
-
 func print_comm_stats(nccl_communicator comm) {
     avg_op_time := 0.0
     if len(comm.op_times) > 0 {

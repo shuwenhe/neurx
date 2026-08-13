@@ -1,10 +1,8 @@
 package neurx.inference.vllm.encoder_cache_manager
-
 struct encoder_cache_config {
     int maximum_entries
     int capacity_embeddings
 }
-
 struct encoder_cache_state {
     encoder_cache_config config
     []int media_hashes
@@ -19,7 +17,6 @@ struct encoder_cache_state {
     int misses
     int evictions
 }
-
 struct encoder_cache_result {
     encoder_cache_state state
     int slot
@@ -27,21 +24,18 @@ struct encoder_cache_result {
     bool hit
     bool accepted
 }
-
 func encoder_cache_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
     while i < capacity { values[i] = 0; i = i + 1 }
     values
 }
-
 func new_encoder_cache(encoder_cache_config config) encoder_cache_state {
     if config.maximum_entries <= 0 { config.maximum_entries = 1 }
     if config.maximum_entries > 4096 { config.maximum_entries = 4096 }
     if config.capacity_embeddings <= 0 { config.capacity_embeddings = 1 }
     encoder_cache_state {config: config, media_hashes: encoder_cache_int_array(config.maximum_entries), embedding_counts: encoder_cache_int_array(config.maximum_entries), reference_counts: encoder_cache_int_array(config.maximum_entries), last_used_steps: encoder_cache_int_array(config.maximum_entries), active: encoder_cache_int_array(config.maximum_entries), entry_count: 0, free_embeddings: config.capacity_embeddings, logical_step: 0, hits: 0, misses: 0, evictions: 0}
 }
-
 func encoder_cache_find(encoder_cache_state state, int media_hash) int {
     int i = 0
     while i < state.config.maximum_entries {
@@ -50,7 +44,6 @@ func encoder_cache_find(encoder_cache_state state, int media_hash) int {
     }
     0 - 1
 }
-
 func encoder_cache_free_slot(encoder_cache_state state) int {
     int i = 0
     while i < state.config.maximum_entries {
@@ -59,7 +52,6 @@ func encoder_cache_free_slot(encoder_cache_state state) int {
     }
     0 - 1
 }
-
 func encoder_cache_oldest_freeable(encoder_cache_state state) int {
     int selected = 0 - 1
     int i = 0
@@ -71,7 +63,6 @@ func encoder_cache_oldest_freeable(encoder_cache_state state) int {
     }
     selected
 }
-
 func encoder_cache_reclaimable_embeddings(encoder_cache_state state) int {
     int total = state.free_embeddings
     int i = 0
@@ -81,7 +72,6 @@ func encoder_cache_reclaimable_embeddings(encoder_cache_state state) int {
     }
     total
 }
-
 func encoder_cache_acquire(encoder_cache_state state, int media_hash, int embedding_count, int compute_budget) encoder_cache_result {
     state.logical_step = state.logical_step + 1
     if media_hash == 0 || embedding_count <= 0 || embedding_count > compute_budget || embedding_count > state.config.capacity_embeddings {
@@ -119,7 +109,6 @@ func encoder_cache_acquire(encoder_cache_state state, int media_hash, int embedd
     state.free_embeddings = state.free_embeddings - embedding_count
     encoder_cache_result {state: state, slot: slot, evicted_hash: evicted_hash, hit: false, accepted: true}
 }
-
 func encoder_cache_release(encoder_cache_state state, int media_hash) encoder_cache_state {
     int slot = encoder_cache_find(state, media_hash)
     if slot < 0 { return state }
@@ -128,7 +117,6 @@ func encoder_cache_release(encoder_cache_state state, int media_hash) encoder_ca
     state.last_used_steps[slot] = state.logical_step
     state
 }
-
 func encoder_cache_reset(encoder_cache_state state) encoder_cache_state {
     new_encoder_cache(state.config)
 }

@@ -1,11 +1,9 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
-
 struct tensor {
     []float data
     int size
 }
-
 struct checkpoint_header {
     int step
     float loss
@@ -14,18 +12,15 @@ struct checkpoint_header {
     int weight_cols
     int bias_size
 }
-
 func mod(int a, int b) int {
     if b == 0 {
         return 0
     }
     a - (a / b) * b
 }
-
 func float(int x) float {
     0.0 + x
 }
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -44,7 +39,6 @@ func int_to_str(int n) string {
     }
     s
 }
-
 func fmt_float(float val, int decimals) string {
     bool neg = val < 0.0
     if neg {
@@ -73,7 +67,6 @@ func fmt_float(float val, int decimals) string {
     }
     s
 }
-
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
@@ -83,7 +76,6 @@ func substring(string s, int start, int end) string {
     }
     out
 }
-
 func trim(string s) string {
     int begin = 0
     while begin < len(s) {
@@ -105,7 +97,6 @@ func trim(string s) string {
     }
     substring(s, begin, finish)
 }
-
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
@@ -120,7 +111,6 @@ func shell_escape(string s) string {
     }
     out + "'"
 }
-
 func digit_value(string ch) int {
     if ch == "0" {
         return 0
@@ -154,7 +144,6 @@ func digit_value(string ch) int {
     }
     -1
 }
-
 func parse_int_str(string s) int {
     string text = trim(s)
     if text == "" {
@@ -177,7 +166,6 @@ func parse_int_str(string s) int {
     }
     sign * value
 }
-
 func parse_float_str(string s) float {
     string text = trim(s)
     if text == "" {
@@ -218,7 +206,6 @@ func parse_float_str(string s) float {
     }
     out
 }
-
 func parse_pair_left(string text) int {
     string trimmed = trim(text)
     int comma = -1
@@ -235,7 +222,6 @@ func parse_pair_left(string text) int {
     }
     parse_int_str(substring(trimmed, 0, comma))
 }
-
 func parse_pair_right(string text) int {
     string trimmed = trim(text)
     int comma = -1
@@ -252,7 +238,6 @@ func parse_pair_right(string text) int {
     }
     parse_int_str(substring(trimmed, comma + 1, len(trimmed)))
 }
-
 func parse_csv_floats_fixed(string text, int expected_count) tensor {
     []float data = []float{cap: expected_count}
     string current = ""
@@ -275,11 +260,9 @@ func parse_csv_floats_fixed(string text, int expected_count) tensor {
     }
     tensor { data: data, size: out_i }
 }
-
 func read_line_command(string checkpoint_path, string line_no) string {
     trim(runtime_run_command_output("sed -n '" + line_no + "p' " + shell_escape(checkpoint_path)))
 }
-
 func load_checkpoint_header_from_file(string checkpoint_path) checkpoint_header {
     string step_line = read_line_command(checkpoint_path, "2")
     string loss_line = read_line_command(checkpoint_path, "3")
@@ -299,12 +282,10 @@ func load_checkpoint_header_from_file(string checkpoint_path) checkpoint_header 
         bias_size: bias_size,
     }
 }
-
 func load_bias_from_file(string checkpoint_path, int bias_size) tensor {
     string line = read_line_command(checkpoint_path, "10")
     parse_csv_floats_fixed(substring(line, 12, len(line)), bias_size)
 }
-
 func load_weight_row_from_file(string checkpoint_path, int row_id, int vocab_size) tensor {
     int start_index = row_id * vocab_size + 1
     int end_index = start_index + vocab_size - 1
@@ -312,7 +293,6 @@ func load_weight_row_from_file(string checkpoint_path, int row_id, int vocab_siz
     string command = "awk -F= '/^param0.data=/{print $2}' " + shell_escape(checkpoint_path) + " | cut -d',' -f" + field_range
     parse_csv_floats_fixed(trim(runtime_run_command_output(command)), vocab_size)
 }
-
 func ascii_code(string text, int idx) int {
     string ch = string(text[idx])
     if ch == " " {
@@ -398,7 +378,6 @@ func ascii_code(string text, int idx) int {
     }
     32
 }
-
 func argmax_next_token(tensor weight_row, tensor bias, int vocab_size) int {
     float best_logit = weight_row.data[0] + bias.data[0]
     int best_id = 0
@@ -413,7 +392,6 @@ func argmax_next_token(tensor weight_row, tensor bias, int vocab_size) int {
     }
     best_id
 }
-
 func generate_text_from_checkpoint(string checkpoint_path, int vocab_size, tensor bias, string seed, int max_new_chars) string {
     string output = seed
     int current_id = 32
@@ -433,7 +411,6 @@ func generate_text_from_checkpoint(string checkpoint_path, int vocab_size, tenso
     }
     output
 }
-
 func main() {
     string checkpoint_path = runtime_env_get("NEURX_INFER_CHECKPOINT_PATH", "artifacts/checkpoints/llm_s_pretrain/final_model.neurx")
     string validate_only = runtime_env_get("NEURX_INFER_VALIDATE_ONLY", "")

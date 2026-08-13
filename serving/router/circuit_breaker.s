@@ -1,5 +1,4 @@
 package neurx.serving.router.circuit_breaker
-
 func circuit_closed() int { 0 }
 
 func circuit_open() int { 1 }
@@ -13,7 +12,6 @@ struct circuit_breaker_config {
     int failure_window_ms
     int half_open_max_requests
 }
-
 struct circuit_breaker_state {
     circuit_breaker_config config
     int state
@@ -25,12 +23,10 @@ struct circuit_breaker_state {
     int state_changed_ms
     int half_open_in_flight
 }
-
 struct circuit_admission_result {
     circuit_breaker_state state
     bool allowed
 }
-
 func new_circuit_breaker(circuit_breaker_config config, int now_ms) circuit_breaker_state {
     if config.failure_threshold <= 0 { config.failure_threshold = 1 }
     if config.success_threshold <= 0 { config.success_threshold = 1 }
@@ -49,7 +45,6 @@ func new_circuit_breaker(circuit_breaker_config config, int now_ms) circuit_brea
         half_open_in_flight: 0,
     }
 }
-
 func circuit_refresh(circuit_breaker_state state, int now_ms) circuit_breaker_state {
     if state.state == circuit_open() && now_ms - state.state_changed_ms >= state.config.open_timeout_ms {
         state.state = circuit_half_open()
@@ -60,7 +55,6 @@ func circuit_refresh(circuit_breaker_state state, int now_ms) circuit_breaker_st
     }
     state
 }
-
 func circuit_try_acquire(circuit_breaker_state state, int now_ms) circuit_admission_result {
     circuit_breaker_state current = circuit_refresh(state, now_ms)
     if current.state == circuit_open() { return circuit_admission_result {state: current, allowed: false} }
@@ -70,7 +64,6 @@ func circuit_try_acquire(circuit_breaker_state state, int now_ms) circuit_admiss
     }
     circuit_admission_result {state: current, allowed: true}
 }
-
 func circuit_record_success(circuit_breaker_state state, int now_ms) circuit_breaker_state {
     state.total_successes = state.total_successes + 1
     state.consecutive_failures = 0
@@ -85,7 +78,6 @@ func circuit_record_success(circuit_breaker_state state, int now_ms) circuit_bre
     }
     state
 }
-
 func circuit_record_failure(circuit_breaker_state state, int now_ms) circuit_breaker_state {
     state.total_failures = state.total_failures + 1
     state.consecutive_successes = 0

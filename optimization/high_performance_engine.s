@@ -1,8 +1,6 @@
 package optimization
-
 import "core"
 import "tensor"
-
 type optimization_config struct {
     enable_flash_attention      bool
     enable_gemm_fusion          bool
@@ -10,7 +8,6 @@ type optimization_config struct {
     enable_runtime_fusion       bool
     optimization_level          int32
 }
-
 type optimization_stats struct {
     total_speedup               float32
     attention_speedup           float32
@@ -20,7 +17,6 @@ type optimization_stats struct {
     memory_reduction            float32
     latency_reduction           float32
 }
-
 type high_performance_optimization_engine struct {
     config                      optimization_config
     flash_attention             *flash_attention_optimized
@@ -29,12 +25,10 @@ type high_performance_optimization_engine struct {
     runtime_fusion              *runtime_fusion_optimizer
     stats                       optimization_stats
 }
-
 func NewHighPerformanceOptimizationEngine(config optimization_config) *high_performance_optimization_engine {
     engine := &high_performance_optimization_engine{
         config: config,
     }
-
     if config.enable_flash_attention {
         att_config := attention_config{
             batch_size:      1,
@@ -46,7 +40,6 @@ func NewHighPerformanceOptimizationEngine(config optimization_config) *high_perf
         }
         engine.flash_attention = NewFlashAttentionOptimized(att_config)
     }
-
     if config.enable_gemm_fusion {
         gemm_config := gemm_config{
             m:              512,
@@ -58,7 +51,6 @@ func NewHighPerformanceOptimizationEngine(config optimization_config) *high_perf
         }
         engine.gemm_kernel = NewFusedGEMMKernel(gemm_config)
     }
-
     if config.enable_cuda_graphs {
         graph_config := cuda_graph_config{
             enable_capture:     true,
@@ -68,7 +60,6 @@ func NewHighPerformanceOptimizationEngine(config optimization_config) *high_perf
         }
         engine.cuda_graph = NewCUDAGraph(graph_config)
     }
-
     if config.enable_runtime_fusion {
         fusion_config := fused_operation_config{
             enable_fusion:  true,
@@ -77,34 +68,26 @@ func NewHighPerformanceOptimizationEngine(config optimization_config) *high_perf
         }
         engine.runtime_fusion = NewRuntimeFusionOptimizer(fusion_config)
     }
-
     return engine
 }
-
 func (hpe *high_performance_optimization_engine) OptimizeAttention(
     q []float32,
     k []float32,
     v []float32,
 ) []float32 {
-
     if !hpe.config.enable_flash_attention || hpe.flash_attention == nil {
-
         return hpe.basicAttention(q, k, v)
     }
-
     return hpe.flash_attention.Forward(q, k, v)
 }
-
 func (hpe *high_performance_optimization_engine) OptimizeGEMM(
     a []float32,
     b []float32,
     bias []float32,
 ) []float32 {
-
     if !hpe.config.enable_gemm_fusion || hpe.gemm_kernel == nil {
         return hpe.basicGEMM(a, b)
     }
-
     gemm := gemm_operation{
         a:         a,
         b:         b,
@@ -112,90 +95,70 @@ func (hpe *high_performance_optimization_engine) OptimizeGEMM(
         bias:      bias,
         has_bias:  len(bias) > 0,
     }
-
     results := hpe.gemm_kernel.ExecuteFused()
     if len(results) > 0 {
         return results[0]
     }
-
     return hpe.basicGEMM(a, b)
 }
-
 func (hpe *high_performance_optimization_engine) OptimizeWithCUDAGraph(
     kernels []string,
     dependencies [][]int32,
 ) map[int32][]float32 {
-
     if !hpe.config.enable_cuda_graphs || hpe.cuda_graph == nil {
         return make(map[int32][]float32)
     }
-
     for i, kernel := range kernels {
         hpe.cuda_graph.AddNode(kernel, dependencies[i], map[string]int32{})
     }
-
     return hpe.cuda_graph.ExecuteGraph()
 }
-
 func (hpe *high_performance_optimization_engine) ApplyRuntimeFusion(
     operations []string,
     shapes [][]int32,
 ) [][]float32 {
-
     if !hpe.config.enable_runtime_fusion || hpe.runtime_fusion == nil {
         return make([][]float32, 0)
     }
-
     for i, op := range operations {
         params := make(map[string]float32)
         hpe.runtime_fusion.QueueOperation(op, shapes[i], shapes[i], params)
     }
-
     return hpe.runtime_fusion.ExecuteFusedOperations()
 }
-
 func (hpe *high_performance_optimization_engine) basicAttention(
     q []float32,
     k []float32,
     v []float32,
 ) []float32 {
-
     output := make([]float32, len(q))
     for i := int32(0); i < int32(len(q)); i++ {
         output[int(i)] = 0.1 * q[int(i)]
     }
-
     return output
 }
-
 func (hpe *high_performance_optimization_engine) basicGEMM(
     a []float32,
     b []float32,
 ) []float32 {
-
     output := make([]float32, len(a))
     for i := int32(0); i < int32(len(a)); i++ {
         output[int(i)] = 0.1 * a[int(i)]
     }
-
     return output
 }
-
 func (hpe *high_performance_optimization_engine) ComputeOptimizationStats() optimization_stats {
     stats := optimization_stats{}
-
     if hpe.config.enable_flash_attention && hpe.flash_attention != nil {
         stats.attention_speedup = hpe.flash_attention.GetSpeedup()
     } else {
         stats.attention_speedup = 1.0
     }
-
     if hpe.config.enable_gemm_fusion && hpe.gemm_kernel != nil {
         stats.gemm_speedup = hpe.gemm_kernel.GetComputationSaving()
     } else {
         stats.gemm_speedup = 1.0
     }
-
     if hpe.config.enable_cuda_graphs && hpe.cuda_graph != nil {
         stats.graph_speedup = hpe.cuda_graph.GetLatencyReduction()
         stats.memory_reduction = hpe.cuda_graph.GetMemoryReduction()
@@ -203,30 +166,24 @@ func (hpe *high_performance_optimization_engine) ComputeOptimizationStats() opti
         stats.graph_speedup = 1.0
         stats.memory_reduction = 1.0
     }
-
     if hpe.config.enable_runtime_fusion && hpe.runtime_fusion != nil {
         stats.fusion_speedup = hpe.runtime_fusion.GetEstimatedSpeedup()
     } else {
         stats.fusion_speedup = 1.0
     }
-
     combined := (stats.attention_speedup-1.0)*0.25 +
                 (stats.gemm_speedup-1.0)*0.25 +
                 (stats.graph_speedup-1.0)*0.25 +
                 (stats.fusion_speedup-1.0)*0.25 +
                 1.0
-
     if combined > 3.0 {
         combined = 3.0
     }
-
     stats.total_speedup = combined
     stats.latency_reduction = combined
-
     hpe.stats = stats
     return stats
 }
-
 func (hpe *high_performance_optimization_engine) GetOptimizationLevel() string {
     switch hpe.config.optimization_level {
     case 0:
@@ -241,45 +198,36 @@ func (hpe *high_performance_optimization_engine) GetOptimizationLevel() string {
         return "UNKNOWN"
     }
 }
-
 func (hpe *high_performance_optimization_engine) ApplyOptimizations() {
     stats := hpe.ComputeOptimizationStats()
-
     core.Println("High Performance Optimization Engine Report")
     core.Println("============================================")
     core.Println("Optimization Level:", hpe.GetOptimizationLevel())
     core.Println()
-
     if hpe.config.enable_flash_attention {
         core.Println("✓ FlashAttention Optimized")
         core.Println("  Speedup: ", stats.attention_speedup, "x")
     }
-
     if hpe.config.enable_gemm_fusion {
         core.Println("✓ GEMM Kernel Fusion")
         core.Println("  Speedup: ", stats.gemm_speedup, "x")
     }
-
     if hpe.config.enable_cuda_graphs {
         core.Println("✓ CUDA Graph Optimization")
         core.Println("  Speedup: ", stats.graph_speedup, "x")
         core.Println("  Memory reduction: ", stats.memory_reduction, "x")
     }
-
     if hpe.config.enable_runtime_fusion {
         core.Println("✓ Runtime Operation Fusion")
         core.Println("  Speedup: ", stats.fusion_speedup, "x")
     }
-
     core.Println()
     core.Println("Overall Performance Improvement:")
     core.Println("  Total Speedup: ", stats.total_speedup, "x")
     core.Println("  Latency Reduction: ", stats.latency_reduction, "x")
     core.Println()
 }
-
 func main() {
-
     config := optimization_config{
         enable_flash_attention: true,
         enable_gemm_fusion:     true,
@@ -287,10 +235,8 @@ func main() {
         enable_runtime_fusion:  true,
         optimization_level:     3,
     }
-
     engine := NewHighPerformanceOptimizationEngine(config)
     engine.ApplyOptimizations()
-
     core.Println("\nPhase 3 Sprint 9: High Performance Optimization ✓")
     core.Println("Total implementation: ~1,500 lines of optimized S code")
 }

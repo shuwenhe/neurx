@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.io.println
-
 func main() {
     let dataset_root = runtime_env_get("NEURX_SPLIT_DATASET_ROOT", "dataset/pretrain")
     let source_file = runtime_env_get("NEURX_SPLIT_SOURCE_FILE", dataset_root + "/cleaned/train.jsonl")
@@ -15,7 +14,6 @@ func main() {
     println("This S entrypoint centralizes the split-data status layer.")
     0
 }
-
 func check_path(string path) string {
     if runtime_file_exists(path) {
         return "ready (" + path + ")"

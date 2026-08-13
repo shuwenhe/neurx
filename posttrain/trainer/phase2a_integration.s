@@ -1,6 +1,5 @@
 package neurx.posttrain.trainer.phase2a_integration
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs}
-
 struct training_config {
     string model_path
     string data_file
@@ -23,13 +22,11 @@ struct training_config {
     bool merge_model
     bool gradient_checkpointing
 }
-
 struct training_result {
     int exit_code
     string status
     string message
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -56,7 +53,6 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
-
 func float_to_str(float value, int decimals) string {
     float current = value
     bool negative = current < 0.0
@@ -93,7 +89,6 @@ func float_to_str(float value, int decimals) string {
     if negative { result = "-" + result }
     return result
 }
-
 func run_phase2a_training_pipeline(training_config cfg) training_result {
     println("")
     println("====================================================")
@@ -200,7 +195,6 @@ func run_phase2a_training_pipeline(training_config cfg) training_result {
     result.message = "Phase 2A training completed successfully"
     return result
 }
-
 func run_phase2a_training_entry_point(training_config cfg) int {
     training_result result = run_phase2a_training_pipeline(cfg)
     if result.exit_code == 0 {

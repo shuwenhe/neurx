@@ -8,7 +8,6 @@ enum serialization_format {
     protocol_2
     custom
 }
-
 struct serialization_config {
     format: SerializationFormat
     version: string
@@ -16,7 +15,6 @@ struct serialization_config {
     compression: bool
     compression_level: i64
 }
-
 struct state_dict {
     tensors: map[string]tensor
     hyperparams: map[string]string

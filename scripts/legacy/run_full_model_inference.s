@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command}
 use std.io.println
-
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -22,7 +21,6 @@ func trim(string s) string {
     }
     out
 }
-
 func main() {
     println("╔════════════════════════════════════════════════════╗")
     println("║      NeurX-1.3 Full model Inference Pipeline      ║")
@@ -111,7 +109,6 @@ func main() {
     println("Output saved to: " + output_dir)
     0
 }
-
 func int_to_str(int val) string {
     if val == 0 {
         return "0"

@@ -11,7 +11,6 @@ enum stream_type {
     communication
     default
 }
-
 struct stream {
     id: i64
     device: device

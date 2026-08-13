@@ -1,7 +1,6 @@
 package neurx.scheduler.lr_scheduler_moe_1t
 use neurx.strings
 use neurx.runtime.io.{io_println}
-
 struct lr_schedule_config {
     string schedule_type
     float base_lr
@@ -12,7 +11,6 @@ struct lr_schedule_config {
     float decay_rate
     int cycle_steps
 }
-
 struct lr_scheduler_state {
     lr_schedule_config config
     int current_step
@@ -25,7 +23,6 @@ struct lr_scheduler_state {
     float max_lr
     float min_lr_achieved
 }
-
 func lr_scheduler_new(
     float base_lr,
     int warmup_steps,
@@ -55,7 +52,6 @@ func lr_scheduler_new(
     }
     state
 }
-
 func compute_cosine_annealing_lr(
     lr_scheduler_state state
 ) float {
@@ -84,7 +80,6 @@ func compute_cosine_annealing_lr(
     state.current_lr = lr
     lr
 }
-
 func compute_linear_decay_lr(
     lr_scheduler_state state
 ) float {
@@ -109,7 +104,6 @@ func compute_linear_decay_lr(
     state.current_lr = lr
     lr
 }
-
 func compute_exponential_decay_lr(
     lr_scheduler_state state
 ) float {
@@ -132,7 +126,6 @@ func compute_exponential_decay_lr(
     state.current_lr = lr
     lr
 }
-
 func compute_one_cycle_lr(
     lr_scheduler_state state
 ) float {
@@ -156,7 +149,6 @@ func compute_one_cycle_lr(
     state.current_lr = lr
     lr
 }
-
 func compute_step_decay_lr(
     lr_scheduler_state state,
     int step_size,
@@ -175,7 +167,6 @@ func compute_step_decay_lr(
     state.current_lr = lr
     lr
 }
-
 func compute_lr(
     lr_scheduler_state state
 ) float {
@@ -201,7 +192,6 @@ func compute_lr(
     }
     lr
 }
-
 func step(
     lr_scheduler_state state
 ) float {
@@ -209,7 +199,6 @@ func step(
     float new_lr = compute_lr(state)
     new_lr
 }
-
 func get_warmup_lr(
     lr_scheduler_state state,
     int warmup_step
@@ -222,7 +211,6 @@ func get_warmup_lr(
     float warmup_lr = base_lr * float(warmup_step) / float(warmup_steps)
     warmup_lr
 }
-
 func cos(float x) float {
     if x < 0.0 {
         x = -x
@@ -238,7 +226,6 @@ func cos(float x) float {
     }
     result
 }
-
 func pow(float base, float exponent) float {
     if exponent == 0.0 {
         return 1.0
@@ -253,7 +240,6 @@ func pow(float base, float exponent) float {
     float result = exp(exponent * log_base)
     result
 }
-
 func exp(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -271,7 +257,6 @@ func exp(float x) float {
     }
     result
 }
-
 func float(int x) float {
     0.0 + x
 }

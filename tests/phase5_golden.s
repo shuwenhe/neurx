@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_file_exists, runtime_run_command_output}
 use std.io.println
-
 func phase5_summary_command(string path) string {
     string cmd = "set -e; default=$(sed -n 's/.*\"default_prompt\": \"\\([^\"]*\\)\".*/\\1/p' '" + path + "' | head -1)"
     cmd = cmd + " && count=$(grep -c '\"name\"' '" + path + "')"
@@ -9,7 +8,6 @@ func phase5_summary_command(string path) string {
     cmd = cmd + " && printf 'prompts=%s default=%s tokens=%s\\n' \"$count\" \"$default\" \"$tokens\""
     cmd
 }
-
 func main() {
     string prompt_path = "tests/golden/prompts.json"
     if !runtime_file_exists(prompt_path) {

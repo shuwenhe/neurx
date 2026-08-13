@@ -1,5 +1,4 @@
 package main
-
 func main() {
     println("========================================")
     println("NeurX Real Data Training")
@@ -49,7 +48,6 @@ func main() {
     println("")
     0
 }
-
 func fmt_progress(float p, int decimals) string {
     int int_part = 0
     float v = p
@@ -83,7 +81,6 @@ func fmt_progress(float p, int decimals) string {
     }
     return s + "XX." + digit(0) + digit(0)
 }
-
 func fmt_loss(float loss) string {
     float v = loss
     int int_part = 0
@@ -123,7 +120,6 @@ func fmt_loss(float loss) string {
     s = s + digit(d4)
     return s
 }
-
 func fmt_lr(float lr) string {
     float v = lr * 100000000.0
     int int_part = 0
@@ -133,13 +129,11 @@ func fmt_lr(float lr) string {
     }
     return "0." + digit_pair(int_part / 1000000) + digit_pair((int_part / 10000) - (int_part / 1000000) * 100) + digit_pair((int_part / 100) - (int_part / 10000) * 100)
 }
-
 func digit_pair(int n) string {
     int tens = n / 10
     int ones = n - tens * 10
     return digit(tens) + digit(ones)
 }
-
 func digit(int d) string {
     if d == 0 {
         return "0"

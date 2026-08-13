@@ -1,5 +1,4 @@
 package neurx.inference.runtime.sleep_mode_backend
-
 func sleep_backend_cumem() int { 1 }
 
 func sleep_backend_cuda_checkpoint() int { 2 }
@@ -24,7 +23,6 @@ struct sleep_backend_capability {
     bool preserves_graphs_with_communicators
     bool supports_durable_storage
 }
-
 struct sleep_mode_state {
     sleep_backend_capability capability
     int state
@@ -36,13 +34,11 @@ struct sleep_mode_state {
     bool communicator_reinit_required
     bool initialized
 }
-
 struct sleep_transition_result {
     sleep_mode_state state
     bool success
     int error_code
 }
-
 func sleep_capability_for(int backend, bool backend_available) sleep_backend_capability {
     if backend == sleep_backend_cumem() { return sleep_backend_capability {backend: backend, supported: backend_available, preserves_communicators: true, preserves_compiled_artifacts: true, preserves_graphs_with_communicators: true, supports_durable_storage: false} }
     if backend == sleep_backend_cuda_checkpoint() { return sleep_backend_capability {backend: backend, supported: backend_available, preserves_communicators: false, preserves_compiled_artifacts: true, preserves_graphs_with_communicators: false, supports_durable_storage: false} }
@@ -50,12 +46,10 @@ func sleep_capability_for(int backend, bool backend_available) sleep_backend_cap
     if backend == sleep_backend_durable_snapshot() { return sleep_backend_capability {backend: backend, supported: backend_available, preserves_communicators: false, preserves_compiled_artifacts: false, preserves_graphs_with_communicators: false, supports_durable_storage: true} }
     sleep_backend_capability {backend: backend, supported: false, preserves_communicators: false, preserves_compiled_artifacts: false, preserves_graphs_with_communicators: false, supports_durable_storage: false}
 }
-
 func init_sleep_mode(int backend, bool backend_available) sleep_mode_state {
     sleep_backend_capability capability = sleep_capability_for(backend, backend_available)
     sleep_mode_state {capability: capability, state: sleep_state_running(), suspend_level: 0, released_weight_bytes: 0, released_kv_bytes: 0, suspend_count: 0, resume_count: 0, communicator_reinit_required: false, initialized: capability.supported}
 }
-
 func suspend_sleep_mode(sleep_mode_state state, int level, int weight_bytes, int kv_bytes) sleep_transition_result {
     if !state.initialized || state.state != sleep_state_running() || (level != 1 && level != 2) { return sleep_transition_result {state: state, success: false, error_code: 1} }
     state.state = sleep_state_suspended()
@@ -66,7 +60,6 @@ func suspend_sleep_mode(sleep_mode_state state, int level, int weight_bytes, int
     state.communicator_reinit_required = !state.capability.preserves_communicators
     sleep_transition_result {state: state, success: true, error_code: 0}
 }
-
 func resume_sleep_mode(sleep_mode_state state, bool communicator_reinitialized, bool artifacts_restored) sleep_transition_result {
     if !state.initialized || state.state != sleep_state_suspended() { return sleep_transition_result {state: state, success: false, error_code: 1} }
     state.state = sleep_state_resuming()

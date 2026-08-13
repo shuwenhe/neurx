@@ -1,5 +1,4 @@
 package neurx.inference.sampling
-
 func softmax([]float logits) []float {
     if len(logits) == 0 { return [] }
     float max_val = logits[0]
@@ -25,7 +24,6 @@ func softmax([]float logits) []float {
     }
     probs
 }
-
 func log_softmax([]float logits) []float {
     if len(logits) == 0 { return [] }
     float max_val = logits[0]

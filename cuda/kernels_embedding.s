@@ -1,5 +1,4 @@
 package neurx.cuda
-
 struct embedding_config {
     int num_embeddings
     int embedding_dim
@@ -7,7 +6,6 @@ struct embedding_config {
     bool padding_idx_set
     int padding_idx
 }
-
 func launch_embedding_forward(
     cuda_context ctx,
     uint64 ptr_weight,
@@ -23,7 +21,6 @@ func launch_embedding_forward(
                       cfg.num_tokens * cfg.embedding_dim * 4)
     nil
 }
-
 func launch_embedding_backward(
     cuda_context ctx,
     uint64 ptr_grad_output,
