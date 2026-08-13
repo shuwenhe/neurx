@@ -1,6 +1,6 @@
 package main
 
-struct VLInferenceConfig {
+struct vl_inference_config {
     model_path: string
     vision_encoder_type: string
     language_model_type: string
@@ -15,7 +15,7 @@ struct VLInferenceConfig {
     quantization: string
 }
 
-struct VisionInput {
+struct vision_input {
     image_path: string
     image_data: []byte
     image_width: int
@@ -23,9 +23,9 @@ struct VisionInput {
     num_patches: int
 }
 
-struct VLInferenceRequest {
+struct vl_inference_request {
     prompt: string
-    images: []VisionInput
+    images: []vision_input
     max_new_tokens: int
     temperature: float
     top_p: float
@@ -34,14 +34,14 @@ struct VLInferenceRequest {
     do_sample: bool
 }
 
-struct VLInferenceResponse {
+struct vl_inference_response {
     text: string
     tokens_generated: int
     processing_time_ms: int
     model: string
 }
 
-func init_vl_inference_engine(VLInferenceConfig config) bool {
+func init_vl_inference_engine(vl_inference_config config) bool {
     print("🚀 Initializing Vision-Language Inference Engine...\n")
     print("Configuration:\n")
     print("  • Model: " + config.model_path + "\n")
@@ -99,7 +99,7 @@ func load_vl_weights(string model_path) bool {
     return true
 }
 
-func init_vision_encoder(VLInferenceConfig config) bool {
+func init_vision_encoder(vl_inference_config config) bool {
     print("  • Vision Transformer (ViT-Large)\n")
     print("    - Patch Size: 14x14\n")
     print("    - Image Input: 448x448\n")
@@ -111,7 +111,7 @@ func init_vision_encoder(VLInferenceConfig config) bool {
     return true
 }
 
-func init_language_model(VLInferenceConfig config) bool {
+func init_language_model(vl_inference_config config) bool {
     print("  • Transformer-based Language Model\n")
     print("    - Hidden Size: 3584\n")
     print("    - Layers: 28\n")
@@ -123,7 +123,7 @@ func init_language_model(VLInferenceConfig config) bool {
     return true
 }
 
-func init_vl_bridge(VLInferenceConfig config) bool {
+func init_vl_bridge(vl_inference_config config) bool {
     print("  • Vision-Language Bridge\n")
     print("    - Type: Linear Projection\n")
     print("    - Vision Output Dim: 1024\n")
@@ -133,8 +133,8 @@ func init_vl_bridge(VLInferenceConfig config) bool {
     return true
 }
 
-func process_image(string image_path, int target_size) VisionInput {
-    VisionInput input
+func process_image(string image_path, int target_size) vision_input {
+    vision_input input
     input.image_path = image_path
     input.image_width = target_size
     input.image_height = target_size
@@ -142,8 +142,8 @@ func process_image(string image_path, int target_size) VisionInput {
     return input
 }
 
-func run_vl_inference(VLInferenceConfig config, VLInferenceRequest request) VLInferenceResponse {
-    VLInferenceResponse response
+func run_vl_inference(vl_inference_config config, vl_inference_request request) vl_inference_response {
+    vl_inference_response response
     response.model = "Qwen2.5-VL-7B"
     print("Processing VL request:\n")
     print("  • Text prompt length: " + int_to_string(len(request.prompt)) + " chars\n")
@@ -270,7 +270,7 @@ func main() {
     print("Model: Qwen2.5-VL-7B\n")
     print("Framework: Pure S Language Implementation\n")
     print("\n")
-    VLInferenceConfig config
+    vl_inference_config config
     config.model_path = "/home/shuwen/shuwen/model/Qwen2.5-VL-7B"
     config.vision_encoder_type = "vit"
     config.language_model_type = "transformer"
@@ -287,7 +287,7 @@ func main() {
         print("❌ Failed to initialize VL inference engine!\n")
         return
     }
-    VLInferenceRequest request
+    vl_inference_request request
     request.prompt = "Describe this image"
     request.max_new_tokens = 100
     request.temperature = 0.7
@@ -295,11 +295,11 @@ func main() {
     request.top_k = 40
     request.repetition_penalty = 1.0
     request.do_sample = true
-    VisionInput img1
+    vision_input img1
     img1.image_path = "/path/to/medical/image.jpg"
     img1.num_patches = 1025
     request.images = append(request.images, img1)
-    VLInferenceResponse response = run_vl_inference(config, request)
+    vl_inference_response response = run_vl_inference(config, request)
     print("Response:\n")
     print("  Text: " + response.text + "\n")
     print("  Tokens: " + int_to_string(response.tokens_generated) + "\n")
