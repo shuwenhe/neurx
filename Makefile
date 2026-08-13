@@ -3158,35 +3158,40 @@ docker: check-bash
 # Build production model loader
 build-production-model-loader: build-s-ir-runner
 	@echo "$(BLUE)🔨 Building Production Model Loader...$(NC)"
-	@$(S_SEED_COMPILER) deploy/production_model_loader.s -o artifacts/build/production_model_loader/model_loader.ir 2>&1 && \
+	@mkdir -p artifacts/build/production_model_loader
+	@$(S_SEED_COMPILER) deploy/production_model_loader.s artifacts/build/production_model_loader/model_loader.ir 2>&1 && \
 	echo "$(GREEN)✓ Model loader compiled successfully!$(NC)" || \
 	(echo "$(RED)✗ Compilation failed!$(NC)" && exit 1)
 
 # Build request scheduler
 build-request-scheduler: build-s-ir-runner
 	@echo "$(BLUE)🔨 Building Request Scheduler & Batch Processor...$(NC)"
-	@$(S_SEED_COMPILER) deploy/request_scheduler.s -o artifacts/build/request_scheduler/scheduler.ir 2>&1 && \
+	@mkdir -p artifacts/build/request_scheduler
+	@$(S_SEED_COMPILER) deploy/request_scheduler.s artifacts/build/request_scheduler/scheduler.ir 2>&1 && \
 	echo "$(GREEN)✓ Request scheduler compiled successfully!$(NC)" || \
 	(echo "$(RED)✗ Compilation failed!$(NC)" && exit 1)
 
 # Build performance monitor
 build-performance-monitor: build-s-ir-runner
 	@echo "$(BLUE)🔨 Building Performance Monitor...$(NC)"
-	@$(S_SEED_COMPILER) deploy/performance_monitor.s -o artifacts/build/performance_monitor/monitor.ir 2>&1 && \
+	@mkdir -p artifacts/build/performance_monitor
+	@$(S_SEED_COMPILER) deploy/performance_monitor.s artifacts/build/performance_monitor/monitor.ir 2>&1 && \
 	echo "$(GREEN)✓ Performance monitor compiled successfully!$(NC)" || \
 	(echo "$(RED)✗ Compilation failed!$(NC)" && exit 1)
 
 # Build REST API server
 build-rest-api-server: build-s-ir-runner
 	@echo "$(BLUE)🔨 Building REST API Server...$(NC)"
-	@$(S_SEED_COMPILER) deploy/rest_api_server.s -o artifacts/build/api_server/rest_api.ir 2>&1 && \
+	@mkdir -p artifacts/build/api_server
+	@$(S_SEED_COMPILER) deploy/rest_api_server.s artifacts/build/api_server/rest_api.ir 2>&1 && \
 	echo "$(GREEN)✓ REST API server compiled successfully!$(NC)" || \
 	(echo "$(RED)✗ Compilation failed!$(NC)" && exit 1)
 
 # Build inference service
 build-inference-service: build-s-ir-runner
 	@echo "$(BLUE)🔨 Building Inference Service Manager...$(NC)"
-	@$(S_SEED_COMPILER) deploy/inference_service.s -o artifacts/build/inference_service/service.ir 2>&1 && \
+	@mkdir -p artifacts/build/inference_service
+	@$(S_SEED_COMPILER) deploy/inference_service.s artifacts/build/inference_service/service.ir 2>&1 && \
 	echo "$(GREEN)✓ Inference service compiled successfully!$(NC)" || \
 	(echo "$(RED)✗ Compilation failed!$(NC)" && exit 1)
 
