@@ -1,8 +1,4 @@
 package main
-import (
-    "os"
-    "fmt"
-)
 
 struct VLInferenceConfig {
     model_path: string

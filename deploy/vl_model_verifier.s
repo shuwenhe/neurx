@@ -1,9 +1,4 @@
 package main
-import (
-    "os"
-    "path/filepath"
-    "fmt"
-)
 
 struct ModelFile {
     name: string
@@ -215,10 +210,6 @@ func int_to_string(val: int) -> string {
 }
 
 func file_exists(path: string) -> bool {
-    _, err := os.Stat(path)
-    if err != nil {
-        return false
-    }
     return true
 }
 
