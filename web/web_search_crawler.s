@@ -95,7 +95,7 @@ struct search_statistics {
     duplicates_removed: int
     cache_hit_count: int
 }
-interface SearchEngineInterface {
+interface search_engine_interface {
     name: string { get }
     search(string query, config: web_search_config)
 }
@@ -109,7 +109,7 @@ struct engine_search_result {
     error?: string
 }
 
-class GoogleSearchEngine implements SearchEngineInterface {
+class google_search_engine implements search_engine_interface {
     name = "google"
     api_key: string?
     cx_id: string?
@@ -203,7 +203,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
     }
 }
 
-class BingSearchEngine implements SearchEngineInterface {
+class bing_search_engine implements search_engine_interface {
     name = "bing"
     api_key: string?
     init(api_key?: string) {

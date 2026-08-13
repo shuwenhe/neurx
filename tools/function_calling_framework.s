@@ -68,7 +68,7 @@ struct tool_call {
     name: string
     arguments: string
     parsed_arguments: map<string, any>?
-    status: CallStatus = call_status.PENDING
+    status: call_status = call_status.PENDING
     result?: tool_call_result
     error?: tool_call_error
     start_time: float?
@@ -161,7 +161,7 @@ class tool_registry {
         this.tools = map<string, tool_definition>{}
         this.executors = map<string, tool_executor>{}
         this.categories = map<string, list<string>>{}
-    register(definition: tool_definition, executor: ToolExecutor) {
+    register(definition: tool_definition, executor: tool_executor) {
         if definition.name in this.tools:
             throw error(f"Tool '{definition.name}' already registered. Use update() to modify.")
         this.tools[definition.name] = definition
@@ -262,12 +262,12 @@ struct validation_report {
 }
 
 class function_calling_engine {
-    registry: ToolRegistry
+    registry: tool_registry
     llm_client: any
     config: function_calling_config
     conversation_history: list<user_message | assistant_message>
-    call_tracker: CallTracker
-    init(llm_client: any, config?: function_calling_config, registry?: ToolRegistry) {
+    call_tracker: call_tracker
+    init(llm_client: any, config?: function_calling_config, registry?: tool_registry) {
         this.llm_client = llm_client
         this.config = config ?? new function_calling_config()
         this.registry = registry ?? new tool_registry(this.config)
@@ -702,7 +702,7 @@ class web_search_executor implements tool_executor {
     }
 }
 
-class CodeInterpreterExecutor implements ToolExecutor {
+class code_interpreter_executor implements tool_executor {
     get_name() { return "code_interpreter" }
     validate_arguments(args, schema) {
         if "code" not in args:
@@ -718,7 +718,7 @@ class CodeInterpreterExecutor implements ToolExecutor {
     }
 }
 
-class FileOperationsExecutor implements ToolExecutor {
+class file_operations_executor implements tool_executor {
     get_name() { return "file_operations" }
     validate_arguments(args, schema) {
         required = ["action", "path"]
@@ -756,7 +756,7 @@ class FileOperationsExecutor implements ToolExecutor {
     }
 }
 function create_function_calling_engine(llm_client: any, config?: function_calling_config) {
-    engine = new FunctionCallingEngine(llm_client=llm_client, config=config)
+    engine = new function_calling_engine(llm_client=llm_client, config=config)
     search_def, search_exec = create_builtin_web_search_tool()
     engine.registry.register(search_def, search_exec)
     code_def, code_exec = create_builtin_code_executor_tool()
@@ -767,7 +767,7 @@ function create_function_calling_engine(llm_client: any, config?: function_calli
 }
 async function test_function_calling() {
     print("🧪 testing NEURX FUNCTION calling system...")
-    mock_llc = MockLLMClientForFC()
+    mock_llc = mock_llm_client_for_fc()
     fc_engine = create_function_calling_engine(mock_llc, function_calling_config(verbose_logging=false))
     print("  ✓ test 1: Tool registration")
     stats = fc_engine.registry.get_statistics()
@@ -800,7 +800,7 @@ async function test_function_calling() {
         first_call = response.tool_calls[0]
         assert first_call.id != null, "tool call should have ID"
         assert first_call.name != null, "tool call should have name"
-        assert first_call.status in [CallStatus.COMPLETED, CallStatus.FAILED, CallStatus.PERMISSION_REQUIRED], \
+        assert first_call.status in [call_status.COMPLETED, call_status.FAILED, call_status.PERMISSION_REQUIRED], \
                f"unexpected status: {first_call.status}"
     assert response.execution_summary != null, "should have execution summary"
     assert response.execution_summary!.total_tool_calls_initiated == response.tool_calls.length
@@ -812,7 +812,7 @@ async function test_function_calling() {
     return true
 }
 
-class MockLLMClientForFC {
+class mock_llm_client_for_fc {
     call_count: int = 0
     async chat.completions.create(model, messages, tools, tool_choice, temperature, max_tokens) {
         this.call_count += 1
@@ -854,11 +854,11 @@ struct llm_raw_response {
 }
 export {
     function_calling_config, tool_definition, parameter_schema, property_definition,
-    tool_call, CallStatus, tool_call_result, tool_call_error, rate_limit,
+    tool_call, call_status, tool_call_result, tool_call_error, rate_limit,
     function_calling_response, assistant_message, user_message, content_block, tool_call_result_block,
     execution_summary,
-    ToolRegistry, ToolExecutor, validation_report, registry_statistics,
-    FunctionCallingEngine, CallTracker, conversation_summary,
+    tool_registry, tool_executor, validation_report, registry_statistics,
+    function_calling_engine, call_tracker, conversation_summary,
     create_function_calling_engine, test_function_calling,
     create_builtin_web_search_tool, create_builtin_code_executor_tool, create_builtin_file_operations_tool
 }

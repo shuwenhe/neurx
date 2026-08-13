@@ -1,39 +1,39 @@
 package neurx.inference.client
 import neurx.util.*
 
-struct ChatMessage {
+struct chat_message {
     string role
     string content
 }
 
-struct CompletionChoice {
+struct completion_choice {
     int index
-    ChatMessage message
+    chat_message message
     string finish_reason
 }
 
-struct CompletionUsage {
+struct completion_usage {
     int prompt_tokens
     int completion_tokens
     int total_tokens
 }
 
-struct ChatCompletion {
+struct chat_completion {
     string id
     string object
     int created
     string model
-    []CompletionChoice choices
-    CompletionUsage usage
+    []completion_choice choices
+    completion_usage usage
 }
 
-struct ErrorResponse {
+struct error_response {
     string error_code
     string error_message
     string request_id
 }
 
-struct NeurXClientConfig {
+struct neurx_client_config {
     string api_endpoint
     string api_key
     int timeout_seconds
@@ -41,9 +41,9 @@ struct NeurXClientConfig {
     string default_model
 }
 
-struct GenerateParams {
+struct generate_params {
     string model
-    []ChatMessage messages
+    []chat_message messages
     int max_tokens
     float temperature
     float top_p
@@ -52,17 +52,17 @@ struct GenerateParams {
     map[string:string extra_params
 }
 
-class NeurXClient {
-    NeurXClientConfig config
+class neurx_client {
+    neurx_client_config config
     string session_id
 
-    func init(config: NeurXClientConfig) {
+    func init(config: neurx_client_config) {
         this.config = config
         this.session_id = generate_session_id()
     }
 
-    func chat(messages: []ChatMessage, max_tokens: int) ChatCompletion {
-        params := GenerateParams{
+    func chat(messages: []chat_message, max_tokens: int) chat_completion {
+        params := generate_params{
             model: this.config.default_model,
             messages: messages,
             max_tokens: max_tokens,
@@ -73,8 +73,8 @@ class NeurXClient {
         return this.generate(params)
     }
 
-    func stream_chat(messages: []ChatMessage, max_tokens: int) []string {
-        params := GenerateParams{
+    func stream_chat(messages: []chat_message, max_tokens: int) []string {
+        params := generate_params{
             model: this.config.default_model,
             messages: messages,
             max_tokens: max_tokens,
@@ -85,7 +85,7 @@ class NeurXClient {
         return this.stream_generate(params)
     }
 
-    func generate(params: GenerateParams) ChatCompletion {
+    func generate(params: generate_params) chat_completion {
         request_json := build_chat_request(params)
         endpoint := this.config.api_endpoint + "/v1/chat/completions"
         response_body := http_post(endpoint, request_json, this.config.api_key)
@@ -93,7 +93,7 @@ class NeurXClient {
         return completion
     }
 
-    func stream_generate(params: GenerateParams) []string {
+    func stream_generate(params: generate_params) []string {
         tokens := []string{}
         request_json := build_chat_request(params)
         endpoint := this.config.api_endpoint + "/v1/chat/completions"
@@ -122,7 +122,7 @@ class NeurXClient {
     }
 }
 
-func build_chat_request(params: GenerateParams) string {
+func build_chat_request(params: generate_params) string {
     request := map[string:any]{
         "model": params.model,
         "messages": params.messages,
@@ -134,9 +134,9 @@ func build_chat_request(params: GenerateParams) string {
     return json_marshal(request)
 }
 
-func parse_chat_completion(response: string) ChatCompletion {
+func parse_chat_completion(response: string) chat_completion {
     data := json_unmarshal(response)
-    completion := ChatCompletion{
+    completion := chat_completion{
         id: get_string(data, "id"),
         object: get_string(data, "object"),
         created: get_int(data, "created"),
@@ -147,10 +147,10 @@ func parse_chat_completion(response: string) ChatCompletion {
     return completion
 }
 
-func parse_choices(choices_array: []any) []CompletionChoice {
-    choices := []CompletionChoice{}
+func parse_choices(choices_array: []any) []completion_choice {
+    choices := []completion_choice{}
     for choice_obj in choices_array {
-        choice := CompletionChoice{
+        choice := completion_choice{
             index: get_int(choice_obj, "index"),
             message: parse_message(get_object(choice_obj, "message")),
             finish_reason: get_string(choice_obj, "finish_reason"),
@@ -160,15 +160,15 @@ func parse_choices(choices_array: []any) []CompletionChoice {
     return choices
 }
 
-func parse_message(msg_obj: any) ChatMessage {
-    return ChatMessage{
+func parse_message(msg_obj: any) chat_message {
+    return chat_message{
         role: get_string(msg_obj, "role"),
         content: get_string(msg_obj, "content"),
     }
 }
 
-func parse_usage(usage_obj: any) CompletionUsage {
-    return CompletionUsage{
+func parse_usage(usage_obj: any) completion_usage {
+    return completion_usage{
         prompt_tokens: get_int(usage_obj, "prompt_tokens"),
         completion_tokens: get_int(usage_obj, "completion_tokens"),
         total_tokens: get_int(usage_obj, "total_tokens"),

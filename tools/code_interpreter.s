@@ -694,9 +694,9 @@ struct formatted_output {
 }
 
 class data_analysis_helper {
-    sandbox: SandboxEnvironment
-    formatter: ResultFormatter
-    init(sandbox: SandboxEnvironment) {
+    sandbox: sandbox_environment
+    formatter: result_formatter
+    init(sandbox: sandbox_environment) {
         this.sandbox = sandbox
         this.formatter = new result_formatter(sandbox.config)
     }
@@ -852,22 +852,22 @@ else:
     }
 }
 
-class CodeInterpreter {
+class code_interpreter {
     config: code_interpreter_config
-    sandbox: SandboxEnvironment?
-    data_helper: DataAnalysisHelper?
-    formatter: ResultFormatter
-    active_sessions: map<string, SandboxEnvironment>
-    default_session: SandboxEnvironment?
+    sandbox: sandbox_environment?
+    data_helper: data_analysis_helper?
+    formatter: result_formatter
+    active_sessions: map<string, sandbox_environment>
+    default_session: sandbox_environment?
     init(config?: code_interpreter_config) {
         this.config = config ?? new code_interpreter_config()
-        this.formatter = new ResultFormatter(this.config)
-        this.active_sessions = map<string, SandboxEnvironment>{}
+        this.formatter = new result_formatter(this.config)
+        this.active_sessions = map<string, sandbox_environment>{}
         this.default_session = this.create_session("default")
-        this.data_helper = new DataAnalysisHelper(this.default_session!)
+        this.data_helper = new data_analysis_helper(this.default_session!)
     }
     create_session(string session_name) {
-        let session = new SandboxEnvironment(config=this.config)
+        let session = new sandbox_environment(config=this.config)
         this.active_sessions[session_name] = session
         return session
     }
@@ -926,11 +926,11 @@ class CodeInterpreter {
     }
 }
 function create_code_interpreter(config?: code_interpreter_config) {
-    return new CodeInterpreter(config=config)
+    return new code_interpreter(config=config)
 }
 function test_code_interpreter() {
     print("🧪 testing NEURX code interpreter...")
-    ci = new CodeInterpreter()
+    ci = new code_interpreter()
     print("  ✓ test 1: Basic python execution")
     result1 = ci.run_python("""
 x = 42
@@ -975,7 +975,7 @@ print("CSV created")
 }
 export {
     code_interpreter_config, execution_result, file_info, image_data, code_block,
-    CodeInterpreter, SandboxEnvironment,
-    DataAnalysisHelper, ResultFormatter,
+    code_interpreter, sandbox_environment,
+    data_analysis_helper, result_formatter,
     create_code_interpreter, test_code_interpreter
 }
