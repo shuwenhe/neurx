@@ -287,7 +287,7 @@ trainer.fit(train_dataloader)
 ### neurx Version
 ```s
 import "posttrain/alignment/ppo/ppo.s"
-import "posttrain/inference/vllm/vllm.s"
+import "posttrain/inference/engine/inference_engine.s"
 import "checkpoint/mooncake_engine.s"
 import "posttrain/reward/reward_managers.s"
 
@@ -297,7 +297,7 @@ let config = PPOConfig{
     num_epochs: 4,
 }
 
-let rollout = new_vllm_rollout(VLLMConfig{
+let rollout = new_inference_engine(InferenceConfig{
     model_path: "meta-llama/Llama-3.1-8B",
     tensor_parallel_size: 2,
 })
