@@ -3,36 +3,36 @@ package optimization
 import "core"
 import "tensor"
 
-type TestResult struct {
+type test_result struct {
     test_name       string
     passed          bool
     error_message   string
     execution_time  float32
 }
 
-type TestStats struct {
+type test_stats struct {
     total_tests     int32
     passed_tests    int32
     failed_tests    int32
     coverage_pct    float32
 }
 
-type ComprehensiveTestSuite struct {
-    results         []TestResult
-    stats           TestStats
+type comprehensive_test_suite struct {
+    results         []test_result
+    stats           test_stats
 }
 
-func NewComprehensiveTestSuite() *ComprehensiveTestSuite {
-    return &ComprehensiveTestSuite{
-        results: make([]TestResult, 0),
-        stats:   TestStats{},
+func NewComprehensiveTestSuite() *comprehensive_test_suite {
+    return &comprehensive_test_suite{
+        results: make([]test_result, 0),
+        stats:   test_stats{},
     }
 }
 
-func (cts *ComprehensiveTestSuite) TestFlashAttentionBasic() {
+func (cts *comprehensive_test_suite) TestFlashAttentionBasic() {
     test_name := "FlashAttention Basic Computation"
 
-    config := AttentionConfig{
+    config := attention_config{
         batch_size:      1,
         num_heads:       2,
         seq_len:         16,
@@ -57,7 +57,7 @@ func (cts *ComprehensiveTestSuite) TestFlashAttentionBasic() {
 
     passed := len(output) == len(q) && output[0] != 0
 
-    result := TestResult{
+    result := test_result{
         test_name:      test_name,
         passed:         passed,
         error_message:  "",
@@ -67,10 +67,10 @@ func (cts *ComprehensiveTestSuite) TestFlashAttentionBasic() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *ComprehensiveTestSuite) TestGEMMFusionSpeedup() {
+func (cts *comprehensive_test_suite) TestGEMMFusionSpeedup() {
     test_name := "GEMM Fusion Speedup"
 
-    config := GEMMConfig{
+    config := gemm_config{
         m:             64,
         n:             64,
         k:             64,
@@ -84,7 +84,7 @@ func (cts *ComprehensiveTestSuite) TestGEMMFusionSpeedup() {
 
     passed := speedup > 1.0
 
-    result := TestResult{
+    result := test_result{
         test_name:      test_name,
         passed:         passed,
         error_message:  "",
@@ -94,10 +94,10 @@ func (cts *ComprehensiveTestSuite) TestGEMMFusionSpeedup() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *ComprehensiveTestSuite) TestCUDAGraphExecution() {
+func (cts *comprehensive_test_suite) TestCUDAGraphExecution() {
     test_name := "CUDA Graph Execution"
 
-    config := CUDAGraphConfig{
+    config := cuda_graph_config{
         enable_capture:     true,
         max_nodes:          100,
         enable_fusion:      true,
@@ -113,7 +113,7 @@ func (cts *ComprehensiveTestSuite) TestCUDAGraphExecution() {
 
     passed := len(results) == 2
 
-    result := TestResult{
+    result := test_result{
         test_name:      test_name,
         passed:         passed,
         error_message:  "",
@@ -123,10 +123,10 @@ func (cts *ComprehensiveTestSuite) TestCUDAGraphExecution() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *ComprehensiveTestSuite) TestRuntimeFusion() {
+func (cts *comprehensive_test_suite) TestRuntimeFusion() {
     test_name := "Runtime Operation Fusion"
 
-    config := FusedOperationConfig{
+    config := fused_operation_config{
         enable_fusion:  true,
         max_queue_size: 100,
         fusion_ratio:   0.7,
@@ -141,7 +141,7 @@ func (cts *ComprehensiveTestSuite) TestRuntimeFusion() {
 
     passed := opportunities > 0
 
-    result := TestResult{
+    result := test_result{
         test_name:      test_name,
         passed:         passed,
         error_message:  "",
@@ -151,10 +151,10 @@ func (cts *ComprehensiveTestSuite) TestRuntimeFusion() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *ComprehensiveTestSuite) TestChunkedPrefill() {
+func (cts *comprehensive_test_suite) TestChunkedPrefill() {
     test_name := "Chunked Prefill Processing"
 
-    config := ChunkConfig{
+    config := chunk_config{
         chunk_size:       64,
         enable_recompute: true,
         enable_gradient:  false,
@@ -166,7 +166,7 @@ func (cts *ComprehensiveTestSuite) TestChunkedPrefill() {
 
     passed := cpp.num_chunks > 0 && cpp.total_tokens == 256
 
-    result := TestResult{
+    result := test_result{
         test_name:      test_name,
         passed:         passed,
         error_message:  "",
@@ -176,10 +176,10 @@ func (cts *ComprehensiveTestSuite) TestChunkedPrefill() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *ComprehensiveTestSuite) TestSpeculativeDecoding() {
+func (cts *comprehensive_test_suite) TestSpeculativeDecoding() {
     test_name := "Speculative Decoding"
 
-    config := SpeculativeConfig{
+    config := speculative_config{
         draft_model_scale:  0.25,
         num_draft_tokens:   3,
         verification_batch: 16,
@@ -190,7 +190,7 @@ func (cts *ComprehensiveTestSuite) TestSpeculativeDecoding() {
 
     passed := speedup > 1.0
 
-    result := TestResult{
+    result := test_result{
         test_name:      test_name,
         passed:         passed,
         error_message:  "",
@@ -200,7 +200,7 @@ func (cts *ComprehensiveTestSuite) TestSpeculativeDecoding() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *ComprehensiveTestSuite) TestVisionLanguageAdapter() {
+func (cts *comprehensive_test_suite) TestVisionLanguageAdapter() {
     test_name := "Vision-Language Adapter"
 
     vlm := NewVisionLanguageModelAdapter(768, 4096)
@@ -215,7 +215,7 @@ func (cts *ComprehensiveTestSuite) TestVisionLanguageAdapter() {
 
     passed := len(visual_tokens) == 196*4096 && len(bridged) == len(visual_tokens)
 
-    result := TestResult{
+    result := test_result{
         test_name:      test_name,
         passed:         passed,
         error_message:  "",
@@ -225,10 +225,10 @@ func (cts *ComprehensiveTestSuite) TestVisionLanguageAdapter() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *ComprehensiveTestSuite) TestLoRAAdapter() {
+func (cts *comprehensive_test_suite) TestLoRAAdapter() {
     test_name := "LoRA Adapter"
 
-    config := LoRAConfig{
+    config := lo_ra_config{
         rank:           8,
         alpha:          16.0,
         target_modules: []string{"q_proj", "v_proj"},
@@ -250,7 +250,7 @@ func (cts *ComprehensiveTestSuite) TestLoRAAdapter() {
 
     passed := len(output) == len(x)
 
-    result := TestResult{
+    result := test_result{
         test_name:      test_name,
         passed:         passed,
         error_message:  "",
@@ -260,7 +260,7 @@ func (cts *ComprehensiveTestSuite) TestLoRAAdapter() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *ComprehensiveTestSuite) TestMultiModelServer() {
+func (cts *comprehensive_test_suite) TestMultiModelServer() {
     test_name := "Multi-Model Serving"
 
     mms := NewMultiModelServingManager(8000)
@@ -276,7 +276,7 @@ func (cts *ComprehensiveTestSuite) TestMultiModelServer() {
 
     passed := loaded && exists && len(retrieved) == len(model_data)
 
-    result := TestResult{
+    result := test_result{
         test_name:      test_name,
         passed:         passed,
         error_message:  "",
@@ -286,10 +286,10 @@ func (cts *ComprehensiveTestSuite) TestMultiModelServer() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *ComprehensiveTestSuite) TestHighPerformanceIntegration() {
+func (cts *comprehensive_test_suite) TestHighPerformanceIntegration() {
     test_name := "High Performance Integration"
 
-    config := OptimizationConfig{
+    config := optimization_config{
         enable_flash_attention: true,
         enable_gemm_fusion:     true,
         enable_cuda_graphs:     true,
@@ -302,7 +302,7 @@ func (cts *ComprehensiveTestSuite) TestHighPerformanceIntegration() {
 
     passed := stats.total_speedup > 1.0
 
-    result := TestResult{
+    result := test_result{
         test_name:      test_name,
         passed:         passed,
         error_message:  "",
@@ -312,10 +312,10 @@ func (cts *ComprehensiveTestSuite) TestHighPerformanceIntegration() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *ComprehensiveTestSuite) TestLongContextIntegration() {
+func (cts *comprehensive_test_suite) TestLongContextIntegration() {
     test_name := "Long Context Integration"
 
-    config := LongContextOptimizationConfig{
+    config := long_context_optimization_config{
         enable_chunked_prefill:  true,
         enable_ring_attention:   true,
         enable_sparse_attention: true,
@@ -330,7 +330,7 @@ func (cts *ComprehensiveTestSuite) TestLongContextIntegration() {
 
     passed := optimizer.chunked_prefill.num_chunks > 0
 
-    result := TestResult{
+    result := test_result{
         test_name:      test_name,
         passed:         passed,
         error_message:  "",
@@ -340,7 +340,7 @@ func (cts *ComprehensiveTestSuite) TestLongContextIntegration() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *ComprehensiveTestSuite) TestAdvancedFeaturesIntegration() {
+func (cts *comprehensive_test_suite) TestAdvancedFeaturesIntegration() {
     test_name := "Advanced Features Integration"
 
     engine := NewAdvancedFeaturesEngine()
@@ -350,7 +350,7 @@ func (cts *ComprehensiveTestSuite) TestAdvancedFeaturesIntegration() {
 
     passed := speedup > 1.0
 
-    result := TestResult{
+    result := test_result{
         test_name:      test_name,
         passed:         passed,
         error_message:  "",
@@ -360,10 +360,10 @@ func (cts *ComprehensiveTestSuite) TestAdvancedFeaturesIntegration() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *ComprehensiveTestSuite) BenchmarkFlashAttention() {
+func (cts *comprehensive_test_suite) BenchmarkFlashAttention() {
     test_name := "Benchmark: FlashAttention"
 
-    config := AttentionConfig{
+    config := attention_config{
         batch_size:      1,
         num_heads:       8,
         seq_len:         2048,
@@ -377,7 +377,7 @@ func (cts *ComprehensiveTestSuite) BenchmarkFlashAttention() {
 
     passed := speedup >= 2.0 && speedup <= 3.5
 
-    result := TestResult{
+    result := test_result{
         test_name:      test_name,
         passed:         passed,
         error_message:  "",
@@ -387,10 +387,10 @@ func (cts *ComprehensiveTestSuite) BenchmarkFlashAttention() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *ComprehensiveTestSuite) BenchmarkGEMMFusion() {
+func (cts *comprehensive_test_suite) BenchmarkGEMMFusion() {
     test_name := "Benchmark: GEMM Fusion"
 
-    config := GEMMConfig{
+    config := gemm_config{
         m:             2048,
         n:             2048,
         k:             2048,
@@ -404,7 +404,7 @@ func (cts *ComprehensiveTestSuite) BenchmarkGEMMFusion() {
 
     passed := speedup >= 1.1
 
-    result := TestResult{
+    result := test_result{
         test_name:      test_name,
         passed:         passed,
         error_message:  "",
@@ -414,10 +414,10 @@ func (cts *ComprehensiveTestSuite) BenchmarkGEMMFusion() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *ComprehensiveTestSuite) BenchmarkSpeculativeDecoding() {
+func (cts *comprehensive_test_suite) BenchmarkSpeculativeDecoding() {
     test_name := "Benchmark: Speculative Decoding"
 
-    config := SpeculativeConfig{
+    config := speculative_config{
         draft_model_scale:  0.25,
         num_draft_tokens:   4,
         verification_batch: 32,
@@ -428,7 +428,7 @@ func (cts *ComprehensiveTestSuite) BenchmarkSpeculativeDecoding() {
 
     passed := speedup >= 2.0 && speedup <= 3.5
 
-    result := TestResult{
+    result := test_result{
         test_name:      test_name,
         passed:         passed,
         error_message:  "",
@@ -438,7 +438,7 @@ func (cts *ComprehensiveTestSuite) BenchmarkSpeculativeDecoding() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *ComprehensiveTestSuite) RunAllTests() {
+func (cts *comprehensive_test_suite) RunAllTests() {
 
     cts.TestFlashAttentionBasic()
     cts.TestGEMMFusionSpeedup()
@@ -475,7 +475,7 @@ func (cts *ComprehensiveTestSuite) RunAllTests() {
     }
 }
 
-func (cts *ComprehensiveTestSuite) PrintTestReport() {
+func (cts *comprehensive_test_suite) PrintTestReport() {
     core.Println("================================================")
     core.Println("COMPREHENSIVE TEST SUITE REPORT")
     core.Println("================================================")

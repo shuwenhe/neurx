@@ -4,10 +4,10 @@ import "core"
 import "tensor"
 import "models"
 
-type EngineConfig struct {
+type engine_config struct {
 
     model_name       string
-    model_config     models.ModelConfig
+    model_config     models.model_config
 
     max_batch_size   int32
     enable_disaggregated bool
@@ -24,7 +24,7 @@ type EngineConfig struct {
     dtype            string
 }
 
-type GenerateRequest struct {
+type generate_request struct {
     request_id       int64
     prompt_text      string
     max_tokens       int32
@@ -34,7 +34,7 @@ type GenerateRequest struct {
     priority         int
 }
 
-type GenerateResponse struct {
+type generate_response struct {
     request_id       int64
     generated_text   string
     output_tokens    []int32
@@ -42,13 +42,13 @@ type GenerateResponse struct {
     latency_ms       int64
 }
 
-type UnifiedInferenceEngine struct {
-    config           EngineConfig
+type unified_inference_engine struct {
+    config           engine_config
 
-    model            *models.BaseLLMModel
-    scheduler        *ContinuousBatchingScheduler
-    kv_cache         *KVCachePoolV2
-    quantizer        *QuantizationEngine
+    model            *models.base_llm_model
+    scheduler        *continuous_batching_scheduler
+    kv_cache         *kv_cache_pool_v2
+    quantizer        *quantization_engine
 
     is_initialized   bool
     total_requests   int64
@@ -58,15 +58,15 @@ type UnifiedInferenceEngine struct {
     throughput_tps   float32
 }
 
-func NewUnifiedInferenceEngine(config EngineConfig) *UnifiedInferenceEngine {
-    engine := &UnifiedInferenceEngine{
+func NewUnifiedInferenceEngine(config engine_config) *unified_inference_engine {
+    engine := &unified_inference_engine{
         config:         config,
         is_initialized: false,
     }
 
     engine.model = models.NewBaseLLMModel(config.model_config)
 
-    sched_config := SchedulerConfig{
+    sched_config := scheduler_config{
         max_batch_size:      config.max_batch_size,
         max_prefill_tokens:  4096,
         max_decode_tokens:   2048,
@@ -74,7 +74,7 @@ func NewUnifiedInferenceEngine(config EngineConfig) *UnifiedInferenceEngine {
     }
     engine.scheduler = NewContinuousBatchingScheduler(sched_config)
 
-    kv_config := KVCacheConfig{
+    kv_config := kv_cache_config{
         num_blocks:          config.num_kv_blocks,
         block_size:          config.block_size,
         hidden_size:         config.model_config.hidden_size,
@@ -93,7 +93,7 @@ func NewUnifiedInferenceEngine(config EngineConfig) *UnifiedInferenceEngine {
     return engine
 }
 
-func (e *UnifiedInferenceEngine) Initialize(model_path string) error {
+func (e *unified_inference_engine) Initialize(model_path string) error {
     if !e.is_initialized {
         return core.Errorf("Engine not properly configured")
     }
@@ -106,7 +106,7 @@ func (e *UnifiedInferenceEngine) Initialize(model_path string) error {
     return nil
 }
 
-func (e *UnifiedInferenceEngine) Submit(req GenerateRequest) (int64, error) {
+func (e *unified_inference_engine) Submit(req generate_request) (int64, error) {
     if !e.is_initialized {
         return -1, core.Errorf("Engine not initialized")
     }
@@ -120,7 +120,7 @@ func (e *UnifiedInferenceEngine) Submit(req GenerateRequest) (int64, error) {
     return request_id, nil
 }
 
-func (e *UnifiedInferenceEngine) ProcessBatch() *BatchInfo {
+func (e *unified_inference_engine) ProcessBatch() *batch_info {
     batch := e.scheduler.Schedule()
 
     if batch.batch_size == 0 {
@@ -142,7 +142,7 @@ func (e *UnifiedInferenceEngine) ProcessBatch() *BatchInfo {
     return batch
 }
 
-func (e *UnifiedInferenceEngine) executeBatch(batch *BatchInfo) {
+func (e *unified_inference_engine) executeBatch(batch *batch_info) {
 
     _ = batch
 
@@ -172,15 +172,15 @@ func (e *UnifiedInferenceEngine) executeBatch(batch *BatchInfo) {
     e.total_tokens = e.total_tokens + int64(batch.total_prefill_len)
 }
 
-func (e *UnifiedInferenceEngine) GetResult(request_id int64) *GenerateResponse {
+func (e *unified_inference_engine) GetResult(request_id int64) *generate_response {
 
-    response := &GenerateResponse{
+    response := &generate_response{
         request_id: request_id,
     }
     return response
 }
 
-func (e *UnifiedInferenceEngine) GetMetrics() map[string]interface{} {
+func (e *unified_inference_engine) GetMetrics() map[string]interface{} {
     metrics := make(map[string]interface{})
 
     sched_stats := e.scheduler.GetStats()
@@ -201,7 +201,7 @@ func (e *UnifiedInferenceEngine) GetMetrics() map[string]interface{} {
     return metrics
 }
 
-func (e *UnifiedInferenceEngine) Shutdown() error {
+func (e *unified_inference_engine) Shutdown() error {
     core.Println("Shutting down inference engine")
 
     e.is_initialized = false
@@ -209,7 +209,7 @@ func (e *UnifiedInferenceEngine) Shutdown() error {
     return nil
 }
 
-func (e *UnifiedInferenceEngine) GetStatus() map[string]string {
+func (e *unified_inference_engine) GetStatus() map[string]string {
     status := make(map[string]string)
 
     if e.is_initialized {
@@ -231,7 +231,7 @@ func (e *UnifiedInferenceEngine) GetStatus() map[string]string {
     return status
 }
 
-func (e *UnifiedInferenceEngine) Benchmark(num_requests int, seq_length int32) map[string]interface{} {
+func (e *unified_inference_engine) Benchmark(num_requests int, seq_length int32) map[string]interface{} {
     results := make(map[string]interface{})
 
     start_time := core.Now()
@@ -260,7 +260,7 @@ func (e *UnifiedInferenceEngine) Benchmark(num_requests int, seq_length int32) m
 }
 
 func main() {
-    config := EngineConfig{
+    config := engine_config{
         model_name:      "llama2",
         model_config:    models.NewModelConfig("llama2"),
         max_batch_size:  16,
@@ -279,7 +279,7 @@ func main() {
 
     engine.Initialize("./models/llama2-7b")
 
-    req := GenerateRequest{
+    req := generate_request{
         prompt_text: "What is machine learning?",
         max_tokens:  100,
         temperature: 0.7,

@@ -3,7 +3,7 @@ package optimization
 import "core"
 import "tensor"
 
-type GEMMConfig struct {
+type gemm_config struct {
     m               int32
     n               int32
     k               int32
@@ -12,7 +12,7 @@ type GEMMConfig struct {
     num_gemms       int32
 }
 
-type GEMMOperation struct {
+type gemm_operation struct {
     a               []float32
     b               []float32
     c               []float32
@@ -20,29 +20,29 @@ type GEMMOperation struct {
     has_bias        bool
 }
 
-type FusedGEMMKernel struct {
-    config          GEMMConfig
-    gemms           []GEMMOperation
+type fused_gemm_kernel struct {
+    config          gemm_config
+    gemms           []gemm_operation
     fused_output    []float32
 }
 
-func NewFusedGEMMKernel(config GEMMConfig) *FusedGEMMKernel {
+func NewFusedGEMMKernel(config gemm_config) *fused_gemm_kernel {
     if config.tile_size <= 0 {
         config.tile_size = 64
     }
 
-    return &FusedGEMMKernel{
+    return &fused_gemm_kernel{
         config:      config,
-        gemms:       make([]GEMMOperation, 0),
+        gemms:       make([]gemm_operation, 0),
         fused_output: make([]float32, 0),
     }
 }
 
-func (fk *FusedGEMMKernel) AddGEMM(gemm GEMMOperation) {
+func (fk *fused_gemm_kernel) AddGEMM(gemm gemm_operation) {
     fk.gemms = append(fk.gemms, gemm)
 }
 
-func (fk *FusedGEMMKernel) ExecuteFused() [][]float32 {
+func (fk *fused_gemm_kernel) ExecuteFused() [][]float32 {
     results := make([][]float32, 0)
 
     if !fk.config.enable_fusion {
@@ -65,7 +65,7 @@ func (fk *FusedGEMMKernel) ExecuteFused() [][]float32 {
     return results
 }
 
-func (fk *FusedGEMMKernel) executeBasicGEMM(gemm GEMMOperation) []float32 {
+func (fk *fused_gemm_kernel) executeBasicGEMM(gemm gemm_operation) []float32 {
     m := fk.config.m
     n := fk.config.n
     k := fk.config.k
@@ -93,7 +93,7 @@ func (fk *FusedGEMMKernel) executeBasicGEMM(gemm GEMMOperation) []float32 {
     return c
 }
 
-func (fk *FusedGEMMKernel) executeOptimizedGEMM(gemm GEMMOperation) []float32 {
+func (fk *fused_gemm_kernel) executeOptimizedGEMM(gemm gemm_operation) []float32 {
     m := fk.config.m
     n := fk.config.n
     k := fk.config.k
@@ -143,8 +143,8 @@ func (fk *FusedGEMMKernel) executeOptimizedGEMM(gemm GEMMOperation) []float32 {
     return c
 }
 
-func (fk *FusedGEMMKernel) FuseGEMMAndActivation(
-    gemm GEMMOperation,
+func (fk *fused_gemm_kernel) FuseGEMMAndActivation(
+    gemm gemm_operation,
     activation_type string,
 ) []float32 {
 
@@ -161,8 +161,8 @@ func (fk *FusedGEMMKernel) FuseGEMMAndActivation(
     return c
 }
 
-func (fk *FusedGEMMKernel) FuseGEMMAndNormalization(
-    gemm GEMMOperation,
+func (fk *fused_gemm_kernel) FuseGEMMAndNormalization(
+    gemm gemm_operation,
     eps float32,
 ) []float32 {
 
@@ -195,9 +195,9 @@ func (fk *FusedGEMMKernel) FuseGEMMAndNormalization(
     return c
 }
 
-func (fk *FusedGEMMKernel) FuseMultipleGEMMs(
-    gemm1 GEMMOperation,
-    gemm2 GEMMOperation,
+func (fk *fused_gemm_kernel) FuseMultipleGEMMs(
+    gemm1 gemm_operation,
+    gemm2 gemm_operation,
 ) []float32 {
 
     intermediate := fk.executeOptimizedGEMM(gemm1)
@@ -210,7 +210,7 @@ func (fk *FusedGEMMKernel) FuseMultipleGEMMs(
     return result
 }
 
-func (fk *FusedGEMMKernel) applyActivation(x float32, act_type string) float32 {
+func (fk *fused_gemm_kernel) applyActivation(x float32, act_type string) float32 {
     switch act_type {
     case "relu":
         if x < 0 {
@@ -232,7 +232,7 @@ func (fk *FusedGEMMKernel) applyActivation(x float32, act_type string) float32 {
     }
 }
 
-func (fk *FusedGEMMKernel) GetComputationSaving() float32 {
+func (fk *fused_gemm_kernel) GetComputationSaving() float32 {
 
     num_gemms := float32(fk.config.num_gemms)
     if num_gemms <= 1 {
@@ -247,8 +247,8 @@ func (fk *FusedGEMMKernel) GetComputationSaving() float32 {
     return speedup
 }
 
-func (fk *FusedGEMMKernel) BenchmarkGEMM(
-    gemm GEMMOperation,
+func (fk *fused_gemm_kernel) BenchmarkGEMM(
+    gemm gemm_operation,
     num_iterations int32,
 ) map[string]float32 {
 
@@ -278,7 +278,7 @@ func (fk *FusedGEMMKernel) BenchmarkGEMM(
 }
 
 func main() {
-    config := GEMMConfig{
+    config := gemm_config{
         m:              512,
         n:              512,
         k:              512,
@@ -294,7 +294,7 @@ func main() {
     core.Println("Tile size:", config.tile_size)
     core.Println("Computation saving:", fk.GetComputationSaving(), "x")
 
-    stats := fk.BenchmarkGEMM(GEMMOperation{}, 100)
+    stats := fk.BenchmarkGEMM(gemm_operation{}, 100)
     core.Println("Benchmark stats:")
     core.Println("  GFLOPS:", stats["gflops"])
     core.Println("  Time per iteration:", stats["time_per_iter_ms"], "ms")

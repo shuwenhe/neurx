@@ -3,7 +3,7 @@ package inference
 import "core"
 import "tensor"
 
-type KVBlock struct {
+type kv_block struct {
     block_id          int
     tokens_per_block  int32
     data              []float32
@@ -12,14 +12,14 @@ type KVBlock struct {
     is_prefix_block   bool
 }
 
-type KVAllocation struct {
+type kv_allocation struct {
     block_table       []int
     block_offsets     []int32
     num_tokens        int32
     request_id        int64
 }
 
-type KVCacheConfig struct {
+type kv_cache_config struct {
     num_blocks        int
     block_size        int32
     hidden_size       int32
@@ -29,12 +29,12 @@ type KVCacheConfig struct {
     enable_prefix_cache bool
 }
 
-type KVCachePoolV2 struct {
-    config            KVCacheConfig
-    blocks            []*KVBlock
+type kv_cache_pool_v2 struct {
+    config            kv_cache_config
+    blocks            []*kv_block
     free_blocks       []int
 
-    request_allocations map[int64]*KVAllocation
+    request_allocations map[int64]*kv_allocation
     request_to_blocks   map[int64][]int
 
     prefix_cache_map    map[string][]int
@@ -44,7 +44,7 @@ type KVCachePoolV2 struct {
     eviction_count    int64
 }
 
-func NewKVCachePoolV2(config KVCacheConfig) *KVCachePoolV2 {
+func NewKVCachePoolV2(config kv_cache_config) *kv_cache_pool_v2 {
     if config.num_blocks <= 0 {
         config.num_blocks = 1024
     }
@@ -52,11 +52,11 @@ func NewKVCachePoolV2(config KVCacheConfig) *KVCachePoolV2 {
         config.block_size = 16
     }
 
-    pool := &KVCachePoolV2{
+    pool := &kv_cache_pool_v2{
         config:              config,
-        blocks:              []*KVBlock{},
+        blocks:              []*kv_block{},
         free_blocks:         []int{},
-        request_allocations: make(map[int64]*KVAllocation),
+        request_allocations: make(map[int64]*kv_allocation),
         request_to_blocks:   make(map[int64][]int),
         prefix_cache_map:    make(map[string][]int),
         total_free:          int32(config.num_blocks),
@@ -64,7 +64,7 @@ func NewKVCachePoolV2(config KVCacheConfig) *KVCachePoolV2 {
 
     for i := 0; i < config.num_blocks; i++ {
         block_data_size := config.block_size * config.hidden_size * 2
-        block := &KVBlock{
+        block := &kv_block{
             block_id:          i,
             tokens_per_block:  config.block_size,
             data:              make([]float32, int(block_data_size)),
@@ -79,7 +79,7 @@ func NewKVCachePoolV2(config KVCacheConfig) *KVCachePoolV2 {
     return pool
 }
 
-func (p *KVCachePoolV2) Allocate(request_id int64, num_tokens int32) *KVAllocation {
+func (p *kv_cache_pool_v2) Allocate(request_id int64, num_tokens int32) *kv_allocation {
 
     blocks_needed := (num_tokens + p.config.block_size - 1) / p.config.block_size
 
@@ -92,7 +92,7 @@ func (p *KVCachePoolV2) Allocate(request_id int64, num_tokens int32) *KVAllocati
         return nil
     }
 
-    allocation := &KVAllocation{
+    allocation := &kv_allocation{
         block_table:   []int{},
         block_offsets: []int32{},
         num_tokens:    num_tokens,
@@ -120,7 +120,7 @@ func (p *KVCachePoolV2) Allocate(request_id int64, num_tokens int32) *KVAllocati
     return allocation
 }
 
-func (p *KVCachePoolV2) SharePrefix(source_id int64, target_id int64, prefix_tokens int32) bool {
+func (p *kv_cache_pool_v2) SharePrefix(source_id int64, target_id int64, prefix_tokens int32) bool {
     source_alloc, exists := p.request_allocations[source_id]
     if !exists {
         return false
@@ -133,7 +133,7 @@ func (p *KVCachePoolV2) SharePrefix(source_id int64, target_id int64, prefix_tok
 
     target_alloc, exists := p.request_allocations[target_id]
     if !exists {
-        target_alloc = &KVAllocation{
+        target_alloc = &kv_allocation{
             block_table:   []int{},
             block_offsets: []int32{},
             num_tokens:    prefix_tokens,
@@ -191,7 +191,7 @@ func (p *KVCachePoolV2) SharePrefix(source_id int64, target_id int64, prefix_tok
     return true
 }
 
-func (p *KVCachePoolV2) Release(request_id int64) {
+func (p *kv_cache_pool_v2) Release(request_id int64) {
     alloc, exists := p.request_allocations[request_id]
     if !exists {
         return
@@ -222,25 +222,25 @@ func (p *KVCachePoolV2) Release(request_id int64) {
     p.total_free = p.total_free + int32(len(alloc.block_table))
 }
 
-func (p *KVCachePoolV2) GetAllocation(request_id int64) *KVAllocation {
+func (p *kv_cache_pool_v2) GetAllocation(request_id int64) *kv_allocation {
     return p.request_allocations[request_id]
 }
 
-func (p *KVCachePoolV2) GetFreeBlocks() int {
+func (p *kv_cache_pool_v2) GetFreeBlocks() int {
     return len(p.free_blocks)
 }
 
-func (p *KVCachePoolV2) GetUsedBlocks() int {
+func (p *kv_cache_pool_v2) GetUsedBlocks() int {
     return p.config.num_blocks - len(p.free_blocks)
 }
 
-func (p *KVCachePoolV2) GetMemoryUsage() int64 {
+func (p *kv_cache_pool_v2) GetMemoryUsage() int64 {
     block_size_bytes := p.config.block_size * p.config.hidden_size * 2 * 4
     used := p.config.num_blocks - len(p.free_blocks)
     return int64(used) * int64(block_size_bytes)
 }
 
-func (p *KVCachePoolV2) evictLRU() {
+func (p *kv_cache_pool_v2) evictLRU() {
     if len(p.free_blocks) > 0 {
         return
     }
@@ -268,7 +268,7 @@ func (p *KVCachePoolV2) evictLRU() {
     }
 }
 
-func (p *KVCachePoolV2) GetStats() map[string]int64 {
+func (p *kv_cache_pool_v2) GetStats() map[string]int64 {
     stats := make(map[string]int64)
     stats["total_blocks"] = int64(p.config.num_blocks)
     stats["used_blocks"] = int64(p.GetUsedBlocks())
@@ -279,7 +279,7 @@ func (p *KVCachePoolV2) GetStats() map[string]int64 {
 }
 
 func main() {
-    config := KVCacheConfig{
+    config := kv_cache_config{
         num_blocks:      256,
         block_size:      16,
         hidden_size:     768,

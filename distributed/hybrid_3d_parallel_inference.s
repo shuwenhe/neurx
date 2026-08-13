@@ -3,7 +3,7 @@ package distributed
 import "core"
 import "tensor"
 
-type Hybrid3DConfig struct {
+type hybrid_3_d_config struct {
 
     tp_size             int32
     pp_size             int32
@@ -26,11 +26,11 @@ type Hybrid3DConfig struct {
     enable_activation_ckpt bool
 }
 
-type Hybrid3DParallelInference struct {
-    config              Hybrid3DConfig
+type hybrid_3_d_parallel_inference struct {
+    config              hybrid_3_d_config
 
-    tp_engine           *TensorParallelInference
-    pp_engine           *PipelineParallelInference
+    tp_engine           *tensor_parallel_inference
+    pp_engine           *pipeline_parallel_inference
 
     rank_to_coords      map[int32][]int32
     coords_to_rank      map[string]int32
@@ -42,7 +42,7 @@ type Hybrid3DParallelInference struct {
     metrics             map[string]interface{}
 }
 
-func NewHybrid3DParallelInference(config Hybrid3DConfig) *Hybrid3DParallelInference {
+func NewHybrid3DParallelInference(config hybrid_3_d_config) *hybrid_3_d_parallel_inference {
     if config.world_size == 0 {
         config.world_size = config.tp_size * config.pp_size * config.dp_size
     }
@@ -55,14 +55,14 @@ func NewHybrid3DParallelInference(config Hybrid3DConfig) *Hybrid3DParallelInfere
     config.pp_rank = pp_rank
     config.dp_rank = dp_rank
 
-    engine := &Hybrid3DParallelInference{
+    engine := &hybrid_3_d_parallel_inference{
         config:         config,
         rank_to_coords: make(map[int32][]int32),
         coords_to_rank: make(map[string]int32),
         metrics:        make(map[string]interface{}),
     }
 
-    tp_config := TensorParallelConfig{
+    tp_config := tensor_parallel_config{
         tp_size:        config.tp_size,
         world_size:    config.tp_size,
         rank:          tp_rank,
@@ -72,7 +72,7 @@ func NewHybrid3DParallelInference(config Hybrid3DConfig) *Hybrid3DParallelInfere
     }
     engine.tp_engine = NewTensorParallelInference(tp_config)
 
-    pp_config := PipelineParallelConfig{
+    pp_config := pipeline_parallel_config{
         pp_size:        config.pp_size,
         world_size:    config.pp_size,
         rank:          pp_rank,
@@ -97,7 +97,7 @@ func NewHybrid3DParallelInference(config Hybrid3DConfig) *Hybrid3DParallelInfere
     return engine
 }
 
-func (h *Hybrid3DParallelInference) GetRankInGroup(group_type string) int32 {
+func (h *hybrid_3_d_parallel_inference) GetRankInGroup(group_type string) int32 {
     if group_type == "tp" {
         return h.config.tp_rank
     } else if group_type == "pp" {
@@ -108,7 +108,7 @@ func (h *Hybrid3DParallelInference) GetRankInGroup(group_type string) int32 {
     return 0
 }
 
-func (h *Hybrid3DParallelInference) GetDataParallelGroup() []int32 {
+func (h *hybrid_3_d_parallel_inference) GetDataParallelGroup() []int32 {
     group := []int32{}
 
     for rank := int32(0); rank < h.config.world_size; rank++ {
@@ -121,7 +121,7 @@ func (h *Hybrid3DParallelInference) GetDataParallelGroup() []int32 {
     return group
 }
 
-func (h *Hybrid3DParallelInference) GetTensorParallelGroup() []int32 {
+func (h *hybrid_3_d_parallel_inference) GetTensorParallelGroup() []int32 {
     group := []int32{}
 
     for rank := int32(0); rank < h.config.world_size; rank++ {
@@ -134,7 +134,7 @@ func (h *Hybrid3DParallelInference) GetTensorParallelGroup() []int32 {
     return group
 }
 
-func (h *Hybrid3DParallelInference) GetPipelineParallelGroup() []int32 {
+func (h *hybrid_3_d_parallel_inference) GetPipelineParallelGroup() []int32 {
     group := []int32{}
 
     for rank := int32(0); rank < h.config.world_size; rank++ {
@@ -147,7 +147,7 @@ func (h *Hybrid3DParallelInference) GetPipelineParallelGroup() []int32 {
     return group
 }
 
-func (h *Hybrid3DParallelInference) Forward(
+func (h *hybrid_3_d_parallel_inference) Forward(
     input []float32,
     batch_size int32,
     seq_len int32,
@@ -176,7 +176,7 @@ func (h *Hybrid3DParallelInference) Forward(
     return output
 }
 
-func (h *Hybrid3DParallelInference) sliceHidden(
+func (h *hybrid_3_d_parallel_inference) sliceHidden(
     tensor []float32,
     start int32,
     end int32,
@@ -192,7 +192,7 @@ func (h *Hybrid3DParallelInference) sliceHidden(
     return result
 }
 
-func (h *Hybrid3DParallelInference) GetOptimalLayout(
+func (h *hybrid_3_d_parallel_inference) GetOptimalLayout(
     model_size_b int64,
     num_gpus int32,
     gpu_memory_gb float32,
@@ -229,7 +229,7 @@ func (h *Hybrid3DParallelInference) GetOptimalLayout(
     return tp_size, pp_size, dp_size
 }
 
-func (h *Hybrid3DParallelInference) GetCommunicationCost(
+func (h *hybrid_3_d_parallel_inference) GetCommunicationCost(
     seq_len int32,
     hidden_size int32,
     bandwidth_gbps float32,
@@ -249,7 +249,7 @@ func (h *Hybrid3DParallelInference) GetCommunicationCost(
     return latency_us
 }
 
-func (h *Hybrid3DParallelInference) GetMemoryFootprint(
+func (h *hybrid_3_d_parallel_inference) GetMemoryFootprint(
     model_size_b int64,
     batch_size int32,
     seq_len int32,
@@ -271,7 +271,7 @@ func (h *Hybrid3DParallelInference) GetMemoryFootprint(
     return result
 }
 
-func (h *Hybrid3DParallelInference) GetSpeedup() float32 {
+func (h *hybrid_3_d_parallel_inference) GetSpeedup() float32 {
 
     tp_speedup := float32(h.config.tp_size) * 0.9
     pp_speedup := float32(h.config.pp_size) * 0.95
@@ -281,7 +281,7 @@ func (h *Hybrid3DParallelInference) GetSpeedup() float32 {
     return overall
 }
 
-func (h *Hybrid3DParallelInference) GetStats() map[string]interface{} {
+func (h *hybrid_3_d_parallel_inference) GetStats() map[string]interface{} {
     stats := make(map[string]interface{})
 
     stats["tp_size"] = h.config.tp_size
@@ -304,7 +304,7 @@ func (h *Hybrid3DParallelInference) GetStats() map[string]interface{} {
 }
 
 func main() {
-    config := Hybrid3DConfig{
+    config := hybrid_3_d_config{
         tp_size:        2,
         pp_size:        2,
         dp_size:        2,

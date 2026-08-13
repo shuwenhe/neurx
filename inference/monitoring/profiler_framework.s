@@ -3,7 +3,7 @@ package neurx.inference.profiling
 import "core"
 import "tensor"
 
-type ProfileEventType struct {
+type profile_event_type struct {
     FORWARD_START    int32
     FORWARD_END      int32
     BACKWARD_START   int32
@@ -20,8 +20,8 @@ type ProfileEventType struct {
     CUSTOM           int32
 }
 
-func ProfileEventTypeValues() ProfileEventType {
-    return ProfileEventType{
+func ProfileEventTypeValues() profile_event_type {
+    return profile_event_type{
         FORWARD_START:   1,
         FORWARD_END:     2,
         BACKWARD_START:  3,
@@ -39,7 +39,7 @@ func ProfileEventTypeValues() ProfileEventType {
     }
 }
 
-type ProfileEvent struct {
+type profile_event struct {
     event_id        string
     event_type      int32
     timestamp_ns    int64
@@ -51,7 +51,7 @@ type ProfileEvent struct {
     metadata        map[string]string
 }
 
-type PhaseTiming struct {
+type phase_timing struct {
     phase_name      string
     start_time_ns   int64
     end_time_ns     int64
@@ -59,24 +59,24 @@ type PhaseTiming struct {
     count           int32
 }
 
-type Profiler struct {
+type profiler struct {
     enabled         bool
-    events          []ProfileEvent
-    phase_timings   map[string]PhaseTiming
-    request_traces  map[string][]ProfileEvent
+    events          []profile_event
+    phase_timings   map[string]phase_timing
+    request_traces  map[string][]profile_event
     max_events      int32
     current_size    int32
 }
 
-type RequestProfiler struct {
+type request_profiler struct {
     request_id      string
     start_time_ns   int64
     end_time_ns     int64
-    phases          []PhaseTiming
+    phases          []phase_timing
     memory_peak_mb  int32
 }
 
-type ProfilerReport struct {
+type profiler_report struct {
     total_time_ns       int64
     forward_time_ns     int64
     decode_time_ns      int64
@@ -90,18 +90,18 @@ type ProfilerReport struct {
     events_count        int32
 }
 
-func NewProfiler() *Profiler {
-    return &Profiler{
+func NewProfiler() *profiler {
+    return &profiler{
         enabled:        true,
-        events:         make([]ProfileEvent, 0),
-        phase_timings:  make(map[string]PhaseTiming),
-        request_traces: make(map[string][]ProfileEvent),
+        events:         make([]profile_event, 0),
+        phase_timings:  make(map[string]phase_timing),
+        request_traces: make(map[string][]profile_event),
         max_events:     1000000,
         current_size:   0,
     }
 }
 
-func (p *Profiler) RecordEvent(
+func (p *profiler) RecordEvent(
     event_type int32,
     name string,
     worker_id string,
@@ -111,7 +111,7 @@ func (p *Profiler) RecordEvent(
         return
     }
 
-    event := ProfileEvent{
+    event := profile_event{
         event_id:     "evt_" + core.ToString(p.current_size),
         event_type:   event_type,
         timestamp_ns: core.Now().UnixNano(),
@@ -125,19 +125,19 @@ func (p *Profiler) RecordEvent(
     p.current_size++
 }
 
-func (p *Profiler) StartPhase(phase_name string) {
+func (p *profiler) StartPhase(phase_name string) {
     if !p.enabled {
         return
     }
 
-    p.phase_timings[phase_name] = PhaseTiming{
+    p.phase_timings[phase_name] = phase_timing{
         phase_name:    phase_name,
         start_time_ns: core.Now().UnixNano(),
         count:         0,
     }
 }
 
-func (p *Profiler) EndPhase(phase_name string) {
+func (p *profiler) EndPhase(phase_name string) {
     if !p.enabled {
         return
     }
@@ -155,15 +155,15 @@ func (p *Profiler) EndPhase(phase_name string) {
     p.phase_timings[phase_name] = timing
 }
 
-func (p *Profiler) StartRequestProfile(request_id string) {
+func (p *profiler) StartRequestProfile(request_id string) {
     if !p.enabled {
         return
     }
 
-    p.request_traces[request_id] = make([]ProfileEvent, 0)
+    p.request_traces[request_id] = make([]profile_event, 0)
 }
 
-func (p *Profiler) RecordRequestEvent(
+func (p *profiler) RecordRequestEvent(
     request_id string,
     event_type int32,
     name string,
@@ -174,10 +174,10 @@ func (p *Profiler) RecordRequestEvent(
 
     trace, exists := p.request_traces[request_id]
     if !exists {
-        trace = make([]ProfileEvent, 0)
+        trace = make([]profile_event, 0)
     }
 
-    event := ProfileEvent{
+    event := profile_event{
         event_id:     request_id + "_" + name,
         event_type:   event_type,
         timestamp_ns: core.Now().UnixNano(),
@@ -188,18 +188,18 @@ func (p *Profiler) RecordRequestEvent(
     p.request_traces[request_id] = trace
 }
 
-func (p *Profiler) GetPhaseMetrics(phase_name string) PhaseTiming {
+func (p *profiler) GetPhaseMetrics(phase_name string) phase_timing {
     timing, exists := p.phase_timings[phase_name]
     if !exists {
-        return PhaseTiming{
+        return phase_timing{
             phase_name: phase_name,
         }
     }
     return timing
 }
 
-func (p *Profiler) GenerateReport() ProfilerReport {
-    report := ProfilerReport{}
+func (p *profiler) GenerateReport() profiler_report {
+    report := profiler_report{}
 
     for _, timing := range p.phase_timings {
         report.total_time_ns = report.total_time_ns + timing.duration_ns
@@ -224,7 +224,7 @@ func (p *Profiler) GenerateReport() ProfilerReport {
     return report
 }
 
-func (p *Profiler) PrintProfile() {
+func (p *profiler) PrintProfile() {
     core.Println("╔═════════════════════════════════════╗")
     core.Println("║  Performance Profiler Report        ║")
     core.Println("╚═════════════════════════════════════╝")
@@ -251,32 +251,32 @@ func (p *Profiler) PrintProfile() {
     core.Println("\nEvents Recorded:", report.events_count)
 }
 
-type TimelineAnalyzer struct {
-    traces          map[string][]ProfileEvent
-    critical_paths  map[string][]ProfileEvent
+type timeline_analyzer struct {
+    traces          map[string][]profile_event
+    critical_paths  map[string][]profile_event
 }
 
-func NewTimelineAnalyzer() *TimelineAnalyzer {
-    return &TimelineAnalyzer{
-        traces:         make(map[string][]ProfileEvent),
-        critical_paths: make(map[string][]ProfileEvent),
+func NewTimelineAnalyzer() *timeline_analyzer {
+    return &timeline_analyzer{
+        traces:         make(map[string][]profile_event),
+        critical_paths: make(map[string][]profile_event),
     }
 }
 
-func (ta *TimelineAnalyzer) AddTrace(request_id string, events []ProfileEvent) {
+func (ta *timeline_analyzer) AddTrace(request_id string, events []profile_event) {
     ta.traces[request_id] = events
 }
 
-func (ta *TimelineAnalyzer) FindCriticalPath(request_id string) []ProfileEvent {
+func (ta *timeline_analyzer) FindCriticalPath(request_id string) []profile_event {
     events, exists := ta.traces[request_id]
     if !exists {
-        return []ProfileEvent{}
+        return []profile_event{}
     }
 
-    sorted := make([]ProfileEvent, len(events))
+    sorted := make([]profile_event, len(events))
     copy(sorted, events)
 
-    critical := make([]ProfileEvent, 0)
+    critical := make([]profile_event, 0)
     for _, event := range sorted {
 
         if event.event_type == ProfileEventTypeValues().FORWARD_START ||
@@ -291,7 +291,7 @@ func (ta *TimelineAnalyzer) FindCriticalPath(request_id string) []ProfileEvent {
     return critical
 }
 
-func (ta *TimelineAnalyzer) IdentifyBottleneck(request_id string) string {
+func (ta *timeline_analyzer) IdentifyBottleneck(request_id string) string {
     events, exists := ta.traces[request_id]
     if !exists {
         return "no traces"

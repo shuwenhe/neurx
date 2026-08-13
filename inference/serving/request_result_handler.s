@@ -3,7 +3,7 @@ package neurx.inference.serving
 import "core"
 import "tensor"
 
-type ResultStatus struct {
+type result_status struct {
     SUCCESS         int32
     PARTIAL         int32
     ERROR           int32
@@ -11,8 +11,8 @@ type ResultStatus struct {
     CANCELLED       int32
 }
 
-func ResultStatusValues() ResultStatus {
-    return ResultStatus{
+func ResultStatusValues() result_status {
+    return result_status{
         SUCCESS:   0,
         PARTIAL:   1,
         ERROR:     2,
@@ -21,7 +21,7 @@ func ResultStatusValues() ResultStatus {
     }
 }
 
-type InferenceResult struct {
+type inference_result struct {
     request_id      string
     status          int32
     output_tokens   []int32
@@ -33,23 +33,23 @@ type InferenceResult struct {
     timestamp_ms    int64
 }
 
-type RequestResultHandler struct {
-    results         map[string]InferenceResult
-    callbacks       map[string]func(InferenceResult)
+type request_result_handler struct {
+    results         map[string]inference_result
+    callbacks       map[string]func(inference_result)
     error_handlers  map[string]func(string)
     max_results     int32
 }
 
-func NewRequestResultHandler() *RequestResultHandler {
-    return &RequestResultHandler{
-        results:        make(map[string]InferenceResult),
-        callbacks:      make(map[string]func(InferenceResult)),
+func NewRequestResultHandler() *request_result_handler {
+    return &request_result_handler{
+        results:        make(map[string]inference_result),
+        callbacks:      make(map[string]func(inference_result)),
         error_handlers: make(map[string]func(string)),
         max_results:    100000,
     }
 }
 
-func (handler *RequestResultHandler) HandleResult(result InferenceResult) {
+func (handler *request_result_handler) HandleResult(result inference_result) {
     if len(handler.results) >= int(handler.max_results) {
 
         oldest_id := ""
@@ -73,8 +73,8 @@ func (handler *RequestResultHandler) HandleResult(result InferenceResult) {
     }
 }
 
-func (handler *RequestResultHandler) HandleError(request_id string, error_msg string) {
-    result := InferenceResult{
+func (handler *request_result_handler) HandleError(request_id string, error_msg string) {
+    result := inference_result{
         request_id:    request_id,
         status:        ResultStatusValues().ERROR,
         error_message: error_msg,
@@ -89,29 +89,29 @@ func (handler *RequestResultHandler) HandleError(request_id string, error_msg st
     }
 }
 
-func (handler *RequestResultHandler) RegisterCallback(
+func (handler *request_result_handler) RegisterCallback(
     request_id string,
-    callback func(InferenceResult),
+    callback func(inference_result),
 ) {
     handler.callbacks[request_id] = callback
 }
 
-func (handler *RequestResultHandler) RegisterErrorHandler(
+func (handler *request_result_handler) RegisterErrorHandler(
     request_id string,
     handler_fn func(string),
 ) {
     handler.error_handlers[request_id] = handler_fn
 }
 
-func (handler *RequestResultHandler) GetResult(request_id string) (InferenceResult, bool) {
+func (handler *request_result_handler) GetResult(request_id string) (inference_result, bool) {
     result, exists := handler.results[request_id]
     return result, exists
 }
 
-func (handler *RequestResultHandler) WaitForResult(
+func (handler *request_result_handler) WaitForResult(
     request_id string,
     timeout_ms int64,
-) (InferenceResult, bool) {
+) (inference_result, bool) {
     start_time := core.Now().UnixMilli()
 
     for {
@@ -122,7 +122,7 @@ func (handler *RequestResultHandler) WaitForResult(
 
         elapsed := core.Now().UnixMilli() - start_time
         if elapsed > timeout_ms {
-            return InferenceResult{
+            return inference_result{
                 request_id:    request_id,
                 status:        ResultStatusValues().TIMEOUT,
                 error_message: "request timeout",
@@ -133,7 +133,7 @@ func (handler *RequestResultHandler) WaitForResult(
     }
 }
 
-type ProxyConfig struct {
+type proxy_config struct {
     listen_address  string
     listen_port     int32
     backend_servers []string
@@ -143,7 +143,7 @@ type ProxyConfig struct {
     max_retries     int32
 }
 
-type BackendServer struct {
+type backend_server struct {
     address         string
     port            int32
     weight          int32
@@ -154,18 +154,18 @@ type BackendServer struct {
     last_check_ms   int64
 }
 
-type ProxyServer struct {
-    config          ProxyConfig
-    backends        []BackendServer
+type proxy_server struct {
+    config          proxy_config
+    backends        []backend_server
     current_backend int32
     request_counter int64
 }
 
-func NewProxyServer(config ProxyConfig) *ProxyServer {
-    backends := make([]BackendServer, 0)
+func NewProxyServer(config proxy_config) *proxy_server {
+    backends := make([]backend_server, 0)
 
     for _, server_addr := range config.backend_servers {
-        backend := BackendServer{
+        backend := backend_server{
             address:            server_addr,
             port:               8000,
             weight:             1,
@@ -178,7 +178,7 @@ func NewProxyServer(config ProxyConfig) *ProxyServer {
         backends = append(backends, backend)
     }
 
-    return &ProxyServer{
+    return &proxy_server{
         config:          config,
         backends:        backends,
         current_backend: 0,
@@ -186,8 +186,8 @@ func NewProxyServer(config ProxyConfig) *ProxyServer {
     }
 }
 
-func (proxy *ProxyServer) SelectBackend() (BackendServer, bool) {
-    healthy_backends := make([]BackendServer, 0)
+func (proxy *proxy_server) SelectBackend() (backend_server, bool) {
+    healthy_backends := make([]backend_server, 0)
 
     for _, backend := range proxy.backends {
         if backend.healthy {
@@ -196,10 +196,10 @@ func (proxy *ProxyServer) SelectBackend() (BackendServer, bool) {
     }
 
     if len(healthy_backends) == 0 {
-        return BackendServer{}, false
+        return backend_server{}, false
     }
 
-    var selected BackendServer
+    var selected backend_server
 
     switch proxy.config.load_balancing {
     case "round_robin":
@@ -222,13 +222,13 @@ func (proxy *ProxyServer) SelectBackend() (BackendServer, bool) {
     return selected, true
 }
 
-func (proxy *ProxyServer) ForwardRequest(
+func (proxy *proxy_server) ForwardRequest(
     request_id string,
     payload []float32,
-) (InferenceResult, bool) {
+) (inference_result, bool) {
     backend, success := proxy.SelectBackend()
     if !success {
-        return InferenceResult{
+        return inference_result{
             request_id:    request_id,
             status:        ResultStatusValues().ERROR,
             error_message: "no healthy backends available",
@@ -242,7 +242,7 @@ func (proxy *ProxyServer) ForwardRequest(
         }
     }
 
-    result := InferenceResult{
+    result := inference_result{
         request_id:     request_id,
         status:         ResultStatusValues().SUCCESS,
         output_logits:  payload,
@@ -269,7 +269,7 @@ func (proxy *ProxyServer) ForwardRequest(
     return result, true
 }
 
-func (proxy *ProxyServer) HealthCheckBackends() {
+func (proxy *proxy_server) HealthCheckBackends() {
     for i := range proxy.backends {
 
         is_healthy := true
@@ -279,7 +279,7 @@ func (proxy *ProxyServer) HealthCheckBackends() {
     }
 }
 
-func (proxy *ProxyServer) GetBackendStats() map[string]map[string]int64 {
+func (proxy *proxy_server) GetBackendStats() map[string]map[string]int64 {
     stats := make(map[string]map[string]int64)
 
     for _, backend := range proxy.backends {
@@ -300,7 +300,7 @@ func (proxy *ProxyServer) GetBackendStats() map[string]map[string]int64 {
     return stats
 }
 
-func (proxy *ProxyServer) PrintProxyStatus() {
+func (proxy *proxy_server) PrintProxyStatus() {
     core.Println("╔═════════════════════════════════════╗")
     core.Println("║  Proxy Server Status                ║")
     core.Println("╚═════════════════════════════════════╝")
@@ -330,7 +330,7 @@ func main() {
     core.Println("=== Request Result Handler ===")
     handler := NewRequestResultHandler()
 
-    result := InferenceResult{
+    result := inference_result{
         request_id:     "req_001",
         status:         ResultStatusValues().SUCCESS,
         output_tokens:  []int32{1, 2, 3},
@@ -343,7 +343,7 @@ func main() {
     core.Println("Result retrieved:", retrieved.request_id, "Status:", retrieved.status)
 
     core.Println("\n=== Proxy Server ===")
-    config := ProxyConfig{
+    config := proxy_config{
         listen_address:  "0.0.0.0",
         listen_port:     8000,
         backend_servers: []string{"worker1", "worker2", "worker3"},

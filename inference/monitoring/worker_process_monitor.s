@@ -3,7 +3,7 @@ package neurx.inference.monitoring
 import "core"
 import "tensor"
 
-type WorkerHealthStatus struct {
+type worker_health_status struct {
     HEALTHY       int32
     DEGRADED      int32
     UNHEALTHY     int32
@@ -11,8 +11,8 @@ type WorkerHealthStatus struct {
     RECOVERING    int32
 }
 
-func WorkerHealthStatusValues() WorkerHealthStatus {
-    return WorkerHealthStatus{
+func WorkerHealthStatusValues() worker_health_status {
+    return worker_health_status{
         HEALTHY:    0,
         DEGRADED:   1,
         UNHEALTHY:  2,
@@ -21,7 +21,7 @@ func WorkerHealthStatusValues() WorkerHealthStatus {
     }
 }
 
-type WorkerProcessInfo struct {
+type worker_process_info struct {
     worker_id           string
     process_id          int32
     host                string
@@ -43,7 +43,7 @@ type WorkerProcessInfo struct {
     throughput          float32
 }
 
-type WorkerMetrics struct {
+type worker_metrics struct {
     total_requests      int64
     successful_requests int64
     failed_requests     int64
@@ -57,7 +57,7 @@ type WorkerMetrics struct {
     restart_count       int32
 }
 
-type HealthCheckResult struct {
+type health_check_result struct {
     worker_id       string
     healthy         bool
     status          int32
@@ -66,19 +66,19 @@ type HealthCheckResult struct {
     timestamp_ms    int64
 }
 
-type WorkerProcessMonitor struct {
-    workers             map[string]*WorkerProcessInfo
-    metrics             map[string]*WorkerMetrics
+type worker_process_monitor struct {
+    workers             map[string]*worker_process_info
+    metrics             map[string]*worker_metrics
     health_check_interval_ms int64
     alert_thresholds    map[string]float32
     recovery_enabled    bool
     failover_enabled    bool
 }
 
-func NewWorkerProcessMonitor() *WorkerProcessMonitor {
-    return &WorkerProcessMonitor{
-        workers:                   make(map[string]*WorkerProcessInfo),
-        metrics:                   make(map[string]*WorkerMetrics),
+func NewWorkerProcessMonitor() *worker_process_monitor {
+    return &worker_process_monitor{
+        workers:                   make(map[string]*worker_process_info),
+        metrics:                   make(map[string]*worker_metrics),
         health_check_interval_ms:  5000,
         alert_thresholds: map[string]float32{
             "cpu_percent":     80.0,
@@ -92,13 +92,13 @@ func NewWorkerProcessMonitor() *WorkerProcessMonitor {
     }
 }
 
-func (monitor *WorkerProcessMonitor) RegisterWorker(
+func (monitor *worker_process_monitor) RegisterWorker(
     worker_id string,
     host string,
     port int32,
     gpu_device int32,
 ) {
-    info := &WorkerProcessInfo{
+    info := &worker_process_info{
         worker_id:           worker_id,
         process_id:          int32(core.Now().Unix() % 65536),
         host:                host,
@@ -122,7 +122,7 @@ func (monitor *WorkerProcessMonitor) RegisterWorker(
 
     monitor.workers[worker_id] = info
 
-    metrics := &WorkerMetrics{
+    metrics := &worker_metrics{
         total_requests:      0,
         successful_requests: 0,
         failed_requests:     0,
@@ -139,7 +139,7 @@ func (monitor *WorkerProcessMonitor) RegisterWorker(
     monitor.metrics[worker_id] = metrics
 }
 
-func (monitor *WorkerProcessMonitor) UpdateWorkerStats(
+func (monitor *worker_process_monitor) UpdateWorkerStats(
     worker_id string,
     cpu_percent float32,
     memory_mb int32,
@@ -177,7 +177,7 @@ func (monitor *WorkerProcessMonitor) UpdateWorkerStats(
     info.last_heartbeat_ms = core.Now().UnixMilli()
 }
 
-func (monitor *WorkerProcessMonitor) RecordRequest(
+func (monitor *worker_process_monitor) RecordRequest(
     worker_id string,
     success bool,
     latency_ms int64,
@@ -210,12 +210,12 @@ func (monitor *WorkerProcessMonitor) RecordRequest(
     }
 }
 
-func (monitor *WorkerProcessMonitor) PerformHealthCheck(
+func (monitor *worker_process_monitor) PerformHealthCheck(
     worker_id string,
-) HealthCheckResult {
+) health_check_result {
     info, exists := monitor.workers[worker_id]
     if !exists {
-        return HealthCheckResult{
+        return health_check_result{
             worker_id:      worker_id,
             healthy:        false,
             status:         WorkerHealthStatusValues().OFFLINE,
@@ -233,7 +233,7 @@ func (monitor *WorkerProcessMonitor) PerformHealthCheck(
         healthy = false
     }
 
-    return HealthCheckResult{
+    return health_check_result{
         worker_id:       worker_id,
         healthy:         healthy,
         status:          info.status,
@@ -243,15 +243,15 @@ func (monitor *WorkerProcessMonitor) PerformHealthCheck(
     }
 }
 
-func (monitor *WorkerProcessMonitor) GetWorkerStatus(worker_id string) *WorkerProcessInfo {
+func (monitor *worker_process_monitor) GetWorkerStatus(worker_id string) *worker_process_info {
     return monitor.workers[worker_id]
 }
 
-func (monitor *WorkerProcessMonitor) GetWorkerMetrics(worker_id string) *WorkerMetrics {
+func (monitor *worker_process_monitor) GetWorkerMetrics(worker_id string) *worker_metrics {
     return monitor.metrics[worker_id]
 }
 
-func (monitor *WorkerProcessMonitor) ListAllWorkers() []string {
+func (monitor *worker_process_monitor) ListAllWorkers() []string {
     workers := make([]string, 0)
     for worker_id := range monitor.workers {
         workers = append(workers, worker_id)
@@ -259,7 +259,7 @@ func (monitor *WorkerProcessMonitor) ListAllWorkers() []string {
     return workers
 }
 
-func (monitor *WorkerProcessMonitor) GetHealthySummary() map[string]int32 {
+func (monitor *worker_process_monitor) GetHealthySummary() map[string]int32 {
     summary := make(map[string]int32)
     summary["total"] = 0
     summary["healthy"] = 0
@@ -285,7 +285,7 @@ func (monitor *WorkerProcessMonitor) GetHealthySummary() map[string]int32 {
     return summary
 }
 
-func (monitor *WorkerProcessMonitor) TriggerRecovery(worker_id string) bool {
+func (monitor *worker_process_monitor) TriggerRecovery(worker_id string) bool {
     if !monitor.recovery_enabled {
         return false
     }
@@ -301,7 +301,7 @@ func (monitor *WorkerProcessMonitor) TriggerRecovery(worker_id string) bool {
     return true
 }
 
-func (monitor *WorkerProcessMonitor) PrintMonitoringSummary() {
+func (monitor *worker_process_monitor) PrintMonitoringSummary() {
     core.Println("=== Worker Process Monitor Summary ===")
 
     summary := monitor.GetHealthySummary()

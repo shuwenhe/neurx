@@ -3,7 +3,7 @@ package optimization
 import "core"
 import "tensor"
 
-type OptimizationConfig struct {
+type optimization_config struct {
     enable_flash_attention      bool
     enable_gemm_fusion          bool
     enable_cuda_graphs          bool
@@ -11,7 +11,7 @@ type OptimizationConfig struct {
     optimization_level          int32
 }
 
-type OptimizationStats struct {
+type optimization_stats struct {
     total_speedup               float32
     attention_speedup           float32
     gemm_speedup                float32
@@ -21,22 +21,22 @@ type OptimizationStats struct {
     latency_reduction           float32
 }
 
-type HighPerformanceOptimizationEngine struct {
-    config                      OptimizationConfig
-    flash_attention             *FlashAttentionOptimized
-    gemm_kernel                 *FusedGEMMKernel
-    cuda_graph                  *CUDAGraph
-    runtime_fusion              *RuntimeFusionOptimizer
-    stats                       OptimizationStats
+type high_performance_optimization_engine struct {
+    config                      optimization_config
+    flash_attention             *flash_attention_optimized
+    gemm_kernel                 *fused_gemm_kernel
+    cuda_graph                  *cuda_graph
+    runtime_fusion              *runtime_fusion_optimizer
+    stats                       optimization_stats
 }
 
-func NewHighPerformanceOptimizationEngine(config OptimizationConfig) *HighPerformanceOptimizationEngine {
-    engine := &HighPerformanceOptimizationEngine{
+func NewHighPerformanceOptimizationEngine(config optimization_config) *high_performance_optimization_engine {
+    engine := &high_performance_optimization_engine{
         config: config,
     }
 
     if config.enable_flash_attention {
-        att_config := AttentionConfig{
+        att_config := attention_config{
             batch_size:      1,
             num_heads:       8,
             seq_len:         512,
@@ -48,7 +48,7 @@ func NewHighPerformanceOptimizationEngine(config OptimizationConfig) *HighPerfor
     }
 
     if config.enable_gemm_fusion {
-        gemm_config := GEMMConfig{
+        gemm_config := gemm_config{
             m:              512,
             n:              512,
             k:              512,
@@ -60,7 +60,7 @@ func NewHighPerformanceOptimizationEngine(config OptimizationConfig) *HighPerfor
     }
 
     if config.enable_cuda_graphs {
-        graph_config := CUDAGraphConfig{
+        graph_config := cuda_graph_config{
             enable_capture:     true,
             max_nodes:          1000,
             enable_fusion:      true,
@@ -70,7 +70,7 @@ func NewHighPerformanceOptimizationEngine(config OptimizationConfig) *HighPerfor
     }
 
     if config.enable_runtime_fusion {
-        fusion_config := FusedOperationConfig{
+        fusion_config := fused_operation_config{
             enable_fusion:  true,
             max_queue_size: 100,
             fusion_ratio:   0.7,
@@ -81,7 +81,7 @@ func NewHighPerformanceOptimizationEngine(config OptimizationConfig) *HighPerfor
     return engine
 }
 
-func (hpe *HighPerformanceOptimizationEngine) OptimizeAttention(
+func (hpe *high_performance_optimization_engine) OptimizeAttention(
     q []float32,
     k []float32,
     v []float32,
@@ -95,7 +95,7 @@ func (hpe *HighPerformanceOptimizationEngine) OptimizeAttention(
     return hpe.flash_attention.Forward(q, k, v)
 }
 
-func (hpe *HighPerformanceOptimizationEngine) OptimizeGEMM(
+func (hpe *high_performance_optimization_engine) OptimizeGEMM(
     a []float32,
     b []float32,
     bias []float32,
@@ -105,7 +105,7 @@ func (hpe *HighPerformanceOptimizationEngine) OptimizeGEMM(
         return hpe.basicGEMM(a, b)
     }
 
-    gemm := GEMMOperation{
+    gemm := gemm_operation{
         a:         a,
         b:         b,
         c:         make([]float32, 0),
@@ -121,7 +121,7 @@ func (hpe *HighPerformanceOptimizationEngine) OptimizeGEMM(
     return hpe.basicGEMM(a, b)
 }
 
-func (hpe *HighPerformanceOptimizationEngine) OptimizeWithCUDAGraph(
+func (hpe *high_performance_optimization_engine) OptimizeWithCUDAGraph(
     kernels []string,
     dependencies [][]int32,
 ) map[int32][]float32 {
@@ -137,7 +137,7 @@ func (hpe *HighPerformanceOptimizationEngine) OptimizeWithCUDAGraph(
     return hpe.cuda_graph.ExecuteGraph()
 }
 
-func (hpe *HighPerformanceOptimizationEngine) ApplyRuntimeFusion(
+func (hpe *high_performance_optimization_engine) ApplyRuntimeFusion(
     operations []string,
     shapes [][]int32,
 ) [][]float32 {
@@ -154,7 +154,7 @@ func (hpe *HighPerformanceOptimizationEngine) ApplyRuntimeFusion(
     return hpe.runtime_fusion.ExecuteFusedOperations()
 }
 
-func (hpe *HighPerformanceOptimizationEngine) basicAttention(
+func (hpe *high_performance_optimization_engine) basicAttention(
     q []float32,
     k []float32,
     v []float32,
@@ -168,7 +168,7 @@ func (hpe *HighPerformanceOptimizationEngine) basicAttention(
     return output
 }
 
-func (hpe *HighPerformanceOptimizationEngine) basicGEMM(
+func (hpe *high_performance_optimization_engine) basicGEMM(
     a []float32,
     b []float32,
 ) []float32 {
@@ -181,8 +181,8 @@ func (hpe *HighPerformanceOptimizationEngine) basicGEMM(
     return output
 }
 
-func (hpe *HighPerformanceOptimizationEngine) ComputeOptimizationStats() OptimizationStats {
-    stats := OptimizationStats{}
+func (hpe *high_performance_optimization_engine) ComputeOptimizationStats() optimization_stats {
+    stats := optimization_stats{}
 
     if hpe.config.enable_flash_attention && hpe.flash_attention != nil {
         stats.attention_speedup = hpe.flash_attention.GetSpeedup()
@@ -227,7 +227,7 @@ func (hpe *HighPerformanceOptimizationEngine) ComputeOptimizationStats() Optimiz
     return stats
 }
 
-func (hpe *HighPerformanceOptimizationEngine) GetOptimizationLevel() string {
+func (hpe *high_performance_optimization_engine) GetOptimizationLevel() string {
     switch hpe.config.optimization_level {
     case 0:
         return "NONE"
@@ -242,7 +242,7 @@ func (hpe *HighPerformanceOptimizationEngine) GetOptimizationLevel() string {
     }
 }
 
-func (hpe *HighPerformanceOptimizationEngine) ApplyOptimizations() {
+func (hpe *high_performance_optimization_engine) ApplyOptimizations() {
     stats := hpe.ComputeOptimizationStats()
 
     core.Println("High Performance Optimization Engine Report")
@@ -280,7 +280,7 @@ func (hpe *HighPerformanceOptimizationEngine) ApplyOptimizations() {
 
 func main() {
 
-    config := OptimizationConfig{
+    config := optimization_config{
         enable_flash_attention: true,
         enable_gemm_fusion:     true,
         enable_cuda_graphs:     true,

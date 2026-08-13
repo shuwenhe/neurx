@@ -3,14 +3,14 @@ package optimization
 import "core"
 import "tensor"
 
-type ChunkConfig struct {
+type chunk_config struct {
     chunk_size          int32
     enable_recompute    bool
     enable_gradient     bool
     overlap_size        int32
 }
 
-type ChunkState struct {
+type chunk_state struct {
     chunk_id            int32
     start_token         int32
     end_token           int32
@@ -19,27 +19,27 @@ type ChunkState struct {
     hidden_state        []float32
 }
 
-type ChunkedPrefillProcessor struct {
-    config              ChunkConfig
-    chunks              []ChunkState
+type chunked_prefill_processor struct {
+    config              chunk_config
+    chunks              []chunk_state
     total_tokens        int32
     num_chunks          int32
 }
 
-func NewChunkedPrefillProcessor(config ChunkConfig) *ChunkedPrefillProcessor {
+func NewChunkedPrefillProcessor(config chunk_config) *chunked_prefill_processor {
     if config.chunk_size <= 0 {
         config.chunk_size = 512
     }
 
-    return &ChunkedPrefillProcessor{
+    return &chunked_prefill_processor{
         config:       config,
-        chunks:       make([]ChunkState, 0),
+        chunks:       make([]chunk_state, 0),
         total_tokens: 0,
         num_chunks:   0,
     }
 }
 
-func (cpp *ChunkedPrefillProcessor) PrepareChunks(total_tokens int32) {
+func (cpp *chunked_prefill_processor) PrepareChunks(total_tokens int32) {
     chunk_size := cpp.config.chunk_size
     overlap := cpp.config.overlap_size
 
@@ -52,7 +52,7 @@ func (cpp *ChunkedPrefillProcessor) PrepareChunks(total_tokens int32) {
             current_end = total_tokens
         }
 
-        chunk := ChunkState{
+        chunk := chunk_state{
             chunk_id:        chunk_id,
             start_token:     current_start,
             end_token:       current_end,
@@ -71,7 +71,7 @@ func (cpp *ChunkedPrefillProcessor) PrepareChunks(total_tokens int32) {
     cpp.num_chunks = chunk_id
 }
 
-func (cpp *ChunkedPrefillProcessor) ProcessChunksPrefill(
+func (cpp *chunked_prefill_processor) ProcessChunksPrefill(
     token_ids []int32,
     embedding_table []float32,
     embedding_dim int32,
@@ -95,7 +95,7 @@ func (cpp *ChunkedPrefillProcessor) ProcessChunksPrefill(
     return chunk_outputs
 }
 
-func (cpp *ChunkedPrefillProcessor) embedChunk(
+func (cpp *chunked_prefill_processor) embedChunk(
     token_ids []int32,
     embedding_table []float32,
     embedding_dim int32,
@@ -112,7 +112,7 @@ func (cpp *ChunkedPrefillProcessor) embedChunk(
     return embeddings
 }
 
-func (cpp *ChunkedPrefillProcessor) processPrefillChunk(
+func (cpp *chunked_prefill_processor) processPrefillChunk(
     embeddings []float32,
     chunk_id int32,
 ) []float32 {
@@ -127,7 +127,7 @@ func (cpp *ChunkedPrefillProcessor) processPrefillChunk(
     return output
 }
 
-func (cpp *ChunkedPrefillProcessor) GetMemorySavings() float32 {
+func (cpp *chunked_prefill_processor) GetMemorySavings() float32 {
 
     full_prefill_memory := float32(cpp.total_tokens * cpp.total_tokens)
     chunk_size := cpp.config.chunk_size
@@ -140,7 +140,7 @@ func (cpp *ChunkedPrefillProcessor) GetMemorySavings() float32 {
     return full_prefill_memory / chunked_memory
 }
 
-func (cpp *ChunkedPrefillProcessor) GetLatencySavings() float32 {
+func (cpp *chunked_prefill_processor) GetLatencySavings() float32 {
 
     full_tokens := cpp.total_tokens
     chunk_size := cpp.config.chunk_size
@@ -158,7 +158,7 @@ func (cpp *ChunkedPrefillProcessor) GetLatencySavings() float32 {
     return speedup
 }
 
-func (cpp *ChunkedPrefillProcessor) PrintChunkInfo() {
+func (cpp *chunked_prefill_processor) PrintChunkInfo() {
     core.Println("Chunked Prefill Configuration:")
     core.Println("  Total tokens:", cpp.total_tokens)
     core.Println("  Chunk size:", cpp.config.chunk_size)
@@ -167,7 +167,7 @@ func (cpp *ChunkedPrefillProcessor) PrintChunkInfo() {
     core.Println("  Latency saving:", cpp.GetLatencySavings(), "x")
 }
 
-type RingAttentionProcessor struct {
+type ring_attention_processor struct {
     num_devices         int32
     sequence_length     int32
     block_size          int32
@@ -177,16 +177,16 @@ func NewRingAttentionProcessor(
     num_devices int32,
     sequence_length int32,
     block_size int32,
-) *RingAttentionProcessor {
+) *ring_attention_processor {
 
-    return &RingAttentionProcessor{
+    return &ring_attention_processor{
         num_devices:     num_devices,
         sequence_length: sequence_length,
         block_size:      block_size,
     }
 }
 
-func (rap *RingAttentionProcessor) ComputeRingAttention(
+func (rap *ring_attention_processor) ComputeRingAttention(
     q []float32,
     k []float32,
     v []float32,
@@ -209,7 +209,7 @@ func (rap *RingAttentionProcessor) ComputeRingAttention(
     return output
 }
 
-func (rap *RingAttentionProcessor) computeLocalAttention(
+func (rap *ring_attention_processor) computeLocalAttention(
     q []float32,
     k []float32,
     v []float32,
@@ -224,14 +224,14 @@ func (rap *RingAttentionProcessor) computeLocalAttention(
     return output
 }
 
-func (rap *RingAttentionProcessor) rotateKV(kv []float32) []float32 {
+func (rap *ring_attention_processor) rotateKV(kv []float32) []float32 {
 
     rotated := make([]float32, len(kv))
     copy(rotated, kv)
     return rotated
 }
 
-func (rap *RingAttentionProcessor) GetCommunicationCost() float32 {
+func (rap *ring_attention_processor) GetCommunicationCost() float32 {
 
     num_devices := float32(rap.num_devices)
     comm_rounds := num_devices - 1.0
@@ -241,7 +241,7 @@ func (rap *RingAttentionProcessor) GetCommunicationCost() float32 {
     return relative_cost
 }
 
-type LongContextOptimizationConfig struct {
+type long_context_optimization_config struct {
     enable_chunked_prefill   bool
     enable_ring_attention    bool
     enable_sparse_attention  bool
@@ -250,22 +250,22 @@ type LongContextOptimizationConfig struct {
     block_size               int32
 }
 
-type LongContextOptimizer struct {
-    config                   LongContextOptimizationConfig
-    chunked_prefill          *ChunkedPrefillProcessor
-    ring_attention           *RingAttentionProcessor
+type long_context_optimizer struct {
+    config                   long_context_optimization_config
+    chunked_prefill          *chunked_prefill_processor
+    ring_attention           *ring_attention_processor
 }
 
 func NewLongContextOptimizer(
-    config LongContextOptimizationConfig,
-) *LongContextOptimizer {
+    config long_context_optimization_config,
+) *long_context_optimizer {
 
-    optimizer := &LongContextOptimizer{
+    optimizer := &long_context_optimizer{
         config: config,
     }
 
     if config.enable_chunked_prefill {
-        prefill_config := ChunkConfig{
+        prefill_config := chunk_config{
             chunk_size:       config.chunk_size,
             enable_recompute: true,
             enable_gradient:  false,
@@ -285,7 +285,7 @@ func NewLongContextOptimizer(
     return optimizer
 }
 
-func (lco *LongContextOptimizer) OptimizeLongContext() {
+func (lco *long_context_optimizer) OptimizeLongContext() {
     core.Println("Long Context Optimization Report")
     core.Println("=================================")
 
@@ -309,7 +309,7 @@ func (lco *LongContextOptimizer) OptimizeLongContext() {
 }
 
 func main() {
-    config := LongContextOptimizationConfig{
+    config := long_context_optimization_config{
         enable_chunked_prefill:  true,
         enable_ring_attention:   true,
         enable_sparse_attention: true,

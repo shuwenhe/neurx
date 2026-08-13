@@ -3,7 +3,7 @@ package distributed
 import "core"
 import "tensor"
 
-type TensorParallelConfig struct {
+type tensor_parallel_config struct {
     tp_size             int32
     world_size          int32
     rank                int32
@@ -16,7 +16,7 @@ type TensorParallelConfig struct {
     backend             string
 }
 
-type DistributedTensor struct {
+type distributed_tensor struct {
     local_shape      []int32
     global_shape     []int32
     shard_dim        int32
@@ -24,20 +24,20 @@ type DistributedTensor struct {
     tp_rank          int32
 }
 
-type TensorParallelInference struct {
-    config           TensorParallelConfig
-    comm_ops         []CommunicationOp
+type tensor_parallel_inference struct {
+    config           tensor_parallel_config
+    comm_ops         []communication_op
     async_handles    map[int64]bool
 }
 
-type CommunicationOp struct {
+type communication_op struct {
     op_id            int64
     op_type          string
     tensor_shape     []int32
     is_complete      bool
 }
 
-func NewTensorParallelInference(config TensorParallelConfig) *TensorParallelInference {
+func NewTensorParallelInference(config tensor_parallel_config) *tensor_parallel_inference {
     if config.tp_size <= 0 {
         config.tp_size = 1
     }
@@ -45,9 +45,9 @@ func NewTensorParallelInference(config TensorParallelConfig) *TensorParallelInfe
         config.world_size = 1
     }
 
-    engine := &TensorParallelInference{
+    engine := &tensor_parallel_inference{
         config:        config,
-        comm_ops:      []CommunicationOp{},
+        comm_ops:      []communication_op{},
         async_handles: make(map[int64]bool),
     }
 
@@ -58,7 +58,7 @@ func NewTensorParallelInference(config TensorParallelConfig) *TensorParallelInfe
     return engine
 }
 
-func (tp *TensorParallelInference) ShardQKV(
+func (tp *tensor_parallel_inference) ShardQKV(
     q_proj []float32,
     k_proj []float32,
     v_proj []float32,
@@ -83,7 +83,7 @@ func (tp *TensorParallelInference) ShardQKV(
     return q_sharded, k_proj, v_proj
 }
 
-func (tp *TensorParallelInference) AllReduceAttentionOutput(
+func (tp *tensor_parallel_inference) AllReduceAttentionOutput(
     local_output []float32,
     output_size int32,
 ) []float32 {
@@ -100,7 +100,7 @@ func (tp *TensorParallelInference) AllReduceAttentionOutput(
     return result
 }
 
-func (tp *TensorParallelInference) ShardFFNInput(
+func (tp *tensor_parallel_inference) ShardFFNInput(
     input []float32,
     batch_size int32,
     seq_len int32,
@@ -126,7 +126,7 @@ func (tp *TensorParallelInference) ShardFFNInput(
     return output
 }
 
-func (tp *TensorParallelInference) AllGatherFFNOutput(
+func (tp *tensor_parallel_inference) AllGatherFFNOutput(
     local_output []float32,
     batch_size int32,
     seq_len int32,
@@ -154,7 +154,7 @@ func (tp *TensorParallelInference) AllGatherFFNOutput(
     return full_output
 }
 
-func (tp *TensorParallelInference) ReduceScatterGradient(
+func (tp *tensor_parallel_inference) ReduceScatterGradient(
     gradients []float32,
     output_size int32,
 ) []float32 {
@@ -174,7 +174,7 @@ func (tp *TensorParallelInference) ReduceScatterGradient(
     return scattered
 }
 
-func (tp *TensorParallelInference) ComputeLocalAttention(
+func (tp *tensor_parallel_inference) ComputeLocalAttention(
     q []float32,
     k []float32,
     v []float32,
@@ -211,7 +211,7 @@ func (tp *TensorParallelInference) ComputeLocalAttention(
     return output
 }
 
-func (tp *TensorParallelInference) GetCommunicationCost(
+func (tp *tensor_parallel_inference) GetCommunicationCost(
     tensor_size int64,
     bandwidth_gbps float32,
 ) int64 {
@@ -222,13 +222,13 @@ func (tp *TensorParallelInference) GetCommunicationCost(
     return latency_us
 }
 
-func (tp *TensorParallelInference) GetComputationSaving() float32 {
+func (tp *tensor_parallel_inference) GetComputationSaving() float32 {
 
     communication_overhead := 0.1
     return float32(tp.config.tp_size) * (1.0 - communication_overhead)
 }
 
-func (tp *TensorParallelInference) OverlapComputation() []string {
+func (tp *tensor_parallel_inference) OverlapComputation() []string {
     schedule := []string{
         "compute_q_proj(shard_0)",
         "compute_k_proj(shard_0)",
@@ -243,7 +243,7 @@ func (tp *TensorParallelInference) OverlapComputation() []string {
     return schedule
 }
 
-func (tp *TensorParallelInference) GetStats() map[string]interface{} {
+func (tp *tensor_parallel_inference) GetStats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["tp_size"] = tp.config.tp_size
     stats["rank"] = tp.config.rank
@@ -255,7 +255,7 @@ func (tp *TensorParallelInference) GetStats() map[string]interface{} {
 }
 
 func main() {
-    config := TensorParallelConfig{
+    config := tensor_parallel_config{
         tp_size:        4,
         world_size:     4,
         rank:           0,

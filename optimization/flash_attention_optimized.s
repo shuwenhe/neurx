@@ -3,7 +3,7 @@ package optimization
 import "core"
 import "tensor"
 
-type AttentionConfig struct {
+type attention_config struct {
     batch_size      int32
     num_heads       int32
     seq_len         int32
@@ -13,7 +13,7 @@ type AttentionConfig struct {
     dropout_rate    float32
 }
 
-type FlashAttentionBlock struct {
+type flash_attention_block struct {
     q_block         []float32
     k_block         []float32
     v_block         []float32
@@ -21,23 +21,23 @@ type FlashAttentionBlock struct {
     output          []float32
 }
 
-type FlashAttentionOptimized struct {
-    config          AttentionConfig
+type flash_attention_optimized struct {
+    config          attention_config
     block_size      int32
 }
 
-func NewFlashAttentionOptimized(config AttentionConfig) *FlashAttentionOptimized {
+func NewFlashAttentionOptimized(config attention_config) *flash_attention_optimized {
     if config.block_size <= 0 {
         config.block_size = 128
     }
 
-    return &FlashAttentionOptimized{
+    return &flash_attention_optimized{
         config:     config,
         block_size: config.block_size,
     }
 }
 
-func (fa *FlashAttentionOptimized) Forward(
+func (fa *flash_attention_optimized) Forward(
     q []float32,
     k []float32,
     v []float32,
@@ -108,7 +108,7 @@ func (fa *FlashAttentionOptimized) Forward(
     return output
 }
 
-func (fa *FlashAttentionOptimized) loadQBlock(
+func (fa *flash_attention_optimized) loadQBlock(
     q []float32,
     batch int32,
     head int32,
@@ -130,7 +130,7 @@ func (fa *FlashAttentionOptimized) loadQBlock(
     return result
 }
 
-func (fa *FlashAttentionOptimized) loadKBlock(
+func (fa *flash_attention_optimized) loadKBlock(
     k []float32,
     batch int32,
     head int32,
@@ -152,7 +152,7 @@ func (fa *FlashAttentionOptimized) loadKBlock(
     return result
 }
 
-func (fa *FlashAttentionOptimized) loadVBlock(
+func (fa *flash_attention_optimized) loadVBlock(
     v []float32,
     batch int32,
     head int32,
@@ -174,7 +174,7 @@ func (fa *FlashAttentionOptimized) loadVBlock(
     return result
 }
 
-func (fa *FlashAttentionOptimized) computeScores(
+func (fa *flash_attention_optimized) computeScores(
     q []float32,
     k []float32,
     q_size int32,
@@ -200,7 +200,7 @@ func (fa *FlashAttentionOptimized) computeScores(
     return scores
 }
 
-func (fa *FlashAttentionOptimized) applyCausalMask(
+func (fa *flash_attention_optimized) applyCausalMask(
     scores []float32,
     q_start int32,
     k_start int32,
@@ -225,7 +225,7 @@ func (fa *FlashAttentionOptimized) applyCausalMask(
     return result
 }
 
-func (fa *FlashAttentionOptimized) stableSoftmax(
+func (fa *flash_attention_optimized) stableSoftmax(
     scores []float32,
     q_size int32,
     k_size int32,
@@ -264,7 +264,7 @@ func (fa *FlashAttentionOptimized) stableSoftmax(
     return probs
 }
 
-func (fa *FlashAttentionOptimized) computeAttentionOutput(
+func (fa *flash_attention_optimized) computeAttentionOutput(
     probs []float32,
     v []float32,
     q_size int32,
@@ -291,7 +291,7 @@ func (fa *FlashAttentionOptimized) computeAttentionOutput(
     return output
 }
 
-func (fa *FlashAttentionOptimized) accumulateOutput(
+func (fa *flash_attention_optimized) accumulateOutput(
     accum []float32,
     new_block []float32,
     q_size int32,
@@ -310,7 +310,7 @@ func (fa *FlashAttentionOptimized) accumulateOutput(
     return result
 }
 
-func (fa *FlashAttentionOptimized) GetMemorySaving() float32 {
+func (fa *flash_attention_optimized) GetMemorySaving() float32 {
 
     seq_len := fa.config.seq_len
     block_size := fa.config.block_size
@@ -327,7 +327,7 @@ func (fa *FlashAttentionOptimized) GetMemorySaving() float32 {
     return reduction
 }
 
-func (fa *FlashAttentionOptimized) GetSpeedup() float32 {
+func (fa *flash_attention_optimized) GetSpeedup() float32 {
 
     seq_len := fa.config.seq_len
 
@@ -343,7 +343,7 @@ func (fa *FlashAttentionOptimized) GetSpeedup() float32 {
 }
 
 func main() {
-    config := AttentionConfig{
+    config := attention_config{
         batch_size:     1,
         num_heads:      8,
         seq_len:        512,

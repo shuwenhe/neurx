@@ -5,7 +5,7 @@ struct operator_context {
     requires_grad: bool
     dispatcher: Dispatcher
     device: device
-    profiler: Profiler
+    profiler: profiler
 }
 interface i_operator {
     forward(inputs: []tensor, ctx: operator_context) -> tensor

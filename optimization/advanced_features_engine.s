@@ -3,27 +3,27 @@ package optimization
 import "core"
 import "tensor"
 
-type SpeculativeConfig struct {
+type speculative_config struct {
     draft_model_scale   float32
     num_draft_tokens    int32
     verification_batch  int32
 }
 
-type DraftRequest struct {
+type draft_request struct {
     prompt_tokens       []int32
     max_length          int32
 }
 
-type SpeculativeDecodingEngine struct {
-    config              SpeculativeConfig
+type speculative_decoding_engine struct {
+    config              speculative_config
     main_model_tokens   int32
     draft_model_tokens  int32
     accepted_count      int32
     rejected_count      int32
 }
 
-func NewSpeculativeDecodingEngine(config SpeculativeConfig) *SpeculativeDecodingEngine {
-    return &SpeculativeDecodingEngine{
+func NewSpeculativeDecodingEngine(config speculative_config) *speculative_decoding_engine {
+    return &speculative_decoding_engine{
         config:             config,
         main_model_tokens:  0,
         draft_model_tokens: 0,
@@ -32,7 +32,7 @@ func NewSpeculativeDecodingEngine(config SpeculativeConfig) *SpeculativeDecoding
     }
 }
 
-func (sde *SpeculativeDecodingEngine) DraftTokens(
+func (sde *speculative_decoding_engine) DraftTokens(
     context []int32,
     num_tokens int32,
 ) []int32 {
@@ -50,7 +50,7 @@ func (sde *SpeculativeDecodingEngine) DraftTokens(
     return drafted
 }
 
-func (sde *SpeculativeDecodingEngine) VerifyDraftTokens(
+func (sde *speculative_decoding_engine) VerifyDraftTokens(
     context []int32,
     drafted_tokens []int32,
     threshold float32,
@@ -81,7 +81,7 @@ func (sde *SpeculativeDecodingEngine) VerifyDraftTokens(
     return verified
 }
 
-func (sde *SpeculativeDecodingEngine) getMainModelLogits(
+func (sde *speculative_decoding_engine) getMainModelLogits(
     context []int32,
     position int32,
 ) []float32 {
@@ -94,7 +94,7 @@ func (sde *SpeculativeDecodingEngine) getMainModelLogits(
     return logits
 }
 
-func (sde *SpeculativeDecodingEngine) computeAcceptanceProbability(
+func (sde *speculative_decoding_engine) computeAcceptanceProbability(
     main_logits []float32,
     token_id int32,
 ) float32 {
@@ -122,7 +122,7 @@ func (sde *SpeculativeDecodingEngine) computeAcceptanceProbability(
     return prob
 }
 
-func (sde *SpeculativeDecodingEngine) resampleFromMainModel(
+func (sde *speculative_decoding_engine) resampleFromMainModel(
     logits []float32,
 ) int32 {
 
@@ -139,7 +139,7 @@ func (sde *SpeculativeDecodingEngine) resampleFromMainModel(
     return max_idx
 }
 
-func (sde *SpeculativeDecodingEngine) GetSpeedup() float32 {
+func (sde *speculative_decoding_engine) GetSpeedup() float32 {
 
     acceptance_rate := 0.65
     effective_speedup := 1.0 + float32(sde.config.num_draft_tokens)*float32(acceptance_rate)
@@ -147,7 +147,7 @@ func (sde *SpeculativeDecodingEngine) GetSpeedup() float32 {
     return effective_speedup
 }
 
-type VisionLanguageModelAdapter struct {
+type vision_language_model_adapter struct {
     vision_encoder_dim   int32
     language_model_dim   int32
     bridge_layer_dim     int32
@@ -156,16 +156,16 @@ type VisionLanguageModelAdapter struct {
 func NewVisionLanguageModelAdapter(
     vision_dim int32,
     language_dim int32,
-) *VisionLanguageModelAdapter {
+) *vision_language_model_adapter {
 
-    return &VisionLanguageModelAdapter{
+    return &vision_language_model_adapter{
         vision_encoder_dim: vision_dim,
         language_model_dim: language_dim,
         bridge_layer_dim:   language_dim,
     }
 }
 
-func (vlm *VisionLanguageModelAdapter) EncodeImage(
+func (vlm *vision_language_model_adapter) EncodeImage(
     image_features []float32,
     num_patches int32,
 ) []float32 {
@@ -182,7 +182,7 @@ func (vlm *VisionLanguageModelAdapter) EncodeImage(
     return visual_tokens
 }
 
-func (vlm *VisionLanguageModelAdapter) BridgeVisionToLanguage(
+func (vlm *vision_language_model_adapter) BridgeVisionToLanguage(
     visual_tokens []float32,
 ) []float32 {
 
@@ -192,27 +192,27 @@ func (vlm *VisionLanguageModelAdapter) BridgeVisionToLanguage(
     return bridged
 }
 
-type LoRAConfig struct {
+type lo_ra_config struct {
     rank                int32
     alpha               float32
     target_modules      []string
 }
 
-type LoRAAdapter struct {
-    config              LoRAConfig
+type lo_ra_adapter struct {
+    config              lo_ra_config
     rank                int32
     adapters            map[string][][]float32
 }
 
-func NewLoRAAdapter(config LoRAConfig) *LoRAAdapter {
-    return &LoRAAdapter{
+func NewLoRAAdapter(config lo_ra_config) *lo_ra_adapter {
+    return &lo_ra_adapter{
         config:    config,
         rank:      config.rank,
         adapters:  make(map[string][][]float32),
     }
 }
 
-func (la *LoRAAdapter) AddLoRAWeight(
+func (la *lo_ra_adapter) AddLoRAWeight(
     layer_name string,
     weight_a []float32,
     weight_b []float32,
@@ -221,7 +221,7 @@ func (la *LoRAAdapter) AddLoRAWeight(
     la.adapters[layer_name] = [][]float32{weight_a, weight_b}
 }
 
-func (la *LoRAAdapter) ApplyLoRA(
+func (la *lo_ra_adapter) ApplyLoRA(
     layer_name string,
     x []float32,
 ) []float32 {
@@ -248,21 +248,21 @@ func (la *LoRAAdapter) ApplyLoRA(
     return output
 }
 
-type MultiModelServingManager struct {
+type multi_model_serving_manager struct {
     loaded_models       map[string]bool
     model_cache         map[string][]float32
     max_memory_mb       int32
 }
 
-func NewMultiModelServingManager(max_memory_mb int32) *MultiModelServingManager {
-    return &MultiModelServingManager{
+func NewMultiModelServingManager(max_memory_mb int32) *multi_model_serving_manager {
+    return &multi_model_serving_manager{
         loaded_models: make(map[string]bool),
         model_cache:   make(map[string][]float32),
         max_memory_mb: max_memory_mb,
     }
 }
 
-func (mms *MultiModelServingManager) LoadModel(
+func (mms *multi_model_serving_manager) LoadModel(
     model_name string,
     model_data []float32,
 ) bool {
@@ -280,17 +280,17 @@ func (mms *MultiModelServingManager) LoadModel(
     return true
 }
 
-func (mms *MultiModelServingManager) GetModel(model_name string) ([]float32, bool) {
+func (mms *multi_model_serving_manager) GetModel(model_name string) ([]float32, bool) {
     data, exists := mms.model_cache[model_name]
     return data, exists
 }
 
-func (mms *MultiModelServingManager) UnloadModel(model_name string) {
+func (mms *multi_model_serving_manager) UnloadModel(model_name string) {
     delete(mms.loaded_models, model_name)
     delete(mms.model_cache, model_name)
 }
 
-func (mms *MultiModelServingManager) GetLoadedModels() []string {
+func (mms *multi_model_serving_manager) GetLoadedModels() []string {
     models := make([]string, 0)
     for name := range mms.loaded_models {
         models = append(models, name)
@@ -298,27 +298,27 @@ func (mms *MultiModelServingManager) GetLoadedModels() []string {
     return models
 }
 
-type AdvancedFeaturesEngine struct {
-    speculative_decoder *SpeculativeDecodingEngine
-    vl_adapter          *VisionLanguageModelAdapter
-    lora_manager        *LoRAAdapter
-    multi_model_server  *MultiModelServingManager
+type advanced_features_engine struct {
+    speculative_decoder *speculative_decoding_engine
+    vl_adapter          *vision_language_model_adapter
+    lora_manager        *lo_ra_adapter
+    multi_model_server  *multi_model_serving_manager
 }
 
-func NewAdvancedFeaturesEngine() *AdvancedFeaturesEngine {
-    spec_config := SpeculativeConfig{
+func NewAdvancedFeaturesEngine() *advanced_features_engine {
+    spec_config := speculative_config{
         draft_model_scale:  0.25,
         num_draft_tokens:   4,
         verification_batch: 32,
     }
 
-    lora_config := LoRAConfig{
+    lora_config := lo_ra_config{
         rank:               16,
         alpha:              16.0,
         target_modules:     []string{"q_proj", "v_proj"},
     }
 
-    return &AdvancedFeaturesEngine{
+    return &advanced_features_engine{
         speculative_decoder: NewSpeculativeDecodingEngine(spec_config),
         vl_adapter:          NewVisionLanguageModelAdapter(768, 4096),
         lora_manager:        NewLoRAAdapter(lora_config),
@@ -326,7 +326,7 @@ func NewAdvancedFeaturesEngine() *AdvancedFeaturesEngine {
     }
 }
 
-func (afe *AdvancedFeaturesEngine) PrintAdvancedFeaturesReport() {
+func (afe *advanced_features_engine) PrintAdvancedFeaturesReport() {
     core.Println("Advanced Features Report")
     core.Println("=======================")
 
