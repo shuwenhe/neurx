@@ -3040,7 +3040,7 @@ verify-vl-model: check-bash build-s-ir-runner
 	@echo ""
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/vl_verifier
 	@cd '$(CURDIR_UNIX)' && \
-		$(S_SEED_COMPILER) deploy/vl_model_verifier.s artifacts/build/vl_verifier/vl_model_verifier.ir 2>&1 || exit 1
+		$(S_SEED_COMPILER) inference/vl_model_verifier.s artifacts/build/vl_verifier/vl_model_verifier.ir 2>&1 || exit 1
 	@echo ""
 	@cd '$(CURDIR_UNIX)' && \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/vl_verifier/vl_model_verifier.ir' \
@@ -3052,7 +3052,7 @@ build-vl-inference: check-bash build-s-ir-runner
 	@echo ""
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/vl_inference
 	@cd '$(CURDIR_UNIX)' && \
-		$(S_SEED_COMPILER) deploy/vl_inference_engine.s artifacts/build/vl_inference/vl_inference_engine.ir 2>&1 || exit 1
+		$(S_SEED_COMPILER) inference/vl_inference_engine.s artifacts/build/vl_inference/vl_inference_engine.ir 2>&1 || exit 1
 	@echo ""
 	@echo "$(GREEN)✓ VL inference engine compiled successfully!$(NC)"
 	@echo ""
