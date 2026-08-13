@@ -5,7 +5,7 @@
 model:
   name: "Qwen2.5-VL-7B"
   model_id: "Qwen/Qwen2.5-VL-7B"
-  local_dir: "/home/shuwen/shuwen/model/Qwen2.5-VL-7B"
+  local_dir: "/model/Qwen2.5-VL-7B"
   type: "vision-language"
   weights_format: "safetensors"
   weights_precision: "bfloat16"

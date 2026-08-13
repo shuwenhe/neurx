@@ -10,7 +10,7 @@ model:
   model_id: "Qwen/Qwen2.5-0.5B-Instruct"
   
   # Local model directory
-  model_dir: "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
+  model_dir: "/model/Qwen2.5-0.5B-Instruct"
   
   # Model type
   type: "language_model"
