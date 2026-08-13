@@ -1,0 +1,248 @@
+# Qwen2.5-VL-7B 多模态模型部署配置
+# Vision-Language Model Deployment Configuration
+# ================================================
+
+model:
+  name: "Qwen2.5-VL-7B"
+  model_id: "Qwen/Qwen2.5-VL-7B"
+  local_dir: "/home/shuwen/shuwen/model/Qwen2.5-VL-7B"
+  type: "vision-language"
+  weights_format: "safetensors"
+  weights_precision: "bfloat16"
+  model_size_gb: 14
+  total_parameters: 7000000000
+
+# Vision Encoder Configuration
+vision_encoder:
+  type: "vit"
+  patch_size: 14
+  image_size: 448
+  embed_dim: 1024
+  depth: 24
+  num_heads: 16
+  hidden_act: "gelu"
+  layer_norm_eps: 1.0e-6
+
+# Language Model Architecture
+architecture:
+  type: "transformer"
+  hidden_size: 3584
+  num_hidden_layers: 28
+  num_attention_heads: 28
+  intermediate_size: 18944
+  hidden_act: "silu"
+  vocab_size: 152064
+  max_position_embeddings: 32768
+  rope_theta: 1000000.0
+  rms_norm_eps: 1.0e-6
+  initializer_range: 0.02
+  use_cache: true
+  num_key_value_heads: 28
+  coupling_vision_language: true
+
+# Vision-Language Bridge
+vl_bridge:
+  type: "linear_projection"
+  vision_output_dim: 1024
+  language_input_dim: 3584
+  activation: "gelu"
+  dropout_rate: 0.1
+
+# Tokenizer Configuration
+tokenizer:
+  type: "qwen_vl_fast"
+  model_file: "vocab.json"
+  merges_file: "merges.txt"
+  tokenizer_config: "tokenizer_config.json"
+  chat_template: "chat_template.json"
+  special_tokens:
+    pad_token: "<pad>"
+    eos_token: "<|endoftext|>"
+    unk_token: "<|endoftext|>"
+    bos_token: "<|im_start|>"
+  encoding:
+    add_prefix_space: false
+    add_eos_token: true
+  image_tokens:
+    image_start: "<|vision_start|>"
+    image_end: "<|vision_end|>"
+    image_pad: "<|image_pad|>"
+
+# Image Processing
+image_processing:
+  do_resize: true
+  size: [448, 448]
+  resample: "bicubic"
+  do_normalize: true
+  image_mean: [0.48145466, 0.4578275, 0.40821073]
+  image_std: [0.26862954, 0.26130258, 0.27577711]
+  do_convert_rgb: true
+  max_dynamic_patch: true
+
+# Inference Configuration
+inference:
+  mode: "local"
+  backend: "cpu"
+  batch_size: 1
+  max_batch_size: 4
+  max_sequence_length: 4096
+  max_image_input: 16
+  enable_kv_cache: true
+  enable_paged_attention: false
+  enable_prefix_cache: true
+  quantization_method: "none"
+  num_gpu_layers: 0
+  device_map: "auto"
+
+# Generation Parameters
+generation:
+  max_new_tokens: 512
+  min_new_tokens: 1
+  do_sample: true
+  temperature: 0.7
+  top_p: 0.9
+  top_k: 40
+  repetition_penalty: 1.0
+  length_penalty: 1.0
+  early_stopping: false
+  num_beams: 1
+  num_beam_groups: 1
+  diversity_penalty: 0.0
+  stop_sequences:
+    - "<|im_end|>"
+    - "<|endoftext|>"
+
+# Quantization Options (Optional)
+quantization:
+  method: "none"
+  # Available methods: "none", "int8", "int4", "nf4", "gptq", "awq"
+  # For VL models, quantization may reduce vision understanding quality
+  # Use "int8" for moderate size reduction (4-6GB)
+  # Use "int4" for aggressive size reduction (2-3GB, quality loss)
+  bits: null
+  group_size: 128
+  desc_act: false
+
+# Deployment Server Configuration
+deployment:
+  name: "NeurX-VL-Inference"
+  api_server:
+    host: "0.0.0.0"
+    port: 8000
+    api_version: "v1"
+    timeout_seconds: 300
+    workers: 1
+  endpoints:
+    - path: "/health"
+      methods: ["GET"]
+      description: "Health check"
+    - path: "/v1/completions"
+      methods: ["POST"]
+      description: "Text completion (with optional image)"
+    - path: "/v1/chat/completions"
+      methods: ["POST"]
+      description: "Chat completion (OpenAI compatible)"
+    - path: "/v1/vision/describe"
+      methods: ["POST"]
+      description: "Image description"
+    - path: "/v1/vision/vqa"
+      methods: ["POST"]
+      description: "Visual question answering"
+  logging:
+    level: "INFO"
+    format: "json"
+    output: "file"
+    log_dir: "artifacts/logs"
+  metrics:
+    enable_prometheus: true
+    port: 9090
+    update_interval_ms: 1000
+
+# Hardware Configuration
+hardware:
+  device: "cpu"
+  num_cpus: 16
+  max_memory_gb: 32
+  use_numa: false
+  num_prefetch_threads: 4
+  cpu_affinity: false
+  optimization:
+    enable_continuous_batching: false
+    enable_flash_attention: false
+    enable_paged_attention: false
+    enable_prefix_cache: true
+    cache_block_size: 16
+    num_cache_blocks: 64
+  memory:
+    reserve_memory_mb: 2048
+    cache_memory_fraction: 0.8
+    working_memory_fraction: 0.2
+
+# Performance Tuning
+performance:
+  prefill_batch_size: 1
+  decode_batch_size: 1
+  max_concurrent_requests: 1
+  scheduler_type: "fifo"  # First-In-First-Out
+  swap_space_mb: 0
+  cpu_worker_threads: 4
+
+# Vision-Specific Optimizations
+vision_optimization:
+  enable_image_caching: true
+  image_cache_size_mb: 512
+  enable_patch_merging: true
+  patch_merge_strategy: "adaptive"
+  enable_dynamic_resolution: false
+  max_aspect_ratio: 2.0
+  multi_image_support: true
+  max_images_per_request: 8
+
+# Model Weight Mapping
+weights:
+  safetensors_files:
+    - "model-00001-of-00005.safetensors"
+    - "model-00002-of-00005.safetensors"
+    - "model-00003-of-00005.safetensors"
+    - "model-00004-of-00005.safetensors"
+    - "model-00005-of-00005.safetensors"
+  index_file: "model.safetensors.index.json"
+  dtype: "bfloat16"
+  device_map: "cpu"
+  load_in_8bit: false
+  load_in_4bit: false
+
+# API Request/Response Configuration
+api:
+  max_prompt_tokens: 8192
+  max_image_tokens: 2048
+  max_output_tokens: 2048
+  timeout_request_seconds: 300
+  timeout_stream_seconds: 60
+  request_id_header: "X-Request-ID"
+  cors_enabled: true
+  cors_origins:
+    - "*"
+
+# Monitoring & Observability
+monitoring:
+  enable_monitoring: true
+  metrics_collection_interval_seconds: 10
+  performance_metrics:
+    - "request_count"
+    - "request_latency"
+    - "token_throughput"
+    - "gpu_memory_usage"
+    - "cpu_usage"
+  tracing_enabled: true
+  tracing_sample_rate: 0.1
+
+# Advanced Configuration
+advanced:
+  enable_custom_ops: false
+  enable_triton_kernels: false
+  enable_onnx_conversion: false
+  num_shards: 1
+  shard_id: 0
+  debug_mode: false
+  verbose_logging: false

@@ -1,0 +1,270 @@
+# NeurX Local Deployment Configuration
+# Qwen2.5-0.5B-Instruct Model Deployment
+
+# ============================================================
+# MODEL CONFIGURATION
+# ============================================================
+model:
+  # Model identifier
+  name: "Qwen2.5-0.5B-Instruct"
+  model_id: "Qwen/Qwen2.5-0.5B-Instruct"
+  
+  # Local model directory
+  model_dir: "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
+  
+  # Model type
+  type: "language_model"
+  framework: "transformers"
+  
+  # Model weights format
+  weights_format: "safetensors"
+  precision: "bfloat16"  # or float32, int8, int4
+  
+# ============================================================
+# ARCHITECTURE PARAMETERS
+# ============================================================
+architecture:
+  # Transformer dimensions
+  hidden_size: 896
+  intermediate_size: 3584
+  num_hidden_layers: 24
+  num_attention_heads: 14
+  num_key_value_heads: 14
+  head_dim: 64
+  
+  # Vocabulary and position embeddings
+  vocab_size: 151936
+  max_position_embeddings: 32768
+  
+  # Activation functions
+  hidden_act: "silu"  # swish
+  
+  # Dropout and normalization
+  attention_dropout: 0.0
+  rms_norm_eps: 1e-6
+  
+  # Rope (Rotary Position Embedding)
+  rope_theta: 1000000
+  rope_scaling:
+    type: "linear"
+    factor: 1.0
+
+# ============================================================
+# TOKENIZER CONFIGURATION
+# ============================================================
+tokenizer:
+  # Tokenizer type
+  type: "qwen_fast"
+  pretrained: "Qwen/Qwen2.5-0.5B-Instruct"
+  
+  # Tokenizer files
+  model_file: "tokenizer.model"      # SentencePiece model
+  vocab_file: "tokenizer.json"       # vocab
+  config_file: "tokenizer_config.json"
+  
+  # Special tokens
+  pad_token: "<|endoftext|>"
+  eos_token: "<|im_end|>"
+  unk_token: "<|unk_token|>"
+  
+  # Encoding settings
+  add_eos_token: true
+  add_bos_token: false
+  clean_up_tokenization_spaces: false
+
+# ============================================================
+# INFERENCE CONFIGURATION
+# ============================================================
+inference:
+  # Inference mode
+  mode: "local"  # local, distributed, cloud
+  backend: "cpu"  # cpu, cuda, metal, neuron
+  
+  # Batch processing
+  batch_size: 1
+  max_batch_size: 8
+  
+  # Sequence length
+  max_seq_length: 2048
+  context_length: 512
+  
+  # KV Cache configuration
+  use_kv_cache: true
+  kv_cache_dtype: "bfloat16"
+  kv_cache_allocation: "eager"  # eager, lazy
+  max_num_cached_tokens: 8192
+  
+  # Attention optimization
+  use_flash_attention: false  # CPU doesn't support
+  use_paged_attention: true
+  
+  # Memory management
+  cpu_offload: false
+  gpu_memory_utilization: 0.9
+
+# ============================================================
+# GENERATION CONFIGURATION
+# ============================================================
+generation:
+  # Generation parameters
+  max_new_tokens: 512
+  min_new_tokens: 1
+  
+  # Sampling strategy
+  do_sample: true
+  top_p: 0.9
+  top_k: 40
+  temperature: 0.7
+  
+  # Repetition control
+  repetition_penalty: 1.0
+  length_penalty: 1.0
+  
+  # Early stopping
+  early_stopping: false
+  num_beams: 1  # greedy if 1, beam search if > 1
+  
+  # Stopping criteria
+  stop_sequences:
+    - "<|endoftext|>"
+    - "<|im_end|>"
+    - "[END]"
+
+# ============================================================
+# QUANTIZATION (Optional)
+# ============================================================
+quantization:
+  # Quantization type
+  enabled: false
+  method: "gptq"  # gptq, awq, int8, nf4
+  
+  # Quantization parameters
+  bits: 4
+  group_size: 128
+  desc_act: false
+  
+  # Pre-quantized model
+  use_precomputed: true
+
+# ============================================================
+# DEPLOYMENT SETTINGS
+# ============================================================
+deployment:
+  # Server configuration
+  host: "0.0.0.0"
+  port: 8000
+  
+  # API endpoints
+  api_version: "v1"
+  enable_openai_api: true
+  enable_rest_api: true
+  
+  # Logging
+  log_level: "INFO"
+  log_dir: "/home/shuwen/shuwen/neurx/artifacts/logs"
+  
+  # Monitoring
+  enable_metrics: true
+  metrics_port: 9090
+  
+  # Performance
+  num_workers: 4
+  worker_timeout: 300
+  request_timeout: 60
+
+# ============================================================
+# OPTIMIZATION SETTINGS
+# ============================================================
+optimization:
+  # Prefill/Decode split
+  enable_prefill_decode_split: true
+  prefill_batch_size: 32
+  decode_batch_size: 8
+  
+  # Continuous batching
+  enable_continuous_batching: true
+  batch_wait_time_ms: 10
+  
+  # Token scheduling
+  enable_speculative_decoding: false
+  speculative_steps: 5
+  
+  # Caching strategy
+  cache_strategy: "lru"  # lru, lfu, fifo
+  cache_size_gb: 4
+
+# ============================================================
+# HARDWARE CONFIGURATION
+# ============================================================
+hardware:
+  # Device settings
+  device_type: "cpu"  # cpu, cuda, metal, neuron
+  
+  # CPU settings
+  num_cpus: 16
+  cpu_affinity: "0-15"
+  
+  # Memory settings
+  max_memory_gb: 32
+  memory_per_worker_gb: 8
+  
+  # Performance tuning
+  enable_numa: false
+  prefetch_threads: 4
+
+# ============================================================
+# CHAT CONFIGURATION (For Interactive Mode)
+# ============================================================
+chat:
+  # System prompt
+  system_prompt: |
+    You are a helpful medical assistant. You provide accurate, 
+    evidence-based medical information to support healthcare professionals 
+    and patients. Always recommend consulting with qualified medical professionals 
+    for diagnosis and treatment.
+  
+  # Chat template
+  template: "qwen"  # qwen, alpaca, vicuna, etc.
+  
+  # Conversation settings
+  max_history: 10
+  context_window: 512
+  
+  # Safety settings
+  enable_content_filter: true
+  max_input_length: 2048
+
+# ============================================================
+# CHECKPOINT & RESUME
+# ============================================================
+checkpoint:
+  # Checkpoint directory
+  checkpoint_dir: "/home/shuwen/shuwen/neurx/artifacts/checkpoints"
+  
+  # Resume from checkpoint
+  resume_from_checkpoint: false
+  checkpoint_path: ""
+  
+  # Checkpoint frequency (for training if applicable)
+  save_frequency: 100
+  keep_last_k: 3
+
+# ============================================================
+# VALIDATION & TESTING
+# ============================================================
+validation:
+  # Validation dataset
+  validation_file: "/home/shuwen/shuwen/dataset/medical/dev.json"
+  
+  # Validation frequency
+  validation_steps: 100
+  
+  # Test dataset
+  test_file: "/home/shuwen/shuwen/dataset/medical/test.json"
+  
+  # Metrics to track
+  metrics:
+    - "perplexity"
+    - "accuracy"
+    - "f1_score"
+    - "bleu_score"

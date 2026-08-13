@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain-cpu posttrain-gpu posttrain-npu posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat-cpu chat-gpu chat-npu chat-xt real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference build-model-inference-s model-weight-probe model-projection-probe \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain-cpu posttrain-gpu posttrain-npu posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat-cpu chat-gpu chat-npu chat-xt real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference build-model-inference-s model-weight-probe model-projection-probe download-model verify-deployment start-inference-service show-deployment-info deploy-local build-local-inference \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -2929,6 +2929,101 @@ build-cpp2s-migration: build-json-parser-s
 	@echo "  🔮 Future: Full S implementation with Unicode lib"
 	@echo ""
 	@echo "Progress: Phase 1/4 (25%)"
+	@echo ""
+
+# ============================================================
+# Local Deployment - Qwen2.5-0.5B-Instruct
+# ============================================================
+
+DEPLOY_DIR := $(CURDIR_UNIX)/deploy
+DEPLOYMENT_CONFIG := $(DEPLOY_DIR)/deployment_config.yaml
+MODEL_DIR := /home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct
+INFERENCE_PORT := 8000
+
+.PHONY: download-model verify-deployment start-inference-service show-deployment-info deploy-local build-local-inference
+
+download-model: check-bash
+	@echo "$(BLUE)📥 Downloading Qwen2.5-0.5B-Instruct model...$(NC)"
+	@echo ""
+	@echo "Model ID: Qwen/Qwen2.5-0.5B-Instruct"
+	@echo "Target: $(MODEL_DIR)"
+	@echo "Size: ~2 GB"
+	@echo ""
+	@python -m huggingface_hub download \
+		Qwen/Qwen2.5-0.5B-Instruct \
+		--local-dir $(MODEL_DIR) \
+		--local-dir-use-symlinks False 2>&1
+	@echo ""
+	@echo "$(GREEN)✓ Model download complete!$(NC)"
+	@echo ""
+
+verify-deployment: check-bash build-s-ir-runner
+	@echo "$(BLUE)🔐 Verifying deployment...$(NC)"
+	@echo ""
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/model_downloader
+	@cd '$(CURDIR_UNIX)' && \
+		$(S_SEED_COMPILER) deploy/model_downloader.s artifacts/build/model_downloader/model_downloader.ir 2>&1 || exit 1
+	@echo ""
+	@cd '$(CURDIR_UNIX)' && \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/model_downloader/model_downloader.ir' \
+		'$(S_RUNNER_BIN)' 2>&1
+	@echo ""
+
+show-deployment-info: check-bash build-s-ir-runner
+	@echo "$(BLUE)ℹ️  Deployment Information$(NC)"
+	@echo ""
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/local_deployment
+	@cd '$(CURDIR_UNIX)' && \
+		$(S_SEED_COMPILER) deploy/local_deployment.s artifacts/build/local_deployment/local_deployment.ir 2>&1 || exit 1
+	@echo ""
+	@cd '$(CURDIR_UNIX)' && \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/local_deployment/local_deployment.ir' \
+		'$(S_RUNNER_BIN)' 2>&1
+	@echo ""
+
+build-local-inference: check-bash build-s-ir-runner build-production-inference-engine-s
+	@echo "$(BLUE)🔨 Building local inference engine...$(NC)"
+	@echo "✓ Production inference engine compiled"
+	@echo ""
+	@echo "Status:"
+	@echo "  • Model path: $(MODEL_DIR)"
+	@echo "  • Inference port: $(INFERENCE_PORT)"
+	@echo "  • Backend: CPU (pure S language)"
+	@echo ""
+
+start-inference-service: verify-deployment build-local-inference
+	@echo "$(BLUE)🚀 Starting inference service...$(NC)"
+	@echo ""
+	@echo "API Server: http://0.0.0.0:$(INFERENCE_PORT)"
+	@echo "Model: Qwen2.5-0.5B-Instruct"
+	@echo ""
+	@mkdir -p $(CURDIR_UNIX)/artifacts/logs
+	@echo "Starting inference engine..."
+	@NEURX_MODEL_PATH='$(MODEL_DIR)/model.safetensors' \
+		NEURX_TOKENIZER_PATH='$(MODEL_DIR)/tokenizer.json' \
+		NEURX_API_PORT=$(INFERENCE_PORT) \
+		'$(S_RUNNER_BIN)' artifacts/build/production_inference_engine/production_inference_engine.ir \
+		2>&1 | tee -a '$(CURDIR_UNIX)/artifacts/logs/inference_service_$(shell date +%Y%m%d_%H%M%S).log'
+
+deploy-local: download-model verify-deployment show-deployment-info
+	@echo ""
+	@echo "$(GREEN)════════════════════════════════════════════════════════════$(NC)"
+	@echo "$(GREEN)✅ LOCAL DEPLOYMENT PREPARED SUCCESSFULLY!$(NC)"
+	@echo "$(GREEN)════════════════════════════════════════════════════════════$(NC)"
+	@echo ""
+	@echo "Next steps:"
+	@echo ""
+	@echo "1. Review the deployment configuration:"
+	@echo "   cat $(DEPLOYMENT_CONFIG)"
+	@echo ""
+	@echo "2. Start the inference service:"
+	@echo "   make start-inference-service"
+	@echo ""
+	@echo "3. Test the service (in another terminal):"
+	@echo "   curl http://localhost:$(INFERENCE_PORT)/health"
+	@echo ""
+	@echo "4. Run interactive chat:"
+	@echo "   make chat-real-model"
 	@echo ""
 
 # ============================================================
