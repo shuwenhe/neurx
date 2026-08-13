@@ -55,7 +55,7 @@ func new_clean_config_from_env() clean_config {
         checkpoint_interval: 200,
     }
 }
-pub func clean_data(config: clean_config) bool {
+pub func clean_data(clean_config config) bool {
     log_info("")
     log_info("╔════════════════════════════════════════════╗")
     log_info("║     NeurX Data Cleaning (S Lang)           ║")
@@ -114,7 +114,7 @@ func find_source_files(string raw_dir) []string {
     dir_list_files(raw_dir, supported)
 }
 
-func process_source_file(config: clean_config, string source_file, stats: &clean_stats, map seen_hashes[string]bool) bool {
+func process_source_file(clean_config config, string source_file, &clean_stats stats, map seen_hashes[string]bool) bool {
     let (content, ok) = file_read_text(source_file)
     if !ok {
         log_error("Failed to read: " + source_file)
@@ -134,7 +134,7 @@ func process_source_file(config: clean_config, string source_file, stats: &clean
     }
 }
 
-func process_jsonl(config: clean_config, string content, stats: &clean_stats, map seen_hashes[string]bool) bool {
+func process_jsonl(clean_config config, string content, &clean_stats stats, map seen_hashes[string]bool) bool {
     let lines = string_split(content, "\n")
     for _, line in lines {
         let trimmed = string_trim(line)
@@ -163,7 +163,7 @@ func process_jsonl(config: clean_config, string content, stats: &clean_stats, ma
     true
 }
 
-func process_text(config: clean_config, string content, stats: &clean_stats, map seen_hashes[string]bool) bool {
+func process_text(clean_config config, string content, &clean_stats stats, map seen_hashes[string]bool) bool {
     let paragraphs = string_split(content, "\n\n")
     for _, para in paragraphs {
         let text = string_trim(para)
@@ -187,7 +187,7 @@ func process_text(config: clean_config, string content, stats: &clean_stats, map
     true
 }
 
-func process_xml(config: clean_config, string content, stats: &clean_stats, map seen_hashes[string]bool) bool {
+func process_xml(clean_config config, string content, &clean_stats stats, map seen_hashes[string]bool) bool {
     let mut text_blocks = []string{}
     let lines = string_split(content, "\n")
     let mut in_tag = false
@@ -290,7 +290,7 @@ func estimate_tokens(string text) i64 {
     i64(max(1, len(text) / 4))
 }
 
-func finalize_dataset(config: clean_config, stats: &clean_stats) bool {
+func finalize_dataset(clean_config config, &clean_stats stats) bool {
     log_info("")
     log_info("📋 Finalizing dataset splits (train/val/test)...")
     let (total_lines, ok) = file_count_lines(config.output_file)
@@ -322,7 +322,7 @@ func finalize_dataset(config: clean_config, stats: &clean_stats) bool {
     true
 }
 
-func split_dataset(string input_file, splits: dataset_splits, i64 train_size, i64 val_size) bool {
+func split_dataset(string input_file, dataset_splits splits, i64 train_size, i64 val_size) bool {
     let (content, ok) = file_read_text(input_file)
     if !ok {
         return false
@@ -350,7 +350,7 @@ func split_dataset(string input_file, splits: dataset_splits, i64 train_size, i6
     file_write_text(splits.test_file, test_data)
 }
 
-func write_cleaned_manifest(config: clean_config, splits: dataset_splits, i64 total, stats: &clean_stats) bool {
+func write_cleaned_manifest(clean_config config, dataset_splits splits, i64 total, &clean_stats stats) bool {
     let manifest = "{
   \"dataset_name\": \"neurx-pretrain-dataset\",
   \"version\": \"1.0\",
@@ -369,7 +369,7 @@ func write_cleaned_manifest(config: clean_config, splits: dataset_splits, i64 to
     file_write_text(config.manifest_file, manifest)
 }
 
-func write_empty_manifest(config: clean_config) bool {
+func write_empty_manifest(clean_config config) bool {
     let manifest = "{
   \"dataset_name\": \"neurx-pretrain-dataset\",
   \"version\": \"1.0\",
@@ -409,7 +409,7 @@ func i64_to_string(i64 n) string {
     ""
 }
 
-func string(u8 ch:) string {
+func string(u8 ch) string {
     ""
 }
 pub func main() i32 {
