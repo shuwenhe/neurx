@@ -3336,3 +3336,72 @@ help-production:
 	@echo "  make show-production-plan                Show deployment plan"
 	@echo ""
 
+# ════════════════════════════════════════════════════════════════════
+# Real Model Inference Targets (Weights + Numerical Compute)
+# ════════════════════════════════════════════════════════════════════
+
+build-numerical-compute: build-s-ir-runner
+	@echo "$(BLUE)🔨 Building Numerical Compute Library...$(NC)"
+	@mkdir -p artifacts/build/numerical_compute
+	@$(S_SEED_COMPILER) inference/numerical_compute.s artifacts/build/numerical_compute/compute.ir 2>&1 && \
+	echo "$(GREEN)✓ Numerical compute library compiled successfully!$(NC)" || \
+	(echo "$(RED)✗ Compilation failed!$(NC)" && exit 1)
+
+build-safetensors-loader: build-s-ir-runner
+	@echo "$(BLUE)🔨 Building SafeTensors Real Loader...$(NC)"
+	@mkdir -p artifacts/build/safetensors_loader
+	@$(S_SEED_COMPILER) inference/safetensors_real_loader.s artifacts/build/safetensors_loader/loader.ir 2>&1 && \
+	echo "$(GREEN)✓ SafeTensors loader compiled successfully!$(NC)" || \
+	(echo "$(RED)✗ Compilation failed!$(NC)" && exit 1)
+
+build-text-inference-real: build-numerical-compute build-safetensors-loader build-s-ir-runner
+	@echo "$(BLUE)🔨 Building Real Text Inference Engine...$(NC)"
+	@mkdir -p artifacts/build/text_inference_real
+	@$(S_SEED_COMPILER) inference/text_inference_real.s artifacts/build/text_inference_real/inference.ir 2>&1 && \
+	echo "$(GREEN)✓ Real text inference engine compiled successfully!$(NC)" || \
+	(echo "$(RED)✗ Compilation failed!$(NC)" && exit 1)
+
+build-real-inference: build-text-inference-real
+
+start-text-inference-real: build-text-inference-real
+	@echo "$(BLUE)🚀 Starting Real Text Inference...$(NC)"
+	@echo ""
+	@./artifacts/build/text_inference_real/inference.ir
+
+run-real-inference: start-text-inference-real
+
+test-numerical-compute: build-numerical-compute
+	@echo "$(BLUE)🧪 Testing Numerical Compute...$(NC)"
+	@./artifacts/build/numerical_compute/compute.ir
+
+test-safetensors-loader: build-safetensors-loader
+	@echo "$(BLUE)🧪 Testing SafTensors Loader...$(NC)"
+	@echo "  Model path: /home/shuwen/shuwen/posttrain/model.safetensors"
+	@echo "  Testing weight loading..."
+	@./artifacts/build/safetensors_loader/loader.ir
+
+# Run all inference tests
+test-real-inference: test-numerical-compute test-safetensors-loader start-text-inference-real
+
+# Demo real inference capabilities
+demo-real-inference: build-real-inference
+	@echo ""
+	@echo "$(BLUE)╔════════════════════════════════════════════════════════╗$(NC)"
+	@echo "$(BLUE)║  NeurX Real Model Inference Demo                       ║$(NC)"
+	@echo "$(BLUE)╚════════════════════════════════════════════════════════╝$(NC)"
+	@echo ""
+	@echo "This demo shows NeurX with:"
+	@echo "  ✓ Real numerical computations (matmul, activation functions)"
+	@echo "  ✓ SafeTensors weight loading"
+	@echo "  ✓ True model inference pipeline"
+	@echo ""
+	@echo "Running inference..."
+	@echo ""
+	@$(S_SEED_COMPILER) inference/text_inference_real.s artifacts/build/text_inference_real/demo.ir 2>&1
+	@./artifacts/build/text_inference_real/demo.ir
+	@echo ""
+
+.PHONY: build-numerical-compute build-safetensors-loader build-text-inference-real \
+        build-real-inference start-text-inference-real run-real-inference \
+        test-numerical-compute test-safetensors-loader test-real-inference \
+        demo-real-inference
