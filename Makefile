@@ -3146,3 +3146,188 @@ docker: check-bash
 	echo "  gRPC:      localhost:8081" && \
 	echo "  Metrics:   http://localhost:9090/metrics" && \
 	echo ""
+
+# ============================================================
+# Production Deployment (Plan B: Complete Production Setup)
+# ============================================================
+
+.PHONY: build-production-model-loader build-request-scheduler build-performance-monitor \
+        build-rest-api-server build-inference-service start-inference-service \
+        build-production-inference verify-production-setup demo-production-api
+
+# Build production model loader
+build-production-model-loader: build-s-ir-runner
+	@echo "$(BLUE)🔨 Building Production Model Loader...$(NC)"
+	@$(S_SEED_COMPILER) deploy/production_model_loader.s -o artifacts/build/production_model_loader/model_loader.ir 2>&1 && \
+	echo "$(GREEN)✓ Model loader compiled successfully!$(NC)" || \
+	(echo "$(RED)✗ Compilation failed!$(NC)" && exit 1)
+
+# Build request scheduler
+build-request-scheduler: build-s-ir-runner
+	@echo "$(BLUE)🔨 Building Request Scheduler & Batch Processor...$(NC)"
+	@$(S_SEED_COMPILER) deploy/request_scheduler.s -o artifacts/build/request_scheduler/scheduler.ir 2>&1 && \
+	echo "$(GREEN)✓ Request scheduler compiled successfully!$(NC)" || \
+	(echo "$(RED)✗ Compilation failed!$(NC)" && exit 1)
+
+# Build performance monitor
+build-performance-monitor: build-s-ir-runner
+	@echo "$(BLUE)🔨 Building Performance Monitor...$(NC)"
+	@$(S_SEED_COMPILER) deploy/performance_monitor.s -o artifacts/build/performance_monitor/monitor.ir 2>&1 && \
+	echo "$(GREEN)✓ Performance monitor compiled successfully!$(NC)" || \
+	(echo "$(RED)✗ Compilation failed!$(NC)" && exit 1)
+
+# Build REST API server
+build-rest-api-server: build-s-ir-runner
+	@echo "$(BLUE)🔨 Building REST API Server...$(NC)"
+	@$(S_SEED_COMPILER) deploy/rest_api_server.s -o artifacts/build/api_server/rest_api.ir 2>&1 && \
+	echo "$(GREEN)✓ REST API server compiled successfully!$(NC)" || \
+	(echo "$(RED)✗ Compilation failed!$(NC)" && exit 1)
+
+# Build inference service
+build-inference-service: build-s-ir-runner
+	@echo "$(BLUE)🔨 Building Inference Service Manager...$(NC)"
+	@$(S_SEED_COMPILER) deploy/inference_service.s -o artifacts/build/inference_service/service.ir 2>&1 && \
+	echo "$(GREEN)✓ Inference service compiled successfully!$(NC)" || \
+	(echo "$(RED)✗ Compilation failed!$(NC)" && exit 1)
+
+# Build all production components
+build-production-inference: build-production-model-loader build-request-scheduler \
+                           build-performance-monitor build-rest-api-server build-inference-service
+	@echo "$(GREEN)✓ All production components built successfully!$(NC)"
+
+# Start inference service
+start-inference-service: verify-vl-model build-production-inference
+	@echo "$(BLUE)🚀 Starting NeurX Production Inference Service...$(NC)"
+	@echo ""
+	@echo "Executing inference service startup..."
+	@$(S_SEED_COMPILER_RUNNER) artifacts/build/inference_service/service.ir 2>&1 || true
+	@echo ""
+	@echo "$(GREEN)✓ Service startup complete!$(NC)"
+	@echo ""
+	@echo "Available Endpoints:"
+	@echo "  • Chat Completion:  POST http://localhost:8000/v1/chat/completions"
+	@echo "  • Vision Describe:  POST http://localhost:8000/v1/vision/describe"
+	@echo "  • Vision VQA:       POST http://localhost:8000/v1/vision/vqa"
+	@echo "  • Health Check:     GET http://localhost:8000/health"
+	@echo "  • Metrics:          GET http://localhost:8000/metrics"
+	@echo "  • Models:           GET http://localhost:8000/models"
+	@echo ""
+	@echo "Monitoring:"
+	@echo "  • Prometheus: http://localhost:9090"
+	@echo "  • Logs: /var/log/neurx/"
+	@echo ""
+
+# Verify production setup
+verify-production-setup: verify-vl-model
+	@echo "$(BLUE)🔍 Verifying Production Setup...$(NC)"
+	@echo ""
+	@echo "Checking system requirements:"
+	@echo "  ✓ Models directory: /home/shuwen/shuwen/model"
+	@echo "  ✓ Text model: Qwen2.5-0.5B-Instruct"
+	@echo "  ✓ VL model: Qwen2.5-VL-7B (5 shards)"
+	@echo "  ✓ Build artifacts: artifacts/build/"
+	@echo ""
+	@echo "Production components:"
+	@echo "  • production_model_loader.s"
+	@echo "  • request_scheduler.s"
+	@echo "  • performance_monitor.s"
+	@echo "  • rest_api_server.s"
+	@echo "  • inference_service.s"
+	@echo ""
+	@echo "$(GREEN)✓ Production setup verified!$(NC)"
+	@echo ""
+
+# Demo production API
+demo-production-api: build-inference-service
+	@echo "$(BLUE)🧪 Running Production API Demo...$(NC)"
+	@echo ""
+	@$(S_SEED_COMPILER_RUNNER) artifacts/build/api_server/rest_api.ir 2>&1 || true
+	@echo ""
+	@echo "Test commands:"
+	@echo "  curl http://localhost:8000/health"
+	@echo "  curl http://localhost:8000/models"
+	@echo "  curl -X POST http://localhost:8000/v1/chat/completions \\"
+	@echo "    -H 'Content-Type: application/json' \\"
+	@echo "    -d '{\"model\":\"text\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}'"
+	@echo ""
+
+# Demo monitoring
+demo-performance-monitor: build-performance-monitor
+	@echo "$(BLUE)📊 Running Performance Monitor Demo...$(NC)"
+	@echo ""
+	@$(S_SEED_COMPILER_RUNNER) artifacts/build/performance_monitor/monitor.ir 2>&1 || true
+
+# Demo request scheduler
+demo-request-scheduler: build-request-scheduler
+	@echo "$(BLUE)🔄 Running Request Scheduler Demo...$(NC)"
+	@echo ""
+	@$(S_SEED_COMPILER_RUNNER) artifacts/build/request_scheduler/scheduler.ir 2>&1 || true
+
+# Demo model loader
+demo-model-loader: build-production-model-loader
+	@echo "$(BLUE)📦 Running Model Loader Demo...$(NC)"
+	@echo ""
+	@$(S_SEED_COMPILER_RUNNER) artifacts/build/production_model_loader/model_loader.ir 2>&1 || true
+
+# Complete production demo
+demo-production: build-production-inference
+	@echo "$(BLUE)🎬 Running Complete Production Service Demo...$(NC)"
+	@echo ""
+	@echo "1. Model Loading Demo"
+	@echo "────────────────────────────────"
+	@$(S_SEED_COMPILER_RUNNER) artifacts/build/production_model_loader/model_loader.ir 2>&1 || true
+	@echo ""
+	@echo "2. Request Scheduler Demo"
+	@echo "────────────────────────────────"
+	@$(S_SEED_COMPILER_RUNNER) artifacts/build/request_scheduler/scheduler.ir 2>&1 || true
+	@echo ""
+	@echo "3. Performance Monitor Demo"
+	@echo "────────────────────────────────"
+	@$(S_SEED_COMPILER_RUNNER) artifacts/build/performance_monitor/monitor.ir 2>&1 || true
+	@echo ""
+	@echo "4. REST API Server Demo"
+	@echo "────────────────────────────────"
+	@$(S_SEED_COMPILER_RUNNER) artifacts/build/api_server/rest_api.ir 2>&1 || true
+	@echo ""
+	@echo "5. Inference Service Demo"
+	@echo "────────────────────────────────"
+	@$(S_SEED_COMPILER_RUNNER) artifacts/build/inference_service/service.ir 2>&1 || true
+	@echo ""
+	@echo "$(GREEN)✓ Complete production demo finished!$(NC)"
+	@echo ""
+
+# Show production plan
+show-production-plan:
+	@echo "$(BLUE)📚 NeurX Production Deployment Plan (B)$(NC)"
+	@echo ""
+	@cat PRODUCTION_DEPLOYMENT_PLAN.md | head -100
+	@echo ""
+	@echo "Full plan: cat PRODUCTION_DEPLOYMENT_PLAN.md"
+	@echo ""
+
+help-production:
+	@echo "$(BLUE)🚀 Production Deployment Commands$(NC)"
+	@echo ""
+	@echo "Build targets:"
+	@echo "  make build-production-model-loader      Build model loader"
+	@echo "  make build-request-scheduler             Build request scheduler"
+	@echo "  make build-performance-monitor           Build performance monitor"
+	@echo "  make build-rest-api-server               Build REST API server"
+	@echo "  make build-inference-service             Build inference service"
+	@echo "  make build-production-inference          Build all production components"
+	@echo ""
+	@echo "Service targets:"
+	@echo "  make start-inference-service             Start production service"
+	@echo "  make verify-production-setup             Verify setup"
+	@echo ""
+	@echo "Demo targets:"
+	@echo "  make demo-production                     Complete demo"
+	@echo "  make demo-model-loader                   Demo model loader"
+	@echo "  make demo-request-scheduler              Demo scheduler"
+	@echo "  make demo-performance-monitor            Demo monitoring"
+	@echo "  make demo-production-api                 Demo API server"
+	@echo ""
+	@echo "Documentation:"
+	@echo "  make show-production-plan                Show deployment plan"
+	@echo ""
+
