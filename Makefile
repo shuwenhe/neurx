@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain-cpu posttrain-gpu posttrain-npu posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat-cpu chat-gpu chat-npu chat-xt real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference build-model-inference-s model-weight-probe model-projection-probe download-model verify-deployment start-inference-service show-deployment-info deploy-local build-local-inference verify-vl-model build-vl-inference start-vl-inference deploy-vl-local vllm-distributed-test vllm-missing-capabilities-test \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain-cpu posttrain-gpu posttrain-npu posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat-cpu chat-gpu chat-npu chat-xt real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference build-model-inference-s model-weight-probe model-projection-probe download-model verify-deployment start-inference-service show-deployment-info deploy-local build-local-inference verify-vl-model build-vl-inference start-vl-inference deploy-vl-local vllm-distributed-test vllm-missing-capabilities-test vllm-remaining-capabilities-test \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -2841,6 +2841,26 @@ vllm-missing-capabilities-test: check-bash build-s-ir-runner
 			artifacts/build/vllm_missing_capabilities/test.ir
 	@cd '$(CURDIR_UNIX)' && \
 		'$(S_RUNNER_BIN)' artifacts/build/vllm_missing_capabilities/test.ir
+
+vllm-remaining-capabilities-test: check-bash build-s-ir-runner
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/vllm_remaining_capabilities'
+	@cd '$(CURDIR_UNIX)' && \
+		awk 'BEGIN { print "package main\n" } /^package / { next } /^use neurx\./ { next } { print }' \
+			inference/cache/kv_event_stream.s \
+			inference/cache/tiered_kv_offload.s \
+			inference/reasoning/reasoning_parser_registry.s \
+			inference/tokenizer/tokenizer_renderer_registry.s \
+			inference/runtime/model_capability_inspection.s \
+			inference/multimodal/media_cache_budget.s \
+			inference/plugins/plugin_registry.s \
+			tests/vllm_s_remaining_contract.s \
+			> artifacts/build/vllm_remaining_capabilities/test.bundle.s
+	@cd '$(CURDIR_UNIX)' && \
+		'$(S_COMPILER)' \
+			artifacts/build/vllm_remaining_capabilities/test.bundle.s \
+			artifacts/build/vllm_remaining_capabilities/test.ir
+	@cd '$(CURDIR_UNIX)' && \
+		'$(S_RUNNER_BIN)' artifacts/build/vllm_remaining_capabilities/test.ir
 posttrain-simple: check-bash build-s-ir-runner
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_simple'
 	@echo "======================================================"
