@@ -185,7 +185,7 @@ struct pretrain_state {
     } performance
 }
 
-func create_pretrain_state(config: pretrain_config) pretrain_state {
+func create_pretrain_state(pretrain_config config) pretrain_state {
     print("\n" + "="*70)
     print("Initializing NEURX Pretraining State")
     print("="*70)
@@ -237,8 +237,8 @@ func create_pretrain_state(config: pretrain_config) pretrain_state {
 }
 
 func get_learning_rate(
-    state: pretrain_state,
-    step: int
+    pretrain_state state,
+    int step
 ) {
     pretrain_config cfg = state.config
     if step <= cfg.warmup_steps:
@@ -260,7 +260,7 @@ func get_learning_rate(
 }
 
 func sample_training_task(
-    state: pretrain_state
+    pretrain_state state
 ) {
     float rand_val = rand()
     float cumulative = 0.0
@@ -277,9 +277,9 @@ func sample_training_task(
 }
 
 func prepare_clm_batch(
-    tokenizer: tokenizer_state,
-    batch_texts: []string,
-    max_len: int
+    tokenizer_state tokenizer,
+    []string batch_texts,
+    int max_len
 ) {
     """
     English text CLM (Causal LM) batchdata
@@ -308,10 +308,10 @@ func prepare_clm_batch(
     }
 
 func prepare_mlm_batch(
-    tokenizer: tokenizer_state,
-    batch_texts: []string,
-    max_len: int,
-    mlm_probability: float = 0.15
+    tokenizer_state tokenizer,
+    []string batch_texts,
+    int max_len,
+    float = 0.15 mlm_probability
 ) {
     """
     English text MLM (Masked LM) batchdata
@@ -351,11 +351,11 @@ func prepare_mlm_batch(
     }
 
 func prepare_prefix_lm_batch(
-    tokenizer: tokenizer_state,
-    batch_prefixes: []string,
-    batch_continuations: []string,
-    max_len: int,
-    max_prefix_ratio: float = 0.7
+    tokenizer_state tokenizer,
+    []string batch_prefixes,
+    []string batch_continuations,
+    int max_len,
+    float = 0.7 max_prefix_ratio
 ) {
     """
     English text PrefixLM batchdata
@@ -399,10 +399,10 @@ func prepare_prefix_lm_batch(
 func train_step(
     ref pretrain_state state,
     neurx_model model,
-    optimizer: adam_w,
-    batch: dict[str, any],
-    scaler: GradScaler,
-    rank: int = 0
+    adam_w optimizer,
+    dict[str, any] batch,
+    GradScaler scaler,
+    int = 0 rank
 ) {
     """
     English textsteptraining
@@ -498,11 +498,11 @@ func train_step(
     return loss_value
 
 func evaluate(
-    state: pretrain_state,
+    pretrain_state state,
     neurx_model model,
-    eval_dataloader: data_loader,
-    tokenizer: tokenizer_state,
-    max_eval_batches: int = 50
+    data_loader eval_dataloader,
+    tokenizer_state tokenizer,
+    int = 50 max_eval_batches
 ) {
     """
     English textevaluationmodel
@@ -548,8 +548,8 @@ func evaluate(
     return metrics
 
 func run_pretraining(
-    model_config_path: option<string> = none,
-    resume_from_checkpoint: option[string] = none
+    option<string> = none model_config_path,
+    option[string] = none resume_from_checkpoint
 ) {
     """
     mainEnglish text: start NEURX English texttrainingpipeline
@@ -672,7 +672,7 @@ func run_pretraining(
         )
 
 func log_training_progress(
-    state: pretrain_state,
+    pretrain_state state,
     float loss: float) {
     pretrain_config cfg = state.config
     int tokens_per_step = cfg.batch_size_per_gpu * cfg.gradient_accum_steps * cfg.max_seq_len
@@ -710,7 +710,7 @@ func log_training_progress(
 }
 
 func log_evaluation_results(
-    state: pretrain_state,
+    pretrain_state state,
     dict[str, float] metrics) {
     print(f"\n{'='*50}")
     print(f"📊 Evaluation Results (Step {state.current_step:,})")

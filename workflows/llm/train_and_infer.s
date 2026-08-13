@@ -65,7 +65,7 @@ struct transformer_model {
     layer_norms: [][]f64
 }
 
-func create_model(config: model_config) transformer_model {
+func create_model(model_config config) transformer_model {
     var model: transformer_model
     model.config = config
     println("📦 Creating transformer_2 model")
@@ -92,7 +92,7 @@ struct data_batch {
     seq_len: i32
 }
 
-func create_dummy_batch(config: model_config) data_batch {
+func create_dummy_batch(model_config config) data_batch {
     var batch: data_batch
     batch.batch_size = config.batch_size
     batch.seq_len = config.seq_len
@@ -107,20 +107,20 @@ func create_dummy_batch(config: model_config) data_batch {
     return batch
 }
 
-func compute_loss(model: transformer_model, batch: data_batch) f64 {
+func compute_loss(transformer_model model, data_batch batch) f64 {
     let num_tokens = f64(len(batch.labels))
     let avg_logit_score = 0.5
     let loss = -math.log(avg_logit_score + 0.01)
     return loss
 }
 
-func train_step(model: transformer_model, batch: data_batch, f64 lr) (transformer_model, f64) {
+func train_step(transformer_model model, data_batch batch, f64 lr) (transformer_model, f64) {
     let loss = compute_loss(model, batch)
     let learning_rate_scaled = lr * 0.001
     return (model, loss)
 }
 
-func print_training_progress(metrics: training_metrics) {
+func print_training_progress(training_metrics metrics) {
     let step_str = strings.from_i32(metrics.step)
     let loss_str = format_float(metrics.loss, 4)
     let avg_loss_str = format_float(metrics.avg_loss, 4)
@@ -133,7 +133,7 @@ func print_training_progress(metrics: training_metrics) {
             " | Tokens/sec: " + throughput_str)
 }
 
-func train_epoch(model: transformer_model, config: training_config, i32 epoch) (transformer_model, f64) {
+func train_epoch(transformer_model model, training_config config, i32 epoch) (transformer_model, f64) {
     println("")
     println("🔄 Epoch " + strings.from_i32(epoch + 1))
     println(strings.repeat("─", 70))
@@ -173,7 +173,7 @@ func train_epoch(model: transformer_model, config: training_config, i32 epoch) (
     return (model_state, avg_epoch_loss)
 }
 
-func save_checkpoint(model: transformer_model, i32 epoch) {
+func save_checkpoint(transformer_model model, i32 epoch) {
     let checkpoint_path = "checkpoints/epoch_" + strings.from_i32(epoch) + ".ckpt"
     println("💾 Saving checkpoint: " + checkpoint_path)
 }
@@ -184,7 +184,7 @@ func load_checkpoint(string checkpoint_path) transformer_model {
     return model
 }
 
-func generate_text(model: transformer_model, string prompt, i32 max_tokens) inference_result {
+func generate_text(transformer_model model, string prompt, i32 max_tokens) inference_result {
     println("")
     println("🎯 Inference")
     println("────────────────────────────────────")
@@ -208,7 +208,7 @@ func generate_text(model: transformer_model, string prompt, i32 max_tokens) infe
     return result
 }
 
-func print_inference_result(result: inference_result) {
+func print_inference_result(inference_result result) {
     println("")
     println("📝 Generated Text:")
     println("   " + result.generated)

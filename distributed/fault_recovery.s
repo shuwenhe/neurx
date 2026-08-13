@@ -52,9 +52,9 @@ structure recovery_state {
 }
 
 func new_checkpoint_manager(
-    base_path: string,
-    save_interval: int,
-    max_keep: int
+    string base_path,
+    int save_interval,
+    int max_keep
 ): checkpoint_manager {
     var manager: checkpoint_manager
     manager.base_path = base_path
@@ -71,16 +71,16 @@ func new_checkpoint_manager(
 }
 
 func save_full_checkpoint(
-    global_step: int,
-    epoch: int,
-    loss: float,
-    learning_rate: float,
-    model_params: vector,
-    optimizer_state: vector,
-    training_state: vector,
-    manager: checkpoint_manager,
-    num_ranks: int,
-    rank: int
+    int global_step,
+    int epoch,
+    float loss,
+    float learning_rate,
+    vector model_params,
+    vector optimizer_state,
+    vector training_state,
+    checkpoint_manager manager,
+    int num_ranks,
+    int rank
 ): checkpoint_metadata {
     var metadata: checkpoint_metadata
     metadata.checkpoint_id = global_step
@@ -123,14 +123,14 @@ func save_full_checkpoint(
 }
 
 func save_incremental_checkpoint(
-    global_step: int,
-    last_checkpoint_step: int,
-    model_params: vector,
-    model_params_prev: vector,
-    optimizer_state: vector,
-    manager: checkpoint_manager,
-    num_ranks: int,
-    rank: int
+    int global_step,
+    int last_checkpoint_step,
+    vector model_params,
+    vector model_params_prev,
+    vector optimizer_state,
+    checkpoint_manager manager,
+    int num_ranks,
+    int rank
 ): checkpoint_metadata {
     var vector changed_indices = allocate_vector(100, 0.0)
     var num_changed: int = 0
@@ -156,10 +156,10 @@ func save_incremental_checkpoint(
 }
 
 func load_checkpoint_for_recovery(
-    checkpoint_id: int,
-    manager: checkpoint_manager,
-    num_ranks: int,
-    rank: int
+    int checkpoint_id,
+    checkpoint_manager manager,
+    int num_ranks,
+    int rank
 ): (vector, vector, vector, checkpoint_metadata) {
     var string ckpt_dir = manager.base_path + "/checkpoint_" + str(checkpoint_id)
     var string rank_file = ckpt_dir + "/rank_" + str(rank) + ".ckpt"
@@ -187,11 +187,11 @@ func load_checkpoint_for_recovery(
 }
 
 func verify_checkpoint_integrity(
-    model_params: vector,
-    optimizer_state: vector,
-    expected_metadata: checkpoint_metadata,
-    num_ranks: int,
-    rank: int
+    vector model_params,
+    vector optimizer_state,
+    checkpoint_metadata expected_metadata,
+    int num_ranks,
+    int rank
 ): bool {
     var is_valid: bool = true
     var int local_checksum = compute_checkpoint_checksum(model_params, optimizer_state)
@@ -213,12 +213,12 @@ func verify_checkpoint_integrity(
 }
 
 func detect_and_handle_failure(
-    current_loss: float,
-    prev_loss: float,
-    gradients: vector,
-    num_ranks: int,
-    rank: int,
-    recovery_state: recovery_state
+    float current_loss,
+    float prev_loss,
+    vector gradients,
+    int num_ranks,
+    int rank,
+    recovery_state recovery_state
 ): bool {
     var should_recover: bool = false
     var failure_reason: string = ""
@@ -255,11 +255,11 @@ func detect_and_handle_failure(
 }
 
 func execute_recovery(
-    last_checkpoint_id: int,
-    manager: checkpoint_manager,
-    num_ranks: int,
-    rank: int,
-    recovery_strategy_type: recovery_strategy
+    int last_checkpoint_id,
+    checkpoint_manager manager,
+    int num_ranks,
+    int rank,
+    recovery_strategy recovery_strategy_type
 ): (vector, vector, vector, checkpoint_metadata) {
     var (model_params, optimizer_state, training_state, metadata) =
         load_checkpoint_for_recovery(last_checkpoint_id, manager, num_ranks, rank)
@@ -288,18 +288,18 @@ func execute_recovery(
 }
 
 func distributed_training_with_recovery(
-    training_steps: int,
-    checkpoint_interval: int,
-    model_forward: func(vector): vector,
-    compute_loss_func: func(vector, vector): float,
-    inputs: vector,
-    targets: vector,
-    model_params: vector,
-    optimizer_state: vector,
-    learning_rate: float,
-    manager: checkpoint_manager,
-    num_ranks: int,
-    rank: int
+    int training_steps,
+    int checkpoint_interval,
+    func(vector): vector model_forward,
+    func(vector, vector): float compute_loss_func,
+    vector inputs,
+    vector targets,
+    vector model_params,
+    vector optimizer_state,
+    float learning_rate,
+    checkpoint_manager manager,
+    int num_ranks,
+    int rank
 ): (vector, vector) {
     var current_params: vector = model_params
     var current_optimizer_state: vector = optimizer_state
@@ -358,8 +358,8 @@ func compute_checkpoint_checksum(vector model_params, vector optimizer_state): i
 }
 
 func collect_rank_checkpoint_data(
-    model_params: vector, optimizer_state: vector, training_state: vector,
-    rank: int, num_ranks: int
+    vector model_params, vector optimizer_state, vector training_state,
+    int rank, int num_ranks
 ): vector {
     var int total_size = length(model_params) + length(optimizer_state) + length(training_state)
     var vector data = allocate_vector(total_size, 0.0)
@@ -378,7 +378,7 @@ func get_time(): float {
 func create_directory(string path): void {
 }
 
-func save_metadata(metadata: checkpoint_metadata, string file): void {
+func save_metadata(checkpoint_metadata metadata, string file): void {
 }
 
 func save_binary(vector data, string file): void {
@@ -430,13 +430,13 @@ func barrier_all_ranks(int num_ranks, int rank): void {
 func replicate_checkpoint_files(string dir, int factor): void {
 }
 
-func add_to_checkpoint_db(vector db, metadata: checkpoint_metadata, int max_keep): void {
+func add_to_checkpoint_db(vector db, checkpoint_metadata metadata, int max_keep): void {
 }
 
 func cleanup_old_checkpoints(string base_path, int max_keep): void {
 }
 
-func broadcast_metadata(metadata: checkpoint_metadata, int num_ranks, int rank): void {
+func broadcast_metadata(checkpoint_metadata metadata, int num_ranks, int rank): void {
 }
 
 func all_reduce_and(bool value, int num_ranks, int rank): bool {
@@ -447,7 +447,7 @@ func check_communication_health(int num_ranks, int rank): bool {
     return true
 }
 
-func find_previous_valid_checkpoint(int ckpt_id, manager: checkpoint_manager, int num_ranks, int rank): int {
+func find_previous_valid_checkpoint(int ckpt_id, checkpoint_manager manager, int num_ranks, int rank): int {
     return ckpt_id - manager.save_interval
 }
 

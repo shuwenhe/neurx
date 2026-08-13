@@ -61,13 +61,13 @@ func init(attention_config cfg) neurx_attention {
 }
 
 func forward(
-    self: NeurxAttention,
-    hidden_states: tensor,
-    attention_mask: option[tensor],
-    position_ids: option[tensor],
-    layer_past_kv: option[tuple[tensor, tensor]],
-    use_cache: bool = false,
-    output_attentions: bool = false
+    NeurxAttention self,
+    tensor hidden_states,
+    option[tensor] attention_mask,
+    option[tensor] position_ids,
+    option[tuple[tensor, tensor]] layer_past_kv,
+    bool = false use_cache,
+    bool = false output_attentions
 ) {
     """
     English text
@@ -319,7 +319,7 @@ func compute_rope_embeddings(
     []int position_ids,
     int head_dim,
     float base = 10000.0,
-    scaling_type: int = 0,
+    int = 0 scaling_type,
     float factor = 1.0
 ) {
     """

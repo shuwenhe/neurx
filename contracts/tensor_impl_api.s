@@ -10,7 +10,7 @@ struct version_counter {
 struct autograd_meta {
     requires_grad: bool
     is_leaf: bool
-    grad_fn: func(grad_output: tensor) -> []tensor
+    grad_fn: func(tensor grad_output) -> []tensor
     saved_tensors: []tensor
 }
 

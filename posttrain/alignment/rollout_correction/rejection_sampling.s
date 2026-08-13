@@ -10,8 +10,8 @@ struct rs_result {
 }
 
 func compute_k1_divergence(
-    new_log_probs: Tensor,
-    rollout_log_probs: Tensor
+    Tensor new_log_probs,
+    Tensor rollout_log_probs
 ) -> Tensor {
     let log_ratio = new_log_probs - rollout_log_probs
     let ratio = exp(log_ratio)
@@ -20,16 +20,16 @@ func compute_k1_divergence(
 }
 
 func compute_k2_divergence(
-    new_log_probs: Tensor,
-    rollout_log_probs: Tensor
+    Tensor new_log_probs,
+    Tensor rollout_log_probs
 ) -> Tensor {
     let log_ratio = new_log_probs - rollout_log_probs
     return 0.5 * (log_ratio * log_ratio)
 }
 
 func compute_k3_divergence(
-    new_log_probs: Tensor,
-    rollout_log_probs: Tensor
+    Tensor new_log_probs,
+    Tensor rollout_log_probs
 ) -> Tensor {
     let log_ratio = new_log_probs - rollout_log_probs
     let ratio = exp(log_ratio)
@@ -37,11 +37,11 @@ func compute_k3_divergence(
 }
 
 func compute_token_rejection(
-    new_log_probs: Tensor,
-    rollout_log_probs: Tensor,
-    mode: RejectionMode,
-    threshold: RSThreshold,
-    response_mask: Tensor
+    Tensor new_log_probs,
+    Tensor rollout_log_probs,
+    RejectionMode mode,
+    RSThreshold threshold,
+    Tensor response_mask
 ) -> RSResult {
     let divergence: Tensor
     match mode {
@@ -80,11 +80,11 @@ func compute_token_rejection(
 }
 
 func compute_sequence_rejection(
-    new_log_probs: Tensor,
-    rollout_log_probs: Tensor,
-    mode: RejectionMode,
-    threshold: RSThreshold,
-    response_mask: Tensor
+    Tensor new_log_probs,
+    Tensor rollout_log_probs,
+    RejectionMode mode,
+    RSThreshold threshold,
+    Tensor response_mask
 ) -> RSResult {
     let batch_size = new_log_probs.shape[0]
     let seq_len = new_log_probs.shape[1]
@@ -149,11 +149,11 @@ func compute_sequence_rejection(
 }
 
 func compute_rejection_sampling(
-    new_log_probs: Tensor,
-    rollout_log_probs: Tensor,
-    old_log_probs: Tensor,
-    config: RolloutCorrectionConfig,
-    response_mask: Tensor
+    Tensor new_log_probs,
+    Tensor rollout_log_probs,
+    Tensor old_log_probs,
+    RolloutCorrectionConfig config,
+    Tensor response_mask
 ) -> []rs_result {
     let results: []rs_result = []
     if config.rs_modes.len() == 0 {
@@ -194,7 +194,7 @@ func compute_rejection_sampling(
     return results
 }
 
-func combine_rejection_results(results: []rs_result) -> RSResult {
+func combine_rejection_results([]rs_result results) -> RSResult {
     if results.len() == 0 {
         return rs_result{
             rejection_mask: tensor_zeros([1, 1]).to_bool(),
@@ -231,13 +231,13 @@ func combine_rejection_results(results: []rs_result) -> RSResult {
 }
 
 func apply_rejection_to_mask(
-    response_mask: Tensor,
-    rejection_result: RSResult
+    Tensor response_mask,
+    RSResult rejection_result
 ) -> Tensor {
     return response_mask * (1.0 - rejection_result.rejection_mask.to_float())
 }
 
-func compute_rs_statistics(results: []rs_result) -> map[string]f32 {
+func compute_rs_statistics([]rs_result results) -> map[string]f32 {
     let stats = map[string]f32{}
     for i in 0..results.len() {
         let prefix = f"rs_mode_{i}"
@@ -252,10 +252,10 @@ func compute_rs_statistics(results: []rs_result) -> map[string]f32 {
     return stats
 }
 
-func clamp(x: Tensor, f32 min_val, f32 max_val) -> Tensor {
+func clamp(Tensor x, f32 min_val, f32 max_val) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
 
-func where(condition: Tensor, x: Tensor, y: Tensor) -> Tensor {
+func where(Tensor condition, Tensor x, Tensor y) -> Tensor {
     return condition.to_float() * x + (1.0 - condition.to_float()) * y
 }

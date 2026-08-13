@@ -32,10 +32,10 @@ struct dppo_trainer {
 }
 
 func new_dppo_trainer(
-    config: dppo_config,
-    policy: *model,
-    value: *model,
-    reference: *model
+    dppo_config config,
+    *model policy,
+    *model value,
+    *model reference
 ) -> DPPOTrainer {
     let params = policy.parameters()
     if config.use_value_loss {
@@ -54,10 +54,10 @@ func new_dppo_trainer(
     }
 }
 
-func (trainer: *dppo_trainer) compute_binary_kl_constraint(
-    new_probs: Tensor,
-    old_probs: Tensor,
-    advantage: Tensor
+func (trainer *dppo_trainer) compute_binary_kl_constraint(
+    Tensor new_probs,
+    Tensor old_probs,
+    Tensor advantage
 ) -> Tensor {
     let epsilon = 1e-8
     let p_new = clamp(new_probs, epsilon, 1.0 - epsilon)
@@ -71,10 +71,10 @@ func (trainer: *dppo_trainer) compute_binary_kl_constraint(
     return constrained_ratio * advantage
 }
 
-func (trainer: *dppo_trainer) compute_binary_tv_constraint(
-    new_probs: Tensor,
-    old_probs: Tensor,
-    advantage: Tensor
+func (trainer *dppo_trainer) compute_binary_tv_constraint(
+    Tensor new_probs,
+    Tensor old_probs,
+    Tensor advantage
 ) -> Tensor {
     let tv = abs(new_probs - old_probs)
     let tv_violation = (tv > trainer.current_epsilon).to_float()
@@ -84,10 +84,10 @@ func (trainer: *dppo_trainer) compute_binary_tv_constraint(
     return constrained_ratio * advantage
 }
 
-func (trainer: *dppo_trainer) compute_constrained_objective(
-    new_log_probs: Tensor,
-    old_log_probs: Tensor,
-    advantage: Tensor
+func (trainer *dppo_trainer) compute_constrained_objective(
+    Tensor new_log_probs,
+    Tensor old_log_probs,
+    Tensor advantage
 ) -> Tensor {
     let new_probs = exp(new_log_probs)
     let old_probs = exp(old_log_probs)
@@ -119,7 +119,7 @@ func (trainer: *dppo_trainer) compute_constrained_objective(
     return constrained_obj
 }
 
-func (trainer: *dppo_trainer) update_adaptive_epsilon(f32 current_kl) {
+func (trainer *dppo_trainer) update_adaptive_epsilon(f32 current_kl) {
     if !trainer.config.use_adaptive_epsilon {
         return
     }
@@ -140,10 +140,10 @@ func (trainer: *dppo_trainer) update_adaptive_epsilon(f32 current_kl) {
     )
 }
 
-func (trainer: *dppo_trainer) compute_gae(
-    rewards: []tensor,
-    values: []tensor,
-    dones: []tensor
+func (trainer *dppo_trainer) compute_gae(
+    []tensor rewards,
+    []tensor values,
+    []tensor dones
 ) -> ([]tensor, []tensor) {
     let batch_size = rewards.len()
     let advantages: []tensor = []
@@ -170,10 +170,10 @@ func (trainer: *dppo_trainer) compute_gae(
     return advantages, returns
 }
 
-func (trainer: *dppo_trainer) train_step(
-    prompts: []tensor,
-    responses: []tensor,
-    rewards: []tensor
+func (trainer *dppo_trainer) train_step(
+    []tensor prompts,
+    []tensor responses,
+    []tensor rewards
 ) -> (f32, f32, f32) {
     let batch_size = prompts.len()
     let inputs: []tensor = []
@@ -272,7 +272,7 @@ func (trainer: *dppo_trainer) train_step(
     )
 }
 
-func (trainer: *dppo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
+func (trainer *dppo_trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
     for batch in train_data {
@@ -294,7 +294,7 @@ func (trainer: *dppo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     return policy_losses, value_losses
 }
 
-func compute_mean(values: []f32) -> f32 {
+func compute_mean([]f32 values) -> f32 {
     if values.len() == 0 {
         return 0.0
     }
@@ -305,7 +305,7 @@ func compute_mean(values: []f32) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_std(values: []f32, f32 mean) -> f32 {
+func compute_std([]f32 values, f32 mean) -> f32 {
     if values.len() == 0 {
         return 1.0
     }
@@ -316,6 +316,6 @@ func compute_std(values: []f32, f32 mean) -> f32 {
     return sqrt(sum_sq / f32(values.len()))
 }
 
-func clamp(x: Tensor, f32 min_val, f32 max_val) -> Tensor {
+func clamp(Tensor x, f32 min_val, f32 max_val) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }

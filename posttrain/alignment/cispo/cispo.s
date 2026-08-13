@@ -40,10 +40,10 @@ struct is_weight_stats {
 }
 
 func new_cispo_trainer(
-    config: cispo_config,
-    policy: *model,
-    value: *model,
-    reference: *model
+    cispo_config config,
+    *model policy,
+    *model value,
+    *model reference
 ) -> CISPOTrainer {
     let params = policy.parameters()
     if config.use_value_loss {
@@ -68,9 +68,9 @@ func new_cispo_trainer(
     }
 }
 
-func (trainer: *cispo_trainer) compute_is_weights(
-    new_log_probs: []tensor,
-    behavior_log_probs: []tensor
+func (trainer *cispo_trainer) compute_is_weights(
+    []tensor new_log_probs,
+    []tensor behavior_log_probs
 ) -> []tensor {
     let is_weights: []tensor = []
     for i in 0..new_log_probs.len() {
@@ -87,7 +87,7 @@ func (trainer: *cispo_trainer) compute_is_weights(
     return is_weights
 }
 
-func (trainer: *cispo_trainer) update_is_weight_stats(is_weights: []tensor) {
+func (trainer *cispo_trainer) update_is_weight_stats([]tensor is_weights) {
     let values: []f32 = []
     let clipped_count = 0
     let total_count = 0
@@ -120,10 +120,10 @@ func (trainer: *cispo_trainer) update_is_weight_stats(is_weights: []tensor) {
     trainer.is_weight_stats.clipped_ratio = f32(clipped_count) / f32(total_count)
 }
 
-func (trainer: *cispo_trainer) compute_cispo_objective(
-    ratio: Tensor,
-    advantage: Tensor,
-    is_weight: Tensor
+func (trainer *cispo_trainer) compute_cispo_objective(
+    Tensor ratio,
+    Tensor advantage,
+    Tensor is_weight
 ) -> Tensor {
     let positive_mask = (advantage > 0.0).to_float()
     let negative_mask = (advantage <= 0.0).to_float()
@@ -147,10 +147,10 @@ func (trainer: *cispo_trainer) compute_cispo_objective(
     return weighted_obj
 }
 
-func (trainer: *cispo_trainer) compute_gae(
-    rewards: []tensor,
-    values: []tensor,
-    dones: []tensor
+func (trainer *cispo_trainer) compute_gae(
+    []tensor rewards,
+    []tensor values,
+    []tensor dones
 ) -> ([]tensor, []tensor) {
     let batch_size = rewards.len()
     let advantages: []tensor = []
@@ -177,10 +177,10 @@ func (trainer: *cispo_trainer) compute_gae(
     return advantages, returns
 }
 
-func (trainer: *cispo_trainer) train_step(
-    prompts: []tensor,
-    responses: []tensor,
-    rewards: []tensor
+func (trainer *cispo_trainer) train_step(
+    []tensor prompts,
+    []tensor responses,
+    []tensor rewards
 ) -> (f32, f32, f32) {
     let batch_size = prompts.len()
     let inputs: []tensor = []
@@ -293,7 +293,7 @@ func (trainer: *cispo_trainer) train_step(
     )
 }
 
-func (trainer: *cispo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
+func (trainer *cispo_trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
     for batch in train_data {
@@ -320,7 +320,7 @@ func (trainer: *cispo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     return policy_losses, value_losses
 }
 
-func compute_mean(values: []f32) -> f32 {
+func compute_mean([]f32 values) -> f32 {
     if values.len() == 0 {
         return 0.0
     }
@@ -331,7 +331,7 @@ func compute_mean(values: []f32) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_std(values: []f32, f32 mean) -> f32 {
+func compute_std([]f32 values, f32 mean) -> f32 {
     if values.len() == 0 {
         return 1.0
     }
@@ -342,6 +342,6 @@ func compute_std(values: []f32, f32 mean) -> f32 {
     return sqrt(sum_sq / f32(values.len()))
 }
 
-func clamp(x: Tensor, f32 min_val, f32 max_val) -> Tensor {
+func clamp(Tensor x, f32 min_val, f32 max_val) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }

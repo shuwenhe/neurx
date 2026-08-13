@@ -185,9 +185,9 @@ func resume_training_from_checkpoint(string checkpoint_path) {
 }
 
 func evaluate_model(
-    model_state: model.transformer_state,
-    eval_batch_size: int,
-    num_eval_batches: int
+    model.transformer_state model_state,
+    int eval_batch_size,
+    int num_eval_batches
 ) float {
     var total_loss: float = 0.0
     var batch: int = 0
@@ -221,9 +221,9 @@ func print_header(string msg) {
 }
 
 func print_config(
-    tc: training_pipeline.training_config,
-    mc: mixed_precision.mixed_precision_config,
-    gc: gradient_accumulation.gradient_accumulation_config
+    training_pipeline.training_config tc,
+    mixed_precision.mixed_precision_config mc,
+    gradient_accumulation.gradient_accumulation_config gc
 ) {
 }
 
@@ -231,8 +231,8 @@ func print_epoch_header(int epoch) {
 }
 
 func print_step_info(
-    epoch: int, step: int, loss: float, perplexity: float,
-    grad_norm: float, loss_scale: float, accum_step: int
+    int epoch, int step, float loss, float perplexity,
+    float grad_norm, float loss_scale, int accum_step
 ) {
 }
 

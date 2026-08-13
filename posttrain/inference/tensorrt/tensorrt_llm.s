@@ -52,7 +52,7 @@ struct tensorrt_decoder {
     bad_words: []string
 }
 
-func new_tensorrt_engine(config: tensorrt_config) -> tensorrt_engine {
+func new_tensorrt_engine(tensorrt_config config) -> tensorrt_engine {
     let runtime = tensorrt_runtime{
         world_size: get_world_size(),
         rank: get_rank(),
@@ -94,10 +94,10 @@ func new_tensorrt_engine(config: tensorrt_config) -> tensorrt_engine {
     }
 }
 
-func (engine: *tensorrt_engine) generate(
-    input_ids: tensor,
-    max_new_tokens: i32,
-    sampling_config: SamplingConfig
+func (engine *tensorrt_engine) generate(
+    tensor input_ids,
+    i32 max_new_tokens,
+    SamplingConfig sampling_config
 ) -> (tensor, []f32) {
     engine.total_requests += 1
     let batch_size = input_ids.shape[0]
@@ -120,8 +120,8 @@ func (engine: *tensorrt_engine) generate(
     return output_ids, log_probs
 }
 
-func (engine: *tensorrt_engine) run_generation(
-    input: tensorrt_decoder_input
+func (engine *tensorrt_engine) run_generation(
+    tensorrt_decoder_input input
 ) -> (tensor, []f32) {
     let batch_size = input.input_ids.shape[0]
     let max_input_len = input.input_ids.shape[1]
@@ -160,10 +160,10 @@ func (engine: *tensorrt_engine) run_generation(
     return output_ids, log_probs
 }
 
-func (engine: *tensorrt_engine) sample(
-    logits: tensor,
-    config: SamplingConfig,
-    finished: tensor
+func (engine *tensorrt_engine) sample(
+    tensor logits,
+    SamplingConfig config,
+    tensor finished
 ) -> (tensor, []f32) {
     let batch_size = logits.shape[0]
     let scaled_logits = logits / config.temperature
@@ -191,7 +191,7 @@ func (engine: *tensorrt_engine) sample(
     return next_tokens, token_log_probs
 }
 
-func (engine: *tensorrt_engine) load_lora_adapter(string adapter_name, string adapter_path) {
+func (engine *tensorrt_engine) load_lora_adapter(string adapter_name, string adapter_path) {
     if engine.lora_manager == null {
         println("Error: LoRA manager not initialized")
         return
@@ -200,14 +200,14 @@ func (engine: *tensorrt_engine) load_lora_adapter(string adapter_name, string ad
     engine.active_adapters[adapter_name] = adapter
 }
 
-func (engine: *tensorrt_engine) apply_lora_adapters() {
+func (engine *tensorrt_engine) apply_lora_adapters() {
     for name, adapter in engine.active_adapters {
         engine.lora_manager.apply_adapter(adapter, engine.engine)
     }
 }
 
-func (engine: *tensorrt_engine) generate_batch(
-    requests: []generation_request
+func (engine *tensorrt_engine) generate_batch(
+    []generation_request requests
 ) -> []generation_response {
     let batch_size = requests.len()
     let input_ids_list: []tensor = []
@@ -238,7 +238,7 @@ func (engine: *tensorrt_engine) generate_batch(
     return responses
 }
 
-func (engine: *tensorrt_engine) get_statistics() -> (i64, i64, f32) {
+func (engine *tensorrt_engine) get_statistics() -> (i64, i64, f32) {
     let avg_tokens_per_request: f32 = 0.0
     if engine.total_requests > 0 {
         avg_tokens_per_request = f32(engine.total_tokens_generated) / f32(engine.total_requests)
@@ -284,6 +284,6 @@ func get_pad_token_id() -> i32 {
     return 0
 }
 
-func pad_sequences(sequences: []tensor, i32 max_len) -> tensor {
+func pad_sequences([]tensor sequences, i32 max_len) -> tensor {
     return sequences[0]
 }

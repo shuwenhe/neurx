@@ -83,7 +83,7 @@ func new_profiler_state() profiler_state {
 }
 
 func record_inference_profile(
-    profiler: profiler_state,
+    profiler_state profiler,
     int batch_size,
     int seq_len,
     float prefill_time,
@@ -119,7 +119,7 @@ func record_inference_profile(
 }
 
 func record_kernel_profile(
-    profile: inference_profile,
+    inference_profile profile,
     string kernel_name,
     int exec_count,
     float total_time,
@@ -149,7 +149,7 @@ func record_kernel_profile(
 }
 
 func recommend_optimizations(
-    profiler: profiler_state
+    profiler_state profiler
 ) string {
     if len(profiler.profiles) == 0 {
         return "No profiles available for recommendations"
@@ -188,7 +188,7 @@ func recommend_optimizations(
 }
 
 func generate_performance_report(
-    profiler: profiler_state
+    profiler_state profiler
 ) string {
     if len(profiler.profiles) == 0 {
         return "No inference profiles available"
@@ -239,8 +239,8 @@ func generate_performance_report(
 }
 
 func compare_profiles(
-    profile1: inference_profile,
-    profile2: inference_profile
+    inference_profile profile1,
+    inference_profile profile2
 ) string {
     result = "Profile Comparison:\n"
     result = result + "Profile 1 vs Profile 2\n"

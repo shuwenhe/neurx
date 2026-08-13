@@ -1,9 +1,9 @@
 import "tensor/tensor.s"
 
 func compute_rloo_advantages_vectorized(
-    rewards: Tensor,
-    response_mask: Tensor,
-    use_whitening: bool
+    Tensor rewards,
+    Tensor response_mask,
+    bool use_whitening
 ) -> Tensor {
     let batch_size = rewards.shape[0]
     let num_samples = rewards.shape[1]
@@ -27,10 +27,10 @@ func compute_rloo_advantages_vectorized(
 }
 
 func compute_rloo_loss_vectorized(
-    log_probs: Tensor,
-    rewards: Tensor,
-    response_mask: Tensor,
-    use_whitening: bool
+    Tensor log_probs,
+    Tensor rewards,
+    Tensor response_mask,
+    bool use_whitening
 ) -> (tensor, tensor) {
     let advantages = compute_rloo_advantages_vectorized(rewards, response_mask, use_whitening)
     let policy_loss = -(log_probs * advantages * response_mask)
@@ -40,10 +40,10 @@ func compute_rloo_loss_vectorized(
 }
 
 func compute_grpo_advantages_vectorized(
-    rewards: Tensor,
-    response_mask: Tensor,
-    use_whitening: bool,
-    advantage_eps: f32
+    Tensor rewards,
+    Tensor response_mask,
+    bool use_whitening,
+    f32 advantage_eps
 ) -> Tensor {
     let batch_size = rewards.shape[0]
     let group_size = rewards.shape[1]
@@ -70,14 +70,14 @@ func compute_grpo_advantages_vectorized(
 }
 
 func compute_grpo_loss_vectorized(
-    log_probs: Tensor,
-    ref_log_probs: Tensor,
-    rewards: Tensor,
-    response_mask: Tensor,
-    clip_epsilon: f32,
-    kl_coef: f32,
-    use_whitening: bool,
-    advantage_eps: f32
+    Tensor log_probs,
+    Tensor ref_log_probs,
+    Tensor rewards,
+    Tensor response_mask,
+    f32 clip_epsilon,
+    f32 kl_coef,
+    bool use_whitening,
+    f32 advantage_eps
 ) -> (tensor, tensor, tensor) {
     let advantages = compute_grpo_advantages_vectorized(
         rewards,
@@ -99,7 +99,7 @@ func compute_grpo_loss_vectorized(
     return total_loss, advantages, mean_kl
 }
 
-func stack_sequences(sequences: []tensor) -> Tensor {
+func stack_sequences([]tensor sequences) -> Tensor {
     if sequences.len() == 0 {
         return tensor_zeros([0, 0])
     }
@@ -112,7 +112,7 @@ func stack_sequences(sequences: []tensor) -> Tensor {
     return stacked
 }
 
-func stack_grouped_sequences(grouped_sequences: [][]tensor) -> Tensor {
+func stack_grouped_sequences([][]tensor grouped_sequences) -> Tensor {
     if grouped_sequences.len() == 0 {
         return tensor_zeros([0, 0, 0])
     }
@@ -128,7 +128,7 @@ func stack_grouped_sequences(grouped_sequences: [][]tensor) -> Tensor {
     return stacked
 }
 
-func unstack_tensor(stacked: Tensor) -> []tensor {
+func unstack_tensor(Tensor stacked) -> []tensor {
     let batch_size = stacked.shape[0]
     let sequences: []tensor = []
     for i in 0..batch_size {
@@ -138,9 +138,9 @@ func unstack_tensor(stacked: Tensor) -> []tensor {
 }
 
 func compute_batch_statistics(
-    values: Tensor,
-    mask: Tensor,
-    compute_variance: bool
+    Tensor values,
+    Tensor mask,
+    bool compute_variance
 ) -> (f32, f32, f32, f32) {
     let masked_values = values * mask
     let valid_count = mask.sum()
@@ -159,18 +159,18 @@ func compute_batch_statistics(
     return mean.item(), variance, min_val.item(), max_val.item()
 }
 
-func clamp(x: Tensor, f32 min_val, f32 max_val) -> Tensor {
+func clamp(Tensor x, f32 min_val, f32 max_val) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
 
-func minimum(x: Tensor, y: Tensor) -> Tensor {
+func minimum(Tensor x, Tensor y) -> Tensor {
     return where((x < y), x, y)
 }
 
-func where(condition: Tensor, x: Tensor, y: Tensor) -> Tensor {
+func where(Tensor condition, Tensor x, Tensor y) -> Tensor {
     return condition.to_float() * x + (1.0 - condition.to_float()) * y
 }
 
-func sqrt(x: Tensor) -> Tensor {
+func sqrt(Tensor x) -> Tensor {
     return x.pow(0.5)
 }

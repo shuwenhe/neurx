@@ -30,7 +30,7 @@ type checkpoint_manager struct {
 }
 
 func initialize_distributed_1t(int world_size, int rank,
-                              local_rank: int): distributed_trainer1_t {
+                              int local_rank): distributed_trainer1_t {
     trainer := distributed_trainer1_t{
         world_size: world_size,
         rank: rank,
@@ -48,7 +48,7 @@ type tensor_parallel_operator struct {
     tp_group_members: [string]
 }
 
-func (op *tensor_parallel_operator) split_linear_weight(weight_shape: [2]int): [2]int {
+func (op *tensor_parallel_operator) split_linear_weight([2]int weight_shape): [2]int {
     out_features := weight_shape[0]
     in_features := weight_shape[1]
     split_out := out_features / op.tp_size
@@ -72,7 +72,7 @@ type pipeline_scheduler struct {
 }
 
 func (ps *pipeline_scheduler) create_pipeline_stages(int num_stages,
-                                                   total_layers: int): {
+                                                   int total_layers): {
     layers_per_stage := total_layers / num_stages
     for i := 0; i < num_stages; i++ {
         stage := pipeline_stage{
@@ -101,7 +101,7 @@ func create_zero_optimizer_1t(): zero_optimizer {
     return zero
 }
 
-func (z *zero_optimizer) estimate_memory_reduction(original_bytes: int64): int64 {
+func (z *zero_optimizer) estimate_memory_reduction(int64 original_bytes): int64 {
     if z.stage == 3 {
         return original_bytes / 4
     } else if z.stage == 2 {
@@ -200,7 +200,7 @@ func create_training_loop_1t(int rank, int world_size): training_loop1_t {
     return loop
 }
 
-func (loop *training_loop1_t) forward_pass(batch_tokens: int64): float {
+func (loop *training_loop1_t) forward_pass(int64 batch_tokens): float {
     loss := 0.0
     time.Sleep(3 * time.Second)
     return loss
@@ -228,11 +228,11 @@ type communication_optimizer struct {
     overlap_communication: bool
 }
 
-func (co *communication_optimizer) all_reduce_grads_async(grad_size: int64): {
+func (co *communication_optimizer) all_reduce_grads_async(int64 grad_size): {
     fmt.Printf("  [COMM] All-reduce gradients (%d MB) asynchronously\n", grad_size / (1024 * 1024))
 }
 
-func (co *communication_optimizer) broadcast_weights_async(weight_size: int64): {
+func (co *communication_optimizer) broadcast_weights_async(int64 weight_size): {
     fmt.Printf("  [COMM] Broadcast weights (%d MB) asynchronously\n", weight_size / (1024 * 1024))
 }
 type performance_monitor struct {
@@ -244,19 +244,19 @@ type performance_monitor struct {
 }
 
 func (pm *performance_monitor) compute_throughput(int batch_size, int seq_len,
-                                               elapsed_seconds: float): float {
+                                               float elapsed_seconds): float {
     tokens_per_batch := batch_size * seq_len
     throughput := float(tokens_per_batch) / elapsed_seconds
     return throughput
 }
 
-func (pm *performance_monitor) compute_flops(params: int64, int batch_size,
-                                          seq_len: int): int64 {
+func (pm *performance_monitor) compute_flops(int64 params, int batch_size,
+                                          int seq_len): int64 {
     flops := 2 * params * int64(batch_size) * int64(seq_len)
     return flops
 }
 
-func (pm *performance_monitor) log_performance(state: training_state) {
+func (pm *performance_monitor) log_performance(training_state state) {
     fmt.Printf("\n[Step %d] Performance Metrics:\n", state.step)
     fmt.Printf("  Tokens/sec: %.0f\n", state.tokens_per_second)
     fmt.Printf("  TFLOPs/sec: %.1f\n", float(pm.compute_flops(1000000000000, 4096, 32768)) / 1e12 / 3.0)

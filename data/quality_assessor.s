@@ -46,7 +46,7 @@ func new_quality_assessor(i64 sample_size) quality_assessor {
     }
 }
 
-func (qa: *quality_assessor) calculate_quality_score(string text) f64 {
+func (qa *quality_assessor) calculate_quality_score(string text) f64 {
     if len(text) == 0 {
         return 0.0
     }
@@ -125,7 +125,7 @@ func detect_language(string text) string {
     return "en"
 }
 
-func (qa: *quality_assessor) assess_file(string filepath) quality_metrics {
+func (qa *quality_assessor) assess_file(string filepath) quality_metrics {
     println("📊 evaluationfile: " + filepath)
     file := io.Open(filepath, "r")
     defer file.Close()
@@ -200,7 +200,7 @@ func (qa: *quality_assessor) assess_file(string filepath) quality_metrics {
     return qa.metrics
 }
 
-func (metrics: quality_metrics) print_report() {
+func (metrics quality_metrics) print_report() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║         📊 NeurX dataEnglish textevaluationEnglish text                      ║")
     println("╚════════════════════════════════════════════════════════╝")

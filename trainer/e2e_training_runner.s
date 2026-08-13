@@ -50,10 +50,10 @@ struct transformer_layer {
 }
 
 func generate_synthetic_data(
-    batch_size: int,
-    seq_length: int,
-    vocab_size: int,
-    num_batches: int
+    int batch_size,
+    int seq_length,
+    int vocab_size,
+    int num_batches
 ) [][]int {
     data := make([][]int, num_batches)
     for i := 0; i < num_batches; i += 1 {
@@ -121,10 +121,10 @@ func create_mini_gpt(config training_config) mini_language_model {
 }
 
 func forward_pass(
-    model: mini_language_model,
-    input_ids: []int,
-    batch_size: int,
-    seq_length: int
+    mini_language_model model,
+    []int input_ids,
+    int batch_size,
+    int seq_length
 ) (bundle.tensor_2, bundle.tensor_2) {
     embeddings := bundle.tensor_2{
         shape: [batch_size, seq_length, model.embedding_dim],
@@ -145,7 +145,7 @@ func forward_pass(
     logits, hidden_states
 }
 
-func compute_loss(logits: bundle.tensor_2, []int targets) float {
+func compute_loss(bundle.tensor_2 logits, []int targets) float {
     batch_size := logits.shape[0]
     seq_length := logits.shape[1]
     vocab_size := logits.shape[2]
@@ -188,7 +188,7 @@ func compute_loss(logits: bundle.tensor_2, []int targets) float {
     0.0
 }
 
-func run_training(config: training_config) {
+func run_training(training_config config) {
     log_file := fmt.Sprintf("%s/training.log", config.output_dir)
     loss_file := fmt.Sprintf("%s/losses.csv", config.output_dir)
     log := logger_new(log_file, loss_file)
@@ -258,7 +258,7 @@ func run_training(config: training_config) {
     fmt.Printf("   • loss_curve.txt - ASCII loss visualization\n")
 }
 
-func count_parameters(model: mini_language_model) int {
+func count_parameters(mini_language_model model) int {
     count := model.token_embedding.num_elements()
     count += model.position_embedding.num_elements()
     count += model.output_projection.num_elements()
@@ -275,10 +275,10 @@ func count_parameters(model: mini_language_model) int {
 }
 
 func compute_learning_rate(
-    step: int,
-    total_steps: int,
-    base_lr: float,
-    warmup_steps: int
+    int step,
+    int total_steps,
+    float base_lr,
+    int warmup_steps
 ) float {
     if step < warmup_steps {
         return base_lr * (float(step) / float(warmup_steps))
@@ -304,7 +304,7 @@ func initialize_ones(int size) []float {
     data
 }
 
-func verify_training(model: mini_language_model, []float losses, log: logger) {
+func verify_training(mini_language_model model, []float losses, logger log) {
     fmt.Printf("   Parameters: %d\n", count_parameters(model))
     fmt.Printf("   Initial loss: %.4f\n", losses[0])
     fmt.Printf("   Final loss: %.4f\n", losses[len(losses)-1])
@@ -425,11 +425,11 @@ func logger_new(string log_file, string loss_file) logger {
     log
 }
 
-func log_message(log: logger, string message) {
+func log_message(logger log, string message) {
     fmt.Printf("[LOG] %s\n", message)
 }
 
-func log_config(log: logger, config: training_config) {
+func log_config(logger log, training_config config) {
     log_message(log, "=== CONFIGURATION ===")
     log_message(log, fmt.Sprintf("Vocab size: %d", config.vocab_size))
     log_message(log, fmt.Sprintf("embedding dim: %d", config.embedding_dim))
@@ -439,14 +439,14 @@ func log_config(log: logger, config: training_config) {
     log_message(log, fmt.Sprintf("Epochs: %d", config.num_epochs))
 }
 
-func log_loss(log: logger, int step, float loss) {
+func log_loss(logger log, int step, float loss) {
     fmt.Printf("%.4f,%d\n", loss, step)
 }
 
-func logger_close(log: logger) {
+func logger_close(logger log) {
 }
 
-func save_checkpoint(string path, model: mini_language_model, optimizer: any, int step) {
+func save_checkpoint(string path, mini_language_model model, any optimizer, int step) {
 }
 
 func write_file(string path, string content) {

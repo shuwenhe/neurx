@@ -63,7 +63,7 @@ func get_base_model() model_config {
     }
 }
 
-func benchmark_single_gpu(model: model_config) gpu_benchmark {
+func benchmark_single_gpu(model_config model) gpu_benchmark {
     println("Benchmarking: Single GPU (A100)")
     let forward_time = 6.0
     let backward_time = 12.0
@@ -84,7 +84,7 @@ func benchmark_single_gpu(model: model_config) gpu_benchmark {
     return benchmark
 }
 
-func benchmark_multi_gpu(model: model_config, i32 gpu_count) gpu_benchmark {
+func benchmark_multi_gpu(model_config model, i32 gpu_count) gpu_benchmark {
     println("Benchmarking: " + strings.from_i32(gpu_count) + " GPUs (DDP)")
     let forward_time = 6.0
     let backward_time = 12.0
@@ -112,7 +112,7 @@ func benchmark_multi_gpu(model: model_config, i32 gpu_count) gpu_benchmark {
     return benchmark
 }
 
-func benchmark_model(model: model_config) performance_report {
+func benchmark_model(model_config model) performance_report {
     println("")
     println("═" + strings.repeat("═", 61))
     println("MODEL: " + model.name)
@@ -170,7 +170,7 @@ func format_large_number(i64 n) string {
     }
 }
 
-func print_performance_summary(reports: performance_report[]) {
+func print_performance_summary(performance_report[] reports) {
     println("")
     println("═" + strings.repeat("═", 61))
     println("PERFORMANCE SUMMARY")
@@ -185,7 +185,7 @@ func print_performance_summary(reports: performance_report[]) {
     }
 }
 
-func print_scaling_analysis(report: performance_report) {
+func print_scaling_analysis(performance_report report) {
     println("")
     println("╔" + strings.repeat("═", 61) + "╗")
     println("║  SCALING ANALYSIS: " + report.model.name + strings.repeat(" ", 35 - len(report.model.name)) + "║")

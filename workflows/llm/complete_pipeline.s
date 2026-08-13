@@ -20,7 +20,7 @@ struct ir_module {
     data_section: []string
 }
 
-func compile_neurx_code(config: compile_config) (bool, ir_module) {
+func compile_neurx_code(compile_config config) (bool, ir_module) {
     println("\n╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 1: COMPILE & IR GENERATION                     ║")
     println("╚════════════════════════════════════════════════════════╝")
@@ -152,7 +152,7 @@ struct runner {
     batch: data_bundle
 }
 
-func init_runner(config: model_config, batch: data_bundle, f64 learning_rate) runner {
+func init_runner(model_config config, data_bundle batch, f64 learning_rate) runner {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 3: RUNNER INITIALIZATION                        ║")
     println("╚════════════════════════════════════════════════════════╝")
@@ -215,7 +215,7 @@ struct forward_output {
     cache: map[string]tensor_2
 }
 
-func forward_pass(runner: runner) (forward_output, f64) {
+func forward_pass(runner runner) (forward_output, f64) {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 4: FORWARD PASS                                 ║")
     println("╚════════════════════════════════════════════════════════╝")
@@ -272,7 +272,7 @@ struct loss_metrics {
     min_logit: f64
 }
 
-func compute_loss(output: forward_output, targets: tensor_2) (loss_metrics, f64) {
+func compute_loss(forward_output output, tensor_2 targets) (loss_metrics, f64) {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 5: LOSS COMPUTATION                             ║")
     println("╚════════════════════════════════════════════════════════╝")
@@ -314,7 +314,7 @@ struct gradient_info {
     grad_overflow: bool
 }
 
-func backward_pass(runner: runner, output: forward_output, f64 loss) (gradient_info, f64) {
+func backward_pass(runner runner, forward_output output, f64 loss) (gradient_info, f64) {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 6: BACKWARD PASS                                ║")
     println("╚════════════════════════════════════════════════════════╝")
@@ -371,7 +371,7 @@ struct optimizer_update {
     weight_decay_applied: bool
 }
 
-func adamw_optimizer_step(runner: runner, grad_info: gradient_info, i32 step) (optimizer_update, f64) {
+func adamw_optimizer_step(runner runner, gradient_info grad_info, i32 step) (optimizer_update, f64) {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 7: OPTIMIZER UPDATE (adam_w)                     ║")
     println("╚════════════════════════════════════════════════════════╝")
@@ -454,14 +454,14 @@ struct training_step {
 }
 
 func exit_and_summarize(
-    step_id: i32,
-    loss: f64,
-    lr: f64,
-    compile_time: f64,
-    forward_time: f64,
-    loss_time: f64,
-    backward_time: f64,
-    optimizer_time: f64
+    i32 step_id,
+    f64 loss,
+    f64 lr,
+    f64 compile_time,
+    f64 forward_time,
+    f64 loss_time,
+    f64 backward_time,
+    f64 optimizer_time
 ) training_step {
     let total_time = compile_time + forward_time + loss_time + backward_time + optimizer_time
     println("╔════════════════════════════════════════════════════════╗")

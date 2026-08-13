@@ -198,7 +198,7 @@ func init_sft_trainer(
         }
     }
 
-func train_sft_epoch(self: sft_trainer, data_loader dataloader) {
+func train_sft_epoch(sft_trainer self, data_loader dataloader) {
     """
     trainingEnglish text epoch English text SFT
     data format:
@@ -306,15 +306,15 @@ class dpotrainer {
     } state
 
 func compute_dpo_loss(
-    self: dpotrainer,
-    chosen_logits: tensor,
-    rejected_logits: tensor,
-    chosen_labels: tensor,
-    rejected_labels: tensor,
-    chosen_attention_mask: tensor,
-    rejected_attention_mask: tensor,
-    beta: float,
-    loss_type: string = "sigmoid"
+    dpotrainer self,
+    tensor chosen_logits,
+    tensor rejected_logits,
+    tensor chosen_labels,
+    tensor rejected_labels,
+    tensor chosen_attention_mask,
+    tensor rejected_attention_mask,
+    float beta,
+    string = "sigmoid" loss_type
 ) {
     """
     compute DPO Loss
@@ -379,8 +379,8 @@ class grpo_trainer {
     } state
 
 func train_grpo_step(
-    self: GRPOTrainer,
-    batch_prompts: []string,
+    GRPOTrainer self,
+    []string batch_prompts,
     data_loader prompt_loader,
     int group_size: int = 8
 ) {
@@ -524,8 +524,8 @@ class ppotrainer {
     } state
 
 func train_ppo_iteration(
-    self: ppotrainer,
-    batch_prompts: []string
+    ppotrainer self,
+    []string batch_prompts
 ) {
     """
     PPO English textpipeline:
@@ -632,7 +632,7 @@ func train_ppo_iteration(
     self.state.mean_reward = iteration_metrics["mean_reward"]
     return iteration_metrics
 
-func log_sft_progress(state: sft_trainer.state, float loss) {
+func log_sft_progress(sft_trainer.state state, float loss) {
     elapsed = now() - state.start_time
     print(
         f"[SFT Step {state.current_step:>6}] "

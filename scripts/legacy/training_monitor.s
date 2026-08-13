@@ -24,9 +24,9 @@ type training_monitor struct {
 }
 
 func (tm *training_monitor) init(
-    total_steps: int,
-    log_file: string,
-    update_interval: int) error {
+    int total_steps,
+    string log_file,
+    int update_interval) error {
     tm.start_time = time.Now()
     tm.steps = make([]training_metrics, 0)
     tm.total_steps = total_steps
@@ -41,12 +41,12 @@ func (tm *training_monitor) init(
 }
 
 func (tm *training_monitor) log_step(
-    step: int,
-    epoch: int,
-    loss: float,
-    learning_rate: float,
-    throughput: float,
-    memory_used: float) {
+    int step,
+    int epoch,
+    float loss,
+    float learning_rate,
+    float throughput,
+    float memory_used) {
     elapsed := time.Since(tm.start_time).Seconds()
     avg_step_time := 0.0
     if step > 0 {
@@ -71,7 +71,7 @@ func (tm *training_monitor) log_step(
     tm.log_to_file(metrics)
 }
 
-func (tm *training_monitor) print_progress(metrics: training_metrics) {
+func (tm *training_monitor) print_progress(training_metrics metrics) {
     progress := float(metrics.step) / float(tm.total_steps) * 100.0
     bar_length := 50
     filled := int(progress / 100.0 * float(bar_length))
@@ -96,7 +96,7 @@ func (tm *training_monitor) print_progress(metrics: training_metrics) {
     println(status)
 }
 
-func (tm *training_monitor) log_to_file(metrics: training_metrics) {
+func (tm *training_monitor) log_to_file(training_metrics metrics) {
     f, err := os.OpenFile(tm.log_file, os.O_APPEND|os.O_WRONLY, 0644)
     if err != nil {
         return

@@ -48,7 +48,7 @@ func create_chat_config() chat_config {
     return config
 }
 
-func init_model(config: chat_config) simple_transformer {
+func init_model(chat_config config) simple_transformer {
     var model: simple_transformer
     model.config = config
     model.embedding_dim = config.hidden_dim
@@ -72,7 +72,7 @@ func tokenize_input(string text) []i32 {
     return tokens
 }
 
-func generate_token(model: simple_transformer, context: []i32) i32 {
+func generate_token(simple_transformer model, []i32 context) i32 {
     if len(context) == 0 {
         return 0
     }
@@ -103,7 +103,7 @@ func generate_token(model: simple_transformer, context: []i32) i32 {
     return next_token
 }
 
-func decode_tokens(tokens: []i32) string {
+func decode_tokens([]i32 tokens) string {
     var result: string = ""
     var i: i32 = 0
     while i < len(tokens) {
@@ -169,7 +169,7 @@ func decode_tokens(tokens: []i32) string {
     return strings.trim_space(result)
 }
 
-func process_chat_request(model: simple_transformer, request: chat_request) chat_response {
+func process_chat_request(simple_transformer model, chat_request request) chat_response {
     var i64 start_time = time.now_ms()
     var input_tokens: []i32 = tokenize_input(request.user_input)
     var context_tokens: []i32

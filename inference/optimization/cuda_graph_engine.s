@@ -39,7 +39,7 @@ func new_cuda_graph_manager(int max_graphs) cuda_graph_manager {
 }
 
 func create_cuda_graph(
-    manager: cuda_graph_manager,
+    cuda_graph_manager manager,
     string name,
     int optimization_level
 ) (cuda_graph_manager, int) {
@@ -65,7 +65,7 @@ func create_cuda_graph(
 }
 
 func add_operation_to_graph(
-    graph: cuda_graph,
+    cuda_graph graph,
     string operation,
     []int inputs,
     []int outputs
@@ -85,14 +85,14 @@ func add_operation_to_graph(
     return new_graph
 }
 
-func freeze_cuda_graph(graph: cuda_graph) cuda_graph {
+func freeze_cuda_graph(cuda_graph graph) cuda_graph {
     new_graph = graph
     new_graph.is_frozen = true
     new_graph.execution_mode = "launch"
     return new_graph
 }
 
-func execute_cuda_graph(graph: cuda_graph, []float input_data) (cuda_graph, []float) {
+func execute_cuda_graph(cuda_graph graph, []float input_data) (cuda_graph, []float) {
     if !graph.is_frozen {
         logger.warning("Cannot execute non-frozen graph")
         return graph, []float{}
@@ -131,7 +131,7 @@ func execute_cuda_graph(graph: cuda_graph, []float input_data) (cuda_graph, []fl
     return new_graph, output_data
 }
 
-func optimize_cuda_graph(graph: cuda_graph) cuda_graph {
+func optimize_cuda_graph(cuda_graph graph) cuda_graph {
     if graph.optimization_level == 0 {
         return graph
     }
@@ -154,7 +154,7 @@ func optimize_cuda_graph(graph: cuda_graph) cuda_graph {
     return new_graph
 }
 
-func fuse_operations(graph: cuda_graph) cuda_graph {
+func fuse_operations(cuda_graph graph) cuda_graph {
     new_nodes = []cuda_graph_node{}
     i = 0
 
@@ -188,7 +188,7 @@ func fuse_operations(graph: cuda_graph) cuda_graph {
     return new_graph
 }
 
-func eliminate_redundant_ops(graph: cuda_graph) cuda_graph {
+func eliminate_redundant_ops(cuda_graph graph) cuda_graph {
     visited = map[string]bool{}
     new_nodes = []cuda_graph_node{}
 
@@ -211,7 +211,7 @@ func eliminate_redundant_ops(graph: cuda_graph) cuda_graph {
     return new_graph
 }
 
-func apply_memory_optimization(graph: cuda_graph) cuda_graph {
+func apply_memory_optimization(cuda_graph graph) cuda_graph {
     return graph
 }
 
@@ -225,7 +225,7 @@ func can_fuse(string op1, string op2) bool {
     return false
 }
 
-func get_graph_stats(graph: cuda_graph) string {
+func get_graph_stats(cuda_graph graph) string {
     result = "CUDA Graph Statistics:\n"
     result = result + "  Graph ID: " + string(graph.graph_id) + "\n"
     result = result + "  Total Nodes: " + string(graph.total_nodes) + "\n"

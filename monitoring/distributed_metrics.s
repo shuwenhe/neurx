@@ -87,24 +87,24 @@ func new_metrics_aggregator(int window_size): metrics_aggregator {
 }
 
 func collect_training_metrics(
-    global_step: int,
-    epoch: int,
-    loss: float,
-    predictions: vector,
-    targets: vector,
-    model_params: vector,
-    gradients: vector,
-    forward_time_ms: float,
-    backward_time_ms: float,
-    optimizer_time_ms: float,
-    communication_time_ms: float,
-    data_load_time_ms: float,
-    batch_size: int,
-    sequence_length: int,
-    reserved_memory_gb: float,
-    allocated_memory_gb: float,
-    peak_memory_gb: float,
-    comm_volume_gb: float
+    int global_step,
+    int epoch,
+    float loss,
+    vector predictions,
+    vector targets,
+    vector model_params,
+    vector gradients,
+    float forward_time_ms,
+    float backward_time_ms,
+    float optimizer_time_ms,
+    float communication_time_ms,
+    float data_load_time_ms,
+    int batch_size,
+    int sequence_length,
+    float reserved_memory_gb,
+    float allocated_memory_gb,
+    float peak_memory_gb,
+    float comm_volume_gb
 ): training_metrics {
     var metrics: training_metrics
     metrics.global_step = global_step
@@ -141,12 +141,12 @@ func collect_training_metrics(
 }
 
 func collect_rank_metrics(
-    rank: int,
-    metrics: training_metrics,
-    gpu_utilization_percent: float,
-    gpu_memory_used_gb: float,
-    network_sent_gb: float,
-    network_recv_gb: float
+    int rank,
+    training_metrics metrics,
+    float gpu_utilization_percent,
+    float gpu_memory_used_gb,
+    float network_sent_gb,
+    float network_recv_gb
 ): rank_metrics {
     var rank_m: rank_metrics
     rank_m.rank = rank
@@ -159,9 +159,9 @@ func collect_rank_metrics(
 }
 
 func aggregate_metrics_across_ranks(
-    all_rank_metrics: vector,
-    num_ranks: int,
-    aggregator: metrics_aggregator
+    vector all_rank_metrics,
+    int num_ranks,
+    metrics_aggregator aggregator
 ): training_metrics {
     var agg_metrics: training_metrics
     if num_ranks <= 0 {
@@ -195,8 +195,8 @@ func aggregate_metrics_across_ranks(
 }
 
 func detect_anomalies(
-    current_metrics: training_metrics,
-    detector: anomaly_detector
+    training_metrics current_metrics,
+    anomaly_detector detector
 ): (bool, string) {
     var is_anomaly: bool = false
     var description: string = ""
@@ -235,7 +235,7 @@ func detect_anomalies(
 }
 
 func compute_timing_breakdown(
-    metrics: training_metrics
+    training_metrics metrics
 ): (float, float, float, float, float) {
     var total_time: float = metrics.forward_time + metrics.backward_time + metrics.optimizer_time +
                             metrics.communication_time + metrics.data_loading_time
@@ -251,9 +251,9 @@ func compute_timing_breakdown(
 }
 
 func identify_communication_bottlenecks(
-    metrics: training_metrics,
-    num_ranks: int,
-    num_layers: int
+    training_metrics metrics,
+    int num_ranks,
+    int num_layers
 ): string {
     var bottleneck_info: string = ""
     var total_compute_time: float = metrics.forward_time + metrics.backward_time + metrics.optimizer_time
@@ -273,8 +273,8 @@ func identify_communication_bottlenecks(
 }
 
 func print_metrics_summary(
-    metrics: training_metrics,
-    aggregator: metrics_aggregator
+    training_metrics metrics,
+    metrics_aggregator aggregator
 ): void {
     var (pct_fwd, pct_bwd, pct_opt, pct_comm, pct_data) = compute_timing_breakdown(metrics)
     println("===== Training Metrics (Step " + str(metrics.global_step) + ") =====")
@@ -288,8 +288,8 @@ func print_metrics_summary(
 }
 
 func export_metrics_to_file(
-    metrics: training_metrics,
-    output_file: string
+    training_metrics metrics,
+    string output_file
 ): void {
 }
 

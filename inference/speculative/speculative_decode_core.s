@@ -195,7 +195,7 @@ func compute_confidence_score([]float logits) float {
     max_prob
 }
 
-func filter_predictions_by_confidence(predictions: []draft_token, float threshold) []draft_token {
+func filter_predictions_by_confidence([]draft_token predictions, float threshold) []draft_token {
     filtered := []draft_token{}
     i := 0
     while i < predictions.len {
@@ -221,7 +221,7 @@ func new_speculative_statistics() speculative_statistics {
     stats
 }
 
-func update_statistics(stats: speculative_statistics, batch: speculative_batch) speculative_statistics {
+func update_statistics(speculative_statistics stats, speculative_batch batch) speculative_statistics {
     updated := stats
     i := 0
     while i < batch.verification_results.len {
@@ -236,7 +236,7 @@ func update_statistics(stats: speculative_statistics, batch: speculative_batch) 
     updated
 }
 
-func get_acceptance_rate(stats: speculative_statistics) float {
+func get_acceptance_rate(speculative_statistics stats) float {
     if stats.total_verified_tokens > 0 {
         (stats.total_accepted_tokens as float) / (stats.total_verified_tokens as float)
     } else {
@@ -244,7 +244,7 @@ func get_acceptance_rate(stats: speculative_statistics) float {
     }
 }
 
-func get_speedup_factor(stats: speculative_statistics) float {
+func get_speedup_factor(speculative_statistics stats) float {
     if stats.total_draft_tokens > 0 {
         (stats.total_accepted_tokens + stats.total_verified_tokens) as float / (stats.total_verified_tokens as float)
     } else {

@@ -12,10 +12,10 @@ struct is_weights {
 }
 
 func compute_token_is_weights(
-    new_log_probs: Tensor,
-    rollout_log_probs: Tensor,
-    threshold: ISThreshold,
-    response_mask: Tensor
+    Tensor new_log_probs,
+    Tensor rollout_log_probs,
+    ISThreshold threshold,
+    Tensor response_mask
 ) -> ISWeights {
     let batch_size = new_log_probs.shape[0]
     let seq_len = new_log_probs.shape[1]
@@ -52,10 +52,10 @@ func compute_token_is_weights(
 }
 
 func compute_sequence_is_weights(
-    new_log_probs: Tensor,
-    rollout_log_probs: Tensor,
-    threshold: ISThreshold,
-    response_mask: Tensor
+    Tensor new_log_probs,
+    Tensor rollout_log_probs,
+    ISThreshold threshold,
+    Tensor response_mask
 ) -> ISWeights {
     let batch_size = new_log_probs.shape[0]
     let seq_len = new_log_probs.shape[1]
@@ -90,7 +90,7 @@ func compute_sequence_is_weights(
     }
 }
 
-func batch_normalize_is_weights(is_weights: ISWeights) -> ISWeights {
+func batch_normalize_is_weights(ISWeights is_weights) -> ISWeights {
     let normalized_weights: Tensor
     if is_weights.level == is_aggregation_level.TOKEN {
         let mean = is_weights.weights.mean()
@@ -113,11 +113,11 @@ func batch_normalize_is_weights(is_weights: ISWeights) -> ISWeights {
 }
 
 func compute_is_weights(
-    new_log_probs: Tensor,
-    rollout_log_probs: Tensor,
-    old_log_probs: Tensor,
-    config: RolloutCorrectionConfig,
-    response_mask: Tensor
+    Tensor new_log_probs,
+    Tensor rollout_log_probs,
+    Tensor old_log_probs,
+    RolloutCorrectionConfig config,
+    Tensor response_mask
 ) -> ISWeights {
     let reference_log_probs: Tensor
     if config.bypass_mode {
@@ -163,9 +163,9 @@ func compute_is_weights(
 }
 
 func apply_is_weights_to_loss(
-    loss: Tensor,
-    is_weights: ISWeights,
-    response_mask: Tensor
+    Tensor loss,
+    ISWeights is_weights,
+    Tensor response_mask
 ) -> Tensor {
     if is_weights.level == is_aggregation_level.TOKEN {
         return loss * is_weights.weights * response_mask
@@ -180,14 +180,14 @@ func apply_is_weights_to_loss(
 }
 
 func apply_is_weights_to_advantages(
-    advantages: Tensor,
-    is_weights: ISWeights,
-    response_mask: Tensor
+    Tensor advantages,
+    ISWeights is_weights,
+    Tensor response_mask
 ) -> Tensor {
     return apply_is_weights_to_loss(advantages, is_weights, response_mask)
 }
 
-func compute_is_statistics(is_weights: ISWeights) -> map[string]f32 {
+func compute_is_statistics(ISWeights is_weights) -> map[string]f32 {
     let stats = map[string]f32{}
     stats["is_mean"] = is_weights.mean_weight
     stats["is_max"] = is_weights.max_weight
@@ -196,6 +196,6 @@ func compute_is_statistics(is_weights: ISWeights) -> map[string]f32 {
     return stats
 }
 
-func clamp(x: Tensor, f32 min_val, f32 max_val) -> Tensor {
+func clamp(Tensor x, f32 min_val, f32 max_val) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }

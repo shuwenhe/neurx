@@ -34,10 +34,10 @@ struct opo_trainer {
 }
 
 func new_opo_trainer(
-    config: opo_config,
-    policy: *model,
-    value: *model,
-    reference: *model
+    opo_config config,
+    *model policy,
+    *model value,
+    *model reference
 ) -> OPOTrainer {
     let params = policy.parameters()
     if config.use_value_loss {
@@ -56,7 +56,7 @@ func new_opo_trainer(
     }
 }
 
-func (trainer: *opo_trainer) compute_advantage_weights(advantages: Tensor) -> Tensor {
+func (trainer *opo_trainer) compute_advantage_weights(Tensor advantages) -> Tensor {
     match trainer.config.advantage_weighting {
         "optimal" => {
             let weights = exp(advantages / trainer.config.temperature)
@@ -86,11 +86,11 @@ func (trainer: *opo_trainer) compute_advantage_weights(advantages: Tensor) -> Te
     }
 }
 
-func (trainer: *opo_trainer) compute_optimal_objective(
-    new_log_probs: Tensor,
-    ref_log_probs: Tensor,
-    advantage: Tensor,
-    weights: Tensor
+func (trainer *opo_trainer) compute_optimal_objective(
+    Tensor new_log_probs,
+    Tensor ref_log_probs,
+    Tensor advantage,
+    Tensor weights
 ) -> Tensor {
     let log_ratio = new_log_probs - ref_log_probs
     let weighted_advantage = weights * advantage
@@ -98,7 +98,7 @@ func (trainer: *opo_trainer) compute_optimal_objective(
     return objective
 }
 
-func (trainer: *opo_trainer) adapt_learning_rate(f32 kl) {
+func (trainer *opo_trainer) adapt_learning_rate(f32 kl) {
     if !trainer.config.use_adaptive_lr {
         return
     }
@@ -118,10 +118,10 @@ func (trainer: *opo_trainer) adapt_learning_rate(f32 kl) {
     trainer.optimizer.set_learning_rate(trainer.current_lr)
 }
 
-func (trainer: *opo_trainer) compute_gae(
-    rewards: []tensor,
-    values: []tensor,
-    dones: []tensor
+func (trainer *opo_trainer) compute_gae(
+    []tensor rewards,
+    []tensor values,
+    []tensor dones
 ) -> ([]tensor, []tensor) {
     let batch_size = rewards.len()
     let advantages: []tensor = []
@@ -148,10 +148,10 @@ func (trainer: *opo_trainer) compute_gae(
     return advantages, returns
 }
 
-func (trainer: *opo_trainer) train_step(
-    prompts: []tensor,
-    responses: []tensor,
-    rewards: []tensor
+func (trainer *opo_trainer) train_step(
+    []tensor prompts,
+    []tensor responses,
+    []tensor rewards
 ) -> (f32, f32, f32) {
     let batch_size = prompts.len()
     let inputs: []tensor = []
@@ -254,7 +254,7 @@ func (trainer: *opo_trainer) train_step(
     )
 }
 
-func (trainer: *opo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
+func (trainer *opo_trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
     for batch in train_data {
@@ -278,7 +278,7 @@ func (trainer: *opo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     return policy_losses, value_losses
 }
 
-func compute_mean(values: []f32) -> f32 {
+func compute_mean([]f32 values) -> f32 {
     if values.len() == 0 {
         return 0.0
     }
@@ -289,7 +289,7 @@ func compute_mean(values: []f32) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_std(values: []f32, f32 mean) -> f32 {
+func compute_std([]f32 values, f32 mean) -> f32 {
     if values.len() == 0 {
         return 1.0
     }
@@ -300,7 +300,7 @@ func compute_std(values: []f32, f32 mean) -> f32 {
     return sqrt(sum_sq / f32(values.len()))
 }
 
-func clamp(x: Tensor, f32 min_val, f32 max_val) -> Tensor {
+func clamp(Tensor x, f32 min_val, f32 max_val) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
 

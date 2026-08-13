@@ -41,10 +41,10 @@ type advanced_training_monitor struct {
 }
 
 func (atm *advanced_training_monitor) init(
-    total_steps: int,
-    log_file: string,
-    update_interval: int,
-    convergence_window: int) error {
+    int total_steps,
+    string log_file,
+    int update_interval,
+    int convergence_window) error {
     atm.start_time = time.Now()
     atm.steps = make([]training_metrics, 0)
     atm.ppl_history = make([]perplexity_metrics, 0)
@@ -71,9 +71,9 @@ func calculate_perplexity(float loss): float {
 }
 
 func (atm *advanced_training_monitor) log_perplexity(
-    step: int,
-    train_loss: float,
-    val_loss: float) {
+    int step,
+    float train_loss,
+    float val_loss) {
     train_ppl := calculate_perplexity(train_loss)
     val_ppl := calculate_perplexity(val_loss)
     improvement := 0.0
@@ -97,15 +97,15 @@ func (atm *advanced_training_monitor) log_perplexity(
 }
 
 func (atm *advanced_training_monitor) log_step(
-    step: int,
-    epoch: int,
-    batch_idx: int,
-    loss: float,
-    learning_rate: float,
-    throughput: float,
-    memory_used: float,
-    grad_norm: float,
-    train_ppl: perplexity_metrics) {
+    int step,
+    int epoch,
+    int batch_idx,
+    float loss,
+    float learning_rate,
+    float throughput,
+    float memory_used,
+    float grad_norm,
+    perplexity_metrics train_ppl) {
     elapsed := time.Since(atm.start_time).Seconds()
     eta := atm.calculate_eta(step, elapsed)
     metrics := training_metrics{
@@ -137,7 +137,7 @@ func (atm *advanced_training_monitor) calculate_eta(int step, float elapsed): fl
     return avg_step_time * float(remaining_steps)
 }
 
-func (atm *advanced_training_monitor) print_progress(metrics: training_metrics) {
+func (atm *advanced_training_monitor) print_progress(training_metrics metrics) {
     progress := float(metrics.step) / float(atm.total_steps) * 100.0
     bar_length := 50
     filled := int(progress / 100.0 * float(bar_length))
@@ -168,7 +168,7 @@ func (atm *advanced_training_monitor) print_progress(metrics: training_metrics) 
     println(status)
 }
 
-func (atm *advanced_training_monitor) log_to_file(metrics: training_metrics) {
+func (atm *advanced_training_monitor) log_to_file(training_metrics metrics) {
     f, err := os.OpenFile(atm.log_file, os.O_APPEND|os.O_WRONLY, 0644)
     if err != nil {
         return

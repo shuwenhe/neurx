@@ -56,12 +56,12 @@ class neurx_client {
     neurx_client_config config
     string session_id
 
-    func init(config: neurx_client_config) {
+    func init(neurx_client_config config) {
         this.config = config
         this.session_id = generate_session_id()
     }
 
-    func chat(messages: []chat_message, max_tokens: int) chat_completion {
+    func chat([]chat_message messages, int max_tokens) chat_completion {
         params := generate_params{
             model: this.config.default_model,
             messages: messages,
@@ -73,7 +73,7 @@ class neurx_client {
         return this.generate(params)
     }
 
-    func stream_chat(messages: []chat_message, max_tokens: int) []string {
+    func stream_chat([]chat_message messages, int max_tokens) []string {
         params := generate_params{
             model: this.config.default_model,
             messages: messages,
@@ -85,7 +85,7 @@ class neurx_client {
         return this.stream_generate(params)
     }
 
-    func generate(params: generate_params) chat_completion {
+    func generate(generate_params params) chat_completion {
         request_json := build_chat_request(params)
         endpoint := this.config.api_endpoint + "/v1/chat/completions"
         response_body := http_post(endpoint, request_json, this.config.api_key)
@@ -93,7 +93,7 @@ class neurx_client {
         return completion
     }
 
-    func stream_generate(params: generate_params) []string {
+    func stream_generate(generate_params params) []string {
         tokens := []string{}
         request_json := build_chat_request(params)
         endpoint := this.config.api_endpoint + "/v1/chat/completions"
@@ -122,7 +122,7 @@ class neurx_client {
     }
 }
 
-func build_chat_request(params: generate_params) string {
+func build_chat_request(generate_params params) string {
     request := map[string:any]{
         "model": params.model,
         "messages": params.messages,
@@ -134,7 +134,7 @@ func build_chat_request(params: generate_params) string {
     return json_marshal(request)
 }
 
-func parse_chat_completion(response: string) chat_completion {
+func parse_chat_completion(string response) chat_completion {
     data := json_unmarshal(response)
     completion := chat_completion{
         id: get_string(data, "id"),
@@ -147,7 +147,7 @@ func parse_chat_completion(response: string) chat_completion {
     return completion
 }
 
-func parse_choices(choices_array: []any) []completion_choice {
+func parse_choices([]any choices_array) []completion_choice {
     choices := []completion_choice{}
     for choice_obj in choices_array {
         choice := completion_choice{
@@ -160,14 +160,14 @@ func parse_choices(choices_array: []any) []completion_choice {
     return choices
 }
 
-func parse_message(msg_obj: any) chat_message {
+func parse_message(any msg_obj) chat_message {
     return chat_message{
         role: get_string(msg_obj, "role"),
         content: get_string(msg_obj, "content"),
     }
 }
 
-func parse_usage(usage_obj: any) completion_usage {
+func parse_usage(any usage_obj) completion_usage {
     return completion_usage{
         prompt_tokens: get_int(usage_obj, "prompt_tokens"),
         completion_tokens: get_int(usage_obj, "completion_tokens"),
@@ -175,7 +175,7 @@ func parse_usage(usage_obj: any) completion_usage {
     }
 }
 
-func extract_content(json_str: string) string {
+func extract_content(string json_str) string {
     data := json_unmarshal(json_str)
     choices := get_array(data, "choices")
     if len(choices) > 0 {
@@ -185,15 +185,15 @@ func extract_content(json_str: string) string {
     return ""
 }
 
-func http_post(endpoint: string, body: string, api_key: string) string {
+func http_post(string endpoint, string body, string api_key) string {
     return ""
 }
 
-func http_stream(endpoint: string, body: string, api_key: string) []string {
+func http_stream(string endpoint, string body, string api_key) []string {
     return []string{}
 }
 
-func http_get(endpoint: string) any {
+func http_get(string endpoint) any {
     return map[string:any]{}
 }
 
@@ -201,31 +201,31 @@ func generate_session_id() string {
     return timestamp_hex() + random_string(16)
 }
 
-func starts_with(str: string, prefix: string) bool {
+func starts_with(string str, string prefix) bool {
     return len(str) >= len(prefix) && str[0:len(prefix)] == prefix
 }
 
-func json_marshal(obj: any) string {
+func json_marshal(any obj) string {
     return ""
 }
 
-func json_unmarshal(json_str: string) any {
+func json_unmarshal(string json_str) any {
     return map[string:any]{}
 }
 
-func get_string(obj: any, key: string) string {
+func get_string(any obj, string key) string {
     return ""
 }
 
-func get_int(obj: any, key: string) int {
+func get_int(any obj, string key) int {
     return 0
 }
 
-func get_array(obj: any, key: string) []any {
+func get_array(any obj, string key) []any {
     return []any{}
 }
 
-func get_object(obj: any, key: string) any {
+func get_object(any obj, string key) any {
     return map[string:any]{}
 }
 
@@ -233,6 +233,6 @@ func timestamp_hex() string {
     return ""
 }
 
-func random_string(length: int) string {
+func random_string(int length) string {
     return ""
 }

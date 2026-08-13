@@ -46,7 +46,7 @@ func new_verifier_config(int vocab, float threshold) verifier_config {
     cfg
 }
 
-func new_verifier_executor(config: verifier_config) verifier_executor {
+func new_verifier_executor(verifier_config config) verifier_executor {
     executor := verifier_executor{
         config: config,
         model_embeddings: [][]float{},
@@ -59,7 +59,7 @@ func new_verifier_executor(config: verifier_config) verifier_executor {
     executor
 }
 
-func initialize_verifier_embeddings(executor: verifier_executor, int vocab_size, int embed_dim) verifier_executor {
+func initialize_verifier_embeddings(verifier_executor executor, int vocab_size, int embed_dim) verifier_executor {
     updated := executor
     i := 0
     while i < vocab_size {
@@ -75,7 +75,7 @@ func initialize_verifier_embeddings(executor: verifier_executor, int vocab_size,
     updated
 }
 
-func verifier_embedding_lookup(executor: verifier_executor, int token_id) []float {
+func verifier_embedding_lookup(verifier_executor executor, int token_id) []float {
     if token_id >= 0 && token_id < executor.model_embeddings.len {
         executor.model_embeddings[token_id]
     } else {
@@ -112,7 +112,7 @@ func verifier_apply_residual([]float original, []float transformed) []float {
     result
 }
 
-func verifier_forward_single(executor: verifier_executor, int token_id, int hidden_dim) []float {
+func verifier_forward_single(verifier_executor executor, int token_id, int hidden_dim) []float {
     hidden := verifier_embedding_lookup(executor, token_id)
     if hidden.len == 0 {
         return []float{}
@@ -147,7 +147,7 @@ func verifier_output_logits([]float hidden_states, int vocab_size) []float {
     logits
 }
 
-func verify_single_draft(executor: verifier_executor, draft: draft_token) verification_result {
+func verify_single_draft(verifier_executor executor, draft_token draft) verification_result {
     hidden := verifier_forward_single(executor, draft.token_id, 768)
     logits := verifier_output_logits(hidden, executor.config.vocab_size)
     is_match := verify_token_match(draft.logits, logits, 1.0)
@@ -174,7 +174,7 @@ func verify_single_draft(executor: verifier_executor, draft: draft_token) verifi
     }
 }
 
-func verify_draft_sequence(executor: verifier_executor, draft_sequence: []draft_token) []verification_result {
+func verify_draft_sequence(verifier_executor executor, []draft_token draft_sequence) []verification_result {
     results := []verification_result{}
     i := 0
     while i < draft_sequence.len {
@@ -191,12 +191,12 @@ func verify_draft_sequence(executor: verifier_executor, draft_sequence: []draft_
     results
 }
 
-func verify_with_confidence_filtering(executor: verifier_executor, draft_sequence: []draft_token, float confidence_threshold) []verification_result {
+func verify_with_confidence_filtering(verifier_executor executor, []draft_token draft_sequence, float confidence_threshold) []verification_result {
     high_confidence := filter_predictions_by_confidence(draft_sequence, confidence_threshold)
     verify_draft_sequence(executor, high_confidence)
 }
 
-func compute_acceptance_rate(results: []verification_result) float {
+func compute_acceptance_rate([]verification_result results) float {
     accepted := 0
     i := 0
     while i < results.len {
@@ -212,14 +212,14 @@ func compute_acceptance_rate(results: []verification_result) float {
     }
 }
 
-func should_accept_draft(result: verification_result, config: verifier_config) bool {
+func should_accept_draft(verification_result result, verifier_config config) bool {
     if !config.verify_all {
         return result.accepted
     }
     result.accepted
 }
 
-func get_verifier_stats(executor: verifier_executor) string {
+func get_verifier_stats(verifier_executor executor) string {
     result := "Verifier Stats:"
     result = result + " Verified=" + (executor.verification_count as string)
     result = result + " Accepted=" + (executor.acceptance_count as string)
@@ -231,7 +231,7 @@ func get_verifier_stats(executor: verifier_executor) string {
     result
 }
 
-func reset_verifier_statistics(executor: verifier_executor) verifier_executor {
+func reset_verifier_statistics(verifier_executor executor) verifier_executor {
     updated := executor
     updated.verification_count = 0
     updated.acceptance_count = 0
@@ -240,7 +240,7 @@ func reset_verifier_statistics(executor: verifier_executor) verifier_executor {
     updated
 }
 
-func adaptive_threshold_adjustment(executor: verifier_executor, float current_acceptance_rate) verifier_executor {
+func adaptive_threshold_adjustment(verifier_executor executor, float current_acceptance_rate) verifier_executor {
     updated := executor
     if current_acceptance_rate > 0.9 {
         updated.config.acceptance_threshold = updated.config.acceptance_threshold - 0.05

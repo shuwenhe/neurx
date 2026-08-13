@@ -214,7 +214,7 @@ func dequantize_int8(
 }
 
 func quantize_tensor(
-    engine: quantization_engine,
+    quantization_engine engine,
     []float tensor_data
 ) (quantization_engine, quantized_tensor) {
     stats = calculate_stats(tensor_data)
@@ -289,7 +289,7 @@ func quantize_tensor(
     return new_engine, q_tensor
 }
 
-func dequantize_tensor(q_tensor: quantized_tensor) []float {
+func dequantize_tensor(quantized_tensor q_tensor) []float {
     if q_tensor.bits == 8 && q_tensor.dtype == "int8" {
         return dequantize_int8(q_tensor.data, q_tensor.scale, q_tensor.zero_point)
     }
@@ -305,8 +305,8 @@ func dequantize_tensor(q_tensor: quantized_tensor) []float {
 }
 
 func get_compression_ratio(
-    original_size: int,
-    quantized: quantized_tensor
+    int original_size,
+    quantized_tensor quantized
 ) float {
     if original_size == 0 {
         return 0.0
@@ -317,7 +317,7 @@ func get_compression_ratio(
 }
 
 func estimate_memory_saving(
-    engine: quantization_engine,
+    quantization_engine engine,
     int original_param_count
 ) string {
     q_ratio = 32 / f(engine.config.bits)

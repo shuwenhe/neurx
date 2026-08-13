@@ -47,8 +47,8 @@ struct tokenizer_state {
 }
 
 func create_tokenizer(
-    vocab_file_path: string,
-    special_tokens: option[special_tokens_config] = none
+    string vocab_file_path,
+    option[special_tokens_config] = none special_tokens
 ) tokenizer_state {
     print("🔤 Loading NEURX tokenizer from: {vocab_file_path}")
     dict[string, int] loaded_encoder = {}
@@ -111,7 +111,7 @@ func _add_special_tokens(
     ref dict[string, int] encoder,
     ref dict[int, string] decoder,
     special_tokens_config specs,
-    base_size: int) {
+    int base_size) {
     int next_id = base_size
     tuple[string, int][] special_list = [
         (specs.pad_token, specs.pad_token_id),
@@ -132,13 +132,13 @@ func _add_special_tokens(
 }
 
 func encode(
-    state: tokenizer_state,
-    text: string,
-    add_special_tokens: bool = true,
-    max_length: option[int] = none,
-    truncation: bool = false,
-    padding: bool = false,
-    return_tensors: bool = false
+    tokenizer_state state,
+    string text,
+    bool = true add_special_tokens,
+    option[int] = none max_length,
+    bool = false truncation,
+    bool = false padding,
+    bool = false return_tensors
 ) dict[str, any] {
     string preprocessed = preprocess_text(text)
     []string tokens = tokenize(state, preprocessed)
@@ -167,14 +167,14 @@ func encode(
 }
 
 func batch_encode(
-    state: tokenizer_state,
+    tokenizer_state state,
     []string texts,
-    add_special_tokens: bool = true,
-    max_length: option[int] = none,
-    truncation: bool = false,
-    padding: bool = true,
-    return_tensors: bool = true,
-    num_threads: int = 4
+    bool = true add_special_tokens,
+    option[int] = none max_length,
+    bool = false truncation,
+    bool = true padding,
+    bool = true return_tensors,
+    int = 4 num_threads
 ) dict[str, any] {
     int batch_size = len(texts)
     dict[str, any][] results = []
@@ -213,10 +213,10 @@ func batch_encode(
 }
 
 func decode(
-    state: tokenizer_state,
+    tokenizer_state state,
     []int token_ids,
-    skip_special_tokens: bool = false,
-    clean_up_tokenization_spaces: bool = true
+    bool = false skip_special_tokens,
+    bool = true clean_up_tokenization_spaces
 ) string {
     []string tokens = []
     for id in token_ids:
@@ -235,9 +235,9 @@ func decode(
 }
 
 func batch_decode(
-    state: tokenizer_state,
+    tokenizer_state state,
     tensor token_ids,
-    skip_special_tokens: bool = false
+    bool = false skip_special_tokens
 ) []string {
     int batch_size = shape(token_ids)[0]
     []string results = []
@@ -282,7 +282,7 @@ func cleanup_spaces(string text) {
     return text
 }
 
-func tokenize(state: tokenizer_state, string text) []string {
+func tokenize(tokenizer_state state, string text) []string {
     if len(text) == 0:
         return []
     []string tokens = []
@@ -304,7 +304,7 @@ func tokenize(state: tokenizer_state, string text) []string {
     return tokens
 }
 
-func convert_tokens_to_ids(state: tokenizer_state, []string tokens) []int {
+func convert_tokens_to_ids(tokenizer_state state, []string tokens) []int {
     []int ids = []
     for token in tokens:
         if token in state.encoder:
@@ -318,7 +318,7 @@ func convert_tokens_to_ids(state: tokenizer_state, []string tokens) []int {
     return ids
 }
 
-func convert_ids_to_tokens(state: tokenizer_state, []int ids) []string {
+func convert_ids_to_tokens(tokenizer_state state, []int ids) []string {
     []string tokens = []
     for id in ids:
         if id in state.decoder:
@@ -329,10 +329,10 @@ func convert_ids_to_tokens(state: tokenizer_state, []int ids) []string {
 }
 
 func build_chat_prompt(
-    state: tokenizer_state,
+    tokenizer_state state,
     []string messages,
-    system_prompt: option<string> = none,
-    add_generation_prompt: bool = true
+    option<string> = none system_prompt,
+    bool = true add_generation_prompt
 ) dict[str, any] {
     []string parts = []
     if system_prompt != none:
@@ -354,10 +354,10 @@ func build_chat_prompt(
 }
 
 func build_prefix_lm_input(
-    state: tokenizer_state,
-    prefix: string,
-    continuation: string,
-    max_prefix_ratio: float = 0.8
+    tokenizer_state state,
+    string prefix,
+    string continuation,
+    float = 0.8 max_prefix_ratio
 ) dict[str, any] {
     string full_text = (
         state.special_tokens.sop_token +
@@ -382,9 +382,9 @@ func build_prefix_lm_input(
 }
 
 func build_mlm_input(
-    state: tokenizer_state,
-    text: string,
-    mlm_probability: float = 0.15
+    tokenizer_state state,
+    string text,
+    float = 0.15 mlm_probability
 ) dict[str, any] {
     dict[str, any] original = encode(
         state=state,
@@ -418,7 +418,7 @@ func build_mlm_input(
     return result
 }
 
-func _is_special_token(int token_id, specs: special_tokens_config) {
+func _is_special_token(int token_id, special_tokens_config specs) {
     return token_id == specs.pad_token_id ||
            token_id == specs.bos_token_id ||
            token_id == specs.eos_token_id ||
@@ -444,7 +444,7 @@ func sample_without_replacement([]int pool, int k) {
     return result[:k]
 }
 
-func print_special_tokens_info(state: tokenizer_state) {
+func print_special_tokens_info(tokenizer_state state) {
     print("\n📋 NEURX Special Tokens:")
     print("-" * 40)
     print(f"  PAD : [{state.special_tokens.pad_token_id}] '{state.special_tokens.pad_token}'")

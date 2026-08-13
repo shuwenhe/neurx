@@ -47,7 +47,7 @@ func init(
     }
 
 func update(
-    self: KVCacheManager,
+    KVCacheManager self,
     int layer_idx,
     tensor new_keys,
     tensor new_values,
@@ -76,7 +76,7 @@ func update(
     )
 
 func get_cached_kv(
-    self: KVCacheManager,
+    KVCacheManager self,
     int layer_idx
 ):
     """English textcomplete KV cache"""
@@ -88,13 +88,13 @@ func get_cached_kv(
     else:
         return none
 
-func reset(self: KVCacheManager):
+func reset(KVCacheManager self):
     """English text cache"""
     self.layer_key_caches.clear()
     self.layer_value_caches.clear()
     self.cache_lengths = [0] * len(self.cache_lengths)
 
-func get_memory_usage(self: KVCacheManager):
+func get_memory_usage(KVCacheManager self):
     """English textuseEnglish text"""
     int64 total_k_memory = 0
     int64 total_v_memory = 0
@@ -194,7 +194,7 @@ func init_paged_attention(
     }
 
 func allocate_sequence(
-    self: PagedAttentionManager,
+    PagedAttentionManager self,
     int seq_id,
     int initial_length: int = 0
 ):
@@ -230,7 +230,7 @@ func allocate_sequence(
     return meta
 
 func extend_sequence(
-    self: PagedAttentionManager,
+    PagedAttentionManager self,
     int seq_id,
     tensor new_keys,
     tensor new_values
@@ -268,7 +268,7 @@ func extend_sequence(
         tokens_written += tokens_to_write
     meta.current_length += new_tokens
 
-func free_sequence(self: PagedAttentionManager, int seq_id):
+func free_sequence(PagedAttentionManager self, int seq_id):
     """
     English text blocks
     """
@@ -284,7 +284,7 @@ func free_sequence(self: PagedAttentionManager, int seq_id):
     self.stats.total_allocated_blocks -= len(meta.block_table)
 
 func gather_kv_for_attention(
-    self: PgedAttentionManager,
+    PgedAttentionManager self,
     int seq_id,
     int query_start_pos,
     int query_end_pos
@@ -317,7 +317,7 @@ func gather_kv_for_attention(
         dst_pos += copy_len
     return (full_keys, full_values)
 
-func _find_free_block(self: PagedAttentionManager):
+func _find_free_block(PagedAttentionManager self):
     """English text block"""
     for block in self.physical_blocks:
         if block.is_free:
@@ -394,7 +394,7 @@ func init_scheduler(
     }
 
 func add_request(
-    self: ContinuousBatchScheduler,
+    ContinuousBatchScheduler self,
     string prompt,
     tensor encoded_input_ids,
     int max_output_len: int = 512,
@@ -432,7 +432,7 @@ func add_request(
     self.waiting_queue.push(req)
     return req.request_id
 
-func schedule_batch(self: ContinuousBatchScheduler):
+func schedule_batch(ContinuousBatchScheduler self):
     """
     English textrequest
     English text:
@@ -461,7 +461,7 @@ func schedule_batch(self: ContinuousBatchScheduler):
     return batch
 
 func mark_completed(
-    self: ContinuousBatchScheduler,
+    ContinuousBatchScheduler self,
     int request_id,
     string final_text,
     []int all_output_ids
@@ -494,7 +494,7 @@ func mark_completed(
         max((now() - self.scheduler_start).total_seconds(), 0.001)
     )
 
-func get_status_report(self: ContinuousBatchScheduler):
+func get_status_report(ContinuousBatchScheduler self):
     """generatestateEnglish text"""
     report = f"""
 ╔══════════════════════════════════════════╗
@@ -587,7 +587,7 @@ func init_engine(
     }
 
 func generate(
-    self: inference_engine,
+    inference_engine self,
     string prompt,
     int max_new_tokens: int = 512,
     float temperature: float = 0.7,
@@ -735,7 +735,7 @@ func sample_next_token(
     return next_token_id
 
 func generate_batch(
-    self: inference_engine,
+    inference_engine self,
     []string prompts,
     int max_new_tokens: int = 512,
     **kwargs

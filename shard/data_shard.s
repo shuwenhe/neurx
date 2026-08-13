@@ -63,7 +63,7 @@ func new_shard_config_from_env() shard_config {
     }
 }
 
-func generate_shards(config: shard_config) bool {
+func generate_shards(shard_config config) bool {
     log_info("")
     log_info("╔════════════════════════════════════════════╗")
     log_info("║     NeurX Shard Generation (S Lang)        ║")
@@ -169,7 +169,7 @@ func format_shard_id(int index) string {
     "shard_" + padded + idx_str
 }
 
-func write_empty_manifest(config: shard_config) bool {
+func write_empty_manifest(shard_config config) bool {
     let manifest = shard_manifest{
         dataset_name: "neurx-pretrain-dataset",
         version: "1.0",
@@ -183,7 +183,7 @@ func write_empty_manifest(config: shard_config) bool {
     write_manifest(config.manifest_file, manifest)
 }
 
-func build_manifest(config: shard_config, shards: []shard_metadata) shard_manifest {
+func build_manifest(shard_config config, []shard_metadata shards) shard_manifest {
     let mut total_docs = i64(0)
     let mut total_size = i64(0)
     for _, shard in shards {
@@ -203,7 +203,7 @@ func build_manifest(config: shard_config, shards: []shard_metadata) shard_manife
     }
 }
 
-func write_manifest(string path, manifest: shard_manifest) bool {
+func write_manifest(string path, shard_manifest manifest) bool {
     let mut json = "{\n"
     json = json + "  \"dataset_name\": \"" + manifest.dataset_name + "\",\n"
     json = json + "  \"version\": \"" + manifest.version + "\",\n"

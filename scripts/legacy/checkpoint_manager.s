@@ -35,14 +35,14 @@ func (cm *checkpoint_manager) init(string checkpoint_dir, int max_checkpoints) e
 }
 
 func (cm *checkpoint_manager) save_checkpoint(
-    step: int,
-    epoch: int,
-    model_state: map[string]interface{},
-    optimizer_state: map[string]interface{},
-    config: map[string]interface{},
-    loss: float,
-    perplexity: float,
-    learning_rate: float) error {
+    int step,
+    int epoch,
+    map[string]interface{} model_state,
+    map[string]interface{} optimizer_state,
+    map[string]interface{} config,
+    float loss,
+    float perplexity,
+    float learning_rate) error {
     checkpoint_name := "checkpoint-" + format_int(step)
     checkpoint_path := filepath.Join(cm.checkpoint_dir, checkpoint_name)
     if err := os.MkdirAll(checkpoint_path, 0755); err != nil {
@@ -129,8 +129,8 @@ func (cm *checkpoint_manager) load_checkpoint(int step): (map[string]interface{}
 }
 
 func (cm *checkpoint_manager) validate_checkpoint(
-    checkpoint_path: string,
-    metadata: checkpoint_metadata) error {
+    string checkpoint_path,
+    checkpoint_metadata metadata) error {
     model_path := filepath.Join(checkpoint_path, "model_state.json")
     model_bytes, err := ioutil.ReadFile(model_path)
     if err != nil {
@@ -228,7 +228,7 @@ func (cm *checkpoint_manager) get_best_perplexity(): float {
     return best
 }
 
-func compute_hash(data: []byte): string {
+func compute_hash([]byte data): string {
     h := sha256.Sum256(data)
     return fmt.Sprintf("%x", h)
 }

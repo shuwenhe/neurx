@@ -14,12 +14,12 @@ struct rollout_correction_result {
 }
 
 func apply_rollout_correction_to_advantages(
-    advantages: Tensor,
-    new_log_probs: Tensor,
-    rollout_log_probs: Tensor,
-    old_log_probs: Tensor,
-    response_mask: Tensor,
-    config: RolloutCorrectionConfig
+    Tensor advantages,
+    Tensor new_log_probs,
+    Tensor rollout_log_probs,
+    Tensor old_log_probs,
+    Tensor response_mask,
+    RolloutCorrectionConfig config
 ) -> RolloutCorrectionResult {
     let is_weights = compute_is_weights(
         new_log_probs,
@@ -57,12 +57,12 @@ func apply_rollout_correction_to_advantages(
 }
 
 func apply_rollout_correction_to_loss(
-    policy_loss: Tensor,
-    new_log_probs: Tensor,
-    rollout_log_probs: Tensor,
-    old_log_probs: Tensor,
-    response_mask: Tensor,
-    config: RolloutCorrectionConfig
+    Tensor policy_loss,
+    Tensor new_log_probs,
+    Tensor rollout_log_probs,
+    Tensor old_log_probs,
+    Tensor response_mask,
+    RolloutCorrectionConfig config
 ) -> RolloutCorrectionResult {
     let is_weights = compute_is_weights(
         new_log_probs,
@@ -100,12 +100,12 @@ func apply_rollout_correction_to_loss(
 }
 
 func compute_policy_loss_bypass_mode(
-    new_log_probs: Tensor,
-    rollout_log_probs: Tensor,
-    advantages: Tensor,
-    response_mask: Tensor,
-    config: RolloutCorrectionConfig,
-    clip_epsilon: f32
+    Tensor new_log_probs,
+    Tensor rollout_log_probs,
+    Tensor advantages,
+    Tensor response_mask,
+    RolloutCorrectionConfig config,
+    f32 clip_epsilon
 ) -> (tensor, rollout_correction_result) {
     let ratio = exp(new_log_probs - rollout_log_probs)
     let policy_loss: Tensor
@@ -132,13 +132,13 @@ func compute_policy_loss_bypass_mode(
 }
 
 func compute_policy_loss_decoupled_mode(
-    new_log_probs: Tensor,
-    rollout_log_probs: Tensor,
-    old_log_probs: Tensor,
-    advantages: Tensor,
-    response_mask: Tensor,
-    config: RolloutCorrectionConfig,
-    clip_epsilon: f32
+    Tensor new_log_probs,
+    Tensor rollout_log_probs,
+    Tensor old_log_probs,
+    Tensor advantages,
+    Tensor response_mask,
+    RolloutCorrectionConfig config,
+    f32 clip_epsilon
 ) -> (tensor, rollout_correction_result) {
     let ratio = exp(new_log_probs - old_log_probs)
     let surr1 = ratio * advantages
@@ -156,10 +156,10 @@ func compute_policy_loss_decoupled_mode(
 }
 
 func collect_statistics(
-    is_weights: ISWeights,
-    rs_results: []rs_result,
-    corrected_mask: Tensor,
-    original_mask: Tensor
+    ISWeights is_weights,
+    []rs_result rs_results,
+    Tensor corrected_mask,
+    Tensor original_mask
 ) -> map[string]f32 {
     let stats = map[string]f32{}
     let is_stats = compute_is_statistics(is_weights)
@@ -179,18 +179,18 @@ func collect_statistics(
     return stats
 }
 
-func is_rollout_correction_enabled(config: RolloutCorrectionConfig) -> bool {
+func is_rollout_correction_enabled(RolloutCorrectionConfig config) -> bool {
     return config.is_level != is_aggregation_level.NONE || config.rs_modes.len() > 0
 }
 
-func clamp(x: Tensor, f32 min_val, f32 max_val) -> Tensor {
+func clamp(Tensor x, f32 min_val, f32 max_val) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
 
-func minimum(x: Tensor, y: Tensor) -> Tensor {
+func minimum(Tensor x, Tensor y) -> Tensor {
     return where((x < y), x, y)
 }
 
-func where(condition: Tensor, x: Tensor, y: Tensor) -> Tensor {
+func where(Tensor condition, Tensor x, Tensor y) -> Tensor {
     return condition.to_float() * x + (1.0 - condition.to_float()) * y
 }

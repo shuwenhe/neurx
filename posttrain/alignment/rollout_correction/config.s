@@ -245,9 +245,9 @@ func bypass_pg_geo_rs(f32 rs_lower, f32 rs_upper) -> RolloutCorrectionConfig {
 }
 
 func bypass_pg_geo_rs_seq_tis(
-    rs_lower: f32,
-    rs_upper: f32,
-    is_threshold: f32
+    f32 rs_lower,
+    f32 rs_upper,
+    f32 is_threshold
 ) -> RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.SEQUENCE,
@@ -265,9 +265,9 @@ func bypass_pg_geo_rs_seq_tis(
 }
 
 func bypass_pg_geo_rs_token_tis(
-    rs_lower: f32,
-    rs_upper: f32,
-    is_threshold: f32
+    f32 rs_lower,
+    f32 rs_upper,
+    f32 is_threshold
 ) -> RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.TOKEN,

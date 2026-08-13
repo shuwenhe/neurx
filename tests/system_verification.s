@@ -89,7 +89,7 @@ func check_all_components() component_status[] {
     return components
 }
 
-func calculate_health_score(components: component_status[]) f64 {
+func calculate_health_score(component_status[] components) f64 {
     let ready = 0
     for component in components {
         if component.status == "ready" {
@@ -99,7 +99,7 @@ func calculate_health_score(components: component_status[]) f64 {
     return (ready * 100.0) / len(components)
 }
 
-func print_component_status(component: component_status) {
+func print_component_status(component_status component) {
     let status_icon = "✅"
     if component.status != "ready" {
         status_icon = "❌"

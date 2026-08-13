@@ -3,14 +3,14 @@ struct graph_node {
     operation_name: string
     forward_inputs: []tensor
     forward_output: tensor
-    backward_fn: func(grad: tensor) -> []tensor
+    backward_fn: func(tensor grad) -> []tensor
 }
 
 struct graph_edge {
     from_node_id: i64
     to_node_id: i64
     tensor_index: i64
-    prev_func: func(grad: tensor) -> tensor
+    prev_func: func(tensor grad) -> tensor
 }
 
 struct computation_graph {

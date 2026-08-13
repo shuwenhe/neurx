@@ -178,8 +178,8 @@ func generate_deployment_config(string deploy_dir) {
 }
 
 func generate_report(
-    compilation_results: compilation_result[],
-    test_results: test_result[]
+    compilation_result[] compilation_results,
+    test_result[] test_results
 ) build_report {
     print_header("TEST REPORT")
     let timestamp = get_timestamp()

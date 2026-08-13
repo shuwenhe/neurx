@@ -24,7 +24,7 @@ struct gpg_trainer {
     reward_history: []f32
 }
 
-func new_gpg_trainer(config: gpg_config, policy: *model) -> GPGTrainer {
+func new_gpg_trainer(gpg_config config, *model policy) -> GPGTrainer {
     let optimizer = adamw_optimizer(policy.parameters(), config.learning_rate)
     return gpg_trainer{
         config: config,
@@ -36,7 +36,7 @@ func new_gpg_trainer(config: gpg_config, policy: *model) -> GPGTrainer {
     }
 }
 
-func (trainer: *gpg_trainer) generate_group(prompt: Tensor) -> ([]tensor, []tensor) {
+func (trainer *gpg_trainer) generate_group(Tensor prompt) -> ([]tensor, []tensor) {
     let responses: []tensor = []
     let log_probs_list: []tensor = []
     for i in 0..trainer.config.group_size {
@@ -51,7 +51,7 @@ func (trainer: *gpg_trainer) generate_group(prompt: Tensor) -> ([]tensor, []tens
     return responses, log_probs_list
 }
 
-func (trainer: *gpg_trainer) compute_baseline(rewards: []f32) -> f32 {
+func (trainer *gpg_trainer) compute_baseline([]f32 rewards) -> f32 {
     match trainer.config.baseline_type {
         "group_mean" => {
             return compute_mean(rewards)
@@ -68,7 +68,7 @@ func (trainer: *gpg_trainer) compute_baseline(rewards: []f32) -> f32 {
     }
 }
 
-func (trainer: *gpg_trainer) compute_advantages(rewards: []f32) -> []f32 {
+func (trainer *gpg_trainer) compute_advantages([]f32 rewards) -> []f32 {
     let baseline = trainer.compute_baseline(rewards)
     let scaled_rewards: []f32 = []
     for r in rewards {
@@ -90,17 +90,17 @@ func (trainer: *gpg_trainer) compute_advantages(rewards: []f32) -> []f32 {
     return advantages
 }
 
-func (trainer: *gpg_trainer) compute_entropy(logits: Tensor) -> Tensor {
+func (trainer *gpg_trainer) compute_entropy(Tensor logits) -> Tensor {
     let probs = softmax(logits, dim: -1)
     let log_probs = log_softmax(logits, dim: -1)
     let entropy = -(probs * log_probs).sum(dim: -1).mean()
     return entropy
 }
 
-func (trainer: *gpg_trainer) train_step_group(
-    prompt: Tensor,
-    responses: []tensor,
-    rewards: []f32
+func (trainer *gpg_trainer) train_step_group(
+    Tensor prompt,
+    []tensor responses,
+    []f32 rewards
 ) -> (f32, f32) {
     let advantages = trainer.compute_advantages(rewards)
     let total_policy_loss: f32 = 0.0
@@ -138,7 +138,7 @@ func (trainer: *gpg_trainer) train_step_group(
     )
 }
 
-func (trainer: *gpg_trainer) train(train_data: DataLoader) -> []f32 {
+func (trainer *gpg_trainer) train(DataLoader train_data) -> []f32 {
     let policy_losses: []f32 = []
     for batch in train_data {
         for i in 0..batch.prompts.len() {
@@ -172,7 +172,7 @@ func (trainer: *gpg_trainer) train(train_data: DataLoader) -> []f32 {
     return policy_losses
 }
 
-func (trainer: *gpg_trainer) get_statistics() -> (f32, f32, f32) {
+func (trainer *gpg_trainer) get_statistics() -> (f32, f32, f32) {
     if trainer.reward_history.len() == 0 {
         return 0.0, 0.0, 0.0
     }
@@ -190,11 +190,11 @@ func (trainer: *gpg_trainer) get_statistics() -> (f32, f32, f32) {
     return mean_reward, std_reward, max_reward
 }
 
-func compute_reward(prompt: Tensor, response: Tensor) -> f32 {
+func compute_reward(Tensor prompt, Tensor response) -> f32 {
     return random_uniform(-1.0, 1.0)
 }
 
-func compute_mean(values: []f32) -> f32 {
+func compute_mean([]f32 values) -> f32 {
     if values.len() == 0 {
         return 0.0
     }
@@ -205,7 +205,7 @@ func compute_mean(values: []f32) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_std(values: []f32, f32 mean) -> f32 {
+func compute_std([]f32 values, f32 mean) -> f32 {
     if values.len() == 0 {
         return 1.0
     }

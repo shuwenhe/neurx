@@ -21,7 +21,7 @@ type mixed_precision_trainer struct {
     steps_since_overflow: int
 }
 
-func (mpt *mixed_precision_trainer) init(config: mixed_precision_config) {
+func (mpt *mixed_precision_trainer) init(mixed_precision_config config) {
     mpt.config = config
     mpt.current_loss_scale = config.loss_scale
     mpt.overflow_counter = 0
@@ -114,8 +114,8 @@ type amp_step_result struct {
 }
 
 func (mpt *mixed_precision_trainer) amp_step(
-    loss: float,
-    grad_norm: float): amp_step_result {
+    float loss,
+    float grad_norm): amp_step_result {
     result := amp_step_result{
         skipped: false,
         loss_scale: mpt.current_loss_scale,

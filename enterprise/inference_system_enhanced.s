@@ -53,7 +53,7 @@ func new_inference_config() inference_system_config {
     cfg
 }
 
-func init_enhanced_inference_system(cfg: inference_system_config) inference_system_enhanced {
+func init_enhanced_inference_system(inference_system_config cfg) inference_system_enhanced {
     gpu_context := cuda_core.cuda_context_create(cfg.gpu_device_id)
     system_metrics := metrics.init_inference_metrics()
     speculative_sys := speculative_inference.init_speculative_inference_system(cfg.speculative_config)
@@ -68,10 +68,10 @@ func init_enhanced_inference_system(cfg: inference_system_config) inference_syst
 }
 
 func inference_enhanced_single(
-    sys: inference_system_enhanced,
-    prompt: string,
-    max_new_tokens: int,
-    temperature: float,
+    inference_system_enhanced sys,
+    string prompt,
+    int max_new_tokens,
+    float temperature,
 ) (inference_system_enhanced, string) {
     updated_sys := sys
     if updated_sys.config.enable_speculative_decode {
@@ -90,9 +90,9 @@ func inference_enhanced_single(
 }
 
 func inference_enhanced_batch(
-    sys: inference_system_enhanced,
-    prompts: []string,
-    max_new_tokens: int,
+    inference_system_enhanced sys,
+    []string prompts,
+    int max_new_tokens,
 ) (inference_system_enhanced, []string) {
     updated_sys := sys
     outputs := []string{}
@@ -120,7 +120,7 @@ func inference_enhanced_batch(
     (updated_sys, outputs)
 }
 
-func adaptive_speculative_inference(sys: inference_system_enhanced) inference_system_enhanced {
+func adaptive_speculative_inference(inference_system_enhanced sys) inference_system_enhanced {
     updated_sys := sys
     updated_sys.speculative_sys = speculative_inference.adaptive_update_speculative_params(
         updated_sys.speculative_sys,
@@ -128,14 +128,14 @@ func adaptive_speculative_inference(sys: inference_system_enhanced) inference_sy
     updated_sys
 }
 
-func get_system_performance_stats(sys: inference_system_enhanced) string {
+func get_system_performance_stats(inference_system_enhanced sys) string {
     stats := speculative_inference.get_speculative_performance_stats(sys.speculative_sys)
     stats
 }
 
 func handle_enhanced_openai_request(
-    sys: inference_system_enhanced,
-    req: openai_compatible.chat_completion_request,
+    inference_system_enhanced sys,
+    openai_compatible.chat_completion_request req,
 ) (inference_system_enhanced, openai_compatible.chat_completion_response) {
     updated_sys := sys
     prompt := ""
@@ -173,13 +173,13 @@ func handle_enhanced_openai_request(
     (updated_sys, response)
 }
 
-func enable_speculative_mode(sys: inference_system_enhanced) inference_system_enhanced {
+func enable_speculative_mode(inference_system_enhanced sys) inference_system_enhanced {
     updated_sys := sys
     updated_sys.config.enable_speculative_decode = true
     updated_sys
 }
 
-func disable_speculative_mode(sys: inference_system_enhanced) inference_system_enhanced {
+func disable_speculative_mode(inference_system_enhanced sys) inference_system_enhanced {
     updated_sys := sys
     updated_sys.config.enable_speculative_decode = false
     updated_sys

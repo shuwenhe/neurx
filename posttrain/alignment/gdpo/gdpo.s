@@ -29,7 +29,7 @@ struct gdpo_trainer {
     reward_histories: [][]f32
 }
 
-func new_gdpo_trainer(config: gdpo_config, model: *model, ref_model: *model) -> gdpo_trainer {
+func new_gdpo_trainer(gdpo_config config, *model model, *model ref_model) -> gdpo_trainer {
     let optimizer = adamw_optimizer(model.parameters(), config.learning_rate)
     let reward_scales: []f32 = []
     let reward_histories: [][]f32 = []
@@ -47,7 +47,7 @@ func new_gdpo_trainer(config: gdpo_config, model: *model, ref_model: *model) -> 
     }
 }
 
-func (trainer: *gdpo_trainer) aggregate_rewards(rubric: rubric) -> f32 {
+func (trainer *gdpo_trainer) aggregate_rewards(rubric rubric) -> f32 {
     let aggregated: f32 = 0.0
     match trainer.config.aggregation_method {
         "sum" => {
@@ -90,7 +90,7 @@ func (trainer: *gdpo_trainer) aggregate_rewards(rubric: rubric) -> f32 {
     return aggregated
 }
 
-func (trainer: *gdpo_trainer) normalize_rubric(rubric: rubric) -> rubric {
+func (trainer *gdpo_trainer) normalize_rubric(rubric rubric) -> rubric {
     let normalized = rubric{
         reward_names: rubric.reward_names.clone(),
         reward_values: [],
@@ -110,13 +110,13 @@ func (trainer: *gdpo_trainer) normalize_rubric(rubric: rubric) -> rubric {
     return normalized
 }
 
-func (trainer: *gdpo_trainer) compute_gdpo_loss(
-    chosen_prompts: []tensor,
-    chosen_responses: []tensor,
-    rejected_prompts: []tensor,
-    rejected_responses: []tensor,
-    chosen_rubrics: []rubric,
-    rejected_rubrics: []rubric
+func (trainer *gdpo_trainer) compute_gdpo_loss(
+    []tensor chosen_prompts,
+    []tensor chosen_responses,
+    []tensor rejected_prompts,
+    []tensor rejected_responses,
+    []rubric chosen_rubrics,
+    []rubric rejected_rubrics
 ) -> tensor {
     let batch_size = chosen_prompts.len()
     let total_loss = tensor_zeros([1])
@@ -154,13 +154,13 @@ func (trainer: *gdpo_trainer) compute_gdpo_loss(
     return total_loss / f32(batch_size)
 }
 
-func (trainer: *gdpo_trainer) train_step(
-    chosen_prompts: []tensor,
-    chosen_responses: []tensor,
-    rejected_prompts: []tensor,
-    rejected_responses: []tensor,
-    chosen_rubrics: []rubric,
-    rejected_rubrics: []rubric
+func (trainer *gdpo_trainer) train_step(
+    []tensor chosen_prompts,
+    []tensor chosen_responses,
+    []tensor rejected_prompts,
+    []tensor rejected_responses,
+    []rubric chosen_rubrics,
+    []rubric rejected_rubrics
 ) -> f32 {
     let loss = trainer.compute_gdpo_loss(
         chosen_prompts,
@@ -177,7 +177,7 @@ func (trainer: *gdpo_trainer) train_step(
     return loss.item()
 }
 
-func (trainer: *gdpo_trainer) train(train_data: DataLoader) -> []f32 {
+func (trainer *gdpo_trainer) train(DataLoader train_data) -> []f32 {
     let losses: []f32 = []
     for epoch in 0..trainer.config.num_epochs {
         println(f"GDPO Epoch {epoch + 1}/{trainer.config.num_epochs}")
@@ -200,7 +200,7 @@ func (trainer: *gdpo_trainer) train(train_data: DataLoader) -> []f32 {
     return losses
 }
 
-func (trainer: *gdpo_trainer) print_reward_statistics() {
+func (trainer *gdpo_trainer) print_reward_statistics() {
     println("Reward Statistics:")
     for i in 0..trainer.config.num_rewards {
         if trainer.reward_histories[i].len() > 0 {
@@ -211,7 +211,7 @@ func (trainer: *gdpo_trainer) print_reward_statistics() {
     }
 }
 
-func compute_mean(values: []f32) -> f32 {
+func compute_mean([]f32 values) -> f32 {
     if values.len() == 0 {
         return 0.0
     }
@@ -222,7 +222,7 @@ func compute_mean(values: []f32) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_std(values: []f32, f32 mean) -> f32 {
+func compute_std([]f32 values, f32 mean) -> f32 {
     if values.len() == 0 {
         return 1.0
     }
@@ -233,10 +233,10 @@ func compute_std(values: []f32, f32 mean) -> f32 {
     return sqrt(sum_sq / f32(values.len()))
 }
 
-func log_sigmoid(x: tensor) -> tensor {
+func log_sigmoid(tensor x) -> tensor {
     return -softplus(-x)
 }
 
-func softplus(x: tensor) -> tensor {
+func softplus(tensor x) -> tensor {
     return log(1.0 + exp(x))
 }

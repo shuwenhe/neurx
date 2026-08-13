@@ -56,11 +56,11 @@ func calculate_cross_entropy([]float logits, []int labels): float {
 }
 
 func (e *evaluator) evaluate(
-    step: int,
-    train_loss: float,
-    val_logits: [][]float,
-    val_labels: [][]int,
-    speed: float) evaluation_metrics {
+    int step,
+    float train_loss,
+    [][]float val_logits,
+    [][]int val_labels,
+    float speed) evaluation_metrics {
     val_loss := 0.0
     for i := 0; i < len(val_labels); i++ {
         if i < len(val_logits) {

@@ -52,7 +52,7 @@ struct hf_tokenizer {
     special_tokens: map[string]i32
 }
 
-func new_hf_transformers_rollout(config: hf_transformers_config) -> hf_transformers_rollout {
+func new_hf_transformers_rollout(hf_transformers_config config) -> hf_transformers_rollout {
     let model = load_hf_model(
         config.model_name_or_path,
         config.device,
@@ -77,8 +77,8 @@ func new_hf_transformers_rollout(config: hf_transformers_config) -> hf_transform
     }
 }
 
-func (rollout: *hf_transformers_rollout) generate_batch(
-    prompts: []string
+func (rollout *hf_transformers_rollout) generate_batch(
+    []string prompts
 ) -> ([]string, [][]f32) {
     let start_time = get_time_ms()
     rollout.total_prompts += i64(prompts.len())
@@ -100,10 +100,10 @@ func (rollout: *hf_transformers_rollout) generate_batch(
     return responses, log_probs
 }
 
-func (rollout: *hf_transformers_rollout) generate(
-    input_ids: tensor,
-    attention_mask: tensor,
-    max_new_tokens: i32
+func (rollout *hf_transformers_rollout) generate(
+    tensor input_ids,
+    tensor attention_mask,
+    i32 max_new_tokens
 ) -> (tensor, [][]f32) {
     let batch_size = input_ids.shape[0]
     let input_length = input_ids.shape[1]
@@ -160,9 +160,9 @@ func (rollout: *hf_transformers_rollout) generate(
     return output_ids, all_log_probs
 }
 
-func (rollout: *hf_transformers_rollout) sample_next_tokens(
-    logits: tensor,
-    finished: tensor
+func (rollout *hf_transformers_rollout) sample_next_tokens(
+    tensor logits,
+    tensor finished
 ) -> (tensor, []f32) {
     let batch_size = logits.shape[0]
     if !rollout.config.do_sample {
@@ -201,8 +201,8 @@ func (rollout: *hf_transformers_rollout) sample_next_tokens(
     return next_tokens, token_log_probs
 }
 
-func (rollout: *hf_transformers_rollout) tokenize_batch(
-    prompts: []string
+func (rollout *hf_transformers_rollout) tokenize_batch(
+    []string prompts
 ) -> (tensor, tensor) {
     let all_input_ids: [][]i32 = []
     let max_length = 0
@@ -238,7 +238,7 @@ func (rollout: *hf_transformers_rollout) tokenize_batch(
     return input_ids_tensor, attention_mask
 }
 
-func (rollout: *hf_transformers_rollout) get_statistics() -> (i64, i64, f32, f32) {
+func (rollout *hf_transformers_rollout) get_statistics() -> (i64, i64, f32, f32) {
     let avg_tokens_per_prompt: f32 = 0.0
     if rollout.total_prompts > 0 {
         avg_tokens_per_prompt = f32(rollout.total_tokens_generated) / f32(rollout.total_prompts)
@@ -255,7 +255,7 @@ func (rollout: *hf_transformers_rollout) get_statistics() -> (i64, i64, f32, f32
     )
 }
 
-func (rollout: *hf_transformers_rollout) print_statistics() {
+func (rollout *hf_transformers_rollout) print_statistics() {
     let prompts, tokens, avg_tokens, throughput = rollout.get_statistics()
     println("HuggingFace Transformers Rollout Statistics:")
     println(f"  Total prompts: {prompts}")
@@ -266,11 +266,11 @@ func (rollout: *hf_transformers_rollout) print_statistics() {
 }
 
 func load_hf_model(
-    model_name: string,
-    device: string,
-    dtype: string,
-    trust_remote_code: bool,
-    low_cpu_mem_usage: bool
+    string model_name,
+    string device,
+    string dtype,
+    bool trust_remote_code,
+    bool low_cpu_mem_usage
 ) -> *hf_model {
     println(f"Loading HF model: {model_name}")
     println(f"  Device: {device}")
@@ -279,9 +279,9 @@ func load_hf_model(
 }
 
 func load_hf_tokenizer(
-    model_name: string,
-    padding_side: string,
-    trust_remote_code: bool
+    string model_name,
+    string padding_side,
+    bool trust_remote_code
 ) -> *hf_tokenizer {
     println(f"Loading HF tokenizer: {model_name}")
     println(f"  Padding side: {padding_side}")

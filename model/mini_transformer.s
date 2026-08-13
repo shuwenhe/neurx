@@ -20,7 +20,7 @@ func tensor_new([]int shape) tensor_2 {
     }
 }
 
-func tensor_shape_string(t: tensor_2) string {
+func tensor_shape_string(tensor_2 t) string {
     result := "["
     for i := 0; i < len(t.shape); i += 1 {
         if i > 0 {
@@ -60,12 +60,12 @@ struct transformer_layer {
 }
 
 func create_mini_transformer(
-    vocab_size: int,
-    embed_dim: int,
-    hidden_dim: int,
-    num_layers: int,
-    seq_len: int,
-    num_heads: int
+    int vocab_size,
+    int embed_dim,
+    int hidden_dim,
+    int num_layers,
+    int seq_len,
+    int num_heads
 ) mini_transformer {
     token_embed := tensor_new([]int{vocab_size, embed_dim})
     for i := 0; i < len(token_embed.data); i += 1 {
@@ -145,10 +145,10 @@ func create_mini_transformer(
 }
 
 func forward(
-    model: mini_transformer,
-    input_ids: []int,
-    batch_size: int,
-    seq_length: int
+    mini_transformer model,
+    []int input_ids,
+    int batch_size,
+    int seq_length
 ) tensor_2 {
     embeddings := tensor_2{
         shape: []int{batch_size, seq_length, model.embed_dim},
@@ -201,12 +201,12 @@ func forward(
 }
 
 func apply_attention(
-    x: tensor_2,
-    layer: transformer_layer,
-    batch_size: int,
-    seq_length: int,
-    embed_dim: int,
-    num_heads: int
+    tensor_2 x,
+    transformer_layer layer,
+    int batch_size,
+    int seq_length,
+    int embed_dim,
+    int num_heads
 ) tensor_2 {
     head_dim := embed_dim / num_heads
     output := tensor_2{
@@ -232,11 +232,11 @@ func apply_attention(
 }
 
 func apply_ffn(
-    x: tensor_2,
-    layer: transformer_layer,
-    batch_size: int,
-    seq_length: int,
-    embed_dim: int
+    tensor_2 x,
+    transformer_layer layer,
+    int batch_size,
+    int seq_length,
+    int embed_dim
 ) tensor_2 {
     hidden_dim := 4 * embed_dim
     hidden := tensor_2{
@@ -287,11 +287,11 @@ func gelu(float x) float {
 }
 
 func compute_cross_entropy_loss(
-    logits: tensor_2,
-    targets: []int,
-    batch_size: int,
-    seq_length: int,
-    vocab_size: int
+    tensor_2 logits,
+    []int targets,
+    int batch_size,
+    int seq_length,
+    int vocab_size
 ) float {
     total_loss := 0.0
     total_count := 0
@@ -325,11 +325,11 @@ func compute_cross_entropy_loss(
 }
 
 func compute_gradients(
-    model: mini_transformer,
-    logits: tensor_2,
-    targets: []int,
-    batch_size: int,
-    seq_length: int
+    mini_transformer model,
+    tensor_2 logits,
+    []int targets,
+    int batch_size,
+    int seq_length
 ) map[string]tensor_2 {
     gradients := make(map[string]tensor_2)
     vocab_size := model.vocab_size
@@ -431,14 +431,14 @@ struct adam_w_state {
 }
 
 func adamw_update(
-    model: &mini_transformer,
-    gradients: map[string]tensor_2,
-    state: &adam_w_state,
-    learning_rate: float,
-    beta1: float,
-    beta2: float,
-    epsilon: float,
-    weight_decay: float
+    &mini_transformer model,
+    map[string]tensor_2 gradients,
+    &adam_w_state state,
+    float learning_rate,
+    float beta1,
+    float beta2,
+    float epsilon,
+    float weight_decay
 ) {
     state.t = state.t + 1
     if output_grad, has_output := gradients["output_proj"]; has_output {
@@ -540,16 +540,16 @@ func adamw_update(
 }
 
 func update_parameter(
-    param: &tensor_2,
-    grad: tensor_2,
-    m: &tensor_2,
-    v: &tensor_2,
-    t: int,
-    lr: float,
-    beta1: float,
-    beta2: float,
-    eps: float,
-    wd: float,
+    &tensor_2 param,
+    tensor_2 grad,
+    &tensor_2 m,
+    &tensor_2 v,
+    int t,
+    float lr,
+    float beta1,
+    float beta2,
+    float eps,
+    float wd,
 ) {
     for i := 0; i < len(param.data); i += 1 {
         g := grad.data[i]

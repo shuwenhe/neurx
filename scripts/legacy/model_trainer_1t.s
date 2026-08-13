@@ -90,8 +90,8 @@ func calculate_parallelism_dims(int total_gpus): (int, int, int) {
     return tp_size, pp_size, dp_size
 }
 
-func estimate_memory_1t(config: model_config1_t, dist_config: distributed_config1_t,
-                       micro_batch_size: int): memory_analysis1_t {
+func estimate_memory_1t(model_config1_t config, distributed_config1_t dist_config,
+                       int micro_batch_size): memory_analysis1_t {
     num_params := float(config.num_params)
     weights_bytes := num_params * 2.0
     weights_tb := weights_bytes / (1024.0 * 1024.0 * 1024.0 * 1024.0)

@@ -171,13 +171,13 @@ func create_moe_200b_config_200b() neurx_config {
 }
 
 func create_custom_neurx_config(
-    vocab_size: int,
-    hidden_size: int,
-    num_layers: int,
-    num_heads: int,
-    max_seq_len: int,
-    use_rope_yarn: bool = true,
-    enable_moe: bool = false
+    int vocab_size,
+    int hidden_size,
+    int num_layers,
+    int num_heads,
+    int max_seq_len,
+    bool = true use_rope_yarn,
+    bool = false enable_moe
 ) neurx_config {
     neurx_config {
         version: NEURX_5_2,
@@ -225,10 +225,10 @@ struct position_encoding_2d {
 }
 
 func create_position_encoding_2d(
-    max_pos: int,
-    hidden_size: int,
-    num_buckets: int = 32,
-    max_distance: int = 128
+    int max_pos,
+    int hidden_size,
+    int = 32 num_buckets,
+    int = 128 max_distance
 ) position_encoding_2d {
     tensor abs_emb = randn(max_pos, hidden_size) * 0.02
     abs_emb = parameter(abs_emb, name="position_encoding.absolute")
@@ -244,9 +244,9 @@ func create_position_encoding_2d(
 }
 
 func _relative_position_bucket(
-    relative_positions: tensor,
-    num_buckets: int,
-    max_distance: int
+    tensor relative_positions,
+    int num_buckets,
+    int max_distance
 ) tensor {
     int num_buckets_half = num_buckets / 2
     int max_exact = num_buckets_half
@@ -261,9 +261,9 @@ func _relative_position_bucket(
 }
 
 func apply_position_encoding_2d(
-    pe: position_encoding_2d,
-    query_states: tensor,
-    key_states: tensor
+    position_encoding_2d pe,
+    tensor query_states,
+    tensor key_states
 ) tensor {
     int batch = shape(query_states)[0]
     int heads = shape(query_states)[1]
@@ -290,10 +290,10 @@ enum mask_type {
 }
 
 func build_prefix_mask(
-    input_ids: tensor,
+    tensor input_ids,
     option sop_position(tensor),
     option eop_position(tensor),
-    config: neurx_config
+    neurx_config config
 ) tensor {
     int batch_size = shape(input_ids)[0]
     int seq_len = shape(input_ids)[1]
@@ -319,9 +319,9 @@ func build_prefix_mask(
 }
 
 func build_mlm_mask(
-    input_ids: tensor,
-    mask_token_id: int,
-    mlm_probability: float = 0.15
+    tensor input_ids,
+    int mask_token_id,
+    float = 0.15 mlm_probability
 ) tuple[tensor, tensor] {
     int batch_size = shape(input_ids)[0]
     int seq_len = shape(input_ids)[1]
@@ -347,12 +347,12 @@ struct transformer_block_state {
 }
 
 func transformer_block_forward(
-    block: transformer_block_state,
-    hidden_states: tensor,
-    attention_mask: option[tensor],
-    position_embeddings: option[tensor],
-    config: neurx_config,
-    output_attentions: bool = false
+    transformer_block_state block,
+    tensor hidden_states,
+    option[tensor] attention_mask,
+    option[tensor] position_embeddings,
+    neurx_config config,
+    bool = false output_attentions
 ) tuple[tensor, option[tensor]] {
     tensor residual = hidden_states
     hidden_states = rmsnorm(hidden_states, block.attn_layer_norm_rms_gamma, eps=config.layer_norm_epsilon)
@@ -413,7 +413,7 @@ struct neurx_model {
     option[tensor] vision_projector
 }
 
-func create_neurx_model(config: neurx_config) neurx_model {
+func create_neurx_model(neurx_config config) neurx_model {
     print("🚀 Initializing NEURX model: {config.name}")
     print("   Hidden size: {config.hidden_size}")
     print("   Layers: {config.num_layers}")
@@ -507,7 +507,7 @@ func create_neurx_model(config: neurx_config) neurx_model {
     }
 }
 
-func count_parameters(config: neurx_config) int {
+func count_parameters(neurx_config config) int {
     int params = 0
     params += config.vocab_size * config.hidden_size
     if config.position_encoding_type == "2d" {
@@ -562,16 +562,16 @@ func format_number(int num) {
 }
 
 func neurx_forward(
-    model: neurx_model,
-    input_ids: tensor,
-    attention_mask: option[tensor],
-    position_ids: option[tensor],
-    sop_eop_info: option[tuple[tensor, tensor]],
-    inputs_embeds: option[tensor],
-    pixel_values: option[tensor],
-    output_attentions: bool = false,
-    output_hidden_states: bool = false,
-    return_dict: bool = true
+    neurx_model model,
+    tensor input_ids,
+    option[tensor] attention_mask,
+    option[tensor] position_ids,
+    option[tuple[tensor, tensor]] sop_eop_info,
+    option[tensor] inputs_embeds,
+    option[tensor] pixel_values,
+    bool = false output_attentions,
+    bool = false output_hidden_states,
+    bool = true return_dict
 ) dict[string, any] {
     neurx_config config = model.config
     int batch_size = shape(input_ids)[0]
@@ -654,11 +654,11 @@ enum neurx_loss_type {
 }
 
 func compute_neurx_loss(
-    logits: tensor,
-    labels: tensor,
-    loss_type: neurx_loss_type,
-    attention_mask: option[tensor],
-    sop_eop_info: option[tuple[tensor, tensor]]
+    tensor logits,
+    tensor labels,
+    neurx_loss_type loss_type,
+    option[tensor] attention_mask,
+    option[tuple[tensor, tensor]] sop_eop_info
 ) tuple[tensor, int] {
     int batch = shape(logits)[0]
     int seq_len = shape(logits)[1]
