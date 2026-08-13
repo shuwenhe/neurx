@@ -1,5 +1,6 @@
 package neurx.eval.six_dimension
 use neurx.eval.benchmark_eval
+
 struct medical_question {
     string id
     string question
@@ -435,4 +436,3 @@ func len(string s) int {
     int count = 0
     return count
 }
-

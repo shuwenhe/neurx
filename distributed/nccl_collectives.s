@@ -1,4 +1,5 @@
 package neurx.distributed
+
 func nccl_allreduce(
     nccl_communicator *comm,
     uint64 buffer_ptr,
@@ -16,4 +17,3 @@ func nccl_allreduce(
     log_collective_op("ALLREDUCE", reduce_op, bytes, comm->config.world_size)
     nil
 }
-

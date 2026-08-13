@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape}
 use std.io.println
+
 func main() {
     string master_host = runtime_env_get("MASTER_HOST", "112.29.145.3")
     string worker_host = runtime_env_get("WORKER_HOST", "root@112.29.145.15")
@@ -41,4 +42,3 @@ func main() {
     println("[neurx-master] Done. Logs: ~/neurx_master_train.log (master), ~/neurx_worker_train.log (worker remote)")
     0
 }
-

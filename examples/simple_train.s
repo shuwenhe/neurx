@@ -1,5 +1,6 @@
 package neurx.examples
 import neurx.train.training_main
+
 func main() {
     train_config cfg = default_training_config()
     cfg.batch_size = 64
@@ -7,4 +8,3 @@ func main() {
     cfg.num_epochs = 3
     train_model(cfg)
 }
-

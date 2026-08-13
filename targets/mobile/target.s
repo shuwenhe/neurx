@@ -19,4 +19,3 @@ func default_mobile_target() mobile_target_config {
         precision:          "int8",
     }
 }
-

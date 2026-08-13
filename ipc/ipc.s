@@ -137,4 +137,3 @@ func sem_up(ss sem_state, int sem_id) sem_state {
     }
     return ss
 }
-

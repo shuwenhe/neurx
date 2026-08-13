@@ -1,4 +1,5 @@
 package neurx.inference.sampling
+
 struct sampling_config {
     string strategy
     float temperature
@@ -78,4 +79,3 @@ func creative_config() sampling_config {
         do_sample: true,
     }
 }
-

@@ -1,4 +1,5 @@
 package neurx.model.diffusion.minimal_diffuser
+
 struct minimal_diffuser_state {
     string name
     string family
@@ -47,4 +48,3 @@ func minimal_diffuser_state_dict(minimal_diffuser_state state) minimal_diffuser_
 func minimal_diffuser_load_state_dict(minimal_diffuser_state state, minimal_diffuser_state other) minimal_diffuser_state {
     other
 }
-

@@ -1,4 +1,5 @@
 package main
+
 struct counter_state {
     int value
 }
@@ -12,4 +13,3 @@ func main() {
     println(string(next.value))
     0
 }
-

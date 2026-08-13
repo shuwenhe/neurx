@@ -4,6 +4,7 @@ use neurx.scheduler.serving_vllm_scheduler
 use neurx.serving.vllm.metrics
 use neurx.serving.vllm.prefix_cache
 use neurx.attention.serving_paged
+
 struct vllm_runtime_state {
     vllm_request_queue_state queue
     vllm_scheduler_state scheduler
@@ -102,4 +103,3 @@ func vllm_runtime_state_dict(vllm_runtime_state state) vllm_runtime_state {
 func vllm_runtime_load_state_dict(vllm_runtime_state state, vllm_runtime_state other) vllm_runtime_state {
     other
 }
-

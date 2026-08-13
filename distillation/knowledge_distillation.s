@@ -1,6 +1,7 @@
 package neurx.distillation
 use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file}
 use neurx.strings
+
 struct distillation_config {
     float temperature
     float student_weight
@@ -271,4 +272,3 @@ func log_approx(float x) float {
     }
     2.0 * acc
 }
-

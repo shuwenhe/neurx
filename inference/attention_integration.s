@@ -2,6 +2,7 @@ package neurx.inference.attention_integration
 use neurx.attention.paged_attention_core
 use neurx.attention.paged_attention_inference
 use neurx.attention.prefix_cache_radix
+
 struct integrated_attention_engine {
     paged_attention_runtime paged_runtime
     prefix_cached_attention_runtime prefix_runtime
@@ -371,4 +372,3 @@ func compute_prefix_hash([]int token_ids) string {
     }
     return result
 }
-

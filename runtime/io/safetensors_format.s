@@ -1,4 +1,5 @@
 package neurx.runtime.io
+
 struct safetensors_writer {
     string filepath
     []tensor tensors
@@ -135,7 +136,7 @@ func safetensors_writer_finish(safetensors_writer w) bool {
     true
 }
 extern "intrinsic" func __host_write_binary_file(string path, []byte data) ()
+
 func runtime_write_binary_file(string path, []byte data) () {
     __host_write_binary_file(path, data)
 }
-

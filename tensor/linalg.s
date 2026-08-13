@@ -1,4 +1,5 @@
 package neurx.linalg
+
 struct tensor {
     []float data
     []int shape
@@ -314,4 +315,3 @@ func matrix_power(tensor a, int n) tensor {
     }
     result
 }
-

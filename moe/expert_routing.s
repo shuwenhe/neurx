@@ -1,4 +1,5 @@
 package neurx.moe.expert_routing
+
 struct expert_layer {
     int expert_id
     int hidden_dim
@@ -297,4 +298,3 @@ func make_float_array(int len) []float {
     }
     arr
 }
-

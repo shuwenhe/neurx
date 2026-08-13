@@ -3,6 +3,7 @@ use neurx.inference.safetensors_loader.{load_transformer_layer}
 use neurx.inference.cpu_backend.{fast_matmul_flat_opt, fast_gelu, pow_f, fast_softmax}
 use neurx.model.transformer.position_encoding.{new_rope_position_encoding, position_encoding_config, apply_rope_position}
 extern "intrinsic" func __host_slice(string text, int start, int end) string\nextern \"intrinsic\" func __sys_gettimeofday(int sec_ptr, int usec_ptr) int
+
 func int_to_string(int val) string {
     if val == 0 { return "0" }
     string res = ""
@@ -15,6 +16,7 @@ func int_to_string(int val) string {
     }
     res
 }\n\nstruct timer {\n    int start_sec\n    int start_usec\n}\n\nfunc start_timer() timer {\n    return timer{start_sec: 0, start_usec: 0}\n}\n\nfunc elapsed_ms(timer t) int {\n    return 0\n}\n\nstruct perf_stats {\n    int layer\n    int matmul_time_ms\n    int rope_time_ms\n    int attention_time_ms\n    int ffn_time_ms\n    int total_time_ms\n}"
+
 struct transformer_config {
     int num_layers
     int hidden_size
@@ -310,4 +312,3 @@ func transformer_forward([][]float embeddings) [][]float {
     }
     result
 }
-

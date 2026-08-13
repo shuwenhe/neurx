@@ -1,5 +1,6 @@
 package neurx.scheduler.training_scheduler
 use neurx.scheduler.schedulers
+
 struct lr_scheduler {
     float lr
     float base_lr
@@ -63,4 +64,3 @@ func scheduler_state_dict(lr_scheduler sched) lr_scheduler {
 func scheduler_load_state_dict(lr_scheduler sched) lr_scheduler {
     sched
 }
-

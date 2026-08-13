@@ -4,6 +4,7 @@ use neurx.moe.fine_grained
 use neurx.model.neurx.mtp
 use neurx.model.neurx.fp8_training
 use neurx.alignment.neurx_r1_grpo
+
 struct neurx_v3_config {
     int hidden_dim
     int num_layers
@@ -397,4 +398,3 @@ func main() {
     println("")
     println("=== NeurX Core Features Demo Complete ===")
 }
-

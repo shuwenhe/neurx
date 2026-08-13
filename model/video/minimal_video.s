@@ -1,4 +1,5 @@
 package neurx.model.video.minimal_video
+
 struct minimal_video_state {
     string name
     string family
@@ -36,4 +37,3 @@ func minimal_video_state_dict(minimal_video_state state) minimal_video_state {
 func minimal_video_load_state_dict(minimal_video_state state, minimal_video_state other) minimal_video_state {
     other
 }
-

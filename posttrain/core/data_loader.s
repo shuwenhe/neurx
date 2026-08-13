@@ -1,5 +1,6 @@
 package neurx.posttrain.core.data_loader
 use std.io.println
+
 struct training_example_s {
     string instruction
     string input
@@ -81,4 +82,3 @@ func pad_sequence_s([]int seq, int target_len, int pad_token) []int {
     }
     result
 }
-

@@ -6,6 +6,7 @@ const int JSON_NUMBER = 2
 const int JSON_STRING = 3
 const int JSON_ARRAY = 4
 const int JSON_OBJECT = 5
+
 struct json_value {
     int value_type
     string str_value
@@ -300,4 +301,3 @@ func json_string_to_int(string json_str) int {
     }
     result
 }
-

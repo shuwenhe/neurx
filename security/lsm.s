@@ -8,6 +8,7 @@ int CAP_ADMIN        = 255
 int LSM_ALLOW = 0
 int LSM_DENY  = 1
 int LSM_AUDIT = 2
+
 struct security_context {
     int    agent_pid
     string agent_name
@@ -103,4 +104,3 @@ func lsm_check_network(ls lsm_state, int agent_pid, string url) (lsm_state, int)
     }
     return (ls, LSM_ALLOW)
 }
-

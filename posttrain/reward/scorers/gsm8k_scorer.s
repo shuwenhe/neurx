@@ -1,5 +1,6 @@
 package neurx.posttrain.reward.scorers.gsm8k
 use neurx.tensor
+
 struct gsm8k_score_config {
     string method
     float format_score
@@ -130,4 +131,3 @@ func remove_commas_and_dollars(string s) string {
 func string_concat(string a, string b) string {
     return a + b
 }
-

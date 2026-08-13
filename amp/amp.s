@@ -1,4 +1,5 @@
 package neurx.amp
+
 struct amp_runtime_config {
     string dtype
     bool enabled
@@ -22,4 +23,3 @@ func amp_enabled(amp_runtime_config cfg) bool {
 func amp_dtype(amp_runtime_config cfg) string {
     cfg.dtype
 }
-

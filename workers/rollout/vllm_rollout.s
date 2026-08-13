@@ -1,5 +1,6 @@
 package neurx.workers.rollout.vllm
 use neurx.tensor
+
 struct vllm_config {
     string model_path
     int tensor_parallel_size
@@ -107,4 +108,3 @@ struct vllm_engine_stats {
     int num_gpu_blocks_free
     float gpu_cache_usage
 }
-

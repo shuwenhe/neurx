@@ -1,4 +1,5 @@
 package neurx.inference.advanced.tool_parser
+
 func tool_choice_none() int { 1 }
 
 func tool_choice_auto() int { 2 }
@@ -315,4 +316,3 @@ func split_reasoning_content(string text, string end_marker) []string {
     }
     [tool_substring(text, 0, end), tool_substring(text, end + len(end_marker), len(text))]
 }
-

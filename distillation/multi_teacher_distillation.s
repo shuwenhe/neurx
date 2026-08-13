@@ -2,6 +2,7 @@ import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "loss/kl_divergence.s"
 import "distillation/knowledge_distillation.s"
+
 struct multi_teacher_config {
     num_teachers: i32
     teacher_weights: []f32
@@ -279,4 +280,3 @@ func kl_divergence_loss(student_logits: tensor, teacher_logits: tensor, f32 temp
     let kl = -(teacher_probs * student_log_probs).sum(dim: -1).mean()
     return kl * (temperature * temperature)
 }
-

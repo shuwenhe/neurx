@@ -27,6 +27,7 @@ struct architecture_config {
     initializer_range float
 }
 type model_factory func(config architecture_config) any
+
 struct model_registry_state {
     factories map[string]model_factory
     configs map[string]architecture_config
@@ -102,6 +103,7 @@ func register_qwen_models() {
     RegisterModel(
         "QwenForCausalLM",
         qwen_config,
+
         func(cfg architecture_config) any {
             return nil
         },
@@ -114,6 +116,7 @@ func register_qwen_models() {
     RegisterModel(
         "QwenForCausalLM-0.5B",
         qwen_small,
+
         func(cfg architecture_config) any {
             return nil
         },
@@ -137,6 +140,7 @@ func register_llama_models() {
     RegisterModel(
         "LlamaForCausalLM",
         llama_config,
+
         func(cfg architecture_config) any {
             return nil
         },
@@ -160,6 +164,7 @@ func register_mixtral_models() {
     RegisterModel(
         "MixtralForCausalLM",
         mixtral_config,
+
         func(cfg architecture_config) any {
             return nil
         },
@@ -176,4 +181,3 @@ func main() {
         println("  Layers:", config.num_hidden_layers)
     }
 }
-

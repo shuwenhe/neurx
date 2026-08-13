@@ -1,4 +1,5 @@
 package neurx.posttrain.training.gradient_utils
+
 struct global_gradient_stats {
     float total_norm
     float clip_coefficient
@@ -274,4 +275,3 @@ func float_to_str_4(float value) string {
     if negative { result = "-" + result }
     return result
 }
-

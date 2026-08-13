@@ -318,4 +318,3 @@ func reward_normalizer_apply(reward_normalizer norm, float reward) float {
     if std < 1e-6 { std = 1.0 }
     (reward - norm.running_mean) / std
 }
-

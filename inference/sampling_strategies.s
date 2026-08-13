@@ -1,4 +1,5 @@
 package neurx.inference.sampling_strategies
+
 struct sampling_config {
     string strategy
     float temperature
@@ -908,4 +909,3 @@ func beam_search_decode_two_steps(
     all_logits.push(second_logits)
     beam_search_decode(all_logits, config, eos_token_id)
 }
-

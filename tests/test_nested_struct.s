@@ -1,4 +1,5 @@
 package main
+
 struct inner_data {
     int value
     float score
@@ -98,4 +99,3 @@ func main() {
     println("[Result] All tests completed!")
     0
 }
-

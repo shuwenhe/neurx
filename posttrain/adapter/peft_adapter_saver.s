@@ -1,6 +1,7 @@
 package neurx.posttrain.adapter.peft_saver
 use std.io.println
 use std.io.file
+
 struct peft_adapter_config {
     int r
     float lora_alpha
@@ -274,4 +275,3 @@ func fmt_float(float value, int decimals) string {
     }
     out
 }
-

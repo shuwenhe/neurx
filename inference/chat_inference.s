@@ -3,6 +3,7 @@ use std.io
 use std.math
 use std.time
 use std.strings
+
 struct chat_config {
     vocab_size: i32
     hidden_dim: i32
@@ -247,4 +248,3 @@ func main() {
         io.println("Example: chat_inference 'Hello, how are you?'")
     }
 }
-

@@ -1,4 +1,5 @@
 package neurx.scheduler.agent_scheduler
+
 struct agent_scheduler_state {
     []string tasks
     []int priorities
@@ -144,4 +145,3 @@ func agent_scheduler_export(agent_scheduler_state state) string {
 func agent_scheduler_summary(agent_scheduler_state state) string {
     "scheduler;total=" + string(state.count) + ";pending=" + string(agent_scheduler_pending_count(state)) + ";next=" + agent_scheduler_next_task(state)
 }
-

@@ -1,5 +1,6 @@
 package neurx.posttrain.lib.json
 use std.io.eprintln
+
 func check_prefix(string text, int pos, string prefix) bool {
     int end = pos + len(prefix)
     if end > len(text) {
@@ -287,4 +288,3 @@ func main() {
     eprintln("All tests completed")
     0
 }
-

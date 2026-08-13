@@ -1,4 +1,5 @@
 package main
+
 struct data {
     int value
 }
@@ -11,4 +12,3 @@ func main() {
     println("Test complete")
     0
 }
-

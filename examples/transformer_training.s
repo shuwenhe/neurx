@@ -1,4 +1,5 @@
 package neurx.examples.transformer_training
+
 func example_transformer_config() {
 }
 
@@ -31,4 +32,3 @@ func training_script_structure() {
 
 func minimal_example() {
 }
-

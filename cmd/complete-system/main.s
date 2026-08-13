@@ -13,6 +13,7 @@ import (
     "../../cmd"
     "../../scripts"
 )
+
 func main() {
     args := os.Args[1:]
     if len(args) == 0 {
@@ -316,4 +317,3 @@ func init() {
     fmt.Println("NeurX - Complete S Language Implementation")
     fmt.Println("Loading core modules...")
 }
-

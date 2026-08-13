@@ -1,4 +1,5 @@
 package neurx.cuda
+
 struct layernorm_config {
     int batch_size
     int normalized_size
@@ -22,4 +23,3 @@ func launch_layernorm(
                       cfg.batch_size * cfg.normalized_size * 6 * 2)
     nil
 }
-

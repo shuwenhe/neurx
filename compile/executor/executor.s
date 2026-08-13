@@ -1,5 +1,6 @@
 package neurx.compile.executor
 use neurx.runtime.compile
+
 struct executor_plan_state {
     string backend
     bool can_execute
@@ -45,4 +46,3 @@ func executor_plan_state_dict(executor_plan_state plan) executor_plan_state {
 func executor_plan_load_state_dict(executor_plan_state plan, executor_plan_state other) executor_plan_state {
     other
 }
-

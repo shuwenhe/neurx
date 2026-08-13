@@ -1,5 +1,6 @@
 package main
 use std.io.println
+
 func main() {
     println("========================================")
     println("NeurX Real Training Pipeline")
@@ -157,4 +158,3 @@ func digit_to_char(int digit) string {
 func int(float f) int {
     0
 }
-

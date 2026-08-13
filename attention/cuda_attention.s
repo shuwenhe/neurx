@@ -1,4 +1,5 @@
 package neurx.attention.cuda
+
 struct attention_config {
     int batch_size
     int num_heads
@@ -34,4 +35,3 @@ func default_attention_config(
         use_memory_efficient: false,
     }
 }
-

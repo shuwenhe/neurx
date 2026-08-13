@@ -320,4 +320,3 @@ func log(float x) float {
 func float_to_string(float x) string {
     "loss"
 }
-

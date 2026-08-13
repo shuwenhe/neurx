@@ -299,4 +299,3 @@ func example_multi_batch_training() {
 
 func main() {
 }
-

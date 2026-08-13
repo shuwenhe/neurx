@@ -1,4 +1,5 @@
 package neurx.simple
+
 func sum2(int a, int b) int {
     a + b
 }
@@ -6,4 +7,3 @@ func sum2(int a, int b) int {
 func product2(int a, int b) int {
     a * b
 }
-

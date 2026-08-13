@@ -1,4 +1,5 @@
 package neurx.posttrain.alignment.lora_trainer
+
 struct lora_config {
     int seq_len
     int hidden_size
@@ -581,4 +582,3 @@ func lora_compute_stats(lora_state state) lora_stats {
         memory_saved_percent: memory_saved,
     }
 }
-

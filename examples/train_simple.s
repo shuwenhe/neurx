@@ -1,4 +1,5 @@
 package examples.train_simple
+
 func rand_float() float {
     int seed = 42
     seed = (seed * 1103515245 + 12345) % 2147483648
@@ -123,4 +124,3 @@ func float_to_string(float f) string {
     int frac_int = int(frac_part * 10000.0)
     return int_to_string(i_part) + "." + int_to_string(frac_int)
 }
-

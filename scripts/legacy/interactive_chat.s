@@ -3,6 +3,7 @@ use std.io
 use std.os
 use std.strings
 use std.bufio
+
 func main() {
     model_path := "/home/shuwen/shuwen/posttrain/model.safetensors"
     stat, err := os.Stat(model_path)
@@ -44,4 +45,3 @@ func main() {
         io.Println("")
     }
 }
-

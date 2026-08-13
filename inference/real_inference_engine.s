@@ -1,5 +1,6 @@
 package neurx.inference.real_inference_engine
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 func tokenize_input(string text) int {
     print("[Tokenizer] Converting text to token ID...\n")
     print("Input: \"" + text + "\"\n")
@@ -114,4 +115,3 @@ func main() {
     print("Implement actual matmul operations\n")
     print("Generate longer sequences (multiple tokens)\n")
 }
-

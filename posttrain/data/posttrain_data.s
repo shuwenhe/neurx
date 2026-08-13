@@ -1,4 +1,5 @@
 package neurx.posttrain.data
+
 struct posttrain_data_state {
     string dataset_name
     string sample_mode
@@ -111,4 +112,3 @@ func posttrain_data_source_kind(posttrain_data_state state) string {
 func posttrain_data_source_size(posttrain_data_state state) int {
     state.source_size
 }
-

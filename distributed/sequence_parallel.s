@@ -1,4 +1,5 @@
 package neurx.distributed
+
 struct sequence_parallel_config {
     int sp_degree
     int sp_rank
@@ -181,4 +182,3 @@ func recommended_2t_combined_parallel_config() sequence_parallel_config {
     cfg.sp_enable_ckpt = true
     return cfg
 }
-

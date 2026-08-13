@@ -1,4 +1,5 @@
 module base_tokenizer
+
 struct tokenizer_config {
     string vocab_path
     string merges_path
@@ -62,4 +63,3 @@ func get_special_tokens(tokenizer_config config) map[string]int {
     special["pad_token_id"] = 151643
     return special
 }
-

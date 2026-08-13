@@ -1,6 +1,7 @@
 package neurx.posttrain.lib.test_json
 use std.io.eprintln
 use neurx.posttrain.lib.json_parser
+
 func main() {
     eprintln("\n=== Testing Pure-S JSON Parser ===\n")
     test_null()
@@ -136,4 +137,3 @@ func test_nested() {
     }
     eprintln("  ✓ nested structure parsing OK")
 }
-

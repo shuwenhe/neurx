@@ -2,6 +2,7 @@ package main
 use neurx.inference.runtime.production_engine
 use neurx.inference.runtime.worker_cluster
 use neurx.inference.scheduler.vllm_scheduler
+
 func test_parallel_topology() bool {
     parallel_topology topology
     topology.tensor_parallel_size = 2
@@ -62,4 +63,3 @@ func main() {
     println("FAIL production engine contract")
     1
 }
-

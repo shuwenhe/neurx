@@ -1,4 +1,5 @@
 package neurx.inference.serve
+
 struct infer_request_state {
     string request_id
     string model
@@ -55,4 +56,3 @@ func infer_response_state_dict(infer_response_state state) infer_response_state 
 func infer_response_load_state_dict(infer_response_state state, infer_response_state other) infer_response_state {
     other
 }
-

@@ -1211,4 +1211,3 @@ func gpt_forward_with_loss(
         loss: loss,
     }
 }
-

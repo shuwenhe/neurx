@@ -346,4 +346,3 @@ func println(string msg): void {
 func recommended_monitoring_config_2t(): metrics_aggregator {
     return new_metrics_aggregator(1000)
 }
-

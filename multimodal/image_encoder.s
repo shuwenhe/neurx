@@ -1,4 +1,5 @@
 package neurx.multimodal.image_encoder
+
 struct image_metadata {
     string image_id
     int width
@@ -209,4 +210,3 @@ func sqrt_approx(float x) float {
     }
     guess
 }
-

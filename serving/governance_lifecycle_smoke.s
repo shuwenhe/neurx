@@ -35,4 +35,3 @@ func main() {
     println("governance-lifecycle PASS authorized=1 rbac=true quota=true retry=true timeout=true cancel=true shutdown=true")
     0
 }
-

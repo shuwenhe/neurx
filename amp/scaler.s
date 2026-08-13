@@ -1,4 +1,5 @@
 package neurx.amp.scaler
+
 struct mixed_precision_config {
     string precision_type
     float loss_scale
@@ -378,4 +379,3 @@ func float_to_string(float f) string {
 func int_to_string(int n) string {
     ""
 }
-

@@ -4,6 +4,7 @@ use std.os
 use std.path
 use std.time
 use std.exec
+
 struct test_config {
     script_dir string
     project_root string
@@ -82,4 +83,3 @@ func main() {
     log_test(config, "Clearing old checkpoint...")
     os.Remove(config.checkpointDir + "/training_state.txt")
     os.Remove(config.checkpointDir + "/checkpoint.state")
-

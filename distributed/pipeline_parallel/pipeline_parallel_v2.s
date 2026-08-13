@@ -2,6 +2,7 @@ package neurx.distributed.pipeline_parallel_v2
 int SCHEDULE_GPIPE = 0
 int SCHEDULE_1F1B = 1
 int SCHEDULE_INTERLEAVED_1F1B = 2
+
 struct pipeline_config {
     int pp_degree
     int pp_rank
@@ -108,8 +109,11 @@ func init_pipeline(pipeline_config cfg) pipeline_state {
 func execute_1f1b_step(
     ref pipeline_state state,
     [][]double initial_input,
+
     func forward_fn,
+
     func backward_fn,
+
     func loss_fn) double {
     pipeline_config cfg = state.config
     int rank = cfg.pp_rank
@@ -337,4 +341,3 @@ func recommended_pp_config_2t(int num_gpus_available) pipeline_config {
     cfg.overlap_comm_compute = true
     return cfg
 }
-

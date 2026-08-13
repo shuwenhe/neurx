@@ -10,6 +10,7 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -187,4 +188,3 @@ func main() {
         }
     }
 }
-

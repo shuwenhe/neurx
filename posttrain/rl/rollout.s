@@ -1,4 +1,5 @@
 package neurx.posttrain.rl.rollout
+
 struct rollout_config {
     int max_seq_len
     float temperature
@@ -409,4 +410,3 @@ func float_to_str_n(float value, int decimals) string {
     if negative { result = "-" + result }
     return result
 }
-

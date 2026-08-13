@@ -4,6 +4,7 @@ int STMT_TYPE_ASSIGNMENT = 2
 int STMT_TYPE_CONDITION = 3
 int STMT_TYPE_LOOP = 4
 int STMT_TYPE_FUNCTION_CALL = 5
+
 struct dsl_statement {
     int statement_type
     string name
@@ -271,4 +272,3 @@ func main() {
     println("Success:", success)
     println("State:", len(result))
 }
-

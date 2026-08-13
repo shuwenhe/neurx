@@ -1,4 +1,5 @@
 package neurx.moe.fine_grained
+
 struct neurx_moe_config {
     int hidden_dim
     int ffn_dim
@@ -413,4 +414,3 @@ func unit_name() string {
 func unit_ready() int {
     1
 }
-

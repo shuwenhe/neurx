@@ -1,4 +1,5 @@
 package main
+
 struct training_data {
     text: string
     category: string
@@ -20,6 +21,7 @@ const (
     CATEGORY_DATABASE = "database"
     CATEGORY_PROJECT = "project"
 )
+
 func generate_python_data(): training_data {
     text := "# PythonEnglish textoptimizeEnglish text..."
     return training_data{
@@ -54,4 +56,3 @@ func main() {
     println("✅ support14English textdataEnglish text")
     println("📚 English texttraining")
 }
-

@@ -1,6 +1,7 @@
 package fast_chat_inference
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
 extern "intrinsic" func __sys_read_string(int fd, int count) string
+
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
@@ -61,6 +62,7 @@ func contains(string text, string substr) int {
     return 0
 }
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 func main() {
     print("Loaded model: /home/shuwen/shuwen/posttrain/model.safetensors\n")
     print("Type /exit or quit to stop.\n\n")
@@ -77,4 +79,3 @@ func main() {
         print("Assistant: " + response + "\n\n")
     }
 }
-

@@ -1,4 +1,5 @@
 package neurx.inference.sampling
+
 func greedy_decode(
     [][]float all_logits,
     sampling_config config,
@@ -78,4 +79,3 @@ func top_k_sample(
         (sample_from_distribution(normalized, rng_state), advance_rng(rng_state))
     }
 }
-

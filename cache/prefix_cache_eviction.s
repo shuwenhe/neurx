@@ -1,4 +1,5 @@
 package neurx.cache.prefix_cache_eviction
+
 struct cache_entry {
     string prefix_hash
     int tokens_count
@@ -223,4 +224,3 @@ func int_to_str(int n) string {
 func float_to_str(float f) string {
     ""
 }
-

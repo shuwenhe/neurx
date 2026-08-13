@@ -1,4 +1,5 @@
 package examples.train_end_to_end
+
 func simple_forward(float w, float b, float x) float {
     return w * x + b
 }
@@ -48,4 +49,3 @@ func main() {
         println("FAILURE: Loss did not decrease")
     }
 }
-

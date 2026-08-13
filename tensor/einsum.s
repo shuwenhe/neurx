@@ -1,4 +1,5 @@
 package neurx.einsum
+
 struct tensor {
     []float data
     []int shape
@@ -89,4 +90,3 @@ func einsum(string equation, tensor a, tensor b) tensor {
         }
     }
 }
-

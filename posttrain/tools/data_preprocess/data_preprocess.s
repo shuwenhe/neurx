@@ -215,4 +215,3 @@ func index_of_from(string s, string sub, int from) int { 0 }
 func substring(string s, int start, int end) string { s }
 
 func tokenize_text(string text) []int { []int{} }
-

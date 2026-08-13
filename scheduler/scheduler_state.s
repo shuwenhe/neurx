@@ -1,4 +1,5 @@
 package neurx.scheduler.scheduler_state
+
 struct scheduler_state_dict {
     int last_epoch
     []float last_lr
@@ -65,4 +66,3 @@ func clone_lr_array([]float values) []float {
     }
     return out
 }
-

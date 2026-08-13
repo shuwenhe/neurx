@@ -1,4 +1,5 @@
 package neurx.data
+
 struct error {
     string message
 }
@@ -88,4 +89,3 @@ func read_lines(string path) []string {
         "Deep learning has many applications",
     }
 }
-

@@ -1,4 +1,5 @@
 package neurx.nn.loss
+
 struct cross_entropy_loss {
     reduction string
     label_smoothing f64
@@ -220,4 +221,3 @@ func ln_approx(f64 x) f64 {
         return ln_approx(y) + exp*0.693147180559945
     }
 }
-

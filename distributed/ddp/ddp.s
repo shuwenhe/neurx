@@ -1,6 +1,7 @@
 package neurx.distributed.ddp
 use neurx.strings
 use neurx.distributed.comm
+
 struct ddp_state {
     string name
     string backend
@@ -295,4 +296,3 @@ func ddp_broadcast_params(ddp_state state, process_group_state pg, []float param
     }
     broadcast(pg, 0, params)
 }
-

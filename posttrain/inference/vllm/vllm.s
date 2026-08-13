@@ -302,4 +302,3 @@ func new_vllm_engine(module model, vllm_config config) vllm_engine {
         next_seq_id: 0,
     }
 }
-

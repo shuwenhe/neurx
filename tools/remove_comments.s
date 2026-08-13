@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 )
+
 func remove_comments(string content) string {
 	lines := strings.Split(content, "\n")
 	result := make([]string, 0, len(lines))
@@ -88,4 +89,3 @@ func main() {
 	}
 	fmt.Println("Done! All comments removed.")
 }
-

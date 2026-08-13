@@ -50,4 +50,3 @@ interface i_kernel_validator {
     validate_backward(kernel: IKernelPair, test_shapes: [][]i64, f64 eps) -> bool
     check_gradient(kernel: IKernelPair, tensor: tensor, f64 eps) -> f64
 }
-

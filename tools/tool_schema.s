@@ -5,6 +5,7 @@ string PARAM_TYPE_BOOL    = "bool"
 string PARAM_TYPE_FLOAT   = "float"
 string PARAM_TYPE_PATH    = "path"
 string PARAM_TYPE_COMMAND = "command"
+
 struct tool_param_schema {
     string name
     string param_type
@@ -249,4 +250,3 @@ func tool_schema_registry_to_prompt(tool_schema_registry reg) string {
 func tool_schema_registry_summary(tool_schema_registry reg) string {
     "tool_schemas count=" + string(reg.count)
 }
-

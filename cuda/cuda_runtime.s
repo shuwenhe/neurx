@@ -4,6 +4,7 @@ use std.io.println
 type cuda_device_ptr = int64
 type cuda_memory_ptr = int64
 type cublas_handle = int64
+
 func get_device_count() int {
     string gpu_list = runtime_run_command_output("nvidia-smi -L 2>/dev/null | wc -l || echo 0")
     parse_int(trim(gpu_list), 0)
@@ -174,4 +175,3 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
-

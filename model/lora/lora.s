@@ -1,4 +1,5 @@
 package neurx.model.lora
+
 struct lora_config {
     int rank
     float alpha
@@ -531,4 +532,3 @@ func lora_compute_stats(lora_linear layer) lora_stats {
         memory_saved_mb: saved,
     }
 }
-

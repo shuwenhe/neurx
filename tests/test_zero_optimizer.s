@@ -1,4 +1,5 @@
 package neurx.tests.distributed
+
 func main() {
     println("============================================================")
     println("DeepSpeed ZeRO-1 Optimizer Test (S Language Implementation)")
@@ -110,4 +111,3 @@ func int_to_string(int n) string {
     if remaining == 9 { result = "9" + result }
     return result
 }
-

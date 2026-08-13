@@ -1,5 +1,6 @@
 package neurx.distributed.pp
 use neurx.strings
+
 struct pipeline_parallel_state {
     string name
     string strategy
@@ -412,4 +413,3 @@ func pp_reset_progress(pipeline_parallel_state state) pipeline_parallel_state {
         schedule: copy_strings(state.schedule),
     }
 }
-

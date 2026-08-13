@@ -1,5 +1,6 @@
 package neurx.inference.attention_example
 use neurx.inference.attention_integration
+
 struct example_config {
     int num_layers
     int num_heads
@@ -248,4 +249,3 @@ func repeat(string char, int count) string {
     }
     return result
 }
-

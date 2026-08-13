@@ -1,5 +1,6 @@
 package neurx.posttrain.lib.safetensors_complete
 use std.io.eprintln
+
 struct safe_tensor_info {
     string name
     string dtype
@@ -306,4 +307,3 @@ func main() {
     eprintln("Supports: F32, F64, I32, I64, I16, U8, I8, BOOL")
     eprintln("Format: 8-byte LE header length + JSON metadata + binary data")
 }
-

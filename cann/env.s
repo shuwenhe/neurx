@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.io.println
+
 func main() {
     string ascend_home = runtime_env_get("ASCEND_HOME_PATH", "/usr/local/Ascend/ascend-toolkit/latest")
     if !runtime_file_exists(ascend_home) {
@@ -19,4 +20,3 @@ func main() {
     println("export ASCEND_SLOG_PRINT_TO_STDOUT=\"${ASCEND_SLOG_PRINT_TO_STDOUT:-0}\"")
     0
 }
-

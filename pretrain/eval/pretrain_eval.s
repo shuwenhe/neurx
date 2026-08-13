@@ -1,4 +1,5 @@
 package neurx.pretrain.eval
+
 struct pretrain_eval_state {
     int last_eval_step
     float val_loss
@@ -186,4 +187,3 @@ func pretrain_eval_state_dict(pretrain_eval_state state) pretrain_eval_state {
 func pretrain_eval_load_state_dict(pretrain_eval_state state, pretrain_eval_state other) pretrain_eval_state {
     other
 }
-

@@ -1,6 +1,7 @@
 package neurx.inference.posttrain_inference
 extern "intrinsic" func __host_readline(string prompt) string
 extern "intrinsic" func __host_file_exists(string path) bool
+
 func main() {
     print("✓ NeurX production S inference ready (pure S backend + KV-cache)\n")
     print("Model: /home/shuwen/shuwen/posttrain/model.safetensors\n\n")
@@ -32,4 +33,3 @@ func main() {
         }
     }
 }
-

@@ -1,6 +1,7 @@
 package neurx.optimizer.adagrad
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct adagrad_optimizer {
     float lr
     float lr_decay
@@ -86,4 +87,3 @@ func adagrad_sqrt(float x) float {
     }
     y
 }
-

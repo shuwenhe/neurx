@@ -1,4 +1,5 @@
 package neurx.logging
+
 func print_progress_bar(
     training_metrics metrics,
     logger_config cfg
@@ -63,4 +64,3 @@ func print_progress_bar(
     }
     print_overwrite(status_line)
 }
-

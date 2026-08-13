@@ -1,4 +1,5 @@
 module code_interpreter
+
 struct code_interpreter_config {
     execution_timeout_seconds: int = 120
     total_session_timeout: int = 600
@@ -62,6 +63,7 @@ struct code_block {
     code: string
     filename: string?
 }
+
 class sandbox_environment {
     config: code_interpreter_config
     session_id: string
@@ -240,6 +242,7 @@ struct security_check_result {
     allowed: bool
     reason: string
 }
+
 class session_state {
     session_id: string
     created_at: float
@@ -297,6 +300,7 @@ struct session_summary {
     variable_names: list<string>
     success_rate: float
 }
+
 class python_runtime {
     sandbox_dir: string
     memory_limit: int
@@ -428,6 +432,7 @@ struct error_info {
     message: string
     traceback: list<string>
 }
+
 class java_script_runtime {
     vm_context: any
     init() {
@@ -473,6 +478,7 @@ class java_script_runtime {
         }
     }
 }
+
 class shell_runtime {
     allow_network: bool
     allowed_commands: set<string>
@@ -536,6 +542,7 @@ class shell_runtime {
         }
     }
 }
+
 class sql_runtime {
     db_path: string
     connection: DatabaseConnection?
@@ -610,6 +617,7 @@ struct sql_query_result {
     rows: list<list<any>>
     row_count: int
 }
+
 class result_formatter {
     config: code_interpreter_config
     init(config: code_interpreter_config) {
@@ -684,6 +692,7 @@ struct formatted_output {
     has_visualizations: bool
     has_files: bool
 }
+
 class data_analysis_helper {
     sandbox: SandboxEnvironment
     formatter: ResultFormatter
@@ -842,6 +851,7 @@ else:
         return this.sandbox.execute(code_block)
     }
 }
+
 class CodeInterpreter {
     config: code_interpreter_config
     sandbox: SandboxEnvironment?
@@ -969,4 +979,3 @@ export {
     DataAnalysisHelper, ResultFormatter,
     create_code_interpreter, test_code_interpreter
 }
-

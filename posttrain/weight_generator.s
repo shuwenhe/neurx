@@ -1,4 +1,5 @@
 package posttrain.weight_generator
+
 func float_to_str(float f) string {
     int i_part = int(f)
     float frac = f - float(i_part)
@@ -60,4 +61,3 @@ func main() {
     println("")
     println("✓ Weight generator ready for integration")
 }
-

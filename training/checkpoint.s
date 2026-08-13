@@ -1,4 +1,5 @@
 package neurx.training.checkpoint
+
 struct checkpoint_state {
     [][]float model_weights
     [][]float optimizer_states
@@ -70,4 +71,3 @@ func clone_float_array([]float arr) []float {
     }
     return cloned
 }
-

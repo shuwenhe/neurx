@@ -1,4 +1,5 @@
 package neurx.tokenizer.vocab_builder
+
 struct token_pair {
     string left
     string right
@@ -268,4 +269,3 @@ func main() {
     save_merge_rules(vocab, "./merges.txt")
     println("BPE vocabulary building completed!")
 }
-

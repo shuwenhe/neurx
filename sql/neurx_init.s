@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
 use std.io.println
+
 func schema_sql(string password) string {
     "CREATE DATABASE IF NOT EXISTS `neurx` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\n" +
     "CREATE USER IF NOT EXISTS 'neurx'@'%' IDENTIFIED BY '" + password + "';\n" +
@@ -33,4 +34,3 @@ func main() {
     println("NeurX MySQL schema initialized")
     0
 }
-

@@ -3,6 +3,7 @@ use neurx.inference.api.http_server.{create_http_server, close_http_server, serv
 use neurx.inference.api.rest_api.{route_request}
 extern "intrinsic" func __host_readline(string prompt) string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 func main() {
     print("╔════════════════════════════════════════════╗\n")
     print("║    NeurX Production Inference Server       ║\n")
@@ -96,4 +97,3 @@ func string_at_index(string s, int idx) string {
     if idx < 0 || idx >= len(s) { return "" }
     return __host_slice(s, idx, idx + 1)
 }
-

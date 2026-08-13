@@ -1,6 +1,7 @@
 package neurx.diffusion.sampler.ddpm
 use neurx.diffusion.noise
 use neurx.ops
+
 struct ddpm_sampler_state {
     int current_t
     int total_steps
@@ -38,4 +39,3 @@ func ddpm_sampler_state_dict(ddpm_sampler_state state) ddpm_sampler_state {
 func ddpm_sampler_load_state_dict(ddpm_sampler_state state, ddpm_sampler_state other) ddpm_sampler_state {
     other
 }
-

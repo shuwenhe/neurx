@@ -3,6 +3,7 @@ use neurx.inference.sampling.sampling_utils
 use neurx.inference.sampling.sampling_utils2
 use neurx.inference.sampling.sampling_utils3
 use neurx.inference.sampling.sampling_utils4
+
 func greedy_step(
     []float logits,
     sampling_config cfg,
@@ -54,4 +55,3 @@ func compute_avg_score([][][]float all_scores) float {
     }
     if count > 0 { total / float(count) } else { 0.0 }
 }
-

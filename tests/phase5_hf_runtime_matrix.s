@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_file_exists, runtime_run_command_output}
 use std.io.println
+
 func phase5_summary_command(string path) string {
     string cmd = "set -e; default=$(sed -n 's/.*\"default_prompt\": \"\\([^\"]*\\)\".*/\\1/p' '" + path + "' | head -1)"
     cmd = cmd + " && count=$(grep -c '\"name\"' '" + path + "')"
@@ -42,4 +43,3 @@ func main() {
     println("phase5-hf-runtime PASS matrix=stable golden_prompt=locked")
     0
 }
-

@@ -1,4 +1,5 @@
 package neurx.posttrain.rl.reward_manager
+
 struct reward_config {
     string reward_type
     float reward_scale
@@ -322,4 +323,3 @@ func float_to_str_4(float value) string {
     if negative { result = "-" + result }
     return result
 }
-

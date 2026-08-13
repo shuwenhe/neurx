@@ -77,4 +77,3 @@ interface i_profiler_context {
 }
 interface i_profiling_guard {
 }
-

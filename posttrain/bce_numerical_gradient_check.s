@@ -1,4 +1,5 @@
 package posttrain.bce_numerical_gradient_check
+
 func sigmoid_fn(float x) float {
     if x > 100.0 {
         return 1.0
@@ -188,4 +189,3 @@ func main() {
     println("  dL/db1 = dL/dz * dz/db1 = (p - target) * 1")
     println("")
 }
-

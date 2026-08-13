@@ -1,4 +1,5 @@
 package neurx.model.robotics.data
+
 struct robotics_dataset_state {
     string source_name
     int sample_count
@@ -28,4 +29,3 @@ func robotics_dataset_mark_normalized(robotics_dataset_state state) robotics_dat
         normalized: true,
     }
 }
-

@@ -4,6 +4,7 @@ use neurx.runtime.control
 use neurx.strings
 use neurx.autograd.function
 use neurx.strings
+
 struct stage_state {
     string name
     string backend
@@ -764,4 +765,3 @@ func transform_chain_to_stage(transform_chain chain, string name, string backend
         control_params: control_params,
     }
 }
-

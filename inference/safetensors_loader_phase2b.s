@@ -1,5 +1,6 @@
 package neurx.inference.safetensors_real
 extern "intrinsic" func __host_read_binary_file(string path) []int
+
 func bytes_to_int32_le([]int bytes, int offset) int {
     int b0 = bytes[offset]
     if b0 < 0 {
@@ -246,4 +247,3 @@ func main() {
     print("Next: Phase 2C - Load embedding matrix from weights\n")
     print("═══════════════════════════════════════════════════════\n")
 }
-

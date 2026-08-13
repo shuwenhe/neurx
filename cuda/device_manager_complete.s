@@ -1,4 +1,5 @@
 package neurx.cuda
+
 struct cuda_device {
     int id
     string name
@@ -199,4 +200,3 @@ func get_memory_stats(cuda_context ctx) map[string]int {
         "device_free": ctx.device.free_memory_bytes,
     }
 }
-

@@ -1,6 +1,7 @@
 package neurx.optimizer.radam
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct radam_optimizer {
     float lr
     float beta1
@@ -111,4 +112,3 @@ func radam_pow(float base, int exponent) float {
     }
     result
 }
-

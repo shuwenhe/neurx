@@ -1,4 +1,5 @@
 package neurx.logging
+
 struct logger_config {
     string experiment_name
     string run_name
@@ -49,4 +50,3 @@ struct logger {
     tensorboard_writer tb_writer
     wandb_run wb_run
 }
-

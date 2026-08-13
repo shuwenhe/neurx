@@ -2,6 +2,7 @@ package neurx.agent.prompt_builder
 use neurx.agent.memory
 use neurx.agent.tool_registry
 use neurx.reasoning.reasoning
+
 struct agent_prompt_builder_state {
     string system_role
     string goal
@@ -141,4 +142,3 @@ func agent_prompt_summary(agent_prompt_builder_state b) string {
     }
     "prompt;goal=" + b.goal + ";task=" + b.task + ";has_memory=" + has_mem + ";has_tools=" + has_tools
 }
-

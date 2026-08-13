@@ -186,4 +186,3 @@ func remax_step(
         relaxation_loss: 0.0,
     }
 }
-

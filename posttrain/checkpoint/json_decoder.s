@@ -1,4 +1,5 @@
 package neurx.posttrain.checkpoint.json_decoder
+
 func json_get_int(string json, string key) int {
     string value_str = json_get_value(json, key)
     return str_to_int(value_str)
@@ -155,4 +156,3 @@ func char_to_digit(string c) int {
     if c == "9" { return 9 }
     return 0 - 1
 }
-

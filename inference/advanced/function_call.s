@@ -3,6 +3,7 @@ int FORMAT_OPENAI = 1
 int FORMAT_ANTHROPIC = 2
 int FORMAT_DEEPSEEK = 3
 int FORMAT_CUSTOM = 4
+
 struct function_parameter {
     string parameter_name
     string parameter_type
@@ -380,4 +381,3 @@ func main() {
 func string_from_any(val any) string {
     return "result"
 }
-

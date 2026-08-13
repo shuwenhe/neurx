@@ -1,6 +1,7 @@
 package neurx.distributed_training
 use std.io
 use std.math
+
 struct process_group {
     rank: int
     world_size: int
@@ -311,4 +312,3 @@ func main() {
     run_distributed_training_example()
     analyze_scaling(4, 32, 256 * 32000)
 }
-

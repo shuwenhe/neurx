@@ -2,6 +2,7 @@ package neurx.inference.safetensors_loader
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __host_read_binary_file(string path) []int
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
+
 struct safetensors_header {
     string filename
     int offset
@@ -429,4 +430,3 @@ func main() {
     print("  5. Test single token generation\n\n")
     close_safetensors(archive)
 }
-

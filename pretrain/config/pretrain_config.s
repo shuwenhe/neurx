@@ -1,4 +1,5 @@
 package neurx.pretrain.config
+
 struct pretrain_config {
     int global_batch_size
     int micro_batch_size
@@ -88,4 +89,3 @@ func pretrain_config_state_dict(pretrain_config cfg) pretrain_config {
 func pretrain_config_load_state_dict(pretrain_config cfg, pretrain_config other) pretrain_config {
     other
 }
-

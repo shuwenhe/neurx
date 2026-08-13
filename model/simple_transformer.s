@@ -1,5 +1,6 @@
 package neurx.model.simple_transformer
 use neurx.tensor
+
 struct simple_transformer {
     vocab_size i64
     hidden_size i64
@@ -336,4 +337,3 @@ func sin_approx(f64 x) f64 {
     }
     return result
 }
-

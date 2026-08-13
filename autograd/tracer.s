@@ -2,6 +2,7 @@ package neurx.autograd.tracer
 use neurx.autograd.function
 use neurx.autograd.eqn
 use neurx.strings
+
 struct tracer_state {
     string name
     bool active
@@ -479,4 +480,3 @@ func transform_chain_to_tracer(transform_chain chain, string name) tracer_state 
         tags: [],
     }
 }
-

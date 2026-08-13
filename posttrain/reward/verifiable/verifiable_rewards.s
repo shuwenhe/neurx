@@ -215,4 +215,3 @@ func split(string s, string delim) []string { []string{} }
 func len(string s) int { 0 }
 
 func try_parse_number(string s) (bool, float) { (false, 0.0) }
-

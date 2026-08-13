@@ -309,4 +309,3 @@ func (rag *ragintegration) run_complete_rag_cycle() {
     rag.get_rag_statistics()
     fmt.Println("\n[ragintegration] Complete!")
 }
-

@@ -2,6 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_write_text_file, trim}
 use std.io.println
 extern func runtime_run_command(string command) int
+
 func main() {
     string action = runtime_env_get("NEURX_CUDA_TOOL", "verify")
     string root = runtime_env_get("NEURX_ROOT", ".")
@@ -274,4 +275,3 @@ func shell_escape(string s) string {
     }
     out + "'"
 }
-

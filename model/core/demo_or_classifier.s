@@ -1,4 +1,5 @@
 package neurx.model.core.demo_or_classifier
+
 struct demo_or_classifier_state {
     string name
     string family
@@ -56,4 +57,3 @@ func demo_or_classifier_state_dict(demo_or_classifier_state state) demo_or_class
 func demo_or_classifier_load_state_dict(demo_or_classifier_state state, demo_or_classifier_state other) demo_or_classifier_state {
     other
 }
-

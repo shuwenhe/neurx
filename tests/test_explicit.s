@@ -1,4 +1,5 @@
 package main
+
 struct data {
     int value
 }
@@ -21,4 +22,3 @@ func main() {
         1
     }
 }
-

@@ -1,4 +1,5 @@
 package neurx.distributed
+
 struct distributed_training_config {
     int world_size
     int global_rank
@@ -259,4 +260,3 @@ func recommended_distributed_config_512_gpus() distributed_training_config {
     config.gradient_accumulation_steps = 2
     return config
 }
-

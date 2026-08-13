@@ -1,5 +1,6 @@
 package neurx.experimental.dynamic_scheduling
 use neurx.tensor
+
 struct dynamic_scheduler_config {
     int min_rollout_workers
     int max_rollout_workers
@@ -121,4 +122,3 @@ struct scheduler_stats {
     int total_steps
     float avg_buffer_utilization
 }
-

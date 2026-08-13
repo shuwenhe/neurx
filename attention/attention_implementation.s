@@ -1,4 +1,5 @@
 package neurx.attention.core
+
 struct attention_config {
     int hidden_dim
     int num_attention_heads
@@ -287,4 +288,3 @@ func sqrt_float(float x) float {
 func len_float([]float v) int {
     return len(v)
 }
-

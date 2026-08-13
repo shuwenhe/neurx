@@ -309,4 +309,3 @@ func shutdown_server(inference_server server) bool {
 func health_check(inference_server server) bool {
     server.max_queue_size > 0 && server.scheduler.max_batch_size > 0
 }
-

@@ -1,5 +1,6 @@
 package neurx.posttrain.lib.inference_core
 use std.io.eprintln
+
 func model_load(string path) string {
     string msg = "Loaded model: " + path
     return msg
@@ -21,4 +22,3 @@ func main() {
     eprintln("✓ Inference engine core")
     eprintln("✓ Tokenization")
 }
-

@@ -1,4 +1,5 @@
 package neurx.workflows.robotics.deploy
+
 struct robotics_deploy_state {
     string target_name
     bool running
@@ -44,4 +45,3 @@ func robotics_deploy_trigger_emergency_stop(robotics_deploy_state state) robotic
         emergency_stop: true,
     }
 }
-

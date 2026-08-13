@@ -1,6 +1,7 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/ppo/ppo.s"
+
 struct otb_config {
     learning_rate: f32
     num_epochs: i32
@@ -262,4 +263,3 @@ func compute_variance(values: []f32, f32 mean) -> f32 {
     }
     return sum_sq / f32(values.len())
 }
-

@@ -140,4 +140,3 @@ func agent_tool_loader_load_from_file(string path) agent_tool_registry_state {
 func agent_tool_loader_summary(agent_tool_registry_state registry, string source) string {
     "tool_loader;source=" + source + ";count=" + string(agent_tool_registry_count(registry))
 }
-

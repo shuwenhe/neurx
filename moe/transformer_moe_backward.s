@@ -329,4 +329,3 @@ func moe_pow(float base, int exp) float {
     while e > 0 { r = r * base; e = e - 1 }
     r
 }
-

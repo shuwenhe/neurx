@@ -1,4 +1,5 @@
 package neurx.posttrain.training.metrics
+
 func record_loss(float loss) float {
     return compute_perplexity(loss)
 }
@@ -197,4 +198,3 @@ func float_to_str_n(float value, int decimals) string {
     if negative { result = "-" + result }
     return result
 }
-

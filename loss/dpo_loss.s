@@ -1,4 +1,5 @@
 package neurx.loss.dpo_loss
+
 func exp_approx(float x) float {
     float x2 = x * x
     float x3 = x2 * x
@@ -29,4 +30,3 @@ func dpo_pair_loss(float chosen_logp, float rejected_logp, float ref_chosen_logp
     float margin = dpo_margin(chosen_logp, rejected_logp, ref_chosen_logp, ref_rejected_logp, beta)
     dpo_loss_from_margin(margin, label_smoothing)
 }
-

@@ -1,4 +1,5 @@
 package neurx.data.pipeline.preprocessing
+
 struct text_quality_metrics {
     float entropy
     float language_confidence
@@ -109,4 +110,3 @@ func get_multilingual_batch(batch_mixer mixer, int batch_size) []int {
 func filter_documents([]string documents, preprocessing_config cfg) []string {
     []string{cap: len(documents)}
 }
-

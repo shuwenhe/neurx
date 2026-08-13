@@ -1,4 +1,5 @@
 package neurx.trainer.production
+
 struct matrix_2d {
     [][]float data
 }
@@ -798,4 +799,3 @@ func float_to_string_6(float val) string {
 
 func println(string msg) {
 }
-

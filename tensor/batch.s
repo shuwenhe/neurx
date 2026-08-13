@@ -4,6 +4,7 @@ use neurx.autograd.function
 use neurx.strings
 use neurx.tensor.tensor
 use neurx.strings
+
 struct batch_state {
     string name
     bool active
@@ -450,4 +451,3 @@ func vmap_reciprocal(tensor a) tensor {
 func vmap_where(tensor condition, tensor x, tensor y) tensor {
     vmap_ternary("where", condition, x, y)
 }
-

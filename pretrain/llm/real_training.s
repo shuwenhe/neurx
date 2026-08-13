@@ -3,6 +3,7 @@ use neurx.tensor.tensor
 use neurx.tensor.new
 use neurx.ops
 use neurx.strings
+
 func relu(tensor x) tensor {
     int n = len(x.data)
     []float out = []float{cap: n}
@@ -294,4 +295,3 @@ func fmt_float(float f, int precision) string {
     }
     result
 }
-

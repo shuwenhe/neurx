@@ -1,5 +1,6 @@
 package neurx.loss.nn_losses
 use neurx.tensor.tensor
+
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
@@ -242,4 +243,3 @@ func pairwise_distance(tensor x, tensor y, int p, float eps) tensor {
     tensor total = neurx.tensor.add(neurx.tensor.sum(powered), neurx.tensor.scalar_tensor(eps))
     return neurx.tensor.exp(neurx.tensor.div(neurx.tensor.log(total), neurx.tensor.scalar_tensor(p)))
 }
-

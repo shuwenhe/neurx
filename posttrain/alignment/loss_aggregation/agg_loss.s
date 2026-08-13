@@ -1,5 +1,6 @@
 package neurx.posttrain.alignment.loss_aggregation
 use neurx.tensor
+
 func masked_sum(tensor values, tensor mask) tensor {
     return sum_all(mul(values, mask))
 }
@@ -69,4 +70,3 @@ func agg_loss(
 func greater_than_zero(tensor x) tensor {
     return x
 }
-

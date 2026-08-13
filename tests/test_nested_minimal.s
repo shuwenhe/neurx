@@ -1,4 +1,5 @@
 package main
+
 struct inner {
     int value
 }
@@ -19,4 +20,3 @@ func main() {
     println("obj.data.value = " + int_to_str(obj.data.value))
     0
 }
-

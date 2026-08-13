@@ -2,6 +2,7 @@ package main
 use neurx.tensor.core
 use neurx.autograd.tensor
 use neurx.tensor.reduce
+
 func assert_true(bool value, string name) {
     if value {
         println("PASS " + name)
@@ -177,4 +178,3 @@ func main() {
     test_broadcast_backward_rules()
     test_reduce_package()
 }
-

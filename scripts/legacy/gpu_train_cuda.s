@@ -252,4 +252,3 @@ func str_len(string s) int {
     }
     n
 }
-

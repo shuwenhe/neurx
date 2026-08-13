@@ -1,5 +1,6 @@
 package neurx.inference.test_keywords
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 func contains_keyword(string text, string keyword) bool {
     int text_len = len(text)
     int keyword_len = len(keyword)
@@ -98,4 +99,3 @@ func main() {
     print("════════════════════════════════════════════════\n")
     print("Keyword matching verification complete.\n")
 }
-

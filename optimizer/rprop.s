@@ -1,6 +1,7 @@
 package neurx.optimizer.rprop
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct rprop_optimizer {
     float lr
     float etaminus
@@ -102,4 +103,3 @@ func rprop_max(float a, float b) float {
     }
     return b
 }
-

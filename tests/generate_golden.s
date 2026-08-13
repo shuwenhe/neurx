@@ -1,4 +1,5 @@
 package neurx.tests.golden
+
 struct golden_config {
     float lr
     float beta1
@@ -255,4 +256,3 @@ func int_to_string(int val) string {
 func float_to_string(float val) string {
     return ""
 }
-

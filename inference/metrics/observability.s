@@ -1,4 +1,5 @@
 package neurx.inference.metrics.observability
+
 struct inference_trace_span {
     string trace_id
     string request_id
@@ -153,4 +154,3 @@ func observability_prometheus(inference_observability_state state) string {
     output = output + "neurx_inference_latency_ms_count " + int_to_str(completed) + "\n"
     output
 }
-

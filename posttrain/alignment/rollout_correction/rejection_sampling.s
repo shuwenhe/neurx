@@ -1,5 +1,6 @@
 import "tensor/tensor.s"
 import "posttrain/alignment/rollout_correction/config.s"
+
 struct rs_result {
     rejection_mask: Tensor
     rejection_scores: Tensor
@@ -258,4 +259,3 @@ func clamp(x: Tensor, f32 min_val, f32 max_val) -> Tensor {
 func where(condition: Tensor, x: Tensor, y: Tensor) -> Tensor {
     return condition.to_float() * x + (1.0 - condition.to_float()) * y
 }
-

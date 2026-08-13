@@ -5,6 +5,7 @@ use neurx.distributed.nccl_backend
 use neurx.cuda.device_manager
 use neurx.optimizer.adamw
 use neurx.data.tokenizer
+
 struct training_config {
     string model_name
     int vocab_size
@@ -464,4 +465,3 @@ func cleanup_training_orchestrator(training_state state) error {
     cleanup_cuda_context(state.cuda_ctx)
     nil
 }
-

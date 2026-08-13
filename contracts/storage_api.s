@@ -1,6 +1,7 @@
 import "device_api"
 import "dtype_api"
 import "layout_api"
+
 struct storage {
     id: i64
     ptr: i64
@@ -36,4 +37,3 @@ interface i_storage_debug {
     debug_info(storage: storage) -> string
     print_info(storage: storage) -> void
 }
-

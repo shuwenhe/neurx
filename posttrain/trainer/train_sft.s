@@ -482,4 +482,3 @@ func main() {
         println("}")
     }
 }
-

@@ -1,4 +1,5 @@
 package main
+
 func test_trainer_state_roundtrip() {
     println("====================================")
     println("[Round Trip Test] TrainerState")
@@ -244,4 +245,3 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
-

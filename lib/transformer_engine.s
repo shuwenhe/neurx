@@ -1,4 +1,5 @@
 module transformer_engine
+
 struct transformer_config {
     int vocab_size
     int hidden_size
@@ -158,4 +159,3 @@ func exp(float x) float {
     if x < -10.0 { return 0.0 }
     return 1.0 + x + (x * x * 0.5)
 }
-

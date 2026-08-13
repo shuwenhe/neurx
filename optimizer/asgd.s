@@ -1,6 +1,7 @@
 package neurx.optimizer.asgd
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct asgd_optimizer {
     float lr
     float lambd
@@ -117,4 +118,3 @@ func asgd_ln(float x) float {
     }
     2.0 * result
 }
-

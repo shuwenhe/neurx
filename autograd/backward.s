@@ -8,6 +8,7 @@ use neurx.autograd.tensor
 use neurx.strings
 use neurx.tensor.tensor
 use neurx.strings
+
 struct backward_state {
     string name
     bool ready
@@ -632,4 +633,3 @@ func backward_pass(backward_state state, tensor loss) tensor {
 func backward(tensor t) tensor {
     backward_pass(new_backward_state("backward"), t)
 }
-

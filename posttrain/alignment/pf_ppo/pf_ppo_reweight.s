@@ -1,5 +1,6 @@
 package neurx.posttrain.alignment.pf_ppo
 use neurx.tensor
+
 struct pf_ppo_config {
     string reweight_method
     float weight_pow
@@ -88,4 +89,3 @@ func multinomial_sample(tensor weights, int num_samples) []int {
     }
     return indices
 }
-

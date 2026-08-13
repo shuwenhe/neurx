@@ -1,5 +1,6 @@
 package main
 use std.io.println
+
 func main() {
     println("=== NVIDIA CUDA Environment Check ===")
     println("")
@@ -23,4 +24,3 @@ func main() {
     println("GPU Training Setup:")
     println("  make pretrain-gpu")
 }
-

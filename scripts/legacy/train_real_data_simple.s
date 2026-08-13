@@ -1,4 +1,5 @@
 package main
+
 func main() {
     println("========================================")
     println("NeurX Real Data Training")
@@ -172,4 +173,3 @@ func digit(int d) string {
     }
     return "?"
 }
-

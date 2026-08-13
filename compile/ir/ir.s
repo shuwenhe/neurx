@@ -1,5 +1,6 @@
 package neurx.compile.ir
 use neurx.strings
+
 struct ir_node_state {
     string name
     string op
@@ -119,4 +120,3 @@ func ir_graph_state_dict(ir_graph_state graph) ir_graph_state {
 func ir_graph_load_state_dict(ir_graph_state graph, ir_graph_state other) ir_graph_state {
     other
 }
-

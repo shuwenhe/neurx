@@ -1,6 +1,7 @@
 package neurx.optimizer.optim
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct sgd_optimizer {
     float lr
 }
@@ -305,4 +306,3 @@ func clip_grad_norm([]tensor params, float max_norm, float eps) float {
     }
     sqrt_approx(total_sq)
 }
-

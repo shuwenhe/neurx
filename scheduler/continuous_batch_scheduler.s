@@ -1,4 +1,5 @@
 package neurx.scheduler.continuous_batch_scheduler
+
 struct batch_request {
     int request_id
     int status
@@ -273,4 +274,3 @@ func reset_scheduler(continuous_batch_scheduler sched) continuous_batch_schedule
 
 func main() {
 }
-

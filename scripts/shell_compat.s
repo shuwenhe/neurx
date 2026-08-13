@@ -7,6 +7,7 @@ import (
     "strings"
     "time"
 )
+
 func mkdir(string path) error {
     err := os.MkdirAll(path, 0755)
     if err != nil {
@@ -313,4 +314,3 @@ func to_lower(string str) string {
 func to_upper(string str) string {
     return strings.ToUpper(str)
 }
-

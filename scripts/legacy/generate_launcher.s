@@ -2,6 +2,7 @@ package neurx.script
 use std.fs
 use std.os
 use std.strings
+
 struct training_config {
     string root_dir
     string hostfile
@@ -246,4 +247,3 @@ func main() {
     os::chmod(output_script, 0755)
     io::println("✓ Ready to launch: bash " + output_script)
 }
-

@@ -1,4 +1,5 @@
 package neurx.model.neurx.mtp
+
 struct mtp_config {
     int hidden_dim
     int vocab_size
@@ -463,4 +464,3 @@ func unit_name() string {
 func unit_ready() int {
     1
 }
-

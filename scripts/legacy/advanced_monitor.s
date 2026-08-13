@@ -341,4 +341,3 @@ func main() {
     }
     println("\n" + monitor.generate_report())
 }
-

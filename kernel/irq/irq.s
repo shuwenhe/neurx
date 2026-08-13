@@ -1,6 +1,7 @@
 int IRQ_HARDIRQ = 0
 int IRQ_SOFTIRQ = 1
 int IRQ_TASKLET = 2
+
 struct irq_descriptor {
     int    irq_num
     string name
@@ -65,4 +66,3 @@ func drain_hardirq(is irq_state) (irq_state, []int) {
     is.pending_hardirq = []
     return (is, fired)
 }
-

@@ -1,5 +1,6 @@
 package neurx.posttrain.rlhf.examples
 use neurx.posttrain.rlhf.ppo_trainer.*
+
 func create_ppo_config() ppo_config {
     ppo_config {
         vocab_size: 128000,
@@ -258,4 +259,3 @@ func float_to_string_ex(float f) string {
 func int_to_string_ex(int i) string {
     string(i)
 }
-

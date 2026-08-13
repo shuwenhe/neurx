@@ -1,5 +1,6 @@
 package neurx.dataset_text
 use neurx.strings
+
 struct text_corpus_state {
     string path
     string raw_text
@@ -202,4 +203,3 @@ func text_corpus_load_state_dict(text_corpus_state state, text_corpus_state othe
         token_count: other.token_count,
     }
 }
-

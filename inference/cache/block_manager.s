@@ -1,4 +1,5 @@
 package neurx.inference.cache.block_manager
+
 struct kv_cache_block {
     int block_id
     int ref_count
@@ -577,4 +578,3 @@ func block_manager_usage(block_manager_state state) float {
     }
     float(state.total_blocks - len(state.free_block_ids)) / float(state.total_blocks)
 }
-

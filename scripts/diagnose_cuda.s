@@ -4,6 +4,7 @@ use std.os
 use std.exec
 use std.time
 use std.path
+
 func check_nvidia_smi() int {
     cmd := exec.command("nvidia-smi", "-L")
     output, err := cmd.Output()
@@ -103,4 +104,3 @@ func main() {
     io.Println("✓ To start full training, run: cd " + curdir + " && make pretrain-gpu")
     io.Println("")
 }
-

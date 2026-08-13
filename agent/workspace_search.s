@@ -88,4 +88,3 @@ func agent_search_workspace(string query, string route, int max_hits, int max_ch
     string root = agent_workspace_root()
     if q != "" {
         string limit_str = string(limit)
-

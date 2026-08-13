@@ -2,6 +2,7 @@ package neurx.runtime.compile
 use neurx.strings
 use neurx.runtime.stage
 use neurx.strings
+
 struct compile_state {
     string name
     string backend
@@ -783,4 +784,3 @@ func stage_to_compile(stage_state state) compile_state {
         tags: [],
     }
 }
-

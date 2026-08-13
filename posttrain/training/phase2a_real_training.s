@@ -602,4 +602,3 @@ func main() {
     training_state final_state = run_real_training(config)
     return 0
 }
-

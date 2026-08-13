@@ -1,5 +1,6 @@
 package neurx.agent.trace
 use neurx.agent.observation
+
 struct agent_trace_state {
     []int steps
     []string tasks
@@ -274,4 +275,3 @@ func agent_trace_filter_task_obs(agent_trace_state state, string task) []string 
     }
     out
 }
-

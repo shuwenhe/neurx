@@ -1,5 +1,6 @@
 package neurx.posttrain.alignment.simpo_examples
 use neurx.posttrain.alignment.simpo_trainer.*
+
 func create_simpo_config() simpo_config {
     simpo_config {
         seq_len: 128,
@@ -255,4 +256,3 @@ func append_pair_ex([]simpo_preference_pair arr, simpo_preference_pair p) []simp
 func append_batch_ex([]simpo_batch arr, simpo_batch b) []simpo_batch {
     arr
 }
-

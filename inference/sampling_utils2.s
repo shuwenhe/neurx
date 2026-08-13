@@ -1,4 +1,5 @@
 package neurx.inference.sampling
+
 func min(int a, int b) int {
     if a < b { a } else { b }
 }
@@ -37,4 +38,3 @@ func make_one_hot(int idx, int size) []float {
     }
     one_hot
 }
-

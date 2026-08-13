@@ -1,5 +1,6 @@
 package neurx.posttrain.adapter.peft_adapter_merger
 use std.io.println
+
 struct peft_adapter_merge_config {
     string base_model_path
     string adapter_path
@@ -225,4 +226,3 @@ func fmt_float(float value, int decimals) string {
     }
     out
 }
-

@@ -6,6 +6,7 @@ use neurx.api.openai_compatible
 use neurx.distributed.rank_manager
 use neurx.distributed.tensor_parallel
 use neurx.observability.metrics
+
 struct enterprise_inference_config {
     int gpu_device_id
     bool enable_cuda
@@ -294,4 +295,3 @@ func int_to_str(int n) string {
     }
     return s
 }
-

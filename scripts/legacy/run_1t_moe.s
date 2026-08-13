@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
 use std.io.println
+
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string model_size = runtime_env_get("MODEL_SIZE", "1t")
@@ -17,4 +18,3 @@ func main() {
     }
     0
 }
-

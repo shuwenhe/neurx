@@ -1,6 +1,7 @@
 package neurx.optimizer.optim_mvp
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct sgd_optimizer {
     float lr
 }
@@ -153,4 +154,3 @@ func rmsprop_step(rmsprop_optimizer optimizer, tensor params, tensor grads) rmsp
         params: new(out, params.shape, params.requires_grad),
     }
 }
-

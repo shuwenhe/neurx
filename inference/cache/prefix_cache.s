@@ -1,4 +1,5 @@
 package neurx.inference.cache.prefix_cache
+
 struct neurx_prefix_cache_state {
     prefix_cache_state cache
     int key_space
@@ -47,4 +48,3 @@ func neurx_prefix_cache_state_dict(neurx_prefix_cache_state state) neurx_prefix_
 func neurx_prefix_cache_load_state_dict(neurx_prefix_cache_state state, neurx_prefix_cache_state other) neurx_prefix_cache_state {
     other
 }
-

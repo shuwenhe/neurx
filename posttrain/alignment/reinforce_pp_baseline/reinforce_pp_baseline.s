@@ -1,5 +1,6 @@
 package neurx.posttrain.reinforce_pp_baseline
 use neurx.tensor
+
 struct reinforce_pp_baseline_config {
     float gamma
     float epsilon
@@ -100,4 +101,3 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
-

@@ -1,5 +1,6 @@
 package main
 use std.io.println
+
 func main() {
     println("🔧 NeurX toolsystem - neurxcompleteimplementation")
     println("==========================================")
@@ -92,4 +93,3 @@ func main() {
     println("✅ systemEnglish text!")
     0
 }
-

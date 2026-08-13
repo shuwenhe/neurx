@@ -2,6 +2,7 @@ package neurx.posttrain.dpo.examples
 use neurx.posttrain.dpo.dpo_trainer.*
 use neurx.model.llm.neurx.*
 use neurx.tokenizer.neurx.*
+
 func create_dpo_example_config() dpo_train_config {
     dpo_train_config {
         method: "dpo",
@@ -215,4 +216,3 @@ func string_float(float f) string {
     int frac_part = int((f - float_of_int(int_part)) * 10000.0)
     string(int_part) + "." + string(frac_part)
 }
-

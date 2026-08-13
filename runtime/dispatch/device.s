@@ -131,4 +131,3 @@ func update_device_mem(dispatch_state ds, string name, int delta_mb) dispatch_st
     }
     return ds
 }
-

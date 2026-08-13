@@ -1,4 +1,5 @@
 package neurx.quantization.advanced_quant
+
 struct awq_config {
     int bits
     int group_size
@@ -249,4 +250,3 @@ func append_int([]int slice, int elem) []int {
     new_slice = append_int(new_slice, elem)
     new_slice
 }
-

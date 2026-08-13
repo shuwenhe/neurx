@@ -1,6 +1,7 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/ppo/ppo.s"
+
 struct opo_config {
     learning_rate: f32
     num_epochs: i32
@@ -312,4 +313,3 @@ func clamp_scalar(f32 x, f32 min_val, f32 max_val) -> f32 {
     }
     return x
 }
-

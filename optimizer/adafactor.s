@@ -1,6 +1,7 @@
 package neurx.optimizer.adafactor
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct adafactor_optimizer {
     float lr
     float beta2_decay
@@ -212,4 +213,3 @@ func adafactor_ln(float x) float {
     }
     2.0 * result
 }
-

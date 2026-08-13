@@ -200,4 +200,3 @@ func drgrpo_step(
         avg_group_reward: avg_group_reward,
     }
 }
-

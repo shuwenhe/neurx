@@ -1,4 +1,5 @@
 package neurx.distributed
+
 struct pipeline_parallel_config {
     int pp_degree
     int pp_rank
@@ -239,4 +240,3 @@ func recommended_2t_ultra_pipeline_config() pipeline_parallel_config {
     cfg.microbatch_size = 2
     return cfg
 }
-

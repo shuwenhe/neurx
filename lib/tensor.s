@@ -1,4 +1,5 @@
 package neurx.lib.tensor
+
 struct vector {
     []float data
     int size
@@ -446,4 +447,3 @@ func matrix_row_mean(matrix m) vector {
     }
     result
 }
-

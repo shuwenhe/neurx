@@ -1,6 +1,7 @@
 package neurx.diffusion.sampler.ddim
 use neurx.diffusion.noise
 use neurx.ops
+
 struct ddim_sampler_state {
     int current_t
     int stride
@@ -45,4 +46,3 @@ func ddim_sampler_state_dict(ddim_sampler_state state) ddim_sampler_state {
 func ddim_sampler_load_state_dict(ddim_sampler_state state, ddim_sampler_state other) ddim_sampler_state {
     other
 }
-

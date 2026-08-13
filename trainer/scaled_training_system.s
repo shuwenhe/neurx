@@ -532,4 +532,3 @@ func main() {
     steps_per_epoch := 20
     run_scaled_training_loop(num_epochs, steps_per_epoch, "synthetic", false, false)
 }
-

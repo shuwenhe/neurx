@@ -335,4 +335,3 @@ func run_all_tests() {
     test_transformer_layer_forward_backward()
     test_complete_forward_backward_cycle()
 }
-

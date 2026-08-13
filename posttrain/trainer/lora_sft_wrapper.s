@@ -4,4 +4,3 @@ use neurx.posttrain.trainer.posttrain_main.{run_posttrain_lora_sft}
 func main() {
     return run_posttrain_lora_sft()
 }
-

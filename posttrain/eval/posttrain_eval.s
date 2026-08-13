@@ -1,4 +1,5 @@
 package neurx.posttrain.eval
+
 struct posttrain_eval_state {
     int last_eval_step
     float reward_score
@@ -34,4 +35,3 @@ func posttrain_eval_state_dict(posttrain_eval_state state) posttrain_eval_state 
 func posttrain_eval_load_state_dict(posttrain_eval_state state, posttrain_eval_state other) posttrain_eval_state {
     other
 }
-

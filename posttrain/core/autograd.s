@@ -1,5 +1,6 @@
 package neurx.posttrain.core.autograd
 use std.io.println
+
 struct computation_node_s {
     string op_name
     tensor_s output
@@ -209,4 +210,3 @@ func matmul_s(tensor_s a, tensor_s b) tensor_s {
 func transpose_s(tensor_s t) tensor_s {
     t
 }
-

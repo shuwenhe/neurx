@@ -1,4 +1,5 @@
 package neurx.attention.gradient
+
 struct attention_forward_cache {
     []float hidden_states
     []float concatenated
@@ -284,4 +285,3 @@ func allocate_vector(int size, float init_val) []float {
     }
     return v
 }
-

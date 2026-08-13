@@ -1,4 +1,5 @@
 package neurx.quantization.dynamic
+
 struct quantization_config {
     string quantization_type
     bool symmetric
@@ -456,4 +457,3 @@ func main() {
     println("Speed improvement: " + float_to_string(metrics.speed_improvement) + "x")
     println("\n=== Quantization Complete ===")
 }
-

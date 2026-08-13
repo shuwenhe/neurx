@@ -1,4 +1,5 @@
 package neurx.attention.nda
+
 struct nda_config {
     int hidden_dim
     int state_dim
@@ -315,4 +316,3 @@ func nda_forward(nda_weights weights, []float input, int tokens, []float initial
         beta: beta_values,
     }
 }
-

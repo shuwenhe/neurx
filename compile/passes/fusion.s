@@ -43,4 +43,3 @@ func apply_fusion_passes(ir_graph graph, fusion_config cfg) ir_graph {
     }
     optimized
 }
-

@@ -1,6 +1,7 @@
 package neurx.inference.production
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
 extern "intrinsic" func __sys_read_string(int fd, int count) string
+
 func matrix_vector_mul([]float matrix, int rows, int cols, []float vec, []float out) {
     int idx = 0
     int i = 0
@@ -327,4 +328,3 @@ func main() {
     println("")
     println("✓ Inference complete")
 }
-

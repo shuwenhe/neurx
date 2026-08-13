@@ -1,4 +1,5 @@
 package neurx.amp.grad_scaler
+
 struct grad_scaler_state {
     float scale
     float growth_factor
@@ -72,4 +73,3 @@ func grad_scaler_step(grad_scaler_state scaler, bool overflow_occurred) grad_sca
 func grad_scaler_get_scale(grad_scaler_state scaler) float {
     return scaler.scale
 }
-

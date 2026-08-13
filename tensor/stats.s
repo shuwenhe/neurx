@@ -1,4 +1,5 @@
 package neurx.stats
+
 struct tensor {
     []float data
     []int shape
@@ -1241,4 +1242,3 @@ func prod(tensor a, int dim) tensor {
         grad: none,
     }
 }
-

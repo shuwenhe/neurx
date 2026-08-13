@@ -1,4 +1,5 @@
 package neurx.strings
+
 func copy_strings([]string values) []string {
     []string out = []string{cap: len(values)}
     int i = 0
@@ -88,4 +89,3 @@ func concat6(string a, string b, string c, string d, string e, string f) string 
 
 func string_set_workaround() {
 }
-

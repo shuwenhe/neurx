@@ -1,4 +1,5 @@
 package neurx.workflows.robotics
+
 struct robotics_workflow_state {
     string name
     string mode
@@ -28,4 +29,3 @@ func robotics_workflow_mark_ready(robotics_workflow_state state) robotics_workfl
         ready: true,
     }
 }
-

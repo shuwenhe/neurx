@@ -1,4 +1,5 @@
 package neurx.serving.serve
+
 func mod(int a, int b) int {
     if b == 0 {
         return 0
@@ -914,4 +915,3 @@ func serving_runtime_smoke_test() int {
     println("cache_misses=" + int_to_str(serving_runtime_cache_misses(state)))
     0
 }
-

@@ -274,4 +274,3 @@ func cai_compute_stats(cai_batch batch) cai_stats {
         weighted_severity: sum_weighted / (n * 1.0),
     }
 }
-

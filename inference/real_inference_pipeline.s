@@ -1,4 +1,5 @@
 package real_inference_pipeline
+
 struct inference_pipeline {
     string model_path
     string tokenizer_path
@@ -92,4 +93,3 @@ func generate_response(string prompt, int max_tokens) string {
     }
     return generated_text
 }
-

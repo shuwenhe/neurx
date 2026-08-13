@@ -1,4 +1,5 @@
 package neurx.protocol.request_response
+
 func new_request_protocol(int req_id, int input_tokens, int max_tokens) []int {
     []int req = []int{req_id, 1, input_tokens, max_tokens, 0, 0, 0, 0}
     return req
@@ -306,4 +307,3 @@ func collect_protocol_stats([][]int requests, [][]float metrics) string {
     stats = stats + string(avg_latency)
     return stats
 }
-

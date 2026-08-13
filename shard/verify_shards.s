@@ -1,4 +1,5 @@
 package main
+
 func main() {
     println("")
     println("==================================================")
@@ -20,4 +21,3 @@ func main() {
     println("")
     0
 }
-

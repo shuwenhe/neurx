@@ -1,4 +1,5 @@
 package neurx.runtime.io
+
 struct tensor {
     string name
     string dtype
@@ -119,4 +120,3 @@ func float_to_bits(float f) int {
     bits = bits + mantissa
     bits
 }
-

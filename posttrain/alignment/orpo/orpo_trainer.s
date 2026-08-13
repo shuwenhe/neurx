@@ -1,6 +1,7 @@
 package neurx.posttrain.alignment.orpo_trainer
 use neurx.distributed.collective
 use neurx.amp.scaler
+
 struct orpo_config {
     int seq_len
     int hidden_size
@@ -352,4 +353,3 @@ func load_checkpoint(string path) orpo_state {
     print("[ORPO] Loading checkpoint from " + path)
     create_orpo_state(create_orpo_default_config())
 }
-

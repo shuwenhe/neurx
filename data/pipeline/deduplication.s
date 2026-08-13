@@ -1,4 +1,5 @@
 package neurx.data.pipeline.deduplication
+
 struct min_hash_signature {
     int* hash_values
     int num_hashes
@@ -333,4 +334,3 @@ func main() {
     println("Duplicate ratio: " + int_to_string(stats.duplicate_ratio) + "%")
     println("Computation time: " + int_to_string(stats.computation_time_ms) + "ms")
 }
-

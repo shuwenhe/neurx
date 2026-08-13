@@ -1,6 +1,7 @@
 package neurx.optimizer.adadelta
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct adadelta_optimizer {
     float lr
     float rho
@@ -82,4 +83,3 @@ func adadelta_sqrt(float x) float {
     }
     y
 }
-

@@ -1,4 +1,5 @@
 package neurx.pretrain.config.frontier_training_plan
+
 struct frontier_model_target {
     string name
     string architecture
@@ -389,4 +390,3 @@ func next_frontier_p0_work(frontier_audit audit) []frontier_capability {
     }
     work
 }
-

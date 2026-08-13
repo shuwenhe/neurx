@@ -1,4 +1,5 @@
 package main
+
 func test_sampling_complete() bool {
     []float logits = []float{2.0, 1.5, 1.0, 0.5, 0.1, -0.5, -1.0, -2.0}
     []float temp_scaled = apply_temperature(logits, 1.5)
@@ -307,4 +308,3 @@ func main() {
         string final = "⚠️ Some tests failed - review implementation"
     }
 }
-

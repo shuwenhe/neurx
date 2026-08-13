@@ -4,6 +4,7 @@ use neurx.inference.runtime.worker_cluster
 use neurx.inference.runtime.engine_lifecycle
 use neurx.inference.scheduler.vllm_scheduler
 use neurx.inference.metrics.observability
+
 func engine_request_active_status() int { 1 }
 
 func engine_request_finished_status() int { 2 }
@@ -606,4 +607,3 @@ func engine_drain_events(production_engine_state state) production_engine_state 
     state.events = []
     state
 }
-

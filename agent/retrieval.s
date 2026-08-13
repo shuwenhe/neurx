@@ -1,5 +1,6 @@
 package neurx.agent.retrieval
 use neurx.agent.memory
+
 struct agent_retrieval_result {
     []string keys
     []string values
@@ -160,4 +161,3 @@ func agent_retrieval_export(agent_retrieval_result result) string {
 func agent_retrieval_summary(agent_retrieval_result result) string {
     "retrieval;hits=" + string(result.count) + ";top=" + agent_retrieval_top_key(result)
 }
-

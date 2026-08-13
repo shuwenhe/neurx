@@ -1,6 +1,7 @@
 package neurx.posttrain.alignment.sapo
 use neurx.tensor
 use neurx.posttrain.alignment.loss_aggregation
+
 struct sapo_config {
     float tau_pos
     float tau_neg
@@ -73,4 +74,3 @@ func masked_mean(tensor values, tensor mask) tensor {
     tensor count = sum_all(mask)
     return div(total, count)
 }
-

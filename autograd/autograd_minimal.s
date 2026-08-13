@@ -1,4 +1,5 @@
 package neurx.autograd.minimal
+
 struct grad_node {
     int id
     []float data
@@ -508,4 +509,3 @@ func distributed_backward(grad_graph graph, int output_id, int num_workers) grad
         nodes: synchronized_nodes,
     }
 }
-

@@ -9,6 +9,7 @@ use neurx.distributed.training_3d.*
 use neurx.checkpoint.distributed.*
 use neurx.data.loader.dataloader.*
 use neurx.monitoring.training_observability.*
+
 struct dpo_preference_pair {
     []int prompt_tokens
     []int chosen_response_tokens
@@ -386,4 +387,3 @@ func string_float(float f) string {
     int frac_part = int((f - float_of_int(int_part)) * 10000.0)
     string(int_part) + "." + string(frac_part)
 }
-

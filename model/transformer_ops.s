@@ -1,5 +1,6 @@
 package neurx.model.transformer_ops
 use std.io.eprintln
+
 func embedding_lookup(
     []int token_ids,
     []float embed_weight,
@@ -282,4 +283,3 @@ func transformer_layer(
     []float output = add_arrays(after_attn, mlp_output)
     output
 }
-

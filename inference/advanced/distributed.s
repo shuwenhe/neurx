@@ -274,4 +274,3 @@ func main() {
     println("Rank:", state.config.rank)
     println("World size:", state.config.world_size)
 }
-

@@ -1,6 +1,7 @@
 import "tensor/tensor.s"
 import "tokenizer/tokenizer.s"
 import "inference/sampling_strategies.s"
+
 struct hf_transformers_config {
     model_name_or_path: string
     device: string
@@ -323,4 +324,3 @@ struct layer_norm {}
 func get_time_ms() -> i64 {
     return 0
 }
-

@@ -1,4 +1,5 @@
 package neurx.inference.serve.lora_router
+
 func lora_unloaded_status() int { 1 }
 
 func lora_loading_status() int { 2 }
@@ -224,4 +225,3 @@ func apply_lora_linear([]float input, []float base_output, []float lora_a, []flo
     }
     output
 }
-

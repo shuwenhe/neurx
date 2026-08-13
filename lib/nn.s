@@ -217,4 +217,3 @@ func create_batch_norm_stats(int feature_size) batch_norm_stats {
     }
     stats
 }
-

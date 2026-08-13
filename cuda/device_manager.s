@@ -1,4 +1,5 @@
 package neurx.cuda
+
 struct cuda_device {
     int id
     string name
@@ -39,4 +40,3 @@ func get_device_count() int {
 func query_gpu_count() int {
     1
 }
-

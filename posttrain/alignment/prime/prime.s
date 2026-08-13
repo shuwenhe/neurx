@@ -220,4 +220,3 @@ func prime_step(
         total_loss: tensor_ops.item(total_loss),
     }
 }
-

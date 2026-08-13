@@ -1,4 +1,5 @@
 package neurx.nn.regularization
+
 struct regularization_config {
     string method
     float lambda
@@ -136,4 +137,3 @@ func random_int(int min, int max) int {
 func beta_random(float alpha, float beta) float {
     return 0.5
 }
-

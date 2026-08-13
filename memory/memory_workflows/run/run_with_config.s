@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape, trim}
 use std.io.println
+
 func main() {
     string config = runtime_env_get("NEURX_MEMORY_CONFIG", "workflows/agent/memory/config/sample.yaml")
     string steps_override = runtime_env_get("NEURX_MEMORY_STEPS", "")
@@ -56,4 +57,3 @@ func default_if_empty(string value, string fallback) string {
     }
     value
 }
-

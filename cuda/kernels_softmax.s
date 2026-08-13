@@ -1,4 +1,5 @@
 package neurx.cuda
+
 struct softmax_config {
     int rows
     int cols
@@ -20,4 +21,3 @@ func launch_softmax(
                       cfg.rows * cfg.cols * 4 * 2)
     nil
 }
-

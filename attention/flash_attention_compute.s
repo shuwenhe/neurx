@@ -1,4 +1,5 @@
 package neurx.attention.flash_compute
+
 struct flash_attention_config {
     int block_size_q
     int block_size_kv
@@ -461,4 +462,3 @@ func recommended_flash_attention_config_2t(): flash_attention_config {
     config.sequence_parallel_size = 4
     return config
 }
-

@@ -1,5 +1,6 @@
 package neurx.compute.cuda_matmul
 use neurx.cpu.cuda_core
+
 struct cuda_matrix {
     int rows
     int columns
@@ -85,4 +86,3 @@ func cuda_matrix_multiply(cuda_context context, cuda_matrix left, cuda_matrix ri
 func cuda_matmul_contract_valid(cuda_matrix left, cuda_matrix right) bool {
     left.rows > 0 && left.columns > 0 && right.rows == left.columns && right.columns > 0
 }
-

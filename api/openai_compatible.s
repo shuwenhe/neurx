@@ -1,5 +1,6 @@
 package neurx.api.openai_compatible
 use neurx.inference.api.openai_protocol
+
 func api_route_unknown() int { 0 }
 
 func api_route_health() int { 1 }
@@ -230,4 +231,3 @@ func api_complete(openai_request request, string generated_text, string finish_r
 func api_contract_valid() bool {
     api_route_kind("/v1/chat/completions") == api_route_chat() && api_route_kind("/v1/models") == api_route_models() && api_route_kind("/missing") == api_route_unknown()
 }
-

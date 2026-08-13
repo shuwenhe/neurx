@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
 use std.io.println
+
 func main() {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     println("==========================================")
@@ -56,4 +57,3 @@ func check_file(string path, string label) bool {
     println("❌ " + label + " : missing (" + path + ")")
     false
 }
-

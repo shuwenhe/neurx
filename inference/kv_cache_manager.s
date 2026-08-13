@@ -1,4 +1,5 @@
 package neurx.inference.kv_cache_manager
+
 func kv_cache_remove_int([]int values, int expected) []int {
     []int result = []int{}
     int i = 0
@@ -294,4 +295,3 @@ func append_token_to_cache(paged_kv_cache cache, int token_id) paged_kv_cache {
     cache.pages[target_page].last_accessed_step = cache.pages[target_page].last_accessed_step + 1
     compress_kv_cache(cache)
 }
-

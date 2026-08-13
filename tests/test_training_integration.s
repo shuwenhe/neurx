@@ -1,4 +1,5 @@
 package main
+
 func test_training_config() {
     println("Test 1: Training configuration")
     let batch_size = 32
@@ -266,4 +267,3 @@ func main() {
     println("✓ All training integration tests passed!")
     println("============================================")
 }
-

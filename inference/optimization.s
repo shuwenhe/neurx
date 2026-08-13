@@ -1,4 +1,5 @@
 package neurx.inference.optimization
+
 struct flash_attention_config {
     int block_size
     bool use_flash_attention
@@ -359,4 +360,3 @@ func main() {
     println("Inference time: " + int_to_string(resp.inference_time_ms) + "ms")
     println("\n=== Inference Optimization Complete ===")
 }
-

@@ -308,4 +308,3 @@ func convert_data_format(string input_path, string output_format) error {
 func clean_dataset(string input_path) error {
     return process_dataset(input_path)
 }
-

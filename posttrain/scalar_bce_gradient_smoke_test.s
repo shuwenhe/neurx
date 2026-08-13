@@ -1,4 +1,5 @@
 package posttrain.scalar_bce_test
+
 func sigmoid_fn(float x) float {
     if x > 100.0 {
         return 1.0
@@ -133,4 +134,3 @@ func train_20_steps() float {
 func main() {
     float result = train_20_steps()
 }
-

@@ -1,4 +1,5 @@
 package neurx.model.robotics.policy
+
 struct robotics_policy_state {
     string policy_name
     int input_dim
@@ -99,4 +100,3 @@ func robotics_policy_forward(robotics_policy_state state, []float input) []float
     }
     action
 }
-

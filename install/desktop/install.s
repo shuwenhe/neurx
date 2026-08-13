@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape, trim}
 use std.io.println
+
 func main() {
     string gpu = runtime_env_get("NEURX_GPU", "auto")
     string os_name = runtime_run_command_output("uname -s")
@@ -21,4 +22,3 @@ func main() {
     println("This entrypoint now lives in S and intentionally stays conservative.")
     0
 }
-

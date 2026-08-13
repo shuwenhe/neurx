@@ -6,6 +6,7 @@ struct embedding_layer {
     int hidden_size
 }
 var GLOBAL_EMBEDDING [][]float
+
 func create_embedding_layer() embedding_layer {
     return embedding_layer{
         vocab_size: 151936,
@@ -41,4 +42,3 @@ func embed_tokens([]int token_ids) [][]float {
     }
     result
 }
-

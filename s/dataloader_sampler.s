@@ -1,4 +1,5 @@
 package neurx.data
+
 struct sampler_config {
     int total_samples
     int batch_size
@@ -235,4 +236,3 @@ func binary_search_cumsum([]float cumsum, float target) int {
 func random_float_01(uint64 rng) float {
     float(advance_rng(rng)) / float(18446744073709551615)
 }
-

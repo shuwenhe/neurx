@@ -1,6 +1,7 @@
 package neurx.compile.compiler
 use neurx.platform.errors.{platform_error_state, new_configuration_error, clear_error, platform_error_active}
 use neurx.compile.pipeline
+
 struct compile_options {
     string backend
     string mode
@@ -142,4 +143,3 @@ func compiled_module_state_dict(compiled_module_state state) compiled_module_sta
 func compiled_module_load_state_dict(compiled_module_state state, compiled_module_state other) compiled_module_state {
     other
 }
-

@@ -1,4 +1,5 @@
 package main
+
 func str_len(string s) int {
     return __host_str_len(s)
 }
@@ -363,4 +364,3 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
-

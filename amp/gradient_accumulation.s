@@ -1,4 +1,5 @@
 package neurx.amp.gradient_accumulation
+
 struct gradient_accumulator {
     [][]float accumulated_grads
     int accumulation_steps
@@ -83,4 +84,3 @@ func make_zero_array(int n) []float {
     }
     return arr
 }
-

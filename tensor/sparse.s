@@ -1,4 +1,5 @@
 package neurx.tensor.sparse
+
 struct sparse_tensor_coo {
     []int indices_i
     []int indices_j
@@ -174,4 +175,3 @@ func allocate_int_array(int n) []int {
     }
     return arr
 }
-

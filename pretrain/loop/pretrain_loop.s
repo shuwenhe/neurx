@@ -1,6 +1,7 @@
 package neurx.pretrain.loop
 use neurx.pretrain.config
 use neurx.pretrain.data
+
 struct pretrain_loop_state {
     pretrain_config cfg
     pretrain_data_state data
@@ -75,4 +76,3 @@ func pretrain_loop_state_dict(pretrain_loop_state state) pretrain_loop_state {
 func pretrain_loop_load_state_dict(pretrain_loop_state state, pretrain_loop_state other) pretrain_loop_state {
     other
 }
-

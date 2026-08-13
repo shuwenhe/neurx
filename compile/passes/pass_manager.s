@@ -1,6 +1,7 @@
 package neurx.compile.pass_manager
 use neurx.strings
 use neurx.runtime.compile
+
 struct pass_plan_state {
     []string passes
     bool has_shape_infer
@@ -71,4 +72,3 @@ func apply_pass_plan(compile_state state, pass_plan_state plan) compile_state {
 func pass_plan_load_state_dict(pass_plan_state plan, pass_plan_state other) pass_plan_state {
     other
 }
-

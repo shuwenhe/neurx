@@ -1,5 +1,6 @@
 package neurx.runtime.model.safetensors
 use std.io.eprintln
+
 struct safe_tensor_info {
     string name
     string dtype
@@ -73,4 +74,3 @@ func contains_tensor(safe_tensor_file file, string name) bool {
 func main() {
     eprintln("SafeTensors Binary Format Parser")
 }
-

@@ -1,5 +1,6 @@
 package neurx.posttrain.core.numerical_validation
 use std.io.println
+
 struct golden_test_case_s {
     string test_name
     string operation
@@ -288,4 +289,3 @@ func int_to_str(int n) string {
     if neg { result = "-" + result }
     result
 }
-

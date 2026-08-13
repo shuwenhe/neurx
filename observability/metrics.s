@@ -1,4 +1,5 @@
 package neurx.observability.metrics
+
 struct metric_counter {
     string name
     string help
@@ -326,4 +327,3 @@ func int(float f) int {
         int(f - 0.5)
     }
 }
-

@@ -3,6 +3,7 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_fi
 extern "intrinsic" func __host_read_binary_file(string path) []int
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 func pow_int(int base, int exp) int {
     int result = 1
     int i = 0
@@ -821,4 +822,3 @@ func main() {
     string response = decode_token_sequence(logits_seed, max_new_tokens)
     print("Assistant: " + response + "\n")
 }
-

@@ -1,5 +1,6 @@
 package neurx.nn.rnn
 use neurx.tensor.tensor
+
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -380,4 +381,3 @@ func gru_forward(gru_cell_state cell, []float input, int seq_len, []float h0) gr
         hidden_size: hs,
     }
 }
-

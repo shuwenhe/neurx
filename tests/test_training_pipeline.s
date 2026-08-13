@@ -6,6 +6,7 @@ import (
     "neurx/model"
     "neurx/nn"
 )
+
 func test_forward_pass_basic() bool {
     var model_state: model.transformer_state
     model_state.hidden_dim = 768
@@ -467,4 +468,3 @@ func run_all_training_pipeline_tests() bool {
     if test_perplexity_calculation() { passed = passed + 1 }
     return passed == total
 }
-

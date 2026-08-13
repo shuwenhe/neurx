@@ -1,4 +1,5 @@
 package neurx.workflows.robotics.real
+
 struct robotics_real_state {
     string robot_name
     bool connected
@@ -36,4 +37,3 @@ func robotics_real_trigger_emergency_stop(robotics_real_state state) robotics_re
         emergency_stop: true,
     }
 }
-

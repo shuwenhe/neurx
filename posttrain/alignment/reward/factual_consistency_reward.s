@@ -1,4 +1,5 @@
 package neurx.posttrain.reward.factual_consistency_reward
+
 struct fact {
     string subject
     string predicate
@@ -618,4 +619,3 @@ func edit_distance(string s1, string s2) int {
     }
     len2 - len1
 }
-

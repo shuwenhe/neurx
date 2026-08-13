@@ -445,4 +445,3 @@ func agent_skill_registry_version(agent_skill_registry_state state, string name)
     }
     state.records[index].spec.version
 }
-

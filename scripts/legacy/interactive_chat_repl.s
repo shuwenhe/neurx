@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output}
 use std.io.println
+
 struct model_config {
     int vocab_size
     int hidden_size
@@ -239,4 +240,3 @@ func main() {
     println("")
     0
 }
-

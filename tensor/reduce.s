@@ -1,5 +1,6 @@
 package neurx.tensor.reduce
 use neurx.tensor.core
+
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
@@ -370,4 +371,3 @@ func reduce_argmin_dim(tensor a, int dim, bool keepdim) tensor {
 func argmin_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_argmin_dim(a, dim, keepdim)
 }
-

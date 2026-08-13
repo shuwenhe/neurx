@@ -1,4 +1,5 @@
 package neurx.distributed.sync
+
 struct distributed_context {
     rank i64
     world_size i64
@@ -224,4 +225,3 @@ func i64_to_string(i64 val) string {
     }
     return result
 }
-

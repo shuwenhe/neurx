@@ -1,4 +1,5 @@
 package neurx.posttrain.training.stability
+
 func clip_all_gradients([][]float all_grads, float max_norm) float {
     float total = 0.0
     int layer = 0
@@ -86,4 +87,3 @@ func compute_accuracy([][][]float logits, [][]int targets) float {
     if total == 0 { return 0.0 }
     return ((correct as float)) / ((total as float))
 }
-

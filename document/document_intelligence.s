@@ -1,4 +1,5 @@
 module document_parser
+
 struct document_parser_config {
     enabled_formats: list<string> = ["pdf", "html", "markdown", "docx", "pptx", "xlsx", "txt", "csv"]
     pdf_extract_images: bool = true
@@ -116,6 +117,7 @@ struct document_statistics {
     link_count: int
     estimated_reading_time_minutes: float
 }
+
 class document_parser {
     config: document_parser_config
     pdf_parser: PDFParser?
@@ -278,6 +280,7 @@ class document_parser {
         }
     }
 }
+
 class pdf_parser {
     config: document_parser_config
     init(config: document_parser_config) {
@@ -371,6 +374,7 @@ class pdf_parser {
         return null
     }
 }
+
 class html_parser {
     config: document_parser_config
     init(config: document_parser_config) {
@@ -605,6 +609,7 @@ struct table_conversion_result {
     table: extracted_table
     markdown: string
 }
+
 class markdown_parser {
     config: document_parser_config
     init(config: document_parser_config) {
@@ -756,6 +761,7 @@ class markdown_parser {
         return parts
     }
 }
+
 class office_document_parser {
     config: document_parser_config
     init(config: document_parser_config) {
@@ -1043,4 +1049,3 @@ export {
     document_statistics, document_parser,
     create_document_parser, test_document_parser
 }
-

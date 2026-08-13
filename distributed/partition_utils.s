@@ -1,4 +1,5 @@
 package neurx.distributed.partition
+
 struct partition_info {
     int total_params
     int num_partitions
@@ -108,4 +109,3 @@ func int_to_string(int n) string {
     if remaining == 9 { result = "9" + result }
     return result
 }
-

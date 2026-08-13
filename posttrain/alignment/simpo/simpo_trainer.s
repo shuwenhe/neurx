@@ -1,6 +1,7 @@
 package neurx.posttrain.alignment.simpo_trainer
 use neurx.distributed.collective
 use neurx.amp.scaler
+
 struct simpo_config {
     int seq_len
     int hidden_size
@@ -267,4 +268,3 @@ func load_simpo_checkpoint(string path) simpo_state {
         save_interval: 10,
     })
 }
-

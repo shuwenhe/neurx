@@ -3,6 +3,7 @@ import io
 import strings
 import path
 import sys
+
 func remove_line_comments(string line) string {
 	idx := strings.index(line, "
 	if idx != -1 {
@@ -118,4 +119,3 @@ func main() {
 	walk_dir(dir)
 	sys.println("Code cleanup completed successfully!")
 }
-

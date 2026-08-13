@@ -1,4 +1,5 @@
 package main
+
 struct tensor {
     []float data
     int rows
@@ -172,4 +173,3 @@ func main() {
     println("✓ All tests completed!")
     println("========================================")
 }
-

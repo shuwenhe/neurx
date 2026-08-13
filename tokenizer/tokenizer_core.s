@@ -1,5 +1,6 @@
 package neurx.tokenizer.neurx
 import neurx.tensor.*
+
 struct special_tokens_config {
     int pad_token_id      = 0
     int bos_token_id      = 1
@@ -36,6 +37,7 @@ struct tokenizer_state {
     dict[int, string] decoder
     special_tokens_config special_tokens
     int num_added_tokens
+
     struct stats {
         int total_encoded_tokens
         int total_decoded_tokens
@@ -529,4 +531,3 @@ func test_tokenizer() {
     print(f"   Masked positions: {mlm_input['mask_positions']}")
     print("✅ MLM input construction works!")
     print("\n[Tes
-

@@ -1,4 +1,5 @@
 package neurx.tests.math
+
 func test_exp() bool {
     bool all_pass = true
     float test_exp_0 = exp_approx(0.0)
@@ -193,4 +194,3 @@ func float(int val) float {
 func float_to_str(float val) string {
     return ""
 }
-

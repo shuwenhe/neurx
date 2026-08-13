@@ -13,6 +13,7 @@ extern func neurx_cublas_create() int64
 extern func neurx_cublas_destroy(int64 handle) int
 extern func neurx_cublas_sgemm(int64 handle, int m, int n, int k, float alpha, int64 left, int64 right, float beta, int64 output) int
 extern func neurx_cuda_synchronize() int
+
 struct cuda_device {
     int device_id
     string device_name
@@ -187,4 +188,3 @@ func cuda_abi_contract_valid() bool {
     cuda_buffer empty = cuda_empty_buffer()
     !empty.allocated && empty.pointer == i64(0) && empty.device_id == -1
 }
-

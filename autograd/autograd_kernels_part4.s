@@ -1,5 +1,6 @@
 package neurx.autograd
 use neurx.tensor.tensor
+
 func backward_sum(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -227,4 +228,3 @@ func log_approx(float x) float {
     float log_m = y - y*y/2.0 + y*y*y/3.0 - y*y*y*y/4.0
     log_m + float(k) * ln2
 }
-

@@ -1,4 +1,5 @@
 package neurx.posttrain.core.tensor_runtime
+
 struct tensor_s {
     []float data
     []int shape
@@ -448,4 +449,3 @@ func tensor_apply_s(tensor_s t, string op) tensor_s {
         device: t.device,
     }
 }
-

@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_run_command_output, runtime_file_exists}
 use std.io.println
+
 func main() {
     println("[CUDA Environment Verification]")
     println("")
@@ -221,4 +222,3 @@ func int_to_str(int n) string {
     }
     out
 }
-

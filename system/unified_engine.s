@@ -1,4 +1,5 @@
 package neurx.system.unified_engine
+
 func new_engine_state(int total_blocks, int block_size, int max_prefill, int max_decode) []int {
     []int state = []int{total_blocks, block_size, max_prefill, max_decode, 0, 0, 0, 0}
     return state
@@ -162,4 +163,3 @@ func validate_config(int block_size, int max_prefill, int max_decode) bool {
     }
     return true
 }
-

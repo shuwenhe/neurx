@@ -1,4 +1,5 @@
 package step5_sampling_step6_decode
+
 struct sampling_config {
     string strategy
     float temperature
@@ -110,4 +111,3 @@ func generate([]int prompt_tokens, int max_new_tokens, sampling_config config) [
     }
     return result
 }
-

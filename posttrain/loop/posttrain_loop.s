@@ -6,6 +6,7 @@ use neurx.posttrain.checkpoint
 use neurx.posttrain.eval
 use neurx.optimizer.optimizer
 use neurx.scheduler.training_scheduler
+
 struct posttrain_loop_state {
     posttrain_config cfg
     posttrain_data_state data
@@ -181,4 +182,3 @@ func posttrain_loop_state_dict(posttrain_loop_state state) posttrain_loop_state 
 func posttrain_loop_load_state_dict(posttrain_loop_state state, posttrain_loop_state other) posttrain_loop_state {
     other
 }
-

@@ -1,4 +1,5 @@
 package neurx.inference.metrics.inference_metrics
+
 struct neurx_metrics_state {
     int admitted
     int rejected
@@ -131,4 +132,3 @@ func neurx_metrics_state_dict(neurx_metrics_state state) neurx_metrics_state {
 func neurx_metrics_load_state_dict(neurx_metrics_state state, neurx_metrics_state other) neurx_metrics_state {
     other
 }
-

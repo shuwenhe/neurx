@@ -1,4 +1,5 @@
 package neurx.distributed.launcher
+
 struct distributed_config {
     int world_size
     int rank
@@ -104,4 +105,3 @@ func validate_distributed_config(distributed_config cfg) bool {
 func is_distributed(distributed_config cfg) bool {
     cfg.world_size > 1
 }
-

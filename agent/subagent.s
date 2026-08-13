@@ -1,4 +1,5 @@
 package neurx.agent.subagent
+
 struct agent_subagent_task {
     string id
     string goal
@@ -114,4 +115,3 @@ func agent_subagent_aggregate_results(agent_subagent_registry_state state) strin
 func agent_subagent_summary(agent_subagent_registry_state state) string {
     "subagents=" + string(state.count) + " completed=" + string(state.completed) + " failed=" + string(state.failed)
 }
-

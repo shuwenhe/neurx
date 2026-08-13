@@ -1,4 +1,5 @@
 package neurx.inference.cache.paged_kv_cache
+
 struct paged_kv_cache_state {
     int layer_count
     int block_size
@@ -94,4 +95,3 @@ func paged_kv_cache_state_dict(paged_kv_cache_state state) paged_kv_cache_state 
 func paged_kv_cache_load_state_dict(paged_kv_cache_state state, paged_kv_cache_state other) paged_kv_cache_state {
     other
 }
-

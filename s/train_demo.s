@@ -1,6 +1,7 @@
 package neurx.train.demo
 use std.fs.write_text_file as fs_write
 use std.fs.read_to_string as fs_read
+
 struct training_config {
     int batch_size
     int seq_len
@@ -241,4 +242,3 @@ func main() {
     println("NeurX Training Complete!")
     if result.trained && result.loss < result.best_loss + 1.0 { 0 } else { 1 }
 }
-

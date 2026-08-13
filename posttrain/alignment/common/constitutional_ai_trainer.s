@@ -1,4 +1,5 @@
 package neurx.posttrain.alignment.constitutional_ai_trainer
+
 struct constitutional_principle {
     string id
     string description
@@ -452,4 +453,3 @@ func int_to_string_cai(int i) string {
 
 func print(string s) {
 }
-

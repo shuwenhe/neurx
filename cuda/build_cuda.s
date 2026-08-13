@@ -195,4 +195,3 @@ func substring(string s, int start, int end) string {
 func chr(int code) string {
     string(code)
 }
-

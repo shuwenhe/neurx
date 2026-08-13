@@ -1,4 +1,5 @@
 module main
+
 struct tensor_2 {
     []float data
     []int shape
@@ -231,4 +232,3 @@ func main() {
     println("Training Complete!")
     println(repeat_string("=", 60))
 }
-

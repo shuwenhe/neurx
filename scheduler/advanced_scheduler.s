@@ -1,4 +1,5 @@
 package neurx.scheduler.advanced_scheduler
+
 func new_request(int req_id, int input_len, int max_len) []int {
     []int req = []int{req_id, 0, input_len, max_len, 0, 0, 0, input_len}
     return req
@@ -368,4 +369,3 @@ func is_request_stalled([]int req, int current_time, int stall_threshold) bool {
     int wait_time = current_time - arrival
     return wait_time > stall_threshold && get_req_status(req) == 0
 }
-

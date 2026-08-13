@@ -1,5 +1,6 @@
 package neurx.distributed.pipelining
 use neurx.strings
+
 struct pipeline_stage {
     string name
     int stage_index
@@ -535,4 +536,3 @@ func pipeline(pipeline_plan plan) pipeline_schedule_state {
     }
     new_schedule_gpipe(plan)
 }
-

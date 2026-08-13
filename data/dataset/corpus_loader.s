@@ -579,4 +579,3 @@ func cl_substring(string s, int start, int end) string {
     }
     out
 }
-

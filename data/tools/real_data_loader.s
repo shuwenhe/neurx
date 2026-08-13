@@ -2,6 +2,7 @@ package neurx.data.tools.real_data_loader
 use std.io
 use std.strings
 use std.math
+
 struct tokenizer {
     vocab_size: int
     vocab: []string
@@ -281,4 +282,3 @@ func main() {
     print_dataset_stats(c4_stats)
     fmt.printfln("✅ Data loader ready for production training!\n")
 }
-

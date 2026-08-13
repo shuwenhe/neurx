@@ -1,4 +1,5 @@
 module rag_system
+
 struct retrieval_system_config {
     vector_db_backend: string = "faiss"
     vector_dim: int = 768
@@ -92,6 +93,7 @@ struct dbstatus {
     is_initialized: bool
     last_updated: float
 }
+
 class in_memory_vector_db implements vector_db_interface {
     config: retrieval_system_config
     embeddings: map<str, tensor>
@@ -182,6 +184,7 @@ class in_memory_vector_db implements vector_db_interface {
         }
     }
 }
+
 class faiss_vector_db implements vector_db_interface {
     config: retrieval_system_config
     index: any
@@ -326,6 +329,7 @@ class faiss_vector_db implements vector_db_interface {
         }
     }
 }
+
 class embedding_service {
     model_name: string
     model: any
@@ -425,6 +429,7 @@ class embedding_service {
         return result
     }
 }
+
 class lru_cache<K, V> {
     capacity: int
     cache: OrderedDict<K, V>
@@ -450,6 +455,7 @@ class lru_cache<K, V> {
         return this.cache.size()
     }
 }
+
 class document_processor {
     config: retrieval_system_config
     splitter: TextSplitter
@@ -483,6 +489,7 @@ class document_processor {
         return all_chunks
     }
 }
+
 class recursive_character_text_splitter {
     chunk_size: int
     chunk_overlap: int
@@ -541,6 +548,7 @@ class recursive_character_text_splitter {
         return chunks
     }
 }
+
 class query_expander {
     llm_client: any
     enabled: bool
@@ -610,6 +618,7 @@ struct query_expansion_result {
     original: string
     expanded: list<string>
 }
+
 class b_m_25_retriever {
     corpus: list<string>
     doc_ids: list<string>
@@ -690,6 +699,7 @@ struct bm25_result {
     chunk_id: string
     score: float
 }
+
 class cross_encoder_reranker {
     model: any
     tokenizer: any
@@ -739,6 +749,7 @@ struct reranked_result {
     chunk: document_chunk
     rerank_score: float
 }
+
 class hybrid_fusion_engine {
     vector_weight: float
     keyword_weight: float
@@ -833,6 +844,7 @@ struct fused_result {
     chunk_id: string
     fused_score: float
 }
+
 class retrieval_engine {
     config: retrieval_system_config
     vector_db: VectorDBInterface
@@ -1095,4 +1107,3 @@ export {
     retrieval_engine, ingestion_report, rag_statistics,
     create_retrieval_system, test_rag_system
 }
-

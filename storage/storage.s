@@ -9,6 +9,7 @@ int IOREQ_PENDING    = 0
 int IOREQ_SUBMITTED  = 1
 int IOREQ_COMPLETE   = 2
 int IOREQ_ERROR      = 3
+
 struct io_request {
     int    req_id
     int    op
@@ -135,4 +136,3 @@ func storage_checkpoint_write(ss storage_state, path string,
     ss.writeback_dirty_mb = ss.writeback_dirty_mb + data_bytes / (1024 * 1024)
     return io_submit(ss, IO_WRITE, path, 0, data_bytes, IOPRIO_NORMAL, owner_pid)
 }
-

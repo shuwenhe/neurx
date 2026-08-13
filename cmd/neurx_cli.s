@@ -5,6 +5,7 @@ import (
     "strconv"
     "../scripts"
 )
+
 struct command {
     name        string
     description string
@@ -320,4 +321,3 @@ func main() {
         os.Exit(1)
     }
 }
-

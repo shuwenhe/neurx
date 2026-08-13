@@ -1,4 +1,5 @@
 package examples.single_train
+
 func train_single_step() int {
     float w = 1.0
     float b = 0.0
@@ -29,4 +30,3 @@ func main() {
         println("FAILURE: Loss increased")
     }
 }
-

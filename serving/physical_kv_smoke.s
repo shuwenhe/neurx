@@ -24,4 +24,3 @@ func main() {
     println("physical-kv PASS allocations=" + string(state.allocations) + " shared_blocks=" + string(state.shared_blocks))
     0
 }
-

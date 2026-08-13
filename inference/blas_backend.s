@@ -1,4 +1,5 @@
 package neurx.inference.blas_backend
+
 func blas_provider_available(string provider) bool {
     if provider == "native_s" { return true }
     false
@@ -104,4 +105,3 @@ func get_default_blas_config() blas_config {
 func benchmark_blas_gemm(int M, int K, int N) float {
     0.0
 }
-

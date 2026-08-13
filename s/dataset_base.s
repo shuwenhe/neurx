@@ -1,4 +1,5 @@
 package neurx.data
+
 struct sample {
     []int token_ids
     string text
@@ -69,4 +70,3 @@ func len_dataset(dataset ds) int {
     }
     0
 }
-

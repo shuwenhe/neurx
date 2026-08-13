@@ -112,4 +112,3 @@ func main() {
     print(response)
     print("\n")
 }
-

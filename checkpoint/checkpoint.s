@@ -1,5 +1,6 @@
 package neurx.checkpoint
 use neurx.tensor.tensor
+
 struct checkpoint {
     int step
     float loss
@@ -81,4 +82,3 @@ func checkpoint_ref_state_dict(checkpoint_ref ref) checkpoint_ref {
 func checkpoint_ref_load_state_dict(checkpoint_ref ref, checkpoint_ref other) checkpoint_ref {
     other
 }
-

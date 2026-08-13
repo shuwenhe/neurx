@@ -1,4 +1,5 @@
 import "tensor/tensor.s"
+
 func compute_rloo_advantages_vectorized(
     rewards: Tensor,
     response_mask: Tensor,
@@ -173,4 +174,3 @@ func where(condition: Tensor, x: Tensor, y: Tensor) -> Tensor {
 func sqrt(x: Tensor) -> Tensor {
     return x.pow(0.5)
 }
-

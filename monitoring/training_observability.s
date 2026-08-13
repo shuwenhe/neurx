@@ -887,4 +887,3 @@ func print_quick_status(monitoring_manager mgr) string {
     "TFLOPS:" + string(mgr.current_perf.tflops_achieved, 1) + " " +
     "GPU:" + string((mgr.current_perf.gpu_memory_used_gb/mgr.current_perf.gpu_memory_total_gb)*100, 1) + "%"
 }
-

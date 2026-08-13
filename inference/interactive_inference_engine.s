@@ -285,4 +285,3 @@ func print_int(int value) {
         i = i - 1
     }
 }
-

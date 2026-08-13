@@ -4,6 +4,7 @@ use std.os
 use std.path
 use std.exec
 use std.collections
+
 func main() {
     script_dir := path.Dir(os.Args[0])
     project_root := os.Getenv("NEURX_ROOT")
@@ -64,4 +65,3 @@ Task coverage:
     io.Println("     s run eval/run_mmlu_benchmark.s")
     io.Println("")
 }
-

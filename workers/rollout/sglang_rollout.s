@@ -1,5 +1,6 @@
 package neurx.workers.rollout.sglang
 use neurx.tensor
+
 struct sglang_config {
     string model_path
     int tensor_parallel_size
@@ -82,4 +83,3 @@ func sglang_generate_batch(
 
 func sglang_update_weights(sglang_rollout_state state, string new_model_path) {
 }
-

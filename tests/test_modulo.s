@@ -1,4 +1,5 @@
 package main
+
 func main() {
     println("======================================================================")
     println("S languageEnglish text (%) English texttest")
@@ -30,4 +31,3 @@ func main() {
     println("✅ English text (%) English textsupportsuccess!")
     println("======================================================================")
 }
-

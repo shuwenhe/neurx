@@ -1,4 +1,5 @@
 package neurx.posttrain.checkpoint.json_encoder
+
 func trainer_state_to_json(
     int version,
     int step,
@@ -133,4 +134,3 @@ func float_to_str(float value) string {
     if negative { result = "-" + result }
     return result
 }
-

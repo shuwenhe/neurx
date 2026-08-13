@@ -1,5 +1,6 @@
 package neurx.posttrain.core.adamw_optimizer
 use std.io.println
+
 struct adamw_state_s {
     float learning_rate
     float beta1
@@ -155,4 +156,3 @@ func clip_grad_norm_s([][]float gradients, float max_norm) [][]float {
     }
     clipped
 }
-

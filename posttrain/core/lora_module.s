@@ -1,5 +1,6 @@
 package neurx.posttrain.core.lora_module
 use std.io.println
+
 struct lora_module_s {
     int input_dim
     int output_dim
@@ -146,4 +147,3 @@ func get_lora_trainable_params_s(lora_module_s lora) int {
     int lora_b_params = lora.rank * lora.output_dim
     lora_a_params + lora_b_params
 }
-

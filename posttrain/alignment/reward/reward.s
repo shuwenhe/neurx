@@ -1,4 +1,5 @@
 package neurx.posttrain.reward
+
 struct reward_state {
     string reward_model
     float last_reward
@@ -34,4 +35,3 @@ func reward_state_dict(reward_state state) reward_state {
 func reward_load_state_dict(reward_state state, reward_state other) reward_state {
     other
 }
-

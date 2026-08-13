@@ -1,5 +1,6 @@
 package neurx.autograd
 use neurx.tensor.tensor
+
 func backward_matmul(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 2 {
         return backward_result { input_grads: [], success: false }
@@ -180,4 +181,3 @@ func elementwise_div([]float a, []float b) []float {
 func abs_float(float x) float {
     if x < 0.0 { -x } else { x }
 }
-

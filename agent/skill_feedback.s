@@ -2,6 +2,7 @@ package neurx.agent.skill_feedback
 use neurx.agent.observation
 use neurx.agent.trace
 use neurx.agent.memory
+
 struct agent_skill_feedback_state {
     string skill_name
     string task
@@ -59,4 +60,3 @@ func agent_skill_feedback_state_dict(agent_skill_feedback_state state) agent_ski
 func agent_skill_feedback_load_state_dict(agent_skill_feedback_state state, agent_skill_feedback_state other) agent_skill_feedback_state {
     other
 }
-

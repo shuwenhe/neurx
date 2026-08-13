@@ -61,6 +61,7 @@ extern func cublas_strmm(
     int64 B,
     int ldb
 ) int
+
 struct gpu_tensor {
     int64 device_ptr
     int size
@@ -238,4 +239,3 @@ func int_to_str(int n) string {
 func string_char(int c) string {
     string(c)
 }
-

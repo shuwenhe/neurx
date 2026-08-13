@@ -2,6 +2,7 @@ import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/grpo/grpo.s"
 import "distributed/moe_all_to_all.s"
+
 struct gspo_config {
     group_size: i32
     learning_rate: f32
@@ -241,4 +242,3 @@ func kmeans_clustering(embeddings: []tensor, i32 k) -> []i32 {
 func compute_reward(prompt: tensor, response: tensor) -> f32 {
     return random_uniform(-1.0, 1.0)
 }
-

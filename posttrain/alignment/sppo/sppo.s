@@ -3,6 +3,7 @@ import "optimizer/optimizer.s"
 import "loss/cross_entropy.s"
 import "nn/linear.s"
 import "posttrain/alignment/base_algorithm.s"
+
 struct sppo_config {
     beta: f32
     learning_rate: f32
@@ -206,4 +207,3 @@ func log_sigmoid(x: tensor) -> tensor {
 func softplus(x: tensor) -> tensor {
     return log(1.0 + exp(x))
 }
-

@@ -1,4 +1,5 @@
 package neurx.model.integration
+
 struct training_batch {
     [][]int token_ids
     [][]int input_ids
@@ -196,4 +197,3 @@ func cos(double x) double {
 func pi() double {
     3.141592653589793
 }
-

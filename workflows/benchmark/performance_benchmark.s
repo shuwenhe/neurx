@@ -3,6 +3,7 @@ use std.io
 use std.strings
 use std.math
 use std.time
+
 struct model_config {
     name: string
     vocab_size: i32
@@ -273,4 +274,3 @@ func main() {
     println("✅ System meets all performance targets!")
     println("")
 }
-

@@ -3,6 +3,7 @@ int PROC_RUNNING = 1
 int PROC_WAITING = 2
 int PROC_ZOMBIE  = 3
 int PROC_REAPED  = 4
+
 struct proc_descriptor {
     int    pid
     int    ppid
@@ -71,4 +72,3 @@ func proc_wait(pt proc_table, int ppid) (proc_table, proc_descriptor, bool) {
     }
     return (pt, proc_descriptor{}, false)
 }
-

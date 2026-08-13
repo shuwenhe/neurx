@@ -1,4 +1,5 @@
 package neurx.model.transformer.layer_norm
+
 struct layer_norm_config {
     int hidden_dim
     float epsilon
@@ -281,4 +282,3 @@ func rms_norm_backward(
     result[1] = grad_gamma
     result
 }
-

@@ -1,5 +1,6 @@
 package neurx.nn.pooling
 use neurx.tensor.tensor
+
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
@@ -460,4 +461,3 @@ func interpolate2d(tensor input, int out_h, int out_w) tensor {
     }
     neurx.tensor.new(out, shape4(batch, channels, out_h, out_w), input.requires_grad)
 }
-

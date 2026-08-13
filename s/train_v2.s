@@ -4,6 +4,7 @@ use std.math_dl as M
 use std.autograd as AG
 use std.nn as NN
 use std.training_io as IO
+
 struct train_config {
     int vocab_size
     int embed_dim
@@ -268,4 +269,3 @@ func pad_int(int n, int w) string {
     while len(s) < w { s = " " + s }
     s
 }
-

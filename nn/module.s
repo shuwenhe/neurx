@@ -2,6 +2,7 @@ package neurx.nn
 use neurx.tensor.tensor
 use neurx.nn.conv
 use neurx.nn.rnn
+
 struct parameter {
     tensor value
     string name
@@ -2467,4 +2468,3 @@ func gru_cell_layer_train(gru_cell_layer layer) gru_cell_layer {
 func gru_cell_layer_eval(gru_cell_layer layer) gru_cell_layer {
     return gru_cell_layer_state_dict(layer)
 }
-

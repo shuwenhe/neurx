@@ -1,4 +1,5 @@
 package neurx.logging
+
 func new_logger(logger_config cfg) logger {
     logger {
         config: cfg,
@@ -91,4 +92,3 @@ func log_message(
         print_message_to_console(lg.config, entry)
     }
 }
-

@@ -281,4 +281,3 @@ func int_from_float(float x) int {
     }
     n
 }
-

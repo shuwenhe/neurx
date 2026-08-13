@@ -255,4 +255,3 @@ func adaptive_threshold_adjustment(executor: verifier_executor, float current_ac
     }
     updated
 }
-

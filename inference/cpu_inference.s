@@ -2,6 +2,7 @@ package neurx.inference.model_cpu_inference
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 struct tensor_location {
     int offset
     int byte_size
@@ -343,4 +344,3 @@ func main() {
     print("error: generation path is not enabled until tokenizer and Transformer validation pass\n")
     1
 }
-

@@ -1,4 +1,5 @@
 package neurx.distributed
+
 func nccl_init(nccl_config cfg) (nccl_communicator, error) {
     if cfg.world_size <= 0 || cfg.rank < 0 || cfg.rank >= cfg.world_size {
         return (nccl_communicator{},
@@ -17,4 +18,3 @@ func nccl_init(nccl_config cfg) (nccl_communicator, error) {
     }
     (comm, nil)
 }
-

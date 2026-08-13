@@ -1,4 +1,5 @@
 package neurx.api.llm_compat
+
 struct chat_message {
     string role
     string content
@@ -376,4 +377,3 @@ func main() {
     println("embedding dimension: " + int_to_string(emb_resp.embedding_dimension))
     println("\n=== API Tests Complete ===")
 }
-

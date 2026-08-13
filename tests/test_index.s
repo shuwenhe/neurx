@@ -1,4 +1,5 @@
 package test
+
 func test_func(string x) string {
     x
 }
@@ -9,4 +10,3 @@ func main() {
     test_func(s[i])
     0
 }
-

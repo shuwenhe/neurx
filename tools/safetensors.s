@@ -1,4 +1,5 @@
 package neurx.tools.safetensors
+
 struct tensor_metadata {
     string name
     string dtype
@@ -144,4 +145,3 @@ func merge_all_lora_tensors(
     int merged_count = 0
     merged_count
 }
-

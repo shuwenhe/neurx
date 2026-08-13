@@ -1,4 +1,5 @@
 package neurx.tests.optimizer
+
 struct adamw_test_state {
     float param
     float grad
@@ -171,4 +172,3 @@ func float(int val) float {
 func float_to_str(float val) string {
     return ""
 }
-

@@ -1,4 +1,5 @@
 package neurx.optimizer.muon
+
 struct muon_config {
     float learning_rate
     float beta
@@ -157,4 +158,3 @@ func muon_get_state(muon_optimizer opt) {
 
 func muon_load_state(muon_optimizer opt) {
 }
-

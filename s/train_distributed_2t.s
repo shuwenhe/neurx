@@ -9,6 +9,7 @@ import neurx.nn.nn
 import neurx.tensor.tensor
 import neurx.loss.losses
 import neurx.optimizer.optim
+
 func main() {
     int world_size = get_world_size_from_env()
     int global_rank = get_global_rank_from_env()
@@ -169,4 +170,3 @@ func cleanup(orchestrator_state orch) {
 func print_memory_report(memory_estimate_result m) {
 }
 main()
-

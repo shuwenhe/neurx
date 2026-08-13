@@ -1,4 +1,5 @@
 package neurx.inference.paged_kv_basic
+
 func calculate_blocks_needed(int block_size, int num_tokens) int {
     return (num_tokens + block_size - 1) / block_size
 }
@@ -106,4 +107,3 @@ func reset_counters([]int stats) []int {
     stats[5] = 0
     return stats
 }
-

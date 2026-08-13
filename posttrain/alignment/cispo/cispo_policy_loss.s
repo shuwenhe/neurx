@@ -1,6 +1,7 @@
 package neurx.posttrain.alignment.cispo
 use neurx.tensor
 use neurx.posttrain.alignment.loss_aggregation
+
 struct cispo_config {
     float clip_ratio_low
     float clip_ratio_high
@@ -63,4 +64,3 @@ func masked_mean(tensor values, tensor mask) tensor {
     tensor count = sum_all(mask)
     return div(total, count)
 }
-

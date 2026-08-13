@@ -1,4 +1,5 @@
 package neurx.serving.sampling
+
 struct sampling_state {
     float temperature
     int top_k
@@ -49,4 +50,3 @@ func sampling_state_dict(sampling_state state) sampling_state {
 func sampling_load_state_dict(sampling_state state, sampling_state other) sampling_state {
     other
 }
-

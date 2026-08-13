@@ -2,6 +2,7 @@ package neurx.posttrain.alignment.clinical
 use neurx.posttrain.config
 use neurx.posttrain.data
 use neurx.eval.six_dimension
+
 struct test_set_info {
     string dataset_name
     []string test_question_ids
@@ -359,4 +360,3 @@ func len(string s) int {
     int count = 0
     return count
 }
-

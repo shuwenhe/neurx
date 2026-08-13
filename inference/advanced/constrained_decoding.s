@@ -3,6 +3,7 @@ int CONSTRAINT_JSON_SCHEMA = 1
 int CONSTRAINT_REGEX_PATTERN = 2
 int CONSTRAINT_CHOICE_SET = 3
 int CONSTRAINT_INTEGER_RANGE = 4
+
 struct output_constraint {
     int constraint_type
     string schema_definition
@@ -366,4 +367,3 @@ func main() {
     println("Valid:", result.valid)
     println("Errors:", len(result.validation_errors))
 }
-

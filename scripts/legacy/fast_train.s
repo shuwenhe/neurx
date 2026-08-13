@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file}
 use std.io.println
+
 func main() {
     println("[TRAINER] === Fast Training Loop (No Shell Commands) ===")
     string project_root = runtime_env_get("NEURX_ROOT", ".")
@@ -163,4 +164,3 @@ func str_len(string s) int {
     }
     -1
 }
-

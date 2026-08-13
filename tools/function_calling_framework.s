@@ -1,4 +1,5 @@
 module function_calling
+
 struct function_calling_config {
     execution_mode: string = "auto"
     max_tool_calls_per_turn: int = 5
@@ -126,6 +127,7 @@ struct content_block {
     id?: string
     name?: string
     input?: map<string, any>
+
 struct user_message {
     role: string = "user"
     content: string | list<content_block>
@@ -148,6 +150,7 @@ struct execution_summary {
     avg_duration_per_call_ms: float
     retry_count: int
 }
+
 class tool_registry {
     tools: map<string, tool_definition>
     executors: map<string, tool_executor>
@@ -257,6 +260,7 @@ struct validation_report {
     invalid_params: list<map<string, string>>
     warnings: list<string>
 }
+
 class function_calling_engine {
     registry: ToolRegistry
     llm_client: any
@@ -554,6 +558,7 @@ struct conversation_summary {
     unique_tools_used: set<string>
     success_rate: float
 }
+
 class call_tracker {
     history: list<tool_call>
     total_calls: int = 0
@@ -676,6 +681,7 @@ function create_builtin_file_operations_tool() {
     executor = file_operations_executor()
     return (defn, executor)
 }
+
 class web_search_executor implements tool_executor {
     get_name() { return "web_search" }
     validate_arguments(args, schema) {
@@ -695,6 +701,7 @@ class web_search_executor implements tool_executor {
         }
     }
 }
+
 class CodeInterpreterExecutor implements ToolExecutor {
     get_name() { return "code_interpreter" }
     validate_arguments(args, schema) {
@@ -710,6 +717,7 @@ class CodeInterpreterExecutor implements ToolExecutor {
         }
     }
 }
+
 class FileOperationsExecutor implements ToolExecutor {
     get_name() { return "file_operations" }
     validate_arguments(args, schema) {
@@ -803,6 +811,7 @@ async function test_function_calling() {
     print("\n✅ all function calling tests passed!")
     return true
 }
+
 class MockLLMClientForFC {
     call_count: int = 0
     async chat.completions.create(model, messages, tools, tool_choice, temperature, max_tokens) {
@@ -853,4 +862,3 @@ export {
     create_function_calling_engine, test_function_calling,
     create_builtin_web_search_tool, create_builtin_code_executor_tool, create_builtin_file_operations_tool
 }
-

@@ -1,4 +1,5 @@
 module web_search_crawler
+
 struct web_search_config {
     search_engines: list<string> = ["google", "bing"]
     max_results_per_engine: int = 10
@@ -107,6 +108,7 @@ struct engine_search_result {
     has_more: bool
     error?: string
 }
+
 class GoogleSearchEngine implements SearchEngineInterface {
     name = "google"
     api_key: string?
@@ -200,6 +202,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
         }
     }
 }
+
 class BingSearchEngine implements SearchEngineInterface {
     name = "bing"
     api_key: string?
@@ -267,6 +270,7 @@ class BingSearchEngine implements SearchEngineInterface {
         }
     }
 }
+
 class web_crawler {
     config: web_search_config
     session: HTTPSession
@@ -337,6 +341,7 @@ class web_crawler {
         return age_hours > this.config.cache_ttl_hours
     }
 }
+
 class main_content_extractor {
     config: web_search_config
     init(config: web_search_config) {
@@ -492,6 +497,7 @@ class main_content_extractor {
         sections: list<page_section>
     }
 }
+
 class html_cleaner {
     config: web_search_config
     init(config: web_search_config) {
@@ -512,6 +518,7 @@ class html_cleaner {
         return text
     }
 }
+
 class web_search_system {
     config: web_search_config
     engines: map<string, search_engine_interface>
@@ -730,6 +737,7 @@ struct search_options {
     verbose: bool = true
     corrected_query?: string
 }
+
 class result_aggregator {
     config: web_search_config
     init(config: web_search_config) {
@@ -838,4 +846,3 @@ export {
     web_search_system, search_options,
     create_web_search_system, test_web_search_system
 }
-

@@ -1,4 +1,5 @@
 package neurx.alignment.rlhf_complete
+
 struct sft_config {
     int num_epochs
     int batch_size
@@ -340,4 +341,3 @@ func main() {
     println("")
     println("Ready for 3-stage alignment training")
 }
-

@@ -24,6 +24,7 @@ func default_prefetch_config() prefetch_config {
     cfg.max_queue_size_bytes = 2 * 1024 * 1024 * 1024
     cfg.enable_backpressure = true
     return cfg
+
 struct prefetched_batch {
     int batch_id
     []int input_ids
@@ -70,6 +71,7 @@ func new_prefetch_queue(int capacity) prefetch_queue {
     q.total_wait_time_consumer_ns = 0
     q.max_queue_depth_observed = 0
     return q
+
 func enqueue(prefetch_queue q, prefetched_batch batch) bool {
     if q.enable_backpressure and q.count >= q.capacity * 0.9:
         wait(q.not_full, q.lock)
@@ -83,6 +85,7 @@ func enqueue(prefetch_queue q, prefetched_batch batch) bool {
         q.max_queue_depth_observed = q.count
     signal(q.not_empty)
     return true
+
 func dequeue(prefetch_queue q) prefetched_batch {
     if q.count == 0:
         wait(q.not_empty, q.lock)
@@ -102,6 +105,7 @@ int get_utilization(prefetch_queue q):
     if q.capacity == 0:
         return 0
     return (q.count * 100) / q.capacity
+
 struct async_prefetch_manager {
     prefetch_config config
     streaming_reader_state reader
@@ -139,6 +143,7 @@ func new_async_prefetch_manager(
     mgr.backpressure_events_count = 0
     mgr.starvation_events_count = 0
     return mgr
+
 func start_workers(async_prefetch_manager mgr) async_prefetch_manager:
     if mgr.workers_running:
         return mgr
@@ -155,6 +160,7 @@ func start_workers(async_prefetch_manager mgr) async_prefetch_manager:
         mgr.tokenizer_workers.push(t)
         i = i + 1
     return mgr
+
 func stop_workers(async_prefetch_manager mgr) async_prefetch_manager:
     if !mgr.workers_running:
         return mgr
@@ -168,11 +174,13 @@ func stop_workers(async_prefetch_manager mgr) async_prefetch_manager:
         join_thread(mgr.tokenizer_workers[i])
         i = i + 1
     return mgr
+
 struct batch_fetch_result:
     prefetched_batch batch
     bool success
     bool had_to_wait
     int wait_time_ms
+
 func fetch_next_batch(async_prefetch_manager mgr) batch_fetch_result:
     int start_wait = get_time_milliseconds()
     if is_empty(mgr.queue):
@@ -218,6 +226,7 @@ func io_worker_function(async_prefetch_manager mgr) void:
             bool enqueued = enqueue(mgr.queue, batch)
             if !enqueued:
                 mgr.backpressure_events_count = mgr.backpressure_events_count + 1
+
 func tokenizer_worker_function(async_prefetch_manager mgr) void:
     while mgr.workers_running:
         []string raw_lines
@@ -233,6 +242,7 @@ func tokenizer_worker_function(async_prefetch_manager mgr) void:
         bool enqueued = enqueue(mgr.queue, batch)
         if !enqueued:
             mgr.backpressure_events_count = mgr.backpressure_events_count + 1
+
 func tokenize_batch(
     async_prefetch_manager mgr,
     []string raw_lines,
@@ -296,6 +306,7 @@ func tokenize_batch(
     batch.priority = 0
     mgr.total_bytes_loaded = mgr.total_bytes_loaded + estimate_bytes_from_lines(raw_lines, line_count)
     return batch
+
 struct prefetch_stats {
     float io_throughput_mbps
     float tokenization_speed_ktok_s
@@ -329,6 +340,7 @@ func get_prefetch_stats(async_prefetch_manager mgr) prefetch_stats:
     else:
         stats.gpu_utilization_estimate = 0.0
     return stats
+
 func empty_prefetched_batch() prefetched_batch:
     return prefetched_batch{
         batch_id: -1,
@@ -357,6 +369,7 @@ func tokenize_single_line(async_prefetch_manager mgr, string line, int max_token
             i = i + 1
         return truncated
     return token_ids
+
 func estimate_bytes_from_lines([]string lines, int count) int64:
     int64 total = 0
     int i = 0
@@ -364,35 +377,48 @@ func estimate_bytes_from_lines([]string lines, int count) int64:
         total = total + int64(len(lines[i]))
         i = i + 1
     return total
+
 func should_loop(async_prefetch_manager mgr) bool:
     return true
+
 func get_time_nanoseconds() int64:
     return 0
+
 func get_time_milliseconds() int:
     return int(get_time_nanoseconds() / 1e6)
+
 func sleep_ms(int ms) void:
     return
+
 struct thread_handle:
     int id
+
 func thread_handle(func callback, void* arg) thread_handle:
     return thread_handle{id: 0}
 
 func join_thread(thread_handle handle) void:
     return
+
 struct mutex:
     int locked
+
 struct condition_variable:
     int waiting_count
+
 func lock(mutex m) void:
     return
+
 func unlock(mutex m) void:
     return
+
 func wait(condition_variable cv, mutex m) void:
     return
+
 func signal(condition_variable cv) void:
     return
+
 func pass_raw_data_to_tokenizers(async_prefetch_manager mgr, []string lines) void:
     return
+
 func get_raw_data_from_io_queue(async_prefetch_manager mgr, []string out_lines) bool:
     return false
-

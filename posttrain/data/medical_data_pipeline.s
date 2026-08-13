@@ -1,4 +1,5 @@
 package neurx.posttrain.data.medical
+
 struct mysql_config {
     string host
     int port
@@ -378,4 +379,3 @@ func append_int([]int arr, int elem) []int {
 
 func write_line(string filepath, string line) {
 }
-

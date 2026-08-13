@@ -1,4 +1,5 @@
 package neurx.serving.runtime.production_runtime
+
 struct production_queue {
     []string request_ids
     []string backends
@@ -483,4 +484,3 @@ func production_release_kv(production_runtime_state state, int tokens) productio
     if state.kv_tokens < 0 { state.kv_tokens = 0 }
     state
 }
-

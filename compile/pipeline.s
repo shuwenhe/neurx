@@ -5,6 +5,7 @@ use neurx.compile.pass_manager
 use neurx.compile.lowering
 use neurx.compile.executor
 use neurx.compile.cache
+
 struct compile_pipeline_state {
     compile_state state
     ir_graph_state graph
@@ -133,4 +134,3 @@ func compile_pipeline_state_dict(compile_pipeline_state pipeline) compile_pipeli
 func compile_pipeline_load_state_dict(compile_pipeline_state pipeline, compile_pipeline_state other) compile_pipeline_state {
     other
 }
-

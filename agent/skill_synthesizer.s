@@ -1,6 +1,7 @@
 package neurx.agent.skill_synthesizer
 use neurx.agent.skill_schema
 use neurx.agent.skill_feedback
+
 func agent_skill_version_from_step(int step) string {
     "v" + string(step)
 }
@@ -213,4 +214,3 @@ func agent_skill_synthesizer_state_dict(agent_skill_record record) agent_skill_r
 func agent_skill_synthesizer_load_state_dict(agent_skill_record record, agent_skill_record other) agent_skill_record {
     agent_skill_record_load_state_dict(record, other)
 }
-

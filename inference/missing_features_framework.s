@@ -1,4 +1,5 @@
 package neurx.inference.missing_features_framework
+
 struct gpu_device {
     int device_id
     string device_name
@@ -451,4 +452,3 @@ func max([]float arr) float {
     }
     return result
 }
-

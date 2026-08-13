@@ -1,4 +1,5 @@
 package neurx.inference.runtime.backend_registry
+
 struct inference_backend_capability {
     string backend_name
     string device_type
@@ -224,4 +225,3 @@ func default_backend_registry(bool cuda_available, bool ascend_available) backen
     state = backend_register(state, backend_cpu_capability())
     state
 }
-

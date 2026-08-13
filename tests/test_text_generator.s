@@ -1,5 +1,6 @@
 package main
 use neurx.inference
+
 func assert_true(bool value, string name) {
     if value {
         println("PASS " + name)
@@ -185,4 +186,3 @@ func main() {
     test_generate_contrastive_with_forward()
     test_generate_no_repeat_ngram_with_forward()
 }
-

@@ -1,6 +1,7 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/ppo/ppo.s"
+
 struct gmpo_config {
     clip_epsilon: f32
     value_clip_epsilon: f32
@@ -348,4 +349,3 @@ func compute_std(values: []f32, f32 mean) -> f32 {
     }
     return sqrt(sum_sq / f32(values.len()))
 }
-

@@ -1,5 +1,6 @@
 package neurx.reasoning.reasoning
 use neurx.agent.observation
+
 struct agent_reasoning_step {
     int index
     string thought
@@ -86,4 +87,3 @@ func agent_reasoning_last_conclusion(agent_reasoning_state state) string {
 func agent_reasoning_export(agent_reasoning_state state) string {
     state.scratchpad
 }
-

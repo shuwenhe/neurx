@@ -1,6 +1,7 @@
 package neurx.module.parameter
 use neurx.tensor.tensor
 use neurx.nn
+
 func parameter_new(tensor value, string name) nn.parameter {
     neurx.nn.new_parameter(value, name)
 }
@@ -44,4 +45,3 @@ func parameter_list_state_dict(nn.parameter_list list) nn.parameter_list {
 func parameter_list_load_state_dict(nn.parameter_list list, nn.parameter_list state) nn.parameter_list {
     neurx.nn.parameter_list_load_state_dict(list, state)
 }
-

@@ -1,4 +1,5 @@
 package neurx.logging
+
 struct training_metrics {
     float current_loss
     []float recent_losses
@@ -48,4 +49,3 @@ func new_training_metrics() training_metrics {
         best_step: -1,
     }
 }
-

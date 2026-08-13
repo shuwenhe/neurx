@@ -1,4 +1,5 @@
 package neurx.distributed.megatron.interleaved_schedule
+
 struct interleaved_config {
     int pipeline_parallel_size
     int pipeline_parallel_rank
@@ -138,4 +139,3 @@ func pp_mod(int val, int div) int {
     }
     return r
 }
-

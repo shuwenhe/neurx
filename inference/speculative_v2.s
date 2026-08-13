@@ -1,4 +1,5 @@
 package neurx.inference.speculative_v2
+
 struct speculative_config {
     string draft_model_path
     int num_speculative_tokens
@@ -319,4 +320,3 @@ struct speculative_stats {
     float acceptance_rate
     float speedup_factor
 }
-

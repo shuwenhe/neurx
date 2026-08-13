@@ -1,5 +1,6 @@
 package neurx.compile.cache
 use neurx.strings
+
 struct compile_cache_state {
     []string keys
     []string entries
@@ -102,4 +103,3 @@ func compile_cache_state_dict(compile_cache_state cache) compile_cache_state {
 func compile_cache_load_state_dict(compile_cache_state cache, compile_cache_state other) compile_cache_state {
     other
 }
-

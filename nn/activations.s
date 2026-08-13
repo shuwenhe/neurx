@@ -1,5 +1,6 @@
 package neurx.nn.activations
 use neurx.tensor.tensor
+
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -374,4 +375,3 @@ func log_approx(float x) float {
     }
     2.0 * result
 }
-

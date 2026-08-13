@@ -1,4 +1,5 @@
 module safetensors
+
 struct tensor_info {
     string name
     []int shape
@@ -212,4 +213,3 @@ func list_tensors(safe_tensors_reader reader) {
         println("      Size: " + int_to_string(size_mb) + "MB")
     }
 }
-

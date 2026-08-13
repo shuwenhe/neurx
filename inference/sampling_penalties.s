@@ -1,4 +1,5 @@
 package neurx.inference.sampling
+
 func apply_repetition_penalty(
     []float logits,
     []int generated_ids,
@@ -39,4 +40,3 @@ func compute_length_penalty(int length, float alpha) float {
     }
     pow_approx(lp, alpha)
 }
-

@@ -1,5 +1,6 @@
 import "dispatcher_api"
 import "autograd_api"
+
 struct operator_context {
     requires_grad: bool
     dispatcher: Dispatcher
@@ -52,4 +53,3 @@ const required_in_operators = """
 ✅ Validate device compatibility       → via supports_device()
 ✅ Document assumptions                → shapes, dtypes, etc.
 """
-

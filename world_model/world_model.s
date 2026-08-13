@@ -82,4 +82,3 @@ func world_model_rollback(wm world_model_state, int target_step) world_model_sta
     }
     return wm
 }
-

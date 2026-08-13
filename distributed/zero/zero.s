@@ -2,6 +2,7 @@ package neurx.distributed.zero
 use neurx.strings
 use neurx.distributed.comm
 use neurx.strings
+
 struct zero_state {
     string name
     string backend
@@ -277,4 +278,3 @@ func zero_finalize_step(zero_state state) zero_state {
         last_sync_scale: state.last_sync_scale,
     }
 }
-

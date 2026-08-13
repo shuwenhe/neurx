@@ -47,4 +47,3 @@ func main() {
     print("Response:\n")
     print(result.text + "\n")
 }
-

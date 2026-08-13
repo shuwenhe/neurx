@@ -6,6 +6,7 @@ func manifest_log(string s) int {
     0
 }
 extern "intrinsic" func __host_write_text_file(string path, string content) int
+
 func runtime_write_text_file(string path, string content) () {
     _ = __host_write_text_file(path, content)
 }
@@ -267,4 +268,3 @@ func path_dirname(string path) string {
     }
     out
 }
-

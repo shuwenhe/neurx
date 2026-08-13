@@ -3,6 +3,7 @@ import "optimizer/optimizer.s"
 import "posttrain/alignment/rollout_correction/config.s"
 import "posttrain/alignment/rollout_correction/importance_sampling.s"
 import "posttrain/alignment/rollout_correction/rejection_sampling.s"
+
 struct rollout_correction_result {
     is_weights: ISWeights
     rs_results: []rs_result
@@ -193,4 +194,3 @@ func minimum(x: Tensor, y: Tensor) -> Tensor {
 func where(condition: Tensor, x: Tensor, y: Tensor) -> Tensor {
     return condition.to_float() * x + (1.0 - condition.to_float()) * y
 }
-

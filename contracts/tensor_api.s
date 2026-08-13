@@ -2,6 +2,7 @@ import "tensor_impl_api"
 import "storage_api"
 import "device_api"
 import "dtype_api"
+
 struct tensor {
     impl: tensor_impl
 }
@@ -66,4 +67,3 @@ interface i_tensor_debug {
     to_string(tensor: tensor) -> string
     is_valid(tensor: tensor) -> bool
 }
-

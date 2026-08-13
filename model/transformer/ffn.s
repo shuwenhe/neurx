@@ -1,4 +1,5 @@
 package neurx.model.transformer.ffn
+
 struct ffn_config {
     int hidden_dim
     int intermediate_dim
@@ -397,4 +398,3 @@ func get_ffn_complexity(
 ) map[string]long {
     map[string]long{}
 }
-

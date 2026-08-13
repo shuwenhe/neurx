@@ -1,4 +1,5 @@
 package neurx.inference.serve.disaggregated_runtime
+
 func disaggregated_queued_prefill() int { 1 }
 
 func disaggregated_prefilling() int { 2 }
@@ -405,4 +406,3 @@ func disaggregated_cancel(disaggregated_runtime_state state, string request_id) 
     state.requests[request_index] = request
     new_disaggregated_result(state, request, empty_kv_transfer_ticket(), true, "")
 }
-

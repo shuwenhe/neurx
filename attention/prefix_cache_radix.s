@@ -1,4 +1,5 @@
 package neurx.attention.prefix_cache_radix
+
 struct prefix_node {
     string prefix_hash
     []float kv_data
@@ -387,4 +388,3 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
-

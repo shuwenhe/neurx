@@ -1,4 +1,5 @@
 package neurx.nn.containers
+
 struct sequential_module {
     []string layer_names
     []string layer_types
@@ -106,4 +107,3 @@ func module_dict_index_of(module_dict md, string key) int {
     }
     return -1
 }
-

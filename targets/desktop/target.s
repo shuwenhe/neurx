@@ -19,4 +19,3 @@ func default_desktop_target() desktop_target_config {
         precision:          "bf16",
     }
 }
-

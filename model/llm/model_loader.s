@@ -6,6 +6,7 @@ import (
     "../../core/tensor"
     "../transformer"
 )
+
 struct gptconfig {
     vocab_size      int
     max_seq_len      int
@@ -276,4 +277,3 @@ func (m *gptmodel) num_params() int64 {
     total := token_emb_params + pos_emb_params + layer_params + output_params + final_norm_params
     return total
 }
-

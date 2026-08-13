@@ -4,6 +4,7 @@ import "fmt"
 import "path/filepath"
 import "strings"
 import "core"
+
 func is_runnable_candidate(string candidate) bool {
     if candidate == "" {
         return false
@@ -82,4 +83,3 @@ func main() {
     }
     fmt.Println(s_binary)
 }
-

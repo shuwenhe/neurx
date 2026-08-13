@@ -1,4 +1,5 @@
 module safetensors_io
+
 struct tensor_meta {
     string name
     []int shape
@@ -59,4 +60,3 @@ func get_model_info(safe_tensors_file file) map[string]string {
     info["num_heads"] = "14"
     return info
 }
-

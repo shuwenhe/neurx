@@ -1,5 +1,6 @@
 package neurx.posttrain.loss_variants
 use neurx.tensor
+
 struct policy_loss_config {
     float clip_epsilon
     float kl_coef
@@ -157,4 +158,3 @@ func exp_approx(float x) float {
     }
     return result
 }
-

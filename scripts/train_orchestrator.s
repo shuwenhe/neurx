@@ -267,6 +267,7 @@ func (t *train_orchestrator) generate_training_source(output_path string) error 
     source := fmt.Sprintf(`
 package main
 import "fmt"
+
 func main() {
     params := %d
     gpus := %d
@@ -363,4 +364,3 @@ func launch_1t_training(int num_gpus) error {
     }
     return orchestrator.setup()
 }
-

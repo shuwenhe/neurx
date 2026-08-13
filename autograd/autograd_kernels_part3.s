@@ -1,5 +1,6 @@
 package neurx.autograd
 use neurx.tensor.tensor
+
 func backward_layer_norm(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -134,4 +135,3 @@ func backward_embedding(node n, tensor grad_output) backward_result {
     }
     backward_result { input_grads: [grad_weight, grad_ids_zeros], success: true }
 }
-

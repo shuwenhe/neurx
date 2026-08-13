@@ -1,5 +1,6 @@
 package main
 use std.io.println
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -89,4 +90,3 @@ func string_char(int code) string {
     println("")
     0
 }
-

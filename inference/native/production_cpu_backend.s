@@ -7,6 +7,7 @@ extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __sys_write_string(int fd, string data) int
 extern "intrinsic" func __sys_close(int fd) int
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 func vocab_size() int { 151936 }
 
 func model_hidden_dim() int { 896 }
@@ -425,4 +426,3 @@ func main() {
         }
     }
 }
-

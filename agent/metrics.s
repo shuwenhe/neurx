@@ -1,4 +1,5 @@
 package neurx.agent.metrics
+
 struct agent_metrics_state {
     int total_steps
     int ok_steps
@@ -166,4 +167,3 @@ func agent_metrics_summary(agent_metrics_state state) string {
     ";skill_hit_rate=" + string(agent_metrics_skill_hit_rate_pct(state)) + "%" +
     ";replans=" + string(state.replan_count)
 }
-

@@ -1,4 +1,5 @@
 package neurx.posttrain.checkpoint.state
+
 struct trainer_state {
     int step
     int epoch
@@ -99,4 +100,3 @@ func float_to_str(float value) string {
     if negative { result = "-" + result }
     return result
 }
-

@@ -1,5 +1,6 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
+
 struct gpg_config {
     learning_rate: f32
     num_epochs: i32
@@ -218,4 +219,3 @@ func compute_std(values: []f32, f32 mean) -> f32 {
 func random_uniform(f32 min_val, f32 max_val) -> f32 {
     return (min_val + max_val) / 2.0
 }
-

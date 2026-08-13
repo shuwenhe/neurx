@@ -1,4 +1,5 @@
 package neurx.distributed
+
 func nccl_allgather(
     nccl_communicator *comm,
     uint64 send_buffer,
@@ -37,4 +38,3 @@ func nccl_reducescatter(
     log_collective_op("REDUCESCATTER", reduce_op, send_bytes, comm->config.world_size)
     nil
 }
-

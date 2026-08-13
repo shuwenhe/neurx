@@ -1,4 +1,5 @@
 package neurx.distributed.comm
+
 struct comm_context {
     int world_size
     int rank
@@ -129,4 +130,3 @@ func int_to_string(int n) string {
     if n == 8 { return "8" }
     return "N"
 }
-

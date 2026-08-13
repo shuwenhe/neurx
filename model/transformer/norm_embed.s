@@ -1,4 +1,5 @@
 package neurx.model.transformer.norm
+
 struct layer_norm_config {
     int hidden_dim
     float epsilon
@@ -443,4 +444,3 @@ func apply_alibi_bias(
 func get_embedding_stats(position_embedding_config cfg) map[string]double {
     map[string]double{}
 }
-

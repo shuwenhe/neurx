@@ -1,5 +1,6 @@
 package main
 use std.io.println
+
 func main() {
     println("NeurX Shard Processing - Real-time Logging Quick Start")
     println("")
@@ -11,4 +12,3 @@ func main() {
     println("  docs/SHARD_PROCESSING_REALTIME_LOGGING.md")
     0
 }
-

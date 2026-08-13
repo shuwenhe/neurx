@@ -16,4 +16,3 @@ func robotics_dataset_load_state_dict(robotics_dataset_state state, robotics_dat
 func robotics_dataset_mark_normalized(robotics_dataset_state state) robotics_dataset_state {
     neurx.model.robotics.data.robotics_dataset_mark_normalized(state)
 }
-

@@ -1,5 +1,6 @@
 package neurx.posttrain.lib.weights_loader
 use std.io.eprintln
+
 func load_model_weights(string model_path) interface {
     eprintln("Loading model weights from: " + model_path)
     interface result = readfile(model_path)
@@ -60,4 +61,3 @@ func main() {
     eprintln("Weights Loader - SafeTensors Support")
     eprintln("✓ Ready to load model weights")
 }
-

@@ -1,4 +1,5 @@
 package neurx.model.vision.minimal_cnn
+
 struct minimal_cnn_state {
     string name
     string family
@@ -54,4 +55,3 @@ func minimal_cnn_state_dict(minimal_cnn_state state) minimal_cnn_state {
 func minimal_cnn_load_state_dict(minimal_cnn_state state, minimal_cnn_state other) minimal_cnn_state {
     other
 }
-

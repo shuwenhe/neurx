@@ -4,6 +4,7 @@ int PRECISION_BF16 = 1
 int PRECISION_FP16 = 2
 int PRECISION_FP8_E4M3 = 3
 int PRECISION_FP8_E5M2 = 4
+
 struct dtype_info {
     int id
     string name
@@ -74,6 +75,7 @@ func make_mp_tensor([]double data, []int shape, int storage_dtype) mp_tensor {
 }
 int LOSS_SCALE_STATIC = 0
 int LOSS_SCALE_DYNAMIC = 1
+
 struct loss_scaler_state {
     int scale_strategy
     double current_scale
@@ -358,4 +360,3 @@ func estimate_mp_memory_usage(
     mb.savings_vs_fp32_pct = (1.0 - mb.total_per_gpu_gb / fp32_total) * 100.0
     return mb
 }
-

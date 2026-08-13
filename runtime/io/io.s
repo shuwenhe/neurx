@@ -5,6 +5,7 @@ use std.fs.write_text_file as fs_write_text_file
 use std.process.run_process
 use std.process.run_process_output
 use std.vec.vec
+
 struct json_value {
 }
 
@@ -58,6 +59,7 @@ func runtime_read_text_file(string path) string {
     ""
 }
 extern "intrinsic" func __host_read_binary_file(string path) []int
+
 func runtime_read_binary_file(string path) []int {
     __host_read_binary_file(path)
 }
@@ -173,6 +175,7 @@ func runtime_run_command_output(string command) string {
 }
 extern func runtime_run_command_exit_code(string command) int
 extern func runtime_execute_file(string target_path, string entry_function) int
+
 func runtime_json_parse(string text) json_value {
     json_value {}
 }
@@ -444,7 +447,7 @@ func safetensors_writer_finish(safetensors_writer w) bool {
     true
 }
 extern "intrinsic" func __host_write_binary_file(string path, []byte data) ()
+
 func runtime_write_binary_file(string path, []byte data) () {
     __host_write_binary_file(path, data)
 }
-

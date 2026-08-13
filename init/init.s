@@ -1,4 +1,5 @@
 package neurx.init.init
+
 struct init_boot_result {
     bool ok
     string phase
@@ -24,4 +25,3 @@ func neurx_boot() init_boot_result {
         summary: "kernel_initialized services_started policy_loaded",
     }
 }
-

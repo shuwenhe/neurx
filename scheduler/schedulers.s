@@ -1,4 +1,5 @@
 package neurx.scheduler.schedulers
+
 func sched_cos_approx(float x) float {
     float x2 = x * x
     float x4 = x2 * x2
@@ -197,4 +198,3 @@ func step_lr_lr(step_lr_state sched) float {
 func constant_scheduler_step(float lr, int step) float {
     lr
 }
-

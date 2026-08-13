@@ -270,4 +270,3 @@ func (trainer *dpotrainer) run_complete_dpo_cycle() {
     trainer.get_dpo_summary()
     fmt.Println("\n[dpotrainer] Complete!")
 }
-

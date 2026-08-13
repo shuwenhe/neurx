@@ -1,6 +1,7 @@
 package neurx.transformer
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
@@ -782,4 +783,3 @@ func apply_rope(tensor input, rope_cache cache, int start_pos) tensor {
     }
     new(out, copy_int(input.shape), input.requires_grad)
 }
-

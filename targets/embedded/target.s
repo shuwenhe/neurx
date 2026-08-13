@@ -19,4 +19,3 @@ func default_embedded_target() embedded_target_config {
         precision:          "int8",
     }
 }
-

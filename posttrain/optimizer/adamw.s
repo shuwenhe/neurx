@@ -187,4 +187,3 @@ func step_learning_rate_schedule(learning_rate_schedule schedule) learning_rate_
     schedule.current_lr = get_learning_rate_from_schedule(schedule)
     return schedule
 }
-

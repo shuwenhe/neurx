@@ -1,4 +1,5 @@
 package neurx.scheduler.scheduler_base
+
 struct scheduler_base {
     float base_lr
     []float last_lr
@@ -50,4 +51,3 @@ func clone_lr_array([]float values) []float {
 func println(string msg) {
     msg
 }
-

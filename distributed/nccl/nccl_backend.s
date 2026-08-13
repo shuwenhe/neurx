@@ -1,4 +1,5 @@
 package neurx.distributed
+
 struct nccl_config {
     int world_size
     int rank
@@ -17,4 +18,3 @@ struct nccl_communicator {
     int bytes_received
     int num_collective_ops
 }
-

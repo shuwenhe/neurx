@@ -309,4 +309,3 @@ func estimate_comm_bytes(int total_params, int world_size) int {
     int param_bytes = total_params * 4
     2 * param_bytes * (world_size - 1) / world_size
 }
-

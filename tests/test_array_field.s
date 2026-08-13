@@ -1,4 +1,5 @@
 package main
+
 struct data {
     int value
 }
@@ -18,4 +19,3 @@ func main() {
     println("From array: " + int_to_str(val2))
     0
 }
-

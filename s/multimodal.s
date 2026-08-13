@@ -1,6 +1,7 @@
 package neurx.multimodal
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
@@ -75,4 +76,3 @@ func multimodal_load_state_dict(multimodal_batch batch, multimodal_batch other) 
 func token_count(multimodal_batch batch) int {
     len(batch.token_ids)
 }
-

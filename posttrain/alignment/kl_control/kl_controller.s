@@ -1,5 +1,6 @@
 package neurx.posttrain.alignment.kl_control
 use neurx.tensor
+
 struct kl_controller_config {
     string controller_type
     float init_kl_coef
@@ -68,4 +69,3 @@ func clamp_float(float x, float min_val, float max_val) float {
     }
     return x
 }
-

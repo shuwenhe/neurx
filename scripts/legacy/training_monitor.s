@@ -204,4 +204,3 @@ func main() {
     println("\nJSON Export:")
     println(monitor.export_json())
 }
-

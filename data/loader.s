@@ -1,4 +1,5 @@
 package neurx.data.loader
+
 struct batch {
     input_ids [][]i64
     labels []i64
@@ -167,4 +168,3 @@ func distributed_sampler_get(sampler distributed_sampler, i64 idx) i64 {
     }
     return sampler.indices[idx]
 }
-

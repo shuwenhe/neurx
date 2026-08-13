@@ -4,6 +4,7 @@ use neurx.inference.speculative.speculative_decode_core
 use neurx.inference.speculative.draft_model_executor
 use neurx.inference.speculative.speculative_verifier
 use neurx.inference.speculative.speculative_runtime
+
 struct speculative_inference_config {
     enable_speculative_decode: bool
     num_draft_tokens: int
@@ -170,4 +171,3 @@ func reset_speculative_statistics(sys: speculative_inference_system) speculative
 func should_use_speculative_decoding(sys: speculative_inference_system) bool {
     sys.system_config.enable_speculative_decode && sys.is_initialized
 }
-

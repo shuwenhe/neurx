@@ -2,6 +2,7 @@ package main
 use neurx.inference.cache.block_manager
 use neurx.inference.scheduler.vllm_scheduler
 use neurx.inference.runtime.engine_lifecycle
+
 func test_block_manager_prefix_reuse() bool {
     block_manager_state state = neurx.inference.cache.block_manager.new_block_manager(8, 4, 1)
     block_allocation_result allocation = neurx.inference.cache.block_manager.block_manager_allocate(state, "request-1", 4, 0, true)
@@ -56,4 +57,3 @@ func main() {
     println("FAIL vllm industrial core")
     1
 }
-

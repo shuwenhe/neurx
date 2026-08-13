@@ -283,4 +283,3 @@ func main() {
     status_json, _ := json.MarshalIndent(status, "", "  ")
     fmt.Printf("Final status:\n%s\n", string(status_json))
 }
-

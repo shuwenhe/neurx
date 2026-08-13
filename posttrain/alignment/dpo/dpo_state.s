@@ -1,4 +1,5 @@
 package neurx.posttrain.dpo.dpo_state
+
 struct dpo_state {
     float beta
     float label_smoothing
@@ -38,4 +39,3 @@ func dpo_state_dict(dpo_state state) dpo_state {
 func dpo_load_state_dict(dpo_state state, dpo_state other) dpo_state {
     other
 }
-

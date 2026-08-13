@@ -1,5 +1,6 @@
 package neurx.inference.scheduler.neurx_scheduler
 use neurx.inference.cache.block_manager
+
 func scheduler_waiting_status() int { 1 }
 
 func scheduler_running_status() int { 2 }
@@ -584,4 +585,3 @@ func scheduler_set_paused(neurx_scheduler_state state, bool paused) neurx_schedu
 func scheduler_unfinished_count(neurx_scheduler_state state) int {
     len(state.waiting) + len(state.running)
 }
-

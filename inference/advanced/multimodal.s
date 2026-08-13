@@ -319,4 +319,3 @@ func main() {
     println("Features:", len(features))
     println("Special tokens:", len(special_tokens))
 }
-

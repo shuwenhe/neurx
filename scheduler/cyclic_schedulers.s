@@ -1,4 +1,5 @@
 package neurx.scheduler.cyclic_schedulers
+
 struct cyclic_lr_state {
     float base_lr
     float max_lr
@@ -147,4 +148,3 @@ func cyclic_cos(float x) float {
     }
     result
 }
-

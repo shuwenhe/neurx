@@ -1,5 +1,6 @@
 package neurx.workers.reward.remote
 use neurx.tensor
+
 struct remote_reward_config {
     string server_url
     int port
@@ -169,4 +170,3 @@ func slice_strings([]string arr, int start, int end) []string {
     }
     return result
 }
-

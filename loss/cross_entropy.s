@@ -1,5 +1,6 @@
 package neurx.loss.cross_entropy
 use std.io.eprintln
+
 func cross_entropy_loss(
     []float logits,
     []int labels,
@@ -132,4 +133,3 @@ func cross_entropy_gradient(
 func perplexity_from_loss(float loss) float {
     exp_approx(loss)
 }
-

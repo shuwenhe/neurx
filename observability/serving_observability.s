@@ -1,4 +1,5 @@
 package neurx.observability.serving_observability
+
 struct serving_observability_state {
     int requests_total
     int requests_active
@@ -106,4 +107,3 @@ func serving_alert_summary(serving_observability_state state) string {
     if state.kv_capacity_alert { alerts = alerts + "kv_capacity_high;" }
     alerts
 }
-

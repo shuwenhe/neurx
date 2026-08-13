@@ -1,5 +1,6 @@
 package neurx.inference.safetensors_parser
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 func int_to_string(int val) string {
     if val == 0 {
         return "0"
@@ -87,4 +88,3 @@ func main() {
     print("Intrinsic: __host_read_binary_file(path) → []int\n")
     print("Goal: Read model.safetensors header and print metadata\n\n")
 }
-

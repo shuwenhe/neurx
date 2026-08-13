@@ -1,4 +1,5 @@
 package main
+
 func test_adamw_init() {
     println("Test 1: adam_w initialization")
     let lr = 1e-4
@@ -193,4 +194,3 @@ func main() {
     println("✓ All optimizer tests completed!")
     println("============================================")
 }
-

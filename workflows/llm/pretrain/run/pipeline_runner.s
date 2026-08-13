@@ -74,4 +74,3 @@ func run_pretrain_with_distributed_config(int micro_batch, int seq_len, float lr
     runtime_write_text_file(checkpoint_dir + "/workflow_summary.txt", two_t_training_plan_summary(plan) + "\n" + two_t_runtime_summary(state) + "\n" + two_t_runtime_report(state) + "\n")
     0
 }
-

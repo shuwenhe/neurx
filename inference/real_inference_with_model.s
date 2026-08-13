@@ -1,4 +1,5 @@
 package real_inference_with_model
+
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -171,4 +172,3 @@ func main() {
     print("✓ Output: Generated via real model probability\n\n")
     print("Session ended. Thank you for using NeurX!\n\n")
 }
-

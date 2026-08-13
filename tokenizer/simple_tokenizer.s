@@ -1,5 +1,6 @@
 package neurx.tokenizer.simple_tokenizer
 use std.io.eprintln
+
 struct simple_tokenizer {
     int vocab_size
     int bos_token_id
@@ -74,4 +75,3 @@ func create_labels([]int input_ids, int seq_len) []int {
     labels[seq_len - 1] = 151645
     labels
 }
-

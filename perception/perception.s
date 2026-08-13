@@ -1,4 +1,5 @@
 package neurx.perception.perception
+
 struct agent_perception_result {
     string kind
     string content
@@ -147,4 +148,3 @@ func agent_perception_get_field(agent_perception_result result, string key) stri
 func agent_perception_summary(agent_perception_result result) string {
     "kind=" + result.kind + " source=" + result.source + " structured=" + string(result.structured) + " fields=" + string(result.field_count)
 }
-

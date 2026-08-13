@@ -1,6 +1,7 @@
 package neurx.diffusion.noise
 use neurx.diffusion.config
 use neurx.ops
+
 struct noise_schedule_state {
     diffusion_config cfg
     int step
@@ -61,4 +62,3 @@ func noise_schedule_state_dict(noise_schedule_state state) noise_schedule_state 
 func noise_schedule_load_state_dict(noise_schedule_state state, noise_schedule_state other) noise_schedule_state {
     other
 }
-

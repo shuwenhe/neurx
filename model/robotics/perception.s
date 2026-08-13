@@ -1,4 +1,5 @@
 package neurx.model.robotics.perception
+
 struct robotics_perception_state {
     string perception_name
     int obs_dim
@@ -110,4 +111,3 @@ func robotics_perception_mark_normalized(robotics_perception_state state) roboti
         trained: state.trained,
     }
 }
-

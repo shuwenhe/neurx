@@ -1,4 +1,5 @@
 package neurx.tokenizer
+
 struct bpe_tokenizer {
     map[string]int vocab
     map[int]string id_to_token
@@ -447,4 +448,3 @@ func train_bpe(string corpus_path, int vocab_size, string output_dir) bpe_tokeni
     tokenizer.vocab_size = len(tokenizer.vocab)
     tokenizer
 }
-

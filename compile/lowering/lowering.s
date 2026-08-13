@@ -1,5 +1,6 @@
 package neurx.compile.lowering
 use neurx.runtime.compile
+
 struct lowering_plan_state {
     string backend
     string target
@@ -47,4 +48,3 @@ func lowering_plan_state_dict(lowering_plan_state plan) lowering_plan_state {
 func lowering_plan_load_state_dict(lowering_plan_state plan, lowering_plan_state other) lowering_plan_state {
     other
 }
-

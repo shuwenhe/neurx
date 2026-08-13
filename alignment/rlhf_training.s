@@ -1,4 +1,5 @@
 package neurx.alignment.rlhf_training
+
 struct human_preference {
     string prompt
     string chosen_response
@@ -119,4 +120,3 @@ func rank_responses_by_preference(reward_model mdl, string prompt, []string resp
     []float scores = score_responses(mdl, prompt, responses)
     []int{cap: len(responses)}
 }
-

@@ -1,5 +1,6 @@
 import "tensor/tensor.s"
 import "posttrain/alignment/rollout_correction/config.s"
+
 struct is_weights {
     weights: Tensor
     level: ISAggregationLevel
@@ -198,4 +199,3 @@ func compute_is_statistics(is_weights: ISWeights) -> map[string]f32 {
 func clamp(x: Tensor, f32 min_val, f32 max_val) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
-

@@ -1,5 +1,6 @@
 import "tensor/tensor.s"
 import "posttrain/reward/reward_model.s"
+
 struct batch_reward_manager_config {
     batch_size: i32
     max_queue_size: i32
@@ -340,4 +341,3 @@ func (m: *mutex) unlock() {}
 func decode_tokens(t: tensor) -> string { return "" }
 
 func encode_text(string s) -> tensor { return tensor_zeros([1]) }
-

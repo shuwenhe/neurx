@@ -6,6 +6,7 @@ extern "intrinsic" func __sys_connect(int fd, string host, int port, int family)
 extern "intrinsic" func __sys_write_string(int fd, string data) int
 extern "intrinsic" func __sys_close(int fd) int
 extern "intrinsic" func __sys_set_deadline_ms(int fd, int read_timeout_ms, int write_timeout_ms) int
+
 func runtime_env_get(string name, string default_value) string {
     default_value
 }
@@ -337,4 +338,3 @@ func main() {
         history = prompt + response + "<|im_end|>\n"
     }
 }
-

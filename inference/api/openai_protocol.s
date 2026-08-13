@@ -1,4 +1,5 @@
 package neurx.inference.api.openai_protocol
+
 struct openai_request {
     string request_id
     string model
@@ -315,4 +316,3 @@ func openai_embedding_body(string model, []float embedding, int prompt_tokens) s
     }
     "{\"object\":\"list\",\"data\":[{\"object\":\"embedding\",\"index\":0,\"embedding\":[" + values + "]}],\"model\":\"" + openai_json_escape(model) + "\",\"usage\":{\"prompt_tokens\":" + int_to_str(prompt_tokens) + ",\"total_tokens\":" + int_to_str(prompt_tokens) + "}}"
 }
-

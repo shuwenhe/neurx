@@ -1,6 +1,7 @@
 package neurx.module
 use neurx.tensor.tensor
 use neurx.nn
+
 func module_new(string name) nn.module {
     neurx.nn.new_module(name)
 }
@@ -136,4 +137,3 @@ func sequential_from_modules([]nn.module layers) nn.sequential {
 func sequential_module(nn.sequential seq) nn.module {
     neurx.nn.sequential_module(seq)
 }
-

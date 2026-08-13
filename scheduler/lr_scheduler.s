@@ -1,4 +1,5 @@
 package neurx.scheduler.lr_scheduler
+
 struct lr_schedule_config {
     float base_lr
     float min_lr
@@ -184,4 +185,3 @@ func abs_approx(float x) float {
     }
     return x
 }
-

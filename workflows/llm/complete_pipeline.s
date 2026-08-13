@@ -4,6 +4,7 @@ use std.math
 use std.time
 use std.strings
 println := io.println
+
 struct compile_config {
     source_file: string
     output_binary: string
@@ -570,4 +571,3 @@ func main() {
     println("🚀 STATUS: ✅ ALL STAGES COMPLETE")
     println("")
 }
-

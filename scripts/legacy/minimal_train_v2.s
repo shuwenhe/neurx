@@ -1,4 +1,5 @@
 package main
+
 func main() {
     int max_steps = 10000
     int log_interval = 10
@@ -98,4 +99,3 @@ func int_to_str(int n) string {
 func string_char(int c) string {
     string(c)
 }
-

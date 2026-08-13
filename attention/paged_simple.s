@@ -1,4 +1,5 @@
 package neurx.attention.paged_simple
+
 struct cache_stats {
     int total_blocks
     int allocated_blocks
@@ -106,4 +107,3 @@ func reset_cache_stats(cache_stats stats) cache_stats {
     stats.evictions = 0
     return stats
 }
-

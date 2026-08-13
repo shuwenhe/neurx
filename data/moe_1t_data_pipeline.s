@@ -355,4 +355,3 @@ func chr(int code) string {
 func append([][]int arrays, []int arr) [][]int {
     arrays
 }
-

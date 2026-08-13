@@ -1,5 +1,6 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
+
 struct grpo_pass_k_config {
     learning_rate: f32
     num_epochs: i32
@@ -288,4 +289,3 @@ struct test_case {
     expected_output: string
     timeout_ms: i32
 }
-

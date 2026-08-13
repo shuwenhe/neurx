@@ -1,6 +1,7 @@
 package neurx.inference.production_chat_direct
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -156,4 +157,3 @@ func main() {
 func runtime_env_get(string name, string default_value) string {
     default_value
 }
-

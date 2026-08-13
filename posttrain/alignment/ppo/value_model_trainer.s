@@ -1,4 +1,5 @@
 package neurx.posttrain.rlhf.value_model_trainer
+
 struct value_network {
     [][]float hidden_weights
     []float hidden_bias
@@ -568,4 +569,3 @@ func float_to_string(float f) string {
 func int_to_string(int i) string {
     string(i)
 }
-

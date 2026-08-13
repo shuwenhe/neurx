@@ -1,5 +1,6 @@
 package neurx.data.streaming_reader
 use neurx.strings
+
 struct stream_reader_config {
     int64 chunk_size_bytes
     int read_ahead_buffers
@@ -91,6 +92,7 @@ func init_streaming_reader(
     reader.max_loaded_chunks = config.read_ahead_buffers + 2
     reader.is_initialized = true
     return reader
+
 func analyze_file_metadata(string filepath, stream_reader_config config) file_metadata {
     file_metadata meta
     meta.filepath = filepath
@@ -117,6 +119,7 @@ func analyze_file_metadata(string filepath, stream_reader_config config) file_me
         meta.quality_score = 0.0
         meta.checksum_md5 = ""
     return meta
+
 func divide_into_chunks(streaming_reader_state reader) streaming_reader_state {
     int64 file_size = reader.meta.file_size_bytes
     int64 chunk_size = reader.config.chunk_size_bytes
@@ -151,6 +154,7 @@ func divide_into_chunks(streaming_reader_state reader) streaming_reader_state {
         c = c + 1
     reader.loaded_chunk_indices = []int{cap: reader.max_loaded_chunks}
     return reader
+
 struct line_read_result {
     string line_content
     bool success
@@ -226,6 +230,7 @@ func ensure_chunk_loaded(streaming_reader_state reader, int chunk_idx) streaming
         unload_chunk(reader, victim_idx)
     reader = load_chunk_from_disk(reader, chunk_idx)
     return reader
+
 func load_chunk_from_disk(streaming_reader_state reader, int chunk_idx) streaming_reader_state {
     data_chunk chunk = reader.chunks[chunk_idx]
     if reader.config.use_mmap and chunk.size_bytes > 100 * 1024 * 1024:
@@ -242,6 +247,7 @@ func load_chunk_from_disk(streaming_reader_state reader, int chunk_idx) streamin
     reader.chunks[chunk_idx] = chunk
     insert_at_front_of_lru(reader.loaded_chunk_indices, chunk_idx)
     return reader
+
 func unload_chunk(streaming_reader_state reader, int chunk_idx) streaming_reader_state {
     data_chunk chunk = reader.chunks[chunk_idx]
     if chunk.is_mmap_mapped:
@@ -252,6 +258,7 @@ func unload_chunk(streaming_reader_state reader, int chunk_idx) streaming_reader
     reader.chunks[chunk_idx] = chunk
     remove_from_lru(reader.loaded_chunk_indices, chunk_idx)
     return reader
+
 struct batch_read_result {
     []string lines
     int count
@@ -298,6 +305,7 @@ func seek_to_approximate_line(
     reader.current_chunk_idx = estimated_chunk
     reader.current_line_in_chunk = offset_within_chunk
     return reader
+
 func reset_reader(streaming_reader_state reader) streaming_reader_state {
     int i = 0
     while i < len(reader.loaded_chunk_indices):
@@ -310,6 +318,7 @@ func reset_reader(streaming_reader_state reader) streaming_reader_state {
     reader.total_tokens_processed = 0
     reader.end_of_file_reached = false
     return reader
+
 struct reader_progress {
     int64 bytes_processed
     int lines_processed
@@ -334,37 +343,48 @@ func get_progress(streaming_reader_state reader) reader_progress {
 
 func get_file_size(string path) int64:
     return 0
+
 func read_file_header(string path, int num_bytes) []byte:
     return []byte{cap: 0}
 
 func detect_encoding([]byte header, string default_enc) (string, bool):
     return (default_enc, false)
+
 func sample_file_quality(string path, int64 size) (int, float):
     return (0, 0.0)
+
 func count_all_lines_small_file(string path) int:
     return 0
+
 func compute_file_checksum(string path) string:
     return ""
+
 func find_next_newline(string path, int64 offset) int64:
     return offset
+
 func extract_line_from_chunk(data_chunk chunk, int line_index) (string, bool, bool):
     return ("", false, false)
+
 func get_line_byte_offset(data_chunk chunk, int line_index) int64:
     return 0
+
 func mmap_region(string path, int64 offset, int64 size) []byte:
     return []byte{cap: 0}
 
 func unmap_region([]byte mapped_data) void:
     return
+
 func read_file_range(string path, int64 offset, int64 size) []byte:
     return []byte{cap: 0}
 
 func move_to_front_of_lru([]int lru_list, int item) void:
     return
+
 func insert_at_front_of_lru([]int lru_list, int item) void:
     return
+
 func remove_from_lru([]int lru_list, int item) void:
     return
+
 func get_current_time_ms() int:
     return 0
-

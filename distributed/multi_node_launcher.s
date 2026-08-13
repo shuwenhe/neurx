@@ -276,4 +276,3 @@ func get_current_timestamp() int {
 
 func sleep_seconds(int seconds) {
 }
-

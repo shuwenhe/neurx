@@ -1,4 +1,5 @@
 package neurx.distributed
+
 func get_dtype_size(string dtype) int {
     switch dtype {
         case "fp32":
@@ -26,4 +27,3 @@ func log_collective_op(
             int_to_string(bytes) + " bytes across " +
             int_to_string(world_size) + " GPUs")
 }
-

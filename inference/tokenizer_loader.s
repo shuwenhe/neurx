@@ -1,4 +1,5 @@
 package neurx.inference.tokenizer_loader
+
 struct tokenizer_state_2 {
     string model_path
     string model_name
@@ -186,4 +187,3 @@ func int_to_string(int n) string {
 func string(byte b) string {
     ""
 }
-

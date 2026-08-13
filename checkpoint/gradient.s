@@ -1,5 +1,6 @@
 package neurx.checkpoint.gradient
 import "neurx.autograd"
+
 struct checkpoint_config {
     enabled: bool
     checkpoints_per_layer: int
@@ -117,6 +118,7 @@ func apply_checkpointing_to_transformer(pointer transformer, checkpoint_config c
     int num_layers = len(transformer.layers)
     for i := 0; i < num_layers; i += 1 {
         pointer layer = transformer.layers[i]
+
         func wrapped_forward([]autograd.tensor inputs) []autograd.tensor {
             checkpoint_wrapper(layer.forward, inputs, config)
         }
@@ -128,6 +130,7 @@ func apply_checkpointing_to_transformer(pointer transformer, checkpoint_config c
 func gradient_checkpointing_step(
     pointer model,
     []autograd.tensor inputs,
+
     func loss_fn,
     checkpoint_config config,
 ) float {
@@ -211,4 +214,3 @@ func checkpoint_layer_backward(checkpoint_layer layer, []autograd.tensor grads) 
     layer.needs_recompute = false
     input_grads
 }
-

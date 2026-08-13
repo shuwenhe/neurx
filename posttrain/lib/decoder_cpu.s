@@ -1,5 +1,6 @@
 package neurx.posttrain.model.decoder_cpu
 use std.io.eprintln
+
 struct decoder_layer_kv_cache {
     []float key
     []float value
@@ -173,4 +174,3 @@ func main() {
     eprintln("CPU Decoder Model - Inference Engine")
     eprintln("Status: Pure S implementation")
 }
-

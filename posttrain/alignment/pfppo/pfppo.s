@@ -1,6 +1,7 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/ppo/ppo.s"
+
 struct pfppo_config {
     clip_epsilon: f32
     value_clip_epsilon: f32
@@ -297,4 +298,3 @@ func (trainer: *pfppo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
 func compute_reward(prompt: tensor, response: tensor) -> f32 {
     return random_uniform(-1.0, 1.0)
 }
-

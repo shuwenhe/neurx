@@ -1,5 +1,6 @@
 package neurx.posttrain.core.training_loop
 use std.io.println
+
 struct training_step_s {
     int step
     float loss
@@ -188,4 +189,3 @@ func float_to_str(float f, int decimals) string {
     }
     result
 }
-

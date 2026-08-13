@@ -4,6 +4,7 @@ use neurx.attention
 use neurx.data.loader.streaming
 use neurx.distributed.fsdp
 use neurx.tokenizer.bpe_trainer
+
 func test_all_modules() {
     print("=== NeurX Integration Test ===\n")
     test_moe_layer()
@@ -72,6 +73,7 @@ func test_streaming_dataloader() {
     config.seq_len = 512
     config.prefetch_size = 2
     streaming.streaming_dataloader loader = streaming.new_streaming_dataloader(config)
+
     func mock_tokenizer(string text) []int {
         []int tokens = []int{cap: 512}
         int i = 0
@@ -145,4 +147,3 @@ func print(string msg) {
 func main() {
     test_all_modules()
 }
-

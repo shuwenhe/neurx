@@ -1,6 +1,7 @@
 import "tensor/tensor.s"
 import "distributed/nccl_collectives.s"
 import "checkpoint/checkpoint.s"
+
 struct mooncake_config {
     world_size: i32
     rank: i32
@@ -269,4 +270,3 @@ func zstd_compress(data: tensor) -> tensor {
 func zstd_decompress(data: tensor) -> tensor {
     return data
 }
-

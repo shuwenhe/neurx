@@ -1,5 +1,6 @@
 package neurx.posttrain.lib.transformer_inference
 use std.io.eprintln
+
 func vec_add([]float a, []float b) []float {
     []float result
     int len_a = len(a)
@@ -282,4 +283,3 @@ func main() {
     eprintln("✓ Layer normalization")
     eprintln("✓ Full transformer stack")
 }
-

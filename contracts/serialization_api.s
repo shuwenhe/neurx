@@ -69,4 +69,3 @@ interface i_maliformed_checkpoint_handler {
     repair(string path) -> bool
     get_error_details(string path) -> string
 }
-

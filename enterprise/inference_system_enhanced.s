@@ -6,6 +6,7 @@ use neurx.api.openai_compatible
 use neurx.distributed.rank_manager
 use neurx.observability.metrics
 use neurx.enterprise.speculative_inference
+
 struct inference_system_config {
     bool enable_speculative_decode
     speculative_inference.speculative_inference_config speculative_config
@@ -226,4 +227,3 @@ func int_to_str(int n) string {
     }
     s
 }
-

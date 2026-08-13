@@ -1,6 +1,7 @@
 package neurx.cuda_backend
 use std.io
 use std.math
+
 struct cuda_device {
     device_id: int
     device_name: string
@@ -328,4 +329,3 @@ func main() {
     multi_gpu := init_multi_gpu_context(4)
     gpu_forward_pass_example(32, 2048, 256, 32000)
 }
-

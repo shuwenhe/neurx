@@ -1,4 +1,5 @@
 package neurx.distributed.tensor_parallel_v2
+
 struct tp_v2_config {
     int tp_degree
     int tp_rank
@@ -505,4 +506,3 @@ func pow_dbl(double base, double exp) double {
     if negative { result = 1.0 / result }
     return result
 }
-

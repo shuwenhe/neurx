@@ -2,6 +2,7 @@ package neurx.optimizer.optimizer
 use neurx.tensor.tensor
 use neurx.optimizer.optim
 use neurx.scheduler.training_scheduler
+
 struct optimizer_param_group {
     []tensor params
     float lr
@@ -403,4 +404,3 @@ func optimizer_set_group_lr(optimizer opt, int group_index, float lr) optimizer 
     next.param_groups[group_index].lr = lr
     return next
 }
-

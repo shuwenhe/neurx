@@ -1,4 +1,5 @@
 package neurx.attention.paged_attention_core
+
 struct paged_block {
     []float key_data
     []float value_data
@@ -308,4 +309,3 @@ func debug_print_cache_state(cache paged_kv_cache) string {
     result = result + "  Utilization: " + str(stats.utilization_percent) + "%\n"
     return result
 }
-

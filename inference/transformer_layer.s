@@ -1,5 +1,6 @@
 package neurx.inference.transformer_layer
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 struct tensor_one_d {
     []float data
     int size
@@ -290,4 +291,3 @@ func main() {
     print("6. Implement token sampling (argmax)\n")
     print("7. Complete: one token generation from model\n\n")
 }
-

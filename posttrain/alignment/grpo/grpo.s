@@ -1,5 +1,6 @@
 package neurx.posttrain.grpo
 use neurx.posttrain.config
+
 struct grpo_config {
     int group_size
     float clip_eps
@@ -375,4 +376,3 @@ func string_trim(string s) string {
 func extract_answer_tag(string output) string {
     output
 }
-

@@ -359,4 +359,3 @@ func new_evaluation_framework(config evaluation_config) *evaluation_framework {
         },
     }
 }
-

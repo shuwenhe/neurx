@@ -1,4 +1,5 @@
 package neurx.serving.serve.admission_control
+
 struct admission_control_state {
     int max_active_requests
     int max_prefill_tokens
@@ -181,4 +182,3 @@ func admission_control_state_dict(admission_control_state state) admission_contr
 func admission_control_load_state_dict(admission_control_state state, admission_control_state other) admission_control_state {
     other
 }
-

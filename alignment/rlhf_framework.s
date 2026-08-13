@@ -1,4 +1,5 @@
 package neurx.alignment.rlhf_framework
+
 struct instruction_data {
     string instruction
     string response
@@ -461,4 +462,3 @@ func main() {
     println("Overall Alignment: " + float_to_string(metrics.overall_alignment_score))
     println("\n=== RLHF Training Complete ===")
 }
-

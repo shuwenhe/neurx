@@ -1,12 +1,14 @@
 package neurx.tests.tokenizer_test
 use std.io.println
 use neurx.inference.tokenizer_loader
+
 struct test_result_2 {
     test_name: string
     passed: bool
     message: string
 }
 []test_result_2 test_results = make([]test_result_2, 0)
+
 func run_all_tests() int {
     println("=== W1.1 Tokenizer Unit Tests ===")
     println("")
@@ -190,4 +192,3 @@ func make(interface{} arr_type, int size) interface{} {
 func main() {
     int exit_code = run_all_tests()
 }
-

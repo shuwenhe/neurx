@@ -1,4 +1,5 @@
 package neurx.distributed.megatron.microbatch_calculator
+
 struct schedule_entry {
     int threshold
     int batch_size
@@ -133,4 +134,3 @@ func validate_schedule([]schedule_entry schedule) bool {
     }
     return true
 }
-

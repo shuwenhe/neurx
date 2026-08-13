@@ -199,4 +199,3 @@ func estimate_file_size(string dataset_path) int {
     }
     size
 }
-

@@ -312,4 +312,3 @@ func gpt_moe_param_count(gpt_moe_config cfg) int {
     int delta = moe_count * (moe_layer_params - dense_ffn)
     base + delta
 }
-

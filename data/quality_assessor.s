@@ -5,6 +5,7 @@ import (
     "std/strings"
     "std/math"
 )
+
 struct quality_metrics {
     total_lines: i64
     valid_docs: i64
@@ -327,4 +328,3 @@ func string_to_int(string s) i64 {
     }
     return result
 }
-

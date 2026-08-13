@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape, trim}
 use std.io.println
+
 func main() {
     string config = runtime_env_get("NEURX_ROBOTICS_OBSERVE_CONFIG", "workflows/robotics/train/config/sample.yaml")
     string steps_override = runtime_env_get("NEURX_ROBOTICS_OBSERVE_STEPS", "")
@@ -77,4 +78,3 @@ func default_if_empty(string value, string fallback) string {
     }
     value
 }
-

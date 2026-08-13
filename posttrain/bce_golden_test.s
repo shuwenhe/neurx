@@ -1,4 +1,5 @@
 package posttrain.bce_golden_test
+
 func sigmoid_fn(float x) float {
     if x > 100.0 {
         return 1.0
@@ -214,4 +215,3 @@ func main() {
         println("✗ At least one test FAILED")
     }
 }
-

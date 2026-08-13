@@ -1,4 +1,5 @@
 package neurx.distributed.zero
+
 struct zero_config {
     int stage
     bool cpu_offload
@@ -213,4 +214,3 @@ func print_zero_memory_stats(zero_state state) {
         println("  Memory saving: " + int_to_string(int_from_float(memory_ratio * 100.0)) + "% vs full replication")
     }
 }
-

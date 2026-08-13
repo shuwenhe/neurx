@@ -1,4 +1,5 @@
 package neurx.data
+
 struct dataloader_config {
     int batch_size
     bool shuffle
@@ -181,4 +182,3 @@ func generate_bucket_order(map[int][]int buckets) []int {
     }
     order
 }
-

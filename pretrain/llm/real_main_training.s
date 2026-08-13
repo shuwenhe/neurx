@@ -168,4 +168,3 @@ func int_to_str(int n, int fallback) string {
 func string_char(int c) string {
     string(c)
 }
-

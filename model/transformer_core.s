@@ -1,4 +1,5 @@
 package neurx.model.gpt_transformer
+
 struct gptconfig {
     int hidden_size
     int num_layers
@@ -424,4 +425,3 @@ func main() {
 func int_to_string(int n) string {
     ""
 }
-

@@ -251,4 +251,3 @@ func get_speedup_factor(stats: speculative_statistics) float {
         1.0
     }
 }
-

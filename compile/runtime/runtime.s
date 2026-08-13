@@ -1,4 +1,5 @@
 package neurx.compile.runtime
+
 struct runtime_status_state {
     bool runtime_available
     bool ops_runtime_enabled
@@ -35,4 +36,3 @@ func runtime_status_state_dict(runtime_status_state state) runtime_status_state 
 func runtime_status_load_state_dict(runtime_status_state state, runtime_status_state other) runtime_status_state {
     other
 }
-

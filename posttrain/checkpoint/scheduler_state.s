@@ -1,4 +1,5 @@
 package neurx.posttrain.checkpoint.scheduler_state
+
 struct scheduler_state {
     int step
     int warmup_steps
@@ -154,4 +155,3 @@ func float_to_str(float value) string {
     if negative { result = "-" + result }
     return result
 }
-

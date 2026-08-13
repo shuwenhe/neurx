@@ -3,6 +3,7 @@ use neurx.eval.mmlu_data
 use neurx.eval.benchmark_eval
 use neurx.model.llm.gpt
 use std.io.println
+
 struct mmlu_fewshot_prompt {
     []mmlu_data.mmlu_question examples
     mmlu_data.mmlu_question test_q
@@ -332,4 +333,3 @@ func fmt_float(float value, int decimals) string {
     }
     out
 }
-

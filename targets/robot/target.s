@@ -21,4 +21,3 @@ func default_robot_target() robot_target_config {
         sensors:        ["camera", "depth", "imu", "force_torque"],
     }
 }
-

@@ -1,5 +1,6 @@
 package neurx.posttrain.monitoring.performance_monitor
 use std.io.eprintln
+
 struct performance_metric {
     string metric_name
     float value
@@ -216,4 +217,3 @@ func float_to_str_2(float f) string {
 func int_to_str_2(int n) string {
     ""
 }
-

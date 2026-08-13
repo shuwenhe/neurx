@@ -1,4 +1,5 @@
 package neurx.model.transformer.position_encoding
+
 struct position_encoding_config {
     int hidden_dim
     int max_seq_len
@@ -321,4 +322,3 @@ func add_position_encoding_to_hidden(
     }
     output
 }
-

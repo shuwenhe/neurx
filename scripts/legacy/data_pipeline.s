@@ -534,4 +534,3 @@ func print_help() {
     fmt.Println("  MAX_SHARDS         - Maximum number of shards (default: 128)")
     fmt.Println("")
 }
-

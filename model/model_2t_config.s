@@ -1,4 +1,5 @@
 package neurx.model
+
 struct model_2t_config {
     int vocab_size
     int hidden_dim
@@ -222,4 +223,3 @@ func recommended_2t_ultra_setup_512_gpus() recommended_2t_training_setup {
 
 func print_2t_model_specification(model_2t_config cfg) {
 }
-

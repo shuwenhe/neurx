@@ -622,4 +622,3 @@ func line_find(string line, string pattern) int {
     }
     -1
 }
-

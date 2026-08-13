@@ -1,6 +1,7 @@
 package neurx.serving.decode
 use neurx.serving.cache.kv_cache
 use neurx.serving.sampling
+
 struct decode_state {
     int step
     int max_new_tokens
@@ -41,4 +42,3 @@ func decode_state_dict(decode_state state) decode_state {
 func decode_load_state_dict(decode_state state, decode_state other) decode_state {
     other
 }
-

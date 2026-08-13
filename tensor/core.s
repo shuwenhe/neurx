@@ -1,4 +1,5 @@
 package neurx.tensor.core
+
 struct tensor_desc {
     []int shape
     []int strides
@@ -1013,4 +1014,3 @@ func matmul2d(tensor a, tensor b) tensor {
     }
     return out
 }
-

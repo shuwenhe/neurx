@@ -1,4 +1,5 @@
 package neurx.serving.cache.prefix_cache
+
 struct prefix_cache_state {
     int max_entries
     int max_tokens
@@ -156,4 +157,3 @@ func prefix_cache_state_dict(prefix_cache_state state) prefix_cache_state {
 func prefix_cache_load_state_dict(prefix_cache_state state, prefix_cache_state other) prefix_cache_state {
     other
 }
-

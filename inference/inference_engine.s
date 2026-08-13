@@ -17,6 +17,7 @@ class kv_cache_manager {
     []tensor layer_key_caches
     []tensor layer_value_caches
     []int cache_lengths
+
 func init(
     int num_layers,
     int num_kv_heads,
@@ -73,6 +74,7 @@ func update(
         self.layer_key_caches[layer_idx],
         self.layer_value_caches[layer_idx]
     )
+
 func get_cached_kv(
     self: KVCacheManager,
     int layer_idx
@@ -85,11 +87,13 @@ func get_cached_kv(
         ))
     else:
         return none
+
 func reset(self: KVCacheManager):
     """English text cache"""
     self.layer_key_caches.clear()
     self.layer_value_caches.clear()
     self.cache_lengths = [0] * len(self.cache_lengths)
+
 func get_memory_usage(self: KVCacheManager):
     """English textuseEnglish text"""
     int64 total_k_memory = 0
@@ -124,6 +128,7 @@ struct sequence_metadata {
     int context_length
     bool is_finished
 }
+
 class paged_attention_manager {
     int block_size
     int num_blocks
@@ -133,6 +138,7 @@ class paged_attention_manager {
     memory_block[] physical_blocks
     dict[int, sequence_metadata> active_sequences
     int next_block_id
+
     struct stats {
         int total_allocated_blocks
         int free_blocks
@@ -141,6 +147,7 @@ class paged_attention_manager {
         float memory_utilization
         int64 peak_memory_bytes
     } stats
+
 func init_paged_attention(
     int num_kv_heads,
     int head_dim,
@@ -221,6 +228,7 @@ func allocate_sequence(
     self.stats.memory_utilization = \
         1.0 - float(self.stats.free_blocks) / float(self.num_blocks)
     return meta
+
 func extend_sequence(
     self: PagedAttentionManager,
     int seq_id,
@@ -259,6 +267,7 @@ func extend_sequence(
         ] = new_values[:, :, tokens_written : tokens_written + tokens_to_write]
         tokens_written += tokens_to_write
     meta.current_length += new_tokens
+
 func free_sequence(self: PagedAttentionManager, int seq_id):
     """
     English text blocks
@@ -273,6 +282,7 @@ func free_sequence(self: PagedAttentionManager, int seq_id):
             self.stats.free_blocks += 1
     del self.active_sequences[seq_id]
     self.stats.total_allocated_blocks -= len(meta.block_table)
+
 func gather_kv_for_attention(
     self: PgedAttentionManager,
     int seq_id,
@@ -306,6 +316,7 @@ func gather_kv_for_attention(
             self.physical_blocks[physical_block_id].value_data[start_in_block : start_in_block + copy_len]
         dst_pos += copy_len
     return (full_keys, full_values)
+
 func _find_free_block(self: PagedAttentionManager):
     """English text block"""
     for block in self.physical_blocks:
@@ -340,6 +351,7 @@ struct inference_request {
     float tokens_per_second
     int total_tokens_processed
 }
+
 class continuous_batch_scheduler {
     int max_batch_size
     int max_queue_size
@@ -347,6 +359,7 @@ class continuous_batch_scheduler {
     queue<inference_request> waiting_queue
     dict<int, inference_request> active_requests
     dict<int, inference_request> completed_requests
+
     struct stats {
         int total_requests_served
         int total_tokens_generated
@@ -354,6 +367,7 @@ class continuous_batch_scheduler {
         float avg_throughput_tps
         int peak_concurrent_requests
     } stats
+
 func init_scheduler(
     int max_batch_size: int = 32,
     int max_queue_size: int = 256,
@@ -417,6 +431,7 @@ func add_request(
     }
     self.waiting_queue.push(req)
     return req.request_id
+
 func schedule_batch(self: ContinuousBatchScheduler):
     """
     English textrequest
@@ -444,6 +459,7 @@ func schedule_batch(self: ContinuousBatchScheduler):
         len(batch)
     )
     return batch
+
 func mark_completed(
     self: ContinuousBatchScheduler,
     int request_id,
@@ -477,6 +493,7 @@ func mark_completed(
         float(self.stats.total_tokens_generated) /
         max((now() - self.scheduler_start).total_seconds(), 0.001)
     )
+
 func get_status_report(self: ContinuousBatchScheduler):
     """generatestateEnglish text"""
     report = f"""
@@ -495,12 +512,14 @@ func get_status_report(self: ContinuousBatchScheduler):
 ╚══════════════════════════════════════════╝
 """
     return report
+
 class inference_engine {
     neurx_model model
     tokenizer_state tokenizer
     kv_cache_manager kv_manager
     option[paged_attention_manager] paged_manager
     continuous_batch_scheduler scheduler
+
     struct gen_config {
         float default_temperature = 0.7
         float default_top_p = 0.9
@@ -513,6 +532,7 @@ class inference_engine {
         bool use_cache = true
         bool early_stopping = False
     } gen_config
+
     struct perf_stats {
         int64 total_forward_time_us
         int total_generate_calls
@@ -520,6 +540,7 @@ class inference_engine {
         float avg_latency_per_token_ms
         float peak_gpu_memory_gb
     } perf_stats
+
 func init_engine(
     neurx_model model,
     tokenizer_state tokenizer,
@@ -674,6 +695,7 @@ func generate(
     print(f"      Latency/token: {latency_per_token:.2f}ms")
     generated_text = truncate_at_special_tokens(generated_text)
     return generated_text
+
 func sample_next_token(
     tensor logits,
     float temperature,
@@ -711,6 +733,7 @@ func sample_next_token(
         probs = probs / probs.sum()
     int next_token_id = multinomial(probs, num_samples=1).item()
     return next_token_id
+
 func generate_batch(
     self: inference_engine,
     []string prompts,
@@ -811,6 +834,7 @@ func apply_quantization(
     print(f"   Original: ~{original_params / 1e6:.0f}M params")
     print(f"   Compressed: ~{compressed_params / 1e6:.0f}M params (effective)")
     return model
+
 func test_inference_system() {
     print("\n" + "="*70)
     print("Testing NEURX Inference Optimization System")
@@ -884,8 +908,10 @@ func test_inference_system() {
     print("\n" + "="*70)
     print("All inference optimization tests passed! ✨")
     print("="*70 + "\n")
+
 func ceil_div(int a, int b):
     return (a + b - 1)
+
 func get_tensor_memory(tensor t):
     """English textuse (English text)"""
     int elements = 1
@@ -893,6 +919,7 @@ func get_tensor_memory(tensor t):
         elements *= dim
     int element_size = 4
     return int64(elements) * element_size
+
 func truncate_at_special_tokens(string text):
     """English text token English text"""
     []string stop_sequences = ["", "\n\n", "<|end_of_turn|>"]
@@ -904,4 +931,3 @@ func truncate_at_special_tokens(string text):
 def call_ai_judge(string prompt, string response):
     """English text AI Judge modelEnglish text (English textmodel)"""
     return 0.5
-

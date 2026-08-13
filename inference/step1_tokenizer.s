@@ -1,4 +1,5 @@
 package step1_tokenizer
+
 struct model_tokenizer {
     int vocab_size
 }
@@ -32,4 +33,3 @@ func tokenize(string text) []int {
 func decode([]int tokens) string {
     return simple_decode(tokens)
 }
-

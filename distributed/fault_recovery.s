@@ -473,4 +473,3 @@ func backward_pass(float loss): vector {
 func recommended_fault_recovery_config_2t(): checkpoint_manager {
     return new_checkpoint_manager("/checkpoints", 1000, 5)
 }
-

@@ -393,4 +393,3 @@ func agent_memory_restore(string path) agent_memory_state {
     }
     next
 }
-

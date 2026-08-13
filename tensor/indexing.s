@@ -1,4 +1,5 @@
 package neurx.indexing
+
 struct tensor {
     []float data
     []int shape
@@ -467,4 +468,3 @@ func gather(tensor a, []int indices) tensor {
         grad: none,
     }
 }
-

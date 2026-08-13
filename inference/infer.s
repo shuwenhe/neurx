@@ -15,6 +15,7 @@ use neurx.runtime.io.{runtime_env_get, runtime_write_text_file, runtime_run_comm
 use neurx.ops
 use neurx.tensor.tensor
 use neurx.checkpoint
+
 struct infer_pipeline_state {
     infer_request_state request
     infer_response_state response
@@ -502,4 +503,3 @@ func infer_pipeline_last_observation(infer_pipeline_state state) string {
     }
     "infer:running"
 }
-

@@ -4,6 +4,7 @@ int SHARDING_GRAD_SHARD = 1
 int SHARDING_NO_SHARD = 2
 int BACKEND_NCCL_FSDP = 0
 int BACKEND_CUSTOM = 1
+
 struct fsdp_config {
     int sharding_policy
     int dp_degree
@@ -423,4 +424,3 @@ func recommend_fsdp_for_2t(int num_gpus, int tp_degree, int pp_degree) fsdp_conf
     int effective_dp = num_gpus / (tp_degree * pp_degree)
     return default_fsdp_config_2t(effective_dp, 0)
 }
-

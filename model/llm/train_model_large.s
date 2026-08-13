@@ -729,4 +729,3 @@ func main() {
     println(gpt_large_training_summary(state, cfg))
     0
 }
-

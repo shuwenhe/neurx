@@ -1,4 +1,5 @@
 package main
+
 func test_close(float actual, float expected, float tolerance) bool {
     float delta = actual - expected
     if delta < 0.0 {
@@ -33,4 +34,3 @@ func main() {
     println("[pretrain-eval] perplexity exp(mean_nll): PASS")
     0
 }
-

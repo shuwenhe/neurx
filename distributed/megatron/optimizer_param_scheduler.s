@@ -1,4 +1,5 @@
 package neurx.distributed.megatron.param_scheduler
+
 struct optimizer_param_scheduler {
     float init_lr
     float max_lr
@@ -219,4 +220,3 @@ func ln_approx(float x) float {
     }
     return 2.0 * result
 }
-

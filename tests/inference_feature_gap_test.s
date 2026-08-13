@@ -7,6 +7,7 @@ use neurx.inference.serve.disaggregated_runtime
 use neurx.inference.advanced.pooling
 use neurx.inference.api.openai_protocol
 use neurx.inference.metrics.observability
+
 func gap_close(float actual, float expected) bool {
     float difference = actual - expected
     if difference < 0.0 {
@@ -100,4 +101,3 @@ func main() {
     println("FAIL inference feature gap")
     1
 }
-

@@ -1,4 +1,5 @@
 package main
+
 struct data {
     int value
 }
@@ -8,4 +9,3 @@ func main() {
     obj.value = 42
     obj.value
 }
-

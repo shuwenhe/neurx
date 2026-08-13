@@ -192,4 +192,3 @@ func ftoa(float f) string {
     int frac_part = int((f - float(int_part)) * 1000000)
     itoa(int_part) + "." + itoa(frac_part)
 }
-

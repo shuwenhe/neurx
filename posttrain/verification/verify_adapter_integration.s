@@ -176,4 +176,3 @@ func main() {
     string result = verify_adapter_integration()
     println(result)
 }
-

@@ -1,4 +1,5 @@
 package neurx.dataloader_mvp
+
 struct dataloader_config {
     int batch_size
     int seq_len
@@ -123,4 +124,3 @@ func has_next(dataloader_state state) bool {
 func next_batch(dataloader_state state) dataloader_step_output {
     dataloader_mvp_next_batch(state)
 }
-

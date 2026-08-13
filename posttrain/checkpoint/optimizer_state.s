@@ -1,4 +1,5 @@
 package neurx.posttrain.checkpoint.optimizer_state
+
 struct adamw_state {
     int step
     [][]float momentum
@@ -88,4 +89,3 @@ func float_to_str(float value) string {
     if negative { result = "-" + result }
     return result
 }
-

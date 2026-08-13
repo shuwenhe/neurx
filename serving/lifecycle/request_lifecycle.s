@@ -1,4 +1,5 @@
 package neurx.serving.lifecycle.request_lifecycle
+
 struct lifecycle_state {
     []string request_ids
     []string statuses
@@ -120,4 +121,3 @@ func lifecycle_begin_shutdown(lifecycle_state state) lifecycle_state {
 func lifecycle_shutdown_complete(lifecycle_state state) bool {
     state.draining && state.active_requests == 0
 }
-

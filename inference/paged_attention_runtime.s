@@ -1,5 +1,6 @@
 package neurx.inference.paged_attention_runtime
 use neurx.attention.paged_attention_core
+
 struct paged_attention_runtime {
     paged_kv_cache cache
     paged_attention_config config
@@ -230,4 +231,3 @@ func print_runtime_stats(runtime paged_attention_runtime) string {
     result = result + "Memory Usage: " + str(get_cache_memory_usage(runtime)) + " bytes\n"
     return result
 }
-

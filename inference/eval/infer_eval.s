@@ -1,4 +1,5 @@
 package neurx.inference.eval
+
 struct infer_eval_state {
     int samples
     float avg_latency_ms
@@ -34,4 +35,3 @@ func infer_eval_state_dict(infer_eval_state state) infer_eval_state {
 func infer_eval_load_state_dict(infer_eval_state state, infer_eval_state other) infer_eval_state {
     other
 }
-

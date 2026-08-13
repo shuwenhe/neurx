@@ -78,4 +78,3 @@ interface i_device_context {
     push_device(device: device) -> void
     pop_device() -> void
 }
-

@@ -1,4 +1,5 @@
 module longwriter_engine
+
 struct long_writer_config {
     max_total_tokens: int = 32000
     max_section_tokens: int = 4096
@@ -124,6 +125,7 @@ struct generation_metadata {
     api_calls_made: int
     errors_encountered: int
 }
+
 class outline_planner {
     config: long_writer_config
     llm_client: any
@@ -283,6 +285,7 @@ Now create the outline:"""
         return root
     }
 }
+
 class content_generator {
     config: long_writer_config
     llm_client: any
@@ -430,6 +433,7 @@ struct post_process_result {
     text: string
     formatting_changes: list<string>
 }
+
 class quality_checker {
     config: long_writer_config
     llm_client: any
@@ -529,6 +533,7 @@ struct coherence_check_result {
     smooth_transition: bool
     has_bridge_phrase: bool
 }
+
 class long_writer_engine {
     config: long_writer_config
     llm_client: any
@@ -769,6 +774,7 @@ async function test_long_writer() {
     print("\n✅ All LongWriter Tests Passed!")
     return true
 }
+
 class mock_llm_client {
     async generate(string prompt, temperature?: float, max_tokens?: int,
                    response_format?: string, stop_sequences?: list<string>) {
@@ -815,4 +821,3 @@ export {
     long_writer_engine,
     create_long_writer, test_long_writer
 }
-

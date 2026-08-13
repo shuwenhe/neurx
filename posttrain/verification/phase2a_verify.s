@@ -1,4 +1,5 @@
 package neurx.posttrain.verification.phase2a_verify
+
 func verify_model_loader() bool {
     println("[✓] Model loader module structure verified")
     return true
@@ -81,4 +82,3 @@ func main() {
         return 1
     }
 }
-

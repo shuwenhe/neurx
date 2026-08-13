@@ -1,5 +1,6 @@
 package neurx.posttrain.trainer.standalone_real
 ·························································································use std.io.eprintln
+
 struct training_config {
     int hidden_size
     int num_layers
@@ -295,4 +296,3 @@ func float_to_str(float x, int precision) string {
     }
     result
 }
-

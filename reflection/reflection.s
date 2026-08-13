@@ -2,6 +2,7 @@ package neurx.reflection
 use neurx.agent.trace
 use neurx.agent.memory
 use neurx.agent.observation
+
 struct agent_reflection_state {
     string critique
     string suggestion
@@ -79,4 +80,3 @@ func agent_reflection_load_state_dict(agent_reflection_state state, agent_reflec
 func agent_reflection_summary(agent_reflection_state state) string {
     "reflections=" + string(state.reflection_count) + " needs_correction=" + string(state.needs_correction) + " suggestion=" + state.suggestion
 }
-

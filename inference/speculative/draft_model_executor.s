@@ -240,4 +240,3 @@ func clear_draft_cache(executor: draft_model_executor) draft_model_executor {
     updated.layer_cache = [][]float{}
     updated
 }
-

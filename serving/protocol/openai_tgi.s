@@ -1,4 +1,5 @@
 package neurx.serving.protocol.openai_tgi
+
 func serving_json_escape(string value) string {
     string out = ""
     int i = 0
@@ -70,4 +71,3 @@ func serving_route_kind(string method, string path) string {
     if method == "GET" && path == "/metrics" { return "metrics" }
     "not-found"
 }
-

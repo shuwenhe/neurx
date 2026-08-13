@@ -66,4 +66,3 @@ func main() {
     }
     print_line("Status: " + status)
 }
-

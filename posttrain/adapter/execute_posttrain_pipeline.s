@@ -1,5 +1,6 @@
 package main
 use std.io.println
+
 func println_separator() int {
     println("═══════════════════════════════════════════════════════════════")
     0
@@ -262,4 +263,3 @@ func main() {
     println("")
     0
 }
-

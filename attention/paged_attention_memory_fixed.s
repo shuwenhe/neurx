@@ -1,4 +1,5 @@
 package neurx.attention.paged_attention_memory
+
 struct physical_block {
     int block_id
     int layer_id
@@ -182,4 +183,3 @@ func can_allocate_blocks(paged_kv_cache_manager mgr, int num_tokens) bool {
     }
     return available >= blocks_needed
 }
-

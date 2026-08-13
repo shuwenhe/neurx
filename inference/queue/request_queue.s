@@ -1,4 +1,5 @@
 package neurx.inference.queue.request_queue
+
 struct neurx_request_queue_state {
     []string request_ids
     []int prefill_tokens
@@ -133,4 +134,3 @@ func neurx_request_queue_state_dict(neurx_request_queue_state state) neurx_reque
 func neurx_request_queue_load_state_dict(neurx_request_queue_state state, neurx_request_queue_state other) neurx_request_queue_state {
     other
 }
-

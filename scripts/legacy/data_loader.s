@@ -73,4 +73,3 @@ package os {
     extern func args() []string
     extern func exit(i64 code)
 }
-

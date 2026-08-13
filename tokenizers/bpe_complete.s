@@ -1,4 +1,5 @@
 package neurx.tokenizers.bpe_complete
+
 func new_vocab() []int {
     []int vocab = []
     int i = 0
@@ -367,4 +368,3 @@ func add_new_tokens([]int existing_vocab, []int new_tokens) []int {
     }
     return combined
 }
-

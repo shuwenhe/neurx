@@ -1,4 +1,5 @@
 package neurx.distributed.nccl_binding
+
 struct nccl_config {
     int rank
     int world_size
@@ -40,6 +41,7 @@ extern func neurx_nccl_all_gather(int64 comm, int64 send_buff, int64 recv_buff, 
 extern func neurx_nccl_reduce_scatter(int64 comm, int64 send_buff, int64 recv_buff, int count, string dtype, string op) int
 extern func neurx_nccl_send(int64 comm, int64 buffer, int count, string dtype, int peer, int tag) int
 extern func neurx_nccl_recv(int64 comm, int64 buffer, int count, string dtype, int peer, int tag) int
+
 func new_nccl_config(int rank, int world_size) nccl_config {
     nccl_config{
         rank: rank,
@@ -214,4 +216,3 @@ func log2(int n) int {
     }
     result
 }
-

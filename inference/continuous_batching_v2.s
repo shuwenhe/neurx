@@ -1,4 +1,5 @@
 package neurx.inference.continuous_batching_v2
+
 struct inference_request {
     int request_id
     []int prompt_tokens
@@ -272,4 +273,3 @@ struct scheduler_stats {
     int avg_wait_time_ms
     float kv_cache_utilization
 }
-

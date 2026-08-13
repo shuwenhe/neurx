@@ -1,4 +1,5 @@
 package neurx.testing.test_distributed_rlhf
+
 struct test_result {
     string name
     int passed
@@ -457,4 +458,3 @@ func main() {
         println("❌ " + int_to_str(total_failed) + " English texttestfailure")
     }
 }
-

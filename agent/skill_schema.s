@@ -1,5 +1,6 @@
 package neurx.agent.skill_schema
 use neurx.strings
+
 struct agent_skill_spec {
     string name
     string version
@@ -134,4 +135,3 @@ func agent_skill_record_load_state_dict(agent_skill_record record, agent_skill_r
         score: other.score,
     }
 }
-

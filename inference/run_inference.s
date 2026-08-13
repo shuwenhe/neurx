@@ -1,4 +1,5 @@
 package main
+
 struct model_config {
     int vocab_size
     int hidden_dim
@@ -230,4 +231,3 @@ func run_inference_demo() {
 func main() {
     run_inference_demo()
 }
-

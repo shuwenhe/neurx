@@ -1,4 +1,5 @@
 package neurx.serving.speculative_decoding
+
 struct spec_decode_config {
     int gamma
     float acceptance_threshold
@@ -389,4 +390,3 @@ func argmax_spec([]float arr, int n) int {
     }
     best
 }
-

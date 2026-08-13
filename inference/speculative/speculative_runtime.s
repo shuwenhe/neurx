@@ -240,4 +240,3 @@ func reset_runtime_statistics(runtime: speculative_decode_runtime) speculative_d
     updated.statistics = new_speculative_statistics()
     updated
 }
-

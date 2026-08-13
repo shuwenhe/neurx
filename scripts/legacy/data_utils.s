@@ -2,6 +2,7 @@ package neurx.script.data_utils
 use std.io
 use std.os
 use std.strings
+
 struct json_value {
     string type
     string str_val
@@ -246,4 +247,3 @@ func max(i64 a, i64 b) i64 {
 func div_round_up(i64 a, i64 b) i64 {
     (a + b - 1) / b
 }
-

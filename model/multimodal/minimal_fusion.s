@@ -1,4 +1,5 @@
 package neurx.model.multimodal.minimal_fusion
+
 struct minimal_fusion_state {
     string name
     string family
@@ -34,4 +35,3 @@ func minimal_fusion_state_dict(minimal_fusion_state state) minimal_fusion_state 
 func minimal_fusion_load_state_dict(minimal_fusion_state state, minimal_fusion_state other) minimal_fusion_state {
     other
 }
-

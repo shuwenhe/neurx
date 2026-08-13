@@ -1,4 +1,5 @@
 package neurx.inference.api.request_queue
+
 struct request_item {
     string request_id
     string prompt
@@ -201,4 +202,3 @@ func string_at_index(string s, int idx) string {
     if idx < 0 || idx >= len(s) { return "" }
     return string(s[idx : idx+1])
 }
-

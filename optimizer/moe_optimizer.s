@@ -1,4 +1,5 @@
 module moe_optimization
+
 struct moe_config {
     hidden_size: int = 4096
     intermediate_size: int = 14336
@@ -70,6 +71,7 @@ struct moe_router {
             this.noise = new normal(mean=0.0, std=config.jitter_noise)
     }
 }
+
 class load_balance_loss_computer {
     config: moe_config
     init(config: moe_config) {
@@ -90,6 +92,7 @@ class load_balance_loss_computer {
         return (load_balance_loss * this.config.loss_coef, aux_loss * this.config.aux_loss_coef)
     }
 }
+
 class mo_effn_layer {
     config: moe_config
     experts: list<moe_expert>
@@ -311,6 +314,7 @@ class mo_effn_layer {
         }
     }
 }
+
 class expert_specializer {
     config: moe_config
     moe_layer: MoEFFNLayer?
@@ -429,6 +433,7 @@ struct individual_expert_report {
     specialization_score: float
     importance_weight: float
 }
+
 class expert_manager {
     moe_layers: list<mo_effn_layer>
     specializer: ExpertSpecializer
@@ -596,4 +601,3 @@ export {
     expert_manager, pruning_report, merging_report, merge_operation, moe_efficiency_report,
     create_moe_ffn_layer, test_moe_system
 }
-

@@ -1,4 +1,5 @@
 package neurx.scheduler.batch_scheduler
+
 func new_batch_request(int req_id) []int {
     []int req = []int{req_id, 0, 0, 0}
     return req
@@ -189,4 +190,3 @@ func get_prefill_indices([][]int queue, int prefill_capacity) []int {
 func get_decode_indices([][]int queue, int decode_capacity) []int {
     return select_decode_requests(queue, decode_capacity)
 }
-

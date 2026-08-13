@@ -1,5 +1,6 @@
 package neurx.reasoning.data
 use neurx.agent.runtime
+
 struct reasoning_trace_sample_state {
     int step
     string goal
@@ -216,4 +217,3 @@ func reasoning_trace_step_output_state_dict(reasoning_trace_step_output output) 
 func reasoning_trace_step_output_load_state_dict(reasoning_trace_step_output output, reasoning_trace_step_output other) reasoning_trace_step_output {
     other
 }
-

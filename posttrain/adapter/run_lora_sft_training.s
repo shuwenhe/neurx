@@ -1,5 +1,6 @@
 package main
 use std.io.println
+
 func digit_to_str(int digit) string {
     if digit == 0 {
         return "0"
@@ -198,4 +199,3 @@ func main() {
     println("✓ LoRA SFT training completed")
     0
 }
-

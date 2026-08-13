@@ -1,4 +1,5 @@
 package neurx.scheduler.request_scheduler
+
 struct scheduled_request {
     string request_id
     int priority
@@ -197,4 +198,3 @@ func make_request_slice(int len) []scheduled_request {
 func get_current_timestamp() int {
     0
 }
-

@@ -1,4 +1,5 @@
 package neurx.agent.budget_manager
+
 struct agent_budget_state {
     int max_tokens
     int used_tokens
@@ -120,4 +121,3 @@ func agent_budget_summary(agent_budget_state state) string {
     ";steps=" + string(state.step_count) + "/" + string(state.max_steps) +
     ";exhausted=" + string(agent_budget_exhausted(state))
 }
-

@@ -1,4 +1,5 @@
 package neurx.serving.security.request_governance
+
 struct governance_state {
     []string tenant_ids
     []string key_fingerprints
@@ -110,4 +111,3 @@ func governance_disable_tenant(governance_state state, string tenant_id) governa
     }
     state
 }
-

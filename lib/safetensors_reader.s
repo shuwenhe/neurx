@@ -1,4 +1,5 @@
 module safetensors_reader
+
 struct tensor_metadata {
     string name
     []int shape
@@ -165,4 +166,3 @@ func int_to_hex(int n) string {
     }
     return result
 }
-

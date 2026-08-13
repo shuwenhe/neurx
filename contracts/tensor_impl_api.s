@@ -2,6 +2,7 @@ import "storage_api"
 import "dtype_api"
 import "layout_api"
 import "device_api"
+
 struct version_counter {
     version: i64
 }
@@ -65,4 +66,3 @@ interface i_tensor_impl_lifecycle {
     finalize(impl: tensor_impl) -> void
     debug_info(impl: tensor_impl) -> string
 }
-

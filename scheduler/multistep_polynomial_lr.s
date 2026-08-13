@@ -1,4 +1,5 @@
 package neurx.scheduler.pytorch_schedulers
+
 struct multistep_lr_state {
     float base_lr
     float gamma
@@ -141,4 +142,3 @@ func sched_ln(float x) float {
     }
     2.0 * result
 }
-

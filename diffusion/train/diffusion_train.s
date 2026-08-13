@@ -1,5 +1,6 @@
 package neurx.diffusion.train
 use neurx.diffusion.config
+
 struct diffusion_train_state {
     diffusion_config cfg
     int step
@@ -34,4 +35,3 @@ func diffusion_train_state_dict(diffusion_train_state state) diffusion_train_sta
 func diffusion_train_load_state_dict(diffusion_train_state state, diffusion_train_state other) diffusion_train_state {
     other
 }
-

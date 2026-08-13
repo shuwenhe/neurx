@@ -1,4 +1,5 @@
 package neurx.agent.tool_registry
+
 struct agent_tool_registry_state {
     []string tool_names
     []bool enabled
@@ -267,4 +268,3 @@ func agent_tool_registry_set_timeout(agent_tool_registry_state state, string too
         capabilities: state.capabilities,
     }
 }
-

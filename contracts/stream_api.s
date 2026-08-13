@@ -57,4 +57,3 @@ interface i_stream_manager_singleton {
     initialize(device: device) -> void
     finalize(device: device) -> void
 }
-

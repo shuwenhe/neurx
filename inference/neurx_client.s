@@ -1,20 +1,15 @@
-// NeurX 推理服务客户端库
-// inference_client.s - 100% Pure S 实现
-
 package neurx.inference.client
-
 import neurx.util.*
 
-// API 响应结构体
 struct ChatMessage {
-    string role          // "user", "assistant", "system"
+    string role
     string content
 }
 
 struct CompletionChoice {
     int index
     ChatMessage message
-    string finish_reason  // "stop", "length", "error"
+    string finish_reason
 }
 
 struct CompletionUsage {
@@ -38,16 +33,14 @@ struct ErrorResponse {
     string request_id
 }
 
-// 客户端配置
 struct NeurXClientConfig {
-    string api_endpoint      // "http://localhost:8000"
+    string api_endpoint
     string api_key
     int timeout_seconds
     bool enable_streaming
     string default_model
 }
 
-// 推理参数
 struct GenerateParams {
     string model
     []ChatMessage messages
@@ -59,7 +52,6 @@ struct GenerateParams {
     map[string:string extra_params
 }
 
-// NeurX 客户端
 class NeurXClient {
     NeurXClientConfig config
     string session_id
@@ -94,32 +86,21 @@ class NeurXClient {
     }
 
     func generate(params: GenerateParams) ChatCompletion {
-        // 构建请求
         request_json := build_chat_request(params)
-        
-        // 发送 HTTP POST 请求
         endpoint := this.config.api_endpoint + "/v1/chat/completions"
         response_body := http_post(endpoint, request_json, this.config.api_key)
-        
-        // 解析响应
         completion := parse_chat_completion(response_body)
         return completion
     }
 
     func stream_generate(params: GenerateParams) []string {
         tokens := []string{}
-        
-        // 构建请求
         request_json := build_chat_request(params)
-        
-        // 发送流式请求
         endpoint := this.config.api_endpoint + "/v1/chat/completions"
         stream := http_stream(endpoint, request_json, this.config.api_key)
-        
-        // 处理流式响应
         for line in stream {
             if starts_with(line, "data: ") {
-                data := line[6:]  // 去掉 "data: "
+                data := line[6:]
                 if data != "[DONE]" {
                     content := extract_content(data)
                     if content != "" {
@@ -128,7 +109,6 @@ class NeurXClient {
                 }
             }
         }
-        
         return tokens
     }
 
@@ -142,9 +122,7 @@ class NeurXClient {
     }
 }
 
-// 辅助函数
 func build_chat_request(params: GenerateParams) string {
-    // 构建 JSON 请求
     request := map[string:any]{
         "model": params.model,
         "messages": params.messages,
@@ -157,9 +135,7 @@ func build_chat_request(params: GenerateParams) string {
 }
 
 func parse_chat_completion(response: string) ChatCompletion {
-    // 解析 JSON 响应
     data := json_unmarshal(response)
-    
     completion := ChatCompletion{
         id: get_string(data, "id"),
         object: get_string(data, "object"),
@@ -168,7 +144,6 @@ func parse_chat_completion(response: string) ChatCompletion {
         choices: parse_choices(get_array(data, "choices")),
         usage: parse_usage(get_object(data, "usage")),
     }
-    
     return completion
 }
 
@@ -211,23 +186,18 @@ func extract_content(json_str: string) string {
 }
 
 func http_post(endpoint: string, body: string, api_key: string) string {
-    // HTTP POST 实现（伪代码）
-    // 实际实现需要调用系统库
     return ""
 }
 
 func http_stream(endpoint: string, body: string, api_key: string) []string {
-    // HTTP 流式请求实现
     return []string{}
 }
 
 func http_get(endpoint: string) any {
-    // HTTP GET 实现
     return map[string:any]{}
 }
 
 func generate_session_id() string {
-    // 生成会话 ID
     return timestamp_hex() + random_string(16)
 }
 
@@ -235,13 +205,12 @@ func starts_with(str: string, prefix: string) bool {
     return len(str) >= len(prefix) && str[0:len(prefix)] == prefix
 }
 
-// JSON 辅助函数（简化版）
 func json_marshal(obj: any) string {
-    return ""  // 实际实现
+    return ""
 }
 
 func json_unmarshal(json_str: string) any {
-    return map[string:any]{}  // 实际实现
+    return map[string:any]{}
 }
 
 func get_string(obj: any, key: string) string {

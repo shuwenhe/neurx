@@ -587,4 +587,3 @@ func int_to_string(int value) string {
 func string_char(int code) string {
     string(code)
 }
-

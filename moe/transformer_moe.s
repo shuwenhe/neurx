@@ -1,4 +1,5 @@
 package neurx.moe.transformer
+
 struct moe_config {
     int num_experts
     int num_experts_per_token
@@ -515,4 +516,3 @@ func moe_compute_memory(moe_layer layer, int batch_size, int seq_len) long {
     long activation_memory = batch_size * seq_len * (hidden_dim + expert_dim) * 4
     param_memory + activation_memory
 }
-

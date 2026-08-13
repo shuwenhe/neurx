@@ -1,5 +1,6 @@
 package neurx.experimental.async_policy
 use neurx.tensor
+
 struct async_policy_config {
     int num_rollout_workers
     int num_training_workers
@@ -134,4 +135,3 @@ struct async_stats {
     int policy_version
     float buffer_utilization
 }
-

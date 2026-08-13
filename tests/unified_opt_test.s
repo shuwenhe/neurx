@@ -1,4 +1,5 @@
 package neurx.tests.unified_test
+
 func test_paged_attention_basic() bool {
     int block_size = 16
     int num_tokens = 64
@@ -139,4 +140,3 @@ func main() {
     bool result = run_all_tests()
     return result
 }
-

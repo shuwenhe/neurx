@@ -1,5 +1,6 @@
 package main
 use std.io.println
+
 func main() {
     println("NeurX S CLI Quick Reference")
     println("")
@@ -21,4 +22,3 @@ func main() {
     println("  tools/cleanup-old-commits.sh -> cleanup-old-commits.s")
     0
 }
-

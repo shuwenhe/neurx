@@ -10,6 +10,7 @@ use neurx.data.dataset.corpus_loader.{corpus_state, corpus_batch_result, new_cor
 use neurx.tensor.tensor
 use neurx.tensor.new
 use neurx.strings
+
 struct real_training_state {
     tensor weights_q
     tensor weights_k
@@ -217,4 +218,3 @@ func new_from_ints([]int values, []int shape) tensor {
     }
     new(data, shape, true)
 }
-

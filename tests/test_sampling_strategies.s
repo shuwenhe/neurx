@@ -1,5 +1,6 @@
 package main
 use neurx.inference.sampling_strategies
+
 func assert_true(bool value, string name) {
     if value {
         println("PASS " + name)
@@ -150,4 +151,3 @@ func main() {
     test_contrastive_search()
     test_beam_search()
 }
-

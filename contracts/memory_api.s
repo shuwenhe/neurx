@@ -1,5 +1,6 @@
 import "device_api"
 import "stream_api"
+
 struct memory_ptr {
     addr: i64
     device: device
@@ -34,4 +35,3 @@ interface i_memory_debug {
     get_memory_leaks() -> []memory_ptr
     print_memory_usage() -> string
 }
-

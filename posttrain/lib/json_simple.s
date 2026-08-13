@@ -1,5 +1,6 @@
 package neurx.posttrain.lib.json_simple
 use std.io.readfile
+
 struct json_value {
     int type
     bool bool_value
@@ -398,4 +399,3 @@ func parse_float(string s) float {
     }
     return f
 }
-

@@ -232,4 +232,3 @@ func route_request(http_request req) http_response {
         body: "{\"error\":\"Not found\"}",
     }
 }
-
