@@ -3,12 +3,8 @@ package neurx.inference.medusa_examples
 use neurx.inference.medusa.*
 use neurx.inference.medusa_integration.*
 
-// ============================================================================
-// Medusa Configuration Presets
-// ============================================================================
-
 func create_medusa_config_small() medusa_heads_config {
-    // Lightweight Medusa for fast inference (2-3x speedup)
+
     config := medusa_heads_config{
         num_heads: 4,
         base_hidden_dim: 4096,
@@ -22,7 +18,7 @@ func create_medusa_config_small() medusa_heads_config {
 }
 
 func create_medusa_config_medium() medusa_heads_config {
-    // Balanced Medusa (3-4x speedup, higher quality)
+
     config := medusa_heads_config{
         num_heads: 8,
         base_hidden_dim: 4096,
@@ -36,7 +32,7 @@ func create_medusa_config_medium() medusa_heads_config {
 }
 
 func create_medusa_config_large() medusa_heads_config {
-    // Maximum quality Medusa (4-5x speedup, best coherence)
+
     config := medusa_heads_config{
         num_heads: 12,
         base_hidden_dim: 4096,
@@ -49,15 +45,10 @@ func create_medusa_config_large() medusa_heads_config {
     config
 }
 
-// ============================================================================
-// Example 1: Basic Medusa Generation
-// ============================================================================
-
 func example_basic_medusa_generation() string {
-    // Setup configuration
+
     medusa_config := create_medusa_config_medium()
-    
-    // Create sampling config
+
     sampling_cfg := sampling_config{
         temperature: 1.0,
         top_k: 50,
@@ -66,58 +57,49 @@ func example_basic_medusa_generation() string {
         min_length: 1,
         max_length: 512,
     }
-    
-    // Initialize Medusa pipeline
+
     pipeline := new_medusa_pipeline(medusa_config)
-    
-    // Simulate hidden states (in practice from model forward pass)
+
     hidden_states := [][]float{}
     i := 0
-    while i < 10 {  // 10 sequence positions
+    while i < 10 {
         hidden := []float{}
         j := 0
-        while j < 4096 {  // Hidden dimension
+        while j < 4096 {
             hidden = append(hidden, 0.1)
             j = j + 1
         }
         hidden_states = append(hidden_states, hidden)
         i = i + 1
     }
-    
-    // Run prefill
+
     (prefill_pipeline, last_hidden) := pipeline.prefill(pipeline, hidden_states, []int{1, 2, 3, 4, 5})
-    
-    // Generate with Medusa
+
     draft_count := 0
     accepted_count := 0
     position := 0
-    
-    while position < 50 {  // Generate 50 tokens
+
+    while position < 50 {
         (prefill_pipeline, draft_tokens) := medusa_decode_step(
             prefill_pipeline,
             last_hidden,
             medusa_config.num_heads
         )
-        
+
         if draft_tokens.len > 0 {
             draft_count = draft_count + draft_tokens[0].len
             accepted_count = accepted_count + 1
         }
         position = position + 1
     }
-    
+
     return "Generated " + int_string(draft_count) + " tokens, accepted " + int_string(accepted_count)
 }
 
-// ============================================================================
-// Example 2: Multi-Batch Inference with Medusa
-// ============================================================================
-
 func example_batch_inference_with_medusa() string {
-    // Create Medusa config
+
     medusa_config := create_medusa_config_medium()
-    
-    // Create batch
+
     batch := inference_batch_with_medusa{
         batch_id: 1,
         input_ids: [][]int{
@@ -134,8 +116,7 @@ func example_batch_inference_with_medusa() string {
         max_draft_tokens: 8,
         num_sequences: 3,
     }
-    
-    // Inference config
+
     sampling_cfg := sampling_config{
         temperature: 1.0,
         top_k: 50,
@@ -144,58 +125,47 @@ func example_batch_inference_with_medusa() string {
         min_length: 1,
         max_length: 512,
     }
-    
-    // Create inference engine
+
     pipeline := new_medusa_pipeline(medusa_config)
     model_handle := inference_model_handle{model_id: 1, is_loaded: true}
     cache_mgr := kv_cache_manager{max_cache_size: 1000000, current_size: 0}
-    
+
     engine := initialize_medusa_inference_engine(model_handle, medusa_config, cache_mgr, sampling_cfg, true)
-    
-    // Run generation
+
     (final_engine, output) := generate_with_medusa(engine, batch, 50)
-    
-    // Compute stats
+
     total_tokens := 0
     i := 0
     while i < output.num_tokens_generated.len {
         total_tokens = total_tokens + output.num_tokens_generated[i]
         i = i + 1
     }
-    
+
     result := "Batch Inference Complete:\n" +
         "  Sequences: " + int_string(batch.num_sequences) + "\n" +
         "  Total tokens generated: " + int_string(total_tokens) + "\n" +
         "  Acceptance rate: " + float_string(final_engine.medusa_pipeline.stats.acceptance_rate)
-    
+
     result
 }
-
-// ============================================================================
-// Example 3: Adaptive Temperature Scaling
-// ============================================================================
 
 func example_adaptive_temperature() string {
     medusa_config := create_medusa_config_medium()
     pipeline := new_medusa_pipeline(medusa_config)
-    
-    // Track acceptance rate over time
+
     acceptance_rates := []float{}
     temperatures := []float{0.7, 0.8, 0.9, 1.0, 1.1}
-    
-    // Simulate different temperatures
+
     temp_idx := 0
     while temp_idx < temperatures.len {
         temp := temperatures[temp_idx]
-        
-        // Simulate inference at this temperature
-        acceptance_rate := 0.75 + (1.0 - temp) * 0.1  // Simplified model
+
+        acceptance_rate := 0.75 + (1.0 - temp) * 0.1
         acceptance_rates = append(acceptance_rates, acceptance_rate)
-        
+
         temp_idx = temp_idx + 1
     }
-    
-    // Find optimal temperature
+
     best_temp_idx := 0
     best_acceptance := acceptance_rates[0]
     i := 1
@@ -206,62 +176,51 @@ func example_adaptive_temperature() string {
         }
         i = i + 1
     }
-    
+
     best_temp := temperatures[best_temp_idx]
-    
+
     result := "Adaptive Temperature Analysis:\n" +
         "  Best temperature: " + float_string(best_temp) + "\n" +
         "  Best acceptance rate: " + float_string(best_acceptance)
-    
+
     result
 }
 
-// ============================================================================
-// Example 4: Progressive Medusa Training
-// ============================================================================
-
 func example_progressive_medusa_training() string {
-    // Simulate progressive training stages
+
     medusa_config := create_medusa_config_small()
     pipeline := new_medusa_pipeline(medusa_config)
-    
+
     training_log := "Progressive Medusa Training:\n"
-    
-    // Stage 1: Train heads separately
+
     stage := 1
     step := 0
     while step < 1000 {
-        // Simulate training step
+
         step = step + 100
     }
     training_log = training_log + "  Stage " + int_string(stage) + ": Separate head training - Complete\n"
-    
-    // Stage 2: Joint fine-tuning
+
     stage = stage + 1
     step = 0
     while step < 500 {
-        // Simulate fine-tuning step
+
         step = step + 50
     }
     training_log = training_log + "  Stage " + int_string(stage) + ": Joint fine-tuning - Complete\n"
-    
-    // Stage 3: Speculative decoding tuning
+
     stage = stage + 1
     step = 0
     while step < 300 {
-        // Simulate tuning
+
         step = step + 30
     }
     training_log = training_log + "  Stage " + int_string(stage) + ": Speculative tuning - Complete\n"
-    
+
     training_log = training_log + "\n✅ Training complete! Expected speedup: 3-4x"
-    
+
     training_log
 }
-
-// ============================================================================
-// Example 5: Medusa Quality vs Speed Trade-off
-// ============================================================================
 
 func example_quality_vs_speed_tradeoff() string {
     configs := []medusa_heads_config{
@@ -269,13 +228,13 @@ func example_quality_vs_speed_tradeoff() string {
         create_medusa_config_medium(),
         create_medusa_config_large(),
     }
-    
+
     config_names := []string{"Small", "Medium", "Large"}
     expected_speedups := []float{2.5, 3.5, 4.5}
     expected_quality := []float{0.95, 0.98, 0.99}
-    
+
     result := "Medusa Configuration Trade-offs:\n\n"
-    
+
     i := 0
     while i < configs.len {
         result = result + config_names[i] + ":\n"
@@ -285,13 +244,9 @@ func example_quality_vs_speed_tradeoff() string {
         result = result + "\n"
         i = i + 1
     }
-    
+
     result
 }
-
-// ============================================================================
-// Benchmarking Suite
-// ============================================================================
 
 struct medusa_benchmark_result {
     test_name: string
@@ -310,35 +265,31 @@ func benchmark_medusa_vs_standard(
     int seq_length,
     int num_iterations
 ) medusa_benchmark_result {
-    // Simplified benchmark
+
     total_time_medusa := 0.0
     total_time_standard := 0.0
     acceptance_rates := []float{}
-    
+
     iter := 0
     while iter < num_iterations {
-        // Simulate standard inference
-        latency_standard := 100.0  // 100ms per token
+
+        latency_standard := 100.0
         total_time_standard = total_time_standard + latency_standard
-        
-        // Simulate Medusa inference
-        latency_medusa := 30.0  // 30ms with Medusa
+
+        latency_medusa := 30.0
         total_time_medusa = total_time_medusa + latency_medusa
-        
-        // Track acceptance rate
+
         acceptance_rates = append(acceptance_rates, 0.78)
-        
+
         iter = iter + 1
     }
-    
+
     avg_latency_medusa := total_time_medusa / float(num_iterations)
     avg_latency_standard := total_time_standard / float(num_iterations)
-    
-    // Compute metrics
+
     speedup := avg_latency_standard / avg_latency_medusa
     throughput := float(num_sequences) / (avg_latency_medusa / 1000.0)
-    
-    // Compute average acceptance rate
+
     avg_acceptance := 0.0
     i := 0
     while i < acceptance_rates.len {
@@ -346,7 +297,7 @@ func benchmark_medusa_vs_standard(
         i = i + 1
     }
     avg_acceptance = avg_acceptance / float(acceptance_rates.len) if acceptance_rates.len > 0 else 0.0
-    
+
     result := medusa_benchmark_result{
         test_name: "Medusa vs Standard",
         avg_latency_ms: avg_latency_medusa,
@@ -357,7 +308,7 @@ func benchmark_medusa_vs_standard(
         acceptance_rate: avg_acceptance,
         speedup_factor: speedup,
     }
-    
+
     result
 }
 
@@ -371,13 +322,9 @@ func print_benchmark_results(medusa_benchmark_result result) string {
         "  Throughput: " + float_string(result.throughput_tokens_per_sec) + " tokens/sec\n" +
         "  Acceptance Rate: " + float_string(result.acceptance_rate) + "\n" +
         "  Speedup Factor: " + float_string(result.speedup_factor) + "x\n"
-    
+
     report
 }
-
-// ============================================================================
-// Production Deployment Guide
-// ============================================================================
 
 func create_production_medusa_config() string {
     guide := "Production Medusa Deployment Guide:\n\n" +
@@ -401,13 +348,9 @@ func create_production_medusa_config() string {
         "   - Disable Medusa if acceptance rate < 60%\n" +
         "   - Fall back to standard decoding\n" +
         "   - Log reason for fallback\n"
-    
+
     guide
 }
-
-// ============================================================================
-// Utility Functions
-// ============================================================================
 
 func int_string(int val) string {
     "0"
