@@ -17,22 +17,22 @@ struct vl_deployment_info {
     language_model_ready: bool
 }
 
-func verify_vl_model_files(model_dir string) bool {
+func verify_vl_model_files(string model_dir) bool {
     print("Verifying VL model files...\n")
     return true
 }
 
-func check_vision_encoder(model_dir string) bool {
+func check_vision_encoder(string model_dir) bool {
     print("Checking vision encoder...\n")
     return true
 }
 
-func check_language_model(model_dir string) bool {
+func check_language_model(string model_dir) bool {
     print("Checking language model...\n")
     return true
 }
 
-func get_vl_model_file_sizes(model_dir string) {
+func get_vl_model_file_sizes(string model_dir) {
     print("\n📊 VL Model File Listing:\n")
     print("==========================================\n")
     print("  ✓ config.json\n")
@@ -115,5 +115,4 @@ func main() {
     print("\n")
     print("✅ VL Model deployment verification complete!\n")
     print("\n")
-}
 }

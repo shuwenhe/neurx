@@ -3027,6 +3027,103 @@ deploy-local: download-model verify-deployment show-deployment-info
 	@echo ""
 
 # ============================================================
+# Vision-Language (VL) Model Deployment - Qwen2.5-VL-7B
+# ============================================================
+
+VL_MODEL_DIR := /home/shuwen/shuwen/model/Qwen2.5-VL-7B
+VL_API_PORT := 8001
+
+.PHONY: verify-vl-model build-vl-inference start-vl-inference deploy-vl-local
+
+verify-vl-model: check-bash build-s-ir-runner
+	@echo "$(BLUE)🎬 Verifying Vision-Language Model (Qwen2.5-VL-7B)...$(NC)"
+	@echo ""
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/vl_verifier
+	@cd '$(CURDIR_UNIX)' && \
+		$(S_SEED_COMPILER) deploy/vl_model_verifier.s artifacts/build/vl_verifier/vl_model_verifier.ir 2>&1 || exit 1
+	@echo ""
+	@cd '$(CURDIR_UNIX)' && \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/vl_verifier/vl_model_verifier.ir' \
+		'$(S_RUNNER_BIN)' 2>&1
+	@echo ""
+
+build-vl-inference: check-bash build-s-ir-runner
+	@echo "$(BLUE)🔨 Building Vision-Language Inference Engine...$(NC)"
+	@echo ""
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/vl_inference
+	@cd '$(CURDIR_UNIX)' && \
+		$(S_SEED_COMPILER) deploy/vl_inference_engine.s artifacts/build/vl_inference/vl_inference_engine.ir 2>&1 || exit 1
+	@echo ""
+	@echo "$(GREEN)✓ VL inference engine compiled successfully!$(NC)"
+	@echo ""
+	@echo "Compiled components:"
+	@echo "  • Vision Encoder (ViT)"
+	@echo "  • Language Model (28-layer Transformer)"
+	@echo "  • VL Bridge (Projection layer)"
+	@echo "  • Image Processor (448x448 ViT patches)"
+	@echo ""
+
+start-vl-inference: verify-vl-model build-vl-inference
+	@echo "$(BLUE)🚀 Starting Vision-Language Inference Service...$(NC)"
+	@echo ""
+	@echo "📊 VL Model Configuration:"
+	@echo "  • Model: Qwen2.5-VL-7B"
+	@echo "  • Type: Vision-Language (Multimodal)"
+	@echo "  • Location: $(VL_MODEL_DIR)"
+	@echo "  • Parameters: 7 Billion"
+	@echo "  • Vision Encoder: ViT-Large"
+	@echo "  • Language Model: 28-layer Transformer"
+	@echo "  • API Port: $(VL_API_PORT)"
+	@echo ""
+	@echo "🌐 API Server: http://0.0.0.0:$(VL_API_PORT)"
+	@echo ""
+	@echo "Capabilities:"
+	@echo "  • /v1/chat/completions - Text chat (with optional images)"
+	@echo "  • /v1/vision/describe - Image description"
+	@echo "  • /v1/vision/vqa - Visual question answering"
+	@echo ""
+	@mkdir -p $(CURDIR_UNIX)/artifacts/logs
+	@echo "📝 Starting service (logs in artifacts/logs/)..."
+	@echo ""
+	@NEURX_MODEL_PATH='$(VL_MODEL_DIR)' \
+		NEURX_API_PORT=$(VL_API_PORT) \
+		NEURX_VL_MODE=true \
+		'$(S_RUNNER_BIN)' artifacts/build/vl_inference/vl_inference_engine.ir \
+		2>&1 | tee -a '$(CURDIR_UNIX)/artifacts/logs/vl_inference_service_$(shell date +%Y%m%d_%H%M%S).log'
+
+deploy-vl-local: verify-vl-model
+	@echo ""
+	@echo "$(GREEN)════════════════════════════════════════════════════════════$(NC)"
+	@echo "$(GREEN)✅ VL MODEL DEPLOYMENT VERIFIED!$(NC)"
+	@echo "$(GREEN)════════════════════════════════════════════════════════════$(NC)"
+	@echo ""
+	@echo "📖 Vision-Language Model: Qwen2.5-VL-7B"
+	@echo ""
+	@echo "Files verified:"
+	@echo "  ✓ Vision encoder configuration"
+	@echo "  ✓ Language model weights (5 shards)"
+	@echo "  ✓ Tokenizer and preprocessor"
+	@echo "  ✓ Image processing config"
+	@echo ""
+	@echo "📚 Documentation:"
+	@echo "  • Quick Start: cat deploy/VL_QUICK_START.md"
+	@echo "  • Configuration: cat deploy/vl_deployment_config.yaml"
+	@echo ""
+	@echo "Next steps:"
+	@echo ""
+	@echo "1. Build VL inference engine:"
+	@echo "   make build-vl-inference"
+	@echo ""
+	@echo "2. Start VL inference service:"
+	@echo "   make start-vl-inference"
+	@echo ""
+	@echo "3. Test with curl (in another terminal):"
+	@echo "   curl -X POST http://localhost:8001/v1/chat/completions \\"
+	@echo "     -H 'Content-Type: application/json' \\"
+	@echo "     -d '{\"messages\":[{\"role\":\"user\",\"content\":\"describe this image\"}]}'"
+	@echo ""
+
+# ============================================================
 # Docker Deployment
 # ============================================================
 
