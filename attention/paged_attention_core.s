@@ -90,11 +90,32 @@ func reserve_tokens(cache paged_kv_cache, int num_new_tokens) paged_kv_cache {
     if needed_blocks > cache.total_blocks {
         needed_blocks = cache.total_blocks
         new_total = cache.total_blocks * cache.block_size
+        if new_total > current_tokens {
+            num_new_tokens = new_total - current_tokens
+        } else {
+            num_new_tokens = 0
+            new_total = current_tokens
+        }
     }
-    int new_slot_count = new_total
+    []slot_mapping slots = cache.token_to_slot
+    int added = 0
+    while added < num_new_tokens {
+        int logical_pos = current_tokens + added
+        int block_id = logical_pos / cache.block_size
+        int offset_in_block = mod_int(logical_pos, cache.block_size)
+        if block_id < 0 || block_id >= len(cache.blocks) {
+            break
+        }
+        if offset_in_block == 0 && cache.blocks[block_id].num_filled > 0 {
+            cache.blocks[block_id].num_filled = 0
+            cache.blocks[block_id].is_full = false
+        }
+        slots = append(slots, slot_mapping{block_id: block_id, offset_in_block: offset_in_block})
+        added = added + 1
+    }
     paged_kv_cache{
         blocks: cache.blocks,
-        token_to_slot: cache.token_to_slot,
+        token_to_slot: slots,
         block_size: cache.block_size,
         num_kv_heads: cache.num_kv_heads,
         head_size: cache.head_size,
@@ -102,6 +123,13 @@ func reserve_tokens(cache paged_kv_cache, int num_new_tokens) paged_kv_cache {
         allocated_blocks: needed_blocks,
         total_tokens: new_total,
     }
+}
+
+func mod_int(int a, int b) int {
+    if b == 0 {
+        return 0
+    }
+    a - (a / b) * b
 }
 
 func release_tokens(cache paged_kv_cache, int num_release) paged_kv_cache {
@@ -154,8 +182,10 @@ func write_kv_to_cache(
     if len(keys) == 0 || len(values) == 0 {
         return cache
     }
+    int kv_stride = cache.num_kv_heads * cache.head_size
+    int num_new_tokens = len(keys) / kv_stride
     int token_offset = 0
-    for token_offset < len(keys) / (cache.num_kv_heads * cache.head_size) {
+    for token_offset < num_new_tokens {
         int logical_pos = start_token_idx + token_offset
         if logical_pos >= cache.total_tokens {
             break
@@ -169,6 +199,20 @@ func write_kv_to_cache(
         if block_id < 0 || block_id >= len(cache.blocks) {
             break
         }
+        paged_block block = cache.blocks[block_id]
+        int base_src = token_offset * kv_stride
+        int base_dst = offset_in_block * kv_stride
+        int i = 0
+        while i < kv_stride && base_src + i < len(keys) && base_dst + i < len(block.key_data) {
+            block.key_data[base_dst + i] = keys[base_src + i]
+            block.value_data[base_dst + i] = values[base_src + i]
+            i = i + 1
+        }
+        block.num_filled = block.num_filled + 1
+        if block.num_filled >= cache.block_size {
+            block.is_full = true
+        }
+        cache.blocks[block_id] = block
         token_offset = token_offset + 1
     }
     return cache
@@ -186,10 +230,82 @@ func compute_paged_attention(
     if len(queries) == 0 {
         return output
     }
-    int num_query_tokens = len(queries) / (num_heads * head_size)
-    int context_len = len(cache.token_to_slot)
+    int q_stride = num_heads * head_size
+    int num_query_tokens = len(queries) / q_stride
+    int context_len = len(slot_mappings)
+    int kv_stride = cache.num_kv_heads * cache.head_size
     int q_idx = 0
-    for q_idx < num_query_tokens {
+    while q_idx < num_query_tokens {
+        int h = 0
+        while h < num_heads {
+            int kv_head = h
+            if kv_head >= cache.num_kv_heads {
+                kv_head = mod_int(kv_head, cache.num_kv_heads)
+            }
+            int q_head_base = q_idx * q_stride + h * head_size
+            float[] scores = make([]float, context_len)
+            int k_pos = 0
+            while k_pos < context_len {
+                if k_pos > q_idx {
+                    scores[k_pos] = -1.0e30
+                    k_pos = k_pos + 1
+                    continue
+                }
+                slot_mapping slot = slot_mappings[k_pos]
+                int block_id = slot.block_id
+                int offset_in_block = slot.offset_in_block
+                if block_id < 0 || block_id >= len(cache.blocks) {
+                    scores[k_pos] = -1.0e30
+                    k_pos = k_pos + 1
+                    continue
+                }
+                paged_block block = cache.blocks[block_id]
+                int kv_base = offset_in_block * kv_stride + kv_head * head_size
+                float qk = 0.0
+                int d = 0
+                while d < head_size {
+                    float q_val = queries[q_head_base + d]
+                    float k_val = 0.0
+                    if kv_base + d < len(block.key_data) {
+                        k_val = block.key_data[kv_base + d]
+                    }
+                    qk = qk + q_val * k_val
+                    d = d + 1
+                }
+                scores[k_pos] = qk * scale
+                k_pos = k_pos + 1
+            }
+            float[] probs = compute_softmax(scores)
+            int out_base = q_head_base
+            int d = 0
+            while d < head_size {
+                float acc = 0.0
+                int k_pos2 = 0
+                while k_pos2 < context_len {
+                    slot_mapping slot = slot_mappings[k_pos2]
+                    int block_id = slot.block_id
+                    int offset_in_block = slot.offset_in_block
+                    if block_id < 0 || block_id >= len(cache.blocks) {
+                        k_pos2 = k_pos2 + 1
+                        continue
+                    }
+                    paged_block block = cache.blocks[block_id]
+                    int kv_base = offset_in_block * kv_stride + kv_head * head_size
+                    float v_val = 0.0
+                    if kv_base + d < len(block.value_data) {
+                        v_val = block.value_data[kv_base + d]
+                    }
+                    acc = acc + probs[k_pos2] * v_val
+                    k_pos2 = k_pos2 + 1
+                }
+                while out_base + d >= len(output) {
+                    output = append(output, 0.0)
+                }
+                output[out_base + d] = acc
+                d = d + 1
+            }
+            h = h + 1
+        }
         q_idx = q_idx + 1
     }
     return output
@@ -245,31 +361,37 @@ func compute_softmax([]float scores) []float {
 }
 
 func math_exp(float x) float {
-    if x > 100.0 {
-        return 3.4028235e38
+    if x > 88.0 {
+        return 6.5623733e37
     }
-    if x < -100.0 {
+    if x < -88.0 {
         return 0.0
     }
-    float result = 1.0 + x
-    float term = x
-    int i = 2
-    for i < 10 {
-        term = term * x / f(i)
+    float term = 1.0
+    float result = 1.0
+    int i = 1
+    while i < 24 {
+        term = term * x / float(i)
         result = result + term
+        if term < 0.0 {
+            term = 0.0 - term
+        }
+        if term < 1.0e-12 {
+            break
+        }
         i = i + 1
     }
     return result
 }
 
-func f(int n) float {
+func factorial(int n) float {
     if n <= 1 {
         return 1.0
     }
     float result = 1.0
     int i = 2
-    for i <= n {
-        result = result * f(i)
+    while i <= n {
+        result = result * float(i)
         i = i + 1
     }
     return result
