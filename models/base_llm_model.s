@@ -237,8 +237,7 @@ func NewBaseLLMModel(config model_config) *base_llm_model {
     return model
 }
 
-impl base_llm_model {
-func Forward(self, []int32 input_ids, [][]int32 attention_mask) []float32 {
+func (m *base_llm_model) Forward(input_ids []int32, attention_mask [][]int32) []float32 {
 
     embeddings := []float32{}
     for i := 0; i < len(input_ids); i++ {
@@ -249,27 +248,27 @@ func Forward(self, []int32 input_ids, [][]int32 attention_mask) []float32 {
 
     hidden_states := embeddings
 
-    for layer_idx := 0; layer_idx < len(self.layers); layer_idx++ {
-        layer := self.layers[layer_idx]
+    for layer_idx := 0; layer_idx < len(m.layers); layer_idx++ {
+        layer := m.layers[layer_idx]
 
-        normed := self.applyLayerNorm(hidden_states, layer.norm1)
+        normed := m.applyLayerNorm(hidden_states, layer.norm1)
 
         attn_output := layer.self_attn.Forward(normed, attention_mask)
-        hidden_states = self.addResidual(hidden_states, attn_output)
+        hidden_states = m.addResidual(hidden_states, attn_output)
 
-        normed = self.applyLayerNorm(hidden_states, layer.norm2)
+        normed = m.applyLayerNorm(hidden_states, layer.norm2)
         ffn_output := layer.feed_forward.Forward(normed)
-        hidden_states = self.addResidual(hidden_states, ffn_output)
+        hidden_states = m.addResidual(hidden_states, ffn_output)
     }
 
-    normed := self.applyLayerNorm(hidden_states, self.norm)
+    normed := m.applyLayerNorm(hidden_states, m.norm)
 
-    logits := self.output_linear.Forward(normed)
+    logits := m.output_linear.Forward(normed)
 
     return logits
 }
 
-func applyLayerNorm(self, []float32 x, *layer_norm norm) []float32 {
+func (m *base_llm_model) applyLayerNorm(x []float32, norm *layer_norm) []float32 {
     if norm == nil {
         return x
     }
@@ -277,7 +276,7 @@ func applyLayerNorm(self, []float32 x, *layer_norm norm) []float32 {
     return x
 }
 
-func addResidual(self, []float32 x, []float32 y) []float32 {
+func (m *base_llm_model) addResidual(x []float32, y []float32) []float32 {
     if len(x) != len(y) {
         return x
     }
@@ -287,23 +286,18 @@ func addResidual(self, []float32 x, []float32 y) []float32 {
     }
     return result
 }
-}
 
-impl attention_layer {
-func Forward(self, []float32 hidden_states, [][]int32 attention_mask) []float32 {
+func (a *attention_layer) Forward(hidden_states []float32, attention_mask [][]int32) []float32 {
 
     _ = hidden_states
     _ = attention_mask
     return []float32{}
 }
-}
 
-impl ffn_layer {
-func Forward(self, []float32 hidden_states) []float32 {
+func (f *ffn_layer) Forward(hidden_states []float32) []float32 {
 
     _ = hidden_states
     return []float32{}
-}
 }
 
 func SupportedModels() []string {
