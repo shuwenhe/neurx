@@ -1,7 +1,5 @@
 package main
 
-use neurx.distributed.inference.*
-
 struct inference_pipeline {
     distributed_inference_full_config config
     distributed_inference_state engine
