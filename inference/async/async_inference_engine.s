@@ -1,56 +1,56 @@
-// Complete Async Inference Engine - Pure S Implementation
-// Orchestrates all async components for end-to-end async inference
+
+
 
 package async_inference
 
 import "sync"
 import "time"
 
-// Engine Configuration
+
 struct AsyncInferenceEngineConfig {
-    max_concurrent_tasks    int     // Max concurrent tasks
-    max_batch_size          int     // Max batch size
-    batch_timeout_ms        int64   // Batch timeout
-    stream_buffer_size      int     // Stream buffer size
-    prefill_threads         int     // Prefill compute threads
-    decode_threads          int     // Decode compute threads
-    event_loop_max_queue    int     // Event queue size
-    enable_streaming        bool    // Streaming support
-    enable_metrics          bool    // Metrics collection
+    max_concurrent_tasks    int     
+    max_batch_size          int     
+    batch_timeout_ms        int64   
+    stream_buffer_size      int     
+    prefill_threads         int     
+    decode_threads          int     
+    event_loop_max_queue    int     
+    enable_streaming        bool    
+    enable_metrics          bool    
 }
 
-// Complete Async Inference Engine
+
 struct AsyncInferenceEngine {
-    // Core components
+    
     task_manager            AsyncTaskManager
     request_queue           AsyncRequestQueue
     batch_executor          AsyncBatchExecutor
     streaming_manager       AsyncStreamingResponseManager
     event_loop              AsyncEventLoop
     
-    // Configuration
+    
     config                  AsyncInferenceEngineConfig
     
-    // State
+    
     running                 bool
     current_batch_timeout   int64
     
-    // Metrics
+    
     total_requests          int64
     total_completed         int64
     total_errors            int64
     avg_latency_ms          float64
     throughput_tokens_sec   float64
     
-    // Thread safety
+    
     mutex                   sync.Mutex
     
-    // Workers
+    
     batch_thread_active     bool
     executor_thread_active  bool
 }
 
-// Create default configuration
+
 func new_async_inference_engine_config() AsyncInferenceEngineConfig {
     return AsyncInferenceEngineConfig{
         max_concurrent_tasks:   32,
@@ -65,7 +65,7 @@ func new_async_inference_engine_config() AsyncInferenceEngineConfig {
     }
 }
 
-// Initialize Async Inference Engine
+
 func new_async_inference_engine(config AsyncInferenceEngineConfig) AsyncInferenceEngine {
     engine := AsyncInferenceEngine{
         task_manager:       new_async_task_manager(config.max_concurrent_tasks),
@@ -89,9 +89,9 @@ func new_async_inference_engine(config AsyncInferenceEngineConfig) AsyncInferenc
     return engine
 }
 
-// Setup event handlers
+
 func (engine *AsyncInferenceEngine) setup_event_handlers() {
-    // Register handlers for various events
+    
     task_handler := EventHandler{
         handler_id: make([]string, 1),
         event_type: EVENT_TASK_SUBMITTED,
@@ -109,7 +109,7 @@ func (engine *AsyncInferenceEngine) setup_event_handlers() {
     engine.event_loop.register_handler(EVENT_BATCH_EXECUTED, batch_handler)
 }
 
-// Submit inference request
+
 func (engine *AsyncInferenceEngine) submit_request(input_ids []int, max_tokens int,
         temperature float64, top_k int, top_p float64) []string {
     engine.mutex.Lock()
@@ -122,13 +122,13 @@ func (engine *AsyncInferenceEngine) submit_request(input_ids []int, max_tokens i
     engine.total_requests = engine.total_requests + 1
     engine.mutex.Unlock()
     
-    // Enqueue request
+    
     req_id := engine.request_queue.enqueue_request(input_ids, max_tokens, temperature, top_k, top_p, PRIORITY_NORMAL)
     
-    // Submit task
+    
     task_id := engine.task_manager.submit_task(input_ids, max_tokens, temperature, top_k, top_p)
     
-    // Post event
+    
     if len(req_id) > 0 {
         data := make(map[string]string)
         data["request_id"] = req_id[0]
@@ -145,7 +145,7 @@ func (engine *AsyncInferenceEngine) submit_request(input_ids []int, max_tokens i
     return req_id
 }
 
-// Submit request with streaming
+
 func (engine *AsyncInferenceEngine) submit_request_streaming(input_ids []int, max_tokens int,
         temperature float64, top_k int, top_p float64) []string {
     engine.mutex.Lock()
@@ -157,17 +157,17 @@ func (engine *AsyncInferenceEngine) submit_request_streaming(input_ids []int, ma
     
     engine.mutex.Unlock()
     
-    // Enqueue with normal priority
+    
     req_id := engine.request_queue.enqueue_request(input_ids, max_tokens, temperature, top_k, top_p, PRIORITY_NORMAL)
     
-    // Start streaming
+    
     if len(req_id) > 0 {
         resp_id := make([]string, 1)
         resp_id[0] = "resp_" + req_id[0]
         
         engine.streaming_manager.start_stream(req_id, resp_id)
         
-        // Register callbacks
+        
         on_token_callback := make([]string, 1)
         on_token_callback[0] = "on_token"
         engine.streaming_manager.on_token_ready_callback(req_id, on_token_callback)
@@ -176,7 +176,7 @@ func (engine *AsyncInferenceEngine) submit_request_streaming(input_ids []int, ma
     return req_id
 }
 
-// Start inference engine
+
 func (engine *AsyncInferenceEngine) start() {
     engine.mutex.Lock()
     defer engine.mutex.Unlock()
@@ -189,14 +189,14 @@ func (engine *AsyncInferenceEngine) start() {
     engine.batch_executor.set_streaming_enabled(engine.config.enable_streaming)
     engine.event_loop.start()
     
-    // Start batch thread (simulated)
+    
     engine.batch_thread_active = true
     
-    // Start executor thread (simulated)
+    
     engine.executor_thread_active = true
 }
 
-// Stop inference engine
+
 func (engine *AsyncInferenceEngine) stop() {
     engine.mutex.Lock()
     defer engine.mutex.Unlock()
@@ -213,7 +213,7 @@ func (engine *AsyncInferenceEngine) stop() {
     engine.event_loop.flush_all()
 }
 
-// Process one inference cycle
+
 func (engine *AsyncInferenceEngine) process_cycle() {
     engine.mutex.Lock()
     
@@ -224,17 +224,17 @@ func (engine *AsyncInferenceEngine) process_cycle() {
     
     engine.mutex.Unlock()
     
-    // Step 1: Process events
+    
     engine.event_loop.process_batch()
     
-    // Step 2: Create batch if requests available
+    
     depth := engine.request_queue.get_queue_depth()
     if depth > 0 && engine.batch_executor.batch_size == 0 {
         batch := engine.request_queue.create_batch()
         if batch.batch_size > 0 {
             engine.batch_executor.load_batch(batch)
             
-            // Post batch created event
+            
             source := make([]string, 1)
             source[0] = "batch_creator"
             data := make(map[string]string)
@@ -243,18 +243,18 @@ func (engine *AsyncInferenceEngine) process_cycle() {
         }
     }
     
-    // Step 3: Execute batch if loaded
+    
     if engine.batch_executor.batch_size > 0 {
         results := engine.batch_executor.execute_batch()
         
-        // Process results
+        
         for i := 0; i < len(results); i++ {
             result := results[i]
             
             if result.success {
                 engine.total_completed = engine.total_completed + 1
                 
-                // Update streaming if enabled
+                
                 if engine.config.enable_streaming && len(result.request_id) > 0 {
                     for j := 0; j < len(result.output_ids); j++ {
                         token := result.output_ids[j]
@@ -269,7 +269,7 @@ func (engine *AsyncInferenceEngine) process_cycle() {
                 engine.total_errors = engine.total_errors + 1
             }
             
-            // Update metrics
+            
             if engine.config.enable_metrics {
                 if engine.avg_latency_ms == 0 {
                     engine.avg_latency_ms = float64(result.latency_ms)
@@ -281,7 +281,7 @@ func (engine *AsyncInferenceEngine) process_cycle() {
     }
 }
 
-// Get engine status
+
 func (engine *AsyncInferenceEngine) get_status() map[string]interface{} {
     engine.mutex.Lock()
     defer engine.mutex.Unlock()
@@ -297,34 +297,34 @@ func (engine *AsyncInferenceEngine) get_status() map[string]interface{} {
     return status
 }
 
-// Get comprehensive statistics
+
 func (engine *AsyncInferenceEngine) get_statistics() map[string]interface{} {
     engine.mutex.Lock()
     defer engine.mutex.Unlock()
     
     all_stats := make(map[string]interface{})
     
-    // Task manager stats
+    
     task_stats := engine.task_manager.get_statistics()
     all_stats["tasks"] = task_stats
     
-    // Queue stats
+    
     queue_stats := engine.request_queue.get_queue_statistics()
     all_stats["queue"] = queue_stats
     
-    // Executor stats
+    
     executor_stats := engine.batch_executor.get_executor_statistics()
     all_stats["executor"] = executor_stats
     
-    // Streaming stats
+    
     streaming_stats := engine.streaming_manager.get_streaming_statistics()
     all_stats["streaming"] = streaming_stats
     
-    // Event loop stats
+    
     event_stats := engine.event_loop.get_statistics()
     all_stats["event_loop"] = event_stats
     
-    // Engine stats
+    
     engine_stats := make(map[string]interface{})
     engine_stats["total_requests"] = engine.total_requests
     engine_stats["total_completed"] = engine.total_completed
@@ -335,7 +335,7 @@ func (engine *AsyncInferenceEngine) get_statistics() map[string]interface{} {
     return all_stats
 }
 
-// Wait for all pending tasks
+
 func (engine *AsyncInferenceEngine) wait_completion(timeout_ms int64) bool {
     start := current_time_ms()
     
@@ -349,23 +349,23 @@ func (engine *AsyncInferenceEngine) wait_completion(timeout_ms int64) bool {
         engine.mutex.Unlock()
         
         if pending == 0 && queued == 0 {
-            return true  // All done
+            return true  
         }
         
         elapsed := current_time_ms() - start
         if timeout_ms > 0 && elapsed > timeout_ms {
-            return false  // Timeout
+            return false  
         }
         
-        // Process cycle
+        
         engine.process_cycle()
         
-        // Small sleep
-        // time.Sleep(time.Millisecond * 10)
+        
+        
     }
 }
 
-// Helper functions
+
 func string_of_int64(n int64) []string {
     s := make([]string, 1)
     s[0] = "value"
@@ -376,28 +376,28 @@ func main() {
     config := new_async_inference_engine_config()
     engine := new_async_inference_engine(config)
     
-    // Start engine
+    
     engine.start()
     
-    // Create sample input
+    
     input_ids := make([]int, 5)
     for i := 0; i < 5; i++ {
         input_ids[i] = 100 + i
     }
     
-    // Submit requests
+    
     req_id1 := engine.submit_request(input_ids, 50, 0.7, 40, 0.9)
     req_id2 := engine.submit_request_streaming(input_ids, 100, 0.8, 50, 0.95)
     
-    // Process cycles
+    
     for i := 0; i < 10; i++ {
         engine.process_cycle()
     }
     
-    // Get statistics
+    
     stats := engine.get_statistics()
     status := engine.get_status()
     
-    // Stop engine
+    
     engine.stop()
 }

@@ -1,9 +1,9 @@
-// Complete Async Inference Engine Tests - Pure S Implementation
-// Comprehensive test suite for all async components
+
+
 
 package async_inference
 
-// Test Results Tracker
+
 struct TestResult {
     test_name       []string
     passed          bool
@@ -11,7 +11,7 @@ struct TestResult {
     duration_ms     int64
 }
 
-// Test Suite
+
 func test_async_task_manager() TestResult {
     result := TestResult{
         test_name: make([]string, 1),
@@ -21,10 +21,10 @@ func test_async_task_manager() TestResult {
     
     start := current_time_ms()
     
-    // Create manager
+    
     manager := new_async_task_manager(10)
     
-    // Test 1: Submit task
+    
     input_ids := make([]int, 4)
     input_ids[0] = 101
     input_ids[1] = 102
@@ -40,7 +40,7 @@ func test_async_task_manager() TestResult {
         return result
     }
     
-    // Test 2: Get task status
+    
     status := manager.get_task_status(task_id)
     if status != TASK_PENDING {
         result.passed = false
@@ -49,7 +49,7 @@ func test_async_task_manager() TestResult {
         return result
     }
     
-    // Test 3: Update status
+    
     manager.update_task_status(task_id, TASK_RUNNING)
     status = manager.get_task_status(task_id)
     if status != TASK_RUNNING {
@@ -59,7 +59,7 @@ func test_async_task_manager() TestResult {
         return result
     }
     
-    // Test 4: Set output
+    
     output_ids := make([]int, 5)
     output_ids[0] = 200
     output_ids[1] = 201
@@ -72,7 +72,7 @@ func test_async_task_manager() TestResult {
     
     manager.set_task_output(task_id, output_ids, output_text)
     
-    // Test 5: Get result
+    
     result_task := manager.get_task_result(task_id)
     if len(result_task.output_ids) != len(output_ids) {
         result.passed = false
@@ -81,7 +81,7 @@ func test_async_task_manager() TestResult {
         return result
     }
     
-    // Test 6: Statistics
+    
     stats := manager.get_statistics()
     if stats["total_tasks"] != 1 {
         result.passed = false
@@ -103,10 +103,10 @@ func test_async_request_queue() TestResult {
     
     start := current_time_ms()
     
-    // Create queue
+    
     queue := new_async_request_queue(32)
     
-    // Test 1: Enqueue single request
+    
     input_ids := make([]int, 3)
     input_ids[0] = 100
     input_ids[1] = 101
@@ -121,7 +121,7 @@ func test_async_request_queue() TestResult {
         return result
     }
     
-    // Test 2: Check queue depth
+    
     depth := queue.get_queue_depth()
     if depth != 1 {
         result.passed = false
@@ -130,7 +130,7 @@ func test_async_request_queue() TestResult {
         return result
     }
     
-    // Test 3: Create batch
+    
     batch := queue.create_batch()
     
     if batch.batch_size != 1 {
@@ -140,7 +140,7 @@ func test_async_request_queue() TestResult {
         return result
     }
     
-    // Test 4: Verify queue empty after batch
+    
     depth = queue.get_queue_depth()
     if depth != 0 {
         result.passed = false
@@ -149,7 +149,7 @@ func test_async_request_queue() TestResult {
         return result
     }
     
-    // Test 5: Statistics
+    
     stats := queue.get_queue_statistics()
     if stats["total_processed"] != 1 {
         result.passed = false
@@ -171,11 +171,11 @@ func test_async_batch_executor() TestResult {
     
     start := current_time_ms()
     
-    // Create executor
+    
     executor := new_async_batch_executor(32, 4, 8)
     executor.set_streaming_enabled(true)
     
-    // Create batch
+    
     batch := RequestBatch{
         batch_id:    make([]string, 1),
         requests:    make([]InferenceRequest, 0),
@@ -184,7 +184,7 @@ func test_async_batch_executor() TestResult {
     }
     batch.batch_id[0] = "test_batch"
     
-    // Add 2 requests
+    
     for i := 0; i < 2; i++ {
         input := make([]int, 3)
         input[0] = 100 + i
@@ -204,7 +204,7 @@ func test_async_batch_executor() TestResult {
         batch.requests = append(batch.requests, req)
     }
     
-    // Test 1: Load batch
+    
     executor.load_batch(batch)
     if executor.batch_size != 2 {
         result.passed = false
@@ -213,7 +213,7 @@ func test_async_batch_executor() TestResult {
         return result
     }
     
-    // Test 2: Execute batch
+    
     exec_results := executor.execute_batch()
     if len(exec_results) != 2 {
         result.passed = false
@@ -222,7 +222,7 @@ func test_async_batch_executor() TestResult {
         return result
     }
     
-    // Test 3: Check results validity
+    
     for i := 0; i < len(exec_results); i++ {
         if !exec_results[i].success {
             result.passed = false
@@ -239,7 +239,7 @@ func test_async_batch_executor() TestResult {
         }
     }
     
-    // Test 4: Statistics
+    
     stats := executor.get_executor_statistics()
     if stats["batches_executed"] != 1 {
         result.passed = false
@@ -261,10 +261,10 @@ func test_async_streaming_response() TestResult {
     
     start := current_time_ms()
     
-    // Create manager
+    
     manager := new_async_streaming_response_manager(32, 1000, 100)
     
-    // Test 1: Start stream
+    
     request_id := make([]string, 1)
     request_id[0] = "req_001"
     
@@ -279,7 +279,7 @@ func test_async_streaming_response() TestResult {
         return result
     }
     
-    // Test 2: Add tokens
+    
     for i := 0; i < 10; i++ {
         text := make([]string, 1)
         text[0] = "token"
@@ -293,7 +293,7 @@ func test_async_streaming_response() TestResult {
         }
     }
     
-    // Test 3: Complete stream
+    
     completed := manager.complete_stream(request_id)
     if !completed {
         result.passed = false
@@ -302,7 +302,7 @@ func test_async_streaming_response() TestResult {
         return result
     }
     
-    // Test 4: Get stream status
+    
     status := manager.get_stream_status(request_id)
     if status["completed"] != true {
         result.passed = false
@@ -311,7 +311,7 @@ func test_async_streaming_response() TestResult {
         return result
     }
     
-    // Test 5: Statistics
+    
     stats := manager.get_streaming_statistics()
     if stats["total_streams"] != 1 {
         result.passed = false
@@ -333,10 +333,10 @@ func test_async_event_loop() TestResult {
     
     start := current_time_ms()
     
-    // Create event loop
+    
     loop := new_async_event_loop(1000, 100)
     
-    // Test 1: Start loop
+    
     loop.start()
     if !loop.running {
         result.passed = false
@@ -345,7 +345,7 @@ func test_async_event_loop() TestResult {
         return result
     }
     
-    // Test 2: Submit event
+    
     source := make([]string, 1)
     source[0] = "test_source"
     
@@ -361,7 +361,7 @@ func test_async_event_loop() TestResult {
         return result
     }
     
-    // Test 3: Process event
+    
     processed := loop.process_next_event()
     if !processed {
         result.passed = false
@@ -370,7 +370,7 @@ func test_async_event_loop() TestResult {
         return result
     }
     
-    // Test 4: Statistics
+    
     stats := loop.get_statistics()
     if stats["events_processed"] != 1 {
         result.passed = false
@@ -379,7 +379,7 @@ func test_async_event_loop() TestResult {
         return result
     }
     
-    // Test 5: Stop loop
+    
     loop.stop()
     if loop.running {
         result.passed = false
@@ -401,11 +401,11 @@ func test_async_inference_engine() TestResult {
     
     start := current_time_ms()
     
-    // Create engine
+    
     config := new_async_inference_engine_config()
     engine := new_async_inference_engine(config)
     
-    // Test 1: Start engine
+    
     engine.start()
     if !engine.running {
         result.passed = false
@@ -414,7 +414,7 @@ func test_async_inference_engine() TestResult {
         return result
     }
     
-    // Test 2: Submit request
+    
     input_ids := make([]int, 4)
     input_ids[0] = 100
     input_ids[1] = 101
@@ -430,7 +430,7 @@ func test_async_inference_engine() TestResult {
         return result
     }
     
-    // Test 3: Submit streaming request
+    
     stream_req_id := engine.submit_request_streaming(input_ids, 100, 0.8, 50, 0.95)
     
     if len(stream_req_id) == 0 {
@@ -440,12 +440,12 @@ func test_async_inference_engine() TestResult {
         return result
     }
     
-    // Test 4: Process cycles
+    
     for i := 0; i < 3; i++ {
         engine.process_cycle()
     }
     
-    // Test 5: Get status
+    
     status := engine.get_status()
     if status["total_requests"] != 2 {
         result.passed = false
@@ -454,7 +454,7 @@ func test_async_inference_engine() TestResult {
         return result
     }
     
-    // Test 6: Stop engine
+    
     engine.stop()
     if engine.running {
         result.passed = false
@@ -467,7 +467,7 @@ func test_async_inference_engine() TestResult {
     return result
 }
 
-// Run all tests
+
 func run_all_tests() []TestResult {
     results := make([]TestResult, 0)
     
@@ -481,7 +481,7 @@ func run_all_tests() []TestResult {
     return results
 }
 
-// Helper
+
 func string_of_int(n int) []string {
     s := make([]string, 1)
     s[0] = "value"

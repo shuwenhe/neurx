@@ -8,6 +8,7 @@
 	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
 	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s transformer-cuda-checkpoint-resume-test build-real-inference-s build-real-model-chat-s build-production-s-inference production-s-inference build-hf-posttrain-chat-s hf-posttrain-chat \
 	build-json-parser-s test-json-parser-s test-hf-config-s build-cpp2s-migration \
+	compile-multimodal-audio compile-multimodal-video compile-multimodal-fusion test-multimodal compile-multimodal-all \
 	docker
 ifeq ($(OS),windows_nt)
 PLATFORM := windows
@@ -2614,6 +2615,73 @@ logs:
 logs-tail:
 	@mkdir -p $(LOG_DIR)
 	@FILE=$$(ls -1t $(LOG_DIR)
+
+MULTIMODAL_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/multimodal
+
+compile-multimodal-audio:
+	@echo "🎵 Compiling Audio Feature Extractor (Pure S)..."
+	@mkdir -p $(MULTIMODAL_BUILD_DIR)
+	@$(S_SEED_COMPILER) multimodal/audio_feature_extractor.s $(MULTIMODAL_BUILD_DIR)/audio_feature_extractor.ir || { \
+		echo "❌ Audio feature extractor compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Audio feature extractor compiled successfully"
+	@echo "   IR: $(MULTIMODAL_BUILD_DIR)/audio_feature_extractor.ir"
+
+compile-multimodal-video:
+	@echo "🎬 Compiling Video Frame Encoder (Pure S)..."
+	@mkdir -p $(MULTIMODAL_BUILD_DIR)
+	@$(S_SEED_COMPILER) multimodal/video_frame_encoder.s $(MULTIMODAL_BUILD_DIR)/video_frame_encoder.ir || { \
+		echo "❌ Video frame encoder compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Video frame encoder compiled successfully"
+	@echo "   IR: $(MULTIMODAL_BUILD_DIR)/video_frame_encoder.ir"
+
+compile-multimodal-fusion:
+	@echo "🔀 Compiling Multimodal Fusion Engine (Pure S)..."
+	@mkdir -p $(MULTIMODAL_BUILD_DIR)
+	@$(S_SEED_COMPILER) multimodal/multimodal_fusion.s $(MULTIMODAL_BUILD_DIR)/multimodal_fusion.ir || { \
+		echo "❌ Multimodal fusion engine compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Multimodal fusion engine compiled successfully"
+	@echo "   IR: $(MULTIMODAL_BUILD_DIR)/multimodal_fusion.ir"
+
+test-multimodal: build-s-ir-runner
+	@echo "🧪 Compiling Multimodal Extension Test Suite (Pure S)..."
+	@mkdir -p $(MULTIMODAL_BUILD_DIR)
+	@$(S_SEED_COMPILER) multimodal/test_multimodal_extended.s $(MULTIMODAL_BUILD_DIR)/test_multimodal_extended.ir || { \
+		echo "❌ Test suite compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Test suite compiled successfully"
+	@echo ""
+	@echo "🚀 Running Multimodal Extension Tests..."
+	@mkdir -p $(LOG_DIR)
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		export NEURX_ROOT='$(CURDIR_UNIX)'; \
+		S_IR_RUNNER_INPUT='$(MULTIMODAL_BUILD_DIR)/test_multimodal_extended.ir' '$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/test_multimodal_$(shell date +%Y%m%d_%H%M%S).log
+	@echo ""
+	@echo "✅ Multimodal tests completed!"
+
+compile-multimodal-all: compile-multimodal-audio compile-multimodal-video compile-multimodal-fusion
+	@echo ""
+	@echo "✅ All multimodal modules compiled successfully!"
+	@echo ""
+	@echo "📦 Compiled artifacts:"
+	@echo "   • Audio Feature Extractor: $(MULTIMODAL_BUILD_DIR)/audio_feature_extractor.ir"
+	@echo "   • Video Frame Encoder: $(MULTIMODAL_BUILD_DIR)/video_frame_encoder.ir"
+	@echo "   • Multimodal Fusion Engine: $(MULTIMODAL_BUILD_DIR)/multimodal_fusion.ir"
+	@echo ""
+	@echo "📚 Modules included:"
+	@echo "   • Audio: MFCC, Mel-Spectrogram, ZCR, Energy extraction"
+	@echo "   • Video: H.264 encoding, Optical flow, Motion descriptors"
+	@echo "   • Fusion: Early/Late/Hybrid fusion, Cross-modal attention"
+	@echo ""
+	@echo "🎯 Next steps:"
+	@echo "   make test-multimodal      # Run comprehensive tests"
 
 docker: docker-build
 	@echo "Docker image built successfully"
