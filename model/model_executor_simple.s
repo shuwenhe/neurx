@@ -1,11 +1,6 @@
 package neurx.model.model_executor
 
-// 30+ 种模型执行器 - 简化实现
-// Pure S 语言实现
-
 use std.vec
-
-// ============ 演示 ============
 
 func main() {
     println("🤖 Model Executor - 30+ 种模型推理引擎")

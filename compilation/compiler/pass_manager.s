@@ -1,0 +1,172 @@
+package neurx.compilation.compiler.pass_manager
+
+use neurx.compilation.ir.graph.computation_graph
+use neurx.compilation.passes.constant_folding.{apply_constant_folding, fold_result}
+use neurx.compilation.passes.op_fusion.{apply_op_fusion, fusion_result}
+use neurx.compilation.passes.dead_code_elim.{remove_dead_code, dead_code_result}
+use neurx.compilation.passes.memory_opt.{apply_memory_optimization, memory_opt_result}
+
+enum pass_type {
+    constant_folding,
+    op_fusion,
+    dead_code_elim,
+    memory_opt,
+}
+
+struct pass_config {
+    pass_type pass_kind
+    bool enabled
+    int priority
+    string description
+}
+
+struct pass_result {
+    pass_type pass_kind
+    bool success
+    string message
+}
+
+struct pass_pipeline {
+    string name
+    vec[pass_config] passes
+}
+
+func default_optimization_pipeline() pass_pipeline {
+    passes = vec[pass_config]()
+
+    passes.push(pass_config {
+        pass_kind: pass_type::constant_folding,
+        enabled: true,
+        priority: 1,
+        description: "fold constant expressions",
+    })
+
+    passes.push(pass_config {
+        pass_kind: pass_type::op_fusion,
+        enabled: true,
+        priority: 2,
+        description: "fuse compatible operations",
+    })
+
+    passes.push(pass_config {
+        pass_kind: pass_type::dead_code_elim,
+        enabled: true,
+        priority: 3,
+        description: "eliminate dead code",
+    })
+
+    passes.push(pass_config {
+        pass_kind: pass_type::memory_opt,
+        enabled: true,
+        priority: 4,
+        description: "optimize memory usage",
+    })
+
+    pass_pipeline {
+        name: "default_optimization",
+        passes: passes,
+    }
+}
+
+func aggressive_optimization_pipeline() pass_pipeline {
+    passes = vec[pass_config]()
+
+    passes.push(pass_config {
+        pass_kind: pass_type::constant_folding,
+        enabled: true,
+        priority: 1,
+        description: "fold constant expressions",
+    })
+
+    passes.push(pass_config {
+        pass_kind: pass_type::op_fusion,
+        enabled: true,
+        priority: 2,
+        description: "fuse compatible operations",
+    })
+
+    passes.push(pass_config {
+        pass_kind: pass_type::memory_opt,
+        enabled: true,
+        priority: 3,
+        description: "optimize memory usage",
+    })
+
+    passes.push(pass_config {
+        pass_kind: pass_type::dead_code_elim,
+        enabled: true,
+        priority: 4,
+        description: "eliminate dead code",
+    })
+
+    pass_pipeline {
+        name: "aggressive_optimization",
+        passes: passes,
+    }
+}
+
+func minimal_optimization_pipeline() pass_pipeline {
+    passes = vec[pass_config]()
+
+    passes.push(pass_config {
+        pass_kind: pass_type::constant_folding,
+        enabled: true,
+        priority: 1,
+        description: "fold constant expressions",
+    })
+
+    pass_pipeline {
+        name: "minimal_optimization",
+        passes: passes,
+    }
+}
+
+func apply_pass(g: &mut computation_graph, pass_kind: pass_type) pass_result {
+    match pass_kind {
+        pass_type::constant_folding: {
+            result = apply_constant_folding(g)
+            pass_result {
+                pass_kind: pass_kind,
+                success: result.success,
+                message: "folded " + result.folded_ops as string + " operations",
+            }
+        },
+        pass_type::op_fusion: {
+            result = apply_op_fusion(g)
+            pass_result {
+                pass_kind: pass_kind,
+                success: result.success,
+                message: "fused " + result.fused_ops as string + " operations",
+            }
+        },
+        pass_type::dead_code_elim: {
+            result = remove_dead_code(g)
+            pass_result {
+                pass_kind: pass_kind,
+                success: result.success,
+                message: "removed " + result.removed_ops as string + " dead operations",
+            }
+        },
+        pass_type::memory_opt: {
+            result = apply_memory_optimization(g)
+            pass_result {
+                pass_kind: pass_kind,
+                success: result.success,
+                message: "saved " + result.memory_saved as string + " bytes of memory",
+            }
+        },
+    }
+}
+
+func run_pass_pipeline(g: &mut computation_graph, pipeline: &pass_pipeline) vec[pass_result] {
+    results = vec[pass_result]()
+
+    for pass_cfg in pipeline.passes {
+        if pass_cfg.enabled {
+            result = apply_pass(g, pass_cfg.pass_kind)
+            results.push(result)
+        }
+    }
+
+    results
+}

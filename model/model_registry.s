@@ -5,14 +5,12 @@ use std.map
 use std.option
 use neurx.model.model_zoo
 
-// Attention types
 const ATTENTION_STANDARD = "standard"
 const ATTENTION_FLASH = "flash_attention"
 const ATTENTION_GQA = "gqa"
 const ATTENTION_MQA = "mqa"
 const ATTENTION_SPARSE = "sparse"
 
-// Activation functions
 const ACTIVATION_RELU = "relu"
 const ACTIVATION_GELU = "gelu"
 const ACTIVATION_GELU_APPROX = "gelu_approx"
@@ -154,7 +152,7 @@ func create_adapter_for_model(model_name: string) option[model_adapter] {
     if spec_opt == none {
         return none
     }
-    
+
     let spec = match spec_opt {
         Some(s) => s,
         None => return none,
@@ -172,7 +170,7 @@ func create_adapter_for_model(model_name: string) option[model_adapter] {
     } else {
         create_default_adapter(spec)
     }
-    
+
     return Some(adapter)
 }
 

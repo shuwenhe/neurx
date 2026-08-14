@@ -1,12 +1,7 @@
 package neurx.model.model_executor
 
-// 30+ 种模型执行器 - 完整推理支持
-// 整合模型架构、权重加载、优化执行
-
 use std.vec
 use std.option
-
-// ============ 模型执行上下文 ============
 
 struct model_executor {
     current_model: string
@@ -20,10 +15,8 @@ func new_model_executor(device: string) model_executor {
     }
 }
 
-// ============ 加载模型 ============
-
 func (executor: &mut model_executor) load_model(model_name: string, device: string) bool {
-    // 验证模型是否存在
+
     if model_name == "llama-7b" {
         executor.current_model = model_name
         return true
@@ -42,8 +35,6 @@ func (executor: &mut model_executor) load_model(model_name: string, device: stri
     }
     return false
 }
-
-// ============ 前向传播 ============
 
 struct forward_output {
     logits: []f32
@@ -68,15 +59,11 @@ func (executor: &model_executor) forward_pass(
     return output
 }
 
-// ============ 量化支持 ============
-
 const QUANT_FP32 = "fp32"
 const QUANT_FP16 = "fp16"
 const QUANT_BF16 = "bf16"
 const QUANT_INT8 = "int8"
 const QUANT_INT4 = "int4"
-
-// ============ 分布式推理 ============
 
 struct distributed_config {
     world_size: int
@@ -94,8 +81,6 @@ func prepare_distributed_model(
     }
     return true
 }
-
-// ============ 性能监控 ============
 
 struct execution_stats {
     model_name: string
@@ -120,8 +105,6 @@ func collect_execution_stats(
     }
 }
 
-// ============ 模型切换 ============
-
 func (executor: &mut model_executor) switch_model(model_name: string) bool {
     if model_name == "llama-7b" || model_name == "qwen2-7b" ||
        model_name == "mistral-7b" || model_name == "deepseek-7b" {
@@ -135,16 +118,12 @@ func (executor: &model_executor) get_current_model() string {
     return executor.current_model
 }
 
-// ============ 模型卸载 ============
-
 func (executor: &mut model_executor) unload_model(model_name: string) bool {
     if executor.current_model == model_name {
         executor.current_model = ""
     }
     return true
 }
-
-// ============ 模型信息查询 ============
 
 struct model_info {
     name: string
@@ -166,7 +145,7 @@ func get_model_info(model_name: string) option[model_info] {
             attention_type: "Flash Attention",
         })
     }
-    
+
     if model_name == "qwen2-7b" {
         return Some(model_info {
             name: "qwen2-7b",
@@ -177,7 +156,7 @@ func get_model_info(model_name: string) option[model_info] {
             attention_type: "Flash Attention",
         })
     }
-    
+
     if model_name == "mistral-7b" {
         return Some(model_info {
             name: "mistral-7b",
@@ -188,7 +167,7 @@ func get_model_info(model_name: string) option[model_info] {
             attention_type: "GQA",
         })
     }
-    
+
     if model_name == "deepseek-7b" {
         return Some(model_info {
             name: "deepseek-7b",
@@ -199,21 +178,17 @@ func get_model_info(model_name: string) option[model_info] {
             attention_type: "GQA",
         })
     }
-    
+
     return None
 }
-
-// ============ 完整演示 ============
 
 func main() {
     println("🤖 Model Executor - 30+ 种模型推理引擎")
     println("=====================================")
     println("")
 
-    // 初始化执行器
     let mut executor = new_model_executor("cuda")
 
-    // 加载几个不同的模型
     println("📥 加载模型:")
     let models_to_load = ["llama-7b", "qwen2-7b", "mistral-7b", "deepseek-7b"]
 

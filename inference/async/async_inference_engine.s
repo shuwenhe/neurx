@@ -1,4 +1,3 @@
-
 package async_inference
 
 import "sync"

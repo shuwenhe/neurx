@@ -1,4 +1,3 @@
-
 import io
 
 struct span_kind {

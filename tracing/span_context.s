@@ -1,4 +1,3 @@
-
 import io
 
 struct trace_id {

@@ -1,4 +1,3 @@
-
 import io
 
 struct tracing_config {
