@@ -2619,40 +2619,40 @@ logs-tail:
 MULTIMODAL_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/multimodal
 
 compile-multimodal-audio:
-	@echo "🎵 Compiling Audio Feature Extractor (Pure S)..."
+	@echo "🎵 Compiling Audio Features (Pure S)..."
 	@mkdir -p $(MULTIMODAL_BUILD_DIR)
-	@$(S_SEED_COMPILER) multimodal/audio_feature_extractor.s $(MULTIMODAL_BUILD_DIR)/audio_feature_extractor.ir || { \
-		echo "❌ Audio feature extractor compilation failed!"; \
+	@$(S_SEED_COMPILER) multimodal/audio.s $(MULTIMODAL_BUILD_DIR)/audio.ir || { \
+		echo "❌ Audio compilation failed!"; \
 		exit 1; \
 	}
-	@echo "✓ Audio feature extractor compiled successfully"
-	@echo "   IR: $(MULTIMODAL_BUILD_DIR)/audio_feature_extractor.ir"
+	@echo "✓ Audio compiled successfully"
+	@echo "   IR: $(MULTIMODAL_BUILD_DIR)/audio.ir"
 
 compile-multimodal-video:
-	@echo "🎬 Compiling Video Frame Encoder (Pure S)..."
+	@echo "🎬 Compiling Video Encoding (Pure S)..."
 	@mkdir -p $(MULTIMODAL_BUILD_DIR)
-	@$(S_SEED_COMPILER) multimodal/video_frame_encoder.s $(MULTIMODAL_BUILD_DIR)/video_frame_encoder.ir || { \
-		echo "❌ Video frame encoder compilation failed!"; \
+	@$(S_SEED_COMPILER) multimodal/video.s $(MULTIMODAL_BUILD_DIR)/video.ir || { \
+		echo "❌ Video compilation failed!"; \
 		exit 1; \
 	}
-	@echo "✓ Video frame encoder compiled successfully"
-	@echo "   IR: $(MULTIMODAL_BUILD_DIR)/video_frame_encoder.ir"
+	@echo "✓ Video compiled successfully"
+	@echo "   IR: $(MULTIMODAL_BUILD_DIR)/video.ir"
 
 compile-multimodal-fusion:
-	@echo "🔀 Compiling Multimodal Fusion Engine (Pure S)..."
+	@echo "🔀 Compiling Fusion Engine (Pure S)..."
 	@mkdir -p $(MULTIMODAL_BUILD_DIR)
-	@$(S_SEED_COMPILER) multimodal/multimodal_fusion.s $(MULTIMODAL_BUILD_DIR)/multimodal_fusion.ir || { \
-		echo "❌ Multimodal fusion engine compilation failed!"; \
+	@$(S_SEED_COMPILER) multimodal/fusion.s $(MULTIMODAL_BUILD_DIR)/fusion.ir || { \
+		echo "❌ Fusion compilation failed!"; \
 		exit 1; \
 	}
-	@echo "✓ Multimodal fusion engine compiled successfully"
-	@echo "   IR: $(MULTIMODAL_BUILD_DIR)/multimodal_fusion.ir"
+	@echo "✓ Fusion compiled successfully"
+	@echo "   IR: $(MULTIMODAL_BUILD_DIR)/fusion.ir"
 
 test-multimodal: build-s-ir-runner
-	@echo "🧪 Compiling Multimodal Extension Test Suite (Pure S)..."
+	@echo "🧪 Compiling Multimodal Test Suite (Pure S)..."
 	@mkdir -p $(MULTIMODAL_BUILD_DIR)
-	@$(S_SEED_COMPILER) multimodal/test_multimodal_extended.s $(MULTIMODAL_BUILD_DIR)/test_multimodal_extended.ir || { \
-		echo "❌ Test suite compilation failed!"; \
+	@$(S_SEED_COMPILER) multimodal/test.s $(MULTIMODAL_BUILD_DIR)/test.ir || { \
+		echo "❌ Test compilation failed!"; \
 		exit 1; \
 	}
 	@echo "✓ Test suite compiled successfully"
@@ -2662,7 +2662,7 @@ test-multimodal: build-s-ir-runner
 	@cd '$(CURDIR_UNIX)' && \
 		set -o pipefail; \
 		export NEURX_ROOT='$(CURDIR_UNIX)'; \
-		S_IR_RUNNER_INPUT='$(MULTIMODAL_BUILD_DIR)/test_multimodal_extended.ir' '$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/test_multimodal_$(shell date +%Y%m%d_%H%M%S).log
+		S_IR_RUNNER_INPUT='$(MULTIMODAL_BUILD_DIR)/test.ir' '$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/test_multimodal_$(shell date +%Y%m%d_%H%M%S).log
 	@echo ""
 	@echo "✅ Multimodal tests completed!"
 
@@ -2671,9 +2671,9 @@ compile-multimodal-all: compile-multimodal-audio compile-multimodal-video compil
 	@echo "✅ All multimodal modules compiled successfully!"
 	@echo ""
 	@echo "📦 Compiled artifacts:"
-	@echo "   • Audio Feature Extractor: $(MULTIMODAL_BUILD_DIR)/audio_feature_extractor.ir"
-	@echo "   • Video Frame Encoder: $(MULTIMODAL_BUILD_DIR)/video_frame_encoder.ir"
-	@echo "   • Multimodal Fusion Engine: $(MULTIMODAL_BUILD_DIR)/multimodal_fusion.ir"
+	@echo "   • Audio Features: $(MULTIMODAL_BUILD_DIR)/audio_features.ir"
+	@echo "   • Video Encoding: $(MULTIMODAL_BUILD_DIR)/video_encoding.ir"
+	@echo "   • Fusion Engine: $(MULTIMODAL_BUILD_DIR)/fusion_engine.ir"
 	@echo ""
 	@echo "📚 Modules included:"
 	@echo "   • Audio: MFCC, Mel-Spectrogram, ZCR, Energy extraction"
