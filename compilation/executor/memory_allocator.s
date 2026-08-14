@@ -24,14 +24,14 @@ struct allocation_result {
 
 func new_memory_arena(int total_size) memory_arena {
     blocks = vec[memory_block]()
-    
+
     blocks.push(memory_block {
         block_id: 0,
         offset: 0,
         size: total_size,
         allocated: false,
     })
-    
+
     memory_arena {
         total_size: total_size,
         blocks: blocks,
@@ -43,7 +43,7 @@ func (arena: &mut memory_arena) allocate(int size) allocation_result {
     for i, block in arena.blocks {
         if !block.allocated && block.size >= size {
             arena.blocks[i].allocated = true
-            
+
             if block.size > size {
                 new_block = memory_block {
                     block_id: arena.next_block_id,
@@ -54,7 +54,7 @@ func (arena: &mut memory_arena) allocate(int size) allocation_result {
                 arena.next_block_id = arena.next_block_id + 1
                 arena.blocks.push(new_block)
             }
-            
+
             return allocation_result {
                 block_id: block.block_id,
                 offset: block.offset,
@@ -63,7 +63,7 @@ func (arena: &mut memory_arena) allocate(int size) allocation_result {
             }
         }
     }
-    
+
     allocation_result {
         block_id: -1,
         offset: -1,
@@ -100,21 +100,21 @@ func (arena: &memory_arena) get_fragmentation_ratio() float {
     if arena.total_size == 0 {
         return 0.0
     }
-    
+
     largest_free = 0
     for block in arena.blocks {
         if !block.allocated && block.size > largest_free {
             largest_free = block.size
         }
     }
-    
+
     1.0 - (largest_free as float / arena.get_free_memory() as float)
 }
 
 func allocate_for_graph(g: &computation_graph) memory_arena {
     total_memory = g.total_memory_bytes()
     arena = new_memory_arena(total_memory)
-    
+
     for vt in g.values {
         mem = vt.memory_bytes()
         result = arena.allocate(mem)
@@ -122,7 +122,7 @@ func allocate_for_graph(g: &computation_graph) memory_arena {
             break
         }
     }
-    
+
     arena
 }
 

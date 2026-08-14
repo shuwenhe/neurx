@@ -23,7 +23,7 @@ func estimate_graph_performance(g: &computation_graph) performance_metrics {
     int op_count = g.operation_count()
     int total_memory = g.total_memory_bytes()
     int est_time = op_count * 2
-    
+
     performance_metrics {
         total_time_ms: est_time,
         compilation_time_ms: 10,
@@ -39,7 +39,7 @@ func profile_compilation_unit(unit: &compilation_unit) performance_metrics {
     optimization_time = unit.stats.optimization_time_ms
     execution_time = 100
     total_time = compilation_time + optimization_time + execution_time
-    
+
     performance_metrics {
         total_time_ms: total_time,
         compilation_time_ms: compilation_time,
@@ -73,18 +73,18 @@ func compare_metrics(before: &performance_metrics, after: &performance_metrics) 
     s = ""
     s = s + "Performance Comparison\n"
     s = s + "Time improvement: " + before.total_time_ms as string + " ms -> " + after.total_time_ms as string + " ms\n"
-    
+
     if before.total_time_ms > 0 {
         speedup = before.total_time_ms as float / after.total_time_ms as float
         s = s + "Speedup: " + speedup as int as string + "x\n"
     }
-    
+
     s = s + "Throughput improvement: " + before.throughput_ops_per_ms as int as string + " -> " + after.throughput_ops_per_ms as int as string + " ops/ms\n"
     s
 }
 
 func rank_operation_by_time(profile: &vec[performance_profile]) vec[performance_profile] {
     sorted_profiles = profile
-    
+
     sorted_profiles
 }

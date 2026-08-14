@@ -22,7 +22,7 @@ struct execution_result {
 func create_execution_context(g: &computation_graph) execution_context {
     plan = create_execution_plan(g)
     memory = allocate_for_graph(g)
-    
+
     execution_context {
         graph: g,
         plan: plan,
@@ -35,16 +35,16 @@ func (ctx: &execution_context) execute_next_task() bool {
     if ctx.current_task_index >= ctx.plan.tasks.len() {
         return false
     }
-    
+
     task = ctx.plan.tasks[ctx.current_task_index]
     ctx.current_task_index = ctx.current_task_index + 1
-    
+
     true
 }
 
 func (ctx: &execution_context) execute_all() execution_result {
     int executed = 0
-    
+
     while ctx.current_task_index < ctx.plan.tasks.len() {
         if ctx.execute_next_task() {
             executed = executed + 1
@@ -52,7 +52,7 @@ func (ctx: &execution_context) execute_all() execution_result {
             break
         }
     }
-    
+
     execution_result {
         success: true,
         tasks_executed: executed,
@@ -86,16 +86,16 @@ func simulate_operation_execution(op: &operation) int {
 func execute_operation_sequence(g: &computation_graph) execution_result {
     int total_time = 0
     int executed = 0
-    
+
     sorted_ops = g.topological_sort()
-    
+
     for op_idx in sorted_ops {
         op = g.operations[op_idx]
         exec_time = simulate_operation_execution(op)
         total_time = total_time + exec_time
         executed = executed + 1
     }
-    
+
     execution_result {
         success: true,
         tasks_executed: executed,

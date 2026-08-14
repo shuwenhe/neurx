@@ -25,12 +25,12 @@ struct execution_stage {
 
 func create_execution_plan(g: &computation_graph) execution_plan {
     tasks = vec[execution_task]()
-    
+
     sorted_ops = g.topological_sort()
-    
+
     for op_idx in sorted_ops {
         op = g.operations[op_idx]
-        
+
         task = execution_task {
             op_id: op.id,
             op: op,
@@ -38,10 +38,10 @@ func create_execution_plan(g: &computation_graph) execution_plan {
             output_memory_offsets: new int[op.output_ids.len()],
             execution_device: "CPU",
         }
-        
+
         tasks.push(task)
     }
-    
+
     execution_plan {
         tasks: tasks,
         total_memory_requirement: g.total_memory_bytes(),
@@ -57,11 +57,11 @@ func (plan: &execution_plan) can_parallelize(task_a_idx: int, task_b_idx: int) b
     if task_a_idx == task_b_idx {
         return false
     }
-    
+
     if task_a_idx < plan.tasks.len() && task_b_idx < plan.tasks.len() {
         task_a = plan.tasks[task_a_idx]
         task_b = plan.tasks[task_b_idx]
-        
+
         for out_id in task_a.op.output_ids {
             for in_id in task_b.op.input_ids {
                 if out_id == in_id {
@@ -69,10 +69,10 @@ func (plan: &execution_plan) can_parallelize(task_a_idx: int, task_b_idx: int) b
                 }
             }
         }
-        
+
         return true
     }
-    
+
     false
 }
 
@@ -86,13 +86,13 @@ func (plan: &execution_plan) estimate_execution_time_ms() int {
 
 func create_staged_execution_plan(g: &computation_graph, num_stages: int) execution_plan {
     basic_plan = create_execution_plan(g)
-    
+
     if num_stages <= 1 {
         return basic_plan
     }
-    
+
     tasks_per_stage = (basic_plan.tasks.len() + num_stages - 1) / num_stages
-    
+
     basic_plan.num_stages = num_stages
     basic_plan
 }

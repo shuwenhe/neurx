@@ -17,7 +17,7 @@ struct validation_report {
 func validate_graph(g: &computation_graph) validation_report {
     errors = vec[validation_error]()
     warnings = vec[string]()
-    
+
     if !g.is_valid() {
         errors.push(validation_error {
             error_type: "invalid_references",
@@ -25,7 +25,7 @@ func validate_graph(g: &computation_graph) validation_report {
             op_id: -1,
         })
     }
-    
+
     for op in g.operations {
         for input_id in op.input_ids {
             if input_id < 0 || input_id >= g.values.len() {
@@ -36,7 +36,7 @@ func validate_graph(g: &computation_graph) validation_report {
                 })
             }
         }
-        
+
         for output_id in op.output_ids {
             if output_id < 0 || output_id >= g.values.len() {
                 errors.push(validation_error {
@@ -47,13 +47,13 @@ func validate_graph(g: &computation_graph) validation_report {
             }
         }
     }
-    
+
     for op in g.operations {
         if op.input_ids.len() > 10 {
             warnings.push("operation " + op.id as string + " has many inputs (" + op.input_ids.len() as string + ")")
         }
     }
-    
+
     validation_report {
         is_valid: errors.len() == 0,
         errors: errors,
@@ -66,7 +66,7 @@ func check_graph_connectivity(g: &computation_graph) bool {
     for i in range(g.operations.len()) {
         visited[i] = false
     }
-    
+
     for input_id in g.input_ids {
         producers = g.find_producers(input_id)
         for producer in producers {
@@ -77,7 +77,7 @@ func check_graph_connectivity(g: &computation_graph) bool {
             }
         }
     }
-    
+
     changed = true
     while changed {
         changed = false
@@ -97,21 +97,21 @@ func check_graph_connectivity(g: &computation_graph) bool {
             }
         }
     }
-    
+
     for output_id in g.output_ids {
         producers = g.find_producers(output_id)
         if producers.len() == 0 {
             return false
         }
     }
-    
+
     true
 }
 
 func check_shape_compatibility(g: &computation_graph) validation_report {
     errors = vec[validation_error]()
     warnings = vec[string]()
-    
+
     validation_report {
         is_valid: errors.len() == 0,
         errors: errors,
@@ -124,16 +124,16 @@ func (report: &validation_report) summary_string() string {
     s = s + "Validation Report\n"
     s = s + "Valid: " + report.is_valid as string + "\n"
     s = s + "Errors: " + report.errors.len() as string + "\n"
-    
+
     for err in report.errors {
         s = s + "  [" + err.error_type + "] " + err.message + "\n"
     }
-    
+
     s = s + "Warnings: " + report.warnings.len() as string + "\n"
-    
+
     for warn in report.warnings {
         s = s + "  [WARN] " + warn + "\n"
     }
-    
+
     s
 }

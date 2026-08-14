@@ -51,41 +51,41 @@ func (compiler: &graph_compiler) get_optimization_level() int {
 
 func (compiler: &graph_compiler) compile(g: &computation_graph) compilation_unit {
     unit = new_compilation_unit("compiled_graph", g)
-    
+
     unit.stats.original_op_count = g.operation_count()
     unit.stats.original_memory = g.total_memory_bytes()
-    
+
     unit.pipeline = default_optimization_pipeline()
     unit.pass_results = run_pass_pipeline(&mut unit.optimized_graph, &unit.pipeline)
-    
+
     unit.stats.optimized_op_count = unit.optimized_graph.operation_count()
     unit.stats.optimized_memory = unit.optimized_graph.total_memory_bytes()
-    
+
     unit
 }
 
 func (compiler: &graph_compiler) compile_with_pipeline(g: &computation_graph, pipeline: &pass_pipeline) compilation_unit {
     unit = new_compilation_unit("compiled_graph", g)
-    
+
     unit.stats.original_op_count = g.operation_count()
     unit.stats.original_memory = g.total_memory_bytes()
-    
+
     unit.pass_results = run_pass_pipeline(&mut unit.optimized_graph, pipeline)
-    
+
     unit.stats.optimized_op_count = unit.optimized_graph.operation_count()
     unit.stats.optimized_memory = unit.optimized_graph.total_memory_bytes()
-    
+
     unit
 }
 
 func (compiler: &graph_compiler) compile_with_config(g: &computation_graph, unit_name: string, cfg: &compilation_config) compilation_unit {
     unit = new_compilation_unit(unit_name, g)
-    
+
     unit.stats.original_op_count = g.operation_count()
     unit.stats.original_memory = g.total_memory_bytes()
-    
+
     opt_level = cfg.opt_level
-    
+
     if opt_level == "O0" {
         unit.pass_results = vec[pass_result]()
     } else if opt_level == "O1" {
@@ -95,16 +95,16 @@ func (compiler: &graph_compiler) compile_with_config(g: &computation_graph, unit
     } else if opt_level == "O3" {
         unit.pass_results = run_pass_pipeline(&mut unit.optimized_graph, &aggressive_optimization_pipeline())
     }
-    
+
     if cfg.enable_validation {
         if !unit.optimized_graph.is_valid() {
             return unit
         }
     }
-    
+
     unit.stats.optimized_op_count = unit.optimized_graph.operation_count()
     unit.stats.optimized_memory = unit.optimized_graph.total_memory_bytes()
-    
+
     unit
 }
 
