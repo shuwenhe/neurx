@@ -42,106 +42,106 @@ struct otlp_exporter {
     export_timeout []int
 }
 
-func NewResource(serviceName []string) Resource {
-    r := Resource{}
+func new_resource(service_name []string) resource {
+    r := resource{}
     r.attributes = make([]map[string]string, 1)
     r.attributes[0] = make(map[string]string)
 
-    if len(serviceName) > 0 {
-        r.attributes[0]["service.name"] = serviceName[0]
+    if len(service_name) > 0 {
+        r.attributes[0]["service.name"] = service_name[0]
     }
     r.attributes[0]["service.version"] = "1.0.0"
     r.attributes[0]["telemetry.sdk.name"] = "neurx"
     r.attributes[0]["telemetry.sdk.language"] = "s"
 
-    r.telemetrySDKVersion = append([]string{}, "1.0.0")
+    r.telemetry_sdk_version = append([]string{}, "1.0.0")
 
     return r
 }
 
-func (r *Resource) AddAttribute(key []string, value []string) {
+func (r *resource) add_attribute(key []string, value []string) {
     if len(key) > 0 && len(value) > 0 && len(r.attributes) > 0 {
         r.attributes[0][key[0]] = value[0]
     }
 }
 
-func NewInstrumentationScope(name []string, version []string) InstrumentationScope {
-    scope := InstrumentationScope{}
+func new_instrumentation_scope(name []string, version []string) instrumentation_scope {
+    scope := instrumentation_scope{}
     scope.name = name
     scope.version = version
     scope.url = append([]string{}, "https://github.com/neurx-ai/neurx")
     return scope
 }
 
-func NewOTLPExporter(endpoint []string, serviceName []string) OTLPExporter {
-    exporter := OTLPExporter{}
+func new_otlp_exporter(endpoint []string, service_name []string) otlp_exporter {
+    exporter := otlp_exporter{}
     exporter.endpoint = endpoint
-    exporter.resource = NewResource(serviceName)
-    exporter.scope = NewInstrumentationScope(
+    exporter.resource = new_resource(service_name)
+    exporter.scope = new_instrumentation_scope(
         append([]string{}, "neurx.inference"),
         append([]string{}, "1.0.0"),
     )
-    exporter.batchSize = append([]int{}, 100)
-    exporter.pendingSpans = make([]ExportedSpan, 0)
-    exporter.exportTimeout = append([]int{}, 30000)
+    exporter.batch_size = append([]int{}, 100)
+    exporter.pending_spans = make([]exported_span, 0)
+    exporter.export_timeout = append([]int{}, 30000)
 
     return exporter
 }
 
-func (exporter *OTLPExporter) ConvertSpanForExport(span interface{}) ExportedSpan {
-    exported := ExportedSpan{}
+func (exporter *otlp_exporter) convert_span_for_export(span interface{}) exported_span {
+    exported := exported_span{}
 
-    exported.traceID = append([]string{}, "sample-trace-id")
-    exported.spanID = append([]string{}, "sample-span-id")
-    exported.parentSpanID = []string{}
+    exported.trace_id = append([]string{}, "sample-trace-id")
+    exported.span_id = append([]string{}, "sample-span-id")
+    exported.parent_span_id = []string{}
     exported.name = append([]string{}, "sample-span")
     exported.kind = append([]string{}, "INTERNAL")
-    exported.startTimeUnix = append([]int{}, 1000000000)
-    exported.endTimeUnix = append([]int{}, 1000010000)
-    exported.durationMs = append([]int{}, 10)
+    exported.start_time_unix = append([]int{}, 1000000000)
+    exported.end_time_unix = append([]int{}, 1000010000)
+    exported.duration_ms = append([]int{}, 10)
     exported.attributes = make([]map[string]string, 1)
     exported.attributes[0] = make(map[string]string)
     exported.status = append([]string{}, "OK")
-    exported.events = make([]ExportedEvent, 0)
+    exported.events = make([]exported_event, 0)
 
     return exported
 }
 
-func (exporter *OTLPExporter) AddSpan(span interface{}) {
-    exported := exporter.ConvertSpanForExport(span)
-    exporter.pendingSpans = append(exporter.pendingSpans, exported)
+func (exporter *otlp_exporter) add_span(span interface{}) {
+    exported := exporter.convert_span_for_export(span)
+    exporter.pending_spans = append(exporter.pending_spans, exported)
 
-    if len(exporter.pendingSpans) >= exporter.batchSize[0] {
-        _ = exporter.Export()
+    if len(exporter.pending_spans) >= exporter.batch_size[0] {
+        _ = exporter.export()
     }
 }
 
-func (exporter *OTLPExporter) Export() []bool {
-    if len(exporter.pendingSpans) == 0 {
+func (exporter *otlp_exporter) export() []bool {
+    if len(exporter.pending_spans) == 0 {
         return append([]bool{}, true)
     }
 
-    io.Println("OTLP Export: " + io.ToString(len(exporter.pendingSpans)) + " spans to " +
+    io.Println("OTLP Export: " + io.ToString(len(exporter.pending_spans)) + " spans to " +
         (exporter.endpoint[0] if len(exporter.endpoint) > 0 else "unknown"))
 
-    exporter.pendingSpans = make([]ExportedSpan, 0)
+    exporter.pending_spans = make([]exported_span, 0)
 
     return append([]bool{}, true)
 }
 
-func (span *ExportedSpan) ToOTLPJSON() []string {
+func (span *exported_span) to_otlp_json() []string {
     json := "{"
 
-    if len(span.traceID) > 0 {
-        json = json + "\"traceId\":\"" + span.traceID[0] + "\","
+    if len(span.trace_id) > 0 {
+        json = json + "\"traceId\":\"" + span.trace_id[0] + "\","
     }
 
-    if len(span.spanID) > 0 {
-        json = json + "\"spanId\":\"" + span.spanID[0] + "\","
+    if len(span.span_id) > 0 {
+        json = json + "\"spanId\":\"" + span.span_id[0] + "\","
     }
 
-    if len(span.parentSpanID) > 0 {
-        json = json + "\"parentSpanId\":\"" + span.parentSpanID[0] + "\","
+    if len(span.parent_span_id) > 0 {
+        json = json + "\"parentSpanId\":\"" + span.parent_span_id[0] + "\","
     }
 
     if len(span.name) > 0 {
@@ -152,18 +152,18 @@ func (span *ExportedSpan) ToOTLPJSON() []string {
         json = json + "\"kind\":\"" + span.kind[0] + "\","
     }
 
-    if len(span.startTimeUnix) > 0 {
-        json = json + "\"startTimeUnixNano\":" + io.ToString(span.startTimeUnix[0]) + ","
+    if len(span.start_time_unix) > 0 {
+        json = json + "\"startTimeUnixNano\":" + io.ToString(span.start_time_unix[0]) + ","
     }
 
-    if len(span.endTimeUnix) > 0 {
-        json = json + "\"endTimeUnixNano\":" + io.ToString(span.endTimeUnix[0]) + ","
+    if len(span.end_time_unix) > 0 {
+        json = json + "\"endTimeUnixNano\":" + io.ToString(span.end_time_unix[0]) + ","
     }
 
     if len(span.status) > 0 {
         json = json + "\"status\":{\"code\":\"" + span.status[0] + "\"}"
-        if len(span.errorMessage) > 0 {
-            json = json + ",\"description\":\"" + span.errorMessage[0] + "\""
+        if len(span.error_message) > 0 {
+            json = json + ",\"description\":\"" + span.error_message[0] + "\""
         }
     }
 
@@ -176,30 +176,30 @@ func (span *ExportedSpan) ToOTLPJSON() []string {
     return append([]string{}, json)
 }
 
-func (exporter *OTLPExporter) ExportFormat() []string {
+func (exporter *otlp_exporter) export_format() []string {
     format := ""
     format = format + "OTLP HTTP Protocol v0.20.0\n"
     format = format + "Endpoint: " + (exporter.endpoint[0] if len(exporter.endpoint) > 0 else "not set") + "\n"
     format = format + "Service: " + (exporter.resource.attributes[0]["service.name"] if len(exporter.resource.attributes) > 0 else "unknown") + "\n"
-    format = format + "Batch Size: " + io.ToString(exporter.batchSize[0]) + "\n"
-    format = format + "Export Timeout: " + io.ToString(exporter.exportTimeout[0]) + "ms\n"
+    format = format + "Batch Size: " + io.ToString(exporter.batch_size[0]) + "\n"
+    format = format + "Export Timeout: " + io.ToString(exporter.export_timeout[0]) + "ms\n"
 
     return append([]string{}, format)
 }
 
-func GenerateW3CTraceContextHeader(traceID []string, spanID []string, sampled bool) []string {
+func generate_w3c_trace_context_header(trace_id []string, span_id []string, sampled bool) []string {
     header := "traceparent: 00-"
 
-    if len(traceID) > 0 {
-        header = header + traceID[0]
+    if len(trace_id) > 0 {
+        header = header + trace_id[0]
     } else {
         header = header + "00000000000000000000000000000000"
     }
 
     header = header + "-"
 
-    if len(spanID) > 0 {
-        header = header + spanID[0]
+    if len(span_id) > 0 {
+        header = header + span_id[0]
     } else {
         header = header + "0000000000000000"
     }
@@ -214,16 +214,16 @@ func GenerateW3CTraceContextHeader(traceID []string, spanID []string, sampled bo
     return append([]string{}, header)
 }
 
-func GenerateTracestateHeader(vendorData []map[string]string) []string {
-    if len(vendorData) == 0 {
+func generate_tracestate_header(vendor_data []map[string]string) []string {
+    if len(vendor_data) == 0 {
         return append([]string{}, "")
     }
 
     header := "tracestate: "
     first := true
 
-    if len(vendorData) > 0 {
-        for k, v := range vendorData[0] {
+    if len(vendor_data) > 0 {
+        for k, v := range vendor_data[0] {
             if !first {
                 header = header + ","
             }
@@ -239,29 +239,29 @@ func main() {
     io.Println("OpenTelemetry Adapter - Distributed Tracing Export")
     io.Println("")
 
-    exporter := NewOTLPExporter(
+    exporter := new_otlp_exporter(
         append([]string{}, "http://localhost:4318/v1/traces"),
         append([]string{}, "neurx-inference-server"),
     )
 
     io.Println("Exporter Configuration:")
-    io.Println(exporter.ExportFormat()[0])
+    io.Println(exporter.export_format()[0])
     io.Println("")
 
-    span := ExportedSpan{}
-    span.traceID = append([]string{}, "00112233445566778899aabbccddeeff")
-    span.spanID = append([]string{}, "0011223344556677")
+    span := exported_span{}
+    span.trace_id = append([]string{}, "00112233445566778899aabbccddeeff")
+    span.span_id = append([]string{}, "0011223344556677")
     span.name = append([]string{}, "ModelInference")
     span.kind = append([]string{}, "INTERNAL")
-    span.startTimeUnix = append([]int{}, 1692864000000000000)
-    span.endTimeUnix = append([]int{}, 1692864000010000000)
+    span.start_time_unix = append([]int{}, 1692864000000000000)
+    span.end_time_unix = append([]int{}, 1692864000010000000)
     span.status = append([]string{}, "OK")
 
     io.Println("Sample Span JSON Export:")
-    io.Println(span.ToOTLPJSON()[0])
+    io.Println(span.to_otlp_json()[0])
     io.Println("")
 
-    w3c := GenerateW3CTraceContextHeader(
+    w3c := generate_w3c_trace_context_header(
         append([]string{}, "00112233445566778899aabbccddeeff"),
         append([]string{}, "0011223344556677"),
         true,

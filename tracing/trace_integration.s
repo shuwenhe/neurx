@@ -30,48 +30,48 @@ struct tracing_metrics {
     overhead_percent    []int
 }
 
-func NewTracingConfig() TracingConfig {
-    config := TracingConfig{}
+func new_tracing_config() tracing_config {
+    config := tracing_config{}
     config.enabled = append([]bool{}, true)
-    config.serviceName = append([]string{}, "neurx-inference")
-    config.samplingRate = append([]int{}, 100)
+    config.service_name = append([]string{}, "neurx-inference")
+    config.sampling_rate = append([]int{}, 100)
     config.exporters = make([][]string, 1)
     config.exporters[0] = append([]string{}, "console", "otel")
-    config.jaegerEndpoint = append([]string{}, "http://localhost:14268/api/traces")
-    config.otelEndpoint = append([]string{}, "http://localhost:4318/v1/traces")
-    config.maxSpansPerTrace = append([]int{}, 500)
+    config.jaeger_endpoint = append([]string{}, "http://localhost:14268/api/traces")
+    config.otel_endpoint = append([]string{}, "http://localhost:4318/v1/traces")
+    config.max_spans_per_trace = append([]int{}, 500)
 
     return config
 }
 
-func NewRequestTracer(config TracingConfig) RequestTracer {
-    rt := RequestTracer{}
-    rt.traceID = append([]string{}, "trace-" + io.ToString(1000 + 1))
-    rt.rootSpanID = append([]string{}, "span-" + io.ToString(100))
+func new_request_tracer(config tracing_config) request_tracer {
+    rt := request_tracer{}
+    rt.trace_id = append([]string{}, "trace-" + io.ToString(1000 + 1))
+    rt.root_span_id = append([]string{}, "span-" + io.ToString(100))
     rt.config = config
-    rt.startTime = append([]int{}, 0)
+    rt.start_time = append([]int{}, 0)
     rt.spans = make([][]string, 0)
-    rt.spanMetadata = make([]map[string][]string, 0)
-    rt.isActive = append([]bool{}, true)
+    rt.span_metadata = make([]map[string][]string, 0)
+    rt.is_active = append([]bool{}, true)
 
-    shouldSample := 50
-    rt.samplingDecision = append([]bool{}, shouldSample < config.samplingRate[0])
+    should_sample := 50
+    rt.sampling_decision = append([]bool{}, should_sample < config.sampling_rate[0])
 
     return rt
 }
 
-func (rt *RequestTracer) StartSpan(spanName []string, spanKind []string) []string {
-    if !rt.isActive[0] {
+func (rt *request_tracer) start_span(span_name []string, span_kind []string) []string {
+    if !rt.is_active[0] {
         return []string{}
     }
 
-    spanID := append([]string{}, "span-" + io.ToString(len(rt.spans) + 1))
+    span_id := append([]string{}, "span-" + io.ToString(len(rt.spans) + 1))
 
-    rt.spans = append(rt.spans, spanID)
+    rt.spans = append(rt.spans, span_id)
 
     metadata := make(map[string][]string)
-    metadata["name"] = spanName
-    metadata["kind"] = spanKind
+    metadata["name"] = span_name
+    metadata["kind"] = span_kind
     metadata["start_time"] = append([]string{}, "0")
     metadata["parent_span"] = []string{}
 
@@ -79,12 +79,12 @@ func (rt *RequestTracer) StartSpan(spanName []string, spanKind []string) []strin
         metadata["parent_span"] = append([]string{}, rt.spans[len(rt.spans)-2][0])
     }
 
-    rt.spanMetadata = append(rt.spanMetadata, metadata)
+    rt.span_metadata = append(rt.span_metadata, metadata)
 
-    return spanID
+    return span_id
 }
 
-func (rt *RequestTracer) EndSpan() {
+func (rt *request_tracer) end_span() {
     if len(rt.spans) == 0 {
         return
     }
@@ -92,35 +92,35 @@ func (rt *RequestTracer) EndSpan() {
     rt.spans = rt.spans[0:len(rt.spans)-1]
 }
 
-func (rt *RequestTracer) AddSpanAttribute(key []string, value []string) {
-    if len(rt.spans) == 0 || len(rt.spanMetadata) == 0 {
+func (rt *request_tracer) add_span_attribute(key []string, value []string) {
+    if len(rt.spans) == 0 || len(rt.span_metadata) == 0 {
         return
     }
 
     if len(key) > 0 && len(value) > 0 {
-        attrKey := "attr_" + key[0]
-        rt.spanMetadata[len(rt.spanMetadata)-1][attrKey] = value
+        attr_key := "attr_" + key[0]
+        rt.span_metadata[len(rt.span_metadata)-1][attr_key] = value
     }
 }
 
-func (rt *RequestTracer) RecordSpanEvent(eventName []string, eventValue []string) {
-    if len(rt.spans) == 0 || len(rt.spanMetadata) == 0 {
+func (rt *request_tracer) record_span_event(event_name []string, event_value []string) {
+    if len(rt.spans) == 0 || len(rt.span_metadata) == 0 {
         return
     }
 
-    if len(eventName) > 0 {
-        eventKey := "event_" + eventName[0]
-        rt.spanMetadata[len(rt.spanMetadata)-1][eventKey] = eventValue
+    if len(event_name) > 0 {
+        event_key := "event_" + event_name[0]
+        rt.span_metadata[len(rt.span_metadata)-1][event_key] = event_value
     }
 }
 
-func (rt *RequestTracer) RecordError(errorMsg []string) {
+func (rt *request_tracer) record_error(error_msg []string) {
     if len(rt.spans) == 0 {
         return
     }
 
-    rt.spanMetadata[len(rt.spanMetadata)-1]["error"] = errorMsg
-    rt.spanMetadata[len(rt.spanMetadata)-1]["status"] = append([]string{}, "ERROR")
+    rt.span_metadata[len(rt.span_metadata)-1]["error"] = error_msg
+    rt.span_metadata[len(rt.span_metadata)-1]["status"] = append([]string{}, "ERROR")
 }
 
 func (rt *RequestTracer) GetTraceID() []string {
