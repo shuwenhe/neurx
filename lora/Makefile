@@ -1,22 +1,17 @@
-# LoRA 模块编译配置
-# 用于编译、测试和打包 LoRA 权重管理系统
 
 .PHONY: all build test clean format lint doc examples help
 
-# 编译器配置
 S_COMPILER := s
 S_FLAGS := -std=latest -Wall -Wextra -O2
 DEBUG_FLAGS := -g -O0
 PROFILE_FLAGS := -pg
 
-# 源文件和输出目录
 SRC_DIR := .
 BUILD_DIR := build
 TEST_DIR := tests
 EXAMPLES_DIR := examples
 DOC_DIR := docs
 
-# 源文件列表
 CORE_MODULES := \
 	lora_config.s \
 	lora_adapter.s \
@@ -29,14 +24,11 @@ EXAMPLE_MODULES := \
 	$(EXAMPLES_DIR)/basic_usage.s \
 	$(EXAMPLES_DIR)/advanced_usage.s
 
-# 编译目标
 CORE_OBJECTS := $(CORE_MODULES:.s=.o)
 EXAMPLE_OBJECTS := $(EXAMPLE_MODULES:.s=.o)
 
-## 默认目标：编译所有模块
 all: build
 
-## 编译核心模块
 build: $(BUILD_DIR)
 	@echo "=== 编译 LoRA 核心模块 ==="
 	@for file in $(CORE_MODULES); do \
@@ -45,7 +37,6 @@ build: $(BUILD_DIR)
 	done
 	@echo "✓ 核心模块编译完成"
 
-## 编译示例代码
 examples: build
 	@echo "=== 编译 LoRA 示例 ==="
 	@mkdir -p $(BUILD_DIR)
@@ -55,17 +46,14 @@ examples: build
 	done
 	@echo "✓ 示例编译完成"
 
-## 调试编译（包含调试符号）
 debug: EXTRA_FLAGS = $(DEBUG_FLAGS)
 debug: clean build
 	@echo "✓ 调试版本编译完成"
 
-## 性能分析编译
 profile: EXTRA_FLAGS = $(PROFILE_FLAGS)
 profile: clean build
 	@echo "✓ 性能分析版本编译完成"
 
-## 运行单元测试
 test: build
 	@echo "=== 运行 LoRA 单元测试 ==="
 	@if [ -d "$(TEST_DIR)" ]; then \
@@ -79,7 +67,6 @@ test: build
 		echo "⚠ 没有找到测试文件"; \
 	fi
 
-## 运行示例程序
 run-examples: examples
 	@echo "=== 运行 LoRA 示例 ==="
 	@echo ""
@@ -91,7 +78,6 @@ run-examples: examples
 	@$(S_COMPILER) $(S_FLAGS) $(EXAMPLES_DIR)/advanced_usage.s -o $(BUILD_DIR)/advanced_example
 	@./$(BUILD_DIR)/advanced_example
 
-## 代码格式化
 format:
 	@echo "=== 格式化代码 ==="
 	@for file in $(CORE_MODULES) $(EXAMPLE_MODULES); do \
@@ -100,7 +86,6 @@ format:
 	done
 	@echo "✓ 格式化完成"
 
-## 代码检查
 lint:
 	@echo "=== 静态代码检查 ==="
 	@for file in $(CORE_MODULES); do \
@@ -109,7 +94,6 @@ lint:
 	done
 	@echo "✓ 代码检查完成"
 
-## 生成文档
 doc: doc-check
 	@echo "=== 生成 API 文档 ==="
 	@mkdir -p $(DOC_DIR)
@@ -125,7 +109,6 @@ doc: doc-check
 	done
 	@echo "✓ 文档生成完成: $(DOC_DIR)/api.md"
 
-## 检查文档有效性
 doc-check:
 	@echo "=== 检查文档 ==="
 	@if [ -f "README.md" ]; then \
@@ -135,7 +118,6 @@ doc-check:
 		exit 1; \
 	fi
 
-## 清理编译产物
 clean:
 	@echo "=== 清理编译产物 ==="
 	@rm -rf $(BUILD_DIR) $(DOC_DIR)/api.md
@@ -144,13 +126,11 @@ clean:
 	@find . -name "*.so" -delete
 	@echo "✓ 清理完成"
 
-## 完整清理（包括文档）
 distclean: clean
 	@echo "=== 完整清理 ==="
 	@rm -rf $(DOC_DIR) $(BUILD_DIR)
 	@echo "✓ 完全清理完成"
 
-## 创建源代码包
 package: clean format
 	@echo "=== 打包源代码 ==="
 	@tar -czf neurx-lora-$(shell date +%Y%m%d).tar.gz \
@@ -160,7 +140,6 @@ package: clean format
 		.
 	@echo "✓ 源代码包创建完成"
 
-## 安装（复制到 NeurX 目录）
 install: build
 	@echo "=== 安装 LoRA 模块 ==="
 	@if [ -z "$(NEURX_HOME)" ]; then \
@@ -172,7 +151,6 @@ install: build
 	@cp -rv examples $(NEURX_HOME)/lora/
 	@echo "✓ 安装完成"
 
-## 模块信息统计
 info:
 	@echo "=== LoRA 模块信息 ==="
 	@echo "核心模块数量: $$(echo $(CORE_MODULES) | wc -w)"
@@ -184,7 +162,6 @@ info:
 	@echo "文件大小:"
 	@du -sh . | cut -f1
 
-## 性能基准测试
 benchmark: build
 	@echo "=== LoRA 性能基准测试 ==="
 	@echo "运行基准测试..."
@@ -192,7 +169,6 @@ benchmark: build
 	@./$(BUILD_DIR)/benchmark
 	@echo "✓ 基准测试完成"
 
-## 显示帮助信息
 help:
 	@echo "=========================================="
 	@echo "   NeurX LoRA 编译系统"
@@ -226,22 +202,17 @@ help:
 	@echo "  make debug                   # 调试编译"
 	@echo ""
 
-## 设置默认目标
 .DEFAULT_GOAL := help
 
-# 创建编译目录
 $(BUILD_DIR):
 	@mkdir -p $(BUILD_DIR)
 
-# 源文件依赖检查
 %.o: %.s
 	@$(S_COMPILER) $(S_FLAGS) $(EXTRA_FLAGS) -c $< -o $(BUILD_DIR)/$@
 
-# 持续集成检查
 ci: lint format test examples
 	@echo "✓ CI 检查通过"
 
-# 预提交检查
 pre-commit: format lint doc-check
 	@echo "✓ 预提交检查通过"
 

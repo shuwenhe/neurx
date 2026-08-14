@@ -1,48 +1,40 @@
-// Package: neurx.reasoning.cot_config
-// 思维链配置管理模块
-// 提供推理链的参数配置和验证
-
 package neurx.reasoning.cot_config
 
-// 推理风格枚举
 enum reasoning_style {
-    step_by_step    // 逐步推理
-    detailed        // 详细推理
-    summarized      // 摘要推理
-    hierarchical    // 分层推理
+    step_by_step
+    detailed
+    summarized
+    hierarchical
 }
 
-// 验证策略枚举
 enum validation_strategy {
-    none           // 无验证
-    consistency    // 一致性检查
-    logical        // 逻辑检查
-    semantic       // 语义检查
+    none
+    consistency
+    logical
+    semantic
 }
 
-// 推理链配置结构体
 struct cot_config {
-    bool enabled                           // 是否启用思维链
-    reasoning_style style                  // 推理风格
-    int max_steps                          // 最大推理步数
-    int max_tokens_per_step                // 每步最大 token 数
-    int max_tokens_total                   // 总 token 数限制
-    bool stream_intermediate               // 是否流式输出中间步骤
-    bool include_reasoning_in_output       // 是否包含推理过程在输出中
-    validation_strategy validation         // 验证策略
-    bool auto_checkpoint                   // 是否自动检查点
-    int checkpoint_interval                // 检查点间隔
-    string system_prompt_template          // 系统提示模板
-    string step_separator                  // 步骤分隔符
-    bool enable_backtracking               // 是否启用回溯
-    int backtrack_depth                    // 回溯深度
-    bool enable_branching                  // 是否启用分支探索
-    int max_branches                       // 最大分支数
-    float confidence_threshold             // 置信度阈值
-    bool summarize_at_end                  // 是否在末尾总结
+    bool enabled
+    reasoning_style style
+    int max_steps
+    int max_tokens_per_step
+    int max_tokens_total
+    bool stream_intermediate
+    bool include_reasoning_in_output
+    validation_strategy validation
+    bool auto_checkpoint
+    int checkpoint_interval
+    string system_prompt_template
+    string step_separator
+    bool enable_backtracking
+    int backtrack_depth
+    bool enable_branching
+    int max_branches
+    float confidence_threshold
+    bool summarize_at_end
 }
 
-// 创建默认配置
 func new_default_cot_config() cot_config {
     cot_config {
         enabled: true,
@@ -66,7 +58,6 @@ func new_default_cot_config() cot_config {
     }
 }
 
-// 创建详细推理配置
 func new_detailed_cot_config() cot_config {
     cfg := new_default_cot_config()
     cfg.style = reasoning_style.detailed
@@ -78,7 +69,6 @@ func new_detailed_cot_config() cot_config {
     cfg
 }
 
-// 创建快速推理配置
 func new_fast_cot_config() cot_config {
     cfg := new_default_cot_config()
     cfg.style = reasoning_style.summarized
@@ -90,7 +80,6 @@ func new_fast_cot_config() cot_config {
     cfg
 }
 
-// 创建分层推理配置
 func new_hierarchical_cot_config() cot_config {
     cfg := new_detailed_cot_config()
     cfg.style = reasoning_style.hierarchical
@@ -101,7 +90,6 @@ func new_hierarchical_cot_config() cot_config {
     cfg
 }
 
-// 验证配置有效性
 func (cfg: &cot_config) validate() bool {
     if cfg.max_steps <= 0 {
         return false
@@ -127,7 +115,6 @@ func (cfg: &cot_config) validate() bool {
     true
 }
 
-// 获取推理风格字符串
 func (cfg: &cot_config) get_style_string() string {
     match cfg.style {
         reasoning_style.step_by_step: "step-by-step",
@@ -138,7 +125,6 @@ func (cfg: &cot_config) get_style_string() string {
     }
 }
 
-// 获取验证策略字符串
 func (cfg: &cot_config) get_validation_string() string {
     match cfg.validation {
         validation_strategy.none: "none",
@@ -149,7 +135,6 @@ func (cfg: &cot_config) get_validation_string() string {
     }
 }
 
-// 调整最大步数
 func (cfg: &cot_config) set_max_steps(int steps) cot_config {
     if steps > 0 {
         cfg.max_steps = steps
@@ -157,7 +142,6 @@ func (cfg: &cot_config) set_max_steps(int steps) cot_config {
     cfg
 }
 
-// 调整最大 token 数
 func (cfg: &cot_config) set_max_tokens(int per_step, int total) cot_config {
     if per_step > 0 {
         cfg.max_tokens_per_step = per_step
@@ -168,7 +152,6 @@ func (cfg: &cot_config) set_max_tokens(int per_step, int total) cot_config {
     cfg
 }
 
-// 克隆配置
 func (cfg: &cot_config) clone() cot_config {
     cot_config {
         enabled: cfg.enabled,

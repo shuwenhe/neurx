@@ -1,4 +1,3 @@
-# Compilation Framework Makefile
 
 .PHONY: all clean test build run docs
 
@@ -24,20 +23,16 @@ EXAMPLE_FILES := $(EXAMPLES_DIR)/simple_graph.s
 ALL_FILES := $(IR_FILES) $(PASSES_FILES) $(COMPILER_FILES) $(EXECUTOR_FILES) \
              $(UTILS_FILES) $(EXAMPLE_FILES)
 
-# 编译选项
 S_COMPILER := s
 S_FLAGS := -O2
 S_OUTPUT_DIR := build
 
-# 默认目标
 all: build
 
-# 创建构建目录
 build_dir:
 	@mkdir -p $(S_OUTPUT_DIR)
 	@echo "Created build directory"
 
-# 检查语法
 check: build_dir
 	@echo "Checking S language syntax..."
 	@for file in $(ALL_FILES); do \
@@ -45,7 +40,6 @@ check: build_dir
 	done
 	@echo "Syntax check complete"
 
-# 编译框架
 build: build_dir check
 	@echo "Building compilation framework..."
 	@echo "Source files:"
@@ -57,7 +51,6 @@ build: build_dir check
 	@echo ""
 	@echo "Build complete: $(S_OUTPUT_DIR)/"
 
-# 运行示例
 run: build
 	@echo "Running compilation framework example..."
 	@echo "Example: simple_graph.s"
@@ -65,13 +58,11 @@ run: build
 	@echo ""
 	@echo "TODO: Compile and execute examples"
 
-# 性能测试
 benchmark: build
 	@echo "Running performance benchmarks..."
 	@echo "Benchmarking different optimization levels (O0, O1, O2, O3)"
 	@echo "TODO: Implement benchmark suite"
 
-# 运行测试
 test: build
 	@echo "Running compilation framework tests..."
 	@echo "Tests:"
@@ -83,7 +74,6 @@ test: build
 	@echo "  - Graph visualization and printing"
 	@echo "TODO: Implement test suite"
 
-# 代码统计
 stats:
 	@echo "=== Compilation Framework Code Statistics ==="
 	@echo ""
@@ -108,7 +98,6 @@ stats:
 	@echo "Total:"
 	@find $(FRAMEWORK_DIR) -name "*.s" -not -path "./build/*" | xargs wc -l | tail -1
 
-# 生成文档
 docs:
 	@echo "Generating documentation..."
 	@echo "Main documentation: README.md"
@@ -131,7 +120,6 @@ docs:
 	@echo ""
 	@echo "Documentation complete"
 
-# 代码风格检查
 lint:
 	@echo "Checking code style..."
 	@echo "Style guidelines:"
@@ -141,7 +129,6 @@ lint:
 	@echo "  - Proper error handling with result/option"
 	@echo "TODO: Implement linter"
 
-# 清理构建产物
 clean:
 	@echo "Cleaning build artifacts..."
 	@rm -rf $(S_OUTPUT_DIR)
@@ -149,12 +136,10 @@ clean:
 	@find . -name "*.a" -delete
 	@echo "Clean complete"
 
-# 格式化代码
 format:
 	@echo "Formatting S code..."
 	@echo "TODO: Implement code formatter"
 
-# 生成依赖关系图
 deps:
 	@echo "=== Module Dependencies ==="
 	@echo ""
@@ -187,7 +172,6 @@ deps:
 	@echo "Examples (depends on all)"
 	@echo "  - simple_graph.s → all modules"
 
-# 帮助
 help:
 	@echo "NeurX Compilation Framework Makefile"
 	@echo ""

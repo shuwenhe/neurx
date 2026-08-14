@@ -110,8 +110,8 @@ g.add_input(input_id)
 hidden_id = g.add_value(value_type_float32(new int[]{32, 512}))
 weight_id = g.add_value(value_type_float32(new int[]{784, 512}))
 
-matmul_id = g.add_operation(op_type::matrix_multiply, "matmul1", 
-                            new int[]{input_id, weight_id}, 
+matmul_id = g.add_operation(op_type::matrix_multiply, "matmul1",
+                            new int[]{input_id, weight_id},
                             new int[]{hidden_id})
 
 g.add_output(hidden_id)
@@ -260,7 +260,7 @@ dot_code = print_graph_dot_format(g)
 
 ---
 
-**编译框架版本**: v0.1.0  
-**创建日期**: 2026-08-14  
-**语言**: S (100% 纯实现)  
+**编译框架版本**: v0.1.0
+**创建日期**: 2026-08-14
+**语言**: S (100% 纯实现)
 **许可证**: MIT

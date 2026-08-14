@@ -145,9 +145,9 @@ hardware:
 
 chat:
   system_prompt: |
-    You are a helpful medical assistant. You provide accurate, 
-    evidence-based medical information to support healthcare professionals 
-    and patients. Always recommend consulting with qualified medical professionals 
+    You are a helpful medical assistant. You provide accurate,
+    evidence-based medical information to support healthcare professionals
+    and patients. Always recommend consulting with qualified medical professionals
     for diagnosis and treatment.
 
   template: "qwen"

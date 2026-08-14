@@ -65,13 +65,13 @@ func main() {
     let options = hf_model_loader.default_hf_load_options()
     options.device = "cpu"
     options.dtype = "float32"
-    
+
     // Load model
     let model = hf_model_loader.load_hf_model(
         "meta-llama/Llama-2-7b",
         options
     )
-    
+
     // Print model info
     hf_model_loader.print_hf_model_summary(model)
 }
@@ -85,18 +85,18 @@ use neurx.transformers_utils.hf_model_loader
 func main() {
     let options = hf_model_loader.default_hf_load_options()
     let model = hf_model_loader.load_hf_model("meta-llama/Llama-2-7b", options)
-    
+
     let config = hf_model_loader.default_inference_config()
     config.temperature = 0.7
     config.top_p = 0.9
     config.max_new_tokens = 128
-    
+
     let result = hf_model_loader.generate_text(
         model,
         "Hello, world!",
         config
     )
-    
+
     print(result)
 }
 ```
@@ -110,15 +110,15 @@ use neurx.transformers_utils.logits_processors.temperature
 
 func main() {
     let logits = [0.5, 1.5, 2.5, 0.3, 1.2]
-    
+
     // Top-K filtering
     let tk_proc = top_k.create_top_k_processor(50)
     let filtered_tk = top_k.apply_top_k(logits, tk_proc)
-    
+
     // Top-P filtering
     let tp_proc = nucleus.create_nucleus_processor(0.9)
     let filtered_tp = nucleus.apply_nucleus(logits, tp_proc)
-    
+
     // Temperature scaling
     let temp_proc = temperature.create_temperature_processor(0.7)
     let scaled = temperature.apply_temperature(logits, temp_proc)
@@ -137,11 +137,11 @@ func main() {
     let config = hf_config.get_hf_config_by_model_id("meta-llama/Llama-2-7b")
     print("Model type: " + config.model_type)
     print("Hidden size: " + config.hidden_size)
-    
+
     // LLaMA specific config
     let llama_cfg = llama_adapter.get_llama_config_by_version("llama-7b")
     llama_adapter.print_llama_config(llama_cfg)
-    
+
     // Qwen specific config
     let qwen_cfg = qwen_adapter.get_qwen_config_by_version("qwen2-7b")
     qwen_adapter.print_qwen_config(qwen_cfg)
@@ -465,7 +465,7 @@ Part of NeurX Inference Engine - Pure S Implementation
 
 ---
 
-**Status**: 🟢 **Production Ready** (Core + 2 Adapters)  
-**Completeness**: 85%+ (30 models, 3 core processors)  
-**vLLM Parity**: 80%+  
+**Status**: 🟢 **Production Ready** (Core + 2 Adapters)
+**Completeness**: 85%+ (30 models, 3 core processors)
+**vLLM Parity**: 80%+
 **Last Updated**: 2026-08-14

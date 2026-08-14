@@ -1,47 +1,39 @@
-// Package: neurx.reasoning.reasoning_step
-// 推理步骤管理模块
-// 定义和管理单个推理步骤的数据结构
-
 package neurx.reasoning.reasoning_step
 
-// 推理步骤状态
 enum step_state {
-    pending       // 待处理
-    processing    // 处理中
-    completed     // 已完成
-    failed        // 失败
-    backtracked   // 已回溯
+    pending
+    processing
+    completed
+    failed
+    backtracked
 }
 
-// 步骤类型
 enum step_type {
-    analysis      // 分析
-    deduction     // 演绎
-    verification  // 验证
-    synthesis     // 综合
-    correction    // 纠正
+    analysis
+    deduction
+    verification
+    synthesis
+    correction
 }
 
-// 推理步骤结构体
 struct reasoning_step {
-    int id                           // 步骤 ID
-    int order                        // 步骤顺序
-    step_type step_type              // 步骤类型
-    step_state state                 // 步骤状态
-    string prompt                    // 输入提示
-    string reasoning                 // 推理过程
-    string intermediate_result       // 中间结果
-    float confidence                 // 置信度 (0-1)
-    int token_count                  // Token 数量
-    string error_message             // 错误信息
-    int retry_count                  // 重试次数
-    int parent_step_id               // 父步骤 ID (用于分支)
-    []int child_step_ids             // 子步骤 ID (用于分支)
-    bool is_valid                    // 是否有效
-    string validation_message        // 验证信息
+    int id
+    int order
+    step_type step_type
+    step_state state
+    string prompt
+    string reasoning
+    string intermediate_result
+    float confidence
+    int token_count
+    string error_message
+    int retry_count
+    int parent_step_id
+    []int child_step_ids
+    bool is_valid
+    string validation_message
 }
 
-// 创建新的推理步骤
 func new_reasoning_step(int id, int order, step_type step_type) reasoning_step {
     reasoning_step {
         id: id,
@@ -62,13 +54,11 @@ func new_reasoning_step(int id, int order, step_type step_type) reasoning_step {
     }
 }
 
-// 设置步骤为处理中
 func (step: &reasoning_step) start_processing() reasoning_step {
     step.state = step_state.processing
     step
 }
 
-// 完成步骤处理
 func (step: &reasoning_step) complete(string reasoning, string result, float confidence) reasoning_step {
     step.state = step_state.completed
     step.reasoning = reasoning
@@ -77,7 +67,6 @@ func (step: &reasoning_step) complete(string reasoning, string result, float con
     step
 }
 
-// 标记步骤失败
 func (step: &reasoning_step) fail(string error) reasoning_step {
     step.state = step_state.failed
     step.error_message = error
@@ -85,26 +74,22 @@ func (step: &reasoning_step) fail(string error) reasoning_step {
     step
 }
 
-// 标记步骤为已回溯
 func (step: &reasoning_step) mark_backtracked() reasoning_step {
     step.state = step_state.backtracked
     step
 }
 
-// 验证步骤
 func (step: &reasoning_step) validate(bool is_valid, string message) reasoning_step {
     step.is_valid = is_valid
     step.validation_message = message
     step
 }
 
-// 更新 token 计数
 func (step: &reasoning_step) update_token_count(int count) reasoning_step {
     step.token_count = count
     step
 }
 
-// 获取步骤状态字符串
 func (step: &reasoning_step) get_state_string() string {
     match step.state {
         step_state.pending: "pending",
@@ -116,7 +101,6 @@ func (step: &reasoning_step) get_state_string() string {
     }
 }
 
-// 获取步骤类型字符串
 func (step: &reasoning_step) get_type_string() string {
     match step.step_type {
         step_type.analysis: "analysis",
@@ -128,17 +112,14 @@ func (step: &reasoning_step) get_type_string() string {
     }
 }
 
-// 是否可以重试
 func (step: &reasoning_step) can_retry(int max_retries) bool {
     step.state == step_state.failed && step.retry_count < max_retries
 }
 
-// 检查步骤是否完成
 func (step: &reasoning_step) is_completed() bool {
     step.state == step_state.completed && step.is_valid
 }
 
-// 添加子步骤
 func (step: &reasoning_step) add_child_step(int child_id) reasoning_step {
     child_ids := []int{cap: len(step.child_step_ids) + 1}
     i := 0
@@ -151,7 +132,6 @@ func (step: &reasoning_step) add_child_step(int child_id) reasoning_step {
     step
 }
 
-// 克隆步骤
 func (step: &reasoning_step) clone() reasoning_step {
     child_ids := []int{cap: len(step.child_step_ids)}
     i := 0
@@ -159,7 +139,7 @@ func (step: &reasoning_step) clone() reasoning_step {
         child_ids[i] = step.child_step_ids[i]
         i = i + 1
     }
-    
+
     reasoning_step {
         id: step.id,
         order: step.order,
@@ -179,7 +159,6 @@ func (step: &reasoning_step) clone() reasoning_step {
     }
 }
 
-// 格式化步骤信息
 func (step: &reasoning_step) format_step() string {
     string result = "Step " + string(step.order) + ": " + step.get_type_string() + "\n"
     result = result + "State: " + step.get_state_string() + "\n"
