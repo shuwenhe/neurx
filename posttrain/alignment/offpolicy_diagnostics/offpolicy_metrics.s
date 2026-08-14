@@ -13,6 +13,7 @@ struct offpolicy_metrics {
     int num_tokens
     int num_sequences
 }
+
 func compute_offpolicy_metrics(
     tensor new_log_probs,
     tensor old_log_probs,
@@ -49,27 +50,33 @@ func compute_offpolicy_metrics(
         num_sequences: num_seqs,
     }
 }
+
 func compute_kl_divergence(tensor new_lp, tensor old_lp, tensor log_ratio, float count) float {
     tensor kl_per_token = mul(exp_tensor(old_lp), log_ratio)
     return item(sum_all(kl_per_token)) / count
 }
+
 func compute_reverse_kl(tensor ratio, float count) float {
     tensor log_ratio = log_tensor(ratio)
     tensor reverse_kl_per_token = sub(ratio, sub(log_ratio, from_float(1.0)))
     return item(sum_all(reverse_kl_per_token)) / count
 }
+
 func compute_js_divergence(float kl, float reverse_kl) float {
     return (kl + reverse_kl) / 2.0
 }
+
 func compute_chi_squared(tensor ratio, float count) float {
     tensor ratio_minus_1 = sub_scalar(ratio, 1.0)
     tensor chi2_per_token = mul(ratio_minus_1, ratio_minus_1)
     return item(sum_all(chi2_per_token)) / count
 }
+
 func compute_perplexity(tensor log_probs, float count) float {
     float avg_neg_log_prob = -item(sum_all(log_probs)) / count
     return exp_approx(avg_neg_log_prob)
 }
+
 func compute_ess_token(tensor ratio, float count) float {
     float sum_ratio = item(sum_all(ratio))
     tensor ratio_squared = mul(ratio, ratio)
@@ -79,6 +86,7 @@ func compute_ess_token(tensor ratio, float count) float {
     }
     return (sum_ratio * sum_ratio) / sum_ratio_squared
 }
+
 func compute_ess_sequence(tensor log_ratio, tensor mask) float {
     tensor seq_log_ratio = sum_dim(mul(log_ratio, mask), 1)
     tensor seq_ratio = exp_tensor(seq_log_ratio)
@@ -91,6 +99,7 @@ func compute_ess_sequence(tensor log_ratio, tensor mask) float {
     }
     return (sum_ratio * sum_ratio) / (num_seqs * sum_ratio_squared)
 }
+
 func log_approx(float x) float {
     if x <= 0.0 {
         return -1000.0
@@ -105,6 +114,7 @@ func log_approx(float x) float {
     }
     return 2.0 * result
 }
+
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0

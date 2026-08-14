@@ -11,6 +11,7 @@ struct ppo_step {
     float return_value
     bool is_terminal
 }
+
 struct ppo_trajectory {
     []ppo_step steps
     int trajectory_id
@@ -20,6 +21,7 @@ struct ppo_trajectory {
     float value_loss
     float entropy
 }
+
 struct ppo_config {
     int vocab_size
     int hidden_size
@@ -46,6 +48,7 @@ struct ppo_config {
     int checkpoint_interval
     int eval_interval
 }
+
 struct ppo_state {
     ppo_config config
     []float policy_params
@@ -67,6 +70,7 @@ struct ppo_state {
     int world_size
     []float global_avg_loss
 }
+
 struct ppo_training_result {
     float policy_loss
     float value_loss
@@ -78,6 +82,7 @@ struct ppo_training_result {
     float ratio_mean
     float advantage_mean
 }
+
 func collect_trajectory(
     string prompt,
     ppo_config config
@@ -113,6 +118,7 @@ func collect_trajectory(
     traj = compute_gae_advantages(traj, config)
     traj
 }
+
 func compute_gae_advantages(ppo_trajectory traj, ppo_config config) ppo_trajectory {
     int T = len(traj.steps)
     if T == 0 {
@@ -161,6 +167,7 @@ func compute_gae_advantages(ppo_trajectory traj, ppo_config config) ppo_trajecto
     }
     traj
 }
+
 func compute_ppo_policy_loss(
     float log_prob_old,
     float log_prob_new,
@@ -179,6 +186,7 @@ func compute_ppo_policy_loss(
     }
     0.0 - policy_loss
 }
+
 func compute_ppo_value_loss(
     float value_pred,
     float return_value
@@ -186,6 +194,7 @@ func compute_ppo_value_loss(
     float diff = value_pred - return_value
     0.5 * diff * diff
 }
+
 func compute_entropy([]float logits) float {
     if len(logits) == 0 {
         return 0.0
@@ -201,12 +210,14 @@ func compute_entropy([]float logits) float {
     }
     entropy
 }
+
 func compute_kl_divergence(
     float log_prob_old,
     float log_prob_new
 ) float {
     log_prob_old - log_prob_new
 }
+
 func ppo_training_step(
     ppo_trajectory trajectory,
     ppo_state state
@@ -273,6 +284,7 @@ func ppo_training_step(
     result.explained_variance = compute_explained_variance(trajectory)
     result
 }
+
 func compute_explained_variance(ppo_trajectory traj) float {
     if len(traj.steps) == 0 {
         return 0.0
@@ -314,6 +326,7 @@ func compute_explained_variance(ppo_trajectory traj) float {
     }
     1.0 - (var_resid / var_return)
 }
+
 func init_ppo_state(ppo_config config) ppo_state {
     ppo_state state
     state.config = config
@@ -337,6 +350,7 @@ func init_ppo_state(ppo_config config) ppo_state {
     state.global_avg_loss = []float{}
     state
 }
+
 func start_ppo_training(
     ppo_config config,
     int num_training_steps
@@ -383,6 +397,7 @@ func start_ppo_training(
     }
     state
 }
+
 func print_ppo_checkpoint(ppo_state state, int step) {
     print("═══════════════════════════════════════════════════════════")
     print("PPO checkpoint - Step " + int_to_string_ppo(step))
@@ -394,6 +409,7 @@ func print_ppo_checkpoint(ppo_state state, int step) {
     print("KL Divergence:      " + float_to_string_ppo(state.avg_kl_divergence))
     print("Clip Fraction:      " + float_to_string_ppo(state.clip_fraction))
 }
+
 func print_ppo_evaluation(ppo_state state, int step) {
     print("")
     print("─────────────────────────────────────────────────────────")
@@ -403,6 +419,7 @@ func print_ppo_evaluation(ppo_state state, int step) {
                                    int_to_string_ppo(state.world_size))
     print("Advantage Mag:      " + float_to_string_ppo(state.avg_advantage_magnitude))
 }
+
 func make_float_array(int size, float init_value) []float {
     []float arr = []float{cap: size}
     int i = 0
@@ -412,10 +429,12 @@ func make_float_array(int size, float init_value) []float {
     }
     arr
 }
+
 func append_ppo_step([]ppo_step arr, ppo_step s) []ppo_step {
     arr = append(arr, s)
     arr
 }
+
 func compute_log_prob([]float logits) float {
     if len(logits) == 0 {
         return 0.0
@@ -428,6 +447,7 @@ func compute_log_prob([]float logits) float {
     }
     log_prob / float(len(logits))
 }
+
 func compute_value_estimate([]float tokens, ppo_config config) float {
     if len(tokens) == 0 {
         return 0.0
@@ -440,18 +460,21 @@ func compute_value_estimate([]float tokens, ppo_config config) float {
     }
     value / float(len(tokens))
 }
+
 func exp_approx(float x) float {
     float x2 = x * x
     float x3 = x2 * x
     float x4 = x3 * x
     1.0 + x + (x2 / 2.0) + (x3 / 6.0) + (x4 / 24.0)
 }
+
 func log_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     if x > 2.0 { return 1.0 + log_approx(x / 2.0) }
     float u = x - 1.0
     u - (u * u / 2.0) + (u * u * u / 3.0)
 }
+
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float guess = x / 2.0
@@ -462,15 +485,18 @@ func sqrt_approx(float x) float {
     }
     guess
 }
+
 func clamp_float(float value, float low, float high) float {
     if value < low { return low }
     if value > high { return high }
     value
 }
+
 func abs_float(float x) float {
     if x < 0.0 { return 0.0 - x }
     x
 }
+
 func softmax_approx([]float logits) []float {
     int n = len(logits)
     []float probs = []float{cap: n}
@@ -508,14 +534,17 @@ func softmax_approx([]float logits) []float {
     }
     probs
 }
+
 func float_to_string_ppo(float f) string {
     int i_part = int(f)
     int f_part = int((f - float(i_part)) * 10000.0)
     string(i_part) + "." + string(f_part)
 }
+
 func int_to_string_ppo(int i) string {
     string(i)
 }
+
 func mod_int(int a, int b) int {
     if b <= 0 {
         return 0

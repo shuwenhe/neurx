@@ -2,10 +2,12 @@ package examples.train_end_to_end
 func simple_forward(float w, float b, float x) float {
     return w * x + b
 }
+
 func compute_loss_mse(float pred, float target) float {
     float diff = pred - target
     return diff * diff
 }
+
 func train_demo() float {
     float w = 0.5
     float b = 0.1
@@ -37,6 +39,7 @@ func train_demo() float {
         return 0.0
     }
 }
+
 func main() {
     float result = train_demo()
     if result > 0.5 {

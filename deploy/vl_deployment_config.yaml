@@ -1,6 +1,3 @@
-# Qwen2.5-VL-7B 多模态模型部署配置
-# Vision-Language Model Deployment Configuration
-# ================================================
 
 model:
   name: "Qwen2.5-VL-7B"
@@ -12,7 +9,6 @@ model:
   model_size_gb: 14
   total_parameters: 7000000000
 
-# Vision Encoder Configuration
 vision_encoder:
   type: "vit"
   patch_size: 14
@@ -23,7 +19,6 @@ vision_encoder:
   hidden_act: "gelu"
   layer_norm_eps: 1.0e-6
 
-# Language Model Architecture
 architecture:
   type: "transformer"
   hidden_size: 3584
@@ -40,7 +35,6 @@ architecture:
   num_key_value_heads: 28
   coupling_vision_language: true
 
-# Vision-Language Bridge
 vl_bridge:
   type: "linear_projection"
   vision_output_dim: 1024
@@ -48,7 +42,6 @@ vl_bridge:
   activation: "gelu"
   dropout_rate: 0.1
 
-# Tokenizer Configuration
 tokenizer:
   type: "qwen_vl_fast"
   model_file: "vocab.json"
@@ -68,7 +61,6 @@ tokenizer:
     image_end: "<|vision_end|>"
     image_pad: "<|image_pad|>"
 
-# Image Processing
 image_processing:
   do_resize: true
   size: [448, 448]
@@ -79,7 +71,6 @@ image_processing:
   do_convert_rgb: true
   max_dynamic_patch: true
 
-# Inference Configuration
 inference:
   mode: "local"
   backend: "cpu"
@@ -94,7 +85,6 @@ inference:
   num_gpu_layers: 0
   device_map: "auto"
 
-# Generation Parameters
 generation:
   max_new_tokens: 512
   min_new_tokens: 1
@@ -112,18 +102,12 @@ generation:
     - "<|im_end|>"
     - "<|endoftext|>"
 
-# Quantization Options (Optional)
 quantization:
   method: "none"
-  # Available methods: "none", "int8", "int4", "nf4", "gptq", "awq"
-  # For VL models, quantization may reduce vision understanding quality
-  # Use "int8" for moderate size reduction (4-6GB)
-  # Use "int4" for aggressive size reduction (2-3GB, quality loss)
   bits: null
   group_size: 128
   desc_act: false
 
-# Deployment Server Configuration
 deployment:
   name: "NeurX-VL-Inference"
   api_server:
@@ -158,7 +142,6 @@ deployment:
     port: 9090
     update_interval_ms: 1000
 
-# Hardware Configuration
 hardware:
   device: "cpu"
   num_cpus: 16
@@ -178,7 +161,6 @@ hardware:
     cache_memory_fraction: 0.8
     working_memory_fraction: 0.2
 
-# Performance Tuning
 performance:
   prefill_batch_size: 1
   decode_batch_size: 1
@@ -187,7 +169,6 @@ performance:
   swap_space_mb: 0
   cpu_worker_threads: 4
 
-# Vision-Specific Optimizations
 vision_optimization:
   enable_image_caching: true
   image_cache_size_mb: 512
@@ -198,7 +179,6 @@ vision_optimization:
   multi_image_support: true
   max_images_per_request: 8
 
-# Model Weight Mapping
 weights:
   safetensors_files:
     - "model-00001-of-00005.safetensors"
@@ -212,7 +192,6 @@ weights:
   load_in_8bit: false
   load_in_4bit: false
 
-# API Request/Response Configuration
 api:
   max_prompt_tokens: 8192
   max_image_tokens: 2048
@@ -224,7 +203,6 @@ api:
   cors_origins:
     - "*"
 
-# Monitoring & Observability
 monitoring:
   enable_monitoring: true
   metrics_collection_interval_seconds: 10
@@ -237,7 +215,6 @@ monitoring:
   tracing_enabled: true
   tracing_sample_rate: 0.1
 
-# Advanced Configuration
 advanced:
   enable_custom_ops: false
   enable_triton_kernels: false

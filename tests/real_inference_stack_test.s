@@ -38,6 +38,7 @@ func approx(float a, float b, float tol) bool {
     if d < 0.0 { d = 0.0 - d }
     d < tol
 }
+
 func expect(bool cond, string name) int {
     if cond {
         println("PASS " + name)
@@ -46,6 +47,7 @@ func expect(bool cond, string name) int {
     println("FAIL " + name)
     1
 }
+
 func test_rms_norm_unit_vector() int {
     int n = 8
     []float x = make([]float, n)
@@ -62,6 +64,7 @@ func test_rms_norm_unit_vector() int {
     fail = fail + expect(approx(out[3], 1.0, 1.0e-3), "rms_norm element 3 ~1")
     fail
 }
+
 func test_matmul_identity() int {
     int in_dim = 4
     int out_dim = 4
@@ -80,6 +83,7 @@ func test_matmul_identity() int {
     fail = fail + expect(approx(out[1], 3.0, 1.0e-6), "matmul identity out[1]=3")
     fail
 }
+
 func test_rope_rotation() int {
     int num_heads = 1
     int head_size = 4
@@ -94,6 +98,7 @@ func test_rope_rotation() int {
     fail = fail + expect(len(out) == len(q), "rope output length matches input")
     fail
 }
+
 func test_silu_zero_and_one() int {
     int fail = 0
     fail = fail + expect(approx(silu(0.0), 0.0, 1.0e-6), "silu(0)=0")
@@ -101,6 +106,7 @@ func test_silu_zero_and_one() int {
     fail = fail + expect(silu(-10.0) > -0.01 && silu(-10.0) < 0.0, "silu(-10) ~ 0 negative")
     fail
 }
+
 func test_moe_route_top_k() int {
     int hidden = 4
     int num_experts = 4
@@ -120,6 +126,7 @@ func test_moe_route_top_k() int {
     fail = fail + expect(approx(route.weights[0] + route.weights[1], 1.0, 1.0e-4), "moe weights sum to 1")
     fail
 }
+
 func test_transformer_layer_forward_runs() int {
     transformer_layer_config cfg = default_layer_config()
     transformer_layer_weights w = make_identity_weights(cfg)
@@ -134,6 +141,7 @@ func test_transformer_layer_forward_runs() int {
     fail = fail + expect(approx(out[0], 1.0, 0.5), "layer forward output[0] near input due to identity weights + residual")
     fail
 }
+
 func test_tokenizer_encode_decode_roundtrip() int {
     real_bpe_tokenizer tok = new_real_bpe_tokenizer()
     []int ids = encode(tok, "hello world")
@@ -145,6 +153,7 @@ func test_tokenizer_encode_decode_roundtrip() int {
     fail = fail + expect(string_contains(decoded, "world"), "decoded contains world")
     fail
 }
+
 func test_tokenizer_byte_fallback() int {
     real_bpe_tokenizer tok = new_real_bpe_tokenizer()
     []int ids = encode(tok, "#@")
@@ -155,6 +164,7 @@ func test_tokenizer_byte_fallback() int {
     fail = fail + expect(string_contains(decoded, "@"), "decoded contains @ via byte fallback")
     fail
 }
+
 func test_generation_engine_end_to_end() int {
     generation_engine engine = new_generation_engine(2)
     generation_result result = generate(engine, "hello", 4)
@@ -172,6 +182,7 @@ func test_generation_engine_end_to_end() int {
     fail = fail + expect(string_contains(full, "hello"), "end-to-end decode contains prompt")
     fail
 }
+
 func test_generation_engine_callback_state() int {
     generation_engine engine = new_generation_engine(1)
     generation_callback_state state = generate_stream(engine, "hi", 3)
@@ -181,6 +192,7 @@ func test_generation_engine_callback_state() int {
     fail = fail + expect(!state.done, "callback state not done initially")
     fail
 }
+
 func string_contains(string text, string pattern) bool {
     int i = 0
     while i + len(pattern) <= len(text) {
@@ -200,6 +212,7 @@ func string_contains(string text, string pattern) bool {
     }
     false
 }
+
 func main() {
     int fail = 0
     fail = fail + test_rms_norm_unit_vector()

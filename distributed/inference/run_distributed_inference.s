@@ -7,6 +7,7 @@ struct inference_pipeline {
     []inference_node_state node_states
     sharding_plan plan
 }
+
 func create_inference_pipeline(
     distributed_inference_full_config cfg
 ) inference_pipeline {
@@ -45,6 +46,7 @@ func create_inference_pipeline(
     }
     pipeline
 }
+
 func process_batch(
     inference_pipeline pipeline,
     []inference_request batch
@@ -65,6 +67,7 @@ func process_batch(
     }
     responses
 }
+
 func handle_tensor_parallel(
     inference_pipeline pipeline
 ) {
@@ -80,6 +83,7 @@ func handle_tensor_parallel(
     [][]float gathered = allgather_attention_heads(test_data, 0, pipeline.config.world_size)
     printf("AllGather result: %d heads\n", len(gathered))
 }
+
 func handle_pipeline_parallel(
     inference_pipeline pipeline
 ) {
@@ -97,6 +101,7 @@ func handle_pipeline_parallel(
         pipeline.config.rank)
     print_sharding_plan(pp_plan)
 }
+
 func handle_hybrid_parallel(
     inference_pipeline pipeline
 ) {
@@ -115,6 +120,7 @@ func handle_hybrid_parallel(
         pipeline.config.max_seq_len)
     printf("Memory per rank: %.2f GB\n", mem_gb)
 }
+
 func run_inference_demo(
     inference_pipeline pipeline
 ) {
@@ -132,6 +138,7 @@ func run_inference_demo(
     []inference_response responses = process_batch(pipeline, batch)
     printf("Received %d responses\n", len(responses))
 }
+
 func print_system_overview(
     inference_pipeline pipeline
 ) {
@@ -147,6 +154,7 @@ func print_system_overview(
     coordinator_stats stats = get_coordinator_stats(pipeline.node_states)
     print_coordinator_stats(stats)
 }
+
 func main() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║   NeurX Distributed Inference System - Full Demo       ║")

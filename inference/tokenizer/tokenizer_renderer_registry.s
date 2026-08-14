@@ -32,6 +32,7 @@ struct tokenizer_renderer_request {
     bool use_fast
     bool skip_tokenizer_init
 }
+
 struct tokenizer_renderer_selection {
     int tokenizer_backend
     int renderer_backend
@@ -40,6 +41,7 @@ struct tokenizer_renderer_selection {
     bool supported
     int error_code
 }
+
 func tokenizer_mode_backend(string mode, string family) int {
     if mode == "mistral" || (mode == "auto" && family == "mistral") { return tokenizer_backend_mistral() }
     if mode == "deepseek_v32" || (mode == "auto" && family == "deepseek_v32") { return tokenizer_backend_deepseek_v32() }
@@ -47,6 +49,7 @@ func tokenizer_mode_backend(string mode, string family) int {
     if mode == "kimi_audio" || (mode == "auto" && family == "kimi_audio") { return tokenizer_backend_kimi_audio() }
     tokenizer_backend_hf()
 }
+
 func renderer_for_family(string family) int {
     if family == "mistral" { return renderer_backend_mistral() }
     if family == "cohere" { return renderer_backend_cohere() }
@@ -55,6 +58,7 @@ func renderer_for_family(string family) int {
     if family == "kimi_k3" || family == "kimi_audio" { return renderer_backend_kimi() }
     renderer_backend_hf()
 }
+
 func select_tokenizer_renderer(tokenizer_renderer_request request) tokenizer_renderer_selection {
     if request.runner_type != "generate" && request.runner_type != "draft" && request.runner_type != "pooling" { return tokenizer_renderer_selection {tokenizer_backend: 0, renderer_backend: 0, truncation_side: 0, tokenizer_available: false, supported: false, error_code: 1} }
     if request.tokenizer_mode == "slow" && request.use_fast { return tokenizer_renderer_selection {tokenizer_backend: 0, renderer_backend: 0, truncation_side: 0, tokenizer_available: false, supported: false, error_code: 2} }

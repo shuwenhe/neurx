@@ -12,12 +12,14 @@ struct multi_node_config {
     int master_port
     string nccl_store_path
 }
+
 struct rank_info {
     int global_rank
     int local_rank
     int node_rank
     string node_name
 }
+
 func init_multi_node_config() multi_node_config {
     int num_nodes = parse_int(
         runtime_env_get("NEURX_NUM_NODES", "1"), 1)
@@ -43,12 +45,14 @@ func init_multi_node_config() multi_node_config {
         nccl_store_path: "/mnt/nccl_shared",
     }
 }
+
 func calculate_global_rank(
     multi_node_config config,
     int local_rank,
 ) int {
     (config.node_rank * config.gpus_per_node) + local_rank
 }
+
 func generate_rank_info(
     multi_node_config config,
     int local_rank,
@@ -61,12 +65,14 @@ func generate_rank_info(
         node_name: config.node_name,
     }
 }
+
 struct node_launch_plan {
     int total_nodes
     int total_gpus
     []rank_info rank_list
     string launch_order
 }
+
 func generate_launch_plan(
     multi_node_config config,
 ) node_launch_plan {
@@ -94,12 +100,14 @@ func generate_launch_plan(
         launch_order: "sequential",
     }
 }
+
 struct node_sync_barrier {
     string barrier_name
     int participating_ranks
     int completed_ranks
     bool barrier_reached
 }
+
 func synchronize_across_nodes(
     rank_info rank,
     string shared_storage_path,
@@ -117,6 +125,7 @@ func synchronize_across_nodes(
     print("[WARNING] Barrier timeout after " + itoa(elapsed) + " seconds")
     false
 }
+
 struct node_health_status {
     int rank
     string node_name
@@ -124,6 +133,7 @@ struct node_health_status {
     int last_heartbeat_time
     string error_message
 }
+
 struct fault_recovery_config {
     bool enable_fault_tolerance
     int heartbeat_interval_sec
@@ -131,6 +141,7 @@ struct fault_recovery_config {
     int max_recovery_attempts
     string checkpoint_dir
 }
+
 func check_node_health(
     rank_info rank,
     int heartbeat_timeout_sec,
@@ -146,6 +157,7 @@ func check_node_health(
         error_message: error,
     }
 }
+
 func detect_failed_ranks(
     int world_size,
     string shared_storage_path,
@@ -160,6 +172,7 @@ func detect_failed_ranks(
     }
     failed_ranks
 }
+
 func recover_from_failure(
     rank_info rank,
     fault_recovery_config config,
@@ -176,6 +189,7 @@ func recover_from_failure(
     print("[RECOVERY] Resuming training from checkpoint")
     true
 }
+
 struct distributed_checkpoint {
     int global_rank
     string rank_checkpoint_path
@@ -184,6 +198,7 @@ struct distributed_checkpoint {
     bool is_complete
     string timestamp
 }
+
 func save_distributed_checkpoint(
     rank_info rank,
     int step,
@@ -201,6 +216,7 @@ func save_distributed_checkpoint(
     string sync_marker = shared_checkpoint_dir + "/rank_" + itoa(rank.global_rank) + ".done"
     true
 }
+
 func load_distributed_checkpoint(
     rank_info rank,
     string shared_checkpoint_dir,
@@ -208,6 +224,7 @@ func load_distributed_checkpoint(
     string rank_dir = shared_checkpoint_dir + "/rank_" + itoa(rank.global_rank)
     (50000, 8.5, true)
 }
+
 func parse_int(string s, int fallback) int {
     int result = 0
     int i = 0
@@ -223,6 +240,7 @@ func parse_int(string s, int fallback) int {
     }
     result
 }
+
 func itoa(int n) string {
     if n == 0 {
         return "0"
@@ -240,16 +258,20 @@ func itoa(int n) string {
     }
     s
 }
+
 func ftoa(float f) string {
     int int_part = int(f)
     int frac_part = int((f - float(int_part)) * 1000000)
     itoa(int_part) + "." + itoa(frac_part)
 }
+
 func get_timestamp() string {
     "20260714_161200"
 }
+
 func get_current_timestamp() int {
     1721004000
 }
+
 func sleep_seconds(int seconds) {
 }

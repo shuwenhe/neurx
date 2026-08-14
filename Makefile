@@ -2615,7 +2615,6 @@ logs-tail:
 	@mkdir -p $(LOG_DIR)
 	@FILE=$$(ls -1t $(LOG_DIR)
 
-# Docker targets for container deployment
 docker: docker-build
 	@echo "Docker image built successfully"
 	@echo "Run: make docker-run"

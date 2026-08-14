@@ -24,6 +24,7 @@ struct plugin_registry_config {
     int supported_task_mask
     bool endpoint_allowlist_configured
 }
+
 struct plugin_registry_state {
     plugin_registry_config config
     []int plugin_ids
@@ -36,21 +37,25 @@ struct plugin_registry_state {
     int failed_count
     bool initialized
 }
+
 struct plugin_registration_result {
     plugin_registry_state state
     int slot
     bool registered
     int error_code
 }
+
 func plugin_zero_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
     while i < capacity { values[i] = 0; i = i + 1 }
     values
 }
+
 func init_plugin_registry(plugin_registry_config config) plugin_registry_state {
     plugin_registry_state {config: config, plugin_ids: plugin_zero_array(config.capacity), groups: plugin_zero_array(config.capacity), required_task_masks: plugin_zero_array(config.capacity), allowlisted: plugin_zero_array(config.capacity), statuses: plugin_zero_array(config.capacity), plugin_count: 0, active_count: 0, failed_count: 0, initialized: config.capacity > 0}
 }
+
 func plugin_tasks_intersect(int required, int supported) bool {
     if required == 0 { return true }
     int flag = 1
@@ -64,6 +69,7 @@ func plugin_tasks_intersect(int required, int supported) bool {
     }
     false
 }
+
 func register_plugin(plugin_registry_state state, int plugin_id, int group, int required_task_mask, bool allowlisted) plugin_registration_result {
     if !state.initialized || plugin_id <= 0 || group < plugin_group_general() || group > plugin_group_lora_resolver() { return plugin_registration_result {state: state, slot: 0 - 1, registered: false, error_code: 1} }
     int i = 0
@@ -81,6 +87,7 @@ func register_plugin(plugin_registry_state state, int plugin_id, int group, int 
     state.plugin_count = state.plugin_count + 1
     plugin_registration_result {state: state, slot: slot, registered: true, error_code: 0}
 }
+
 func activate_plugin(plugin_registry_state state, int slot) plugin_registry_state {
     if slot < 0 || slot >= state.plugin_count || state.statuses[slot] != plugin_status_discovered() { return state }
     bool allowed = true
@@ -92,6 +99,7 @@ func activate_plugin(plugin_registry_state state, int slot) plugin_registry_stat
     } else { state.statuses[slot] = plugin_status_skipped() }
     state
 }
+
 func fail_plugin(plugin_registry_state state, int slot) plugin_registry_state {
     if slot < 0 || slot >= state.plugin_count { return state }
     if state.statuses[slot] == plugin_status_active() && state.active_count > 0 { state.active_count = state.active_count - 1 }

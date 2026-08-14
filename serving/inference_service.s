@@ -11,12 +11,14 @@ struct service_config {
     bool enable_metrics
     int metric_collection_interval_sec
 }
+
 struct service_state {
     string state_name
     int state_code
     int timestamp
     string message
 }
+
 struct inference_service {
     service_config config
     service_state current_state
@@ -26,6 +28,7 @@ struct inference_service {
     int startup_time
     int current_time
 }
+
 func init_service_config() service_config {
     service_config config
     config.service_name = "NeurX Inference Service"
@@ -40,6 +43,7 @@ func init_service_config() service_config {
     config.metric_collection_interval_sec = 60
     config
 }
+
 func init_inference_service() inference_service {
     inference_service service
     service.config = init_service_config()
@@ -51,6 +55,7 @@ func init_inference_service() inference_service {
     service.startup_time = 0
     service
 }
+
 func service_startup(inference_service service) {
     print("\n" + "="*70 + "\n")
     print("🚀 NeurX Production Inference Service Startup\n")
@@ -107,6 +112,7 @@ func service_startup(inference_service service) {
     print("✅ All systems ready!\n\n")
     print("="*70 + "\n")
 }
+
 func print_service_status(inference_service service) {
     print("\n📊 Service Status Report\n")
     print("="*70 + "\n")
@@ -150,6 +156,7 @@ func print_service_status(inference_service service) {
     print("Max Connections: 100\n\n")
     print("="*70 + "\n\n")
 }
+
 func print_deployment_guide() {
     print("\n" + "="*70 + "\n")
     print("📚 NeurX Production Deployment Guide\n")
@@ -205,6 +212,7 @@ func print_deployment_guide() {
     print("• Error logs: /var/log/neurx/errors.log\n\n")
     print("="*70 + "\n\n")
 }
+
 func main() {
     inference_service service = init_inference_service()
     service_startup(service)

@@ -13,10 +13,12 @@ func int_to_string(int val) string {
     }
     res
 }
+
 struct matrix_stats {
     float mean
     float sample
 }
+
 func float_to_string(float val) string {
     int int_part = int(val)
     string res = int_to_string(int_part)
@@ -27,6 +29,7 @@ func float_to_string(float val) string {
     res = res + int_to_string(frac_part)
     res
 }
+
 func compute_matrix_stats([][]float mat) matrix_stats {
     if len(mat) == 0 { return matrix_stats{mean: 0.0, sample: 0.0} }
     int R = len(mat)
@@ -59,6 +62,7 @@ func compute_matrix_stats([][]float mat) matrix_stats {
     }
     return matrix_stats{mean: mean, sample: sample}
 }
+
 func create_test_matrix(int rows, int cols, float scale) [][]float {
     [][]float mat = [][]float{cap: rows}
     int r = 0
@@ -75,6 +79,7 @@ func create_test_matrix(int rows, int cols, float scale) [][]float {
     }
     mat
 }
+
 func test_matmul_numeric() {
     print("\n=== MATMUL TEST ===\n")
     int M = 4
@@ -119,6 +124,7 @@ func test_matmul_numeric() {
     }
     print("...]\n")
 }
+
 func test_softmax_numeric() {
     print("\n=== SOFTMAX TEST ===\n")
     int len_x = 8
@@ -153,6 +159,7 @@ func test_softmax_numeric() {
     print("]\n")
     print("sum(probs) = " + float_to_string(sum_probs) + " (should be ~1.0)\n")
 }
+
 func test_gelu_numeric() {
     print("\n=== GELU TEST ===\n")
     []float test_vals = []float{cap: 5}
@@ -169,6 +176,7 @@ func test_gelu_numeric() {
         i = i + 1
     }
 }
+
 func test_attention_numeric() {
     print("\n=== SCALED DOT-PRODUCT ATTENTION TEST ===\n")
     int seq_len = 4
@@ -208,6 +216,7 @@ func test_attention_numeric() {
         qi = qi + 1
     }
 }
+
 func main() {
     print("\n╔════════════════════════════════════════════════════════════════╗\n")
     print("║  NeurX Numeric Path Verification                             ║\n")

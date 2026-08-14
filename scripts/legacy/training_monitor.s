@@ -38,6 +38,7 @@ func (tm *training_monitor) init(
     defer f.Close()
     return nil
 }
+
 func (tm *training_monitor) log_step(
     int step,
     int epoch,
@@ -68,6 +69,7 @@ func (tm *training_monitor) log_step(
     }
     tm.log_to_file(metrics)
 }
+
 func (tm *training_monitor) print_progress(training_metrics metrics) {
     progress := float(metrics.step) / float(tm.total_steps) * 100.0
     bar_length := 50
@@ -92,6 +94,7 @@ func (tm *training_monitor) print_progress(training_metrics metrics) {
         metrics.memory_used, elapsed_str, eta_str)
     println(status)
 }
+
 func (tm *training_monitor) log_to_file(training_metrics metrics) {
     f, err := os.OpenFile(tm.log_file, os.O_APPEND|os.O_WRONLY, 0644)
     if err != nil {
@@ -101,6 +104,7 @@ func (tm *training_monitor) log_to_file(training_metrics metrics) {
     json_data, _ := json.Marshal(metrics)
     f.WriteString(string(json_data) + "\n")
 }
+
 func (tm *training_monitor) get_stats(): map[string]interface{} {
     if len(tm.steps) == 0 {
         return map[string]interface{}{
@@ -136,6 +140,7 @@ func (tm *training_monitor) get_stats(): map[string]interface{} {
         "estimated_total_time": last.time_elapsed + last.eta,
     }
 }
+
 func (tm *training_monitor) generate_report(): string {
     stats := tm.get_stats()
     report := "========================================\n"
@@ -155,6 +160,7 @@ func (tm *training_monitor) generate_report(): string {
     report += "└─ Completion: " + fmt.Sprintf("%.1f%%", float(stats["total_steps"].(int))/float(tm.total_steps)*100) + "\n"
     return report
 }
+
 func (tm *training_monitor) export_json(): string {
     data := map[string]interface{}{
         "training_info": tm.get_stats(),
@@ -163,6 +169,7 @@ func (tm *training_monitor) export_json(): string {
     json_bytes, _ := json.Marshal(data)
     return string(json_bytes)
 }
+
 func format_time(float seconds): string {
     if seconds < 0 {
         return "N/A"
@@ -178,6 +185,7 @@ func format_time(float seconds): string {
         return fmt.Sprintf("%ds", s)
     }
 }
+
 func main() {
     monitor := &training_monitor{}
     if err := monitor.init(10000, "./logs/training.jsonl", 100); err != nil {

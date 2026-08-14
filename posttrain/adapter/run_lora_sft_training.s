@@ -30,6 +30,7 @@ func digit_to_str(int digit) string {
     }
     "9"
 }
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -51,6 +52,7 @@ func int_to_str(int n) string {
     }
     out
 }
+
 func fmt_float(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -80,12 +82,14 @@ func fmt_float(float value, int decimals) string {
     }
     out
 }
+
 func resolve_non_empty(string primary, string fallback) string {
     if len(primary) > 0 {
         return primary
     }
     fallback
 }
+
 func main() {
     string project_root = "/home/shuwen/shuwen/train/neurx"
     string model_path = "/home/shuwen/shuwen/train/model/base-model"

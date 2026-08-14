@@ -11,6 +11,7 @@ struct agent_action_state {
     bool replace_all
     bool structured
 }
+
 func new_agent_action_state() agent_action_state {
     agent_action_state {
         tool: "",
@@ -25,6 +26,7 @@ func new_agent_action_state() agent_action_state {
         structured: false,
     }
 }
+
 func agent_action_parse_json_string_token(string raw, int start) string {
     string out = ""
     int i = start
@@ -52,6 +54,7 @@ func agent_action_parse_json_string_token(string raw, int start) string {
     }
     out
 }
+
 func agent_action_extract_json_string(string raw, string key) string {
     string marker = "\"" + key + "\""
     int i = 0
@@ -84,6 +87,7 @@ func agent_action_extract_json_string(string raw, string key) string {
     }
     ""
 }
+
 func agent_action_extract_json_bool(string raw, string key) string {
     string marker = "\"" + key + "\""
     int i = 0
@@ -123,6 +127,7 @@ func agent_action_extract_json_bool(string raw, string key) string {
     }
     ""
 }
+
 func agent_action_extract_block(string raw, string begin_marker, string end_marker) string {
     int start = -1
     int i = 0
@@ -177,6 +182,7 @@ func agent_action_extract_block(string raw, string begin_marker, string end_mark
     }
     out
 }
+
 func agent_action_text_contains(string text, string pattern) bool {
     string haystack = lower(trim(text))
     string needle = lower(trim(pattern))
@@ -206,6 +212,7 @@ func agent_action_text_contains(string text, string pattern) bool {
     }
     false
 }
+
 func agent_action_extract_field(string raw, string key) string {
     string marker = key + "="
     int raw_len = len(raw)
@@ -259,6 +266,7 @@ func agent_action_extract_field(string raw, string key) string {
     }
     trim(value)
 }
+
 func agent_action_detect_tool(string raw, string fallback) string {
     string text = lower(trim(raw))
     if agent_action_text_contains(text, "\"action\":\"read_file\"") || agent_action_text_contains(text, "\"tool\":\"read_file\"") {
@@ -355,6 +363,7 @@ func agent_action_detect_tool(string raw, string fallback) string {
     }
     fallback
 }
+
 func agent_action_parse(string raw, string fallback_tool) agent_action_state {
     string tool = agent_action_detect_tool(raw, fallback_tool)
     string path = agent_action_extract_field(raw, "path")
@@ -418,6 +427,7 @@ func agent_action_parse(string raw, string fallback_tool) agent_action_state {
         structured: structured,
     }
 }
+
 func agent_action_summary(agent_action_state state) string {
     string out = "tool=" + state.tool
     out = out + " path=" + state.path

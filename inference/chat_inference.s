@@ -13,23 +13,27 @@ struct chat_config {
     max_new_tokens: i32
     temperature: f64
 }
+
 struct chat_request {
     user_input: string
     conversation_history: []string
     max_tokens: i32
     temperature: f64
 }
+
 struct chat_response {
     assistant_reply: string
     tokens_generated: i32
     latency_ms: f64
 }
+
 struct simple_transformer {
     config: chat_config
     embedding_dim: i32
     head_dim: i32
     total_params: i64
 }
+
 func create_chat_config() chat_config {
     var config: chat_config
     config.vocab_size = 32000
@@ -42,6 +46,7 @@ func create_chat_config() chat_config {
     config.temperature = 0.7
     return config
 }
+
 func init_model(chat_config config) simple_transformer {
     var model: simple_transformer
     model.config = config
@@ -53,6 +58,7 @@ func init_model(chat_config config) simple_transformer {
     model.total_params = embedding_params + layer_params + ffn_params
     return model
 }
+
 func tokenize_input(string text) []i32 {
     var tokens: []i32
     var []string words = strings.split(text, " ")
@@ -64,6 +70,7 @@ func tokenize_input(string text) []i32 {
     }
     return tokens
 }
+
 func generate_token(simple_transformer model, []i32 context) i32 {
     if len(context) == 0 {
         return 0
@@ -94,6 +101,7 @@ func generate_token(simple_transformer model, []i32 context) i32 {
     }
     return next_token
 }
+
 func decode_tokens([]i32 tokens) string {
     var result: string = ""
     var i: i32 = 0
@@ -159,6 +167,7 @@ func decode_tokens([]i32 tokens) string {
     }
     return strings.trim_space(result)
 }
+
 func process_chat_request(simple_transformer model, chat_request request) chat_response {
     var i64 start_time = time.now_ms()
     var input_tokens: []i32 = tokenize_input(request.user_input)
@@ -202,6 +211,7 @@ func process_chat_request(simple_transformer model, chat_request request) chat_r
     response.latency_ms = latency
     return response
 }
+
 func main() {
     io.println("")
     io.println("╔════════════════════════════════════════════════════════════════════╗")

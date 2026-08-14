@@ -5,6 +5,7 @@ func print_line(string text) {
     print(text)
     print("\n")
 }
+
 func parse_positive_int(string text, int fallback) int {
     if len(text) == 0 {
         return fallback
@@ -24,6 +25,7 @@ func parse_positive_int(string text, int fallback) int {
     }
     value
 }
+
 func main() {
     string model_path = resolve_model_path_from_env()
     string prompt = read_prompt_from_env()

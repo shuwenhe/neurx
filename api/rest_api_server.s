@@ -6,12 +6,14 @@ struct api_request {
     string body
     int timestamp
 }
+
 struct api_response {
     int status_code
     string status_message
     string response_body
     int processing_time_ms
 }
+
 struct chat_completion_request {
     string model
     []string messages
@@ -20,6 +22,7 @@ struct chat_completion_request {
     float top_p
     bool stream
 }
+
 struct chat_completion_response {
     string id
     string object
@@ -31,6 +34,7 @@ struct chat_completion_response {
     int completion_tokens
     int total_tokens
 }
+
 struct api_server_config {
     string host
     int port
@@ -40,6 +44,7 @@ struct api_server_config {
     bool enable_cors
     bool enable_logging
 }
+
 func init_api_server_config() api_server_config {
     api_server_config config
     config.host = "0.0.0.0"
@@ -51,6 +56,7 @@ func init_api_server_config() api_server_config {
     config.enable_logging = true
     config
 }
+
 func create_api_response(int status_code, string message, string body, int processing_time) api_response {
     api_response resp
     resp.status_code = status_code
@@ -59,6 +65,7 @@ func create_api_response(int status_code, string message, string body, int proce
     resp.processing_time_ms = processing_time
     resp
 }
+
 func parse_chat_request(string request_body) chat_completion_request {
     chat_completion_request req
     req.model = "text"
@@ -68,6 +75,7 @@ func parse_chat_request(string request_body) chat_completion_request {
     req.stream = false
     req
 }
+
 func create_chat_completion_response(string model, int prompt_tokens, int completion_tokens) chat_completion_response {
     chat_completion_response resp
     resp.id = "chatcmpl-generated"
@@ -80,6 +88,7 @@ func create_chat_completion_response(string model, int prompt_tokens, int comple
     resp.total_tokens = prompt_tokens + completion_tokens
     resp
 }
+
 func handle_chat_endpoint(string request_body) api_response {
     print("  Endpoint: /v1/chat/completions\n")
     print("  Method: POST\n")
@@ -100,6 +109,7 @@ func handle_chat_endpoint(string request_body) api_response {
     api_response api_resp = create_api_response(200, "OK", response_body, 150)
     api_resp
 }
+
 func handle_vision_endpoint(string request_body) api_response {
     print("  Endpoint: /v1/vision/describe\n")
     print("  Method: POST\n")
@@ -111,6 +121,7 @@ func handle_vision_endpoint(string request_body) api_response {
     api_response resp = create_api_response(200, "OK", response_body, 250)
     resp
 }
+
 func handle_vqa_endpoint(string request_body) api_response {
     print("  Endpoint: /v1/vision/vqa\n")
     print("  Method: POST\n")
@@ -122,6 +133,7 @@ func handle_vqa_endpoint(string request_body) api_response {
     api_response resp = create_api_response(200, "OK", response_body, 200)
     resp
 }
+
 func handle_health_endpoint() api_response {
     string response_body = "{"
     response_body = response_body + "\"status\":\"healthy\","
@@ -131,6 +143,7 @@ func handle_health_endpoint() api_response {
     api_response resp = create_api_response(200, "OK", response_body, 5)
     resp
 }
+
 func handle_metrics_endpoint() api_response {
     string response_body = "{"
     response_body = response_body + "\"requests_total\":1024,"
@@ -142,6 +155,7 @@ func handle_metrics_endpoint() api_response {
     api_response resp = create_api_response(200, "OK", response_body, 10)
     resp
 }
+
 func handle_models_endpoint() api_response {
     string response_body = "{"
     response_body = response_body + "\"data\":["
@@ -152,6 +166,7 @@ func handle_models_endpoint() api_response {
     api_response resp = create_api_response(200, "OK", response_body, 8)
     resp
 }
+
 func route_api_request(api_request req) api_response {
     print("📨 Processing API Request\n")
     print("  Request ID: " + req.request_id + "\n")
@@ -174,6 +189,7 @@ func route_api_request(api_request req) api_response {
         return not_found
     }
 }
+
 func print_api_response(api_response resp) {
     print("\n✅ API Response\n")
     print("  Status: " + int_to_string(resp.status_code) + " " + resp.status_message + "\n")
@@ -181,6 +197,7 @@ func print_api_response(api_response resp) {
     print("  Response Body:\n")
     print("  " + resp.response_body + "\n")
 }
+
 func simulate_api_server() {
     print("\n" + "="*60 + "\n")
     print("🌐 NeurX REST API Server Simulation\n")
@@ -224,6 +241,7 @@ func simulate_api_server() {
     print_api_response(resp3)
     print("\n" + "="*60 + "\n\n")
 }
+
 func main() {
     simulate_api_server()
 }

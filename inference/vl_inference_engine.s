@@ -19,6 +19,7 @@ func compute_num_patches(int img_size, int patch_size) int {
     int patches = (img_size / patch_size) * (img_size / patch_size)
     patches + 1
 }
+
 func get_vl_config_vision_patch_size() int { return 14 }
 
 func get_vl_config_image_size() int { return 448 }
@@ -33,14 +34,17 @@ func init_image_processor(int width, int height, int channels) int {
     int total = width * height * channels
     total
 }
+
 func process_image_to_patches(int image_size, int patch_size) int {
     int patches = (image_size / patch_size) * (image_size / patch_size)
     patches
 }
+
 func embed_image_patches(int num_patches, int hidden_dim) int {
     int total = num_patches * hidden_dim
     total
 }
+
 func vision_encoder_forward(int num_patches, int hidden_dim, int num_layers) int {
     int output_dim = num_patches * hidden_dim
     int layer = 0
@@ -49,20 +53,25 @@ func vision_encoder_forward(int num_patches, int hidden_dim, int num_layers) int
     }
     output_dim
 }
+
 func vl_bridge_projection(int num_patches, int vision_dim, int language_dim) int {
     int output_dim = num_patches * language_dim
     output_dim
 }
+
 func normalize_vision_features(int feature_dim) int {
     feature_dim
 }
+
 func combine_vision_and_text(int vision_dim, int text_len, int language_dim) int {
     int combined_dim = vision_dim + text_len * language_dim
     combined_dim
 }
+
 func generate_response_with_vision(int vision_dim, int max_tokens) int {
     max_tokens
 }
+
 func vl_inference_pipeline(int image_width, int image_height, int num_prompt_tokens) int {
     int patch_size = get_vl_config_vision_patch_size()
     int hidden_dim = get_vl_config_vision_hidden()
@@ -76,6 +85,7 @@ func vl_inference_pipeline(int image_width, int image_height, int num_prompt_tok
     int response = generate_response_with_vision(normalized_vision, num_prompt_tokens)
     response
 }
+
 func test_vl_inference() int {
     print("Testing VL Inference Pipeline...\n")
     int num_patches = compute_num_patches(448, 14)
@@ -83,6 +93,7 @@ func test_vl_inference() int {
     print("✓\n")
     0
 }
+
 func main() {
     print("\n")
     print("════════════════════════════════════════════════════════════\n")

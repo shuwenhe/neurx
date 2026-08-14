@@ -7,16 +7,19 @@ struct tensor {
     int shape_count
     int data_count
 }
+
 struct tensor_buffer {
     []byte buffer
     int pos
 }
+
 func tensor_buffer_new(int capacity) tensor_buffer {
     tensor_buffer {
         buffer: []byte{cap: capacity},
         pos: 0,
     }
 }
+
 func tensor_buffer_write_bytes(tensor_buffer buf, []byte data) () {
     int i = 0
     while i < len(data) {
@@ -28,6 +31,7 @@ func tensor_buffer_write_bytes(tensor_buffer buf, []byte data) () {
         i = i + 1
     }
 }
+
 func tensor_buffer_write_u64_le(tensor_buffer buf, int value) () {
     []byte bytes = []byte{cap: 8}
     int v = value
@@ -41,6 +45,7 @@ func tensor_buffer_write_u64_le(tensor_buffer buf, int value) () {
     }
     tensor_buffer_write_bytes(buf, bytes)
 }
+
 func tensor_buffer_write_f32_le(tensor_buffer buf, float value) () {
     int bits = 0
     if value >= 0.0 {
@@ -59,6 +64,7 @@ func tensor_buffer_write_f32_le(tensor_buffer buf, float value) () {
     bytes[3] = byte(v - (v / 256) * 256)
     tensor_buffer_write_bytes(buf, bytes)
 }
+
 func tensor_buffer_write_string(tensor_buffer buf, string s) () {
     int i = 0
     while i < len(s) {
@@ -70,9 +76,11 @@ func tensor_buffer_write_string(tensor_buffer buf, string s) () {
         i = i + 1
     }
 }
+
 func tensor_buffer_len(tensor_buffer buf) int {
     buf.pos
 }
+
 func tensor_buffer_slice(tensor_buffer buf) []byte {
     []byte result = []byte{cap: buf.pos}
     int i = 0
@@ -82,6 +90,7 @@ func tensor_buffer_slice(tensor_buffer buf) []byte {
     }
     result
 }
+
 func float_to_bits(float f) int {
     if f == 0.0 {
         return 0

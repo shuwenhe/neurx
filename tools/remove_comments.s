@@ -41,6 +41,7 @@ func remove_comments(string content) string {
 	}
 	return strings.Join(result, "\n")
 }
+
 func process_file(string file_path) error {
 	content, err := ioutil.ReadFile(file_path)
 	if err != nil {
@@ -49,6 +50,7 @@ func process_file(string file_path) error {
 	clean_content := remove_comments(string(content))
 	return ioutil.WriteFile(file_path, []byte(clean_content), 0644)
 }
+
 func get_files_with_comments(string root_dir) []string {
 	files := []string{}
 	_ = filepath.Walk(root_dir, func(current_path string, info os.FileInfo, walk_err error) error {
@@ -69,6 +71,7 @@ func get_files_with_comments(string root_dir) []string {
 	})
 	return files
 }
+
 func main() {
 	root_dir := "."
 	if len(os.Args) > 1 {

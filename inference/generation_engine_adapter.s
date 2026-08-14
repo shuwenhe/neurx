@@ -47,11 +47,13 @@ struct generation_engine {
     sampling_params sampling
     rng_state rng
 }
+
 struct generation_result {
     []int token_ids
     []string token_strings
     int num_generated
 }
+
 func new_generation_engine(int num_layers) generation_engine {
     transformer_layer_config cfg = default_layer_config()
     transformer_layer_weights w = make_identity_weights(cfg)
@@ -92,6 +94,7 @@ func new_generation_engine(int num_layers) generation_engine {
         rng: new_rng(42),
     }
 }
+
 func embed_token(generation_engine engine, int token_id) []float {
     []float hidden = make([]float, engine.hidden_size)
     if token_id < 0 || token_id >= engine.tokenizer.vocab_size {
@@ -107,6 +110,7 @@ func embed_token(generation_engine engine, int token_id) []float {
     }
     hidden
 }
+
 func argmax_logits([]float logits, int vocab_size) int {
     if vocab_size == 0 {
         return 0
@@ -123,6 +127,7 @@ func argmax_logits([]float logits, int vocab_size) int {
     }
     best_idx
 }
+
 func compute_logits([]float hidden, float[] lm_head, int hidden_size, int vocab_size) []float {
     []float logits = make([]float, vocab_size)
     int v = 0
@@ -138,6 +143,7 @@ func compute_logits([]float hidden, float[] lm_head, int hidden_size, int vocab_
     }
     logits
 }
+
 func run_layer_stack(generation_engine engine, []float hidden, int position) ([]float, paged_kv_cache) {
     paged_kv_cache cache = engine.cache
     []float current = hidden
@@ -151,6 +157,7 @@ func run_layer_stack(generation_engine engine, []float hidden, int position) ([]
     engine.cache = cache
     current
 }
+
 func generate(generation_engine engine, string prompt, int max_new_tokens) generation_result {
     []int prompt_ids = encode(engine.tokenizer, prompt)
     engine.cache = reserve_tokens(engine.cache, len(prompt_ids) + max_new_tokens)
@@ -198,10 +205,12 @@ func generate(generation_engine engine, string prompt, int max_new_tokens) gener
     engine.rng = rng
     generation_result{token_ids: generated, token_strings: token_strings, num_generated: len(generated)}
 }
+
 func map_has_int(map[int]string m, int key) bool {
     string v = m[key]
     v != ""
 }
+
 func engine_to_callback_state(generation_result result) generation_callback_state {
     []string toks = result.token_strings
     generation_callback_state state
@@ -210,22 +219,27 @@ func engine_to_callback_state(generation_result result) generation_callback_stat
     state.done = false
     state
 }
+
 func generate_stream(generation_engine engine, string prompt, int max_new_tokens) generation_callback_state {
     generation_result result = generate(engine, prompt, max_new_tokens)
     engine_to_callback_state(result)
 }
+
 func decode_ids(generation_engine engine, []int ids) string {
     decode(engine.tokenizer, ids)
 }
+
 func generate_with_sampling(generation_engine engine, string prompt, int max_new_tokens, sampling_params params) generation_result {
     engine.sampling = params
     generate(engine, prompt, max_new_tokens)
 }
+
 func generate_greedy(generation_engine engine, string prompt, int max_new_tokens) generation_result {
     engine.sampling = new_sampling_params(1.0, 0, 1.0, 0)
     engine.sampling.greedy = true
     generate(engine, prompt, max_new_tokens)
 }
+
 func load_weights_from_safetensors(generation_engine engine, string path) bool {
     safetensors_header hdr = load_safetensors_header(path)
     if !hdr.valid {

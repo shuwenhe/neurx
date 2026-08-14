@@ -41,14 +41,17 @@ func main() {
     println("Ran agent skills workflow with generations=" + max_generations + ", promote=" + promotion_threshold + ", retire=" + retire_threshold + ", min_success=" + min_success_rate + ", max_avg_steps=" + max_avg_steps + ", output=" + output_dir + ", s_bin=" + s_bin)
     0
 }
+
 func usage() {
     println("Usage: run_with_config.s")
     println("Configure via NEURX_SKILLS_CONFIG, NEURX_SKILLS_GENERATIONS and S_BIN.")
 }
+
 func yaml_value(string file, string key) string {
     string cmd = "awk -F\":\" '/^" + key + "[[:space:]]*:/ {gsub(/ /, \"\", $2); print $2; exit}' " + runtime_shell_escape(file)
     trim(runtime_run_command_output(cmd))
 }
+
 func default_if_empty(string value, string fallback) string {
     if value == "" {
         return fallback

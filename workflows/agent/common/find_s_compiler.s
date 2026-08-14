@@ -21,6 +21,7 @@ func is_runnable_candidate(string candidate) bool {
     mode := stat.Mode()
     return (mode & 0111) != 0
 }
+
 func find_s_binary(string root_dir) string {
     var candidate string
     if s_bin := os.Getenv("S_BIN"); s_bin != "" {
@@ -53,6 +54,7 @@ func find_s_binary(string root_dir) string {
     }
     return ""
 }
+
 func resolve_s_bin(string root_dir) (string, error) {
     if root_dir == "" {
         pwd, err := os.Getwd()
@@ -67,6 +69,7 @@ func resolve_s_bin(string root_dir) (string, error) {
     }
     return s_binary, nil
 }
+
 func main() {
     root_dir := ""
     if len(os.Args) > 1 {

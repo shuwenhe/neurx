@@ -13,6 +13,7 @@ struct speculative_inference_config {
     adaptive_num_tokens: bool
     max_speculative_length: int
 }
+
 struct speculative_inference_system {
     draft_executor: draft_model_executor.draft_model_executor
     verifier_executor: speculative_verifier.verifier_executor
@@ -22,6 +23,7 @@ struct speculative_inference_system {
     statistics: speculative_decode_core.speculative_statistics
     is_initialized: bool
 }
+
 func new_speculative_inference_config() speculative_inference_config {
     cfg := speculative_inference_config{
         enable_speculative_decode: true,
@@ -34,6 +36,7 @@ func new_speculative_inference_config() speculative_inference_config {
     }
     cfg
 }
+
 func init_speculative_inference_system(speculative_inference_config spec_cfg) speculative_inference_system {
     draft_model_cfg := draft_model_executor.new_draft_model_config(
         "small",
@@ -68,6 +71,7 @@ func init_speculative_inference_system(speculative_inference_config spec_cfg) sp
     }
     sys
 }
+
 func speculative_inference_single(
     speculative_inference_system sys,
     []int input_ids,
@@ -83,6 +87,7 @@ func speculative_inference_single(
     updated_sys.statistics = updated_runtime.statistics
     (updated_sys, output_tokens)
 }
+
 func speculative_inference_batch(
     speculative_inference_system sys,
     [][]int batch_input_ids,
@@ -106,6 +111,7 @@ func speculative_inference_batch(
     batch_outputs = updated_batch.final_outputs
     (updated_sys, batch_outputs)
 }
+
 func update_speculative_config(
     speculative_inference_system sys,
     int new_num_draft,
@@ -116,6 +122,7 @@ func update_speculative_config(
     updated_sys.verifier_executor.config.acceptance_threshold = new_threshold
     updated_sys
 }
+
 func adaptive_update_speculative_params(speculative_inference_system sys) speculative_inference_system {
     updated_sys := sys
     current_acceptance := speculative_decode_core.get_acceptance_rate(updated_sys.statistics)
@@ -136,6 +143,7 @@ func adaptive_update_speculative_params(speculative_inference_system sys) specul
     )
     updated_sys
 }
+
 func get_speculative_performance_stats(speculative_inference_system sys) string {
     result := "Speculative Inference Performance:"
     result = result + "\n  Total Generated: " + (sys.statistics.total_tokens_generated as string)
@@ -151,12 +159,14 @@ func get_speculative_performance_stats(speculative_inference_system sys) string 
     result = result + "\n  Acceptance Threshold: " + (sys.verifier_executor.config.acceptance_threshold as string)
     result
 }
+
 func reset_speculative_statistics(speculative_inference_system sys) speculative_inference_system {
     updated_sys := sys
     updated_sys.statistics = speculative_decode_core.new_speculative_statistics()
     updated_sys.runtime = speculative_runtime.reset_runtime_statistics(updated_sys.runtime)
     updated_sys
 }
+
 func should_use_speculative_decoding(speculative_inference_system sys) bool {
     sys.system_config.enable_speculative_decode && sys.is_initialized
 }

@@ -74,6 +74,7 @@ func NewContinuousBatchingScheduler(config scheduler_config) *continuous_batchin
         next_batch_id:       1,
     }
 }
+
 func (s *continuous_batching_scheduler) SubmitRequest(prompt_tokens []int32, max_tokens int32, priority int) int64 {
     req := &sequence_request{
         request_id:      s.next_request_id,
@@ -88,6 +89,7 @@ func (s *continuous_batching_scheduler) SubmitRequest(prompt_tokens []int32, max
     s.next_request_id = s.next_request_id + 1
     return req.request_id
 }
+
 func (s *continuous_batching_scheduler) Schedule() *batch_info {
     batch := &batch_info{
         batch_id:      s.next_batch_id,
@@ -114,6 +116,7 @@ func (s *continuous_batching_scheduler) Schedule() *batch_info {
     }
     return batch
 }
+
 func (s *continuous_batching_scheduler) schedulePrefillPhase(batch *batch_info) {
     prefill_budget := int32(float32(s.config.max_prefill_tokens) * s.config.prefill_budget)
     current_prefill_tokens := int32(0)
@@ -138,6 +141,7 @@ func (s *continuous_batching_scheduler) schedulePrefillPhase(batch *batch_info) 
     }
     batch.total_prefill_len = current_prefill_tokens
 }
+
 func (s *continuous_batching_scheduler) scheduleContinuousPhase(batch *batch_info) {
     current_tokens := int32(0)
     batch_size := int32(0)
@@ -177,11 +181,13 @@ func (s *continuous_batching_scheduler) scheduleContinuousPhase(batch *batch_inf
         }
     }
 }
+
 func (s *continuous_batching_scheduler) scheduleDecodePhase(batch *batch_info) {
     if s.config.enable_disaggregated {
         return
     }
 }
+
 func (s *continuous_batching_scheduler) CompletePrefill(request_id int64) {
     for i := 0; i < len(s.active_prefill); i++ {
         if s.active_prefill[i].request_id == request_id {
@@ -194,6 +200,7 @@ func (s *continuous_batching_scheduler) CompletePrefill(request_id int64) {
         }
     }
 }
+
 func (s *continuous_batching_scheduler) AddGeneratedToken(request_id int64, token_id int32) {
     for i := 0; i < len(s.active_decode); i++ {
         if s.active_decode[i].request_id == request_id {
@@ -203,6 +210,7 @@ func (s *continuous_batching_scheduler) AddGeneratedToken(request_id int64, toke
         }
     }
 }
+
 func (s *continuous_batching_scheduler) CompleteRequest(request_id int64) {
     for i := 0; i < len(s.active_decode); i++ {
         if s.active_decode[i].request_id == request_id {
@@ -215,12 +223,15 @@ func (s *continuous_batching_scheduler) CompleteRequest(request_id int64) {
         }
     }
 }
+
 func (s *continuous_batching_scheduler) GetQueueSize() int {
     return len(s.queue)
 }
+
 func (s *continuous_batching_scheduler) GetActiveCount() int {
     return len(s.active_prefill) + len(s.active_decode)
 }
+
 func (s *continuous_batching_scheduler) GetStats() map[string]int64 {
     stats := make(map[string]int64)
     stats["queued"] = int64(len(s.queue))
@@ -231,6 +242,7 @@ func (s *continuous_batching_scheduler) GetStats() map[string]int64 {
     stats["total_completed"] = s.total_completed
     return stats
 }
+
 func (s *continuous_batching_scheduler) sortByPriority(requests []*sequence_request) {
     for i := 0; i < len(requests); i++ {
         for j := i + 1; j < len(requests); j++ {
@@ -248,6 +260,7 @@ func (s *continuous_batching_scheduler) sortByPriority(requests []*sequence_requ
         }
     }
 }
+
 func main() {
     config := scheduler_config{
         max_batch_size:     16,

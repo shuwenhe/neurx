@@ -31,6 +31,7 @@ class neurx_attention {
         float memory_usage_mb
     } stats
 }
+
 func init(attention_config cfg) neurx_attention {
     int kv_dim = cfg.head_dim * cfg.num_key_value_heads
     print("🔧 Initializing NEURX Attention:")
@@ -55,6 +56,7 @@ func init(attention_config cfg) neurx_attention {
         }
     }
 }
+
 func forward(
     NeurxAttention self,
     tensor hidden_states,

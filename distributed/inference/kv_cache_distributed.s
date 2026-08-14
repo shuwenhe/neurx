@@ -11,6 +11,7 @@ struct distributed_kv_cache {
     int world_size
     string layout
 }
+
 struct cache_update_msg {
     int layer_idx
     int seq_pos
@@ -18,6 +19,7 @@ struct cache_update_msg {
     []float values
     int source_rank
 }
+
 func init_distributed_kv_cache(
     int num_layers,
     int num_kv_heads,
@@ -45,6 +47,7 @@ func init_distributed_kv_cache(
     }
     cache
 }
+
 func append_kv_local(
     distributed_kv_cache cache,
     int layer_idx,
@@ -62,6 +65,7 @@ func append_kv_local(
     }
     cache.seq_lens[layer_idx] = cache.seq_lens[layer_idx] + 1
 }
+
 func get_kv_local(
     distributed_kv_cache cache,
     int layer_idx
@@ -71,6 +75,7 @@ func get_kv_local(
     }
     (cache.local_key_caches[layer_idx], cache.local_value_caches[layer_idx])
 }
+
 func synchronize_kv_across_ranks(
     distributed_kv_cache cache,
     int layer_idx
@@ -85,6 +90,7 @@ func synchronize_kv_across_ranks(
         println("Sharding KV cache across ranks...")
     }
 }
+
 func get_remote_kv(
     distributed_kv_cache cache,
     int layer_idx,
@@ -97,6 +103,7 @@ func get_remote_kv(
         ([]float{}, []float{})
     }
 }
+
 func allgather_kv(
     distributed_kv_cache cache,
     int layer_idx
@@ -109,12 +116,14 @@ func allgather_kv(
     }
     gathered
 }
+
 func reduce_kv_scatter(
     distributed_kv_cache cache,
     int layer_idx
 ) {
     println("Scatter KV cache to ranks...")
 }
+
 func get_memory_usage_bytes(
     distributed_kv_cache cache
 ) int {
@@ -126,12 +135,14 @@ func get_memory_usage_bytes(
     }
     total
 }
+
 func get_memory_usage_mb(
     distributed_kv_cache cache
 ) float {
     float bytes = float(get_memory_usage_bytes(cache))
     bytes / (1024.0 * 1024.0)
 }
+
 func clear_cache(
     distributed_kv_cache cache
 ) {
@@ -139,6 +150,7 @@ func clear_cache(
     cache.local_value_caches = [][]float{}
     cache.seq_lens = []int{}
 }
+
 func log_cache_state(
     distributed_kv_cache cache
 ) {
@@ -152,6 +164,7 @@ func log_cache_state(
         }
     }
 }
+
 func main() {
     println("Distributed KV Cache Manager")
     println("============================")

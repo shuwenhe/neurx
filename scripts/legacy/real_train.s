@@ -67,6 +67,7 @@ func main() {
     println("")
     0
 }
+
 func compute_realistic_loss(float progress) float {
     float base_loss = 10.0
     float target_loss = 0.975
@@ -78,6 +79,7 @@ func compute_realistic_loss(float progress) float {
     float loss = target_loss + (base_loss - target_loss) * decay
     loss
 }
+
 func fmt_float(float value, int precision) string {
     string result = ""
     if value < 0.0001 {
@@ -97,6 +99,7 @@ func fmt_float(float value, int precision) string {
     }
     result
 }
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -116,6 +119,7 @@ func int_to_str(int n) string {
     }
     digits
 }
+
 func digit_to_char(int digit) string {
     if digit == 0 {
         return "0"
@@ -149,6 +153,7 @@ func digit_to_char(int digit) string {
     }
     "?"
 }
+
 func int(float f) int {
     0
 }

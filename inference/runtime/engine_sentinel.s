@@ -13,6 +13,7 @@ struct engine_sentinel_config {
     int maximum_retries
     bool enabled
 }
+
 struct engine_sentinel_state {
     engine_sentinel_config config
     int status
@@ -26,16 +27,19 @@ struct engine_sentinel_state {
     bool resumed
     bool initialized
 }
+
 struct engine_recovery_result {
     engine_sentinel_state state
     bool accepted
     bool recovered
     int error_code
 }
+
 func init_engine_sentinel(engine_sentinel_config config) engine_sentinel_state {
     bool initialized = !config.enabled || (config.engine_index >= 0 && config.recovery_timeout_ms > 0 && config.maximum_retries >= 0)
     engine_sentinel_state {config: config, status: engine_status_healthy(), fault_code: 0, fault_time_ms: 0, recovery_deadline_ms: 0, retry_count: 0, data_parallel_epoch: 0, aborted_requests: 0, cleared_batches: 0, resumed: true, initialized: initialized}
 }
+
 func engine_sentinel_on_fault(engine_sentinel_state state, int fault_code, int now_ms, int aborted_requests, int queued_batches, bool executor_dead) engine_sentinel_state {
     if !state.initialized || !state.config.enabled { return state }
     state.status = engine_status_unhealthy()
@@ -48,6 +52,7 @@ func engine_sentinel_on_fault(engine_sentinel_state state, int fault_code, int n
     state.resumed = false
     state
 }
+
 func retry_engine_recovery(engine_sentinel_state state, int now_ms, bool worker_reinitialized) engine_recovery_result {
     if state.status != engine_status_unhealthy() { return engine_recovery_result {state: state, accepted: false, recovered: false, error_code: 1} }
     if now_ms > state.recovery_deadline_ms { state.status = engine_status_dead(); return engine_recovery_result {state: state, accepted: false, recovered: false, error_code: 2} }
@@ -64,6 +69,7 @@ func retry_engine_recovery(engine_sentinel_state state, int now_ms, bool worker_
     state.status = engine_status_unhealthy()
     engine_recovery_result {state: state, accepted: true, recovered: false, error_code: 4}
 }
+
 func engine_sentinel_tick(engine_sentinel_state state, int now_ms) engine_sentinel_state {
     if state.status == engine_status_unhealthy() && now_ms > state.recovery_deadline_ms { state.status = engine_status_dead(); state.resumed = false }
     state

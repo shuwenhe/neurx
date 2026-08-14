@@ -31,6 +31,7 @@ struct dsl_runtime_config {
     int variable_count
     int maximum_steps
 }
+
 struct dsl_program_runtime {
     dsl_runtime_config config
     []int operation_types
@@ -51,6 +52,7 @@ struct dsl_program_runtime {
     bool halted
     bool failed
 }
+
 struct dsl_step_result {
     dsl_program_runtime runtime
     int thread_id
@@ -59,12 +61,14 @@ struct dsl_step_result {
     bool progressed
     bool needs_external_result
 }
+
 func dsl_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
     while i < capacity { values[i] = 0; i = i + 1 }
     values
 }
+
 func new_dsl_runtime(dsl_runtime_config config) dsl_program_runtime {
     if config.maximum_operations <= 0 { config.maximum_operations = 1 }
     if config.maximum_operations > 4096 { config.maximum_operations = 4096 }
@@ -75,6 +79,7 @@ func new_dsl_runtime(dsl_runtime_config config) dsl_program_runtime {
     if config.maximum_steps <= 0 { config.maximum_steps = 1 }
     dsl_program_runtime {config: config, operation_types: dsl_int_array(config.maximum_operations), destination_variables: dsl_int_array(config.maximum_operations), argument_a: dsl_int_array(config.maximum_operations), argument_b: dsl_int_array(config.maximum_operations), jump_targets: dsl_int_array(config.maximum_operations), operation_count: 0, variables: dsl_int_array(config.variable_count), program_counters: dsl_int_array(config.maximum_threads), thread_statuses: dsl_int_array(config.maximum_threads), parent_threads: dsl_int_array(config.maximum_threads), join_threads: dsl_int_array(config.maximum_threads), thread_count: 1, step_count: 0, generated_calls: 0, select_calls: 0, halted: false, failed: false}
 }
+
 func dsl_add_operation(dsl_program_runtime runtime, int operation_type, int destination_variable, int argument_a, int argument_b, int jump_target) dsl_program_runtime {
     if operation_type < dsl_op_text() || operation_type > dsl_op_halt() || runtime.operation_count >= runtime.config.maximum_operations { return runtime }
     int slot = runtime.operation_count
@@ -87,6 +92,7 @@ func dsl_add_operation(dsl_program_runtime runtime, int operation_type, int dest
     if slot == 0 { runtime.thread_statuses[0] = dsl_thread_ready() }
     runtime
 }
+
 func dsl_all_threads_terminal(dsl_program_runtime runtime) bool {
     int i = 0
     while i < runtime.thread_count {
@@ -95,6 +101,7 @@ func dsl_all_threads_terminal(dsl_program_runtime runtime) bool {
     }
     true
 }
+
 func dsl_next_ready_thread(dsl_program_runtime runtime) int {
     int i = 0
     while i < runtime.thread_count {
@@ -103,6 +110,7 @@ func dsl_next_ready_thread(dsl_program_runtime runtime) int {
     }
     0 - 1
 }
+
 func dsl_wake_joiners(dsl_program_runtime runtime) dsl_program_runtime {
     int thread = 0
     while thread < runtime.thread_count {
@@ -118,6 +126,7 @@ func dsl_wake_joiners(dsl_program_runtime runtime) dsl_program_runtime {
     }
     runtime
 }
+
 func dsl_step(dsl_program_runtime runtime) dsl_step_result {
     if runtime.halted || runtime.failed || runtime.step_count >= runtime.config.maximum_steps {
         runtime.failed = runtime.step_count >= runtime.config.maximum_steps
@@ -187,6 +196,7 @@ func dsl_step(dsl_program_runtime runtime) dsl_step_result {
     runtime.halted = dsl_all_threads_terminal(runtime)
     dsl_step_result {runtime: runtime, thread_id: thread, operation_type: operation, external_request_id: 0, progressed: true, needs_external_result: false}
 }
+
 func dsl_resume_external(dsl_program_runtime runtime, int thread_id, int value) dsl_program_runtime {
     if thread_id < 0 || thread_id >= runtime.thread_count || runtime.thread_statuses[thread_id] != dsl_thread_waiting() { return runtime }
     int pc = runtime.program_counters[thread_id]

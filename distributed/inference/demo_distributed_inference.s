@@ -10,29 +10,35 @@ struct distributed_inference_full_config {
     int batch_size
     int max_seq_len
 }
+
 struct distributed_inference_state {
     int rank
     int local_num_layers
     int hidden_dim
 }
+
 struct inference_request {
     string request_id
     []int input_ids
     int seq_len
 }
+
 struct inference_response {
     string request_id
     int generated_len
 }
+
 struct inference_node_state {
     int rank
     int num_pending_requests
     float utilization
 }
+
 struct sharding_plan {
     string strategy
     int num_stages
 }
+
 func init_full_config() distributed_inference_full_config {
     distributed_inference_full_config cfg
     cfg.world_size = 4
@@ -46,6 +52,7 @@ func init_full_config() distributed_inference_full_config {
     cfg.max_seq_len = 4096
     cfg
 }
+
 func validate_config(distributed_inference_full_config cfg) bool {
     if cfg.world_size <= 0 {
         return false
@@ -55,6 +62,7 @@ func validate_config(distributed_inference_full_config cfg) bool {
     }
     true
 }
+
 func print_config(distributed_inference_full_config cfg) {
     printf("Distributed Inference Configuration\n")
     printf("====================================\n")
@@ -67,6 +75,7 @@ func print_config(distributed_inference_full_config cfg) {
         cfg.num_layers,
         cfg.hidden_dim)
 }
+
 func init_node_state(int rank) inference_node_state {
     inference_node_state state
     state.rank = rank
@@ -74,6 +83,7 @@ func init_node_state(int rank) inference_node_state {
     state.utilization = 0.0
     state
 }
+
 func create_sharding_plan(
     string strategy,
     int world_size
@@ -83,10 +93,12 @@ func create_sharding_plan(
     plan.num_stages = world_size
     plan
 }
+
 func print_sharding_plan(sharding_plan plan) {
     printf("Sharding Plan: %s\n", plan.strategy)
     printf("Number of stages: %d\n", plan.num_stages)
 }
+
 func schedule_request(req inference_request, nodes []inference_node_state) int {
     int best_rank = 0
     int min_load = nodes[0].num_pending_requests
@@ -98,12 +110,14 @@ func schedule_request(req inference_request, nodes []inference_node_state) int {
     }
     best_rank
 }
+
 func forward_inference(engine distributed_inference_state, req inference_request) inference_response {
     inference_response resp
     resp.request_id = req.request_id
     resp.generated_len = 1
     resp
 }
+
 func update_node_utilization(nodes []inference_node_state) {
     for i = 0; i < len(nodes); i = i + 1 {
         float util = float(nodes[i].num_pending_requests) / 100.0
@@ -114,6 +128,7 @@ func update_node_utilization(nodes []inference_node_state) {
             nodes[i].num_pending_requests)
     }
 }
+
 func process_batch(batch []inference_request, nodes []inference_node_state, engine distributed_inference_state) int {
     printf("Processing batch of %d requests\n", len(batch))
     int total_processed = 0
@@ -127,6 +142,7 @@ func process_batch(batch []inference_request, nodes []inference_node_state, engi
     }
     total_processed
 }
+
 func main() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║   NeurX Distributed Inference System - Demo            ║")

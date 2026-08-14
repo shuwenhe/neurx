@@ -7,6 +7,7 @@ struct medical_fact {
     float confidence
     string evidence_source
 }
+
 struct fact_verification_result {
     []medical_fact extracted_facts
     []medical_fact matched_facts
@@ -15,6 +16,7 @@ struct fact_verification_result {
     float fact_accuracy
     float grounding_score
 }
+
 func extract_medical_facts(string response) []medical_fact {
     []medical_fact facts = []
     []string dosage_patterns = [
@@ -54,6 +56,7 @@ func extract_medical_facts(string response) []medical_fact {
     }
     return facts
 }
+
 func verify_facts_against_mcp([]medical_fact extracted, string mcp_context) fact_verification_result {
     fact_verification_result result = fact_verification_result{
         extracted_facts: extracted,
@@ -83,6 +86,7 @@ func verify_facts_against_mcp([]medical_fact extracted, string mcp_context) fact
     }
     return result
 }
+
 func cds_fact_consistency_reward(
     string prompt,
     string response,
@@ -93,6 +97,7 @@ func cds_fact_consistency_reward(
     fact_verification_result verification = verify_facts_against_mcp(facts, mcp_context)
     return verification.grounding_score
 }
+
 func cds_length_penalty_reward(
     string response,
     int approx_token_count
@@ -111,11 +116,13 @@ func cds_length_penalty_reward(
     }
     return 0.0
 }
+
 struct clarification_analysis {
     bool has_underspecified_prompt
     int clarification_count
     float clarification_score
 }
+
 func detect_underspecified_medical_question(string prompt) bool {
     []string missing_indicators = [
         "患者",
@@ -135,6 +142,7 @@ func detect_underspecified_medical_question(string prompt) bool {
     }
     return missing_count > 4
 }
+
 func count_clarification_questions(string response) int {
     int count = 0
     []string clarification_patterns = [
@@ -153,6 +161,7 @@ func count_clarification_questions(string response) int {
     }
     return count
 }
+
 func cds_clarification_bonus_reward(
     string prompt,
     string response
@@ -170,17 +179,20 @@ func cds_clarification_bonus_reward(
     }
     return bonus
 }
+
 struct reward_model_output {
     float score
     float confidence
     []float logits
 }
+
 func cds_external_reward_model(
     string prompt,
     string response
 ) float {
     return 0.0
 }
+
 struct cds_reward_breakdown {
     float fact_consistency
     float length_penalty
@@ -188,6 +200,7 @@ struct cds_reward_breakdown {
     float external_model
     float total_reward
 }
+
 func compute_cds_reward(
     string prompt,
     string response,
@@ -209,6 +222,7 @@ func compute_cds_reward(
     }
     return breakdown
 }
+
 func contains(string text, string pattern) bool {
     if len(text) == 0 || len(pattern) == 0 {
         return false
@@ -229,6 +243,7 @@ func contains(string text, string pattern) bool {
     }
     return false
 }
+
 func append([]medical_fact arr, medical_fact elem) []medical_fact {
     if arr == nil {
         arr = []medical_fact{}

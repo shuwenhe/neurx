@@ -8,6 +8,7 @@ func main() {
     fix_variable_declarations()
     print("\n✓ 变量声明格式统一完成\n")
 }
+
 func fix_variable_declarations() {
     string cmd = `
 find ./neurx -name "*.s" -type f | while read file; do
@@ -17,6 +18,7 @@ done
     create_fixer_script()
     run_fixer()
 }
+
 func create_fixer_script() {
     string script = `#!/usr/bin/env python3
 import os
@@ -82,6 +84,7 @@ PYEOF
         return
     }
 }
+
 func run_fixer() {
     cd_result := runtime_run_command("cd /home/shuwen/shuwen && python3 /tmp/fix_neurx_syntax.py")
     if !cd_result.ok {

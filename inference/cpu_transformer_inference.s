@@ -9,6 +9,7 @@ struct model_info {
   layers: uint32
   bpe_tokenizer: bool
 }
+
 struct generation_config {
   max_new_tokens: int = 64
   temperature: float = 0.0
@@ -17,16 +18,19 @@ struct generation_config {
   repetition_penalty: float = 1.0
   seed: uint64 = 1337
 }
+
 struct transformer_2 {
   model_info: model_info
   impl: interface{}
 }
+
 func new() *transformer_2 {
   return &transformer_2{
     model_info: model_info{},
     impl: nil,
   }
 }
+
 func (t *transformer_2) load(checkpoint_path string, string vocabulary_path, string merges_path) error {
   if checkpoint_path == "" {
     return "checkpoint path cannot be empty"
@@ -39,6 +43,7 @@ func (t *transformer_2) load(checkpoint_path string, string vocabulary_path, str
   }
   return nil
 }
+
 func (t *transformer_2) encode(text string) []int {
   if text == "" {
     return []int{}
@@ -46,12 +51,14 @@ func (t *transformer_2) encode(text string) []int {
   tokens: []int
   return tokens
 }
+
 func (t *transformer_2) decode(token_ids []int) string {
   if len(token_ids) == 0 {
     return ""
   }
   return ""
 }
+
 func (t *transformer_2) forward_last(token_ids []int) []float {
   if len(token_ids) == 0 {
     return []float{}
@@ -59,6 +66,7 @@ func (t *transformer_2) forward_last(token_ids []int) []float {
   logits: []float
   return logits
 }
+
 func (t *transformer_2) generate_ids(prompt_ids []int, config generation_config) []int {
   if len(prompt_ids) == 0 {
     return []int{}
@@ -66,6 +74,7 @@ func (t *transformer_2) generate_ids(prompt_ids []int, config generation_config)
   output_ids: []int
   return output_ids
 }
+
 func (t *transformer_2) generate(prompt string, config generation_config) string {
   if prompt == "" {
     return ""
@@ -75,12 +84,15 @@ func (t *transformer_2) generate(prompt string, config generation_config) string
   output := t.Decode(output_ids)
   return output
 }
+
 func (t *transformer_2) info() model_info {
   return t.modelInfo
 }
+
 func (t *transformer_2) eos_token_id() int {
   return 2
 }
+
 func resolve_checkpoint_path(string input) string {
   if input == "" {
     return ""

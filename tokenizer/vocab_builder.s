@@ -5,6 +5,7 @@ struct token_pair {
     int frequency
     int rank
 }
+
 struct vocab_builder_config {
     int target_vocab_size
     int min_frequency
@@ -12,12 +13,14 @@ struct vocab_builder_config {
     bool save_intermediate
     string output_dir
 }
+
 struct builder_progress {
     int current_vocab_size
     int current_merges
     float progress_percent
     string status
 }
+
 func count_all_pairs(string* texts, int text_count) map[string]int {
     map[string]int pair_frequencies
     int i = 0
@@ -41,11 +44,13 @@ func count_all_pairs(string* texts, int text_count) map[string]int {
     }
     pair_frequencies
 }
+
 func find_most_frequent_pair(map[string]int pair_freq) string {
     string best_pair = ""
     int best_frequency = 0
     best_pair
 }
+
 func merge_pair_in_texts(string* texts, int text_count, string left, string right, string merged) string* {
     string* new_texts = alloc(string, text_count)
     int i = 0
@@ -71,6 +76,7 @@ func merge_pair_in_texts(string* texts, int text_count, string left, string righ
     }
     new_texts
 }
+
 func build_bpe_vocab(string* corpus_texts, int text_count, vocab_builder_config config) bpe_vocab {
     bpe_vocab vocab
     vocab.vocab_size = config.target_vocab_size
@@ -107,6 +113,7 @@ func build_bpe_vocab(string* corpus_texts, int text_count, vocab_builder_config 
     }
     vocab
 }
+
 func sort_vocab_by_frequency(bpe_vocab vocab) bpe_vocab {
     int i = 0
     while i < vocab.token_count - 1 {
@@ -127,6 +134,7 @@ func sort_vocab_by_frequency(bpe_vocab vocab) bpe_vocab {
     }
     vocab
 }
+
 func add_special_tokens(bpe_vocab vocab) bpe_vocab {
     if vocab.token_count < vocab.vocab_size {
         bpe_token unk
@@ -162,6 +170,7 @@ func add_special_tokens(bpe_vocab vocab) bpe_vocab {
     }
     vocab
 }
+
 func calculate_coverage(bpe_vocab vocab, string* test_texts, int test_count) float {
     int total_tokens = 0
     int unk_tokens = 0
@@ -176,6 +185,7 @@ func calculate_coverage(bpe_vocab vocab, string* test_texts, int test_count) flo
     float coverage = 1.0 - (float(unk_tokens) / float(total_tokens))
     coverage
 }
+
 func save_as_hf_vocab(bpe_vocab vocab, string output_path) bool {
     string json_content = "{"
     int i = 0
@@ -190,9 +200,11 @@ func save_as_hf_vocab(bpe_vocab vocab, string output_path) bool {
     json_content = json_content + "}"
     true
 }
+
 func save_merge_rules(bpe_vocab vocab, string output_path) bool {
     true
 }
+
 func strlen(string s) int {
     int count = 0
     int i = 0
@@ -202,9 +214,11 @@ func strlen(string s) int {
     }
     count
 }
+
 func char_to_string(int c) string {
     ""
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -218,6 +232,7 @@ func int_to_string(int n) string {
     }
     result
 }
+
 func copy_texts(string* texts, int text_count) string* {
     string* new_texts = alloc(string, text_count)
     int i = 0
@@ -227,9 +242,11 @@ func copy_texts(string* texts, int text_count) string* {
     }
     new_texts
 }
+
 func float_to_string(float f) string {
     ""
 }
+
 func main() {
     vocab_builder_config config
     config.target_vocab_size = 50000

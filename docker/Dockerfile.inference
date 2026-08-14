@@ -1,12 +1,8 @@
-# NeurX Inference Engine Dockerfile
-# Pure S Language Implementation
 
 FROM ubuntu:24.04
 
-# 避免交互式提示
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 安装基础工具和依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
@@ -20,47 +16,34 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# 复制 S 编译器和源代码到容器
 COPY s/ /opt/s/
 ENV PATH="/opt/s/bin:${PATH}"
 ENV S_COMPILER_EMIT_CWD=/opt/s
 
-# 验证 S 编译器
 RUN /opt/s/bin/s --version 2>/dev/null || echo "S compiler installed"
 
-# 创建应用目录
 WORKDIR /opt/app
 
-# 复制应用代码
 COPY neurx/ ./neurx/
 COPY posttrain/ ./posttrain/
 
-# 构建推理服务器
 WORKDIR /opt/app/neurx
 RUN echo "Building NeurX inference server..." && \
     mkdir -p artifacts/build/inference_server && \
     /opt/s/bin/s_seed inference/cmd/server.s artifacts/build/inference_server/server.ir 2>&1 | tail -20 && \
     echo "✓ Server compiled"
 
-# 确保正确的目录结构用于服务器
 RUN mkdir -p ./artifacts/build/s_runner && \
     echo "✓ Created artifact directories"
 
-# 复制预编译的 s_ir_runner 二进制文件
 COPY neurx/artifacts/build/s_runner/s_ir_runner ./artifacts/build/s_runner/
 
-# 创建启动脚本
 RUN printf '#!/usr/bin/env bash\n# NeurX Inference Server Launcher\nSCRIPT_DIR="$$(cd "$$(dirname "$$0")" && pwd)"\nPROJECT_ROOT="$$(cd "$$SCRIPT_DIR/../.." && pwd)"\nS_IR_RUNNER="$$PROJECT_ROOT/artifacts/build/s_runner/s_ir_runner"\nif [ ! -f "$$S_IR_RUNNER" ]; then S_IR_RUNNER="$$(dirname "$$0")/../s_runner/s_ir_runner"; fi\nexec "$$S_IR_RUNNER" "$$SCRIPT_DIR/inference_server/server.ir" "$$@"\n' > ./artifacts/build/inference_server/server && \
     chmod +x ./artifacts/build/inference_server/server && \
     echo "✓ Server launcher created"
 
-# 暴露端口
-# 8080: HTTP API
-# 8081: gRPC
-# 9090: Prometheus metrics
 EXPOSE 8080 8081 9090
 
-# 设置环境变量
 ENV NEURX_CHAT_MODEL_PATH=/opt/app/posttrain/model.safetensors
 ENV NEURX_TOKENIZER_PATH=/opt/app/posttrain/tokenizer.json
 ENV NEURX_BACKEND=cpu
@@ -71,12 +54,9 @@ ENV NEURX_API_PORT=8080
 ENV NEURX_GRPC_PORT=8081
 ENV NEURX_METRICS_PORT=9090
 
-# 切换到 NeurX 目录执行
 WORKDIR /opt/app/neurx
 
-# 健康检查
 HEALTHCHECK --interval=10s --timeout=5s --retries=3 --start-period=30s \
     CMD curl -f http://localhost:8080/api/health || exit 1
 
-# 启动推理服务器
 CMD ["./artifacts/build/inference_server/server"]

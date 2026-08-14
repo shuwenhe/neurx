@@ -26,6 +26,7 @@ struct transfer_adapter_config {
     bool nixl_available
     bool mori_available
 }
+
 struct transfer_adapter_state {
     transfer_adapter_config config
     []int transfer_ids
@@ -50,6 +51,7 @@ struct transfer_adapter_state {
     int failed_count
     int transferred_bytes
 }
+
 struct transfer_adapter_result {
     transfer_adapter_state state
     int slot
@@ -57,12 +59,14 @@ struct transfer_adapter_result {
     int backend_type
     bool accepted
 }
+
 func transfer_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
     while i < capacity { values[i] = 0; i = i + 1 }
     values
 }
+
 func new_transfer_adapter_state(transfer_adapter_config config) transfer_adapter_state {
     if config.capacity <= 0 { config.capacity = 1 }
     if config.capacity > 2048 { config.capacity = 2048 }
@@ -71,6 +75,7 @@ func new_transfer_adapter_state(transfer_adapter_config config) transfer_adapter
     if config.timeout_ms <= 0 { config.timeout_ms = 1 }
     transfer_adapter_state {config: config, transfer_ids: transfer_int_array(config.capacity), room_ids: transfer_int_array(config.capacity), backend_types: transfer_int_array(config.capacity), source_ranks: transfer_int_array(config.capacity), destination_ranks: transfer_int_array(config.capacity), source_ptr_low: transfer_int_array(config.capacity), destination_ptr_low: transfer_int_array(config.capacity), byte_counts: transfer_int_array(config.capacity), shard_counts: transfer_int_array(config.capacity), ready_shards: transfer_int_array(config.capacity), completed_shards: transfer_int_array(config.capacity), checksums: transfer_int_array(config.capacity), statuses: transfer_int_array(config.capacity), retry_counts: transfer_int_array(config.capacity), created_ms: transfer_int_array(config.capacity), updated_ms: transfer_int_array(config.capacity), error_codes: transfer_int_array(config.capacity), transfer_count: 0, completed_count: 0, failed_count: 0, transferred_bytes: 0}
 }
+
 func transfer_find(transfer_adapter_state state, int transfer_id) int {
     int i = 0
     while i < state.transfer_count {
@@ -79,16 +84,19 @@ func transfer_find(transfer_adapter_state state, int transfer_id) int {
     }
     0 - 1
 }
+
 func transfer_backend_available(transfer_adapter_state state, int backend_type) bool {
     if backend_type == transfer_backend_mooncake() { return state.config.mooncake_available }
     if backend_type == transfer_backend_nixl() { return state.config.nixl_available }
     if backend_type == transfer_backend_mori() { return state.config.mori_available }
     false
 }
+
 func transfer_result_of(transfer_adapter_state state, int slot, bool accepted) transfer_adapter_result {
     if slot < 0 { return transfer_adapter_result {state: state, slot: slot, status: 0, backend_type: 0, accepted: accepted} }
     transfer_adapter_result {state: state, slot: slot, status: state.statuses[slot], backend_type: state.backend_types[slot], accepted: accepted}
 }
+
 func transfer_create(transfer_adapter_state state, int transfer_id, int room_id, int backend_type, int source_rank, int destination_rank, int source_ptr_low, int destination_ptr_low, int byte_count, int shard_count, int checksum, int now_ms) transfer_adapter_result {
     if transfer_id <= 0 || room_id <= 0 || byte_count <= 0 || shard_count <= 0 || shard_count > state.config.maximum_shards || source_ptr_low == 0 || destination_ptr_low == 0 || state.transfer_count >= state.config.capacity || transfer_find(state, transfer_id) >= 0 || !transfer_backend_available(state, backend_type) { return transfer_result_of(state, -1, false) }
     int slot = state.transfer_count
@@ -108,6 +116,7 @@ func transfer_create(transfer_adapter_state state, int transfer_id, int room_id,
     state.transfer_count = state.transfer_count + 1
     transfer_result_of(state, slot, true)
 }
+
 func transfer_register_memory(transfer_adapter_state state, int transfer_id, bool registration_success, int now_ms) transfer_adapter_result {
     int slot = transfer_find(state, transfer_id)
     if slot < 0 || state.statuses[slot] != transfer_created() { return transfer_result_of(state, slot, false) }
@@ -121,6 +130,7 @@ func transfer_register_memory(transfer_adapter_state state, int transfer_id, boo
     state.updated_ms[slot] = now_ms
     transfer_result_of(state, slot, true)
 }
+
 func transfer_mark_shard_ready(transfer_adapter_state state, int transfer_id, int now_ms) transfer_adapter_result {
     int slot = transfer_find(state, transfer_id)
     if slot < 0 || (state.statuses[slot] != transfer_registered() && state.statuses[slot] != transfer_metadata_ready()) { return transfer_result_of(state, slot, false) }
@@ -129,6 +139,7 @@ func transfer_mark_shard_ready(transfer_adapter_state state, int transfer_id, in
     state.updated_ms[slot] = now_ms
     transfer_result_of(state, slot, true)
 }
+
 func transfer_start(transfer_adapter_state state, int transfer_id, int now_ms) transfer_adapter_result {
     int slot = transfer_find(state, transfer_id)
     if slot < 0 || state.statuses[slot] != transfer_metadata_ready() { return transfer_result_of(state, slot, false) }
@@ -136,6 +147,7 @@ func transfer_start(transfer_adapter_state state, int transfer_id, int now_ms) t
     state.updated_ms[slot] = now_ms
     transfer_result_of(state, slot, true)
 }
+
 func transfer_complete_shard(transfer_adapter_state state, int transfer_id, bool success, int received_checksum, int now_ms) transfer_adapter_result {
     int slot = transfer_find(state, transfer_id)
     if slot < 0 || state.statuses[slot] != transfer_in_flight() { return transfer_result_of(state, slot, false) }
@@ -166,6 +178,7 @@ func transfer_complete_shard(transfer_adapter_state state, int transfer_id, bool
     state.updated_ms[slot] = now_ms
     transfer_result_of(state, slot, true)
 }
+
 func transfer_poll_timeout(transfer_adapter_state state, int transfer_id, int now_ms) transfer_adapter_result {
     int slot = transfer_find(state, transfer_id)
     if slot < 0 { return transfer_result_of(state, slot, false) }

@@ -23,6 +23,7 @@ func NewComprehensiveTestSuite() *comprehensive_test_suite {
         stats:   test_stats{},
     }
 }
+
 func (cts *comprehensive_test_suite) TestFlashAttentionBasic() {
     test_name := "FlashAttention Basic Computation"
     config := attention_config{
@@ -52,6 +53,7 @@ func (cts *comprehensive_test_suite) TestFlashAttentionBasic() {
     }
     cts.results = append(cts.results, result)
 }
+
 func (cts *comprehensive_test_suite) TestGEMMFusionSpeedup() {
     test_name := "GEMM Fusion Speedup"
     config := gemm_config{
@@ -73,6 +75,7 @@ func (cts *comprehensive_test_suite) TestGEMMFusionSpeedup() {
     }
     cts.results = append(cts.results, result)
 }
+
 func (cts *comprehensive_test_suite) TestCUDAGraphExecution() {
     test_name := "CUDA Graph Execution"
     config := cuda_graph_config{
@@ -94,6 +97,7 @@ func (cts *comprehensive_test_suite) TestCUDAGraphExecution() {
     }
     cts.results = append(cts.results, result)
 }
+
 func (cts *comprehensive_test_suite) TestRuntimeFusion() {
     test_name := "Runtime Operation Fusion"
     config := fused_operation_config{
@@ -114,6 +118,7 @@ func (cts *comprehensive_test_suite) TestRuntimeFusion() {
     }
     cts.results = append(cts.results, result)
 }
+
 func (cts *comprehensive_test_suite) TestChunkedPrefill() {
     test_name := "Chunked Prefill Processing"
     config := chunk_config{
@@ -133,6 +138,7 @@ func (cts *comprehensive_test_suite) TestChunkedPrefill() {
     }
     cts.results = append(cts.results, result)
 }
+
 func (cts *comprehensive_test_suite) TestSpeculativeDecoding() {
     test_name := "Speculative Decoding"
     config := speculative_config{
@@ -151,6 +157,7 @@ func (cts *comprehensive_test_suite) TestSpeculativeDecoding() {
     }
     cts.results = append(cts.results, result)
 }
+
 func (cts *comprehensive_test_suite) TestVisionLanguageAdapter() {
     test_name := "Vision-Language Adapter"
     vlm := NewVisionLanguageModelAdapter(768, 4096)
@@ -169,6 +176,7 @@ func (cts *comprehensive_test_suite) TestVisionLanguageAdapter() {
     }
     cts.results = append(cts.results, result)
 }
+
 func (cts *comprehensive_test_suite) TestLoRAAdapter() {
     test_name := "LoRA Adapter"
     config := lo_ra_config{
@@ -194,6 +202,7 @@ func (cts *comprehensive_test_suite) TestLoRAAdapter() {
     }
     cts.results = append(cts.results, result)
 }
+
 func (cts *comprehensive_test_suite) TestMultiModelServer() {
     test_name := "Multi-Model Serving"
     mms := NewMultiModelServingManager(8000)
@@ -212,6 +221,7 @@ func (cts *comprehensive_test_suite) TestMultiModelServer() {
     }
     cts.results = append(cts.results, result)
 }
+
 func (cts *comprehensive_test_suite) TestHighPerformanceIntegration() {
     test_name := "High Performance Integration"
     config := optimization_config{
@@ -232,6 +242,7 @@ func (cts *comprehensive_test_suite) TestHighPerformanceIntegration() {
     }
     cts.results = append(cts.results, result)
 }
+
 func (cts *comprehensive_test_suite) TestLongContextIntegration() {
     test_name := "Long Context Integration"
     config := long_context_optimization_config{
@@ -253,6 +264,7 @@ func (cts *comprehensive_test_suite) TestLongContextIntegration() {
     }
     cts.results = append(cts.results, result)
 }
+
 func (cts *comprehensive_test_suite) TestAdvancedFeaturesIntegration() {
     test_name := "Advanced Features Integration"
     engine := NewAdvancedFeaturesEngine()
@@ -267,6 +279,7 @@ func (cts *comprehensive_test_suite) TestAdvancedFeaturesIntegration() {
     }
     cts.results = append(cts.results, result)
 }
+
 func (cts *comprehensive_test_suite) BenchmarkFlashAttention() {
     test_name := "Benchmark: FlashAttention"
     config := attention_config{
@@ -288,6 +301,7 @@ func (cts *comprehensive_test_suite) BenchmarkFlashAttention() {
     }
     cts.results = append(cts.results, result)
 }
+
 func (cts *comprehensive_test_suite) BenchmarkGEMMFusion() {
     test_name := "Benchmark: GEMM Fusion"
     config := gemm_config{
@@ -309,6 +323,7 @@ func (cts *comprehensive_test_suite) BenchmarkGEMMFusion() {
     }
     cts.results = append(cts.results, result)
 }
+
 func (cts *comprehensive_test_suite) BenchmarkSpeculativeDecoding() {
     test_name := "Benchmark: Speculative Decoding"
     config := speculative_config{
@@ -327,6 +342,7 @@ func (cts *comprehensive_test_suite) BenchmarkSpeculativeDecoding() {
     }
     cts.results = append(cts.results, result)
 }
+
 func (cts *comprehensive_test_suite) RunAllTests() {
     cts.TestFlashAttentionBasic()
     cts.TestGEMMFusionSpeedup()
@@ -357,6 +373,7 @@ func (cts *comprehensive_test_suite) RunAllTests() {
         cts.stats.coverage_pct = float32(cts.stats.passed_tests) * 100.0 / float32(cts.stats.total_tests)
     }
 }
+
 func (cts *comprehensive_test_suite) PrintTestReport() {
     core.Println("================================================")
     core.Println("COMPREHENSIVE TEST SUITE REPORT")
@@ -382,6 +399,7 @@ func (cts *comprehensive_test_suite) PrintTestReport() {
     core.Println()
     core.Println("================================================")
 }
+
 func main() {
     suite := NewComprehensiveTestSuite()
     suite.RunAllTests()

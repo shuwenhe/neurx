@@ -15,6 +15,7 @@ func approx(float a, float b, float tol) bool {
     if d < 0.0 { d = 0.0 - d }
     d < tol
 }
+
 func expect(bool cond, string name) int {
     if cond {
         println("PASS " + name)
@@ -23,6 +24,7 @@ func expect(bool cond, string name) int {
     println("FAIL " + name)
     1
 }
+
 func test_softmax_simple() int {
     float[] scores = []float{1.0, 2.0, 3.0}
     float[] probs = compute_softmax(scores)
@@ -37,6 +39,7 @@ func test_softmax_simple() int {
     fail = fail + expect(probs[2] > probs[1] && probs[1] > probs[0], "softmax monotone")
     fail
 }
+
 func test_exp_basic() int {
     int fail = 0
     fail = fail + expect(approx(math_exp(0.0), 1.0, 1.0e-4), "exp(0)=1")
@@ -44,6 +47,7 @@ func test_exp_basic() int {
     fail = fail + expect(approx(math_exp(-1.0), 0.3678794, 1.0e-3), "exp(-1)=1/e")
     fail
 }
+
 func test_paged_kv_write_and_attention() int {
     int block_size = 4
     int num_kv_heads = 2
@@ -98,6 +102,7 @@ func test_paged_kv_write_and_attention() int {
     fail = fail + expect(approx(out0, 0.2, 0.05), "attention output at query 0 head 0 dim 0 reasonable")
     fail
 }
+
 func main() {
     int fail = 0
     fail = fail + test_softmax_simple()

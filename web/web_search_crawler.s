@@ -28,6 +28,7 @@ struct web_search_config {
     cache_enabled: bool = true
     cache_ttl_hours: int = 24
 }
+
 struct search_result_item {
     url: string
     title: string
@@ -40,6 +41,7 @@ struct search_result_item {
     crawl_status?: string
     crawl_error?: string
 }
+
 struct crawled_content {
     raw_html_size: int
     text_content: string
@@ -49,6 +51,7 @@ struct crawled_content {
     extraction_timestamp: float
     word_count: int
 }
+
 struct page_metadata {
     title: string
     description: string?
@@ -63,11 +66,13 @@ struct page_metadata {
     keywords: list<string>?
     og_data: map<string, string>?
 }
+
 struct page_section {
     heading: string?
     level: int
     content: string
 }
+
 struct search_response {
     query: string
     corrected_query?: string
@@ -79,6 +84,7 @@ struct search_response {
     key_findings: list<string>?
     stats: search_statistics
 }
+
 struct search_statistics {
     engine_query_times_ms: map<string, float>
     crawl_times_ms: list<float>
@@ -92,6 +98,7 @@ interface search_engine_interface {
     name: string { get }
     search(string query, config: web_search_config)
 }
+
 struct engine_search_result {
     items: list<search_result_item>
     total_estimated: int

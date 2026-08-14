@@ -10,11 +10,13 @@ struct flash_attention_config {
     int sequence_parallel_rank
     int sequence_parallel_size
 }
+
 struct online_softmax_state {
     float max_val
     float sum_exp
     float normalization
 }
+
 struct flash_attention_state {
     int batch_size
     int seq_len
@@ -27,6 +29,7 @@ struct flash_attention_state {
     vector row_sum
     flash_attention_config config
 }
+
 func new_flash_attention_config() flash_attention_config {
     return flash_attention_config {
         block_size_q: 128,
@@ -40,6 +43,7 @@ func new_flash_attention_config() flash_attention_config {
         sequence_parallel_size: 1
     }
 }
+
 func new_flash_attention_state(
     int batch_size,
     int seq_len,
@@ -60,6 +64,7 @@ func new_flash_attention_state(
     state.row_sum = allocate_vector(batch_size * num_heads * seq_len, 0.0)
     return state
 }
+
 func flash_attention_forward(
     vector q,
     vector k,
@@ -120,6 +125,7 @@ func flash_attention_forward(
     }
     return output
 }
+
 func flash_attention_backward(
     vector q,
     vector k,
@@ -154,6 +160,7 @@ func flash_attention_backward(
     }
     return (grad_q, grad_k, grad_v)
 }
+
 func flash_attention_gqa(
     vector q,
     vector k,
@@ -167,6 +174,7 @@ func flash_attention_gqa(
     var vector v_expanded = expand_kv_heads(v, num_heads, num_kv_heads)
     return flash_attention_forward(q, k_expanded, v_expanded, mask, state)
 }
+
 func flash_attention_sequence_parallel(
     vector q,
     vector k,
@@ -191,6 +199,7 @@ func flash_attention_sequence_parallel(
     }
     return local_output
 }
+
 func compute_flash_attention_memory_savings(
     int batch_size,
     int seq_len,
@@ -203,11 +212,14 @@ func compute_flash_attention_memory_savings(
     var speedup: float = standard_memory / flash_memory
     return (memory_savings, speedup)
 }
+
 func load_block(vector data, int start_idx, int block_size, int num_heads, int head_dim): vector {
     return allocate_vector(block_size * num_heads * head_dim, 0.0)
 }
+
 func store_block(vector output, vector block, int start_idx, int block_size, int num_heads, int head_dim): void {
 }
+
 func block_matrix_multiply(
     vector q_block, vector k_block,
     int q_size, int kv_size, int num_heads, int head_dim,
@@ -229,6 +241,7 @@ func block_matrix_multiply(
     }
     return result
 }
+
 func apply_causal_mask(
     vector scores,
     int q_start, int kv_start,
@@ -246,6 +259,7 @@ func apply_causal_mask(
         }
     }
 }
+
 func update_row_max(vector row_max, vector scores, int q_size, int kv_size, int num_heads): void {
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
@@ -261,6 +275,7 @@ func update_row_max(vector row_max, vector scores, int q_size, int kv_size, int 
         }
     }
 }
+
 func compute_online_exponentials(
     vector scores, vector old_max, vector new_max,
     int q_size, int kv_size, int num_heads
@@ -278,6 +293,7 @@ func compute_online_exponentials(
     }
     return result
 }
+
 func add_row_sum(vector row_sum, vector exp_scores, int q_size, int kv_size, int num_heads): void {
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
@@ -290,6 +306,7 @@ func add_row_sum(vector row_sum, vector exp_scores, int q_size, int kv_size, int
         }
     }
 }
+
 func update_output_block(
     vector output, vector exp_scores, vector v_block,
     vector old_max, vector new_max,
@@ -314,6 +331,7 @@ func update_output_block(
         }
     }
 }
+
 func normalize_output_block(vector output, vector row_sum, int q_size, int num_heads, int head_dim): void {
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
@@ -326,6 +344,7 @@ func normalize_output_block(vector output, vector row_sum, int q_size, int num_h
         }
     }
 }
+
 func expand_kv_heads(vector kv, int num_heads, int num_kv_heads): vector {
     var expansion_factor: int = num_heads / num_kv_heads
     var int expanded_size = length(kv) * expansion_factor
@@ -337,12 +356,15 @@ func expand_kv_heads(vector kv, int num_heads, int num_kv_heads): vector {
     }
     return result
 }
+
 func get_chunk_from_all_gather(vector all_gathered, int rank): vector {
     return allocate_vector(length(all_gathered) / rank, 0.0)
 }
+
 func get_cross_mask(int from_rank, int to_rank): vector {
     return allocate_vector(1, 0.0)
 }
+
 func scale_and_add(vector result, vector scale_vec, int q_size, int num_heads): void {
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
@@ -350,6 +372,7 @@ func scale_and_add(vector result, vector scale_vec, int q_size, int num_heads): 
         }
     }
 }
+
 func compute_attention_gradients_block(
     vector grad_q, vector grad_k, vector grad_v,
     vector q, vector k, vector v, vector grad_output,
@@ -358,6 +381,7 @@ func compute_attention_gradients_block(
     int num_heads, int head_dim
 ): void {
 }
+
 func benchmark_flash_attention(
     vector seq_lengths,
     int num_heads,
@@ -376,6 +400,7 @@ func benchmark_flash_attention(
     }
     return results
 }
+
 func verify_flash_attention_correctness(
     vector q, vector k, vector v, vector mask,
     int seq_len, int num_heads, int head_dim
@@ -394,6 +419,7 @@ func verify_flash_attention_correctness(
     }
     return max_diff < tolerance
 }
+
 func standard_attention(vector q, vector k, vector v, vector mask,
                      int seq_len, int num_heads, int head_dim): vector {
     var float q_scale = 1.0 / sqrt(float(head_dim))
@@ -422,6 +448,7 @@ func standard_attention(vector q, vector k, vector v, vector mask,
     }
     return output
 }
+
 func recommended_flash_attention_config_2t(): flash_attention_config {
     var config: flash_attention_config = new_flash_attention_config()
     config.block_size_q = 128

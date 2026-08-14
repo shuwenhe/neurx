@@ -22,6 +22,7 @@ struct neurx_v3_config {
     int max_seq_len
     int batch_size
 }
+
 func new_neurx_v3_config() neurx_v3_config {
     neurx_v3_config {
         hidden_dim: 5120,
@@ -42,12 +43,14 @@ func new_neurx_v3_config() neurx_v3_config {
         batch_size: 128,
     }
 }
+
 struct neurx_transformer_block {
     mla.mla_weights mla_weights
     []float mla_norm
     moe.neurx_moe_weights moe_weights
     []float moe_norm
 }
+
 struct neurx_v3_model {
     neurx_v3_config config
     []float token_embedding
@@ -57,6 +60,7 @@ struct neurx_v3_model {
     []float lm_head
     mtp.mtp_weights mtp_weights
 }
+
 func demonstrate_kv_cache_savings() {
     println("========================================")
     println("  KV cache: MLA vs Standard MHA")
@@ -90,6 +94,7 @@ func demonstrate_kv_cache_savings() {
     println("  Standard MHA: ~" + int_to_string(standard_total_gb) + " GB")
     println("  MLA:          ~" + int_to_string(mla_total_kb / 1024) + " MB")
 }
+
 func demonstrate_moe() {
     println("")
     println("========================================")
@@ -133,6 +138,7 @@ func demonstrate_moe() {
     println("  Load balance: max/avg = " + float_to_string(stats.load_imbalance_ratio))
     println("  Utilization:  " + float_to_string(stats.utilization * 100.0) + "%")
 }
+
 func demonstrate_mtp() {
     println("")
     println("========================================")
@@ -174,6 +180,7 @@ func demonstrate_mtp() {
         j = j + 1
     }
 }
+
 func demonstrate_grpo() {
     println("")
     println("========================================")
@@ -233,6 +240,7 @@ func demonstrate_grpo() {
     println("  advantage < 0 -> worse than group avg -> suppressed")
     println("  No critic/value model needed!")
 }
+
 func demonstrate_rule_rewards() {
     println("")
     println("========================================")
@@ -255,6 +263,7 @@ func demonstrate_rule_rewards() {
     println("")
     println("  Deterministic, explainable, no reward hacking")
 }
+
 func demonstrate_fp8() {
     println("")
     println("========================================")
@@ -281,6 +290,7 @@ func demonstrate_fp8() {
     println("  Memory saved:  " + float_to_string(monitor.memory_saved_percent) + "%")
     println("  Speedup:       " + float_to_string(monitor.speedup_estimated) + "x")
 }
+
 func int_to_string(int n) string {
     if n == 0 { return "0" }
     string result = ""
@@ -295,6 +305,7 @@ func int_to_string(int n) string {
     if is_neg { result = "-" + result }
     result
 }
+
 func digit_to_char(int d) string {
     if d == 0 { return "0" }
     if d == 1 { return "1" }
@@ -308,6 +319,7 @@ func digit_to_char(int d) string {
     if d == 9 { return "9" }
     "?"
 }
+
 func float_to_string(float x) string {
     string result = ""
     if x < 0.0 {
@@ -328,16 +340,20 @@ func float_to_string(float x) string {
     }
     result
 }
+
 func bool_to_string(bool b) string {
     if b { return "true" }
     "false"
 }
+
 func unit_name() string {
     "neurx/model/neurx/main"
 }
+
 func unit_ready() int {
     1
 }
+
 func main() {
     println("============================================")
     println("  NeurX Core Features - neurx project")

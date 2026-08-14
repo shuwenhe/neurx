@@ -7,6 +7,7 @@ struct sse_server_config {
     string default_model
     int max_concurrent_streams
 }
+
 struct sse_session {
     string request_id
     string model
@@ -15,11 +16,13 @@ struct sse_session {
     int tokens_sent
     bool closed
 }
+
 struct generation_callback_state {
     []string tokens
     int cursor
     bool done
 }
+
 func new_sse_server_config(string host, int port, string default_model) sse_server_config {
     int norm_port = port
     if norm_port <= 0 {
@@ -36,6 +39,7 @@ func new_sse_server_config(string host, int port, string default_model) sse_serv
         max_concurrent_streams: 64,
     }
 }
+
 func new_sse_session(string request_id, string model, bool stream, int max_tokens) sse_session {
     int norm_max = max_tokens
     if norm_max <= 0 {
@@ -50,6 +54,7 @@ func new_sse_session(string request_id, string model, bool stream, int max_token
         closed: false,
     }
 }
+
 func new_generation_callback_state([]string tokens) generation_callback_state {
     generation_callback_state{
         tokens: tokens,
@@ -57,6 +62,7 @@ func new_generation_callback_state([]string tokens) generation_callback_state {
         done: false,
     }
 }
+
 func sse_header() string {
     "HTTP/1.1 200 OK\r\n" +
     "Content-Type: text/event-stream\r\n" +
@@ -64,12 +70,14 @@ func sse_header() string {
     "Connection: keep-alive\r\n" +
     "Access-Control-Allow-Origin: *\r\n\r\n"
 }
+
 func json_response_header(int body_len) string {
     "HTTP/1.1 200 OK\r\n" +
     "Content-Type: application/json\r\n" +
     "Content-Length: " + int_to_string(body_len) + "\r\n" +
     "Connection: close\r\n\r\n"
 }
+
 func error_response(int status_code, string message, string error_type, string code) http_response {
     string body = openai_error_body(message, error_type, code)
     http_response{
@@ -78,13 +86,16 @@ func error_response(int status_code, string message, string error_type, string c
         body: body,
     }
 }
+
 func sse_write_chunk(int client_fd, string request_id, string model, string content_delta, string finish_reason) int {
     string chunk = openai_chat_chunk(request_id, model, content_delta, finish_reason)
     __sys_send(client_fd, chunk)
 }
+
 func sse_write_done(int client_fd) int {
     __sys_send(client_fd, openai_done_event())
 }
+
 func next_token(generation_callback_state gen) generation_callback_state {
     if gen.cursor >= len(gen.tokens) {
         gen.done = true
@@ -93,12 +104,14 @@ func next_token(generation_callback_state gen) generation_callback_state {
     gen.cursor = gen.cursor + 1
     gen
 }
+
 func current_token(generation_callback_state gen) string {
     if gen.cursor == 0 || gen.cursor > len(gen.tokens) {
         return ""
     }
     gen.tokens[gen.cursor - 1]
 }
+
 func sse_serve_stream(int client_fd, sse_session session, generation_callback_state gen) sse_session {
     __sys_send(client_fd, sse_header())
     while !gen.done && session.tokens_sent < session.max_tokens {
@@ -115,6 +128,7 @@ func sse_serve_stream(int client_fd, sse_session session, generation_callback_st
     session.closed = true
     session
 }
+
 func non_stream_response(sse_session session, generation_callback_state gen) string {
     string full = ""
     while !gen.done {
@@ -131,6 +145,7 @@ func non_stream_response(sse_session session, generation_callback_state gen) str
     body = body + "\"usage\":{\"prompt_tokens\":0,\"completion_tokens\":" + int_to_string(session.tokens_sent) + ",\"total_tokens\":" + int_to_string(session.tokens_sent) + "}}"
     body
 }
+
 func sse_serve_non_stream(int client_fd, sse_session session, generation_callback_state gen) sse_session {
     while !gen.done && session.tokens_sent < session.max_tokens {
         gen = next_token(gen)
@@ -145,6 +160,7 @@ func sse_serve_non_stream(int client_fd, sse_session session, generation_callbac
     session.closed = true
     session
 }
+
 func extract_request_id(string path) string {
     int slash = -1
     int i = 0
@@ -159,9 +175,11 @@ func extract_request_id(string path) string {
     }
     path[slash+1:]
 }
+
 func current_timestamp_ms() int64 {
     0
 }
+
 func route_request(http_request req, sse_server_config config) http_response {
     if req.method == "POST" && (req.path == "/v1/chat/completions" || req.path == "/chat/completions") {
         openai_request_result parsed = parse_openai_request(req.body, extract_request_id(req.path))
@@ -193,6 +211,7 @@ func route_request(http_request req, sse_server_config config) http_response {
     }
     error_response(404, "path not found: " + req.path, "invalid_request_error", "not_found")
 }
+
 func split_to_tokens(string text) []string {
     []string toks = []string{}
     if len(text) == 0 {
@@ -219,6 +238,7 @@ func split_to_tokens(string text) []string {
     }
     toks
 }
+
 func start_sse_server(sse_server_config config) {
     http_server server = create_http_server(config.host, config.port)
     if server.listen_fd < 0 {

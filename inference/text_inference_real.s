@@ -16,6 +16,7 @@ func embedding_lookup(int token_id) float {
     }
     value
 }
+
 func attention_forward(float query) float {
     float score = query * 0.9
     if score > 0.0 {
@@ -23,11 +24,13 @@ func attention_forward(float query) float {
     }
     0.0
 }
+
 func ffn_forward(float hidden) float {
     float proj = hidden * 0.8
     float gated = proj * 0.7
     gated
 }
+
 func layer_forward(float hidden, int layer_idx) float {
     float residual = hidden
     float norm = hidden * 0.95
@@ -39,6 +42,7 @@ func layer_forward(float hidden, int layer_idx) float {
     float output = residual + ffn * 0.1
     output
 }
+
 func forward_pass(int token_id) float {
     float hidden = embedding_lookup(token_id)
     int layer = 0
@@ -50,6 +54,7 @@ func forward_pass(int token_id) float {
     float logits = norm * 2.0
     logits
 }
+
 func generate(int prompt_token, int num_tokens) int {
     int generated = 0
     int current_token = prompt_token
@@ -72,6 +77,7 @@ func generate(int prompt_token, int num_tokens) int {
     }
     generated
 }
+
 func main() {
     print("\n")
     print("╔══════════════════════════════════════════════════════╗\n")
@@ -92,6 +98,7 @@ func main() {
     print_num(tokens)
     print(" tokens\n\n")
 }
+
 func print_num(int n) {
     if n < 10 {
         if n == 0 { print("0") }

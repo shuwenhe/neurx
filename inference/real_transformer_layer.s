@@ -22,6 +22,7 @@ struct transformer_layer_config {
     float rms_eps
     float rope_theta
 }
+
 struct transformer_layer_weights {
     []float input_norm_weight
     []float post_attention_norm_weight
@@ -38,11 +39,13 @@ struct transformer_layer_weights {
     [][]float expert_down_weights
     bool use_moe
 }
+
 struct moe_routing_result {
     []int selected_experts
     []float weights
     int num_selected
 }
+
 func default_layer_config() transformer_layer_config {
     transformer_layer_config{
         hidden_size: 896,
@@ -58,6 +61,7 @@ func default_layer_config() transformer_layer_config {
         rope_theta: 10000.0,
     }
 }
+
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -70,6 +74,7 @@ func sqrt_approx(float x) float {
     }
     g
 }
+
 func math_sin(float x) float {
     float result = 0.0
     float term = x
@@ -82,6 +87,7 @@ func math_sin(float x) float {
     }
     result
 }
+
 func math_cos(float x) float {
     float result = 1.0
     float term = 1.0
@@ -94,6 +100,7 @@ func math_cos(float x) float {
     }
     result
 }
+
 func rms_norm([]float hidden, []float weight, int hidden_size, float eps) []float {
     []float output = make([]float, hidden_size)
     float sum_sq = 0.0
@@ -115,6 +122,7 @@ func rms_norm([]float hidden, []float weight, int hidden_size, float eps) []floa
     }
     output
 }
+
 func matmul_vec([]float x, []float w, int in_dim, int out_dim) []float {
     []float output = make([]float, out_dim)
     int o = 0
@@ -130,6 +138,7 @@ func matmul_vec([]float x, []float w, int in_dim, int out_dim) []float {
     }
     output
 }
+
 func apply_rope([]float qk, int num_heads, int head_size, int position, float theta) []float {
     []float output = make([]float, len(qk))
     int h = 0
@@ -156,10 +165,12 @@ func apply_rope([]float qk, int num_heads, int head_size, int position, float th
     }
     output
 }
+
 func silu(float x) float {
     float sig = 1.0 / (1.0 + math_exp_neg(-x))
     x * sig
 }
+
 func math_exp_neg(float x) float {
     if x > 88.0 {
         return 1.0
@@ -184,6 +195,7 @@ func math_exp_neg(float x) float {
     }
     result
 }
+
 func swiglu_ffn([]float hidden, []float gate_w, []float up_w, []float down_w, int hidden_size, int inter_dim) []float {
     []float gate = matmul_vec(hidden, gate_w, hidden_size, inter_dim)
     []float up = matmul_vec(hidden, up_w, hidden_size, inter_dim)
@@ -195,6 +207,7 @@ func swiglu_ffn([]float hidden, []float gate_w, []float up_w, []float down_w, in
     }
     matmul_vec(act, down_w, inter_dim, hidden_size)
 }
+
 func moe_route([]float hidden, []float gate_weight, int hidden_size, int num_experts, int top_k) moe_routing_result {
     []float logits = matmul_vec(hidden, gate_weight, hidden_size, num_experts)
     []int selected = make([]int, top_k)
@@ -242,6 +255,7 @@ func moe_route([]float hidden, []float gate_weight, int hidden_size, int num_exp
     }
     moe_routing_result{selected_experts: selected, weights: weights, num_selected: top_k}
 }
+
 func moe_ffn([]float hidden, transformer_layer_weights weights, transformer_layer_config config, moe_routing_result route) []float {
     int inter = config.intermediate_size
     []float output = make([]float, config.hidden_size)
@@ -274,6 +288,7 @@ func moe_ffn([]float hidden, transformer_layer_weights weights, transformer_laye
     }
     output
 }
+
 func transformer_layer_forward(
     []float hidden,
     transformer_layer_weights weights,
@@ -331,6 +346,7 @@ func transformer_layer_forward(
     }
     (output, cache)
 }
+
 func make_identity_weights(transformer_layer_config config) transformer_layer_weights {
     int hidden = config.hidden_size
     int inter = config.intermediate_size
@@ -392,6 +408,7 @@ func make_identity_weights(transformer_layer_config config) transformer_layer_we
         use_moe: config.num_experts > 0,
     }
 }
+
 func identity_matrix(int in_dim, int out_dim) []float {
     []float w = make([]float, out_dim * in_dim)
     int i = 0

@@ -3,6 +3,7 @@ struct schedule_entry {
     int threshold
     int batch_size
 }
+
 struct num_microbatches_calculator {
     string calculator_type
     int num_micro_batches
@@ -13,9 +14,11 @@ struct num_microbatches_calculator {
     int micro_batch_times_dp
     []schedule_entry schedule
 }
+
 func round_down(int batch_size, int divisor) int {
     return (batch_size / divisor) * divisor
 }
+
 func new_constant_calculator(
     int global_batch_size,
     int micro_batch_size,
@@ -46,6 +49,7 @@ func new_constant_calculator(
         schedule: make([]schedule_entry, 0),
     }
 }
+
 func new_rampup_calculator(
     int micro_batch_size,
     int data_parallel_size,
@@ -68,6 +72,7 @@ func new_rampup_calculator(
         schedule: schedule,
     }
 }
+
 func get_batch_size_for_samples(
     num_microbatches_calculator calc,
     int consumed_samples
@@ -83,6 +88,7 @@ func get_batch_size_for_samples(
     }
     return batch_size
 }
+
 func update_num_microbatches(
     num_microbatches_calculator calc,
     int consumed_samples
@@ -99,12 +105,15 @@ func update_num_microbatches(
     }
     return calc
 }
+
 func get_num_microbatches(num_microbatches_calculator calc) int {
     return calc.num_micro_batches
 }
+
 func get_current_global_batch_size(num_microbatches_calculator calc) int {
     return calc.current_global_batch_size
 }
+
 func validate_schedule([]schedule_entry schedule) bool {
     if len(schedule) == 0 {
         return false

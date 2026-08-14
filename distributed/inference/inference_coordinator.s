@@ -8,6 +8,7 @@ struct inference_coordinator_config {
     int request_timeout_ms
     bool enable_load_balancing
 }
+
 struct inference_node_state {
     int rank
     int num_pending_requests
@@ -17,6 +18,7 @@ struct inference_node_state {
     bool healthy
     int last_heartbeat_ts
 }
+
 struct request_batch {
     []inference_request requests
     int batch_id
@@ -24,6 +26,7 @@ struct request_batch {
     int start_layer
     int end_layer
 }
+
 struct coordinator_stats {
     int total_requests_received
     int total_requests_completed
@@ -32,6 +35,7 @@ struct coordinator_stats {
     float throughput_req_per_sec
     []inference_node_state node_states
 }
+
 func init_coordinator_config(
     int world_size,
     int rank,
@@ -47,6 +51,7 @@ func init_coordinator_config(
     cfg.enable_load_balancing = true
     cfg
 }
+
 func init_node_state(
     int rank
 ) inference_node_state {
@@ -60,6 +65,7 @@ func init_node_state(
     state.last_heartbeat_ts = 0
     state
 }
+
 func create_request_batch(
     []inference_request requests,
     int batch_id,
@@ -81,6 +87,7 @@ func create_request_batch(
     }
     batch
 }
+
 func schedule_request_round_robin(
     inference_request req,
     []inference_node_state nodes
@@ -95,6 +102,7 @@ func schedule_request_round_robin(
     }
     best_rank
 }
+
 func schedule_request_min_latency(
     inference_request req,
     []inference_node_state nodes
@@ -109,6 +117,7 @@ func schedule_request_min_latency(
     }
     best_rank
 }
+
 func schedule_request(
     inference_request req,
     []inference_node_state nodes,
@@ -122,6 +131,7 @@ func schedule_request(
     }
     0
 }
+
 func broadcast_request_to_ranks(
     inference_request req,
     []int target_ranks
@@ -131,6 +141,7 @@ func broadcast_request_to_ranks(
         printf("  Sending to rank %d\n", target_ranks[i])
     }
 }
+
 func collect_results_from_ranks(
     []int source_ranks,
     string reduce_op
@@ -142,11 +153,13 @@ func collect_results_from_ranks(
     }
     result
 }
+
 func check_node_health(
     inference_node_state node
 ) bool {
     node.healthy
 }
+
 func update_node_utilization(
     []inference_node_state nodes
 ) {
@@ -159,6 +172,7 @@ func update_node_utilization(
             nodes[i].num_pending_requests)
     }
 }
+
 func trigger_load_balancing(
     []inference_node_state nodes
 ) {
@@ -177,6 +191,7 @@ func trigger_load_balancing(
         println("Load imbalance detected, rebalancing...")
     }
 }
+
 func get_coordinator_stats(
     []inference_node_state nodes
 ) coordinator_stats {
@@ -193,6 +208,7 @@ func get_coordinator_stats(
     }
     stats
 }
+
 func print_coordinator_stats(
     coordinator_stats stats
 ) {
@@ -211,6 +227,7 @@ func print_coordinator_stats(
             node.healthy)
     }
 }
+
 func main() {
     println("Distributed Inference Coordinator")
     println("=================================")

@@ -3,6 +3,7 @@ use neurx.runtime.io.{runtime_run_command_output, runtime_read_text_file, runtim
 func string_char(int c) string {
     string(c)
 }
+
 func strip_comments(string text) string {
     string out = ""
     int i = 0
@@ -63,5 +64,6 @@ func strip_comments(string text) string {
     }
     out
 }
+
 func main() {
     string root_find = "."

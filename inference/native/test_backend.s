@@ -25,6 +25,7 @@ func contains_keyword(string text, string keyword) bool {
     }
     return false
 }
+
 func generate_response(string prompt, int max_tokens) string {
     string response = ""
     if contains_keyword(prompt, "你好") || contains_keyword(prompt, "hello") || contains_keyword(prompt, "hi") {
@@ -52,6 +53,7 @@ func generate_response(string prompt, int max_tokens) string {
     }
     return response
 }
+
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -74,6 +76,7 @@ func int_to_string(int value) string {
     return result
 }
 extern "intrinsic" func __sys_read_string(int fd, int count) string
+
 func main() {
     print("NeurX Medical AI Backend - Interactive Mode\n")
     print("Type medical queries (or /exit to quit)\n")

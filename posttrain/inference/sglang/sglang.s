@@ -13,6 +13,7 @@ struct sglang_config {
     int schedule_conservativeness
     string attention_backend
 }
+
 struct radix_node {
     int node_id
     []int token_ids
@@ -23,11 +24,13 @@ struct radix_node {
     tensor key_cache
     tensor value_cache
 }
+
 struct radix_tree {
     []radix_node nodes
     int root_id
     int next_node_id
 }
+
 struct sglang_request {
     int request_id
     []int input_ids
@@ -39,6 +42,7 @@ struct sglang_request {
     bool finished
     int radix_node_id
 }
+
 struct sglang_engine {
     module model
     sglang_config config
@@ -46,6 +50,7 @@ struct sglang_engine {
     []sglang_request requests
     int next_request_id
 }
+
 func new_sglang_config() sglang_config {
     sglang_config {
         max_total_tokens: 4096,
@@ -60,6 +65,7 @@ func new_sglang_config() sglang_config {
         attention_backend: "flashinfer",
     }
 }
+
 func radix_tree_find_prefix(
     radix_tree tree,
     []int tokens
@@ -105,6 +111,7 @@ func radix_tree_find_prefix(
     }
     best_node
 }
+
 func radix_tree_insert(
     radix_tree tree,
     []int tokens,
@@ -161,6 +168,7 @@ func radix_tree_insert(
     tree.next_node_id = tree.next_node_id + 1
     return new_node.node_id
 }
+
 func sglang_radix_attention(
     tensor query,
     radix_tree tree,
@@ -193,6 +201,7 @@ func sglang_radix_attention(
     tensor output = tensor_ops.matmul(attn_weights, value)
     output
 }
+
 func sglang_generate(
     sglang_engine engine,
     [][]int prompts,
@@ -255,6 +264,7 @@ func sglang_generate(
     }
     outputs
 }
+
 func new_sglang_engine(module model, sglang_config config) sglang_engine {
     radix_node root = radix_node {
         node_id: 0,

@@ -17,6 +17,7 @@ struct rope_scaling_config {
     float yarn_mscale
     bool ntk_use_log_space
 }
+
 func default_rope_scaling_4k_to_32k(int head_dim) rope_scaling_config {
     rope_scaling_config {
         method: ROPE_SCALING_YARN,
@@ -32,6 +33,7 @@ func default_rope_scaling_4k_to_32k(int head_dim) rope_scaling_config {
         ntk_use_log_space: true,
     }
 }
+
 func default_rope_scaling_4k_to_128k(int head_dim) rope_scaling_config {
     rope_scaling_config {
         method: ROPE_SCALING_YARN,
@@ -47,6 +49,7 @@ func default_rope_scaling_4k_to_128k(int head_dim) rope_scaling_config {
         ntk_use_log_space: true,
     }
 }
+
 func pow_float(float base, float exp) float {
     if exp == 0.0 { return 1.0 }
     if base <= 0.0 { return 0.0 }
@@ -61,6 +64,7 @@ func pow_float(float base, float exp) float {
     if negative { result = 1.0 / result }
     return result
 }
+
 func log_approx(float x) float {
     if x <= 0.0 { return -1000000.0 }
     float y = 0.0
@@ -87,6 +91,7 @@ func log_approx(float x) float {
     }
     return 2.0 * series + y
 }
+
 func float_of_int(int n) float {
     float result = 0.0
     int i = 0
@@ -96,22 +101,27 @@ func float_of_int(int n) float {
     }
     return result
 }
+
 func min_int(int a, int b) int {
     if a < b { return a }
     return b
 }
+
 func max_int(int a, int b) int {
     if a > b { return a }
     return b
 }
+
 func min_float(float a, float b) float {
     if a < b { return a }
     return b
 }
+
 func max_float(float a, float b) float {
     if a > b { return a }
     return b
 }
+
 func compute_rope_frequencies(int seq_len, int dim, float base) []float {
     int half_dim = dim / 2
     []float freqs = []float{cap: half_dim}
@@ -123,6 +133,7 @@ func compute_rope_frequencies(int seq_len, int dim, float base) []float {
     }
     return freqs
 }
+
 func rope_linear_scaling(
     rope_scaling_config cfg,
     int position
@@ -139,6 +150,7 @@ func rope_linear_scaling(
     }
     return angles
 }
+
 func rope_ntk_scaling(
     rope_scaling_config cfg,
     int position
@@ -170,6 +182,7 @@ func rope_ntk_scaling(
     }
     return angles
 }
+
 func rope_yarn_scaling(
     rope_scaling_config cfg,
     int position
@@ -198,17 +211,20 @@ func rope_yarn_scaling(
     }
     return angles
 }
+
 func tanh_approx(float x) float {
     if x > 5.0 { return 1.0 }
     if x < -5.0 { return -1.0 }
     float x2 = x * x
     return x * (27.0 + x2) / (27.0 + 9.0 * x2)
 }
+
 struct rope_result {
     []float cos_values
     []float sin_values
     float attention_scale
 }
+
 func get_rope_angles(
     rope_scaling_config cfg,
     int position
@@ -240,12 +256,14 @@ func get_rope_angles(
         attention_scale: attn_scale,
     }
 }
+
 struct rope_cache {
     [][]float all_cos
     [][]float all_sin
     float attention_scale
     int cached_seq_len
 }
+
 func build_rope_cache(rope_scaling_config cfg, int seq_len) rope_cache {
     int half_dim = cfg.dim / 2
     [][]float cos_table = [][]float{cap: seq_len}
@@ -266,6 +284,7 @@ func build_rope_cache(rope_scaling_config cfg, int seq_len) rope_cache {
         cached_seq_len: seq_len,
     }
 }
+
 func apply_rope_single(
     []float x,
     rope_result angles
@@ -285,6 +304,7 @@ func apply_rope_single(
     }
     return out
 }
+
 func apply_rope_batch(
     [][][]float x,
     rope_cache cache
@@ -318,6 +338,7 @@ func apply_rope_batch(
     }
     return out
 }
+
 func cos_approx(float x) float {
     float pi = 3.141592653589793
     float two_pi = 2.0 * pi
@@ -336,6 +357,7 @@ func cos_approx(float x) float {
     }
     return result
 }
+
 func sin_approx(float x) float {
     float pi = 3.141592653589793
     float two_pi = 2.0 * pi
@@ -354,10 +376,12 @@ func sin_approx(float x) float {
     }
     return result
 }
+
 struct neurx_position_encoding {
     int block_position
     int position
 }
+
 func get_neurx_rope_angles(
     rope_scaling_config cfg,
     neurx_position_encoding pos
@@ -365,6 +389,7 @@ func get_neurx_rope_angles(
     int effective_position = pos.block_position * cfg.original_max_seq_len + pos.position
     return get_rope_angles(cfg, effective_position)
 }
+
 func build_neurx_rope_cache(
     rope_scaling_config cfg,
     int num_blocks,
@@ -373,12 +398,14 @@ func build_neurx_rope_cache(
     int total_seq_len = num_blocks * block_size
     return build_rope_cache(cfg, total_seq_len)
 }
+
 struct rope_stats {
     int total_positions_computed
     float avg_compute_time_us
     float peak_memory_bytes
     string method_used
 }
+
 func validate_rope_scaling(
     rope_scaling_config cfg,
     int test_positions_count
@@ -400,6 +427,7 @@ func validate_rope_scaling(
     }
     return passed
 }
+
 func print_rope_config_summary(rope_scaling_config cfg) string {
     string method_name = ""
     if cfg.method == ROPE_SCALING_LINEAR {

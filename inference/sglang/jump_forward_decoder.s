@@ -8,23 +8,27 @@ struct jump_forward_fsm {
     int final_count
     int max_jump_steps
 }
+
 struct jump_forward_result {
     []int bytes
     int next_state
     int step_count
     bool jumped
 }
+
 func jump_forward_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
     while i < capacity { values[i] = 0; i = i + 1 }
     values
 }
+
 func new_jump_forward_fsm(int max_jump_steps) jump_forward_fsm {
     int steps = max_jump_steps
     if steps <= 0 { steps = 256 }
     jump_forward_fsm {from_states: jump_forward_int_array(512), to_states: jump_forward_int_array(512), byte_values: jump_forward_int_array(512), final_states: jump_forward_int_array(128), edge_count: 0, final_count: 0, max_jump_steps: steps}
 }
+
 func jump_forward_add_edge(jump_forward_fsm fsm, int from_state, int to_state, int byte_value) jump_forward_fsm {
     if from_state < 0 || to_state < 0 || byte_value < 0 || byte_value > 255 || fsm.edge_count >= 512 { return fsm }
     int index = fsm.edge_count
@@ -34,6 +38,7 @@ func jump_forward_add_edge(jump_forward_fsm fsm, int from_state, int to_state, i
     fsm.edge_count = fsm.edge_count + 1
     fsm
 }
+
 func jump_forward_add_final(jump_forward_fsm fsm, int state) jump_forward_fsm {
     int i = 0
     while i < fsm.final_count {
@@ -45,6 +50,7 @@ func jump_forward_add_final(jump_forward_fsm fsm, int state) jump_forward_fsm {
     fsm.final_count = fsm.final_count + 1
     fsm
 }
+
 func jump_forward_is_final(jump_forward_fsm fsm, int state) bool {
     int i = 0
     while i < fsm.final_count {
@@ -53,6 +59,7 @@ func jump_forward_is_final(jump_forward_fsm fsm, int state) bool {
     }
     false
 }
+
 func jump_forward_unique_edge(jump_forward_fsm fsm, int state) int {
     int found = 0 - 1
     int count = 0
@@ -64,6 +71,7 @@ func jump_forward_unique_edge(jump_forward_fsm fsm, int state) int {
     if count == 1 { return found }
     0 - 1
 }
+
 func jump_forward_contains_state([]int states, int count, int state) bool {
     int i = 0
     while i < count {
@@ -72,6 +80,7 @@ func jump_forward_contains_state([]int states, int count, int state) bool {
     }
     false
 }
+
 func jump_forward_try(jump_forward_fsm fsm, int initial_state) jump_forward_result {
     []int bytes = jump_forward_int_array(fsm.max_jump_steps)
     []int visited = jump_forward_int_array(fsm.max_jump_steps + 1)

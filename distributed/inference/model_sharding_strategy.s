@@ -7,12 +7,14 @@ struct sharding_strategy_config {
     int hidden_dim
     int num_heads
 }
+
 struct layer_partition {
     int start_layer
     int end_layer
     int rank_owner
     int global_layer_idx
 }
+
 struct tensor_partition {
     int tensor_id
     int partition_dim
@@ -20,12 +22,14 @@ struct tensor_partition {
     int rank_owner
     string partition_type
 }
+
 struct sharding_plan {
     []layer_partition layer_partitions
     []tensor_partition tensor_partitions
     string strategy
     int num_stages
 }
+
 func compute_tensor_parallel_partition(
     int global_hidden_dim,
     int world_size,
@@ -39,6 +43,7 @@ func compute_tensor_parallel_partition(
     tp.partition_type = "column_parallel"
     tp
 }
+
 func compute_pipeline_parallel_partition(
     int num_layers,
     int world_size,
@@ -52,6 +57,7 @@ func compute_pipeline_parallel_partition(
     pp.global_layer_idx = rank
     pp
 }
+
 func compute_hybrid_partition(
     int num_layers,
     int hidden_dim,
@@ -72,6 +78,7 @@ func compute_hybrid_partition(
     plan.tensor_partitions = append(plan.tensor_partitions, tp)
     plan
 }
+
 func compute_sequence_parallel_partition(
     int seq_len,
     int world_size,
@@ -85,6 +92,7 @@ func compute_sequence_parallel_partition(
     sp.partition_type = "sequence_parallel"
     sp
 }
+
 func create_sharding_plan(
     string strategy,
     int num_layers,
@@ -122,6 +130,7 @@ func create_sharding_plan(
     }
     plan
 }
+
 func get_layer_owner_rank(
     sharding_plan plan,
     int global_layer_idx
@@ -134,6 +143,7 @@ func get_layer_owner_rank(
     }
     0
 }
+
 func get_tensor_partition(
     sharding_plan plan,
     int tensor_id,
@@ -150,6 +160,7 @@ func get_tensor_partition(
     }
     default_tp
 }
+
 func print_sharding_plan(
     sharding_plan plan
 ) {
@@ -168,6 +179,7 @@ func print_sharding_plan(
             i, tp.partition_type, tp.partition_size, tp.rank_owner)
     }
 }
+
 func estimate_memory_per_rank(
     sharding_plan plan,
     int global_hidden_dim,
@@ -192,6 +204,7 @@ func estimate_memory_per_rank(
     float memory_gb = float(total_elements) * 4.0 / (1024.0 * 1024.0 * 1024.0)
     memory_gb
 }
+
 func main() {
     println("Model Sharding Strategy")
     println("=======================")

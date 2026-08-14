@@ -11,15 +11,18 @@ struct platform_capability {
     bool supports_distributed
     string distributed_backend
 }
+
 struct platform_request {
     string platform
     int requirements
 }
+
 struct platform_selection {
     int distributed_backend
     bool supported
     int error_code
 }
+
 func platform_require_graph_capture() int { 1 }
 
 func platform_require_speculative_decode() int { 2 }
@@ -48,6 +51,7 @@ func platform_requirement_enabled(int requirements, int flag) bool {
     int quotient = requirements / flag
     quotient - (quotient / 2) * 2 == 1
 }
+
 func platform_capability_for(string platform) platform_capability {
     if platform == "cuda" {
         return platform_capability {platform: platform, device_type: "gpu", available: true, supports_graph_capture: true, supports_speculative_decode: true, supports_multimodal: true, supports_fp8: true, supports_int4: true, supports_distributed: true, distributed_backend: "nccl"}
@@ -69,6 +73,7 @@ func platform_capability_for(string platform) platform_capability {
     }
     platform_capability {platform: platform, device_type: "unknown", available: false, supports_graph_capture: false, supports_speculative_decode: false, supports_multimodal: false, supports_fp8: false, supports_int4: false, supports_distributed: false, distributed_backend: ""}
 }
+
 func select_platform(platform_request request) platform_selection {
     if request.platform == "cuda" { return platform_selection {distributed_backend: platform_backend_nccl(), supported: true, error_code: 0} }
     if request.platform == "rocm" { return platform_selection {distributed_backend: platform_backend_rccl(), supported: true, error_code: 0} }

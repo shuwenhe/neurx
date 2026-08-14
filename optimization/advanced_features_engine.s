@@ -26,6 +26,7 @@ func NewSpeculativeDecodingEngine(config speculative_config) *speculative_decodi
         rejected_count:     0,
     }
 }
+
 func (sde *speculative_decoding_engine) DraftTokens(
     context []int32,
     num_tokens int32,
@@ -38,6 +39,7 @@ func (sde *speculative_decoding_engine) DraftTokens(
     }
     return drafted
 }
+
 func (sde *speculative_decoding_engine) VerifyDraftTokens(
     context []int32,
     drafted_tokens []int32,
@@ -60,6 +62,7 @@ func (sde *speculative_decoding_engine) VerifyDraftTokens(
     }
     return verified
 }
+
 func (sde *speculative_decoding_engine) getMainModelLogits(
     context []int32,
     position int32,
@@ -70,6 +73,7 @@ func (sde *speculative_decoding_engine) getMainModelLogits(
     }
     return logits
 }
+
 func (sde *speculative_decoding_engine) computeAcceptanceProbability(
     main_logits []float32,
     token_id int32,
@@ -92,6 +96,7 @@ func (sde *speculative_decoding_engine) computeAcceptanceProbability(
     prob := float32(token_exp / sum_exp)
     return prob
 }
+
 func (sde *speculative_decoding_engine) resampleFromMainModel(
     logits []float32,
 ) int32 {
@@ -105,6 +110,7 @@ func (sde *speculative_decoding_engine) resampleFromMainModel(
     }
     return max_idx
 }
+
 func (sde *speculative_decoding_engine) GetSpeedup() float32 {
     acceptance_rate := 0.65
     effective_speedup := 1.0 + float32(sde.config.num_draft_tokens)*float32(acceptance_rate)
@@ -115,6 +121,7 @@ type vision_language_model_adapter struct {
     language_model_dim   int32
     bridge_layer_dim     int32
 }
+
 func NewVisionLanguageModelAdapter(
     vision_dim int32,
     language_dim int32,
@@ -125,6 +132,7 @@ func NewVisionLanguageModelAdapter(
         bridge_layer_dim:   language_dim,
     }
 }
+
 func (vlm *vision_language_model_adapter) EncodeImage(
     image_features []float32,
     num_patches int32,
@@ -137,6 +145,7 @@ func (vlm *vision_language_model_adapter) EncodeImage(
     }
     return visual_tokens
 }
+
 func (vlm *vision_language_model_adapter) BridgeVisionToLanguage(
     visual_tokens []float32,
 ) []float32 {
@@ -154,6 +163,7 @@ type lo_ra_adapter struct {
     rank                int32
     adapters            map[string][][]float32
 }
+
 func NewLoRAAdapter(config lo_ra_config) *lo_ra_adapter {
     return &lo_ra_adapter{
         config:    config,
@@ -161,6 +171,7 @@ func NewLoRAAdapter(config lo_ra_config) *lo_ra_adapter {
         adapters:  make(map[string][][]float32),
     }
 }
+
 func (la *lo_ra_adapter) AddLoRAWeight(
     layer_name string,
     weight_a []float32,
@@ -168,6 +179,7 @@ func (la *lo_ra_adapter) AddLoRAWeight(
 ) {
     la.adapters[layer_name] = [][]float32{weight_a, weight_b}
 }
+
 func (la *lo_ra_adapter) ApplyLoRA(
     layer_name string,
     x []float32,
@@ -193,6 +205,7 @@ type multi_model_serving_manager struct {
     model_cache         map[string][]float32
     max_memory_mb       int32
 }
+
 func NewMultiModelServingManager(max_memory_mb int32) *multi_model_serving_manager {
     return &multi_model_serving_manager{
         loaded_models: make(map[string]bool),
@@ -200,6 +213,7 @@ func NewMultiModelServingManager(max_memory_mb int32) *multi_model_serving_manag
         max_memory_mb: max_memory_mb,
     }
 }
+
 func (mms *multi_model_serving_manager) LoadModel(
     model_name string,
     model_data []float32,
@@ -213,14 +227,17 @@ func (mms *multi_model_serving_manager) LoadModel(
     mms.model_cache[model_name] = model_data
     return true
 }
+
 func (mms *multi_model_serving_manager) GetModel(model_name string) ([]float32, bool) {
     data, exists := mms.model_cache[model_name]
     return data, exists
 }
+
 func (mms *multi_model_serving_manager) UnloadModel(model_name string) {
     delete(mms.loaded_models, model_name)
     delete(mms.model_cache, model_name)
 }
+
 func (mms *multi_model_serving_manager) GetLoadedModels() []string {
     models := make([]string, 0)
     for name := range mms.loaded_models {
@@ -234,6 +251,7 @@ type advanced_features_engine struct {
     lora_manager        *lo_ra_adapter
     multi_model_server  *multi_model_serving_manager
 }
+
 func NewAdvancedFeaturesEngine() *advanced_features_engine {
     spec_config := speculative_config{
         draft_model_scale:  0.25,
@@ -252,6 +270,7 @@ func NewAdvancedFeaturesEngine() *advanced_features_engine {
         multi_model_server:  NewMultiModelServingManager(24000),
     }
 }
+
 func (afe *advanced_features_engine) PrintAdvancedFeaturesReport() {
     core.Println("Advanced Features Report")
     core.Println("=======================")
@@ -266,6 +285,7 @@ func (afe *advanced_features_engine) PrintAdvancedFeaturesReport() {
     core.Println("✓ Multi-Model Serving")
     core.Println("  Max memory:", afe.multi_model_server.max_memory_mb, "MB")
 }
+
 func main() {
     engine := NewAdvancedFeaturesEngine()
     engine.PrintAdvancedFeaturesReport()

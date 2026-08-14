@@ -18,6 +18,7 @@ func sglang_expect(bool condition, string name) int {
     println("FAIL " + name)
     1
 }
+
 func test_cache_aware_routing() int {
     int failures = 0
     cache_aware_router_state state = new_cache_aware_router(cache_aware_router_config {cache_threshold_per_mille: 500, balance_absolute_threshold: 2, balance_relative_percent: 150, max_affinity_entries: 8})
@@ -37,6 +38,7 @@ func test_cache_aware_routing() int {
     failures = failures + sglang_expect(!isolated.routed, "cache-aware pool isolation")
     failures
 }
+
 func test_circuit_breaker() int {
     int failures = 0
     circuit_breaker_state state = new_circuit_breaker(circuit_breaker_config {failure_threshold: 2, success_threshold: 2, open_timeout_ms: 100, failure_window_ms: 1000, half_open_max_requests: 1}, 0)
@@ -53,6 +55,7 @@ func test_circuit_breaker() int {
     failures = failures + sglang_expect(state.state == circuit_closed() && state.total_failures == 2 && state.total_successes == 2, "circuit recovery threshold")
     failures
 }
+
 func test_jump_forward() int {
     int failures = 0
     jump_forward_fsm fsm = new_jump_forward_fsm(16)
@@ -73,6 +76,7 @@ func test_jump_forward() int {
     failures = failures + sglang_expect(jump.step_count == 2 && jump.next_state == 7, "jump-forward cycle guard")
     failures
 }
+
 func test_hicache() int {
     int failures = 0
     hicache_config through_config = hicache_config {write_policy: hicache_write_through(), prefetch_threshold_pages: 2, prefetch_base_timeout_ms: 2000, prefetch_per_ki_token_ms: 100, prefetch_max_timeout_ms: 30000, storage_enabled: true}
@@ -103,6 +107,7 @@ func test_hicache() int {
     failures = failures + sglang_expect(!deferred.scheduled && eviction.scheduled, "HiCache deferred write-back")
     failures
 }
+
 func test_two_batch_overlap() int {
     int failures = 0
     tbo_config config = tbo_config {token_distribution_threshold_per_mille: 300, minimum_tokens: 4, decode_delta_stages: 2}
@@ -116,6 +121,7 @@ func test_two_batch_overlap() int {
     failures = failures + sglang_expect(schedule.valid && schedule.tick_count == 7 && schedule.child_a_stages[0] == 0 && schedule.child_b_stages[0] == 0 - 1 && schedule.child_a_stages[2] == 2 && schedule.child_b_stages[2] == 0 && schedule.child_b_stages[6] == 4, "TBO overlapped stage order")
     failures
 }
+
 func test_streaming_sessions() int {
     int failures = 0
     streaming_session_state state = new_streaming_session_state(streaming_session_config {capacity: 3, default_timeout_ms: 100})
@@ -137,6 +143,7 @@ func test_streaming_sessions() int {
     failures = failures + sglang_expect(state.session_count == 0 && state.timed_out == 1, "streaming session timeout reap")
     failures
 }
+
 func test_pd_bootstrap_rooms() int {
     int failures = 0
     pd_bootstrap_state state = new_pd_bootstrap_state(pd_bootstrap_config {capacity: 2, bootstrap_timeout_ms: 100, waiting_timeout_ms: 200})
@@ -155,6 +162,7 @@ func test_pd_bootstrap_rooms() int {
     failures = failures + sglang_expect(room.status == pd_room_failed() && room.state.failure_codes[room.room_slot] == 408 && room.state.failed_rooms == 1, "PD bootstrap timeout cleanup")
     failures
 }
+
 func test_gpu_tbo_execution() int {
     int failures = 0
     gpu_tbo_executor_state state = new_gpu_tbo_executor(gpu_tbo_config {capacity: 8, device_id: 0, compute_stream_a: 10, compute_stream_b: 11, communication_stream: 12, world_size: 2, cuda_available: true, collective_available: true})
@@ -170,6 +178,7 @@ func test_gpu_tbo_execution() int {
     failures = failures + sglang_expect(!execution.launched && execution.backend_code == 503 && execution.state.statuses[0] == gpu_exec_failed(), "GPU TBO unavailable collective fails closed")
     failures
 }
+
 func test_session_kv_pool_binding() int {
     int failures = 0
     session_kv_binding_state state = new_session_kv_binding(session_kv_binding_config {capacity: 2, page_size: 4, maximum_pages_per_session: 16})
@@ -187,6 +196,7 @@ func test_session_kv_pool_binding() int {
     failures = failures + sglang_expect(state.binding_count == 0 && state.released_pages == 3, "Session releases bound KV pages")
     failures
 }
+
 func test_transfer_adapters() int {
     int failures = 0
     transfer_adapter_state state = new_transfer_adapter_state(transfer_adapter_config {capacity: 4, maximum_shards: 2, maximum_retries: 1, timeout_ms: 100, mooncake_available: true, nixl_available: true, mori_available: true})
@@ -212,6 +222,7 @@ func test_transfer_adapters() int {
     failures = failures + sglang_expect(transfer.status == transfer_failed() && transfer.state.error_codes[transfer.slot] == 408, "Mori transfer timeout")
     failures
 }
+
 func test_program_dsl_runtime() int {
     int failures = 0
     dsl_program_runtime runtime = new_dsl_runtime(dsl_runtime_config {maximum_operations: 8, maximum_threads: 2, variable_count: 3, maximum_steps: 16})
@@ -246,6 +257,7 @@ func test_program_dsl_runtime() int {
     failures = failures + sglang_expect(step.runtime.halted && step.runtime.variables[1] == 9, "SGLang DSL join wakes without starvation")
     failures
 }
+
 func test_dllm_runtime() int {
     int failures = 0
     dllm_state state = new_dllm_state(dllm_config {sequence_length: 6, maximum_steps: 3, tokens_per_step: 2, remask_strategy: dllm_strategy_low_confidence(), confidence_threshold_per_mille: 700, block_size: 2}, []int{10, 11})
@@ -264,6 +276,7 @@ func test_dllm_runtime() int {
     failures = failures + sglang_expect(decoded.selected_count == 2 && decoded.selected_positions[0] == 3 && decoded.selected_positions[1] == 4, "DLLM deterministic random remask strategy")
     failures
 }
+
 func test_kv_canary() int {
     int failures = 0
     kv_canary_state state = new_kv_canary(kv_canary_config {capacity: 4, sample_interval: 1, failure_threshold: 2, perturbation_seed: 7})
@@ -276,6 +289,7 @@ func test_kv_canary() int {
     failures = failures + sglang_expect(state.statuses[0] == canary_healthy() && state.quarantined_pages == 0 && canary_inject_perturbation(state, 101, 3) != 1234, "KV Canary repair and perturbation probe")
     failures
 }
+
 func test_model_kernel_registry() int {
     int failures = 0
     model_kernel_registry_state state = new_model_kernel_registry(model_kernel_registry_config {capacity: 4, platform_mask: 1})
@@ -290,6 +304,7 @@ func test_model_kernel_registry() int {
     failures = failures + sglang_expect(!selected.supported, "kernel capability gate after disable")
     failures
 }
+
 func main() {
     int failures = 0
     failures = failures + test_cache_aware_routing()

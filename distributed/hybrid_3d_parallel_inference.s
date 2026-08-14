@@ -74,6 +74,7 @@ func NewHybrid3DParallelInference(config hybrid_3_d_config) *hybrid_3_d_parallel
     }
     return engine
 }
+
 func (h *hybrid_3_d_parallel_inference) GetRankInGroup(group_type string) int32 {
     if group_type == "tp" {
         return h.config.tp_rank
@@ -84,6 +85,7 @@ func (h *hybrid_3_d_parallel_inference) GetRankInGroup(group_type string) int32 
     }
     return 0
 }
+
 func (h *hybrid_3_d_parallel_inference) GetDataParallelGroup() []int32 {
     group := []int32{}
     for rank := int32(0); rank < h.config.world_size; rank++ {
@@ -94,6 +96,7 @@ func (h *hybrid_3_d_parallel_inference) GetDataParallelGroup() []int32 {
     }
     return group
 }
+
 func (h *hybrid_3_d_parallel_inference) GetTensorParallelGroup() []int32 {
     group := []int32{}
     for rank := int32(0); rank < h.config.world_size; rank++ {
@@ -104,6 +107,7 @@ func (h *hybrid_3_d_parallel_inference) GetTensorParallelGroup() []int32 {
     }
     return group
 }
+
 func (h *hybrid_3_d_parallel_inference) GetPipelineParallelGroup() []int32 {
     group := []int32{}
     for rank := int32(0); rank < h.config.world_size; rank++ {
@@ -114,6 +118,7 @@ func (h *hybrid_3_d_parallel_inference) GetPipelineParallelGroup() []int32 {
     }
     return group
 }
+
 func (h *hybrid_3_d_parallel_inference) Forward(
     input []float32,
     batch_size int32,
@@ -135,6 +140,7 @@ func (h *hybrid_3_d_parallel_inference) Forward(
     }
     return output
 }
+
 func (h *hybrid_3_d_parallel_inference) sliceHidden(
     tensor []float32,
     start int32,
@@ -147,6 +153,7 @@ func (h *hybrid_3_d_parallel_inference) sliceHidden(
     }
     return result
 }
+
 func (h *hybrid_3_d_parallel_inference) GetOptimalLayout(
     model_size_b int64,
     num_gpus int32,
@@ -175,6 +182,7 @@ func (h *hybrid_3_d_parallel_inference) GetOptimalLayout(
     }
     return tp_size, pp_size, dp_size
 }
+
 func (h *hybrid_3_d_parallel_inference) GetCommunicationCost(
     seq_len int32,
     hidden_size int32,
@@ -189,6 +197,7 @@ func (h *hybrid_3_d_parallel_inference) GetCommunicationCost(
     latency_us := int64(float32(total_bytes*8) / bandwidth_gbps / 1000.0)
     return latency_us
 }
+
 func (h *hybrid_3_d_parallel_inference) GetMemoryFootprint(
     model_size_b int64,
     batch_size int32,
@@ -204,12 +213,14 @@ func (h *hybrid_3_d_parallel_inference) GetMemoryFootprint(
     result["total"] = model_memory + activation_memory + kv_cache
     return result
 }
+
 func (h *hybrid_3_d_parallel_inference) GetSpeedup() float32 {
     tp_speedup := float32(h.config.tp_size) * 0.9
     pp_speedup := float32(h.config.pp_size) * 0.95
     overall := tp_speedup * pp_speedup
     return overall
 }
+
 func (h *hybrid_3_d_parallel_inference) GetStats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["tp_size"] = h.config.tp_size
@@ -226,6 +237,7 @@ func (h *hybrid_3_d_parallel_inference) GetStats() map[string]interface{} {
     stats["dp_group_size"] = len(h.GetDataParallelGroup())
     return stats
 }
+
 func main() {
     config := hybrid_3_d_config{
         tp_size:        2,

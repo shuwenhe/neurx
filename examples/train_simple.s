@@ -4,6 +4,7 @@ func rand_float() float {
     seed = (seed * 1103515245 + 12345) % 2147483648
     return float(seed % 10000) / 10000.0
 }
+
 func exp_approx(float x) float {
     if x > 50.0 {
         return 1e10
@@ -21,6 +22,7 @@ func exp_approx(float x) float {
     }
     return result
 }
+
 func sigmoid(float x) float {
     if x > 100.0 {
         return 1.0
@@ -30,6 +32,7 @@ func sigmoid(float x) float {
     }
     return 1.0 / (1.0 + exp_approx(-x))
 }
+
 func train_steps() float {
     float w = rand_float() - 0.5
     float b = 0.0
@@ -79,6 +82,7 @@ func train_steps() float {
     }
     return total_loss
 }
+
 func ln_approx(float x) float {
     if x <= 0.0 {
         return -100.0
@@ -100,6 +104,7 @@ func ln_approx(float x) float {
         return -ln_approx(inv)
     }
 }
+
 func main() {
     float loss = train_steps()
     if loss > 0.0 {
@@ -108,6 +113,7 @@ func main() {
         println("Training failed")
     }
 }
+
 func float_to_string(float f) string {
     int i_part = int(f)
     float frac_part = f - float(i_part)

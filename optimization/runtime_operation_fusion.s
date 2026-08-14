@@ -32,6 +32,7 @@ func NewRuntimeFusionOptimizer(config fused_operation_config) *runtime_fusion_op
     optimizer.registerDefaultFusionRules()
     return optimizer
 }
+
 func (rfo *runtime_fusion_optimizer) registerDefaultFusionRules() {
     rfo.addFusionRule("matmul", "activation", true, "matmul_activation")
     rfo.addFusionRule("matmul", "bias_activation", true, "matmul_bias_activation")
@@ -40,6 +41,7 @@ func (rfo *runtime_fusion_optimizer) registerDefaultFusionRules() {
     rfo.addFusionRule("dropout", "add", true, "dropout_add")
     rfo.addFusionRule("scale_softmax", "scale", true, "attention_softmax_scale")
 }
+
 func (rfo *runtime_fusion_optimizer) addFusionRule(
     producer string,
     consumer string,
@@ -54,6 +56,7 @@ func (rfo *runtime_fusion_optimizer) addFusionRule(
     }
     rfo.fusion_rules = append(rfo.fusion_rules, rule)
 }
+
 func (rfo *runtime_fusion_optimizer) QueueOperation(
     op_type string,
     input_shape []int32,
@@ -68,6 +71,7 @@ func (rfo *runtime_fusion_optimizer) QueueOperation(
     }
     rfo.operation_queue = append(rfo.operation_queue, sig)
 }
+
 func (rfo *runtime_fusion_optimizer) AnalyzeFusibility() [][]int32 {
     fusions := make([][]int32, 0)
     for i := int32(0); i < int32(len(rfo.operation_queue))-1; i++ {
@@ -86,6 +90,7 @@ func (rfo *runtime_fusion_optimizer) AnalyzeFusibility() [][]int32 {
     }
     return fusions
 }
+
 func (rfo *runtime_fusion_optimizer) shapesCompatible(
     output_shape []int32,
     input_shape []int32,
@@ -100,6 +105,7 @@ func (rfo *runtime_fusion_optimizer) shapesCompatible(
     }
     return true
 }
+
 func (rfo *runtime_fusion_optimizer) ExecuteFusedOperations() [][]float32 {
     results := make([][]float32, 0)
     fusions := rfo.AnalyzeFusibility()
@@ -138,6 +144,7 @@ func (rfo *runtime_fusion_optimizer) ExecuteFusedOperations() [][]float32 {
     }
     return results
 }
+
 func (rfo *runtime_fusion_optimizer) executeFusedKernel(
     kernel_name string,
     producer operation_signature,
@@ -179,6 +186,7 @@ func (rfo *runtime_fusion_optimizer) executeFusedKernel(
     }
     return output
 }
+
 func (rfo *runtime_fusion_optimizer) executeStandaloneOperation(
     op operation_signature,
 ) []float32 {
@@ -213,10 +221,12 @@ func (rfo *runtime_fusion_optimizer) executeStandaloneOperation(
     }
     return output
 }
+
 func (rfo *runtime_fusion_optimizer) GetFusionOpportunities() int32 {
     fusions := rfo.AnalyzeFusibility()
     return int32(len(fusions))
 }
+
 func (rfo *runtime_fusion_optimizer) GetEstimatedSpeedup() float32 {
     fusions := rfo.AnalyzeFusibility()
     num_ops := int32(len(rfo.operation_queue))
@@ -229,6 +239,7 @@ func (rfo *runtime_fusion_optimizer) GetEstimatedSpeedup() float32 {
     }
     return speedup
 }
+
 func (rfo *runtime_fusion_optimizer) GetFusionCoverage() float32 {
     fusions := rfo.AnalyzeFusibility()
     num_fused := int32(len(fusions)) * 2
@@ -241,9 +252,11 @@ func (rfo *runtime_fusion_optimizer) GetFusionCoverage() float32 {
     }
     return coverage
 }
+
 func (rfo *runtime_fusion_optimizer) Clear() {
     rfo.operation_queue = make([]operation_signature, 0)
 }
+
 func main() {
     config := fused_operation_config{
         enable_fusion:  true,

@@ -6,6 +6,7 @@ func test_null(string text) bool {
     }
     return false
 }
+
 func main() {
     eprintln("Test 1: Parse null")
     if test_null("null") {

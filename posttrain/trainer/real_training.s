@@ -24,6 +24,7 @@ struct training_config {
     float lora_alpha
     float lora_dropout
 }
+
 func default_training_config() training_config {
     training_config{
         model_path: "../model/base-model",
@@ -44,6 +45,7 @@ func default_training_config() training_config {
         lora_dropout: 0.05
     }
 }
+
 func run_real_training() int {
     eprintln("============================================================")
     eprintln("[Real Training Pipeline] Real Language Model 0.5B Training")
@@ -185,6 +187,7 @@ func run_real_training() int {
     eprintln("")
     0
 }
+
 func mean([]float arr) float {
     if len(arr) == 0 { return 0.0 }
     float sum = 0.0
@@ -195,6 +198,7 @@ func mean([]float arr) float {
     }
     sum / (len(arr) as float)
 }
+
 func int_to_str(int x) string {
     if x == 0 { return "0" }
     if x < 0 { return "-" + int_to_str(0 - x) }
@@ -216,6 +220,7 @@ func int_to_str(int x) string {
     }
     result
 }
+
 func float_to_str(float x, int precision) string {
     int integer_part = x as int
     float decimal_part = x - (integer_part as float)

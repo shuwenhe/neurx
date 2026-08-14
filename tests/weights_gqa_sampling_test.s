@@ -51,6 +51,7 @@ func approx(float a, float b, float tol) bool {
     if d < 0.0 { d = 0.0 - d }
     d < tol
 }
+
 func expect(bool cond, string name) int {
     if cond {
         println("PASS " + name)
@@ -59,6 +60,7 @@ func expect(bool cond, string name) int {
     println("FAIL " + name)
     1
 }
+
 func test_header_json_parse() int {
     string json = "{\"embedding.weight\":{\"dtype\":\"F32\",\"shape\":[100,8],\"data_offsets\":[0,3200]},\"lm_head.weight\":{\"dtype\":\"F32\",\"shape\":[8,100],\"data_offsets\":[3200,6400]}}"
     []tensor_meta tensors = parse_header_json(json)
@@ -75,6 +77,7 @@ func test_header_json_parse() int {
     }
     fail
 }
+
 func test_ints_to_float() int {
     int sign = 0
     int exp_bits = 127
@@ -90,6 +93,7 @@ func test_ints_to_float() int {
     fail = fail + expect(approx(z, 0.0, 1.0e-9), "all zero bits decode to 0.0")
     fail
 }
+
 func test_pow2() int {
     int fail = 0
     fail = fail + expect(approx(pow2(0), 1.0, 1.0e-9), "pow2(0)=1")
@@ -97,6 +101,7 @@ func test_pow2() int {
     fail = fail + expect(approx(pow2(-2), 0.25, 1.0e-9), "pow2(-2)=0.25")
     fail
 }
+
 func test_gqa_attention_matches_mqa() int {
     int block_size = 4
     int num_kv_heads = 1
@@ -144,6 +149,7 @@ func test_gqa_attention_matches_mqa() int {
     fail = fail + expect(approx(out_gqa[head_size], 0.2, 0.05), "gqa output at query 0 head 1 dim 0 shares same kv head")
     fail
 }
+
 func test_gqa_group_assignment() int {
     int num_heads = 8
     int num_kv_heads = 2
@@ -158,6 +164,7 @@ func test_gqa_group_assignment() int {
     }
     fail
 }
+
 func test_softmax_sums_to_one() int {
     []float logits = make([]float, 4)
     logits[0] = 1.0
@@ -176,6 +183,7 @@ func test_softmax_sums_to_one() int {
     fail = fail + expect(probs[2] > probs[1] && probs[1] > probs[0], "softmax monotone with logits")
     fail
 }
+
 func test_temperature_scaling() int {
     []float logits = make([]float, 3)
     logits[0] = 1.0
@@ -188,6 +196,7 @@ func test_temperature_scaling() int {
     fail = fail + expect(approx(scaled[2], 6.0, 1.0e-6), "temp 0.5 scales logit 3.0 to 6.0")
     fail
 }
+
 func test_top_k_filter_keeps_top() int {
     []float logits = make([]float, 5)
     logits[0] = 1.0
@@ -202,6 +211,7 @@ func test_top_k_filter_keeps_top() int {
     fail = fail + expect(filtered[0] < -1.0e29, "top_k zeroes out index 0")
     fail
 }
+
 func test_top_p_filter_nucleus() int {
     []float logits = make([]float, 4)
     logits[0] = 0.0
@@ -214,6 +224,7 @@ func test_top_p_filter_nucleus() int {
     fail = fail + expect(filtered[3] < -1.0e29, "top_p filters out index 3 (low prob)")
     fail
 }
+
 func test_argmax() int {
     []float arr = make([]float, 4)
     arr[0] = 1.0
@@ -225,6 +236,7 @@ func test_argmax() int {
     fail = fail + expect(idx == 1, "argmax picks index 1 with value 5.0")
     fail
 }
+
 func test_greedy_sample() int {
     []float logits = make([]float, 4)
     logits[0] = 1.0
@@ -236,6 +248,7 @@ func test_greedy_sample() int {
     fail = fail + expect(idx == 1, "greedy_sample picks argmax index 1")
     fail
 }
+
 func test_sample_deterministic_with_seed() int {
     []float logits = make([]float, 4)
     logits[0] = 1.0
@@ -251,6 +264,7 @@ func test_sample_deterministic_with_seed() int {
     fail = fail + expect(tok1 == tok2, "same seed produces same token")
     fail
 }
+
 func test_rng_float_range() int {
     rng_state rng = new_rng(123)
     int fail = 0
@@ -266,6 +280,7 @@ func test_rng_float_range() int {
     }
     fail
 }
+
 func test_engine_greedy_vs_sampling() int {
     generation_engine engine = new_generation_engine(1)
     generation_result greedy = generate_greedy(engine, "hello", 4)
@@ -277,6 +292,7 @@ func test_engine_greedy_vs_sampling() int {
     fail = fail + expect(sampled.num_generated > 0, "sampling generates tokens")
     fail
 }
+
 func test_engine_weights_load_missing_file() int {
     generation_engine engine = new_generation_engine(1)
     bool ok = load_weights_from_safetensors(engine, "/nonexistent/path/model.safetensors")
@@ -284,6 +300,7 @@ func test_engine_weights_load_missing_file() int {
     fail = fail + expect(!ok, "missing safetensors file returns false")
     fail
 }
+
 func test_math_exp() int {
     int fail = 0
     fail = fail + expect(approx(math_exp(0.0), 1.0, 1.0e-4), "exp(0)=1")
@@ -291,6 +308,7 @@ func test_math_exp() int {
     fail = fail + expect(approx(math_exp(-2.0), 0.1353352, 1.0e-4), "exp(-2)=0.1353")
     fail
 }
+
 func main() {
     int fail = 0
     fail = fail + test_header_json_parse()

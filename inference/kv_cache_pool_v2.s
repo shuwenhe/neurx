@@ -66,6 +66,7 @@ func NewKVCachePoolV2(config kv_cache_config) *kv_cache_pool_v2 {
     }
     return pool
 }
+
 func (p *kv_cache_pool_v2) Allocate(request_id int64, num_tokens int32) *kv_allocation {
     blocks_needed := (num_tokens + p.config.block_size - 1) / p.config.block_size
     if int32(len(p.free_blocks)) < blocks_needed {
@@ -95,6 +96,7 @@ func (p *kv_cache_pool_v2) Allocate(request_id int64, num_tokens int32) *kv_allo
     p.total_free = p.total_free - int32(len(allocation.block_table))
     return allocation
 }
+
 func (p *kv_cache_pool_v2) SharePrefix(source_id int64, target_id int64, prefix_tokens int32) bool {
     source_alloc, exists := p.request_allocations[source_id]
     if !exists {
@@ -153,6 +155,7 @@ func (p *kv_cache_pool_v2) SharePrefix(source_id int64, target_id int64, prefix_
     }
     return true
 }
+
 func (p *kv_cache_pool_v2) Release(request_id int64) {
     alloc, exists := p.request_allocations[request_id]
     if !exists {
@@ -178,20 +181,25 @@ func (p *kv_cache_pool_v2) Release(request_id int64) {
     p.total_allocated = p.total_allocated - int32(len(alloc.block_table))
     p.total_free = p.total_free + int32(len(alloc.block_table))
 }
+
 func (p *kv_cache_pool_v2) GetAllocation(request_id int64) *kv_allocation {
     return p.request_allocations[request_id]
 }
+
 func (p *kv_cache_pool_v2) GetFreeBlocks() int {
     return len(p.free_blocks)
 }
+
 func (p *kv_cache_pool_v2) GetUsedBlocks() int {
     return p.config.num_blocks - len(p.free_blocks)
 }
+
 func (p *kv_cache_pool_v2) GetMemoryUsage() int64 {
     block_size_bytes := p.config.block_size * p.config.hidden_size * 2 * 4
     used := p.config.num_blocks - len(p.free_blocks)
     return int64(used) * int64(block_size_bytes)
 }
+
 func (p *kv_cache_pool_v2) evictLRU() {
     if len(p.free_blocks) > 0 {
         return
@@ -216,6 +224,7 @@ func (p *kv_cache_pool_v2) evictLRU() {
         }
     }
 }
+
 func (p *kv_cache_pool_v2) GetStats() map[string]int64 {
     stats := make(map[string]int64)
     stats["total_blocks"] = int64(p.config.num_blocks)
@@ -225,6 +234,7 @@ func (p *kv_cache_pool_v2) GetStats() map[string]int64 {
     stats["evictions"] = p.eviction_count
     return stats
 }
+
 func main() {
     config := kv_cache_config{
         num_blocks:      256,

@@ -23,6 +23,7 @@ struct production_api_config {
     int max_queued_requests
     bool allow_health_without_auth
 }
+
 struct production_api_request {
     string method
     string path
@@ -30,24 +31,28 @@ struct production_api_request {
     string body
     string request_id
 }
+
 struct production_api_response {
     int status_code
     string content_type
     string body
     bool streaming
 }
+
 struct api_admission_state {
     int inflight_requests
     int queued_requests
     int accepted_total
     int rejected_total
 }
+
 struct production_api_result {
     api_admission_state admission
     openai_request request
     production_api_response response
     bool accepted
 }
+
 func default_production_api_config(string served_model) production_api_config {
     production_api_config config
     config.served_model = served_model
@@ -59,6 +64,7 @@ func default_production_api_config(string served_model) production_api_config {
     config.allow_health_without_auth = true
     config
 }
+
 func new_api_admission_state() api_admission_state {
     api_admission_state state
     state.inflight_requests = 0
@@ -67,6 +73,7 @@ func new_api_admission_state() api_admission_state {
     state.rejected_total = 0
     state
 }
+
 func api_empty_openai_request() openai_request {
     openai_request request
     request.request_id = ""
@@ -83,6 +90,7 @@ func api_empty_openai_request() openai_request {
     request.user = ""
     request
 }
+
 func api_response(int status_code, string content_type, string body, bool streaming) production_api_response {
     production_api_response response
     response.status_code = status_code
@@ -91,9 +99,11 @@ func api_response(int status_code, string content_type, string body, bool stream
     response.streaming = streaming
     response
 }
+
 func api_error(int status_code, string message, string code) production_api_response {
     api_response(status_code, "application/json", neurx.inference.api.openai_protocol.openai_error_body(message, "invalid_request_error", code), false)
 }
+
 func api_new_result(api_admission_state admission, openai_request request, production_api_response response, bool accepted) production_api_result {
     production_api_result result
     result.admission = admission
@@ -102,9 +112,11 @@ func api_new_result(api_admission_state admission, openai_request request, produ
     result.accepted = accepted
     result
 }
+
 func production_api_config_valid(production_api_config config) bool {
     config.served_model != "" && config.max_body_bytes > 0 && config.max_tokens > 0 && config.max_inflight_requests > 0 && config.max_queued_requests >= 0
 }
+
 func api_route_kind(string path) int {
     if path == "/health" || path == "/healthz" { return api_route_health() }
     if path == "/v1/models" { return api_route_models() }
@@ -114,21 +126,26 @@ func api_route_kind(string path) int {
     if path == "/metrics" { return api_route_metrics() }
     api_route_unknown()
 }
+
 func api_authorized(production_api_config config, production_api_request request, int route) bool {
     if route == api_route_health() && config.allow_health_without_auth { return true }
     if config.api_key == "" { return true }
     request.authorization == "Bearer " + config.api_key
 }
+
 func api_models_body(production_api_config config) string {
     "{\"object\":\"list\",\"data\":[{\"id\":\"" + neurx.inference.api.openai_protocol.openai_json_escape(config.served_model) + "\",\"object\":\"model\",\"owned_by\":\"neurx\"}]}"
 }
+
 func api_health_body(production_api_config config) string {
     "{\"status\":\"ok\",\"model\":\"" + neurx.inference.api.openai_protocol.openai_json_escape(config.served_model) + "\"}"
 }
+
 func api_reject(api_admission_state state, int status_code, string message, string code) production_api_result {
     state.rejected_total = state.rejected_total + 1
     api_new_result(state, api_empty_openai_request(), api_error(status_code, message, code), false)
 }
+
 func api_admit(production_api_config config, api_admission_state state, production_api_request incoming) production_api_result {
     if !production_api_config_valid(config) {
         return api_reject(state, 503, "API configuration is invalid", "service_unavailable")
@@ -180,6 +197,7 @@ func api_admit(production_api_config config, api_admission_state state, producti
     state.accepted_total = state.accepted_total + 1
     api_new_result(state, parsed.request, api_response(202, "application/json", "", parsed.request.stream), true)
 }
+
 func api_finish(api_admission_state state) api_admission_state {
     if state.inflight_requests > 0 {
         state.inflight_requests = state.inflight_requests - 1
@@ -190,6 +208,7 @@ func api_finish(api_admission_state state) api_admission_state {
     }
     state
 }
+
 func api_chat_completion_body(openai_request request, string generated_text, string finish_reason, int prompt_tokens, int completion_tokens) string {
     string escaped_id = neurx.inference.api.openai_protocol.openai_json_escape(request.request_id)
     string escaped_model = neurx.inference.api.openai_protocol.openai_json_escape(request.model)
@@ -197,6 +216,7 @@ func api_chat_completion_body(openai_request request, string generated_text, str
     string escaped_finish = neurx.inference.api.openai_protocol.openai_json_escape(finish_reason)
     "{\"id\":\"" + escaped_id + "\",\"object\":\"chat.completion\",\"model\":\"" + escaped_model + "\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"" + escaped_text + "\"},\"finish_reason\":\"" + escaped_finish + "\"}],\"usage\":{\"prompt_tokens\":" + neurx.inference.api.openai_protocol.int_to_str(prompt_tokens) + ",\"completion_tokens\":" + neurx.inference.api.openai_protocol.int_to_str(completion_tokens) + ",\"total_tokens\":" + neurx.inference.api.openai_protocol.int_to_str(prompt_tokens + completion_tokens) + "}}"
 }
+
 func api_complete(openai_request request, string generated_text, string finish_reason, int prompt_tokens, int completion_tokens) production_api_response {
     if request.stream {
         string body = neurx.inference.api.openai_protocol.openai_chat_chunk(request.request_id, request.model, generated_text, finish_reason)
@@ -206,6 +226,7 @@ func api_complete(openai_request request, string generated_text, string finish_r
     string completion_body = api_chat_completion_body(request, generated_text, finish_reason, prompt_tokens, completion_tokens)
     api_response(200, "application/json", completion_body, false)
 }
+
 func api_contract_valid() bool {
     api_route_kind("/v1/chat/completions") == api_route_chat() && api_route_kind("/v1/models") == api_route_models() && api_route_kind("/missing") == api_route_unknown()
 }

@@ -14,6 +14,7 @@ struct drgrpo_config {
     bool use_adaptive_kl
     float target_kl
 }
+
 struct drgrpo_state {
     tensor policy_logits
     tensor log_probs
@@ -27,6 +28,7 @@ struct drgrpo_state {
     float total_loss
     float avg_group_reward
 }
+
 func new_drgrpo_config() drgrpo_config {
     drgrpo_config {
         learning_rate: 1e-5,
@@ -42,6 +44,7 @@ func new_drgrpo_config() drgrpo_config {
         target_kl: 0.01,
     }
 }
+
 func drgrpo_compute_group_baselines(
     []tensor rewards,
     int group_size
@@ -66,6 +69,7 @@ func drgrpo_compute_group_baselines(
     }
     baselines
 }
+
 func drgrpo_compute_divergence(
     tensor log_probs,
     tensor old_log_probs,
@@ -93,6 +97,7 @@ func drgrpo_compute_divergence(
     }
     tensor_ops.concat(divergences, 0)
 }
+
 func drgrpo_step(
     module policy,
     module reference_policy,

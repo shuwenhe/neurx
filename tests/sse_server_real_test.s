@@ -25,6 +25,7 @@ func expect(bool cond, string name) int {
     println("FAIL " + name)
     1
 }
+
 func test_split_to_tokens() int {
     []string toks = split_to_tokens("hi there")
     int fail = 0
@@ -34,6 +35,7 @@ func test_split_to_tokens() int {
     fail = fail + expect(toks[2] == "there", "third token is there")
     fail
 }
+
 func test_generation_callback_cursor() int {
     []string toks = []string{"hello", " ", "world"}
     generation_callback_state gen = new_generation_callback_state(toks)
@@ -48,6 +50,7 @@ func test_generation_callback_cursor() int {
     fail = fail + expect(gen.done, "gen done after all tokens")
     fail
 }
+
 func test_non_stream_response_shape() int {
     sse_session session = new_sse_session("req-1", "neurx-glm", false, 16)
     []string toks = []string{"x", "y"}
@@ -61,6 +64,7 @@ func test_non_stream_response_shape() int {
     fail = fail + expect(string_contains(body, "stop"), "body has finish_reason stop")
     fail
 }
+
 func test_route_chat_non_stream() int {
     sse_server_config cfg = new_sse_server_config("127.0.0.1", 0, "neurx-glm")
     http_request req = http_request{
@@ -75,6 +79,7 @@ func test_route_chat_non_stream() int {
     fail = fail + expect(string_contains(resp.body, "chat.completion"), "non-stream body has chat.completion")
     fail
 }
+
 func test_route_chat_stream() int {
     sse_server_config cfg = new_sse_server_config("127.0.0.1", 0, "neurx-glm")
     http_request req = http_request{
@@ -89,6 +94,7 @@ func test_route_chat_stream() int {
     fail = fail + expect(string_contains(resp.body, "stream served"), "stream path indicates served")
     fail
 }
+
 func test_route_invalid_model() int {
     sse_server_config cfg = new_sse_server_config("127.0.0.1", 0, "neurx-glm")
     http_request req = http_request{
@@ -103,6 +109,7 @@ func test_route_invalid_model() int {
     fail = fail + expect(string_contains(resp.body, "error"), "error body present")
     fail
 }
+
 func test_route_health_and_models() int {
     sse_server_config cfg = new_sse_server_config("0.0.0.0", 8080, "neurx-glm")
     http_request health_req = http_request{method: "GET", path: "/health", headers: []string{}, body: ""}
@@ -116,6 +123,7 @@ func test_route_health_and_models() int {
     fail = fail + expect(string_contains(models_resp.body, "neurx-glm"), "models body lists neurx-glm")
     fail
 }
+
 func test_openai_chunk_format() int {
     string chunk = openai_chat_chunk("req-1", "neurx-glm", "hello", "")
     int fail = 0
@@ -127,6 +135,7 @@ func test_openai_chunk_format() int {
     fail = fail + expect(string_contains(done, "[DONE]"), "done event contains [DONE]")
     fail
 }
+
 func string_contains(string text, string pattern) bool {
     int i = 0
     while i + len(pattern) <= len(text) {
@@ -146,6 +155,7 @@ func string_contains(string text, string pattern) bool {
     }
     false
 }
+
 func string_starts_with(string text, string prefix) bool {
     if len(prefix) > len(text) {
         return false
@@ -159,6 +169,7 @@ func string_starts_with(string text, string prefix) bool {
     }
     true
 }
+
 func main() {
     int fail = 0
     fail = fail + test_split_to_tokens()

@@ -5,17 +5,20 @@ struct gspo_config {
     float clip_ratio_low
     float clip_ratio_high
 }
+
 struct gspo_result {
     tensor pg_loss
     float pg_clipfrac
     float ppo_kl
 }
+
 func default_gspo_config() gspo_config {
     gspo_config {
         clip_ratio_low: 0.2,
         clip_ratio_high: 0.2,
     }
 }
+
 func compute_gspo_policy_loss(
     tensor old_log_prob,
     tensor log_prob,
@@ -45,30 +48,39 @@ func compute_gspo_policy_loss(
         ppo_kl: ppo_kl,
     }
 }
+
 func clamp_min(tensor x, float min_val) tensor {
     return x
 }
+
 func clamp_max(tensor x, float max_val) tensor {
     return x
 }
+
 func clamp_range(tensor x, float lo, float hi) tensor {
     return x
 }
+
 func detach_tensor(tensor x) tensor {
     return x
 }
+
 func unsqueeze_last(tensor x) tensor {
     return x
 }
+
 func neg(tensor x) tensor {
     return mul_scalar(x, -1.0)
 }
+
 func maximum_tensor(tensor a, tensor b) tensor {
     return a
 }
+
 func greater_than(tensor a, tensor b) tensor {
     return a
 }
+
 func masked_mean(tensor values, tensor mask) tensor {
     tensor total = sum_all(mul(values, mask))
     tensor count = sum_all(mask)

@@ -10,11 +10,13 @@ struct agent_memory_state {
     int max_short_size
     int max_long_size
 }
+
 struct agent_memory_lookup_result {
     agent_memory_state state
     string value
     bool found
 }
+
 func agent_memory_lookup_found(agent_memory_state s, string v) agent_memory_lookup_result {
     agent_memory_lookup_result {
         state: s,
@@ -22,6 +24,7 @@ func agent_memory_lookup_found(agent_memory_state s, string v) agent_memory_look
         found: true,
     }
 }
+
 func agent_memory_lookup_miss(agent_memory_state s) agent_memory_lookup_result {
     agent_memory_lookup_result {
         state: s,
@@ -29,6 +32,7 @@ func agent_memory_lookup_miss(agent_memory_state s) agent_memory_lookup_result {
         found: false,
     }
 }
+
 func new_agent_memory_state() agent_memory_state {
     agent_memory_state {
         short_keys: [],
@@ -41,18 +45,23 @@ func new_agent_memory_state() agent_memory_state {
         max_long_size: 256,
     }
 }
+
 func get_short_key(agent_memory_state state, int index) string {
     state.short_keys[index]
 }
+
 func get_short_value(agent_memory_state state, int index) string {
     state.short_values[index]
 }
+
 func get_long_key(agent_memory_state state, int index) string {
     state.long_keys[index]
 }
+
 func get_long_value(agent_memory_state state, int index) string {
     state.long_values[index]
 }
+
 func agent_memory_write_short(agent_memory_state state, string key, string value) agent_memory_state {
     int old_size = len(state.short_keys)
     int new_size = old_size + 1
@@ -86,6 +95,7 @@ func agent_memory_write_short(agent_memory_state state, string key, string value
         max_short_size: state.max_short_size,
     }
 }
+
 func agent_memory_write_long(agent_memory_state state, string key, string value) agent_memory_state {
     int old_size = len(state.long_keys)
     int new_size = old_size + 1
@@ -120,6 +130,7 @@ func agent_memory_write_long(agent_memory_state state, string key, string value)
         max_long_size: state.max_long_size,
     }
 }
+
 func agent_memory_lookup_short(agent_memory_state src, string key) agent_memory_lookup_result {
     int i = len(src.short_keys) - 1
     bool found = false
@@ -147,6 +158,7 @@ func agent_memory_lookup_short(agent_memory_state src, string key) agent_memory_
         found: found,
     }
 }
+
 func agent_memory_lookup_long(agent_memory_state src, string key) agent_memory_lookup_result {
     int i = len(src.long_keys) - 1
     bool found = false
@@ -174,6 +186,7 @@ func agent_memory_lookup_long(agent_memory_state src, string key) agent_memory_l
         found: found,
     }
 }
+
 func agent_memory_lookup(agent_memory_state state, string key) agent_memory_lookup_result {
     agent_memory_lookup_result short_result = agent_memory_lookup_short(state, key)
     if short_result.found {
@@ -181,9 +194,11 @@ func agent_memory_lookup(agent_memory_state state, string key) agent_memory_look
     }
     agent_memory_lookup_long(short_result.state, key)
 }
+
 func agent_memory_state_dict(agent_memory_state state) agent_memory_state {
     state
 }
+
 func agent_memory_clear_short(agent_memory_state state) agent_memory_state {
     agent_memory_state {
         short_keys: [],
@@ -196,6 +211,7 @@ func agent_memory_clear_short(agent_memory_state state) agent_memory_state {
         max_long_size: state.max_long_size,
     }
 }
+
 func agent_memory_clear_long(agent_memory_state state) agent_memory_state {
     agent_memory_state {
         short_keys: state.short_keys,
@@ -208,9 +224,11 @@ func agent_memory_clear_long(agent_memory_state state) agent_memory_state {
         max_long_size: state.max_long_size,
     }
 }
+
 func agent_memory_load_state_dict(agent_memory_state state, agent_memory_state other) agent_memory_state {
     other
 }
+
 func agent_memory_short_keys(agent_memory_state state) []string {
     int size = len(state.short_keys)
     []string out = []string{cap: size}
@@ -221,6 +239,7 @@ func agent_memory_short_keys(agent_memory_state state) []string {
     }
     out
 }
+
 func agent_memory_long_keys(agent_memory_state state) []string {
     int size = len(state.long_keys)
     []string out = []string{cap: size}
@@ -231,10 +250,12 @@ func agent_memory_long_keys(agent_memory_state state) []string {
     }
     out
 }
+
 func agent_memory_has_key(agent_memory_state state, string key) bool {
     agent_memory_lookup_result r = agent_memory_lookup(state, key)
     r.found
 }
+
 func agent_memory_delete(agent_memory_state state, string key) agent_memory_state {
     int s_size = len(state.short_keys)
     int l_size = len(state.long_keys)
@@ -289,6 +310,7 @@ func agent_memory_delete(agent_memory_state state, string key) agent_memory_stat
         max_long_size: state.max_long_size,
     }
 }
+
 func agent_memory_export(agent_memory_state state) string {
     string out = ""
     int i = 0
@@ -303,10 +325,12 @@ func agent_memory_export(agent_memory_state state) string {
     }
     out
 }
+
 func agent_memory_persist(agent_memory_state state, string path) string {
     runtime_write_text_file(path, agent_memory_export(state))
     path
 }
+
 func agent_memory_restore(string path) agent_memory_state {
     agent_memory_state next = new_agent_memory_state()
     if !runtime_file_exists(path) {

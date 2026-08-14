@@ -15,18 +15,21 @@ struct inode {
     int    ref_count
     string backend
 }
+
 struct dentry {
     int    dino
     string name
     int    ino
     int    parent_dino
 }
+
 struct vfs_state {
     []inode  inodes
     []dentry dentries
     int      next_ino
     int      next_dino
 }
+
 func new_vfs() vfs_state {
     return vfs_state{
         inodes:    [],
@@ -35,6 +38,7 @@ func new_vfs() vfs_state {
         next_dino: 1,
     }
 }
+
 func vfs_create(vfs vfs_state, string path, int inode_type, int size_bytes, string backend) (vfs_state, int) {
     inode n = inode{
         ino:        vfs.next_ino,
@@ -51,6 +55,7 @@ func vfs_create(vfs vfs_state, string path, int inode_type, int size_bytes, stri
     vfs.next_ino = vfs.next_ino + 1
     return (vfs, ino)
 }
+
 func vfs_lookup(vfs vfs_state, string path) (inode, bool) {
     int i = 0
     while i < len(vfs.inodes) {
@@ -61,6 +66,7 @@ func vfs_lookup(vfs vfs_state, string path) (inode, bool) {
     }
     return (inode{}, false)
 }
+
 func vfs_open(vfs vfs_state, int ino) vfs_state {
     int i = 0
     while i < len(vfs.inodes) {
@@ -71,6 +77,7 @@ func vfs_open(vfs vfs_state, int ino) vfs_state {
     }
     return vfs
 }
+
 func vfs_close(vfs vfs_state, int ino) vfs_state {
     int i = 0
     while i < len(vfs.inodes) {

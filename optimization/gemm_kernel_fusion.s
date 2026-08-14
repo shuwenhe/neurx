@@ -31,9 +31,11 @@ func NewFusedGEMMKernel(config gemm_config) *fused_gemm_kernel {
         fused_output: make([]float32, 0),
     }
 }
+
 func (fk *fused_gemm_kernel) AddGEMM(gemm gemm_operation) {
     fk.gemms = append(fk.gemms, gemm)
 }
+
 func (fk *fused_gemm_kernel) ExecuteFused() [][]float32 {
     results := make([][]float32, 0)
     if !fk.config.enable_fusion {
@@ -52,6 +54,7 @@ func (fk *fused_gemm_kernel) ExecuteFused() [][]float32 {
     }
     return results
 }
+
 func (fk *fused_gemm_kernel) executeBasicGEMM(gemm gemm_operation) []float32 {
     m := fk.config.m
     n := fk.config.n
@@ -73,6 +76,7 @@ func (fk *fused_gemm_kernel) executeBasicGEMM(gemm gemm_operation) []float32 {
     }
     return c
 }
+
 func (fk *fused_gemm_kernel) executeOptimizedGEMM(gemm gemm_operation) []float32 {
     m := fk.config.m
     n := fk.config.n
@@ -115,6 +119,7 @@ func (fk *fused_gemm_kernel) executeOptimizedGEMM(gemm gemm_operation) []float32
     }
     return c
 }
+
 func (fk *fused_gemm_kernel) FuseGEMMAndActivation(
     gemm gemm_operation,
     activation_type string,
@@ -128,6 +133,7 @@ func (fk *fused_gemm_kernel) FuseGEMMAndActivation(
     }
     return c
 }
+
 func (fk *fused_gemm_kernel) FuseGEMMAndNormalization(
     gemm gemm_operation,
     eps float32,
@@ -154,6 +160,7 @@ func (fk *fused_gemm_kernel) FuseGEMMAndNormalization(
     }
     return c
 }
+
 func (fk *fused_gemm_kernel) FuseMultipleGEMMs(
     gemm1 gemm_operation,
     gemm2 gemm_operation,
@@ -164,6 +171,7 @@ func (fk *fused_gemm_kernel) FuseMultipleGEMMs(
     result := fk.executeOptimizedGEMM(gemm2_fused)
     return result
 }
+
 func (fk *fused_gemm_kernel) applyActivation(x float32, act_type string) float32 {
     switch act_type {
     case "relu":
@@ -181,6 +189,7 @@ func (fk *fused_gemm_kernel) applyActivation(x float32, act_type string) float32
         return x
     }
 }
+
 func (fk *fused_gemm_kernel) GetComputationSaving() float32 {
     num_gemms := float32(fk.config.num_gemms)
     if num_gemms <= 1 {
@@ -191,6 +200,7 @@ func (fk *fused_gemm_kernel) GetComputationSaving() float32 {
     speedup := 1.0 + overhead_saving + cache_saving
     return speedup
 }
+
 func (fk *fused_gemm_kernel) BenchmarkGEMM(
     gemm gemm_operation,
     num_iterations int32,
@@ -213,6 +223,7 @@ func (fk *fused_gemm_kernel) BenchmarkGEMM(
     stats["total_time_ms"] = float32(num_iterations) * time_per_iter * 1000.0
     return stats
 }
+
 func main() {
     config := gemm_config{
         m:              512,

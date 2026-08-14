@@ -11,15 +11,18 @@ struct batch_request {
     float top_p
     int top_k
 }
+
 struct prefill_batch {
     []int request_ids
     int total_tokens
     int num_requests
 }
+
 struct decode_batch {
     []int request_ids
     int num_requests
 }
+
 struct continuous_batch_scheduler {
     []batch_request requests
     prefill_batch prefill_batch
@@ -33,6 +36,7 @@ struct continuous_batch_scheduler {
     float average_acceptance_rate
     int total_tokens_generated
 }
+
 func new_continuous_batch_scheduler(int batch_capacity) continuous_batch_scheduler {
     []batch_request requests = make([]batch_request, 0)
     prefill_batch prefill = prefill_batch {
@@ -58,6 +62,7 @@ func new_continuous_batch_scheduler(int batch_capacity) continuous_batch_schedul
         total_tokens_generated: 0,
     }
 }
+
 func add_request(
     continuous_batch_scheduler sched,
     int request_id,
@@ -84,6 +89,7 @@ func add_request(
     sched.total_prefill_tokens = sched.total_prefill_tokens + len(input_ids)
     sched
 }
+
 func schedule_batch(
     continuous_batch_scheduler sched
 ) continuous_batch_scheduler {
@@ -137,6 +143,7 @@ func schedule_batch(
     sched.scheduling_round = sched.scheduling_round + 1
     sched
 }
+
 func record_decode_step(
     continuous_batch_scheduler sched,
     int request_id,
@@ -158,6 +165,7 @@ func record_decode_step(
     }
     sched
 }
+
 func finish_request(
     continuous_batch_scheduler sched,
     int request_id
@@ -172,6 +180,7 @@ func finish_request(
     }
     sched
 }
+
 func get_request(
     continuous_batch_scheduler sched,
     int request_id
@@ -197,6 +206,7 @@ func get_request(
     }
     empty
 }
+
 func get_scheduler_stats(continuous_batch_scheduler sched) string {
     prefill_requests := sched.prefill_batch.num_requests
     decode_requests := sched.decode_batch.num_requests
@@ -225,16 +235,19 @@ func get_scheduler_stats(continuous_batch_scheduler sched) string {
     "Finished Requests: " + string(finished_count) + "\n" +
     "Average Acceptance Rate: " + string(sched.average_acceptance_rate * 100) + "%"
 }
+
 func get_prefill_batch(
     continuous_batch_scheduler sched
 ) prefill_batch {
     sched.prefill_batch
 }
+
 func get_decode_batch(
     continuous_batch_scheduler sched
 ) decode_batch {
     sched.decode_batch
 }
+
 func reset_scheduler(continuous_batch_scheduler sched) continuous_batch_scheduler {
     continuous_batch_scheduler {
         requests: make([]batch_request, 0),
@@ -257,5 +270,6 @@ func reset_scheduler(continuous_batch_scheduler sched) continuous_batch_schedule
         total_tokens_generated: 0,
     }
 }
+
 func main() {
 }
