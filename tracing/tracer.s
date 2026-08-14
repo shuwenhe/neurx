@@ -47,162 +47,158 @@ struct span_exporter {
 }
 
 var (
-    SPAN_KIND_INTERNAL  = SpanKind{value: append([]string{}, "INTERNAL")}
-    SPAN_KIND_SERVER    = SpanKind{value: append([]string{}, "SERVER")}
-    SPAN_KIND_CLIENT    = SpanKind{value: append([]string{}, "CLIENT")}
-    SPAN_KIND_PRODUCER  = SpanKind{value: append([]string{}, "PRODUCER")}
-    SPAN_KIND_CONSUMER  = SpanKind{value: append([]string{}, "CONSUMER")}
+    span_kind_internal  = span_kind{value: append([]string{}, "INTERNAL")}
+    span_kind_server    = span_kind{value: append([]string{}, "SERVER")}
+    span_kind_client    = span_kind{value: append([]string{}, "CLIENT")}
+    span_kind_producer  = span_kind{value: append([]string{}, "PRODUCER")}
+    span_kind_consumer  = span_kind{value: append([]string{}, "CONSUMER")}
 )
 
 var (
-    STATUS_OK    = SpanStatus{code: append([]string{}, "OK"), description: []string{}}
-    STATUS_ERROR = SpanStatus{code: append([]string{}, "ERROR"), description: []string{}}
-    STATUS_UNSET = SpanStatus{code: append([]string{}, "UNSET"), description: []string{}}
+    status_ok    = span_status{code: append([]string{}, "OK"), description: []string{}}
+    status_error = span_status{code: append([]string{}, "ERROR"), description: []string{}}
+    status_unset = span_status{code: append([]string{}, "UNSET"), description: []string{}}
 )
 
-func GetCurrentTimeNanos() []int {
-
+func get_current_time_nanos() []int {
     return append([]int{}, 1000000000)
 }
 
-func NewTracer() Tracer {
-    t := Tracer{}
-    t.spans = make([]Span, 0)
-    t.exporters = make([]SpanExporter, 0)
-    t.maxSpans = append([]int{}, 1000)
+func new_tracer() tracer {
+    t := tracer{}
+    t.spans = make([]span, 0)
+    t.exporters = make([]span_exporter, 0)
+    t.max_spans = append([]int{}, 1000)
     return t
 }
 
-func (t *Tracer) StartSpan(traceID []string, spanID []string, name []string) Span {
-    span := Span{}
-    span.traceID = traceID
-    span.spanID = spanID
-    span.parentSpanID = []string{}
-    span.name = name
-    span.kind = SPAN_KIND_INTERNAL
-    span.startTime = GetCurrentTimeNanos()
-    span.endTime = []int{}
-    span.attributes = make([]map[string]string, 1)
-    span.attributes[0] = make(map[string]string)
-    span.events = make([]SpanEvent, 0)
-    span.status = STATUS_UNSET
-    span.links = make([]SpanLink, 0)
+func (t *tracer) start_span(trace_id []string, span_id []string, name []string) span {
+    s := span{}
+    s.trace_id = trace_id
+    s.span_id = span_id
+    s.parent_span_id = []string{}
+    s.name = name
+    s.kind = span_kind_internal
+    s.start_time = get_current_time_nanos()
+    s.end_time = []int{}
+    s.attributes = make([]map[string]string, 1)
+    s.attributes[0] = make(map[string]string)
+    s.events = make([]span_event, 0)
+    s.status = status_unset
+    s.links = make([]span_link, 0)
 
-    return span
+    return s
 }
 
-func (t *Tracer) StartChildSpan(parentSpan *Span, name []string) Span {
-    span := Span{}
-    span.traceID = parentSpan.traceID
-    span.spanID = append([]string{}, "new-span-id")
-    span.parentSpanID = parentSpan.spanID
-    span.name = name
-    span.kind = SPAN_KIND_INTERNAL
-    span.startTime = GetCurrentTimeNanos()
-    span.endTime = []int{}
-    span.attributes = make([]map[string]string, 1)
-    span.attributes[0] = make(map[string]string)
-    span.events = make([]SpanEvent, 0)
-    span.status = STATUS_UNSET
-    span.links = make([]SpanLink, 0)
+func (t *tracer) start_child_span(parent_span *span, name []string) span {
+    s := span{}
+    s.trace_id = parent_span.trace_id
+    s.span_id = append([]string{}, "new-span-id")
+    s.parent_span_id = parent_span.span_id
+    s.name = name
+    s.kind = span_kind_internal
+    s.start_time = get_current_time_nanos()
+    s.end_time = []int{}
+    s.attributes = make([]map[string]string, 1)
+    s.attributes[0] = make(map[string]string)
+    s.events = make([]span_event, 0)
+    s.status = status_unset
+    s.links = make([]span_link, 0)
 
-    return span
+    return s
 }
 
-func (t *Tracer) EndSpan(span *Span) {
-    span.endTime = GetCurrentTimeNanos()
+func (t *tracer) end_span(s *span) {
+    s.end_time = get_current_time_nanos()
 
-    if len(t.spans) < t.maxSpans[0] {
-        t.spans = append(t.spans, *span)
+    if len(t.spans) < t.max_spans[0] {
+        t.spans = append(t.spans, *s)
     } else {
-
         for i := 0; i < len(t.spans) - 1; i++ {
             t.spans[i] = t.spans[i+1]
         }
-        t.spans[len(t.spans)-1] = *span
+        t.spans[len(t.spans)-1] = *s
     }
 
     t.export()
 }
-
-func (span *Span) AddAttribute(key []string, value []string) {
-    if len(key) > 0 && len(value) > 0 && len(span.attributes) > 0 {
-        span.attributes[0][key[0]] = value[0]
+func (s *span) add_attribute(key []string, value []string) {
+    if len(key) > 0 && len(value) > 0 && len(s.attributes) > 0 {
+        s.attributes[0][key[0]] = value[0]
     }
 }
 
-func (span *Span) AddEvent(name []string, attributes []map[string]string) {
-    event := SpanEvent{}
+func (s *span) add_event(name []string, attributes []map[string]string) {
+    event := span_event{}
     event.name = name
-    event.timestamp = GetCurrentTimeNanos()
+    event.timestamp = get_current_time_nanos()
     event.attributes = attributes
 
-    span.events = append(span.events, event)
+    s.events = append(s.events, event)
 }
 
-func (span *Span) SetStatus(status SpanStatus) {
-    span.status = status
+func (s *span) set_status(status span_status) {
+    s.status = status
 }
 
-func (span *Span) SetKind(kind SpanKind) {
-    span.kind = kind
+func (s *span) set_kind(kind span_kind) {
+    s.kind = kind
 }
 
-func (span *Span) SetError(errorMsg []string) {
-    span.status = SpanStatus{
+func (s *span) set_error(error_msg []string) {
+    s.status = span_status{
         code: append([]string{}, "ERROR"),
-        description: errorMsg,
+        description: error_msg,
     }
 
-    errorAttrs := make([]map[string]string, 1)
-    errorAttrs[0] = make(map[string]string)
-    errorAttrs[0]["exception.message"] = errorMsg[0] if len(errorMsg) > 0 else ""
-    errorAttrs[0]["exception.type"] = "exception"
+    error_attrs := make([]map[string]string, 1)
+    error_attrs[0] = make(map[string]string)
+    error_attrs[0]["exception.message"] = error_msg[0] if len(error_msg) > 0 else ""
+    error_attrs[0]["exception.type"] = "exception"
 
-    span.AddEvent(append([]string{}, "exception"), errorAttrs)
+    s.add_event(append([]string{}, "exception"), error_attrs)
 }
 
-func (span *Span) GetDuration() []int {
-    if len(span.endTime) > 0 && len(span.startTime) > 0 {
-        return append([]int{}, span.endTime[0] - span.startTime[0])
+func (s *span) get_duration() []int {
+    if len(s.end_time) > 0 && len(s.start_time) > 0 {
+        return append([]int{}, s.end_time[0] - s.start_time[0])
     }
     return append([]int{}, 0)
 }
 
-func (t *Tracer) RegisterExporter(exporter SpanExporter) {
+func (t *tracer) register_exporter(exporter span_exporter) {
     t.exporters = append(t.exporters, exporter)
 }
 
-func (t *Tracer) export() {
+func (t *tracer) export() {
     for i := 0; i < len(t.exporters); i++ {
         if len(t.exporters) > 0 {
-
             _ = t.exporters[i]
         }
     }
 }
 
-func (t *Tracer) GetSpans() []Span {
+func (t *tracer) get_spans() []span {
     return t.spans
 }
 
-func (span *Span) String() []string {
+func (s *span) string_rep() []string {
     result := ""
 
-    if len(span.traceID) > 0 {
-        result = result + "TraceID=" + span.traceID[0] + " "
+    if len(s.trace_id) > 0 {
+        result = result + "TraceID=" + s.trace_id[0] + " "
     }
-    if len(span.spanID) > 0 {
-        result = result + "SpanID=" + span.spanID[0] + " "
+    if len(s.span_id) > 0 {
+        result = result + "SpanID=" + s.span_id[0] + " "
     }
-    if len(span.name) > 0 {
-        result = result + "Name=" + span.name[0] + " "
+    if len(s.name) > 0 {
+        result = result + "Name=" + s.name[0] + " "
     }
-    if len(span.kind.value) > 0 {
-        result = result + "Kind=" + span.kind.value[0] + " "
+    if len(s.kind.value) > 0 {
+        result = result + "Kind=" + s.kind.value[0] + " "
     }
 
-    duration := span.GetDuration()
+    duration := s.get_duration()
     if len(duration) > 0 && duration[0] > 0 {
         result = result + "Duration=" + io.ToString(duration[0]) + "ns"
     }
@@ -213,30 +209,30 @@ func (span *Span) String() []string {
 func main() {
     io.Println("Tracer Module - Span Recording and Management")
 
-    tracer := NewTracer()
+    t := new_tracer()
 
-    rootSpan := tracer.StartSpan(
+    root_span := t.start_span(
         append([]string{}, "00112233445566778899aabbccddeeff"),
         append([]string{}, "0011223344556677"),
         append([]string{}, "ProcessRequest"),
     )
 
-    rootSpan.AddAttribute(append([]string{}, "user.id"), append([]string{}, "12345"))
-    rootSpan.AddAttribute(append([]string{}, "http.method"), append([]string{}, "POST"))
+    root_span.add_attribute(append([]string{}, "user.id"), append([]string{}, "12345"))
+    root_span.add_attribute(append([]string{}, "http.method"), append([]string{}, "POST"))
 
-    io.Println("Root Span: " + rootSpan.String()[0])
+    io.Println("Root Span: " + root_span.string_rep()[0])
 
-    childSpan := tracer.StartChildSpan(&rootSpan, append([]string{}, "ModelInference"))
-    childSpan.SetKind(SPAN_KIND_INTERNAL)
-    childSpan.AddAttribute(append([]string{}, "model.name"), append([]string{}, "qwen2.5"))
+    child_span := t.start_child_span(&root_span, append([]string{}, "ModelInference"))
+    child_span.set_kind(span_kind_internal)
+    child_span.add_attribute(append([]string{}, "model.name"), append([]string{}, "qwen2.5"))
 
-    childSpan.AddEvent(append([]string{}, "TokensProcessed"), []map[string]string{})
+    child_span.add_event(append([]string{}, "TokensProcessed"), []map[string]string{})
 
-    io.Println("Child Span: " + childSpan.String()[0])
+    io.Println("Child Span: " + child_span.string_rep()[0])
 
-    tracer.EndSpan(&childSpan)
-    rootSpan.SetStatus(STATUS_OK)
-    tracer.EndSpan(&rootSpan)
+    t.end_span(&child_span)
+    root_span.set_status(status_ok)
+    t.end_span(&root_span)
 
-    io.Println("Total spans recorded: " + io.ToString(len(tracer.GetSpans())))
+    io.Println("Total spans recorded: " + io.ToString(len(t.get_spans())))
 }

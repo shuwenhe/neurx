@@ -1,45 +1,45 @@
 
 import io
 
-type Resource struct {
+struct resource {
     attributes []map[string]string
-    telemetrySDKVersion []string
+    telemetry_sdk_version []string
 }
 
-type InstrumentationScope struct {
+struct instrumentation_scope {
     name    []string
     version []string
     url     []string
 }
 
-type ExportedSpan struct {
-    traceID       []string
-    spanID        []string
-    parentSpanID  []string
+struct exported_span {
+    trace_id       []string
+    span_id        []string
+    parent_span_id  []string
     name          []string
     kind          []string
-    startTimeUnix []int
-    endTimeUnix   []int
-    durationMs    []int
+    start_time_unix []int
+    end_time_unix   []int
+    duration_ms    []int
     attributes    []map[string]string
-    events        []ExportedEvent
+    events        []exported_event
     status        []string
-    errorMessage  []string
+    error_message  []string
 }
 
-type ExportedEvent struct {
+struct exported_event {
     name      []string
     timestamp []int
     attributes []map[string]string
 }
 
-type OTLPExporter struct {
+struct otlp_exporter {
     endpoint      []string
-    resource      Resource
-    scope         InstrumentationScope
-    batchSize     []int
-    pendingSpans  []ExportedSpan
-    exportTimeout []int
+    resource      resource
+    scope         instrumentation_scope
+    batch_size     []int
+    pending_spans  []exported_span
+    export_timeout []int
 }
 
 func NewResource(serviceName []string) Resource {

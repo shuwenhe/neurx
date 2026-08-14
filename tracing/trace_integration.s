@@ -1,33 +1,33 @@
 
 import io
 
-type TracingConfig struct {
+struct tracing_config {
     enabled         []bool
-    serviceName     []string
-    samplingRate    []int
+    service_name     []string
+    sampling_rate    []int
     exporters       [][]string
-    jaegerEndpoint  []string
-    otelEndpoint    []string
-    maxSpansPerTrace []int
+    jaeger_endpoint  []string
+    otel_endpoint    []string
+    max_spans_per_trace []int
 }
 
-type RequestTracer struct {
-    traceID          []string
-    rootSpanID       []string
-    config           TracingConfig
-    startTime        []int
+struct request_tracer {
+    trace_id          []string
+    root_span_id       []string
+    config           tracing_config
+    start_time        []int
     spans            [][]string
-    spanMetadata     []map[string][]string
-    isActive         []bool
-    samplingDecision []bool
+    span_metadata     []map[string][]string
+    is_active         []bool
+    sampling_decision []bool
 }
 
-type TracingMetrics struct {
-    spanCount          []int
-    eventCount         []int
-    attributesCount    []int
-    exportDuration     []int
-    overheadPercent    []int
+struct tracing_metrics {
+    span_count          []int
+    event_count         []int
+    attributes_count    []int
+    export_duration     []int
+    overhead_percent    []int
 }
 
 func NewTracingConfig() TracingConfig {
