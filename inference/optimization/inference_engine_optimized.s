@@ -3,10 +3,6 @@ package neurx.inference.optimization.inference_engine_optimized
 use neurx.inference.optimization.attention_layers
 use neurx.inference.optimization.attention_integration
 
-
-
-
-
 struct optimized_inference_engine {
     attention_layer_manager attn_manager
     attention_optimized_model_config model_config
@@ -54,7 +50,6 @@ func (engine *optimized_inference_engine) forward_with_attention(
     []float embeddings
 ) []float {
 
-
     seq_len := len(input_ids)
 
     if seq_len > 4096 {
@@ -65,7 +60,6 @@ func (engine *optimized_inference_engine) forward_with_attention(
         engine.attn_manager.set_method("flash")
     }
 
-
     var hidden := embeddings
 
     layer_idx := 0
@@ -74,20 +68,15 @@ func (engine *optimized_inference_engine) forward_with_attention(
         attn_type := engine.model_config.per_layer_attention[layer_idx]
         engine.attn_manager.set_method(attn_type)
 
-
         queries := hidden
         keys := hidden
         values := hidden
 
-
         attn_output := engine.attn_manager.forward(queries, keys, values)
-
 
         hidden = add_residual(hidden, attn_output)
 
-
         ff_output := apply_feed_forward(hidden, engine.model_config.hidden_dim)
-
 
         hidden = add_residual(hidden, ff_output)
 
@@ -104,7 +93,6 @@ func (engine *optimized_inference_engine) prefill(
 
     engine.inference_mode = "prefill"
     engine.current_seq_pos = len(input_ids)
-
 
     []float token_floats = make([]float, len(input_ids))
     int i = 0
@@ -123,7 +111,6 @@ func (engine *optimized_inference_engine) decode(
 
     engine.inference_mode = "decode"
     engine.current_seq_pos = engine.current_seq_pos + 1
-
 
     []float token_float = []float{last_embedding[0]}
     var result = engine.forward_with_attention(token_float, last_embedding)
@@ -156,7 +143,6 @@ func apply_feed_forward([]float x, int hidden_dim) []float {
         i = i + 1
     }
 
-
     i = 0
     for i < len(x) {
         if i < ff_dim {
@@ -167,7 +153,6 @@ func apply_feed_forward([]float x, int hidden_dim) []float {
         }
         i = i + 1
     }
-
 
     []float output = make([]float, hidden_dim)
     i = 0
@@ -201,7 +186,6 @@ func benchmark_inference_methods(
 
     results := []inference_benchmark{}
 
-
     flash_benchmark := inference_benchmark{
         method: "Flash Attention",
         seq_len: len(queries),
@@ -211,7 +195,6 @@ func benchmark_inference_methods(
         kv_cache_memory_mb: 512.0,
     }
     results = append_benchmark(results, flash_benchmark)
-
 
     mla_benchmark := inference_benchmark{
         method: "MLA",
@@ -223,7 +206,6 @@ func benchmark_inference_methods(
     }
     results = append_benchmark(results, mla_benchmark)
 
-
     lightning_benchmark := inference_benchmark{
         method: "Lightning",
         seq_len: len(queries),
@@ -233,7 +215,6 @@ func benchmark_inference_methods(
         kv_cache_memory_mb: 480.0,
     }
     results = append_benchmark(results, lightning_benchmark)
-
 
     sparse_benchmark := inference_benchmark{
         method: "Sparse",

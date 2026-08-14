@@ -4,24 +4,17 @@ use neurx.inference.optimization.attention_layers
 use neurx.inference.optimization.attention_integration
 use neurx.inference.optimization.inference_engine_optimized
 
-
-
-
-
 func test_flash_attention_basic() {
     print("🧪 Test: Flash Attention Basic Functionality")
-
 
     int seq_len = 8
     int num_heads = 2
     int head_dim = 64
     int num_kv_heads = 2
 
-
     []float queries = make([]float, seq_len * num_heads * head_dim)
     []float keys = make([]float, seq_len * num_kv_heads * head_dim)
     []float values = make([]float, seq_len * num_kv_heads * head_dim)
-
 
     int i = 0
     for i < len(queries) {
@@ -41,7 +34,6 @@ func test_flash_attention_basic() {
         i = i + 1
     }
 
-
     config := new_flash_attention_config(
         head_dim,
         num_heads,
@@ -50,16 +42,13 @@ func test_flash_attention_basic() {
         "cpu"
     )
 
-
     output := flash_attention_forward(queries, keys, values, config)
-
 
     if len(output) == len(queries) {
         print("  ✓ Output shape correct")
     } else {
         print("  ✗ Output shape mismatch")
     }
-
 
     has_invalid = false
     i = 0
@@ -145,7 +134,6 @@ func test_sparse_attention_pattern() {
 
     mask := create_sparse_pattern(seq_len, config)
 
-
     count := 0
     i := 0
     for i < len(mask.mask) {
@@ -154,7 +142,6 @@ func test_sparse_attention_pattern() {
         }
         i = i + 1
     }
-
 
     total := seq_len * seq_len
     sparsity := 100 - (count * 100 / total)
@@ -179,7 +166,6 @@ func test_attention_layer_manager() {
         print("  ✓ Manager selected Flash for seq_len=1024")
     }
 
-
     manager.set_method("sparse")
     if manager.current_method == "sparse" {
         print("  ✓ Method switching works")
@@ -190,7 +176,6 @@ func test_attention_layer_manager() {
 
 func test_attention_optimizer() {
     print("🧪 Test: Attention Optimizer Method Selection")
-
 
     seq_len_1 := 256
     method_1 := get_best_attention_method(seq_len_1, 128, 32)
@@ -230,7 +215,6 @@ func test_performance_benchmarking() {
         print("  ✓ Benchmarking completed")
         print("  ✓ Generated " + string_from_int(len(reports)) + " reports")
 
-
         report := reports[0]
         if len(report.method_name) > 0 {
             print("  ✓ First method: " + report.method_name)
@@ -261,7 +245,6 @@ func test_model_config_creation() {
     if len(config.per_layer_attention) == 32 {
         print("  ✓ Per-layer attention array initialized")
     }
-
 
     if config.per_layer_attention[0] == "lightning" {
         print("  ✓ Early layers use Lightning")
@@ -318,7 +301,6 @@ func test_attention_presets() {
         print("  ✓ Accurate preset loaded")
     }
 
-
     if fast.lightning_cfg.block_size < balanced.lightning_cfg.block_size {
         print("  ✓ Fast preset has smaller blocks")
     }
@@ -345,7 +327,6 @@ func string_from_int(int n) string {
     for i < 20 {
         int digit = abs_n % 10
         abs_n = abs_n / 10
-
 
         result = char_from_digit(digit) + result
 

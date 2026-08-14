@@ -2,15 +2,15 @@
 model:
   name: "Qwen2.5-0.5B-Instruct"
   model_id: "Qwen/Qwen2.5-0.5B-Instruct"
-  
+
   model_dir: "/model/Qwen2.5-0.5B-Instruct"
-  
+
   type: "language_model"
   framework: "transformers"
-  
+
   weights_format: "safetensors"
-  precision: "bfloat16"  # or float32, int8, int4
-  
+  precision: "bfloat16"
+
 architecture:
   hidden_size: 896
   intermediate_size: 3584
@@ -18,15 +18,15 @@ architecture:
   num_attention_heads: 14
   num_key_value_heads: 14
   head_dim: 64
-  
+
   vocab_size: 151936
   max_position_embeddings: 32768
-  
-  hidden_act: "silu"  # swish
-  
+
+  hidden_act: "silu"
+
   attention_dropout: 0.0
   rms_norm_eps: 1e-6
-  
+
   rope_theta: 1000000
   rope_scaling:
     type: "linear"
@@ -35,55 +35,55 @@ architecture:
 tokenizer:
   type: "qwen_fast"
   pretrained: "Qwen/Qwen2.5-0.5B-Instruct"
-  
-  model_file: "tokenizer.model"      # SentencePiece model
-  vocab_file: "tokenizer.json"       # vocab
+
+  model_file: "tokenizer.model"
+  vocab_file: "tokenizer.json"
   config_file: "tokenizer_config.json"
-  
+
   pad_token: "<|endoftext|>"
   eos_token: "<|im_end|>"
   unk_token: "<|unk_token|>"
-  
+
   add_eos_token: true
   add_bos_token: false
   clean_up_tokenization_spaces: false
 
 inference:
-  mode: "local"  # local, distributed, cloud
-  backend: "cpu"  # cpu, cuda, metal, neuron
-  
+  mode: "local"
+  backend: "cpu"
+
   batch_size: 1
   max_batch_size: 8
-  
+
   max_seq_length: 2048
   context_length: 512
-  
+
   use_kv_cache: true
   kv_cache_dtype: "bfloat16"
-  kv_cache_allocation: "eager"  # eager, lazy
+  kv_cache_allocation: "eager"
   max_num_cached_tokens: 8192
-  
-  use_flash_attention: false  # CPU doesn't support
+
+  use_flash_attention: false
   use_paged_attention: true
-  
+
   cpu_offload: false
   gpu_memory_utilization: 0.9
 
 generation:
   max_new_tokens: 512
   min_new_tokens: 1
-  
+
   do_sample: true
   top_p: 0.9
   top_k: 40
   temperature: 0.7
-  
+
   repetition_penalty: 1.0
   length_penalty: 1.0
-  
+
   early_stopping: false
-  num_beams: 1  # greedy if 1, beam search if > 1
-  
+  num_beams: 1
+
   stop_sequences:
     - "<|endoftext|>"
     - "<|im_end|>"
@@ -91,28 +91,28 @@ generation:
 
 quantization:
   enabled: false
-  method: "gptq"  # gptq, awq, int8, nf4
-  
+  method: "gptq"
+
   bits: 4
   group_size: 128
   desc_act: false
-  
+
   use_precomputed: true
 
 deployment:
   host: "0.0.0.0"
   port: 8000
-  
+
   api_version: "v1"
   enable_openai_api: true
   enable_rest_api: true
-  
+
   log_level: "INFO"
   log_dir: "/home/shuwen/shuwen/neurx/artifacts/logs"
-  
+
   enable_metrics: true
   metrics_port: 9090
-  
+
   num_workers: 4
   worker_timeout: 300
   request_timeout: 60
@@ -121,25 +121,25 @@ optimization:
   enable_prefill_decode_split: true
   prefill_batch_size: 32
   decode_batch_size: 8
-  
+
   enable_continuous_batching: true
   batch_wait_time_ms: 10
-  
+
   enable_speculative_decoding: false
   speculative_steps: 5
-  
-  cache_strategy: "lru"  # lru, lfu, fifo
+
+  cache_strategy: "lru"
   cache_size_gb: 4
 
 hardware:
-  device_type: "cpu"  # cpu, cuda, metal, neuron
-  
+  device_type: "cpu"
+
   num_cpus: 16
   cpu_affinity: "0-15"
-  
+
   max_memory_gb: 32
   memory_per_worker_gb: 8
-  
+
   enable_numa: false
   prefetch_threads: 4
 
@@ -149,31 +149,31 @@ chat:
     evidence-based medical information to support healthcare professionals 
     and patients. Always recommend consulting with qualified medical professionals 
     for diagnosis and treatment.
-  
-  template: "qwen"  # qwen, alpaca, vicuna, etc.
-  
+
+  template: "qwen"
+
   max_history: 10
   context_window: 512
-  
+
   enable_content_filter: true
   max_input_length: 2048
 
 checkpoint:
   checkpoint_dir: "/home/shuwen/shuwen/neurx/artifacts/checkpoints"
-  
+
   resume_from_checkpoint: false
   checkpoint_path: ""
-  
+
   save_frequency: 100
   keep_last_k: 3
 
 validation:
   validation_file: "/home/shuwen/shuwen/dataset/medical/dev.json"
-  
+
   validation_steps: 100
-  
+
   test_file: "/home/shuwen/shuwen/dataset/medical/test.json"
-  
+
   metrics:
     - "perplexity"
     - "accuracy"

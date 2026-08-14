@@ -10,34 +10,34 @@ services:
     restart: unless-stopped
     environment:
       NEURX_BACKEND: "cpu"
-      
+
       NEURX_BATCH_SIZE: "4"
       NEURX_NUM_WORKERS: "4"
-      
+
       NEURX_KV_BLOCKS: "64"
       NEURX_KV_BLOCK_SIZE: "256"
-      
+
       NEURX_MODEL_PATH: "/opt/app/posttrain/model.safetensors"
       NEURX_TOKENIZER_PATH: "/opt/app/posttrain/tokenizer.json"
-      
+
       NEURX_API_PORT: "8080"
       NEURX_GRPC_PORT: "8081"
       NEURX_METRICS_PORT: "9090"
-      
+
       NEURX_LOG_LEVEL: "INFO"
-      
+
     ports:
-      - "8080:8080"   # HTTP API
-      - "8081:8081"   # gRPC
-      - "9090:9090"   # Prometheus metrics
-    
+      - "8080:8080"
+      - "8081:8081"
+      - "9090:9090"
+
     volumes:
       - /home/shuwen/shuwen/posttrain:/opt/app/posttrain:ro
-      
+
       - ./logs:/var/log/neurx
-      
+
       - ./config:/etc/neurx:ro
-    
+
     deploy:
       resources:
         reservations:
@@ -45,21 +45,20 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
-    
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 30s
-    
+
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
         labels: "service=neurx-inference"
-    
 
 volumes:
   logs:

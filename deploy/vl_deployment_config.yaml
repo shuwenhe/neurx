@@ -165,7 +165,7 @@ performance:
   prefill_batch_size: 1
   decode_batch_size: 1
   max_concurrent_requests: 1
-  scheduler_type: "fifo"  # First-In-First-Out
+  scheduler_type: "fifo"
   swap_space_mb: 0
   cpu_worker_threads: 4
 

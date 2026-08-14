@@ -2,10 +2,6 @@ package neurx.inference.optimization.attention_integration
 
 use neurx.inference.optimization.attention_layers
 
-
-
-
-
 struct attention_layer_manager {
     flash_attention_config flash_config
     mla_config mla_config
@@ -57,7 +53,6 @@ func new_attention_layer_manager(
         sparsity_ratio: 75,
         use_token_budget: false,
     }
-
 
     method := "flash"
     if seq_len > 4096 {
@@ -160,7 +155,6 @@ func create_layer_with_optimized_attention(
     int hidden_dim
 ) transformer_layer_with_optimized_attention {
 
-
     attention_type := "flash"
     if seq_len > 4096 {
         attention_type = "sparse"
@@ -223,13 +217,11 @@ func (layer *transformer_layer_with_optimized_attention) forward(
     []float position_ids
 ) []float {
 
-
     normalized := apply_layer_norm(
         hidden_states,
         layer.layer_norm_weight,
         layer.layer_norm_bias
     )
-
 
     var attn_output []float
 
@@ -255,7 +247,6 @@ func (layer *transformer_layer_with_optimized_attention) forward(
             layer.attn_config.sparse_cfg
         )
     }
-
 
     int i = 0
     for i < len(hidden_states) {
@@ -286,10 +277,6 @@ func new_attention_optimized_config(
 ) attention_optimized_model_config {
 
     int head_dim = hidden_dim / num_heads
-
-
-
-
 
     []string per_layer = make([]string, num_layers)
 
@@ -339,9 +326,6 @@ func benchmark_attention_methods(
 ) []attention_performance_report {
 
     reports := []attention_performance_report{}
-
-
-
 
     flash_report := attention_performance_report{
         method_name: "Flash Attention v3",
@@ -427,7 +411,6 @@ func apply_layer_norm(
         }
         mean = mean / float(dim)
 
-
         float var = 0.0
         j = 0
         for j < dim {
@@ -436,7 +419,6 @@ func apply_layer_norm(
             j = j + 1
         }
         var = var / float(dim)
-
 
         float std = sqrt_f(var + eps)
         j = 0
