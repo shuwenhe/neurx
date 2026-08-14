@@ -1,12 +1,5 @@
 package neurx.inference.speculative
 
-
-
-
-
-
-
-
 struct speculative_decoding_config {
     string method
     int num_speculative_tokens
@@ -33,10 +26,6 @@ struct speculative_draft_model {
     int num_layers
     int vocab_size
 }
-
-
-
-
 
 struct medusa_config {
     int num_speculative_heads
@@ -137,10 +126,6 @@ func medusa_verify_and_accept(
     output
 }
 
-
-
-
-
 struct eagle_config {
     int num_layers
     int hidden_dim
@@ -181,7 +166,6 @@ func eagle_generate_draft_tokens(
     for t = 0; t < num_tokens; t = t + 1 {
 
         for layer = 0; layer < len(model.layer_weights); layer = layer + 1 {
-
 
         }
         
@@ -232,10 +216,6 @@ func eagle_verify(
     
     output
 }
-
-
-
-
 
 struct lookahead_config {
     int window_size
@@ -309,10 +289,6 @@ func lookahead_decode(
     final_tokens
 }
 
-
-
-
-
 func speculative_decoding_step(
     []float current_hidden,
     speculative_decoding_config cfg,
@@ -331,18 +307,12 @@ func speculative_decoding_step(
     
     if cfg.method == "medusa" {
 
-
     } else if cfg.method == "eagle" {
-
 
     }
     
     output
 }
-
-
-
-
 
 struct speculative_cache {
     map<string, speculative_decoding_output> cache
@@ -364,7 +334,6 @@ func cache_speculative_output(
     speculative_decoding_output output
 ) {
 
-
 }
 
 func get_cached_output(
@@ -382,10 +351,6 @@ func get_cached_output(
     output.speedup = 1.0
     output
 }
-
-
-
-
 
 struct speculative_decoding_metrics {
     float total_speedup
@@ -425,11 +390,6 @@ func print_metrics(speculative_decoding_metrics metrics) {
     println("Number of Calls: ", metrics.num_calls)
 }
 
-
-
-
-
-
 struct adaptive_speculative_config {
     bool enable_adaptive_speculation
     float min_acceptance_threshold
@@ -457,7 +417,6 @@ func adaptive_speculative_decoding(
     num_speculative_tokens
 }
 
-
 func joint_speculative_decoding(
     []float hidden_state,
     medusa_model medusa,
@@ -476,10 +435,6 @@ func joint_speculative_decoding(
     output
 }
 
-
-
-
-
 func print_speculative_config(speculative_decoding_config cfg) {
     println("=== Speculative Decoding Config ===")
     println("Method: ", cfg.method)
@@ -497,10 +452,6 @@ func validate_speculative_config(speculative_decoding_config cfg) bool {
     }
     true
 }
-
-
-
-
 
 func main() {
     println("=== Complete Speculative Decoding System ===")

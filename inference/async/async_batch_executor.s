@@ -1,10 +1,8 @@
 
 
-
 package async_inference
 
 import "sync"
-
 
 struct ExecutionResult {
     request_id      []string    
@@ -17,7 +15,6 @@ struct ExecutionResult {
     success         bool        
     error_msg       []string    
 }
-
 
 struct AsyncBatchExecutor {
     
@@ -43,7 +40,6 @@ struct AsyncBatchExecutor {
     mutex           sync.Mutex
 }
 
-
 func new_async_batch_executor(max_batch_size int, prefill_threads int, decode_threads int) AsyncBatchExecutor {
     return AsyncBatchExecutor{
         batch_size:      0,
@@ -60,7 +56,6 @@ func new_async_batch_executor(max_batch_size int, prefill_threads int, decode_th
     }
 }
 
-
 func (executor *AsyncBatchExecutor) load_batch(batch RequestBatch) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
@@ -76,7 +71,6 @@ func (executor *AsyncBatchExecutor) load_batch(batch RequestBatch) {
         }
     }
 }
-
 
 func (executor *AsyncBatchExecutor) execute_batch() []ExecutionResult {
     executor.mutex.Lock()
@@ -166,7 +160,6 @@ func (executor *AsyncBatchExecutor) execute_batch() []ExecutionResult {
     return results
 }
 
-
 func (executor *AsyncBatchExecutor) execute_prefill_phase(req InferenceRequest) []int {
     
     
@@ -179,7 +172,6 @@ func (executor *AsyncBatchExecutor) execute_prefill_phase(req InferenceRequest) 
     return output
 }
 
-
 func (executor *AsyncBatchExecutor) execute_decode_step(req InferenceRequest, result ExecutionResult) int {
     
     
@@ -188,7 +180,6 @@ func (executor *AsyncBatchExecutor) execute_decode_step(req InferenceRequest, re
     token := 1000 + ((len(result.output_ids) * 7) % 5000)
     return token
 }
-
 
 func (executor *AsyncBatchExecutor) stream_token(request_id []string, token int) {
     executor.mutex.Lock()
@@ -210,7 +201,6 @@ func (executor *AsyncBatchExecutor) stream_token(request_id []string, token int)
     executor.stream_buffers[request_id[0]] = append(executor.stream_buffers[request_id[0]], token_str)
 }
 
-
 func (executor *AsyncBatchExecutor) get_streamed_tokens(request_id []string) [][]string {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
@@ -222,7 +212,6 @@ func (executor *AsyncBatchExecutor) get_streamed_tokens(request_id []string) [][
     return executor.stream_buffers[request_id[0]]
 }
 
-
 func (executor *AsyncBatchExecutor) clear_stream_buffer(request_id []string) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
@@ -232,7 +221,6 @@ func (executor *AsyncBatchExecutor) clear_stream_buffer(request_id []string) {
     }
 }
 
-
 func (executor *AsyncBatchExecutor) store_result(result ExecutionResult) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
@@ -241,7 +229,6 @@ func (executor *AsyncBatchExecutor) store_result(result ExecutionResult) {
         executor.results[result.request_id[0]] = result
     }
 }
-
 
 func (executor *AsyncBatchExecutor) get_result(request_id []string) ExecutionResult {
     executor.mutex.Lock()
@@ -253,7 +240,6 @@ func (executor *AsyncBatchExecutor) get_result(request_id []string) ExecutionRes
     
     return executor.results[request_id[0]]
 }
-
 
 func (executor *AsyncBatchExecutor) get_all_results() []ExecutionResult {
     executor.mutex.Lock()
@@ -267,14 +253,12 @@ func (executor *AsyncBatchExecutor) get_all_results() []ExecutionResult {
     return results
 }
 
-
 func (executor *AsyncBatchExecutor) set_streaming_enabled(enabled bool) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
     
     executor.stream_enabled = enabled
 }
-
 
 func (executor *AsyncBatchExecutor) get_executor_statistics() map[string]interface{} {
     executor.mutex.Lock()
@@ -292,7 +276,6 @@ func (executor *AsyncBatchExecutor) get_executor_statistics() map[string]interfa
     
     return stats
 }
-
 
 func (executor *AsyncBatchExecutor) cancel_batch() {
     executor.mutex.Lock()

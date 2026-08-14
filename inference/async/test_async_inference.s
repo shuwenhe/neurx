@@ -1,8 +1,6 @@
 
 
-
 package async_inference
-
 
 struct TestResult {
     test_name       []string
@@ -10,7 +8,6 @@ struct TestResult {
     error_msg       []string
     duration_ms     int64
 }
-
 
 func test_async_task_manager() TestResult {
     result := TestResult{
@@ -467,7 +464,6 @@ func test_async_inference_engine() TestResult {
     return result
 }
 
-
 func run_all_tests() []TestResult {
     results := make([]TestResult, 0)
     
@@ -480,7 +476,6 @@ func run_all_tests() []TestResult {
     
     return results
 }
-
 
 func string_of_int(n int) []string {
     s := make([]string, 1)

@@ -1,7 +1,5 @@
 package neurx.inference.distributed
 
-
-
 struct distributed_inference_config {
     int world_size
     int rank
@@ -62,7 +60,6 @@ struct communication_buffer {
     []int buffer_sizes
     int max_buffer_size
 }
-
 
 func new_distributed_inference_config(
     int world_size,
@@ -160,7 +157,6 @@ func new_communication_buffer(int max_size) communication_buffer {
     buf
 }
 
-
 func all_reduce_sum(
     [][]float local_data,
     distributed_inference_config cfg
@@ -209,7 +205,6 @@ func reduce_scatter(
     local_chunk
 }
 
-
 func forward_tensor_parallel(
     []float input_hidden,
     distributed_model_shards shards,
@@ -240,7 +235,6 @@ func attention_tensor_parallel(
     []float output
     output
 }
-
 
 struct pipeline_stage {
     int stage_id
@@ -284,7 +278,6 @@ func backward_pipeline_parallel(
     grad_input
 }
 
-
 func forward_sequence_parallel(
     [][]float hidden_states,
     distributed_inference_config cfg,
@@ -306,7 +299,6 @@ func forward_sequence_parallel(
     
     local_hidden_states
 }
-
 
 func compute_rank_mapping(
     string strategy,
@@ -335,7 +327,6 @@ func compute_rank_mapping(
     
     mapping
 }
-
 
 func run_distributed_inference(
     distributed_inference_request request,
@@ -372,7 +363,6 @@ func run_distributed_inference(
     response
 }
 
-
 func enable_overlap_communication(
     distributed_inference_config cfg
 ) bool {
@@ -385,7 +375,6 @@ func optimize_gradient_accumulation(
 ) [][]float {
     gradients
 }
-
 
 struct distributed_performance_metrics {
     float compute_time
@@ -408,7 +397,6 @@ func get_performance_metrics(
     metrics.latency = 0.0
     metrics
 }
-
 
 func print_distributed_config(distributed_inference_config cfg) {
     println("=== Distributed Inference Config ===")

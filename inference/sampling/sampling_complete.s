@@ -1,7 +1,5 @@
 package neurx.inference.sampling
 
-
-
 struct sampling_parameters {
     float temperature
     float top_p
@@ -21,7 +19,6 @@ struct sampling_output {
     []float top_tokens
     []int top_token_ids
 }
-
 
 func next_token([]float logits, sampling_parameters params) int {
     []float adjusted_logits = []float{}
@@ -47,7 +44,6 @@ func next_token([]float logits, sampling_parameters params) int {
         argmax_sampling(adjusted_logits)
     }
 }
-
 
 func argmax_sampling([]float logits) int {
     int best_idx = 0
@@ -142,7 +138,6 @@ func typical_sampling([]float logits, float mass, int seed) int {
     top_k_sampling(typical_scores, 100, seed)
 }
 
-
 struct mirostat_state {
     float tau
     float eta
@@ -235,7 +230,6 @@ func lookahead_sampling(
     argmax_sampling(combined_logits)
 }
 
-
 struct beam_search_state {
     []int sequences
     []float scores
@@ -324,7 +318,6 @@ func constrained_decoding_sampling(
     argmax_sampling(constrained_logits)
 }
 
-
 func softmax_logits([]float logits) []float {
     []float probs = []float{}
     float max_logit = get_max(logits)
@@ -396,7 +389,6 @@ func copy_array([]float arr) []float {
     copy
 }
 
-
 struct sampling_pipeline {
     string[] preprocessing_steps
     string main_sampler
@@ -430,7 +422,6 @@ func apply_sampling_pipeline(
     output
 }
 
-
 func benchmark_sampling_methods(
     [][]float logits_batch,
     int num_iterations
@@ -444,7 +435,6 @@ func benchmark_sampling_methods(
     params.top_p = 0.9
     
 }
-
 
 struct sampling_statistics {
     []int token_counts
@@ -465,7 +455,6 @@ func collect_sampling_statistics(
     
     stats
 }
-
 
 func main() {
     println("=== Complete Sampling System ===")

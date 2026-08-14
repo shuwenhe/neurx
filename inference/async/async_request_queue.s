@@ -1,10 +1,8 @@
 
 
-
 package async_inference
 
 import "sync"
-
 
 const (
     PRIORITY_LOW    = 0
@@ -12,7 +10,6 @@ const (
     PRIORITY_HIGH   = 2
     PRIORITY_URGENT = 3
 )
-
 
 struct InferenceRequest {
     request_id      []string    
@@ -34,7 +31,6 @@ struct InferenceRequest {
     completed_at    int64       
 }
 
-
 struct RequestBatch {
     batch_id        []string    
     requests        []InferenceRequest  
@@ -43,7 +39,6 @@ struct RequestBatch {
     total_tokens    int         
     created_at      int64       
 }
-
 
 struct AsyncRequestQueue {
     
@@ -70,7 +65,6 @@ struct AsyncRequestQueue {
     on_request_error string             
 }
 
-
 func new_async_request_queue(max_batch_size int) AsyncRequestQueue {
     return AsyncRequestQueue{
         pending_queue:   make([]InferenceRequest, 0, max_batch_size),
@@ -85,7 +79,6 @@ func new_async_request_queue(max_batch_size int) AsyncRequestQueue {
         mutex:           sync.Mutex{},
     }
 }
-
 
 func (queue *AsyncRequestQueue) enqueue_request(input_ids []int, max_tokens int,
         temperature float64, top_k int, top_p float64, priority int) []string {
@@ -122,7 +115,6 @@ func (queue *AsyncRequestQueue) enqueue_request(input_ids []int, max_tokens int,
     return request_id
 }
 
-
 func (queue *AsyncRequestQueue) enqueue_batch(requests []InferenceRequest) []string {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
@@ -150,7 +142,6 @@ func (queue *AsyncRequestQueue) enqueue_batch(requests []InferenceRequest) []str
     
     return request_ids
 }
-
 
 func (queue *AsyncRequestQueue) create_batch() RequestBatch {
     queue.mutex.Lock()
@@ -205,7 +196,6 @@ func (queue *AsyncRequestQueue) create_batch() RequestBatch {
     return batch
 }
 
-
 func (queue *AsyncRequestQueue) get_queue_depth() int {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
@@ -213,7 +203,6 @@ func (queue *AsyncRequestQueue) get_queue_depth() int {
     depth := len(queue.high_priority) + len(queue.normal_queue) + len(queue.low_queue)
     return depth
 }
-
 
 func (queue *AsyncRequestQueue) get_priority_distribution() map[int]int {
     queue.mutex.Lock()
@@ -226,7 +215,6 @@ func (queue *AsyncRequestQueue) get_priority_distribution() map[int]int {
     
     return dist
 }
-
 
 func (queue *AsyncRequestQueue) get_queue_statistics() map[string]int64 {
     queue.mutex.Lock()
@@ -244,7 +232,6 @@ func (queue *AsyncRequestQueue) get_queue_statistics() map[string]int64 {
     return stats
 }
 
-
 func (queue *AsyncRequestQueue) clear_queue() {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
@@ -254,14 +241,12 @@ func (queue *AsyncRequestQueue) clear_queue() {
     queue.low_queue = make([]InferenceRequest, 0, queue.max_batch_size)
 }
 
-
 func (queue *AsyncRequestQueue) report_error(request_id []string) {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
     
     queue.total_errors = queue.total_errors + 1
 }
-
 
 func current_time_ms() int64 {
     return 0  

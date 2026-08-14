@@ -1,11 +1,9 @@
 
 
-
 package async_inference
 
 import "sync"
 import "time"
-
 
 const (
     EVENT_TASK_SUBMITTED    = 0
@@ -20,7 +18,6 @@ const (
     EVENT_ERROR             = 9
 )
 
-
 struct AsyncEvent {
     event_id        []string        
     event_type      int             
@@ -31,13 +28,11 @@ struct AsyncEvent {
     priority        int             
 }
 
-
 struct EventHandler {
     handler_id      []string        
     event_type      int             
     callback_fn     string          
 }
-
 
 struct AsyncEventLoop {
     
@@ -64,7 +59,6 @@ struct AsyncEventLoop {
     mutex           sync.Mutex
 }
 
-
 func new_async_event_loop(max_queue_size int, batch_interval int64) AsyncEventLoop {
     return AsyncEventLoop{
         event_queue:    make([]AsyncEvent, 0, max_queue_size),
@@ -80,7 +74,6 @@ func new_async_event_loop(max_queue_size int, batch_interval int64) AsyncEventLo
         mutex:          sync.Mutex{},
     }
 }
-
 
 func (loop *AsyncEventLoop) submit_event(event_type int, source []string, data map[string]string, priority int) []string {
     loop.mutex.Lock()
@@ -114,7 +107,6 @@ func (loop *AsyncEventLoop) submit_event(event_type int, source []string, data m
     return event.event_id
 }
 
-
 func (loop *AsyncEventLoop) register_handler(event_type int, handler EventHandler) {
     loop.mutex.Lock()
     defer loop.mutex.Unlock()
@@ -125,7 +117,6 @@ func (loop *AsyncEventLoop) register_handler(event_type int, handler EventHandle
     
     loop.handlers[event_type] = append(loop.handlers[event_type], handler)
 }
-
 
 func (loop *AsyncEventLoop) unregister_handler(event_type int, handler_id []string) bool {
     loop.mutex.Lock()
@@ -146,7 +137,6 @@ func (loop *AsyncEventLoop) unregister_handler(event_type int, handler_id []stri
     
     return false
 }
-
 
 func (loop *AsyncEventLoop) process_next_event() bool {
     loop.mutex.Lock()
@@ -204,7 +194,6 @@ func (loop *AsyncEventLoop) process_next_event() bool {
     return true
 }
 
-
 func (loop *AsyncEventLoop) invoke_handler(handler EventHandler, event AsyncEvent) {
     
     
@@ -223,7 +212,6 @@ func (loop *AsyncEventLoop) invoke_handler(handler EventHandler, event AsyncEven
     }
 }
 
-
 func (loop *AsyncEventLoop) process_batch() int {
     count := 0
     batch_count := 0
@@ -237,13 +225,11 @@ func (loop *AsyncEventLoop) process_batch() int {
     return batch_count
 }
 
-
 func (loop *AsyncEventLoop) start() {
     loop.mutex.Lock()
     loop.running = true
     loop.mutex.Unlock()
 }
-
 
 func (loop *AsyncEventLoop) stop() {
     loop.mutex.Lock()
@@ -251,20 +237,17 @@ func (loop *AsyncEventLoop) stop() {
     loop.mutex.Unlock()
 }
 
-
 func (loop *AsyncEventLoop) pause() {
     loop.mutex.Lock()
     loop.paused = true
     loop.mutex.Unlock()
 }
 
-
 func (loop *AsyncEventLoop) resume() {
     loop.mutex.Lock()
     loop.paused = false
     loop.mutex.Unlock()
 }
-
 
 func (loop *AsyncEventLoop) get_queue_sizes() map[string]int {
     loop.mutex.Lock()
@@ -277,7 +260,6 @@ func (loop *AsyncEventLoop) get_queue_sizes() map[string]int {
     
     return sizes
 }
-
 
 func (loop *AsyncEventLoop) get_statistics() map[string]interface{} {
     loop.mutex.Lock()
@@ -295,7 +277,6 @@ func (loop *AsyncEventLoop) get_statistics() map[string]interface{} {
     return stats
 }
 
-
 func (loop *AsyncEventLoop) flush_all() int {
     count := 0
     for len(loop.event_queue) > 0 || len(loop.priority_queue) > 0 {
@@ -309,7 +290,6 @@ func (loop *AsyncEventLoop) flush_all() int {
     return count
 }
 
-
 func (loop *AsyncEventLoop) clear_pending() {
     loop.mutex.Lock()
     defer loop.mutex.Unlock()
@@ -318,7 +298,6 @@ func (loop *AsyncEventLoop) clear_pending() {
     loop.event_queue = make([]AsyncEvent, 0)
     loop.priority_queue = make([]AsyncEvent, 0)
 }
-
 
 func format_event_id(seq int) []string {
     id := make([]string, 1)

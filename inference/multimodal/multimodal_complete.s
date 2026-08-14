@@ -1,12 +1,5 @@
 package neurx.inference.multimodal
 
-
-
-
-
-
-
-
 struct image_data {
     []byte raw_data
     int width
@@ -35,10 +28,6 @@ struct vision_language_bridge_output {
     int num_patches
     int feature_dim
 }
-
-
-
-
 
 struct image_preprocess_config {
     int target_height
@@ -141,10 +130,6 @@ func augment_image(
     augmented
 }
 
-
-
-
-
 struct vit_config {
     int patch_size
     int image_size
@@ -243,8 +228,6 @@ func vit_transformer_layers(
     
     for layer = 0; layer < encoder.config.num_layers; layer = layer + 1 {
 
-
-
     }
     
     output
@@ -258,10 +241,6 @@ func vit_pooling(
     pooled
 }
 
-
-
-
-
 func vit_inference_pipeline(
     image_data image,
     vit_encoder encoder,
@@ -271,8 +250,6 @@ func vit_inference_pipeline(
     image_data preprocessed = augment_image(image, preprocess_cfg)
     preprocessed = resize_image(preprocessed, preprocess_cfg.target_width, preprocess_cfg.target_height)
     
-
-
 
     
     image_tensor tensor
@@ -294,10 +271,6 @@ func vit_inference_pipeline(
     
     image_features
 }
-
-
-
-
 
 struct vision_language_bridge {
     [][]float image_projection_weights
@@ -324,7 +297,6 @@ func project_image_features(
     []float projected = image_features
     
 
-
     
     projected
 }
@@ -344,10 +316,6 @@ func fuse_image_and_text_embeddings(
     
     fused
 }
-
-
-
-
 
 struct multimodal_cache {
     map<string, []float> image_embedding_cache
@@ -371,7 +339,6 @@ func cache_image_embedding(
     []float embedding
 ) {
 
-
 }
 
 func get_cached_image_embedding(
@@ -382,11 +349,6 @@ func get_cached_image_embedding(
     []float embedding
     embedding
 }
-
-
-
-
-
 
 struct image_captioning_config {
     int max_caption_length
@@ -404,7 +366,6 @@ func generate_image_caption(
     caption
 }
 
-
 struct vqa_config {
     int num_classes
     float confidence_threshold
@@ -421,7 +382,6 @@ func answer_visual_question(
     answer
 }
 
-
 struct detection_result {
     string label
     float confidence
@@ -436,7 +396,6 @@ func detect_objects(
     []detection_result results
     results
 }
-
 
 struct scene_understanding {
     []string objects
@@ -455,11 +414,6 @@ func understand_scene(
     understanding.overall_scene = "Unknown scene"
     understanding
 }
-
-
-
-
-
 
 struct segmentation_mask {
     [][]int mask
@@ -481,7 +435,6 @@ func segment_image(
     seg
 }
 
-
 func retrieve_images_similar(
     image_data query_image,
     []image_data database_images,
@@ -493,7 +446,6 @@ func retrieve_images_similar(
     results
 }
 
-
 func guide_image_generation(
     string text_prompt,
     vit_encoder encoder
@@ -502,10 +454,6 @@ func guide_image_generation(
     []float guidance_features
     guidance_features
 }
-
-
-
-
 
 func process_image_batch(
     []image_data images,
@@ -523,20 +471,9 @@ func process_image_batch(
     batch_features
 }
 
-
-
-
-
 func optimize_vit_for_inference(vit_encoder encoder) {
 
-
-
-
 }
-
-
-
-
 
 func min(int a, int b) int {
     if a < b {
@@ -562,10 +499,6 @@ func print_vit_config(vit_config cfg) {
     println("Hidden Dim: ", cfg.hidden_dim)
     println("Num Heads: ", cfg.num_heads)
 }
-
-
-
-
 
 func main() {
     println("=== Complete Multimodal Image Support ===")

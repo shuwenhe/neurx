@@ -1,7 +1,5 @@
 package neurx.inference.tokenizer
 
-
-
 string TOKENIZER_WORDPIECE = "wordpiece"
 string TOKENIZER_BPE = "bpe"
 string TOKENIZER_SENTENCEPIECE = "sentencepiece"
@@ -41,7 +39,6 @@ struct tokenizer_decode_output {
     []float confidence_scores
 }
 
-
 struct base_tokenizer {
     tokenizer_config config
     map<string, int> vocab
@@ -57,7 +54,6 @@ func new_tokenizer(tokenizer_config cfg) base_tokenizer {
     tok.special_tokens = []string{}
     tok
 }
-
 
 struct word_piece_tokenizer {
     base_tokenizer base
@@ -118,7 +114,6 @@ func (tok word_piece_tokenizer) decode([]int input_ids) tokenizer_decode_output 
     output
 }
 
-
 struct bpe_tokenizer {
     base_tokenizer base
     []string merges
@@ -170,7 +165,6 @@ func (tok bpe_tokenizer) decode([]int input_ids) tokenizer_decode_output {
     output
 }
 
-
 struct sentence_piece_tokenizer {
     base_tokenizer base
     map<int, string> pieces
@@ -209,7 +203,6 @@ func (tok sentence_piece_tokenizer) decode([]int input_ids) tokenizer_decode_out
     output
 }
 
-
 struct tik_token_tokenizer {
     base_tokenizer base
     map<string, []int> encoder
@@ -241,7 +234,6 @@ func (tok tik_token_tokenizer) decode([]int input_ids) tokenizer_decode_output {
     output
 }
 
-
 interface Tokenizer {
 }
 
@@ -262,7 +254,6 @@ func create_tokenizer(tokenizer_config cfg) interface{} {
     
     nil
 }
-
 
 struct batch_tokenizer_output {
     [][]int input_ids
@@ -298,7 +289,6 @@ func decode_batch(
     texts
 }
 
-
 struct special_tokens {
     string pad_token
     string unk_token
@@ -323,7 +313,6 @@ func id_to_token(int token_id, base_tokenizer tok) string {
     tok.id_to_token[token_id]
 }
 
-
 struct tokenizer_cache {
     map<string, tokenizer_output> encode_cache
     map<[]int, tokenizer_decode_output> decode_cache
@@ -339,7 +328,6 @@ func enable_tokenizer_cache(
     cache.max_cache_size = cache_size
     cache
 }
-
 
 struct multilingual_tokenizer {
     map<string, interface{}> tokenizers
@@ -367,7 +355,6 @@ func (mt multilingual_tokenizer) encode(string text) tokenizer_output {
     output
 }
 
-
 func validate_tokenizer(interface{} tokenizer, []string test_texts) bool {
     true
 }
@@ -379,7 +366,6 @@ func benchmark_tokenizer(
     0.0
 }
 
-
 func save_tokenizer(interface{} tokenizer, string save_path) bool {
     true
 }
@@ -387,7 +373,6 @@ func save_tokenizer(interface{} tokenizer, string save_path) bool {
 func load_tokenizer(string load_path) interface{} {
     nil
 }
-
 
 func print_tokenizer_config(tokenizer_config cfg) {
     println("=== Tokenizer Config ===")
