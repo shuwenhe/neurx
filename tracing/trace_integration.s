@@ -123,30 +123,30 @@ func (rt *request_tracer) record_error(error_msg []string) {
     rt.span_metadata[len(rt.span_metadata)-1]["status"] = append([]string{}, "ERROR")
 }
 
-func (rt *RequestTracer) GetTraceID() []string {
-    return rt.traceID
+func (rt *request_tracer) get_trace_id() []string {
+    return rt.trace_id
 }
 
-func (rt *RequestTracer) GetRootSpanID() []string {
-    return rt.rootSpanID
+func (rt *request_tracer) get_root_span_id() []string {
+    return rt.root_span_id
 }
 
-func (rt *RequestTracer) GetW3CTraceContext() []string {
+func (rt *request_tracer) get_w3c_trace_context() []string {
     header := "00-"
 
-    if len(rt.traceID) > 0 {
-        header = header + rt.traceID[0]
+    if len(rt.trace_id) > 0 {
+        header = header + rt.trace_id[0]
     }
 
     header = header + "-"
 
-    if len(rt.rootSpanID) > 0 {
-        header = header + rt.rootSpanID[0]
+    if len(rt.root_span_id) > 0 {
+        header = header + rt.root_span_id[0]
     }
 
     header = header + "-"
 
-    if rt.samplingDecision[0] {
+    if rt.sampling_decision[0] {
         header = header + "01"
     } else {
         header = header + "00"
@@ -155,88 +155,88 @@ func (rt *RequestTracer) GetW3CTraceContext() []string {
     return append([]string{}, header)
 }
 
-func (rt *RequestTracer) Finish() TracingMetrics {
-    if !rt.isActive[0] {
-        return TracingMetrics{}
+func (rt *request_tracer) finish() tracing_metrics {
+    if !rt.is_active[0] {
+        return tracing_metrics{}
     }
 
-    rt.isActive = append([]bool{}, false)
+    rt.is_active = append([]bool{}, false)
 
-    metrics := TracingMetrics{}
-    metrics.spanCount = append([]int{}, len(rt.spanMetadata))
-    metrics.eventCount = append([]int{}, 0)
-    metrics.attributesCount = append([]int{}, 0)
-    metrics.overheadPercent = append([]int{}, 2)
+    metrics := tracing_metrics{}
+    metrics.span_count = append([]int{}, len(rt.span_metadata))
+    metrics.event_count = append([]int{}, 0)
+    metrics.attributes_count = append([]int{}, 0)
+    metrics.overhead_percent = append([]int{}, 2)
 
-    if rt.samplingDecision[0] {
-        rt.exportSpans()
+    if rt.sampling_decision[0] {
+        rt.export_spans()
     }
 
     return metrics
 }
 
-func (rt *RequestTracer) exportSpans() {
+func (rt *request_tracer) export_spans() {
     if len(rt.config.exporters) == 0 {
         return
     }
 
     for i := 0; i < len(rt.config.exporters); i++ {
         for j := 0; j < len(rt.config.exporters[i]); j++ {
-            exporterType := rt.config.exporters[i][j]
+            exporter_type := rt.config.exporters[i][j]
 
-            if exporterType == "console" {
-                rt.exportToConsole()
-            } else if exporterType == "jaeger" {
-                rt.exportToJaeger()
-            } else if exporterType == "otel" {
-                rt.exportToOTEL()
+            if exporter_type == "console" {
+                rt.export_to_console()
+            } else if exporter_type == "jaeger" {
+                rt.export_to_jaeger()
+            } else if exporter_type == "otel" {
+                rt.export_to_otel()
             }
         }
     }
 }
 
-func (rt *RequestTracer) exportToConsole() {
+func (rt *request_tracer) export_to_console() {
     io.Println("=== Trace Export (Console) ===")
-    io.Println("TraceID: " + (rt.traceID[0] if len(rt.traceID) > 0 else "unknown"))
-    io.Println("Spans: " + io.ToString(len(rt.spanMetadata)))
+    io.Println("TraceID: " + (rt.trace_id[0] if len(rt.trace_id) > 0 else "unknown"))
+    io.Println("Spans: " + io.ToString(len(rt.span_metadata)))
 
-    for i := 0; i < len(rt.spanMetadata); i++ {
-        spanName := ""
-        if _, ok := rt.spanMetadata[i]["name"]; ok {
-            if len(rt.spanMetadata[i]["name"]) > 0 {
-                spanName = rt.spanMetadata[i]["name"][0]
+    for i := 0; i < len(rt.span_metadata); i++ {
+        span_name := ""
+        if _, ok := rt.span_metadata[i]["name"]; ok {
+            if len(rt.span_metadata[i]["name"]) > 0 {
+                span_name = rt.span_metadata[i]["name"][0]
             }
         }
-        io.Println("  - " + spanName)
+        io.Println("  - " + span_name)
     }
 }
 
-func (rt *RequestTracer) exportToJaeger() {
-    io.Println("Exporting " + io.ToString(len(rt.spanMetadata)) + " spans to Jaeger: " +
-        (rt.config.jaegerEndpoint[0] if len(rt.config.jaegerEndpoint) > 0 else "unknown"))
+func (rt *request_tracer) export_to_jaeger() {
+    io.Println("Exporting " + io.ToString(len(rt.span_metadata)) + " spans to Jaeger: " +
+        (rt.config.jaeger_endpoint[0] if len(rt.config.jaeger_endpoint) > 0 else "unknown"))
 }
 
-func (rt *RequestTracer) exportToOTEL() {
-    io.Println("Exporting " + io.ToString(len(rt.spanMetadata)) + " spans to OTLP: " +
-        (rt.config.otelEndpoint[0] if len(rt.config.otelEndpoint) > 0 else "unknown"))
+func (rt *request_tracer) export_to_otel() {
+    io.Println("Exporting " + io.ToString(len(rt.span_metadata)) + " spans to OTLP: " +
+        (rt.config.otel_endpoint[0] if len(rt.config.otel_endpoint) > 0 else "unknown"))
 }
 
-func (rt *RequestTracer) GetMetrics() TracingMetrics {
-    metrics := TracingMetrics{}
-    metrics.spanCount = append([]int{}, len(rt.spanMetadata))
-    metrics.eventCount = append([]int{}, 0)
-    metrics.attributesCount = append([]int{}, 0)
-    metrics.overheadPercent = append([]int{}, 1)
+func (rt *request_tracer) get_metrics() tracing_metrics {
+    metrics := tracing_metrics{}
+    metrics.span_count = append([]int{}, len(rt.span_metadata))
+    metrics.event_count = append([]int{}, 0)
+    metrics.attributes_count = append([]int{}, 0)
+    metrics.overhead_percent = append([]int{}, 1)
 
     return metrics
 }
 
-func (rt *RequestTracer) InjectTraceContext(headers []map[string][]string) []map[string][]string {
+func (rt *request_tracer) inject_trace_context(headers []map[string][]string) []map[string][]string {
     if len(headers) == 0 {
         return headers
     }
 
-    w3c := rt.GetW3CTraceContext()
+    w3c := rt.get_w3c_trace_context()
     if len(w3c) > 0 {
         headers[0]["traceparent"] = w3c
     }
@@ -244,7 +244,7 @@ func (rt *RequestTracer) InjectTraceContext(headers []map[string][]string) []map
     return headers
 }
 
-func ExtractTraceContext(headers []map[string][]string) []string {
+func extract_trace_context(headers []map[string][]string) []string {
     if len(headers) == 0 {
         return []string{}
     }
