@@ -1,14 +1,8 @@
-// NeurX Tokenizers - Core Tokenizer Interface
-// Abstract tokenizer implementation with encoding/decoding support
 
 import "./types"
 import "std/string"
 import "std/vector"
 import "std/hash"
-
-// ============================================================================
-// Core Tokenizer Interface
-// ============================================================================
 
 struct BaseTokenizer {
     config: types.TokenizerConfig,
@@ -21,7 +15,6 @@ struct BaseTokenizer {
     cache_size_bytes: i32,
 }
 
-// NewBaseTokenizer - Create a new base tokenizer
 func NewBaseTokenizer(config: types.TokenizerConfig) &BaseTokenizer {
     tokenizer := new(BaseTokenizer)
     tokenizer.config = config
@@ -44,11 +37,6 @@ func NewBaseTokenizer(config: types.TokenizerConfig) &BaseTokenizer {
     return tokenizer
 }
 
-// ============================================================================
-// Encoding Operations
-// ============================================================================
-
-// Encode - Encode text to token IDs
 func (t: &BaseTokenizer) Encode(text: string) types.TokenizerResult {
     return t.EncodeWithOptions(text, types.EncodingOptions{
         add_special_tokens: true,
@@ -57,11 +45,9 @@ func (t: &BaseTokenizer) Encode(text: string) types.TokenizerResult {
     })
 }
 
-// EncodeWithOptions - Encode with specific options
 func (t: &BaseTokenizer) EncodeWithOptions(text: string, opts: types.EncodingOptions) types.TokenizerResult {
     t.stats.total_encodings += 1
-    
-    // Check cache first
+
     if t.config.cache_enabled {
         if cached, ok := t.cache[text]; ok {
             t.stats.cache_hits += 1
@@ -75,16 +61,13 @@ func (t: &BaseTokenizer) EncodeWithOptions(text: string, opts: types.EncodingOpt
         }
     }
     t.stats.cache_misses += 1
-    
-    // Basic tokenization (simplified)
+
     tokens := t.tokenize_internal(text)
-    
-    // Add special tokens
+
     if opts.add_special_tokens {
         tokens = t.add_special_tokens_internal(tokens)
     }
-    
-    // Truncation
+
     if opts.truncation && opts.max_length > 0 {
         if len(tokens) > opts.max_length {
             if opts.truncation_side == "right" {
@@ -95,16 +78,14 @@ func (t: &BaseTokenizer) EncodeWithOptions(text: string, opts: types.EncodingOpt
             }
         }
     }
-    
-    // Padding
+
     if opts.padding == "max_length" && opts.max_length > 0 {
         padding_needed := opts.max_length - len(tokens)
         for i := 0; i < padding_needed; i += 1 {
             tokens = append(tokens, t.special_tokens.pad_token_id)
         }
     }
-    
-    // Cache result if enabled
+
     if t.config.cache_enabled && len(tokens) < types.DEFAULT_CACHE_SIZE {
         cache_entry := types.TokenCache{
             text: text,
@@ -114,15 +95,15 @@ func (t: &BaseTokenizer) EncodeWithOptions(text: string, opts: types.EncodingOpt
             hit_count: 0,
             size_bytes: len(text) + len(tokens) * 4 + types.CACHE_ENTRY_OVERHEAD_BYTES,
         }
-        
+
         if t.cache_size_bytes + cache_entry.size_bytes < t.config.cache_size {
             t.cache[text] = cache_entry
             t.cache_size_bytes += cache_entry.size_bytes
         }
     }
-    
+
     t.stats.bytes_processed += i64(len(text))
-    
+
     return types.TokenizerResult{
         success: true,
         error_code: types.ERROR_SUCCESS,
@@ -132,7 +113,6 @@ func (t: &BaseTokenizer) EncodeWithOptions(text: string, opts: types.EncodingOpt
     }
 }
 
-// EncodeBatch - Encode multiple texts
 func (t: &BaseTokenizer) EncodeBatch(texts: vec[string]) vec[types.TokenizerResult] {
     results := make(vec[types.TokenizerResult], len(texts))
     for i := 0; i < len(texts); i += 1 {
@@ -141,11 +121,6 @@ func (t: &BaseTokenizer) EncodeBatch(texts: vec[string]) vec[types.TokenizerResu
     return results
 }
 
-// ============================================================================
-// Decoding Operations
-// ============================================================================
-
-// Decode - Decode token IDs to text
 func (t: &BaseTokenizer) Decode(token_ids: vec[i32]) types.TokenizerResult {
     return t.DecodeWithOptions(token_ids, types.DecodingOptions{
         skip_special_tokens: false,
@@ -153,31 +128,27 @@ func (t: &BaseTokenizer) Decode(token_ids: vec[i32]) types.TokenizerResult {
     })
 }
 
-// DecodeWithOptions - Decode with specific options
 func (t: &BaseTokenizer) DecodeWithOptions(token_ids: vec[i32], opts: types.DecodingOptions) types.TokenizerResult {
     t.stats.total_decodings += 1
-    
+
     text_parts := make(vec[string], len(token_ids))
-    
+
     for i := 0; i < len(token_ids); i += 1 {
         token_id := token_ids[i]
-        
-        // Skip special tokens if needed
+
         if opts.skip_special_tokens && t.is_special_token(token_id) {
             continue
         }
-        
-        // Convert token ID to text
+
         if token_text, ok := t.vocab_id_to_text[token_id]; ok {
             text_parts[i] = token_text
         } else {
             text_parts[i] = "<unk>"
         }
     }
-    
-    // Join text parts
+
     decoded_text := t.join_tokens(text_parts, opts.clean_up_tokenization_spaces)
-    
+
     return types.TokenizerResult{
         success: true,
         error_code: types.ERROR_SUCCESS,
@@ -186,7 +157,6 @@ func (t: &BaseTokenizer) DecodeWithOptions(token_ids: vec[i32], opts: types.Deco
     }
 }
 
-// DecodeBatch - Decode multiple token sequences
 func (t: &BaseTokenizer) DecodeBatch(token_sequences: vec[vec[i32]]) vec[types.TokenizerResult] {
     results := make(vec[types.TokenizerResult], len(token_sequences))
     for i := 0; i < len(token_sequences); i += 1 {
@@ -195,17 +165,11 @@ func (t: &BaseTokenizer) DecodeBatch(token_sequences: vec[vec[i32]]) vec[types.T
     return results
 }
 
-// ============================================================================
-// Special Token Operations
-// ============================================================================
-
-// SetSpecialTokens - Set special token IDs
 func (t: &BaseTokenizer) SetSpecialTokens(special: types.SpecialTokens) {
     t.special_tokens = special
-    t.vocab.num_special_tokens = 7  // BOS, EOS, UNK, PAD, CLS, SEP, MASK
+    t.vocab.num_special_tokens = 7
 }
 
-// GetSpecialToken - Get a specific special token ID
 func (t: &BaseTokenizer) GetSpecialToken(name: string) i32 {
     switch name {
     case "bos":
@@ -221,21 +185,14 @@ func (t: &BaseTokenizer) GetSpecialToken(name: string) i32 {
     }
 }
 
-// IsSpecialToken - Check if token ID is special
 func (t: &BaseTokenizer) IsSpecialToken(token_id: i32) bool {
     return t.is_special_token(token_id)
 }
 
-// ============================================================================
-// Vocabulary Operations
-// ============================================================================
-
-// GetVocabularySize - Get vocabulary size
 func (t: &BaseTokenizer) GetVocabularySize() i32 {
     return t.vocab.size
 }
 
-// GetTokenText - Get text representation of token ID
 func (t: &BaseTokenizer) GetTokenText(token_id: i32) string {
     if token_text, ok := t.vocab_id_to_text[token_id]; ok {
         return token_text
@@ -243,7 +200,6 @@ func (t: &BaseTokenizer) GetTokenText(token_id: i32) string {
     return "<unk>"
 }
 
-// GetTokenId - Get token ID from text
 func (t: &BaseTokenizer) GetTokenId(text: string) i32 {
     if token_id, ok := t.vocab_text_to_id[text]; ok {
         return token_id
@@ -251,24 +207,18 @@ func (t: &BaseTokenizer) GetTokenId(text: string) i32 {
     return t.special_tokens.unk_token_id
 }
 
-// ============================================================================
-// Internal Helper Functions
-// ============================================================================
-
-// tokenize_internal - Internal tokenization (simplified)
 func (t: &BaseTokenizer) tokenize_internal(text: string) vec[i32] {
     tokens := make(vec[i32], 0)
-    
-    // Simplified: split by spaces
+
     words := split_string(text, " ")
     for i := 0; i < len(words); i += 1 {
         word := words[i]
         if len(word) > 0 {
-            // Try to get token ID from vocabulary
+
             if token_id, ok := t.vocab_text_to_id[word]; ok {
                 tokens = append(tokens, token_id)
             } else {
-                // Character-level tokenization for unknown words
+
                 for j := 0; j < len(word); j += 1 {
                     char_str := string(word[j])
                     if char_id, ok := t.vocab_text_to_id[char_str]; ok {
@@ -278,28 +228,26 @@ func (t: &BaseTokenizer) tokenize_internal(text: string) vec[i32] {
             }
         }
     }
-    
+
     return tokens
 }
 
-// add_special_tokens_internal - Add BOS/EOS tokens
 func (t: &BaseTokenizer) add_special_tokens_internal(tokens: vec[i32]) vec[i32] {
     result := make(vec[i32], 0)
-    
+
     if t.config.add_bos {
         result = append(result, t.special_tokens.bos_token_id)
     }
-    
+
     result = append_slice(result, tokens)
-    
+
     if t.config.add_eos {
         result = append(result, t.special_tokens.eos_token_id)
     }
-    
+
     return result
 }
 
-// is_special_token - Check if token is special
 func (t: &BaseTokenizer) is_special_token(token_id: i32) bool {
     return token_id == t.special_tokens.bos_token_id ||
            token_id == t.special_tokens.eos_token_id ||
@@ -310,12 +258,11 @@ func (t: &BaseTokenizer) is_special_token(token_id: i32) bool {
            token_id == t.special_tokens.mask_token_id
 }
 
-// join_tokens - Join tokens into text
 func (t: &BaseTokenizer) join_tokens(tokens: vec[string], clean_spaces: bool) string {
     if len(tokens) == 0 {
         return ""
     }
-    
+
     result := ""
     for i := 0; i < len(tokens); i += 1 {
         if i > 0 && clean_spaces {
@@ -323,15 +270,10 @@ func (t: &BaseTokenizer) join_tokens(tokens: vec[string], clean_spaces: bool) st
         }
         result = result + tokens[i]
     }
-    
+
     return result
 }
 
-// ============================================================================
-// Statistics and Reporting
-// ============================================================================
-
-// GetStatistics - Get tokenizer statistics
 func (t: &BaseTokenizer) GetStatistics() types.TokenizerStats {
     if t.stats.total_encodings > 0 {
         t.stats.avg_tokens_per_sequence = f32(t.stats.bytes_processed) / f32(t.stats.total_encodings)
@@ -339,12 +281,10 @@ func (t: &BaseTokenizer) GetStatistics() types.TokenizerStats {
     return t.stats
 }
 
-// ResetStatistics - Reset tokenizer statistics
 func (t: &BaseTokenizer) ResetStatistics() {
     t.stats = types.TokenizerStats{}
 }
 
-// ClearCache - Clear the token cache
 func (t: &BaseTokenizer) ClearCache() {
     for key := range t.cache {
         delete(t.cache, key)
@@ -352,25 +292,20 @@ func (t: &BaseTokenizer) ClearCache() {
     t.cache_size_bytes = 0
 }
 
-// GetCacheStatistics - Get cache statistics
 func (t: &BaseTokenizer) GetCacheStatistics() map[string]i64 {
     stats := make(map[string]i64)
     stats["cache_size_bytes"] = i64(t.cache_size_bytes)
     stats["cache_entries"] = i64(len(t.cache))
     stats["cache_hits"] = t.stats.cache_hits
     stats["cache_misses"] = t.stats.cache_misses
-    
+
     if t.stats.cache_hits + t.stats.cache_misses > 0 {
         hit_rate := i64(100 * t.stats.cache_hits / (t.stats.cache_hits + t.stats.cache_misses))
         stats["cache_hit_rate_percent"] = hit_rate
     }
-    
+
     return stats
 }
-
-// ============================================================================
-// Utility Functions
-// ============================================================================
 
 func simple_hash(s: string) u64 {
     hash := u64(5381)
@@ -381,14 +316,14 @@ func simple_hash(s: string) u64 {
 }
 
 func current_time_ms() i64 {
-    // Simplified: return a fixed value
+
     return i64(0)
 }
 
 func split_string(s: string, sep: string) vec[string] {
     parts := make(vec[string], 0)
     current := ""
-    
+
     for i := 0; i < len(s); i += 1 {
         if string(s[i]) == sep {
             if len(current) > 0 {
@@ -399,11 +334,11 @@ func split_string(s: string, sep: string) vec[string] {
             current = current + string(s[i])
         }
     }
-    
+
     if len(current) > 0 {
         parts = append(parts, current)
     }
-    
+
     return parts
 }
 

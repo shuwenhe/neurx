@@ -1,36 +1,23 @@
-// NeurX Tokenizers - Type Definitions
-// Comprehensive tokenizer types and structures for vLLM-compatible tokenization
 
 import "std/string"
 import "std/vector"
 
-// ============================================================================
-// Enums
-// ============================================================================
-
-// TokenizerType - Different tokenizer implementations
 enum TokenizerType {
-    HUGGINGFACE,      // Hugging Face transformers tokenizer
-    SENTENCEPIECE,    // Google SentencePiece
-    TIKTOKEN,         // OpenAI tiktoken
-    LLAMA,            // LLaMA BPE tokenizer
-    CUSTOM,           // Custom implementation
+    HUGGINGFACE,
+    SENTENCEPIECE,
+    TIKTOKEN,
+    LLAMA,
+    CUSTOM,
 }
 
-// Token type classification
 enum TokenClass {
-    NORMAL,           // Regular token
-    SPECIAL,          // Special tokens (EOS, BOS, etc.)
-    PADDING,          // Padding token
-    UNKNOWN,          // Unknown token
-    SYSTEM,           // System/internal token
+    NORMAL,
+    SPECIAL,
+    PADDING,
+    UNKNOWN,
+    SYSTEM,
 }
 
-// ============================================================================
-// Structures
-// ============================================================================
-
-// Token - Basic token information
 struct Token {
     id: i32,
     text: string,
@@ -38,7 +25,6 @@ struct Token {
     special: bool,
 }
 
-// TokenizerConfig - Configuration for tokenizer initialization
 struct TokenizerConfig {
     model_name: string,
     tokenizer_type: TokenizerType,
@@ -53,7 +39,6 @@ struct TokenizerConfig {
     lowercase: bool,
 }
 
-// TokenizerStats - Statistics for tokenizer operations
 struct TokenizerStats {
     total_encodings: i64,
     total_decodings: i64,
@@ -65,7 +50,6 @@ struct TokenizerStats {
     decoding_time_ms: f32,
 }
 
-// TokenizerResult - Return value for tokenizer operations
 struct TokenizerResult {
     success: bool,
     error_code: i32,
@@ -76,18 +60,16 @@ struct TokenizerResult {
     timestamp_ms: i64,
 }
 
-// SpecialTokens - Special token IDs mapping
 struct SpecialTokens {
-    bos_token_id: i32,         // Beginning of sequence
-    eos_token_id: i32,         // End of sequence
-    unk_token_id: i32,         // Unknown token
-    pad_token_id: i32,         // Padding token
-    cls_token_id: i32,         // Classification token
-    sep_token_id: i32,         // Separator token
-    mask_token_id: i32,        // Mask token
+    bos_token_id: i32,
+    eos_token_id: i32,
+    unk_token_id: i32,
+    pad_token_id: i32,
+    cls_token_id: i32,
+    sep_token_id: i32,
+    mask_token_id: i32,
 }
 
-// TokenizerVocab - Vocabulary information
 struct TokenizerVocab {
     size: i32,
     min_token_id: i32,
@@ -98,25 +80,22 @@ struct TokenizerVocab {
     language: string,
 }
 
-// EncodingOptions - Options for encoding operations
 struct EncodingOptions {
     add_special_tokens: bool,
     max_length: i32,
-    padding: string,           // "max_length", "do_not_pad"
+    padding: string,
     truncation: bool,
-    truncation_side: string,   // "right", "left"
+    truncation_side: string,
     return_attention_mask: bool,
     return_token_type_ids: bool,
 }
 
-// DecodingOptions - Options for decoding operations
 struct DecodingOptions {
     skip_special_tokens: bool,
     clean_up_tokenization_spaces: bool,
     use_source_tokenizer: bool,
 }
 
-// TokenSequence - Represents a sequence of tokens
 struct TokenSequence {
     tokens: vec[i32],
     text_tokens: vec[string],
@@ -126,7 +105,6 @@ struct TokenSequence {
     length: i32,
 }
 
-// TokenCache - Entry for token cache
 struct TokenCache {
     text: string,
     tokens: vec[i32],
@@ -136,7 +114,6 @@ struct TokenCache {
     size_bytes: i32,
 }
 
-// EncodingStats - Statistics for a single encoding operation
 struct EncodingStats {
     input_length: i32,
     output_length: i32,
@@ -146,7 +123,6 @@ struct EncodingStats {
     padding_added: i32,
 }
 
-// VocabularyEntry - Single vocabulary entry
 struct VocabularyEntry {
     token_id: i32,
     text: string,
@@ -156,7 +132,6 @@ struct VocabularyEntry {
     encoding_length: i32,
 }
 
-// TokenStatistics - Detailed token statistics
 struct TokenStatistics {
     token_id: i32,
     occurrences: i64,
@@ -165,10 +140,6 @@ struct TokenStatistics {
     entropy: f32,
     cross_entropy: f32,
 }
-
-// ============================================================================
-// Error Codes
-// ============================================================================
 
 const ERROR_SUCCESS = 0
 const ERROR_INVALID_CONFIG = -1
@@ -182,16 +153,11 @@ const ERROR_CACHE_FULL = -8
 const ERROR_INVALID_ENCODING_OPTIONS = -9
 const ERROR_TRUNCATION_FAILED = -10
 
-// ============================================================================
-// Constants
-// ============================================================================
-
 const DEFAULT_CACHE_SIZE = 10000
 const DEFAULT_MAX_TOKEN_LENGTH = 512
 const DEFAULT_VOCAB_SIZE = 32000
 const CACHE_ENTRY_OVERHEAD_BYTES = 256
 
-// Token ID ranges for common models
 const LLAMA_VOCAB_SIZE = 32000
 const QWEN_VOCAB_SIZE = 152064
 const GPT_VOCAB_SIZE = 50257

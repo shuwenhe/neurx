@@ -1,12 +1,7 @@
-# NeurX Tokenizers - Build Configuration
-# Makefile for tokenizer module compilation and testing
-
-# Compiler and flags
 SC := scc
 CFLAGS := -O2
 DEBUG_FLAGS := -g -D DEBUG
 
-# Directories
 SRC_DIR := .
 BUILD_DIR := build
 BIN_DIR := $(BUILD_DIR)/bin
@@ -14,7 +9,6 @@ OBJ_DIR := $(BUILD_DIR)/obj
 EXAMPLES_DIR := examples
 TESTS_DIR := tests
 
-# Source files
 CORE_SOURCES := \
 	types.s \
 	tokenizer.s \
@@ -28,11 +22,9 @@ CORE_OBJECTS := $(CORE_SOURCES:%.s=$(OBJ_DIR)/%.o)
 EXAMPLE_SOURCES := $(EXAMPLES_DIR)/basic_example.s $(EXAMPLES_DIR)/advanced_example.s
 TEST_SOURCES := $(TESTS_DIR)/tokenizers_tests.s
 
-# Targets
 EXAMPLE_BINS := $(BIN_DIR)/basic_example $(BIN_DIR)/advanced_example
 TEST_BIN := $(BIN_DIR)/tokenizers_tests
 
-# Default target
 .PHONY: help
 help:
 	@echo "NeurX Tokenizers - Build System"
@@ -48,25 +40,21 @@ help:
 	@echo "  make all         - Build everything"
 	@echo ""
 
-# Main build target
 .PHONY: build
 build: $(BIN_DIR) $(OBJ_DIR) $(CORE_OBJECTS)
 	@echo "✓ Core modules compiled successfully"
 	@echo "  Compiled objects: $(CORE_OBJECTS)"
 
-# Create build directories
 $(BIN_DIR):
 	@mkdir -p $(BIN_DIR)
 
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
-# Compile core objects
 $(OBJ_DIR)/%.o: %.s
 	$(SC) $(CFLAGS) -c $< -o $@
 	@echo "  Compiled: $<"
 
-# Build examples
 .PHONY: examples
 examples: build $(EXAMPLE_BINS)
 	@echo "✓ All examples built successfully"
@@ -79,12 +67,10 @@ $(BIN_DIR)/advanced_example: $(EXAMPLES_DIR)/advanced_example.s $(CORE_OBJECTS)
 	$(SC) $(CFLAGS) $< $(CORE_OBJECTS) -o $@
 	@echo "  Built: $@"
 
-# Build tests
 $(TEST_BIN): $(TESTS_DIR)/tokenizers_tests.s $(CORE_OBJECTS)
 	$(SC) $(CFLAGS) $< $(CORE_OBJECTS) -o $@
 	@echo "  Built: $@"
 
-# Run tests
 .PHONY: test
 test: $(TEST_BIN)
 	@echo ""
@@ -92,12 +78,10 @@ test: $(TEST_BIN)
 	@echo "===================="
 	$(TEST_BIN)
 
-# Quick build and test
 .PHONY: quick
 quick: clean build test
 	@echo "✓ Quick build completed"
 
-# Build everything
 .PHONY: all
 all: build examples test
 	@echo ""
@@ -108,7 +92,6 @@ all: build examples test
 	@echo "  Examples: $(EXAMPLE_BINS)"
 	@echo "  Tests: $(TEST_BIN)"
 
-# Run basic example
 .PHONY: run-basic
 run-basic: $(BIN_DIR)/basic_example
 	@echo ""
@@ -116,7 +99,6 @@ run-basic: $(BIN_DIR)/basic_example
 	@echo "========================"
 	$(BIN_DIR)/basic_example
 
-# Run advanced example
 .PHONY: run-advanced
 run-advanced: $(BIN_DIR)/advanced_example
 	@echo ""
@@ -124,13 +106,11 @@ run-advanced: $(BIN_DIR)/advanced_example
 	@echo "============================"
 	$(BIN_DIR)/advanced_example
 
-# Run all examples
 .PHONY: run-examples
 run-examples: run-basic run-advanced
 	@echo ""
 	@echo "✓ All examples completed"
 
-# Generate documentation
 .PHONY: docs
 docs:
 	@echo "Generating documentation..."
@@ -158,7 +138,6 @@ docs:
 	@echo "" >> GENERATED_DOCS.md
 	@echo "✓ Documentation generated: GENERATED_DOCS.md"
 
-# Static analysis
 .PHONY: check
 check:
 	@echo "Running static checks..."
@@ -169,21 +148,18 @@ check:
 	@echo "Total examples: 2"
 	@echo "Total tests: 14"
 
-# Clean build artifacts
 .PHONY: clean
 clean:
 	@echo "Cleaning build artifacts..."
 	@rm -rf $(BUILD_DIR)
 	@echo "✓ Clean complete"
 
-# Cleanup everything
 .PHONY: distclean
 distclean: clean
 	@rm -f GENERATED_DOCS.md
 	@rm -f *.log
 	@echo "✓ Distribution clean complete"
 
-# Stats
 .PHONY: stats
 stats:
 	@echo "Tokenizers Module Statistics"
@@ -201,7 +177,6 @@ stats:
 	@echo "Total:"
 	@wc -l $(CORE_SOURCES) $(EXAMPLE_SOURCES) $(TEST_SOURCES) | tail -1
 
-# Display build info
 .PHONY: info
 info:
 	@echo "NeurX Tokenizers Module"
@@ -218,5 +193,3 @@ info:
 	@echo "  Tests: 1"
 	@echo ""
 	@echo "Use 'make help' for available commands"
-
-.PHONY: .PHONY
