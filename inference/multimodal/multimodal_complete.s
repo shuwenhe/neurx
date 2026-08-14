@@ -93,19 +93,19 @@ func normalize_image(
     normalized.channels = tensor.channels
     normalized.color_space = tensor.color_space
     normalized.data = [][]float{}
-    
+
     for c = 0; c < tensor.channels; c = c + 1 {
         []float channel_data = tensor.data[c]
         []float normalized_channel = []float{}
-        
+
         for i = 0; i < len(channel_data); i = i + 1 {
             float normalized_val = (channel_data[i] - mean[c]) / std[c]
             normalized_channel = append(normalized_channel, normalized_val)
         }
-        
+
         normalized.data = append(normalized.data, normalized_channel)
     }
-    
+
     normalized
 }
 
@@ -115,18 +115,18 @@ func augment_image(
 ) image_data {
 
     image_data augmented = img
-    
+
     if cfg.center_crop {
         int crop_size = min(img.width, img.height)
         int x = (img.width - crop_size) / 2
         int y = (img.height - crop_size) / 2
         augmented = crop_image(img, x, y, crop_size, crop_size)
     }
-    
+
     if cfg.random_flip {
 
     }
-    
+
     augmented
 }
 
@@ -150,15 +150,13 @@ struct vit_encoder {
 func new_vit_encoder(vit_config cfg) vit_encoder {
     vit_encoder encoder
     encoder.config = cfg
-    
 
     int num_patches = (cfg.image_size / cfg.patch_size) * (cfg.image_size / cfg.patch_size)
-    
 
     encoder.patch_embedding_weights = [][]float{}
     encoder.position_embeddings = [][]float{}
     encoder.cls_token = [][]float{}
-    
+
     encoder
 }
 
@@ -168,11 +166,11 @@ func extract_patches(
 ) []vit_patch {
 
     []vit_patch patches = []vit_patch{}
-    
+
     int patch_size = config.patch_size
     int num_patches_h = image.height / patch_size
     int num_patches_w = image.width / patch_size
-    
+
     for ph = 0; ph < num_patches_h; ph = ph + 1 {
         for pw = 0; pw < num_patches_w; pw = pw + 1 {
             vit_patch patch
@@ -182,7 +180,7 @@ func extract_patches(
             patches = append(patches, patch)
         }
     }
-    
+
     patches
 }
 
@@ -192,12 +190,12 @@ func encode_patches_to_embedding(
 ) [][]float {
 
     [][]float embeddings = [][]float{}
-    
+
     for i = 0; i < len(patches); i = i + 1 {
         []float embedding = encoder.patch_embedding_weights[0]
         embeddings = append(embeddings, embedding)
     }
-    
+
     embeddings
 }
 
@@ -207,7 +205,7 @@ func apply_position_embedding(
 ) [][]float {
 
     [][]float with_pos_emb = [][]float{}
-    
+
     for i = 0; i < len(patch_embeddings); i = i + 1 {
         []float emb = patch_embeddings[i]
         if i < len(encoder.position_embeddings) {
@@ -215,7 +213,7 @@ func apply_position_embedding(
         }
         with_pos_emb = append(with_pos_emb, emb)
     }
-    
+
     with_pos_emb
 }
 
@@ -225,11 +223,11 @@ func vit_transformer_layers(
 ) [][]float {
 
     [][]float output = embeddings
-    
+
     for layer = 0; layer < encoder.config.num_layers; layer = layer + 1 {
 
     }
-    
+
     output
 }
 
@@ -249,26 +247,19 @@ func vit_inference_pipeline(
 
     image_data preprocessed = augment_image(image, preprocess_cfg)
     preprocessed = resize_image(preprocessed, preprocess_cfg.target_width, preprocess_cfg.target_height)
-    
 
-    
     image_tensor tensor
-    
 
     []vit_patch patches = extract_patches(tensor, encoder.config)
-    
 
     [][]float patch_embeds = encode_patches_to_embedding(patches, encoder)
-    
 
     patch_embeds = apply_position_embedding(patch_embeds, encoder)
-    
 
     [][]float transformer_out = vit_transformer_layers(patch_embeds, encoder)
-    
 
     []float image_features = vit_pooling(transformer_out)
-    
+
     image_features
 }
 
@@ -295,9 +286,7 @@ func project_image_features(
 ) []float {
 
     []float projected = image_features
-    
 
-    
     projected
 }
 
@@ -308,12 +297,12 @@ func fuse_image_and_text_embeddings(
 ) []float {
 
     []float fused = []float{}
-    
+
     for i = 0; i < len(text_embeddings); i = i + 1 {
         float fused_val = text_embeddings[i] + image_features[0] * fusion_weight
         fused = append(fused, fused_val)
     }
-    
+
     fused
 }
 
@@ -462,12 +451,12 @@ func process_image_batch(
 ) [][]float {
 
     [][]float batch_features = [][]float{}
-    
+
     for i = 0; i < len(images); i = i + 1 {
         []float features = vit_inference_pipeline(images[i], encoder, cfg)
         batch_features = append(batch_features, features)
     }
-    
+
     batch_features
 }
 
@@ -502,7 +491,6 @@ func print_vit_config(vit_config cfg) {
 
 func main() {
     println("=== Complete Multimodal Image Support ===")
-    
 
     vit_config vit_cfg
     vit_cfg.patch_size = 16
@@ -511,30 +499,25 @@ func main() {
     vit_cfg.hidden_dim = 768
     vit_cfg.num_heads = 12
     vit_cfg.mlp_dim = 3072
-    
+
     print_vit_config(vit_cfg)
-    
 
     vit_encoder encoder = new_vit_encoder(vit_cfg)
     println("ViT Encoder initialized!")
-    
 
     image_data img
     img.width = 224
     img.height = 224
     img.channels = 3
     img.format = "png"
-    
+
     print_image_info(img)
-    
 
     image_preprocess_config preprocess_cfg = new_image_preprocess_config()
     println("Image preprocessing configured!")
-    
 
     multimodal_cache cache = new_multimodal_cache(1000)
     println("Multimodal cache created!")
-    
 
     vision_language_bridge bridge = new_vision_language_bridge(768, 768)
     println("Vision-Language bridge initialized!")

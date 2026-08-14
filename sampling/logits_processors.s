@@ -21,7 +21,7 @@ func (tp: &temperature_processor) apply(logits: &vec[float]) result[vec[float], 
             message: "Temperature must be positive",
         })
     }
-    
+
     let result_logits = vec[float]()
     let i = 0
     while i < logits.len() {
@@ -29,7 +29,7 @@ func (tp: &temperature_processor) apply(logits: &vec[float]) result[vec[float], 
         result_logits.push(scaled)
         i = i + 1
     }
-    
+
     result::ok(result_logits)
 }
 
@@ -41,7 +41,7 @@ func find_kth_largest(logits: &vec[float], k: int) float {
     if k >= logits.len() {
         return logits[0]
     }
-    
+
     let max_val = logits[0]
     let i = 1
     while i < logits.len() {
@@ -50,7 +50,7 @@ func find_kth_largest(logits: &vec[float], k: int) float {
         }
         i = i + 1
     }
-    
+
     max_val
 }
 
@@ -61,13 +61,13 @@ func (tp: &top_k_processor) apply(logits: &vec[float]) result[vec[float], proces
             message: "K must be positive",
         })
     }
-    
+
     if tp.k >= logits.len() {
         return result::ok(logits)
     }
-    
+
     let threshold = find_kth_largest(logits, tp.k)
-    
+
     let result_logits = vec[float]()
     let i = 0
     while i < logits.len() {
@@ -78,7 +78,7 @@ func (tp: &top_k_processor) apply(logits: &vec[float]) result[vec[float], proces
         }
         i = i + 1
     }
-    
+
     result::ok(result_logits)
 }
 
@@ -95,7 +95,7 @@ func softmax(logits: &vec[float]) vec[float] {
         }
         i = i + 1
     }
-    
+
     let exps = vec[float]()
     let sum_exp = 0.0
     let i = 0
@@ -105,7 +105,7 @@ func softmax(logits: &vec[float]) vec[float] {
         sum_exp = sum_exp + exp_val
         i = i + 1
     }
-    
+
     let probs = vec[float]()
     let i = 0
     while i < exps.len() {
@@ -113,7 +113,7 @@ func softmax(logits: &vec[float]) vec[float] {
         probs.push(prob)
         i = i + 1
     }
-    
+
     probs
 }
 
@@ -124,9 +124,9 @@ func (np: &nucleus_processor) apply(logits: &vec[float]) result[vec[float], proc
             message: "top_p must be in (0, 1]",
         })
     }
-    
+
     let probs = softmax(logits)
-    
+
     let cumsum = vec[float]()
     let cum = 0.0
     let i = 0
@@ -135,7 +135,7 @@ func (np: &nucleus_processor) apply(logits: &vec[float]) result[vec[float], proc
         cumsum.push(cum)
         i = i + 1
     }
-    
+
     let threshold = 0.0
     let i = 0
     while i < cumsum.len() {
@@ -145,7 +145,7 @@ func (np: &nucleus_processor) apply(logits: &vec[float]) result[vec[float], proc
         }
         i = i + 1
     }
-    
+
     let result_logits = vec[float]()
     let i = 0
     while i < logits.len() {
@@ -156,7 +156,7 @@ func (np: &nucleus_processor) apply(logits: &vec[float]) result[vec[float], proc
         }
         i = i + 1
     }
-    
+
     result::ok(result_logits)
 }
 
@@ -172,7 +172,7 @@ func (fp: &frequency_penalty_processor) apply(logits: &vec[float]) result[vec[fl
             message: "Penalty must be non-negative",
         })
     }
-    
+
     let result_logits = vec[float]()
     let i = 0
     while i < logits.len() {
@@ -180,12 +180,12 @@ func (fp: &frequency_penalty_processor) apply(logits: &vec[float]) result[vec[fl
         if fp.token_counts.contains(i) {
             count = fp.token_counts.get(i)
         }
-        
+
         let penalized = logits[i] - fp.penalty * (count as float)
         result_logits.push(penalized)
         i = i + 1
     }
-    
+
     result::ok(result_logits)
 }
 
@@ -200,7 +200,7 @@ func (lp: &length_penalty_processor) apply(logits: &vec[float]) result[vec[float
             message: "Penalty must be non-negative",
         })
     }
-    
+
     let result_logits = vec[float]()
     let i = 0
     while i < logits.len() {
@@ -208,7 +208,7 @@ func (lp: &length_penalty_processor) apply(logits: &vec[float]) result[vec[float
         result_logits.push(adjusted)
         i = i + 1
     }
-    
+
     result::ok(result_logits)
 }
 
@@ -224,7 +224,7 @@ func (rp: &repetition_penalty_processor) apply(logits: &vec[float]) result[vec[f
             message: "Penalty must be >= 1.0",
         })
     }
-    
+
     let result_logits = vec[float]()
     let i = 0
     while i < logits.len() {
@@ -237,7 +237,7 @@ func (rp: &repetition_penalty_processor) apply(logits: &vec[float]) result[vec[f
             }
             j = j + 1
         }
-        
+
         if is_repeated {
             if logits[i] > 0.0 {
                 result_logits.push(logits[i] / rp.penalty)
@@ -249,7 +249,7 @@ func (rp: &repetition_penalty_processor) apply(logits: &vec[float]) result[vec[f
         }
         i = i + 1
     }
-    
+
     result::ok(result_logits)
 }
 
@@ -291,7 +291,7 @@ func (pipeline: &mut logits_processor_pipeline) with_temperature(
             message: "Temperature must be positive",
         })
     }
-    
+
     pipeline.temperature_proc = option::some(temperature_processor { temperature: temperature })
     result::ok(())
 }
@@ -305,7 +305,7 @@ func (pipeline: &mut logits_processor_pipeline) with_top_k(
             message: "K must be positive",
         })
     }
-    
+
     pipeline.top_k_proc = option::some(top_k_processor { k: k })
     result::ok(())
 }
@@ -319,7 +319,7 @@ func (pipeline: &mut logits_processor_pipeline) with_nucleus(
             message: "top_p must be in (0, 1]",
         })
     }
-    
+
     pipeline.nucleus_proc = option::some(nucleus_processor { top_p: top_p })
     result::ok(())
 }
@@ -328,28 +328,28 @@ func (pipeline: &logits_processor_pipeline) process(
     logits: &vec[float]
 ) result[vec[float], processor_error] {
     let mut result_logits = logits
-    
+
     switch pipeline.temperature_proc {
         option::some(tp) : {
             result_logits = tp.apply(result_logits)?
         },
         option::none : {},
     }
-    
+
     switch pipeline.top_k_proc {
         option::some(tp) : {
             result_logits = tp.apply(result_logits)?
         },
         option::none : {},
     }
-    
+
     switch pipeline.nucleus_proc {
         option::some(np) : {
             result_logits = np.apply(result_logits)?
         },
         option::none : {},
     }
-    
+
     result::ok(result_logits)
 }
 
@@ -360,12 +360,12 @@ func main() {
     logits.push(3.0)
     logits.push(4.0)
     logits.push(5.0)
-    
+
     let mut pipeline = logits_processor_pipeline::new()
     pipeline.with_temperature(0.7)?
     pipeline.with_top_k(3)?
     pipeline.with_nucleus(0.9)?
-    
+
     switch pipeline.process(logits) {
         result::ok(processed) : {
             ""

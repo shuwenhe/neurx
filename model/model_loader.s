@@ -319,42 +319,42 @@ func (config: &model_config) is_valid() result[(), model_loader_error] {
             message: "Hidden size must be positive",
         })
     }
-    
+
     if config.num_hidden_layers <= 0 {
         return result::err(model_loader_error {
             code: "INVALID_CONFIG",
             message: "Number of layers must be positive",
         })
     }
-    
+
     if config.vocab_size <= 0 {
         return result::err(model_loader_error {
             code: "INVALID_CONFIG",
             message: "Vocab size must be positive",
         })
     }
-    
+
     if config.num_attention_heads <= 0 {
         return result::err(model_loader_error {
             code: "INVALID_CONFIG",
             message: "Number of attention heads must be positive",
         })
     }
-    
+
     if config.hidden_size % config.num_attention_heads != 0 {
         return result::err(model_loader_error {
             code: "INVALID_CONFIG",
             message: "Hidden size must be divisible by number of attention heads",
         })
     }
-    
+
     result::ok(())
 }
 
 func load_model_architecture(model_name: string) result[model_architecture, model_loader_error] {
     let config = create_model_config(model_name)?
     config.is_valid()?
-    
+
     result::ok(model_architecture {
         model_type: model_name,
         config: config,
@@ -369,7 +369,7 @@ func main() {
     model_names.push("deepseek")
     model_names.push("mistral")
     model_names.push("phi")
-    
+
     let i = 0
     while i < model_names.len() {
         let name = model_names[i]
