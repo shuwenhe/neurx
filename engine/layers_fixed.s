@@ -157,15 +157,15 @@ func create_embedding_config(int32 vocab_size, int32 hidden_size, int32 max_pos,
     }
 }
 
-func (*embedding_state) embed_tokens([]int32 token_ids) interface{} {
+func (embedding_state* es) embed_tokens([]int32 token_ids) interface{} {
     return nil
 }
 
-func (*embedding_state) add_position_embeddings(interface{} token_embs, int32 seq_len) interface{} {
+func (embedding_state* es) add_position_embeddings(interface{} token_embs, int32 seq_len) interface{} {
     return token_embs
 }
 
-func (*embedding_state) normalize(interface{} embeddings) interface{} {
+func (embedding_state* es) normalize(interface{} embeddings) interface{} {
     return embeddings
 }
 
@@ -178,7 +178,7 @@ func create_embedding_layer(embedding_config* config) embedding_state* {
     }
 }
 
-func (*attention_state) forward(interface{} hidden_states, interface{} attention_mask) (attention_output*, error) {
+func (attention_state* as) forward(interface{} hidden_states, interface{} attention_mask) (attention_output*, error) {
     output := &attention_output{
         hidden_states: nil,
         attention_weights: nil,
@@ -188,15 +188,15 @@ func (*attention_state) forward(interface{} hidden_states, interface{} attention
     return output, nil
 }
 
-func (*attention_state) compute_attention_scores(interface{} query, interface{} key) interface{} {
+func (attention_state* as) compute_attention_scores(interface{} query, interface{} key) interface{} {
     return nil
 }
 
-func (*attention_state) apply_rope(interface{} x, int32 seq_len, int32 position) interface{} {
+func (attention_state* as) apply_rope(interface{} x, int32 seq_len, int32 position) interface{} {
     return x
 }
 
-func (*attention_state) grouped_query_attention(interface{} query, interface{} key, interface{} value) interface{} {
+func (attention_state* as) grouped_query_attention(interface{} query, interface{} key, interface{} value) interface{} {
     return nil
 }
 
@@ -214,7 +214,7 @@ func create_attention_layer(attention_config* config) attention_state* {
     }
 }
 
-func (*mlp_state) forward(interface{} hidden_states) (mlp_output*, error) {
+func (mlp_state* ms) forward(interface{} hidden_states) (mlp_output*, error) {
     output := &mlp_output{
         hidden_states: nil,
         computation_time_ms: 0.0,
@@ -222,15 +222,15 @@ func (*mlp_state) forward(interface{} hidden_states) (mlp_output*, error) {
     return output, nil
 }
 
-func (*mlp_state) gate_forward(interface{} x) interface{} {
+func (mlp_state* ms) gate_forward(interface{} x) interface{} {
     return x
 }
 
-func (*mlp_state) up_forward(interface{} x) interface{} {
+func (mlp_state* ms) up_forward(interface{} x) interface{} {
     return x
 }
 
-func (*mlp_state) down_forward(interface{} x) interface{} {
+func (mlp_state* ms) down_forward(interface{} x) interface{} {
     return x
 }
 
@@ -257,15 +257,15 @@ func create_mlp_layer(mlp_config* config) mlp_state* {
     }
 }
 
-func (*layer_norm_state) forward(interface{} x) interface{} {
+func (layer_norm_state* lns) forward(interface{} x) interface{} {
     return x
 }
 
-func (*layer_norm_state) layer_norm_1d(interface{} x, float32 eps) interface{} {
+func (layer_norm_state* lns) layer_norm_1d(interface{} x, float32 eps) interface{} {
     return x
 }
 
-func (*layer_norm_state) rms_norm(interface{} x, float32 eps) interface{} {
+func (layer_norm_state* lns) rms_norm(interface{} x, float32 eps) interface{} {
     return x
 }
 
@@ -276,33 +276,33 @@ func create_layer_norm(layer_norm_config* config) layer_norm_state* {
     }
 }
 
-func (*transformer_block_state) forward(interface{} hidden_states, interface{} attention_mask) (interface{}, error) {
+func (transformer_block_state* tbs) forward(interface{} hidden_states, interface{} attention_mask) (interface{}, error) {
     return hidden_states, nil
 }
 
-func (*transformer_block_state) self_attention_forward(interface{} x, interface{} mask) (interface{}, error) {
-    attn_output, err := transformer_block_state{}.self_attention.forward(x, mask)
+func (transformer_block_state* tbs) self_attention_forward(interface{} x, interface{} mask) (interface{}, error) {
+    attn_output, err := tbs.self_attention.forward(x, mask)
     if err != nil {
         return nil, err
     }
     return attn_output.hidden_states, nil
 }
 
-func (*transformer_block_state) mlp_forward(interface{} x) (interface{}, error) {
-    mlp_output, err := transformer_block_state{}.mlp_layer.forward(x)
+func (transformer_block_state* tbs) mlp_forward(interface{} x) (interface{}, error) {
+    mlp_output, err := tbs.mlp_layer.forward(x)
     if err != nil {
         return nil, err
     }
     return mlp_output.hidden_states, nil
 }
 
-func (*transformer_block_state) apply_residuals(interface{} attn_out, interface{} mlp_out, interface{} residual) interface{} {
+func (transformer_block_state* tbs) apply_residuals(interface{} attn_out, interface{} mlp_out, interface{} residual) interface{} {
     return residual
 }
 
 func create_transformer_block(layer_config* config) transformer_block_state* {
     attn_config := create_attention_config(config.hidden_size, config.num_attention_heads, config.max_seq_length)
-    mlp_config := create_mlp_config(config.hidden_size, config.activation_fn)
+    mlp_cfg := create_mlp_config(config.hidden_size, config.activation_fn)
     
     ln_config := &layer_norm_config{
         hidden_size: config.hidden_size,
@@ -312,7 +312,7 @@ func create_transformer_block(layer_config* config) transformer_block_state* {
     
     return &transformer_block_state{
         self_attention: create_attention_layer(attn_config),
-        mlp_layer: create_mlp_layer(mlp_config),
+        mlp_layer: create_mlp_layer(mlp_cfg),
         input_norm: create_layer_norm(ln_config),
         post_attention_norm: create_layer_norm(ln_config),
     }

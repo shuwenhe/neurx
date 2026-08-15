@@ -189,7 +189,7 @@ func (*kernel_registry) select_best_kernel(kernel_type kt, compute_capability ca
     return best_kernel
 }
 
-func create_matmul_kernel_config(int32 m, int32 n, int32 k) *matmul_config {
+func create_matmul_kernel_config(int32 m, int32 n, int32 k) matmul_config* {
     return &matmul_config{
         m: m,
         n: n,
@@ -216,7 +216,7 @@ func (*kernel_registry) fused_matmul_bias_activation(matmul_config* config, inte
     return nil, nil
 }
 
-func create_attention_kernel_config(int32 batch, int32 seq_len, int32 num_heads, int32 head_dim) *attention_kernel_config {
+func create_attention_kernel_config(int32 batch, int32 seq_len, int32 num_heads, int32 head_dim) attention_kernel_config* {
     return &attention_kernel_config{
         batch_size: batch,
         seq_length: seq_len,
@@ -245,7 +245,7 @@ func (*kernel_registry) paged_attention(attention_kernel_config* config, interfa
     return nil, nil
 }
 
-func create_rope_kernel_config(int32 dim, int32 max_seq, float32 theta) *rope_config {
+func create_rope_kernel_config(int32 dim, int32 max_seq, float32 theta) rope_config* {
     return &rope_config{
         dim: dim,
         max_seq_length: max_seq,
@@ -267,7 +267,7 @@ func (*kernel_registry) rope_backward(rope_config* config, interface{} grad_outp
     return grad_output, nil
 }
 
-func create_layer_norm_kernel_config(int32 hidden_size) *layer_norm_kernel_config {
+func create_layer_norm_kernel_config(int32 hidden_size) layer_norm_kernel_config* {
     return &layer_norm_kernel_config{
         num_elements: 0,
         hidden_size: hidden_size,
@@ -290,7 +290,7 @@ func (*kernel_registry) fused_layer_norm_residual(layer_norm_kernel_config* conf
     return x, nil
 }
 
-func create_softmax_kernel_config(int32 batch, int32 seq_len) *softmax_kernel_config {
+func create_softmax_kernel_config(int32 batch, int32 seq_len) softmax_kernel_config* {
     return &softmax_kernel_config{
         batch_size: batch,
         seq_length: seq_len,
@@ -312,7 +312,7 @@ func (*kernel_registry) softmax_with_temperature(softmax_kernel_config* config, 
     return x, nil
 }
 
-func create_activation_kernel_config(int64 num_elements, activation_fn_type act) *activation_kernel_config {
+func create_activation_kernel_config(int64 num_elements, activation_fn_type act) activation_kernel_config* {
     return &activation_kernel_config{
         num_elements: num_elements,
         activation_type: act,
@@ -341,7 +341,7 @@ func (*kernel_registry) relu(interface{} x) (interface{}, error) {
     return x, nil
 }
 
-func create_reduce_kernel_config(int64 num_elements, string reduce_type) *reduce_kernel_config {
+func create_reduce_kernel_config(int64 num_elements, string reduce_type) reduce_kernel_config* {
     return &reduce_kernel_config{
         num_elements: num_elements,
         reduce_type: reduce_type,
@@ -367,7 +367,7 @@ func (*kernel_registry) fuse_kernels([]kernel_type kernels_to_fuse) (interface{}
     return nil, nil
 }
 
-func (*kernel_registry) get_kernel_performance_stats(string kernel_name) *kernel_perf_stats {
+func (*kernel_registry) get_kernel_performance_stats(string kernel_name) kernel_perf_stats* {
     return &kernel_perf_stats{
         kernel_name: kernel_name,
         total_calls: 0,
@@ -394,7 +394,7 @@ func (*kernel_registry) optimize_for_device(compute_capability cap) error {
     return nil
 }
 
-func create_kernel_cache() *kernel_cache {
+func create_kernel_cache() kernel_cache* {
     return &kernel_cache{
         compiled_kernels: make(map[string]interface{}),
         kernel_configs: make(map[string]*kernel_config),
