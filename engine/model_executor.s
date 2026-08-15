@@ -35,154 +35,154 @@ const (
 )
 
 struct model_weight_spec {
-    name                string
-    shape               []int32
-    dtype               model_dtype
-    offset              int64
-    size_bytes          int64
-    storage_location    string
-    is_quantized        bool
-    quantization_config interface{}
+    string name
+    []int32 shape
+    model_dtype dtype
+    int64 offset
+    int64 size_bytes
+    string storage_location
+    bool is_quantized
+    interface{} quantization_config
 }
 
 struct model_weight_map {
-    weights             map[string]*model_weight_spec
-    total_size_bytes    int64
-    num_weights         int32
-    dtype               model_dtype
-    quantization_type   string
+    map[string]*model_weight_spec weights
+    int64 total_size_bytes
+    int32 num_weights
+    model_dtype dtype
+    string quantization_type
 }
 
 struct model_config_spec {
-    model_id                string
-    model_name              string
-    model_type              string
-    model_family            string
-    hidden_size             int32
-    num_hidden_layers       int32
-    num_attention_heads     int32
-    num_key_value_heads     int32
-    intermediate_size       int32
-    vocab_size              int32
-    max_seq_length          int32
-    max_position_embeddings int32
-    rope_theta              float32
-    attention_dropout       float32
-    hidden_dropout          float32
-    initializer_range       float32
-    layer_norm_eps          float32
-    bos_token_id            int32
-    eos_token_id            int32
-    pad_token_id            int32
-    use_cache               bool
-    attention_bias          bool
-    tie_word_embeddings     bool
-    dtype                   model_dtype
-    quantization_config     interface{}
+    string model_id
+    string model_name
+    string model_type
+    string model_family
+    int32 hidden_size
+    int32 num_hidden_layers
+    int32 num_attention_heads
+    int32 num_key_value_heads
+    int32 intermediate_size
+    int32 vocab_size
+    int32 max_seq_length
+    int32 max_position_embeddings
+    float32 rope_theta
+    float32 attention_dropout
+    float32 hidden_dropout
+    float32 initializer_range
+    float32 layer_norm_eps
+    int32 bos_token_id
+    int32 eos_token_id
+    int32 pad_token_id
+    bool use_cache
+    bool attention_bias
+    bool tie_word_embeddings
+    model_dtype dtype
+    interface{} quantization_config
 }
 
 struct model_load_config {
-    model_path              string
-    model_id                string
-    device_type             string
-    device_id               int32
-    dtype                   model_dtype
-    load_format             model_format
-    enable_prefix_cache     bool
-    enable_kv_cache         bool
-    kv_cache_dtype          model_dtype
-    max_num_seqs            int32
-    max_num_tokens          int32
-    tensor_parallel_size    int32
-    pipeline_parallel_size  int32
-    trust_remote_code       bool
-    use_safetensors         bool
-    timeout_seconds         int32
-    retry_count             int32
-    enable_streaming_weights bool
+    string model_path
+    string model_id
+    string device_type
+    int32 device_id
+    model_dtype dtype
+    model_format load_format
+    bool enable_prefix_cache
+    bool enable_kv_cache
+    model_dtype kv_cache_dtype
+    int32 max_num_seqs
+    int32 max_num_tokens
+    int32 tensor_parallel_size
+    int32 pipeline_parallel_size
+    bool trust_remote_code
+    bool use_safetensors
+    int32 timeout_seconds
+    int32 retry_count
+    bool enable_streaming_weights
 }
 
 struct model_loading_state {
-    status                  loader_status
-    progress_percent        int32
-    current_stage           string
-    loaded_weights          int32
-    total_weights           int32
-    bytes_loaded            int64
-    total_bytes             int64
-    last_error              string
-    start_time              int64
-    estimated_completion_ms int64
+    loader_status status
+    int32 progress_percent
+    string current_stage
+    int32 loaded_weights
+    int32 total_weights
+    int64 bytes_loaded
+    int64 total_bytes
+    string last_error
+    int64 start_time
+    int64 estimated_completion_ms
 }
 
 struct model_executor_cache {
-    weights                 map[string]interface{}
-    activations             map[string]interface{}
-    kv_cache                map[string]interface{}
-    attention_cache         map[string]interface{}
-    cache_size_bytes        int64
-    max_cache_size_bytes    int64
-    num_cached_layers       int32
+    map[string]interface{} weights
+    map[string]interface{} activations
+    map[string]interface{} kv_cache
+    map[string]interface{} attention_cache
+    int64 cache_size_bytes
+    int64 max_cache_size_bytes
+    int32 num_cached_layers
 }
 
 struct model_layer_executor {
-    layer_id                int32
-    layer_type              string
-    config                  interface{}
-    weights                 map[string]interface{}
-    state                   interface{}
-    compute_capability      string
+    int32 layer_id
+    string layer_type
+    interface{} config
+    map[string]interface{} weights
+    interface{} state
+    string compute_capability
 }
 
 struct model_executor {
-    config                  model_config_spec
-    load_config             model_load_config
-    weight_map              model_weight_map
-    loading_state           model_loading_state
-    cache                   model_executor_cache
-    layer_executors         []*model_layer_executor
-    device_memory_bytes     int64
-    compute_streams         []interface{}
-    initialized             bool
-    ready                   bool
+    model_config_spec config
+    model_load_config load_config
+    model_weight_map weight_map
+    model_loading_state loading_state
+    model_executor_cache cache
+    []*model_layer_executor layer_executors
+    int64 device_memory_bytes
+    []interface{} compute_streams
+    bool initialized
+    bool ready
 }
 
 struct model_loader {
-    config                  model_load_config
-    executors               map[string]*model_executor
-    loading_tasks           map[string]interface{}
-    cache_dir               string
-    device_allocator        interface{}
-    logger                  interface{}
-    metrics                 interface{}
-    initialized             bool
+    model_load_config config
+    map[string]*model_executor executors
+    map[string]interface{} loading_tasks
+    string cache_dir
+    interface{} device_allocator
+    interface{} logger
+    interface{} metrics
+    bool initialized
 }
 
 struct weight_buffer {
-    data                    []byte
-    dtype                   model_dtype
-    shape                   []int32
-    size_bytes              int64
-    device_location         string
-    is_pinned               bool
+    []byte data
+    model_dtype dtype
+    []int32 shape
+    int64 size_bytes
+    string device_location
+    bool is_pinned
 }
 
 struct model_load_result {
-    success                 bool
-    executor                *model_executor
-    config                  *model_config_spec
-    error_message           string
-    load_duration_ms        int32
-    num_weights_loaded      int32
-    total_size_mb           int32
+    bool success
+    *model_executor executor
+    *model_config_spec config
+    string error_message
+    int32 load_duration_ms
+    int32 num_weights_loaded
+    int32 total_size_mb
 }
 
 struct layer_execution_output {
-    hidden_states           interface{}
-    attention_output        interface{}
-    mlp_output              interface{}
-    cache_outputs           interface{}
-    computation_time_ms     float32
+    interface{} hidden_states
+    interface{} attention_output
+    interface{} mlp_output
+    interface{} cache_outputs
+    float32 computation_time_ms
 }
 
 func new_model_loader(model_load_config config) *model_loader {

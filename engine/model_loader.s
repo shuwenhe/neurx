@@ -24,67 +24,67 @@ const (
 )
 
 struct model_loader_options {
-    max_workers             int32
-    max_retries             int32
-    retry_delay_ms          int32
-    prefetch_num_layers     int32
-    batch_load              bool
-    parallel_weight_loading bool
-    enable_cache_warming    bool
-    cache_policy            model_cache_policy
-    weight_loader_strategy  weight_loader_strategy
+    int32 max_workers
+    int32 max_retries
+    int32 retry_delay_ms
+    int32 prefetch_num_layers
+    bool batch_load
+    bool parallel_weight_loading
+    bool enable_cache_warming
+    model_cache_policy cache_policy
+    weight_loader_strategy weight_loader_strategy
 }
 
 struct model_loader_metrics {
-    total_load_time_ms      int64
-    weight_loading_time_ms  int64
-    cache_prep_time_ms      int64
-    total_weights_loaded    int32
-    total_bytes_loaded      int64
-    cache_hits              int64
-    cache_misses            int64
-    weight_load_errors      int32
-    successful_loads        int32
-    failed_loads            int32
+    int64 total_load_time_ms
+    int64 weight_loading_time_ms
+    int64 cache_prep_time_ms
+    int32 total_weights_loaded
+    int64 total_bytes_loaded
+    int64 cache_hits
+    int64 cache_misses
+    int32 weight_load_errors
+    int32 successful_loads
+    int32 failed_loads
 }
 
 struct dynamic_model_loader {
-    config                  model_load_config
-    options                 model_loader_options
-    executors               map[string]*model_executor
-    loading_queue           []*model_executor
-    model_cache             map[string]*weight_buffer
-    layer_cache             map[string][]*weight_buffer
-    metrics                 model_loader_metrics
-    callbacks               []loader_callback
-    running                 bool
-    lock                    interface{}
+    model_load_config config
+    model_loader_options options
+    map[string]*model_executor executors
+    []*model_executor loading_queue
+    map[string]*weight_buffer model_cache
+    map[string][]*weight_buffer layer_cache
+    model_loader_metrics metrics
+    []loader_callback callbacks
+    bool running
+    interface{} lock
 }
 
 struct weight_loading_task {
-    executor                *model_executor
-    layer_id                int32
-    weights                 []*model_weight_spec
-    status                  loader_status
-    start_time              int64
-    completion_time         int64
-    bytes_loaded            int64
+    *model_executor executor
+    int32 layer_id
+    []*model_weight_spec weights
+    loader_status status
+    int64 start_time
+    int64 completion_time
+    int64 bytes_loaded
 }
 
 struct model_registry_entry {
-    model_id                string
-    config                  *model_config_spec
-    cache_hit               bool
-    last_access_time        int64
-    access_count            int64
-    size_mb                 int32
+    string model_id
+    *model_config_spec config
+    bool cache_hit
+    int64 last_access_time
+    int64 access_count
+    int32 size_mb
 }
 
 struct model_registry {
-    entries                 map[string]*model_registry_entry
-    capacity_mb             int64
-    current_usage_mb        int64
-    eviction_policy         model_cache_policy
+    map[string]*model_registry_entry entries
+    int64 capacity_mb
+    int64 current_usage_mb
+    model_cache_policy eviction_policy
 }
 
 func new_dynamic_model_loader(model_load_config config, model_loader_options options) *dynamic_model_loader {

@@ -24,84 +24,84 @@ type weight_metadata {
 }
 
 struct weight_file_info {
-    file_path               string
-    file_size_bytes         int64
-    format                  model_format
-    metadata                weight_metadata
-    is_sharded              bool
-    shard_index             int32
-    num_shards              int32
+    string file_path
+    int64 file_size_bytes
+    model_format format
+    weight_metadata metadata
+    bool is_sharded
+    int32 shard_index
+    int32 num_shards
 }
 
 struct safetensors_header {
-    magic                   []byte
-    header_size             int64
-    format_version          int32
-    metadata_json           string
+    []byte magic
+    int64 header_size
+    int32 format_version
+    string metadata_json
 }
 
 struct checkpoint_header {
-    version                 int32
-    pytorch_version         string
-    metadata                map[string]string
-    tensor_info             map[string]*weight_metadata
+    int32 version
+    string pytorch_version
+    map[string]string metadata
+    map[string]*weight_metadata tensor_info
 }
 
 struct weight_shard_info {
-    shard_id                int32
-    start_offset            int64
-    end_offset              int64
-    tensors                 []string
-    size_bytes              int64
+    int32 shard_id
+    int64 start_offset
+    int64 end_offset
+    []string tensors
+    int64 size_bytes
 }
 
 struct weight_quantization_info {
-    method                  string
-    bits                    int32
-    scale_dtype             model_dtype
-    zero_point_dtype        model_dtype
-    block_size              int32
-    group_size              int32
+    string method
+    int32 bits
+    model_dtype scale_dtype
+    model_dtype zero_point_dtype
+    int32 block_size
+    int32 group_size
 }
 
 struct weight_buffer_allocator {
-    total_capacity          int64
-    allocated               int64
-    free                    int64
-    buffer_pool             [][]byte
-    allocation_count        int64
-    deallocation_count      int64
+    int64 total_capacity
+    int64 allocated
+    int64 free
+    [][]byte buffer_pool
+    int64 allocation_count
+    int64 deallocation_count
 }
 
 struct weight_loader {
-    file_path               string
-    format                  model_format
-    dtype                   model_dtype
-    allocator               *weight_buffer_allocator
-    cached_headers          map[string]*safetensors_header
-    quantization_info       *weight_quantization_info
-    enable_mmap             bool
-    enable_pin_memory       bool
-    num_worker_threads      int32
+    string file_path
+    model_format format
+    model_dtype dtype
+    *weight_buffer_allocator allocator
+    map[string]*safetensors_header cached_headers
+    *weight_quantization_info quantization_info
+    bool enable_mmap
+    bool enable_pin_memory
+    int32 num_worker_threads
 }
 
 struct tensor_loading_context {
-    tensor_name             string
-    source_dtype            model_dtype
-    target_dtype            model_dtype
-    requires_conversion     bool
-    buffer_ptr              []byte
-    position_in_buffer      int64
-    size_bytes              int64
+    string tensor_name
+    model_dtype source_dtype
+    model_dtype target_dtype
+    bool requires_conversion
+    []byte buffer_ptr
+    int64 position_in_buffer
+    int64 size_bytes
 }
 
 struct weight_loading_stats {
-    total_bytes_loaded      int64
-    total_tensors_loaded    int32
-    avg_load_time_ms        float32
-    bandwidth_gb_per_sec    float32
-    peak_memory_usage_bytes int64
-    current_memory_usage    int64
+    int64 total_bytes_loaded
+    int32 total_tensors_loaded
+    float32 avg_load_time_ms
+    float32 bandwidth_gb_per_sec
+    int64 peak_memory_usage_bytes
+    int64 current_memory_usage
 }
 
 func new_weight_loader(string file_path, model_format format, model_dtype dtype) *weight_loader {
