@@ -4,14 +4,16 @@ import (
     "math"
     "time"
 )
-type data_synthesis_config struct {
+
+struct data_synthesis_config {
     num_synthetic_samples   int
     num_preference_pairs    int
     quality_threshold       float64
     diversity_weight        float64
     task_types              []string
 }
-type synthetic_example struct {
+
+struct synthetic_example {
     id                      string
     prompt                  string
     response                string
@@ -21,7 +23,8 @@ type synthetic_example struct {
     diversity_metric        float64
     timestamp               int64
 }
-type preference_pair struct {
+
+struct preference_pair {
     prompt                  string
     response_a              string
     response_b              string
@@ -30,20 +33,23 @@ type preference_pair struct {
     reason                  string
     annotator_id            string
 }
-type data_synthesis_engine struct {
+
+struct data_synthesis_engine {
     config                  data_synthesis_config
     synthetic_examples      []synthetic_example
     preference_pairs        []preference_pair
     task_distribution       map[string]int
     quality_stats           synthesis_quality_stats
 }
-type synthesis_quality_stats struct {
+
+struct synthesis_quality_stats {
     avg_quality             float64
     avg_diversity           float64
     avg_length              float64
     total_generated         int
     passed_quality_filter   int
 }
+
 func (engine *data_synthesis_engine) generate_synthetic_examples() {
     fmt.Println("[DataSynthesis] Generating synthetic examples...")
     tasks := []string{"qa", "writing", "coding", "math", "reasoning", "translation"}

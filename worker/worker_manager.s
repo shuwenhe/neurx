@@ -2,7 +2,7 @@
 import "types.s"
 import "worker_base.s"
 
-type WorkerManager struct {
+struct WorkerManager {
     workers             []WorkerState
     worker_count        i32
     max_workers         i32

@@ -1,13 +1,15 @@
 package optimization
 import "core"
 import "tensor"
-type chunk_config struct {
+
+struct chunk_config {
     chunk_size          int32
     enable_recompute    bool
     enable_gradient     bool
     overlap_size        int32
 }
-type chunk_state struct {
+
+struct chunk_state {
     chunk_id            int32
     start_token         int32
     end_token           int32
@@ -15,12 +17,14 @@ type chunk_state struct {
     attention_cache     []float32
     hidden_state        []float32
 }
-type chunked_prefill_processor struct {
+
+struct chunked_prefill_processor {
     config              chunk_config
     chunks              []chunk_state
     total_tokens        int32
     num_chunks          int32
 }
+
 func NewChunkedPrefillProcessor(config chunk_config) *chunked_prefill_processor {
     if config.chunk_size <= 0 {
         config.chunk_size = 512
@@ -132,7 +136,8 @@ func (cpp *chunked_prefill_processor) PrintChunkInfo() {
     core.Println("  Memory saving:", cpp.GetMemorySavings(), "x")
     core.Println("  Latency saving:", cpp.GetLatencySavings(), "x")
 }
-type ring_attention_processor struct {
+
+struct ring_attention_processor {
     num_devices         int32
     sequence_length     int32
     block_size          int32
@@ -191,7 +196,8 @@ func (rap *ring_attention_processor) GetCommunicationCost() float32 {
     relative_cost := comm_rounds * 0.05
     return relative_cost
 }
-type long_context_optimization_config struct {
+
+struct long_context_optimization_config {
     enable_chunked_prefill   bool
     enable_ring_attention    bool
     enable_sparse_attention  bool
@@ -199,7 +205,8 @@ type long_context_optimization_config struct {
     chunk_size               int32
     block_size               int32
 }
-type long_context_optimizer struct {
+
+struct long_context_optimizer {
     config                   long_context_optimization_config
     chunked_prefill          *chunked_prefill_processor
     ring_attention           *ring_attention_processor

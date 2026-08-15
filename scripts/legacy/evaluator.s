@@ -4,7 +4,8 @@ import (
     "io"
     "encoding/json"
 )
-type evaluation_metrics struct {
+
+struct evaluation_metrics {
     step: int
     loss: float
     perplexity: float
@@ -14,11 +15,13 @@ type evaluation_metrics struct {
     speed: float
     timestamp: string
 }
-type evaluator struct {
+
+struct evaluator {
     batch_size: int
     accumulation_steps: int
     history: []evaluation_metrics
 }
+
 func (e *evaluator) init(int batch_size, int accumulation_steps) {
     e.batch_size = batch_size
     e.accumulation_steps = accumulation_steps

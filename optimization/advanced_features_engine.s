@@ -1,22 +1,26 @@
 package optimization
 import "core"
 import "tensor"
-type speculative_config struct {
+
+struct speculative_config {
     draft_model_scale   float32
     num_draft_tokens    int32
     verification_batch  int32
 }
-type draft_request struct {
+
+struct draft_request {
     prompt_tokens       []int32
     max_length          int32
 }
-type speculative_decoding_engine struct {
+
+struct speculative_decoding_engine {
     config              speculative_config
     main_model_tokens   int32
     draft_model_tokens  int32
     accepted_count      int32
     rejected_count      int32
 }
+
 func NewSpeculativeDecodingEngine(config speculative_config) *speculative_decoding_engine {
     return &speculative_decoding_engine{
         config:             config,
@@ -116,7 +120,8 @@ func (sde *speculative_decoding_engine) GetSpeedup() float32 {
     effective_speedup := 1.0 + float32(sde.config.num_draft_tokens)*float32(acceptance_rate)
     return effective_speedup
 }
-type vision_language_model_adapter struct {
+
+struct vision_language_model_adapter {
     vision_encoder_dim   int32
     language_model_dim   int32
     bridge_layer_dim     int32
@@ -153,12 +158,14 @@ func (vlm *vision_language_model_adapter) BridgeVisionToLanguage(
     copy(bridged, visual_tokens)
     return bridged
 }
-type lo_ra_config struct {
+
+struct lo_ra_config {
     rank                int32
     alpha               float32
     target_modules      []string
 }
-type lo_ra_adapter struct {
+
+struct lo_ra_adapter {
     config              lo_ra_config
     rank                int32
     adapters            map[string][][]float32
@@ -200,7 +207,8 @@ func (la *lo_ra_adapter) ApplyLoRA(
     }
     return output
 }
-type multi_model_serving_manager struct {
+
+struct multi_model_serving_manager {
     loaded_models       map[string]bool
     model_cache         map[string][]float32
     max_memory_mb       int32
@@ -245,7 +253,8 @@ func (mms *multi_model_serving_manager) GetLoadedModels() []string {
     }
     return models
 }
-type advanced_features_engine struct {
+
+struct advanced_features_engine {
     speculative_decoder *speculative_decoding_engine
     vl_adapter          *vision_language_model_adapter
     lora_manager        *lo_ra_adapter

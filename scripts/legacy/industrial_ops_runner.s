@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{io_mkdir_recursive, io_println, runtime_file_exists, runtime_read_text_file, runtime_write_text_file}
-type industrial_run_summary struct {
+
+struct industrial_run_summary {
     name            string
     input_path      string
     output_path     string
@@ -8,6 +9,7 @@ type industrial_run_summary struct {
     matched_records int
     score           float64
 }
+
 struct command_args {
     command string
     options map[string]string

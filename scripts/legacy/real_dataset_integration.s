@@ -3,7 +3,8 @@ import (
     "fmt"
     "math"
 )
-type data_source struct {
+
+struct data_source {
     source_type         string
     name                string
     path                string
@@ -11,7 +12,8 @@ type data_source struct {
     size                int
     url                 string
 }
-type dataset_config struct {
+
+struct dataset_config {
     sources             []data_source
     batch_size          int
     shuffle             bool
@@ -20,13 +22,15 @@ type dataset_config struct {
     cache_enabled       bool
     max_cache_size_gb   int
 }
-type data_sample struct {
+
+struct data_sample {
     input_ids           []int
     attention_mask      []int
     token_type_ids      []int
     labels              []int
 }
-type data_loader struct {
+
+struct data_loader {
     config              dataset_config
     loaded_samples      []data_sample
     current_index       int
@@ -34,13 +38,15 @@ type data_loader struct {
     samples_loaded      int64
     load_time_ms        float64
 }
-type dataset_statistics struct {
+
+struct dataset_statistics {
     total_samples       int64
     avg_sequence_length float64
     vocab_size          int
     num_unique_tokens   int64
     data_types          map[string]int64
 }
+
 func (loader *data_loader) register_source(source data_source) {
     loader.config.sources = append(loader.config.sources, source)
     fmt.Printf("[Dataset] Registered source: %s (%s)\n", source.name, source.source_type)

@@ -6,7 +6,7 @@ import "worker_manager.s"
 import "communication.s"
 import "batch_processor.s"
 
-type TestResult struct {
+struct TestResult {
     name            string
     passed          i32
     total           i32

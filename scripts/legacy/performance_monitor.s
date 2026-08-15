@@ -4,13 +4,15 @@ import (
     "math"
     "time"
 )
-type performance_monitor_config struct {
+
+struct performance_monitor_config {
     sampling_interval       int
     metrics_window          int
     alert_thresholds        map[string]float64
     enable_adaptive          bool
 }
-type performance_metrics struct {
+
+struct performance_metrics {
     timestamp               int64
     throughput              float64
     latency_ms              float64
@@ -21,7 +23,8 @@ type performance_metrics struct {
     perplexity              float64
     cache_hit_rate          float64
 }
-type system_health_status struct {
+
+struct system_health_status {
     overall_status          string
     cpu_status              string
     memory_status           string
@@ -29,14 +32,16 @@ type system_health_status struct {
     network_status          string
     alerts                  []string
 }
-type performance_monitor struct {
+
+struct performance_monitor {
     config                  performance_monitor_config
     metrics_history         []performance_metrics
     health_history          []system_health_status
     alerts                  []alert
     recommendations         []string
 }
-type alert struct {
+
+struct alert {
     timestamp               int64
     level                   string
     metric                  string
@@ -44,6 +49,7 @@ type alert struct {
     threshold               float64
     message                 string
 }
+
 func (monitor *performance_monitor) collect_metrics() performance_metrics {
     sample_idx := float64(len(monitor.metrics_history))
     perplexity := 100.0 / (float64(len(monitor.metrics_history)/100) + 1.0)

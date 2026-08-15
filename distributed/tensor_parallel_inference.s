@@ -1,7 +1,8 @@
 package distributed
 import "core"
 import "tensor"
-type tensor_parallel_config struct {
+
+struct tensor_parallel_config {
     tp_size             int32
     world_size          int32
     rank                int32
@@ -12,24 +13,28 @@ type tensor_parallel_config struct {
     enable_overlap      bool
     backend             string
 }
-type distributed_tensor struct {
+
+struct distributed_tensor {
     local_shape      []int32
     global_shape     []int32
     shard_dim        int32
     data             []float32
     tp_rank          int32
 }
-type tensor_parallel_inference struct {
+
+struct tensor_parallel_inference {
     config           tensor_parallel_config
     comm_ops         []communication_op
     async_handles    map[int64]bool
 }
-type communication_op struct {
+
+struct communication_op {
     op_id            int64
     op_type          string
     tensor_shape     []int32
     is_complete      bool
 }
+
 func NewTensorParallelInference(config tensor_parallel_config) *tensor_parallel_inference {
     if config.tp_size <= 0 {
         config.tp_size = 1

@@ -3,7 +3,8 @@ import (
     "fmt"
     "math"
 )
-type checkpoint_metadata struct {
+
+struct checkpoint_metadata {
     checkpoint_id       string
     step                int64
     epoch               int
@@ -14,7 +15,8 @@ type checkpoint_metadata struct {
     model_size_mb       int
     state_size_mb       int
 }
-type optimizer_state struct {
+
+struct optimizer_state {
     optimizer_type      string
     learning_rate       float64
     beta1               float64
@@ -26,7 +28,8 @@ type optimizer_state struct {
     m_t                 []float64
     v_t                 []float64
 }
-type training_state struct {
+
+struct training_state {
     current_step        int64
     current_epoch       int
     train_loss_history  []float64
@@ -35,7 +38,8 @@ type training_state struct {
     batch_count         int64
     total_tokens        int64
 }
-type checkpoint struct {
+
+struct checkpoint {
     metadata            checkpoint_metadata
     model_weights       [][]float64
     optimizer_state     optimizer_state
@@ -43,25 +47,29 @@ type checkpoint struct {
     distributed_state   map[string]string
     custom_data         map[string]string
 }
-type checkpoint_manager struct {
+
+struct checkpoint_manager {
     checkpoint_dir      string
     checkpoints         map[string]checkpoint
     latest_checkpoint   string
     recovery_enabled    bool
 }
-type recovery_manager struct {
+
+struct recovery_manager {
     manager             *checkpoint_manager
     recovery_points     []checkpoint_metadata
     backup_locations    []string
     verification_status map[string]bool
 }
-type checkpoint_storage struct {
+
+struct checkpoint_storage {
     backend             string
     base_path           string
     max_checkpoints     int
     compression_enabled bool
     replication_factor  int
 }
+
 func (manager *checkpoint_manager) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Complete checkpoint Recovery System                  ║")

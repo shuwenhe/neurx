@@ -2,7 +2,8 @@ package inference
 import "core"
 import "tensor"
 import "models"
-type engine_config struct {
+
+struct engine_config {
     model_name       string
     model_config     models.model_config
     max_batch_size   int32
@@ -16,7 +17,8 @@ type engine_config struct {
     device           string
     dtype            string
 }
-type generate_request struct {
+
+struct generate_request {
     request_id       int64
     prompt_text      string
     max_tokens       int32
@@ -25,14 +27,16 @@ type generate_request struct {
     top_k            int32
     priority         int
 }
-type generate_response struct {
+
+struct generate_response {
     request_id       int64
     generated_text   string
     output_tokens    []int32
     total_tokens     int32
     latency_ms       int64
 }
-type unified_inference_engine struct {
+
+struct unified_inference_engine {
     config           engine_config
     model            *models.base_llm_model
     scheduler        *continuous_batching_scheduler
@@ -44,6 +48,7 @@ type unified_inference_engine struct {
     avg_latency_ms   float32
     throughput_tps   float32
 }
+
 func NewUnifiedInferenceEngine(config engine_config) *unified_inference_engine {
     engine := &unified_inference_engine{
         config:         config,

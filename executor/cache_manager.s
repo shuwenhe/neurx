@@ -1,7 +1,7 @@
 
 import "types.s"
 
-type KVCacheBlockAllocator struct {
+struct KVCacheBlockAllocator {
     total_blocks    i32
     allocated_blocks i32
     free_blocks     []KVCacheBlock

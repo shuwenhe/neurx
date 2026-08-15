@@ -7,7 +7,8 @@ import (
     "strings"
     "time"
 )
-type trajectory_step struct {
+
+struct trajectory_step {
     step_id         int
     tokens          []int
     log_probs       []float64
@@ -17,7 +18,8 @@ type trajectory_step struct {
     gae_advantages  []float64
     is_terminal     bool
 }
-type trajectory struct {
+
+struct trajectory {
     steps           []trajectory_step
     episode_return  float64
     episode_length  int
@@ -26,7 +28,8 @@ type trajectory struct {
     reward_sum      float64
     timestamp       int64
 }
-type ppoconfig struct {
+
+struct ppoconfig {
     learning_rate           float64
     gamma                   float64
     gae_lambda              float64
@@ -43,7 +46,8 @@ type ppoconfig struct {
     checkpoint_interval     int
     eval_interval           int
 }
-type ppotrainer struct {
+
+struct ppotrainer {
     config              ppoconfig
     policy_model        policy_model
     value_model         value_model
@@ -55,7 +59,8 @@ type ppotrainer struct {
     total_reward        float64
     performance_history []performance_metric
 }
-type performance_metric struct {
+
+struct performance_metric {
     step                int
     episode_return      float64
     policy_loss         float64
@@ -66,7 +71,8 @@ type performance_metric struct {
     advantage_mean      float64
     explained_variance  float64
 }
-type policy_model struct {
+
+struct policy_model {
     model_name          string
     num_layers          int
     hidden_size         int
@@ -74,21 +80,24 @@ type policy_model struct {
     learning_rate       float64
     parameters          map[string]interface{}
 }
-type value_model struct {
+
+struct value_model {
     model_name          string
     num_layers          int
     hidden_size         int
     learning_rate       float64
     parameters          map[string]interface{}
 }
-type reward_model struct {
+
+struct reward_model {
     model_name          string
     trained_steps       int
     accuracy            float64
     calibration_error   float64
     parameters          map[string]interface{}
 }
-type optimizer struct {
+
+struct optimizer {
     name                string
     learning_rate       float64
     beta1               float64
@@ -97,6 +106,7 @@ type optimizer struct {
     weight_decay        float64
     grad_accumulation   int
 }
+
 func (trainer *ppotrainer) collect_trajectories(num_trajectories int) []trajectory {
     fmt.Println("[PPO] Collecting trajectories...")
     trajectories := []trajectory{}

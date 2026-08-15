@@ -4,12 +4,14 @@ import (
     "encoding/json"
     "math"
 )
-type tokenizer struct {
+
+struct tokenizer {
     vocab: map[string]int
     inv_vocab: map[int]string
     vocab_size: int
     special_tokens: map[string]int
 }
+
 func (t *tokenizer) init(int vocab_size) {
     t.vocab_size = vocab_size
     t.vocab = make(map[string]int)

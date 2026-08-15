@@ -3,38 +3,44 @@ import (
     "fmt"
     "math"
 )
-type document struct {
+
+struct document {
     doc_id              string
     content             string
     source              string
     timestamp           int64
     metadata            map[string]string
 }
-type embedding struct {
+
+struct embedding {
     embedding_id        string
     document_id         string
     vector              []float64
     dimension           int
     model               string
 }
-type retrieval_result struct {
+
+struct retrieval_result {
     document            document
     similarity_score    float64
     rank                int
 }
-type retrieval_system_config struct {
+
+struct retrieval_system_config {
     embedding_model     string
     vector_db_type      string
     top_k               int
     similarity_threshold float64
     cache_enabled       bool
 }
-type vector_database struct {
+
+struct vector_database {
     embeddings          map[string]embedding
     documents           map[string]document
     index_built         bool
 }
-type ragmetrics struct {
+
+struct ragmetrics {
     step                int64
     query               string
     retrieved_count     int
@@ -42,13 +48,15 @@ type ragmetrics struct {
     avg_similarity      float64
     retrieval_time_ms   int
 }
-type ragintegration struct {
+
+struct ragintegration {
     config              retrieval_system_config
     vector_db           vector_database
     metrics_history     []ragmetrics
     cache               map[string][]retrieval_result
     knowledge_base_size int
 }
+
 func (rag *ragintegration) initialize(config retrieval_system_config) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  RAG Integration System                               ║")

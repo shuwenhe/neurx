@@ -6,7 +6,8 @@ import (
     "strconv"
     "math"
 )
-type large_model_config struct {
+
+struct large_model_config {
     model_name: string
     num_params: int
     hidden_dim: int
@@ -24,13 +25,15 @@ type large_model_config struct {
     pipeline_parallel_stages: int
     zero_stage: int
 }
-type memory_estimate struct {
+
+struct memory_estimate {
     model_weights_gb: float
     gradients_gb: float
     optimizer_states_gb: float
     activation_gb: float
     total_gb: float
 }
+
 func create_7b_config(): large_model_config {
     return large_model_config{
         model_name: "neurx-7b",
@@ -127,7 +130,8 @@ func (config *large_model_config) estimate_memory(int batch_size): memory_estima
         total_gb: total_gb,
     }
 }
-type gradient_accumulator struct {
+
+struct gradient_accumulator {
     accumulation_steps: int
     current_step: int
     accumulated_grads: map[string][]float
@@ -180,7 +184,8 @@ func (ga *gradient_accumulator) reset() {
     }
     ga.current_step = 0
 }
-type activation_checkpointer struct {
+
+struct activation_checkpointer {
     checkpoint_segments: int
     checkpointed_layers: map[int]bool
 }
@@ -221,7 +226,8 @@ func (ac *activation_checkpointer) estimate_memory_savings(): float {
     }
     return float(checkpointed_count) * 0.4 / float(total_layers)
 }
-type large_model_trainer struct {
+
+struct large_model_trainer {
     config: large_model_config
     memory_est: memory_estimate
     grad_accumulator: gradient_accumulator

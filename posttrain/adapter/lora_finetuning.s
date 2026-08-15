@@ -3,7 +3,8 @@ import (
     "fmt"
     "math"
 )
-type lora_config struct {
+
+struct lora_config {
     int rank
     int alpha
     []string target_modules
@@ -11,7 +12,8 @@ type lora_config struct {
     string task_type
     bool inference_mode
 }
-type lora_layer struct {
+
+struct lora_layer {
     int rank
     int alpha
     [][]float64 lora_a
@@ -20,7 +22,8 @@ type lora_layer struct {
     float64 dropout_p
     string name
 }
-type lora_adapter struct {
+
+struct lora_adapter {
     lora_config config
     map[string]*lora_layer modules
     int64 total_params
@@ -28,6 +31,7 @@ type lora_adapter struct {
     policy_model original_model
     float64 scaling_factor
 }
+
 func (adapter *lora_adapter) initialize_lora_modules(model policy_model) {
     fmt.Println("[LoRA] Initializing LoRA modules...")
     for layer_idx := 0; layer_idx < model.num_layers; layer_idx++ {

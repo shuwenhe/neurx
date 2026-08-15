@@ -4,7 +4,8 @@ import (
     "os"
     "strconv"
 )
-type large_model_config struct {
+
+struct large_model_config {
     model_name: string
     num_params: int
     hidden_dim: int
@@ -19,13 +20,15 @@ type large_model_config struct {
     use_mixed_precision: bool
     zero_stage: int
 }
-type memory_estimate struct {
+
+struct memory_estimate {
     model_weights_gb: float
     gradients_gb: float
     optimizer_states_gb: float
     activation_gb: float
     total_gb: float
 }
+
 func create_7b_config(): large_model_config {
     config := large_model_config{
         model_name: "neurx-7b",

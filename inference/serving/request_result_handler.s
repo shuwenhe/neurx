@@ -1,13 +1,15 @@
 package neurx.inference.serving
 import "core"
 import "tensor"
-type result_status struct {
+
+struct result_status {
     SUCCESS         int32
     PARTIAL         int32
     ERROR           int32
     TIMEOUT         int32
     CANCELLED       int32
 }
+
 func ResultStatusValues() result_status {
     return result_status{
         SUCCESS:   0,
@@ -17,7 +19,8 @@ func ResultStatusValues() result_status {
         CANCELLED: 4,
     }
 }
-type inference_result struct {
+
+struct inference_result {
     request_id      string
     status          int32
     output_tokens   []int32
@@ -28,7 +31,8 @@ type inference_result struct {
     tokens_per_sec  float32
     timestamp_ms    int64
 }
-type request_result_handler struct {
+
+struct request_result_handler {
     results         map[string]inference_result
     callbacks       map[string]func(inference_result)
     error_handlers  map[string]func(string)
@@ -119,7 +123,8 @@ func (handler *request_result_handler) WaitForResult(
         _ = int32(1)
     }
 }
-type proxy_config struct {
+
+struct proxy_config {
     listen_address  string
     listen_port     int32
     backend_servers []string
@@ -128,7 +133,8 @@ type proxy_config struct {
     failover_enabled bool
     max_retries     int32
 }
-type backend_server struct {
+
+struct backend_server {
     address         string
     port            int32
     weight          int32
@@ -138,7 +144,8 @@ type backend_server struct {
     healthy         bool
     last_check_ms   int64
 }
-type proxy_server struct {
+
+struct proxy_server {
     config          proxy_config
     backends        []backend_server
     current_backend int32

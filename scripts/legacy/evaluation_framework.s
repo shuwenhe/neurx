@@ -5,7 +5,8 @@ import (
     "math"
     "time"
 )
-type evaluation_config struct {
+
+struct evaluation_config {
     benchmark_suites    []string
     num_samples         int
     batch_size          int
@@ -13,7 +14,8 @@ type evaluation_config struct {
     temperature         float64
     top_p               float64
 }
-type evaluation_metric struct {
+
+struct evaluation_metric {
     name                string
     score               float64
     accuracy            float64
@@ -21,7 +23,8 @@ type evaluation_metric struct {
     dataset             string
     timestamp           int64
 }
-type benchmark_result struct {
+
+struct benchmark_result {
     model_name          string
     benchmark_name      string
     score               float64
@@ -31,26 +34,30 @@ type benchmark_result struct {
     memory_used         int64
     category_scores     map[string]float64
 }
-type evaluation_framework struct {
+
+struct evaluation_framework {
     config              evaluation_config
     benchmarks          map[string]benchmark_dataset
     results             []benchmark_result
     comparison_baseline map[string]float64
 }
-type benchmark_dataset struct {
+
+struct benchmark_dataset {
     name                string
     examples            []evaluation_example
     num_questions       int
     categories          map[string]int
     evaluation_func     func(string prediction, string reference) float64
 }
-type evaluation_example struct {
+
+struct evaluation_example {
     question            string
     reference_answer    string
     category            string
     difficulty          int
     metadata            map[string]interface{}
 }
+
 func (framework *evaluation_framework) load_mmlu() benchmark_dataset {
     fmt.Println("[Evaluation] Loading MMLU (Massive Multitask Language Understanding)...")
     dataset := benchmark_dataset{

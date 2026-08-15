@@ -15,7 +15,8 @@ const (
     QUANT_SYMMETRIC     QuantMode = 0
     QUANT_ASYMMETRIC    QuantMode = 1
 )
-type quantization_config struct {
+
+struct quantization_config {
     format       QuantFormat
     mode         QuantMode
     group_size   int
@@ -24,7 +25,8 @@ type quantization_config struct {
     calibration  []float32
     static_scale bool
 }
-type quantization_stats struct {
+
+struct quantization_stats {
     min_value      float32
     max_value      float32
     mean_value     float32
@@ -32,7 +34,8 @@ type quantization_stats struct {
     scale          float32
     zero_point     int32
 }
-type quantized_tensor struct {
+
+struct quantized_tensor {
     data           []int8
     scales         []float32
     zero_points    []int32
@@ -40,12 +43,14 @@ type quantized_tensor struct {
     format         QuantFormat
     original_shape []int
 }
-type quantization_engine struct {
+
+struct quantization_engine {
     config        quantization_config
     format        QuantFormat
     scales_cache  map[string][]float32
     enabled       bool
 }
+
 func NewQuantizationEngine(format QuantFormat, mode QuantMode, group_size int) *quantization_engine {
     engine := &quantization_engine{
         format:       format,

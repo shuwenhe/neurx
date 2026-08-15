@@ -5,7 +5,8 @@ import (
     "os"
     "strconv"
 )
-type distributed_config struct {
+
+struct distributed_config {
     backend: string
     rank: int
     world_size: int
@@ -19,7 +20,8 @@ type distributed_config struct {
     sync_gradients: bool
     static_graph: bool
 }
-type distributed_process struct {
+
+struct distributed_process {
     config: distributed_config
     is_master: bool
     initialized: bool
@@ -27,6 +29,7 @@ type distributed_process struct {
     grad_buckets: [][]float
     bucket_size: int
 }
+
 func (dp *distributed_process) init_from_env(string backend) error {
     config := distributed_config{
         backend: backend,
@@ -108,7 +111,8 @@ func (dp *distributed_process) reduce_bucket(int bucket_idx) {
         bucket[i] = bucket[i] / float(dp.config.world_size)
     }
 }
-type data_partitioner struct {
+
+struct data_partitioner {
     world_size: int
     rank: int
     total_samples: int
@@ -139,7 +143,8 @@ func (dp *data_partitioner) get_local_batch_size(): int {
     total_batch := dp.local_batch_size * dp.world_size
     return total_batch / dp.world_size
 }
-type distributed_sampler struct {
+
+struct distributed_sampler {
     num_samples: int
     world_size: int
     rank: int
@@ -163,7 +168,8 @@ func (ds *distributed_sampler) get_indices(): []int {
 func (ds *distributed_sampler) set_epoch(int epoch) {
     ds.epoch = epoch
 }
-type communication_metrics struct {
+
+struct communication_metrics {
     allreduce_count: int
     broadcast_count: int
     total_bytes_communicated: int
@@ -178,7 +184,8 @@ func (cm *communication_metrics) get_efficiency(): float {
     }
     return cm.computation_time_ms / total_time * 100.0
 }
-type multi_node_config struct {
+
+struct multi_node_config {
     num_nodes: int
     processes_per_node: int
     node_rank: int
@@ -211,7 +218,8 @@ func (dp *distributed_process) barrier() {
 func (dp *distributed_process) destroy_process_group() {
     dp.initialized = false
 }
-type distributed_context struct {
+
+struct distributed_context {
     process: *distributed_process
     comm_metrics: communication_metrics
 }
@@ -226,7 +234,8 @@ func (dc *distributed_context) exit() {
         dc.process.destroy_process_group()
     }
 }
-type launch_config struct {
+
+struct launch_config {
     num_processes: int
     num_nodes: int
     node_rank: int

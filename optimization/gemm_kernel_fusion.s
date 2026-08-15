@@ -1,7 +1,8 @@
 package optimization
 import "core"
 import "tensor"
-type gemm_config struct {
+
+struct gemm_config {
     m               int32
     n               int32
     k               int32
@@ -9,18 +10,21 @@ type gemm_config struct {
     enable_fusion   bool
     num_gemms       int32
 }
-type gemm_operation struct {
+
+struct gemm_operation {
     a               []float32
     b               []float32
     c               []float32
     bias            []float32
     has_bias        bool
 }
-type fused_gemm_kernel struct {
+
+struct fused_gemm_kernel {
     config          gemm_config
     gemms           []gemm_operation
     fused_output    []float32
 }
+
 func NewFusedGEMMKernel(config gemm_config) *fused_gemm_kernel {
     if config.tile_size <= 0 {
         config.tile_size = 64

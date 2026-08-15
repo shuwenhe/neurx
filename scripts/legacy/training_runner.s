@@ -9,7 +9,8 @@ import (
 	"encoding/json"
 	"time"
 )
-type training_config struct {
+
+struct training_config {
 	model_name       string `json:"model_name"`
 	model_size       string `json:"model_size"`
 	param_count      int64  `json:"param_count"`
@@ -35,7 +36,8 @@ type training_config struct {
 	mixed_precision  string `json:"mixed_precision"`
 	seed            int64  `json:"seed"`
 }
-type training_state struct {
+
+struct training_state {
 	current_step     int64
 	current_epoch    int
 	total_loss       float64
@@ -48,7 +50,8 @@ type training_state struct {
 	last_eval_loss    float64
 	eval_accuracy    float64
 }
-type training_metrics struct {
+
+struct training_metrics {
 	step        int64       `json:"step"`
 	train_loss   float64     `json:"train_loss"`
 	eval_loss    float64     `json:"eval_loss"`
@@ -86,6 +89,7 @@ var g_config = &training_config{
 	mixed_precision: "fp16",
 	seed: 42,
 }
+
 func load_config_from_env() {
 	if home := os.Getenv("NEURX_HOME"); home != "" {
 		g_config.data_dir = filepath.Join(home, "dataset", "pretrain")

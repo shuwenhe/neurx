@@ -5,7 +5,8 @@ import (
     "math"
     "time"
 )
-type preference_data struct {
+
+struct preference_data {
     prompt              string
     response_a          string
     response_b          string
@@ -14,13 +15,15 @@ type preference_data struct {
     annotation_time     int64
     annotator_id        string
 }
-type preference_dataset struct {
+
+struct preference_dataset {
     examples            []preference_data
     train_size          int
     val_size            int
     test_size           int
 }
-type reward_model_config struct {
+
+struct reward_model_config {
     learning_rate       float64
     weight_decay        float64
     num_epochs          int
@@ -32,7 +35,8 @@ type reward_model_config struct {
     temperature         float64
     save_interval       int
 }
-type reward_model_trainer struct {
+
+struct reward_model_trainer {
     config              reward_model_config
     model               reward_model
     optimizer           optimizer_2
@@ -42,7 +46,8 @@ type reward_model_trainer struct {
     training_history    []training_metric
     step_count          int
 }
-type training_metric struct {
+
+struct training_metric {
     step                int
     train_loss          float64
     train_accuracy      float64
@@ -52,7 +57,8 @@ type training_metric struct {
     auc_score           float64
     timestamp           int64
 }
-type reward_model struct {
+
+struct reward_model {
     model_name          string
     hidden_size         int
     num_layers          int
@@ -61,11 +67,13 @@ type reward_model struct {
     best_val_accuracy   float64
     is_trained          bool
 }
-type bradley_terry_loss struct {
+
+struct bradley_terry_loss {
     reward_a            float64
     reward_b            float64
     preference_label    int
 }
+
 func (trainer *reward_model_trainer) load_preference_data(data_path string) {
     fmt.Printf("[Reward model] Loading preference data from %s\n", data_path)
     for i := 0; i < 1000; i++ {

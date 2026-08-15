@@ -3,7 +3,8 @@ import (
     "fmt"
     "math"
 )
-type apirequest struct {
+
+struct apirequest {
     request_id          string
     endpoint            string
     method              string
@@ -11,14 +12,16 @@ type apirequest struct {
     body                map[string]string
     timestamp           int64
 }
-type apiresponse struct {
+
+struct apiresponse {
     status_code         int
     headers             map[string]string
     body                map[string]string
     processing_time_ms  float64
     error_message       string
 }
-type inference_request struct {
+
+struct inference_request {
     prompt              string
     max_tokens          int
     temperature         float64
@@ -26,13 +29,15 @@ type inference_request struct {
     top_k               int
     repetition_penalty  float64
 }
-type inference_response struct {
+
+struct inference_response {
     generated_text      string
     tokens_generated    int
     processing_time_ms  float64
     model_name          string
 }
-type apiserver struct {
+
+struct apiserver {
     host                string
     port                int
     routes              map[string]string
@@ -40,19 +45,22 @@ type apiserver struct {
     max_connections     int
     current_connections int
 }
-type request_queue struct {
+
+struct request_queue {
     pending_requests    []apirequest
     processing_requests []apirequest
     completed_requests  []apirequest
     request_count       int64
     queue_size          int
 }
-type rate_limiter struct {
+
+struct rate_limiter {
     requests_per_second int
     max_concurrent      int
     current_concurrent  int
     rejected_requests   int64
 }
+
 func (server *apiserver) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  REST API Service                                     ║")

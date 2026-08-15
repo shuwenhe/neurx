@@ -6,7 +6,8 @@ import (
     "strings"
     "time"
 )
-type instruction_example struct {
+
+struct instruction_example {
     string instruction
     string input
     string output
@@ -15,12 +16,14 @@ type instruction_example struct {
     float64 quality_score
     []int tokens
 }
-type instruction_dataset struct {
+
+struct instruction_dataset {
     []instruction_example examples
     map[string]int categories
     int64 total_tokens
 }
-type sft_config struct {
+
+struct sft_config {
     float64 learning_rate
     int warmup_steps
     int total_steps
@@ -32,7 +35,8 @@ type sft_config struct {
     float64 weight_decay
     float64 dropout
 }
-type sft_trainer struct {
+
+struct sft_trainer {
     sft_config config
     policy_model model
     optimizer_2 optimizer
@@ -41,7 +45,8 @@ type sft_trainer struct {
     int step_count
     []sft_metric training_history
 }
-type sft_metric struct {
+
+struct sft_metric {
     int step
     float64 loss
     float64 perplexity
@@ -54,6 +59,7 @@ type sft_metric struct {
     float64 throughput
     int64 timestamp
 }
+
 func (trainer *sft_trainer) load_instruction_data(data_path string) {
     fmt.Printf("[SFT] Loading instruction data from %s\n", data_path)
     categories := []string{"math", "writing", "coding", "qa", "reasoning"}

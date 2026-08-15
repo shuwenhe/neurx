@@ -1,7 +1,7 @@
 
 import "types.s"
 
-type BatchProcessor struct {
+struct BatchProcessor {
     max_batch_size      i32
     scheduling_policy   SchedulingPolicy
     active_batches      []Batch

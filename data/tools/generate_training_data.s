@@ -1,9 +1,11 @@
 package main
 use std.io
 use std.strings
-type training_data struct {
+
+struct training_data {
     text: string
 }
+
 func main() {
     io.println("🚀 NeurXEnglish textLLMtrainingdatagenerateEnglish text (Slanguageimplementation)")
     io.println("")

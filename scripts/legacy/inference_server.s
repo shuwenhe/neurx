@@ -9,7 +9,8 @@ import (
 	"encoding/json"
 	"time"
 )
-type inference_server_config struct {
+
+struct inference_server_config {
 	server_name      string `json:"server_name"`
 	host            string `json:"host"`
 	port            int    `json:"port"`
@@ -27,7 +28,8 @@ type inference_server_config struct {
 	log_level        string `json:"log_level"`
 	worker_threads   int    `json:"worker_threads"`
 }
-type inference_request struct {
+
+struct inference_request {
 	prompt          string   `json:"prompt"`
 	max_tokens       int      `json:"max_tokens"`
 	temperature     float64  `json:"temperature"`
@@ -39,7 +41,8 @@ type inference_request struct {
 	stop_sequences   []string `json:"stop_sequences"`
 	return_logprobs  bool     `json:"return_logprobs"`
 }
-type inference_response struct {
+
+struct inference_response {
 	request_id    string    `json:"request_id"`
 	generated    string    `json:"generated"`
 	token_count   int       `json:"token_count"`
@@ -50,7 +53,8 @@ type inference_response struct {
 	logprobs     []float64 `json:"logprobs,omitempty"`
 	timestamp    string    `json:"timestamp"`
 }
-type server_metrics struct {
+
+struct server_metrics {
 	total_requests      int64   `json:"total_requests"`
 	successful_requests int64   `json:"successful_requests"`
 	failed_requests     int64   `json:"failed_requests"`
@@ -91,6 +95,7 @@ var g_metrics = &server_metrics{
 	uptime_seconds: 0,
 }
 var g_server_start_time = time.Now()
+
 func load_config_from_env() {
 	if home := os.Getenv("NEURX_HOME"); home != "" {
 		g_config.model_path = filepath.Join(home, "artifacts", "models", "1t.bin")

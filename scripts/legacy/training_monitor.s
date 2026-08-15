@@ -5,7 +5,8 @@ import (
     "fmt"
     "encoding/json"
 )
-type training_metrics struct {
+
+struct training_metrics {
     step: int
     epoch: int
     loss: float
@@ -15,13 +16,15 @@ type training_metrics struct {
     eta: float
     memory_used: float
 }
-type training_monitor struct {
+
+struct training_monitor {
     start_time: time.Time
     steps: []training_metrics
     total_steps: int
     log_file: string
     update_interval: int
 }
+
 func (tm *training_monitor) init(
     int total_steps,
     string log_file,

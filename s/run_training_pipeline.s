@@ -5,7 +5,8 @@ import "path/filepath"
 import "strings"
 import "exec"
 import "core"
-type training_config struct {
+
+struct training_config {
     script_dir      string
     neur_x_dir       string
     checkpoint_dir  string
@@ -14,6 +15,7 @@ type training_config struct {
     materialize_warmup_steps int
     materialize_corpus_path  string
 }
+
 func setup_training_config(string train_bin) (*training_config, error) {
     script_dir := core.ResolveScriptDir()
     neurx_dir := core.ResolveRelativePath(script_dir, "../neurx")

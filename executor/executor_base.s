@@ -1,7 +1,7 @@
 
 import "types.s"
 
-type BaseExecutor struct {
+struct BaseExecutor {
     config              ExecutorConfig
     state               i32
     statistics          ExecutorStatistics

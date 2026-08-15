@@ -4,14 +4,16 @@ import (
     "math"
     "strings"
 )
-type safety_config struct {
+
+struct safety_config {
     harmful_keywords        []string
     toxicity_threshold      float64
     safety_threshold        float64
     use_model_based         bool
     enable_logging          bool
 }
-type safety_check_result struct {
+
+struct safety_check_result {
     is_safe                 bool
     toxicity_score          float64
     safety_score            float64
@@ -19,25 +21,29 @@ type safety_check_result struct {
     confidence              float64
     reason                  string
 }
-type safety_filter struct {
+
+struct safety_filter {
     config                  safety_config
     toxicity_model          policy_model
     safety_stats            safety_stats
     violations              []safety_violation
 }
-type safety_violation struct {
+
+struct safety_violation {
     timestamp               int64
     text_snippet            string
     violation_type          string
     toxicity_score          float64
     category                string
 }
-type safety_stats struct {
+
+struct safety_stats {
     total_checks            int64
     flagged_safe            int64
     flagged_unsafe          int64
     blocked_generation      int64
 }
+
 func (filter *safety_filter) detect_harmful_keywords(text string) []string {
     harmful := []string{}
     text_lower := strings.ToLower(text)

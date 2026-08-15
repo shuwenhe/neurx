@@ -18,7 +18,8 @@ use neurx.cuda.runtime.{
 }
 use neurx.common.parse.{parse_int, parse_float}
 use neurx.common.string.{trim, substring, str_len, int_to_str, float_to_str}
-type gpu_training_config = struct {
+
+struct gpu_training_config {
     max_steps: int
     batch_size: int
     seq_len: int
@@ -30,7 +31,8 @@ type gpu_training_config = struct {
     gradient_accumulation_steps: int
     weight_decay: float
 }
-type gpu_model = struct {
+
+struct gpu_model {
     embedding_size: int
     hidden_size: int
     num_layers: int
@@ -42,12 +44,14 @@ type gpu_model = struct {
     m_gpu: int64
     v_gpu: int64
 }
-type training_state = struct {
+
+struct training_state {
     step: int
     total_loss: float
     samples_seen: int
     batches_completed: int
 }
+
 func main() {
     int max_steps = parse_int(runtime_env_get("NEURX_PRETRAIN_STEPS"), 1000000000)
     int batch_size = parse_int(runtime_env_get("NEURX_PRETRAIN_BATCH_SIZE"), 32)

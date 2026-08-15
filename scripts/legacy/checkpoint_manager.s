@@ -7,7 +7,8 @@ import (
     "crypto/sha256"
     "time"
 )
-type checkpoint_metadata struct {
+
+struct checkpoint_metadata {
     step: int
     epoch: int
     timestamp: string
@@ -18,11 +19,13 @@ type checkpoint_metadata struct {
     model_hash: string
     config_hash: string
 }
-type checkpoint_manager struct {
+
+struct checkpoint_manager {
     checkpoint_dir: string
     max_checkpoints: int
     checkpoints: []checkpoint_metadata
 }
+
 func (cm *checkpoint_manager) init(string checkpoint_dir, int max_checkpoints) error {
     cm.checkpoint_dir = checkpoint_dir
     cm.max_checkpoints = max_checkpoints

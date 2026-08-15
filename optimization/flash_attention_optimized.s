@@ -1,7 +1,8 @@
 package optimization
 import "core"
 import "tensor"
-type attention_config struct {
+
+struct attention_config {
     batch_size      int32
     num_heads       int32
     seq_len         int32
@@ -10,17 +11,20 @@ type attention_config struct {
     enable_dropout  bool
     dropout_rate    float32
 }
-type flash_attention_block struct {
+
+struct flash_attention_block {
     q_block         []float32
     k_block         []float32
     v_block         []float32
     scores          []float32
     output          []float32
 }
-type flash_attention_optimized struct {
+
+struct flash_attention_optimized {
     config          attention_config
     block_size      int32
 }
+
 func NewFlashAttentionOptimized(config attention_config) *flash_attention_optimized {
     if config.block_size <= 0 {
         config.block_size = 128

@@ -3,7 +3,8 @@ import (
     "fmt"
     "math"
 )
-type distillation_config struct {
+
+struct distillation_config {
     temperature             float64
     student_weight          float64
     distill_weight          float64
@@ -12,7 +13,8 @@ type distillation_config struct {
     learning_rate           float64
     compression_ratio       float64
 }
-type distillation_metrics struct {
+
+struct distillation_metrics {
     student_loss            float64
     distillation_loss       float64
     total_loss              float64
@@ -20,13 +22,15 @@ type distillation_metrics struct {
     teacher_accuracy        float64
     kl_divergence           float64
 }
-type distillation_framework struct {
+
+struct distillation_framework {
     config                  distillation_config
     teacher_model           policy_model
     student_model           policy_model
     metrics_history         []distillation_metrics
     best_loss               float64
 }
+
 func (framework *distillation_framework) apply_temperature(logits []float64, temperature float64) []float64 {
     scaled := make([]float64, len(logits))
     for i, logit := range logits {

@@ -3,19 +3,22 @@ import (
     "fmt"
     "math"
 )
-type task struct {
+
+struct task {
     name                    string
     task_id                 int
     data_size               int
     loss_weight             float64
     samples                 []task_sample
 }
-type task_sample struct {
+
+struct task_sample {
     input                   []int
     target                  []int
     task_id                 int
 }
-type multi_task_config struct {
+
+struct multi_task_config {
     num_tasks               int
     task_weights            map[int]float64
     shared_hidden_size      int
@@ -23,7 +26,8 @@ type multi_task_config struct {
     learning_rate           float64
     loss_balancing          string
 }
-type multi_task_learner struct {
+
+struct multi_task_learner {
     config                  multi_task_config
     tasks                   []task
     shared_encoder          policy_model
@@ -32,6 +36,7 @@ type multi_task_learner struct {
     task_performance        map[int]float64
     uncertainty_weights     map[int]float64
 }
+
 func (mtl *multi_task_learner) register_task(task_name string, int data_size, weight float64) int {
     task_id := len(mtl.tasks)
     task := task{

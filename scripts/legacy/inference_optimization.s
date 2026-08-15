@@ -4,7 +4,8 @@ import (
     "math"
     "time"
 )
-type inference_config struct {
+
+struct inference_config {
     max_batch_size      int
     max_seq_length      int
     use_kv_cache        bool
@@ -13,13 +14,15 @@ type inference_config struct {
     quantization_type   string
     num_replicas        int
 }
-type kvcache struct {
+
+struct kvcache {
     key_cache           [][]float64
     value_cache         [][]float64
     cache_size          int
     max_seq_length      int
 }
-type inference_request struct {
+
+struct inference_request {
     request_id          string
     prompt              []int
     max_tokens          int
@@ -28,7 +31,8 @@ type inference_request struct {
     top_k               int
     timestamp           int64
 }
-type inference_response struct {
+
+struct inference_response {
     request_id          string
     generated_tokens    []int
     generated_text      string
@@ -36,7 +40,8 @@ type inference_response struct {
     latency_ms          float64
     tokens_per_second   float64
 }
-type inference_engine struct {
+
+struct inference_engine {
     config              inference_config
     model               policy_model
     kv_cache            *kvcache
@@ -44,7 +49,8 @@ type inference_engine struct {
     response_cache      map[string]inference_response
     performance_stats   inference_stats
 }
-type inference_stats struct {
+
+struct inference_stats {
     total_requests      int64
     total_tokens        int64
     total_latency       float64
@@ -55,6 +61,7 @@ type inference_stats struct {
     p99_latency         float64
     cache_hit_rate      float64
 }
+
 func (engine *inference_engine) initialize_kv_cache() {
     fmt.Println("[Inference] Initializing KV cache...")
     cache_size := engine.config.max_batch_size *

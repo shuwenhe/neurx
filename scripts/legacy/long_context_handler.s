@@ -3,7 +3,8 @@ import (
     "fmt"
     "math"
 )
-type long_context_config struct {
+
+struct long_context_config {
     max_seq_length          int
     rope_theta              float64
     rope_dimensions         int
@@ -12,22 +13,26 @@ type long_context_config struct {
     use_sliding_window      bool
     window_size             int
 }
-type ro_pepositional_encoding struct {
+
+struct ro_pepositional_encoding {
     theta                   float64
     dimensions              int
     max_seq_length          int
 }
-type long_context_handler struct {
+
+struct long_context_handler {
     config                  long_context_config
     positional_encoding     *ro_pepositional_encoding
     cache_stats             cache_stats
 }
-type cache_stats struct {
+
+struct cache_stats {
     total_requests          int64
     cache_hits              int64
     cache_misses            int64
     avg_cache_time          float64
 }
+
 func (encoder *ro_pepositional_encoding) compute_rope_frequencies() []float64 {
     frequencies := make([]float64, encoder.dimensions)
     for i := 0; i < encoder.dimensions; i += 2 {

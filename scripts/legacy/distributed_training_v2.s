@@ -5,7 +5,8 @@ import (
     "os"
     "strconv"
 )
-type distributed_config_v2 struct {
+
+struct distributed_config_v2 {
     backend: string
     rank: int
     world_size: int
@@ -23,6 +24,7 @@ type distributed_config_v2 struct {
     enable_flash_attention: bool
     mixed_precision_dtype: string
 }
+
 func create_7b_distributed_config(): distributed_config_v2 {
     return distributed_config_v2{
         backend: "nccl",
@@ -43,7 +45,8 @@ func create_7b_distributed_config(): distributed_config_v2 {
         mixed_precision_dtype: "fp16",
     }
 }
-type grad_accum_manager struct {
+
+struct grad_accum_manager {
     accum_steps: int
     current_step: int
     accumulated_grads: map[string]float
@@ -76,7 +79,8 @@ func (gm *grad_accum_manager) reset() {
     gm.is_sync_step = false
     gm.accumulated_grads = make(map[string]float)
 }
-type activation_ckpt_manager struct {
+
+struct activation_ckpt_manager {
     checkpoint_strategy: string
     layer_checkpoint_map: map[int]bool
     total_layers: int
@@ -109,7 +113,8 @@ func (acm *activation_ckpt_manager) should_checkpoint(int layer_id): bool {
     }
     return false
 }
-type mixed_precision_manager struct {
+
+struct mixed_precision_manager {
     dtype: string
     compute_dtype: string
     weight_dtype: string
@@ -143,7 +148,8 @@ func (mpm *mixed_precision_manager) get_memory_savings(): float {
     }
     return 50.0
 }
-type large_model_distributed_trainer struct {
+
+struct large_model_distributed_trainer {
     config: distributed_config_v2
     grad_accum: grad_accum_manager
     activation_ckpt: activation_ckpt_manager

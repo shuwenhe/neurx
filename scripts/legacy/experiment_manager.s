@@ -4,13 +4,15 @@ import (
     "math"
     "time"
 )
-type hyper_parameter struct {
+
+struct hyper_parameter {
     name            string
     value           string
     data_type       string
     search_range    string
 }
-type experiment_metrics struct {
+
+struct experiment_metrics {
     step            int64
     train_loss      float64
     val_loss        float64
@@ -20,7 +22,8 @@ type experiment_metrics struct {
     throughput      float64
     memory_usage_gb float64
 }
-type experiment_config struct {
+
+struct experiment_config {
     experiment_id       string
     name                string
     description         string
@@ -31,7 +34,8 @@ type experiment_config struct {
     end_time            int64
     status              string
 }
-type experiment_result struct {
+
+struct experiment_result {
     config              experiment_config
     metrics_history     []experiment_metrics
     best_checkpoint     string
@@ -40,19 +44,22 @@ type experiment_result struct {
     training_duration   int64
     converged           bool
 }
-type experiment_comparison struct {
+
+struct experiment_comparison {
     experiment_ids      []string
     metric_name         string
     results             map[string]float64
     winner              string
     significance        float64
 }
-type experiment_manager struct {
+
+struct experiment_manager {
     experiments         map[string]experiment_result
     current_experiment  string
     comparison_history  []experiment_comparison
     best_experiment     string
 }
+
 func (manager *experiment_manager) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Industrial Experiment Management System              ║")

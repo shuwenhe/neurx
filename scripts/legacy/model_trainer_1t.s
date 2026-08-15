@@ -5,7 +5,8 @@ import (
     "os"
     "strconv"
 )
-type model_config1_t struct {
+
+struct model_config1_t {
     model_name: string
     num_params: int
     hidden_dim: int
@@ -22,7 +23,8 @@ type model_config1_t struct {
     use_mixed_precision: bool
     use_bfloat16: bool
 }
-type distributed_config1_t struct {
+
+struct distributed_config1_t {
     tensor_parallel_size: int
     pipeline_parallel_stages: int
     data_parallel_size: int
@@ -30,7 +32,8 @@ type distributed_config1_t struct {
     zero_stage: int
     total_gpus: int
 }
-type memory_analysis1_t struct {
+
+struct memory_analysis1_t {
     model_weights_tb: float
     gradients_tb: float
     optimizer_states_tb: float
@@ -38,7 +41,8 @@ type memory_analysis1_t struct {
     total_per_gpu_gb: float
     total_system_tb: float
 }
-type training_optimization1_t struct {
+
+struct training_optimization1_t {
     learning_rate: float
     warmup_steps: int
     total_steps: int
@@ -49,6 +53,7 @@ type training_optimization1_t struct {
     eval_steps: int
     max_grad_norm: float
 }
+
 func create_1t_config(): model_config1_t {
     config := model_config1_t{
         model_name: "neurx-1t",
@@ -138,7 +143,8 @@ func create_training_config_1t(): training_optimization1_t {
     }
     return config
 }
-type hardware_requirements struct {
+
+struct hardware_requirements {
     num_h100_gpus: int
     total_memory_tb: float
     interconnect: string
@@ -164,7 +170,8 @@ func calculate_hardware_requirements(): hardware_requirements {
     }
     return req
 }
-type training_pipeline1_t struct {
+
+struct training_pipeline1_t {
     config: model_config1_t
     dist_config: distributed_config1_t
     train_config: training_optimization1_t

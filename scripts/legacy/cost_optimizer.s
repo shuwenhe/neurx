@@ -3,7 +3,8 @@ import (
     "fmt"
     "math"
 )
-type resource_metrics struct {
+
+struct resource_metrics {
     step                int64
     gpu_count           int
     batch_size          int
@@ -12,32 +13,37 @@ type resource_metrics struct {
     gpu_utilization     float64
     cost_per_step       float64
 }
-type cost_model struct {
+
+struct cost_model {
     gpu_price_per_hour  float64
     memory_price_per_gb float64
     network_price_per_gb float64
     storage_price_per_gb_month float64
 }
-type optimization_strategy struct {
+
+struct optimization_strategy {
     strategy_name       string
     target_metric       string
     constraint          string
     expected_saving     float64
 }
-type resource_allocation struct {
+
+struct resource_allocation {
     gpu_ids             []string
     batch_size          int
     sequence_length     int
     gradient_accumulation int
     precision           string
 }
-type cost_optimizer struct {
+
+struct cost_optimizer {
     config              cost_model
     current_allocation  resource_allocation
     metrics_history     []resource_metrics
     total_cost          float64
     optimization_strategies []optimization_strategy
 }
+
 func (co *cost_optimizer) initialize(config cost_model) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Cost Optimization and Resource Management            ║")

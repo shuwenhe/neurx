@@ -3,14 +3,16 @@ import (
     "fmt"
     "math"
 )
-type preference_pair struct {
+
+struct preference_pair {
     prompt              string
     chosen_response     string
     rejected_response   string
     chosen_reward       float64
     rejected_reward     float64
 }
-type dpoconfig struct {
+
+struct dpoconfig {
     learning_rate       float64
     beta                float64
     temperature         float64
@@ -18,7 +20,8 @@ type dpoconfig struct {
     num_epochs          int
     loss_type           string
 }
-type dpometrics struct {
+
+struct dpometrics {
     step                int64
     loss                float64
     chosen_logits       float64
@@ -26,19 +29,22 @@ type dpometrics struct {
     margin              float64
     accuracy            float64
 }
-type trajectory_reward struct {
+
+struct trajectory_reward {
     trajectory_id       string
     responses           []string
     rewards             []float64
     avg_reward          float64
 }
-type dpodataset struct {
+
+struct dpodataset {
     preference_pairs    []preference_pair
     size                int
     source              string
     quality_score       float64
 }
-type dpotrainer struct {
+
+struct dpotrainer {
     config              dpoconfig
     dataset             dpodataset
     model_logits        map[string]float64
@@ -46,6 +52,7 @@ type dpotrainer struct {
     metrics_history     []dpometrics
     best_loss           float64
 }
+
 func (trainer *dpotrainer) initialize(config dpoconfig) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Direct Preference Optimization (DPO) Trainer         ║")

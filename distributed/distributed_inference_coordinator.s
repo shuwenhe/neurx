@@ -1,7 +1,8 @@
 package distributed
 import "core"
 import "tensor"
-type coordinator_config struct {
+
+struct coordinator_config {
     num_nodes           int32
     gpus_per_node       int32
     total_gpus          int32
@@ -16,7 +17,8 @@ type coordinator_config struct {
     enable_checkpointing bool
     checkpoint_interval  int64
 }
-type node_info struct {
+
+struct node_info {
     node_id             int32
     node_rank           int32
     ip_address          string
@@ -27,7 +29,8 @@ type node_info struct {
     is_alive            bool
     last_heartbeat      int64
 }
-type distributed_request struct {
+
+struct distributed_request {
     request_id          int64
     primary_node        int32
     target_nodes        []int32
@@ -36,13 +39,15 @@ type distributed_request struct {
     current_stage       int32
     state               string
 }
-type load_balance_state struct {
+
+struct load_balance_state {
     gpu_loads           []float32
     node_loads          []float32
     queue_lengths       []int32
     network_congestion  []float32
 }
-type distributed_inference_coordinator struct {
+
+struct distributed_inference_coordinator {
     config              coordinator_config
     nodes               map[int32]*node_info
     network_topology    map[string]float32
@@ -56,6 +61,7 @@ type distributed_inference_coordinator struct {
     total_requests      int64
     total_completed     int64
 }
+
 func NewDistributedInferenceCoordinator(config coordinator_config) *distributed_inference_coordinator {
     coordinator := &distributed_inference_coordinator{
         config:            config,

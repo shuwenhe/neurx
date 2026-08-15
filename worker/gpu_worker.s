@@ -2,7 +2,7 @@
 import "types.s"
 import "worker_base.s"
 
-type GPUWorker struct {
+struct GPUWorker {
     base                BaseWorker
     gpu_devices         []i32
     device_count        i32

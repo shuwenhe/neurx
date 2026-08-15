@@ -9,7 +9,7 @@ import "executor_scheduler.s"
 import "cache_manager.s"
 import "distributed_executor.s"
 
-type TestResult struct {
+struct TestResult {
     name            string
     passed          i32
     error_message   string
@@ -21,7 +21,7 @@ var passed_tests i32 = 0
 // Helper: Log test result
 func LogTest(test_name string, condition i32, error_msg string) {
     total_tests++
-    
+
     if condition == 1 {
         passed_tests++
         println("✓ PASS:", test_name)
@@ -33,7 +33,7 @@ func LogTest(test_name string, condition i32, error_msg string) {
 // Test 1: Executor initialization
 func TestExecutorInitialization() {
     println("\n--- Test: Executor Initialization ---")
-    
+
     config := ExecutorConfig{
         executor_id: 0,
         model_name: "test-model",
@@ -43,7 +43,7 @@ func TestExecutorInitialization() {
 
     executor := NewBaseExecutor(config)
     result := executor.Initialize()
-    
+
     LogTest("Initialize succeeds", result.success, "Initialize failed")
     LogTest("Executor running", executor.state == EXECUTOR_STATE_RUNNING, "State not RUNNING")
     LogTest("Cache manager created", executor.cache_manager != nil, "Cache manager not created")
@@ -52,7 +52,7 @@ func TestExecutorInitialization() {
 // Test 2: Sequence addition
 func TestSequenceAddition() {
     println("\n--- Test: Sequence Addition ---")
-    
+
     config := ExecutorConfig{executor_id: 1}
     executor := NewBaseExecutor(config)
     executor.Initialize()
@@ -71,7 +71,7 @@ func TestSequenceAddition() {
 // Test 3: Sequence removal
 func TestSequenceRemoval() {
     println("\n--- Test: Sequence Removal ---")
-    
+
     config := ExecutorConfig{executor_id: 2}
     executor := NewBaseExecutor(config)
     executor.Initialize()
@@ -87,7 +87,7 @@ func TestSequenceRemoval() {
 // Test 4: Prefill executor
 func TestPrefillExecutor() {
     println("\n--- Test: Prefill Executor ---")
-    
+
     config := ExecutorConfig{
         executor_id: 3,
         max_batch_size: 256,
@@ -106,7 +106,7 @@ func TestPrefillExecutor() {
 
     sequences := make([]string, 4)
     tokens := make([]i32, 4)
-    
+
     for i := 0; i < 4; i++ {
         sequences[i] = "seq_" + string(i)
         tokens[i] = 128
@@ -120,7 +120,7 @@ func TestPrefillExecutor() {
 // Test 5: Decode executor
 func TestDecodeExecutor() {
     println("\n--- Test: Decode Executor ---")
-    
+
     config := ExecutorConfig{
         executor_id: 4,
         max_batch_size: 512,
@@ -151,7 +151,7 @@ func TestDecodeExecutor() {
 // Test 6: Scheduler - Round-robin
 func TestSchedulerRoundRobin() {
     println("\n--- Test: Scheduler Round-Robin ---")
-    
+
     scheduler := NewExecutionScheduler(SCHEDULE_FCFS)
 
     for i := 0; i < 8; i++ {
@@ -168,7 +168,7 @@ func TestSchedulerRoundRobin() {
 // Test 7: Scheduler - Priority
 func TestSchedulerPriority() {
     println("\n--- Test: Scheduler Priority ---")
-    
+
     scheduler := NewExecutionScheduler(SCHEDULE_PRIORITY)
 
     for i := 0; i < 16; i++ {
@@ -183,7 +183,7 @@ func TestSchedulerPriority() {
 // Test 8: KV cache allocation
 func TestKVCacheAllocation() {
     println("\n--- Test: KV Cache Allocation ---")
-    
+
     cache := NewKVCacheManager(20, EVICTION_LRU)
 
     result := cache.AllocateBlock("seq_0", 0, 256)
@@ -195,7 +195,7 @@ func TestKVCacheAllocation() {
 // Test 9: KV cache eviction
 func TestKVCacheEviction() {
     println("\n--- Test: KV Cache Eviction ---")
-    
+
     cache := NewKVCacheManager(1, EVICTION_LRU)  // Small cache
 
     // Fill cache
@@ -214,7 +214,7 @@ func TestKVCacheEviction() {
 // Test 10: Cache LRU vs LFU
 func TestCacheEvictionPolicies() {
     println("\n--- Test: Cache Eviction Policies ---")
-    
+
     // Test LRU
     lru_cache := NewKVCacheManager(10, EVICTION_LRU)
     result := lru_cache.AllocateBlock("seq_0", 0, 256)
@@ -234,7 +234,7 @@ func TestCacheEvictionPolicies() {
 // Test 11: Iteration execution
 func TestIterationExecution() {
     println("\n--- Test: Iteration Execution ---")
-    
+
     config := ExecutorConfig{
         executor_id: 5,
         max_batch_size: 256,
@@ -256,7 +256,7 @@ func TestIterationExecution() {
 // Test 12: Statistics collection
 func TestStatisticsCollection() {
     println("\n--- Test: Statistics Collection ---")
-    
+
     config := ExecutorConfig{executor_id: 6}
     executor := NewBaseExecutor(config)
     executor.Initialize()
@@ -275,7 +275,7 @@ func TestStatisticsCollection() {
 // Test 13: Distributed executor
 func TestDistributedExecutor() {
     println("\n--- Test: Distributed Executor ---")
-    
+
     config := ExecutorConfig{
         executor_id: 7,
         max_batch_size: 256,
@@ -298,7 +298,7 @@ func TestDistributedExecutor() {
 // Test 14: Load balancing
 func TestLoadBalancing() {
     println("\n--- Test: Load Balancing ---")
-    
+
     config := ExecutorConfig{
         executor_id: 8,
         max_batch_size: 256,
@@ -319,7 +319,7 @@ func TestLoadBalancing() {
 
     balanced := dist.LoadBalance(sequences)
     LogTest("Load balance succeeds", len(balanced) == 4, "Incorrect number of ranks")
-    
+
     total := 0
     for rank := 0; rank < len(balanced); rank++ {
         total += len(balanced[rank])
@@ -335,7 +335,7 @@ func PrintTestReport() {
     println("Total tests:", total_tests)
     println("Passed:     ", passed_tests)
     println("Failed:     ", total_tests - passed_tests)
-    
+
     if total_tests > 0 {
         percentage := (passed_tests * 100) / total_tests
         println("Pass rate:  ", percentage, "%")

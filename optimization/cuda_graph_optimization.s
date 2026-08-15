@@ -1,26 +1,30 @@
 package optimization
 import "core"
 import "tensor"
-type cuda_graph_node struct {
+
+struct cuda_graph_node {
     id              int32
     kernel_name     string
     dependencies    []int32
     params          map[string]int32
     status          string
 }
-type cuda_graph_config struct {
+
+struct cuda_graph_config {
     enable_capture  bool
     max_nodes       int32
     enable_fusion   bool
     enable_coarsening bool
 }
-type cuda_graph struct {
+
+struct cuda_graph {
     config          cuda_graph_config
     nodes           []cuda_graph_node
     node_outputs    map[int32][]float32
     execution_order []int32
     ready_queue     []int32
 }
+
 func NewCUDAGraph(config cuda_graph_config) *cuda_graph {
     if config.max_nodes <= 0 {
         config.max_nodes = 1000

@@ -6,7 +6,8 @@ import (
     "encoding/json"
     "math"
 )
-type perplexity_metrics struct {
+
+struct perplexity_metrics {
     step: int
     loss: float
     perplexity: float
@@ -14,7 +15,8 @@ type perplexity_metrics struct {
     val_perplexity: float
     improvement: float
 }
-type training_metrics struct {
+
+struct training_metrics {
     step: int
     epoch: int
     batch_idx: int
@@ -27,7 +29,8 @@ type training_metrics struct {
     grad_norm: float
     perplexity: perplexity_metrics
 }
-type advanced_training_monitor struct {
+
+struct advanced_training_monitor {
     start_time: time.Time
     steps: []training_metrics
     total_steps: int
@@ -39,6 +42,7 @@ type advanced_training_monitor struct {
     convergence_window: int
     convergence_threshold: float
 }
+
 func (atm *advanced_training_monitor) init(
     int total_steps,
     string log_file,

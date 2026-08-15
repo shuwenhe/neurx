@@ -1,28 +1,33 @@
 package optimization
 import "core"
 import "tensor"
-type operation_signature struct {
+
+struct operation_signature {
     op_type         string
     input_shape     []int32
     output_shape    []int32
     params          map[string]float32
 }
-type fusion_rule struct {
+
+struct fusion_rule {
     producer        string
     consumer        string
     is_fusible      bool
     fusion_kernel   string
 }
-type runtime_fusion_optimizer struct {
+
+struct runtime_fusion_optimizer {
     fusion_rules    []fusion_rule
     operation_queue []operation_signature
     fused_kernels   map[string]bool
 }
-type fused_operation_config struct {
+
+struct fused_operation_config {
     enable_fusion   bool
     max_queue_size  int32
     fusion_ratio    float32
 }
+
 func NewRuntimeFusionOptimizer(config fused_operation_config) *runtime_fusion_optimizer {
     optimizer := &runtime_fusion_optimizer{
         fusion_rules:    make([]fusion_rule, 0),

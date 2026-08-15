@@ -49,7 +49,7 @@ const (
     DEFAULT_DECODE_BATCH_SIZE   = 512
 )
 
-type ExecutorConfig struct {
+struct ExecutorConfig {
     executor_id         i32
     model_name          string
     device_id           i32
@@ -65,7 +65,7 @@ type ExecutorConfig struct {
     timeout_ms          i32
 }
 
-type ExecutionIteration struct {
+struct ExecutionIteration {
     iteration_id    i64
     phase           i32
     start_time      i64
@@ -78,7 +78,7 @@ type ExecutionIteration struct {
     error_code      i32
 }
 
-type SequenceStatus struct {
+struct SequenceStatus {
     sequence_id     string
     phase           i32
     token_pos       i32
@@ -90,7 +90,7 @@ type SequenceStatus struct {
     estimated_finish i64
 }
 
-type KVCacheBlock struct {
+struct KVCacheBlock {
     block_id        i32
     sequence_id     string
     token_start     i32
@@ -101,7 +101,7 @@ type KVCacheBlock struct {
     access_count    i64
 }
 
-type KVCacheManager struct {
+struct KVCacheManager {
     total_size_gb   f64
     allocated_mb    i32
     free_mb         i32
@@ -111,7 +111,7 @@ type KVCacheManager struct {
     max_blocks      i32
 }
 
-type ExecutionResult struct {
+struct ExecutionResult {
     iteration_id    i64
     success         i32
     error_code      i32
@@ -123,7 +123,7 @@ type ExecutionResult struct {
     cache_hit_rate  f64
 }
 
-type ExecutorStatistics struct {
+struct ExecutorStatistics {
     total_iterations    i64
     completed_iterations i64
     failed_iterations   i64
@@ -138,7 +138,7 @@ type ExecutorStatistics struct {
     memory_peak         i32
 }
 
-type PrefillConfig struct {
+struct PrefillConfig {
     max_batch_size  i32
     max_tokens      i32
     enable_paging   i32
@@ -146,7 +146,7 @@ type PrefillConfig struct {
     block_size      i32
 }
 
-type DecodeConfig struct {
+struct DecodeConfig {
     max_batch_size  i32
     beam_width      i32
     enable_batching i32
@@ -154,7 +154,7 @@ type DecodeConfig struct {
     num_beams       i32
 }
 
-type DistributedConfig struct {
+struct DistributedConfig {
     rank            i32
     world_size      i32
     tensor_parallel i32
@@ -162,7 +162,7 @@ type DistributedConfig struct {
     sync_timeout_ms i32
 }
 
-type IterationSchedule struct {
+struct IterationSchedule {
     iteration_id    i64
     prefill_batch   []string
     prefill_count   i32
@@ -173,7 +173,7 @@ type IterationSchedule struct {
     priority_order  []i32
 }
 
-type ExecutorMetrics struct {
+struct ExecutorMetrics {
     current_state   i32
     active_sequences i32
     queued_sequences i32
@@ -186,7 +186,7 @@ type ExecutorMetrics struct {
     gpu_util        f64
 }
 
-type AttentionMask struct {
+struct AttentionMask {
     sequence_id     string
     mask_data       []u8
     mask_size       i32
@@ -194,7 +194,7 @@ type AttentionMask struct {
     enable_prefix   i32
 }
 
-type CacheEvictionPolicy struct {
+struct CacheEvictionPolicy {
     policy_type     i32
     max_block_age   i64
     max_block_freq  i64

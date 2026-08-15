@@ -1,13 +1,15 @@
 package neurx.inference.rpc
 import "core"
 import "tensor"
-type rpc_message_type struct {
+
+struct rpc_message_type {
     REQUEST          int32
     RESPONSE         int32
     HEARTBEAT        int32
     ERROR            int32
     ACK              int32
 }
+
 func RpcMessageTypeValues() rpc_message_type {
     return rpc_message_type{
         REQUEST:   1,
@@ -17,7 +19,8 @@ func RpcMessageTypeValues() rpc_message_type {
         ACK:       5,
     }
 }
-type rpc_method_type struct {
+
+struct rpc_method_type {
     FORWARD          int32
     BACKWARD         int32
     PREFILL          int32
@@ -38,7 +41,8 @@ func RpcMethodTypeValues() rpc_method_type {
         CANCEL:         7,
     }
 }
-type rpc_request struct {
+
+struct rpc_request {
     request_id      string
     method          int32
     endpoint        string
@@ -48,7 +52,8 @@ type rpc_request struct {
     timeout_ms      int64
     retry_count     int32
 }
-type rpc_response struct {
+
+struct rpc_response {
     request_id      string
     method          int32
     status          int32
@@ -57,7 +62,8 @@ type rpc_response struct {
     latency_ms      int64
     timestamp_ms    int64
 }
-type rpc_client struct {
+
+struct rpc_client {
     server_address  string
     port            int32
     timeout_ms      int64
@@ -65,20 +71,23 @@ type rpc_client struct {
     connection_id   string
     healthy         bool
 }
-type rpc_retry_policy struct {
+
+struct rpc_retry_policy {
     max_retries     int32
     initial_delay   int64
     max_delay       int64
     backoff_factor  float32
     retry_on_codes  []int32
 }
-type rpc_server_handler struct {
+
+struct rpc_server_handler {
     name            string
     handler_fn      func(rpc_request) rpc_response
     methods         []int32
     max_concurrency int32
 }
-type rpc_server struct {
+
+struct rpc_server {
     listen_address  string
     port            int32
     handlers        map[string]rpc_server_handler
@@ -189,7 +198,8 @@ func (server *rpc_server) HandleRequest(request rpc_request) rpc_response {
     }
     return handler.handler_fn(request)
 }
-type rpc_connection_pool struct {
+
+struct rpc_connection_pool {
     connections    map[string]*rpc_client
     max_pool_size  int32
     current_size   int32

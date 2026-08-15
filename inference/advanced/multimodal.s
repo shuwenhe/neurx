@@ -15,6 +15,7 @@ enum audio_format {
     MP3
     FLAC
 }
+
 struct image_data {
     format image_format
     width int
@@ -193,7 +194,8 @@ func (processor multimodal_processor) ProcessInput(
     )
     return text_tokens, all_features, special_tokens
 }
-type image_preprocessor struct {
+
+struct image_preprocessor {
     target_size int
     normalize_mean []float
     normalize_std []float

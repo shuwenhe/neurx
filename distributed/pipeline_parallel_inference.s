@@ -1,7 +1,8 @@
 package distributed
 import "core"
 import "tensor"
-type pipeline_parallel_config struct {
+
+struct pipeline_parallel_config {
     pp_size             int32
     world_size          int32
     rank                int32
@@ -13,37 +14,43 @@ type pipeline_parallel_config struct {
     enable_activation_ckpt bool
     backend             string
 }
-type pipeline_stage struct {
+
+struct pipeline_stage {
     stage_rank          int32
     layers              []string
     start_layer         int32
     end_layer           int32
 }
-type micro_batch struct {
+
+struct micro_batch {
     batch_id            int32
     input_data          []float32
     output_data         []float32
     loss                float32
     processed           bool
 }
-type pipeline_schedule struct {
+
+struct pipeline_schedule {
     forward_ops         []schedule_op
     backward_ops        []schedule_op
     bubble_fraction     float32
 }
-type schedule_op struct {
+
+struct schedule_op {
     op_type             string
     stage_rank          int32
     micro_batch_id      int32
     layer_id            int32
 }
-type pipeline_parallel_inference struct {
+
+struct pipeline_parallel_inference {
     config              pipeline_parallel_config
     stage               *pipeline_stage
     micro_batches       []*micro_batch
     schedule            *pipeline_schedule
     recv_buffer         map[int32][]float32
 }
+
 func NewPipelineParallelInference(config pipeline_parallel_config) *pipeline_parallel_inference {
     if config.pp_size <= 0 {
         config.pp_size = 1

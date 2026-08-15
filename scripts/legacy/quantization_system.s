@@ -3,7 +3,8 @@ import (
     "fmt"
     "math"
 )
-type quantization_config struct {
+
+struct quantization_config {
     quantization_type   string
     scale_method        string
     calibration_method  string
@@ -11,7 +12,8 @@ type quantization_config struct {
     qat_enabled         bool
     num_calibration     int
 }
-type quantization_stats struct {
+
+struct quantization_stats {
     min_val             float64
     max_val             float64
     mean_val            float64
@@ -19,7 +21,8 @@ type quantization_stats struct {
     scale               float64
     zero_point          int
 }
-type quantized_layer struct {
+
+struct quantized_layer {
     name                string
     weights_int         [][]int
     bias_fp32           []float64
@@ -28,7 +31,8 @@ type quantized_layer struct {
     original_shape      []int
     quantization_type   string
 }
-type quantization_framework struct {
+
+struct quantization_framework {
     config              quantization_config
     original_model      policy_model
     quantized_layers    map[string]*quantized_layer
@@ -36,6 +40,7 @@ type quantization_framework struct {
     compression_ratio   float64
     accuracy_loss       float64
 }
+
 func (framework *quantization_framework) calculate_stats(data [][]float64) quantization_stats {
     if len(data) == 0 {
         return quantization_stats{}

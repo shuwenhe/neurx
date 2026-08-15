@@ -1,7 +1,7 @@
 
 import "types.s"
 
-type ExecutionScheduler struct {
+struct ExecutionScheduler {
     scheduling_policy   i32
     prefill_sequences   []string
     decode_sequences    []string

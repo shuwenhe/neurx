@@ -3,7 +3,8 @@ import (
     "fmt"
     "math"
 )
-type data_quality_metrics struct {
+
+struct data_quality_metrics {
     total_samples       int
     valid_samples       int
     invalid_samples     int
@@ -12,7 +13,8 @@ type data_quality_metrics struct {
     accuracy_rate       float64
     null_rate           float64
 }
-type data_provenance struct {
+
+struct data_provenance {
     source              string
     timestamp           int64
     creator             string
@@ -20,14 +22,16 @@ type data_provenance struct {
     data_location       string
     format              string
 }
-type data_audit_log struct {
+
+struct data_audit_log {
     operation           string
     timestamp           int64
     actor               string
     changes             string
     status              string
 }
-type dataset_version struct {
+
+struct dataset_version {
     version_id          string
     dataset_name        string
     version_number      int
@@ -40,19 +44,22 @@ type dataset_version struct {
     compliance_checks   map[string]bool
     lineage             []string
 }
-type data_version_control struct {
+
+struct data_version_control {
     datasets            map[string][]dataset_version
     audit_logs          []dataudit_log
     current_version     map[string]string
     quality_threshold   float64
 }
-type data_governance_report struct {
+
+struct data_governance_report {
     dataset_name        string
     total_versions      int
     quality_trend       []float64
     compliance_status   string
     audit_summary       string
 }
+
 func (dvc *data_version_control) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Data Version Control and Governance System           ║")

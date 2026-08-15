@@ -9,7 +9,8 @@ const (
     REQUEST_FINISHED     RequestState = 3
     REQUEST_ERROR        RequestState = 4
 )
-type sequence_request struct {
+
+struct sequence_request {
     request_id           int64
     prompt_tokens        []int32
     max_tokens           int32
@@ -21,7 +22,8 @@ type sequence_request struct {
     priority             int
     created_at           int64
 }
-type batch_info struct {
+
+struct batch_info {
     batch_id          int64
     requests          []*sequence_request
     batch_size        int
@@ -30,7 +32,8 @@ type batch_info struct {
     max_seq_len       int32
     total_prefill_len int32
 }
-type scheduler_config struct {
+
+struct scheduler_config {
     max_batch_size        int32
     max_prefill_tokens    int32
     max_decode_tokens     int32
@@ -39,7 +42,8 @@ type scheduler_config struct {
     enable_disaggregated  bool
     min_decode_batch_size int32
 }
-type continuous_batching_scheduler struct {
+
+struct continuous_batching_scheduler {
     config               scheduler_config
     queue                []*sequence_request
     active_prefill       []*sequence_request
@@ -51,6 +55,7 @@ type continuous_batching_scheduler struct {
     total_completed      int64
     scheduler_step       int64
 }
+
 func NewContinuousBatchingScheduler(config scheduler_config) *continuous_batching_scheduler {
     if config.max_batch_size <= 0 {
         config.max_batch_size = 32

@@ -1,7 +1,8 @@
 package neurx.inference.profiling
 import "core"
 import "tensor"
-type profile_event_type struct {
+
+struct profile_event_type {
     FORWARD_START    int32
     FORWARD_END      int32
     BACKWARD_START   int32
@@ -17,6 +18,7 @@ type profile_event_type struct {
     KERNEL_LAUNCH    int32
     CUSTOM           int32
 }
+
 func ProfileEventTypeValues() profile_event_type {
     return profile_event_type{
         FORWARD_START:   1,
@@ -35,7 +37,8 @@ func ProfileEventTypeValues() profile_event_type {
         CUSTOM:          14,
     }
 }
-type profile_event struct {
+
+struct profile_event {
     event_id        string
     event_type      int32
     timestamp_ns    int64
@@ -46,14 +49,16 @@ type profile_event struct {
     name            string
     metadata        map[string]string
 }
-type phase_timing struct {
+
+struct phase_timing {
     phase_name      string
     start_time_ns   int64
     end_time_ns     int64
     duration_ns     int64
     count           int32
 }
-type profiler struct {
+
+struct profiler {
     enabled         bool
     events          []profile_event
     phase_timings   map[string]phase_timing
@@ -61,14 +66,16 @@ type profiler struct {
     max_events      int32
     current_size    int32
 }
-type request_profiler struct {
+
+struct request_profiler {
     request_id      string
     start_time_ns   int64
     end_time_ns     int64
     phases          []phase_timing
     memory_peak_mb  int32
 }
-type profiler_report struct {
+
+struct profiler_report {
     total_time_ns       int64
     forward_time_ns     int64
     decode_time_ns      int64
@@ -224,7 +231,8 @@ func (p *profiler) PrintProfile() {
     core.Println("  Communication time:", float32(report.communication_ns)/1e6, "ms")
     core.Println("\nEvents Recorded:", report.events_count)
 }
-type timeline_analyzer struct {
+
+struct timeline_analyzer {
     traces          map[string][]profile_event
     critical_paths  map[string][]profile_event
 }

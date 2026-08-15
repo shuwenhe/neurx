@@ -1,7 +1,8 @@
 package inference
 import "core"
 import "tensor"
-type kv_block struct {
+
+struct kv_block {
     block_id          int
     tokens_per_block  int32
     data              []float32
@@ -9,13 +10,15 @@ type kv_block struct {
     request_ids       []int64
     is_prefix_block   bool
 }
-type kv_allocation struct {
+
+struct kv_allocation {
     block_table       []int
     block_offsets     []int32
     num_tokens        int32
     request_id        int64
 }
-type kv_cache_config struct {
+
+struct kv_cache_config {
     num_blocks        int
     block_size        int32
     hidden_size       int32
@@ -24,7 +27,8 @@ type kv_cache_config struct {
     dtype             string
     enable_prefix_cache bool
 }
-type kv_cache_pool_v2 struct {
+
+struct kv_cache_pool_v2 {
     config            kv_cache_config
     blocks            []*kv_block
     free_blocks       []int
@@ -35,6 +39,7 @@ type kv_cache_pool_v2 struct {
     total_free        int32
     eviction_count    int64
 }
+
 func NewKVCachePoolV2(config kv_cache_config) *kv_cache_pool_v2 {
     if config.num_blocks <= 0 {
         config.num_blocks = 1024

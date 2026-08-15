@@ -2,7 +2,7 @@
 import "types.s"
 import "executor_base.s"
 
-type PrefillExecutor struct {
+struct PrefillExecutor {
     base                BaseExecutor
     prefill_config      PrefillConfig
     input_sequences     []string

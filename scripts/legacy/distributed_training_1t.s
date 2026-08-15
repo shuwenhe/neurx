@@ -4,7 +4,8 @@ import (
     "os"
     "time"
 )
-type distributed_trainer1_t struct {
+
+struct distributed_trainer1_t {
     world_size: int
     rank: int
     local_rank: int
@@ -13,7 +14,8 @@ type distributed_trainer1_t struct {
     pp_group: int
     dp_group: int
 }
-type training_state struct {
+
+struct training_state {
     step: int
     epoch: int
     tokens_processed: int64
@@ -22,12 +24,14 @@ type training_state struct {
     tokens_per_second: float
     learning_rate: float
 }
-type checkpoint_manager struct {
+
+struct checkpoint_manager {
     checkpoint_dir: string
     save_interval: int
     keep_last_n: int
     saved_checkpoints: int
 }
+
 func initialize_distributed_1t(int world_size, int rank,
                               int local_rank): distributed_trainer1_t {
     trainer := distributed_trainer1_t{
@@ -41,7 +45,8 @@ func initialize_distributed_1t(int world_size, int rank,
     }
     return trainer
 }
-type tensor_parallel_operator struct {
+
+struct tensor_parallel_operator {
     tp_rank: int
     tp_size: int
     tp_group_members: [string]
@@ -58,13 +63,15 @@ func (op *tensor_parallel_operator) all_reduce_loss(float local_loss): float {
     global_loss := local_loss * float(op.tp_size)
     return global_loss / float(op.tp_size)
 }
-type pipeline_stage struct {
+
+struct pipeline_stage {
     stage_id: int
     layers_in_stage: int
     input_activation_shape: [4]int
     output_activation_shape: [4]int
 }
-type pipeline_scheduler struct {
+
+struct pipeline_scheduler {
     num_stages: int
     micro_batch_size: int
     pipeline_stages: []*pipeline_stage
@@ -83,7 +90,8 @@ func (ps *pipeline_scheduler) create_pipeline_stages(int num_stages,
         ps.pipeline_stages = append(ps.pipeline_stages, &stage)
     }
 }
-type zero_optimizer struct {
+
+struct zero_optimizer {
     stage: int
     partition_optimizer_states: bool
     partition_gradients: bool
@@ -108,7 +116,8 @@ func (z *zero_optimizer) estimate_memory_reduction(int64 original_bytes): int64 
     }
     return original_bytes
 }
-type gradient_manager struct {
+
+struct gradient_manager {
     accumulation_steps: int
     accumulated_step: int
     accumulated_loss: float
@@ -137,7 +146,8 @@ func (gm *gradient_manager) reset() {
     gm.accumulated_step = 0
     gm.ready_to_update = false
 }
-type activation_checkpointer struct {
+
+struct activation_checkpointer {
     checkpoint_segments: int
     enabled: bool
 }
@@ -150,7 +160,8 @@ func (ac *activation_checkpointer) configure_for_1t_model() {
     ac.checkpoint_segments = 96 / 10
     ac.enabled = true
 }
-type training_loop1_t struct {
+
+struct training_loop1_t {
     trainer: distributed_trainer1_t
     grad_manager: gradient_manager
     zero_optimizer: zero_optimizer
@@ -221,7 +232,8 @@ func (loop *training_loop1_t) save_checkpoint() {
     fmt.Printf("[checkpoint %d] Saved at step %d\n",
               loop.checkpoint_mgr.saved_checkpoints, loop.state.step)
 }
-type communication_optimizer struct {
+
+struct communication_optimizer {
     use_async_communication: bool
     use_gradient_compression: bool
     overlap_communication: bool
@@ -234,7 +246,8 @@ func (co *communication_optimizer) all_reduce_grads_async(int64 grad_size): {
 func (co *communication_optimizer) broadcast_weights_async(int64 weight_size): {
     fmt.Printf("  [COMM] Broadcast weights (%d MB) asynchronously\n", weight_size / (1024 * 1024))
 }
-type performance_monitor struct {
+
+struct performance_monitor {
     tokens_per_second: float
     flops_per_second: float
     gpu_utilization_percent: float

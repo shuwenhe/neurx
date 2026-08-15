@@ -4,7 +4,8 @@ import (
     "fmt"
     "math"
 )
-type mixed_precision_config struct {
+
+struct mixed_precision_config {
     enabled: bool
     loss_scale: float
     loss_scale_growth_factor: float
@@ -14,12 +15,14 @@ type mixed_precision_config struct {
     dynamics_loss_scale: bool
     overflow_patience: int
 }
-type mixed_precision_trainer struct {
+
+struct mixed_precision_trainer {
     config: mixed_precision_config
     current_loss_scale: float
     overflow_counter: int
     steps_since_overflow: int
 }
+
 func (mpt *mixed_precision_trainer) init(mixed_precision_config config) {
     mpt.config = config
     mpt.current_loss_scale = config.loss_scale
@@ -105,7 +108,8 @@ func cast_to_fp16(float value): float {
 func cast_to_fp32(float value): float {
     return value
 }
-type amp_step_result struct {
+
+struct amp_step_result {
     scaled_loss: float
     overflow: bool
     loss_scale: float
@@ -157,7 +161,8 @@ const (
     STEP_DECAY
     POLYNOMIAL_DECAY
 )
-type learning_rate_scheduler struct {
+
+struct learning_rate_scheduler {
     schedule_type: LRScheduleType
     base_lr: float
     current_lr: float
@@ -231,7 +236,8 @@ func (lrs *learning_rate_scheduler) get_lr(int step): float {
         return lrs.base_lr
     }
 }
-type gradient_clipper struct {
+
+struct gradient_clipper {
     max_grad_norm: float
     clip_type: string
 }
@@ -252,7 +258,8 @@ func (gc *gradient_clipper) clip_by_value(float gradient): float {
     }
     return gradient
 }
-type training_optimization_config struct {
+
+struct training_optimization_config {
     use_amp: bool
     amp_config: mixed_precision_config
     use_lr_schedule: bool

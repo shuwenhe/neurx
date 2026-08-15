@@ -1,7 +1,8 @@
 package distributed
 import "core"
 import "tensor"
-type hybrid_3_d_config struct {
+
+struct hybrid_3_d_config {
     tp_size             int32
     pp_size             int32
     dp_size             int32
@@ -18,7 +19,8 @@ type hybrid_3_d_config struct {
     enable_overlap      bool
     enable_activation_ckpt bool
 }
-type hybrid_3_d_parallel_inference struct {
+
+struct hybrid_3_d_parallel_inference {
     config              hybrid_3_d_config
     tp_engine           *tensor_parallel_inference
     pp_engine           *pipeline_parallel_inference
@@ -29,6 +31,7 @@ type hybrid_3_d_parallel_inference struct {
     dp_group            int32
     metrics             map[string]interface{}
 }
+
 func NewHybrid3DParallelInference(config hybrid_3_d_config) *hybrid_3_d_parallel_inference {
     if config.world_size == 0 {
         config.world_size = config.tp_size * config.pp_size * config.dp_size

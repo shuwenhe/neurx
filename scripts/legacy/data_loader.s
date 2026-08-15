@@ -1,15 +1,18 @@
 package main
 use std.io
 use std.strings
-type data_loader_config struct {
+
+struct data_loader_config {
     shard_dir: string
     max_samples_per_shard: i64
     max_shards: i64
 }
-type sample struct {
+
+struct sample {
     text: string
     index: i64
 }
+
 func main() {
     io.println("🚀 dataloadEnglish text - Slanguageimplementation")
     io.println("")

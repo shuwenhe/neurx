@@ -50,7 +50,7 @@ const (
     MAX_RETRIES             = 3
 )
 
-type RequestMetadata struct {
+struct RequestMetadata {
     request_id      string
     prompt_tokens   i32
     max_tokens      i32
@@ -60,7 +60,7 @@ type RequestMetadata struct {
     worker_id       i32
 }
 
-type WorkerConfig struct {
+struct WorkerConfig {
     worker_id       i32
     worker_type     i32
     device_id       i32
@@ -78,7 +78,7 @@ type WorkerConfig struct {
     custom_config   map[string]string
 }
 
-type WorkerStats struct {
+struct WorkerStats {
     total_requests  i64
     completed_requests i64
     failed_requests i64
@@ -93,7 +93,7 @@ type WorkerStats struct {
     last_heartbeat  i64
 }
 
-type WorkerState struct {
+struct WorkerState {
     worker_id       i32
     state           i32
     worker_type     i32
@@ -108,7 +108,7 @@ type WorkerState struct {
     last_update     i64
 }
 
-type BatchRequest struct {
+struct BatchRequest {
     request_id      string
     prompt_tokens   []i32
     prompt_len      i32
@@ -119,7 +119,7 @@ type BatchRequest struct {
     metadata        RequestMetadata
 }
 
-type Batch struct {
+struct Batch {
     batch_id        i32
     requests        []BatchRequest
     request_count   i32
@@ -132,7 +132,7 @@ type Batch struct {
     submitted_time  i64
 }
 
-type ExecutionResult struct {
+struct ExecutionResult {
     request_id      string
     batch_id        i32
     worker_id       i32
@@ -147,7 +147,7 @@ type ExecutionResult struct {
     error_message   string
 }
 
-type WorkerMessage struct {
+struct WorkerMessage {
     message_id      i64
     sender_id       i32
     receiver_id     i32
@@ -158,7 +158,7 @@ type WorkerMessage struct {
     requires_ack    i32
 }
 
-type CommunicationConfig struct {
+struct CommunicationConfig {
     comm_type       i32
     timeout_ms      i32
     max_msg_size    i32
@@ -167,7 +167,7 @@ type CommunicationConfig struct {
     buffer_size     i32
 }
 
-type SchedulingPolicy struct {
+struct SchedulingPolicy {
     policy_type     i32
     enable_preemption i32
     enable_backfill i32
@@ -176,7 +176,7 @@ type SchedulingPolicy struct {
     priority_levels i32
 }
 
-type WorkerPool struct {
+struct WorkerPool {
     total_workers   i32
     active_workers  i32
     idle_workers    i32
@@ -186,7 +186,7 @@ type WorkerPool struct {
     total_memory_gb f64
 }
 
-type SyncState struct {
+struct SyncState {
     sync_id         i64
     source_worker   i32
     target_workers  []i32
@@ -197,7 +197,7 @@ type SyncState struct {
     is_distributed  i32
 }
 
-type WorkerResult struct {
+struct WorkerResult {
     success         i32
     error_code      i32
     error_message   string
@@ -206,7 +206,7 @@ type WorkerResult struct {
     execution_time  i32
 }
 
-type HeartbeatMessage struct {
+struct HeartbeatMessage {
     worker_id       i32
     timestamp       i64
     state           i32
@@ -218,7 +218,7 @@ type HeartbeatMessage struct {
     is_responsive   i32
 }
 
-type WorkerPoolStats struct {
+struct WorkerPoolStats {
     total_requests  i64
     completed_requests i64
     failed_requests i64
@@ -231,7 +231,7 @@ type WorkerPoolStats struct {
     last_updated    i64
 }
 
-type DistributedConfig struct {
+struct DistributedConfig {
     rank            i32
     world_size      i32
     master_addr     string

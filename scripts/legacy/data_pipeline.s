@@ -11,27 +11,31 @@ import (
     "encoding/json"
     "sort"
 )
-type clean_config struct {
+
+struct clean_config {
     raw_dir         string
     cleaned_dir     string
     output_file     string
     manifest_file   string
     checkpoint_file string
 }
-type shard_config struct {
+
+struct shard_config {
     input_file      string
     shard_dir       string
     manifest_file   string
     max_shards      int
     lines_per_shard  int
 }
-type shard_metadata struct {
+
+struct shard_metadata {
     shard_id       string `json:"shard_id"`
     file_path      string `json:"file_path"`
     num_documents  int64  `json:"num_documents"`
     size_bytes     int64  `json:"size_bytes"`
 }
-type manifest struct {
+
+struct manifest {
     dataset_name         string           `json:"dataset_name"`
     version             string           `json:"version"`
     created_at           string           `json:"created_at"`
@@ -41,6 +45,7 @@ type manifest struct {
     average_docs_per_shard int64            `json:"average_docs_per_shard"`
     shards              []shard_metadata  `json:"shards"`
 }
+
 func main() {
     if len(os.Args) < 2 {
         print_help()
@@ -190,7 +195,8 @@ func clean_data(config clean_config) error {
     }
     return write_manifest(config, stats.TotalWritten)
 }
-type clean_stats struct {
+
+struct clean_stats {
     total_processed int64
     total_written   int64
     duplicates     int64

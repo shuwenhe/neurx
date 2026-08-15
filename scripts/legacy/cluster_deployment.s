@@ -3,7 +3,8 @@ import (
     "fmt"
     "math"
 )
-type node_spec struct {
+
+struct node_spec {
     node_id             int
     node_name           string
     ip_address          string
@@ -14,7 +15,8 @@ type node_spec struct {
     status              string
     utilization         float64
 }
-type cluster_config struct {
+
+struct cluster_config {
     cluster_name        string
     num_nodes           int
     backend             string
@@ -23,7 +25,8 @@ type cluster_config struct {
     timeout_minutes     int
     heartbeat_interval_s int
 }
-type deployment_spec struct {
+
+struct deployment_spec {
     deployment_name     string
     image_name          string
     replica_count       int
@@ -31,7 +34,8 @@ type deployment_spec struct {
     env_vars            map[string]string
     volumes             []string
 }
-type cluster_manager struct {
+
+struct cluster_manager {
     config              cluster_config
     nodes               []node_spec
     deployments         []deployment_spec
@@ -39,19 +43,22 @@ type cluster_manager struct {
     total_gpus          int
     healthy_nodes       int
 }
-type cluster_monitor struct {
+
+struct cluster_monitor {
     manager             *cluster_manager
     metrics             map[string]float64
     alerts              []string
     health_status       string
 }
-type job_scheduler struct {
+
+struct job_scheduler {
     pending_jobs        []string
     running_jobs        []string
     completed_jobs      []string
     failed_jobs         []string
     job_queue           []map[string]string
 }
+
 func (manager *cluster_manager) initialize_cluster() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Cluster Deployment & Orchestration System            ║")

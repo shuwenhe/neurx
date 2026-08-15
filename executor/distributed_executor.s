@@ -5,7 +5,7 @@ import "types.s"
 import "executor_base.s"
 
 // DistributedExecutor - Executor for distributed execution
-type DistributedExecutor struct {
+struct DistributedExecutor {
     base                BaseExecutor
     distributed_config  DistributedConfig
     peer_executors      map[i32]string  // rank -> address
@@ -15,7 +15,7 @@ type DistributedExecutor struct {
 }
 
 // NewDistributedExecutor - Create distributed executor
-func NewDistributedExecutor(config ExecutorConfig, 
+func NewDistributedExecutor(config ExecutorConfig,
                            dist_config DistributedConfig) *DistributedExecutor {
     executor := &DistributedExecutor{
         base: *NewBaseExecutor(config),
@@ -204,7 +204,7 @@ func (de *DistributedExecutor) PipelineParallelForward(layers []string) Executio
 // LoadBalance - Load balance work across ranks
 func (de *DistributedExecutor) LoadBalance(sequences []string) [][]string {
     // Distribute sequences across ranks
-    
+
     result := make([][]string, de.distributed_config.world_size)
     for i := 0; i < len(sequences); i++ {
         rank := i % int(de.distributed_config.world_size)

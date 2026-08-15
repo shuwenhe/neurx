@@ -1,22 +1,26 @@
 package optimization
 import "core"
 import "tensor"
-type test_result struct {
+
+struct test_result {
     test_name       string
     passed          bool
     error_message   string
     execution_time  float32
 }
-type test_stats struct {
+
+struct test_stats {
     total_tests     int32
     passed_tests    int32
     failed_tests    int32
     coverage_pct    float32
 }
-type comprehensive_test_suite struct {
+
+struct comprehensive_test_suite {
     results         []test_result
     stats           test_stats
 }
+
 func NewComprehensiveTestSuite() *comprehensive_test_suite {
     return &comprehensive_test_suite{
         results: make([]test_result, 0),

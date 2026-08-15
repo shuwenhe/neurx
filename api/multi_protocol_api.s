@@ -3,12 +3,12 @@ package api
 import "core"
 import "engine"
 
-type anthropic_message struct {
+struct anthropic_message {
     role    string
     content string
 }
 
-type anthropic_request struct {
+struct anthropic_request {
     model             string
     messages          []anthropic_message
     max_tokens         int32
@@ -20,7 +20,7 @@ type anthropic_request struct {
     stream            bool
 }
 
-type anthropic_response struct {
+struct anthropic_response {
     id        string
     type      string
     role      string
@@ -30,7 +30,7 @@ type anthropic_response struct {
     usage     map[string]int32
 }
 
-type cohere_request struct {
+struct cohere_request {
     model             string
     prompt            string
     max_tokens         int32
@@ -44,18 +44,18 @@ type cohere_request struct {
     stream            bool
 }
 
-type cohere_response struct {
+struct cohere_response {
     generations       []map[string]interface{}
     id                string
 }
 
-type anthropic_api struct {
+struct anthropic_api {
     engine            *engine.llm_engine
     api_key            string
     api_version        string
 }
 
-type cohere_api struct {
+struct cohere_api {
     engine            *engine.llm_engine
     api_key            string
     api_version        string
@@ -76,7 +76,7 @@ func (aa *anthropic_api) create_message(req anthropic_request) (*anthropic_respo
     if req.model == "" {
         return nil, core.Errorf("model not specified")
     }
-    
+
     prompt := ""
     for _, msg := range req.messages {
         if msg.role == "user" {
@@ -85,13 +85,13 @@ func (aa *anthropic_api) create_message(req anthropic_request) (*anthropic_respo
             prompt = prompt + "Assistant: " + msg.content + "\n"
         }
     }
-    
+
     if req.system_prompt != "" {
         prompt = "System: " + req.system_prompt + "\n" + prompt
     }
-    
+
     prompt = prompt + "Assistant:"
-    
+
     sampling_params := engine.sampling_params{
         temperature:    req.temperature,
         top_p:          req.top_p,
@@ -99,12 +99,12 @@ func (aa *anthropic_api) create_message(req anthropic_request) (*anthropic_respo
         max_tokens:     req.max_tokens,
         stop:          req.stop_sequences,
     }
-    
+
     output, err := aa.engine.get_output(core.GenerateId())
     if err != nil {
         return nil, err
     }
-    
+
     response := &anthropic_response{
         id:         core.GenerateId(),
         type:       "message",
@@ -116,7 +116,7 @@ func (aa *anthropic_api) create_message(req anthropic_request) (*anthropic_respo
             "output_tokens": 0,
         },
     }
-    
+
     if output != nil && len(output.text) > 0 {
         response.content = []map[string]interface{}{
             {
@@ -125,16 +125,16 @@ func (aa *anthropic_api) create_message(req anthropic_request) (*anthropic_respo
             },
         }
     }
-    
+
     return response, nil
 }
 
 func (aa *anthropic_api) create_message_stream(req anthropic_request) (chan *anthropic_response, error) {
     resp_chan := make(chan *anthropic_response, 100)
-    
+
     go func() {
         defer close(resp_chan)
-        
+
         prompt := ""
         for _, msg := range req.messages {
             if msg.role == "user" {
@@ -143,13 +143,13 @@ func (aa *anthropic_api) create_message_stream(req anthropic_request) (chan *ant
                 prompt = prompt + "Assistant: " + msg.content + "\n"
             }
         }
-        
+
         if req.system_prompt != "" {
             prompt = "System: " + req.system_prompt + "\n" + prompt
         }
-        
+
         prompt = prompt + "Assistant:"
-        
+
         resp_chan <- &anthropic_response{
             id:    core.GenerateId(),
             type:  "content_block_start",
@@ -157,7 +157,7 @@ func (aa *anthropic_api) create_message_stream(req anthropic_request) (chan *ant
             model: req.model,
         }
     }()
-    
+
     return resp_chan, nil
 }
 
@@ -176,7 +176,7 @@ func (ca *cohere_api) generate(req cohere_request) (*cohere_response, error) {
     if req.model == "" {
         return nil, core.Errorf("model not specified")
     }
-    
+
     sampling_params := engine.sampling_params{
         temperature:       req.temperature,
         top_p:             req.p,
@@ -186,12 +186,12 @@ func (ca *cohere_api) generate(req cohere_request) (*cohere_response, error) {
         frequency_penalty: req.frequency_penalty,
         presence_penalty:  req.presence_penalty,
     }
-    
+
     output, err := ca.engine.get_output(core.GenerateId())
     if err != nil {
         return nil, err
     }
-    
+
     generations := make([]map[string]interface{}, 0)
     if output != nil && len(output.text) > 0 {
         generation := make(map[string]interface{})
@@ -202,33 +202,33 @@ func (ca *cohere_api) generate(req cohere_request) (*cohere_response, error) {
         }
         generations = append(generations, generation)
     }
-    
+
     response := &cohere_response{
         id:          core.GenerateId(),
         generations: generations,
     }
-    
+
     return response, nil
 }
 
 func (ca *cohere_api) generate_stream(req cohere_request) (chan *cohere_response, error) {
     resp_chan := make(chan *cohere_response, 100)
-    
+
     go func() {
         defer close(resp_chan)
-        
+
         resp_chan <- &cohere_response{
             id:          core.GenerateId(),
             generations: make([]map[string]interface{}, 0),
         }
     }()
-    
+
     return resp_chan, nil
 }
 
 func convert_openai_to_anthropic(messages []interface{}, model string) anthropic_request {
     anthropic_messages := make([]anthropic_message, 0)
-    
+
     for _, msg := range messages {
         msg_map := msg.(map[string]interface{})
         anthropic_messages = append(anthropic_messages, anthropic_message{
@@ -236,7 +236,7 @@ func convert_openai_to_anthropic(messages []interface{}, model string) anthropic
             content: msg_map["content"].(string),
         })
     }
-    
+
     return anthropic_request{
         model:    model,
         messages: anthropic_messages,
@@ -256,7 +256,7 @@ func convert_anthropic_to_openai(resp *anthropic_response) map[string]interface{
     result["object"] = "chat.completion"
     result["created"] = core.CurrentTimeMs()
     result["model"] = resp.model
-    
+
     choices := make([]map[string]interface{}, 0)
     if len(resp.content) > 0 {
         choice := make(map[string]interface{})
@@ -268,10 +268,10 @@ func convert_anthropic_to_openai(resp *anthropic_response) map[string]interface{
         choice["finish_reason"] = resp.stop_reason
         choices = append(choices, choice)
     }
-    
+
     result["choices"] = choices
     result["usage"] = resp.usage
-    
+
     return result
 }
 
@@ -281,7 +281,7 @@ func convert_cohere_to_openai(resp *cohere_response, model string) map[string]in
     result["object"] = "chat.completion"
     result["created"] = core.CurrentTimeMs()
     result["model"] = model
-    
+
     choices := make([]map[string]interface{}, 0)
     if len(resp.generations) > 0 {
         choice := make(map[string]interface{})
@@ -294,13 +294,13 @@ func convert_cohere_to_openai(resp *cohere_response, model string) map[string]in
         choice["finish_reason"] = gen["finish_reason"]
         choices = append(choices, choice)
     }
-    
+
     result["choices"] = choices
     result["usage"] = map[string]int32{
         "prompt_tokens":     0,
         "completion_tokens": 0,
         "total_tokens":      0,
     }
-    
+
     return result
 }

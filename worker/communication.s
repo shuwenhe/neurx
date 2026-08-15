@@ -1,7 +1,7 @@
 
 import "types.s"
 
-type MessageQueue struct {
+struct MessageQueue {
     messages        []WorkerMessage
     queue_size      i32
     max_size        i32
@@ -9,7 +9,7 @@ type MessageQueue struct {
     recv_count      i64
 }
 
-type CommunicationHandler struct {
+struct CommunicationHandler {
     config              CommunicationConfig
     message_queues      []MessageQueue
     queue_count         i32
@@ -233,7 +233,7 @@ func (h *CommunicationHandler) Shutdown() WorkerResult {
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-type SynchronizationManager struct {
+struct SynchronizationManager {
     sync_state          SyncState
     pending_syncs       []SyncState
     completed_syncs     i64

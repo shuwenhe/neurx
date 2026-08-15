@@ -1,7 +1,7 @@
 
 import "types.s"
 
-type BaseWorker struct {
+struct BaseWorker {
     config              WorkerConfig
     state               i32
     stats               WorkerStats

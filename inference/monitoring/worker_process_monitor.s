@@ -1,13 +1,15 @@
 package neurx.inference.monitoring
 import "core"
 import "tensor"
-type worker_health_status struct {
+
+struct worker_health_status {
     HEALTHY       int32
     DEGRADED      int32
     UNHEALTHY     int32
     OFFLINE       int32
     RECOVERING    int32
 }
+
 func WorkerHealthStatusValues() worker_health_status {
     return worker_health_status{
         HEALTHY:    0,
@@ -17,7 +19,8 @@ func WorkerHealthStatusValues() worker_health_status {
         RECOVERING: 4,
     }
 }
-type worker_process_info struct {
+
+struct worker_process_info {
     worker_id           string
     process_id          int32
     host                string
@@ -38,7 +41,8 @@ type worker_process_info struct {
     avg_latency_ms      float32
     throughput          float32
 }
-type worker_metrics struct {
+
+struct worker_metrics {
     total_requests      int64
     successful_requests int64
     failed_requests     int64
@@ -51,7 +55,8 @@ type worker_metrics struct {
     memory_peak_mb      int32
     restart_count       int32
 }
-type health_check_result struct {
+
+struct health_check_result {
     worker_id       string
     healthy         bool
     status          int32
@@ -59,7 +64,8 @@ type health_check_result struct {
     error_message   string
     timestamp_ms    int64
 }
-type worker_process_monitor struct {
+
+struct worker_process_monitor {
     workers             map[string]*worker_process_info
     metrics             map[string]*worker_metrics
     health_check_interval_ms int64

@@ -2,14 +2,14 @@
 import "types.s"
 import "executor_base.s"
 
-type DecodeExecutor struct {
+struct DecodeExecutor {
     base                BaseExecutor
     decode_config       DecodeConfig
     active_sequences    []string
     beam_search_state   map[string]BeamSearchData
 }
 
-type BeamSearchData struct {
+struct BeamSearchData {
     sequence_id     string
     beam_width      i32
     current_length  i32

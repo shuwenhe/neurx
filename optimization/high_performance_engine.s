@@ -1,14 +1,16 @@
 package optimization
 import "core"
 import "tensor"
-type optimization_config struct {
+
+struct optimization_config {
     enable_flash_attention      bool
     enable_gemm_fusion          bool
     enable_cuda_graphs          bool
     enable_runtime_fusion       bool
     optimization_level          int32
 }
-type optimization_stats struct {
+
+struct optimization_stats {
     total_speedup               float32
     attention_speedup           float32
     gemm_speedup                float32
@@ -17,7 +19,8 @@ type optimization_stats struct {
     memory_reduction            float32
     latency_reduction           float32
 }
-type high_performance_optimization_engine struct {
+
+struct high_performance_optimization_engine {
     config                      optimization_config
     flash_attention             *flash_attention_optimized
     gemm_kernel                 *fused_gemm_kernel
@@ -25,6 +28,7 @@ type high_performance_optimization_engine struct {
     runtime_fusion              *runtime_fusion_optimizer
     stats                       optimization_stats
 }
+
 func NewHighPerformanceOptimizationEngine(config optimization_config) *high_performance_optimization_engine {
     engine := &high_performance_optimization_engine{
         config: config,

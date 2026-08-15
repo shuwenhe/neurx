@@ -2,7 +2,7 @@ package config
 
 import "core"
 
-type model_config struct {
+struct model_config {
     model_id              string
     model_path            string
     model_name            string
@@ -25,7 +25,7 @@ type model_config struct {
     pad_token_id           int32
 }
 
-type attention_config struct {
+struct attention_config {
     attention_type        string
     backend_impl           string
     use_flash_attn         bool
@@ -37,7 +37,7 @@ type attention_config struct {
     attention_dropout     float32
 }
 
-type quantization_config struct {
+struct quantization_config {
     quantization         string
     group_size            int32
     symmetric_quant       bool
@@ -50,7 +50,7 @@ type quantization_config struct {
     calibration_data_type  string
 }
 
-type parallel_config struct {
+struct parallel_config {
     tensor_parallel_size   int32
     pipeline_parallel_size int32
     data_parallel_size     int32
@@ -63,7 +63,7 @@ type parallel_config struct {
     data_parallel_rank     int32
 }
 
-type scheduler_config struct {
+struct scheduler_config {
     max_batch_size         int32
     max_num_seqs           int32
     max_num_tokens         int32
@@ -75,7 +75,7 @@ type scheduler_config struct {
     disaggregated_prefill_decode bool
 }
 
-type cache_config struct {
+struct cache_config {
     block_size            int32
     cpu_cache_size         int32
     gpu_cache_size         int32
@@ -87,7 +87,7 @@ type cache_config struct {
     blocks_per_sequence    int32
 }
 
-type lora_config struct {
+struct lora_config {
     max_lora_modules       int32
     max_lora_dim           int32
     lora_max_slots         int32
@@ -98,7 +98,7 @@ type lora_config struct {
     torch_dtype           string
 }
 
-type multimodal_config struct {
+struct multimodal_config {
     max_multimodal_tokens  int32
     patch_tokens_per_image  int32
     max_tokens_per_image    int32
@@ -112,7 +112,7 @@ type multimodal_config struct {
     max_video_shape       []int32
 }
 
-type device_config struct {
+struct device_config {
     device_type           string
     device_id             int32
     cuda_devices          []int32
@@ -122,7 +122,7 @@ type device_config struct {
     pipeline_parallel_devices [][]int32
 }
 
-type speculative_config struct {
+struct speculative_config {
     spec_method           string
     num_speculative_tokens int32
     speculative_model    string
@@ -130,19 +130,19 @@ type speculative_config struct {
     mlp_type              string
 }
 
-type tracing_config struct {
+struct tracing_config {
     tracing_enabled       bool
     tracing_dir           string
     tracing_level         string
 }
 
-type profiler_config struct {
+struct profiler_config {
     enable_profiler       bool
     profiler_interval     int32
     profiler_output_dir    string
 }
 
-type config struct {
+struct config {
     model                model_config
     attention            attention_config
     quantization         quantization_config
