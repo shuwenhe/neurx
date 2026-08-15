@@ -101,7 +101,7 @@ func create_reasoning_optimizer() reasoning_optimizer {
 	}
 }
 
-func (o reasoning_optimizer*) optimize_reasoning_path(
+func (reasoning_optimizer* o) optimize_reasoning_path(
 	node_ids vec[string],
 	node_scores map[string]float32,
 ) vec[string] {
@@ -135,7 +135,7 @@ func (o reasoning_optimizer*) optimize_reasoning_path(
 	return optimized
 }
 
-func (o reasoning_optimizer*) greedy_optimization(
+func (reasoning_optimizer* o) greedy_optimization(
 	node_ids vec[string],
 	node_scores map[string]float32,
 ) vec[string] {
@@ -163,7 +163,7 @@ func (o reasoning_optimizer*) greedy_optimization(
 	return result
 }
 
-func (o reasoning_optimizer*) beam_search_optimization(
+func (reasoning_optimizer* o) beam_search_optimization(
 	node_ids vec[string],
 	node_scores map[string]float32,
 ) vec[string] {
@@ -197,7 +197,7 @@ func (o reasoning_optimizer*) beam_search_optimization(
 	return result
 }
 
-func (o reasoning_optimizer*) branch_and_bound_optimization(
+func (reasoning_optimizer* o) branch_and_bound_optimization(
 	node_ids vec[string],
 	node_scores map[string]float32,
 ) vec[string] {
@@ -219,7 +219,7 @@ func (o reasoning_optimizer*) branch_and_bound_optimization(
 	return result
 }
 
-func (o reasoning_optimizer*) adaptive_optimization(
+func (reasoning_optimizer* o) adaptive_optimization(
 	node_ids vec[string],
 	node_scores map[string]float32,
 ) vec[string] {
@@ -234,7 +234,7 @@ func (o reasoning_optimizer*) adaptive_optimization(
 	}
 }
 
-func (o reasoning_optimizer*) evaluate_collection_quality(
+func (reasoning_optimizer* o) evaluate_collection_quality(
 	node_ids vec[string],
 	node_scores map[string]float32,
 ) float32 {
@@ -254,7 +254,7 @@ func (o reasoning_optimizer*) evaluate_collection_quality(
 	return total / float32(len(node_ids))
 }
 
-func (o reasoning_optimizer*) prune_low_scoring_nodes(
+func (reasoning_optimizer* o) prune_low_scoring_nodes(
 	node_ids vec[string],
 	node_scores map[string]float32,
 ) vec[string] {
@@ -281,7 +281,7 @@ func (o reasoning_optimizer*) prune_low_scoring_nodes(
 	return result
 }
 
-func (o reasoning_optimizer*) create_backtrack_point(
+func (reasoning_optimizer* o) create_backtrack_point(
 	state_before string,
 	step_number int32,
 ) int32 {
@@ -304,7 +304,7 @@ func (o reasoning_optimizer*) create_backtrack_point(
 	return backtrack_id
 }
 
-func (o reasoning_optimizer*) attempt_recovery(
+func (reasoning_optimizer* o) attempt_recovery(
 	backtrack_id int32,
 	recovery_strategy string,
 ) bool {
@@ -321,7 +321,7 @@ func (o reasoning_optimizer*) attempt_recovery(
 	return true
 }
 
-func (o reasoning_optimizer*) check_resource_limits() bool {
+func (reasoning_optimizer* o) check_resource_limits() bool {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 	
@@ -340,7 +340,7 @@ func (o reasoning_optimizer*) check_resource_limits() bool {
 	return true
 }
 
-func (o reasoning_optimizer*) update_resource_usage(
+func (reasoning_optimizer* o) update_resource_usage(
 	nodes_added int32,
 	time_elapsed_ms int64,
 	memory_used_mb float32,
@@ -353,7 +353,7 @@ func (o reasoning_optimizer*) update_resource_usage(
 	o.resources.memory_used_mb += memory_used_mb
 }
 
-func (o reasoning_optimizer*) set_optimization_strategy(
+func (reasoning_optimizer* o) set_optimization_strategy(
 	strategy optimization_strategy,
 ) {
 	o.mu.Lock()
@@ -365,7 +365,7 @@ func (o reasoning_optimizer*) set_optimization_strategy(
 	}
 }
 
-func (o reasoning_optimizer*) get_optimization_stats() optimization_stats {
+func (reasoning_optimizer* o) get_optimization_stats() optimization_stats {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 	
@@ -381,7 +381,7 @@ func (o reasoning_optimizer*) get_optimization_stats() optimization_stats {
 	return stats
 }
 
-func (o reasoning_optimizer*) set_score_threshold(threshold float32) {
+func (reasoning_optimizer* o) set_score_threshold(threshold float32) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 	
@@ -390,7 +390,7 @@ func (o reasoning_optimizer*) set_score_threshold(threshold float32) {
 	}
 }
 
-func (o reasoning_optimizer*) set_beam_width(width int32) {
+func (reasoning_optimizer* o) set_beam_width(width int32) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 	
@@ -399,7 +399,7 @@ func (o reasoning_optimizer*) set_beam_width(width int32) {
 	}
 }
 
-func (o reasoning_optimizer*) get_pruning_percentage() float32 {
+func (reasoning_optimizer* o) get_pruning_percentage() float32 {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 	
@@ -411,7 +411,7 @@ func (o reasoning_optimizer*) get_pruning_percentage() float32 {
 	return float32(len(o.pruned_node_ids)) / float32(total)
 }
 
-func (o reasoning_optimizer*) get_backtrack_history() vec[backtrack_point] {
+func (reasoning_optimizer* o) get_backtrack_history() vec[backtrack_point] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 	
@@ -423,7 +423,7 @@ func (o reasoning_optimizer*) get_backtrack_history() vec[backtrack_point] {
 	return history
 }
 
-func (o reasoning_optimizer*) get_resource_utilization() map[string]float32 {
+func (reasoning_optimizer* o) get_resource_utilization() map[string]float32 {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 	
@@ -441,7 +441,7 @@ func (o reasoning_optimizer*) get_resource_utilization() map[string]float32 {
 	return utilization
 }
 
-func (o reasoning_optimizer*) reset() {
+func (reasoning_optimizer* o) reset() {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 	

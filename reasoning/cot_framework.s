@@ -60,7 +60,7 @@ func create_cot_framework(
 	}
 }
 
-func (f cot_framework*) add_reasoning_step(
+func (cot_framework* f) add_reasoning_step(
 	step_id int32,
 	reasoning_text string,
 	confidence float32,
@@ -87,7 +87,7 @@ func (f cot_framework*) add_reasoning_step(
 	return step, true
 }
 
-func (f cot_framework*) add_thought(
+func (cot_framework* f) add_thought(
 	thought_content string,
 	thought_type thought_type,
 	step_number int32,
@@ -114,7 +114,7 @@ func (f cot_framework*) add_thought(
 	return thought_id
 }
 
-func (f cot_framework*) add_thought_dependency(
+func (cot_framework* f) add_thought_dependency(
 	thought_id string,
 	dependency_id string,
 ) bool {
@@ -134,7 +134,7 @@ func (f cot_framework*) add_thought_dependency(
 	return false
 }
 
-func (f cot_framework*) get_reasoning_chain() vec[string] {
+func (cot_framework* f) get_reasoning_chain() vec[string] {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	
@@ -146,7 +146,7 @@ func (f cot_framework*) get_reasoning_chain() vec[string] {
 	return chain
 }
 
-func (f cot_framework*) validate_reasoning_step(step_id int32) bool {
+func (cot_framework* f) validate_reasoning_step(step_id int32) bool {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	
@@ -159,7 +159,7 @@ func (f cot_framework*) validate_reasoning_step(step_id int32) bool {
 	return false
 }
 
-func (f cot_framework*) get_step_confidence(step_id int32) float32 {
+func (cot_framework* f) get_step_confidence(step_id int32) float32 {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	
@@ -172,7 +172,7 @@ func (f cot_framework*) get_step_confidence(step_id int32) float32 {
 	return 0.0
 }
 
-func (f cot_framework*) update_step_result(
+func (cot_framework* f) update_step_result(
 	step_id int32,
 	result string,
 ) bool {
@@ -195,7 +195,7 @@ func (f cot_framework*) update_step_result(
 	return found
 }
 
-func (f cot_framework*) get_step_dependencies(thought_id string) vec[string] {
+func (cot_framework* f) get_step_dependencies(thought_id string) vec[string] {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	
@@ -212,7 +212,7 @@ func (f cot_framework*) get_step_dependencies(thought_id string) vec[string] {
 	return make(vec[string], 0)
 }
 
-func (f cot_framework*) get_thoughts_by_type(
+func (cot_framework* f) get_thoughts_by_type(
 	thought_type thought_type,
 ) vec[thought] {
 	f.mu.Lock()
@@ -228,7 +228,7 @@ func (f cot_framework*) get_thoughts_by_type(
 	return filtered
 }
 
-func (f cot_framework*) get_confidence_average() float32 {
+func (cot_framework* f) get_confidence_average() float32 {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	
@@ -244,7 +244,7 @@ func (f cot_framework*) get_confidence_average() float32 {
 	return total / float32(len(f.steps))
 }
 
-func (f cot_framework*) complete_reasoning(final_answer string) bool {
+func (cot_framework* f) complete_reasoning(final_answer string) bool {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	
@@ -254,28 +254,28 @@ func (f cot_framework*) complete_reasoning(final_answer string) bool {
 	return true
 }
 
-func (f cot_framework*) is_reasoning_complete() bool {
+func (cot_framework* f) is_reasoning_complete() bool {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	
 	return f.reasoning_complete
 }
 
-func (f cot_framework*) get_total_steps() int32 {
+func (cot_framework* f) get_total_steps() int32 {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	
 	return int32(len(f.steps))
 }
 
-func (f cot_framework*) get_thought_count() int32 {
+func (cot_framework* f) get_thought_count() int32 {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	
 	return int32(len(f.thoughts))
 }
 
-func (f cot_framework*) verify_reasoning_consistency() bool {
+func (cot_framework* f) verify_reasoning_consistency() bool {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	
@@ -292,7 +292,7 @@ func (f cot_framework*) verify_reasoning_consistency() bool {
 	return true
 }
 
-func (f cot_framework*) clear_reasoning() {
+func (cot_framework* f) clear_reasoning() {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	
