@@ -1173,7 +1173,27 @@ benchmark-production-inference: build-production-inference-engine-s
 		echo ""; \
 	done
 
-.PHONY: build-production-inference-engine-s build-production-hpc-chat-s production-inference production-chat benchmark-production-inference
+.PHONY: build-production-inference-engine-s build-production-hpc-chat-s production-inference production-chat benchmark-production-inference build-rest-api-server-s rest-api-server-s
+
+build-rest-api-server-s: build-s-ir-runner
+	@mkdir -p artifacts/build/rest_api_server
+	@echo "🚀 Compiling NeurX REST API Server (Pure S)..."
+	@$(S_SEED_COMPILER) inference/api/rest_api_server.s artifacts/build/rest_api_server/rest_api_server.ir || { \
+		echo "❌ Compilation of REST API server failed!"; \
+		exit 1; \
+	}
+	@test -f artifacts/build/rest_api_server/rest_api_server.ir
+	@echo "✓ REST API Server compiled successfully"
+	@echo "  File: artifacts/build/rest_api_server/rest_api_server.ir"
+
+rest-api-server-s: build-rest-api-server-s
+	@echo ""
+	@echo "╔════════════════════════════════════════════════════════════════╗"
+	@echo "║       NeurX REST API Server (Pure S Language)                  ║"
+	@echo "║       OpenAI-Compatible HTTP API                               ║"
+	@echo "╚════════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@'$(S_RUNNER_BIN)' artifacts/build/rest_api_server/rest_api_server.ir
 
 build-production-training-s: check-bash
 	@echo "[Building] Production Training System..."
