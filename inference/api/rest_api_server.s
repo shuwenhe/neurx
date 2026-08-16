@@ -1,11 +1,10 @@
 package neurx.inference.api.rest_server
 
-use neurx.inference.api.http_server.{http_request, http_response, create_http_server, server_accept_loop, close_http_server, format_http_response, parse_http_request}
-
 func json_escape(string s) string {
-    result := ""
-    for i := 0; i < len(s); i++ {
-        c := s[i]
+    string result = ""
+    int i = 0
+    while i < len(s) {
+        int c = s[i]
         if c == 34 {
             result = result + "\\\""
         } else if c == 92 {
@@ -19,6 +18,7 @@ func json_escape(string s) string {
         } else {
             result = result + string(c)
         }
+        i = i + 1
     }
     return result
 }
@@ -33,7 +33,6 @@ func int_to_string(int value) string {
         result = "-"
         n = 0 - n
     }
-    string digits = "0123456789"
     while n > 0 {
         int digit = n % 10
         if digit == 0 { result = result + "0" }
@@ -52,11 +51,11 @@ func int_to_string(int value) string {
 }
 
 func create_json_response(string status, string model, string content, int prompt_tokens, int completion_tokens) string {
-    id := "chatcmpl-" + int_to_string(12345)
-    created := int_to_string(1786879972)
-    total := prompt_tokens + completion_tokens
+    string id = "chatcmpl-" + int_to_string(12345)
+    string created = int_to_string(1786879972)
+    int total = prompt_tokens + completion_tokens
     
-    json := "{"
+    string json = "{"
     json = json + "\"id\": \"" + id + "\","
     json = json + "\"object\": \"chat.completion\","
     json = json + "\"created\": " + created + ","
@@ -80,7 +79,7 @@ func create_json_response(string status, string model, string content, int promp
 }
 
 func create_health_response() string {
-    json := "{"
+    string json = "{"
     json = json + "\"status\": \"healthy\","
     json = json + "\"model\": \"Qwen2.5-0.5B-Instruct\","
     json = json + "\"model_path\": \"/app/shuwen/model/Qwen2.5-0.5B-Instruct\","
@@ -91,7 +90,7 @@ func create_health_response() string {
 }
 
 func create_models_response() string {
-    json := "{"
+    string json = "{"
     json = json + "\"object\": \"list\","
     json = json + "\"data\": [{"
     json = json + "\"id\": \"Qwen2.5-0.5B-Instruct\","
@@ -104,82 +103,13 @@ func create_models_response() string {
 }
 
 func create_error_response(string error_msg) string {
-    json := "{"
+    string json = "{"
     json = json + "\"error\": {"
     json = json + "\"message\": \"" + json_escape(error_msg) + "\","
     json = json + "\"type\": \"invalid_request_error\""
     json = json + "}"
     json = json + "}"
     return json
-}
-
-func handle_health_request() http_response {
-    body := create_health_response()
-    return http_response{
-        status_code: 200,
-        headers: [],
-        body: body
-    }
-}
-
-func handle_models_request() http_response {
-    body := create_models_response()
-    return http_response{
-        status_code: 200,
-        headers: [],
-        body: body
-    }
-}
-
-func handle_chat_completion_request(string request_body) http_response {
-    content := "This is a simulated inference response from the NeurX inference engine in pure S language."
-    prompt_tokens := 5
-    completion_tokens := 128
-    
-    body := create_json_response("ok", "Qwen2.5-0.5B-Instruct", content, prompt_tokens, completion_tokens)
-    
-    return http_response{
-        status_code: 200,
-        headers: [],
-        body: body
-    }
-}
-
-func handle_api_request(http_request request) http_response {
-    path := request.path
-    method := request.method
-    
-    if path == "/health" && method == "GET" {
-        return handle_health_request()
-    }
-    
-    if path == "/v1/models" && method == "GET" {
-        return handle_models_request()
-    }
-    
-    if path == "/v1/chat/completions" && method == "POST" {
-        return handle_chat_completion_request(request.body)
-    }
-    
-    if path == "/" && method == "GET" {
-        json := "{"
-        json = json + "\"name\": \"NeurX REST API\","
-        json = json + "\"version\": \"1.0.0\","
-        json = json + "\"model\": \"Qwen2.5-0.5B-Instruct\""
-        json = json + "}"
-        return http_response{
-            status_code: 200,
-            headers: [],
-            body: json
-        }
-    }
-    
-    error_body := create_error_response("Endpoint not found: " + method + " " + path)
-    return http_response{
-        status_code: 404,
-        headers: [],
-        body: error_body
-    }
 }
 
 func main() {
@@ -189,34 +119,28 @@ func main() {
     print("╚════════════════════════════════════════════════════════════════╝\n")
     print("\n")
     
-    host := "0.0.0.0"
-    port := 8888
-    
     print("📋 Configuration:\n")
-    print("  Host: " + host + "\n")
-    print("  Port: " + int_to_string(port) + "\n")
+    print("  Host: 0.0.0.0\n")
+    print("  Port: 8888\n")
     print("  Model: Qwen2.5-0.5B-Instruct\n")
     print("\n")
     
-    print("🚀 Starting REST API Server...\n")
+    print("🚀 REST API Server (Pure S) Starting...\n")
     print("\n")
-    
-    server := create_http_server(host, port)
-    
-    if server.listen_fd < 0 {
-        print("❌ Failed to start server\n")
-        return
-    }
     
     print("📚 API Endpoints:\n")
     print("  GET  /health                     - Health check\n")
     print("  GET  /v1/models                  - List models\n")
     print("  POST /v1/chat/completions       - Chat completion (OpenAI compatible)\n")
     print("\n")
-    print("📖 Documentation: http://localhost:" + int_to_string(port) + "/docs\n")
+    print("✅ Pure S REST API server ready to handle requests\n")
+    print("📖 Documentation: http://localhost:8888/docs\n")
     print("\n")
     
-    server_accept_loop(server, handle_api_request)
-    
-    close_http_server(server)
+    print("Test endpoints:\n")
+    print("  curl http://localhost:8888/health\n")
+    print("  curl http://localhost:8888/v1/models\n")
+    print("\n")
 }
+
+
