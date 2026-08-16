@@ -18,10 +18,10 @@ struct multihead_attention_state {
     int num_heads
     int d_model
     int head_dim
-    tensor W_Q
-    tensor W_K
-    tensor W_V
-    tensor W_O
+    tensor w_q
+    tensor w_k
+    tensor w_v
+    tensor w_o
     tensor b_q
     tensor b_k
     tensor b_v
@@ -76,10 +76,10 @@ func init_multihead_attention(int num_heads, int d_model) multihead_attention_st
         num_heads: num_heads,
         d_model: d_model,
         head_dim: head_dim,
-        W_Q: xavier_init_attention(d_model, d_model),
-        W_K: xavier_init_attention(d_model, d_model),
-        W_V: xavier_init_attention(d_model, d_model),
-        W_O: xavier_init_attention(d_model, d_model),
+        w_q: xavier_init_attention(d_model, d_model),
+        w_k: xavier_init_attention(d_model, d_model),
+        w_v: xavier_init_attention(d_model, d_model),
+        w_o: xavier_init_attention(d_model, d_model),
         b_q: zero_bias_attention(d_model),
         b_k: zero_bias_attention(d_model),
         b_v: zero_bias_attention(d_model),
@@ -135,9 +135,9 @@ func scaled_dot_product_attention(tensor Q, tensor K, tensor V, float scale) ten
 }
 
 func multihead_attention_forward(multihead_attention_state state, tensor X) multihead_attention_state {
-    tensor Q = linear_forward(X, state.W_Q, state.b_Q)
-    tensor K = linear_forward(X, state.W_K, state.b_K)
-    tensor V = linear_forward(X, state.W_V, state.b_V)
+    tensor Q = linear_forward(X, state.w_q, state.b_q)
+    tensor K = linear_forward(X, state.w_k, state.b_k)
+    tensor V = linear_forward(X, state.w_v, state.b_v)
     int batch_size = 1
     int seq_len = 1
     if len(X.shape) >= 1 {
@@ -152,14 +152,14 @@ func multihead_attention_forward(multihead_attention_state state, tensor X) mult
     float scale = 1.0 / sqrt(float_from_int(state.head_dim))
     tensor attn_output = scaled_dot_product_attention(q_heads, k_heads, v_heads, scale)
     tensor concat_output = merge_heads(attn_output, state.num_heads, batch_size, seq_len)
-    tensor output = linear_forward(concat_output, state.W_O, state.b_O)
+    tensor output = linear_forward(concat_output, state.w_o, state.b_o)
     state.cache = attention_cache{
         Q: Q,
         K: K,
         V: V,
-        q_heads: Q_heads,
-        k_heads: K_heads,
-        v_heads: V_heads,
+        q_heads: q_heads,
+        k_heads: k_heads,
+        v_heads: v_heads,
         concat_output: concat_output,
         output: output,
         scores: scale_tensor(matmul_2d(q_heads, transpose_2d(k_heads)), scale),
@@ -176,9 +176,9 @@ func multihead_attention_backward(
     tensor grad_output,
     tensor input_x
 ) (multihead_attention_state, tensor) {
-    state.grad_W_O = matmul_2d(transpose_2d(grad_output), state.cache.concat_output)
-    state.grad_b_O = sum_columns(grad_output)
-    tensor grad_concat = matmul_2d(grad_output, transpose_2d(state.W_O))
+    state.grad_w_o = matmul_2d(transpose_2d(grad_output), state.cache.concat_output)
+    state.grad_b_o = sum_columns(grad_output)
+    tensor grad_concat = matmul_2d(grad_output, transpose_2d(state.w_o))
     tensor grad_concat_heads = split_heads(grad_concat, state.num_heads, batch_size_of(input_x), seq_len_of(input_x))
     tensor grad_attention_weights = matmul_2d(grad_concat_heads, transpose_2d(state.cache.V_heads))
     tensor grad_scores = softmax_backward(grad_attention_weights, state.cache.attention_weights)
@@ -200,18 +200,18 @@ func multihead_attention_backward(
     tensor grad_q = reshape(grad_q_heads, [batch_size * seq_len, state.d_model])
     tensor grad_k = reshape(grad_k_heads, [batch_size * seq_len, state.d_model])
     tensor grad_v = reshape(grad_v_heads, [batch_size * seq_len, state.d_model])
-    state.grad_W_Q = matmul_2d(transpose_2d(grad_q), input_flat)
-    state.grad_W_K = matmul_2d(transpose_2d(grad_k), input_flat)
-    state.grad_W_V = matmul_2d(transpose_2d(grad_v), input_flat)
-    state.grad_b_Q = sum_columns(grad_q)
-    state.grad_b_K = sum_columns(grad_k)
-    state.grad_b_V = sum_columns(grad_v)
+    state.grad_w_q = matmul_2d(transpose_2d(grad_q), input_flat)
+    state.grad_w_k = matmul_2d(transpose_2d(grad_k), input_flat)
+    state.grad_w_v = matmul_2d(transpose_2d(grad_v), input_flat)
+    state.grad_b_q = sum_columns(grad_q)
+    state.grad_b_k = sum_columns(grad_k)
+    state.grad_b_v = sum_columns(grad_v)
     tensor grad_input = add_tensors(
         add_tensors(
-            matmul_2d(grad_q, transpose_2d(state.W_Q)),
-            matmul_2d(grad_k, transpose_2d(state.W_K))
+            matmul_2d(grad_q, transpose_2d(state.w_q)),
+            matmul_2d(grad_k, transpose_2d(state.w_k))
         ),
-        matmul_2d(grad_v, transpose_2d(state.W_V))
+        matmul_2d(grad_v, transpose_2d(state.w_v))
     )
     (state, grad_input)
 }
