@@ -103,7 +103,7 @@ func create_device_config_manager() (device_config_manager_impl*) {
     return mgr
 }
 
-func (m* device_config_manager_impl) create_default_config(device device_type) (device_config*) {
+func (device_config_manager_impl* m) create_default_config(device device_type) (device_config*) {
     cfg := &device_config{
         device: device,
         device_id: 0,
@@ -120,7 +120,7 @@ func (m* device_config_manager_impl) create_default_config(device device_type) (
     return cfg
 }
 
-func (m* device_config_manager_impl) create_memory_config(max_mem int64) (memory_config*) {
+func (device_config_manager_impl* m) create_memory_config(max_mem int64) (memory_config*) {
     cfg := &memory_config{
         max_memory: max_mem,
         gpu_memory_utilization: 90,
@@ -134,7 +134,7 @@ func (m* device_config_manager_impl) create_memory_config(max_mem int64) (memory
     return cfg
 }
 
-func (m* device_config_manager_impl) create_computation_config() (computation_config*) {
+func (device_config_manager_impl* m) create_computation_config() (computation_config*) {
     cfg := &computation_config{
         enable_flash_attn: true,
         enable_triton: true,
@@ -148,7 +148,7 @@ func (m* device_config_manager_impl) create_computation_config() (computation_co
     return cfg
 }
 
-func (m* device_config_manager_impl) create_attention_config() (attention_config*) {
+func (device_config_manager_impl* m) create_attention_config() (attention_config*) {
     cfg := &attention_config{
         backend: "flash_attn",
         use_causal_mask: true,
@@ -161,7 +161,7 @@ func (m* device_config_manager_impl) create_attention_config() (attention_config
     return cfg
 }
 
-func (m* device_config_manager_impl) create_optimization_config() (optimization_config*) {
+func (device_config_manager_impl* m) create_optimization_config() (optimization_config*) {
     cfg := &optimization_config{
         enable_kernel_fusion: true,
         enable_memory_optimization: true,
@@ -173,7 +173,7 @@ func (m* device_config_manager_impl) create_optimization_config() (optimization_
     return cfg
 }
 
-func (m* device_config_manager_impl) apply_config(cfg device_config_full*) (bool) {
+func (device_config_manager_impl* m) apply_config(cfg device_config_full*) (bool) {
     errors := m.validate_config(cfg)
     if len(errors) > 0 {
         return false
@@ -185,11 +185,11 @@ func (m* device_config_manager_impl) apply_config(cfg device_config_full*) (bool
     return true
 }
 
-func (m* device_config_manager_impl) get_current_config() (device_config_full*) {
+func (device_config_manager_impl* m) get_current_config() (device_config_full*) {
     return m.current_config
 }
 
-func (m* device_config_manager_impl) validate_config(cfg device_config_full*) (vec[string]) {
+func (device_config_manager_impl* m) validate_config(cfg device_config_full*) (vec[string]) {
     errors := vec[string]{}
     
     if cfg == nil {

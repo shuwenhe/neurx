@@ -103,7 +103,7 @@ func create_hardware_detector() (hardware_detector_impl*) {
     return impl
 }
 
-func (d* hardware_detector_impl) detect() (detection_result*) {
+func (hardware_detector_impl* d) detect() (detection_result*) {
     result := &detection_result{
         success: false,
         hw_info: nil,
@@ -168,11 +168,11 @@ func (d* hardware_detector_impl) detect() (detection_result*) {
     return result
 }
 
-func (d* hardware_detector_impl) detect_device_type() (device_type) {
+func (hardware_detector_impl* d) detect_device_type() (device_type) {
     return device_type.cuda
 }
 
-func (d* hardware_detector_impl) detect_gpu_properties(device_id int32) (gpu_properties*) {
+func (hardware_detector_impl* d) detect_gpu_properties(device_id int32) (gpu_properties*) {
     props := &gpu_properties{
         name: "NVIDIA GPU",
         total_memory: 8 * 1024 * 1024 * 1024,
@@ -188,7 +188,7 @@ func (d* hardware_detector_impl) detect_gpu_properties(device_id int32) (gpu_pro
     return props
 }
 
-func (d* hardware_detector_impl) detect_cpu_properties() (cpu_properties*) {
+func (hardware_detector_impl* d) detect_cpu_properties() (cpu_properties*) {
     props := &cpu_properties{
         model_name: "Intel",
         num_cpus: 16,
@@ -203,7 +203,7 @@ func (d* hardware_detector_impl) detect_cpu_properties() (cpu_properties*) {
     return props
 }
 
-func (d* hardware_detector_impl) detect_memory_info() (memory_info*) {
+func (hardware_detector_impl* d) detect_memory_info() (memory_info*) {
     mem := &memory_info{
         total_memory: 32 * 1024 * 1024 * 1024,
         available_memory: 24 * 1024 * 1024 * 1024,
@@ -213,12 +213,12 @@ func (d* hardware_detector_impl) detect_memory_info() (memory_info*) {
     return mem
 }
 
-func (d* hardware_detector_impl) detect_visible_devices() (vec[int32]) {
+func (hardware_detector_impl* d) detect_visible_devices() (vec[int32]) {
     devices := vec[int32]{0}
     return devices
 }
 
-func (d* hardware_detector_impl) validate_device_access(device_id int32) (bool) {
+func (hardware_detector_impl* d) validate_device_access(device_id int32) (bool) {
     visible := d.detect_visible_devices()
     for vid in visible {
         if vid == device_id {
@@ -228,7 +228,7 @@ func (d* hardware_detector_impl) validate_device_access(device_id int32) (bool) 
     return false
 }
 
-func (d* hardware_detector_impl) get_device_capability(device_id int32) (device_capability*) {
+func (hardware_detector_impl* d) get_device_capability(device_id int32) (device_capability*) {
     cap := &device_capability{
         major: 8,
         minor: 0,
