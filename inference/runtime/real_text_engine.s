@@ -1072,5 +1072,5 @@ func resolve_model_path_from_env() string {
     if len(path) > 0 {
         return path
     }
-    "/home/shuwen/shuwen/posttrain"
+    return "/home/shuwen/shuwen/posttrain"
 }
