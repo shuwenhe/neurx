@@ -1,0 +1,188 @@
+package attention
+
+enum hardware_type {
+    cuda_sm_70
+    cuda_sm_80
+    cuda_sm_90
+    rocm_mi100
+    rocm_mi200
+    cpu
+    unknown
+}
+
+struct backend_capability {
+    string backend_name
+    vec[string] supported_dtypes
+    vec[hardware_type] supported_hardware
+    int min_batch_size
+    int max_seq_length
+    int estimated_flops_per_token
+    bool supports_paged_cache
+    bool supports_sparse
+}
+
+struct attention_backend_manager {
+    map[string, attention_backend] backends
+    string default_backend
+    string current_backend
+    hardware_type detected_hardware
+    map[string, backend_capability] capabilities
+}
+
+func detect_hardware() (hardware_type) {
+    hardware_type::unknown
+}
+
+func get_backend_capability(attention_backend_type backend_type) (backend_capability) {
+    switch backend_type {
+        attention_backend_type::standard : backend_capability {
+            backend_name: "standard",
+            supported_dtypes: vec[string]{"float32", "float16", "bfloat16"},
+            supported_hardware: vec[hardware_type]{hardware_type::cpu, hardware_type::unknown},
+            min_batch_size: 1,
+            max_seq_length: 8192,
+            estimated_flops_per_token: 0,
+            supports_paged_cache: false,
+            supports_sparse: false,
+        },
+        attention_backend_type::flash_attention : backend_capability {
+            backend_name: "flash_attention",
+            supported_dtypes: vec[string]{"float16", "bfloat16"},
+            supported_hardware: vec[hardware_type]{hardware_type::cuda_sm_70, hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
+            min_batch_size: 1,
+            max_seq_length: 16384,
+            estimated_flops_per_token: 1000000,
+            supports_paged_cache: true,
+            supports_sparse: false,
+        },
+        attention_backend_type::dsa : backend_capability {
+            backend_name: "dsa",
+            supported_dtypes: vec[string]{"float16", "bfloat16"},
+            supported_hardware: vec[hardware_type]{hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
+            min_batch_size: 1,
+            max_seq_length: 32768,
+            estimated_flops_per_token: 1200000,
+            supports_paged_cache: true,
+            supports_sparse: true,
+        },
+        attention_backend_type::paged_attention : backend_capability {
+            backend_name: "paged_attention",
+            supported_dtypes: vec[string]{"float16", "bfloat16", "int8"},
+            supported_hardware: vec[hardware_type]{hardware_type::cuda_sm_70, hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
+            min_batch_size: 1,
+            max_seq_length: 32768,
+            estimated_flops_per_token: 900000,
+            supports_paged_cache: true,
+            supports_sparse: false,
+        },
+        attention_backend_type::sparse_attention : backend_capability {
+            backend_name: "sparse_attention",
+            supported_dtypes: vec[string]{"float16", "bfloat16"},
+            supported_hardware: vec[hardware_type]{hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
+            min_batch_size: 1,
+            max_seq_length: 1000000,
+            estimated_flops_per_token: 300000,
+            supports_paged_cache: true,
+            supports_sparse: true,
+        },
+    }
+}
+
+func new_attention_backend_manager() (attention_backend_manager) {
+    hw := detect_hardware()
+
+    attention_backend_manager {
+        backends: map[string, attention_backend]{},
+        default_backend: "standard",
+        current_backend: "standard",
+        detected_hardware: hw,
+        capabilities: map[string, backend_capability]{},
+    }
+}
+
+func (mgr *attention_backend_manager) register_backend(string backend_name, attention_backend backend) (bool) {
+    mgr.backends[backend_name] = backend
+    true
+}
+
+func (mgr *attention_backend_manager) has_backend(string backend_name) (bool) {
+    backend_name in mgr.backends
+}
+
+func (mgr *attention_backend_manager) get_backend(string backend_name) (attention_backend) {
+    if backend_name in mgr.backends {
+        mgr.backends[backend_name]
+    }
+
+    config := new_attention_config(8, 64)
+    new_attention_backend(attention_backend_type::standard, config)
+}
+
+func (mgr *attention_backend_manager) set_current_backend(string backend_name) (bool) {
+    if !mgr.has_backend(backend_name) {
+        false
+    }
+
+    mgr.current_backend = backend_name
+    true
+}
+
+func (mgr *attention_backend_manager) get_current_backend() (attention_backend) {
+    mgr.get_backend(mgr.current_backend)
+}
+
+func (mgr *attention_backend_manager) auto_select_backend(int seq_length, string precision) (string) {
+    if mgr.detected_hardware == hardware_type::cuda_sm_90 {
+        if seq_length > 16384 && precision == "float16" {
+            "dsa"
+        } else {
+            "flash_attention"
+        }
+    } else if mgr.detected_hardware == hardware_type::cuda_sm_80 {
+        "flash_attention"
+    } else {
+        "standard"
+    }
+}
+
+func (mgr *attention_backend_manager) initialize_all() (bool) {
+    for name in mgr.backends.keys() {
+        backend := mgr.get_backend(name)
+        if !backend.initialize() {
+            false
+        }
+    }
+
+    true
+}
+
+func (mgr *attention_backend_manager) finalize_all() (bool) {
+    for name in mgr.backends.keys() {
+        backend := mgr.get_backend(name)
+        if !backend.finalize() {
+            false
+        }
+    }
+
+    true
+}
+
+func (mgr *attention_backend_manager) list_backends() (vec[string]) {
+    result := vec[string]{}
+    for name in mgr.backends.keys() {
+        result.push(name)
+    }
+    result
+}
+
+func (mgr *attention_backend_manager) get_detected_hardware() (string) {
+    switch mgr.detected_hardware {
+        hardware_type::cuda_sm_70 : "cuda_sm_70",
+        hardware_type::cuda_sm_80 : "cuda_sm_80",
+        hardware_type::cuda_sm_90 : "cuda_sm_90",
+        hardware_type::rocm_mi100 : "rocm_mi100",
+        hardware_type::rocm_mi200 : "rocm_mi200",
+        hardware_type::cpu : "cpu",
+        hardware_type::unknown : "unknown",
+    }
+}
