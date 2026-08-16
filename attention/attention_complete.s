@@ -96,27 +96,27 @@ func init_multihead_attention(int num_heads, int d_model) multihead_attention_st
     }
 }
 
-func split_heads(tensor X, int num_heads, int batch_size, int seq_len) tensor {
-    int head_dim = X.shape[1] / num_heads
+func split_heads(tensor x, int num_heads, int batch_size, int seq_len) tensor {
+    int head_dim = x.shape[1] / num_heads
     int total_tokens = batch_size * seq_len
-    reshape(X, [total_tokens * num_heads, head_dim])
+    reshape(x, [total_tokens * num_heads, head_dim])
 }
 
-func merge_heads(tensor X, int num_heads, int batch_size, int seq_len) tensor {
-    int d_model = X.shape[1] * num_heads
-    reshape(X, [batch_size * seq_len, d_model])
+func merge_heads(tensor x, int num_heads, int batch_size, int seq_len) tensor {
+    int d_model = x.shape[1] * num_heads
+    reshape(x, [batch_size * seq_len, d_model])
 }
 
-func linear_forward(tensor X, tensor W, tensor b) tensor {
-    int rank = len(X.shape)
+func linear_forward(tensor x, tensor w, tensor b) tensor {
+    int rank = len(x.shape)
     int leading = 1
     int i = 0
     while i < rank - 1 {
-        leading = leading * X.shape[i]
+        leading = leading * x.shape[i]
         i = i + 1
     }
-    tensor flat_input = reshape(X, [leading, X.shape[rank - 1]])
-    tensor output = matmul_2d(flat_input, W)
+    tensor flat_input = reshape(x, [leading, x.shape[rank - 1]])
+    tensor output = matmul_2d(flat_input, w)
     i = 0
     while i < len(output.data) {
         output.data[i] = output.data[i] + b.data[i % len(b.data)]
@@ -125,38 +125,38 @@ func linear_forward(tensor X, tensor W, tensor b) tensor {
     output
 }
 
-func scaled_dot_product_attention(tensor Q, tensor K, tensor V, float scale) tensor {
-    tensor K_T = transpose_2d(K)
-    tensor scores = matmul_2d(Q, K_T)
+func scaled_dot_product_attention(tensor q, tensor k, tensor v, float scale) tensor {
+    tensor k_t = transpose_2d(k)
+    tensor scores = matmul_2d(q, k_t)
     scores = scale_tensor(scores, scale)
     tensor attention_weights = softmax(scores)
-    tensor output = matmul_2d(attention_weights, V)
+    tensor output = matmul_2d(attention_weights, v)
     output
 }
 
-func multihead_attention_forward(multihead_attention_state state, tensor X) multihead_attention_state {
-    tensor Q = linear_forward(X, state.w_q, state.b_q)
-    tensor K = linear_forward(X, state.w_k, state.b_k)
-    tensor V = linear_forward(X, state.w_v, state.b_v)
+func multihead_attention_forward(multihead_attention_state state, tensor x) multihead_attention_state {
+    tensor q = linear_forward(x, state.w_q, state.b_q)
+    tensor k = linear_forward(x, state.w_k, state.b_k)
+    tensor v = linear_forward(x, state.w_v, state.b_v)
     int batch_size = 1
     int seq_len = 1
-    if len(X.shape) >= 1 {
-        batch_size = X.shape[0]
+    if len(x.shape) >= 1 {
+        batch_size = x.shape[0]
     }
-    if len(X.shape) >= 2 {
-        seq_len = X.shape[1]
+    if len(x.shape) >= 2 {
+        seq_len = x.shape[1]
     }
-    tensor q_heads = split_heads(Q, state.num_heads, batch_size, seq_len)
-    tensor k_heads = split_heads(K, state.num_heads, batch_size, seq_len)
-    tensor v_heads = split_heads(V, state.num_heads, batch_size, seq_len)
+    tensor q_heads = split_heads(q, state.num_heads, batch_size, seq_len)
+    tensor k_heads = split_heads(k, state.num_heads, batch_size, seq_len)
+    tensor v_heads = split_heads(v, state.num_heads, batch_size, seq_len)
     float scale = 1.0 / sqrt(float_from_int(state.head_dim))
     tensor attn_output = scaled_dot_product_attention(q_heads, k_heads, v_heads, scale)
     tensor concat_output = merge_heads(attn_output, state.num_heads, batch_size, seq_len)
     tensor output = linear_forward(concat_output, state.w_o, state.b_o)
     state.cache = attention_cache{
-        Q: Q,
-        K: K,
-        V: V,
+        Q: q,
+        K: k,
+        V: v,
         q_heads: q_heads,
         k_heads: k_heads,
         v_heads: v_heads,
@@ -165,9 +165,9 @@ func multihead_attention_forward(multihead_attention_state state, tensor X) mult
         scores: scale_tensor(matmul_2d(q_heads, transpose_2d(k_heads)), scale),
         attention_weights: softmax(scale_tensor(matmul_2d(q_heads, transpose_2d(k_heads)), scale)),
     }
-    state.cache.Q = Q
-    state.cache.K = K
-    state.cache.V = V
+    state.cache.Q = q
+    state.cache.K = k
+    state.cache.V = v
     state
 }
 
@@ -180,11 +180,11 @@ func multihead_attention_backward(
     state.grad_b_o = sum_columns(grad_output)
     tensor grad_concat = matmul_2d(grad_output, transpose_2d(state.w_o))
     tensor grad_concat_heads = split_heads(grad_concat, state.num_heads, batch_size_of(input_x), seq_len_of(input_x))
-    tensor grad_attention_weights = matmul_2d(grad_concat_heads, transpose_2d(state.cache.V_heads))
+    tensor grad_attention_weights = matmul_2d(grad_concat_heads, transpose_2d(state.cache.v_heads))
     tensor grad_scores = softmax_backward(grad_attention_weights, state.cache.attention_weights)
     float scale = 1.0 / sqrt(float_from_int(state.head_dim))
-    tensor grad_q_heads = matmul_2d(grad_scores, state.cache.K_heads)
-    tensor grad_k_heads = matmul_2d(transpose_2d(grad_scores), state.cache.Q_heads)
+    tensor grad_q_heads = matmul_2d(grad_scores, state.cache.k_heads)
+    tensor grad_k_heads = matmul_2d(transpose_2d(grad_scores), state.cache.q_heads)
     tensor grad_v_heads = matmul_2d(transpose_2d(state.cache.attention_weights), grad_concat_heads)
     grad_q_heads = scale_tensor(grad_q_heads, scale)
     grad_k_heads = scale_tensor(grad_k_heads, scale)
@@ -220,8 +220,8 @@ func float_from_int(int x) float {
     0.0 + x
 }
 
-func sum_columns(tensor X) tensor {
-    int cols = X.shape[1]
+func sum_columns(tensor x) tensor {
+    int cols = x.shape[1]
     []float out = []float{cap: cols}
     int j = 0
     while j < cols {
@@ -229,10 +229,10 @@ func sum_columns(tensor X) tensor {
         j = j + 1
     }
     int i = 0
-    while i < X.shape[0] {
+    while i < x.shape[0] {
         j = 0
         while j < cols {
-            out[j] = out[j] + X.data[i * cols + j]
+            out[j] = out[j] + x.data[i * cols + j]
             j = j + 1
         }
         i = i + 1
@@ -245,16 +245,16 @@ func sum_columns(tensor X) tensor {
     }
 }
 
-func batch_size_of(tensor X) int {
-    if len(X.shape) >= 1 {
-        return X.shape[0]
+func batch_size_of(tensor x) int {
+    if len(x.shape) >= 1 {
+        return x.shape[0]
     }
     1
 }
 
-func seq_len_of(tensor X) int {
-    if len(X.shape) >= 2 {
-        return X.shape[1]
+func seq_len_of(tensor x) int {
+    if len(x.shape) >= 2 {
+        return x.shape[1]
     }
     1
 }
