@@ -11,7 +11,7 @@ struct distributed_context {
     bool initialized
 }
 
-func new_distributed_context(int rank, int world_size, int local_rank, int num_gpus, comm_backend backend) (distributed_context) {
+func new_distributed_context(int rank, int world_size, int local_rank, int num_gpus, comm_backend backend) distributed_context {
     backend_name := ""
     switch backend {
         comm_backend::nccl : backend_name = "nccl",
@@ -35,7 +35,7 @@ func new_distributed_context(int rank, int world_size, int local_rank, int num_g
     }
 }
 
-func (ctx *distributed_context) initialize() (bool) {
+func (ctx *distributed_context) initialize() bool {
     if ctx.initialized {
         false
     }
@@ -48,7 +48,7 @@ func (ctx *distributed_context) initialize() (bool) {
     true
 }
 
-func (ctx *distributed_context) finalize() (bool) {
+func (ctx *distributed_context) finalize() bool {
     if !ctx.initialized {
         false
     }
@@ -67,27 +67,27 @@ func (ctx *distributed_context) finalize() (bool) {
     true
 }
 
-func (ctx *distributed_context) is_initialized() (bool) {
+func (ctx *distributed_context) is_initialized() bool {
     ctx.initialized
 }
 
-func (ctx *distributed_context) get_rank() (int) {
+func (ctx *distributed_context) get_rank() int {
     ctx.rank
 }
 
-func (ctx *distributed_context) get_world_size() (int) {
+func (ctx *distributed_context) get_world_size() int {
     ctx.world_size
 }
 
-func (ctx *distributed_context) get_local_rank() (int) {
+func (ctx *distributed_context) get_local_rank() int {
     ctx.local_rank
 }
 
-func (ctx *distributed_context) is_master() (bool) {
+func (ctx *distributed_context) is_master() bool {
     ctx.rank == 0
 }
 
-func (ctx *distributed_context) create_subgroup(vec[int] ranks, string name) (int) {
+func (ctx *distributed_context) create_subgroup(vec[int] ranks, string name) int {
     backend := comm_backend::nccl
     switch ctx.backend_name {
         "nccl" : backend = comm_backend::nccl,
@@ -99,7 +99,7 @@ func (ctx *distributed_context) create_subgroup(vec[int] ranks, string name) (in
     ctx.group_manager.create_group(ranks, name, backend)
 }
 
-func (ctx *distributed_context) synchronize() (bool) {
+func (ctx *distributed_context) synchronize() bool {
     ctx.comm.barrier()
 }
 

@@ -34,19 +34,19 @@ struct reduce_op {
     string op_name
 }
 
-func reduce_op_sum() (reduce_op) {
+func reduce_op_sum() reduce_op {
     reduce_op { op_name: "sum" }
 }
 
-func reduce_op_max() (reduce_op) {
+func reduce_op_max() reduce_op {
     reduce_op { op_name: "max" }
 }
 
-func reduce_op_min() (reduce_op) {
+func reduce_op_min() reduce_op {
     reduce_op { op_name: "min" }
 }
 
-func reduce_op_avg() (reduce_op) {
+func reduce_op_avg() reduce_op {
     reduce_op { op_name: "avg" }
 }
 
@@ -67,7 +67,7 @@ struct communicator {
     map[string, comm_operation] operations
 }
 
-func new_tensor_handle(int64 device_id, string device_type, int64 ptr, int64 size, string dtype) (tensor_handle) {
+func new_tensor_handle(int64 device_id, string device_type, int64 ptr, int64 size, string dtype) tensor_handle {
     tensor_handle {
         device_id: device_id,
         device_type: device_type,
@@ -77,7 +77,7 @@ func new_tensor_handle(int64 device_id, string device_type, int64 ptr, int64 siz
     }
 }
 
-func new_communicator(comm_backend backend, int rank, int world_size, int local_rank) (communicator) {
+func new_communicator(comm_backend backend, int rank, int world_size, int local_rank) communicator {
     backend_name := ""
     switch backend {
         comm_backend::nccl : backend_name = "nccl",
@@ -104,7 +104,7 @@ func new_communicator(comm_backend backend, int rank, int world_size, int local_
     }
 }
 
-func (comm *communicator) initialize() (bool) {
+func (comm *communicator) initialize() bool {
     if comm.initialized {
         false
     }
@@ -114,7 +114,7 @@ func (comm *communicator) initialize() (bool) {
     true
 }
 
-func (comm *communicator) finalize() (bool) {
+func (comm *communicator) finalize() bool {
     if !comm.initialized {
         false
     }
@@ -123,22 +123,22 @@ func (comm *communicator) finalize() (bool) {
     true
 }
 
-func (comm *communicator) get_rank() (int) {
+func (comm *communicator) get_rank() int {
     comm.config.rank
 }
 
-func (comm *communicator) get_world_size() (int) {
+func (comm *communicator) get_world_size() int {
     comm.config.world_size
 }
 
-func (comm *communicator) get_local_rank() (int) {
+func (comm *communicator) get_local_rank() int {
     comm.config.local_rank
 }
 
-func (comm *communicator) is_initialized() (bool) {
+func (comm *communicator) is_initialized() bool {
     comm.initialized
 }
 
-func (comm *communicator) get_backend() (string) {
+func (comm *communicator) get_backend() string {
     comm.backend_name
 }

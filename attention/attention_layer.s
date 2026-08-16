@@ -35,7 +35,7 @@ struct attention_output {
     bool cache_updated
 }
 
-func new_attention_layer(string layer_id, int layer_index, int num_heads, int head_dim) (attention_layer) {
+func new_attention_layer(string layer_id, int layer_index, int num_heads, int head_dim) attention_layer {
     backend_mgr := new_attention_backend_manager()
 
     config := new_attention_config(num_heads, head_dim)
@@ -66,23 +66,23 @@ func new_attention_layer(string layer_id, int layer_index, int num_heads, int he
     }
 }
 
-func (layer *attention_layer) initialize() (bool) {
+func (layer *attention_layer) initialize() bool {
     layer.backend_manager.initialize_all()
 }
 
-func (layer *attention_layer) finalize() (bool) {
+func (layer *attention_layer) finalize() bool {
     layer.backend_manager.finalize_all()
 }
 
-func (layer *attention_layer) set_active_backend(string backend_name) (bool) {
+func (layer *attention_layer) set_active_backend(string backend_name) bool {
     layer.backend_manager.set_current_backend(backend_name)
 }
 
-func (layer *attention_layer) get_active_backend_name() (string) {
+func (layer *attention_layer) get_active_backend_name() string {
     layer.backend_manager.current_backend
 }
 
-func (layer *attention_layer) forward(attention_forward_input input) (attention_output) {
+func (layer *attention_layer) forward(attention_forward_input input) attention_output {
     if !layer.backend_manager.has_backend(layer.active_backend) {
         attention_output {
             success: false,
@@ -128,27 +128,27 @@ func (layer *attention_layer) forward(attention_forward_input input) (attention_
     }
 }
 
-func (layer *attention_layer) auto_tune_backend(int seq_length, string precision) (string) {
+func (layer *attention_layer) auto_tune_backend(int seq_length, string precision) string {
     selected := layer.backend_manager.auto_select_backend(seq_length, precision)
     layer.set_active_backend(selected)
     selected
 }
 
-func (layer *attention_layer) get_kv_cache() (key_value_cache) {
+func (layer *attention_layer) get_kv_cache() key_value_cache {
     layer.kv_cache
 }
 
-func (layer *attention_layer) clear_cache() (bool) {
+func (layer *attention_layer) clear_cache() bool {
     layer.use_kv_cache = false
     true
 }
 
-func (layer *attention_layer) enable_cache() (bool) {
+func (layer *attention_layer) enable_cache() bool {
     layer.use_kv_cache = true
     true
 }
 
-func (layer *attention_layer) list_available_backends() (vec[string]) {
+func (layer *attention_layer) list_available_backends() vec[string] {
     layer.backend_manager.list_backends()
 }
 
@@ -159,7 +159,7 @@ struct attention_layer_stack {
     int head_dim
 }
 
-func new_attention_layer_stack(int num_layers, int num_heads, int head_dim) (attention_layer_stack) {
+func new_attention_layer_stack(int num_layers, int num_heads, int head_dim) attention_layer_stack {
     layers := vec[attention_layer]{}
     i := 0
     while i < num_layers {
@@ -177,7 +177,7 @@ func new_attention_layer_stack(int num_layers, int num_heads, int head_dim) (att
     }
 }
 
-func (stack *attention_layer_stack) initialize_all() (bool) {
+func (stack *attention_layer_stack) initialize_all() bool {
     i := 0
     while i < stack.layers.len() {
         if !stack.layers[i].initialize() {
@@ -189,7 +189,7 @@ func (stack *attention_layer_stack) initialize_all() (bool) {
     true
 }
 
-func (stack *attention_layer_stack) finalize_all() (bool) {
+func (stack *attention_layer_stack) finalize_all() bool {
     i := 0
     while i < stack.layers.len() {
         if !stack.layers[i].finalize() {
@@ -201,7 +201,7 @@ func (stack *attention_layer_stack) finalize_all() (bool) {
     true
 }
 
-func (stack *attention_layer_stack) set_all_backend(string backend_name) (bool) {
+func (stack *attention_layer_stack) set_all_backend(string backend_name) bool {
     i := 0
     while i < stack.layers.len() {
         if !stack.layers[i].set_active_backend(backend_name) {
@@ -213,7 +213,7 @@ func (stack *attention_layer_stack) set_all_backend(string backend_name) (bool) 
     true
 }
 
-func (stack *attention_layer_stack) get_layer(int index) (attention_layer) {
+func (stack *attention_layer_stack) get_layer(int index) attention_layer {
     if index >= 0 && index < stack.layers.len() {
         stack.layers[index]
     }
