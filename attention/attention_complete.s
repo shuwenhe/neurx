@@ -2,9 +2,9 @@ package neurx.attention.complete
 use neurx.tensor.{tensor, new, zeros, ones, fill, reshape}
 use neurx.ml.math_ops.{softmax, softmax_backward, scale_tensor, add_tensors, matmul_2d, transpose_2d}
 struct attention_cache {
-    tensor Q
-    tensor K
-    tensor V
+    tensor q
+    tensor k
+    tensor v
     tensor q_heads
     tensor k_heads
     tensor v_heads
@@ -154,9 +154,9 @@ func multihead_attention_forward(multihead_attention_state state, tensor x) mult
     tensor concat_output = merge_heads(attn_output, state.num_heads, batch_size, seq_len)
     tensor output = linear_forward(concat_output, state.w_o, state.b_o)
     state.cache = attention_cache{
-        Q: q,
-        K: k,
-        V: v,
+        q: q,
+        k: k,
+        v: v,
         q_heads: q_heads,
         k_heads: k_heads,
         v_heads: v_heads,
@@ -165,9 +165,9 @@ func multihead_attention_forward(multihead_attention_state state, tensor x) mult
         scores: scale_tensor(matmul_2d(q_heads, transpose_2d(k_heads)), scale),
         attention_weights: softmax(scale_tensor(matmul_2d(q_heads, transpose_2d(k_heads)), scale)),
     }
-    state.cache.Q = q
-    state.cache.K = k
-    state.cache.V = v
+    state.cache.q = q
+    state.cache.k = k
+    state.cache.v = v
     state
 }
 
