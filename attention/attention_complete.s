@@ -213,7 +213,7 @@ func multihead_attention_backward(
         ),
         matmul_2d(grad_v, transpose_2d(state.w_v))
     )
-    (state, grad_input)
+    state, grad_input
 }
 
 func float_from_int(int x) float {
