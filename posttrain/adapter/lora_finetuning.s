@@ -32,7 +32,7 @@ struct lora_adapter {
     float64 scaling_factor
 }
 
-func (adapter *lora_adapter) initialize_lora_modules(model policy_model) {
+func (lora_adapter* adapter) initialize_lora_modules(model policy_model) {
     fmt.Println("[LoRA] Initializing LoRA modules...")
     for layer_idx := 0; layer_idx < model.num_layers; layer_idx++ {
         for _, proj := range []string{"q_proj", "v_proj"} {
@@ -46,7 +46,7 @@ func (adapter *lora_adapter) initialize_lora_modules(model policy_model) {
     fmt.Printf("  Total trainable parameters: %d\n", adapter.trainable_params)
 }
 
-func (adapter *lora_adapter) create_lora_layer(name string, int in_features, int out_features) {
+func (lora_adapter* adapter) create_lora_layer(name string, int in_features, int out_features) {
     layer := &lora_layer{
         rank: adapter.config.rank,
         alpha: adapter.config.alpha,
@@ -60,7 +60,7 @@ func (adapter *lora_adapter) create_lora_layer(name string, int in_features, int
     adapter.trainable_params += int64(adapter.config.rank*in_features + out_features*adapter.config.rank)
 }
 
-func (adapter *lora_adapter) init_matrix(rows int, int cols, scale float64) [][]float64 {
+func (lora_adapter* adapter) init_matrix(rows int, int cols, scale float64) [][]float64 {
     matrix := make([][]float64, rows)
     for i := 0; i < rows; i++ {
         matrix[i] = make([]float64, cols)
@@ -75,7 +75,7 @@ func (adapter *lora_adapter) init_matrix(rows int, int cols, scale float64) [][]
     return matrix
 }
 
-func (layer *lora_layer) forward(x []float64) []float64 {
+func (lora_layer* layer) forward(x []float64) []float64 {
     xa := adapter.matrix_vector_mult(x, layer.lora_a)
     delta := adapter.matrix_vector_mult(xa, layer.lora_b)
     output := make([]float64, len(delta))
@@ -85,7 +85,7 @@ func (layer *lora_layer) forward(x []float64) []float64 {
     return output
 }
 
-func (adapter *lora_adapter) matrix_vector_mult(vec []float64, matrix [][]float64) []float64 {
+func (lora_adapter* adapter) matrix_vector_mult(vec []float64, matrix [][]float64) []float64 {
     if len(matrix) == 0 {
         return []float64{}
     }
@@ -100,7 +100,7 @@ func (adapter *lora_adapter) matrix_vector_mult(vec []float64, matrix [][]float6
     return result
 }
 
-func (adapter *lora_adapter) merge_lora_to_model() {
+func (lora_adapter* adapter) merge_lora_to_model() {
     fmt.Println("[LoRA] Merging LoRA weights into base model...")
     for name, lora_layer := range adapter.modules {
         merged := adapter.compute_merged_weight(lora_layer)
@@ -110,7 +110,7 @@ func (adapter *lora_adapter) merge_lora_to_model() {
     fmt.Println("  LoRA merged successfully")
 }
 
-func (adapter *lora_adapter) compute_merged_weight(layer *lora_layer) [][]float64 {
+func (lora_adapter* adapter) compute_merged_weight(lora_layer* layer) [][]float64 {
     ab := make([][]float64, len(layer.lora_b))
     for i := 0; i < len(layer.lora_b); i++ {
         ab[i] = make([]float64, len(layer.lora_a[0]))

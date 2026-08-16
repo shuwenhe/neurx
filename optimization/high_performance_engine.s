@@ -75,7 +75,7 @@ func NewHighPerformanceOptimizationEngine(config optimization_config) *high_perf
     return engine
 }
 
-func (hpe *high_performance_optimization_engine) OptimizeAttention(
+func (high_performance_optimization_engine* hpe) OptimizeAttention(
     q []float32,
     k []float32,
     v []float32,
@@ -86,7 +86,7 @@ func (hpe *high_performance_optimization_engine) OptimizeAttention(
     return hpe.flash_attention.Forward(q, k, v)
 }
 
-func (hpe *high_performance_optimization_engine) OptimizeGEMM(
+func (high_performance_optimization_engine* hpe) OptimizeGEMM(
     a []float32,
     b []float32,
     bias []float32,
@@ -108,7 +108,7 @@ func (hpe *high_performance_optimization_engine) OptimizeGEMM(
     return hpe.basicGEMM(a, b)
 }
 
-func (hpe *high_performance_optimization_engine) OptimizeWithCUDAGraph(
+func (high_performance_optimization_engine* hpe) OptimizeWithCUDAGraph(
     kernels []string,
     dependencies [][]int32,
 ) map[int32][]float32 {
@@ -121,7 +121,7 @@ func (hpe *high_performance_optimization_engine) OptimizeWithCUDAGraph(
     return hpe.cuda_graph.ExecuteGraph()
 }
 
-func (hpe *high_performance_optimization_engine) ApplyRuntimeFusion(
+func (high_performance_optimization_engine* hpe) ApplyRuntimeFusion(
     operations []string,
     shapes [][]int32,
 ) [][]float32 {
@@ -135,7 +135,7 @@ func (hpe *high_performance_optimization_engine) ApplyRuntimeFusion(
     return hpe.runtime_fusion.ExecuteFusedOperations()
 }
 
-func (hpe *high_performance_optimization_engine) basicAttention(
+func (high_performance_optimization_engine* hpe) basicAttention(
     q []float32,
     k []float32,
     v []float32,
@@ -147,7 +147,7 @@ func (hpe *high_performance_optimization_engine) basicAttention(
     return output
 }
 
-func (hpe *high_performance_optimization_engine) basicGEMM(
+func (high_performance_optimization_engine* hpe) basicGEMM(
     a []float32,
     b []float32,
 ) []float32 {
@@ -158,7 +158,7 @@ func (hpe *high_performance_optimization_engine) basicGEMM(
     return output
 }
 
-func (hpe *high_performance_optimization_engine) ComputeOptimizationStats() optimization_stats {
+func (high_performance_optimization_engine* hpe) ComputeOptimizationStats() optimization_stats {
     stats := optimization_stats{}
     if hpe.config.enable_flash_attention && hpe.flash_attention != nil {
         stats.attention_speedup = hpe.flash_attention.GetSpeedup()
@@ -196,7 +196,7 @@ func (hpe *high_performance_optimization_engine) ComputeOptimizationStats() opti
     return stats
 }
 
-func (hpe *high_performance_optimization_engine) GetOptimizationLevel() string {
+func (high_performance_optimization_engine* hpe) GetOptimizationLevel() string {
     switch hpe.config.optimization_level {
     case 0:
         return "NONE"
@@ -211,7 +211,7 @@ func (hpe *high_performance_optimization_engine) GetOptimizationLevel() string {
     }
 }
 
-func (hpe *high_performance_optimization_engine) ApplyOptimizations() {
+func (high_performance_optimization_engine* hpe) ApplyOptimizations() {
     stats := hpe.ComputeOptimizationStats()
     core.Println("High Performance Optimization Engine Report")
     core.Println("============================================")

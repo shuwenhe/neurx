@@ -86,7 +86,7 @@ func new_attention_backend(attention_backend_type backend_type, attention_config
     }
 }
 
-func (backend *attention_backend) initialize() bool {
+func (attention_backend* backend) initialize() bool {
     if backend.initialized {
         false
     }
@@ -95,7 +95,7 @@ func (backend *attention_backend) initialize() bool {
     true
 }
 
-func (backend *attention_backend) finalize() bool {
+func (attention_backend* backend) finalize() bool {
     if !backend.initialized {
         false
     }
@@ -104,31 +104,31 @@ func (backend *attention_backend) finalize() bool {
     true
 }
 
-func (backend *attention_backend) is_initialized() bool {
+func (attention_backend* backend) is_initialized() bool {
     backend.initialized
 }
 
-func (backend *attention_backend) get_backend_name() string {
+func (attention_backend* backend) get_backend_name() string {
     backend.backend_name
 }
 
-func (backend *attention_backend) get_num_heads() int {
+func (attention_backend* backend) get_num_heads() int {
     backend.config.num_heads
 }
 
-func (backend *attention_backend) get_head_dim() int {
+func (attention_backend* backend) get_head_dim() int {
     backend.config.head_dim
 }
 
-func (backend *attention_backend) supports_cache() bool {
+func (attention_backend* backend) supports_cache() bool {
     backend.config.enable_cache
 }
 
-func (backend *attention_backend) supports_flash_attention() bool {
+func (attention_backend* backend) supports_flash_attention() bool {
     backend.config.use_flash_attention
 }
 
-func (backend *attention_backend) forward(attention_forward_request req) attention_forward_result {
+func (attention_backend* backend) forward(attention_forward_request req) attention_forward_result {
     if !backend.initialized {
         attention_forward_result {
             success: false,
@@ -146,11 +146,11 @@ func (backend *attention_backend) forward(attention_forward_request req) attenti
     }
 }
 
-func (backend *attention_backend) set_metadata(string key, string value) () {
+func (attention_backend* backend) set_metadata(string key, string value) () {
     backend.metadata[key] = value
 }
 
-func (backend *attention_backend) get_metadata(string key) string {
+func (attention_backend* backend) get_metadata(string key) string {
     if key in backend.metadata {
         backend.metadata[key]
     }
@@ -184,18 +184,18 @@ func new_kv_cache(string cache_id, string dtype, vec[int64] shape, bool is_paged
     cache
 }
 
-func (cache *key_value_cache) get_cache_id() string {
+func (key_value_cache* cache) get_cache_id() string {
     cache.cache_id
 }
 
-func (cache *key_value_cache) get_num_pages() int {
+func (key_value_cache* cache) get_num_pages() int {
     cache.num_pages
 }
 
-func (cache *key_value_cache) get_bytes_allocated() int64 {
+func (key_value_cache* cache) get_bytes_allocated() int64 {
     cache.bytes_allocated
 }
 
-func (cache *key_value_cache) is_paged() bool {
+func (key_value_cache* cache) is_paged() bool {
     cache.is_paged
 }

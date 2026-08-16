@@ -70,7 +70,7 @@ func new_inference_orchestrator(string model_path) (*inference_orchestrator, err
     }, nil
 }
 
-func (i *inference_orchestrator) setup() error {
+func (inference_orchestrator* i) setup() error {
     i.logger.log("Setting up inference environment...")
     if err := mkdir(i.config.log_dir); err != nil {
         return err
@@ -79,7 +79,7 @@ func (i *inference_orchestrator) setup() error {
     return nil
 }
 
-func (i *inference_orchestrator) compile() error {
+func (inference_orchestrator* i) compile() error {
     i.logger.log("Compiling inference server...")
     build_dir := filepath.Join(i.neurx_root, ".build", "inference")
     if err := mkdir(build_dir); err != nil {
@@ -108,7 +108,7 @@ func (i *inference_orchestrator) compile() error {
     return nil
 }
 
-func (i *inference_orchestrator) start_server() error {
+func (inference_orchestrator* i) start_server() error {
     i.logger.log("Starting inference server...")
     bin_file := filepath.Join(i.neurx_root, ".build", "inference", "inference_server")
     if !file_exists(bin_file) {
@@ -142,7 +142,7 @@ func (i *inference_orchestrator) start_server() error {
     return fmt.Errorf("server failed to start within timeout")
 }
 
-func (i *inference_orchestrator) interactive() error {
+func (inference_orchestrator* i) interactive() error {
     i.logger.log("Starting interactive inference session...")
     bin_file := filepath.Join(i.neurx_root, ".build", "inference", "inference_interactive")
     if !file_exists(bin_file) {
@@ -156,7 +156,7 @@ func (i *inference_orchestrator) interactive() error {
     return nil
 }
 
-func (i *inference_orchestrator) chat() error {
+func (inference_orchestrator* i) chat() error {
     i.logger.log("Starting chat interface...")
     source_file := filepath.Join(i.neurx_root, "tools", "chat.s")
     if !file_exists(source_file) {
@@ -189,7 +189,7 @@ func (i *inference_orchestrator) chat() error {
     return nil
 }
 
-func (i *inference_orchestrator) benchmark() error {
+func (inference_orchestrator* i) benchmark() error {
     i.logger.log("Running inference benchmarks...")
     source_file := filepath.Join(i.neurx_root, "eval", "benchmark_eval.s")
     if !file_exists(source_file) {
@@ -224,12 +224,12 @@ func (i *inference_orchestrator) benchmark() error {
     return nil
 }
 
-func (i *inference_orchestrator) is_server_ready() bool {
+func (inference_orchestrator* i) is_server_ready() bool {
     result := exec_command("curl", "-s", fmt.Sprintf("http:
     return result.ExitCode == 0
 }
 
-func (i *inference_orchestrator) log_config() {
+func (inference_orchestrator* i) log_config() {
     config := fmt.Sprintf(`Inference Configuration
 model: %s
 Backend: %s

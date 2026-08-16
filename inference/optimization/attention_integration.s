@@ -75,7 +75,7 @@ func new_attention_layer_manager(
     }
 }
 
-func (mgr *attention_layer_manager) forward(
+func (attention_layer_manager* mgr) forward(
     []float queries,
     []float keys,
     []float values
@@ -114,11 +114,11 @@ func (mgr *attention_layer_manager) forward(
     }
 }
 
-func (mgr *attention_layer_manager) set_method(method string) {
+func (attention_layer_manager* mgr) set_method(method string) {
     mgr.current_method = method
 }
 
-func (mgr *attention_layer_manager) get_stats() map[string]float {
+func (attention_layer_manager* mgr) get_stats() map[string]float {
     stats := map[string]float{}
     stats["total_calls"] = float(mgr.total_forward_calls)
     stats["skipped_calls"] = float(mgr.total_skipped_calls)
@@ -212,7 +212,7 @@ func create_layer_with_optimized_attention(
     }
 }
 
-func (layer *transformer_layer_with_optimized_attention) forward(
+func (transformer_layer_with_optimized_attention* layer) forward(
     []float hidden_states,
     []float position_ids
 ) []float {

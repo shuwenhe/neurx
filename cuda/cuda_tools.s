@@ -70,7 +70,7 @@ func verify(string root) int {
     string test_dir = root + "/artifacts/build/cuda_verify"
     runtime_make_dirs(test_dir)
     string test_src = test_dir + "/test.cu"
-    runtime_write_text_file(test_src, "#include <cuda_runtime.h>\n#include <stdio.h>\n__global__ void test_kernel(float *data) { int idx = blockIdx.x * blockDim.x + threadIdx.x; data[idx] = 42.0f; }\nint main() { printf(\"CUDA test kernel compiled successfully\\n\"); return 0; }\n")
+    runtime_write_text_file(test_src, "#include <cuda_runtime.h>\n#include <stdio.h>\n__global__ void test_kernel(data* float) { int idx = blockIdx.x * blockDim.x + threadIdx.x; data[idx] = 42.0f; }\nint main() { printf(\"CUDA test kernel compiled successfully\\n\"); return 0; }\n")
     string cmd = "nvcc -c " + shell_escape(test_src) + " -o " + shell_escape(test_dir + "/test.o") + " -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0"
     if runtime_run_command(cmd) != 1 {
         println("[ERROR] CUDA compilation failed.")

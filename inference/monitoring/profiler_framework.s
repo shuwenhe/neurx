@@ -100,7 +100,7 @@ func NewProfiler() *profiler {
     }
 }
 
-func (p *profiler) RecordEvent(
+func (profiler* p) RecordEvent(
     event_type int32,
     name string,
     worker_id string,
@@ -122,7 +122,7 @@ func (p *profiler) RecordEvent(
     p.current_size++
 }
 
-func (p *profiler) StartPhase(phase_name string) {
+func (profiler* p) StartPhase(phase_name string) {
     if !p.enabled {
         return
     }
@@ -133,7 +133,7 @@ func (p *profiler) StartPhase(phase_name string) {
     }
 }
 
-func (p *profiler) EndPhase(phase_name string) {
+func (profiler* p) EndPhase(phase_name string) {
     if !p.enabled {
         return
     }
@@ -148,14 +148,14 @@ func (p *profiler) EndPhase(phase_name string) {
     p.phase_timings[phase_name] = timing
 }
 
-func (p *profiler) StartRequestProfile(request_id string) {
+func (profiler* p) StartRequestProfile(request_id string) {
     if !p.enabled {
         return
     }
     p.request_traces[request_id] = make([]profile_event, 0)
 }
 
-func (p *profiler) RecordRequestEvent(
+func (profiler* p) RecordRequestEvent(
     request_id string,
     event_type int32,
     name string,
@@ -177,7 +177,7 @@ func (p *profiler) RecordRequestEvent(
     p.request_traces[request_id] = trace
 }
 
-func (p *profiler) GetPhaseMetrics(phase_name string) phase_timing {
+func (profiler* p) GetPhaseMetrics(phase_name string) phase_timing {
     timing, exists := p.phase_timings[phase_name]
     if !exists {
         return phase_timing{
@@ -187,7 +187,7 @@ func (p *profiler) GetPhaseMetrics(phase_name string) phase_timing {
     return timing
 }
 
-func (p *profiler) GenerateReport() profiler_report {
+func (profiler* p) GenerateReport() profiler_report {
     report := profiler_report{}
     for _, timing := range p.phase_timings {
         report.total_time_ns = report.total_time_ns + timing.duration_ns
@@ -208,7 +208,7 @@ func (p *profiler) GenerateReport() profiler_report {
     return report
 }
 
-func (p *profiler) PrintProfile() {
+func (profiler* p) PrintProfile() {
     core.Println("╔═════════════════════════════════════╗")
     core.Println("║  Performance Profiler Report        ║")
     core.Println("╚═════════════════════════════════════╝")
@@ -244,11 +244,11 @@ func NewTimelineAnalyzer() *timeline_analyzer {
     }
 }
 
-func (ta *timeline_analyzer) AddTrace(request_id string, events []profile_event) {
+func (timeline_analyzer* ta) AddTrace(request_id string, events []profile_event) {
     ta.traces[request_id] = events
 }
 
-func (ta *timeline_analyzer) FindCriticalPath(request_id string) []profile_event {
+func (timeline_analyzer* ta) FindCriticalPath(request_id string) []profile_event {
     events, exists := ta.traces[request_id]
     if !exists {
         return []profile_event{}
@@ -268,7 +268,7 @@ func (ta *timeline_analyzer) FindCriticalPath(request_id string) []profile_event
     return critical
 }
 
-func (ta *timeline_analyzer) IdentifyBottleneck(request_id string) string {
+func (timeline_analyzer* ta) IdentifyBottleneck(request_id string) string {
     events, exists := ta.traces[request_id]
     if !exists {
         return "no traces"

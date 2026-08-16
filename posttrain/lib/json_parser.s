@@ -127,7 +127,7 @@ func json_parser_create(string text) json_parser {
     return json_parser{text: text, pos: 0}
 }
 
-func parser_skip_whitespace(p *json_parser) {
+func parser_skip_whitespace(json_parser* p) {
     for p.pos < len(p.text) {
         ch := p.text[p.pos]
         if ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r' {
@@ -137,14 +137,14 @@ func parser_skip_whitespace(p *json_parser) {
     }
 }
 
-func parser_peek(p *json_parser) byte {
+func parser_peek(json_parser* p) byte {
     if p.pos >= len(p.text) {
         return 0
     }
     return p.text[p.pos]
 }
 
-func parser_advance(p *json_parser) byte {
+func parser_advance(json_parser* p) byte {
     if p.pos >= len(p.text) {
         return 0
     }
@@ -153,7 +153,7 @@ func parser_advance(p *json_parser) byte {
     return ch
 }
 
-func parser_parse_value(p *json_parser) json_value {
+func parser_parse_value(json_parser* p) json_value {
     parser_skip_whitespace(p)
     ch := parser_peek(p)
     if ch == 'n' {
@@ -181,7 +181,7 @@ func parser_parse_value(p *json_parser) json_value {
     panic("unexpected character in JSON: " + string(ch))
 }
 
-func parser_parse_null(p *json_parser) json_value {
+func parser_parse_null(json_parser* p) json_value {
     if p.text[p.pos:p.pos+4] != "null" {
         panic("expected 'null'")
     }
@@ -189,7 +189,7 @@ func parser_parse_null(p *json_parser) json_value {
     return json_value{type: 0}
 }
 
-func parser_parse_bool(p *json_parser) json_value {
+func parser_parse_bool(json_parser* p) json_value {
     if p.text[p.pos] == 't' {
         if p.text[p.pos:p.pos+4] != "true" {
             panic("expected 'true'")
@@ -205,7 +205,7 @@ func parser_parse_bool(p *json_parser) json_value {
     }
 }
 
-func parser_parse_string(p *json_parser) string {
+func parser_parse_string(json_parser* p) string {
     if parser_advance(p) != '"' {
         panic("expected '\"'")
     }
@@ -248,7 +248,7 @@ func parser_parse_string(p *json_parser) string {
     panic("unexpected end of string")
 }
 
-func parser_parse_number(p *json_parser) float {
+func parser_parse_number(json_parser* p) float {
     start := p.pos
     if parser_peek(p) == '-' {
         parser_advance(p)
@@ -287,7 +287,7 @@ func parser_parse_number(p *json_parser) float {
     return parse_float(num_str)
 }
 
-func parser_parse_array(p *json_parser) []json_value {
+func parser_parse_array(json_parser* p) []json_value {
     if parser_advance(p) != '[' {
         panic("expected '['")
     }
@@ -313,7 +313,7 @@ func parser_parse_array(p *json_parser) []json_value {
     }
 }
 
-func parser_parse_object(p *json_parser) map[string]json_value {
+func parser_parse_object(json_parser* p) map[string]json_value {
     if parser_advance(p) != '{' {
         panic("expected '{'")
     }

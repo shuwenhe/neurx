@@ -50,7 +50,7 @@ struct synthesis_quality_stats {
     passed_quality_filter   int
 }
 
-func (engine *data_synthesis_engine) generate_synthetic_examples() {
+func (data_synthesis_engine* engine) generate_synthetic_examples() {
     fmt.Println("[DataSynthesis] Generating synthetic examples...")
     tasks := []string{"qa", "writing", "coding", "math", "reasoning", "translation"}
     for i := 0; i < engine.config.num_synthetic_samples; i++ {
@@ -82,7 +82,7 @@ func (engine *data_synthesis_engine) generate_synthetic_examples() {
     }
 }
 
-func (engine *data_synthesis_engine) generate_prompt(task string, int index) string {
+func (data_synthesis_engine* engine) generate_prompt(task string, int index) string {
     prompts := map[string][]string{
         "qa": {
             "What is the capital of France?",
@@ -134,7 +134,7 @@ func (engine *data_synthesis_engine) generate_prompt(task string, int index) str
     return fmt.Sprintf("task %s example %d", task, index)
 }
 
-func (engine *data_synthesis_engine) generate_response(prompt string, string task) string {
+func (data_synthesis_engine* engine) generate_response(prompt string, string task) string {
     responses := map[string]string{
         "qa": "The answer is based on knowledge about " + prompt,
         "writing": "Here's a thoughtful response addressing the prompt with creativity and clarity.",
@@ -149,7 +149,7 @@ func (engine *data_synthesis_engine) generate_response(prompt string, string tas
     return "Generated response for the given prompt"
 }
 
-func (engine *data_synthesis_engine) evaluate_quality(prompt string, string response) float64 {
+func (data_synthesis_engine* engine) evaluate_quality(prompt string, string response) float64 {
     length_score := math.Min(float64(len(response)) / 500.0, 1.0)
     coherence_score := 0.8
     relevance_score := 0.85
@@ -164,7 +164,7 @@ func (engine *data_synthesis_engine) evaluate_quality(prompt string, string resp
     return quality
 }
 
-func (engine *data_synthesis_engine) calculate_diversity(prompt string, string response) float64 {
+func (data_synthesis_engine* engine) calculate_diversity(prompt string, string response) float64 {
     unique_tokens := make(map[string]bool)
     for i := 0; i < len(response); i++ {
         if i+3 < len(response) {
@@ -178,7 +178,7 @@ func (engine *data_synthesis_engine) calculate_diversity(prompt string, string r
     return diversity
 }
 
-func (engine *data_synthesis_engine) generate_preference_pairs() {
+func (data_synthesis_engine* engine) generate_preference_pairs() {
     fmt.Println("[DataSynthesis] Generating preference pairs...")
     for i := 0; i < engine.config.num_preference_pairs; i++ {
         prompt := engine.generate_prompt("qa", i)
@@ -210,7 +210,7 @@ func (engine *data_synthesis_engine) generate_preference_pairs() {
     }
 }
 
-func (engine *data_synthesis_engine) analyze_quality() {
+func (data_synthesis_engine* engine) analyze_quality() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Synthetic Data Quality Analysis                      ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
@@ -249,7 +249,7 @@ func (engine *data_synthesis_engine) analyze_quality() {
     fmt.Printf("\nPreference Pairs: %d generated\n", len(engine.preference_pairs))
 }
 
-func (engine *data_synthesis_engine) export_to_jsonl() {
+func (data_synthesis_engine* engine) export_to_jsonl() {
     fmt.Println("\n[DataSynthesis] Exporting to JSONL format...")
     fmt.Printf("  Synthetic examples: %d\n", len(engine.synthetic_examples))
     fmt.Printf("  Preference pairs: %d\n", len(engine.preference_pairs))
@@ -266,7 +266,7 @@ func new_data_synthesis_engine(config data_synthesis_config) *data_synthesis_eng
     }
 }
 
-func (engine *data_synthesis_engine) synthesize_data() {
+func (data_synthesis_engine* engine) synthesize_data() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Data Synthesis Engine                                ║")
     fmt.Println("║  Generate high-quality training and preference data   ║")

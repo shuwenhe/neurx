@@ -46,7 +46,7 @@ func new_gdpo_trainer(gdpo_config config, *model model, *model ref_model) -> gdp
     }
 }
 
-func (trainer *gdpo_trainer) aggregate_rewards(rubric rubric) -> f32 {
+func (gdpo_trainer* trainer) aggregate_rewards(rubric rubric) -> f32 {
     let aggregated: f32 = 0.0
     match trainer.config.aggregation_method {
         "sum" => {
@@ -89,7 +89,7 @@ func (trainer *gdpo_trainer) aggregate_rewards(rubric rubric) -> f32 {
     return aggregated
 }
 
-func (trainer *gdpo_trainer) normalize_rubric(rubric rubric) -> rubric {
+func (gdpo_trainer* trainer) normalize_rubric(rubric rubric) -> rubric {
     let normalized = rubric{
         reward_names: rubric.reward_names.clone(),
         reward_values: [],
@@ -109,7 +109,7 @@ func (trainer *gdpo_trainer) normalize_rubric(rubric rubric) -> rubric {
     return normalized
 }
 
-func (trainer *gdpo_trainer) compute_gdpo_loss(
+func (gdpo_trainer* trainer) compute_gdpo_loss(
     []tensor chosen_prompts,
     []tensor chosen_responses,
     []tensor rejected_prompts,
@@ -153,7 +153,7 @@ func (trainer *gdpo_trainer) compute_gdpo_loss(
     return total_loss / f32(batch_size)
 }
 
-func (trainer *gdpo_trainer) train_step(
+func (gdpo_trainer* trainer) train_step(
     []tensor chosen_prompts,
     []tensor chosen_responses,
     []tensor rejected_prompts,
@@ -176,7 +176,7 @@ func (trainer *gdpo_trainer) train_step(
     return loss.item()
 }
 
-func (trainer *gdpo_trainer) train(DataLoader train_data) -> []f32 {
+func (gdpo_trainer* trainer) train(DataLoader train_data) -> []f32 {
     let losses: []f32 = []
     for epoch in 0..trainer.config.num_epochs {
         println(f"GDPO Epoch {epoch + 1}/{trainer.config.num_epochs}")
@@ -199,7 +199,7 @@ func (trainer *gdpo_trainer) train(DataLoader train_data) -> []f32 {
     return losses
 }
 
-func (trainer *gdpo_trainer) print_reward_statistics() {
+func (gdpo_trainer* trainer) print_reward_statistics() {
     println("Reward Statistics:")
     for i in 0..trainer.config.num_rewards {
         if trainer.reward_histories[i].len() > 0 {

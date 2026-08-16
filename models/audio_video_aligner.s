@@ -87,7 +87,7 @@ func create_audio_video_aligner() *audio_video_aligner {
 	return ava
 }
 
-func (ava *audio_video_aligner) create_pair(audio_id string, video_id string, audio *audio_data, video *video_data) (string, error) {
+func (audio_video_aligner* ava) create_pair(audio_id string, video_id string, audio *audio_data, video *video_data) (string, error) {
 	ava.mu.Lock()
 	defer ava.mu.Unlock()
 
@@ -110,7 +110,7 @@ func (ava *audio_video_aligner) create_pair(audio_id string, video_id string, au
 	return pair_id, nil
 }
 
-func (ava *audio_video_aligner) sync_cross_correlation(pair_id string) (*sync_result, error) {
+func (audio_video_aligner* ava) sync_cross_correlation(pair_id string) (*sync_result, error) {
 	ava.mu.Lock()
 	pair, exists := ava.pair_cache[pair_id]
 	ava.mu.Unlock()
@@ -187,7 +187,7 @@ func (ava *audio_video_aligner) sync_cross_correlation(pair_id string) (*sync_re
 	return result, nil
 }
 
-func (ava *audio_video_aligner) sync_dtw(pair_id string) (*sync_result, error) {
+func (audio_video_aligner* ava) sync_dtw(pair_id string) (*sync_result, error) {
 	ava.mu.Lock()
 	pair, exists := ava.pair_cache[pair_id]
 	ava.mu.Unlock()
@@ -275,7 +275,7 @@ func (ava *audio_video_aligner) sync_dtw(pair_id string) (*sync_result, error) {
 	return result, nil
 }
 
-func (ava *audio_video_aligner) detect_sync_points(pair_id string) ([]temporal_alignment, error) {
+func (audio_video_aligner* ava) detect_sync_points(pair_id string) ([]temporal_alignment, error) {
 	ava.mu.Lock()
 	pair, exists := ava.pair_cache[pair_id]
 	ava.mu.Unlock()
@@ -311,7 +311,7 @@ func (ava *audio_video_aligner) detect_sync_points(pair_id string) ([]temporal_a
 	return alignment_points, nil
 }
 
-func (ava *audio_video_aligner) auto_sync(pair_id string) (*sync_result, error) {
+func (audio_video_aligner* ava) auto_sync(pair_id string) (*sync_result, error) {
 	methods := []sync_method{
 		SYNC_CROSS_CORRELATION,
 		SYNC_DTW,
@@ -349,7 +349,7 @@ func (ava *audio_video_aligner) auto_sync(pair_id string) (*sync_result, error) 
 	return best_result, nil
 }
 
-func (ava *audio_video_aligner) manually_align(pair_id string, time_offset_ms float64) error {
+func (audio_video_aligner* ava) manually_align(pair_id string, time_offset_ms float64) error {
 	ava.mu.Lock()
 	pair, exists := ava.pair_cache[pair_id]
 	if !exists {
@@ -373,7 +373,7 @@ func (ava *audio_video_aligner) manually_align(pair_id string, time_offset_ms fl
 	return nil
 }
 
-func (ava *audio_video_aligner) get_sync_result(pair_id string) (*sync_result, error) {
+func (audio_video_aligner* ava) get_sync_result(pair_id string) (*sync_result, error) {
 	ava.mu.Lock()
 	defer ava.mu.Unlock()
 
@@ -385,7 +385,7 @@ func (ava *audio_video_aligner) get_sync_result(pair_id string) (*sync_result, e
 	return result, nil
 }
 
-func (ava *audio_video_aligner) get_alignment_points(pair_id string) []temporal_alignment {
+func (audio_video_aligner* ava) get_alignment_points(pair_id string) []temporal_alignment {
 	ava.mu.Lock()
 	defer ava.mu.Unlock()
 
@@ -393,14 +393,14 @@ func (ava *audio_video_aligner) get_alignment_points(pair_id string) []temporal_
 	return points
 }
 
-func (ava *audio_video_aligner) get_aligner_stats() *sync_statistics {
+func (audio_video_aligner* ava) get_aligner_stats() *sync_statistics {
 	ava.mu.Lock()
 	defer ava.mu.Unlock()
 
 	return ava.stats
 }
 
-func (ava *audio_video_aligner) set_confidence_threshold(threshold float32) error {
+func (audio_video_aligner* ava) set_confidence_threshold(threshold float32) error {
 	if threshold < 0 || threshold > 1 {
 		return fmt.Errorf("threshold must be between 0 and 1")
 	}
@@ -413,14 +413,14 @@ func (ava *audio_video_aligner) set_confidence_threshold(threshold float32) erro
 	return nil
 }
 
-func (ava *audio_video_aligner) set_sync_method(method sync_method) {
+func (audio_video_aligner* ava) set_sync_method(method sync_method) {
 	ava.mu.Lock()
 	defer ava.mu.Unlock()
 
 	ava.default_method = method
 }
 
-func (ava *audio_video_aligner) clear_pair(pair_id string) error {
+func (audio_video_aligner* ava) clear_pair(pair_id string) error {
 	ava.mu.Lock()
 	defer ava.mu.Unlock()
 

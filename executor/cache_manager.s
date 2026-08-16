@@ -20,7 +20,7 @@ func NewKVCacheManager(total_size_gb f64, eviction_policy i32) *KVCacheManager {
     return manager
 }
 
-func (m *KVCacheManager) AllocateBlock(sequence_id string, token_range_start i32,
+func (KVCacheManager* m) AllocateBlock(sequence_id string, token_range_start i32,
                                        token_range_end i32) ExecutionResult {
     size_bytes := (token_range_end - token_range_start) * 100
 
@@ -51,7 +51,7 @@ func (m *KVCacheManager) AllocateBlock(sequence_id string, token_range_start i32
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (m *KVCacheManager) FreeBlock(block_id i32) ExecutionResult {
+func (KVCacheManager* m) FreeBlock(block_id i32) ExecutionResult {
     for i := 0; i < m.block_count; i++ {
         if m.blocks[i].block_id == block_id {
             block := m.blocks[i]
@@ -69,7 +69,7 @@ func (m *KVCacheManager) FreeBlock(block_id i32) ExecutionResult {
     }
 }
 
-func (m *KVCacheManager) FreeSequenceBlocks(sequence_id string) ExecutionResult {
+func (KVCacheManager* m) FreeSequenceBlocks(sequence_id string) ExecutionResult {
     freed := 0
 
     for i := 0; i < m.block_count; i++ {
@@ -88,7 +88,7 @@ func (m *KVCacheManager) FreeSequenceBlocks(sequence_id string) ExecutionResult 
     }
 }
 
-func (m *KVCacheManager) EvictBlocks() ExecutionResult {
+func (KVCacheManager* m) EvictBlocks() ExecutionResult {
     match m.eviction_policy {
     case EVICTION_LRU:
         return m.evict_lru()
@@ -103,7 +103,7 @@ func (m *KVCacheManager) EvictBlocks() ExecutionResult {
     }
 }
 
-func (m *KVCacheManager) evict_lru() ExecutionResult {
+func (KVCacheManager* m) evict_lru() ExecutionResult {
     oldest_block := i32(-1)
     oldest_time := i64(9223372036854775807)
 
@@ -127,7 +127,7 @@ func (m *KVCacheManager) evict_lru() ExecutionResult {
     }
 }
 
-func (m *KVCacheManager) evict_lfu() ExecutionResult {
+func (KVCacheManager* m) evict_lfu() ExecutionResult {
     min_block := i32(-1)
     min_access := i64(9223372036854775807)
 
@@ -151,7 +151,7 @@ func (m *KVCacheManager) evict_lfu() ExecutionResult {
     }
 }
 
-func (m *KVCacheManager) evict_fifo() ExecutionResult {
+func (KVCacheManager* m) evict_fifo() ExecutionResult {
     if m.block_count > 0 && m.blocks[0].is_allocated == 1 {
         return m.FreeBlock(m.blocks[0].block_id)
     }
@@ -163,7 +163,7 @@ func (m *KVCacheManager) evict_fifo() ExecutionResult {
     }
 }
 
-func (m *KVCacheManager) evict_adaptive() ExecutionResult {
+func (KVCacheManager* m) evict_adaptive() ExecutionResult {
 
     min_block := i32(-1)
     min_cost := f64(9223372036854775807)
@@ -189,7 +189,7 @@ func (m *KVCacheManager) evict_adaptive() ExecutionResult {
     }
 }
 
-func (m *KVCacheManager) GetBlockStats() map[string]i64 {
+func (KVCacheManager* m) GetBlockStats() map[string]i64 {
     stats := make(map[string]i64)
 
     allocated := 0
@@ -217,7 +217,7 @@ func (m *KVCacheManager) GetBlockStats() map[string]i64 {
     return stats
 }
 
-func (m *KVCacheManager) GetCacheUtilization() f64 {
+func (KVCacheManager* m) GetCacheUtilization() f64 {
     total := m.total_size_gb * 1024
     if total == 0 {
         return 0.0
@@ -225,32 +225,32 @@ func (m *KVCacheManager) GetCacheUtilization() f64 {
     return f64(m.allocated_mb) / total * 100.0
 }
 
-func (m *KVCacheManager) CompactCache() ExecutionResult {
+func (KVCacheManager* m) CompactCache() ExecutionResult {
 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (m *KVCacheManager) SwapToHost(sequence_id string, num_tokens i32) ExecutionResult {
+func (KVCacheManager* m) SwapToHost(sequence_id string, num_tokens i32) ExecutionResult {
 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (m *KVCacheManager) SwapToDevice(sequence_id string, num_tokens i32) ExecutionResult {
+func (KVCacheManager* m) SwapToDevice(sequence_id string, num_tokens i32) ExecutionResult {
 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (m *KVCacheManager) PrefixCache(prefix_hash string, tokens i32) ExecutionResult {
+func (KVCacheManager* m) PrefixCache(prefix_hash string, tokens i32) ExecutionResult {
 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (m *KVCacheManager) GetPrefixCache(prefix_hash string) ExecutionResult {
+func (KVCacheManager* m) GetPrefixCache(prefix_hash string) ExecutionResult {
 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (m *KVCacheManager) GetCacheHitRate() f64 {
+func (KVCacheManager* m) GetCacheHitRate() f64 {
     if m.block_count == 0 {
         return 0.0
     }
@@ -271,7 +271,7 @@ func (m *KVCacheManager) GetCacheHitRate() f64 {
     return f64(hits) / f64(total_accesses)
 }
 
-func (m *KVCacheManager) Shutdown() ExecutionResult {
+func (KVCacheManager* m) Shutdown() ExecutionResult {
     m.allocated_mb = 0
     m.free_mb = i32(m.total_size_gb * 1024)
     m.block_count = 0

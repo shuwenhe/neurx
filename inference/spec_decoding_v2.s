@@ -67,7 +67,7 @@ func new_draft_model_manager(draft_model_type model_type, string model_name) dra
     }
 }
 
-func (mgr *draft_model_manager) initialize() bool {
+func (draft_model_manager* mgr) initialize() bool {
     if mgr.initialized {
         false
     }
@@ -76,7 +76,7 @@ func (mgr *draft_model_manager) initialize() bool {
     true
 }
 
-func (mgr *draft_model_manager) finalize() bool {
+func (draft_model_manager* mgr) finalize() bool {
     if !mgr.initialized {
         false
     }
@@ -85,11 +85,11 @@ func (mgr *draft_model_manager) finalize() bool {
     true
 }
 
-func (mgr *draft_model_manager) is_initialized() bool {
+func (draft_model_manager* mgr) is_initialized() bool {
     mgr.initialized
 }
 
-func (mgr *draft_model_manager) get_speed_multiplier() float {
+func (draft_model_manager* mgr) get_speed_multiplier() float {
     mgr.inference_speed_multiplier
 }
 
@@ -111,7 +111,7 @@ func new_draft_generator(string generator_id, draft_model_manager model_manager)
     }
 }
 
-func (gen *draft_generator) generate_draft_tokens(int num_tokens) draft_sequence {
+func (draft_generator* gen) generate_draft_tokens(int num_tokens) draft_sequence {
     tokens := vec[draft_token]{}
 
     i := 0
@@ -152,7 +152,7 @@ func new_token_verifier(string verifier_id, float threshold) token_verifier {
     }
 }
 
-func (verifier *token_verifier) verify_tokens(draft_sequence draft_tokens, vec[float] target_logits) verification_result {
+func (token_verifier* verifier) verify_tokens(draft_sequence draft_tokens, vec[float] target_logits) verification_result {
     accepted_positions := vec[int]{}
     rejected_positions := vec[int]{}
 
@@ -190,7 +190,7 @@ func (verifier *token_verifier) verify_tokens(draft_sequence draft_tokens, vec[f
     }
 }
 
-func (verifier *token_verifier) get_acceptance_rate() float {
+func (token_verifier* verifier) get_acceptance_rate() float {
     if verifier.num_verified_tokens == 0 {
         1.0
     }
@@ -220,7 +220,7 @@ func new_speculative_decoder(string decoder_id, draft_generator gen, token_verif
     }
 }
 
-func (decoder *speculative_decoder) generate_and_verify(int sequence_length) bool {
+func (speculative_decoder* decoder) generate_and_verify(int sequence_length) bool {
     draft_seq := decoder.draft_gen.generate_draft_tokens(decoder.config.num_draft_tokens)
 
     target_logits := vec[float]{}
@@ -240,7 +240,7 @@ func (decoder *speculative_decoder) generate_and_verify(int sequence_length) boo
     false
 }
 
-func (decoder *speculative_decoder) get_speedup() float {
+func (speculative_decoder* decoder) get_speedup() float {
     if decoder.total_verify_time_us == 0 {
         1.0
     }
@@ -256,7 +256,7 @@ func (decoder *speculative_decoder) get_speedup() float {
     1.0 / (seq_cost / (float(decoder.total_sequences_generated) * 1000000.0))
 }
 
-func (decoder *speculative_decoder) get_stats() string {
+func (speculative_decoder* decoder) get_stats() string {
     stats := "Total Sequences Generated: " + string(decoder.total_sequences_generated) + "\n"
     stats = stats + "Acceptance Rate: " + string(decoder.verifier.get_acceptance_rate()) + "\n"
     stats = stats + "Estimated Speedup: " + string(decoder.get_speedup())

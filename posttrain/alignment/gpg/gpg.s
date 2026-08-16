@@ -35,7 +35,7 @@ func new_gpg_trainer(gpg_config config, *model policy) -> GPGTrainer {
     }
 }
 
-func (trainer *gpg_trainer) generate_group(Tensor prompt) -> ([]tensor, []tensor) {
+func (gpg_trainer* trainer) generate_group(Tensor prompt) -> ([]tensor, []tensor) {
     let responses: []tensor = []
     let log_probs_list: []tensor = []
     for i in 0..trainer.config.group_size {
@@ -50,7 +50,7 @@ func (trainer *gpg_trainer) generate_group(Tensor prompt) -> ([]tensor, []tensor
     return responses, log_probs_list
 }
 
-func (trainer *gpg_trainer) compute_baseline([]f32 rewards) -> f32 {
+func (gpg_trainer* trainer) compute_baseline([]f32 rewards) -> f32 {
     match trainer.config.baseline_type {
         "group_mean" => {
             return compute_mean(rewards)
@@ -67,7 +67,7 @@ func (trainer *gpg_trainer) compute_baseline([]f32 rewards) -> f32 {
     }
 }
 
-func (trainer *gpg_trainer) compute_advantages([]f32 rewards) -> []f32 {
+func (gpg_trainer* trainer) compute_advantages([]f32 rewards) -> []f32 {
     let baseline = trainer.compute_baseline(rewards)
     let scaled_rewards: []f32 = []
     for r in rewards {
@@ -89,14 +89,14 @@ func (trainer *gpg_trainer) compute_advantages([]f32 rewards) -> []f32 {
     return advantages
 }
 
-func (trainer *gpg_trainer) compute_entropy(Tensor logits) -> Tensor {
+func (gpg_trainer* trainer) compute_entropy(Tensor logits) -> Tensor {
     let probs = softmax(logits, dim: -1)
     let log_probs = log_softmax(logits, dim: -1)
     let entropy = -(probs * log_probs).sum(dim: -1).mean()
     return entropy
 }
 
-func (trainer *gpg_trainer) train_step_group(
+func (gpg_trainer* trainer) train_step_group(
     Tensor prompt,
     []tensor responses,
     []f32 rewards
@@ -137,7 +137,7 @@ func (trainer *gpg_trainer) train_step_group(
     )
 }
 
-func (trainer *gpg_trainer) train(DataLoader train_data) -> []f32 {
+func (gpg_trainer* trainer) train(DataLoader train_data) -> []f32 {
     let policy_losses: []f32 = []
     for batch in train_data {
         for i in 0..batch.prompts.len() {
@@ -171,7 +171,7 @@ func (trainer *gpg_trainer) train(DataLoader train_data) -> []f32 {
     return policy_losses
 }
 
-func (trainer *gpg_trainer) get_statistics() -> (f32, f32, f32) {
+func (gpg_trainer* trainer) get_statistics() -> (f32, f32, f32) {
     if trainer.reward_history.len() == 0 {
         return 0.0, 0.0, 0.0
     }

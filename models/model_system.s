@@ -47,7 +47,7 @@ struct model_system {
 	int64 total_inferences
 }
 
-func create_model_system(config *model_system_config) *model_system {
+func create_model_system(model_system_config* config) *model_system {
 	if config == nil {
 		config = &model_system_config{
 			max_models: 100,
@@ -366,7 +366,7 @@ func (model_system* system) shutdown() error {
 	return nil
 }
 
-func (model_system* system) set_config(config *model_system_config) {
+func (model_system* system) set_config(model_system_config* config) {
 	system.mu.Lock()
 	defer system.mu.Unlock()
 	

@@ -39,7 +39,7 @@ func NewCommunicationHandler(config CommunicationConfig, worker_count i32) *Comm
     return handler
 }
 
-func (h *CommunicationHandler) SendMessage(msg WorkerMessage) WorkerResult {
+func (CommunicationHandler* h) SendMessage(msg WorkerMessage) WorkerResult {
     if msg.receiver_id < 0 || msg.receiver_id >= h.queue_count {
         return WorkerResult{
             success: 0,
@@ -77,7 +77,7 @@ func (h *CommunicationHandler) SendMessage(msg WorkerMessage) WorkerResult {
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (h *CommunicationHandler) ReceiveMessage(worker_id i32) WorkerMessage {
+func (CommunicationHandler* h) ReceiveMessage(worker_id i32) WorkerMessage {
     if worker_id < 0 || worker_id >= h.queue_count {
         return WorkerMessage{message_id: -1}
     }
@@ -96,7 +96,7 @@ func (h *CommunicationHandler) ReceiveMessage(worker_id i32) WorkerMessage {
     return msg
 }
 
-func (h *CommunicationHandler) BroadcastMessage(msg WorkerMessage, target_ids []i32) i32 {
+func (CommunicationHandler* h) BroadcastMessage(msg WorkerMessage, target_ids []i32) i32 {
     success_count := i32(0)
 
     for i := 0; i < len(target_ids); i++ {
@@ -115,7 +115,7 @@ func (h *CommunicationHandler) BroadcastMessage(msg WorkerMessage, target_ids []
     return success_count
 }
 
-func (h *CommunicationHandler) ReceiveAck(worker_id i32, message_id i64) i32 {
+func (CommunicationHandler* h) ReceiveAck(worker_id i32, message_id i64) i32 {
     queue := &h.message_queues[worker_id]
 
     for i := 0; i < queue.queue_size; i++ {
@@ -130,7 +130,7 @@ func (h *CommunicationHandler) ReceiveAck(worker_id i32, message_id i64) i32 {
     return 0
 }
 
-func (h *CommunicationHandler) SyncBarrier(worker_ids []i32, timeout_ms i32) WorkerResult {
+func (CommunicationHandler* h) SyncBarrier(worker_ids []i32, timeout_ms i32) WorkerResult {
     barrier_id := get_barrier_id()
     ack_count := i32(0)
     target_count := len(worker_ids)
@@ -161,7 +161,7 @@ func (h *CommunicationHandler) SyncBarrier(worker_ids []i32, timeout_ms i32) Wor
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (h *CommunicationHandler) AllReduce(data []f32, worker_ids []i32) WorkerResult {
+func (CommunicationHandler* h) AllReduce(data []f32, worker_ids []i32) WorkerResult {
 
     reduce_msg := WorkerMessage{
         message_id: get_message_id(),
@@ -177,7 +177,7 @@ func (h *CommunicationHandler) AllReduce(data []f32, worker_ids []i32) WorkerRes
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (h *CommunicationHandler) AllGather(local_data []f32, worker_ids []i32) []f32 {
+func (CommunicationHandler* h) AllGather(local_data []f32, worker_ids []i32) []f32 {
     total_size := len(local_data) * len(worker_ids)
     gathered := make([]f32, total_size)
 
@@ -199,7 +199,7 @@ func (h *CommunicationHandler) AllGather(local_data []f32, worker_ids []i32) []f
     return gathered
 }
 
-func (h *CommunicationHandler) GetMessageQueueStats(worker_id i32) map[string]i64 {
+func (CommunicationHandler* h) GetMessageQueueStats(worker_id i32) map[string]i64 {
     stats := make(map[string]i64)
 
     if worker_id >= 0 && worker_id < h.queue_count {
@@ -213,7 +213,7 @@ func (h *CommunicationHandler) GetMessageQueueStats(worker_id i32) map[string]i6
     return stats
 }
 
-func (h *CommunicationHandler) PurgeQueue(worker_id i32) WorkerResult {
+func (CommunicationHandler* h) PurgeQueue(worker_id i32) WorkerResult {
     if worker_id < 0 || worker_id >= h.queue_count {
         return WorkerResult{
             success: 0,
@@ -228,7 +228,7 @@ func (h *CommunicationHandler) PurgeQueue(worker_id i32) WorkerResult {
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (h *CommunicationHandler) Shutdown() WorkerResult {
+func (CommunicationHandler* h) Shutdown() WorkerResult {
     h.queue_count = 0
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
@@ -247,7 +247,7 @@ func NewSynchronizationManager() *SynchronizationManager {
     }
 }
 
-func (s *SynchronizationManager) InitiateSync(source_worker i32,
+func (SynchronizationManager* s) InitiateSync(source_worker i32,
                                               target_workers []i32) WorkerResult {
     sync := SyncState{
         sync_id: get_sync_id(),
@@ -264,7 +264,7 @@ func (s *SynchronizationManager) InitiateSync(source_worker i32,
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (s *SynchronizationManager) WaitForSync(sync_id i64, timeout_ms i32) WorkerResult {
+func (SynchronizationManager* s) WaitForSync(sync_id i64, timeout_ms i32) WorkerResult {
     start_time := get_current_time_us()
 
     for {

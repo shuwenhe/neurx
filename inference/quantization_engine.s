@@ -67,7 +67,7 @@ func NewQuantizationEngine(format QuantFormat, mode QuantMode, group_size int) *
     return engine
 }
 
-func (e *quantization_engine) ComputeQuantizationStats(data []float32) quantization_stats {
+func (quantization_engine* e) ComputeQuantizationStats(data []float32) quantization_stats {
     if len(data) == 0 {
         return quantization_stats{}
     }
@@ -122,7 +122,7 @@ func (e *quantization_engine) ComputeQuantizationStats(data []float32) quantizat
     }
 }
 
-func (e *quantization_engine) QuantizeWeights(weights []float32, shape []int) *quantized_tensor {
+func (quantization_engine* e) QuantizeWeights(weights []float32, shape []int) *quantized_tensor {
     if !e.enabled {
         return nil
     }
@@ -140,7 +140,7 @@ func (e *quantization_engine) QuantizeWeights(weights []float32, shape []int) *q
     return quant_tensor
 }
 
-func (e *quantization_engine) quantizeToInt8(weights []float32, shape []int) *quantized_tensor {
+func (quantization_engine* e) quantizeToInt8(weights []float32, shape []int) *quantized_tensor {
     if len(weights) == 0 {
         return nil
     }
@@ -199,7 +199,7 @@ func (e *quantization_engine) quantizeToInt8(weights []float32, shape []int) *qu
     return quant_tensor
 }
 
-func (e *quantization_engine) quantizeToInt4(weights []float32, shape []int) *quantized_tensor {
+func (quantization_engine* e) quantizeToInt4(weights []float32, shape []int) *quantized_tensor {
     if len(weights) == 0 {
         return nil
     }
@@ -249,7 +249,7 @@ func (e *quantization_engine) quantizeToInt4(weights []float32, shape []int) *qu
     return quant_tensor
 }
 
-func (e *quantization_engine) quantizeToFP8(weights []float32, shape []int) *quantized_tensor {
+func (quantization_engine* e) quantizeToFP8(weights []float32, shape []int) *quantized_tensor {
     if len(weights) == 0 {
         return nil
     }
@@ -276,7 +276,7 @@ func (e *quantization_engine) quantizeToFP8(weights []float32, shape []int) *qua
     return quant_tensor
 }
 
-func (e *quantization_engine) DequantizeWeights(quant *quantized_tensor) []float32 {
+func (quantization_engine* e) DequantizeWeights(quantized_tensor* quant) []float32 {
     if quant == nil || len(quant.data) == 0 {
         return []float32{}
     }
@@ -292,7 +292,7 @@ func (e *quantization_engine) DequantizeWeights(quant *quantized_tensor) []float
     }
 }
 
-func (e *quantization_engine) dequantizeInt8(quant *quantized_tensor) []float32 {
+func (quantization_engine* e) dequantizeInt8(quantized_tensor* quant) []float32 {
     result := make([]float32, len(quant.data))
     if len(quant.scales) == 1 {
         scale := quant.scales[0]
@@ -314,7 +314,7 @@ func (e *quantization_engine) dequantizeInt8(quant *quantized_tensor) []float32 
     return result
 }
 
-func (e *quantization_engine) dequantizeInt4(quant *quantized_tensor) []float32 {
+func (quantization_engine* e) dequantizeInt4(quantized_tensor* quant) []float32 {
     result := make([]float32, len(quant.data)*2)
     scale_idx := 0
     for byte_idx := 0; byte_idx < len(quant.data); byte_idx++ {
@@ -341,7 +341,7 @@ func (e *quantization_engine) dequantizeInt4(quant *quantized_tensor) []float32 
     return result
 }
 
-func (e *quantization_engine) dequantizeFP8(quant *quantized_tensor) []float32 {
+func (quantization_engine* e) dequantizeFP8(quantized_tensor* quant) []float32 {
     result := make([]float32, len(quant.data))
     scale := quant.scales[0]
     for i := 0; i < len(quant.data); i++ {
@@ -350,7 +350,7 @@ func (e *quantization_engine) dequantizeFP8(quant *quantized_tensor) []float32 {
     return result
 }
 
-func (e *quantization_engine) GetQuantizationSaving(original_size int64) float64 {
+func (quantization_engine* e) GetQuantizationSaving(original_size int64) float64 {
     if e.config.format == QUANT_INT8 {
         return 0.25
     } else if e.config.format == QUANT_INT4 {

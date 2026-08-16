@@ -128,7 +128,7 @@ func create_video_processor() *video_processor {
 	return vp
 }
 
-func (vp *video_processor) load_video(video_id string, frames []video_frame, metadata *video_metadata) error {
+func (video_processor* vp) load_video(video_id string, frames []video_frame, metadata *video_metadata) error {
 	vp.mu.Lock()
 	defer vp.mu.Unlock()
 
@@ -158,7 +158,7 @@ func (vp *video_processor) load_video(video_id string, frames []video_frame, met
 	return nil
 }
 
-func (vp *video_processor) unload_video(video_id string) error {
+func (video_processor* vp) unload_video(video_id string) error {
 	vp.mu.Lock()
 	defer vp.mu.Unlock()
 
@@ -182,7 +182,7 @@ func (vp *video_processor) unload_video(video_id string) error {
 	return nil
 }
 
-func (vp *video_processor) extract_frames_uniform(video_id string, num_frames int32) ([]video_frame, error) {
+func (video_processor* vp) extract_frames_uniform(video_id string, num_frames int32) ([]video_frame, error) {
 	vp.mu.Lock()
 	video, exists := vp.loaded_videos[video_id]
 	vp.mu.Unlock()
@@ -211,7 +211,7 @@ func (vp *video_processor) extract_frames_uniform(video_id string, num_frames in
 	return selected_frames, nil
 }
 
-func (vp *video_processor) extract_frames_keyframe(video_id string) ([]video_frame, error) {
+func (video_processor* vp) extract_frames_keyframe(video_id string) ([]video_frame, error) {
 	vp.mu.Lock()
 	video, exists := vp.loaded_videos[video_id]
 	vp.mu.Unlock()
@@ -237,7 +237,7 @@ func (vp *video_processor) extract_frames_keyframe(video_id string) ([]video_fra
 	return keyframes, nil
 }
 
-func (vp *video_processor) extract_frames_adaptive(video_id string, target_frames int32) ([]video_frame, error) {
+func (video_processor* vp) extract_frames_adaptive(video_id string, target_frames int32) ([]video_frame, error) {
 	vp.mu.Lock()
 	video, exists := vp.loaded_videos[video_id]
 	vp.mu.Unlock()
@@ -278,7 +278,7 @@ func (vp *video_processor) extract_frames_adaptive(video_id string, target_frame
 	return selected, nil
 }
 
-func (vp *video_processor) detect_scene_changes(video_id string) ([]scene_change_detection, error) {
+func (video_processor* vp) detect_scene_changes(video_id string) ([]scene_change_detection, error) {
 	vp.mu.Lock()
 	video, exists := vp.loaded_videos[video_id]
 	vp.mu.Unlock()
@@ -318,7 +318,7 @@ func (vp *video_processor) detect_scene_changes(video_id string) ([]scene_change
 	return scenes, nil
 }
 
-func (vp *video_processor) compute_optical_flow(video_id string) (*optical_flow_result, error) {
+func (video_processor* vp) compute_optical_flow(video_id string) (*optical_flow_result, error) {
 	vp.mu.Lock()
 	video, exists := vp.loaded_videos[video_id]
 	vp.mu.Unlock()
@@ -379,7 +379,7 @@ func (vp *video_processor) compute_optical_flow(video_id string) (*optical_flow_
 	return result, nil
 }
 
-func (vp *video_processor) analyze_video(video_id string) (*video_analysis_result, error) {
+func (video_processor* vp) analyze_video(video_id string) (*video_analysis_result, error) {
 	vp.mu.Lock()
 	video, exists := vp.loaded_videos[video_id]
 	vp.mu.Unlock()
@@ -422,7 +422,7 @@ func (vp *video_processor) analyze_video(video_id string) (*video_analysis_resul
 	return result, nil
 }
 
-func (vp *video_processor) get_video(video_id string) (*video_data, error) {
+func (video_processor* vp) get_video(video_id string) (*video_data, error) {
 	vp.mu.Lock()
 	defer vp.mu.Unlock()
 
@@ -434,7 +434,7 @@ func (vp *video_processor) get_video(video_id string) (*video_data, error) {
 	return video, nil
 }
 
-func (vp *video_processor) list_loaded_videos() []string {
+func (video_processor* vp) list_loaded_videos() []string {
 	vp.mu.Lock()
 	defer vp.mu.Unlock()
 
@@ -446,7 +446,7 @@ func (vp *video_processor) list_loaded_videos() []string {
 	return ids
 }
 
-func (vp *video_processor) clear_cache() error {
+func (video_processor* vp) clear_cache() error {
 	vp.mu.Lock()
 	defer vp.mu.Unlock()
 
@@ -457,7 +457,7 @@ func (vp *video_processor) clear_cache() error {
 	return nil
 }
 
-func (vp *video_processor) get_processor_stats() map[string]interface{} {
+func (video_processor* vp) get_processor_stats() map[string]interface{} {
 	vp.mu.Lock()
 	defer vp.mu.Unlock()
 
@@ -473,7 +473,7 @@ func (vp *video_processor) get_processor_stats() map[string]interface{} {
 	}
 }
 
-func (vp *video_processor) set_target_resolution(width int32, height int32) {
+func (video_processor* vp) set_target_resolution(width int32, height int32) {
 	vp.mu.Lock()
 	defer vp.mu.Unlock()
 
@@ -481,14 +481,14 @@ func (vp *video_processor) set_target_resolution(width int32, height int32) {
 	vp.target_height = height
 }
 
-func (vp *video_processor) set_target_frame_rate(fps int32) {
+func (video_processor* vp) set_target_frame_rate(fps int32) {
 	vp.mu.Lock()
 	defer vp.mu.Unlock()
 
 	vp.target_frame_rate = fps
 }
 
-func (vp *video_processor) set_motion_threshold(threshold int32) {
+func (video_processor* vp) set_motion_threshold(threshold int32) {
 	vp.mu.Lock()
 	defer vp.mu.Unlock()
 

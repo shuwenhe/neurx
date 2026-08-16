@@ -53,28 +53,28 @@ struct grad_accum_manager {
     is_sync_step: bool
 }
 
-func (gm *grad_accum_manager) init(int accum_steps) {
+func (grad_accum_manager* gm) init(int accum_steps) {
     gm.accum_steps = accum_steps
     gm.current_step = 0
     gm.accumulated_grads = make(map[string]float)
     gm.is_sync_step = false
 }
 
-func (gm *grad_accum_manager) step(float grad_norm) {
+func (grad_accum_manager* gm) step(float grad_norm) {
     gm.current_step++
     gm.accumulated_grads["grad_norm"] = grad_norm
     gm.is_sync_step = (gm.current_step % gm.accum_steps) == 0
 }
 
-func (gm *grad_accum_manager) should_sync(): bool {
+func (grad_accum_manager* gm) should_sync(): bool {
     return gm.is_sync_step
 }
 
-func (gm *grad_accum_manager) get_effective_batch_multiplier(): int {
+func (grad_accum_manager* gm) get_effective_batch_multiplier(): int {
     return gm.accum_steps
 }
 
-func (gm *grad_accum_manager) reset() {
+func (grad_accum_manager* gm) reset() {
     gm.current_step = 0
     gm.is_sync_step = false
     gm.accumulated_grads = make(map[string]float)
@@ -87,7 +87,7 @@ struct activation_ckpt_manager {
     memory_savings_percent: float
 }
 
-func (acm *activation_ckpt_manager) init(int total_layers, string strategy) {
+func (activation_ckpt_manager* acm) init(int total_layers, string strategy) {
     acm.total_layers = total_layers
     acm.checkpoint_strategy = strategy
     acm.layer_checkpoint_map = make(map[int]bool)
@@ -107,7 +107,7 @@ func (acm *activation_ckpt_manager) init(int total_layers, string strategy) {
     }
 }
 
-func (acm *activation_ckpt_manager) should_checkpoint(int layer_id): bool {
+func (activation_ckpt_manager* acm) should_checkpoint(int layer_id): bool {
     if val, exists := acm.layer_checkpoint_map[layer_id]; exists {
         return val
     }
@@ -122,7 +122,7 @@ struct mixed_precision_manager {
     loss_scaling_enabled: bool
 }
 
-func (mpm *mixed_precision_manager) init(string dtype) {
+func (mixed_precision_manager* mpm) init(string dtype) {
     mpm.dtype = dtype
     mpm.loss_scaling_enabled = (dtype != "fp32")
     mpm.loss_scaling = 1024.0
@@ -142,7 +142,7 @@ func (mpm *mixed_precision_manager) init(string dtype) {
     }
 }
 
-func (mpm *mixed_precision_manager) get_memory_savings(): float {
+func (mixed_precision_manager* mpm) get_memory_savings(): float {
     if mpm.dtype == "fp32" {
         return 0.0
     }
@@ -160,7 +160,7 @@ struct large_model_distributed_trainer {
     estimated_memory_gb: float
 }
 
-func (lmdt *large_model_distributed_trainer) init(int world_size, int rank) error {
+func (large_model_distributed_trainer* lmdt) init(int world_size, int rank) error {
     lmdt.config = create_7b_distributed_config()
     lmdt.config.world_size = world_size
     lmdt.config.rank = rank
@@ -177,7 +177,7 @@ func (lmdt *large_model_distributed_trainer) init(int world_size, int rank) erro
     return nil
 }
 
-func (lmdt *large_model_distributed_trainer) estimate_memory() {
+func (large_model_distributed_trainer* lmdt) estimate_memory() {
     model_weights_gb := 7.0 * 4.0 / 1024.0
     gradients_gb := model_weights_gb
     optimizer_states_gb := model_weights_gb * 2.0
@@ -192,7 +192,7 @@ func (lmdt *large_model_distributed_trainer) estimate_memory() {
     lmdt.estimated_memory_gb = total_gb
 }
 
-func (lmdt *large_model_distributed_trainer) step(float loss) {
+func (large_model_distributed_trainer* lmdt) step(float loss) {
     lmdt.global_step++
     lmdt.grad_accum.step(loss)
     if lmdt.grad_accum.should_sync() {
@@ -201,7 +201,7 @@ func (lmdt *large_model_distributed_trainer) step(float loss) {
     }
 }
 
-func (lmdt *large_model_distributed_trainer) print_config() {
+func (large_model_distributed_trainer* lmdt) print_config() {
     if !lmdt.is_master {
         return
     }
@@ -236,7 +236,7 @@ func (lmdt *large_model_distributed_trainer) print_config() {
     fmt.Printf("\n✅ System Ready for 7B model Training\n\n")
 }
 
-func (lmdt *large_model_distributed_trainer) get_status(): map[string]interface{} {
+func (large_model_distributed_trainer* lmdt) get_status(): map[string]interface{} {
     return map[string]interface{}{
         "global_step": lmdt.global_step,
         "gradient_syncs": lmdt.num_gradient_syncs,

@@ -42,21 +42,21 @@ func new_diversity_processor(int vocab_size) diversity_processor {
     }
 }
 
-func (processor *diversity_processor) set_temperature(float temp) {
+func (diversity_processor* processor) set_temperature(float temp) {
     if temp <= 0.0 {
         temp = 0.1
     }
     processor.config.temperature = temp
 }
 
-func (processor *diversity_processor) set_top_k(int k) {
+func (diversity_processor* processor) set_top_k(int k) {
     if k <= 0 {
         k = 40
     }
     processor.config.top_k = k
 }
 
-func (processor *diversity_processor) set_top_p(float p) {
+func (diversity_processor* processor) set_top_p(float p) {
     if p <= 0.0 {
         p = 0.1
     }
@@ -66,20 +66,20 @@ func (processor *diversity_processor) set_top_p(float p) {
     processor.config.top_p = p
 }
 
-func (processor *diversity_processor) set_frequency_penalty(float penalty) {
+func (diversity_processor* processor) set_frequency_penalty(float penalty) {
     processor.config.frequency_penalty = penalty
 }
 
-func (processor *diversity_processor) set_presence_penalty(float penalty) {
+func (diversity_processor* processor) set_presence_penalty(float penalty) {
     processor.config.presence_penalty = penalty
 }
 
-func (processor *diversity_processor) enable_cooling(bool enable, float factor) {
+func (diversity_processor* processor) enable_cooling(bool enable, float factor) {
     processor.config.enable_cooling = enable
     processor.config.cooling_factor = factor
 }
 
-func (processor *diversity_processor) process_logits(
+func (diversity_processor* processor) process_logits(
     []float logits
 ) []float {
 
@@ -229,7 +229,7 @@ func apply_cooling([]float logits, float factor) {
     }
 }
 
-func (processor *diversity_processor) apply_contrastive_search(
+func (diversity_processor* processor) apply_contrastive_search(
     []float logits,
     [][]float embedding_history,
     []float current_embedding,
@@ -262,7 +262,7 @@ func (processor *diversity_processor) apply_contrastive_search(
     return result
 }
 
-func (processor *diversity_processor) apply_mutual_information(
+func (diversity_processor* processor) apply_mutual_information(
     []float logits,
     [][]float past_embeddings,
     float lambda
@@ -305,7 +305,7 @@ struct beam_search_state {
     int beam_width
 }
 
-func (processor *diversity_processor) create_beam_search(
+func (diversity_processor* processor) create_beam_search(
     int beam_width
 ) beam_search_state {
 
@@ -316,7 +316,7 @@ func (processor *diversity_processor) create_beam_search(
     }
 }
 
-func (processor *diversity_processor) add_token_to_history(int token_id) {
+func (diversity_processor* processor) add_token_to_history(int token_id) {
 
     processor.token_frequency[token_id] = processor.token_frequency[token_id] + 1
 
@@ -336,12 +336,12 @@ func (processor *diversity_processor) add_token_to_history(int token_id) {
     }
 }
 
-func (processor *diversity_processor) reset_history() {
+func (diversity_processor* processor) reset_history() {
     processor.token_frequency = map[int]int{}
     processor.generation_history = make([]int, 0)
 }
 
-func (processor *diversity_processor) get_unique_token_ratio() float {
+func (diversity_processor* processor) get_unique_token_ratio() float {
 
     if len(processor.generation_history) == 0 {
         return 0.0
@@ -357,7 +357,7 @@ func (processor *diversity_processor) get_unique_token_ratio() float {
     return float(unique_count) / float(len(processor.generation_history))
 }
 
-func (processor *diversity_processor) get_entropy() float {
+func (diversity_processor* processor) get_entropy() float {
 
     if len(processor.token_frequency) == 0 {
         return 0.0

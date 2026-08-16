@@ -68,11 +68,11 @@ func new_anthropic_api(eng *engine.llm_engine) *anthropic_api {
     }
 }
 
-func (aa *anthropic_api) set_api_key(api_key string) {
+func (anthropic_api* aa) set_api_key(api_key string) {
     aa.api_key = api_key
 }
 
-func (aa *anthropic_api) create_message(req anthropic_request) (*anthropic_response, error) {
+func (anthropic_api* aa) create_message(req anthropic_request) (*anthropic_response, error) {
     if req.model == "" {
         return nil, core.Errorf("model not specified")
     }
@@ -129,7 +129,7 @@ func (aa *anthropic_api) create_message(req anthropic_request) (*anthropic_respo
     return response, nil
 }
 
-func (aa *anthropic_api) create_message_stream(req anthropic_request) (chan *anthropic_response, error) {
+func (anthropic_api* aa) create_message_stream(req anthropic_request) (chan *anthropic_response, error) {
     resp_chan := make(chan *anthropic_response, 100)
 
     go func() {
@@ -168,11 +168,11 @@ func new_cohere_api(eng *engine.llm_engine) *cohere_api {
     }
 }
 
-func (ca *cohere_api) set_api_key(api_key string) {
+func (cohere_api* ca) set_api_key(api_key string) {
     ca.api_key = api_key
 }
 
-func (ca *cohere_api) generate(req cohere_request) (*cohere_response, error) {
+func (cohere_api* ca) generate(req cohere_request) (*cohere_response, error) {
     if req.model == "" {
         return nil, core.Errorf("model not specified")
     }
@@ -211,7 +211,7 @@ func (ca *cohere_api) generate(req cohere_request) (*cohere_response, error) {
     return response, nil
 }
 
-func (ca *cohere_api) generate_stream(req cohere_request) (chan *cohere_response, error) {
+func (cohere_api* ca) generate_stream(req cohere_request) (chan *cohere_response, error) {
     resp_chan := make(chan *cohere_response, 100)
 
     go func() {
@@ -250,7 +250,7 @@ func convert_openai_to_cohere(prompt string, model string) cohere_request {
     }
 }
 
-func convert_anthropic_to_openai(resp *anthropic_response) map[string]interface{} {
+func convert_anthropic_to_openai(anthropic_response* resp) map[string]interface{} {
     result := make(map[string]interface{})
     result["id"] = resp.id
     result["object"] = "chat.completion"

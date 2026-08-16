@@ -37,7 +37,7 @@ func new_model_parameter_manager() model_parameter_manager {
     }
 }
 
-func (mgr *model_parameter_manager) register_layer(string layer_id) bool {
+func (model_parameter_manager* mgr) register_layer(string layer_id) bool {
     if layer_id in mgr.layers {
         false
     }
@@ -48,7 +48,7 @@ func (mgr *model_parameter_manager) register_layer(string layer_id) bool {
     true
 }
 
-func (mgr *model_parameter_manager) add_parameter(string layer_id, string weight_id, weight_parameter param) bool {
+func (model_parameter_manager* mgr) add_parameter(string layer_id, string weight_id, weight_parameter param) bool {
     if layer_id in mgr.layers {
         layer := mgr.layers[layer_id]
         layer.add_weight(weight_id, param)
@@ -60,7 +60,7 @@ func (mgr *model_parameter_manager) add_parameter(string layer_id, string weight
     false
 }
 
-func (mgr *model_parameter_manager) get_layer(string layer_id) layer_weights {
+func (model_parameter_manager* mgr) get_layer(string layer_id) layer_weights {
     if layer_id in mgr.layers {
         mgr.layers[layer_id]
     }
@@ -68,19 +68,19 @@ func (mgr *model_parameter_manager) get_layer(string layer_id) layer_weights {
     new_layer_weights("")
 }
 
-func (mgr *model_parameter_manager) has_layer(string layer_id) bool {
+func (model_parameter_manager* mgr) has_layer(string layer_id) bool {
     layer_id in mgr.layers
 }
 
-func (mgr *model_parameter_manager) get_total_parameters() int64 {
+func (model_parameter_manager* mgr) get_total_parameters() int64 {
     mgr.total_parameters
 }
 
-func (mgr *model_parameter_manager) get_total_memory() int64 {
+func (model_parameter_manager* mgr) get_total_memory() int64 {
     mgr.total_memory_bytes
 }
 
-func (mgr *model_parameter_manager) list_layers() vec[string] {
+func (model_parameter_manager* mgr) list_layers() vec[string] {
     result := vec[string]{}
     for layer_id in mgr.layers.keys() {
         result.push(layer_id)
@@ -88,7 +88,7 @@ func (mgr *model_parameter_manager) list_layers() vec[string] {
     result
 }
 
-func (mgr *model_parameter_manager) apply_quantization(string layer_id, parameter_dtype target_dtype) int {
+func (model_parameter_manager* mgr) apply_quantization(string layer_id, parameter_dtype target_dtype) int {
     if !mgr.has_layer(layer_id) {
         0
     }
@@ -110,7 +110,7 @@ func (mgr *model_parameter_manager) apply_quantization(string layer_id, paramete
     quantized_count
 }
 
-func (mgr *model_parameter_manager) apply_packing(string layer_id) int {
+func (model_parameter_manager* mgr) apply_packing(string layer_id) int {
     if !mgr.has_layer(layer_id) {
         0
     }
@@ -127,7 +127,7 @@ func (mgr *model_parameter_manager) apply_packing(string layer_id) int {
     packed_count
 }
 
-func (mgr *model_parameter_manager) get_parameter_statistics(string layer_id) parameter_statistics {
+func (model_parameter_manager* mgr) get_parameter_statistics(string layer_id) parameter_statistics {
     if !mgr.has_layer(layer_id) {
         parameter_statistics {
             layer_id: "",
@@ -170,7 +170,7 @@ func (mgr *model_parameter_manager) get_parameter_statistics(string layer_id) pa
     }
 }
 
-func (mgr *model_parameter_manager) optimize_all(parameter_optimization_config config) bool {
+func (model_parameter_manager* mgr) optimize_all(parameter_optimization_config config) bool {
     for layer_id in mgr.layers.keys() {
         if config.enable_quantization {
             mgr.apply_quantization(layer_id, config.quantization_dtype)
@@ -183,7 +183,7 @@ func (mgr *model_parameter_manager) optimize_all(parameter_optimization_config c
     true
 }
 
-func (mgr *model_parameter_manager) get_memory_summary() string {
+func (model_parameter_manager* mgr) get_memory_summary() string {
     summary := "Total Parameters: " + string(mgr.total_parameters) + "\n"
     summary = summary + "Total Memory: " + string(mgr.total_memory_bytes) + " bytes\n"
     summary = summary + "Compression Ratio: " + string(mgr.compression_ratio)

@@ -45,7 +45,7 @@ func new_logits_processor_manager(int vocab_size) logits_processor_manager {
     }
 }
 
-func (mgr *logits_processor_manager) register_processor(
+func (logits_processor_manager* mgr) register_processor(
     string name,
     string processor_type,
     int priority,
@@ -70,7 +70,7 @@ func (mgr *logits_processor_manager) register_processor(
     return true
 }
 
-func (mgr *logits_processor_manager) disable_processor(string name) bool {
+func (logits_processor_manager* mgr) disable_processor(string name) bool {
 
     int i = 0
     for i < len(mgr.processors) {
@@ -84,7 +84,7 @@ func (mgr *logits_processor_manager) disable_processor(string name) bool {
     return false
 }
 
-func (mgr *logits_processor_manager) enable_processor(string name) bool {
+func (logits_processor_manager* mgr) enable_processor(string name) bool {
 
     int i = 0
     for i < len(mgr.processors) {
@@ -98,7 +98,7 @@ func (mgr *logits_processor_manager) enable_processor(string name) bool {
     return false
 }
 
-func (mgr *logits_processor_manager) process_logits(
+func (logits_processor_manager* mgr) process_logits(
     []float logits
 ) []float {
 
@@ -225,7 +225,7 @@ func create_inference_pipeline(
     }
 }
 
-func (pipeline *inference_with_logits_processing) process_step(
+func (inference_with_logits_processing* pipeline) process_step(
     []float raw_logits,
     string generation_mode
 ) int {
@@ -249,7 +249,7 @@ func (pipeline *inference_with_logits_processing) process_step(
     return selected_token
 }
 
-func (pipeline *inference_with_logits_processing) get_statistics() map[string]float {
+func (inference_with_logits_processing* pipeline) get_statistics() map[string]float {
 
     stats := map[string]float{}
 
@@ -336,11 +336,11 @@ func softmax_probs([]float logits) []float {
     return probs
 }
 
-func (mgr *logits_processor_manager) get_statistics() pipeline_statistics {
+func (logits_processor_manager* mgr) get_statistics() pipeline_statistics {
     return mgr.stats
 }
 
-func (mgr *logits_processor_manager) reset_statistics() {
+func (logits_processor_manager* mgr) reset_statistics() {
     mgr.stats.total_calls = 0
     mgr.stats.failed_calls = 0
     mgr.stats.total_time_ms = 0.0
@@ -348,7 +348,7 @@ func (mgr *logits_processor_manager) reset_statistics() {
     mgr.stats.processor_call_counts = map[string]int{}
 }
 
-func (mgr *logits_processor_manager) print_statistics() {
+func (logits_processor_manager* mgr) print_statistics() {
     print("=== Logits Processor Statistics ===")
     print("Total calls: " + int_to_str(mgr.stats.total_calls))
     print("Failed calls: " + int_to_str(mgr.stats.failed_calls))

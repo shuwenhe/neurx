@@ -135,7 +135,7 @@ func new_train_orchestrator(scale training_scale, int num_gpus) (*train_orchestr
     }, nil
 }
 
-func (t *train_orchestrator) setup() error {
+func (train_orchestrator* t) setup() error {
     t.logger.log("Setting up training environment...")
     for _, dir := range []string{t.config.log_dir, t.config.checkpoint_dir, t.config.output_dir} {
         if err := mkdir(dir); err != nil {
@@ -146,7 +146,7 @@ func (t *train_orchestrator) setup() error {
     return nil
 }
 
-func (t *train_orchestrator) check_environment() error {
+func (train_orchestrator* t) check_environment() error {
     t.logger.log("Checking environment...")
     num_gpus, backend := t.detect_gp_us()
     if num_gpus < t.config.num_gpus {
@@ -161,7 +161,7 @@ func (t *train_orchestrator) check_environment() error {
     return nil
 }
 
-func (t *train_orchestrator) compile() error {
+func (train_orchestrator* t) compile() error {
     t.logger.log("Compiling NeurX training module...")
     source_file := filepath.Join(t.config.output_dir, "neurx_training.s")
     ir_file := filepath.Join(t.config.output_dir, "neurx_training.ir")
@@ -188,7 +188,7 @@ func (t *train_orchestrator) compile() error {
     return nil
 }
 
-func (t *train_orchestrator) run() error {
+func (train_orchestrator* t) run() error {
     t.logger.log("Starting training...")
     bin_file := filepath.Join(t.config.output_dir, "neurx_train")
     if !file_exists(bin_file) {
@@ -209,7 +209,7 @@ func (t *train_orchestrator) run() error {
     return nil
 }
 
-func (t *train_orchestrator) monitor() error {
+func (train_orchestrator* t) monitor() error {
     t.logger.log("Starting training monitor...")
     log_file := filepath.Join(t.config.log_dir, "train.log")
     for i := 0; i < 30; i++ {
@@ -228,7 +228,7 @@ func (t *train_orchestrator) monitor() error {
     return nil
 }
 
-func (t *train_orchestrator) detect_gp_us() (int, string) {
+func (train_orchestrator* t) detect_gp_us() (int, string) {
     if command_exists("nvidia-smi") {
         result := exec_command("nvidia-smi", "--query-gpu=name", "--format=csv,noheader")
         if result.ExitCode == 0 {
@@ -245,7 +245,7 @@ func (t *train_orchestrator) detect_gp_us() (int, string) {
     return 1, "CPU"
 }
 
-func (t *train_orchestrator) log_config() error {
+func (train_orchestrator* t) log_config() error {
     config := fmt.Sprintf(`╔══════════════════════════════════════════════════╗
 ║   neur_x foundation model training               ║
 ║   english text: English text neur_x english text                    ║
@@ -261,7 +261,7 @@ func (t *train_orchestrator) log_config() error {
     return write_file(log_file, config)
 }
 
-func (t *train_orchestrator) generate_training_source(output_path string) error {
+func (train_orchestrator* t) generate_training_source(output_path string) error {
     scale_config := get_scale_config(t.config.scale)
     source := fmt.Sprintf(`
 package main

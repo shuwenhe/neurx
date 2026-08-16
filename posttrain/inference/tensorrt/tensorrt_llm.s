@@ -93,7 +93,7 @@ func new_tensorrt_engine(tensorrt_config config) -> tensorrt_engine {
     }
 }
 
-func (engine *tensorrt_engine) generate(
+func (tensorrt_engine* engine) generate(
     tensor input_ids,
     i32 max_new_tokens,
     SamplingConfig sampling_config
@@ -119,7 +119,7 @@ func (engine *tensorrt_engine) generate(
     return output_ids, log_probs
 }
 
-func (engine *tensorrt_engine) run_generation(
+func (tensorrt_engine* engine) run_generation(
     tensorrt_decoder_input input
 ) -> (tensor, []f32) {
     let batch_size = input.input_ids.shape[0]
@@ -159,7 +159,7 @@ func (engine *tensorrt_engine) run_generation(
     return output_ids, log_probs
 }
 
-func (engine *tensorrt_engine) sample(
+func (tensorrt_engine* engine) sample(
     tensor logits,
     SamplingConfig config,
     tensor finished
@@ -190,7 +190,7 @@ func (engine *tensorrt_engine) sample(
     return next_tokens, token_log_probs
 }
 
-func (engine *tensorrt_engine) load_lora_adapter(string adapter_name, string adapter_path) {
+func (tensorrt_engine* engine) load_lora_adapter(string adapter_name, string adapter_path) {
     if engine.lora_manager == null {
         println("Error: LoRA manager not initialized")
         return
@@ -199,13 +199,13 @@ func (engine *tensorrt_engine) load_lora_adapter(string adapter_name, string ada
     engine.active_adapters[adapter_name] = adapter
 }
 
-func (engine *tensorrt_engine) apply_lora_adapters() {
+func (tensorrt_engine* engine) apply_lora_adapters() {
     for name, adapter in engine.active_adapters {
         engine.lora_manager.apply_adapter(adapter, engine.engine)
     }
 }
 
-func (engine *tensorrt_engine) generate_batch(
+func (tensorrt_engine* engine) generate_batch(
     []generation_request requests
 ) -> []generation_response {
     let batch_size = requests.len()
@@ -237,7 +237,7 @@ func (engine *tensorrt_engine) generate_batch(
     return responses
 }
 
-func (engine *tensorrt_engine) get_statistics() -> (i64, i64, f32) {
+func (tensorrt_engine* engine) get_statistics() -> (i64, i64, f32) {
     let avg_tokens_per_request: f32 = 0.0
     if engine.total_requests > 0 {
         avg_tokens_per_request = f32(engine.total_tokens_generated) / f32(engine.total_requests)

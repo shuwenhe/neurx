@@ -403,7 +403,7 @@ func production_schedule(production_runtime_state state) production_schedule_res
     if production_queue_size(state.decode_queue) > 0 {
         return production_schedule_decode(state)
     }
-    production_schedule_prefill(state)
+    return production_schedule_prefill(state)
 }
 
 func production_complete_prefill(production_runtime_state state, production_batch batch, bool succeeded) production_runtime_state {

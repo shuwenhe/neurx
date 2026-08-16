@@ -37,7 +37,7 @@ func NewChunkedPrefillProcessor(config chunk_config) *chunked_prefill_processor 
     }
 }
 
-func (cpp *chunked_prefill_processor) PrepareChunks(total_tokens int32) {
+func (chunked_prefill_processor* cpp) PrepareChunks(total_tokens int32) {
     chunk_size := cpp.config.chunk_size
     overlap := cpp.config.overlap_size
     var current_start int32 = 0
@@ -63,7 +63,7 @@ func (cpp *chunked_prefill_processor) PrepareChunks(total_tokens int32) {
     cpp.num_chunks = chunk_id
 }
 
-func (cpp *chunked_prefill_processor) ProcessChunksPrefill(
+func (chunked_prefill_processor* cpp) ProcessChunksPrefill(
     token_ids []int32,
     embedding_table []float32,
     embedding_dim int32,
@@ -80,7 +80,7 @@ func (cpp *chunked_prefill_processor) ProcessChunksPrefill(
     return chunk_outputs
 }
 
-func (cpp *chunked_prefill_processor) embedChunk(
+func (chunked_prefill_processor* cpp) embedChunk(
     token_ids []int32,
     embedding_table []float32,
     embedding_dim int32,
@@ -94,7 +94,7 @@ func (cpp *chunked_prefill_processor) embedChunk(
     return embeddings
 }
 
-func (cpp *chunked_prefill_processor) processPrefillChunk(
+func (chunked_prefill_processor* cpp) processPrefillChunk(
     embeddings []float32,
     chunk_id int32,
 ) []float32 {
@@ -105,7 +105,7 @@ func (cpp *chunked_prefill_processor) processPrefillChunk(
     return output
 }
 
-func (cpp *chunked_prefill_processor) GetMemorySavings() float32 {
+func (chunked_prefill_processor* cpp) GetMemorySavings() float32 {
     full_prefill_memory := float32(cpp.total_tokens * cpp.total_tokens)
     chunk_size := cpp.config.chunk_size
     chunked_memory := float32(cpp.num_chunks) * chunk_size * chunk_size
@@ -115,7 +115,7 @@ func (cpp *chunked_prefill_processor) GetMemorySavings() float32 {
     return full_prefill_memory / chunked_memory
 }
 
-func (cpp *chunked_prefill_processor) GetLatencySavings() float32 {
+func (chunked_prefill_processor* cpp) GetLatencySavings() float32 {
     full_tokens := cpp.total_tokens
     chunk_size := cpp.config.chunk_size
     if chunk_size >= full_tokens {
@@ -128,7 +128,7 @@ func (cpp *chunked_prefill_processor) GetLatencySavings() float32 {
     return speedup
 }
 
-func (cpp *chunked_prefill_processor) PrintChunkInfo() {
+func (chunked_prefill_processor* cpp) PrintChunkInfo() {
     core.Println("Chunked Prefill Configuration:")
     core.Println("  Total tokens:", cpp.total_tokens)
     core.Println("  Chunk size:", cpp.config.chunk_size)
@@ -155,7 +155,7 @@ func NewRingAttentionProcessor(
     }
 }
 
-func (rap *ring_attention_processor) ComputeRingAttention(
+func (ring_attention_processor* rap) ComputeRingAttention(
     q []float32,
     k []float32,
     v []float32,
@@ -172,7 +172,7 @@ func (rap *ring_attention_processor) ComputeRingAttention(
     return output
 }
 
-func (rap *ring_attention_processor) computeLocalAttention(
+func (ring_attention_processor* rap) computeLocalAttention(
     q []float32,
     k []float32,
     v []float32,
@@ -184,13 +184,13 @@ func (rap *ring_attention_processor) computeLocalAttention(
     return output
 }
 
-func (rap *ring_attention_processor) rotateKV(kv []float32) []float32 {
+func (ring_attention_processor* rap) rotateKV(kv []float32) []float32 {
     rotated := make([]float32, len(kv))
     copy(rotated, kv)
     return rotated
 }
 
-func (rap *ring_attention_processor) GetCommunicationCost() float32 {
+func (ring_attention_processor* rap) GetCommunicationCost() float32 {
     num_devices := float32(rap.num_devices)
     comm_rounds := num_devices - 1.0
     relative_cost := comm_rounds * 0.05
@@ -237,7 +237,7 @@ func NewLongContextOptimizer(
     return optimizer
 }
 
-func (lco *long_context_optimizer) OptimizeLongContext() {
+func (long_context_optimizer* lco) OptimizeLongContext() {
     core.Println("Long Context Optimization Report")
     core.Println("=================================")
     if lco.config.enable_chunked_prefill && lco.chunked_prefill != nil {

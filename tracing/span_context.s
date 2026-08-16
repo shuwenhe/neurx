@@ -45,7 +45,7 @@ func new_span_id() span_id {
     return id
 }
 
-func (t *trace_id) to_hex() []string {
+func (trace_id* t) to_hex() []string {
     hex := ""
     hex_chars := []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"}
 
@@ -58,7 +58,7 @@ func (t *trace_id) to_hex() []string {
     return append([]string{}, hex)
 }
 
-func (s *span_id) to_hex() []string {
+func (span_id* s) to_hex() []string {
     hex := ""
     hex_chars := []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"}
 
@@ -81,7 +81,7 @@ func new_span_context() span_context {
     return ctx
 }
 
-func new_child_span_context(parent_ctx *span_context) span_context {
+func new_child_span_context(span_context* parent_ctx) span_context {
     ctx := span_context{}
     ctx.trace_id = parent_ctx.trace_id
     ctx.span_id = new_span_id()
@@ -91,23 +91,23 @@ func new_child_span_context(parent_ctx *span_context) span_context {
     return ctx
 }
 
-func (c *span_context) get_trace_id() trace_id {
+func (span_context* c) get_trace_id() trace_id {
     return c.trace_id
 }
 
-func (c *span_context) get_span_id() span_id {
+func (span_context* c) get_span_id() span_id {
     return c.span_id
 }
 
-func (c *span_context) is_sampled() bool {
+func (span_context* c) is_sampled() bool {
     return c.trace_flags.sampled
 }
 
-func (c *span_context) set_sampled(sampled bool) {
+func (span_context* c) set_sampled(sampled bool) {
     c.trace_flags.sampled = sampled
 }
 
-func (c *span_context) w3c_format() []string {
+func (span_context* c) w3c_format() []string {
     trace_id_hex := c.trace_id.to_hex()
     span_id_hex := c.span_id.to_hex()
 
@@ -143,13 +143,13 @@ func new_baggage() baggage {
     return b
 }
 
-func (b *baggage) set(key []string, value []string) {
+func (baggage* b) set(key []string, value []string) {
     if len(key) > 0 && len(value) > 0 && len(b.items) > 0 {
         b.items[0][key[0]] = value[0]
     }
 }
 
-func (b *baggage) get(key []string) []string {
+func (baggage* b) get(key []string) []string {
     if len(key) > 0 && len(b.items) > 0 {
         if val, ok := b.items[0][key[0]]; ok {
             return append([]string{}, val)
@@ -158,7 +158,7 @@ func (b *baggage) get(key []string) []string {
     return []string{}
 }
 
-func (b *baggage) merge(other *baggage) {
+func (baggage* b) merge(baggage* other) {
     if len(other.items) > 0 {
         for k, v := range other.items[0] {
             b.set(append([]string{}, k), append([]string{}, v))

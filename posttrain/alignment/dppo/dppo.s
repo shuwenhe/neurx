@@ -53,7 +53,7 @@ func new_dppo_trainer(
     }
 }
 
-func (trainer *dppo_trainer) compute_binary_kl_constraint(
+func (dppo_trainer* trainer) compute_binary_kl_constraint(
     Tensor new_probs,
     Tensor old_probs,
     Tensor advantage
@@ -70,7 +70,7 @@ func (trainer *dppo_trainer) compute_binary_kl_constraint(
     return constrained_ratio * advantage
 }
 
-func (trainer *dppo_trainer) compute_binary_tv_constraint(
+func (dppo_trainer* trainer) compute_binary_tv_constraint(
     Tensor new_probs,
     Tensor old_probs,
     Tensor advantage
@@ -83,7 +83,7 @@ func (trainer *dppo_trainer) compute_binary_tv_constraint(
     return constrained_ratio * advantage
 }
 
-func (trainer *dppo_trainer) compute_constrained_objective(
+func (dppo_trainer* trainer) compute_constrained_objective(
     Tensor new_log_probs,
     Tensor old_log_probs,
     Tensor advantage
@@ -118,7 +118,7 @@ func (trainer *dppo_trainer) compute_constrained_objective(
     return constrained_obj
 }
 
-func (trainer *dppo_trainer) update_adaptive_epsilon(f32 current_kl) {
+func (dppo_trainer* trainer) update_adaptive_epsilon(f32 current_kl) {
     if !trainer.config.use_adaptive_epsilon {
         return
     }
@@ -139,7 +139,7 @@ func (trainer *dppo_trainer) update_adaptive_epsilon(f32 current_kl) {
     )
 }
 
-func (trainer *dppo_trainer) compute_gae(
+func (dppo_trainer* trainer) compute_gae(
     []tensor rewards,
     []tensor values,
     []tensor dones
@@ -169,7 +169,7 @@ func (trainer *dppo_trainer) compute_gae(
     return advantages, returns
 }
 
-func (trainer *dppo_trainer) train_step(
+func (dppo_trainer* trainer) train_step(
     []tensor prompts,
     []tensor responses,
     []tensor rewards
@@ -271,7 +271,7 @@ func (trainer *dppo_trainer) train_step(
     )
 }
 
-func (trainer *dppo_trainer) train(DataLoader train_data) -> ([]f32, []f32) {
+func (dppo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
     for batch in train_data {

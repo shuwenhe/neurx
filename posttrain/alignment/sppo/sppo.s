@@ -44,7 +44,7 @@ func new_sppo_trainer(sppo_config config, *model model, *model ref_model) -> spp
     }
 }
 
-func (trainer *sppo_trainer) self_play_rollout(tensor prompts, i32 num_samples) -> []trajectory {
+func (sppo_trainer* trainer) self_play_rollout(tensor prompts, i32 num_samples) -> []trajectory {
     let trajectories: []trajectory = []
     for i in 0..prompts.shape[0] {
         let prompt = prompts[i]
@@ -69,14 +69,14 @@ func (trainer *sppo_trainer) self_play_rollout(tensor prompts, i32 num_samples) 
     return trajectories
 }
 
-func (trainer *sppo_trainer) compute_self_play_reward(tensor prompt, tensor response) -> f32 {
+func (sppo_trainer* trainer) compute_self_play_reward(tensor prompt, tensor response) -> f32 {
     let logits = trainer.policy_model.forward(concat(prompt, response))
     let ref_logits = trainer.reference_model.forward(concat(prompt, response))
     let kl_div = compute_kl_divergence(logits, ref_logits)
     return -kl_div
 }
 
-func (trainer *sppo_trainer) compute_win_rates([]trajectory trajectories) -> []trajectory {
+func (sppo_trainer* trainer) compute_win_rates([]trajectory trajectories) -> []trajectory {
     let n = trajectories.len()
     for i in 0..n {
         let wins = 0
@@ -99,7 +99,7 @@ func (trainer *sppo_trainer) compute_win_rates([]trajectory trajectories) -> []t
     return trajectories
 }
 
-func (trainer *sppo_trainer) create_preference_pairs([]trajectory trajectories) -> ([]trajectory, []trajectory) {
+func (sppo_trainer* trainer) create_preference_pairs([]trajectory trajectories) -> ([]trajectory, []trajectory) {
     let chosen: []trajectory = []
     let rejected: []trajectory = []
     let prompt_groups: map[string][]trajectory = {}
@@ -121,7 +121,7 @@ func (trainer *sppo_trainer) create_preference_pairs([]trajectory trajectories) 
     return chosen, rejected
 }
 
-func (trainer *sppo_trainer) compute_sppo_loss(
+func (sppo_trainer* trainer) compute_sppo_loss(
     []trajectory chosen,
     []trajectory rejected
 ) -> tensor {
@@ -154,7 +154,7 @@ func (trainer *sppo_trainer) compute_sppo_loss(
     return total_loss / f32(batch_size)
 }
 
-func (trainer *sppo_trainer) train_step(tensor prompts) -> f32 {
+func (sppo_trainer* trainer) train_step(tensor prompts) -> f32 {
     let trajectories = trainer.self_play_rollout(prompts, num_samples: 4)
     trajectories = trainer.compute_win_rates(trajectories)
     let chosen, rejected = trainer.create_preference_pairs(trajectories)
@@ -178,7 +178,7 @@ func (trainer *sppo_trainer) train_step(tensor prompts) -> f32 {
     return loss.item()
 }
 
-func (trainer *sppo_trainer) train(DataLoader train_data) -> []f32 {
+func (sppo_trainer* trainer) train(DataLoader train_data) -> []f32 {
     let losses: []f32 = []
     for batch in train_data {
         let prompts = batch.prompts

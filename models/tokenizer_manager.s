@@ -242,7 +242,7 @@ func (tokenizer_interface* t) get_vocab_size() int32 {
 	return int32(len(t.vocab))
 }
 
-func (tokenizer_interface* t) set_config(config *tokenizer_config) {
+func (tokenizer_interface* t) set_config(tokenizer_config* config) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	

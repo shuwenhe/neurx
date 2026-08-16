@@ -219,7 +219,7 @@ func (model_loader* loader) find_package_by_id(package_id string) *model_package
 	return nil
 }
 
-func (model_loader* loader) validate_model_package(pkg *model_package) *load_validation_result {
+func (model_loader* loader) validate_model_package(model_package* pkg) *load_validation_result {
 	result := &load_validation_result{
 		valid: true,
 		errors: []string{},

@@ -34,7 +34,7 @@ func new_process_group_manager(string default_backend) process_group_manager {
     }
 }
 
-func (mgr *process_group_manager) create_group(vec[int] ranks, string name, comm_backend backend) int {
+func (process_group_manager* mgr) create_group(vec[int] ranks, string name, comm_backend backend) int {
     group_id := mgr.next_group_id
     mgr.next_group_id = mgr.next_group_id + 1
 
@@ -44,7 +44,7 @@ func (mgr *process_group_manager) create_group(vec[int] ranks, string name, comm
     group_id
 }
 
-func (mgr *process_group_manager) get_group(int group_id) process_group {
+func (process_group_manager* mgr) get_group(int group_id) process_group {
     if group_id in mgr.groups {
         mgr.groups[group_id]
     }
@@ -59,11 +59,11 @@ func (mgr *process_group_manager) get_group(int group_id) process_group {
     }
 }
 
-func (mgr *process_group_manager) has_group(int group_id) bool {
+func (process_group_manager* mgr) has_group(int group_id) bool {
     group_id in mgr.groups
 }
 
-func (mgr *process_group_manager) delete_group(int group_id) bool {
+func (process_group_manager* mgr) delete_group(int group_id) bool {
     if group_id in mgr.groups {
         del mgr.groups[group_id]
         true
@@ -72,7 +72,7 @@ func (mgr *process_group_manager) delete_group(int group_id) bool {
     false
 }
 
-func (mgr *process_group_manager) list_groups() vec[int] {
+func (process_group_manager* mgr) list_groups() vec[int] {
     result := vec[int]{}
     for gid in mgr.groups.keys() {
         result.push(gid)
@@ -80,7 +80,7 @@ func (mgr *process_group_manager) list_groups() vec[int] {
     result
 }
 
-func (group *process_group) initialize() bool {
+func (process_group* group) initialize() bool {
     if group.initialized {
         false
     }
@@ -89,7 +89,7 @@ func (group *process_group) initialize() bool {
     true
 }
 
-func (group *process_group) finalize() bool {
+func (process_group* group) finalize() bool {
     if !group.initialized {
         false
     }
@@ -98,7 +98,7 @@ func (group *process_group) finalize() bool {
     true
 }
 
-func (group *process_group) contains_rank(int rank) bool {
+func (process_group* group) contains_rank(int rank) bool {
     i := 0
     while i < group.ranks.len() {
         if group.ranks[i] == rank {
@@ -110,7 +110,7 @@ func (group *process_group) contains_rank(int rank) bool {
     false
 }
 
-func (group *process_group) get_rank_index(int rank) int {
+func (process_group* group) get_rank_index(int rank) int {
     i := 0
     while i < group.ranks.len() {
         if group.ranks[i] == rank {
@@ -122,10 +122,10 @@ func (group *process_group) get_rank_index(int rank) int {
     -1
 }
 
-func (group *process_group) get_ranks() vec[int] {
+func (process_group* group) get_ranks() vec[int] {
     group.ranks
 }
 
-func (group *process_group) get_size() int {
+func (process_group* group) get_size() int {
     group.world_size
 }

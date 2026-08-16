@@ -92,7 +92,7 @@ func create_inference_engine(model_id string, model *model_interface) *inference
 	}
 }
 
-func (inference_engine* engine) submit_request(request *inference_request) error {
+func (inference_engine* engine) submit_request(inference_request* request) error {
 	engine.mu.Lock()
 	defer engine.mu.Unlock()
 	
@@ -113,7 +113,7 @@ func (inference_engine* engine) submit_request(request *inference_request) error
 	return nil
 }
 
-func (inference_engine* engine) execute_inference(request *inference_request) *inference_response {
+func (inference_engine* engine) execute_inference(inference_request* request) *inference_response {
 	start_time := time.Now()
 	
 	if request == nil || request.input == nil {
@@ -160,7 +160,7 @@ func (inference_engine* engine) execute_inference(request *inference_request) *i
 	return response
 }
 
-func (inference_engine* engine) submit_batch_inference(batch_request *batch_inference_request) *batch_inference_response {
+func (inference_engine* engine) submit_batch_inference(batch_inference_request* batch_request) *batch_inference_response {
 	start_time := time.Now()
 	
 	engine.mu.Lock()

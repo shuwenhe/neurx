@@ -35,7 +35,7 @@ func NewFlashAttentionOptimized(config attention_config) *flash_attention_optimi
     }
 }
 
-func (fa *flash_attention_optimized) Forward(
+func (flash_attention_optimized* fa) Forward(
     q []float32,
     k []float32,
     v []float32,
@@ -90,7 +90,7 @@ func (fa *flash_attention_optimized) Forward(
     return output
 }
 
-func (fa *flash_attention_optimized) loadQBlock(
+func (flash_attention_optimized* fa) loadQBlock(
     q []float32,
     batch int32,
     head int32,
@@ -109,7 +109,7 @@ func (fa *flash_attention_optimized) loadQBlock(
     return result
 }
 
-func (fa *flash_attention_optimized) loadKBlock(
+func (flash_attention_optimized* fa) loadKBlock(
     k []float32,
     batch int32,
     head int32,
@@ -128,7 +128,7 @@ func (fa *flash_attention_optimized) loadKBlock(
     return result
 }
 
-func (fa *flash_attention_optimized) loadVBlock(
+func (flash_attention_optimized* fa) loadVBlock(
     v []float32,
     batch int32,
     head int32,
@@ -147,7 +147,7 @@ func (fa *flash_attention_optimized) loadVBlock(
     return result
 }
 
-func (fa *flash_attention_optimized) computeScores(
+func (flash_attention_optimized* fa) computeScores(
     q []float32,
     k []float32,
     q_size int32,
@@ -168,7 +168,7 @@ func (fa *flash_attention_optimized) computeScores(
     return scores
 }
 
-func (fa *flash_attention_optimized) applyCausalMask(
+func (flash_attention_optimized* fa) applyCausalMask(
     scores []float32,
     q_start int32,
     k_start int32,
@@ -189,7 +189,7 @@ func (fa *flash_attention_optimized) applyCausalMask(
     return result
 }
 
-func (fa *flash_attention_optimized) stableSoftmax(
+func (flash_attention_optimized* fa) stableSoftmax(
     scores []float32,
     q_size int32,
     k_size int32,
@@ -222,7 +222,7 @@ func (fa *flash_attention_optimized) stableSoftmax(
     return probs
 }
 
-func (fa *flash_attention_optimized) computeAttentionOutput(
+func (flash_attention_optimized* fa) computeAttentionOutput(
     probs []float32,
     v []float32,
     q_size int32,
@@ -244,7 +244,7 @@ func (fa *flash_attention_optimized) computeAttentionOutput(
     return output
 }
 
-func (fa *flash_attention_optimized) accumulateOutput(
+func (flash_attention_optimized* fa) accumulateOutput(
     accum []float32,
     new_block []float32,
     q_size int32,
@@ -260,7 +260,7 @@ func (fa *flash_attention_optimized) accumulateOutput(
     return result
 }
 
-func (fa *flash_attention_optimized) GetMemorySaving() float32 {
+func (flash_attention_optimized* fa) GetMemorySaving() float32 {
     seq_len := fa.config.seq_len
     block_size := fa.config.block_size
     if block_size <= 0 {
@@ -273,7 +273,7 @@ func (fa *flash_attention_optimized) GetMemorySaving() float32 {
     return reduction
 }
 
-func (fa *flash_attention_optimized) GetSpeedup() float32 {
+func (flash_attention_optimized* fa) GetSpeedup() float32 {
     seq_len := fa.config.seq_len
     if seq_len < 256 {
         return 1.5

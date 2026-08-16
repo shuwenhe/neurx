@@ -59,26 +59,26 @@ func new_profiler() *profiler {
     }
 }
 
-func (p *profiler) enable() {
+func (profiler* p) enable() {
     p.is_enabled = true
     p.start_time = core.CurrentTimeMs()
     core.Println("Profiler enabled")
 }
 
-func (p *profiler) disable() {
+func (profiler* p) disable() {
     p.is_enabled = false
     core.Println("Profiler disabled")
 }
 
-func (p *profiler) is_enabled_check() bool {
+func (profiler* p) is_enabled_check() bool {
     return p.is_enabled
 }
 
-func (p *profiler) set_output_dir(dir string) {
+func (profiler* p) set_output_dir(dir string) {
     p.output_dir = dir
 }
 
-func (p *profiler) record_engine_stats(eng *engine.llm_engine) {
+func (profiler* p) record_engine_stats(eng *engine.llm_engine) {
     if !p.is_enabled {
         return
     }
@@ -100,7 +100,7 @@ func (p *profiler) record_engine_stats(eng *engine.llm_engine) {
     }
 }
 
-func (p *profiler) record_request_profile(request_id string, prefill_time_ms, decode_time_ms float32, prefill_tokens, decode_tokens int32) {
+func (profiler* p) record_request_profile(request_id string, prefill_time_ms, decode_time_ms float32, prefill_tokens, decode_tokens int32) {
     if !p.is_enabled {
         return
     }
@@ -122,7 +122,7 @@ func (p *profiler) record_request_profile(request_id string, prefill_time_ms, de
     p.request_profiles[request_id] = profile
 }
 
-func (p *profiler) record_layer_profile(layer_id, layer_name, layer_type string, time_ms float32, memory_bytes int64, input_shape, output_shape []int32, num_params, flops int64) {
+func (profiler* p) record_layer_profile(layer_id, layer_name, layer_type string, time_ms float32, memory_bytes int64, input_shape, output_shape []int32, num_params, flops int64) {
     if !p.is_enabled {
         return
     }
@@ -142,7 +142,7 @@ func (p *profiler) record_layer_profile(layer_id, layer_name, layer_type string,
     p.layer_profiles[layer_id] = profile
 }
 
-func (p *profiler) get_engine_stats() map[string]interface{} {
+func (profiler* p) get_engine_stats() map[string]interface{} {
     stats := make(map[string]interface{})
 
     if len(p.profiles) == 0 {
@@ -178,7 +178,7 @@ func (p *profiler) get_engine_stats() map[string]interface{} {
     return stats
 }
 
-func (p *profiler) get_request_stats() map[string]interface{} {
+func (profiler* p) get_request_stats() map[string]interface{} {
     stats := make(map[string]interface{})
 
     if len(p.request_profiles) == 0 {
@@ -203,7 +203,7 @@ func (p *profiler) get_request_stats() map[string]interface{} {
     return stats
 }
 
-func (p *profiler) get_layer_stats() map[string]interface{} {
+func (profiler* p) get_layer_stats() map[string]interface{} {
     stats := make(map[string]interface{})
 
     if len(p.layer_profiles) == 0 {
@@ -246,7 +246,7 @@ func (p *profiler) get_layer_stats() map[string]interface{} {
     return stats
 }
 
-func (p *profiler) save_profile(filename string) error {
+func (profiler* p) save_profile(filename string) error {
     if len(p.profiles) == 0 {
         return core.Errorf("no profiles to save")
     }
@@ -261,7 +261,7 @@ func (p *profiler) save_profile(filename string) error {
     return nil
 }
 
-func (p *profiler) print_summary() {
+func (profiler* p) print_summary() {
     core.Println("=" * 50)
     core.Println("Profiler Summary")
     core.Println("=" * 50)
@@ -287,7 +287,7 @@ func (p *profiler) print_summary() {
     core.Println("=" * 50)
 }
 
-func (p *profiler) reset() {
+func (profiler* p) reset() {
     p.profiles = make([]*engine_profile, 0)
     p.request_profiles = make(map[string]*request_profile)
     p.layer_profiles = make(map[string]*layer_profile)

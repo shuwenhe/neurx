@@ -205,7 +205,7 @@ func new_request_queue(max_size int32) *request_queue {
     }
 }
 
-func (q *request_queue) add(req *request) error {
+func (request_queue* q) add(request* req) error {
     if int32(len(q.queue)) >= q.max_size {
         return core.Errorf("request queue is full (size=%d)", q.max_size)
     }
@@ -221,11 +221,11 @@ func (q *request_queue) add(req *request) error {
     return nil
 }
 
-func (q *request_queue) get(request_id string) *request {
+func (request_queue* q) get(request_id string) *request {
     return q.requests[request_id]
 }
 
-func (q *request_queue) remove(request_id string) error {
+func (request_queue* q) remove(request_id string) error {
     if _, exists := q.requests[request_id]; !exists {
         return core.Errorf("request not found: %s", request_id)
     }
@@ -249,7 +249,7 @@ func (q *request_queue) remove(request_id string) error {
     return nil
 }
 
-func (q *request_queue) get_next_batch(batch_size int32) []*request {
+func (request_queue* q) get_next_batch(batch_size int32) []*request {
     batch := make([]*request, 0, batch_size)
 
     for len(batch) < int(batch_size) && len(q.priority_queue) > 0 {
@@ -265,7 +265,7 @@ func (q *request_queue) get_next_batch(batch_size int32) []*request {
     return batch
 }
 
-func (q *request_queue) size() int32 {
+func (request_queue* q) size() int32 {
     return int32(len(q.queue) + len(q.priority_queue))
 }
 
@@ -287,7 +287,7 @@ func new_llm_engine(config engine_config) *llm_engine {
     return engine
 }
 
-func (e *llm_engine) initialize() error {
+func (llm_engine* e) initialize() error {
     if e.is_initialized {
         return nil
     }
@@ -319,7 +319,7 @@ func (e *llm_engine) initialize() error {
     return nil
 }
 
-func (e *llm_engine) add_request(request_id string, prompt string, sampling_params sampling_params) error {
+func (llm_engine* e) add_request(request_id string, prompt string, sampling_params sampling_params) error {
     if !e.is_initialized {
         return core.Errorf("engine not initialized")
     }
@@ -353,14 +353,14 @@ func (e *llm_engine) add_request(request_id string, prompt string, sampling_para
     return nil
 }
 
-func (e *llm_engine) get_request(request_id string) *request {
+func (llm_engine* e) get_request(request_id string) *request {
     if req, exists := e.running_requests[request_id]; exists {
         return req
     }
     return e.request_queue.get(request_id)
 }
 
-func (e *llm_engine) step() (bool, error) {
+func (llm_engine* e) step() (bool, error) {
     if !e.is_initialized || e.paused {
         return false, nil
     }
@@ -416,7 +416,7 @@ func (e *llm_engine) step() (bool, error) {
     return true, nil
 }
 
-func (e *llm_engine) update_latency_stats(latency_ms float32) {
+func (llm_engine* e) update_latency_stats(latency_ms float32) {
     if latency_ms < e.min_latency_ms {
         e.min_latency_ms = latency_ms
     }
@@ -429,7 +429,7 @@ func (e *llm_engine) update_latency_stats(latency_ms float32) {
     }
 }
 
-func (e *llm_engine) generate_completion(prompt string, sampling_params sampling_params) (string, error) {
+func (llm_engine* e) generate_completion(prompt string, sampling_params sampling_params) (string, error) {
     if !e.is_initialized {
         return "", core.Errorf("engine not initialized")
     }
@@ -468,15 +468,15 @@ func (e *llm_engine) generate_completion(prompt string, sampling_params sampling
     return "", core.Errorf("failed to generate completion for request: %s", request_id)
 }
 
-func (e *llm_engine) get_output(request_id string) *request_output {
+func (llm_engine* e) get_output(request_id string) *request_output {
     return e.outputs[request_id]
 }
 
-func (e *llm_engine) register_stream_callback(request_id string, callback interface{}) {
+func (llm_engine* e) register_stream_callback(request_id string, callback interface{}) {
     e.stream_output_callbacks[request_id] = callback
 }
 
-func (e *llm_engine) abort_request(request_id string) error {
+func (llm_engine* e) abort_request(request_id string) error {
     req := e.get_request(request_id)
     if req == nil {
         return core.Errorf("request not found: %s", request_id)
@@ -490,11 +490,11 @@ func (e *llm_engine) abort_request(request_id string) error {
     return e.request_queue.remove(request_id)
 }
 
-func (e *llm_engine) get_num_unfinished_requests() int32 {
+func (llm_engine* e) get_num_unfinished_requests() int32 {
     return e.request_queue.size() + int32(len(e.running_requests))
 }
 
-func (e *llm_engine) get_stats() llm_engine_stats {
+func (llm_engine* e) get_stats() llm_engine_stats {
     return llm_engine_stats{
         total_requests:     e.total_requests,
         total_tokens:       e.total_tokens,
@@ -509,7 +509,7 @@ func (e *llm_engine) get_stats() llm_engine_stats {
     }
 }
 
-func (e *llm_engine) print_stats() {
+func (llm_engine* e) print_stats() {
     stats := e.get_stats()
     core.Println("\n" + "="*60)
     core.Println("llm_engine Statistics")
@@ -527,17 +527,17 @@ func (e *llm_engine) print_stats() {
     core.Println("="*60 + "\n")
 }
 
-func (e *llm_engine) pause() {
+func (llm_engine* e) pause() {
     e.paused = true
     core.Println("llm_engine paused")
 }
 
-func (e *llm_engine) resume() {
+func (llm_engine* e) resume() {
     e.paused = false
     core.Println("llm_engine resumed")
 }
 
-func (e *llm_engine) shutdown() error {
+func (llm_engine* e) shutdown() error {
     if !e.is_initialized {
         return core.Errorf("engine not initialized")
     }
@@ -556,7 +556,7 @@ func (e *llm_engine) shutdown() error {
     return nil
 }
 
-func (e *llm_engine) get_configuration() map[string]interface{} {
+func (llm_engine* e) get_configuration() map[string]interface{} {
     config_map := make(map[string]interface{})
     config_map["model_path"] = e.config.model_path
     config_map["model_name"] = e.config.model_name
@@ -573,7 +573,7 @@ func (e *llm_engine) get_configuration() map[string]interface{} {
     return config_map
 }
 
-func (e *llm_engine) warmup() error {
+func (llm_engine* e) warmup() error {
     core.Println("Warming up llm_engine...")
 
     for i := 0; i < 3; i++ {

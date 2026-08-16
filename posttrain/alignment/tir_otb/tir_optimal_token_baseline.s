@@ -77,7 +77,7 @@ func new_tir_otb_trainer(
     }
 }
 
-func (trainer *tir_optimal_token_baseline_trainer) compute_tir_token_baseline(
+func (tir_optimal_token_baseline_trainer* trainer) compute_tir_token_baseline(
     Tensor tokens,
     Tensor rewards,
     Tensor is_weights,
@@ -114,7 +114,7 @@ func (trainer *tir_optimal_token_baseline_trainer) compute_tir_token_baseline(
     return baselines
 }
 
-func (trainer *tir_optimal_token_baseline_trainer) compute_tir_advantages(
+func (tir_optimal_token_baseline_trainer* trainer) compute_tir_advantages(
     Tensor tokens,
     Tensor rewards,
     Tensor is_weights,
@@ -144,7 +144,7 @@ func (trainer *tir_optimal_token_baseline_trainer) compute_tir_advantages(
     return advantages
 }
 
-func (trainer *tir_optimal_token_baseline_trainer) train_step(
+func (tir_optimal_token_baseline_trainer* trainer) train_step(
     []tensor prompts,
     []tensor responses,
     []tensor rollout_log_probs,
@@ -238,7 +238,7 @@ func (trainer *tir_optimal_token_baseline_trainer) train_step(
     )
 }
 
-func (trainer *tir_optimal_token_baseline_trainer) update_is_weight_stats(Tensor is_weights) {
+func (tir_optimal_token_baseline_trainer* trainer) update_is_weight_stats(Tensor is_weights) {
     let values = is_weights.flatten()
     trainer.is_weight_stats.mean = values.mean().item()
     trainer.is_weight_stats.std = values.std().item()
@@ -249,7 +249,7 @@ func (trainer *tir_optimal_token_baseline_trainer) update_is_weight_stats(Tensor
     trainer.is_weight_stats.clip_fraction = clipped.mean().item()
 }
 
-func (trainer *tir_optimal_token_baseline_trainer) get_variance_reduction() -> f32 {
+func (tir_optimal_token_baseline_trainer* trainer) get_variance_reduction() -> f32 {
     return trainer.variance_reduction_ratio
 }
 

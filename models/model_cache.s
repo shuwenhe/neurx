@@ -72,7 +72,7 @@ struct cache_config {
 	string persistence_dir
 }
 
-func create_model_cache(config *cache_config) *model_cache {
+func create_model_cache(cache_config* config) *model_cache {
 	if config == nil {
 		config = &cache_config{
 			max_size_bytes: 1024 * 1024 * 1024,

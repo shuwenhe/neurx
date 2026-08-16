@@ -41,7 +41,7 @@ struct quantization_framework {
     accuracy_loss       float64
 }
 
-func (framework *quantization_framework) calculate_stats(data [][]float64) quantization_stats {
+func (quantization_framework* framework) calculate_stats(data [][]float64) quantization_stats {
     if len(data) == 0 {
         return quantization_stats{}
     }
@@ -87,7 +87,7 @@ func (framework *quantization_framework) calculate_stats(data [][]float64) quant
     }
 }
 
-func (framework *quantization_framework) quantize_weights(weights [][]float64, string layer_name) *quantized_layer {
+func (quantization_framework* framework) quantize_weights(weights [][]float64, string layer_name) *quantized_layer {
     fmt.Printf("[Quantization] Quantizing layer %s\n", layer_name)
     stats := framework.calculate_stats(weights)
     quantized := make([][]int, len(weights))
@@ -115,7 +115,7 @@ func (framework *quantization_framework) quantize_weights(weights [][]float64, s
     return layer
 }
 
-func (layer *quantized_layer) dequantize() [][]float64 {
+func (quantized_layer* layer) dequantize() [][]float64 {
     result := make([][]float64, len(layer.weights_int))
     for i := 0; i < len(layer.weights_int); i++ {
         result[i] = make([]float64, len(layer.weights_int[i]))
@@ -127,12 +127,12 @@ func (layer *quantized_layer) dequantize() [][]float64 {
     return result
 }
 
-func (framework *quantization_framework) fake_quantize(weights [][]float64, string layer_name) [][]float64 {
+func (quantization_framework* framework) fake_quantize(weights [][]float64, string layer_name) [][]float64 {
     quantized_layer := framework.quantize_weights(weights, layer_name)
     return quantized_layer.dequantize()
 }
 
-func (framework *quantization_framework) qat_train_step(weights [][]float64, loss float64) float64 {
+func (quantization_framework* framework) qat_train_step(weights [][]float64, loss float64) float64 {
     quantized_weights := framework.fake_quantize(weights, "temp")
     kl_div := 0.0
     for i := 0; i < len(weights); i++ {
@@ -144,7 +144,7 @@ func (framework *quantization_framework) qat_train_step(weights [][]float64, los
     return loss + 0.1*kl_div / float64(len(weights)*len(weights[0]))
 }
 
-func (framework *quantization_framework) calibrate(data [][]float64) {
+func (quantization_framework* framework) calibrate(data [][]float64) {
     fmt.Printf("[Quantization] Calibrating on %d samples\n", len(data))
     num_samples := framework.config.num_calibration
     if num_samples > len(data) {
@@ -160,7 +160,7 @@ func (framework *quantization_framework) calibrate(data [][]float64) {
     fmt.Println("  Calibration complete")
 }
 
-func (framework *quantization_framework) analyze_compression() {
+func (quantization_framework* framework) analyze_compression() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Quantization Compression Analysis                    ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
@@ -183,7 +183,7 @@ func (framework *quantization_framework) analyze_compression() {
     fmt.Printf("\nCompression Ratio (INT8): %.2fx\n", framework.compression_ratio)
 }
 
-func (framework *quantization_framework) evaluate_quantization_impact(original_ppl float64) {
+func (quantization_framework* framework) evaluate_quantization_impact(original_ppl float64) {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Quantization Impact on Accuracy                      ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
@@ -202,7 +202,7 @@ func (framework *quantization_framework) evaluate_quantization_impact(original_p
     }
 }
 
-func (framework *quantization_framework) estimate_inference_speedup() {
+func (quantization_framework* framework) estimate_inference_speedup() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Estimated Inference Speedup                          ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
@@ -229,7 +229,7 @@ func new_quantization_framework(config quantization_config, model policy_model) 
     }
 }
 
-func (framework *quantization_framework) quantize_model(calibration_data [][]float64) {
+func (quantization_framework* framework) quantize_model(calibration_data [][]float64) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  model Quantization (INT8/INT4 Compression)           ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")

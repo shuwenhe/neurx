@@ -36,7 +36,7 @@ func new_gspo_trainer(gspo_config config, *model model, *model ref_model) -> gsp
     }
 }
 
-func (trainer *gspo_trainer) group_sequences([]tensor sequences) -> [][]tensor {
+func (gspo_trainer* trainer) group_sequences([]tensor sequences) -> [][]tensor {
     match trainer.config.sequence_group_method {
         "length" => return trainer.group_by_length(sequences),
         "similarity" => return trainer.group_by_similarity(sequences),
@@ -45,7 +45,7 @@ func (trainer *gspo_trainer) group_sequences([]tensor sequences) -> [][]tensor {
     }
 }
 
-func (trainer *gspo_trainer) group_by_length([]tensor sequences) -> [][]tensor {
+func (gspo_trainer* trainer) group_by_length([]tensor sequences) -> [][]tensor {
     let sorted_seqs = sequences.clone()
     sorted_seqs.sort(|a, b| a.shape[0] - b.shape[0])
     let groups: [][]tensor = []
@@ -63,7 +63,7 @@ func (trainer *gspo_trainer) group_by_length([]tensor sequences) -> [][]tensor {
     return groups
 }
 
-func (trainer *gspo_trainer) group_by_similarity([]tensor sequences) -> [][]tensor {
+func (gspo_trainer* trainer) group_by_similarity([]tensor sequences) -> [][]tensor {
     let embeddings: []tensor = []
     for seq in sequences {
         let emb = trainer.policy_model.encode(seq)
@@ -81,7 +81,7 @@ func (trainer *gspo_trainer) group_by_similarity([]tensor sequences) -> [][]tens
     return groups
 }
 
-func (trainer *gspo_trainer) group_randomly([]tensor sequences) -> [][]tensor {
+func (gspo_trainer* trainer) group_randomly([]tensor sequences) -> [][]tensor {
     let shuffled = sequences.clone()
     shuffled.shuffle()
     let groups: [][]tensor = []
@@ -99,7 +99,7 @@ func (trainer *gspo_trainer) group_randomly([]tensor sequences) -> [][]tensor {
     return groups
 }
 
-func (trainer *gspo_trainer) compute_sequence_advantages(
+func (gspo_trainer* trainer) compute_sequence_advantages(
     []tensor group,
     []f32 rewards
 ) -> []f32 {
@@ -121,7 +121,7 @@ func (trainer *gspo_trainer) compute_sequence_advantages(
     return advantages
 }
 
-func (trainer *gspo_trainer) compute_load_balance_loss(tensor router_logits) -> tensor {
+func (gspo_trainer* trainer) compute_load_balance_loss(tensor router_logits) -> tensor {
     let batch_size = router_logits.shape[0]
     let seq_len = router_logits.shape[1]
     let num_experts = router_logits.shape[2]
@@ -132,7 +132,7 @@ func (trainer *gspo_trainer) compute_load_balance_loss(tensor router_logits) -> 
     return lb_loss * trainer.config.moe_load_balance_coeff
 }
 
-func (trainer *gspo_trainer) train_step(Batch batch) -> (f32, f32) {
+func (gspo_trainer* trainer) train_step(Batch batch) -> (f32, f32) {
     let prompts = batch.prompts
     let rewards = batch.rewards
     let groups = trainer.group_sequences(prompts)
@@ -184,7 +184,7 @@ func (trainer *gspo_trainer) train_step(Batch batch) -> (f32, f32) {
     return total_policy_loss, total_lb_loss
 }
 
-func (trainer *gspo_trainer) train(DataLoader train_data) -> ([]f32, []f32) {
+func (gspo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let lb_losses: []f32 = []
     for epoch in 0..trainer.config.num_epochs {

@@ -220,18 +220,18 @@ func new_usage_log_probs_result() usage_log_probs_result {
     }
 }
 
-func is_request_completed(req *request) bool {
+func is_request_completed(request* req) bool {
     return req.status == request_status_completed || 
            req.status == request_status_failed ||
            req.status == request_status_cancelled ||
            req.status == request_status_aborted
 }
 
-func is_request_running(req *request) bool {
+func is_request_running(request* req) bool {
     return req.status == request_status_running
 }
 
-func is_request_pending(req *request) bool {
+func is_request_pending(request* req) bool {
     return req.status == request_status_pending
 }
 
@@ -262,7 +262,7 @@ func get_finish_reason_name(reason finish_reason) string {
     return "unknown"
 }
 
-func validate_sampling_params(params *sampling_params) error {
+func validate_sampling_params(sampling_params* params) error {
     if params.temperature < 0.0 {
         return "temperature must be >= 0"
     }
@@ -287,7 +287,7 @@ func validate_sampling_params(params *sampling_params) error {
     nil
 }
 
-func request_output_to_string(output *request_output) string {
+func request_output_to_string(request_output* output) string {
     result := ""
     result = result + "RequestOutput("
     result = result + "request_id=" + output.request_id + ", "

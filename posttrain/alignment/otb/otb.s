@@ -57,7 +57,7 @@ func new_otb_trainer(
     }
 }
 
-func (trainer *otb_trainer) compute_token_baseline(
+func (otb_trainer* trainer) compute_token_baseline(
     Tensor tokens,
     Tensor rewards
 ) -> Tensor {
@@ -114,7 +114,7 @@ func (trainer *otb_trainer) compute_token_baseline(
     return baselines
 }
 
-func (trainer *otb_trainer) compute_advantages(
+func (otb_trainer* trainer) compute_advantages(
     Tensor tokens,
     Tensor rewards
 ) -> Tensor {
@@ -135,7 +135,7 @@ func (trainer *otb_trainer) compute_advantages(
     return advantages
 }
 
-func (trainer *otb_trainer) train_step(
+func (otb_trainer* trainer) train_step(
     []tensor prompts,
     []tensor responses,
     []tensor rewards
@@ -197,7 +197,7 @@ func (trainer *otb_trainer) train_step(
     )
 }
 
-func (trainer *otb_trainer) train(DataLoader train_data) -> []f32 {
+func (otb_trainer* trainer) train(DataLoader train_data) -> []f32 {
     let policy_losses: []f32 = []
     for batch in train_data {
         let policy_loss, baseline_loss, entropy = trainer.train_step(
@@ -227,7 +227,7 @@ func (trainer *otb_trainer) train(DataLoader train_data) -> []f32 {
     return policy_losses
 }
 
-func (trainer *otb_trainer) get_variance_reduction() -> f32 {
+func (otb_trainer* trainer) get_variance_reduction() -> f32 {
     if trainer.advantage_variance_before < 1e-8 {
         return 0.0
     }

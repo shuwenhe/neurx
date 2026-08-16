@@ -46,7 +46,7 @@ func new_lora_integrated_model(config lora_model_config) lora_integrated_model {
     }
 }
 
-func (model *lora_integrated_model) register_adapter(
+func (lora_integrated_model* model) register_adapter(
     adapter_id string,
     adapter_path string,
     rank int,
@@ -65,19 +65,19 @@ func (model *lora_integrated_model) register_adapter(
     return model.adapter_manager.load_adapter(config)
 }
 
-func (model *lora_integrated_model) unload_adapter(adapter_id string) bool {
+func (lora_integrated_model* model) unload_adapter(adapter_id string) bool {
     return model.adapter_manager.unload_adapter(adapter_id)
 }
 
-func (model *lora_integrated_model) pin_adapter(adapter_id string) bool {
+func (lora_integrated_model* model) pin_adapter(adapter_id string) bool {
     return model.adapter_manager.pin_adapter(adapter_id)
 }
 
-func (model *lora_integrated_model) unpin_adapter(adapter_id string) bool {
+func (lora_integrated_model* model) unpin_adapter(adapter_id string) bool {
     return model.adapter_manager.unpin_adapter(adapter_id)
 }
 
-func (model *lora_integrated_model) switch_adapter(adapter_id string) bool {
+func (lora_integrated_model* model) switch_adapter(adapter_id string) bool {
     if !model.adapter_manager.switch_adapter(adapter_id) {
         return false
     }
@@ -89,11 +89,11 @@ func (model *lora_integrated_model) switch_adapter(adapter_id string) bool {
     return true
 }
 
-func (model *lora_integrated_model) get_current_adapter() string {
+func (lora_integrated_model* model) get_current_adapter() string {
     return model.current_adapter_id
 }
 
-func (model *lora_integrated_model) forward_with_lora(
+func (lora_integrated_model* model) forward_with_lora(
     []float hidden_states,
     string adapter_id
 ) []float {
@@ -141,7 +141,7 @@ struct batch_item {
     string request_id
 }
 
-func (model *lora_integrated_model) forward_batch_multi_adapter(
+func (lora_integrated_model* model) forward_batch_multi_adapter(
     []batch_item items
 ) [][]float {
 
@@ -176,7 +176,7 @@ func (model *lora_integrated_model) forward_batch_multi_adapter(
     return results
 }
 
-func (model *lora_integrated_model) forward_with_merged_weights(
+func (lora_integrated_model* model) forward_with_merged_weights(
     []float hidden_states,
     string adapter_id
 ) []float {
@@ -220,7 +220,7 @@ func compute_with_merged_weights(
     return result
 }
 
-func (model *lora_integrated_model) forward_with_adapter_ensemble(
+func (lora_integrated_model* model) forward_with_adapter_ensemble(
     []float hidden_states,
     []string adapter_ids,
     []float ensemble_weights
@@ -276,7 +276,7 @@ func (model *lora_integrated_model) forward_with_adapter_ensemble(
     return result
 }
 
-func (model *lora_integrated_model) submit_inference_request(
+func (lora_integrated_model* model) submit_inference_request(
     request_id string,
     adapter_id string,
     hidden_states []float,
@@ -298,11 +298,11 @@ func (model *lora_integrated_model) submit_inference_request(
     return model.request_router.submit_request(req)
 }
 
-func (model *lora_integrated_model) process_request_batch() []lora_inference_result {
+func (lora_integrated_model* model) process_request_batch() []lora_inference_result {
     return model.request_router.process_request_batch()
 }
 
-func (model *lora_integrated_model) list_loaded_adapters() []string {
+func (lora_integrated_model* model) list_loaded_adapters() []string {
     adapters := []string{}
 
     for adapter_id in model.adapter_manager.cache {
@@ -314,11 +314,11 @@ func (model *lora_integrated_model) list_loaded_adapters() []string {
     return adapters
 }
 
-func (model *lora_integrated_model) get_adapter_stats(adapter_id string) map[string]int {
+func (lora_integrated_model* model) get_adapter_stats(adapter_id string) map[string]int {
     return model.adapter_manager.get_adapter_status(adapter_id)
 }
 
-func (model *lora_integrated_model) get_model_stats() map[string]float {
+func (lora_integrated_model* model) get_model_stats() map[string]float {
     stats := model.adapter_manager.get_memory_stats()
     stats["adapters_loaded"] = float(len(model.list_loaded_adapters()))
     return stats
@@ -347,7 +347,7 @@ func create_lora_transformer_layer(
     }
 }
 
-func (layer *lora_transformer_layer) forward(
+func (lora_transformer_layer* layer) forward(
     []float hidden_states,
     string adapter_id
 ) []float {

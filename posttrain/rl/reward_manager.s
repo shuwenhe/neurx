@@ -23,7 +23,7 @@ func new_rule_reward_manager(reward_config config) rule_reward_manager {
     return rm
 }
 
-func (rm *rule_reward_manager) compute_rewards(
+func (rule_reward_manager* rm) compute_rewards(
     []string prompts,
     []string responses
 ) reward_result {
@@ -95,7 +95,7 @@ func new_batch_reward_manager(reward_config config, int batch_size) batch_reward
     return brm
 }
 
-func (brm *batch_reward_manager) compute_rewards_batched(
+func (batch_reward_manager* brm) compute_rewards_batched(
     []string prompts,
     []string responses
 ) reward_result {
@@ -139,7 +139,7 @@ func new_mixed_reward_manager(
     return mrm
 }
 
-func (mrm *mixed_reward_manager) compute_rewards(
+func (mixed_reward_manager* mrm) compute_rewards(
     []string prompts,
     []string responses
 ) reward_result {

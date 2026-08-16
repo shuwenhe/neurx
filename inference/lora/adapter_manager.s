@@ -269,7 +269,7 @@ func cos_f(float x) float {
     return result
 }
 
-func (mgr *lora_adapter_manager) load_adapter(
+func (lora_adapter_manager* mgr) load_adapter(
     config lora_adapter_config
 ) bool {
 
@@ -301,7 +301,7 @@ func (mgr *lora_adapter_manager) load_adapter(
     return true
 }
 
-func (mgr *lora_adapter_manager) unload_adapter(adapter_id string) bool {
+func (lora_adapter_manager* mgr) unload_adapter(adapter_id string) bool {
     if mgr.cache[adapter_id].weights.rank <= 0 {
         return false
     }
@@ -326,7 +326,7 @@ func (mgr *lora_adapter_manager) unload_adapter(adapter_id string) bool {
     return true
 }
 
-func (mgr *lora_adapter_manager) evict_lru_adapter() {
+func (lora_adapter_manager* mgr) evict_lru_adapter() {
 
     lru_adapter_id := ""
     min_access_time := int64(9223372036854775807)
@@ -372,7 +372,7 @@ func append([]string arr, string val) []string {
     return new_arr
 }
 
-func (mgr *lora_adapter_manager) switch_adapter(adapter_id string) bool {
+func (lora_adapter_manager* mgr) switch_adapter(adapter_id string) bool {
 
     if mgr.cache[adapter_id].weights.rank <= 0 {
         return false
@@ -393,7 +393,7 @@ func (mgr *lora_adapter_manager) switch_adapter(adapter_id string) bool {
     return true
 }
 
-func (mgr *lora_adapter_manager) get_active_adapter() lora_weights {
+func (lora_adapter_manager* mgr) get_active_adapter() lora_weights {
     if len(mgr.active_adapter_id) == 0 {
         return lora_weights{
             lora_a: []float{},
@@ -406,7 +406,7 @@ func (mgr *lora_adapter_manager) get_active_adapter() lora_weights {
     return mgr.cache[mgr.active_adapter_id].weights
 }
 
-func (mgr *lora_adapter_manager) merge_adapter_to_base_weights(
+func (lora_adapter_manager* mgr) merge_adapter_to_base_weights(
     []float base_weights,
     string adapter_id,
     int input_dim,
@@ -453,7 +453,7 @@ func transpose([]float matrix, int rows, int cols) []float {
     return result
 }
 
-func (mgr *lora_adapter_manager) merge_multiple_adapters(
+func (lora_adapter_manager* mgr) merge_multiple_adapters(
     []float base_weights,
     []string adapter_ids,
     []float weights_per_adapter,
@@ -492,7 +492,7 @@ func (mgr *lora_adapter_manager) merge_multiple_adapters(
     return result
 }
 
-func (mgr *lora_adapter_manager) unmerge_adapter_from_weights(
+func (lora_adapter_manager* mgr) unmerge_adapter_from_weights(
     []float merged_weights,
     string adapter_id,
     []float base_weights,
@@ -523,7 +523,7 @@ func (mgr *lora_adapter_manager) unmerge_adapter_from_weights(
     return unmerged
 }
 
-func (mgr *lora_adapter_manager) pin_adapter(adapter_id string) bool {
+func (lora_adapter_manager* mgr) pin_adapter(adapter_id string) bool {
     if mgr.cache[adapter_id].weights.rank <= 0 {
         return false
     }
@@ -537,7 +537,7 @@ func (mgr *lora_adapter_manager) pin_adapter(adapter_id string) bool {
     return true
 }
 
-func (mgr *lora_adapter_manager) unpin_adapter(adapter_id string) bool {
+func (lora_adapter_manager* mgr) unpin_adapter(adapter_id string) bool {
     if mgr.cache[adapter_id].weights.rank <= 0 {
         return false
     }
@@ -551,7 +551,7 @@ func (mgr *lora_adapter_manager) unpin_adapter(adapter_id string) bool {
     return true
 }
 
-func (mgr *lora_adapter_manager) get_memory_stats() map[string]float {
+func (lora_adapter_manager* mgr) get_memory_stats() map[string]float {
     stats := map[string]float{}
     stats["total_cache_mb"] = float(mgr.current_cache_used_mb)
     stats["max_cache_mb"] = float(mgr.max_cache_size_mb)
@@ -565,11 +565,11 @@ func (mgr *lora_adapter_manager) get_memory_stats() map[string]float {
     return stats
 }
 
-func (mgr *lora_adapter_manager) list_loaded_adapters() []string {
+func (lora_adapter_manager* mgr) list_loaded_adapters() []string {
     return mgr.loaded_adapters
 }
 
-func (mgr *lora_adapter_manager) get_adapter_status(adapter_id string) map[string]int {
+func (lora_adapter_manager* mgr) get_adapter_status(adapter_id string) map[string]int {
     status := map[string]int{}
 
     if mgr.cache[adapter_id].weights.rank <= 0 {

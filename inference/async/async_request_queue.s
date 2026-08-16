@@ -73,7 +73,7 @@ func new_async_request_queue(max_batch_size int) AsyncRequestQueue {
     }
 }
 
-func (queue *AsyncRequestQueue) enqueue_request(input_ids []int, max_tokens int,
+func (AsyncRequestQueue* queue) enqueue_request(input_ids []int, max_tokens int,
         temperature float64, top_k int, top_p float64, priority int) []string {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
@@ -105,7 +105,7 @@ func (queue *AsyncRequestQueue) enqueue_request(input_ids []int, max_tokens int,
     return request_id
 }
 
-func (queue *AsyncRequestQueue) enqueue_batch(requests []InferenceRequest) []string {
+func (AsyncRequestQueue* queue) enqueue_batch(requests []InferenceRequest) []string {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
 
@@ -132,7 +132,7 @@ func (queue *AsyncRequestQueue) enqueue_batch(requests []InferenceRequest) []str
     return request_ids
 }
 
-func (queue *AsyncRequestQueue) create_batch() RequestBatch {
+func (AsyncRequestQueue* queue) create_batch() RequestBatch {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
 
@@ -180,7 +180,7 @@ func (queue *AsyncRequestQueue) create_batch() RequestBatch {
     return batch
 }
 
-func (queue *AsyncRequestQueue) get_queue_depth() int {
+func (AsyncRequestQueue* queue) get_queue_depth() int {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
 
@@ -188,7 +188,7 @@ func (queue *AsyncRequestQueue) get_queue_depth() int {
     return depth
 }
 
-func (queue *AsyncRequestQueue) get_priority_distribution() map[int]int {
+func (AsyncRequestQueue* queue) get_priority_distribution() map[int]int {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
 
@@ -200,7 +200,7 @@ func (queue *AsyncRequestQueue) get_priority_distribution() map[int]int {
     return dist
 }
 
-func (queue *AsyncRequestQueue) get_queue_statistics() map[string]int64 {
+func (AsyncRequestQueue* queue) get_queue_statistics() map[string]int64 {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
 
@@ -216,7 +216,7 @@ func (queue *AsyncRequestQueue) get_queue_statistics() map[string]int64 {
     return stats
 }
 
-func (queue *AsyncRequestQueue) clear_queue() {
+func (AsyncRequestQueue* queue) clear_queue() {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
 
@@ -225,7 +225,7 @@ func (queue *AsyncRequestQueue) clear_queue() {
     queue.low_queue = make([]InferenceRequest, 0, queue.max_batch_size)
 }
 
-func (queue *AsyncRequestQueue) report_error(request_id []string) {
+func (AsyncRequestQueue* queue) report_error(request_id []string) {
     queue.mutex.Lock()
     defer queue.mutex.Unlock()
 

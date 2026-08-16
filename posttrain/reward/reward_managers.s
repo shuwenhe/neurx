@@ -44,7 +44,7 @@ func new_batch_reward_manager(batch_reward_manager_config config, *model model) 
     }
 }
 
-func (manager *batch_reward_manager) compute_reward_async(
+func (batch_reward_manager* manager) compute_reward_async(
     tensor prompt,
     tensor response,
     fn(f32) callback
@@ -64,7 +64,7 @@ func (manager *batch_reward_manager) compute_reward_async(
     }
 }
 
-func (manager *batch_reward_manager) process_batch() {
+func (batch_reward_manager* manager) process_batch() {
     manager.queue_mutex.lock()
     if manager.request_queue.len() == 0 {
         manager.queue_mutex.unlock()
@@ -93,7 +93,7 @@ func (manager *batch_reward_manager) process_batch() {
                               f32(batch_size)) / f32(manager.total_batches)
 }
 
-func (manager *batch_reward_manager) flush() {
+func (batch_reward_manager* manager) flush() {
     while manager.request_queue.len() > 0 {
         manager.process_batch()
     }
@@ -135,7 +135,7 @@ func new_rate_limited_reward_manager(
     }
 }
 
-func (manager *rate_limited_reward_manager) compute_reward(
+func (rate_limited_reward_manager* manager) compute_reward(
     tensor prompt,
     tensor response
 ) -> f32 {
@@ -154,7 +154,7 @@ func (manager *rate_limited_reward_manager) compute_reward(
     }
 }
 
-func (manager *rate_limited_reward_manager) refill_tokens() {
+func (rate_limited_reward_manager* manager) refill_tokens() {
     let now = get_time_ms()
     let elapsed = f32(now - manager.last_refill_time) / 1000.0
     let tokens_to_add = elapsed * manager.config.max_requests_per_second
@@ -165,7 +165,7 @@ func (manager *rate_limited_reward_manager) refill_tokens() {
     manager.last_refill_time = now
 }
 
-func (manager *rate_limited_reward_manager) compute_reward_internal(
+func (rate_limited_reward_manager* manager) compute_reward_internal(
     tensor prompt,
     tensor response
 ) -> f32 {
@@ -198,7 +198,7 @@ func new_dapo_reward_manager(dapo_reward_manager_config config) -> dapo_reward_m
     }
 }
 
-func (manager *dapo_reward_manager) compute_reward(
+func (dapo_reward_manager* manager) compute_reward(
     tensor prompt,
     tensor response,
     string ground_truth
@@ -250,7 +250,7 @@ func new_prime_reward_manager(
     }
 }
 
-func (manager *prime_reward_manager) compute_reward(
+func (prime_reward_manager* manager) compute_reward(
     tensor prompt,
     tensor response,
     []string steps
@@ -333,9 +333,9 @@ func new_worker(i32 id) -> worker { return worker{ id: id } }
 
 func mutex_new() -> mutex { return mutex{} }
 
-func (m *mutex) lock() {}
+func (mutex* m) lock() {}
 
-func (m *mutex) unlock() {}
+func (mutex* m) unlock() {}
 
 func decode_tokens(tensor t) -> string { return "" }
 

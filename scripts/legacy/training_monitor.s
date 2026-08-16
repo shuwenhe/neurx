@@ -25,7 +25,7 @@ struct training_monitor {
     update_interval: int
 }
 
-func (tm *training_monitor) init(
+func (training_monitor* tm) init(
     int total_steps,
     string log_file,
     int update_interval) error {
@@ -42,7 +42,7 @@ func (tm *training_monitor) init(
     return nil
 }
 
-func (tm *training_monitor) log_step(
+func (training_monitor* tm) log_step(
     int step,
     int epoch,
     float loss,
@@ -73,7 +73,7 @@ func (tm *training_monitor) log_step(
     tm.log_to_file(metrics)
 }
 
-func (tm *training_monitor) print_progress(training_metrics metrics) {
+func (training_monitor* tm) print_progress(training_metrics metrics) {
     progress := float(metrics.step) / float(tm.total_steps) * 100.0
     bar_length := 50
     filled := int(progress / 100.0 * float(bar_length))
@@ -98,7 +98,7 @@ func (tm *training_monitor) print_progress(training_metrics metrics) {
     println(status)
 }
 
-func (tm *training_monitor) log_to_file(training_metrics metrics) {
+func (training_monitor* tm) log_to_file(training_metrics metrics) {
     f, err := os.OpenFile(tm.log_file, os.O_APPEND|os.O_WRONLY, 0644)
     if err != nil {
         return
@@ -108,7 +108,7 @@ func (tm *training_monitor) log_to_file(training_metrics metrics) {
     f.WriteString(string(json_data) + "\n")
 }
 
-func (tm *training_monitor) get_stats(): map[string]interface{} {
+func (training_monitor* tm) get_stats(): map[string]interface{} {
     if len(tm.steps) == 0 {
         return map[string]interface{}{
             "status": "no_data",
@@ -144,7 +144,7 @@ func (tm *training_monitor) get_stats(): map[string]interface{} {
     }
 }
 
-func (tm *training_monitor) generate_report(): string {
+func (training_monitor* tm) generate_report(): string {
     stats := tm.get_stats()
     report := "========================================\n"
     report += "🎯 NeurX Training Report\n"
@@ -164,7 +164,7 @@ func (tm *training_monitor) generate_report(): string {
     return report
 }
 
-func (tm *training_monitor) export_json(): string {
+func (training_monitor* tm) export_json(): string {
     data := map[string]interface{}{
         "training_info": tm.get_stats(),
         "history": tm.steps,

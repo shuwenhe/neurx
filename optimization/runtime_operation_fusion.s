@@ -38,7 +38,7 @@ func NewRuntimeFusionOptimizer(config fused_operation_config) *runtime_fusion_op
     return optimizer
 }
 
-func (rfo *runtime_fusion_optimizer) registerDefaultFusionRules() {
+func (runtime_fusion_optimizer* rfo) registerDefaultFusionRules() {
     rfo.addFusionRule("matmul", "activation", true, "matmul_activation")
     rfo.addFusionRule("matmul", "bias_activation", true, "matmul_bias_activation")
     rfo.addFusionRule("activation", "layernorm", true, "activation_layernorm")
@@ -47,7 +47,7 @@ func (rfo *runtime_fusion_optimizer) registerDefaultFusionRules() {
     rfo.addFusionRule("scale_softmax", "scale", true, "attention_softmax_scale")
 }
 
-func (rfo *runtime_fusion_optimizer) addFusionRule(
+func (runtime_fusion_optimizer* rfo) addFusionRule(
     producer string,
     consumer string,
     fusible bool,
@@ -62,7 +62,7 @@ func (rfo *runtime_fusion_optimizer) addFusionRule(
     rfo.fusion_rules = append(rfo.fusion_rules, rule)
 }
 
-func (rfo *runtime_fusion_optimizer) QueueOperation(
+func (runtime_fusion_optimizer* rfo) QueueOperation(
     op_type string,
     input_shape []int32,
     output_shape []int32,
@@ -77,7 +77,7 @@ func (rfo *runtime_fusion_optimizer) QueueOperation(
     rfo.operation_queue = append(rfo.operation_queue, sig)
 }
 
-func (rfo *runtime_fusion_optimizer) AnalyzeFusibility() [][]int32 {
+func (runtime_fusion_optimizer* rfo) AnalyzeFusibility() [][]int32 {
     fusions := make([][]int32, 0)
     for i := int32(0); i < int32(len(rfo.operation_queue))-1; i++ {
         producer := rfo.operation_queue[i]
@@ -96,7 +96,7 @@ func (rfo *runtime_fusion_optimizer) AnalyzeFusibility() [][]int32 {
     return fusions
 }
 
-func (rfo *runtime_fusion_optimizer) shapesCompatible(
+func (runtime_fusion_optimizer* rfo) shapesCompatible(
     output_shape []int32,
     input_shape []int32,
 ) bool {
@@ -111,7 +111,7 @@ func (rfo *runtime_fusion_optimizer) shapesCompatible(
     return true
 }
 
-func (rfo *runtime_fusion_optimizer) ExecuteFusedOperations() [][]float32 {
+func (runtime_fusion_optimizer* rfo) ExecuteFusedOperations() [][]float32 {
     results := make([][]float32, 0)
     fusions := rfo.AnalyzeFusibility()
     processed := make([]bool, len(rfo.operation_queue))
@@ -150,7 +150,7 @@ func (rfo *runtime_fusion_optimizer) ExecuteFusedOperations() [][]float32 {
     return results
 }
 
-func (rfo *runtime_fusion_optimizer) executeFusedKernel(
+func (runtime_fusion_optimizer* rfo) executeFusedKernel(
     kernel_name string,
     producer operation_signature,
     consumer operation_signature,
@@ -192,7 +192,7 @@ func (rfo *runtime_fusion_optimizer) executeFusedKernel(
     return output
 }
 
-func (rfo *runtime_fusion_optimizer) executeStandaloneOperation(
+func (runtime_fusion_optimizer* rfo) executeStandaloneOperation(
     op operation_signature,
 ) []float32 {
     output_size := int32(1)
@@ -227,12 +227,12 @@ func (rfo *runtime_fusion_optimizer) executeStandaloneOperation(
     return output
 }
 
-func (rfo *runtime_fusion_optimizer) GetFusionOpportunities() int32 {
+func (runtime_fusion_optimizer* rfo) GetFusionOpportunities() int32 {
     fusions := rfo.AnalyzeFusibility()
     return int32(len(fusions))
 }
 
-func (rfo *runtime_fusion_optimizer) GetEstimatedSpeedup() float32 {
+func (runtime_fusion_optimizer* rfo) GetEstimatedSpeedup() float32 {
     fusions := rfo.AnalyzeFusibility()
     num_ops := int32(len(rfo.operation_queue))
     if num_ops <= 1 {
@@ -245,7 +245,7 @@ func (rfo *runtime_fusion_optimizer) GetEstimatedSpeedup() float32 {
     return speedup
 }
 
-func (rfo *runtime_fusion_optimizer) GetFusionCoverage() float32 {
+func (runtime_fusion_optimizer* rfo) GetFusionCoverage() float32 {
     fusions := rfo.AnalyzeFusibility()
     num_fused := int32(len(fusions)) * 2
     if len(rfo.operation_queue) == 0 {
@@ -258,7 +258,7 @@ func (rfo *runtime_fusion_optimizer) GetFusionCoverage() float32 {
     return coverage
 }
 
-func (rfo *runtime_fusion_optimizer) Clear() {
+func (runtime_fusion_optimizer* rfo) Clear() {
     rfo.operation_queue = make([]operation_signature, 0)
 }
 

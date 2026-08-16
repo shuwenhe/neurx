@@ -22,7 +22,7 @@ struct evaluator {
     history: []evaluation_metrics
 }
 
-func (e *evaluator) init(int batch_size, int accumulation_steps) {
+func (evaluator* e) init(int batch_size, int accumulation_steps) {
     e.batch_size = batch_size
     e.accumulation_steps = accumulation_steps
     e.history = make([]evaluation_metrics, 0)
@@ -57,7 +57,7 @@ func calculate_cross_entropy([]float logits, []int labels): float {
     return 0.0
 }
 
-func (e *evaluator) evaluate(
+func (evaluator* e) evaluate(
     int step,
     float train_loss,
     [][]float val_logits,
@@ -89,7 +89,7 @@ func (e *evaluator) evaluate(
     return metrics
 }
 
-func (e *evaluator) best_perplexity(): float {
+func (evaluator* e) best_perplexity(): float {
     if len(e.history) == 0 {
         return math.MaxFloat
     }
@@ -102,7 +102,7 @@ func (e *evaluator) best_perplexity(): float {
     return best
 }
 
-func (e *evaluator) convergence_info(): map[string]interface{} {
+func (evaluator* e) convergence_info(): map[string]interface{} {
     if len(e.history) < 2 {
         return map[string]interface{}{
             "status": "insufficient_data",
@@ -133,7 +133,7 @@ func (e *evaluator) convergence_info(): map[string]interface{} {
     }
 }
 
-func (e *evaluator) generate_report(): string {
+func (evaluator* e) generate_report(): string {
     report := "=== NeurX Training Evaluation Report ===\n\n"
     if len(e.history) == 0 {
         return report + "No evaluation data available\n"
@@ -168,7 +168,7 @@ func (e *evaluator) generate_report(): string {
     return report
 }
 
-func (e *evaluator) export_json(): string {
+func (evaluator* e) export_json(): string {
     data := map[string]interface{}{
         "total_evaluations": len(e.history),
         "best_perplexity": e.best_perplexity(),

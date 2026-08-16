@@ -50,7 +50,7 @@ func new_async_batch_executor(max_batch_size int, prefill_threads int, decode_th
     }
 }
 
-func (executor *AsyncBatchExecutor) load_batch(batch RequestBatch) {
+func (AsyncBatchExecutor* executor) load_batch(batch RequestBatch) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
 
@@ -65,7 +65,7 @@ func (executor *AsyncBatchExecutor) load_batch(batch RequestBatch) {
     }
 }
 
-func (executor *AsyncBatchExecutor) execute_batch() []ExecutionResult {
+func (AsyncBatchExecutor* executor) execute_batch() []ExecutionResult {
     executor.mutex.Lock()
     batch := executor.current_batch
     executor.mutex.Unlock()
@@ -144,7 +144,7 @@ func (executor *AsyncBatchExecutor) execute_batch() []ExecutionResult {
     return results
 }
 
-func (executor *AsyncBatchExecutor) execute_prefill_phase(req InferenceRequest) []int {
+func (AsyncBatchExecutor* executor) execute_prefill_phase(req InferenceRequest) []int {
 
     output := make([]int, len(req.input_ids))
     for i := 0; i < len(req.input_ids); i++ {
@@ -154,13 +154,13 @@ func (executor *AsyncBatchExecutor) execute_prefill_phase(req InferenceRequest) 
     return output
 }
 
-func (executor *AsyncBatchExecutor) execute_decode_step(req InferenceRequest, result ExecutionResult) int {
+func (AsyncBatchExecutor* executor) execute_decode_step(req InferenceRequest, result ExecutionResult) int {
 
     token := 1000 + ((len(result.output_ids) * 7) % 5000)
     return token
 }
 
-func (executor *AsyncBatchExecutor) stream_token(request_id []string, token int) {
+func (AsyncBatchExecutor* executor) stream_token(request_id []string, token int) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
 
@@ -178,7 +178,7 @@ func (executor *AsyncBatchExecutor) stream_token(request_id []string, token int)
     executor.stream_buffers[request_id[0]] = append(executor.stream_buffers[request_id[0]], token_str)
 }
 
-func (executor *AsyncBatchExecutor) get_streamed_tokens(request_id []string) [][]string {
+func (AsyncBatchExecutor* executor) get_streamed_tokens(request_id []string) [][]string {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
 
@@ -189,7 +189,7 @@ func (executor *AsyncBatchExecutor) get_streamed_tokens(request_id []string) [][
     return executor.stream_buffers[request_id[0]]
 }
 
-func (executor *AsyncBatchExecutor) clear_stream_buffer(request_id []string) {
+func (AsyncBatchExecutor* executor) clear_stream_buffer(request_id []string) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
 
@@ -198,7 +198,7 @@ func (executor *AsyncBatchExecutor) clear_stream_buffer(request_id []string) {
     }
 }
 
-func (executor *AsyncBatchExecutor) store_result(result ExecutionResult) {
+func (AsyncBatchExecutor* executor) store_result(result ExecutionResult) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
 
@@ -207,7 +207,7 @@ func (executor *AsyncBatchExecutor) store_result(result ExecutionResult) {
     }
 }
 
-func (executor *AsyncBatchExecutor) get_result(request_id []string) ExecutionResult {
+func (AsyncBatchExecutor* executor) get_result(request_id []string) ExecutionResult {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
 
@@ -218,7 +218,7 @@ func (executor *AsyncBatchExecutor) get_result(request_id []string) ExecutionRes
     return executor.results[request_id[0]]
 }
 
-func (executor *AsyncBatchExecutor) get_all_results() []ExecutionResult {
+func (AsyncBatchExecutor* executor) get_all_results() []ExecutionResult {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
 
@@ -230,14 +230,14 @@ func (executor *AsyncBatchExecutor) get_all_results() []ExecutionResult {
     return results
 }
 
-func (executor *AsyncBatchExecutor) set_streaming_enabled(enabled bool) {
+func (AsyncBatchExecutor* executor) set_streaming_enabled(enabled bool) {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
 
     executor.stream_enabled = enabled
 }
 
-func (executor *AsyncBatchExecutor) get_executor_statistics() map[string]interface{} {
+func (AsyncBatchExecutor* executor) get_executor_statistics() map[string]interface{} {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
 
@@ -254,7 +254,7 @@ func (executor *AsyncBatchExecutor) get_executor_statistics() map[string]interfa
     return stats
 }
 
-func (executor *AsyncBatchExecutor) cancel_batch() {
+func (AsyncBatchExecutor* executor) cancel_batch() {
     executor.mutex.Lock()
     defer executor.mutex.Unlock()
 

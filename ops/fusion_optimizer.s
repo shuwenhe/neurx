@@ -93,7 +93,7 @@ func new_operation_scheduler(operation_registry reg) operation_scheduler {
     }
 }
 
-func (sched *operation_scheduler) add_operation(string op_id) bool {
+func (operation_scheduler* sched) add_operation(string op_id) bool {
     if sched.registry.has_operation(op_id) {
         sched.operation_queue.push(op_id)
         sched.fusion_graph.nodes.push(op_id)
@@ -104,7 +104,7 @@ func (sched *operation_scheduler) add_operation(string op_id) bool {
     false
 }
 
-func (sched *operation_scheduler) add_dependency(string producer_op, string consumer_op, int output_size) bool {
+func (operation_scheduler* sched) add_dependency(string producer_op, string consumer_op, int output_size) bool {
     dep := operation_dependency {
         producer_op: producer_op,
         consumer_op: consumer_op,
@@ -116,7 +116,7 @@ func (sched *operation_scheduler) add_dependency(string producer_op, string cons
     true
 }
 
-func (sched *operation_scheduler) optimize_schedule() vec[string] {
+func (operation_scheduler* sched) optimize_schedule() vec[string] {
     if !sched.optimization_enabled {
         sched.operation_queue
     }
@@ -148,7 +148,7 @@ func (sched *operation_scheduler) optimize_schedule() vec[string] {
     optimized_schedule
 }
 
-func (sched *operation_scheduler) execute_schedule(compute_capability hw) bool {
+func (operation_scheduler* sched) execute_schedule(compute_capability hw) bool {
     schedule := sched.optimize_schedule()
 
     i := 0
@@ -168,7 +168,7 @@ func (sched *operation_scheduler) execute_schedule(compute_capability hw) bool {
     true
 }
 
-func (sched *operation_scheduler) get_schedule_stats() string {
+func (operation_scheduler* sched) get_schedule_stats() string {
     stats := "Scheduled Operations: " + string(sched.num_scheduled_ops) + "\n"
     stats = stats + "Total Operations: " + string(sched.operation_queue.len()) + "\n"
     stats = stats + "Dependencies: " + string(sched.fusion_graph.num_edges)

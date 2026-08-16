@@ -31,7 +31,7 @@ func NewSpeculativeDecodingEngine(config speculative_config) *speculative_decodi
     }
 }
 
-func (sde *speculative_decoding_engine) DraftTokens(
+func (speculative_decoding_engine* sde) DraftTokens(
     context []int32,
     num_tokens int32,
 ) []int32 {
@@ -44,7 +44,7 @@ func (sde *speculative_decoding_engine) DraftTokens(
     return drafted
 }
 
-func (sde *speculative_decoding_engine) VerifyDraftTokens(
+func (speculative_decoding_engine* sde) VerifyDraftTokens(
     context []int32,
     drafted_tokens []int32,
     threshold float32,
@@ -67,7 +67,7 @@ func (sde *speculative_decoding_engine) VerifyDraftTokens(
     return verified
 }
 
-func (sde *speculative_decoding_engine) getMainModelLogits(
+func (speculative_decoding_engine* sde) getMainModelLogits(
     context []int32,
     position int32,
 ) []float32 {
@@ -78,7 +78,7 @@ func (sde *speculative_decoding_engine) getMainModelLogits(
     return logits
 }
 
-func (sde *speculative_decoding_engine) computeAcceptanceProbability(
+func (speculative_decoding_engine* sde) computeAcceptanceProbability(
     main_logits []float32,
     token_id int32,
 ) float32 {
@@ -101,7 +101,7 @@ func (sde *speculative_decoding_engine) computeAcceptanceProbability(
     return prob
 }
 
-func (sde *speculative_decoding_engine) resampleFromMainModel(
+func (speculative_decoding_engine* sde) resampleFromMainModel(
     logits []float32,
 ) int32 {
     max_idx := int32(0)
@@ -115,7 +115,7 @@ func (sde *speculative_decoding_engine) resampleFromMainModel(
     return max_idx
 }
 
-func (sde *speculative_decoding_engine) GetSpeedup() float32 {
+func (speculative_decoding_engine* sde) GetSpeedup() float32 {
     acceptance_rate := 0.65
     effective_speedup := 1.0 + float32(sde.config.num_draft_tokens)*float32(acceptance_rate)
     return effective_speedup
@@ -138,7 +138,7 @@ func NewVisionLanguageModelAdapter(
     }
 }
 
-func (vlm *vision_language_model_adapter) EncodeImage(
+func (vision_language_model_adapter* vlm) EncodeImage(
     image_features []float32,
     num_patches int32,
 ) []float32 {
@@ -151,7 +151,7 @@ func (vlm *vision_language_model_adapter) EncodeImage(
     return visual_tokens
 }
 
-func (vlm *vision_language_model_adapter) BridgeVisionToLanguage(
+func (vision_language_model_adapter* vlm) BridgeVisionToLanguage(
     visual_tokens []float32,
 ) []float32 {
     bridged := make([]float32, len(visual_tokens))
@@ -179,7 +179,7 @@ func NewLoRAAdapter(config lo_ra_config) *lo_ra_adapter {
     }
 }
 
-func (la *lo_ra_adapter) AddLoRAWeight(
+func (lo_ra_adapter* la) AddLoRAWeight(
     layer_name string,
     weight_a []float32,
     weight_b []float32,
@@ -187,7 +187,7 @@ func (la *lo_ra_adapter) AddLoRAWeight(
     la.adapters[layer_name] = [][]float32{weight_a, weight_b}
 }
 
-func (la *lo_ra_adapter) ApplyLoRA(
+func (lo_ra_adapter* la) ApplyLoRA(
     layer_name string,
     x []float32,
 ) []float32 {
@@ -222,7 +222,7 @@ func NewMultiModelServingManager(max_memory_mb int32) *multi_model_serving_manag
     }
 }
 
-func (mms *multi_model_serving_manager) LoadModel(
+func (multi_model_serving_manager* mms) LoadModel(
     model_name string,
     model_data []float32,
 ) bool {
@@ -236,17 +236,17 @@ func (mms *multi_model_serving_manager) LoadModel(
     return true
 }
 
-func (mms *multi_model_serving_manager) GetModel(model_name string) ([]float32, bool) {
+func (multi_model_serving_manager* mms) GetModel(model_name string) ([]float32, bool) {
     data, exists := mms.model_cache[model_name]
     return data, exists
 }
 
-func (mms *multi_model_serving_manager) UnloadModel(model_name string) {
+func (multi_model_serving_manager* mms) UnloadModel(model_name string) {
     delete(mms.loaded_models, model_name)
     delete(mms.model_cache, model_name)
 }
 
-func (mms *multi_model_serving_manager) GetLoadedModels() []string {
+func (multi_model_serving_manager* mms) GetLoadedModels() []string {
     models := make([]string, 0)
     for name := range mms.loaded_models {
         models = append(models, name)
@@ -280,7 +280,7 @@ func NewAdvancedFeaturesEngine() *advanced_features_engine {
     }
 }
 
-func (afe *advanced_features_engine) PrintAdvancedFeaturesReport() {
+func (advanced_features_engine* afe) PrintAdvancedFeaturesReport() {
     core.Println("Advanced Features Report")
     core.Println("=======================")
     core.Println("✓ Speculative Decoding")

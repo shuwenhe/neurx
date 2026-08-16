@@ -124,7 +124,7 @@ func create_audio_processor() *audio_processor {
 	return ap
 }
 
-func (ap *audio_processor) load_audio(audio_id string, samples []float32, metadata *audio_metadata) error {
+func (audio_processor* ap) load_audio(audio_id string, samples []float32, metadata *audio_metadata) error {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
 
@@ -149,7 +149,7 @@ func (ap *audio_processor) load_audio(audio_id string, samples []float32, metada
 	return nil
 }
 
-func (ap *audio_processor) unload_audio(audio_id string) error {
+func (audio_processor* ap) unload_audio(audio_id string) error {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
 
@@ -168,7 +168,7 @@ func (ap *audio_processor) unload_audio(audio_id string) error {
 	return nil
 }
 
-func (ap *audio_processor) normalize_audio(audio_id string) error {
+func (audio_processor* ap) normalize_audio(audio_id string) error {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
 
@@ -203,7 +203,7 @@ func (ap *audio_processor) normalize_audio(audio_id string) error {
 	return nil
 }
 
-func (ap *audio_processor) resample_audio(audio_id string, target_rate int32) error {
+func (audio_processor* ap) resample_audio(audio_id string, target_rate int32) error {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
 
@@ -239,7 +239,7 @@ func (ap *audio_processor) resample_audio(audio_id string, target_rate int32) er
 	return nil
 }
 
-func (ap *audio_processor) compute_spectrogram(audio_id string) (*spectrogram_data, error) {
+func (audio_processor* ap) compute_spectrogram(audio_id string) (*spectrogram_data, error) {
 	ap.mu.Lock()
 	audio, exists := ap.loaded_audios[audio_id]
 	ap.mu.Unlock()
@@ -288,7 +288,7 @@ func (ap *audio_processor) compute_spectrogram(audio_id string) (*spectrogram_da
 	return spec_data, nil
 }
 
-func (ap *audio_processor) compute_mfcc(audio_id string) (*mfcc_features, error) {
+func (audio_processor* ap) compute_mfcc(audio_id string) (*mfcc_features, error) {
 	spectrogram, err := ap.compute_spectrogram(audio_id)
 	if err != nil {
 		return nil, err
@@ -328,7 +328,7 @@ func (ap *audio_processor) compute_mfcc(audio_id string) (*mfcc_features, error)
 	return mfcc, nil
 }
 
-func (ap *audio_processor) get_audio_stats(audio_id string) (*audio_stats, error) {
+func (audio_processor* ap) get_audio_stats(audio_id string) (*audio_stats, error) {
 	ap.mu.Lock()
 	audio, exists := ap.loaded_audios[audio_id]
 	ap.mu.Unlock()
@@ -422,7 +422,7 @@ func (ap *audio_processor) get_audio_stats(audio_id string) (*audio_stats, error
 	return stats, nil
 }
 
-func (ap *audio_processor) get_audio(audio_id string) (*audio_data, error) {
+func (audio_processor* ap) get_audio(audio_id string) (*audio_data, error) {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
 
@@ -434,7 +434,7 @@ func (ap *audio_processor) get_audio(audio_id string) (*audio_data, error) {
 	return audio, nil
 }
 
-func (ap *audio_processor) list_loaded_audios() []string {
+func (audio_processor* ap) list_loaded_audios() []string {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
 
@@ -446,7 +446,7 @@ func (ap *audio_processor) list_loaded_audios() []string {
 	return ids
 }
 
-func (ap *audio_processor) clear_cache() error {
+func (audio_processor* ap) clear_cache() error {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
 
@@ -457,7 +457,7 @@ func (ap *audio_processor) clear_cache() error {
 	return nil
 }
 
-func (ap *audio_processor) get_processor_stats() map[string]interface{} {
+func (audio_processor* ap) get_processor_stats() map[string]interface{} {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
 
@@ -472,21 +472,21 @@ func (ap *audio_processor) get_processor_stats() map[string]interface{} {
 	}
 }
 
-func (ap *audio_processor) set_target_sample_rate(sample_rate int32) {
+func (audio_processor* ap) set_target_sample_rate(sample_rate int32) {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
 
 	ap.target_sample_rate = sample_rate
 }
 
-func (ap *audio_processor) set_fft_size(size int32) {
+func (audio_processor* ap) set_fft_size(size int32) {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
 
 	ap.fft_size = size
 }
 
-func (ap *audio_processor) set_mfcc_coefficients(num_coefficients int32) {
+func (audio_processor* ap) set_mfcc_coefficients(num_coefficients int32) {
 	ap.mu.Lock()
 	defer ap.mu.Unlock()
 

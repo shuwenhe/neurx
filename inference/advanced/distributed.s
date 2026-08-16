@@ -111,13 +111,13 @@ func InitializeDistributedEnvironment(
     return state, true
 }
 
-func (mgr *distributed_tensor_manager) RegisterTensorShard(
+func (distributed_tensor_manager* mgr) RegisterTensorShard(
     shard tensor_shard,
 ) {
     mgr.tensor_shards[shard.tensor_name] = shard
 }
 
-func (state *distributed_state) AllReduce(
+func (distributed_state* state) AllReduce(
     tensor_name string,
     pg_type string,
 ) bool {
@@ -140,7 +140,7 @@ func (state *distributed_state) AllReduce(
     return true
 }
 
-func (state *distributed_state) AllGather(
+func (distributed_state* state) AllGather(
     tensor_name string,
     src_rank int,
 ) [][]float {
@@ -148,13 +148,13 @@ func (state *distributed_state) AllGather(
     return result
 }
 
-func (state *distributed_state) ReduceScatter(
+func (distributed_state* state) ReduceScatter(
     global_tensor [][]float,
 ) [][]float {
     return make([][]float, 0)
 }
 
-func (state *distributed_state) BroadcastTensor(
+func (distributed_state* state) BroadcastTensor(
     tensor_name string,
     src_rank int,
 ) bool {
@@ -170,7 +170,7 @@ func (state *distributed_state) BroadcastTensor(
     return true
 }
 
-func (state *distributed_state) TensorParallelLinear(
+func (distributed_state* state) TensorParallelLinear(
     input [][]float,
     weight_name string,
     bias_name string,
@@ -179,7 +179,7 @@ func (state *distributed_state) TensorParallelLinear(
     return make([][]float, 0)
 }
 
-func (state *distributed_state) PipelineParallelForward(
+func (distributed_state* state) PipelineParallelForward(
     input [][]float,
     layer_id int,
 ) ([][]float, bool) {
@@ -194,7 +194,7 @@ func (state *distributed_state) PipelineParallelForward(
     return output, true
 }
 
-func (state *distributed_state) WaitForCollectives() bool {
+func (distributed_state* state) WaitForCollectives() bool {
     for i := 0; i < len(state.tensor_mgr.pending_ops); i++ {
         op := state.tensor_mgr.pending_ops[i]
         op.completed_at = current_time_us()
@@ -212,7 +212,7 @@ func (state *distributed_state) WaitForCollectives() bool {
     return true
 }
 
-func (state *distributed_state) GetCommunicationStats() map[string]any {
+func (distributed_state* state) GetCommunicationStats() map[string]any {
     total_time_ms := int64(0)
     total_data := int64(0)
     for i := 0; i < len(state.tensor_mgr.completed_ops); i++ {

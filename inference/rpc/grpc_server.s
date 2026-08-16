@@ -49,15 +49,15 @@ func new_grpc_server(server_addr string) *grpc_server {
     }
 }
 
-func (gs *grpc_server) set_engine(eng *engine.llm_engine) {
+func (grpc_server* gs) set_engine(eng *engine.llm_engine) {
     gs.engine = eng
 }
 
-func (gs *grpc_server) set_async_engine(async_eng *engine.async_llm_engine) {
+func (grpc_server* gs) set_async_engine(async_eng *engine.async_llm_engine) {
     gs.async_engine = async_eng
 }
 
-func (gs *grpc_server) start() error {
+func (grpc_server* gs) start() error {
     if gs.is_running {
         return core.Errorf("grpc server already running")
     }
@@ -73,7 +73,7 @@ func (gs *grpc_server) start() error {
     return nil
 }
 
-func (gs *grpc_server) stop() error {
+func (grpc_server* gs) stop() error {
     if !gs.is_running {
         return core.Errorf("grpc server not running")
     }
@@ -86,7 +86,7 @@ func (gs *grpc_server) stop() error {
     return nil
 }
 
-func (gs *grpc_server) complete(req *grpc_request) (*grpc_response, error) {
+func (grpc_server* gs) complete(grpc_request* req) (*grpc_response, error) {
     if !gs.is_running {
         return nil, core.Errorf("server not running")
     }
@@ -123,9 +123,9 @@ func (gs *grpc_server) complete(req *grpc_request) (*grpc_response, error) {
     return response, nil
 }
 
-func (gs *grpc_server) complete_stream(req *grpc_request) (chan *grpc_stream_response, error) {
+func (grpc_server* gs) complete_stream(grpc_request* req) (chan *grpc_stream_response, error) {
     if !gs.is_running {
-        resp_chan := make(chan *grpc_stream_response)
+        resp_chan := make(grpc_stream_response* chan)
         close(resp_chan)
         return resp_chan, core.Errorf("server not running")
     }
@@ -170,7 +170,7 @@ func (gs *grpc_server) complete_stream(req *grpc_request) (chan *grpc_stream_res
     return resp_chan, nil
 }
 
-func (gs *grpc_server) complete_async(req *grpc_request, callback func(*grpc_response, error)) error {
+func (grpc_server* gs) complete_async(req *grpc_request, callback func(*grpc_response, error)) error {
     if !gs.is_running {
         return core.Errorf("server not running")
     }
@@ -216,7 +216,7 @@ func (gs *grpc_server) complete_async(req *grpc_request, callback func(*grpc_res
     return err
 }
 
-func (gs *grpc_server) get_status() map[string]interface{} {
+func (grpc_server* gs) get_status() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["is_running"] = gs.is_running
     stats["server_addr"] = gs.server_addr
@@ -233,7 +233,7 @@ func (gs *grpc_server) get_status() map[string]interface{} {
     return stats
 }
 
-func (gs *grpc_server) cancel_request(request_id string) error {
+func (grpc_server* gs) cancel_request(request_id string) error {
     if gs.async_engine == nil {
         return core.Errorf("async engine not initialized")
     }
@@ -245,7 +245,7 @@ struct grpc_health_check_response {
     status string
 }
 
-func (gs *grpc_server) health_check() *grpc_health_check_response {
+func (grpc_server* gs) health_check() *grpc_health_check_response {
     status := "SERVING"
     if !gs.is_running {
         status = "NOT_SERVING"
@@ -256,7 +256,7 @@ func (gs *grpc_server) health_check() *grpc_health_check_response {
     }
 }
 
-func (gs *grpc_server) get_server_info() map[string]interface{} {
+func (grpc_server* gs) get_server_info() map[string]interface{} {
     info := make(map[string]interface{})
     info["server_addr"] = gs.server_addr
     info["is_running"] = gs.is_running

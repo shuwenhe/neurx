@@ -284,7 +284,7 @@ func get_cuda_wrapper_c() string {
 "\n" +
 "\n" +
 "\n" +
-"int cublasCreate(int64_t *handle) {\n" +
+"int cublasCreate(handle* int64_t) {\n" +
 "    cublasHandle_t h;\n" +
 "    cublasStatus_t status = cublasCreate(&h);\n" +
 "    if (handle) *handle = (int64_t)h;\n" +

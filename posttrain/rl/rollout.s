@@ -37,7 +37,7 @@ func new_rollout_generator(rollout_config config, int vocab_size) rollout_genera
     return rg
 }
 
-func (rg *rollout_generator) generate_single(
+func (rollout_generator* rg) generate_single(
     string prompt,
     []int prompt_token_ids
 ) rollout_sample {
@@ -89,7 +89,7 @@ func (rg *rollout_generator) generate_single(
     return sample
 }
 
-func (rg *rollout_generator) generate_batch(
+func (rollout_generator* rg) generate_batch(
     []string prompts,
     [][]int prompt_token_ids_batch
 ) rollout_batch {

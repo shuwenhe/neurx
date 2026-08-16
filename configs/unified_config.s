@@ -333,7 +333,7 @@ func new_config() config {
     }
 }
 
-func (c *config) validate() error {
+func (config* c) validate() error {
     if c.model.hidden_size <= 0 {
         return core.Errorf("hidden_size must be positive")
     }
@@ -352,7 +352,7 @@ func (c *config) validate() error {
     return nil
 }
 
-func (c *config) to_map() map[string]interface{} {
+func (config* c) to_map() map[string]interface{} {
     result := make(map[string]interface{})
     result["model"] = c.model
     result["attention"] = c.attention

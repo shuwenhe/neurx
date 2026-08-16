@@ -90,7 +90,7 @@ func NewDistributedInferenceCoordinator(config coordinator_config) *distributed_
     return coordinator
 }
 
-func (d *distributed_inference_coordinator) RegisterNode(
+func (distributed_inference_coordinator* d) RegisterNode(
     node_id int32,
     ip_address string,
     port int32,
@@ -111,7 +111,7 @@ func (d *distributed_inference_coordinator) RegisterNode(
     return true
 }
 
-func (d *distributed_inference_coordinator) SubmitRequest(
+func (distributed_inference_coordinator* d) SubmitRequest(
     input_tokens []int32,
     max_output_tokens int32,
 ) int64 {
@@ -129,7 +129,7 @@ func (d *distributed_inference_coordinator) SubmitRequest(
     return req.request_id
 }
 
-func (d *distributed_inference_coordinator) selectPrimaryNode() int32 {
+func (distributed_inference_coordinator* d) selectPrimaryNode() int32 {
     if len(d.nodes) == 0 {
         return 0
     }
@@ -144,7 +144,7 @@ func (d *distributed_inference_coordinator) selectPrimaryNode() int32 {
     return selected
 }
 
-func (d *distributed_inference_coordinator) ScheduleRequest(req *distributed_request) bool {
+func (distributed_inference_coordinator* d) ScheduleRequest(distributed_request* req) bool {
     target_nodes := []int32{}
     for i := int32(0); i < d.config.tp_size; i++ {
         node_id := i % d.config.num_nodes
@@ -165,7 +165,7 @@ func (d *distributed_inference_coordinator) ScheduleRequest(req *distributed_req
     return true
 }
 
-func (d *distributed_inference_coordinator) ProcessPrefillBatch() {
+func (distributed_inference_coordinator* d) ProcessPrefillBatch() {
     for req_id, req := range d.active_requests {
         if req.current_stage == 0 {
             _ = req_id
@@ -174,7 +174,7 @@ func (d *distributed_inference_coordinator) ProcessPrefillBatch() {
     }
 }
 
-func (d *distributed_inference_coordinator) ProcessDecodeBatch() {
+func (distributed_inference_coordinator* d) ProcessDecodeBatch() {
     completed := []int64{}
     for req_id, req := range d.active_requests {
         if req.current_stage == 1 {
@@ -192,7 +192,7 @@ func (d *distributed_inference_coordinator) ProcessDecodeBatch() {
     }
 }
 
-func (d *distributed_inference_coordinator) UpdateLoadState() {
+func (distributed_inference_coordinator* d) UpdateLoadState() {
     for node_id, node := range d.nodes {
         avg_util := 0.0
         for _, util := range node.gpu_utilization {
@@ -206,7 +206,7 @@ func (d *distributed_inference_coordinator) UpdateLoadState() {
     }
 }
 
-func (d *distributed_inference_coordinator) RebalanceLoad() bool {
+func (distributed_inference_coordinator* d) RebalanceLoad() bool {
     if !d.config.enable_load_balance {
         return false
     }
@@ -236,7 +236,7 @@ func (d *distributed_inference_coordinator) RebalanceLoad() bool {
     return false
 }
 
-func (d *distributed_inference_coordinator) HandleNodeFailure(node_id int32) bool {
+func (distributed_inference_coordinator* d) HandleNodeFailure(node_id int32) bool {
     node, exists := d.nodes[node_id]
     if !exists {
         return false
@@ -258,7 +258,7 @@ func (d *distributed_inference_coordinator) HandleNodeFailure(node_id int32) boo
     return true
 }
 
-func (d *distributed_inference_coordinator) GetClusterMetrics() map[string]interface{} {
+func (distributed_inference_coordinator* d) GetClusterMetrics() map[string]interface{} {
     metrics := make(map[string]interface{})
     avg_gpu_util := 0.0
     for _, util := range d.load_state.gpu_loads {
@@ -284,7 +284,7 @@ func (d *distributed_inference_coordinator) GetClusterMetrics() map[string]inter
     return metrics
 }
 
-func (d *distributed_inference_coordinator) EstimateLatency(
+func (distributed_inference_coordinator* d) EstimateLatency(
     seq_len int32,
     output_tokens int32,
 ) int64 {
@@ -295,7 +295,7 @@ func (d *distributed_inference_coordinator) EstimateLatency(
     return total
 }
 
-func (d *distributed_inference_coordinator) GetStats() map[string]interface{} {
+func (distributed_inference_coordinator* d) GetStats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["num_nodes"] = d.config.num_nodes
     stats["total_gpus"] = d.config.total_gpus

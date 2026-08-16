@@ -131,7 +131,7 @@ func new_async_llm_engine(config engine_config) *async_llm_engine {
     return async_engine
 }
 
-func (ae *async_llm_engine) initialize() error {
+func (async_llm_engine* ae) initialize() error {
     if err := ae.engine.initialize(); err != nil {
         return err
     }
@@ -147,7 +147,7 @@ func (ae *async_llm_engine) initialize() error {
     return nil
 }
 
-func (ae *async_llm_engine) start_workers() error {
+func (async_llm_engine* ae) start_workers() error {
     if ae.is_running {
         return core.Errorf("async engine workers already running")
     }
@@ -165,7 +165,7 @@ func (ae *async_llm_engine) start_workers() error {
     return nil
 }
 
-func (ae *async_llm_engine) worker_loop(worker_id int32) {
+func (async_llm_engine* ae) worker_loop(worker_id int32) {
     defer func() {
         ae.workers_stopped <- true
     }()
@@ -191,7 +191,7 @@ func (ae *async_llm_engine) worker_loop(worker_id int32) {
     }
 }
 
-func (ae *async_llm_engine) process_async_request(async_req *async_request) {
+func (async_llm_engine* ae) process_async_request(async_request* async_req) {
     if ae.concurrent_requests >= ae.max_concurrent {
         ae.request_queue <- async_req
         core.Sleep(100)
@@ -226,7 +226,7 @@ func (ae *async_llm_engine) process_async_request(async_req *async_request) {
     core.Printf("async request started: %s (concurrent: %d)\n", async_req.request_id, ae.concurrent_requests)
 }
 
-func (ae *async_llm_engine) check_completed_requests() {
+func (async_llm_engine* ae) check_completed_requests() {
     for request_id, req_info := range ae.request_callbacks {
         if req_info.state != async_request_state_running {
             continue
@@ -249,7 +249,7 @@ func (ae *async_llm_engine) check_completed_requests() {
     }
 }
 
-func (ae *async_llm_engine) generate_completion_async(
+func (async_llm_engine* ae) generate_completion_async(
     prompt string,
     sampling_params sampling_params,
     callback async_request_callback) (string, error) {
@@ -264,7 +264,7 @@ func (ae *async_llm_engine) generate_completion_async(
     )
 }
 
-func (ae *async_llm_engine) generate_completion_async_advanced(
+func (async_llm_engine* ae) generate_completion_async_advanced(
     prompt string,
     sampling_params sampling_params,
     callback async_request_callback,
@@ -314,7 +314,7 @@ func (ae *async_llm_engine) generate_completion_async_advanced(
     }
 }
 
-func (ae *async_llm_engine) poll_output(request_id string) (*request_output, error) {
+func (async_llm_engine* ae) poll_output(request_id string) (*request_output, error) {
     req_info, exists := ae.request_callbacks[request_id]
     if !exists {
         return nil, core.Errorf("request not found: %s", request_id)
@@ -336,7 +336,7 @@ func (ae *async_llm_engine) poll_output(request_id string) (*request_output, err
     return output, nil
 }
 
-func (ae *async_llm_engine) cancel_request(request_id string) error {
+func (async_llm_engine* ae) cancel_request(request_id string) error {
     req_info, exists := ae.request_callbacks[request_id]
     if !exists {
         return core.Errorf("request not found: %s", request_id)
@@ -359,11 +359,11 @@ func (ae *async_llm_engine) cancel_request(request_id string) error {
     return nil
 }
 
-func (ae *async_llm_engine) abort_request(request_id string) error {
+func (async_llm_engine* ae) abort_request(request_id string) error {
     return ae.cancel_request(request_id)
 }
 
-func (ae *async_llm_engine) abort_all() error {
+func (async_llm_engine* ae) abort_all() error {
     core.Println("aborting all requests...")
 
     for request_id := range ae.request_callbacks {
@@ -375,7 +375,7 @@ func (ae *async_llm_engine) abort_all() error {
     return nil
 }
 
-func (ae *async_llm_engine) get_request_state(request_id string) async_request_state {
+func (async_llm_engine* ae) get_request_state(request_id string) async_request_state {
     req_info, exists := ae.request_callbacks[request_id]
     if !exists {
         return -1
@@ -383,7 +383,7 @@ func (ae *async_llm_engine) get_request_state(request_id string) async_request_s
     return req_info.state
 }
 
-func (ae *async_llm_engine) get_num_unfinished_requests() int32 {
+func (async_llm_engine* ae) get_num_unfinished_requests() int32 {
     count := int32(0)
 
     for _, req_info := range ae.request_callbacks {
@@ -395,7 +395,7 @@ func (ae *async_llm_engine) get_num_unfinished_requests() int32 {
     return count
 }
 
-func (ae *async_llm_engine) get_num_waiting_requests() int32 {
+func (async_llm_engine* ae) get_num_waiting_requests() int32 {
     count := int32(0)
 
     for _, req_info := range ae.request_callbacks {
@@ -407,7 +407,7 @@ func (ae *async_llm_engine) get_num_waiting_requests() int32 {
     return count
 }
 
-func (ae *async_llm_engine) get_num_running_requests() int32 {
+func (async_llm_engine* ae) get_num_running_requests() int32 {
     count := int32(0)
 
     for _, req_info := range ae.request_callbacks {
@@ -419,7 +419,7 @@ func (ae *async_llm_engine) get_num_running_requests() int32 {
     return count
 }
 
-func (ae *async_llm_engine) event_loop() {
+func (async_llm_engine* ae) event_loop() {
     for ae.is_running {
         select {
         case <-ae.stop_signal:
@@ -432,7 +432,7 @@ func (ae *async_llm_engine) event_loop() {
     }
 }
 
-func (ae *async_llm_engine) handle_event(event *async_event) {
+func (async_llm_engine* ae) handle_event(async_event* event) {
     if event == nil {
         return
     }
@@ -450,7 +450,7 @@ func (ae *async_llm_engine) handle_event(event *async_event) {
     }
 }
 
-func (ae *async_llm_engine) timeout_checker() {
+func (async_llm_engine* ae) timeout_checker() {
     if !ae.pool_config.enable_request_timeout {
         return
     }
@@ -482,7 +482,7 @@ func (ae *async_llm_engine) timeout_checker() {
     }
 }
 
-func (ae *async_llm_engine) stop_workers() error {
+func (async_llm_engine* ae) stop_workers() error {
     if !ae.is_running {
         return core.Errorf("async engine workers not running")
     }
@@ -501,7 +501,7 @@ func (ae *async_llm_engine) stop_workers() error {
     return nil
 }
 
-func (ae *async_llm_engine) shutdown() error {
+func (async_llm_engine* ae) shutdown() error {
     if ae.is_running {
         ae.abort_all()
         ae.stop_workers()
@@ -513,7 +513,7 @@ func (ae *async_llm_engine) shutdown() error {
     return ae.engine.shutdown()
 }
 
-func (ae *async_llm_engine) get_stats() map[string]interface{} {
+func (async_llm_engine* ae) get_stats() map[string]interface{} {
     stats := make(map[string]interface{})
 
     engine_stats := ae.engine.get_stats()
@@ -537,7 +537,7 @@ func (ae *async_llm_engine) get_stats() map[string]interface{} {
     return stats
 }
 
-func (ae *async_llm_engine) print_async_stats() {
+func (async_llm_engine* ae) print_async_stats() {
     elapsed := core.CurrentTimeMs() - ae.start_time
     completion_rate := float32(0.0)
     if ae.total_requests > 0 {
@@ -557,7 +557,7 @@ func (ae *async_llm_engine) print_async_stats() {
     core.Println("="*60 + "\n")
 }
 
-func (ae *async_llm_engine) wait_all_completed(timeout_ms int64) error {
+func (async_llm_engine* ae) wait_all_completed(timeout_ms int64) error {
     start := core.CurrentTimeMs()
 
     for {
@@ -575,7 +575,7 @@ func (ae *async_llm_engine) wait_all_completed(timeout_ms int64) error {
     }
 }
 
-func (ae *async_llm_engine) is_request_completed(request_id string) bool {
+func (async_llm_engine* ae) is_request_completed(request_id string) bool {
     req_info, exists := ae.request_callbacks[request_id]
     if !exists {
         return false
@@ -583,7 +583,7 @@ func (ae *async_llm_engine) is_request_completed(request_id string) bool {
     return req_info.state == async_request_state_completed
 }
 
-func (ae *async_llm_engine) get_request_latency_ms(request_id string) int64 {
+func (async_llm_engine* ae) get_request_latency_ms(request_id string) int64 {
     req_info, exists := ae.request_callbacks[request_id]
     if !exists {
         return 0

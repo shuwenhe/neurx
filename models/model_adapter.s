@@ -314,7 +314,7 @@ func (mpt_adapter* adapter) enable_alibi(enabled bool) {
 	adapter.alibi_enabled = enabled
 }
 
-func register_all_standard_adapters(registry *model_adapter_registry) {
+func register_all_standard_adapters(model_adapter_registry* registry) {
 	qwen_metadata := &model_metadata{
 		model_type: TYPE_QWEN,
 		vocabulary_size: 32000,

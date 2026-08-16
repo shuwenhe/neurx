@@ -90,7 +90,7 @@ func NewAsyncEngine(
     }
 }
 
-func (engine *async_inference_engine) EnqueueRequest(
+func (async_inference_engine* engine) EnqueueRequest(
     request inference_request,
 ) bool {
     if len(engine.queue.pending) >= engine.queue.max_queue_size {
@@ -104,7 +104,7 @@ func (engine *async_inference_engine) EnqueueRequest(
     return true
 }
 
-func (engine *async_inference_engine) SchedulingStep() []inference_request {
+func (async_inference_engine* engine) SchedulingStep() []inference_request {
     batch := make([]inference_request, 0)
     available_slots := engine.max_concurrent - len(engine.queue.active)
     if available_slots == 0 {
@@ -125,7 +125,7 @@ func (engine *async_inference_engine) SchedulingStep() []inference_request {
     return batch
 }
 
-func (engine *async_inference_engine) ProcessBatch(
+func (async_inference_engine* engine) ProcessBatch(
     batch []inference_request,
 ) []completion_output {
     if len(batch) == 0 {
@@ -146,7 +146,7 @@ func (engine *async_inference_engine) ProcessBatch(
     return outputs
 }
 
-func (engine *async_inference_engine) EngineStep() []completion_output {
+func (async_inference_engine* engine) EngineStep() []completion_output {
     batch := engine.SchedulingStep()
     if len(batch) == 0 {
         return make([]completion_output, 0)
@@ -166,7 +166,7 @@ func (engine *async_inference_engine) EngineStep() []completion_output {
     return outputs
 }
 
-func (engine *async_inference_engine) GetOutput(
+func (async_inference_engine* engine) GetOutput(
     request_id string,
 ) ([]completion_output, bool) {
     if req, ok := engine.queue.active[request_id]; ok {
@@ -178,7 +178,7 @@ func (engine *async_inference_engine) GetOutput(
     return make([]completion_output, 0), false
 }
 
-func (engine *async_inference_engine) CancelRequest(request_id string) bool {
+func (async_inference_engine* engine) CancelRequest(request_id string) bool {
     for i := 0; i < len(engine.queue.pending); i++ {
         if engine.queue.pending[i].request_id == request_id {
             engine.queue.pending = remove_at_index(
@@ -197,7 +197,7 @@ func (engine *async_inference_engine) CancelRequest(request_id string) bool {
     return false
 }
 
-func (engine *async_inference_engine) GetMetrics() async_engine_metrics {
+func (async_inference_engine* engine) GetMetrics() async_engine_metrics {
     return engine.metrics
 }
 
@@ -269,7 +269,7 @@ func check_finish_condition(req inference_request) bool {
     return false
 }
 
-func (engine *async_inference_engine) update_metrics() {
+func (async_inference_engine* engine) update_metrics() {
     if engine.queue.total_completed > 0 {
         engine.metrics.throughput = float(engine.queue.total_completed) / 60.0
     }

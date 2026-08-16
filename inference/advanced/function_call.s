@@ -57,13 +57,13 @@ func NewFunctionRegistry() function_registry {
     }
 }
 
-func (registry *function_registry) RegisterFunction(
+func (function_registry* registry) RegisterFunction(
     fn function_def,
 ) {
     registry.functions[fn.function_name] = fn
 }
 
-func (registry *function_registry) ListFunctions() []string {
+func (function_registry* registry) ListFunctions() []string {
     functions := make([]string, 0)
     for name := range registry.functions {
         functions = append(functions, name)
@@ -71,7 +71,7 @@ func (registry *function_registry) ListFunctions() []string {
     return functions
 }
 
-func (registry *function_registry) GetFunction(
+func (function_registry* registry) GetFunction(
     string name,
 ) (function_def, bool) {
     fn, ok := registry.functions[name]
@@ -229,7 +229,7 @@ func detect_deepseek_function_call(
     return call, true
 }
 
-func (detector *function_call_detector) DetectFunctionCall(
+func (function_call_detector* detector) DetectFunctionCall(
     string output,
 ) (detected_function_call, bool) {
     switch detector.format_type {
@@ -253,7 +253,7 @@ func (detector *function_call_detector) DetectFunctionCall(
     }
 }
 
-func (detector *function_call_detector) ValidateFunctionCall(
+func (function_call_detector* detector) ValidateFunctionCall(
     call detected_function_call,
 ) bool {
     if !call.valid {
@@ -290,7 +290,7 @@ func NewFunctionExecutor(
     }
 }
 
-func (executor *function_executor) ExecuteFunctionCall(
+func (function_executor* executor) ExecuteFunctionCall(
     call detected_function_call,
 ) function_execution_result {
     result := function_execution_result {

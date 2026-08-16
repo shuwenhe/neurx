@@ -114,28 +114,28 @@ func new_operation_registry(string default_hw) operation_registry {
     }
 }
 
-func (op *custom_operation) add_kernel(operation_kernel kernel) bool {
+func (custom_operation* op) add_kernel(operation_kernel kernel) bool {
     op.kernels.push(kernel)
     true
 }
 
-func (op *custom_operation) add_input_type(string input_type) () {
+func (custom_operation* op) add_input_type(string input_type) () {
     op.metadata.input_types.push(input_type)
 }
 
-func (op *custom_operation) add_output_type(string output_type) () {
+func (custom_operation* op) add_output_type(string output_type) () {
     op.metadata.output_types.push(output_type)
 }
 
-func (op *custom_operation) add_supported_hardware(compute_capability hw) () {
+func (custom_operation* op) add_supported_hardware(compute_capability hw) () {
     op.metadata.supported_hardware.push(hw)
 }
 
-func (op *custom_operation) set_metadata(operation_metadata meta) () {
+func (custom_operation* op) set_metadata(operation_metadata meta) () {
     op.metadata = meta
 }
 
-func (op *custom_operation) get_kernel_for_hardware(compute_capability hw) operation_kernel {
+func (custom_operation* op) get_kernel_for_hardware(compute_capability hw) operation_kernel {
     i := 0
     while i < op.kernels.len() {
         if op.kernels[i].target_hardware == hw {
@@ -147,7 +147,7 @@ func (op *custom_operation) get_kernel_for_hardware(compute_capability hw) opera
     new_operation_kernel("", "", hw)
 }
 
-func (reg *operation_registry) register_operation(custom_operation op) bool {
+func (operation_registry* reg) register_operation(custom_operation op) bool {
     if op.op_id in reg.operations {
         false
     }
@@ -157,7 +157,7 @@ func (reg *operation_registry) register_operation(custom_operation op) bool {
     true
 }
 
-func (reg *operation_registry) unregister_operation(string op_id) bool {
+func (operation_registry* reg) unregister_operation(string op_id) bool {
     if op_id in reg.operations {
         del reg.operations[op_id]
         reg.operation_count = reg.operation_count - 1
@@ -167,11 +167,11 @@ func (reg *operation_registry) unregister_operation(string op_id) bool {
     false
 }
 
-func (reg *operation_registry) has_operation(string op_id) bool {
+func (operation_registry* reg) has_operation(string op_id) bool {
     op_id in reg.operations
 }
 
-func (reg *operation_registry) get_operation(string op_id) custom_operation {
+func (operation_registry* reg) get_operation(string op_id) custom_operation {
     if op_id in reg.operations {
         reg.operations[op_id]
     }
@@ -179,7 +179,7 @@ func (reg *operation_registry) get_operation(string op_id) custom_operation {
     new_custom_operation("", "", operation_type::custom)
 }
 
-func (reg *operation_registry) register_fused_operation(string fused_id, vec[string] component_ops, string fusion_name) bool {
+func (operation_registry* reg) register_fused_operation(string fused_id, vec[string] component_ops, string fusion_name) bool {
     if fused_id in reg.fused_ops {
         false
     }
@@ -197,11 +197,11 @@ func (reg *operation_registry) register_fused_operation(string fused_id, vec[str
     true
 }
 
-func (reg *operation_registry) has_fused_operation(string fused_id) bool {
+func (operation_registry* reg) has_fused_operation(string fused_id) bool {
     fused_id in reg.fused_ops
 }
 
-func (reg *operation_registry) get_fused_operation(string fused_id) fused_operation {
+func (operation_registry* reg) get_fused_operation(string fused_id) fused_operation {
     if fused_id in reg.fused_ops {
         reg.fused_ops[fused_id]
     }
@@ -215,7 +215,7 @@ func (reg *operation_registry) get_fused_operation(string fused_id) fused_operat
     }
 }
 
-func (reg *operation_registry) list_operations() vec[string] {
+func (operation_registry* reg) list_operations() vec[string] {
     result := vec[string]{}
     for op_id in reg.operations.keys() {
         result.push(op_id)
@@ -223,7 +223,7 @@ func (reg *operation_registry) list_operations() vec[string] {
     result
 }
 
-func (reg *operation_registry) list_fused_operations() vec[string] {
+func (operation_registry* reg) list_fused_operations() vec[string] {
     result := vec[string]{}
     for fused_id in reg.fused_ops.keys() {
         result.push(fused_id)
@@ -231,7 +231,7 @@ func (reg *operation_registry) list_fused_operations() vec[string] {
     result
 }
 
-func (reg *operation_registry) find_operations_by_type(operation_type op_type) vec[string] {
+func (operation_registry* reg) find_operations_by_type(operation_type op_type) vec[string] {
     result := vec[string]{}
     for op_id in reg.operations.keys() {
         op := reg.get_operation(op_id)
@@ -242,7 +242,7 @@ func (reg *operation_registry) find_operations_by_type(operation_type op_type) v
     result
 }
 
-func (reg *operation_registry) find_operations_for_hardware(compute_capability hw) vec[string] {
+func (operation_registry* reg) find_operations_for_hardware(compute_capability hw) vec[string] {
     result := vec[string]{}
     for op_id in reg.operations.keys() {
         op := reg.get_operation(op_id)
@@ -257,7 +257,7 @@ func (reg *operation_registry) find_operations_for_hardware(compute_capability h
     result
 }
 
-func (reg *operation_registry) get_stats() string {
+func (operation_registry* reg) get_stats() string {
     stats := "Total Operations: " + string(reg.operation_count) + "\n"
     stats = stats + "Total Fused Operations: " + string(reg.fused_op_count)
     stats

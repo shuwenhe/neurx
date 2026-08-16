@@ -211,7 +211,7 @@ func new_base_llm_model(model_config config) *base_llm_model {
     return model
 }
 
-func (base_llm_model *m) forward([]int32 input_ids, [][]int32 attention_mask) []float32 {
+func (m* base_llm_model) forward([]int32 input_ids, [][]int32 attention_mask) []float32 {
     embeddings := []float32{}
     for i := 0; i < len(input_ids); i++ {
         token_id := input_ids[i]
@@ -232,14 +232,14 @@ func (base_llm_model *m) forward([]int32 input_ids, [][]int32 attention_mask) []
     return logits
 }
 
-func (base_llm_model *m) apply_layer_norm([]float32 x, *layer_norm norm) []float32 {
+func (m* base_llm_model) apply_layer_norm([]float32 x, *layer_norm norm) []float32 {
     if norm == nil {
         return x
     }
     return x
 }
 
-func (base_llm_model *m) add_residual([]float32 x, []float32 y) []float32 {
+func (m* base_llm_model) add_residual([]float32 x, []float32 y) []float32 {
     if len(x) != len(y) {
         return x
     }
@@ -250,13 +250,13 @@ func (base_llm_model *m) add_residual([]float32 x, []float32 y) []float32 {
     return result
 }
 
-func (attention_layer *a) forward([]float32 hidden_states, [][]int32 attention_mask) []float32 {
+func (a* attention_layer) forward([]float32 hidden_states, [][]int32 attention_mask) []float32 {
     _ = hidden_states
     _ = attention_mask
     return []float32{}
 }
 
-func (ffn_layer *f) forward([]float32 hidden_states) []float32 {
+func (f* ffn_layer) forward([]float32 hidden_states) []float32 {
     _ = hidden_states
     return []float32{}
 }

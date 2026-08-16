@@ -91,7 +91,7 @@ func NewWorkerProcessMonitor() *worker_process_monitor {
     }
 }
 
-func (monitor *worker_process_monitor) RegisterWorker(
+func (worker_process_monitor* monitor) RegisterWorker(
     worker_id string,
     host string,
     port int32,
@@ -135,7 +135,7 @@ func (monitor *worker_process_monitor) RegisterWorker(
     monitor.metrics[worker_id] = metrics
 }
 
-func (monitor *worker_process_monitor) UpdateWorkerStats(
+func (worker_process_monitor* monitor) UpdateWorkerStats(
     worker_id string,
     cpu_percent float32,
     memory_mb int32,
@@ -168,7 +168,7 @@ func (monitor *worker_process_monitor) UpdateWorkerStats(
     info.last_heartbeat_ms = core.Now().UnixMilli()
 }
 
-func (monitor *worker_process_monitor) RecordRequest(
+func (worker_process_monitor* monitor) RecordRequest(
     worker_id string,
     success bool,
     latency_ms int64,
@@ -196,7 +196,7 @@ func (monitor *worker_process_monitor) RecordRequest(
     }
 }
 
-func (monitor *worker_process_monitor) PerformHealthCheck(
+func (worker_process_monitor* monitor) PerformHealthCheck(
     worker_id string,
 ) health_check_result {
     info, exists := monitor.workers[worker_id]
@@ -225,15 +225,15 @@ func (monitor *worker_process_monitor) PerformHealthCheck(
     }
 }
 
-func (monitor *worker_process_monitor) GetWorkerStatus(worker_id string) *worker_process_info {
+func (worker_process_monitor* monitor) GetWorkerStatus(worker_id string) *worker_process_info {
     return monitor.workers[worker_id]
 }
 
-func (monitor *worker_process_monitor) GetWorkerMetrics(worker_id string) *worker_metrics {
+func (worker_process_monitor* monitor) GetWorkerMetrics(worker_id string) *worker_metrics {
     return monitor.metrics[worker_id]
 }
 
-func (monitor *worker_process_monitor) ListAllWorkers() []string {
+func (worker_process_monitor* monitor) ListAllWorkers() []string {
     workers := make([]string, 0)
     for worker_id := range monitor.workers {
         workers = append(workers, worker_id)
@@ -241,7 +241,7 @@ func (monitor *worker_process_monitor) ListAllWorkers() []string {
     return workers
 }
 
-func (monitor *worker_process_monitor) GetHealthySummary() map[string]int32 {
+func (worker_process_monitor* monitor) GetHealthySummary() map[string]int32 {
     summary := make(map[string]int32)
     summary["total"] = 0
     summary["healthy"] = 0
@@ -264,7 +264,7 @@ func (monitor *worker_process_monitor) GetHealthySummary() map[string]int32 {
     return summary
 }
 
-func (monitor *worker_process_monitor) TriggerRecovery(worker_id string) bool {
+func (worker_process_monitor* monitor) TriggerRecovery(worker_id string) bool {
     if !monitor.recovery_enabled {
         return false
     }
@@ -277,7 +277,7 @@ func (monitor *worker_process_monitor) TriggerRecovery(worker_id string) bool {
     return true
 }
 
-func (monitor *worker_process_monitor) PrintMonitoringSummary() {
+func (worker_process_monitor* monitor) PrintMonitoringSummary() {
     core.Println("=== Worker Process Monitor Summary ===")
     summary := monitor.GetHealthySummary()
     core.Println("Total workers:", summary["total"])

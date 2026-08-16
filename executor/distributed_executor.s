@@ -28,7 +28,7 @@ func NewDistributedExecutor(config ExecutorConfig,
 }
 
 // Initialize - Initialize distributed executor
-func (de *DistributedExecutor) Initialize() ExecutionResult {
+func (DistributedExecutor* de) Initialize() ExecutionResult {
     result := de.base.Initialize()
     if result.success == 0 {
         return result
@@ -47,7 +47,7 @@ func (de *DistributedExecutor) Initialize() ExecutionResult {
 }
 
 // discover_peers - Discover other executors in distributed system
-func (de *DistributedExecutor) discover_peers() ExecutionResult {
+func (DistributedExecutor* de) discover_peers() ExecutionResult {
     // In real implementation: connect to master, get peer addresses
     // For demo: simulate peer discovery
 
@@ -62,7 +62,7 @@ func (de *DistributedExecutor) discover_peers() ExecutionResult {
 }
 
 // synchronize_init - Synchronize initialization across executors
-func (de *DistributedExecutor) synchronize_init() ExecutionResult {
+func (DistributedExecutor* de) synchronize_init() ExecutionResult {
     // Barrier synchronization
     // All executors must reach this point before continuing
 
@@ -70,7 +70,7 @@ func (de *DistributedExecutor) synchronize_init() ExecutionResult {
 }
 
 // ExecuteDistributedIteration - Execute iteration across distributed system
-func (de *DistributedExecutor) ExecuteDistributedIteration() ExecutionResult {
+func (DistributedExecutor* de) ExecuteDistributedIteration() ExecutionResult {
     if de.base.state != EXECUTOR_STATE_RUNNING {
         return ExecutionResult{
             success: 0,
@@ -118,7 +118,7 @@ func (de *DistributedExecutor) ExecuteDistributedIteration() ExecutionResult {
 }
 
 // gather_inputs - Gather inputs from all ranks
-func (de *DistributedExecutor) gather_inputs() ExecutionResult {
+func (DistributedExecutor* de) gather_inputs() ExecutionResult {
     // In real implementation: receive inputs from other ranks
     // For demo: simulate gather
 
@@ -126,7 +126,7 @@ func (de *DistributedExecutor) gather_inputs() ExecutionResult {
 }
 
 // all_reduce_gradients - All-reduce operation for tensor parallelism
-func (de *DistributedExecutor) all_reduce_gradients() ExecutionResult {
+func (DistributedExecutor* de) all_reduce_gradients() ExecutionResult {
     // In real implementation: perform collective all-reduce
     // Using NCCL or equivalent
 
@@ -134,14 +134,14 @@ func (de *DistributedExecutor) all_reduce_gradients() ExecutionResult {
 }
 
 // synchronize_results - Synchronize results across ranks
-func (de *DistributedExecutor) synchronize_results() ExecutionResult {
+func (DistributedExecutor* de) synchronize_results() ExecutionResult {
     // Barrier to ensure all ranks complete before next iteration
 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
 // SendToRank - Send data to specific rank
-func (de *DistributedExecutor) SendToRank(rank i32, data []u8) ExecutionResult {
+func (DistributedExecutor* de) SendToRank(rank i32, data []u8) ExecutionResult {
     if rank < 0 || rank >= de.distributed_config.world_size {
         return ExecutionResult{
             success: 0,
@@ -156,7 +156,7 @@ func (de *DistributedExecutor) SendToRank(rank i32, data []u8) ExecutionResult {
 }
 
 // ReceiveFromRank - Receive data from specific rank
-func (de *DistributedExecutor) ReceiveFromRank(rank i32) ExecutionResult {
+func (DistributedExecutor* de) ReceiveFromRank(rank i32) ExecutionResult {
     if rank < 0 || rank >= de.distributed_config.world_size {
         return ExecutionResult{
             success: 0,
@@ -171,21 +171,21 @@ func (de *DistributedExecutor) ReceiveFromRank(rank i32) ExecutionResult {
 }
 
 // BroadcastFromRank - Broadcast data from one rank to all
-func (de *DistributedExecutor) BroadcastFromRank(rank i32, data []u8) ExecutionResult {
+func (DistributedExecutor* de) BroadcastFromRank(rank i32, data []u8) ExecutionResult {
     // Broadcast from root rank
 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
 // AllGather - Gather data from all ranks
-func (de *DistributedExecutor) AllGather(local_data []u8) ExecutionResult {
+func (DistributedExecutor* de) AllGather(local_data []u8) ExecutionResult {
     // Gather from all ranks and concatenate
 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
 // TensorParallelForward - Forward pass with tensor parallelism
-func (de *DistributedExecutor) TensorParallelForward(input []f32) ExecutionResult {
+func (DistributedExecutor* de) TensorParallelForward(input []f32) ExecutionResult {
     // Split input across tensor parallel dimension
     // Each rank computes portion
     // All-reduce to combine results
@@ -194,7 +194,7 @@ func (de *DistributedExecutor) TensorParallelForward(input []f32) ExecutionResul
 }
 
 // PipelineParallelForward - Forward pass with pipeline parallelism
-func (de *DistributedExecutor) PipelineParallelForward(layers []string) ExecutionResult {
+func (DistributedExecutor* de) PipelineParallelForward(layers []string) ExecutionResult {
     // Different ranks compute different layers in pipeline
     // Send activations between stages
 
@@ -202,7 +202,7 @@ func (de *DistributedExecutor) PipelineParallelForward(layers []string) Executio
 }
 
 // LoadBalance - Load balance work across ranks
-func (de *DistributedExecutor) LoadBalance(sequences []string) [][]string {
+func (DistributedExecutor* de) LoadBalance(sequences []string) [][]string {
     // Distribute sequences across ranks
 
     result := make([][]string, de.distributed_config.world_size)
@@ -215,14 +215,14 @@ func (de *DistributedExecutor) LoadBalance(sequences []string) [][]string {
 }
 
 // CollectResults - Collect results from all ranks
-func (de *DistributedExecutor) CollectResults() ExecutionResult {
+func (DistributedExecutor* de) CollectResults() ExecutionResult {
     // Gather execution results from all ranks
 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
 // GetDistributedStats - Get statistics including distributed metrics
-func (de *DistributedExecutor) GetDistributedStats() map[string]f64 {
+func (DistributedExecutor* de) GetDistributedStats() map[string]f64 {
     stats := make(map[string]f64)
 
     stats["rank"] = f64(de.distributed_config.rank)
@@ -234,7 +234,7 @@ func (de *DistributedExecutor) GetDistributedStats() map[string]f64 {
 }
 
 // Shutdown - Shutdown distributed executor
-func (de *DistributedExecutor) Shutdown() ExecutionResult {
+func (DistributedExecutor* de) Shutdown() ExecutionResult {
     // Synchronize shutdown
     // Clean up peer connections
 

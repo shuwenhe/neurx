@@ -42,7 +42,7 @@ func new_quality_assessor(i64 sample_size) quality_assessor {
         seen_hashes: make(set<string>),
     }
 }
-func (qa *quality_assessor) calculate_quality_score(string text) f64 {
+func (quality_assessor* qa) calculate_quality_score(string text) f64 {
     if len(text) == 0 {
         return 0.0
     }
@@ -117,7 +117,7 @@ func detect_language(string text) string {
     }
     return "en"
 }
-func (qa *quality_assessor) assess_file(string filepath) quality_metrics {
+func (quality_assessor* qa) assess_file(string filepath) quality_metrics {
     println("📊 evaluationfile: " + filepath)
     file := io.Open(filepath, "r")
     defer file.Close()

@@ -93,13 +93,13 @@ struct json_schema_builder {
     []json_schema_property properties
 }
 
-func (builder *json_schema_builder) AddProperty(
+func (json_schema_builder* builder) AddProperty(
     prop json_schema_property,
 ) {
     builder.properties = append(builder.properties, prop)
 }
 
-func (builder *json_schema_builder) Build() json_schema {
+func (json_schema_builder* builder) Build() json_schema {
     schema := json_schema {
         schema_type: "object",
         properties: builder.properties,
@@ -198,7 +198,7 @@ func validate_integer_range(
     return true, errors
 }
 
-func (sampler *constrained_sampler) ValidateOutput(
+func (constrained_sampler* sampler) ValidateOutput(
     string output,
     output_constraint constraint,
 ) constrained_output {
@@ -225,7 +225,7 @@ func (sampler *constrained_sampler) ValidateOutput(
     }
 }
 
-func (sampler *constrained_sampler) FilterLogits(
+func (constrained_sampler* sampler) FilterLogits(
     []float logits,
     output_constraint constraint,
 ) []float {
@@ -242,7 +242,7 @@ func (sampler *constrained_sampler) FilterLogits(
     return filtered
 }
 
-func (sampler *constrained_sampler) SampleWithConstraint(
+func (constrained_sampler* sampler) SampleWithConstraint(
     []float logits,
     output_constraint constraint,
 ) int {
@@ -290,7 +290,7 @@ func NewConstrainedDecodingEngine(
     return engine
 }
 
-func (engine *constrained_decoding_engine) DecodeWithConstraints(
+func (constrained_decoding_engine* engine) DecodeWithConstraints(
     []float logits,
     string constraint_name,
 ) int {

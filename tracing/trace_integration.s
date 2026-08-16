@@ -59,7 +59,7 @@ func new_request_tracer(config tracing_config) request_tracer {
     return rt
 }
 
-func (rt *request_tracer) start_span(span_name []string, span_kind []string) []string {
+func (request_tracer* rt) start_span(span_name []string, span_kind []string) []string {
     if !rt.is_active[0] {
         return []string{}
     }
@@ -83,7 +83,7 @@ func (rt *request_tracer) start_span(span_name []string, span_kind []string) []s
     return span_id
 }
 
-func (rt *request_tracer) end_span() {
+func (request_tracer* rt) end_span() {
     if len(rt.spans) == 0 {
         return
     }
@@ -91,7 +91,7 @@ func (rt *request_tracer) end_span() {
     rt.spans = rt.spans[0:len(rt.spans)-1]
 }
 
-func (rt *request_tracer) add_span_attribute(key []string, value []string) {
+func (request_tracer* rt) add_span_attribute(key []string, value []string) {
     if len(rt.spans) == 0 || len(rt.span_metadata) == 0 {
         return
     }
@@ -102,7 +102,7 @@ func (rt *request_tracer) add_span_attribute(key []string, value []string) {
     }
 }
 
-func (rt *request_tracer) record_span_event(event_name []string, event_value []string) {
+func (request_tracer* rt) record_span_event(event_name []string, event_value []string) {
     if len(rt.spans) == 0 || len(rt.span_metadata) == 0 {
         return
     }
@@ -113,7 +113,7 @@ func (rt *request_tracer) record_span_event(event_name []string, event_value []s
     }
 }
 
-func (rt *request_tracer) record_error(error_msg []string) {
+func (request_tracer* rt) record_error(error_msg []string) {
     if len(rt.spans) == 0 {
         return
     }
@@ -122,15 +122,15 @@ func (rt *request_tracer) record_error(error_msg []string) {
     rt.span_metadata[len(rt.span_metadata)-1]["status"] = append([]string{}, "ERROR")
 }
 
-func (rt *request_tracer) get_trace_id() []string {
+func (request_tracer* rt) get_trace_id() []string {
     return rt.trace_id
 }
 
-func (rt *request_tracer) get_root_span_id() []string {
+func (request_tracer* rt) get_root_span_id() []string {
     return rt.root_span_id
 }
 
-func (rt *request_tracer) get_w3c_trace_context() []string {
+func (request_tracer* rt) get_w3c_trace_context() []string {
     header := "00-"
 
     if len(rt.trace_id) > 0 {
@@ -154,7 +154,7 @@ func (rt *request_tracer) get_w3c_trace_context() []string {
     return append([]string{}, header)
 }
 
-func (rt *request_tracer) finish() tracing_metrics {
+func (request_tracer* rt) finish() tracing_metrics {
     if !rt.is_active[0] {
         return tracing_metrics{}
     }
@@ -174,7 +174,7 @@ func (rt *request_tracer) finish() tracing_metrics {
     return metrics
 }
 
-func (rt *request_tracer) export_spans() {
+func (request_tracer* rt) export_spans() {
     if len(rt.config.exporters) == 0 {
         return
     }
@@ -194,7 +194,7 @@ func (rt *request_tracer) export_spans() {
     }
 }
 
-func (rt *request_tracer) export_to_console() {
+func (request_tracer* rt) export_to_console() {
     io.Println("=== Trace Export (Console) ===")
     io.Println("TraceID: " + (rt.trace_id[0] if len(rt.trace_id) > 0 else "unknown"))
     io.Println("Spans: " + io.ToString(len(rt.span_metadata)))
@@ -210,17 +210,17 @@ func (rt *request_tracer) export_to_console() {
     }
 }
 
-func (rt *request_tracer) export_to_jaeger() {
+func (request_tracer* rt) export_to_jaeger() {
     io.Println("Exporting " + io.ToString(len(rt.span_metadata)) + " spans to Jaeger: " +
         (rt.config.jaeger_endpoint[0] if len(rt.config.jaeger_endpoint) > 0 else "unknown"))
 }
 
-func (rt *request_tracer) export_to_otel() {
+func (request_tracer* rt) export_to_otel() {
     io.Println("Exporting " + io.ToString(len(rt.span_metadata)) + " spans to OTLP: " +
         (rt.config.otel_endpoint[0] if len(rt.config.otel_endpoint) > 0 else "unknown"))
 }
 
-func (rt *request_tracer) get_metrics() tracing_metrics {
+func (request_tracer* rt) get_metrics() tracing_metrics {
     metrics := tracing_metrics{}
     metrics.span_count = append([]int{}, len(rt.span_metadata))
     metrics.event_count = append([]int{}, 0)
@@ -230,7 +230,7 @@ func (rt *request_tracer) get_metrics() tracing_metrics {
     return metrics
 }
 
-func (rt *request_tracer) inject_trace_context(headers []map[string][]string) []map[string][]string {
+func (request_tracer* rt) inject_trace_context(headers []map[string][]string) []map[string][]string {
     if len(headers) == 0 {
         return headers
     }

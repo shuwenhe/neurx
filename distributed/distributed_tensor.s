@@ -62,32 +62,32 @@ func new_distributed_tensor(string tensor_id, vec[int64] shape, string dtype, te
     }
 }
 
-func (dtensor *distributed_tensor) mark_dirty() () {
+func (distributed_tensor* dtensor) mark_dirty() () {
     dtensor.requires_sync = true
     dtensor.version = dtensor.version + 1
 }
 
-func (dtensor *distributed_tensor) mark_synced() () {
+func (distributed_tensor* dtensor) mark_synced() () {
     dtensor.requires_sync = false
 }
 
-func (dtensor *distributed_tensor) get_version() int64 {
+func (distributed_tensor* dtensor) get_version() int64 {
     dtensor.version
 }
 
-func (dtensor *distributed_tensor) is_synced() bool {
+func (distributed_tensor* dtensor) is_synced() bool {
     !dtensor.requires_sync
 }
 
-func (dtensor *distributed_tensor) get_shape() vec[int64] {
+func (distributed_tensor* dtensor) get_shape() vec[int64] {
     dtensor.metadata.shape
 }
 
-func (dtensor *distributed_tensor) get_dtype() string {
+func (distributed_tensor* dtensor) get_dtype() string {
     dtensor.metadata.dtype
 }
 
-func (dtensor *distributed_tensor) get_rank() int {
+func (distributed_tensor* dtensor) get_rank() int {
     dtensor.metadata.rank
 }
 
@@ -103,13 +103,13 @@ func new_distributed_tensor_manager(distributed_context ctx) distributed_tensor_
     }
 }
 
-func (mgr *distributed_tensor_manager) register_tensor(string tensor_id, vec[int64] shape, string dtype) string {
+func (distributed_tensor_manager* mgr) register_tensor(string tensor_id, vec[int64] shape, string dtype) string {
     dtensor := new_distributed_tensor(tensor_id, shape, dtype, tensor_layout::dense)
     mgr.tensors[tensor_id] = dtensor
     tensor_id
 }
 
-func (mgr *distributed_tensor_manager) get_tensor(string tensor_id) distributed_tensor {
+func (distributed_tensor_manager* mgr) get_tensor(string tensor_id) distributed_tensor {
     if tensor_id in mgr.tensors {
         mgr.tensors[tensor_id]
     }
@@ -117,11 +117,11 @@ func (mgr *distributed_tensor_manager) get_tensor(string tensor_id) distributed_
     new_distributed_tensor("", vec[int64]{}, "float32", tensor_layout::dense)
 }
 
-func (mgr *distributed_tensor_manager) has_tensor(string tensor_id) bool {
+func (distributed_tensor_manager* mgr) has_tensor(string tensor_id) bool {
     tensor_id in mgr.tensors
 }
 
-func (mgr *distributed_tensor_manager) remove_tensor(string tensor_id) bool {
+func (distributed_tensor_manager* mgr) remove_tensor(string tensor_id) bool {
     if tensor_id in mgr.tensors {
         del mgr.tensors[tensor_id]
         true
@@ -130,7 +130,7 @@ func (mgr *distributed_tensor_manager) remove_tensor(string tensor_id) bool {
     false
 }
 
-func (mgr *distributed_tensor_manager) all_reduce_tensor(string tensor_id, reduce_op op) bool {
+func (distributed_tensor_manager* mgr) all_reduce_tensor(string tensor_id, reduce_op op) bool {
     if !mgr.has_tensor(tensor_id) {
         false
     }
@@ -147,7 +147,7 @@ func (mgr *distributed_tensor_manager) all_reduce_tensor(string tensor_id, reduc
     false
 }
 
-func (mgr *distributed_tensor_manager) all_gather_tensor(string tensor_id) bool {
+func (distributed_tensor_manager* mgr) all_gather_tensor(string tensor_id) bool {
     if !mgr.has_tensor(tensor_id) {
         false
     }
@@ -171,7 +171,7 @@ func (mgr *distributed_tensor_manager) all_gather_tensor(string tensor_id) bool 
     false
 }
 
-func (mgr *distributed_tensor_manager) synchronize_all() bool {
+func (distributed_tensor_manager* mgr) synchronize_all() bool {
     for tid in mgr.tensors.keys() {
         dtensor := mgr.get_tensor(tid)
         if dtensor.requires_sync {

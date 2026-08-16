@@ -67,7 +67,7 @@ func new_cispo_trainer(
     }
 }
 
-func (trainer *cispo_trainer) compute_is_weights(
+func (cispo_trainer* trainer) compute_is_weights(
     []tensor new_log_probs,
     []tensor behavior_log_probs
 ) -> []tensor {
@@ -86,7 +86,7 @@ func (trainer *cispo_trainer) compute_is_weights(
     return is_weights
 }
 
-func (trainer *cispo_trainer) update_is_weight_stats([]tensor is_weights) {
+func (cispo_trainer* trainer) update_is_weight_stats([]tensor is_weights) {
     let values: []f32 = []
     let clipped_count = 0
     let total_count = 0
@@ -119,7 +119,7 @@ func (trainer *cispo_trainer) update_is_weight_stats([]tensor is_weights) {
     trainer.is_weight_stats.clipped_ratio = f32(clipped_count) / f32(total_count)
 }
 
-func (trainer *cispo_trainer) compute_cispo_objective(
+func (cispo_trainer* trainer) compute_cispo_objective(
     Tensor ratio,
     Tensor advantage,
     Tensor is_weight
@@ -146,7 +146,7 @@ func (trainer *cispo_trainer) compute_cispo_objective(
     return weighted_obj
 }
 
-func (trainer *cispo_trainer) compute_gae(
+func (cispo_trainer* trainer) compute_gae(
     []tensor rewards,
     []tensor values,
     []tensor dones
@@ -176,7 +176,7 @@ func (trainer *cispo_trainer) compute_gae(
     return advantages, returns
 }
 
-func (trainer *cispo_trainer) train_step(
+func (cispo_trainer* trainer) train_step(
     []tensor prompts,
     []tensor responses,
     []tensor rewards
@@ -292,7 +292,7 @@ func (trainer *cispo_trainer) train_step(
     )
 }
 
-func (trainer *cispo_trainer) train(DataLoader train_data) -> ([]f32, []f32) {
+func (cispo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
     for batch in train_data {

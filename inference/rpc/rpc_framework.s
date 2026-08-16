@@ -113,7 +113,7 @@ func NewRpcClient(server_address string, port int32) *rpc_client {
     }
 }
 
-func (client *rpc_client) SendRequest(request rpc_request) (rpc_response, bool) {
+func (rpc_client* client) SendRequest(request rpc_request) (rpc_response, bool) {
     if !client.healthy {
         return rpc_response{
             request_id:    request.request_id,
@@ -133,7 +133,7 @@ func (client *rpc_client) SendRequest(request rpc_request) (rpc_response, bool) 
     return response, true
 }
 
-func (client *rpc_client) HealthCheck() bool {
+func (rpc_client* client) HealthCheck() bool {
     heartbeat := rpc_request{
         request_id:   "health_check_" + core.ToString(core.Now().UnixMilli()),
         method:       RpcMethodTypeValues().HEARTBEAT_CHECK,
@@ -155,7 +155,7 @@ func NewRpcServer(listen_address string, port int32) *rpc_server {
     }
 }
 
-func (server *rpc_server) RegisterHandler(
+func (rpc_server* server) RegisterHandler(
     name string,
     handler func(rpc_request) rpc_response,
     methods []int32,
@@ -169,18 +169,18 @@ func (server *rpc_server) RegisterHandler(
     server.handlers[name] = h
 }
 
-func (server *rpc_server) Start() bool {
+func (rpc_server* server) Start() bool {
     server.started = true
     core.Println("RPC Server started on", server.listen_address, ":", server.port)
     return true
 }
 
-func (server *rpc_server) Stop() {
+func (rpc_server* server) Stop() {
     server.started = false
     core.Println("RPC Server stopped")
 }
 
-func (server *rpc_server) HandleRequest(request rpc_request) rpc_response {
+func (rpc_server* server) HandleRequest(request rpc_request) rpc_response {
     if !server.started {
         return rpc_response{
             request_id:    request.request_id,
@@ -213,7 +213,7 @@ func NewRpcConnectionPool(max_size int32) *rpc_connection_pool {
     }
 }
 
-func (pool *rpc_connection_pool) GetConnection(address string, port int32) *rpc_client {
+func (rpc_connection_pool* pool) GetConnection(address string, port int32) *rpc_client {
     key := address + ":" + core.ToString(port)
     client, exists := pool.connections[key]
     if exists && client.healthy {
@@ -228,7 +228,7 @@ func (pool *rpc_connection_pool) GetConnection(address string, port int32) *rpc_
     return nil
 }
 
-func (pool *rpc_connection_pool) ReleaseConnection(address string, port int32) {
+func (rpc_connection_pool* pool) ReleaseConnection(address string, port int32) {
     key := address + ":" + core.ToString(port)
     client, exists := pool.connections[key]
     if exists {
@@ -236,7 +236,7 @@ func (pool *rpc_connection_pool) ReleaseConnection(address string, port int32) {
     }
 }
 
-func (pool *rpc_connection_pool) CloseAll() {
+func (rpc_connection_pool* pool) CloseAll() {
     for _, client := range pool.connections {
         client.healthy = false
     }

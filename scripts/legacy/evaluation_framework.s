@@ -58,7 +58,7 @@ struct evaluation_example {
     metadata            map[string]interface{}
 }
 
-func (framework *evaluation_framework) load_mmlu() benchmark_dataset {
+func (evaluation_framework* framework) load_mmlu() benchmark_dataset {
     fmt.Println("[Evaluation] Loading MMLU (Massive Multitask Language Understanding)...")
     dataset := benchmark_dataset{
         name: "MMLU",
@@ -89,7 +89,7 @@ func (framework *evaluation_framework) load_mmlu() benchmark_dataset {
     return dataset
 }
 
-func (framework *evaluation_framework) load_truthful_qa() benchmark_dataset {
+func (evaluation_framework* framework) load_truthful_qa() benchmark_dataset {
     fmt.Println("[Evaluation] Loading TruthfulQA (Truthfulness assessment)...")
     dataset := benchmark_dataset{
         name: "TruthfulQA",
@@ -113,7 +113,7 @@ func (framework *evaluation_framework) load_truthful_qa() benchmark_dataset {
     return dataset
 }
 
-func (framework *evaluation_framework) load_gsm8k() benchmark_dataset {
+func (evaluation_framework* framework) load_gsm8k() benchmark_dataset {
     fmt.Println("[Evaluation] Loading GSM8K (Math word problems)...")
     dataset := benchmark_dataset{
         name: "GSM8K",
@@ -137,7 +137,7 @@ func (framework *evaluation_framework) load_gsm8k() benchmark_dataset {
     return dataset
 }
 
-func (framework *evaluation_framework) load_hellaswag() benchmark_dataset {
+func (evaluation_framework* framework) load_hellaswag() benchmark_dataset {
     fmt.Println("[Evaluation] Loading HellaSwag (Common sense reasoning)...")
     dataset := benchmark_dataset{
         name: "HellaSwag",
@@ -161,7 +161,7 @@ func (framework *evaluation_framework) load_hellaswag() benchmark_dataset {
     return dataset
 }
 
-func (framework *evaluation_framework) evaluate_accuracy(predictions []string, []string references) float64 {
+func (evaluation_framework* framework) evaluate_accuracy(predictions []string, []string references) float64 {
     correct := 0
     for i, pred := range predictions {
         if pred == references[i] {
@@ -171,7 +171,7 @@ func (framework *evaluation_framework) evaluate_accuracy(predictions []string, [
     return float64(correct) / float64(len(predictions))
 }
 
-func (framework *evaluation_framework) evaluate_f1(predictions []string, []string references) float64 {
+func (evaluation_framework* framework) evaluate_f1(predictions []string, []string references) float64 {
     tp := 0.0
     fp := 0.0
     false_negatives := 0.0
@@ -197,7 +197,7 @@ func (framework *evaluation_framework) evaluate_f1(predictions []string, []strin
     return 2 * (precision * recall) / (precision + recall)
 }
 
-func (framework *evaluation_framework) evaluate_semantic_similarity(prediction string, string reference) float64 {
+func (evaluation_framework* framework) evaluate_semantic_similarity(prediction string, string reference) float64 {
     pred_words := len(prediction)
     ref_words := len(reference)
     common := 0
@@ -216,7 +216,7 @@ func (framework *evaluation_framework) evaluate_semantic_similarity(prediction s
     return float64(common) / float64(max_len)
 }
 
-func (framework *evaluation_framework) evaluate_perplexity(logits []float64, []int labels) float64 {
+func (evaluation_framework* framework) evaluate_perplexity(logits []float64, []int labels) float64 {
     loss := 0.0
     count := 0
     for i, label := range labels {
@@ -232,12 +232,12 @@ func (framework *evaluation_framework) evaluate_perplexity(logits []float64, []i
     return math.Exp(avg_loss)
 }
 
-func (framework *evaluation_framework) generate_prediction(question string, int max_tokens) string {
+func (evaluation_framework* framework) generate_prediction(question string, int max_tokens) string {
     prediction := "The answer is: " + question[len(question)-10:]
     return prediction
 }
 
-func (framework *evaluation_framework) run_benchmark(dataset benchmark_dataset) benchmark_result {
+func (evaluation_framework* framework) run_benchmark(dataset benchmark_dataset) benchmark_result {
     fmt.Printf("[Evaluation] Running %s benchmark...\n", dataset.name)
     predictions := []string{}
     references := []string{}
@@ -284,7 +284,7 @@ func (framework *evaluation_framework) run_benchmark(dataset benchmark_dataset) 
     return result
 }
 
-func (framework *evaluation_framework) run_full_evaluation() {
+func (evaluation_framework* framework) run_full_evaluation() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Comprehensive Evaluation Framework                   ║")
     fmt.Println("║  Multi-Dimensional Assessment                         ║")
@@ -302,7 +302,7 @@ func (framework *evaluation_framework) run_full_evaluation() {
     framework.print_report()
 }
 
-func (framework *evaluation_framework) print_report() {
+func (evaluation_framework* framework) print_report() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Evaluation Report                                    ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
@@ -327,7 +327,7 @@ func (framework *evaluation_framework) print_report() {
     fmt.Printf("═══════════════════════════════════════════════════════\n")
 }
 
-func (framework *evaluation_framework) compare_with_baseline() {
+func (evaluation_framework* framework) compare_with_baseline() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  model Comparison with reference systems               ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")

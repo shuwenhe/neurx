@@ -61,7 +61,7 @@ struct rate_limiter {
     rejected_requests   int64
 }
 
-func (server *apiserver) initialize() {
+func (apiserver* server) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  REST API Service                                     ║")
     fmt.Println("║  HTTP server for LLM inference                        ║")
@@ -73,7 +73,7 @@ func (server *apiserver) initialize() {
     fmt.Printf("  URL: http:
 }
 
-func (server *apiserver) register_models() {
+func (apiserver* server) register_models() {
     server.models["neurx-346m"] = "neur_x-level 346M parameter model"
     server.models["neurx-7b"] = "neur_x-level 7B parameter model"
     server.models["neurx-70b"] = "neur_x-level 70B parameter model"
@@ -84,7 +84,7 @@ func (server *apiserver) register_models() {
     fmt.Println()
 }
 
-func (server *apiserver) register_routes() {
+func (apiserver* server) register_routes() {
     server.routes = make(map[string]string)
     server.routes["/health"] = "Health check endpoint"
     server.routes["/models"] = "List available models"
@@ -100,7 +100,7 @@ func (server *apiserver) register_routes() {
     fmt.Println()
 }
 
-func (server *apiserver) handle_health_check(req apirequest) apiresponse {
+func (apiserver* server) handle_health_check(req apirequest) apiresponse {
     response := apiresponse{
         status_code: 200,
         headers: map[string]string{
@@ -117,7 +117,7 @@ func (server *apiserver) handle_health_check(req apirequest) apiresponse {
     return response
 }
 
-func (server *apiserver) handle_list_models(req apirequest) apiresponse {
+func (apiserver* server) handle_list_models(req apirequest) apiresponse {
     models_str := ""
     for name := range server.models {
         if models_str != "" {
@@ -139,7 +139,7 @@ func (server *apiserver) handle_list_models(req apirequest) apiresponse {
     return response
 }
 
-func (server *apiserver) handle_completion(req apirequest) apiresponse {
+func (apiserver* server) handle_completion(req apirequest) apiresponse {
     prompt := req.body["prompt"]
     max_tokens := 100
     generated := fmt.Sprintf("%s [Generated %d tokens]", prompt, max_tokens)
@@ -159,7 +159,7 @@ func (server *apiserver) handle_completion(req apirequest) apiresponse {
     return response
 }
 
-func (server *apiserver) handle_chat_completion(req apirequest) apiresponse {
+func (apiserver* server) handle_chat_completion(req apirequest) apiresponse {
     messages := req.body["messages"]
     response := apiresponse{
         status_code: 200,
@@ -176,7 +176,7 @@ func (server *apiserver) handle_chat_completion(req apirequest) apiresponse {
     return response
 }
 
-func (server *apiserver) handle_embeddings(req apirequest) apiresponse {
+func (apiserver* server) handle_embeddings(req apirequest) apiresponse {
     text := req.body["text"]
     embedding := "[0.1, 0.2, 0.3, ...]"
     response := apiresponse{
@@ -195,7 +195,7 @@ func (server *apiserver) handle_embeddings(req apirequest) apiresponse {
     return response
 }
 
-func (server *apiserver) route_request(req apirequest) apiresponse {
+func (apiserver* server) route_request(req apirequest) apiresponse {
     switch req.endpoint {
     case "/health":
         return server.handle_health_check(req)
@@ -217,14 +217,14 @@ func (server *apiserver) route_request(req apirequest) apiresponse {
     }
 }
 
-func (server *apiserver) process_request(req apirequest) apiresponse {
+func (apiserver* server) process_request(req apirequest) apiresponse {
     server.current_connections++
     response := server.route_request(req)
     server.current_connections--
     return response
 }
 
-func (queue *request_queue) enqueue(req apirequest) bool {
+func (request_queue* queue) enqueue(req apirequest) bool {
     if len(queue.pending_requests) >= queue.queue_size {
         fmt.Printf("[Queue] request queue full\n")
         return false
@@ -234,7 +234,7 @@ func (queue *request_queue) enqueue(req apirequest) bool {
     return true
 }
 
-func (queue *request_queue) dequeue() apirequest {
+func (request_queue* queue) dequeue() apirequest {
     if len(queue.pending_requests) == 0 {
         return apirequest{}
     }
@@ -243,7 +243,7 @@ func (queue *request_queue) dequeue() apirequest {
     return req
 }
 
-func (queue *request_queue) process_queue(server *apiserver) {
+func (request_queue* queue) process_queue(apiserver* server) {
     fmt.Printf("[Queue] Processing %d pending requests\n", len(queue.pending_requests))
     for len(queue.pending_requests) > 0 {
         req := queue.dequeue()
@@ -256,7 +256,7 @@ func (queue *request_queue) process_queue(server *apiserver) {
     }
 }
 
-func (limiter *rate_limiter) allow_request() bool {
+func (rate_limiter* limiter) allow_request() bool {
     if limiter.current_concurrent >= limiter.max_concurrent {
         limiter.rejected_requests++
         fmt.Printf("[rate_limiter] request rejected (concurrent: %d/%d)\n",
@@ -267,20 +267,20 @@ func (limiter *rate_limiter) allow_request() bool {
     return true
 }
 
-func (limiter *rate_limiter) release_request() {
+func (rate_limiter* limiter) release_request() {
     if limiter.current_concurrent > 0 {
         limiter.current_concurrent--
     }
 }
 
-func (limiter *rate_limiter) report_stats() {
+func (rate_limiter* limiter) report_stats() {
     fmt.Printf("\nRate Limiter Statistics:\n")
     fmt.Printf("  Max Concurrent: %d\n", limiter.max_concurrent)
     fmt.Printf("  Requests/Second: %d\n", limiter.requests_per_second)
     fmt.Printf("  Rejected: %d\n", limiter.rejected_requests)
 }
 
-func (server *apiserver) start() {
+func (apiserver* server) start() {
     server.initialize()
     server.register_models()
     server.register_routes()
@@ -292,7 +292,7 @@ func (server *apiserver) start() {
     fmt.Printf("✓ Ready to accept requests\n\n")
 }
 
-func (server *apiserver) handle_incoming_requests() {
+func (apiserver* server) handle_incoming_requests() {
     fmt.Println("┌────────────────────────────────────────┐")
     fmt.Println("│  Processing Incoming Requests          │")
     fmt.Println("└────────────────────────────────────────┘\n")
@@ -343,7 +343,7 @@ func (server *apiserver) handle_incoming_requests() {
     }
 }
 
-func (server *apiserver) print_stats() {
+func (apiserver* server) print_stats() {
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  API Server Statistics                 │")
     fmt.Println("└────────────────────────────────────────┘\n")
@@ -363,7 +363,7 @@ func new_api_server(string host, int port) *apiserver {
     }
 }
 
-func (server *apiserver) run() {
+func (apiserver* server) run() {
     server.start()
     server.handle_incoming_requests()
     server.print_stats()

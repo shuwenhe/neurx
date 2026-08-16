@@ -338,7 +338,7 @@ func log_error(string msg) {
 	fmt.Printf("[%s] ERROR: %s\n", timestamp, msg)
 }
 
-func log_metric(m *training_metrics) {
+func log_metric(training_metrics* m) {
 	data, _ := json.Marshal(m)
 	metrics_path := filepath.Join(g_config.log_dir, "metrics.jsonl")
 	f, err := os.OpenFile(metrics_path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)

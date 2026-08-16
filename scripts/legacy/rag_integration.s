@@ -57,7 +57,7 @@ struct ragintegration {
     knowledge_base_size int
 }
 
-func (rag *ragintegration) initialize(config retrieval_system_config) {
+func (ragintegration* rag) initialize(config retrieval_system_config) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  RAG Integration System                               ║")
     fmt.Println("║  Retrieval-Augmented Generation for LLMs              ║")
@@ -78,7 +78,7 @@ func (rag *ragintegration) initialize(config retrieval_system_config) {
     fmt.Printf("  cache Enabled: %v\n\n", config.cache_enabled)
 }
 
-func (rag *ragintegration) load_knowledge_base(
+func (ragintegration* rag) load_knowledge_base(
     doc_count int,
     avg_doc_length int) {
     fmt.Printf("\n[KnowledgeBase] Loading knowledge base\n")
@@ -103,7 +103,7 @@ func (rag *ragintegration) load_knowledge_base(
     fmt.Printf("  ✓ Knowledge base loaded\n")
 }
 
-func (rag *ragintegration) generate_embeddings() {
+func (ragintegration* rag) generate_embeddings() {
     fmt.Printf("\n[Embeddings] Generating embeddings\n")
     fmt.Printf("  Documents: %d\n", len(rag.vector_db.documents))
     fmt.Printf("  model: %s\n", rag.config.embedding_model)
@@ -127,7 +127,7 @@ func (rag *ragintegration) generate_embeddings() {
     fmt.Printf("  ✓ Embeddings generated: %d\n", len(rag.vector_db.embeddings))
 }
 
-func (rag *ragintegration) cosine_similarity(vec1 []float64, vec2 []float64) float64 {
+func (ragintegration* rag) cosine_similarity(vec1 []float64, vec2 []float64) float64 {
     if len(vec1) != len(vec2) {
         return 0.0
     }
@@ -147,7 +147,7 @@ func (rag *ragintegration) cosine_similarity(vec1 []float64, vec2 []float64) flo
     return dot_product / (norm1 * norm2)
 }
 
-func (rag *ragintegration) retrieve_relevant_documents(
+func (ragintegration* rag) retrieve_relevant_documents(
     query string,
     query_embedding []float64) []retrieval_result {
     if rag.config.cache_enabled {
@@ -192,7 +192,7 @@ func (rag *ragintegration) retrieve_relevant_documents(
     return results
 }
 
-func (rag *ragintegration) display_retrieval_results(results []retrieval_result) {
+func (ragintegration* rag) display_retrieval_results(results []retrieval_result) {
     fmt.Printf("\n[Results] Top Retrieved Documents:\n")
     fmt.Println("  Rank  Similarity  Source          Content")
     fmt.Println("  ────────────────────────────────────────────────")
@@ -209,7 +209,7 @@ func (rag *ragintegration) display_retrieval_results(results []retrieval_result)
     }
 }
 
-func (rag *ragintegration) augment_context(
+func (ragintegration* rag) augment_context(
     query string,
     results []retrieval_result) string {
     fmt.Printf("\n[Augmentation] Augmenting context\n")
@@ -226,7 +226,7 @@ func (rag *ragintegration) augment_context(
     return augmented_context
 }
 
-func (rag *ragintegration) record_retrieval_metrics(
+func (ragintegration* rag) record_retrieval_metrics(
     query string,
     retrieved_count int,
     top_similarity float64,
@@ -243,7 +243,7 @@ func (rag *ragintegration) record_retrieval_metrics(
     rag.metrics_history = append(rag.metrics_history, metric)
 }
 
-func (rag *ragintegration) get_rag_statistics() {
+func (ragintegration* rag) get_rag_statistics() {
     fmt.Printf("\n┌────────────────────────────────────────┐\n")
     fmt.Printf("│  RAG Performance Statistics            │\n")
     fmt.Printf("└────────────────────────────────────────┘\n\n")
@@ -276,7 +276,7 @@ func new_rag_integration() *ragintegration {
     }
 }
 
-func (rag *ragintegration) run_complete_rag_cycle() {
+func (ragintegration* rag) run_complete_rag_cycle() {
     config := retrieval_system_config{
         embedding_model:     "sentence-transformers/all-MiniLM-L6-v2",
         vector_db_type:      "faiss",

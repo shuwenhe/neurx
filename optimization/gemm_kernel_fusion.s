@@ -36,11 +36,11 @@ func NewFusedGEMMKernel(config gemm_config) *fused_gemm_kernel {
     }
 }
 
-func (fk *fused_gemm_kernel) AddGEMM(gemm gemm_operation) {
+func (fused_gemm_kernel* fk) AddGEMM(gemm gemm_operation) {
     fk.gemms = append(fk.gemms, gemm)
 }
 
-func (fk *fused_gemm_kernel) ExecuteFused() [][]float32 {
+func (fused_gemm_kernel* fk) ExecuteFused() [][]float32 {
     results := make([][]float32, 0)
     if !fk.config.enable_fusion {
         for _, gemm := range fk.gemms {
@@ -59,7 +59,7 @@ func (fk *fused_gemm_kernel) ExecuteFused() [][]float32 {
     return results
 }
 
-func (fk *fused_gemm_kernel) executeBasicGEMM(gemm gemm_operation) []float32 {
+func (fused_gemm_kernel* fk) executeBasicGEMM(gemm gemm_operation) []float32 {
     m := fk.config.m
     n := fk.config.n
     k := fk.config.k
@@ -81,7 +81,7 @@ func (fk *fused_gemm_kernel) executeBasicGEMM(gemm gemm_operation) []float32 {
     return c
 }
 
-func (fk *fused_gemm_kernel) executeOptimizedGEMM(gemm gemm_operation) []float32 {
+func (fused_gemm_kernel* fk) executeOptimizedGEMM(gemm gemm_operation) []float32 {
     m := fk.config.m
     n := fk.config.n
     k := fk.config.k
@@ -124,7 +124,7 @@ func (fk *fused_gemm_kernel) executeOptimizedGEMM(gemm gemm_operation) []float32
     return c
 }
 
-func (fk *fused_gemm_kernel) FuseGEMMAndActivation(
+func (fused_gemm_kernel* fk) FuseGEMMAndActivation(
     gemm gemm_operation,
     activation_type string,
 ) []float32 {
@@ -138,7 +138,7 @@ func (fk *fused_gemm_kernel) FuseGEMMAndActivation(
     return c
 }
 
-func (fk *fused_gemm_kernel) FuseGEMMAndNormalization(
+func (fused_gemm_kernel* fk) FuseGEMMAndNormalization(
     gemm gemm_operation,
     eps float32,
 ) []float32 {
@@ -165,7 +165,7 @@ func (fk *fused_gemm_kernel) FuseGEMMAndNormalization(
     return c
 }
 
-func (fk *fused_gemm_kernel) FuseMultipleGEMMs(
+func (fused_gemm_kernel* fk) FuseMultipleGEMMs(
     gemm1 gemm_operation,
     gemm2 gemm_operation,
 ) []float32 {
@@ -176,7 +176,7 @@ func (fk *fused_gemm_kernel) FuseMultipleGEMMs(
     return result
 }
 
-func (fk *fused_gemm_kernel) applyActivation(x float32, act_type string) float32 {
+func (fused_gemm_kernel* fk) applyActivation(x float32, act_type string) float32 {
     switch act_type {
     case "relu":
         if x < 0 {
@@ -194,7 +194,7 @@ func (fk *fused_gemm_kernel) applyActivation(x float32, act_type string) float32
     }
 }
 
-func (fk *fused_gemm_kernel) GetComputationSaving() float32 {
+func (fused_gemm_kernel* fk) GetComputationSaving() float32 {
     num_gemms := float32(fk.config.num_gemms)
     if num_gemms <= 1 {
         return 1.0
@@ -205,7 +205,7 @@ func (fk *fused_gemm_kernel) GetComputationSaving() float32 {
     return speedup
 }
 
-func (fk *fused_gemm_kernel) BenchmarkGEMM(
+func (fused_gemm_kernel* fk) BenchmarkGEMM(
     gemm gemm_operation,
     num_iterations int32,
 ) map[string]float32 {

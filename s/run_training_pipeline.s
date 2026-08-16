@@ -38,7 +38,7 @@ func setup_training_config(string train_bin) (*training_config, error) {
     return config, nil
 }
 
-func print_header(config *training_config) {
+func print_header(training_config* config) {
     fmt.Println("========================================")
     fmt.Println("NeurX Training Pipeline")
     fmt.Printf("S Compiler: %s\n", os.Getenv("S_BIN"))
@@ -47,7 +47,7 @@ func print_header(config *training_config) {
     fmt.Println("")
 }
 
-func run_training(config *training_config) (string, error) {
+func run_training(training_config* config) (string, error) {
     if !core.FileExists(config.TrainBin) {
         return "", fmt.Errorf("[ERROR] Training binary not found: %s", config.TrainBin)
     }
@@ -111,7 +111,7 @@ func generate_checkpoints(config *training_config, metrics map[string]string) er
     return nil
 }
 
-func list_checkpoints(config *training_config) {
+func list_checkpoints(training_config* config) {
     fmt.Println("")
     fmt.Println("--- checkpoint Files Generated ---")
     filepath.Walk(config.CheckpointDir, func(path string, info os.file_info, err error) error {
@@ -125,7 +125,7 @@ func list_checkpoints(config *training_config) {
     })
 }
 
-func print_footer(config *training_config) {
+func print_footer(training_config* config) {
     fmt.Println("")
     fmt.Println("========================================")
     fmt.Println("Training Pipeline Complete!")

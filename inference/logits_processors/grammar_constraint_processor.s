@@ -39,7 +39,7 @@ func new_grammar_constraint_processor(int vocab_size) grammar_constraint_process
     }
 }
 
-func (processor *grammar_constraint_processor) add_grammar_rule(
+func (grammar_constraint_processor* processor) add_grammar_rule(
     rule_name string,
     allowed_tokens []string,
     rule_type string
@@ -59,7 +59,7 @@ func (processor *grammar_constraint_processor) add_grammar_rule(
     return true
 }
 
-func (processor *grammar_constraint_processor) add_pattern_rule(
+func (grammar_constraint_processor* processor) add_pattern_rule(
     rule_name string,
     pattern string
 ) bool {
@@ -78,7 +78,7 @@ func (processor *grammar_constraint_processor) add_pattern_rule(
     return true
 }
 
-func (processor *grammar_constraint_processor) process_logits(
+func (grammar_constraint_processor* processor) process_logits(
     []float logits
 ) []float {
 
@@ -190,7 +190,7 @@ func apply_alphanumeric_pattern([]float result) {
     }
 }
 
-func (processor *grammar_constraint_processor) update_state(int token_id) {
+func (grammar_constraint_processor* processor) update_state(int token_id) {
     processor.constraints.tokens_matched = processor.constraints.tokens_matched + 1
 
     is_valid := validate_token_against_rules(processor, token_id)

@@ -76,7 +76,7 @@ func new_hf_transformers_rollout(hf_transformers_config config) -> hf_transforme
     }
 }
 
-func (rollout *hf_transformers_rollout) generate_batch(
+func (hf_transformers_rollout* rollout) generate_batch(
     []string prompts
 ) -> ([]string, [][]f32) {
     let start_time = get_time_ms()
@@ -99,7 +99,7 @@ func (rollout *hf_transformers_rollout) generate_batch(
     return responses, log_probs
 }
 
-func (rollout *hf_transformers_rollout) generate(
+func (hf_transformers_rollout* rollout) generate(
     tensor input_ids,
     tensor attention_mask,
     i32 max_new_tokens
@@ -159,7 +159,7 @@ func (rollout *hf_transformers_rollout) generate(
     return output_ids, all_log_probs
 }
 
-func (rollout *hf_transformers_rollout) sample_next_tokens(
+func (hf_transformers_rollout* rollout) sample_next_tokens(
     tensor logits,
     tensor finished
 ) -> (tensor, []f32) {
@@ -200,7 +200,7 @@ func (rollout *hf_transformers_rollout) sample_next_tokens(
     return next_tokens, token_log_probs
 }
 
-func (rollout *hf_transformers_rollout) tokenize_batch(
+func (hf_transformers_rollout* rollout) tokenize_batch(
     []string prompts
 ) -> (tensor, tensor) {
     let all_input_ids: [][]i32 = []
@@ -237,7 +237,7 @@ func (rollout *hf_transformers_rollout) tokenize_batch(
     return input_ids_tensor, attention_mask
 }
 
-func (rollout *hf_transformers_rollout) get_statistics() -> (i64, i64, f32, f32) {
+func (hf_transformers_rollout* rollout) get_statistics() -> (i64, i64, f32, f32) {
     let avg_tokens_per_prompt: f32 = 0.0
     if rollout.total_prompts > 0 {
         avg_tokens_per_prompt = f32(rollout.total_tokens_generated) / f32(rollout.total_prompts)
@@ -254,7 +254,7 @@ func (rollout *hf_transformers_rollout) get_statistics() -> (i64, i64, f32, f32)
     )
 }
 
-func (rollout *hf_transformers_rollout) print_statistics() {
+func (hf_transformers_rollout* rollout) print_statistics() {
     let prompts, tokens, avg_tokens, throughput = rollout.get_statistics()
     println("HuggingFace Transformers Rollout Statistics:")
     println(f"  Total prompts: {prompts}")

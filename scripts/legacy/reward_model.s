@@ -74,7 +74,7 @@ struct bradley_terry_loss {
     preference_label    int
 }
 
-func (trainer *reward_model_trainer) load_preference_data(data_path string) {
+func (reward_model_trainer* trainer) load_preference_data(data_path string) {
     fmt.Printf("[Reward model] Loading preference data from %s\n", data_path)
     for i := 0; i < 1000; i++ {
         example := preference_data{
@@ -93,7 +93,7 @@ func (trainer *reward_model_trainer) load_preference_data(data_path string) {
     fmt.Printf("  Loaded %d preference pairs\n", len(trainer.train_dataset.examples))
 }
 
-func (trainer *reward_model_trainer) preprocess_example(example preference_data) ([]float64, int) {
+func (reward_model_trainer* trainer) preprocess_example(example preference_data) ([]float64, int) {
     tokens_a := trainer.tokenize(example.response_a)
     tokens_b := trainer.tokenize(example.response_b)
     features_a := trainer.embed_tokens(tokens_a)
@@ -102,7 +102,7 @@ func (trainer *reward_model_trainer) preprocess_example(example preference_data)
     return combined, example.preferred
 }
 
-func (trainer *reward_model_trainer) tokenize(text string) []int {
+func (reward_model_trainer* trainer) tokenize(text string) []int {
     words := strings.Split(text, " ")
     tokens := []int{}
     for i, word := range words {
@@ -112,7 +112,7 @@ func (trainer *reward_model_trainer) tokenize(text string) []int {
     return tokens
 }
 
-func (trainer *reward_model_trainer) embed_tokens(tokens []int) []float64 {
+func (reward_model_trainer* trainer) embed_tokens(tokens []int) []float64 {
     embeddings := []float64{}
     for i, token := range tokens {
         emb := math.Sin(float64(token) / 1000.0) * math.Cos(float64(i) / 100.0)
@@ -121,7 +121,7 @@ func (trainer *reward_model_trainer) embed_tokens(tokens []int) []float64 {
     return embeddings
 }
 
-func (trainer *reward_model_trainer) bradley_terry_loss(reward_a float64, reward_b float64, int preference) float64 {
+func (reward_model_trainer* trainer) bradley_terry_loss(reward_a float64, reward_b float64, int preference) float64 {
     if preference == 0 {
         diff := reward_a - reward_b
         return -trainer.log_sigmoid(diff)
@@ -131,7 +131,7 @@ func (trainer *reward_model_trainer) bradley_terry_loss(reward_a float64, reward
     }
 }
 
-func (trainer *reward_model_trainer) log_sigmoid(x float64) float64 {
+func (reward_model_trainer* trainer) log_sigmoid(x float64) float64 {
     if x >= 0 {
         return -math.Log(1.0 + math.Exp(-x))
     } else {
@@ -139,11 +139,11 @@ func (trainer *reward_model_trainer) log_sigmoid(x float64) float64 {
     }
 }
 
-func (trainer *reward_model_trainer) sigmoid(x float64) float64 {
+func (reward_model_trainer* trainer) sigmoid(x float64) float64 {
     return 1.0 / (1.0 + math.Exp(-x))
 }
 
-func (trainer *reward_model_trainer) predict_reward(text string) float64 {
+func (reward_model_trainer* trainer) predict_reward(text string) float64 {
     tokens := trainer.tokenize(text)
     embeddings := trainer.embed_tokens(tokens)
     hidden := 0.0
@@ -154,7 +154,7 @@ func (trainer *reward_model_trainer) predict_reward(text string) float64 {
     return reward
 }
 
-func (trainer *reward_model_trainer) train_step(batch []preference_data) float64 {
+func (reward_model_trainer* trainer) train_step(batch []preference_data) float64 {
     total_loss := 0.0
     correct := 0
     for _, example := range batch {
@@ -176,7 +176,7 @@ func (trainer *reward_model_trainer) train_step(batch []preference_data) float64
     return batch_loss
 }
 
-func (trainer *reward_model_trainer) evaluate(dataset preference_dataset) training_metric {
+func (reward_model_trainer* trainer) evaluate(dataset preference_dataset) training_metric {
     fmt.Printf("[Reward model] Evaluating on %d examples\n", len(dataset.examples))
     total_loss := 0.0
     correct := 0
@@ -210,7 +210,7 @@ func (trainer *reward_model_trainer) evaluate(dataset preference_dataset) traini
     return metric
 }
 
-func (trainer *reward_model_trainer) calculate_calibration_error(logits []float64, []int labels) float64 {
+func (reward_model_trainer* trainer) calculate_calibration_error(logits []float64, []int labels) float64 {
     ece := 0.0
     num_bins := 10
     bin_size := 1.0 / float64(num_bins)
@@ -239,7 +239,7 @@ func (trainer *reward_model_trainer) calculate_calibration_error(logits []float6
     return ece
 }
 
-func (trainer *reward_model_trainer) calculate_auc(logits []float64, []int labels) float64 {
+func (reward_model_trainer* trainer) calculate_auc(logits []float64, []int labels) float64 {
     pairs := 0
     correct := 0
     for i := range logits {
@@ -292,7 +292,7 @@ func new_reward_model_trainer(config reward_model_config) *reward_model_trainer 
     }
 }
 
-func (trainer *reward_model_trainer) train() {
+func (reward_model_trainer* trainer) train() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Reward model Training for Preference Learning        ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
@@ -326,11 +326,11 @@ func (trainer *reward_model_trainer) train() {
     trainer.print_summary()
 }
 
-func (trainer *reward_model_trainer) save_checkpoint() {
+func (reward_model_trainer* trainer) save_checkpoint() {
     fmt.Printf("[Reward model] Saving checkpoint (Accuracy: %.4f)\n", trainer.model.best_val_accuracy)
 }
 
-func (trainer *reward_model_trainer) print_summary() {
+func (reward_model_trainer* trainer) print_summary() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Reward model Training Summary                        ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")

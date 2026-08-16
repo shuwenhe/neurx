@@ -61,7 +61,7 @@ struct broadcast_result {
     int bytes_broadcast
 }
 
-func (comm *communicator) all_reduce(tensor_handle tensor, reduce_op op) all_reduce_result {
+func (communicator* comm) all_reduce(tensor_handle tensor, reduce_op op) all_reduce_result {
     if !comm.initialized {
         all_reduce_result {
             success: false,
@@ -81,7 +81,7 @@ func (comm *communicator) all_reduce(tensor_handle tensor, reduce_op op) all_red
     result
 }
 
-func (comm *communicator) all_reduce_async(tensor_handle tensor, reduce_op op) string {
+func (communicator* comm) all_reduce_async(tensor_handle tensor, reduce_op op) string {
     request_id := "allreduce_" + string(comm.config.rank) + "_" + string(tensor.device_id)
     
     op_info := comm_operation {
@@ -94,7 +94,7 @@ func (comm *communicator) all_reduce_async(tensor_handle tensor, reduce_op op) s
     request_id
 }
 
-func (comm *communicator) all_gather(tensor_handle send_tensor, vec[tensor_handle] recv_tensors) all_gather_result {
+func (communicator* comm) all_gather(tensor_handle send_tensor, vec[tensor_handle] recv_tensors) all_gather_result {
     if !comm.initialized {
         all_gather_result {
             success: false,
@@ -121,7 +121,7 @@ func (comm *communicator) all_gather(tensor_handle send_tensor, vec[tensor_handl
     result
 }
 
-func (comm *communicator) all_gather_async(tensor_handle send_tensor, vec[tensor_handle] recv_tensors) string {
+func (communicator* comm) all_gather_async(tensor_handle send_tensor, vec[tensor_handle] recv_tensors) string {
     request_id := "allgather_" + string(comm.config.rank) + "_" + string(send_tensor.device_id)
     
     op_info := comm_operation {
@@ -134,7 +134,7 @@ func (comm *communicator) all_gather_async(tensor_handle send_tensor, vec[tensor
     request_id
 }
 
-func (comm *communicator) reduce_scatter(vec[tensor_handle] send_tensors, tensor_handle recv_tensor, reduce_op op) reduce_scatter_result {
+func (communicator* comm) reduce_scatter(vec[tensor_handle] send_tensors, tensor_handle recv_tensor, reduce_op op) reduce_scatter_result {
     if !comm.initialized {
         reduce_scatter_result {
             success: false,
@@ -161,7 +161,7 @@ func (comm *communicator) reduce_scatter(vec[tensor_handle] send_tensors, tensor
     result
 }
 
-func (comm *communicator) broadcast(tensor_handle tensor, int root_rank) broadcast_result {
+func (communicator* comm) broadcast(tensor_handle tensor, int root_rank) broadcast_result {
     if !comm.initialized {
         broadcast_result {
             success: false,
@@ -190,7 +190,7 @@ func (comm *communicator) broadcast(tensor_handle tensor, int root_rank) broadca
     result
 }
 
-func (comm *communicator) barrier() bool {
+func (communicator* comm) barrier() bool {
     if !comm.initialized {
         false
     }
@@ -198,7 +198,7 @@ func (comm *communicator) barrier() bool {
     true
 }
 
-func (comm *communicator) wait_all() bool {
+func (communicator* comm) wait_all() bool {
     comm.operations.clear()
     true
 }

@@ -28,7 +28,7 @@ func NewComprehensiveTestSuite() *comprehensive_test_suite {
     }
 }
 
-func (cts *comprehensive_test_suite) TestFlashAttentionBasic() {
+func (comprehensive_test_suite* cts) TestFlashAttentionBasic() {
     test_name := "FlashAttention Basic Computation"
     config := attention_config{
         batch_size:      1,
@@ -58,7 +58,7 @@ func (cts *comprehensive_test_suite) TestFlashAttentionBasic() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *comprehensive_test_suite) TestGEMMFusionSpeedup() {
+func (comprehensive_test_suite* cts) TestGEMMFusionSpeedup() {
     test_name := "GEMM Fusion Speedup"
     config := gemm_config{
         m:             64,
@@ -80,7 +80,7 @@ func (cts *comprehensive_test_suite) TestGEMMFusionSpeedup() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *comprehensive_test_suite) TestCUDAGraphExecution() {
+func (comprehensive_test_suite* cts) TestCUDAGraphExecution() {
     test_name := "CUDA Graph Execution"
     config := cuda_graph_config{
         enable_capture:     true,
@@ -102,7 +102,7 @@ func (cts *comprehensive_test_suite) TestCUDAGraphExecution() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *comprehensive_test_suite) TestRuntimeFusion() {
+func (comprehensive_test_suite* cts) TestRuntimeFusion() {
     test_name := "Runtime Operation Fusion"
     config := fused_operation_config{
         enable_fusion:  true,
@@ -123,7 +123,7 @@ func (cts *comprehensive_test_suite) TestRuntimeFusion() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *comprehensive_test_suite) TestChunkedPrefill() {
+func (comprehensive_test_suite* cts) TestChunkedPrefill() {
     test_name := "Chunked Prefill Processing"
     config := chunk_config{
         chunk_size:       64,
@@ -143,7 +143,7 @@ func (cts *comprehensive_test_suite) TestChunkedPrefill() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *comprehensive_test_suite) TestSpeculativeDecoding() {
+func (comprehensive_test_suite* cts) TestSpeculativeDecoding() {
     test_name := "Speculative Decoding"
     config := speculative_config{
         draft_model_scale:  0.25,
@@ -162,7 +162,7 @@ func (cts *comprehensive_test_suite) TestSpeculativeDecoding() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *comprehensive_test_suite) TestVisionLanguageAdapter() {
+func (comprehensive_test_suite* cts) TestVisionLanguageAdapter() {
     test_name := "Vision-Language Adapter"
     vlm := NewVisionLanguageModelAdapter(768, 4096)
     image_features := make([]float32, 768*196)
@@ -181,7 +181,7 @@ func (cts *comprehensive_test_suite) TestVisionLanguageAdapter() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *comprehensive_test_suite) TestLoRAAdapter() {
+func (comprehensive_test_suite* cts) TestLoRAAdapter() {
     test_name := "LoRA Adapter"
     config := lo_ra_config{
         rank:           8,
@@ -207,7 +207,7 @@ func (cts *comprehensive_test_suite) TestLoRAAdapter() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *comprehensive_test_suite) TestMultiModelServer() {
+func (comprehensive_test_suite* cts) TestMultiModelServer() {
     test_name := "Multi-Model Serving"
     mms := NewMultiModelServingManager(8000)
     model_data := make([]float32, 100000)
@@ -226,7 +226,7 @@ func (cts *comprehensive_test_suite) TestMultiModelServer() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *comprehensive_test_suite) TestHighPerformanceIntegration() {
+func (comprehensive_test_suite* cts) TestHighPerformanceIntegration() {
     test_name := "High Performance Integration"
     config := optimization_config{
         enable_flash_attention: true,
@@ -247,7 +247,7 @@ func (cts *comprehensive_test_suite) TestHighPerformanceIntegration() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *comprehensive_test_suite) TestLongContextIntegration() {
+func (comprehensive_test_suite* cts) TestLongContextIntegration() {
     test_name := "Long Context Integration"
     config := long_context_optimization_config{
         enable_chunked_prefill:  true,
@@ -269,7 +269,7 @@ func (cts *comprehensive_test_suite) TestLongContextIntegration() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *comprehensive_test_suite) TestAdvancedFeaturesIntegration() {
+func (comprehensive_test_suite* cts) TestAdvancedFeaturesIntegration() {
     test_name := "Advanced Features Integration"
     engine := NewAdvancedFeaturesEngine()
     speedup := engine.speculative_decoder.GetSpeedup()
@@ -284,7 +284,7 @@ func (cts *comprehensive_test_suite) TestAdvancedFeaturesIntegration() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *comprehensive_test_suite) BenchmarkFlashAttention() {
+func (comprehensive_test_suite* cts) BenchmarkFlashAttention() {
     test_name := "Benchmark: FlashAttention"
     config := attention_config{
         batch_size:      1,
@@ -306,7 +306,7 @@ func (cts *comprehensive_test_suite) BenchmarkFlashAttention() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *comprehensive_test_suite) BenchmarkGEMMFusion() {
+func (comprehensive_test_suite* cts) BenchmarkGEMMFusion() {
     test_name := "Benchmark: GEMM Fusion"
     config := gemm_config{
         m:             2048,
@@ -328,7 +328,7 @@ func (cts *comprehensive_test_suite) BenchmarkGEMMFusion() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *comprehensive_test_suite) BenchmarkSpeculativeDecoding() {
+func (comprehensive_test_suite* cts) BenchmarkSpeculativeDecoding() {
     test_name := "Benchmark: Speculative Decoding"
     config := speculative_config{
         draft_model_scale:  0.25,
@@ -347,7 +347,7 @@ func (cts *comprehensive_test_suite) BenchmarkSpeculativeDecoding() {
     cts.results = append(cts.results, result)
 }
 
-func (cts *comprehensive_test_suite) RunAllTests() {
+func (comprehensive_test_suite* cts) RunAllTests() {
     cts.TestFlashAttentionBasic()
     cts.TestGEMMFusionSpeedup()
     cts.TestCUDAGraphExecution()
@@ -378,7 +378,7 @@ func (cts *comprehensive_test_suite) RunAllTests() {
     }
 }
 
-func (cts *comprehensive_test_suite) PrintTestReport() {
+func (comprehensive_test_suite* cts) PrintTestReport() {
     core.Println("================================================")
     core.Println("COMPREHENSIVE TEST SUITE REPORT")
     core.Println("================================================")

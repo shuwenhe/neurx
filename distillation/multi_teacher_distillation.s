@@ -77,7 +77,7 @@ func new_multi_teacher_distillation(
     }
 }
 
-func (distill *multi_teacher_distillation) compute_distillation_loss(
+func (multi_teacher_distillation* distill) compute_distillation_loss(
     tensor input,
     tensor targets
 ) -> tensor {
@@ -115,7 +115,7 @@ func (distill *multi_teacher_distillation) compute_distillation_loss(
     return total_loss
 }
 
-func (distill *multi_teacher_distillation) average_distillation(
+func (multi_teacher_distillation* distill) average_distillation(
     tensor student_logits,
     []tensor teacher_logits
 ) -> tensor {
@@ -131,7 +131,7 @@ func (distill *multi_teacher_distillation) average_distillation(
     )
 }
 
-func (distill *multi_teacher_distillation) weighted_distillation(
+func (multi_teacher_distillation* distill) weighted_distillation(
     tensor student_logits,
     []tensor teacher_logits
 ) -> tensor {
@@ -149,7 +149,7 @@ func (distill *multi_teacher_distillation) weighted_distillation(
     return total_loss
 }
 
-func (distill *multi_teacher_distillation) ensemble_distillation(
+func (multi_teacher_distillation* distill) ensemble_distillation(
     tensor student_logits,
     []tensor teacher_logits
 ) -> tensor {
@@ -168,7 +168,7 @@ func (distill *multi_teacher_distillation) ensemble_distillation(
     return kl * (distill.config.temperature * distill.config.temperature)
 }
 
-func (distill *multi_teacher_distillation) dynamic_distillation(
+func (multi_teacher_distillation* distill) dynamic_distillation(
     tensor student_logits,
     []tensor teacher_logits
 ) -> tensor {
@@ -189,7 +189,7 @@ func (distill *multi_teacher_distillation) dynamic_distillation(
     return total_loss
 }
 
-func (distill *multi_teacher_distillation) update_teacher_weights() {
+func (multi_teacher_distillation* distill) update_teacher_weights() {
     let scores: []f32 = []
     for teacher in distill.teachers {
         scores.push(teacher.performance_score)
@@ -206,7 +206,7 @@ func (distill *multi_teacher_distillation) update_teacher_weights() {
     }
 }
 
-func (distill *multi_teacher_distillation) compute_layer_distillation_loss(
+func (multi_teacher_distillation* distill) compute_layer_distillation_loss(
     tensor input
 ) -> tensor {
     let student_activations = distill.student.forward_with_activations(input)
@@ -229,7 +229,7 @@ func (distill *multi_teacher_distillation) compute_layer_distillation_loss(
     return total_layer_loss / f32(num_layers)
 }
 
-func (distill *multi_teacher_distillation) train_step(Batch batch) -> f32 {
+func (multi_teacher_distillation* distill) train_step(Batch batch) -> f32 {
     let input = batch.input
     let targets = batch.targets
     let loss = distill.compute_distillation_loss(input, targets)
@@ -240,7 +240,7 @@ func (distill *multi_teacher_distillation) train_step(Batch batch) -> f32 {
     return loss.item()
 }
 
-func (distill *multi_teacher_distillation) train(DataLoader train_data) -> []f32 {
+func (multi_teacher_distillation* distill) train(DataLoader train_data) -> []f32 {
     let losses: []f32 = []
     let step = 0
     for epoch in 0..distill.config.num_epochs {
@@ -262,7 +262,7 @@ func (distill *multi_teacher_distillation) train(DataLoader train_data) -> []f32
     return losses
 }
 
-func (distill *multi_teacher_distillation) print_teacher_contributions() {
+func (multi_teacher_distillation* distill) print_teacher_contributions() {
     println("Teacher Contributions:")
     for i in 0..distill.teachers.len() {
         let teacher = distill.teachers[i]

@@ -78,7 +78,7 @@ func NewUnifiedInferenceEngine(config engine_config) *unified_inference_engine {
     return engine
 }
 
-func (e *unified_inference_engine) Initialize(model_path string) error {
+func (unified_inference_engine* e) Initialize(model_path string) error {
     if !e.is_initialized {
         return core.Errorf("Engine not properly configured")
     }
@@ -89,7 +89,7 @@ func (e *unified_inference_engine) Initialize(model_path string) error {
     return nil
 }
 
-func (e *unified_inference_engine) Submit(req generate_request) (int64, error) {
+func (unified_inference_engine* e) Submit(req generate_request) (int64, error) {
     if !e.is_initialized {
         return -1, core.Errorf("Engine not initialized")
     }
@@ -99,7 +99,7 @@ func (e *unified_inference_engine) Submit(req generate_request) (int64, error) {
     return request_id, nil
 }
 
-func (e *unified_inference_engine) ProcessBatch() *batch_info {
+func (unified_inference_engine* e) ProcessBatch() *batch_info {
     batch := e.scheduler.Schedule()
     if batch.batch_size == 0 {
         return batch
@@ -117,7 +117,7 @@ func (e *unified_inference_engine) ProcessBatch() *batch_info {
     return batch
 }
 
-func (e *unified_inference_engine) executeBatch(batch *batch_info) {
+func (unified_inference_engine* e) executeBatch(batch_info* batch) {
     _ = batch
     for layer_idx := 0; layer_idx < len(e.model.layers); layer_idx++ {
         _ = layer_idx
@@ -139,14 +139,14 @@ func (e *unified_inference_engine) executeBatch(batch *batch_info) {
     e.total_tokens = e.total_tokens + int64(batch.total_prefill_len)
 }
 
-func (e *unified_inference_engine) GetResult(request_id int64) *generate_response {
+func (unified_inference_engine* e) GetResult(request_id int64) *generate_response {
     response := &generate_response{
         request_id: request_id,
     }
     return response
 }
 
-func (e *unified_inference_engine) GetMetrics() map[string]interface{} {
+func (unified_inference_engine* e) GetMetrics() map[string]interface{} {
     metrics := make(map[string]interface{})
     sched_stats := e.scheduler.GetStats()
     metrics["queued_requests"] = sched_stats["queued"]
@@ -163,13 +163,13 @@ func (e *unified_inference_engine) GetMetrics() map[string]interface{} {
     return metrics
 }
 
-func (e *unified_inference_engine) Shutdown() error {
+func (unified_inference_engine* e) Shutdown() error {
     core.Println("Shutting down inference engine")
     e.is_initialized = false
     return nil
 }
 
-func (e *unified_inference_engine) GetStatus() map[string]string {
+func (unified_inference_engine* e) GetStatus() map[string]string {
     status := make(map[string]string)
     if e.is_initialized {
         status["state"] = "running"
@@ -187,7 +187,7 @@ func (e *unified_inference_engine) GetStatus() map[string]string {
     return status
 }
 
-func (e *unified_inference_engine) Benchmark(num_requests int, seq_length int32) map[string]interface{} {
+func (unified_inference_engine* e) Benchmark(num_requests int, seq_length int32) map[string]interface{} {
     results := make(map[string]interface{})
     start_time := core.Now()
     for i := 0; i < num_requests; i++ {

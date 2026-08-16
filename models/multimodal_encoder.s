@@ -167,7 +167,7 @@ func create_multimodal_encoder(fusion_dim int32) *multimodal_encoder {
 	return mme
 }
 
-func (mme *multimodal_encoder) register_text_encoder(tokenizer *tokenizer_interface, model_id string, max_seq int32) error {
+func (multimodal_encoder* mme) register_text_encoder(tokenizer *tokenizer_interface, model_id string, max_seq int32) error {
 	mme.mu.Lock()
 	defer mme.mu.Unlock()
 
@@ -187,7 +187,7 @@ func (mme *multimodal_encoder) register_text_encoder(tokenizer *tokenizer_interf
 	return nil
 }
 
-func (mme *multimodal_encoder) register_vision_encoder(model_id string, image_size int32, patch_size int32) error {
+func (multimodal_encoder* mme) register_vision_encoder(model_id string, image_size int32, patch_size int32) error {
 	mme.mu.Lock()
 	defer mme.mu.Unlock()
 
@@ -214,7 +214,7 @@ func (mme *multimodal_encoder) register_vision_encoder(model_id string, image_si
 	return nil
 }
 
-func (mme *multimodal_encoder) register_audio_encoder(model_id string, sample_rate int32, n_mels int32) error {
+func (multimodal_encoder* mme) register_audio_encoder(model_id string, sample_rate int32, n_mels int32) error {
 	mme.mu.Lock()
 	defer mme.mu.Unlock()
 
@@ -243,7 +243,7 @@ func (mme *multimodal_encoder) register_audio_encoder(model_id string, sample_ra
 	return nil
 }
 
-func (mme *multimodal_encoder) register_video_encoder(model_id string, num_frames int32, temporal_agg string) error {
+func (multimodal_encoder* mme) register_video_encoder(model_id string, num_frames int32, temporal_agg string) error {
 	mme.mu.Lock()
 	defer mme.mu.Unlock()
 
@@ -267,7 +267,7 @@ func (mme *multimodal_encoder) register_video_encoder(model_id string, num_frame
 	return nil
 }
 
-func (mme *multimodal_encoder) encode_text(text string, max_length int32) (*encoded_features, error) {
+func (multimodal_encoder* mme) encode_text(text string, max_length int32) (*encoded_features, error) {
 	mme.mu.Lock()
 	if mme.text_enc == nil {
 		mme.mu.Unlock()
@@ -310,7 +310,7 @@ func (mme *multimodal_encoder) encode_text(text string, max_length int32) (*enco
 	return features, nil
 }
 
-func (mme *multimodal_encoder) encode_image(image_data *image_data) (*encoded_features, error) {
+func (multimodal_encoder* mme) encode_image(image_data* image_data) (*encoded_features, error) {
 	mme.mu.Lock()
 	if mme.vision_enc == nil {
 		mme.mu.Unlock()
@@ -340,7 +340,7 @@ func (mme *multimodal_encoder) encode_image(image_data *image_data) (*encoded_fe
 	return features, nil
 }
 
-func (mme *multimodal_encoder) encode_audio(audio_data *audio_data) (*encoded_features, error) {
+func (multimodal_encoder* mme) encode_audio(audio_data* audio_data) (*encoded_features, error) {
 	mme.mu.Lock()
 	if mme.audio_enc == nil {
 		mme.mu.Unlock()
@@ -374,7 +374,7 @@ func (mme *multimodal_encoder) encode_audio(audio_data *audio_data) (*encoded_fe
 	return features, nil
 }
 
-func (mme *multimodal_encoder) encode_video(video_data *video_data) (*encoded_features, error) {
+func (multimodal_encoder* mme) encode_video(video_data* video_data) (*encoded_features, error) {
 	mme.mu.Lock()
 	if mme.video_enc == nil {
 		mme.mu.Unlock()
@@ -413,7 +413,7 @@ func (mme *multimodal_encoder) encode_video(video_data *video_data) (*encoded_fe
 	return features, nil
 }
 
-func (mme *multimodal_encoder) get_encoder_config(encoder_name string) (*encoder_config, error) {
+func (multimodal_encoder* mme) get_encoder_config(encoder_name string) (*encoder_config, error) {
 	mme.mu.Lock()
 	defer mme.mu.Unlock()
 
@@ -425,7 +425,7 @@ func (mme *multimodal_encoder) get_encoder_config(encoder_name string) (*encoder
 	return config, nil
 }
 
-func (mme *multimodal_encoder) update_encoder_config(encoder_name string, config *encoder_config) error {
+func (multimodal_encoder* mme) update_encoder_config(encoder_name string, config *encoder_config) error {
 	mme.mu.Lock()
 	defer mme.mu.Unlock()
 
@@ -434,7 +434,7 @@ func (mme *multimodal_encoder) update_encoder_config(encoder_name string, config
 	return nil
 }
 
-func (mme *multimodal_encoder) list_registered_encoders() []string {
+func (multimodal_encoder* mme) list_registered_encoders() []string {
 	mme.mu.Lock()
 	defer mme.mu.Unlock()
 
@@ -455,7 +455,7 @@ func (mme *multimodal_encoder) list_registered_encoders() []string {
 	return encoders
 }
 
-func (mme *multimodal_encoder) get_encoder_stats() map[string]interface{} {
+func (multimodal_encoder* mme) get_encoder_stats() map[string]interface{} {
 	mme.mu.Lock()
 	defer mme.mu.Unlock()
 
@@ -468,14 +468,14 @@ func (mme *multimodal_encoder) get_encoder_stats() map[string]interface{} {
 	return stats
 }
 
-func (mme *multimodal_encoder) set_cross_modal_attention(enable bool) {
+func (multimodal_encoder* mme) set_cross_modal_attention(enable bool) {
 	mme.mu.Lock()
 	defer mme.mu.Unlock()
 
 	mme.enable_cross_modal_attention = enable
 }
 
-func (mme *multimodal_encoder) set_feature_fusion_dimension(dim int32) {
+func (multimodal_encoder* mme) set_feature_fusion_dimension(dim int32) {
 	mme.mu.Lock()
 	defer mme.mu.Unlock()
 

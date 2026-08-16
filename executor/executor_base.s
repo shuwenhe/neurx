@@ -24,7 +24,7 @@ func NewBaseExecutor(config ExecutorConfig) *BaseExecutor {
     return executor
 }
 
-func (e *BaseExecutor) Initialize() ExecutionResult {
+func (BaseExecutor* e) Initialize() ExecutionResult {
     if e.initialized == 1 {
         return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
     }
@@ -50,7 +50,7 @@ func (e *BaseExecutor) Initialize() ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (e *BaseExecutor) AddSequence(sequence_id string, priority i32) ExecutionResult {
+func (BaseExecutor* e) AddSequence(sequence_id string, priority i32) ExecutionResult {
     if e.state != EXECUTOR_STATE_RUNNING {
         return ExecutionResult{
             success: 0,
@@ -73,7 +73,7 @@ func (e *BaseExecutor) AddSequence(sequence_id string, priority i32) ExecutionRe
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (e *BaseExecutor) RemoveSequence(sequence_id string) ExecutionResult {
+func (BaseExecutor* e) RemoveSequence(sequence_id string) ExecutionResult {
     if _, exists := e.sequences[sequence_id]; !exists {
         return ExecutionResult{
             success: 0,
@@ -90,7 +90,7 @@ func (e *BaseExecutor) RemoveSequence(sequence_id string) ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (e *BaseExecutor) ExecuteIteration() ExecutionResult {
+func (BaseExecutor* e) ExecuteIteration() ExecutionResult {
     if e.state != EXECUTOR_STATE_RUNNING {
         return ExecutionResult{
             success: 0,
@@ -134,7 +134,7 @@ func (e *BaseExecutor) ExecuteIteration() ExecutionResult {
     }
 }
 
-func (e *BaseExecutor) execute_prefill_phase(sequences []string) ExecutionResult {
+func (BaseExecutor* e) execute_prefill_phase(sequences []string) ExecutionResult {
     if len(sequences) == 0 {
         return ExecutionResult{
             success: 1,
@@ -165,7 +165,7 @@ func (e *BaseExecutor) execute_prefill_phase(sequences []string) ExecutionResult
     }
 }
 
-func (e *BaseExecutor) execute_decode_phase(sequences []string) ExecutionResult {
+func (BaseExecutor* e) execute_decode_phase(sequences []string) ExecutionResult {
     if len(sequences) == 0 {
         return ExecutionResult{
             success: 1,
@@ -191,7 +191,7 @@ func (e *BaseExecutor) execute_decode_phase(sequences []string) ExecutionResult 
     }
 }
 
-func (e *BaseExecutor) select_prefill_sequences() []string {
+func (BaseExecutor* e) select_prefill_sequences() []string {
     result := make([]string, 0)
     count := i32(0)
 
@@ -205,7 +205,7 @@ func (e *BaseExecutor) select_prefill_sequences() []string {
     return result
 }
 
-func (e *BaseExecutor) select_decode_sequences() []string {
+func (BaseExecutor* e) select_decode_sequences() []string {
     result := make([]string, 0)
     count := i32(0)
 
@@ -219,18 +219,18 @@ func (e *BaseExecutor) select_decode_sequences() []string {
     return result
 }
 
-func (e *BaseExecutor) GetSequenceStatus(sequence_id string) SequenceStatus {
+func (BaseExecutor* e) GetSequenceStatus(sequence_id string) SequenceStatus {
     if status, exists := e.sequences[sequence_id]; exists {
         return status
     }
     return SequenceStatus{sequence_id: sequence_id, error_code: ERROR_INVALID_SEQUENCE}
 }
 
-func (e *BaseExecutor) GetStatistics() ExecutorStatistics {
+func (BaseExecutor* e) GetStatistics() ExecutorStatistics {
     return e.statistics
 }
 
-func (e *BaseExecutor) ResetStatistics() {
+func (BaseExecutor* e) ResetStatistics() {
     e.statistics.total_iterations = 0
     e.statistics.completed_iterations = 0
     e.statistics.failed_iterations = 0
@@ -238,7 +238,7 @@ func (e *BaseExecutor) ResetStatistics() {
     e.statistics.avg_latency = 0.0
 }
 
-func (e *BaseExecutor) GetMetrics() ExecutorMetrics {
+func (BaseExecutor* e) GetMetrics() ExecutorMetrics {
     cache_usage := i32(e.cache_manager.allocated_mb)
 
     return ExecutorMetrics{
@@ -250,7 +250,7 @@ func (e *BaseExecutor) GetMetrics() ExecutorMetrics {
     }
 }
 
-func (e *BaseExecutor) Drain() ExecutionResult {
+func (BaseExecutor* e) Drain() ExecutionResult {
     if e.state == EXECUTOR_STATE_SHUTDOWN {
         return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
     }
@@ -266,7 +266,7 @@ func (e *BaseExecutor) Drain() ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (e *BaseExecutor) Shutdown() ExecutionResult {
+func (BaseExecutor* e) Shutdown() ExecutionResult {
     e.Drain()
 
     e.state = EXECUTOR_STATE_SHUTDOWN
@@ -276,7 +276,7 @@ func (e *BaseExecutor) Shutdown() ExecutionResult {
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (km *KVCacheManager) free_blocks_for_sequence(seq_id string) {
+func (KVCacheManager* km) free_blocks_for_sequence(seq_id string) {
     for i := 0; i < km.block_count; i++ {
         if km.blocks[i].sequence_id == seq_id {
             km.blocks[i].is_allocated = 0

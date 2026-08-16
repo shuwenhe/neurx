@@ -79,7 +79,7 @@ func new_transformer_block(config transformer_config) *transformer_block {
     }
 }
 
-func (tb *transformer_block) forward(x *tensor.tensor_2, causal_mask *tensor.tensor_2) *tensor.tensor_2 {
+func (transformer_block* tb) forward(x *tensor.tensor_2, causal_mask *tensor.tensor_2) *tensor.tensor_2 {
     x_norm := tb.norm1.forward(x)
     attn_out := tb.self_attention(x_norm, causal_mask)
     x = tensor.Add(x, attn_out)
@@ -89,7 +89,7 @@ func (tb *transformer_block) forward(x *tensor.tensor_2, causal_mask *tensor.ten
     return x
 }
 
-func (tb *transformer_block) self_attention(x *tensor.tensor_2, causal_mask *tensor.tensor_2) *tensor.tensor_2 {
+func (transformer_block* tb) self_attention(x *tensor.tensor_2, causal_mask *tensor.tensor_2) *tensor.tensor_2 {
     batch_size := x.Shape[0]
     seq_len := x.Shape[1]
     q := tensor.MatMul(x, tb.attention.query_proj)
@@ -111,7 +111,7 @@ func (tb *transformer_block) self_attention(x *tensor.tensor_2, causal_mask *ten
     return output
 }
 
-func (tb *transformer_block) feed_forward(x *tensor.tensor_2) *tensor.tensor_2 {
+func (transformer_block* tb) feed_forward(x *tensor.tensor_2) *tensor.tensor_2 {
     proj := tensor.MatMul(x, tb.ffn.proj1)
     gate := tensor.MatMul(x, tb.ffn.gate_proj)
     gate = activation.Swish(gate)
@@ -120,7 +120,7 @@ func (tb *transformer_block) feed_forward(x *tensor.tensor_2) *tensor.tensor_2 {
     return output
 }
 
-func (tb *transformer_block) backward(grad_output *tensor.tensor_2) (*tensor.tensor_2, error) {
+func (transformer_block* tb) backward(grad_output *tensor.tensor_2) (*tensor.tensor_2, error) {
     grad_after_ffn := tensor.Add(grad_output, grad_output)
     grad_norm_2 := tb.norm2.backward(grad_after_ffn)
     grad_ffn_input := tb.ffn_backward(grad_norm_2)
@@ -131,15 +131,15 @@ func (tb *transformer_block) backward(grad_output *tensor.tensor_2) (*tensor.ten
     return grad_input, nil
 }
 
-func (tb *transformer_block) attention_backward(grad_output *tensor.tensor_2) *tensor.tensor_2 {
+func (transformer_block* tb) attention_backward(grad_output *tensor.tensor_2) *tensor.tensor_2 {
     return grad_output
 }
 
-func (tb *transformer_block) ffn_backward(grad_output *tensor.tensor_2) *tensor.tensor_2 {
+func (transformer_block* tb) ffn_backward(grad_output *tensor.tensor_2) *tensor.tensor_2 {
     return grad_output
 }
 
-func (ln *layer_norm) forward(x *tensor.tensor_2) *tensor.tensor_2 {
+func (layer_norm* ln) forward(x *tensor.tensor_2) *tensor.tensor_2 {
     mean := compute_mean(x, -1)
     variance := compute_variance(x, -1)
     x_norm := tensor.Sub(x, mean)
@@ -149,7 +149,7 @@ func (ln *layer_norm) forward(x *tensor.tensor_2) *tensor.tensor_2 {
     return output
 }
 
-func (ln *layer_norm) backward(grad_output *tensor.tensor_2) *tensor.tensor_2 {
+func (layer_norm* ln) backward(grad_output *tensor.tensor_2) *tensor.tensor_2 {
     return grad_output
 }
 

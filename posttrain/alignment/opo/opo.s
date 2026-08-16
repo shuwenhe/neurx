@@ -55,7 +55,7 @@ func new_opo_trainer(
     }
 }
 
-func (trainer *opo_trainer) compute_advantage_weights(Tensor advantages) -> Tensor {
+func (opo_trainer* trainer) compute_advantage_weights(Tensor advantages) -> Tensor {
     match trainer.config.advantage_weighting {
         "optimal" => {
             let weights = exp(advantages / trainer.config.temperature)
@@ -85,7 +85,7 @@ func (trainer *opo_trainer) compute_advantage_weights(Tensor advantages) -> Tens
     }
 }
 
-func (trainer *opo_trainer) compute_optimal_objective(
+func (opo_trainer* trainer) compute_optimal_objective(
     Tensor new_log_probs,
     Tensor ref_log_probs,
     Tensor advantage,
@@ -97,7 +97,7 @@ func (trainer *opo_trainer) compute_optimal_objective(
     return objective
 }
 
-func (trainer *opo_trainer) adapt_learning_rate(f32 kl) {
+func (opo_trainer* trainer) adapt_learning_rate(f32 kl) {
     if !trainer.config.use_adaptive_lr {
         return
     }
@@ -117,7 +117,7 @@ func (trainer *opo_trainer) adapt_learning_rate(f32 kl) {
     trainer.optimizer.set_learning_rate(trainer.current_lr)
 }
 
-func (trainer *opo_trainer) compute_gae(
+func (opo_trainer* trainer) compute_gae(
     []tensor rewards,
     []tensor values,
     []tensor dones
@@ -147,7 +147,7 @@ func (trainer *opo_trainer) compute_gae(
     return advantages, returns
 }
 
-func (trainer *opo_trainer) train_step(
+func (opo_trainer* trainer) train_step(
     []tensor prompts,
     []tensor responses,
     []tensor rewards
@@ -253,7 +253,7 @@ func (trainer *opo_trainer) train_step(
     )
 }
 
-func (trainer *opo_trainer) train(DataLoader train_data) -> ([]f32, []f32) {
+func (opo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
     for batch in train_data {

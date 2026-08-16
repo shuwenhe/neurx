@@ -60,7 +60,7 @@ struct data_governance_report {
     audit_summary       string
 }
 
-func (dvc *data_version_control) initialize() {
+func (data_version_control* dvc) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Data Version Control and Governance System           ║")
     fmt.Println("║  Track, audit, and manage datasets                    ║")
@@ -72,7 +72,7 @@ func (dvc *data_version_control) initialize() {
     fmt.Printf("  Audit Logs: %d\n\n", len(dvc.audit_logs))
 }
 
-func (dvc *data_version_control) register_dataset_version(
+func (data_version_control* dvc) register_dataset_version(
     dataset_name string,
     version_number int,
     creator string,
@@ -115,7 +115,7 @@ func (dvc *data_version_control) register_dataset_version(
     return version
 }
 
-func (dvc *data_version_control) assess_data_quality(
+func (data_version_control* dvc) assess_data_quality(
     dataset_name string,
     version_number int,
     valid_samples int,
@@ -156,7 +156,7 @@ func (dvc *data_version_control) assess_data_quality(
     }
 }
 
-func (dvc *data_version_control) run_compliance_checks(
+func (data_version_control* dvc) run_compliance_checks(
     dataset_name string,
     version_number int) {
     version_id := fmt.Sprintf("%s-v%d", dataset_name, version_number)
@@ -187,7 +187,7 @@ func (dvc *data_version_control) run_compliance_checks(
     }
 }
 
-func (dvc *data_version_control) add_to_lineage(
+func (data_version_control* dvc) add_to_lineage(
     dataset_name string,
     version_number int,
     parent_versions []string) {
@@ -208,7 +208,7 @@ func (dvc *data_version_control) add_to_lineage(
     }
 }
 
-func (dvc *data_version_control) get_data_provenance(
+func (data_version_control* dvc) get_data_provenance(
     dataset_name string,
     version_number int) {
     version_id := fmt.Sprintf("%s-v%d", dataset_name, version_number)
@@ -226,7 +226,7 @@ func (dvc *data_version_control) get_data_provenance(
     }
 }
 
-func (dvc *data_version_control) log_audit_operation(
+func (data_version_control* dvc) log_audit_operation(
     operation string,
     actor string,
     changes string) {
@@ -240,7 +240,7 @@ func (dvc *data_version_control) log_audit_operation(
     dvc.audit_logs = append(dvc.audit_logs, log_entry)
 }
 
-func (dvc *data_version_control) get_audit_trail(
+func (data_version_control* dvc) get_audit_trail(
     dataset_name string) {
     fmt.Printf("\n[Audit] Audit trail for %s:\n", dataset_name)
     fmt.Println("  Time                Operation             Actor            Changes")
@@ -254,7 +254,7 @@ func (dvc *data_version_control) get_audit_trail(
     }
 }
 
-func (dvc *data_version_control) generate_governance_report(
+func (data_version_control* dvc) generate_governance_report(
     dataset_name string) {
     fmt.Printf("\n┌────────────────────────────────────────┐\n")
     fmt.Printf("│  Data Governance Report: %s       │\n", dataset_name)
@@ -307,7 +307,7 @@ func new_data_version_control() *data_version_control {
     }
 }
 
-func (dvc *data_version_control) run_complete_version_control_cycle() {
+func (data_version_control* dvc) run_complete_version_control_cycle() {
     dvc.initialize()
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Registering Dataset Versions          │")

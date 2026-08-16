@@ -104,7 +104,7 @@ func new_communicator(comm_backend backend, int rank, int world_size, int local_
     }
 }
 
-func (comm *communicator) initialize() bool {
+func (communicator* comm) initialize() bool {
     if comm.initialized {
         false
     }
@@ -114,7 +114,7 @@ func (comm *communicator) initialize() bool {
     true
 }
 
-func (comm *communicator) finalize() bool {
+func (communicator* comm) finalize() bool {
     if !comm.initialized {
         false
     }
@@ -123,22 +123,22 @@ func (comm *communicator) finalize() bool {
     true
 }
 
-func (comm *communicator) get_rank() int {
+func (communicator* comm) get_rank() int {
     comm.config.rank
 }
 
-func (comm *communicator) get_world_size() int {
+func (communicator* comm) get_world_size() int {
     comm.config.world_size
 }
 
-func (comm *communicator) get_local_rank() int {
+func (communicator* comm) get_local_rank() int {
     comm.config.local_rank
 }
 
-func (comm *communicator) is_initialized() bool {
+func (communicator* comm) is_initialized() bool {
     comm.initialized
 }
 
-func (comm *communicator) get_backend() string {
+func (communicator* comm) get_backend() string {
     comm.backend_name
 }

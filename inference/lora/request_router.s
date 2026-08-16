@@ -55,7 +55,7 @@ func new_lora_request_router(
     }
 }
 
-func (router *lora_request_router) submit_request(req lora_request) bool {
+func (lora_request_router* router) submit_request(req lora_request) bool {
 
     if router.adapter_mgr.cache[req.adapter_id].weights.rank <= 0 {
         return false
@@ -94,7 +94,7 @@ func (router *lora_request_router) submit_request(req lora_request) bool {
     return true
 }
 
-func (router *lora_request_router) process_request_batch() []lora_inference_result {
+func (lora_request_router* router) process_request_batch() []lora_inference_result {
     results := []lora_inference_result{}
 
     sort_queues_by_priority(router.queues)
@@ -127,7 +127,7 @@ func (router *lora_request_router) process_request_batch() []lora_inference_resu
     return results
 }
 
-func (router *lora_request_router) process_single_request(req lora_request) lora_inference_result {
+func (lora_request_router* router) process_single_request(req lora_request) lora_inference_result {
 
     if !router.adapter_mgr.switch_adapter(req.adapter_id) {
         return lora_inference_result{
@@ -186,7 +186,7 @@ func (router *lora_request_router) process_single_request(req lora_request) lora
     return result
 }
 
-func (router *lora_request_router) adjust_queue_priorities() {
+func (lora_request_router* router) adjust_queue_priorities() {
 
     int i = 0
     for i < len(router.queues) {
@@ -232,7 +232,7 @@ func create_adaptive_batch_config() adaptive_batch_config {
     }
 }
 
-func (router *lora_request_router) create_adaptive_batches(
+func (lora_request_router* router) create_adaptive_batches(
     config adaptive_batch_config
 ) [][]lora_request {
 
@@ -281,7 +281,7 @@ struct load_balance_strategy {
     int max_queue_length
 }
 
-func (router *lora_request_router) get_best_adapter_for_loading(
+func (lora_request_router* router) get_best_adapter_for_loading(
     []string candidate_adapters
 ) string {
 
@@ -309,7 +309,7 @@ func (router *lora_request_router) get_best_adapter_for_loading(
     return best_adapter
 }
 
-func (router *lora_request_router) find_queue_for_adapter(adapter_id string) adapter_queue {
+func (lora_request_router* router) find_queue_for_adapter(adapter_id string) adapter_queue {
     int i = 0
     for i < len(router.queues) {
         if router.queues[i].adapter_id == adapter_id {
@@ -325,7 +325,7 @@ func (router *lora_request_router) find_queue_for_adapter(adapter_id string) ada
     }
 }
 
-func (router *lora_request_router) get_router_stats() map[string]int {
+func (lora_request_router* router) get_router_stats() map[string]int {
     stats := map[string]int{}
 
     stats["total_processed"] = router.total_requests_processed
@@ -343,12 +343,12 @@ func (router *lora_request_router) get_router_stats() map[string]int {
     return stats
 }
 
-func (router *lora_request_router) get_queue_length(adapter_id string) int {
+func (lora_request_router* router) get_queue_length(adapter_id string) int {
     queue := router.find_queue_for_adapter(adapter_id)
     return len(queue.requests)
 }
 
-func (router *lora_request_router) clear_cache() {
+func (lora_request_router* router) clear_cache() {
     router.results_cache = map[string]lora_inference_result{}
 }
 

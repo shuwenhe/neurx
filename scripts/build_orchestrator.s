@@ -66,7 +66,7 @@ func new_build_orchestrator() (*build_orchestrator, error) {
     }, nil
 }
 
-func (b *build_orchestrator) setup() error {
+func (build_orchestrator* b) setup() error {
     b.logger.log("Setting up build environment...")
     if err := mkdir(b.buildDir); err != nil {
         return err
@@ -75,7 +75,7 @@ func (b *build_orchestrator) setup() error {
     return nil
 }
 
-func (b *build_orchestrator) clean() error {
+func (build_orchestrator* b) clean() error {
     b.logger.log("Cleaning build artifacts...")
     if err := remove_dir(b.buildDir); err != nil {
         b.logger.warn("Failed to clean build directory: %v", err)
@@ -94,7 +94,7 @@ func (b *build_orchestrator) clean() error {
     return nil
 }
 
-func (b *build_orchestrator) build_compiler() error {
+func (build_orchestrator* b) build_compiler() error {
     b.logger.log("Checking S compiler...")
     if !command_exists("s") && !file_exists(filepath.Join(b.sRoot, ".local", "bin", "s")) {
         b.logger.log("Building S compiler...")
@@ -110,7 +110,7 @@ func (b *build_orchestrator) build_compiler() error {
     return nil
 }
 
-func (b *build_orchestrator) build_core() error {
+func (build_orchestrator* b) build_core() error {
     b.logger.log("Building core NeurX components...")
     components := []string{
         "core/tensor.s",
@@ -137,7 +137,7 @@ func (b *build_orchestrator) build_core() error {
     return nil
 }
 
-func (b *build_orchestrator) build_training() error {
+func (build_orchestrator* b) build_training() error {
     b.logger.log("Building training components...")
     components := []string{
         "training/train_loop.s",
@@ -164,7 +164,7 @@ func (b *build_orchestrator) build_training() error {
     return nil
 }
 
-func (b *build_orchestrator) build_inference() error {
+func (build_orchestrator* b) build_inference() error {
     b.logger.log("Building inference components...")
     components := []string{
         "infer/inference_server.s",
@@ -190,7 +190,7 @@ func (b *build_orchestrator) build_inference() error {
     return nil
 }
 
-func (b *build_orchestrator) build_all() error {
+func (build_orchestrator* b) build_all() error {
     b.logger.log("Building all NeurX components...")
     if err := b.setup(); err != nil {
         return err
@@ -211,7 +211,7 @@ func (b *build_orchestrator) build_all() error {
     return nil
 }
 
-func (b *build_orchestrator) run_tests() error {
+func (build_orchestrator* b) run_tests() error {
     if !b.config.tests {
         b.logger.log("Tests disabled")
         return nil
@@ -231,14 +231,14 @@ func (b *build_orchestrator) run_tests() error {
     return nil
 }
 
-func (b *build_orchestrator) get_s_compiler() string {
+func (build_orchestrator* b) get_s_compiler() string {
     if command_exists("s") {
         return "s"
     }
     return filepath.Join(b.sRoot, ".local", "bin", "s")
 }
 
-func (b *build_orchestrator) log_config() {
+func (build_orchestrator* b) log_config() {
     config := fmt.Sprintf(`neur_x build configuration
 target: %s
 architecture: %s

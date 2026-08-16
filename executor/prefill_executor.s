@@ -23,11 +23,11 @@ func NewPrefillExecutor(config ExecutorConfig, prefill_config PrefillConfig) *Pr
     return executor
 }
 
-func (pe *PrefillExecutor) Initialize() ExecutionResult {
+func (PrefillExecutor* pe) Initialize() ExecutionResult {
     return pe.base.Initialize()
 }
 
-func (pe *PrefillExecutor) ProcessPrefill(sequences []string, prompt_tokens []i32) ExecutionResult {
+func (PrefillExecutor* pe) ProcessPrefill(sequences []string, prompt_tokens []i32) ExecutionResult {
     if pe.base.state != EXECUTOR_STATE_RUNNING {
         return ExecutionResult{
             success: 0,
@@ -88,7 +88,7 @@ func (pe *PrefillExecutor) ProcessPrefill(sequences []string, prompt_tokens []i3
     }
 }
 
-func (pe *PrefillExecutor) allocate_kv_cache(sequence_id string, num_tokens i32) ExecutionResult {
+func (PrefillExecutor* pe) allocate_kv_cache(sequence_id string, num_tokens i32) ExecutionResult {
 
     memory_needed := num_tokens * 100
 
@@ -118,7 +118,7 @@ func (pe *PrefillExecutor) allocate_kv_cache(sequence_id string, num_tokens i32)
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (pe *PrefillExecutor) compute_attention(sequences []string, token_counts []i32) ExecutionResult {
+func (PrefillExecutor* pe) compute_attention(sequences []string, token_counts []i32) ExecutionResult {
 
     total_ops := i32(0)
     for i := 0; i < len(token_counts); i++ {
@@ -132,7 +132,7 @@ func (pe *PrefillExecutor) compute_attention(sequences []string, token_counts []
     }
 }
 
-func (pe *PrefillExecutor) compute_logits(sequences []string) ExecutionResult {
+func (PrefillExecutor* pe) compute_logits(sequences []string) ExecutionResult {
 
     return ExecutionResult{
         success: 1,
@@ -140,7 +140,7 @@ func (pe *PrefillExecutor) compute_logits(sequences []string) ExecutionResult {
     }
 }
 
-func (pe *PrefillExecutor) CreateBatch(num_sequences i32) []string {
+func (PrefillExecutor* pe) CreateBatch(num_sequences i32) []string {
     batch := make([]string, 0)
 
     for seq_id, _ := range pe.base.sequences {
@@ -152,12 +152,12 @@ func (pe *PrefillExecutor) CreateBatch(num_sequences i32) []string {
     return batch
 }
 
-func (pe *PrefillExecutor) EstimatePrefillTime(total_tokens i32) i32 {
+func (PrefillExecutor* pe) EstimatePrefillTime(total_tokens i32) i32 {
 
     return (total_tokens * 10) / 1000
 }
 
-func (pe *PrefillExecutor) Shutdown() ExecutionResult {
+func (PrefillExecutor* pe) Shutdown() ExecutionResult {
     return pe.base.Shutdown()
 }
 

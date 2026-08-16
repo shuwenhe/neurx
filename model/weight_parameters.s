@@ -147,7 +147,7 @@ func new_packed_weight(string weight_id, string original_weight_id, string algor
     }
 }
 
-func (weight *model_weight) get_dtype_string() string {
+func (model_weight* weight) get_dtype_string() string {
     switch weight.metadata.dtype {
         parameter_dtype::float32 : "float32",
         parameter_dtype::float16 : "float16",
@@ -158,28 +158,28 @@ func (weight *model_weight) get_dtype_string() string {
     }
 }
 
-func (weight *model_weight) get_size_bytes() int64 {
+func (model_weight* weight) get_size_bytes() int64 {
     weight.metadata.size_bytes
 }
 
-func (weight *model_weight) get_total_elements() int64 {
+func (model_weight* weight) get_total_elements() int64 {
     weight.metadata.total_elements
 }
 
-func (weight *model_weight) set_device(string device_type) () {
+func (model_weight* weight) set_device(string device_type) () {
     weight.metadata.device_type = device_type
 }
 
-func (weight *model_weight) get_device() string {
+func (model_weight* weight) get_device() string {
     weight.metadata.device_type
 }
 
-func (qweight *quantized_weight) set_scales(float scale, float zero_pt) () {
+func (quantized_weight* qweight) set_scales(float scale, float zero_pt) () {
     qweight.scale = scale
     qweight.zero_point = zero_pt
 }
 
-func (qweight *quantized_weight) get_compression_ratio() float {
+func (quantized_weight* qweight) get_compression_ratio() float {
     switch qweight.quantized_dtype {
         parameter_dtype::int8 : 4.0,
         parameter_dtype::int4 : 8.0,
@@ -190,17 +190,17 @@ func (qweight *quantized_weight) get_compression_ratio() float {
     }
 }
 
-func (pweight *weight_parameter) enable_quantization() bool {
+func (weight_parameter* pweight) enable_quantization() bool {
     pweight.uses_quantization = true
     true
 }
 
-func (pweight *weight_parameter) enable_packing() bool {
+func (weight_parameter* pweight) enable_packing() bool {
     pweight.uses_packing = true
     true
 }
 
-func (pweight *weight_parameter) is_compressed() bool {
+func (weight_parameter* pweight) is_compressed() bool {
     pweight.uses_quantization || pweight.uses_packing
 }
 
@@ -222,14 +222,14 @@ func new_layer_weights(string layer_id) layer_weights {
     }
 }
 
-func (layer *layer_weights) add_weight(string weight_id, weight_parameter param) bool {
+func (layer_weights* layer) add_weight(string weight_id, weight_parameter param) bool {
     layer.weights[weight_id] = param
     layer.total_memory_bytes = layer.total_memory_bytes + param.weight.get_size_bytes()
     layer.weight_count = layer.weight_count + 1
     true
 }
 
-func (layer *layer_weights) get_weight(string weight_id) weight_parameter {
+func (layer_weights* layer) get_weight(string weight_id) weight_parameter {
     if weight_id in layer.weights {
         layer.weights[weight_id]
     }
@@ -244,14 +244,14 @@ func (layer *layer_weights) get_weight(string weight_id) weight_parameter {
     }
 }
 
-func (layer *layer_weights) has_weight(string weight_id) bool {
+func (layer_weights* layer) has_weight(string weight_id) bool {
     weight_id in layer.weights
 }
 
-func (layer *layer_weights) get_total_memory() int64 {
+func (layer_weights* layer) get_total_memory() int64 {
     layer.total_memory_bytes
 }
 
-func (layer *layer_weights) get_weight_count() int {
+func (layer_weights* layer) get_weight_count() int {
     layer.weight_count
 }

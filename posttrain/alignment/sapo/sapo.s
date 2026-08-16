@@ -60,7 +60,7 @@ func new_sapo_trainer(
     }
 }
 
-func (trainer *sapo_trainer) smooth_clip(Tensor x, f32 lower, f32 upper) -> Tensor {
+func (sapo_trainer* trainer) smooth_clip(Tensor x, f32 lower, f32 upper) -> Tensor {
     let tau = trainer.config.tau
     let lower_weight = sigmoid((x - lower) / tau)
     let upper_weight = sigmoid((upper - x) / tau)
@@ -70,7 +70,7 @@ func (trainer *sapo_trainer) smooth_clip(Tensor x, f32 lower, f32 upper) -> Tens
     return smooth_clipped
 }
 
-func (trainer *sapo_trainer) compute_smooth_surrogate(
+func (sapo_trainer* trainer) compute_smooth_surrogate(
     Tensor ratio,
     Tensor advantage
 ) -> Tensor {
@@ -87,7 +87,7 @@ func (trainer *sapo_trainer) compute_smooth_surrogate(
     }
 }
 
-func (trainer *sapo_trainer) compute_gae(
+func (sapo_trainer* trainer) compute_gae(
     []tensor rewards,
     []tensor values,
     []tensor dones
@@ -117,7 +117,7 @@ func (trainer *sapo_trainer) compute_gae(
     return advantages, returns
 }
 
-func (trainer *sapo_trainer) normalize_advantages([]tensor advantages) -> []tensor {
+func (sapo_trainer* trainer) normalize_advantages([]tensor advantages) -> []tensor {
     if !trainer.config.normalize_advantages {
         return advantages
     }
@@ -145,7 +145,7 @@ func (trainer *sapo_trainer) normalize_advantages([]tensor advantages) -> []tens
     return normalized
 }
 
-func (trainer *sapo_trainer) train_step(
+func (sapo_trainer* trainer) train_step(
     []tensor prompts,
     []tensor responses,
     []tensor rewards
@@ -227,7 +227,7 @@ func (trainer *sapo_trainer) train_step(
     )
 }
 
-func (trainer *sapo_trainer) train(DataLoader train_data) -> ([]f32, []f32) {
+func (sapo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
     for batch in train_data {

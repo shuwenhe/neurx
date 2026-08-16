@@ -52,14 +52,14 @@ struct tensor_parallel_operator {
     tp_group_members: [string]
 }
 
-func (op *tensor_parallel_operator) split_linear_weight([2]int weight_shape): [2]int {
+func (tensor_parallel_operator* op) split_linear_weight([2]int weight_shape): [2]int {
     out_features := weight_shape[0]
     in_features := weight_shape[1]
     split_out := out_features / op.tp_size
     return [2]int{split_out, in_features}
 }
 
-func (op *tensor_parallel_operator) all_reduce_loss(float local_loss): float {
+func (tensor_parallel_operator* op) all_reduce_loss(float local_loss): float {
     global_loss := local_loss * float(op.tp_size)
     return global_loss / float(op.tp_size)
 }
@@ -77,7 +77,7 @@ struct pipeline_scheduler {
     pipeline_stages: []*pipeline_stage
 }
 
-func (ps *pipeline_scheduler) create_pipeline_stages(int num_stages,
+func (pipeline_scheduler* ps) create_pipeline_stages(int num_stages,
                                                    int total_layers): {
     layers_per_stage := total_layers / num_stages
     for i := 0; i < num_stages; i++ {
@@ -108,7 +108,7 @@ func create_zero_optimizer_1t(): zero_optimizer {
     return zero
 }
 
-func (z *zero_optimizer) estimate_memory_reduction(int64 original_bytes): int64 {
+func (zero_optimizer* z) estimate_memory_reduction(int64 original_bytes): int64 {
     if z.stage == 3 {
         return original_bytes / 4
     } else if z.stage == 2 {
@@ -124,7 +124,7 @@ struct gradient_manager {
     ready_to_update: bool
 }
 
-func (gm *gradient_manager) accumulate_gradient(float loss): bool {
+func (gradient_manager* gm) accumulate_gradient(float loss): bool {
     gm.accumulated_loss += loss
     gm.accumulated_step += 1
     if gm.accumulated_step >= gm.accumulation_steps {
@@ -134,14 +134,14 @@ func (gm *gradient_manager) accumulate_gradient(float loss): bool {
     return false
 }
 
-func (gm *gradient_manager) get_accumulated_loss(): float {
+func (gradient_manager* gm) get_accumulated_loss(): float {
     if gm.accumulated_step > 0 {
         return gm.accumulated_loss / float(gm.accumulated_step)
     }
     return 0.0
 }
 
-func (gm *gradient_manager) reset() {
+func (gradient_manager* gm) reset() {
     gm.accumulated_loss = 0.0
     gm.accumulated_step = 0
     gm.ready_to_update = false
@@ -152,11 +152,11 @@ struct activation_checkpointer {
     enabled: bool
 }
 
-func (ac *activation_checkpointer) compute_memory_savings(): float {
+func (activation_checkpointer* ac) compute_memory_savings(): float {
     return 0.70
 }
 
-func (ac *activation_checkpointer) configure_for_1t_model() {
+func (activation_checkpointer* ac) configure_for_1t_model() {
     ac.checkpoint_segments = 96 / 10
     ac.enabled = true
 }
@@ -210,24 +210,24 @@ func create_training_loop_1t(int rank, int world_size): training_loop1_t {
     return loop
 }
 
-func (loop *training_loop1_t) forward_pass(int64 batch_tokens): float {
+func (training_loop1_t* loop) forward_pass(int64 batch_tokens): float {
     loss := 0.0
     time.Sleep(3 * time.Second)
     return loss
 }
 
-func (loop *training_loop1_t) backward_pass() {
+func (training_loop1_t* loop) backward_pass() {
     fmt.Printf("[Step %d] Computing gradients with ZeRO-3\n", loop.state.step)
 }
 
-func (loop *training_loop1_t) optimizer_step() {
+func (training_loop1_t* loop) optimizer_step() {
     loop.state.step += 1
     progress := float(loop.state.step) / 500000.0
     cosine_factor := (1.0 + math.Cos(3.14159 * progress)) / 2.0
     loop.state.learning_rate = 1e-4 * cosine_factor
 }
 
-func (loop *training_loop1_t) save_checkpoint() {
+func (training_loop1_t* loop) save_checkpoint() {
     loop.checkpoint_mgr.saved_checkpoints += 1
     fmt.Printf("[checkpoint %d] Saved at step %d\n",
               loop.checkpoint_mgr.saved_checkpoints, loop.state.step)
@@ -239,11 +239,11 @@ struct communication_optimizer {
     overlap_communication: bool
 }
 
-func (co *communication_optimizer) all_reduce_grads_async(int64 grad_size): {
+func (communication_optimizer* co) all_reduce_grads_async(int64 grad_size): {
     fmt.Printf("  [COMM] All-reduce gradients (%d MB) asynchronously\n", grad_size / (1024 * 1024))
 }
 
-func (co *communication_optimizer) broadcast_weights_async(int64 weight_size): {
+func (communication_optimizer* co) broadcast_weights_async(int64 weight_size): {
     fmt.Printf("  [COMM] Broadcast weights (%d MB) asynchronously\n", weight_size / (1024 * 1024))
 }
 
@@ -255,20 +255,20 @@ struct performance_monitor {
     memory_usage_percent: float
 }
 
-func (pm *performance_monitor) compute_throughput(int batch_size, int seq_len,
+func (performance_monitor* pm) compute_throughput(int batch_size, int seq_len,
                                                float elapsed_seconds): float {
     tokens_per_batch := batch_size * seq_len
     throughput := float(tokens_per_batch) / elapsed_seconds
     return throughput
 }
 
-func (pm *performance_monitor) compute_flops(int64 params, int batch_size,
+func (performance_monitor* pm) compute_flops(int64 params, int batch_size,
                                           int seq_len): int64 {
     flops := 2 * params * int64(batch_size) * int64(seq_len)
     return flops
 }
 
-func (pm *performance_monitor) log_performance(training_state state) {
+func (performance_monitor* pm) log_performance(training_state state) {
     fmt.Printf("\n[Step %d] Performance Metrics:\n", state.step)
     fmt.Printf("  Tokens/sec: %.0f\n", state.tokens_per_second)
     fmt.Printf("  TFLOPs/sec: %.1f\n", float(pm.compute_flops(1000000000000, 4096, 32768)) / 1e12 / 3.0)

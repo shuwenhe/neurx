@@ -77,7 +77,7 @@ func new_async_inference_engine(config AsyncInferenceEngineConfig) AsyncInferenc
     return engine
 }
 
-func (engine *AsyncInferenceEngine) setup_event_handlers() {
+func (AsyncInferenceEngine* engine) setup_event_handlers() {
 
     task_handler := EventHandler{
         handler_id: make([]string, 1),
@@ -96,7 +96,7 @@ func (engine *AsyncInferenceEngine) setup_event_handlers() {
     engine.event_loop.register_handler(EVENT_BATCH_EXECUTED, batch_handler)
 }
 
-func (engine *AsyncInferenceEngine) submit_request(input_ids []int, max_tokens int,
+func (AsyncInferenceEngine* engine) submit_request(input_ids []int, max_tokens int,
         temperature float64, top_k int, top_p float64) []string {
     engine.mutex.Lock()
 
@@ -128,7 +128,7 @@ func (engine *AsyncInferenceEngine) submit_request(input_ids []int, max_tokens i
     return req_id
 }
 
-func (engine *AsyncInferenceEngine) submit_request_streaming(input_ids []int, max_tokens int,
+func (AsyncInferenceEngine* engine) submit_request_streaming(input_ids []int, max_tokens int,
         temperature float64, top_k int, top_p float64) []string {
     engine.mutex.Lock()
 
@@ -155,7 +155,7 @@ func (engine *AsyncInferenceEngine) submit_request_streaming(input_ids []int, ma
     return req_id
 }
 
-func (engine *AsyncInferenceEngine) start() {
+func (AsyncInferenceEngine* engine) start() {
     engine.mutex.Lock()
     defer engine.mutex.Unlock()
 
@@ -172,7 +172,7 @@ func (engine *AsyncInferenceEngine) start() {
     engine.executor_thread_active = true
 }
 
-func (engine *AsyncInferenceEngine) stop() {
+func (AsyncInferenceEngine* engine) stop() {
     engine.mutex.Lock()
     defer engine.mutex.Unlock()
 
@@ -188,7 +188,7 @@ func (engine *AsyncInferenceEngine) stop() {
     engine.event_loop.flush_all()
 }
 
-func (engine *AsyncInferenceEngine) process_cycle() {
+func (AsyncInferenceEngine* engine) process_cycle() {
     engine.mutex.Lock()
 
     if !engine.running {
@@ -248,7 +248,7 @@ func (engine *AsyncInferenceEngine) process_cycle() {
     }
 }
 
-func (engine *AsyncInferenceEngine) get_status() map[string]interface{} {
+func (AsyncInferenceEngine* engine) get_status() map[string]interface{} {
     engine.mutex.Lock()
     defer engine.mutex.Unlock()
 
@@ -263,7 +263,7 @@ func (engine *AsyncInferenceEngine) get_status() map[string]interface{} {
     return status
 }
 
-func (engine *AsyncInferenceEngine) get_statistics() map[string]interface{} {
+func (AsyncInferenceEngine* engine) get_statistics() map[string]interface{} {
     engine.mutex.Lock()
     defer engine.mutex.Unlock()
 
@@ -294,7 +294,7 @@ func (engine *AsyncInferenceEngine) get_statistics() map[string]interface{} {
     return all_stats
 }
 
-func (engine *AsyncInferenceEngine) wait_completion(timeout_ms int64) bool {
+func (AsyncInferenceEngine* engine) wait_completion(timeout_ms int64) bool {
     start := current_time_ms()
 
     for {

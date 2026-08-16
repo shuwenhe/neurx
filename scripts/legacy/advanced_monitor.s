@@ -43,7 +43,7 @@ struct advanced_training_monitor {
     convergence_threshold: float
 }
 
-func (atm *advanced_training_monitor) init(
+func (advanced_training_monitor* atm) init(
     int total_steps,
     string log_file,
     int update_interval,
@@ -73,7 +73,7 @@ func calculate_perplexity(float loss): float {
     return math.Exp(loss)
 }
 
-func (atm *advanced_training_monitor) log_perplexity(
+func (advanced_training_monitor* atm) log_perplexity(
     int step,
     float train_loss,
     float val_loss) {
@@ -99,7 +99,7 @@ func (atm *advanced_training_monitor) log_perplexity(
     }
 }
 
-func (atm *advanced_training_monitor) log_step(
+func (advanced_training_monitor* atm) log_step(
     int step,
     int epoch,
     int batch_idx,
@@ -131,7 +131,7 @@ func (atm *advanced_training_monitor) log_step(
     atm.log_to_file(metrics)
 }
 
-func (atm *advanced_training_monitor) calculate_eta(int step, float elapsed): float {
+func (advanced_training_monitor* atm) calculate_eta(int step, float elapsed): float {
     if step <= 0 {
         return 0.0
     }
@@ -140,7 +140,7 @@ func (atm *advanced_training_monitor) calculate_eta(int step, float elapsed): fl
     return avg_step_time * float(remaining_steps)
 }
 
-func (atm *advanced_training_monitor) print_progress(training_metrics metrics) {
+func (advanced_training_monitor* atm) print_progress(training_metrics metrics) {
     progress := float(metrics.step) / float(atm.total_steps) * 100.0
     bar_length := 50
     filled := int(progress / 100.0 * float(bar_length))
@@ -171,7 +171,7 @@ func (atm *advanced_training_monitor) print_progress(training_metrics metrics) {
     println(status)
 }
 
-func (atm *advanced_training_monitor) log_to_file(training_metrics metrics) {
+func (advanced_training_monitor* atm) log_to_file(training_metrics metrics) {
     f, err := os.OpenFile(atm.log_file, os.O_APPEND|os.O_WRONLY, 0644)
     if err != nil {
         return
@@ -181,7 +181,7 @@ func (atm *advanced_training_monitor) log_to_file(training_metrics metrics) {
     f.WriteString(string(json_data) + "\n")
 }
 
-func (atm *advanced_training_monitor) check_convergence(): bool {
+func (advanced_training_monitor* atm) check_convergence(): bool {
     if len(atm.ppl_history) < atm.convergence_window {
         return false
     }
@@ -192,7 +192,7 @@ func (atm *advanced_training_monitor) check_convergence(): bool {
     return change < atm.convergence_threshold
 }
 
-func (atm *advanced_training_monitor) get_stats(): map[string]interface{} {
+func (advanced_training_monitor* atm) get_stats(): map[string]interface{} {
     if len(atm.steps) == 0 {
         return map[string]interface{}{
             "status": "no_data",
@@ -244,7 +244,7 @@ func (atm *advanced_training_monitor) get_stats(): map[string]interface{} {
     }
 }
 
-func (atm *advanced_training_monitor) generate_report(): string {
+func (advanced_training_monitor* atm) generate_report(): string {
     stats := atm.get_stats()
     report := "╔════════════════════════════════════════════════════════════╗\n"
     report += "║          🎯 NeurX Advanced Training Report                 ║\n"
@@ -288,7 +288,7 @@ func (atm *advanced_training_monitor) generate_report(): string {
     return report
 }
 
-func (atm *advanced_training_monitor) export_json(): string {
+func (advanced_training_monitor* atm) export_json(): string {
     data := map[string]interface{}{
         "summary": atm.get_stats(),
         "perplexity_history": atm.ppl_history,

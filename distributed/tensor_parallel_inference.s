@@ -53,7 +53,7 @@ func NewTensorParallelInference(config tensor_parallel_config) *tensor_parallel_
     return engine
 }
 
-func (tp *tensor_parallel_inference) ShardQKV(
+func (tensor_parallel_inference* tp) ShardQKV(
     q_proj []float32,
     k_proj []float32,
     v_proj []float32,
@@ -75,7 +75,7 @@ func (tp *tensor_parallel_inference) ShardQKV(
     return q_sharded, k_proj, v_proj
 }
 
-func (tp *tensor_parallel_inference) AllReduceAttentionOutput(
+func (tensor_parallel_inference* tp) AllReduceAttentionOutput(
     local_output []float32,
     output_size int32,
 ) []float32 {
@@ -89,7 +89,7 @@ func (tp *tensor_parallel_inference) AllReduceAttentionOutput(
     return result
 }
 
-func (tp *tensor_parallel_inference) ShardFFNInput(
+func (tensor_parallel_inference* tp) ShardFFNInput(
     input []float32,
     batch_size int32,
     seq_len int32,
@@ -110,7 +110,7 @@ func (tp *tensor_parallel_inference) ShardFFNInput(
     return output
 }
 
-func (tp *tensor_parallel_inference) AllGatherFFNOutput(
+func (tensor_parallel_inference* tp) AllGatherFFNOutput(
     local_output []float32,
     batch_size int32,
     seq_len int32,
@@ -133,7 +133,7 @@ func (tp *tensor_parallel_inference) AllGatherFFNOutput(
     return full_output
 }
 
-func (tp *tensor_parallel_inference) ReduceScatterGradient(
+func (tensor_parallel_inference* tp) ReduceScatterGradient(
     gradients []float32,
     output_size int32,
 ) []float32 {
@@ -149,7 +149,7 @@ func (tp *tensor_parallel_inference) ReduceScatterGradient(
     return scattered
 }
 
-func (tp *tensor_parallel_inference) ComputeLocalAttention(
+func (tensor_parallel_inference* tp) ComputeLocalAttention(
     q []float32,
     k []float32,
     v []float32,
@@ -180,7 +180,7 @@ func (tp *tensor_parallel_inference) ComputeLocalAttention(
     return output
 }
 
-func (tp *tensor_parallel_inference) GetCommunicationCost(
+func (tensor_parallel_inference* tp) GetCommunicationCost(
     tensor_size int64,
     bandwidth_gbps float32,
 ) int64 {
@@ -189,12 +189,12 @@ func (tp *tensor_parallel_inference) GetCommunicationCost(
     return latency_us
 }
 
-func (tp *tensor_parallel_inference) GetComputationSaving() float32 {
+func (tensor_parallel_inference* tp) GetComputationSaving() float32 {
     communication_overhead := 0.1
     return float32(tp.config.tp_size) * (1.0 - communication_overhead)
 }
 
-func (tp *tensor_parallel_inference) OverlapComputation() []string {
+func (tensor_parallel_inference* tp) OverlapComputation() []string {
     schedule := []string{
         "compute_q_proj(shard_0)",
         "compute_k_proj(shard_0)",
@@ -209,7 +209,7 @@ func (tp *tensor_parallel_inference) OverlapComputation() []string {
     return schedule
 }
 
-func (tp *tensor_parallel_inference) GetStats() map[string]interface{} {
+func (tensor_parallel_inference* tp) GetStats() map[string]interface{} {
     stats := make(map[string]interface{})
     stats["tp_size"] = tp.config.tp_size
     stats["rank"] = tp.config.rank

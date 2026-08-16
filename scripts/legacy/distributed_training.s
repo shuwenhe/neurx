@@ -30,7 +30,7 @@ struct distributed_process {
     bucket_size: int
 }
 
-func (dp *distributed_process) init_from_env(string backend) error {
+func (distributed_process* dp) init_from_env(string backend) error {
     config := distributed_config{
         backend: backend,
         rank: 0,
@@ -68,7 +68,7 @@ func (dp *distributed_process) init_from_env(string backend) error {
     return nil
 }
 
-func (dp *distributed_process) all_reduce_grad(float grad_norm): float {
+func (distributed_process* dp) all_reduce_grad(float grad_norm): float {
     if !dp.config.sync_gradients || dp.config.world_size == 1 {
         return grad_norm
     }
@@ -76,14 +76,14 @@ func (dp *distributed_process) all_reduce_grad(float grad_norm): float {
     return reduced_grad / float(dp.config.world_size)
 }
 
-func (dp *distributed_process) broadcast_parameters(float param): float {
+func (distributed_process* dp) broadcast_parameters(float param): float {
     if dp.config.world_size == 1 {
         return param
     }
     return param
 }
 
-func (dp *distributed_process) build_grad_buckets(int total_params) {
+func (distributed_process* dp) build_grad_buckets(int total_params) {
     if dp.config.world_size == 1 {
         return
     }
@@ -101,7 +101,7 @@ func (dp *distributed_process) build_grad_buckets(int total_params) {
     }
 }
 
-func (dp *distributed_process) reduce_bucket(int bucket_idx) {
+func (distributed_process* dp) reduce_bucket(int bucket_idx) {
     if bucket_idx >= len(dp.grad_buckets) {
         return
     }
@@ -119,7 +119,7 @@ struct data_partitioner {
     local_batch_size: int
 }
 
-func (dp *data_partitioner) get_local_indices(): []int {
+func (data_partitioner* dp) get_local_indices(): []int {
     indices := make([]int, 0)
     samples_per_rank := dp.total_samples / dp.world_size
     remainder := dp.total_samples % dp.world_size
@@ -139,7 +139,7 @@ func (dp *data_partitioner) get_local_indices(): []int {
     return indices
 }
 
-func (dp *data_partitioner) get_local_batch_size(): int {
+func (data_partitioner* dp) get_local_batch_size(): int {
     total_batch := dp.local_batch_size * dp.world_size
     return total_batch / dp.world_size
 }
@@ -153,7 +153,7 @@ struct distributed_sampler {
     epoch: int
 }
 
-func (ds *distributed_sampler) get_indices(): []int {
+func (distributed_sampler* ds) get_indices(): []int {
     indices := make([]int, 0)
     samples_per_rank := ds.num_samples / ds.world_size
     for i := 0; i < samples_per_rank; i++ {
@@ -165,7 +165,7 @@ func (ds *distributed_sampler) get_indices(): []int {
     return indices
 }
 
-func (ds *distributed_sampler) set_epoch(int epoch) {
+func (distributed_sampler* ds) set_epoch(int epoch) {
     ds.epoch = epoch
 }
 
@@ -177,7 +177,7 @@ struct communication_metrics {
     computation_time_ms: float
 }
 
-func (cm *communication_metrics) get_efficiency(): float {
+func (communication_metrics* cm) get_efficiency(): float {
     total_time := cm.communication_time_ms + cm.computation_time_ms
     if total_time == 0 {
         return 0.0
@@ -193,7 +193,7 @@ struct multi_node_config {
     timeout_minutes: int
 }
 
-func (dp *distributed_process) get_stats(): map[string]interface{} {
+func (distributed_process* dp) get_stats(): map[string]interface{} {
     return map[string]interface{}{
         "rank": dp.config.rank,
         "world_size": dp.config.world_size,
@@ -208,14 +208,14 @@ func (dp *distributed_process) get_stats(): map[string]interface{} {
     }
 }
 
-func (dp *distributed_process) is_main_process(): bool {
+func (distributed_process* dp) is_main_process(): bool {
     return dp.is_master
 }
 
-func (dp *distributed_process) barrier() {
+func (distributed_process* dp) barrier() {
 }
 
-func (dp *distributed_process) destroy_process_group() {
+func (distributed_process* dp) destroy_process_group() {
     dp.initialized = false
 }
 
@@ -224,12 +224,12 @@ struct distributed_context {
     comm_metrics: communication_metrics
 }
 
-func (dc *distributed_context) enter(): error {
+func (distributed_context* dc) enter(): error {
     dc.process = &distributed_process{}
     return dc.process.init_from_env("nccl")
 }
 
-func (dc *distributed_context) exit() {
+func (distributed_context* dc) exit() {
     if dc.process != nil {
         dc.process.destroy_process_group()
     }

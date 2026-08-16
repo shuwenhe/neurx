@@ -297,7 +297,7 @@ func (model_interface* m) has_capability(cap model_capability) bool {
 	return false
 }
 
-func (model_interface* m) set_generation_config(config *model_generation_config) {
+func (model_interface* m) set_generation_config(model_generation_config* config) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if config != nil {
@@ -305,7 +305,7 @@ func (model_interface* m) set_generation_config(config *model_generation_config)
 	}
 }
 
-func (model_interface* m) set_memory_config(config *model_memory_config) {
+func (model_interface* m) set_memory_config(model_memory_config* config) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if config != nil {

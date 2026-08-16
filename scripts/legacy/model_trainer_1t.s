@@ -193,7 +193,7 @@ func create_training_pipeline_1t(): training_pipeline1_t {
     return pipeline
 }
 
-func (p *training_pipeline1_t) print_summary() {
+func (training_pipeline1_t* p) print_summary() {
     fmt.Println("\n" + "="*80)
     fmt.Println("🚀 NEURX 1T PARAMETER MODEL - TRAINING CONFIGURATION")
     fmt.Println("="*80)
@@ -246,7 +246,7 @@ func (p *training_pipeline1_t) print_summary() {
     fmt.Println("\n" + "="*80)
 }
 
-func (p *training_pipeline1_t) initialize_distributed_environment() {
+func (training_pipeline1_t* p) initialize_distributed_environment() {
     fmt.Println("\n[INIT] Initializing distributed training environment...")
     fmt.Printf("  Setting up %d GPU processes\n", p.dist_config.total_gpus)
     fmt.Printf("  tensor_2 Parallelism: %d\n", p.dist_config.tensor_parallel_size)
@@ -255,7 +255,7 @@ func (p *training_pipeline1_t) initialize_distributed_environment() {
     fmt.Println("  status: ✓ Distributed environment ready")
 }
 
-func (p *training_pipeline1_t) initialize_model() {
+func (training_pipeline1_t* p) initialize_model() {
     fmt.Println("\n[MODEL] Initializing 1T parameter model...")
     fmt.Printf("  Parameters: %.2fT\n", float(p.config.num_params)/1e12)
     fmt.Printf("  Architecture: %d layers x %d hidden dims x %d heads\n",
@@ -263,7 +263,7 @@ func (p *training_pipeline1_t) initialize_model() {
     fmt.Println("  status: ✓ model initialized with tensor parallelism")
 }
 
-func (p *training_pipeline1_t) setup_optimization() {
+func (training_pipeline1_t* p) setup_optimization() {
     fmt.Println("\n[OPTIM] Setting up optimizer and scheduler...")
     fmt.Printf("  optimizer_2: adam_w with weight decay %.2e\n", 0.01)
     fmt.Printf("  Learning Rate: %.2e (peak)\n", p.train_config.learning_rate)
@@ -272,7 +272,7 @@ func (p *training_pipeline1_t) setup_optimization() {
     fmt.Println("  status: ✓ optimizer_2 and scheduler ready")
 }
 
-func (p *training_pipeline1_t) run_training() {
+func (training_pipeline1_t* p) run_training() {
     fmt.Println("\n[TRAIN] Starting 1T model training...")
     fmt.Printf("  Total Steps: %d\n", p.train_config.total_steps)
     fmt.Printf("  Global batch_2 Size: %d tokens per step\n",

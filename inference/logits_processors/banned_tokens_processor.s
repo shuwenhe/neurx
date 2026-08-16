@@ -34,7 +34,7 @@ func new_banned_tokens_processor(int vocab_size) banned_tokens_processor {
     }
 }
 
-func (processor *banned_tokens_processor) ban_token(int token_id) bool {
+func (banned_tokens_processor* processor) ban_token(int token_id) bool {
 
     if token_id < 0 || token_id >= processor.vocab_size {
         return false
@@ -49,7 +49,7 @@ func (processor *banned_tokens_processor) ban_token(int token_id) bool {
     return true
 }
 
-func (processor *banned_tokens_processor) ban_token_ids([]int token_ids) bool {
+func (banned_tokens_processor* processor) ban_token_ids([]int token_ids) bool {
 
     int i = 0
     for i < len(token_ids) {
@@ -60,7 +60,7 @@ func (processor *banned_tokens_processor) ban_token_ids([]int token_ids) bool {
     return true
 }
 
-func (processor *banned_tokens_processor) ban_word(string word) bool {
+func (banned_tokens_processor* processor) ban_word(string word) bool {
 
     ban_word := word
     if !processor.config.case_sensitive {
@@ -76,7 +76,7 @@ func (processor *banned_tokens_processor) ban_word(string word) bool {
     return true
 }
 
-func (processor *banned_tokens_processor) ban_words([]string words) bool {
+func (banned_tokens_processor* processor) ban_words([]string words) bool {
 
     int i = 0
     for i < len(words) {
@@ -87,7 +87,7 @@ func (processor *banned_tokens_processor) ban_words([]string words) bool {
     return true
 }
 
-func (processor *banned_tokens_processor) unban_token(int token_id) bool {
+func (banned_tokens_processor* processor) unban_token(int token_id) bool {
 
     if processor.banned_id_map[token_id] {
         delete_from_map(processor.banned_id_map, token_id)
@@ -97,7 +97,7 @@ func (processor *banned_tokens_processor) unban_token(int token_id) bool {
     return false
 }
 
-func (processor *banned_tokens_processor) unban_word(string word) bool {
+func (banned_tokens_processor* processor) unban_word(string word) bool {
 
     ban_word := word
     if !processor.config.case_sensitive {
@@ -112,14 +112,14 @@ func (processor *banned_tokens_processor) unban_word(string word) bool {
     return false
 }
 
-func (processor *banned_tokens_processor) clear_all_bans() {
+func (banned_tokens_processor* processor) clear_all_bans() {
     processor.banned_id_map = map[int]bool{}
     processor.banned_word_map = map[string]bool{}
     processor.config.banned_token_ids = make([]int, 0)
     processor.config.banned_words = make([]string, 0)
 }
 
-func (processor *banned_tokens_processor) process_logits(
+func (banned_tokens_processor* processor) process_logits(
     []float logits
 ) []float {
 
@@ -163,7 +163,7 @@ func apply_word_bans(
     }
 }
 
-func (processor *banned_tokens_processor) ban_repeated_token(
+func (banned_tokens_processor* processor) ban_repeated_token(
     []int history,
     int last_token
 ) {
@@ -184,7 +184,7 @@ func (processor *banned_tokens_processor) ban_repeated_token(
     }
 }
 
-func (processor *banned_tokens_processor) ban_sequence(
+func (banned_tokens_processor* processor) ban_sequence(
     []int token_sequence
 ) bool {
 
@@ -197,7 +197,7 @@ func (processor *banned_tokens_processor) ban_sequence(
     return true
 }
 
-func (processor *banned_tokens_processor) anneal_bans(float progress) {
+func (banned_tokens_processor* processor) anneal_bans(float progress) {
 
     if progress < 0.3 {
 
@@ -236,11 +236,11 @@ func create_malformed_symbol_bans() []string {
     }
 }
 
-func (processor *banned_tokens_processor) get_banned_count() int {
+func (banned_tokens_processor* processor) get_banned_count() int {
     return len(processor.config.banned_token_ids)
 }
 
-func (processor *banned_tokens_processor) get_banned_tokens() []int {
+func (banned_tokens_processor* processor) get_banned_tokens() []int {
     []int result = make([]int, len(processor.config.banned_token_ids))
     int i = 0
     for i < len(processor.config.banned_token_ids) {
@@ -250,11 +250,11 @@ func (processor *banned_tokens_processor) get_banned_tokens() []int {
     return result
 }
 
-func (processor *banned_tokens_processor) is_token_banned(int token_id) bool {
+func (banned_tokens_processor* processor) is_token_banned(int token_id) bool {
     return processor.banned_id_map[token_id]
 }
 
-func (processor *banned_tokens_processor) is_word_banned(string word) bool {
+func (banned_tokens_processor* processor) is_word_banned(string word) bool {
     check_word := word
     if !processor.config.case_sensitive {
         check_word = to_lowercase(word)
@@ -269,7 +269,7 @@ struct adaptive_ban_config {
     bool ban_common_tokens
 }
 
-func (processor *banned_tokens_processor) apply_adaptive_bans(
+func (banned_tokens_processor* processor) apply_adaptive_bans(
     []int token_history,
     adaptive_ban_config config
 ) {

@@ -321,12 +321,12 @@ func new_logits_processor_manager(int vocab_size) logits_processor_manager {
     }
 }
 
-func (mgr *logits_processor_manager) add_processor(config logits_processor_config) {
+func (logits_processor_manager* mgr) add_processor(config logits_processor_config) {
     mgr.processors = append_processor(mgr.processors, config)
     mgr.sorting_by_priority = true
 }
 
-func (mgr *logits_processor_manager) process([]float logits) []float {
+func (logits_processor_manager* mgr) process([]float logits) []float {
 
     if mgr.sorting_by_priority {
         sort_processors_by_priority(mgr.processors)

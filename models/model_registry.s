@@ -57,7 +57,7 @@ func create_model_registry() *model_registry {
 	}
 }
 
-func (model_registry* registry) register_model(reg_info *model_registration_info) error {
+func (model_registry* registry) register_model(model_registration_info* reg_info) error {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	
@@ -152,7 +152,7 @@ func (model_registry* registry) update_model_state(package_id string, active boo
 	return nil
 }
 
-func (model_registry* registry) query_models(query *model_query) *model_query_result {
+func (model_registry* registry) query_models(model_query* query) *model_query_result {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	

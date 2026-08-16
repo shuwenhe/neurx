@@ -71,7 +71,7 @@ func new_tracer() tracer {
     return t
 }
 
-func (t *tracer) start_span(trace_id []string, span_id []string, name []string) span {
+func (tracer* t) start_span(trace_id []string, span_id []string, name []string) span {
     s := span{}
     s.trace_id = trace_id
     s.span_id = span_id
@@ -89,7 +89,7 @@ func (t *tracer) start_span(trace_id []string, span_id []string, name []string) 
     return s
 }
 
-func (t *tracer) start_child_span(parent_span *span, name []string) span {
+func (tracer* t) start_child_span(parent_span *span, name []string) span {
     s := span{}
     s.trace_id = parent_span.trace_id
     s.span_id = append([]string{}, "new-span-id")
@@ -107,7 +107,7 @@ func (t *tracer) start_child_span(parent_span *span, name []string) span {
     return s
 }
 
-func (t *tracer) end_span(s *span) {
+func (tracer* t) end_span(span* s) {
     s.end_time = get_current_time_nanos()
 
     if len(t.spans) < t.max_spans[0] {
@@ -121,13 +121,13 @@ func (t *tracer) end_span(s *span) {
 
     t.export()
 }
-func (s *span) add_attribute(key []string, value []string) {
+func (span* s) add_attribute(key []string, value []string) {
     if len(key) > 0 && len(value) > 0 && len(s.attributes) > 0 {
         s.attributes[0][key[0]] = value[0]
     }
 }
 
-func (s *span) add_event(name []string, attributes []map[string]string) {
+func (span* s) add_event(name []string, attributes []map[string]string) {
     event := span_event{}
     event.name = name
     event.timestamp = get_current_time_nanos()
@@ -136,15 +136,15 @@ func (s *span) add_event(name []string, attributes []map[string]string) {
     s.events = append(s.events, event)
 }
 
-func (s *span) set_status(status span_status) {
+func (span* s) set_status(status span_status) {
     s.status = status
 }
 
-func (s *span) set_kind(kind span_kind) {
+func (span* s) set_kind(kind span_kind) {
     s.kind = kind
 }
 
-func (s *span) set_error(error_msg []string) {
+func (span* s) set_error(error_msg []string) {
     s.status = span_status{
         code: append([]string{}, "ERROR"),
         description: error_msg,
@@ -158,18 +158,18 @@ func (s *span) set_error(error_msg []string) {
     s.add_event(append([]string{}, "exception"), error_attrs)
 }
 
-func (s *span) get_duration() []int {
+func (span* s) get_duration() []int {
     if len(s.end_time) > 0 && len(s.start_time) > 0 {
         return append([]int{}, s.end_time[0] - s.start_time[0])
     }
     return append([]int{}, 0)
 }
 
-func (t *tracer) register_exporter(exporter span_exporter) {
+func (tracer* t) register_exporter(exporter span_exporter) {
     t.exporters = append(t.exporters, exporter)
 }
 
-func (t *tracer) export() {
+func (tracer* t) export() {
     for i := 0; i < len(t.exporters); i++ {
         if len(t.exporters) > 0 {
             _ = t.exporters[i]
@@ -177,11 +177,11 @@ func (t *tracer) export() {
     }
 }
 
-func (t *tracer) get_spans() []span {
+func (tracer* t) get_spans() []span {
     return t.spans
 }
 
-func (s *span) string_rep() []string {
+func (span* s) string_rep() []string {
     result := ""
 
     if len(s.trace_id) > 0 {

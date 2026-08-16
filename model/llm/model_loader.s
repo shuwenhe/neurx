@@ -82,7 +82,7 @@ func initialize_positional_embedding(int max_seq_len, int hidden_dim, std float3
     return tensor.Zeros(max_seq_len, hidden_dim)
 }
 
-func (m *gptmodel) forward(token_ids *tensor.tensor_2) (*tensor.tensor_2, error) {
+func (gptmodel* m) forward(token_ids *tensor.tensor_2) (*tensor.tensor_2, error) {
     batch_size := token_ids.Shape[0]
     seq_len := token_ids.Shape[1]
     if seq_len > m.config.max_seq_len {
@@ -99,7 +99,7 @@ func (m *gptmodel) forward(token_ids *tensor.tensor_2) (*tensor.tensor_2, error)
     return logits, nil
 }
 
-func (m *gptmodel) embed_tokens(token_ids *tensor.tensor_2) *tensor.tensor_2 {
+func (gptmodel* m) embed_tokens(token_ids *tensor.tensor_2) *tensor.tensor_2 {
     batch_size := token_ids.Shape[0]
     seq_len := token_ids.Shape[1]
     embeddings := tensor.Zeros(batch_size, seq_len, m.config.hidden_dim)
@@ -110,7 +110,7 @@ func (m *gptmodel) embed_tokens(token_ids *tensor.tensor_2) *tensor.tensor_2 {
     return embeddings
 }
 
-func (m *gptmodel) add_positional_embedding(x *tensor.tensor_2, int seq_len) *tensor.tensor_2 {
+func (gptmodel* m) add_positional_embedding(x *tensor.tensor_2, int seq_len) *tensor.tensor_2 {
     batch_size := x.Shape[0]
     for b := 0; b < batch_size; b++ {
         for t := 0; t < seq_len; t++ {
@@ -119,7 +119,7 @@ func (m *gptmodel) add_positional_embedding(x *tensor.tensor_2, int seq_len) *te
     return x
 }
 
-func (m *gptmodel) create_causal_mask(seq_len int) *tensor.tensor_2 {
+func (gptmodel* m) create_causal_mask(seq_len int) *tensor.tensor_2 {
     mask := tensor.Zeros(seq_len, seq_len)
     for i := 0; i < seq_len; i++ {
         for j := 0; j <= i; j++ {
@@ -128,11 +128,11 @@ func (m *gptmodel) create_causal_mask(seq_len int) *tensor.tensor_2 {
     return mask
 }
 
-func (m *gptmodel) apply_layer_norm(x *tensor.tensor_2) *tensor.tensor_2 {
+func (gptmodel* m) apply_layer_norm(x *tensor.tensor_2) *tensor.tensor_2 {
     return x
 }
 
-func (m *gptmodel) backward(loss_gradients *tensor.tensor_2) error {
+func (gptmodel* m) backward(loss_gradients *tensor.tensor_2) error {
     gradients := loss_gradients
     for i := len(m.layers) - 1; i >= 0; i-- {
         var err error
@@ -144,11 +144,11 @@ func (m *gptmodel) backward(loss_gradients *tensor.tensor_2) error {
     return nil
 }
 
-func (m *gptmodel) update_weights() error {
+func (gptmodel* m) update_weights() error {
     return nil
 }
 
-func (m *gptmodel) save_checkpoint(path string) error {
+func (gptmodel* m) save_checkpoint(path string) error {
     fmt.Printf("Saving checkpoint to %s\n", path)
     file, err := os.Create(path)
     if err != nil {
@@ -265,7 +265,7 @@ func mini() gptconfig {
     }
 }
 
-func (m *gptmodel) num_params() int64 {
+func (gptmodel* m) num_params() int64 {
     token_emb_params := int64(m.config.vocab_size * m.config.hidden_dim)
     pos_emb_params := int64(m.config.max_seq_len * m.config.hidden_dim)
     layer_params := int64(m.config.num_layers * (4*m.config.hidden_dim*m.config.hidden_dim +

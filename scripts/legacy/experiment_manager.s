@@ -60,7 +60,7 @@ struct experiment_manager {
     best_experiment     string
 }
 
-func (manager *experiment_manager) initialize() {
+func (experiment_manager* manager) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Industrial Experiment Management System              ║")
     fmt.Println("║  Track, compare, and optimize training experiments    ║")
@@ -70,7 +70,7 @@ func (manager *experiment_manager) initialize() {
     fmt.Printf("  Current: %s\n\n", manager.current_experiment)
 }
 
-func (manager *experiment_manager) create_experiment(
+func (experiment_manager* manager) create_experiment(
     experiment_id string,
     name string,
     description string,
@@ -95,7 +95,7 @@ func (manager *experiment_manager) create_experiment(
     return config
 }
 
-func (manager *experiment_manager) add_hyperparameter(
+func (experiment_manager* manager) add_hyperparameter(
     experiment_id string,
     param_name string,
     param_value string,
@@ -112,7 +112,7 @@ func (manager *experiment_manager) add_hyperparameter(
     }
 }
 
-func (manager *experiment_manager) log_hyperparameters(experiment_id string) {
+func (experiment_manager* manager) log_hyperparameters(experiment_id string) {
     fmt.Printf("\n[Experiment] Hyperparameters for %s:\n", experiment_id)
     if result, exists := manager.experiments[experiment_id]; exists {
         for _, param := range result.config.hyperparameters {
@@ -121,7 +121,7 @@ func (manager *experiment_manager) log_hyperparameters(experiment_id string) {
     }
 }
 
-func (manager *experiment_manager) record_metrics(
+func (experiment_manager* manager) record_metrics(
     experiment_id string,
     step int64,
     train_loss float64,
@@ -154,7 +154,7 @@ func (manager *experiment_manager) record_metrics(
     }
 }
 
-func (manager *experiment_manager) get_metrics_summary(experiment_id string) {
+func (experiment_manager* manager) get_metrics_summary(experiment_id string) {
     fmt.Printf("\n[Metrics] Summary for %s:\n", experiment_id)
     if result, exists := manager.experiments[experiment_id]; exists {
         if len(result.metrics_history) > 0 {
@@ -171,7 +171,7 @@ func (manager *experiment_manager) get_metrics_summary(experiment_id string) {
     }
 }
 
-func (manager *experiment_manager) compare_experiments(
+func (experiment_manager* manager) compare_experiments(
     exp_ids []string,
     metric string) experiment_comparison {
     fmt.Printf("\n[Comparison] Comparing %d experiments on metric: %s\n", len(exp_ids), metric)
@@ -214,7 +214,7 @@ func (manager *experiment_manager) compare_experiments(
     return comparison
 }
 
-func (manager *experiment_manager) mark_experiment_complete(
+func (experiment_manager* manager) mark_experiment_complete(
     experiment_id string,
     converged bool) {
     if result, exists := manager.experiments[experiment_id]; exists {
@@ -232,7 +232,7 @@ func (manager *experiment_manager) mark_experiment_complete(
     }
 }
 
-func (manager *experiment_manager) get_experiment_history() {
+func (experiment_manager* manager) get_experiment_history() {
     fmt.Println("\n[History] Experiment History:")
     fmt.Println("  ID                    status      Loss        PPL         Time")
     fmt.Println("  ──────────────────────────────────────────────────────────────")
@@ -246,7 +246,7 @@ func (manager *experiment_manager) get_experiment_history() {
     }
 }
 
-func (manager *experiment_manager) export_experiment_config(experiment_id string) string {
+func (experiment_manager* manager) export_experiment_config(experiment_id string) string {
     if result, exists := manager.experiments[experiment_id]; exists {
         config_str := fmt.Sprintf("# Experiment: %s\n", result.config.name)
         config_str += fmt.Sprintf("ID: %s\n", experiment_id)
@@ -266,7 +266,7 @@ func (manager *experiment_manager) export_experiment_config(experiment_id string
     return ""
 }
 
-func (manager *experiment_manager) find_best_experiment() string {
+func (experiment_manager* manager) find_best_experiment() string {
     var best_exp string = ""
     var best_ppl float64 = math.MaxFloat64
     fmt.Println("\n[Analysis] Finding best experiment...")
@@ -290,7 +290,7 @@ func new_experiment_manager() *experiment_manager {
     }
 }
 
-func (manager *experiment_manager) run_complete_experiment_cycle() {
+func (experiment_manager* manager) run_complete_experiment_cycle() {
     manager.initialize()
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Creating and Running Experiments      │")

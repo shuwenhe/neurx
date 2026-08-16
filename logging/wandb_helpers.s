@@ -30,7 +30,7 @@ func log_wandb_config(wandb_run run) {
     }
 }
 
-func flush_wandb(wandb_run *run) {
+func flush_wandb(run* wandb_run) {
     if !run.active { return }
     run.steps_logged = run.steps_logged + 1
 }

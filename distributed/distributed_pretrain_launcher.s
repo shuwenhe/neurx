@@ -148,7 +148,7 @@ func format_string(string template, int number) string {
     template
 }
 
-func (launcher *distributed_pretrain_launcher) sync_gradients_nccl(
+func (distributed_pretrain_launcher* launcher) sync_gradients_nccl(
     []float gradients,
 ) []float {
     []float reduced_grads = cuda_bridge_all_reduce_sum(
@@ -165,7 +165,7 @@ func (launcher *distributed_pretrain_launcher) sync_gradients_nccl(
     averaged_grads
 }
 
-func (launcher *distributed_pretrain_launcher) optimizer_step(
+func (distributed_pretrain_launcher* launcher) optimizer_step(
     int step,
     float learning_rate,
     []float gradients,
@@ -176,13 +176,13 @@ func (launcher *distributed_pretrain_launcher) optimizer_step(
     ddp_step(launcher.ddp_state, step)
 }
 
-func (launcher *distributed_pretrain_launcher) log(string message) {
+func (distributed_pretrain_launcher* launcher) log(string message) {
     if launcher.env.rank == 0 {
         print("[rank=0] " + message)
     }
 }
 
-func (launcher *distributed_pretrain_launcher) rank_info() string {
+func (distributed_pretrain_launcher* launcher) rank_info() string {
     string info = "rank=" + itoa(launcher.env.rank) +
                   " world_size=" + itoa(launcher.env.world_size) +
                   " local_rank=" + itoa(launcher.env.local_rank) +
@@ -190,7 +190,7 @@ func (launcher *distributed_pretrain_launcher) rank_info() string {
     info
 }
 
-func (launcher *distributed_pretrain_launcher) finalize() {
+func (distributed_pretrain_launcher* launcher) finalize() {
     launcher.log("Finalizing distributed training...")
     cuda_bridge_finalize(launcher.cb)
     launcher.log("Distributed training finalized.")

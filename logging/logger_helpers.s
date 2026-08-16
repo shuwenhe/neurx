@@ -9,7 +9,7 @@ func should_log(logger lg) bool {
     (lg.current_step % freq) == 0
 }
 
-func flush_if_needed(logger *lg) {
+func flush_if_needed(lg* logger) {
     int buffer_size = len(lg.metric_buffer)
     bool should_flush = false
     if lg.config.log_to_tensorboard && buffer_size >= lg.config.flush_every_n_steps {
@@ -23,7 +23,7 @@ func flush_if_needed(logger *lg) {
     }
 }
 
-func flush_metrics(logger *lg) {
+func flush_metrics(lg* logger) {
     if len(lg.metric_buffer) == 0 {
         return
     }

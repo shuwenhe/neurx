@@ -33,7 +33,7 @@ func NewBaseWorker(config WorkerConfig) *BaseWorker {
     return worker
 }
 
-func (w *BaseWorker) Initialize() WorkerResult {
+func (BaseWorker* w) Initialize() WorkerResult {
     if w.initialized == 1 {
         return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
     }
@@ -59,7 +59,7 @@ func (w *BaseWorker) Initialize() WorkerResult {
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (w *BaseWorker) SubmitRequest(request RequestMetadata) WorkerResult {
+func (BaseWorker* w) SubmitRequest(request RequestMetadata) WorkerResult {
     if w.state != WORKER_STATE_READY && w.state != WORKER_STATE_BUSY {
         return WorkerResult{
             success: 0,
@@ -87,7 +87,7 @@ func (w *BaseWorker) SubmitRequest(request RequestMetadata) WorkerResult {
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (w *BaseWorker) GetNextBatch(max_size i32) Batch {
+func (BaseWorker* w) GetNextBatch(max_size i32) Batch {
     batch_size := max_size
     if w.queue_size < max_size {
         batch_size = w.queue_size
@@ -123,7 +123,7 @@ func (w *BaseWorker) GetNextBatch(max_size i32) Batch {
     return batch
 }
 
-func (w *BaseWorker) CompleteBatch(batch_id i32, result_count i32,
+func (BaseWorker* w) CompleteBatch(batch_id i32, result_count i32,
                                    total_tokens i32, error_code i32) WorkerResult {
     if error_code == ERROR_SUCCESS {
         w.successful_batches++
@@ -153,7 +153,7 @@ func (w *BaseWorker) CompleteBatch(batch_id i32, result_count i32,
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (w *BaseWorker) ProcessBatch(batch Batch) ExecutionResult {
+func (BaseWorker* w) ProcessBatch(batch Batch) ExecutionResult {
     return ExecutionResult{
         batch_id: batch.batch_id,
         worker_id: w.config.worker_id,
@@ -163,7 +163,7 @@ func (w *BaseWorker) ProcessBatch(batch Batch) ExecutionResult {
     }
 }
 
-func (w *BaseWorker) GetWorkerState() WorkerState {
+func (BaseWorker* w) GetWorkerState() WorkerState {
     return WorkerState{
         worker_id: w.config.worker_id,
         state: w.state,
@@ -180,11 +180,11 @@ func (w *BaseWorker) GetWorkerState() WorkerState {
     }
 }
 
-func (w *BaseWorker) GetStatistics() WorkerStats {
+func (BaseWorker* w) GetStatistics() WorkerStats {
     return w.stats
 }
 
-func (w *BaseWorker) ResetStatistics() {
+func (BaseWorker* w) ResetStatistics() {
     w.stats.total_requests = 0
     w.stats.completed_requests = 0
     w.stats.failed_requests = 0
@@ -192,7 +192,7 @@ func (w *BaseWorker) ResetStatistics() {
     w.stats.queue_length = 0
 }
 
-func (w *BaseWorker) IsHealthy() i32 {
+func (BaseWorker* w) IsHealthy() i32 {
     if w.state == WORKER_STATE_ERROR || w.state == WORKER_STATE_SHUTDOWN {
         return 0
     }
@@ -206,11 +206,11 @@ func (w *BaseWorker) IsHealthy() i32 {
     return 1
 }
 
-func (w *BaseWorker) SendHeartbeat() {
+func (BaseWorker* w) SendHeartbeat() {
     w.last_heartbeat = system_time_ms()
 }
 
-func (w *BaseWorker) Shutdown() WorkerResult {
+func (BaseWorker* w) Shutdown() WorkerResult {
     if w.state == WORKER_STATE_SHUTDOWN {
         return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
     }
@@ -227,19 +227,19 @@ func (w *BaseWorker) Shutdown() WorkerResult {
     return WorkerResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (w *BaseWorker) SetState(new_state i32) {
+func (BaseWorker* w) SetState(new_state i32) {
     w.state = new_state
 }
 
-func (w *BaseWorker) GetState() i32 {
+func (BaseWorker* w) GetState() i32 {
     return w.state
 }
 
-func (w *BaseWorker) GetQueueSize() i32 {
+func (BaseWorker* w) GetQueueSize() i32 {
     return w.queue_size
 }
 
-func (w *BaseWorker) state_to_string(state i32) string {
+func (BaseWorker* w) state_to_string(state i32) string {
     match state {
     case WORKER_STATE_IDLE:
         return "IDLE"

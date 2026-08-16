@@ -58,7 +58,7 @@ func new_resource(service_name []string) resource {
     return r
 }
 
-func (r *resource) add_attribute(key []string, value []string) {
+func (resource* r) add_attribute(key []string, value []string) {
     if len(key) > 0 && len(value) > 0 && len(r.attributes) > 0 {
         r.attributes[0][key[0]] = value[0]
     }
@@ -87,7 +87,7 @@ func new_otlp_exporter(endpoint []string, service_name []string) otlp_exporter {
     return exporter
 }
 
-func (exporter *otlp_exporter) convert_span_for_export(span interface{}) exported_span {
+func (otlp_exporter* exporter) convert_span_for_export(span interface{}) exported_span {
     exported := exported_span{}
 
     exported.trace_id = append([]string{}, "sample-trace-id")
@@ -106,7 +106,7 @@ func (exporter *otlp_exporter) convert_span_for_export(span interface{}) exporte
     return exported
 }
 
-func (exporter *otlp_exporter) add_span(span interface{}) {
+func (otlp_exporter* exporter) add_span(span interface{}) {
     exported := exporter.convert_span_for_export(span)
     exporter.pending_spans = append(exporter.pending_spans, exported)
 
@@ -115,7 +115,7 @@ func (exporter *otlp_exporter) add_span(span interface{}) {
     }
 }
 
-func (exporter *otlp_exporter) export() []bool {
+func (otlp_exporter* exporter) export() []bool {
     if len(exporter.pending_spans) == 0 {
         return append([]bool{}, true)
     }
@@ -128,7 +128,7 @@ func (exporter *otlp_exporter) export() []bool {
     return append([]bool{}, true)
 }
 
-func (span *exported_span) to_otlp_json() []string {
+func (exported_span* span) to_otlp_json() []string {
     json := "{"
 
     if len(span.trace_id) > 0 {
@@ -175,7 +175,7 @@ func (span *exported_span) to_otlp_json() []string {
     return append([]string{}, json)
 }
 
-func (exporter *otlp_exporter) export_format() []string {
+func (otlp_exporter* exporter) export_format() []string {
     format := ""
     format = format + "OTLP HTTP Protocol v0.20.0\n"
     format = format + "Endpoint: " + (exporter.endpoint[0] if len(exporter.endpoint) > 0 else "not set") + "\n"

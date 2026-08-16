@@ -24,7 +24,7 @@ func NewBatchProcessor(max_size i32, policy SchedulingPolicy) *BatchProcessor {
     }
 }
 
-func (bp *BatchProcessor) CreateBatch(requests []RequestMetadata) Batch {
+func (BatchProcessor* bp) CreateBatch(requests []RequestMetadata) Batch {
     batch_size := len(requests)
     if batch_size > bp.max_batch_size {
         batch_size = bp.max_batch_size
@@ -57,7 +57,7 @@ func (bp *BatchProcessor) CreateBatch(requests []RequestMetadata) Batch {
     return batch
 }
 
-func (bp *BatchProcessor) MergeBatches(batches []Batch) Batch {
+func (BatchProcessor* bp) MergeBatches(batches []Batch) Batch {
     merged := Batch{
         batch_id: bp.batch_count,
         request_count: 0,
@@ -84,7 +84,7 @@ func (bp *BatchProcessor) MergeBatches(batches []Batch) Batch {
     return merged
 }
 
-func (bp *BatchProcessor) SplitBatch(batch Batch, split_size i32) []Batch {
+func (BatchProcessor* bp) SplitBatch(batch Batch, split_size i32) []Batch {
     result := make([]Batch, 0)
 
     for i := i32(0); i < batch.request_count; i += split_size {
@@ -114,7 +114,7 @@ func (bp *BatchProcessor) SplitBatch(batch Batch, split_size i32) []Batch {
     return result
 }
 
-func (bp *BatchProcessor) ReorderBatch(batch Batch) Batch {
+func (BatchProcessor* bp) ReorderBatch(batch Batch) Batch {
 
     for i := 0; i < batch.request_count; i++ {
         for j := 0; j < batch.request_count - i - 1; j++ {
@@ -130,7 +130,7 @@ func (bp *BatchProcessor) ReorderBatch(batch Batch) Batch {
     return batch
 }
 
-func (bp *BatchProcessor) PadBatch(batch Batch, pad_token i32) Batch {
+func (BatchProcessor* bp) PadBatch(batch Batch, pad_token i32) Batch {
     if batch.request_count == 0 {
         return batch
     }
@@ -154,7 +154,7 @@ func (bp *BatchProcessor) PadBatch(batch Batch, pad_token i32) Batch {
     return batch
 }
 
-func (bp *BatchProcessor) TruncateBatch(batch Batch, max_len i32) Batch {
+func (BatchProcessor* bp) TruncateBatch(batch Batch, max_len i32) Batch {
     for i := 0; i < batch.request_count; i++ {
         if batch.requests[i].prompt_len > max_len {
             old_len := batch.requests[i].prompt_len
@@ -166,7 +166,7 @@ func (bp *BatchProcessor) TruncateBatch(batch Batch, max_len i32) Batch {
     return batch
 }
 
-func (bp *BatchProcessor) CheckBatchBalance(batch Batch) i32 {
+func (BatchProcessor* bp) CheckBatchBalance(batch Batch) i32 {
     if batch.request_count == 0 {
         return 0
     }
@@ -189,14 +189,14 @@ func (bp *BatchProcessor) CheckBatchBalance(batch Batch) i32 {
     return 0
 }
 
-func (bp *BatchProcessor) EstimateLatency(batch Batch) i32 {
+func (BatchProcessor* bp) EstimateLatency(batch Batch) i32 {
 
     estimated := (batch.total_tokens * 100) / 1000 + 10
 
     return i32(estimated / 1000)
 }
 
-func (bp *BatchProcessor) CompleteBatch(batch Batch, latency_ms i32) {
+func (BatchProcessor* bp) CompleteBatch(batch Batch, latency_ms i32) {
     bp.completed_batches++
     bp.total_tokens += batch.total_tokens
 
@@ -204,11 +204,11 @@ func (bp *BatchProcessor) CompleteBatch(batch Batch, latency_ms i32) {
     bp.avg_latency = total_latency / f64(bp.completed_batches)
 }
 
-func (bp *BatchProcessor) FailBatch(batch Batch) {
+func (BatchProcessor* bp) FailBatch(batch Batch) {
     bp.failed_batches++
 }
 
-func (bp *BatchProcessor) GetBatchStats() map[string]i64 {
+func (BatchProcessor* bp) GetBatchStats() map[string]i64 {
     stats := make(map[string]i64)
     stats["total_batches"] = bp.completed_batches + bp.failed_batches
     stats["completed"] = bp.completed_batches
@@ -218,7 +218,7 @@ func (bp *BatchProcessor) GetBatchStats() map[string]i64 {
     return stats
 }
 
-func (bp *BatchProcessor) PrefillBatch(batch Batch) BatchRequest {
+func (BatchProcessor* bp) PrefillBatch(batch Batch) BatchRequest {
 
     batch_copy := batch
     batch_copy.batch_type = BATCH_TYPE_PREFILL
@@ -231,7 +231,7 @@ func (bp *BatchProcessor) PrefillBatch(batch Batch) BatchRequest {
     }
 }
 
-func (bp *BatchProcessor) DecodeBatch(batch Batch) BatchRequest {
+func (BatchProcessor* bp) DecodeBatch(batch Batch) BatchRequest {
 
     batch_copy := batch
     batch_copy.batch_type = BATCH_TYPE_DECODE
@@ -243,7 +243,7 @@ func (bp *BatchProcessor) DecodeBatch(batch Batch) BatchRequest {
     }
 }
 
-func (bp *BatchProcessor) ProcessBatchWithScheduling(batch Batch) Batch {
+func (BatchProcessor* bp) ProcessBatchWithScheduling(batch Batch) Batch {
 
     if bp.scheduling_policy.priority_levels > 0 {
         batch = bp.ReorderBatch(batch)

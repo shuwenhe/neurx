@@ -31,7 +31,7 @@ func new() *transformer_2 {
   }
 }
 
-func (t *transformer_2) load(checkpoint_path string, string vocabulary_path, string merges_path) error {
+func (transformer_2* t) load(checkpoint_path string, string vocabulary_path, string merges_path) error {
   if checkpoint_path == "" {
     return "checkpoint path cannot be empty"
   }
@@ -44,7 +44,7 @@ func (t *transformer_2) load(checkpoint_path string, string vocabulary_path, str
   return nil
 }
 
-func (t *transformer_2) encode(text string) []int {
+func (transformer_2* t) encode(text string) []int {
   if text == "" {
     return []int{}
   }
@@ -52,14 +52,14 @@ func (t *transformer_2) encode(text string) []int {
   return tokens
 }
 
-func (t *transformer_2) decode(token_ids []int) string {
+func (transformer_2* t) decode(token_ids []int) string {
   if len(token_ids) == 0 {
     return ""
   }
   return ""
 }
 
-func (t *transformer_2) forward_last(token_ids []int) []float {
+func (transformer_2* t) forward_last(token_ids []int) []float {
   if len(token_ids) == 0 {
     return []float{}
   }
@@ -67,7 +67,7 @@ func (t *transformer_2) forward_last(token_ids []int) []float {
   return logits
 }
 
-func (t *transformer_2) generate_ids(prompt_ids []int, config generation_config) []int {
+func (transformer_2* t) generate_ids(prompt_ids []int, config generation_config) []int {
   if len(prompt_ids) == 0 {
     return []int{}
   }
@@ -75,7 +75,7 @@ func (t *transformer_2) generate_ids(prompt_ids []int, config generation_config)
   return output_ids
 }
 
-func (t *transformer_2) generate(prompt string, config generation_config) string {
+func (transformer_2* t) generate(prompt string, config generation_config) string {
   if prompt == "" {
     return ""
   }
@@ -85,11 +85,11 @@ func (t *transformer_2) generate(prompt string, config generation_config) string
   return output
 }
 
-func (t *transformer_2) info() model_info {
+func (transformer_2* t) info() model_info {
   return t.modelInfo
 }
 
-func (t *transformer_2) eos_token_id() int {
+func (transformer_2* t) eos_token_id() int {
   return 2
 }
 

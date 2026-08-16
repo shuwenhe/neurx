@@ -45,7 +45,7 @@ func new_optimized_inference_engine(
     }
 }
 
-func (engine *optimized_inference_engine) forward_with_attention(
+func (optimized_inference_engine* engine) forward_with_attention(
     []float input_ids,
     []float embeddings
 ) []float {
@@ -86,7 +86,7 @@ func (engine *optimized_inference_engine) forward_with_attention(
     return hidden
 }
 
-func (engine *optimized_inference_engine) prefill(
+func (optimized_inference_engine* engine) prefill(
     []int input_ids,
     []float embeddings
 ) []float {
@@ -104,7 +104,7 @@ func (engine *optimized_inference_engine) prefill(
     return engine.forward_with_attention(token_floats, embeddings)
 }
 
-func (engine *optimized_inference_engine) decode(
+func (optimized_inference_engine* engine) decode(
     int next_token_id,
     []float last_embedding
 ) []float {

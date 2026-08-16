@@ -66,7 +66,7 @@ func new_gmpo_trainer(
     }
 }
 
-func (trainer *gmpo_trainer) compute_geometric_mean([]f32 rewards) -> f32 {
+func (gmpo_trainer* trainer) compute_geometric_mean([]f32 rewards) -> f32 {
     if rewards.len() == 0 {
         return 0.0
     }
@@ -94,7 +94,7 @@ func compute_arithmetic_mean([]f32 rewards) -> f32 {
     return sum / f32(rewards.len())
 }
 
-func (trainer *gmpo_trainer) update_reward_statistics(
+func (gmpo_trainer* trainer) update_reward_statistics(
     [][]f32 multi_rewards
 ) {
     for reward_idx in 0..trainer.config.num_rewards {
@@ -129,7 +129,7 @@ func (trainer *gmpo_trainer) update_reward_statistics(
     }
 }
 
-func (trainer *gmpo_trainer) normalize_rewards(
+func (gmpo_trainer* trainer) normalize_rewards(
     [][]f32 multi_rewards
 ) -> [][]f32 {
     if !trainer.config.reward_normalization {
@@ -150,7 +150,7 @@ func (trainer *gmpo_trainer) normalize_rewards(
     return normalized
 }
 
-func (trainer *gmpo_trainer) combine_rewards([]f32 multi_rewards) -> f32 {
+func (gmpo_trainer* trainer) combine_rewards([]f32 multi_rewards) -> f32 {
     if trainer.config.use_geometric_mean {
         return trainer.compute_geometric_mean(multi_rewards)
     } else {
@@ -158,7 +158,7 @@ func (trainer *gmpo_trainer) combine_rewards([]f32 multi_rewards) -> f32 {
     }
 }
 
-func (trainer *gmpo_trainer) compute_gae(
+func (gmpo_trainer* trainer) compute_gae(
     []tensor rewards,
     []tensor values,
     []tensor dones
@@ -197,7 +197,7 @@ func (trainer *gmpo_trainer) compute_gae(
     return advantages, returns
 }
 
-func (trainer *gmpo_trainer) train_step(
+func (gmpo_trainer* trainer) train_step(
     []tensor prompts,
     []tensor responses,
     [][]f32 multi_rewards
@@ -294,7 +294,7 @@ func (trainer *gmpo_trainer) train_step(
     )
 }
 
-func (trainer *gmpo_trainer) train(DataLoader train_data) -> ([]f32, []f32) {
+func (gmpo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
     for batch in train_data {
@@ -316,7 +316,7 @@ func (trainer *gmpo_trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     return policy_losses, value_losses
 }
 
-func (trainer *gmpo_trainer) print_reward_statistics() {
+func (gmpo_trainer* trainer) print_reward_statistics() {
     println("Reward Statistics (Geometric Mean):")
     for i in 0..trainer.config.num_rewards {
         let stats = trainer.reward_statistics[i]

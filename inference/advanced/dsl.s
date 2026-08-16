@@ -50,11 +50,11 @@ func NewDslProgram(
     }
 }
 
-func (prog *dsl_program) AddStatement(stmt dsl_statement) {
+func (dsl_program* prog) AddStatement(stmt dsl_statement) {
     prog.statements = append(prog.statements, stmt)
 }
 
-func (prog *dsl_program) SetVariable(
+func (dsl_program* prog) SetVariable(
     string name,
     any value,
     string var_type,
@@ -63,7 +63,7 @@ func (prog *dsl_program) SetVariable(
     prog.types[name] = var_type
 }
 
-func (prog *dsl_program) GetVariable(string name) any {
+func (dsl_program* prog) GetVariable(string name) any {
     if val, ok := prog.state[name]; ok {
         return val
     }
@@ -154,7 +154,7 @@ func NewDslInterpreter(prog dsl_program) dsl_interpreter {
     }
 }
 
-func (interp *dsl_interpreter) ExecuteStatement(
+func (dsl_interpreter* interp) ExecuteStatement(
     stmt dsl_statement,
 ) (any, bool) {
     interp.context.execution_trace = append(
@@ -177,7 +177,7 @@ func (interp *dsl_interpreter) ExecuteStatement(
     }
 }
 
-func (interp *dsl_interpreter) execute_llm_call(
+func (dsl_interpreter* interp) execute_llm_call(
     stmt dsl_statement,
 ) (any, bool) {
     prompt := ""
@@ -194,7 +194,7 @@ func (interp *dsl_interpreter) execute_llm_call(
     return response, true
 }
 
-func (interp *dsl_interpreter) execute_assignment(
+func (dsl_interpreter* interp) execute_assignment(
     stmt dsl_statement,
 ) (any, bool) {
     value := stmt.arguments[0]
@@ -202,13 +202,13 @@ func (interp *dsl_interpreter) execute_assignment(
     return value, true
 }
 
-func (interp *dsl_interpreter) execute_condition(
+func (dsl_interpreter* interp) execute_condition(
     stmt dsl_statement,
 ) (any, bool) {
     return true, true
 }
 
-func (interp *dsl_interpreter) execute_loop(
+func (dsl_interpreter* interp) execute_loop(
     stmt dsl_statement,
 ) (any, bool) {
     iterations := 1
@@ -220,7 +220,7 @@ func (interp *dsl_interpreter) execute_loop(
     return nil, true
 }
 
-func (interp *dsl_interpreter) execute_function_call(
+func (dsl_interpreter* interp) execute_function_call(
     stmt dsl_statement,
 ) (any, bool) {
     if fn, ok := interp.functions[stmt.name]; ok {
@@ -230,7 +230,7 @@ func (interp *dsl_interpreter) execute_function_call(
     return nil, false
 }
 
-func (interp *dsl_interpreter) ExecuteProgram() (map[string]any, bool) {
+func (dsl_interpreter* interp) ExecuteProgram() (map[string]any, bool) {
     for i := 0; i < len(interp.context.program.statements); i++ {
         stmt := interp.context.program.statements[i]
         _, success := interp.ExecuteStatement(stmt)
@@ -243,7 +243,7 @@ func (interp *dsl_interpreter) ExecuteProgram() (map[string]any, bool) {
     return interp.context.current_state, true
 }
 
-func (interp *dsl_interpreter) GetExecutionTrace() []string {
+func (dsl_interpreter* interp) GetExecutionTrace() []string {
     return interp.context.execution_trace
 }
 

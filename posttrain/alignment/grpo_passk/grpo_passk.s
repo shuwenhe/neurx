@@ -87,7 +87,7 @@ func compute_passk([]code_evaluation evaluations, i32 k) -> f32 {
     return 0.0
 }
 
-func (trainer *grpo_pass_k_trainer) compute_code_reward(CodeEvaluation eval) -> f32 {
+func (grpo_pass_k_trainer* trainer) compute_code_reward(CodeEvaluation eval) -> f32 {
     let reward: f32 = 0.0
     if eval.compiles {
         reward += trainer.config.compilation_weight
@@ -98,7 +98,7 @@ func (trainer *grpo_pass_k_trainer) compute_code_reward(CodeEvaluation eval) -> 
     return reward
 }
 
-func (trainer *grpo_pass_k_trainer) compute_passk_advantages(
+func (grpo_pass_k_trainer* trainer) compute_passk_advantages(
     [][]code_evaluation evaluations,
     [][]f32 rewards
 ) -> [][]f32 {
@@ -129,7 +129,7 @@ func (trainer *grpo_pass_k_trainer) compute_passk_advantages(
     return advantages
 }
 
-func (trainer *grpo_pass_k_trainer) normalize_advantages(
+func (grpo_pass_k_trainer* trainer) normalize_advantages(
     [][]f32 advantages
 ) -> [][]f32 {
     if !trainer.config.normalize_advantages {
@@ -158,7 +158,7 @@ func (trainer *grpo_pass_k_trainer) normalize_advantages(
     return normalized
 }
 
-func (trainer *grpo_pass_k_trainer) train_step(
+func (grpo_pass_k_trainer* trainer) train_step(
     []string prompts,
     [][]test_case test_cases
 ) -> (f32, f32, f32) {

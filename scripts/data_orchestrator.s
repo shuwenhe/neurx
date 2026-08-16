@@ -65,7 +65,7 @@ func new_data_orchestrator(string input_path) (*data_orchestrator, error) {
     }, nil
 }
 
-func (d *data_orchestrator) setup() error {
+func (data_orchestrator* d) setup() error {
     d.logger.log("Setting up data environment...")
     output_dir := filepath.Dir(d.config.outputPath)
     if err := mkdir(output_dir); err != nil {
@@ -75,7 +75,7 @@ func (d *data_orchestrator) setup() error {
     return nil
 }
 
-func (d *data_orchestrator) validate_input() error {
+func (data_orchestrator* d) validate_input() error {
     d.logger.log("Validating input data...")
     if !file_exists(d.config.inputPath) {
         return fmt.Errorf("input file not found: %s", d.config.inputPath)
@@ -93,7 +93,7 @@ func (d *data_orchestrator) validate_input() error {
     return nil
 }
 
-func (d *data_orchestrator) process_data() error {
+func (data_orchestrator* d) process_data() error {
     d.logger.log("Processing data...")
     if d.config.deduplication {
         d.logger.log("Deduplicating data...")
@@ -121,7 +121,7 @@ func (d *data_orchestrator) process_data() error {
     return nil
 }
 
-func (d *data_orchestrator) split(train_ratio float32, val_ratio float32) error {
+func (data_orchestrator* d) split(train_ratio float32, val_ratio float32) error {
     d.logger.log("Splitting data into train/val/test sets...")
     train_ratio = train_ratio
     test_ratio := 1.0 - train_ratio - val_ratio
@@ -142,7 +142,7 @@ func (d *data_orchestrator) split(train_ratio float32, val_ratio float32) error 
     return nil
 }
 
-func (d *data_orchestrator) convert(to_format data_format) error {
+func (data_orchestrator* d) convert(to_format data_format) error {
     d.logger.log("Converting data format...")
     d.logger.log("From: %s", format_string(d.config.format))
     d.logger.log("To: %s", format_string(to_format))
@@ -151,7 +151,7 @@ func (d *data_orchestrator) convert(to_format data_format) error {
     return nil
 }
 
-func (d *data_orchestrator) statistics() error {
+func (data_orchestrator* d) statistics() error {
     d.logger.log("Generating data statistics...")
     stats := fmt.Sprintf(`data statistics:
 Input: %s
@@ -178,7 +178,7 @@ workers: %d
     return nil
 }
 
-func (d *data_orchestrator) is_valid_format(path string) bool {
+func (data_orchestrator* d) is_valid_format(path string) bool {
     ext := strings.ToLower(filepath.Ext(path))
     valid_exts := []string{".jsonl", ".parquet", ".hdf5", ".arrow", ".tfrecord"}
     for _, valid := range valid_exts {
@@ -189,31 +189,31 @@ func (d *data_orchestrator) is_valid_format(path string) bool {
     return false
 }
 
-func (d *data_orchestrator) deduplicate_data() error {
+func (data_orchestrator* d) deduplicate_data() error {
     d.logger.log("Running deduplication pass...")
     sleep_seconds(2)
     return nil
 }
 
-func (d *data_orchestrator) filter_quality() error {
+func (data_orchestrator* d) filter_quality() error {
     d.logger.log("Filtering by quality score...")
     sleep_seconds(2)
     return nil
 }
 
-func (d *data_orchestrator) filter_language() error {
+func (data_orchestrator* d) filter_language() error {
     d.logger.log("Detecting and filtering languages...")
     sleep_seconds(2)
     return nil
 }
 
-func (d *data_orchestrator) tokenize_data() error {
+func (data_orchestrator* d) tokenize_data() error {
     d.logger.log("Tokenizing with BPE...")
     sleep_seconds(2)
     return nil
 }
 
-func (d *data_orchestrator) log_config() {
+func (data_orchestrator* d) log_config() {
     config := fmt.Sprintf(`data processing configuration
 input: %s
 output: %s

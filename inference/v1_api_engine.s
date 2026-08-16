@@ -59,7 +59,7 @@ func new_request_pool(max_size int32) *request_pool {
     }
 }
 
-func (rp *request_pool) add(req *v1_request) error {
+func (request_pool* rp) add(v1_request* req) error {
     if int32(len(rp.requests)) >= rp.max_size {
         return core.Errorf("request pool full")
     }
@@ -70,7 +70,7 @@ func (rp *request_pool) add(req *v1_request) error {
     return nil
 }
 
-func (rp *request_pool) get(request_id string) *v1_request {
+func (request_pool* rp) get(request_id string) *v1_request {
     if idx, exists := rp.indices[request_id]; exists {
         if idx >= 0 && idx < int32(len(rp.requests)) {
             return rp.requests[idx]
@@ -79,7 +79,7 @@ func (rp *request_pool) get(request_id string) *v1_request {
     return nil
 }
 
-func (rp *request_pool) remove(request_id string) {
+func (request_pool* rp) remove(request_id string) {
     if idx, exists := rp.indices[request_id]; exists {
         if idx >= 0 && idx < int32(len(rp.requests)) {
             rp.requests = append(rp.requests[:idx], rp.requests[idx+1:]...)
@@ -88,7 +88,7 @@ func (rp *request_pool) remove(request_id string) {
     }
 }
 
-func (rp *request_pool) size() int32 {
+func (request_pool* rp) size() int32 {
     return int32(len(rp.requests))
 }
 
@@ -100,11 +100,11 @@ func new_v1_engine(eng *engine.llm_engine) *v1_engine {
     }
 }
 
-func (ve *v1_engine) set_async_engine(async_eng *engine.async_llm_engine) {
+func (v1_engine* ve) set_async_engine(async_eng *engine.async_llm_engine) {
     ve.async_engine = async_eng
 }
 
-func (ve *v1_engine) initialize() error {
+func (v1_engine* ve) initialize() error {
     if ve.engine == nil {
         return core.Errorf("base engine not set")
     }
@@ -115,7 +115,7 @@ func (ve *v1_engine) initialize() error {
     return nil
 }
 
-func (ve *v1_engine) prepare_request(req *v1_request) error {
+func (v1_engine* ve) prepare_request(v1_request* req) error {
     if !ve.is_initialized {
         return core.Errorf("engine not initialized")
     }
@@ -139,7 +139,7 @@ func (ve *v1_engine) prepare_request(req *v1_request) error {
     return ve.request_pool.add(req)
 }
 
-func (ve *v1_engine) execute(req *v1_request) (*v1_response, error) {
+func (v1_engine* ve) execute(v1_request* req) (*v1_response, error) {
     if !ve.is_initialized {
         return nil, core.Errorf("engine not initialized")
     }
@@ -200,9 +200,9 @@ func (ve *v1_engine) execute(req *v1_request) (*v1_response, error) {
     return response, nil
 }
 
-func (ve *v1_engine) execute_stream(req *v1_request) (chan *v1_stream_response, error) {
+func (v1_engine* ve) execute_stream(v1_request* req) (chan *v1_stream_response, error) {
     if !ve.is_initialized {
-        resp_chan := make(chan *v1_stream_response)
+        resp_chan := make(v1_stream_response* chan)
         close(resp_chan)
         return resp_chan, core.Errorf("engine not initialized")
     }
@@ -302,7 +302,7 @@ func (ve *v1_engine) execute_stream(req *v1_request) (chan *v1_stream_response, 
     return resp_chan, nil
 }
 
-func (ve *v1_engine) execute_async(req *v1_request, callback func(*v1_response, error)) error {
+func (v1_engine* ve) execute_async(req *v1_request, callback func(*v1_response, error)) error {
     if !ve.is_initialized {
         return core.Errorf("engine not initialized")
     }
@@ -371,7 +371,7 @@ func (ve *v1_engine) execute_async(req *v1_request, callback func(*v1_response, 
     return err
 }
 
-func (ve *v1_engine) get_stats() map[string]interface{} {
+func (v1_engine* ve) get_stats() map[string]interface{} {
     stats := make(map[string]interface{})
 
     if ve.engine != nil {

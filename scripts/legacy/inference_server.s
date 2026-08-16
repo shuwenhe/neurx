@@ -171,7 +171,7 @@ func initialize_model() error {
 	return nil
 }
 
-func process_inference_request(req *inference_request) (*inference_response, error) {
+func process_inference_request(inference_request* req) (*inference_response, error) {
 	start_time := time.Now()
 	if req.prompt == "" {
 		return nil, fmt.Errorf("prompt is empty")

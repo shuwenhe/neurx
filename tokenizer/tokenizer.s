@@ -12,7 +12,7 @@ struct tokenizer {
     special_tokens: map[string]int
 }
 
-func (t *tokenizer) init(int vocab_size) {
+func (tokenizer* t) init(int vocab_size) {
     t.vocab_size = vocab_size
     t.vocab = make(map[string]int)
     t.inv_vocab = make(map[int]string)
@@ -33,7 +33,7 @@ func (t *tokenizer) init(int vocab_size) {
     }
 }
 
-func (t *tokenizer) encode(string text): []int {
+func (tokenizer* t) encode(string text): []int {
     tokens := make([]int, 0)
     words := split_whitespace(text)
     for _, word := range words {
@@ -57,7 +57,7 @@ func (t *tokenizer) encode(string text): []int {
     return tokens
 }
 
-func (t *tokenizer) decode([]int tokens): string {
+func (tokenizer* t) decode([]int tokens): string {
     text := ""
     for _, token_id := range tokens {
         if token, exists := t.inv_vocab[token_id]; exists {
@@ -67,7 +67,7 @@ func (t *tokenizer) decode([]int tokens): string {
     return text
 }
 
-func (t *tokenizer) vocab_stats(): map[string]interface{} {
+func (tokenizer* t) vocab_stats(): map[string]interface{} {
     return map[string]interface{}{
         "vocab_size": t.vocab_size,
         "actual_vocab": len(t.vocab),
@@ -76,7 +76,7 @@ func (t *tokenizer) vocab_stats(): map[string]interface{} {
     }
 }
 
-func (t *tokenizer) encode_batch([]string texts, int max_length, bool padding): [][]int {
+func (tokenizer* t) encode_batch([]string texts, int max_length, bool padding): [][]int {
     batch := make([][]int, len(texts))
     for i, text := range texts {
         tokens := t.encode(text)
