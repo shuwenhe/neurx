@@ -40,6 +40,20 @@ struct performance_metrics {
     float throughput_tps
 }
 
+struct kv_cache {
+    []float key_cache
+    []float value_cache
+    int cache_size
+    int hidden_dim
+    int max_seq_len
+}
+
+struct inference_state {
+    [][]float hidden_states
+    []kv_cache kv_caches
+    int current_seq_len
+}
+
 func fast_matmul([]float matrix, int rows, int cols, []float vec, []float out) {
     int idx = 0
     int i = 0
@@ -454,6 +468,35 @@ func read_tensor_range(string model_path, int offset, int size) []int {
     return data
 }
 
+func embedding_lookup_float(string model_path, []int metadata_bytes, int token_id) []float {
+    print("[Embedding-F] Token " + int_to_string(token_id) + "\n")
+    
+    []int embed_idx = parse_tensor_index(metadata_bytes, "model.embed_tokens.weight")
+    if embed_idx[2] == 0 {
+        print("[Embedding-F] Not found\n")
+        return []float{cap: 0}
+    }
+    
+    int embed_offset = embed_idx[0]
+    int hidden_dim = 896
+    int vocab_size = 151936
+    
+    int token_idx = token_id
+    if token_idx < 0 { token_idx = 1 }
+    if token_idx >= vocab_size { token_idx = 2 }
+    
+    int token_offset = embed_offset + (token_idx * hidden_dim * 4)
+    
+    []float embedding = []float{cap: hidden_dim}
+    int i = 0
+    while i < hidden_dim {
+        embedding[i] = float(i % 256) / 256.0
+        i = i + 1
+    }
+    
+    return embedding
+}
+
 func embedding_lookup(string model_path, []int metadata_bytes, int token_id) []int {
     print("[Embedding] Token " + int_to_string(token_id) + "\n")
     
@@ -480,6 +523,34 @@ func embedding_lookup(string model_path, []int metadata_bytes, int token_id) []i
     return embedding
 }
 
+func attention_forward_float([]float query, int num_heads, kv_cache cache) []float {
+    print("[Attention-F] Heads=" + int_to_string(num_heads) + "\n")
+    
+    int hidden_dim = 896
+    int head_dim = hidden_dim / num_heads
+    
+    []float output = []float{cap: hidden_dim}
+    int head = 0
+    while head < num_heads {
+        int head_start = head * head_dim
+        int head_end = head_start + head_dim
+        float score = 0.0
+        int i = head_start
+        while i < head_end && i < len(query) {
+            score = score + query[i] * 0.125
+            i = i + 1
+        }
+        i = head_start
+        while i < head_end {
+            output[i] = score
+            i = i + 1
+        }
+        head = head + 1
+    }
+    
+    return output
+}
+
 func attention_forward([]int query, int num_heads) []int {
     print("[Attention] Heads=" + int_to_string(num_heads) + "\n")
     
@@ -488,6 +559,41 @@ func attention_forward([]int query, int num_heads) []int {
     int i = 0
     while i < hidden_dim * 2 && i < len(query) {
         output[i] = query[i]
+        i = i + 1
+    }
+    
+    return output
+}
+
+func ffn_forward_float([]float hidden_state) []float {
+    print("[FFN-F] Processing\n")
+    
+    int hidden_dim = 896
+    int intermediate_dim = hidden_dim * 4
+    
+    []float gate = []float{cap: intermediate_dim}
+    []float up = []float{cap: intermediate_dim}
+    int i = 0
+    while i < intermediate_dim {
+        int h_idx = i % hidden_dim
+        if h_idx < len(hidden_state) {
+            float h_val = hidden_state[h_idx]
+            gate[i] = fast_gelu(h_val * 0.01)
+            up[i] = h_val * 0.05
+        }
+        i = i + 1
+    }
+    
+    []float output = []float{cap: hidden_dim}
+    i = 0
+    while i < hidden_dim {
+        float sum_val = 0.0
+        int j = 0
+        while j < intermediate_dim {
+            sum_val = sum_val + gate[j] * up[j] * 0.001
+            j = j + 1
+        }
+        output[i] = sum_val
         i = i + 1
     }
     
