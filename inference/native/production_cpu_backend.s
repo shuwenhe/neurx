@@ -1182,7 +1182,7 @@ func decode_tokens_simple_old([]int token_ids) string {
 
     string model_dir = runtime_env_get("NEURX_MODEL_DIR")
     if len(model_dir) == 0 {
-        model_dir = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
+        model_dir = "/model/Qwen2.5-VL-7B"
     }
     string script_path = "/home/shuwen/shuwen/posttrain/tokenize_detokenize.py"
 
@@ -1373,7 +1373,7 @@ func perform_inference(string prompt, string model_path) string {
     print("[Inference] Sampling tokens\n")
 
     string output = "Input: " + prompt + "\n"
-    output = output + "Model: Qwen2.5-0.5B-Instruct\n"
+    output = output + "Model: Qwen2.5-VL-7B\n"
     output = output + "Status: Real inference complete\n"
 
     if len(logits) > 0 {
