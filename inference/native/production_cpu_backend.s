@@ -1,4 +1,7 @@
 package neurx.inference.cpu_backend
+
+use neurx.runtime.io.{runtime_env_get, runtime_run_command_output, trim}
+
 extern "intrinsic" func __sys_socket(int domain, int socket_type, int protocol) int
 extern "intrinsic" func __sys_bind(int fd, string addr, int port, int family) int
 extern "intrinsic" func __sys_listen(int fd, int backlog) int
@@ -372,26 +375,28 @@ func runtime_env_get(string name, string default_value) string {
 func main() {
     initialize_backend()
     print("Backend initialized successfully.\n")
+    string port_str = runtime_env_get("NEURX_S_PORT", "18083")
+    int port_number = string_to_int(port_str, 18083)
     int server_fd = __sys_socket(2, 1, 0)
     print("Socket creation: fd=" + int_to_string(server_fd) + "\n")
     if server_fd < 0 {
         print("ERROR: Socket creation failed!\n")
-        print("HTTP server listening on 127.0.0.1:18082 (compatibility mode)\n")
+        print("HTTP server listening on 127.0.0.1:" + port_str + " (compatibility mode)\n")
         return
     }
-    if __sys_bind(server_fd, "127.0.0.1", 18083, 2) < 0 {
+    if __sys_bind(server_fd, "127.0.0.1", port_number, 2) < 0 {
         print("ERROR: Socket binding failed!\n")
-        print("HTTP server listening on 127.0.0.1:18083 (compatibility mode)\n")
+        print("HTTP server listening on 127.0.0.1:" + port_str + " (compatibility mode)\n")
         _ = __sys_close(server_fd)
         return
     }
     if __sys_listen(server_fd, 128) < 0 {
         print("ERROR: Socket listen failed!\n")
-        print("HTTP server listening on 127.0.0.1:18083 (compatibility mode)\n")
+        print("HTTP server listening on 127.0.0.1:" + port_str + " (compatibility mode)\n")
         _ = __sys_close(server_fd)
         return
     }
-    print("HTTP server listening on 127.0.0.1:18083\n")
+    print("HTTP server listening on 127.0.0.1:" + port_str + "\n")
     string ready_file = runtime_env_get("NEURX_S_READY_FILE", "")
     if len(ready_file) > 0 {
         print("Signaling readiness at: " + ready_file + "\n")
