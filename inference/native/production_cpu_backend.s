@@ -398,18 +398,14 @@ func parse_int_at_bytes([]int bytes, int pos) int {
     return value
 }
 
-func parse_tensor_index([]int metadata_bytes, string tensor_name) vec[int] {
-    vec[int] result = vec[int]()
-    result.push(0)
-    result.push(0)
-    result.push(0)
+func parse_tensor_index([]int metadata_bytes, string tensor_name) []int {
+    []int result = []int{0, 0, 0}
     
     if len(metadata_bytes) == 0 { return result }
     
     int pos = find_substring_bytes(metadata_bytes, tensor_name, 0)
     if pos == -1 {
-        result.push(-1)
-        return result
+        return []int{-1, -1, -1}
     }
     
     int offset_start = find_substring_bytes(metadata_bytes, "\"data_offsets\":[", pos)
@@ -435,21 +431,21 @@ func parse_tensor_index([]int metadata_bytes, string tensor_name) vec[int] {
     return result
 }
 
-func load_model_metadata(string model_path) vec[int] {
+func load_model_metadata(string model_path) []int {
     if !runtime_file_exists(model_path) {
-        vec[int] empty = vec[int]()
+        []int empty = []int{}
         return empty
     }
     
     []int size_bytes = __host_read_binary_file_range(model_path, 0, 8)
     if len(size_bytes) < 8 {
-        vec[int] empty = vec[int]()
+        []int empty = []int{}
         return empty
     }
     
     int metadata_size = u64_le(size_bytes, 0)
     if metadata_size <= 0 || metadata_size > 10000000 {
-        vec[int] empty = vec[int]()
+        []int empty = []int{}
         return empty
     }
     
@@ -457,7 +453,7 @@ func load_model_metadata(string model_path) vec[int] {
     
     []int header_bytes = __host_read_binary_file_range(model_path, 0, metadata_start + metadata_size)
     if len(header_bytes) < metadata_start + metadata_size {
-        vec[int] empty = vec[int]()
+        []int empty = []int{}
         return empty
     }
     
@@ -472,7 +468,7 @@ func perform_inference(string prompt, string model_path) string {
         return "Error: Model file not found"
     }
     
-    vec[int] metadata_bytes = load_model_metadata(model_path)
+    []int metadata_bytes = load_model_metadata(model_path)
     if len(metadata_bytes) == 0 {
         print("[Inference] Failed to load metadata\n")
         return "Error: Failed to load model metadata"
@@ -480,9 +476,9 @@ func perform_inference(string prompt, string model_path) string {
     
     print("[Inference] Metadata loaded: " + int_to_string(len(metadata_bytes)) + " bytes\n")
     
-    vec[int] embed_idx = parse_tensor_index(metadata_bytes, "model.embed_tokens.weight")
-    vec[int] norm_idx = parse_tensor_index(metadata_bytes, "model.norm.weight")
-    vec[int] head_idx = parse_tensor_index(metadata_bytes, "lm_head.weight")
+    []int embed_idx = parse_tensor_index(metadata_bytes, "model.embed_tokens.weight")
+    []int norm_idx = parse_tensor_index(metadata_bytes, "model.norm.weight")
+    []int head_idx = parse_tensor_index(metadata_bytes, "lm_head.weight")
     
     print("[Inference] Embedding: offset=" + int_to_string(embed_idx[0]) + " size=" + int_to_string(embed_idx[1]) + "\n")
     print("[Inference] Norm: offset=" + int_to_string(norm_idx[0]) + " size=" + int_to_string(norm_idx[1]) + "\n")
