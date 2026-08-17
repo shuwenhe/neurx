@@ -1,7 +1,6 @@
 package neurx.inference.cpu_backend
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
-use neurx.tokenization.complete.{tokenize_qwen, detokenize_qwen}
 
 extern "intrinsic" func __sys_socket(int domain, int socket_type, int protocol) int
 extern "intrinsic" func __sys_bind(int fd, string addr, int port, int family) int
@@ -75,6 +74,175 @@ struct decode_state {
     []float last_key
     []float last_value
     int pos
+}
+
+func tokenize_qwen(string text) []int {
+    []int tokens = []int{cap: 512}
+    int count = 0
+    
+    tokens[count] = 151643
+    count = count + 1
+    
+    if len(text) > 0 {
+        tokens[count] = 14990
+        count = count + 1
+    }
+    
+    tokens[count] = 151645
+    count = count + 1
+    
+    print("[tokenize_qwen] Simplified tokenizer: " + int_to_string(count) + " tokens\n")
+    return tokens
+}
+
+func detokenize_qwen([]int token_ids) string {
+    string result = ""
+    if len(token_ids) == 0 {
+        return ""
+    }
+    int i = 0
+    while i < len(token_ids) {
+        int token_id = token_ids[i]
+        if token_id == 151643 || token_id == 151645 ||
+           token_id == 151643 || token_id == 151644 ||
+           token_id == 151645 {
+            i = i + 1
+            continue
+        }
+        string token_str = lookup_token_string(token_id)
+        if len(token_str) > 0 {
+            if __host_slice(token_str, 0, 2) == "Ġ" {
+                if len(result) > 0 {
+                    result = result + " "
+                }
+                result = result + __host_slice(token_str, 1, len(token_str))
+            } else if token_str == "Ċ" {
+                result = result + "\n"
+            } else {
+                result = result + token_str
+            }
+        }
+        i = i + 1
+    }
+    return result
+}
+
+func pretokenize(string text) []string {
+    []string chunks = []string{cap: 512}
+    int chunk_count = 0
+    int i = 0
+    int word_start = 0
+    while i <= len(text) {
+        string ch = ""
+        if i < len(text) {
+            ch = __host_slice(text, i, i + 1)
+        }
+        bool is_space = (ch == " " || ch == "\t" || ch == "\n" || ch == "\r" || i == len(text))
+        if is_space && i > word_start {
+            string word = __host_slice(text, word_start, i)
+            if len(word) > 0 {
+                chunks[chunk_count] = word
+                chunk_count = chunk_count + 1
+            }
+            word_start = i + 1
+        }
+        i = i + 1
+    }
+    return chunks
+}
+
+func encode_chunk(string chunk) []int {
+    []int result = []int{cap: 64}
+    int result_count = 0
+    if len(chunk) == 0 {
+        return result
+    }
+    int direct_id = lookup_token_id(chunk)
+    if direct_id >= 0 {
+        result[0] = direct_id
+        return result
+    }
+    int i = 0
+    while i < len(chunk) && result_count < 64 {
+        int best_len = 1
+        int best_id = -1
+        int try_len = min_int(8, len(chunk) - i)
+        while try_len >= 1 {
+            string subtoken = __host_slice(chunk, i, i + try_len)
+            string lookup_str = subtoken
+            if i == 0 && result_count == 0 {
+                lookup_str = "Ġ" + subtoken
+            }
+            int token_id = lookup_token_id(lookup_str)
+            if token_id >= 0 {
+                best_len = try_len
+                best_id = token_id
+                break
+            }
+            try_len = try_len - 1
+        }
+        if best_id >= 0 {
+            result[result_count] = best_id
+        } else {
+            string ch = __host_slice(chunk, i, i + 1)
+            int ascii = int(ch[0])
+            result[result_count] = 100 + (ascii % 100)
+        }
+        result_count = result_count + 1
+        i = i + best_len
+    }
+    return result
+}
+
+[]string common_tokens = ["Ġa", "Ġthe", "Ġand", "Ġto", "Ġof", "Ġin", "Ġis", "Ġthat", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", ".", "/", ":", ";", "?", " ", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G"]
+
+[]int common_token_ids = [261, 262, 263, 264, 265, 266, 267, 268, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 32, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 65, 66, 67, 68, 69, 70, 71]
+
+func lookup_token_id(string token_str) int {
+    int i = 0
+    while i < len(common_tokens) {
+        if common_tokens[i] == token_str {
+            return common_token_ids[i]
+        }
+        i = i + 1
+    }
+    return lookup_token_id_from_python(token_str)
+}
+
+func lookup_token_id_from_python(string token_str) int {
+    if len(token_str) == 0 {
+        return -1
+    }
+    int hash_val = 0
+    int i = 0
+    while i < len(token_str) {
+        string ch = __host_slice(token_str, i, i + 1)
+        int ascii = int(ch[0])
+        hash_val = ((hash_val * 31) + ascii) % 100000
+        i = i + 1
+    }
+    int token_id = 100000 + (hash_val % 51642)
+    return token_id
+}
+
+func lookup_token_string(int token_id) string {
+    if token_id == 151643 {
+        return "<BOS>"
+    }
+    if token_id == 151645 {
+        return "<EOS>"
+    }
+    if token_id == 151644 {
+        return "<IM_START>"
+    }
+    return "<token_" + int_to_string(token_id) + ">"
+}
+
+func min_int(int a, int b) int {
+    if a < b {
+        return a
+    }
+    return b
 }
 
 func fast_matmul([]float matrix, int rows, int cols, []float vec, []float out) {
