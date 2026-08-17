@@ -942,7 +942,7 @@ func handle_client(int client_fd) {
             if len(prompt) == 0 {
                 prompt = "test"
             }
-            response = http_response_ok(generate_response(prompt, 128))
+            response = http_response_ok(generate_response(prompt, 3))
         } else {
             response = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n"
         }
