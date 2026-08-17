@@ -84,7 +84,7 @@ func generate_response(string prompt) string {
     }
     if contains_keyword(lower, "c++") || contains_keyword(lower, "cpp") || contains_keyword(lower, "c++实现") {
         if contains_keyword(lower, "1+") || contains_keyword(lower, "1 +") || contains_keyword(lower, "sum") || contains_keyword(lower, "100") {
-            return "#include <iostream>\nusing namespace std;\nint main() {\n    int sum = 0;\n    for (int i = 1; i <= 100; i++) {\n        sum += i;\n    }\n    cout << \"Sum from 1 to 100: \" << sum << endl;\n    return 0;\n}\n
+            return "#include <iostream>\nusing namespace std;\nint main() {\n    int sum = 0;\n    for (int i = 1; i <= 100; i++) {\n        sum += i;\n    }\n    cout << \"Sum from 1 to 100: \" << sum << endl;\n    return 0;\n}\n"
         }
         if contains_keyword(lower, "快速排序") || contains_keyword(lower, "quicksort") || contains_keyword(lower, "quick sort") {
             return "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint partition(vector<int>& nums, int left, int right) {\n    int pivot = nums[right];\n    int i = left - 1;\n    for (int j = left; j < right; j++) {\n        if (nums[j] <= pivot) {\n            i++;\n            swap(nums[i], nums[j]);\n        }\n    }\n    swap(nums[i + 1], nums[right]);\n    return i + 1;\n}\n\nvoid quickSort(vector<int>& nums, int left, int right) {\n    if (left >= right) return;\n    int p = partition(nums, left, right);\n    quickSort(nums, left, p - 1);\n    quickSort(nums, p + 1, right);\n}\n\nint main() {\n    vector<int> nums = {5, 2, 9, 1, 5, 6};\n    quickSort(nums, 0, (int)nums.size() - 1);\n    for (int x : nums) cout << x << ' ';\n    cout << endl;\n    return 0;\n}"
