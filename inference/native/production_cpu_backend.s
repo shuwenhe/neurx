@@ -947,8 +947,7 @@ func tokenize_text(string text) []int {
     }
     string script_path = "/home/shuwen/shuwen/posttrain/tokenize_detokenize.py"
     
-    string escaped_text = text
-    string cmd = "cd " + model_dir + " && python3 " + script_path + " encode '" + escaped_text + "' 2>/dev/null"
+    string cmd = "cd " + model_dir + " && python3 " + script_path + " encode '" + text + "' 2>/dev/null"
     
     string output = runtime_run_command_output(cmd)
     
@@ -961,27 +960,37 @@ func tokenize_text(string text) []int {
     int count = 0
     int i = 0
     int start = 0
+    int out_len = len(output)
     
-    while i < len(output) && count < 128 {
-        if __host_slice(output, i, i + 1) == "," || __host_slice(output, i, i + 1) == "]" {
-            if i > start {
-                string num_str = __host_slice(output, start, i)
-                int token_id = 0
-                int j = 0
-                while j < len(num_str) {
-                    string ch = __host_slice(num_str, j, j + 1)
-                    if ch >= "0" && ch <= "9" {
-                        token_id = token_id * 10 + (int(ch[0]) - int("0"[0]))
+    while i < out_len && count < 128 {
+        string ch = __host_slice(output, i, i + 1)
+        
+        if ch == " " || i == out_len - 1 {
+            int end = i
+            if i == out_len - 1 && ch != " " {
+                end = i + 1
+            }
+            
+            if end > start && start < out_len {
+                if end <= out_len && end > start {
+                    string num_str = __host_slice(output, start, end)
+                    int token_id = 0
+                    int j = 0
+                    int num_len = len(num_str)
+                    while j < num_len {
+                        string digit = __host_slice(num_str, j, j + 1)
+                        if digit >= "0" && digit <= "9" {
+                            token_id = token_id * 10 + (int(digit[0]) - int("0"[0]))
+                        }
+                        j = j + 1
                     }
-                    j = j + 1
-                }
-                if token_id >= 0 {
-                    tokens[count] = token_id
-                    count = count + 1
+                    
+                    if token_id >= 0 && token_id < 151936 {
+                        tokens[count] = token_id
+                        count = count + 1
+                    }
                 }
             }
-            start = i + 1
-        } else if __host_slice(output, i, i + 1) == "[" {
             start = i + 1
         }
         i = i + 1
@@ -1007,12 +1016,14 @@ func decode_tokens_simple([]int token_ids) string {
     
     string token_json = "["
     int i = 0
-    while i < len(token_ids) {
+    int token_count = 0
+    while i < len(token_ids) && token_count < 256 {
         if i > 0 {
             token_json = token_json + ","
         }
         token_json = token_json + int_to_string(token_ids[i])
         i = i + 1
+        token_count = token_count + 1
     }
     token_json = token_json + "]"
     
@@ -1020,7 +1031,11 @@ func decode_tokens_simple([]int token_ids) string {
     
     string output = runtime_run_command_output(cmd)
     
-    return output
+    if len(output) > 0 {
+        return output
+    }
+    
+    return "[decode failed]"
 }
 
 func perform_inference_multi_token_optimized(string prompt, string model_path, int max_tokens) string {
