@@ -1,4 +1,4 @@
-package neurx.tokenizers.bpe_complete
+package neurx.tokenizer.common.bpe_complete
 
 func new_vocab() []int {
     []int vocab = []
