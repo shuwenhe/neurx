@@ -116,7 +116,7 @@ func detokenize_qwen([]int token_ids) string {
         string token_str = lookup_token_string(token_id)
         print("[detokenize] Token string: '" + token_str + "' (len=" + int_to_string(len(token_str)) + ")\n")
         if len(token_str) > 0 {
-            if __host_slice(token_str, 0, 2) == "Ġ" {
+            if len(token_str) >= 2 && __host_slice(token_str, 0, 2) == "Ġ" {
                 if len(result) > 0 {
                     result = result + " "
                 }
