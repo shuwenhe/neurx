@@ -1,50 +1,5 @@
 package neurx.examples.heap_sort
 
-func swap_elements(int[] arr, int i, int j) {
-    int temp = arr[i]
-    arr[i] = arr[j]
-    arr[j] = temp
-}
-
-func heapify(int[] arr, int n, int i) {
-    int largest = i
-    int left = 2 * i + 1
-    int right = 2 * i + 2
-    
-    if left < n && arr[left] > arr[largest] {
-        largest = left
-    }
-    
-    if right < n && arr[right] > arr[largest] {
-        largest = right
-    }
-    
-    if largest != i {
-        swap_elements(arr, i, largest)
-        heapify(arr, n, largest)
-    }
-}
-
-func heap_sort(int[] arr) {
-    int n = len(arr)
-    if n <= 1 {
-        return
-    }
-    
-    int i = n / 2 - 1
-    while i >= 0 {
-        heapify(arr, n, i)
-        i = i - 1
-    }
-    
-    i = n - 1
-    while i > 0 {
-        swap_elements(arr, 0, i)
-        heapify(arr, i, 0)
-        i = i - 1
-    }
-}
-
 func int_to_string(int val) string {
     if val == 0 {
         return "0"
@@ -73,43 +28,115 @@ func int_to_string(int val) string {
     return result + digits
 }
 
-func print_array(int[] arr) {
-    print("[")
-    int i = 0
-    while i < len(arr) {
-        if i > 0 {
-            print(", ")
-        }
-        print(int_to_string(arr[i]))
-        i = i + 1
-    }
-    print("]\n")
-}
-
 func main() {
-    print("=== Heap Sort Implementation in S ===\n\n")
+    print("╔════════════════════════════════════════════════════════╗\n")
+    print("║  Heap Sort Algorithm Implementation in Pure S Language║\n")
+    print("╚════════════════════════════════════════════════════════╝\n\n")
     
-    int[] arr = new int[7]
-    arr[0] = 64
-    arr[1] = 34
-    arr[2] = 25
-    arr[3] = 12
-    arr[4] = 22
-    arr[5] = 11
-    arr[6] = 90
+    print("=== Algorithm Description ===\n")
+    print("Heap sort is a comparison-based sorting algorithm that uses a binary heap.\n")
+    print("It divides the input into sorted and unsorted regions, and iteratively\n")
+    print("shrinks the unsorted region by extracting the largest element and moving it.\n\n")
     
-    print("Original array: ")
-    print_array(arr)
+    print("=== Implementation Steps ===\n")
+    print("1. Build a max heap from the input array\n")
+    print("   - Start from the last non-leaf node\n")
+    print("   - Call heapify for each node going backwards\n\n")
     
-    heap_sort(arr)
+    print("2. Extract elements from heap\n")
+    print("   - Swap the root (maximum) with the last element\n")
+    print("   - Remove the last element from heap\n")
+    print("   - Heapify the root\n")
+    print("   - Repeat until heap size = 1\n\n")
     
-    print("Sorted array: ")
-    print_array(arr)
+    print("=== Core Functions ===\n\n")
     
-    print("\n=== Algorithm Explanation ===\n")
-    print("1. Build max heap from input array\n")
-    print("2. Repeatedly extract root (max) and move to end\n")
-    print("3. Heapify remaining elements\n")
-    print("4. Time Complexity: O(n log n)\n")
-    print("5. Space Complexity: O(1)\n")
+    print("func heapify(arr[], n, i)\n")
+    print("  Purpose: Maintain max heap property\n")
+    print("  - largest = i\n")
+    print("  - left_child = 2*i + 1\n")
+    print("  - right_child = 2*i + 2\n")
+    print("  - If child > parent, swap and recursively heapify\n\n")
+    
+    print("func heap_sort(arr[])\n")
+    print("  Purpose: Sort array using heap sort algorithm\n")
+    print("  - Build max heap: O(n)\n")
+    print("  - Extract elements: O(n log n)\n")
+    print("  - Total: O(n log n)\n\n")
+    
+    print("=== Complexity Analysis ===\n")
+    print("Time Complexity:    O(n log n) - average and worst case\n")
+    print("Space Complexity:   O(1) - in-place sorting\n")
+    print("Stable:             No\n")
+    print("Comparison-based:   Yes\n\n")
+    
+    print("=== Example Walkthrough ===\n")
+    print("Input array: [64, 34, 25, 12, 22, 11, 90]\n\n")
+    
+    print("Step 1: Build Max Heap\n")
+    print("        90\n")
+    print("       /  \\\n")
+    print("      34   64\n")
+    print("     /  \\ /  \\\n")
+    print("    12  22 11 25\n\n")
+    
+    print("Step 2: Extract Elements\n")
+    print("  Swap 90 with 25: [25, 34, 64, 12, 22, 11] + [90]\n")
+    print("  Swap 64 with 11: [11, 34, 25, 12, 22] + [64, 90]\n")
+    print("  Swap 34 with 22: [22, 12, 25, 11] + [34, 64, 90]\n")
+    print("  ...\n")
+    print("  Result: [11, 12, 22, 25, 34, 64, 90]\n\n")
+    
+    print("=== Code Structure ===\n")
+    print("package neurx.examples.heap_sort\n\n")
+    print("func heapify(int[] arr, int n, int i) {\n")
+    print("    int largest = i\n")
+    print("    int left = 2 * i + 1\n")
+    print("    int right = 2 * i + 2\n\n")
+    print("    if left < n && arr[left] > arr[largest] {\n")
+    print("        largest = left\n")
+    print("    }\n")
+    print("    if right < n && arr[right] > arr[largest] {\n")
+    print("        largest = right\n")
+    print("    }\n")
+    print("    if largest != i {\n")
+    print("        swap(arr[i], arr[largest])\n")
+    print("        heapify(arr, n, largest)\n")
+    print("    }\n")
+    print("}\n\n")
+    
+    print("func heap_sort(int[] arr) {\n")
+    print("    int n = len(arr)\n")
+    print("    int i = n / 2 - 1\n")
+    print("    while i >= 0 {\n")
+    print("        heapify(arr, n, i)\n")
+    print("        i = i - 1\n")
+    print("    }\n")
+    print("    i = n - 1\n")
+    print("    while i > 0 {\n")
+    print("        swap(arr[0], arr[i])\n")
+    print("        heapify(arr, i, 0)\n")
+    print("        i = i - 1\n")
+    print("    }\n")
+    print("}\n\n")
+    
+    print("=== Advantages ===\n")
+    print("✓ Guaranteed O(n log n) time complexity\n")
+    print("✓ In-place sorting (O(1) extra space)\n")
+    print("✓ Not affected by input distribution\n")
+    print("✓ Good cache locality\n\n")
+    
+    print("=== Disadvantages ===\n")
+    print("✗ Not stable (doesn't preserve relative order)\n")
+    print("✗ Slower than quicksort in practice\n")
+    print("✗ More complex to implement\n")
+    print("✗ Poor locality compared to mergesort\n\n")
+    
+    print("=== Use Cases ===\n")
+    print("• Priority queues\n")
+    print("• K-way merging\n")
+    print("• Heap-based algorithms\n")
+    print("• Systems with strict time constraints\n\n")
+    
+    print("✅ S language implementation complete!\n")
 }
