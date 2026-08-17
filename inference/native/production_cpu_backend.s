@@ -323,18 +323,20 @@ func u64_le([]int bytes, int offset) int {
 
 func slice_bytes([]int bytes, int start, int count) []int {
     if start < 0 || start >= len(bytes) {
-        []int empty = []int{}
-        return empty
+        return []int{}
     }
     int end_pos = start + count
     if end_pos > len(bytes) {
         end_pos = len(bytes)
     }
     int actual_len = end_pos - start
+    if actual_len <= 0 {
+        return []int{}
+    }
+    []int result = []int{cap: actual_len}
     int i = 0
-    []int result = []int{}
     while i < actual_len && start + i < len(bytes) {
-        result = result + []int{bytes[start + i]}
+        result[i] = bytes[start + i]
         i = i + 1
     }
     return result
@@ -399,13 +401,17 @@ func parse_int_at_bytes([]int bytes, int pos) int {
 }
 
 func parse_tensor_index([]int metadata_bytes, string tensor_name) []int {
-    []int result = []int{0, 0, 0}
+    []int result = []int{cap: 3}
+    result[0] = 0
+    result[1] = 0
+    result[2] = 0
     
     if len(metadata_bytes) == 0 { return result }
     
     int pos = find_substring_bytes(metadata_bytes, tensor_name, 0)
     if pos == -1 {
-        return []int{-1, -1, -1}
+        result[2] = -1
+        return result
     }
     
     int offset_start = find_substring_bytes(metadata_bytes, "\"data_offsets\":[", pos)
@@ -432,20 +438,19 @@ func parse_tensor_index([]int metadata_bytes, string tensor_name) []int {
 }
 
 func load_model_metadata(string model_path) []int {
+    []int empty = []int{cap: 0}
+    
     if !runtime_file_exists(model_path) {
-        []int empty = []int{}
         return empty
     }
     
     []int size_bytes = __host_read_binary_file_range(model_path, 0, 8)
     if len(size_bytes) < 8 {
-        []int empty = []int{}
         return empty
     }
     
     int metadata_size = u64_le(size_bytes, 0)
     if metadata_size <= 0 || metadata_size > 10000000 {
-        []int empty = []int{}
         return empty
     }
     
@@ -453,7 +458,6 @@ func load_model_metadata(string model_path) []int {
     
     []int header_bytes = __host_read_binary_file_range(model_path, 0, metadata_start + metadata_size)
     if len(header_bytes) < metadata_start + metadata_size {
-        []int empty = []int{}
         return empty
     }
     
