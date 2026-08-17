@@ -502,16 +502,11 @@ func perform_inference(string prompt, string model_path) string {
 }
 
 func generate_response(string prompt, int max_tokens) string {
-    string model_dir = runtime_env_get("NEURX_MODEL_DIR", "")
-    print("DEBUG: NEURX_MODEL_DIR = " + model_dir + "\n")
+    string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
+    print("[Inference] NEURX_CHAT_MODEL_PATH = " + model_path + "\n")
     
-    string result = ""
-    if len(model_dir) > 0 {
-        string model_file = model_dir + "/model.safetensors"
-        result = perform_inference(prompt, model_file)
-    } else {
-        result = "Error: NEURX_MODEL_DIR not set"
-    }
+    string model_file = model_path + "/model.safetensors"
+    string result = perform_inference(prompt, model_file)
     
     return "{\"output\":\"" + result + "\"}"
 }
