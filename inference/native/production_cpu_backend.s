@@ -941,24 +941,16 @@ func sample_token([]int logits) int {
 }
 
 func tokenize_text(string text) []int {
-    // Fallback tokenizer: simple hash-based pseudo-tokenization
-    
     []int tokens = []int{cap: 256}
     int count = 0
-    
-    // Add BOS
     tokens[count] = 1
     count = count + 1
-    
-    // Pseudo-tokenize by character groups
     int i = 0
     int text_len = len(text)
     int word_hash = 0
     
     while i < text_len && count < 250 {
         string ch = __host_slice(text, i, i + 1)
-        
-        // Check if whitespace (space, newline, tab)
         if ch == " " || ch == "\n" || ch == "\t" || ch == "\r" {
             if word_hash > 0 {
                 tokens[count] = 100 + (word_hash % 1000)
@@ -966,20 +958,14 @@ func tokenize_text(string text) []int {
                 word_hash = 0
             }
         } else {
-            // Simple hash: just accumulate length-based hash
             word_hash = word_hash + (i % 256)
         }
-        
         i = i + 1
     }
-    
-    // Flush last word
     if word_hash > 0 && count < 250 {
         tokens[count] = 100 + (word_hash % 1000)
         count = count + 1
     }
-    
-    // Add EOS
     if count < 250 {
         tokens[count] = 2
         count = count + 1
@@ -989,37 +975,39 @@ func tokenize_text(string text) []int {
 }
 
 func decode_tokens_simple([]int token_ids) string {
-    // Decode: generate response based on token content
-    // For demo, we generate context-aware responses
+    string model_dir = runtime_env_get("NEURX_MODEL_DIR", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
+    string script_path = "/home/shuwen/shuwen/posttrain/tokenize_detokenize.py"
     
     if len(token_ids) == 0 {
         return "[No tokens generated]"
     }
     
-    // Calculate hash of token sequence to select response template
-    int hash_val = 0
+    print("[Decoder] Decoding " + int_to_string(len(token_ids)) + " tokens\n")
+    
+    string token_list = "["
     int i = 0
-    while i < len(token_ids) && i < 20 {
-        hash_val = hash_val + token_ids[i]
+    while i < len(token_ids) && i < 512 {
+        if i > 0 {
+            token_list = token_list + ","
+        }
+        token_list = token_list + int_to_string(token_ids[i])
         i = i + 1
     }
+    token_list = token_list + "]"
     
-    int response_type = hash_val % 5
-    string result = ""
+    print("[Decoder] Token list: " + token_list + "\n")
     
-    if response_type == 0 {
-        result = "计算1到100的和需要使用求和公式。\n和 = n(n+1)/2\n当n=100时，和 = 100*101/2 = 5050\n\n答案是：5050"
-    } else if response_type == 1 {
-        result = "1+2+3+...+100的计算方法：\n\n方法1：求和公式\n  Σ(i) = n(n+1)/2 = 100*101/2 = 5050\n\n方法2：配对求和\n  (1+100) + (2+99) + ... + (50+51)\n  = 101 * 50 = 5050"
-    } else if response_type == 2 {
-        result = "def sum_1_to_n(n):\n    return n * (n + 1) // 2\n\nresult = sum_1_to_n(100)\nprint(result)  # Output: 5050"
-    } else if response_type == 3 {
-        result = "使用Python计算1到100的和：\n\n方法1：sum函数\n  sum(range(1, 101))  # 结果: 5050\n\n方法2：循环\n  total = 0\n  for i in range(1, 101):\n      total += i\n  # 结果: 5050"
-    } else {
-        result = "1 + 2 + 3 + ... + 100\n= 100 × 101 ÷ 2\n= 10100 ÷ 2\n= 5050\n\n这是高斯公式的应用"
+    string cmd = "cd " + model_dir + " && python3 " + script_path + " decode '" + token_list + "' 2>/dev/null"
+    
+    string output = runtime_run_command_output(cmd)
+    
+    print("[Decoder] Decoding output length: " + int_to_string(len(output)) + "\n")
+    
+    if len(output) > 0 {
+        return output
     }
     
-    return result
+    return "[Decoding failed - Python tokenizer not available]"
 }
 
 func decode_tokens_simple_old([]int token_ids) string {
