@@ -1,4 +1,7 @@
 package neurx.inference.production_chat
+
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
+
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __sys_socket(int domain, int socket_type, int protocol) int
@@ -6,32 +9,8 @@ extern "intrinsic" func __sys_connect(int fd, string host, int port, int family)
 extern "intrinsic" func __sys_write_string(int fd, string data) int
 extern "intrinsic" func __sys_close(int fd) int
 extern "intrinsic" func __sys_set_deadline_ms(int fd, int read_timeout_ms, int write_timeout_ms) int
-func runtime_env_get(string name, string default_value) string {
-    default_value
-}
 
-func runtime_file_exists(string path) bool {
-    true
-}
 
-func runtime_run_command_output(string command) string {
-    ""
-}
-
-func trim(string s) string {
-    int i = 0
-    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
-        i = i + 1
-    }
-    int j = len(s) - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
-        j = j - 1
-    }
-    if j < i {
-        return ""
-    }
-    return __host_slice(s, i, j + 1)
-}
 
 func shell_escape(string value) string {
     string output = "'"
@@ -255,9 +234,10 @@ func main() {
             " NEURX_S_READY_FILE=" + shell_escape(ready_file) +
             " nohup " + backend_cmd +
             " >" + shell_escape(log_file) + " 2>&1 < /dev/null &"
+        print("[DEBUG] Launch command: " + launch + "\n")
         _ = runtime_run_command_output(launch)
         int attempts = 0
-        int max_attempts = 200
+        int max_attempts = 300
         print("[DEBUG] Starting health check attempts for backend at " + host + ":" + int_to_string(port_number) + "\n")
         while attempts < max_attempts && !backend_ready(host, port_number) {
             attempts = attempts + 1
@@ -268,13 +248,15 @@ func main() {
                     print("[DEBUG] Response preview: " + __host_slice(debug_response, 0, 200) + "\n")
                 }
             }
-            if attempts < 10 {
-                runtime_run_command_output("sleep 0.05")
+            if attempts % 10 == 0 {
+                print("[DEBUG] Health check attempt " + int_to_string(attempts) + "/" + int_to_string(max_attempts) + "\n")
             }
+            runtime_run_command_output("sleep 0.2")
         }
         print("[DEBUG] Health check completed after " + int_to_string(attempts) + " attempts\n")
         if !backend_ready(host, port_number) {
             print("error: NeurX S backend failed to start; log: " + log_file + "\n")
+            print("Backend startup command: " + launch + "\n")
             return 1
         }
         owned_backend = true

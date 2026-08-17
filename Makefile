@@ -936,7 +936,7 @@ chat-cpu: build-real-model-chat-s
 		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
 		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
 		NEURX_INFER_DEVICE='cpu' \
-		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_ENHANCED_IR)'
+		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_IR)'
 
 chat-gpu: build-real-model-chat-s
 	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \
