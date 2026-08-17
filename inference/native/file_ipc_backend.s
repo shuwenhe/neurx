@@ -54,11 +54,45 @@ func generate_response(string prompt, int max_tokens) string {
     return response
 }
 
+func runtime_run_command_output(string command) string {
+    ""
+}
+
 func main() {
     print("NeurX Medical AI Backend - File IPC Mode\n")
     print("Listening on: /tmp/neurx_request.txt\n")
     print("Will write response to: /tmp/neurx_response.json\n\n")
+    int sleep_count = 0
     while true {
-        _ = 0
+        _ = runtime_run_command_output("sleep 0.1")
+        sleep_count = sleep_count + 1
+        if sleep_count % 10 == 0 {
+            print("Backend waiting for requests (checked " + int_to_string(sleep_count) + " times)...\n")
+        }
     }
 }
+
+func int_to_string(int value) string {
+    if value == 0 { return "0" }
+    string out = ""
+    int n = value
+    if n < 0 {
+        out = "-"
+        n = 0 - n
+    }
+    string tmp = ""
+    while n > 0 {
+        int digit = n - (n / 10) * 10
+        if digit == 0 { tmp = "0" + tmp }
+        if digit == 1 { tmp = "1" + tmp }
+        if digit == 2 { tmp = "2" + tmp }
+        if digit == 3 { tmp = "3" + tmp }
+        if digit == 4 { tmp = "4" + tmp }
+        if digit == 5 { tmp = "5" + tmp }
+        if digit == 6 { tmp = "6" + tmp }
+        if digit == 7 { tmp = "7" + tmp }
+        if digit == 8 { tmp = "8" + tmp }
+        if digit == 9 { tmp = "9" + tmp }
+        n = n / 10
+    }
+    return out + tmp

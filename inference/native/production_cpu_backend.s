@@ -173,6 +173,10 @@ func load_tokenizer(string model_dir) tokenizer {
     }
 }
 
+func runtime_run_command_output(string command) string {
+    ""
+}
+
 func initialize_backend() {
     print("╔════════════════════════════════════════════════════════════════╗\n")
     print("║  NeurX CPU Backend - Pure S Implementation                     ║\n")
@@ -373,37 +377,19 @@ func main() {
     if server_fd < 0 {
         print("ERROR: Socket creation failed!\n")
         print("HTTP server listening on 127.0.0.1:18082 (compatibility mode)\n")
-        int counter = 0
-        while true {
-            counter = counter + 1
-            if counter > 10000000 {
-                counter = 0
-            }
-        }
+        return
     }
     if __sys_bind(server_fd, "127.0.0.1", 18083, 2) < 0 {
         print("ERROR: Socket binding failed!\n")
         print("HTTP server listening on 127.0.0.1:18083 (compatibility mode)\n")
         _ = __sys_close(server_fd)
-        int counter = 0
-        while true {
-            counter = counter + 1
-            if counter > 10000000 {
-                counter = 0
-            }
-        }
+        return
     }
     if __sys_listen(server_fd, 128) < 0 {
         print("ERROR: Socket listen failed!\n")
         print("HTTP server listening on 127.0.0.1:18083 (compatibility mode)\n")
         _ = __sys_close(server_fd)
-        int counter = 0
-        while true {
-            counter = counter + 1
-            if counter > 10000000 {
-                counter = 0
-            }
-        }
+        return
     }
     print("HTTP server listening on 127.0.0.1:18083\n")
     string ready_file = runtime_env_get("NEURX_S_READY_FILE", "")
@@ -411,16 +397,11 @@ func main() {
         print("Signaling readiness at: " + ready_file + "\n")
         create_ready_file(ready_file)
     }
-    int idle_sleep = 0
     while true {
         int client_fd = __sys_accept(server_fd)
         if client_fd < 0 {
-            idle_sleep = idle_sleep + 1
-            if idle_sleep > 1000000 {
-                idle_sleep = 0
-            }
+            _ = runtime_run_command_output("sleep 0.001")
         } else {
-            idle_sleep = 0
             handle_client(client_fd)
         }
     }
