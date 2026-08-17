@@ -1,4 +1,5 @@
 module document_parser
+
 struct document_parser_config {
     enabled_formats: list<string> = ["pdf", "html", "markdown", "docx", "pptx", "xlsx", "txt", "csv"]
     pdf_extract_images: bool = true

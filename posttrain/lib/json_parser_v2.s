@@ -1,5 +1,6 @@
 package neurx.posttrain.lib
 use std.io.eprintln
+
 func string_starts_with(string text, int pos, string prefix) bool {
     end := pos + len(prefix)
     if end > len(text) {

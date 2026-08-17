@@ -2,6 +2,7 @@ package neurx.distributed.zero
 use neurx.strings
 use neurx.distributed.comm
 use neurx.strings
+
 struct zero_state {
     string name
     string backend

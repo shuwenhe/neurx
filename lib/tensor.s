@@ -1,4 +1,5 @@
 package neurx.lib.tensor
+
 struct vector {
     []float data
     int size

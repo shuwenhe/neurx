@@ -5,6 +5,7 @@ enum amp_dtype {
     FP16 = 1
     BF16 = 2
 }
+
 struct amp_config {
     dtype: amp_dtype
     enable_grad_scaling: bool

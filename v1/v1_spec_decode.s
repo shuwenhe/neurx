@@ -17,17 +17,17 @@ struct speculative_tokens {
 
 struct v1_spec_decode {
     speculative_method method
-    
+
     int32 num_speculative_tokens
     int32 num_candidates
-    
+
     float32 acceptance_threshold
     bool enable_adaptive_speculation
-    
+
     int32 accepted_tokens
     int32 rejected_tokens
     int32 total_tokens_generated
-    
+
     speculative_tokens* spec_tokens
 }
 
@@ -55,31 +55,31 @@ func (v1_spec_decode* spec) speculate(vec[float32] logits) speculative_tokens {
         probabilities: make(vec[float32]),
         num_speculated: 0,
     }
-    
+
     if spec.method == method_medusa {
         for i := 0; i < spec.num_speculative_tokens; i = i + 1 {
             max_idx := 0
             max_val := logits[0]
-            
+
             for j := 1; j < len(logits); j = j + 1 {
                 if logits[j] > max_val {
                     max_val = logits[j]
                     max_idx = j
                 }
             }
-            
+
             result.tokens = append(result.tokens, int32(max_idx))
             result.probabilities = append(result.probabilities, max_val)
         }
         result.num_speculated = spec.num_speculative_tokens
     }
-    
+
     return result
 }
 
 func (v1_spec_decode* spec) verify_speculated_tokens(vec[int32] predicted_tokens, vec[int32] actual_tokens) int32 {
     accepted := 0
-    
+
     for i := 0; i < len(predicted_tokens) && i < len(actual_tokens); i = i + 1 {
         if predicted_tokens[i] == actual_tokens[i] {
             accepted = accepted + 1
@@ -89,28 +89,28 @@ func (v1_spec_decode* spec) verify_speculated_tokens(vec[int32] predicted_tokens
             break
         }
     }
-    
+
     return int32(accepted)
 }
 
 func (v1_spec_decode* spec) batch_speculate(vec[vec[float32]] batch_logits) vec[speculative_tokens] {
     results := make(vec[speculative_tokens])
-    
+
     for i := 0; i < len(batch_logits); i = i + 1 {
         spec_result := spec.speculate(batch_logits[i])
         results = append(results, spec_result)
     }
-    
+
     return results
 }
 
 func (v1_spec_decode* spec) get_expected_speedup() float32 {
     total := spec.accepted_tokens + spec.rejected_tokens
-    
+
     if total == 0 {
         return 1.0
     }
-    
+
     acceptance_rate := float32(spec.accepted_tokens) / float32(total)
     return 1.0 + (acceptance_rate * float32(spec.num_speculative_tokens))
 }

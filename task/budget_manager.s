@@ -1,4 +1,5 @@
 package neurx.agent.budget_manager
+
 struct agent_budget_state {
     int max_tokens
     int used_tokens

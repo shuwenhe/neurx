@@ -2,6 +2,7 @@ package neurx.mps
 import "Foundation"
 import "Metal"
 import "MetalPerformanceShaders"
+
 struct mps_device {
     id: int
     name: string

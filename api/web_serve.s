@@ -124,7 +124,7 @@ func (web_server* ws) handle_request(http_request* req) http_response* {
     for _, mw := range ws.middlewares {
         _ = mw
     }
-    
+
     for _, route := range ws.routes {
         if route.path == req.path && route.method == req.method {
             return &http_response{
@@ -135,7 +135,7 @@ func (web_server* ws) handle_request(http_request* req) http_response* {
             }
         }
     }
-    
+
     return &http_response{
         status: http_not_found,
         headers: make(map[string]string),
@@ -170,12 +170,12 @@ func (web_server* ws) verify_authorization(http_request* req) bool {
     if !ws.config.enable_auth {
         return true
     }
-    
+
     auth_header, exists := req.headers["Authorization"]
     if !exists {
         return false
     }
-    
+
     return auth_header == ws.config.auth_header
 }
 

@@ -113,18 +113,18 @@ func (cohere_api_server* srv) generate(cohere_generate_request* req) (cohere_gen
             stop_sequences: req.stop_sequences,
         },
     }
-    
+
     resp, err := srv.engine.complete(api_req)
     if err != nil {
         return nil, err
     }
-    
+
     cohere_resp := &cohere_generate_response{
         generations: resp.generated_text,
         token_likelihoods: make([]interface{}, 0),
         meta: make(map[string]interface{}),
     }
-    
+
     return cohere_resp, nil
 }
 
@@ -133,12 +133,12 @@ func (cohere_api_server* srv) chat(cohere_chat_request* req) (cohere_chat_respon
         prompt: req.message,
         model_id: req.model,
     }
-    
+
     resp, err := srv.engine.complete(api_req)
     if err != nil {
         return nil, err
     }
-    
+
     chat_resp := &cohere_chat_response{
         text: "",
         chat_history: make([]cohere_chat_message*, 0),
@@ -147,7 +147,7 @@ func (cohere_api_server* srv) chat(cohere_chat_request* req) (cohere_chat_respon
         prompt_tokens: resp.input_tokens,
         generation_tokens: resp.output_tokens,
     }
-    
+
     return chat_resp, nil
 }
 
@@ -157,13 +157,13 @@ func (cohere_api_server* srv) embed(cohere_embed_request* req) (cohere_embed_res
         embedding := make([]float32, 0)
         embeddings = append(embeddings, embedding)
     }
-    
+
     embed_resp := &cohere_embed_response{
         embeddings: embeddings,
         model: req.model,
         meta: make(map[string]interface{}),
     }
-    
+
     return embed_resp, nil
 }
 

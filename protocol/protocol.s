@@ -221,7 +221,7 @@ func new_usage_log_probs_result() usage_log_probs_result {
 }
 
 func is_request_completed(request* req) bool {
-    return req.status == request_status_completed || 
+    return req.status == request_status_completed ||
            req.status == request_status_failed ||
            req.status == request_status_cancelled ||
            req.status == request_status_aborted

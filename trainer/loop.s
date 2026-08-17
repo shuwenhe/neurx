@@ -11,6 +11,7 @@ enum training_mode {
     VALIDATE = 1
     TEST = 2
 }
+
 struct training_config {
     epochs: int
     batch_size: int

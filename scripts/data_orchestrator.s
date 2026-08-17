@@ -12,6 +12,7 @@ enum data_format {
     arrow,
     tf_record,
 }
+
 struct data_config {
     input_path       string
     output_path      string

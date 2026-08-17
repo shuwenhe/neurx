@@ -7,23 +7,23 @@ import "encoding/json"
 struct structured_logger {
 	string                  logger_name
 	log_level               min_level
-	
+
 	vec[log_entry]          entries
 	int32                   max_entries
 	int32                   entry_count
-	
+
 	vec[log_entry_batch]    batches
 	int32                   batch_count
-	
+
 	map[string]string       default_labels
 	map[string]interface{}  default_fields
-	
+
 	int32                   flush_interval_ms
 	int64                   last_flush_time
-	
+
 	int32                   total_entries_logged
 	int32                   total_errors_logged
-	
+
 	sync.Mutex              mu
 }
 
@@ -56,33 +56,33 @@ func create_structured_logger(config logger_config) structured_logger {
 func (structured_logger* s) log_entry(entry log_entry) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	if entry.level < s.min_level {
 		return
 	}
-	
+
 	entry.entry_id = "log_" + string(s.total_entries_logged)
-	
+
 	for key, val := range s.default_labels {
 		if _, exists := entry.labels[key]; !exists {
 			entry.labels[key] = val
 		}
 	}
-	
+
 	for key, val := range s.default_fields {
 		if _, exists := entry.fields[key]; !exists {
 			entry.fields[key] = val
 		}
 	}
-	
+
 	s.entries = append(s.entries, entry)
 	s.entry_count++
 	s.total_entries_logged++
-	
+
 	if entry.level == ERROR || entry.level == FATAL {
 		s.total_errors_logged++
 	}
-	
+
 	if s.entry_count >= s.max_entries {
 		s.flush_batch()
 	}
@@ -128,11 +128,11 @@ func (structured_logger* s) log_with_context(msg string, ctx log_context, level 
 	entry.level = level
 	entry.trace_id = ctx.request_id
 	entry.add_field("depth", ctx.depth)
-	
+
 	for key, val := range ctx.metadata {
 		entry.add_field(key, val)
 	}
-	
+
 	s.log_entry(entry)
 }
 
@@ -157,7 +157,7 @@ func (structured_logger* s) set_min_level(level log_level) {
 func (structured_logger* s) get_entries() vec[log_entry] {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	result := make(vec[log_entry], 0, len(s.entries))
 	for entry := range s.entries {
 		result = append(result, entry)
@@ -169,15 +169,15 @@ func (structured_logger* s) flush_batch() {
 	if int32(len(s.entries)) == 0 {
 		return
 	}
-	
+
 	batch := create_log_entry_batch()
 	batch.source_component = s.logger_name
 	batch.batch_id = s.batch_count
-	
+
 	for entry := range s.entries {
 		batch.add_entry(entry)
 	}
-	
+
 	s.batches = append(s.batches, batch)
 	s.batch_count++
 	s.entries = make(vec[log_entry], 0, 1000)
@@ -188,7 +188,7 @@ func (structured_logger* s) flush_batch() {
 func (structured_logger* s) needs_flush() bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	elapsed := (time.Now().UnixNano() - s.last_flush_time) / 1000000
 	return elapsed > int64(s.flush_interval_ms) || s.entry_count >= s.max_entries
 }
@@ -196,7 +196,7 @@ func (structured_logger* s) needs_flush() bool {
 func (structured_logger* s) flush_if_needed() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	elapsed := (time.Now().UnixNano() - s.last_flush_time) / 1000000
 	if elapsed > int64(s.flush_interval_ms) || s.entry_count >= s.max_entries {
 		s.flush_batch()
@@ -206,21 +206,21 @@ func (structured_logger* s) flush_if_needed() {
 func (structured_logger* s) get_statistics() map[string]interface{} {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	stats := make(map[string]interface{})
 	stats["total_entries_logged"] = s.total_entries_logged
 	stats["total_errors_logged"] = s.total_errors_logged
 	stats["current_entries"] = s.entry_count
 	stats["total_batches"] = s.batch_count
 	stats["logger_name"] = s.logger_name
-	
+
 	return stats
 }
 
 func (structured_logger* s) clear_entries() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	s.entries = make(vec[log_entry], 0, 1000)
 	s.entry_count = 0
 }
@@ -228,7 +228,7 @@ func (structured_logger* s) clear_entries() {
 func (structured_logger* s) clear_all() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	s.entries = make(vec[log_entry], 0, 1000)
 	s.batches = make(vec[log_entry_batch], 0, 100)
 	s.entry_count = 0

@@ -8,6 +8,7 @@ enum serialization_format {
     protocol_2
     custom
 }
+
 struct serialization_config {
     format: SerializationFormat
     version: string

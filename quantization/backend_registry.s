@@ -1,4 +1,5 @@
 package neurx.quantization.backend_registry
+
 func quant_none() int { 0 }
 
 func quant_fp8() int { 1 }

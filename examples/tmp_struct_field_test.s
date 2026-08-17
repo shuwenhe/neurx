@@ -1,4 +1,5 @@
 package main
+
 struct counter_state {
     int value
 }

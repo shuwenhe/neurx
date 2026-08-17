@@ -1,4 +1,5 @@
 package neurx.inference.sglang.hicache_controller
+
 func hicache_write_back() int { 1 }
 
 func hicache_write_through() int { 2 }

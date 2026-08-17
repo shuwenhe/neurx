@@ -1,6 +1,7 @@
 package neurx.posttrain.benchmark
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, runtime_make_dirs}
 use std.io.{println, eprintln}
+
 struct benchmark_timer {
     string name
     int64 start_ns

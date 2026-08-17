@@ -1,4 +1,5 @@
 package neurx.posttrain.reward.factual_consistency_reward
+
 struct fact {
     string subject
     string predicate

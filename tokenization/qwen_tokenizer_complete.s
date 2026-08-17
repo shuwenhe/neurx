@@ -4,6 +4,7 @@ int QWEN_EOS_ID = 151645
 int QWEN_PAD_ID = 151643
 int QWEN_IM_START_ID = 151644
 int QWEN_IM_END_ID = 151645
+
 func tokenize_qwen(string text) []int {
     []int tokens = []int{cap: 512}
     int count = 0
@@ -27,6 +28,7 @@ func tokenize_qwen(string text) []int {
     }
     return tokens
 }
+
 func detokenize_qwen([]int token_ids) string {
     string result = ""
     if len(token_ids) == 0 {
@@ -58,6 +60,7 @@ func detokenize_qwen([]int token_ids) string {
     }
     return result
 }
+
 func pretokenize(string text) []string {
     []string chunks = []string{cap: 512}
     int chunk_count = 0
@@ -81,6 +84,7 @@ func pretokenize(string text) []string {
     }
     return chunks
 }
+
 func encode_chunk(string chunk) []int {
     []int result = []int{cap: 64}
     int result_count = 0
@@ -137,6 +141,7 @@ func encode_chunk(string chunk) []int {
     104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
     117, 118, 119, 120, 121, 122, 65, 66, 67, 68, 69, 70, 71,
 ]
+
 func lookup_token_id(string token_str) int {
     int i = 0
     while i < len(common_tokens) {
@@ -147,6 +152,7 @@ func lookup_token_id(string token_str) int {
     }
     return lookup_token_id_from_python(token_str)
 }
+
 func lookup_token_id_from_python(string token_str) int {
     string script_path = "/home/shuwen/shuwen/posttrain/tokenize_detokenize.py"
     string escaped = token_str
@@ -157,6 +163,7 @@ func lookup_token_id_from_python(string token_str) int {
     }
     return -1
 }
+
 func lookup_token_string(int token_id) string {
     string script_path = "/home/shuwen/shuwen/posttrain/tokenize_detokenize.py"
     string id_str = int_to_string(token_id)
@@ -164,12 +171,14 @@ func lookup_token_string(int token_id) string {
     string output = runtime_run_command_output(cmd)
     return output
 }
+
 func min_int(int a, int b) int {
     if a < b {
         return a
     }
     return b
 }
+
 func int_to_string(int num) string {
     if num == 0 {
         return "0"
@@ -202,6 +211,7 @@ func int_to_string(int num) string {
     }
     return result
 }
+
 func string_to_int(string text) int {
     int result = 0
     int i = 0

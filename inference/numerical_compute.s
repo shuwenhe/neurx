@@ -1,4 +1,5 @@
 package neurx.inference.numerical_compute
+
 func sqrt_app(float x) float {
     if x <= 0.0 {
         return 1.0

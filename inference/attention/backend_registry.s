@@ -1,4 +1,5 @@
 package neurx.inference.attention.backend_registry
+
 func attention_cpu() int { 1 }
 
 func attention_flash() int { 2 }

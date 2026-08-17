@@ -21,6 +21,7 @@ package neurx.distributed.training_orchestrator
 |  total gp_us = TP × PP × DP                                   |
 |  example: 16 × 16 × 2 = 512 gp_us for 2T model              |
 +-------------------------------------------------------------+
+
 struct training_orchestrator_config {
     int vocab_size
     int hidden_dim

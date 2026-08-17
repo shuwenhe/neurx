@@ -1,4 +1,5 @@
 package neurx.scheduler.scheduler_state
+
 struct scheduler_state_dict {
     int last_epoch
     []float last_lr

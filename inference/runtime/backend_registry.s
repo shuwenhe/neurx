@@ -1,4 +1,5 @@
 package neurx.inference.runtime.backend_registry
+
 struct inference_backend_capability {
     string backend_name
     string device_type

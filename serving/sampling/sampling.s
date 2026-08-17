@@ -1,4 +1,5 @@
 package neurx.serving.sampling
+
 struct sampling_state {
     float temperature
     int top_k

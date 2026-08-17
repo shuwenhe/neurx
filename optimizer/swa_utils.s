@@ -1,6 +1,7 @@
 package neurx.optimizer.swa_utils
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct averaged_model_state {
     tensor averaged_params
     int num_averaged

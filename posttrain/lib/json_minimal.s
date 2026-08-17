@@ -1,5 +1,6 @@
 package neurx.posttrain.lib
 use std.io.eprintln
+
 func test_null(string text) bool {
     if text == "null" {
         return true

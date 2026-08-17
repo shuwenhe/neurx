@@ -2,6 +2,7 @@ package neurx.posttrain.alignment
 import neurx.model.llm.neurx.*
 import neurx.tokenizer.neurx.*
 import neurx.amp.scaler.*
+
 struct alignment_config {
     string method
     string model_name

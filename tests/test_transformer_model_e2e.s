@@ -1,6 +1,7 @@
 package main
 use neurx.model.transformer.ffn.{ffn_layer, new_ffn_layer, forward_ffn_layer}
 use neurx.model.transformer.transformer.{transformer_config, transformer_layer_config, transformer_block, transformer_model, transformer_output, new_transformer_config, new_transformer_layer_config, new_transformer_block, new_transformer_model, forward_transformer_block, forward_transformer, new_7b_transformer_config, new_13b_transformer_config, new_70b_transformer_config, new_foundation_model, foundation_model_forward}
+
 func build_hidden_states(int batch_size, int seq_len, int hidden_dim) []float {
     int total = batch_size * seq_len * hidden_dim
     []float values = []float{cap: total}

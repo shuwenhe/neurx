@@ -3,6 +3,7 @@ int PROC_RUNNING = 1
 int PROC_WAITING = 2
 int PROC_ZOMBIE  = 3
 int PROC_REAPED  = 4
+
 struct proc_descriptor {
     int    pid
     int    ppid

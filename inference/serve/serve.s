@@ -1,4 +1,5 @@
 package neurx.inference.serve
+
 struct infer_request_state {
     string request_id
     string model

@@ -1,4 +1,5 @@
 package neurx.inference.sglang.transfer_adapters
+
 func transfer_backend_mooncake() int { 1 }
 
 func transfer_backend_nixl() int { 2 }

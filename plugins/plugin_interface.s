@@ -38,36 +38,36 @@ struct plugin_metadata {
 	string                  plugin_id
 	string                  plugin_name
 	string                  version
-	
+
 	string                  author
 	string                  description
-	
+
 	plugin_type             plugin_category
-	
+
 	vec[string]             dependencies
 	vec[string]             capabilities
-	
+
 	int32                   priority
 	bool                    required
-	
+
 	string                  config_schema
 }
 
 struct plugin_interface {
 	string                  plugin_id
 	plugin_metadata         metadata
-	
+
 	plugin_state            current_state
-	
+
 	int64                   loaded_at
 	int64                   initialized_at
 	int64                   last_error_at
-	
+
 	string                  last_error_message
 	int32                   error_count
-	
+
 	map[string]interface{}  context_data
-	
+
 	vec[plugin_hook]        hooks
 	int32                   hook_count
 }
@@ -75,13 +75,13 @@ struct plugin_interface {
 struct plugin_hook {
 	plugin_hook_type        hook_event
 	string                  hook_name
-	
+
 	string                  handler_module
 	string                  handler_function
-	
+
 	int32                   priority
 	bool                    sync_execution
-	
+
 	int64                   created_at
 }
 
@@ -89,20 +89,20 @@ struct plugin_error {
 	string                  plugin_id
 	int32                   error_code
 	string                  error_message
-	
+
 	int64                   error_time
 	string                  stack_trace
-	
+
 	plugin_state            state_when_error
 }
 
 struct plugin_capability {
 	string                  capability_name
 	string                  capability_version
-	
+
 	vec[string]             provided_methods
 	vec[string]             required_interfaces
-	
+
 	map[string]interface{}  capability_config
 }
 
@@ -110,7 +110,7 @@ struct plugin_dependency {
 	string                  dependent_plugin_id
 	string                  required_plugin_id
 	string                  required_version
-	
+
 	bool                    is_optional
 	bool                    is_satisfied
 }
@@ -166,7 +166,7 @@ func (plugin_interface* p) add_hook(hook plugin_hook) {
 
 func (plugin_interface* p) set_state(state plugin_state) {
 	p.current_state = state
-	
+
 	switch state {
 	case PLUGIN_LOADED:
 		p.loaded_at = time.Now().UnixNano()
@@ -197,13 +197,13 @@ func (plugin_interface* p) clear_context() {
 
 func (plugin_interface* p) get_hooks_by_type(event plugin_hook_type) vec[plugin_hook] {
 	result := make(vec[plugin_hook], 0)
-	
+
 	for hook := range p.hooks {
 		if hook.hook_event == event {
 			result = append(result, hook)
 		}
 	}
-	
+
 	return result
 }
 
@@ -248,6 +248,6 @@ func (plugin_interface* p) get_plugin_stats() map[string]interface{} {
 	stats["uptime_ms"] = p.get_uptime_ms()
 	stats["hook_count"] = p.hook_count
 	stats["capability_count"] = int32(len(p.metadata.capabilities))
-	
+
 	return stats
 }

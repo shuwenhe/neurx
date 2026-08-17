@@ -1,4 +1,5 @@
 package neurx.inference.kv.kv_event_stream
+
 func kv_event_block_stored() int { 1 }
 
 func kv_event_block_removed() int { 2 }

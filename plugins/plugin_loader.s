@@ -13,36 +13,36 @@ enum loader_status {
 struct plugin_loader {
 	string                  plugin_search_path
 	vec[string]             loaded_plugin_paths
-	
+
 	int32                   max_plugins
 	int32                   current_plugins_loaded
-	
+
 	loader_status           status
-	
+
 	map[string]string]      plugin_path_map
-	
+
 	int32                   total_load_attempts
 	int32                   total_load_failures
 	int32                   total_load_successes
-	
+
 	int64                   loader_start_time
-	
+
 	sync.Mutex              mu
 }
 
 struct plugin_package {
 	string                  package_id
 	string                  package_name
-	
+
 	string                  package_path
 	string                  checksum
-	
+
 	plugin_metadata         metadata
 	vec[string]             files
 	int32                   file_count
-	
+
 	map[string]string]      file_content_map
-	
+
 	int64                   package_created_at
 	int64                   package_size_bytes
 }
@@ -51,17 +51,17 @@ struct plugin_descriptor {
 	string                  descriptor_id
 	string                  plugin_id
 	string                  plugin_name
-	
+
 	string                  plugin_main_file
 	string                  plugin_version
-	
+
 	vec[string]             required_modules
 	vec[string]             exported_functions
-	
+
 	bool                    requires_config
 	bool                    requires_init
 	bool                    auto_start
-	
+
 	int32                   startup_timeout_ms
 	int32                   shutdown_timeout_ms
 }
@@ -70,7 +70,7 @@ struct load_validation_result {
 	bool                    is_valid
 	vec[string]             validation_errors
 	int32                   error_count
-	
+
 	string                  validation_message
 	int64                   validation_time
 }
@@ -126,42 +126,42 @@ func create_plugin_descriptor(plugin_id string, name string) plugin_descriptor {
 func (plugin_loader* l) load_plugin(plugin_id string, plugin_path string) (plugin_package, bool) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	
+
 	if l.current_plugins_loaded >= l.max_plugins {
 		return plugin_package{}, false
 	}
-	
+
 	if l.status != LOADER_READY {
 		return plugin_package{}, false
 	}
-	
+
 	l.status = LOADER_LOADING
 	l.total_load_attempts++
-	
+
 	pkg := create_plugin_package(plugin_id, plugin_id, plugin_path)
-	
+
 	l.loaded_plugin_paths = append(l.loaded_plugin_paths, plugin_path)
 	l.plugin_path_map[plugin_id] = plugin_path
 	l.current_plugins_loaded++
 	l.total_load_successes++
-	
+
 	l.status = LOADER_READY
-	
+
 	return pkg, true
 }
 
 func (plugin_loader* l) unload_plugin(plugin_id string) bool {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	
+
 	path, exists := l.plugin_path_map[plugin_id]
 	if !exists {
 		return false
 	}
-	
+
 	delete(l.plugin_path_map, plugin_id)
 	l.current_plugins_loaded--
-	
+
 	result_list := make(vec[string], 0)
 	for p := range l.loaded_plugin_paths {
 		if p != path {
@@ -169,7 +169,7 @@ func (plugin_loader* l) unload_plugin(plugin_id string) bool {
 		}
 	}
 	l.loaded_plugin_paths = result_list
-	
+
 	return true
 }
 
@@ -181,50 +181,50 @@ func (plugin_loader* l) validate_plugin_package(pkg plugin_package) load_validat
 		validation_message:  "",
 		validation_time:     time.Now().UnixNano(),
 	}
-	
+
 	if pkg.package_id == "" {
 		result.is_valid = false
 		result.validation_errors = append(result.validation_errors, "package_id_missing")
 		result.error_count++
 	}
-	
+
 	if pkg.package_path == "" {
 		result.is_valid = false
 		result.validation_errors = append(result.validation_errors, "package_path_missing")
 		result.error_count++
 	}
-	
+
 	if pkg.file_count == 0 {
 		result.is_valid = false
 		result.validation_errors = append(result.validation_errors, "no_files_in_package")
 		result.error_count++
 	}
-	
+
 	if result.is_valid {
 		result.validation_message = "validation_passed"
 	} else {
 		result.validation_message = "validation_failed"
 	}
-	
+
 	return result
 }
 
 func (plugin_loader* l) get_loaded_plugins() vec[string] {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	
+
 	result := make(vec[string], 0)
 	for plugin_id, _ := range l.plugin_path_map {
 		result = append(result, plugin_id)
 	}
-	
+
 	return result
 }
 
 func (plugin_loader* l) get_plugin_path(plugin_id string) (string, bool) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	
+
 	path, exists := l.plugin_path_map[plugin_id]
 	return path, exists
 }
@@ -232,23 +232,23 @@ func (plugin_loader* l) get_plugin_path(plugin_id string) (string, bool) {
 func (plugin_loader* l) register_plugin_path(plugin_id string, path string) bool {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	
+
 	_, exists := l.plugin_path_map[plugin_id]
 	if exists {
 		return false
 	}
-	
+
 	l.plugin_path_map[plugin_id] = path
 	l.loaded_plugin_paths = append(l.loaded_plugin_paths, path)
 	l.current_plugins_loaded++
-	
+
 	return true
 }
 
 func (plugin_loader* l) get_loader_stats() map[string]interface{} {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	
+
 	stats := make(map[string]interface{})
 	stats["current_plugins_loaded"] = l.current_plugins_loaded
 	stats["max_plugins"] = l.max_plugins
@@ -256,29 +256,29 @@ func (plugin_loader* l) get_loader_stats() map[string]interface{} {
 	stats["total_load_failures"] = l.total_load_failures
 	stats["total_load_successes"] = l.total_load_successes
 	stats["loader_status"] = l.status
-	
+
 	uptime_ms := (time.Now().UnixNano() - l.loader_start_time) / 1000000
 	stats["uptime_ms"] = uptime_ms
-	
+
 	return stats
 }
 
 func (plugin_loader* l) reload_plugin(plugin_id string) bool {
 	l.mu.Lock()
-	
+
 	path, exists := l.plugin_path_map[plugin_id]
 	if !exists {
 		l.mu.Unlock()
 		return false
 	}
-	
+
 	l.mu.Unlock()
-	
+
 	success := l.unload_plugin(plugin_id)
 	if !success {
 		return false
 	}
-	
+
 	_, load_success := l.load_plugin(plugin_id, path)
 	return load_success
 }
@@ -286,7 +286,7 @@ func (plugin_loader* l) reload_plugin(plugin_id string) bool {
 func (plugin_loader* l) has_plugin(plugin_id string) bool {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	
+
 	_, exists := l.plugin_path_map[plugin_id]
 	return exists
 }
@@ -305,13 +305,13 @@ func (plugin_package* p) get_file_content(filename string) (string, bool) {
 
 func (plugin_package* p) calculate_checksum() string {
 	checksum := int32(0)
-	
+
 	for _, content := range p.file_content_map {
 		for i := int32(0); i < int32(len(content)); i++ {
 			checksum = checksum + int32(content[i])
 		}
 	}
-	
+
 	p.checksum = string(checksum)
 	return p.checksum
 }

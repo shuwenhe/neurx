@@ -1,6 +1,7 @@
 package neurx.ml.math_ops
 use neurx.cpu.compute_backend
 use neurx.tensor.{tensor, zeros}
+
 func matmul_2d(tensor A, tensor B) tensor {
     int m = A.shape[0]
     int n = A.shape[1]

@@ -4,6 +4,7 @@ use neurx.inference.speculative.speculative_decode_core
 use neurx.inference.speculative.draft_model_executor
 use neurx.inference.speculative.speculative_verifier
 use neurx.inference.speculative.speculative_runtime
+
 struct speculative_inference_config {
     enable_speculative_decode: bool
     num_draft_tokens: int

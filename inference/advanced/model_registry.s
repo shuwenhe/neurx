@@ -6,6 +6,7 @@ enum model_type {
     PHI
     GEMMA
 }
+
 struct architecture_config {
     name string
     model_type model_type

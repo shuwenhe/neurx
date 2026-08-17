@@ -1,5 +1,6 @@
 package neurx.posttrain.lib.text_tokenizer
 use std.io.eprintln
+
 func normalize_text(string text) string {
     string result = ""
     int i = 0

@@ -1,4 +1,5 @@
 package neurx.inference.sglang.jump_forward_decoder
+
 struct jump_forward_fsm {
     []int from_states
     []int to_states

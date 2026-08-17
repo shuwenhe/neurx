@@ -7,6 +7,7 @@ enum log_level {
     ERROR = 3
     CRITICAL = 4
 }
+
 struct log_entry {
     timestamp: string
     level: log_level

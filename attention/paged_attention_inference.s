@@ -1,5 +1,6 @@
 package neurx.attention.paged_attention_inference
 use neurx.attention.paged_attention_core
+
 struct attention_config {
     int num_heads
     int num_kv_heads

@@ -1,4 +1,5 @@
 package neurx.tool.tool_cache
+
 struct tool_cache_entry {
     string key
     string value

@@ -1,4 +1,5 @@
 package main
+
 struct model_file {
     name: string
     size_mb: int

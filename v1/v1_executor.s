@@ -20,10 +20,10 @@ struct executor_config {
 struct v1_executor {
     executor_config config
     v1_core* core
-    
+
     int32 total_executed
     int32 total_batches
-    
+
     vec[v1_request*] current_batch
 }
 
@@ -48,18 +48,18 @@ func (v1_executor* exec) prepare_batch(vec[v1_request*] requests) bool {
     if len(requests) == 0 {
         return false
     }
-    
+
     exec.current_batch = make(vec[v1_request*])
-    
+
     batch_size := exec.config.batch_size
     if len(requests) < batch_size {
         batch_size = len(requests)
     }
-    
+
     for i := 0; i < batch_size; i = i + 1 {
         exec.current_batch = append(exec.current_batch, requests[i])
     }
-    
+
     return true
 }
 
@@ -67,21 +67,21 @@ func (v1_executor* exec) execute_prefill() bool {
     if len(exec.current_batch) == 0 {
         return false
     }
-    
+
     batch_input_ids := make(vec[vec[int32]])
     batch_logits := make(vec[vec[float32]])
-    
+
     for i := 0; i < len(exec.current_batch); i = i + 1 {
         req := exec.current_batch[i]
         batch_input_ids = append(batch_input_ids, req.prompt_token_ids)
-        
+
         logits := make(vec[float32])
         for j := 0; j < 100; j = j + 1 {
             logits = append(logits, 0.5)
         }
         batch_logits = append(batch_logits, logits)
     }
-    
+
     success := exec.core.batch_prefill(batch_input_ids, batch_logits)
     return success
 }
@@ -90,9 +90,9 @@ func (v1_executor* exec) execute_decode() bool {
     if len(exec.current_batch) == 0 {
         return false
     }
-    
+
     batch_logits := make(vec[vec[float32]])
-    
+
     for i := 0; i < len(exec.current_batch); i = i + 1 {
         logits := make(vec[float32])
         for j := 0; j < 100; j = j + 1 {
@@ -100,14 +100,14 @@ func (v1_executor* exec) execute_decode() bool {
         }
         batch_logits = append(batch_logits, logits)
     }
-    
+
     tokens := exec.core.batch_decode(batch_logits, nil)
-    
+
     for i := 0; i < len(exec.current_batch) && i < len(tokens); i = i + 1 {
         req := exec.current_batch[i]
         req.add_output_token(tokens[i])
     }
-    
+
     return true
 }
 
@@ -115,20 +115,20 @@ func (v1_executor* exec) execute() bool {
     if len(exec.current_batch) == 0 {
         return false
     }
-    
+
     success := exec.execute_prefill()
     if !success {
         return false
     }
-    
+
     success = exec.execute_decode()
     if !success {
         return false
     }
-    
+
     exec.total_executed = exec.total_executed + len(exec.current_batch)
     exec.total_batches = exec.total_batches + 1
-    
+
     return true
 }
 

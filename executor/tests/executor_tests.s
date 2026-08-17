@@ -1,6 +1,4 @@
 
-
-
 import "types.s"
 import "executor_base.s"
 import "prefill_executor.s"
@@ -18,7 +16,6 @@ struct TestResult {
 var total_tests i32 = 0
 var passed_tests i32 = 0
 
-
 func LogTest(test_name string, condition i32, error_msg string) {
     total_tests++
 
@@ -29,7 +26,6 @@ func LogTest(test_name string, condition i32, error_msg string) {
         println("✗ FAIL:", test_name, "-", error_msg)
     }
 }
-
 
 func TestExecutorInitialization() {
     println("\n--- Test: Executor Initialization ---")
@@ -49,7 +45,6 @@ func TestExecutorInitialization() {
     LogTest("Cache manager created", executor.cache_manager != nil, "Cache manager not created")
 }
 
-
 func TestSequenceAddition() {
     println("\n--- Test: Sequence Addition ---")
 
@@ -68,7 +63,6 @@ func TestSequenceAddition() {
     LogTest("Multiple sequences", executor.sequence_count == 10, "Count mismatch")
 }
 
-
 func TestSequenceRemoval() {
     println("\n--- Test: Sequence Removal ---")
 
@@ -83,7 +77,6 @@ func TestSequenceRemoval() {
     LogTest("Remove sequence succeeds", result.success, "Removal failed")
     LogTest("Sequence count decremented", executor.sequence_count == 1, "Count not updated")
 }
-
 
 func TestPrefillExecutor() {
     println("\n--- Test: Prefill Executor ---")
@@ -117,7 +110,6 @@ func TestPrefillExecutor() {
     LogTest("Tokens processed", result.tokens_processed > 0, "No tokens processed")
 }
 
-
 func TestDecodeExecutor() {
     println("\n--- Test: Decode Executor ---")
 
@@ -148,7 +140,6 @@ func TestDecodeExecutor() {
     LogTest("Correct tokens processed", result.tokens_processed == 16, "Token count wrong")
 }
 
-
 func TestSchedulerRoundRobin() {
     println("\n--- Test: Scheduler Round-Robin ---")
 
@@ -165,7 +156,6 @@ func TestSchedulerRoundRobin() {
     LogTest("Decode count", schedule.decode_count == 4, "Decode count mismatch")
 }
 
-
 func TestSchedulerPriority() {
     println("\n--- Test: Scheduler Priority ---")
 
@@ -180,7 +170,6 @@ func TestSchedulerPriority() {
     LogTest("Correct batch size", schedule.prefill_count <= 8, "Batch size exceeded")
 }
 
-
 func TestKVCacheAllocation() {
     println("\n--- Test: KV Cache Allocation ---")
 
@@ -192,13 +181,12 @@ func TestKVCacheAllocation() {
     LogTest("Memory updated", cache.allocated_mb > 0, "Memory not allocated")
 }
 
-
 func TestKVCacheEviction() {
     println("\n--- Test: KV Cache Eviction ---")
 
-    cache := NewKVCacheManager(1, EVICTION_LRU)  
+    cache := NewKVCacheManager(1, EVICTION_LRU)
 
-    
+
     for i := 0; i < 16; i++ {
         seq_id := "seq_" + string(i)
         cache.AllocateBlock(seq_id, 0, 256)
@@ -206,31 +194,29 @@ func TestKVCacheEviction() {
 
     LogTest("Cache blocks created", cache.block_count > 0, "No blocks allocated")
 
-    
+
     result := cache.EvictBlocks()
     LogTest("Eviction triggers", result.success == 0 || cache.allocated_mb < i32(1024), "Eviction not working")
 }
 
-
 func TestCacheEvictionPolicies() {
     println("\n--- Test: Cache Eviction Policies ---")
 
-    
+
     lru_cache := NewKVCacheManager(10, EVICTION_LRU)
     result := lru_cache.AllocateBlock("seq_0", 0, 256)
     LogTest("LRU allocation", result.success, "LRU allocation failed")
 
-    
+
     lfu_cache := NewKVCacheManager(10, EVICTION_LFU)
     result = lfu_cache.AllocateBlock("seq_1", 0, 256)
     LogTest("LFU allocation", result.success, "LFU allocation failed")
 
-    
+
     fifo_cache := NewKVCacheManager(10, EVICTION_FIFO)
     result = fifo_cache.AllocateBlock("seq_2", 0, 256)
     LogTest("FIFO allocation", result.success, "FIFO allocation failed")
 }
-
 
 func TestIterationExecution() {
     println("\n--- Test: Iteration Execution ---")
@@ -253,7 +239,6 @@ func TestIterationExecution() {
     LogTest("Tokens processed", result.tokens_processed > 0, "No tokens processed")
 }
 
-
 func TestStatisticsCollection() {
     println("\n--- Test: Statistics Collection ---")
 
@@ -271,7 +256,6 @@ func TestStatisticsCollection() {
     LogTest("Total tokens tracked", stats.total_tokens > 0, "No tokens tracked")
     LogTest("Latency calculated", stats.avg_latency > 0, "Latency not calculated")
 }
-
 
 func TestDistributedExecutor() {
     println("\n--- Test: Distributed Executor ---")
@@ -294,7 +278,6 @@ func TestDistributedExecutor() {
     LogTest("Rank set", dist.distributed_config.rank == 0, "Rank not set")
     LogTest("World size set", dist.distributed_config.world_size == 4, "World size not set")
 }
-
 
 func TestLoadBalancing() {
     println("\n--- Test: Load Balancing ---")
@@ -327,7 +310,6 @@ func TestLoadBalancing() {
     LogTest("All sequences distributed", total == 16, "Not all sequences distributed")
 }
 
-
 func PrintTestReport() {
     println("\n╔════════════════════════════════════════╗")
     println("║          Test Report                   ║")
@@ -342,7 +324,6 @@ func PrintTestReport() {
     }
     println()
 }
-
 
 func main() {
     println("╔════════════════════════════════════════╗")

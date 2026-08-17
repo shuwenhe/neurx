@@ -1,6 +1,7 @@
 package neurx.tokenizer.model_bpe
 use neurx.strings
 use neurx.runtime.io.{io_println}
+
 struct token_config {
     int vocab_size
     int min_frequency

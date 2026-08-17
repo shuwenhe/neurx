@@ -121,6 +121,7 @@ func (tracer* t) end_span(span* s) {
 
     t.export()
 }
+
 func (span* s) add_attribute(key []string, value []string) {
     if len(key) > 0 && len(value) > 0 && len(s.attributes) > 0 {
         s.attributes[0][key[0]] = value[0]

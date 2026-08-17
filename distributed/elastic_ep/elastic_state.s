@@ -1,4 +1,5 @@
 package neurx.distributed.elastic_ep
+
 func elastic_phase_stable() int { 0 }
 
 func elastic_phase_staging() int { 1 }

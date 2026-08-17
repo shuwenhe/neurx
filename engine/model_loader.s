@@ -123,20 +123,20 @@ func (dynamic_model_loader* dml) load_model_eager(string model_id) (*model_execu
     if !dml.running {
         return nil, "loader not running"
     }
-    
+
     if executor, exists := dml.executors[model_id]; exists && executor.ready {
         dml.metrics.cache_hits++
         return executor, nil
     }
-    
+
     dml.metrics.cache_misses++
-    
+
     executor, err := dml.load_model_with_strategy(model_id, weight_loader_eager)
     if err != nil {
         dml.metrics.failed_loads++
         return nil, err
     }
-    
+
     dml.metrics.successful_loads++
     return executor, nil
 }
@@ -158,10 +158,10 @@ func (dynamic_model_loader* dml) load_model_lazy(string model_id) (*model_execut
         initialized: false,
         ready: false,
     }
-    
+
     dml.executors[model_id] = executor
     dml.loading_queue = append(dml.loading_queue, executor)
-    
+
     return executor, nil
 }
 
@@ -170,7 +170,7 @@ func (dynamic_model_loader* dml) load_model_with_strategy(string model_id, weigh
     if err != nil {
         return nil, err
     }
-    
+
     executor := &model_executor{
         config: *config,
         load_config: dml.config,
@@ -188,26 +188,26 @@ func (dynamic_model_loader* dml) load_model_with_strategy(string model_id, weigh
         initialized: false,
         ready: false,
     }
-    
+
     dml.executors[model_id] = executor
-    
+
     err = dml.load_weights_with_strategy(executor, strategy)
     if err != nil {
         dml.metrics.failed_loads++
         return nil, err
     }
-    
+
     err = dml.initialize_layers(executor)
     if err != nil {
         return nil, err
     }
-    
+
     executor.loading_state.status = loader_status_ready
     executor.ready = true
     executor.initialized = true
-    
+
     dml.invoke_callbacks(executor)
-    
+
     return executor, nil
 }
 
@@ -228,7 +228,7 @@ func (dynamic_model_loader* dml) load_config_from_source(string model_id) (*mode
         use_cache: true,
         attention_bias: false,
     }
-    
+
     if model_id == "Qwen2.5-0.5B" || model_id == "Qwen2.5-0.5B-Instruct" {
         config.model_type = "qwen2"
         config.hidden_size = 1024
@@ -245,14 +245,14 @@ func (dynamic_model_loader* dml) load_config_from_source(string model_id) (*mode
         config.bos_token_id = 1
         config.eos_token_id = 2
     }
-    
+
     return config, nil
 }
 
 func (dynamic_model_loader* dml) load_weights_with_strategy(model_executor* executor, weight_loader_strategy strategy) error {
     executor.loading_state.current_stage = "loading_weights"
     executor.loading_state.progress_percent = 10
-    
+
     switch strategy {
         case weight_loader_eager:
             return dml.load_weights_eager(executor)
@@ -269,22 +269,22 @@ func (dynamic_model_loader* dml) load_weights_with_strategy(model_executor* exec
 
 func (dynamic_model_loader* dml) load_weights_eager(model_executor* executor) error {
     executor.loading_state.progress_percent = 20
-    
+
     config := executor.config
     num_layers := config.num_hidden_layers
-    
+
     total_weight_specs := int32(0)
     weight_spec_per_layer := int32(12)
     total_weight_specs = num_layers * weight_spec_per_layer + 3
-    
+
     executor.loading_state.total_weights = total_weight_specs
     executor.loading_state.estimated_completion_ms = 5000
-    
+
     executor.loading_state.progress_percent = 50
-    
+
     for i := int32(0); i < num_layers; i++ {
         layer_weights := []*model_weight_spec{}
-        
+
         for j := int32(0); j < weight_spec_per_layer; j++ {
             weight_name := "layers." + string(i) + ".weights." + string(j)
             spec := &model_weight_spec{
@@ -298,14 +298,14 @@ func (dynamic_model_loader* dml) load_weights_eager(model_executor* executor) er
             }
             layer_weights = append(layer_weights, spec)
         }
-        
+
         dml.layer_cache["layer_"+string(i)] = layer_weights
         executor.loading_state.loaded_weights = executor.loading_state.loaded_weights + weight_spec_per_layer
     }
-    
+
     executor.loading_state.progress_percent = 80
     executor.loading_state.progress_percent = 95
-    
+
     executor.loading_state.progress_percent = 100
     return nil
 }
@@ -318,12 +318,12 @@ func (dynamic_model_loader* dml) load_weights_lazy(model_executor* executor) err
 
 func (dynamic_model_loader* dml) load_weights_streaming(model_executor* executor) error {
     executor.loading_state.current_stage = "streaming_weights"
-    
+
     for i := int32(0); i < executor.config.num_hidden_layers; i++ {
         executor.loading_state.progress_percent = int32(30 + (i * 70 / executor.config.num_hidden_layers))
         executor.loading_state.loaded_weights = i
     }
-    
+
     executor.loading_state.progress_percent = 100
     executor.loading_state.loaded_weights = executor.config.num_hidden_layers
     return nil
@@ -340,7 +340,7 @@ func (dynamic_model_loader* dml) load_weights_mmap(model_executor* executor) err
 func (dynamic_model_loader* dml) initialize_layers(model_executor* executor) error {
     executor.loading_state.current_stage = "initializing_layers"
     executor.layer_executors = []*model_layer_executor{}
-    
+
     for i := int32(0); i < executor.config.num_hidden_layers; i++ {
         layer := &model_layer_executor{
             layer_id: i,
@@ -350,7 +350,7 @@ func (dynamic_model_loader* dml) initialize_layers(model_executor* executor) err
         }
         executor.layer_executors = append(executor.layer_executors, layer)
     }
-    
+
     return nil
 }
 
@@ -359,18 +359,18 @@ func (dynamic_model_loader* dml) prefetch_model(string model_id, int32 num_layer
     if executor == nil {
         return "model not found"
     }
-    
+
     if num_layers > executor.config.num_hidden_layers {
         num_layers = executor.config.num_hidden_layers
     }
-    
+
     for i := int32(0); i < num_layers; i++ {
         layer_key := "layer_" + string(i)
         if _, exists := dml.layer_cache[layer_key]; !exists {
             return "layer not in cache"
         }
     }
-    
+
     return nil
 }
 

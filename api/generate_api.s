@@ -113,7 +113,7 @@ func (generate_engine* ge) generate(generate_config* config, generate_input* inp
     if config == nil {
         config = &ge.default_config
     }
-    
+
     api_req := &completion_request{
         prompt: input.text,
         model_id: config.model_id,
@@ -128,12 +128,12 @@ func (generate_engine* ge) generate(generate_config* config, generate_input* inp
             return_full_text: config.return_full_text,
         },
     }
-    
+
     resp, err := ge.engine.complete(api_req)
     if err != nil {
         return nil, err
     }
-    
+
     outputs := make([]generated_output*, 0)
     for _, text := range resp.generated_text {
         output := &generated_output{
@@ -147,7 +147,7 @@ func (generate_engine* ge) generate(generate_config* config, generate_input* inp
         }
         outputs = append(outputs, output)
     }
-    
+
     gen_resp := &generate_response{
         generation_id: core.generate_uuid(),
         model_id: config.model_id,
@@ -156,7 +156,7 @@ func (generate_engine* ge) generate(generate_config* config, generate_input* inp
         total_input_tokens: resp.input_tokens,
         total_output_tokens: resp.output_tokens,
     }
-    
+
     return gen_resp, nil
 }
 
@@ -164,7 +164,7 @@ func (generate_engine* ge) generate_stream(generate_config* config, generate_inp
     if config == nil {
         config = &ge.default_config
     }
-    
+
     api_req := &completion_request{
         prompt: input.text,
         model_id: config.model_id,
@@ -174,7 +174,7 @@ func (generate_engine* ge) generate_stream(generate_config* config, generate_inp
             top_p: config.top_p,
         },
     }
-    
+
     return ge.engine.complete_stream(api_req)
 }
 
@@ -190,7 +190,7 @@ func (generate_engine* ge) beam_search_generate(generate_config* config, generat
 func (generate_engine* ge) sample_generate(generate_config* config, generate_input* input, int32 num_samples) ([]generate_response*, error) {
     config.do_sample = true
     results := make([]generate_response*, 0)
-    
+
     for i := 0; i < num_samples; i {
         resp, err := ge.generate(config, input)
         if err != nil {
@@ -199,7 +199,7 @@ func (generate_engine* ge) sample_generate(generate_config* config, generate_inp
         results = append(results, resp)
         i = i + 1
     }
-    
+
     return results, nil
 }
 

@@ -2,20 +2,20 @@ package neurx.endpoints
 
 func int_to_string(int n) string {
     if n == 0 { return "0" }
-    
+
     string result = ""
     bool negative = false
     int num = n
-    
+
     if num < 0 {
         negative = true
         num = 0 - num
     }
-    
+
     while num > 0 {
         int digit = num % 10
         string digit_str = ""
-        
+
         if digit == 0 { digit_str = "0" }
         else if digit == 1 { digit_str = "1" }
         else if digit == 2 { digit_str = "2" }
@@ -26,15 +26,15 @@ func int_to_string(int n) string {
         else if digit == 7 { digit_str = "7" }
         else if digit == 8 { digit_str = "8" }
         else if digit == 9 { digit_str = "9" }
-        
+
         result = digit_str + result
         num = num / 10
     }
-    
+
     if negative {
         result = "-" + result
     }
-    
+
     return result
 }
 
@@ -76,7 +76,7 @@ func handle_completions(string method) string {
         string body = json_completions()
         return format_http_response(200, "OK", body)
     }
-    
+
     return format_http_response(405, "Method Not Allowed", "{\"error\":\"method not allowed\"}")
 }
 
@@ -85,7 +85,7 @@ func handle_embeddings(string method) string {
         string body = json_embeddings()
         return format_http_response(200, "OK", body)
     }
-    
+
     return format_http_response(405, "Method Not Allowed", "{\"error\":\"method not allowed\"}")
 }
 
@@ -94,7 +94,7 @@ func handle_images(string method) string {
         string body = json_image_generation()
         return format_http_response(200, "OK", body)
     }
-    
+
     return format_http_response(405, "Method Not Allowed", "{\"error\":\"method not allowed\"}")
 }
 
@@ -103,7 +103,7 @@ func handle_audio(string method) string {
         string body = json_audio_transcription()
         return format_http_response(200, "OK", body)
     }
-    
+
     return format_http_response(405, "Method Not Allowed", "{\"error\":\"method not allowed\"}")
 }
 
@@ -112,7 +112,7 @@ func handle_fine_tunes(string method) string {
         string body = json_fine_tune_list()
         return format_http_response(200, "OK", body)
     }
-    
+
     return format_http_response(405, "Method Not Allowed", "{\"error\":\"method not allowed\"}")
 }
 

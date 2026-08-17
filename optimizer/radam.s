@@ -1,6 +1,7 @@
 package neurx.optimizer.radam
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct radam_optimizer {
     float lr
     float beta1

@@ -17,6 +17,7 @@ use neurx.inference.api.sse_server.{
 }
 use neurx.inference.api.http_server.{http_request, http_response}
 use neurx.inference.api.openai_protocol.{openai_chat_chunk, openai_done_event}
+
 func expect(bool cond, string name) int {
     if cond {
         println("PASS " + name)

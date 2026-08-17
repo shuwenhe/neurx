@@ -1,4 +1,5 @@
 package neurx.inference.vllm.gpu_input_batch
+
 func input_batch_padding_slot() int { 0 - 1 }
 
 struct gpu_input_batch_config {

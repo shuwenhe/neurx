@@ -1,4 +1,5 @@
 package neurx.inference.vl
+
 func vision_encoder_dim() int { return 1024 }
 
 func language_model_dim() int { return 3584 }

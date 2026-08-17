@@ -5,21 +5,21 @@ import "time"
 
 struct plugin_manager {
 	plugin_system              system
-	
+
 	map[string]plugin_interface]  plugin_cache
 	int32                         cache_size
-	
+
 	int32                         max_startup_retries
 	int32                         startup_retry_delay_ms
-	
+
 	map[string]int64]             plugin_last_health_check
 	int32                         health_check_interval_ms
-	
+
 	int64                         manager_start_time
-	
+
 	int32                         total_requests_processed
 	int32                         total_requests_failed
-	
+
 	sync.Mutex                    mu
 }
 
@@ -27,25 +27,25 @@ struct plugin_import_descriptor {
 	string                  descriptor_id
 	string                  plugin_name
 	string                  plugin_version
-	
+
 	string                  import_source
 	string                  import_path
-	
+
 	map[string]string]      import_parameters
-	
+
 	bool                    auto_enable
 	int32                   startup_priority
 }
 
 struct plugin_compatibility_info {
 	string                  plugin_id
-	
+
 	vec[string]             compatible_phases
 	int32                   compatible_phase_count
-	
+
 	vec[string]             required_interfaces
 	int32                   interface_count
-	
+
 	bool                    is_compatible
 	string                  compatibility_message
 }
@@ -53,12 +53,12 @@ struct plugin_compatibility_info {
 struct phase_plugin_adapter {
 	string                  adapter_id
 	string                  phase_name
-	
+
 	vec[string]             phase_endpoints
 	int32                   endpoint_count
-	
+
 	map[string]interface{}  adapter_config
-	
+
 	bool                    is_active
 }
 
@@ -81,74 +81,74 @@ func create_plugin_manager(max_plugins int32) plugin_manager {
 func (plugin_manager* m) import_and_load_plugin(descriptor plugin_import_descriptor) (plugin_interface, bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	metadata := create_plugin_metadata(descriptor.plugin_name, descriptor.plugin_name, TYPE_CUSTOM)
 	metadata.version = descriptor.plugin_version
-	
+
 	for param_key, param_value := range descriptor.import_parameters {
 		metadata.capabilities = append(metadata.capabilities, param_key + ":" + param_value)
 	}
-	
+
 	plugin, load_ok := m.system.load_plugin(descriptor.plugin_name, descriptor.import_path, metadata)
 	if !load_ok {
 		m.total_requests_failed++
 		return plugin_interface{}, false
 	}
-	
+
 	if descriptor.auto_enable {
 		config := create_plugin_config(descriptor.plugin_name+"_config", descriptor.plugin_name)
 		m.system.initialize_plugin(descriptor.plugin_name, config)
 		m.system.start_plugin(descriptor.plugin_name)
 	}
-	
+
 	m.plugin_cache[descriptor.plugin_name] = plugin
 	m.cache_size++
 	m.total_requests_processed++
-	
+
 	return plugin, true
 }
 
 func (plugin_manager* m) perform_plugin_health_check(plugin_id string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	plugin, exists := m.plugin_cache[plugin_id]
 	if !exists {
 		return false
 	}
-	
+
 	now := time.Now().UnixNano()
 	last_check, check_exists := m.plugin_last_health_check[plugin_id]
-	
+
 	if check_exists {
 		check_interval := (now - last_check) / 1000000
 		if check_interval < int64(m.health_check_interval_ms) {
 			return true
 		}
 	}
-	
+
 	if plugin.is_error() {
 		return false
 	}
-	
+
 	m.plugin_last_health_check[plugin_id] = now
-	
+
 	return plugin.is_active()
 }
 
 func (plugin_manager* m) perform_system_health_check() plugin_system_health {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	return m.system.get_system_health()
 }
 
 func (plugin_manager* m) get_compatible_plugins_for_phase(phase_name string) vec[string] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	compatible := make(vec[string], 0)
-	
+
 	for plugin_id, plugin := range m.plugin_cache {
 		for cap := range plugin.metadata.capabilities {
 			if cap == phase_name {
@@ -157,26 +157,26 @@ func (plugin_manager* m) get_compatible_plugins_for_phase(phase_name string) vec
 			}
 		}
 	}
-	
+
 	return compatible
 }
 
 func (plugin_manager* m) get_manager_stats() map[string]interface{} {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	stats := make(map[string]interface{})
 	stats["total_requests_processed"] = m.total_requests_processed
 	stats["total_requests_failed"] = m.total_requests_failed
 	stats["cache_size"] = m.cache_size
 	stats["max_startup_retries"] = m.max_startup_retries
-	
+
 	system_stats := m.system.get_system_stats()
 	stats["system_stats"] = system_stats
-	
+
 	uptime_ms := (time.Now().UnixNano() - m.manager_start_time) / 1000000
 	stats["manager_uptime_ms"] = uptime_ms
-	
+
 	return stats
 }
 
@@ -223,30 +223,30 @@ func (phase_plugin_adapter* a) deactivate() {
 
 struct phase6_plugin_integration {
 	phase_plugin_adapter    adapter
-	
+
 	vec[string]             sampling_method_plugins
 	int32                   sampling_plugins_count
-	
+
 	vec[string]             penalty_function_plugins
 	int32                   penalty_plugins_count
 }
 
 struct phase9_plugin_integration {
 	phase_plugin_adapter    adapter
-	
+
 	vec[string]             chat_endpoint_plugins
 	int32                   chat_plugins_count
-	
+
 	vec[string]             embedding_plugins
 	int32                   embedding_plugins_count
 }
 
 struct phase12_plugin_integration {
 	phase_plugin_adapter    adapter
-	
+
 	vec[string]             sse_handler_plugins
 	int32                   sse_plugins_count
-	
+
 	vec[string]             compression_plugins
 	int32                   compression_plugins_count
 }

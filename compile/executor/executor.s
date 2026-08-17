@@ -1,5 +1,6 @@
 package neurx.compile.executor
 use neurx.runtime.compile
+
 struct executor_plan_state {
     string backend
     bool can_execute

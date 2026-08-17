@@ -1,4 +1,5 @@
 package neurx.inference.metrics.inference_metrics
+
 struct neurx_metrics_state {
     int admitted
     int rejected

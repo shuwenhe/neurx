@@ -6,26 +6,26 @@ struct sse_encoder {
 	compression_type        default_compression
 	bool                    enable_multiline
 	bool                    enable_escape
-	
+
 	int32                   max_line_length
 	string                  line_separator
-	
+
 	int32                   total_events_encoded
 	int32                   total_bytes_encoded
-	
+
 	map[string]int32        field_counts
 }
 
 struct encoded_event {
 	string                  raw_text
 	int32                   size_bytes
-	
+
 	vec[string]             lines
 	int32                   line_count
-	
+
 	bool                    compressed
 	string                  compression_method
-	
+
 	int64                   encoded_time
 }
 
@@ -58,31 +58,31 @@ func (sse_encoder* e) encode_event(event sse_event) encoded_event {
 		compression_method:  "none",
 		encoded_time:        time.Now().UnixNano(),
 	}
-	
+
 	output := ""
-	
+
 	if event.event_type != "" {
 		output = output + "event: " + event.event_type + "\n"
 		e.field_counts["event"]++
 	}
-	
+
 	if event.event_id != "" {
 		output = output + "id: " + event.event_id + "\n"
 		e.field_counts["id"]++
 	}
-	
+
 	if event.retry_ms > 0 {
 		output = output + "retry: " + string(event.retry_ms) + "\n"
 		e.field_counts["retry"]++
 	}
-	
+
 	if event.event_data != "" {
 		data := event.event_data
-		
+
 		if e.enable_multiline {
 			lines := make(vec[string], 0)
 			current_line := ""
-			
+
 			for i := int32(0); i < int32(len(data)); i++ {
 				if int32(len(current_line)) >= e.max_line_length {
 					lines = append(lines, current_line)
@@ -90,30 +90,30 @@ func (sse_encoder* e) encode_event(event sse_event) encoded_event {
 				}
 				current_line = current_line + string(data[i])
 			}
-			
+
 			if int32(len(current_line)) > 0 {
 				lines = append(lines, current_line)
 			}
-			
+
 			for line := range lines {
 				output = output + "data: " + line + "\n"
 			}
 		} else {
 			output = output + "data: " + data + "\n"
 		}
-		
+
 		e.field_counts["data"]++
 	}
-	
+
 	output = output + "\n"
-	
+
 	encoded.raw_text = output
 	encoded.size_bytes = int32(len(output))
 	encoded.line_count = int32(len(output))
-	
+
 	e.total_events_encoded++
 	e.total_bytes_encoded = e.total_bytes_encoded + encoded.size_bytes
-	
+
 	return encoded
 }
 
@@ -124,13 +124,13 @@ func (sse_encoder* e) encode_event_json(event sse_event) string {
 	json_str = json_str + "\"data\":\"" + event.event_data + "\","
 	json_str = json_str + "\"retry\":" + string(event.retry_ms)
 	json_str = json_str + "}\n"
-	
+
 	return json_str
 }
 
 func (sse_encoder* e) encode_frame(frame sse_frame) string {
 	output := ""
-	
+
 	for field := range frame.fields {
 		switch field.field_type {
 		case FIELD_EVENT:
@@ -145,18 +145,18 @@ func (sse_encoder* e) encode_frame(frame sse_frame) string {
 			output = output + ": " + field.field_value + "\n"
 		}
 	}
-	
+
 	output = output + "\n"
-	
+
 	return output
 }
 
 func (sse_encoder* e) escape_data(data string) string {
 	escaped := ""
-	
+
 	for i := int32(0); i < int32(len(data)); i++ {
 		ch := data[i]
-		
+
 		if ch == '\n' {
 			escaped = escaped + "\\n"
 		} else if ch == '\r' {
@@ -169,14 +169,14 @@ func (sse_encoder* e) escape_data(data string) string {
 			escaped = escaped + string(ch)
 		}
 	}
-	
+
 	return escaped
 }
 
 func (sse_encoder* e) split_multiline(data string) vec[string] {
 	lines := make(vec[string], 0)
 	current_line := ""
-	
+
 	for i := int32(0); i < int32(len(data)); i++ {
 		if data[i] == '\n' {
 			if int32(len(current_line)) > 0 {
@@ -185,18 +185,18 @@ func (sse_encoder* e) split_multiline(data string) vec[string] {
 			current_line = ""
 		} else {
 			current_line = current_line + string(data[i])
-			
+
 			if int32(len(current_line)) >= e.max_line_length {
 				lines = append(lines, current_line)
 				current_line = ""
 			}
 		}
 	}
-	
+
 	if int32(len(current_line)) > 0 {
 		lines = append(lines, current_line)
 	}
-	
+
 	return lines
 }
 
@@ -205,7 +205,7 @@ func (sse_encoder* e) get_encoder_stats() map[string]interface{} {
 	stats["total_events_encoded"] = e.total_events_encoded
 	stats["total_bytes_encoded"] = e.total_bytes_encoded
 	stats["compression_enabled"] = e.default_compression != COMPRESSION_NONE
-	
+
 	return stats
 }
 
@@ -218,10 +218,10 @@ func (sse_encoder* e) reset_stats() {
 struct sse_batch_encoder {
 	vec[encoded_event]      encoded_events
 	int32                   event_count
-	
+
 	int32                   batch_size_bytes
 	int32                   max_batch_size
-	
+
 	bool                    ready_to_send
 }
 
@@ -240,21 +240,21 @@ func (sse_batch_encoder* b) add_encoded_event(event encoded_event) bool {
 		b.ready_to_send = true
 		return false
 	}
-	
+
 	b.encoded_events = append(b.encoded_events, event)
 	b.event_count++
 	b.batch_size_bytes = b.batch_size_bytes + event.size_bytes
-	
+
 	return true
 }
 
 func (sse_batch_encoder* b) get_batch_data() string {
 	output := ""
-	
+
 	for event := range b.encoded_events {
 		output = output + event.raw_text
 	}
-	
+
 	return output
 }
 

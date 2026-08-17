@@ -1,5 +1,6 @@
 import "tensor/tensor.s"
 import "posttrain/reward/reward_model.s"
+
 struct batch_reward_manager_config {
     batch_size: i32
     max_queue_size: i32

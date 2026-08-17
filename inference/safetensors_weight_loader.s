@@ -3,6 +3,7 @@ extern "intrinsic" func __host_read_binary_file_range(string path, int start, in
 extern "intrinsic" func __host_read_binary_file(string path) []int
 extern "intrinsic" func __host_file_exists(string path) bool
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 struct tensor_meta {
     string name
     []int shape

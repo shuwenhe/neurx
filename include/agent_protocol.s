@@ -20,6 +20,7 @@ string AGENT_ERR_TOOL_FAILED     = "tool_failed"
 string AGENT_ERR_OVERLOADED      = "overloaded"
 string AGENT_ERR_SAFETY          = "safety_block"
 string AGENT_ERR_TIMEOUT         = "timeout"
+
 struct agent_message_header {
     string session_id
     string task_id

@@ -5,6 +5,7 @@ enum vision_encoder_type {
     RESNET = 1
     HYBRID = 2
 }
+
 struct vision_encoder_config {
     vision_encoder_type encoder_type
     int image_size

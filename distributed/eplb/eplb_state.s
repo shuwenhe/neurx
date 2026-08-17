@@ -1,4 +1,5 @@
 package neurx.distributed.eplb
+
 struct eplb_config {
     int expert_count
     int rank_count

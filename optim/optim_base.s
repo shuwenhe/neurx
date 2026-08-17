@@ -1,4 +1,5 @@
 package neurx.optim.optim_base
+
 struct optimizer_config {
     float lr
     float weight_decay

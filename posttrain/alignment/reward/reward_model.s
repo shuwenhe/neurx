@@ -3,6 +3,7 @@ use neurx.model.llm.gpt.{
     model_config, language_model, model_output,
     new_language_model, gpt_forward
 }
+
 struct reward_model {
     language_model backbone
     []float head

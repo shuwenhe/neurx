@@ -1,4 +1,5 @@
 package neurx.scheduler.continuous_batch_scheduler
+
 struct batch_request {
     int request_id
     int status

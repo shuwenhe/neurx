@@ -12,37 +12,37 @@ const (
 
 struct scheduler_config {
     scheduling_algorithm algorithm
-    
+
     int32 max_batch_size
     int32 min_batch_size
     int32 prefill_batch_size
     int32 decode_batch_size
-    
+
     int32 max_tokens_per_request
     int32 max_tokens_per_batch
-    
+
     int32 queue_length
     int32 priority_levels
-    
+
     int32 scheduling_interval_ms
     bool enable_chunked_prefill
     int32 chunk_size
-    
+
     bool enable_prefix_caching
     float32 cache_hit_threshold
-    
+
     bool enable_request_batching
     int32 batching_timeout_ms
-    
+
     bool enable_early_exit
     bool enable_early_termination
-    
+
     bool enable_token_limit_detection
     int32 token_limit_threshold
-    
+
     bool enable_adaptive_batching
     float32 adaptive_batch_factor
-    
+
     map[string]interface{} extra_config
 }
 

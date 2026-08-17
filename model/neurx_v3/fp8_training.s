@@ -1,4 +1,5 @@
 package neurx.model.neurx.fp8_training
+
 struct fp8_config {
     string forward_dtype
     string backward_dtype

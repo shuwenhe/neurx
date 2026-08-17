@@ -1,5 +1,6 @@
 package neurx.tokenizer.neurx
 import neurx.tensor.*
+
 struct special_tokens_config {
     int pad_token_id      = 0
     int bos_token_id      = 1

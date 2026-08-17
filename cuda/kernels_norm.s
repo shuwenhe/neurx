@@ -1,4 +1,5 @@
 package neurx.cuda
+
 struct layernorm_config {
     int batch_size
     int normalized_size

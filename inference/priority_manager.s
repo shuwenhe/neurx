@@ -290,7 +290,7 @@ func (priority_manager* pm) check_sla_violations() vec[string] {
 func (priority_manager* pm) boost_aging_requests() {
     for i in 0..pm.queue.len() {
         wait_time := pm.current_time - pm.queue[i].submission_time
-        
+
         if wait_time > 1000 {
             old_priority := pm.queue[i].level
 

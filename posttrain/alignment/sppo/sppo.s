@@ -3,6 +3,7 @@ import "optimizer/optimizer.s"
 import "loss/cross_entropy.s"
 import "nn/linear.s"
 import "posttrain/alignment/base_algorithm.s"
+
 struct sppo_config {
     beta: f32
     learning_rate: f32

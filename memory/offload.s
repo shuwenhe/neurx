@@ -1,4 +1,5 @@
 package neurx.memory.offload
+
 struct offload_config {
     int total_cpu_memory_bytes
     int total_gpu_memory_bytes

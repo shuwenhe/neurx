@@ -10,35 +10,35 @@ const (
 
 struct lora_config {
     bool enable_lora
-    
+
     string lora_base_model_name_or_path
     []string lora_model_paths
-    
+
     int32 lora_r
     int32 lora_alpha
     float32 lora_dropout
-    
+
     bool lora_bias
     string lora_modules_to_save
-    
+
     bool enable_lora_bias
     bool enable_lora_activation_checkpointing
-    
+
     float32 lora_scaling_factor
     lora_init_method init_method
-    
+
     int32 max_lora_rank
     int32 max_lora_count
     int32 max_cpu_lora_rank
-    
+
     bool enable_lora_weight_merging
     bool enable_lora_quantization
-    
+
     bool use_rslora
     bool use_dora
-    
+
     float32 lora_merge_threshold
-    
+
     map[string]interface{} extra_config
 }
 

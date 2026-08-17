@@ -1,4 +1,5 @@
 package neurx.serving.serve
+
 func mod(int a, int b) int {
     if b == 0 {
         return 0

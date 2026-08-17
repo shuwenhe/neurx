@@ -20,16 +20,16 @@ struct sse_event {
 	string                  event_id
 	string                  event_type
 	string                  event_data
-	
+
 	int64                   timestamp
 	int32                   retry_ms
-	
+
 	map[string]string       headers
-	
+
 	int32                   data_size_bytes
 	bool                    compressed
 	compression_type        compression_method
-	
+
 	string                  source_component
 	string                  trace_id
 	string                  span_id
@@ -44,10 +44,10 @@ struct sse_field {
 struct sse_frame {
 	vec[sse_field]          fields
 	int32                   field_count
-	
+
 	string                  raw_data
 	int32                   raw_size_bytes
-	
+
 	int64                   created_at
 	int32                   checksum
 }
@@ -56,16 +56,16 @@ struct sse_stream {
 	vec[sse_event]          events
 	int32                   event_count
 	int32                   max_events_buffered
-	
+
 	string                  stream_id
 	string                  client_id
-	
+
 	int64                   stream_start_time
 	int64                   last_event_time
-	
+
 	int32                   total_bytes_sent
 	int32                   total_events_sent
-	
+
 	bool                    is_active
 	bool                    compression_enabled
 	compression_type        active_compression
@@ -203,13 +203,13 @@ func (sse_stream* s) add_event(event sse_event) bool {
 	if s.event_count >= s.max_events_buffered {
 		return false
 	}
-	
+
 	s.events = append(s.events, event)
 	s.event_count++
 	s.last_event_time = time.Now().UnixNano()
 	s.total_events_sent++
 	s.total_bytes_sent = s.total_bytes_sent + event.data_size_bytes
-	
+
 	return true
 }
 
@@ -245,10 +245,10 @@ func (sse_stream* s) get_stream_stats() map[string]interface{} {
 	stats["total_bytes_sent"] = s.total_bytes_sent
 	stats["is_active"] = s.is_active
 	stats["compression_enabled"] = s.compression_enabled
-	
+
 	elapsed := (time.Now().UnixNano() - s.stream_start_time) / 1000000
 	stats["stream_duration_ms"] = elapsed
-	
+
 	return stats
 }
 

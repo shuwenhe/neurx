@@ -1,4 +1,5 @@
 package neurx.distributed.synchronization
+
 struct rank_state {
     int rank_id
     int world_size

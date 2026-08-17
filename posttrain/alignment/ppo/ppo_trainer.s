@@ -1,4 +1,5 @@
 package neurx.posttrain.rlhf.ppo_trainer
+
 struct ppo_step {
     int step_id
     []float tokens

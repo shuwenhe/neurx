@@ -1,4 +1,5 @@
 package neurx.amp.gradient_checkpoint
+
 struct checkpoint_context {
     [][]float saved_activations
     []bool is_checkpoint_required

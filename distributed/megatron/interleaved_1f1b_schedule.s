@@ -1,4 +1,5 @@
 package neurx.distributed.megatron.interleaved_schedule
+
 struct interleaved_config {
     int pipeline_parallel_size
     int pipeline_parallel_rank

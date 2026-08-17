@@ -37,29 +37,29 @@ struct model_config {
     int32 max_seq_length
     int32 max_position_embeddings
     int32 context_window
-    
+
     activation_function hidden_act
     float32 initializer_range
     float32 layer_norm_eps
     float32 rms_norm_eps
-    
+
     bool use_cache
     bool is_training
     bool use_reentrant_checkpointing
-    
+
     float32 rope_theta
     float32 rope_scaling
     bool use_sliding_window
     int32 sliding_window
-    
+
     int32 bos_token_id
     int32 eos_token_id
     int32 pad_token_id
     int32 unk_token_id
-    
+
     bool tie_word_embeddings
     bool pretraining_tp
-    
+
     map[string]interface{} extra_config
 }
 
@@ -143,7 +143,7 @@ func (model_config* cfg) get_total_params() int64 {
     mlp_params := int64(cfg.num_hidden_layers) * int64(cfg.hidden_size) * int64(cfg.intermediate_size) * int64(2)
     norm_params := int64(cfg.num_hidden_layers) * int64(2) * int64(cfg.hidden_size)
     output_params := int64(cfg.hidden_size) * int64(cfg.vocab_size)
-    
+
     return embedding_params + attention_params + mlp_params + norm_params + output_params
 }
 

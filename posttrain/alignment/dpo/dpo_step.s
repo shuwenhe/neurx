@@ -1,6 +1,7 @@
 package neurx.posttrain.dpo.dpo_step
 use neurx.posttrain.dpo.dpo_state
 use neurx.loss.dpo_loss
+
 struct dpo_step_result {
     dpo_state state
     float loss

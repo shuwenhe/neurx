@@ -1,4 +1,5 @@
 package neurx.tokenizer.manager
+
 struct tokenizer_stats {
     int total_tokens_encoded
     int total_sequences_processed

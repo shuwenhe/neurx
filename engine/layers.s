@@ -203,7 +203,7 @@ func (attention_state* as) grouped_query_attention(interface{} query, interface{
 func create_attention_layer(attention_config* config) attention_state* {
     head_dim := config.hidden_size / config.num_attention_heads
     scale := float32(1.0) / float32(head_dim)
-    
+
     return &attention_state{
         query_proj: nil,
         key_proj: nil,
@@ -303,13 +303,13 @@ func (transformer_block_state* tbs) apply_residuals(interface{} attn_out, interf
 func create_transformer_block(layer_config* config) transformer_block_state* {
     attn_config := create_attention_config(config.hidden_size, config.num_attention_heads, config.max_seq_length)
     mlp_cfg := create_mlp_config(config.hidden_size, config.activation_fn)
-    
+
     ln_config := &layer_norm_config{
         hidden_size: config.hidden_size,
         eps: config.layer_norm_eps,
         elementwise_affine: true,
     }
-    
+
     return &transformer_block_state{
         self_attention: create_attention_layer(attn_config),
         mlp_layer: create_mlp_layer(mlp_cfg),

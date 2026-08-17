@@ -133,12 +133,12 @@ func (weight_buffer_allocator* wba) allocate(int64 size) ([]byte, error) {
     if size > wba.free {
         return nil, "insufficient memory"
     }
-    
+
     buffer := make([]byte, size)
     wba.allocated += size
     wba.free -= size
     wba.allocation_count++
-    
+
     return buffer, nil
 }
 
@@ -147,7 +147,7 @@ func (weight_buffer_allocator* wba) deallocate([]byte buffer) error {
     wba.allocated -= size
     wba.free += size
     wba.deallocation_count++
-    
+
     return nil
 }
 
@@ -165,7 +165,7 @@ func (weight_loader* wl) detect_format(string file_path) (model_format, error) {
     } else if len(file_path) > 4 && string(file_path[len(file_path)-4:]) == ".bin" {
         return model_format_checkpoint, nil
     }
-    
+
     return model_format_vllm, nil
 }
 
@@ -185,7 +185,7 @@ func (weight_loader* wl) load_safetensors(string file_path) (*weight_file_info, 
         shard_index: 0,
         num_shards: 1,
     }
-    
+
     return file_info, nil
 }
 
@@ -205,18 +205,18 @@ func (weight_loader* wl) load_checkpoint(string file_path) (*weight_file_info, e
         shard_index: 0,
         num_shards: 1,
     }
-    
+
     return file_info, nil
 }
 
 func (weight_loader* wl) load_weights_from_file(string file_path) (map[string]*weight_buffer, error) {
     weights := make(map[string]*weight_buffer)
-    
+
     format, err := wl.detect_format(file_path)
     if err != nil {
         return nil, err
     }
-    
+
     switch format {
         case model_format_safetensors:
             return wl.load_safetensors_weights(file_path)
@@ -229,22 +229,22 @@ func (weight_loader* wl) load_weights_from_file(string file_path) (map[string]*w
 
 func (weight_loader* wl) load_safetensors_weights(string file_path) (map[string]*weight_buffer, error) {
     weights := make(map[string]*weight_buffer)
-    
+
     config := &safetensors_header{
         magic: []byte{},
         header_size: 0,
         format_version: 1,
         metadata_json: "{}",
     }
-    
+
     wl.cached_headers[file_path] = config
-    
+
     return weights, nil
 }
 
 func (weight_loader* wl) load_checkpoint_weights(string file_path) (map[string]*weight_buffer, error) {
     weights := make(map[string]*weight_buffer)
-    
+
     return weights, nil
 }
 
@@ -253,7 +253,7 @@ func (weight_loader* wl) load_tensor(string name, model_dtype target_dtype) (*we
     if err != nil {
         return nil, err
     }
-    
+
     weight_buf := &weight_buffer{
         data: buffer,
         dtype: target_dtype,
@@ -262,18 +262,18 @@ func (weight_loader* wl) load_tensor(string name, model_dtype target_dtype) (*we
         device_location: "gpu",
         is_pinned: wl.enable_pin_memory,
     }
-    
+
     return weight_buf, nil
 }
 
 func (weight_loader* wl) load_tensor_quantized(string name, weight_quantization_info* quant_info) (*weight_buffer, error) {
     size := int64(1024 * 512)
-    
+
     buffer, err := wl.allocator.allocate(size)
     if err != nil {
         return nil, err
     }
-    
+
     weight_buf := &weight_buffer{
         data: buffer,
         dtype: quant_info.scale_dtype,
@@ -282,7 +282,7 @@ func (weight_loader* wl) load_tensor_quantized(string name, weight_quantization_
         device_location: "gpu",
         is_pinned: false,
     }
-    
+
     return weight_buf, nil
 }
 
@@ -290,12 +290,12 @@ func (weight_loader* wl) convert_dtype(weight_buffer* src_buffer, model_dtype ta
     if src_buffer.dtype == target_dtype {
         return src_buffer, nil
     }
-    
+
     dst_buffer, err := wl.allocator.allocate(src_buffer.size_bytes)
     if err != nil {
         return nil, err
     }
-    
+
     converted := &weight_buffer{
         data: dst_buffer,
         dtype: target_dtype,
@@ -304,35 +304,35 @@ func (weight_loader* wl) convert_dtype(weight_buffer* src_buffer, model_dtype ta
         device_location: src_buffer.device_location,
         is_pinned: src_buffer.is_pinned,
     }
-    
+
     return converted, nil
 }
 
 func (weight_loader* wl) shard_weights(map[string]*weight_buffer weights, int32 num_shards) ([]map[string]*weight_buffer, error) {
     shards := make([]map[string]*weight_buffer, num_shards)
-    
+
     for i := int32(0); i < num_shards; i++ {
         shards[i] = make(map[string]*weight_buffer)
     }
-    
+
     shard_idx := int32(0)
     for name, buffer := range weights {
         shards[shard_idx][name] = buffer
         shard_idx = (shard_idx + 1) % num_shards
     }
-    
+
     return shards, nil
 }
 
 func (weight_loader* wl) merge_weight_shards([]map[string]*weight_buffer shards) (map[string]*weight_buffer, error) {
     merged := make(map[string]*weight_buffer)
-    
+
     for _, shard := range shards {
         for name, buffer := range shard {
             merged[name] = buffer
         }
     }
-    
+
     return merged, nil
 }
 
@@ -365,12 +365,12 @@ func (weight_loader* wl) set_num_worker_threads(int32 num_threads) {
 
 func load_weights_with_fallback(string primary_path, string fallback_path, model_dtype dtype) (map[string]*weight_buffer, error) {
     loader := new_weight_loader(primary_path, model_format_safetensors, dtype)
-    
+
     weights, err := loader.load_weights_from_file(primary_path)
     if err != nil && fallback_path != "" {
         weights, err = loader.load_weights_from_file(fallback_path)
     }
-    
+
     return weights, err
 }
 
@@ -388,14 +388,14 @@ func create_weight_loading_task(model_executor* executor, int32 layer_id, []*mod
 
 func (weight_loading_task* wlt) execute() error {
     wlt.status = loader_status_loading
-    
+
     total_bytes := int64(0)
     for _, spec := range wlt.weights {
         total_bytes += spec.size_bytes
     }
-    
+
     wlt.bytes_loaded = total_bytes
     wlt.status = loader_status_completed
-    
+
     return nil
 }

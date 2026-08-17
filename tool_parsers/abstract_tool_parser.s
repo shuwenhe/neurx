@@ -48,28 +48,28 @@ struct ParserResponse {
 
 trait ToolParser {
     fn extract_tool_calls(model_output: str, request: ParserRequest) -> ExtractedToolCallInformation
-    
+
     fn extract_tool_calls_streaming(
         previous_text: str,
         current_text: str,
         delta_text: str,
         request: ParserRequest
     ) -> DeltaToolCall
-    
+
     fn adjust_request(request: ParserRequest) -> ParserRequest {
         request
     }
-    
+
     fn get_parser_name() -> str
-    
+
     fn supports_streaming() -> bool {
         true
     }
-    
+
     fn supports_tool_choice_required() -> bool {
         true
     }
-    
+
     fn get_structural_tag_model() -> str {
         ""
     }
@@ -95,22 +95,22 @@ impl BaseToolParser {
             tools: Vec::new()
         }
     }
-    
+
     func set_tools(mut self, tools: Vec<str>) -> BaseToolParser {
         self.tools = tools
         self
     }
-    
+
     func set_streaming(mut self, streaming: bool) -> BaseToolParser {
         self.supports_streaming = streaming
         self
     }
-    
+
     func set_tool_choice_required(mut self, required: bool) -> BaseToolParser {
         self.supports_required = required
         self
     }
-    
+
     func set_structural_tag(mut self, tag: str) -> BaseToolParser {
         self.structural_tag_model = tag
         self
@@ -143,28 +143,28 @@ func find_json_boundaries(text: str, start: i32) -> (i32, i32) {
     let mut escaped = false
     let mut start_pos = -1
     let mut end_pos = -1
-    
+
     let chars = strings::chars(text)
     let i = start
     while i < len(chars) {
         let c = chars[i]
-        
+
         if escaped {
             escaped = false
             i = i + 1
             continue
         }
-        
+
         if c == '\\' && in_string {
             escaped = true
             i = i + 1
             continue
         }
-        
+
         if c == '"' {
             in_string = !in_string
         }
-        
+
         if !in_string {
             if c == '{' {
                 if brace_depth == 0 {
@@ -179,10 +179,10 @@ func find_json_boundaries(text: str, start: i32) -> (i32, i32) {
                 }
             }
         }
-        
+
         i = i + 1
     }
-    
+
     (start_pos, end_pos)
 }
 

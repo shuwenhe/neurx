@@ -1,6 +1,7 @@
 package neurx.inference.api.rest_api
 use neurx.inference.api.http_server.{http_request, http_response}
 use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, resolve_model_path_from_env, resolve_prompt_from_body, parse_max_tokens, parse_bool, build_health_json, build_models_json, build_generate_json, build_chat_completion_json}
+
 struct inference_request {
     string prompt
     int max_tokens

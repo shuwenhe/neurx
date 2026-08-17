@@ -34,7 +34,7 @@ struct chat_completion_response {
 	vec[choice]         choices
 	usage               usage
 	string              system_fingerprint
-	
+
 	string              request_id
 	int64               response_ms
 }
@@ -60,7 +60,7 @@ struct embedding_response {
 	vec[embedding_data] data
 	string          model
 	usage           usage
-	
+
 	int64           created
 }
 
@@ -137,7 +137,7 @@ func create_embedding_response(
 	usage_data usage,
 ) embedding_response {
 	data := make(vec[embedding_data], 0, len(embeddings))
-	
+
 	for i := int32(0); i < int32(len(embeddings)); i++ {
 		data = append(data, embedding_data{
 			object:    "embedding",
@@ -145,7 +145,7 @@ func create_embedding_response(
 			embedding: embeddings[i],
 		})
 	}
-	
+
 	return embedding_response{
 		object:  "list",
 		data:    data,
@@ -157,7 +157,7 @@ func create_embedding_response(
 
 func create_model_list_response(models vec[string]) model_list_response {
 	data := make(vec[model_info], 0, len(models))
-	
+
 	for model := range models {
 		data = append(data, model_info{
 			id:       model,
@@ -166,7 +166,7 @@ func create_model_list_response(models vec[string]) model_list_response {
 			owned_by: "neurx",
 		})
 	}
-	
+
 	return model_list_response{
 		object: "list",
 		data:   data,
@@ -203,7 +203,7 @@ func (resp chat_completion_response) to_json() string {
 		},
 		"system_fingerprint": resp.system_fingerprint,
 	}
-	
+
 	return json.Marshal(data)
 }
 
@@ -221,7 +221,7 @@ func (resp completion_response) to_json() string {
 		},
 		"system_fingerprint": resp.system_fingerprint,
 	}
-	
+
 	return json.Marshal(data)
 }
 
@@ -236,7 +236,7 @@ func (resp embedding_response) to_json() string {
 		},
 		"created": resp.created,
 	}
-	
+
 	return json.Marshal(data)
 }
 
@@ -245,7 +245,7 @@ func (resp model_list_response) to_json() string {
 		"object": resp.object,
 		"data":   resp.data,
 	}
-	
+
 	return json.Marshal(data)
 }
 
@@ -364,7 +364,7 @@ func format_choice_for_streaming(choice choice) string {
 		"delta": choice.delta,
 		"finish_reason": choice.finish_reason,
 	}
-	
+
 	return json.Marshal(data)
 }
 
@@ -382,6 +382,6 @@ func format_chunk_response(chunk_id string, model string, choice choice) string 
 			},
 		},
 	}
-	
+
 	return json.Marshal(data)
 }

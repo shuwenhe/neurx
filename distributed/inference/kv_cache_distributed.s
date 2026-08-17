@@ -1,4 +1,5 @@
 package neurx.distributed.inference
+
 struct distributed_kv_cache {
     int num_layers
     int num_kv_heads

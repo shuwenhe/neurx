@@ -51,35 +51,35 @@ func (distributed_inference_coordinator* dic) initialize() error {
         initialized: false,
         error_message: "",
     }
-    
+
     err := dic.ps.initialize()
     if err != nil {
         return err
     }
-    
+
     dic.comm = create_communicator(communication_backend_nccl, dic.config.pconfig.rank, dic.config.pconfig.world_size)
     err = dic.comm.initialize()
     if err != nil {
         return err
     }
-    
+
     dic.dev_comm = create_device_communicator(device_type_cuda, dic.config.pconfig.rank, dic.config.pconfig.rank, dic.config.pconfig.world_size)
     err = dic.dev_comm.initialize()
     if err != nil {
         return err
     }
-    
+
     dic.wm = create_weight_manager(dic.config.wconfig, dic.comm, dic.dev_comm, dic.config.pconfig.rank, dic.config.pconfig.world_size)
     dic.kcm = create_kv_cache_manager(dic.config.kconfig, dic.comm, dic.dev_comm)
-    
+
     if dic.config.enable_elastic {
         dic.ec = create_elastic_coordinator(dic.config.econfig, dic.ps, dic.comm)
     }
-    
+
     if dic.config.enable_fault_tolerance {
         dic.codec = create_erasure_codec(dic.config.ecconfig, dic.comm)
     }
-    
+
     dic.initialized = true
     return nil
 }
@@ -102,14 +102,14 @@ func (distributed_inference_coordinator* dic) forward_pass(interface{} input, []
             return nil, err
         }
     }
-    
+
     if dic.config.enable_pipeline_parallel {
         err := dic.send_activations_to_next_stage(input)
         if err != nil {
             return nil, err
         }
     }
-    
+
     output := input
     return output, nil
 }
@@ -121,14 +121,14 @@ func (distributed_inference_coordinator* dic) backward_pass(interface{} grad_out
             return err
         }
     }
-    
+
     if dic.config.enable_tensor_parallel {
         err := dic.reduce_scatter_gradients(grad_output)
         if err != nil {
             return err
         }
     }
-    
+
     return nil
 }
 

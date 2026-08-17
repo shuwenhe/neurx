@@ -1,4 +1,5 @@
 package neurx.inference.sglang.dllm_runtime
+
 func dllm_strategy_low_confidence() int { 1 }
 
 func dllm_strategy_random() int { 2 }

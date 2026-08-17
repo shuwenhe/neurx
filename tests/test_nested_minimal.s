@@ -1,4 +1,5 @@
 package main
+
 struct inner {
     int value
 }

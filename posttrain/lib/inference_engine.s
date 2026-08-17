@@ -1,5 +1,6 @@
 package neurx.posttrain.model.inference_engine
 use std.io.eprintln
+
 struct inference_config {
     int vocab_size
     int hidden_size

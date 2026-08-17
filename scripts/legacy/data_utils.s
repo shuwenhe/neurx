@@ -2,6 +2,7 @@ package neurx.script.data_utils
 use std.io
 use std.os
 use std.strings
+
 struct json_value {
     string type
     string str_val

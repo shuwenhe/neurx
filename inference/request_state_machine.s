@@ -335,7 +335,7 @@ func (state_machine* sm) is_at_capacity() bool {
 func (state_machine* sm) verify_state_consistency() bool {
     for req_id in sm.active_requests.keys() {
         lifecycle := sm.active_requests[req_id]
-        
+
         if lifecycle.request_id != req_id {
             false
         }

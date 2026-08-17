@@ -1,4 +1,5 @@
 package neurx.deploy.production
+
 func model_path_text() string { return "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct" }
 
 func model_path_vl() string { return "/home/shuwen/shuwen/model/Qwen2.5-VL-7B" }

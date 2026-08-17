@@ -1,4 +1,5 @@
 package neurx.moe.fine_grained
+
 struct neurx_moe_config {
     int hidden_dim
     int ffn_dim

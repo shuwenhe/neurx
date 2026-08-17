@@ -1,4 +1,5 @@
 package neurx.inference.metrics.observability
+
 struct inference_trace_span {
     string trace_id
     string request_id

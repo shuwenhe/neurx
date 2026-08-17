@@ -1,4 +1,5 @@
 package neurx.attention.paged_simple
+
 struct cache_stats {
     int total_blocks
     int allocated_blocks

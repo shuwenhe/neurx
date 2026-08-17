@@ -143,14 +143,14 @@ func (gpu_memory_offloader* gmo) get_tensor_location(string tensor_id) int32 {
 func (gpu_memory_offloader* gmo) evict_lru_tensor() error {
     var oldest_time int64
     var oldest_tensor_id string
-    
+
     for id, metadata := range gmo.tensor_locations {
         if metadata.last_access_time < oldest_time {
             oldest_time = metadata.last_access_time
             oldest_tensor_id = id
         }
     }
-    
+
     if oldest_tensor_id != "" {
         return gmo.offload_tensor(oldest_tensor_id, 1)
     }
@@ -185,7 +185,7 @@ func (tensor_buffer_cache* tbc) cache_tensor(string tensor_id, interface{} tenso
             tbc.access_order = tbc.access_order[1:]
         }
     }
-    
+
     tbc.cached_tensors[tensor_id] = tensor
     tbc.access_order = append(tbc.access_order, tensor_id)
     return nil

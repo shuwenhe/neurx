@@ -1,4 +1,5 @@
 package neurx.attention.gradient
+
 struct attention_forward_cache {
     []float hidden_states
     []float concatenated

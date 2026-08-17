@@ -1,4 +1,5 @@
 package neurx.distributed.ec_transfer
+
 struct ec_transfer_config {
     string engine_id
     int rank

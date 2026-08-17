@@ -1,6 +1,7 @@
 package neurx.optimizer.adamax
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct adamax_optimizer {
     float lr
     float beta1

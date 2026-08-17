@@ -1,6 +1,7 @@
 package neurx.autograd.tensor
 use neurx.tensor.tensor
 use neurx.autograd.function
+
 func tensor_backward_rule_add(tensor a, tensor b, tensor upstream) backward_rule {
     tensor grad_a = neurx.tensor.tensor.tensor_backward_add_grad_a(a, upstream)
     tensor grad_b = neurx.tensor.tensor.tensor_backward_add_grad_b(b, upstream)

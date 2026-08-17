@@ -13,37 +13,37 @@ const (
 struct kernel_config {
     kernel_type type
     string kernel_name
-    
+
     bool enable_kernel_fusion
     bool enable_kernel_autotuning
-    
+
     bool enable_tensor_core
     bool enable_sparsity
-    
+
     int32 block_size_x
     int32 block_size_y
     int32 block_size_z
-    
+
     int32 grid_size_x
     int32 grid_size_y
     int32 grid_size_z
-    
+
     int32 shared_memory_size_kb
     bool enable_shared_memory_optimization
-    
+
     bool enable_register_reuse
     int32 register_per_thread
-    
+
     string optimization_level
     bool enable_profiling
-    
+
     bool enable_triton_kernels
     bool enable_cutlass_kernels
     bool enable_vllm_kernels
-    
+
     int32 kernel_cache_size_mb
     bool enable_kernel_caching
-    
+
     map[string]interface{} extra_config
 }
 

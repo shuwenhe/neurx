@@ -1,4 +1,5 @@
 package neurx.inference.safetensors_loader
+
 func load_header_size(int b1, int b2, int b3, int b4) int {
     b1 + (b2 * 256) + (b3 * 65536) + (b4 * 16777216)
 }

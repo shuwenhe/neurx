@@ -1,5 +1,6 @@
 package neurx.posttrain.offpolicy_diagnostics
 use neurx.tensor
+
 struct offpolicy_metrics {
     float kl_divergence
     float reverse_kl

@@ -1,4 +1,5 @@
 package neurx.util.math
+
 func exp_approx(float x) float {
     if x >= 20.0 {
         return 485165195.4097903

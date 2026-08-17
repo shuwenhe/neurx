@@ -178,10 +178,10 @@ func (device_config_manager_impl* m) apply_config(cfg device_config_full*) (bool
     if len(errors) > 0 {
         return false
     }
-    
+
     m.current_config = cfg
     m.config_applied = true
-    
+
     return true
 }
 
@@ -191,12 +191,12 @@ func (device_config_manager_impl* m) get_current_config() (device_config_full*) 
 
 func (device_config_manager_impl* m) validate_config(cfg device_config_full*) (vec[string]) {
     errors := vec[string]{}
-    
+
     if cfg == nil {
         errors = append(errors, "Config is nil")
         return errors
     }
-    
+
     if cfg.dev_cfg == nil {
         errors = append(errors, "Device config is nil")
     } else {
@@ -207,7 +207,7 @@ func (device_config_manager_impl* m) validate_config(cfg device_config_full*) (v
             errors = append(errors, "Invalid tensor_parallelism_degree: must be > 0")
         }
     }
-    
+
     if cfg.mem_cfg != nil {
         if cfg.mem_cfg.max_memory <= 0 {
             errors = append(errors, "Invalid max_memory: must be > 0")
@@ -219,13 +219,13 @@ func (device_config_manager_impl* m) validate_config(cfg device_config_full*) (v
             errors = append(errors, "Invalid kv_cache_ratio: must be 0.0-1.0")
         }
     }
-    
+
     if cfg.comp_cfg != nil {
         if cfg.comp_cfg.max_batch_size <= 0 {
             errors = append(errors, "Invalid max_batch_size: must be > 0")
         }
     }
-    
+
     if cfg.attn_cfg != nil {
         if cfg.attn_cfg.attention_dropout < 0.0 || cfg.attn_cfg.attention_dropout > 1.0 {
             errors = append(errors, "Invalid attention_dropout: must be 0.0-1.0")
@@ -234,7 +234,7 @@ func (device_config_manager_impl* m) validate_config(cfg device_config_full*) (v
             errors = append(errors, "Invalid num_attention_heads: must be > 0")
         }
     }
-    
+
     if cfg.opt_cfg != nil {
         if cfg.opt_cfg.compute_utilization_target < 0.0 || cfg.opt_cfg.compute_utilization_target > 1.0 {
             errors = append(errors, "Invalid compute_utilization_target: must be 0.0-1.0")
@@ -243,7 +243,7 @@ func (device_config_manager_impl* m) validate_config(cfg device_config_full*) (v
             errors = append(errors, "Invalid memory_utilization_target: must be 0.0-1.0")
         }
     }
-    
+
     return errors
 }
 

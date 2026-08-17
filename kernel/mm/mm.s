@@ -1,6 +1,7 @@
 int HOST_MEM   = 0
 int DEVICE_MEM = 1
 int SHARED_MEM = 2
+
 struct mem_region {
     int    region_id
     int    domain

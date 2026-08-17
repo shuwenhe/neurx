@@ -16,7 +16,7 @@ impl GlmParser {
         parser.base = parser.base.set_structural_tag("glm_4_7")
         parser
     }
-    
+
     func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
         extract_xml_tools(model_output, "tool_call")
     }
@@ -34,7 +34,7 @@ impl Glm47MoeParser {
         parser.base = parser.base.set_structural_tag("glm_4_7")
         parser
     }
-    
+
     func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
         extract_xml_tools(model_output, "tool_call")
     }
@@ -52,7 +52,7 @@ impl KimiK3Parser {
         parser.base = parser.base.set_structural_tag("kimi")
         parser
     }
-    
+
     func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
         extract_xml_tools(model_output, "function")
     }
@@ -69,7 +69,7 @@ impl InternlmParser {
         }
         parser
     }
-    
+
     func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
         extract_qwen_json_tools(model_output)
     }
@@ -86,7 +86,7 @@ impl MinimaxM3Parser {
         }
         parser
     }
-    
+
     func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
         extract_qwen_json_tools(model_output)
     }
@@ -103,7 +103,7 @@ impl MiniCpm5Parser {
         }
         parser
     }
-    
+
     func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
         extract_xml_function_tools(model_output)
     }
@@ -120,7 +120,7 @@ impl CohereCommand3Parser {
         }
         parser
     }
-    
+
     func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
         extract_json_tool_array(model_output)
     }
@@ -137,7 +137,7 @@ impl CohereCommand4Parser {
         }
         parser
     }
-    
+
     func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
         extract_json_tool_array(model_output)
     }
@@ -154,7 +154,7 @@ impl GraniteParser {
         }
         parser
     }
-    
+
     func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
         extract_qwen_xml_tools(model_output)
     }
@@ -171,7 +171,7 @@ impl PythonicToolParser {
         }
         parser
     }
-    
+
     func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
         extract_python_tool_calls(model_output)
     }
@@ -180,7 +180,7 @@ impl PythonicToolParser {
 func extract_xml_tools(model_output: str, tag: str) -> ExtractedToolCallInformation {
     let start_tag = "<" + tag + ">"
     let end_tag = "</" + tag + ">"
-    
+
     if !strings::contains_str(model_output, start_tag) {
         return ExtractedToolCallInformation {
             tools_called: false,
@@ -188,42 +188,42 @@ func extract_xml_tools(model_output: str, tag: str) -> ExtractedToolCallInformat
             content: model_output
         }
     }
-    
+
     let content_end = strings::index_of(model_output, start_tag)
     let content = if content_end > 0 {
         strings::substring(model_output, 0, content_end)
     } else {
         ""
     }
-    
+
     let mut tool_calls = Vec::new()
     let mut search_pos = 0
-    
+
     while search_pos < strings::len(model_output) {
         let call_start = strings::index_of_from(model_output, start_tag, search_pos)
         if call_start < 0 {
             break
         }
-        
+
         let call_end = strings::index_of_from(model_output, end_tag, call_start)
         if call_end < 0 {
             break
         }
-        
+
         let call_content = strings::substring(
             model_output,
             call_start + strings::len(start_tag),
             call_end
         )
-        
+
         match parse_qwen_json_tool(call_content) {
             Some(tc) => tool_calls.push(tc),
             None => {}
         }
-        
+
         search_pos = call_end + strings::len(end_tag)
     }
-    
+
     ExtractedToolCallInformation {
         tools_called: len(tool_calls) > 0,
         tool_calls: tool_calls,
@@ -234,7 +234,7 @@ func extract_xml_tools(model_output: str, tag: str) -> ExtractedToolCallInformat
 func extract_xml_function_tools(model_output: str) -> ExtractedToolCallInformation {
     let start_tag = "<function name=\""
     let end_tag = "</function>"
-    
+
     if !strings::contains_str(model_output, start_tag) {
         return ExtractedToolCallInformation {
             tools_called: false,
@@ -242,43 +242,43 @@ func extract_xml_function_tools(model_output: str) -> ExtractedToolCallInformati
             content: model_output
         }
     }
-    
+
     let content_end = strings::index_of(model_output, start_tag)
     let content = if content_end > 0 {
         strings::substring(model_output, 0, content_end)
     } else {
         ""
     }
-    
+
     let mut tool_calls = Vec::new()
     let mut search_pos = 0
-    
+
     while search_pos < strings::len(model_output) {
         let call_start = strings::index_of_from(model_output, start_tag, search_pos)
         if call_start < 0 {
             break
         }
-        
+
         let call_end = strings::index_of_from(model_output, end_tag, call_start)
         if call_end < 0 {
             break
         }
-        
+
         let full_tag_end = strings::index_of_from(model_output, ">", call_start)
         let func_name = strings::substring(
             model_output,
             call_start + strings::len(start_tag),
             full_tag_end - 1
         )
-        
+
         let call_content = strings::substring(
             model_output,
             full_tag_end + 1,
             call_end
         )
-        
+
         let arguments = extract_param_values(call_content)
-        
+
         tool_calls.push(ToolCall {
             type: "function",
             id: "",
@@ -287,10 +287,10 @@ func extract_xml_function_tools(model_output: str) -> ExtractedToolCallInformati
                 arguments: arguments
             }
         })
-        
+
         search_pos = call_end + strings::len(end_tag)
     }
-    
+
     ExtractedToolCallInformation {
         tools_called: len(tool_calls) > 0,
         tool_calls: tool_calls,
@@ -301,15 +301,15 @@ func extract_xml_function_tools(model_output: str) -> ExtractedToolCallInformati
 func extract_json_tool_array(model_output: str) -> ExtractedToolCallInformation {
     let pattern = "\\[\\s*\\{[^\\]]*\\}\\s*\\]"
     let re = regex::compile(pattern)
-    
+
     match regex::find_string(re, model_output) {
         Some(m) => {
             let json_array = extract_group(m, 0)
             let mut tool_calls = Vec::new()
-            
+
             let pattern2 = "\\{[^}]*\\}"
             let re2 = regex::compile(pattern2)
-            
+
             match regex::find_string(re2, json_array) {
                 Some(m2) => {
                     let json_obj = extract_group(m2, 0)
@@ -320,14 +320,14 @@ func extract_json_tool_array(model_output: str) -> ExtractedToolCallInformation 
                 }
                 None => {}
             }
-            
+
             let content_end = strings::index_of(model_output, "[")
             let content = if content_end > 0 {
                 strings::substring(model_output, 0, content_end)
             } else {
                 ""
             }
-            
+
             ExtractedToolCallInformation {
                 tools_called: len(tool_calls) > 0,
                 tool_calls: tool_calls,
@@ -347,20 +347,20 @@ func extract_json_tool_array(model_output: str) -> ExtractedToolCallInformation 
 func extract_python_tool_calls(model_output: str) -> ExtractedToolCallInformation {
     let pattern = "\\[([a-zA-Z_][a-zA-Z0-9_]*\\([^)]*\\)[,\\s]*)+\\]"
     let re = regex::compile(pattern)
-    
+
     match regex::find_string(re, model_output) {
         Some(m) => {
             let tool_list = extract_group(m, 0)
             let mut tool_calls = Vec::new()
-            
+
             let pattern2 = "([a-zA-Z_][a-zA-Z0-9_]*)\\(([^)]*)\\)"
             let re2 = regex::compile(pattern2)
-            
+
             match regex::find_string(re2, tool_list) {
                 Some(m2) => {
                     let func_name = extract_group(m2, 1)
                     let func_args = extract_group(m2, 2)
-                    
+
                     tool_calls.push(ToolCall {
                         type: "function",
                         id: "",
@@ -372,14 +372,14 @@ func extract_python_tool_calls(model_output: str) -> ExtractedToolCallInformatio
                 }
                 None => {}
             }
-            
+
             let content_end = strings::index_of(model_output, "[")
             let content = if content_end > 0 {
                 strings::substring(model_output, 0, content_end)
             } else {
                 ""
             }
-            
+
             ExtractedToolCallInformation {
                 tools_called: len(tool_calls) > 0,
                 tool_calls: tool_calls,
@@ -408,7 +408,7 @@ func extract_group(m: RegexMatch, group: i32) -> str {
 func parse_qwen_json_tool(json_str: str) -> Option<ToolCall> {
     let func_name = extract_json_field(json_str, "name")
     let arguments = extract_json_field(json_str, "arguments")
-    
+
     if len(func_name) > 0 && len(arguments) > 0 {
         Some(ToolCall {
             type: "function",

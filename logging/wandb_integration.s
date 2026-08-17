@@ -1,4 +1,5 @@
 package neurx.logging
+
 struct wandb_run {
     bool active
     string run_id

@@ -10,6 +10,7 @@ enum quantization_type {
     INT4_FULL,
     FP8_E4M3,
 }
+
 struct quantization_stats {
     quantization_type quantization_method
     float min_value

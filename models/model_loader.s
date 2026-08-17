@@ -109,7 +109,7 @@ func create_model_loader() *model_loader {
 func (model_loader* loader) register_model_path(path string) error {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
-	
+
 	info, err := os.Stat(path)
 	if err != nil {
 		return err
@@ -117,20 +117,20 @@ func (model_loader* loader) register_model_path(path string) error {
 	if !info.IsDir() {
 		return fmt.Errorf("path is not a directory: %s", path)
 	}
-	
+
 	for _, p := range loader.model_paths {
 		if p == path {
 			return nil
 		}
 	}
-	
+
 	loader.model_paths = append(loader.model_paths, path)
 	return nil
 }
 
 func (model_loader* loader) load_model(package_id string, model_type model_type, device model_device_type) *model_load_result {
 	loader.mu.Lock()
-	
+
 	if loader.current_loads >= loader.max_concurrent_loads {
 		loader.mu.Unlock()
 		return &model_load_result{
@@ -139,35 +139,35 @@ func (model_loader* loader) load_model(package_id string, model_type model_type,
 			error_message: "max concurrent loads exceeded",
 		}
 	}
-	
+
 	loader.current_loads++
 	loader.total_load_attempts++
 	loader.status = LOADER_STATUS_LOADING
 	loader.mu.Unlock()
-	
+
 	start_time := time.Now()
-	
+
 	pkg := loader.find_package_by_id(package_id)
 	if pkg == nil {
 		loader.mu.Lock()
 		loader.current_loads--
 		loader.total_load_failures++
 		loader.mu.Unlock()
-		
+
 		return &model_load_result{
 			success: false,
 			package_id: package_id,
 			error_message: fmt.Sprintf("package not found: %s", package_id),
 		}
 	}
-	
+
 	validation_result := loader.validate_model_package(pkg)
 	if !validation_result.valid {
 		loader.mu.Lock()
 		loader.current_loads--
 		loader.total_load_failures++
 		loader.mu.Unlock()
-		
+
 		error_msg := "validation failed"
 		if len(validation_result.errors) > 0 {
 			error_msg = validation_result.errors[0]
@@ -179,20 +179,20 @@ func (model_loader* loader) load_model(package_id string, model_type model_type,
 			warnings: validation_result.warnings,
 		}
 	}
-	
+
 	model := create_model_interface(pkg.model_id, pkg.model_name, pkg.model_type)
 	model.set_device(device)
 	model.set_state(STATE_LOADED)
-	
+
 	loader.mu.Lock()
 	loader.loaded_packages[package_id] = pkg
 	loader.current_loads--
 	loader.total_load_successes++
 	loader.status = LOADER_STATUS_COMPLETE
 	loader.mu.Unlock()
-	
+
 	load_time := int64(time.Since(start_time).Milliseconds())
-	
+
 	return &model_load_result{
 		success: true,
 		model_id: pkg.model_id,
@@ -225,45 +225,45 @@ func (model_loader* loader) validate_model_package(model_package* pkg) *load_val
 		errors: []string{},
 		warnings: []string{},
 	}
-	
+
 	start_time := time.Now()
-	
+
 	if pkg == nil {
 		result.valid = false
 		result.errors = append(result.errors, "package is nil")
 		return result
 	}
-	
+
 	if pkg.path == "" {
 		result.valid = false
 		result.errors = append(result.errors, "package path is empty")
 		return result
 	}
-	
+
 	if info, err := os.Stat(pkg.path); err != nil || !info.IsDir() {
 		result.valid = false
 		result.errors = append(result.errors, fmt.Sprintf("invalid package path: %s", pkg.path))
 		return result
 	}
-	
+
 	if _, err := os.Stat(pkg.metadata_file); err != nil {
 		result.warnings = append(result.warnings, fmt.Sprintf("metadata file not found: %s", pkg.metadata_file))
 	}
-	
+
 	if _, err := os.Stat(pkg.weights_file); err != nil {
 		result.valid = false
 		result.errors = append(result.errors, fmt.Sprintf("weights file not found: %s", pkg.weights_file))
 	}
-	
+
 	if _, err := os.Stat(pkg.tokenizer_file); err != nil {
 		result.warnings = append(result.warnings, fmt.Sprintf("tokenizer file not found: %s", pkg.tokenizer_file))
 	}
-	
+
 	file_info, _ := os.Stat(pkg.weights_file)
 	if file_info != nil {
 		pkg.size_bytes = file_info.Size()
 	}
-	
+
 	result.validation_time_ms = int64(time.Since(start_time).Milliseconds())
 	return result
 }
@@ -273,7 +273,7 @@ func (model_loader* loader) calculate_checksum(file_path string) (string, error)
 	if err != nil {
 		return "", err
 	}
-	
+
 	hash := md5.Sum(data)
 	return fmt.Sprintf("%x", hash), nil
 }
@@ -281,7 +281,7 @@ func (model_loader* loader) calculate_checksum(file_path string) (string, error)
 func (model_loader* loader) unload_model(package_id string) error {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
-	
+
 	delete(loader.loaded_packages, package_id)
 	delete(loader.loading_packages, package_id)
 	return nil
@@ -295,7 +295,7 @@ func (model_loader* loader) reload_model(package_id string, device model_device_
 func (model_loader* loader) get_loaded_models() []string {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
-	
+
 	models := make([]string, 0, len(loader.loaded_packages))
 	for package_id := range loader.loaded_packages {
 		models = append(models, package_id)
@@ -306,7 +306,7 @@ func (model_loader* loader) get_loaded_models() []string {
 func (model_loader* loader) has_model(package_id string) bool {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
-	
+
 	_, exists := loader.loaded_packages[package_id]
 	return exists
 }
@@ -314,14 +314,14 @@ func (model_loader* loader) has_model(package_id string) bool {
 func (model_loader* loader) get_model_package(package_id string) *model_package {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
-	
+
 	return loader.loaded_packages[package_id]
 }
 
 func (model_loader* loader) get_loader_stats() map[string]interface{} {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
-	
+
 	stats := make(map[string]interface{})
 	stats["status"] = loader.status
 	stats["total_load_attempts"] = loader.total_load_attempts
@@ -331,7 +331,7 @@ func (model_loader* loader) get_loader_stats() map[string]interface{} {
 	stats["current_loads"] = loader.current_loads
 	stats["max_concurrent_loads"] = loader.max_concurrent_loads
 	stats["model_paths"] = loader.model_paths
-	
+
 	return stats
 }
 

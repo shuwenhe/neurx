@@ -1,4 +1,5 @@
 package neurx.tokenizer.chat_template
+
 struct chat_message {
     string role
     string content

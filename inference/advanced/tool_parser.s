@@ -1,4 +1,5 @@
 package neurx.inference.advanced.tool_parser
+
 func tool_choice_none() int { 1 }
 
 func tool_choice_auto() int { 2 }

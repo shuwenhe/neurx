@@ -1,4 +1,5 @@
 package neurx.tokenizer.vocab_builder
+
 struct token_pair {
     string left
     string right

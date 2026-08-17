@@ -79,16 +79,16 @@ func print_section(string title) {
 
 func main() {
     print_header()
-    
+
     optimization_config config = create_default_optimization_config()
-    
+
     println("Configuration:")
     println("  Optimization Level: " + config.optimization_level)
     println("  KV Cache Optimization: " + (if config.enable_kv_cache_optimization { "enabled" } else { "disabled" }))
     println("  Batch Optimization: " + (if config.enable_batch_optimization { "enabled" } else { "disabled" }))
     println("  Model Verification: " + (if config.enable_model_verification { "enabled" } else { "disabled" }))
     println("")
-    
+
     println("Action Plan:")
     println("  1. Download model files (optional)")
     println("  2. Verify model structure and weights")
@@ -96,9 +96,9 @@ func main() {
     println("  4. Configure batch processing scheduler")
     println("  5. Benchmark and report results")
     println("")
-    
+
     print_section("Step 1: Model Preparation")
-    
+
     if config.enable_model_download {
         println("  ⏳ Downloading model files...")
         println("     - model.safetensors (1.9 GB)")
@@ -109,9 +109,9 @@ func main() {
     } else {
         println("  ℹ️  Model download skipped (use NEURX_DOWNLOAD=1 to enable)")
     }
-    
+
     print_section("Step 2: Model Verification")
-    
+
     if config.enable_model_verification {
         println("  ✓ Model structure verification")
         println("    - Model: Qwen2.5-0.5B-Instruct")
@@ -129,9 +129,9 @@ func main() {
         println("    - Precision: bfloat16/float32")
         println("    - Checksum validation: PASSED")
     }
-    
+
     print_section("Step 3: KV Cache Optimization")
-    
+
     if config.enable_kv_cache_optimization {
         println("  Configuration:")
         println("    - Page Size: 16 tokens")
@@ -150,9 +150,9 @@ func main() {
         println("    ✓ Token reuse across sequences")
         println("    ✓ Prefix caching for repetitive inputs")
     }
-    
+
     print_section("Step 4: Batch Processing Optimization")
-    
+
     if config.enable_batch_optimization {
         println("  Configuration:")
         println("    - Max Batch Size: 32")
@@ -173,9 +173,9 @@ func main() {
         println("    ✓ Request prioritization support")
         println("    ✓ Token recycling within batch")
     }
-    
+
     print_section("Step 5: Expected Performance Gains")
-    
+
     println("  Baseline (no optimization):")
     println("    - Throughput: 100 tokens/sec")
     println("    - Latency (p50): 1280 ms")
@@ -195,9 +195,9 @@ func main() {
     println("    - Throughput: +85% → 185 tokens/sec ✅")
     println("    - Latency (p50): -48% → 665 ms ✅")
     println("    - Memory: -18% → 3100 MB ✅")
-    
+
     print_section("Step 6: Module Locations")
-    
+
     println("  File Locations:")
     println("    ✓ Download Module:")
     println("      /app/shuwen/neurx/scripts/download_model.s")
@@ -213,9 +213,9 @@ func main() {
     println("")
     println("    ✓ Integration Suite (this file):")
     println("      /app/shuwen/neurx/inference/optimization_suite.s")
-    
+
     print_section("Step 7: How to Use")
-    
+
     println("  Compile and run each module:")
     println("")
     println("    1. Download Model:")
@@ -233,9 +233,9 @@ func main() {
     println("")
     println("    5. Full Optimization Suite:")
     println("       $S_RUNNER optimization_suite.ir")
-    
+
     print_section("Step 8: Integration with Inference Engine")
-    
+
     println("  Recommended Settings in production_inference.s:")
     println("")
     println("    // KV Cache Configuration")
@@ -252,7 +252,7 @@ func main() {
     println("    int num_threads = 8")
     println("    bool pin_to_cores = true")
     println("    bool prefetch_weights = true")
-    
+
     println("")
     println("╔════════════════════════════════════════════════════════════╗")
     println("║              ✅ Optimization Suite Complete                ║")

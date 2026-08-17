@@ -1,4 +1,5 @@
 package neurx.tests.serving
+
 struct socket_result {
     int fd
     int error

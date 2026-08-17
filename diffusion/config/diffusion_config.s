@@ -1,4 +1,5 @@
 package neurx.diffusion.config
+
 struct diffusion_config {
     int timesteps
     float beta_start

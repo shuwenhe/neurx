@@ -1,4 +1,5 @@
 package neurx.inference.text_real
+
 func vocab_size() int { return 151936 }
 
 func hidden_dim() int { return 896 }

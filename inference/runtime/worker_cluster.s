@@ -1,4 +1,5 @@
 package neurx.inference.runtime.worker_cluster
+
 func worker_starting_status() int { 1 }
 
 func worker_ready_status() int { 2 }

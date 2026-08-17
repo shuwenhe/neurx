@@ -1,4 +1,5 @@
 package neurx.moe.expert_routing
+
 struct expert_layer {
     int expert_id
     int hidden_dim

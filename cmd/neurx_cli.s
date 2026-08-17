@@ -5,6 +5,7 @@ import (
     "strconv"
     "../scripts"
 )
+
 struct command {
     name        string
     description string

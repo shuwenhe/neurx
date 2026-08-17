@@ -1,5 +1,6 @@
 package neurx.agent.retrieval
 use neurx.agent.memory
+
 struct agent_retrieval_result {
     []string keys
     []string values

@@ -1,4 +1,5 @@
 package neurx.quantization.dynamic
+
 struct quantization_config {
     string quantization_type
     bool symmetric

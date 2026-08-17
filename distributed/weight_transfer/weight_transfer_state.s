@@ -1,4 +1,5 @@
 package neurx.distributed.weight_transfer
+
 func weight_update_idle() int { 0 }
 
 func weight_update_active() int { 1 }

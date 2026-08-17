@@ -1,4 +1,5 @@
 package main
+
 struct model_config {
     int vocab_size
     int hidden_dim

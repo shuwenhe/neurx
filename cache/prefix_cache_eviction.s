@@ -1,4 +1,5 @@
 package neurx.cache.prefix_cache_eviction
+
 struct cache_entry {
     string prefix_hash
     int tokens_count

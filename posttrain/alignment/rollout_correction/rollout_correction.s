@@ -3,6 +3,7 @@ import "optimizer/optimizer.s"
 import "posttrain/alignment/rollout_correction/config.s"
 import "posttrain/alignment/rollout_correction/importance_sampling.s"
 import "posttrain/alignment/rollout_correction/rejection_sampling.s"
+
 struct rollout_correction_result {
     is_weights: ISWeights
     rs_results: []rs_result

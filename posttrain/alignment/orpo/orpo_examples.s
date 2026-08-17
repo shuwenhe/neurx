@@ -1,5 +1,6 @@
 package neurx.posttrain.alignment.orpo_examples
 use neurx.posttrain.alignment.orpo_trainer
+
 func create_base_orpo_config() orpo_config {
     orpo_config {
         seq_len: 128,

@@ -1,4 +1,5 @@
 package neurx.observability.serving_observability
+
 struct serving_observability_state {
     int requests_total
     int requests_active

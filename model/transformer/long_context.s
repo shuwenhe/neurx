@@ -6,6 +6,7 @@ enum context_type {
     FULL_ATTENTION = 2
     MIXED = 3
 }
+
 struct long_context_config {
     int max_context_length
     int sliding_window_size

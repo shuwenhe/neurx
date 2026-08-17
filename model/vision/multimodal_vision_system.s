@@ -1,4 +1,5 @@
 module multimodal_vision
+
 struct vision_config {
     image_size: int = 336
     patch_size: int = 14

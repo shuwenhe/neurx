@@ -1,4 +1,5 @@
 package neurx.distributed.parallel_state
+
 func group_world() int { 0 }
 
 func group_tensor_parallel() int { 1 }

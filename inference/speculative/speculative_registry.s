@@ -1,4 +1,5 @@
 package neurx.inference.speculative.registry
+
 func speculative_none() int { 0 }
 
 func speculative_ngram() int { 1 }

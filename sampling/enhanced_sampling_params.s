@@ -45,25 +45,25 @@ struct sampling_params {
 	stop_token_ids vec[int32]
 	bad_token_ids vec[int32]
 	forced_token_ids vec[int32]
-	
+
 	beam_width int32
 	num_beam_groups int32
 	diversity_penalty_in_beam float32
 	early_stopping_cond bool
 	num_return_sequences int32
-	
+
 	contrastive_alpha float32
 	contrastive_k int32
 	contrastive_degenerate_to_greedy bool
-	
+
 	ngram_size int32
 	ngram_penalty float32
-	
+
 	length_norm float32
 	no_repeat_ngram_size int32
-	
+
 	encoder_no_repeat_ngram_size int32
-	
+
 	remove_invalid_values bool
 }
 
@@ -207,11 +207,11 @@ func (p* sampling_params) set_beam_search(width int32, num_groups int32, div_pen
 	}
 	p.beam_width = width
 	p.method = sampling_beam
-	
+
 	if num_groups > 1 {
 		p.num_beam_groups = num_groups
 	}
-	
+
 	if div_pen >= 0.0 {
 		p.diversity_penalty_in_beam = div_pen
 	}
@@ -225,7 +225,7 @@ func (p* sampling_params) set_contrastive_search(alpha float32, k int32, degener
 		alpha = 1.0
 	}
 	p.contrastive_alpha = alpha
-	
+
 	if k < 1 {
 		k = 4
 	}
@@ -233,7 +233,7 @@ func (p* sampling_params) set_contrastive_search(alpha float32, k int32, degener
 		k = 100
 	}
 	p.contrastive_k = k
-	
+
 	p.contrastive_degenerate_to_greedy = degenerate
 	p.method = sampling_contrastive
 }
@@ -254,49 +254,49 @@ func (p* sampling_params) validate() bool {
 	if p.temperature < 0.0 {
 		return false
 	}
-	
+
 	if p.top_p < 0.0 || p.top_p > 1.0 {
 		return false
 	}
-	
+
 	if p.top_k < 0 {
 		return false
 	}
-	
+
 	if p.min_p < 0.0 || p.min_p > 1.0 {
 		return false
 	}
-	
+
 	if p.presence_penalty < -2.0 || p.presence_penalty > 2.0 {
 		return false
 	}
-	
+
 	if p.frequency_penalty < -2.0 || p.frequency_penalty > 2.0 {
 		return false
 	}
-	
+
 	if p.repetition_penalty < 0.0 {
 		return false
 	}
-	
+
 	if p.beam_width < 1 {
 		return false
 	}
-	
+
 	if p.max_tokens < 0 {
 		return false
 	}
-	
+
 	if p.min_tokens < 0 || p.min_tokens > p.max_tokens {
 		return false
 	}
-	
+
 	return true
 }
 
 func (p* sampling_params) to_dict() map[string]interface{} {
 	result := make(map[string]interface{})
-	
+
 	result["method"] = int32(p.method)
 	result["n"] = p.n
 	result["temperature"] = p.temperature
@@ -311,13 +311,13 @@ func (p* sampling_params) to_dict() map[string]interface{} {
 	result["max_tokens"] = p.max_tokens
 	result["min_tokens"] = p.min_tokens
 	result["seed"] = p.seed
-	
+
 	return result
 }
 
 func (p* sampling_params) clone() sampling_params* {
 	new_params := create_sampling_params()
-	
+
 	new_params.method = p.method
 	new_params.n = p.n
 	new_params.temperature = p.temperature
@@ -338,6 +338,6 @@ func (p* sampling_params) clone() sampling_params* {
 	new_params.diversity_penalty_in_beam = p.diversity_penalty_in_beam
 	new_params.contrastive_alpha = p.contrastive_alpha
 	new_params.contrastive_k = p.contrastive_k
-	
+
 	return new_params
 }

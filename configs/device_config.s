@@ -13,36 +13,36 @@ const (
 struct device_config {
     device_type type
     int32 device_id
-    
+
     string device_name
     int32 num_devices
-    
+
     int32 total_memory_mb
     int32 reserved_memory_mb
     float32 device_utilization_threshold
-    
+
     bool enable_memory_optimization
     bool enable_device_P2P
-    
+
     int32 max_concurrent_kernels
     int32 max_threads_per_block
     int32 max_blocks_per_grid
-    
+
     bool enable_device_scheduling
     bool enable_stream_management
-    
+
     int32 num_streams
     bool enable_stream_prioritization
-    
+
     bool enable_pinned_memory
     int32 pinned_memory_size_mb
-    
+
     bool enable_device_pooling
     float32 device_pool_threshold
-    
+
     bool enable_device_swap
     int32 swap_space_mb
-    
+
     map[string]interface{} extra_config
 }
 

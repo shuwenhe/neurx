@@ -1,4 +1,5 @@
 package neurx.tokenizers.bpe_complete
+
 func new_vocab() []int {
     []int vocab = []
     int i = 0

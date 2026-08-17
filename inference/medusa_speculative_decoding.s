@@ -1,4 +1,5 @@
 package neurx.inference.medusa
+
 struct medusa_head {
     head_id: int
     layer_depth: int

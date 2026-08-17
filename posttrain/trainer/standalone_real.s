@@ -1,5 +1,6 @@
 package neurx.posttrain.trainer.standalone_real
 ·························································································use std.io.eprintln
+
 struct training_config {
     int hidden_size
     int num_layers

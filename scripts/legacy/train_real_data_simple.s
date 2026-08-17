@@ -1,4 +1,5 @@
 package main
+
 func main() {
     println("========================================")
     println("NeurX Real Data Training")

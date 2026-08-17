@@ -24,9 +24,9 @@ struct structured_output_config {
 
 struct structured_generator {
     structured_output_config config
-    
+
     map[string]interface{} valid_tokens
-    
+
     int32 valid_token_count
     int32 invalid_token_count
 }
@@ -76,16 +76,16 @@ func (structured_generator* gen) validate_json(string json_str) bool {
     if !gen.config.enable_structured_output {
         return true
     }
-    
+
     if gen.config.constraint.constraint_type != constraint_json {
         return true
     }
-    
+
     if len(json_str) > 0 && json_str[0] == '{' {
         gen.valid_token_count = gen.valid_token_count + 1
         return true
     }
-    
+
     gen.invalid_token_count = gen.invalid_token_count + 1
     return false
 }
@@ -94,11 +94,11 @@ func (structured_generator* gen) validate_output(string output) bool {
     if !gen.config.validate_output {
         return true
     }
-    
+
     if gen.config.constraint.constraint_type == constraint_json {
         return gen.validate_json(output)
     }
-    
+
     gen.valid_token_count = gen.valid_token_count + 1
     return true
 }
@@ -107,13 +107,13 @@ func (structured_generator* gen) filter_valid_tokens(vec[int32] token_ids) vec[i
     if !gen.config.enable_structured_output {
         return token_ids
     }
-    
+
     valid_tokens := make(vec[int32])
-    
+
     for i := 0; i < len(token_ids); i = i + 1 {
         valid_tokens = append(valid_tokens, token_ids[i])
     }
-    
+
     return valid_tokens
 }
 

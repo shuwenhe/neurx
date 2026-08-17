@@ -6,6 +6,7 @@ enum profiling_mode {
     memory_only
     time_only
 }
+
 struct kernel_profile {
     kernel_name: string
     device: device

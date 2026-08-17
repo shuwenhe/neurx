@@ -1,4 +1,5 @@
 package neurx.model.llm.minimal_decoder
+
 struct minimal_decoder_state {
     string name
     string family

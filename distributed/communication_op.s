@@ -1,5 +1,6 @@
 package neurx.distributed.communication_op
 use neurx.distributed.parallel_state.{group_coordinator}
+
 struct distributed_tensor {
     []float data
     []int shape

@@ -1,4 +1,5 @@
 package neurx.inference.sglang.gpu_tbo_executor
+
 func gpu_op_attention() int { 1 }
 
 func gpu_op_moe_dispatch() int { 2 }

@@ -152,7 +152,7 @@ func (kv_cache_manager* kcm) reset_stats() {
 func (kv_cache_manager* kcm) evict_lru_block() int32 {
     var lru_block_id int32 = -1
     var oldest_time int64 = int64(9223372036854775807)
-    
+
     for id, block := range kcm.blocks {
         if block.last_access_time < oldest_time {
             oldest_time = block.last_access_time

@@ -3,6 +3,7 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_fi
 use neurx.inference.runtime.model_manifest.{hf_model_manifest, load_hf_model_manifest}
 use neurx.inference.model_cpu_inference.{safetensors_model, open_model, validate_model, read_tensor_elements, bf16_at, load_vector, matvec_named, rms_norm}
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 struct real_text_engine_state {
     string model_directory
     string model_file

@@ -30,6 +30,7 @@ const (
     NORM_RMSNORM    NormType = 1
     NORM_GROUPNORM  NormType = 2
 )
+
 struct model_config {
     string model_type
     int32 vocab_size

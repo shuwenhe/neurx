@@ -104,7 +104,7 @@ func (model_warmup_engine* mwe) profile_layer_forward(string layer_name, interfa
         backward_time_ms: 0.0,
         memory_bytes: 0,
     }
-    
+
     mwe.profile.layer_profiles = append(mwe.profile.layer_profiles, layer_info)
     return layer_info, nil
 }

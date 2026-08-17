@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape}
 use std.io.println
+
 func main() {
     string train_bin = runtime_env_get("NEURX_TRAIN_BIN", "/tmp/neurx_train")
     string script_dir = runtime_env_get("NEURX_ROOT", ".")

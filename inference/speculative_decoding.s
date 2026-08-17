@@ -6,6 +6,7 @@ enum speculative_mode {
     ADAPTIVE = 2
     BATCH_VERIFICATION = 3
 }
+
 struct speculative_config {
     speculative_mode mode
     int draft_model_size

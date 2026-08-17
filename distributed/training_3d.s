@@ -1,4 +1,5 @@
 package neurx.distributed.training_3d
+
 struct parallel_dims {
     int tp_degree
     int pp_degree

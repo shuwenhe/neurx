@@ -1,22 +1,26 @@
 package neurx.checkpoint.gradient
 import "neurx.autograd"
+
 struct checkpoint_config {
     enabled: bool
     checkpoints_per_layer: int
     preserve_inputs: bool
     recomputation_strategy: int
 }
+
 struct checkpoint_state {
     saved_tensors: [][]autograd.tensor
     recomputation_count: int
     memory_saved: float
 }
+
 struct checkpoint_layer {
     layer_fn: func([][]autograd.tensor) [][]autograd.tensor
     inputs: [][]autograd.tensor
     outputs: [][]autograd.tensor
     needs_recompute: bool
 }
+
 func new_checkpoint_config(bool enabled) checkpoint_config {
     checkpoint_config config {
         enabled: enabled,
@@ -26,6 +30,7 @@ func new_checkpoint_config(bool enabled) checkpoint_config {
     }
     config
 }
+
 func new_checkpoint_state() checkpoint_state {
     checkpoint_state state {
         saved_tensors: [][]autograd.tensor{},
@@ -34,6 +39,7 @@ func new_checkpoint_state() checkpoint_state {
     }
     state
 }
+
 func checkpoint_wrapper(func layer_fn, []autograd.tensor inputs, checkpoint_config config) []autograd.tensor {
     if !config.enabled {
         return layer_fn(inputs...)
@@ -66,6 +72,7 @@ func checkpoint_wrapper(func layer_fn, []autograd.tensor inputs, checkpoint_conf
     }
     detached_outputs
 }
+
 func checkpoint_module(pointer module, []autograd.tensor inputs, checkpoint_config config) []autograd.tensor {
     if !config.enabled {
         return module.forward(inputs...)
@@ -101,6 +108,7 @@ func checkpoint_module(pointer module, []autograd.tensor inputs, checkpoint_conf
     }
     detached_outputs
 }
+
 func apply_checkpointing_to_transformer(pointer transformer, checkpoint_config config) pointer {
     if !config.enabled {
         return transformer
@@ -115,9 +123,11 @@ func apply_checkpointing_to_transformer(pointer transformer, checkpoint_config c
     }
     transformer
 }
+
 func gradient_checkpointing_step(
     pointer model,
     []autograd.tensor inputs,
+
     func loss_fn,
     checkpoint_config config,
 ) float {
@@ -132,6 +142,7 @@ func gradient_checkpointing_step(
     autograd.backward(loss)
     loss
 }
+
 func estimate_memory_savings(checkpoint_config config, int num_layers, int layer_memory_mb) float {
     if !config.enabled {
         return 0.0
@@ -140,23 +151,28 @@ func estimate_memory_savings(checkpoint_config config, int num_layers, int layer
     float with_checkpointing = layer_memory_mb + (num_layers / config.checkpoints_per_layer) * layer_memory_mb
     baseline - with_checkpointing
 }
+
 func checkpoint_save_tensor(autograd.tensor tensor, checkpoint_state state) checkpoint_state {
     state.saved_tensors.push([tensor])
     state
 }
+
 func checkpoint_save_tensors([][]autograd.tensor tensors, checkpoint_state state) checkpoint_state {
     state.saved_tensors.push(tensors)
     state
 }
+
 func checkpoint_clear(checkpoint_state state) checkpoint_state {
     state.saved_tensors = [][]autograd.tensor{}
     state.recomputation_count = 0
     state
 }
+
 func get_checkpoint_stats(checkpoint_state state) string {
     "checkpoint Stats: Recomputations=" + string(state.recomputation_count) +
     ", Memory Saved=" + string(state.memory_saved) + "MB"
 }
+
 func create_checkpoint_layer(func layer_fn) checkpoint_layer {
     checkpoint_layer layer {
         layer_fn: layer_fn,
@@ -166,6 +182,7 @@ func create_checkpoint_layer(func layer_fn) checkpoint_layer {
     }
     layer
 }
+
 func checkpoint_layer_forward(checkpoint_layer layer, []autograd.tensor inputs) []autograd.tensor {
     layer.inputs = [inputs]
     layer.outputs = [layer.layer_fn(inputs...)]
@@ -176,6 +193,7 @@ func checkpoint_layer_forward(checkpoint_layer layer, []autograd.tensor inputs) 
     }
     detached
 }
+
 func checkpoint_layer_backward(checkpoint_layer layer, []autograd.tensor grads) []autograd.tensor {
     if !layer.needs_recompute {
         return []autograd.tensor{}

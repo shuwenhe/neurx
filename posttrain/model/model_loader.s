@@ -1,5 +1,6 @@
 package neurx.posttrain.model.model_loader
 use neurx.runtime.io.{runtime_file_exists, runtime_read_binary_file}
+
 struct model_weights {
     string name
     []float embedding_weight

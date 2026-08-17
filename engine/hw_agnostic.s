@@ -87,7 +87,7 @@ func create_hw_agnostic_executor(device_info* device, kernel_registry* kr) hw_ag
         tensor_cache: make([]interface{}, 0),
         metadata: make(map[string]interface{}),
     }
-    
+
     return &hw_agnostic_executor{
         ctx: ctx,
         tensor_parallel_degree: 1,

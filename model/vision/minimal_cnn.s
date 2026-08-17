@@ -1,4 +1,5 @@
 package neurx.model.vision.minimal_cnn
+
 struct minimal_cnn_state {
     string name
     string family

@@ -48,27 +48,27 @@ struct v1_request {
     string request_id
     string prompt
     vec[int32] prompt_token_ids
-    
+
     int32 arrival_time
     int32 start_time
     int32 finish_time
-    
+
     request_status status
-    
+
     sampling_params* sampling
-    
+
     int32 max_tokens
     float32 timeout_seconds
-    
+
     bool stream
     bool echo_prompt
-    
+
     vec[string] output_texts
     vec[int32] output_token_ids
-    
+
     int32 num_completed_tokens
     int32 num_total_tokens
-    
+
     map[string]interface{} extra_params
 }
 

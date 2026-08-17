@@ -1,4 +1,5 @@
 package neurx.inference.sglang.streaming_session
+
 func session_ok() int { 0 }
 
 func session_not_found() int { 1 }

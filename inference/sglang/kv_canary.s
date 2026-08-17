@@ -1,4 +1,5 @@
 package neurx.inference.sglang.kv_canary
+
 func canary_healthy() int { 1 }
 
 func canary_suspect() int { 2 }

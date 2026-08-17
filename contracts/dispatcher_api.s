@@ -25,6 +25,7 @@ interface operator_impl {
 
     func supports_device(device device) -> bool
 }
+
 struct dispatch_context {
     preferred_device: device
     enable_autograd: bool

@@ -2,6 +2,7 @@ import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/rollout_correction/config.s"
 import "posttrain/alignment/rollout_correction/importance_sampling.s"
+
 struct tir_optimal_token_baseline_config {
     learning_rate: f32
     num_epochs: i32

@@ -19,32 +19,32 @@ struct trace_span {
 	string              span_id
 	string              trace_id
 	string              parent_span_id
-	
+
 	string              operation_name
 	span_status         status
-	
+
 	int64               start_time
 	int64               end_time
 	int32               duration_ms
-	
+
 	vec[span_event]     events
 	map[string]string   attributes
-	
+
 	int32               baggage_items
 }
 
 struct distributed_trace {
 	string              trace_id
 	string              root_span_id
-	
+
 	vec[trace_span]     spans
 	int32               span_count
-	
+
 	int64               trace_start_time
 	int64               trace_end_time
-	
+
 	map[string]string   baggage
-	
+
 	int32               total_duration_ms
 	bool                has_errors
 }
@@ -78,7 +78,7 @@ func create_trace_span(operation_name string) trace_span {
 func create_distributed_trace() distributed_trace {
 	root_span_id := generate_span_id()
 	trace_id := generate_trace_id()
-	
+
 	return distributed_trace{
 		trace_id:         trace_id,
 		root_span_id:     root_span_id,
@@ -126,7 +126,7 @@ func (trace_span* s) get_duration_ms() int32 {
 
 func (distributed_trace* t) add_span(span trace_span) {
 	span.trace_id = t.trace_id
-	
+
 	if t.span_count == 0 {
 		span.span_id = t.root_span_id
 	} else {
@@ -134,18 +134,18 @@ func (distributed_trace* t) add_span(span trace_span) {
 			span.parent_span_id = t.spans[t.span_count-1].span_id
 		}
 	}
-	
+
 	t.spans = append(t.spans, span)
 	t.span_count++
 }
 
 func (distributed_trace* t) start_child_span(operation_name string) trace_span {
 	span := create_trace_span(operation_name)
-	
+
 	if t.span_count > 0 {
 		span.parent_span_id = t.spans[t.span_count-1].span_id
 	}
-	
+
 	span.trace_id = t.trace_id
 	return span
 }
@@ -162,7 +162,7 @@ func (distributed_trace* t) get_baggage_item(key string) (string, bool) {
 func (distributed_trace* t) end_trace() {
 	t.trace_end_time = time.Now().UnixNano()
 	t.total_duration_ms = int32((t.trace_end_time - t.trace_start_time) / 1000000)
-	
+
 	for i := int32(0); i < int32(len(t.spans)); i++ {
 		if t.spans[i].end_time == 0 {
 			t.spans[i].end_span()
@@ -180,7 +180,7 @@ func (distributed_trace* t) get_trace_summary() map[string]interface{} {
 	summary["span_count"] = t.span_count
 	summary["total_duration_ms"] = t.total_duration_ms
 	summary["has_errors"] = t.has_errors
-	
+
 	error_count := int32(0)
 	for span := range t.spans {
 		if span.status == SPAN_ERROR {
@@ -188,20 +188,20 @@ func (distributed_trace* t) get_trace_summary() map[string]interface{} {
 		}
 	}
 	summary["error_spans"] = error_count
-	
+
 	return summary
 }
 
 func (distributed_trace* t) get_critical_path() vec[trace_span] {
 	result := make(vec[trace_span], 0)
-	
+
 	for span := range t.spans {
 		if span.parent_span_id == "" || span.parent_span_id == t.root_span_id {
 			result = append(result, span)
 			break
 		}
 	}
-	
+
 	return result
 }
 
@@ -209,7 +209,7 @@ struct trace_context {
 	string              trace_id
 	string              span_id
 	string              parent_span_id
-	
+
 	map[string]string   baggage
 }
 

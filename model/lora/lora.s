@@ -1,4 +1,5 @@
 package neurx.model.lora
+
 struct lora_config {
     int rank
     float alpha

@@ -1,4 +1,5 @@
 package neurx.trainer.simple
+
 struct simple_tensor {
     []float data
     int rows

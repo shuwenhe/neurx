@@ -1,4 +1,5 @@
 package neurx.distributed.inference
+
 struct sharding_strategy_config {
     string strategy_type
     int world_size

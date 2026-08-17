@@ -1,6 +1,7 @@
 package neurx.optimizer.sparse_adam
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct sparse_adam_optimizer {
     float lr
     float beta1

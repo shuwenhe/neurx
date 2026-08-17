@@ -2,6 +2,7 @@ package neurx.distributed.pipeline_parallel_v2
 int SCHEDULE_GPIPE = 0
 int SCHEDULE_1F1B = 1
 int SCHEDULE_INTERLEAVED_1F1B = 2
+
 struct pipeline_config {
     int pp_degree
     int pp_rank

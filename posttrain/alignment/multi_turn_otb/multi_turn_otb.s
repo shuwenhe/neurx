@@ -1,5 +1,6 @@
 package neurx.posttrain.multi_turn_otb
 use neurx.tensor
+
 struct multi_turn_otb_config {
     float epsilon
     bool handle_zero_tail

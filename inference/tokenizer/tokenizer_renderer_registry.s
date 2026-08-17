@@ -1,4 +1,5 @@
 package neurx.inference.tokenizer.tokenizer_renderer_registry
+
 func tokenizer_backend_hf() int { 1 }
 
 func tokenizer_backend_mistral() int { 2 }

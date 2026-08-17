@@ -1,4 +1,5 @@
 package neurx.runtime.io
+
 struct safetensors_writer {
     string filepath
     []tensor tensors

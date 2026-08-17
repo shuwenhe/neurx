@@ -1,4 +1,5 @@
 package neurx.tokenizer.real_bpe_tokenizer
+
 struct real_bpe_tokenizer {
     map[string]int vocab
     map[int]string id_to_token

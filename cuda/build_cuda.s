@@ -5,6 +5,7 @@ use neurx.runtime.io.{
     runtime_file_exists,
     runtime_run_command_output,
 }
+
 func main() {
     println("[CUDA Manager] NeurX GPU Build System")
     println("")

@@ -2,6 +2,7 @@ package neurx.agent.answer_synthesizer
 use neurx.agent.trace
 use neurx.agent.memory
 use neurx.agent.observation
+
 struct agent_answer_state {
     string goal
     string answer

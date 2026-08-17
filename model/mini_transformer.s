@@ -1,6 +1,7 @@
 package neurx.model
 import fmt
 import math
+
 struct tensor_2 {
     shape: []int
     data: []float

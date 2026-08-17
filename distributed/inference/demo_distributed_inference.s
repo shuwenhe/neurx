@@ -1,4 +1,5 @@
 package main
+
 struct distributed_inference_full_config {
     int world_size
     int rank

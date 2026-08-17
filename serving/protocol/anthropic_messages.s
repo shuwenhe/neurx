@@ -1,4 +1,5 @@
 package neurx.serving.protocol.anthropic_messages
+
 struct anthropic_message_request {
     string model
     string system_prompt

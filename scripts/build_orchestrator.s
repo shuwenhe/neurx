@@ -17,6 +17,7 @@ enum build_arch {
     X86_64,
     ARM64,
 }
+
 struct build_config {
     target        build_target
     arch          build_arch

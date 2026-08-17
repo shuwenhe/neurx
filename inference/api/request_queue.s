@@ -1,4 +1,5 @@
 package neurx.inference.api.request_queue
+
 struct request_item {
     string request_id
     string prompt

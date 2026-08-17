@@ -10,8 +10,6 @@ extern "intrinsic" func __sys_write_string(int fd, string data) int
 extern "intrinsic" func __sys_close(int fd) int
 extern "intrinsic" func __sys_set_deadline_ms(int fd, int read_timeout_ms, int write_timeout_ms) int
 
-
-
 func shell_escape(string value) string {
     string output = "'"
     int index = 0

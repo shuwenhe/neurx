@@ -1,5 +1,6 @@
 package main
 use neurx.serving.serve.{new_serving_runtime_state, serving_runtime_submit_request, serving_runtime_schedule_next, serving_runtime_record_decode, serving_runtime_finish_request, serving_runtime_active_requests, serving_runtime_queue_depth, serving_runtime_last_selected_request, serving_runtime_cache_hits, serving_runtime_cache_misses}
+
 func main() {
     serving_runtime_state state = new_serving_runtime_state(4, 128, 4, 8, 16, 16, 64, 1024, "srpt")
     println("serving smoke test")

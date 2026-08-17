@@ -4,6 +4,7 @@ int SHARDING_GRAD_SHARD = 1
 int SHARDING_NO_SHARD = 2
 int BACKEND_NCCL_FSDP = 0
 int BACKEND_CUSTOM = 1
+
 struct fsdp_config {
     int sharding_policy
     int dp_degree

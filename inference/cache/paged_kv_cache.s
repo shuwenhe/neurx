@@ -1,4 +1,5 @@
 package neurx.inference.cache.paged_kv_cache
+
 struct paged_kv_cache_state {
     int layer_count
     int block_size

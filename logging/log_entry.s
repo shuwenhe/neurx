@@ -30,25 +30,25 @@ struct log_entry {
 	string                  entry_id
 	log_level               level
 	event_type              event_category
-	
+
 	string                  message
 	string                  component
 	string                  operation
-	
+
 	int64                   timestamp
 	int64                   unix_nanos
-	
+
 	string                  trace_id
 	string                  span_id
 	string                  parent_span_id
-	
+
 	map[string]interface{}  fields
 	map[string]string       labels
-	
+
 	int32                   duration_ms
 	int32                   error_code
 	string                  error_message
-	
+
 	float32                 confidence_score
 	int32                   attempt_number
 }
@@ -57,10 +57,10 @@ struct log_context {
 	string                  request_id
 	string                  user_id
 	string                  session_id
-	
+
 	string                  component
 	int32                   depth
-	
+
 	map[string]interface{}  metadata
 }
 
@@ -68,7 +68,7 @@ struct log_entry_batch {
 	vec[log_entry]          entries
 	int64                   batch_timestamp
 	int32                   batch_id
-	
+
 	string                  source_component
 	int32                   total_entries
 	int32                   total_size_bytes

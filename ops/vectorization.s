@@ -3,6 +3,7 @@ import (
     "neurx/model"
     "neurx/nn"
 )
+
 struct matmul_config {
     batch_size: int
     use_blocked: bool

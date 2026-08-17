@@ -8,6 +8,7 @@ enum pretrain_task_type {
     MLM
     PREFIX_LM
 }
+
 struct pretrain_config {
     string model_name
     neurx_config model_config

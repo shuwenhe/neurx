@@ -1,4 +1,5 @@
 package neurx.model.integration
+
 struct training_batch {
     [][]int token_ids
     [][]int input_ids

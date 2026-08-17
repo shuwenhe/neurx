@@ -1,4 +1,5 @@
 package neurx.inference.plugins.plugin_registry
+
 func plugin_group_general() int { 1 }
 
 func plugin_group_io_processor() int { 2 }

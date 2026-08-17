@@ -1,6 +1,7 @@
 package neurx.inference.runtime.model_manifest
 use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file, runtime_run_command_output, runtime_shell_escape}
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
+
 struct hf_model_config {
     string architecture
     string model_type

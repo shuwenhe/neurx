@@ -3,6 +3,7 @@ use std.io
 use std.math
 use std.time
 use std.strings
+
 struct model_config {
     vocab_size: i32
     hidden_dim: i32

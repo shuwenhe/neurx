@@ -12,30 +12,30 @@ const (
 struct speculative_config {
     bool enable_speculative_decoding
     spec_decode_method method
-    
+
     string speculator_model_path
     bool use_builtin_speculator
-    
+
     int32 num_spec_tokens
     int32 max_spec_tokens
     int32 min_spec_tokens
-    
+
     float32 spec_topk
     float32 spec_temperature
     float32 acceptance_rate_threshold
-    
+
     bool enable_adaptive_spec_tokens
     float32 spec_token_adjustment_factor
-    
+
     bool enable_multi_candidate_verification
     int32 num_candidates
-    
+
     bool enable_dry_run
     int32 dry_run_samples
-    
+
     bool enable_rejection_sampling
     float32 rejection_threshold
-    
+
     map[string]interface{} extra_config
 }
 

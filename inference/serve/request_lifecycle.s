@@ -1,4 +1,5 @@
 package neurx.inference.serve.request_lifecycle
+
 func request_queued_status() int { 1 }
 
 func request_prefilling_status() int { 2 }

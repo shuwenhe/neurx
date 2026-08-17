@@ -1,4 +1,5 @@
 package neurx.inference.cache.block_manager
+
 struct kv_cache_block {
     int block_id
     int ref_count

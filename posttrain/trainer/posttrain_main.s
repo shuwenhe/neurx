@@ -1,6 +1,7 @@
 package neurx.posttrain.trainer.posttrain_main
 use std.io.eprintln
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, trim}
+
 func write_file_simple(string path, string content) int {
     eprintln("[DEBUG] Writing file to: " + path)
     eprintln("[DEBUG] Content length: " + int_to_str(len(content)))

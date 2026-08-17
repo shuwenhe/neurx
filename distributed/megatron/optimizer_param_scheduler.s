@@ -1,4 +1,5 @@
 package neurx.distributed.megatron.param_scheduler
+
 struct optimizer_param_scheduler {
     float init_lr
     float max_lr

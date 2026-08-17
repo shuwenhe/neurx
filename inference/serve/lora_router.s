@@ -1,4 +1,5 @@
 package neurx.inference.serve.lora_router
+
 func lora_unloaded_status() int { 1 }
 
 func lora_loading_status() int { 2 }

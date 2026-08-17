@@ -2,6 +2,7 @@ import "storage_api"
 import "dtype_api"
 import "layout_api"
 import "device_api"
+
 struct version_counter {
     version: i64
 }

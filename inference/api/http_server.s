@@ -6,6 +6,7 @@ extern "intrinsic" func __sys_accept(int fd) int
 extern "intrinsic" func __sys_recv(int fd, int count) string
 extern "intrinsic" func __sys_send(int fd, string data) int
 extern "intrinsic" func __sys_close(int fd) int
+
 struct http_request {
     string method
     string path

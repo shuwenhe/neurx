@@ -1,4 +1,5 @@
 package neurx.platforms.registry
+
 struct platform_capability {
     string platform
     string device_type

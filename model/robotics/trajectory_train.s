@@ -1,6 +1,7 @@
 package neurx.model.robotics.trajectory_train
 use neurx.model.robotics.perception.{robotics_perception_state, new_robotics_perception_state, robotics_perception_state_dict, robotics_perception_load_state_dict, robotics_perception_encode, robotics_perception_mark_normalized}
 use neurx.model.robotics.policy.{robotics_policy_state, new_robotics_policy_state, robotics_policy_state_dict, robotics_policy_load_state_dict, robotics_policy_forward}
+
 struct robotics_trajectory_train_config {
     int obs_dim
     int latent_dim

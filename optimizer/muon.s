@@ -1,4 +1,5 @@
 package neurx.optimizer.muon
+
 struct muon_config {
     float learning_rate
     float beta

@@ -20,11 +20,11 @@ impl JsonToolParser {
             extract_function_body: default_extract_function_body
         }
     }
-    
+
     func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
         let mut tool_calls = Vec::new()
         let mut content_end = 0
-        
+
         if !strings::contains_str(model_output, self.tool_call_start_marker) {
             return ExtractedToolCallInformation {
                 tools_called: false,
@@ -32,15 +32,15 @@ impl JsonToolParser {
                 content: model_output
             }
         }
-        
+
         let start_pos = strings::index_of(model_output, self.tool_call_start_marker)
         if start_pos >= 0 {
             content_end = start_pos
         }
-        
+
         let pattern = "\\{[^}]*\\}"
         let re = regex::compile(pattern)
-        
+
         let mut search_start = start_pos
         while search_start >= 0 && search_start < strings::len(model_output) {
             match regex::find_at(re, model_output, search_start) {
@@ -57,20 +57,20 @@ impl JsonToolParser {
                 None => break
             }
         }
-        
+
         let content = if content_end > 0 {
             strings::substring(model_output, 0, content_end)
         } else {
             ""
         }
-        
+
         ExtractedToolCallInformation {
             tools_called: len(tool_calls) > 0,
             tool_calls: tool_calls,
             content: content
         }
     }
-    
+
     func extract_tool_calls_streaming(
         self,
         previous_text: str,
@@ -81,13 +81,13 @@ impl JsonToolParser {
         let mut tool_index = 0
         let pattern = "\\{[^}]*\\}"
         let re = regex::compile(pattern)
-        
+
         match regex::find_at(re, current_text, 0) {
             Some(m) => {
                 let json_str = strings::substring(current_text, m.start, m.end)
                 let mut prev_args = ""
                 let mut curr_args = ""
-                
+
                 if len(previous_text) > 0 {
                     match regex::find_at(re, previous_text, 0) {
                         Some(pm) => {
@@ -97,11 +97,11 @@ impl JsonToolParser {
                         None => {}
                     }
                 }
-                
+
                 curr_args = extract_arguments_from_json(json_str)
-                
+
                 let func_name = extract_function_name_from_json(json_str)
-                
+
                 DeltaToolCall {
                     index: tool_index,
                     type: "function",
@@ -133,9 +133,9 @@ func parse_json_tool_call(json_str: str) -> Option<ToolCall> {
             return None
         }
     }
-    
+
     let arguments = extract_json_string(json_str, "arguments")
-    
+
     Some(ToolCall {
         type: "function",
         id: "",

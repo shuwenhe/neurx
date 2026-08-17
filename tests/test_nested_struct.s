@@ -1,4 +1,5 @@
 package main
+
 struct inner_data {
     int value
     float score

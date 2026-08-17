@@ -1,4 +1,5 @@
 package neurx.training.warmup
+
 struct warmup_scheduler {
     float base_lr
     int warmup_steps

@@ -1,4 +1,5 @@
 package neurx.agent.event
+
 struct agent_event_state {
     []string kinds
     []string payloads

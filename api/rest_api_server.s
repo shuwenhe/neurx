@@ -1,4 +1,5 @@
 package neurx.deploy.rest_api_server
+
 struct api_request {
     string request_id
     string endpoint

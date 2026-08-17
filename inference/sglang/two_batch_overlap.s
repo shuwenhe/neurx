@@ -1,4 +1,5 @@
 package neurx.inference.sglang.two_batch_overlap
+
 func tbo_mode_extend() int { 1 }
 
 func tbo_mode_decode() int { 2 }

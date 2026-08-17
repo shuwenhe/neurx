@@ -6,6 +6,7 @@ enum execution_mode {
     JIT
     AOT
 }
+
 struct execution_profile {
     total_time_us: i64
     kernel_profiles: map[string]kernel_profile

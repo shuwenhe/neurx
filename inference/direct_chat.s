@@ -1,6 +1,7 @@
 package neurx.inference.direct_chat
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __sys_read_string(int fd, int count) string
+
 func contains_keyword(string text, string keyword) bool {
     int text_len = len(text)
     int keyword_len = len(keyword)

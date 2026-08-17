@@ -1,5 +1,6 @@
 package neurx.tokenization
 use neurx.runtime.io.{runtime_run_command_output, runtime_file_exists, runtime_env_get}
+
 struct TokenizerConfig {
     int vocab_size
     string vocab_path
@@ -9,6 +10,7 @@ struct TokenizerConfig {
 []int cached_vocab_ids = []int{cap: 151700}
 int cached_vocab_count = 0
 bool vocab_loaded = false
+
 func init_tokenizer_config() TokenizerConfig {
     string model_dir = runtime_env_get("NEURX_MODEL_DIR", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     TokenizerConfig config = TokenizerConfig{
@@ -18,6 +20,7 @@ func init_tokenizer_config() TokenizerConfig {
     }
     return config
 }
+
 func encode_text(string text) []int {
     string model_dir = runtime_env_get("NEURX_MODEL_DIR", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     string script_path = "/home/shuwen/shuwen/posttrain/tokenize_detokenize.py"
@@ -62,6 +65,7 @@ func encode_text(string text) []int {
     }
     return tokens
 }
+
 func decode_tokens([]int token_ids) string {
     string model_dir = runtime_env_get("NEURX_MODEL_DIR", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     string script_path = "/home/shuwen/shuwen/posttrain/tokenize_detokenize.py"
@@ -84,6 +88,7 @@ func decode_tokens([]int token_ids) string {
     }
     return "[Decode failed]"
 }
+
 func int_to_string(int num) string {
     if num == 0 {
         return "0"
@@ -116,6 +121,7 @@ func int_to_string(int num) string {
     }
     return result
 }
+
 func test_tokenizer() {
     string test_input = "你是"
     print("[Tokenizer] Input: " + test_input + "\n")

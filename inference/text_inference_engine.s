@@ -1,5 +1,6 @@
 package neurx.inference.production
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_file, trim, println, printf}
+
 func vocab_size() int { return 151936 }
 
 func hidden_dim() int { return 896 }

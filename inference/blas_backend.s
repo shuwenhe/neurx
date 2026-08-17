@@ -1,4 +1,5 @@
 package neurx.inference.blas_backend
+
 func blas_provider_available(string provider) bool {
     if provider == "native_s" { return true }
     false

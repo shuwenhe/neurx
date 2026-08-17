@@ -1,5 +1,6 @@
 package neurx.workers.rollout.sglang
 use neurx.tensor
+
 struct sglang_config {
     string model_path
     int tensor_parallel_size

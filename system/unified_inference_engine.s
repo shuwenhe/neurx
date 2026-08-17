@@ -1,6 +1,7 @@
 package neurx.system.unified_inference_engine
 import "neurx.attention.paged_attention_memory"
 import "neurx.scheduler.continuous_batch_scheduler"
+
 struct unified_inference_config {
     bool enable_paged_attention
     bool enable_continuous_batching

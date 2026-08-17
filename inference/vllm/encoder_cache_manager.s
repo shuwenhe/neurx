@@ -1,4 +1,5 @@
 package neurx.inference.vllm.encoder_cache_manager
+
 struct encoder_cache_config {
     int maximum_entries
     int capacity_embeddings

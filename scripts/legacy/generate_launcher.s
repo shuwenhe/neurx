@@ -2,6 +2,7 @@ package neurx.script
 use std.fs
 use std.os
 use std.strings
+
 struct training_config {
     string root_dir
     string hostfile

@@ -1,4 +1,5 @@
 package neurx.distributed.kv_transfer.connectors
+
 func kv_connector_nixl() int { 1 }
 
 func kv_connector_mooncake() int { 2 }

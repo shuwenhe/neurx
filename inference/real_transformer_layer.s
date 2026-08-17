@@ -9,6 +9,7 @@ use neurx.attention.paged_attention_core.{
     compute_paged_attention,
     compute_paged_attention_gqa,
 }
+
 struct transformer_layer_config {
     int hidden_size
     int num_heads

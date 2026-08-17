@@ -8,6 +8,7 @@ enum request_status {
     FAILED
     CANCELLED
 }
+
 struct completion_output {
     request_id string
     token_id int

@@ -1,4 +1,5 @@
 package neurx.logging
+
 struct tensorboard_writer {
     bool initialized
     string log_dir

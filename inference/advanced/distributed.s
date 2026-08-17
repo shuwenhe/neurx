@@ -16,6 +16,7 @@ enum comm_backend {
     GLOO
     MPI
 }
+
 struct process_group_config {
     group_name string
     rank int

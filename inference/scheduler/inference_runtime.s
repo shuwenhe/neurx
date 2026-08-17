@@ -4,6 +4,7 @@ use neurx.scheduler.inference_scheduler
 use neurx.inference.metrics.inference_metrics
 use neurx.inference.cache.prefix_cache
 use neurx.attention.inference_paged
+
 struct neurx_inference_runtime_state {
     neurx_request_queue_state queue
     neurx_scheduler_state scheduler

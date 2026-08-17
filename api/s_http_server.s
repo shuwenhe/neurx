@@ -26,19 +26,19 @@ func int_to_string(int n) string {
     if n == 0 {
         return "0"
     }
-    
+
     string result = ""
     bool negative = false
-    
+
     if n < 0 {
         negative = true
         n = 0 - n
     }
-    
+
     while n > 0 {
         int digit = n % 10
         string digit_str = ""
-        
+
         if digit == 0 { digit_str = "0" }
         else if digit == 1 { digit_str = "1" }
         else if digit == 2 { digit_str = "2" }
@@ -49,15 +49,15 @@ func int_to_string(int n) string {
         else if digit == 7 { digit_str = "7" }
         else if digit == 8 { digit_str = "8" }
         else if digit == 9 { digit_str = "9" }
-        
+
         result = digit_str + result
         n = n / 10
     }
-    
+
     if negative {
         result = "-" + result
     }
-    
+
     return result
 }
 
@@ -97,7 +97,7 @@ func main() {
     config.backlog = 128
     config.timeout_sec = 30
     config.debug_mode = true
-    
+
     print_config(config)
     print("✅ NeurX S 语言服务器已初始化\n")
 }

@@ -1,4 +1,5 @@
 package neurx.agent.metrics
+
 struct agent_metrics_state {
     int total_steps
     int ok_steps

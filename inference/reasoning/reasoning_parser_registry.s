@@ -1,4 +1,5 @@
 package neurx.inference.reasoning.reasoning_parser_registry
+
 func reasoning_parser_none() int { 0 }
 
 func reasoning_parser_deepseek_r1() int { 1 }

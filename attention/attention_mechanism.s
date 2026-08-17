@@ -2,6 +2,7 @@ package neurx.attention.mechanism
 import neurx.arch.cuda.bindings.*
 import neurx.tensor.*
 import neurx.nn.*
+
 struct attention_config {
     int hidden_size
     int num_attention_heads

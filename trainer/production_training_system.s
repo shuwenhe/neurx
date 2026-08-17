@@ -1,4 +1,5 @@
 package neurx.trainer.production
+
 struct matrix_2d {
     [][]float data
 }

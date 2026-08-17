@@ -22,30 +22,30 @@ const (
 struct attention_config {
     attention_backend backend
     attention_dtype dtype
-    
+
     bool use_flash_attention
     bool use_paged_attention
     bool use_sliding_window_attention
-    
+
     int32 block_size
     int32 num_kv_blocks
-    
+
     float32 attention_dropout
     bool use_attention_dropout
-    
+
     bool enable_fused_qkv
     bool enable_fused_output_projection
-    
+
     bool use_rope
     float32 rope_theta
     float32 rope_scaling_factor
-    
+
     int32 max_context_length
     bool use_dynamic_context_length
-    
+
     bool enable_attention_fusion
     int32 attention_fusion_threshold
-    
+
     map[string]interface{} extra_config
 }
 
@@ -90,8 +90,8 @@ func (attention_config* cfg) validate() bool {
 }
 
 func (attention_config* cfg) supports_flash_attention() bool {
-    return cfg.use_flash_attention && 
-           (cfg.backend == attention_flash_attention_v2 || 
+    return cfg.use_flash_attention &&
+           (cfg.backend == attention_flash_attention_v2 ||
             cfg.backend == attention_flash_attention_v3)
 }
 

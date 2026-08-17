@@ -1,4 +1,5 @@
 package neurx.distributed.stateless_coordinator
+
 struct stateless_group_config {
     int group_id
     int global_rank

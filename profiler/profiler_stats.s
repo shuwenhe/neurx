@@ -159,7 +159,7 @@ func (s* profiler_stats) get_memory_summary() map[string]interface{} {
 	total_alloc := float64(0)
 	total_reserved := float64(0)
 	peak := float64(0)
-	
+
 	for _, mem := range s.memory {
 		if mem != nil {
 			total_alloc = total_alloc + mem.allocated_mb
@@ -169,12 +169,12 @@ func (s* profiler_stats) get_memory_summary() map[string]interface{} {
 			}
 		}
 	}
-	
+
 	summary["total_allocated_mb"] = total_alloc
 	summary["total_reserved_mb"] = total_reserved
 	summary["peak_usage_mb"] = peak
 	summary["memory_count"] = int64(len(s.memory))
-	
+
 	return summary
 }
 
@@ -193,7 +193,7 @@ func (s* profiler_stats) get_stats_summary() map[string]interface{} {
 
 func (s* profiler_stats) to_dict() map[string]interface{} {
 	result := make(map[string]interface{})
-	
+
 	ops := make(map[string]interface{})
 	for name, op := range s.operations {
 		if op != nil {
@@ -209,7 +209,7 @@ func (s* profiler_stats) to_dict() map[string]interface{} {
 	result["operations"] = ops
 	result["summary"] = s.get_stats_summary()
 	result["metadata"] = s.metadata
-	
+
 	return result
 }
 

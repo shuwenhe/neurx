@@ -1,4 +1,5 @@
 package neurx.distributed.nccl_binding
+
 struct nccl_config {
     int rank
     int world_size

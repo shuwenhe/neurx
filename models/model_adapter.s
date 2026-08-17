@@ -186,19 +186,19 @@ func create_mpt_adapter(model_id string, model_name string, n_layers int32) *mpt
 func (model_adapter_registry* registry) register_adapter(model_type model_type, adapter interface{}, metadata *model_metadata) error {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
-	
+
 	type_str := fmt.Sprintf("%v", model_type)
 	registry.adapters[type_str] = adapter
 	registry.adapter_metadata[type_str] = metadata
 	registry.total_registered++
-	
+
 	return nil
 }
 
 func (model_adapter_registry* registry) get_adapter(model_type model_type) interface{} {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
-	
+
 	type_str := fmt.Sprintf("%v", model_type)
 	return registry.adapters[type_str]
 }
@@ -206,7 +206,7 @@ func (model_adapter_registry* registry) get_adapter(model_type model_type) inter
 func (model_adapter_registry* registry) set_adapter_config(model_type model_type, config map[string]interface{}) {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
-	
+
 	type_str := fmt.Sprintf("%v", model_type)
 	registry.adapter_configs[type_str] = config
 }
@@ -214,7 +214,7 @@ func (model_adapter_registry* registry) set_adapter_config(model_type model_type
 func (model_adapter_registry* registry) get_adapter_config(model_type model_type) map[string]interface{} {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
-	
+
 	type_str := fmt.Sprintf("%v", model_type)
 	return registry.adapter_configs[type_str]
 }
@@ -222,7 +222,7 @@ func (model_adapter_registry* registry) get_adapter_config(model_type model_type
 func (model_adapter_registry* registry) get_adapter_metadata(model_type model_type) *model_metadata {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
-	
+
 	type_str := fmt.Sprintf("%v", model_type)
 	return registry.adapter_metadata[type_str]
 }
@@ -230,7 +230,7 @@ func (model_adapter_registry* registry) get_adapter_metadata(model_type model_ty
 func (model_adapter_registry* registry) list_registered_adapters() []string {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
-	
+
 	adapters := make([]string, 0, len(registry.adapters))
 	for key := range registry.adapters {
 		adapters = append(adapters, key)
@@ -241,12 +241,12 @@ func (model_adapter_registry* registry) list_registered_adapters() []string {
 func (model_adapter_registry* registry) get_registry_stats() map[string]interface{} {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
-	
+
 	stats := make(map[string]interface{})
 	stats["total_registered"] = registry.total_registered
 	stats["registered_adapters"] = len(registry.adapters)
 	stats["configured_adapters"] = len(registry.adapter_configs)
-	
+
 	return stats
 }
 
@@ -321,35 +321,35 @@ func register_all_standard_adapters(model_adapter_registry* registry) {
 		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
 		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION},
 	}
-	
+
 	llama_metadata := &model_metadata{
 		model_type: TYPE_LLAMA,
 		vocabulary_size: 32000,
 		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
 		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION, CAP_CODE_GENERATION},
 	}
-	
+
 	mixtral_metadata := &model_metadata{
 		model_type: TYPE_MIXTRAL,
 		vocabulary_size: 32000,
 		supported_devices: []model_device_type{DEVICE_CUDA},
 		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION, CAP_CODE_GENERATION},
 	}
-	
+
 	chatglm_metadata := &model_metadata{
 		model_type: TYPE_CHATGLM,
 		vocabulary_size: 130528,
 		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
 		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION},
 	}
-	
+
 	baichuan_metadata := &model_metadata{
 		model_type: TYPE_BAICHUAN,
 		vocabulary_size: 125696,
 		supported_devices: []model_device_type{DEVICE_CUDA, DEVICE_CPU},
 		capabilities: []model_capability{CAP_CHAT, CAP_COMPLETION},
 	}
-	
+
 	registry.register_adapter(TYPE_QWEN, create_qwen_adapter("qwen-7b", "Qwen-7B", "1.0"), qwen_metadata)
 	registry.register_adapter(TYPE_LLAMA, create_llama_adapter("llama-7b", "Llama-7B", 4096), llama_metadata)
 	registry.register_adapter(TYPE_MIXTRAL, create_mixtral_adapter("mixtral-8x7b", "Mixtral-8x7B", 8), mixtral_metadata)

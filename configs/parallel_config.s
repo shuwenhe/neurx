@@ -14,28 +14,28 @@ struct parallel_config {
     int32 world_size
     int32 local_rank
     int32 global_rank
-    
+
     int32 tensor_parallel_size
     int32 pipeline_parallel_size
     int32 data_parallel_size
     int32 expert_parallel_size
     int32 context_parallel_size
-    
+
     bool enable_tensor_parallel
     bool enable_pipeline_parallel
     bool enable_data_parallel
     bool enable_expert_parallel
     bool enable_context_parallel
-    
+
     string communication_backend
     bool enable_overlap_communication
-    
+
     bool enable_zero
     int32 zero_stage
-    
+
     bool enable_gradient_accumulation
     int32 gradient_accumulation_steps
-    
+
     map[string]interface{} extra_config
 }
 

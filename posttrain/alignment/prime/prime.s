@@ -1,6 +1,7 @@
 package neurx.posttrain.alignment.prime
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
+
 struct prime_config {
     float learning_rate
     int batch_size

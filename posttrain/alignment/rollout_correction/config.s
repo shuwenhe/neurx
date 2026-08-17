@@ -22,6 +22,7 @@ enum loss_type {
     PPO_CLIP,
     REINFORCE
 }
+
 struct is_threshold {
     lower: f32
     upper: f32

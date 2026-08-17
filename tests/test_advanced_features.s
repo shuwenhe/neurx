@@ -5,6 +5,7 @@ import (
     "neurx/training/gradient_accumulation"
     "neurx/distributed/tensor_parallel"
 )
+
 func test_vectorization_basic() bool {
     var []float A = []float(4)
     var []float B = []float(4)

@@ -1,4 +1,5 @@
 package neurx.inference.runtime.sleep_mode_backend
+
 func sleep_backend_cumem() int { 1 }
 
 func sleep_backend_cuda_checkpoint() int { 2 }

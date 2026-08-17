@@ -50,6 +50,7 @@ structure recovery_state {
     recovery_end_time: float
     recovery_duration: float
 }
+
 func new_checkpoint_manager(
     string base_path,
     int save_interval,
@@ -289,7 +290,9 @@ func execute_recovery(
 func distributed_training_with_recovery(
     int training_steps,
     int checkpoint_interval,
+
     func(vector): vector model_forward,
+
     func(vector, vector): float compute_loss_func,
     vector inputs,
     vector targets,

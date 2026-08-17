@@ -1,4 +1,5 @@
 package posttrain.bce_numerical_gradient_check
+
 func sigmoid_fn(float x) float {
     if x > 100.0 {
         return 1.0

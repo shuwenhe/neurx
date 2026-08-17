@@ -362,7 +362,7 @@ func (audio_processor* ap) get_audio_stats(audio_id string) (*audio_stats, error
 		variance += diff * diff
 	}
 	variance /= float32(len(audio.samples))
-	std_dev := float32(1.0) 
+	std_dev := float32(1.0)
 	if variance > 0 {
 		for i := 0; i < 10; i++ {
 			std_dev = (std_dev + variance/std_dev) / 2

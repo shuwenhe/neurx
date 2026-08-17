@@ -31,16 +31,16 @@ struct kv_cache_interface {
     int32 block_size
     int32 num_blocks
     int32 num_allocated_blocks
-    
+
     map[int32]kv_block* blocks
     map[int32]kv_cache_metadata* metadata
-    
+
     int32 gpu_memory_used
     int32 cpu_memory_used
-    
+
     bool enable_prefix_caching
     map[string]int32 prefix_cache_map
-    
+
     bool enable_compression
     float32 compression_ratio
 }
@@ -66,10 +66,10 @@ func (kv_cache_interface* cache) allocate_block(int32 seq_id) int32 {
     if cache.num_allocated_blocks >= cache.num_blocks {
         return -1
     }
-    
+
     block_id := cache.num_allocated_blocks
     cache.num_allocated_blocks = cache.num_allocated_blocks + 1
-    
+
     block := &kv_block{
         block_id: block_id,
         seq_id: seq_id,
@@ -79,7 +79,7 @@ func (kv_cache_interface* cache) allocate_block(int32 seq_id) int32 {
         is_full: false,
         allocated_size: cache.block_size,
     }
-    
+
     cache.blocks[block_id] = block
     cache.metadata[block_id] = &kv_cache_metadata{
         seq_id: seq_id,
@@ -88,7 +88,7 @@ func (kv_cache_interface* cache) allocate_block(int32 seq_id) int32 {
         slot_id: 0,
         is_allocated: true,
     }
-    
+
     return block_id
 }
 
@@ -96,23 +96,23 @@ func (kv_cache_interface* cache) put_kv(int32 seq_id, vec[float32] keys, vec[flo
     if len(cache.blocks) == 0 {
         cache.allocate_block(seq_id)
     }
-    
+
     for block_id, block := range cache.blocks {
         if block.seq_id == seq_id && !block.is_full {
             block.key_data = append(block.key_data, keys...)
             block.value_data = append(block.value_data, values...)
             block.token_count = block.token_count + 1
-            
+
             if len(block.key_data) >= cache.block_size {
                 block.is_full = true
             }
-            
+
             meta := cache.metadata[block_id]
             meta.seq_len = block.token_count
             return true
         }
     }
-    
+
     return false
 }
 

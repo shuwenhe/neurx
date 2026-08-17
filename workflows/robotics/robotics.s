@@ -1,4 +1,5 @@
 package neurx.workflows.robotics
+
 struct robotics_workflow_state {
     string name
     string mode

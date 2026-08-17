@@ -1,4 +1,5 @@
 package neurx.quantization.quant_core
+
 func quant_type_int8() string { "int8" }
 
 func quant_type_int4() string { "int4" }

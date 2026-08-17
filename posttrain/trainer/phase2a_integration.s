@@ -1,5 +1,6 @@
 package neurx.posttrain.trainer.phase2a_integration
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs}
+
 struct training_config {
     string model_path
     string data_file

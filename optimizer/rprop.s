@@ -1,6 +1,7 @@
 package neurx.optimizer.rprop
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct rprop_optimizer {
     float lr
     float etaminus

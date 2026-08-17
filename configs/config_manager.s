@@ -21,7 +21,7 @@ struct config_manager {
     cache_config* cache_cfg
     device_config* device_cfg
     kernel_config* kernel_cfg
-    
+
     optimization_target target
     bool initialized
 }

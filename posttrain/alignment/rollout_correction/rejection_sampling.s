@@ -1,5 +1,6 @@
 import "tensor/tensor.s"
 import "posttrain/alignment/rollout_correction/config.s"
+
 struct rs_result {
     rejection_mask: Tensor
     rejection_scores: Tensor

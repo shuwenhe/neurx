@@ -1,4 +1,5 @@
 package main
+
 func test_sampling_complete() bool {
     []float logits = []float{2.0, 1.5, 1.0, 0.5, 0.1}
     []float temp_scaled = apply_temperature(logits, 1.5)

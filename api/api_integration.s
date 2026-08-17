@@ -8,15 +8,15 @@ struct openai_api_server {
 	text_completion_handler*        text_handler
 	embeddings_handler*             embeddings_handler_
 	model_list_handler*             model_list_handler_
-	
+
 	request_validator               validator
 	error_handler*                  error_handler_
 	error_recovery*                 error_recovery_
 	usage_tracker*                  usage_tracker_
-	
+
 	interface{}                     v1_engine
 	interface{}                     async_engine
-	
+
 	bool                            is_running
 	sync.Mutex                      mu
 }
@@ -26,17 +26,17 @@ func create_openai_api_server(
 	async_engine interface{},
 ) openai_api_server {
 	sampler := interface{}(nil)
-	
+
 	chat_h := create_chat_completion_handler(v1_engine, async_engine, sampler)
 	text_h := create_text_completion_handler(v1_engine, async_engine, sampler)
 	emb_h := create_embeddings_handler(nil)
 	model_h := create_model_list_handler(&create_model_registry())
-	
+
 	validator := create_default_validator()
 	validator.add_supported_model("neurx-7b")
 	validator.add_supported_model("neurx-13b")
 	validator.add_supported_model("neurx-70b")
-	
+
 	return openai_api_server{
 		chat_handler:            &chat_h,
 		text_handler:            &text_h,
@@ -56,13 +56,13 @@ func create_openai_api_server(
 func (s openai_api_server*) start() bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	if s.is_running {
 		return false
 	}
-	
+
 	s.is_running = true
-	
+
 	registry := &create_model_registry()
 	registry.register_model("neurx-7b", model_info{
 		id:       "neurx-7b",
@@ -82,14 +82,14 @@ func (s openai_api_server*) start() bool {
 		created:  time.Now().Unix(),
 		owned_by: "neurx",
 	})
-	
+
 	return true
 }
 
 func (s openai_api_server*) shutdown() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	s.is_running = false
 }
 
@@ -103,7 +103,7 @@ func (s openai_api_server*) handle_chat_completion_request(
 			503,
 		)
 	}
-	
+
 	valid, err_code := s.validator.validate_chat_request(req)
 	if !valid {
 		return chat_completion_response{}, create_api_error(
@@ -112,7 +112,7 @@ func (s openai_api_server*) handle_chat_completion_request(
 			400,
 		)
 	}
-	
+
 	response, err := s.chat_handler.handle_chat_completion(req, s.validator)
 	if err != nil {
 		return chat_completion_response{}, create_api_error(
@@ -121,7 +121,7 @@ func (s openai_api_server*) handle_chat_completion_request(
 			500,
 		)
 	}
-	
+
 	s.usage_tracker_.record_request(
 		response.id,
 		req.user_id,
@@ -131,7 +131,7 @@ func (s openai_api_server*) handle_chat_completion_request(
 		response.response_ms,
 		200,
 	)
-	
+
 	return response, api_error{}
 }
 
@@ -145,7 +145,7 @@ func (s openai_api_server*) handle_text_completion_request(
 			503,
 		)
 	}
-	
+
 	valid, err_code := s.validator.validate_completion_request(req)
 	if !valid {
 		return completion_response{}, create_api_error(
@@ -154,7 +154,7 @@ func (s openai_api_server*) handle_text_completion_request(
 			400,
 		)
 	}
-	
+
 	response, err := s.text_handler.handle_completion(req, s.validator)
 	if err != nil {
 		return completion_response{}, create_api_error(
@@ -163,7 +163,7 @@ func (s openai_api_server*) handle_text_completion_request(
 			500,
 		)
 	}
-	
+
 	s.usage_tracker_.record_request(
 		response.id,
 		req.user_id,
@@ -173,7 +173,7 @@ func (s openai_api_server*) handle_text_completion_request(
 		0,
 		200,
 	)
-	
+
 	return response, api_error{}
 }
 
@@ -187,7 +187,7 @@ func (s openai_api_server*) handle_embeddings_request(
 			503,
 		)
 	}
-	
+
 	valid, err_code := s.validator.validate_embedding_request(req)
 	if !valid {
 		return embedding_response{}, create_api_error(
@@ -196,7 +196,7 @@ func (s openai_api_server*) handle_embeddings_request(
 			400,
 		)
 	}
-	
+
 	response, err := s.embeddings_handler_.handle_embeddings(req, s.validator)
 	if err != nil {
 		return embedding_response{}, create_api_error(
@@ -205,7 +205,7 @@ func (s openai_api_server*) handle_embeddings_request(
 			500,
 		)
 	}
-	
+
 	s.usage_tracker_.record_request(
 		req.request_id,
 		req.user_id,
@@ -215,7 +215,7 @@ func (s openai_api_server*) handle_embeddings_request(
 		0,
 		200,
 	)
-	
+
 	return response, api_error{}
 }
 
@@ -232,7 +232,7 @@ func (s openai_api_server*) handle_get_model_request(model_id string) (model_inf
 			404,
 		)
 	}
-	
+
 	return model, api_error{}
 }
 
@@ -245,7 +245,7 @@ func (s openai_api_server*) register_model(model_id string, model model_info) ap
 			400,
 		)
 	}
-	
+
 	return api_error{}
 }
 
@@ -258,7 +258,7 @@ func (s openai_api_server*) delete_model(model_id string) api_error {
 			404,
 		)
 	}
-	
+
 	return api_error{}
 }
 
@@ -273,14 +273,14 @@ func (s openai_api_server*) get_error_stats() map[string]int32 {
 func (s openai_api_server*) get_server_status() map[string]interface{} {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	status := map[string]interface{}{
 		"running": s.is_running,
 		"models": s.model_list_handler_.get_model_count(),
 		"uptime_ms": 0,
 		"timestamp": time.Now().Unix(),
 	}
-	
+
 	return status
 }
 
@@ -298,7 +298,7 @@ struct openai_api_client {
 	base_url    string
 	api_key     string
 	timeout_ms  int64
-	
+
 	mu          sync.Mutex
 }
 
@@ -323,7 +323,7 @@ func (c openai_api_client*) chat_complete(
 		max_tokens:  256,
 		stream:      false,
 	}
-	
+
 	return chat_completion_response{}, nil
 }
 
@@ -339,7 +339,7 @@ func (c openai_api_client*) text_complete(
 		max_tokens:  256,
 		stream:      false,
 	}
-	
+
 	return completion_response{}, nil
 }
 
@@ -351,7 +351,7 @@ func (c openai_api_client*) embed_text(
 		model: model,
 		input: input,
 	}
-	
+
 	return embedding_response{}, nil
 }
 
@@ -364,7 +364,7 @@ struct openai_api_middleware {
 	error_handler    error_handler*
 	usage_tracker    usage_tracker*
 	error_recovery   error_recovery*
-	
+
 	mu               sync.Mutex
 }
 
@@ -381,7 +381,7 @@ func create_openai_api_middleware() openai_api_middleware {
 func (m openai_api_middleware*) validate_request(req interface{}) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	return true
 }
 
@@ -391,15 +391,15 @@ func (m openai_api_middleware*) handle_error_with_recovery(
 ) (api_error, bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if !m.error_recovery.is_retriable(err.code) {
 		return err, false
 	}
-	
+
 	if retry_count >= m.error_recovery.max_retries {
 		return err, false
 	}
-	
+
 	return err, true
 }
 
@@ -411,7 +411,7 @@ func (m openai_api_middleware*) record_usage(
 ) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	m.usage_tracker.record_request(
 		request_id,
 		user_id,

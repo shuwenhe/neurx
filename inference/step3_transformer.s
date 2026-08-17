@@ -3,6 +3,7 @@ use neurx.inference.safetensors_loader.{load_transformer_layer}
 use neurx.inference.cpu_backend.{fast_matmul_flat_opt, fast_gelu, pow_f, fast_softmax}
 use neurx.model.transformer.position_encoding.{new_rope_position_encoding, position_encoding_config, apply_rope_position}
 extern "intrinsic" func __host_slice(string text, int start, int end) string\nextern \"intrinsic\" func __sys_gettimeofday(int sec_ptr, int usec_ptr) int
+
 func int_to_string(int val) string {
     if val == 0 { return "0" }
     string res = ""

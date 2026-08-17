@@ -1,4 +1,5 @@
 package neurx.inference.sglang.pd_bootstrap_room
+
 func pd_room_empty() int { 0 }
 
 func pd_room_bootstrapping() int { 1 }

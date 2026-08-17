@@ -40,10 +40,10 @@ struct image_processor {
     int32 max_image_width
     int32 max_image_height
     int32 default_channels
-    
+
     bool enable_compression
     int32 compression_quality
-    
+
     bool enable_format_conversion
     image_format target_format
 }
@@ -64,7 +64,7 @@ func (image_processor* proc) resize_image(image_data* img, int32 new_width, int3
     if img == nil || img.metadata == nil {
         return nil
     }
-    
+
     new_img := &image_data{
         raw_data: make(vec[uint8]),
         metadata: &image_metadata{
@@ -80,12 +80,12 @@ func (image_processor* proc) resize_image(image_data* img, int32 new_width, int3
         is_compressed: img.is_compressed,
         source_url: img.source_url,
     }
-    
+
     scale_x := float32(new_width) / float32(img.metadata.width)
     scale_y := float32(new_height) / float32(img.metadata.height)
     _ = scale_x
     _ = scale_y
-    
+
     return new_img
 }
 
@@ -93,7 +93,7 @@ func (image_processor* proc) convert_format(image_data* img, image_format new_fo
     if img == nil || img.metadata == nil {
         return nil
     }
-    
+
     new_img := &image_data{
         raw_data: img.raw_data,
         metadata: &image_metadata{
@@ -109,7 +109,7 @@ func (image_processor* proc) convert_format(image_data* img, image_format new_fo
         is_compressed: img.is_compressed,
         source_url: img.source_url,
     }
-    
+
     return new_img
 }
 
@@ -117,7 +117,7 @@ func (image_processor* proc) convert_color_space(image_data* img, color_space ne
     if img == nil || img.metadata == nil {
         return nil
     }
-    
+
     new_img := &image_data{
         raw_data: img.raw_data,
         metadata: &image_metadata{
@@ -133,7 +133,7 @@ func (image_processor* proc) convert_color_space(image_data* img, color_space ne
         is_compressed: img.is_compressed,
         source_url: img.source_url,
     }
-    
+
     return new_img
 }
 
@@ -141,9 +141,9 @@ func (image_processor* proc) compress_image(image_data* img, int32 quality) imag
     if img == nil || img.metadata == nil {
         return nil
     }
-    
+
     compressed_size := img.size_bytes * quality / 100
-    
+
     new_img := &image_data{
         raw_data: make(vec[uint8]),
         metadata: img.metadata,
@@ -151,7 +151,7 @@ func (image_processor* proc) compress_image(image_data* img, int32 quality) imag
         is_compressed: true,
         source_url: img.source_url,
     }
-    
+
     return new_img
 }
 
@@ -159,7 +159,7 @@ func (image_processor* proc) normalize_image(image_data* img) image_data* {
     if img == nil || img.metadata == nil {
         return nil
     }
-    
+
     normalized := &image_data{
         raw_data: img.raw_data,
         metadata: img.metadata,
@@ -167,23 +167,23 @@ func (image_processor* proc) normalize_image(image_data* img) image_data* {
         is_compressed: img.is_compressed,
         source_url: img.source_url,
     }
-    
+
     return normalized
 }
 
 func (image_processor* proc) get_image_stats(image_data* img) map[string]interface{} {
     stats := make(map[string]interface{})
-    
+
     if img == nil || img.metadata == nil {
         return stats
     }
-    
+
     stats["width"] = img.metadata.width
     stats["height"] = img.metadata.height
     stats["channels"] = img.metadata.channels
     stats["format"] = img.metadata.format
     stats["size_bytes"] = img.size_bytes
     stats["compressed"] = img.is_compressed
-    
+
     return stats
 }

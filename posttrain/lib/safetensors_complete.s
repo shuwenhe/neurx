@@ -1,5 +1,6 @@
 package neurx.posttrain.lib.safetensors_complete
 use std.io.eprintln
+
 struct safe_tensor_info {
     string name
     string dtype

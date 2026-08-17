@@ -1,5 +1,6 @@
 package neurx.tokenizer.data_pipeline
 use neurx.strings
+
 struct tokenizer_config {
     string tokenizer_type
     int vocab_size

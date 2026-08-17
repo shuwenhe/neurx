@@ -199,23 +199,23 @@ func (model_loader* ml) initialize() error {
     if ml.initialized {
         return nil
     }
-    
+
     if ml.config.model_path == "" {
         return "model_path is required"
     }
-    
+
     if ml.config.dtype == "" {
         ml.config.dtype = model_dtype_float16
     }
-    
+
     if ml.config.tensor_parallel_size <= 0 {
         ml.config.tensor_parallel_size = 1
     }
-    
+
     if ml.config.pipeline_parallel_size <= 0 {
         ml.config.pipeline_parallel_size = 1
     }
-    
+
     ml.initialized = true
     return nil
 }
@@ -224,11 +224,11 @@ func (model_loader* ml) load_model_async(string model_id) (*model_executor, erro
     if !ml.initialized {
         return nil, "loader not initialized"
     }
-    
+
     if executor, exists := ml.executors[model_id]; exists {
         return executor, nil
     }
-    
+
     executor := &model_executor{
         load_config: ml.config,
         loading_state: model_loading_state{
@@ -246,9 +246,9 @@ func (model_loader* ml) load_model_async(string model_id) (*model_executor, erro
         initialized: false,
         ready: false,
     }
-    
+
     ml.executors[model_id] = executor
-    
+
     return executor, nil
 }
 
@@ -277,7 +277,7 @@ func (model_loader* ml) load_model_config(string model_id) (*model_config_spec, 
         tie_word_embeddings: false,
         dtype: ml.config.dtype,
     }
-    
+
     if model_id == "Qwen2.5-0.5B" || model_id == "Qwen2.5-0.5B-Instruct" {
         config.model_type = "qwen2"
         config.hidden_size = 1024
@@ -288,7 +288,7 @@ func (model_loader* ml) load_model_config(string model_id) (*model_config_spec, 
         config.vocab_size = 151936
         config.rope_theta = 1000000.0
     }
-    
+
     return config, nil
 }
 
@@ -296,19 +296,19 @@ func (model_loader* ml) load_weights(model_executor* executor) error {
     if executor.loading_state.status != loader_status_loading {
         return "executor not in loading state"
     }
-    
+
     executor.loading_state.current_stage = "loading_weights"
     executor.loading_state.progress_percent = 10
-    
+
     executor.weight_map = model_weight_map{
         weights: make(map[string]*model_weight_spec),
         total_size_bytes: 0,
         num_weights: 0,
         dtype: executor.load_config.dtype,
     }
-    
+
     executor.loading_state.progress_percent = 50
-    
+
     num_layers := executor.config.num_hidden_layers
     for i := int32(0); i < num_layers; i++ {
         layer_exec := &model_layer_executor{
@@ -319,15 +319,15 @@ func (model_loader* ml) load_weights(model_executor* executor) error {
         }
         executor.layer_executors = append(executor.layer_executors, layer_exec)
     }
-    
+
     executor.loading_state.progress_percent = 90
     executor.loading_state.loaded_weights = executor.loading_state.total_weights
     executor.loading_state.bytes_loaded = executor.loading_state.total_bytes
-    
+
     executor.loading_state.progress_percent = 100
     executor.loading_state.status = loader_status_loaded
     executor.initialized = true
-    
+
     return nil
 }
 
@@ -335,11 +335,11 @@ func (model_loader* ml) prepare_weights(model_executor* executor) error {
     if executor.initialized == false {
         return "executor not initialized"
     }
-    
+
     executor.loading_state.current_stage = "preparing_weights"
     executor.loading_state.status = loader_status_ready
     executor.ready = true
-    
+
     return nil
 }
 
@@ -382,11 +382,11 @@ func (model_executor* me) execute_layer(int32 layer_id, interface{} input) (*lay
     if layer_id < 0 || layer_id >= int32(len(me.layer_executors)) {
         return nil, "invalid layer_id"
     }
-    
+
     if !me.ready {
         return nil, "executor not ready"
     }
-    
+
     output := &layer_execution_output{
         hidden_states: nil,
         attention_output: nil,
@@ -394,7 +394,7 @@ func (model_executor* me) execute_layer(int32 layer_id, interface{} input) (*lay
         cache_outputs: nil,
         computation_time_ms: 0.0,
     }
-    
+
     return output, nil
 }
 
@@ -402,11 +402,11 @@ func (model_executor* me) forward_pass([]int32 tokens) (interface{}, error) {
     if !me.ready {
         return nil, "executor not ready"
     }
-    
+
     if len(tokens) == 0 {
         return nil, "empty token sequence"
     }
-    
+
     return nil, nil
 }
 
@@ -449,7 +449,7 @@ func load_model_with_timeout(*model_loader loader, string model_id, int32 timeou
             error_message: err,
         }, err
     }
-    
+
     config, err := loader.load_model_config(model_id)
     if err != nil {
         return &model_load_result{
@@ -457,9 +457,9 @@ func load_model_with_timeout(*model_loader loader, string model_id, int32 timeou
             error_message: err,
         }, err
     }
-    
+
     executor.config = *config
-    
+
     err = loader.load_weights(executor)
     if err != nil {
         return &model_load_result{
@@ -467,7 +467,7 @@ func load_model_with_timeout(*model_loader loader, string model_id, int32 timeou
             error_message: err,
         }, err
     }
-    
+
     err = loader.prepare_weights(executor)
     if err != nil {
         return &model_load_result{
@@ -475,7 +475,7 @@ func load_model_with_timeout(*model_loader loader, string model_id, int32 timeou
             error_message: err,
         }, err
     }
-    
+
     return &model_load_result{
         success: true,
         executor: executor,

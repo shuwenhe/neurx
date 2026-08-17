@@ -1,6 +1,7 @@
 package neurx.data.async_prefetch
 use neurx.data.streaming_reader.{streaming_reader_state, read_batch_of_lines}
 use neurx.tokenizer.data_pipeline.{tokenizer_config, default_llm_tokenizer_config, bpe_tokenizer_state, init_bpe_tokenizer, encode}
+
 struct prefetch_config {
     int prefetch_queue_size
     int num_io_threads
@@ -11,6 +12,7 @@ struct prefetch_config {
     int max_queue_size_bytes
     bool enable_backpressure
 }
+
 func default_prefetch_config() prefetch_config {
     prefetch_config cfg
     cfg.prefetch_queue_size = 3

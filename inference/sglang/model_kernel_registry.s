@@ -1,4 +1,5 @@
 package neurx.inference.sglang.model_kernel_registry
+
 func model_family_generic() int { 1 }
 
 func model_family_deepseek_v2() int { 2 }

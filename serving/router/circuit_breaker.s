@@ -1,4 +1,5 @@
 package neurx.serving.router.circuit_breaker
+
 func circuit_closed() int { 0 }
 
 func circuit_open() int { 1 }

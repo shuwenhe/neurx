@@ -1,4 +1,5 @@
 package neurx.inference.advanced.structured_output
+
 func structured_root_object() int { 1 }
 
 func structured_root_array() int { 2 }

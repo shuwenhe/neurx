@@ -1,6 +1,7 @@
 package neurx.posttrain.alignment.batch_rollout_correction
 use neurx.tensor
 use neurx.posttrain.offpolicy_diagnostics
+
 struct batch_correction_config {
     bool enable_is
     bool enable_rs

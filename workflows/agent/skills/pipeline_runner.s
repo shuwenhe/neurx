@@ -1,6 +1,7 @@
 package neurx.workflows.agent.skills.pipeline_runner
 use neurx.train.skill_evolution
 use neurx.agent.skill_feedback
+
 func workflow_skill_feedback(string skill_name, string task, string signal, string summary, int step, bool success) agent_skill_feedback_state {
     agent_skill_feedback_state {
         skill_name: skill_name,

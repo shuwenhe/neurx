@@ -1,5 +1,6 @@
 package neurx.posttrain.lib.safetensors
 use std.io.eprintln
+
 func dtype_name_to_size(string dtype_name) int {
     if dtype_name == "F32" {
         return 4

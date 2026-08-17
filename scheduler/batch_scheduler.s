@@ -1,4 +1,5 @@
 package neurx.scheduler.batch_scheduler
+
 func new_batch_request(int req_id) []int {
     []int req = []int{req_id, 0, 0, 0}
     return req

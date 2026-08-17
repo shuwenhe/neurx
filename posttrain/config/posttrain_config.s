@@ -1,4 +1,5 @@
 package neurx.posttrain.config
+
 struct posttrain_config {
     string stage
     int global_batch_size

@@ -93,7 +93,7 @@ func (anthropic_api_server* srv) create_message(message_input* req) (message_res
     if !srv.verify_api_key(req.metadata["authorization"]) {
         return nil, nil
     }
-    
+
     api_req := &completion_request{
         prompt: "",
         model_id: req.model,
@@ -102,17 +102,17 @@ func (anthropic_api_server* srv) create_message(message_input* req) (message_res
             temperature: req.temperature,
         },
     }
-    
+
     resp, err := srv.engine.complete(api_req)
     if err != nil {
         return nil, err
     }
-    
+
     content_block := &message_content_block{
         type: content_block_text,
         text: "",
     }
-    
+
     anthropic_resp := &message_response{
         id: "msg-" + core.generate_uuid(),
         type: "message",
@@ -124,7 +124,7 @@ func (anthropic_api_server* srv) create_message(message_input* req) (message_res
         input_tokens: resp.input_tokens,
         output_tokens: resp.output_tokens,
     }
-    
+
     return anthropic_resp, nil
 }
 
@@ -132,7 +132,7 @@ func (anthropic_api_server* srv) create_message_stream(message_input* req) strea
     if !srv.verify_api_key(req.metadata["authorization"]) {
         return nil
     }
-    
+
     api_req := &completion_request{
         prompt: "",
         model_id: req.model,
@@ -141,7 +141,7 @@ func (anthropic_api_server* srv) create_message_stream(message_input* req) strea
             temperature: req.temperature,
         },
     }
-    
+
     return srv.engine.complete_stream(api_req)
 }
 

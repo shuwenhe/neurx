@@ -4,6 +4,7 @@ use neurx.runtime.control
 use neurx.strings
 use neurx.autograd.function
 use neurx.strings
+
 struct stage_state {
     string name
     string backend

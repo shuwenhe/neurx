@@ -1,4 +1,5 @@
 module web_search_crawler
+
 struct web_search_config {
     search_engines: list<string> = ["google", "bing"]
     max_results_per_engine: int = 10

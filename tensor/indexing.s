@@ -1,4 +1,5 @@
 package neurx.indexing
+
 struct tensor {
     []float data
     []int shape

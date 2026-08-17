@@ -13,6 +13,7 @@ use neurx.inference.sglang.program_dsl_runtime.{dsl_runtime_config, dsl_program_
 use neurx.inference.sglang.dllm_runtime.{dllm_config, dllm_state, dllm_step_result, dllm_strategy_low_confidence, dllm_strategy_random, new_dllm_state, dllm_set_prediction, dllm_decode_step}
 use neurx.inference.sglang.kv_canary.{kv_canary_config, kv_canary_state, kv_canary_result, canary_healthy, canary_suspect, canary_quarantined, new_kv_canary, canary_register_page, canary_observe, canary_repair, canary_inject_perturbation}
 use neurx.inference.sglang.model_kernel_registry.{model_kernel_registry_config, model_kernel_registry_state, model_kernel_selection, model_family_generic, model_family_deepseek_v4, model_family_mimo_v2, kernel_attention, new_model_kernel_registry, kernel_register, kernel_select, kernel_disable}
+
 func sglang_expect(bool condition, string name) int {
     if condition { println("PASS " + name); return 0 }
     println("FAIL " + name)

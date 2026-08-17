@@ -83,13 +83,13 @@ func (communicator* comm) all_reduce(tensor_handle tensor, reduce_op op) all_red
 
 func (communicator* comm) all_reduce_async(tensor_handle tensor, reduce_op op) string {
     request_id := "allreduce_" + string(comm.config.rank) + "_" + string(tensor.device_id)
-    
+
     op_info := comm_operation {
         op_type: comm_op_type::all_reduce,
         name: request_id,
         created_at: 0,
     }
-    
+
     comm.operations[request_id] = op_info
     request_id
 }
@@ -123,13 +123,13 @@ func (communicator* comm) all_gather(tensor_handle send_tensor, vec[tensor_handl
 
 func (communicator* comm) all_gather_async(tensor_handle send_tensor, vec[tensor_handle] recv_tensors) string {
     request_id := "allgather_" + string(comm.config.rank) + "_" + string(send_tensor.device_id)
-    
+
     op_info := comm_operation {
         op_type: comm_op_type::all_gather,
         name: request_id,
         created_at: 0,
     }
-    
+
     comm.operations[request_id] = op_info
     request_id
 }

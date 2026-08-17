@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
 use std.io.println
+
 func main() {
     string s_compiler = runtime_env_get("S_COMPILER", "/home/shuwen/s/bin/s")
     string root = runtime_env_get("NEURX_ROOT", ".")

@@ -1,4 +1,5 @@
 package main
+
 struct data {
     int value
 }

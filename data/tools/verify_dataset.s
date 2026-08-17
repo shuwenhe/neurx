@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_dir_exists, runtime_file_exists}
 use std.io.println
+
 func main() {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let shards_dir = runtime_env_get("VERIFY_DATASET_DIR", project_root + "/dataset/pretrain/shard")
@@ -16,12 +17,14 @@ func main() {
     println("This S entrypoint centralizes the dataset verification status layer.")
     0
 }
+
 func check_dir(string path) string {
     if runtime_dir_exists(path) {
         return "ready (" + path + ")"
     }
     return "missing (" + path + ")"
 }
+
 func check_path(string path) string {
     if runtime_file_exists(path) {
         return "ready (" + path + ")"

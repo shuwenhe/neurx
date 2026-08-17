@@ -17,7 +17,7 @@ struct async_request {
 	priority   int32
 	created_at int64
 	deadline   int64
-	
+
 	status      int32
 	is_cancelled bool
 	mu          sync.Mutex
@@ -53,16 +53,16 @@ struct async_request_queue {
 	pending_requests vec[async_request*]
 	processing_batch vec[request_batch*]
 	completed        vec[async_request*]
-	
+
 	mu              sync.Mutex
 	capacity        int32
 	batch_size      int32
 	max_batch_wait  int64
-	
+
 	backpressure    backpressure_config
 	current_load    int32
 	is_backpressure bool
-	
+
 	stats           queue_statistics
 }
 
@@ -122,7 +122,7 @@ func (q async_request_queue*) create_request(
 func (q async_request_queue*) enqueue(req async_request*) (bool, error) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	
+
 	if len(q.pending_requests) >= int32(len(q.pending_requests)) {
 		if q.current_load >= q.backpressure.high_watermark {
 			q.is_backpressure = true
@@ -131,20 +131,20 @@ func (q async_request_queue*) enqueue(req async_request*) (bool, error) {
 		}
 		return false, "queue_full"
 	}
-	
+
 	if req.deadline > 0 && current_timestamp_ns() > req.deadline {
 		q.stats.dropped_requests++
 		return false, "request_deadline_exceeded"
 	}
-	
+
 	req.status = STATUS_QUEUED
 	q.pending_requests = append(q.pending_requests, req)
 	q.current_load++
-	
+
 	if q.current_load > q.stats.max_queue_depth {
 		q.stats.max_queue_depth = q.current_load
 	}
-	
+
 	q.stats.total_requests++
 	return true, nil
 }
@@ -152,17 +152,17 @@ func (q async_request_queue*) enqueue(req async_request*) (bool, error) {
 func (q async_request_queue*) dequeue_batch() request_batch {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	
+
 	batch := request_batch{
 		batch_id:   generate_batch_id(),
 		created_at: current_timestamp_ns(),
 		requests:   make(vec[async_request*], 0, q.batch_size),
 	}
-	
+
 	count := int32(0)
 	if len(q.pending_requests) > 0 {
 		sort_by_priority(q.pending_requests)
-		
+
 		for i := int32(0); i < q.batch_size && i < int32(len(q.pending_requests)); i++ {
 			req := q.pending_requests[i]
 			if !is_expired(req) {
@@ -174,25 +174,25 @@ func (q async_request_queue*) dequeue_batch() request_batch {
 				q.stats.dropped_requests++
 			}
 		}
-		
+
 		q.pending_requests = q.pending_requests[count:]
 	}
-	
+
 	batch.size = int32(len(batch.requests))
 	q.processing_batch = append(q.processing_batch, &batch)
 	q.current_load -= count
-	
+
 	if q.current_load < q.backpressure.low_watermark && q.is_backpressure {
 		q.is_backpressure = false
 	}
-	
+
 	return batch
 }
 
 func (q async_request_queue*) mark_completed(request_id string, latency_ms int64) error {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	
+
 	for batch := range q.processing_batch {
 		for req := range batch.requests {
 			if req.request_id == request_id {
@@ -203,14 +203,14 @@ func (q async_request_queue*) mark_completed(request_id string, latency_ms int64
 			}
 		}
 	}
-	
+
 	return "request_not_found"
 }
 
 func (q async_request_queue*) mark_failed(request_id string, error_msg string) error {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	
+
 	for batch := range q.processing_batch {
 		for req := range batch.requests {
 			if req.request_id == request_id {
@@ -220,14 +220,14 @@ func (q async_request_queue*) mark_failed(request_id string, error_msg string) e
 			}
 		}
 	}
-	
+
 	return "request_not_found"
 }
 
 func (q async_request_queue*) cancel_request(request_id string) bool {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	
+
 	for req := range q.pending_requests {
 		if req.request_id == request_id {
 			req.is_cancelled = true
@@ -236,7 +236,7 @@ func (q async_request_queue*) cancel_request(request_id string) bool {
 			return true
 		}
 	}
-	
+
 	for batch := range q.processing_batch {
 		for req := range batch.requests {
 			if req.request_id == request_id {
@@ -247,7 +247,7 @@ func (q async_request_queue*) cancel_request(request_id string) bool {
 			}
 		}
 	}
-	
+
 	return false
 }
 
@@ -281,23 +281,23 @@ func (q async_request_queue*) update_latency(latency_ms int64) {
 func (q async_request_queue*) drain_queue(timeout_ms int64) vec[async_request*] {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	
+
 	result := make(vec[async_request*], 0, len(q.pending_requests))
 	deadline := current_timestamp_ns() + timeout_ms*1000000
-	
+
 	for len(q.pending_requests) > 0 && current_timestamp_ns() < deadline {
 		req := q.pending_requests[0]
 		q.pending_requests = q.pending_requests[1:]
 		result = append(result, req)
 	}
-	
+
 	return result
 }
 
 func (q async_request_queue*) flush_batch(batch request_batch) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	
+
 	for i := int32(0); i < int32(len(q.processing_batch)); i++ {
 		if q.processing_batch[i].batch_id == batch.batch_id {
 			q.processing_batch = append(q.processing_batch[:i], q.processing_batch[i+1:]...)

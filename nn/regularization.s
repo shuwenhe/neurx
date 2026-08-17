@@ -1,4 +1,5 @@
 package neurx.nn.regularization
+
 struct regularization_config {
     string method
     float lambda

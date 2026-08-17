@@ -1,4 +1,5 @@
 package neurx.inference.sglang.program_dsl_runtime
+
 func dsl_op_text() int { 1 }
 
 func dsl_op_generate() int { 2 }

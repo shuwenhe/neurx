@@ -1,4 +1,5 @@
 package neurx.serving.lifecycle.request_lifecycle
+
 struct lifecycle_state {
     []string request_ids
     []string statuses

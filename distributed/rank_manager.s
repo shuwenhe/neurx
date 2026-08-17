@@ -6,6 +6,7 @@ extern func neurx_nccl_all_gather_f32(int64 communicator, int64 send_pointer, in
 extern func neurx_nccl_reduce_scatter_f32(int64 communicator, int64 send_pointer, int64 receive_pointer, int count, int operation, int64 stream) int
 extern func neurx_nccl_broadcast_f32(int64 communicator, int64 pointer, int count, int root, int64 stream) int
 extern func neurx_nccl_barrier(int64 communicator, int64 stream) int
+
 func group_world() int { 0 }
 
 func group_tensor_parallel() int { 1 }

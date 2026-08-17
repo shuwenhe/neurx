@@ -1,6 +1,7 @@
 package neurx.compile.pass_manager
 use neurx.strings
 use neurx.runtime.compile
+
 struct pass_plan_state {
     []string passes
     bool has_shape_infer

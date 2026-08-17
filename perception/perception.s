@@ -1,4 +1,5 @@
 package neurx.perception.perception
+
 struct agent_perception_result {
     string kind
     string content

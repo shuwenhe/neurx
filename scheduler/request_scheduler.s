@@ -1,4 +1,5 @@
 package neurx.scheduler.request_scheduler
+
 struct scheduled_request {
     string request_id
     int priority

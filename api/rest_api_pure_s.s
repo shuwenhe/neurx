@@ -44,10 +44,10 @@ func extract_json_value(string json, string key) string {
     int key_len = len(key)
     int search_key_len = key_len + 4
     string search_key = "\"" + key + "\":"
-    
+
     int pos = 0
     int found_pos = -1
-    
+
     int i = 0
     while i < len(json) {
         bool matches = true
@@ -58,57 +58,57 @@ func extract_json_value(string json, string key) string {
             }
             j = j + 1
         }
-        
+
         if matches {
             found_pos = i + len(search_key)
             break
         }
         i = i + 1
     }
-    
+
     if found_pos == -1 {
         return ""
     }
-    
+
     string result = ""
     int j = found_pos
     bool in_string = false
     bool escaped = false
-    
+
     while j < len(json) {
         string char = json[j]
-        
+
         if escaped {
             result = result + char
             escaped = false
             j = j + 1
             continue
         }
-        
+
         if char == "\\" {
             result = result + char
             escaped = true
             j = j + 1
             continue
         }
-        
+
         if char == "\"" && !in_string {
             in_string = true
             j = j + 1
             continue
         }
-        
+
         if char == "\"" && in_string {
             break
         }
-        
+
         if in_string {
             result = result + char
         }
-        
+
         j = j + 1
     }
-    
+
     return result
 }
 
@@ -122,7 +122,7 @@ func extract_int_field(string body, string field_name) int {
     if value_str == "" {
         return 0
     }
-    
+
     int result = 0
     int i = 0
     while i < len(value_str) {
@@ -140,21 +140,21 @@ func extract_float_field(string body, string field_name) float {
     if value_str == "" {
         return 0.0
     }
-    
+
     float result = 0.0
     int i = 0
     bool has_dot = false
     float decimal_places = 1.0
-    
+
     while i < len(value_str) {
         string c = value_str[i]
-        
+
         if c == "." {
             has_dot = true
             i = i + 1
             continue
         }
-        
+
         if c >= "0" && c <= "9" {
             int digit = c[0] - '0'[0]
             if has_dot {
@@ -166,7 +166,7 @@ func extract_float_field(string body, string field_name) float {
         }
         i = i + 1
     }
-    
+
     return result
 }
 
@@ -201,13 +201,13 @@ func int_to_string(int n) string {
     if n == 0 {
         return "0"
     }
-    
+
     bool negative = false
     if n < 0 {
         negative = true
         n = -n
     }
-    
+
     string result = ""
     while n > 0 {
         int digit = n % 10
@@ -222,33 +222,33 @@ func int_to_string(int n) string {
         else if digit == 7 { digit_char = "7" }
         else if digit == 8 { digit_char = "8" }
         else if digit == 9 { digit_char = "9" }
-        
+
         result = digit_char + result
         n = n / 10
     }
-    
+
     if negative {
         result = "-" + result
     }
-    
+
     return result
 }
 
 func float_to_string(float f) string {
     int int_part = int(f)
     int frac_part = int((f - float(int_part)) * 100.0)
-    
+
     if frac_part < 0 {
         frac_part = -frac_part
     }
-    
+
     string result = int_to_string(int_part)
     result = result + "."
-    
+
     if frac_part < 10 {
         result = result + "0"
     }
-    
+
     result = result + int_to_string(frac_part)
     return result
 }
@@ -258,9 +258,9 @@ func run_inference(string prompt, int max_tokens, float temperature) string {
     print("   提示: " + prompt + "\n")
     print("   最大tokens: " + int_to_string(max_tokens) + "\n")
     print("   温度: " + float_to_string(temperature) + "\n")
-    
+
     string response = ""
-    
+
     if len(prompt) < 10 {
         response = "这是一个简短提示的响应。"
     } else if len(prompt) < 50 {
@@ -268,48 +268,48 @@ func run_inference(string prompt, int max_tokens, float temperature) string {
     } else {
         response = "这是对长提示的详细回复。模型在这里生成更长的、更具信息性的响应。包括多个段落、解释和示例。这演示了完整推理流程。"
     }
-    
+
     if max_tokens < len(response) {
         response = response[:max_tokens]
     }
-    
+
     return response
 }
 
 func handle_chat_completion(http_request req) http_response {
     print("\n📨 处理聊天完成请求\n")
-    
+
     string model = extract_string_field(req.body, "model")
     if model == "" {
         model = "Qwen2.5-0.5B-Instruct"
     }
-    
+
     int max_tokens = extract_int_field(req.body, "max_tokens")
     if max_tokens == 0 {
         max_tokens = 256
     }
-    
+
     float temperature = extract_float_field(req.body, "temperature")
     if temperature == 0.0 {
         temperature = 0.7
     }
-    
+
     string prompt = extract_string_field(req.body, "content")
     if prompt == "" {
         prompt = "你好"
     }
-    
+
     print("   模型: " + model + "\n")
     print("   提示内容: " + prompt + "\n")
-    
+
     string response_text = run_inference(prompt, max_tokens, temperature)
-    
+
     int prompt_tokens = estimate_token_count(prompt)
     int completion_tokens = estimate_token_count(response_text)
     int total_tokens = prompt_tokens + completion_tokens
-    
+
     string escaped_response = format_json_string(response_text)
-    
+
     string body = "{"
     body = body + "\"id\":\"chatcmpl-" + int_to_string(len(prompt)) + "\","
     body = body + "\"object\":\"chat.completion\","
@@ -329,18 +329,18 @@ func handle_chat_completion(http_request req) http_response {
     body = body + "\"total_tokens\":" + int_to_string(total_tokens)
     body = body + "}"
     body = body + "}"
-    
+
     http_response resp
     resp.status_code = 200
     resp.status_message = "OK"
     resp.body = body
-    
+
     return resp
 }
 
 func handle_health_check(http_request req) http_response {
     print("\n💚 处理健康检查\n")
-    
+
     string body = "{"
     body = body + "\"status\":\"healthy\","
     body = body + "\"service\":\"neurx-inference\","
@@ -348,18 +348,18 @@ func handle_health_check(http_request req) http_response {
     body = body + "\"model\":\"Qwen2.5-0.5B-Instruct\","
     body = body + "\"timestamp\":1692547200"
     body = body + "}"
-    
+
     http_response resp
     resp.status_code = 200
     resp.status_message = "OK"
     resp.body = body
-    
+
     return resp
 }
 
 func handle_list_models(http_request req) http_response {
     print("\n📋 列出可用模型\n")
-    
+
     string body = "{"
     body = body + "\"object\":\"list\","
     body = body + "\"data\":["
@@ -371,12 +371,12 @@ func handle_list_models(http_request req) http_response {
     body = body + "}"
     body = body + "]"
     body = body + "}"
-    
+
     http_response resp
     resp.status_code = 200
     resp.status_message = "OK"
     resp.body = body
-    
+
     return resp
 }
 
@@ -387,12 +387,12 @@ func handle_error(int status_code, string message) http_response {
     body = body + "\"type\":\"request_error\""
     body = body + "}"
     body = body + "}"
-    
+
     http_response resp
     resp.status_code = status_code
     resp.status_message = "Error"
     resp.body = body
-    
+
     return resp
 }
 
@@ -402,7 +402,7 @@ func route_request(http_request req) http_response {
     print("="*70 + "\n")
     print("方法: " + req.method + "\n")
     print("路径: " + req.path + "\n")
-    
+
     if req.path == "/v1/chat/completions" && req.method == "POST" {
         return handle_chat_completion(req)
     } else if req.path == "/health" && req.method == "GET" {
@@ -428,37 +428,37 @@ func main() {
     print("\n╔════════════════════════════════════════════════════════════════════╗\n")
     print("║          🚀 NeurX REST API 服务器 (纯 S 语言实现)               ║\n")
     print("╚════════════════════════════════════════════════════════════════════╝\n\n")
-    
+
     print("📝 示例 1: 聊天完成请求\n")
     http_request req1
     req1.method = "POST"
     req1.path = "/v1/chat/completions"
     req1.body = "{\"model\":\"Qwen2.5-0.5B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"你好，请介绍一下你自己\"}],\"max_tokens\":256,\"temperature\":0.7}"
-    
+
     http_response resp1 = route_request(req1)
     print_response(resp1)
-    
+
     print("📝 示例 2: 健康检查\n")
     http_request req2
     req2.method = "GET"
     req2.path = "/health"
-    
+
     http_response resp2 = route_request(req2)
     print_response(resp2)
-    
+
     print("📝 示例 3: 列表模型\n")
     http_request req3
     req3.method = "GET"
     req3.path = "/v1/models"
-    
+
     http_response resp3 = route_request(req3)
     print_response(resp3)
-    
+
     print("📝 示例 4: 错误处理\n")
     http_request req4
     req4.method = "GET"
     req4.path = "/unknown"
-    
+
     http_response resp4 = route_request(req4)
     print_response(resp4)
 }

@@ -46,6 +46,7 @@ use neurx.inference.generation_engine_adapter.{
     generate_greedy,
     load_weights_from_safetensors,
 }
+
 func approx(float a, float b, float tol) bool {
     float d = a - b
     if d < 0.0 { d = 0.0 - d }

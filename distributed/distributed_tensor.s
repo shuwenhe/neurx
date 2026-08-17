@@ -137,7 +137,7 @@ func (distributed_tensor_manager* mgr) all_reduce_tensor(string tensor_id, reduc
 
     dtensor := mgr.get_tensor(tensor_id)
     comm := mgr.ctx.get_communicator()
-    
+
     result := comm.all_reduce(dtensor.local_shard, op)
     if result.success {
         dtensor.mark_synced()
@@ -154,7 +154,7 @@ func (distributed_tensor_manager* mgr) all_gather_tensor(string tensor_id) bool 
 
     dtensor := mgr.get_tensor(tensor_id)
     comm := mgr.ctx.get_communicator()
-    
+
     recv_tensors := vec[tensor_handle]{}
     i := 0
     while i < mgr.ctx.get_world_size() {

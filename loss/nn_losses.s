@@ -1,5 +1,6 @@
 package neurx.loss.nn_losses
 use neurx.tensor.tensor
+
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}

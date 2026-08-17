@@ -1,4 +1,5 @@
 package test
+
 func test_func(string x) string {
     x
 }

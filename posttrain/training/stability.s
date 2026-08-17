@@ -1,4 +1,5 @@
 package neurx.posttrain.training.stability
+
 func clip_all_gradients([][]float all_grads, float max_norm) float {
     float total = 0.0
     int layer = 0

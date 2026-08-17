@@ -1,5 +1,6 @@
 package neurx.attention.serving_paged
 use neurx.serving.cache.paged_kv_cache
+
 struct paged_attention_state {
     paged_kv_cache_state kv
     int page_size

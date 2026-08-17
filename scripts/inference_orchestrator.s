@@ -12,6 +12,7 @@ enum inference_backend {
     deep_speed,
     native,
 }
+
 struct inference_config {
     model_path    string
     backend      inference_backend

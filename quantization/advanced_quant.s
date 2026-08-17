@@ -1,4 +1,5 @@
 package neurx.quantization.advanced_quant
+
 struct awq_config {
     int bits
     int group_size

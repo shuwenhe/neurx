@@ -31,15 +31,15 @@ impl ToolParserManager {
             loaded_modules: map::new()
         }
     }
-    
+
     func register_parser(mut self, name: str, factory: ToolParserFactory) {
         self.parsers.insert(name, factory)
     }
-    
+
     func register_lazy_parser(mut self, name: str, module: str, class_name: str) {
         self.lazy_parsers.insert(name, (module, class_name))
     }
-    
+
     func get_parser(self, name: str) -> Option<ToolParser> {
         match self.parsers.get(name) {
             Some(factory) => Some(factory()),
@@ -53,7 +53,7 @@ impl ToolParserManager {
             }
         }
     }
-    
+
     func list_parsers(self) -> Vec<str> {
         let mut names = Vec::new()
         for (name, _) in self.parsers.iter() {
@@ -64,7 +64,7 @@ impl ToolParserManager {
         }
         names
     }
-    
+
     func get_parser_for_model(self, model_name: str) -> Option<ToolParser> {
         let parser_name = infer_parser_from_model_name(model_name)
         self.get_parser(parser_name)

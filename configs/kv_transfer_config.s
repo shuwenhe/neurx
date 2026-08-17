@@ -12,35 +12,35 @@ const (
 struct kv_transfer_config {
     kv_cache_location location
     bool enable_kv_transfer
-    
+
     bool enable_prefetching
     bool enable_prefill_prefetch
     bool enable_decode_prefetch
-    
+
     int32 prefetch_threshold
     int32 prefetch_lookahead_distance
-    
+
     bool enable_offloading
     int32 offload_threshold
     float32 offload_ratio
-    
+
     bool enable_kv_compression
     float32 compression_ratio
     string compression_method
-    
+
     int32 gpu_kv_cache_size_mb
     int32 cpu_kv_cache_size_mb
     int32 nvme_kv_cache_size_gb
-    
+
     bool enable_dynamic_kv_cache
     float32 dynamic_kv_ratio
-    
+
     bool enable_reuse_cache
     float32 cache_reuse_threshold
-    
+
     int32 kv_cache_block_size
     int32 num_kv_cache_blocks
-    
+
     map[string]interface{} extra_config
 }
 

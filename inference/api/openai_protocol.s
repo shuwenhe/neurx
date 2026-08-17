@@ -1,4 +1,5 @@
 package neurx.inference.api.openai_protocol
+
 struct openai_request {
     string request_id
     string model

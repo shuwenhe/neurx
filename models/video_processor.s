@@ -344,7 +344,7 @@ func (video_processor* vp) compute_optical_flow(video_id string) (*optical_flow_
 			dy := (float32(by) - float32(by+5)) / 5.0
 			magnitude := float32(0)
 			if dx*dx+dy*dy > 0 {
-				magnitude = float32(1.0) 
+				magnitude = float32(1.0)
 				for i := 0; i < 10; i++ {
 					magnitude = (magnitude + (dx*dx+dy*dy)/magnitude) / 2.0
 				}

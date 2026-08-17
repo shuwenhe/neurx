@@ -1,4 +1,5 @@
 package neurx.distributed.kv_transfer
+
 struct kv_transfer_config {
     string connector
     string engine_id

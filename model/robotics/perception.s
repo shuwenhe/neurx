@@ -1,4 +1,5 @@
 package neurx.model.robotics.perception
+
 struct robotics_perception_state {
     string perception_name
     int obs_dim

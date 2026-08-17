@@ -1,4 +1,5 @@
 package posttrain.lora_real_training
+
 func sigmoid_fn(float x) float {
     if x > 100.0 {
         return 1.0

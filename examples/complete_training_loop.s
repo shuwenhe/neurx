@@ -16,6 +16,7 @@ use neurx.logging.progress_display
 use neurx.inference.text_generator
 use neurx.cuda.device_manager
 use neurx.distributed.nccl_backend
+
 struct training_config {
     int vocab_size
     int d_model

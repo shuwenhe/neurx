@@ -1,4 +1,5 @@
 package neurx.inference.runtime.model_capability_inspection
+
 func model_task_generate() int { 1 }
 
 func model_task_pooling() int { 2 }

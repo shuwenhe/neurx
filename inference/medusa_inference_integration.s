@@ -1,6 +1,7 @@
 package neurx.inference.medusa_integration
 use neurx.inference.medusa.*
 use neurx.inference.sampling.*
+
 struct inference_engine_with_medusa {
     base_model: inference_model_handle
     medusa_pipeline: medusa_generation_pipeline

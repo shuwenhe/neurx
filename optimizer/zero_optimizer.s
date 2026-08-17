@@ -1,4 +1,5 @@
 package neurx.optimizer.zero_optimizer
+
 struct zero_optimizer_config {
     int zero_stage
     int dp_degree

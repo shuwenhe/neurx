@@ -111,11 +111,11 @@ func add_request(batch_scheduler* scheduler, inference_request req) bool {
     if len(scheduler.queue) >= scheduler.config.queue_size {
         return false
     }
-    
+
     req.request_id = scheduler.request_counter
     scheduler.request_counter = scheduler.request_counter + 1
     scheduler.queue = append(scheduler.queue, req)
-    
+
     true
 }
 
@@ -126,37 +126,37 @@ func get_next_batch(batch_scheduler* scheduler) batch_request {
         max_length: 0,
         total_tokens: 0
     }
-    
+
     int batch_idx = 0
     while batch_idx < scheduler.config.max_batch_size && batch_idx < len(scheduler.queue) {
         inference_request req = scheduler.queue[batch_idx]
-        
+
         int new_total = batch.total_tokens + req.seq_length + req.max_new_tokens
         if new_total <= scheduler.config.max_batch_size * scheduler.config.max_seq_length {
             batch.requests = append(batch.requests, req)
             batch.batch_size = batch.batch_size + 1
             batch.total_tokens = new_total
-            
+
             if req.seq_length > batch.max_length {
                 batch.max_length = req.seq_length
             }
         }
-        
+
         batch_idx = batch_idx + 1
     }
-    
+
     int i = 0
     while i < batch.batch_size && i < len(scheduler.queue) {
         i = i + 1
     }
-    
+
     if batch.batch_size > 0 && i > 0 {
         scheduler.queue = scheduler.queue[i : len(scheduler.queue)]
     }
-    
+
     scheduler.total_scheduled = scheduler.total_scheduled + batch.batch_size
     scheduler.current_batch_size = batch.batch_size
-    
+
     batch
 }
 
@@ -164,10 +164,10 @@ func calculate_batch_efficiency(batch_request batch) float {
     if batch.batch_size == 0 {
         return 0.0
     }
-    
+
     float avg_tokens = float(batch.total_tokens) / float(batch.batch_size)
     float efficiency = avg_tokens / float(batch.max_length)
-    
+
     if efficiency > 1.0 {
         return 1.0
     }
@@ -179,12 +179,12 @@ func should_merge_batches(batch_request batch1, batch_request batch2, batch_conf
     if merged_size > config.max_batch_size {
         return false
     }
-    
+
     int merged_tokens = batch1.total_tokens + batch2.total_tokens
     if merged_tokens > config.max_batch_size * config.max_seq_length {
         return false
     }
-    
+
     true
 }
 
@@ -195,13 +195,13 @@ func merge_batches(batch_request batch1, batch_request batch2) batch_request {
         max_length: batch1.max_length,
         total_tokens: batch1.total_tokens + batch2.total_tokens
     }
-    
+
     int i = 0
     while i < len(batch1.requests) {
         merged.requests = append(merged.requests, batch1.requests[i])
         i = i + 1
     }
-    
+
     int j = 0
     while j < len(batch2.requests) {
         merged.requests = append(merged.requests, batch2.requests[j])
@@ -210,7 +210,7 @@ func merge_batches(batch_request batch1, batch_request batch2) batch_request {
         }
         j = j + 1
     }
-    
+
     merged
 }
 
@@ -218,10 +218,10 @@ func estimate_batch_latency(batch_request batch, batch_config config) float {
     if batch.batch_size == 0 {
         return 0.0
     }
-    
+
     float prefill_latency = float(batch.max_length) * 0.5
     float decode_latency = float(batch.batch_size) * 10.0
-    
+
     prefill_latency + decode_latency
 }
 
@@ -235,7 +235,7 @@ func create_batch_statistics(batch_scheduler scheduler) batch_statistics {
         throughput_tokens_per_sec: 0.0,
         utilization_rate: 0.0
     }
-    
+
     if scheduler.total_scheduled > 0 {
         stats.avg_batch_size = scheduler.total_scheduled / scheduler.current_batch_size
         stats.max_batch_size = scheduler.config.max_batch_size
@@ -244,7 +244,7 @@ func create_batch_statistics(batch_scheduler scheduler) batch_statistics {
         stats.avg_latency_ms = 42.5
         stats.throughput_tokens_per_sec = float(scheduler.total_scheduled * 128) / (stats.avg_latency_ms / 1000.0)
     }
-    
+
     stats
 }
 
@@ -254,7 +254,7 @@ func float_to_string(float value) string {
     if frac_part < 0 {
         frac_part = 0 - frac_part
     }
-    
+
     string result = int_to_string(int_part) + "."
     if frac_part < 10 {
         result = result + "0"
@@ -278,19 +278,19 @@ func main() {
     println("║        Batch Processing Optimization Module                ║")
     println("╚════════════════════════════════════════════════════════════╝")
     println("")
-    
+
     batch_config config = create_default_batch_config()
     batch_scheduler* scheduler = &(create_batch_scheduler(config))
-    
+
     println("Configuration:")
     println("  Max Batch Size: " + int_to_string(config.max_batch_size))
     println("  Max Sequence Length: " + int_to_string(config.max_seq_length))
     println("  Continuous Batching: " + (if config.enable_continuous_batching { "enabled" } else { "disabled" }))
     println("")
-    
+
     println("Step 1: Queueing Inference Requests")
     println("─────────────────────────────────────────────────────────────")
-    
+
     int i = 0
     while i < 50 {
         inference_request req = inference_request{
@@ -301,7 +301,7 @@ func main() {
             seq_length: 256 + (i * 10),
             streaming: (i % 2) == 0
         }
-        
+
         if add_request(scheduler, req) {
             if i % 10 == 0 {
                 println("  ✓ Queued " + int_to_string(i + 1) + " requests")
@@ -309,15 +309,15 @@ func main() {
         }
         i = i + 1
     }
-    
+
     println("")
     println("Step 2: Scheduling Batches")
     println("─────────────────────────────────────────────────────────────")
-    
+
     int batch_count = 0
     while len(scheduler.queue) > 0 {
         batch_request batch = get_next_batch(scheduler)
-        
+
         if batch.batch_size > 0 {
             batch_count = batch_count + 1
             println("")
@@ -325,24 +325,24 @@ func main() {
             print_batch_summary(batch)
         }
     }
-    
+
     println("")
     println("Step 3: Batch Statistics")
     println("─────────────────────────────────────────────────────────────")
-    
+
     batch_statistics stats = create_batch_statistics(*scheduler)
-    
+
     println("  Total Requests: " + int_to_string(stats.total_requests))
     println("  Average Batch Size: " + int_to_string(stats.avg_batch_size))
     println("  Max Batch Size: " + int_to_string(stats.max_batch_size))
     println("  Utilization Rate: " + float_to_string(stats.utilization_rate * 100.0) + "%")
     println("  Average Latency: " + float_to_string(stats.avg_latency_ms) + " ms")
     println("  Throughput: " + float_to_string(stats.throughput_tokens_per_sec) + " tokens/sec")
-    
+
     println("")
     println("Step 4: Optimization Recommendations")
     println("─────────────────────────────────────────────────────────────")
-    
+
     if stats.utilization_rate < 0.5 {
         println("  ℹ️  Consider increasing batch size for better GPU utilization")
     } else if stats.utilization_rate > 0.9 {
@@ -350,11 +350,11 @@ func main() {
     } else {
         println("  ✓ Batch size well-optimized")
     }
-    
+
     if config.enable_continuous_batching {
         println("  ✓ Continuous batching enabled for dynamic scheduling")
     }
-    
+
     println("")
     println("✅ Batch optimization analysis complete!")
     println("")

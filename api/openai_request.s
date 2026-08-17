@@ -17,26 +17,26 @@ struct chat_completion_request {
 	float32             top_p
 	int32               top_k
 	float32             min_p
-	
+
 	int32               max_tokens
 	float32             presence_penalty
 	float32             frequency_penalty
 	float32             repetition_penalty
-	
+
 	vec[string]         stop
 	bool                stream
 	interface{}         stream_options
-	
+
 	int32               seed
 	interface{}         response_format
-	
+
 	vec[interface{}]    tools
 	string              tool_choice
-	
+
 	int64               timeout_ms
 	string              request_id
 	string              user_id
-	
+
 	int64               created_at
 }
 
@@ -44,27 +44,27 @@ struct completion_request {
 	string          model
 	string          prompt
 	string          suffix
-	
+
 	int32           max_tokens
 	float32         temperature
 	float32         top_p
 	int32           top_k
-	
+
 	float32         frequency_penalty
 	float32         presence_penalty
-	
+
 	vec[string]     stop
 	bool            stream
-	
+
 	int32           seed
 	bool            echo
-	
+
 	int32           best_of
-	
+
 	int64           timeout_ms
 	string          request_id
 	string          user_id
-	
+
 	int64           created_at
 }
 
@@ -72,11 +72,11 @@ struct embedding_request {
 	string          model
 	vec[string]     input
 	string          encoding_format
-	
+
 	int64           timeout_ms
 	string          request_id
 	string          user_id
-	
+
 	int64           created_at
 }
 
@@ -97,7 +97,7 @@ struct request_validator {
 	float32         max_temperature
 	int32           max_tokens_limit
 	int32           min_tokens_limit
-	
+
 	vec[string]     supported_models
 }
 
@@ -119,39 +119,39 @@ func (v request_validator*) validate_chat_request(req chat_completion_request) (
 	if len(req.model) == 0 {
 		return false, ERR_MISSING_MODEL
 	}
-	
+
 	if len(req.messages) == 0 {
 		return false, ERR_MISSING_MESSAGES
 	}
-	
+
 	if req.temperature < v.min_temperature || req.temperature > v.max_temperature {
 		return false, ERR_INVALID_TEMPERATURE
 	}
-	
+
 	if req.top_p < 0.0 || req.top_p > 1.0 {
 		return false, ERR_INVALID_TOP_P
 	}
-	
+
 	if req.top_k < 0 {
 		return false, ERR_INVALID_TOP_K
 	}
-	
+
 	if req.max_tokens < v.min_tokens_limit || req.max_tokens > v.max_tokens_limit {
 		return false, ERR_INVALID_MAX_TOKENS
 	}
-	
+
 	if req.frequency_penalty < -2.0 || req.frequency_penalty > 2.0 {
 		return false, ERR_INVALID_PENALTY
 	}
-	
+
 	if req.presence_penalty < -2.0 || req.presence_penalty > 2.0 {
 		return false, ERR_INVALID_PENALTY
 	}
-	
+
 	if !v.is_model_supported(req.model) {
 		return false, ERR_UNSUPPORTED_MODEL
 	}
-	
+
 	return true, 0
 }
 
@@ -159,27 +159,27 @@ func (v request_validator*) validate_completion_request(req completion_request) 
 	if len(req.model) == 0 {
 		return false, ERR_MISSING_MODEL
 	}
-	
+
 	if len(req.prompt) == 0 {
 		return false, ERR_MISSING_MESSAGES
 	}
-	
+
 	if req.temperature < v.min_temperature || req.temperature > v.max_temperature {
 		return false, ERR_INVALID_TEMPERATURE
 	}
-	
+
 	if req.top_p < 0.0 || req.top_p > 1.0 {
 		return false, ERR_INVALID_TOP_P
 	}
-	
+
 	if req.max_tokens < v.min_tokens_limit || req.max_tokens > v.max_tokens_limit {
 		return false, ERR_INVALID_MAX_TOKENS
 	}
-	
+
 	if !v.is_model_supported(req.model) {
 		return false, ERR_UNSUPPORTED_MODEL
 	}
-	
+
 	return true, 0
 }
 
@@ -187,15 +187,15 @@ func (v request_validator*) validate_embedding_request(req embedding_request) (b
 	if len(req.model) == 0 {
 		return false, ERR_MISSING_MODEL
 	}
-	
+
 	if len(req.input) == 0 {
 		return false, ERR_INVALID_REQUEST
 	}
-	
+
 	if !v.is_model_supported(req.model) {
 		return false, ERR_UNSUPPORTED_MODEL
 	}
-	
+
 	return true, 0
 }
 
@@ -218,7 +218,7 @@ func create_chat_completion_request_from_json(data interface{}) (chat_completion
 		stream:      false,
 		created_at:  time.Now().UnixNano(),
 	}
-	
+
 	return req, nil
 }
 
@@ -231,7 +231,7 @@ func create_completion_request_from_json(data interface{}) (completion_request, 
 		stream:      false,
 		created_at:  time.Now().UnixNano(),
 	}
-	
+
 	return req, nil
 }
 
@@ -240,7 +240,7 @@ func create_embedding_request_from_json(data interface{}) (embedding_request, er
 		encoding_format: "float",
 		created_at:      time.Now().UnixNano(),
 	}
-	
+
 	return req, nil
 }
 
@@ -257,7 +257,7 @@ func (req chat_completion_request) to_json() string {
 		"stream":            req.stream,
 		"created_at":        req.created_at,
 	}
-	
+
 	return json.Marshal(data)
 }
 
@@ -273,7 +273,7 @@ func (req completion_request) to_json() string {
 		"stream":            req.stream,
 		"created_at":        req.created_at,
 	}
-	
+
 	return json.Marshal(data)
 }
 
@@ -284,7 +284,7 @@ func (req embedding_request) to_json() string {
 		"encoding_format": req.encoding_format,
 		"created_at":      req.created_at,
 	}
-	
+
 	return json.Marshal(data)
 }
 

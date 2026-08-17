@@ -60,7 +60,7 @@ func create_lora_model(string adapter_name, lora_config config) lora_model* {
         total_params: 0,
         trainable_params: 0,
     }
-    
+
     return &model
 }
 
@@ -81,7 +81,7 @@ func (lora_model* model) add_lora_layer(string layer_name, int32 in_features, in
         layer_name: layer_name,
         is_active: true,
     }
-    
+
     model.layers[layer_name] = layer
     model.num_layers = model.num_layers + 1
     model.trainable_params = model.trainable_params + (model.config.rank * in_features) + (out_features * model.config.rank)
@@ -92,7 +92,7 @@ func (lora_model* model) activate_layer(string layer_name) bool {
         layer.is_active = true
         return true
     }
-    
+
     return false
 }
 
@@ -101,7 +101,7 @@ func (lora_model* model) deactivate_layer(string layer_name) bool {
         layer.is_active = false
         return true
     }
-    
+
     return false
 }
 
@@ -109,7 +109,7 @@ func (lora_model* model) get_lora_layer(string layer_name) lora_layer* {
     if layer, exists := model.layers[layer_name]; exists {
         return layer
     }
-    
+
     return nil
 }
 
@@ -124,7 +124,7 @@ func (lora_model* model) is_loaded() bool {
 func (lora_model* model) initialize_weights() {
     for name := range model.layers {
         layer := model.layers[name]
-        
+
         layer.lora_a.weights = make(vec[vec[float32]])
         for i := 0; i < layer.lora_a.rows; i = i + 1 {
             row := make(vec[float32])
@@ -133,7 +133,7 @@ func (lora_model* model) initialize_weights() {
             }
             layer.lora_a.weights = append(layer.lora_a.weights, row)
         }
-        
+
         layer.lora_b.weights = make(vec[vec[float32]])
         for i := 0; i < layer.lora_b.rows; i = i + 1 {
             row := make(vec[float32])
@@ -149,21 +149,21 @@ func (lora_model* model) validate_config() bool {
     if model.config.rank <= 0 {
         return false
     }
-    
+
     if model.config.lora_alpha <= 0 {
         return false
     }
-    
+
     if model.config.dropout < 0.0 || model.config.dropout > 1.0 {
         return false
     }
-    
+
     return true
 }
 
 func (lora_model* model) get_model_stats() map[string]interface{} {
     stats := make(map[string]interface{})
-    
+
     stats["adapter_name"] = model.adapter_name
     stats["status"] = model.status
     stats["num_layers"] = model.num_layers
@@ -172,7 +172,7 @@ func (lora_model* model) get_model_stats() map[string]interface{} {
     stats["rank"] = model.config.rank
     stats["lora_alpha"] = model.config.lora_alpha
     stats["dropout"] = model.config.dropout
-    
+
     active_layers := 0
     for name := range model.layers {
         if model.layers[name].is_active {
@@ -180,7 +180,7 @@ func (lora_model* model) get_model_stats() map[string]interface{} {
         }
     }
     stats["active_layers"] = active_layers
-    
+
     return stats
 }
 
@@ -188,8 +188,8 @@ func (lora_model* model) compute_scaling_factor() float32 {
     if model.config.lora_alpha == 0 {
         return 1.0
     }
-    
+
     scaling := float32(model.config.lora_alpha) / float32(model.config.rank)
-    
+
     return scaling
 }

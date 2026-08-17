@@ -8,6 +8,7 @@ enum component_type {
     data_format
     custom
 }
+
 struct registry_entry {
     component_type: ComponentType
     name: string

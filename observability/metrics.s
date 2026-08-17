@@ -1,4 +1,5 @@
 package neurx.observability.metrics
+
 struct metric_counter {
     string name
     string help

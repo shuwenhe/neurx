@@ -1,6 +1,7 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/dpo/dpo.s"
+
 struct gdpo_config {
     beta: f32
     learning_rate: f32

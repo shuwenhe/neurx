@@ -1,6 +1,7 @@
 package neurx.posttrain.tools.model_merger
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
+
 struct merge_config {
     string merge_method
     []float weights

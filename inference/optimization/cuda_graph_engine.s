@@ -1,5 +1,6 @@
 package neurx.inference.optimization.cuda_graph_engine
 use neurx.util.logger
+
 struct cuda_graph_node {
     int node_id
     string operation

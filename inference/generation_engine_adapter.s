@@ -34,6 +34,7 @@ use neurx.inference.safetensors_weight_loader.{
     load_tensor_floats,
     has_tensor,
 }
+
 struct generation_engine {
     transformer_layer_config layer_config
     transformer_layer_weights weights

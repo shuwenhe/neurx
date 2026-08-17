@@ -1,4 +1,5 @@
 package neurx.inference.speech.speech_to_text
+
 func speech_task_transcribe() int { 1 }
 
 func speech_task_translate() int { 2 }

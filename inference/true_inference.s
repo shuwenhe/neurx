@@ -5,6 +5,7 @@ use step2_embedding.{embed_tokens}
 use step3_transformer.{create_transformer_config, transformer_forward}
 use step5_sampling_step6_decode.{create_sampling_config, generate, decode_tokens}
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 struct mean_std {
     float mean
     float std

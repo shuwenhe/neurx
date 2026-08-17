@@ -107,14 +107,14 @@ func string_at_index(string s, int idx) string {
 func split_string(string s, string sep) []string {
     []string result = []string{}
     if len(s) == 0 { return result }
-    
+
     string current = ""
     int i = 0
     int sep_len = len(sep)
-    
+
     while i < len(s) {
         bool found = true
-        
+
         if i + sep_len <= len(s) {
             int j = 0
             while j < sep_len {
@@ -127,7 +127,7 @@ func split_string(string s, string sep) []string {
         } else {
             found = false
         }
-        
+
         if found {
             result = append(result, current)
             current = ""
@@ -137,11 +137,11 @@ func split_string(string s, string sep) []string {
             i = i + 1
         }
     }
-    
+
     if len(current) > 0 {
         result = append(result, current)
     }
-    
+
     return result
 }
 
@@ -165,20 +165,20 @@ func extract_json_string(string json, string key) string {
         }
         i = i + 1
     }
-    
+
     if key_pos == -1 {
         return ""
     }
-    
+
     int start = key_pos + len(search_key)
     while start < len(json) && (json[start] == 32 || json[start] == 9) {
         start = start + 1
     }
-    
+
     if start >= len(json) || json[start] != 34 {
         return ""
     }
-    
+
     start = start + 1
     string result = ""
     int idx = start
@@ -202,7 +202,7 @@ func extract_json_string(string json, string key) string {
         result = result + string(c)
         idx = idx + 1
     }
-    
+
     return result
 }
 
@@ -226,11 +226,11 @@ func extract_user_message_from_json(string json_body) string {
         }
         i = i + 1
     }
-    
+
     if user_pos == -1 {
         return "You are a helpful AI assistant."
     }
-    
+
     int search_start = user_pos + len(search)
     string content_search = "\"content\":"
     int content_pos = -1
@@ -251,20 +251,20 @@ func extract_user_message_from_json(string json_body) string {
         }
         idx = idx + 1
     }
-    
+
     if content_pos == -1 {
         return "You are a helpful AI assistant."
     }
-    
+
     int quote_start = content_pos + len(content_search)
     while quote_start < len(json_body) && json_body[quote_start] != 34 {
         quote_start = quote_start + 1
     }
-    
+
     if quote_start >= len(json_body) {
         return "You are a helpful AI assistant."
     }
-    
+
     quote_start = quote_start + 1
     string content = ""
     int cidx = quote_start
@@ -276,7 +276,7 @@ func extract_user_message_from_json(string json_body) string {
         content = content + string(c)
         cidx = cidx + 1
     }
-    
+
     return content
 }
 
@@ -295,9 +295,9 @@ func run_inference(string prompt, int max_tokens, float temperature) inference_r
     if completion_tokens < 5 {
         completion_tokens = 5
     }
-    
+
     string generated_text = ""
-    
+
     if prompt == "" {
         generated_text = "Hello! I'm here to assist you."
     } else if len(prompt) < 10 {
@@ -307,7 +307,7 @@ func run_inference(string prompt, int max_tokens, float temperature) inference_r
         generated_text = generated_text + "Please consult with a qualified healthcare professional for personalized medical advice. "
         generated_text = generated_text + "I can provide educational information about various medical conditions and treatments."
     }
-    
+
     return inference_response{
         text: generated_text,
         prompt_tokens: prompt_tokens,
@@ -322,20 +322,20 @@ func parse_http_request(string raw_request) http_request {
     if len(lines) == 0 {
         return http_request{method: "", path: "", headers: [], body: ""}
     }
-    
+
     string request_line = lines[0]
     []string parts = split_string(request_line, " ")
-    
+
     string method = ""
     string path = "/"
     if len(parts) >= 2 {
         method = parts[0]
         path = parts[1]
     }
-    
+
     []string headers = []string{}
     int body_start = 0
-    
+
     int i = 1
     while i < len(lines) {
         string line = lines[i]
@@ -346,12 +346,12 @@ func parse_http_request(string raw_request) http_request {
         headers = append(headers, line)
         i = i + 1
     }
-    
+
     string body = ""
     if body_start < len(lines) {
         body = lines[body_start]
     }
-    
+
     return http_request{
         method: method,
         path: path,
@@ -365,13 +365,13 @@ func format_http_response(http_response resp) string {
     response = response + "Content-Type: application/json\r\n"
     response = response + "Content-Length: " + int_to_string(len(resp.body)) + "\r\n"
     response = response + "Connection: close\r\n"
-    
+
     int i = 0
     while i < len(resp.headers) {
         response = response + resp.headers[i] + "\r\n"
         i = i + 1
     }
-    
+
     response = response + "\r\n" + resp.body
     return response
 }
@@ -382,23 +382,23 @@ func create_http_server(string host, int port) http_server {
         print("❌ error: failed to create socket\n")
         return http_server{listen_fd: -1, port: port, host: host, running: false}
     }
-    
+
     int bind_result = __sys_bind(listen_fd, host, port, 2)
     if bind_result < 0 {
         print("❌ error: failed to bind socket\n")
         __sys_close(listen_fd)
         return http_server{listen_fd: -1, port: port, host: host, running: false}
     }
-    
+
     int listen_result = __sys_listen(listen_fd, 128)
     if listen_result < 0 {
         print("❌ error: failed to listen\n")
         __sys_close(listen_fd)
         return http_server{listen_fd: -1, port: port, host: host, running: false}
     }
-    
+
     print("✅ HTTP server listening on " + host + ":" + int_to_string(port) + "\n")
-    
+
     return http_server{
         listen_fd: listen_fd,
         port: port,
@@ -413,11 +413,11 @@ func handle_connection(int client_fd) {
         __sys_close(client_fd)
         return
     }
-    
+
     http_request request = parse_http_request(request_data)
     http_response response = route_request(request)
     string response_data = format_http_response(response)
-    
+
     __sys_send(client_fd, response_data)
     __sys_close(client_fd)
 }
@@ -432,11 +432,12 @@ func server_accept_loop(http_server server) {
         handle_connection(client_fd)
     }
 }
+
 func create_json_response(string status, string model, string content, int prompt_tokens, int completion_tokens) string {
     string id = "chatcmpl-" + int_to_string(12345)
     string created = int_to_string(1786879972)
     int total = prompt_tokens + completion_tokens
-    
+
     string json = "{"
     json = json + "\"id\": \"" + id + "\","
     json = json + "\"object\": \"chat.completion\","
@@ -456,7 +457,7 @@ func create_json_response(string status, string model, string content, int promp
     json = json + "\"total_tokens\": " + int_to_string(total)
     json = json + "}"
     json = json + "}"
-    
+
     return json
 }
 
@@ -521,10 +522,10 @@ func handle_chat_completions(http_request req) http_response {
             body: body,
         }
     }
-    
+
     string user_prompt = extract_user_message_from_json(req.body)
     inference_response inference_result = run_inference(user_prompt, 128, 0.7)
-    
+
     if !inference_result.success {
         string body = create_error_response("Inference failed: " + inference_result.error)
         return http_response{
@@ -533,9 +534,9 @@ func handle_chat_completions(http_request req) http_response {
             body: body,
         }
     }
-    
+
     string body = create_json_response("ok", "Qwen2.5-0.5B-Instruct", inference_result.text, inference_result.prompt_tokens, inference_result.completion_tokens)
-    
+
     return http_response{
         status_code: 200,
         headers: [],
@@ -566,20 +567,20 @@ func main() {
     print("║       OpenAI-Compatible HTTP API                             ║\n")
     print("╚════════════════════════════════════════════════════════════════╝\n")
     print("\n")
-    
+
     print("📋 Configuration:\n")
     print("  Host: 0.0.0.0\n")
     print("  Port: 8888\n")
     print("  Model: Qwen2.5-0.5B-Instruct\n")
     print("\n")
-    
+
     http_server server = create_http_server("0.0.0.0", 8888)
-    
+
     if server.listen_fd < 0 {
         print("❌ Failed to start server\n")
         return
     }
-    
+
     print("📚 API Endpoints:\n")
     print("  GET  /health                     - Health check\n")
     print("  GET  /v1/models                  - List models\n")
@@ -592,6 +593,6 @@ func main() {
     print("  curl http://localhost:8888/v1/models\n")
     print("  curl -X POST http://localhost:8888/v1/chat/completions -H 'Content-Type: application/json' -d '{\"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}]}'\n")
     print("\n")
-    
+
     server_accept_loop(server)
 }

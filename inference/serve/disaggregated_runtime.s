@@ -1,4 +1,5 @@
 package neurx.inference.serve.disaggregated_runtime
+
 func disaggregated_queued_prefill() int { 1 }
 
 func disaggregated_prefilling() int { 2 }

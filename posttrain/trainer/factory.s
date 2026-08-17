@@ -1,5 +1,6 @@
 package neurx.posttrain.trainer
 use neurx.runtime.io.{runtime_env_get, trim}
+
 struct trainer_factory {
     trainer_type selected_type
 }

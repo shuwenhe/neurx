@@ -1,5 +1,6 @@
 package neurx.posttrain.lib.bpe_tokenizer_complete
 use std.io.eprintln
+
 struct bpe_tokenizer {
     map[string]int vocab
     []string id_to_token

@@ -10,6 +10,7 @@ use neurx.attention.paged_attention_core.{
     compute_softmax,
     math_exp,
 }
+
 func approx(float a, float b, float tol) bool {
     float d = a - b
     if d < 0.0 { d = 0.0 - d }

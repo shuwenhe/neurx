@@ -6,6 +6,7 @@ enum reward_type {
     HUMAN_FEEDBACK,
     VERIFIABLE,
 }
+
 struct verification_result {
     bool is_valid
     bool is_correct

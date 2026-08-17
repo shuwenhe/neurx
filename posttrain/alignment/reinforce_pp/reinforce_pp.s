@@ -1,6 +1,7 @@
 package neurx.posttrain.alignment.reinforce_pp
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
+
 struct reinforce_pp_config {
     float learning_rate
     int batch_size

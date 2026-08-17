@@ -1,4 +1,5 @@
 package neurx.distributed.comm
+
 struct comm_context {
     int world_size
     int rank

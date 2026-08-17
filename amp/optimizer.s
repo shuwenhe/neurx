@@ -33,6 +33,7 @@ structure gradient_overflow_info {
     overflow_value: float
     num_overflowing_params: int
 }
+
 func new_mixed_precision_state(loss_scale_config config): mixed_precision_state {
     var state: mixed_precision_state
     state.compute_precision = BF16
@@ -59,6 +60,7 @@ func mixed_precision_forward(
 }
 
 func mixed_precision_forward(
+
     func(vector): vector layer_fn,
     vector inputs,
     mixed_precision_state state
@@ -157,7 +159,9 @@ func mixed_precision_optimizer_step(
 }
 
 func mixed_precision_training_step(
+
     func(vector): vector model_forward,
+
     func(vector, vector): float compute_loss_func,
     vector targets,
     vector inputs,

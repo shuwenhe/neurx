@@ -142,12 +142,12 @@ func (resource_constraint_checker_impl* c) check_constraints(cfg device_config_f
         recommendations: vec[string]{},
         check_time_ms: 0,
     }
-    
+
     if cfg == nil || hw_info == nil {
         report.all_satisfied = false
         return report
     }
-    
+
     mem_checks := c.check_memory_constraints(cfg, hw_info)
     for check in mem_checks {
         report.checks = append(report.checks, check)
@@ -155,7 +155,7 @@ func (resource_constraint_checker_impl* c) check_constraints(cfg device_config_f
             report.all_satisfied = false
         }
     }
-    
+
     compute_checks := c.check_compute_constraints(cfg, hw_info)
     for check in compute_checks {
         report.checks = append(report.checks, check)
@@ -163,43 +163,43 @@ func (resource_constraint_checker_impl* c) check_constraints(cfg device_config_f
             report.all_satisfied = false
         }
     }
-    
+
     bw_checks := c.check_bandwidth_constraints(cfg, hw_info)
     for check in bw_checks {
         report.checks = append(report.checks, check)
     }
-    
+
     if !report.all_satisfied {
         report.recommendations = c.generate_recommendations(report.checks)
     }
-    
+
     return report
 }
 
 func (resource_constraint_checker_impl* c) check_memory_constraints(cfg device_config_full*, hw_info hardware_info*) (vec[constraint_check]) {
     checks := vec[constraint_check]{}
-    
+
     if cfg.mem_cfg == nil {
         return checks
     }
-    
+
     max_allocatable := hw_info.mem_info.total_memory - c.mem_constraints.reserved_memory
-    
+
     check1 := constraint_check{
         constraint_name: "gpu_memory_limit",
         status: constraint_status.satisfied,
         violation_ratio: 0.0,
         message: "GPU memory usage within limits",
     }
-    
+
     if cfg.mem_cfg.max_memory > max_allocatable {
         check1.status = constraint_status.violated
         check1.violation_ratio = float(cfg.mem_cfg.max_memory - max_allocatable) / float(max_allocatable)
         check1.message = "Requested GPU memory exceeds available capacity"
     }
-    
+
     checks = append(checks, check1)
-    
+
     utilization := float(cfg.mem_cfg.max_memory) / float(hw_info.mem_info.total_memory) * 100.0
     check2 := constraint_check{
         constraint_name: "memory_utilization",
@@ -207,55 +207,55 @@ func (resource_constraint_checker_impl* c) check_memory_constraints(cfg device_c
         violation_ratio: 0.0,
         message: "Memory utilization within acceptable range",
     }
-    
+
     if utilization > c.mem_constraints.max_utilization_percent {
         check2.status = constraint_status.warning
         check2.violation_ratio = (utilization - c.mem_constraints.max_utilization_percent) / c.mem_constraints.max_utilization_percent
         check2.message = "Memory utilization is very high"
     }
-    
+
     checks = append(checks, check2)
-    
+
     return checks
 }
 
 func (resource_constraint_checker_impl* c) check_compute_constraints(cfg device_config_full*, hw_info hardware_info*) (vec[constraint_check]) {
     checks := vec[constraint_check]{}
-    
+
     if cfg.comp_cfg == nil {
         return checks
     }
-    
+
     check1 := constraint_check{
         constraint_name: "batch_size",
         status: constraint_status.satisfied,
         violation_ratio: 0.0,
         message: "Batch size within limits",
     }
-    
+
     if cfg.comp_cfg.max_batch_size > c.compute_constraints.max_batch_size {
         check1.status = constraint_status.warning
         check1.violation_ratio = float(cfg.comp_cfg.max_batch_size - c.compute_constraints.max_batch_size) / float(c.compute_constraints.max_batch_size)
         check1.message = "Batch size exceeds recommended limit"
     }
-    
+
     checks = append(checks, check1)
-    
+
     return checks
 }
 
 func (resource_constraint_checker_impl* c) check_bandwidth_constraints(cfg device_config_full*, hw_info hardware_info*) (vec[constraint_check]) {
     checks := vec[constraint_check]{}
-    
+
     check1 := constraint_check{
         constraint_name: "memory_bandwidth",
         status: constraint_status.satisfied,
         violation_ratio: 0.0,
         message: "Memory bandwidth requirement satisfied",
     }
-    
+
     checks = append(checks, check1)
-    
+
     return checks
 }
 
@@ -268,27 +268,27 @@ func (resource_constraint_checker_impl* c) estimate_memory_usage(cfg device_conf
     if cfg.mem_cfg == nil {
         return 0
     }
-    
+
     base_usage := cfg.mem_cfg.max_memory
-    
+
     if cfg.mem_cfg.enable_kv_cache {
         kv_usage := int64(float(base_usage) * cfg.mem_cfg.kv_cache_ratio)
         base_usage = base_usage + kv_usage
     }
-    
+
     return base_usage
 }
 
 func (resource_constraint_checker_impl* c) get_available_resources(hw_info hardware_info*) (device_config_full*) {
     cfg := &device_config_full{}
-    
+
     available_mem := hw_info.mem_info.available_memory - c.mem_constraints.min_free_memory
     mem_cfg := create_default_memory_config(available_mem)
     cfg.mem_cfg = mem_cfg
-    
+
     comp_cfg := create_default_compute_config()
     cfg.comp_cfg = comp_cfg
-    
+
     return cfg
 }
 
@@ -322,41 +322,41 @@ func create_default_compute_config() (computation_config*) {
 
 func (resource_constraint_checker_impl* c) apply_conservative_limits(cfg device_config_full*, hw_info hardware_info*) (device_config_full*) {
     conservative := &device_config_full{}
-    
+
     if cfg.dev_cfg != nil {
         conservative.dev_cfg = cfg.dev_cfg
     }
-    
+
     if cfg.mem_cfg != nil {
         mem_cfg := *cfg.mem_cfg
         mem_cfg.gpu_memory_utilization = 70
         mem_cfg.kv_cache_ratio = 0.6
         conservative.mem_cfg = &mem_cfg
     }
-    
+
     if cfg.comp_cfg != nil {
         comp_cfg := *cfg.comp_cfg
         comp_cfg.max_batch_size = comp_cfg.max_batch_size / 2
         conservative.comp_cfg = &comp_cfg
     }
-    
+
     if cfg.attn_cfg != nil {
         conservative.attn_cfg = cfg.attn_cfg
     }
-    
+
     if cfg.opt_cfg != nil {
         opt_cfg := *cfg.opt_cfg
         opt_cfg.compute_utilization_target = 0.7
         opt_cfg.memory_utilization_target = 0.75
         conservative.opt_cfg = &opt_cfg
     }
-    
+
     return conservative
 }
 
 func (resource_constraint_checker_impl* c) generate_recommendations(checks vec[constraint_check]) (vec[string]) {
     recommendations := vec[string]{}
-    
+
     for check in checks {
         if check.status == constraint_status.warning || check.status == constraint_status.violated {
             match check.constraint_name {
@@ -373,7 +373,7 @@ func (resource_constraint_checker_impl* c) generate_recommendations(checks vec[c
             }
         }
     }
-    
+
     return recommendations
 }
 

@@ -117,12 +117,12 @@ func (grpc_server* srv) complete(completion_request_pb* req) (completion_respons
             temperature: req.temperature,
         },
     }
-    
+
     resp, err := srv.engine.complete(api_req)
     if err != nil {
         return nil, err
     }
-    
+
     tokens := make([]token*, 0)
     for _, text := range resp.generated_text {
         tokens = append(tokens, &token{
@@ -131,14 +131,14 @@ func (grpc_server* srv) complete(completion_request_pb* req) (completion_respons
             log_prob: 0.0,
         })
     }
-    
+
     pb_resp := &completion_response_pb{
         request_id: resp.id,
         tokens: tokens,
         num_prompt_tokens: resp.input_tokens,
         num_completion_tokens: resp.output_tokens,
     }
-    
+
     return pb_resp, nil
 }
 
@@ -151,7 +151,7 @@ func (grpc_server* srv) complete_stream(completion_request_pb* req) streaming_re
             temperature: req.temperature,
         },
     }
-    
+
     return srv.engine.complete_stream(api_req)
 }
 
@@ -164,12 +164,12 @@ func (grpc_server* srv) chat_completion(chat_completion_request_pb* req) (chat_c
             temperature: req.temperature,
         },
     }
-    
+
     resp, err := srv.engine.complete(api_req)
     if err != nil {
         return nil, err
     }
-    
+
     choice := &chat_completion_choice_pb{
         index: 0,
         message: &chat_message_pb{
@@ -178,14 +178,14 @@ func (grpc_server* srv) chat_completion(chat_completion_request_pb* req) (chat_c
         },
         finish_reason: "stop",
     }
-    
+
     pb_resp := &chat_completion_response_pb{
         request_id: resp.id,
         choices: []*chat_completion_choice_pb{choice},
         num_prompt_tokens: resp.input_tokens,
         num_completion_tokens: resp.output_tokens,
     }
-    
+
     return pb_resp, nil
 }
 
@@ -198,13 +198,13 @@ func (grpc_server* srv) chat_completion_stream(chat_completion_request_pb* req) 
             temperature: req.temperature,
         },
     }
-    
+
     return srv.engine.complete_stream(api_req)
 }
 
 func (grpc_server* srv) embed(embedding_request_pb* req) (embedding_response_pb*, error) {
     embeddings := make([]embedding_pb*, 0)
-    
+
     for i, _ := range req.texts {
         emb := &embedding_pb{
             index: int32(i),
@@ -212,12 +212,12 @@ func (grpc_server* srv) embed(embedding_request_pb* req) (embedding_response_pb*
         }
         embeddings = append(embeddings, emb)
     }
-    
+
     pb_resp := &embedding_response_pb{
         model: req.model_id,
         data: embeddings,
     }
-    
+
     return pb_resp, nil
 }
 

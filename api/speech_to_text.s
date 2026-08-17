@@ -123,21 +123,21 @@ func (speech_to_text_server* srv) extract_features([]uint8 audio_data, audio_con
 
 func (speech_to_text_server* srv) transcribe(transcription_request* req) (transcription_response*, error) {
     format := srv.detect_audio_format(req.audio_data)
-    
+
     resampled_audio, err := srv.resample_audio(req.audio_data, req.config.sample_rate, 16000)
     if err != nil {
         return nil, err
     }
-    
+
     features, err := srv.extract_features(resampled_audio, req.config)
     if err != nil {
         return nil, err
     }
-    
+
     _ = features
-    
+
     segments := make([]transcription_segment*, 0)
-    
+
     segment := &transcription_segment{
         id: 0,
         start_time_ms: 0,
@@ -147,7 +147,7 @@ func (speech_to_text_server* srv) transcribe(transcription_request* req) (transc
         speaker_id: 0,
     }
     segments = append(segments, segment)
-    
+
     resp := &transcription_response{
         id: core.generate_uuid(),
         text: "",
@@ -158,13 +158,13 @@ func (speech_to_text_server* srv) transcribe(transcription_request* req) (transc
         model: string(req.model),
         processing_time_ms: 0.0,
     }
-    
+
     return resp, nil
 }
 
 func (speech_to_text_server* srv) synthesize(text_to_speech_request* req) (text_to_speech_response*, error) {
     audio_data := make([]uint8, 0)
-    
+
     resp := &text_to_speech_response{
         id: core.generate_uuid(),
         audio_data: audio_data,
@@ -177,7 +177,7 @@ func (speech_to_text_server* srv) synthesize(text_to_speech_request* req) (text_
         },
         duration_ms: 0,
     }
-    
+
     return resp, nil
 }
 

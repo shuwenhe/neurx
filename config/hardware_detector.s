@@ -111,19 +111,19 @@ func (hardware_detector_impl* d) detect() (detection_result*) {
         errors: vec[string]{},
         detection_time_ms: 0,
     }
-    
+
     if d.detection_done && d.cached_info != nil {
         result.success = true
         result.hw_info = d.cached_info
         return result
     }
-    
+
     device := d.detect_device_type()
     if device == device_type.unknown {
         result.errors = append(result.errors, "Failed to detect device type")
         return result
     }
-    
+
     hw_info := &hardware_info{
         device: device,
         device_name: device_type_to_string(device),
@@ -138,7 +138,7 @@ func (hardware_detector_impl* d) detect() (detection_result*) {
         tpu_available: device == device_type.tpu,
         xpu_available: device == device_type.xpu,
     }
-    
+
     if device == device_type.cuda || device == device_type.rocm {
         hw_info.gpu_props = d.detect_gpu_properties(0)
         if hw_info.gpu_props == nil {
@@ -146,25 +146,25 @@ func (hardware_detector_impl* d) detect() (detection_result*) {
             return result
         }
     }
-    
+
     hw_info.cpu_props = d.detect_cpu_properties()
     if hw_info.cpu_props == nil {
         result.warnings = append(result.warnings, "Failed to detect CPU properties")
     }
-    
+
     mem := d.detect_memory_info()
     hw_info.mem_info = mem
-    
+
     visible_devices := d.detect_visible_devices()
     hw_info.visible_device_ids = visible_devices
     hw_info.num_devices = len(visible_devices)
-    
+
     result.success = true
     result.hw_info = hw_info
-    
+
     d.cached_info = hw_info
     d.detection_done = true
-    
+
     return result
 }
 

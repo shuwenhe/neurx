@@ -1,4 +1,5 @@
 package neurx.deploy.inference_service
+
 struct service_config {
     string service_name
     string version

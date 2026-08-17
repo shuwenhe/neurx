@@ -1,4 +1,5 @@
 package neurx.posttrain.reward
+
 struct reward_state {
     string reward_model
     float last_reward

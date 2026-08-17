@@ -1,5 +1,6 @@
 package real_inference_simple
 use std.io.{print, println}
+
 func int_to_string(int value) string {
     if value == 0 {
         return "0"

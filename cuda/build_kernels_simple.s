@@ -8,6 +8,7 @@ use neurx.runtime.io.{
     runtime_write_text_file,
     runtime_run_command_output,
 }
+
 func main() {
     println("[CUDA] Building Kernels (Simplified PTX Approach)")
     println("")

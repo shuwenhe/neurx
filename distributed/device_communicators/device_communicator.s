@@ -9,6 +9,7 @@ extern func neurx_nccl_broadcast_f32(int64 communicator, int64 pointer, int coun
 extern func neurx_nccl_send_f32(int64 communicator, int64 pointer, int count, int peer, int tag, int64 stream) int
 extern func neurx_nccl_recv_f32(int64 communicator, int64 pointer, int count, int peer, int tag, int64 stream) int
 extern func neurx_nccl_barrier(int64 communicator, int64 stream) int
+
 func reduce_sum() int { 0 }
 
 func reduce_product() int { 1 }

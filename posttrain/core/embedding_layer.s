@@ -1,5 +1,6 @@
 package neurx.posttrain.core.embedding_layer
 use std.io.println
+
 struct embedding_state_s {
     int vocab_size
     int hidden_dim

@@ -1,4 +1,5 @@
 package neurx.data
+
 struct error {
     string message
 }

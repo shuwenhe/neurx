@@ -8,7 +8,7 @@ func char_to_string(int ch) string {
     else if ch == 45 { return "-" }
     else if ch == 46 { return "." }
     else if ch == 47 { return "/" }
-    else if ch >= 48 && ch <= 57 { 
+    else if ch >= 48 && ch <= 57 {
         if ch == 48 { return "0" }
         else if ch == 49 { return "1" }
         else if ch == 50 { return "2" }
@@ -76,26 +76,25 @@ func char_to_string(int ch) string {
         else if ch == 121 { return "y" }
         else if ch == 122 { return "z" }
     }
-    
+
     return ""
 }
 
-
     if n == 0 { return "0" }
-    
+
     string result = ""
     bool negative = false
     int num = n
-    
+
     if num < 0 {
         negative = true
         num = 0 - num
     }
-    
+
     while num > 0 {
         int digit = num % 10
         string digit_str = ""
-        
+
         if digit == 0 { digit_str = "0" }
         else if digit == 1 { digit_str = "1" }
         else if digit == 2 { digit_str = "2" }
@@ -106,15 +105,15 @@ func char_to_string(int ch) string {
         else if digit == 7 { digit_str = "7" }
         else if digit == 8 { digit_str = "8" }
         else if digit == 9 { digit_str = "9" }
-        
+
         result = digit_str + result
         num = num / 10
     }
-    
+
     if negative {
         result = "-" + result
     }
-    
+
     return result
 }
 
@@ -122,68 +121,68 @@ func extract_json_value(string json_body, string key) string {
     int i = 0
     int key_len = len(key)
     int json_len = len(json_body)
-    
+
     while i < json_len {
         if json_body[i] == 34 {
             int j = 0
             bool match = true
-            
+
             while j < key_len {
                 int check_pos = i + 1 + j
                 if check_pos >= json_len {
                     match = false
                     break
                 }
-                
+
                 if key[j] != json_body[check_pos] {
                     match = false
                     break
                 }
                 j = j + 1
             }
-            
+
             if match {
                 int quote_pos = i + 1 + key_len
-                
+
                 if quote_pos < json_len && json_body[quote_pos] == 34 {
                     int colon_pos = quote_pos + 1
-                    
+
                     while colon_pos < json_len && json_body[colon_pos] == 32 {
                         colon_pos = colon_pos + 1
                     }
-                    
+
                     if colon_pos < json_len && json_body[colon_pos] == 58 {
                         int val_pos = colon_pos + 1
-                        
+
                         while val_pos < json_len && json_body[val_pos] == 32 {
                             val_pos = val_pos + 1
                         }
-                        
+
                         if val_pos < json_len {
                             if json_body[val_pos] == 34 {
                                 val_pos = val_pos + 1
                                 int end_pos = val_pos
-                                
+
                                 while end_pos < json_len && json_body[end_pos] != 34 {
                                     end_pos = end_pos + 1
                                 }
-                                
+
                                 string value = ""
                                 int idx = val_pos
-                                
+
                                 while idx < end_pos {
                                     value = value + json_body[idx]
                                     idx = idx + 1
                                 }
-                                
+
                                 return value
                             }
                             else if json_body[val_pos] >= 48 && json_body[val_pos] <= 57 {
                                 int num_end = val_pos
-                                
+
                                 while num_end < json_len {
                                     int ch = json_body[num_end]
-                                    
+
                                     if ch >= 48 && ch <= 57 {
                                         num_end = num_end + 1
                                     }
@@ -194,15 +193,15 @@ func extract_json_value(string json_body, string key) string {
                                         break
                                     }
                                 }
-                                
+
                                 string value = ""
                                 int idx = val_pos
-                                
+
                                 while idx < num_end {
                                     value = value + json_body[idx]
                                     idx = idx + 1
                                 }
-                                
+
                                 return value
                             }
                         }
@@ -210,36 +209,36 @@ func extract_json_value(string json_body, string key) string {
                 }
             }
         }
-        
+
         i = i + 1
     }
-    
+
     return ""
 }
 
 func validate_json_braces(string json_body) bool {
     int i = 0
     int brace_count = 0
-    
+
     while i < len(json_body) {
         int ch = json_body[i]
-        
+
         if ch == 123 {
             brace_count = brace_count + 1
         }
         else if ch == 125 {
             brace_count = brace_count - 1
         }
-        
+
         i = i + 1
     }
-    
+
     return brace_count == 0
 }
 
 func format_error_response(int status, string error_msg) string {
     string body = "{\"error\":\"" + error_msg + "\"}"
-    
+
     string response = "HTTP/1.1 "
     response = response + int_to_string(status)
     response = response + " Error\r\n"
@@ -248,7 +247,7 @@ func format_error_response(int status, string error_msg) string {
     response = response + "Access-Control-Allow-Origin: *\r\n"
     response = response + "Connection: close\r\n\r\n"
     response = response + body
-    
+
     return response
 }
 

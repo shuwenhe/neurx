@@ -1,4 +1,5 @@
 package neurx.inference.vllm.request_scheduler
+
 func scheduler_policy_fcfs() int { 1 }
 
 func scheduler_policy_priority() int { 2 }

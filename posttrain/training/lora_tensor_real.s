@@ -1,5 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_write_binary_file}
+
 struct tensor {
     int rows
     int cols

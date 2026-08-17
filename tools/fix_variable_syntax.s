@@ -1,5 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_run_command, runtime_run_command_output}
+
 func main() {
     print("========================================\n")
     print("NeurX Variable Syntax Fixer\n")

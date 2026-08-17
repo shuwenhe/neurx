@@ -1,4 +1,5 @@
 package test
+
 func main() {
     string s = "hello"
     int i = 0

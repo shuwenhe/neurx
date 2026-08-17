@@ -1,5 +1,6 @@
 package neurx.inference.model_integration
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 func int_to_string(int value) string {
     if value == 0 {
         return "0"

@@ -1,5 +1,6 @@
 package neurx.posttrain.tools.data_preprocess
 use neurx.tensor.{tensor}
+
 struct conversation {
     []message messages
     string conversation_id

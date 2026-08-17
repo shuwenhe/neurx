@@ -1,4 +1,5 @@
 package neurx.distributed
+
 struct pipeline_parallel_config {
     int pp_degree
     int pp_rank

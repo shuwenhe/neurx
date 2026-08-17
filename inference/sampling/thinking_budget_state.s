@@ -1,4 +1,5 @@
 package neurx.inference.sampling.thinking_budget_state
+
 struct thinking_budget_config {
     int capacity
     int start_token_id

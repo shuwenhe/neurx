@@ -1,4 +1,5 @@
 package neurx.distributed.performance_monitor
+
 struct rank_metrics {
     int rank_id
     int compute_time_ms

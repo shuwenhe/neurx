@@ -2,6 +2,7 @@ package neurx.inference.hpc
 use neurx.runtime.io.{runtime_env_get, trim}
 use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, resolve_model_path_from_env, int_to_string, float_to_string}
 extern "intrinsic" func __sys_read_string(int fd, int count) string
+
 func print_line(string text) {
     print(text)
     print("\n")

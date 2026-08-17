@@ -1,5 +1,6 @@
 package neurx.inference.medical_reasoning_engine
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 func CATEGORY_UNKNOWN() int { return 0 }
 
 func CATEGORY_TREATMENT() int { return 1 }

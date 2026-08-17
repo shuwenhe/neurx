@@ -1,6 +1,7 @@
 package neurx.serving.decode
 use neurx.serving.cache.kv_cache
 use neurx.serving.sampling
+
 struct decode_state {
     int step
     int max_new_tokens

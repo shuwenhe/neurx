@@ -1,4 +1,5 @@
 package neurx.distributed.data_parallel
+
 struct data_parallel_config {
     int world_size
     int rank

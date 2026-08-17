@@ -1,4 +1,5 @@
 package neurx.tokenization.native
+
 struct UnicodeMap {
     int from_byte1
     int from_byte2
@@ -7,9 +8,11 @@ struct UnicodeMap {
 }
 []UnicodeMap unicode_table = []UnicodeMap{cap: 1000}
 int unicode_table_size = 0
+
 func init_unicode_table() {
     unicode_table_size = 0
 }
+
 func simple_tokenize(string text) []int {
     []int tokens = []int{cap: 512}
     int token_count = 0
@@ -37,6 +40,7 @@ func simple_tokenize(string text) []int {
     }
     return tokens
 }
+
 func simple_detokenize([]int token_ids) string {
     string result = ""
     if len(token_ids) == 0 {
@@ -69,6 +73,7 @@ func simple_detokenize([]int token_ids) string {
     }
     return result
 }
+
 func int_to_string(int num) string {
     if num == 0 {
         return "0"
@@ -101,6 +106,7 @@ func int_to_string(int num) string {
     }
     return result
 }
+
 func load_vocab_from_python(string vocab_path) []string {
     string cmd = "python3 -c \"import json; v = json.load(open('" + vocab_path + "')); print(' '.join(v.keys()))\" 2>/dev/null"
     string output = runtime_run_command_output(cmd)

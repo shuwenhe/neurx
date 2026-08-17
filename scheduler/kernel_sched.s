@@ -3,6 +3,7 @@ int SCHED_RT     = 0
 int SCHED_NORMAL = 1
 int SCHED_BATCH  = 2
 int SCHED_IDLE   = 3
+
 struct task_struct {
     int     pid
     string  name

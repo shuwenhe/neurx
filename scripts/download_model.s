@@ -105,49 +105,49 @@ func trim_string(string s) string {
 
 func get_model_files() []model_file_info {
     []model_file_info files = []model_file_info{cap: 6}
-    
+
     files[0] = model_file_info{
         name: "model.safetensors",
         size_bytes: 1945505792,
         checksum: "abc123def456",
         downloaded: false
     }
-    
+
     files[1] = model_file_info{
         name: "tokenizer.json",
         size_bytes: 2621440,
         checksum: "xyz789uvw123",
         downloaded: false
     }
-    
+
     files[2] = model_file_info{
         name: "config.json",
         size_bytes: 4096,
         checksum: "config123",
         downloaded: false
     }
-    
+
     files[3] = model_file_info{
         name: "generation_config.json",
         size_bytes: 2048,
         checksum: "genconfig123",
         downloaded: false
     }
-    
+
     files[4] = model_file_info{
         name: "tokenizer_config.json",
         size_bytes: 1024,
         checksum: "tokenconfig123",
         downloaded: false
     }
-    
+
     files[5] = model_file_info{
         name: ".gitattributes",
         size_bytes: 512,
         checksum: "git123",
         downloaded: false
     }
-    
+
     files
 }
 
@@ -169,32 +169,32 @@ func download_file(
     int retry_count
 ) bool {
     string file_path = config.model_dir + "/" + file_info.name
-    
+
     if check_file_exists(file_path) && config.resume_download {
         log_message(config, "✓ Already downloaded: " + file_info.name)
         return true
     }
-    
+
     string url = config.model_url_base + "/" + file_info.name
     string size_mb = int_to_string(file_info.size_bytes / 1048576)
-    
+
     log_message(config, "⏳ Downloading: " + file_info.name + " (" + size_mb + " MB)")
-    
+
     if retry_count > config.max_retries {
         log_message(config, "❌ Max retries exceeded for: " + file_info.name)
         return false
     }
-    
+
     log_message(config, "   URL: " + url)
     log_message(config, "   Destination: " + file_path)
-    
+
     return true
 }
 
 func verify_downloaded_files(download_config config, []model_file_info files) (int, int) {
     int verified = 0
     int failed = 0
-    
+
     int i = 0
     while i < len(files) {
         string file_path = config.model_dir + "/" + files[i].name
@@ -207,7 +207,7 @@ func verify_downloaded_files(download_config config, []model_file_info files) (i
         }
         i = i + 1
     }
-    
+
     (verified, failed)
 }
 
@@ -237,11 +237,11 @@ func print_download_status(download_config config, []model_file_info files) {
     println("Directory: " + config.model_dir)
     println("")
     println("Files:")
-    
+
     int i = 0
     int downloaded = 0
     int skipped = 0
-    
+
     while i < len(files) {
         string status = "⏳"
         if files[i].downloaded {
@@ -250,16 +250,16 @@ func print_download_status(download_config config, []model_file_info files) {
         } else {
             skipped = skipped + 1
         }
-        
+
         int size_mb = files[i].size_bytes / 1048576
         if size_mb == 0 {
             size_mb = 1
         }
-        
+
         println("  " + status + " " + files[i].name + " (" + int_to_string(size_mb) + " MB)")
         i = i + 1
     }
-    
+
     println("")
     println("Summary: " + int_to_string(downloaded) + " downloaded, " + int_to_string(skipped) + " failed")
     println("")
@@ -267,43 +267,43 @@ func print_download_status(download_config config, []model_file_info files) {
 
 func main() {
     download_config config = create_default_config()
-    
+
     println("╔════════════════════════════════════════════════════════════╗")
     println("║         NeurX Model Downloader (S Language)                ║")
     println("╚════════════════════════════════════════════════════════════╝")
     println("")
-    
+
     string model_name_env = trim_string(runtime_env_get("NEURX_MODEL_NAME", ""))
     if len(model_name_env) > 0 {
         config.model_name = model_name_env
     }
-    
+
     string model_dir_env = trim_string(runtime_env_get("NEURX_MODEL_DIR", ""))
     if len(model_dir_env) > 0 {
         config.model_dir = model_dir_env
     }
-    
+
     println("Model: " + config.model_name)
     println("Target: " + config.model_dir)
     println("")
-    
+
     if !check_model_directory(config) {
         println("❌ Failed to create model directory")
         return
     }
-    
+
     println("✓ Model directory ready")
     println("")
-    
+
     []model_file_info files = get_model_files()
-    
+
     log_message(config, "Starting model download: " + config.model_name)
     log_message(config, "Target directory: " + config.model_dir)
-    
+
     int downloaded = 0
     int skipped = 0
     int failed = 0
-    
+
     int i = 0
     while i < len(files) {
         if download_file(config, files[i], 0) {
@@ -314,16 +314,16 @@ func main() {
         }
         i = i + 1
     }
-    
+
     (int verified, int verify_failed) = verify_downloaded_files(config, files)
-    
+
     print_download_status(config, files)
-    
+
     println("✓ Download completed")
     println("  Downloaded: " + int_to_string(verified) + " files")
     println("  Failed: " + int_to_string(verify_failed) + " files")
     println("")
-    
+
     if verify_failed == 0 {
         println("✅ All files downloaded successfully!")
         log_message(config, "Download completed successfully")

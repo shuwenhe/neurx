@@ -1,5 +1,6 @@
 package neurx.scheduler.training_scheduler
 use neurx.scheduler.schedulers
+
 struct lr_scheduler {
     float lr
     float base_lr

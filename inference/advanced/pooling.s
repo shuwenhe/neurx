@@ -1,4 +1,5 @@
 package neurx.inference.advanced.pooling
+
 func pooling_copy_row([]float hidden_states, int sequence_length, int hidden_size, int row) []float {
     []float output = []float{cap: hidden_size}
     if sequence_length <= 0 || hidden_size <= 0 || row < 0 || row >= sequence_length || len(hidden_states) < sequence_length * hidden_size {

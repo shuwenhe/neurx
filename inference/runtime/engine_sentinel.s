@@ -1,4 +1,5 @@
 package neurx.inference.runtime.engine_sentinel
+
 func engine_status_healthy() int { 1 }
 
 func engine_status_unhealthy() int { 2 }

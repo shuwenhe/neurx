@@ -1,4 +1,5 @@
 package neurx.moe.core
+
 struct moe_config {
     int hidden_dim
     int latent_dim

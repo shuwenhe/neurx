@@ -3,6 +3,7 @@ use neurx.inference.runtime.model_manifest
 use neurx.inference.runtime.worker_cluster
 use neurx.inference.runtime.engine_lifecycle
 use neurx.inference.metrics.observability
+
 func engine_request_active_status() int { 1 }
 
 func engine_request_finished_status() int { 2 }

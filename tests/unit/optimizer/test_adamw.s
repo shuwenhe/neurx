@@ -1,4 +1,5 @@
 package neurx.tests.optimizer
+
 struct adamw_test_state {
     float param
     float grad

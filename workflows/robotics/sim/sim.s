@@ -1,4 +1,5 @@
 package neurx.workflows.robotics.sim
+
 struct robotics_sim_state {
     string env_name
     int episodes

@@ -1,6 +1,4 @@
 
-
-
 import "types.s"
 import "executor_base.s"
 import "prefill_executor.s"
@@ -9,11 +7,10 @@ import "executor_scheduler.s"
 import "cache_manager.s"
 import "distributed_executor.s"
 
-
 func BasicExecutorExample() {
     println("=== Basic Executor Example ===")
 
-    
+
     config := ExecutorConfig{
         executor_id: 0,
         model_name: "llama-7b",
@@ -26,15 +23,15 @@ func BasicExecutorExample() {
         timeout_ms: DEFAULT_ITERATION_TIMEOUT,
     }
 
-    
+
     executor := NewBaseExecutor(config)
     result := executor.Initialize()
-    
+
     if result.success == 1 {
         println("Executor initialized successfully")
     }
 
-    
+
     for i := 0; i < 10; i++ {
         sequence_id := "seq_" + string(i)
         executor.AddSequence(sequence_id, i % 3)
@@ -42,7 +39,7 @@ func BasicExecutorExample() {
 
     println("Active sequences:", executor.sequence_count)
 
-    
+
     for iter := 0; iter < 3; iter++ {
         result := executor.ExecuteIteration()
         if result.success == 1 {
@@ -50,17 +47,16 @@ func BasicExecutorExample() {
         }
     }
 
-    
+
     stats := executor.GetStatistics()
     println("Total iterations:", stats.completed_iterations)
     println("Total tokens:", stats.total_tokens)
     println("Avg latency:", stats.avg_latency, "ms")
 
-    
+
     executor.Shutdown()
     println("Executor shutdown\n")
 }
-
 
 func PrefillExecutorExample() {
     println("=== Prefill Executor Example ===")
@@ -81,18 +77,18 @@ func PrefillExecutorExample() {
     prefill := NewPrefillExecutor(config, prefill_config)
     prefill.Initialize()
 
-    
+
     sequences := make([]string, 8)
     prompt_tokens := make([]i32, 8)
-    
+
     for i := 0; i < 8; i++ {
         sequences[i] = "prompt_" + string(i)
-        prompt_tokens[i] = 128 + i*16  
+        prompt_tokens[i] = 128 + i*16
     }
 
-    
+
     result := prefill.ProcessPrefill(sequences, prompt_tokens)
-    
+
     if result.success == 1 {
         println("Prefill phase completed")
         println("Tokens processed:", result.tokens_processed)
@@ -102,7 +98,6 @@ func PrefillExecutorExample() {
     prefill.Shutdown()
     println("Prefill executor shutdown\n")
 }
-
 
 func DecodeExecutorExample() {
     println("=== Decode Executor Example ===")
@@ -123,17 +118,17 @@ func DecodeExecutorExample() {
     decoder := NewDecodeExecutor(config, decode_config)
     decoder.Initialize()
 
-    
+
     sequences := make([]string, 32)
     for i := 0; i < 32; i++ {
         sequences[i] = "generation_" + string(i)
         decoder.base.AddSequence(sequences[i], 0)
     }
 
-    
+
     for step := 0; step < 5; step++ {
         result := decoder.ProcessDecodeStep(sequences)
-        
+
         if result.success == 1 {
             println("Decode step", step, "completed")
             println("Latency:", result.latency_ms, "ms")
@@ -144,13 +139,12 @@ func DecodeExecutorExample() {
     println("Decode executor shutdown\n")
 }
 
-
 func ExecutionSchedulerExample() {
     println("=== Execution Scheduler Example ===")
 
     scheduler := NewExecutionScheduler(SCHEDULE_DYNAMIC)
 
-    
+
     for i := 0; i < 16; i++ {
         if i % 2 == 0 {
             scheduler.AddPrefillSequence("prefill_" + string(i))
@@ -161,10 +155,10 @@ func ExecutionSchedulerExample() {
 
     println("Pending sequences:", scheduler.GetPendingSequenceCount())
 
-    
+
     for iter := 0; iter < 3; iter++ {
         schedule := scheduler.PlanIteration(128, 256)
-        
+
         println("Iteration", iter)
         println("  Prefill batch:", schedule.prefill_count)
         println("  Decode batch:", schedule.decode_count)
@@ -177,7 +171,6 @@ func ExecutionSchedulerExample() {
     println()
 }
 
-
 func KVCacheExample() {
     println("=== KV Cache Management Example ===")
 
@@ -185,11 +178,11 @@ func KVCacheExample() {
 
     println("Total cache:", cache_manager.total_size_gb, "GB")
 
-    
+
     for i := 0; i < 4; i++ {
         seq_id := "seq_" + string(i)
         result := cache_manager.AllocateBlock(seq_id, 0, 256)
-        
+
         if result.success == 1 {
             println("Allocated cache block for", seq_id)
         }
@@ -199,7 +192,7 @@ func KVCacheExample() {
     println("Free:", cache_manager.free_mb, "MB")
     println("Utilization:", cache_manager.GetCacheUtilization(), "%")
 
-    
+
     cache_manager.FreeSequenceBlocks("seq_0")
     println("After freeing seq_0:")
     println("Allocated:", cache_manager.allocated_mb, "MB")
@@ -209,7 +202,6 @@ func KVCacheExample() {
     println("Allocated blocks:", stats["allocated_blocks"])
     println()
 }
-
 
 func PrefillDecodeIterationExample() {
     println("=== Prefill + Decode Iteration Example ===")
@@ -227,7 +219,7 @@ func PrefillDecodeIterationExample() {
 
     scheduler := NewExecutionScheduler(SCHEDULE_DYNAMIC)
 
-    
+
     for i := 0; i < 16; i++ {
         scheduler.AddPrefillSequence("prompt_" + string(i))
         executor.AddSequence("prompt_" + string(i), 0)
@@ -240,7 +232,7 @@ func PrefillDecodeIterationExample() {
     println("  Prefill sequences:", schedule1.prefill_count)
     println("  Tokens processed:", result1.tokens_processed)
 
-    
+
     for i := 16; i < 24; i++ {
         scheduler.AddPrefillSequence("prompt_" + string(i))
     }
@@ -255,7 +247,6 @@ func PrefillDecodeIterationExample() {
     executor.Shutdown()
     println("Prefill-Decode iteration example complete\n")
 }
-
 
 func DistributedExecutorExample() {
     println("=== Distributed Executor Example ===")
@@ -285,12 +276,12 @@ func DistributedExecutorExample() {
         println("Tensor parallel:", dist_executor.tensor_parallel_size)
     }
 
-    
+
     for i := 0; i < 16; i++ {
         dist_executor.base.AddSequence("seq_" + string(i), 0)
     }
 
-    
+
     sequences := make([]string, 16)
     for i := 0; i < 16; i++ {
         sequences[i] = "seq_" + string(i)
@@ -302,7 +293,7 @@ func DistributedExecutorExample() {
         println("  Rank", rank, ":", len(balanced[rank]), "sequences")
     }
 
-    
+
     result = dist_executor.ExecuteDistributedIteration()
     if result.success == 1 {
         println("Distributed iteration completed")
@@ -312,7 +303,6 @@ func DistributedExecutorExample() {
     dist_executor.Shutdown()
     println("Distributed executor shutdown\n")
 }
-
 
 func main() {
     println("╔════════════════════════════════════════╗")

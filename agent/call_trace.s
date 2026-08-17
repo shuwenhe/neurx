@@ -24,6 +24,7 @@ string CALL_TRACE_ANSWER    = "neurx/agent/answer_synthesizer.s"
 string CALL_TRACE_SESSION   = "neurx/session/session.s"
 string CALL_TRACE_MEMORY    = "neurx/memory/memory.s"
 string CALL_TRACE_MEM_KEY   = "call_trace_log"
+
 func call_trace_make_entry(int step, string phase, string module_path, string func_name, bool ok) string {
     string status = "ok"
     if !ok {

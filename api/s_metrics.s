@@ -2,20 +2,20 @@ package neurx.monitoring
 
 func int_to_string(int n) string {
     if n == 0 { return "0" }
-    
+
     string result = ""
     bool negative = false
     int num = n
-    
+
     if num < 0 {
         negative = true
         num = 0 - num
     }
-    
+
     while num > 0 {
         int digit = num % 10
         string digit_str = ""
-        
+
         if digit == 0 { digit_str = "0" }
         else if digit == 1 { digit_str = "1" }
         else if digit == 2 { digit_str = "2" }
@@ -26,15 +26,15 @@ func int_to_string(int n) string {
         else if digit == 7 { digit_str = "7" }
         else if digit == 8 { digit_str = "8" }
         else if digit == 9 { digit_str = "9" }
-        
+
         result = digit_str + result
         num = num / 10
     }
-    
+
     if negative {
         result = "-" + result
     }
-    
+
     return result
 }
 
@@ -92,17 +92,17 @@ func json_error_summary() string {
 
 func main() {
     print("✅ 纯 S 性能监控系统已编译\n")
-    
+
     string metrics = format_metrics_json(10000, 45, 200, 2)
     print("系统指标: ")
     print(metrics)
     print("\n")
-    
+
     string endpoint_stats = format_endpoint_stats("/v1/chat/completions", 5000, 4900, 100)
     print("端点统计: ")
     print(endpoint_stats)
     print("\n")
-    
+
     string latency = format_latency_histogram(20, 50, 100, 200)
     print("延迟分布: ")
     print(latency)

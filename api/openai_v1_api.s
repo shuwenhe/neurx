@@ -136,17 +136,17 @@ func (openai_api_server* srv) create_chat_completion(chat_completion_request* re
     if !srv.verify_api_key(req.metadata["authorization"]) {
         return nil, nil
     }
-    
+
     api_req := &completion_request{
         prompt: "",
         model_id: req.model,
     }
-    
+
     resp, err := srv.engine.complete(api_req)
     if err != nil {
         return nil, err
     }
-    
+
     choice := &chat_completion_choice{
         index: 0,
         message: &chat_completion_message{
@@ -156,7 +156,7 @@ func (openai_api_server* srv) create_chat_completion(chat_completion_request* re
         finish_reason: "stop",
         logprobs: 0.0,
     }
-    
+
     openai_resp := &chat_completion_response{
         id: "chatcmpl-" + core.generate_uuid(),
         object: "chat.completion",
@@ -170,7 +170,7 @@ func (openai_api_server* srv) create_chat_completion(chat_completion_request* re
         },
         system_fingerprint: core.generate_uuid(),
     }
-    
+
     return openai_resp, nil
 }
 
@@ -178,12 +178,12 @@ func (openai_api_server* srv) create_chat_completion_stream(chat_completion_requ
     if !srv.verify_api_key(req.metadata["authorization"]) {
         return nil
     }
-    
+
     api_req := &completion_request{
         prompt: "",
         model_id: req.model,
     }
-    
+
     return srv.engine.complete_stream(api_req)
 }
 
@@ -192,12 +192,12 @@ func (openai_api_server* srv) create_completion(completion_request* req) (comple
         prompt: req.prompt,
         model_id: req.model,
     }
-    
+
     resp, err := srv.engine.complete(api_req)
     if err != nil {
         return nil, err
     }
-    
+
     openai_resp := &completion_response{
         id: "cmpl-" + core.generate_uuid(),
         object: "text_completion",
@@ -210,7 +210,7 @@ func (openai_api_server* srv) create_completion(completion_request* req) (comple
             total_tokens: resp.input_tokens + resp.output_tokens,
         },
     }
-    
+
     return openai_resp, nil
 }
 

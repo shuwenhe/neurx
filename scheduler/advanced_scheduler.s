@@ -1,4 +1,5 @@
 package neurx.scheduler.advanced_scheduler
+
 func new_request(int req_id, int input_len, int max_len) []int {
     []int req = []int{req_id, 0, input_len, max_len, 0, 0, 0, input_len}
     return req

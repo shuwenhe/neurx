@@ -144,14 +144,14 @@ func (mcp_server* srv) call_tool(string tool_name, map[string]interface{} params
             error_message: "Tool not found",
         }, nil
     }
-    
+
     result := &tool_call_result{
         tool_name: tool_name,
         result: nil,
         success: true,
         error_message: "",
     }
-    
+
     return result, nil
 }
 
@@ -178,7 +178,7 @@ func (mcp_server* srv) process_request(mcp_request* req) (mcp_response*, error) 
         result: nil,
         error: nil,
     }
-    
+
     switch req.method {
     case "initialize":
         resp.result = map[string]interface{}{
@@ -193,37 +193,37 @@ func (mcp_server* srv) process_request(mcp_request* req) (mcp_response*, error) 
                 "version": srv.server_version,
             },
         }
-    
+
     case "tools/list":
         tools, _ := srv.list_tools()
         resp.result = map[string]interface{}{
             "tools": tools,
         }
-    
+
     case "resources/list":
         resources, _ := srv.list_resources()
         resp.result = map[string]interface{}{
             "resources": resources,
         }
-    
+
     case "prompts/list":
         prompts, _ := srv.list_prompts()
         resp.result = map[string]interface{}{
             "prompts": prompts,
         }
-    
+
     case "tools/call":
         tool_name := req.params["name"]
         tool_result, _ := srv.call_tool(tool_name, req.params)
         resp.result = tool_result
-    
+
     default:
         resp.error = map[string]interface{}{
             "code": -32601,
             "message": "Method not found",
         }
     }
-    
+
     return resp, nil
 }
 

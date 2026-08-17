@@ -1,4 +1,5 @@
 package neurx.distributed.tp
+
 struct tp_state {
     int world_size
     int rank

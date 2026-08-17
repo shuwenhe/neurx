@@ -1,6 +1,7 @@
 package neurx.tests.paged_continuous_batch_test
 import "neurx.attention.paged_attention_memory"
 import "neurx.scheduler.continuous_batch_scheduler"
+
 func test_paged_kv_allocation() bool {
     mgr := paged_attention_memory.new_paged_kv_cache_manager(
         100,

@@ -1,4 +1,5 @@
 package neurx.distributed.inference
+
 struct inference_coordinator_config {
     int world_size
     int rank

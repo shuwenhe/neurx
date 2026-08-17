@@ -1,5 +1,6 @@
 package neurx.posttrain.distillation.topk
 use neurx.tensor
+
 struct topk_kl_config {
     int top_k
     int chunk_size

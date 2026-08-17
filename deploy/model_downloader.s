@@ -1,4 +1,5 @@
 package neurx.deploy.model_downloader
+
 func download_model_from_huggingface(
     string model_id,
     string output_dir,

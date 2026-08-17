@@ -12,30 +12,30 @@ const (
 struct cache_config {
     bool enable_cache
     cache_policy policy
-    
+
     int32 cache_size_mb
     int32 cache_capacity
-    
+
     bool enable_prefix_caching
     float32 prefix_cache_threshold
     int32 prefix_cache_num_blocks
-    
+
     bool enable_prompt_caching
     bool enable_request_caching
     bool enable_token_caching
-    
+
     int32 cache_line_size
     int32 cache_associativity
-    
+
     float32 cache_hit_threshold
     float32 cache_eviction_ratio
-    
+
     bool enable_smart_cache_management
     float32 cache_warmup_ratio
-    
+
     int32 cache_flush_interval_ms
     bool enable_adaptive_cache_sizing
-    
+
     map[string]interface{} extra_config
 }
 

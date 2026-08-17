@@ -1,5 +1,6 @@
 package neurx.posttrain.optimization.seqlen_balancing
 use neurx.tensor
+
 struct seqlen_balance_config {
     int target_num_batches
     bool sort_descending

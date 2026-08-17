@@ -1,4 +1,5 @@
 package neurx.distributed.inference
+
 struct comm_primitive_config {
     string backend
     int rank

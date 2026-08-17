@@ -8,11 +8,13 @@ int IM_START_ID = 151644
 int IM_END_ID = 151645
 string SPACE_TOKEN = "Ġ"
 string NEWLINE_TOKEN = "Ċ"
+
 struct TokenPair {
     string left
     string right
     int priority
 }
+
 struct VocabEntry {
     string token_str
     int token_id
@@ -22,6 +24,7 @@ int merge_rules_count = 0
 []VocabEntry vocab_cache = []VocabEntry{cap: 151700}
 int vocab_cache_count = 0
 bool tokenizer_initialized = false
+
 func init_tokenizer() {
     if tokenizer_initialized {
         return
@@ -30,6 +33,7 @@ func init_tokenizer() {
     load_merge_rules()
     load_vocabulary()
 }
+
 func load_merge_rules() {
     string model_dir = runtime_env_get("NEURX_MODEL_DIR", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     string merges_file = model_dir + "/merges.txt"
@@ -59,6 +63,7 @@ func load_merge_rules() {
         i = i + 1
     }
 }
+
 func load_vocabulary() {
     string model_dir = runtime_env_get("NEURX_MODEL_DIR", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     string vocab_file = model_dir + "/vocab.json"
@@ -68,6 +73,7 @@ func load_vocabulary() {
     }
     parse_json_vocab(json_content)
 }
+
 func parse_json_vocab(string json_str) {
     vocab_cache_count = 0
     string content = json_str
@@ -106,6 +112,7 @@ func parse_json_vocab(string json_str) {
         i = i + 1
     }
 }
+
 func string_last_index_of(string text, string ch) int {
     int last_idx = -1
     int i = 0
@@ -117,6 +124,7 @@ func string_last_index_of(string text, string ch) int {
     }
     return last_idx
 }
+
 func string_trim(string text) string {
     int start = 0
     int end = len(text)
@@ -134,6 +142,7 @@ func string_trim(string text) string {
     }
     return __host_slice(text, start, end)
 }
+
 func vocab_lookup(string token_str) int {
     int i = 0
     while i < vocab_cache_count {
@@ -144,6 +153,7 @@ func vocab_lookup(string token_str) int {
     }
     return -1
 }
+
 func vocab_reverse_lookup(int token_id) string {
     int i = 0
     while i < vocab_cache_count {
@@ -154,6 +164,7 @@ func vocab_reverse_lookup(int token_id) string {
     }
     return ""
 }
+
 func encode_text_bpe(string text) []int {
     init_tokenizer()
     []int token_ids = []int{cap: 512}
@@ -177,6 +188,7 @@ func encode_text_bpe(string text) []int {
     }
     return token_ids
 }
+
 func tokenize_to_word_pieces(string text) []string {
     []string pieces = []string{cap: 512}
     int piece_count = 0
@@ -207,6 +219,7 @@ func tokenize_to_word_pieces(string text) []string {
     }
     return pieces
 }
+
 func apply_bpe_merges([]string pieces) []string {
     []string result = pieces
     int merge_idx = 0
@@ -217,6 +230,7 @@ func apply_bpe_merges([]string pieces) []string {
     }
     return result
 }
+
 func apply_single_merge([]string pieces, string left, string right) []string {
     []string result = []string{cap: 512}
     int result_count = 0
@@ -234,6 +248,7 @@ func apply_single_merge([]string pieces, string left, string right) []string {
     }
     return result
 }
+
 func decode_tokens_bpe([]int token_ids) string {
     init_tokenizer()
     string result = ""
@@ -267,6 +282,7 @@ extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func runtime_env_get(string key, string default_val) string
 extern "intrinsic" func runtime_read_file(string path) string
 extern "intrinsic" func print(string text) void
+
 func test_qwen_tokenizer() {
     print("=== Qwen Tokenizer Test ===\n")
     string test_text = "你是"
@@ -285,6 +301,7 @@ func test_qwen_tokenizer() {
     string decoded = decode_tokens_bpe(tokens)
     print("Decoded: " + decoded + "\n")
 }
+
 func int_to_string(int num) string {
     if num == 0 {
         return "0"

@@ -1,4 +1,5 @@
 package neurx.posttrain.trainer
+
 struct trainer_config {
     string model_path
     string data_file

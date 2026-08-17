@@ -1,6 +1,7 @@
 package neurx.pretrain.loop
 use neurx.pretrain.config
 use neurx.pretrain.data
+
 struct pretrain_loop_state {
     pretrain_config cfg
     pretrain_data_state data

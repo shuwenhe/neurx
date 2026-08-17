@@ -1,4 +1,5 @@
 package neurx.serving.router.cache_aware_router
+
 func cache_route_none() int { 0 }
 
 func cache_route_affinity() int { 1 }

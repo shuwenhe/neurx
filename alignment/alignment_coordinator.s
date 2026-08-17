@@ -1,6 +1,7 @@
 package neurx.alignment.alignment_coordinator
 use neurx.alignment.supervised_finetuning.{sft_config, new_sft_config, sft_trainer}
 use neurx.alignment.rlhf_training.{ppo_config, new_ppo_config, rlhf_trainer}
+
 struct alignment_stage {
     string stage_name
     int steps_total

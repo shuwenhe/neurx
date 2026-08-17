@@ -21,6 +21,7 @@ use std.ai.nn.modules.{linear, embedding, layer_norm, multi_head_attention,
                          new_mha, new_feed_forward, new_transformer_block,
                          new_dropout, new_relu, new_gelu, new_silu, new_sigmoid, new_softmax,
                          new_sequential, count_parameters, print_module_summary}
+
 struct gptconfig {
     int vocab_size
     int embed_dim

@@ -1,4 +1,5 @@
 package neurx.attention.core
+
 struct attention_config {
     int hidden_dim
     int num_attention_heads

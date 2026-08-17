@@ -1,4 +1,5 @@
 package neurx.deploy.performance_monitor
+
 struct performance_metric {
     string metric_name
     float metric_value

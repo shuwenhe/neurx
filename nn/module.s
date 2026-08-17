@@ -2,6 +2,7 @@ package neurx.nn
 use neurx.tensor.tensor
 use neurx.nn.conv
 use neurx.nn.rnn
+
 struct parameter {
     tensor value
     string name

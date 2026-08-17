@@ -1,4 +1,5 @@
 package neurx.einsum
+
 struct tensor {
     []float data
     []int shape

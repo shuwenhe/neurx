@@ -171,7 +171,7 @@ func (kernel_registry* kr) get_kernel(kernel_type kt, compute_capability cap) (i
 func (kernel_registry* kr) select_best_kernel(kernel_type kt, []compute_capability available_caps) interface{} {
     best_priority := int32(-1)
     best_kernel := nil
-    
+
     for _, entry := range kr.kernels {
         if entry.kernel_type == kt {
             if entry.priority > best_priority {

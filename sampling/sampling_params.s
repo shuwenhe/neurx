@@ -1,4 +1,5 @@
 package neurx.sampling.sampling_params
+
 func apply_temperature([]float logits, float temperature) []float {
     if temperature <= 0.0 {
         return logits

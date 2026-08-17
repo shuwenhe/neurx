@@ -1,4 +1,5 @@
 module safetensors_io
+
 struct tensor_meta {
     string name
     []int shape

@@ -1,5 +1,6 @@
 package neurx.inference.attention_example
 use neurx.inference.attention_integration
+
 struct example_config {
     int num_layers
     int num_heads

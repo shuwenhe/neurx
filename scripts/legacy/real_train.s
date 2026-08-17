@@ -1,5 +1,6 @@
 package main
 use std.io.println
+
 func main() {
     println("========================================")
     println("NeurX Real Training Pipeline")

@@ -1,4 +1,5 @@
 package neurx.inference.cache.prefix_cache
+
 struct neurx_prefix_cache_state {
     prefix_cache_state cache
     int key_space

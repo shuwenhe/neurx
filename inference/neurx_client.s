@@ -1,5 +1,6 @@
 package neurx.inference.client
 import neurx.util.*
+
 struct chat_message {
     string role
     string content

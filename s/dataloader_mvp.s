@@ -1,4 +1,5 @@
 package neurx.dataloader_mvp
+
 struct dataloader_config {
     int batch_size
     int seq_len

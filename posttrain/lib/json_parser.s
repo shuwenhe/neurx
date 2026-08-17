@@ -1,5 +1,6 @@
 package neurx.posttrain.lib.json_parser
 use std.io.{readfile, writefile}
+
 struct json_value {
     int type
     bool bool_value

@@ -1,4 +1,5 @@
 package neurx.inference.continuous_batching_v2
+
 struct inference_request {
     int request_id
     []int prompt_tokens

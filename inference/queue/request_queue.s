@@ -1,4 +1,5 @@
 package neurx.inference.queue.request_queue
+
 struct neurx_request_queue_state {
     []string request_ids
     []int prefill_tokens

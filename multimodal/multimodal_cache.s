@@ -22,13 +22,13 @@ struct multimodal_cache {
     cache_policy policy
     int32 max_cache_size
     int32 current_cache_size
-    
+
     map[string]cache_entry* cache_data
     vec[string] access_order
-    
+
     int32 hit_count
     int32 miss_count
-    
+
     bool enable_compression
 }
 
@@ -49,13 +49,13 @@ func (multimodal_cache* cache) put(string key, vec[uint8] data, modality_type mo
     if len(key) == 0 {
         return false
     }
-    
+
     data_size := len(data)
-    
+
     if data_size > cache.max_cache_size {
         return false
     }
-    
+
     if _, exists := cache.cache_data[key]; exists {
         entry := cache.cache_data[key]
         old_size := entry.size_bytes
@@ -65,16 +65,16 @@ func (multimodal_cache* cache) put(string key, vec[uint8] data, modality_type mo
         cache.current_cache_size = cache.current_cache_size - old_size + data_size
         return true
     }
-    
+
     needed_space := cache.current_cache_size + data_size
-    
+
     for needed_space > cache.max_cache_size && len(cache.cache_data) > 0 {
         evicted_key := cache.evict_one()
         if evicted_key == "" {
             break
         }
     }
-    
+
     entry := &cache_entry{
         cache_key: key,
         cached_data: data,
@@ -83,11 +83,11 @@ func (multimodal_cache* cache) put(string key, vec[uint8] data, modality_type mo
         size_bytes: data_size,
         modality: modality,
     }
-    
+
     cache.cache_data[key] = entry
     cache.access_order = append(cache.access_order, key)
     cache.current_cache_size = cache.current_cache_size + data_size
-    
+
     return true
 }
 
@@ -98,7 +98,7 @@ func (multimodal_cache* cache) get(string key) option[vec[uint8]] {
         cache.hit_count = cache.hit_count + 1
         return option[vec[uint8]]{value: entry.cached_data}
     }
-    
+
     cache.miss_count = cache.miss_count + 1
     return option[vec[uint8]]{}
 }
@@ -107,9 +107,9 @@ func (multimodal_cache* cache) evict_one() string {
     if len(cache.cache_data) == 0 {
         return ""
     }
-    
+
     var evict_key string
-    
+
     if cache.policy == policy_lru {
         min_time := int64(9223372036854775807)
         for key, entry := range cache.cache_data {
@@ -131,12 +131,12 @@ func (multimodal_cache* cache) evict_one() string {
             evict_key = cache.access_order[0]
         }
     }
-    
+
     if evict_key != "" {
         entry := cache.cache_data[evict_key]
         cache.current_cache_size = cache.current_cache_size - entry.size_bytes
         delete(cache.cache_data, evict_key)
-        
+
         for i := 0; i < len(cache.access_order); i = i + 1 {
             if cache.access_order[i] == evict_key {
                 cache.access_order = append(cache.access_order[:i], cache.access_order[i+1:]...)
@@ -144,7 +144,7 @@ func (multimodal_cache* cache) evict_one() string {
             }
         }
     }
-    
+
     return evict_key
 }
 
@@ -157,17 +157,17 @@ func (multimodal_cache* cache) delete(string key) bool {
     if entry, exists := cache.cache_data[key]; exists {
         cache.current_cache_size = cache.current_cache_size - entry.size_bytes
         delete(cache.cache_data, key)
-        
+
         for i := 0; i < len(cache.access_order); i = i + 1 {
             if cache.access_order[i] == key {
                 cache.access_order = append(cache.access_order[:i], cache.access_order[i+1:]...)
                 break
             }
         }
-        
+
         return true
     }
-    
+
     return false
 }
 
@@ -179,11 +179,11 @@ func (multimodal_cache* cache) clear() {
 
 func (multimodal_cache* cache) get_hit_rate() float32 {
     total := cache.hit_count + cache.miss_count
-    
+
     if total == 0 {
         return 0.0
     }
-    
+
     return float32(cache.hit_count) / float32(total)
 }
 

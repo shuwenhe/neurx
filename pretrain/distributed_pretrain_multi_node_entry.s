@@ -14,6 +14,7 @@ use neurx.distributed.nccl_id_manager.{
     load_nccl_id_from_shared_storage,
 }
 use neurx.runtime.io.{runtime_env_get}
+
 func main() {
     print("="*60)
     print("NeurX Multi-Node Distributed Pretraining entry")

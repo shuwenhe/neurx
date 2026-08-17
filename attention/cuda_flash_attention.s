@@ -1,4 +1,5 @@
 package neurx.attention.cuda
+
 func launch_flash_attention_forward(
     cuda_context ctx,
     uint64 ptr_q,

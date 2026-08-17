@@ -4,6 +4,7 @@ use std.math
 use std.time
 use std.strings
 println := io.println
+
 struct compile_config {
     source_file: string
     output_binary: string

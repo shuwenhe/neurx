@@ -44,11 +44,11 @@ func main() {
     print("║          Real model-backed CPU execution path                  ║\n")
     print("╚════════════════════════════════════════════════════════════════╝\n")
     print("\n")
-    
+
     string model_path = "/app/shuwen/model/Qwen2.5-0.5B-Instruct/model.safetensors"
     string prompt = "Hello, I am"
     int max_new_tokens = 128
-    
+
     print("Model Path: " + model_path + "\n")
     print("Prompt: " + prompt + "\n")
     print("Max New Tokens: " + int_to_string(max_new_tokens) + "\n")
@@ -62,4 +62,3 @@ func main() {
     print("\n")
     print("Status: ok\n")
 }
-

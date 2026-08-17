@@ -1,4 +1,5 @@
 package neurx.loss.dpo_loss
+
 func exp_approx(float x) float {
     float x2 = x * x
     float x3 = x2 * x

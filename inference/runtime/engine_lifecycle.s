@@ -1,4 +1,5 @@
 package neurx.inference.runtime.engine_lifecycle
+
 func engine_awake_status() int { 1 }
 
 func engine_sleeping_status() int { 2 }

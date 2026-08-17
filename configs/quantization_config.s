@@ -16,30 +16,30 @@ const (
 struct quantization_config {
     quantization_method method
     bool enable_quantization
-    
+
     int32 num_bits
     bool use_sym_quant
     bool per_channel_quantization
-    
+
     string calibration_method
     int32 calibration_steps
     float32 calibration_q_alpha
-    
+
     bool enable_dynamic_quantization
     bool enable_static_quantization
-    
+
     bool enable_int8_activation
     bool enable_int8_weight
-    
+
     float32 scale_factor
     int32 zero_point
-    
+
     bool use_smooth_quant
     float32 smooth_quant_alpha
-    
+
     bool enable_mixed_precision
     []string mixed_precision_layers
-    
+
     map[string]interface{} extra_config
 }
 

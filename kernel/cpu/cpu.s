@@ -1,6 +1,7 @@
 int CPUFREQ_POWERSAVE    = 0
 int CPUFREQ_ONDEMAND     = 1
 int CPUFREQ_PERFORMANCE  = 2
+
 struct cpu_info {
     int    cpu_id
     int    numa_node
