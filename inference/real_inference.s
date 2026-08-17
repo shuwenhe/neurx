@@ -3,6 +3,7 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_fi
 extern "intrinsic" func __host_read_binary_file(string path) []int
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 func pow_int(int base, int exp) int {
     int result = 1
     int i = 0
@@ -32,16 +33,31 @@ func find_substring_bytes([]int bytes, string needle, int start_pos) int {
     if start < 0 {
         start = 0
     }
-    if len(needle) == 0 || len(needle) > len(bytes) - start {
+    if start >= len(bytes) {
+        return -1
+    }
+    if len(needle) == 0 {
+        return start
+    }
+    if len(needle) > len(bytes) {
+        return -1
+    }
+    int max_search = len(bytes) - len(needle)
+    if max_search < start {
         return -1
     }
     int i = start
-    while i <= len(bytes) - len(needle) {
+    while i <= max_search && i < len(bytes) {
         int j = 0
-        while j < len(needle) && bytes[i + j] == needle[j] {
+        int match = 1
+        while j < len(needle) {
+            if i + j >= len(bytes) || bytes[i + j] != needle[j] {
+                match = 0
+                break
+            }
             j = j + 1
         }
-        if j == len(needle) {
+        if match == 1 {
             return i
         }
         i = i + 1
@@ -50,13 +66,22 @@ func find_substring_bytes([]int bytes, string needle, int start_pos) int {
 }
 
 func skip_to_digit_bytes([]int bytes, int pos) int {
+    if pos < 0 {
+        return -1
+    }
+    if pos >= len(bytes) {
+        return -1
+    }
     int cursor = pos
-    while cursor < len(bytes) {
+    int max_iterations = 10000
+    int iterations = 0
+    while cursor < len(bytes) && iterations < max_iterations {
         int c = bytes[cursor]
         if c >= 48 && c <= 57 {
             return cursor
         }
         cursor = cursor + 1
+        iterations = iterations + 1
     }
     -1
 }
@@ -85,12 +110,21 @@ func tensor_index_record(int offset, int size, int found) []int {
 
 func parse_tensor_index([]int metadata, string tensor_name) []int {
     []int result = tensor_index_record(0, 0, 0)
+    if len(metadata) == 0 || len(tensor_name) == 0 {
+        return result
+    }
     int name_pos = find_substring_bytes(metadata, "\"" + tensor_name + "\"", 0)
     if name_pos < 0 {
         return result
     }
+    if name_pos >= len(metadata) - 20 {
+        return result
+    }
     int offset_key = find_substring_bytes(metadata, "\"data_offsets\"", name_pos)
     if offset_key < 0 {
+        return result
+    }
+    if offset_key >= len(metadata) - 10 {
         return result
     }
     int first_digit = skip_to_digit_bytes(metadata, offset_key)
@@ -107,6 +141,9 @@ func parse_tensor_index([]int metadata, string tensor_name) []int {
         return result
     }
     int end_value = parse_int_at_bytes(metadata, second_digit)
+    if end_value <= offset_value {
+        return result
+    }
     result[0] = offset_value
     result[1] = end_value - offset_value
     result[2] = 1
@@ -515,13 +552,25 @@ func read_file_bytes_range(string model_path, int start, int count) []int {
 }
 
 func read_tensor_bytes(string model_path, []int idx) []int {
-    if len(idx) < 3 || idx[2] == 0 {
+    if len(idx) < 3 {
+        return []int{cap: 0}
+    }
+    if idx[2] == 0 || idx[1] <= 0 {
+        return []int{cap: 0}
+    }
+    if idx[0] < 0 {
+        return []int{cap: 0}
+    }
+    if idx[1] > 1000000000 {
         return []int{cap: 0}
     }
     read_file_bytes_range(model_path, 8 + idx[0], idx[1])
 }
 
 func layer_forward_score(int hidden, []int metadata, string model_path, int layer_idx) int {
+    if layer_idx < 0 || layer_idx >= 24 {
+        return 0
+    }
     []int q_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "self_attn.q_proj.weight")))
     []int k_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "self_attn.k_proj.weight")))
     []int v_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "self_attn.v_proj.weight")))
@@ -531,15 +580,18 @@ func layer_forward_score(int hidden, []int metadata, string model_path, int laye
     []int g_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "mlp.gate_proj.weight")))
     []int u_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "mlp.up_proj.weight")))
     []int d_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "mlp.down_proj.weight")))
+    if len(q_bytes) == 0 {
+        return hidden + layer_idx * 7
+    }
     int q_sig = tensor_signature(q_bytes, hidden + layer_idx * 3)
-    int k_sig = tensor_signature(k_bytes, hidden + layer_idx * 5)
-    int v_sig = tensor_signature(v_bytes, hidden + layer_idx * 7)
-    int o_sig = tensor_signature(o_bytes, hidden + layer_idx * 11)
-    int n1_sig = tensor_signature(n1_bytes, layer_idx * 13 + 1)
-    int n2_sig = tensor_signature(n2_bytes, layer_idx * 17 + 2)
-    int g_sig = tensor_signature(g_bytes, hidden + layer_idx * 19)
-    int u_sig = tensor_signature(u_bytes, hidden + layer_idx * 23)
-    int d_sig = tensor_signature(d_bytes, hidden + layer_idx * 29)
+    int k_sig = if len(k_bytes) > 0 { tensor_signature(k_bytes, hidden + layer_idx * 5) } else { 0 }
+    int v_sig = if len(v_bytes) > 0 { tensor_signature(v_bytes, hidden + layer_idx * 7) } else { 0 }
+    int o_sig = if len(o_bytes) > 0 { tensor_signature(o_bytes, hidden + layer_idx * 11) } else { 0 }
+    int n1_sig = if len(n1_bytes) > 0 { tensor_signature(n1_bytes, layer_idx * 13 + 1) } else { 0 }
+    int n2_sig = if len(n2_bytes) > 0 { tensor_signature(n2_bytes, layer_idx * 17 + 2) } else { 0 }
+    int g_sig = if len(g_bytes) > 0 { tensor_signature(g_bytes, hidden + layer_idx * 19) } else { 0 }
+    int u_sig = if len(u_bytes) > 0 { tensor_signature(u_bytes, hidden + layer_idx * 23) } else { 0 }
+    int d_sig = if len(d_bytes) > 0 { tensor_signature(d_bytes, hidden + layer_idx * 29) } else { 0 }
     int q_head_sig = 0
     int k_head_sig = 0
     int v_head_sig = 0
@@ -547,16 +599,20 @@ func layer_forward_score(int hidden, []int metadata, string model_path, int laye
     int attn_score = 0
     int head = 0
     while head < 14 {
-        int triplet_sig = attention_head_triplet_signature(q_bytes, k_bytes, v_bytes, head, 64, hidden + layer_idx * 13)
-        int head_score = attention_head_score(q_bytes, k_bytes, v_bytes, o_bytes, head, 64, hidden, hidden + layer_idx * 17)
-        q_head_sig = q_head_sig + attention_head_signature(q_bytes, head, 64, hidden + layer_idx * 3)
-        k_head_sig = k_head_sig + attention_head_signature(k_bytes, head, 64, hidden + layer_idx * 5)
-        v_head_sig = v_head_sig + attention_head_signature(v_bytes, head, 64, hidden + layer_idx * 7)
-        o_head_sig = o_head_sig + attention_head_signature(o_bytes, head, 64, hidden + layer_idx * 11)
-        q_head_sig = q_head_sig + triplet_sig
-        v_head_sig = v_head_sig + triplet_sig / 2
-        o_head_sig = o_head_sig + tensor_window_signature(o_bytes, head * 64, 64, hidden + layer_idx * 17)
-        attn_score = attn_score + head_score
+        if len(q_bytes) > 0 && len(k_bytes) > 0 && len(v_bytes) > 0 {
+            int triplet_sig = attention_head_triplet_signature(q_bytes, k_bytes, v_bytes, head, 64, hidden + layer_idx * 13)
+            q_head_sig = q_head_sig + attention_head_signature(q_bytes, head, 64, hidden + layer_idx * 3)
+            k_head_sig = k_head_sig + attention_head_signature(k_bytes, head, 64, hidden + layer_idx * 5)
+            v_head_sig = v_head_sig + attention_head_signature(v_bytes, head, 64, hidden + layer_idx * 7)
+            q_head_sig = q_head_sig + triplet_sig
+            v_head_sig = v_head_sig + triplet_sig / 2
+        }
+        if len(o_bytes) > 0 && len(k_bytes) > 0 && len(v_bytes) > 0 {
+            int head_score = attention_head_score(q_bytes, k_bytes, v_bytes, o_bytes, head, 64, hidden, hidden + layer_idx * 17)
+            o_head_sig = o_head_sig + attention_head_signature(o_bytes, head, 64, hidden + layer_idx * 11)
+            o_head_sig = o_head_sig + tensor_window_signature(o_bytes, head * 64, 64, hidden + layer_idx * 17)
+            attn_score = attn_score + head_score
+        }
         head = head + 1
     }
     int attention_mix = hidden + q_sig + v_sig - k_sig - o_sig + q_head_sig + v_head_sig - k_head_sig - o_head_sig + attn_score
