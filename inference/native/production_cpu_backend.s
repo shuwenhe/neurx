@@ -176,9 +176,6 @@ func load_tokenizer(string model_dir) tokenizer {
     }
 }
 
-func runtime_run_command_output(string command) string {
-    ""
-}
 
 func initialize_backend() {
     print("╔════════════════════════════════════════════════════════════════╗\n")
@@ -237,6 +234,36 @@ func int_to_string(int value) string {
         n = n / 10
     }
     return out + tmp
+}
+
+func string_to_int(string value, int default_value) int {
+    int result = 0
+    int i = 0
+    int len_val = len(value)
+    if len_val == 0 { return default_value }
+    int sign = 1
+    if __host_slice(value, 0, 1) == "-" {
+        sign = -1
+        i = 1
+    }
+    while i < len_val {
+        string c = __host_slice(value, i, i + 1)
+        int digit = -1
+        if c == "0" { digit = 0 }
+        else if c == "1" { digit = 1 }
+        else if c == "2" { digit = 2 }
+        else if c == "3" { digit = 3 }
+        else if c == "4" { digit = 4 }
+        else if c == "5" { digit = 5 }
+        else if c == "6" { digit = 6 }
+        else if c == "7" { digit = 7 }
+        else if c == "8" { digit = 8 }
+        else if c == "9" { digit = 9 }
+        if digit == -1 { return default_value }
+        result = result * 10 + digit
+        i = i + 1
+    }
+    return sign * result
 }
 
 func health_check_response() string {
@@ -366,10 +393,6 @@ func extract_http_body(string request) string {
 
 func create_ready_file(string path) {
     print("✓ Backend ready file: " + path + "\n")
-}
-
-func runtime_env_get(string name, string default_value) string {
-    default_value
 }
 
 func main() {
