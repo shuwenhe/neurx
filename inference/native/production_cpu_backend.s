@@ -322,8 +322,10 @@ func u64_le([]int bytes, int offset) int {
 }
 
 func slice_bytes([]int bytes, int start, int count) []int {
+    []int result = []int{cap: 0}
+    
     if start < 0 || start >= len(bytes) {
-        return []int{}
+        return result
     }
     int end_pos = start + count
     if end_pos > len(bytes) {
@@ -331,9 +333,9 @@ func slice_bytes([]int bytes, int start, int count) []int {
     }
     int actual_len = end_pos - start
     if actual_len <= 0 {
-        return []int{}
+        return result
     }
-    []int result = []int{cap: actual_len}
+    result = []int{cap: actual_len}
     int i = 0
     while i < actual_len && start + i < len(bytes) {
         result[i] = bytes[start + i]
