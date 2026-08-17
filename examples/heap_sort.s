@@ -1,6 +1,12 @@
 package neurx.examples.heap_sort
 
-func heapify(vec[int] arr, int n, int i) {
+func swap_elements(int[] arr, int i, int j) {
+    int temp = arr[i]
+    arr[i] = arr[j]
+    arr[j] = temp
+}
+
+func heapify(int[] arr, int n, int i) {
     int largest = i
     int left = 2 * i + 1
     int right = 2 * i + 2
@@ -14,15 +20,12 @@ func heapify(vec[int] arr, int n, int i) {
     }
     
     if largest != i {
-        int temp = arr[i]
-        arr[i] = arr[largest]
-        arr[largest] = temp
-        
+        swap_elements(arr, i, largest)
         heapify(arr, n, largest)
     }
 }
 
-func heap_sort(vec[int] arr) {
+func heap_sort(int[] arr) {
     int n = len(arr)
     if n <= 1 {
         return
@@ -36,10 +39,7 @@ func heap_sort(vec[int] arr) {
     
     i = n - 1
     while i > 0 {
-        int temp = arr[0]
-        arr[0] = arr[i]
-        arr[i] = temp
-        
+        swap_elements(arr, 0, i)
         heapify(arr, i, 0)
         i = i - 1
     }
@@ -73,7 +73,7 @@ func int_to_string(int val) string {
     return result + digits
 }
 
-func print_array(vec[int] arr) {
+func print_array(int[] arr) {
     print("[")
     int i = 0
     while i < len(arr) {
@@ -89,14 +89,14 @@ func print_array(vec[int] arr) {
 func main() {
     print("=== Heap Sort Implementation in S ===\n\n")
     
-    vec[int] arr = vec[int]()
-    arr.push(64)
-    arr.push(34)
-    arr.push(25)
-    arr.push(12)
-    arr.push(22)
-    arr.push(11)
-    arr.push(90)
+    int[] arr = new int[7]
+    arr[0] = 64
+    arr[1] = 34
+    arr[2] = 25
+    arr[3] = 12
+    arr[4] = 22
+    arr[5] = 11
+    arr[6] = 90
     
     print("Original array: ")
     print_array(arr)
