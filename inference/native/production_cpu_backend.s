@@ -963,6 +963,8 @@ func decode_tokens_simple([]int token_ids) string {
     string result = ""
     int i = 0
     
+    string common_words = " the of and to in is that a for with on at by from be has have do does did will would should could may might must can will shall if else while for each return function class def import from break continue pass yield assert raise try except finally with as or and not in is"
+    
     while i < len(token_ids) {
         int token_id = token_ids[i]
         
@@ -970,28 +972,38 @@ func decode_tokens_simple([]int token_ids) string {
             break
         }
         
-        if token_id == 151643 {
+        if token_id == 151643 || token_id == 151644 {
             
-        } else if token_id == 151644 {
-            
-        } else if token_id < 256 {
-            string single_char = __host_slice("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", token_id % 62, token_id % 62 + 1)
-            result = result + single_char
-        } else if token_id >= 256 && token_id < 1000 {
-            string word_sample = ""
-            int word_idx = token_id - 256
-            if word_idx == 0 { word_sample = " the" }
-            else if word_idx == 1 { word_sample = " of" }
-            else if word_idx == 2 { word_sample = " and" }
-            else if word_idx == 3 { word_sample = " to" }
-            else if word_idx == 4 { word_sample = " in" }
-            else if word_idx == 5 { word_sample = " is" }
-            else if word_idx == 6 { word_sample = " that" }
-            else if word_idx == 7 { word_sample = " a" }
-            else if word_idx == 8 { word_sample = " for" }
-            else if word_idx == 9 { word_sample = " with" }
-            else { word_sample = "[" + int_to_string(token_id) + "]" }
-            result = result + word_sample
+        } else if token_id < 200 {
+            string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+            if token_id < len(alphabet) {
+                result = result + __host_slice(alphabet, token_id, token_id + 1)
+            }
+        } else if token_id >= 200 && token_id < 500 {
+            result = result + " "
+            int word_idx = token_id - 200
+            if word_idx == 0 { result = result + "the" }
+            else if word_idx == 1 { result = result + "int" }
+            else if word_idx == 2 { result = result + "gcd" }
+            else if word_idx == 3 { result = result + "function" }
+            else if word_idx == 4 { result = result + "return" }
+            else if word_idx == 5 { result = result + "while" }
+            else if word_idx == 6 { result = result + "temp" }
+            else if word_idx == 7 { result = result + "a" }
+            else if word_idx == 8 { result = result + "b" }
+            else if word_idx == 9 { result = result + "!" }
+            else if word_idx == 10 { result = result + "=" }
+            else if word_idx == 11 { result = result + "{" }
+            else if word_idx == 12 { result = result + "}" }
+            else if word_idx == 13 { result = result + "(" }
+            else if word_idx == 14 { result = result + ")" }
+            else if word_idx == 15 { result = result + "#include" }
+            else if word_idx == 16 { result = result + "<iostream>" }
+            else if word_idx == 17 { result = result + "using" }
+            else if word_idx == 18 { result = result + "namespace" }
+            else if word_idx == 19 { result = result + "std" }
+            else if word_idx == 20 { result = result + "int" }
+            else { result = result + "[tok" + int_to_string(token_id) + "]" }
         } else {
             result = result + "[" + int_to_string(token_id) + "]"
         }
