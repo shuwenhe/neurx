@@ -1389,7 +1389,7 @@ func perform_inference(string prompt, string model_path) string {
 
 func generate_response(string prompt, int max_tokens) string {
     string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
-    string model_dir = runtime_env_get("NEURX_MODEL_DIR", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
+    string model_dir = runtime_env_get("NEURX_MODEL_DIR", "/model/Qwen2.5-VL-7B")
     string optimize_mode = runtime_env_get("NEURX_OPTIMIZE_MODE", "standard")
 
     string model_file = model_dir + "/model.safetensors"
