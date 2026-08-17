@@ -1,5 +1,5 @@
-// NeurX Executor Advanced Examples
-// Demonstrates advanced executor patterns and optimizations
+
+
 
 import "types.s"
 import "executor_base.s"
@@ -9,7 +9,7 @@ import "executor_scheduler.s"
 import "cache_manager.s"
 import "distributed_executor.s"
 
-// Example 1: Adaptive batching strategy
+
 func AdaptiveBatchingExample() {
     println("=== Adaptive Batching Example ===")
 
@@ -26,15 +26,15 @@ func AdaptiveBatchingExample() {
 
     scheduler := NewExecutionScheduler(SCHEDULE_DYNAMIC)
 
-    // Simulate dynamic workload
-    target_latency := i32(50)  // 50ms target
+    
+    target_latency := i32(50)  
     current_batch_size := i32(128)
 
     for iteration := 0; iteration < 5; iteration++ {
         println("\nIteration", iteration)
         println("Target batch size:", current_batch_size)
 
-        // Add sequences
+        
         for i := 0; i < int(current_batch_size); i++ {
             scheduler.AddDecodeSequence("seq_" + string(i))
         }
@@ -44,7 +44,7 @@ func AdaptiveBatchingExample() {
 
         println("Estimated latency:", estimated_latency, "ms")
 
-        // Adapt batch size
+        
         if estimated_latency > target_latency {
             current_batch_size = (current_batch_size * 7) / 8
             println("Reducing batch size to", current_batch_size)
@@ -58,7 +58,7 @@ func AdaptiveBatchingExample() {
     println("\nAdaptive batching complete\n")
 }
 
-// Example 2: KV cache eviction policies
+
 func CacheEvictionPoliciesExample() {
     println("=== Cache Eviction Policies Example ===")
 
@@ -70,7 +70,7 @@ func CacheEvictionPoliciesExample() {
 
         cache := NewKVCacheManager(10, policies[idx])
 
-        // Fill cache
+        
         for i := 0; i < 16; i++ {
             seq_id := "seq_" + string(i)
             result := cache.AllocateBlock(seq_id, 0, 256)
@@ -92,7 +92,7 @@ func CacheEvictionPoliciesExample() {
     println()
 }
 
-// Example 3: Prefill-decode scheduling optimization
+
 func PrefillDecodeOptimizationExample() {
     println("=== Prefill-Decode Optimization Example ===")
 
@@ -107,7 +107,7 @@ func PrefillDecodeOptimizationExample() {
 
     scheduler := NewExecutionScheduler(SCHEDULE_DYNAMIC)
 
-    // Phase 1: Mostly prefill
+    
     println("Phase 1: Prefill intensive")
     for i := 0; i < 256; i++ {
         scheduler.AddPrefillSequence("prompt_" + string(i))
@@ -118,7 +118,7 @@ func PrefillDecodeOptimizationExample() {
         println("Iteration", iter, "- Prefill:", schedule.prefill_count, "Decode:", schedule.decode_count)
     }
 
-    // Phase 2: Mostly decode
+    
     println("\nPhase 2: Decode intensive")
     for i := 256; i < 512; i++ {
         scheduler.AddDecodeSequence("gen_" + string(i))
@@ -133,13 +133,13 @@ func PrefillDecodeOptimizationExample() {
     println("\nOptimization example complete\n")
 }
 
-// Example 4: Prompt caching with prefix reuse
+
 func PromptCachingExample() {
     println("=== Prompt Caching Example ===")
 
     cache_manager := NewKVCacheManager(16, EVICTION_LRU)
 
-    // Common prompts that can be cached
+    
     prompts := []string{
         "You are a helpful assistant.",
         "Translate to Spanish:",
@@ -156,7 +156,7 @@ func PromptCachingExample() {
         }
     }
 
-    // Reuse cached prefixes
+    
     println("\nReusing cached prefixes:")
     for i := 0; i < 5; i++ {
         prefix_idx := i % len(prompts)
@@ -172,7 +172,7 @@ func PromptCachingExample() {
     println("\nPrompt caching example complete\n")
 }
 
-// Example 5: Tensor parallelism execution
+
 func TensorParallelismExample() {
     println("=== Tensor Parallelism Example ===")
 
@@ -197,7 +197,7 @@ func TensorParallelismExample() {
     println("Total GPUs:", dist_config.world_size)
     println("Tensor parallel degree:", dist_config.tensor_parallel)
 
-    // Simulate tensor parallel forward
+    
     input_data := make([]f32, 4096)
     result := dist_exec.TensorParallelForward(input_data)
 
@@ -212,7 +212,7 @@ func TensorParallelismExample() {
     println("\nTensor parallelism example complete\n")
 }
 
-// Example 6: Pipeline parallelism across stages
+
 func PipelineParallelismExample() {
     println("=== Pipeline Parallelism Example ===")
 
@@ -254,30 +254,30 @@ func PipelineParallelismExample() {
     println("\nPipeline parallelism example complete\n")
 }
 
-// Example 7: Multi-level scheduling with priority
+
 func MultiLevelSchedulingExample() {
     println("=== Multi-Level Scheduling Example ===")
 
     scheduler := NewExecutionScheduler(SCHEDULE_PRIORITY)
 
-    // High-priority requests
+    
     for i := 0; i < 8; i++ {
         scheduler.AddPrefillSequence("high_priority_" + string(i))
     }
 
-    // Normal-priority requests
+    
     for i := 0; i < 16; i++ {
         scheduler.AddPrefillSequence("normal_" + string(i))
     }
 
-    // Low-priority requests
+    
     for i := 0; i < 32; i++ {
         scheduler.AddDecodeSequence("low_priority_" + string(i))
     }
 
     println("Total sequences:", scheduler.GetPendingSequenceCount())
 
-    // Schedule with priority bias
+    
     for iteration := 0; iteration < 3; iteration++ {
         schedule := scheduler.PlanIteration(128, 128)
         
@@ -289,7 +289,7 @@ func MultiLevelSchedulingExample() {
     println("\nMulti-level scheduling example complete\n")
 }
 
-// Example 8: Memory optimization with cache swapping
+
 func CacheSwappingExample() {
     println("=== Cache Swapping Example ===")
 
@@ -297,7 +297,7 @@ func CacheSwappingExample() {
     
     println("Initial cache: 8GB GPU memory")
 
-    // Fill cache to capacity
+    
     for i := 0; i < 32; i++ {
         seq_id := "seq_" + string(i)
         cache_manager.AllocateBlock(seq_id, 0, 256)
@@ -305,7 +305,7 @@ func CacheSwappingExample() {
 
     println("Cache utilization:", cache_manager.GetCacheUtilization(), "%")
 
-    // Swap least used sequences to host
+    
     println("\nSwapping sequences to host:")
     for i := 0; i < 8; i++ {
         seq_id := "seq_" + string(i)
@@ -318,7 +318,7 @@ func CacheSwappingExample() {
 
     println("New utilization:", cache_manager.GetCacheUtilization(), "%")
 
-    // Swap back when needed
+    
     println("\nSwapping sequences back to GPU:")
     result := cache_manager.SwapToDevice("seq_0", 256)
     if result.success == 1 {
@@ -329,7 +329,7 @@ func CacheSwappingExample() {
     println("\nCache swapping example complete\n")
 }
 
-// Main execution
+
 func main() {
     println("╔════════════════════════════════════════════╗")
     println("║  NeurX Executor Advanced Examples          ║")

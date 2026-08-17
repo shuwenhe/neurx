@@ -1,5 +1,5 @@
-// NeurX Executor Test Suite
-// Comprehensive unit tests for executor functionality
+
+
 
 import "types.s"
 import "executor_base.s"
@@ -18,7 +18,7 @@ struct TestResult {
 var total_tests i32 = 0
 var passed_tests i32 = 0
 
-// Helper: Log test result
+
 func LogTest(test_name string, condition i32, error_msg string) {
     total_tests++
 
@@ -30,7 +30,7 @@ func LogTest(test_name string, condition i32, error_msg string) {
     }
 }
 
-// Test 1: Executor initialization
+
 func TestExecutorInitialization() {
     println("\n--- Test: Executor Initialization ---")
 
@@ -49,7 +49,7 @@ func TestExecutorInitialization() {
     LogTest("Cache manager created", executor.cache_manager != nil, "Cache manager not created")
 }
 
-// Test 2: Sequence addition
+
 func TestSequenceAddition() {
     println("\n--- Test: Sequence Addition ---")
 
@@ -68,7 +68,7 @@ func TestSequenceAddition() {
     LogTest("Multiple sequences", executor.sequence_count == 10, "Count mismatch")
 }
 
-// Test 3: Sequence removal
+
 func TestSequenceRemoval() {
     println("\n--- Test: Sequence Removal ---")
 
@@ -84,7 +84,7 @@ func TestSequenceRemoval() {
     LogTest("Sequence count decremented", executor.sequence_count == 1, "Count not updated")
 }
 
-// Test 4: Prefill executor
+
 func TestPrefillExecutor() {
     println("\n--- Test: Prefill Executor ---")
 
@@ -117,7 +117,7 @@ func TestPrefillExecutor() {
     LogTest("Tokens processed", result.tokens_processed > 0, "No tokens processed")
 }
 
-// Test 5: Decode executor
+
 func TestDecodeExecutor() {
     println("\n--- Test: Decode Executor ---")
 
@@ -148,7 +148,7 @@ func TestDecodeExecutor() {
     LogTest("Correct tokens processed", result.tokens_processed == 16, "Token count wrong")
 }
 
-// Test 6: Scheduler - Round-robin
+
 func TestSchedulerRoundRobin() {
     println("\n--- Test: Scheduler Round-Robin ---")
 
@@ -165,7 +165,7 @@ func TestSchedulerRoundRobin() {
     LogTest("Decode count", schedule.decode_count == 4, "Decode count mismatch")
 }
 
-// Test 7: Scheduler - Priority
+
 func TestSchedulerPriority() {
     println("\n--- Test: Scheduler Priority ---")
 
@@ -180,7 +180,7 @@ func TestSchedulerPriority() {
     LogTest("Correct batch size", schedule.prefill_count <= 8, "Batch size exceeded")
 }
 
-// Test 8: KV cache allocation
+
 func TestKVCacheAllocation() {
     println("\n--- Test: KV Cache Allocation ---")
 
@@ -192,13 +192,13 @@ func TestKVCacheAllocation() {
     LogTest("Memory updated", cache.allocated_mb > 0, "Memory not allocated")
 }
 
-// Test 9: KV cache eviction
+
 func TestKVCacheEviction() {
     println("\n--- Test: KV Cache Eviction ---")
 
-    cache := NewKVCacheManager(1, EVICTION_LRU)  // Small cache
+    cache := NewKVCacheManager(1, EVICTION_LRU)  
 
-    // Fill cache
+    
     for i := 0; i < 16; i++ {
         seq_id := "seq_" + string(i)
         cache.AllocateBlock(seq_id, 0, 256)
@@ -206,32 +206,32 @@ func TestKVCacheEviction() {
 
     LogTest("Cache blocks created", cache.block_count > 0, "No blocks allocated")
 
-    // Try to evict
+    
     result := cache.EvictBlocks()
     LogTest("Eviction triggers", result.success == 0 || cache.allocated_mb < i32(1024), "Eviction not working")
 }
 
-// Test 10: Cache LRU vs LFU
+
 func TestCacheEvictionPolicies() {
     println("\n--- Test: Cache Eviction Policies ---")
 
-    // Test LRU
+    
     lru_cache := NewKVCacheManager(10, EVICTION_LRU)
     result := lru_cache.AllocateBlock("seq_0", 0, 256)
     LogTest("LRU allocation", result.success, "LRU allocation failed")
 
-    // Test LFU
+    
     lfu_cache := NewKVCacheManager(10, EVICTION_LFU)
     result = lfu_cache.AllocateBlock("seq_1", 0, 256)
     LogTest("LFU allocation", result.success, "LFU allocation failed")
 
-    // Test FIFO
+    
     fifo_cache := NewKVCacheManager(10, EVICTION_FIFO)
     result = fifo_cache.AllocateBlock("seq_2", 0, 256)
     LogTest("FIFO allocation", result.success, "FIFO allocation failed")
 }
 
-// Test 11: Iteration execution
+
 func TestIterationExecution() {
     println("\n--- Test: Iteration Execution ---")
 
@@ -253,7 +253,7 @@ func TestIterationExecution() {
     LogTest("Tokens processed", result.tokens_processed > 0, "No tokens processed")
 }
 
-// Test 12: Statistics collection
+
 func TestStatisticsCollection() {
     println("\n--- Test: Statistics Collection ---")
 
@@ -272,7 +272,7 @@ func TestStatisticsCollection() {
     LogTest("Latency calculated", stats.avg_latency > 0, "Latency not calculated")
 }
 
-// Test 13: Distributed executor
+
 func TestDistributedExecutor() {
     println("\n--- Test: Distributed Executor ---")
 
@@ -295,7 +295,7 @@ func TestDistributedExecutor() {
     LogTest("World size set", dist.distributed_config.world_size == 4, "World size not set")
 }
 
-// Test 14: Load balancing
+
 func TestLoadBalancing() {
     println("\n--- Test: Load Balancing ---")
 
@@ -327,7 +327,7 @@ func TestLoadBalancing() {
     LogTest("All sequences distributed", total == 16, "Not all sequences distributed")
 }
 
-// Print test report
+
 func PrintTestReport() {
     println("\n╔════════════════════════════════════════╗")
     println("║          Test Report                   ║")
@@ -343,7 +343,7 @@ func PrintTestReport() {
     println()
 }
 
-// Main test execution
+
 func main() {
     println("╔════════════════════════════════════════╗")
     println("║  NeurX Executor Test Suite             ║")

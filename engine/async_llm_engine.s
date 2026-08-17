@@ -90,7 +90,7 @@ struct async_output_event {
 }
 
 struct async_event {
-    event_type      string  // "request_complete", "request_failed", "timeout", "retry"
+    event_type      string  
     request_id      string
     data            interface{}
 }

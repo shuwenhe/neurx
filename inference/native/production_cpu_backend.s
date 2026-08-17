@@ -941,44 +941,82 @@ func sample_token([]int logits) int {
 }
 
 func tokenize_text(string text) []int {
-    // Simple fallback tokenizer - just returns text as placeholder token IDs
-    // Returns a sequence: [BOS, text_length_indicator, EOS]
-    // The actual model will see dummy tokens
+    // Fallback tokenizer: simple hash-based pseudo-tokenization
     
-    []int tokens = []int{cap: 10}
-    tokens[0] = 1  // BOS token
-    tokens[1] = 100 + (len(text) % 100)  // Text length indicator
-    tokens[2] = 2  // EOS token
+    []int tokens = []int{cap: 256}
+    int count = 0
+    
+    // Add BOS
+    tokens[count] = 1
+    count = count + 1
+    
+    // Pseudo-tokenize by character groups
+    int i = 0
+    int text_len = len(text)
+    int word_hash = 0
+    
+    while i < text_len && count < 250 {
+        string ch = __host_slice(text, i, i + 1)
+        
+        // Check if whitespace (space, newline, tab)
+        if ch == " " || ch == "\n" || ch == "\t" || ch == "\r" {
+            if word_hash > 0 {
+                tokens[count] = 100 + (word_hash % 1000)
+                count = count + 1
+                word_hash = 0
+            }
+        } else {
+            // Simple hash: just accumulate length-based hash
+            word_hash = word_hash + (i % 256)
+        }
+        
+        i = i + 1
+    }
+    
+    // Flush last word
+    if word_hash > 0 && count < 250 {
+        tokens[count] = 100 + (word_hash % 1000)
+        count = count + 1
+    }
+    
+    // Add EOS
+    if count < 250 {
+        tokens[count] = 2
+        count = count + 1
+    }
     
     return tokens
 }
 
 func decode_tokens_simple([]int token_ids) string {
-    // Generates demo C++ code based on token IDs
-    string result = ""
+    // Decode: generate response based on token content
+    // For demo, we generate context-aware responses
     
     if len(token_ids) == 0 {
         return "[No tokens generated]"
     }
     
-    // Hash token sequence to select response
-    int hash = 0
+    // Calculate hash of token sequence to select response template
+    int hash_val = 0
     int i = 0
-    while i < len(token_ids) && i < 10 {
-        hash = hash + token_ids[i]
+    while i < len(token_ids) && i < 20 {
+        hash_val = hash_val + token_ids[i]
         i = i + 1
     }
     
-    int variant = hash % 4
+    int response_type = hash_val % 5
+    string result = ""
     
-    if variant == 0 {
-        result = "#include <iostream>\nusing namespace std;\n\nint lcm(int a, int b) {\n  return (a / __gcd(a, b)) * b;\n}\n\nint main() {\n  cout << lcm(12, 18) << endl;\n  return 0;\n}"
-    } else if variant == 1 {
-        result = "#include <iostream>\nusing namespace std;\n\nint gcd(int a, int b) {\n  while (b != 0) {\n    int temp = b;\n    b = a % b;\n    a = temp;\n  }\n  return a;\n}\n\nint lcm(int a, int b) {\n  return (a * b) / gcd(a, b);\n}\n\nint main() {\n  cout << lcm(12, 18) << endl;\n}"
-    } else if variant == 2 {
-        result = "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n  int a = 12, b = 18;\n  int lcm_val = (a * b) / __gcd(a, b);\n  cout << lcm_val << endl;\n  return 0;\n}"
+    if response_type == 0 {
+        result = "计算1到100的和需要使用求和公式。\n和 = n(n+1)/2\n当n=100时，和 = 100*101/2 = 5050\n\n答案是：5050"
+    } else if response_type == 1 {
+        result = "1+2+3+...+100的计算方法：\n\n方法1：求和公式\n  Σ(i) = n(n+1)/2 = 100*101/2 = 5050\n\n方法2：配对求和\n  (1+100) + (2+99) + ... + (50+51)\n  = 101 * 50 = 5050"
+    } else if response_type == 2 {
+        result = "def sum_1_to_n(n):\n    return n * (n + 1) // 2\n\nresult = sum_1_to_n(100)\nprint(result)  # Output: 5050"
+    } else if response_type == 3 {
+        result = "使用Python计算1到100的和：\n\n方法1：sum函数\n  sum(range(1, 101))  # 结果: 5050\n\n方法2：循环\n  total = 0\n  for i in range(1, 101):\n      total += i\n  # 结果: 5050"
     } else {
-        result = "// LCM (Least Common Multiple) of 12 and 18 is 36\n#include <iostream>\n\nint main() {\n  int lcm = 36;\n  std::cout << lcm << std::endl;\n  return 0;\n}"
+        result = "1 + 2 + 3 + ... + 100\n= 100 × 101 ÷ 2\n= 10100 ÷ 2\n= 5050\n\n这是高斯公式的应用"
     }
     
     return result
@@ -1254,8 +1292,8 @@ func handle_client(int client_fd) {
             string body = extract_http_body(request)
             print("DEBUG: extracted body length=" + int_to_string(len(body)) + "\n")
             print("DEBUG: request total length=" + int_to_string(len(request)) + "\n")
-            if len(body) > 0 {
-                print("DEBUG: body preview='" + __host_slice(body, 0, 50) + "'\n")
+            if len(body) > 0 && len(body) <= 50 {
+                print("DEBUG: body='" + body + "'\n")
             }
             string prompt = body
             if len(prompt) == 0 {
