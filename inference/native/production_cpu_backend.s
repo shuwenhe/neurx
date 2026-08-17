@@ -232,6 +232,7 @@ func lookup_token_id_from_python(string token_str) int {
 }
 
 func lookup_token_string(int token_id) string {
+    print("[lookup] Token ID: " + int_to_string(token_id) + "\n")
     if token_id == 151643 {
         return ""
     }
@@ -243,15 +244,19 @@ func lookup_token_string(int token_id) string {
     }
     
     if token_id == 14990 {
+        print("[lookup] Returning 'hello'\n")
         return "hello"
     }
     if token_id == 2 {
+        print("[lookup] Returning space\n")
         return " "
     }
     if token_id == 34 {
+        print("[lookup] Returning comma\n")
         return ","
     }
     if token_id == 70 {
+        print("[lookup] Returning period\n")
         return "."
     }
     if token_id == 1 {
@@ -270,6 +275,7 @@ func lookup_token_string(int token_id) string {
         return "Ġthe"
     }
     
+    print("[lookup] No mapping found\n")
     return ""
 }
 
