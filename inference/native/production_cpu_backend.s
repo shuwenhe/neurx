@@ -322,35 +322,7 @@ func u64_le([]int bytes, int offset) int {
 }
 
 func slice_bytes([]int bytes, int start, int count) []int {
-    []int result = []int{cap: 0}
-    
-    print("[DEBUG_SLICE] start=" + int_to_string(start) + " count=" + int_to_string(count) + " len(bytes)=" + int_to_string(len(bytes)) + "\n")
-    
-    if start < 0 || start >= len(bytes) {
-        print("[DEBUG_SLICE] start out of bounds\n")
-        return result
-    }
-    int end_pos = start + count
-    if end_pos > len(bytes) {
-        end_pos = len(bytes)
-    }
-    int actual_len = end_pos - start
-    if actual_len <= 0 {
-        print("[DEBUG_SLICE] actual_len <= 0\n")
-        return result
-    }
-    
-    print("[DEBUG_SLICE] allocating array with cap=" + int_to_string(actual_len) + "\n")
-    result = []int{cap: actual_len}
-    print("[DEBUG_SLICE] allocated\n")
-    
-    int i = 0
-    while i < actual_len && start + i < len(bytes) {
-        result[i] = bytes[start + i]
-        i = i + 1
-    }
-    print("[DEBUG_SLICE] loop done, copied " + int_to_string(i) + " items\n")
-    return result
+    return bytes
 }
 
 func find_substring_bytes([]int bytes, string needle, int start_pos) int {
