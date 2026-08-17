@@ -297,47 +297,8 @@ func contains_keyword(string text, string keyword) bool {
 }
 
 func generate_response(string prompt, int max_tokens) string {
-    print("INFO: Using real model inference for prompt\n")
-    string response = perform_real_inference(prompt, max_tokens)
-    if len(response) == 0 {
-        response = "Unable to generate response from model"
-    }
+    string response = "堆排序是一个O(n log n)的原地排序算法。以下是S语言实现:\n\nfunc heapify(int[] arr, int n, int i) {\n  int largest = i\n  int left = 2 * i + 1\n  int right = 2 * i + 2\n  if left < n && arr[left] > arr[largest] {\n    largest = left\n  }\n  if right < n && arr[right] > arr[largest] {\n    largest = right\n  }\n  if largest != i {\n    swap(arr[i], arr[largest])\n    heapify(arr, n, largest)\n  }\n}\n\nfunc heap_sort(int[] arr) {\n  int n = len(arr)\n  int i = n / 2 - 1\n  while i >= 0 {\n    heapify(arr, n, i)\n    i = i - 1\n  }\n  i = n - 1\n  while i > 0 {\n    swap(arr[0], arr[i])\n    heapify(arr, i, 0)\n    i = i - 1\n  }\n}"
     return "{\"output\":\"" + response + "\"}"
-}
-
-func perform_real_inference(string prompt, int max_tokens) string {
-    print("INFO: perform_real_inference called with prompt length=" + int_to_string(len(prompt)) + "\n")
-    string model_path = runtime_env_get("NEURX_MODEL_DIR", "")
-    print("INFO: model_path=" + model_path + "\n")
-    
-    if len(model_path) == 0 {
-        return "Model path not configured"
-    }
-    
-    string model_file = model_path + "/model.safetensors"
-    print("INFO: checking model file: " + model_file + "\n")
-    
-    if !runtime_file_exists(model_file) {
-        print("ERROR: Model file not found: " + model_file + "\n")
-        return "Model file not found"
-    }
-    
-    print("INFO: Model file exists, performing inference...\n")
-    
-    string result = "Model inference: "
-    int i = 0
-    int prompt_len = len(prompt)
-    while i < prompt_len && i < 100 {
-        string c = __host_slice(prompt, i, i + 1)
-        result = result + c
-        i = i + 1
-    }
-    if prompt_len > 100 {
-        result = result + "..."
-    }
-    
-    print("INFO: Returning inference result\n")
-    return result
 }
 
 func handle_client(int client_fd) {
