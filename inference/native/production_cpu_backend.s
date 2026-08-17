@@ -942,43 +942,50 @@ func sample_token([]int logits) int {
 }
 
 func tokenize_text(string text) []int {
+    string script_path = "/home/shuwen/shuwen/posttrain/tokenize_detokenize.py"
+    
+    string cmd = "python3 " + script_path + " encode '" + text + "' 2>/dev/null"
+    string output = runtime_run_command_output(cmd)
+    
+    print("[Tokenizer] Encoded \"" + text + "\" -> " + output + "\n")
+    
     []int tokens = []int{cap: 256}
     int count = 0
-    tokens[count] = 1
+        tokens[count] = 151643
     count = count + 1
+    
     int i = 0
-    int text_len = len(text)
-    int word_hash = 0
-
-    while i < text_len && count < 250 {
-        string ch = __host_slice(text, i, i + 1)
-        if ch == " " || ch == "\n" || ch == "\t" || ch == "\r" {
-            if word_hash > 0 {
-                tokens[count] = 100 + (word_hash % 1000)
-                count = count + 1
-                word_hash = 0
+    int start = 0
+    while i <= len(output) {
+        string ch = ""
+        if i < len(output) {
+            ch = __host_slice(output, i, i + 1)
+        }
+        
+        if ((ch == " " || i == len(output)) && i > start) {
+            string num_str = __host_slice(output, start, i)
+            if len(num_str) > 0 {
+                int token_id = string_to_int(num_str, -1)
+                if token_id >= 0 && count < 254 {
+                    tokens[count] = token_id
+                    count = count + 1
+                }
             }
-        } else {
-            word_hash = word_hash + (i % 256)
+            start = i + 1
         }
         i = i + 1
     }
-    if word_hash > 0 && count < 250 {
-        tokens[count] = 100 + (word_hash % 1000)
+    
+    if count < 255 {
+        tokens[count] = 151645
         count = count + 1
     }
-    if count < 250 {
-        tokens[count] = 2
-        count = count + 1
-    }
-
+    
+    print("[Tokenizer] Total tokens: " + int_to_string(count) + "\n")
     return tokens
 }
 
 func decode_tokens_simple([]int token_ids) string {
-    string model_dir = runtime_env_get("NEURX_MODEL_DIR", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
-    string script_path = "/home/shuwen/shuwen/posttrain/tokenize_detokenize.py"
-
     if len(token_ids) == 0 {
         return "[No tokens generated]"
     }
@@ -998,8 +1005,8 @@ func decode_tokens_simple([]int token_ids) string {
 
     print("[Decoder] Token list: " + token_list + "\n")
 
-    string cmd = "cd " + model_dir + " && python3 " + script_path + " decode '" + token_list + "' 2>/dev/null"
-
+    string script_path = "/home/shuwen/shuwen/posttrain/tokenize_detokenize.py"
+    string cmd = "python3 " + script_path + " decode '" + token_list + "' 2>/dev/null"
     string output = runtime_run_command_output(cmd)
 
     print("[Decoder] Decoding output length: " + int_to_string(len(output)) + "\n")
@@ -1009,6 +1016,15 @@ func decode_tokens_simple([]int token_ids) string {
     }
 
     return "[Decoding failed - Python tokenizer not available]"
+}
+
+// Complete stub implementations to prevent linker errors
+func tokenize_qwen(string text) []int {
+    return tokenize_text(text)
+}
+
+func detokenize_qwen([]int token_ids) string {
+    return decode_tokens_simple(token_ids)
 }
 
 func decode_tokens_simple_old([]int token_ids) string {
