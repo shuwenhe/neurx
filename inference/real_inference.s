@@ -87,15 +87,21 @@ func skip_to_digit_bytes([]int bytes, int pos) int {
 }
 
 func parse_int_at_bytes([]int bytes, int pos) int {
+    if pos < 0 || pos >= len(bytes) {
+        return 0
+    }
     int value = 0
     int cursor = pos
-    while cursor < len(bytes) {
+    int max_iterations = 20
+    int iterations = 0
+    while cursor < len(bytes) && iterations < max_iterations {
         int c = bytes[cursor]
         if c < 48 || c > 57 {
             break
         }
         value = value * 10 + (c - 48)
         cursor = cursor + 1
+        iterations = iterations + 1
     }
     return value
 }
@@ -584,14 +590,38 @@ func layer_forward_score(int hidden, []int metadata, string model_path, int laye
         return hidden + layer_idx * 7
     }
     int q_sig = tensor_signature(q_bytes, hidden + layer_idx * 3)
-    int k_sig = if len(k_bytes) > 0 { tensor_signature(k_bytes, hidden + layer_idx * 5) } else { 0 }
-    int v_sig = if len(v_bytes) > 0 { tensor_signature(v_bytes, hidden + layer_idx * 7) } else { 0 }
-    int o_sig = if len(o_bytes) > 0 { tensor_signature(o_bytes, hidden + layer_idx * 11) } else { 0 }
-    int n1_sig = if len(n1_bytes) > 0 { tensor_signature(n1_bytes, layer_idx * 13 + 1) } else { 0 }
-    int n2_sig = if len(n2_bytes) > 0 { tensor_signature(n2_bytes, layer_idx * 17 + 2) } else { 0 }
-    int g_sig = if len(g_bytes) > 0 { tensor_signature(g_bytes, hidden + layer_idx * 19) } else { 0 }
-    int u_sig = if len(u_bytes) > 0 { tensor_signature(u_bytes, hidden + layer_idx * 23) } else { 0 }
-    int d_sig = if len(d_bytes) > 0 { tensor_signature(d_bytes, hidden + layer_idx * 29) } else { 0 }
+    int k_sig = 0
+    int v_sig = 0
+    int o_sig = 0
+    int n1_sig = 0
+    int n2_sig = 0
+    int g_sig = 0
+    int u_sig = 0
+    int d_sig = 0
+    if len(k_bytes) > 0 {
+        k_sig = tensor_signature(k_bytes, hidden + layer_idx * 5)
+    }
+    if len(v_bytes) > 0 {
+        v_sig = tensor_signature(v_bytes, hidden + layer_idx * 7)
+    }
+    if len(o_bytes) > 0 {
+        o_sig = tensor_signature(o_bytes, hidden + layer_idx * 11)
+    }
+    if len(n1_bytes) > 0 {
+        n1_sig = tensor_signature(n1_bytes, layer_idx * 13 + 1)
+    }
+    if len(n2_bytes) > 0 {
+        n2_sig = tensor_signature(n2_bytes, layer_idx * 17 + 2)
+    }
+    if len(g_bytes) > 0 {
+        g_sig = tensor_signature(g_bytes, hidden + layer_idx * 19)
+    }
+    if len(u_bytes) > 0 {
+        u_sig = tensor_signature(u_bytes, hidden + layer_idx * 23)
+    }
+    if len(d_bytes) > 0 {
+        d_sig = tensor_signature(d_bytes, hidden + layer_idx * 29)
+    }
     int q_head_sig = 0
     int k_head_sig = 0
     int v_head_sig = 0
@@ -623,6 +653,12 @@ func layer_forward_score(int hidden, []int metadata, string model_path, int laye
 }
 
 func forward_step([]int prompt_tokens, string model_path, []int metadata, []int embed_index, []int final_norm_index, []int lm_head_index) int {
+    if len(prompt_tokens) == 0 {
+        return 50000
+    }
+    if len(prompt_tokens) > 256 {
+        return 50000
+    }
     int token_sum = 0
     int token_mix = 0
     int i = 0
@@ -633,13 +669,18 @@ func forward_step([]int prompt_tokens, string model_path, []int metadata, []int 
     }
     []int embed_bytes = read_tensor_bytes(model_path, embed_index)
     []int head_bytes = read_tensor_bytes(model_path, lm_head_index)
-    int hidden = token_sum + tensor_signature(embed_bytes, token_mix)
+    int hidden = token_sum
+    if len(embed_bytes) > 0 {
+        hidden = hidden + tensor_signature(embed_bytes, token_mix)
+    }
     hidden = hidden + len(prompt_tokens) * 97
     int token_idx = 0
     while token_idx < len(prompt_tokens) && token_idx < 8 {
-        int token_sig = embedding_token_signature(embed_bytes, prompt_tokens[token_idx], 896, hidden + token_idx * 23)
-        int token_window = tensor_window_signature(embed_bytes, prompt_tokens[token_idx] * 896, 128, hidden + token_idx * 29)
-        hidden = hidden + token_sig + token_window
+        if len(embed_bytes) > 0 {
+            int token_sig = embedding_token_signature(embed_bytes, prompt_tokens[token_idx], 896, hidden + token_idx * 23)
+            int token_window = tensor_window_signature(embed_bytes, prompt_tokens[token_idx] * 896, 128, hidden + token_idx * 29)
+            hidden = hidden + token_sig + token_window
+        }
         token_idx = token_idx + 1
     }
     i = 0
@@ -647,16 +688,23 @@ func forward_step([]int prompt_tokens, string model_path, []int metadata, []int 
         hidden = layer_forward_score(hidden, metadata, model_path, i)
         i = i + 1
     }
-    hidden = hidden + tensor_signature(read_tensor_bytes(model_path, final_norm_index), hidden)
-    hidden = hidden + tensor_signature(head_bytes, hidden + 11)
+    []int final_norm_bytes = read_tensor_bytes(model_path, final_norm_index)
+    if len(final_norm_bytes) > 0 {
+        hidden = hidden + tensor_signature(final_norm_bytes, hidden)
+    }
+    if len(head_bytes) > 0 {
+        hidden = hidden + tensor_signature(head_bytes, hidden + 11)
+    }
     int lm_mix = 0
     int slot = 0
     while slot < 64 {
-        int row_sig = lm_head_row_signature(head_bytes, slot, hidden + slot * 5)
-        int row_window = tensor_window_signature(head_bytes, slot * 32, 32, hidden + slot * 11)
-        lm_mix = lm_mix + lm_head_projection_score(head_bytes, slot, hidden + row_sig + row_window, hidden + slot * 7)
-        lm_mix = lm_mix + row_sig
-        lm_mix = lm_mix + row_window
+        if len(head_bytes) > 0 {
+            int row_sig = lm_head_row_signature(head_bytes, slot, hidden + slot * 5)
+            int row_window = tensor_window_signature(head_bytes, slot * 32, 32, hidden + slot * 11)
+            lm_mix = lm_mix + lm_head_projection_score(head_bytes, slot, hidden + row_sig + row_window, hidden + slot * 7)
+            lm_mix = lm_mix + row_sig
+            lm_mix = lm_mix + row_window
+        }
         slot = slot + 1
     }
     hidden = hidden + lm_mix
