@@ -941,15 +941,54 @@ func sample_token([]int logits) int {
 }
 
 func tokenize_text(string text) []int {
-    []int tokens = []int{cap: 20}
-    tokens[0] = 1
+    string model_dir = runtime_env_get("NEURX_MODEL_DIR")
+    if len(model_dir) == 0 {
+        model_dir = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
+    }
+    string script_path = "/home/shuwen/shuwen/posttrain/tokenize_detokenize.py"
     
-    int token_count = 1
+    string escaped_text = text
+    string cmd = "cd " + model_dir + " && python3 " + script_path + " encode '" + escaped_text + "' 2>/dev/null"
+    
+    string output = runtime_run_command_output(cmd)
+    
+    []int tokens = []int{cap: 128}
+    if len(output) == 0 {
+        tokens[0] = 1
+        return tokens
+    }
+    
+    int count = 0
     int i = 0
-    while i < len(text) && token_count < 128 {
-        tokens[token_count] = 100 + (i % 50)
-        token_count = token_count + 1
+    int start = 0
+    
+    while i < len(output) && count < 128 {
+        if __host_slice(output, i, i + 1) == "," || __host_slice(output, i, i + 1) == "]" {
+            if i > start {
+                string num_str = __host_slice(output, start, i)
+                int token_id = 0
+                int j = 0
+                while j < len(num_str) {
+                    string ch = __host_slice(num_str, j, j + 1)
+                    if ch >= "0" && ch <= "9" {
+                        token_id = token_id * 10 + (int(ch[0]) - int("0"[0]))
+                    }
+                    j = j + 1
+                }
+                if token_id >= 0 {
+                    tokens[count] = token_id
+                    count = count + 1
+                }
+            }
+            start = i + 1
+        } else if __host_slice(output, i, i + 1) == "[" {
+            start = i + 1
+        }
         i = i + 1
+    }
+    
+    if count == 0 {
+        tokens[0] = 1
     }
     
     return tokens
@@ -960,58 +999,28 @@ func decode_tokens_simple([]int token_ids) string {
         return ""
     }
     
-    string result = ""
+    string model_dir = runtime_env_get("NEURX_MODEL_DIR")
+    if len(model_dir) == 0 {
+        model_dir = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
+    }
+    string script_path = "/home/shuwen/shuwen/posttrain/tokenize_detokenize.py"
+    
+    string token_json = "["
     int i = 0
-    
-    string common_words = " the of and to in is that a for with on at by from be has have do does did will would should could may might must can will shall if else while for each return function class def import from break continue pass yield assert raise try except finally with as or and not in is"
-    
     while i < len(token_ids) {
-        int token_id = token_ids[i]
-        
-        if token_id == 151645 {
-            break
+        if i > 0 {
+            token_json = token_json + ","
         }
-        
-        if token_id == 151643 || token_id == 151644 {
-            
-        } else if token_id < 200 {
-            string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-            if token_id < len(alphabet) {
-                result = result + __host_slice(alphabet, token_id, token_id + 1)
-            }
-        } else if token_id >= 200 && token_id < 500 {
-            result = result + " "
-            int word_idx = token_id - 200
-            if word_idx == 0 { result = result + "the" }
-            else if word_idx == 1 { result = result + "int" }
-            else if word_idx == 2 { result = result + "gcd" }
-            else if word_idx == 3 { result = result + "function" }
-            else if word_idx == 4 { result = result + "return" }
-            else if word_idx == 5 { result = result + "while" }
-            else if word_idx == 6 { result = result + "temp" }
-            else if word_idx == 7 { result = result + "a" }
-            else if word_idx == 8 { result = result + "b" }
-            else if word_idx == 9 { result = result + "!" }
-            else if word_idx == 10 { result = result + "=" }
-            else if word_idx == 11 { result = result + "{" }
-            else if word_idx == 12 { result = result + "}" }
-            else if word_idx == 13 { result = result + "(" }
-            else if word_idx == 14 { result = result + ")" }
-            else if word_idx == 15 { result = result + "#include" }
-            else if word_idx == 16 { result = result + "<iostream>" }
-            else if word_idx == 17 { result = result + "using" }
-            else if word_idx == 18 { result = result + "namespace" }
-            else if word_idx == 19 { result = result + "std" }
-            else if word_idx == 20 { result = result + "int" }
-            else { result = result + "[tok" + int_to_string(token_id) + "]" }
-        } else {
-            result = result + "[" + int_to_string(token_id) + "]"
-        }
-        
+        token_json = token_json + int_to_string(token_ids[i])
         i = i + 1
     }
+    token_json = token_json + "]"
     
-    return result
+    string cmd = "cd " + model_dir + " && python3 " + script_path + " decode '" + token_json + "' 2>/dev/null"
+    
+    string output = runtime_run_command_output(cmd)
+    
+    return output
 }
 
 func perform_inference_multi_token_optimized(string prompt, string model_path, int max_tokens) string {
