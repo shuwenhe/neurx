@@ -451,39 +451,27 @@ func parse_tensor_index([]int metadata_bytes, string tensor_name) []int {
 func load_model_metadata(string model_path) []int {
     []int empty = []int{cap: 0}
     
-    print("[DEBUG] load_model_metadata: reading file " + model_path + "\n")
-    
-    print("[DEBUG] reading first 8 bytes for metadata size\n")
+    print("[DEBUG] Reading model metadata\n")
     []int size_bytes = __host_read_binary_file_range(model_path, 0, 8)
-    print("[DEBUG] read " + int_to_string(len(size_bytes)) + " bytes\n")
-    
     if len(size_bytes) < 8 {
-        print("[DEBUG] failed to read 8 bytes\n")
         return empty
     }
     
-    print("[DEBUG] parsing metadata size from bytes\n")
     int metadata_size = u64_le(size_bytes, 0)
-    print("[DEBUG] metadata size: " + int_to_string(metadata_size) + "\n")
+    print("[DEBUG] Metadata size: " + int_to_string(metadata_size) + "\n")
     
     if metadata_size <= 0 || metadata_size > 10000000 {
-        print("[DEBUG] invalid metadata size\n")
         return empty
     }
     
     int metadata_start = 8
     
-    print("[DEBUG] reading metadata bytes, total=" + int_to_string(metadata_start + metadata_size) + "\n")
-    []int header_bytes = __host_read_binary_file_range(model_path, 0, metadata_start + metadata_size)
-    print("[DEBUG] read header " + int_to_string(len(header_bytes)) + " bytes\n")
+    print("[DEBUG] Loading metadata section\n")
+    []int metadata = __host_read_binary_file_range(model_path, metadata_start, metadata_size)
     
-    if len(header_bytes) < metadata_start + metadata_size {
-        print("[DEBUG] failed to read complete header\n")
-        return empty
-    }
+    print("[DEBUG] Metadata loaded: " + int_to_string(len(metadata)) + " bytes\n")
     
-    print("[DEBUG] slicing metadata bytes\n")
-    return slice_bytes(header_bytes, metadata_start, metadata_size)
+    return metadata
 }
 
 func read_tensor_range(string model_path, int offset, int size) []int {
@@ -507,10 +495,11 @@ func embedding_lookup(string model_path, []int metadata_bytes, int token_id) []i
     int hidden_dim = 896
     int vocab_size = 151936
     
-    if token_id < 0 { token_id = 1 }
-    if token_id >= vocab_size { token_id = 2 }
+    int token_idx = token_id
+    if token_idx < 0 { token_idx = 1 }
+    if token_idx >= vocab_size { token_idx = 2 }
     
-    int token_offset = embed_offset + (token_id * hidden_dim * 2)
+    int token_offset = embed_offset + (token_idx * hidden_dim * 2)
     
     print("[Embedding] Offset=" + int_to_string(token_offset) + "\n")
     
