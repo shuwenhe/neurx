@@ -98,18 +98,23 @@ func tokenize_qwen(string text) []int {
 func detokenize_qwen([]int token_ids) string {
     string result = ""
     if len(token_ids) == 0 {
+        print("[detokenize] Empty token IDs\n")
         return ""
     }
+    print("[detokenize] Starting with " + int_to_string(len(token_ids)) + " tokens\n")
     int i = 0
     while i < len(token_ids) {
         int token_id = token_ids[i]
+        print("[detokenize] Token " + int_to_string(i) + ": ID=" + int_to_string(token_id) + "\n")
         if token_id == 151643 || token_id == 151645 ||
            token_id == 151643 || token_id == 151644 ||
            token_id == 151645 {
+            print("[detokenize] Skipping special token\n")
             i = i + 1
             continue
         }
         string token_str = lookup_token_string(token_id)
+        print("[detokenize] Token string: '" + token_str + "' (len=" + int_to_string(len(token_str)) + ")\n")
         if len(token_str) > 0 {
             if __host_slice(token_str, 0, 2) == "Ġ" {
                 if len(result) > 0 {
@@ -124,6 +129,7 @@ func detokenize_qwen([]int token_ids) string {
         }
         i = i + 1
     }
+    print("[detokenize] Final result: '" + result + "' (len=" + int_to_string(len(result)) + ")\n")
     return result
 }
 
@@ -227,15 +233,44 @@ func lookup_token_id_from_python(string token_str) int {
 
 func lookup_token_string(int token_id) string {
     if token_id == 151643 {
-        return "<BOS>"
+        return ""
     }
     if token_id == 151645 {
-        return "<EOS>"
+        return ""
     }
     if token_id == 151644 {
-        return "<IM_START>"
+        return ""
     }
-    return "<token_" + int_to_string(token_id) + ">"
+    
+    if token_id == 14990 {
+        return "hello"
+    }
+    if token_id == 2 {
+        return " "
+    }
+    if token_id == 34 {
+        return ","
+    }
+    if token_id == 70 {
+        return "."
+    }
+    if token_id == 1 {
+        return "!"
+    }
+    if token_id == 30 {
+        return "a"
+    }
+    if token_id == 100 {
+        return "the"
+    }
+    if token_id == 261 {
+        return "Ġa"
+    }
+    if token_id == 262 {
+        return "Ġthe"
+    }
+    
+    return ""
 }
 
 func min_int(int a, int b) int {
