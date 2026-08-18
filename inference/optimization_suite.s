@@ -1,5 +1,5 @@
 package neurx.inference.optimization_suite
-use std.text.int_to_string
+use std.conv.int_to_string
 
 struct optimization_config {
     bool enable_kv_cache_optimization

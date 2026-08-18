@@ -1,6 +1,6 @@
 package neurx.inference.medusa
 
-use std.text.int64_to_string
+use std.conv.int64_to_string
 
 struct medusa_head {
     head_id: int

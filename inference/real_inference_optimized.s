@@ -1,7 +1,7 @@
 package real_inference_optimized
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file}
 use std.binary.u64_le_bytes
-use std.text.int_to_string
+use std.conv.int_to_string
 extern "intrinsic" func __host_read_binary_file(string path) []int
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 extern "intrinsic" func __host_slice(string text, int start, int end) string

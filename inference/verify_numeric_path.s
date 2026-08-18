@@ -1,6 +1,7 @@
 package neurx.inference.verify_numeric
 use neurx.inference.cpu_backend.{fast_matmul_flat_opt, fast_gelu, pow_f, fast_softmax}
-use std.text.int_to_string
+use std.conv.int_to_string
+use std.conv.float_to_string_precision
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
 struct matrix_stats {
@@ -9,15 +10,7 @@ struct matrix_stats {
 }
 
 func float_to_string(float val) string {
-    int int_part = int(val)
-    string res = int_to_string(int_part)
-    res = res + "."
-    float frac = val - float(int_part)
-    if frac < 0.0 { frac = -frac }
-    int frac_part = int(frac * 100000.0)
-    res = res + int_to_string(frac_part)
-    res
-}
+    return float_to_string_precision(val, 5)
 
 func compute_matrix_stats([][]float mat) matrix_stats {
     if len(mat) == 0 { return matrix_stats{mean: 0.0, sample: 0.0} }

@@ -1,6 +1,6 @@
 package neurx.inference.tokenizer_loader
 
-use std.text.int_to_string
+use std.conv.int_to_string
 
 struct tokenizer_state_2 {
     string model_path

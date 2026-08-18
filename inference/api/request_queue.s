@@ -1,4 +1,4 @@
-use std.text.int_to_string
+use std.conv.int_to_string
 
 package neurx.inference.api.request_queue
 

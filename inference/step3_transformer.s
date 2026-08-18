@@ -1,5 +1,5 @@
 package step3_transformer
-use std.text.int_to_string
+use std.conv.int_to_string
 use neurx.inference.safetensors_loader.{load_transformer_layer}
 use neurx.inference.cpu_backend.{fast_matmul_flat_opt, fast_gelu, pow_f, fast_softmax}
 use neurx.model.transformer.position_encoding.{new_rope_position_encoding, position_encoding_config, apply_rope_position}

@@ -1,4 +1,4 @@
-use std.text.int_to_string
+use std.conv.int_to_string
 
 package neurx.inference.test_backend
 extern "intrinsic" func __host_slice(string text, int start, int end) string

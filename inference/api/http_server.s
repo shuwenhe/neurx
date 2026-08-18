@@ -1,4 +1,4 @@
-use std.text.int_to_string
+use std.conv.int_to_string
 
 package neurx.inference.api.http_server
 extern "intrinsic" func __sys_socket(int domain, int type, int protocol) int

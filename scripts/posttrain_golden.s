@@ -1,4 +1,4 @@
-use std.text.parse_int_default
+use std.conv.parse_int_default
 
 module posttrain_golden
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file, trim}

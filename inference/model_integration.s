@@ -1,5 +1,5 @@
 package neurx.inference.model_integration
-use std.text.int_to_string
+use std.conv.int_to_string
 
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 

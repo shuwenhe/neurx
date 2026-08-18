@@ -6,7 +6,7 @@ use std.tensor.{
 use std.ai.nn.{
     linear, embedding, transformer_block, layer_norm
 }
-use std.text.int_to_string
+use std.conv.int_to_string
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 extern "intrinsic" func __sys_read_string(int fd, int count) string

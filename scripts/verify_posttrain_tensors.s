@@ -1,6 +1,6 @@
-use std.text.parse_int_default
 
-use std.text.bytes_to_string_range
+use std.conv.parse_int_default
+use std.encoding.bytes_to_string_range
 
 module verify_posttrain_tensors
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_binary_file, trim}

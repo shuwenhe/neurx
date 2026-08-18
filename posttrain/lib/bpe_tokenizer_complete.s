@@ -1,10 +1,10 @@
 package neurx.posttrain.lib.bpe_tokenizer_complete
 use std.io.eprintln
-use std.text.bytes_to_string
-use std.text.normalize_byte
-use std.text.str_to_bytes
-use std.text.normalize_ascii_text
-use std.text.is_ascii_space
+use std.encoding.bytes_to_string
+use std.encoding.normalize_byte
+use std.encoding.str_to_bytes
+use std.encoding.normalize_ascii_text
+use std.encoding.is_ascii_space
 
 struct bpe_tokenizer {
     map[string]int vocab

@@ -1,4 +1,4 @@
-use std.text.parse_int_default
+use std.conv.parse_int_default
 
 module posttrain_validation_verify_adapter
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_binary_file, runtime_read_text_file, runtime_run_command_output, trim}

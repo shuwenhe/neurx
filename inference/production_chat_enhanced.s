@@ -1,5 +1,5 @@
 package neurx.inference.production_chat_enhanced
-use std.text.int_to_string
+use std.conv.int_to_string
 
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __host_slice(string text, int start, int end) string

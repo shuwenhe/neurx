@@ -1,7 +1,7 @@
 package neurx.posttrain.lib.text_tokenizer
 use std.io.eprintln
-use std.text.normalize_ascii_text
-use std.text.is_ascii_space
+use std.encoding.normalize_ascii_text
+use std.encoding.is_ascii_space
 
 func normalize_text(string text) string {
     return normalize_ascii_text(text)

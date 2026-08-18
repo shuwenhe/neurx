@@ -1,6 +1,6 @@
 package real_inference_with_model
 
-use std.text.int_to_string
+use std.conv.int_to_string
 
 func generate_response(string question) string {
     if question == "hello" || question == "你好" {

@@ -1,5 +1,6 @@
 package neurx.inference.kv_cache_optimize
-use std.text.int_to_string
+use std.conv.int_to_string
+use std.conv.float_to_string_precision
 
 
 struct kv_cache_config {
@@ -291,14 +292,7 @@ func reset_cache(kv_cache_optimizer* opt) {
 }
 
 func float_to_string(float value) string {
-    int int_part = int(value * 100.0)
-    string result = int_to_string(int_part / 100) + "."
-    int frac = int_part - (int_part / 100) * 100
-    if frac < 10 {
-        result = result + "0"
-    }
-    result + int_to_string(frac)
-}
+    return float_to_string_precision(value, 2)
 
 func print_cache_statistics(kv_cache_optimizer opt) {
     println("")

@@ -1,6 +1,6 @@
 package real_inference_simple
 use std.io.{print, println}
-use std.text.int_to_string
+use std.conv.int_to_string
 
 func tokenize_simple(string text) string {
     string result = ""

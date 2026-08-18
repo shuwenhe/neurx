@@ -1,6 +1,6 @@
 package neurx.tokenizer.common.bpe_complete
 
-use std.text.bytes_to_string
+use std.encoding.bytes_to_string
 
 func new_vocab() []int {
     []int vocab = []

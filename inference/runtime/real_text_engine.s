@@ -2,7 +2,8 @@ package neurx.inference.runtime.real_text_engine
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, trim}
 use neurx.inference.runtime.model_manifest.{hf_model_manifest, load_hf_model_manifest}
 use neurx.inference.model_cpu_inference.{safetensors_model, open_model, validate_model, read_tensor_elements, bf16_at, load_vector, matvec_named, rms_norm}
-use std.text.int_to_string
+use std.conv.int_to_string
+use std.conv.float_to_string_precision
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
 struct real_text_engine_state {
@@ -35,20 +36,7 @@ struct real_generation_result {
 }
 
 func float_to_string(float value) string {
-    int int_part = int(value)
-    float frac_value = value - float(int_part)
-    if frac_value < 0.0 {
-        frac_value = 0.0 - frac_value
-    }
-    int frac_part = int(frac_value * 1000.0)
-    string result = int_to_string(int_part)
-    result = result + "."
-    if frac_part < 10 {
-        result = result + "00"
-    } else if frac_part < 100 {
-        result = result + "0"
-    }
-    result + int_to_string(frac_part)
+    return float_to_string_precision(value, 3)
 }
 
 func abs_float(float value) float {

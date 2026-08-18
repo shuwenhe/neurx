@@ -1,6 +1,7 @@
 package neurx.monitoring.moe_1t_metrics
 use neurx.strings
 use neurx.runtime.io.{io_println, runtime_make_dirs, runtime_write_text_file, runtime_run_command_output}
+use std.conv.float_to_string_precision
 
 struct training_metrics {
     float loss
@@ -344,46 +345,7 @@ func int_to_string(int x) string {
 }
 
 func float_to_string(float x, int precision) string {
-    if precision < 0 {
-        precision = 0
-    }
-    bool neg = false
-    float value = x
-    if value < 0.0 {
-        neg = true
-        value = -value
-    }
-    int scale = 1
-    int i = 0
-    while i < precision {
-        scale = scale * 10
-        i = i + 1
-    }
-    int scaled = int(value * float(scale) + 0.5)
-    int whole = 0
-    int frac = 0
-    if scale > 0 {
-        whole = scaled / scale
-        frac = scaled % scale
-    } else {
-        whole = int(value)
-    }
-    string result = ""
-    if neg {
-        result = "-"
-    }
-    result = result + int_to_string(whole)
-    if precision > 0 {
-        result = result + "."
-        string frac_str = int_to_string(frac)
-        int pad = precision - len(frac_str)
-        while pad > 0 {
-            result = result + "0"
-            pad = pad - 1
-        }
-        result = result + frac_str
-    }
-    result
+    return float_to_string_precision(x, precision)
 }
 
 func trim_history([]metrics_frame frames, int limit) []metrics_frame {

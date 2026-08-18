@@ -1,5 +1,6 @@
 package neurx.inference.batch_optimize
-use std.text.int_to_string
+use std.conv.int_to_string
+use std.conv.float_to_string_precision
 
 
 struct batch_config {
@@ -230,18 +231,7 @@ func create_batch_statistics(batch_scheduler scheduler) batch_statistics {
 }
 
 func float_to_string(float value) string {
-    int int_part = int(value)
-    int frac_part = int((value - float(int_part)) * 100.0)
-    if frac_part < 0 {
-        frac_part = 0 - frac_part
-    }
-
-    string result = int_to_string(int_part) + "."
-    if frac_part < 10 {
-        result = result + "0"
-    }
-    result + int_to_string(frac_part)
-}
+    return float_to_string_precision(value, 2)
 
 func print_batch_summary(batch_request batch) {
     println("  Batch Size: " + int_to_string(batch.batch_size) + " requests")

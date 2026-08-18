@@ -1,6 +1,6 @@
 package neurx.inference.api.rest_server
 
-use std.text.int_to_string
+use std.conv.int_to_string
 
 extern "intrinsic" func __sys_socket(int domain, int type, int protocol) int
 extern "intrinsic" func __sys_bind(int fd, string host, int port, int family) int

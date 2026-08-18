@@ -1,6 +1,6 @@
 package neurx.inference.hpc
 
-use std.text.int_to_string
+use std.conv.int_to_string
 
 func print_line(string text) {
     print(text + "\n")
