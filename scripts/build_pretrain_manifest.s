@@ -1,3 +1,5 @@
+use std.text.parse_int_default
+
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, trim}
 
@@ -147,29 +149,6 @@ func json_escape(string s) string {
     }
     out = out + "\""
     out
-}
-
-func parse_int(string s, int fallback) int {
-    string text = trim(s)
-    if text == "" {
-        return fallback
-    }
-    int sign = 1
-    int i = 0
-    if text[0] == 45 {
-        sign = -1
-        i = 1
-    }
-    int value = 0
-    while i < len(text) {
-        int digit = text[i] - 48
-        if digit < 0 || digit > 9 {
-            return fallback
-        }
-        value = value * 10 + digit
-        i = i + 1
-    }
-    sign * value
 }
 
 func path_basename(string path) string {

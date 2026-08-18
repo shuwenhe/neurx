@@ -1,3 +1,5 @@
+use std.text.int_to_string
+
 package neurx.scripts.download_model
 
 use neurx.runtime.io.{
@@ -47,26 +49,6 @@ func create_default_config() download_config {
     }
 }
 
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    string output = ""
-    int n = value
-    string sign = ""
-    if n < 0 {
-        sign = "-"
-        n = 0 - n
-    }
-    string digits = "0123456789"
-    string tmp = ""
-    while n > 0 {
-        int digit = n - (n / 10) * 10
-        tmp = string_slice(digits, digit, digit + 1) + tmp
-        n = n / 10
-    }
-    sign + tmp
-}
 
 func string_slice(string text, int start, int end) string {
     string result = ""

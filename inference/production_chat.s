@@ -1,6 +1,7 @@
 package neurx.inference.production_chat
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
+use std.text.{int_to_string, parse_int_default}
 
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __host_write_text_file(string path, string content) int
@@ -30,45 +31,8 @@ func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
 
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    string output = ""
-    int current = value
-    while current > 0 {
-        int digit = current - (current / 10) * 10
-        output = __host_slice("0123456789", digit, digit + 1) + output
-        current = current / 10
-    }
-    output
-}
-
 func parse_positive_int(string text, int fallback) int {
-    if len(text) == 0 {
-        return fallback
-    }
-    int value = 0
-    int index = 0
-    while index < len(text) {
-        string digit = __host_slice(text, index, index + 1)
-        int number = -1
-        if digit == "0" { number = 0 }
-        if digit == "1" { number = 1 }
-        if digit == "2" { number = 2 }
-        if digit == "3" { number = 3 }
-        if digit == "4" { number = 4 }
-        if digit == "5" { number = 5 }
-        if digit == "6" { number = 6 }
-        if digit == "7" { number = 7 }
-        if digit == "8" { number = 8 }
-        if digit == "9" { number = 9 }
-        if number < 0 {
-            return fallback
-        }
-        value = value * 10 + number
-        index = index + 1
-    }
+    int value = parse_int_default(text, fallback)
     if value <= 0 {
         return fallback
     }

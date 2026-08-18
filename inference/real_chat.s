@@ -1,35 +1,10 @@
 package real_chat
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
+use std.text.int_to_string
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 
 func read_user_line() string {
     return trim(__sys_read_string(0, 4096))
-}
-
-func int_to_string(int value) string {
-    if value == 0 { return "0" }
-    string out = ""
-    int n = value
-    if n < 0 {
-        out = "-"
-        n = 0 - n
-    }
-    string tmp = ""
-    while n > 0 {
-        int digit = n - (n / 10) * 10
-        if digit == 0 { tmp = "0" + tmp }
-        if digit == 1 { tmp = "1" + tmp }
-        if digit == 2 { tmp = "2" + tmp }
-        if digit == 3 { tmp = "3" + tmp }
-        if digit == 4 { tmp = "4" + tmp }
-        if digit == 5 { tmp = "5" + tmp }
-        if digit == 6 { tmp = "6" + tmp }
-        if digit == 7 { tmp = "7" + tmp }
-        if digit == 8 { tmp = "8" + tmp }
-        if digit == 9 { tmp = "9" + tmp }
-        n = n / 10
-    }
-    return out + tmp
 }
 
 func generate_response(string prompt, int max_tokens) string {

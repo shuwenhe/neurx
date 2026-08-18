@@ -1,3 +1,5 @@
+use std.text.parse_int_default
+
 use std.text.bytes_to_string_range
 
 module verify_posttrain_tensors
@@ -353,29 +355,6 @@ func substring(string text, int start, int end) string {
         i = i + 1
     }
     result
-}
-
-func parse_int(string s, int fallback) int {
-    string text = trim(s)
-    if text == "" {
-        return fallback
-    }
-    int sign = 1
-    int i = 0
-    if text[0] == 45 {
-        sign = -1
-        i = 1
-    }
-    int value = 0
-    while i < len(text) {
-        int digit = text[i] - 48
-        if digit < 0 || digit > 9 {
-            return fallback
-        }
-        value = value * 10 + digit
-        i = i + 1
-    }
-    sign * value
 }
 
 func string_char(int c) string {

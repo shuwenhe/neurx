@@ -1,6 +1,7 @@
 package neurx.inference.hpc
 use neurx.runtime.io.{runtime_env_get, trim}
 use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, resolve_model_path_from_env, int_to_string, float_to_string}
+use std.text.parse_int_default
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 
 func print_line(string text) {
@@ -13,19 +14,7 @@ func read_user_line() string {
 }
 
 func parse_positive_int(string text, int fallback) int {
-    if len(text) == 0 {
-        return fallback
-    }
-    int value = 0
-    int index = 0
-    while index < len(text) {
-        int ch = text[index]
-        if ch < 48 || ch > 57 {
-            return fallback
-        }
-        value = value * 10 + (ch - 48)
-        index = index + 1
-    }
+    int value = parse_int_default(text, fallback)
     if value <= 0 {
         return fallback
     }

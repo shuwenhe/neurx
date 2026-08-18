@@ -2,7 +2,7 @@ package neurx.inference.cpu_backend
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
 use std.binary.u64_le_bytes
-use std.text.bytes_to_string
+use std.text.{bytes_to_string, int_to_string, parse_int_default}
 
 extern "intrinsic" func __sys_socket(int domain, int socket_type, int protocol) int
 extern "intrinsic" func __sys_bind(int fd, string addr, int port, int family) int
@@ -624,62 +624,6 @@ func http_response_ok(string body) string {
     response = response + "\r\n"
     response = response + body
     return response
-}
-
-func int_to_string(int value) string {
-    if value == 0 { return "0" }
-    string out = ""
-    int n = value
-    if n < 0 {
-        out = "-"
-        n = 0 - n
-    }
-    string tmp = ""
-    while n > 0 {
-        int digit = n - (n / 10) * 10
-        if digit == 0 { tmp = "0" + tmp }
-        if digit == 1 { tmp = "1" + tmp }
-        if digit == 2 { tmp = "2" + tmp }
-        if digit == 3 { tmp = "3" + tmp }
-        if digit == 4 { tmp = "4" + tmp }
-        if digit == 5 { tmp = "5" + tmp }
-        if digit == 6 { tmp = "6" + tmp }
-        if digit == 7 { tmp = "7" + tmp }
-        if digit == 8 { tmp = "8" + tmp }
-        if digit == 9 { tmp = "9" + tmp }
-        n = n / 10
-    }
-    return out + tmp
-}
-
-func string_to_int(string value, int default_value) int {
-    int result = 0
-    int i = 0
-    int len_val = len(value)
-    if len_val == 0 { return default_value }
-    int sign = 1
-    if __host_slice(value, 0, 1) == "-" {
-        sign = -1
-        i = 1
-    }
-    while i < len_val {
-        string c = __host_slice(value, i, i + 1)
-        int digit = -1
-        if c == "0" { digit = 0 }
-        else if c == "1" { digit = 1 }
-        else if c == "2" { digit = 2 }
-        else if c == "3" { digit = 3 }
-        else if c == "4" { digit = 4 }
-        else if c == "5" { digit = 5 }
-        else if c == "6" { digit = 6 }
-        else if c == "7" { digit = 7 }
-        else if c == "8" { digit = 8 }
-        else if c == "9" { digit = 9 }
-        if digit == -1 { return default_value }
-        result = result * 10 + digit
-        i = i + 1
-    }
-    return sign * result
 }
 
 func health_check_response() string {
@@ -1847,7 +1791,7 @@ func main() {
     print("Backend initialized successfully.\n")
 
     string port_str = runtime_env_get("NEURX_S_PORT", "18083")
-    int port_number = string_to_int(port_str, 18083)
+    int port_number = parse_int_default(port_str, 18083)
 
     int max_retries = 3
     int retry_count = 0

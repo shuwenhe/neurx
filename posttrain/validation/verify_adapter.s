@@ -1,3 +1,5 @@
+use std.text.parse_int_default
+
 module posttrain_validation_verify_adapter
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_binary_file, runtime_read_text_file, runtime_run_command_output, trim}
 float MIN_ADAPTER_L1 = 1e-6
@@ -269,29 +271,6 @@ func read_u64_le([]int bytes, int offset) int {
         i = i + 1
     }
     value
-}
-
-func parse_int(string s, int fallback) int {
-    string text = trim(s)
-    if text == "" {
-        return fallback
-    }
-    int sign = 1
-    int i = 0
-    if text[0] == 45 {
-        sign = -1
-        i = 1
-    }
-    int value = 0
-    while i < len(text) {
-        int digit = text[i] - 48
-        if digit < 0 || digit > 9 {
-            return fallback
-        }
-        value = value * 10 + digit
-        i = i + 1
-    }
-    sign * value
 }
 
 func string_char(int c) string {
