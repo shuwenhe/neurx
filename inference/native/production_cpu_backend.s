@@ -842,21 +842,161 @@ func get_model_directory(string model_path) string {
 }
 
 func load_model_metadata_sharded(string model_dir) []int {
-    []int metadata = []int{cap: 100000}
-    
     print("[ShardedModel] Loading metadata from sharded model\n")
-    
+
     let index_content = load_shard_index(model_dir)
-    
     if len(index_content) == 0 {
         print("[ShardedModel] Failed to load shard index\n")
         return []int{cap: 0}
     }
-    
-    print("[ShardedModel] Loaded shard index successfully\n")
-    print("[ShardedModel] Metadata ready for inference\n")
-    
-    return metadata
+
+    print("[ShardedModel] Parsing weight_map from index\n")
+
+    []string tensor_names = []string{cap: 10000}
+    []string tensor_shards = []string{cap: 10000}
+    int tn = 0
+
+    int wm_pos = 0
+    while wm_pos < len(index_content) {
+        int p = wm_pos
+        if __host_slice(index_content, p, p + 11) == "\"weight_map\"" {
+            int b = p
+            while b < len(index_content) && __host_slice(index_content, b, b + 1) != "{" {
+                b = b + 1
+            }
+            b = b + 1
+            int cur = b
+            while cur < len(index_content) && __host_slice(index_content, cur, cur + 1) != "}" {
+                while cur < len(index_content) && __host_slice(index_content, cur, cur + 1) != '"' {
+                    cur = cur + 1
+                }
+                if cur >= len(index_content) { break }
+                int kstart = cur + 1
+                int kend = kstart
+                while kend < len(index_content) && __host_slice(index_content, kend, kend + 1) != '"' {
+                    kend = kend + 1
+                }
+                string key = __host_slice(index_content, kstart, kend)
+
+                cur = kend + 1
+                while cur < len(index_content) && __host_slice(index_content, cur, cur + 1) != '"' {
+                    cur = cur + 1
+                }
+                if cur >= len(index_content) { break }
+                int vstart = cur + 1
+                int vend = vstart
+                while vend < len(index_content) && __host_slice(index_content, vend, vend + 1) != '"' {
+                    vend = vend + 1
+                }
+                string val = __host_slice(index_content, vstart, vend)
+
+                tensor_names[tn] = key
+                tensor_shards[tn] = val
+                tn = tn + 1
+
+                cur = vend + 1
+            }
+            break
+        }
+        wm_pos = wm_pos + 1
+    }
+
+    if tn == 0 {
+        print("[ShardedModel] No entries found in weight_map\n")
+        return []int{cap: 0}
+    }
+
+    print("[ShardedModel] Collected " + int_to_string(tn) + " tensor entries\n")
+
+    []string shard_files = []string{cap: 64}
+    int sf = 0
+    int i = 0
+    while i < tn {
+        string sfile = tensor_shards[i]
+        bool found = false
+        int j = 0
+        while j < sf {
+            if shard_files[j] == sfile { found = true; break }
+            j = j + 1
+        }
+        if !found {
+            shard_files[sf] = sfile
+            sf = sf + 1
+        }
+        i = i + 1
+    }
+
+    print("[ShardedModel] Found " + int_to_string(sf) + " shard files\n")
+
+    string combined = "{"
+
+    int sidx = 0
+    while sidx < sf {
+        string shard = shard_files[sidx]
+        string shard_path = model_dir + "/" + shard
+        print("[ShardedModel] Inspecting shard: " + shard_path + "\n")
+
+        []int size_bytes = __host_read_binary_file_range(shard_path, 0, 8)
+        if len(size_bytes) < 8 {
+            print("[ShardedModel] Failed reading header size for " + shard + "\n")
+            sidx = sidx + 1
+            continue
+        }
+        int header_len = u64_le(size_bytes, 0)
+        if header_len <= 0 || header_len > 20000000 {
+            print("[ShardedModel] Invalid header length for " + shard + " -> " + int_to_string(header_len) + "\n")
+            sidx = sidx + 1
+            continue
+        }
+
+        []int header_bytes = __host_read_binary_file_range(shard_path, 8, header_len)
+        if len(header_bytes) == 0 {
+            print("[ShardedModel] Failed reading header bytes for " + shard + "\n")
+            sidx = sidx + 1
+            continue
+        }
+
+        int ti = 0
+        while ti < tn {
+            if tensor_shards[ti] != shard { ti = ti + 1; continue }
+            string tname = tensor_names[ti]
+            []int parsed = parse_tensor_index(header_bytes, tname)
+            if parsed[2] != 1 {
+                ti = ti + 1
+                continue
+            }
+
+            int rel_start = parsed[0]
+            int byte_len = parsed[1]
+
+            int file_start = 8 + header_len + rel_start
+            int file_end = file_start + byte_len
+
+            if len(combined) > 1 { combined = combined + "," }
+            combined = combined + "\"" + tname + "\":{\"data_offsets\":[" + int_to_string(file_start) + "," + int_to_string(file_end) + "]}"
+
+            ti = ti + 1
+        }
+
+        sidx = sidx + 1
+    }
+
+    combined = combined + "}"
+
+    []int out_bytes = string_to_bytes(combined)
+    print("[ShardedModel] Combined metadata size: " + int_to_string(len(out_bytes)) + " bytes\n")
+    return out_bytes
+}
+
+func string_to_bytes(string s) []int {
+    []int out = []int{cap: len(s)}
+    int i = 0
+    while i < len(s) {
+        string ch = __host_slice(s, i, i + 1)
+        out[i] = int(ch[0])
+        i = i + 1
+    }
+    out
 }
 
 func read_tensor_range(string model_path, int offset, int size) []int {
