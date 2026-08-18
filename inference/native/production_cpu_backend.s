@@ -867,25 +867,25 @@ func load_model_metadata_sharded(string model_dir) []int {
             b = b + 1
             int cur = b
             while cur < len(index_content) && __host_slice(index_content, cur, cur + 1) != "}" {
-                while cur < len(index_content) && __host_slice(index_content, cur, cur + 1) != '"' {
+                while cur < len(index_content) && __host_slice(index_content, cur, cur + 1) != "\"" {
                     cur = cur + 1
                 }
                 if cur >= len(index_content) { break }
                 int kstart = cur + 1
                 int kend = kstart
-                while kend < len(index_content) && __host_slice(index_content, kend, kend + 1) != '"' {
+                while kend < len(index_content) && __host_slice(index_content, kend, kend + 1) != "\"" {
                     kend = kend + 1
                 }
                 string key = __host_slice(index_content, kstart, kend)
 
                 cur = kend + 1
-                while cur < len(index_content) && __host_slice(index_content, cur, cur + 1) != '"' {
+                while cur < len(index_content) && __host_slice(index_content, cur, cur + 1) != "\"" {
                     cur = cur + 1
                 }
                 if cur >= len(index_content) { break }
                 int vstart = cur + 1
                 int vend = vstart
-                while vend < len(index_content) && __host_slice(index_content, vend, vend + 1) != '"' {
+                  while vend < len(index_content) && __host_slice(index_content, vend, vend + 1) != "\"" {
                     vend = vend + 1
                 }
                 string val = __host_slice(index_content, vstart, vend)
@@ -1781,11 +1781,16 @@ func perform_inference(string prompt, string model_path) string {
 }
 
 func generate_response(string prompt, int max_tokens) string {
-    string model_dir = runtime_env_get("NEURX_MODEL_DIR", "/model/Qwen2.5-VL-7B")
-    string fallback_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
+    string model_path_env = runtime_env_get("NEURX_CHAT_MODEL_PATH", "")
+    string model_dir = model_path_env
+
+    if len(model_dir) == 0 {
+        model_dir = runtime_env_get("NEURX_MODEL_DIR", "/model/Qwen2.5-VL-7B")
+    }
+
     string optimize_mode = runtime_env_get("NEURX_OPTIMIZE_MODE", "standard")
 
-    print("[Inference] NEURX_MODEL_DIR = " + model_dir + "\n")
+    print("[Inference] Model directory = " + model_dir + "\n")
     print("[Inference] Max tokens to generate = " + int_to_string(max_tokens) + "\n")
     print("[Inference] Optimization mode = " + optimize_mode + "\n")
     
@@ -1794,11 +1799,16 @@ func generate_response(string prompt, int max_tokens) string {
     
     if runtime_file_exists(index_file) {
         print("[Inference] Detected sharded model at: " + model_dir + "\n")
-        model_file = model_dir + "/model-00001-of-00005.safetensors"
-        print("[Inference] Using shard: " + model_file + "\n")
+        model_file = index_file
     } else {
-        model_file = model_dir + "/model.safetensors"
-        print("[Inference] Model file = " + model_file + "\n")
+        let single_file = model_dir + "/model.safetensors"
+        if runtime_file_exists(single_file) {
+            model_file = single_file
+            print("[Inference] Using single model file: " + model_file + "\n")
+        } else {
+            model_file = model_dir
+            print("[Inference] Using model directory: " + model_dir + "\n")
+        }
     }
 
     string result = ""

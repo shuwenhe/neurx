@@ -141,7 +141,7 @@ POSTTRAIN_ADAPTER_DIR ?= $(POSTTRAIN_OUTPUT_DIR)/adapter
 POSTTRAIN_MERGED_MODEL_DIR ?= $(POSTTRAIN_OUTPUT_DIR)
 POSTTRAIN_LORA_ALPHA ?= 16.0
 POSTTRAIN_LORA_RANK ?= 8
-CHAT_MODEL_PATH ?= $(if $(wildcard /home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct/model.safetensors),/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct,$(if $(wildcard $(CURDIR_UNIX)/../posttrain/model.safetensors),$(CURDIR_UNIX)/../posttrain,$(POSTTRAIN_OUTPUT_DIR)))
+CHAT_MODEL_PATH ?= $(if $(wildcard /model/Qwen2.5-VL-7B/model.safetensors.index.json),/model/Qwen2.5-VL-7B,$(if $(wildcard /home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct/model.safetensors),/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct,$(if $(wildcard $(CURDIR_UNIX)/../posttrain/model.safetensors),$(CURDIR_UNIX)/../posttrain,$(POSTTRAIN_OUTPUT_DIR))))
 CHAT_MAX_NEW_TOKENS ?= 512
 POSTTRAIN_GOLDEN_DIR ?= /home/shuwen/shuwen/posttrain/golden
 POSTTRAIN_GOLDEN_SOURCE ?= $(CURDIR_UNIX)/scripts/posttrain_golden.s
@@ -927,8 +927,8 @@ build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUC
 build-real-model-chat-s: build-production-s-inference
 
 chat-cpu: build-real-model-chat-s
-	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \
-		echo "Model weights not found: $(CHAT_MODEL_PATH)/model.safetensors"; \
+	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' -o -f '$(CHAT_MODEL_PATH)/model.safetensors.index.json' || { \
+		echo "Model weights not found in $(CHAT_MODEL_PATH) (neither model.safetensors nor sharded model)"; \
 		exit 1; \
 	}
 	@mkdir -p /tmp
@@ -939,8 +939,8 @@ chat-cpu: build-real-model-chat-s
 		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_IR)'
 
 chat-gpu: build-real-model-chat-s
-	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \
-		echo "Model weights not found: $(CHAT_MODEL_PATH)/model.safetensors"; \
+	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' -o -f '$(CHAT_MODEL_PATH)/model.safetensors.index.json' || { \
+		echo "Model weights not found in $(CHAT_MODEL_PATH) (neither model.safetensors nor sharded model)"; \
 		exit 1; \
 	}
 	@mkdir -p /tmp

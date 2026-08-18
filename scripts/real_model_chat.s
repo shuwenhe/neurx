@@ -41,7 +41,7 @@ func resolve_model_file(string configured_path) string {
     }
     string index_file = path + "/model.safetensors.index.json"
     if runtime_file_exists(index_file) {
-        return path + "/model-00001-of-00005.safetensors"
+        return path
     }
     string candidate = path + "/model.safetensors"
     if runtime_file_exists(candidate) {
