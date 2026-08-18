@@ -5,6 +5,7 @@ use std.encoding.normalize_byte
 use std.encoding.str_to_bytes
 use std.encoding.normalize_ascii_text
 use std.encoding.is_ascii_space
+use std.text.substring
 
 struct bpe_tokenizer {
     map[string]int vocab
