@@ -1,5 +1,6 @@
 package neurx.inference.runtime.model_manifest
 use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file, runtime_run_command_output, runtime_shell_escape}
+use std.text.bytes_to_string
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 
 struct hf_model_config {
@@ -339,18 +340,6 @@ func model_u64_le([]int bytes, int offset) int {
     value
 }
 
-func model_bytes_to_string([]int bytes) string {
-    string result = ""
-    int i = 0
-    while i < len(bytes) {
-        int ch = bytes[i]
-        if ch < 0 { ch = ch + 256 }
-        result = result + string(ch)
-        i = i + 1
-    }
-    result
-}
-
 func model_matching_end(string text, int start, int open_char, int close_char) int {
     int depth = 0
     bool in_string = false
@@ -432,7 +421,7 @@ func model_parse_archive(string path) safetensors_archive_manifest {
         archive.error_message = "invalid safetensors header size"
         return archive
     }
-    string header = model_bytes_to_string(__host_read_binary_file_range(path, 8, archive.header_size))
+    string header = bytes_to_string(__host_read_binary_file_range(path, 8, archive.header_size))
     if len(header) != archive.header_size {
         archive.error_message = "incomplete safetensors header"
         return archive

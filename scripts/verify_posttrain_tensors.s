@@ -1,3 +1,5 @@
+use std.text.bytes_to_string_range
+
 module verify_posttrain_tensors
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_binary_file, trim}
 
@@ -39,7 +41,7 @@ func main() {
         println("❌ FAIL: Invalid safetensors header")
         return
     }
-    string header = bytes_to_string(file_bytes, 8, header_size)
+    string header = bytes_to_string_range(file_bytes, 8, header_size)
     println("[1] Reading adapter tensors...")
     int found = 0
     tensor_sample sample_q_a = read_tensor_sample(file_bytes, header, "base_model.model.model.layers.0.self_attn.q_proj.lora_A.weight")
@@ -410,7 +412,6 @@ func int_to_str(int n) string {
     }
     out
 }
-
 func float_to_str(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -445,16 +446,6 @@ func float_to_str(float value, int decimals) string {
         else if digit == 7 { out = out + "7" }
         else if digit == 8 { out = out + "8" }
         else { out = out + "9" }
-        i = i + 1
-    }
-    out
-}
-
-func bytes_to_string([]int bytes, int start, int length) string {
-    string out = ""
-    int i = 0
-    while i < length && start + i < len(bytes) {
-        out = out + string_char(bytes[start + i])
         i = i + 1
     }
     out

@@ -1,5 +1,6 @@
 package neurx.posttrain.lib.bpe_tokenizer_complete
 use std.io.eprintln
+use std.text.bytes_to_string
 
 struct bpe_tokenizer {
     map[string]int vocab
@@ -28,18 +29,6 @@ func str_to_bytes(string text) []int {
         int val = int(b)
         if val < 0 { val = 256 + val }
         result = append(result, val)
-        i = i + 1
-    }
-    return result
-}
-
-func bytes_to_str([]int byte_arr) string {
-    string result = ""
-    int i = 0
-    while i < len(byte_arr) {
-        if byte_arr[i] >= 0 && byte_arr[i] < 256 {
-            result = result + string(byte(byte_arr[i]))
-        }
         i = i + 1
     }
     return result
