@@ -1,4 +1,5 @@
 use std.conv.int_to_string
+use std.conv.string_to_int
 
 package neurx.inference.api.rest_api
 use neurx.inference.api.http_server.{http_request, http_response}
@@ -71,17 +72,6 @@ func index_of_from(string s, string substr, int start) int {
         }
     }
     return -1
-}
-
-func string_to_int(string s) int {
-    result := 0
-    for i := 0; i < len(s); i++ {
-        ch := s[i]
-        if ch >= '0' && ch <= '9' {
-            result = result * 10 + (int(ch) - int('0'))
-        }
-    }
-    return result
 }
 
 func string_at_index(string s, int idx) string {

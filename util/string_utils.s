@@ -1,4 +1,6 @@
 package neurx.util.string_utils
+use std.conv.string_to_int
+
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
 func string_split(string text, string delimiter) []string {
@@ -168,28 +170,6 @@ func int_to_string(int num) string {
     return result
 }
 
-func string_to_int(string text) int {
-    int result = 0
-    int i = 0
-    int start = 0
-    bool negative = false
-    if len(text) > 0 && __host_slice(text, 0, 1) == "-" {
-        negative = true
-        start = 1
-    }
-    i = start
-    while i < len(text) {
-        string ch = __host_slice(text, i, i + 1)
-        if ch >= "0" && ch <= "9" {
-            result = result * 10 + (int(ch[0]) - int("0"[0]))
-        }
-        i = i + 1
-    }
-    if negative {
-        result = -result
-    }
-    return result
-}
 
 func string_join([]string parts, string separator) string {
     string result = ""

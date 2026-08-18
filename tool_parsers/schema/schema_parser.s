@@ -1,6 +1,7 @@
 package neurx.tool_parsers.schema.schema_parser
 
 use neurx.tool_parsers.schema.schema_types
+use std.conv.string_to_int
 use std.vec
 
 func parse_schema_from_json(json_str: string) json_schema {
@@ -239,17 +240,6 @@ func string_from_char(c: int) string {
     return result
 }
 
-func string_to_int(s: string) int {
-    let result = 0
-    let i = 0
-    while i < len(s) {
-        if s[i] >= '0' && s[i] <= '9' {
-            result = result * 10 + (int(s[i]) - int('0'))
-        }
-        i = i + 1
-    }
-    return result
-}
 
 func create_string_schema(min_len: int, max_len: int, pattern: string) json_schema {
     let schema = schema_types.create_empty_schema()
