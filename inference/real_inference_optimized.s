@@ -1,6 +1,7 @@
 package real_inference_optimized
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file}
 use std.binary.u64_le_bytes
+use std.text.int_to_string
 extern "intrinsic" func __host_read_binary_file(string path) []int
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 extern "intrinsic" func __host_slice(string text, int start, int end) string
@@ -91,26 +92,6 @@ func parse_tensor_index([]int metadata, string tensor_name) []int {
     result[1] = end_value - offset_value
     result[2] = 1
     return result
-}
-
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    string out = ""
-    int n = value
-    if n < 0 {
-        out = "-"
-        n = 0 - n
-    }
-    string digits = "0123456789"
-    string tmp = ""
-    while n > 0 {
-        int digit = n - (n / 10) * 10
-        tmp = __host_slice(digits, digit, digit + 1) + tmp
-        n = n / 10
-    }
-    return out + tmp
 }
 
 func slice_bytes([]int bytes, int start, int length) []int {

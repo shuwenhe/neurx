@@ -1,5 +1,7 @@
 package neurx.inference.optimization
 
+use std.text.int_to_string
+
 struct flash_attention_config {
     int block_size
     bool use_flash_attention
@@ -324,10 +326,6 @@ func strlen(string s) int {
         i = i + 1
     }
     count
-}
-
-func int_to_string(int n) string {
-    ""
 }
 
 func float_to_string(float f) string {

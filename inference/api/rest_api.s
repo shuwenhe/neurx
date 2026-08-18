@@ -1,3 +1,5 @@
+use std.text.int_to_string
+
 package neurx.inference.api.rest_api
 use neurx.inference.api.http_server.{http_request, http_response}
 use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, resolve_model_path_from_env, resolve_prompt_from_body, parse_max_tokens, parse_bool, build_health_json, build_models_json, build_generate_json, build_chat_completion_json}
@@ -80,19 +82,6 @@ func string_to_int(string s) int {
         }
     }
     return result
-}
-
-func int_to_string(int val) string {
-    if val == 0 { return "0" }
-    string res = ""
-    int cur = val
-    if cur < 0 { cur = -cur }
-    while cur != 0 {
-        int d = cur - (cur / 10) * 10
-        res = string_at_index("0123456789", d) + res
-        cur = cur / 10
-    }
-    return res
 }
 
 func string_at_index(string s, int idx) string {

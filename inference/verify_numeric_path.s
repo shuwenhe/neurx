@@ -1,19 +1,7 @@
 package neurx.inference.verify_numeric
 use neurx.inference.cpu_backend.{fast_matmul_flat_opt, fast_gelu, pow_f, fast_softmax}
+use std.text.int_to_string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
-func int_to_string(int val) string {
-    if val == 0 { return "0" }
-    string res = ""
-    int cur = val
-    if cur < 0 { cur = -cur }
-    while cur != 0 {
-        int d = cur - (cur / 10) * 10
-        res = __host_slice("0123456789", d, d+1) + res
-        cur = cur / 10
-    }
-    res
-}
 
 struct matrix_stats {
     float mean

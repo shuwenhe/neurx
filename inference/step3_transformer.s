@@ -1,21 +1,32 @@
 package step3_transformer
+use std.text.int_to_string
 use neurx.inference.safetensors_loader.{load_transformer_layer}
 use neurx.inference.cpu_backend.{fast_matmul_flat_opt, fast_gelu, pow_f, fast_softmax}
 use neurx.model.transformer.position_encoding.{new_rope_position_encoding, position_encoding_config, apply_rope_position}
-extern "intrinsic" func __host_slice(string text, int start, int end) string\nextern \"intrinsic\" func __sys_gettimeofday(int sec_ptr, int usec_ptr) int
+extern "intrinsic" func __host_slice(string text, int start, int end) string
+extern "intrinsic" func __sys_gettimeofday(int sec_ptr, int usec_ptr) int
 
-func int_to_string(int val) string {
-    if val == 0 { return "0" }
-    string res = ""
-    int cur = val
-    if cur < 0 { cur = -cur }
-    while cur != 0 {
-        int d = cur - (cur / 10) * 10
-        res = __host_slice("0123456789", d, d+1) + res
-        cur = cur / 10
-    }
-    res
-}\n\nstruct timer {\n    int start_sec\n    int start_usec\n}\n\nfunc start_timer() timer {\n    return timer{start_sec: 0, start_usec: 0}\n}\n\nfunc elapsed_ms(timer t) int {\n    return 0\n}\n\nstruct perf_stats {\n    int layer\n    int matmul_time_ms\n    int rope_time_ms\n    int attention_time_ms\n    int ffn_time_ms\n    int total_time_ms\n}"
+struct timer {
+    int start_sec
+    int start_usec
+}
+
+func start_timer() timer {
+    return timer{start_sec: 0, start_usec: 0}
+}
+
+func elapsed_ms(timer t) int {
+    return 0
+}
+
+struct perf_stats {
+    int layer
+    int matmul_time_ms
+    int rope_time_ms
+    int attention_time_ms
+    int ffn_time_ms
+    int total_time_ms
+}
 
 struct transformer_config {
     int num_layers

@@ -1,5 +1,7 @@
 package neurx.inference.tokenizer_loader
 
+use std.text.int_to_string
+
 struct tokenizer_state_2 {
     string model_path
     string model_name
@@ -162,26 +164,6 @@ func word_to_token_id(string word, int vocab_size) int {
         token_id = token_id + 1000
     }
     token_id
-}
-
-func int_to_string(int n) string {
-    if n == 0 {
-        return "0"
-    }
-    negative := n < 0
-    if negative {
-        n = -n
-    }
-    result := ""
-    for n > 0 {
-        digit := n % 10
-        result = string(byte('0' + digit)) + result
-        n = n / 10
-    }
-    if negative {
-        result = "-" + result
-    }
-    result
 }
 
 func string(byte b) string {

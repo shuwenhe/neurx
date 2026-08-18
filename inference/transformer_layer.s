@@ -1,3 +1,5 @@
+use std.text.int_to_string
+
 package neurx.inference.transformer_layer
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
@@ -23,20 +25,6 @@ func create_tensor_two_d(int rows, int cols) tensor_two_d {
         rows: rows,
         cols: cols
     }
-}
-
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    string output = ""
-    int current = value
-    while current > 0 {
-        int digit = current - (current / 10) * 10
-        output = __host_slice("0123456789", digit, digit + 1) + output
-        current = current / 10
-    }
-    output
 }
 
 func float_to_string(float value) string {

@@ -1,3 +1,5 @@
+use std.text.int_to_string
+
 package neurx.inference.cmd.server
 use neurx.inference.api.http_server.{create_http_server, close_http_server, server_accept_loop, http_request, http_response, http_server}
 use neurx.inference.api.rest_api.{route_request}
@@ -78,19 +80,6 @@ func print_help() {
     print("   help     - Show this help\n")
     print("   quit     - Shutdown server\n")
     print("   exit     - Shutdown server\n\n")
-}
-
-func int_to_string(int val) string {
-    if val == 0 { return "0" }
-    string res = ""
-    int cur = val
-    if cur < 0 { cur = -cur }
-    while cur != 0 {
-        int d = cur - (cur / 10) * 10
-        res = string_at_index("0123456789", d) + res
-        cur = cur / 10
-    }
-    return res
 }
 
 func string_at_index(string s, int idx) string {

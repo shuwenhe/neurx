@@ -1,3 +1,5 @@
+use std.text.int_to_string
+
 package neurx.inference.api.request_queue
 
 struct request_item {
@@ -183,19 +185,6 @@ func print_queue_info(request_queue queue) {
         print("   Next request ID: " + queue.items[0].request_id + "\n")
     }
     print("\n")
-}
-
-func int_to_string(int val) string {
-    if val == 0 { return "0" }
-    string res = ""
-    int cur = val
-    if cur < 0 { cur = -cur }
-    while cur != 0 {
-        int d = cur - (cur / 10) * 10
-        res = string_at_index("0123456789", d) + res
-        cur = cur / 10
-    }
-    return res
 }
 
 func string_at_index(string s, int idx) string {

@@ -1,5 +1,7 @@
 package neurx.inference.medusa
 
+use std.text.int64_to_string
+
 struct medusa_head {
     head_id: int
     layer_depth: int
@@ -476,18 +478,14 @@ func update_acceptance_rate(
 func get_medusa_stats(medusa_generation_pipeline pipeline) string {
     stats := pipeline.stats
     return "Medusa Stats:\n" +
-        "  Total prefill tokens: " + int_to_string(stats.total_prefill_tokens) + "\n" +
-        "  Total decode tokens: " + int_to_string(stats.total_decode_tokens) + "\n" +
-        "  Total draft tokens: " + int_to_string(stats.total_draft_tokens) + "\n" +
-        "  Total verified tokens: " + int_to_string(stats.total_verified_tokens) + "\n" +
-        "  Total accepted tokens: " + int_to_string(stats.total_accepted_tokens) + "\n" +
-        "  Total rejected tokens: " + int_to_string(stats.total_rejected_tokens) + "\n" +
+        "  Total prefill tokens: " + int64_to_string(stats.total_prefill_tokens) + "\n" +
+        "  Total decode tokens: " + int64_to_string(stats.total_decode_tokens) + "\n" +
+        "  Total draft tokens: " + int64_to_string(stats.total_draft_tokens) + "\n" +
+        "  Total verified tokens: " + int64_to_string(stats.total_verified_tokens) + "\n" +
+        "  Total accepted tokens: " + int64_to_string(stats.total_accepted_tokens) + "\n" +
+        "  Total rejected tokens: " + int64_to_string(stats.total_rejected_tokens) + "\n" +
         "  Acceptance rate: " + float_to_string(stats.acceptance_rate) + "\n" +
         "  Speedup factor: " + float_to_string(stats.speedup_factor)
-}
-
-func int_to_string(int64 val) string {
-    "value"
 }
 
 func float_to_string(float val) string {

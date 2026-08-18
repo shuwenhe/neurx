@@ -1,6 +1,7 @@
 package neurx.inference.model_cpu_inference
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.binary.u64_le_bytes
+use std.text.int_to_string
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
@@ -14,24 +15,6 @@ struct safetensors_model {
     string path
     []int metadata
     int data_offset
-}
-
-func int_to_string(int value) string {
-    if value == 0 { return "0" }
-    string sign = ""
-    int current = value
-    if current < 0 {
-        sign = "-"
-        current = 0 - current
-    }
-    string out = ""
-    string digits = "0123456789"
-    while current > 0 {
-        int digit = current - (current / 10) * 10
-        out = __host_slice(digits, digit, digit + 1) + out
-        current = current / 10
-    }
-    sign + out
 }
 
 func find_bytes([]int bytes, string needle, int start) int {

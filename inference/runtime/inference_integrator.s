@@ -31,11 +31,17 @@ func parallel_process([]string items, int workers) []string {
 }
 
 func int_to_string(int n) string {
-    if n == 0 {
-        return "0"
+    if n == 0 { return "0" }
+    string out = ""
+    if n < 0 {
+        out = "-"
+        n = 0 - n
     }
-    if n < 10 {
-        return string(n + 48)
+    string tmp = ""
+    while n > 0 {
+        int digit = n - (n / 10) * 10
+        tmp = string(48 + digit) + tmp
+        n = n / 10
     }
-    return int_to_string(n / 10) + string(n % 10 + 48)
+    return out + tmp
 }
