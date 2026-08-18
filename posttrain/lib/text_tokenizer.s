@@ -1,22 +1,10 @@
 package neurx.posttrain.lib.text_tokenizer
 use std.io.eprintln
+use std.text.normalize_ascii_text
+use std.text.is_ascii_space
 
 func normalize_text(string text) string {
-    string result = ""
-    int i = 0
-    while i < len(text) {
-        byte b = byte(text[i])
-        int val = int(b)
-        if val < 0 { val = 256 + val }
-        if val >= 65 && val <= 90 {
-            val = val + 32
-        }
-        if val >= 32 && val <= 126 {
-            result = result + string(byte(val))
-        }
-        i = i + 1
-    }
-    return result
+    return normalize_ascii_text(text)
 }
 
 func pretokenize(string text) []string {
@@ -24,10 +12,8 @@ func pretokenize(string text) []string {
     string current_token = ""
     int idx = 0
     while idx < len(text) {
-        byte b_val = byte(text[idx])
-        int char_val = int(b_val)
-        if char_val < 0 { char_val = 256 + char_val }
-        if char_val == 32 || char_val == 9 || char_val == 10 || char_val == 13 {
+        int char_val = int(byte(text[idx]))
+        if is_ascii_space(char_val) {
             if len(current_token) > 0 {
                 tokens = append(tokens, current_token)
                 current_token = ""

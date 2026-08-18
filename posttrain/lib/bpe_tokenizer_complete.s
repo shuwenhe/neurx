@@ -1,6 +1,10 @@
 package neurx.posttrain.lib.bpe_tokenizer_complete
 use std.io.eprintln
 use std.text.bytes_to_string
+use std.text.normalize_byte
+use std.text.str_to_bytes
+use std.text.normalize_ascii_text
+use std.text.is_ascii_space
 
 struct bpe_tokenizer {
     map[string]int vocab
@@ -21,37 +25,8 @@ struct tokenization_state {
     int position
 }
 
-func str_to_bytes(string text) []int {
-    []int result
-    int i = 0
-    while i < len(text) {
-        byte b = byte(text[i])
-        int val = int(b)
-        if val < 0 { val = 256 + val }
-        result = append(result, val)
-        i = i + 1
-    }
-    return result
-}
-
 func normalize_text(string text) string {
-    string result = ""
-    int i = 0
-    while i < len(text) {
-        string ch = string(text[i])
-        byte b = byte(text[i])
-        int val = int(b)
-        if val < 0 { val = 256 + val }
-        if val >= 65 && val <= 90 {
-            val = val + 32
-            ch = string(byte(val))
-        }
-        if val >= 32 && val <= 126 {
-            result = result + ch
-        }
-        i = i + 1
-    }
-    return result
+    return normalize_ascii_text(text)
 }
 
 func pretokenize(string text) []string {
@@ -60,10 +35,8 @@ func pretokenize(string text) []string {
     int i = 0
     while i < len(text) {
         string ch = string(text[i])
-        byte b = byte(text[i])
-        int val = int(b)
-        if val < 0 { val = 256 + val }
-        if val == 32 || val == 9 || val == 10 || val == 13 {
+        int val = int(byte(text[i]))
+        if is_ascii_space(val) {
             if len(current) > 0 {
                 tokens = append(tokens, current)
                 current = ""
@@ -90,9 +63,7 @@ func word_to_byte_tokens(string word) []string {
     int i = 0
     while i < len(word) {
         string ch = string(word[i])
-        byte b = byte(word[i])
-        int val = int(b)
-        if val < 0 { val = 256 + val }
+        int val = normalize_byte(int(byte(word[i])))
         if val < 10 {
             tokens = append(tokens, "<0" + string(byte(48 + val)) + ">")
         } else if val < 100 {

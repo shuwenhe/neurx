@@ -1,5 +1,6 @@
 package neurx.posttrain.lib.safetensors_complete
 use std.io.eprintln
+use std.text.normalize_byte
 
 struct safe_tensor_info {
     string name
@@ -43,9 +44,7 @@ func read_uint64_le(string data, int offset) int {
     int result = 0
     int i = 0
     while i < 8 {
-        byte b = byte(data[offset + i])
-        int val = int(b)
-        if val < 0 { val = 256 + val }
+        int val = normalize_byte(int(byte(data[offset + i])))
         int shift_amount = 1
         int j = 0
         while j < i * 8 {
@@ -63,9 +62,7 @@ func read_int32_le(string data, int offset) int {
     int result = 0
     int i = 0
     while i < 4 {
-        byte b = byte(data[offset + i])
-        int val = int(b)
-        if val < 0 { val = 256 + val }
+        int val = normalize_byte(int(byte(data[offset + i])))
         int shift_amount = 1
         int j = 0
         while j < i * 8 {
