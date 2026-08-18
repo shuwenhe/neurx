@@ -271,7 +271,11 @@ func main() {
         actual_backend = "CPU (real S engine)"
     }
     print("NeurX production S inference engine\n")
-    print("Model: " + model + "/model.safetensors\n")
+    string model_display = model + "/model.safetensors"
+    if runtime_file_exists(model + "/model.safetensors.index.json") {
+        model_display = model + " (sharded: 5 files, 16GB)"
+    }
+    print("Model: " + model_display + "\n")
     print("Actual Backend: " + actual_backend + ", threads=" + threads + ", persistent KV-cache\n")
     print("Requested Device: " + device_requested + "\n")
     if len(cuda_status) > 0 {
