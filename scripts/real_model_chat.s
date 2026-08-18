@@ -39,12 +39,10 @@ func resolve_model_file(string configured_path) string {
     if ends_with(path, ".safetensors") && runtime_file_exists(path) {
         return path
     }
-    // Check for sharded model (Qwen2.5-VL-7B format)
     string index_file = path + "/model.safetensors.index.json"
     if runtime_file_exists(index_file) {
         return path + "/model-00001-of-00005.safetensors"
     }
-    // Check for single model file
     string candidate = path + "/model.safetensors"
     if runtime_file_exists(candidate) {
         return candidate

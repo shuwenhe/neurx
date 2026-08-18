@@ -888,7 +888,6 @@ func read_tensor_range_sharded(string model_dir, int offset, int size) []int {
 
     print("[ShardedRead] Weight map loaded, scanning shard files\n")
 
-    // Extract shard filenames from index_content by searching for occurrences of ".safetensors"
     []string shard_files = []string{cap: 16}
     int pos = 0
     while pos < len(index_content) {
@@ -903,9 +902,8 @@ func read_tensor_range_sharded(string model_dir, int offset, int size) []int {
         }
         if found == -1 { break }
 
-        // walk backwards to find the start of filename (quote " before name)
         int start = found - 1
-        while start >= 0 && __host_slice(index_content, start, start + 1) != '"' {
+        while start >= 0 && __host_slice(index_content, start, start + 1) != "\"" {
             start = start - 1
         }
         start = start + 1
@@ -913,7 +911,6 @@ func read_tensor_range_sharded(string model_dir, int offset, int size) []int {
 
         string fname = __host_slice(index_content, start, found + 11)
 
-        // add if not already present
         bool exists = false
         int j = 0
         while j < len(shard_files) {
@@ -928,7 +925,6 @@ func read_tensor_range_sharded(string model_dir, int offset, int size) []int {
         pos = found + 11
     }
 
-    // If none extracted, fallback to default shard names
     if len(shard_files) == 0 || len(shard_files[0]) == 0 {
         int k = 0
         while k < 16 {
@@ -939,7 +935,6 @@ func read_tensor_range_sharded(string model_dir, int offset, int size) []int {
         }
     }
 
-    // Try reading the requested range from each shard until one returns data
     int s = 0
     while s < len(shard_files) {
         if len(shard_files[s]) == 0 { break }

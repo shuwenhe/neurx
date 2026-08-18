@@ -76,17 +76,13 @@ func string_from_char(int code) string {
 }
 
 func http_request_to_server(string host, int port, string path) result[http_response, string] {
-    // Create socket
     switch socket(2, 1, 0) {
         result::ok(fd) : {
-            // Connect to server
             switch socket_connect(fd, host, port) {
                 result::ok(_) : {
-                    // Send HTTP request
                     let request = create_http_get_request(host, port, path)
                     switch socket_send(fd, request) {
                         result::ok(_) : {
-                            // Receive response
                             switch socket_recv(fd, 4096) {
                                 result::ok(response_data) : {
                                     socket_close(fd)
@@ -137,6 +133,4 @@ func main() {
 }
 
 func println(string msg) {
-    // Implementation depends on your I/O library
-    // For now, using standard output
 }
