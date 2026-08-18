@@ -208,8 +208,8 @@ func main() {
     string pid_file = prefix + ".pid"
     string ready_file = prefix + "_ready"
     string log_file = prefix + ".log"
-    if !runtime_file_exists(model + "/model.safetensors") {
-        print("error: model not found: " + model + "/model.safetensors\n")
+    if !runtime_file_exists(model + "/model.safetensors") && !runtime_file_exists(model + "/model.safetensors.index.json") {
+        print("error: model not found: " + model + "/model.safetensors (or .index.json for sharded)\n")
         return 1
     }
     if !runtime_file_exists(backend) {

@@ -108,10 +108,22 @@ func main() {
         "NEURX_CHAT_SYSTEM_PROMPT",
         "You are a helpful assistant."
     )
-    if !runtime_file_exists(model_file) {
-        print("error: model not found: " + model_file + "\n")
+
+    string index_check = model_file + "/model.safetensors.index.json"
+    string single_check = model_file
+    if ends_with(model_file, ".safetensors") {
+        single_check = model_file
+    } else {
+        single_check = model_file + "/model.safetensors"
+    }
+
+    if !runtime_file_exists(single_check) && !runtime_file_exists(index_check) {
+        print("error: model not found at: " + model_file + "\n")
+        print("  checked for: " + single_check + "\n")
+        print("  checked for: " + index_check + "\n")
         return
     }
+
     if !runtime_file_exists(runner) {
         print("error: NeurX inference runner not found: " + runner + "\n")
         return
