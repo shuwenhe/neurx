@@ -1,6 +1,7 @@
 package neurx.inference.verify
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
+use std.text.int_to_string
 
 struct inference_test_case {
     string name
@@ -38,27 +39,6 @@ struct model_verification_state {
     int hidden_size
     int num_layers
     string error_log
-}
-
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    string output = ""
-    int n = value
-    string sign = ""
-    if n < 0 {
-        sign = "-"
-        n = 0 - n
-    }
-    string digits = "0123456789"
-    string tmp = ""
-    while n > 0 {
-        int digit = n - (n / 10) * 10
-        tmp = string_char(digits, digit) + tmp
-        n = n / 10
-    }
-    sign + tmp
 }
 
 func string_char(string text, int index) string {

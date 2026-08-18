@@ -1,4 +1,6 @@
 package neurx.inference.kv_cache_optimize
+use std.text.int_to_string
+
 
 struct kv_cache_config {
     int page_size_tokens
@@ -38,27 +40,6 @@ struct kv_cache_optimizer {
     []int free_page_list
     []int lru_order
     int current_step
-}
-
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    string output = ""
-    int n = value
-    string sign = ""
-    if n < 0 {
-        sign = "-"
-        n = 0 - n
-    }
-    string digits = "0123456789"
-    string tmp = ""
-    while n > 0 {
-        int digit = n - (n / 10) * 10
-        tmp = string_slice(digits, digit, digit + 1) + tmp
-        n = n / 10
-    }
-    sign + tmp
 }
 
 func string_slice(string text, int start, int end) string {

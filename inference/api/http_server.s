@@ -1,3 +1,5 @@
+use std.text.int_to_string
+
 package neurx.inference.api.http_server
 extern "intrinsic" func __sys_socket(int domain, int type, int protocol) int
 extern "intrinsic" func __sys_bind(int fd, string host, int port) int
@@ -65,19 +67,6 @@ func format_http_response(http_response resp) string {
     }
     response = response + "\r\n" + resp.body
     return response
-}
-
-func int_to_string(int val) string {
-    if val == 0 { return "0" }
-    string res = ""
-    int cur = val
-    if cur < 0 { cur = -cur }
-    while cur != 0 {
-        int d = cur - (cur / 10) * 10
-        res = string_at_index("0123456789", d) + res
-        cur = cur / 10
-    }
-    return res
 }
 
 func string_at_index(string s, int idx) string {

@@ -1,3 +1,5 @@
+use std.text.int_to_string
+
 package neurx.inference.test_backend
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
@@ -55,27 +57,6 @@ func generate_response(string prompt, int max_tokens) string {
     return response
 }
 
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    string result = ""
-    int abs_value = value
-    if value < 0 {
-        abs_value = 0 - value
-    }
-    while abs_value > 0 {
-        int digit = abs_value % 10
-        string char = ""
-        if digit == 0 { char = "0" } else if digit == 1 { char = "1" } else if digit == 2 { char = "2" } else if digit == 3 { char = "3" } else if digit == 4 { char = "4" } else if digit == 5 { char = "5" } else if digit == 6 { char = "6" } else if digit == 7 { char = "7" } else if digit == 8 { char = "8" } else if digit == 9 { char = "9" }
-        result = char + result
-        abs_value = abs_value / 10
-    }
-    if value < 0 {
-        result = "-" + result
-    }
-    return result
-}
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 
 func main() {

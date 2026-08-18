@@ -1,34 +1,6 @@
 package real_inference_with_model
 
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    string out = ""
-    int n = value
-    if n < 0 {
-        out = "-"
-        n = 0 - n
-    }
-    string digits = "0123456789"
-    string tmp = ""
-    while n > 0 {
-        int digit = n - (n / 10) * 10
-        int d = digit
-        if d == 0 { tmp = "0" + tmp }
-        if d == 1 { tmp = "1" + tmp }
-        if d == 2 { tmp = "2" + tmp }
-        if d == 3 { tmp = "3" + tmp }
-        if d == 4 { tmp = "4" + tmp }
-        if d == 5 { tmp = "5" + tmp }
-        if d == 6 { tmp = "6" + tmp }
-        if d == 7 { tmp = "7" + tmp }
-        if d == 8 { tmp = "8" + tmp }
-        if d == 9 { tmp = "9" + tmp }
-        n = n / 10
-    }
-    return out + tmp
-}
+use std.text.int_to_string
 
 func generate_response(string question) string {
     if question == "hello" || question == "你好" {

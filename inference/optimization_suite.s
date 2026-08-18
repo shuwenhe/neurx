@@ -1,4 +1,5 @@
 package neurx.inference.optimization_suite
+use std.text.int_to_string
 
 struct optimization_config {
     bool enable_kv_cache_optimization
@@ -14,27 +15,6 @@ struct optimization_result {
     bool model_verified
     float estimated_speedup
     string optimization_report
-}
-
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    string output = ""
-    int n = value
-    string sign = ""
-    if n < 0 {
-        sign = "-"
-        n = 0 - n
-    }
-    string digits = "0123456789"
-    string tmp = ""
-    while n > 0 {
-        int digit = n - (n / 10) * 10
-        tmp = string_slice(digits, digit, digit + 1) + tmp
-        n = n / 10
-    }
-    sign + tmp
 }
 
 func string_slice(string text, int start, int end) string {

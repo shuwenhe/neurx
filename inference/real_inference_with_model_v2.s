@@ -6,30 +6,11 @@ use std.tensor.{
 use std.ai.nn.{
     linear, embedding, transformer_block, layer_norm
 }
+use std.text.int_to_string
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    string out = ""
-    int n = value
-    if n < 0 {
-        out = "-"
-        n = 0 - n
-    }
-    string digits = "0123456789"
-    string tmp = ""
-    while n > 0 {
-        int digit = n - (n / 10) * 10
-        tmp = __host_slice(digits, digit, digit + 1) + tmp
-        n = n / 10
-    }
-    return out + tmp
-}
 
 struct transformer_config {
     int vocab_size

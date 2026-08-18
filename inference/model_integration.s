@@ -1,19 +1,7 @@
 package neurx.inference.model_integration
-extern "intrinsic" func __host_slice(string text, int start, int end) string
+use std.text.int_to_string
 
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    string output = ""
-    int current = value
-    while current > 0 {
-        int digit = current - (current / 10) * 10
-        output = __host_slice("0123456789", digit, digit + 1) + output
-        current = current / 10
-    }
-    output
-}
+extern "intrinsic" func __host_slice(string text, int start, int end) string
 
 func load_safetensors_header(string model_path) string {
     print("[SafeTensors] Opening: " + model_path + "/model.safetensors\n")

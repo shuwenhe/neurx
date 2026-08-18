@@ -1,4 +1,6 @@
 package neurx.inference.batch_optimize
+use std.text.int_to_string
+
 
 struct batch_config {
     int max_batch_size
@@ -44,27 +46,6 @@ struct batch_statistics {
     float avg_latency_ms
     float throughput_tokens_per_sec
     float utilization_rate
-}
-
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    string output = ""
-    int n = value
-    string sign = ""
-    if n < 0 {
-        sign = "-"
-        n = 0 - n
-    }
-    string digits = "0123456789"
-    string tmp = ""
-    while n > 0 {
-        int digit = n - (n / 10) * 10
-        tmp = string_slice(digits, digit, digit + 1) + tmp
-        n = n / 10
-    }
-    sign + tmp
 }
 
 func string_slice(string text, int start, int end) string {

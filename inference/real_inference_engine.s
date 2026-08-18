@@ -1,3 +1,5 @@
+use std.text.int_to_string
+
 package neurx.inference.real_inference_engine
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
@@ -49,20 +51,6 @@ func forward_through_transformer(int token_id) string {
     print("  Token 2048 → \"医学\"\n")
     print("  ✓ Text generated\n")
     "医学"
-}
-
-func int_to_string(int val) string {
-    if val == 0 {
-        return "0"
-    }
-    string result = ""
-    int current = val
-    while current != 0 {
-        int digit = current - (current / 10) * 10
-        result = __host_slice("0123456789", digit, digit + 1) + result
-        current = current / 10
-    }
-    result
 }
 
 func float(int val) float {
