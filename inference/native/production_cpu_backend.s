@@ -1,6 +1,7 @@
 package neurx.inference.cpu_backend
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
+use std.binary.u64_le_bytes
 use std.text.bytes_to_string
 
 extern "intrinsic" func __sys_socket(int domain, int socket_type, int protocol) int
@@ -711,30 +712,6 @@ func contains_keyword(string text, string keyword) bool {
     return false
 }
 
-func pow_int(int base, int exp) int {
-    int result = 1
-    int i = 0
-    while i < exp {
-        result = result * base
-        i = i + 1
-    }
-    result
-}
-
-func u64_le([]int bytes, int offset) int {
-    if len(bytes) < offset + 8 {
-        return 0
-    }
-    int value = 0
-    int i = 0
-    while i < 8 {
-        int byte_value = bytes[offset + i]
-        value = value + (byte_value * pow_int(256, i))
-        i = i + 1
-    }
-    return value
-}
-
 func slice_bytes([]int bytes, int start, int count) []int {
     return bytes
 }
@@ -852,7 +829,7 @@ func load_model_metadata(string model_path) []int {
         return empty
     }
 
-    int metadata_size = u64_le(size_bytes, 0)
+    int metadata_size = u64_le_bytes(size_bytes, 0)
     print("[DEBUG] Metadata size: " + int_to_string(metadata_size) + "\n")
 
     if metadata_size <= 0 || metadata_size > 10000000 {
@@ -913,7 +890,7 @@ func load_model_metadata_sharded(string model_dir) []int {
         print("[ShardedModel] Failed reading header size for target shard\n")
         return []int{cap: 0}
     }
-    int header_len = u64_le(size_bytes, 0)
+    int header_len = u64_le_bytes(size_bytes, 0)
     if header_len <= 0 || header_len > 20000000 {
         print("[ShardedModel] Invalid header length for target shard -> " + int_to_string(header_len) + "\n")
         return []int{cap: 0}

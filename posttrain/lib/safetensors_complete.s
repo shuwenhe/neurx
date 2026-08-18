@@ -1,6 +1,7 @@
 package neurx.posttrain.lib.safetensors_complete
+use std.binary.i32_le_string
+use std.binary.u64_le_string
 use std.io.eprintln
-use std.text.normalize_byte
 
 struct safe_tensor_info {
     string name
@@ -39,45 +40,9 @@ func shape_numel([]int shape) int {
     return result
 }
 
-func read_uint64_le(string data, int offset) int {
-    if offset + 8 > len(data) { return 0 }
-    int result = 0
-    int i = 0
-    while i < 8 {
-        int val = normalize_byte(int(byte(data[offset + i])))
-        int shift_amount = 1
-        int j = 0
-        while j < i * 8 {
-            shift_amount = shift_amount * 2
-            j = j + 1
-        }
-        result = result + val * shift_amount
-        i = i + 1
-    }
-    return result
-}
-
-func read_int32_le(string data, int offset) int {
-    if offset + 4 > len(data) { return 0 }
-    int result = 0
-    int i = 0
-    while i < 4 {
-        int val = normalize_byte(int(byte(data[offset + i])))
-        int shift_amount = 1
-        int j = 0
-        while j < i * 8 {
-            shift_amount = shift_amount * 2
-            j = j + 1
-        }
-        result = result + val * shift_amount
-        i = i + 1
-    }
-    return result
-}
-
 func bytes_to_float(string data, int offset) float {
     if offset + 4 > len(data) { return 0.0 }
-    int bits = read_int32_le(data, offset)
+    int bits = i32_le_string(data, offset)
     float sign = 1.0
     if bits < 0 {
         sign = -1.0
@@ -101,7 +66,7 @@ func bytes_to_float(string data, int offset) float {
 
 func extract_json_header(string data) string {
     if len(data) < 8 { return "" }
-    int header_size = read_uint64_le(data, 0)
+    int header_size = u64_le_string(data, 0)
     if header_size <= 0 || 8 + header_size > len(data) {
         return ""
     }
@@ -239,7 +204,7 @@ func open_safetensors(string path) safe_tensor_file {
         file.data_offset = 8
         return file
     }
-    int header_size = read_uint64_le(data, 0)
+    int header_size = u64_le_string(data, 0)
     file.header_size = header_size
     file.data_offset = 8 + header_size
     return file

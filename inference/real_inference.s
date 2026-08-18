@@ -1,32 +1,9 @@
 package real_inference
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file}
+use std.binary.u64_le_bytes
 extern "intrinsic" func __host_read_binary_file(string path) []int
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
-func pow_int(int base, int exp) int {
-    int result = 1
-    int i = 0
-    while i < exp {
-        result = result * base
-        i = i + 1
-    }
-    result
-}
-
-func u64_le([]int bytes, int offset) int {
-    if len(bytes) < offset + 8 {
-        return 0
-    }
-    int value = 0
-    int i = 0
-    while i < 8 {
-        int byte_value = bytes[offset + i]
-        value = value + (byte_value * pow_int(256, i))
-        i = i + 1
-    }
-    return value
-}
 
 func find_substring_bytes([]int bytes, string needle, int start_pos) int {
     int start = start_pos
@@ -864,7 +841,7 @@ func main() {
         print("ERROR: failed to read model bytes\n")
         return
     }
-    int metadata_size = u64_le(size_bytes, 0)
+    int metadata_size = u64_le_bytes(size_bytes, 0)
     int metadata_start = 8
     []int header_bytes = __host_read_binary_file_range(model_path, 0, metadata_start + metadata_size)
     if len(header_bytes) < metadata_start + metadata_size {
