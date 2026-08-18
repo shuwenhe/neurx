@@ -2,6 +2,7 @@ package neurx.inference.runtime.real_text_engine
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, trim}
 use neurx.inference.runtime.model_manifest.{hf_model_manifest, load_hf_model_manifest}
 use neurx.inference.model_cpu_inference.{safetensors_model, open_model, validate_model, read_tensor_elements, bf16_at, load_vector, matvec_named, rms_norm}
+use std.text.int_to_string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
 struct real_text_engine_state {
@@ -31,27 +32,6 @@ struct real_generation_result {
     bool stream
     bool ok
     string error_message
-}
-
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    string output = ""
-    int n = value
-    string sign = ""
-    if n < 0 {
-        sign = "-"
-        n = 0 - n
-    }
-    string digits = "0123456789"
-    string tmp = ""
-    while n > 0 {
-        int digit = n - (n / 10) * 10
-        tmp = __host_slice(digits, digit, digit + 1) + tmp
-        n = n / 10
-    }
-    sign + tmp
 }
 
 func float_to_string(float value) string {

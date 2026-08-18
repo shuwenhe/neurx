@@ -1,3 +1,5 @@
+use std.text.parse_int_default
+
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, runtime_run_command_output}
 use std.io.println
@@ -399,29 +401,6 @@ func is_space(int c) bool {
     c == 32 || c == 9 || c == 10 || c == 13
 }
 
-func parse_int(string s, int fallback) int {
-    string text = trim(s)
-    if str_len(text) == 0 {
-        return fallback
-    }
-    int sign = 1
-    int i = 0
-    if text[0] == 45 {
-        sign = -1
-        i = 1
-    }
-    int value = 0
-    while i < str_len(text) {
-        int digit = text[i] - 48
-        if digit < 0 || digit > 9 {
-            return fallback
-        }
-        value = value * 10 + digit
-        i = i + 1
-    }
-    sign * value
-}
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -624,29 +603,6 @@ func substring(string s, int start, int end) string {
 
 func is_space(int c) bool {
     c == 32 || c == 9 || c == 10 || c == 13
-}
-
-func parse_int(string s, int fallback) int {
-    string text = trim(s)
-    if str_len(text) == 0 {
-        return fallback
-    }
-    int sign = 1
-    int i = 0
-    if text[0] == 45 {
-        sign = -1
-        i = 1
-    }
-    int value = 0
-    while i < str_len(text) {
-        int digit = text[i] - 48
-        if digit < 0 || digit > 9 {
-            return fallback
-        }
-        value = value * 10 + digit
-        i = i + 1
-    }
-    sign * value
 }
 
 func int_to_str(int n) string {

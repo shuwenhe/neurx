@@ -1,5 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_run_command_output, trim}
+use std.text.{int_to_string, parse_int_default}
 
 func manifest_log(string s) int {
     _ = runtime_run_command_output("printf '%s\\n' " + shell_escape(s))
@@ -174,50 +175,6 @@ func json_escape(string s) string {
         i = i + 1
     }
     out = out + "\""
-    out
-}
-
-func parse_int(string s, int fallback) int {
-    string text = trim(s)
-    if text == "" {
-        return fallback
-    }
-    int sign = 1
-    int i = 0
-    if text[0] == 45 {
-        sign = -1
-        i = 1
-    }
-    int value = 0
-    while i < len(text) {
-        int digit = text[i] - 48
-        if digit < 0 || digit > 9 {
-            return fallback
-        }
-        value = value * 10 + digit
-        i = i + 1
-    }
-    sign * value
-}
-
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    bool negative = value < 0
-    int remaining = value
-    if negative {
-        remaining = -remaining
-    }
-    string out = ""
-    while remaining > 0 {
-        int digit = remaining - (remaining / 10) * 10
-        out = string_char(digit + 48) + out
-        remaining = remaining / 10
-    }
-    if negative {
-        out = "-" + out
-    }
     out
 }
 

@@ -1,5 +1,7 @@
 package neurx.inference.api.rest_server
 
+use std.text.int_to_string
+
 extern "intrinsic" func __sys_socket(int domain, int type, int protocol) int
 extern "intrinsic" func __sys_bind(int fd, string host, int port, int family) int
 extern "intrinsic" func __sys_listen(int fd, int backlog) int
@@ -67,33 +69,6 @@ func json_escape(string s) string {
             result = result + string(c)
         }
         i = i + 1
-    }
-    return result
-}
-
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    string result = ""
-    int n = value
-    if n < 0 {
-        result = "-"
-        n = 0 - n
-    }
-    while n > 0 {
-        int digit = n % 10
-        if digit == 0 { result = result + "0" }
-        if digit == 1 { result = result + "1" }
-        if digit == 2 { result = result + "2" }
-        if digit == 3 { result = result + "3" }
-        if digit == 4 { result = result + "4" }
-        if digit == 5 { result = result + "5" }
-        if digit == 6 { result = result + "6" }
-        if digit == 7 { result = result + "7" }
-        if digit == 8 { result = result + "8" }
-        if digit == 9 { result = result + "9" }
-        n = n / 10
     }
     return result
 }
