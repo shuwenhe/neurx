@@ -55,7 +55,7 @@ func int_to_string(int value) string {
 func string_index(string s, int idx) string {
     string result = ""
     if idx >= 0 && idx < string_length(s) {
-        int char_code = s[idx]
+        int char_code = s[idx]`
         result = string_from_char(char_code)
     }
     result

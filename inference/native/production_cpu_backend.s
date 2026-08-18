@@ -877,33 +877,84 @@ func read_tensor_range(string model_path, int offset, int size) []int {
 
 func read_tensor_range_sharded(string model_dir, int offset, int size) []int {
     print("[ShardedRead] Loading from sharded model (offset=" + int_to_string(offset) + ", size=" + int_to_string(size) + ")\n")
-    
+
     []int result = []int{cap: size + 1000}
-    
+
     let index_content = load_shard_index(model_dir)
-    
     if len(index_content) == 0 {
         print("[ShardedRead] Failed to load weight map\n")
         return result
     }
-    
-    print("[ShardedRead] Weight map loaded, attempting to read tensor data\n")
-    
-    let shard_file = "model-00001-of-00005.safetensors"
-    let shard_path = model_dir + "/" + shard_file
-    
-    print("[ShardedRead] Reading from shard: " + shard_path + "\n")
-    
-    []int data = __host_read_binary_file_range(shard_path, offset, size)
-    
-    if len(data) == 0 {
-        print("[ShardedRead] Warning: no data read from shard, trying fallback\n")
-        data = __host_read_binary_file_range(shard_path, 0, 8192)
+
+    print("[ShardedRead] Weight map loaded, scanning shard files\n")
+
+    // Extract shard filenames from index_content by searching for occurrences of ".safetensors"
+    []string shard_files = []string{cap: 16}
+    int pos = 0
+    while pos < len(index_content) {
+        int found = -1
+        int i = pos
+        while i < len(index_content) {
+            if __host_slice(index_content, i, i + 11) == ".safetensors" {
+                found = i
+                break
+            }
+            i = i + 1
+        }
+        if found == -1 { break }
+
+        // walk backwards to find the start of filename (quote " before name)
+        int start = found - 1
+        while start >= 0 && __host_slice(index_content, start, start + 1) != '"' {
+            start = start - 1
+        }
+        start = start + 1
+        if start < 0 { pos = found + 11; continue }
+
+        string fname = __host_slice(index_content, start, found + 11)
+
+        // add if not already present
+        bool exists = false
+        int j = 0
+        while j < len(shard_files) {
+            if len(shard_files[j]) == 0 { break }
+            if shard_files[j] == fname { exists = true; break }
+            j = j + 1
+        }
+        if !exists {
+            shard_files[j] = fname
+        }
+
+        pos = found + 11
     }
-    
-    print("[ShardedRead] Read " + int_to_string(len(data)) + " bytes from shard\n")
-    
-    return data
+
+    // If none extracted, fallback to default shard names
+    if len(shard_files) == 0 || len(shard_files[0]) == 0 {
+        int k = 0
+        while k < 16 {
+            int idx = k + 1
+            string candidate = "model-0000" + int_to_string(idx) + "-of-00005.safetensors"
+            shard_files[k] = candidate
+            k = k + 1
+        }
+    }
+
+    // Try reading the requested range from each shard until one returns data
+    int s = 0
+    while s < len(shard_files) {
+        if len(shard_files[s]) == 0 { break }
+        string shard_path = model_dir + "/" + shard_files[s]
+        print("[ShardedRead] Trying shard: " + shard_path + "\n")
+        []int data = __host_read_binary_file_range(shard_path, offset, size)
+        if len(data) > 0 {
+            print("[ShardedRead] Read " + int_to_string(len(data)) + " bytes from " + shard_files[s] + "\n")
+            return data
+        }
+        s = s + 1
+    }
+
+    print("[ShardedRead] No shard contained data at that offset. Returning empty result.\n")
+    return []int{cap: 0}
 }
 
 func embedding_lookup_float(string model_path, []int metadata_bytes, int token_id) []float {
