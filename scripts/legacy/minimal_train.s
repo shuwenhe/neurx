@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output, runtime_write_text_file}
 use std.io.println
+use std.conv.parse_int_default as parse_int
 
 func main() {
     println("[TRAINER] Initializing minimal_train.s...")
@@ -530,29 +531,6 @@ func mod_int(int a, int b) int {
 
 func byte_token(int c, int vocab_size) int {
     mod_int(c + 1, vocab_size)
-}
-
-func parse_int(string s, int fallback) int {
-    string text = trim(s)
-    if str_len(text) == 0 {
-        return fallback
-    }
-    int sign = 1
-    int i = 0
-    if text[0] == 45 {
-        sign = -1
-        i = 1
-    }
-    int value = 0
-    while i < str_len(text) {
-        int digit = text[i] - 48
-        if digit < 0 || digit > 9 {
-            return fallback
-        }
-        value = value * 10 + digit
-        i = i + 1
-    }
-    sign * value
 }
 
 func parse_float(string s) float {

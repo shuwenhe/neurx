@@ -1,5 +1,6 @@
 package main
 use std.os.{command, getenv}
+use std.conv.parse_int_default as parse_int
 
 func string_char(int c) string {
     string(c)
@@ -43,30 +44,6 @@ func substring(string s, int start, int end) string {
     out
 }
 
-func parse_int(string s, int fallback) int {
-    string text = trim(s)
-    if len(text) == 0 {
-        return fallback
-    }
-    int sign = 1
-    int i = 0
-    if string_char(text[0]) == "-" {
-        sign = -1
-        i = 1
-    } else if string_char(text[0]) == "+" {
-        i = 1
-    }
-    int value = 0
-    while i < len(text) {
-        int digit = text[i] - 48
-        if digit < 0 || digit > 9 {
-            return fallback
-        }
-        value = value * 10 + digit
-        i = i + 1
-    }
-    sign * value
-}
 
 func int_to_str(int n) string {
     if n == 0 {

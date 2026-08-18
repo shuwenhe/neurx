@@ -1,4 +1,5 @@
 package main
+use std.conv.extract_int_default as parse_int
 use neurx.runtime.io.{runtime_env_get, runtime_run_command_exit_code}
 use neurx.eval.mmlu_data
 use neurx.eval.mmlu_evaluator
@@ -85,25 +86,3 @@ func main() {
     0
 }
 
-func parse_int(string s, int fallback) int {
-    if len(s) < 1 { return fallback }
-    int i = 0
-    int sign = 1
-    if s[0] > 44 && s[0] < 46 {
-        sign = -1
-        i = 1
-    }
-    int value = 0
-    bool seen = false
-    while i < len(s) {
-        int ch = s[i]
-        if ch > 47 && ch < 58 {
-            value = value * 10 + (ch - 48)
-            seen = true
-        }
-        i = i + 1
-    }
-    if !seen { return fallback }
-    if sign < 0 { return 0 - value }
-    value
-}

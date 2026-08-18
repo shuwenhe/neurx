@@ -1,6 +1,7 @@
 package neurx.posttrain.trainer.posttrain_main
 use std.io.eprintln
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, trim}
+use std.conv.parse_int_default as parse_int
 
 func write_file_simple(string path, string content) int {
     eprintln("[DEBUG] Writing file to: " + path)
@@ -1323,50 +1324,6 @@ func find_substring(string text, string pattern) int {
         i = i + 1
     }
     -1
-}
-
-func parse_int(string s, int fallback) int {
-    string text = trim(s)
-    if text == "" {
-        return fallback
-    }
-    int sign = 1
-    int i = 0
-    if char_at(text, 0) == "-" {
-        sign = -1
-        i = 1
-    }
-    int value = 0
-    while i < len(text) {
-        string ch = char_at(text, i)
-        int digit = -1
-        if ch == "0" {
-            digit = 0
-        } else if ch == "1" {
-            digit = 1
-        } else if ch == "2" {
-            digit = 2
-        } else if ch == "3" {
-            digit = 3
-        } else if ch == "4" {
-            digit = 4
-        } else if ch == "5" {
-            digit = 5
-        } else if ch == "6" {
-            digit = 6
-        } else if ch == "7" {
-            digit = 7
-        } else if ch == "8" {
-            digit = 8
-        } else if ch == "9" {
-            digit = 9
-        } else {
-            return fallback
-        }
-        value = value * 10 + digit
-        i = i + 1
-    }
-    sign * value
 }
 
 func make_shape(int a, int b) []int {

@@ -1,5 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
+use std.conv.parse_int_default as parse_int
 
 func string_char(int c) string {
     string(c)
@@ -33,30 +34,6 @@ func trim(string s) string {
     out
 }
 
-func parse_int(string s, int fallback) int {
-    var text = trim(s)
-    if len(text) == 0 {
-        return fallback
-    }
-    var sign = 1
-    var i = 0
-    if string_char(text[0]) == "-" {
-        sign = -1
-        i = 1
-    } else if string_char(text[0]) == "+" {
-        i = 1
-    }
-    var value = 0
-    while i < len(text) {
-        var digit = text[i] - 48
-        if digit < 0 || digit > 9 {
-            return fallback
-        }
-        value = value * 10 + digit
-        i = i + 1
-    }
-    sign * value
-}
 
 func shell_escape(string s) string {
     string out = "'"

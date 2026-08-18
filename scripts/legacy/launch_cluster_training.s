@@ -1,4 +1,5 @@
 package main
+use std.conv.extract_int_default as parse_int
 use neurx.runtime.io.{runtime_env_get}
 use neurx.strings.{string_concat}
 
@@ -253,22 +254,6 @@ func string_join([]string parts, string sep) string {
             result = result + sep
         }
         i = i + 1
-    }
-    result
-}
-
-func parse_int(string s, int fallback) int {
-    int result = 0
-    int i = 0
-    while i < len(s) {
-        byte b = s[i]
-        if b >= '0' && b <= '9' {
-            result = result * 10 + int(b - '0')
-        }
-        i = i + 1
-    }
-    if result == 0 {
-        result = fallback
     }
     result
 }

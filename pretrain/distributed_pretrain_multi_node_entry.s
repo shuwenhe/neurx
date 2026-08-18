@@ -1,4 +1,5 @@
 package main
+use std.conv.extract_int_default as parse_int
 use neurx.distributed.multi_node_launcher.{
     init_multi_node_config,
     generate_rank_info,
@@ -114,22 +115,6 @@ func simulate_training_step(int step) float {
     float base_loss = 10.0
     float loss = base_loss * (1.0 / float(step + 1))
     loss
-}
-
-func parse_int(string s, int fallback) int {
-    int result = 0
-    int i = 0
-    while i < len(s) {
-        byte b = s[i]
-        if b >= '0' && b <= '9' {
-            result = result * 10 + int(b - '0')
-        }
-        i = i + 1
-    }
-    if result == 0 {
-        result = fallback
-    }
-    result
 }
 
 func itoa(int n) string {

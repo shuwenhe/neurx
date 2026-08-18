@@ -1,5 +1,6 @@
 package neurx.scripts.posttrain_lora_train
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_binary_file, runtime_write_text_file, tensor_buffer_new, tensor_buffer_slice, tensor_buffer_write_f32_le, tensor_buffer_write_string, tensor_buffer_write_u64_le, trim}
+use std.conv.parse_int_default as parse_int
 
 struct lora_config {
     int seq_len
@@ -1160,28 +1161,6 @@ func find_substring(string text, string pattern) int {
     -1
 }
 
-func parse_int(string s, int fallback) int {
-    string text = trim(s)
-    if text == "" {
-        return fallback
-    }
-    int sign = 1
-    int i = 0
-    if text[0] == 45 {
-        sign = -1
-        i = 1
-    }
-    int value = 0
-    while i < len(text) {
-        int digit = text[i] - 48
-        if digit < 0 || digit > 9 {
-            return fallback
-        }
-        value = value * 10 + digit
-        i = i + 1
-    }
-    sign * value
-}
 
 func make_shape(int a, int b) []int {
     []int shape = []int{cap: 2}

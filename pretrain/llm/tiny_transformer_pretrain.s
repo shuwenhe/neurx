@@ -1,5 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output}
+use std.conv.parse_int_default as parse_int
 extern "intrinsic" func __host_write_text_file(string path, string content) int
 
 func runtime_write_text_file(string path, string content) () {
@@ -624,27 +625,6 @@ func substring(string text, int start, int end) string {
         i = i + 1
     }
     out
-}
-
-func parse_int(string text, int fallback) int {
-    if len(text) == 0 {
-        return fallback
-    }
-    int value = 0
-    int sign = 1
-    int i = 0
-    if text[0] == 45 {
-        sign = -1
-        i = 1
-    }
-    while i < len(text) {
-        if text[i] < 48 || text[i] > 57 {
-            return fallback
-        }
-        value = value * 10 + text[i] - 48
-        i = i + 1
-    }
-    value * sign
 }
 
 func parse_float(string text) float {
