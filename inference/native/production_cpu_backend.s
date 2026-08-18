@@ -3,7 +3,8 @@ package neurx.inference.cpu_backend
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
 use std.binary.parse_int_at_bytes
 use std.binary.u64_le_bytes
-use std.text.{bytes_to_string}
+use std.encoding.bytes_to_string
+use std.conv.int_to_string
 
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __sys_write_string(int fd, string data) int
@@ -25,28 +26,6 @@ func num_transformer_layers() int { 24 }
 func num_attention_heads() int { 14 }
 
 func max_sequence_length() int { 32768 }
-
-func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
-    int n = value
-    bool negative = false
-    if n < 0 {
-        negative = true
-        n = 0 - n
-    }
-    string out = ""
-    while n > 0 {
-        int digit = n - (n / 10) * 10
-        out = string(digit + 48) + out
-        n = n / 10
-    }
-    if negative {
-        out = "-" + out
-    }
-    return out
-}
 
 func decimal_digit_value(string text) int {
     if text == "0" { return 0 }
