@@ -3,11 +3,16 @@ package neurx.inference.cpu_backend
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
 use std.binary.parse_int_at_bytes
 use std.binary.u64_le_bytes
-use std.result.result
-use std.text.{bytes_to_string, int_to_string, parse_int_default}
-use src.net.{listen_tcp, TCPConn}
+use std.text.{bytes_to_string}
 
 extern "intrinsic" func __sys_read_string(int fd, int count) string
+extern "intrinsic" func __sys_write_string(int fd, string data) int
+extern "intrinsic" func __sys_close(int fd) int
+extern "intrinsic" func __sys_socket(int domain, int typ, int proto) int
+extern "intrinsic" func __sys_bind(int sockfd, string ip, int port, int family) int
+extern "intrinsic" func __sys_listen(int sockfd, int backlog) int
+extern "intrinsic" func __sys_accept(int sockfd) int
+extern "intrinsic" func __sys_local_port(int fd) int
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 
@@ -20,6 +25,67 @@ func num_transformer_layers() int { 24 }
 func num_attention_heads() int { 14 }
 
 func max_sequence_length() int { 32768 }
+
+func int_to_string(int value) string {
+    if value == 0 {
+        return "0"
+    }
+    int n = value
+    bool negative = false
+    if n < 0 {
+        negative = true
+        n = 0 - n
+    }
+    string out = ""
+    while n > 0 {
+        int digit = n - (n / 10) * 10
+        out = string(digit + 48) + out
+        n = n / 10
+    }
+    if negative {
+        out = "-" + out
+    }
+    return out
+}
+
+func decimal_digit_value(string text) int {
+    if text == "0" { return 0 }
+    if text == "1" { return 1 }
+    if text == "2" { return 2 }
+    if text == "3" { return 3 }
+    if text == "4" { return 4 }
+    if text == "5" { return 5 }
+    if text == "6" { return 6 }
+    if text == "7" { return 7 }
+    if text == "8" { return 8 }
+    if text == "9" { return 9 }
+    -1
+}
+
+func parse_int_or_default(string text, int fallback) int {
+    if len(text) == 0 {
+        return fallback
+    }
+    int index = 0
+    int sign = 1
+    if __host_slice(text, 0, 1) == "-" {
+        sign = -1
+        index = 1
+    }
+    if index >= len(text) {
+        return fallback
+    }
+    int value = 0
+    while index < len(text) {
+        int digit = decimal_digit_value(__host_slice(text, index, index + 1))
+        if digit < 0 {
+            return fallback
+        }
+        value = value * 10 + digit
+        index = index + 1
+    }
+    value * sign
+}
 
 struct model_config {
     int vocab_size
@@ -1642,16 +1708,14 @@ func generate_response(string prompt, int max_tokens) string {
     return json_response
 }
 
-func handle_client(TCPConn conn) {
-    string request = switch conn.read(4096) {
-        result::ok(data) : data,
-        result::err(_) : {
-            conn.close()
-            return
-        },
+func handle_client(int client_fd) {
+    string request = __sys_read_string(client_fd, 4096)
+    if len(request) == 0 {
+        _ = __sys_close(client_fd)
+        return
     }
     if len(request) < 4 {
-        conn.close()
+        _ = __sys_close(client_fd)
         return
     }
     string response = ""
@@ -1683,9 +1747,9 @@ func handle_client(TCPConn conn) {
         }
     }
     if len(response) > 0 {
-        _ = conn.write(response)
+        _ = __sys_write_string(client_fd, response)
     }
-    conn.close()
+    _ = __sys_close(client_fd)
 }
 
 func extract_http_body(string request) string {
@@ -1715,8 +1779,6 @@ func extract_http_body(string request) string {
     return result
 }
 
-}
-
 func create_ready_file(string path) {
     print("✓ Backend ready file: " + path + "\n")
 }
@@ -1726,20 +1788,28 @@ func main() {
     print("Backend initialized successfully.\n")
 
     string port_str = runtime_env_get("NEURX_S_PORT", "18083")
-    int port_number = parse_int_default(port_str, 18083)
+    int port_number = parse_int_or_default(port_str, 18083)
 
-    let listener_res = listen_tcp("127.0.0.1", port_number)
-    let listener = switch listener_res {
-        result::ok(value) : value,
-        result::err(err) : {
-            print("ERROR: Socket listen failed: " + err.message + "\n")
-            print("HTTP server listening on 127.0.0.1:" + port_str + " (compatibility mode)\n")
-            return
-        },
+    int listener_fd = __sys_socket(2, 1, 6)
+    if listener_fd < 0 {
+        print("ERROR: Socket create failed\n")
+        print("HTTP server listening on 127.0.0.1:" + port_str + " (compatibility mode)\n")
+        return
+    }
+    if __sys_bind(listener_fd, "127.0.0.1", port_number, 2) < 0 {
+        print("ERROR: Socket bind failed\n")
+        _ = __sys_close(listener_fd)
+        return
+    }
+    if __sys_listen(listener_fd, 128) < 0 {
+        print("ERROR: Socket listen failed\n")
+        _ = __sys_close(listener_fd)
+        return
     }
 
-    print("Socket creation: fd=" + int_to_string(listener.fd) + "\n")
-    print("HTTP server listening on 127.0.0.1:" + int_to_string(listener.port) + "\n")
+    int bound_port = __sys_local_port(listener_fd)
+    print("Socket creation: fd=" + int_to_string(listener_fd) + "\n")
+    print("HTTP server listening on 127.0.0.1:" + int_to_string(bound_port) + "\n")
     print("[Socket] Ready to accept connections\n")
 
     string ready_file = runtime_env_get("NEURX_S_READY_FILE", "")
@@ -1752,22 +1822,19 @@ func main() {
     int max_consecutive_errors = 100
 
     while true {
-        let conn_res = listener.accept()
-        switch conn_res {
-            result::ok(conn) : {
-                consecutive_errors = 0
-                handle_client(conn)
-            },
-            result::err(_) : {
-                consecutive_errors = consecutive_errors + 1
-                if consecutive_errors > max_consecutive_errors {
-                    print("ERROR: Too many consecutive accept failures, restarting...\n")
-                    break
-                }
-            },
+        int client_fd = __sys_accept(listener_fd)
+        if client_fd < 0 {
+            if consecutive_errors > max_consecutive_errors {
+                print("ERROR: Too many consecutive accept failures, restarting...\n")
+                break
+            }
+            consecutive_errors = consecutive_errors + 1
+            continue
         }
+        consecutive_errors = 0
+        handle_client(client_fd)
     }
 
     print("[Socket] Closing server\n")
-    _ = listener.close()
+    _ = __sys_close(listener_fd)
 }

@@ -1,13 +1,14 @@
 package neurx.inference.production_chat
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
-use std.result.result
-use std.text.{int_to_string, parse_int_default}
-use src.net.{dial_tcp}
 
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __host_write_text_file(string path, string content) int
 extern "intrinsic" func __sys_read_string(int fd, int count) string
+extern "intrinsic" func __sys_write_string(int fd, string data) int
+extern "intrinsic" func __sys_close(int fd) int
+extern "intrinsic" func __sys_socket(int domain, int typ, int proto) int
+extern "intrinsic" func __sys_connect(int sockfd, string ip, int port, int family) int
 
 func shell_escape(string value) string {
     string output = "'"
@@ -28,8 +29,69 @@ func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
 
+func int_to_string(int value) string {
+    if value == 0 {
+        return "0"
+    }
+    int n = value
+    bool negative = false
+    if n < 0 {
+        negative = true
+        n = 0 - n
+    }
+    string out = ""
+    while n > 0 {
+        int digit = n - (n / 10) * 10
+        out = string(digit + 48) + out
+        n = n / 10
+    }
+    if negative {
+        out = "-" + out
+    }
+    return out
+}
+
+func decimal_digit_value(string text) int {
+    if text == "0" { return 0 }
+    if text == "1" { return 1 }
+    if text == "2" { return 2 }
+    if text == "3" { return 3 }
+    if text == "4" { return 4 }
+    if text == "5" { return 5 }
+    if text == "6" { return 6 }
+    if text == "7" { return 7 }
+    if text == "8" { return 8 }
+    if text == "9" { return 9 }
+    -1
+}
+
+func parse_int_or_default(string text, int fallback) int {
+    if len(text) == 0 {
+        return fallback
+    }
+    int index = 0
+    int sign = 1
+    if __host_slice(text, 0, 1) == "-" {
+        sign = -1
+        index = 1
+    }
+    if index >= len(text) {
+        return fallback
+    }
+    int value = 0
+    while index < len(text) {
+        int digit = decimal_digit_value(__host_slice(text, index, index + 1))
+        if digit < 0 {
+            return fallback
+        }
+        value = value * 10 + digit
+        index = index + 1
+    }
+    value * sign
+}
+
 func parse_positive_int(string text, int fallback) int {
-    int value = parse_int_default(text, fallback)
+    int value = parse_int_or_default(text, fallback)
     if value <= 0 {
         return fallback
     }
@@ -64,15 +126,17 @@ func starts_with(string text, string prefix) bool {
 }
 
 func http_request(string host, int port, string method, string path, string body, string extra_headers) string {
-    let conn_res = dial_tcp(host, port)
-    let conn = switch conn_res {
-        result::ok(value) : value,
-        result::err(_) : {
-            print("[HTTP] Connection failed to " + host + ":" + int_to_string(port) + "\n")
-            return ""
-        },
+    int conn_fd = __sys_socket(2, 1, 6)
+    if conn_fd < 0 {
+        print("[HTTP] Socket creation failed\n")
+        return ""
     }
-    print("[HTTP] Socket created: fd=" + int_to_string(conn.fd) + "\n")
+    if __sys_connect(conn_fd, host, port, 2) < 0 {
+        print("[HTTP] Connection failed to " + host + ":" + int_to_string(port) + "\n")
+        _ = __sys_close(conn_fd)
+        return ""
+    }
+    print("[HTTP] Socket created: fd=" + int_to_string(conn_fd) + "\n")
     print("[HTTP] Connected to " + host + ":" + int_to_string(port) + "\n")
     string request = method + " " + path + " HTTP/1.1\r\n" +
         "Host: " + host + "\r\n" +
@@ -82,34 +146,22 @@ func http_request(string host, int port, string method, string path, string body
     int offset = 0
     while offset < len(request) {
         string remaining = __host_slice(request, offset, len(request))
-        int written = switch conn.write(remaining) {
-            result::ok(count) : count,
-            result::err(_) : {
-                conn.close()
-                return ""
-            },
-        }
+        int written = __sys_write_string(conn_fd, remaining)
         if written <= 0 {
-            conn.close()
+            _ = __sys_close(conn_fd)
             return ""
         }
         offset = offset + written
     }
     string response = ""
     while true {
-        string chunk = switch conn.read(65536) {
-            result::ok(data) : data,
-            result::err(_) : {
-                conn.close()
-                return response
-            },
-        }
+        string chunk = __sys_read_string(conn_fd, 65536)
         if len(chunk) == 0 {
             break
         }
         response = response + chunk
     }
-    conn.close()
+    _ = __sys_close(conn_fd)
     response
 }
 

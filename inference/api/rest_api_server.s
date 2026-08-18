@@ -1,7 +1,8 @@
 package neurx.inference.api.rest_server
 
 use std.conv.int_to_string
-use neurx.inference.api.http_server.{http_request, http_response, http_server, create_http_server, server_accept_loop}
+use neurx.inference.api.http_server.{http_server, create_http_server, server_accept_loop}
+use src.net.http.{http_request, http_response}
 
 struct chat_message {
     string role

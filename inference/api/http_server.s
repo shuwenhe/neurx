@@ -3,38 +3,7 @@ use std.result.result
 
 package neurx.inference.api.http_server
 use src.net.{listen_tcp, TCPListener, TCPConn}
-use src.net.http.{http_request as net_http_request, http_response as net_http_response, parse_http_request as net_parse_http_request, format_http_response as net_format_http_response}
-
-struct http_request {
-    string method
-    string path
-    []string headers
-    string body
-}
-
-struct http_response {
-    int status_code
-    []string headers
-    string body
-}
-
-func parse_http_request(string raw_request) http_request {
-    net_http_request parsed = net_parse_http_request(raw_request)
-    http_request {
-        method: parsed.method,
-        path: parsed.path,
-        headers: parsed.headers,
-        body: parsed.body,
-    }
-}
-
-func format_http_response(http_response resp) string {
-    net_format_http_response(net_http_response {
-        status_code: resp.status_code,
-        headers: resp.headers,
-        body: resp.body,
-    })
-}
+use src.net.http.{http_request, http_response, parse_http_request, format_http_response}
 
 struct http_server {
     int listen_fd

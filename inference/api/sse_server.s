@@ -1,6 +1,7 @@
 package neurx.inference.api.sse_server
-use neurx.inference.api.http_server.{http_server, http_request, http_response, create_http_server, close_http_server, int_to_string, server_accept_loop, write_client_data}
+use neurx.inference.api.http_server.{http_server, create_http_server, close_http_server, int_to_string, server_accept_loop, write_client_data}
 use neurx.inference.api.openai_protocol.{openai_request, openai_request_result, parse_openai_request, openai_chat_chunk, openai_done_event, openai_error_body, openai_json_escape, openai_embedding_body}
+use src.net.http.{http_request, http_response}
 
 struct sse_server_config {
     string host
