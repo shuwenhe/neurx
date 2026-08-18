@@ -266,8 +266,12 @@ func main() {
     }
     bool owned_backend = false
     if backend_ready(host, port_number) {
-        print("[DEBUG] Existing backend detected on port " + port + "; restarting fresh backend\n")
-        _ = stop_backend_for_restart(pid_file, backend, port)
+        if backend_matches_requested_model(meta_file, model, threads) {
+            print("[DEBUG] Reusing healthy backend on port " + port + " for requested model\n")
+        } else {
+            print("[DEBUG] Existing backend detected on port " + port + "; restarting for requested model\n")
+            _ = stop_backend_for_restart(pid_file, backend, port)
+        }
     }
     if !backend_ready(host, port_number) {
         string runner = runtime_env_get("NEURX_S_RUNNER_BIN", root + "/artifacts/build/s_runner/s_ir_runner")

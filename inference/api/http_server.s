@@ -2,7 +2,7 @@ use std.conv.int_to_string
 use std.result.result
 
 package neurx.inference.api.http_server
-use src.net.{listen_tcp, TCPListener, TCPConn}
+use src.net.{listen_tcp, tcp_listener, tcp_conn}
 use src.net.http.{http_request, http_response, parse_http_request, format_http_response}
 
 struct http_server {
@@ -12,16 +12,16 @@ struct http_server {
     bool running
 }
 
-func listener_from_server(http_server server) TCPListener {
-    TCPListener {
+func listener_from_server(http_server server) tcp_listener {
+    tcp_listener {
         fd: server.listen_fd,
         host: server.host,
         port: server.port,
     }
 }
 
-func conn_from_fd(int client_fd) TCPConn {
-    TCPConn {
+func conn_from_fd(int client_fd) tcp_conn {
+    tcp_conn {
         fd: client_fd,
         remote_ip: "",
         remote_port: 0,
@@ -31,7 +31,7 @@ func conn_from_fd(int client_fd) TCPConn {
 }
 
 func write_client_data(int client_fd, string data) int {
-    TCPConn conn = conn_from_fd(client_fd)
+    tcp_conn conn = conn_from_fd(client_fd)
     switch conn.write(data) {
         result::ok(n) : n,
         result::err(_) : -1,
@@ -39,7 +39,7 @@ func write_client_data(int client_fd, string data) int {
 }
 
 func close_client_connection(int client_fd) int {
-    TCPConn conn = conn_from_fd(client_fd)
+    tcp_conn conn = conn_from_fd(client_fd)
     switch conn.close() {
         result::ok(_) : 0,
         result::err(_) : -1,
@@ -65,7 +65,7 @@ func create_http_server(string host, int port) http_server {
 }
 
 func handle_connection(int client_fd, func(http_request) http_response handler) {
-    TCPConn conn = conn_from_fd(client_fd)
+    tcp_conn conn = conn_from_fd(client_fd)
     string request_data = switch conn.read(4096) {
         result::ok(data) : data,
         result::err(err) : {
@@ -91,7 +91,7 @@ func handle_connection(int client_fd, func(http_request) http_response handler) 
 }
 
 func server_accept_loop(http_server server, func(http_request) http_response handler) {
-    TCPListener listener = listener_from_server(server)
+    tcp_listener listener = listener_from_server(server)
     while server.running {
         let conn_res = listener.accept()
         switch conn_res {
