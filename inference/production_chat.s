@@ -3,6 +3,7 @@ package neurx.inference.production_chat
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
 
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+extern "intrinsic" func __host_write_text_file(string path, string content) int
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __sys_socket(int domain, int socket_type, int protocol) int
 extern "intrinsic" func __sys_connect(int fd, string host, int port, int family) int
@@ -170,6 +171,27 @@ func stop_owned_backend(bool owned, string pid_file) int {
     0
 }
 
+func backend_signature(string model, string threads) string {
+    model + "\n" + threads
+}
+
+func read_text_file(string path) string {
+    trim(runtime_run_command_output("cat " + shell_escape(path) + " 2>/dev/null || true"))
+}
+
+func backend_matches_requested_model(string meta_file, string model, string threads) bool {
+    if !runtime_file_exists(meta_file) {
+        return false
+    }
+    read_text_file(meta_file) == backend_signature(model, threads)
+}
+
+func stop_backend_for_restart(string pid_file, string backend) int {
+    _ = runtime_run_command_output("pkill -f " + shell_escape(backend) + " 2>/dev/null || true")
+    runtime_run_command_output("sleep 1")
+    0
+}
+
 func ends_with(string text, string suffix) bool {
     int text_len = len(text)
     int suffix_len = len(suffix)
@@ -208,6 +230,7 @@ func main() {
     string pid_file = prefix + ".pid"
     string ready_file = prefix + "_ready"
     string log_file = prefix + ".log"
+    string meta_file = prefix + ".meta"
     if !runtime_file_exists(model + "/model.safetensors") && !runtime_file_exists(model + "/model.safetensors.index.json") {
         print("error: model not found: " + model + "/model.safetensors (or .index.json for sharded)\n")
         return 1
@@ -217,21 +240,26 @@ func main() {
         return 1
     }
     bool owned_backend = false
+    if backend_ready(host, port_number) && !backend_matches_requested_model(meta_file, model, threads) {
+        print("[DEBUG] Existing backend model does not match requested model; restarting backend\n")
+        _ = stop_backend_for_restart(pid_file, backend)
+    }
     if !backend_ready(host, port_number) {
         string runner = runtime_env_get("NEURX_S_RUNNER_BIN", root + "/artifacts/build/s_runner/s_ir_runner")
         string backend_cmd = backend
         if ends_with(backend, ".ir") {
             backend_cmd = runner + " " + shell_escape(backend)
         }
+        _ = __host_write_text_file(meta_file, backend_signature(model, threads))
         string launch =
-            "rm -f " + shell_escape(ready_file) + "; " +
+            "rm -f " + shell_escape(ready_file) + " " + shell_escape(pid_file) + "; " +
             "NEURX_MODEL_DIR=" + shell_escape(model) +
             " NEURX_CPU_THREADS=" + shell_escape(threads) +
             " NEURX_S_HOST=" + shell_escape(host) +
             " NEURX_S_PORT=" + shell_escape(port) +
             " NEURX_S_READY_FILE=" + shell_escape(ready_file) +
             " nohup " + backend_cmd +
-            " >" + shell_escape(log_file) + " 2>&1 < /dev/null &"
+            " >" + shell_escape(log_file) + " 2>&1 < /dev/null & echo $! >" + shell_escape(pid_file)
         print("[DEBUG] Launch command: " + launch + "\n")
         _ = runtime_run_command_output(launch)
         int attempts = 0
