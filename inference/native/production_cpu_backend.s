@@ -1,6 +1,7 @@
 package neurx.inference.cpu_backend
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
+use std.text.bytes_to_string
 
 extern "intrinsic" func __sys_socket(int domain, int socket_type, int protocol) int
 extern "intrinsic" func __sys_bind(int fd, string addr, int port, int family) int
@@ -106,41 +107,14 @@ func load_shard_index(string model_dir) string {
 
 func read_index_json(string file_path) string {
     print("[ShardLoader] Reading JSON index file...\n")
-    
+
     []int file_bytes = __host_read_binary_file_range(file_path, 0, 1000000)
     if len(file_bytes) == 0 {
         print("[ShardLoader] Failed to read index file\n")
         return ""
     }
-    
-    string content = bytes_to_string(file_bytes)
-    return content
-}
 
-func bytes_to_string([]int bytes) string {
-    string result = ""
-    int i = 0
-    while i < len(bytes) {
-        result = result + string_from_code(bytes[i])
-        i = i + 1
-    }
-    return result
-}
-
-func string_from_code(int code) string {
-    if code == 0 { return "" }
-    if code == 10 { return "\n" }
-    if code == 13 { return "\r" }
-    if code == 34 { return "\"" }
-    if code == 44 { return "," }
-    if code == 58 { return ":" }
-    if code == 91 { return "[" }
-    if code == 93 { return "]" }
-    if code == 123 { return "{" }
-    if code == 125 { return "}" }
-    if code == 32 { return " " }
-    if code == 9 { return "\t" }
-    ""
+    return bytes_to_string(file_bytes)
 }
 
 func parse_weight_map(string json_content) string {
@@ -182,6 +156,77 @@ func get_tensor_shard(string json_content, string tensor_name) string {
     
     print("[ShardLoader] Defaulting to first shard\n")
     return "model-00001-of-00005.safetensors"
+}
+
+func find_tensor_shard_in_index(string index_content, string tensor_name) string {
+    string weight_map_key = "\"weight_map\""
+    int weight_map_pos = find_substring(index_content, weight_map_key)
+    if weight_map_pos < 0 {
+        return ""
+    }
+
+    int object_start = weight_map_pos + len(weight_map_key)
+    while object_start < len(index_content) && __host_slice(index_content, object_start, object_start + 1) != "{" {
+        object_start = object_start + 1
+    }
+    if object_start >= len(index_content) {
+        return ""
+    }
+
+    int cur = object_start + 1
+    while cur < len(index_content) {
+        while cur < len(index_content) {
+            string ch = __host_slice(index_content, cur, cur + 1)
+            if ch != " " && ch != "\n" && ch != "\r" && ch != "\t" && ch != "," {
+                break
+            }
+            cur = cur + 1
+        }
+        if cur >= len(index_content) || __host_slice(index_content, cur, cur + 1) == "}" {
+            break
+        }
+        if __host_slice(index_content, cur, cur + 1) != "\"" {
+            cur = cur + 1
+            continue
+        }
+
+        int kstart = cur + 1
+        int kend = kstart
+        while kend < len(index_content) && __host_slice(index_content, kend, kend + 1) != "\"" {
+            kend = kend + 1
+        }
+        if kend >= len(index_content) {
+            break
+        }
+        string key = __host_slice(index_content, kstart, kend)
+
+        cur = kend + 1
+        while cur < len(index_content) && __host_slice(index_content, cur, cur + 1) != "\"" {
+            if __host_slice(index_content, cur, cur + 1) == "}" {
+                break
+            }
+            cur = cur + 1
+        }
+        if cur >= len(index_content) || __host_slice(index_content, cur, cur + 1) != "\"" {
+            break
+        }
+
+        int vstart = cur + 1
+        int vend = vstart
+        while vend < len(index_content) && __host_slice(index_content, vend, vend + 1) != "\"" {
+            vend = vend + 1
+        }
+        if vend >= len(index_content) {
+            break
+        }
+
+        if key == tensor_name {
+            return __host_slice(index_content, vstart, vend)
+        }
+        cur = vend + 1
+    }
+
+    return ""
 }
 
 func load_tensor_from_shard(string model_dir, string shard_file, int offset, int size) []int {
@@ -850,138 +895,48 @@ func load_model_metadata_sharded(string model_dir) []int {
         return []int{cap: 0}
     }
 
-    print("[ShardedModel] Parsing weight_map from index\n")
+    string target_tensor = "model.embed_tokens.weight"
+    print("[ShardedModel] Resolving shard for " + target_tensor + "\n")
 
-    []string tensor_names = []string{cap: 10000}
-    []string tensor_shards = []string{cap: 10000}
-    int tn = 0
-
-    int wm_pos = 0
-    while wm_pos < len(index_content) {
-        int p = wm_pos
-        if __host_slice(index_content, p, p + 11) == "\"weight_map\"" {
-            int b = p
-            while b < len(index_content) && __host_slice(index_content, b, b + 1) != "{" {
-                b = b + 1
-            }
-            b = b + 1
-            int cur = b
-            while cur < len(index_content) && __host_slice(index_content, cur, cur + 1) != "}" {
-                while cur < len(index_content) && __host_slice(index_content, cur, cur + 1) != "\"" {
-                    cur = cur + 1
-                }
-                if cur >= len(index_content) { break }
-                int kstart = cur + 1
-                int kend = kstart
-                while kend < len(index_content) && __host_slice(index_content, kend, kend + 1) != "\"" {
-                    kend = kend + 1
-                }
-                string key = __host_slice(index_content, kstart, kend)
-
-                cur = kend + 1
-                while cur < len(index_content) && __host_slice(index_content, cur, cur + 1) != "\"" {
-                    cur = cur + 1
-                }
-                if cur >= len(index_content) { break }
-                int vstart = cur + 1
-                int vend = vstart
-                  while vend < len(index_content) && __host_slice(index_content, vend, vend + 1) != "\"" {
-                    vend = vend + 1
-                }
-                string val = __host_slice(index_content, vstart, vend)
-
-                tensor_names[tn] = key
-                tensor_shards[tn] = val
-                tn = tn + 1
-
-                cur = vend + 1
-            }
-            break
-        }
-        wm_pos = wm_pos + 1
+    string shard = find_tensor_shard_in_index(index_content, target_tensor)
+    if len(shard) == 0 {
+        print("[ShardedModel] No shard entry found for target tensor\n")
+        return []int{cap: 0}
     }
+    print("[ShardedModel] Target tensor shard: " + shard + "\n")
 
-    if tn == 0 {
-        print("[ShardedModel] No entries found in weight_map\n")
+    string shard_path = model_dir + "/" + shard
+    print("[ShardedModel] Inspecting shard: " + shard_path + "\n")
+
+    []int size_bytes = __host_read_binary_file_range(shard_path, 0, 8)
+    if len(size_bytes) < 8 {
+        print("[ShardedModel] Failed reading header size for target shard\n")
+        return []int{cap: 0}
+    }
+    int header_len = u64_le(size_bytes, 0)
+    if header_len <= 0 || header_len > 20000000 {
+        print("[ShardedModel] Invalid header length for target shard -> " + int_to_string(header_len) + "\n")
         return []int{cap: 0}
     }
 
-    print("[ShardedModel] Collected " + int_to_string(tn) + " tensor entries\n")
-
-    []string shard_files = []string{cap: 64}
-    int sf = 0
-    int i = 0
-    while i < tn {
-        string sfile = tensor_shards[i]
-        bool found = false
-        int j = 0
-        while j < sf {
-            if shard_files[j] == sfile { found = true; break }
-            j = j + 1
-        }
-        if !found {
-            shard_files[sf] = sfile
-            sf = sf + 1
-        }
-        i = i + 1
+    []int header_bytes = __host_read_binary_file_range(shard_path, 8, header_len)
+    if len(header_bytes) == 0 {
+        print("[ShardedModel] Failed reading header bytes for target shard\n")
+        return []int{cap: 0}
     }
 
-    print("[ShardedModel] Found " + int_to_string(sf) + " shard files\n")
-
-    string combined = "{"
-
-    int sidx = 0
-    while sidx < sf {
-        string shard = shard_files[sidx]
-        string shard_path = model_dir + "/" + shard
-        print("[ShardedModel] Inspecting shard: " + shard_path + "\n")
-
-        []int size_bytes = __host_read_binary_file_range(shard_path, 0, 8)
-        if len(size_bytes) < 8 {
-            print("[ShardedModel] Failed reading header size for " + shard + "\n")
-            sidx = sidx + 1
-            continue
-        }
-        int header_len = u64_le(size_bytes, 0)
-        if header_len <= 0 || header_len > 20000000 {
-            print("[ShardedModel] Invalid header length for " + shard + " -> " + int_to_string(header_len) + "\n")
-            sidx = sidx + 1
-            continue
-        }
-
-        []int header_bytes = __host_read_binary_file_range(shard_path, 8, header_len)
-        if len(header_bytes) == 0 {
-            print("[ShardedModel] Failed reading header bytes for " + shard + "\n")
-            sidx = sidx + 1
-            continue
-        }
-
-        int ti = 0
-        while ti < tn {
-            if tensor_shards[ti] != shard { ti = ti + 1; continue }
-            string tname = tensor_names[ti]
-            []int parsed = parse_tensor_index(header_bytes, tname)
-            if parsed[2] != 1 {
-                ti = ti + 1
-                continue
-            }
-
-            int rel_start = parsed[0]
-            int byte_len = parsed[1]
-
-            int file_start = 8 + header_len + rel_start
-            int file_end = file_start + byte_len
-
-            if len(combined) > 1 { combined = combined + "," }
-            combined = combined + "\"" + tname + "\":{\"data_offsets\":[" + int_to_string(file_start) + "," + int_to_string(file_end) + "]}"
-
-            ti = ti + 1
-        }
-
-        sidx = sidx + 1
+    []int parsed = parse_tensor_index(header_bytes, target_tensor)
+    if parsed[2] != 1 {
+        print("[ShardedModel] Target tensor not found in shard header\n")
+        return []int{cap: 0}
     }
 
-    combined = combined + "}"
+    int rel_start = parsed[0]
+    int byte_len = parsed[1]
+    int file_start = 8 + header_len + rel_start
+    int file_end = file_start + byte_len
+
+    string combined = "{\"" + target_tensor + "\":{\"data_offsets\":[" + int_to_string(file_start) + "," + int_to_string(file_end) + "]}}"
 
     []int out_bytes = string_to_bytes(combined)
     print("[ShardedModel] Combined metadata size: " + int_to_string(len(out_bytes)) + " bytes\n")
@@ -1018,77 +973,28 @@ func read_tensor_range(string model_path, int offset, int size) []int {
 func read_tensor_range_sharded(string model_dir, int offset, int size) []int {
     print("[ShardedRead] Loading from sharded model (offset=" + int_to_string(offset) + ", size=" + int_to_string(size) + ")\n")
 
-    []int result = []int{cap: size + 1000}
-
     let index_content = load_shard_index(model_dir)
     if len(index_content) == 0 {
         print("[ShardedRead] Failed to load weight map\n")
-        return result
+        return []int{cap: 0}
     }
 
-    print("[ShardedRead] Weight map loaded, scanning shard files\n")
-
-    []string shard_files = []string{cap: 16}
-    int pos = 0
-    while pos < len(index_content) {
-        int found = -1
-        int i = pos
-        while i < len(index_content) {
-            if __host_slice(index_content, i, i + 11) == ".safetensors" {
-                found = i
-                break
-            }
-            i = i + 1
-        }
-        if found == -1 { break }
-
-        int start = found - 1
-        while start >= 0 && __host_slice(index_content, start, start + 1) != "\"" {
-            start = start - 1
-        }
-        start = start + 1
-        if start < 0 { pos = found + 11; continue }
-
-        string fname = __host_slice(index_content, start, found + 11)
-
-        bool exists = false
-        int j = 0
-        while j < len(shard_files) {
-            if len(shard_files[j]) == 0 { break }
-            if shard_files[j] == fname { exists = true; break }
-            j = j + 1
-        }
-        if !exists {
-            shard_files[j] = fname
-        }
-
-        pos = found + 11
+    string target_tensor = "model.embed_tokens.weight"
+    string shard = find_tensor_shard_in_index(index_content, target_tensor)
+    if len(shard) == 0 {
+        print("[ShardedRead] Could not resolve shard for target tensor\n")
+        return []int{cap: 0}
     }
 
-    if len(shard_files) == 0 || len(shard_files[0]) == 0 {
-        int k = 0
-        while k < 16 {
-            int idx = k + 1
-            string candidate = "model-0000" + int_to_string(idx) + "-of-00005.safetensors"
-            shard_files[k] = candidate
-            k = k + 1
-        }
+    string shard_path = model_dir + "/" + shard
+    print("[ShardedRead] Using target shard: " + shard_path + "\n")
+    []int data = __host_read_binary_file_range(shard_path, offset, size)
+    if len(data) > 0 {
+        print("[ShardedRead] Read " + int_to_string(len(data)) + " bytes from " + shard + "\n")
+        return data
     }
 
-    int s = 0
-    while s < len(shard_files) {
-        if len(shard_files[s]) == 0 { break }
-        string shard_path = model_dir + "/" + shard_files[s]
-        print("[ShardedRead] Trying shard: " + shard_path + "\n")
-        []int data = __host_read_binary_file_range(shard_path, offset, size)
-        if len(data) > 0 {
-            print("[ShardedRead] Read " + int_to_string(len(data)) + " bytes from " + shard_files[s] + "\n")
-            return data
-        }
-        s = s + 1
-    }
-
-    print("[ShardedRead] No shard contained data at that offset. Returning empty result.\n")
+    print("[ShardedRead] Failed to read requested range from target shard\n")
     return []int{cap: 0}
 }
 

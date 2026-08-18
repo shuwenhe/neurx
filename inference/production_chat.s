@@ -186,7 +186,8 @@ func backend_matches_requested_model(string meta_file, string model, string thre
     read_text_file(meta_file) == backend_signature(model, threads)
 }
 
-func stop_backend_for_restart(string pid_file, string backend) int {
+func stop_backend_for_restart(string pid_file, string backend, string port) int {
+    _ = runtime_run_command_output("fuser -k " + shell_escape(port + "/tcp") + " 2>/dev/null || true")
     _ = runtime_run_command_output("pkill -f " + shell_escape(backend) + " 2>/dev/null || true")
     runtime_run_command_output("sleep 1")
     0
@@ -240,9 +241,9 @@ func main() {
         return 1
     }
     bool owned_backend = false
-    if backend_ready(host, port_number) && !backend_matches_requested_model(meta_file, model, threads) {
-        print("[DEBUG] Existing backend model does not match requested model; restarting backend\n")
-        _ = stop_backend_for_restart(pid_file, backend)
+    if backend_ready(host, port_number) {
+        print("[DEBUG] Existing backend detected on port " + port + "; restarting fresh backend\n")
+        _ = stop_backend_for_restart(pid_file, backend, port)
     }
     if !backend_ready(host, port_number) {
         string runner = runtime_env_get("NEURX_S_RUNNER_BIN", root + "/artifacts/build/s_runner/s_ir_runner")

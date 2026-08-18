@@ -1,4 +1,6 @@
 package neurx.inference.safetensors_weight_loader
+use std.text.bytes_to_string
+
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 extern "intrinsic" func __host_read_binary_file(string path) []int
 extern "intrinsic" func __host_file_exists(string path) bool
@@ -51,16 +53,6 @@ func load_safetensors_header(string path) safetensors_header {
     hdr.total_tensors = len(tensors)
     hdr.valid = len(tensors) > 0
     hdr
-}
-
-func bytes_to_string([]int bytes) string {
-    string s = ""
-    int i = 0
-    while i < len(bytes) {
-        s = s + string(bytes[i])
-        i = i + 1
-    }
-    s
 }
 
 func skip_ws(string json, int pos) int {

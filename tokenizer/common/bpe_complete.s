@@ -1,5 +1,7 @@
 package neurx.tokenizer.common.bpe_complete
 
+use std.text.bytes_to_string
+
 func new_vocab() []int {
     []int vocab = []
     int i = 0
@@ -56,16 +58,6 @@ func char_to_bytes(string text) []int {
         i = i + 1
     }
     return bytes
-}
-
-func bytes_to_string([]int bytes) string {
-    string result = ""
-    int i = 0
-    for i < len(bytes) {
-        result = result + string(bytes[i])
-        i = i + 1
-    }
-    return result
 }
 
 func find_most_frequent_pair([]int tokens) int {
