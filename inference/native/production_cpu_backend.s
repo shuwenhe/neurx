@@ -3,15 +3,11 @@ package neurx.inference.cpu_backend
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
 use std.binary.parse_int_at_bytes
 use std.binary.u64_le_bytes
+use std.result.result
 use std.text.{bytes_to_string, int_to_string, parse_int_default}
+use src.net.{listen_tcp, TCPConn}
 
-extern "intrinsic" func __sys_socket(int domain, int socket_type, int protocol) int
-extern "intrinsic" func __sys_bind(int fd, string addr, int port, int family) int
-extern "intrinsic" func __sys_listen(int fd, int backlog) int
-extern "intrinsic" func __sys_accept(int fd) int
 extern "intrinsic" func __sys_read_string(int fd, int count) string
-extern "intrinsic" func __sys_write_string(int fd, string data) int
-extern "intrinsic" func __sys_close(int fd) int
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 
@@ -1646,10 +1642,16 @@ func generate_response(string prompt, int max_tokens) string {
     return json_response
 }
 
-func handle_client(int client_fd) {
-    string request = __sys_read_string(client_fd, 4096)
+func handle_client(TCPConn conn) {
+    string request = switch conn.read(4096) {
+        result::ok(data) : data,
+        result::err(_) : {
+            conn.close()
+            return
+        },
+    }
     if len(request) < 4 {
-        _ = __sys_close(client_fd)
+        conn.close()
         return
     }
     string response = ""
@@ -1681,9 +1683,9 @@ func handle_client(int client_fd) {
         }
     }
     if len(response) > 0 {
-        _ = __sys_write_string(client_fd, response)
+        _ = conn.write(response)
     }
-    _ = __sys_close(client_fd)
+    conn.close()
 }
 
 func extract_http_body(string request) string {
@@ -1713,57 +1715,6 @@ func extract_http_body(string request) string {
     return result
 }
 
-func socket_bind_with_retry(int fd, string addr, int port, int max_retries) int {
-    int retry_count = 0
-    int result = -1
-
-    while retry_count < max_retries {
-        result = __sys_bind(fd, addr, port, 2)
-        if result >= 0 {
-            print("[Socket] Bind successful on attempt " + int_to_string(retry_count + 1) + "\n")
-            return result
-        }
-
-        retry_count = retry_count + 1
-        if retry_count < max_retries {
-            print("[Socket] Bind attempt " + int_to_string(retry_count) + " failed, retrying...\n")
-            _ = runtime_run_command_output("sleep 0.01")
-        }
-    }
-
-    print("[Socket] Bind failed after " + int_to_string(max_retries) + " attempts\n")
-    return result
-}
-
-func socket_listen_with_retry(int fd, int backlog, int max_retries) int {
-    int retry_count = 0
-    int result = -1
-
-    while retry_count < max_retries {
-        result = __sys_listen(fd, backlog)
-        if result >= 0 {
-            print("[Socket] Listen successful on attempt " + int_to_string(retry_count + 1) + "\n")
-            return result
-        }
-
-        retry_count = retry_count + 1
-        if retry_count < max_retries {
-            print("[Socket] Listen attempt " + int_to_string(retry_count) + " failed, retrying...\n")
-            _ = runtime_run_command_output("sleep 0.01")
-        }
-    }
-
-    print("[Socket] Listen failed after " + int_to_string(max_retries) + " attempts\n")
-    return result
-}
-
-func socket_accept_safe(int fd) int {
-    int client_fd = __sys_accept(fd)
-    if client_fd < 0 {
-        _ = runtime_run_command_output("sleep 0.001")
-        return -1
-    }
-    return client_fd
 }
 
 func create_ready_file(string path) {
@@ -1777,44 +1728,18 @@ func main() {
     string port_str = runtime_env_get("NEURX_S_PORT", "18083")
     int port_number = parse_int_default(port_str, 18083)
 
-    int max_retries = 3
-    int retry_count = 0
-    int server_fd = -1
-
-    while retry_count < max_retries && server_fd < 0 {
-        server_fd = __sys_socket(2, 1, 0)
-        if server_fd < 0 {
-            print("[Socket] Creation failed on attempt " + int_to_string(retry_count + 1) + "/" + int_to_string(max_retries) + "\n")
-            retry_count = retry_count + 1
-            if retry_count < max_retries {
-                _ = runtime_run_command_output("sleep 0.1")
-            }
-        }
+    let listener_res = listen_tcp("127.0.0.1", port_number)
+    let listener = switch listener_res {
+        result::ok(value) : value,
+        result::err(err) : {
+            print("ERROR: Socket listen failed: " + err.message + "\n")
+            print("HTTP server listening on 127.0.0.1:" + port_str + " (compatibility mode)\n")
+            return
+        },
     }
 
-    if server_fd < 0 {
-        print("ERROR: Socket creation failed after " + int_to_string(max_retries) + " attempts!\n")
-        print("HTTP server listening on 127.0.0.1:" + port_str + " (compatibility mode)\n")
-        return
-    }
-
-    print("Socket creation: fd=" + int_to_string(server_fd) + "\n")
-
-    if socket_bind_with_retry(server_fd, "127.0.0.1", port_number, 3) < 0 {
-        print("ERROR: Socket binding failed after retries!\n")
-        print("HTTP server listening on 127.0.0.1:" + port_str + " (compatibility mode)\n")
-        _ = __sys_close(server_fd)
-        return
-    }
-
-    if socket_listen_with_retry(server_fd, 128, 3) < 0 {
-        print("ERROR: Socket listen failed after retries!\n")
-        print("HTTP server listening on 127.0.0.1:" + port_str + " (compatibility mode)\n")
-        _ = __sys_close(server_fd)
-        return
-    }
-
-    print("HTTP server listening on 127.0.0.1:" + port_str + "\n")
+    print("Socket creation: fd=" + int_to_string(listener.fd) + "\n")
+    print("HTTP server listening on 127.0.0.1:" + int_to_string(listener.port) + "\n")
     print("[Socket] Ready to accept connections\n")
 
     string ready_file = runtime_env_get("NEURX_S_READY_FILE", "")
@@ -1827,19 +1752,22 @@ func main() {
     int max_consecutive_errors = 100
 
     while true {
-        int client_fd = socket_accept_safe(server_fd)
-        if client_fd < 0 {
-            consecutive_errors = consecutive_errors + 1
-            if consecutive_errors > max_consecutive_errors {
-                print("ERROR: Too many consecutive accept failures, restarting...\n")
-                break
-            }
-        } else {
-            consecutive_errors = 0
-            handle_client(client_fd)
+        let conn_res = listener.accept()
+        switch conn_res {
+            result::ok(conn) : {
+                consecutive_errors = 0
+                handle_client(conn)
+            },
+            result::err(_) : {
+                consecutive_errors = consecutive_errors + 1
+                if consecutive_errors > max_consecutive_errors {
+                    print("ERROR: Too many consecutive accept failures, restarting...\n")
+                    break
+                }
+            },
         }
     }
 
     print("[Socket] Closing server\n")
-    _ = __sys_close(server_fd)
+    _ = listener.close()
 }

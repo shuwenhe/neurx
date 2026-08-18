@@ -1,34 +1,7 @@
 package neurx.inference.api.rest_server
 
 use std.conv.int_to_string
-
-extern "intrinsic" func __sys_socket(int domain, int type, int protocol) int
-extern "intrinsic" func __sys_bind(int fd, string host, int port, int family) int
-extern "intrinsic" func __sys_listen(int fd, int backlog) int
-extern "intrinsic" func __sys_accept(int fd) int
-extern "intrinsic" func __sys_recv(int fd, int count) string
-extern "intrinsic" func __sys_send(int fd, string data) int
-extern "intrinsic" func __sys_close(int fd) int
-
-struct http_request {
-    string method
-    string path
-    []string headers
-    string body
-}
-
-struct http_response {
-    int status_code
-    []string headers
-    string body
-}
-
-struct http_server {
-    int listen_fd
-    int port
-    string host
-    bool running
-}
+use neurx.inference.api.http_server.{http_request, http_response, http_server, create_http_server, server_accept_loop}
 
 struct chat_message {
     string role
@@ -292,122 +265,6 @@ func run_inference(string prompt, int max_tokens, float temperature) inference_r
     }
 }
 
-func parse_http_request(string raw_request) http_request {
-    []string lines = split_string(raw_request, "\n")
-    if len(lines) == 0 {
-        return http_request{method: "", path: "", headers: [], body: ""}
-    }
-
-    string request_line = lines[0]
-    []string parts = split_string(request_line, " ")
-
-    string method = ""
-    string path = "/"
-    if len(parts) >= 2 {
-        method = parts[0]
-        path = parts[1]
-    }
-
-    []string headers = []string{}
-    int body_start = 0
-
-    int i = 1
-    while i < len(lines) {
-        string line = lines[i]
-        if len(line) == 0 {
-            body_start = i + 1
-            break
-        }
-        headers = append(headers, line)
-        i = i + 1
-    }
-
-    string body = ""
-    if body_start < len(lines) {
-        body = lines[body_start]
-    }
-
-    return http_request{
-        method: method,
-        path: path,
-        headers: headers,
-        body: body,
-    }
-}
-
-func format_http_response(http_response resp) string {
-    string response = "HTTP/1.1 " + int_to_string(resp.status_code) + " OK\r\n"
-    response = response + "Content-Type: application/json\r\n"
-    response = response + "Content-Length: " + int_to_string(len(resp.body)) + "\r\n"
-    response = response + "Connection: close\r\n"
-
-    int i = 0
-    while i < len(resp.headers) {
-        response = response + resp.headers[i] + "\r\n"
-        i = i + 1
-    }
-
-    response = response + "\r\n" + resp.body
-    return response
-}
-
-func create_http_server(string host, int port) http_server {
-    int listen_fd = __sys_socket(2, 1, 0)
-    if listen_fd < 0 {
-        print("❌ error: failed to create socket\n")
-        return http_server{listen_fd: -1, port: port, host: host, running: false}
-    }
-
-    int bind_result = __sys_bind(listen_fd, host, port, 2)
-    if bind_result < 0 {
-        print("❌ error: failed to bind socket\n")
-        __sys_close(listen_fd)
-        return http_server{listen_fd: -1, port: port, host: host, running: false}
-    }
-
-    int listen_result = __sys_listen(listen_fd, 128)
-    if listen_result < 0 {
-        print("❌ error: failed to listen\n")
-        __sys_close(listen_fd)
-        return http_server{listen_fd: -1, port: port, host: host, running: false}
-    }
-
-    print("✅ HTTP server listening on " + host + ":" + int_to_string(port) + "\n")
-
-    return http_server{
-        listen_fd: listen_fd,
-        port: port,
-        host: host,
-        running: true,
-    }
-}
-
-func handle_connection(int client_fd) {
-    string request_data = __sys_recv(client_fd, 4096)
-    if len(request_data) == 0 {
-        __sys_close(client_fd)
-        return
-    }
-
-    http_request request = parse_http_request(request_data)
-    http_response response = route_request(request)
-    string response_data = format_http_response(response)
-
-    __sys_send(client_fd, response_data)
-    __sys_close(client_fd)
-}
-
-func server_accept_loop(http_server server) {
-    while server.running {
-        int client_fd = __sys_accept(server.listen_fd)
-        if client_fd < 0 {
-            print("⚠️  warning: accept failed\n")
-            continue
-        }
-        handle_connection(client_fd)
-    }
-}
-
 func create_json_response(string status, string model, string content, int prompt_tokens, int completion_tokens) string {
     string id = "chatcmpl-" + int_to_string(12345)
     string created = int_to_string(1786879972)
@@ -569,5 +426,5 @@ func main() {
     print("  curl -X POST http://localhost:8888/v1/chat/completions -H 'Content-Type: application/json' -d '{\"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}]}'\n")
     print("\n")
 
-    server_accept_loop(server)
+    server_accept_loop(server, route_request)
 }

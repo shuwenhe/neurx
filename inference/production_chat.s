@@ -1,16 +1,13 @@
 package neurx.inference.production_chat
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
+use std.result.result
 use std.text.{int_to_string, parse_int_default}
+use src.net.{dial_tcp}
 
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __host_write_text_file(string path, string content) int
 extern "intrinsic" func __sys_read_string(int fd, int count) string
-extern "intrinsic" func __sys_socket(int domain, int socket_type, int protocol) int
-extern "intrinsic" func __sys_connect(int fd, string host, int port, int family) int
-extern "intrinsic" func __sys_write_string(int fd, string data) int
-extern "intrinsic" func __sys_close(int fd) int
-extern "intrinsic" func __sys_set_deadline_ms(int fd, int read_timeout_ms, int write_timeout_ms) int
 
 func shell_escape(string value) string {
     string output = "'"
@@ -67,19 +64,16 @@ func starts_with(string text, string prefix) bool {
 }
 
 func http_request(string host, int port, string method, string path, string body, string extra_headers) string {
-    int fd = __sys_socket(2, 1, 0)
-    if fd < 0 {
-        print("[HTTP] Socket creation failed\n")
-        return ""
+    let conn_res = dial_tcp(host, port)
+    let conn = switch conn_res {
+        result::ok(value) : value,
+        result::err(_) : {
+            print("[HTTP] Connection failed to " + host + ":" + int_to_string(port) + "\n")
+            return ""
+        },
     }
-    print("[HTTP] Socket created: fd=" + int_to_string(fd) + "\n")
-    if __sys_connect(fd, host, port, 2) < 0 {
-        print("[HTTP] Connection failed to " + host + ":" + int_to_string(port) + "\n")
-        _ = __sys_close(fd)
-        return ""
-    }
+    print("[HTTP] Socket created: fd=" + int_to_string(conn.fd) + "\n")
     print("[HTTP] Connected to " + host + ":" + int_to_string(port) + "\n")
-    _ = __sys_set_deadline_ms(fd, 600000, 30000)
     string request = method + " " + path + " HTTP/1.1\r\n" +
         "Host: " + host + "\r\n" +
         "Connection: close\r\n" +
@@ -88,20 +82,34 @@ func http_request(string host, int port, string method, string path, string body
     int offset = 0
     while offset < len(request) {
         string remaining = __host_slice(request, offset, len(request))
-        int written = __sys_write_string(fd, remaining)
+        int written = switch conn.write(remaining) {
+            result::ok(count) : count,
+            result::err(_) : {
+                conn.close()
+                return ""
+            },
+        }
         if written <= 0 {
-            _ = __sys_close(fd)
+            conn.close()
             return ""
         }
         offset = offset + written
     }
     string response = ""
-    string chunk = __sys_read_string(fd, 65536)
-    while len(chunk) > 0 {
+    while true {
+        string chunk = switch conn.read(65536) {
+            result::ok(data) : data,
+            result::err(_) : {
+                conn.close()
+                return response
+            },
+        }
+        if len(chunk) == 0 {
+            break
+        }
         response = response + chunk
-        chunk = __sys_read_string(fd, 65536)
     }
-    _ = __sys_close(fd)
+    conn.close()
     response
 }
 

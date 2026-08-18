@@ -1,5 +1,5 @@
 package neurx.inference.api.sse_server
-use neurx.inference.api.http_server.{http_server, http_request, http_response, create_http_server, parse_http_request, format_http_response, close_http_server, int_to_string, split_string, server_accept_loop, handle_connection, __sys_send, __sys_recv, __sys_close}
+use neurx.inference.api.http_server.{http_server, http_request, http_response, create_http_server, close_http_server, int_to_string, server_accept_loop, write_client_data}
 use neurx.inference.api.openai_protocol.{openai_request, openai_request_result, parse_openai_request, openai_chat_chunk, openai_done_event, openai_error_body, openai_json_escape, openai_embedding_body}
 
 struct sse_server_config {
@@ -90,11 +90,11 @@ func error_response(int status_code, string message, string error_type, string c
 
 func sse_write_chunk(int client_fd, string request_id, string model, string content_delta, string finish_reason) int {
     string chunk = openai_chat_chunk(request_id, model, content_delta, finish_reason)
-    __sys_send(client_fd, chunk)
+    write_client_data(client_fd, chunk)
 }
 
 func sse_write_done(int client_fd) int {
-    __sys_send(client_fd, openai_done_event())
+    write_client_data(client_fd, openai_done_event())
 }
 
 func next_token(generation_callback_state gen) generation_callback_state {
@@ -114,7 +114,7 @@ func current_token(generation_callback_state gen) string {
 }
 
 func sse_serve_stream(int client_fd, sse_session session, generation_callback_state gen) sse_session {
-    __sys_send(client_fd, sse_header())
+    write_client_data(client_fd, sse_header())
     while !gen.done && session.tokens_sent < session.max_tokens {
         gen = next_token(gen)
         if gen.done {
@@ -157,7 +157,7 @@ func sse_serve_non_stream(int client_fd, sse_session session, generation_callbac
     }
     string body = non_stream_response(session, gen)
     string header = json_response_header(len(body))
-    __sys_send(client_fd, header + body)
+    write_client_data(client_fd, header + body)
     session.closed = true
     session
 }
