@@ -1,6 +1,7 @@
 package neurx.inference.cpu_backend
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
+use std.binary.parse_int_at_bytes
 use std.binary.u64_le_bytes
 use std.text.{bytes_to_string, int_to_string, parse_int_default}
 
@@ -699,23 +700,6 @@ func skip_to_digit_bytes([]int bytes, int pos) int {
         iterations = iterations + 1
     }
     -1
-}
-
-func parse_int_at_bytes([]int bytes, int pos) int {
-    if pos < 0 || pos >= len(bytes) { return 0 }
-    int value = 0
-    int cursor = pos
-    int max_iterations = 20
-    int iterations = 0
-    while cursor < len(bytes) && iterations < max_iterations {
-        int c = bytes[cursor]
-        if c < 48 || c > 57 { break }
-        int digit = c - 48
-        value = value * 10 + digit
-        cursor = cursor + 1
-        iterations = iterations + 1
-    }
-    return value
 }
 
 func parse_tensor_index([]int metadata_bytes, string tensor_name) []int {

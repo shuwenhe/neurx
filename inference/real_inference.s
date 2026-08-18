@@ -1,5 +1,6 @@
 package real_inference
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file}
+use std.binary.parse_int_at_bytes
 use std.binary.u64_le_bytes
 use std.conv.int_to_string
 extern "intrinsic" func __host_read_binary_file(string path) []int
@@ -62,26 +63,6 @@ func skip_to_digit_bytes([]int bytes, int pos) int {
         iterations = iterations + 1
     }
     -1
-}
-
-func parse_int_at_bytes([]int bytes, int pos) int {
-    if pos < 0 || pos >= len(bytes) {
-        return 0
-    }
-    int value = 0
-    int cursor = pos
-    int max_iterations = 20
-    int iterations = 0
-    while cursor < len(bytes) && iterations < max_iterations {
-        int c = bytes[cursor]
-        if c < 48 || c > 57 {
-            break
-        }
-        value = value * 10 + (c - 48)
-        cursor = cursor + 1
-        iterations = iterations + 1
-    }
-    return value
 }
 
 func tensor_index_record(int offset, int size, int found) []int {
