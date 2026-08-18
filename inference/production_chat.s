@@ -210,6 +210,13 @@ func backend_matches_requested_model(string meta_file, string model, string thre
     read_text_file(meta_file) == backend_signature(model, threads)
 }
 
+func backend_failed_to_bind(string log_file) bool {
+    if !runtime_file_exists(log_file) {
+        return false
+    }
+    index_of(read_text_file(log_file), "Socket bind failed") >= 0
+}
+
 func stop_backend_for_restart(string pid_file, string backend, string port) int {
     _ = runtime_run_command_output("fuser -k " + shell_escape(port + "/tcp") + " 2>/dev/null || true")
     _ = runtime_run_command_output("pkill -f " + shell_escape(backend) + " 2>/dev/null || true")
@@ -232,6 +239,55 @@ func ends_with(string text, string suffix) bool {
         i = i + 1
     }
     return true
+}
+
+func extract_json_string(string json, string key) string {
+    string search = "\"" + key + "\":"
+    int start_pos = index_of(json, search)
+    if start_pos < 0 {
+        return ""
+    }
+
+    int cursor = start_pos + len(search)
+    while cursor < len(json) && __host_slice(json, cursor, cursor + 1) != "\"" {
+        cursor = cursor + 1
+    }
+    if cursor >= len(json) {
+        return ""
+    }
+
+    cursor = cursor + 1
+    string result = ""
+    bool escaped = false
+    while cursor < len(json) {
+        string ch = __host_slice(json, cursor, cursor + 1)
+        if escaped {
+            if ch == "n" {
+                result = result + "\n"
+            } else if ch == "r" {
+                result = result + "\r"
+            } else if ch == "t" {
+                result = result + "\t"
+            } else {
+                result = result + ch
+            }
+            escaped = false
+            cursor = cursor + 1
+            continue
+        }
+        if ch == "\\" {
+            escaped = true
+            cursor = cursor + 1
+            continue
+        }
+        if ch == "\"" {
+            break
+        }
+        result = result + ch
+        cursor = cursor + 1
+    }
+
+    return result
 }
 
 func main() {
@@ -279,37 +335,63 @@ func main() {
         if ends_with(backend, ".ir") {
             backend_cmd = runner + " " + shell_escape(backend)
         }
-        _ = __host_write_text_file(meta_file, backend_signature(model, threads))
-        string launch =
-            "rm -f " + shell_escape(ready_file) + " " + shell_escape(pid_file) + "; " +
-            "NEURX_MODEL_DIR=" + shell_escape(model) +
-            " NEURX_CPU_THREADS=" + shell_escape(threads) +
-            " NEURX_S_HOST=" + shell_escape(host) +
-            " NEURX_S_PORT=" + shell_escape(port) +
-            " NEURX_S_READY_FILE=" + shell_escape(ready_file) +
-            " nohup " + backend_cmd +
-            " >" + shell_escape(log_file) + " 2>&1 < /dev/null & echo $! >" + shell_escape(pid_file)
-        print("[DEBUG] Launch command: " + launch + "\n")
-        _ = runtime_run_command_output(launch)
-        int attempts = 0
-        int max_attempts = 300
-        print("[DEBUG] Starting health check attempts for backend at " + host + ":" + int_to_string(port_number) + "\n")
-        while attempts < max_attempts && !backend_ready(host, port_number) {
-            attempts = attempts + 1
-            if attempts == 1 {
-                string debug_response = http_request(host, port_number, "GET", "/health", "", "")
-                print("[DEBUG] First HTTP response length: " + int_to_string(len(debug_response)) + "\n")
-                if len(debug_response) > 0 {
-                    print("[DEBUG] Response preview: " + __host_slice(debug_response, 0, 200) + "\n")
+        int launch_attempt = 0
+        int max_launch_attempts = 5
+        bool backend_started = false
+        string launch = ""
+        while launch_attempt < max_launch_attempts && !backend_started {
+            _ = __host_write_text_file(meta_file, backend_signature(model, threads))
+            launch =
+                "rm -f " + shell_escape(ready_file) + " " + shell_escape(pid_file) + "; " +
+                "NEURX_MODEL_DIR=" + shell_escape(model) +
+                " NEURX_CPU_THREADS=" + shell_escape(threads) +
+                " NEURX_S_HOST=" + shell_escape(host) +
+                " NEURX_S_PORT=" + shell_escape(port) +
+                " NEURX_S_READY_FILE=" + shell_escape(ready_file) +
+                " nohup " + backend_cmd +
+                " >" + shell_escape(log_file) + " 2>&1 < /dev/null & echo $! >" + shell_escape(pid_file)
+            print("[DEBUG] Launch command: " + launch + "\n")
+            _ = runtime_run_command_output(launch)
+            int attempts = 0
+            int max_attempts = 300
+            print("[DEBUG] Starting health check attempts for backend at " + host + ":" + int_to_string(port_number) + "\n")
+            while attempts < max_attempts && !backend_ready(host, port_number) {
+                attempts = attempts + 1
+                if attempts == 1 {
+                    string debug_response = http_request(host, port_number, "GET", "/health", "", "")
+                    print("[DEBUG] First HTTP response length: " + int_to_string(len(debug_response)) + "\n")
+                    if len(debug_response) > 0 {
+                        print("[DEBUG] Response preview: " + __host_slice(debug_response, 0, 200) + "\n")
+                    }
                 }
+                if attempts % 10 == 0 {
+                    print("[DEBUG] Health check attempt " + int_to_string(attempts) + "/" + int_to_string(max_attempts) + "\n")
+                }
+                if backend_failed_to_bind(log_file) {
+                    print("[DEBUG] Backend reported socket bind failure on port " + port + "\n")
+                    break
+                }
+                runtime_run_command_output("sleep 0.2")
             }
-            if attempts % 10 == 0 {
-                print("[DEBUG] Health check attempt " + int_to_string(attempts) + "/" + int_to_string(max_attempts) + "\n")
+            print("[DEBUG] Health check completed after " + int_to_string(attempts) + " attempts\n")
+            if backend_ready(host, port_number) {
+                backend_started = true
+                break
             }
-            runtime_run_command_output("sleep 0.2")
+            if !backend_failed_to_bind(log_file) {
+                break
+            }
+            launch_attempt = launch_attempt + 1
+            port_number = port_number + 1
+            port = int_to_string(port_number)
+            prefix = "/tmp/neurx_s_inference_" + port
+            pid_file = prefix + ".pid"
+            ready_file = prefix + "_ready"
+            log_file = prefix + ".log"
+            meta_file = prefix + ".meta"
+            print("[DEBUG] Backend bind failed; retrying on port " + port + "\n")
         }
-        print("[DEBUG] Health check completed after " + int_to_string(attempts) + " attempts\n")
-        if !backend_ready(host, port_number) {
+        if !backend_started {
             print("error: NeurX S backend failed to start; log: " + log_file + "\n")
             print("Backend startup command: " + launch + "\n")
             return 1
@@ -370,11 +452,15 @@ func main() {
             print("error: native inference request failed; log: " + log_file + "\n\n")
             continue
         }
-        if len(trim(response)) == 0 {
+        string assistant_text = extract_json_string(response, "output")
+        if len(assistant_text) == 0 {
+            assistant_text = response
+        }
+        if len(trim(assistant_text)) == 0 {
             print("error: model returned an empty response\n\n")
             continue
         }
-        print("Assistant: " + response + "\n\n")
-        history = prompt + response + "<|im_end|>\n"
+        print("Assistant: " + assistant_text + "\n\n")
+        history = prompt + assistant_text + "<|im_end|>\n"
     }
 }
