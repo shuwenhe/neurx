@@ -14,9 +14,12 @@ extern func runtime_env_get(string key, string default_value) string
 extern func runtime_file_exists(string path) bool
 
 func int_to_string(int value) string {
-    if value == 0 {
-        return "0"
-    }
+    if value == 0 { return "0" }
+    if value == 1 { return "1" }
+    if value == 2 { return "2" }
+    if value == 24 { return "24" }
+    if value == 896 { return "896" }
+    if value == 18083 { return "18083" }
     string result = ""
     int current = value
     if current < 0 {
@@ -24,19 +27,50 @@ func int_to_string(int value) string {
     }
     while current > 0 {
         int digit = current - (current / 10) * 10
-        result = string(48 + digit) + result
+        if digit == 0 { result = "0" + result }
+        else if digit == 1 { result = "1" + result }
+        else if digit == 2 { result = "2" + result }
+        else if digit == 3 { result = "3" + result }
+        else if digit == 4 { result = "4" + result }
+        else if digit == 5 { result = "5" + result }
+        else if digit == 6 { result = "6" + result }
+        else if digit == 7 { result = "7" + result }
+        else if digit == 8 { result = "8" + result }
+        else if digit == 9 { result = "9" + result }
         current = current / 10
     }
-    if value < 0 {
-        return "-" + result
-    }
+    if value < 0 { return "-" + result }
     return result
 }
 
 func gpu_available() bool {
     string cuda_path = runtime_env_get("CUDA_HOME", "/usr/local/cuda")
-    return runtime_file_exists(cuda_path + "/lib64/libcudart.so") || 
-           runtime_file_exists(cuda_path + "/lib/libcudart.so")
+    
+    // Check standard CUDA paths
+    if runtime_file_exists(cuda_path + "/lib64/libcudart.so") {
+        return true
+    }
+    if runtime_file_exists(cuda_path + "/lib/libcudart.so") {
+        return true
+    }
+    
+    // Check Debian/Ubuntu paths
+    if runtime_file_exists("/usr/lib/x86_64-linux-gnu/libcudart.so") {
+        return true
+    }
+    if runtime_file_exists("/usr/lib/libcudart.so") {
+        return true
+    }
+    
+    // Check if nvcc is available
+    if runtime_file_exists("/usr/bin/nvcc") {
+        return true
+    }
+    if runtime_file_exists("/usr/local/cuda/bin/nvcc") {
+        return true
+    }
+    
+    return false
 }
 
 func gpu_device_info() string {
@@ -198,7 +232,7 @@ func main() {
     print("\nBackend Status: ✓ READY\n")
     print("Execution Mode: Pure S Language + GPU Acceleration ⚡\n\n")
     
-    int listener_fd = __sys_socket(2, 1, 0)
+    int listener_fd = __sys_socket(2, 1, 6)
     if listener_fd < 0 {
         print("ERROR: Socket creation failed\n")
         return

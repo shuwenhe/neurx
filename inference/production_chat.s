@@ -297,7 +297,12 @@ func main() {
     
     string default_backend = root + "/artifacts/build/production_s_inference/cpu_backend.ir"
     if device_type == "gpu" {
-        default_backend = root + "/artifacts/build/production_s_inference/gpu_backend.ir"
+        string gpu_enhanced = runtime_env_get("NEURX_GPU_ENHANCED", "false")
+        if gpu_enhanced == "true" {
+            default_backend = root + "/artifacts/build/production_s_inference/gpu_backend_enhanced.ir"
+        } else {
+            default_backend = root + "/artifacts/build/production_s_inference/gpu_backend.ir"
+        }
     }
     
     string backend = runtime_env_get(
@@ -362,9 +367,6 @@ func main() {
                     if len(debug_response) > 0 {
                         print("[DEBUG] Response preview: " + __host_slice(debug_response, 0, 200) + "\n")
                     }
-                }
-                if attempts % 10 == 0 {
-                    print("[DEBUG] Health check attempt " + int_to_string(attempts) + "/" + int_to_string(max_attempts) + "\n")
                 }
                 if backend_failed_to_bind(log_file) {
                     print("[DEBUG] Backend reported socket bind failure on port " + port + "\n")

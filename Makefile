@@ -60,6 +60,7 @@ POSTTRAIN_SFT_TRAIN_PROBE := $(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_lora_train_pr
 PRODUCTION_S_INFERENCE_DIR := $(CURDIR_UNIX)/artifacts/build/production_s_inference
 PRODUCTION_S_BACKEND := $(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir
 PRODUCTION_S_GPU_BACKEND := $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir
+PRODUCTION_S_GPU_BACKEND_ENHANCED := $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir
 PRODUCTION_S_CHAT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat.ir
 PRODUCTION_S_CHAT_DIRECT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat_direct.ir
 PRODUCTION_S_CHAT_ENHANCED_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat_enhanced.ir
@@ -915,6 +916,15 @@ $(PRODUCTION_S_GPU_BACKEND): inference/native/production_gpu_backend.s | $(PRODU
 	@echo "✓ GPU backend compiled: $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir"
 	@touch '$(PRODUCTION_S_GPU_BACKEND)'
 
+$(PRODUCTION_S_GPU_BACKEND_ENHANCED): inference/native/production_gpu_backend_enhanced.s | $(PRODUCTION_S_INFERENCE_DIR)
+	@echo "🔧 Building NeurX GPU Backend Enhanced (Real Inference + Streaming MatMul)..."
+	@$(S_SEED_COMPILER) inference/native/production_gpu_backend_enhanced.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir' || { \
+		echo "❌ GPU Backend Enhanced compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ GPU backend enhanced compiled: $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir"
+	@touch '$(PRODUCTION_S_GPU_BACKEND_ENHANCED)'
+
 $(PRODUCTION_S_CHAT_IR): inference/production_chat.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "Compiling production chat control plane in S..."
 	@$(S_SEED_COMPILER) inference/production_chat.s '$(PRODUCTION_S_CHAT_IR)'
@@ -927,7 +937,7 @@ $(PRODUCTION_S_CHAT_ENHANCED_IR): inference/production_chat_enhanced.s | $(PRODU
 	@echo "Compiling enhanced production chat (multi-domain knowledge)..."
 	@$(S_SEED_COMPILER) inference/production_chat_enhanced.s '$(PRODUCTION_S_CHAT_ENHANCED_IR)'
 
-build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUCTION_S_GPU_BACKEND) $(PRODUCTION_S_CHAT_IR) $(PRODUCTION_S_CHAT_DIRECT_IR) $(PRODUCTION_S_CHAT_ENHANCED_IR)
+build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUCTION_S_GPU_BACKEND) $(PRODUCTION_S_GPU_BACKEND_ENHANCED) $(PRODUCTION_S_CHAT_IR) $(PRODUCTION_S_CHAT_DIRECT_IR) $(PRODUCTION_S_CHAT_ENHANCED_IR)
 	@test -f '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir'
 	@test -f '$(PRODUCTION_S_CHAT_IR)'
 	@test -f '$(PRODUCTION_S_CHAT_DIRECT_IR)'
