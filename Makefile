@@ -59,6 +59,7 @@ POSTTRAIN_SFT_FORWARD_PROBE := $(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_forward_pro
 POSTTRAIN_SFT_TRAIN_PROBE := $(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_lora_train_probe$(BIN_EXT)
 PRODUCTION_S_INFERENCE_DIR := $(CURDIR_UNIX)/artifacts/build/production_s_inference
 PRODUCTION_S_BACKEND := $(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir
+PRODUCTION_S_GPU_BACKEND := $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir
 PRODUCTION_S_CHAT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat.ir
 PRODUCTION_S_CHAT_DIRECT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat_direct.ir
 PRODUCTION_S_CHAT_ENHANCED_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat_enhanced.ir
@@ -905,6 +906,15 @@ $(PRODUCTION_S_BACKEND): inference/native/production_cpu_backend.s | $(PRODUCTIO
 	@echo "✓ CPU backend compiled: $(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir"
 	@touch '$(PRODUCTION_S_BACKEND)'
 
+$(PRODUCTION_S_GPU_BACKEND): inference/native/production_gpu_backend.s | $(PRODUCTION_S_INFERENCE_DIR)
+	@echo "🔧 Building NeurX GPU Backend (Pure S Language + GPU Acceleration)..."
+	@$(S_SEED_COMPILER) inference/native/production_gpu_backend.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir' || { \
+		echo "❌ GPU Backend compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ GPU backend compiled: $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir"
+	@touch '$(PRODUCTION_S_GPU_BACKEND)'
+
 $(PRODUCTION_S_CHAT_IR): inference/production_chat.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "Compiling production chat control plane in S..."
 	@$(S_SEED_COMPILER) inference/production_chat.s '$(PRODUCTION_S_CHAT_IR)'
@@ -917,7 +927,7 @@ $(PRODUCTION_S_CHAT_ENHANCED_IR): inference/production_chat_enhanced.s | $(PRODU
 	@echo "Compiling enhanced production chat (multi-domain knowledge)..."
 	@$(S_SEED_COMPILER) inference/production_chat_enhanced.s '$(PRODUCTION_S_CHAT_ENHANCED_IR)'
 
-build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUCTION_S_CHAT_IR) $(PRODUCTION_S_CHAT_DIRECT_IR) $(PRODUCTION_S_CHAT_ENHANCED_IR)
+build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUCTION_S_GPU_BACKEND) $(PRODUCTION_S_CHAT_IR) $(PRODUCTION_S_CHAT_DIRECT_IR) $(PRODUCTION_S_CHAT_ENHANCED_IR)
 	@test -f '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir'
 	@test -f '$(PRODUCTION_S_CHAT_IR)'
 	@test -f '$(PRODUCTION_S_CHAT_DIRECT_IR)'
@@ -932,7 +942,8 @@ chat-cpu: build-real-model-chat-s
 		exit 1; \
 	}
 	@mkdir -p /tmp
-	@NEURX_ROOT='$(CURDIR_UNIX)' \
+	S_IR_RUNNER_EXIT_ON_PARENT_DEATH=1 \
+	NEURX_ROOT='$(CURDIR_UNIX)' \
 		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
 		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
 		NEURX_INFER_DEVICE='cpu' \
@@ -948,7 +959,7 @@ chat-gpu: build-real-model-chat-s
 		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
 		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
 		NEURX_INFER_DEVICE='gpu' \
-		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_ENHANCED_IR)'
+		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_IR)'
 
 chat-npu: build-real-model-chat-s
 	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \

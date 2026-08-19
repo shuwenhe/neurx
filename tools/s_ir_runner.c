@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "../../s/src/cmd/compile/seed/error/error.h"
 #include "../../s/src/cmd/compile/seed/runtime/memory.h"
+#include <signal.h>
+#include <sys/prctl.h>
 static void print_compile_error(const compile_error *err) {
     if (!err || !error_is_set(err)) {
         return;
@@ -28,6 +30,16 @@ int main(int argc, char **argv) {
     long ret = 0;
     const char *ir_path = NULL;
     const char *entry = "main";
+    /* Optionally ensure this process gets terminated when its parent dies (e.g., make exited via Ctrl+C).
+       Enable by setting environment variable S_IR_RUNNER_EXIT_ON_PARENT_DEATH=1. Default: disabled to preserve
+       behavior for detached/nohup usage. */
+    const char *pdeath = getenv("S_IR_RUNNER_EXIT_ON_PARENT_DEATH");
+    if (pdeath && pdeath[0] == '1') {
+        prctl(PR_SET_PDEATHSIG, SIGTERM);
+        /* Restore default handlers so SIGINT/SIGTERM terminate the process */
+        signal(SIGINT, SIG_DFL);
+        signal(SIGTERM, SIG_DFL);
+    }
     setvbuf(stdout, NULL, _IOLBF, 0);
     setvbuf(stderr, NULL, _IONBF, 0);
     error_clear(&err);

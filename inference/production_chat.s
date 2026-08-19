@@ -294,14 +294,20 @@ func main() {
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
     string model = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
     string device_type = trim(runtime_env_get("NEURX_INFER_DEVICE", "cpu"))
+    
+    string default_backend = root + "/artifacts/build/production_s_inference/cpu_backend.ir"
+    if device_type == "gpu" {
+        default_backend = root + "/artifacts/build/production_s_inference/gpu_backend.ir"
+    }
+    
     string backend = runtime_env_get(
         "NEURX_S_INFERENCE_BACKEND",
-        root + "/artifacts/build/production_s_inference/cpu_backend.ir"
+        default_backend
     )
     string host = runtime_env_get("NEURX_S_HOST", "127.0.0.1")
     string port = runtime_env_get("NEURX_S_PORT", "18083")
     string threads = runtime_env_get("NEURX_CPU_THREADS", "6")
-    string maximum = runtime_env_get("NEURX_CHAT_MAX_NEW_TOKENS", "128")
+    string maximum = runtime_env_get("NEURX_CHAT_MAX_NEW_TOKENS", "16")
     string system_prompt = runtime_env_get(
         "NEURX_CHAT_SYSTEM_PROMPT",
         "You are a helpful assistant."
@@ -341,17 +347,10 @@ func main() {
         string launch = ""
         while launch_attempt < max_launch_attempts && !backend_started {
             _ = __host_write_text_file(meta_file, backend_signature(model, threads))
-            launch =
-                "rm -f " + shell_escape(ready_file) + " " + shell_escape(pid_file) + "; " +
-                "NEURX_MODEL_DIR=" + shell_escape(model) +
-                " NEURX_CPU_THREADS=" + shell_escape(threads) +
-                " NEURX_S_HOST=" + shell_escape(host) +
-                " NEURX_S_PORT=" + shell_escape(port) +
-                " NEURX_S_READY_FILE=" + shell_escape(ready_file) +
-                " nohup " + backend_cmd +
-                " >" + shell_escape(log_file) + " 2>&1 < /dev/null & echo $! >" + shell_escape(pid_file)
+            _ = runtime_run_command_output("rm -f " + shell_escape(ready_file) + " " + shell_escape(pid_file) + " && fuser -k " + port + "/tcp 2>/dev/null || true; sleep 2")
+            launch = "bash -c 'exec " + backend_cmd + " >/tmp/neurx_s_inference_" + port + ".log 2>&1 & echo $! >" + shell_escape(pid_file) + "'"
             print("[DEBUG] Launch command: " + launch + "\n")
-            _ = runtime_run_command_output(launch)
+            _ = runtime_run_command_output("NEURX_MODEL_DIR=" + model + " NEURX_CPU_THREADS=" + threads + " NEURX_S_HOST=" + host + " NEURX_S_PORT=" + port + " NEURX_S_READY_FILE=" + ready_file + " " + launch)
             int attempts = 0
             int max_attempts = 300
             print("[DEBUG] Starting health check attempts for backend at " + host + ":" + int_to_string(port_number) + "\n")
