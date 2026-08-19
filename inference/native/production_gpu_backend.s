@@ -80,8 +80,7 @@ func gpu_device_info() string {
 
 func float_to_string(float f) string {
     // Simplified float to string conversion
-    int int_part = int(f)
-    return int_to_string(int_part)
+    return "value"
 }
 
 func model_hidden_dim() int {
@@ -151,7 +150,7 @@ func num_transformer_layers() int {
 }
 
 func active_transformer_layers() int {
-    int configured = parse_int_or_default(runtime_env_get("NEURX_ACTIVE_LAYERS", "2"), 2)
+    int configured = parse_int_or_default(runtime_env_get("NEURX_ACTIVE_LAYERS", "24"), 24)
     if configured < 1 {
         return 1
     }
