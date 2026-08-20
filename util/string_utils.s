@@ -170,7 +170,6 @@ func int_to_string(int num) string {
     return result
 }
 
-
 func string_join([]string parts, string separator) string {
     string result = ""
     int i = 0

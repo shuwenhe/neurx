@@ -49,7 +49,6 @@ func create_default_config() download_config {
     }
 }
 
-
 func string_slice(string text, int start, int end) string {
     string result = ""
     int i = start

@@ -1,4 +1,3 @@
-
 package neurx.multimodal.vision_encoder
 
 import (

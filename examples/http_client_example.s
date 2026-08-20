@@ -32,23 +32,23 @@ func int_to_string(int value) string {
     if value == 0 {
         return "0"
     }
-    
+
     string digits = "0123456789"
     string result = ""
     int n = value
-    
+
     if n < 0 {
         result = "-"
         n = 0 - n
     }
-    
+
     string temp = ""
     while n > 0 {
         int digit = n % 10
         temp = string_index(digits, digit) + temp
         n = n / 10
     }
-    
+
     result + temp
 }
 
@@ -119,7 +119,7 @@ func http_request_to_server(string host, int port, string path) result[http_resp
 func main() {
     println("NeurX HTTP Client Example")
     println("Connecting to 127.0.0.1:18083...")
-    
+
     switch http_request_to_server("127.0.0.1", 18083, "/api/chat") {
         result::ok(response) : {
             println("[HTTP] Response received")

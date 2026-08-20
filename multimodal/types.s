@@ -1,4 +1,3 @@
-
 package neurx.multimodal.types
 
 import "neurx.tensor.types"

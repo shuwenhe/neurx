@@ -1,4 +1,3 @@
-
 package neurx.parser.text_parser
 
 use neurx.parser.types

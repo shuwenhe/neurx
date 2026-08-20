@@ -1,4 +1,3 @@
-
 package neurx.parser.stream_parser
 
 use neurx.parser.types

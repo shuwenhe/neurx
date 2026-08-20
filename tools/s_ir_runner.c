@@ -30,13 +30,11 @@ int main(int argc, char **argv) {
     long ret = 0;
     const char *ir_path = NULL;
     const char *entry = "main";
-    /* Optionally ensure this process gets terminated when its parent dies (e.g., make exited via Ctrl+C).
-       Enable by setting environment variable S_IR_RUNNER_EXIT_ON_PARENT_DEATH=1. Default: disabled to preserve
-       behavior for detached/nohup usage. */
+
     const char *pdeath = getenv("S_IR_RUNNER_EXIT_ON_PARENT_DEATH");
     if (pdeath && pdeath[0] == '1') {
         prctl(PR_SET_PDEATHSIG, SIGTERM);
-        /* Restore default handlers so SIGINT/SIGTERM terminate the process */
+
         signal(SIGINT, SIG_DFL);
         signal(SIGTERM, SIG_DFL);
     }

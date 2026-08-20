@@ -294,7 +294,7 @@ func main() {
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
     string model = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
     string device_type = trim(runtime_env_get("NEURX_INFER_DEVICE", "cpu"))
-    
+
     string default_backend = root + "/artifacts/build/production_s_inference/cpu_backend.ir"
     if device_type == "gpu" {
         string gpu_enhanced = runtime_env_get("NEURX_GPU_ENHANCED", "false")
@@ -304,7 +304,7 @@ func main() {
             default_backend = root + "/artifacts/build/production_s_inference/gpu_backend.ir"
         }
     }
-    
+
     string backend = runtime_env_get(
         "NEURX_S_INFERENCE_BACKEND",
         default_backend

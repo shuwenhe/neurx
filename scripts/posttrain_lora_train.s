@@ -1161,7 +1161,6 @@ func find_substring(string text, string pattern) int {
     -1
 }
 
-
 func make_shape(int a, int b) []int {
     []int shape = []int{cap: 2}
     shape[0] = a

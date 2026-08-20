@@ -64,6 +64,8 @@ PRODUCTION_S_GPU_BACKEND_ENHANCED := $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_e
 PRODUCTION_S_CHAT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat.ir
 PRODUCTION_S_CHAT_DIRECT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat_direct.ir
 PRODUCTION_S_CHAT_ENHANCED_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat_enhanced.ir
+PRODUCTION_S_CHAT_CLIENT_IR := $(PRODUCTION_S_INFERENCE_DIR)/chat_client.ir
+WAIT_BACKEND_READY_IR := $(PRODUCTION_S_INFERENCE_DIR)/wait_backend_ready.ir
 NEURX_CPU_THREADS ?= 6
 CUDA_NVCC ?= $(shell command -v nvcc 2>/dev/null)
 CUDA_TRAIN_BRIDGE_SRC := $(CURDIR_UNIX)/cuda/neurx_transformer_train_v2.cu
@@ -904,6 +906,10 @@ $(PRODUCTION_S_BACKEND): inference/native/production_cpu_backend.s | $(PRODUCTIO
 		echo "❌ Backend compilation failed!"; \
 		exit 1; \
 	}
+	@test -s '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' || { \
+		echo "❌ CPU Backend IR file is empty!"; \
+		exit 1; \
+	}
 	@echo "✓ CPU backend compiled: $(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir"
 	@touch '$(PRODUCTION_S_BACKEND)'
 
@@ -911,6 +917,10 @@ $(PRODUCTION_S_GPU_BACKEND): inference/native/production_gpu_backend.s | $(PRODU
 	@echo "🔧 Building NeurX GPU Backend (Pure S Language + GPU Acceleration)..."
 	@$(S_SEED_COMPILER) inference/native/production_gpu_backend.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir' || { \
 		echo "❌ GPU Backend compilation failed!"; \
+		exit 1; \
+	}
+	@test -s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir' || { \
+		echo "❌ GPU Backend IR file is empty!"; \
 		exit 1; \
 	}
 	@echo "✓ GPU backend compiled: $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir"
@@ -922,54 +932,143 @@ $(PRODUCTION_S_GPU_BACKEND_ENHANCED): inference/native/production_gpu_backend_en
 		echo "❌ GPU Backend Enhanced compilation failed!"; \
 		exit 1; \
 	}
+	@test -s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir' || { \
+		echo "❌ GPU Backend Enhanced IR file is empty!"; \
+		exit 1; \
+	}
 	@echo "✓ GPU backend enhanced compiled: $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir"
 	@touch '$(PRODUCTION_S_GPU_BACKEND_ENHANCED)'
 
 $(PRODUCTION_S_CHAT_IR): inference/production_chat.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "Compiling production chat control plane in S..."
-	@$(S_SEED_COMPILER) inference/production_chat.s '$(PRODUCTION_S_CHAT_IR)'
+	@$(S_SEED_COMPILER) inference/production_chat.s '$(PRODUCTION_S_CHAT_IR)' || { \
+		echo "❌ Production Chat IR compilation failed!"; \
+		exit 1; \
+	}
+	@test -s '$(PRODUCTION_S_CHAT_IR)' || { \
+		echo "❌ Production Chat IR file is empty!"; \
+		exit 1; \
+	}
+	@echo "✓ Production Chat IR compiled: $(PRODUCTION_S_CHAT_IR)"
 
 $(PRODUCTION_S_CHAT_DIRECT_IR): inference/production_chat_direct.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "Compiling direct production chat (no HTTP backend)..."
-	@$(S_SEED_COMPILER) inference/production_chat_direct.s '$(PRODUCTION_S_CHAT_DIRECT_IR)'
+	@$(S_SEED_COMPILER) inference/production_chat_direct.s '$(PRODUCTION_S_CHAT_DIRECT_IR)' || { \
+		echo "❌ Production Chat Direct IR compilation failed!"; \
+		exit 1; \
+	}
+	@test -s '$(PRODUCTION_S_CHAT_DIRECT_IR)' || { \
+		echo "❌ Production Chat Direct IR file is empty!"; \
+		exit 1; \
+	}
+	@echo "✓ Production Chat Direct IR compiled: $(PRODUCTION_S_CHAT_DIRECT_IR)"
 
 $(PRODUCTION_S_CHAT_ENHANCED_IR): inference/production_chat_enhanced.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "Compiling enhanced production chat (multi-domain knowledge)..."
-	@$(S_SEED_COMPILER) inference/production_chat_enhanced.s '$(PRODUCTION_S_CHAT_ENHANCED_IR)'
+	@$(S_SEED_COMPILER) inference/production_chat_enhanced.s '$(PRODUCTION_S_CHAT_ENHANCED_IR)' || { \
+		echo "❌ Production Chat Enhanced IR compilation failed!"; \
+		exit 1; \
+	}
+	@test -s '$(PRODUCTION_S_CHAT_ENHANCED_IR)' || { \
+		echo "❌ Production Chat Enhanced IR file is empty!"; \
+		exit 1; \
+	}
+	@echo "✓ Production Chat Enhanced IR compiled: $(PRODUCTION_S_CHAT_ENHANCED_IR)"
 
-build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUCTION_S_GPU_BACKEND) $(PRODUCTION_S_GPU_BACKEND_ENHANCED) $(PRODUCTION_S_CHAT_IR) $(PRODUCTION_S_CHAT_DIRECT_IR) $(PRODUCTION_S_CHAT_ENHANCED_IR)
+$(PRODUCTION_S_CHAT_CLIENT_IR): inference/chat_client.s | $(PRODUCTION_S_INFERENCE_DIR)
+	@echo "Compiling chat client (pure S)..."
+	@$(S_SEED_COMPILER) inference/chat_client.s '$(PRODUCTION_S_CHAT_CLIENT_IR)' || { \
+		echo "❌ Chat Client IR compilation failed!"; \
+		exit 1; \
+	}
+	@test -s '$(PRODUCTION_S_CHAT_CLIENT_IR)' || { \
+		echo "❌ Chat Client IR file is empty!"; \
+		exit 1; \
+	}
+	@echo "✓ Chat Client IR compiled: $(PRODUCTION_S_CHAT_CLIENT_IR)"
+
+$(WAIT_BACKEND_READY_IR): inference/native/wait_backend_ready.s | $(PRODUCTION_S_INFERENCE_DIR)
+	@echo "Compiling health check (pure S)..."
+	@$(S_SEED_COMPILER) inference/native/wait_backend_ready.s '$(WAIT_BACKEND_READY_IR)' || { \
+		echo "❌ Health check IR compilation failed!"; \
+		exit 1; \
+	}
+	@test -s '$(WAIT_BACKEND_READY_IR)' || { \
+		echo "❌ Health check IR file is empty!"; \
+		exit 1; \
+	}
+	@echo "✓ Health check IR compiled: $(WAIT_BACKEND_READY_IR)"
+
+build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUCTION_S_GPU_BACKEND) $(PRODUCTION_S_GPU_BACKEND_ENHANCED) $(PRODUCTION_S_CHAT_IR) $(PRODUCTION_S_CHAT_DIRECT_IR) $(PRODUCTION_S_CHAT_ENHANCED_IR) $(PRODUCTION_S_CHAT_CLIENT_IR) $(WAIT_BACKEND_READY_IR)
 	@test -f '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir'
 	@test -f '$(PRODUCTION_S_CHAT_IR)'
 	@test -f '$(PRODUCTION_S_CHAT_DIRECT_IR)'
 	@test -f '$(PRODUCTION_S_CHAT_ENHANCED_IR)'
+	@test -f '$(PRODUCTION_S_CHAT_CLIENT_IR)'
 	@echo "✓ NeurX production S inference ready (pure S backend + all chat variants)"
 
 build-real-model-chat-s: build-production-s-inference
 
-chat-cpu: build-real-model-chat-s
-	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' -o -f '$(CHAT_MODEL_PATH)/model.safetensors.index.json' || { \
-		echo "Model weights not found in $(CHAT_MODEL_PATH) (neither model.safetensors nor sharded model)"; \
-		exit 1; \
-	}
-	@mkdir -p /tmp
-	S_IR_RUNNER_EXIT_ON_PARENT_DEATH=1 \
-	NEURX_ROOT='$(CURDIR_UNIX)' \
-		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
-		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
-		NEURX_INFER_DEVICE='cpu' \
-		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_IR)'
+chat-gpu: build-production-s-inference chat-gpu-run
 
-chat-gpu: build-real-model-chat-s
+chat-gpu: build-production-s-inference chat-gpu-run
+
+chat-gpu-run:
+	@echo "🚀 GPU-accelerated chat interface (NVIDIA GPU Inference)"
+	@echo "   Backend: 127.0.0.1:18083 | Model: Qwen2.5-0.5B-Instruct"
+	@echo "   ⏳ Starting backend with smart health check..."
+	@pkill -9 s_ir_runner 2>/dev/null || true
+	@sleep 2
+	@
+	@for i in 1 2 3 4 5; do lsof -i :18083 >/dev/null 2>&1 && sleep 1 || break; done
+	@
+	@bash -c '\
+		NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct NEURX_INFER_DEVICE=gpu NEURX_S_PORT=18083 NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir" >/tmp/neurx_gpu_backend.log 2>&1 & \
+		"$(S_RUNNER_BIN)" "$(WAIT_BACKEND_READY_IR)"; \
+		sleep 2; \
+		NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct NEURX_INFER_DEVICE=gpu NEURX_S_PORT=18083 NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_CHAT_CLIENT_IR)"; \
+	'
+
+chat-gpu-native: build-production-s-inference
+	@echo "🚀 GPU-accelerated chat interface (NVIDIA GPU Inference - Native)"
+	@echo "   Backend: 127.0.0.1:18083 | Model: Qwen2.5-0.5B-Instruct"
+	@echo "   Note: GPU backend may fail with socket binding issues"
+	@pkill -9 s_ir_runner 2>/dev/null || true
+	@sleep 3
+	@echo "   Waiting for OS to release port 18083..."
+	@for i in 1 2 3 4 5 6 7; do if lsof -i :18083 >/dev/null 2>&1; then sleep 1; else break; fi; done
+	@echo "   Initializing GPU backend..."
+	NEURX_ROOT=$(CURDIR_UNIX) \
+	NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct \
+	NEURX_INFER_DEVICE=gpu \
+	NEURX_S_PORT=18083 \
+	NEURX_S_HOST=127.0.0.1 \
+	NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) \
+	bash -c '"$(S_RUNNER_BIN)" "$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir" >/tmp/neurx_gpu_backend.log 2>&1 & BACKEND_PID=$$!; sleep 15; if ! lsof -i :18083 >/dev/null 2>&1; then echo "ERROR: GPU Backend socket binding failed."; kill $$BACKEND_PID 2>/dev/null; exit 1; fi; NEURX_S_PORT=18083 NEURX_S_HOST=127.0.0.1 "$(S_RUNNER_BIN)" "$(PRODUCTION_S_CHAT_CLIENT_IR)"'
+
+chat-cpu: build-production-s-inference
 	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' -o -f '$(CHAT_MODEL_PATH)/model.safetensors.index.json' || { \
 		echo "Model weights not found in $(CHAT_MODEL_PATH) (neither model.safetensors nor sharded model)"; \
 		exit 1; \
 	}
 	@mkdir -p /tmp
+	@pkill -f "s_ir_runner.*cpu_backend" || true
+	@sleep 1
+	@echo "🚀 Starting CPU backend service in background..."
+	@NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
+		NEURX_CPU_THREADS='$(NEURX_CPU_THREADS)' \
+		NEURX_INFER_DEVICE='cpu' \
+		NEURX_S_PORT='18084' \
+		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' >/tmp/neurx_cpu_backend.log 2>&1 &
+	@sleep 6
+	@echo ""
 	@NEURX_ROOT='$(CURDIR_UNIX)' \
 		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
 		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
-		NEURX_INFER_DEVICE='gpu' \
-		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_IR)'
+		NEURX_S_HOST='127.0.0.1' \
+		NEURX_S_PORT='18084' \
+		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_CLIENT_IR)'
 
 chat-npu: build-real-model-chat-s
 	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \

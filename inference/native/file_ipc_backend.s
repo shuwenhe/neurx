@@ -1,5 +1,4 @@
 use std.conv.int_to_string
-
 package neurx.inference.file_backend
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
@@ -74,4 +73,3 @@ func main() {
         }
     }
 }
-

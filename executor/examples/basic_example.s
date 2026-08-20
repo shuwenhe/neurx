@@ -1,4 +1,3 @@
-
 import "types.s"
 import "executor_base.s"
 import "prefill_executor.s"
@@ -9,7 +8,6 @@ import "distributed_executor.s"
 
 func BasicExecutorExample() {
     println("=== Basic Executor Example ===")
-
 
     config := ExecutorConfig{
         executor_id: 0,
@@ -23,14 +21,12 @@ func BasicExecutorExample() {
         timeout_ms: DEFAULT_ITERATION_TIMEOUT,
     }
 
-
     executor := NewBaseExecutor(config)
     result := executor.Initialize()
 
     if result.success == 1 {
         println("Executor initialized successfully")
     }
-
 
     for i := 0; i < 10; i++ {
         sequence_id := "seq_" + string(i)
@@ -39,7 +35,6 @@ func BasicExecutorExample() {
 
     println("Active sequences:", executor.sequence_count)
 
-
     for iter := 0; iter < 3; iter++ {
         result := executor.ExecuteIteration()
         if result.success == 1 {
@@ -47,12 +42,10 @@ func BasicExecutorExample() {
         }
     }
 
-
     stats := executor.GetStatistics()
     println("Total iterations:", stats.completed_iterations)
     println("Total tokens:", stats.total_tokens)
     println("Avg latency:", stats.avg_latency, "ms")
-
 
     executor.Shutdown()
     println("Executor shutdown\n")
@@ -77,7 +70,6 @@ func PrefillExecutorExample() {
     prefill := NewPrefillExecutor(config, prefill_config)
     prefill.Initialize()
 
-
     sequences := make([]string, 8)
     prompt_tokens := make([]i32, 8)
 
@@ -85,7 +77,6 @@ func PrefillExecutorExample() {
         sequences[i] = "prompt_" + string(i)
         prompt_tokens[i] = 128 + i*16
     }
-
 
     result := prefill.ProcessPrefill(sequences, prompt_tokens)
 
@@ -118,13 +109,11 @@ func DecodeExecutorExample() {
     decoder := NewDecodeExecutor(config, decode_config)
     decoder.Initialize()
 
-
     sequences := make([]string, 32)
     for i := 0; i < 32; i++ {
         sequences[i] = "generation_" + string(i)
         decoder.base.AddSequence(sequences[i], 0)
     }
-
 
     for step := 0; step < 5; step++ {
         result := decoder.ProcessDecodeStep(sequences)
@@ -144,7 +133,6 @@ func ExecutionSchedulerExample() {
 
     scheduler := NewExecutionScheduler(SCHEDULE_DYNAMIC)
 
-
     for i := 0; i < 16; i++ {
         if i % 2 == 0 {
             scheduler.AddPrefillSequence("prefill_" + string(i))
@@ -154,7 +142,6 @@ func ExecutionSchedulerExample() {
     }
 
     println("Pending sequences:", scheduler.GetPendingSequenceCount())
-
 
     for iter := 0; iter < 3; iter++ {
         schedule := scheduler.PlanIteration(128, 256)
@@ -178,7 +165,6 @@ func KVCacheExample() {
 
     println("Total cache:", cache_manager.total_size_gb, "GB")
 
-
     for i := 0; i < 4; i++ {
         seq_id := "seq_" + string(i)
         result := cache_manager.AllocateBlock(seq_id, 0, 256)
@@ -191,7 +177,6 @@ func KVCacheExample() {
     println("Allocated:", cache_manager.allocated_mb, "MB")
     println("Free:", cache_manager.free_mb, "MB")
     println("Utilization:", cache_manager.GetCacheUtilization(), "%")
-
 
     cache_manager.FreeSequenceBlocks("seq_0")
     println("After freeing seq_0:")
@@ -219,7 +204,6 @@ func PrefillDecodeIterationExample() {
 
     scheduler := NewExecutionScheduler(SCHEDULE_DYNAMIC)
 
-
     for i := 0; i < 16; i++ {
         scheduler.AddPrefillSequence("prompt_" + string(i))
         executor.AddSequence("prompt_" + string(i), 0)
@@ -231,7 +215,6 @@ func PrefillDecodeIterationExample() {
     println("Iteration 1: Prefill focus")
     println("  Prefill sequences:", schedule1.prefill_count)
     println("  Tokens processed:", result1.tokens_processed)
-
 
     for i := 16; i < 24; i++ {
         scheduler.AddPrefillSequence("prompt_" + string(i))
@@ -276,11 +259,9 @@ func DistributedExecutorExample() {
         println("Tensor parallel:", dist_executor.tensor_parallel_size)
     }
 
-
     for i := 0; i < 16; i++ {
         dist_executor.base.AddSequence("seq_" + string(i), 0)
     }
-
 
     sequences := make([]string, 16)
     for i := 0; i < 16; i++ {
@@ -292,7 +273,6 @@ func DistributedExecutorExample() {
     for rank := 0; rank < len(balanced); rank++ {
         println("  Rank", rank, ":", len(balanced[rank]), "sequences")
     }
-
 
     result = dist_executor.ExecuteDistributedIteration()
     if result.success == 1 {

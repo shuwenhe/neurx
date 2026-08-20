@@ -1,4 +1,3 @@
-
 .PHONY: all build-cuda build-trainer train-gpu clean help
 
 NEURX_ROOT ?= $(CURDIR)

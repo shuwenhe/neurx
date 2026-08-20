@@ -240,7 +240,6 @@ func string_from_char(c: int) string {
     return result
 }
 
-
 func create_string_schema(min_len: int, max_len: int, pattern: string) json_schema {
     let schema = schema_types.create_empty_schema()
     schema.type_name = schema_types.TYPE_STRING

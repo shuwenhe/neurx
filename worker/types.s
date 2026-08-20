@@ -1,4 +1,3 @@
-
 const (
 
     WORKER_STATE_IDLE       = 0

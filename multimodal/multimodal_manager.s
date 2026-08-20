@@ -1,4 +1,3 @@
-
 package neurx.multimodal.multimodal_manager
 
 import (

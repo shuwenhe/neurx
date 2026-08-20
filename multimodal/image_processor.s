@@ -1,4 +1,3 @@
-
 package neurx.multimodal.image_processor
 
 import (

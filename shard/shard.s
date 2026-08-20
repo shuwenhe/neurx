@@ -34,7 +34,6 @@ func trim(string s) string {
     out
 }
 
-
 func shell_escape(string s) string {
     string out = "'"
     int i = 0

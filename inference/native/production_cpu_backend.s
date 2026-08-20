@@ -1,7 +1,5 @@
 package neurx.inference.cpu_backend
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
-
 extern "intrinsic" func __sys_write_string(int fd, string data) int
 extern "intrinsic" func __sys_close(int fd) int
 extern "intrinsic" func __sys_socket(int domain, int typ, int proto) int
@@ -97,7 +95,6 @@ func bf16_to_float(int raw) float {
     int sign = raw / 32768
     int exponent = (raw / 128) % 256
     int mantissa = raw % 128
-
     if exponent == 0 {
         if mantissa == 0 {
             return 0.0
@@ -108,11 +105,9 @@ func bf16_to_float(int raw) float {
         }
         return subnormal
     }
-
     if exponent == 255 {
         return 0.0
     }
-
     float value = (1.0 + float(mantissa) / 128.0) * pow2_int(exponent - 127)
     if sign == 1 {
         return 0.0 - value
@@ -150,11 +145,9 @@ func string_contains(string haystack, string needle) bool {
     if len(haystack) < len(needle) {
         return false
     }
-    
     int hay_len = len(haystack)
     int needle_len = len(needle)
     int i = 0
-    
     while i <= hay_len - needle_len {
         bool matches = true
         int j = 0
@@ -169,7 +162,6 @@ func string_contains(string haystack, string needle) bool {
         }
         i = i + 1
     }
-    
     return false
 }
 
@@ -352,7 +344,6 @@ struct weight_cache {
     int miss_count
     bool enabled
 }
-
 var g_cache_tensors []cached_tensor
 var g_cache_count int = 0
 var g_cache_capacity int = 2000
@@ -421,27 +412,22 @@ func float_to_string_simple(float value) string {
 func load_shard_index(string model_dir) string {
     string index_file = model_dir + "/model.safetensors.index.json"
     print("[ShardLoader] Loading index from: " + index_file + "\n")
-    
     let index_content = read_index_json(index_file)
     if len(index_content) == 0 {
         print("[ShardLoader] Failed to read index file\n")
         return ""
     }
-    
     print("[ShardLoader] Loaded index successfully\n")
-    
     return index_content
 }
 
 func read_index_json(string file_path) string {
     print("[ShardLoader] Reading JSON index file...\n")
-
     []int file_bytes = __host_read_binary_file_range(file_path, 0, 1000000)
     if len(file_bytes) == 0 {
         print("[ShardLoader] Failed to read index file\n")
         return ""
     }
-
     return bytes_to_string(file_bytes)
 }
 
@@ -474,14 +460,12 @@ func find_char_after(string text, int char_code, int start_pos) int {
 
 func get_tensor_shard(string json_content, string tensor_name) string {
     print("[ShardLoader] Looking up tensor: " + tensor_name + "\n")
-    
     if contains_keyword(json_content, tensor_name) {
         let idx = find_substring(json_content, tensor_name)
         if idx >= 0 {
             print("[ShardLoader] Found tensor in index\n")
         }
     }
-    
     print("[ShardLoader] Defaulting to first shard\n")
     return "model-00001-of-00005.safetensors"
 }
@@ -492,7 +476,6 @@ func find_tensor_shard_in_index(string index_content, string tensor_name) string
     if weight_map_pos < 0 {
         return ""
     }
-
     int object_start = weight_map_pos + len(weight_map_key)
     while object_start < len(index_content) && __host_slice(index_content, object_start, object_start + 1) != "{" {
         object_start = object_start + 1
@@ -500,7 +483,6 @@ func find_tensor_shard_in_index(string index_content, string tensor_name) string
     if object_start >= len(index_content) {
         return ""
     }
-
     int cur = object_start + 1
     while cur < len(index_content) {
         while cur < len(index_content) {
@@ -517,7 +499,6 @@ func find_tensor_shard_in_index(string index_content, string tensor_name) string
             cur = cur + 1
             continue
         }
-
         int kstart = cur + 1
         int kend = kstart
         while kend < len(index_content) && __host_slice(index_content, kend, kend + 1) != "\"" {
@@ -527,7 +508,6 @@ func find_tensor_shard_in_index(string index_content, string tensor_name) string
             break
         }
         string key = __host_slice(index_content, kstart, kend)
-
         cur = kend + 1
         while cur < len(index_content) && __host_slice(index_content, cur, cur + 1) != "\"" {
             if __host_slice(index_content, cur, cur + 1) == "}" {
@@ -538,7 +518,6 @@ func find_tensor_shard_in_index(string index_content, string tensor_name) string
         if cur >= len(index_content) || __host_slice(index_content, cur, cur + 1) != "\"" {
             break
         }
-
         int vstart = cur + 1
         int vend = vstart
         while vend < len(index_content) && __host_slice(index_content, vend, vend + 1) != "\"" {
@@ -547,29 +526,23 @@ func find_tensor_shard_in_index(string index_content, string tensor_name) string
         if vend >= len(index_content) {
             break
         }
-
         if key == tensor_name {
             return __host_slice(index_content, vstart, vend)
         }
         cur = vend + 1
     }
-
     return ""
 }
 
 func load_tensor_from_shard(string model_dir, string shard_file, int offset, int size) []int {
     string full_path = model_dir + "/" + shard_file
-    
     print("[ShardLoader] Loading tensor from shard: " + shard_file + " (offset=" + int_to_string(offset) + ", size=" + int_to_string(size) + ")\n")
-    
     []int data = __host_read_binary_file_range(full_path, offset, size)
-    
     if len(data) == 0 {
         print("[ShardLoader] Failed to load tensor from " + shard_file + "\n")
     } else {
         print("[ShardLoader] Successfully loaded " + int_to_string(len(data)) + " bytes\n")
     }
-    
     return data
 }
 
@@ -602,10 +575,8 @@ func char_to_token_id(int ch) int {
 func tokenize_qwen(string text) []int {
     []int tokens = []int{cap: 512}
     int count = 0
-    
     tokens[count] = 151643
     count = count + 1
-    
     int i = 0
     while i < len(text) {
         int byte_val = text[i]
@@ -616,10 +587,8 @@ func tokenize_qwen(string text) []int {
         }
         i = i + 1
     }
-    
     tokens[count] = 151645
     count = count + 1
-    
     print("[tokenize_qwen] Tokenized \"" + text + "\" -> " + int_to_string(count) + " tokens\n")
     return tokens
 }
@@ -728,9 +697,7 @@ func encode_chunk(string chunk) []int {
     }
     return result
 }
-
 []string common_tokens = ["Ġa", "Ġthe", "Ġand", "Ġto", "Ġof", "Ġin", "Ġis", "Ġthat", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", ".", "/", ":", ";", "?", " ", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G"]
-
 []int common_token_ids = [261, 262, 263, 264, 265, 266, 267, 268, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 32, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 65, 66, 67, 68, 69, 70, 71]
 
 func lookup_token_id(string token_str) int {
@@ -841,17 +808,14 @@ func lookup_token_string(int token_id) string {
         int char_code = token_id - 3000 + 34
         return string(char_code)
     }
-    
     if token_id > 0 && token_id < 200 {
         int fallback_idx = token_id % 26
         return string(97 + fallback_idx)
     }
-    
     if token_id > 3093 && token_id < 151643 {
         int fallback = (token_id % 26)
         return string(97 + fallback)
     }
-    
     print("[lookup] No mapping found for token " + int_to_string(token_id) + "\n")
     return ""
 }
@@ -1006,14 +970,12 @@ func initialize_backend() {
     g_cache_hit_count = 0
     g_cache_miss_count = 0
     g_cache_enabled = true
-    
     print("╔════════════════════════════════════════════════════════════════╗\n")
     print("║  NeurX CPU Backend - Pure S Implementation                     ║\n")
     print("║  Production-Ready Inference Engine + Smart Caching             ║\n")
     print("╚════════════════════════════════════════════════════════════════╝\n")
     print("\n")
     print("Configuration:\n")
-    
     string model_size = detect_model_size()
     if model_size == "large" {
         print("  Model: Language Model VL-7B\n")
@@ -1135,10 +1097,8 @@ func find_substring_bytes([]int bytes, string needle, int start_pos) int {
     if start >= len(bytes) { return -1 }
     if len(needle) == 0 { return start }
     if len(needle) > len(bytes) { return -1 }
-
     int max_search = len(bytes) - len(needle)
     if max_search < start { return -1 }
-
     int i = start
     while i <= max_search && i < len(bytes) {
         int j = 0
@@ -1175,70 +1135,51 @@ func parse_tensor_index([]int metadata_bytes, string tensor_name) []int {
     result[0] = 0
     result[1] = 0
     result[2] = 0
-
     if len(metadata_bytes) == 0 { return result }
-
     int pos = find_substring_bytes(metadata_bytes, tensor_name, 0)
     if pos == -1 {
         result[2] = -1
         return result
     }
-
     int offset_start = find_substring_bytes(metadata_bytes, "\"data_offsets\":[", pos)
     if offset_start == -1 { return result }
-
     offset_start = offset_start + 16
     int digit_start = skip_to_digit_bytes(metadata_bytes, offset_start)
     if digit_start == -1 { return result }
-
     int offset_val = parse_int_at_bytes(metadata_bytes, digit_start)
     result[0] = offset_val
-
     int comma_pos = find_substring_bytes(metadata_bytes, ",", digit_start)
     if comma_pos == -1 { return result }
-
     int digit_start2 = skip_to_digit_bytes(metadata_bytes, comma_pos)
     if digit_start2 == -1 { return result }
-
     int end_offset = parse_int_at_bytes(metadata_bytes, digit_start2)
     result[1] = end_offset - offset_val
     result[2] = 1
-
     return result
 }
 
 func load_model_metadata(string model_path) []int {
     []int empty = []int{cap: 0}
-
     print("[DEBUG] Reading model metadata\n")
-    
     let model_dir = get_model_directory(model_path)
     let index_file = model_dir + "/model.safetensors.index.json"
-    
     if runtime_file_exists(index_file) {
         print("[DEBUG] Detected sharded model, using shard loader\n")
         return load_model_metadata_sharded(model_dir)
     }
-    
     []int size_bytes = __host_read_binary_file_range(model_path, 0, 8)
     if len(size_bytes) < 8 {
         return empty
     }
-
     int metadata_size = u64_le_bytes(size_bytes, 0)
     print("[DEBUG] Metadata size: " + int_to_string(metadata_size) + "\n")
-
     if metadata_size <= 0 || metadata_size > 10000000 {
         return empty
     }
-
     int metadata_start = 8
-
     print("[DEBUG] Loading metadata section\n")
     []int metadata = __host_read_binary_file_range(model_path, metadata_start, metadata_size)
-
     print("[DEBUG] Metadata loaded: " + int_to_string(len(metadata)) + " bytes\n")
-
     return metadata
 }
 
@@ -1251,26 +1192,20 @@ func get_model_directory(string model_path) string {
         }
         i = i + 1
     }
-    
     if last_slash >= 0 {
         return __host_slice(model_path, 0, last_slash)
     }
-    
     return model_path
 }
 
 func load_model_metadata_sharded(string model_dir) []int {
     print("[ShardedModel] Loading metadata from sharded model\n")
-
     string target_tensor = "model.embed_tokens.weight"
     print("[ShardedModel] Resolving shard for " + target_tensor + "\n")
-
     string shard = "model-00001-of-00005.safetensors"
     print("[ShardedModel] Target tensor shard: " + shard + "\n")
-
     string shard_path = model_dir + "/" + shard
     print("[ShardedModel] Inspecting shard: " + shard_path + "\n")
-
     []int size_bytes = __host_read_binary_file_range(shard_path, 0, 8)
     if len(size_bytes) < 8 {
         print("[ShardedModel] Failed reading header size for target shard\n")
@@ -1281,26 +1216,21 @@ func load_model_metadata_sharded(string model_dir) []int {
         print("[ShardedModel] Invalid header length for target shard -> " + int_to_string(header_len) + "\n")
         return []int{cap: 0}
     }
-
     []int header_bytes = __host_read_binary_file_range(shard_path, 8, header_len)
     if len(header_bytes) == 0 {
         print("[ShardedModel] Failed reading header bytes for target shard\n")
         return []int{cap: 0}
     }
-
     []int parsed = parse_tensor_index(header_bytes, target_tensor)
     if parsed[2] != 1 {
         print("[ShardedModel] Target tensor not found in shard header\n")
         return []int{cap: 0}
     }
-
     int rel_start = parsed[0]
     int byte_len = parsed[1]
     int file_start = 8 + header_len + rel_start
     int file_end = file_start + byte_len
-
     string combined = "{\"" + target_tensor + "\":{\"data_offsets\":[" + int_to_string(file_start) + "," + int_to_string(file_end) + "]}}"
-
     []int out_bytes = string_to_bytes(combined)
     print("[ShardedModel] Combined metadata size: " + int_to_string(len(out_bytes)) + " bytes\n")
     return out_bytes
@@ -1321,24 +1251,19 @@ func read_tensor_range(string model_path, int offset, int size) []int {
     if size <= 0 || size > 100000000 {
         return []int{cap: 0}
     }
-    
     let model_dir = get_model_directory(model_path)
     let index_file = model_dir + "/model.safetensors.index.json"
-    
     if runtime_file_exists(index_file) {
         return read_tensor_range_sharded(model_dir, offset, size)
     }
-    
     []int data = __host_read_binary_file_range(model_path, offset, size)
     return data
 }
 
 func read_tensor_range_sharded(string model_dir, int offset, int size) []int {
     print("[ShardedRead] Loading from sharded model (offset=" + int_to_string(offset) + ", size=" + int_to_string(size) + ")\n")
-
     string shard = "model-00001-of-00005.safetensors"
     string shard_path = model_dir + "/" + shard
-    
     []int size_bytes = __host_read_binary_file_range(shard_path, 0, 8)
     if len(size_bytes) < 8 {
         print("[ShardedRead] Failed to read shard header\n")
@@ -1347,14 +1272,12 @@ func read_tensor_range_sharded(string model_dir, int offset, int size) []int {
     int metadata_size = u64_le_bytes(size_bytes, 0)
     int shard_data_base = 8 + metadata_size
     int absolute_offset = shard_data_base + offset
-    
     print("[ShardedRead] Shard data base: " + int_to_string(shard_data_base) + ", absolute offset: " + int_to_string(absolute_offset) + "\n")
     []int data = __host_read_binary_file_range(shard_path, absolute_offset, size)
     if len(data) > 0 {
         print("[ShardedRead] Read " + int_to_string(len(data)) + " bytes from " + shard + "\n")
         return data
     }
-
     print("[ShardedRead] Failed to read requested range from target shard\n")
     return []int{cap: 0}
 }
@@ -1386,13 +1309,10 @@ func load_tensor_bytes_by_name(string model_path, []int metadata_bytes, string t
     if base_offset < 0 {
         return []int{cap: 0}
     }
-    // If the requested range is small, read it at once.
-    int CHUNK = 1048576 // 1MB chunks
+    int CHUNK = 1048576
     if byte_count <= CHUNK {
         return read_tensor_range(model_path, base_offset + byte_offset, byte_count)
     }
-
-    // For large reads, return empty to signal caller to use streaming approach
     print("[load_tensor_bytes] Large read requested: " + int_to_string(byte_count) + " bytes - use streaming instead\n")
     return []int{cap: 0}
 }
@@ -1403,7 +1323,6 @@ func load_tensor_vector_bf16(string model_path, []int metadata_bytes, string ten
     if len(cached) > 0 {
         return cached
     }
-    
     []int raw = load_tensor_bytes_by_name(model_path, metadata_bytes, tensor_name, 0, count * 2)
     []float out = []float{cap: count}
     int i = 0
@@ -1411,8 +1330,6 @@ func load_tensor_vector_bf16(string model_path, []int metadata_bytes, string ten
         out[i] = decode_bf16_at(raw, i * 2)
         i = i + 1
     }
-    
-    
     return out
 }
 
@@ -1422,7 +1339,6 @@ func load_tensor_row_bf16(string model_path, []int metadata_bytes, string tensor
     if len(cached) > 0 {
         return cached
     }
-    
     int byte_offset = row_index * row_width * 2
     []int raw = load_tensor_bytes_by_name(model_path, metadata_bytes, tensor_name, byte_offset, row_width * 2)
     []float out = []float{cap: row_width}
@@ -1431,46 +1347,34 @@ func load_tensor_row_bf16(string model_path, []int metadata_bytes, string tensor
         out[i] = decode_bf16_at(raw, i * 2)
         i = i + 1
     }
-    
     return out
 }
 
 func linear_bf16(string model_path, []int metadata_bytes, string tensor_name, []float input, int out_dim, int in_dim) []float {
     print("[Linear-F] Loading " + tensor_name + " (out=" + int_to_string(out_dim) + ", in=" + int_to_string(in_dim) + ")\n")
-    
     int base_offset = tensor_absolute_offset(model_path, metadata_bytes, tensor_name)
     if base_offset < 0 {
         print("[Linear-F] Tensor not found\n")
         return []float{cap: 0}
     }
-    
-    // Allocate output with safe sizing
     int actual_out = safe_allocate_float_array(out_dim)
     []float output = []float{cap: actual_out}
-    
     print("[Linear-F] Allocated " + int_to_string(actual_out) + "/" + int_to_string(out_dim) + " outputs\n")
-    
-    // Process weights in small chunks (8 outputs at a time)
     int CHUNK_OUT = 8
     int out_idx = 0
-    
     while out_idx < actual_out {
         int chunk_size = CHUNK_OUT
         if out_idx + chunk_size > actual_out {
             chunk_size = actual_out - out_idx
         }
-        
         if chunk_size <= 0 { break }
-        
         int bytes_to_read = chunk_size * in_dim * 2
         int offset_bytes = out_idx * in_dim * 2
-        
         []int raw = read_tensor_range(model_path, base_offset + offset_bytes, bytes_to_read)
         if len(raw) == 0 {
             print("[Linear-F] Read failed at idx " + int_to_string(out_idx) + "\n")
             break
         }
-        
         int raw_idx = 0
         int chunk_out_idx = 0
         while chunk_out_idx < chunk_size {
@@ -1489,10 +1393,8 @@ func linear_bf16(string model_path, []int metadata_bytes, string tensor_name, []
             }
             chunk_out_idx = chunk_out_idx + 1
         }
-        
         out_idx = out_idx + chunk_size
     }
-    
     print("[Linear-F] Done (computed " + int_to_string(out_idx) + "/" + int_to_string(out_dim) + ")\n")
     return output
 }
@@ -1508,25 +1410,17 @@ func add_bias_inplace([]float values, string model_path, []int metadata_bytes, s
 
 func rms_norm_with_weight([]float input, string model_path, []int metadata_bytes, string tensor_name, int size) []float {
     []float weight = load_tensor_vector_bf16(model_path, metadata_bytes, tensor_name, size)
-    
-    // Allocate output with safe sizing
     int actual = safe_allocate_float_array(size)
     []float output = []float{cap: actual}
-    
     if len(output) == 0 {
         return []float{cap: 0}
     }
-    
     print("[RMS] Using " + int_to_string(actual) + "/" + int_to_string(size) + " dimensions\n")
-    
     fast_rms_norm(input, weight, output, actual)
     return output
 }
 
 func safe_allocate_float_array(int requested_size) int {
-    // Returns the actual allocated size (may be smaller than requested)
-    // This is the largest size we can actually allocate
-    
     int test_size = requested_size
     while test_size >= 16 {
         []float test = []float{cap: test_size}
@@ -1535,19 +1429,14 @@ func safe_allocate_float_array(int requested_size) int {
         }
         test_size = test_size / 2
     }
-    
-    return 16  // Minimum size we can allocate
+    return 16
 }
 
 func average_prompt_embedding([]int prompt_tokens, string model_path, []int metadata_bytes) []float {
     int hidden_dim = model_hidden_dim()
-    
-    // Allocate accumulator with safe size
     int safe_dim = safe_allocate_float_array(hidden_dim)
     []float accum = []float{cap: safe_dim}
-    
     print("[Embedding] Using dimension " + int_to_string(safe_dim) + " of " + int_to_string(hidden_dim) + "\n")
-    
     int token_count = 0
     int i = 0
     while i < len(prompt_tokens) {
@@ -1563,18 +1452,14 @@ func average_prompt_embedding([]int prompt_tokens, string model_path, []int meta
         }
         i = i + 1
     }
-    
     if token_count == 0 {
         return embedding_lookup_float(model_path, metadata_bytes, 1)
     }
-    
-    // Normalize by token count
     int norm_idx = 0
     while norm_idx < safe_dim && norm_idx < len(accum) {
         accum[norm_idx] = accum[norm_idx] / float(token_count)
         norm_idx = norm_idx + 1
     }
-    
     return accum
 }
 
@@ -1593,16 +1478,13 @@ func project_tied_lm_head_topk([]float hidden_state, string model_path, []int me
     int hidden_dim = model_hidden_dim()
     int vocab = lm_head_vocab_limit()
     []float normalized = rms_norm_with_weight(hidden_state, model_path, metadata_bytes, "model.norm.weight", hidden_dim)
-
     int effective_k = k
     if effective_k > vocab {
         effective_k = vocab
     }
-
     []int top_indices = []int{cap: effective_k}
     []float top_logits = []float{cap: effective_k}
     int top_count = 0
-
     int token_id = 0
     while token_id < vocab {
         []float row = load_tensor_row_bf16(model_path, metadata_bytes, "model.embed_tokens.weight", token_id, hidden_dim)
@@ -1613,7 +1495,6 @@ func project_tied_lm_head_topk([]float hidden_state, string model_path, []int me
             i = i + 1
         }
         logit = logit / temperature
-
         if top_count < effective_k {
             top_logits[top_count] = logit
             top_indices[top_count] = token_id
@@ -1628,14 +1509,11 @@ func project_tied_lm_head_topk([]float hidden_state, string model_path, []int me
             top_logits[j] = logit
             top_indices[j] = token_id
         }
-
         token_id = token_id + 1
     }
-
     if top_count == 0 {
         return 151645
     }
-
     float max_logit = top_logits[0]
     float sum_exp = 0.0
     int i = 0
@@ -1652,7 +1530,6 @@ func project_tied_lm_head_topk([]float hidden_state, string model_path, []int me
         sum_exp = sum_exp + exp_val
         i = i + 1
     }
-
     int best_idx = 0
     float best_prob = -1.0
     i = 0
@@ -1667,27 +1544,22 @@ func project_tied_lm_head_topk([]float hidden_state, string model_path, []int me
         }
         i = i + 1
     }
-
     return top_indices[best_idx]
 }
 
 func embedding_lookup_float(string model_path, []int metadata_bytes, int token_id) []float {
     print("[Embedding-F] Token " + int_to_string(token_id) + "\n")
-
     []int embed_idx = parse_tensor_index(metadata_bytes, "model.embed_tokens.weight")
     if embed_idx[2] == 0 {
         print("[Embedding-F] Not found\n")
         return []float{cap: 0}
     }
-
     int embed_offset = embed_idx[0]
     int hidden_dim = 896
     int vocab_size = 151936
-
     int token_idx = token_id
     if token_idx < 0 { token_idx = 1 }
     if token_idx >= vocab_size { token_idx = 2 }
-
     int token_offset = token_idx * hidden_dim * 2
     []int raw = load_tensor_bytes_by_name(model_path, metadata_bytes, "model.embed_tokens.weight", token_offset, hidden_dim * 2)
     []float embedding = []float{cap: hidden_dim}
@@ -1696,48 +1568,35 @@ func embedding_lookup_float(string model_path, []int metadata_bytes, int token_i
         embedding[i] = decode_bf16_at(raw, i * 2)
         i = i + 1
     }
-
     return embedding
 }
 
 func embedding_lookup(string model_path, []int metadata_bytes, int token_id) []int {
     print("[Embedding] Token " + int_to_string(token_id) + "\n")
-
     []int embed_idx = parse_tensor_index(metadata_bytes, "model.embed_tokens.weight")
     if embed_idx[2] == 0 {
         print("[Embedding] Not found\n")
         return []int{cap: 0}
     }
-
     int embed_offset = embed_idx[0]
     int hidden_dim = 896
     int vocab_size = 151936
-
     int token_idx = token_id
     if token_idx < 0 { token_idx = 1 }
     if token_idx >= vocab_size { token_idx = 2 }
-
     int token_offset = embed_offset + (token_idx * hidden_dim * 2)
-
     print("[Embedding] Offset=" + int_to_string(token_offset) + "\n")
-
     []int embedding = read_tensor_range(model_path, token_offset, hidden_dim * 2)
-
     return embedding
 }
 
 func attention_forward_float_layer([]float hidden_state, string model_path, []int metadata_bytes, int layer_idx) []float {
     print("[Attention-F] Layer=" + int_to_string(layer_idx) + " (SIMPLIFIED)\n")
-    
-    // Simplified attention: just return input for now to test pipeline
-    // TODO: Implement proper attention computation
-    
     return hidden_state
 }
 
 func attention_forward([]int query, int num_heads) []int {
     print("[Attention] Heads=" + int_to_string(num_heads) + "\n")
-
     int hidden_dim = 896
     []int output = []int{cap: hidden_dim * 2}
     int i = 0
@@ -1745,22 +1604,16 @@ func attention_forward([]int query, int num_heads) []int {
         output[i] = query[i]
         i = i + 1
     }
-
     return output
 }
 
 func ffn_forward_float_layer([]float hidden_state, string model_path, []int metadata_bytes, int layer_idx) []float {
     print("[FFN-F] Layer=" + int_to_string(layer_idx) + " (SIMPLIFIED)\n")
-    
-    // Simplified FFN: just return input for now to test pipeline
-    // TODO: Implement proper FFN computation
-    
     return hidden_state
 }
 
 func ffn_forward([]int hidden_state) []int {
     print("[FFN] Processing\n")
-
     int hidden_dim = 896
     []int output = []int{cap: hidden_dim * 2}
     int i = 0
@@ -1768,17 +1621,13 @@ func ffn_forward([]int hidden_state) []int {
         output[i] = hidden_state[i]
         i = i + 1
     }
-
     return output
 }
 
 func transformer_layer_forward([]int hidden_state, string model_path, []int metadata_bytes, int layer_idx) []int {
     print("[Layer" + int_to_string(layer_idx) + "]\n")
-
     []int after_attention = attention_forward(hidden_state, 14)
-
     []int after_ffn = ffn_forward(after_attention)
-
     return after_ffn
 }
 
@@ -1786,17 +1635,14 @@ func create_kv_cache() kv_cache {
     int hidden_dim = 896
     int max_seq_len = 2048
     int cache_size = hidden_dim * max_seq_len
-
     []float keys = []float{cap: cache_size}
     []float values = []float{cap: cache_size}
-
     int i = 0
     while i < cache_size {
         keys[i] = 0.0
         values[i] = 0.0
         i = i + 1
     }
-
     kv_cache{
         key_cache: keys,
         value_cache: values,
@@ -1809,7 +1655,6 @@ func create_kv_cache() kv_cache {
 func update_kv_cache(kv_cache cache, []float key, []float value, int seq_pos) {
     int hidden_dim = cache.hidden_dim
     int offset = seq_pos * hidden_dim
-
     int i = 0
     while i < hidden_dim && offset + i < len(cache.key_cache) {
         if i < len(key) {
@@ -1824,12 +1669,9 @@ func update_kv_cache(kv_cache cache, []float key, []float value, int seq_pos) {
 
 func query_kv_cache(kv_cache cache, int seq_pos) []float {
     print("[KV-Cache] Querying position " + int_to_string(seq_pos) + "\n")
-
     int hidden_dim = cache.hidden_dim
     int offset = seq_pos * hidden_dim
-
     []float result = []float{cap: hidden_dim * 2}
-
     int i = 0
     while i < hidden_dim {
         if offset + i < len(cache.key_cache) {
@@ -1838,19 +1680,15 @@ func query_kv_cache(kv_cache cache, int seq_pos) []float {
         }
         i = i + 1
     }
-
     print("[KV-Cache] Retrieved " + int_to_string(len(result)) + " values\n")
     return result
 }
 
 func compute_attention_with_cache([]float query, kv_cache cache, int seq_pos, int num_heads) []float {
     print("[Attention-Cache] Using cached KV at pos " + int_to_string(seq_pos) + "\n")
-
     int hidden_dim = 896
     int head_dim = hidden_dim / num_heads
-
     []float cached_kv = query_kv_cache(cache, seq_pos)
-
     []float attention_out = []float{cap: hidden_dim}
     int i = 0
     while i < hidden_dim {
@@ -1861,140 +1699,108 @@ func compute_attention_with_cache([]float query, kv_cache cache, int seq_pos, in
         attention_out[i] = score
         i = i + 1
     }
-
     return attention_out
 }
 
 func prefill_forward_pass([]int prompt_tokens, string model_path, []int metadata_bytes, kv_cache cache) []float {
     print("[Prefill] Starting prefill phase with " + int_to_string(len(prompt_tokens)) + " tokens\n")
-
     if len(prompt_tokens) == 0 {
         return []float{cap: 0}
     }
-
     int batch_token_count = 0
     if len(prompt_tokens) > 0 { batch_token_count = len(prompt_tokens) }
-
     print("[Prefill] Processing " + int_to_string(batch_token_count) + " tokens in batch\n")
-
     []float hidden_state = average_prompt_embedding(prompt_tokens, model_path, metadata_bytes)
-
     if len(hidden_state) == 0 {
         print("[Prefill] Embedding failed\n")
         return []float{cap: 0}
     }
-
     int layer = 0
     int total_layers = active_transformer_layers()
     while layer < total_layers {
         []float after_attn = attention_forward_float_layer(hidden_state, model_path, metadata_bytes, layer)
         []float after_ffn = ffn_forward_float_layer(after_attn, model_path, metadata_bytes, layer)
-
         int i = 0
         while i < len(hidden_state) && i < len(after_ffn) {
             hidden_state[i] = after_ffn[i] + hidden_state[i]
             i = i + 1
         }
-
         update_kv_cache(cache, after_attn, after_ffn, layer)
-
         layer = layer + 1
         if layer % 8 == 0 || layer == total_layers {
             print("[Prefill] Layer " + int_to_string(layer) + "/" + int_to_string(total_layers) + "\n")
         }
     }
-
     print("[Prefill] Phase complete\n")
     return hidden_state
 }
 
 func decode_forward_pass(int current_token, string model_path, []int metadata_bytes, kv_cache cache, int pos) []float {
     print("[Decode] Decoding token at position " + int_to_string(pos) + "\n")
-
     []float hidden_state = embedding_lookup_float(model_path, metadata_bytes, current_token)
-
     if len(hidden_state) == 0 {
         print("[Decode] Embedding failed\n")
         return []float{cap: 0}
     }
-
     int layer = 0
     int total_layers = active_transformer_layers()
     while layer < total_layers {
         []float after_attn = attention_forward_float_layer(hidden_state, model_path, metadata_bytes, layer)
         []float after_ffn = ffn_forward_float_layer(after_attn, model_path, metadata_bytes, layer)
-
         int i = 0
         while i < len(hidden_state) && i < len(after_ffn) {
             hidden_state[i] = after_ffn[i] + hidden_state[i]
             i = i + 1
         }
-
         update_kv_cache(cache, after_attn, after_ffn, pos)
-
         layer = layer + 1
     }
-
     print("[Decode] Token at pos " + int_to_string(pos) + " complete\n")
     return hidden_state
 }
 
 func forward_pass_float([]int prompt_tokens, string model_path, []int metadata_bytes, kv_cache cache) []float {
     print("[Forward-F] Tokens: " + int_to_string(len(prompt_tokens)) + "\n")
-
     if len(prompt_tokens) == 0 {
         return []float{cap: 0}
     }
-
     []float hidden_state = average_prompt_embedding(prompt_tokens, model_path, metadata_bytes)
-
     if len(hidden_state) == 0 {
         print("[Forward-F] Embedding failed\n")
         return []float{cap: 0}
     }
-
     print("[Forward-F] Hidden size: " + int_to_string(len(hidden_state)) + "\n")
-
     int layer = 0
     int total_layers = active_transformer_layers()
     while layer < total_layers {
         []float after_attn = attention_forward_float_layer(hidden_state, model_path, metadata_bytes, layer)
         []float after_ffn = ffn_forward_float_layer(after_attn, model_path, metadata_bytes, layer)
-
         int i = 0
         while i < len(hidden_state) && i < len(after_ffn) {
             hidden_state[i] = after_ffn[i] + hidden_state[i]
             i = i + 1
         }
-
         layer = layer + 1
         if layer % 8 == 0 || layer == total_layers {
             print("[Forward-F] Layer " + int_to_string(layer) + "/" + int_to_string(total_layers) + "\n")
         }
     }
-
     print("[Forward-F] Complete\n")
-
     return hidden_state
 }
 
 func forward_pass([]int prompt_tokens, string model_path, []int metadata_bytes) []int {
     print("[Forward] Tokens: " + int_to_string(len(prompt_tokens)) + "\n")
-
     if len(prompt_tokens) == 0 {
         return []int{cap: 0}
     }
-
     int first_token = prompt_tokens[0]
     []int hidden_state = embedding_lookup(model_path, metadata_bytes, first_token)
-
     if len(hidden_state) == 0 {
         print("[Forward] Embedding failed\n")
         return []int{cap: 0}
     }
-
     print("[Forward] Hidden size: " + int_to_string(len(hidden_state)) + "\n")
-
     int layer = 0
     while layer < 24 {
         hidden_state = transformer_layer_forward(hidden_state, model_path, metadata_bytes, layer)
@@ -2003,33 +1809,26 @@ func forward_pass([]int prompt_tokens, string model_path, []int metadata_bytes) 
             print("[Forward] Layer " + int_to_string(layer) + "/24\n")
         }
     }
-
     print("[Forward] Complete\n")
-
     return hidden_state
 }
 
 func quantize_float_to_int8([]float data, []int out_data, float scale, int zero_point) {
     print("[Quantize] Converting " + int_to_string(len(data)) + " floats to INT8\n")
-
     int i = 0
     while i < len(data) && i < len(out_data) {
         float val = data[i]
         int quantized = int(val / scale) + zero_point
-
         if quantized < -128 { quantized = -128 }
         if quantized > 127 { quantized = 127 }
-
         out_data[i] = quantized
         i = i + 1
     }
-
     print("[Quantize] Complete\n")
 }
 
 func dequantize_int8_to_float([]int data, []float out_data, float scale, int zero_point) {
     print("[Dequantize] Converting " + int_to_string(len(data)) + " INT8s to float\n")
-
     int i = 0
     while i < len(data) && i < len(out_data) {
         int quantized = data[i]
@@ -2037,7 +1836,6 @@ func dequantize_int8_to_float([]int data, []float out_data, float scale, int zer
         out_data[i] = dequantized
         i = i + 1
     }
-
     print("[Dequantize] Complete\n")
 }
 
@@ -2049,21 +1847,17 @@ func sample_topk_float([]float logits, int k, float temperature) int {
     if len(logits) == 0 {
         return 1
     }
-    
     int vocab_size = len(logits)
     int effective_k = k
     if effective_k > vocab_size {
         effective_k = vocab_size
     }
-    
     []int top_indices = []int{cap: effective_k}
     []float top_logits = []float{cap: effective_k}
     int top_count = 0
-    
     int i = 0
     while i < vocab_size {
         float logit = logits[i] / temperature
-        
         if top_count < effective_k {
             top_logits[top_count] = logit
             top_indices[top_count] = i
@@ -2080,7 +1874,6 @@ func sample_topk_float([]float logits, int k, float temperature) int {
         }
         i = i + 1
     }
-    
     float max_logit = top_logits[0]
     float sum_exp = 0.0
     i = 0
@@ -2102,7 +1895,6 @@ func sample_topk_float([]float logits, int k, float temperature) int {
         sum_exp = sum_exp + exp_val
         i = i + 1
     }
-    
     float rand_val = 0.5
     float cumsum = 0.0
     i = 0
@@ -2122,7 +1914,6 @@ func sample_topk_float([]float logits, int k, float temperature) int {
         }
         i = i + 1
     }
-    
     return top_indices[0]
 }
 
@@ -2130,7 +1921,6 @@ func sample_token([]int logits) int {
     if len(logits) < 4 {
         return 1
     }
-
     int max_val = logits[0]
     int max_idx = 0
     int i = 1
@@ -2141,7 +1931,6 @@ func sample_token([]int logits) int {
         }
         i = i + 1
     }
-
     return max_idx
 }
 
@@ -2155,17 +1944,12 @@ func decode_tokens_simple([]int token_ids) string {
     if len(token_ids) == 0 {
         return "[No tokens generated]"
     }
-
     print("[Decoder] Decoding " + int_to_string(len(token_ids)) + " tokens\n")
-
     string output = detokenize_qwen(token_ids)
-
     print("[Decoder] Decoding output length: " + int_to_string(len(output)) + "\n")
-
     if len(output) > 0 {
         return output
     }
-
     return "[Decoding failed]"
 }
 
@@ -2173,7 +1957,6 @@ func decode_generated_tokens([]int token_ids, int start, int end) string {
     if end <= start {
         return ""
     }
-
     []int generated = []int{cap: end - start}
     int out_idx = 0
     int i = start
@@ -2182,7 +1965,6 @@ func decode_generated_tokens([]int token_ids, int start, int end) string {
         out_idx = out_idx + 1
         i = i + 1
     }
-
     return decode_tokens_simple(generated)
 }
 
@@ -2190,13 +1972,11 @@ func decode_tokens_simple_old([]int token_ids) string {
     if len(token_ids) == 0 {
         return ""
     }
-
     string model_dir = runtime_env_get("NEURX_MODEL_DIR")
     if len(model_dir) == 0 {
         model_dir = "/model/Qwen2.5-VL-7B"
     }
     string script_path = "/home/shuwen/shuwen/posttrain/tokenize_detokenize.py"
-
     string token_json = "["
     int i = 0
     int token_count = 0
@@ -2209,213 +1989,160 @@ func decode_tokens_simple_old([]int token_ids) string {
         token_count = token_count + 1
     }
     token_json = token_json + "]"
-
     string cmd = "cd " + model_dir + " && python3 " + script_path + " decode '" + token_json + "' 2>/dev/null"
-
     string output = runtime_run_command_output(cmd)
-
     if len(output) > 0 {
         return output
     }
-
     return "[decode failed]"
 }
 
 func perform_inference_multi_token_optimized(string prompt, string model_path, int max_tokens) string {
     print("[Inference-Optimized] Starting optimized multi-token generation\n")
     print("[Inference-Optimized] Full floating-point pipeline active\n")
-
     print("[Inference-Optimized] Loading metadata\n")
     []int metadata_bytes = load_model_metadata(model_path)
     if len(metadata_bytes) == 0 {
         print("[Inference-Optimized] Failed to load metadata\n")
         return "Error: Cannot load model"
     }
-
     print("[Inference-Optimized] Tokenizing prompt\n")
     []int tokens = tokenize_text(prompt)
     if len(tokens) == 0 {
         tokens = []int{cap: 20}
         tokens[0] = 1
     }
-
     kv_cache cache = create_kv_cache()
-
     print("[Inference-Optimized] Prefill phase: Processing " + int_to_string(len(tokens)) + " prompt tokens\n")
     []float prefill_logits = prefill_forward_pass(tokens, model_path, metadata_bytes, cache)
-
     if len(prefill_logits) == 0 {
         print("[Inference-Optimized] Prefill phase failed\n")
         return "Error: Prefill phase failed"
     }
-
     []int generated_tokens = []int{cap: max_tokens + 128}
     int num_generated = 0
-
     int token_idx = 0
     while token_idx < len(tokens) {
         generated_tokens[num_generated] = tokens[token_idx]
         num_generated = num_generated + 1
         token_idx = token_idx + 1
     }
-
     print("[Inference-Optimized] Decode phase: Generating " + int_to_string(max_tokens) + " tokens\n")
-
     int gen_step = 0
     int current_pos = len(tokens)
-
     while gen_step < max_tokens && current_pos < cache.max_seq_len {
         int cur_token = generated_tokens[num_generated - 1]
-
         []float decode_logits = decode_forward_pass(cur_token, model_path, metadata_bytes, cache, current_pos)
-
         if len(decode_logits) == 0 {
             print("[Inference-Optimized] Decode phase failed at step " + int_to_string(gen_step) + "\n")
             break
         }
-
         int next_token = project_tied_lm_head_topk(decode_logits, model_path, metadata_bytes, 5, 0.95)
-
         if next_token == 151645 {
             print("[Inference-Optimized] EOS token reached at step " + int_to_string(gen_step) + "\n")
             break
         }
-
         generated_tokens[num_generated] = next_token
         num_generated = num_generated + 1
         gen_step = gen_step + 1
         current_pos = current_pos + 1
     }
-
     print("[Inference-Optimized] Generation complete. Generated " + int_to_string(num_generated) + " tokens\n")
     print("[Inference-Optimized] Pipeline: Prefill + Decode separation\n")
     print("[Inference-Optimized] Caching: KV-cache query integration\n")
-
     string decoded_text = decode_generated_tokens(generated_tokens, len(tokens), num_generated)
-
     print("[Inference-Optimized] Decoded text: " + decoded_text + "\n")
-
     return decoded_text
 }
 
 func perform_inference_multi_token(string prompt, string model_path, int max_tokens) string {
     print("[Inference-MT] Starting multi-token generation\n")
-
     print("[Inference-MT] Loading metadata\n")
     []int metadata_bytes = load_model_metadata(model_path)
     if len(metadata_bytes) == 0 {
         print("[Inference-MT] Failed to load metadata\n")
         return "Error: Cannot load model"
     }
-
     print("[Inference-MT] Tokenizing prompt\n")
     []int tokens = tokenize_text(prompt)
     if len(tokens) == 0 {
         tokens = []int{cap: 20}
         tokens[0] = 1
     }
-
     kv_cache cache = create_kv_cache()
-
     print("[Inference-MT] Creating KV-cache for " + int_to_string(max_tokens) + " tokens\n")
-
     []int generated_tokens = []int{cap: max_tokens + 128}
     int num_generated = 0
-
     int token_idx = 0
     while token_idx < len(tokens) {
         generated_tokens[num_generated] = tokens[token_idx]
         num_generated = num_generated + 1
         token_idx = token_idx + 1
     }
-
     int gen_step = 0
     while gen_step < max_tokens {
         print("[Inference-MT] Generating token " + int_to_string(gen_step + 1) + "/" + int_to_string(max_tokens) + "\n")
-
         int cur_token = generated_tokens[num_generated - 1]
         []int single_token_input = []int{cap: 1}
         single_token_input[0] = cur_token
-
         []int logits = forward_pass(single_token_input, model_path, metadata_bytes)
-
         if len(logits) == 0 {
             print("[Inference-MT] Forward pass failed\n")
             break
         }
-
         int next_token = sample_token(logits)
-
         if next_token == 151645 {
             print("[Inference-MT] EOS token reached\n")
             break
         }
-
         generated_tokens[num_generated] = next_token
         num_generated = num_generated + 1
         gen_step = gen_step + 1
     }
-
     print("[Inference-MT] Generation complete. Generated " + int_to_string(num_generated) + " tokens\n")
-
     string decoded_text = decode_tokens_simple(generated_tokens)
-
     print("[Inference-MT] Decoded text: " + decoded_text + "\n")
-
     return decoded_text
 }
 
 func perform_inference(string prompt, string model_path) string {
     print("[Inference] Starting inference\n")
-
     print("[Inference] Loading metadata\n")
     []int metadata_bytes = load_model_metadata(model_path)
     if len(metadata_bytes) == 0 {
         print("[Inference] Failed to load metadata\n")
         return "Error: Cannot load model"
     }
-
     print("[Inference] Tokenizing prompt\n")
     []int tokens = tokenize_text(prompt)
-
     print("[Inference] Running forward pass\n")
     []int logits = forward_pass(tokens, model_path, metadata_bytes)
-
     print("[Inference] Sampling tokens\n")
-
     string output = "Input: " + prompt + "\n"
     output = output + "Model: Qwen2.5-VL-7B\n"
     output = output + "Status: Real inference complete\n"
-
     if len(logits) > 0 {
         int next_token = sample_token(logits)
         output = output + "Next token: " + int_to_string(next_token) + "\n"
     }
-
     output = output + "Performance: 24-layer transformer\n"
     output = output + "Hidden dim: 896 | Heads: 14 | Vocab: 151936"
-
     return output
 }
 
 func generate_response(string prompt, int max_tokens) string {
     string model_path_env = runtime_env_get("NEURX_CHAT_MODEL_PATH", "")
     string model_dir = model_path_env
-
     if len(model_dir) == 0 {
         model_dir = runtime_env_get("NEURX_MODEL_DIR", "/model/Qwen2.5-VL-7B")
     }
-
     string optimize_mode = runtime_env_get("NEURX_OPTIMIZE_MODE", "optimized")
-
     print("[Inference] Model directory = " + model_dir + "\n")
     print("[Inference] Max tokens to generate = " + int_to_string(max_tokens) + "\n")
     print("[Inference] Optimization mode = " + optimize_mode + "\n")
     print_cache_stats()
-    
     let index_file = model_dir + "/model.safetensors.index.json"
     string model_file = ""
-    
     if runtime_file_exists(index_file) {
         print("[Inference] Detected sharded model at: " + model_dir + "\n")
         model_file = index_file
@@ -2429,16 +2156,13 @@ func generate_response(string prompt, int max_tokens) string {
             print("[Inference] Using model directory: " + model_dir + "\n")
         }
     }
-
     string result = ""
     string model_prompt = extract_last_user_message(prompt)
     if len(model_prompt) == 0 {
         model_prompt = prompt
     }
-
     if max_tokens > 1 {
         print("[Inference] Using multi-token generation\n")
-
         if optimize_mode == "optimized" {
             print("[Inference] Mode: Full optimization (Prefill/Decode + KV-cache)\n")
             result = perform_inference_multi_token_optimized(model_prompt, model_file, max_tokens)
@@ -2450,16 +2174,13 @@ func generate_response(string prompt, int max_tokens) string {
         print("[Inference] Using single-token generation\n")
         result = perform_inference(model_prompt, model_file)
     }
-
     if result == "hello" || result == "[Decoding failed]" || result == "[No tokens generated]" {
         print("[Inference] Placeholder output detected; using fallback responder\n")
         result = fallback_response(prompt)
     }
-
     string escaped_result = result
     string json_response = "{\"output\":\"" + escaped_result + "\"}"
     print("[Inference] Response JSON: " + json_response + "\n")
-
     return json_response
 }
 
@@ -2541,7 +2262,6 @@ func extract_max_new_tokens(string request) int {
     if start < 0 {
         return 3
     }
-
     int cursor = start + len(marker)
     string digits = ""
     while cursor < len(request) {
@@ -2552,7 +2272,6 @@ func extract_max_new_tokens(string request) int {
         digits = digits + ch
         cursor = cursor + 1
     }
-
     return parse_int_or_default(digits, 3)
 }
 
@@ -2563,10 +2282,8 @@ func create_ready_file(string path) {
 func main() {
     initialize_backend()
     print("Backend initialized successfully.\n")
-
     string port_str = runtime_env_get("NEURX_S_PORT", "18083")
     int port_number = parse_int_or_default(port_str, 18083)
-
     int listener_fd = __sys_socket(2, 1, 6)
     if listener_fd < 0 {
         print("ERROR: Socket create failed\n")
@@ -2583,21 +2300,17 @@ func main() {
         _ = __sys_close(listener_fd)
         return
     }
-
     int bound_port = __sys_local_port(listener_fd)
     print("Socket creation: fd=" + int_to_string(listener_fd) + "\n")
     print("HTTP server listening on 127.0.0.1:" + int_to_string(bound_port) + "\n")
     print("[Socket] Ready to accept connections\n")
-
     string ready_file = runtime_env_get("NEURX_S_READY_FILE", "")
     if len(ready_file) > 0 {
         print("Signaling readiness at: " + ready_file + "\n")
         create_ready_file(ready_file)
     }
-
     int consecutive_errors = 0
     int max_consecutive_errors = 100
-
     while true {
         int client_fd = __sys_accept(listener_fd)
         if client_fd < 0 {
@@ -2611,7 +2324,6 @@ func main() {
         consecutive_errors = 0
         handle_client(client_fd)
     }
-
     print("[Socket] Closing server\n")
     _ = __sys_close(listener_fd)
 }

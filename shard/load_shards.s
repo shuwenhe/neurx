@@ -44,7 +44,6 @@ func substring(string s, int start, int end) string {
     out
 }
 
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"

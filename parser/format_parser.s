@@ -1,4 +1,3 @@
-
 package neurx.parser.format_parser
 
 use neurx.parser.types

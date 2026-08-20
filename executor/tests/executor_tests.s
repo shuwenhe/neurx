@@ -1,4 +1,3 @@
-
 import "types.s"
 import "executor_base.s"
 import "prefill_executor.s"
@@ -186,14 +185,12 @@ func TestKVCacheEviction() {
 
     cache := NewKVCacheManager(1, EVICTION_LRU)
 
-
     for i := 0; i < 16; i++ {
         seq_id := "seq_" + string(i)
         cache.AllocateBlock(seq_id, 0, 256)
     }
 
     LogTest("Cache blocks created", cache.block_count > 0, "No blocks allocated")
-
 
     result := cache.EvictBlocks()
     LogTest("Eviction triggers", result.success == 0 || cache.allocated_mb < i32(1024), "Eviction not working")
@@ -202,16 +199,13 @@ func TestKVCacheEviction() {
 func TestCacheEvictionPolicies() {
     println("\n--- Test: Cache Eviction Policies ---")
 
-
     lru_cache := NewKVCacheManager(10, EVICTION_LRU)
     result := lru_cache.AllocateBlock("seq_0", 0, 256)
     LogTest("LRU allocation", result.success, "LRU allocation failed")
 
-
     lfu_cache := NewKVCacheManager(10, EVICTION_LFU)
     result = lfu_cache.AllocateBlock("seq_1", 0, 256)
     LogTest("LFU allocation", result.success, "LFU allocation failed")
-
 
     fifo_cache := NewKVCacheManager(10, EVICTION_FIFO)
     result = fifo_cache.AllocateBlock("seq_2", 0, 256)

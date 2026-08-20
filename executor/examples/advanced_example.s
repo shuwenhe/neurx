@@ -1,4 +1,3 @@
-
 import "types.s"
 import "executor_base.s"
 import "prefill_executor.s"
@@ -23,14 +22,12 @@ func AdaptiveBatchingExample() {
 
     scheduler := NewExecutionScheduler(SCHEDULE_DYNAMIC)
 
-
     target_latency := i32(50)
     current_batch_size := i32(128)
 
     for iteration := 0; iteration < 5; iteration++ {
         println("\nIteration", iteration)
         println("Target batch size:", current_batch_size)
-
 
         for i := 0; i < int(current_batch_size); i++ {
             scheduler.AddDecodeSequence("seq_" + string(i))
@@ -40,7 +37,6 @@ func AdaptiveBatchingExample() {
         estimated_latency := scheduler.EstimateLatency(schedule)
 
         println("Estimated latency:", estimated_latency, "ms")
-
 
         if estimated_latency > target_latency {
             current_batch_size = (current_batch_size * 7) / 8
@@ -65,7 +61,6 @@ func CacheEvictionPoliciesExample() {
         println("\n--- Policy:", policy_names[idx], "---")
 
         cache := NewKVCacheManager(10, policies[idx])
-
 
         for i := 0; i < 16; i++ {
             seq_id := "seq_" + string(i)
@@ -102,7 +97,6 @@ func PrefillDecodeOptimizationExample() {
 
     scheduler := NewExecutionScheduler(SCHEDULE_DYNAMIC)
 
-
     println("Phase 1: Prefill intensive")
     for i := 0; i < 256; i++ {
         scheduler.AddPrefillSequence("prompt_" + string(i))
@@ -112,7 +106,6 @@ func PrefillDecodeOptimizationExample() {
         schedule := scheduler.PlanIteration(256, 64)
         println("Iteration", iter, "- Prefill:", schedule.prefill_count, "Decode:", schedule.decode_count)
     }
-
 
     println("\nPhase 2: Decode intensive")
     for i := 256; i < 512; i++ {
@@ -133,7 +126,6 @@ func PromptCachingExample() {
 
     cache_manager := NewKVCacheManager(16, EVICTION_LRU)
 
-
     prompts := []string{
         "You are a helpful assistant.",
         "Translate to Spanish:",
@@ -149,7 +141,6 @@ func PromptCachingExample() {
             println("Cached:", prompts[i])
         }
     }
-
 
     println("\nReusing cached prefixes:")
     for i := 0; i < 5; i++ {
@@ -189,7 +180,6 @@ func TensorParallelismExample() {
     println("Setting up tensor parallelism:")
     println("Total GPUs:", dist_config.world_size)
     println("Tensor parallel degree:", dist_config.tensor_parallel)
-
 
     input_data := make([]f32, 4096)
     result := dist_exec.TensorParallelForward(input_data)
@@ -251,23 +241,19 @@ func MultiLevelSchedulingExample() {
 
     scheduler := NewExecutionScheduler(SCHEDULE_PRIORITY)
 
-
     for i := 0; i < 8; i++ {
         scheduler.AddPrefillSequence("high_priority_" + string(i))
     }
 
-
     for i := 0; i < 16; i++ {
         scheduler.AddPrefillSequence("normal_" + string(i))
     }
-
 
     for i := 0; i < 32; i++ {
         scheduler.AddDecodeSequence("low_priority_" + string(i))
     }
 
     println("Total sequences:", scheduler.GetPendingSequenceCount())
-
 
     for iteration := 0; iteration < 3; iteration++ {
         schedule := scheduler.PlanIteration(128, 128)
@@ -287,14 +273,12 @@ func CacheSwappingExample() {
 
     println("Initial cache: 8GB GPU memory")
 
-
     for i := 0; i < 32; i++ {
         seq_id := "seq_" + string(i)
         cache_manager.AllocateBlock(seq_id, 0, 256)
     }
 
     println("Cache utilization:", cache_manager.GetCacheUtilization(), "%")
-
 
     println("\nSwapping sequences to host:")
     for i := 0; i < 8; i++ {
@@ -307,7 +291,6 @@ func CacheSwappingExample() {
     }
 
     println("New utilization:", cache_manager.GetCacheUtilization(), "%")
-
 
     println("\nSwapping sequences back to GPU:")
     result := cache_manager.SwapToDevice("seq_0", 256)

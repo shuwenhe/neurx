@@ -1,4 +1,3 @@
-
 package neurx.parser.error_recovery
 
 use neurx.parser.types

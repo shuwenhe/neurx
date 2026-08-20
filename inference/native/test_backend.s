@@ -1,5 +1,4 @@
 use std.conv.int_to_string
-
 package neurx.inference.test_backend
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
@@ -56,7 +55,6 @@ func generate_response(string prompt, int max_tokens) string {
     }
     return response
 }
-
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 
 func main() {

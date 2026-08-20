@@ -1,4 +1,3 @@
-
 package neurx.multimodal.feature_fusion
 
 import (

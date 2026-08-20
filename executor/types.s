@@ -1,4 +1,3 @@
-
 const (
 
     EXECUTOR_STATE_IDLE         = 0

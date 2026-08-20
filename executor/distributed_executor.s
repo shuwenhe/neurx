@@ -1,4 +1,3 @@
-
 import "types.s"
 import "executor_base.s"
 
@@ -29,12 +28,10 @@ func (DistributedExecutor* de) Initialize() ExecutionResult {
         return result
     }
 
-
     result = de.discover_peers()
     if result.success == 0 {
         return result
     }
-
 
     result = de.synchronize_init()
 
@@ -42,8 +39,6 @@ func (DistributedExecutor* de) Initialize() ExecutionResult {
 }
 
 func (DistributedExecutor* de) discover_peers() ExecutionResult {
-
-
 
     for i := 0; i < de.distributed_config.world_size; i++ {
         if i != de.distributed_config.rank {
@@ -56,8 +51,6 @@ func (DistributedExecutor* de) discover_peers() ExecutionResult {
 }
 
 func (DistributedExecutor* de) synchronize_init() ExecutionResult {
-
-
 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
@@ -73,18 +66,15 @@ func (DistributedExecutor* de) ExecuteDistributedIteration() ExecutionResult {
 
     start_time := get_time_ms()
 
-
     result := de.gather_inputs()
     if result.success == 0 {
         return result
     }
 
-
     local_result := de.base.ExecuteIteration()
     if local_result.success == 0 {
         return local_result
     }
-
 
     if de.tensor_parallel_size > 1 {
         result = de.all_reduce_gradients()
@@ -92,7 +82,6 @@ func (DistributedExecutor* de) ExecuteDistributedIteration() ExecutionResult {
             return result
         }
     }
-
 
     result = de.synchronize_results()
     if result.success == 0 {
@@ -111,20 +100,15 @@ func (DistributedExecutor* de) ExecuteDistributedIteration() ExecutionResult {
 
 func (DistributedExecutor* de) gather_inputs() ExecutionResult {
 
-
-
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
 func (DistributedExecutor* de) all_reduce_gradients() ExecutionResult {
 
-
-
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
 func (DistributedExecutor* de) synchronize_results() ExecutionResult {
-
 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
@@ -138,8 +122,6 @@ func (DistributedExecutor* de) SendToRank(rank i32, data []u8) ExecutionResult {
         }
     }
 
-
-
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
@@ -152,40 +134,30 @@ func (DistributedExecutor* de) ReceiveFromRank(rank i32) ExecutionResult {
         }
     }
 
-
-
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
 func (DistributedExecutor* de) BroadcastFromRank(rank i32, data []u8) ExecutionResult {
-
 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
 func (DistributedExecutor* de) AllGather(local_data []u8) ExecutionResult {
 
-
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
 func (DistributedExecutor* de) TensorParallelForward(input []f32) ExecutionResult {
-
-
-
 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
 func (DistributedExecutor* de) PipelineParallelForward(layers []string) ExecutionResult {
 
-
-
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
 func (DistributedExecutor* de) LoadBalance(sequences []string) [][]string {
-
 
     result := make([][]string, de.distributed_config.world_size)
     for i := 0; i < len(sequences); i++ {
@@ -197,7 +169,6 @@ func (DistributedExecutor* de) LoadBalance(sequences []string) [][]string {
 }
 
 func (DistributedExecutor* de) CollectResults() ExecutionResult {
-
 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
@@ -214,8 +185,6 @@ func (DistributedExecutor* de) GetDistributedStats() map[string]f64 {
 }
 
 func (DistributedExecutor* de) Shutdown() ExecutionResult {
-
-
 
     return de.base.Shutdown()
 }

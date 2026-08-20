@@ -1,4 +1,3 @@
-
 package neurx.multimodal.dynamic_resolution
 
 import (

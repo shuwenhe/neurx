@@ -1,4 +1,3 @@
-
 .PHONY: help build train train-full train-amp train-distributed demo test clean
 
 S_COMPILER ?= s

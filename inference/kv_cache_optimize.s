@@ -2,7 +2,6 @@ package neurx.inference.kv_cache_optimize
 use std.conv.int_to_string
 use std.conv.float_to_string_precision
 
-
 struct kv_cache_config {
     int page_size_tokens
     int max_pages
