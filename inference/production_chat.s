@@ -179,8 +179,19 @@ func http_body(string response) string {
 func backend_ready(string host, int port) bool {
     string response = http_request(host, port, "GET", "/health", "", "")
     string body = http_body(response)
-    index_of(body, "\"status\":\"ok\"") >= 0 &&
-        index_of(body, "\"backend\":\"neurx-s-cpu\"") >= 0
+    if index_of(body, "\"status\":\"ok\"") < 0 {
+        return false
+    }
+    if index_of(body, "\"backend\":\"neurx-s-cpu\"") >= 0 {
+        return true
+    }
+    if index_of(body, "\"backend\":\"neurx-gpu\"") >= 0 {
+        return true
+    }
+    if index_of(body, "\"backend\":\"neurx-gpu-enhanced\"") >= 0 {
+        return true
+    }
+    false
 }
 
 func stop_owned_backend(bool owned, string pid_file) int {

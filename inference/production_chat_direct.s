@@ -1,8 +1,10 @@
 package neurx.inference.production_chat_direct
 use std.conv.int_to_string
+use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, generate_response_stream}
 
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+extern func runtime_env_get(string key, string default_value) string
 
 func trim(string s) string {
     int i = 0
@@ -63,36 +65,25 @@ func to_lowercase(string text) string {
     return result
 }
 
-func generate_medical_response(string prompt) string {
-    string lower = to_lowercase(prompt)
-    if contains_keyword(lower, "hello") || contains_keyword(lower, "hi") || contains_keyword(lower, "你好") {
-        return "I'm a medical AI assistant trained on medical knowledge. How can I help you with your medical questions today?"
+func generate_medical_response(real_text_engine_state state, string prompt) string {
+    if !state.ready {
+        return "error: " + state.error_message
     }
-    if contains_keyword(lower, "treatment") || contains_keyword(lower, "治疗") {
-        return "Treatment approaches depend on the specific condition. Common options include medication therapy, physical therapy, surgical intervention, or conservative management. Please consult with a healthcare provider for personalized treatment recommendations."
+    real_generation_result result = generate_response(state, prompt, 128)
+    if !result.ok {
+        if len(result.error_message) > 0 {
+            return "error: " + result.error_message
+        }
+        return "error: real model inference failed"
     }
-    if contains_keyword(lower, "symptom") || contains_keyword(lower, "症状") || contains_keyword(lower, "pain") || contains_keyword(lower, "fever") {
-        return "Symptoms can indicate various conditions. Fever, pain, and other symptoms require proper medical evaluation. Please seek professional medical attention for accurate diagnosis."
+    return result.text
+}
+
+func stream_medical_token(string token) bool {
+    if len(token) > 0 {
+        print(token + " ")
     }
-    if contains_keyword(lower, "diagnosis") || contains_keyword(lower, "diagnos") || contains_keyword(lower, "诊断") {
-        return "Diagnosis requires a comprehensive medical evaluation including patient history, physical examination, and appropriate diagnostic tests. A healthcare provider can determine the correct diagnosis."
-    }
-    if contains_keyword(lower, "disease") || contains_keyword(lower, "condition") || contains_keyword(lower, "疾病") {
-        return "Various diseases and conditions have different presentations and management strategies. Understanding the specific disease characteristics is essential for appropriate care."
-    }
-    if contains_keyword(lower, "medication") || contains_keyword(lower, "drug") || contains_keyword(lower, "medicine") || contains_keyword(lower, "药物") {
-        return "Medications should be taken only as prescribed by a healthcare provider. Always follow dosing instructions and report any side effects or concerns to your doctor."
-    }
-    if contains_keyword(lower, "infection") || contains_keyword(lower, "感染") {
-        return "Infections can be caused by bacteria, viruses, fungi, or parasites. The appropriate treatment depends on the type of infection and requires professional medical diagnosis."
-    }
-    if contains_keyword(lower, "health") || contains_keyword(lower, "healthy") || contains_keyword(lower, "care") || contains_keyword(lower, "健康") {
-        return "Maintaining good health involves regular exercise, balanced nutrition, adequate sleep, stress management, and preventive medical care. Consult healthcare professionals for personalized health advice."
-    }
-    if contains_keyword(lower, "thank") || contains_keyword(lower, "thanks") || contains_keyword(lower, "谢谢") {
-        return "You're welcome! Please don't hesitate to ask if you have any other medical questions."
-    }
-    return "That's an important medical question. For accurate medical advice, please consult with a qualified healthcare provider who can evaluate your specific situation and medical history."
+    true
 }
 
 func main() {
@@ -116,6 +107,11 @@ func main() {
     print("  Type your medical question and press Enter\n")
     print("  /exit or exit to quit\n")
     print("  /reset to clear conversation history\n\n")
+    real_text_engine_state state = load_real_text_engine(model_path)
+    if !state.ready {
+        print("error: " + state.error_message + "\n")
+        return 0
+    }
     string conversation_history = ""
     int turn_count = 0
     while true {
@@ -135,13 +131,11 @@ func main() {
             continue
         }
         turn_count = turn_count + 1
-        string response = generate_medical_response(user_input)
-        print("\nAssistant: " + response + "\n\n")
+        print("Assistant: ")
+        real_generation_result result = generate_response_stream(state, user_input, 128, stream_medical_token)
+        string response = result.text
+        print("\n\n")
         conversation_history = conversation_history + "User: " + user_input + "\n"
         conversation_history = conversation_history + "Assistant: " + response + "\n"
     }
-}
-
-func runtime_env_get(string name, string default_value) string {
-    default_value
 }

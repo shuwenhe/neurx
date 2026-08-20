@@ -1,24 +1,22 @@
 package real_inference_with_model
 
 use std.conv.int_to_string
+use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result}
 
 func generate_response(string question) string {
-    if question == "hello" || question == "你好" {
-        return "你好！我是一个基于真实权重的神经网络AI助手。"
+    string model_path = neurx.inference.runtime.real_text_engine.resolve_model_path_from_env()
+    real_text_engine_state state = neurx.inference.runtime.real_text_engine.load_real_text_engine(model_path)
+    if !state.ready {
+        return "error: " + state.error_message
     }
-    if question == "who" || question == "你是谁" {
-        return "我是语言模型0.5B，一个拥有494百万参数的Transformer模型。"
+    real_generation_result result = neurx.inference.runtime.real_text_engine.generate_response(state, question, 128)
+    if !result.ok {
+        if len(result.error_message) > 0 {
+            return "error: " + result.error_message
+        }
+        return "error: real model inference failed"
     }
-    if question == "help" || question == "帮助" {
-        return "我可以帮助您进行自然语言处理、问答、文本生成等任务。"
-    }
-    if question == "model" || question == "模型" {
-        return "我的模型架构包括12个Transformer块，896维隐藏层，14个注意头。"
-    }
-    if question == "training" || question == "训练" {
-        return "我通过监督学习和强化学习训练而来。所有权重都保存在真实的safetensors格式文件中。"
-    }
-    return "这是一个基于真实模型权重的回复。"
+    return result.text
 }
 
 func main() {

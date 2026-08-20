@@ -1,7 +1,15 @@
 package neurx.inference.api.sse_server
-use neurx.inference.api.http_server.{http_server, create_http_server, close_http_server, int_to_string, server_accept_loop, write_client_data}
+use std.result.result
+use neurx.inference.api.http_server.{http_server, create_http_server, close_http_server, int_to_string, write_client_data}
 use neurx.inference.api.openai_protocol.{openai_request, openai_request_result, parse_openai_request, openai_chat_chunk, openai_done_event, openai_error_body, openai_json_escape, openai_embedding_body}
-use src.net.http.{http_request, http_response}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
+use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response_stream}
+use src.net.http.{http_request, http_response, parse_http_request, format_http_response}
+use neurx.serving.network.native_socket.{neurx_net_accept}
+extern "intrinsic" func __host_slice(string text, int start, int end) string
+extern "intrinsic" func __sys_read_string(int fd, int count) string
+extern "intrinsic" func __sys_write_string(int fd, string data) int
+extern "intrinsic" func __sys_close(int fd) int
 
 struct sse_server_config {
     string host
@@ -24,6 +32,15 @@ struct generation_callback_state {
     int cursor
     bool done
 }
+
+var g_cached_engine real_text_engine_state = real_text_engine_state{}
+var g_cached_engine_path string = ""
+var g_cached_engine_loaded bool = false
+var g_stream_client_fd int = -1
+var g_stream_request_id string = ""
+var g_stream_model string = ""
+var g_stream_tokens_sent int = 0
+var g_stream_max_tokens int = 0
 
 func new_sse_server_config(string host, int port, string default_model) sse_server_config {
     int norm_port = port
@@ -98,13 +115,101 @@ func sse_write_done(int client_fd) int {
     write_client_data(client_fd, openai_done_event())
 }
 
-func next_token(generation_callback_state gen) generation_callback_state {
-    if gen.cursor >= len(gen.tokens) {
-        gen.done = true
-        return gen
+func load_engine() real_text_engine_state {
+    string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
+    if g_cached_engine_loaded && g_cached_engine_path == model_path {
+        return g_cached_engine
     }
-    gen.cursor = gen.cursor + 1
-    gen
+    real_text_engine_state state = load_real_text_engine(model_path)
+    g_cached_engine = state
+    g_cached_engine_path = model_path
+    g_cached_engine_loaded = true
+    state
+}
+
+func stream_openai_token(string token) bool {
+    if len(token) == 0 {
+        return true
+    }
+    if g_stream_client_fd < 0 {
+        return false
+    }
+    if g_stream_tokens_sent >= g_stream_max_tokens {
+        return false
+    }
+    sse_write_chunk(g_stream_client_fd, g_stream_request_id, g_stream_model, token, "")
+    g_stream_tokens_sent = g_stream_tokens_sent + 1
+    true
+}
+
+func write_http_response(int client_fd, http_response resp) {
+    write_client_data(client_fd, format_http_response(resp))
+}
+
+func write_http_error(int client_fd, int status_code, string message, string error_type, string code) {
+    write_http_response(client_fd, error_response(status_code, message, error_type, code))
+}
+
+func handle_streaming_chat(int client_fd, openai_request oreq, sse_server_config config) {
+    real_text_engine_state state = load_engine()
+    if !state.ready {
+        write_http_error(client_fd, 500, state.error_message, "server_error", "engine_not_ready")
+        return
+    }
+    string model = oreq.model
+    if model == "" {
+        model = config.default_model
+    }
+    g_stream_client_fd = client_fd
+    g_stream_request_id = oreq.request_id
+    g_stream_model = model
+    g_stream_tokens_sent = 0
+    g_stream_max_tokens = oreq.max_tokens
+    write_client_data(client_fd, sse_header())
+    real_generation_result result = generate_response_stream(state, oreq.prompt, oreq.max_tokens, stream_openai_token)
+    if !result.ok && len(result.error_message) > 0 {
+        sse_write_chunk(client_fd, oreq.request_id, model, "error: " + result.error_message, "stop")
+    } else {
+        sse_write_chunk(client_fd, oreq.request_id, model, "", "stop")
+    }
+    sse_write_done(client_fd)
+    g_stream_client_fd = -1
+}
+
+func handle_socket_connection(int client_fd, sse_server_config config) {
+    string request_data = __sys_read_string(client_fd, 8192)
+    if len(request_data) == 0 {
+        __sys_close(client_fd)
+        return
+    }
+    http_request req = parse_http_request(request_data)
+    if req.method == "POST" && (req.path == "/v1/chat/completions" || req.path == "/chat/completions") {
+        openai_request_result parsed = parse_openai_request(req.body, extract_request_id(req.path))
+        if !parsed.valid {
+            write_http_error(client_fd, parsed.status_code, parsed.error_message, "invalid_request_error", "invalid_request")
+            __sys_close(client_fd)
+            return
+        }
+        openai_request oreq = parsed.request
+        if oreq.stream {
+            handle_streaming_chat(client_fd, oreq, config)
+            __sys_close(client_fd)
+            return
+        }
+    }
+    http_response resp = route_request(req, config)
+    write_http_response(client_fd, resp)
+    __sys_close(client_fd)
+}
+
+func next_token(generation_callback_state gen) generation_callback_state {
+    generation_callback_state current = gen
+    if current.cursor >= len(current.tokens) {
+        current.done = true
+        return current
+    }
+    current.cursor = current.cursor + 1
+    current
 }
 
 func current_token(generation_callback_state gen) string {
@@ -115,30 +220,33 @@ func current_token(generation_callback_state gen) string {
 }
 
 func sse_serve_stream(int client_fd, sse_session session, generation_callback_state gen) sse_session {
+    sse_session current = session
+    generation_callback_state current_gen = gen
     write_client_data(client_fd, sse_header())
-    while !gen.done && session.tokens_sent < session.max_tokens {
-        gen = next_token(gen)
-        if gen.done {
+    while !current_gen.done && current.tokens_sent < current.max_tokens {
+        current_gen = next_token(current_gen)
+        if current_gen.done {
             break
         }
-        string tok = current_token(gen)
-        sse_write_chunk(client_fd, session.request_id, session.model, tok, "")
-        session.tokens_sent = session.tokens_sent + 1
+        string tok = current_token(current_gen)
+        sse_write_chunk(client_fd, current.request_id, current.model, tok, "")
+        current.tokens_sent = current.tokens_sent + 1
     }
-    sse_write_chunk(client_fd, session.request_id, session.model, "", "stop")
+    sse_write_chunk(client_fd, current.request_id, current.model, "", "stop")
     sse_write_done(client_fd)
-    session.closed = true
-    session
+    current.closed = true
+    current
 }
 
 func non_stream_response(sse_session session, generation_callback_state gen) string {
     string full = ""
-    while !gen.done {
-        gen = next_token(gen)
-        if gen.done {
+    generation_callback_state current_gen = gen
+    while !current_gen.done {
+        current_gen = next_token(current_gen)
+        if current_gen.done {
             break
         }
-        full = full + current_token(gen)
+        full = full + current_token(current_gen)
     }
     string body = "{\"id\":\"" + openai_json_escape(session.request_id) + "\","
     body = body + "\"object\":\"chat.completion\","
@@ -149,18 +257,20 @@ func non_stream_response(sse_session session, generation_callback_state gen) str
 }
 
 func sse_serve_non_stream(int client_fd, sse_session session, generation_callback_state gen) sse_session {
-    while !gen.done && session.tokens_sent < session.max_tokens {
-        gen = next_token(gen)
-        if gen.done {
+    sse_session current = session
+    generation_callback_state current_gen = gen
+    while !current_gen.done && current.tokens_sent < current.max_tokens {
+        current_gen = next_token(current_gen)
+        if current_gen.done {
             break
         }
-        session.tokens_sent = session.tokens_sent + 1
+        current.tokens_sent = current.tokens_sent + 1
     }
-    string body = non_stream_response(session, gen)
+    string body = non_stream_response(current, current_gen)
     string header = json_response_header(len(body))
     write_client_data(client_fd, header + body)
-    session.closed = true
-    session
+    current.closed = true
+    current
 }
 
 func extract_request_id(string path) string {
@@ -175,10 +285,10 @@ func extract_request_id(string path) string {
     if slash < 0 || slash >= len(path) - 1 {
         return "req-" + int_to_string(current_timestamp_ms() % 100000)
     }
-    path[slash+1:]
+    return __host_slice(path, slash + 1, len(path))
 }
 
-func current_timestamp_ms() int64 {
+func current_timestamp_ms() int {
     0
 }
 
@@ -248,8 +358,13 @@ func start_sse_server(sse_server_config config) {
         return
     }
     print("sse server: streaming at http://" + config.host + ":" + int_to_string(config.port) + "/v1/chat/completions\n")
-    server_accept_loop(server, func(http_request req) http_response {
-        return route_request(req, config)
-    })
+    while server.running {
+        int client_fd = neurx_net_accept(server.listen_fd)
+        if client_fd >= 0 {
+            handle_socket_connection(client_fd, config)
+        } else {
+            print("error: accept failed\n")
+        }
+    }
     close_http_server(server)
 }

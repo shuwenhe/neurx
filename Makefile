@@ -61,6 +61,8 @@ PRODUCTION_S_INFERENCE_DIR := $(CURDIR_UNIX)/artifacts/build/production_s_infere
 PRODUCTION_S_BACKEND := $(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir
 PRODUCTION_S_GPU_BACKEND := $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir
 PRODUCTION_S_GPU_BACKEND_ENHANCED := $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir
+PRODUCTION_S_TRANSFORMER_REAL := $(PRODUCTION_S_INFERENCE_DIR)/transformer_real_inference.ir
+PRODUCTION_S_QWEN_TOKENIZER := $(PRODUCTION_S_INFERENCE_DIR)/qwen_tokenizer.ir
 PRODUCTION_S_CHAT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat.ir
 PRODUCTION_S_CHAT_DIRECT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat_direct.ir
 PRODUCTION_S_CHAT_ENHANCED_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat_enhanced.ir
@@ -938,6 +940,30 @@ $(PRODUCTION_S_GPU_BACKEND_ENHANCED): inference/native/production_gpu_backend_en
 	}
 	@echo "✓ GPU backend enhanced compiled: $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir"
 	@touch '$(PRODUCTION_S_GPU_BACKEND_ENHANCED)'
+
+$(PRODUCTION_S_TRANSFORMER_REAL): inference/native/transformer_real_inference.s | $(PRODUCTION_S_INFERENCE_DIR)
+	@echo "🔧 Building Real Transformer Inference Module..."
+	@$(S_SEED_COMPILER) inference/native/transformer_real_inference.s '$(PRODUCTION_S_TRANSFORMER_REAL)' || { \
+		echo "❌ Transformer Real Inference compilation failed!"; \
+		exit 1; \
+	}
+	@test -s '$(PRODUCTION_S_TRANSFORMER_REAL)' || { \
+		echo "❌ Transformer Real Inference IR file is empty!"; \
+		exit 1; \
+	}
+	@echo "✓ Real Transformer Inference compiled: $(PRODUCTION_S_TRANSFORMER_REAL)"
+
+$(PRODUCTION_S_QWEN_TOKENIZER): inference/native/qwen_tokenizer.s | $(PRODUCTION_S_INFERENCE_DIR)
+	@echo "🔧 Building Qwen Tokenizer..."
+	@$(S_SEED_COMPILER) inference/native/qwen_tokenizer.s '$(PRODUCTION_S_QWEN_TOKENIZER)' || { \
+		echo "❌ Qwen Tokenizer compilation failed!"; \
+		exit 1; \
+	}
+	@test -s '$(PRODUCTION_S_QWEN_TOKENIZER)' || { \
+		echo "❌ Qwen Tokenizer IR file is empty!"; \
+		exit 1; \
+	}
+	@echo "✓ Qwen Tokenizer compiled: $(PRODUCTION_S_QWEN_TOKENIZER)"
 
 $(PRODUCTION_S_CHAT_IR): inference/production_chat.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "Compiling production chat control plane in S..."

@@ -20,6 +20,10 @@ struct inference_response {
     float latency_ms
 }
 
+var g_cached_engine real_text_engine_state = real_text_engine_state{}
+var g_cached_engine_path string = ""
+var g_cached_engine_loaded bool = false
+
 func parse_json_string(string json_str, string key) string {
     start_key := "\"" + key + "\":"
     start_idx := index_of(json_str, start_key)
@@ -96,7 +100,14 @@ func parse_inference_request(string body) inference_request {
 }
 
 func load_engine() real_text_engine_state {
-    load_real_text_engine(resolve_model_path_from_env())
+    string model_path = resolve_model_path_from_env()
+    if g_cached_engine_loaded && g_cached_engine_path == model_path {
+        return g_cached_engine
+    }
+    g_cached_engine = load_real_text_engine(model_path)
+    g_cached_engine_path = model_path
+    g_cached_engine_loaded = true
+    g_cached_engine
 }
 
 func handle_generate(http_request req) http_response {

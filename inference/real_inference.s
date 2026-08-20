@@ -1,11 +1,136 @@
 package real_inference
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file}
-use std.binary.parse_int_at_bytes
-use std.binary.u64_le_bytes
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, trim}
 use std.conv.int_to_string
 extern "intrinsic" func __host_read_binary_file(string path) []int
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
+func find_substring(string text, string pattern, int start_pos) int {
+    int start = start_pos
+    if start < 0 {
+        start = 0
+    }
+    if len(pattern) == 0 {
+        return start
+    }
+    if len(pattern) > len(text) {
+        return -1
+    }
+
+    int i = start
+    while i <= len(text) - len(pattern) {
+        int j = 0
+        while j < len(pattern) &&
+            __host_slice(text, i + j, i + j + 1) == __host_slice(pattern, j, j + 1) {
+            j = j + 1
+        }
+        if j == len(pattern) {
+            return i
+        }
+        i = i + 1
+    }
+
+    return -1
+}
+
+func lower_ascii(string text) string {
+    string output = ""
+    int i = 0
+    while i < len(text) {
+        int ch = text[i]
+        if ch >= 65 && ch <= 90 {
+            ch = ch + 32
+        }
+        output = output + string(ch)
+        i = i + 1
+    }
+    return output
+}
+
+func contains_text(string text, string needle) bool {
+    find_substring(text, needle, 0) >= 0
+}
+
+func extract_last_user_message(string prompt) string {
+    string qwen_marker = "<|im_start|>user\n"
+    int marker_pos = find_substring(prompt, qwen_marker, 0)
+    int last_pos = -1
+    while marker_pos >= 0 {
+        last_pos = marker_pos
+        int next_search = marker_pos + len(qwen_marker)
+        if next_search >= len(prompt) {
+            break
+        }
+        int next_pos = find_substring(__host_slice(prompt, next_search, len(prompt)), qwen_marker, 0)
+        if next_pos < 0 {
+            break
+        }
+        marker_pos = next_search + next_pos
+    }
+    if last_pos >= 0 {
+        int content_start = last_pos + len(qwen_marker)
+        int content_end = find_substring(__host_slice(prompt, content_start, len(prompt)), "<|im_end|>", 0)
+        if content_end < 0 {
+            return trim(__host_slice(prompt, content_start, len(prompt)))
+        }
+        return trim(__host_slice(prompt, content_start, content_start + content_end))
+    }
+
+    string plain_marker = "User:"
+    marker_pos = find_substring(prompt, plain_marker, 0)
+    last_pos = -1
+    while marker_pos >= 0 {
+        last_pos = marker_pos
+        int next_search = marker_pos + len(plain_marker)
+        if next_search >= len(prompt) {
+            break
+        }
+        int next_pos = find_substring(__host_slice(prompt, next_search, len(prompt)), plain_marker, 0)
+        if next_pos < 0 {
+            break
+        }
+        marker_pos = next_search + next_pos
+    }
+    if last_pos < 0 {
+        plain_marker = "user:"
+        marker_pos = find_substring(prompt, plain_marker, 0)
+        while marker_pos >= 0 {
+            last_pos = marker_pos
+            int next_search = marker_pos + len(plain_marker)
+            if next_search >= len(prompt) {
+                break
+            }
+            int next_pos = find_substring(__host_slice(prompt, next_search, len(prompt)), plain_marker, 0)
+            if next_pos < 0 {
+                break
+            }
+            marker_pos = next_search + next_pos
+        }
+    }
+    if last_pos >= 0 {
+        int content_start = last_pos + len(plain_marker)
+        while content_start < len(prompt) {
+            int ch = prompt[content_start]
+            if ch != 32 && ch != 9 {
+                break
+            }
+            content_start = content_start + 1
+        }
+        int content_end = find_substring(__host_slice(prompt, content_start, len(prompt)), "\nAssistant:", 0)
+        if content_end < 0 {
+            content_end = find_substring(__host_slice(prompt, content_start, len(prompt)), "\nassistant:", 0)
+        }
+        if content_end < 0 {
+            content_end = find_substring(__host_slice(prompt, content_start, len(prompt)), "\n", 0)
+        }
+        if content_end < 0 {
+            return trim(__host_slice(prompt, content_start, len(prompt)))
+        }
+        return trim(__host_slice(prompt, content_start, content_start + content_end))
+    }
+
+    return trim(prompt)
+}
 
 func find_substring_bytes([]int bytes, string needle, int start_pos) int {
     int start = start_pos
@@ -63,6 +188,45 @@ func skip_to_digit_bytes([]int bytes, int pos) int {
         iterations = iterations + 1
     }
     -1
+}
+
+func normalize_byte(int value) int {
+    if value < 0 {
+        return value + 256
+    }
+    return value
+}
+
+func u64_le_bytes([]int bytes, int offset) int {
+    if offset < 0 || offset + 8 > len(bytes) {
+        return 0
+    }
+    int value = 0
+    int multiplier = 1
+    int i = 0
+    while i < 8 {
+        value = value + normalize_byte(bytes[offset + i]) * multiplier
+        multiplier = multiplier * 256
+        i = i + 1
+    }
+    return value
+}
+
+func parse_int_at_bytes([]int bytes, int offset) int {
+    if offset < 0 || offset >= len(bytes) {
+        return 0
+    }
+    int value = 0
+    int index = offset
+    while index < len(bytes) {
+        int c = bytes[index]
+        if c < 48 || c > 57 {
+            break
+        }
+        value = value * 10 + (c - 48)
+        index = index + 1
+    }
+    return value
 }
 
 func tensor_index_record(int offset, int size, int found) []int {
@@ -844,8 +1008,13 @@ func main() {
     print("Loaded layer weights: 24 layers\n\n")
     print("Running single-turn demo prompt.\n\n")
     string input_text = load_prompt_text()
-    print("User: " + input_text + "\n\n")
-    []int prompt_tokens = tokenize(input_text)
+    string user_text = extract_last_user_message(input_text)
+    if len(user_text) == 0 {
+        user_text = trim(input_text)
+    }
+    print("User: " + user_text + "\n\n")
+
+    []int prompt_tokens = tokenize(user_text)
     int logits_seed = forward_step(prompt_tokens, model_path, metadata_bytes, embed_index, norm_index, head_index)
     int max_new_tokens = 8
     string max_tokens_text = runtime_env_get("NEURX_CHAT_MAX_NEW_TOKENS", "8")

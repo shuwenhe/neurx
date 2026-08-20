@@ -1061,11 +1061,64 @@ func extract_last_user_message(string prompt) string {
         }
         marker_pos = next_search + next_pos
     }
+    if last_pos >= 0 {
+        int content_start = last_pos + len(marker)
+        int end_rel = find_substring(__host_slice(prompt, content_start, len(prompt)), "<|im_end|>")
+        if end_rel < 0 {
+            return __host_slice(prompt, content_start, len(prompt))
+        }
+        return __host_slice(prompt, content_start, content_start + end_rel)
+    }
+
+    marker = "User:"
+    marker_pos = find_substring(prompt, marker)
+    last_pos = -1
+    while marker_pos >= 0 {
+        last_pos = marker_pos
+        int next_search = marker_pos + len(marker)
+        if next_search >= len(prompt) {
+            break
+        }
+        int next_pos = find_substring(__host_slice(prompt, next_search, len(prompt)), marker)
+        if next_pos < 0 {
+            break
+        }
+        marker_pos = next_search + next_pos
+    }
+    if last_pos < 0 {
+        marker = "user:"
+        marker_pos = find_substring(prompt, marker)
+        while marker_pos >= 0 {
+            last_pos = marker_pos
+            int next_search = marker_pos + len(marker)
+            if next_search >= len(prompt) {
+                break
+            }
+            int next_pos = find_substring(__host_slice(prompt, next_search, len(prompt)), marker)
+            if next_pos < 0 {
+                break
+            }
+            marker_pos = next_search + next_pos
+        }
+    }
     if last_pos < 0 {
         return prompt
     }
     int content_start = last_pos + len(marker)
-    int end_rel = find_substring(__host_slice(prompt, content_start, len(prompt)), "<|im_end|>")
+    while content_start < len(prompt) {
+        int ch = prompt[content_start]
+        if ch != 32 && ch != 9 {
+            break
+        }
+        content_start = content_start + 1
+    }
+    int end_rel = find_substring(__host_slice(prompt, content_start, len(prompt)), "\nAssistant:")
+    if end_rel < 0 {
+        end_rel = find_substring(__host_slice(prompt, content_start, len(prompt)), "\nassistant:")
+    }
+    if end_rel < 0 {
+        end_rel = find_substring(__host_slice(prompt, content_start, len(prompt)), "\n")
+    }
     if end_rel < 0 {
         return __host_slice(prompt, content_start, len(prompt))
     }
@@ -1073,18 +1126,7 @@ func extract_last_user_message(string prompt) string {
 }
 
 func fallback_response(string prompt) string {
-    string user_text = extract_last_user_message(prompt)
-    if contains_keyword(user_text, "c++") &&
-       (contains_keyword(user_text, "1+到100") ||
-        contains_keyword(user_text, "1到100") ||
-        contains_keyword(user_text, "1 到 100") ||
-        contains_keyword(user_text, "1到 100")) {
-        return "#include <iostream>\n\nint main() {\n    int sum = 0;\n    for (int i = 1; i <= 100; ++i) {\n        sum += i;\n    }\n    std::cout << sum << std::endl;\n    return 0;\n}"
-    }
-    if contains_keyword(user_text, "hello") {
-        return "hello"
-    }
-    return "当前 CPU 后端仍在简化推理路径，暂时不能可靠回答这个请求。"
+    return "当前模型输出为空或解码失败，请检查模型权重、上下文模板和推理参数后重试。"
 }
 
 func slice_bytes([]int bytes, int start, int count) []int {
@@ -2161,7 +2203,14 @@ func generate_response(string prompt, int max_tokens) string {
     if len(model_prompt) == 0 {
         model_prompt = prompt
     }
-    if max_tokens > 1 {
+    if contains_keyword(model_prompt, "hello") ||
+       contains_keyword(model_prompt, "Hello") ||
+       contains_keyword(model_prompt, "hi") ||
+       contains_keyword(model_prompt, "Hi") ||
+       contains_keyword(model_prompt, "你好") {
+        print("[Inference] Greeting detected; using fallback responder\n")
+        result = fallback_response(prompt)
+    } else if max_tokens > 1 {
         print("[Inference] Using multi-token generation\n")
         if optimize_mode == "optimized" {
             print("[Inference] Mode: Full optimization (Prefill/Decode + KV-cache)\n")

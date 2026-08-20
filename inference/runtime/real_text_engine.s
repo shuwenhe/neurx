@@ -1,4 +1,5 @@
 package neurx.inference.runtime.real_text_engine
+use neurx.attention.paged_attention_core.{paged_attention_config, paged_kv_cache, slot_mapping, new_paged_kv_cache, reserve_tokens, write_kv_to_cache, compute_paged_attention_gqa}
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, trim}
 use neurx.inference.runtime.model_manifest.{hf_model_manifest, load_hf_model_manifest}
 use neurx.inference.model_cpu_inference.{safetensors_model, open_model, validate_model, read_tensor_elements, bf16_at, load_vector, matvec_named, rms_norm}
@@ -44,6 +45,19 @@ func abs_float(float value) float {
         return 0.0 - value
     }
     value
+}
+
+func sqrt_approx(float value) float {
+    if value <= 0.0 {
+        return 1.0
+    }
+    float guess = value
+    int i = 0
+    while i < 6 {
+        guess = 0.5 * (guess + value / guess)
+        i = i + 1
+    }
+    guess
 }
 
 func min_int(int a, int b) int {
@@ -507,6 +521,41 @@ func copy_vector([]float source) []float {
     output
 }
 
+func token_text_from_id(int token_id) string {
+    string word = token_to_word(token_id)
+    if len(word) == 0 {
+        return "token_" + int_to_string(token_id - (token_id / 1000) * 1000)
+    }
+    word
+}
+
+func make_layer_cache(real_text_engine_state state, int total_tokens) paged_kv_cache {
+    int hidden_size = safe_hidden_size(state)
+    paged_attention_config config = paged_attention_config{
+        block_size: 16,
+        num_kv_heads: 1,
+        head_size: hidden_size,
+        max_blocks: 1024,
+        scale: 1.0 / sqrt_approx(float(hidden_size)),
+    }
+    paged_kv_cache cache = new_paged_kv_cache(config)
+    if total_tokens > 0 {
+        cache = reserve_tokens(cache, total_tokens)
+    }
+    cache
+}
+
+func make_layer_caches(real_text_engine_state state, int total_tokens) []paged_kv_cache {
+    int layer_count = safe_num_layers(state)
+    []paged_kv_cache caches = []paged_kv_cache{cap: layer_count}
+    int layer = 0
+    while layer < layer_count {
+        caches[layer] = make_layer_cache(state, total_tokens)
+        layer = layer + 1
+    }
+    caches
+}
+
 func blend_vectors([]float left, []float right, float left_scale, float right_scale) []float {
     int size = min_int(len(left), len(right))
     []float output = []float{cap: size}
@@ -594,6 +643,105 @@ func run_transformer_layer(real_text_engine_state state, int layer, []float hidd
     hidden
 }
 
+func run_transformer_layer_cached(real_text_engine_state state, int layer, []float hidden, paged_kv_cache cache, int position) ([]float, paged_kv_cache) {
+    int hidden_size = safe_hidden_size(state)
+    int intermediate_size = safe_intermediate_size(state)
+    string input_norm = layer_name(layer, "input_layernorm.weight")
+    []float norm_weight = load_vector(state.model, input_norm, hidden_size)
+    []float normalized = rms_norm(hidden, norm_weight)
+    if len(normalized) != hidden_size {
+        return (hidden, cache)
+    }
+    string q_name = layer_name(layer, "self_attn.q_proj.weight")
+    string k_name = layer_name(layer, "self_attn.k_proj.weight")
+    string v_name = layer_name(layer, "self_attn.v_proj.weight")
+    string o_name = layer_name(layer, "self_attn.o_proj.weight")
+    []float q = matvec_named(state.model, q_name, hidden_size, hidden_size, normalized)
+    []float k = matvec_named(state.model, k_name, hidden_size, hidden_size, normalized)
+    []float v = matvec_named(state.model, v_name, hidden_size, hidden_size, normalized)
+    if len(q) != hidden_size || len(k) != hidden_size || len(v) != hidden_size {
+        return (hidden, cache)
+    }
+    if cache.total_tokens < position + 1 {
+        cache = reserve_tokens(cache, position + 1 - cache.total_tokens)
+    }
+    cache = write_kv_to_cache(cache, k, v, position)
+    []float attn_out = []float{cap: hidden_size}
+    float scale = 1.0 / sqrt_approx(float(hidden_size))
+    attn_out = compute_paged_attention_gqa(cache, q, attn_out, cache.token_to_slot, 1, 1, hidden_size, scale)
+    if len(attn_out) != hidden_size {
+        return (hidden, cache)
+    }
+    []float attention = matvec_named(state.model, o_name, hidden_size, hidden_size, attn_out)
+    if len(attention) != hidden_size {
+        return (hidden, cache)
+    }
+    int index = 0
+    while index < hidden_size {
+        hidden[index] = hidden[index] + attention[index] * 0.25
+        index = index + 1
+    }
+    string ffn_norm_name = layer_name(layer, "post_attention_layernorm.weight")
+    []float ffn_norm_weight = load_vector(state.model, ffn_norm_name, hidden_size)
+    []float ffn_hidden = rms_norm(hidden, ffn_norm_weight)
+    if len(ffn_hidden) != hidden_size {
+        return (hidden, cache)
+    }
+    string gate_name = layer_name(layer, "mlp.gate_proj.weight")
+    string up_name = layer_name(layer, "mlp.up_proj.weight")
+    string down_name = layer_name(layer, "mlp.down_proj.weight")
+    []float gate = matvec_named(state.model, gate_name, intermediate_size, hidden_size, ffn_hidden)
+    []float up = matvec_named(state.model, up_name, intermediate_size, hidden_size, ffn_hidden)
+    if len(gate) != intermediate_size || len(up) != intermediate_size {
+        return (hidden, cache)
+    }
+    []float activated = []float{cap: intermediate_size}
+    index = 0
+    while index < intermediate_size {
+        activated[index] = approx_silu(gate[index]) * up[index]
+        index = index + 1
+    }
+    []float down = matvec_named(state.model, down_name, hidden_size, intermediate_size, activated)
+    if len(down) != hidden_size {
+        return (hidden, cache)
+    }
+    index = 0
+    while index < hidden_size {
+        hidden[index] = hidden[index] + down[index] * 0.25
+        index = index + 1
+    }
+    (hidden, cache)
+}
+
+func run_transformer_stack_cached(real_text_engine_state state, []float hidden, []paged_kv_cache caches, int position) ([]float, []paged_kv_cache) {
+    int layer_count = safe_num_layers(state)
+    int layer = 0
+    while layer < layer_count {
+        ([]float updated_hidden, paged_kv_cache updated_cache) = run_transformer_layer_cached(state, layer, hidden, caches[layer], position)
+        hidden = updated_hidden
+        caches[layer] = updated_cache
+        layer = layer + 1
+    }
+    string norm_name = "model.norm.weight"
+    []float final_norm = load_vector(state.model, norm_name, safe_hidden_size(state))
+    []float output = rms_norm(hidden, final_norm)
+    if len(output) == len(hidden) {
+        return (output, caches)
+    }
+    (hidden, caches)
+}
+
+func advance_hidden_state_cached(real_text_engine_state state, []float hidden, int token_id, []paged_kv_cache caches, int position) ([]float, []paged_kv_cache) {
+    int hidden_size = safe_hidden_size(state)
+    int vocab_size = safe_vocab_size(state)
+    []float row = load_embedding_row(state.model, "model.embed_tokens.weight", token_id, hidden_size, vocab_size)
+    if len(row) != hidden_size {
+        return (hidden, caches)
+    }
+    []float blended = blend_vectors(hidden, row, 0.78, 0.22)
+    run_transformer_stack_cached(state, blended, caches, position)
+}
+
 func run_transformer_stack(real_text_engine_state state, []float hidden) []float {
     int layer_count = safe_num_layers(state)
     int layer = 0
@@ -644,16 +792,6 @@ func argmax_float([]float values) int {
 }
 
 func prompt_fallback(string prompt, string reason) string {
-    string lower = lower_ascii(prompt)
-    if contains_text(lower, "difference") || contains_text(lower, "区别") || contains_text(lower, "compare") {
-        return "NeurX now loads real safetensors weights, runs transformer projections, and serves health and generate endpoints from the same S engine."
-    }
-    if contains_text(lower, "gpu") || contains_text(lower, "cuda") || contains_text(lower, "pagedattention") {
-        return "The current S path is CPU-backed and model-aware, while GPU paged attention, CUDA graphs, distributed workers, kv offload, and recovery are still the remaining gaps."
-    }
-    if contains_text(lower, "industrial") || contains_text(lower, "工业") {
-        return "NeurX now has a real model-backed S inference path, but it still needs GPU kernels, tensor parallel scheduling, streaming transport, and fault-tolerant multi-worker execution to match production maturity."
-    }
     if len(reason) > 0 {
         return "Model fallback: " + reason
     }
@@ -785,7 +923,11 @@ func estimate_latency_ms(int prompt_tokens, int generated_tokens, int layers) fl
     base + decode + 3.0
 }
 
-func generate_response(real_text_engine_state state, string prompt, int max_new_tokens) real_generation_result {
+func noop_stream_callback(string token) bool {
+    true
+}
+
+func generate_response_stream(real_text_engine_state state, string prompt, int max_new_tokens, func(string) bool on_token) real_generation_result {
     real_generation_result result
     result.text = ""
     result.prompt_tokens = 0
@@ -793,7 +935,7 @@ func generate_response(real_text_engine_state state, string prompt, int max_new_
     result.latency_ms = 0.0
     result.model_name = state.model_name
     result.backend = state.backend
-    result.stream = false
+    result.stream = true
     result.ok = false
     result.error_message = ""
     if !state.ready {
@@ -809,7 +951,28 @@ func generate_response(real_text_engine_state state, string prompt, int max_new_
     }
     []int prompt_tokens = tokenize_prompt(prompt)
     result.prompt_tokens = len(prompt_tokens)
-    []float hidden = encode_prompt_state(state, prompt_tokens)
+    int total_tokens = len(prompt_tokens) + max_new_tokens
+    if total_tokens <= 0 {
+        total_tokens = 1
+    }
+    []paged_kv_cache caches = make_layer_caches(state, total_tokens)
+    []float hidden = []float{}
+    int position = 0
+    while position < len(prompt_tokens) {
+        int current_token = prompt_tokens[position]
+        if len(hidden) == 0 {
+            hidden = load_embedding_row(state.model, "model.embed_tokens.weight", current_token, safe_hidden_size(state), safe_vocab_size(state))
+        } else {
+            hidden = blend_vectors(hidden, load_embedding_row(state.model, "model.embed_tokens.weight", current_token, safe_hidden_size(state), safe_vocab_size(state)), 0.78, 0.22)
+        }
+        ([]float updated_hidden, []paged_kv_cache updated_caches) = run_transformer_stack_cached(state, hidden, caches, position)
+        hidden = updated_hidden
+        caches = updated_caches
+        position = position + 1
+    }
+    if len(hidden) == 0 {
+        hidden = load_embedding_row(state.model, "model.embed_tokens.weight", safe_bos_token_id(state), safe_hidden_size(state), safe_vocab_size(state))
+    }
     int generated_count = 0
     []int generated_tokens = []int{cap: max_new_tokens}
     string response_text = ""
@@ -827,15 +990,19 @@ func generate_response(real_text_engine_state state, string prompt, int max_new_
             break
         }
         generated_tokens[generated_count] = next_token
-        string word = token_to_word(next_token)
-        if len(word) == 0 {
-            word = "token_" + int_to_string(next_token - (next_token / 1000) * 1000)
-        }
+        string word = token_text_from_id(next_token)
         if len(response_text) > 0 {
             response_text = response_text + " "
         }
         response_text = response_text + word
-        hidden = advance_hidden_state(state, hidden, next_token)
+        if !on_token(word) {
+            generated_count = generated_count + 1
+            break
+        }
+        ([]float updated_hidden, []paged_kv_cache updated_caches) = advance_hidden_state_cached(state, hidden, next_token, caches, position)
+        hidden = updated_hidden
+        caches = updated_caches
+        position = position + 1
         generated_count = generated_count + 1
     }
     if len(response_text) == 0 {
@@ -845,6 +1012,12 @@ func generate_response(real_text_engine_state state, string prompt, int max_new_
     result.generated_tokens = generated_count
     result.latency_ms = estimate_latency_ms(result.prompt_tokens, result.generated_tokens, safe_num_layers(state))
     result.ok = true
+    result
+}
+
+func generate_response(real_text_engine_state state, string prompt, int max_new_tokens) real_generation_result {
+    real_generation_result result = generate_response_stream(state, prompt, max_new_tokens, noop_stream_callback)
+    result.stream = false
     result
 }
 

@@ -418,7 +418,7 @@ func main() {
 
     int health_check_retries = 0
 
-    int max_health_retries = 20
+    int max_health_retries = 3
 
     while len(health_response) == 0 && health_check_retries < max_health_retries {
 
@@ -430,9 +430,9 @@ func main() {
 
             if health_check_retries < max_health_retries {
 
-                print("   [Retry " + int_to_string(health_check_retries) + "/" + int_to_string(max_health_retries) + "] Backend not ready yet, retrying...\n")
+                print("   [Retry " + int_to_string(health_check_retries) + "/" + int_to_string(max_health_retries) + "] Backend connecting...\n")
 
-                int wait_ms = 3000000
+                int wait_ms = 500000
 
                 while wait_ms > 0 { wait_ms = wait_ms - 1 }
 

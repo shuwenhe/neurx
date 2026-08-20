@@ -1,5 +1,7 @@
 package v1
 
+use neurx.inference.runtime.model_manifest.{hf_model_manifest, load_hf_model_manifest}
+
 struct runtime_config {
     string model_path
     string model_name
@@ -18,7 +20,7 @@ struct runtime_config {
 
 func load_config_from_env() runtime_config {
     return runtime_config{
-        model_path: "/app/shuwen/model/Qwen2.5-0.5B-Instruct",
+        model_path: "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct",
         model_name: "Qwen2.5-0.5B-Instruct",
         vocab_size: 151936,
         hidden_dim: 896,
@@ -62,15 +64,28 @@ func create_neurx_runtime(runtime_config cfg) neurx_runtime* {
 }
 
 func (neurx_runtime* rt) initialize() bool {
+    manifest := load_hf_model_manifest(rt.config.model_path)
+
     model_cfg := model_config{
         model_name: rt.config.model_name,
         model_path: rt.config.model_path,
         vocab_size: rt.config.vocab_size,
         hidden_dim: rt.config.hidden_dim,
         num_layers: rt.config.num_layers,
-        num_heads: 8,
+        num_heads: 14,
         max_seq_length: rt.config.max_seq_length,
-        rope_base: 10000.0,
+        rope_base: 1000000.0,
+    }
+
+    if manifest.valid {
+        model_cfg.vocab_size = int32(manifest.config.vocab_size)
+        model_cfg.hidden_dim = int32(manifest.config.hidden_size)
+        model_cfg.num_layers = int32(manifest.config.num_layers)
+        model_cfg.num_heads = int32(manifest.config.num_attention_heads)
+        model_cfg.max_seq_length = int32(manifest.config.max_position_embeddings)
+        if manifest.config.rope_theta > 0 {
+            model_cfg.rope_base = float32(manifest.config.rope_theta)
+        }
     }
 
     rt.engine = create_inference_engine(model_cfg)

@@ -1,8 +1,15 @@
 package neurx.inference.api.rest_server
 
 use std.conv.int_to_string
-use neurx.inference.api.http_server.{http_server, create_http_server, server_accept_loop}
-use src.net.http.{http_request, http_response}
+use neurx.inference.api.http_server.{http_server, create_http_server, close_http_server, write_client_data}
+use neurx.inference.api.openai_protocol.{openai_request, openai_request_result, parse_openai_request, openai_chat_chunk, openai_done_event, openai_error_body}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
+use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, generate_response_stream}
+use neurx.serving.network.native_socket.{neurx_net_accept}
+use src.net.http.{http_request, http_response, format_http_response}
+extern "intrinsic" func __host_slice(string text, int start, int end) string
+extern "intrinsic" func __sys_read_string(int fd, int count) string
+extern "intrinsic" func __sys_close(int fd) int
 
 struct chat_message {
     string role
@@ -23,6 +30,15 @@ struct inference_response {
     bool success
     string error
 }
+
+var g_cached_engine real_text_engine_state = real_text_engine_state{}
+var g_cached_engine_path string = ""
+var g_cached_engine_loaded bool = false
+var g_stream_client_fd int = -1
+var g_stream_request_id string = ""
+var g_stream_model string = ""
+var g_stream_tokens_sent int = 0
+var g_stream_max_tokens int = 0
 
 func json_escape(string s) string {
     string result = ""
@@ -238,31 +254,153 @@ func estimate_token_count(string text) int {
     return token_estimate
 }
 
-func run_inference(string prompt, int max_tokens, float temperature) inference_response {
-    int prompt_tokens = estimate_token_count(prompt)
-    int completion_tokens = max_tokens / 2
-    if completion_tokens < 5 {
-        completion_tokens = 5
+func load_engine() real_text_engine_state {
+    string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
+    if g_cached_engine_loaded && g_cached_engine_path == model_path {
+        return g_cached_engine
+    }
+    real_text_engine_state state = load_real_text_engine(model_path)
+    g_cached_engine = state
+    g_cached_engine_path = model_path
+    g_cached_engine_loaded = true
+    state
+}
+
+func stream_http_header() string {
+    "HTTP/1.1 200 OK\r\n" +
+    "Content-Type: text/event-stream\r\n" +
+    "Cache-Control: no-cache\r\n" +
+    "Connection: keep-alive\r\n" +
+    "Access-Control-Allow-Origin: *\r\n\r\n"
+}
+
+func write_http_response(int client_fd, http_response resp) {
+    write_client_data(client_fd, format_http_response(resp))
+}
+
+func write_http_error(int client_fd, int status_code, string message, string error_type, string code) {
+    string body = openai_error_body(message, error_type, code)
+    write_http_response(client_fd, http_response{
+        status_code: status_code,
+        headers: [],
+        body: body,
+    })
+}
+
+func stream_openai_token(string token) bool {
+    if len(token) == 0 {
+        return true
+    }
+    if g_stream_client_fd < 0 {
+        return false
+    }
+    if g_stream_tokens_sent >= g_stream_max_tokens {
+        return false
+    }
+    string chunk = openai_chat_chunk(g_stream_request_id, g_stream_model, token, "")
+    write_client_data(g_stream_client_fd, chunk)
+    g_stream_tokens_sent = g_stream_tokens_sent + 1
+    true
+}
+
+func extract_request_id(string path) string {
+    int slash = -1
+    int i = 0
+    while i < len(path) {
+        if int(path[i]) == 47 {
+            slash = i
+        }
+        i = i + 1
+    }
+    if slash < 0 || slash >= len(path) - 1 {
+        return "req-0001"
+    }
+    return __host_slice(path, slash + 1, len(path))
+}
+
+func handle_streaming_chat(int client_fd, openai_request oreq) {
+    real_text_engine_state state = load_engine()
+    if !state.ready {
+        write_http_error(client_fd, 500, "Inference failed: " + state.error_message, "server_error", "engine_not_ready")
+        return
     }
 
-    string generated_text = ""
+    string model = oreq.model
+    if model == "" {
+        model = "Qwen2.5-0.5B-Instruct"
+    }
 
-    if prompt == "" {
-        generated_text = "Hello! I'm here to assist you."
-    } else if len(prompt) < 10 {
-        generated_text = "Thank you for your message. I'm here to help with your medical questions and concerns."
+    g_stream_client_fd = client_fd
+    g_stream_request_id = oreq.request_id
+    g_stream_model = model
+    g_stream_tokens_sent = 0
+    g_stream_max_tokens = oreq.max_tokens
+
+    write_client_data(client_fd, stream_http_header())
+    real_generation_result result = generate_response_stream(state, oreq.prompt, oreq.max_tokens, stream_openai_token)
+    if !result.ok && len(result.error_message) > 0 {
+        write_client_data(client_fd, openai_chat_chunk(oreq.request_id, model, "error: " + result.error_message, "stop"))
     } else {
-        generated_text = "Based on your inquiry, I would like to provide you with comprehensive medical guidance. "
-        generated_text = generated_text + "Please consult with a qualified healthcare professional for personalized medical advice. "
-        generated_text = generated_text + "I can provide educational information about various medical conditions and treatments."
+        write_client_data(client_fd, openai_chat_chunk(oreq.request_id, model, "", "stop"))
+    }
+    write_client_data(client_fd, openai_done_event())
+    g_stream_client_fd = -1
+}
+
+func handle_socket_connection(int client_fd) {
+    string request_data = __sys_read_string(client_fd, 8192)
+    if len(request_data) == 0 {
+        _ = __sys_close(client_fd)
+        return
     }
 
+    http_request req = parse_http_request(request_data)
+    if req.method == "POST" && (req.path == "/v1/chat/completions" || req.path == "/chat/completions") {
+        openai_request_result parsed = parse_openai_request(req.body, extract_request_id(req.path))
+        if !parsed.valid {
+            write_http_error(client_fd, parsed.status_code, parsed.error_message, "invalid_request_error", "invalid_request")
+            _ = __sys_close(client_fd)
+            return
+        }
+        if parsed.request.stream {
+            handle_streaming_chat(client_fd, parsed.request)
+            _ = __sys_close(client_fd)
+            return
+        }
+    }
+
+    http_response resp = route_request(req)
+    write_http_response(client_fd, resp)
+    _ = __sys_close(client_fd)
+}
+
+func run_inference(string prompt, int max_tokens, float temperature) inference_response {
+    real_text_engine_state state = load_engine()
+    if !state.ready {
+        return inference_response{
+            text: "error: " + state.error_message,
+            prompt_tokens: 0,
+            completion_tokens: 0,
+            success: false,
+            error: state.error_message,
+        }
+    }
+    real_generation_result result = generate_response(state, prompt, max_tokens)
+    if !result.ok {
+        return inference_response{
+            text: result.text,
+            prompt_tokens: result.prompt_tokens,
+            completion_tokens: result.generated_tokens,
+            success: false,
+            error: result.error_message,
+        }
+    }
     return inference_response{
-        text: generated_text,
-        prompt_tokens: prompt_tokens,
-        completion_tokens: completion_tokens,
+        text: result.text,
+        prompt_tokens: result.prompt_tokens,
+        completion_tokens: result.generated_tokens,
         success: true,
-        error: "",
+        error: result.error_message,
     }
 }
 
@@ -425,7 +563,17 @@ func main() {
     print("  curl http://localhost:8888/health\n")
     print("  curl http://localhost:8888/v1/models\n")
     print("  curl -X POST http://localhost:8888/v1/chat/completions -H 'Content-Type: application/json' -d '{\"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}]}'\n")
+    print("  curl -N -X POST http://localhost:8888/v1/chat/completions -H 'Content-Type: application/json' -d '{\"stream\": true, \"messages\": [{\"role\": \"user\", \"content\": \"Hello\"}]}'\n")
     print("\n")
 
-    server_accept_loop(server, route_request)
+    while server.running {
+        int client_fd = neurx_net_accept(server.listen_fd)
+        if client_fd >= 0 {
+            handle_socket_connection(client_fd)
+        } else {
+            print("error: accept failed\n")
+        }
+    }
+
+    close_http_server(server)
 }
