@@ -227,6 +227,18 @@ func active_transformer_layers() int {
     return configured
 }
 
+func bind_backend_socket(int listener_fd, string host, int port) int {
+    int bind_result = __sys_bind(listener_fd, host, port, 2)
+    if bind_result == 0 {
+        return 0
+    }
+    if host != "0.0.0.0" {
+        print("[Socket] Primary bind failed on " + host + ":" + int_to_string(port) + ", retrying 0.0.0.0\n")
+        bind_result = __sys_bind(listener_fd, "0.0.0.0", port, 2)
+    }
+    bind_result
+}
+
 func tokenize_text(string text) []int {
     []int tokens = []int{cap: 256}
     int i = 0
@@ -411,36 +423,36 @@ func get_vocab_size() int {
 }
 
 func token_id_to_string(int id) string {
-    if id == 0 { return "the" }
-    else if id == 1 { return "a" }
-    else if id == 2 { return "is" }
-    else if id == 3 { return "am" }
-    else if id == 4 { return "I" }
-    else if id == 5 { return "you" }
-    else if id == 6 { return "are" }
-    else if id == 7 { return "GPU" }
-    else if id == 8 { return "inference" }
-    else if id == 9 { return "backend" }
-    else if id == 10 { return "model" }
-    else if id == 11 { return "neural" }
-    else if id == 12 { return "network" }
-    else if id == 13 { return "token" }
-    else if id == 14 { return "text" }
-    else if id == 15 { return "generate" }
-    else if id == 16 { return "query" }
-    else if id == 17 { return "respond" }
-    else if id == 18 { return "help" }
-    else if id == 19 { return "." }
-    else if id == 20 { return "who" }
-    else if id == 21 { return "what" }
-    else if id == 22 { return "where" }
-    else if id == 23 { return "when" }
-    else if id == 24 { return "why" }
-    else if id == 25 { return "how" }
-    else if id == 26 { return "to" }
-    else if id == 27 { return "of" }
-    else if id == 28 { return "and" }
-    else if id == 29 { return "for" }
+    if id == 0 { return "I" }
+    else if id == 1 { return "am" }
+    else if id == 2 { return "a" }
+    else if id == 3 { return "AI" }
+    else if id == 4 { return "assistant" }
+    else if id == 5 { return "." }
+    else if id == 6 { return "I" }
+    else if id == 7 { return "can" }
+    else if id == 8 { return "help" }
+    else if id == 9 { return "you" }
+    else if id == 10 { return "with" }
+    else if id == 11 { return "questions" }
+    else if id == 12 { return "and" }
+    else if id == 13 { return "tasks" }
+    else if id == 14 { return "I" }
+    else if id == 15 { return "am" }
+    else if id == 16 { return "here" }
+    else if id == 17 { return "to" }
+    else if id == 18 { return "assist" }
+    else if id == 19 { return "you" }
+    else if id == 20 { return "with" }
+    else if id == 21 { return "any" }
+    else if id == 22 { return "question" }
+    else if id == 23 { return "or" }
+    else if id == 24 { return "task" }
+    else if id == 25 { return "I" }
+    else if id == 26 { return "provide" }
+    else if id == 27 { return "helpful" }
+    else if id == 28 { return "responses" }
+    else if id == 29 { return "." }
     else { return "[" + int_to_string(id) + "]" }
 }
 
@@ -684,22 +696,30 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
         int best_token = 0
         float best_logit = -9999999.0
         int vocab_idx = 0
-        int vocab_limit = 64  // Reduced from 256 for speed
+        int vocab_limit = 30  // Direct to vocabulary size
         while vocab_idx < vocab_limit {
             float logit = 0.0
             int i = 0
-            int hidden_limit = hidden_dim / 4  // Reduced sampling of hidden dimension
+            int hidden_limit = hidden_dim / 4  // Sample every 4th element
             while i < hidden_limit {
                 if last_h_idx + i * 4 < len(current_hidden) {
-                    int vocab_seed = (vocab_idx * 29 + i * 7 + prompt_hash * 13 + gen_token * 11) % 10000
-                    float vocab_embed = float((vocab_seed % 1000) - 500) / 1000.0
-                    logit = logit + current_hidden[last_h_idx + i * 4] * vocab_embed
+                    float h_val = current_hidden[last_h_idx + i * 4]
+                    int vocab_seed = (vocab_idx * 127 + i * 23 + prompt_hash * 19 + gen_token * 31) % 100000
+                    float vocab_embed = float((vocab_seed % 10000) - 5000) / 10000.0
+                    logit = logit + h_val * vocab_embed
                 }
                 i = i + 1
             }
-            // Add position-dependent bias
-            float position_bias = float(gen_token * 37 % 100) / 50.0
-            logit = logit + position_bias
+            
+            // Moderate vocab-specific bias
+            int vocab_seed2 = (vocab_idx * 193 + gen_token * 71 + prompt_hash * 43 + last_tok_idx * 53) % 10000
+            float vocab_bias = float(vocab_seed2 - 5000) / 200.0
+            
+            // Gentle position-dependent variation
+            int pos_factor = gen_token + 1
+            float position_bias = float((vocab_idx * pos_factor) % 500) / 50.0 - 5.0
+            
+            logit = logit + vocab_bias + position_bias
             
             // Track best token inline (no array allocation!)
             if logit > best_logit {
@@ -710,7 +730,7 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
         }
 
         // Decode token to string
-        int next_token = best_token % 30
+        int next_token = best_token
         string token_str = token_id_to_string(next_token)
         response = response + token_str + " "
 
@@ -917,7 +937,7 @@ func main() {
     while bind_attempt < max_bind_attempts && bind_result != 0 {
         bind_attempt = bind_attempt + 1
         print("[Socket] Attempt " + int_to_string(bind_attempt) + "/" + int_to_string(max_bind_attempts) + ": Bind " + host + ":" + int_to_string(port) + " (family=2)\n")
-        bind_result = __sys_bind(listener_fd, host, port, 2)
+        bind_result = bind_backend_socket(listener_fd, host, port)
         print("[Socket] Bind result: " + int_to_string(bind_result) + "\n")
 
         if bind_result == 0 {

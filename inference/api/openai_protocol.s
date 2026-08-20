@@ -204,6 +204,60 @@ func openai_latest_message_content(string body) string {
     latest
 }
 
+func openai_model_uses_qwen_style(string model) bool {
+    if openai_find(model, "Qwen", 0) >= 0 {
+        return true
+    }
+    if openai_find(model, "qwen", 0) >= 0 {
+        return true
+    }
+    false
+}
+
+func openai_chat_template(string body, string model) string {
+    int messages = openai_find(body, "\"messages\"", 0)
+    if messages < 0 {
+        string prompt = openai_latest_message_content(body)
+        if len(prompt) == 0 {
+            return openai_json_string(body, "prompt")
+        }
+        return prompt
+    }
+
+    bool qwen_style = openai_model_uses_qwen_style(model)
+    string system_prompt = "You are a helpful AI assistant."
+    string conversation = ""
+    int search_from = messages
+
+    while true {
+        int role_pos = openai_find(body, "\"role\"", search_from)
+        if role_pos < 0 {
+            break
+        }
+        string role = openai_json_string(openai_substring(body, role_pos, len(body)), "role")
+        int content_pos = openai_find(body, "\"content\"", role_pos)
+        if content_pos < 0 {
+            break
+        }
+        string content = openai_json_string(openai_substring(body, content_pos, len(body)), "content")
+        if role == "system" && len(content) > 0 {
+            system_prompt = content
+        } else if len(content) > 0 {
+            if qwen_style {
+                conversation = conversation + "<|im_start|>" + role + "\n" + content + "\n<|im_end|>\n"
+            } else {
+                conversation = conversation + role + ": " + content + "\n"
+            }
+        }
+        search_from = content_pos + len("\"content\"")
+    }
+
+    if qwen_style {
+        return "<|im_start|>system\n" + system_prompt + "\n<|im_end|>\n" + conversation + "<|im_start|>assistant\n"
+    }
+    return "System: " + system_prompt + "\n" + conversation + "assistant: "
+}
+
 func openai_response_format(string body) string {
     int start = openai_field_start(body, "response_format")
     if start < 0 {
@@ -233,7 +287,7 @@ func parse_openai_request(string body, string request_id) openai_request_result 
     openai_request request
     request.request_id = request_id
     request.model = openai_json_string(body, "model")
-    request.prompt = openai_latest_message_content(body)
+    request.prompt = openai_chat_template(body, request.model)
     request.max_tokens = openai_json_int(body, "max_completion_tokens", 0)
     if request.max_tokens <= 0 {
         request.max_tokens = openai_json_int(body, "max_tokens", 256)

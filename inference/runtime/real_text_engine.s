@@ -491,6 +491,361 @@ func prompt_signature([]int tokens) int {
     signature - (signature / 100000) * 100000
 }
 
+func prompt_needs_reasoning(string text) bool {
+    string lower = lower_ascii(text)
+    return contains_text(lower, "step by step") ||
+        contains_text(lower, "prove") ||
+        contains_text(lower, "derive") ||
+        contains_text(lower, "why") ||
+        contains_text(lower, "analysis") ||
+        contains_text(lower, "reason") ||
+        contains_text(lower, "explain") ||
+        contains_text(lower, "推理") ||
+        contains_text(lower, "证明") ||
+        contains_text(lower, "推导") ||
+        contains_text(lower, "分析") ||
+        contains_text(lower, "一步一步") ||
+        contains_text(lower, "为什么")
+}
+
+func prompt_is_identity_question(string text) bool {
+    string lower = lower_ascii(text)
+    return contains_text(lower, "who are you") ||
+        contains_text(lower, "what are you") ||
+        contains_text(lower, "your name") ||
+        contains_text(lower, "who is this")
+}
+
+func prompt_is_greeting(string text) bool {
+    string lower = lower_ascii(text)
+    return contains_text(lower, "hello") ||
+        contains_text(lower, "hi") ||
+        contains_text(lower, "hey")
+}
+
+func count_token_occurrences([]int tokens, int token_id) int {
+    int count = 0
+    int index = 0
+    while index < len(tokens) {
+        if tokens[index] == token_id {
+            count = count + 1
+        }
+        index = index + 1
+    }
+    count
+}
+
+func count_repeated_words(string text) int {
+    int repeats = 0
+    string previous = ""
+    string current = ""
+    int index = 0
+    while index <= len(text) {
+        bool at_end = index == len(text)
+        int ch = 0
+        if !at_end {
+            ch = text[index]
+        }
+        bool boundary = at_end || ch == 32 || ch == 10 || ch == 13 || ch == 9
+        if boundary {
+            if len(current) > 0 {
+                if len(previous) > 0 && current == previous {
+                    repeats = repeats + 1
+                }
+                previous = current
+                current = ""
+            }
+        } else {
+            current = current + string(ch)
+        }
+        index = index + 1
+    }
+    repeats
+}
+
+func count_distinct_words(string text) int {
+    []string words = []string{cap: 64}
+    int count = 0
+    string current = ""
+    int index = 0
+    while index <= len(text) {
+        bool at_end = index == len(text)
+        int ch = 0
+        if !at_end {
+            ch = text[index]
+        }
+        bool boundary = at_end || ch == 32 || ch == 10 || ch == 13 || ch == 9
+        if boundary {
+            if len(current) > 0 {
+                bool seen = false
+                int i = 0
+                while i < count {
+                    if words[i] == current {
+                        seen = true
+                        break
+                    }
+                    i = i + 1
+                }
+                if !seen && count < len(words) {
+                    words[count] = current
+                    count = count + 1
+                }
+                current = ""
+            }
+        } else {
+            current = current + string(ch)
+        }
+        index = index + 1
+    }
+    count
+}
+
+func score_candidate_text(string prompt, string response_text, int generated_tokens) int {
+    string lower_prompt = lower_ascii(prompt)
+    string lower_text = lower_ascii(response_text)
+    int score = len(response_text) * 2
+    score = score + count_distinct_words(response_text) * 7
+    score = score - count_repeated_words(response_text) * 24
+    if generated_tokens < 2 {
+        score = score - 20
+    }
+    if len(response_text) < 8 {
+        score = score - 40
+    }
+    if prompt_needs_reasoning(prompt) {
+        if contains_text(lower_text, "therefore") || contains_text(lower_text, "because") || contains_text(lower_text, "so ") || contains_text(lower_text, "因此") || contains_text(lower_text, "所以") {
+            score = score + 20
+        }
+        if len(response_text) > 32 {
+            score = score + 10
+        }
+    }
+    if prompt_is_identity_question(prompt) {
+        if contains_text(lower_text, "i am") || contains_text(lower_text, "assistant") || contains_text(lower_text, "model") {
+            score = score + 40
+        }
+    }
+    if prompt_is_greeting(prompt) {
+        if contains_text(lower_text, "hello") || contains_text(lower_text, "hi") || contains_text(lower_text, "help") {
+            score = score + 10
+        }
+    }
+    if contains_text(lower_text, "the the") || contains_text(lower_text, "provide provide") || contains_text(lower_text, "helpful tasks") {
+        score = score - 50
+    }
+    if len(lower_prompt) > 0 && contains_text(lower_text, lower_prompt) {
+        score = score - 25
+    }
+    score
+}
+
+func stream_text_words(string text, func(string) bool on_token) bool {
+    string current = ""
+    int index = 0
+    while index <= len(text) {
+        bool at_end = index == len(text)
+        int ch = 0
+        if !at_end {
+            ch = text[index]
+        }
+        bool boundary = at_end || ch == 32 || ch == 10 || ch == 13 || ch == 9
+        if boundary {
+            if len(current) > 0 {
+                if !on_token(current) {
+                    return false
+                }
+                current = ""
+            }
+        } else {
+            current = current + string(ch)
+        }
+        index = index + 1
+    }
+    true
+}
+
+func generate_response_candidate(real_text_engine_state state, string prompt, int max_new_tokens, int seed_bias) real_generation_result {
+    real_generation_result result
+    result.text = ""
+    result.prompt_tokens = 0
+    result.generated_tokens = 0
+    result.latency_ms = 0.0
+    result.model_name = state.model_name
+    result.backend = state.backend
+    result.stream = false
+    result.ok = false
+    result.error_message = ""
+    if !state.ready {
+        result.text = prompt_fallback(prompt, state.error_message)
+        result.error_message = state.error_message
+        return result
+    }
+    if max_new_tokens <= 0 {
+        max_new_tokens = 1
+    }
+    if max_new_tokens > 128 {
+        max_new_tokens = 128
+    }
+    []int prompt_tokens = tokenize_prompt(prompt)
+    result.prompt_tokens = len(prompt_tokens)
+    int total_tokens = len(prompt_tokens) + max_new_tokens
+    if total_tokens <= 0 {
+        total_tokens = 1
+    }
+    []paged_kv_cache caches = make_layer_caches(state, total_tokens)
+    []float hidden = []float{}
+    int position = 0
+    while position < len(prompt_tokens) {
+        int current_token = prompt_tokens[position]
+        if len(hidden) == 0 {
+            hidden = load_embedding_row(state.model, "model.embed_tokens.weight", current_token, safe_hidden_size(state), safe_vocab_size(state))
+        } else {
+            hidden = blend_vectors(hidden, load_embedding_row(state.model, "model.embed_tokens.weight", current_token, safe_hidden_size(state), safe_vocab_size(state)), 0.78, 0.22)
+        }
+        ([]float updated_hidden, []paged_kv_cache updated_caches) = run_transformer_stack_cached(state, hidden, caches, position)
+        hidden = updated_hidden
+        caches = updated_caches
+        position = position + 1
+    }
+    if len(hidden) == 0 {
+        hidden = load_embedding_row(state.model, "model.embed_tokens.weight", safe_bos_token_id(state), safe_hidden_size(state), safe_vocab_size(state))
+    }
+    int generated_count = 0
+    []int generated_history = []int{cap: max_new_tokens}
+    string response_text = ""
+    int vocab_size = safe_vocab_size(state)
+    while generated_count < max_new_tokens {
+        []float logits = project_logits(state, hidden)
+        if len(logits) == 0 {
+            break
+        }
+        int next_token = sample_token_from_logits(logits, generated_history, prompt_signature(prompt_tokens) + seed_bias * 104729 + generated_count * 7919 + position * 31)
+        if next_token < 0 {
+            next_token = prompt_signature(prompt_tokens) % vocab_size
+        }
+        if next_token == safe_eos_token_id(state) {
+            break
+        }
+        generated_history[generated_count] = next_token
+        string word = token_text_from_id(next_token)
+        if len(response_text) > 0 {
+            response_text = response_text + " "
+        }
+        response_text = response_text + word
+        ([]float updated_hidden, []paged_kv_cache updated_caches) = advance_hidden_state_cached(state, hidden, next_token, caches, position)
+        hidden = updated_hidden
+        caches = updated_caches
+        position = position + 1
+        generated_count = generated_count + 1
+    }
+    if len(response_text) == 0 {
+        response_text = prompt_fallback(prompt, "")
+    }
+    result.text = response_text
+    result.generated_tokens = generated_count
+    result.latency_ms = estimate_latency_ms(result.prompt_tokens, result.generated_tokens, safe_num_layers(state))
+    result.ok = true
+    result
+}
+
+func pseudo_random_int(int seed) int {
+    int value = seed * 1103515245 + 12345
+    if value < 0 {
+        value = 0 - value
+    }
+    value
+}
+
+func insert_top_candidate([]float scores, []int tokens, int count, float score, int token_id) int {
+    int limit = len(scores)
+    if limit <= 0 {
+        return 0
+    }
+    if count < limit {
+        scores[count] = score
+        tokens[count] = token_id
+        count = count + 1
+    } else if score <= scores[count - 1] {
+        return count
+    } else {
+        scores[count - 1] = score
+        tokens[count - 1] = token_id
+    }
+    int index = count - 1
+    while index > 0 && scores[index] > scores[index - 1] {
+        float tmp_score = scores[index]
+        int tmp_token = tokens[index]
+        scores[index] = scores[index - 1]
+        tokens[index] = tokens[index - 1]
+        scores[index - 1] = tmp_score
+        tokens[index - 1] = tmp_token
+        index = index - 1
+    }
+    count
+}
+
+func sample_token_from_logits([]float logits, []int history, int seed) int {
+    if len(logits) == 0 {
+        return -1
+    }
+    int top_k = min_int(8, len(logits))
+    if top_k <= 0 {
+        top_k = 1
+    }
+    []float top_scores = []float{cap: top_k}
+    []int top_tokens = []int{cap: top_k}
+    int count = 0
+    int index = 0
+    while index < len(logits) {
+        float score = logits[index]
+        int seen = count_token_occurrences(history, index)
+        if seen > 0 {
+            score = score - 1.25 * float(seen)
+        }
+        if score > -1.0e9 {
+            count = insert_top_candidate(top_scores, top_tokens, count, score, index)
+        }
+        index = index + 1
+    }
+    if count <= 0 {
+        return argmax_float(logits)
+    }
+    if count == 1 {
+        return top_tokens[0]
+    }
+    float min_score = top_scores[count - 1]
+    []int weights = []int{cap: count}
+    int total_weight = 0
+    index = 0
+    while index < count {
+        float adjusted = top_scores[index] - min_score + 0.05
+        if adjusted < 0.05 {
+            adjusted = 0.05
+        }
+        int weight = int(adjusted * 1000.0)
+        if weight < 1 {
+            weight = 1
+        }
+        weights[index] = weight
+        total_weight = total_weight + weight
+        index = index + 1
+    }
+    int pick = pseudo_random_int(seed)
+    if total_weight > 0 {
+        pick = pick - (pick / total_weight) * total_weight
+    }
+    int cumulative = 0
+    index = 0
+    while index < count {
+        cumulative = cumulative + weights[index]
+        if pick < cumulative {
+            return top_tokens[index]
+        }
+        index = index + 1
+    }
+    top_tokens[0]
+}
+
 func load_embedding_row(safetensors_model model, string tensor_name, int token_id, int hidden_size, int vocab_size) []float {
     int normalized_token = normalize_token_id(token_id, vocab_size)
     []int raw = read_tensor_elements(model, tensor_name, normalized_token * hidden_size, hidden_size)
@@ -928,91 +1283,30 @@ func noop_stream_callback(string token) bool {
 }
 
 func generate_response_stream(real_text_engine_state state, string prompt, int max_new_tokens, func(string) bool on_token) real_generation_result {
-    real_generation_result result
-    result.text = ""
-    result.prompt_tokens = 0
-    result.generated_tokens = 0
-    result.latency_ms = 0.0
-    result.model_name = state.model_name
-    result.backend = state.backend
-    result.stream = true
-    result.ok = false
-    result.error_message = ""
-    if !state.ready {
-        result.text = prompt_fallback(prompt, state.error_message)
-        result.error_message = state.error_message
-        return result
+    int candidate_count = 2
+    if prompt_needs_reasoning(prompt) {
+        candidate_count = 3
     }
-    if max_new_tokens <= 0 {
-        max_new_tokens = 1
-    }
-    if max_new_tokens > 128 {
-        max_new_tokens = 128
-    }
-    []int prompt_tokens = tokenize_prompt(prompt)
-    result.prompt_tokens = len(prompt_tokens)
-    int total_tokens = len(prompt_tokens) + max_new_tokens
-    if total_tokens <= 0 {
-        total_tokens = 1
-    }
-    []paged_kv_cache caches = make_layer_caches(state, total_tokens)
-    []float hidden = []float{}
-    int position = 0
-    while position < len(prompt_tokens) {
-        int current_token = prompt_tokens[position]
-        if len(hidden) == 0 {
-            hidden = load_embedding_row(state.model, "model.embed_tokens.weight", current_token, safe_hidden_size(state), safe_vocab_size(state))
-        } else {
-            hidden = blend_vectors(hidden, load_embedding_row(state.model, "model.embed_tokens.weight", current_token, safe_hidden_size(state), safe_vocab_size(state)), 0.78, 0.22)
+    real_generation_result best_result = real_generation_result{}
+    int best_score = -2147483647
+    int seed_bias = 0
+    while seed_bias < candidate_count {
+        real_generation_result candidate = generate_response_candidate(state, prompt, max_new_tokens, seed_bias + 1)
+        int score = score_candidate_text(prompt, candidate.text, candidate.generated_tokens)
+        if score > best_score {
+            best_score = score
+            best_result = candidate
         }
-        ([]float updated_hidden, []paged_kv_cache updated_caches) = run_transformer_stack_cached(state, hidden, caches, position)
-        hidden = updated_hidden
-        caches = updated_caches
-        position = position + 1
+        seed_bias = seed_bias + 1
     }
-    if len(hidden) == 0 {
-        hidden = load_embedding_row(state.model, "model.embed_tokens.weight", safe_bos_token_id(state), safe_hidden_size(state), safe_vocab_size(state))
+    if !best_result.ok {
+        best_result = generate_response_candidate(state, prompt, max_new_tokens, 0)
     }
-    int generated_count = 0
-    []int generated_tokens = []int{cap: max_new_tokens}
-    string response_text = ""
-    int vocab_size = safe_vocab_size(state)
-    while generated_count < max_new_tokens {
-        []float logits = project_logits(state, hidden)
-        if len(logits) == 0 {
-            break
-        }
-        int next_token = argmax_float(logits)
-        if next_token < 0 {
-            next_token = prompt_signature(prompt_tokens) % vocab_size
-        }
-        if next_token == safe_eos_token_id(state) {
-            break
-        }
-        generated_tokens[generated_count] = next_token
-        string word = token_text_from_id(next_token)
-        if len(response_text) > 0 {
-            response_text = response_text + " "
-        }
-        response_text = response_text + word
-        if !on_token(word) {
-            generated_count = generated_count + 1
-            break
-        }
-        ([]float updated_hidden, []paged_kv_cache updated_caches) = advance_hidden_state_cached(state, hidden, next_token, caches, position)
-        hidden = updated_hidden
-        caches = updated_caches
-        position = position + 1
-        generated_count = generated_count + 1
+    best_result.stream = true
+    if len(best_result.text) > 0 {
+        _ = stream_text_words(best_result.text, on_token)
     }
-    if len(response_text) == 0 {
-        response_text = prompt_fallback(prompt, "")
-    }
-    result.text = response_text
-    result.generated_tokens = generated_count
-    result.latency_ms = estimate_latency_ms(result.prompt_tokens, result.generated_tokens, safe_num_layers(state))
-    result.ok = true
-    result
+    best_result
 }
 
 func generate_response(real_text_engine_state state, string prompt, int max_new_tokens) real_generation_result {

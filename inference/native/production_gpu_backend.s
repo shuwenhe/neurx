@@ -152,6 +152,18 @@ func create_ready_file(string path) {
     print("✓ Backend ready file: " + path + "\n")
 }
 
+func bind_backend_socket(int listener_fd, string host, int port) int {
+    int bind_result = __sys_bind(listener_fd, host, port, 2)
+    if bind_result == 0 {
+        return 0
+    }
+    if host != "0.0.0.0" {
+        print("[Socket] Primary bind failed on " + host + ":" + int_to_string(port) + ", retrying 0.0.0.0\n")
+        bind_result = __sys_bind(listener_fd, "0.0.0.0", port, 2)
+    }
+    bind_result
+}
+
 func handle_client_gpu(int client_fd, string model_path, string device_type) {
     []int input_buffer = []int{cap: 4096}
     string request = __sys_read_string(client_fd, 4096)
@@ -211,7 +223,7 @@ func main() {
         print("ERROR: Socket creation failed\n")
         return
     }
-    int bind_result = __sys_bind(listener_fd, host, port, 2)
+    int bind_result = bind_backend_socket(listener_fd, host, port)
     if bind_result != 0 {
         print("ERROR: Socket bind failed\n")
         _ = __sys_close(listener_fd)

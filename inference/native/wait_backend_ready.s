@@ -1,4 +1,26 @@
 package neurx.inference.native
+extern func runtime_env_get(string key, string default_value) string
+extern "intrinsic" func __sys_socket(int domain, int type, int protocol) int
+extern "intrinsic" func __sys_connect(int sockfd, string ip, int port, int family) int
+extern "intrinsic" func __sys_close(int fd) int
+
+func parse_int_or_default(string s, int default_val) int {
+    if len(s) == 0 {
+        return default_val
+    }
+    int result = 0
+    int i = 0
+    while i < len(s) {
+        int ch = s[i]
+        if ch >= 48 && ch <= 57 {
+            result = result * 10 + (ch - 48)
+        } else {
+            return result
+        }
+        i = i + 1
+    }
+    result
+}
 
 func format_int(int value) string {
     if value == 0 { return "0" }
@@ -22,12 +44,12 @@ func format_int(int value) string {
 }
 
 func main() {
-    string host = "127.0.0.1"
-    int port = 18083
+    string host = runtime_env_get("NEURX_S_HOST", "127.0.0.1")
+    int port = parse_int_or_default(runtime_env_get("NEURX_S_PORT", "18083"), 18083)
     int max_attempts = 150
     int attempt = 0
     bool backend_ready = false
-    print("[HealthCheck] Waiting for backend at " + host + ":18083\n")
+    print("[HealthCheck] Waiting for backend at " + host + ":" + runtime_env_get("NEURX_S_PORT", "18083") + "\n")
     while attempt < max_attempts && !backend_ready {
         attempt = attempt + 1
         int sock = __sys_socket(2, 1, 6)

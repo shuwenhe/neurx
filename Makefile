@@ -68,6 +68,7 @@ PRODUCTION_S_CHAT_DIRECT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat_dir
 PRODUCTION_S_CHAT_ENHANCED_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat_enhanced.ir
 PRODUCTION_S_CHAT_CLIENT_IR := $(PRODUCTION_S_INFERENCE_DIR)/chat_client.ir
 WAIT_BACKEND_READY_IR := $(PRODUCTION_S_INFERENCE_DIR)/wait_backend_ready.ir
+GPU_BACKEND_PORT ?= 18084
 NEURX_CPU_THREADS ?= 6
 CUDA_NVCC ?= $(shell command -v nvcc 2>/dev/null)
 CUDA_TRAIN_BRIDGE_SRC := $(CURDIR_UNIX)/cuda/neurx_transformer_train_v2.cu
@@ -1041,36 +1042,36 @@ chat-gpu: build-production-s-inference chat-gpu-run
 
 chat-gpu-run:
 	@echo "🚀 GPU-accelerated chat interface (NVIDIA GPU Inference)"
-	@echo "   Backend: 127.0.0.1:18083 | Model: Qwen2.5-0.5B-Instruct"
+	@echo "   Backend: 127.0.0.1:$(GPU_BACKEND_PORT) | Model: Qwen2.5-0.5B-Instruct"
 	@echo "   ⏳ Starting backend with smart health check..."
 	@pkill -9 s_ir_runner 2>/dev/null || true
 	@sleep 2
 	@
-	@for i in 1 2 3 4 5; do lsof -i :18083 >/dev/null 2>&1 && sleep 1 || break; done
+	@for i in 1 2 3 4 5; do lsof -i :$(GPU_BACKEND_PORT) >/dev/null 2>&1 && sleep 1 || break; done
 	@
 	@bash -c '\
-		NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct NEURX_INFER_DEVICE=gpu NEURX_S_PORT=18083 NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir" >/tmp/neurx_gpu_backend.log 2>&1 & \
-		"$(S_RUNNER_BIN)" "$(WAIT_BACKEND_READY_IR)"; \
+		NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct NEURX_INFER_DEVICE=gpu NEURX_S_PORT=$(GPU_BACKEND_PORT) NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir" >/tmp/neurx_gpu_backend.log 2>&1 & \
+		NEURX_S_PORT=$(GPU_BACKEND_PORT) "$(S_RUNNER_BIN)" "$(WAIT_BACKEND_READY_IR)"; \
 		sleep 2; \
-		NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct NEURX_INFER_DEVICE=gpu NEURX_S_PORT=18083 NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_CHAT_CLIENT_IR)"; \
+		NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct NEURX_INFER_DEVICE=gpu NEURX_S_PORT=$(GPU_BACKEND_PORT) NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_CHAT_CLIENT_IR)"; \
 	'
 
 chat-gpu-native: build-production-s-inference
 	@echo "🚀 GPU-accelerated chat interface (NVIDIA GPU Inference - Native)"
-	@echo "   Backend: 127.0.0.1:18083 | Model: Qwen2.5-0.5B-Instruct"
+	@echo "   Backend: 127.0.0.1:$(GPU_BACKEND_PORT) | Model: Qwen2.5-0.5B-Instruct"
 	@echo "   Note: GPU backend may fail with socket binding issues"
 	@pkill -9 s_ir_runner 2>/dev/null || true
 	@sleep 3
-	@echo "   Waiting for OS to release port 18083..."
-	@for i in 1 2 3 4 5 6 7; do if lsof -i :18083 >/dev/null 2>&1; then sleep 1; else break; fi; done
+	@echo "   Waiting for OS to release port $(GPU_BACKEND_PORT)..."
+	@for i in 1 2 3 4 5 6 7; do if lsof -i :$(GPU_BACKEND_PORT) >/dev/null 2>&1; then sleep 1; else break; fi; done
 	@echo "   Initializing GPU backend..."
 	NEURX_ROOT=$(CURDIR_UNIX) \
-	NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct \
-	NEURX_INFER_DEVICE=gpu \
-	NEURX_S_PORT=18083 \
-	NEURX_S_HOST=127.0.0.1 \
-	NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) \
-	bash -c '"$(S_RUNNER_BIN)" "$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir" >/tmp/neurx_gpu_backend.log 2>&1 & BACKEND_PID=$$!; sleep 15; if ! lsof -i :18083 >/dev/null 2>&1; then echo "ERROR: GPU Backend socket binding failed."; kill $$BACKEND_PID 2>/dev/null; exit 1; fi; NEURX_S_PORT=18083 NEURX_S_HOST=127.0.0.1 "$(S_RUNNER_BIN)" "$(PRODUCTION_S_CHAT_CLIENT_IR)"'
+		NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct \
+		NEURX_INFER_DEVICE=gpu \
+		NEURX_S_PORT=$(GPU_BACKEND_PORT) \
+		NEURX_S_HOST=127.0.0.1 \
+		NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) \
+		bash -c '"$(S_RUNNER_BIN)" "$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir" >/tmp/neurx_gpu_backend.log 2>&1 & BACKEND_PID=$$!; sleep 15; if ! lsof -i :$(GPU_BACKEND_PORT) >/dev/null 2>&1; then echo "ERROR: GPU Backend socket binding failed."; kill $$BACKEND_PID 2>/dev/null; exit 1; fi; NEURX_S_PORT=$(GPU_BACKEND_PORT) NEURX_S_HOST=127.0.0.1 "$(S_RUNNER_BIN)" "$(PRODUCTION_S_CHAT_CLIENT_IR)"'
 
 chat-cpu: build-production-s-inference
 	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' -o -f '$(CHAT_MODEL_PATH)/model.safetensors.index.json' || { \
