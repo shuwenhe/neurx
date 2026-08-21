@@ -72,6 +72,8 @@ PRODUCTION_S_CHAT_CLIENT_IR := $(PRODUCTION_S_INFERENCE_DIR)/chat_client.ir
 STREAMING_CHAT_IR := $(PRODUCTION_S_INFERENCE_DIR)/streaming_chat.ir
 WAIT_BACKEND_READY_IR := $(PRODUCTION_S_INFERENCE_DIR)/wait_backend_ready.ir
 WEB_UI_SERVER_IR := $(PRODUCTION_S_INFERENCE_DIR)/web_ui_server.ir
+START_BACKEND_IR := $(PRODUCTION_S_INFERENCE_DIR)/start_backend.ir
+START_FRONTEND_IR := $(PRODUCTION_S_INFERENCE_DIR)/start_frontend.ir
 GPU_BACKEND_PORT ?= 18084
 GPU_BACKEND_PID_FILE ?= /tmp/neurx_gpu_backend_$(GPU_BACKEND_PORT).pid
 NEURX_CPU_THREADS ?= 6
@@ -1055,7 +1057,31 @@ $(WEB_UI_SERVER_IR): serving/web_ui_server.s | $(PRODUCTION_S_INFERENCE_DIR)
 	}
 	@echo "✓ Web UI Server IR compiled: $(WEB_UI_SERVER_IR)"
 
-build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUCTION_S_GPU_BACKEND) $(PRODUCTION_S_GPU_BACKEND_ENHANCED) $(PRODUCTION_S_CHAT_IR) $(PRODUCTION_S_CHAT_DIRECT_IR) $(PRODUCTION_S_CHAT_ENHANCED_IR) $(PRODUCTION_S_CHAT_CLIENT_IR) $(STREAMING_CHAT_IR) $(WAIT_BACKEND_READY_IR) $(WEB_UI_SERVER_IR)
+$(START_BACKEND_IR): scripts/start_backend.s | $(PRODUCTION_S_INFERENCE_DIR)
+	@echo "Compiling Backend Startup Script (pure S)..."
+	@$(S_SEED_COMPILER) scripts/start_backend.s '$(START_BACKEND_IR)' || { \
+		echo "❌ Backend startup script compilation failed!"; \
+		exit 1; \
+	}
+	@test -s '$(START_BACKEND_IR)' || { \
+		echo "❌ Backend startup script IR is empty!"; \
+		exit 1; \
+	}
+	@echo "✓ Backend startup script compiled: $(START_BACKEND_IR)"
+
+$(START_FRONTEND_IR): scripts/start_frontend.s | $(PRODUCTION_S_INFERENCE_DIR)
+	@echo "Compiling Frontend Startup Script (pure S)..."
+	@$(S_SEED_COMPILER) scripts/start_frontend.s '$(START_FRONTEND_IR)' || { \
+		echo "❌ Frontend startup script compilation failed!"; \
+		exit 1; \
+	}
+	@test -s '$(START_FRONTEND_IR)' || { \
+		echo "❌ Frontend startup script IR is empty!"; \
+		exit 1; \
+	}
+	@echo "✓ Frontend startup script compiled: $(START_FRONTEND_IR)"
+
+build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUCTION_S_GPU_BACKEND) $(PRODUCTION_S_GPU_BACKEND_ENHANCED) $(PRODUCTION_S_CHAT_IR) $(PRODUCTION_S_CHAT_DIRECT_IR) $(PRODUCTION_S_CHAT_ENHANCED_IR) $(PRODUCTION_S_CHAT_CLIENT_IR) $(STREAMING_CHAT_IR) $(WAIT_BACKEND_READY_IR) $(WEB_UI_SERVER_IR) $(START_BACKEND_IR) $(START_FRONTEND_IR)
 	@test -f '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir'
 	@test -f '$(PRODUCTION_S_CHAT_IR)'
 	@test -f '$(PRODUCTION_S_CHAT_DIRECT_IR)'
@@ -1218,7 +1244,7 @@ backend: build-production-s-inference
 		echo "Model weights not found in $(CHAT_MODEL_PATH)"; \
 		exit 1; \
 	}
-	@bash scripts/start_backend.sh '$(CURDIR_UNIX)' '$(CHAT_MODEL_PATH)'
+	@NEURX_ROOT='$(CURDIR_UNIX)' NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' '$(S_RUNNER_BIN)' '$(START_BACKEND_IR)'
 
 backend-stop:
 	@echo "🛑 Stopping NeurX GPU Backend..."
@@ -1258,7 +1284,7 @@ backend-cpu: build-production-s-inference
 		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir'
 
 frontend: build-production-s-inference
-	@bash scripts/start_frontend.sh '$(CURDIR_UNIX)'
+	@NEURX_ROOT='$(CURDIR_UNIX)' '$(S_RUNNER_BIN)' '$(START_FRONTEND_IR)'
 
 frontend-stop:
 	@echo "🛑 Stopping NeurX Web UI Frontend..."

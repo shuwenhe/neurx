@@ -36,7 +36,7 @@ uint64_t checked_product(const std::vector<int64_t>& shape) {
   return product;
 }
 
-}  // namespace
+}
 
 safe_tensor_file safe_tensor_file::open(const std::string& path) {
   safe_tensor_file result;
@@ -93,4 +93,4 @@ native::tensor safe_tensor_file::load(const std::string& name, native::device ta
   return target_device.type == native::device_type::cpu ? cpu : cpu.to(target_device);
 }
 
-}  // namespace neurx::runtime::model
+}

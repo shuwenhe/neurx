@@ -40,7 +40,7 @@ std::string chat_prompt(const std::string& prompt) {
          prompt + "\n<|im_end|>\n<|im_start|>assistant\n";
 }
 
-}  // namespace
+}
 
 extern "C" int neurx_s_cuda_device_count() {
   int count = 0;

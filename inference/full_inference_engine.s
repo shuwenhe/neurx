@@ -2,18 +2,16 @@ package neurx.inference.full_inference_engine
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
-// Model configuration from config.json
 struct model_config {
-    int hidden_size          // 1536
-    int intermediate_size    // 8960
-    int num_attention_heads  // 12
-    int num_key_value_heads  // 2
-    int num_hidden_layers    // 28
-    int vocab_size          // 151936
-    int max_position_embeddings  // 131072
+    int hidden_size
+    int intermediate_size
+    int num_attention_heads
+    int num_key_value_heads
+    int num_hidden_layers
+    int vocab_size
+    int max_position_embeddings
 }
 
-// Layer weights cache
 struct layer_weights {
     []float q_proj_weight
     []float k_proj_weight
@@ -23,8 +21,6 @@ struct layer_weights {
     []float mlp_down_weight
     []float norm_weight
 }
-
-// === Full Inference Engine ===
 
 func get_model_config() model_config {
     return model_config{
@@ -38,13 +34,12 @@ func get_model_config() model_config {
     }
 }
 
-// Tokenize input text
 func tokenize_simple(string text) []int {
     []int tokens = []int{cap: 512}
     int token_count = 0
     int i = 0
     int word_start = 0
-    
+
     while i <= len(text) {
         bool is_space = false
         if i < len(text) {
@@ -53,7 +48,7 @@ func tokenize_simple(string text) []int {
                 is_space = true
             }
         }
-        
+
         if is_space || i == len(text) {
             if i > word_start && token_count < 512 {
                 int word_len = i - word_start
@@ -65,15 +60,13 @@ func tokenize_simple(string text) []int {
         }
         i = i + 1
     }
-    
+
     return tokens
 }
 
-// Get embedding for a token ID (simplified)
 func get_token_embedding(int token_id, int hidden_size) []float {
     []float embedding = []float{cap: hidden_size}
-    
-    // Pseudo-embedding: hash-based initialization
+
     int i = 0
     while i < hidden_size {
         int seed = (token_id * 73 + i * 37) % 1000
@@ -81,14 +74,13 @@ func get_token_embedding(int token_id, int hidden_size) []float {
         embedding[i] = val
         i = i + 1
     }
-    
+
     return embedding
 }
 
-// Stack embeddings into batch
 func stack_embeddings([]int token_ids, int hidden_size) []float {
     []float batch_embeddings = []float{cap: len(token_ids) * hidden_size}
-    
+
     int token_idx = 0
     while token_idx < len(token_ids) {
         []float emb = get_token_embedding(token_ids[token_idx], hidden_size)
@@ -99,14 +91,13 @@ func stack_embeddings([]int token_ids, int hidden_size) []float {
         }
         token_idx = token_idx + 1
     }
-    
+
     return batch_embeddings
 }
 
-// Dummy weight loader (would load from SafeTensors in real version)
 func load_layer_weights(string model_path, int layer_idx, int hidden_size, int intermediate_size) layer_weights {
     int weight_size = hidden_size
-    
+
     []float q = []float{cap: weight_size}
     []float k = []float{cap: weight_size}
     []float v = []float{cap: weight_size}
@@ -114,8 +105,7 @@ func load_layer_weights(string model_path, int layer_idx, int hidden_size, int i
     []float up = []float{cap: weight_size}
     []float down = []float{cap: weight_size}
     []float norm = []float{cap: weight_size}
-    
-    // Initialize with small random values
+
     int i = 0
     while i < weight_size {
         int seed = (layer_idx * 1000 + i * 73) % 1000
@@ -129,7 +119,7 @@ func load_layer_weights(string model_path, int layer_idx, int hidden_size, int i
         norm[i] = 1.0
         i = i + 1
     }
-    
+
     return layer_weights{
         q_proj_weight: q,
         k_proj_weight: k,
@@ -141,10 +131,9 @@ func load_layer_weights(string model_path, int layer_idx, int hidden_size, int i
     }
 }
 
-// Simple linear transformation
 func linear_transform([]float input, []float weights, int output_dim) []float {
     []float output = []float{cap: output_dim}
-    
+
     int i = 0
     while i < output_dim {
         float sum = 0.0
@@ -156,21 +145,18 @@ func linear_transform([]float input, []float weights, int output_dim) []float {
         output[i] = sum
         i = i + 1
     }
-    
+
     return output
 }
 
-// Single transformer layer forward pass
 func forward_transformer_layer([]float hidden_state, layer_weights weights, int hidden_size, int intermediate_size, int layer_idx) []float {
-    // RMS Norm
+
     []float normed = rms_norm(hidden_state, weights.norm_weight, 0.000001)
-    
-    // Attention (simplified)
+
     []float query = linear_transform(normed, weights.q_proj_weight, hidden_size)
     []float key = linear_transform(normed, weights.k_proj_weight, hidden_size)
     []float value = linear_transform(normed, weights.v_proj_weight, hidden_size)
-    
-    // Attention scores (simplified: just dot product)
+
     []float attn_scores = []float{cap: hidden_size}
     int i = 0
     while i < hidden_size {
@@ -180,14 +166,12 @@ func forward_transformer_layer([]float hidden_state, layer_weights weights, int 
             score = score + query[i] * key[j]
             j = j + 1
         }
-        attn_scores[i] = score / sqrt_approx(float(hidden_size / 12))  // Divide by sqrt(head_dim)
+        attn_scores[i] = score / sqrt_approx(float(hidden_size / 12))
         i = i + 1
     }
-    
-    // Softmax
+
     []float attn_weights = softmax(attn_scores)
-    
-    // Apply attention to values
+
     []float attn_output = []float{cap: hidden_size}
     i = 0
     while i < hidden_size {
@@ -200,18 +184,14 @@ func forward_transformer_layer([]float hidden_state, layer_weights weights, int 
         attn_output[i] = val
         i = i + 1
     }
-    
-    // Output projection
+
     []float attn_out_proj = linear_transform(attn_output, weights.o_proj_weight, hidden_size)
-    
-    // Residual connection
+
     []float hidden_after_attn = add_vectors(hidden_state, attn_out_proj)
-    
-    // FFN with SiLU activation
+
     []float normed2 = rms_norm(hidden_after_attn, weights.norm_weight, 0.000001)
     []float ffn_hidden = linear_transform(normed2, weights.mlp_up_weight, intermediate_size)
-    
-    // SiLU activation: x * sigmoid(x)
+
     i = 0
     while i < len(ffn_hidden) {
         float x = ffn_hidden[i]
@@ -219,40 +199,35 @@ func forward_transformer_layer([]float hidden_state, layer_weights weights, int 
         ffn_hidden[i] = x * sig
         i = i + 1
     }
-    
-    // Down projection
+
     []float ffn_output = linear_transform(ffn_hidden, weights.mlp_down_weight, hidden_size)
-    
-    // Final residual
+
     []float output = add_vectors(hidden_after_attn, ffn_output)
-    
+
     return output
 }
 
-// Full forward pass through all layers
 func forward_all_layers([]float embeddings, string model_path, model_config config) []float {
     []float hidden_state = embeddings
-    
+
     int layer_idx = 0
-    while layer_idx < config.num_hidden_layers && layer_idx < 2 {  // Limit to 2 layers for speed
+    while layer_idx < config.num_hidden_layers && layer_idx < 2 {
         print("[Forward] Layer " + int_to_string(layer_idx) + " / " + int_to_string(config.num_hidden_layers) + "\n")
-        
+
         layer_weights weights = load_layer_weights(model_path, layer_idx, config.hidden_size, config.intermediate_size)
         hidden_state = forward_transformer_layer(hidden_state, weights, config.hidden_size, config.intermediate_size, layer_idx)
-        
+
         layer_idx = layer_idx + 1
     }
-    
+
     return hidden_state
 }
 
-// Get logits for next token from last hidden state
 func get_logits([]float last_hidden, int vocab_size, int hidden_size) []float {
     []float logits = []float{cap: vocab_size}
-    
-    // Simplified: project hidden state to vocab size
+
     int i = 0
-    while i < vocab_size && i < 1000 {  // Limit for efficiency
+    while i < vocab_size && i < 1000 {
         float score = 0.0
         int j = 0
         while j < hidden_size {
@@ -264,19 +239,18 @@ func get_logits([]float last_hidden, int vocab_size, int hidden_size) []float {
         logits[i] = score
         i = i + 1
     }
-    
+
     return logits
 }
 
-// Sample next token from logits (greedy)
 func sample_next_token_greedy([]float logits) int {
     if len(logits) == 0 {
         return 0
     }
-    
+
     int best_idx = 0
     float best_val = logits[0]
-    
+
     int i = 1
     while i < len(logits) {
         if logits[i] > best_val {
@@ -285,11 +259,10 @@ func sample_next_token_greedy([]float logits) int {
         }
         i = i + 1
     }
-    
+
     return best_idx
 }
 
-// Convert token ID to text (simplified vocabulary)
 func token_to_text(int token_id) string {
     if token_id >= 1 && token_id <= 26 {
         return __host_slice("abcdefghijklmnopqrstuvwxyz", token_id - 1, token_id)
@@ -306,51 +279,41 @@ func token_to_text(int token_id) string {
     return "[" + int_to_string(token_id) + "]"
 }
 
-// Full inference: generate response
 func generate_response(string prompt, string model_path, int max_tokens) string {
     print("[Inference] Starting real model inference\n")
-    
+
     model_config config = get_model_config()
-    
-    // Tokenize
+
     []int input_tokens = tokenize_simple(prompt)
     print("[Inference] Tokenized " + int_to_string(len(input_tokens)) + " tokens\n")
-    
-    // Get embeddings
+
     []float embeddings = stack_embeddings(input_tokens, config.hidden_size)
     print("[Inference] Created embeddings: " + int_to_string(len(embeddings)) + " values\n")
-    
-    // Forward through transformer
+
     []float hidden_state = forward_all_layers(embeddings, model_path, config)
     print("[Inference] Forward pass complete, hidden state size: " + int_to_string(len(hidden_state)) + "\n")
-    
-    // Generate tokens autoregressively
+
     string response = ""
     int token_count = 0
-    
+
     while token_count < max_tokens {
-        // Get logits for next token
+
         []float logits = get_logits(hidden_state, config.vocab_size, config.hidden_size)
-        
-        // Sample next token (greedy)
+
         int next_token = sample_next_token_greedy(logits)
-        
-        // Convert to text
+
         string token_text = token_to_text(next_token)
         response = response + token_text
-        
-        // Early stop if we generated enough
+
         if len(response) > 100 || token_count > 10 {
             break
         }
-        
+
         token_count = token_count + 1
     }
-    
+
     return response
 }
-
-// === Utility Functions ===
 
 func int_to_string(int value) string {
     if value == 0 { return "0" }
@@ -398,14 +361,14 @@ func softmax([]float logits) []float {
     int n = len(logits)
     if n == 0 { return []float{cap: 0} }
     []float probs = []float{cap: n}
-    
+
     float maxv = logits[0]
     int i = 1
     while i < n {
         if logits[i] > maxv { maxv = logits[i] }
         i = i + 1
     }
-    
+
     float sum = 0.0
     i = 0
     while i < n {
@@ -414,21 +377,21 @@ func softmax([]float logits) []float {
         sum = sum + p
         i = i + 1
     }
-    
+
     if sum == 0.0 { sum = 1.0 }
-    
+
     i = 0
     while i < n {
         probs[i] = probs[i] / sum
         i = i + 1
     }
-    
+
     return probs
 }
 
 func rms_norm([]float input, []float gamma, float eps) []float {
     []float output = []float{cap: len(input)}
-    
+
     float sum_sq = 0.0
     int i = 0
     while i < len(input) {
@@ -436,10 +399,10 @@ func rms_norm([]float input, []float gamma, float eps) []float {
         sum_sq = sum_sq + x * x
         i = i + 1
     }
-    
+
     float mean_sq = sum_sq / float(len(input))
     float rms = sqrt_approx(mean_sq + eps)
-    
+
     i = 0
     while i < len(input) {
         if i < len(gamma) {
@@ -449,7 +412,7 @@ func rms_norm([]float input, []float gamma, float eps) []float {
         }
         i = i + 1
     }
-    
+
     return output
 }
 

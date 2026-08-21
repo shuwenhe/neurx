@@ -1,8 +1,5 @@
 package neurx.inference.qwen_tokenizer
 
-// Simple Qwen2.5 Tokenizer (approximation)
-// Maps tokens to vocabulary IDs
-
 struct tokenizer {
     int vocab_size
 }
@@ -13,7 +10,6 @@ func init_tokenizer() tokenizer {
     }
 }
 
-// Simple hash-based token ID assignment
 func hash_word(string word) int {
     int hash = 0
     int i = 0
@@ -25,7 +21,6 @@ func hash_word(string word) int {
     return hash % 151936
 }
 
-// Find token ID for a word
 func find_token_id(tokenizer tok, string word) int {
     if word == "hello" { return 4 }
     else if word == "world" { return 5 }
@@ -43,20 +38,19 @@ func find_token_id(tokenizer tok, string word) int {
     else if word == "enum" { return 39 }
     else if word == "main" { return 25 }
     else if word == "print" { return 26 }
-    
+
     return hash_word(word)
 }
 
-// Simple tokenization: split by spaces and special characters
 func tokenize(tokenizer tok, string text) []int {
     []int tokens = []int{cap: len(text) + 10}
     int token_count = 0
-    
+
     string current_word = ""
     int i = 0
     while i < len(text) {
         string ch = __host_slice(text, i, i + 1)
-        
+
         if ch == " " || ch == "." || ch == "," || ch == "!" {
             if current_word != "" {
                 int token_id = find_token_id(tok, current_word)
@@ -75,28 +69,26 @@ func tokenize(tokenizer tok, string text) []int {
         } else {
             current_word = current_word + ch
         }
-        
+
         i = i + 1
     }
-    
+
     if current_word != "" {
         int token_id = find_token_id(tok, current_word)
         tokens[token_count] = token_id
         token_count = token_count + 1
     }
-    
-    // Resize to actual token count
+
     []int result = []int{cap: token_count}
     int j = 0
     while j < token_count {
         result[j] = tokens[j]
         j = j + 1
     }
-    
+
     return result
 }
 
-// Decode token IDs back to text
 func decode_tokens(tokenizer tok, []int token_ids) string {
     string result = ""
     int i = 0
@@ -105,16 +97,16 @@ func decode_tokens(tokenizer tok, []int token_ids) string {
         string token_str = "["
         token_str = token_str + int_to_string(token_id)
         token_str = token_str + "]"
-        
+
         result = result + token_str
-        
+
         if i < len(token_ids) - 1 {
             result = result + " "
         }
-        
+
         i = i + 1
     }
-    
+
     return result
 }
 

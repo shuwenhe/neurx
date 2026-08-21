@@ -23,7 +23,7 @@ std::vector<int64_t> shape(std::initializer_list<int64_t> dimensions) {
   return std::vector<int64_t>(dimensions);
 }
 
-}  // namespace
+}
 
 int64_t hf_config::head_dim() const {
   return head_dimension > 0 ? head_dimension : hidden_size / num_attention_heads;
@@ -48,7 +48,7 @@ hf_config hf_config::from_file(const std::string& path) {
   const json root = json::parse_file(path);
   hf_config config;
   config.model_type = root.at("model_type").as_string();
-  // Support causal language models (llama, mistral, etc.)
+
   config.architecture = model_architecture::base_model;
   config.vocab_size = root.at("vocab_size").as_int();
   config.hidden_size = root.at("hidden_size").as_int();
@@ -145,4 +145,4 @@ void hf_weight_store::validate_architecture(const hf_config& config) const {
   }
 }
 
-}  // namespace neurx::runtime::model
+}

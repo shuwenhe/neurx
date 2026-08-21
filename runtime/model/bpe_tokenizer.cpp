@@ -109,7 +109,7 @@ const icu::Normalizer2* normalizer_for(const std::string& type, UErrorCode* stat
   return nullptr;
 }
 
-}  // namespace
+}
 
 bpe_tokenizer bpe_tokenizer::from_tokenizer_json(const std::string& path) {
   const json root = json::parse_file(path);
@@ -387,4 +387,4 @@ int32_t bpe_tokenizer::token_id(const std::string& token) const {
   return it == token_to_id_.end() ? -1 : it->second;
 }
 
-}  // namespace neurx::runtime::model
+}

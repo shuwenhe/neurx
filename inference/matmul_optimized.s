@@ -19,25 +19,25 @@ func default_block_multiply_config() block_multiply_config {
 
 func matrix_multiply_blocked(float[] result, float[] matrix_a, float[] matrix_b, int m, int n, int k, block_multiply_config config) bool {
     int block_size = config.block_size
-    
+
     if block_size <= 0 || block_size > 256 {
         return false
     }
-    
+
     int i = 0
     while i < m {
         int i_end = i + block_size
         if i_end > m {
             i_end = m
         }
-        
+
         int j = 0
         while j < n {
             int j_end = j + block_size
             if j_end > n {
                 j_end = n
             }
-            
+
             int ii = i
             while ii < i_end {
                 int jj = j
@@ -56,13 +56,13 @@ func matrix_multiply_blocked(float[] result, float[] matrix_a, float[] matrix_b,
                 }
                 ii = ii + 1
             }
-            
+
             j = j_end
         }
-        
+
         i = i_end
     }
-    
+
     true
 }
 
@@ -79,7 +79,7 @@ func matrix_vector_multiply_optimized(float[] result, float[] matrix, float[] ve
         result[i] = sum
         i = i + 1
     }
-    
+
     true
 }
 
@@ -102,7 +102,7 @@ func fused_matmul_add(float[] result, float[] a, float[] b, float[] bias, int m,
         }
         i = i + 1
     }
-    
+
     true
 }
 
@@ -110,12 +110,12 @@ func memory_efficient_gemm(float[] result, float[] a, float[] b, int m, int n, i
     if cache_line_size <= 0 {
         return false
     }
-    
+
     int block = cache_line_size / 4
     if block <= 0 {
         block = 8
     }
-    
+
     return matrix_multiply_blocked(result, a, b, m, n, k, block_multiply_config{
         block_size: block,
         use_cache_locality: true,
@@ -135,7 +135,7 @@ func transpose_optimized(float[] result, float[] input, int rows, int cols) bool
         }
         i = i + 1
     }
-    
+
     true
 }
 
@@ -143,7 +143,7 @@ func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
     if size <= 0 {
         return false
     }
-    
+
     float max_val = logits[0]
     int i = 1
     while i < size {
@@ -152,7 +152,7 @@ func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
         }
         i = i + 1
     }
-    
+
     float sum = 0.0
     i = 0
     while i < size {
@@ -163,7 +163,7 @@ func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
         result[i] = exp_val
         i = i + 1
     }
-    
+
     i = 0
     while i < size {
         float exp_approx = 1.0 + result[i] + (result[i] * result[i] / 2.0)
@@ -174,7 +174,7 @@ func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
         sum = sum + exp_approx
         i = i + 1
     }
-    
+
     if sum > 0.0 {
         i = 0
         while i < size {
@@ -182,6 +182,6 @@ func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
             i = i + 1
         }
     }
-    
+
     true
 }

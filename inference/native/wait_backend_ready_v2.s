@@ -22,8 +22,6 @@ func parse_int_or_default(string s, int default_val) int {
     result
 }
 
-
-
 func main() {
     string host = runtime_env_get("NEURX_S_HOST", "127.0.0.1")
     int port = parse_int_or_default(runtime_env_get("NEURX_S_PORT", "18083"), 18083)

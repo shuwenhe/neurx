@@ -3,8 +3,7 @@ package neurx.inference.qwen_tokenizer_lookup
 use std.conv.int_to_string
 
 func qwen_token_to_text(int token_id) string {
-    // Qwen2.5 token ID 到文本的直接映射
-    // 自动生成 - 包含前 5000 个最常见的 tokens
+
     switch token_id {
         case 0: "!"
         case 1: "\""
@@ -5006,6 +5005,6 @@ func qwen_token_to_text(int token_id) string {
         case 4997: "hs"
         case 4998: "Ġhom"
         case 4999: ",-"
-        case: int_to_string(token_id)  // fallback
+        case: int_to_string(token_id)
     }
 }

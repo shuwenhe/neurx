@@ -119,7 +119,7 @@ if [ $? -eq 0 ]; then
     max_attempts=30
     attempts=0
     while [ $attempts -lt $max_attempts ]; do
-        if curl -s http://localhost:$API_PORT/health/ready &> /dev/null; then
+        if curl -s http:
             echo -e "${GREEN}✓ 服务已就绪${NC}"
             break
         fi

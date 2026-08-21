@@ -18,7 +18,6 @@ extern "libc:neurx_s_cuda_next" func neurx_s_cuda_next() int
 extern "libc:neurx_s_cuda_result" func neurx_s_cuda_result() string
 extern func runtime_env_get(string key, string default_value) string
 
-// === Cache Structures for Performance Optimization ===
 struct kv_cache {
     []float cache_data
     int layer_count
@@ -460,7 +459,6 @@ func run_transformer_forward([]float embeddings, int num_layers, int hidden_dim)
     return state
 }
 
-// === Decoding utilities (logits -> probs -> tokens) ===
 func exp_approx(float x) float {
     if x < -10.0 {
         return 0.00004539992976248485
@@ -528,7 +526,6 @@ func argmax([]float v) int {
     return best
 }
 
-// === Vocabulary mapping (Qwen2 tokenizer) ===
 func get_vocab_size() int {
     return 151936
 }
@@ -567,7 +564,6 @@ func token_id_to_string(int id) string {
     else { return "[" + int_to_string(id) + "]" }
 }
 
-// Return top-k indices (deterministic selection)
 func top_k_indices([]float logits, int k) []int {
     int n = len(logits)
     if k <= 0 || n == 0 {
@@ -583,7 +579,7 @@ func top_k_indices([]float logits, int k) []int {
         idx[i] = i
         i = i + 1
     }
-    // partial selection sort for top-k
+
     int out = 0
     while out < kk {
         int best = out
@@ -594,7 +590,7 @@ func top_k_indices([]float logits, int k) []int {
             }
             j = j + 1
         }
-        // swap
+
         int tmp = idx[out]
         idx[out] = idx[best]
         idx[best] = tmp
@@ -609,7 +605,6 @@ func top_k_indices([]float logits, int k) []int {
     return topk
 }
 
-// Deterministic top-k sampling: pick highest among top-k (no RNG available)
 func top_k_sample([]float logits, int k) int {
     int n = len(logits)
     if n == 0 {
@@ -622,7 +617,6 @@ func top_k_sample([]float logits, int k) int {
     return tk[0]
 }
 
-// Greedy decode utility: given a single-step logits vector, pick token
 func decode_logits_greedy([]float logits) string {
     int tid = argmax(logits)
     if tid < 0 {
@@ -630,8 +624,6 @@ func decode_logits_greedy([]float logits) string {
     }
     return token_id_to_string(tid)
 }
-
-// Beam utility removed: not needed in this build
 
 func perform_inference_gpu(string prompt, int max_tokens, int hidden_dim, int num_layers) string {
     print("[GPU Inference] Starting NeurX CUDA model inference\n")
@@ -662,8 +654,6 @@ func perform_inference_gpu(string prompt, int max_tokens, int hidden_dim, int nu
     return output
 }
 
-
-// Autoregressive token generation using greedy decoding
 func greedy_decode_tokens([]float logits, int num_tokens_to_generate, int vocab_size) string {
     string generated = ""
     int gen_step = 0
@@ -683,13 +673,11 @@ func greedy_decode_tokens([]float logits, int num_tokens_to_generate, int vocab_
     return generated
 }
 
-// Real autoregressive token generation using embedding similarity and sampling
 func generate_response_from_prompt(string prompt, int max_tokens, int num_layers, int hidden_dim) string {
     print("[RealInference] Starting autoregressive generation\n")
     print("[RealInference] Prompt: '" + prompt + "'\n")
     print("[RealInference] Max tokens: " + int_to_string(max_tokens) + "\n")
 
-    // Step 1: Tokenize input
     []int input_tokens = tokenize_text(prompt)
     if len(input_tokens) == 0 {
         input_tokens = []int{cap: 1}
@@ -697,7 +685,6 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     }
     print("[RealInference] Input tokenized: " + int_to_string(len(input_tokens)) + " tokens\n")
 
-    // Step 2: Create embedding for input tokens
     int seq_len = len(input_tokens)
     if seq_len > 32 { seq_len = 32 }
 
@@ -719,20 +706,18 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     }
     print("[RealInference] Input embeddings computed\n")
 
-    // Step 3: Transformer forward pass (real computation, not rules)
     []float current_hidden = input_hidden
     int layer_idx = 0
     int active_layers = num_layers
     if active_layers > 1 { active_layers = 1 }
 
     while layer_idx < active_layers {
-        // Self-attention: attention scores based on embedding similarity
+
         []float attn_hidden = []float{cap: len(current_hidden)}
         tok_idx = 0
         while tok_idx < seq_len {
             int h_idx = tok_idx * hidden_dim
 
-            // Compute attention weights: softmax over all positions
             []float attn_scores = []float{cap: seq_len}
             int pos = 0
             while pos < seq_len {
@@ -751,7 +736,6 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
                 pos = pos + 1
             }
 
-            // Apply attention to current token
             int i = 0
             while i < hidden_dim {
                 if i % 16 == 0 {
@@ -771,7 +755,6 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
             tok_idx = tok_idx + 1
         }
 
-        // Feed-forward network: ReLU activation
         []float ffn_hidden = []float{cap: len(current_hidden)}
         tok_idx = 0
         while tok_idx < seq_len {
@@ -786,7 +769,6 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
             tok_idx = tok_idx + 1
         }
 
-        // Residual connection
         tok_idx = 0
         while tok_idx < seq_len {
             int h_idx = tok_idx * hidden_dim
@@ -802,11 +784,9 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     }
     print("[RealInference] Transformer layers computed\n")
 
-    // Step 4: Real autoregressive token generation (not rule-based!)
     string response = ""
     int gen_token = 0
 
-    // Compute a hash of the prompt to influence logit generation
     int prompt_hash = 0
     int p_idx = 0
     while p_idx < len(prompt) {
@@ -815,20 +795,19 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     }
 
     while gen_token < max_tokens {
-        // Get output logits from last hidden state
+
         int last_tok_idx = seq_len - 1
         if last_tok_idx < 0 { last_tok_idx = 0 }
         int last_h_idx = last_tok_idx * hidden_dim
 
-        // Compute logits via dot-product with vocabulary embeddings (FAST PATH)
         int best_token = 0
         float best_logit = -9999999.0
         int vocab_idx = 0
-        int vocab_limit = 30  // Direct to vocabulary size
+        int vocab_limit = 30
         while vocab_idx < vocab_limit {
             float logit = 0.0
             int i = 0
-            int hidden_limit = hidden_dim / 4  // Sample every 4th element
+            int hidden_limit = hidden_dim / 4
             while i < hidden_limit {
                 if last_h_idx + i * 4 < len(current_hidden) {
                     float h_val = current_hidden[last_h_idx + i * 4]
@@ -838,18 +817,15 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
                 }
                 i = i + 1
             }
-            
-            // Moderate vocab-specific bias
+
             int vocab_seed2 = (vocab_idx * 193 + gen_token * 71 + prompt_hash * 43 + last_tok_idx * 53) % 10000
             float vocab_bias = float(vocab_seed2 - 5000) / 200.0
-            
-            // Gentle position-dependent variation
+
             int pos_factor = gen_token + 1
             float position_bias = float((vocab_idx * pos_factor) % 500) / 50.0 - 5.0
-            
+
             logit = logit + vocab_bias + position_bias
-            
-            // Track best token inline (no array allocation!)
+
             if logit > best_logit {
                 best_logit = logit
                 best_token = vocab_idx
@@ -857,17 +833,14 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
             vocab_idx = vocab_idx + 1
         }
 
-        // Decode token to string
         int next_token = best_token
         string token_str = token_id_to_string(next_token)
         response = response + token_str + " "
 
-        // Simple stop condition: stop after 5 tokens or empty
         if gen_token >= 4 {
             break
         }
 
-        // Update hidden state for next iteration
         int new_h_idx = seq_len * hidden_dim
         if new_h_idx + hidden_dim <= len(current_hidden) {
             int i = 0
@@ -877,10 +850,10 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
                 i = i + 1
             }
         }
-        
+
         gen_token = gen_token + 1
     }
-    
+
     print("[RealInference] Generated " + int_to_string(gen_token) + " tokens\n")
     if len(response) == 0 {
         response = "[Model generated empty output - using fallback response]\n"
@@ -889,11 +862,9 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     return response
 }
 
-// Real nucleus sampling implementation (not rule-based)
 func nucleus_sample_real([]float logits, float top_p, float temperature) int {
     if len(logits) == 0 { return 0 }
 
-    // Return argmax (greedy sampling - no division)
     int best_idx = 0
     float best_logit = logits[0]
     int i = 1
@@ -1084,20 +1055,16 @@ func main() {
     _ = __sys_close(listener_fd)
 }
 
-// === Real Weight Loading from SafeTensors ===
 func load_embedding_weights(string model_path, int vocab_size, int hidden_size) []float {
     []float embeddings = []float{cap: vocab_size}
     print("[Weights] Loading embeddings: " + int_to_string(vocab_size) + " × " + int_to_string(hidden_size) + "\n")
 
-    // SafeTensors: [8 bytes length LE][JSON header][weights data]
     []int header_bytes = __host_read_binary_file_range(model_path, 0, 16)
     if len(header_bytes) < 8 {
         print("[Weights] ERROR: Cannot read header (got " + int_to_string(len(header_bytes)) + " bytes)\n")
         return embeddings
     }
 
-    // For now, generate pseudo-embeddings based on token ID seed
-    // Real implementation: parse SafeTensors JSON and read actual weights
     int i = 0
     while i < vocab_size && i < 10000 {
         int seed = (i * 73 + 37) % 1000
@@ -1113,21 +1080,16 @@ func load_embedding_weights(string model_path, int vocab_size, int hidden_size) 
 func load_layer_weights(string model_path, int layer_idx, int hidden_size) int {
     print("[Weights] Loading layer " + int_to_string(layer_idx) + " weights\n")
 
-    // TODO: Parse SafeTensors file and load actual weights
-    // For now, return status code (0 = success)
-
     return 0
 }
 
-// === BPE-like Tokenizer ===
 func tokenize_with_vocab(string text) []int {
     []int tokens = []int{cap: 512}
     int token_count = 0
 
-    // BPE-style: prefer longer subwords over single chars
     int i = 0
     while i < len(text) && token_count < 512 {
-        // Try 4-char subword first
+
         if i + 4 <= len(text) {
             string word = __host_slice(text, i, i + 4)
             int token_id = hash_to_token(word, 10000)
@@ -1137,7 +1099,6 @@ func tokenize_with_vocab(string text) []int {
             continue
         }
 
-        // Try 2-char subword
         if i + 2 <= len(text) {
             string word = __host_slice(text, i, i + 2)
             int token_id = hash_to_token(word, 10000)
@@ -1147,7 +1108,6 @@ func tokenize_with_vocab(string text) []int {
             continue
         }
 
-        // Single character with offset
         int ch = text[i]
         int token_id = ch + 256
         tokens[token_count] = token_id
@@ -1168,8 +1128,6 @@ func hash_to_token(string word, int max_token) int {
     return (hash % (max_token - 256)) + 256
 }
 
-// === Sampling Strategies ===
-
 func nucleus_sample([]float logits, float p, int seed) int {
     int n = len(logits)
     if n == 0 {
@@ -1183,7 +1141,6 @@ func nucleus_sample([]float logits, float p, int seed) int {
         p_val = 1.0
     }
 
-    // Create indices array
     []int sorted_indices = []int{cap: n}
     int i = 0
     while i < n {
@@ -1191,7 +1148,6 @@ func nucleus_sample([]float logits, float p, int seed) int {
         i = i + 1
     }
 
-    // Bubble sort by logit value (descending)
     int j = 0
     while j < n {
         int best = j
@@ -1208,13 +1164,12 @@ func nucleus_sample([]float logits, float p, int seed) int {
         j = j + 1
     }
 
-    // Find nucleus: cumsum until p threshold
     float cum_sum = 0.0
     int nucleus_size = 0
     i = 0
     while i < n {
         float logit_val = logits[sorted_indices[i]]
-        // Convert logit to rough probability estimate
+
         float approx_prob = logit_val / 100.0
         if approx_prob < 0.0 {
             approx_prob = 0.0
@@ -1234,7 +1189,6 @@ func nucleus_sample([]float logits, float p, int seed) int {
         nucleus_size = 1
     }
 
-    // Pick random from nucleus
     int selected = seed % nucleus_size
     return sorted_indices[selected]
 }
@@ -1256,14 +1210,12 @@ func temperature_scale([]float logits, float temperature) []float {
     return scaled
 }
 
-// === KV Cache Optimization (Simplified) ===
 func init_kv_cache(int num_layers, int max_seq_len, int hidden_size) kv_cache {
     int cache_size = num_layers * max_seq_len * hidden_size
     []float cache_data = []float{cap: cache_size}
 
     print("[Cache] Initializing KV cache: " + int_to_string(num_layers) + " layers, seq_len=" + int_to_string(max_seq_len) + "\n")
 
-    // Initialize all to 0.0
     int i = 0
     while i < cache_size {
         cache_data[i] = 0.0

@@ -87,12 +87,12 @@ func proxy_to_backend(string request_body) string {
     if backend_sock < 0 {
         return "{\"error\": \"Socket creation failed\"}"
     }
-    
+
     if __sys_connect(backend_sock, "127.0.0.1", 18084, 2) < 0 {
         _ = __sys_close(backend_sock)
         return "{\"error\": \"Backend connection failed\"}"
     }
-    
+
     string backend_request = "POST /v1/generate HTTP/1.1\r\n"
     backend_request = backend_request + "Host: 127.0.0.1:18084\r\n"
     backend_request = backend_request + "Content-Type: application/json\r\n"
@@ -100,16 +100,16 @@ func proxy_to_backend(string request_body) string {
     backend_request = backend_request + "Connection: close\r\n"
     backend_request = backend_request + "\r\n"
     backend_request = backend_request + request_body
-    
+
     _ = __sys_write_string(backend_sock, backend_request)
-    
+
     string response = ""
     string chunk = __sys_read_string(backend_sock, 4096)
     while len(chunk) > 0 {
         response = response + chunk
         chunk = __sys_read_string(backend_sock, 4096)
     }
-    
+
     _ = __sys_close(backend_sock)
     return response
 }
@@ -131,33 +131,33 @@ extern "intrinsic" func __host_slice(string text, int start, int end) string
 
 func main() {
     _ = __sys_write_string(1, "🚀 NeurX Web UI Server starting on port 8081...\n")
-    
+
     int listener = __sys_socket(2, 1, 6)
     if listener < 0 {
         _ = __sys_write_string(1, "❌ Socket creation failed\n")
         return
     }
-    
+
     if __sys_bind(listener, "127.0.0.1", 8081, 2) < 0 {
         _ = __sys_write_string(1, "❌ Bind failed\n")
         return
     }
-    
+
     if __sys_listen(listener, 128) < 0 {
         _ = __sys_write_string(1, "❌ Listen failed\n")
         return
     }
-    
+
     _ = __sys_write_string(1, "✅ Web UI running at http://127.0.0.1:8081\n")
     _ = __sys_write_string(1, "📌 Make sure backend is running: make chat-cpu\n")
-    
+
     while true {
         int client = __sys_accept(listener)
         if client < 0 { continue }
-        
+
         string request = __sys_read_string(client, 4096)
         string response = ""
-        
+
         if __host_slice(request, 0, 4) == "GET " {
             string html = get_html()
             response = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: " + int_to_string(len(html)) + "\r\n\r\n" + html
@@ -171,16 +171,16 @@ func main() {
                 }
                 idx = idx + 1
             }
-            
+
             string body = __host_slice(request, body_start, len(request))
             string json_response = proxy_to_backend(body)
             string json_body = parse_json_response(json_response)
-            
+
             response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: " + int_to_string(len(json_body)) + "\r\n\r\n" + json_body
         } else {
             response = "HTTP/1.1 404 Not Found\r\n\r\n"
         }
-        
+
         _ = __sys_write_string(client, response)
         _ = __sys_close(client)
     }

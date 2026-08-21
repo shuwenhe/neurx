@@ -45,9 +45,9 @@ use neurx.tool_parsers
 fn main() {
     let model_output = "I'll help with that. {\"function\": \"search\", \"arguments\": {\"query\": \"AI trends\"}}"
     let tools = vec!["search", "calculator", "weather"]
-    
+
     let result = extract_tool_calls("qwen3-32b", model_output, tools)
-    
+
     if result.tools_called {
         for tool_call in result.tool_calls {
             println("Tool: " + tool_call.function.name)
@@ -85,18 +85,18 @@ let mut previous_text = ""
 
 for token in model.stream(prompt) {
     let current_text = previous_text + token
-    
+
     let delta = parser.extract_tool_calls_streaming(
         previous_text,
         current_text,
         token,
         request
     )
-    
+
     if delta.index >= 0 {
         emit_tool_delta(delta)
     }
-    
+
     previous_text = current_text
 }
 ```
@@ -269,7 +269,7 @@ fn inference_with_tools(
 ) -> (str, Vec<ToolCall>) {
     let output = model.generate(prompt)
     let result = extract_tool_calls(model.name(), output, tools)
-    
+
     (result.content, result.tool_calls)
 }
 ```
@@ -280,9 +280,9 @@ fn inference_with_tools(
 route("/v1/chat/completions", POST, |request| {
     let output = generate_response(request.messages, request.model)
     let tools = request.tools.unwrap_or(vec![])
-    
+
     let result = extract_tool_calls(request.model, output, tools)
-    
+
     json_response({
         "choices": [{
             "message": {
@@ -300,7 +300,7 @@ route("/v1/chat/completions", POST, |request| {
 ```s
 for token in model.stream(prompt) {
     let current_text = previous_text + token
-    
+
     match get_parser_for_model(model.name()) {
         Some(parser) => {
             let delta = parser.extract_tool_calls_streaming(
@@ -315,7 +315,7 @@ for token in model.stream(prompt) {
         }
         None => {}
     }
-    
+
     previous_text = current_text
 }
 ```

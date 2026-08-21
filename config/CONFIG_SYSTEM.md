@@ -198,13 +198,13 @@ Master orchestrator tying all components together.
 ```s
 fn main() {
     mgr := create_config_manager()
-    
+
     result := mgr.initialize()
-    
+
     if result.success {
         cfg := mgr.get_current_config()
         hw := mgr.get_hardware_info()
-        
+
         println("Initialization successful!")
         println(mgr.get_system_info())
     } else {
@@ -221,7 +221,7 @@ fn main() {
 fn init_cuda() {
     mgr := create_config_manager()
     result := mgr.initialize_with_device(device_type.cuda)
-    
+
     if result.success {
         cfg := mgr.get_current_config()
         return cfg
@@ -236,13 +236,13 @@ fn init_cuda() {
 fn validate_custom_config(cfg device_config_full*, hw_info hardware_info*) {
     validator := create_config_validator()
     report := validator.validate_with_level(cfg, hw_info, validation_level.strict)
-    
+
     if !report.is_valid {
         for err in report.errors {
             println("Validation error: " + err.message)
         }
     }
-    
+
     for suggestion in report.suggestions {
         println("Suggestion: " + suggestion)
     }
@@ -255,7 +255,7 @@ fn validate_custom_config(cfg device_config_full*, hw_info hardware_info*) {
 fn check_resources(cfg device_config_full*, hw_info hardware_info*) {
     checker := create_resource_constraint_checker()
     report := checker.check_constraints(cfg, hw_info)
-    
+
     if !report.all_satisfied {
         println("Resource constraints violated:")
         for check in report.checks {
@@ -263,7 +263,7 @@ fn check_resources(cfg device_config_full*, hw_info hardware_info*) {
                 println("- " + check.constraint_name + ": " + check.message)
             }
         }
-        
+
         for recommendation in report.recommendations {
             println("Recommended: " + recommendation)
         }
@@ -276,9 +276,9 @@ fn check_resources(cfg device_config_full*, hw_info hardware_info*) {
 ```s
 fn reconfigure_system(new_cfg device_config_full*) {
     mgr := create_config_manager()
-    
+
     result := mgr.reconfigure(new_cfg)
-    
+
     if result.success {
         println("Reconfiguration successful!")
     } else {

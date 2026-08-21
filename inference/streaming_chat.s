@@ -9,7 +9,6 @@ extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __sys_close(int fd) int
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
-
 func int_to_string(int value) string {
     if value == 0 { return "0" }
     int n = value
@@ -53,14 +52,14 @@ func send_request(int sockfd, string prompt, int max_tokens) {
     string request = "POST /v1/generate HTTP/1.1\r\n"
     request = request + "Host: localhost\r\n"
     request = request + "Content-Type: application/json\r\n"
-    
+
     string body = "{\"action\": \"generate\", \"prompt\": \"" + json_escape(prompt) + "\", \"max_tokens\": " + int_to_string(max_tokens) + "}"
-    
+
     request = request + "Content-Length: " + int_to_string(len(body)) + "\r\n"
     request = request + "Connection: close\r\n"
     request = request + "\r\n"
     request = request + body
-    
+
     _ = __sys_write_string(sockfd, request)
 }
 
@@ -70,57 +69,57 @@ func main() {
     _ = __sys_write_string(1, "  NeurX Streaming Chat\n")
     _ = __sys_write_string(1, "========================================\n")
     _ = __sys_write_string(1, "Commands: /exit, /reset, /max [N]\n\n")
-    
+
     string backend_ip = "127.0.0.1"
     int backend_port = 18084
     int max_tokens = 256
     string history = ""
-    
+
     while true {
         _ = __sys_write_string(1, "You: ")
         string user_input = read_line()
-        
+
         if len(user_input) == 0 {
             continue
         }
-        
+
         if user_input == "/exit" {
             _ = __sys_write_string(1, "Goodbye!\n")
             return
         }
-        
+
         if user_input == "/reset" {
             history = ""
             _ = __sys_write_string(1, "History cleared.\n\n")
             continue
         }
-        
+
         string prompt = history + user_input
-        
+
         _ = __sys_write_string(1, "Assistant: ")
-        
+
         int sockfd = __sys_socket(2, 1, 0)
         if sockfd < 0 {
             _ = __sys_write_string(1, "Error: Failed to create socket\n\n")
             continue
         }
-        
+
         int result = __sys_connect(sockfd, backend_ip, backend_port, 2)
         if result < 0 {
             _ = __sys_write_string(1, "Error: Failed to connect to backend\n\n")
             _ = __sys_close(sockfd)
             continue
         }
-        
+
         send_request(sockfd, prompt, max_tokens)
-        
+
         int token_count = 0
         string response = __sys_read_string(sockfd, 1024)
-        
+
         int i = 0
         bool in_body = false
         bool first_token = true
-        
+
         while i < len(response) {
             if !in_body {
                 string chunk = __host_slice(response, i, i + 4)
@@ -142,14 +141,14 @@ func main() {
             }
             i = i + 1
         }
-        
+
         _ = __sys_close(sockfd)
-        
+
         _ = __sys_write_string(1, "\n\n")
         _ = __sys_write_string(1, "[Generated ")
         _ = __sys_write_string(1, int_to_string(token_count))
         _ = __sys_write_string(1, " tokens]\n\n")
-        
+
         history = prompt + " "
     }
 }

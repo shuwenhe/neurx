@@ -129,18 +129,18 @@ let mut previous_text = ""
 
 for token in model.stream(prompt) {
     let current_text = previous_text + token
-    
+
     let delta = parser.extract_tool_calls_streaming(
         previous_text,
         current_text,
         token,
         request
     )
-    
+
     if delta.index >= 0 {
         emit_tool_delta(delta)  // 发送增量工具调用
     }
-    
+
     previous_text = current_text
 }
 ```
@@ -184,12 +184,12 @@ use neurx.tool_parsers
 fn inference_with_tools(model: Model, prompt: str, tools: Vec<str>) {
     let output = model.generate(prompt)
     let result = extract_tool_calls(model.name(), output, tools)
-    
+
     // 执行提取的工具
     for tool_call in result.tool_calls {
         execute_tool(tool_call.function.name, tool_call.function.arguments)
     }
-    
+
     // 继续对话
     return result.content
 }
@@ -201,9 +201,9 @@ fn inference_with_tools(model: Model, prompt: str, tools: Vec<str>) {
 route("/v1/chat/completions", POST, |request| {
     let output = model.generate(request.messages)
     let tools = request.tools.unwrap_or(vec![])
-    
+
     let result = extract_tool_calls(request.model, output, tools)
-    
+
     json_response({
         "choices": [{
             "message": {
@@ -284,7 +284,7 @@ for call in valid {
 - ✅ 解析器注册表和自动检测
 - ✅ JSON/XML 提取和验证工具
 - ✅ DeepSeek V3/V32/V4 解析器
-- ✅ Qwen (1/3/Coder) 解析器  
+- ✅ Qwen (1/3/Coder) 解析器
 - ✅ LLaMA 3/4 解析器
 - ✅ Gemma 2/4 解析器
 - ✅ Mistral 解析器

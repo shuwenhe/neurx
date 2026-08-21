@@ -25,7 +25,7 @@ echo ""
 
 echo -e "${BLUE}测试 1: 健康检查${NC}"
 echo "GET http://localhost:$API_PORT/health/ready"
-health_response=$(curl -s http://localhost:$API_PORT/health/ready)
+health_response=$(curl -s http:
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ 健康检查通过${NC}"
     echo "  响应: $health_response"
@@ -36,7 +36,7 @@ echo ""
 
 echo -e "${BLUE}测试 2: Prometheus 指标${NC}"
 echo "GET http://localhost:$METRICS_PORT/metrics"
-metrics=$(curl -s http://localhost:$METRICS_PORT/metrics | grep "neurx_" | head -5)
+metrics=$(curl -s http:
 if [ -n "$metrics" ]; then
     echo -e "${GREEN}✓ 指标可用${NC}"
     echo "  样本指标:"
@@ -48,7 +48,7 @@ echo ""
 
 echo -e "${BLUE}测试 3: 文本生成推理${NC}"
 echo "POST http://localhost:$API_PORT/v1/completions"
-inference_response=$(curl -s -X POST http://localhost:$API_PORT/v1/completions \
+inference_response=$(curl -s -X POST http:
     -H "Content-Type: application/json" \
     -d '{
         "model": "base-model-posttrain",
@@ -70,7 +70,7 @@ echo ""
 echo -e "${BLUE}测试 4: 流式输出${NC}"
 echo "POST http://localhost:$API_PORT/v1/completions (stream=true)"
 echo -e "${YELLOW}流式响应 (前 5 块):${NC}"
-curl -s -X POST http://localhost:$API_PORT/v1/completions \
+curl -s -X POST http:
     -H "Content-Type: application/json" \
     -d '{
         "model": "base-model-posttrain",

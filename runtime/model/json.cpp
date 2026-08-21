@@ -39,7 +39,7 @@ json convert_json(const nlohmann::json& value) {
   return json(std::move(out));
 }
 
-}  // namespace
+}
 
 json json::parse(const std::string& text) {
   try {
@@ -118,4 +118,4 @@ const json& json::at(const std::string& key) const {
   return it->second;
 }
 
-}  // namespace neurx::runtime::model
+}

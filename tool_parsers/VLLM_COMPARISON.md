@@ -91,7 +91,7 @@ class ToolParser(ABC):
     supports_required_and_named: bool = True
     structural_tag_model: str | None = None
     engine_based_streaming: bool = False
-    
+
     def __init__(self, tokenizer: TokenizerLike, tools: list[Tool] | None = None)
     def adjust_request(self, request) -> ChatCompletionRequest
     def get_structural_tag(self, request, *, reasoning: bool = False)
@@ -119,7 +119,7 @@ trait ToolParser {
 class ToolParserManager:
     tool_parsers: dict[str, type[ToolParser]] = {}
     lazy_parsers: dict[str, tuple[str, str]] = {}
-    
+
     @classmethod
     def get_tool_parser(cls, name: str) -> type[ToolParser]
     @classmethod
@@ -189,7 +189,7 @@ impl ToolParserManager {
 struct ToolCallValidator {
     available_tools: Vec<str>
     strict_mode: bool
-    
+
     fn validate_tool_call(tool_call: ToolCall) -> bool
     fn validate_tool_calls(tool_calls: Vec<ToolCall>) -> Vec<ToolCall>
 }
@@ -201,20 +201,20 @@ struct ToolCallValidator {
 ```python
 class DeepSeekV3ToolParser(ToolParser):
     structural_tag_model = "deepseek_r1"
-    
+
     tool_calls_start_token = "<｜tool▁calls▁begin｜>"
     tool_calls_end_token = "<｜tool▁calls▁end｜>"
     tool_call_start_token = "<｜tool▁call▁begin｜>"
     tool_call_end_token = "<｜tool▁call▁end｜>"
-    
+
     tool_call_regex = re.compile(
         r"<｜tool▁call▁begin｜>(?P<type>.*)<｜tool▁sep｜>(?P<function_name>.*)\n```json\n(?P<function_arguments>.*)\n```<｜tool▁call▁end｜>"
     )
-    
+
     def extract_tool_calls(self, model_output: str, request: ChatCompletionRequest):
         if self.tool_calls_start_token not in model_output:
             return ExtractedToolCallInformation(...)
-        
+
         matches = self.tool_call_regex.findall(model_output)
         tool_calls = [
             ToolCall(
@@ -226,7 +226,7 @@ class DeepSeekV3ToolParser(ToolParser):
             )
             for tool_type, function_name, function_args in matches
         ]
-        
+
         content = model_output[:model_output.find(self.tool_calls_start_token)]
         return ExtractedToolCallInformation(
             tools_called=True,
@@ -249,13 +249,13 @@ impl DeepSeekV3Parser {
         parser.base = parser.base.set_structural_tag("deepseek_r1")
         parser
     }
-    
+
     func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
         let tool_start = "<｜tool▁calls▁begin｜>"
         let tool_end = "<｜tool▁calls▁end｜>"
         let single_call_start = "<｜tool▁call▁begin｜>"
         let single_call_end = "<｜tool▁call▁end｜>"
-        
+
         if !strings::contains_str(model_output, tool_start) {
             return ExtractedToolCallInformation {
                 tools_called: false,
@@ -263,49 +263,49 @@ impl DeepSeekV3Parser {
                 content: model_output
             }
         }
-        
+
         let content_end = strings::index_of(model_output, tool_start)
         let content = if content_end > 0 {
             strings::substring(model_output, 0, content_end)
         } else {
             ""
         }
-        
+
         let tool_section_start = content_end
         let tool_section_end = strings::index_of_from(model_output, tool_end, tool_section_start)
-        
+
         let mut tool_calls = Vec::new()
-        
+
         if tool_section_end > tool_section_start {
             let tool_section = strings::substring(
                 model_output,
                 tool_section_start + strings::len(tool_start),
                 tool_section_end
             )
-            
+
             let mut search_pos = 0
             while search_pos < strings::len(tool_section) {
                 let call_start_pos = strings::index_of_from(tool_section, single_call_start, search_pos)
                 if call_start_pos < 0 { break }
-                
+
                 let call_end_pos = strings::index_of_from(tool_section, single_call_end, call_start_pos)
                 if call_end_pos < 0 { break }
-                
+
                 let call_content = strings::substring(
                     tool_section,
                     call_start_pos + strings::len(single_call_start),
                     call_end_pos
                 )
-                
+
                 match parse_deepseek_tool_call(call_content) {
                     Some(tc) => tool_calls.push(tc),
                     None => {}
                 }
-                
+
                 search_pos = call_end_pos + strings::len(single_call_end)
             }
         }
-        
+
         ExtractedToolCallInformation {
             tools_called: len(tool_calls) > 0,
             tool_calls: tool_calls,
