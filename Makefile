@@ -1036,21 +1036,20 @@ build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUC
 
 build-real-model-chat-s: build-production-s-inference
 
-chat-gpu: build-production-s-inference chat-gpu-run
-
-chat-gpu: build-production-s-inference chat-gpu-run
+chat-gpu: build-s-ir-runner build-hf-cuda-backend $(PRODUCTION_S_CHAT_CLIENT_IR) $(WAIT_BACKEND_READY_IR) chat-gpu-run
 
 chat-gpu-run:
-	@echo "🚀 GPU-accelerated chat interface (NVIDIA GPU Inference)"
+	@echo "🚀 GPU-accelerated chat interface (NeurX native HF CUDA inference)"
 	@echo "   Backend: 127.0.0.1:$(GPU_BACKEND_PORT) | Model: Qwen2.5-0.5B-Instruct"
 	@echo "   ⏳ Starting backend with smart health check..."
-	@pkill -9 s_ir_runner 2>/dev/null || true
+	@pkill -f neurx_hf_cuda_backend 2>/dev/null || true
+	@pkill -f "s_ir_runner.*gpu_backend_enhanced" 2>/dev/null || true
 	@sleep 2
 	@
 	@for i in 1 2 3 4 5; do lsof -i :$(GPU_BACKEND_PORT) >/dev/null 2>&1 && sleep 1 || break; done
 	@
 	@bash -c '\
-		NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct NEURX_INFER_DEVICE=gpu NEURX_S_PORT=$(GPU_BACKEND_PORT) NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir" >/tmp/neurx_gpu_backend.log 2>&1 & \
+		NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct NEURX_HF_CUDA_PORT=$(GPU_BACKEND_PORT) NEURX_HF_CUDA_HOST=127.0.0.1 "$(CURDIR_UNIX)/artifacts/build/hf_decoder_cuda/neurx_hf_cuda_backend" >/tmp/neurx_gpu_backend.log 2>&1 & \
 		NEURX_S_PORT=$(GPU_BACKEND_PORT) "$(S_RUNNER_BIN)" "$(WAIT_BACKEND_READY_IR)"; \
 		sleep 2; \
 		NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct NEURX_INFER_DEVICE=gpu NEURX_S_PORT=$(GPU_BACKEND_PORT) NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_CHAT_CLIENT_IR)"; \
@@ -2210,6 +2209,8 @@ hf-decoder-cuda-build: check-nvcc
 		-o artifacts/build/hf_decoder_cuda/safetensors.o
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/model/hf_model.cpp \
 		-o artifacts/build/hf_decoder_cuda/hf_model.o
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/model/bpe_tokenizer.cpp \
+		-o artifacts/build/hf_decoder_cuda/bpe_tokenizer.o
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/hf_decoder_cuda/tensor_runtime.o
 hf-decoder-cuda-kernels-test: check-nvcc
@@ -2243,9 +2244,10 @@ build-hf-cuda-backend: hf-decoder-cuda-build
 		artifacts/build/hf_decoder_cuda/json.o \
 		artifacts/build/hf_decoder_cuda/safetensors.o \
 		artifacts/build/hf_decoder_cuda/hf_model.o \
+		artifacts/build/hf_decoder_cuda/bpe_tokenizer.o \
 		artifacts/build/hf_decoder_cuda/tensor_runtime.o \
 		artifacts/build/hf_decoder_cuda/serving_socket.o \
-		-lcublas -o artifacts/build/hf_decoder_cuda/neurx_hf_cuda_backend
+		-lcublas -licui18n -licuuc -licudata -o artifacts/build/hf_decoder_cuda/neurx_hf_cuda_backend
 transformer-cuda-checkpoint-resume-test:
 	@if [ -z '$(CUDA_NVCC)' ]; then \
 		echo "Error: nvcc not found. Run this CUDA checkpoint test on a Linux NVIDIA CUDA host."; \

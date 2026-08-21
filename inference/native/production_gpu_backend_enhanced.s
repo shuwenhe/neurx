@@ -99,6 +99,114 @@ func parse_int_or_default(string s, int default_val) int {
     return result
 }
 
+func find_substring(string text, string pattern) int {
+    int i = 0
+    while i <= len(text) - len(pattern) {
+        if __host_slice(text, i, i + len(pattern)) == pattern {
+            return i
+        }
+        i = i + 1
+    }
+    -1
+}
+
+func json_escape(string value) string {
+    string output = ""
+    int i = 0
+    while i < len(value) {
+        string ch = __host_slice(value, i, i + 1)
+        if ch == "\\" {
+            output = output + "\\\\"
+        } else if ch == "\"" {
+            output = output + "\\\""
+        } else if ch == "\n" {
+            output = output + "\\n"
+        } else if ch == "\r" {
+            output = output + "\\r"
+        } else if ch == "\t" {
+            output = output + "\\t"
+        } else {
+            output = output + ch
+        }
+        i = i + 1
+    }
+    output
+}
+
+func extract_json_string(string json, string key) string {
+    string marker = "\"" + key + "\""
+    int marker_pos = find_substring(json, marker)
+    if marker_pos < 0 {
+        return ""
+    }
+    int i = marker_pos + len(marker)
+    while i < len(json) && __host_slice(json, i, i + 1) != ":" {
+        i = i + 1
+    }
+    if i >= len(json) {
+        return ""
+    }
+    i = i + 1
+    while i < len(json) && (__host_slice(json, i, i + 1) == " " || __host_slice(json, i, i + 1) == "\n" || __host_slice(json, i, i + 1) == "\r" || __host_slice(json, i, i + 1) == "\t") {
+        i = i + 1
+    }
+    if i >= len(json) || __host_slice(json, i, i + 1) != "\"" {
+        return ""
+    }
+    i = i + 1
+    string value = ""
+    bool escaped = false
+    while i < len(json) {
+        string ch = __host_slice(json, i, i + 1)
+        if escaped {
+            if ch == "n" {
+                value = value + "\n"
+            } else if ch == "r" {
+                value = value + "\r"
+            } else if ch == "t" {
+                value = value + "\t"
+            } else {
+                value = value + ch
+            }
+            escaped = false
+        } else if ch == "\\" {
+            escaped = true
+        } else if ch == "\"" {
+            return value
+        } else {
+            value = value + ch
+        }
+        i = i + 1
+    }
+    ""
+}
+
+func extract_max_new_tokens(string request) int {
+    string marker = "X-Max-New-Tokens: "
+    int marker_pos = find_substring(request, marker)
+    if marker_pos < 0 {
+        return 128
+    }
+    int i = marker_pos + len(marker)
+    string digits = ""
+    while i < len(request) {
+        string ch = __host_slice(request, i, i + 1)
+        if ch < "0" || ch > "9" {
+            break
+        }
+        digits = digits + ch
+        i = i + 1
+    }
+    int value = parse_int_or_default(digits, 128)
+    if value < 1 {
+        return 1
+    }
+    if value > 2048 {
+        return 2048
+    }
+    value
+}
+
 func normalize_byte(int value) int {
     int current = value
     if current < 0 {
@@ -523,13 +631,10 @@ func decode_logits_greedy([]float logits) string {
 // Beam utility removed: not needed in this build
 
 func perform_inference_gpu(string prompt, int max_tokens, int hidden_dim, int num_layers) string {
-    print("[GPU Inference] Starting real model inference (Qwen2.5-0.5B-Instruct)\n")
+    print("[GPU Inference] Starting legacy S model inference\n")
     print("[GPU Inference] Prompt: '" + prompt + "'\n")
     print("[GPU Inference] Max tokens: " + int_to_string(max_tokens) + "\n")
-
-    // Use direct real autoregressive inference
     string output = generate_response_from_prompt(prompt, max_tokens, num_layers, hidden_dim)
-
     print("[GPU Inference] Generated output (" + int_to_string(len(output)) + " chars)\n")
     return output
 }
@@ -806,7 +911,7 @@ func write_complete(int fd, string data) {
 }
 
 func handle_client_gpu(int client_fd, string model_path, string device_type) {
-    string request = __sys_read_string(client_fd, 4096)
+    string request = __sys_read_string(client_fd, 65536)
     int slice_end = len(request)
     if slice_end > 100 {
         slice_end = 100
@@ -820,68 +925,16 @@ func handle_client_gpu(int client_fd, string model_path, string device_type) {
         response = "{\"status\":\"ok\",\"backend\":\"neurx-gpu-enhanced\",\"layers\":" + int_to_string(active_transformer_layers()) + "}"
     } else if is_generate {
         print("[GPU-Backend] Processing generate request\n")
-        string prompt = "default prompt"
-        int prompt_pos = 0
-        int search_idx = 0
-        string search_str = "\"prompt\":"
-        while search_idx <= len(request) - len(search_str) {
-            bool found_match = true
-            int char_idx = 0
-            while char_idx < len(search_str) {
-                if __host_slice(request, search_idx + char_idx, search_idx + char_idx + 1) != __host_slice(search_str, char_idx, char_idx + 1) {
-                    found_match = false
-                    break
-                }
-                char_idx = char_idx + 1
-            }
-            if found_match {
-                prompt_pos = search_idx + len(search_str)
-                break
-            }
-            search_idx = search_idx + 1
-        }
-        if prompt_pos > 0 {
-            int value_start = prompt_pos
-            while value_start < len(request) {
-                string ch = __host_slice(request, value_start, value_start + 1)
-                if ch != " " && ch != "\n" && ch != "\r" && ch != "\t" && ch != "\"" {
-                    break
-                }
-                if ch == "\"" {
-                    value_start = value_start + 1
-                    break
-                }
-                value_start = value_start + 1
-            }
-            int value_end = value_start
-            while value_end < len(request) {
-                string ch = __host_slice(request, value_end, value_end + 1)
-                if ch == "\"" {
-                    prompt = __host_slice(request, value_start, value_end)
-                    break
-                }
-                value_end = value_end + 1
-            }
+        string prompt = extract_json_string(request, "prompt")
+        if len(prompt) == 0 {
+            prompt = "Hello"
         }
         print("[GPU-Backend] Extracted prompt: '" + prompt + "'\n")
         int hidden_dim = model_hidden_dim()
         int num_layers = active_transformer_layers()
-        string inference_output = perform_inference_gpu(prompt, 16, hidden_dim, num_layers)
-        string safe_output = ""
-        int out_idx = 0
-        while out_idx < len(inference_output) {
-            string ch = __host_slice(inference_output, out_idx, out_idx + 1)
-            if ch == "\"" {
-                safe_output = safe_output + "\\\""
-            } else if ch == "\\" {
-                safe_output = safe_output + "\\\\"
-            } else if ch == "\n" {
-                safe_output = safe_output + "\\n"
-            } else {
-                safe_output = safe_output + ch
-            }
-            out_idx = out_idx + 1
-        }
+        int max_tokens = extract_max_new_tokens(request)
+        string inference_output = perform_inference_gpu(prompt, max_tokens, hidden_dim, num_layers)
+        string safe_output = json_escape(inference_output)
         response = "{\"status\":\"ok\",\"output\":\"" + safe_output + "\",\"backend\":\"neurx-gpu-enhanced\"}"
     } else {
         print("[GPU-Backend] Unknown request\n")

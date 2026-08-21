@@ -48,6 +48,36 @@ func int_to_string(int value) string {
 
 }
 
+func json_escape(string value) string {
+
+    string output = ""
+
+    int i = 0
+
+    while i < len(value) {
+
+        string ch = __host_slice(value, i, i + 1)
+
+        if ch == "\\" { output = output + "\\\\" }
+
+        else if ch == "\"" { output = output + "\\\"" }
+
+        else if ch == "\n" { output = output + "\\n" }
+
+        else if ch == "\r" { output = output + "\\r" }
+
+        else if ch == "\t" { output = output + "\\t" }
+
+        else { output = output + ch }
+
+        i = i + 1
+
+    }
+
+    return output
+
+}
+
 func string_to_int(string text) int {
 
     string trimmed = trim(text)
@@ -516,7 +546,7 @@ func main() {
 
         print("⏳ Generating response...\n")
 
-        string request_body = "{\"action\":\"generate\",\"prompt\":\""+ prompt + "\"}"
+        string request_body = "{\"action\":\"generate\",\"prompt\":\"" + json_escape(prompt) + "\",\"max_new_tokens\":" + max_tokens + "}"
 
         string raw_response = http_request(
 
