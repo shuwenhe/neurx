@@ -216,34 +216,32 @@ func extract_json_string(string json, string key) string {
 
     }
 
-    int end = start + 1
-
+    int cursor = start + 1
     bool escaped = false
+    string result = ""
 
-    while end < len(json) {
-
-        string ch = __host_slice(json, end, end + 1)
-
-        if ch == "\\" && !escaped {
-
-            escaped = true
-
-        } else if ch == "\"" && !escaped {
-
-            break
-
-        } else {
-
+    while cursor < len(json) {
+        string ch = __host_slice(json, cursor, cursor + 1)
+        if escaped {
+            if ch == "n" {
+                result = result + "\n"
+            } else if ch == "r" {
+                result = result + "\r"
+            } else if ch == "t" {
+                result = result + "\t"
+            } else {
+                result = result + ch
+            }
             escaped = false
-
+        } else if ch == "\\" {
+            escaped = true
+        } else if ch == "\"" {
+            return result
+        } else {
+            result = result + ch
         }
-
-        end = end + 1
-
+        cursor = cursor + 1
     }
-
-    string result = __host_slice(json, start + 1, end)
-
     return result
 
 }
