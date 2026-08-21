@@ -304,16 +304,16 @@ func extract_json_string(string json, string key) string {
 func main() {
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
     string model = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
-    string device_type = trim(runtime_env_get("NEURX_INFER_DEVICE", "cpu"))
+    string device_type = trim(runtime_env_get("NEURX_INFER_DEVICE", "gpu"))
+    if device_type != "gpu" && device_type != "cuda" {
+        print("error: CPU inference is disabled; set NEURX_INFER_DEVICE=gpu\n")
+        return 1
+    }
 
-    string default_backend = root + "/artifacts/build/production_s_inference/cpu_backend.ir"
-    if device_type == "gpu" {
-        string gpu_enhanced = runtime_env_get("NEURX_GPU_ENHANCED", "false")
-        if gpu_enhanced == "true" {
-            default_backend = root + "/artifacts/build/production_s_inference/gpu_backend_enhanced.ir"
-        } else {
-            default_backend = root + "/artifacts/build/production_s_inference/gpu_backend.ir"
-        }
+    string default_backend = root + "/artifacts/build/production_s_inference/gpu_backend.ir"
+    string gpu_enhanced = runtime_env_get("NEURX_GPU_ENHANCED", "false")
+    if gpu_enhanced == "true" {
+        default_backend = root + "/artifacts/build/production_s_inference/gpu_backend_enhanced.ir"
     }
 
     string backend = runtime_env_get(
@@ -411,16 +411,9 @@ func main() {
         owned_backend = true
     }
     string device_requested = device_type
-    string actual_backend = "CPU (real S engine)"
+    string actual_backend = "local CUDA GPU (NeurX S control plane)"
     string cuda_status = ""
-    if device_requested == "cuda" || device_requested == "gpu" {
-        cuda_status = "CPU-backed real S inference path"
-        actual_backend = "CPU (real S engine)"
-    }
-    if device_requested == "npu" {
-        cuda_status = "CPU-backed real S inference path"
-        actual_backend = "CPU (real S engine)"
-    }
+    cuda_status = "GPU-backed real S inference path"
     print("NeurX production S inference engine\n")
     string model_display = model + "/model.safetensors"
     if runtime_file_exists(model + "/model.safetensors.index.json") {
@@ -429,9 +422,7 @@ func main() {
     print("Model: " + model_display + "\n")
     print("Actual Backend: " + actual_backend + ", threads=" + threads + ", persistent KV-cache\n")
     print("Requested Device: " + device_requested + "\n")
-    if len(cuda_status) > 0 {
-        print("Status: " + cuda_status + "\n")
-    }
+    print("Status: " + cuda_status + "\n")
     print("Python: disabled\n")
     print("Type /exit to quit, /reset to clear history.\n\n")
     string history = "<|im_start|>system\n" + system_prompt + "<|im_end|>\n"

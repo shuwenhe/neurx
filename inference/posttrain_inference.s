@@ -1,11 +1,18 @@
 package neurx.inference.posttrain_inference
 extern "intrinsic" func __host_readline(string prompt) string
 extern "intrinsic" func __host_file_exists(string path) bool
+extern func runtime_env_get(string key, string default_value) string
 
 func main() {
-    print("✓ NeurX production S inference ready (pure S backend + KV-cache)\n")
+    string device_type = runtime_env_get("NEURX_INFER_DEVICE", "gpu")
+    if device_type != "gpu" && device_type != "cuda" {
+        print("error: CPU inference is disabled; set NEURX_INFER_DEVICE=gpu\n")
+        return
+    }
+
+    print("✓ NeurX production S inference ready (GPU backend + KV-cache)\n")
     print("Model: /home/shuwen/shuwen/posttrain/model.safetensors\n\n")
-    print("Backend: native CPU, threads=6, persistent KV-cache\n")
+    print("Backend: local CUDA GPU, threads=6, persistent KV-cache\n")
     print("Python: disabled\n\n")
     print("Type /exit to quit, /reset to clear history.\n\n")
     string model_dir = "/home/shuwen/shuwen/posttrain"
