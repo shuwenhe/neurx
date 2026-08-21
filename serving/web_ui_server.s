@@ -62,7 +62,7 @@ func get_html() string {
     html = html + "else{document.getElementById('backendStatus').className='status-err';document.getElementById('backendStatus').innerHTML='⚠️ Backend: Unreachable'}\n"
     html = html + "}catch(e){document.getElementById('backendStatus').className='status-err';document.getElementById('backendStatus').innerHTML='❌ Backend: Offline (Start with: make chat-cpu)'}\n"
     html = html + "}\n"
-    html = html + "async function sendRequest(){const p=document.getElementById('prompt').value;const m=document.getElementById('maxTokens').value;const r=document.getElementById('result');r.innerHTML='<p class=\"loading\">⏳ Generating...</p>';try{const res=await fetch('/api/infer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p,max_tokens:parseInt(m)})});const d=await res.json();if(d.text){r.innerHTML='<p class=\"success\"><strong>AI Response:</strong></p><p>'+d.text+'</p>'}else{r.innerHTML='<p class=\"error\">❌ Error: '+d.error+'</p>'}}catch(e){r.innerHTML='<p class=\"error\">❌ Connection error: '+e+'</p>'}}\n"
+    html = html + "async function sendRequest(){const p=document.getElementById('prompt').value;const m=parseInt(document.getElementById('maxTokens').value);const r=document.getElementById('result');r.innerHTML='<p class=\"loading\">⏳ Generating...</p>';try{const res=await fetch('/api/infer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p,max_tokens:m,max_new_tokens:m})});const d=await res.json();const output=d.text||d.output;if(output){r.innerHTML='<p class=\"success\"><strong>AI Response:</strong></p><p>'+output+'</p>'}else{r.innerHTML='<p class=\"error\">❌ Error: '+(d.error||'Inference failed')+'</p>'}}catch(e){r.innerHTML='<p class=\"error\">❌ Connection error: '+e+'</p>'}}\n"
     html = html + "function clearText(){document.getElementById('prompt').value='';document.getElementById('result').innerHTML=''}\n"
     html = html + "checkBackend();setInterval(checkBackend,5000);\n"
     html = html + "</script>\n"
@@ -89,13 +89,13 @@ func proxy_to_backend(string method, string path, string request_body) string {
         return "{\"error\": \"Socket creation failed\"}"
     }
 
-    if __sys_connect(backend_sock, "127.0.0.1", 18084, 2) < 0 {
+    if __sys_connect(backend_sock, "127.0.0.1", 18081, 2) < 0 {
         _ = __sys_close(backend_sock)
         return "{\"error\": \"Backend connection failed\"}"
     }
 
     string backend_request = method + " " + path + " HTTP/1.1\r\n"
-    backend_request = backend_request + "Host: 127.0.0.1:18084\r\n"
+    backend_request = backend_request + "Host: 127.0.0.1:18081\r\n"
     backend_request = backend_request + "Content-Type: application/json\r\n"
     backend_request = backend_request + "Content-Length: " + int_to_string(len(request_body)) + "\r\n"
     backend_request = backend_request + "Connection: close\r\n"
