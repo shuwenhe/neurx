@@ -1008,6 +1008,9 @@ func run_inference(string input_text, int max_tokens) string {
 func http_response_ok(string body) string {
     string response = "HTTP/1.1 200 OK\r\n"
     response = response + "Content-Type: application/json\r\n"
+    response = response + "Access-Control-Allow-Origin: *\r\n"
+    response = response + "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n"
+    response = response + "Access-Control-Allow-Headers: Content-Type\r\n"
     response = response + "Content-Length: " + int_to_string(len(body)) + "\r\n"
     response = response + "Connection: close\r\n"
     response = response + "\r\n"
@@ -1017,6 +1020,18 @@ func http_response_ok(string body) string {
 
 func health_check_response() string {
     return http_response_ok("{\"status\":\"ok\",\"backend\":\"neurx-s-cpu\"}")
+}
+
+func http_response_404() string {
+    string response = "HTTP/1.1 404 Not Found\r\n"
+    response = response + "Content-Type: application/json\r\n"
+    response = response + "Access-Control-Allow-Origin: *\r\n"
+    response = response + "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n"
+    response = response + "Access-Control-Allow-Headers: Content-Type\r\n"
+    response = response + "Connection: close\r\n"
+    response = response + "\r\n"
+    response = response + "{\"error\":\"Not Found\"}"
+    return response
 }
 
 func contains_keyword(string text, string keyword) bool {
@@ -2269,7 +2284,7 @@ func handle_client(int client_fd) {
             int max_tokens = extract_max_new_tokens(request)
             response = http_response_ok(generate_response(prompt, max_tokens))
         } else {
-            response = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n"
+            response = http_response_404()
         }
     }
     if len(response) > 0 {

@@ -964,7 +964,7 @@ func handle_client_gpu(int client_fd, string model_path, string device_type) {
         response = "{\"status\":\"error\",\"message\":\"Unknown action\"}"
     }
     print("[GPU-Backend] Sending response\n")
-    string http_response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " + int_to_string(len(response)) + "\r\n\r\n" + response
+    string http_response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Headers: Content-Type\r\nContent-Length: " + int_to_string(len(response)) + "\r\n\r\n" + response
     write_complete(client_fd, http_response)
     _ = __sys_close(client_fd)
 }

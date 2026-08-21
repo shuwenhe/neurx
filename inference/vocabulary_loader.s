@@ -29,7 +29,7 @@ func load_qwen_vocabulary() bool {
         return false
     }
     
-    string json_content = runtime_read_text_file(tokenizer_path)
+    string json_content = runtime_read_text_file(tokenizer_path)·
     
     if len(json_content) == 0 {
         global_vocab.loaded = true

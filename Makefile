@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain-cpu posttrain-gpu posttrain-npu posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat-cpu chat-gpu chat-npu chat-xt real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference build-model-inference-s model-weight-probe model-projection-probe download-model verify-deployment start-inference-service show-deployment-info deploy-local build-local-inference verify-vl-model build-vl-inference start-vl-inference deploy-vl-local vllm-distributed-test vllm-missing-capabilities-test vllm-remaining-capabilities-test sglang-capabilities-test \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain-cpu posttrain-gpu posttrain-npu posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat-cpu chat-gpu chat-npu chat-xt streaming-chat web-ui backend backend-stop backend-logs backend-tail backend-cpu frontend real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference build-model-inference-s model-weight-probe model-projection-probe download-model verify-deployment start-inference-service show-deployment-info deploy-local build-local-inference verify-vl-model build-vl-inference start-vl-inference deploy-vl-local vllm-distributed-test vllm-missing-capabilities-test vllm-remaining-capabilities-test sglang-capabilities-test \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -69,7 +69,9 @@ PRODUCTION_S_CHAT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat.ir
 PRODUCTION_S_CHAT_DIRECT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat_direct.ir
 PRODUCTION_S_CHAT_ENHANCED_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat_enhanced.ir
 PRODUCTION_S_CHAT_CLIENT_IR := $(PRODUCTION_S_INFERENCE_DIR)/chat_client.ir
+STREAMING_CHAT_IR := $(PRODUCTION_S_INFERENCE_DIR)/streaming_chat.ir
 WAIT_BACKEND_READY_IR := $(PRODUCTION_S_INFERENCE_DIR)/wait_backend_ready.ir
+WEB_UI_SERVER_IR := $(PRODUCTION_S_INFERENCE_DIR)/web_ui_server.ir
 GPU_BACKEND_PORT ?= 18084
 GPU_BACKEND_PID_FILE ?= /tmp/neurx_gpu_backend_$(GPU_BACKEND_PORT).pid
 NEURX_CPU_THREADS ?= 6
@@ -1017,6 +1019,18 @@ $(PRODUCTION_S_CHAT_CLIENT_IR): inference/chat_client.s | $(PRODUCTION_S_INFEREN
 	}
 	@echo "✓ Chat Client IR compiled: $(PRODUCTION_S_CHAT_CLIENT_IR)"
 
+$(STREAMING_CHAT_IR): inference/streaming_chat.s | $(PRODUCTION_S_INFERENCE_DIR)
+	@echo "Compiling streaming chat interface (pure S)..."
+	@$(S_SEED_COMPILER) inference/streaming_chat.s '$(STREAMING_CHAT_IR)' || { \
+		echo "❌ Streaming Chat IR compilation failed!"; \
+		exit 1; \
+	}
+	@test -s '$(STREAMING_CHAT_IR)' || { \
+		echo "❌ Streaming Chat IR file is empty!"; \
+		exit 1; \
+	}
+	@echo "✓ Streaming Chat IR compiled: $(STREAMING_CHAT_IR)"
+
 $(WAIT_BACKEND_READY_IR): inference/native/wait_backend_ready.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "Compiling health check (pure S)..."
 	@$(S_SEED_COMPILER) inference/native/wait_backend_ready.s '$(WAIT_BACKEND_READY_IR)' || { \
@@ -1029,7 +1043,19 @@ $(WAIT_BACKEND_READY_IR): inference/native/wait_backend_ready.s | $(PRODUCTION_S
 	}
 	@echo "✓ Health check IR compiled: $(WAIT_BACKEND_READY_IR)"
 
-build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUCTION_S_GPU_BACKEND) $(PRODUCTION_S_GPU_BACKEND_ENHANCED) $(PRODUCTION_S_CHAT_IR) $(PRODUCTION_S_CHAT_DIRECT_IR) $(PRODUCTION_S_CHAT_ENHANCED_IR) $(PRODUCTION_S_CHAT_CLIENT_IR) $(WAIT_BACKEND_READY_IR)
+$(WEB_UI_SERVER_IR): serving/web_ui_server.s | $(PRODUCTION_S_INFERENCE_DIR)
+	@echo "Compiling Web UI Server (pure S)..."
+	@$(S_SEED_COMPILER) serving/web_ui_server.s '$(WEB_UI_SERVER_IR)' || { \
+		echo "❌ Web UI Server IR compilation failed!"; \
+		exit 1; \
+	}
+	@test -s '$(WEB_UI_SERVER_IR)' || { \
+		echo "❌ Web UI Server IR file is empty!"; \
+		exit 1; \
+	}
+	@echo "✓ Web UI Server IR compiled: $(WEB_UI_SERVER_IR)"
+
+build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUCTION_S_GPU_BACKEND) $(PRODUCTION_S_GPU_BACKEND_ENHANCED) $(PRODUCTION_S_CHAT_IR) $(PRODUCTION_S_CHAT_DIRECT_IR) $(PRODUCTION_S_CHAT_ENHANCED_IR) $(PRODUCTION_S_CHAT_CLIENT_IR) $(STREAMING_CHAT_IR) $(WAIT_BACKEND_READY_IR) $(WEB_UI_SERVER_IR)
 	@test -f '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir'
 	@test -f '$(PRODUCTION_S_CHAT_IR)'
 	@test -f '$(PRODUCTION_S_CHAT_DIRECT_IR)'
@@ -1136,6 +1162,141 @@ chat-cpu: build-production-s-inference
 		NEURX_S_HOST='127.0.0.1' \
 		NEURX_S_PORT='18084' \
 		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_CLIENT_IR)'
+
+streaming-chat: build-production-s-inference
+	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' -o -f '$(CHAT_MODEL_PATH)/model.safetensors.index.json' || { \
+		echo "Model weights not found in $(CHAT_MODEL_PATH) (neither model.safetensors nor sharded model)"; \
+		exit 1; \
+	}
+	@mkdir -p /tmp
+	@pkill -f "s_ir_runner.*cpu_backend" || true
+	@sleep 1
+	@echo "🚀 Starting CPU backend service for streaming chat..."
+	@NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
+		NEURX_CPU_THREADS='$(NEURX_CPU_THREADS)' \
+		NEURX_INFER_DEVICE='cpu' \
+		NEURX_S_PORT='18084' \
+		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' >/tmp/neurx_cpu_backend.log 2>&1 &
+	@sleep 6
+	@echo ""
+	@echo "💬 Starting streaming chat client..."
+	@NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
+		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
+		NEURX_S_HOST='127.0.0.1' \
+		NEURX_S_PORT='18084' \
+		'$(S_RUNNER_BIN)' '$(STREAMING_CHAT_IR)'
+
+web-ui: build-production-s-inference
+	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' -o -f '$(CHAT_MODEL_PATH)/model.safetensors.index.json' || { \
+		echo "Model weights not found in $(CHAT_MODEL_PATH) (neither model.safetensors nor sharded model)"; \
+		exit 1; \
+	}
+	@mkdir -p /tmp
+	@pkill -f "s_ir_runner.*cpu_backend" || true
+	@pkill -f "s_ir_runner.*web_ui_server" || true
+	@sleep 1
+	@echo "🚀 Starting CPU backend service on port 18084..."
+	@NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
+		NEURX_CPU_THREADS='$(NEURX_CPU_THREADS)' \
+		NEURX_INFER_DEVICE='cpu' \
+		NEURX_S_PORT='18084' \
+		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' >/tmp/neurx_cpu_backend.log 2>&1 &
+	@sleep 3
+	@echo "🌐 Starting Web UI Server on port 8081..."
+	@echo ""
+	@echo "💡 Open your browser: http://127.0.0.1:8081"
+	@echo "⚙️  Backend running on: http://127.0.0.1:18084"
+	@echo ""
+	@NEURX_ROOT='$(CURDIR_UNIX)' \
+		'$(S_RUNNER_BIN)' '$(WEB_UI_SERVER_IR)'
+
+backend: build-production-s-inference
+	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' -o -f '$(CHAT_MODEL_PATH)/model.safetensors.index.json' || { \
+		echo "Model weights not found in $(CHAT_MODEL_PATH)"; \
+		exit 1; \
+	}
+	@bash scripts/start_backend.sh '$(CURDIR_UNIX)' '$(CHAT_MODEL_PATH)'
+
+backend-stop:
+	@echo "🛑 Stopping NeurX GPU Backend..."
+	@pkill -f "s_ir_runner.*gpu_backend" 2>/dev/null && echo "✅ Backend stopped" || echo "ℹ️  Backend not running"
+	@sleep 1
+	@lsof -i :18084 2>/dev/null || echo "✅ Port 18084 is now free"
+
+backend-logs:
+	@echo "📋 GPU Backend logs:"
+	@tail -50 /tmp/neurx_gpu_backend.log
+
+backend-tail:
+	@tail -f /tmp/neurx_gpu_backend.log
+
+backend-cpu: build-production-s-inference
+	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' -o -f '$(CHAT_MODEL_PATH)/model.safetensors.index.json' || { \
+		echo "Model weights not found in $(CHAT_MODEL_PATH)"; \
+		exit 1; \
+	}
+	@mkdir -p /tmp
+	@echo "🚀 Starting NeurX CPU Backend on port 18084..."
+	@echo ""
+	@echo "Backend Information:"
+	@echo "  Model: Qwen2.5-0.5B (Transformer 24L-896H-14A)"
+	@echo "  Device: CPU"
+	@echo "  Port: 18084"
+	@echo "  Cache: Smart LRU (2000 tensors)"
+	@echo ""
+	@echo "💡 To use Web UI, run in another terminal: make frontend"
+	@echo "   Or test with: curl -X POST http://127.0.0.1:18084/v1/generate -H 'Content-Type: application/json' -d '{\"action\":\"generate\",\"prompt\":\"Hello\",\"max_tokens\":32}'"
+	@echo ""
+	@NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
+		NEURX_CPU_THREADS='$(NEURX_CPU_THREADS)' \
+		NEURX_INFER_DEVICE='cpu' \
+		NEURX_S_PORT='18084' \
+		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir'
+
+frontend: build-production-s-inference
+	@bash scripts/start_frontend.sh '$(CURDIR_UNIX)'
+
+frontend-stop:
+	@echo "🛑 Stopping NeurX Web UI Frontend..."
+	@pkill -f "s_ir_runner.*web_ui_server" 2>/dev/null && echo "✅ Frontend stopped" || echo "ℹ️  Frontend not running"
+	@sleep 1
+	@lsof -i :8081 2>/dev/null || echo "✅ Port 8081 is now free"
+
+frontend-logs:
+	@echo "📋 Web UI Frontend logs:"
+	@tail -50 /tmp/neurx_frontend.log
+
+frontend-tail:
+	@tail -f /tmp/neurx_frontend.log
+
+system-status:
+	@echo "=== NeurX System Status ==="
+	@echo ""
+	@echo "🔍 Running Processes:"
+	@pgrep -a s_ir_runner | grep -E "(gpu_backend|web_ui_server)" || echo "❌ No NeurX services running"
+	@echo ""
+	@echo "🔌 Open Ports:"
+	@lsof -i :18084 -n 2>/dev/null | grep LISTEN > /dev/null && echo "✅ Port 18084 (Backend): OPEN" || echo "❌ Port 18084: CLOSED"
+	@lsof -i :8081 -n 2>/dev/null | grep LISTEN > /dev/null && echo "✅ Port 8081 (Web UI): OPEN" || echo "❌ Port 8081: CLOSED"
+	@echo ""
+	@echo "🌐 Services:"
+	@echo "  Web UI:    http://127.0.0.1:8081"
+	@echo "  Backend:   http://127.0.0.1:18084/v1/generate"
+	@echo ""
+	@echo "📋 Available Commands:"
+	@echo "  make backend          - Start GPU backend"
+	@echo "  make backend-stop     - Stop GPU backend"
+	@echo "  make backend-logs     - View backend logs"
+	@echo "  make backend-tail     - Follow backend logs"
+	@echo "  make frontend         - Start Web UI"
+	@echo "  make frontend-stop    - Stop Web UI"
+	@echo "  make frontend-logs    - View frontend logs"
+	@echo "  make frontend-tail    - Follow frontend logs"
+	@echo "  make system-status    - Show this status"
 
 chat-npu: build-real-model-chat-s
 	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \
