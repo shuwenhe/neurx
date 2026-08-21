@@ -33,6 +33,7 @@ bool is_stop_token(int32_t token) {
 }
 
 std::string chat_prompt(const std::string& prompt) {
+  if (prompt.find("<|im_start|>") != std::string::npos) return prompt;
   return "<|im_start|>system\n"
          "You are a helpful assistant. Answer accurately and directly.\n"
          "<|im_end|>\n<|im_start|>user\n" +
@@ -144,4 +145,3 @@ extern "C" const char* neurx_s_cuda_result() {
     return g_output.c_str();
   }
 }
-

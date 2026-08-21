@@ -71,6 +71,7 @@ PRODUCTION_S_CHAT_ENHANCED_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat_e
 PRODUCTION_S_CHAT_CLIENT_IR := $(PRODUCTION_S_INFERENCE_DIR)/chat_client.ir
 WAIT_BACKEND_READY_IR := $(PRODUCTION_S_INFERENCE_DIR)/wait_backend_ready.ir
 GPU_BACKEND_PORT ?= 18084
+GPU_BACKEND_PID_FILE ?= /tmp/neurx_gpu_backend_$(GPU_BACKEND_PORT).pid
 NEURX_CPU_THREADS ?= 6
 CUDA_NVCC ?= $(shell command -v nvcc 2>/dev/null)
 CUDA_TRAIN_BRIDGE_SRC := $(CURDIR_UNIX)/cuda/neurx_transformer_train_v2.cu
@@ -1072,17 +1073,27 @@ chat-gpu-run:
 	@echo "🚀 GPU-accelerated chat interface (NVIDIA GPU Inference)"
 	@echo "   Backend: 127.0.0.1:$(GPU_BACKEND_PORT) | Model: Qwen2.5-0.5B-Instruct"
 	@echo "   ⏳ Starting backend with smart health check..."
-	@pkill -f neurx_hf_cuda_backend 2>/dev/null || true
-	@pkill -f "s_ir_runner.*gpu_backend_enhanced" 2>/dev/null || true
-	@sleep 2
-	@
+	@if [ -s '$(GPU_BACKEND_PID_FILE)' ]; then \
+		backend_pid="$$(cat '$(GPU_BACKEND_PID_FILE)')"; \
+		case "$$backend_pid" in \
+			*[!0-9]*|'') ;; \
+			*) kill "$$backend_pid" 2>/dev/null || true ;; \
+		esac; \
+	fi
+	@printf '' > '$(GPU_BACKEND_PID_FILE)'
 	@for i in 1 2 3 4 5; do lsof -i :$(GPU_BACKEND_PORT) >/dev/null 2>&1 && sleep 1 || break; done
-	@
+	@if lsof -i :$(GPU_BACKEND_PORT) >/dev/null 2>&1; then \
+		echo "ERROR: port $(GPU_BACKEND_PORT) is already used by a process not owned by this target"; \
+		exit 1; \
+	fi
 	@bash -c '\
 		LD_PRELOAD="$(S_GPU_RUNTIME_LIB)" NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct NEURX_INFER_DEVICE=gpu NEURX_CUDA_DEVICE=0 NEURX_S_PORT=$(GPU_BACKEND_PORT) NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir" >/tmp/neurx_gpu_backend.log 2>&1 & \
+		backend_pid=$$!; printf "%s\n" "$$backend_pid" > "$(GPU_BACKEND_PID_FILE)"; \
 		NEURX_S_PORT=$(GPU_BACKEND_PORT) "$(S_RUNNER_BIN)" "$(WAIT_BACKEND_READY_IR)"; \
+		if ! kill -0 "$$backend_pid" 2>/dev/null; then echo "ERROR: GPU backend exited during startup"; tail -50 /tmp/neurx_gpu_backend.log; printf "" > "$(GPU_BACKEND_PID_FILE)"; exit 1; fi; \
 		sleep 2; \
-		NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct NEURX_INFER_DEVICE=gpu NEURX_S_PORT=$(GPU_BACKEND_PORT) NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_CHAT_CLIENT_IR)"; \
+		NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct NEURX_INFER_DEVICE=gpu NEURX_S_PORT=$(GPU_BACKEND_PORT) NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_CHAT_CLIENT_IR)"; client_status=$$?; \
+		kill "$$backend_pid" 2>/dev/null || true; wait "$$backend_pid" 2>/dev/null || true; printf "" > "$(GPU_BACKEND_PID_FILE)"; exit "$$client_status"; \
 	'
 
 chat-gpu-native: build-production-s-inference

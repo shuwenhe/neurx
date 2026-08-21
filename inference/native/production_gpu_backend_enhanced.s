@@ -6,6 +6,7 @@ extern "intrinsic" func __sys_accept(int sockfd) int
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __sys_write_string(int fd, string data) int
 extern "intrinsic" func __sys_close(int fd) int
+extern "intrinsic" func __sys_setsockopt(int fd, int level, int option, int value) int
 extern "intrinsic" func __host_read_binary_file_range(string path, int offset, int size) []int
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "libc:neurx_s_cuda_device_count" func neurx_s_cuda_device_count() int
@@ -1017,6 +1018,11 @@ func main() {
     print("[Socket] Creation result: " + int_to_string(listener_fd) + " (0=AF_INET, 1=SOCK_STREAM, 6=TCP)\n")
     if listener_fd < 0 {
         print("ERROR: Socket creation failed (fd=" + int_to_string(listener_fd) + ")\n")
+        return
+    }
+    if __sys_setsockopt(listener_fd, 1, 2, 1) != 0 {
+        print("ERROR: failed to enable SO_REUSEADDR\n")
+        _ = __sys_close(listener_fd)
         return
     }
 
