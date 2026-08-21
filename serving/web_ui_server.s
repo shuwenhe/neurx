@@ -8,6 +8,7 @@ extern "intrinsic" func __sys_write_string(int fd, string data) int
 extern "intrinsic" func __sys_read_string(int fd, int n) string
 extern "intrinsic" func __sys_close(int fd) int
 extern "intrinsic" func __sys_connect(int sockfd, string ip, int port, int family) int
+extern "intrinsic" func __sys_setsockopt(int fd, int level, int option, int value) int
 
 func get_html() string {
     string html = "<!DOCTYPE html>\n"
@@ -56,8 +57,8 @@ func get_html() string {
     html = html + "<script>\n"
     html = html + "async function checkBackend() {\n"
     html = html + "try{\n"
-    html = html + "const resp=await fetch('http://127.0.0.1:18084/health');\n"
-    html = html + "if(resp.ok){document.getElementById('backendStatus').className='status-ok';document.getElementById('backendStatus').innerHTML='✅ Backend: Ready (Qwen2.5-0.5B)'}\n"
+    html = html + "const resp=await fetch('/api/health');\n"
+    html = html + "const data=await resp.json();if(resp.ok&&data.status==='ok'){document.getElementById('backendStatus').className='status-ok';document.getElementById('backendStatus').textContent='✅ Backend: Ready ('+(data.model||data.backend||'NeurX')+')'}\n"
     html = html + "else{document.getElementById('backendStatus').className='status-err';document.getElementById('backendStatus').innerHTML='⚠️ Backend: Unreachable'}\n"
     html = html + "}catch(e){document.getElementById('backendStatus').className='status-err';document.getElementById('backendStatus').innerHTML='❌ Backend: Offline (Start with: make chat-cpu)'}\n"
     html = html + "}\n"
@@ -82,7 +83,7 @@ func int_to_string(int value) string {
     return result
 }
 
-func proxy_to_backend(string request_body) string {
+func proxy_to_backend(string method, string path, string request_body) string {
     int backend_sock = __sys_socket(2, 1, 6)
     if backend_sock < 0 {
         return "{\"error\": \"Socket creation failed\"}"
@@ -93,7 +94,7 @@ func proxy_to_backend(string request_body) string {
         return "{\"error\": \"Backend connection failed\"}"
     }
 
-    string backend_request = "POST /v1/generate HTTP/1.1\r\n"
+    string backend_request = method + " " + path + " HTTP/1.1\r\n"
     backend_request = backend_request + "Host: 127.0.0.1:18084\r\n"
     backend_request = backend_request + "Content-Type: application/json\r\n"
     backend_request = backend_request + "Content-Length: " + int_to_string(len(request_body)) + "\r\n"
@@ -138,6 +139,8 @@ func main() {
         return
     }
 
+    _ = __sys_setsockopt(listener, 1, 2, 1)
+
     if __sys_bind(listener, "127.0.0.1", 8081, 2) < 0 {
         _ = __sys_write_string(1, "❌ Bind failed\n")
         return
@@ -158,10 +161,14 @@ func main() {
         string request = __sys_read_string(client, 4096)
         string response = ""
 
-        if __host_slice(request, 0, 4) == "GET " {
+        if __host_slice(request, 0, 16) == "GET /api/health " {
+            string backend_response = proxy_to_backend("GET", "/health", "")
+            string json_body = parse_json_response(backend_response)
+            response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " + int_to_string(len(json_body)) + "\r\n\r\n" + json_body
+        } else if __host_slice(request, 0, 4) == "GET " {
             string html = get_html()
             response = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: " + int_to_string(len(html)) + "\r\n\r\n" + html
-        } else if __host_slice(request, 0, 5) == "POST " {
+        } else if __host_slice(request, 0, 16) == "POST /api/infer " {
             int body_start = 0
             int idx = 0
             while idx < len(request) - 3 {
@@ -173,7 +180,7 @@ func main() {
             }
 
             string body = __host_slice(request, body_start, len(request))
-            string json_response = proxy_to_backend(body)
+            string json_response = proxy_to_backend("POST", "/v1/generate", body)
             string json_body = parse_json_response(json_response)
 
             response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: " + int_to_string(len(json_body)) + "\r\n\r\n" + json_body

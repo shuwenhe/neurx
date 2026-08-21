@@ -41,21 +41,17 @@ func main() {
 }
 
 func system_exec(string cmd) int {
-
     return 0
 }
 
 func system_sleep(int seconds) {
-
 }
 
 func get_env_or(string key, string default_val) string {
-
     return default_val
 }
 
 func verify_port_listening(int port) bool {
-
     let check_cmd = "lsof -i :" + int_to_string(port) + " 2>/dev/null | grep -q LISTEN"
     return system_exec(check_cmd) == 0
 }

@@ -1284,7 +1284,25 @@ backend-cpu: build-production-s-inference
 		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir'
 
 frontend: build-production-s-inference
-	@NEURX_ROOT='$(CURDIR_UNIX)' '$(S_RUNNER_BIN)' '$(START_FRONTEND_IR)'
+	@echo ""
+	@echo "🌐 NeurX Web UI Frontend Ready"
+	@echo ""
+	@echo "To start the frontend, run in a terminal:"
+	@echo ""
+	@echo "  $$ '$(S_RUNNER_BIN)' '$(WEB_UI_SERVER_IR)'"
+	@echo ""
+	@echo "Then access at: http://127.0.0.1:8081"
+	@echo ""
+	@echo "Or run:"
+	@echo "  $$ make start-frontend"
+	@echo ""
+
+start-frontend: build-production-s-inference
+	@pkill -9 -f "s_ir_runner.*web_ui_server" 2>/dev/null || true
+	@echo "🌐 Starting Web UI on port 8081 (Ctrl+C to stop)..."
+	@'$(S_RUNNER_BIN)' '$(WEB_UI_SERVER_IR)' >/tmp/neurx_frontend.log 2>&1 &
+	@sleep 2
+	@lsof -i :8081 2>/dev/null | grep LISTEN >/dev/null && echo "✅ Frontend is running at http://127.0.0.1:8081" || echo "❌ Failed to start"
 
 frontend-stop:
 	@echo "🛑 Stopping NeurX Web UI Frontend..."
