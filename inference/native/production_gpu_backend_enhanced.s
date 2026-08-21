@@ -8,8 +8,14 @@ extern "intrinsic" func __sys_write_string(int fd, string data) int
 extern "intrinsic" func __sys_close(int fd) int
 extern "intrinsic" func __host_read_binary_file_range(string path, int offset, int size) []int
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+extern "libc:neurx_s_cuda_device_count" func neurx_s_cuda_device_count() int
+extern "libc:neurx_s_cuda_device_name" func neurx_s_cuda_device_name() string
+extern "libc:neurx_s_cuda_last_error" func neurx_s_cuda_last_error() string
+extern "libc:neurx_s_cuda_initialize" func neurx_s_cuda_initialize(string model_path, int device_id) int
+extern "libc:neurx_s_cuda_begin" func neurx_s_cuda_begin(string prompt, int max_new_tokens) int
+extern "libc:neurx_s_cuda_next" func neurx_s_cuda_next() int
+extern "libc:neurx_s_cuda_result" func neurx_s_cuda_result() string
 extern func runtime_env_get(string key, string default_value) string
-extern func runtime_file_exists(string path) bool
 
 // === Cache Structures for Performance Optimization ===
 struct kv_cache {
@@ -185,9 +191,24 @@ func extract_max_new_tokens(string request) int {
     string marker = "X-Max-New-Tokens: "
     int marker_pos = find_substring(request, marker)
     if marker_pos < 0 {
+        marker = "\"max_new_tokens\""
+        marker_pos = find_substring(request, marker)
+        if marker_pos >= 0 {
+            int colon = marker_pos + len(marker)
+            while colon < len(request) && __host_slice(request, colon, colon + 1) != ":" {
+                colon = colon + 1
+            }
+            marker_pos = colon
+            marker = ":"
+        }
+    }
+    if marker_pos < 0 {
         return 128
     }
     int i = marker_pos + len(marker)
+    while i < len(request) && (__host_slice(request, i, i + 1) == " " || __host_slice(request, i, i + 1) == "\t") {
+        i = i + 1
+    }
     string digits = ""
     while i < len(request) {
         string ch = __host_slice(request, i, i + 1)
@@ -276,30 +297,11 @@ func decode_bf16_at([]int data, int byte_offset) float {
 }
 
 func gpu_available() bool {
-    string cuda_path = runtime_env_get("CUDA_HOME", "/usr/local/cuda")
-    if runtime_file_exists(cuda_path + "/lib64/libcudart.so") {
-        return true
-    }
-    if runtime_file_exists(cuda_path + "/lib/libcudart.so") {
-        return true
-    }
-    if runtime_file_exists("/usr/lib/x86_64-linux-gnu/libcudart.so") {
-        return true
-    }
-    if runtime_file_exists("/usr/lib/libcudart.so") {
-        return true
-    }
-    if runtime_file_exists("/usr/bin/nvcc") {
-        return true
-    }
-    if runtime_file_exists("/usr/local/cuda/bin/nvcc") {
-        return true
-    }
-    return false
+    return neurx_s_cuda_device_count() > 0
 }
 
 func gpu_device_info() string {
-    return "NVIDIA GPU - GPU Accelerated Inference"
+    return neurx_s_cuda_device_name()
 }
 
 func model_hidden_dim() int {
@@ -631,10 +633,30 @@ func decode_logits_greedy([]float logits) string {
 // Beam utility removed: not needed in this build
 
 func perform_inference_gpu(string prompt, int max_tokens, int hidden_dim, int num_layers) string {
-    print("[GPU Inference] Starting legacy S model inference\n")
+    print("[GPU Inference] Starting NeurX CUDA model inference\n")
     print("[GPU Inference] Prompt: '" + prompt + "'\n")
     print("[GPU Inference] Max tokens: " + int_to_string(max_tokens) + "\n")
-    string output = generate_response_from_prompt(prompt, max_tokens, num_layers, hidden_dim)
+    int prompt_tokens = neurx_s_cuda_begin(prompt, max_tokens)
+    if prompt_tokens < 0 {
+        return "NeurX CUDA error: " + neurx_s_cuda_last_error()
+    }
+    print("[GPU Inference] Prompt tokens: " + int_to_string(prompt_tokens) + "\n")
+    int generated = 0
+    while generated < max_tokens {
+        int token_id = neurx_s_cuda_next()
+        if token_id == -1 {
+            break
+        }
+        if token_id < -1 {
+            return "NeurX CUDA error: " + neurx_s_cuda_last_error()
+        }
+        generated = generated + 1
+    }
+    string output = neurx_s_cuda_result()
+    if len(output) == 0 && len(neurx_s_cuda_last_error()) > 0 {
+        return "NeurX CUDA error: " + neurx_s_cuda_last_error()
+    }
+    print("[GPU Inference] Generated tokens: " + int_to_string(generated) + "\n")
     print("[GPU Inference] Generated output (" + int_to_string(len(output)) + " chars)\n")
     return output
 }
@@ -956,12 +978,26 @@ func main() {
     string port_str = runtime_env_get("NEURX_S_PORT", "18083")
     int port = parse_int_or_default(port_str, 18083)
     string device_type = runtime_env_get("NEURX_INFER_DEVICE", "gpu")
+    int device_id = parse_int_or_default(runtime_env_get("NEURX_CUDA_DEVICE", "0"), 0)
     print("Configuration:\n")
     print("  Model: " + model_path + "\n")
     print("  Device: " + device_type + "\n")
     print("  Host: " + host + "\n")
     print("  Port: " + port_str + "\n")
+    if device_type != "gpu" && device_type != "cuda" {
+        print("ERROR: CPU inference is disabled; set NEURX_INFER_DEVICE=gpu\n")
+        return
+    }
     bool gpu_ok = gpu_available()
+    if !gpu_ok {
+        print("ERROR: no local CUDA GPU is available; CPU fallback is disabled\n")
+        return
+    }
+    print("  Loading model weights into local GPU memory...\n")
+    if neurx_s_cuda_initialize(model_path, device_id) != 0 {
+        print("ERROR: NeurX CUDA initialization failed: " + neurx_s_cuda_last_error() + "\n")
+        return
+    }
     string gpu_status = "NO ✗"
     if gpu_ok {
         gpu_status = "YES ✓"
@@ -976,7 +1012,7 @@ func main() {
     print("  Active Layers: " + int_to_string(active_layers) + "\n")
     print("  Hidden Dimension: " + int_to_string(model_hidden_dim()) + "\n")
     print("\nBackend Status: ✓ READY\n")
-    print("Execution Mode: Pure S Language + GPU Acceleration + Streaming MatMul ⚡\n\n")
+    print("Execution Mode: NeurX S engine + local CUDA GPU (no CPU fallback) ⚡\n\n")
     int listener_fd = __sys_socket(2, 1, 6)
     print("[Socket] Creation result: " + int_to_string(listener_fd) + " (0=AF_INET, 1=SOCK_STREAM, 6=TCP)\n")
     if listener_fd < 0 {

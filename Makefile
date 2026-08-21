@@ -53,6 +53,8 @@ S_RUNNER_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.s
 S_RUNNER_C_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.c
 S_RUNNER_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/s_runner
 S_RUNNER_BIN := $(S_RUNNER_BUILD_DIR)/s_ir_runner$(BIN_EXT)
+S_GPU_RUNTIME_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/s_gpu_runtime
+S_GPU_RUNTIME_LIB := $(S_GPU_RUNTIME_BUILD_DIR)/libneurx_s_cuda.so
 POSTTRAIN_SFT_NATIVE_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/posttrain_sft_native
 POSTTRAIN_SFT_BATCH_PROBE := $(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_batch_probe$(BIN_EXT)
 POSTTRAIN_SFT_FORWARD_PROBE := $(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_forward_probe$(BIN_EXT)
@@ -1036,10 +1038,38 @@ build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUC
 
 build-real-model-chat-s: build-production-s-inference
 
-chat-gpu: build-s-ir-runner build-hf-cuda-backend $(PRODUCTION_S_CHAT_CLIENT_IR) $(WAIT_BACKEND_READY_IR) chat-gpu-run
+build-s-gpu-cuda-runtime: check-nvcc
+	@echo "Building NeurX S local CUDA runtime..."
+	@mkdir -p '$(S_GPU_RUNTIME_BUILD_DIR)'
+	@$(CUDA_NVCC) -O2 -std=c++17 -Xcompiler -fPIC -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
+		cuda/hf_decoder_cuda.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/hf_decoder_cuda.o'
+	@$(CUDA_NVCC) -O2 -std=c++17 -Xcompiler -fPIC -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
+		cuda/s_inference_cuda_bridge.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/s_inference_cuda_bridge.o'
+	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c runtime/model/json.cpp \
+		-o '$(S_GPU_RUNTIME_BUILD_DIR)/json.o'
+	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c runtime/model/safetensors.cpp \
+		-o '$(S_GPU_RUNTIME_BUILD_DIR)/safetensors.o'
+	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c runtime/model/hf_model.cpp \
+		-o '$(S_GPU_RUNTIME_BUILD_DIR)/hf_model.o'
+	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c runtime/model/bpe_tokenizer.cpp \
+		-o '$(S_GPU_RUNTIME_BUILD_DIR)/bpe_tokenizer.o'
+	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c runtime/native/tensor_runtime.cpp \
+		-o '$(S_GPU_RUNTIME_BUILD_DIR)/tensor_runtime.o'
+	@$(CUDA_NVCC) -shared \
+		'$(S_GPU_RUNTIME_BUILD_DIR)/s_inference_cuda_bridge.o' \
+		'$(S_GPU_RUNTIME_BUILD_DIR)/hf_decoder_cuda.o' \
+		'$(S_GPU_RUNTIME_BUILD_DIR)/json.o' \
+		'$(S_GPU_RUNTIME_BUILD_DIR)/safetensors.o' \
+		'$(S_GPU_RUNTIME_BUILD_DIR)/hf_model.o' \
+		'$(S_GPU_RUNTIME_BUILD_DIR)/bpe_tokenizer.o' \
+		'$(S_GPU_RUNTIME_BUILD_DIR)/tensor_runtime.o' \
+		-lcublas -licui18n -licuuc -licudata -o '$(S_GPU_RUNTIME_LIB)'
+	@test -s '$(S_GPU_RUNTIME_LIB)'
+
+chat-gpu: build-s-ir-runner build-s-gpu-cuda-runtime $(PRODUCTION_S_GPU_BACKEND_ENHANCED) $(PRODUCTION_S_CHAT_CLIENT_IR) $(WAIT_BACKEND_READY_IR) chat-gpu-run
 
 chat-gpu-run:
-	@echo "🚀 GPU-accelerated chat interface (NeurX native HF CUDA inference)"
+	@echo "🚀 GPU-accelerated chat interface (NVIDIA GPU Inference)"
 	@echo "   Backend: 127.0.0.1:$(GPU_BACKEND_PORT) | Model: Qwen2.5-0.5B-Instruct"
 	@echo "   ⏳ Starting backend with smart health check..."
 	@pkill -f neurx_hf_cuda_backend 2>/dev/null || true
@@ -1049,7 +1079,7 @@ chat-gpu-run:
 	@for i in 1 2 3 4 5; do lsof -i :$(GPU_BACKEND_PORT) >/dev/null 2>&1 && sleep 1 || break; done
 	@
 	@bash -c '\
-		NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct NEURX_HF_CUDA_PORT=$(GPU_BACKEND_PORT) NEURX_HF_CUDA_HOST=127.0.0.1 "$(CURDIR_UNIX)/artifacts/build/hf_decoder_cuda/neurx_hf_cuda_backend" >/tmp/neurx_gpu_backend.log 2>&1 & \
+		LD_PRELOAD="$(S_GPU_RUNTIME_LIB)" NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct NEURX_INFER_DEVICE=gpu NEURX_CUDA_DEVICE=0 NEURX_S_PORT=$(GPU_BACKEND_PORT) NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir" >/tmp/neurx_gpu_backend.log 2>&1 & \
 		NEURX_S_PORT=$(GPU_BACKEND_PORT) "$(S_RUNNER_BIN)" "$(WAIT_BACKEND_READY_IR)"; \
 		sleep 2; \
 		NEURX_ROOT=$(CURDIR_UNIX) NEURX_MODEL_DIR=/model/Qwen2.5-0.5B-Instruct NEURX_INFER_DEVICE=gpu NEURX_S_PORT=$(GPU_BACKEND_PORT) NEURX_S_HOST=127.0.0.1 NEURX_CHAT_MAX_NEW_TOKENS=$(CHAT_MAX_NEW_TOKENS) "$(S_RUNNER_BIN)" "$(PRODUCTION_S_CHAT_CLIENT_IR)"; \
