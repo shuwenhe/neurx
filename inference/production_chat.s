@@ -42,7 +42,7 @@ func int_to_string(int value) string {
     string out = ""
     while n > 0 {
         int digit = n - (n / 10) * 10
-        out = string(digit + 48) + out
+        out = __host_slice("0123456789", digit, digit + 1) + out
         n = n / 10
     }
     if negative {
