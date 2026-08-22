@@ -2423,23 +2423,146 @@ func escape_json_string(string text) string {
     return result
 }
 
+func extract_json_string_between_quotes(string json_str, int start_pos) string {
+    int pos = start_pos
+    while pos < len(json_str) && string(json_str[pos]) != "\"" {
+        pos = pos + 1
+    }
+    if pos >= len(json_str) {
+        return ""
+    }
+    
+    pos = pos + 1
+    int end_pos = pos
+    while end_pos < len(json_str) && string(json_str[end_pos]) != "\"" {
+        if string(json_str[end_pos]) == "\\" && end_pos + 1 < len(json_str) {
+            end_pos = end_pos + 2
+        } else {
+            end_pos = end_pos + 1
+        }
+    }
+    
+    if end_pos >= len(json_str) {
+        return ""
+    }
+    
+    string result = ""
+    int idx = pos
+    while idx < end_pos {
+        result = result + string(json_str[idx])
+        idx = idx + 1
+    }
+    return result
+}
+
+func extract_message_content_from_json(string json_str) string {
+    int content_key_pos = find_substring(json_str, "\"content\":")
+    if content_key_pos < 0 {
+        print("DEBUG: 'content' key not found in JSON\n")
+        return ""
+    }
+    
+    int value_start = content_key_pos + 10
+    while value_start < len(json_str) && (string(json_str[value_start]) == " " || string(json_str[value_start]) == "\t") {
+        value_start = value_start + 1
+    }
+    
+    if value_start >= len(json_str) || string(json_str[value_start]) != "\"" {
+        print("DEBUG: content value is not a string\n")
+        return ""
+    }
+    
+    return extract_json_string_between_quotes(json_str, value_start)
+}
+
+func count_tokens_simple(string text) int {
+    int count = 1
+    int i = 0
+    while i < len(text) {
+        if string(text[i]) == " " {
+            count = count + 1
+        }
+        i = i + 1
+    }
+    return count / 2 + 1
+}
+
+func extract_model_param_from_json(string json_str) string {
+    int model_key_pos = find_substring(json_str, "\"model\":")
+    if model_key_pos < 0 {
+        return "qwen-0.5b-instruct"
+    }
+    int value_start = model_key_pos + 8
+    while value_start < len(json_str) && string(json_str[value_start]) != "\"" {
+        value_start = value_start + 1
+    }
+    return extract_json_string_between_quotes(json_str, value_start)
+}
+
+func extract_max_tokens_from_json(string json_str) int {
+    int max_tokens_key_pos = find_substring(json_str, "\"max_tokens\":")
+    if max_tokens_key_pos < 0 {
+        return 512
+    }
+    int value_start = max_tokens_key_pos + 13
+    while value_start < len(json_str) && (string(json_str[value_start]) == " " || string(json_str[value_start]) == "\t") {
+        value_start = value_start + 1
+    }
+    
+    string num_str = ""
+    while value_start < len(json_str) && string(json_str[value_start]) >= "0" && string(json_str[value_start]) <= "9" {
+        num_str = num_str + string(json_str[value_start])
+        value_start = value_start + 1
+    }
+    
+    return parse_int_or_default(num_str, 512)
+}
+
 func build_openai_chat_response(string request_body) string {
-    string prompt = "This is a test response from NeurX OpenAI API."
-    int prompt_tokens = 20
-    int completion_tokens = 15
+    print("DEBUG: Processing request body (length=" + int_to_string(len(request_body)) + ")\n")
+    
+    string user_prompt = extract_message_content_from_json(request_body)
+    if len(user_prompt) == 0 {
+        print("DEBUG: Failed to extract content from JSON, using empty prompt\n")
+        user_prompt = ""
+    }
+    print("DEBUG: Extracted prompt: '" + user_prompt + "'\n")
+    
+    string model_name = extract_model_param_from_json(request_body)
+    int max_tokens = extract_max_tokens_from_json(request_body)
+    
+    print("DEBUG: Model=" + model_name + ", MaxTokens=" + int_to_string(max_tokens) + "\n")
+    
+    string model_output_json = generate_response(user_prompt, max_tokens)
+    print("DEBUG: Model output JSON: " + model_output_json + "\n")
+    
+    string model_output = ""
+    int output_key_pos = find_substring(model_output_json, "\"output\":")
+    if output_key_pos >= 0 {
+        model_output = extract_json_string_between_quotes(model_output_json, output_key_pos + 9)
+    }
+    
+    if len(model_output) == 0 {
+        model_output = "Sorry, I couldn't generate a response. Please try again."
+    }
+    
+    print("DEBUG: Final model output: '" + model_output + "'\n")
+    
+    int prompt_tokens = count_tokens_simple(user_prompt)
+    int completion_tokens = count_tokens_simple(model_output)
     
     string body = ""
     body = body + "{"
-    body = body + "\"id\":\"chatcmpl-test\","
+    body = body + "\"id\":\"chatcmpl-neurx-" + int_to_string(1000000) + "\","
     body = body + "\"object\":\"chat.completion\","
     body = body + "\"created\":1692903600,"
-    body = body + "\"model\":\"qwen-0.5b-instruct\","
+    body = body + "\"model\":\"" + escape_json_string(model_name) + "\","
     body = body + "\"choices\":["
     body = body + "{"
     body = body + "\"index\":0,"
     body = body + "\"message\":{"
     body = body + "\"role\":\"assistant\","
-    body = body + "\"content\":\"" + escape_json_string(prompt) + "\""
+    body = body + "\"content\":\"" + escape_json_string(model_output) + "\""
     body = body + "},"
     body = body + "\"finish_reason\":\"stop\""
     body = body + "}"
