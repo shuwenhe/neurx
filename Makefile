@@ -910,9 +910,9 @@ build-real-chat-s:
 $(PRODUCTION_S_INFERENCE_DIR):
 	@mkdir -p '$(PRODUCTION_S_INFERENCE_DIR)'
 
-$(PRODUCTION_S_BACKEND): inference/native/production_cpu_backend.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_BACKEND): inference/serve/cpu_backend.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX CPU Backend (Pure S Language)..."
-	@$(S_SEED_COMPILER) inference/native/production_cpu_backend.s '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' || { \
+	@$(S_SEED_COMPILER) inference/serve/cpu_backend.s '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' || { \
 		echo "❌ Backend compilation failed!"; \
 		exit 1; \
 	}
