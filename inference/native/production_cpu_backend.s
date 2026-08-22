@@ -344,12 +344,12 @@ struct weight_cache {
     int miss_count
     bool enabled
 }
-var g_cache_tensors []cached_tensor
-var g_cache_count int = 0
-var g_cache_capacity int = 2000
-var g_cache_hit_count int = 0
-var g_cache_miss_count int = 0
-var g_cache_enabled bool = true
+var g_cache_tensors = []cached_tensor{}
+var g_cache_count = 0
+var g_cache_capacity = 2000
+var g_cache_hit_count = 0
+var g_cache_miss_count = 0
+var g_cache_enabled = true
 
 func get_cache_stats() weight_cache {
     []cached_tensor tensors = []cached_tensor{cap: 2000}
