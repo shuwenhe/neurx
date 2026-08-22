@@ -2259,17 +2259,24 @@ func handle_client(int client_fd) {
         return
     }
     
+    print("DEBUG: Received request (length=" + int_to_string(len(request)) + ")\n")
+    
     string response = ""
     string first_line = extract_request_line(request)
+    print("DEBUG: First line='" + first_line + "'\n")
     
     if find_in_string(first_line, "GET /v1/models") >= 0 {
+        print("DEBUG: Matched GET /v1/models\n")
         response = build_models_response()
     } else if find_in_string(first_line, "POST /v1/chat/completions") >= 0 {
+        print("DEBUG: Matched POST /v1/chat/completions\n")
         string body = extract_http_body(request)
         response = build_openai_chat_response(body)
     } else if find_in_string(first_line, "GET ") >= 0 {
+        print("DEBUG: Matched GET (health check)\n")
         response = health_check_response()
     } else {
+        print("DEBUG: No match, returning 404\n")
         response = http_response_404()
     }
     
@@ -2332,25 +2339,20 @@ func create_ready_file(string path) {
 func extract_request_line(string request) string {
     int end_pos = 0
     int i = 0
-    while i < len(request) && string(request[i]) != "\n" {
+    int req_len = len(request)
+    
+    while i < req_len && string(request[i]) != "\r" && string(request[i]) != "\n" {
         end_pos = i
         i = i + 1
     }
     
-    if end_pos == 0 {
-        return request
-    }
-    
-    if end_pos > 0 && string(request[end_pos]) == "\r" {
-        return ""
-    }
-    
     string result = ""
     int j = 0
-    while j <= end_pos && j < len(request) {
+    while j <= end_pos && j < req_len {
         result = result + string(request[j])
         j = j + 1
     }
+    
     return result
 }
 
