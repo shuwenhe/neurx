@@ -2291,24 +2291,36 @@ func extract_http_body(string request) string {
     int i = 0
     int req_len = len(request)
     print("DEBUG extract_http_body: searching in " + int_to_string(req_len) + " bytes\n")
+    
     while i < req_len - 3 {
-        string chunk = __host_slice(request, i, i + 4)
-        if chunk == "\r\n\r\n" {
+        if string(request[i]) == "\r" && 
+           i + 1 < req_len && string(request[i + 1]) == "\n" &&
+           i + 2 < req_len && string(request[i + 2]) == "\r" &&
+           i + 3 < req_len && string(request[i + 3]) == "\n" {
             header_end = i + 4
             print("DEBUG: found header/body separator at offset " + int_to_string(i) + "\n")
             break
         }
         i = i + 1
     }
+    
     if header_end == 0 {
-        print("DEBUG: separator not found, scanning further\n")
+        print("DEBUG: separator not found\n")
         return ""
     }
+    
     if header_end >= req_len {
-        print("DEBUG: separator at end of request\n")
+        print("DEBUG: separator at end, body is empty\n")
         return ""
     }
-    string result = __host_slice(request, header_end, req_len)
+    
+    string result = ""
+    int idx = header_end
+    while idx < req_len {
+        result = result + string(request[idx])
+        idx = idx + 1
+    }
+    
     print("DEBUG: extracted " + int_to_string(len(result)) + " bytes of body\n")
     return result
 }
@@ -2518,8 +2530,105 @@ func extract_max_tokens_from_json(string json_str) int {
     return parse_int_or_default(num_str, 512)
 }
 
+func extract_stream_param_from_json(string json_str) bool {
+    int stream_key_pos = find_substring(json_str, "\"stream\":")
+    if stream_key_pos < 0 {
+        return false
+    }
+    
+    int value_start = stream_key_pos + 9
+    while value_start < len(json_str) && (string(json_str[value_start]) == " " || string(json_str[value_start]) == "\t") {
+        value_start = value_start + 1
+    }
+    
+    if value_start >= len(json_str) {
+        return false
+    }
+    
+    if string(json_str[value_start]) == "t" && value_start + 3 < len(json_str) {
+        string substr = ""
+        int i = 0
+        while i < 4 && value_start + i < len(json_str) {
+            substr = substr + string(json_str[value_start + i])
+            i = i + 1
+        }
+        if substr == "true" {
+            return true
+        }
+    }
+    
+    return false
+}
+
+func build_streaming_chunk(string content_delta, int index) string {
+    string choice_json = "{\"index\":" + int_to_string(index) + ",\"delta\":{\"content\":\"" + escape_json_string(content_delta) + "\"},\"finish_reason\":null}"
+    string chunk_json = "{\"choices\":[" + choice_json + "]}"
+    return "data: " + chunk_json + "\r\n\r\n"
+}
+
+func build_streaming_done() string {
+    return "data: [DONE]\r\n\r\n"
+}
+
+func build_sse_response_header() string {
+    string response = ""
+    response = response + "HTTP/1.1 200 OK\r\n"
+    response = response + "Content-Type: text/event-stream\r\n"
+    response = response + "Cache-Control: no-cache\r\n"
+    response = response + "Connection: keep-alive\r\n"
+    response = response + "Access-Control-Allow-Origin: *\r\n"
+    response = response + "\r\n"
+    return response
+}
+
+func split_text_into_words(string text) []string {
+    []string words = []string{}
+    return words
+}
+
+func build_openai_streaming_response(string request_body, string model_output, string model_name) string {
+    string header = build_sse_response_header()
+    string body = ""
+    
+    print("DEBUG: Building streaming response\n")
+    
+    int idx = 0
+    string current_word = ""
+    while idx < len(model_output) {
+        string ch = string(model_output[idx])
+        if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
+            if len(current_word) > 0 {
+                string chunk = build_streaming_chunk(current_word + " ", 0)
+                body = body + chunk
+                current_word = ""
+            }
+        } else {
+            current_word = current_word + ch
+        }
+        idx = idx + 1
+    }
+    
+    if len(current_word) > 0 {
+        string chunk = build_streaming_chunk(current_word, 0)
+        body = body + chunk
+    }
+    
+    body = body + build_streaming_done()
+    
+    print("DEBUG: Streaming body length=" + int_to_string(len(body)) + "\n")
+    
+    return header + body
+}
+
 func build_openai_chat_response(string request_body) string {
     print("DEBUG: Processing request body (length=" + int_to_string(len(request_body)) + ")\n")
+    
+    bool is_streaming = extract_stream_param_from_json(request_body)
+    string stream_mode = "false"
+    if is_streaming {
+        stream_mode = "true"
+    }
+    print("DEBUG: Stream mode=" + stream_mode + "\n")
     
     string user_prompt = extract_message_content_from_json(request_body)
     if len(user_prompt) == 0 {
@@ -2547,6 +2656,11 @@ func build_openai_chat_response(string request_body) string {
     }
     
     print("DEBUG: Final model output: '" + model_output + "'\n")
+    
+    if is_streaming {
+        print("DEBUG: Returning streaming response\n")
+        return build_openai_streaming_response(request_body, model_output, model_name)
+    }
     
     int prompt_tokens = count_tokens_simple(user_prompt)
     int completion_tokens = count_tokens_simple(model_output)
