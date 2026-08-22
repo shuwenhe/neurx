@@ -2249,7 +2249,7 @@ func generate_response(string prompt, int max_tokens) string {
 }
 
 func handle_client(int client_fd) {
-    string request = __sys_read_string(client_fd, 4096)
+    string request = __sys_read_string(client_fd, 8192)
     if len(request) == 0 {
         _ = __sys_close(client_fd)
         return
@@ -2258,35 +2258,21 @@ func handle_client(int client_fd) {
         _ = __sys_close(client_fd)
         return
     }
+    
     string response = ""
-    string method = ""
-    if len(request) >= 4 {
-        method = __host_slice(request, 0, 4)
-    }
-    if method == "GET " {
+    string first_line = extract_request_line(request)
+    
+    if find_in_string(first_line, "GET /v1/models") >= 0 {
+        response = build_models_response()
+    } else if find_in_string(first_line, "POST /v1/chat/completions") >= 0 {
+        string body = extract_http_body(request)
+        response = build_openai_chat_response(body)
+    } else if find_in_string(first_line, "GET ") >= 0 {
         response = health_check_response()
     } else {
-        string first_five = ""
-        if len(request) >= 5 {
-            first_five = __host_slice(request, 0, 5)
-        }
-        if first_five == "POST " {
-            string body = extract_http_body(request)
-            print("DEBUG: extracted body length=" + int_to_string(len(body)) + "\n")
-            print("DEBUG: request total length=" + int_to_string(len(request)) + "\n")
-            if len(body) > 0 && len(body) <= 50 {
-                print("DEBUG: body='" + body + "'\n")
-            }
-            string prompt = body
-            if len(prompt) == 0 {
-                prompt = "test"
-            }
-            int max_tokens = extract_max_new_tokens(request)
-            response = http_response_ok(generate_response(prompt, max_tokens))
-        } else {
-            response = http_response_404()
-        }
+        response = http_response_404()
     }
+    
     if len(response) > 0 {
         _ = __sys_write_string(client_fd, response)
     }
@@ -2341,6 +2327,136 @@ func extract_max_new_tokens(string request) int {
 
 func create_ready_file(string path) {
     print("✓ Backend ready file: " + path + "\n")
+}
+
+func extract_request_line(string request) string {
+    int end_pos = 0
+    int i = 0
+    while i < len(request) && string(request[i]) != "\n" {
+        end_pos = i
+        i = i + 1
+    }
+    
+    if end_pos == 0 {
+        return request
+    }
+    
+    if end_pos > 0 && string(request[end_pos]) == "\r" {
+        return ""
+    }
+    
+    string result = ""
+    int j = 0
+    while j <= end_pos && j < len(request) {
+        result = result + string(request[j])
+        j = j + 1
+    }
+    return result
+}
+
+func find_in_string(string haystack, string needle) int {
+    int i = 0
+    while i < len(haystack) - len(needle) {
+        int j = 0
+        bool match = true
+        while j < len(needle) && i + j < len(haystack) {
+            if string(haystack[i + j]) != string(needle[j]) {
+                match = false
+                break
+            }
+            j = j + 1
+        }
+        if match {
+            return i
+        }
+        i = i + 1
+    }
+    return -1
+}
+
+func build_models_response() string {
+    string body = ""
+    body = body + "{"
+    body = body + "\"object\":\"list\","
+    body = body + "\"data\":["
+    body = body + "{"
+    body = body + "\"id\":\"qwen-0.5b-instruct\","
+    body = body + "\"object\":\"model\","
+    body = body + "\"created\":1692903600,"
+    body = body + "\"owned_by\":\"neurx\""
+    body = body + "}"
+    body = body + "]"
+    body = body + "}"
+    
+    string response = ""
+    response = response + "HTTP/1.1 200 OK\r\n"
+    response = response + "Content-Type: application/json\r\n"
+    response = response + "Content-Length: " + int_to_string(len(body)) + "\r\n"
+    response = response + "Connection: close\r\n"
+    response = response + "\r\n"
+    response = response + body
+    return response
+}
+
+func escape_json_string(string text) string {
+    string result = ""
+    int i = 0
+    while i < len(text) {
+        string ch = string(text[i])
+        if ch == "\"" {
+            result = result + "\\\""
+        } else if ch == "\\" {
+            result = result + "\\\\"
+        } else if ch == "\n" {
+            result = result + "\\n"
+        } else if ch == "\r" {
+            result = result + "\\r"
+        } else if ch == "\t" {
+            result = result + "\\t"
+        } else {
+            result = result + ch
+        }
+        i = i + 1
+    }
+    return result
+}
+
+func build_openai_chat_response(string request_body) string {
+    string prompt = "This is a test response from NeurX OpenAI API."
+    int prompt_tokens = 20
+    int completion_tokens = 15
+    
+    string body = ""
+    body = body + "{"
+    body = body + "\"id\":\"chatcmpl-test\","
+    body = body + "\"object\":\"chat.completion\","
+    body = body + "\"created\":1692903600,"
+    body = body + "\"model\":\"qwen-0.5b-instruct\","
+    body = body + "\"choices\":["
+    body = body + "{"
+    body = body + "\"index\":0,"
+    body = body + "\"message\":{"
+    body = body + "\"role\":\"assistant\","
+    body = body + "\"content\":\"" + escape_json_string(prompt) + "\""
+    body = body + "},"
+    body = body + "\"finish_reason\":\"stop\""
+    body = body + "}"
+    body = body + "],"
+    body = body + "\"usage\":{"
+    body = body + "\"prompt_tokens\":" + int_to_string(prompt_tokens) + ","
+    body = body + "\"completion_tokens\":" + int_to_string(completion_tokens) + ","
+    body = body + "\"total_tokens\":" + int_to_string(prompt_tokens + completion_tokens)
+    body = body + "}"
+    body = body + "}"
+    
+    string response = ""
+    response = response + "HTTP/1.1 200 OK\r\n"
+    response = response + "Content-Type: application/json\r\n"
+    response = response + "Content-Length: " + int_to_string(len(body)) + "\r\n"
+    response = response + "Connection: close\r\n"
+    response = response + "\r\n"
+    response = response + body
+    return response
 }
 
 func main() {
