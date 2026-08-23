@@ -209,7 +209,7 @@ neurx/
 │   ├── nginx.conf                  # Reverse proxy config
 │   └── entrypoint.sh               # Service startup script
 │
-├── tests/neurx/                           # Test suite
+├── tests/                                 # Test suite by test level
 │   ├── test_advanced_cache_integration.s
 │   ├── fixtures/                   # Test data
 │   └── golden/                     # Golden outputs
