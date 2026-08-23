@@ -9,6 +9,8 @@ struct safetensors_embedding {
     int columns
     int data_offset
     int data_bytes
+    string dtype
+    int element_bytes
     string error_code
 }
 
@@ -89,8 +91,35 @@ func st_f32_le([]int bytes, int offset) float {
     sign * (1.0 + mantissa * 1.0 / 8388608.0) * st_pow2(exponent - 127)
 }
 
+func st_bf16_le([]int bytes, int offset) float {
+    int bits = bytes[offset] * 65536 + bytes[offset + 1] * 16777216
+    []int expanded = []int{cap: 4}
+    expanded[0] = 0
+    expanded[1] = 0
+    expanded[2] = bits / 65536 % 256
+    expanded[3] = bits / 16777216 % 256
+    st_f32_le(expanded, 0)
+}
+
+func st_f16_le([]int bytes, int offset) float {
+    int bits = bytes[offset] + bytes[offset + 1] * 256
+    int sign = 1
+    if bits >= 32768 { sign = -1; bits = bits - 32768 }
+    int exponent = bits / 1024
+    int mantissa = bits % 1024
+    if exponent == 0 { return sign * (mantissa * 1.0 / 1024.0) * st_pow2(-14) }
+    if exponent == 31 { return sign * 65504.0 }
+    sign * (1.0 + mantissa * 1.0 / 1024.0) * st_pow2(exponent - 15)
+}
+
+func st_decode([]int bytes, int offset, string dtype) float {
+    if dtype == "BF16" { return st_bf16_le(bytes, offset) }
+    if dtype == "F16" { return st_f16_le(bytes, offset) }
+    st_f32_le(bytes, offset)
+}
+
 func invalid_safetensors_embedding(string path, string code) safetensors_embedding {
-    safetensors_embedding { valid: false, path: path, rows: 0, columns: 0, data_offset: 0, data_bytes: 0, error_code: code }
+    safetensors_embedding { valid: false, path: path, rows: 0, columns: 0, data_offset: 0, data_bytes: 0, dtype: "", element_bytes: 0, error_code: code }
 }
 
 func load_f32_tensor(string path, string tensor_name) safetensors_embedding {
@@ -102,9 +131,17 @@ func load_f32_tensor(string path, string tensor_name) safetensors_embedding {
     string header = st_bytes_to_string(header_bytes)
     int tensor = st_find(header, "\"" + tensor_name + "\"", 0)
     if tensor < 0 { return invalid_safetensors_embedding(path, "tensor_not_found") }
-    int dtype = st_find(header, "\"dtype\":\"F32\"", tensor)
-    if dtype < 0 { return invalid_safetensors_embedding(path, "unsupported_dtype") }
-    int shape = st_find(header, "\"shape\":[", dtype)
+    int object_end = st_find(header, "}", tensor)
+    int dtype_position = st_find(header, "\"dtype\":\"", tensor)
+    if dtype_position < 0 || object_end < 0 || dtype_position > object_end { return invalid_safetensors_embedding(path, "missing_dtype") }
+    int dtype_start = dtype_position + 9
+    int dtype_end = st_find(header, "\"", dtype_start)
+    string dtype = ""
+    int dtype_cursor = dtype_start
+    while dtype_cursor < dtype_end { dtype = dtype + string(header[dtype_cursor]); dtype_cursor = dtype_cursor + 1 }
+    int element_bytes = 4
+    if dtype == "F16" || dtype == "BF16" { element_bytes = 2 } else if dtype != "F32" { return invalid_safetensors_embedding(path, "unsupported_dtype") }
+    int shape = st_find(header, "\"shape\":[", dtype_end)
     int comma = st_find(header, ",", shape + 9)
     int shape_end = st_find(header, "]", shape + 9)
     if shape < 0 || shape_end < 0 { return invalid_safetensors_embedding(path, "invalid_shape") }
@@ -117,8 +154,8 @@ func load_f32_tensor(string path, string tensor_name) safetensors_embedding {
     if rows <= 0 || columns <= 0 || offsets < 0 || offset_comma < 0 || offsets_end < 0 { return invalid_safetensors_embedding(path, "invalid_metadata") }
     int begin = st_parse_uint(header, offsets + 16)
     int end = st_parse_uint(header, offset_comma + 1)
-    if begin < 0 || end <= begin || end - begin != rows * columns * 4 { return invalid_safetensors_embedding(path, "invalid_tensor_range") }
-    safetensors_embedding { valid: true, path: path, rows: rows, columns: columns, data_offset: 8 + header_size + begin, data_bytes: end - begin, error_code: "" }
+    if begin < 0 || end <= begin || end - begin != rows * columns * element_bytes { return invalid_safetensors_embedding(path, "invalid_tensor_range") }
+    safetensors_embedding { valid: true, path: path, rows: rows, columns: columns, data_offset: 8 + header_size + begin, data_bytes: end - begin, dtype: dtype, element_bytes: element_bytes, error_code: "" }
 }
 
 func load_f32_embedding(string path, string tensor_name) safetensors_embedding {
@@ -128,11 +165,11 @@ func load_f32_embedding(string path, string tensor_name) safetensors_embedding {
 func lookup_f32_embedding(safetensors_embedding embedding, int token_id) embedding_lookup_result {
     if !embedding.valid { return embedding_lookup_result { ok: false, values: [], error_code: embedding.error_code } }
     if token_id < 0 || token_id >= embedding.rows { return embedding_lookup_result { ok: false, values: [], error_code: "token_out_of_range" } }
-    []int bytes = __host_read_binary_file_range(embedding.path, embedding.data_offset + token_id * embedding.columns * 4, embedding.columns * 4)
-    if len(bytes) != embedding.columns * 4 { return embedding_lookup_result { ok: false, values: [], error_code: "truncated_tensor" } }
+    []int bytes = __host_read_binary_file_range(embedding.path, embedding.data_offset + token_id * embedding.columns * embedding.element_bytes, embedding.columns * embedding.element_bytes)
+    if len(bytes) != embedding.columns * embedding.element_bytes { return embedding_lookup_result { ok: false, values: [], error_code: "truncated_tensor" } }
     []float values = []float{cap: embedding.columns}
     int i = 0
-    while i < embedding.columns { values[i] = st_f32_le(bytes, i * 4); i = i + 1 }
+    while i < embedding.columns { values[i] = st_decode(bytes, i * embedding.element_bytes, embedding.dtype); i = i + 1 }
     embedding_lookup_result { ok: true, values: values, error_code: "" }
 }
 
@@ -143,6 +180,6 @@ func read_f32_tensor(safetensors_embedding tensor) f32_tensor_result {
     int count = tensor.rows * tensor.columns
     []float values = []float{cap: count}
     int i = 0
-    while i < count { values[i] = st_f32_le(bytes, i * 4); i = i + 1 }
+    while i < count { values[i] = st_decode(bytes, i * tensor.element_bytes, tensor.dtype); i = i + 1 }
     f32_tensor_result { ok: true, tensor: tensor, values: values, error_code: "" }
 }

@@ -4,6 +4,7 @@ use neurx.backends.cpu.reference_inference.{cpu_reference_generate}
 use neurx.backends.cpu.transformer_decode.{cpu_transformer_result, cpu_transformer_prefill_decode, hf_generation_result, hf_generate}
 use neurx.inference.scheduler.native_scheduler.{native_schedule_decision, schedule_native_request}
 use neurx.inference.tokenizer.byte_tokenizer.{byte_tokenization_result, tokenize_bytes}
+use neurx.inference.tokenizer.hf_bpe_tokenizer.{hf_bpe_tokenizer, hf_bpe_result, load_hf_bpe_tokenizer, hf_bpe_encode}
 use neurx.models.formats.safetensors_embedding.{safetensors_embedding, load_f32_embedding}
 use neurx.models.loaders.hf_transformer.{hf_model_weights, load_hf_model}
 
@@ -58,8 +59,10 @@ func execute_native_request(string request_id, string model, string prompt, int 
         if !native_ends_with(model, ".safetensors") {
             hf_model_weights hf_model = load_hf_model(model)
             if !hf_model.valid { return native_execution_result { ok: false, request_id: request_id, output: "", backend: "cpu-hf-transformer", error_code: hf_model.error_code, error_message: "failed to load HF model directory" } }
-            byte_tokenization_result hf_tokens = tokenize_bytes(prompt, hf_model.config.vocabulary_size, len(prompt))
-            if !hf_tokens.ok { return native_execution_result { ok: false, request_id: request_id, output: "", backend: "cpu-hf-transformer", error_code: hf_tokens.error_code, error_message: "tokenization failed" } }
+            hf_bpe_tokenizer tokenizer = load_hf_bpe_tokenizer(model)
+            if !tokenizer.valid { return native_execution_result { ok: false, request_id: request_id, output: "", backend: "cpu-hf-transformer", error_code: tokenizer.error_code, error_message: "failed to load tokenizer.json" } }
+            hf_bpe_result hf_tokens = hf_bpe_encode(tokenizer, prompt, len(prompt) * 2)
+            if !hf_tokens.ok { return native_execution_result { ok: false, request_id: request_id, output: "", backend: "cpu-hf-transformer", error_code: hf_tokens.error_code, error_message: "BPE tokenization failed" } }
             hf_generation_result hf_result = hf_generate(hf_model, hf_tokens.token_ids, decision.token_budget)
             if !hf_result.ok { return native_execution_result { ok: false, request_id: request_id, output: "", backend: "cpu-hf-transformer", error_code: hf_result.error_code, error_message: "HF Transformer generation failed" } }
             return native_execution_result { ok: true, request_id: request_id, output: "token_ids:" + native_token_ids(hf_result.token_ids), backend: "cpu-hf-transformer", error_code: "", error_message: "" }

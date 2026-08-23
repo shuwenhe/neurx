@@ -1,6 +1,6 @@
 package main
 use neurx.backends.cpu.transformer_decode.{hf_cpu_config, hf_kv_cache, hf_layer_result, hf_generation_result, new_hf_kv_cache, hf_cpu_layer, hf_generate}
-use neurx.models.loaders.hf_transformer.{hf_layer_weights, hf_model_weights}
+use neurx.models.loaders.hf_transformer.{hf_layer_weights, hf_model_weights, hf_resolve_tensor_path}
 use neurx.models.formats.hf_config.{hf_model_config, parse_hf_config}
 use neurx.models.formats.safetensors_embedding.{safetensors_embedding, load_f32_embedding, read_f32_tensor, f32_tensor_result}
 
@@ -64,6 +64,8 @@ func main() {
     hf_generation_result generation = hf_generate(model, prompt, 2)
     if !generation.ok { println("FAIL generation: " + generation.error_code); return 1 }
     if len(generation.token_ids) != 2 { println("FAIL generated length"); return 1 }
+    if hf_resolve_tensor_path("tests/fixtures/hf_sharded", "model.embed_tokens.weight") != "tests/fixtures/hf_sharded/model-00001-of-00002.safetensors" { return 1 }
+    if hf_resolve_tensor_path("tests/fixtures/hf_sharded", "model.norm.weight") != "tests/fixtures/hf_sharded/model-00002-of-00002.safetensors" { return 1 }
     println("PASS pure S HF Transformer GQA RoPE KV contract")
     0
 }
