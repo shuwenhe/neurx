@@ -306,8 +306,8 @@ func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
     tokenizer
 }
 
-func bpe_encode_piece(hf_bpe_tokenizer tokenizer, string text, []int ids, int output_count, int maximum_tokens) int {
-    if text == "" { return output_count }
+func bpe_encode_piece(hf_bpe_tokenizer tokenizer, string text, int maximum_tokens) hf_bpe_result {
+    if text == "" { return hf_bpe_result { ok: true, token_ids: [], error_code: "" } }
     []string symbols = []string{cap: len(text) + 4}
     int count = 0
     int i = 0
@@ -338,16 +338,15 @@ func bpe_encode_piece(hf_bpe_tokenizer tokenizer, string text, []int ids, int ou
         while i + 1 < count { symbols[i] = symbols[i + 1]; i = i + 1 }
         count = count - 1
     }
+    int output_count = count
+    if output_count > maximum_tokens { output_count = maximum_tokens }
+    []int ids = []int{cap: output_count}
     i = 0
-    while i < count && output_count < maximum_tokens {
-        ids[output_count] = bpe_vocab_id(tokenizer, symbols[i])
-        output_count = output_count + 1
-        i = i + 1
-    }
-    output_count
+    while i < output_count { ids[i] = bpe_vocab_id(tokenizer, symbols[i]); i = i + 1 }
+    hf_bpe_result { ok: true, token_ids: ids, error_code: "" }
 }
 
-func bpe_encode_normal(hf_bpe_tokenizer tokenizer, string source, []int ids, int output_count, int maximum_tokens) int {
+func bpe_encode_normal(hf_bpe_tokenizer tokenizer, string source, int maximum_tokens) hf_bpe_result {
     string text = bpe_normalize(tokenizer, source)
     if tokenizer.metaspace_pre_tokenizer {
         string replaced = tokenizer.metaspace_replacement
@@ -358,22 +357,35 @@ func bpe_encode_normal(hf_bpe_tokenizer tokenizer, string source, []int ids, int
                 while i < len(text) && bpe_is_space(text[i]) { i = i + 1 }
             } else { replaced = replaced + string(text[i]); i = i + 1 }
         }
-        return bpe_encode_piece(tokenizer, replaced, ids, output_count, maximum_tokens)
+        return bpe_encode_piece(tokenizer, replaced, maximum_tokens)
     }
     if tokenizer.bert_pre_tokenizer {
         int start = 0
         int i = 0
+        []int ids = []int{cap: maximum_tokens}
+        int output_count = 0
         while i <= len(text) && output_count < maximum_tokens {
             bool boundary = i == len(text)
             if i < len(text) && (bpe_is_space(text[i]) || bpe_is_bert_punctuation(text[i])) { boundary = true }
-            if boundary && start < i { output_count = bpe_encode_piece(tokenizer, bpe_substring(text, start, i), ids, output_count, maximum_tokens) }
-            if i < len(text) && bpe_is_bert_punctuation(text[i]) { output_count = bpe_encode_piece(tokenizer, string(text[i]), ids, output_count, maximum_tokens) }
+            if boundary && start < i {
+                hf_bpe_result piece = bpe_encode_piece(tokenizer, bpe_substring(text, start, i), maximum_tokens - output_count)
+                int p = 0
+                while p < len(piece.token_ids) { ids[output_count] = piece.token_ids[p]; output_count = output_count + 1; p = p + 1 }
+            }
+            if i < len(text) && bpe_is_bert_punctuation(text[i]) {
+                hf_bpe_result punctuation = bpe_encode_piece(tokenizer, string(text[i]), maximum_tokens - output_count)
+                int p = 0
+                while p < len(punctuation.token_ids) { ids[output_count] = punctuation.token_ids[p]; output_count = output_count + 1; p = p + 1 }
+            }
             if boundary { start = i + 1 }
             i = i + 1
         }
-        return output_count
+        []int result_ids = []int{cap: output_count}
+        i = 0
+        while i < output_count { result_ids[i] = ids[i]; i = i + 1 }
+        return hf_bpe_result { ok: true, token_ids: result_ids, error_code: "" }
     }
-    bpe_encode_piece(tokenizer, text, ids, output_count, maximum_tokens)
+    bpe_encode_piece(tokenizer, text, maximum_tokens)
 }
 
 func hf_bpe_encode(hf_bpe_tokenizer tokenizer, string text, int maximum_tokens) hf_bpe_result {
@@ -392,13 +404,19 @@ func hf_bpe_encode(hf_bpe_tokenizer tokenizer, string text, int maximum_tokens) 
             special = special + 1
         }
         if best >= 0 {
-            output_count = bpe_encode_normal(tokenizer, bpe_substring(text, plain_start, position), ids, output_count, maximum_tokens)
+            hf_bpe_result plain = bpe_encode_normal(tokenizer, bpe_substring(text, plain_start, position), maximum_tokens - output_count)
+            int p = 0
+            while p < len(plain.token_ids) { ids[output_count] = plain.token_ids[p]; output_count = output_count + 1; p = p + 1 }
             if output_count < maximum_tokens { ids[output_count] = tokenizer.added_ids[best]; output_count = output_count + 1 }
             position = position + best_length
             plain_start = position
         } else { position = position + 1 }
     }
-    if output_count < maximum_tokens { output_count = bpe_encode_normal(tokenizer, bpe_substring(text, plain_start, len(text)), ids, output_count, maximum_tokens) }
+    if output_count < maximum_tokens {
+        hf_bpe_result trailing = bpe_encode_normal(tokenizer, bpe_substring(text, plain_start, len(text)), maximum_tokens - output_count)
+        int p = 0
+        while p < len(trailing.token_ids) { ids[output_count] = trailing.token_ids[p]; output_count = output_count + 1; p = p + 1 }
+    }
     []int result_ids = []int{cap: output_count}
     int i = 0
     while i < output_count { result_ids[i] = ids[i]; i = i + 1 }
