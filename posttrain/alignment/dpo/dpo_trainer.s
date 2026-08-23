@@ -8,7 +8,7 @@ use neurx.amp.scaler.*
 use neurx.distributed.training_3d.*
 use neurx.checkpoint.distributed.*
 use neurx.data.loader.dataloader.*
-use neurx.monitoring.training_observability.*
+use neurx.observability.training.training_observability.*
 
 struct dpo_preference_pair {
     []int prompt_tokens

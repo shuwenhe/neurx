@@ -429,7 +429,7 @@ if delta.index >= 0 {
 ## Monitoring & Logging
 
 ```s
-use neurx.monitoring.performance_monitor
+use neurx.observability.metrics.performance_monitor
 
 fn monitored_tool_extraction(
     model: str,

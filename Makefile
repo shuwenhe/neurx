@@ -165,6 +165,8 @@ POSTTRAIN_PRETRAIN_MANIFEST_SOURCE ?= $(CURDIR_UNIX)/scripts/build_pretrain_mani
 POSTTRAIN_GOLDEN_DATASET_LIMIT ?= 12
 POSTTRAIN_MATERIALIZED_SAMPLES ?= 1
 
+include mk/layout.mk
+
 help:
 	@echo ""
 	@echo "  make shard"

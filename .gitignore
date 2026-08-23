@@ -111,6 +111,8 @@ data/training_data*.jsonl.gpt_backup
 
 reports/
 metrics/
+!observability/metrics/
+!observability/metrics/**
 *.metrics
 
 .DS_Store

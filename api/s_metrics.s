@@ -1,4 +1,4 @@
-package neurx.monitoring
+package neurx.api.s_metrics
 
 func int_to_string(int n) string {
     if n == 0 { return "0" }
