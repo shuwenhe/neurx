@@ -1,300 +1,205 @@
 package config
 
-enum initialization_stage {
-    not_started
-    detecting_hardware
-    validating_hardware
-    creating_config
-    validating_config
-    checking_constraints
-    applying_config
-    completed
-    failed
-}
+type optimization_target string
 
-struct initialization_result {
-    bool success
-    initialization_stage stage
-    device_config_full* final_config
-    hardware_info* hw_info
-    validation_report* validation_report
-    constraint_report* constraint_report
-    vec[string] errors
-    vec[string] warnings
-    int64 total_time_ms
-}
+const (
+    target_latency      optimization_target = "latency"
+    target_throughput   optimization_target = "throughput"
+    target_memory       optimization_target = "memory"
+    target_balanced     optimization_target = "balanced"
+)
 
-interface config_manager {
-    func initialize() (initialization_result*)
-    func initialize_with_device(device device_type) (initialization_result*)
-    func get_current_config() (device_config_full*)
-    func get_hardware_info() (hardware_info*)
-    func reconfigure(cfg device_config_full*) (initialization_result*)
-    func get_status() (initialization_stage)
-    func get_system_info() (string)
-    func suggest_optimal_config() (device_config_full*)
-}
+struct config_manager {
+    model_config* model_cfg
+    attention_config* attention_cfg
+    parallel_config* parallel_cfg
+    quantization_config* quant_cfg
+    scheduler_config* scheduler_cfg
+    speculative_config* spec_cfg
+    lora_config* lora_cfg
+    kv_transfer_config* kv_cfg
+    cache_config* cache_cfg
+    device_config* device_cfg
+    kernel_config* kernel_cfg
 
-struct config_manager_impl {
-    hardware_detector_impl* detector
-    device_config_manager_impl* config_mgr
-    config_validator_impl* validator
-    resource_constraint_checker_impl* constraint_checker
-    initialization_stage current_stage
-    hardware_info* current_hw_info
-    device_config_full* current_config
+    optimization_target target
     bool initialized
 }
 
-func create_config_manager() (config_manager_impl*) {
-    mgr := &config_manager_impl{
-        detector: create_hardware_detector(),
-        config_mgr: create_device_config_manager(),
-        validator: create_config_validator(),
-        constraint_checker: create_resource_constraint_checker(),
-        current_stage: initialization_stage.not_started,
-        current_hw_info: nil,
-        current_config: nil,
+func create_config_manager() config_manager* {
+    return &config_manager{
+        model_cfg: nil,
+        attention_cfg: nil,
+        parallel_cfg: nil,
+        quant_cfg: nil,
+        scheduler_cfg: nil,
+        spec_cfg: nil,
+        lora_cfg: nil,
+        kv_cfg: nil,
+        cache_cfg: nil,
+        device_cfg: nil,
+        kernel_cfg: nil,
+        target: target_balanced,
         initialized: false,
     }
-    return mgr
 }
 
-func (config_manager_impl* m) initialize() (initialization_result*) {
-    result := &initialization_result{
-        success: false,
-        stage: initialization_stage.not_started,
-        final_config: nil,
-        hw_info: nil,
-        validation_report: nil,
-        constraint_report: nil,
-        errors: vec[string]{},
-        warnings: vec[string]{},
-        total_time_ms: 0,
-    }
-
-    result.stage = initialization_stage.detecting_hardware
-    m.current_stage = initialization_stage.detecting_hardware
-
-    detection := m.detector.detect()
-    if !detection.success {
-        result.errors = detection.errors
-        result.errors = append(result.errors, "Hardware detection failed")
-        result.stage = initialization_stage.failed
-        m.current_stage = initialization_stage.failed
-        return result
-    }
-
-    m.current_hw_info = detection.hw_info
-    result.hw_info = detection.hw_info
-    result.warnings = detection.warnings
-
-    device := detection.hw_info.device
-
-    result.stage = initialization_stage.creating_config
-    m.current_stage = initialization_stage.creating_config
-
-    dev_cfg := m.config_mgr.create_default_config(device)
-    mem_cfg := m.config_mgr.create_memory_config(detection.hw_info.mem_info.total_memory - 2 * 1024 * 1024 * 1024)
-    comp_cfg := m.config_mgr.create_computation_config()
-    attn_cfg := m.config_mgr.create_attention_config()
-    opt_cfg := m.config_mgr.create_optimization_config()
-
-    full_cfg := &device_config_full{
-        dev_cfg: dev_cfg,
-        mem_cfg: mem_cfg,
-        comp_cfg: comp_cfg,
-        attn_cfg: attn_cfg,
-        opt_cfg: opt_cfg,
-    }
-
-    result.stage = initialization_stage.validating_config
-    m.current_stage = initialization_stage.validating_config
-
-    val_report := m.validator.validate_with_level(full_cfg, detection.hw_info, validation_level.normal)
-    result.validation_report = val_report
-
-    if !val_report.is_valid {
-        for err in val_report.errors {
-            result.errors = append(result.errors, err.message)
-        }
-        result.stage = initialization_stage.failed
-        m.current_stage = initialization_stage.failed
-        return result
-    }
-
-    result.stage = initialization_stage.checking_constraints
-    m.current_stage = initialization_stage.checking_constraints
-
-    constraint_report := m.constraint_checker.check_constraints(full_cfg, detection.hw_info)
-    result.constraint_report = constraint_report
-
-    if !constraint_report.all_satisfied {
-        full_cfg = m.constraint_checker.apply_conservative_limits(full_cfg, detection.hw_info)
-
-        for recommendation in constraint_report.recommendations {
-            result.warnings = append(result.warnings, recommendation)
-        }
-    }
-
-    result.stage = initialization_stage.applying_config
-    m.current_stage = initialization_stage.applying_config
-
-    success := m.config_mgr.apply_config(full_cfg)
-    if !success {
-        result.errors = append(result.errors, "Failed to apply configuration")
-        result.stage = initialization_stage.failed
-        m.current_stage = initialization_stage.failed
-        return result
-    }
-
-    m.current_config = full_cfg
-    result.final_config = full_cfg
-
-    result.stage = initialization_stage.completed
-    m.current_stage = initialization_stage.completed
-    result.success = true
-    m.initialized = true
-
-    return result
+func (config_manager* mgr) initialize_all_defaults() {
+    mgr.model_cfg = &create_default_model_config()
+    mgr.attention_cfg = &create_default_attention_config()
+    mgr.parallel_cfg = &create_default_parallel_config()
+    mgr.quant_cfg = &create_default_quantization_config()
+    mgr.scheduler_cfg = &create_default_scheduler_config()
+    mgr.spec_cfg = &create_default_speculative_config()
+    mgr.lora_cfg = &create_default_lora_config()
+    mgr.kv_cfg = &create_default_kv_transfer_config()
+    mgr.cache_cfg = &create_default_cache_config()
+    mgr.device_cfg = &create_default_device_config()
+    mgr.kernel_cfg = &create_default_kernel_config()
+    mgr.initialized = true
 }
 
-func (config_manager_impl* m) initialize_with_device(device device_type) (initialization_result*) {
-    result := m.initialize()
-
-    if result.success && m.current_config != nil && m.current_config.dev_cfg != nil {
-        m.current_config.dev_cfg.device = device
+func (config_manager* mgr) validate_all() bool {
+    if mgr.model_cfg == nil || !mgr.model_cfg.validate() {
+        return false
     }
-
-    return result
-}
-
-func (config_manager_impl* m) get_current_config() (device_config_full*) {
-    return m.current_config
-}
-
-func (config_manager_impl* m) get_hardware_info() (hardware_info*) {
-    return m.current_hw_info
-}
-
-func (config_manager_impl* m) reconfigure(cfg device_config_full*) (initialization_result*) {
-    result := &initialization_result{
-        success: false,
-        stage: initialization_stage.validating_config,
-        final_config: nil,
-        hw_info: m.current_hw_info,
-        validation_report: nil,
-        constraint_report: nil,
-        errors: vec[string]{},
-        warnings: vec[string]{},
-        total_time_ms: 0,
+    if mgr.attention_cfg == nil || !mgr.attention_cfg.validate() {
+        return false
     }
-
-    if m.current_hw_info == nil {
-        result.errors = append(result.errors, "Hardware info not available, run initialize first")
-        result.stage = initialization_stage.failed
-        return result
+    if mgr.parallel_cfg == nil || !mgr.parallel_cfg.validate() {
+        return false
     }
-
-    if cfg == nil {
-        result.errors = append(result.errors, "New configuration is nil")
-        result.stage = initialization_stage.failed
-        return result
+    if mgr.quant_cfg == nil || !mgr.quant_cfg.validate() {
+        return false
     }
-
-    val_report := m.validator.validate_with_level(cfg, m.current_hw_info, validation_level.normal)
-    result.validation_report = val_report
-
-    if !val_report.is_valid {
-        for err in val_report.errors {
-            result.errors = append(result.errors, err.message)
-        }
-        result.stage = initialization_stage.failed
-        return result
+    if mgr.scheduler_cfg == nil || !mgr.scheduler_cfg.validate() {
+        return false
     }
-
-    constraint_report := m.constraint_checker.check_constraints(cfg, m.current_hw_info)
-    result.constraint_report = constraint_report
-
-    if !constraint_report.all_satisfied {
-        for recommendation in constraint_report.recommendations {
-            result.warnings = append(result.warnings, recommendation)
-        }
+    if mgr.device_cfg == nil || !mgr.device_cfg.validate() {
+        return false
     }
-
-    success := m.config_mgr.apply_config(cfg)
-    if !success {
-        result.errors = append(result.errors, "Failed to apply new configuration")
-        result.stage = initialization_stage.failed
-        return result
-    }
-
-    m.current_config = cfg
-    result.final_config = cfg
-    result.stage = initialization_stage.completed
-    result.success = true
-
-    return result
+    return true
 }
 
-func (config_manager_impl* m) get_status() (initialization_stage) {
-    return m.current_stage
+func (config_manager* mgr) optimize_for_latency() {
+    mgr.target = target_latency
+    mgr.scheduler_cfg.optimize_for_latency()
+    mgr.kernel_cfg.optimize_for_latency()
+    mgr.cache_cfg.optimize_for_performance()
 }
 
-func (config_manager_impl* m) get_system_info() (string) {
-    if m.current_hw_info == nil {
-        return "System not initialized"
+func (config_manager* mgr) optimize_for_throughput() {
+    mgr.target = target_throughput
+    mgr.scheduler_cfg.optimize_for_throughput()
+    mgr.kernel_cfg.optimize_for_throughput()
+    mgr.cache_cfg.optimize_for_performance()
+}
+
+func (config_manager* mgr) optimize_for_memory() {
+    mgr.target = target_memory
+    mgr.quant_cfg.enable_int8()
+    mgr.kernel_cfg.optimize_for_memory()
+    mgr.cache_cfg.optimize_for_memory()
+    mgr.device_cfg.optimize_for_memory()
+}
+
+func (config_manager* mgr) optimize_balanced() {
+    mgr.target = target_balanced
+    mgr.scheduler_cfg.optimize_for_throughput()
+    mgr.kernel_cfg.optimize_for_performance()
+    mgr.cache_cfg.optimize_for_performance()
+}
+
+func (config_manager* mgr) get_model_config() model_config* {
+    return mgr.model_cfg
+}
+
+func (config_manager* mgr) get_attention_config() attention_config* {
+    return mgr.attention_cfg
+}
+
+func (config_manager* mgr) get_parallel_config() parallel_config* {
+    return mgr.parallel_cfg
+}
+
+func (config_manager* mgr) get_quantization_config() quantization_config* {
+    return mgr.quant_cfg
+}
+
+func (config_manager* mgr) get_scheduler_config() scheduler_config* {
+    return mgr.scheduler_cfg
+}
+
+func (config_manager* mgr) get_speculative_config() speculative_config* {
+    return mgr.spec_cfg
+}
+
+func (config_manager* mgr) get_lora_config() lora_config* {
+    return mgr.lora_cfg
+}
+
+func (config_manager* mgr) get_kv_transfer_config() kv_transfer_config* {
+    return mgr.kv_cfg
+}
+
+func (config_manager* mgr) get_cache_config() cache_config* {
+    return mgr.cache_cfg
+}
+
+func (config_manager* mgr) get_device_config() device_config* {
+    return mgr.device_cfg
+}
+
+func (config_manager* mgr) get_kernel_config() kernel_config* {
+    return mgr.kernel_cfg
+}
+
+func (config_manager* mgr) get_optimization_target() optimization_target {
+    return mgr.target
+}
+
+func (config_manager* mgr) is_initialized() bool {
+    return mgr.initialized
+}
+
+func (config_manager* mgr) export_config() map[string]interface{} {
+    config_map := make(map[string]interface{})
+    if mgr.model_cfg != nil {
+        config_map["model"] = mgr.model_cfg
     }
-
-    hw := m.current_hw_info
-    info := "System Information:\n"
-    info = info + "Device: " + device_type_to_string(hw.device) + "\n"
-    info = info + "Device Name: " + hw.device_name + "\n"
-    info = info + "Num Devices: " + int_to_string(hw.num_devices) + "\n"
-    info = info + "Total Memory: " + int64_to_string(hw.mem_info.total_memory) + " bytes\n"
-    info = info + "Available Memory: " + int64_to_string(hw.mem_info.available_memory) + " bytes\n"
-    info = info + "Memory Usage: " + float_to_string(hw.mem_info.usage_percentage) + "%\n"
-    info = info + "PyTorch Version: " + hw.pytorch_version + "\n"
-
-    return info
-}
-
-func (config_manager_impl* m) suggest_optimal_config() (device_config_full*) {
-    if m.current_hw_info == nil {
-        return nil
+    if mgr.attention_cfg != nil {
+        config_map["attention"] = mgr.attention_cfg
     }
-
-    available := m.constraint_checker.get_available_resources(m.current_hw_info)
-    return available
-}
-
-func int_to_string(i int32) (string) {
-    return "value"
-}
-
-func int64_to_string(i int64) (string) {
-    return "value"
-}
-
-func float_to_string(f float) (string) {
-    return "value"
-}
-
-func initialization_stage_to_string(stage initialization_stage) (string) {
-    match stage {
-        initialization_stage.not_started => return "not_started"
-        initialization_stage.detecting_hardware => return "detecting_hardware"
-        initialization_stage.validating_hardware => return "validating_hardware"
-        initialization_stage.creating_config => return "creating_config"
-        initialization_stage.validating_config => return "validating_config"
-        initialization_stage.checking_constraints => return "checking_constraints"
-        initialization_stage.applying_config => return "applying_config"
-        initialization_stage.completed => return "completed"
-        initialization_stage.failed => return "failed"
+    if mgr.parallel_cfg != nil {
+        config_map["parallel"] = mgr.parallel_cfg
     }
-    return "unknown"
+    if mgr.quant_cfg != nil {
+        config_map["quantization"] = mgr.quant_cfg
+    }
+    if mgr.scheduler_cfg != nil {
+        config_map["scheduler"] = mgr.scheduler_cfg
+    }
+    if mgr.spec_cfg != nil {
+        config_map["speculative"] = mgr.spec_cfg
+    }
+    if mgr.lora_cfg != nil {
+        config_map["lora"] = mgr.lora_cfg
+    }
+    if mgr.kv_cfg != nil {
+        config_map["kv_transfer"] = mgr.kv_cfg
+    }
+    if mgr.cache_cfg != nil {
+        config_map["cache"] = mgr.cache_cfg
+    }
+    if mgr.device_cfg != nil {
+        config_map["device"] = mgr.device_cfg
+    }
+    if mgr.kernel_cfg != nil {
+        config_map["kernel"] = mgr.kernel_cfg
+    }
+    return config_map
 }
 
-func get_global_config_manager() (config_manager_impl*) {
-    return create_config_manager()
+func (config_manager* mgr) print_summary() {
+    _ = mgr
 }

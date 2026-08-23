@@ -1,4 +1,4 @@
-package neurx.inference.vllm.parallel_sampling
+package neurx.inference.sampling.parallel_sampling
 
 struct parallel_sampling_config {
     int maximum_parents

@@ -1,0 +1,111 @@
+{
+  "deployment": {
+    "platform": "Docker Compose",
+    "environment": "Production",
+    "networking_mode": "host",
+    "status": "✓ ACTIVE",
+    "last_updated": "2025-08-23"
+  },
+
+  "frontend": {
+    "access_url": "http://8.140.241.141:8000",
+    "access_host": "8.140.241.141",
+    "access_port": 8000,
+    "protocol": "HTTP",
+    "note": "Public IP address for external access"
+  },
+
+  "backend": {
+    "service_url": "http://localhost:8000",
+    "service_host": "0.0.0.0",
+    "service_port": 8000,
+    "network_mode": "host",
+    "note": "Accessible from host machine and Docker containers"
+  },
+
+  "model_service": {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "model_path": "/models/default",
+    "model_storage": "/model/Qwen2.5-0.5B-Instruct",
+    "model_size": "0.5B parameters",
+    "max_tokens": 2048,
+    "device": "CPU",
+    "note": "Model pre-staged at /model, volume-mounted to /models/default"
+  },
+
+  "api_endpoints": {
+    "health_check": {
+      "method": "GET",
+      "path": "/health",
+      "url": "http://8.140.241.141:8000/health",
+      "response": "{\"status\":\"ok\",\"backend\":\"neurx-s-cpu\"}"
+    },
+    "chat_completion": {
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "url": "http://8.140.241.141:8000/v1/chat/completions",
+      "content_type": "application/json",
+      "example_payload": {
+        "model": "default",
+        "messages": [
+          {"role": "user", "content": "hello"}
+        ],
+        "max_tokens": 50
+      }
+    }
+  },
+
+  "docker_compose": {
+    "services": {
+      "neurx-api": {
+        "container_name": "neurx-api-server",
+        "image": "neurx:latest",
+        "command": "api",
+        "network_mode": "host",
+        "ports_mapped": "Direct to host (8000:8000)",
+        "volumes": [
+          "/model/Qwen2.5-0.5B-Instruct:/models/default",
+          "./logs:/logs",
+          "./data:/data"
+        ],
+        "environment": {
+          "NEURX_INFER_DEVICE": "cpu",
+          "NEURX_S_PORT": "8000",
+          "NEURX_S_HOST": "0.0.0.0",
+          "NEURX_CPU_THREADS": "8",
+          "NEURX_CHAT_MAX_NEW_TOKENS": "2048"
+        }
+      }
+    }
+  },
+
+  "deployment_guide": {
+    "prerequisites": [
+      "Docker with docker-compose (v1.29+)",
+      "Model files at /model/Qwen2.5-0.5B-Instruct/",
+      "Port 8000 available on host"
+    ],
+    "startup_command": "docker compose --profile api up -d neurx-api",
+    "shutdown_command": "docker compose down",
+    "verification": "curl http://localhost:8000/health",
+    "logs_command": "docker logs neurx-api-server"
+  },
+
+  "network_configuration": {
+    "note": "Using Docker host networking mode for direct port exposure",
+    "http_server_binding": "0.0.0.0:8000",
+    "access_methods": [
+      "Local: http://localhost:8000",
+      "Public: http://8.140.241.141:8000",
+      "Container network: http://neurx-api-server:8000"
+    ],
+    "port_mapping": "Direct to host (no docker port translation needed)"
+  },
+
+  "troubleshooting": {
+    "port_conflict": "Kill existing processes: lsof -i :8000",
+    "container_restart_loop": "Check logs: docker logs neurx-api-server",
+    "connection_refused": "Verify network_mode: host in docker-compose.yml",
+    "health_check_fails": "Wait for model initialization (up to 60s)"
+  }
+}

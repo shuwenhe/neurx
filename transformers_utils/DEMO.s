@@ -188,8 +188,7 @@ func main() {
     print("Total model families: 6\n")
     print("Total supported models: " + int_to_string(adapter_registry.count_supported_models()) + "\n")
     print("Total implementation files: 14\n")
-    print("Total lines of Pure S code: ~3500+\n")
-    print("vLLM transformers_utils replacement: 85%+\n\n")
+    print("Total lines of Pure S code: ~3500+\n\n")
 
     print("🎯 NEXT STEPS:\n\n")
     print("1. Implement remaining model adapters (Mistral, DeepSeek, Phi, ChatGLM)\n")

@@ -39,7 +39,6 @@ struct kernel_config {
 
     bool enable_triton_kernels
     bool enable_cutlass_kernels
-    bool enable_vllm_kernels
 
     int32 kernel_cache_size_mb
     bool enable_kernel_caching
@@ -69,7 +68,6 @@ func create_default_kernel_config() kernel_config {
         enable_profiling: false,
         enable_triton_kernels: true,
         enable_cutlass_kernels: true,
-        enable_vllm_kernels: true,
         kernel_cache_size_mb: 512,
         enable_kernel_caching: true,
         extra_config: make(map[string]interface{}),
@@ -116,5 +114,4 @@ func (kernel_config* cfg) optimize_for_throughput() {
 func (kernel_config* cfg) enable_all_backends() {
     cfg.enable_triton_kernels = true
     cfg.enable_cutlass_kernels = true
-    cfg.enable_vllm_kernels = true
 }

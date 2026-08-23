@@ -28,8 +28,8 @@ func main() {
     println("  Mistral-7B: 480 tok/s")
     println("  DeepSeek-7B: 520 tok/s")
     println("")
-    println("📄 相比 vLLM:")
-    println("  代码行数: 98% 更简洁")
-    println("  文件数: 98% 更少")
-    println("  维护复杂度: Pure S, 易于理解")
+    println("📄 核心特性:")
+    println("  代码简洁: Pure S 语言实现")
+    println("  易于维护: 一致的架构设计")
+    println("  高效执行: 优化的推理管线")
 }

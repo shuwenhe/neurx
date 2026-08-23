@@ -173,7 +173,7 @@ func step4_summary() int {
     println("     continueUsage LoRA  or 其他method")
     println("")
     println("  3. deployment and service")
-    println("     Usage: SGLang, TGI, etc. inference engines")
+    println("     Usage: NeuRx inference engine")
     println("")
     0
 }

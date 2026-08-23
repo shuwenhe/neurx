@@ -253,7 +253,7 @@ func (profiler* p) save_profile(filename string) error {
 
     profile_dir := p.output_dir
     if profile_dir == "" {
-        profile_dir = "/tmp/vllm_profile"
+        profile_dir = "/tmp/profile"
     }
 
     core.Printf("Saving profiles to %s/%s\n", profile_dir, filename)

@@ -20,7 +20,6 @@ const (
     model_format_checkpoint   model_format = "checkpoint"
     model_format_onnx         model_format = "onnx"
     model_format_tensorrt     model_format = "tensorrt"
-    model_format_vllm         model_format = "vllm"
 )
 
 type loader_status int32

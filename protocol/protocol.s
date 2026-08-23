@@ -300,7 +300,7 @@ func request_output_to_string(request_output* output) string {
 
 func protocol_info() string {
     version := get_protocol_version()
-    info := "NeuRx LLM Protocol v" + version.version_string + " (vLLM Compatible)\n"
+    info := "NeuRx LLM Protocol v" + version.version_string + "\n"
     info = info + "Request/Response Protocol Definition\n"
     info = info + "Supports: streaming, priority scheduling, log probabilities\n"
     return info

@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  neurx-api:
+    image: neurx:latest
+    container_name: neurx-api-server
+    network_mode: host
+    environment:
+      NEURX_MODEL_DIR: /models/default
+      NEURX_INFER_DEVICE: cpu
+      NEURX_S_PORT: 8000
+      NEURX_S_HOST: 0.0.0.0
+      NEURX_CPU_THREADS: 8
+      NEURX_CHAT_MAX_NEW_TOKENS: 2048
+    volumes:
+      - /model/Qwen2.5-0.5B-Instruct:/models/default
+      - ./logs:/logs
+      - ./data:/data
+    stdin_open: false
+    tty: false
+    restart: unless-stopped
+    command: api

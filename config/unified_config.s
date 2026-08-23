@@ -303,7 +303,7 @@ func new_speculative_config() speculative_config {
 func new_tracing_config() tracing_config {
     return tracing_config{
         tracing_enabled: false,
-        tracing_dir:     "/tmp/vllm_trace",
+        tracing_dir:     "/tmp/trace",
         tracing_level:   "INFO",
     }
 }
@@ -312,7 +312,7 @@ func new_profiler_config() profiler_config {
     return profiler_config{
         enable_profiler:     false,
         profiler_interval:   1000,
-        profiler_output_dir:  "/tmp/vllm_profile",
+        profiler_output_dir:  "/tmp/profile",
     }
 }
 

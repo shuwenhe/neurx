@@ -1,0 +1,62 @@
+# Stage 1: Builder (轻量开发版)
+FROM ubuntu:22.04 as dev-builder
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    wget \
+    curl \
+    ca-certificates \
+    pkg-config \
+    libssl-dev \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY . /app/neurx
+
+WORKDIR /app/neurx
+
+RUN echo "Building development environment..." && \
+    make build-s-ir-runner && \
+    make build-production-s-inference || echo "Warning: Some builds failed, continuing..."
+
+# Stage 2: Development Runtime
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    NEURX_HOME=/app/neurx \
+    NEURX_MODEL_DIR=/models/default \
+    NEURX_INFER_DEVICE=cpu \
+    NEURX_S_PORT=8000 \
+    PATH=/app/neurx/artifacts/build:$PATH
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    lsof \
+    vim \
+    gdb \
+    strace \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app/neurx
+
+COPY --from=dev-builder /app/neurx /app/neurx
+
+RUN mkdir -p /models/default /logs /data
+
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 8000 8001 9090
+
+VOLUME ["/models", "/logs", "/data"]
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["start"]

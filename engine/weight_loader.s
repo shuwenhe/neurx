@@ -166,7 +166,7 @@ func (weight_loader* wl) detect_format(string file_path) (model_format, error) {
         return model_format_checkpoint, nil
     }
 
-    return model_format_vllm, nil
+    return model_format_safetensors, nil
 }
 
 func (weight_loader* wl) load_safetensors(string file_path) (*weight_file_info, error) {

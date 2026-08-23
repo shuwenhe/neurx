@@ -60,7 +60,6 @@ struct scheduler_config {
     int64 max_batch_timeout_ms
     int32 max_queue_size
     bool enable_chunked_prefill
-    bool enable_vllm_scheduling
     int32 schedule_interval_ms
 }
 
@@ -277,7 +276,6 @@ func new_scheduler_config() scheduler_config {
         max_batch_timeout_ms: 100,
         max_queue_size: 1024,
         enable_chunked_prefill: true,
-        enable_vllm_scheduling: true,
         schedule_interval_ms: 10,
     }
 }
