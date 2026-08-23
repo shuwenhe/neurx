@@ -1,6 +1,5 @@
 package main
-use std.conv.parse_int_default as parse_int
-use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
+use neurx.runtime.command.{runtime_env_get, runtime_parse_int, runtime_run_command_exit_code, runtime_shell_escape}
 
 func main() {
     string apply = runtime_env_get("NEURX_CONTROLLER_APPLY", "0")
@@ -11,8 +10,8 @@ func main() {
     string master_port = runtime_env_get("MASTER_PORT", "29500")
     string world_size_text = runtime_env_get("WORLD_SIZE", "2")
     string worker_rank_text = runtime_env_get("NEURX_WORKER_RANK", "1")
-    int world_size = parse_int(world_size_text, 0)
-    int worker_rank = parse_int(worker_rank_text, -1)
+    int world_size = runtime_parse_int(world_size_text, 0)
+    int worker_rank = runtime_parse_int(worker_rank_text, -1)
     if worker_host == "" || worker_bin == "" || known_hosts == "" || master_addr == "" {
         println("[neurx-controller] worker host, remote binary, known_hosts, and master address are required")
         return 2
@@ -34,10 +33,10 @@ func main() {
     string command = "ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="
         + runtime_shell_escape(known_hosts) + " -- " + runtime_shell_escape(worker_host)
         + " " + runtime_shell_escape(remote_command)
-    var result = runtime_run_command(command)
-    if !result.ok {
-        println("[neurx-controller] remote launch failed: " + result.error)
-        return result.exit_code
+    int exit_code = runtime_run_command_exit_code(command)
+    if exit_code != 0 {
+        println("[neurx-controller] remote launch failed")
+        return exit_code
     }
     0
 }

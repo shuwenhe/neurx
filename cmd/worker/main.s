@@ -1,6 +1,5 @@
 package main
-use std.conv.parse_int_default as parse_int
-use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
+use neurx.runtime.command.{runtime_env_get, runtime_parse_int, runtime_run_command_exit_code, runtime_shell_escape}
 
 func main() {
     string worker_bin = runtime_env_get("NEURX_WORKER_BIN", "")
@@ -9,14 +8,14 @@ func main() {
     string world_size_text = runtime_env_get("WORLD_SIZE", "")
     string rank_text = runtime_env_get("RANK", "")
     string local_rank_text = runtime_env_get("LOCAL_RANK", "0")
-    int world_size = parse_int(world_size_text, 0)
-    int rank = parse_int(rank_text, -1)
-    int local_rank = parse_int(local_rank_text, -1)
+    int world_size = runtime_parse_int(world_size_text, 0)
+    int rank = runtime_parse_int(rank_text, -1)
+    int local_rank = runtime_parse_int(local_rank_text, -1)
     if worker_bin == "" || master_addr == "" || world_size <= 0 || rank < 0 || rank >= world_size || local_rank < 0 {
         println("[neurx-worker] NEURX_WORKER_BIN, MASTER_ADDR, WORLD_SIZE, RANK, and LOCAL_RANK must be valid")
         return 2
     }
-    if !runtime_run_command("test -x " + runtime_shell_escape(worker_bin)).ok {
+    if runtime_run_command_exit_code("test -x " + runtime_shell_escape(worker_bin)) != 0 {
         println("[neurx-worker] worker binary is not executable: " + worker_bin)
         return 3
     }
@@ -27,10 +26,10 @@ func main() {
         + " MASTER_ADDR=" + runtime_shell_escape(master_addr)
         + " MASTER_PORT=" + runtime_shell_escape(master_port)
         + " exec " + runtime_shell_escape(worker_bin)
-    var result = runtime_run_command(command)
-    if !result.ok {
-        println("[neurx-worker] execution failed: " + result.error)
-        return result.exit_code
+    int exit_code = runtime_run_command_exit_code(command)
+    if exit_code != 0 {
+        println("[neurx-worker] execution failed")
+        return exit_code
     }
     0
 }

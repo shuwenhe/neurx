@@ -1,7 +1,7 @@
 .PHONY: train check-training-boundary
 
-train: check-training-boundary build-command-contracts
-	@echo "Training entrypoint compiled to artifacts/build/commands/train.ir."
+train: check-training-boundary build-commands
+	@echo "Training binary ready at artifacts/bin/train."
 
 check-training-boundary:
 	@test -d src/training/api

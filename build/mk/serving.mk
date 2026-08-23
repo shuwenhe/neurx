@@ -1,7 +1,7 @@
 .PHONY: serve check-serving-boundary
 
-serve: check-serving-boundary build-command-contracts
-	@echo "Serving entrypoint compiled to artifacts/build/commands/serve.ir."
+serve: check-serving-boundary build-commands
+	@echo "Serving binary ready at artifacts/bin/serve."
 
 check-serving-boundary:
 	@test -d src/serving/api/openai

@@ -21,7 +21,16 @@ test-api-contracts:
 	@$(S_SEED_COMPILER) tests/contract/training_api_contract_test.s artifacts/build/contracts/training_api_contract_test.ir
 	@$(S_SEED_COMPILER) tests/contract/inference_api_contract_test.s artifacts/build/contracts/inference_api_contract_test.ir
 	@$(S_SEED_COMPILER) tests/contract/serving_api_contract_test.s artifacts/build/contracts/serving_api_contract_test.ir
-	@echo "API and contract caller compilation passed (runtime module linking is not yet supported by the S CLI)."
+	@$(S_SEED_COMPILER) --link-ir artifacts/build/contracts/training_contract.ir artifacts/build/contracts/training_api.ir artifacts/build/contracts/training_api_contract_test.ir
+	@$(S_SEED_COMPILER) --link-ir artifacts/build/contracts/inference_contract.ir artifacts/build/contracts/inference_api.ir artifacts/build/contracts/inference_api_contract_test.ir
+	@$(S_SEED_COMPILER) --link-ir artifacts/build/contracts/serving_contract.ir artifacts/build/contracts/serving_api.ir artifacts/build/contracts/serving_api_contract_test.ir
+	@S_SOURCE_ROOT='$(S_REPO_ROOT)' $(S_SEED_COMPILER) --emit-bin artifacts/build/contracts/training_contract.ir artifacts/build/contracts/training_contract
+	@S_SOURCE_ROOT='$(S_REPO_ROOT)' $(S_SEED_COMPILER) --emit-bin artifacts/build/contracts/inference_contract.ir artifacts/build/contracts/inference_contract
+	@S_SOURCE_ROOT='$(S_REPO_ROOT)' $(S_SEED_COMPILER) --emit-bin artifacts/build/contracts/serving_contract.ir artifacts/build/contracts/serving_contract
+	@artifacts/build/contracts/training_contract
+	@artifacts/build/contracts/inference_contract
+	@artifacts/build/contracts/serving_contract
+	@echo "Linked API contract runtime tests passed."
 
 test-benchmark-schema:
 	@node tools/validate_benchmark_result.js tests/fixtures/benchmark_result.valid.json

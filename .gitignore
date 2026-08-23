@@ -96,6 +96,7 @@ outputs/
 end_to_end_output/
 scripts/legacy/output/
 artifacts/logs/
+artifacts/bin/
 artifacts/train_output/
 artifacts/inference_output/
 

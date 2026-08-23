@@ -75,6 +75,10 @@ implementations remain at compatibility paths. A domain is considered migrated
 only after its stable command calls the new API, tests pass, and the old path is
 removed.
 
+Stable command modules are linked with the S seed compiler's `--link-ir` stage
+and emitted as standalone launchers under `artifacts/bin/`. Run
+`make test-commands` to compile, link, emit, and verify their exit contracts.
+
 Build targets are split by concern under `build/mk/`; the root Makefile remains the
 stable entry point.
 
