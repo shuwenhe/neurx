@@ -1,6 +1,6 @@
 package neurx.backends.cpu.transformer_decode
 use neurx.models.formats.safetensors_embedding.{safetensors_embedding, embedding_lookup_result, lookup_f32_embedding}
-use neurx.models.loaders.hf_transformer.{hf_layer_weights}
+use neurx.models.loaders.hf_transformer.{hf_layer_weights, hf_model_weights}
 
 struct hf_cpu_config {
     int hidden_size
@@ -24,6 +24,12 @@ struct hf_layer_result {
     bool ok
     []float hidden
     hf_kv_cache cache
+    string error_code
+}
+
+struct hf_generation_result {
+    bool ok
+    []int token_ids
     string error_code
 }
 
@@ -198,6 +204,82 @@ func hf_cpu_layer(hf_cpu_config config, hf_layer_weights weights, []float input,
     i = 0
     while i < config.hidden_size { residual[i] = residual[i] + down[i]; i = i + 1 }
     hf_layer_result { ok: true, hidden: residual, cache: cache, error_code: "" }
+}
+
+func hf_model_cpu_config(hf_model_weights model) hf_cpu_config {
+    hf_cpu_config {
+        hidden_size: model.config.hidden_size,
+        intermediate_size: model.config.intermediate_size,
+        attention_heads: model.config.attention_heads,
+        kv_heads: model.config.kv_heads,
+        head_dim: model.config.head_dim,
+        rms_epsilon: model.config.rms_epsilon,
+        rope_theta: model.config.rope_theta,
+    }
+}
+
+func hf_argmax_logits(hf_model_weights model, []float hidden) int {
+    []float normalized = hf_rms_norm(hidden, model.final_norm, model.config.rms_epsilon)
+    if len(normalized) != model.config.hidden_size || len(model.lm_head) != model.config.vocabulary_size * model.config.hidden_size { return -1 }
+    int best_token = 0
+    float best_logit = -1000000000.0
+    int token = 0
+    while token < model.config.vocabulary_size {
+        float logit = 0.0
+        int column = 0
+        while column < model.config.hidden_size {
+            logit = logit + model.lm_head[token * model.config.hidden_size + column] * normalized[column]
+            column = column + 1
+        }
+        if token == 0 || logit > best_logit { best_logit = logit; best_token = token }
+        token = token + 1
+    }
+    best_token
+}
+
+func hf_forward_token(hf_model_weights model, int token_id, []hf_kv_cache caches, int position) hf_layer_result {
+    embedding_lookup_result embedding = lookup_f32_embedding(model.embedding, token_id)
+    if !embedding.ok { return hf_layer_result { ok: false, hidden: [], cache: hf_kv_cache {}, error_code: embedding.error_code } }
+    []float hidden = embedding.values
+    hf_cpu_config config = hf_model_cpu_config(model)
+    int layer = 0
+    while layer < model.config.layers {
+        hf_layer_result result = hf_cpu_layer(config, model.layers[layer], hidden, caches[layer], position)
+        if !result.ok { return result }
+        hidden = result.hidden
+        caches[layer] = result.cache
+        layer = layer + 1
+    }
+    hf_layer_result { ok: true, hidden: hidden, cache: hf_kv_cache {}, error_code: "" }
+}
+
+func hf_generate(hf_model_weights model, []int prompt_tokens, int maximum_new_tokens) hf_generation_result {
+    if !model.valid || len(prompt_tokens) == 0 || maximum_new_tokens <= 0 { return hf_generation_result { ok: false, token_ids: [], error_code: "invalid_generation_input" } }
+    int capacity = len(prompt_tokens) + maximum_new_tokens
+    []hf_kv_cache caches = []hf_kv_cache{cap: model.config.layers}
+    int layer = 0
+    while layer < model.config.layers { caches[layer] = new_hf_kv_cache(capacity, model.config.kv_heads * model.config.head_dim); layer = layer + 1 }
+    hf_layer_result state = hf_layer_result { ok: false, hidden: [], cache: hf_kv_cache {}, error_code: "empty_prefill" }
+    int position = 0
+    while position < len(prompt_tokens) {
+        state = hf_forward_token(model, prompt_tokens[position], caches, position)
+        if !state.ok { return hf_generation_result { ok: false, token_ids: [], error_code: state.error_code } }
+        position = position + 1
+    }
+    []int generated = []int{cap: maximum_new_tokens}
+    int step = 0
+    while step < maximum_new_tokens {
+        int next_token = hf_argmax_logits(model, state.hidden)
+        if next_token < 0 { return hf_generation_result { ok: false, token_ids: [], error_code: "invalid_lm_head_shape" } }
+        generated[step] = next_token
+        step = step + 1
+        if step < maximum_new_tokens {
+            state = hf_forward_token(model, next_token, caches, position)
+            if !state.ok { return hf_generation_result { ok: false, token_ids: [], error_code: state.error_code } }
+            position = position + 1
+        }
+    }
+    hf_generation_result { ok: true, token_ids: generated, error_code: "" }
 }
 
 func cpu_reference_mlp([]float input) []float {

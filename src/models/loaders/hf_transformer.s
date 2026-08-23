@@ -1,5 +1,6 @@
 package neurx.models.loaders.hf_transformer
 use neurx.models.formats.safetensors_embedding.{safetensors_embedding, f32_tensor_result, load_f32_tensor, read_f32_tensor}
+use neurx.models.formats.hf_config.{hf_model_config, load_hf_config}
 
 struct hf_layer_weights {
     bool valid
@@ -15,23 +16,73 @@ struct hf_layer_weights {
     string error_code
 }
 
+struct hf_model_weights {
+    bool valid
+    hf_model_config config
+    safetensors_embedding embedding
+    []hf_layer_weights layers
+    []float final_norm
+    []float lm_head
+    string error_code
+}
+
+func hf_int_string(int value) string {
+    if value == 0 { return "0" }
+    string output = ""
+    int current = value
+    while current > 0 { output = string(48 + current % 10) + output; current = current / 10 }
+    output
+}
+
 func hf_load_values(string path, string name) f32_tensor_result {
     safetensors_embedding tensor = load_f32_tensor(path, name)
     read_f32_tensor(tensor)
 }
 
 func load_hf_layer_zero(string path) hf_layer_weights {
-    f32_tensor_result input_norm = hf_load_values(path, "model.layers.0.input_layernorm.weight")
-    f32_tensor_result q = hf_load_values(path, "model.layers.0.self_attn.q_proj.weight")
-    f32_tensor_result k = hf_load_values(path, "model.layers.0.self_attn.k_proj.weight")
-    f32_tensor_result v = hf_load_values(path, "model.layers.0.self_attn.v_proj.weight")
-    f32_tensor_result o = hf_load_values(path, "model.layers.0.self_attn.o_proj.weight")
-    f32_tensor_result post_norm = hf_load_values(path, "model.layers.0.post_attention_layernorm.weight")
-    f32_tensor_result gate = hf_load_values(path, "model.layers.0.mlp.gate_proj.weight")
-    f32_tensor_result up = hf_load_values(path, "model.layers.0.mlp.up_proj.weight")
-    f32_tensor_result down = hf_load_values(path, "model.layers.0.mlp.down_proj.weight")
+    load_hf_layer(path, 0)
+}
+
+func load_hf_layer(string path, int layer) hf_layer_weights {
+    string prefix = "model.layers." + hf_int_string(layer) + "."
+    f32_tensor_result input_norm = hf_load_values(path, prefix + "input_layernorm.weight")
+    f32_tensor_result q = hf_load_values(path, prefix + "self_attn.q_proj.weight")
+    f32_tensor_result k = hf_load_values(path, prefix + "self_attn.k_proj.weight")
+    f32_tensor_result v = hf_load_values(path, prefix + "self_attn.v_proj.weight")
+    f32_tensor_result o = hf_load_values(path, prefix + "self_attn.o_proj.weight")
+    f32_tensor_result post_norm = hf_load_values(path, prefix + "post_attention_layernorm.weight")
+    f32_tensor_result gate = hf_load_values(path, prefix + "mlp.gate_proj.weight")
+    f32_tensor_result up = hf_load_values(path, prefix + "mlp.up_proj.weight")
+    f32_tensor_result down = hf_load_values(path, prefix + "mlp.down_proj.weight")
     if !input_norm.ok || !q.ok || !k.ok || !v.ok || !o.ok || !post_norm.ok || !gate.ok || !up.ok || !down.ok {
         return hf_layer_weights { valid: false, input_norm: [], q_proj: [], k_proj: [], v_proj: [], o_proj: [], post_norm: [], gate_proj: [], up_proj: [], down_proj: [], error_code: "missing_hf_layer_weight" }
     }
     hf_layer_weights { valid: true, input_norm: input_norm.values, q_proj: q.values, k_proj: k.values, v_proj: v.values, o_proj: o.values, post_norm: post_norm.values, gate_proj: gate.values, up_proj: up.values, down_proj: down.values, error_code: "" }
+}
+
+func invalid_hf_model(hf_model_config config, string code) hf_model_weights {
+    hf_model_weights { valid: false, config: config, embedding: safetensors_embedding {}, layers: [], final_norm: [], lm_head: [], error_code: code }
+}
+
+func load_hf_model(string model_dir) hf_model_weights {
+    hf_model_config config = load_hf_config(model_dir)
+    if !config.valid { return invalid_hf_model(config, config.error_code) }
+    string path = model_dir + "/model.safetensors"
+    safetensors_embedding embedding = load_f32_tensor(path, "model.embed_tokens.weight")
+    if !embedding.valid { return invalid_hf_model(config, "embedding_" + embedding.error_code) }
+    []hf_layer_weights layers = []hf_layer_weights{cap: config.layers}
+    int layer = 0
+    while layer < config.layers {
+        layers[layer] = load_hf_layer(path, layer)
+        if !layers[layer].valid { return invalid_hf_model(config, "layer_" + hf_int_string(layer) + "_" + layers[layer].error_code) }
+        layer = layer + 1
+    }
+    f32_tensor_result final_norm = hf_load_values(path, "model.norm.weight")
+    f32_tensor_result lm_head = hf_load_values(path, "lm_head.weight")
+    if !final_norm.ok { return invalid_hf_model(config, "missing_final_norm") }
+    if !lm_head.ok {
+        lm_head = read_f32_tensor(embedding)
+        if !lm_head.ok { return invalid_hf_model(config, "missing_lm_head") }
+    }
+    hf_model_weights { valid: true, config: config, embedding: embedding, layers: layers, final_norm: final_norm.values, lm_head: lm_head.values, error_code: "" }
 }
