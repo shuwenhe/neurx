@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeurX 模型推理 - Web UI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.95;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .card h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: 500;
+      font-size: 0.95em;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.95em;
+      font-family: inherit;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    button.secondary {
+      background: #e0e0e0;
+      color: #333;
+      margin-top: 10px;
+    }
+
+    button.secondary:hover {
+      background: #d0d0d0;
+    }
+
+    .response-area {
+      background: #f5f5f5;
+      border-radius: 6px;
+      padding: 20px;
+      min-height: 200px;
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.9em;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .response-area.empty {
+      color: #999;
+    }
+
+    .message {
+      margin-bottom: 15px;
+      padding: 12px;
+      border-radius: 6px;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.user {
+      background: #e3f2fd;
+      color: #1565c0;
+      margin-left: 20px;
+      text-align: right;
+    }
+
+    .message.assistant {
+      background: #f3e5f5;
+      color: #6a1b9a;
+    }
+
+    .message.error {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .message.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .status.ok {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-left: 4px solid #4caf50;
+    }
+
+    .status.error {
+      background: #ffebee;
+      color: #c62828;
+      border-left: 4px solid #f44336;
+    }
+
+    .status.loading {
+      background: #e3f2fd;
+      color: #1565c0;
+      border-left: 4px solid #2196f3;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status.ok .status-dot {
+      background: #4caf50;
+    }
+
+    .status.error .status-dot {
+      background: #f44336;
+    }
+
+    .status.loading .status-dot {
+      background: #2196f3;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .param-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .slider-group {
+      margin-bottom: 20px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #ddd;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .value-display {
+      text-align: right;
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    .footer {
+      text-align: center;
+      color: white;
+      margin-top: 40px;
+      opacity: 0.9;
+      font-size: 0.95em;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #ddd;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      color: #666;
+      cursor: pointer;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+
+      .header h1 {
+        font-size: 1.8em;
+      }
+
+      .param-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(102, 126, 234, 0.3);
+      border-radius: 50%;
+      border-top-color: #667eea;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module">
+    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8000' : '';
+
+    const app = {
+      state: {
+        messages: [],
+        userInput: '',
+        isLoading: false,
+        backendStatus: 'checking',
+        temperature: 0.7,
+        maxTokens: 200,
+        topP: 0.9,
+        topK: 40,
+        currentTab: 'chat'
+      },
+
+      async checkBackendStatus() {
+        try {
+          const response = await fetch(`${API_BASE}/health`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            this.state.backendStatus = data.backend || 'ok';
+            return true;
+          }
+        } catch (e) {
+          this.state.backendStatus = 'offline';
+        }
+        return false;
+      },
+
+      async sendMessage() {
+        if (!this.state.userInput.trim() || this.state.isLoading) return;
+
+        const userMessage = this.state.userInput.trim();
+        this.state.userInput = '';
+        this.state.messages.push({ role: 'user', content: userMessage });
+        this.state.isLoading = true;
+        this.render();
+
+        try {
+          const response = await fetch(`${API_BASE}/v1/chat/completions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: 'default',
+              messages: this.state.messages.filter(m => m.role !== 'error'),
+              max_tokens: this.state.maxTokens,
+              temperature: this.state.temperature,
+              top_p: this.state.topP,
+              top_k: this.state.topK
+            })
+          });
+
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const data = await response.json();
+          const assistantMessage = data.choices[0]?.message?.content || 'No response';
+          this.state.messages.push({ role: 'assistant', content: assistantMessage });
+        } catch (error) {
+          this.state.messages.push({
+            role: 'error',
+            content: `Error: ${error.message || 'Failed to get response'}`
+          });
+        } finally {
+          this.state.isLoading = false;
+          this.render();
+        }
+      },
+
+      async tryClearChat() {
+        if (confirm('确定要清空聊天历史吗？')) {
+          this.state.messages = [];
+          this.state.userInput = '';
+          this.render();
+        }
+      },
+
+      setTab(tab) {
+        this.state.currentTab = tab;
+        this.render();
+      },
+
+      render() {
+        document.body.innerHTML = `
+          <div class="container">
+            <div class="header">
+              <h1>🤖 NeurX 模型推理</h1>
+              <p>利用 AI 的力量进行智能对话</p>
+            </div>
+
+            <div class="main-content">
+              <div class="card">
+                <h2>对话</h2>
+                <div class="status ${this.state.backendStatus === 'ok' || this.state.backendStatus === 'neurx-s-cpu' ? 'ok' : this.state.backendStatus === 'checking' ? 'loading' : 'error'}">
+                  <span class="status-dot"></span>
+                  <span>${
+                    this.state.backendStatus === 'checking' ? '检查后端...' :
+                    this.state.backendStatus === 'offline' ? '后端离线' :
+                    `后端在线 (${this.state.backendStatus})`
+                  }</span>
+                </div>
+
+                <div class="response-area ${this.state.messages.length === 0 ? 'empty' : ''}">
+                  ${this.state.messages.map(msg => `
+                    <div class="message ${msg.role}">
+                      ${msg.role === 'user' ? '👤 ' : msg.role === 'error' ? '❌ ' : '🤖 '}${msg.content}
+                    </div>
+                  `).join('') || '对话内容将显示在这里...'}
+                </div>
+
+                <div style="margin-top: 20px;">
+                  <div class="form-group">
+                    <textarea
+                      id="userInput"
+                      placeholder="输入您的问题或消息..."
+                      value="${this.state.userInput}"
+                      onkeypress="if(event.key==='Enter' && !event.shiftKey) { event.preventDefault(); app.sendMessage(); }"
+                      oninput="app.state.userInput = event.target.value; app.render();"
+                      ${this.state.isLoading ? 'disabled' : ''}
+                    ></textarea>
+                  </div>
+                  <button
+                    onclick="app.sendMessage()"
+                    ${this.state.isLoading || !this.state.userInput.trim() ? 'disabled' : ''}
+                  >
+                    ${this.state.isLoading ? '<span class="loading-spinner"></span> 思考中...' : '📤 发送'}
+                  </button>
+                  <button class="secondary" onclick="app.tryClearChat()">🗑️ 清空聊天</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <h2>⚙️ 参数配置</h2>
+
+                <div class="slider-group">
+                  <label>温度 (Temperature): ${this.state.temperature.toFixed(2)}</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="2"
+                    step="0.1"
+                    value="${this.state.temperature}"
+                    oninput="app.state.temperature = parseFloat(event.target.value); app.render();"
+                  >
+                  <small style="color: #999;">越高越随机 (0.0-2.0)</small>
+                </div>
+
+                <div class="slider-group">
+                  <label>最大 Tokens: ${this.state.maxTokens}</label>
+                  <input
+                    type="range"
+                    min="10"
+                    max="2048"
+                    step="10"
+                    value="${this.state.maxTokens}"
+                    oninput="app.state.maxTokens = parseInt(event.target.value); app.render();"
+                  >
+                  <small style="color: #999;">生成内容的最大长度</small>
+                </div>
+
+                <div class="param-grid">
+                  <div class="slider-group" style="margin-bottom: 0;">
+                    <label>核采样 (Top P): ${this.state.topP.toFixed(2)}</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value="${this.state.topP}"
+                      oninput="app.state.topP = parseFloat(event.target.value); app.render();"
+                    >
+                  </div>
+
+                  <div class="slider-group" style="margin-bottom: 0;">
+                    <label>Top K: ${this.state.topK}</label>
+                    <input
+                      type="range"
+                      min="1"
+                      max="100"
+                      step="1"
+                      value="${this.state.topK}"
+                      oninput="app.state.topK = parseInt(event.target.value); app.render();"
+                    >
+                  </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                  <h3 style="color: #333; margin-bottom: 15px;">📊 模型信息</h3>
+                  <div style="background: #f5f5f5; padding: 15px; border-radius: 6px; font-size: 0.9em;">
+                    <p><strong>模型名称:</strong> Qwen2.5-0.5B-Instruct</p>
+                    <p><strong>模型大小:</strong> 0.5B 参数</p>
+                    <p><strong>推理方式:</strong> ${this.state.backendStatus}</p>
+                    <p><strong>API 地址:</strong> ${API_BASE || 'http://localhost:8000'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="footer">
+              <p>💡 提示: 在文本框中输入您的问题，按 Enter 或点击发送按钮即可提交。</p>
+              <p>🔗 API 地址: ${API_BASE || 'http://localhost:8000'} | 📚 详见文档: ONE_CLICK_DEPLOY.md</p>
+            </div>
+          </div>
+        `;
+
+        const textarea = document.getElementById('userInput');
+        if (textarea) textarea.focus();
+      }
+    };
+
+    app.checkBackendStatus().then(() => app.render());
+    setInterval(() => app.checkBackendStatus(), 5000);
+    window.app = app;
+  </script>
+</body>
+</html>

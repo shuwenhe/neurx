@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeurX AI 对话系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            max-height: 700px;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.offline {
+            background: #ef4444;
+            animation: none;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .message {
+            display: flex;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+        
+        .message.assistant .message-content {
+            background: white;
+            border: 1px solid #e5e7eb;
+            color: #1f2937;
+        }
+        
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .message.error .message-content {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+        
+        .message.system .message-content {
+            background: #f0f4ff;
+            border: 1px solid #c7d2fe;
+            color: #3730a3;
+            font-size: 12px;
+            max-width: 100%;
+        }
+        
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            font-size: 12px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .control-group label {
+            font-weight: 600;
+            color: #4b5563;
+        }
+        
+        .control-group input,
+        .control-group select {
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        
+        .control-group input[type="range"] {
+            padding: 0;
+        }
+        
+        .value-display {
+            font-size: 11px;
+            color: #6b7280;
+        }
+        
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-wrapper textarea {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            max-height: 100px;
+        }
+        
+        .input-wrapper textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+        
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .clear-btn {
+            background: #e5e7eb;
+            color: #374151;
+            padding: 10px 16px;
+        }
+        
+        .clear-btn:hover {
+            background: #d1d5db;
+        }
+        
+        .loading {
+            display: flex;
+            gap: 6px;
+            padding: 12px 16px;
+        }
+        
+        .loading-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: bounce 1.4s infinite;
+        }
+        
+        .loading-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .loading-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { opacity: 0.3; }
+            40% { opacity: 1; }
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #9ca3af;
+            gap: 12px;
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            opacity: 0.5;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                height: 100vh;
+                max-height: none;
+                border-radius: 0;
+            }
+            
+            .controls {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 NeurX AI 对话</h1>
+            <div class="status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">连接中...</span>
+            </div>
+        </div>
+        
+        <div class="chat-area" id="chatArea">
+            <div class="empty-state">
+                <div class="empty-state-icon">💬</div>
+                <div>输入您的问题开始对话</div>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <div class="controls">
+                <div class="control-group">
+                    <label>温度 (Temperature)</label>
+                    <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7">
+                    <div class="value-display" id="tempDisplay">0.7</div>
+                </div>
+                <div class="control-group">
+                    <label>Max Tokens</label>
+                    <input type="range" id="maxTokens" min="10" max="2048" step="10" value="500">
+                    <div class="value-display" id="tokensDisplay">500</div>
+                </div>
+                <div class="control-group">
+                    <label>Top P</label>
+                    <input type="range" id="topP" min="0" max="1" step="0.05" value="0.9">
+                    <div class="value-display" id="topPDisplay">0.9</div>
+                </div>
+                <div class="control-group">
+                    <label>Top K</label>
+                    <input type="range" id="topK" min="1" max="100" step="1" value="50">
+                    <div class="value-display" id="topKDisplay">50</div>
+                </div>
+            </div>
+            
+            <div class="input-wrapper">
+                <textarea id="userInput" placeholder="输入您的问题... (Ctrl+Enter 发送)" rows="2"></textarea>
+                <div class="button-group">
+                    <button class="send-btn" id="sendBtn">发送</button>
+                    <button class="clear-btn" id="clearBtn">清空</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatArea = document.getElementById('chatArea');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const temperature = document.getElementById('temperature');
+        const maxTokens = document.getElementById('maxTokens');
+        const topP = document.getElementById('topP');
+        const topK = document.getElementById('topK');
+        
+        let isLoading = false;
+        let backendHealthy = false;
+        
+        // 获取参数值的基础路径 - 支持不同的部署方式
+        function getApiBaseUrl() {
+            const protocol = window.location.protocol;
+            const host = window.location.host;
+            const path = window.location.pathname;
+            
+            // 如果访问的是 /neurx 开头的路径
+            if (path.startsWith('/neurx')) {
+                return `${protocol}//${host}/neurx`;
+            }
+            
+            return `${protocol}//${host}`;
+        }
+        
+        const API_BASE = getApiBaseUrl();
+        
+        // 更新参数显示
+        temperature.addEventListener('input', () => {
+            document.getElementById('tempDisplay').textContent = temperature.value;
+        });
+        maxTokens.addEventListener('input', () => {
+            document.getElementById('tokensDisplay').textContent = maxTokens.value;
+        });
+        topP.addEventListener('input', () => {
+            document.getElementById('topPDisplay').textContent = topP.value;
+        });
+        topK.addEventListener('input', () => {
+            document.getElementById('topKDisplay').textContent = topK.value;
+        });
+        
+        // 检查后端健康状态
+        async function checkBackendHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                backendHealthy = response.ok;
+                updateStatus();
+            } catch (error) {
+                backendHealthy = false;
+                updateStatus();
+            }
+        }
+        
+        function updateStatus() {
+            if (backendHealthy) {
+                statusDot.classList.remove('offline');
+                statusText.textContent = '✓ 后端在线';
+            } else {
+                statusDot.classList.add('offline');
+                statusText.textContent = '✗ 后端离线';
+            }
+        }
+        
+        // 添加消息到聊天区域
+        function addMessage(content, role = 'assistant', isError = false) {
+            if (chatArea.querySelector('.empty-state')) {
+                chatArea.innerHTML = '';
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isError ? 'error' : role}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+            
+            messageDiv.appendChild(contentDiv);
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        function addSystemMessage(content) {
+            if (chatArea.querySelector('.empty-state')) {
+                chatArea.innerHTML = '';
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message system';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+            
+            messageDiv.appendChild(contentDiv);
+            chatArea.appendChild(messageDiv);
+        }
+        
+        function addLoadingMessage() {
+            if (chatArea.querySelector('.empty-state')) {
+                chatArea.innerHTML = '';
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message assistant';
+            messageDiv.id = 'loadingMessage';
+            
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            
+            for (let i = 0; i < 3; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'loading-dot';
+                loadingDiv.appendChild(dot);
+            }
+            
+            messageDiv.appendChild(loadingDiv);
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        function removeLoadingMessage() {
+            const loadingMessage = document.getElementById('loadingMessage');
+            if (loadingMessage) {
+                loadingMessage.remove();
+            }
+        }
+        
+        // 发送消息
+        async function sendMessage() {
+            if (!userInput.value.trim()) return;
+            if (isLoading) return;
+            if (!backendHealthy) {
+                addMessage('❌ 后端服务离线，请检查连接', 'error', true);
+                return;
+            }
+            
+            const message = userInput.value.trim();
+            userInput.value = '';
+            
+            // 添加用户消息
+            addMessage(message, 'user');
+            
+            // 显示加载状态
+            isLoading = true;
+            sendBtn.disabled = true;
+            addLoadingMessage();
+            
+            try {
+                const response = await fetch(`${API_BASE}/v1/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'default',
+                        messages: [
+                            { role: 'user', content: message }
+                        ],
+                        temperature: parseFloat(temperature.value),
+                        max_tokens: parseInt(maxTokens.value),
+                        top_p: parseFloat(topP.value),
+                        top_k: parseInt(topK.value)
+                    })
+                });
+                
+                removeLoadingMessage();
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.choices && data.choices[0] && data.choices[0].message) {
+                    addMessage(data.choices[0].message.content, 'assistant');
+                } else {
+                    addMessage('❌ 无效的响应格式', 'error', true);
+                }
+            } catch (error) {
+                removeLoadingMessage();
+                addMessage(`❌ 错误: ${error.message}`, 'error', true);
+                console.error('Error:', error);
+            } finally {
+                isLoading = false;
+                sendBtn.disabled = false;
+                userInput.focus();
+            }
+        }
+        
+        // 清空聊天记录
+        clearBtn.addEventListener('click', () => {
+            chatArea.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">💬</div>
+                    <div>输入您的问题开始对话</div>
+                </div>
+            `;
+            userInput.focus();
+        });
+        
+        // 发送按钮事件
+        sendBtn.addEventListener('click', sendMessage);
+        
+        // 回车发送
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // 初始化
+        window.addEventListener('load', () => {
+            userInput.focus();
+            checkBackendHealth();
+            // 每5秒检查一次后端状态
+            setInterval(checkBackendHealth, 5000);
+        });
+    </script>
+</body>
+</html>

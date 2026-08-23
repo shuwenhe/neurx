@@ -20,7 +20,7 @@ print_info() {
 
 print_step() {
     echo -e "\n${COLOR_YELLOW}━━━ $1 ━━━${NC}"
-}
+}   
 
 echo -e "${COLOR_BLUE}╔════════════════════════════════════════╗${NC}"
 echo -e "${COLOR_BLUE}║     NeurX API 功能测试${NC}"
@@ -88,7 +88,8 @@ LONG_RESPONSE=$(curl -s -X POST http://localhost:8000/v1/chat/completions \
 if echo "$LONG_RESPONSE" | grep -q "chatcmpl"; then
     print_success "长文本生成正常"
     CONTENT=$(echo "$LONG_RESPONSE" | python3 -c "import json, sys; d=json.load(sys.stdin); print(d['choices'][0]['message']['content'])" 2>/dev/null)
-    echo "  应答 (前 100 字): ${CONTENT:0:100}..."
+    PREVIEW="${CONTENT:0:100}"
+    echo "  应答 (前 100 字): ${PREVIEW}..."
 else
     print_error "长文本生成失败"
 fi

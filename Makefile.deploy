@@ -1,0 +1,137 @@
+.PHONY: help deploy deploy-full deploy-backend deploy-frontend stop restart test logs clean
+
+# 颜色定义
+RED := \033[0;31m
+GREEN := \033[0;32m
+YELLOW := \033[1;33m
+BLUE := \033[0;34m
+NC := \033[0m
+
+help:
+	@echo "$(BLUE)╔════════════════════════════════════════════════════════════════╗$(NC)"
+	@echo "$(BLUE)║$(NC) NeurX 前后端部署 - Make 命令参考"
+	@echo "$(BLUE)╚════════════════════════════════════════════════════════════════╝$(NC)"
+	@echo ""
+	@echo "$(GREEN)📋 基础命令:$(NC)"
+	@echo "  make help                - 显示此帮助信息"
+	@echo "  make deploy              - 一键部署后端 (推荐)"
+	@echo "  make deploy-full         - 一键部署前后端 (完整方案)"
+	@echo ""
+	@echo "$(GREEN)🔧 分离命令:$(NC)"
+	@echo "  make deploy-backend      - 仅部署后端"
+	@echo "  make deploy-frontend     - 仅部署前端"
+	@echo "  make build-frontend      - 构建前端"
+	@echo ""
+	@echo "$(GREEN)⚙️  管理命令:$(NC)"
+	@echo "  make stop                - 停止所有服务"
+	@echo "  make restart             - 重启所有服务"
+	@echo "  make test                - 测试 API"
+	@echo "  make logs                - 查看后端日志"
+	@echo "  make logs-frontend       - 查看前端日志"
+	@echo "  make status              - 显示服务状态"
+	@echo "  make clean               - 清理所有容器和镜像"
+	@echo ""
+	@echo "$(GREEN)🚀 快速开始:$(NC)"
+	@echo "  1. make deploy          # 启动后端服务"
+	@echo "  2. make status          # 检查服务状态"
+	@echo "  3. make test            # 测试 API"
+	@echo ""
+	@echo "$(GREEN)🌐 完整部署:$(NC)"
+	@echo "  make deploy-full        # 启动前后端"
+	@echo "  然后访问 http://localhost:3000"
+	@echo ""
+
+# 一键部署后端 (推荐)
+deploy:
+	@echo "$(BLUE)▶$(NC) 启动 NeurX 后端推理服务..."
+	@bash deploy.sh
+
+# 一键部署前后端
+deploy-full:
+	@echo "$(BLUE)▶$(NC) 启动 NeurX 前后端..."
+	@bash deploy-full.sh
+
+# 仅部署后端
+deploy-backend:
+	@echo "$(BLUE)▶$(NC) 部署后端..."
+	@docker build -t neurx:latest .
+	@docker compose --profile api up -d neurx-api
+	@echo "$(GREEN)✓$(NC) 后端已启动，端口: 8000"
+
+# 构建前端
+build-frontend:
+	@echo "$(BLUE)▶$(NC) 构建前端..."
+	@cd frontend && npm install && npm run build
+	@echo "$(GREEN)✓$(NC) 前端构建完成"
+
+# 部署前端
+deploy-frontend: build-frontend
+	@echo "$(BLUE)▶$(NC) 部署前端..."
+	@docker build -t neurx-frontend:latest ./frontend
+	@docker run -d --name neurx-frontend -p 3000:3000 --network host neurx-frontend:latest
+	@echo "$(GREEN)✓$(NC) 前端已启动，访问: http://localhost:3000"
+
+# 停止服务
+stop:
+	@echo "$(BLUE)▶$(NC) 停止所有服务..."
+	@bash stop.sh
+
+# 重启服务
+restart:
+	@echo "$(BLUE)▶$(NC) 重启服务..."
+	@bash restart.sh
+
+# 测试 API
+test:
+	@echo "$(BLUE)▶$(NC) 测试 API..."
+	@bash test.sh
+
+# 查看后端日志
+logs:
+	@docker logs -f neurx-api-server
+
+# 查看前端日志
+logs-frontend:
+	@docker logs -f neurx-frontend
+
+# 服务状态
+status:
+	@echo "$(BLUE)╔════════════════════════════════════════════════════════════════╗$(NC)"
+	@echo "$(BLUE)║$(NC) 服务状态"
+	@echo "$(BLUE)╚════════════════════════════════════════════════════════════════╝$(NC)"
+	@echo ""
+	@echo "$(BLUE)📦 运行中的容器:$(NC)"
+	@docker ps | grep neurx || echo "  (暂无 NeurX 容器运行)"
+	@echo ""
+	@echo "$(BLUE)🌐 服务访问:$(NC)"
+	@curl -s http://localhost:8000/health > /dev/null 2>&1 && echo "  $(GREEN)✓$(NC) 后端 API: http://localhost:8000" || echo "  $(RED)✗$(NC) 后端 API: 离线"
+	@curl -s http://localhost:3000 > /dev/null 2>&1 && echo "  $(GREEN)✓$(NC) 前端 Web: http://localhost:3000" || echo "  $(RED)✗$(NC) 前端 Web: 离线"
+	@echo ""
+
+# 清理
+clean:
+	@echo "$(YELLOW)⚠$(NC) 确定要清理所有容器和镜像吗？"
+	@read -p "输入 'yes' 确认: " confirm; \
+	if [ "$$confirm" = "yes" ]; then \
+		docker compose down -v; \
+		docker rmi neurx:latest neurx-frontend:latest 2>/dev/null || true; \
+		echo "$(GREEN)✓$(NC) 清理完成"; \
+	else \
+		echo "$(YELLOW)取消$(NC)"; \
+	fi
+
+# 开发模式
+dev:
+	@echo "$(BLUE)▶$(NC) 启动开发模式..."
+	@echo "  后端: docker compose --profile api up -d neurx-api"
+	@echo "  前端: cd frontend && npm run dev"
+	@docker compose --profile api up -d neurx-api
+	@cd frontend && npm run dev
+
+# 生产部署
+production: clean deploy-full
+	@echo "$(GREEN)✓$(NC) 生产环境部署完成"
+	@echo "  后端 API: http://localhost:8000"
+	@echo "  前端 Web: http://localhost:3000"
+
+.DEFAULT_GOAL := help

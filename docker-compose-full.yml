@@ -1,0 +1,137 @@
+version: '3.8'
+
+services:
+  # NeurX CPU 后端
+  neurx-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: neurx:latest
+    container_name: neurx-cpu-inference
+    profiles:
+      - cpu
+    environment:
+      - NEURX_INFER_DEVICE=cpu
+      - NEURX_CPU_THREADS=8
+      - NEURX_MODEL_DIR=/models/default
+      - NEURX_S_PORT=8000
+      - NEURX_CHAT_MAX_NEW_TOKENS=2048
+    volumes:
+      - /model/Qwen2.5-0.5B-Instruct:/models/default:ro
+    network_mode: host
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # NeurX GPU 后端
+  neurx-gpu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: neurx:latest
+    container_name: neurx-gpu-inference
+    profiles:
+      - gpu
+    environment:
+      - NEURX_INFER_DEVICE=gpu
+      - NEURX_GPU_ID=0
+      - NEURX_MODEL_DIR=/models/default
+      - NEURX_S_PORT=8000
+      - NEURX_CHAT_MAX_NEW_TOKENS=2048
+    volumes:
+      - /model/Qwen2.5-0.5B-Instruct:/models/default:ro
+    network_mode: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # NeurX API (默认 CPU 模式)
+  neurx-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: neurx:latest
+    container_name: neurx-api-server
+    profiles:
+      - api
+    environment:
+      - NEURX_INFER_DEVICE=cpu
+      - NEURX_CPU_THREADS=8
+      - NEURX_MODEL_DIR=/models/default
+      - NEURX_S_PORT=8000
+      - NEURX_CHAT_MAX_NEW_TOKENS=2048
+    volumes:
+      - /model/Qwen2.5-0.5B-Instruct:/models/default:ro
+    network_mode: host
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # 前端 Web UI
+  neurx-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: neurx-frontend:latest
+    container_name: neurx-frontend
+    profiles:
+      - frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    network_mode: host
+    depends_on:
+      neurx-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # 模型下载服务
+  download-model:
+    image: curlimages/curl:latest
+    container_name: neurx-model-download
+    profiles:
+      - download
+    volumes:
+      - /model:/model
+    command: >
+      sh -c "
+      if [ ! -f /model/Qwen2.5-0.5B-Instruct/model.safetensors ]; then
+        echo 'Downloading Qwen2.5-0.5B-Instruct model...';
+        mkdir -p /model/Qwen2.5-0.5B-Instruct;
+        cd /model/Qwen2.5-0.5B-Instruct;
+        curl -L -o model.safetensors https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct/resolve/main/model.safetensors;
+        echo 'Model download completed.';
+      else
+        echo 'Model already exists.';
+      fi
+      "
+
+volumes:
+  model_cache:
+    driver: local
+
+networks:
+  default:
+    driver: bridge

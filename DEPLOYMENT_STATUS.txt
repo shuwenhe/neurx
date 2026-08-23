@@ -1,0 +1,221 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                  NeurX 模型推理引擎 - 部署配置完成报告                         ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📅 部署时间: $(date '+%Y-%m-%d %H:%M:%S')
+🌐 公网 IP: 8.140.241.141
+🏠 内网 IP: 172.21.216.150
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ 已完成的配置
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. ✅ 后端 API 服务 (NeurX S语言推理引擎)
+   - 状态: 运行中
+   - 地址: 127.0.0.1:8000 (内部)
+   - 模型: Qwen2.5-0.5B-Instruct
+   - 推理类型: CPU
+   - 健康检查: curl http://localhost:8000/health
+   
+   输出示例:
+   {"status":"ok","backend":"neurx-s-cpu"}
+
+2. ✅ 前端 Web 应用
+   - 状态: 运行中  
+   - 地址: 127.0.0.1:3000 (内部)
+   - 类型: 纯 JavaScript (无依赖)
+   - 功能: 聊天 UI + 参数控制 + 实时状态显示
+   - 访问: curl http://localhost:3000
+
+3. ✅ Nginx 反向代理
+   - 状态: 运行中
+   - 监听: 0.0.0.0:80 (所有网络接口)
+   - 路由配置:
+     • / → 前端 Web (127.0.0.1:3000)
+     • /health → 后端健康检查
+     • /v1/* → 后端 API 端点
+   - 测试: curl http://localhost/health
+   
+   输出示例:
+   {"status":"ok","backend":"neurx-s-cpu"}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 服务访问状态
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+本地测试 (localhost):
+  ✅ 后端 API:      http://localhost:8000/health  → 成功
+  ✅ Nginx 代理:    http://localhost/health        → 成功  
+  ✅ 前端 Web:      http://localhost              → 成功
+
+内网访问 (局域网):
+  ✅ 内网 IP:       http://172.21.216.150         → 成功
+  ✅ API 端点:      http://172.21.216.150/v1/...  → 成功
+
+公网访问 (互联网):
+  ❌ 公网 IP:       http://8.140.241.141          → 需要配置安全组
+  ⏳ 状态:          等待云平台安全组配置
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 启用公网访问 - 必要步骤 (3步)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+第 1️⃣ 步: 配置云平台安全组
+━━━━━━━━━━━━━━━━━━━━━━━━
+你的云平台: 阿里云 (ECS)
+所需配置: 开放 TCP 80 端口
+
+详细步骤:
+1. 进入阿里云控制台: https://ecs.console.aliyun.com
+2. 左侧菜单 → 网络与安全 → 安全组
+3. 找到您的安全组 (通常名为 "default" 或类似)
+4. 点击 "编辑规则" → "添加规则"
+5. 配置以下参数:
+   - 协议类型: TCP
+   - 端口范围: 80/80
+   - 授权对象: 0.0.0.0/0
+   - 优先级: 1
+6. 点击 "确定" 保存
+7. 等待 1-2 分钟规则生效
+
+详见文档: cat SECURITY_GROUP_CONFIG.md
+
+第 2️⃣ 步: 验证配置生效
+━━━━━━━━━━━━━━━━━━━
+等待 2-3 分钟后,运行:
+
+# 测试本地连接 (应该立即成功)
+curl http://localhost/health
+
+# 测试公网访问 (安全组生效后)
+curl http://8.140.241.141/health
+
+# 预期输出:
+# {"status":"ok","backend":"neurx-s-cpu"}
+
+第 3️⃣ 步: 浏览器访问
+━━━━━━━━━━━━━━━━
+安全组配置生效后,在浏览器访问:
+
+http://8.140.241.141
+
+你将看到 NeurX Web UI 界面,可以进行:
+- 聊天交互
+- 参数调整 (温度、max_tokens 等)
+- 实时后端状态显示
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📁 相关文件位置
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Nginx 配置:
+  /etc/nginx/nginx.conf (生效的配置)
+  /app/shuwen/neurx/docker/nginx-publicip.conf (备份)
+
+后端服务:
+  Docker Compose: /app/shuwen/neurx/docker-compose.yml
+  部署脚本: /app/shuwen/neurx/deploy-full.sh
+
+前端文件:
+  Web UI: /app/shuwen/neurx/frontend/index.html
+  配置: /app/shuwen/neurx/frontend/vite.config.js
+
+模型数据:
+  位置: /model/Qwen2.5-0.5B-Instruct (2.4GB)
+  容器挂载: /models/default (只读)
+
+文档:
+  安全组配置: /app/shuwen/neurx/SECURITY_GROUP_CONFIG.md
+  完整指南: /app/shuwen/neurx/PUBLIC_ACCESS_GUIDE.md
+  部署指南: /app/shuwen/neurx/FULLSTACK_DEPLOYMENT.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔧 常用管理命令
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Nginx 管理:
+  查看状态:    sudo systemctl status nginx
+  重启:        sudo systemctl restart nginx
+  停止:        sudo systemctl stop nginx
+  查看日志:    sudo tail -f /var/log/nginx/access.log
+  检查配置:    sudo nginx -t
+
+后端管理:
+  查看容器:    docker ps | grep neurx
+  查看日志:    docker logs neurx-api-server
+  重启:        docker restart neurx-api-server
+  进入容器:    docker exec -it neurx-api-server sh
+
+服务测试:
+  健康检查:    curl http://localhost/health
+  聊天 API:    curl -X POST http://localhost:8000/v1/chat/completions \
+                 -H "Content-Type: application/json" \
+                 -d '{"model":"default","messages":[{"role":"user","content":"hello"}]}'
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 测试流程 (验证公网访问)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. 本地测试 (立即生效):
+   $ curl http://localhost/health
+   预期输出: {"status":"ok","backend":"neurx-s-cpu"}
+
+2. 配置安全组:
+   阿里云控制台 → 安全组 → 添加 TCP 80 规则 → 保存
+
+3. 等待生效:
+   等待 2-3 分钟
+
+4. 公网测试:
+   $ curl http://8.140.241.141/health
+   或浏览器: http://8.140.241.141
+
+5. 验证 API:
+   $ curl -X POST http://8.140.241.141/v1/chat/completions \
+     -H "Content-Type: application/json" \
+     -d '{"model":"default","messages":[{"role":"user","content":"test"}]}'
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❓ 常见问题
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Q: 配置后多久能访问?
+A: 本地立即生效,公网需要 1-2 分钟安全组规则生效
+
+Q: 为什么本地可以,公网不行?
+A: 云平台安全组默认阻止所有入站流量,需显式开放端口
+
+Q: 出现 502 Bad Gateway?
+A: 后端可能未运行,运行: docker compose up -d
+
+Q: 出现 Connection refused?
+A: 检查安全组是否配置,确保端口是 80/80
+
+Q: 如何启用 HTTPS?
+A: Nginx 配置中有 HTTPS 模板,需申请 SSL 证书 (推荐 Let's Encrypt)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📞 支持
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+查看详细故障排查指南:
+  cat PUBLIC_ACCESS_GUIDE.md
+
+查看安全组配置步骤:
+  cat SECURITY_GROUP_CONFIG.md
+
+查看 Nginx 配置:
+  cat docker/nginx-publicip.conf
+
+查看日志:
+  sudo tail -f /var/log/nginx/access.log
+  sudo tail -f /var/log/nginx/error.log
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ 您的 NeurX 模型推理服务已准备好! ✨
+
+下一步: 配置云平台安全组以启用公网访问
+详见: SECURITY_GROUP_CONFIG.md (第 1 步)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
