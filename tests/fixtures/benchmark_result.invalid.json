@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0",
+  "run_id": "invalid-run",
+  "created_at": "not-a-date",
+  "system": { "engine": "simulated" },
+  "model": {},
+  "workload": { "repetitions": 1 },
+  "metrics": { "error_rate": 2 }
+}

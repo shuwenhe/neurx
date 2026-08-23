@@ -1,4 +1,4 @@
-.PHONY: check-test-layout test-api-contracts
+.PHONY: check-test-layout test-api-contracts test-benchmark-schema
 check-test-layout:
 	@test ! -d tests/neurx
 	@test -d tests/unit
@@ -22,3 +22,8 @@ test-api-contracts:
 	@$(S_SEED_COMPILER) tests/contract/inference_api_contract_test.s artifacts/build/contracts/inference_api_contract_test.ir
 	@$(S_SEED_COMPILER) tests/contract/serving_api_contract_test.s artifacts/build/contracts/serving_api_contract_test.ir
 	@echo "API and contract caller compilation passed (runtime module linking is not yet supported by the S CLI)."
+
+test-benchmark-schema:
+	@node tools/validate_benchmark_result.js tests/fixtures/benchmark_result.valid.json
+	@! node tools/validate_benchmark_result.js tests/fixtures/benchmark_result.invalid.json >/dev/null 2>&1
+	@echo "Benchmark schema positive and negative tests passed."

@@ -2,7 +2,7 @@
 
 quality-gate: check-architecture
 
-release-check: quality-gate
+release-check: quality-gate test-benchmark-schema
 	@test -f benchmarks/result.schema.json
 	@echo "Release checks passed."
 

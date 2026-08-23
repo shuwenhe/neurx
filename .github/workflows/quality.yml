@@ -26,6 +26,8 @@ jobs:
         env:
           NEURX_ARCH_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: make check-architecture
+      - name: Check benchmark result contract
+        run: make test-benchmark-schema
 
   shell:
     runs-on: ubuntu-latest
