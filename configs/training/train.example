@@ -1,0 +1,12 @@
+# Required identity and inputs
+NEURX_JOB_ID=example-pretrain-001
+NEURX_TRAIN_MODE=pretrain
+NEURX_MODEL=model-manifest-name
+NEURX_DATASET=dataset-manifest-name
+
+# Execution
+NEURX_BACKEND=cuda
+WORLD_SIZE=1
+NEURX_MAX_STEPS=1000
+NEURX_CHECKPOINT_INTERVAL=100
+NEURX_ROOT=/opt/neurx

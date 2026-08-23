@@ -11,6 +11,8 @@ build-command-contracts:
 	@$(S_SEED_COMPILER) cmd/train/main.s artifacts/build/commands/train.ir
 	@$(S_SEED_COMPILER) cmd/worker/main.s artifacts/build/commands/worker.ir
 	@$(S_SEED_COMPILER) cmd/controller/main.s artifacts/build/commands/controller.ir
+	@$(S_SEED_COMPILER) cmd/serve/main.s artifacts/build/commands/serve.ir
+	@$(S_SEED_COMPILER) cmd/benchmark/main.s artifacts/build/commands/benchmark.ir
 	@echo "Command entrypoint compilation passed."
 
 # Compatibility entry points remain explicit until their implementations move
@@ -21,6 +23,5 @@ worker: quality-gate build-command-contracts
 controller: quality-gate build-command-contracts
 	@echo "Controller entrypoint compiled to artifacts/build/commands/controller.ir."
 
-benchmark: release-check
-	@echo "Benchmark contract is ready under benchmarks/."
-	@echo "A measured result is required; simulated legacy benchmark data is rejected."
+benchmark: release-check build-command-contracts
+	@echo "Benchmark entrypoint compiled to artifacts/build/commands/benchmark.ir."

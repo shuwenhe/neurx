@@ -79,6 +79,14 @@ for file in "${lifecycle_files[@]}"; do
   fi
 done
 
+if rg -n 'StrictHostKeyChecking=no|rsync[^\n]*--delete' cmd --glob '*.s'; then
+  report_error "command entrypoints must not disable SSH verification or delete remote trees"
+fi
+
+if rg -n '([0-9]{1,3}\.){3}[0-9]{1,3}' cmd --glob '*.s'; then
+  report_error "command entrypoints must not contain deployment-specific IPv4 addresses"
+fi
+
 if (( failed != 0 )); then
   exit 1
 fi

@@ -1,0 +1,6 @@
+NEURX_BENCHMARK_BIN=/opt/neurx/bin/benchmark-driver
+NEURX_BENCHMARK_ENGINE=neurx
+NEURX_BENCHMARK_OUTPUT=artifacts/benchmarks/neurx-result.json
+NEURX_BENCHMARK_REPETITIONS=3
+NEURX_BENCHMARK_VALIDATOR=tools/validate_benchmark_result.js
+NEURX_MODEL=model-manifest-name

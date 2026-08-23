@@ -47,7 +47,7 @@ for directory in "${required_dirs[@]}"; do
   fi
 done
 
-required_command_entries=(cmd/train/main.s cmd/worker/main.s cmd/controller/main.s)
+required_command_entries=(cmd/train/main.s cmd/serve/main.s cmd/worker/main.s cmd/controller/main.s cmd/benchmark/main.s)
 for entry in "${required_command_entries[@]}"; do
   if [[ ! -f "$entry" ]]; then
     printf 'required command entrypoint is missing: %s\n' "$entry" >&2

@@ -1,0 +1,9 @@
+# Dry-run is the default. Set to 1 only after reviewing all values.
+NEURX_CONTROLLER_APPLY=0
+NEURX_WORKER_HOST=worker-user@worker.internal.example
+NEURX_REMOTE_WORKER_BIN=/opt/neurx/bin/training-worker
+NEURX_SSH_KNOWN_HOSTS=/etc/neurx/ssh_known_hosts
+MASTER_ADDR=controller.internal.example
+MASTER_PORT=29500
+WORLD_SIZE=2
+NEURX_WORKER_RANK=1

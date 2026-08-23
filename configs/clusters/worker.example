@@ -1,0 +1,6 @@
+NEURX_WORKER_BIN=/opt/neurx/bin/training-worker
+MASTER_ADDR=controller.internal.example
+MASTER_PORT=29500
+WORLD_SIZE=2
+RANK=1
+LOCAL_RANK=0
