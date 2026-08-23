@@ -116,8 +116,8 @@ func (build_orchestrator* b) build_core() error {
     components := []string{
         "core/tensor.s",
         "core/autograd.s",
-        "tokenizer/model_bpe.s",
-        "optimizer/adamw.s",
+        "src/inference/extensions/tokenizer/model_bpe.s",
+        "src/training/optimizer/adamw.s",
     }
     s_compiler := b.get_s_compiler()
     for _, comp := range components {
@@ -141,10 +141,10 @@ func (build_orchestrator* b) build_core() error {
 func (build_orchestrator* b) build_training() error {
     b.logger.log("Building training components...")
     components := []string{
-        "training/train_loop.s",
-        "training/checkpoint.s",
-        "training/validator.s",
-        "distributed/training_coordinator.s",
+        "src/training/common/train_loop.s",
+        "src/training/common/checkpoint.s",
+        "src/training/common/validator.s",
+        "src/runtime/distributed/training_coordinator.s",
     }
     s_compiler := b.get_s_compiler()
     for _, comp := range components {
@@ -170,7 +170,7 @@ func (build_orchestrator* b) build_inference() error {
     components := []string{
         "infer/inference_server.s",
         "infer/kv_cache_manager.s",
-        "serving/speculative_decoding.s",
+        "src/serving/speculative_decoding.s",
     }
     s_compiler := b.get_s_compiler()
     for _, comp := range components {

@@ -11,7 +11,7 @@ func main() {
     println("Project root: " + project_root)
     println("checkpoint : " + checkpoint_dir)
     println("")
-    println("  inference source : " + check_path("inference/production_inference.s"))
+    println("  inference source : " + check_path("src/inference/production_inference.s"))
     println("  checkpoint dir   : " + check_path(checkpoint_dir))
     println("  output dir       : " + check_path(output_dir))
     println("")

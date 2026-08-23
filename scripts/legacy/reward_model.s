@@ -296,7 +296,7 @@ func (reward_model_trainer* trainer) train() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Reward model Training for Preference Learning        ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
-    trainer.load_preference_data("data/preferences")
+    trainer.load_preference_data("src/training/data/preferences")
     num_batches := trainer.train_dataset.train_size / trainer.config.batch_size
     for epoch := 0; epoch < trainer.config.num_epochs; epoch++ {
         fmt.Printf("\n[Epoch %d]\n", epoch+1)

@@ -40,7 +40,7 @@ func toolchain_status() int {
     print_flag("scripts/legacy/data_clean.s", runtime_file_exists("scripts/legacy/data_clean.s"))
     print_flag("scripts/legacy/data_shard.s", runtime_file_exists("scripts/legacy/data_shard.s"))
     print_flag("scripts/legacy/scripts.s", runtime_file_exists("scripts/legacy/scripts.s"))
-    print_flag("data/tools/verify_dataset.s", runtime_file_exists("data/tools/verify_dataset.s"))
+    print_flag("src/training/data/tools/verify_dataset.s", runtime_file_exists("src/training/data/tools/verify_dataset.s"))
     print_flag("scripts/legacy/industrial_ops_runner.s", runtime_file_exists("scripts/legacy/industrial_ops_runner.s"))
     print_flag("scripts/legacy/s_toolchain.s", runtime_file_exists("scripts/legacy/s_toolchain.s"))
     println("")

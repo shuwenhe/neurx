@@ -14,6 +14,8 @@ env/
 venv/
 
 /build/
+!/build/
+!/build/**
 /bin/
 /out/
 /dist/
@@ -33,18 +35,18 @@ secrets.env
 *.pem
 *.key
 
-data/pretrain_dataset/raw/
-data/training_data_shards/
-data/training_data_splits/
-data/training_data_*.jsonl
+src/training/data/pretrain_dataset/raw/
+src/training/data/training_data_shards/
+src/training/data/training_data_splits/
+src/training/data/training_data_*.jsonl
 
 ../dataset/**/*.jsonl
 ../dataset/medmcqa/
 ../dataset/*_sft/
 
 checkpoint_*/
-checkpoint/NeurX-1.3/
-checkpoint/NeurX-1.3/logs/
+src/training/checkpoint/NeurX-1.3/
+src/training/checkpoint/NeurX-1.3/logs/
 tmp/
 scripts/legacy/.run/
 *.pid
@@ -86,7 +88,7 @@ out/
 *.log
 
 chat_history/
-session/
+src/runtime/session/
 *.chat*
 
 output/
@@ -98,21 +100,21 @@ artifacts/train_output/
 artifacts/inference_output/
 
 */cache/
-!cann/cache/
+!backends/cann/cache/
 *.cache
-serving/cache/
-compile/cache/
+src/serving/cache/
+src/compiler/cache/
 
 *.backup
 *.bak
 *.tmp
-data/training_data*.jsonl.backup
-data/training_data*.jsonl.gpt_backup
+src/training/data/training_data*.jsonl.backup
+src/training/data/training_data*.jsonl.gpt_backup
 
 reports/
 metrics/
-!observability/metrics/
-!observability/metrics/**
+!src/observability/metrics/
+!src/observability/metrics/**
 *.metrics
 
 .DS_Store
@@ -123,13 +125,13 @@ metrics/
 artifacts/checkpoints/*.neurx
 artifacts/checkpoints/**/*.neurx
 artifacts/checkpoints/llm_s_pretrain/
-artifacts/checkpoints/base-model/
+artifacts/checkpoints/base-src/models/
 artifacts/checkpoints/base-model-7b/
 
 .auto_push_state/
 
-cann/checkpoints/
-cann/compile/
+backends/cann/checkpoints/
+backends/cann/compile/
 
 *.bin
 *.safetensors
@@ -154,46 +156,46 @@ cann/compile/
 model_output/
 inference_output/
 validation_output/
-cann/dumps/
-cann/kernel_meta/
-cann/logs/
-cann/output/
-cann/outputs/
-cann/profiling/
-cann/runs/
-cann/workdir/
-cann/**/*.air
-cann/**/*.bin
-cann/**/*.mindir
-cann/**/*.om
-cann/**/*.pbtxt
-cann/**/*.prof
+backends/cann/dumps/
+backends/cann/kernel_meta/
+backends/cann/logs/
+backends/cann/output/
+backends/cann/outputs/
+backends/cann/profiling/
+backends/cann/runs/
+backends/cann/workdir/
+backends/cann/**/*.air
+backends/cann/**/*.bin
+backends/cann/**/*.mindir
+backends/cann/**/*.om
+backends/cann/**/*.pbtxt
+backends/cann/**/*.prof
 
 *.ir
-s/*.ir
+src/core/s/*.ir
 ad/*.ir
 tensor/*.ir
-engine/*.ir
-nn/*.ir
-optimizer/*.ir
+src/runtime/engine/*.ir
+src/core/nn/*.ir
+src/training/optimizer/*.ir
 dl/*.ir
 lf/*.ir
 train/*.ir
-runtime/*.ir
+src/runtime/*.ir
 
 /bin/
 
 /tmp/neurx-ollama/
 
-data/pretrain_dataset/raw/
-data/pretrain_dataset/cleaned/
-data/pretrain_dataset/shard/
-data/pretrain_dataset/manifest.json
-data/training_data_splits/
-data/*.jsonl
-data/**/*.jsonl
-posttrain/data/tokenized_medical_data.json
-posttrain/data/real_medical_tokenized.json
+src/training/data/pretrain_dataset/raw/
+src/training/data/pretrain_dataset/cleaned/
+src/training/data/pretrain_dataset/shard/
+src/training/data/pretrain_dataset/manifest.json
+src/training/data/training_data_splits/
+src/training/data/*.jsonl
+src/training/data/**/*.jsonl
+src/training/posttrain/data/tokenized_medical_data.json
+src/training/posttrain/data/real_medical_tokenized.json
 
 dataset/pretrain/cleaned/*.jsonl
 dataset/pretrain/cleaned/pretrain_data_cleaned.jsonl
@@ -220,6 +222,10 @@ scripts/legacy/train_gpu.py
 scripts/legacy/run_gpu_pretrain.s
 
 CMakeFiles/
+
+# Repository build definitions are source; generated build output belongs in artifacts/.
+!/build/
+!/build/**
 CMakeCache.txt
 cmake_install.cmake
 compile_commands.json
@@ -247,4 +253,4 @@ app/mobile/**/android-build/
 *.keystore
 .gradle/
 gradle/wrapper/gradle-wrapper.jar
-s/
+src/core/s/

@@ -2,5 +2,5 @@ batch_size: 16
 image_size: 640
 max_steps: 1200
 lr: 0.0002
-dataset_manifest: "data/vision/detection/mini_manifest.json"
+dataset_manifest: "src/training/data/vision/detection/mini_manifest.json"
 output_dir: "artifacts/checkpoints/vision/detection"

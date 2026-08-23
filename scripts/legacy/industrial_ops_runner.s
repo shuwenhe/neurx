@@ -480,21 +480,21 @@ pub func main([]string args) i32 {
             io_println("DPO done: " + result.output_path)
             return 0
         case "rag":
-            corpus := ops_get_arg(parsed.options, "corpus", "data/corpus/train_corpus.txt")
+            corpus := ops_get_arg(parsed.options, "corpus", "src/training/data/corpus/train_corpus.txt")
             query := ops_get_arg(parsed.options, "query", "NeurX industrial RAG")
             result := rag_execute_from_corpus(corpus, query, output_dir + "/rag")
             io_println("RAG done: " + result.output_path)
             return 0
         case "governance":
-            dataset := ops_get_arg(parsed.options, "dataset", "data/training_data_industrial_complete.jsonl")
+            dataset := ops_get_arg(parsed.options, "dataset", "src/training/data/training_data_industrial_complete.jsonl")
             result := governance_execute_from_dataset(dataset, output_dir + "/governance")
             io_println("Governance done: " + result.output_path)
             return 0
         case "all":
             preference := ops_get_arg(parsed.options, "preference", "dataset/dpo/preferences.jsonl")
-            corpus := ops_get_arg(parsed.options, "corpus", "data/corpus/train_corpus.txt")
+            corpus := ops_get_arg(parsed.options, "corpus", "src/training/data/corpus/train_corpus.txt")
             query := ops_get_arg(parsed.options, "query", "NeurX industrial RAG")
-            dataset := ops_get_arg(parsed.options, "dataset", "data/training_data_industrial_complete.jsonl")
+            dataset := ops_get_arg(parsed.options, "dataset", "src/training/data/training_data_industrial_complete.jsonl")
             run_all_industrial_ops(preference, corpus, query, dataset, output_dir)
             return 0
         case "help":

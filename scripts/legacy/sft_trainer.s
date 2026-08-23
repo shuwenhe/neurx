@@ -300,7 +300,7 @@ func (sft_trainer* trainer) train() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Supervised Fine-Tuning (SFT) for Instruction Following║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
-    trainer.load_instruction_data("data/instructions")
+    trainer.load_instruction_data("src/training/data/instructions")
     num_batches := len(trainer.dataset.examples) / trainer.config.batch_size
     for step := 0; step < trainer.config.total_steps && step < 1000; step++ {
         batch_start := (step % num_batches) * trainer.config.batch_size

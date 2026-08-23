@@ -165,7 +165,8 @@ POSTTRAIN_PRETRAIN_MANIFEST_SOURCE ?= $(CURDIR_UNIX)/scripts/build_pretrain_mani
 POSTTRAIN_GOLDEN_DATASET_LIMIT ?= 12
 POSTTRAIN_MATERIALIZED_SAMPLES ?= 1
 
-include mk/layout.mk
+include build/mk/layout.mk
+include build/mk/compiler.mk
 
 help:
 	@echo ""
@@ -187,7 +188,7 @@ train:
 pretrain-s-p0: check-bash build-s-ir-runner
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/tiny_s_pretrain'
 	@cd '$(CURDIR_UNIX)' && \
-		'$(S_COMPILER)' 'pretrain/llm/tiny_transformer_pretrain.s' '$(CURDIR_UNIX)/artifacts/build/tiny_s_pretrain/tiny_transformer_pretrain.ir'
+		'$(S_COMPILER)' 'src/training/pretrain/llm/tiny_transformer_pretrain.s' '$(CURDIR_UNIX)/artifacts/build/tiny_s_pretrain/tiny_transformer_pretrain.ir'
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_TINY_OUTPUT_DIR="$${NEURX_TINY_OUTPUT_DIR:-$(CURDIR_UNIX)/artifacts/checkpoints/tiny_s_transformer}" \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/tiny_s_pretrain/tiny_transformer_pretrain.ir'
@@ -196,8 +197,8 @@ pretrain-eval-test: check-bash build-s-ir-runner
 	@cd '$(CURDIR_UNIX)' && \
 		bash tools/bundle_s_modules.sh \
 			'artifacts/build/pretrain_eval_s/pretrain_eval_test.bundle.s' \
-			'tests/pretrain_eval_test.s' \
-			'pretrain/eval/pretrain_eval.s' && \
+			'tests/neurx/pretrain_eval_test.s' \
+			'src/training/pretrain/eval/pretrain_eval.s' && \
 		'$(S_COMPILER)' \
 			'artifacts/build/pretrain_eval_s/pretrain_eval_test.bundle.s' \
 			'artifacts/build/pretrain_eval_s/pretrain_eval_test.ir'
@@ -208,9 +209,9 @@ hybrid-moe-s: check-bash build-s-ir-runner
 	@cd '$(CURDIR_UNIX)' && \
 		bash tools/bundle_s_modules.sh \
 			'artifacts/build/hybrid_moe_s/hybrid_moe.bundle.s' \
-			'moe/hybrid_moe.s' \
-			'moe/moe_core.s' \
-			'attention/nda.s' && \
+			'src/models/extensions/moe/hybrid_moe.s' \
+			'src/models/extensions/moe/moe_core.s' \
+			'src/inference/extensions/attention/nda.s' && \
 		'$(S_COMPILER)' \
 			'artifacts/build/hybrid_moe_s/hybrid_moe.bundle.s' \
 			'artifacts/build/hybrid_moe_s/hybrid_moe.ir'
@@ -363,9 +364,9 @@ build-posttrain-phase2a-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" ir 'posttrain/trainer/posttrain_main.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir' 2>&1 || true; \
+		"$(POSTTRAIN_S_COMPILER)" ir 'src/training/posttrain/trainer/posttrain_main.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir' 2>&1 || true; \
 		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir' ]; then \
-			"$(POSTTRAIN_S_COMPILER)" 'posttrain/trainer/posttrain_main.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir' 2>&1 || exit 1; \
+			"$(POSTTRAIN_S_COMPILER)" 'src/training/posttrain/trainer/posttrain_main.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir' 2>&1 || exit 1; \
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir'
 	@echo "✓ Phase 2A compiled to S IR successfully"
@@ -391,7 +392,7 @@ build-posttrain-sft-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_sft'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" 'posttrain/trainer/train_sft.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 || exit 1; \
+		"$(POSTTRAIN_S_COMPILER)" 'src/training/posttrain/trainer/train_sft.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 || exit 1; \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'
 build-posttrain-verify-adapter-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter'
@@ -537,7 +538,7 @@ posttrain-benchmark: check-bash
 	@mkdir -p '$(LOG_DIR)'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_benchmark/benchmark.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" 'posttrain/benchmark/posttrain_benchmark.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_benchmark/benchmark.ir' 2>&1 || exit 1; \
+		"$(POSTTRAIN_S_COMPILER)" 'src/training/posttrain/benchmark/posttrain_benchmark.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_benchmark/benchmark.ir' 2>&1 || exit 1; \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_benchmark/benchmark.ir' || exit 1
 	@cd '$(CURDIR_UNIX)' && \
 		set -o pipefail; \
@@ -563,7 +564,7 @@ posttrain-eval-medical: check-bash
 		export NEURX_POSTTRAIN_EVAL_MAX_LENGTH='$(POSTTRAIN_EVAL_MAX_LENGTH)'; \
 		export NEURX_POSTTRAIN_EVAL_BATCH_SIZE='$(POSTTRAIN_EVAL_BATCH_SIZE)'; \
 		export NEURX_POSTTRAIN_DEVICE='$(POSTTRAIN_DEVICE)'; \
-		'$(POSTTRAIN_PYTHON)' 'posttrain/evaluate_medical_mcq.py' 2>&1 | tee -a '$(LOG_DIR)/posttrain_eval_medical_$(shell date +%Y%m%d_%H%M%S).log'
+		'$(POSTTRAIN_PYTHON)' 'src/training/posttrain/evaluate_medical_mcq.py' 2>&1 | tee -a '$(LOG_DIR)/posttrain_eval_medical_$(shell date +%Y%m%d_%H%M%S).log'
 test-posttrain: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_test'
 	@mkdir -p '$(LOG_DIR)'
@@ -572,7 +573,7 @@ test-posttrain: check-bash
 	@echo "======================================================"
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_test/verify_phase2a.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" 'posttrain/testing/verify_phase2a.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_test/verify_phase2a.ir' 2>&1 || exit 1; \
+		"$(POSTTRAIN_S_COMPILER)" 'src/training/posttrain/testing/verify_phase2a.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_test/verify_phase2a.ir' 2>&1 || exit 1; \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_test/verify_phase2a.ir' || exit 1
 	@cd '$(CURDIR_UNIX)' && \
 		set -o pipefail; \
@@ -704,7 +705,7 @@ runtime-test:
 	@echo "$(YELLOW)Compiling test_runtime.s...$(NC)"
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/runtime_test'
 	@cd '$(CURDIR_UNIX)' && \
-		"$(POSTTRAIN_S_COMPILER)" 'posttrain/checkpoint/test_runtime.s' '$(CURDIR_UNIX)/artifacts/build/runtime_test/test_runtime.ir' 2>&1 || exit 1
+		"$(POSTTRAIN_S_COMPILER)" 'src/training/posttrain/checkpoint/test_runtime.s' '$(CURDIR_UNIX)/artifacts/build/runtime_test/test_runtime.ir' 2>&1 || exit 1
 	@echo ""
 	@echo "$(YELLOW)Running runtime tests...$(NC)"
 	@echo ""
@@ -782,18 +783,18 @@ posttrain-simulated: check-bash build-s-ir-runner
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir'; \
 		S_COMPILER='$(POSTTRAIN_S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)'; \
-		"$(POSTTRAIN_S_COMPILER)" ir 'posttrain/posttrain.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir' 2>&1 || true; \
+		"$(POSTTRAIN_S_COMPILER)" ir 'src/training/posttrain/posttrain.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir' 2>&1 || true; \
 		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir' ]; then \
-			"$(POSTTRAIN_S_COMPILER)" 'posttrain/posttrain.s' '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir' 2>&1 || exit 1; \
+			"$(POSTTRAIN_S_COMPILER)" 'src/training/posttrain/posttrain.s' '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir' 2>&1 || exit 1; \
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir'
 	@echo "✓ posttrain entry compiled to S IR"
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/lora_sft
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/lora_sft/run_lora_sft_training.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" ir 'posttrain/adapter/run_lora_sft_training.s' -o '$(CURDIR_UNIX)/artifacts/build/lora_sft/run_lora_sft_training.ir' 2>&1 || true; \
+		"$(POSTTRAIN_S_COMPILER)" ir 'src/training/posttrain/adapter/run_lora_sft_training.s' -o '$(CURDIR_UNIX)/artifacts/build/lora_sft/run_lora_sft_training.ir' 2>&1 || true; \
 		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/lora_sft/run_lora_sft_training.ir' ]; then \
-			"$(POSTTRAIN_S_COMPILER)" 'posttrain/adapter/run_lora_sft_training.s' '$(CURDIR_UNIX)/artifacts/build/lora_sft/run_lora_sft_training.ir' 2>&1 || exit 1; \
+			"$(POSTTRAIN_S_COMPILER)" 'src/training/posttrain/adapter/run_lora_sft_training.s' '$(CURDIR_UNIX)/artifacts/build/lora_sft/run_lora_sft_training.ir' 2>&1 || exit 1; \
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/lora_sft/run_lora_sft_training.ir'
 	@echo "✓ LoRA SFT entry compiled to S IR"
@@ -818,7 +819,7 @@ posttrain-simulated: check-bash build-s-ir-runner
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/lora_merge
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/lora_merge/run_lora_merge_simple.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" 'posttrain/adapter/run_lora_merge_simple.s' '$(CURDIR_UNIX)/artifacts/build/lora_merge/run_lora_merge_simple.ir' 2>&1 || exit 1; \
+		"$(POSTTRAIN_S_COMPILER)" 'src/training/posttrain/adapter/run_lora_merge_simple.s' '$(CURDIR_UNIX)/artifacts/build/lora_merge/run_lora_merge_simple.ir' 2>&1 || exit 1; \
 		test -f '$(CURDIR_UNIX)/artifacts/build/lora_merge/run_lora_merge_simple.ir'
 	@echo "✓ 合并脚本编译成功"
 	@echo "🚀 运行合并和保存..."
@@ -863,9 +864,9 @@ posttrain-merge-lora: check-bash build-s-ir-runner build-lora-merge
 	@mkdir -p '$(LORA_MERGE_BUILD_DIR)' $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(LORA_MERGE_IR)'; \
-		"$(POSTTRAIN_S_COMPILER)" ir 'posttrain/adapter/run_lora_merge.s' -o '$(LORA_MERGE_IR)' 2>&1 || true; \
+		"$(POSTTRAIN_S_COMPILER)" ir 'src/training/posttrain/adapter/run_lora_merge.s' -o '$(LORA_MERGE_IR)' 2>&1 || true; \
 		if [ ! -f '$(LORA_MERGE_IR)' ]; then \
-			"$(POSTTRAIN_S_COMPILER)" 'posttrain/adapter/run_lora_merge.s' '$(LORA_MERGE_IR)' 2>&1 || exit 1; \
+			"$(POSTTRAIN_S_COMPILER)" 'src/training/posttrain/adapter/run_lora_merge.s' '$(LORA_MERGE_IR)' 2>&1 || exit 1; \
 		fi && \
 		test -f '$(LORA_MERGE_IR)'
 	@cd '$(CURDIR_UNIX)' && \
@@ -887,7 +888,7 @@ posttrain-e2e: check-bash build-s-ir-runner
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_e2e/posttrain_e2e.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" 'posttrain/adapter/run_posttrain_end_to_end.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_e2e/posttrain_e2e.ir' 2>&1 || exit 1; \
+		"$(POSTTRAIN_S_COMPILER)" 'src/training/posttrain/adapter/run_posttrain_end_to_end.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_e2e/posttrain_e2e.ir' 2>&1 || exit 1; \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_e2e/posttrain_e2e.ir'
 	@echo "✓ End-to-End pipeline compiled to S IR"
 	@cd '$(CURDIR_UNIX)' && \
@@ -903,7 +904,7 @@ pretrain-watch: check-bash
 build-real-chat-s:
 	@mkdir -p artifacts/build/real_chat
 	@echo "Compiling Real Chat with Real Inference Pipeline (S)..."
-	@$(S_SEED_COMPILER) inference/llm/chat/real_chat.s artifacts/build/real_chat/real_chat.ir || { \
+	@$(S_SEED_COMPILER) src/inference/llm/chat/real_chat.s artifacts/build/real_chat/real_chat.ir || { \
 		echo "❌ Compilation failed!"; \
 		exit 1; \
 	}
@@ -916,11 +917,11 @@ build-real-chat-s:
 $(PRODUCTION_S_INFERENCE_DIR):
 	@mkdir -p '$(PRODUCTION_S_INFERENCE_DIR)'
 
-$(PRODUCTION_S_BACKEND): inference/serve/cpu_backend.s cache/kv_cache_block.s cache/cache_index.s cache/kv_cache_engine.s cache/kv_cache_integration.s cache/hash_table.s cache/storage_backend.s cache/lru_linked_list.s cache/distributed_cache.s cache/performance_optimization.s cache/advanced_cache_engine.s cache/advanced_cache_integration.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_BACKEND): src/inference/serve/cpu_backend.s src/inference/extensions/cache/kv_cache_block.s src/inference/extensions/cache/cache_index.s src/inference/extensions/cache/kv_cache_engine.s src/inference/extensions/cache/kv_cache_integration.s src/inference/extensions/cache/hash_table.s src/inference/extensions/cache/storage_backend.s src/inference/extensions/cache/lru_linked_list.s src/inference/extensions/cache/distributed_cache.s src/inference/extensions/cache/performance_optimization.s src/inference/extensions/cache/advanced_cache_engine.s src/inference/extensions/cache/advanced_cache_integration.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX CPU Backend (Pure S Language)..."
 	@echo "  Phase 1 (Legacy): kv_cache_block.s, cache_index.s, kv_cache_engine.s, kv_cache_integration.s"
 	@echo "  Phase 2-4 (Advanced): hash_table.s, storage_backend.s, lru_linked_list.s, distributed_cache.s, performance_optimization.s, advanced_cache_engine.s, advanced_cache_integration.s"
-	@$(S_SEED_COMPILER) inference/serve/cpu_backend.s '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' || { \
+	@$(S_SEED_COMPILER) src/inference/serve/cpu_backend.s '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' || { \
 		echo "❌ Backend compilation failed!"; \
 		exit 1; \
 	}
@@ -933,9 +934,9 @@ $(PRODUCTION_S_BACKEND): inference/serve/cpu_backend.s cache/kv_cache_block.s ca
 	@echo "✓ LMCache Phase 2-4 modules included: hash_table (O(1) lookup), storage_backend (L1/L2/L3), lru_linked_list (O(1) evict), distributed_cache, performance_optimization, advanced_cache_engine"
 	@touch '$(PRODUCTION_S_BACKEND)'
 
-$(PRODUCTION_S_GPU_BACKEND): inference/serve/production_gpu_backend.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_GPU_BACKEND): src/inference/serve/production_gpu_backend.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX GPU Backend (Pure S Language + GPU Acceleration)..."
-	@$(S_SEED_COMPILER) inference/serve/production_gpu_backend.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir' || { \
+	@$(S_SEED_COMPILER) src/inference/serve/production_gpu_backend.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir' || { \
 		echo "❌ GPU Backend compilation failed!"; \
 		exit 1; \
 	}
@@ -946,9 +947,9 @@ $(PRODUCTION_S_GPU_BACKEND): inference/serve/production_gpu_backend.s | $(PRODUC
 	@echo "✓ GPU backend compiled: $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir"
 	@touch '$(PRODUCTION_S_GPU_BACKEND)'
 
-$(PRODUCTION_S_GPU_BACKEND_ENHANCED): inference/serve/production_gpu_backend_enhanced.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_GPU_BACKEND_ENHANCED): src/inference/serve/production_gpu_backend_enhanced.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX GPU Backend Enhanced (Real Inference + Streaming MatMul)..."
-	@$(S_SEED_COMPILER) inference/serve/production_gpu_backend_enhanced.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir' || { \
+	@$(S_SEED_COMPILER) src/inference/serve/production_gpu_backend_enhanced.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir' || { \
 		echo "❌ GPU Backend Enhanced compilation failed!"; \
 		exit 1; \
 	}
@@ -959,9 +960,9 @@ $(PRODUCTION_S_GPU_BACKEND_ENHANCED): inference/serve/production_gpu_backend_enh
 	@echo "✓ GPU backend enhanced compiled: $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir"
 	@touch '$(PRODUCTION_S_GPU_BACKEND_ENHANCED)'
 
-$(PRODUCTION_S_TRANSFORMER_REAL): inference/runtime/transformer_real_inference.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_TRANSFORMER_REAL): src/inference/runtime/transformer_real_inference.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building Real Transformer Inference Module..."
-	@$(S_SEED_COMPILER) inference/runtime/transformer_real_inference.s '$(PRODUCTION_S_TRANSFORMER_REAL)' || { \
+	@$(S_SEED_COMPILER) src/inference/runtime/transformer_real_inference.s '$(PRODUCTION_S_TRANSFORMER_REAL)' || { \
 		echo "❌ Transformer Real Inference compilation failed!"; \
 		exit 1; \
 	}
@@ -971,9 +972,9 @@ $(PRODUCTION_S_TRANSFORMER_REAL): inference/runtime/transformer_real_inference.s
 	}
 	@echo "✓ Real Transformer Inference compiled: $(PRODUCTION_S_TRANSFORMER_REAL)"
 
-$(PRODUCTION_S_QWEN_TOKENIZER): inference/tokenizer/qwen_tokenizer.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_QWEN_TOKENIZER): src/inference/tokenizer/qwen_tokenizer.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building Qwen Tokenizer..."
-	@$(S_SEED_COMPILER) inference/tokenizer/qwen_tokenizer.s '$(PRODUCTION_S_QWEN_TOKENIZER)' || { \
+	@$(S_SEED_COMPILER) src/inference/tokenizer/qwen_tokenizer.s '$(PRODUCTION_S_QWEN_TOKENIZER)' || { \
 		echo "❌ Qwen Tokenizer compilation failed!"; \
 		exit 1; \
 	}
@@ -983,9 +984,9 @@ $(PRODUCTION_S_QWEN_TOKENIZER): inference/tokenizer/qwen_tokenizer.s | $(PRODUCT
 	}
 	@echo "✓ Qwen Tokenizer compiled: $(PRODUCTION_S_QWEN_TOKENIZER)"
 
-$(PRODUCTION_S_CHAT_IR): inference/llm/chat/production_chat.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_CHAT_IR): src/inference/llm/chat/production_chat.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "Compiling production chat control plane in S..."
-	@$(S_SEED_COMPILER) inference/llm/chat/production_chat.s '$(PRODUCTION_S_CHAT_IR)' || { \
+	@$(S_SEED_COMPILER) src/inference/llm/chat/production_chat.s '$(PRODUCTION_S_CHAT_IR)' || { \
 		echo "❌ Production Chat IR compilation failed!"; \
 		exit 1; \
 	}
@@ -995,9 +996,9 @@ $(PRODUCTION_S_CHAT_IR): inference/llm/chat/production_chat.s | $(PRODUCTION_S_I
 	}
 	@echo "✓ Production Chat IR compiled: $(PRODUCTION_S_CHAT_IR)"
 
-$(PRODUCTION_S_CHAT_DIRECT_IR): inference/llm/chat/production_chat_direct.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_CHAT_DIRECT_IR): src/inference/llm/chat/production_chat_direct.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "Compiling direct production chat (no HTTP backend)..."
-	@$(S_SEED_COMPILER) inference/llm/chat/production_chat_direct.s '$(PRODUCTION_S_CHAT_DIRECT_IR)' || { \
+	@$(S_SEED_COMPILER) src/inference/llm/chat/production_chat_direct.s '$(PRODUCTION_S_CHAT_DIRECT_IR)' || { \
 		echo "❌ Production Chat Direct IR compilation failed!"; \
 		exit 1; \
 	}
@@ -1007,9 +1008,9 @@ $(PRODUCTION_S_CHAT_DIRECT_IR): inference/llm/chat/production_chat_direct.s | $(
 	}
 	@echo "✓ Production Chat Direct IR compiled: $(PRODUCTION_S_CHAT_DIRECT_IR)"
 
-$(PRODUCTION_S_CHAT_ENHANCED_IR): inference/llm/chat/production_chat_enhanced.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_CHAT_ENHANCED_IR): src/inference/llm/chat/production_chat_enhanced.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "Compiling enhanced production chat (multi-domain knowledge)..."
-	@$(S_SEED_COMPILER) inference/llm/chat/production_chat_enhanced.s '$(PRODUCTION_S_CHAT_ENHANCED_IR)' || { \
+	@$(S_SEED_COMPILER) src/inference/llm/chat/production_chat_enhanced.s '$(PRODUCTION_S_CHAT_ENHANCED_IR)' || { \
 		echo "❌ Production Chat Enhanced IR compilation failed!"; \
 		exit 1; \
 	}
@@ -1019,9 +1020,9 @@ $(PRODUCTION_S_CHAT_ENHANCED_IR): inference/llm/chat/production_chat_enhanced.s 
 	}
 	@echo "✓ Production Chat Enhanced IR compiled: $(PRODUCTION_S_CHAT_ENHANCED_IR)"
 
-$(PRODUCTION_S_CHAT_CLIENT_IR): inference/llm/chat/chat_client.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_CHAT_CLIENT_IR): src/inference/llm/chat/chat_client.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "Compiling chat client (pure S)..."
-	@$(S_SEED_COMPILER) inference/llm/chat/chat_client.s '$(PRODUCTION_S_CHAT_CLIENT_IR)' || { \
+	@$(S_SEED_COMPILER) src/inference/llm/chat/chat_client.s '$(PRODUCTION_S_CHAT_CLIENT_IR)' || { \
 		echo "❌ Chat Client IR compilation failed!"; \
 		exit 1; \
 	}
@@ -1031,9 +1032,9 @@ $(PRODUCTION_S_CHAT_CLIENT_IR): inference/llm/chat/chat_client.s | $(PRODUCTION_
 	}
 	@echo "✓ Chat Client IR compiled: $(PRODUCTION_S_CHAT_CLIENT_IR)"
 
-$(STREAMING_CHAT_IR): inference/llm/chat/streaming_chat.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(STREAMING_CHAT_IR): src/inference/llm/chat/streaming_chat.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "Compiling streaming chat interface (pure S)..."
-	@$(S_SEED_COMPILER) inference/llm/chat/streaming_chat.s '$(STREAMING_CHAT_IR)' || { \
+	@$(S_SEED_COMPILER) src/inference/llm/chat/streaming_chat.s '$(STREAMING_CHAT_IR)' || { \
 		echo "❌ Streaming Chat IR compilation failed!"; \
 		exit 1; \
 	}
@@ -1043,9 +1044,9 @@ $(STREAMING_CHAT_IR): inference/llm/chat/streaming_chat.s | $(PRODUCTION_S_INFER
 	}
 	@echo "✓ Streaming Chat IR compiled: $(STREAMING_CHAT_IR)"
 
-$(WAIT_BACKEND_READY_IR): inference/runtime/wait_backend_ready.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(WAIT_BACKEND_READY_IR): src/inference/runtime/wait_backend_ready.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "Compiling health check (pure S)..."
-	@$(S_SEED_COMPILER) inference/runtime/wait_backend_ready.s '$(WAIT_BACKEND_READY_IR)' || { \
+	@$(S_SEED_COMPILER) src/inference/runtime/wait_backend_ready.s '$(WAIT_BACKEND_READY_IR)' || { \
 		echo "❌ Health check IR compilation failed!"; \
 		exit 1; \
 	}
@@ -1055,9 +1056,9 @@ $(WAIT_BACKEND_READY_IR): inference/runtime/wait_backend_ready.s | $(PRODUCTION_
 	}
 	@echo "✓ Health check IR compiled: $(WAIT_BACKEND_READY_IR)"
 
-$(WEB_UI_SERVER_IR): serving/web_ui_server.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(WEB_UI_SERVER_IR): src/serving/web_ui_server.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "Compiling Web UI Server (pure S)..."
-	@$(S_SEED_COMPILER) serving/web_ui_server.s '$(WEB_UI_SERVER_IR)' || { \
+	@$(S_SEED_COMPILER) src/serving/web_ui_server.s '$(WEB_UI_SERVER_IR)' || { \
 		echo "❌ Web UI Server IR compilation failed!"; \
 		exit 1; \
 	}
@@ -1105,18 +1106,18 @@ build-s-gpu-cuda-runtime: check-nvcc
 	@echo "Building NeurX S local CUDA runtime..."
 	@mkdir -p '$(S_GPU_RUNTIME_BUILD_DIR)'
 	@$(CUDA_NVCC) -O2 -std=c++17 -Xcompiler -fPIC -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		cuda/hf_decoder_cuda.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/hf_decoder_cuda.o'
+		backends/cuda/hf_decoder_cuda.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/hf_decoder_cuda.o'
 	@$(CUDA_NVCC) -O2 -std=c++17 -Xcompiler -fPIC -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		cuda/s_inference_cuda_bridge.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/s_inference_cuda_bridge.o'
-	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c runtime/model/json.cpp \
+		backends/cuda/s_inference_cuda_bridge.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/s_inference_cuda_bridge.o'
+	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c src/runtime/model/json.cpp \
 		-o '$(S_GPU_RUNTIME_BUILD_DIR)/json.o'
-	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c runtime/model/safetensors.cpp \
+	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c src/runtime/model/safetensors.cpp \
 		-o '$(S_GPU_RUNTIME_BUILD_DIR)/safetensors.o'
-	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c runtime/model/hf_model.cpp \
+	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c src/runtime/model/hf_model.cpp \
 		-o '$(S_GPU_RUNTIME_BUILD_DIR)/hf_model.o'
-	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c runtime/model/bpe_tokenizer.cpp \
+	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c src/runtime/model/bpe_tokenizer.cpp \
 		-o '$(S_GPU_RUNTIME_BUILD_DIR)/bpe_tokenizer.o'
-	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c runtime/native/tensor_runtime.cpp \
+	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c src/runtime/native/tensor_runtime.cpp \
 		-o '$(S_GPU_RUNTIME_BUILD_DIR)/tensor_runtime.o'
 	@$(CUDA_NVCC) -shared \
 		'$(S_GPU_RUNTIME_BUILD_DIR)/s_inference_cuda_bridge.o' \
@@ -1421,9 +1422,9 @@ build-neurx-interactive-inference-s:
 	@mkdir -p artifacts/build/neurx_interactive_inference
 	@echo "Compiling NeurX Interactive Inference (S)..."
 	@rm -f artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir
-	@$(S_SEED_COMPILER) ir inference/runtime/core/neurx_interactive_inference.s -o artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir 2>&1 || true
+	@$(S_SEED_COMPILER) ir src/inference/runtime/core/neurx_interactive_inference.s -o artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir 2>&1 || true
 	@if [ ! -f artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir ]; then \
-		$(S_SEED_COMPILER) inference/runtime/core/neurx_interactive_inference.s artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir 2>&1 || exit 1; \
+		$(S_SEED_COMPILER) src/inference/runtime/core/neurx_interactive_inference.s artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir 2>&1 || exit 1; \
 	fi
 	@test -f artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir
 real-inference: build-real-inference-s
@@ -1439,7 +1440,7 @@ real-inference: build-real-inference-s
 build-posttrain-chat-s:
 	@mkdir -p artifacts/build/posttrain_chat
 	@echo "Compiling PostTrain Chat (S)..."
-	@/home/shuwen/shuwen/train/s/bin/s_seed inference/runtime/core/posttrain_chat.s artifacts/build/posttrain_chat/posttrain_chat.ir || { \
+	@/home/shuwen/shuwen/train/s/bin/s_seed src/inference/runtime/core/posttrain_chat.s artifacts/build/posttrain_chat/posttrain_chat.ir || { \
 		echo "❌ Compilation failed!"; \
 		exit 1; \
 	}
@@ -1451,7 +1452,7 @@ build-posttrain-chat-s:
 build-real-inference-s: build-s-ir-runner
 	@mkdir -p artifacts/build/real_inference
 	@echo "Compiling NeurX inference entrypoint (S)..."
-	@$(S_SEED_COMPILER) inference/runtime/core/real_inference.s artifacts/build/real_inference/real_inference.ir
+	@$(S_SEED_COMPILER) src/inference/runtime/core/real_inference.s artifacts/build/real_inference/real_inference.ir
 	@printf '#!/usr/bin/env bash\n# Inference engine wrapper - works in Docker and locally\nSCRIPT_DIR="$$(cd "$$(dirname "$$0")" && pwd)"\nPROJECT_ROOT="$$(cd "$$SCRIPT_DIR/../.." && pwd)"\nS_IR_RUNNER="$$PROJECT_ROOT/artifacts/build/s_runner/s_ir_runner"\nif [ ! -f "$$S_IR_RUNNER" ]; then S_IR_RUNNER="$$(dirname "$$0")/../s_runner/s_ir_runner"; fi\nexec "$$S_IR_RUNNER" "$$SCRIPT_DIR/real_inference.ir" "$$@"\n' > artifacts/build/real_inference/real_inference
 	@chmod +x artifacts/build/real_inference/real_inference
 	@echo "✓ NeurX S inference runner ready"
@@ -1459,7 +1460,7 @@ build-real-inference-s: build-s-ir-runner
 build-model-inference-s: build-s-ir-runner
 	@mkdir -p artifacts/build/model_inference
 	@echo "Compiling strict pure-S Language Model CPU inference kernel..."
-	@$(S_SEED_COMPILER) inference/model_cpu_inference.s artifacts/build/model_inference/model_cpu_inference.ir
+	@$(S_SEED_COMPILER) src/inference/model_cpu_inference.s artifacts/build/model_inference/model_cpu_inference.ir
 	@test -f artifacts/build/model_inference/model_cpu_inference.ir
 
 model-weight-probe: build-model-inference-s
@@ -1474,7 +1475,7 @@ model-projection-probe: build-model-inference-s
 build-fast-chat-inference-s:
 	@mkdir -p artifacts/build/fast_chat_inference
 	@echo "Compiling Fast Chat Inference (S)..."
-	@$(S_SEED_COMPILER) inference/runtime/core/fast_chat_inference.s artifacts/build/fast_chat_inference/fast_chat_inference.ir || { \
+	@$(S_SEED_COMPILER) src/inference/runtime/core/fast_chat_inference.s artifacts/build/fast_chat_inference/fast_chat_inference.ir || { \
 		echo "❌ Compilation failed!"; \
 		exit 1; \
 	}
@@ -1486,7 +1487,7 @@ build-fast-chat-inference-s:
 build-real-inference-interactive-s:
 	@mkdir -p artifacts/build/real_inference_interactive
 	@echo "Compiling Real Inference Interactive (S)..."
-	@$(S_SEED_COMPILER) inference/runtime/core/real_inference_interactive.s artifacts/build/real_inference_interactive/real_inference_interactive.ir || { \
+	@$(S_SEED_COMPILER) src/inference/runtime/core/real_inference_interactive.s artifacts/build/real_inference_interactive/real_inference_interactive.ir || { \
 		echo "❌ Compilation failed!"; \
 		exit 1; \
 	}
@@ -1498,7 +1499,7 @@ build-real-inference-interactive-s:
 build-real-inference-with-model-s:
 	@mkdir -p artifacts/build/real_inference_with_model
 	@echo "Compiling Real Inference with Model Weights (S)..."
-	@$(S_SEED_COMPILER) inference/runtime/core/real_inference_with_model.s artifacts/build/real_inference_with_model/real_inference_with_model.ir || { \
+	@$(S_SEED_COMPILER) src/inference/runtime/core/real_inference_with_model.s artifacts/build/real_inference_with_model/real_inference_with_model.ir || { \
 		echo "❌ Compilation failed!"; \
 		exit 1; \
 	}
@@ -1519,7 +1520,7 @@ hf-posttrain-chat: build-hf-posttrain-chat-s
 build-production-inference-engine-s: build-s-ir-runner
 	@mkdir -p artifacts/build/production_inference_engine
 	@echo "🚀 Compiling NeurX High-Performance Production Inference Engine (S)..."
-	@$(S_SEED_COMPILER) inference/production_inference_hpc_final.s artifacts/build/production_inference_engine/production_inference_engine.ir || { \
+	@$(S_SEED_COMPILER) src/inference/production_inference_hpc_final.s artifacts/build/production_inference_engine/production_inference_engine.ir || { \
 		echo "❌ Compilation of production inference engine failed!"; \
 		exit 1; \
 	}
@@ -1530,7 +1531,7 @@ build-production-inference-engine-s: build-s-ir-runner
 build-production-hpc-chat-s: build-s-ir-runner
 	@mkdir -p artifacts/build/production_hpc_chat
 	@echo "🚀 Compiling NeurX HPC Chat Interface (S)..."
-	@$(S_SEED_COMPILER) inference/production_inference_hpc.s artifacts/build/production_hpc_chat/production_hpc_chat.ir || { \
+	@$(S_SEED_COMPILER) src/inference/production_inference_hpc.s artifacts/build/production_hpc_chat/production_hpc_chat.ir || { \
 		echo "❌ Compilation of HPC chat failed!"; \
 		exit 1; \
 	}
@@ -1546,7 +1547,7 @@ production-inference: build-production-inference-engine-s
 	@echo "╚════════════════════════════════════════════════════════════════╝"
 	@echo ""
 	@NEURX_MODEL_PATH='$(CHAT_MODEL_PATH)/model.safetensors' \
-		NEURX_TOKENIZER_PATH='$(CHAT_MODEL_PATH)/../model/base-model/tokenizer.json' \
+		NEURX_TOKENIZER_PATH='$(CHAT_MODEL_PATH)/../model/base-src/models/tokenizer.json' \
 		NEURX_PROMPT='Hello, I am' \
 		NEURX_MAX_TOKENS=128 \
 		'$(S_RUNNER_BIN)' artifacts/build/production_inference_engine/production_inference_engine.ir
@@ -1559,7 +1560,7 @@ production-chat: build-production-hpc-chat-s
 	@echo "╚════════════════════════════════════════════════════════════════╝"
 	@echo ""
 	@NEURX_MODEL_PATH='$(CHAT_MODEL_PATH)/model.safetensors' \
-		NEURX_TOKENIZER_PATH='$(CHAT_MODEL_PATH)/../model/base-model/tokenizer.json' \
+		NEURX_TOKENIZER_PATH='$(CHAT_MODEL_PATH)/../model/base-src/models/tokenizer.json' \
 		'$(S_RUNNER_BIN)' artifacts/build/production_hpc_chat/production_hpc_chat.ir
 
 benchmark-production-inference: build-production-inference-engine-s
@@ -1580,7 +1581,7 @@ benchmark-production-inference: build-production-inference-engine-s
 build-rest-api-server-s: build-s-ir-runner
 	@mkdir -p artifacts/build/rest_api_server
 	@echo "🚀 Compiling NeurX REST API Server (Pure S)..."
-	@$(S_SEED_COMPILER) inference/api/rest_api_server.s artifacts/build/rest_api_server/rest_api_server.ir || { \
+	@$(S_SEED_COMPILER) src/inference/api/rest_api_server.s artifacts/build/rest_api_server/rest_api_server.ir || { \
 		echo "❌ Compilation of REST API server failed!"; \
 		exit 1; \
 	}
@@ -1602,7 +1603,7 @@ build-production-training-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/production_training'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_system.ir'; \
-		$(S_SEED_COMPILER) 'trainer/production_training_system.s' '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_system.ir' 2>&1 || exit 1
+		$(S_SEED_COMPILER) 'src/training/orchestration/production_training_system.s' '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_system.ir' 2>&1 || exit 1
 	@test -f '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_system.ir'
 	@echo "✓ Production Training System compiled successfully"
 build-production-example-s: check-bash build-production-training-s
@@ -1687,7 +1688,7 @@ shard: check-bash
 			echo "Running Wikipedia shard processor on $(PLATFORM)..."; \
 			$(MAKE) shard-enwiki ENWIKI_BZ2_FILE="$$SHARD_INPUT_FILE" ENWIKI_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' ENWIKI_MANIFEST_FILE='$(PRETRAIN_MANIFEST)' DOCS_PER_SHARD='$(PRETRAIN_SHARD_DOCS_PER_FILE)'; \
 		else \
-			SHARD_SOURCE='shard/jsonl_shard.s'; \
+			SHARD_SOURCE='src/runtime/shard/jsonl_shard.s'; \
 			export S_COMPILER='$(S_SEED_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)'; \
 			if "$$S_COMPILER" --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
 				"$$S_COMPILER" "$$SHARD_SOURCE" '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
@@ -1977,7 +1978,7 @@ verify-framework-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/framework_stack
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		"$(S_SEED_COMPILER)" 'tests/framework_stack.s' '$(CURDIR_UNIX)/artifacts/build/framework_stack/framework_stack.ir' 2>&1 && \
+		"$(S_SEED_COMPILER)" 'tests/neurx/framework_stack.s' '$(CURDIR_UNIX)/artifacts/build/framework_stack/framework_stack.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/framework_stack/framework_stack.ir'
 	@echo "Running framework stack verification entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -2029,9 +2030,9 @@ VERIFY_DATASET_DIR_DEFAULT ?= $(CURDIR_UNIX)/dataset/pretrain/shard
 VERIFY_DATASET_DIR ?= $(VERIFY_DATASET_DIR_DEFAULT)
 INDUSTRIAL_CMD ?= all
 INDUSTRIAL_PREFERENCE ?= dataset/dpo/preferences.jsonl
-INDUSTRIAL_CORPUS ?= data/corpus/train_corpus.txt
+INDUSTRIAL_CORPUS ?= src/training/data/corpus/train_corpus.txt
 INDUSTRIAL_QUERY ?= neur_x industrial RAG
-INDUSTRIAL_DATASET ?= data/training_data_industrial_complete.jsonl
+INDUSTRIAL_DATASET ?= src/training/data/training_data_industrial_complete.jsonl
 TOOLCHAIN_CMD ?= status
 build-data-scripts: check-bash
 	@echo "Building NeurX S-only Data Pipeline..."
@@ -2077,9 +2078,9 @@ shard-enwiki: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		export S_COMPILER='$(S_SEED_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)'; \
 		if "$$S_COMPILER" --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
-			"$$S_COMPILER" 'shard/shard_wikipedia.s' '$(CURDIR_UNIX)/artifacts/build/shard/shard_wikipedia.ir' 2>&1 || exit 1; \
+			"$$S_COMPILER" 'src/runtime/shard/shard_wikipedia.s' '$(CURDIR_UNIX)/artifacts/build/shard/shard_wikipedia.ir' 2>&1 || exit 1; \
 		else \
-			"$$S_COMPILER" ir 'shard/shard_wikipedia.s' -o '$(CURDIR_UNIX)/artifacts/build/shard/shard_wikipedia.ir' 2>&1 || exit 1; \
+			"$$S_COMPILER" ir 'src/runtime/shard/shard_wikipedia.s' -o '$(CURDIR_UNIX)/artifacts/build/shard/shard_wikipedia.ir' 2>&1 || exit 1; \
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/shard/shard_wikipedia.ir'
 	@$(MAKE) build-s-ir-runner
@@ -2110,7 +2111,7 @@ verify-dataset-s: check-bash
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'data/tools/verify_dataset.s' -o '$(CURDIR_UNIX)/artifacts/build/dataset_verify/dataset_verify.ir' 2>&1 && \
+		$(S_COMPILER) ir 'src/training/data/tools/verify_dataset.s' -o '$(CURDIR_UNIX)/artifacts/build/dataset_verify/dataset_verify.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/dataset_verify/dataset_verify.ir'
 	@echo "✓ Dataset verification entry compiled to S IR"
 build-industrial-ops: check-bash
@@ -2161,11 +2162,11 @@ build-s-ir-runner: check-bash
 		chmod +x '$(S_RUNNER_BIN)' && \
 		test -f '$(S_RUNNER_BIN)'
 build-posttrain-sft-native: check-bash
-	@echo "Building native model tokenizer/SFT batch probe..."
+	@echo "Building native model src/inference/extensions/tokenizer/SFT batch probe..."
 	@mkdir -p '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)'
 	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror \
-		'posttrain/native/sft_batch_probe.cpp' \
-		'runtime/model/json.cpp' 'runtime/model/bpe_tokenizer.cpp' \
+		'src/training/posttrain/native/sft_batch_probe.cpp' \
+		'src/runtime/model/json.cpp' 'src/runtime/model/bpe_tokenizer.cpp' \
 		-licui18n -licuuc -licudata \
 		-o '$(POSTTRAIN_SFT_BATCH_PROBE)'
 	@test -x '$(POSTTRAIN_SFT_BATCH_PROBE)'
@@ -2173,19 +2174,19 @@ build-posttrain-sft-forward: check-bash check-nvcc
 	@echo "Building native model full-sequence CUDA forward probe..."
 	@mkdir -p '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)'
 	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror -c \
-		'runtime/model/json.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/json.o'
+		'src/runtime/model/json.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/json.o'
 	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror -c \
-		'runtime/model/bpe_tokenizer.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/bpe_tokenizer.o'
+		'src/runtime/model/bpe_tokenizer.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/bpe_tokenizer.o'
 	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror -c \
-		'runtime/native/tensor_runtime.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/tensor_runtime.o'
+		'src/runtime/native/tensor_runtime.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/tensor_runtime.o'
 	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror -c \
-		'runtime/model/safetensors.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/safetensors.o'
+		'src/runtime/model/safetensors.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/safetensors.o'
 	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror -c \
-		'runtime/model/hf_model.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/hf_model.o'
+		'src/runtime/model/hf_model.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/hf_model.o'
 	@'$(CUDA_NVCC)' -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		'cuda/hf_decoder_cuda.cu' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/hf_decoder_cuda.o'
+		'backends/cuda/hf_decoder_cuda.cu' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/hf_decoder_cuda.o'
 	@'$(CUDA_NVCC)' -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		'posttrain/native/sft_forward_probe.cu' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_forward_probe.o'
+		'src/training/posttrain/native/sft_forward_probe.cu' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_forward_probe.o'
 	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror \
 		'$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_forward_probe.o' \
 		'$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/hf_decoder_cuda.o' \
@@ -2198,9 +2199,9 @@ build-posttrain-sft-forward: check-bash check-nvcc
 		-o '$(POSTTRAIN_SFT_FORWARD_PROBE)'
 	@test -x '$(POSTTRAIN_SFT_FORWARD_PROBE)'
 build-posttrain-sft-training: build-posttrain-sft-forward
-	@echo "Building native model LoRA CUDA training/checkpoint probe..."
+	@echo "Building native model LoRA CUDA src/training/common/checkpoint probe..."
 	@'$(CUDA_NVCC)' -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		'posttrain/native/sft_lora_train_probe.cu' \
+		'src/training/posttrain/native/sft_lora_train_probe.cu' \
 		-o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_lora_train_probe.o'
 	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror \
 		'$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_lora_train_probe.o' \
@@ -2277,32 +2278,32 @@ training-policy-test:
 tensor-runtime-native-test:
 	@mkdir -p artifacts/build/tensor_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/tensor_runtime_native_test.cpp runtime/native/tensor_runtime.cpp \
+		tests/tensor_runtime_native_test.cpp src/runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/tensor_runtime_native/tensor_runtime_native_test
 	@artifacts/build/tensor_runtime_native/tensor_runtime_native_test
 tensor-runtime-native-backends-build: check-nvcc
 	@mkdir -p artifacts/build/tensor_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c \
-		runtime/native/cann_memory_backend.cpp \
+		src/runtime/native/cann_memory_backend.cpp \
 		-o artifacts/build/tensor_runtime_native/cann_memory_backend.o
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		runtime/native/cuda_memory_backend.cu \
+		src/runtime/native/cuda_memory_backend.cu \
 		-o artifacts/build/tensor_runtime_native/cuda_memory_backend.o
 model-runtime-native-test:
 	@mkdir -p artifacts/build/model_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/model_runtime_native_test.cpp \
-		runtime/model/json.cpp runtime/model/safetensors.cpp \
-		runtime/model/hf_model.cpp runtime/model/bpe_tokenizer.cpp \
-		runtime/native/tensor_runtime.cpp \
+		src/runtime/model/json.cpp src/runtime/model/safetensors.cpp \
+		src/runtime/model/hf_model.cpp src/runtime/model/bpe_tokenizer.cpp \
+		src/runtime/native/tensor_runtime.cpp \
 		-licui18n -licuuc -licudata \
 		-o artifacts/build/model_runtime_native/model_runtime_native_test
 	@artifacts/build/model_runtime_native/model_runtime_native_test
 tokenizer-hf-parity-test:
 	@mkdir -p artifacts/build/model_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/tokenizer_parity_probe.cpp runtime/model/json.cpp \
-		runtime/model/bpe_tokenizer.cpp -licui18n -licuuc -licudata \
+		tests/tokenizer_parity_probe.cpp src/runtime/model/json.cpp \
+		src/runtime/model/bpe_tokenizer.cpp -licui18n -licuuc -licudata \
 		-o artifacts/build/model_runtime_native/tokenizer_parity_probe
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-$(POSTTRAIN_PYTHON)}"; \
 		HF_MODEL_DIR="$${HF_MODEL_DIR:-/home/shuwen/model/base-model}"; \
@@ -2311,9 +2312,9 @@ tokenizer-hf-parity-test:
 hf-checkpoint-level1-test:
 	@mkdir -p artifacts/build/model_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/hf_checkpoint_level1_probe.cpp runtime/model/json.cpp \
-		runtime/model/safetensors.cpp runtime/model/hf_model.cpp \
-		runtime/native/tensor_runtime.cpp \
+		tests/hf_checkpoint_level1_probe.cpp src/runtime/model/json.cpp \
+		src/runtime/model/safetensors.cpp src/runtime/model/hf_model.cpp \
+		src/runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/model_runtime_native/hf_checkpoint_level1_probe
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
 		HF_MODEL_DIR="$${HF_MODEL_DIR:-/home/shuwen/model/base-model}"; \
@@ -2322,9 +2323,9 @@ hf-checkpoint-level1-test:
 hf-decoder-cpu-parity-test:
 	@mkdir -p artifacts/build/model_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/hf_decoder_cpu_probe.cpp runtime/model/json.cpp \
-		runtime/model/safetensors.cpp runtime/model/hf_model.cpp \
-		runtime/model/decoder_cpu.cpp runtime/native/tensor_runtime.cpp \
+		tests/hf_decoder_cpu_probe.cpp src/runtime/model/json.cpp \
+		src/runtime/model/safetensors.cpp src/runtime/model/hf_model.cpp \
+		src/runtime/model/decoder_cpu.cpp src/runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/model_runtime_native/hf_decoder_cpu_probe
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
 		"$$PYTORCH_PYTHON" tests/hf_decoder_cpu_parity.py \
@@ -2332,9 +2333,9 @@ hf-decoder-cpu-parity-test:
 hf-kv-generation-parity-test:
 	@mkdir -p artifacts/build/model_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/hf_kv_generation_probe.cpp runtime/model/json.cpp \
-		runtime/model/safetensors.cpp runtime/model/hf_model.cpp \
-		runtime/model/decoder_cpu.cpp runtime/native/tensor_runtime.cpp \
+		tests/hf_kv_generation_probe.cpp src/runtime/model/json.cpp \
+		src/runtime/model/safetensors.cpp src/runtime/model/hf_model.cpp \
+		src/runtime/model/decoder_cpu.cpp src/runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/model_runtime_native/hf_kv_generation_probe
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
 		"$$PYTORCH_PYTHON" tests/hf_kv_generation_parity.py \
@@ -2348,8 +2349,8 @@ kv-cache-reference-test:
 numeric-alignment-test:
 	@mkdir -p artifacts/build/numeric_alignment
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/numeric_alignment_probe.cpp runtime/native/quantization.cpp \
-		runtime/native/tensor_runtime.cpp \
+		tests/numeric_alignment_probe.cpp src/runtime/native/quantization.cpp \
+		src/runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/numeric_alignment/numeric_alignment_probe
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
 		"$$PYTORCH_PYTHON" tests/numeric_alignment_pytorch.py \
@@ -2357,21 +2358,21 @@ numeric-alignment-test:
 .PHONY: inference-feature-gap-check
 S_INFERENCE_CHECK_COMPILER ?= $(firstword $(wildcard $(CURDIR_UNIX)/../../s/bin/s /home/shuwen/s/bin/s) $(S_COMPILER))
 INFERENCE_FEATURE_GAP_S_MODULES := \
-	inference/serve/request_lifecycle.s \
-	inference/advanced/structured_output.s \
-	inference/advanced/tool_parser.s \
-	inference/serve/lora_router.s \
-	inference/serve/disaggregated_runtime.s \
-	inference/advanced/pooling.s \
-	inference/api/openai_protocol.s \
-	inference/metrics/observability.s \
-	inference/runtime/backend_registry.s \
-	inference/cache/block_manager.s \
-	inference/scheduler/vllm_scheduler.s \
-	inference/runtime/engine_lifecycle.s \
-	inference/runtime/model_manifest.s \
-	inference/runtime/worker_cluster.s \
-	inference/runtime/production_engine.s
+	src/inference/serve/request_lifecycle.s \
+	src/inference/advanced/structured_output.s \
+	src/inference/advanced/tool_parser.s \
+	src/inference/serve/lora_router.s \
+	src/inference/serve/disaggregated_runtime.s \
+	src/inference/advanced/pooling.s \
+	src/inference/api/openai_protocol.s \
+	src/inference/metrics/observability.s \
+	src/inference/runtime/backend_registry.s \
+	src/inference/cache/block_manager.s \
+	src/inference/scheduler/vllm_scheduler.s \
+	src/inference/runtime/engine_lifecycle.s \
+	src/inference/runtime/model_manifest.s \
+	src/inference/runtime/worker_cluster.s \
+	src/inference/runtime/production_engine.s
 inference-feature-gap-check:
 	@mkdir -p artifacts/build/inference_feature_gap
 	@set -e; for source in $(INFERENCE_FEATURE_GAP_S_MODULES); do \
@@ -2388,8 +2389,8 @@ inference-feature-gap-check:
 inference-runtime-test:
 	@mkdir -p artifacts/build/inference_runtime
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/inference_runtime_test.cpp cann/inference/ascend_adapter.cpp \
-		cann/runtime/acl_runtime.cpp \
+		tests/inference_runtime_test.cpp backends/cann/inference/ascend_adapter.cpp \
+		backends/cann/runtime/acl_runtime.cpp \
 		-ldl -o artifacts/build/inference_runtime/inference_runtime_test
 	@artifacts/build/inference_runtime/inference_runtime_test
 cpu-inference-test:
@@ -2404,11 +2405,11 @@ serving-native-socket-test:
 build-openai-gateway:
 	@mkdir -p artifacts/build/serving_native
 	@$(CC) -O2 -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -Werror -c \
-		serving/native/serving_socket.c \
+		src/serving/native/serving_socket.c \
 		-o artifacts/build/serving_native/serving_socket.o
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		serving/native/openai_gateway.cpp \
-		runtime/model/json.cpp runtime/model/bpe_tokenizer.cpp \
+		src/serving/native/openai_gateway.cpp \
+		src/runtime/model/json.cpp src/runtime/model/bpe_tokenizer.cpp \
 		artifacts/build/serving_native/serving_socket.o \
 		-licui18n -licuuc -licudata \
 		-o artifacts/build/serving_native/neurx_openai_gateway
@@ -2425,7 +2426,7 @@ phase5-golden-prompt-test: build-s-ir-runner
 	@mkdir -p artifacts/build/phase5
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir'; \
-		"$(S_SEED_COMPILER)" 'tests/phase5_golden.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir' 2>&1 || exit 1; \
+		"$(S_SEED_COMPILER)" 'tests/neurx/phase5_golden.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir' 2>&1 || exit 1; \
 		test -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir'
 	@cd '$(CURDIR_UNIX)' && \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir' \
@@ -2434,7 +2435,7 @@ phase5-hf-runtime-matrix: build-s-ir-runner
 	@mkdir -p artifacts/build/phase5
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir'; \
-		"$(S_SEED_COMPILER)" 'tests/phase5_hf_runtime_matrix.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir' 2>&1 || exit 1; \
+		"$(S_SEED_COMPILER)" 'tests/neurx/phase5_hf_runtime_matrix.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir' 2>&1 || exit 1; \
 		test -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir'
 	@cd '$(CURDIR_UNIX)' && \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir' \
@@ -2447,37 +2448,37 @@ check-nvcc:
 	fi
 transformer-cuda-kernels-test: check-nvcc
 	@mkdir -p artifacts/build/transformer_cuda
-	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 cuda/transformer_kernels_test.cu \
+	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 backends/cuda/transformer_kernels_test.cu \
 		-o artifacts/build/transformer_cuda/transformer_kernels_test
 	@artifacts/build/transformer_cuda/transformer_kernels_test
 transformer-cuda-integration-test: check-nvcc
 	@mkdir -p artifacts/build/transformer_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
-		cuda/transformer_integration_test.cu -lcublas -o artifacts/build/transformer_cuda/transformer_integration_test
+		backends/cuda/transformer_integration_test.cu -lcublas -o artifacts/build/transformer_cuda/transformer_integration_test
 	@artifacts/build/transformer_cuda/transformer_integration_test
 hf-decoder-cuda-build: check-nvcc
 	@mkdir -p artifacts/build/hf_decoder_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		cuda/hf_decoder_cuda.cu -o artifacts/build/hf_decoder_cuda/hf_decoder_cuda.o
-	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/model/json.cpp \
+		backends/cuda/hf_decoder_cuda.cu -o artifacts/build/hf_decoder_cuda/hf_decoder_cuda.o
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c src/runtime/model/json.cpp \
 		-o artifacts/build/hf_decoder_cuda/json.o
-	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/model/safetensors.cpp \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c src/runtime/model/safetensors.cpp \
 		-o artifacts/build/hf_decoder_cuda/safetensors.o
-	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/model/hf_model.cpp \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c src/runtime/model/hf_model.cpp \
 		-o artifacts/build/hf_decoder_cuda/hf_model.o
-	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/model/bpe_tokenizer.cpp \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c src/runtime/model/bpe_tokenizer.cpp \
 		-o artifacts/build/hf_decoder_cuda/bpe_tokenizer.o
-	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/native/tensor_runtime.cpp \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c src/runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/hf_decoder_cuda/tensor_runtime.o
 hf-decoder-cuda-kernels-test: check-nvcc
 	@mkdir -p artifacts/build/hf_decoder_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
-		cuda/hf_decoder_kernels_test.cu \
+		backends/cuda/hf_decoder_kernels_test.cu \
 		-o artifacts/build/hf_decoder_cuda/hf_decoder_kernels_test
 	@artifacts/build/hf_decoder_cuda/hf_decoder_kernels_test
 hf-decoder-cuda-parity-test: hf-decoder-cuda-build
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		cuda/hf_decoder_cuda_probe.cu \
+		backends/cuda/hf_decoder_cuda_probe.cu \
 		-o artifacts/build/hf_decoder_cuda/hf_decoder_cuda_probe.o
 	@$(CUDA_NVCC) artifacts/build/hf_decoder_cuda/hf_decoder_cuda_probe.o \
 		artifacts/build/hf_decoder_cuda/hf_decoder_cuda.o \
@@ -2490,10 +2491,10 @@ hf-decoder-cuda-parity-test: hf-decoder-cuda-build
 		"$$PYTORCH_PYTHON" tests/hf_decoder_cuda_parity.py \
 		artifacts/build/hf_decoder_cuda/hf_decoder_cuda_probe
 build-hf-cuda-backend: hf-decoder-cuda-build
-	@$(CC) -O2 -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -Werror -c serving/native/serving_socket.c \
+	@$(CC) -O2 -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -Werror -c src/serving/native/serving_socket.c \
 		-o artifacts/build/hf_decoder_cuda/serving_socket.o
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		serving/native/hf_cuda_backend.cu \
+		src/serving/native/hf_cuda_backend.cu \
 		-o artifacts/build/hf_decoder_cuda/hf_cuda_backend.o
 	@$(CUDA_NVCC) artifacts/build/hf_decoder_cuda/hf_cuda_backend.o \
 		artifacts/build/hf_decoder_cuda/hf_decoder_cuda.o \
@@ -2511,7 +2512,7 @@ transformer-cuda-checkpoint-resume-test:
 	fi
 	@mkdir -p artifacts/build/transformer_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
-		cuda/transformer_checkpoint_resume_test.cu -lcublas -o artifacts/build/transformer_cuda/transformer_checkpoint_resume_test
+		backends/cuda/transformer_checkpoint_resume_test.cu -lcublas -o artifacts/build/transformer_cuda/transformer_checkpoint_resume_test
 	@artifacts/build/transformer_cuda/transformer_checkpoint_resume_test
 cuda-tools-s: check-bash
 	@echo "Building S CUDA tools entry..."
@@ -2524,7 +2525,7 @@ cuda-tools-s: check-bash
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'cuda/cuda_tools.s' -o 'artifacts/build/cuda_tools/cuda_tools.ir' 2>&1
+		$(S_COMPILER) ir 'backends/cuda/cuda_tools.s' -o 'artifacts/build/cuda_tools/cuda_tools.ir' 2>&1
 	@if [ ! -x "$(S_RUNNER_BIN)" ]; then \
 		$(MAKE) build-s-ir-runner; \
 	fi
@@ -2576,7 +2577,7 @@ analyze-dataset-s: check-bash
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'data/tools/run_analyze.s' -o 'artifacts/build/dataset_analyze/run_analyze.ir' 2>&1
+		$(S_COMPILER) ir 'src/training/data/tools/run_analyze.s' -o 'artifacts/build/dataset_analyze/run_analyze.ir' 2>&1
 	@if [ ! -f "$(CURDIR_UNIX)/artifacts/build/dataset_analyze/run_analyze.ir" ]; then \
 		echo "Error: failed to generate $(CURDIR_UNIX)/artifacts/build/dataset_analyze/run_analyze.ir"; \
 		exit 1; \
@@ -2867,7 +2868,7 @@ run-gpu-pretrain-s: check-bash
 				CUDA_VISIBLE_DEVICES="$$rank" RANK="$$rank" LOCAL_RANK=0 WORLD_SIZE="$$world" NEURX_CUDA_DEVICE=0 NEURX_NCCL_ID_FILE="$$id_file" \
 				NEURX_PRETRAIN_RESUME="$$rank_resume" \
 				NEURX_PRETRAIN_RESUME_FROM="$$rank_resume_path" \
-					"$(CUDA_TRAIN_BRIDGE_BIN)" 2>&1 | sed "s/^/[rank $$rank] /" & pids="$$pids $$!"; \
+					"$(CUDA_TRAIN_BRIDGE_BIN)" 2>&1 | sed "src/core/s/^/[rank $$rank] /" & pids="$$pids $$!"; \
 			 done; \
 			 echo "[training] Waiting for all ranks to complete..."; \
 			 status=0; for pid in $$pids; do wait $$pid || status=$$?; done; \
@@ -3046,7 +3047,7 @@ MULTIMODAL_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/multimodal
 compile-multimodal-audio:
 	@echo "🎵 Compiling Audio Features (Pure S)..."
 	@mkdir -p $(MULTIMODAL_BUILD_DIR)
-	@$(S_SEED_COMPILER) multimodal/audio.s $(MULTIMODAL_BUILD_DIR)/audio.ir || { \
+	@$(S_SEED_COMPILER) src/models/extensions/multimodal/audio.s $(MULTIMODAL_BUILD_DIR)/audio.ir || { \
 		echo "❌ Audio compilation failed!"; \
 		exit 1; \
 	}
@@ -3056,7 +3057,7 @@ compile-multimodal-audio:
 compile-multimodal-video:
 	@echo "🎬 Compiling Video Encoding (Pure S)..."
 	@mkdir -p $(MULTIMODAL_BUILD_DIR)
-	@$(S_SEED_COMPILER) multimodal/video.s $(MULTIMODAL_BUILD_DIR)/video.ir || { \
+	@$(S_SEED_COMPILER) src/models/extensions/multimodal/video.s $(MULTIMODAL_BUILD_DIR)/video.ir || { \
 		echo "❌ Video compilation failed!"; \
 		exit 1; \
 	}
@@ -3066,7 +3067,7 @@ compile-multimodal-video:
 compile-multimodal-fusion:
 	@echo "🔀 Compiling Fusion Engine (Pure S)..."
 	@mkdir -p $(MULTIMODAL_BUILD_DIR)
-	@$(S_SEED_COMPILER) multimodal/fusion.s $(MULTIMODAL_BUILD_DIR)/fusion.ir || { \
+	@$(S_SEED_COMPILER) src/models/extensions/multimodal/fusion.s $(MULTIMODAL_BUILD_DIR)/fusion.ir || { \
 		echo "❌ Fusion compilation failed!"; \
 		exit 1; \
 	}
@@ -3076,7 +3077,7 @@ compile-multimodal-fusion:
 test-multimodal: build-s-ir-runner
 	@echo "🧪 Compiling Multimodal Test Suite (Pure S)..."
 	@mkdir -p $(MULTIMODAL_BUILD_DIR)
-	@$(S_SEED_COMPILER) multimodal/test.s $(MULTIMODAL_BUILD_DIR)/test.ir || { \
+	@$(S_SEED_COMPILER) src/models/extensions/multimodal/test.s $(MULTIMODAL_BUILD_DIR)/test.ir || { \
 		echo "❌ Test compilation failed!"; \
 		exit 1; \
 	}
@@ -3285,7 +3286,7 @@ docker-download-model:
 		exit 1; \
 	fi
 	@echo "$(BLUE)⬇️  下载模型: $(MODEL)...$(NC)"
-	@mkdir -p models/default
+	@mkdir -p src/models/catalog/default
 	@docker compose --profile download run --rm neurx-download download-model $(MODEL)
 	@echo "$(GREEN)✓ 模型已下载到 ./models/default$(NC)"
 

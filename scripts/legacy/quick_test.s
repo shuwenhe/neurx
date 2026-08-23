@@ -8,7 +8,7 @@ func main() {
     println("")
     println("Project root: " + project_root)
     println("")
-    println("  smart inference source : " + check_path("s/smart_inference.s"))
+    println("  smart inference source : " + check_path("src/core/s/smart_inference.s"))
     println("  build dir              : " + check_path("build"))
     println("  docs                    : " + check_path("docs"))
     println("")

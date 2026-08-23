@@ -1,0 +1,12 @@
+*                               @shuwenhe
+/src/core/                      @shuwenhe
+/src/compiler/                  @shuwenhe
+/src/runtime/                   @shuwenhe
+/src/inference/                 @shuwenhe
+/src/training/                  @shuwenhe
+/src/models/                    @shuwenhe
+/src/serving/                   @shuwenhe
+/src/agent/                     @shuwenhe
+/src/observability/             @shuwenhe
+/backends/                      @shuwenhe
+/deploy/                        @shuwenhe

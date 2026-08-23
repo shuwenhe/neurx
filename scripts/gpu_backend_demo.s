@@ -42,13 +42,13 @@ func main() {
 
     print("──────────────────────────────────────────────────────────────────\n")
 
-    print("Backend:    inference/native/production_gpu_backend.s\n")
+    print("Backend:    src/inference/native/production_gpu_backend.s\n")
 
     print("Compiled:   artifacts/build/production_s_inference/gpu_backend.ir\n")
 
     print("Test:       scripts/test_gpu_backend.s\n")
 
-    print("Frontend:   inference/production_chat.s\n\n")
+    print("Frontend:   src/inference/production_chat.s\n\n")
 
     print("🚀 STARTUP COMMAND\n")
 

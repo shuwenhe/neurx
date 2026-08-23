@@ -24,7 +24,7 @@ func first_non_empty_line(string path) string {
 
 func extract_json_string_field(string json_text, string field_name) string {
     string cmd = "printf %s " + shell_escape(json_text) +
-        " | sed -n 's/.*\"" + field_name + "\"[[:space:]]*:[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p' | head -1"
+        " | sed -n 'src/core/s/.*\"" + field_name + "\"[[:space:]]*:[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p' | head -1"
     trim(runtime_run_command_output(cmd))
 }
 

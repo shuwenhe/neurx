@@ -16,7 +16,7 @@ func main() {
     io.Println("║  Pure S Language Implementation + stdin support       ║")
     io.Println("╚════════════════════════════════════════════════════════╝")
     io.Println("")
-    io.Println("📦 model: base-model-posttrain/model.safetensors")
+    io.Println("📦 model: base-model-src/training/posttrain/model.safetensors")
     io.Println("🔤 Tokenizer: BPE (151,936 vocab)")
     io.Println("🧠 model: 24 layers, 896 hidden, 14 heads")
     io.Println("")

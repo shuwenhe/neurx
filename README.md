@@ -178,7 +178,7 @@ curl -X POST http://localhost:8080/v1/chat/completions \
 
 ```
 neurx/
-├── cache/                          # Advanced LMCache implementation
+├── src/inference/extensions/cache/                          # Advanced LMCache implementation
 │   ├── kv_cache_block.s            # Phase 1: Basic KV blocks
 │   ├── cache_index.s               # Phase 1: Linear index (legacy)
 │   ├── kv_cache_engine.s           # Phase 1: Engine
@@ -194,13 +194,13 @@ neurx/
 │   ├── advanced_cache_engine.s     # Phase 2-4: Unified orchestration
 │   └── advanced_cache_integration.s # Phase 2-4: Global singleton
 │
-├── inference/
+├── src/inference/
 │   └── serve/
 │       ├── cpu_backend.s           # Main inference engine
 │       ├── tokenizer.s             # Token encoding/decoding
 │       └── model.s                 # Model weights & inference logic
 │
-├── docker/                         # Container configuration
+├── deploy/docker/                         # Container configuration
 │   ├── Dockerfile                  # Main inference service
 │   ├── Dockerfile.dev              # Development image
 │   ├── Dockerfile.prod             # Production optimized
@@ -209,7 +209,7 @@ neurx/
 │   ├── nginx.conf                  # Reverse proxy config
 │   └── entrypoint.sh               # Service startup script
 │
-├── test/                           # Test suite
+├── tests/neurx/                           # Test suite
 │   ├── test_advanced_cache_integration.s
 │   ├── fixtures/                   # Test data
 │   └── golden/                     # Golden outputs
@@ -228,7 +228,7 @@ neurx/
 - **Algorithm**: DJB2 hash with collision chaining
 - **Performance**: O(1) average, O(n) worst case (rare)
 - **Load Factor**: Auto-resize at 0.75 threshold
-- **File**: `cache/hash_table.s` (230 lines)
+- **File**: `src/inference/extensions/cache/hash_table.s` (230 lines)
 
 ```s
 // Example: O(1) cache lookup
@@ -243,13 +243,13 @@ string prefix_hash = compute_prefix_hash(tokens, 100)
 - **L2 (CPU)**: 2GB, 5000 blocks, 1-10μs access
 - **L3 (Disk)**: 5GB, 10000 blocks, 1-100ms access
 - **Auto-Promotion**: Hot blocks move L3→L2→L1
-- **File**: `cache/storage_backend.s` (225 lines)
+- **File**: `src/inference/extensions/cache/storage_backend.s` (225 lines)
 
 #### O(1) LRU Eviction
 - **Structure**: Doubly-linked list via array indices
 - **Operations**: Move-to-front, evict-tail all O(1)
 - **Tracking**: Timestamp + access count
-- **File**: `cache/lru_linked_list.s` (217 lines)
+- **File**: `src/inference/extensions/cache/lru_linked_list.s` (217 lines)
 
 ### Phase 3: Distributed Cache
 
@@ -258,7 +258,7 @@ string prefix_hash = compute_prefix_hash(tokens, 100)
 - **Consensus**: Raft-like quorum (peers/2 + 1)
 - **Health Check**: 30-second timeout, 10-second ticks
 - **Failure Detection**: Automatic rebalancing on node loss
-- **File**: `cache/distributed_cache.s` (237 lines)
+- **File**: `src/inference/extensions/cache/distributed_cache.s` (237 lines)
 
 ```s
 // Add peer nodes for distributed caching
@@ -431,9 +431,9 @@ bash run_tests.sh
 
 ### Adding Custom Optimizations
 
-1. **Extend Compression**: Edit `cache/performance_optimization.s`
-2. **Add Peer Policies**: Modify `cache/distributed_cache.s`
-3. **Tune Adaptive Eviction**: Adjust thresholds in `cache/performance_optimization.s`
+1. **Extend Compression**: Edit `src/inference/extensions/cache/performance_optimization.s`
+2. **Add Peer Policies**: Modify `src/inference/extensions/cache/distributed_cache.s`
+3. **Tune Adaptive Eviction**: Adjust thresholds in `src/inference/extensions/cache/performance_optimization.s`
 4. **Recompile**: `make build-production-s-inference`
 
 ### Fallback Mechanism
@@ -457,8 +457,8 @@ switch_to_advanced_cache()
 
 - [PHASE_2_4_SUMMARY.md](PHASE_2_4_SUMMARY.md) - Implementation details and architecture
 - [ADVANCED_CACHE_USAGE.md](ADVANCED_CACHE_USAGE.md) - Complete usage guide with examples
-- [docker/QUICK_START.md](docker/QUICK_START.md) - Docker deployment guide
-- [docker/DEPLOYMENT_GUIDE.md](docker/DEPLOYMENT_GUIDE.md) - Production deployment
+- [deploy/docker/QUICK_START.md](deploy/docker/QUICK_START.md) - Docker deployment guide
+- [deploy/docker/DEPLOYMENT_GUIDE.md](deploy/docker/DEPLOYMENT_GUIDE.md) - Production deployment
 
 ## 🧪 Testing
 

@@ -211,11 +211,11 @@ func run_build([]string args) {
 
 func build_all_components() {
     components := []string{
-        "model/transformer/transformer_block.s",
-        "model/llm/model_loader.s",
-        "trainer/end_to_end_training.s",
-        "inference/inference_server.s",
-        "distributed/distributed_training.s",
+        "src/models/transformer/transformer_block.s",
+        "src/models/llm/model_loader.s",
+        "src/training/orchestration/end_to_end_training.s",
+        "src/inference/inference_server.s",
+        "src/runtime/distributed/distributed_training.s",
     }
     for _, comp := range components {
         fmt.Printf("  ✓ %s\n", comp)
@@ -225,8 +225,8 @@ func build_all_components() {
 
 func build_core_components() {
     components := []string{
-        "model/transformer/transformer_block.s",
-        "model/llm/model_loader.s",
+        "src/models/transformer/transformer_block.s",
+        "src/models/llm/model_loader.s",
     }
     for _, comp := range components {
         fmt.Printf("  ✓ %s\n", comp)

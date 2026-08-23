@@ -33,7 +33,7 @@ func main() {
     io.Println("  ✓ Directories created")
     io.Println("")
     io.Println("[Step 2] Downloading MMLU dataset from the S pipeline...")
-    cmd := exec.command("s", "run", "eval/setup_mmlu_s.s")
+    cmd := exec.command("s", "run", "tests/evaluation/setup_mmlu_s.s")
     cmd.Env = append(os.Environ(), "NEURX_ROOT="+project_root, "NEURX_MMLU_DATA_ROOT="+data_root)
     cmd.Output()
     io.Println("")
@@ -62,6 +62,6 @@ Task coverage:
     io.Println("Next steps:")
     io.Println("  1. Run MMLU evaluation:")
     io.Println("     export NEURX_MMLU_DATA_ROOT='" + data_root + "'")
-    io.Println("     s run eval/run_mmlu_benchmark.s")
+    io.Println("     s run tests/evaluation/run_mmlu_benchmark.s")
     io.Println("")
 }

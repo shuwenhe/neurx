@@ -29,7 +29,7 @@ func generate_slurm_script(deployment_config config, string output_path) bool {
     let total_tasks = num_nodes * gpus_per_node
     let batch_size = config.batch_size_per_gpu * total_tasks
     let slurm_script = `
-module load cuda/11.8
+module load backends/cuda/11.8
 module load nccl/2.16.2
 module load gcc/11.2.0
 export CUDA_VISIBLE_DEVICES=0,1,2,3

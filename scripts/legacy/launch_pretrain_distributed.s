@@ -84,7 +84,7 @@ func setup_directories(launcher_config config) bool {
         print("[ERROR] Failed to create log directory: " + config.log_dir)
         return false
     }
-    if !create_directory("checkpoint/NeurX-1.3") {
+    if !create_directory("src/training/checkpoint/NeurX-1.3") {
         print("[ERROR] Failed to create checkpoint directory")
         return false
     }

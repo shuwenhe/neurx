@@ -2,7 +2,7 @@ package neurx.examples.observability.profiler
 
 package main
 
-import "observability/profiling"
+import "src/observability/profiling"
 
 func example_basic_profiling() {
 	config := profiler.create_profiler_config()

@@ -1,0 +1,61 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    wget \
+    git \
+    gcc \
+    g++ \
+    make \
+    python3 \
+    python3-pip \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY src/core/s/ /opt/s/
+ENV PATH="/opt/s/bin:${PATH}"
+ENV S_COMPILER_EMIT_CWD=/opt/s
+
+RUN /opt/s/bin/s --version 2>/dev/null || echo "S compiler installed"
+
+WORKDIR /opt/app
+
+COPY neurx/ ./neurx/
+COPY src/training/posttrain/ ./posttrain/
+
+WORKDIR /opt/app/neurx
+RUN echo "Building NeurX inference server..." && \
+    mkdir -p artifacts/build/inference_server && \
+    /opt/s/bin/s_seed src/inference/cmd/server.s artifacts/build/inference_server/server.ir 2>&1 | tail -20 && \
+    echo "✓ Server compiled"
+
+RUN mkdir -p ./artifacts/build/s_runner && \
+    echo "✓ Created artifact directories"
+
+COPY neurx/artifacts/build/s_runner/s_ir_runner ./artifacts/build/s_runner/
+
+RUN printf '#!/usr/bin/env bash\n# NeurX Inference Server Launcher\nSCRIPT_DIR="$$(cd "$$(dirname "$$0")" && pwd)"\nPROJECT_ROOT="$$(cd "$$SCRIPT_DIR/../.." && pwd)"\nS_IR_RUNNER="$$PROJECT_ROOT/artifacts/build/s_runner/s_ir_runner"\nif [ ! -f "$$S_IR_RUNNER" ]; then S_IR_RUNNER="$$(dirname "$$0")/../s_runner/s_ir_runner"; fi\nexec "$$S_IR_RUNNER" "$$SCRIPT_DIR/inference_server/server.ir" "$$@"\n' > ./artifacts/build/inference_server/server && \
+    chmod +x ./artifacts/build/inference_server/server && \
+    echo "✓ Server launcher created"
+
+EXPOSE 8080 8081 9090
+
+ENV NEURX_CHAT_MODEL_PATH=/opt/app/posttrain/model.safetensors
+ENV NEURX_TOKENIZER_PATH=/opt/app/posttrain/tokenizer.json
+ENV NEURX_BACKEND=cpu
+ENV NEURX_BATCH_SIZE=4
+ENV NEURX_NUM_WORKERS=4
+ENV NEURX_KV_BLOCKS=64
+ENV NEURX_API_PORT=8080
+ENV NEURX_GRPC_PORT=8081
+ENV NEURX_METRICS_PORT=9090
+
+WORKDIR /opt/app/neurx
+
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 --start-period=30s \
+    CMD curl -f http://localhost:8080/api/health || exit 1
+
+CMD ["./artifacts/build/inference_server/server"]

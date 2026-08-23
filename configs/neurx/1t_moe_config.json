@@ -1,0 +1,160 @@
+{
+  "model_name": "neurx-1t-moe",
+  "model_type": "transformer_moe",
+  "num_parameters": 1000000000000,
+  "active_parameters": 111111111111,
+  "activation_sparsity": 99.2,
+  "hidden_size": 12288,
+  "num_hidden_layers": 80,
+  "num_attention_heads": 96,
+  "head_dim": 128,
+  "intermediate_size": 49152,
+  "vocab_size": 128000,
+  "max_position_embeddings": 32768,
+  "long_context_max": 200000,
+  "rope_theta": 500000.0,
+  "attention_dropout": 0.0,
+  "hidden_dropout_prob": 0.0,
+  "initializer_range": 0.02,
+  "layer_norm_eps": 1e-6,
+  "use_cache": true,
+  "torch_dtype": "bfloat16",
+  "pretraining_tp": 16,
+  "output_attentions": false,
+  "output_hidden_states": false,
+  "transformers_version": "4.40.0",
+
+  "moe": {
+    "num_experts": 256,
+    "num_experts_per_tok": 2,
+    "expert_capacity_factor": 1.25,
+    "routing_method": "top_k",
+    "load_balancing_method": "auxiliary_loss",
+    "router_aux_loss_coef": 0.001,
+    "use_expert_dropout": true,
+    "expert_dropout_prob": 0.01,
+    "gate_logits_normalizer": "softmax"
+  },
+
+  "training": {
+    "batch_size": 2,
+    "gradient_accumulation_steps": 8,
+    "learning_rate": 2e-4,
+    "lr_scheduler_type": "cosine",
+    "warmup_ratio": 0.02,
+    "warmup_steps": 10000,
+    "num_training_steps": 500000,
+    "weight_decay": 0.01,
+    "max_grad_norm": 1.0,
+    "adam_epsilon": 1e-8,
+    "adam_beta1": 0.9,
+    "adam_beta2": 0.95,
+    "num_train_epochs": 1,
+    "total_tokens": 1000000000000
+  },
+
+  "distributed": {
+    "world_size": 16,
+    "rank": 0,
+    "master_addr": "localhost",
+    "master_port": 29500,
+    "backend": "nccl",
+    "nccl_timeout": 1800,
+    "zero_stage": 3,
+    "tensor_parallel_size": 4,
+    "pipeline_parallel_stages": 2,
+    "expert_parallel_size": 2,
+    "data_parallel_size": 1
+  },
+
+  "data": {
+    "dataset_name": "pretrain_dataset",
+    "dataset_type": "text",
+    "max_seq_length": 4096,
+    "cache_dataset": true,
+    "streaming": true,
+    "shuffle": true,
+    "seed": 42,
+    "dataset_root": "src/training/data/pretrain",
+    "manifest_path": "src/training/data/pretrain/manifest.json",
+    "tokenizer_name": "neurx-bpe-128k",
+    "tokenizer_model_path": "src/inference/extensions/tokenizer/neurx_bpe_128k.model",
+    "total_tokens_needed": 1000000000000
+  },
+
+  "checkpoint": {
+    "save_path": "checkpoints_1t_moe",
+    "save_steps": 5000,
+    "save_total_limit": 5,
+    "resume_from_checkpoint": null,
+    "save_optimizer_state": true,
+    "save_rng_state": true,
+    "save_sharded_optimizer_state": true,
+    "checkpoint_format": "sharded",
+    "checkpoint_validation_enabled": true
+  },
+
+  "logging": {
+    "logging_dir": "logs/1t_moe",
+    "logging_steps": 100,
+    "logging_first_step": true,
+    "log_model": true,
+    "log_level": "INFO"
+  },
+
+  "optimization": {
+    "mixed_precision": true,
+    "mixed_precision_dtype": "bfloat16",
+    "activation_checkpointing": true,
+    "gradient_checkpointing": true,
+    "flash_attention": true,
+    "fused_ops": true,
+    "use_fused_add_norm": true,
+    "use_fused_gelu": true,
+    "use_fused_linear": true,
+    "use_memory_efficient_attention": true,
+    "offload_param": false,
+    "offload_optimizer": false
+  },
+
+  "inference": {
+    "max_new_tokens": 2048,
+    "min_new_tokens": 1,
+    "do_sample": true,
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "top_k": 50,
+    "repetition_penalty": 1.0,
+    "length_penalty": 1.0,
+    "early_stopping": false,
+    "num_beams": 1,
+    "use_cache": true,
+    "use_expert_cache": true
+  },
+
+  "evaluation": {
+    "eval_steps": 5000,
+    "eval_strategy": "steps",
+    "metric_for_best_model": "loss",
+    "load_best_model_at_end": true,
+    "eval_accumulation_steps": 10
+  },
+
+  "hardware": {
+    "num_gpus": 16,
+    "gpu_type": "H100",
+    "gpu_memory_per_device_gb": 80,
+    "total_gpu_memory_gb": 1280,
+    "estimated_per_gpu_usage_gb": 75,
+    "safety_margin_gb": 5,
+    "use_deepspeed": true,
+    "deepspeed_config_file": "deepspeed_1t_moe.json"
+  },
+
+  "monitoring": {
+    "use_tensorboard": true,
+    "report_to": ["tensorboard"],
+    "tensorboard_dir": "logs/1t_moe/tensorboard",
+    "save_metrics_history": true
+  }
+}

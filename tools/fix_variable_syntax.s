@@ -13,7 +13,7 @@ func main() {
 func fix_variable_declarations() {
     string cmd = `
 find ./neurx -name "*.s" -type f | while read file; do
-    sed -i 's/\([a-zA-Z_][a-zA-Z0-9_]*\): \(int\|string\|bool\|float\|i32\|i64\|f32\|f64\)/\2 \1/g' "$file"
+    sed -i 'src/core/s/\([a-zA-Z_][a-zA-Z0-9_]*\): \(int\|string\|bool\|float\|i32\|i64\|f32\|f64\)/\2 \1/g' "$file"
 done
 `
     create_fixer_script()

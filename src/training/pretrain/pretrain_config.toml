@@ -1,0 +1,73 @@
+[model]
+name = "model_large"
+vocab_size = 50257
+hidden_dim = 1024
+num_layers = 24
+num_heads = 16
+ffn_dim = 4096
+max_seq_length = 2048
+[training]
+total_steps = 50000
+warmup_steps = 5000
+learning_rate = 0.0002
+lr_schedule = "cosine"
+weight_decay = 0.01
+gradient_clip_norm = 1.0
+max_grad_norm = 1.0
+enable_data_offload = true
+enable_cpu_offload = true
+batch_size = 64
+micro_batch_size = 8
+num_accumulation_steps = 8
+num_workers = 4
+prefetch_factor = 2
+[optimization]
+optimizer = "adamw"
+betas = [0.9, 0.999]
+eps = 1e-8
+mixed_precision = "bf16"
+scale_loss = true
+gradient_checkpointing = true
+activation_checkpointing = true
+flash_attention = true
+fused_kernels = true
+[checkpointing]
+save_interval = 5000
+keep_last_n = 3
+save_optimizer_state = true
+save_training_state = true
+[distributed]
+world_size = 0
+rank = 0
+backend = "nccl"
+find_unused_parameters = false
+pin_memory = true
+prefetch_distance = 2
+async_grad_reduce = true
+[logging]
+log_interval = 100
+log_dir = "artifacts/logs"
+save_metrics = true
+tensorboard = false
+[evaluation]
+eval_steps = 2500
+eval_samples = 1000
+eval_metrics = ["perplexity", "loss", "accuracy"]
+[data]
+train_dataset_path = "src/training/data/pretrain_dataset.jsonl"
+val_dataset_path = "src/training/data/val_dataset.jsonl"
+cache_dir = "src/training/data/cache"
+tokenizer_name = "gpt2"
+max_seq_length = 2048
+[output]
+output_dir = "src/training/checkpoint/NeurX-1.3"
+model_name = "NeurX-1.3.neurx"
+resume_from_checkpoint = null
+seed = 42
+[hardware]
+gpu_model = "RTX4060Ti"
+gpu_memory_mb = 16384
+fp16_loss_scale = 65536
+enable_tf32 = true
+num_gpu_devices = 0
+torch_compile = false
