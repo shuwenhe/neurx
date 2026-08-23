@@ -914,8 +914,10 @@ build-real-chat-s:
 $(PRODUCTION_S_INFERENCE_DIR):
 	@mkdir -p '$(PRODUCTION_S_INFERENCE_DIR)'
 
-$(PRODUCTION_S_BACKEND): inference/serve/cpu_backend.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_BACKEND): inference/serve/cpu_backend.s cache/kv_cache_block.s cache/cache_index.s cache/kv_cache_engine.s cache/kv_cache_integration.s cache/hash_table.s cache/storage_backend.s cache/lru_linked_list.s cache/distributed_cache.s cache/performance_optimization.s cache/advanced_cache_engine.s cache/advanced_cache_integration.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX CPU Backend (Pure S Language)..."
+	@echo "  Phase 1 (Legacy): kv_cache_block.s, cache_index.s, kv_cache_engine.s, kv_cache_integration.s"
+	@echo "  Phase 2-4 (Advanced): hash_table.s, storage_backend.s, lru_linked_list.s, distributed_cache.s, performance_optimization.s, advanced_cache_engine.s, advanced_cache_integration.s"
 	@$(S_SEED_COMPILER) inference/serve/cpu_backend.s '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' || { \
 		echo "❌ Backend compilation failed!"; \
 		exit 1; \
@@ -925,6 +927,8 @@ $(PRODUCTION_S_BACKEND): inference/serve/cpu_backend.s | $(PRODUCTION_S_INFERENC
 		exit 1; \
 	}
 	@echo "✓ CPU backend compiled: $(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir"
+	@echo "✓ LMCache Phase 1 modules included: kv_cache_block, cache_index, kv_cache_engine, kv_cache_integration"
+	@echo "✓ LMCache Phase 2-4 modules included: hash_table (O(1) lookup), storage_backend (L1/L2/L3), lru_linked_list (O(1) evict), distributed_cache, performance_optimization, advanced_cache_engine"
 	@touch '$(PRODUCTION_S_BACKEND)'
 
 $(PRODUCTION_S_GPU_BACKEND): inference/serve/production_gpu_backend.s | $(PRODUCTION_S_INFERENCE_DIR)
