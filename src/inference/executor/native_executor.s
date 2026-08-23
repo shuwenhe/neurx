@@ -1,7 +1,7 @@
 package neurx.inference.executor.native_executor
 use neurx.backends.api.inference_backend.{backend_generation_result}
 use neurx.backends.cpu.reference_inference.{cpu_reference_generate}
-use neurx.backends.cpu.embedding_prefill.{cpu_embedding_prefill}
+use neurx.backends.cpu.transformer_decode.{cpu_transformer_result, cpu_transformer_prefill_decode}
 use neurx.inference.scheduler.native_scheduler.{native_schedule_decision, schedule_native_request}
 use neurx.inference.tokenizer.byte_tokenizer.{byte_tokenization_result, tokenize_bytes}
 use neurx.models.formats.safetensors_embedding.{safetensors_embedding, load_f32_embedding}
@@ -32,7 +32,16 @@ func execute_native_request(string request_id, string model, string prompt, int 
         if !tokens.ok {
             return native_execution_result { ok: false, request_id: request_id, output: "", backend: "cpu-prefill", error_code: tokens.error_code, error_message: "tokenization failed" }
         }
-        generated = cpu_embedding_prefill(embedding, tokens.token_ids)
+        cpu_transformer_result transformed = cpu_transformer_prefill_decode(embedding, tokens.token_ids, decision.token_budget)
+        if !transformed.ok {
+            return native_execution_result { ok: false, request_id: request_id, output: "", backend: "cpu-transformer", error_code: transformed.error_code, error_message: "transformer prefill or decode failed" }
+        }
+        string token_text = "many"
+        if transformed.next_token == 0 { token_text = "0" }
+        if transformed.next_token == 1 { token_text = "1" }
+        if transformed.next_token == 2 { token_text = "2" }
+        if transformed.next_token == 3 { token_text = "3" }
+        generated = backend_generation_result { ok: true, output: "token:" + token_text, backend: "cpu-transformer", error_code: "", error_message: "" }
     }
     native_execution_result {
         ok: generated.ok,

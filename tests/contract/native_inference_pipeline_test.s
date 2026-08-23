@@ -21,7 +21,7 @@ func main() {
     request.prompt = "AB"
     request.max_tokens = 2
     result = serve_native_inference(request, 4, 0)
-    if !result.ok || result.output != "prefill:3" || result.backend != "cpu-prefill" { return 1 }
+    if !result.ok || result.output != "token:1" || result.backend != "cpu-transformer" { return 1 }
 
     request.prompt = ""
     result = serve_native_inference(request, 4, 0)
