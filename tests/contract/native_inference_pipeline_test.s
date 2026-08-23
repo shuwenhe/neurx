@@ -16,6 +16,13 @@ func main() {
     if !result.ok || result.output != "indus" || result.backend != "cpu-reference" { return 1 }
     result = serve_native_inference(request, 1, 1)
     if result.ok || result.error_code != "capacity_exhausted" { return 1 }
+
+    request.model = "artifacts/build/commands/native-test/embedding.safetensors"
+    request.prompt = "AB"
+    request.max_tokens = 2
+    result = serve_native_inference(request, 4, 0)
+    if !result.ok || result.output != "prefill:3" || result.backend != "cpu-prefill" { return 1 }
+
     request.prompt = ""
     result = serve_native_inference(request, 4, 0)
     if result.ok || result.error_code != "missing_prompt" { return 1 }

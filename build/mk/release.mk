@@ -1,11 +1,11 @@
-.PHONY: quality-gate release-check build-command-contracts build-commands test-commands test-native-inference worker controller benchmark
+.PHONY: quality-gate release-check build-command-contracts build-commands test-commands test-native-inference test-model-formats worker controller benchmark
 
 COMMAND_IR_DIR := $(CURDIR_UNIX)/artifacts/build/commands
 COMMAND_BIN_DIR := $(CURDIR_UNIX)/artifacts/bin
 
 quality-gate: check-architecture
 
-release-check: quality-gate test-benchmark-schema test-native-inference
+release-check: quality-gate test-benchmark-schema test-native-inference test-model-formats
 	@test -f benchmarks/result.schema.json
 	@echo "Release checks passed."
 
@@ -17,6 +17,9 @@ build-command-contracts:
 	@$(S_SEED_COMPILER) src/serving/api/contracts.s '$(COMMAND_IR_DIR)/serving_api.ir'
 	@$(S_SEED_COMPILER) backends/api/inference_backend.s '$(COMMAND_IR_DIR)/inference_backend_api.ir'
 	@$(S_SEED_COMPILER) backends/cpu/reference_inference.s '$(COMMAND_IR_DIR)/cpu_reference_inference.ir'
+	@$(S_SEED_COMPILER) src/models/formats/safetensors_embedding.s '$(COMMAND_IR_DIR)/safetensors_embedding.ir'
+	@$(S_SEED_COMPILER) src/inference/tokenizer/byte_tokenizer.s '$(COMMAND_IR_DIR)/byte_tokenizer.ir'
+	@$(S_SEED_COMPILER) backends/cpu/embedding_prefill.s '$(COMMAND_IR_DIR)/embedding_prefill.ir'
 	@$(S_SEED_COMPILER) src/inference/scheduler/native_scheduler.s '$(COMMAND_IR_DIR)/native_scheduler.ir'
 	@$(S_SEED_COMPILER) src/inference/executor/native_executor.s '$(COMMAND_IR_DIR)/native_executor.ir'
 	@$(S_SEED_COMPILER) src/serving/lifecycle/native_inference_service.s '$(COMMAND_IR_DIR)/native_inference_service.ir'
@@ -32,7 +35,7 @@ build-commands: build-command-contracts
 	@$(S_SEED_COMPILER) --link-ir '$(COMMAND_IR_DIR)/train.ir' '$(COMMAND_IR_DIR)/command_runtime.ir' '$(COMMAND_IR_DIR)/training_api.ir' '$(COMMAND_IR_DIR)/train_main.ir'
 	@$(S_SEED_COMPILER) --link-ir '$(COMMAND_IR_DIR)/worker.ir' '$(COMMAND_IR_DIR)/command_runtime.ir' '$(COMMAND_IR_DIR)/worker_main.ir'
 	@$(S_SEED_COMPILER) --link-ir '$(COMMAND_IR_DIR)/controller.ir' '$(COMMAND_IR_DIR)/command_runtime.ir' '$(COMMAND_IR_DIR)/controller_main.ir'
-	@$(S_SEED_COMPILER) --link-ir '$(COMMAND_IR_DIR)/serve.ir' '$(COMMAND_IR_DIR)/command_runtime.ir' '$(COMMAND_IR_DIR)/inference_api.ir' '$(COMMAND_IR_DIR)/serving_api.ir' '$(COMMAND_IR_DIR)/inference_backend_api.ir' '$(COMMAND_IR_DIR)/cpu_reference_inference.ir' '$(COMMAND_IR_DIR)/native_scheduler.ir' '$(COMMAND_IR_DIR)/native_executor.ir' '$(COMMAND_IR_DIR)/native_inference_service.ir' '$(COMMAND_IR_DIR)/serve_main.ir'
+	@$(S_SEED_COMPILER) --link-ir '$(COMMAND_IR_DIR)/serve.ir' '$(COMMAND_IR_DIR)/command_runtime.ir' '$(COMMAND_IR_DIR)/inference_api.ir' '$(COMMAND_IR_DIR)/serving_api.ir' '$(COMMAND_IR_DIR)/inference_backend_api.ir' '$(COMMAND_IR_DIR)/cpu_reference_inference.ir' '$(COMMAND_IR_DIR)/safetensors_embedding.ir' '$(COMMAND_IR_DIR)/byte_tokenizer.ir' '$(COMMAND_IR_DIR)/embedding_prefill.ir' '$(COMMAND_IR_DIR)/native_scheduler.ir' '$(COMMAND_IR_DIR)/native_executor.ir' '$(COMMAND_IR_DIR)/native_inference_service.ir' '$(COMMAND_IR_DIR)/serve_main.ir'
 	@$(S_SEED_COMPILER) --link-ir '$(COMMAND_IR_DIR)/benchmark.ir' '$(COMMAND_IR_DIR)/command_runtime.ir' '$(COMMAND_IR_DIR)/benchmark_main.ir'
 	@S_SOURCE_ROOT='$(S_REPO_ROOT)' $(S_SEED_COMPILER) --emit-bin '$(COMMAND_IR_DIR)/train.ir' '$(COMMAND_BIN_DIR)/train'
 	@S_SOURCE_ROOT='$(S_REPO_ROOT)' $(S_SEED_COMPILER) --emit-bin '$(COMMAND_IR_DIR)/worker.ir' '$(COMMAND_BIN_DIR)/worker'
@@ -48,20 +51,36 @@ test-commands: build-commands
 	done
 	@output=$$(NEURX_MODEL=reference-model NEURX_PROMPT=industrial NEURX_MAX_TOKENS=5 '$(COMMAND_BIN_DIR)/serve'); \
 		test "$$output" = "indus" || { echo "serve: unexpected native output: $$output" >&2; exit 1; }
+	@xxd -r -p tests/fixtures/embedding.safetensors.hex '$(COMMAND_IR_DIR)/embedding.safetensors'
+	@output=$$(NEURX_MODEL='$(COMMAND_IR_DIR)/embedding.safetensors' NEURX_PROMPT=AB NEURX_MAX_TOKENS=2 '$(COMMAND_BIN_DIR)/serve'); \
+		test "$$output" = "prefill:3" || { echo "serve: unexpected CPU prefill output: $$output" >&2; exit 1; }
 	@echo "Command binary runtime contract tests passed."
 
 test-native-inference:
 	@mkdir -p '$(COMMAND_IR_DIR)/native-test'
+	@xxd -r -p tests/fixtures/embedding.safetensors.hex '$(COMMAND_IR_DIR)/native-test/embedding.safetensors'
 	@$(S_SEED_COMPILER) src/inference/api/contracts.s '$(COMMAND_IR_DIR)/native-test/inference_api.ir'
 	@$(S_SEED_COMPILER) backends/api/inference_backend.s '$(COMMAND_IR_DIR)/native-test/inference_backend_api.ir'
 	@$(S_SEED_COMPILER) backends/cpu/reference_inference.s '$(COMMAND_IR_DIR)/native-test/cpu_reference_inference.ir'
+	@$(S_SEED_COMPILER) src/models/formats/safetensors_embedding.s '$(COMMAND_IR_DIR)/native-test/safetensors_embedding.ir'
+	@$(S_SEED_COMPILER) src/inference/tokenizer/byte_tokenizer.s '$(COMMAND_IR_DIR)/native-test/byte_tokenizer.ir'
+	@$(S_SEED_COMPILER) backends/cpu/embedding_prefill.s '$(COMMAND_IR_DIR)/native-test/embedding_prefill.ir'
 	@$(S_SEED_COMPILER) src/inference/scheduler/native_scheduler.s '$(COMMAND_IR_DIR)/native-test/native_scheduler.ir'
 	@$(S_SEED_COMPILER) src/inference/executor/native_executor.s '$(COMMAND_IR_DIR)/native-test/native_executor.ir'
 	@$(S_SEED_COMPILER) src/serving/lifecycle/native_inference_service.s '$(COMMAND_IR_DIR)/native-test/native_inference_service.ir'
 	@$(S_SEED_COMPILER) tests/contract/native_inference_pipeline_test.s '$(COMMAND_IR_DIR)/native-test/test_main.ir'
-	@$(S_SEED_COMPILER) --link-ir '$(COMMAND_IR_DIR)/native-test/test.ir' '$(COMMAND_IR_DIR)/native-test/inference_api.ir' '$(COMMAND_IR_DIR)/native-test/inference_backend_api.ir' '$(COMMAND_IR_DIR)/native-test/cpu_reference_inference.ir' '$(COMMAND_IR_DIR)/native-test/native_scheduler.ir' '$(COMMAND_IR_DIR)/native-test/native_executor.ir' '$(COMMAND_IR_DIR)/native-test/native_inference_service.ir' '$(COMMAND_IR_DIR)/native-test/test_main.ir'
+	@$(S_SEED_COMPILER) --link-ir '$(COMMAND_IR_DIR)/native-test/test.ir' '$(COMMAND_IR_DIR)/native-test/inference_api.ir' '$(COMMAND_IR_DIR)/native-test/inference_backend_api.ir' '$(COMMAND_IR_DIR)/native-test/cpu_reference_inference.ir' '$(COMMAND_IR_DIR)/native-test/safetensors_embedding.ir' '$(COMMAND_IR_DIR)/native-test/byte_tokenizer.ir' '$(COMMAND_IR_DIR)/native-test/embedding_prefill.ir' '$(COMMAND_IR_DIR)/native-test/native_scheduler.ir' '$(COMMAND_IR_DIR)/native-test/native_executor.ir' '$(COMMAND_IR_DIR)/native-test/native_inference_service.ir' '$(COMMAND_IR_DIR)/native-test/test_main.ir'
 	@S_SOURCE_ROOT='$(S_REPO_ROOT)' $(S_SEED_COMPILER) --emit-bin '$(COMMAND_IR_DIR)/native-test/test.ir' '$(COMMAND_IR_DIR)/native-test/test'
 	@'$(COMMAND_IR_DIR)/native-test/test'
+
+test-model-formats:
+	@mkdir -p '$(COMMAND_IR_DIR)/model-format-test'
+	@xxd -r -p tests/fixtures/embedding.safetensors.hex '$(COMMAND_IR_DIR)/model-format-test/embedding.safetensors'
+	@$(S_SEED_COMPILER) src/models/formats/safetensors_embedding.s '$(COMMAND_IR_DIR)/model-format-test/safetensors_embedding.ir'
+	@$(S_SEED_COMPILER) tests/contract/safetensors_embedding_test.s '$(COMMAND_IR_DIR)/model-format-test/test_main.ir'
+	@$(S_SEED_COMPILER) --link-ir '$(COMMAND_IR_DIR)/model-format-test/test.ir' '$(COMMAND_IR_DIR)/model-format-test/safetensors_embedding.ir' '$(COMMAND_IR_DIR)/model-format-test/test_main.ir'
+	@S_SOURCE_ROOT='$(S_REPO_ROOT)' $(S_SEED_COMPILER) --emit-bin '$(COMMAND_IR_DIR)/model-format-test/test.ir' '$(COMMAND_IR_DIR)/model-format-test/test'
+	@'$(COMMAND_IR_DIR)/model-format-test/test'
 
 # Compatibility entry points remain explicit until their implementations move
 # under cmd/. Keeping the source path here prevents duplicate command logic.
