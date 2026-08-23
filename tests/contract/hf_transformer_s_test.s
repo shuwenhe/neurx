@@ -57,10 +57,7 @@ func main() {
     if !parsed.valid || parsed.layers != 2 || parsed.head_dim != 2 { return 1 }
     safetensors_embedding embedding = load_f32_embedding("artifacts/build/commands/native-test/embedding.safetensors", "embedding.weight")
     f32_tensor_result embedding_values = read_f32_tensor(embedding)
-    []hf_layer_weights layers = []hf_layer_weights{cap: 2}
-    layers[0] = weights
-    layers[1] = weights
-    hf_model_weights model = hf_model_weights { valid: true, config: parsed, embedding: embedding, layers: layers, final_norm: ones(4), lm_head: embedding_values.values, error_code: "" }
+    hf_model_weights model = hf_model_weights { valid: true, config: parsed, embedding: embedding, input_norm: ones(8), q_proj: matrix(8, 4, 1.0, 0.0), k_proj: matrix(4, 4, 1.0, 0.0), v_proj: matrix(4, 4, 1.0, 0.0), o_proj: matrix(8, 4, 1.0, 0.0), post_norm: ones(8), gate_proj: matrix(8, 4, 1.0, 0.0), up_proj: matrix(8, 4, 1.0, 0.0), down_proj: matrix(8, 4, 1.0, 0.0), final_norm: ones(4), lm_head: embedding_values.values, error_code: "" }
     []int prompt = []int{cap: 2}
     prompt[0] = 1
     prompt[1] = 2

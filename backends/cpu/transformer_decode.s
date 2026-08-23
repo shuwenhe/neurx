@@ -237,7 +237,7 @@ func hf_argmax_logits(hf_model_weights model, []float hidden) int {
     best_token
 }
 
-func hf_forward_token(hf_model_weights model, int token_id, []hf_kv_cache caches, int position) hf_layer_result {
+func hf_forward_token(hf_model_weights model, int token_id, []float cache_keys, []float cache_values, int cache_capacity, int position) hf_layer_result {
     embedding_lookup_result embedding = lookup_f32_embedding(model.embedding, token_id)
     hf_kv_cache empty_cache = hf_kv_cache { keys: [], values: [], length: 0, capacity: 0, kv_width: 0 }
     if !embedding.ok { return hf_layer_result { ok: false, hidden: [], cache: empty_cache, error_code: embedding.error_code } }
@@ -245,28 +245,65 @@ func hf_forward_token(hf_model_weights model, int token_id, []hf_kv_cache caches
     hf_cpu_config config = hf_model_cpu_config(model)
     int layer = 0
     while layer < model.config.layers {
-        hf_layer_weights weights = model.layers[layer]
-        hf_kv_cache layer_cache = caches[layer]
+        int hidden_square = config.hidden_size * config.hidden_size
+        int kv_size = config.kv_heads * config.head_dim * config.hidden_size
+        int mlp_size = config.intermediate_size * config.hidden_size
+        hf_layer_weights weights = hf_layer_weights {
+            valid: true,
+            input_norm: hf_float_slice(model.input_norm, layer * config.hidden_size, config.hidden_size),
+            q_proj: hf_float_slice(model.q_proj, layer * hidden_square, hidden_square),
+            k_proj: hf_float_slice(model.k_proj, layer * kv_size, kv_size),
+            v_proj: hf_float_slice(model.v_proj, layer * kv_size, kv_size),
+            o_proj: hf_float_slice(model.o_proj, layer * hidden_square, hidden_square),
+            post_norm: hf_float_slice(model.post_norm, layer * config.hidden_size, config.hidden_size),
+            gate_proj: hf_float_slice(model.gate_proj, layer * mlp_size, mlp_size),
+            up_proj: hf_float_slice(model.up_proj, layer * mlp_size, mlp_size),
+            down_proj: hf_float_slice(model.down_proj, layer * mlp_size, mlp_size),
+            error_code: "",
+        }
+        int kv_width = config.kv_heads * config.head_dim
+        int cache_size = cache_capacity * kv_width
+        hf_kv_cache layer_cache = hf_kv_cache {
+            keys: hf_float_slice(cache_keys, layer * cache_size, cache_size),
+            values: hf_float_slice(cache_values, layer * cache_size, cache_size),
+            length: position,
+            capacity: cache_capacity,
+            kv_width: kv_width,
+        }
         hf_layer_result result = hf_cpu_layer(config, weights, hidden, layer_cache, position)
         if !result.ok { return result }
         hidden = result.hidden
-        caches[layer] = result.cache
+        hf_float_copy(cache_keys, layer * cache_size, result.cache.keys)
+        hf_float_copy(cache_values, layer * cache_size, result.cache.values)
         layer = layer + 1
     }
     hf_layer_result { ok: true, hidden: hidden, cache: empty_cache, error_code: "" }
 }
 
+func hf_float_slice([]float values, int offset, int count) []float {
+    if offset < 0 || count < 0 || offset + count > len(values) { return []float{} }
+    []float output = []float{cap: count}
+    int i = 0
+    while i < count { output[i] = values[offset + i]; i = i + 1 }
+    output
+}
+
+func hf_float_copy([]float target, int offset, []float source) {
+    int i = 0
+    while i < len(source) { target[offset + i] = source[i]; i = i + 1 }
+}
+
 func hf_generate(hf_model_weights model, []int prompt_tokens, int maximum_new_tokens) hf_generation_result {
     if !model.valid || len(prompt_tokens) == 0 || maximum_new_tokens <= 0 { return hf_generation_result { ok: false, token_ids: [], error_code: "invalid_generation_input" } }
     int capacity = len(prompt_tokens) + maximum_new_tokens
-    []hf_kv_cache caches = []hf_kv_cache{cap: model.config.layers}
-    int layer = 0
-    while layer < model.config.layers { caches[layer] = new_hf_kv_cache(capacity, model.config.kv_heads * model.config.head_dim); layer = layer + 1 }
+    int cache_elements = model.config.layers * capacity * model.config.kv_heads * model.config.head_dim
+    []float cache_keys = []float{cap: cache_elements}
+    []float cache_values = []float{cap: cache_elements}
     hf_kv_cache empty_cache = hf_kv_cache { keys: [], values: [], length: 0, capacity: 0, kv_width: 0 }
     hf_layer_result state = hf_layer_result { ok: false, hidden: [], cache: empty_cache, error_code: "empty_prefill" }
     int position = 0
     while position < len(prompt_tokens) {
-        state = hf_forward_token(model, prompt_tokens[position], caches, position)
+        state = hf_forward_token(model, prompt_tokens[position], cache_keys, cache_values, capacity, position)
         if !state.ok { return hf_generation_result { ok: false, token_ids: [], error_code: state.error_code } }
         position = position + 1
     }
@@ -278,7 +315,7 @@ func hf_generate(hf_model_weights model, []int prompt_tokens, int maximum_new_to
         generated[step] = next_token
         step = step + 1
         if step < maximum_new_tokens {
-            state = hf_forward_token(model, next_token, caches, position)
+            state = hf_forward_token(model, next_token, cache_keys, cache_values, capacity, position)
             if !state.ok { return hf_generation_result { ok: false, token_ids: [], error_code: state.error_code } }
             position = position + 1
         }

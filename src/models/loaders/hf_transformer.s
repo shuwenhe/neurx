@@ -20,7 +20,15 @@ struct hf_model_weights {
     bool valid
     hf_model_config config
     safetensors_embedding embedding
-    []hf_layer_weights layers
+    []float input_norm
+    []float q_proj
+    []float k_proj
+    []float v_proj
+    []float o_proj
+    []float post_norm
+    []float gate_proj
+    []float up_proj
+    []float down_proj
     []float final_norm
     []float lm_head
     string error_code
@@ -62,7 +70,12 @@ func load_hf_layer(string path, int layer) hf_layer_weights {
 
 func invalid_hf_model(hf_model_config config, string code) hf_model_weights {
     safetensors_embedding empty = safetensors_embedding { valid: false, path: "", rows: 0, columns: 0, data_offset: 0, data_bytes: 0, error_code: code }
-    hf_model_weights { valid: false, config: config, embedding: empty, layers: [], final_norm: [], lm_head: [], error_code: code }
+    hf_model_weights { valid: false, config: config, embedding: empty, input_norm: [], q_proj: [], k_proj: [], v_proj: [], o_proj: [], post_norm: [], gate_proj: [], up_proj: [], down_proj: [], final_norm: [], lm_head: [], error_code: code }
+}
+
+func hf_copy_layer([]float target, int offset, []float source) {
+    int i = 0
+    while i < len(source) { target[offset + i] = source[i]; i = i + 1 }
 }
 
 func load_hf_model(string model_dir) hf_model_weights {
@@ -71,11 +84,31 @@ func load_hf_model(string model_dir) hf_model_weights {
     string path = model_dir + "/model.safetensors"
     safetensors_embedding embedding = load_f32_tensor(path, "model.embed_tokens.weight")
     if !embedding.valid { return invalid_hf_model(config, "embedding_" + embedding.error_code) }
-    []hf_layer_weights layers = []hf_layer_weights{cap: config.layers}
+    int hidden_square = config.hidden_size * config.hidden_size
+    int kv_size = config.kv_heads * config.head_dim * config.hidden_size
+    int mlp_size = config.intermediate_size * config.hidden_size
+    []float input_norm = []float{cap: config.layers * config.hidden_size}
+    []float q_proj = []float{cap: config.layers * hidden_square}
+    []float k_proj = []float{cap: config.layers * kv_size}
+    []float v_proj = []float{cap: config.layers * kv_size}
+    []float o_proj = []float{cap: config.layers * hidden_square}
+    []float post_norm = []float{cap: config.layers * config.hidden_size}
+    []float gate_proj = []float{cap: config.layers * mlp_size}
+    []float up_proj = []float{cap: config.layers * mlp_size}
+    []float down_proj = []float{cap: config.layers * mlp_size}
     int layer = 0
     while layer < config.layers {
-        layers[layer] = load_hf_layer(path, layer)
-        if !layers[layer].valid { return invalid_hf_model(config, "layer_" + hf_int_string(layer) + "_" + layers[layer].error_code) }
+        hf_layer_weights weights = load_hf_layer(path, layer)
+        if !weights.valid { return invalid_hf_model(config, "layer_" + hf_int_string(layer) + "_" + weights.error_code) }
+        hf_copy_layer(input_norm, layer * config.hidden_size, weights.input_norm)
+        hf_copy_layer(q_proj, layer * hidden_square, weights.q_proj)
+        hf_copy_layer(k_proj, layer * kv_size, weights.k_proj)
+        hf_copy_layer(v_proj, layer * kv_size, weights.v_proj)
+        hf_copy_layer(o_proj, layer * hidden_square, weights.o_proj)
+        hf_copy_layer(post_norm, layer * config.hidden_size, weights.post_norm)
+        hf_copy_layer(gate_proj, layer * mlp_size, weights.gate_proj)
+        hf_copy_layer(up_proj, layer * mlp_size, weights.up_proj)
+        hf_copy_layer(down_proj, layer * mlp_size, weights.down_proj)
         layer = layer + 1
     }
     f32_tensor_result final_norm = hf_load_values(path, "model.norm.weight")
@@ -85,5 +118,5 @@ func load_hf_model(string model_dir) hf_model_weights {
         lm_head = read_f32_tensor(embedding)
         if !lm_head.ok { return invalid_hf_model(config, "missing_lm_head") }
     }
-    hf_model_weights { valid: true, config: config, embedding: embedding, layers: layers, final_norm: final_norm.values, lm_head: lm_head.values, error_code: "" }
+    hf_model_weights { valid: true, config: config, embedding: embedding, input_norm: input_norm, q_proj: q_proj, k_proj: k_proj, v_proj: v_proj, o_proj: o_proj, post_norm: post_norm, gate_proj: gate_proj, up_proj: up_proj, down_proj: down_proj, final_norm: final_norm.values, lm_head: lm_head.values, error_code: "" }
 }
