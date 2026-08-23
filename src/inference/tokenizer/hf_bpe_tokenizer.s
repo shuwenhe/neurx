@@ -1,5 +1,5 @@
 package neurx.inference.tokenizer.hf_bpe_tokenizer
-use neurx.core.unicode.normalization.{unicode_database, load_unicode_database, unicode_nfc, unicode_nfkc}
+use neurx.core.unicode.normalization.{unicode_database, empty_unicode_database, load_unicode_database, unicode_nfc, unicode_nfkc}
 extern "intrinsic" func __host_read_binary_file(string path) []int
 
 struct hf_bpe_tokenizer {
@@ -22,6 +22,7 @@ struct hf_bpe_tokenizer {
     bool bert_strip_accents
     bool byte_level_trim_offsets
     string unicode_normalizer
+    unicode_database unicode_db
     string metaspace_replacement
     int bos_id
     int eos_id
@@ -235,8 +236,7 @@ func bpe_latin_accent(int lead, int tail) int {
 func bpe_normalize(hf_bpe_tokenizer tokenizer, string text) string {
     string normalized = text
     if tokenizer.unicode_normalizer != "" {
-        unicode_database database = load_unicode_database("configs/unicode")
-        if tokenizer.unicode_normalizer == "NFKC" { normalized = unicode_nfkc(database, normalized) } else { normalized = unicode_nfc(database, normalized) }
+        if tokenizer.unicode_normalizer == "NFKC" { normalized = unicode_nfkc(tokenizer.unicode_db, normalized) } else { normalized = unicode_nfc(tokenizer.unicode_db, normalized) }
     }
     int start = 0
     int end = len(normalized)
@@ -302,7 +302,7 @@ func bpe_id_token(hf_bpe_tokenizer tokenizer, int id) string {
 
 func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
     []int bytes = __host_read_binary_file(model_dir + "/tokenizer.json")
-    if len(bytes) == 0 { return hf_bpe_tokenizer { valid: false, vocab_tokens: [], vocab_ids: [], vocab_count: 0, merge_left: [], merge_right: [], merge_count: 0, added_tokens: [], added_ids: [], added_count: 0, byte_level: false, bert_pre_tokenizer: false, metaspace_pre_tokenizer: false, normalizer_lowercase: false, normalizer_strip: false, bert_clean_text: false, bert_strip_accents: false, byte_level_trim_offsets: false, unicode_normalizer: "", metaspace_replacement: "", bos_id: -1, eos_id: -1, pad_id: -1, unknown_id: 0, error_code: "tokenizer_not_found" } }
+    if len(bytes) == 0 { return hf_bpe_tokenizer { valid: false, vocab_tokens: [], vocab_ids: [], vocab_count: 0, merge_left: [], merge_right: [], merge_count: 0, added_tokens: [], added_ids: [], added_count: 0, byte_level: false, bert_pre_tokenizer: false, metaspace_pre_tokenizer: false, normalizer_lowercase: false, normalizer_strip: false, bert_clean_text: false, bert_strip_accents: false, byte_level_trim_offsets: false, unicode_normalizer: "", unicode_db: empty_unicode_database(), metaspace_replacement: "", bos_id: -1, eos_id: -1, pad_id: -1, unknown_id: 0, error_code: "tokenizer_not_found" } }
     string json = bpe_bytes_string(bytes)
     []string vocab_tokens = []string{cap: 200000}
     []int vocab_ids = []int{cap: 200000}
@@ -373,7 +373,9 @@ func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
     }
     string unicode_normalizer = ""
     if bpe_find(json, "\"NFKC\"", 0) >= 0 { unicode_normalizer = "NFKC" } else if bpe_find(json, "\"NFC\"", 0) >= 0 { unicode_normalizer = "NFC" }
-    hf_bpe_tokenizer tokenizer = hf_bpe_tokenizer { valid: vocab_count > 0, vocab_tokens: vocab_tokens, vocab_ids: vocab_ids, vocab_count: vocab_count, merge_left: merge_left, merge_right: merge_right, merge_count: merge_count, added_tokens: added_tokens, added_ids: added_ids, added_count: added_count, byte_level: bpe_find(json, "\"ByteLevel\"", 0) >= 0, bert_pre_tokenizer: bpe_find(json, "\"BertPreTokenizer\"", 0) >= 0, metaspace_pre_tokenizer: bpe_find(json, "\"Metaspace\"", 0) >= 0, normalizer_lowercase: bpe_find(json, "\"Lowercase\"", 0) >= 0 || bpe_json_true(json, "\"lowercase\"", 0) || bpe_json_true(json, "\"lower_case\"", 0), normalizer_strip: bpe_find(json, "\"Strip\"", 0) >= 0, bert_clean_text: bpe_json_true(json, "\"clean_text\"", 0), bert_strip_accents: bpe_json_true(json, "\"strip_accents\"", 0), byte_level_trim_offsets: bpe_json_true(json, "\"trim_offsets\"", 0), unicode_normalizer: unicode_normalizer, metaspace_replacement: metaspace_replacement, bos_id: -1, eos_id: -1, pad_id: -1, unknown_id: 0, error_code: "" }
+    unicode_database unicode_db = empty_unicode_database()
+    if unicode_normalizer != "" { unicode_db = load_unicode_database("configs/unicode") }
+    hf_bpe_tokenizer tokenizer = hf_bpe_tokenizer { valid: vocab_count > 0 && (unicode_normalizer == "" || unicode_db.valid), vocab_tokens: vocab_tokens, vocab_ids: vocab_ids, vocab_count: vocab_count, merge_left: merge_left, merge_right: merge_right, merge_count: merge_count, added_tokens: added_tokens, added_ids: added_ids, added_count: added_count, byte_level: bpe_find(json, "\"ByteLevel\"", 0) >= 0, bert_pre_tokenizer: bpe_find(json, "\"BertPreTokenizer\"", 0) >= 0, metaspace_pre_tokenizer: bpe_find(json, "\"Metaspace\"", 0) >= 0, normalizer_lowercase: bpe_find(json, "\"Lowercase\"", 0) >= 0 || bpe_json_true(json, "\"lowercase\"", 0) || bpe_json_true(json, "\"lower_case\"", 0), normalizer_strip: bpe_find(json, "\"Strip\"", 0) >= 0, bert_clean_text: bpe_json_true(json, "\"clean_text\"", 0), bert_strip_accents: bpe_json_true(json, "\"strip_accents\"", 0), byte_level_trim_offsets: bpe_json_true(json, "\"trim_offsets\"", 0), unicode_normalizer: unicode_normalizer, unicode_db: unicode_db, metaspace_replacement: metaspace_replacement, bos_id: -1, eos_id: -1, pad_id: -1, unknown_id: 0, error_code: "" }
     tokenizer.unknown_id = bpe_vocab_id(tokenizer, "<unk>")
     tokenizer.bos_id = bpe_first_token_id(tokenizer, "<s>", "[CLS]", "<|begin_of_text|>")
     tokenizer.eos_id = bpe_first_token_id(tokenizer, "</s>", "[SEP]", "<|endoftext|>")
