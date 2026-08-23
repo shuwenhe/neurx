@@ -1,5 +1,31 @@
 package neurx.backends.cpu.transformer_decode
 use neurx.models.formats.safetensors_embedding.{safetensors_embedding, embedding_lookup_result, lookup_f32_embedding}
+use neurx.models.loaders.hf_transformer.{hf_layer_weights}
+
+struct hf_cpu_config {
+    int hidden_size
+    int intermediate_size
+    int attention_heads
+    int kv_heads
+    int head_dim
+    float rms_epsilon
+    float rope_theta
+}
+
+struct hf_kv_cache {
+    []float keys
+    []float values
+    int length
+    int capacity
+    int kv_width
+}
+
+struct hf_layer_result {
+    bool ok
+    []float hidden
+    hf_kv_cache cache
+    string error_code
+}
 
 struct cpu_transformer_result {
     bool ok
@@ -48,6 +74,130 @@ func cpu_rms_norm([]float input) []float {
     i = 0
     while i < len(input) { output[i] = input[i] * scale; i = i + 1 }
     output
+}
+
+func hf_rms_norm([]float input, []float weight, float epsilon) []float {
+    if len(input) != len(weight) { return []float{} }
+    []float output = []float{cap: len(input)}
+    float squares = 0.0
+    int i = 0
+    while i < len(input) { squares = squares + input[i] * input[i]; i = i + 1 }
+    float scale = 1.0 / cpu_sqrt(squares / (len(input) * 1.0) + epsilon)
+    i = 0
+    while i < len(input) { output[i] = input[i] * scale * weight[i]; i = i + 1 }
+    output
+}
+
+func hf_matvec([]float weight, int rows, int columns, []float input) []float {
+    if len(weight) != rows * columns || len(input) != columns { return []float{} }
+    []float output = []float{cap: rows}
+    int row = 0
+    while row < rows {
+        float value = 0.0
+        int column = 0
+        while column < columns { value = value + weight[row * columns + column] * input[column]; column = column + 1 }
+        output[row] = value
+        row = row + 1
+    }
+    output
+}
+
+func hf_rope([]float input, int heads, int head_dim, int position, float theta) []float {
+    []float output = []float{cap: len(input)}
+    int i = 0
+    while i < len(input) { output[i] = input[i]; i = i + 1 }
+    int head = 0
+    while head < heads {
+        int pair = 0
+        while pair + 1 < head_dim {
+            float frequency = 1.0
+            int power = pair
+            while power > 0 { frequency = frequency / cpu_sqrt(theta); power = power - 1 }
+            float angle = position * 1.0 * frequency
+            float angle2 = angle * angle
+            float cosine = 1.0 - angle2 / 2.0 + angle2 * angle2 / 24.0
+            float sine = angle - angle * angle2 / 6.0 + angle * angle2 * angle2 / 120.0
+            int offset = head * head_dim + pair
+            float left = output[offset]
+            float right = output[offset + 1]
+            output[offset] = left * cosine - right * sine
+            output[offset + 1] = left * sine + right * cosine
+            pair = pair + 2
+        }
+        head = head + 1
+    }
+    output
+}
+
+func new_hf_kv_cache(int capacity, int kv_width) hf_kv_cache {
+    hf_kv_cache { keys: []float{cap: capacity * kv_width}, values: []float{cap: capacity * kv_width}, length: 0, capacity: capacity, kv_width: kv_width }
+}
+
+func hf_silu(float value) float {
+    value / (1.0 + cpu_exp(-value))
+}
+
+func hf_cpu_layer(hf_cpu_config config, hf_layer_weights weights, []float input, hf_kv_cache cache, int position) hf_layer_result {
+    if !weights.valid || len(input) != config.hidden_size || cache.length >= cache.capacity {
+        return hf_layer_result { ok: false, hidden: [], cache: cache, error_code: "invalid_hf_layer_input" }
+    }
+    []float normalized = hf_rms_norm(input, weights.input_norm, config.rms_epsilon)
+    []float query = hf_matvec(weights.q_proj, config.attention_heads * config.head_dim, config.hidden_size, normalized)
+    []float key = hf_matvec(weights.k_proj, config.kv_heads * config.head_dim, config.hidden_size, normalized)
+    []float value = hf_matvec(weights.v_proj, config.kv_heads * config.head_dim, config.hidden_size, normalized)
+    if len(query) == 0 || len(key) == 0 || len(value) == 0 { return hf_layer_result { ok: false, hidden: [], cache: cache, error_code: "projection_shape_mismatch" } }
+    query = hf_rope(query, config.attention_heads, config.head_dim, position, config.rope_theta)
+    key = hf_rope(key, config.kv_heads, config.head_dim, position, config.rope_theta)
+    int kv_width = config.kv_heads * config.head_dim
+    int i = 0
+    while i < kv_width { cache.keys[cache.length * kv_width + i] = key[i]; cache.values[cache.length * kv_width + i] = value[i]; i = i + 1 }
+    cache.length = cache.length + 1
+    []float attended = []float{cap: config.attention_heads * config.head_dim}
+    int group_size = config.attention_heads / config.kv_heads
+    int head = 0
+    while head < config.attention_heads {
+        int kv_head = head / group_size
+        []float scores = []float{cap: cache.length}
+        float maximum = -1000000.0
+        int token = 0
+        while token < cache.length {
+            float score = 0.0
+            int dim = 0
+            while dim < config.head_dim {
+                score = score + query[head * config.head_dim + dim] * cache.keys[token * kv_width + kv_head * config.head_dim + dim]
+                dim = dim + 1
+            }
+            score = score / cpu_sqrt(config.head_dim * 1.0)
+            scores[token] = score
+            if score > maximum { maximum = score }
+            token = token + 1
+        }
+        float denominator = 0.0
+        token = 0
+        while token < cache.length { scores[token] = cpu_exp(scores[token] - maximum); denominator = denominator + scores[token]; token = token + 1 }
+        int dim = 0
+        while dim < config.head_dim {
+            float sum = 0.0
+            token = 0
+            while token < cache.length { sum = sum + scores[token] / denominator * cache.values[token * kv_width + kv_head * config.head_dim + dim]; token = token + 1 }
+            attended[head * config.head_dim + dim] = sum
+            dim = dim + 1
+        }
+        head = head + 1
+    }
+    []float projected = hf_matvec(weights.o_proj, config.hidden_size, config.attention_heads * config.head_dim, attended)
+    []float residual = []float{cap: config.hidden_size}
+    i = 0
+    while i < config.hidden_size { residual[i] = input[i] + projected[i]; i = i + 1 }
+    normalized = hf_rms_norm(residual, weights.post_norm, config.rms_epsilon)
+    []float gate = hf_matvec(weights.gate_proj, config.intermediate_size, config.hidden_size, normalized)
+    []float up = hf_matvec(weights.up_proj, config.intermediate_size, config.hidden_size, normalized)
+    i = 0
+    while i < config.intermediate_size { gate[i] = hf_silu(gate[i]) * up[i]; i = i + 1 }
+    []float down = hf_matvec(weights.down_proj, config.hidden_size, config.intermediate_size, gate)
+    i = 0
+    while i < config.hidden_size { residual[i] = residual[i] + down[i]; i = i + 1 }
+    hf_layer_result { ok: true, hidden: residual, cache: cache, error_code: "" }
 }
 
 func cpu_reference_mlp([]float input) []float {
