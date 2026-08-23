@@ -42,6 +42,14 @@ struct hf_bpe_decode_result {
     string error_code
 }
 
+struct hf_bpe_offset_result {
+    bool ok
+    []int token_ids
+    []int start_offsets
+    []int end_offsets
+    string error_code
+}
+
 struct bpe_string_result {
     string value
     int next
@@ -489,6 +497,66 @@ func hf_bpe_encode(hf_bpe_tokenizer tokenizer, string text, int maximum_tokens) 
     int i = 0
     while i < output_count { result_ids[i] = ids[i]; i = i + 1 }
     hf_bpe_result { ok: true, token_ids: result_ids, error_code: "" }
+}
+
+func hf_bpe_encode_bytelevel_offsets(hf_bpe_tokenizer tokenizer, string text, int maximum_tokens) hf_bpe_offset_result {
+    if !tokenizer.valid || !tokenizer.byte_level || text == "" || maximum_tokens <= 0 { return hf_bpe_offset_result { ok: false, token_ids: [], start_offsets: [], end_offsets: [], error_code: "invalid_bytelevel_offset_input" } }
+    int exact_special = 0
+    while exact_special < tokenizer.added_count {
+        if text == tokenizer.added_tokens[exact_special] {
+            []int special_ids = []int{cap: 1}
+            []int special_starts = []int{cap: 1}
+            []int special_ends = []int{cap: 1}
+            special_ids[0] = tokenizer.added_ids[exact_special]
+            special_starts[0] = 0
+            special_ends[0] = len(text)
+            return hf_bpe_offset_result { ok: true, token_ids: special_ids, start_offsets: special_starts, end_offsets: special_ends, error_code: "" }
+        }
+        exact_special = exact_special + 1
+    }
+    string normalized = bpe_normalize(tokenizer, text)
+    if normalized != text { return hf_bpe_offset_result { ok: false, token_ids: [], start_offsets: [], end_offsets: [], error_code: "normalized_offset_mapping_required" } }
+    []string symbols = []string{cap: len(text) + 1}
+    []int starts = []int{cap: len(text) + 1}
+    []int ends = []int{cap: len(text) + 1}
+    int count = len(text)
+    int i = 0
+    while i < count { symbols[i] = bpe_byte_symbol(text[i]); starts[i] = i; ends[i] = i + 1; i = i + 1 }
+    while count > 1 {
+        int best = -1
+        int best_rank = 2147483647
+        i = 0
+        while i + 1 < count {
+            int rank = bpe_merge_rank(tokenizer, symbols[i], symbols[i + 1])
+            if rank >= 0 && rank < best_rank { best = i; best_rank = rank }
+            i = i + 1
+        }
+        if best < 0 { break }
+        symbols[best] = symbols[best] + symbols[best + 1]
+        ends[best] = ends[best + 1]
+        i = best + 1
+        while i + 1 < count { symbols[i] = symbols[i + 1]; starts[i] = starts[i + 1]; ends[i] = ends[i + 1]; i = i + 1 }
+        count = count - 1
+    }
+    int output_count = count
+    if output_count > maximum_tokens { output_count = maximum_tokens }
+    []int ids = []int{cap: output_count}
+    []int output_starts = []int{cap: output_count}
+    []int output_ends = []int{cap: output_count}
+    i = 0
+    while i < output_count {
+        ids[i] = bpe_vocab_id(tokenizer, symbols[i])
+        int start = starts[i]
+        int end = ends[i]
+        if tokenizer.byte_level_trim_offsets {
+            while start < end && bpe_is_space(text[start]) { start = start + 1 }
+            while end > start && bpe_is_space(text[end - 1]) { end = end - 1 }
+        }
+        output_starts[i] = start
+        output_ends[i] = end
+        i = i + 1
+    }
+    hf_bpe_offset_result { ok: true, token_ids: ids, start_offsets: output_starts, end_offsets: output_ends, error_code: "" }
 }
 
 func bpe_decode_byte_symbol(string symbol) int {

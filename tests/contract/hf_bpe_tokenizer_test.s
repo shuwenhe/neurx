@@ -1,5 +1,5 @@
 package main
-use neurx.inference.tokenizer.hf_bpe_tokenizer.{hf_bpe_tokenizer, hf_bpe_result, hf_bpe_decode_result, load_hf_bpe_tokenizer, hf_bpe_encode, hf_bpe_decode}
+use neurx.inference.tokenizer.hf_bpe_tokenizer.{hf_bpe_tokenizer, hf_bpe_result, hf_bpe_decode_result, hf_bpe_offset_result, load_hf_bpe_tokenizer, hf_bpe_encode, hf_bpe_decode, hf_bpe_encode_bytelevel_offsets}
 use neurx.models.formats.safetensors_embedding.{st_f16_le, st_bf16_le}
 
 func main() {
@@ -9,6 +9,8 @@ func main() {
     if !result.ok || len(result.token_ids) != 1 || result.token_ids[0] != 3 { return 1 }
     result = hf_bpe_encode(tokenizer, " H", 8)
     if !result.ok || len(result.token_ids) != 1 || result.token_ids[0] != 5 { return 1 }
+    hf_bpe_offset_result offsets = hf_bpe_encode_bytelevel_offsets(tokenizer, " H", 8)
+    if !offsets.ok || len(offsets.token_ids) != 1 || offsets.token_ids[0] != 5 || offsets.start_offsets[0] != 1 || offsets.end_offsets[0] != 2 { return 1 }
     result = hf_bpe_encode(tokenizer, "<s>", 8)
     if !result.ok || len(result.token_ids) != 1 || result.token_ids[0] != 6 { return 1 }
     result = hf_bpe_encode(tokenizer, "Hi<s> H", 8)
