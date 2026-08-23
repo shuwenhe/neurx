@@ -17,7 +17,14 @@ struct hf_bpe_tokenizer {
     bool metaspace_pre_tokenizer
     bool normalizer_lowercase
     bool normalizer_strip
+    bool bert_clean_text
+    bool bert_strip_accents
+    bool byte_level_trim_offsets
+    string unicode_normalizer
     string metaspace_replacement
+    int bos_id
+    int eos_id
+    int pad_id
     int unknown_id
     string error_code
 }
@@ -189,6 +196,27 @@ func bpe_is_bert_punctuation(int byte) bool {
     byte >= 123 && byte <= 126
 }
 
+func bpe_latin_accent(int lead, int tail) int {
+    if lead != 195 { return -1 }
+    if tail >= 128 && tail <= 133 { return 65 }
+    if tail == 135 { return 67 }
+    if tail >= 136 && tail <= 139 { return 69 }
+    if tail >= 140 && tail <= 143 { return 73 }
+    if tail == 145 { return 78 }
+    if tail >= 146 && tail <= 150 { return 79 }
+    if tail >= 153 && tail <= 156 { return 85 }
+    if tail == 157 { return 89 }
+    if tail >= 160 && tail <= 165 { return 97 }
+    if tail == 167 { return 99 }
+    if tail >= 168 && tail <= 171 { return 101 }
+    if tail >= 172 && tail <= 175 { return 105 }
+    if tail == 177 { return 110 }
+    if tail >= 178 && tail <= 182 { return 111 }
+    if tail >= 185 && tail <= 188 { return 117 }
+    if tail == 189 || tail == 191 { return 121 }
+    -1
+}
+
 func bpe_normalize(hf_bpe_tokenizer tokenizer, string text) string {
     int start = 0
     int end = len(text)
@@ -200,6 +228,14 @@ func bpe_normalize(hf_bpe_tokenizer tokenizer, string text) string {
     int i = start
     while i < end {
         int byte = text[i]
+        if tokenizer.unicode_normalizer == "NFKC" && i + 1 < end && byte == 194 && text[i + 1] == 160 { byte = 32; i = i + 1 }
+        else if tokenizer.unicode_normalizer == "NFKC" && i + 2 < end && byte == 239 && text[i + 1] == 188 && text[i + 2] >= 129 { byte = text[i + 2] - 96; i = i + 2 }
+        else if tokenizer.unicode_normalizer == "NFKC" && i + 2 < end && byte == 239 && text[i + 1] == 189 && text[i + 2] >= 128 && text[i + 2] <= 158 { byte = text[i + 2] - 32; i = i + 2 }
+        else if tokenizer.bert_strip_accents && i + 1 < end {
+            int accent = bpe_latin_accent(byte, text[i + 1])
+            if accent >= 0 { byte = accent; i = i + 1 }
+        }
+        if tokenizer.bert_clean_text && (byte == 0 || byte == 127 || byte < 32) { byte = 32 }
         if tokenizer.normalizer_lowercase && byte >= 65 && byte <= 90 { byte = byte + 32 }
         output = output + string(byte)
         i = i + 1
@@ -214,6 +250,23 @@ func bpe_added_id(hf_bpe_tokenizer tokenizer, string token) int {
         i = i + 1
     }
     -1
+}
+
+func bpe_first_token_id(hf_bpe_tokenizer tokenizer, string first, string second, string third) int {
+    int id = bpe_added_id(tokenizer, first)
+    if id < 0 { id = bpe_vocab_id(tokenizer, first) }
+    if id == tokenizer.unknown_id && first != "<unk>" { id = -1 }
+    if id < 0 {
+        id = bpe_added_id(tokenizer, second)
+        if id < 0 { id = bpe_vocab_id(tokenizer, second) }
+        if id == tokenizer.unknown_id && second != "<unk>" { id = -1 }
+    }
+    if id < 0 {
+        id = bpe_added_id(tokenizer, third)
+        if id < 0 { id = bpe_vocab_id(tokenizer, third) }
+        if id == tokenizer.unknown_id && third != "<unk>" { id = -1 }
+    }
+    id
 }
 
 func bpe_id_token(hf_bpe_tokenizer tokenizer, int id) string {
@@ -232,7 +285,7 @@ func bpe_id_token(hf_bpe_tokenizer tokenizer, int id) string {
 
 func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
     []int bytes = __host_read_binary_file(model_dir + "/tokenizer.json")
-    if len(bytes) == 0 { return hf_bpe_tokenizer { valid: false, vocab_tokens: [], vocab_ids: [], vocab_count: 0, merge_left: [], merge_right: [], merge_count: 0, added_tokens: [], added_ids: [], added_count: 0, byte_level: false, bert_pre_tokenizer: false, metaspace_pre_tokenizer: false, normalizer_lowercase: false, normalizer_strip: false, metaspace_replacement: "", unknown_id: 0, error_code: "tokenizer_not_found" } }
+    if len(bytes) == 0 { return hf_bpe_tokenizer { valid: false, vocab_tokens: [], vocab_ids: [], vocab_count: 0, merge_left: [], merge_right: [], merge_count: 0, added_tokens: [], added_ids: [], added_count: 0, byte_level: false, bert_pre_tokenizer: false, metaspace_pre_tokenizer: false, normalizer_lowercase: false, normalizer_strip: false, bert_clean_text: false, bert_strip_accents: false, byte_level_trim_offsets: false, unicode_normalizer: "", metaspace_replacement: "", bos_id: -1, eos_id: -1, pad_id: -1, unknown_id: 0, error_code: "tokenizer_not_found" } }
     string json = bpe_bytes_string(bytes)
     []string vocab_tokens = []string{cap: 200000}
     []int vocab_ids = []int{cap: 200000}
@@ -301,8 +354,14 @@ func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
         bpe_string_result replacement = bpe_json_string(json, replacement_quote)
         if replacement.value != "" { metaspace_replacement = replacement.value }
     }
-    hf_bpe_tokenizer tokenizer = hf_bpe_tokenizer { valid: vocab_count > 0, vocab_tokens: vocab_tokens, vocab_ids: vocab_ids, vocab_count: vocab_count, merge_left: merge_left, merge_right: merge_right, merge_count: merge_count, added_tokens: added_tokens, added_ids: added_ids, added_count: added_count, byte_level: bpe_find(json, "\"ByteLevel\"", 0) >= 0, bert_pre_tokenizer: bpe_find(json, "\"BertPreTokenizer\"", 0) >= 0, metaspace_pre_tokenizer: bpe_find(json, "\"Metaspace\"", 0) >= 0, normalizer_lowercase: bpe_find(json, "\"Lowercase\"", 0) >= 0 || bpe_json_true(json, "\"lowercase\"", 0), normalizer_strip: bpe_find(json, "\"Strip\"", 0) >= 0, metaspace_replacement: metaspace_replacement, unknown_id: 0, error_code: "" }
+    string unicode_normalizer = ""
+    if bpe_find(json, "\"NFKC\"", 0) >= 0 { unicode_normalizer = "NFKC" } else if bpe_find(json, "\"NFC\"", 0) >= 0 { unicode_normalizer = "NFC" }
+    hf_bpe_tokenizer tokenizer = hf_bpe_tokenizer { valid: vocab_count > 0, vocab_tokens: vocab_tokens, vocab_ids: vocab_ids, vocab_count: vocab_count, merge_left: merge_left, merge_right: merge_right, merge_count: merge_count, added_tokens: added_tokens, added_ids: added_ids, added_count: added_count, byte_level: bpe_find(json, "\"ByteLevel\"", 0) >= 0, bert_pre_tokenizer: bpe_find(json, "\"BertPreTokenizer\"", 0) >= 0, metaspace_pre_tokenizer: bpe_find(json, "\"Metaspace\"", 0) >= 0, normalizer_lowercase: bpe_find(json, "\"Lowercase\"", 0) >= 0 || bpe_json_true(json, "\"lowercase\"", 0) || bpe_json_true(json, "\"lower_case\"", 0), normalizer_strip: bpe_find(json, "\"Strip\"", 0) >= 0, bert_clean_text: bpe_json_true(json, "\"clean_text\"", 0), bert_strip_accents: bpe_json_true(json, "\"strip_accents\"", 0), byte_level_trim_offsets: bpe_json_true(json, "\"trim_offsets\"", 0), unicode_normalizer: unicode_normalizer, metaspace_replacement: metaspace_replacement, bos_id: -1, eos_id: -1, pad_id: -1, unknown_id: 0, error_code: "" }
     tokenizer.unknown_id = bpe_vocab_id(tokenizer, "<unk>")
+    tokenizer.bos_id = bpe_first_token_id(tokenizer, "<s>", "[CLS]", "<|begin_of_text|>")
+    tokenizer.eos_id = bpe_first_token_id(tokenizer, "</s>", "[SEP]", "<|endoftext|>")
+    if tokenizer.eos_id < 0 { tokenizer.eos_id = bpe_first_token_id(tokenizer, "<|eot_id|>", "<|end_of_text|>", "<eos>") }
+    tokenizer.pad_id = bpe_first_token_id(tokenizer, "<pad>", "[PAD]", "<|pad|>")
     tokenizer
 }
 
@@ -459,4 +518,19 @@ func hf_bpe_decode(hf_bpe_tokenizer tokenizer, []int token_ids) hf_bpe_decode_re
     }
     if tokenizer.metaspace_pre_tokenizer && len(output) > 0 && output[0] == 32 { output = bpe_substring(output, 1, len(output)) }
     hf_bpe_decode_result { ok: true, text: output, error_code: "" }
+}
+
+func hf_bpe_decode_generated(hf_bpe_tokenizer tokenizer, []int token_ids) hf_bpe_decode_result {
+    []int content_ids = []int{cap: len(token_ids)}
+    int count = 0
+    int i = 0
+    while i < len(token_ids) {
+        int id = token_ids[i]
+        if id != tokenizer.eos_id && id != tokenizer.bos_id && id != tokenizer.pad_id { content_ids[count] = id; count = count + 1 }
+        i = i + 1
+    }
+    []int exact = []int{cap: count}
+    i = 0
+    while i < count { exact[i] = content_ids[i]; i = i + 1 }
+    hf_bpe_decode(tokenizer, exact)
 }

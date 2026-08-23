@@ -30,6 +30,8 @@ struct hf_layer_result {
 struct hf_generation_result {
     bool ok
     []int token_ids
+    bool eos_reached
+    string finish_reason
     string error_code
 }
 
@@ -293,8 +295,8 @@ func hf_float_copy([]float target, int offset, []float source) {
     while i < len(source) { target[offset + i] = source[i]; i = i + 1 }
 }
 
-func hf_generate(hf_model_weights model, []int prompt_tokens, int maximum_new_tokens) hf_generation_result {
-    if !model.valid || len(prompt_tokens) == 0 || maximum_new_tokens <= 0 { return hf_generation_result { ok: false, token_ids: [], error_code: "invalid_generation_input" } }
+func hf_generate_until(hf_model_weights model, []int prompt_tokens, int maximum_new_tokens, int eos_id) hf_generation_result {
+    if !model.valid || len(prompt_tokens) == 0 || maximum_new_tokens <= 0 { return hf_generation_result { ok: false, token_ids: [], eos_reached: false, finish_reason: "error", error_code: "invalid_generation_input" } }
     int capacity = len(prompt_tokens) + maximum_new_tokens
     int cache_elements = model.config.layers * capacity * model.config.kv_heads * model.config.head_dim
     []float cache_keys = []float{cap: cache_elements}
@@ -304,23 +306,33 @@ func hf_generate(hf_model_weights model, []int prompt_tokens, int maximum_new_to
     int position = 0
     while position < len(prompt_tokens) {
         state = hf_forward_token(model, prompt_tokens[position], cache_keys, cache_values, capacity, position)
-        if !state.ok { return hf_generation_result { ok: false, token_ids: [], error_code: state.error_code } }
+        if !state.ok { return hf_generation_result { ok: false, token_ids: [], eos_reached: false, finish_reason: "error", error_code: state.error_code } }
         position = position + 1
     }
     []int generated = []int{cap: maximum_new_tokens}
     int step = 0
     while step < maximum_new_tokens {
         int next_token = hf_argmax_logits(model, state.hidden)
-        if next_token < 0 { return hf_generation_result { ok: false, token_ids: [], error_code: "invalid_lm_head_shape" } }
+        if next_token < 0 { return hf_generation_result { ok: false, token_ids: [], eos_reached: false, finish_reason: "error", error_code: "invalid_lm_head_shape" } }
         generated[step] = next_token
         step = step + 1
+        if eos_id >= 0 && next_token == eos_id {
+            []int stopped = []int{cap: step}
+            int i = 0
+            while i < step { stopped[i] = generated[i]; i = i + 1 }
+            return hf_generation_result { ok: true, token_ids: stopped, eos_reached: true, finish_reason: "stop", error_code: "" }
+        }
         if step < maximum_new_tokens {
             state = hf_forward_token(model, next_token, cache_keys, cache_values, capacity, position)
-            if !state.ok { return hf_generation_result { ok: false, token_ids: [], error_code: state.error_code } }
+            if !state.ok { return hf_generation_result { ok: false, token_ids: [], eos_reached: false, finish_reason: "error", error_code: state.error_code } }
             position = position + 1
         }
     }
-    hf_generation_result { ok: true, token_ids: generated, error_code: "" }
+    hf_generation_result { ok: true, token_ids: generated, eos_reached: false, finish_reason: "length", error_code: "" }
+}
+
+func hf_generate(hf_model_weights model, []int prompt_tokens, int maximum_new_tokens) hf_generation_result {
+    hf_generate_until(model, prompt_tokens, maximum_new_tokens, -1)
 }
 
 func cpu_reference_mlp([]float input) []float {

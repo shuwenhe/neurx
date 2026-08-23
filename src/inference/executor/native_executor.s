@@ -1,10 +1,10 @@
 package neurx.inference.executor.native_executor
 use neurx.backends.api.inference_backend.{backend_generation_result}
 use neurx.backends.cpu.reference_inference.{cpu_reference_generate}
-use neurx.backends.cpu.transformer_decode.{cpu_transformer_result, cpu_transformer_prefill_decode, hf_generation_result, hf_generate}
+use neurx.backends.cpu.transformer_decode.{cpu_transformer_result, cpu_transformer_prefill_decode, hf_generation_result, hf_generate_until}
 use neurx.inference.scheduler.native_scheduler.{native_schedule_decision, schedule_native_request}
 use neurx.inference.tokenizer.byte_tokenizer.{byte_tokenization_result, tokenize_bytes}
-use neurx.inference.tokenizer.hf_bpe_tokenizer.{hf_bpe_tokenizer, hf_bpe_result, load_hf_bpe_tokenizer, hf_bpe_encode}
+use neurx.inference.tokenizer.hf_bpe_tokenizer.{hf_bpe_tokenizer, hf_bpe_result, hf_bpe_decode_result, load_hf_bpe_tokenizer, hf_bpe_encode, hf_bpe_decode_generated}
 use neurx.models.formats.safetensors_embedding.{safetensors_embedding, load_f32_embedding}
 use neurx.models.loaders.hf_transformer.{hf_model_weights, load_hf_model}
 
@@ -12,6 +12,8 @@ struct native_execution_result {
     bool ok
     string request_id
     string output
+    []int token_ids
+    string finish_reason
     string backend
     string error_code
     string error_message
@@ -50,7 +52,7 @@ func native_ends_with(string value, string suffix) bool {
 func execute_native_request(string request_id, string model, string prompt, int max_tokens, int capacity, int active_requests) native_execution_result {
     native_schedule_decision decision = schedule_native_request(request_id, max_tokens, capacity, active_requests)
     if !decision.accepted {
-        return native_execution_result { ok: false, request_id: request_id, output: "", backend: "", error_code: decision.error_code, error_message: "request was rejected by the scheduler" }
+        return native_execution_result { ok: false, request_id: request_id, output: "", token_ids: [], finish_reason: "error", backend: "", error_code: decision.error_code, error_message: "request was rejected by the scheduler" }
     }
     backend_generation_result generated = cpu_reference_generate("", "", 0)
     if model == "reference-model" {
@@ -58,14 +60,16 @@ func execute_native_request(string request_id, string model, string prompt, int 
     } else {
         if !native_ends_with(model, ".safetensors") {
             hf_model_weights hf_model = load_hf_model(model)
-            if !hf_model.valid { return native_execution_result { ok: false, request_id: request_id, output: "", backend: "cpu-hf-transformer", error_code: hf_model.error_code, error_message: "failed to load HF model directory" } }
+            if !hf_model.valid { return native_execution_result { ok: false, request_id: request_id, output: "", token_ids: [], finish_reason: "error", backend: "cpu-hf-transformer", error_code: hf_model.error_code, error_message: "failed to load HF model directory" } }
             hf_bpe_tokenizer tokenizer = load_hf_bpe_tokenizer(model)
-            if !tokenizer.valid { return native_execution_result { ok: false, request_id: request_id, output: "", backend: "cpu-hf-transformer", error_code: tokenizer.error_code, error_message: "failed to load tokenizer.json" } }
+            if !tokenizer.valid { return native_execution_result { ok: false, request_id: request_id, output: "", token_ids: [], finish_reason: "error", backend: "cpu-hf-transformer", error_code: tokenizer.error_code, error_message: "failed to load tokenizer.json" } }
             hf_bpe_result hf_tokens = hf_bpe_encode(tokenizer, prompt, len(prompt) * 2)
-            if !hf_tokens.ok { return native_execution_result { ok: false, request_id: request_id, output: "", backend: "cpu-hf-transformer", error_code: hf_tokens.error_code, error_message: "BPE tokenization failed" } }
-            hf_generation_result hf_result = hf_generate(hf_model, hf_tokens.token_ids, decision.token_budget)
-            if !hf_result.ok { return native_execution_result { ok: false, request_id: request_id, output: "", backend: "cpu-hf-transformer", error_code: hf_result.error_code, error_message: "HF Transformer generation failed" } }
-            return native_execution_result { ok: true, request_id: request_id, output: "token_ids:" + native_token_ids(hf_result.token_ids), backend: "cpu-hf-transformer", error_code: "", error_message: "" }
+            if !hf_tokens.ok { return native_execution_result { ok: false, request_id: request_id, output: "", token_ids: [], finish_reason: "error", backend: "cpu-hf-transformer", error_code: hf_tokens.error_code, error_message: "BPE tokenization failed" } }
+            hf_generation_result hf_result = hf_generate_until(hf_model, hf_tokens.token_ids, decision.token_budget, tokenizer.eos_id)
+            if !hf_result.ok { return native_execution_result { ok: false, request_id: request_id, output: "", token_ids: [], finish_reason: "error", backend: "cpu-hf-transformer", error_code: hf_result.error_code, error_message: "HF Transformer generation failed" } }
+            hf_bpe_decode_result decoded = hf_bpe_decode_generated(tokenizer, hf_result.token_ids)
+            if !decoded.ok { return native_execution_result { ok: false, request_id: request_id, output: "", token_ids: hf_result.token_ids, finish_reason: "error", backend: "cpu-hf-transformer", error_code: decoded.error_code, error_message: "generated token decoding failed" } }
+            return native_execution_result { ok: true, request_id: request_id, output: decoded.text, token_ids: hf_result.token_ids, finish_reason: hf_result.finish_reason, backend: "cpu-hf-transformer", error_code: "", error_message: "" }
         }
         safetensors_embedding embedding = load_f32_embedding(model, "embedding.weight")
         if !embedding.valid {
@@ -90,6 +94,8 @@ func execute_native_request(string request_id, string model, string prompt, int 
         ok: generated.ok,
         request_id: request_id,
         output: generated.output,
+        token_ids: [],
+        finish_reason: "length",
         backend: generated.backend,
         error_code: generated.error_code,
         error_message: generated.error_message,

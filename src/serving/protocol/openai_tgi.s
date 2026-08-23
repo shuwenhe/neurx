@@ -42,6 +42,13 @@ func openai_chat_sse_chunk(string request_id, string model, int created, string 
     "data: " + payload + "\n\n"
 }
 
+func openai_completion_sse_chunk(string request_id, string model, int created, string content, string finish_reason) string {
+    string finish = "null"
+    if finish_reason != "" { finish = "\"" + serving_json_escape(finish_reason) + "\"" }
+    string payload = "{\"id\":\"" + serving_json_escape(request_id) + "\",\"object\":\"text_completion\",\"created\":" + string(created) + ",\"model\":\"" + serving_json_escape(model) + "\",\"choices\":[{\"index\":0,\"text\":\"" + serving_json_escape(content) + "\",\"finish_reason\":" + finish + "]}"
+    "data: " + payload + "\n\n"
+}
+
 func openai_sse_done() string {
     "data: [DONE]\n\n"
 }
