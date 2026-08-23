@@ -1,5 +1,5 @@
 package neurx.models.formats.hf_config
-use std.fs.read_to_string as fs_read_to_string
+extern "intrinsic" func __host_read_binary_file(string path) []int
 
 struct hf_model_config {
     bool valid
@@ -99,7 +99,10 @@ func parse_hf_config(string text) hf_model_config {
 }
 
 func load_hf_config(string model_dir) hf_model_config {
-    var content = fs_read_to_string(model_dir + "/config.json")
-    if !content.is_ok() { return invalid_hf_config("config_not_found") }
-    parse_hf_config(content.unwrap())
+    []int bytes = __host_read_binary_file(model_dir + "/config.json")
+    if len(bytes) == 0 { return invalid_hf_config("config_not_found") }
+    string content = ""
+    int i = 0
+    while i < len(bytes) { content = content + string(bytes[i]); i = i + 1 }
+    parse_hf_config(content)
 }

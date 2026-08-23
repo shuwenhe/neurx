@@ -35,6 +35,17 @@ func native_token_ids([]int values) string {
     output
 }
 
+func native_ends_with(string value, string suffix) bool {
+    if len(value) < len(suffix) { return false }
+    int offset = len(value) - len(suffix)
+    int i = 0
+    while i < len(suffix) {
+        if value[offset + i] != suffix[i] { return false }
+        i = i + 1
+    }
+    true
+}
+
 func execute_native_request(string request_id, string model, string prompt, int max_tokens, int capacity, int active_requests) native_execution_result {
     native_schedule_decision decision = schedule_native_request(request_id, max_tokens, capacity, active_requests)
     if !decision.accepted {
@@ -44,8 +55,9 @@ func execute_native_request(string request_id, string model, string prompt, int 
     if model == "reference-model" {
         generated = cpu_reference_generate(model, prompt, decision.token_budget)
     } else {
-        hf_model_weights hf_model = load_hf_model(model)
-        if hf_model.valid {
+        if !native_ends_with(model, ".safetensors") {
+            hf_model_weights hf_model = load_hf_model(model)
+            if !hf_model.valid { return native_execution_result { ok: false, request_id: request_id, output: "", backend: "cpu-hf-transformer", error_code: hf_model.error_code, error_message: "failed to load HF model directory" } }
             byte_tokenization_result hf_tokens = tokenize_bytes(prompt, hf_model.config.vocabulary_size, len(prompt))
             if !hf_tokens.ok { return native_execution_result { ok: false, request_id: request_id, output: "", backend: "cpu-hf-transformer", error_code: hf_tokens.error_code, error_message: "tokenization failed" } }
             hf_generation_result hf_result = hf_generate(hf_model, hf_tokens.token_ids, decision.token_budget)
@@ -54,7 +66,7 @@ func execute_native_request(string request_id, string model, string prompt, int 
         }
         safetensors_embedding embedding = load_f32_embedding(model, "embedding.weight")
         if !embedding.valid {
-            return native_execution_result { ok: false, request_id: request_id, output: "", backend: "cpu-prefill", error_code: hf_model.error_code + ":" + embedding.error_code, error_message: "failed to load HF model directory or embedding model" }
+            return native_execution_result { ok: false, request_id: request_id, output: "", backend: "cpu-prefill", error_code: embedding.error_code, error_message: "failed to load embedding model" }
         }
         byte_tokenization_result tokens = tokenize_bytes(prompt, embedding.rows, decision.token_budget)
         if !tokens.ok {

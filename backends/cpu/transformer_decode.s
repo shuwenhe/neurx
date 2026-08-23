@@ -239,18 +239,21 @@ func hf_argmax_logits(hf_model_weights model, []float hidden) int {
 
 func hf_forward_token(hf_model_weights model, int token_id, []hf_kv_cache caches, int position) hf_layer_result {
     embedding_lookup_result embedding = lookup_f32_embedding(model.embedding, token_id)
-    if !embedding.ok { return hf_layer_result { ok: false, hidden: [], cache: hf_kv_cache {}, error_code: embedding.error_code } }
+    hf_kv_cache empty_cache = hf_kv_cache { keys: [], values: [], length: 0, capacity: 0, kv_width: 0 }
+    if !embedding.ok { return hf_layer_result { ok: false, hidden: [], cache: empty_cache, error_code: embedding.error_code } }
     []float hidden = embedding.values
     hf_cpu_config config = hf_model_cpu_config(model)
     int layer = 0
     while layer < model.config.layers {
-        hf_layer_result result = hf_cpu_layer(config, model.layers[layer], hidden, caches[layer], position)
+        hf_layer_weights weights = model.layers[layer]
+        hf_kv_cache layer_cache = caches[layer]
+        hf_layer_result result = hf_cpu_layer(config, weights, hidden, layer_cache, position)
         if !result.ok { return result }
         hidden = result.hidden
         caches[layer] = result.cache
         layer = layer + 1
     }
-    hf_layer_result { ok: true, hidden: hidden, cache: hf_kv_cache {}, error_code: "" }
+    hf_layer_result { ok: true, hidden: hidden, cache: empty_cache, error_code: "" }
 }
 
 func hf_generate(hf_model_weights model, []int prompt_tokens, int maximum_new_tokens) hf_generation_result {
@@ -259,7 +262,8 @@ func hf_generate(hf_model_weights model, []int prompt_tokens, int maximum_new_to
     []hf_kv_cache caches = []hf_kv_cache{cap: model.config.layers}
     int layer = 0
     while layer < model.config.layers { caches[layer] = new_hf_kv_cache(capacity, model.config.kv_heads * model.config.head_dim); layer = layer + 1 }
-    hf_layer_result state = hf_layer_result { ok: false, hidden: [], cache: hf_kv_cache {}, error_code: "empty_prefill" }
+    hf_kv_cache empty_cache = hf_kv_cache { keys: [], values: [], length: 0, capacity: 0, kv_width: 0 }
+    hf_layer_result state = hf_layer_result { ok: false, hidden: [], cache: empty_cache, error_code: "empty_prefill" }
     int position = 0
     while position < len(prompt_tokens) {
         state = hf_forward_token(model, prompt_tokens[position], caches, position)

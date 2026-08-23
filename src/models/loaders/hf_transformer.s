@@ -61,7 +61,8 @@ func load_hf_layer(string path, int layer) hf_layer_weights {
 }
 
 func invalid_hf_model(hf_model_config config, string code) hf_model_weights {
-    hf_model_weights { valid: false, config: config, embedding: safetensors_embedding {}, layers: [], final_norm: [], lm_head: [], error_code: code }
+    safetensors_embedding empty = safetensors_embedding { valid: false, path: "", rows: 0, columns: 0, data_offset: 0, data_bytes: 0, error_code: code }
+    hf_model_weights { valid: false, config: config, embedding: empty, layers: [], final_norm: [], lm_head: [], error_code: code }
 }
 
 func load_hf_model(string model_dir) hf_model_weights {
