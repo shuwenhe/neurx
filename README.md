@@ -388,7 +388,7 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ## 🙏 Acknowledgments
 
-Built with inspiration from vLLM, SGLang, and Hugging Face Transformers. Special thanks to the S language compiler team for enabling high-performance systems programming.
+Special thanks to the S language compiler team for enabling high-performance systems programming.
 
 ---
 
