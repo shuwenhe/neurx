@@ -12,6 +12,7 @@ neurx/
 |   |-- core/                  Tensor, autograd, operators, and contracts
 |   |-- compiler/              IR, passes, lowering, and execution plans
 |   |-- runtime/               Execution, scheduling, and worker management
+|   |-- distributed/           Shared collectives and distributed control plane
 |   |-- inference/             Engines, sampling, tokenization, and cache
 |   |-- training/              Pretraining, post-training, and alignment
 |   |-- models/                Model families and adapters
@@ -22,6 +23,7 @@ neurx/
 |-- apps/                      User-facing applications
 |-- configs/                   Runtime and training configuration
 |-- tests/                     Unit, integration, fixtures, and golden tests
+|-- benchmarks/                Reproducible training and inference comparisons
 |-- build/                     Modular build definitions
 |-- examples/                  Focused usage examples
 |-- tools/                     Developer tools
@@ -65,6 +67,13 @@ temporarily retained as compatibility APIs and will migrate domain by domain.
 5. Remove compatibility paths only after all integration gates pass.
 
 Run `make check-layout` before committing structural changes.
+Run `make check-architecture` before merging. It also rejects new reverse-domain
+dependencies and lifecycle-suffixed implementation names.
+
+Target directories may initially contain ownership contracts while legacy
+implementations remain at compatibility paths. A domain is considered migrated
+only after its stable command calls the new API, tests pass, and the old path is
+removed.
 
 Build targets are split by concern under `build/mk/`; the root Makefile remains the
 stable entry point.

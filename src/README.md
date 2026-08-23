@@ -9,7 +9,7 @@ agent / serving / training
 inference / models
             |
             v
-runtime / compiler
+runtime / compiler / distributed
             |
             v
 core <--- backends

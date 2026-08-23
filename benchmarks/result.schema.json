@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neurx.dev/schemas/benchmark-result.schema.json",
+  "title": "NeurX benchmark result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "created_at", "system", "model", "workload", "metrics"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "git_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "system": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engine", "engine_version", "accelerator", "accelerator_count", "precision"],
+      "properties": {
+        "engine": { "enum": ["neurx", "vllm", "sglang"] },
+        "engine_version": { "type": "string", "minLength": 1 },
+        "accelerator": { "type": "string", "minLength": 1 },
+        "accelerator_count": { "type": "integer", "minimum": 1 },
+        "precision": { "type": "string", "minLength": 1 },
+        "software_stack": { "type": "string" }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "revision"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "revision": { "type": "string", "minLength": 1 },
+        "quantization": { "type": ["string", "null"] }
+      }
+    },
+    "workload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataset", "requests", "concurrency", "input_tokens", "output_tokens", "warmup_requests", "repetitions"],
+      "properties": {
+        "dataset": { "type": "string", "minLength": 1 },
+        "requests": { "type": "integer", "minimum": 1 },
+        "concurrency": { "type": "integer", "minimum": 1 },
+        "input_tokens": { "type": "integer", "minimum": 1 },
+        "output_tokens": { "type": "integer", "minimum": 1 },
+        "warmup_requests": { "type": "integer", "minimum": 0 },
+        "repetitions": { "type": "integer", "minimum": 3 }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ttft_ms_p50", "tpot_ms_p50", "request_latency_ms_p99", "output_tokens_per_second", "requests_per_second", "error_rate"],
+      "properties": {
+        "ttft_ms_p50": { "type": "number", "minimum": 0 },
+        "tpot_ms_p50": { "type": "number", "minimum": 0 },
+        "request_latency_ms_p50": { "type": "number", "minimum": 0 },
+        "request_latency_ms_p95": { "type": "number", "minimum": 0 },
+        "request_latency_ms_p99": { "type": "number", "minimum": 0 },
+        "output_tokens_per_second": { "type": "number", "minimum": 0 },
+        "requests_per_second": { "type": "number", "minimum": 0 },
+        "peak_memory_bytes": { "type": "integer", "minimum": 0 },
+        "error_rate": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

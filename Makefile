@@ -168,6 +168,11 @@ POSTTRAIN_MATERIALIZED_SAMPLES ?= 1
 include build/mk/layout.mk
 include build/mk/compiler.mk
 include build/mk/testing.mk
+include build/mk/training.mk
+include build/mk/inference.mk
+include build/mk/serving.mk
+include build/mk/backends.mk
+include build/mk/release.mk
 
 help:
 	@echo ""

@@ -47,6 +47,14 @@ for directory in "${required_dirs[@]}"; do
   fi
 done
 
+required_command_entries=(cmd/train/main.s cmd/worker/main.s cmd/controller/main.s)
+for entry in "${required_command_entries[@]}"; do
+  if [[ ! -f "$entry" ]]; then
+    printf 'required command entrypoint is missing: %s\n' "$entry" >&2
+    failed=1
+  fi
+done
+
 if rg -l '%src/|src/src/|backends/backends/' . \
   --glob '!artifacts/**' --glob '!scripts/check_layout.sh' >/dev/null; then
   printf 'malformed path prefix detected\n' >&2

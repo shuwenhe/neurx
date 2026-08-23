@@ -9,4 +9,7 @@
 /src/agent/                     @shuwenhe
 /src/observability/             @shuwenhe
 /backends/                      @shuwenhe
+/benchmarks/                    @shuwenhe
+/build/                         @shuwenhe
+/scripts/check_architecture.sh  @shuwenhe
 /deploy/                        @shuwenhe

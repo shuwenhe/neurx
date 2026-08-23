@@ -1,11 +1,11 @@
 .PHONY: train check-training-boundary
 
-# Stable product entry point. The underlying pretrain target remains compatible
-# while training implementations migrate behind src/training/api.
-train: pretrain-gpu
+train: check-training-boundary build-command-contracts
+	@echo "Training entrypoint compiled to artifacts/build/commands/train.ir."
 
 check-training-boundary:
 	@test -d src/training/api
+	@test -f src/training/api/contracts.s
 	@test -d src/training/engine
 	@test -d src/training/strategy
 	@echo "Training boundary checks passed."

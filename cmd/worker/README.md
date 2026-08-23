@@ -1,5 +1,4 @@
 # neurx-worker
 
-Stable worker executable boundary. The compatibility implementation currently
-lives in `scripts/neurx_worker_start.s` and will migrate without changing the
-public command name.
+Stable worker executable boundary. It requires explicit rank, master, and
+executable configuration and contains no deployment-specific host values.
