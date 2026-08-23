@@ -87,6 +87,25 @@ and emitted as standalone launchers under `artifacts/bin/`. Run
 Build targets are split by concern under `build/mk/`; the root Makefile remains the
 stable entry point.
 
+## Native inference path
+
+The stable executable path is linked directly into `artifacts/bin/serve`:
+
+```text
+cmd/serve
+  -> src/serving/lifecycle
+  -> src/inference/api
+  -> src/inference/scheduler
+  -> src/inference/executor
+  -> backends/api
+  -> backends/cpu
+```
+
+`make test-native-inference` executes this entire linked path and verifies
+successful generation, capacity rejection, and invalid-request propagation.
+The current CPU reference backend provides deterministic contract behavior; it
+is intentionally not presented as production model inference.
+
 ## Completed migrations
 
 - `optim/` was consolidated into `src/training/optimizer/`.

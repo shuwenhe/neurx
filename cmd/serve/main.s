@@ -1,9 +1,11 @@
 package main
-use neurx.runtime.command.{runtime_env_get, runtime_parse_int, runtime_run_command_exit_code, runtime_shell_escape}
+use neurx.runtime.command.{runtime_env_get, runtime_parse_int}
+use neurx.inference.api.contracts.{inference_request}
+use neurx.inference.executor.native_executor.{native_execution_result}
 use neurx.serving.api.contracts.{serving_config, serving_validation_result, validate_serving_config}
+use neurx.serving.lifecycle.native_inference_service.{serve_native_inference}
 
 func main() {
-    string serve_bin = runtime_env_get("NEURX_SERVE_BIN", "")
     serving_config config = serving_config {
         model: runtime_env_get("NEURX_MODEL", ""),
         bind_address: runtime_env_get("NEURX_BIND_ADDRESS", "localhost"),
@@ -17,22 +19,24 @@ func main() {
         println("[neurx-serve] invalid configuration: " + validation.error_code + ": " + validation.error_message)
         return 2
     }
-    if serve_bin == "" || runtime_run_command_exit_code("test -x " + runtime_shell_escape(serve_bin)) != 0 {
-        println("[neurx-serve] NEURX_SERVE_BIN must reference an executable production server")
+    string prompt = runtime_env_get("NEURX_PROMPT", "")
+    if prompt == "" {
+        println("[neurx-serve] NEURX_PROMPT is required for native one-shot inference")
         return 3
     }
-    println("[neurx-serve] model=" + config.model + " bind=" + config.bind_address)
-    string command = "NEURX_MODEL=" + runtime_shell_escape(config.model)
-        + " NEURX_BIND_ADDRESS=" + runtime_shell_escape(config.bind_address)
-        + " NEURX_PORT=" + runtime_shell_escape(runtime_env_get("NEURX_PORT", "8000"))
-        + " NEURX_MAX_CONCURRENCY=" + runtime_shell_escape(runtime_env_get("NEURX_MAX_CONCURRENCY", "128"))
-        + " NEURX_REQUEST_TIMEOUT_MS=" + runtime_shell_escape(runtime_env_get("NEURX_REQUEST_TIMEOUT_MS", "30000"))
-        + " NEURX_SHUTDOWN_GRACE_MS=" + runtime_shell_escape(runtime_env_get("NEURX_SHUTDOWN_GRACE_MS", "30000"))
-        + " exec " + runtime_shell_escape(serve_bin)
-    int exit_code = runtime_run_command_exit_code(command)
-    if exit_code != 0 {
-        println("[neurx-serve] server exited with an error")
-        return exit_code
+    inference_request request = inference_request {
+        request_id: runtime_env_get("NEURX_REQUEST_ID", "native-1"),
+        model: config.model,
+        prompt: prompt,
+        max_tokens: runtime_parse_int(runtime_env_get("NEURX_MAX_TOKENS", "128"), 128),
+        timeout_ms: config.request_timeout_ms,
+        stream: false,
     }
+    native_execution_result result = serve_native_inference(request, config.max_concurrency, 0)
+    if !result.ok {
+        println("[neurx-serve] inference failed: " + result.error_code + ": " + result.error_message)
+        return 4
+    }
+    println(result.output)
     0
 }
