@@ -34,6 +34,11 @@ neurx/
 `-- artifacts/                 Generated output; never source code
 ```
 
+The stable subdomain boundaries are now enforced by `scripts/check_layout.sh`.
+Compiler code is split into `frontend`, `ir`, `passes`, `lowering`, and
+`codegen`; models expose `registry`, `loaders`, `formats`, and `families`;
+backends implement the contracts in `backends/api/`.
+
 Physical source paths follow this layout. Existing `neurx.*` package names are
 temporarily retained as compatibility APIs and will migrate domain by domain.
 
@@ -91,3 +96,12 @@ stable entry point.
 - The legacy `compilation/` prototype was isolated under
   `experimental/compiler/`; production compilation remains under `src/compiler/`.
 - `workers/` was consolidated into `src/runtime/worker/`.
+- Inference KV and request queues were consolidated under `src/inference/cache/`
+  and `src/inference/scheduler/`.
+- Decode, sampling, and KV state were removed from `src/serving/`; serving now
+  owns transport and service governance only.
+- Inference metrics and profiling moved under `src/observability/`.
+- Inference-specific distributed coordination moved under
+  `src/distributed/inference/`.
+- MPS is now a first-class backend, while OS-kernel prototypes live under
+  `experimental/os/`.

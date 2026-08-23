@@ -31,14 +31,37 @@ fi
 
 required_dirs=(
   cmd/train cmd/serve cmd/worker cmd/controller cmd/benchmark
-  src/training/api src/training/engine src/training/strategy src/inference/executor
+  src/core/tensor src/core/ops src/core/autograd src/core/memory src/core/contracts
+  src/compiler/frontend src/compiler/ir src/compiler/passes src/compiler/lowering src/compiler/codegen
+  src/runtime/executor src/runtime/dispatch src/runtime/memory src/runtime/task src/runtime/system
+  src/models/registry src/models/loaders src/models/formats src/models/families
+  src/training/api src/training/engine src/training/strategy src/training/optimizer
+  src/training/checkpoint src/training/data src/training/pretrain src/training/posttrain
+  src/inference/api src/inference/engine src/inference/scheduler src/inference/executor
+  src/inference/cache src/inference/sampling src/inference/speculative src/inference/tokenizer
   src/serving/api/openai src/serving/api/admin src/serving/gateway src/serving/admission
+  src/serving/protocol src/serving/router src/serving/security src/serving/lifecycle
   src/distributed/collective src/distributed/topology src/distributed/rendezvous
-  src/distributed/elasticity src/distributed/fault_tolerance backends/common
+  src/distributed/elasticity src/distributed/fault_tolerance src/observability src/agent
+  backends/api backends/common backends/cpu backends/cuda backends/cann backends/mps
   tests/contract tests/distributed tests/chaos
   benchmarks/training benchmarks/inference benchmarks/kernels benchmarks/baselines
   configs/models configs/training configs/inference configs/clusters configs/schemas
 )
+
+legacy_dirs=(
+  src/inference/kv src/inference/queue src/inference/serve src/inference/serving
+  src/inference/distributed src/inference/monitoring src/inference/metrics
+  src/serving/cache src/serving/decode src/serving/net src/serving/network src/serving/sampling
+  backends/arch/mps backends/kernel
+)
+
+for directory in "${legacy_dirs[@]}"; do
+  if find "$directory" -type f -print -quit 2>/dev/null | grep -q .; then
+    printf 'retired compatibility directory contains files: %s/\n' "$directory" >&2
+    failed=1
+  fi
+done
 
 for directory in "${required_dirs[@]}"; do
   if [[ ! -d "$directory" ]]; then
