@@ -923,11 +923,11 @@ build-real-chat-s:
 $(PRODUCTION_S_INFERENCE_DIR):
 	@mkdir -p '$(PRODUCTION_S_INFERENCE_DIR)'
 
-$(PRODUCTION_S_BACKEND): src/inference/serve/cpu_backend.s src/inference/extensions/cache/kv_cache_block.s src/inference/extensions/cache/cache_index.s src/inference/extensions/cache/kv_cache_engine.s src/inference/extensions/cache/kv_cache_integration.s src/inference/extensions/cache/hash_table.s src/inference/extensions/cache/storage_backend.s src/inference/extensions/cache/lru_linked_list.s src/inference/extensions/cache/distributed_cache.s src/inference/extensions/cache/performance_optimization.s src/inference/extensions/cache/advanced_cache_engine.s src/inference/extensions/cache/advanced_cache_integration.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_BACKEND): backends/cpu/inference_server.s src/inference/extensions/cache/kv_cache_block.s src/inference/extensions/cache/cache_index.s src/inference/extensions/cache/kv_cache_engine.s src/inference/extensions/cache/kv_cache_integration.s src/inference/extensions/cache/hash_table.s src/inference/extensions/cache/storage_backend.s src/inference/extensions/cache/lru_linked_list.s src/inference/extensions/cache/distributed_cache.s src/inference/extensions/cache/performance_optimization.s src/inference/extensions/cache/advanced_cache_engine.s src/inference/extensions/cache/advanced_cache_integration.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX CPU Backend (Pure S Language)..."
 	@echo "  Phase 1 (Legacy): kv_cache_block.s, cache_index.s, kv_cache_engine.s, kv_cache_integration.s"
 	@echo "  Phase 2-4 (Advanced): hash_table.s, storage_backend.s, lru_linked_list.s, distributed_cache.s, performance_optimization.s, advanced_cache_engine.s, advanced_cache_integration.s"
-	@$(S_SEED_COMPILER) src/inference/serve/cpu_backend.s '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' || { \
+	@$(S_SEED_COMPILER) backends/cpu/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' || { \
 		echo "❌ Backend compilation failed!"; \
 		exit 1; \
 	}
@@ -940,9 +940,9 @@ $(PRODUCTION_S_BACKEND): src/inference/serve/cpu_backend.s src/inference/extensi
 	@echo "✓ LMCache Phase 2-4 modules included: hash_table (O(1) lookup), storage_backend (L1/L2/L3), lru_linked_list (O(1) evict), distributed_cache, performance_optimization, advanced_cache_engine"
 	@touch '$(PRODUCTION_S_BACKEND)'
 
-$(PRODUCTION_S_GPU_BACKEND): src/inference/serve/production_gpu_backend.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_GPU_BACKEND): backends/cuda/inference_server.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX GPU Backend (Pure S Language + GPU Acceleration)..."
-	@$(S_SEED_COMPILER) src/inference/serve/production_gpu_backend.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir' || { \
+	@$(S_SEED_COMPILER) backends/cuda/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir' || { \
 		echo "❌ GPU Backend compilation failed!"; \
 		exit 1; \
 	}
@@ -953,9 +953,9 @@ $(PRODUCTION_S_GPU_BACKEND): src/inference/serve/production_gpu_backend.s | $(PR
 	@echo "✓ GPU backend compiled: $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir"
 	@touch '$(PRODUCTION_S_GPU_BACKEND)'
 
-$(PRODUCTION_S_GPU_BACKEND_ENHANCED): src/inference/serve/production_gpu_backend_enhanced.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_GPU_BACKEND_ENHANCED): experimental/inference/cuda_server_candidate.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX GPU Backend Enhanced (Real Inference + Streaming MatMul)..."
-	@$(S_SEED_COMPILER) src/inference/serve/production_gpu_backend_enhanced.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir' || { \
+	@$(S_SEED_COMPILER) experimental/inference/cuda_server_candidate.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir' || { \
 		echo "❌ GPU Backend Enhanced compilation failed!"; \
 		exit 1; \
 	}
@@ -2364,14 +2364,14 @@ numeric-alignment-test:
 .PHONY: inference-feature-gap-check
 S_INFERENCE_CHECK_COMPILER ?= $(firstword $(wildcard $(CURDIR_UNIX)/../../s/bin/s /home/shuwen/s/bin/s) $(S_COMPILER))
 INFERENCE_FEATURE_GAP_S_MODULES := \
-	src/inference/serve/request_lifecycle.s \
+	src/serving/lifecycle/inference_request.s \
 	src/inference/advanced/structured_output.s \
 	src/inference/advanced/tool_parser.s \
-	src/inference/serve/lora_router.s \
-	src/inference/serve/disaggregated_runtime.s \
+	src/inference/engine/lora_router.s \
+	src/inference/scheduler/disaggregated_runtime.s \
 	src/inference/advanced/pooling.s \
 	src/inference/api/openai_protocol.s \
-	src/inference/metrics/observability.s \
+	src/observability/tracing/inference_observability.s \
 	src/inference/runtime/backend_registry.s \
 	src/inference/cache/block_manager.s \
 	src/inference/scheduler/vllm_scheduler.s \

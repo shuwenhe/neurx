@@ -5,7 +5,7 @@ use neurx.inference.api.openai_protocol.{openai_request, openai_request_result, 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response_stream}
 use src.net.http.{http_request, http_response, parse_http_request, format_http_response}
-use neurx.serving.network.native_socket.{neurx_net_accept}
+use neurx.serving.protocol.transport.native_socket.{neurx_net_accept}
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __sys_write_string(int fd, string data) int

@@ -1,12 +1,12 @@
 package main
-use neurx.inference.serve.request_lifecycle
+use neurx.serving.lifecycle.inference_request
 use neurx.inference.advanced.structured_output
 use neurx.inference.advanced.tool_parser
-use neurx.inference.serve.lora_router
-use neurx.inference.serve.disaggregated_runtime
+use neurx.inference.engine.lora_router
+use neurx.inference.scheduler.disaggregated_runtime
 use neurx.inference.advanced.pooling
 use neurx.inference.api.openai_protocol
-use neurx.inference.metrics.observability
+use neurx.observability.tracing.inference_observability
 
 func gap_close(float actual, float expected) bool {
     float difference = actual - expected
@@ -37,8 +37,8 @@ func gap_contains(string text, string pattern) bool {
 }
 
 func test_request_lifecycle() bool {
-    request_lifecycle_state state = neurx.inference.serve.request_lifecycle.new_request_lifecycle("req-1", 12, 2, 100, 500)
-    state.status == neurx.inference.serve.request_lifecycle.request_queued_status() && neurx.inference.serve.request_lifecycle.request_remaining_tokens(state) == 2 && !neurx.inference.serve.request_lifecycle.request_is_terminal(state)
+    request_lifecycle_state state = neurx.serving.lifecycle.inference_request.new_request_lifecycle("req-1", 12, 2, 100, 500)
+    state.status == neurx.serving.lifecycle.inference_request.request_queued_status() && neurx.serving.lifecycle.inference_request.request_remaining_tokens(state) == 2 && !neurx.serving.lifecycle.inference_request.request_is_terminal(state)
 }
 
 func test_structured_output() bool {
@@ -58,11 +58,11 @@ func test_tool_parser() bool {
 }
 
 func test_lora_router() bool {
-    neurx.inference.serve.lora_router.lora_unloaded_status() != neurx.inference.serve.lora_router.lora_ready_status() && neurx.inference.serve.lora_router.lora_loading_status() != neurx.inference.serve.lora_router.lora_failed_status()
+    neurx.inference.engine.lora_router.lora_unloaded_status() != neurx.inference.engine.lora_router.lora_ready_status() && neurx.inference.engine.lora_router.lora_loading_status() != neurx.inference.engine.lora_router.lora_failed_status()
 }
 
 func test_disaggregated_runtime() bool {
-    neurx.inference.serve.disaggregated_runtime.disaggregated_queued_prefill() != neurx.inference.serve.disaggregated_runtime.disaggregated_decoding() && neurx.inference.serve.disaggregated_runtime.kv_transfer_pending() != neurx.inference.serve.disaggregated_runtime.kv_transfer_complete()
+    neurx.inference.scheduler.disaggregated_runtime.disaggregated_queued_prefill() != neurx.inference.scheduler.disaggregated_runtime.disaggregated_decoding() && neurx.inference.scheduler.disaggregated_runtime.kv_transfer_pending() != neurx.inference.scheduler.disaggregated_runtime.kv_transfer_complete()
 }
 
 func test_pooling() bool {
@@ -76,12 +76,12 @@ func test_openai_protocol() bool {
 }
 
 func test_observability() bool {
-    inference_observability_state state = neurx.inference.metrics.observability.new_inference_observability()
-    state = neurx.inference.metrics.observability.observability_start_request(state, 4)
-    state = neurx.inference.metrics.observability.observability_record_cache(state, true)
-    state = neurx.inference.metrics.observability.observability_record_kv_handoff(state)
-    state = neurx.inference.metrics.observability.observability_finish_request(state, 2, 25, false)
-    string metrics = neurx.inference.metrics.observability.observability_prometheus(state)
+    inference_observability_state state = neurx.observability.tracing.inference_observability.new_inference_observability()
+    state = neurx.observability.tracing.inference_observability.observability_start_request(state, 4)
+    state = neurx.observability.tracing.inference_observability.observability_record_cache(state, true)
+    state = neurx.observability.tracing.inference_observability.observability_record_kv_handoff(state)
+    state = neurx.observability.tracing.inference_observability.observability_finish_request(state, 2, 25, false)
+    string metrics = neurx.observability.tracing.inference_observability.observability_prometheus(state)
     gap_contains(metrics, "neurx_inference_requests_total 1") && gap_contains(metrics, "neurx_inference_kv_handoffs_total 1")
 }
 

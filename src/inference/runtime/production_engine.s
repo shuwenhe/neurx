@@ -2,7 +2,7 @@ package neurx.inference.runtime.production_engine
 use neurx.inference.runtime.model_manifest
 use neurx.inference.runtime.worker_cluster
 use neurx.inference.runtime.engine_lifecycle
-use neurx.inference.metrics.observability
+use neurx.observability.tracing.inference_observability
 
 func engine_request_active_status() int { 1 }
 

@@ -1,7 +1,7 @@
 package neurx.inference.scheduler.inference_runtime
-use neurx.inference.queue.request_queue
+use neurx.inference.scheduler.queue.request_queue
 use neurx.scheduler.inference_scheduler
-use neurx.inference.metrics.inference_metrics
+use neurx.observability.metrics.inference_metrics
 use neurx.inference.cache.prefix_cache
 use neurx.attention.inference_paged
 
