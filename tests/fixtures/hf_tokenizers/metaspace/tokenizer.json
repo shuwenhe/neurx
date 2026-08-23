@@ -1,0 +1,1 @@
+{"pre_tokenizer":{"type":"Metaspace","replacement":"\u2581","prepend_scheme":"always","split":true},"decoder":{"type":"Metaspace","replacement":"\u2581","prepend_scheme":"always"},"model":{"type":"BPE","vocab":{"<unk>":0,"\u2581":1,"H":2,"i":3,"Hi":4,"\u2581Hi":5},"merges":["H i","\u2581 Hi"],"unk_token":"<unk>"},"added_tokens":[]}

@@ -1,5 +1,5 @@
 package main
-use neurx.inference.tokenizer.hf_bpe_tokenizer.{hf_bpe_tokenizer, hf_bpe_result, load_hf_bpe_tokenizer, hf_bpe_encode}
+use neurx.inference.tokenizer.hf_bpe_tokenizer.{hf_bpe_tokenizer, hf_bpe_result, hf_bpe_decode_result, load_hf_bpe_tokenizer, hf_bpe_encode, hf_bpe_decode}
 use neurx.models.formats.safetensors_embedding.{st_f16_le, st_bf16_le}
 
 func main() {
@@ -11,6 +11,20 @@ func main() {
     if !result.ok || len(result.token_ids) != 1 || result.token_ids[0] != 5 { return 1 }
     result = hf_bpe_encode(tokenizer, "<s>", 8)
     if !result.ok || len(result.token_ids) != 1 || result.token_ids[0] != 6 { return 1 }
+    result = hf_bpe_encode(tokenizer, "Hi<s> H", 8)
+    if !result.ok || len(result.token_ids) != 3 || result.token_ids[0] != 3 || result.token_ids[1] != 6 || result.token_ids[2] != 5 { return 1 }
+    hf_bpe_decode_result decoded = hf_bpe_decode(tokenizer, result.token_ids)
+    if !decoded.ok || decoded.text != "Hi<s> H" { return 1 }
+    hf_bpe_tokenizer bert = load_hf_bpe_tokenizer("tests/fixtures/hf_tokenizers/bert")
+    if !bert.valid || !bert.bert_pre_tokenizer || !bert.normalizer_lowercase || !bert.normalizer_strip { return 1 }
+    result = hf_bpe_encode(bert, "  Hi!  ", 8)
+    if !result.ok || len(result.token_ids) != 2 || result.token_ids[0] != 3 || result.token_ids[1] != 4 { return 1 }
+    hf_bpe_tokenizer metaspace = load_hf_bpe_tokenizer("tests/fixtures/hf_tokenizers/metaspace")
+    if !metaspace.valid || !metaspace.metaspace_pre_tokenizer { return 1 }
+    result = hf_bpe_encode(metaspace, "Hi Hi", 8)
+    if !result.ok || len(result.token_ids) != 2 || result.token_ids[0] != 5 || result.token_ids[1] != 5 { return 1 }
+    decoded = hf_bpe_decode(metaspace, result.token_ids)
+    if !decoded.ok || decoded.text != "Hi Hi" { return 1 }
     []int f16 = []int{cap: 2}
     f16[0] = 0
     f16[1] = 60
@@ -19,6 +33,6 @@ func main() {
     bf16[0] = 128
     bf16[1] = 63
     if st_bf16_le(bf16, 0) != 1.0 { return 1 }
-    println("PASS pure S F16 BF16 and HF BPE contract")
+    println("PASS pure S HF tokenizer pipeline and F16 BF16 contract")
     0
 }
