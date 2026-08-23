@@ -4,9 +4,13 @@ use neurx.models.formats.safetensors_embedding.{st_f16_le, st_bf16_le}
 
 func main() {
     hf_bpe_tokenizer tokenizer = load_hf_bpe_tokenizer("tests/fixtures/gateway_model")
-    if !tokenizer.valid || tokenizer.vocab_count != 4 || tokenizer.merge_count != 1 { return 1 }
+    if !tokenizer.valid || tokenizer.vocab_count != 6 || tokenizer.merge_count != 2 || !tokenizer.byte_level || tokenizer.added_count != 1 { return 1 }
     hf_bpe_result result = hf_bpe_encode(tokenizer, "Hi", 8)
     if !result.ok || len(result.token_ids) != 1 || result.token_ids[0] != 3 { return 1 }
+    result = hf_bpe_encode(tokenizer, " H", 8)
+    if !result.ok || len(result.token_ids) != 1 || result.token_ids[0] != 5 { return 1 }
+    result = hf_bpe_encode(tokenizer, "<s>", 8)
+    if !result.ok || len(result.token_ids) != 1 || result.token_ids[0] != 6 { return 1 }
     []int f16 = []int{cap: 2}
     f16[0] = 0
     f16[1] = 60

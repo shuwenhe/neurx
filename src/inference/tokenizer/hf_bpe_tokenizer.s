@@ -9,6 +9,10 @@ struct hf_bpe_tokenizer {
     []string merge_left
     []string merge_right
     int merge_count
+    []string added_tokens
+    []int added_ids
+    int added_count
+    bool byte_level
     int unknown_id
     string error_code
 }
@@ -27,6 +31,27 @@ struct bpe_string_result {
 struct bpe_int_result {
     int value
     int next
+}
+
+func bpe_hex(int ch) int {
+    if ch >= 48 && ch <= 57 { return ch - 48 }
+    if ch >= 65 && ch <= 70 { return ch - 55 }
+    if ch >= 97 && ch <= 102 { return ch - 87 }
+    -1
+}
+
+func bpe_utf8(int codepoint) string {
+    if codepoint < 128 { return string(codepoint) }
+    string output = ""
+    if codepoint < 2048 {
+        output = output + string(192 + codepoint / 64)
+        output = output + string(128 + codepoint % 64)
+        return output
+    }
+    output = output + string(224 + codepoint / 4096)
+    output = output + string(128 + codepoint / 64 % 64)
+    output = output + string(128 + codepoint % 64)
+    output
 }
 
 func bpe_bytes_string([]int bytes) string {
@@ -61,7 +86,18 @@ func bpe_json_string(string text, int quote) bpe_string_result {
     while i < len(text) && text[i] != 34 {
         if text[i] == 92 && i + 1 < len(text) {
             i = i + 1
-            if text[i] == 110 { output = output + "\n" } else if text[i] == 116 { output = output + "\t" } else { output = output + string(text[i]) }
+            if text[i] == 110 { output = output + "\n" } else if text[i] == 116 { output = output + "\t" } else if text[i] == 117 && i + 4 < len(text) {
+                int codepoint = 0
+                int j = 1
+                while j <= 4 {
+                    int digit = bpe_hex(text[i + j])
+                    if digit < 0 { digit = 0 }
+                    codepoint = codepoint * 16 + digit
+                    j = j + 1
+                }
+                output = output + bpe_utf8(codepoint)
+                i = i + 4
+            } else { output = output + string(text[i]) }
         } else { output = output + string(text[i]) }
         i = i + 1
     }
@@ -93,9 +129,27 @@ func bpe_merge_rank(hf_bpe_tokenizer tokenizer, string left, string right) int {
     -1
 }
 
+func bpe_direct_byte(int value) bool {
+    if value >= 33 && value <= 126 { return true }
+    if value >= 161 && value <= 172 { return true }
+    if value >= 174 && value <= 255 { return true }
+    false
+}
+
+func bpe_byte_symbol(int value) string {
+    if bpe_direct_byte(value) { return bpe_utf8(value) }
+    int codepoint = 256
+    int byte = 0
+    while byte < value {
+        if !bpe_direct_byte(byte) { codepoint = codepoint + 1 }
+        byte = byte + 1
+    }
+    bpe_utf8(codepoint)
+}
+
 func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
     []int bytes = __host_read_binary_file(model_dir + "/tokenizer.json")
-    if len(bytes) == 0 { return hf_bpe_tokenizer { valid: false, vocab_tokens: [], vocab_ids: [], vocab_count: 0, merge_left: [], merge_right: [], merge_count: 0, unknown_id: 0, error_code: "tokenizer_not_found" } }
+    if len(bytes) == 0 { return hf_bpe_tokenizer { valid: false, vocab_tokens: [], vocab_ids: [], vocab_count: 0, merge_left: [], merge_right: [], merge_count: 0, added_tokens: [], added_ids: [], added_count: 0, byte_level: false, unknown_id: 0, error_code: "tokenizer_not_found" } }
     string json = bpe_bytes_string(bytes)
     []string vocab_tokens = []string{cap: 200000}
     []int vocab_ids = []int{cap: 200000}
@@ -139,17 +193,47 @@ func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
             position = merge.next
         } else { position = position + 1 }
     }
-    hf_bpe_tokenizer tokenizer = hf_bpe_tokenizer { valid: vocab_count > 0, vocab_tokens: vocab_tokens, vocab_ids: vocab_ids, vocab_count: vocab_count, merge_left: merge_left, merge_right: merge_right, merge_count: merge_count, unknown_id: 0, error_code: "" }
+    []string added_tokens = []string{cap: 1024}
+    []int added_ids = []int{cap: 1024}
+    int added_count = 0
+    int added = bpe_find(json, "\"added_tokens\"", 0)
+    position = bpe_find(json, "[", added) + 1
+    while position > 0 && position < len(json) && json[position] != 93 {
+        int object = bpe_find(json, "{", position)
+        if object < 0 || object > bpe_find(json, "]", position) { position = len(json) } else {
+            int object_end = bpe_find(json, "}", object)
+            int content_key = bpe_find(json, "\"content\"", object)
+            int content_quote = bpe_find(json, "\"", bpe_find(json, ":", content_key) + 1)
+            bpe_string_result content = bpe_json_string(json, content_quote)
+            int id_key = bpe_find(json, "\"id\"", object)
+            bpe_int_result id = bpe_parse_int(json, bpe_find(json, ":", id_key) + 1)
+            if content_key < object_end && id_key < object_end { added_tokens[added_count] = content.value; added_ids[added_count] = id.value; added_count = added_count + 1 }
+            position = object_end + 1
+        }
+    }
+    hf_bpe_tokenizer tokenizer = hf_bpe_tokenizer { valid: vocab_count > 0, vocab_tokens: vocab_tokens, vocab_ids: vocab_ids, vocab_count: vocab_count, merge_left: merge_left, merge_right: merge_right, merge_count: merge_count, added_tokens: added_tokens, added_ids: added_ids, added_count: added_count, byte_level: bpe_find(json, "\"ByteLevel\"", 0) >= 0, unknown_id: 0, error_code: "" }
     tokenizer.unknown_id = bpe_vocab_id(tokenizer, "<unk>")
     tokenizer
 }
 
 func hf_bpe_encode(hf_bpe_tokenizer tokenizer, string text, int maximum_tokens) hf_bpe_result {
     if !tokenizer.valid || text == "" || maximum_tokens <= 0 { return hf_bpe_result { ok: false, token_ids: [], error_code: "invalid_bpe_input" } }
+    int special = 0
+    while special < tokenizer.added_count {
+        if text == tokenizer.added_tokens[special] {
+            []int special_ids = []int{cap: 1}
+            special_ids[0] = tokenizer.added_ids[special]
+            return hf_bpe_result { ok: true, token_ids: special_ids, error_code: "" }
+        }
+        special = special + 1
+    }
     []string symbols = []string{cap: len(text) + 1}
     int count = len(text)
     int i = 0
-    while i < count { symbols[i] = string(text[i]); i = i + 1 }
+    while i < count {
+        if tokenizer.byte_level { symbols[i] = bpe_byte_symbol(int(text[i])) } else { symbols[i] = string(text[i]) }
+        i = i + 1
+    }
     while count > 1 {
         int best = -1
         int best_rank = 2147483647
