@@ -255,3 +255,82 @@ app/mobile/**/android-build/
 .gradle/
 gradle/wrapper/gradle-wrapper.jar
 src/core/s/
+
+# New directory structure (post-refactoring 2026-08-23)
+
+# Backends - compiled code and outputs
+backends/*/build/
+backends/*/output/
+backends/*/logs/
+backends/*/cache/
+!backends/cann/cache/
+backends/*/checkpoints/
+backends/**/*.ir
+backends/**/*.o
+backends/**/*.a
+
+# Experimental - temporary implementations and tests
+experimental/*/output/
+experimental/*/logs/
+experimental/*/cache/
+experimental/**/*.ir
+
+# Compiler - build artifacts and cache
+src/compiler/*/cache/
+src/compiler/*/build/
+src/compiler/**/*.ir
+src/compiler/**/*.o
+
+# Distributed - coordination and consensus artifacts
+src/distributed/*/logs/
+src/distributed/*/checkpoints/
+src/distributed/**/*.cache
+
+# Models - downloaded and cached models
+src/models/*/cache/
+src/models/*/downloads/
+src/models/**/*.bin
+src/models/**/*.safetensors
+
+# Observability - metrics and profiling outputs
+src/observability/*/output/
+src/observability/*/logs/
+src/observability/**/*.metrics
+src/observability/**/*.prof
+src/observability/**/*.trace
+
+# Runtime - execution artifacts
+src/runtime/*/output/
+src/runtime/*/logs/
+src/runtime/*/cache/
+src/runtime/**/*.dump
+
+# Serving - service outputs and cache
+src/serving/*/cache/
+src/serving/*/logs/
+src/serving/**/*.cache
+
+# Training - training data, checkpoints and outputs
+src/training/data/**/*.jsonl
+src/training/*/output/
+src/training/*/logs/
+src/training/*/checkpoints/
+src/training/**/*.ckpt
+
+# Inference - inference outputs and cache
+src/inference/*/output/
+src/inference/*/logs/
+src/inference/*/cache/
+src/inference/**/*.ir
+
+# Testing - test outputs and fixtures
+tests/*/output/
+tests/*/logs/
+tests/**/*.tmp
+
+# Build and artifacts
+*.ir
+*.o
+*.a
+*.obj
+*.lib
