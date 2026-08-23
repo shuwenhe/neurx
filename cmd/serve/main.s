@@ -4,6 +4,7 @@ use neurx.inference.api.contracts.{inference_request}
 use neurx.inference.executor.native_executor.{native_execution_result}
 use neurx.serving.api.contracts.{serving_config, serving_validation_result, validate_serving_config}
 use neurx.serving.lifecycle.native_inference_service.{serve_native_inference}
+use neurx.serving.api.native_openai.{native_openai_response, serve_native_openai}
 
 func main() {
     serving_config config = serving_config {
@@ -30,7 +31,14 @@ func main() {
         prompt: prompt,
         max_tokens: runtime_parse_int(runtime_env_get("NEURX_MAX_TOKENS", "128"), 128),
         timeout_ms: config.request_timeout_ms,
-        stream: false,
+        stream: runtime_env_get("NEURX_STREAM", "false") == "true",
+    }
+    string route = runtime_env_get("NEURX_ROUTE", "native")
+    if route != "native" {
+        native_openai_response response = serve_native_openai(request, route, config.max_concurrency, 0)
+        if !response.ok { println(response.body); return 4 }
+        println(response.body)
+        return 0
     }
     native_execution_result result = serve_native_inference(request, config.max_concurrency, 0)
     if !result.ok {

@@ -59,6 +59,11 @@ test-commands: build-commands
 	@xxd -r -p tests/fixtures/embedding.safetensors.hex '$(COMMAND_IR_DIR)/embedding.safetensors'
 	@output=$$(NEURX_MODEL='$(COMMAND_IR_DIR)/embedding.safetensors' NEURX_PROMPT=AB NEURX_MAX_TOKENS=2 '$(COMMAND_BIN_DIR)/serve'); \
 		test "$$output" = "token:1" || { echo "serve: unexpected CPU transformer output: $$output" >&2; exit 1; }
+	@mkdir -p '$(COMMAND_IR_DIR)/hf-tiny'
+	@cp tests/fixtures/hf_tiny/config.json tests/fixtures/hf_tiny/tokenizer.json '$(COMMAND_IR_DIR)/hf-tiny/'
+	@xxd -r -p tests/fixtures/hf_tiny/model.safetensors.hex '$(COMMAND_IR_DIR)/hf-tiny/model.safetensors'
+	@output=$$(NEURX_MODEL='$(COMMAND_IR_DIR)/hf-tiny' NEURX_PROMPT=Hi NEURX_MAX_TOKENS=4 NEURX_ROUTE=openai-chat '$(COMMAND_BIN_DIR)/serve'); \
+		echo "$$output" | grep -q '"object":"chat.completion"' || { echo "serve: missing OpenAI chat response" >&2; exit 1; }
 	@echo "Command binary runtime contract tests passed."
 
 test-native-inference:

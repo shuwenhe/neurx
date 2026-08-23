@@ -19,6 +19,9 @@ func main() {
     if !bert.valid || !bert.bert_pre_tokenizer || !bert.normalizer_lowercase || !bert.normalizer_strip { return 1 }
     result = hf_bpe_encode(bert, "  Hi!  ", 8)
     if !result.ok || len(result.token_ids) != 2 || result.token_ids[0] != 3 || result.token_ids[1] != 4 { return 1 }
+    string normalized_input = "  " + string(239) + string(188) + string(168) + string(195) + string(173) + "!  "
+    result = hf_bpe_encode(bert, normalized_input, 8)
+    if !result.ok || len(result.token_ids) != 2 || result.token_ids[0] != 3 || result.token_ids[1] != 4 { return 1 }
     hf_bpe_tokenizer metaspace = load_hf_bpe_tokenizer("tests/fixtures/hf_tokenizers/metaspace")
     if !metaspace.valid || !metaspace.metaspace_pre_tokenizer { return 1 }
     result = hf_bpe_encode(metaspace, "Hi Hi", 8)

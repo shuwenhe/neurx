@@ -161,15 +161,14 @@ func load_hf_model(string model_dir) hf_model_weights {
     while layer < config.layers {
         hf_layer_weights weights = load_hf_model_layer(model_dir, layer)
         if !weights.valid { return invalid_hf_model(config, "layer_" + hf_int_string(layer) + "_" + weights.error_code) }
-        hf_copy_layer(input_norm, layer * config.hidden_size, weights.input_norm)
-        hf_copy_layer(q_proj, layer * hidden_square, weights.q_proj)
-        hf_copy_layer(k_proj, layer * kv_size, weights.k_proj)
-        hf_copy_layer(v_proj, layer * kv_size, weights.v_proj)
-        hf_copy_layer(o_proj, layer * hidden_square, weights.o_proj)
-        hf_copy_layer(post_norm, layer * config.hidden_size, weights.post_norm)
-        hf_copy_layer(gate_proj, layer * mlp_size, weights.gate_proj)
-        hf_copy_layer(up_proj, layer * mlp_size, weights.up_proj)
-        hf_copy_layer(down_proj, layer * mlp_size, weights.down_proj)
+        int i = 0
+        while i < config.hidden_size { input_norm[layer * config.hidden_size + i] = weights.input_norm[i]; post_norm[layer * config.hidden_size + i] = weights.post_norm[i]; i = i + 1 }
+        i = 0
+        while i < hidden_square { q_proj[layer * hidden_square + i] = weights.q_proj[i]; o_proj[layer * hidden_square + i] = weights.o_proj[i]; i = i + 1 }
+        i = 0
+        while i < kv_size { k_proj[layer * kv_size + i] = weights.k_proj[i]; v_proj[layer * kv_size + i] = weights.v_proj[i]; i = i + 1 }
+        i = 0
+        while i < mlp_size { gate_proj[layer * mlp_size + i] = weights.gate_proj[i]; up_proj[layer * mlp_size + i] = weights.up_proj[i]; down_proj[layer * mlp_size + i] = weights.down_proj[i]; i = i + 1 }
         layer = layer + 1
     }
     f32_tensor_result final_norm = hf_load_model_values(model_dir, "model.norm.weight")
