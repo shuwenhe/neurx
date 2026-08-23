@@ -1,67 +1,140 @@
 version: '3.8'
 
 services:
-  neurx-inference:
+  neurx-cpu:
     build:
-      context: /home/shuwen/shuwen
-      dockerfile: neurx/docker/Dockerfile.inference
-    container_name: neurx-inference
-    image: neurx-inference:latest
-    restart: unless-stopped
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    image: neurx:latest
+    container_name: neurx-inference-cpu
+    
+    network_mode: host
+    
     environment:
-      NEURX_BACKEND: "cpu"
-
-      NEURX_BATCH_SIZE: "4"
-      NEURX_NUM_WORKERS: "4"
-
-      NEURX_KV_BLOCKS: "64"
-      NEURX_KV_BLOCK_SIZE: "256"
-
-      NEURX_MODEL_PATH: "/opt/app/posttrain/model.safetensors"
-      NEURX_TOKENIZER_PATH: "/opt/app/posttrain/tokenizer.json"
-
-      NEURX_API_PORT: "8080"
-      NEURX_GRPC_PORT: "8081"
-      NEURX_METRICS_PORT: "9090"
-
-      NEURX_LOG_LEVEL: "INFO"
-
-    ports:
-      - "8080:8080"
-      - "8081:8081"
-      - "9090:9090"
-
+      NEURX_MODEL_DIR: /models/default
+      NEURX_INFER_DEVICE: cpu
+      NEURX_S_PORT: 8000
+      NEURX_S_HOST: 0.0.0.0
+      NEURX_CPU_THREADS: 4
+      NEURX_CHAT_MAX_NEW_TOKENS: 512
+    
     volumes:
-      - /home/shuwen/shuwen/posttrain:/opt/app/posttrain:ro
-
-      - ./logs:/var/log/neurx
-
-      - ./config:/etc/neurx:ro
-
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-
+      - /model/Qwen2.5-0.5B-Instruct:/models/default
+      - ./logs:/logs
+      - ./data:/data
+    
+    stdin_open: false
+    tty: false
+    
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 60s
+    
+    restart: unless-stopped
+    
+    command: start
 
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-        labels: "service=neurx-inference"
+  neurx-gpu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: neurx:latest-gpu
+    container_name: neurx-inference-gpu
+    
+    runtime: nvidia
+    network_mode: host
+    
+    environment:
+      NEURX_MODEL_DIR: /models/default
+      NEURX_INFER_DEVICE: gpu
+      NEURX_S_PORT: 8000
+      NEURX_S_HOST: 0.0.0.0
+      NEURX_CHAT_MAX_NEW_TOKENS: 512
+      NVIDIA_VISIBLE_DEVICES: all
+    
+    volumes:
+      - /model/Qwen2.5-0.5B-Instruct:/models/default
+      - ./logs:/logs
+      - ./data:/data
+    
+    stdin_open: false
+    tty: false
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    restart: unless-stopped
+    
+    command: start
+    
+    profiles:
+      - gpu
 
-volumes:
-  logs:
-    driver: local
-  config:
-    driver: local
+  neurx-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: neurx:latest
+    container_name: neurx-api-server
+    
+    network_mode: host
+    
+    environment:
+      NEURX_MODEL_DIR: /models/default
+      NEURX_INFER_DEVICE: cpu
+      NEURX_S_PORT: 8000
+      NEURX_S_HOST: 0.0.0.0
+      NEURX_CPU_THREADS: 8
+      NEURX_CHAT_MAX_NEW_TOKENS: 2048
+    
+    volumes:
+      - /model/Qwen2.5-0.5B-Instruct:/models/default
+      - ./logs:/logs
+      - ./data:/data
+    
+    stdin_open: false
+    tty: false
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    restart: unless-stopped
+    
+    command: api
+    
+    profiles:
+      - api
+
+  neurx-download:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: neurx:latest
+    container_name: neurx-download-models
+    
+    environment:
+      NEURX_MODEL_DIR: /models/default
+    
+    volumes:
+      - /model/Qwen2.5-0.5B-Instruct:/models/default
+      - ./logs:/logs
+    
+    entrypoint: ["/entrypoint.sh"]
+    command: ["download-model", "Qwen/Qwen2.5-0.5B-Instruct"]
+    
+    profiles:
+      - download
+
+

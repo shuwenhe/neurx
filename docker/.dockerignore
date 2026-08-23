@@ -1,44 +1,95 @@
+# Git
 .git
 .gitignore
 .gitattributes
 
-.vscode
-.idea
+# Build artifacts
+artifacts/*
+!artifacts/build
+build/
+dist/
+*.o
+*.so
+*.a
+*.lib
+*.exe
+
+# Development
+.vscode/
+.idea/
 *.swp
 *.swo
 *~
 .DS_Store
 
-*.o
-*.a
-*.so
+# Logs
+*.log
+logs/
+.vscode-server/
+
+# Cache
+.cache/
+__pycache__/
 *.pyc
-__pycache__
-*.egg-info
-dist/
-build/
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
 
-neurx/artifacts/build/
-neurx/artifacts/logs/
-neurx/checkpoint/
-neurx/output/
+# IDE
+.vscode
+.idea
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
 
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+docker/*.md
+docker/docker-compose.yml
+docker/build.sh
+docker/run.sh
+docker/test.sh
+
+# Models (don't include in image)
+models/
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Documentation
+docs/
+README.md
+*.md
+
+# Testing
+tests/
+test_*.s
+*_test.s
+.coverage
+
+# Node modules
+node_modules/
+package-lock.json
+yarn.lock
+
+# Python
 venv/
 env/
-*.egg
-pip-log.txt
+.python-version
 
-docs/
-examples/
-
-tests/
-test/
-
-*.tmp
-*.bak
-*.log
-*.pid
-
-.dockerignore
-Dockerfile*
-docker-compose*.yml
+# Misc
+*.tar
+*.tar.gz
+*.zip
+.env
+.env.local
