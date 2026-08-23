@@ -19,7 +19,7 @@ use neurx.tokenizer.real_bpe_tokenizer.{
     encode,
     decode,
 }
-use neurx.inference.generation_engine_adapter.{
+use neurx.inference.engine.generation_engine_adapter.{
     generation_engine,
     new_generation_engine,
     generate,

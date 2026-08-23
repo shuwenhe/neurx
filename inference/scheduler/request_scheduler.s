@@ -1,169 +1,181 @@
-package neurx.inference.vllm.request_scheduler
+package neurx.deploy.request_scheduler
 
-func scheduler_policy_fcfs() int { 1 }
-
-func scheduler_policy_priority() int { 2 }
-
-func scheduler_request_queued() int { 1 }
-
-func scheduler_request_running() int { 2 }
-
-func scheduler_request_preempted() int { 3 }
-
-func scheduler_request_finished() int { 4 }
-
-func scheduler_request_cancelled() int { 5 }
-
-struct vllm_scheduler_config {
-    int capacity
-    int policy
-    int maximum_running_requests
-    int maximum_batch_tokens
-    int aging_interval_steps
+func get_current_time_ms() int {
+    0
 }
 
-struct vllm_scheduler_state {
-    vllm_scheduler_config config
-    []int request_ids
-    []int priorities
-    []int arrival_steps
-    []int prompt_tokens
-    []int remaining_tokens
-    []int statuses
-    []int active
-    int request_count
-    int running_count
-    int completed_count
-    int cancelled_count
-    int preemption_count
-    int logical_step
+struct inference_request {
+    string request_id
+    string model_type
+    string prompt
+    int max_tokens
+    float temperature
+    float top_p
+    int batch_index
+    int submit_time
+    int start_time
+    int end_time
 }
 
-struct vllm_schedule_result {
-    vllm_scheduler_state state
-    int request_id
-    int scheduled_tokens
-    bool scheduled
+struct batch_item {
+    inference_request request
+    string status
+    string generated_text
+    int tokens_generated
 }
 
-func scheduler_int_array(int capacity) []int {
-    []int values = []int{cap: capacity}
-    int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
-    values
+struct request_batch {
+    []batch_item items
+    int batch_size
+    int max_batch_size
+    int created_time
+    int start_time
+    int end_time
+    string status
 }
 
-func new_vllm_scheduler(vllm_scheduler_config config) vllm_scheduler_state {
-    if config.capacity <= 0 { config.capacity = 1 }
-    if config.capacity > 8192 { config.capacity = 8192 }
-    if config.policy != scheduler_policy_priority() { config.policy = scheduler_policy_fcfs() }
-    if config.maximum_running_requests <= 0 { config.maximum_running_requests = 1 }
-    if config.maximum_batch_tokens <= 0 { config.maximum_batch_tokens = 1 }
-    if config.aging_interval_steps <= 0 { config.aging_interval_steps = 1 }
-    vllm_scheduler_state {config: config, request_ids: scheduler_int_array(config.capacity), priorities: scheduler_int_array(config.capacity), arrival_steps: scheduler_int_array(config.capacity), prompt_tokens: scheduler_int_array(config.capacity), remaining_tokens: scheduler_int_array(config.capacity), statuses: scheduler_int_array(config.capacity), active: scheduler_int_array(config.capacity), request_count: 0, running_count: 0, completed_count: 0, cancelled_count: 0, preemption_count: 0, logical_step: 0}
+struct request_queue {
+    []inference_request pending_requests
+    []request_batch active_batches
+    []request_batch completed_batches
+    int queue_max_size
+    int batch_max_size
+    int total_requests_processed
+    int total_batches_processed
 }
 
-func scheduler_find(vllm_scheduler_state state, int request_id) int {
-    int i = 0
-    while i < state.config.capacity {
-        if state.active[i] == 1 && state.request_ids[i] == request_id { return i }
-        i = i + 1
+func init_request_queue(int max_queue_size, int max_batch_size) request_queue {
+    request_queue queue
+    queue.queue_max_size = max_queue_size
+    queue.batch_max_size = max_batch_size
+    queue.total_requests_processed = 0
+    queue.total_batches_processed = 0
+    queue
+}
+
+func enqueue_request(request_queue queue, inference_request req) bool {
+    if len(queue.pending_requests) >= queue.queue_max_size {
+        print("❌ Queue is full! Max size: " + int_to_string(queue.queue_max_size) + "\n")
+        return false
     }
-    0 - 1
+    req.submit_time = get_current_time_ms()
+    queue.pending_requests = append(queue.pending_requests, req)
+    print("✓ Request enqueued: " + req.request_id + "\n")
+    true
 }
 
-func scheduler_enqueue(vllm_scheduler_state state, int request_id, int priority, int prompt_tokens, int maximum_output_tokens) vllm_scheduler_state {
-    if request_id <= 0 || prompt_tokens < 0 || maximum_output_tokens <= 0 || scheduler_find(state, request_id) >= 0 || state.request_count >= state.config.capacity { return state }
-    int slot = 0 - 1
-    int i = 0
-    while i < state.config.capacity {
-        if slot < 0 && state.active[i] == 0 { slot = i }
-        i = i + 1
+func dequeue_batch(request_queue queue) request_batch {
+    request_batch batch
+    batch.batch_size = 0
+    batch.max_batch_size = queue.batch_max_size
+    batch.created_time = get_current_time_ms()
+    batch.status = "created"
+    int num_to_dequeue = queue.batch_max_size
+    if len(queue.pending_requests) < queue.batch_max_size {
+        num_to_dequeue = len(queue.pending_requests)
     }
-    if slot < 0 { return state }
-    state.active[slot] = 1
-    state.request_ids[slot] = request_id
-    state.priorities[slot] = priority
-    state.arrival_steps[slot] = state.logical_step
-    state.prompt_tokens[slot] = prompt_tokens
-    state.remaining_tokens[slot] = prompt_tokens + maximum_output_tokens
-    state.statuses[slot] = scheduler_request_queued()
-    state.request_count = state.request_count + 1
-    state
-}
-
-func scheduler_effective_priority(vllm_scheduler_state state, int slot) int {
-    if state.config.policy == scheduler_policy_fcfs() { return state.arrival_steps[slot] }
-    int age = state.logical_step - state.arrival_steps[slot]
-    state.priorities[slot] - age / state.config.aging_interval_steps
-}
-
-func scheduler_next_slot(vllm_scheduler_state state) int {
-    int selected = 0 - 1
     int i = 0
-    while i < state.config.capacity {
-        bool ready = state.active[i] == 1 && (state.statuses[i] == scheduler_request_queued() || state.statuses[i] == scheduler_request_preempted())
-        if ready {
-            if selected < 0 || scheduler_effective_priority(state, i) < scheduler_effective_priority(state, selected) || (scheduler_effective_priority(state, i) == scheduler_effective_priority(state, selected) && state.arrival_steps[i] < state.arrival_steps[selected]) { selected = i }
+    while i < num_to_dequeue {
+        batch_item item
+        if i < len(queue.pending_requests) {
+            item.request = queue.pending_requests[i]
+            item.status = "pending"
         }
+        batch.items = append(batch.items, item)
         i = i + 1
     }
-    selected
+    batch.batch_size = num_to_dequeue
+    batch
 }
 
-func scheduler_schedule_next(vllm_scheduler_state state, int token_budget) vllm_schedule_result {
-    state.logical_step = state.logical_step + 1
-    int budget = token_budget
-    if budget > state.config.maximum_batch_tokens { budget = state.config.maximum_batch_tokens }
-    if budget <= 0 || state.running_count >= state.config.maximum_running_requests { return vllm_schedule_result {state: state, request_id: 0, scheduled_tokens: 0, scheduled: false} }
-    int slot = scheduler_next_slot(state)
-    if slot < 0 { return vllm_schedule_result {state: state, request_id: 0, scheduled_tokens: 0, scheduled: false} }
-    int scheduled_tokens = state.remaining_tokens[slot]
-    if scheduled_tokens > budget { scheduled_tokens = budget }
-    state.statuses[slot] = scheduler_request_running()
-    state.running_count = state.running_count + 1
-    vllm_schedule_result {state: state, request_id: state.request_ids[slot], scheduled_tokens: scheduled_tokens, scheduled: true}
+func get_queue_stats(request_queue queue) string {
+    string stats = ""
+    stats = stats + "📊 Queue Statistics:\n"
+    stats = stats + "  Pending requests: " + int_to_string(len(queue.pending_requests)) + "\n"
+    stats = stats + "  Active batches: " + int_to_string(len(queue.active_batches)) + "\n"
+    stats = stats + "  Completed batches: " + int_to_string(len(queue.completed_batches)) + "\n"
+    stats = stats + "  Total processed: " + int_to_string(queue.total_requests_processed) + "\n"
+    stats
 }
 
-func scheduler_complete_step(vllm_scheduler_state state, int request_id, int processed_tokens, bool finished) vllm_scheduler_state {
-    int slot = scheduler_find(state, request_id)
-    if slot < 0 || state.statuses[slot] != scheduler_request_running() { return state }
-    int used = processed_tokens
-    if used < 0 { used = 0 }
-    if used > state.remaining_tokens[slot] { used = state.remaining_tokens[slot] }
-    state.remaining_tokens[slot] = state.remaining_tokens[slot] - used
-    if state.running_count > 0 { state.running_count = state.running_count - 1 }
-    if finished || state.remaining_tokens[slot] == 0 {
-        state.statuses[slot] = scheduler_request_finished()
-        state.completed_count = state.completed_count + 1
-    } else {
-        state.statuses[slot] = scheduler_request_queued()
-    }
-    state
-}
-
-func scheduler_preempt_lowest(vllm_scheduler_state state) vllm_scheduler_state {
-    int selected = 0 - 1
+func process_batch(request_queue queue, request_batch batch) request_batch {
+    print("\n⚙️  Processing batch:\n")
+    print("  Batch size: " + int_to_string(batch.batch_size) + "\n")
+    print("  Status: " + batch.status + " → processing\n")
+    batch.status = "processing"
+    batch.start_time = get_current_time_ms()
     int i = 0
-    while i < state.config.capacity {
-        if state.active[i] == 1 && state.statuses[i] == scheduler_request_running() {
-            if selected < 0 || scheduler_effective_priority(state, i) > scheduler_effective_priority(state, selected) { selected = i }
-        }
+    while i < len(batch.items) {
+        batch.items[i].status = "processing"
+        string req_id = batch.items[i].request.request_id
+        int max_tokens = batch.items[i].request.max_tokens
+        print("    Processing request " + int_to_string(i+1) + "/" + int_to_string(batch.batch_size) + "\n")
+        print("      ID: " + req_id + "\n")
+        print("      Max tokens: " + int_to_string(max_tokens) + "\n")
+        batch.items[i].generated_text = "Generated response for " + req_id
+        batch.items[i].tokens_generated = max_tokens / 2
+        batch.items[i].status = "completed"
+        queue.total_requests_processed = queue.total_requests_processed + 1
         i = i + 1
     }
-    if selected >= 0 {
-        state.statuses[selected] = scheduler_request_preempted()
-        state.running_count = state.running_count - 1
-        state.preemption_count = state.preemption_count + 1
-    }
-    state
+    batch.end_time = get_current_time_ms()
+    batch.status = "completed"
+    print("  Status: processing → completed\n")
+    batch
 }
 
-func scheduler_cancel(vllm_scheduler_state state, int request_id) vllm_scheduler_state {
-    int slot = scheduler_find(state, request_id)
-    if slot < 0 || state.statuses[slot] == scheduler_request_finished() || state.statuses[slot] == scheduler_request_cancelled() { return state }
-    if state.statuses[slot] == scheduler_request_running() && state.running_count > 0 { state.running_count = state.running_count - 1 }
-    state.statuses[slot] = scheduler_request_cancelled()
-    state.cancelled_count = state.cancelled_count + 1
-    state
+func print_batch_results(request_batch batch) {
+    print("\n📋 Batch Results:\n")
+    print("  Batch ID: generated\n")
+    print("  Batch size: " + int_to_string(batch.batch_size) + "\n")
+    print("  Status: " + batch.status + "\n")
+    print("  Processing time: " + int_to_string(batch.end_time - batch.start_time) + " ms\n")
+    print("\n  Results:\n")
+    int i = 0
+    while i < len(batch.items) {
+        print("    [" + int_to_string(i+1) + "] " + batch.items[i].request.request_id + "\n")
+        print("        Generated text: " + batch.items[i].generated_text + "\n")
+        print("        Tokens: " + int_to_string(batch.items[i].tokens_generated) + "\n")
+        i = i + 1
+    }
+}
+
+func simulate_inference_queue() {
+    print("\n" + "="*60 + "\n")
+    print("🔄 Simulating Request Queue & Batch Processing\n")
+    print("="*60 + "\n\n")
+    request_queue queue = init_request_queue(100, 4)
+    print("✓ Queue initialized (max_queue: 100, max_batch: 4)\n\n")
+    print("📥 Adding requests to queue...\n")
+    int req_id = 1
+    while req_id <= 10 {
+        inference_request req
+        req.request_id = "req_" + int_to_string(req_id)
+        req.model_type = "text"
+        req.prompt = "What is AI?"
+        req.max_tokens = 100
+        req.temperature = 0.7
+        req.top_p = 0.9
+        enqueue_request(queue, req)
+        req_id = req_id + 1
+    }
+    print("\n" + get_queue_stats(queue) + "\n")
+    print("\n🔄 Processing batches...\n")
+    int batch_count = 0
+    while len(queue.pending_requests) > 0 {
+        batch_count = batch_count + 1
+        print("Batch " + int_to_string(batch_count) + ":\n")
+        request_batch batch = dequeue_batch(queue)
+        batch = process_batch(queue, batch)
+        print_batch_results(batch)
+        if batch_count >= 3 {
+            break
+        }
+    }
+    print("\n" + get_queue_stats(queue) + "\n")
+    print("="*60 + "\n")
+}
+
+func main() {
+    simulate_inference_queue()
 }

@@ -38,7 +38,7 @@ use neurx.inference.real_sampling.{
     next_float,
     next_uint,
 }
-use neurx.inference.generation_engine_adapter.{
+use neurx.inference.engine.generation_engine_adapter.{
     generation_engine,
     new_generation_engine,
     generate,
