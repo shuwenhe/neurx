@@ -1,4 +1,5 @@
 package neurx.inference.tokenizer.hf_bpe_tokenizer
+use neurx.core.unicode.normalization.{unicode_database, load_unicode_database, unicode_nfc, unicode_nfkc}
 extern "intrinsic" func __host_read_binary_file(string path) []int
 
 struct hf_bpe_tokenizer {
@@ -65,6 +66,12 @@ func bpe_utf8(int codepoint) string {
         output = output + string(192 + codepoint / 64)
         output = output + string(128 + codepoint % 64)
         return output
+    }
+    if codepoint >= 65536 {
+        output = output + string(240 + codepoint / 262144)
+        output = output + string(128 + codepoint / 4096 % 64)
+        output = output + string(128 + codepoint / 64 % 64)
+        return output + string(128 + codepoint % 64)
     }
     output = output + string(224 + codepoint / 4096)
     output = output + string(128 + codepoint / 64 % 64)
@@ -218,21 +225,23 @@ func bpe_latin_accent(int lead, int tail) int {
 }
 
 func bpe_normalize(hf_bpe_tokenizer tokenizer, string text) string {
+    string normalized = text
+    if tokenizer.unicode_normalizer != "" {
+        unicode_database database = load_unicode_database("configs/unicode")
+        if tokenizer.unicode_normalizer == "NFKC" { normalized = unicode_nfkc(database, normalized) } else { normalized = unicode_nfc(database, normalized) }
+    }
     int start = 0
-    int end = len(text)
+    int end = len(normalized)
     if tokenizer.normalizer_strip {
-        while start < end && bpe_is_space(text[start]) { start = start + 1 }
-        while end > start && bpe_is_space(text[end - 1]) { end = end - 1 }
+        while start < end && bpe_is_space(normalized[start]) { start = start + 1 }
+        while end > start && bpe_is_space(normalized[end - 1]) { end = end - 1 }
     }
     string output = ""
     int i = start
     while i < end {
-        int byte = text[i]
-        if tokenizer.unicode_normalizer == "NFKC" && i + 1 < end && byte == 194 && text[i + 1] == 160 { byte = 32; i = i + 1 }
-        else if tokenizer.unicode_normalizer == "NFKC" && i + 2 < end && byte == 239 && text[i + 1] == 188 && text[i + 2] >= 129 { byte = text[i + 2] - 96; i = i + 2 }
-        else if tokenizer.unicode_normalizer == "NFKC" && i + 2 < end && byte == 239 && text[i + 1] == 189 && text[i + 2] >= 128 && text[i + 2] <= 158 { byte = text[i + 2] - 32; i = i + 2 }
-        else if tokenizer.bert_strip_accents && i + 1 < end {
-            int accent = bpe_latin_accent(byte, text[i + 1])
+        int byte = normalized[i]
+        if tokenizer.bert_strip_accents && i + 1 < end {
+            int accent = bpe_latin_accent(byte, normalized[i + 1])
             if accent >= 0 { byte = accent; i = i + 1 }
         }
         if tokenizer.bert_clean_text && (byte == 0 || byte == 127 || byte < 32) { byte = 32 }
