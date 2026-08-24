@@ -1,4 +1,4 @@
-# NeurX - High-Performance LLM Inference Engine
+# NeurX - High-Performance LLM Training & Inference Engine
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Language: S](https://img.shields.io/badge/Language-S-blue.svg)](#)
