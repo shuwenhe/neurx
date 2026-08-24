@@ -38,7 +38,7 @@ struct dsl_function_def {
     string description
 }
 
-func NewDslProgram(
+func new_dsl_program(
     string program_id,
     string program_name,
 ) dsl_program {
@@ -51,11 +51,11 @@ func NewDslProgram(
     }
 }
 
-func (dsl_program* prog) AddStatement(stmt dsl_statement) {
+func (dsl_program* prog) add_statement(stmt dsl_statement) {
     prog.statements = append(prog.statements, stmt)
 }
 
-func (dsl_program* prog) SetVariable(
+func (dsl_program* prog) set_variable(
     string name,
     any value,
     string var_type,
@@ -64,14 +64,14 @@ func (dsl_program* prog) SetVariable(
     prog.types[name] = var_type
 }
 
-func (dsl_program* prog) GetVariable(string name) any {
+func (dsl_program* prog) get_variable(string name) any {
     if val, ok := prog.state[name]; ok {
         return val
     }
     return nil
 }
 
-func CreateLlmCallStatement(
+func create_llm_call_statement(
     string prompt,
     string model_name,
     int max_tokens,
@@ -92,7 +92,7 @@ func CreateLlmCallStatement(
     return stmt
 }
 
-func CreateAssignmentStatement(
+func create_assignment_statement(
     string variable,
     string value,
 ) dsl_statement {
@@ -106,7 +106,7 @@ func CreateAssignmentStatement(
     }
 }
 
-func CreateLoopStatement(
+func create_loop_statement(
     string loop_var,
     string collection,
     int num_iterations,
@@ -123,7 +123,7 @@ func CreateLoopStatement(
     return stmt
 }
 
-func CreateFunctionCallStatement(
+func create_function_call_statement(
     string function_name,
     []string args,
 ) dsl_statement {
@@ -142,7 +142,7 @@ struct dsl_interpreter {
     map[string]dsl_function_def functions
 }
 
-func NewDslInterpreter(prog dsl_program) dsl_interpreter {
+func new_dsl_interpreter(prog dsl_program) dsl_interpreter {
     return dsl_interpreter {
         context: dsl_execution_context {
             program: prog,
@@ -155,7 +155,7 @@ func NewDslInterpreter(prog dsl_program) dsl_interpreter {
     }
 }
 
-func (dsl_interpreter* interp) ExecuteStatement(
+func (dsl_interpreter* interp) execute_statement(
     stmt dsl_statement,
 ) (any, bool) {
     interp.context.execution_trace = append(
@@ -231,7 +231,7 @@ func (dsl_interpreter* interp) execute_function_call(
     return nil, false
 }
 
-func (dsl_interpreter* interp) ExecuteProgram() (map[string]any, bool) {
+func (dsl_interpreter* interp) execute_program() (map[string]any, bool) {
     for i := 0; i < len(interp.context.program.statements); i++ {
         stmt := interp.context.program.statements[i]
         _, success := interp.ExecuteStatement(stmt)
@@ -244,7 +244,7 @@ func (dsl_interpreter* interp) ExecuteProgram() (map[string]any, bool) {
     return interp.context.current_state, true
 }
 
-func (dsl_interpreter* interp) GetExecutionTrace() []string {
+func (dsl_interpreter* interp) get_execution_trace() []string {
     return interp.context.execution_trace
 }
 
@@ -257,18 +257,18 @@ func parse_int(string s) int {
 }
 
 func main() {
-    prog := NewDslProgram("prog-1", "Medical Assistant")
-    prog.SetVariable("user_input", "What is diabetes?", "string")
-    llm_call := CreateLlmCallStatement(
+    prog := new_dsl_program("prog-1", "Medical Assistant")
+    prog.set_variable("user_input", "What is diabetes?", "string")
+    llm_call := create_llm_call_statement(
         "What is diabetes?",
         "qwen",
         200,
     )
-    prog.AddStatement(llm_call)
-    assign := CreateAssignmentStatement("result", "llm_response")
-    prog.AddStatement(assign)
-    interp := NewDslInterpreter(prog)
-    result, success := interp.ExecuteProgram()
+    prog.add_statement(llm_call)
+    assign := create_assignment_statement("result", "llm_response")
+    prog.add_statement(assign)
+    interp := new_dsl_interpreter(prog)
+    result, success := interp.execute_program()
     println("Success:", success)
     println("State:", len(result))
 }
