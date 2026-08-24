@@ -1662,7 +1662,7 @@ build-production-example-s: check-bash build-production-training-s
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/production_training'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_example.ir'; \
-		$(S_SEED_COMPILER) 'examples/production_training_example.s' '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_example.ir' 2>&1 || exit 1
+		$(S_SEED_COMPILER) 'example/production_training_example.s' '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_example.ir' 2>&1 || exit 1
 	@test -f '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_example.ir'
 	@echo "✓ Production Training Examples compiled successfully"
 production-training: build-production-example-s
