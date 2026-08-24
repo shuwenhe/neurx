@@ -12,6 +12,7 @@ extern "libc:neurx_device_copy" func neurx_device_copy(int context, int destinat
 extern "libc:neurx_device_stream_create" func neurx_device_stream_create(int context, int priority) int
 extern "libc:neurx_device_stream_destroy" func neurx_device_stream_destroy(int context, int stream) int
 extern "libc:neurx_device_op_create" func neurx_device_op_create(int context, string op_descriptor) int
+extern "libc:neurx_device_op_destroy" func neurx_device_op_destroy(int context, int operation) int
 extern "libc:neurx_device_op_launch" func neurx_device_op_launch(int context, int operation, int stream, string bindings) int
 extern "libc:neurx_device_synchronize" func neurx_device_synchronize(int context, int stream) int
 extern "libc:neurx_device_last_error" func neurx_device_last_error(int context) string
@@ -93,4 +94,29 @@ func device_new_stream(device_context context, int priority) device_stream {
     if !context.valid { return device_stream {handle: 0, context_handle: 0, valid: false} }
     int handle = neurx_device_stream_create(context.handle, priority)
     device_stream {handle: handle, context_handle: context.handle, valid: handle > 0}
+}
+
+func device_release_stream(device_stream stream) int {
+    if !stream.valid { return 0 }
+    neurx_device_stream_destroy(stream.context_handle, stream.handle)
+}
+
+struct device_operation {
+    int handle
+    int context_handle
+    string descriptor
+    bool valid
+}
+
+func device_new_operation(device_context context, string descriptor) device_operation {
+    if !context.valid || len(descriptor) == 0 {
+        return device_operation {handle: 0, context_handle: 0, descriptor: descriptor, valid: false}
+    }
+    int handle = neurx_device_op_create(context.handle, descriptor)
+    device_operation {handle: handle, context_handle: context.handle, descriptor: descriptor, valid: handle > 0}
+}
+
+func device_release_operation(device_operation operation) int {
+    if !operation.valid { return 0 }
+    neurx_device_op_destroy(operation.context_handle, operation.handle)
 }

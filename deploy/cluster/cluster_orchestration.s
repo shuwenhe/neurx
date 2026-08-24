@@ -554,7 +554,7 @@ func cluster_generate_slurm_script(cluster_deployment_spec spec) string {
 
 func cluster_generate_kubernetes_yaml(cluster_deployment_spec spec) string {
     []string lines = []string{cap: 40}
-    lines.push("apiVersion: apps/v1")
+    lines.push("apiVersion: app/v1")
     lines.push("kind: StatefulSet")
     lines.push("metadata:")
     lines.push("  name: " + spec.deployment_name)

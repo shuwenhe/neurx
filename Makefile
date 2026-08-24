@@ -186,6 +186,7 @@ device-abi-contract-test: build-s-ir-runner $(S_REPO_ROOT)/bin/s_seed
 	@$(S_SEED_COMPILER) src/runtime/device/device_abi.s artifact/build/device_abi_test/device_abi.ir
 	@$(S_SEED_COMPILER) src/runtime/device/device_tensor.s artifact/build/device_abi_test/device_tensor.ir
 	@$(S_SEED_COMPILER) src/runtime/device/device_ops.s artifact/build/device_abi_test/device_ops.ir
+	@$(S_SEED_COMPILER) src/runtime/device/device_binding.s artifact/build/device_abi_test/device_binding.ir
 	@$(S_SEED_COMPILER) src/runtime/device/vendor_lowering.s artifact/build/device_abi_test/vendor_lowering.ir
 	@$(S_SEED_COMPILER) src/inference/runtime/device_transformer.s artifact/build/device_abi_test/device_transformer.ir
 	@$(S_SEED_COMPILER) --link-ir artifact/build/device_abi_test/linked.ir \
@@ -193,9 +194,37 @@ device-abi-contract-test: build-s-ir-runner $(S_REPO_ROOT)/bin/s_seed
 		artifact/build/device_abi_test/device_abi.ir \
 		artifact/build/device_abi_test/device_tensor.ir \
 		artifact/build/device_abi_test/device_ops.ir \
+		artifact/build/device_abi_test/device_binding.ir \
 		artifact/build/device_abi_test/vendor_lowering.ir \
 		artifact/build/device_abi_test/device_transformer.ir
 	@'$(S_RUNNER_BIN)' artifact/build/device_abi_test/linked.ir
+
+DEVICE_ABI_BUILD_DIR := $(CURDIR_UNIX)/artifact/build/device_abi
+DEVICE_ABI_COMMON_LIB := $(DEVICE_ABI_BUILD_DIR)/libneurx_device.so
+DEVICE_ABI_CUDA_PLUGIN := $(DEVICE_ABI_BUILD_DIR)/libneurx_backend_cuda.so
+DEVICE_ABI_CANN_PLUGIN := $(DEVICE_ABI_BUILD_DIR)/libneurx_backend_cann.so
+
+.PHONY: device-abi-build device-abi-probe-test
+device-abi-build: $(DEVICE_ABI_COMMON_LIB) $(DEVICE_ABI_CANN_PLUGIN) $(if $(shell command -v $(CUDA_NVCC) 2>/dev/null),$(DEVICE_ABI_CUDA_PLUGIN))
+
+$(DEVICE_ABI_BUILD_DIR):
+	@mkdir -p '$@'
+
+$(DEVICE_ABI_COMMON_LIB): backend/common/device_abi_registry.cpp backend/api/device_abi.h backend/api/device_plugin_abi.h | $(DEVICE_ABI_BUILD_DIR)
+	@$(CXX) -O2 -std=c++17 -fPIC -shared -Ibackend/api '$<' -ldl -o '$@'
+
+$(DEVICE_ABI_CANN_PLUGIN): backend/cann/device_abi_cann.cpp backend/cann/runtime/acl_dynamic.h backend/api/device_plugin_abi.h | $(DEVICE_ABI_BUILD_DIR)
+	@$(CXX) -O2 -std=c++17 -fPIC -shared -Ibackend/api '$<' -ldl -o '$@'
+
+$(DEVICE_ABI_CUDA_PLUGIN): backend/cuda/device_abi_cuda.cu backend/api/device_plugin_abi.h | $(DEVICE_ABI_BUILD_DIR)
+	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -Xcompiler=-fPIC -shared -Ibackend/api '$<' -o '$@'
+
+$(DEVICE_ABI_BUILD_DIR)/device_abi_registry_test: test/contract/device_abi_registry_test.cpp $(DEVICE_ABI_COMMON_LIB) | $(DEVICE_ABI_BUILD_DIR)
+	@$(CXX) -O2 -std=c++17 -Ibackend/api '$<' -L'$(DEVICE_ABI_BUILD_DIR)' -lneurx_device -Wl,-rpath,'$(DEVICE_ABI_BUILD_DIR)' -o '$@'
+
+device-abi-probe-test: device-abi-build $(DEVICE_ABI_BUILD_DIR)/device_abi_registry_test
+	@NEURX_BACKEND_PLUGIN_DIR='$(DEVICE_ABI_BUILD_DIR)' '$(DEVICE_ABI_BUILD_DIR)/device_abi_registry_test' cann
+	@if [ -f '$(DEVICE_ABI_CUDA_PLUGIN)' ]; then NEURX_BACKEND_PLUGIN_DIR='$(DEVICE_ABI_BUILD_DIR)' '$(DEVICE_ABI_BUILD_DIR)/device_abi_registry_test' cuda; fi
 
 help:
 	@echo ""

@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: app/v1
 kind: Deployment
 metadata:
   name: neurx-inference-cuda
@@ -55,7 +55,7 @@ api_version: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata: {name: neurx-inference-cuda}
 spec:
-  scaleTargetRef: {api_version: apps/v1, kind: Deployment, name: neurx-inference-cuda}
+  scaleTargetRef: {api_version: app/v1, kind: Deployment, name: neurx-inference-cuda}
   min_replicas: 2
   max_replicas: 20
   behavior:

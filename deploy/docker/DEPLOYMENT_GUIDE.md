@@ -71,7 +71,7 @@ docker run -it \
 ```yaml
 # kubernetes/neurx-deployment.yaml
 
-apiVersion: apps/v1
+apiVersion: app/v1
 kind: Deployment
 metadata:
   name: neurx-inference

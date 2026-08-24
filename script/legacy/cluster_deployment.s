@@ -134,7 +134,7 @@ func (cluster_manager* manager) deploy_via_kubernetes(deployment deployment_spec
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Kubernetes Deployment                 │")
     fmt.Println("└────────────────────────────────────────┘\n")
-    fmt.Printf("apiVersion: apps/v1\n")
+    fmt.Printf("apiVersion: app/v1\n")
     fmt.Printf("kind: Deployment\n")
     fmt.Printf("metadata:\n")
     fmt.Printf("  name: %s\n", deployment.deployment_name)

@@ -251,7 +251,7 @@ services:
 ### 2. Kubernetes 部署
 
 ```yaml
-apiVersion: apps/v1
+apiVersion: app/v1
 kind: Deployment
 metadata:
   name: neurx-inference
