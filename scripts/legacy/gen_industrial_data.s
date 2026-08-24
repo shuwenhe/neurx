@@ -5,7 +5,7 @@ use std.io.println
 func main() {
     let root = runtime_env_get("NEURX_ROOT", ".")
     println("NeurX S entry: gen_industrial_data")
-    let command = "make -C " + runtime_shell_escape(root) + " -f Makefile -f configs/Makefile.large_models data-pipeline-s"
+    let command = "make -C " + runtime_shell_escape(root) + " -f Makefile -f config/Makefile.large_models data-pipeline-s"
     if !runtime_run_command(command).ok {
         println("error: gen_industrial_data failed")
         return 1

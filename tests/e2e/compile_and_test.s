@@ -277,7 +277,7 @@ func main() {
     println("   sbatch deploy/production/scripts/slurm_submit.sh")
     println("")
     println("5. KUBERNETES DEPLOYMENT:")
-    println("   kubectl apply -f deploy/production/configs/kubernetes_deployment.yaml")
+    println("   kubectl apply -f deploy/production/config/kubernetes_deployment.yaml")
     println("")
     println(strings.repeat("═", 65))
     println("")

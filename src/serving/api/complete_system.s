@@ -323,7 +323,7 @@ func show_usage_examples():
 ║
 ║  start_neurx_training(                                        ║
 ║      mode="pretrain",                                         ║
-║      config_path="./configs/my_neurx_config.json",                ║
+║      config_path="./config/my_neurx_config.json",                ║
 ║      resume_from="./checkpoints/step_10000/"                   ║
 ║  )                                                           ║
 ║                                                              ║
@@ -332,7 +332,7 @@ func show_usage_examples():
 ║                                                              ║
 ║
 ║  start_neurx_training(mode="sft",                             ║
-║      config_path="./configs/sft_config.json"                    ║
+║      config_path="./config/sft_config.json"                    ║
 ║  )                                                           ║
 ║                                                              ║
 ║  ══════════════════════════════════════════════════════════  ║
@@ -340,7 +340,7 @@ func show_usage_examples():
 ║                                                              ║
 ║
 ║  start_neurx_training(mode="align",                            ║
-║      config_path="./configs/dpo_config.json"                    ║
+║      config_path="./config/dpo_config.json"                    ║
 ║  )                                                           ║
 ║                                                              ║
 ║

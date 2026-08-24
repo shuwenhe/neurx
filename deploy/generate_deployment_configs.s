@@ -323,7 +323,7 @@ func main() {
     println("")
     println("📁 Creating directories...")
     println("  ✅ deploy/production/scripts/")
-    println("  ✅ deploy/production/configs/")
+    println("  ✅ deploy/production/config/")
     println("")
     println("🔧 GENERATING DEPLOYMENT ARTIFACTS:")
     println("─" + strings.repeat("─", 61))
@@ -343,7 +343,7 @@ func main() {
         println("  ✅ Kubernetes deployment manifest generated")
     }
     println("")
-    let cluster_ok = generate_cluster_config(config, "deploy/production/configs/cluster_config.json")
+    let cluster_ok = generate_cluster_config(config, "deploy/production/config/cluster_config.json")
     if cluster_ok {
         println("  ✅ Cluster configuration generated")
     }
@@ -358,7 +358,7 @@ func main() {
     println("    │   ├── slurm_submit.sh          (SLURM job submission)")
     println("    │   ├── launch_training.sh       (Training launcher)")
     println("    │   └── monitor_training.sh      (Performance monitor)")
-    println("    ├── configs/")
+    println("    ├── config/")
     println("    │   ├── cluster_config.json      (Cluster topology)")
     println("    │   └── kubernetes_deployment.yaml (K8s manifest)")
     println("    ├── docker-compose.yml           (Docker Compose)")

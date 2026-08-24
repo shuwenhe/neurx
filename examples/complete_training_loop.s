@@ -1112,13 +1112,13 @@ func print_config_pretty(training_config cfg):
     }
 func log_model_summary(logger lg, transformer_model model, training_config cfg):
     """Log model architecture summary"""
-    log_scalar(&lg, "configs/neurx/vocab_size", float(cfg.vocab_size), 0, {})
-    log_scalar(&lg, "configs/neurx/d_model", float(cfg.d_model), 0, {})
-    log_scalar(&lg, "configs/neurx/n_layers", float(cfg.n_layers), 0, {})
-    log_scalar(&lg, "configs/neurx/n_heads", float(cfg.n_heads), 0, {})
-    log_scalar(&lg, "configs/neurx/parameters", float(count_parameters(model)), 0, {})
-    log_scalar(&lg, "configs/neurx/batch_size", float(cfg.batch_size), 0, {})
-    log_scalar(&lg, "configs/neurx/learning_rate", cfg.learning_rate, 0, {})
+    log_scalar(&lg, "config/neurx/vocab_size", float(cfg.vocab_size), 0, {})
+    log_scalar(&lg, "config/neurx/d_model", float(cfg.d_model), 0, {})
+    log_scalar(&lg, "config/neurx/n_layers", float(cfg.n_layers), 0, {})
+    log_scalar(&lg, "config/neurx/n_heads", float(cfg.n_heads), 0, {})
+    log_scalar(&lg, "config/neurx/parameters", float(count_parameters(model)), 0, {})
+    log_scalar(&lg, "config/neurx/batch_size", float(cfg.batch_size), 0, {})
+    log_scalar(&lg, "config/neurx/learning_rate", cfg.learning_rate, 0, {})
 func save_best_model(transformer_model model, optimizer opt, int step,
                      string dir, float val_loss):
     """Save best model checkpoint based on validation performance"""

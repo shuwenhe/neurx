@@ -5,7 +5,7 @@ use std.io.println
 func main() {
     let root = runtime_env_get("NEURX_ROOT", ".")
     println("NeurX S entry: demo_chat")
-    let command = "make -C " + runtime_shell_escape(root) + " -f Makefile -f configs/Makefile.large_models run-interactive-inference-s"
+    let command = "make -C " + runtime_shell_escape(root) + " -f Makefile -f config/Makefile.large_models run-interactive-inference-s"
     if !runtime_run_command(command).ok {
         println("error: demo_chat failed")
         return 1

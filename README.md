@@ -63,7 +63,7 @@ neurx/
 │   ├── serving/          # Serving APIs (OpenAI compatible)
 │   └── training/         # Training infrastructure
 ├── tests/                # Contract and unit tests
-├── configs/              # Configuration examples
+├── config/              # Configuration examples
 ├── benchmarks/           # Performance benchmarking
 ├── cmd/                  # Command-line entry points
 │   ├── train/           # Training command
@@ -140,7 +140,7 @@ make profile
 ## 📝 Configuration
 
 ### Server Configuration
-Create `configs/inference/serve.example`:
+Create `config/inference/serve.example`:
 ```
 host: 0.0.0.0
 port: 8000
@@ -153,7 +153,7 @@ quantization: int8
 ```
 
 ### Training Configuration
-Create `configs/training/train.example`:
+Create `config/training/train.example`:
 ```
 model_size: 1b
 batch_size: 128
@@ -292,7 +292,7 @@ kubectl apply -f deploy/k8s/neurx-service.yaml
 ### Distributed Cluster
 ```bash
 # Start controller
-./cmd/controller/main.s --config configs/clusters/controller.example
+./cmd/controller/main.s --config config/clusters/controller.example
 
 # Start workers
 ./cmd/worker/main.s --controller-addr controller:9000
@@ -301,7 +301,7 @@ kubectl apply -f deploy/k8s/neurx-service.yaml
 ## 📈 Performance Tuning
 
 ### Cache Configuration
-- Adjust cache size in `configs/inference/serve.example`
+- Adjust cache size in `config/inference/serve.example`
 - Enable cache compression for memory constraints
 - Set prefetch threshold based on workload patterns
 

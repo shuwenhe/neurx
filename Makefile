@@ -87,7 +87,7 @@ CUDA_CHAT_BRIDGE_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/cuda_chat
 CUDA_CHAT_BRIDGE_BIN := $(CUDA_CHAT_BRIDGE_BUILD_DIR)/neurx_transformer_chat$(BIN_EXT)
 ASCEND_HOME_DEFAULT ?= /usr/local/ascend/ascend-toolkit/latest
 ASCEND_SOC_VERSION ?= ascend_910_b_1
-NPU_PRETRAIN_CONFIG ?= $(CURDIR_UNIX)/cann/configs/ascend_910b_train.json
+NPU_PRETRAIN_CONFIG ?= $(CURDIR_UNIX)/cann/config/ascend_910b_train.json
 NPU_PRETRAIN_MASTER_ADDR ?= 112.29.145.3
 NPU_PRETRAIN_MASTER_PORT ?= 29500
 NPU_PRETRAIN_WORKER_HOST ?= root@112.29.145.15
@@ -365,7 +365,7 @@ pretrain-gpu-legacy: check-bash
 pretrain-gpu-resume: pretrain-gpu
 	@echo "Resume mode enabled by default"
 pretrain-gpu-multinode: check-bash build-cuda-train-bridge
-	@NEURX_HOSTFILE="$${NEURX_HOSTFILE:-$(CURDIR_UNIX)/configs/pretrain.hosts}" \
+	@NEURX_HOSTFILE="$${NEURX_HOSTFILE:-$(CURDIR_UNIX)/config/pretrain.hosts}" \
 	NEURX_SHARED_NCCL_ID_FILE="$${NEURX_SHARED_NCCL_ID_FILE:-$(CURDIR_UNIX)/artifacts/nccl/unique_id}" \
 	MASTER_PORT="$${MASTER_PORT:-29500}" \
 	s run $(CURDIR_UNIX)/scripts/legacy/launch_multinode_pretrain.s

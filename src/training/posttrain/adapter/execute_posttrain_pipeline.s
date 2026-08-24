@@ -103,7 +103,7 @@ func step_verify_environment() int {
     println("    /home/shuwen/shuwen/train/dataset/medmcqa/val.jsonl")
     println("")
     println("  ✓ configurationfile")
-    println("    /home/shuwen/shuwen/train/neurx/configs/posttrain.yaml")
+    println("    /home/shuwen/shuwen/train/neurx/config/posttrain.yaml")
     println("")
     println("  ✓ S compiledevice")
     println("    /home/shuwen/shuwen/train/s/bin/s_seed")

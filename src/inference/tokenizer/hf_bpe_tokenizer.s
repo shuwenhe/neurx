@@ -374,7 +374,7 @@ func load_hf_bpe_tokenizer(string model_dir) hf_bpe_tokenizer {
     string unicode_normalizer = ""
     if bpe_find(json, "\"NFKC\"", 0) >= 0 { unicode_normalizer = "NFKC" } else if bpe_find(json, "\"NFC\"", 0) >= 0 { unicode_normalizer = "NFC" }
     unicode_database unicode_db = empty_unicode_database()
-    if unicode_normalizer != "" { unicode_db = load_unicode_database("configs/unicode") }
+    if unicode_normalizer != "" { unicode_db = load_unicode_database("config/unicode") }
     hf_bpe_tokenizer tokenizer = hf_bpe_tokenizer { valid: vocab_count > 0 && (unicode_normalizer == "" || unicode_db.valid), vocab_tokens: vocab_tokens, vocab_ids: vocab_ids, vocab_count: vocab_count, merge_left: merge_left, merge_right: merge_right, merge_count: merge_count, added_tokens: added_tokens, added_ids: added_ids, added_count: added_count, byte_level: bpe_find(json, "\"ByteLevel\"", 0) >= 0, bert_pre_tokenizer: bpe_find(json, "\"BertPreTokenizer\"", 0) >= 0, metaspace_pre_tokenizer: bpe_find(json, "\"Metaspace\"", 0) >= 0, normalizer_lowercase: bpe_find(json, "\"Lowercase\"", 0) >= 0 || bpe_json_true(json, "\"lowercase\"", 0) || bpe_json_true(json, "\"lower_case\"", 0), normalizer_strip: bpe_find(json, "\"Strip\"", 0) >= 0, bert_clean_text: bpe_json_true(json, "\"clean_text\"", 0), bert_strip_accents: bpe_json_true(json, "\"strip_accents\"", 0), byte_level_trim_offsets: bpe_json_true(json, "\"trim_offsets\"", 0), unicode_normalizer: unicode_normalizer, unicode_db: unicode_db, metaspace_replacement: metaspace_replacement, bos_id: -1, eos_id: -1, pad_id: -1, unknown_id: 0, error_code: "" }
     tokenizer.unknown_id = bpe_vocab_id(tokenizer, "<unk>")
     tokenizer.bos_id = bpe_first_token_id(tokenizer, "<s>", "[CLS]", "<|begin_of_text|>")

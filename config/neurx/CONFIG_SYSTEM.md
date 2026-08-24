@@ -428,7 +428,7 @@ All 5 modules implemented (1,550 lines total):
 
 ```
 neurx/
-├── configs/neurx/
+├── config/neurx/
 │   ├── hardware_detector.s         (Device detection)
 │   ├── device_config.s             (Config management)
 │   ├── config_validator.s          (Validation engine)

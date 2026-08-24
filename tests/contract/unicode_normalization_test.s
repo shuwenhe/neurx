@@ -2,7 +2,7 @@ package main
 use neurx.core.unicode.normalization.{unicode_database, load_unicode_database, unicode_nfc, unicode_nfkc}
 
 func main() {
-    unicode_database database = load_unicode_database("configs/unicode")
+    unicode_database database = load_unicode_database("config/unicode")
     if !database.valid || database.version != "17.0.0" { return 1 }
     string ring = "A" + string(204) + string(138)
     string composed_ring = "" + string(195) + string(133)

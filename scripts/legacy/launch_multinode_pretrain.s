@@ -64,7 +64,7 @@ func main() {
     }
     hostfile := os.Getenv("NEURX_HOSTFILE")
     if hostfile == "" {
-        hostfile = root + "/configs/pretrain.hosts"
+        hostfile = root + "/config/pretrain.hosts"
     }
     config := multi_node_config_2{
         root: root,

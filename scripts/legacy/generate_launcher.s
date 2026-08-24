@@ -37,7 +37,7 @@ func load_config_from_env() training_config {
     cfg.root_dir = root
     cfg.hostfile = os::getenv("NEURX_HOSTFILE")
     if cfg.hostfile == "" {
-        cfg.hostfile = root + "/configs/pretrain.hosts"
+        cfg.hostfile = root + "/config/pretrain.hosts"
     }
     cfg.output_dir = os::getenv("NEURX_PRETRAIN_OUTPUT_DIR")
     if cfg.output_dir == "" {
