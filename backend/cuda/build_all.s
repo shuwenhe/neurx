@@ -126,7 +126,7 @@ func build_verify_env(build_config cfg) {
         return
     }
     println("[1/1] Compiling verify_environment.s...")
-    string cmd = s_compiler + " ir backends/cuda/verify_environment.s -o " + ir_path
+    string cmd = s_compiler + " ir backend/cuda/verify_environment.s -o " + ir_path
     string output = runtime_run_command_output(cmd)
     if runtime_file_exists(ir_path) {
         println("[SUCCESS] verify_env.ir created")
@@ -168,7 +168,7 @@ func is_cuda_available(build_config cfg) bool {
 func compile_cuda_runtime(build_config cfg, string build_dir) build_result {
     string cmd = "gcc -shared -fPIC " +
         "-o " + build_dir + "/libcuda_runtime.so " +
-        "backends/cuda/cuda_wrapper_simple.cu " +
+        "backend/cuda/cuda_wrapper_simple.cu " +
         "-I/usr/local/cuda/include " +
         "-L" + cfg.cuda_lib + " " +
         "-L/usr/local/cuda/lib64 " +
@@ -189,7 +189,7 @@ func link_cuda_runtime(build_config cfg, string build_dir) build_result {
 }
 
 func compile_kernels_ptx(build_config cfg, string build_dir) build_result {
-    string cmd = "nvcc -ptx backends/cuda/cuda_kernels.cu " +
+    string cmd = "nvcc -ptx backend/cuda/cuda_kernels.cu " +
         "-o " + build_dir + "/cuda_kernels.ptx " +
         "-arch=sm_" + cfg.gpu_arch + " " +
         "-std=c++11 -O3 2>&1"

@@ -10,7 +10,7 @@ func main() {
     println("")
     println("  src/training/orchestration/scaled_training_system.s : " + check_path("src/training/orchestration/scaled_training_system.s"))
     println("  src/training/data/tools/real_data_loader.s         : " + check_path("src/training/data/tools/real_data_loader.s"))
-    println("  backends/cuda/cuda_accelerated_training.s   : " + check_path("backends/cuda/cuda_accelerated_training.s"))
+    println("  backend/cuda/cuda_accelerated_training.s   : " + check_path("backend/cuda/cuda_accelerated_training.s"))
     println("  src/runtime/distributed/ddp_distributed_training.s : " + check_path("src/runtime/distributed/ddp_distributed_training.s"))
     println("")
     println("This S entrypoint centralizes the full compilation/test status layer.")

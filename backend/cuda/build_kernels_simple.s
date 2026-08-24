@@ -76,7 +76,7 @@ func get_cuda_home() string {
 }
 
 func compile_to_ptx(string build_dir, string gpu_arch) bool {
-    string cmd = "nvcc -ptx backends/cuda/cuda_kernels.cu " +
+    string cmd = "nvcc -ptx backend/cuda/cuda_kernels.cu " +
         "-o " + build_dir + "/cuda_kernels.ptx " +
         "-arch=sm_" + gpu_arch + " " +
         "-std=c++11 -O3 2>&1"

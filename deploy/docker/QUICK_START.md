@@ -122,7 +122,7 @@ docker run -it \
 | 变量 | 默认值 | 说明 |
 |------|-------|------|
 | `NEURX_MODEL_DIR` | `/models/default` | 模型权重路径 |
-| `NEURX_INFER_DEVICE` | `cpu` | 推理设备 (backends/cpu/gpu) |
+| `NEURX_INFER_DEVICE` | `cpu` | 推理设备 (backend/cpu/gpu) |
 | `NEURX_S_PORT` | `8000` | 服务端口 |
 | `NEURX_S_HOST` | `0.0.0.0` | 服务地址 |
 | `NEURX_CPU_THREADS` | `4` | CPU 线程数 |

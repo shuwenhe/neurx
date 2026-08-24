@@ -21,7 +21,7 @@ func main() {
     println("[1/2] Compiling CUDA Runtime wrapper...")
     string cmd = "gcc -shared -fPIC " +
         "-o " + build_dir + "/libcuda_runtime.so " +
-        "backends/cuda/cuda_wrapper_simple.cu " +
+        "backend/cuda/cuda_wrapper_simple.cu " +
         "-I" + cuda_home + "/include " +
         "-I/usr/local/cuda/include " +
         "-L" + cuda_lib + " " +

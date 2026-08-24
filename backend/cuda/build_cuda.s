@@ -37,22 +37,22 @@ func build_all() {
 
 func build_kernels() {
     println("[BUILD] CUDA Kernels")
-    execute_s_script("backends/cuda/build_kernels_simple.s")
+    execute_s_script("backend/cuda/build_kernels_simple.s")
 }
 
 func build_runtime() {
     println("[BUILD] CUDA Runtime")
-    execute_s_script("backends/cuda/build_cuda_runtime.s")
+    execute_s_script("backend/cuda/build_cuda_runtime.s")
 }
 
 func build_verify() {
     println("[BUILD] Environment Verification")
-    execute_s_script("backends/cuda/verify_environment.s")
+    execute_s_script("backend/cuda/verify_environment.s")
 }
 
 func clean_all() {
     println("[CLEAN] CUDA Build Artifacts")
-    execute_s_script("backends/cuda/clean_build.s")
+    execute_s_script("backend/cuda/clean_build.s")
 }
 
 func verify_environment() {

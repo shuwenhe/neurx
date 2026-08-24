@@ -53,7 +53,7 @@ func check_all_components() component_status[] {
     components = append(components, data)
     let cuda = verify_component(
         "CUDA Accelerated Training",
-        "backends/cuda/cuda_accelerated_training.s",
+        "backend/cuda/cuda_accelerated_training.s",
         750
     )
     cuda.description = "GPU memory, transfers, kernels"
@@ -162,7 +162,7 @@ func verify_integration() {
     println("  Provides batch data to model")
     println("")
     println("✅ Compute acceleration:")
-    println("  src/training/orchestration/scaled_training_system.s ←→ backends/cuda/cuda_accelerated_training.s")
+    println("  src/training/orchestration/scaled_training_system.s ←→ backend/cuda/cuda_accelerated_training.s")
     println("  Executes forward/backward on GPU")
     println("")
     println("✅ Distributed training:")

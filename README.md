@@ -41,7 +41,7 @@ NeurX is a production-grade, high-performance LLM inference engine built entirel
 ### Directory Structure
 ```
 neurx/
-├── backends/              # Hardware backends (CPU, CUDA, MPS)
+├── backend/              # Hardware backends (CPU, CUDA, MPS)
 │   ├── api/              # Backend interface definitions
 │   ├── cpu/              # CPU inference server
 │   └── cuda/             # CUDA inference server

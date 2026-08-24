@@ -94,7 +94,7 @@ func compile_all_components(string bin_dir, string log_dir) compilation_result[]
     let components = [
         "src/training/orchestration/scaled_training_system.s",
         "src/training/data/tools/real_data_loader.s",
-        "backends/cuda/cuda_accelerated_training.s",
+        "backend/cuda/cuda_accelerated_training.s",
         "src/runtime/distributed/ddp_distributed_training.s"
     ]
     let results = compilation_result[]{}

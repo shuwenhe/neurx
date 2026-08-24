@@ -946,11 +946,11 @@ build-real-chat-s:
 $(PRODUCTION_S_INFERENCE_DIR):
 	@mkdir -p '$(PRODUCTION_S_INFERENCE_DIR)'
 
-$(PRODUCTION_S_BACKEND): backends/cpu/inference_server.s src/inference/extensions/cache/kv_cache_block.s src/inference/extensions/cache/cache_index.s src/inference/extensions/cache/kv_cache_engine.s src/inference/extensions/cache/kv_cache_integration.s src/inference/extensions/cache/hash_table.s src/inference/extensions/cache/storage_backend.s src/inference/extensions/cache/lru_linked_list.s src/inference/extensions/cache/distributed_cache.s src/inference/extensions/cache/performance_optimization.s src/inference/extensions/cache/advanced_cache_engine.s src/inference/extensions/cache/advanced_cache_integration.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_BACKEND): backend/cpu/inference_server.s src/inference/extensions/cache/kv_cache_block.s src/inference/extensions/cache/cache_index.s src/inference/extensions/cache/kv_cache_engine.s src/inference/extensions/cache/kv_cache_integration.s src/inference/extensions/cache/hash_table.s src/inference/extensions/cache/storage_backend.s src/inference/extensions/cache/lru_linked_list.s src/inference/extensions/cache/distributed_cache.s src/inference/extensions/cache/performance_optimization.s src/inference/extensions/cache/advanced_cache_engine.s src/inference/extensions/cache/advanced_cache_integration.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX CPU Backend (Pure S Language)..."
 	@echo "  Phase 1 (Legacy): kv_cache_block.s, cache_index.s, kv_cache_engine.s, kv_cache_integration.s"
 	@echo "  Phase 2-4 (Advanced): hash_table.s, storage_backend.s, lru_linked_list.s, distributed_cache.s, performance_optimization.s, advanced_cache_engine.s, advanced_cache_integration.s"
-	@$(S_SEED_COMPILER) backends/cpu/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' || { \
+	@$(S_SEED_COMPILER) backend/cpu/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' || { \
 		echo "❌ Backend compilation failed!"; \
 		exit 1; \
 	}
@@ -963,9 +963,9 @@ $(PRODUCTION_S_BACKEND): backends/cpu/inference_server.s src/inference/extension
 	@echo "✓ LMCache Phase 2-4 modules included: hash_table (O(1) lookup), storage_backend (L1/L2/L3), lru_linked_list (O(1) evict), distributed_cache, performance_optimization, advanced_cache_engine"
 	@touch '$(PRODUCTION_S_BACKEND)'
 
-$(PRODUCTION_S_GPU_BACKEND): backends/cuda/inference_server.s src/models/formats/hf_config.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_GPU_BACKEND): backend/cuda/inference_server.s src/models/formats/hf_config.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX GPU Backend (Pure S Language + GPU Acceleration)..."
-	@$(S_SEED_COMPILER) backends/cuda/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_entry.ir' && \
+	@$(S_SEED_COMPILER) backend/cuda/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_entry.ir' && \
 		$(S_SEED_COMPILER) src/models/formats/hf_config.s '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' && \
 		$(S_SEED_COMPILER) --link-ir '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir' '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_entry.ir' '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' || { \
 		echo "❌ GPU Backend compilation failed!"; \
@@ -978,9 +978,9 @@ $(PRODUCTION_S_GPU_BACKEND): backends/cuda/inference_server.s src/models/formats
 	@echo "✓ GPU backend compiled: $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir"
 	@touch '$(PRODUCTION_S_GPU_BACKEND)'
 
-$(PRODUCTION_S_GPU_BACKEND_ENHANCED): backends/cuda/inference_server.s src/models/formats/hf_config.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_GPU_BACKEND_ENHANCED): backend/cuda/inference_server.s src/models/formats/hf_config.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX GPU Backend Enhanced (Real Inference + Streaming MatMul)..."
-	@$(S_SEED_COMPILER) backends/cuda/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced_entry.ir' && \
+	@$(S_SEED_COMPILER) backend/cuda/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced_entry.ir' && \
 		$(S_SEED_COMPILER) src/models/formats/hf_config.s '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' && \
 		$(S_SEED_COMPILER) --link-ir '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir' '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced_entry.ir' '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' || { \
 		echo "❌ GPU Backend Enhanced compilation failed!"; \
@@ -1139,9 +1139,9 @@ build-s-gpu-cuda-runtime: check-nvcc
 	@echo "Building NeurX S local CUDA runtime..."
 	@mkdir -p '$(S_GPU_RUNTIME_BUILD_DIR)'
 	@$(CUDA_NVCC) -O2 -std=c++17 -Xcompiler -fPIC -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		backends/cuda/hf_decoder_cuda.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/hf_decoder_cuda.o'
+		backend/cuda/hf_decoder_cuda.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/hf_decoder_cuda.o'
 	@$(CUDA_NVCC) -O2 -std=c++17 -Xcompiler -fPIC -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		backends/cuda/s_inference_cuda_bridge.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/s_inference_cuda_bridge.o'
+		backend/cuda/s_inference_cuda_bridge.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/s_inference_cuda_bridge.o'
 	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c src/runtime/model/json.cpp \
 		-o '$(S_GPU_RUNTIME_BUILD_DIR)/json.o'
 	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c src/runtime/model/safetensors.cpp \
@@ -2235,7 +2235,7 @@ build-posttrain-sft-forward: check-bash check-nvcc
 	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror -c \
 		'src/runtime/model/hf_model.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/hf_model.o'
 	@'$(CUDA_NVCC)' -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		'backends/cuda/hf_decoder_cuda.cu' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/hf_decoder_cuda.o'
+		'backend/cuda/hf_decoder_cuda.cu' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/hf_decoder_cuda.o'
 	@'$(CUDA_NVCC)' -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
 		'src/training/posttrain/native/sft_forward_probe.cu' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_forward_probe.o'
 	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror \
@@ -2440,8 +2440,8 @@ inference-feature-gap-check:
 inference-runtime-test:
 	@mkdir -p artifacts/build/inference_runtime
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/inference_runtime_test.cpp backends/cann/inference/ascend_adapter.cpp \
-		backends/cann/runtime/acl_runtime.cpp \
+		tests/inference_runtime_test.cpp backend/cann/inference/ascend_adapter.cpp \
+		backend/cann/runtime/acl_runtime.cpp \
 		-ldl -o artifacts/build/inference_runtime/inference_runtime_test
 	@artifacts/build/inference_runtime/inference_runtime_test
 cpu-inference-test:
@@ -2499,18 +2499,18 @@ check-nvcc:
 	fi
 transformer-cuda-kernels-test: check-nvcc
 	@mkdir -p artifacts/build/transformer_cuda
-	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 backends/cuda/transformer_kernels_test.cu \
+	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 backend/cuda/transformer_kernels_test.cu \
 		-o artifacts/build/transformer_cuda/transformer_kernels_test
 	@artifacts/build/transformer_cuda/transformer_kernels_test
 transformer-cuda-integration-test: check-nvcc
 	@mkdir -p artifacts/build/transformer_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
-		backends/cuda/transformer_integration_test.cu -lcublas -o artifacts/build/transformer_cuda/transformer_integration_test
+		backend/cuda/transformer_integration_test.cu -lcublas -o artifacts/build/transformer_cuda/transformer_integration_test
 	@artifacts/build/transformer_cuda/transformer_integration_test
 hf-decoder-cuda-build: check-nvcc
 	@mkdir -p artifacts/build/hf_decoder_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		backends/cuda/hf_decoder_cuda.cu -o artifacts/build/hf_decoder_cuda/hf_decoder_cuda.o
+		backend/cuda/hf_decoder_cuda.cu -o artifacts/build/hf_decoder_cuda/hf_decoder_cuda.o
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c src/runtime/model/json.cpp \
 		-o artifacts/build/hf_decoder_cuda/json.o
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c src/runtime/model/safetensors.cpp \
@@ -2524,12 +2524,12 @@ hf-decoder-cuda-build: check-nvcc
 hf-decoder-cuda-kernels-test: check-nvcc
 	@mkdir -p artifacts/build/hf_decoder_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
-		backends/cuda/hf_decoder_kernels_test.cu \
+		backend/cuda/hf_decoder_kernels_test.cu \
 		-o artifacts/build/hf_decoder_cuda/hf_decoder_kernels_test
 	@artifacts/build/hf_decoder_cuda/hf_decoder_kernels_test
 hf-decoder-cuda-parity-test: hf-decoder-cuda-build
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		backends/cuda/hf_decoder_cuda_probe.cu \
+		backend/cuda/hf_decoder_cuda_probe.cu \
 		-o artifacts/build/hf_decoder_cuda/hf_decoder_cuda_probe.o
 	@$(CUDA_NVCC) artifacts/build/hf_decoder_cuda/hf_decoder_cuda_probe.o \
 		artifacts/build/hf_decoder_cuda/hf_decoder_cuda.o \
@@ -2563,7 +2563,7 @@ transformer-cuda-checkpoint-resume-test:
 	fi
 	@mkdir -p artifacts/build/transformer_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
-		backends/cuda/transformer_checkpoint_resume_test.cu -lcublas -o artifacts/build/transformer_cuda/transformer_checkpoint_resume_test
+		backend/cuda/transformer_checkpoint_resume_test.cu -lcublas -o artifacts/build/transformer_cuda/transformer_checkpoint_resume_test
 	@artifacts/build/transformer_cuda/transformer_checkpoint_resume_test
 cuda-tools-s: check-bash
 	@echo "Building S CUDA tools entry..."
@@ -2576,7 +2576,7 @@ cuda-tools-s: check-bash
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'backends/cuda/cuda_tools.s' -o 'artifacts/build/cuda_tools/cuda_tools.ir' 2>&1
+		$(S_COMPILER) ir 'backend/cuda/cuda_tools.s' -o 'artifacts/build/cuda_tools/cuda_tools.ir' 2>&1
 	@if [ ! -x "$(S_RUNNER_BIN)" ]; then \
 		$(MAKE) build-s-ir-runner; \
 	fi

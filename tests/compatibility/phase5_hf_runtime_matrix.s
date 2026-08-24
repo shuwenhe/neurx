@@ -36,10 +36,10 @@ func main() {
     println("KV + generation        MISSING  N/A      N/A     missing tests/hf_kv_generation_probe.cpp, tests/hf_kv_generation_parity.py, src/runtime/model/decoder_cpu.cpp, src/runtime/model/safetensors.cpp, src/runtime/model/hf_model.cpp, src/runtime/native/tensor_runtime.cpp")
     println("SSE streaming          MISSING  N/A      N/A     missing tests/openai_gateway_fake_backend.cpp, tests/openai_sse_streaming_test.py, src/serving/native/openai_gateway.cpp, src/runtime/model/bpe_tokenizer.cpp, src/runtime/model/json.cpp")
     println("Numeric alignment      MISSING  N/A      N/A     missing tests/numeric_alignment_probe.cpp, tests/numeric_alignment_pytorch.py, src/runtime/native/quantization.cpp, src/runtime/native/tensor_runtime.cpp")
-    println("CUDA build             N/A      MISSING  N/A     missing backends/cuda/hf_decoder_cuda.cu, backends/cuda/hf_decoder_cuda.h, src/runtime/model/json.cpp, src/runtime/model/safetensors.cpp, src/runtime/model/hf_model.cpp, src/runtime/native/tensor_runtime.cpp")
+    println("CUDA build             N/A      MISSING  N/A     missing backend/cuda/hf_decoder_cuda.cu, backend/cuda/hf_decoder_cuda.h, src/runtime/model/json.cpp, src/runtime/model/safetensors.cpp, src/runtime/model/hf_model.cpp, src/runtime/native/tensor_runtime.cpp")
     println("CUDA kernels           N/A      SKIP     N/A     hf-decoder-cuda-kernels-test")
-    println("CUDA parity            N/A      MISSING  N/A     missing backends/cuda/hf_decoder_cuda_probe.cu, backends/cuda/hf_decoder_cuda.h, backends/cuda/hf_decoder_cuda.cu, src/runtime/model/json.cpp, src/runtime/model/safetensors.cpp, src/runtime/model/hf_model.cpp, src/runtime/native/tensor_runtime.cpp")
-    println("CUDA backend           N/A      MISSING  N/A     missing src/serving/native/hf_cuda_backend.cu, backends/cuda/hf_decoder_cuda.cu, backends/cuda/hf_decoder_cuda.h, src/runtime/model/json.cpp, src/runtime/model/safetensors.cpp, src/runtime/model/hf_model.cpp, src/runtime/native/tensor_runtime.cpp")
+    println("CUDA parity            N/A      MISSING  N/A     missing backend/cuda/hf_decoder_cuda_probe.cu, backend/cuda/hf_decoder_cuda.h, backend/cuda/hf_decoder_cuda.cu, src/runtime/model/json.cpp, src/runtime/model/safetensors.cpp, src/runtime/model/hf_model.cpp, src/runtime/native/tensor_runtime.cpp")
+    println("CUDA backend           N/A      MISSING  N/A     missing src/serving/native/hf_cuda_backend.cu, backend/cuda/hf_decoder_cuda.cu, backend/cuda/hf_decoder_cuda.h, src/runtime/model/json.cpp, src/runtime/model/safetensors.cpp, src/runtime/model/hf_model.cpp, src/runtime/native/tensor_runtime.cpp")
     println("phase5-hf-runtime PASS matrix=stable golden_prompt=locked")
     0
 }
