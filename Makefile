@@ -47,7 +47,7 @@ S_REPO_ROOT ?= $(firstword $(wildcard $(CURDIR_UNIX)/../s /home/shuwen/s /home/s
 S_COMPILER_LOCAL ?= $(S_REPO_ROOT)/.local/bin/s
 S_COMPILER_BIN ?= $(S_REPO_ROOT)/bin/s
 S_COMPILER ?= $(firstword $(wildcard $(S_COMPILER_BIN) $(S_COMPILER_LOCAL)) $(shell command -v s 2>/dev/null) s)
-S_SEED_COMPILER ?= $(firstword $(wildcard $(S_REPO_ROOT)/bin/s_seed $(S_REPO_ROOT)/src/cmd/compile/seed/s_seed) $(S_COMPILER))
+S_SEED_COMPILER ?= $(S_REPO_ROOT)/bin/s_seed
 S_COMPILER_EMIT_CWD ?= $(S_REPO_ROOT)
 S_RUNNER_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.s
 S_RUNNER_C_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.c
@@ -173,6 +173,11 @@ include build/mk/inference.mk
 include build/mk/serving.mk
 include build/mk/backends.mk
 include build/mk/release.mk
+
+$(S_REPO_ROOT)/bin/s_seed:
+	@$(MAKE) -C '$(S_REPO_ROOT)' seed-compiler-bin
+
+build-commands test-native-inference test-model-formats build-production-s-inference: $(S_REPO_ROOT)/bin/s_seed
 
 help:
 	@echo ""

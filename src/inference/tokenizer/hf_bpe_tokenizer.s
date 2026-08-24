@@ -391,7 +391,7 @@ func bpe_encode_piece(hf_bpe_tokenizer tokenizer, string text, int maximum_token
     int i = 0
     while i < len(text) {
         if tokenizer.byte_level {
-            symbols[count] = bpe_byte_symbol(int(text[i]))
+            symbols[count] = bpe_byte_symbol(text[i])
             i = i + 1
         } else {
             int width = bpe_utf8_width(text[i])

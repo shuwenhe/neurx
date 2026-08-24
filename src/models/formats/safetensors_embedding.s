@@ -47,7 +47,7 @@ func st_parse_uint(string text, int start) int {
     int i = start
     bool found = false
     while i < len(text) {
-        int ch = int(text[i])
+        int ch = text[i]
         if ch >= 48 && ch <= 57 { found = true; value = value * 10 + ch - 48; i = i + 1 } else { i = len(text) }
     }
     if !found { return -1 }

@@ -654,6 +654,45 @@ func perform_inference_gpu(string prompt, int max_tokens, int hidden_dim, int nu
     return output
 }
 
+func perform_inference_gpu_stream(int client_fd, string prompt, int max_tokens) {
+    string headers = "HTTP/1.1 200 OK\r\n"
+    headers = headers + "Content-Type: application/x-ndjson; charset=utf-8\r\n"
+    headers = headers + "Cache-Control: no-cache\r\n"
+    headers = headers + "Access-Control-Allow-Origin: *\r\n"
+    headers = headers + "Connection: close\r\n\r\n"
+    write_complete(client_fd, headers)
+
+    int prompt_tokens = neurx_s_cuda_begin(prompt, max_tokens)
+    if prompt_tokens < 0 {
+        string error_line = "{\"error\":\"" + json_escape(neurx_s_cuda_last_error()) + "\",\"done\":true}\n"
+        write_complete(client_fd, error_line)
+        return
+    }
+
+    int generated = 0
+    int emitted_chars = 0
+    while generated < max_tokens {
+        int token_id = neurx_s_cuda_next()
+        if token_id == -1 { break }
+        if token_id < -1 {
+            string error_line = "{\"error\":\"" + json_escape(neurx_s_cuda_last_error()) + "\",\"done\":true}\n"
+            write_complete(client_fd, error_line)
+            return
+        }
+        string current = neurx_s_cuda_result()
+        if len(current) > emitted_chars {
+            string delta = __host_slice(current, emitted_chars, len(current))
+            string frame = "{\"delta\":\"" + json_escape(delta) + "\",\"done\":false}\n"
+            write_complete(client_fd, frame)
+            emitted_chars = len(current)
+        }
+        generated = generated + 1
+    }
+    string done_frame = "{\"delta\":\"\",\"done\":true,\"backend\":\"neurx-gpu-enhanced\",\"generated_tokens\":" + int_to_string(generated) + "}\n"
+    write_complete(client_fd, done_frame)
+    print("[GPU Inference] Stream completed: " + int_to_string(generated) + " tokens\n")
+}
+
 func greedy_decode_tokens([]float logits, int num_tokens_to_generate, int vocab_size) string {
     string generated = ""
     int gen_step = 0
@@ -927,6 +966,13 @@ func handle_client_gpu(int client_fd, string model_path, string device_type) {
         int hidden_dim = model_hidden_dim()
         int num_layers = active_transformer_layers()
         int max_tokens = extract_max_new_tokens(request)
+        bool is_stream = contains_substring(request, "\"stream\":true")
+        if is_stream {
+            print("[GPU-Backend] Streaming generate request\n")
+            perform_inference_gpu_stream(client_fd, prompt, max_tokens)
+            _ = __sys_close(client_fd)
+            return
+        }
         string inference_output = perform_inference_gpu(prompt, max_tokens, hidden_dim, num_layers)
         string safe_output = json_escape(inference_output)
         response = "{\"status\":\"ok\",\"output\":\"" + safe_output + "\",\"backend\":\"neurx-gpu-enhanced\"}"

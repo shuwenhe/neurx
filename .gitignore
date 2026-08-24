@@ -29,6 +29,8 @@ build/s_ir_runner*
 /tmp/
 /var/tmp/
 core*
+!src/core/
+!src/core/**
 
 .env
 secrets.env

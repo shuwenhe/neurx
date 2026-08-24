@@ -45,7 +45,7 @@ func hf_json_int(string text, string key, int fallback) int {
     int value = 0
     bool found = false
     while position < len(text) {
-        int ch = int(text[position])
+        int ch = text[position]
         if ch < 48 || ch > 57 { position = len(text) } else { found = true; value = value * 10 + ch - 48; position = position + 1 }
     }
     if !found { return fallback }
@@ -58,7 +58,7 @@ func hf_json_float(string text, string key, float fallback) float {
     float value = 0.0
     float scale = 0.0
     while position < len(text) {
-        int ch = int(text[position])
+        int ch = text[position]
         if ch >= 48 && ch <= 57 {
             if scale == 0.0 { value = value * 10.0 + (ch - 48) * 1.0 } else { scale = scale * 10.0; value = value + (ch - 48) * 1.0 / scale }
             position = position + 1

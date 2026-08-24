@@ -53,7 +53,7 @@ func get_html() string {
     html = html + "</div>\n"
     html = html + "<div class=\"form-group\">\n"
     html = html + "<label for=\"maxTokens\">Max Tokens:</label>\n"
-    html = html + "<input type=\"number\" id=\"maxTokens\" value=\"256\" min=\"1\" max=\"2048\">\n"
+    html = html + "<input type=\"number\" id=\"maxTokens\" value=\"1024\" min=\"1\" max=\"4096\">\n"
     html = html + "</div>\n"
     html = html + "<div class=\"button-group\">\n"
     html = html + "<button onclick=\"sendRequest()\">🚀 Generate</button>\n"
@@ -76,7 +76,7 @@ func get_html() string {
     html = html + "function renderMarkdown(text){window.__neurxCodes=[];let html='',pos=0;while(pos<text.length){const open=text.indexOf('```',pos);if(open<0){html+=renderText(text.slice(pos));break}html+=renderText(text.slice(pos,open));let q=open+3,lang='';while(q<text.length&&/[A-Za-z0-9_+.-]/.test(text[q])){lang+=text[q];q++}while(q<text.length&&(text[q]===' '||text.charCodeAt(q)===10||text.charCodeAt(q)===13))q++;const close=text.indexOf('```',q);const raw=close<0?text.slice(q):text.slice(q,close);const code=formatCode(raw,lang);const id=window.__neurxCodes.push(code)-1;html+='<div class=\"code-block\"><div class=\"code-head\"><span>'+(escapeHtml(lang)||'code')+'</span><button class=\"copy-code\" onclick=\"copyCode('+id+',this)\">📋 Copy</button></div><pre><code>'+escapeHtml(code)+'</code></pre></div>';if(close<0)break;pos=close+3}return html}\n"
     html = html + "async function copyCode(id,btn){await navigator.clipboard.writeText(window.__neurxCodes[id]||'');const old=btn.textContent;btn.textContent='✅ Copied';setTimeout(()=>btn.textContent=old,1200)}\n"
     html = html + "function streamRender(target,text){return new Promise(resolve=>{let shown=0;function frame(){shown=Math.min(text.length,shown+3);target.innerHTML=renderMarkdown(text.slice(0,shown))+(shown<text.length?'<span class=\"stream-cursor\"></span>':'');target.scrollIntoView({block:'nearest'});if(shown<text.length)requestAnimationFrame(frame);else resolve()}frame()})}\n"
-    html = html + "async function sendRequest(){const p=document.getElementById('prompt').value;const m=parseInt(document.getElementById('maxTokens').value);const r=document.getElementById('result');r.innerHTML='<p class=\"loading\">⏳ GPU generating...</p>';try{const res=await fetch('/api/infer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p,max_tokens:m,max_new_tokens:m})});const d=await res.json();const output=d.text||d.output;if(output){r.innerHTML='<p class=\"success\"><strong>AI Response:</strong></p><div id=\"responseBody\" class=\"response-body\"></div>';await streamRender(document.getElementById('responseBody'),output)}else{r.innerHTML='<p class=\"error\">❌ Error: '+escapeHtml(d.error||'Inference failed')+'</p>'}}catch(e){r.innerHTML='<p class=\"error\">❌ Connection error: '+escapeHtml(e)+'</p>'}}\n"
+    html = html + "async function sendRequest(){const p=document.getElementById('prompt').value;const m=parseInt(document.getElementById('maxTokens').value);const r=document.getElementById('result');r.innerHTML='<p class=\"success\"><strong>AI Response:</strong> <span class=\"stream-cursor\"></span></p><div id=\"responseBody\" class=\"response-body\"></div>';const body=document.getElementById('responseBody');let output='',pending='';try{const res=await fetch('/api/infer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p,max_tokens:m,max_new_tokens:m,stream:true})});if(!res.ok||!res.body)throw new Error('Streaming response unavailable');const reader=res.body.getReader();const decoder=new TextDecoder();let finished=false;while(!finished){const part=await reader.read();finished=part.done;pending+=decoder.decode(part.value||new Uint8Array(),{stream:!finished});const lines=pending.split(String.fromCharCode(10));pending=lines.pop()||'';for(const line of lines){if(!line.trim())continue;const event=JSON.parse(line);if(event.error)throw new Error(event.error);if(event.delta){output+=event.delta;body.innerHTML=renderMarkdown(output);body.scrollIntoView({block:'nearest'})}if(event.done)finished=true}}if(pending.trim()){const event=JSON.parse(pending);if(event.delta){output+=event.delta;body.innerHTML=renderMarkdown(output)}}const cursor=r.querySelector('.stream-cursor');if(cursor)cursor.remove()}catch(e){r.innerHTML+='<p class=\"error\">❌ Connection error: '+escapeHtml(e)+'</p>'}}\n"
     html = html + "function clearText(){document.getElementById('prompt').value='';document.getElementById('result').innerHTML=''}\n"
     html = html + "checkBackend();setInterval(checkBackend,5000);\n"
     html = html + "</script>\n"
@@ -127,6 +127,32 @@ func proxy_to_backend(string method, string path, string request_body) string {
 
     _ = __sys_close(backend_sock)
     return response
+}
+
+func proxy_stream_to_backend(int client_fd, string request_body) {
+    int backend_sock = __sys_socket(2, 1, 6)
+    if backend_sock < 0 {
+        _ = __sys_write_string(client_fd, "HTTP/1.1 502 Bad Gateway\r\nConnection: close\r\n\r\n")
+        return
+    }
+    if __sys_connect(backend_sock, "127.0.0.1", 18084, 2) < 0 {
+        _ = __sys_close(backend_sock)
+        _ = __sys_write_string(client_fd, "HTTP/1.1 502 Bad Gateway\r\nConnection: close\r\n\r\n")
+        return
+    }
+    string backend_request = "POST /v1/generate HTTP/1.1\r\n"
+    backend_request = backend_request + "Host: 127.0.0.1:18084\r\n"
+    backend_request = backend_request + "Content-Type: application/json\r\n"
+    backend_request = backend_request + "Content-Length: " + int_to_string(len(request_body)) + "\r\n"
+    backend_request = backend_request + "Connection: close\r\n\r\n" + request_body
+    _ = __sys_write_string(backend_sock, backend_request)
+
+    string chunk = __sys_read_string(backend_sock, 4096)
+    while len(chunk) > 0 {
+        _ = __sys_write_string(client_fd, chunk)
+        chunk = __sys_read_string(backend_sock, 4096)
+    }
+    _ = __sys_close(backend_sock)
 }
 
 func parse_json_response(string http_response) string {
@@ -194,10 +220,12 @@ func main() {
             }
 
             string body = __host_slice(request, body_start, len(request))
-            string json_response = proxy_to_backend("POST", "/v1/generate", body)
-            string json_body = parse_json_response(json_response)
-
-            response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: " + int_to_string(len(json_body)) + "\r\n\r\n" + json_body
+            if len(body) > 0 {
+                proxy_stream_to_backend(client, body)
+                _ = __sys_close(client)
+                continue
+            }
+            response = "HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n"
         } else {
             response = "HTTP/1.1 404 Not Found\r\n\r\n"
         }
