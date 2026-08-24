@@ -12,14 +12,17 @@ extern "intrinsic" func __sys_close(int fd) int
 struct chat_message {
     string role
     string content
-}
 struct inference_request {
     string model
     []chat_message messages
     int max_tokens
     float temperature
-}
 struct inference_response {
+    string text
+    int prompt_tokens
+    int completion_tokens
+    bool success
+    string error
     string text
     int prompt_tokens
     int completion_tokens
@@ -55,12 +58,10 @@ func json_escape(string s) string {
         i = i + 1
     }
     return result
-}
 func string_at_index(string s, int idx) string {
     if idx < 0 || idx >= len(s) { return "" }
     int c = s[idx]
     return string(c)
-}
 func split_string(string s, string sep) []string {
     []string result = []string{}
     if len(s) == 0 { return result }
@@ -94,7 +95,6 @@ func split_string(string s, string sep) []string {
         result = append(result, current)
     }
     return result
-}
 func extract_json_string(string json, string key) string {
     string search_key = "\"" + key + "\":"
     int key_pos = -1
@@ -149,7 +149,6 @@ func extract_json_string(string json, string key) string {
         idx = idx + 1
     }
     return result
-}
 func extract_user_message_from_json(string json_body) string {
     string search = "\"role\": \"user\""
     int user_pos = -1
@@ -215,7 +214,6 @@ func extract_user_message_from_json(string json_body) string {
         cidx = cidx + 1
     }
     return content
-}
 func estimate_token_count(string text) int {
     int len_text = len(text)
     int token_estimate = len_text / 4
@@ -223,7 +221,6 @@ func estimate_token_count(string text) int {
         token_estimate = 1
     }
     return token_estimate
-}
 func load_engine() real_text_engine_state {
     string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
     if g_cached_engine_loaded && g_cached_engine_path == model_path {
@@ -234,17 +231,14 @@ func load_engine() real_text_engine_state {
     g_cached_engine_path = model_path
     g_cached_engine_loaded = true
     state
-}
 func stream_http_header() string {
     "HTTP/1.1 200 OK\r\n" +
     "Content-Type: text/event-stream\r\n" +
     "Cache-Control: no-cache\r\n" +
     "Connection: keep-alive\r\n" +
     "Access-Control-Allow-Origin: *\r\n\r\n"
-}
 func write_http_response(int client_fd, http_response resp) {
     write_client_data(client_fd, format_http_response(resp))
-}
 func write_http_error(int client_fd, int status_code, string message, string error_type, string code) {
     string body = openai_error_body(message, error_type, code)
     write_http_response(client_fd, http_response{
@@ -252,7 +246,6 @@ func write_http_error(int client_fd, int status_code, string message, string err
         headers: [],
         body: body,
     })
-}
 func stream_openai_token(string token) bool {
     if len(token) == 0 {
         return true
@@ -267,7 +260,6 @@ func stream_openai_token(string token) bool {
     write_client_data(g_stream_client_fd, chunk)
     g_stream_tokens_sent = g_stream_tokens_sent + 1
     true
-}
 func extract_request_id(string path) string {
     int slash = -1
     int i = 0
@@ -281,7 +273,6 @@ func extract_request_id(string path) string {
         return "req-0001"
     }
     return __host_slice(path, slash + 1, len(path))
-}
 func handle_streaming_chat(int client_fd, openai_request oreq) {
     real_text_engine_state state = load_engine()
     if !state.ready {
@@ -306,7 +297,6 @@ func handle_streaming_chat(int client_fd, openai_request oreq) {
     }
     write_client_data(client_fd, openai_done_event())
     g_stream_client_fd = -1
-}
 func handle_socket_connection(int client_fd) {
     string request_data = __sys_read_string(client_fd, 8192)
     if len(request_data) == 0 {
@@ -330,7 +320,6 @@ func handle_socket_connection(int client_fd) {
     http_response resp = route_request(req)
     write_http_response(client_fd, resp)
     _ = __sys_close(client_fd)
-}
 func run_inference(string prompt, int max_tokens, float temperature) inference_response {
     real_text_engine_state state = load_engine()
     if !state.ready {
@@ -359,7 +348,7 @@ func run_inference(string prompt, int max_tokens, float temperature) inference_r
         success: true,
         error: result.error_message,
     }
-}
+
 func create_json_response(string status, string model, string content, int prompt_tokens, int completion_tokens) string {
     string id = "chatcmpl-" + int_to_string(12345)
     string created = int_to_string(1786879972)
@@ -384,7 +373,6 @@ func create_json_response(string status, string model, string content, int promp
     json = json + "}"
     json = json + "}"
     return json
-}
 func create_health_response() string {
     string json = "{"
     json = json + "\"status\": \"healthy\","
@@ -394,7 +382,6 @@ func create_health_response() string {
     json = json + "\"api_version\": \"v1\""
     json = json + "}"
     return json
-}
 func create_models_response() string {
     string json = "{"
     json = json + "\"object\": \"list\","
@@ -406,7 +393,6 @@ func create_models_response() string {
     json = json + "}]"
     json = json + "}"
     return json
-}
 func create_error_response(string error_msg) string {
     string json = "{"
     json = json + "\"error\": {"
@@ -415,7 +401,6 @@ func create_error_response(string error_msg) string {
     json = json + "}"
     json = json + "}"
     return json
-}
 func handle_health_check(http_request req) http_response {
     string body = create_health_response()
     return http_response{
@@ -423,7 +408,7 @@ func handle_health_check(http_request req) http_response {
         headers: [],
         body: body,
     }
-}
+
 func handle_models_list(http_request req) http_response {
     string body = create_models_response()
     return http_response{
@@ -431,7 +416,7 @@ func handle_models_list(http_request req) http_response {
         headers: [],
         body: body,
     }
-}
+
 func handle_chat_completions(http_request req) http_response {
     if req.method != "POST" {
         string body = create_error_response("Method not allowed")
@@ -457,7 +442,7 @@ func handle_chat_completions(http_request req) http_response {
         headers: [],
         body: body,
     }
-}
+
 func route_request(http_request req) http_response {
     if req.path == "/health" {
         return handle_health_check(req)
@@ -473,8 +458,45 @@ func route_request(http_request req) http_response {
             body: body,
         }
     }
-}
+
 func main() {
+    print("\n╔════════════════════════════════════════════════════════════════╗\n")
+    print("║       NeurX REST API Server (Pure S Language)                ║\n")
+    print("║       OpenAI-Compatible HTTP API                             ║\n")
+    print("╚════════════════════════════════════════════════════════════════╝\n")
+    print("\n")
+    print("📋 Configuration:\n")
+    print("  Host: 0.0.0.0\n")
+    print("  Port: 8888\n")
+    print("  Model: Qwen2.5-0.5B-Instruct\n")
+    print("\n")
+    http_server server = create_http_server("0.0.0.0", 8888)
+    if server.listen_fd < 0 {
+        print("❌ Failed to start server\n")
+        return
+    }
+    print("📚 API Endpoints:\n")
+    print("  GET  /health                     - Health check\n")
+    print("  GET  /v1/models                  - List models\n")
+    print("  POST /v1/chat/completions       - Chat completion (OpenAI compatible)\n")
+    print("\n")
+    print("🎯 Server is running. Press Ctrl+C to stop.\n")
+    print("\n")
+    print("💬 Test commands:\n")
+    print("  curl http:
+    print("  curl http:
+    print("  curl -X POST http:
+    print("  curl -N -X POST http:
+    print("\n")
+    while server.running {
+        int client_fd = neurx_net_accept(server.listen_fd)
+        if client_fd >= 0 {
+            handle_socket_connection(client_fd)
+        } else {
+            print("error: accept failed\n")
+        }
+    }
+    close_http_server(server)
     print("\n╔════════════════════════════════════════════════════════════════╗\n")
     print("║       NeurX REST API Server (Pure S Language)                ║\n")
     print("║       OpenAI-Compatible HTTP API                             ║\n")

@@ -60,6 +60,7 @@ struct training_config {
     bool use_rope_scaling
     int rope_target_length
 }
+
 enum training_phase {
     PHASE_IDLE,
     PHASE_FORWARD,
@@ -99,6 +100,7 @@ struct pipeline_stage_state {
     float backward_time_ms
     float comm_time_ms
 }
+
 enum schedule_type {
     SCHEDULE_1F1B,
     SCHEDULE_GPIPE,

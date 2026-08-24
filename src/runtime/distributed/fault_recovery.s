@@ -5,6 +5,7 @@ enum checkpoint_type {
     PARTIAL,
     CKPT_ASYNC,
 }
+
 enum recovery_strategy {
     IMMEDIATE,
     ROLLBACK,

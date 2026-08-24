@@ -11,6 +11,7 @@ func print_deployment_banner() {
     print("╚══════════════════════════════════════════════════════════╝\n")
     print("\n")
 }
+
 func check_system_requirements() bool {
     print("📋 SYSTEM REQUIREMENTS CHECK\n")
     print("═════════════════════════════════════════════════════════\n\n")
@@ -29,6 +30,7 @@ func check_system_requirements() bool {
     print("\nStatus: " + int_to_string(checks_passed) + "/" + int_to_string(total_checks) + " checks passed\n\n")
     return checks_passed == total_checks
 }
+
 func show_deployment_steps() {
     print("🛠️  DEPLOYMENT STEPS\n")
     print("═════════════════════════════════════════════════════════\n\n")
@@ -56,6 +58,7 @@ func show_deployment_steps() {
     print("  • Verify model responses\n")
     print("  • Monitor performance\n\n")
 }
+
 func show_directory_structure() {
     print("📁 EXPECTED DIRECTORY STRUCTURE\n")
     print("═════════════════════════════════════════════════════════\n\n")
@@ -89,6 +92,7 @@ func show_directory_structure() {
     print("        ├── dev.json\n")
     print("        └── test.json\n\n")
 }
+
 func show_configuration_details() {
     print("⚙️  MODEL CONFIGURATION\n")
     print("═════════════════════════════════════════════════════════\n\n")
@@ -116,6 +120,7 @@ func show_configuration_details() {
     print("  • Top-K: 40\n")
     print("  • Do sample: true\n\n")
 }
+
 func show_performance_metrics() {
     print("📊 EXPECTED PERFORMANCE (CPU)\n")
     print("═════════════════════════════════════════════════════════\n\n")
@@ -135,6 +140,7 @@ func show_performance_metrics() {
     print("  ✓ Continuous batching (increased throughput)\n")
     print("  ✓ Operator fusion (CPU efficiency)\n\n")
 }
+
 func show_network_configuration() {
     print("🌐 NETWORK CONFIGURATION\n")
     print("═════════════════════════════════════════════════════════\n\n")
@@ -157,6 +163,7 @@ func show_network_configuration() {
     print("      \"temperature\": 0.7\n")
     print("    }'\n\n")
 }
+
 func show_next_steps() {
     print("🎯 NEXT STEPS\n")
     print("═════════════════════════════════════════════════════════\n\n")
@@ -172,6 +179,7 @@ func show_next_steps() {
     print("   └─ make run-interactive-chat\n\n")
     print("📚 For detailed instructions, see: DEPLOYMENT_GUIDE.md\n\n")
 }
+
 func show_troubleshooting_guide() {
     print("🔧 TROUBLESHOOTING GUIDE\n")
     print("═════════════════════════════════════════════════════════\n\n")
@@ -198,6 +206,7 @@ func show_troubleshooting_guide() {
     print("  Solution: Set S_COMPILER_BIN environment variable\n")
     print("    export S_COMPILER_BIN=/home/shuwen/shuwen/train/s/bin/s_seed\n\n")
 }
+
 func int_to_string(int val) string {
     if val == 0 {
         return "0"
@@ -222,6 +231,7 @@ func int_to_string(int val) string {
     }
     result
 }
+
 func main() {
     print_deployment_banner()
     print("\n")

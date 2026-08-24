@@ -600,6 +600,7 @@ struct conversion_result {
     links: list<extracted_link>
     code_blocks: list<code_block>
 }
+
 struct table_conversion_result {
     table: extracted_table
     markdown: string

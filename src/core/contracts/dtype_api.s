@@ -4,6 +4,7 @@ enum d_type_category {
     complex
     boolean
 }
+
 enum d_type {
     float_16
     b_float_16

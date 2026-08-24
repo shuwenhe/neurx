@@ -7,6 +7,7 @@ enum log_backend {
     LOG_CONSOLE,
     LOG_ALL
 }
+
 enum alert_channel {
     ALERT_WEBHOOK,
     ALERT_EMAIL,
@@ -151,6 +152,7 @@ struct alert_info {
     bool acknowledged
     string suggested_action
 }
+
 enum severity_level {
     SEVERITY_INFO,
     SEVERITY_WARNING,
@@ -178,7 +180,9 @@ struct recommendation {
     expected_improvement
     complexity complexity
 }
+
 enum priority { PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW }
+
 enum complexity { COMPLEXITY_EASY, COMPLEXITY_MEDIUM, COMPLEXITY_HARD }
 
 struct monitoring_manager {

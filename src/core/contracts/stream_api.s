@@ -5,6 +5,7 @@ enum stream_priority {
     normal
     low
 }
+
 enum stream_type {
     compute
     transfer

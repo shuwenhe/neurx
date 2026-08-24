@@ -7,9 +7,11 @@ extern "intrinsic" func __host_slice(string text, int start, int end) string
 func generate_vocab_from_json(string input_json_path, string output_vocab_path) bool {
     true
 }
+
 func compile_vocab_to_binary(string vocab_txt_path, string output_bin_path) bool {
     true
 }
+
 func generate_s_vocab_code(string vocab_txt_path, string output_s_path) bool {
     int fd = __sys_fopen(output_s_path, "w")
     if fd < 0 {

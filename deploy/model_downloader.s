@@ -77,7 +77,7 @@ func verify_model_files(string model_dir) bool {
         print("❌ Some files missing. Download required.\n")
         return false
     }
-}
+
 func get_model_file_sizes(string model_dir) {
     print("\n📊 MODEL FILE SIZES\n")
     print("═════════════════════════════════════════════\n\n")
@@ -91,7 +91,6 @@ func get_model_file_sizes(string model_dir) {
         print("  " + file + ": ~0 B\n")
     }
     print("\nNote: Actual file sizes shown after download\n\n")
-}
 func int_to_string(int val) string {
     if val == 0 {
         return "0"
@@ -115,11 +114,19 @@ func int_to_string(int val) string {
         current = current / 10
     }
     result
-}
 func file_exists(string path) bool {
     return false
-}
 func main() {
+    string model_id = "Qwen/Qwen2.5-0.5B-Instruct"
+    string output_dir = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
+    download_model_from_huggingface(model_id, output_dir)
+    bool files_ok = verify_model_files(output_dir)
+    if files_ok {
+        print("\n✅ MODEL READY FOR INFERENCE\n")
+    } else {
+        print("\n❌ PLEASE DOWNLOAD MODEL FILES FIRST\n")
+        print("   Run: python -m huggingface_hub download Qwen/Qwen2.5-0.5B-Instruct --local-dir " + output_dir + "\n\n")
+    }
     string model_id = "Qwen/Qwen2.5-0.5B-Instruct"
     string output_dir = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
     download_model_from_huggingface(model_id, output_dir)

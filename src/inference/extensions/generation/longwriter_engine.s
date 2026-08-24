@@ -44,6 +44,7 @@ struct outline_node {
     status: SectionStatus = section_status.PENDING
     revisions: int = 0
 }
+
 enum section_status {
     PENDING
     GENERATING
@@ -413,6 +414,7 @@ struct generation_context {
     completed_sections: list<string>
     global_constraints: map<string, string>
 }
+
 struct generated_section {
     section: outline_node
     raw_text: string
@@ -424,6 +426,7 @@ struct generated_section {
     quality_feedback?: string
     revision_suggested: bool = false
 }
+
 struct post_process_result {
     text: string
     formatting_changes: list<string>
@@ -520,6 +523,7 @@ struct quality_check_result {
     specific_improvements: list<string>
     feedback: string
 }
+
 struct coherence_check_result {
     feedback: string
     smooth_transition: bool
@@ -796,6 +800,7 @@ struct usage_info {
     prompt_tokens: int
     completion_tokens: int
 }
+
 struct llm_response {
     text: string
     usage: usage_info

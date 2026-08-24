@@ -113,6 +113,7 @@ struct memory_block {
     bool is_free
     int ref_count
 }
+
 struct sequence_metadata {
     int seq_id
     []int block_table
@@ -137,6 +138,7 @@ class paged_attention_manager {
         float memory_utilization
         int64 peak_memory_bytes
     } stats
+
 func init_paged_attention(
     int num_kv_heads,
     int head_dim,
@@ -314,6 +316,7 @@ enum request_status {
     COMPLETED
     CANCELLED
 }
+
 struct inference_request {
     int request_id
     string prompt_text
@@ -348,6 +351,7 @@ class continuous_batch_scheduler {
         float avg_throughput_tps
         int peak_concurrent_requests
     } stats
+
 func init_scheduler(
     int max_batch_size: int = 32,
     int max_queue_size: int = 256,
@@ -506,6 +510,7 @@ class inference_engine {
         bool use_cache = true
         bool early_stopping = False
     } gen_config
+
     struct perf_stats {
         int64 total_forward_time_us
         int total_generate_calls
@@ -513,6 +518,7 @@ class inference_engine {
         float avg_latency_per_token_ms
         float peak_gpu_memory_gb
     } perf_stats
+
 func init_engine(
     neurx_model model,
     tokenizer_state tokenizer,
@@ -753,12 +759,14 @@ enum quantization_type {
     GPTQ
     AWQ
 }
+
 struct quantization_config {
     quantization_type qtype
     int group_size
     bool symmetric
     float scale_dtype
 }
+
 func create_default_quant_config():
     return quantization_config{
         qtype: NONE,

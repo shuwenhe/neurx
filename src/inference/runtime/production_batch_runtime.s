@@ -2,10 +2,15 @@ package neurx.inference.runtime.production_batch_runtime
 use neurx.inference.runtime.transformer_executor.{transformer_execution_plan, transformer_execution_result, transformer_plan_execute}
 
 func production_request_free() int { 0 }
+
 func production_request_waiting() int { 1 }
+
 func production_request_prefill() int { 2 }
+
 func production_request_decode() int { 3 }
+
 func production_request_finished() int { 4 }
+
 func production_request_cancelled() int { 5 }
 
 struct production_batch_config {

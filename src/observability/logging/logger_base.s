@@ -5,6 +5,7 @@ enum log_level {
     WARNING,
     ERROR,
 }
+
 enum metric_type {
     SCALAR,
     HISTOGRAM,

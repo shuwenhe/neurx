@@ -4,6 +4,7 @@ enum compression_type {
     COMPRESSION_LZ4,
     COMPRESSION_ZSTD,
 }
+
 enum checkpoint_format {
     FORMAT_PT,
     FORMAT_SAFE_TENSORS,
@@ -109,6 +110,7 @@ struct data_iterator_state {
     int samples_consumed_from_file
     string dataset_version
 }
+
 enum checkpoint_status {
     CKPT_IDLE,
     CKPT_PREPARING,

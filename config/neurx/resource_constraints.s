@@ -69,12 +69,19 @@ struct thermal_constraints {
 
 interface resource_constraint_checker {
     func check_constraints(cfg device_config_full*, hw_info hardware_info*) (constraint_report*)
+
     func check_memory_constraints(cfg device_config_full*, hw_info hardware_info*) (vec[constraint_check])
+
     func check_compute_constraints(cfg device_config_full*, hw_info hardware_info*) (vec[constraint_check])
+
     func check_bandwidth_constraints(cfg device_config_full*, hw_info hardware_info*) (vec[constraint_check])
+
     func can_allocate_memory(size int64, hw_info hardware_info*) (bool)
+
     func estimate_memory_usage(cfg device_config_full*) (int64)
+
     func get_available_resources(hw_info hardware_info*) (device_config_full*)
+
     func apply_conservative_limits(cfg device_config_full*, hw_info hardware_info*) (device_config_full*)
 }
 

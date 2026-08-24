@@ -38,7 +38,6 @@ func int_to_string(int value) string {
     }
     if value < 0 { return "-" + result }
     return result
-}
 func gpu_available() bool {
     string cuda_path = runtime_env_get("CUDA_HOME", "/usr/local/cuda")
     if runtime_file_exists(cuda_path + "/lib64/libcudart.so") {
@@ -60,13 +59,10 @@ func gpu_available() bool {
         return true
     }
     return false
-}
 func gpu_device_info() string {
     return "NVIDIA GPU (Mock)"
-}
 func float_to_string(float f) string {
     return "value"
-}
 func model_hidden_dim() int {
     string model_path = runtime_env_get("NEURX_MODEL_DIR", "")
     if len(model_path) > 0 && (contains_substring(model_path, "0.5B") || contains_substring(model_path, "500M")) {
@@ -76,7 +72,6 @@ func model_hidden_dim() int {
         return 3584
     }
     return 896
-}
 func contains_substring(string haystack, string needle) bool {
     if len(needle) == 0 {
         return true
@@ -100,7 +95,6 @@ func contains_substring(string haystack, string needle) bool {
         i = i + 1
     }
     return false
-}
 func parse_int_or_default(string s, int default_val) int {
     if len(s) == 0 {
         return default_val
@@ -117,7 +111,6 @@ func parse_int_or_default(string s, int default_val) int {
         i = i + 1
     }
     return result
-}
 func num_transformer_layers() int {
     string model_path = runtime_env_get("NEURX_MODEL_DIR", "")
     if len(model_path) > 0 && (contains_substring(model_path, "0.5B") || contains_substring(model_path, "500M")) {
@@ -127,7 +120,6 @@ func num_transformer_layers() int {
         return 28
     }
     return 24
-}
 func active_transformer_layers() int {
     int configured = parse_int_or_default(runtime_env_get("NEURX_ACTIVE_LAYERS", "24"), 24)
     if configured < 1 {
@@ -137,10 +129,8 @@ func active_transformer_layers() int {
         return num_transformer_layers()
     }
     return configured
-}
 func create_ready_file(string path) {
     print("✓ Backend ready file: " + path + "\n")
-}
 func bind_backend_socket(int listener_fd, string host, int port) int {
     int bind_result = __sys_bind(listener_fd, host, port, 2)
     if bind_result == 0 {
@@ -151,7 +141,6 @@ func bind_backend_socket(int listener_fd, string host, int port) int {
         bind_result = __sys_bind(listener_fd, "0.0.0.0", port, 2)
     }
     return bind_result
-}
 func extract_json_field(string json, string field_name) string {
     string search_key = "\"" + field_name + "\":"
     int key_idx = 0
@@ -190,7 +179,7 @@ func extract_json_field(string json, string field_name) string {
         }
         return result
     }
-}
+
 func generate_response_for_prompt(string prompt) string {
     string prefix = "Thank you for the question. You asked about '"
     string first_word = "unknown"
@@ -214,7 +203,6 @@ func generate_response_for_prompt(string prompt) string {
     }
     string response = prefix + prompt + ". [GPU-based processing completed successfully]"
     return response
-}
 func handle_client_gpu(int client_fd, string model_path, string device_type) {
     []int input_buffer = []int{cap: 4096}
     string request = __sys_read_string(client_fd, 4096)
@@ -252,8 +240,74 @@ func handle_client_gpu(int client_fd, string model_path, string device_type) {
     _ = __sys_write_string(client_fd, "\r\n")
     _ = __sys_write_string(client_fd, response)
     _ = __sys_close(client_fd)
-}
 func main() {
+    print("╔════════════════════════════════════════════════════════════════╗\n")
+    print("║  NeurX GPU Backend - Pure S Implementation                     ║\n")
+    print("║  GPU-Accelerated Inference Engine                             ║\n")
+    print("╚════════════════════════════════════════════════════════════════╝\n\n")
+    string model_path = runtime_env_get("NEURX_MODEL_DIR", "/model/Qwen2.5-0.5B-Instruct")
+    string host = runtime_env_get("NEURX_S_HOST", "0.0.0.0")
+    string port_str = runtime_env_get("NEURX_S_PORT", "18083")
+    int port = parse_int_or_default(port_str, 18083)
+    string device_type = runtime_env_get("NEURX_INFER_DEVICE", "gpu")
+    string ready_file = runtime_env_get("NEURX_S_READY_FILE", "/tmp/neurx_s_inference_" + port_str + "_ready")
+    print("Configuration:\n")
+    print("  Model: " + model_path + "\n")
+    print("  Device: " + device_type + "\n")
+    print("  Host: " + host + "\n")
+    print("  Port: " + port_str + "\n")
+    bool gpu_ok = gpu_available()
+    string gpu_status = "NO ✗"
+    if gpu_ok {
+        gpu_status = "YES ✓"
+    }
+    print("  GPU Available: " + gpu_status + "\n")
+    if gpu_ok {
+        print("  GPU Device: " + gpu_device_info() + "\n")
+    }
+    print("  Active Layers: " + int_to_string(active_transformer_layers()) + "\n")
+    print("  Hidden Dimension: " + int_to_string(model_hidden_dim()) + "\n")
+    print("\nBackend Status: ✓ READY\n")
+    print("Execution Mode: Pure S Language + GPU Acceleration ⚡\n\n")
+    int listener_fd = __sys_socket(2, 1, 6)
+    if listener_fd < 0 {
+        print("ERROR: Socket creation failed\n")
+        return
+    }
+    int bind_result = bind_backend_socket(listener_fd, host, port)
+    if bind_result != 0 {
+        print("ERROR: Socket bind failed\n")
+        _ = __sys_close(listener_fd)
+        return
+    }
+    int listen_result = __sys_listen(listener_fd, 128)
+    if listen_result != 0 {
+        print("ERROR: Socket listen failed\n")
+        _ = __sys_close(listener_fd)
+        return
+    }
+    print("Socket creation: fd=" + int_to_string(listener_fd) + "\n")
+    print("HTTP server listening on " + host + ":" + port_str + "\n")
+    print("[Socket] Ready to accept connections\n")
+    print("Signaling readiness at: " + ready_file + "\n")
+    create_ready_file(ready_file)
+    print("✓ Backend ready file: " + ready_file + "\n\n")
+    int consecutive_errors = 0
+    int max_consecutive_errors = 10
+    while true {
+        int client_fd = __sys_accept(listener_fd)
+        if client_fd < 0 {
+            consecutive_errors = consecutive_errors + 1
+            if consecutive_errors >= max_consecutive_errors {
+                print("ERROR: Too many consecutive accept failures\n")
+                break
+            }
+        } else {
+            consecutive_errors = 0
+            handle_client_gpu(client_fd, model_path, device_type)
+        }
+    }
+    _ = __sys_close(listener_fd)
     print("╔════════════════════════════════════════════════════════════════╗\n")
     print("║  NeurX GPU Backend - Pure S Implementation                     ║\n")
     print("║  GPU-Accelerated Inference Engine                             ║\n")

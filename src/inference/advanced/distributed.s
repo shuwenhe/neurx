@@ -5,12 +5,14 @@ enum device_type {
     CUDA_GPU
     ROCm_GPU
 }
+
 enum parallel_mode {
     DATA_PARALLEL
     TENSOR_PARALLEL
     PIPELINE_PARALLEL
     HYBRID_PARALLEL
 }
+
 enum comm_backend {
     NCCL
     GLOO
@@ -47,6 +49,7 @@ struct tensor_shard {
     num_shards int
     shard_index int
 }
+
 enum communication_op {
     ALL_REDUCE
     ALL_GATHER

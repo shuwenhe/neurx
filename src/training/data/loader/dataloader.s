@@ -7,6 +7,7 @@ enum data_format {
     FORMAT_MMAP,
     FORMAT_CUSTOM,
 }
+
 enum packing_strategy {
     PACKING_NONE,
     PACKING_FIXED_LENGTH,
@@ -104,6 +105,7 @@ struct training_batch {
     float64 tokenize_time_ms
     float64 total_prepare_time_ms
 }
+
 enum loader_status {
     LOADER_IDLE,
     LOADER_LOADING,

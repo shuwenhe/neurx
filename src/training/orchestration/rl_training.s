@@ -6,6 +6,7 @@ enum rl_algorithm {
     DAPO = 2
     RLAIF = 3
 }
+
 enum rl_stage {
     COLLECTING = 0
     TRAINING = 1

@@ -15,7 +15,6 @@ struct download_config {
     bool resume_download
     int max_retries
     string log_file
-}
 struct download_result {
     bool success
     string message
@@ -24,13 +23,11 @@ struct download_result {
     int files_failed
     float total_size_gb
     float download_speed_mbps
-}
 struct model_file_info {
     string name
     int size_bytes
     string checksum
     bool downloaded
-}
 func create_default_config() download_config {
     download_config{
         model_name: "Qwen2.5-0.5B-Instruct",
@@ -41,7 +38,7 @@ func create_default_config() download_config {
         max_retries: 3,
         log_file: "/app/shuwen/neurx/artifact/download_model.log"
     }
-}
+
 func string_slice(string text, int start, int end) string {
     string result = ""
     int i = start
@@ -50,7 +47,6 @@ func string_slice(string text, int start, int end) string {
         i = i + 1
     }
     result
-}
 func string_char(int code) string {
     if code == 0 { return "\x00" }
     if code == 9 { return "\t" }
@@ -59,7 +55,6 @@ func string_char(int code) string {
     if code == 32 { return " " }
     if code >= 48 && code <= 57 { return string_slice("0123456789", code - 48, code - 47) }
     ""
-}
 func trim_string(string s) string {
     int start = 0
     while start < len(s) && (s[start] == 32 || s[start] == 9 || s[start] == 10 || s[start] == 13) {
@@ -73,7 +68,6 @@ func trim_string(string s) string {
         return ""
     }
     string_slice(s, start, end + 1)
-}
 func get_model_files() []model_file_info {
     []model_file_info files = []model_file_info{cap: 6}
     files[0] = model_file_info{
@@ -113,17 +107,14 @@ func get_model_files() []model_file_info {
         downloaded: false
     }
     files
-}
 func check_model_directory(download_config config) bool {
     if runtime_file_exists(config.model_dir) {
         return true
     }
     runtime_make_dirs(config.model_dir)
     runtime_file_exists(config.model_dir)
-}
 func check_file_exists(string file_path) bool {
     runtime_file_exists(file_path)
-}
 func download_file(
     download_config config,
     model_file_info file_info,
@@ -161,7 +152,6 @@ func verify_downloaded_files(download_config config, []model_file_info files) (i
         i = i + 1
     }
     (verified, failed)
-}
 func calculate_total_size([]model_file_info files) int {
     int total = 0
     int i = 0
@@ -172,10 +162,8 @@ func calculate_total_size([]model_file_info files) int {
         i = i + 1
     }
     total
-}
 func log_message(download_config config, string message) {
     println(message)
-}
 func print_download_status(download_config config, []model_file_info files) {
     println("")
     println("╔════════════════════════════════════════════════════════════╗")
@@ -207,8 +195,58 @@ func print_download_status(download_config config, []model_file_info files) {
     println("")
     println("Summary: " + int_to_string(downloaded) + " downloaded, " + int_to_string(skipped) + " failed")
     println("")
-}
 func main() {
+    download_config config = create_default_config()
+    println("╔════════════════════════════════════════════════════════════╗")
+    println("║         NeurX Model Downloader (S Language)                ║")
+    println("╚════════════════════════════════════════════════════════════╝")
+    println("")
+    string model_name_env = trim_string(runtime_env_get("NEURX_MODEL_NAME", ""))
+    if len(model_name_env) > 0 {
+        config.model_name = model_name_env
+    }
+    string model_dir_env = trim_string(runtime_env_get("NEURX_MODEL_DIR", ""))
+    if len(model_dir_env) > 0 {
+        config.model_dir = model_dir_env
+    }
+    println("Model: " + config.model_name)
+    println("Target: " + config.model_dir)
+    println("")
+    if !check_model_directory(config) {
+        println("❌ Failed to create model directory")
+        return
+    }
+    println("✓ Model directory ready")
+    println("")
+    []model_file_info files = get_model_files()
+    log_message(config, "Starting model download: " + config.model_name)
+    log_message(config, "Target directory: " + config.model_dir)
+    int downloaded = 0
+    int skipped = 0
+    int failed = 0
+    int i = 0
+    while i < len(files) {
+        if download_file(config, files[i], 0) {
+            files[i].downloaded = true
+            downloaded = downloaded + 1
+        } else {
+            failed = failed + 1
+        }
+        i = i + 1
+    }
+    (int verified, int verify_failed) = verify_downloaded_files(config, files)
+    print_download_status(config, files)
+    println("✓ Download completed")
+    println("  Downloaded: " + int_to_string(verified) + " files")
+    println("  Failed: " + int_to_string(verify_failed) + " files")
+    println("")
+    if verify_failed == 0 {
+        println("✅ All files downloaded successfully!")
+        log_message(config, "Download completed successfully")
+    } else {
+        println("⚠️  Some files failed to download. Please retry.")
+        log_message(config, "Download completed with " + int_to_string(verify_failed) + " failures")
+    }
     download_config config = create_default_config()
     println("╔════════════════════════════════════════════════════════════╗")
     println("║         NeurX Model Downloader (S Language)                ║")

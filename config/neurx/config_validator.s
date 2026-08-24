@@ -38,12 +38,19 @@ struct validation_report {
 
 interface config_validator {
     func validate(cfg device_config_full*, hw_info hardware_info*) (validation_report*)
+
     func validate_with_level(cfg device_config_full*, hw_info hardware_info*, level validation_level) (validation_report*)
+
     func add_custom_rule(rule validation_rule*) (bool)
+
     func validate_memory_constraints(cfg device_config_full*, hw_info hardware_info*) (vec[validation_error])
+
     func validate_compute_capabilities(cfg device_config_full*, hw_info hardware_info*) (vec[validation_error])
+
     func validate_feature_support(cfg device_config_full*, hw_info hardware_info*) (vec[validation_error])
+
     func validate_precision_support(dtype precision_type, hw_info hardware_info*) (bool)
+
     func get_applicable_rules(cfg device_config_full*) (vec[validation_rule*])
 }
 

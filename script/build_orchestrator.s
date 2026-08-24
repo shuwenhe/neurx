@@ -13,6 +13,7 @@ enum build_target {
     one_api,
     CANN,
 }
+
 enum build_arch {
     X86_64,
     ARM64,

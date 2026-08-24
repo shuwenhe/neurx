@@ -304,6 +304,7 @@ struct rope_cache {
     tensor sin_vals
     int cached_max_seq
 }
+
 func compute_rope_embeddings(
     []int position_ids,
     int head_dim,

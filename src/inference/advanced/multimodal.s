@@ -5,11 +5,13 @@ enum modality_type {
     VIDEO
     AUDIO
 }
+
 enum image_format {
     PNG
     JPEG
     WEBP
 }
+
 enum audio_format {
     WAV
     MP3

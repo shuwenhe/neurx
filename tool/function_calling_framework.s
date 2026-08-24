@@ -78,6 +78,7 @@ struct tool_call {
     children_ids: list<string> = []
     retry_count: int = 0
 }
+
 enum call_status {
     PENDING
     RUNNING

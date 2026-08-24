@@ -1028,6 +1028,7 @@ struct ingestion_report {
     processing_time_ms: float
     db_status: dbstatus
 }
+
 struct rag_statistics {
     total_documents: int
     db_status: dbstatus

@@ -91,6 +91,7 @@ func get_html() string {
     html = html + "</body></html>\n"
     return html
 }
+
 func int_to_string(int value) string {
     if value == 0 { return "0" }
     string result = ""
@@ -103,6 +104,7 @@ func int_to_string(int value) string {
     if value < 0 { result = "-" + result }
     return result
 }
+
 func proxy_to_backend(string method, string path, string request_body) string {
     int backend_sock = __sys_socket(2, 1, 6)
     if backend_sock < 0 {
@@ -129,6 +131,7 @@ func proxy_to_backend(string method, string path, string request_body) string {
     _ = __sys_close(backend_sock)
     return response
 }
+
 func proxy_stream_to_backend(int client_fd, string request_body) {
     int backend_sock = __sys_socket(2, 1, 6)
     if backend_sock < 0 {
@@ -153,6 +156,7 @@ func proxy_stream_to_backend(int client_fd, string request_body) {
     }
     _ = __sys_close(backend_sock)
 }
+
 func parse_json_response(string http_response) string {
     int idx = 0
     while idx < len(http_response) {

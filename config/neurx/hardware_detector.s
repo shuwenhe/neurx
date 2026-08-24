@@ -81,12 +81,19 @@ struct detection_result {
 
 interface hardware_detector {
     func detect() (detection_result*)
+
     func detect_device_type() (device_type)
+
     func detect_gpu_properties(device_id int32) (gpu_properties*)
+
     func detect_cpu_properties() (cpu_properties*)
+
     func detect_memory_info() (memory_info*)
+
     func detect_visible_devices() (vec[int32])
+
     func validate_device_access(device_id int32) (bool)
+
     func get_device_capability(device_id int32) (device_capability*)
 }
 
