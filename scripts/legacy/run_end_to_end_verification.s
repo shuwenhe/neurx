@@ -10,7 +10,7 @@ func main() {
     println("")
     println("  verification script : " + check_path("scripts/legacy/run_end_to_end_verification.s"))
     println("  training src        : " + check_path("src/training/orchestration/trainer.s"))
-    println("  tests src           : " + check_path("tests/test_suite_complete.s"))
+    println("  tests src           : " + check_path("test/test_suite_complete.s"))
     println("")
     println("This S entrypoint centralizes the end-to-end verification status layer.")
     0

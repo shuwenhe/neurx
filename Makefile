@@ -182,7 +182,7 @@ build-commands test-native-inference test-model-formats build-production-s-infer
 .PHONY: device-abi-contract-test
 device-abi-contract-test: build-s-ir-runner $(S_REPO_ROOT)/bin/s_seed
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/device_abi_test'
-	@$(S_SEED_COMPILER) tests/contract/device_transformer_abi_test.s artifacts/build/device_abi_test/device_transformer_abi_test.ir
+	@$(S_SEED_COMPILER) test/contract/device_transformer_abi_test.s artifacts/build/device_abi_test/device_transformer_abi_test.ir
 	@$(S_SEED_COMPILER) src/runtime/device/device_abi.s artifacts/build/device_abi_test/device_abi.ir
 	@$(S_SEED_COMPILER) src/runtime/device/device_tensor.s artifacts/build/device_abi_test/device_tensor.ir
 	@$(S_SEED_COMPILER) src/runtime/device/device_ops.s artifacts/build/device_abi_test/device_ops.ir
@@ -226,7 +226,7 @@ pretrain-eval-test: check-bash build-s-ir-runner
 	@cd '$(CURDIR_UNIX)' && \
 		bash tools/bundle_s_modules.sh \
 			'artifacts/build/pretrain_eval_s/pretrain_eval_test.bundle.s' \
-			'tests/integration/pretrain_eval_test.s' \
+			'test/integration/pretrain_eval_test.s' \
 			'src/training/pretrain/eval/pretrain_eval.s' && \
 		'$(S_COMPILER)' \
 			'artifacts/build/pretrain_eval_s/pretrain_eval_test.bundle.s' \
@@ -388,7 +388,7 @@ test-pretrain-model: check-bash
 test-checkpoint-resume: check-bash
 	@echo "Running End-to-End Checkpoint Resume Test..."
 	@mkdir -p $(CURDIR_UNIX)/tests
-	@bash $(CURDIR_UNIX)/tests/checkpoint_resume_e2e.sh
+	@bash $(CURDIR_UNIX)/test/checkpoint_resume_e2e.sh
 build-posttrain-phase2a-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a'
 	@cd '$(CURDIR_UNIX)' && \
@@ -1868,12 +1868,12 @@ quick-test-s: check-bash
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'scripts/legacy/quick_test.s' -o '$(CURDIR_UNIX)/artifacts/build/quick_tests/quick_test.ir' 2>&1 && \
-		test -f '$(CURDIR_UNIX)/artifacts/build/quick_tests/quick_test.ir'
+		$(S_COMPILER) ir 'scripts/legacy/quick_test.s' -o '$(CURDIR_UNIX)/artifacts/build/quick_test/quick_test.ir' 2>&1 && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/quick_test/quick_test.ir'
 	@echo "Running quick test entry..."
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/quick_tests/quick_test.ir' 2>&1 | tee -a $(LOG_DIR)/quick_test_$(shell date +%Y%m%d_%H%M%S).log
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/quick_test/quick_test.ir' 2>&1 | tee -a $(LOG_DIR)/quick_test_$(shell date +%Y%m%d_%H%M%S).log
 quickstart-s: check-bash
 	@echo "Building quickstart entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/quickstart
@@ -2029,7 +2029,7 @@ verify-framework-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/framework_stack
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		"$(S_SEED_COMPILER)" 'tests/compatibility/framework_stack.s' '$(CURDIR_UNIX)/artifacts/build/framework_stack/framework_stack.ir' 2>&1 && \
+		"$(S_SEED_COMPILER)" 'test/compatibility/framework_stack.s' '$(CURDIR_UNIX)/artifacts/build/framework_stack/framework_stack.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/framework_stack/framework_stack.ir'
 	@echo "Running framework stack verification entry..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -2312,24 +2312,24 @@ pretrain-bigram-gpu: build-cuda-bigram-bridge build-pretrain-manifest-s
 transformer-reference-test:
 	@mkdir -p artifacts/build/transformer_reference
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/transformer_reference.cpp -o artifacts/build/transformer_reference/transformer_reference
+		test/transformer_reference.cpp -o artifacts/build/transformer_reference/transformer_reference
 	@artifacts/build/transformer_reference/transformer_reference
 adam-optimizer-test:
 	@mkdir -p artifacts/build/adam_optimizer
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/adam_optimizer_regression_test.cpp \
+		test/adam_optimizer_regression_test.cpp \
 		-o artifacts/build/adam_optimizer/adam_optimizer_regression_test
 	@artifacts/build/adam_optimizer/adam_optimizer_regression_test
 training-policy-test:
 	@mkdir -p artifacts/build/training_policy
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/training_policy_test.cpp \
+		test/training_policy_test.cpp \
 		-o artifacts/build/training_policy/training_policy_test
 	@artifacts/build/training_policy/training_policy_test
 tensor-runtime-native-test:
 	@mkdir -p artifacts/build/tensor_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/tensor_runtime_native_test.cpp src/runtime/native/tensor_runtime.cpp \
+		test/tensor_runtime_native_test.cpp src/runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/tensor_runtime_native/tensor_runtime_native_test
 	@artifacts/build/tensor_runtime_native/tensor_runtime_native_test
 tensor-runtime-native-backends-build: check-nvcc
@@ -2343,7 +2343,7 @@ tensor-runtime-native-backends-build: check-nvcc
 model-runtime-native-test:
 	@mkdir -p artifacts/build/model_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/model_runtime_native_test.cpp \
+		test/model_runtime_native_test.cpp \
 		src/runtime/model/json.cpp src/runtime/model/safetensors.cpp \
 		src/runtime/model/hf_model.cpp src/runtime/model/bpe_tokenizer.cpp \
 		src/runtime/native/tensor_runtime.cpp \
@@ -2353,58 +2353,58 @@ model-runtime-native-test:
 tokenizer-hf-parity-test:
 	@mkdir -p artifacts/build/model_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/tokenizer_parity_probe.cpp src/runtime/model/json.cpp \
+		test/tokenizer_parity_probe.cpp src/runtime/model/json.cpp \
 		src/runtime/model/bpe_tokenizer.cpp -licui18n -licuuc -licudata \
 		-o artifacts/build/model_runtime_native/tokenizer_parity_probe
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-$(POSTTRAIN_PYTHON)}"; \
 		HF_MODEL_DIR="$${HF_MODEL_DIR:-/home/shuwen/model/base-model}"; \
-		"$$PYTORCH_PYTHON" tests/tokenizer_hf_parity.py \
+		"$$PYTORCH_PYTHON" test/tokenizer_hf_parity.py \
 		artifacts/build/model_runtime_native/tokenizer_parity_probe "$$HF_MODEL_DIR"
 hf-checkpoint-level1-test:
 	@mkdir -p artifacts/build/model_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/hf_checkpoint_level1_probe.cpp src/runtime/model/json.cpp \
+		test/hf_checkpoint_level1_probe.cpp src/runtime/model/json.cpp \
 		src/runtime/model/safetensors.cpp src/runtime/model/hf_model.cpp \
 		src/runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/model_runtime_native/hf_checkpoint_level1_probe
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
 		HF_MODEL_DIR="$${HF_MODEL_DIR:-/home/shuwen/model/base-model}"; \
-		"$$PYTORCH_PYTHON" tests/hf_checkpoint_level1_parity.py \
+		"$$PYTORCH_PYTHON" test/hf_checkpoint_level1_parity.py \
 		artifacts/build/model_runtime_native/hf_checkpoint_level1_probe "$$HF_MODEL_DIR"
 hf-decoder-cpu-parity-test:
 	@mkdir -p artifacts/build/model_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/hf_decoder_cpu_probe.cpp src/runtime/model/json.cpp \
+		test/hf_decoder_cpu_probe.cpp src/runtime/model/json.cpp \
 		src/runtime/model/safetensors.cpp src/runtime/model/hf_model.cpp \
 		src/runtime/model/decoder_cpu.cpp src/runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/model_runtime_native/hf_decoder_cpu_probe
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
-		"$$PYTORCH_PYTHON" tests/hf_decoder_cpu_parity.py \
+		"$$PYTORCH_PYTHON" test/hf_decoder_cpu_parity.py \
 		artifacts/build/model_runtime_native/hf_decoder_cpu_probe
 hf-kv-generation-parity-test:
 	@mkdir -p artifacts/build/model_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/hf_kv_generation_probe.cpp src/runtime/model/json.cpp \
+		test/hf_kv_generation_probe.cpp src/runtime/model/json.cpp \
 		src/runtime/model/safetensors.cpp src/runtime/model/hf_model.cpp \
 		src/runtime/model/decoder_cpu.cpp src/runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/model_runtime_native/hf_kv_generation_probe
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
-		"$$PYTORCH_PYTHON" tests/hf_kv_generation_parity.py \
+		"$$PYTORCH_PYTHON" test/hf_kv_generation_parity.py \
 		artifacts/build/model_runtime_native/hf_kv_generation_probe
 kv-cache-reference-test:
 	@mkdir -p artifacts/build/kv_cache
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/kv_cache_reference_test.cpp \
+		test/kv_cache_reference_test.cpp \
 		-o artifacts/build/kv_cache/kv_cache_reference_test
 	@artifacts/build/kv_cache/kv_cache_reference_test
 numeric-alignment-test:
 	@mkdir -p artifacts/build/numeric_alignment
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/numeric_alignment_probe.cpp src/runtime/native/quantization.cpp \
+		test/numeric_alignment_probe.cpp src/runtime/native/quantization.cpp \
 		src/runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/numeric_alignment/numeric_alignment_probe
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
-		"$$PYTORCH_PYTHON" tests/numeric_alignment_pytorch.py \
+		"$$PYTORCH_PYTHON" test/numeric_alignment_pytorch.py \
 		artifacts/build/numeric_alignment/numeric_alignment_probe
 .PHONY: inference-feature-gap-check
 S_INFERENCE_CHECK_COMPILER ?= $(firstword $(wildcard $(CURDIR_UNIX)/../../s/bin/s /home/shuwen/s/bin/s) $(S_COMPILER))
@@ -2429,18 +2429,18 @@ inference-feature-gap-check:
 	@set -e; for source in $(INFERENCE_FEATURE_GAP_S_MODULES); do \
 		"$(S_INFERENCE_CHECK_COMPILER)" check "$$source"; \
 	done
-	@"$(S_INFERENCE_CHECK_COMPILER)" ir tests/inference_feature_gap_test.s \
+	@"$(S_INFERENCE_CHECK_COMPILER)" ir test/inference_feature_gap_test.s \
 		-o artifacts/build/inference_feature_gap/inference_feature_gap_test.ir
-	@"$(S_INFERENCE_CHECK_COMPILER)" ir tests/vllm_industrial_core_test.s \
+	@"$(S_INFERENCE_CHECK_COMPILER)" ir test/vllm_industrial_core_test.s \
 		-o artifacts/build/inference_feature_gap/vllm_industrial_core_test.ir
-	@"$(S_INFERENCE_CHECK_COMPILER)" ir tests/model_manifest_test.s \
+	@"$(S_INFERENCE_CHECK_COMPILER)" ir test/model_manifest_test.s \
 		-o artifacts/build/inference_feature_gap/model_manifest_test.ir
-	@"$(S_INFERENCE_CHECK_COMPILER)" ir tests/production_engine_contract_test.s \
+	@"$(S_INFERENCE_CHECK_COMPILER)" ir test/production_engine_contract_test.s \
 		-o artifacts/build/inference_feature_gap/production_engine_contract_test.ir
 inference-runtime-test:
 	@mkdir -p artifacts/build/inference_runtime
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/inference_runtime_test.cpp backend/cann/inference/ascend_adapter.cpp \
+		test/inference_runtime_test.cpp backend/cann/inference/ascend_adapter.cpp \
 		backend/cann/runtime/acl_runtime.cpp \
 		-ldl -o artifacts/build/inference_runtime/inference_runtime_test
 	@artifacts/build/inference_runtime/inference_runtime_test
@@ -2450,7 +2450,7 @@ cpu-inference-test:
 		$(CURDIR_UNIX)/artifacts/build/real_inference/real_inference
 serving-native-socket-test:
 	@echo "🧪 [Test] Serving Socket (S implementation)"
-	@$(S_SEED_COMPILER) tests/serving_socket_test.s /tmp/serving_socket_test.ir
+	@$(S_SEED_COMPILER) test/serving_socket_test.s /tmp/serving_socket_test.ir
 	@echo "✅ Compiled (runtime execution pending)"
 	@echo "ℹ️  Replaces former C implementation"
 build-openai-gateway:
@@ -2465,19 +2465,19 @@ build-openai-gateway:
 		-licui18n -licuuc -licudata \
 		-o artifacts/build/serving_native/neurx_openai_gateway
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		tests/openai_gateway_fake_backend.cpp \
+		test/openai_gateway_fake_backend.cpp \
 		artifacts/build/serving_native/serving_socket.o \
 		-o artifacts/build/serving_native/openai_gateway_fake_backend
 openai-sse-streaming-test: build-openai-gateway
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
-		"$$PYTORCH_PYTHON" tests/openai_sse_streaming_test.py \
+		"$$PYTORCH_PYTHON" test/openai_sse_streaming_test.py \
 		artifacts/build/serving_native/neurx_openai_gateway \
 		artifacts/build/serving_native/openai_gateway_fake_backend
 phase5-golden-prompt-test: build-s-ir-runner
 	@mkdir -p artifacts/build/phase5
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir'; \
-		"$(S_SEED_COMPILER)" 'tests/compatibility/phase5_golden.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir' 2>&1 || exit 1; \
+		"$(S_SEED_COMPILER)" 'test/compatibility/phase5_golden.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir' 2>&1 || exit 1; \
 		test -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir'
 	@cd '$(CURDIR_UNIX)' && \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir' \
@@ -2486,7 +2486,7 @@ phase5-hf-runtime-matrix: build-s-ir-runner
 	@mkdir -p artifacts/build/phase5
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir'; \
-		"$(S_SEED_COMPILER)" 'tests/compatibility/phase5_hf_runtime_matrix.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir' 2>&1 || exit 1; \
+		"$(S_SEED_COMPILER)" 'test/compatibility/phase5_hf_runtime_matrix.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir' 2>&1 || exit 1; \
 		test -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir'
 	@cd '$(CURDIR_UNIX)' && \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir' \
@@ -2539,7 +2539,7 @@ hf-decoder-cuda-parity-test: hf-decoder-cuda-build
 		artifacts/build/hf_decoder_cuda/tensor_runtime.o \
 		-lcublas -o artifacts/build/hf_decoder_cuda/hf_decoder_cuda_probe
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
-		"$$PYTORCH_PYTHON" tests/hf_decoder_cuda_parity.py \
+		"$$PYTORCH_PYTHON" test/hf_decoder_cuda_parity.py \
 		artifacts/build/hf_decoder_cuda/hf_decoder_cuda_probe
 build-hf-cuda-backend: hf-decoder-cuda-build
 	@$(CC) -O2 -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -Werror -c src/serving/native/serving_socket.c \
@@ -2932,7 +2932,7 @@ test-neurx-1-3: check-bash
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'scripts/legacy/test_neurx_1_3_model.s' -o '$(CURDIR_UNIX)/artifacts/build/tests/neurx_1_3_test.ir' 2>&1
+		$(S_COMPILER) ir 'scripts/legacy/test_neurx_1_3_model.s' -o '$(CURDIR_UNIX)/artifacts/build/test/neurx_1_3_test.ir' 2>&1
 	@echo "Compiling IR runner..."
 	@if [ ! -x "$(S_RUNNER_BIN)" ]; then \
 		$(MAKE) build-s-ir-runner; \
@@ -2940,7 +2940,7 @@ test-neurx-1-3: check-bash
 	@echo "Running NeurX-1.3 Model Test..."
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
-		$(S_RUNNER_BIN) '$(CURDIR_UNIX)/artifacts/build/tests/neurx_1_3_test.ir' 2>&1 | tee -a $(LOG_DIR)/test_neurx_1_3_$(shell date +%Y%m%d_%H%M%S).log
+		$(S_RUNNER_BIN) '$(CURDIR_UNIX)/artifacts/build/test/neurx_1_3_test.ir' 2>&1 | tee -a $(LOG_DIR)/test_neurx_1_3_$(shell date +%Y%m%d_%H%M%S).log
 compile-all-components-s: check-bash
 	@echo "Building full compilation/test status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/compile_all_components
@@ -3031,12 +3031,12 @@ run-integration-tests-s: check-bash
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'scripts/legacy/run_integration_tests.s' -o '$(CURDIR_UNIX)/artifacts/build/run_integration_tests/run_integration_tests.ir' 2>&1 && \
-		test -f '$(CURDIR_UNIX)/artifacts/build/run_integration_tests/run_integration_tests.ir'
+		$(S_COMPILER) ir 'scripts/legacy/run_integration_tests.s' -o '$(CURDIR_UNIX)/artifacts/build/run_integration_test/run_integration_tests.ir' 2>&1 && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/run_integration_test/run_integration_tests.ir'
 	@echo "Running integration tests status entry..."
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/run_integration_tests/run_integration_tests.ir' 2>&1 | tee -a $(LOG_DIR)/run_integration_tests_$(shell date +%Y%m%d_%H%M%S).log
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/run_integration_test/run_integration_tests.ir' 2>&1 | tee -a $(LOG_DIR)/run_integration_tests_$(shell date +%Y%m%d_%H%M%S).log
 minimal-diagnostic-s: check-bash
 	@echo "Building minimal diagnostic status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/minimal_diagnostic

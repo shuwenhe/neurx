@@ -1,7 +1,7 @@
 #include "transformer_kernels.cuh"
 #include <cublas_v2.h>
 #define NEURX_TRANSFORMER_REFERENCE_NO_MAIN
-#include "../tests/transformer_reference.cpp"
+#include "../test/transformer_reference.cpp"
 #include <map>
 using namespace neurx_cuda_transformer;
 #define CK(x) do{auto e=(x);if(e!=cuda_success){printf("CUDA: %s\n",cuda_get_error_string(e));return false;}}while(0)

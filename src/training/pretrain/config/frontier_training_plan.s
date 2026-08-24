@@ -263,7 +263,7 @@ func current_neurx_frontier_capabilities() []frontier_capability {
         "partial",
         "p1",
         false,
-        "tests/evaluation/benchmark_eval.s",
+        "test/evaluation/benchmark_eval.s",
         "add benchmark loaders, held-out perplexity, coding, math, safety, and long-context suites"
     )
     caps[11] = make_capability(

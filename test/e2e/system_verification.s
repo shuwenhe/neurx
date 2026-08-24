@@ -67,7 +67,7 @@ func check_all_components() component_status[] {
     components = append(components, ddp)
     let compile = verify_component(
         "Compilation & Testing",
-        "tests/compile_and_test.s",
+        "test/compile_and_test.s",
         300
     )
     compile.description = "Full test suite"
@@ -199,7 +199,7 @@ func check_deployment_readiness() {
     println("  [✓] Performance benchmarks")
     println("")
     println("🧪 Testing:")
-    println("  [✓] Compilation suite ready (tests/compile_and_test.s)")
+    println("  [✓] Compilation suite ready (test/compile_and_test.s)")
     println("  [✓] Unit tests implemented")
     println("  [✓] Performance benchmarks (workflows/benchmark/performance_benchmark.s)")
     println("  [✓] Integration tests planned")

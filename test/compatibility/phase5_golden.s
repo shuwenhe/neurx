@@ -11,7 +11,7 @@ func phase5_summary_command(string path) string {
 }
 
 func main() {
-    string prompt_path = "tests/golden/prompts.json"
+    string prompt_path = "test/golden/prompts.json"
     if !runtime_file_exists(prompt_path) {
         println("phase5-golden-prompt FAIL missing_file=" + prompt_path)
         return 1

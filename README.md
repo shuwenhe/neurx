@@ -62,7 +62,7 @@ neurx/
 │   ├── runtime/          # Runtime and command system
 │   ├── serving/          # Serving APIs (OpenAI compatible)
 │   └── training/         # Training infrastructure
-├── tests/                # Contract and unit tests
+├── test/                # Contract and unit tests
 ├── config/              # Configuration examples
 ├── benchmarks/           # Performance benchmarking
 ├── cmd/                  # Command-line entry points
@@ -245,28 +245,28 @@ make test
 Tests ensure API compatibility across backends:
 ```bash
 # Inference API contract test
-./tests/contract/inference_api_contract_test.s
+./test/contract/inference_api_contract_test.s
 
 # Serving API contract test
-./tests/contract/serving_api_contract_test.s
+./test/contract/serving_api_contract_test.s
 
 # Training API contract test
-./tests/contract/training_api_contract_test.s
+./test/contract/training_api_contract_test.s
 
 # Embedding compatibility test
-./tests/contract/safetensors_embedding_test.s
+./test/contract/safetensors_embedding_test.s
 
 # Native inference pipeline test
-./tests/contract/native_inference_pipeline_test.s
+./test/contract/native_inference_pipeline_test.s
 ```
 
 ### Distributed Tests
 ```bash
 # Test distributed inference
-./tests/distributed/distributed_inference_test.s
+./test/distributed/distributed_inference_test.s
 
 # Test fault tolerance
-./tests/distributed/fault_tolerance_test.s
+./test/distributed/fault_tolerance_test.s
 ```
 
 ## 🚢 Deployment

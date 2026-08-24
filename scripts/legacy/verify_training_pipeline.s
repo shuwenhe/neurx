@@ -19,7 +19,7 @@ func main() {
         pass_count = pass_count + 1
     }
     total_count = total_count + 1
-    if check_file(project_root + "/tests/test_training_pipeline.s", "testEnglish text") {
+    if check_file(project_root + "/test/test_training_pipeline.s", "testEnglish text") {
         pass_count = pass_count + 1
     }
     total_count = total_count + 1

@@ -18,7 +18,7 @@ func generate_adamw_golden() {
     float param = 1.0
     float momentum = 0.0
     float variance = 0.0
-    string output_dir = "tests/golden/adamw"
+    string output_dir = "test/golden/adamw"
     save_float_to_file(param, output_dir + "/param_step0.bin")
     int step = 1
     while step <= 10 {
@@ -43,7 +43,7 @@ func generate_adamw_golden() {
 
 func generate_math_golden() {
     println("\n=== Generating Math Functions Golden Tests ===\n")
-    string output_dir = "tests/golden/math"
+    string output_dir = "test/golden/math"
     test_exp(0.0, output_dir)
     test_exp(1.0, output_dir)
     test_exp(-1.0, output_dir)
@@ -91,7 +91,7 @@ func test_sqrt(float x, string output_dir) {
 
 func generate_embedding_golden() {
     println("\n=== Generating Embedding Golden Tests ===\n")
-    string output_dir = "tests/golden/embedding"
+    string output_dir = "test/golden/embedding"
     int vocab_size = 10
     int hidden_dim = 8
     []float embedding_weight = []
@@ -129,7 +129,7 @@ func process_embedding_test([]float embedding_weight, []int input_ids, int test_
 
 func generate_cross_entropy_golden() {
     println("\n=== Generating Cross-Entropy Golden Tests ===\n")
-    string output_dir = "tests/golden/loss"
+    string output_dir = "test/golden/loss"
     println("Note: Cross-entropy test generation simplified due to S language array constraints\n")
     println("\n✅ Cross-Entropy golden tests generated in " + output_dir + "/\n")
 }
@@ -147,7 +147,7 @@ func main() {
     println("============================================================")
     println("\nUsage:")
     println("  1. Run NeurX implementations")
-    println("  2. Compare outputs with .bin files in tests/golden/")
+    println("  2. Compare outputs with .bin files in test/golden/")
     println("  3. Verify max absolute error < 1e-5")
     println("")
 }
