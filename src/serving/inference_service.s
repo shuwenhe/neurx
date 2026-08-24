@@ -1,5 +1,4 @@
 package neurx.deploy.inference_service
-
 struct service_config {
     string service_name
     string version
@@ -12,14 +11,12 @@ struct service_config {
     bool enable_metrics
     int metric_collection_interval_sec
 }
-
 struct service_state {
     string state_name
     int state_code
     int timestamp
     string message
 }
-
 struct inference_service {
     service_config config
     service_state current_state
@@ -29,7 +26,6 @@ struct inference_service {
     int startup_time
     int current_time
 }
-
 func init_service_config() service_config {
     service_config config
     config.service_name = "NeurX Inference Service"
@@ -44,7 +40,6 @@ func init_service_config() service_config {
     config.metric_collection_interval_sec = 60
     config
 }
-
 func init_inference_service() inference_service {
     inference_service service
     service.config = init_service_config()
@@ -56,7 +51,6 @@ func init_inference_service() inference_service {
     service.startup_time = 0
     service
 }
-
 func service_startup(inference_service service) {
     print("\n" + "="*70 + "\n")
     print("🚀 NeurX Production Inference Service Startup\n")
@@ -113,7 +107,6 @@ func service_startup(inference_service service) {
     print("✅ All systems ready!\n\n")
     print("="*70 + "\n")
 }
-
 func print_service_status(inference_service service) {
     print("\n📊 Service Status Report\n")
     print("="*70 + "\n")
@@ -157,7 +150,6 @@ func print_service_status(inference_service service) {
     print("Max Connections: 100\n\n")
     print("="*70 + "\n\n")
 }
-
 func print_deployment_guide() {
     print("\n" + "="*70 + "\n")
     print("📚 NeurX Production Deployment Guide\n")
@@ -167,13 +159,13 @@ func print_deployment_guide() {
     print("1. Start the service:\n")
     print("   $ make start-inference-service\n\n")
     print("2. Verify the service is running:\n")
-    print("   $ curl http://localhost:8000/health\n\n")
+    print("   $ curl http:
     print("3. Test text generation:\n")
-    print("   $ curl -X POST http://localhost:8000/v1/chat/completions \\\n")
+    print("   $ curl -X POST http:
     print("     -H \"Content-Type: application/json\" \\\n")
     print("     -d '{\"model\":\"text\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}'\n\n")
     print("4. Test vision understanding:\n")
-    print("   $ curl -X POST http://localhost:8000/v1/vision/describe \\\n")
+    print("   $ curl -X POST http:
     print("     -H \"Content-Type: application/json\" \\\n")
     print("     -d '{\"image_path\":\"/path/to/image.jpg\"}'\n\n")
     print("📋 API Endpoints\n")
@@ -208,12 +200,11 @@ func print_deployment_guide() {
     print("• OS: Linux (Ubuntu 20.04 LTS or later recommended)\n\n")
     print("📊 Monitoring\n")
     print("─────────────────────────────────────────────────────────────────────\n")
-    print("• Prometheus metrics: http://localhost:9090\n")
+    print("• Prometheus metrics: http:
     print("• Service logs: /var/log/neurx/inference.log\n")
     print("• Error logs: /var/log/neurx/errors.log\n\n")
     print("="*70 + "\n\n")
 }
-
 func main() {
     inference_service service = init_inference_service()
     service_startup(service)

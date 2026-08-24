@@ -1,16 +1,10 @@
 #pragma once
-
 #include <stdint.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 #define NEURX_DEVICE_PLUGIN_ABI_VERSION 1u
 #define NEURX_DEVICE_PLUGIN_ENTRY "neurx_device_plugin_get_v1"
-
-// Vendor SDK types never cross this table. Handles are local to one plugin
-// context and the common registry translates them to process-wide handles.
 typedef struct neurx_device_plugin_v1 {
   uint32_t abi_version;
   uint32_t struct_size;
@@ -31,9 +25,7 @@ typedef struct neurx_device_plugin_v1 {
   int (*synchronize)(int context, int stream);
   const char* (*last_error)(int context);
 } neurx_device_plugin_v1;
-
 typedef const neurx_device_plugin_v1* (*neurx_device_plugin_get_v1_fn)(void);
-
 #ifdef __cplusplus
 }
 #endif

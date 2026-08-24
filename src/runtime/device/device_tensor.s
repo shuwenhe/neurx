@@ -1,5 +1,5 @@
 package neurx.runtime.device.device_tensor
-use neurx.runtime.device.device_abi.{device_context, neurx_device_alloc, neurx_device_free}
+use neurx.runtime.device.device_abi.{device_context, device_buffer_alloc, device_buffer_free}
 
 struct device_tensor {
     int buffer
@@ -57,7 +57,7 @@ func tensor_empty(device_context context, []int shape, string dtype) device_tens
     int elements = tensor_numel(shape)
     if element_bytes <= 0 || elements <= 0 { return tensor_invalid(context.backend, dtype, "invalid_tensor_layout") }
     int bytes = elements * element_bytes
-    int buffer = neurx_device_alloc(context.handle, bytes, "device")
+    int buffer = device_buffer_alloc(context.handle, bytes, "device")
     if buffer <= 0 { return tensor_invalid(context.backend, dtype, "device_allocation_failed") }
     device_tensor {buffer: buffer, context: context.handle, device_id: context.device_id, backend: context.backend, dtype: dtype, shape: shape, strides: tensor_contiguous_strides(shape), offset_bytes: 0, storage_bytes: bytes, owns_storage: true, valid: true, error_message: ""}
 }
@@ -74,5 +74,5 @@ func tensor_view(device_tensor source, []int shape, int offset_elements) device_
 
 func tensor_release(device_tensor tensor) int {
     if !tensor.valid || !tensor.owns_storage { return 0 }
-    neurx_device_free(tensor.context, tensor.buffer)
+    device_buffer_free(tensor.context, tensor.buffer)
 }

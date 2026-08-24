@@ -189,6 +189,7 @@ device-abi-contract-test: build-s-ir-runner $(S_REPO_ROOT)/bin/s_seed
 	@$(S_SEED_COMPILER) src/runtime/device/device_binding.s artifact/build/device_abi_test/device_binding.ir
 	@$(S_SEED_COMPILER) src/runtime/device/vendor_lowering.s artifact/build/device_abi_test/vendor_lowering.ir
 	@$(S_SEED_COMPILER) src/inference/runtime/device_transformer.s artifact/build/device_abi_test/device_transformer.ir
+	@$(S_SEED_COMPILER) src/inference/runtime/transformer_executor.s artifact/build/device_abi_test/transformer_executor.ir
 	@$(S_SEED_COMPILER) --link-ir artifact/build/device_abi_test/linked.ir \
 		artifact/build/device_abi_test/device_transformer_abi_test.ir \
 		artifact/build/device_abi_test/device_abi.ir \
@@ -196,8 +197,20 @@ device-abi-contract-test: build-s-ir-runner $(S_REPO_ROOT)/bin/s_seed
 		artifact/build/device_abi_test/device_ops.ir \
 		artifact/build/device_abi_test/device_binding.ir \
 		artifact/build/device_abi_test/vendor_lowering.ir \
-		artifact/build/device_abi_test/device_transformer.ir
+		artifact/build/device_abi_test/device_transformer.ir \
+		artifact/build/device_abi_test/transformer_executor.ir
 	@'$(S_RUNNER_BIN)' artifact/build/device_abi_test/linked.ir
+
+.PHONY: production-batch-runtime-test
+production-batch-runtime-test: build-s-ir-runner $(S_REPO_ROOT)/bin/s_seed
+	@mkdir -p '$(CURDIR_UNIX)/artifact/build/production_batch_runtime'
+	@bash tool/bundle_s_module.sh '$(CURDIR_UNIX)/artifact/build/production_batch_runtime/bundle.s' \
+		test/contract/production_batch_runtime_test.s \
+		src/runtime/device/device_abi.s src/inference/runtime/transformer_executor.s \
+		src/inference/runtime/production_batch_runtime.s
+	@$(S_SEED_COMPILER) '$(CURDIR_UNIX)/artifact/build/production_batch_runtime/bundle.s' \
+		'$(CURDIR_UNIX)/artifact/build/production_batch_runtime/test.ir'
+	@'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifact/build/production_batch_runtime/test.ir'
 
 DEVICE_ABI_BUILD_DIR := $(CURDIR_UNIX)/artifact/build/device_abi
 DEVICE_ABI_COMMON_LIB := $(DEVICE_ABI_BUILD_DIR)/libneurx_device.so
@@ -217,10 +230,31 @@ $(DEVICE_ABI_CANN_PLUGIN): backend/cann/device_abi_cann.cpp backend/cann/runtime
 	@$(CXX) -O2 -std=c++17 -fPIC -shared -Ibackend/api '$<' -ldl -o '$@'
 
 $(DEVICE_ABI_CUDA_PLUGIN): backend/cuda/device_abi_cuda.cu backend/api/device_plugin_abi.h | $(DEVICE_ABI_BUILD_DIR)
-	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -Xcompiler=-fPIC -shared -Ibackend/api '$<' -o '$@'
+	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -Xcompiler=-fPIC -shared -Ibackend/api '$<' -lcublasLt -lcublas -o '$@'
 
 $(DEVICE_ABI_BUILD_DIR)/device_abi_registry_test: test/contract/device_abi_registry_test.cpp $(DEVICE_ABI_COMMON_LIB) | $(DEVICE_ABI_BUILD_DIR)
 	@$(CXX) -O2 -std=c++17 -Ibackend/api '$<' -L'$(DEVICE_ABI_BUILD_DIR)' -lneurx_device -Wl,-rpath,'$(DEVICE_ABI_BUILD_DIR)' -o '$@'
+
+$(DEVICE_ABI_BUILD_DIR)/device_abi_cuda_kernel_test: test/contract/device_abi_cuda_kernel_test.cpp $(DEVICE_ABI_COMMON_LIB) $(DEVICE_ABI_CUDA_PLUGIN) | $(DEVICE_ABI_BUILD_DIR)
+	@$(CXX) -O2 -std=c++17 -Ibackend/api '$<' -L'$(DEVICE_ABI_BUILD_DIR)' -lneurx_device -Wl,-rpath,'$(DEVICE_ABI_BUILD_DIR)' -o '$@'
+
+.PHONY: device-abi-cuda-kernel-test
+device-abi-cuda-kernel-test: device-abi-build $(DEVICE_ABI_BUILD_DIR)/device_abi_cuda_kernel_test
+	@NEURX_BACKEND_PLUGIN_DIR='$(DEVICE_ABI_BUILD_DIR)' '$(DEVICE_ABI_BUILD_DIR)/device_abi_cuda_kernel_test'
+
+.PHONY: s-transformer-cuda-runtime-build s-transformer-cuda-runtime-test
+s-transformer-cuda-runtime-build: build-s-ir-runner $(S_REPO_ROOT)/bin/s_seed device-abi-build
+	@mkdir -p '$(DEVICE_ABI_BUILD_DIR)/s_runtime'
+	@bash tool/bundle_s_module.sh '$(DEVICE_ABI_BUILD_DIR)/s_runtime/bundle.s' \
+		test/contract/s_transformer_cuda_runtime_test.s \
+		src/runtime/device/device_abi.s src/runtime/device/device_tensor.s src/runtime/device/device_ops.s \
+		src/runtime/device/device_binding.s src/runtime/device/vendor_lowering.s \
+		src/inference/runtime/device_transformer.s src/inference/runtime/transformer_executor.s
+	@$(S_SEED_COMPILER) '$(DEVICE_ABI_BUILD_DIR)/s_runtime/bundle.s' '$(DEVICE_ABI_BUILD_DIR)/s_runtime/linked.ir'
+
+s-transformer-cuda-runtime-test: s-transformer-cuda-runtime-build
+	@NEURX_BACKEND_PLUGIN_DIR='$(DEVICE_ABI_BUILD_DIR)' LD_PRELOAD='$(DEVICE_ABI_COMMON_LIB)' \
+		'$(S_RUNNER_BIN)' '$(DEVICE_ABI_BUILD_DIR)/s_runtime/linked.ir'
 
 device-abi-probe-test: device-abi-build $(DEVICE_ABI_BUILD_DIR)/device_abi_registry_test
 	@NEURX_BACKEND_PLUGIN_DIR='$(DEVICE_ABI_BUILD_DIR)' '$(DEVICE_ABI_BUILD_DIR)/device_abi_registry_test' cann

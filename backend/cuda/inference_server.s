@@ -20,6 +20,12 @@ extern "libc:neurx_s_cuda_config_finalize" func neurx_s_cuda_config_finalize(str
 extern "libc:neurx_s_cuda_begin" func neurx_s_cuda_begin(string prompt, int max_new_tokens) int
 extern "libc:neurx_s_cuda_next" func neurx_s_cuda_next() int
 extern "libc:neurx_s_cuda_result" func neurx_s_cuda_result() string
+extern "libc:neurx_s_cuda_session_create" func neurx_s_cuda_session_create() int
+extern "libc:neurx_s_cuda_session_destroy" func neurx_s_cuda_session_destroy(int session_id) int
+extern "libc:neurx_s_cuda_session_begin" func neurx_s_cuda_session_begin(int session_id, string prompt, int max_new_tokens) int
+extern "libc:neurx_s_cuda_session_next" func neurx_s_cuda_session_next(int session_id) int
+extern "libc:neurx_s_cuda_session_result" func neurx_s_cuda_session_result(int session_id) string
+extern "libc:neurx_s_cuda_session_error" func neurx_s_cuda_session_error(int session_id) string
 extern func runtime_env_get(string key, string default_value) string
 
 struct kv_cache {
@@ -633,28 +639,37 @@ func perform_inference_gpu(string prompt, int max_tokens, int hidden_dim, int nu
     print("[GPU Inference] Starting NeurX CUDA model inference\n")
     print("[GPU Inference] Prompt: '" + prompt + "'\n")
     print("[GPU Inference] Max tokens: " + int_to_string(max_tokens) + "\n")
-    int prompt_tokens = neurx_s_cuda_begin(prompt, max_tokens)
+    int session_id = neurx_s_cuda_session_create()
+    if session_id <= 0 { return "NeurX CUDA error: " + neurx_s_cuda_last_error() }
+    int prompt_tokens = neurx_s_cuda_session_begin(session_id, prompt, max_tokens)
     if prompt_tokens < 0 {
-        return "NeurX CUDA error: " + neurx_s_cuda_last_error()
+        string error_message = neurx_s_cuda_session_error(session_id)
+        _ = neurx_s_cuda_session_destroy(session_id)
+        return "NeurX CUDA error: " + error_message
     }
     print("[GPU Inference] Prompt tokens: " + int_to_string(prompt_tokens) + "\n")
     int generated = 0
     while generated < max_tokens {
-        int token_id = neurx_s_cuda_next()
+        int token_id = neurx_s_cuda_session_next(session_id)
         if token_id == -1 {
             break
         }
         if token_id < -1 {
-            return "NeurX CUDA error: " + neurx_s_cuda_last_error()
+            string error_message = neurx_s_cuda_session_error(session_id)
+            _ = neurx_s_cuda_session_destroy(session_id)
+            return "NeurX CUDA error: " + error_message
         }
         generated = generated + 1
     }
-    string output = neurx_s_cuda_result()
-    if len(output) == 0 && len(neurx_s_cuda_last_error()) > 0 {
-        return "NeurX CUDA error: " + neurx_s_cuda_last_error()
+    string output = neurx_s_cuda_session_result(session_id)
+    if len(output) == 0 && len(neurx_s_cuda_session_error(session_id)) > 0 {
+        string error_message = neurx_s_cuda_session_error(session_id)
+        _ = neurx_s_cuda_session_destroy(session_id)
+        return "NeurX CUDA error: " + error_message
     }
     print("[GPU Inference] Generated tokens: " + int_to_string(generated) + "\n")
     print("[GPU Inference] Generated output (" + int_to_string(len(output)) + " chars)\n")
+    _ = neurx_s_cuda_session_destroy(session_id)
     return output
 }
 
@@ -666,24 +681,32 @@ func perform_inference_gpu_stream(int client_fd, string prompt, int max_tokens) 
     headers = headers + "Connection: close\r\n\r\n"
     write_complete(client_fd, headers)
 
-    int prompt_tokens = neurx_s_cuda_begin(prompt, max_tokens)
-    if prompt_tokens < 0 {
+    int session_id = neurx_s_cuda_session_create()
+    if session_id <= 0 {
         string error_line = "{\"error\":\"" + json_escape(neurx_s_cuda_last_error()) + "\",\"done\":true}\n"
         write_complete(client_fd, error_line)
+        return
+    }
+    int prompt_tokens = neurx_s_cuda_session_begin(session_id, prompt, max_tokens)
+    if prompt_tokens < 0 {
+        string error_line = "{\"error\":\"" + json_escape(neurx_s_cuda_session_error(session_id)) + "\",\"done\":true}\n"
+        write_complete(client_fd, error_line)
+        _ = neurx_s_cuda_session_destroy(session_id)
         return
     }
 
     int generated = 0
     int emitted_chars = 0
     while generated < max_tokens {
-        int token_id = neurx_s_cuda_next()
+        int token_id = neurx_s_cuda_session_next(session_id)
         if token_id == -1 { break }
         if token_id < -1 {
-            string error_line = "{\"error\":\"" + json_escape(neurx_s_cuda_last_error()) + "\",\"done\":true}\n"
+            string error_line = "{\"error\":\"" + json_escape(neurx_s_cuda_session_error(session_id)) + "\",\"done\":true}\n"
             write_complete(client_fd, error_line)
+            _ = neurx_s_cuda_session_destroy(session_id)
             return
         }
-        string current = neurx_s_cuda_result()
+        string current = neurx_s_cuda_session_result(session_id)
         if len(current) > emitted_chars {
             string delta = __host_slice(current, emitted_chars, len(current))
             string frame = "{\"delta\":\"" + json_escape(delta) + "\",\"done\":false}\n"
@@ -694,6 +717,7 @@ func perform_inference_gpu_stream(int client_fd, string prompt, int max_tokens) 
     }
     string done_frame = "{\"delta\":\"\",\"done\":true,\"backend\":\"neurx-gpu-enhanced\",\"generated_tokens\":" + int_to_string(generated) + "}\n"
     write_complete(client_fd, done_frame)
+    _ = neurx_s_cuda_session_destroy(session_id)
     print("[GPU Inference] Stream completed: " + int_to_string(generated) + " tokens\n")
 }
 

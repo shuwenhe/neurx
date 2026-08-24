@@ -1,11 +1,9 @@
 use std.conv.int_to_string
-
 package neurx.inference.cmd.server
 use neurx.inference.api.http_server.{create_http_server, close_http_server, server_accept_loop, http_server}
 use neurx.inference.api.rest_api.{route_request}
 extern "intrinsic" func __host_readline(string prompt) string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
 func main() {
     print("╔════════════════════════════════════════════╗\n")
     print("║    NeurX Production Inference Server       ║\n")
@@ -33,7 +31,7 @@ func main() {
     print("   GET    /api/health            - Health check\n")
     print("   POST   /api/embeddings        - Generate embeddings\n\n")
     print("🧪 Quick Test:\n")
-    print("   curl -X POST http://127.0.0.1:8000/api/generate \\\n")
+    print("   curl -X POST http:
     print("     -H 'Content-Type: application/json' \\\n")
     print("     -d '{\"prompt\": \"医学术语\", \"max_tokens\": 100}'\n\n")
     print("📝 Type 'quit' to shutdown server\n")
@@ -43,7 +41,6 @@ func main() {
     close_http_server(server)
     print("✅ Server shutdown complete\n")
 }
-
 func handle_requests(http_server server) {
     while server.running {
         string prompt = __host_readline("neurx> ")
@@ -63,7 +60,6 @@ func handle_requests(http_server server) {
         }
     }
 }
-
 func print_server_status() {
     print("\n📊 Server Status:\n")
     print("   Status: ✅ Running\n")
@@ -73,7 +69,6 @@ func print_server_status() {
     print("   Throughput: ~50 tok/s (estimated)\n")
     print("   Uptime: Running\n\n")
 }
-
 func print_help() {
     print("\n📖 Commands:\n")
     print("   status   - Show server status\n")
@@ -81,7 +76,6 @@ func print_help() {
     print("   quit     - Shutdown server\n")
     print("   exit     - Shutdown server\n\n")
 }
-
 func string_at_index(string s, int idx) string {
     if idx < 0 || idx >= len(s) { return "" }
     return __host_slice(s, idx, idx + 1)

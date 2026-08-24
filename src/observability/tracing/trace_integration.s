@@ -1,6 +1,5 @@
 package neurx.observability.tracing.trace_integration
 import io
-
 struct tracing_config {
     enabled         []bool
     service_name     []string
@@ -10,7 +9,6 @@ struct tracing_config {
     otel_endpoint    []string
     max_spans_per_trace []int
 }
-
 struct request_tracer {
     trace_id          []string
     root_span_id       []string
@@ -21,7 +19,6 @@ struct request_tracer {
     is_active         []bool
     sampling_decision []bool
 }
-
 struct tracing_metrics {
     span_count          []int
     event_count         []int
@@ -29,7 +26,6 @@ struct tracing_metrics {
     export_duration     []int
     overhead_percent    []int
 }
-
 func new_tracing_config() tracing_config {
     config := tracing_config{}
     config.enabled = append([]bool{}, true)
@@ -37,13 +33,11 @@ func new_tracing_config() tracing_config {
     config.sampling_rate = append([]int{}, 100)
     config.exporters = make([][]string, 1)
     config.exporters[0] = append([]string{}, "console", "otel")
-    config.jaeger_endpoint = append([]string{}, "http://localhost:14268/api/traces")
-    config.otel_endpoint = append([]string{}, "http://localhost:4318/v1/traces")
+    config.jaeger_endpoint = append([]string{}, "http:
+    config.otel_endpoint = append([]string{}, "http:
     config.max_spans_per_trace = append([]int{}, 500)
-
     return config
 }
-
 func new_request_tracer(config tracing_config) request_tracer {
     rt := request_tracer{}
     rt.trace_id = append([]string{}, "trace-" + io.ToString(1000 + 1))
@@ -53,137 +47,103 @@ func new_request_tracer(config tracing_config) request_tracer {
     rt.spans = make([][]string, 0)
     rt.span_metadata = make([]map[string][]string, 0)
     rt.is_active = append([]bool{}, true)
-
     should_sample := 50
     rt.sampling_decision = append([]bool{}, should_sample < config.sampling_rate[0])
-
     return rt
 }
-
 func (request_tracer* rt) start_span(span_name []string, span_kind []string) []string {
     if !rt.is_active[0] {
         return []string{}
     }
-
     span_id := append([]string{}, "span-" + io.ToString(len(rt.spans) + 1))
-
     rt.spans = append(rt.spans, span_id)
-
     metadata := make(map[string][]string)
     metadata["name"] = span_name
     metadata["kind"] = span_kind
     metadata["start_time"] = append([]string{}, "0")
     metadata["parent_span"] = []string{}
-
     if len(rt.spans) > 1 {
         metadata["parent_span"] = append([]string{}, rt.spans[len(rt.spans)-2][0])
     }
-
     rt.span_metadata = append(rt.span_metadata, metadata)
-
     return span_id
 }
-
 func (request_tracer* rt) end_span() {
     if len(rt.spans) == 0 {
         return
     }
-
     rt.spans = rt.spans[0:len(rt.spans)-1]
 }
-
 func (request_tracer* rt) add_span_attribute(key []string, value []string) {
     if len(rt.spans) == 0 || len(rt.span_metadata) == 0 {
         return
     }
-
     if len(key) > 0 && len(value) > 0 {
         attr_key := "attr_" + key[0]
         rt.span_metadata[len(rt.span_metadata)-1][attr_key] = value
     }
 }
-
 func (request_tracer* rt) record_span_event(event_name []string, event_value []string) {
     if len(rt.spans) == 0 || len(rt.span_metadata) == 0 {
         return
     }
-
     if len(event_name) > 0 {
         event_key := "event_" + event_name[0]
         rt.span_metadata[len(rt.span_metadata)-1][event_key] = event_value
     }
 }
-
 func (request_tracer* rt) record_error(error_msg []string) {
     if len(rt.spans) == 0 {
         return
     }
-
     rt.span_metadata[len(rt.span_metadata)-1]["error"] = error_msg
     rt.span_metadata[len(rt.span_metadata)-1]["status"] = append([]string{}, "ERROR")
 }
-
 func (request_tracer* rt) get_trace_id() []string {
     return rt.trace_id
 }
-
 func (request_tracer* rt) get_root_span_id() []string {
     return rt.root_span_id
 }
-
 func (request_tracer* rt) get_w3c_trace_context() []string {
     header := "00-"
-
     if len(rt.trace_id) > 0 {
         header = header + rt.trace_id[0]
     }
-
     header = header + "-"
-
     if len(rt.root_span_id) > 0 {
         header = header + rt.root_span_id[0]
     }
-
     header = header + "-"
-
     if rt.sampling_decision[0] {
         header = header + "01"
     } else {
         header = header + "00"
     }
-
     return append([]string{}, header)
 }
-
 func (request_tracer* rt) finish() tracing_metrics {
     if !rt.is_active[0] {
         return tracing_metrics{}
     }
-
     rt.is_active = append([]bool{}, false)
-
     metrics := tracing_metrics{}
     metrics.span_count = append([]int{}, len(rt.span_metadata))
     metrics.event_count = append([]int{}, 0)
     metrics.attributes_count = append([]int{}, 0)
     metrics.overhead_percent = append([]int{}, 2)
-
     if rt.sampling_decision[0] {
         rt.export_spans()
     }
-
     return metrics
 }
-
 func (request_tracer* rt) export_spans() {
     if len(rt.config.exporters) == 0 {
         return
     }
-
     for i := 0; i < len(rt.config.exporters); i++ {
         for j := 0; j < len(rt.config.exporters[i]); j++ {
             exporter_type := rt.config.exporters[i][j]
-
             if exporter_type == "console" {
                 rt.export_to_console()
             } else if exporter_type == "jaeger" {
@@ -194,12 +154,10 @@ func (request_tracer* rt) export_spans() {
         }
     }
 }
-
 func (request_tracer* rt) export_to_console() {
     io.Println("=== Trace Export (Console) ===")
     io.Println("TraceID: " + (rt.trace_id[0] if len(rt.trace_id) > 0 else "unknown"))
     io.Println("Spans: " + io.ToString(len(rt.span_metadata)))
-
     for i := 0; i < len(rt.span_metadata); i++ {
         span_name := ""
         if _, ok := rt.span_metadata[i]["name"]; ok {
@@ -210,92 +168,71 @@ func (request_tracer* rt) export_to_console() {
         io.Println("  - " + span_name)
     }
 }
-
 func (request_tracer* rt) export_to_jaeger() {
     io.Println("Exporting " + io.ToString(len(rt.span_metadata)) + " spans to Jaeger: " +
         (rt.config.jaeger_endpoint[0] if len(rt.config.jaeger_endpoint) > 0 else "unknown"))
 }
-
 func (request_tracer* rt) export_to_otel() {
     io.Println("Exporting " + io.ToString(len(rt.span_metadata)) + " spans to OTLP: " +
         (rt.config.otel_endpoint[0] if len(rt.config.otel_endpoint) > 0 else "unknown"))
 }
-
 func (request_tracer* rt) get_metrics() tracing_metrics {
     metrics := tracing_metrics{}
     metrics.span_count = append([]int{}, len(rt.span_metadata))
     metrics.event_count = append([]int{}, 0)
     metrics.attributes_count = append([]int{}, 0)
     metrics.overhead_percent = append([]int{}, 1)
-
     return metrics
 }
-
 func (request_tracer* rt) inject_trace_context(headers []map[string][]string) []map[string][]string {
     if len(headers) == 0 {
         return headers
     }
-
     w3c := rt.get_w3c_trace_context()
     if len(w3c) > 0 {
         headers[0]["traceparent"] = w3c
     }
-
     return headers
 }
-
 func extract_trace_context(headers []map[string][]string) []string {
     if len(headers) == 0 {
         return []string{}
     }
-
     if traceparent, ok := headers[0]["traceparent"]; ok && len(traceparent) > 0 {
         return traceparent
     }
-
     return []string{}
 }
-
 func main() {
     io.Println("Distributed Tracing System Integration Test")
     io.Println("")
-
     config := new_tracing_config()
     config.sampling_rate = append([]int{}, 100)
     config.service_name = append([]string{}, "neurx-inference-server")
-
     tracer := new_request_tracer(config)
-
     io.Println("Trace Configuration:")
     io.Println("  Service: " + (config.service_name[0] if len(config.service_name) > 0 else "unknown"))
     io.Println("  Sampling Rate: " + io.ToString(config.sampling_rate[0]) + "%")
     io.Println("  Trace ID: " + (tracer.trace_id[0] if len(tracer.trace_id) > 0 else "unknown"))
     io.Println("")
-
     api_span := tracer.start_span(append([]string{}, "APIHandler"), append([]string{}, "SERVER"))
     tracer.add_span_attribute(append([]string{}, "http.method"), append([]string{}, "POST"))
     tracer.add_span_attribute(append([]string{}, "http.url"), append([]string{}, "/v1/completions"))
-
     prefill_span := tracer.start_span(append([]string{}, "Prefill"), append([]string{}, "INTERNAL"))
     tracer.add_span_attribute(append([]string{}, "tokens_processed"), append([]string{}, "512"))
     tracer.record_span_event(append([]string{}, "prefill_done"), []string{})
     tracer.end_span()
-
     decode_span := tracer.start_span(append([]string{}, "Decode"), append([]string{}, "INTERNAL"))
     tracer.add_span_attribute(append([]string{}, "tokens_generated"), append([]string{}, "256"))
     tracer.record_span_event(append([]string{}, "decode_done"), []string{})
     tracer.end_span()
-
     tracer.end_span()
-
     metrics := tracer.finish()
-
     io.Println("Trace Metrics:")
     io.Println("  Total Spans: " + io.ToString(metrics.span_count[0]))
     io.Println("  Events Recorded: " + io.ToString(metrics.event_count[0]))
     io.Println("  Tracing Overhead: " + io.ToString(metrics.overhead_percent[0]) + "%")
     io.Println("")
-
     w3c := tracer.get_w3c_trace_context()
     io.Println("W3C Trace Context (for header propagation):")
     io.Println("  " + (w3c[0] if len(w3c) > 0 else "empty"))

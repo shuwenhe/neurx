@@ -1,9 +1,6 @@
 package neurx.inference.qwen_tokenizer_lookup
-
 use std.conv.int_to_string
-
 func qwen_token_to_text(int token_id) string {
-
     switch token_id {
         case 0: "!"
         case 1: "\""
@@ -327,7 +324,7 @@ func qwen_token_to_text(int token_id) string {
         case 319: "čĊ"
         case 320: "Ġ("
         case 321: "il"
-        case 322: "//"
+        case 322: "
         case 323: "Ġand"
         case 324: "ur"
         case 325: "se"
@@ -447,7 +444,7 @@ func qwen_token_to_text(int token_id) string {
         case 439: "ect"
         case 440: "ke"
         case 441: "rom"
-        case 442: "Ġ//"
+        case 442: "Ġ
         case 443: "con"
         case 444: "ĠL"
         case 445: "(\""
@@ -730,7 +727,7 @@ func qwen_token_to_text(int token_id) string {
         case 722: "ery"
         case 723: "ft"
         case 724: "ens"
-        case 725: "////"
+        case 725: "
         case 726: "ake"
         case 727: ".C"
         case 728: "Ġgo"
@@ -1053,7 +1050,7 @@ func qwen_token_to_text(int token_id) string {
         case 1045: "Ġsome"
         case 1046: "fter"
         case 1047: "ys"
-        case 1048: "Ġ///"
+        case 1048: "Ġ
         case 1049: "round"
         case 1050: "view"
         case 1051: "Ġpe"
@@ -1115,7 +1112,7 @@ func qwen_token_to_text(int token_id) string {
         case 1107: "der"
         case 1108: "reak"
         case 1109: "Con"
-        case 1110: "://"
+        case 1110: ":
         case 1111: "ule"
         case 1112: "..."
         case 1113: "arch"
@@ -1150,7 +1147,7 @@ func qwen_token_to_text(int token_id) string {
         case 1142: "Ġcase"
         case 1143: "Ch"
         case 1144: "ĉĉĉĉĉ"
-        case 1145: "////////"
+        case 1145: "
         case 1146: "ponent"
         case 1147: "Ġz"
         case 1148: "Ġkn"
@@ -1975,7 +1972,7 @@ func qwen_token_to_text(int token_id) string {
         case 1967: "ĠLe"
         case 1968: "Ġhead"
         case 1969: "Ġmust"
-        case 1970: "////////////////"
+        case 1970: "
         case 1971: ".util"
         case 1972: "Context"
         case 1973: "Ġorder"
@@ -2294,7 +2291,7 @@ func qwen_token_to_text(int token_id) string {
         case 2286: "Ġsrc"
         case 2287: "Ġcatch"
         case 2288: "ĠAmeric"
-        case 2289: "//Ċ"
+        case 2289: "
         case 2290: "ĠĠĠĠĠĠĠĠĠĠĠĠĠĠ"
         case 2291: "Ġpay"
         case 2292: "plit"
@@ -2580,7 +2577,7 @@ func qwen_token_to_text(int token_id) string {
         case 2572: ".,"
         case 2573: "ĠSet"
         case 2574: "urch"
-        case 2575: "///"
+        case 2575: "
         case 2576: "ts"
         case 2577: "af"
         case 2578: "Ġmight"
@@ -3903,7 +3900,7 @@ func qwen_token_to_text(int token_id) string {
         case 3895: "_back"
         case 3896: "first"
         case 3897: "Ġprovided"
-        case 3898: "////////////////////////////////"
+        case 3898: "
         case 3899: "Ġfilename"
         case 3900: "Ġhope"
         case 3901: "uly"

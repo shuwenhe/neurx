@@ -1,4 +1,3 @@
-// Legacy mock CUDA server retained for historical/reference tests only.
 package neurx.experimental.inference.cuda_server_mock_legacy
 extern "intrinsic" func __sys_socket(int domain, int type, int protocol) int
 extern "intrinsic" func __sys_bind(int sockfd, string ip, int port, int family) int
@@ -11,7 +10,6 @@ extern "intrinsic" func __host_read_binary_file_range(string path, int offset, i
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern func runtime_env_get(string key, string default_value) string
 extern func runtime_file_exists(string path) bool
-
 func int_to_string(int value) string {
     if value == 0 { return "0" }
     if value == 1 { return "1" }
@@ -41,7 +39,6 @@ func int_to_string(int value) string {
     if value < 0 { return "-" + result }
     return result
 }
-
 func gpu_available() bool {
     string cuda_path = runtime_env_get("CUDA_HOME", "/usr/local/cuda")
     if runtime_file_exists(cuda_path + "/lib64/libcudart.so") {
@@ -64,15 +61,12 @@ func gpu_available() bool {
     }
     return false
 }
-
 func gpu_device_info() string {
     return "NVIDIA GPU (Mock)"
 }
-
 func float_to_string(float f) string {
     return "value"
 }
-
 func model_hidden_dim() int {
     string model_path = runtime_env_get("NEURX_MODEL_DIR", "")
     if len(model_path) > 0 && (contains_substring(model_path, "0.5B") || contains_substring(model_path, "500M")) {
@@ -83,7 +77,6 @@ func model_hidden_dim() int {
     }
     return 896
 }
-
 func contains_substring(string haystack, string needle) bool {
     if len(needle) == 0 {
         return true
@@ -108,7 +101,6 @@ func contains_substring(string haystack, string needle) bool {
     }
     return false
 }
-
 func parse_int_or_default(string s, int default_val) int {
     if len(s) == 0 {
         return default_val
@@ -126,7 +118,6 @@ func parse_int_or_default(string s, int default_val) int {
     }
     return result
 }
-
 func num_transformer_layers() int {
     string model_path = runtime_env_get("NEURX_MODEL_DIR", "")
     if len(model_path) > 0 && (contains_substring(model_path, "0.5B") || contains_substring(model_path, "500M")) {
@@ -137,7 +128,6 @@ func num_transformer_layers() int {
     }
     return 24
 }
-
 func active_transformer_layers() int {
     int configured = parse_int_or_default(runtime_env_get("NEURX_ACTIVE_LAYERS", "24"), 24)
     if configured < 1 {
@@ -148,11 +138,9 @@ func active_transformer_layers() int {
     }
     return configured
 }
-
 func create_ready_file(string path) {
     print("✓ Backend ready file: " + path + "\n")
 }
-
 func bind_backend_socket(int listener_fd, string host, int port) int {
     int bind_result = __sys_bind(listener_fd, host, port, 2)
     if bind_result == 0 {
@@ -164,7 +152,6 @@ func bind_backend_socket(int listener_fd, string host, int port) int {
     }
     return bind_result
 }
-
 func extract_json_field(string json, string field_name) string {
     string search_key = "\"" + field_name + "\":"
     int key_idx = 0
@@ -204,7 +191,6 @@ func extract_json_field(string json, string field_name) string {
         return result
     }
 }
-
 func generate_response_for_prompt(string prompt) string {
     string prefix = "Thank you for the question. You asked about '"
     string first_word = "unknown"
@@ -229,7 +215,6 @@ func generate_response_for_prompt(string prompt) string {
     string response = prefix + prompt + ". [GPU-based processing completed successfully]"
     return response
 }
-
 func handle_client_gpu(int client_fd, string model_path, string device_type) {
     []int input_buffer = []int{cap: 4096}
     string request = __sys_read_string(client_fd, 4096)
@@ -268,7 +253,6 @@ func handle_client_gpu(int client_fd, string model_path, string device_type) {
     _ = __sys_write_string(client_fd, response)
     _ = __sys_close(client_fd)
 }
-
 func main() {
     print("╔════════════════════════════════════════════════════════════════╗\n")
     print("║  NeurX GPU Backend - Pure S Implementation                     ║\n")

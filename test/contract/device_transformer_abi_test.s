@@ -1,6 +1,8 @@
 package main
 use neurx.runtime.device.device_tensor.{tensor_dtype_bytes, tensor_numel, tensor_contiguous_strides}
 use neurx.inference.runtime.device_transformer.{transformer_device_config, transformer_schedule, transformer_prefill_schedule, transformer_decode_schedule, transformer_vendor_at}
+use neurx.runtime.device.device_binding.{embedding_binding, paged_attention_binding}
+use neurx.inference.runtime.transformer_executor.{transformer_execution_plan, transformer_plan_binding_valid}
 
 func require(bool condition, string message) {
     if !condition { print("FAIL: " + message + "\n"); return }
@@ -23,5 +25,9 @@ func main() {
     require(transformer_vendor_at(cann_prefill, 2) == "aclnn_matmul", "CANN linear lowering")
     require(transformer_vendor_at(cuda_prefill, 6) == "cuda_paged_attention", "CUDA attention lowering")
     require(transformer_vendor_at(cann_prefill, 6) == "atb_paged_attention", "CANN attention lowering")
+    require(embedding_binding(1, 2, 3, 4) == "buffer.ids=1;buffer.weight=2;buffer.output=3;tokens=4", "embedding binding ABI")
+    require(paged_attention_binding(1, 2, 3, 4, 5, 6, 7, 8, 16) == "buffer.query=1;buffer.key_cache=2;buffer.value_cache=3;buffer.block_table=4;buffer.workspace=5;buffer.output=6;position=7;max_sequence=8;block_size=16", "paged attention binding ABI")
+    transformer_execution_plan invalid_plan = transformer_execution_plan {context_handle: 0, stream_handle: 0, operation_handle: [], operation_count: 0, backend: "cuda", valid: false, error_message: "test"}
+    require(!transformer_plan_binding_valid(invalid_plan, []), "invalid execution plan rejected")
     print("PASS: unified S Device ABI and Transformer schedule\n")
 }

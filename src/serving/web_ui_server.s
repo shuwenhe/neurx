@@ -1,5 +1,4 @@
 package neurx.serving.web_ui
-
 extern "intrinsic" func __sys_socket(int domain, int type, int protocol) int
 extern "intrinsic" func __sys_bind(int sockfd, string ip, int port, int family) int
 extern "intrinsic" func __sys_listen(int sockfd, int backlog) int
@@ -9,7 +8,6 @@ extern "intrinsic" func __sys_read_string(int fd, int n) string
 extern "intrinsic" func __sys_close(int fd) int
 extern "intrinsic" func __sys_connect(int sockfd, string ip, int port, int family) int
 extern "intrinsic" func __sys_setsockopt(int fd, int level, int option, int value) int
-
 func get_html() string {
     string html = "<!DOCTYPE html>\n"
     html = html + "<html>\n"
@@ -93,7 +91,6 @@ func get_html() string {
     html = html + "</body></html>\n"
     return html
 }
-
 func int_to_string(int value) string {
     if value == 0 { return "0" }
     string result = ""
@@ -106,18 +103,15 @@ func int_to_string(int value) string {
     if value < 0 { result = "-" + result }
     return result
 }
-
 func proxy_to_backend(string method, string path, string request_body) string {
     int backend_sock = __sys_socket(2, 1, 6)
     if backend_sock < 0 {
         return "{\"error\": \"Socket creation failed\"}"
     }
-
     if __sys_connect(backend_sock, "127.0.0.1", 18084, 2) < 0 {
         _ = __sys_close(backend_sock)
         return "{\"error\": \"Backend connection failed\"}"
     }
-
     string backend_request = method + " " + path + " HTTP/1.1\r\n"
     backend_request = backend_request + "Host: 127.0.0.1:18084\r\n"
     backend_request = backend_request + "Content-Type: application/json\r\n"
@@ -125,20 +119,16 @@ func proxy_to_backend(string method, string path, string request_body) string {
     backend_request = backend_request + "Connection: close\r\n"
     backend_request = backend_request + "\r\n"
     backend_request = backend_request + request_body
-
     _ = __sys_write_string(backend_sock, backend_request)
-
     string response = ""
     string chunk = __sys_read_string(backend_sock, 4096)
     while len(chunk) > 0 {
         response = response + chunk
         chunk = __sys_read_string(backend_sock, 4096)
     }
-
     _ = __sys_close(backend_sock)
     return response
 }
-
 func proxy_stream_to_backend(int client_fd, string request_body) {
     int backend_sock = __sys_socket(2, 1, 6)
     if backend_sock < 0 {
@@ -156,7 +146,6 @@ func proxy_stream_to_backend(int client_fd, string request_body) {
     backend_request = backend_request + "Content-Length: " + int_to_string(len(request_body)) + "\r\n"
     backend_request = backend_request + "Connection: close\r\n\r\n" + request_body
     _ = __sys_write_string(backend_sock, backend_request)
-
     string chunk = __sys_read_string(backend_sock, 4096)
     while len(chunk) > 0 {
         _ = __sys_write_string(client_fd, chunk)
@@ -164,7 +153,6 @@ func proxy_stream_to_backend(int client_fd, string request_body) {
     }
     _ = __sys_close(backend_sock)
 }
-
 func parse_json_response(string http_response) string {
     int idx = 0
     while idx < len(http_response) {
@@ -177,40 +165,30 @@ func parse_json_response(string http_response) string {
     }
     return http_response
 }
-
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
 func main() {
     _ = __sys_write_string(1, "🚀 NeurX Web UI Server starting on port 8081...\n")
-
     int listener = __sys_socket(2, 1, 6)
     if listener < 0 {
         _ = __sys_write_string(1, "❌ Socket creation failed\n")
         return
     }
-
     _ = __sys_setsockopt(listener, 1, 2, 1)
-
     if __sys_bind(listener, "127.0.0.1", 8081, 2) < 0 {
         _ = __sys_write_string(1, "❌ Bind failed\n")
         return
     }
-
     if __sys_listen(listener, 128) < 0 {
         _ = __sys_write_string(1, "❌ Listen failed\n")
         return
     }
-
-    _ = __sys_write_string(1, "✅ Web UI running at http://127.0.0.1:8081\n")
+    _ = __sys_write_string(1, "✅ Web UI running at http:
     _ = __sys_write_string(1, "📌 Make sure backend is running: make chat-cpu\n")
-
     while true {
         int client = __sys_accept(listener)
         if client < 0 { continue }
-
         string request = __sys_read_string(client, 4096)
         string response = ""
-
         if __host_slice(request, 0, 16) == "GET /api/health " {
             string backend_response = proxy_to_backend("GET", "/health", "")
             string json_body = parse_json_response(backend_response)
@@ -228,7 +206,6 @@ func main() {
                 }
                 idx = idx + 1
             }
-
             string body = __host_slice(request, body_start, len(request))
             if len(body) > 0 {
                 proxy_stream_to_backend(client, body)
@@ -239,7 +216,6 @@ func main() {
         } else {
             response = "HTTP/1.1 404 Not Found\r\n\r\n"
         }
-
         _ = __sys_write_string(client, response)
         _ = __sys_close(client)
     }
