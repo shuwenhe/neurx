@@ -3,7 +3,7 @@ use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_
 use std.io.println
 
 func main() {
-    string config = runtime_env_get("NEURX_PRETRAIN_CONFIG", "workflows/llm/pretrain/config/sample.yaml")
+    string config = runtime_env_get("NEURX_PRETRAIN_CONFIG", "workflow/llm/pretrain/config/sample.yaml")
     string steps_override = runtime_env_get("NEURX_PRETRAIN_STEPS_OVERRIDE", "")
     string s_bin_override = runtime_env_get("S_BIN", runtime_env_get("S_COMPILER", ""))
     string root = runtime_run_command_output("git rev-parse --show-toplevel 2>/dev/null || pwd")

@@ -3,7 +3,7 @@ use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_
 use std.io.println
 
 func main() {
-    string config = runtime_env_get("NEURX_ROBOTICS_CONFIG", "workflows/robotics/train/config/sample.yaml")
+    string config = runtime_env_get("NEURX_ROBOTICS_CONFIG", "workflow/robotics/train/config/sample.yaml")
     string steps_override = runtime_env_get("NEURX_ROBOTICS_STEPS", "")
     if !runtime_run_command("test -f " + runtime_shell_escape(config)).ok {
         println("config not found: " + config)

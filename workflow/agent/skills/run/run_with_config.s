@@ -3,7 +3,7 @@ use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_
 use std.io.println
 
 func main() {
-    string config = runtime_env_get("NEURX_SKILLS_CONFIG", "workflows/agent/skills/config/sample.yaml")
+    string config = runtime_env_get("NEURX_SKILLS_CONFIG", "workflow/agent/skills/config/sample.yaml")
     string generations_override = runtime_env_get("NEURX_SKILLS_GENERATIONS", "")
     string s_bin_override = runtime_env_get("S_BIN", runtime_env_get("S_COMPILER", ""))
     if !runtime_run_command("test -f " + runtime_shell_escape(config)).ok {

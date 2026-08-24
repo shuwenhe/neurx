@@ -81,7 +81,7 @@ func check_all_components() component_status[] {
     components = append(components, deploy)
     let perf = verify_component(
         "Performance Benchmark",
-        "workflows/benchmark/performance_benchmark.s",
+        "workflow/benchmark/performance_benchmark.s",
         350
     )
     perf.description = "Scaling analysis"
@@ -174,7 +174,7 @@ func verify_integration() {
     println("  Packaged for SLURM/Docker/K8s")
     println("")
     println("✅ Performance validation:")
-    println("  All components ←→ workflows/benchmark/performance_benchmark.s")
+    println("  All components ←→ workflow/benchmark/performance_benchmark.s")
     println("  Meets throughput and efficiency targets")
     println("")
 }
@@ -201,7 +201,7 @@ func check_deployment_readiness() {
     println("🧪 Testing:")
     println("  [✓] Compilation suite ready (test/compile_and_test.s)")
     println("  [✓] Unit tests implemented")
-    println("  [✓] Performance benchmarks (workflows/benchmark/performance_benchmark.s)")
+    println("  [✓] Performance benchmarks (workflow/benchmark/performance_benchmark.s)")
     println("  [✓] Integration tests planned")
     println("")
     println("🚀 Deployment:")

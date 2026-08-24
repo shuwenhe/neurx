@@ -515,7 +515,7 @@ func main() {
     println("")
     let pipeline_start = time.now()
     var compile_config: compile_config
-    compile_config.source_file = "workflows/llm/train_and_infer.s"
+    compile_config.source_file = "workflow/llm/train_and_infer.s"
     compile_config.output_binary = "bin/train_and_infer"
     compile_config.optimization_level = 2
     compile_config.debug_mode = false

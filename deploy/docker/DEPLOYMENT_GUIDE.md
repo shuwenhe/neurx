@@ -153,7 +153,7 @@ spec:
 ### 场景 3: CI/CD 管道
 
 ```yaml
-# .github/workflows/docker-build.yml
+# .github/workflow/docker-build.yml
 
 name: Build Docker Image
 
