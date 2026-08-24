@@ -6,7 +6,7 @@ func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string s_root = runtime_env_get("S_ROOT", project_root + "/../s")
     string s_compiler = runtime_env_get("S_COMPILER", s_root + "/.local/bin/s")
-    string source_file = runtime_env_get("NEURX_INFER_SOURCE", project_root + "/tools/infer_llm_checkpoint.s")
+    string source_file = runtime_env_get("NEURX_INFER_SOURCE", project_root + "/tool/infer_llm_checkpoint.s")
     string build_dir = runtime_env_get("NEURX_INFER_BUILD_DIR", project_root + "/build")
     string ir_file = build_dir + "/infer_llm.ir"
     string runner_bin = runtime_env_get("NEURX_INFER_RUNNER_BIN", project_root + "/artifacts/build/s_runner/s_ir_runner")

@@ -49,8 +49,8 @@ S_COMPILER_BIN ?= $(S_REPO_ROOT)/bin/s
 S_COMPILER ?= $(firstword $(wildcard $(S_COMPILER_BIN) $(S_COMPILER_LOCAL)) $(shell command -v s 2>/dev/null) s)
 S_SEED_COMPILER ?= $(S_REPO_ROOT)/bin/s_seed
 S_COMPILER_EMIT_CWD ?= $(S_REPO_ROOT)
-S_RUNNER_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.s
-S_RUNNER_C_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.c
+S_RUNNER_SRC := $(CURDIR_UNIX)/tool/s_ir_runner.s
+S_RUNNER_C_SRC := $(CURDIR_UNIX)/tool/s_ir_runner.c
 S_RUNNER_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/s_runner
 S_RUNNER_BIN := $(S_RUNNER_BUILD_DIR)/s_ir_runner$(BIN_EXT)
 S_GPU_RUNTIME_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/s_gpu_runtime
@@ -224,7 +224,7 @@ pretrain-s-p0: check-bash build-s-ir-runner
 pretrain-eval-test: check-bash build-s-ir-runner
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/pretrain_eval_s'
 	@cd '$(CURDIR_UNIX)' && \
-		bash tools/bundle_s_modules.sh \
+		bash tool/bundle_s_modules.sh \
 			'artifacts/build/pretrain_eval_s/pretrain_eval_test.bundle.s' \
 			'test/integration/pretrain_eval_test.s' \
 			'src/training/pretrain/eval/pretrain_eval.s' && \
@@ -236,7 +236,7 @@ pretrain-eval-test: check-bash build-s-ir-runner
 hybrid-moe-s: check-bash build-s-ir-runner
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/hybrid_moe_s'
 	@cd '$(CURDIR_UNIX)' && \
-		bash tools/bundle_s_modules.sh \
+		bash tool/bundle_s_modules.sh \
 			'artifacts/build/hybrid_moe_s/hybrid_moe.bundle.s' \
 			'src/models/extensions/moe/hybrid_moe.s' \
 			'src/models/extensions/moe/moe_core.s' \
@@ -888,7 +888,7 @@ build-lora-merge: check-bash
 	@mkdir -p '$(LORA_MERGE_BUILD_DIR)'
 	@$(CC) -std=c11 -O2 -Wall -Wextra \
 		-o '$(LORA_MERGE_BIN)' \
-		'$(CURDIR_UNIX)/tools/lora_safetensors_merge.c'
+		'$(CURDIR_UNIX)/tool/lora_safetensors_merge.c'
 posttrain-merge-lora: check-bash build-s-ir-runner build-lora-merge
 	@mkdir -p '$(LORA_MERGE_BUILD_DIR)' $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
@@ -2162,7 +2162,7 @@ verify-dataset-s: check-bash
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'src/training/data/tools/verify_dataset.s' -o '$(CURDIR_UNIX)/artifacts/build/dataset_verify/dataset_verify.ir' 2>&1 && \
+		$(S_COMPILER) ir 'src/training/data/tool/verify_dataset.s' -o '$(CURDIR_UNIX)/artifacts/build/dataset_verify/dataset_verify.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/dataset_verify/dataset_verify.ir'
 	@echo "✓ Dataset verification entry compiled to S IR"
 build-industrial-ops: check-bash
@@ -2576,14 +2576,14 @@ cuda-tools-s: check-bash
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'backend/cuda/cuda_tools.s' -o 'artifacts/build/cuda_tools/cuda_tools.ir' 2>&1
+		$(S_COMPILER) ir 'backend/cuda/cuda_tools.s' -o 'artifacts/build/cuda_tool/cuda_tools.ir' 2>&1
 	@if [ ! -x "$(S_RUNNER_BIN)" ]; then \
 		$(MAKE) build-s-ir-runner; \
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		NEURX_CUDA_TOOL="$${NEURX_CUDA_TOOL:-verify}" \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/cuda_tools/cuda_tools.ir' 2>&1 | tee -a $(LOG_DIR)/cuda_tools_$(shell date +%Y%m%d_%H%M%S).log
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/cuda_tool/cuda_tools.ir' 2>&1 | tee -a $(LOG_DIR)/cuda_tools_$(shell date +%Y%m%d_%H%M%S).log
 cuda-verify-s:
 	@NEURX_CUDA_TOOL=verify $(MAKE) cuda-tools-s
 cuda-build-s:
@@ -2628,7 +2628,7 @@ analyze-dataset-s: check-bash
 	fi
 	@cd '$(CURDIR_UNIX)' && \
 		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'src/training/data/tools/run_analyze.s' -o 'artifacts/build/dataset_analyze/run_analyze.ir' 2>&1
+		$(S_COMPILER) ir 'src/training/data/tool/run_analyze.s' -o 'artifacts/build/dataset_analyze/run_analyze.ir' 2>&1
 	@if [ ! -f "$(CURDIR_UNIX)/artifacts/build/dataset_analyze/run_analyze.ir" ]; then \
 		echo "Error: failed to generate $(CURDIR_UNIX)/artifacts/build/dataset_analyze/run_analyze.ir"; \
 		exit 1; \

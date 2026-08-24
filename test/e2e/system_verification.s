@@ -46,7 +46,7 @@ func check_all_components() component_status[] {
     components = append(components, scaled)
     let data = verify_component(
         "Real Data Loader",
-        "src/training/data/tools/real_data_loader.s",
+        "src/training/data/tool/real_data_loader.s",
         650
     )
     data.description = "WikiText-2, C4, 32K BPE tokenizer"
@@ -158,7 +158,7 @@ func verify_integration() {
     println("╚" + strings.repeat("═", 61) + "╝")
     println("")
     println("✅ Data flow integration:")
-    println("  src/training/orchestration/scaled_training_system.s ←→ src/training/data/tools/real_data_loader.s")
+    println("  src/training/orchestration/scaled_training_system.s ←→ src/training/data/tool/real_data_loader.s")
     println("  Provides batch data to model")
     println("")
     println("✅ Compute acceleration:")

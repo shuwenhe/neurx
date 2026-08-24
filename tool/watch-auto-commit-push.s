@@ -44,7 +44,7 @@ func generate_commit_message(string prefix, string changed, string added, string
     if contains(changed, "docs/") {
         return prefix + ": update docs (" + added + " added, " + removed + " removed)"
     }
-    if contains(changed, "tools/") {
+    if contains(changed, "tool/") {
         return prefix + ": update tooling (" + added + " added, " + removed + " removed)"
     }
     return prefix + ": update code (" + added + " added, " + removed + " removed)"

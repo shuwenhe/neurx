@@ -194,7 +194,7 @@ func (mcp_server* srv) process_request(mcp_request* req) (mcp_response*, error) 
             },
         }
 
-    case "tools/list":
+    case "tool/list":
         tools, _ := srv.list_tools()
         resp.result = map[string]interface{}{
             "tools": tools,
@@ -212,7 +212,7 @@ func (mcp_server* srv) process_request(mcp_request* req) (mcp_response*, error) 
             "prompts": prompts,
         }
 
-    case "tools/call":
+    case "tool/call":
         tool_name := req.params["name"]
         tool_result, _ := srv.call_tool(tool_name, req.params)
         resp.result = tool_result

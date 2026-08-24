@@ -10,7 +10,7 @@ func main() {
     string engine = runtime_env_get("NEURX_BENCHMARK_ENGINE", "")
     string output = runtime_env_get("NEURX_BENCHMARK_OUTPUT", "")
     string model = runtime_env_get("NEURX_MODEL", "")
-    string validator = runtime_env_get("NEURX_BENCHMARK_VALIDATOR", "tools/validate_benchmark_result.js")
+    string validator = runtime_env_get("NEURX_BENCHMARK_VALIDATOR", "tool/validate_benchmark_result.js")
     string repetitions_text = runtime_env_get("NEURX_BENCHMARK_REPETITIONS", "3")
     int repetitions = runtime_parse_int(repetitions_text, 0)
     if benchmark_bin == "" || output == "" || model == "" || !valid_engine(engine) || repetitions < 3 {

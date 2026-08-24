@@ -17,8 +17,8 @@ func main() {
     println("  chat.sh -> neurx chat")
     println("")
     println("Utilities")
-    println("  tools/watch-auto-commit-push.sh -> watch-auto-commit-push.s")
-    println("  tools/rewrite-commit-messages.sh -> rewrite-commit-messages.s")
-    println("  tools/cleanup-old-commits.sh -> cleanup-old-commits.s")
+    println("  tool/watch-auto-commit-push.sh -> watch-auto-commit-push.s")
+    println("  tool/rewrite-commit-messages.sh -> rewrite-commit-messages.s")
+    println("  tool/cleanup-old-commits.sh -> cleanup-old-commits.s")
     0
 }

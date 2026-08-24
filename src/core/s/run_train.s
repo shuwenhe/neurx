@@ -34,7 +34,7 @@ func main() {
     println("")
     println("--- Generating checkpoint Files ---")
     string materializer = runtime_env_get("NEURX_MATERIALIZE_BIN", script_dir + "/artifacts/build/materialize_llm_checkpoint")
-    string materializer_source = script_dir + "/tools/materialize_llm_checkpoint.s"
+    string materializer_source = script_dir + "/tool/materialize_llm_checkpoint.s"
     string compiler = runtime_env_get("S_COMPILER", script_dir + "/../s/.local/bin/s")
     if !runtime_run_command("test -x " + runtime_shell_escape(materializer)).ok {
         _ = runtime_run_command("mkdir -p " + runtime_shell_escape(script_dir + "/artifacts/build"))

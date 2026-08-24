@@ -9,7 +9,7 @@ func main() {
     println("Project root: " + project_root)
     println("")
     println("  agent controller : " + check_path("src/bridge/AgentController.cpp"))
-    println("  tool registry    : " + check_path("src/tools/NeurXStandardTools.cpp"))
+    println("  tool registry    : " + check_path("src/tool/NeurXStandardTools.cpp"))
     println("  build dir        : " + check_path("build"))
     println("")
     println("This S entrypoint centralizes the tool registration diagnostic status layer.")

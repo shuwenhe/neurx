@@ -19,7 +19,7 @@ func merge_lora_adapters(string base_model_dir, string adapter_dir, string out_d
     println("")
     println("  2. External C implementation:")
     println("     - src/training/posttrain/adapter/run_lora_merge.s")
-    println("     - tools/lora_safetensors_merge.c")
+    println("     - tool/lora_safetensors_merge.c")
     println("     - Run: make posttrain-merge-lora")
     println("")
     println("  3. Python-based merge (compatibility):")

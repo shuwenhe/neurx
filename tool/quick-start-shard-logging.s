@@ -6,7 +6,7 @@ func main() {
     println("")
     println("This guide has been migrated to S.")
     println("Run the S monitor and runner directly from the repo root:")
-    println("  s tools/run-with-shard-monitor.s")
+    println("  s tool/run-with-shard-monitor.s")
     println("")
     println("Documentation:")
     println("  docs/SHARD_PROCESSING_REALTIME_LOGGING.md")
