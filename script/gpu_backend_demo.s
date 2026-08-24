@@ -46,7 +46,7 @@ func main() {
 
     print("Compiled:   artifacts/build/production_s_inference/gpu_backend.ir\n")
 
-    print("Test:       scripts/test_gpu_backend.s\n")
+    print("Test:       script/test_gpu_backend.s\n")
 
     print("Frontend:   src/inference/production_chat.s\n\n")
 

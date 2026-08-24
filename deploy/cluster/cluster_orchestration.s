@@ -623,7 +623,7 @@ func cluster_write_deployment_bundle(cluster_orchestration_state state, cluster_
     runtime_make_dirs(next.deployment_dir)
     runtime_make_dirs(next.deployment_dir + "/scripts")
     runtime_make_dirs(next.deployment_dir + "/configs")
-    string slurm_path = next.deployment_dir + "/scripts/slurm_submit.sh"
+    string slurm_path = next.deployment_dir + "/script/slurm_submit.sh"
     string k8s_path = next.deployment_dir + "/kubernetes_deployment.yaml"
     string summary_path = next.deployment_dir + "/cluster_summary.txt"
     string startup_path = next.deployment_dir + "/training_startup.env"

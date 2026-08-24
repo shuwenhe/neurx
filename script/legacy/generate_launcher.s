@@ -238,7 +238,7 @@ func main() {
         cfg.world_size = cfg.world_size + 1
     }
     string script = generate_launcher_script(cfg, hosts)
-    string output_script = cfg.root_dir + "/scripts/legacy/launch_multinode_pretrain_generated.sh"
+    string output_script = cfg.root_dir + "/script/legacy/launch_multinode_pretrain_generated.sh"
     if !fs::write_file(output_script, script) {
         io::eprintln("ERROR: cannot write script to " + output_script)
         os::exit(1)

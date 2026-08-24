@@ -259,7 +259,7 @@ func print_final_report() {
     println("  2. Run local tests: ./compile_and_test")
     println("  3. Benchmark performance: ./performance_benchmark")
     println("  4. Deploy to cluster:")
-    println("     - SLURM: sbatch deploy/production/scripts/slurm_submit.sh")
+    println("     - SLURM: sbatch deploy/production/script/slurm_submit.sh")
     println("     - Docker: docker-compose -f deploy/production/docker-compose.yml up")
     println("     - K8s: kubectl apply -f deploy/production/kubernetes_deployment.yaml")
     println("")

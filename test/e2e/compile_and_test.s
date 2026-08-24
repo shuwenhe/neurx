@@ -274,7 +274,7 @@ func main() {
     println("   ./bin/scaled_training_system --dataset=c4 --epochs=3 --device=cuda")
     println("")
     println("4. CLUSTER DEPLOYMENT:")
-    println("   sbatch deploy/production/scripts/slurm_submit.sh")
+    println("   sbatch deploy/production/script/slurm_submit.sh")
     println("")
     println("5. KUBERNETES DEPLOYMENT:")
     println("   kubectl apply -f deploy/production/config/kubernetes_deployment.yaml")

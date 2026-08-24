@@ -85,7 +85,7 @@ func main() {
         println("     - tokenizer.json")
         println("     - config.json")
         println("  ✓ Model download script available at:")
-        println("     /app/shuwen/neurx/scripts/download_model.s")
+        println("     /app/shuwen/neurx/script/download_model.s")
     } else {
         println("  ℹ️  Model download skipped (use NEURX_DOWNLOAD=1 to enable)")
     }
@@ -180,7 +180,7 @@ func main() {
 
     println("  File Locations:")
     println("    ✓ Download Module:")
-    println("      /app/shuwen/neurx/scripts/download_model.s")
+    println("      /app/shuwen/neurx/script/download_model.s")
     println("")
     println("    ✓ Verification Suite:")
     println("      /app/shuwen/neurx/src/inference/verify_inference.s")

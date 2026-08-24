@@ -4,15 +4,15 @@ use std.io.println
 
 func main() {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    println("NeurX Large model Train status (S Lang)")
+    println("NeurX End-to-End Verification status (S Lang)")
     println("")
     println("Project root: " + project_root)
     println("")
-    println("  training script : " + check_path("scripts/legacy/run_llm_training.s"))
-    println("  large model src : " + check_path("train/train_large_model.s"))
-    println("  output dir      : " + check_path("output/large_model"))
+    println("  verification script : " + check_path("script/legacy/run_end_to_end_verification.s"))
+    println("  training src        : " + check_path("src/training/orchestration/trainer.s"))
+    println("  tests src           : " + check_path("test/test_suite_complete.s"))
     println("")
-    println("This S entrypoint centralizes the large-model training status layer.")
+    println("This S entrypoint centralizes the end-to-end verification status layer.")
     0
 }
 

@@ -4,15 +4,15 @@ use std.io.println
 
 func main() {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    println("NeurX Cluster Launch status (S Lang)")
+    println("NeurX Linux Build status (S Lang)")
     println("")
     println("Project root: " + project_root)
     println("")
-    println("  launch script : " + check_path("scripts/legacy/cluster_launch.s"))
-    println("  deployment dir : " + check_path("production_deployment"))
-    println("  checkpoints   : " + check_path("artifacts/checkpoints"))
+    println("  build script : " + check_path("script/legacy/build-linux.s"))
+    println("  cmake cache  : " + check_path("build/linux-Release/CMakeCache.txt"))
+    println("  qt bundle    : " + check_path("build/linux-Release"))
     println("")
-    println("This S entrypoint centralizes the cluster launch status layer.")
+    println("This S entrypoint centralizes the Linux build status layer.")
     0
 }
 

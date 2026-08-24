@@ -10,7 +10,7 @@ func main() {
     println("Project root : " + project_root)
     println("ASCEND_HOME  : " + ascend_home)
     println("")
-    string cmd = "ASCEND_HOME_PATH=" + runtime_shell_escape(ascend_home) + " bash " + runtime_shell_escape(project_root + "/cann/scripts/launch_8card_310p3_inference.sh")
+    string cmd = "ASCEND_HOME_PATH=" + runtime_shell_escape(ascend_home) + " bash " + runtime_shell_escape(project_root + "/cann/script/launch_8card_310p3_inference.sh")
     if !runtime_run_command(cmd).ok {
         return 1
     }

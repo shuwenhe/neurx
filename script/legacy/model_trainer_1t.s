@@ -292,6 +292,6 @@ func main() {
     pipeline.setup_optimization()
     pipeline.run_training()
     fmt.Println("\n💾 Configuration saved for deployment")
-    fmt.Println("command: s run scripts/legacy/model_trainer_1t.s")
+    fmt.Println("command: s run script/legacy/model_trainer_1t.s")
     fmt.Println("\n✅ Ready for 1T model training on H100 cluster")
 }

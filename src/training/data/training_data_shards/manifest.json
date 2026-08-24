@@ -1,12 +1,12 @@
 {
   "dataset_name": "training_data",
-  "source_path": "/app/shuwen/train/neurx/scripts/legacy/../../data/training_data.jsonl",
-  "output_dir": "/app/shuwen/train/neurx/scripts/legacy/../../data/training_data_shards",
+  "source_path": "/app/shuwen/train/neurx/script/legacy/../../data/training_data.jsonl",
+  "output_dir": "/app/shuwen/train/neurx/script/legacy/../../data/training_data_shards",
   "total_records": 2347126,
   "shard_count": 2293,
   "shard_size_target": 1024,
   "generated_at": "2026-07-04T05:17:13Z",
-  "shard_list_path": "/app/shuwen/train/neurx/scripts/legacy/../../data/training_data_shards/manifest.txt",
+  "shard_list_path": "/app/shuwen/train/neurx/script/legacy/../../data/training_data_shards/manifest.txt",
   "shards": [
     {
       "file": "training_data-00000.jsonl",

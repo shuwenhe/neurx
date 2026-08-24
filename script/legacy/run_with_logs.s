@@ -8,7 +8,7 @@ func main() {
     println("")
     println("Project root: " + project_root)
     println("")
-    println("  train script : " + check_path("scripts/legacy/run_training.s"))
+    println("  train script : " + check_path("script/legacy/run_training.s"))
     println("  log dir      : " + check_path("artifacts/logs"))
     println("  build dir    : " + check_path("build"))
     println("")

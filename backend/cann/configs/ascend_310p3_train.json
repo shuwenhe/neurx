@@ -13,7 +13,7 @@
     "workdir": "/app/neurx",
     "command": [
       "bash",
-      "backends/cann/scripts/launch_8card_310p3_inference.sh"
+      "backends/cann/script/launch_8card_310p3_inference.sh"
     ]
   }
 }

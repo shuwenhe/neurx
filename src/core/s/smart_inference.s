@@ -255,7 +255,7 @@ func generate_model_response(string question) string {
     }
     string ir_path = resolve_real_inference_ir()
     if ir_path == "" {
-        return "model IR fileEnglish text, English textrun `scripts/legacy/run_interactive_inference.s` generate `interactive_inference.ir`."
+        return "model IR fileEnglish text, English textrun `script/legacy/run_interactive_inference.s` generate `interactive_inference.ir`."
     }
     string prompt = build_real_inference_prompt(question)
     string command = "NEURX_INFER_SMOKE_TEST=1 "

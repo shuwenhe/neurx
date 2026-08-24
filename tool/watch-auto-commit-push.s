@@ -38,7 +38,7 @@ func generate_commit_message(string prefix, string changed, string added, string
     if changed == "" {
         return prefix + ": update code (" + added + " added, " + removed + " removed)"
     }
-    if contains(changed, "scripts/legacy/") {
+    if contains(changed, "script/legacy/") {
         return prefix + ": update scripts (" + added + " added, " + removed + " removed)"
     }
     if contains(changed, "docs/") {

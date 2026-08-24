@@ -4,15 +4,15 @@ use std.io.println
 
 func main() {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    println("NeurX macOS Build status (S Lang)")
+    println("NeurX Integration Tests status (S Lang)")
     println("")
     println("Project root: " + project_root)
     println("")
-    println("  build script : " + check_path("scripts/legacy/build-macos.s"))
-    println("  xcodeproj    : " + check_path("build/macos-Release/neurx-codeApp.xcodeproj"))
-    println("  app bundle   : " + check_path("build/macos-Release/neurx-codeApp.app"))
+    println("  integration script : " + check_path("script/legacy/run_integration_tests.s"))
+    println("  core modules       : " + check_path("distributed"))
+    println("  checkpoints dir    : " + check_path("artifacts/checkpoints"))
     println("")
-    println("This S entrypoint centralizes the macOS build status layer.")
+    println("This S entrypoint centralizes the integration test status layer.")
     0
 }
 
