@@ -29,7 +29,7 @@ func create_empty_report() production_readiness_report {
     }
 }
 
-func add_check(production_readiness_report &report, production_check check) {
+func add_check(production_readiness_report* report, production_check check) {
     report.checks.push(check)
     report.total_checks = report.total_checks + 1
     if check.status {
@@ -38,7 +38,7 @@ func add_check(production_readiness_report &report, production_check check) {
     report.readiness_score = float(report.passed_checks) / float(report.total_checks) * 100.0
 }
 
-func verify_architecture_checks(production_readiness_report &report) {
+func verify_architecture_checks(production_readiness_report* report) {
     print("\n📐 Verifying Architecture Compliance...\n")
     
     add_check(report, production_check {
@@ -70,7 +70,7 @@ func verify_architecture_checks(production_readiness_report &report) {
     })
 }
 
-func verify_inference_pipeline_checks(production_readiness_report &report) {
+func verify_inference_pipeline_checks(production_readiness_report* report) {
     print("\n🔄 Verifying Inference Pipeline...\n")
     
     add_check(report, production_check {
@@ -109,7 +109,7 @@ func verify_inference_pipeline_checks(production_readiness_report &report) {
     })
 }
 
-func verify_performance_checks(production_readiness_report &report) {
+func verify_performance_checks(production_readiness_report* report) {
     print("\n⚡ Verifying Performance Metrics...\n")
     
     add_check(report, production_check {
@@ -141,7 +141,7 @@ func verify_performance_checks(production_readiness_report &report) {
     })
 }
 
-func verify_reliability_checks(production_readiness_report &report) {
+func verify_reliability_checks(production_readiness_report* report) {
     print("\n🛡️  Verifying Reliability & Robustness...\n")
     
     add_check(report, production_check {
@@ -180,7 +180,7 @@ func verify_reliability_checks(production_readiness_report &report) {
     })
 }
 
-func verify_observability_checks(production_readiness_report &report) {
+func verify_observability_checks(production_readiness_report* report) {
     print("\n👁️  Verifying Observability...\n")
     
     add_check(report, production_check {
@@ -219,7 +219,7 @@ func verify_observability_checks(production_readiness_report &report) {
     })
 }
 
-func verify_compatibility_checks(production_readiness_report &report) {
+func verify_compatibility_checks(production_readiness_report* report) {
     print("\n🔗 Verifying Compatibility...\n")
     
     add_check(report, production_check {
@@ -251,7 +251,7 @@ func verify_compatibility_checks(production_readiness_report &report) {
     })
 }
 
-func verify_testing_checks(production_readiness_report &report) {
+func verify_testing_checks(production_readiness_report* report) {
     print("\n🧪 Verifying Test Coverage...\n")
     
     add_check(report, production_check {
@@ -290,7 +290,7 @@ func verify_testing_checks(production_readiness_report &report) {
     })
 }
 
-func verify_documentation_checks(production_readiness_report &report) {
+func verify_documentation_checks(production_readiness_report* report) {
     print("\n📚 Verifying Documentation...\n")
     
     add_check(report, production_check {

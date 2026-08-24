@@ -1,4 +1,6 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain-cpu posttrain-gpu posttrain-npu posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat-cpu chat-gpu chat-npu chat-xt streaming-chat web-ui backend backend-stop backend-logs backend-tail backend-cpu frontend real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference build-model-inference-s model-weight-probe model-projection-probe download-model verify-deployment start-inference-service show-deployment-info deploy-local build-local-inference verify-vl-model build-vl-inference start-vl-inference deploy-vl-local vllm-distributed-test vllm-missing-capabilities-test vllm-remaining-capabilities-test sglang-capabilities-test \
+.DEFAULT_GOAL := help
+
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain-cpu posttrain-gpu posttrain-npu posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat-cpu chat-gpu chat-npu chat-xt streaming-chat web-ui backend backend-stop backend-logs backend-tail backend-cpu frontend real-inference check-bash check-nvcc shard split logs log logs-tail log-gpu log-web start-inference build-start-inference gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference build-model-inference-s model-weight-probe model-projection-probe download-model verify-deployment start-inference-service show-deployment-info deploy-local build-local-inference verify-vl-model build-vl-inference start-vl-inference deploy-vl-local vllm-distributed-test vllm-missing-capabilities-test vllm-remaining-capabilities-test sglang-capabilities-test \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -261,20 +263,19 @@ device-abi-probe-test: device-abi-build $(DEVICE_ABI_BUILD_DIR)/device_abi_regis
 	@if [ -f '$(DEVICE_ABI_CUDA_PLUGIN)' ]; then NEURX_BACKEND_PLUGIN_DIR='$(DEVICE_ABI_BUILD_DIR)' '$(DEVICE_ABI_BUILD_DIR)/device_abi_registry_test' cuda; fi
 
 help:
-	@echo ""
 	@echo "  make shard"
 	@echo "  make pretrain-npu"
 	@echo "  make pretrain-gpu"
 	@echo "  make posttrain-cpu"
 	@echo "  make posttrain-gpu"
 	@echo "  make posttrain-npu"
-	@echo "  make infer"
 	@echo "  make chat-cpu"
 	@echo "  make chat-gpu"
 	@echo "  make chat-npu"
-	@echo "  make chat-xt"
-	@echo "  make neurx"           
-	@echo ""
+	@echo "  make inference"
+	@echo "  make backend"
+	@echo "  make frontend"
+	@echo "  make log"
 
 train:
 pretrain-s-p0: check-bash build-s-ir-runner
@@ -1466,6 +1467,19 @@ system-status:
 	@echo "  make frontend-logs    - View frontend logs"
 	@echo "  make frontend-tail    - Follow frontend logs"
 	@echo "  make system-status    - Show this status"
+
+build-start-inference: build-s-ir-runner
+	@echo "🔨 Compiling S startup launcher..."
+	@mkdir -p '$(CURDIR_UNIX)/artifact/build/startup'
+	@'$(S_COMPILER)' 'src/inference/runtime/start_inference_with_logs.s' '$(CURDIR_UNIX)/artifact/build/startup/start_inference_with_logs.ir' || { \
+		echo "❌ Compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Startup launcher compiled"
+	@echo "   IR: $(CURDIR_UNIX)/artifact/build/startup/start_inference_with_logs.ir"
+
+start-inference:
+	@bash '$(CURDIR_UNIX)/scripts/start_inference.sh'
 
 chat-npu: build-real-model-chat-s
 	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \
@@ -3152,10 +3166,44 @@ diagnose-autoscroll-s: check-bash
 logs:
 	@mkdir -p $(LOG_DIR)
 	@echo "Available logs in $(LOG_DIR):"
-	@ls -1t $(LOG_DIR) | sed -n '1,200p' || true
-logs-tail:
+	@ls -1t $(LOG_DIR) 2>/dev/null | sed -n '1,20p' || echo "  (no logs yet)"
+	@echo ""
+	@echo "💡 Tip: Run 'make log-tail' to watch logs in real-time"
+
+log:
 	@mkdir -p $(LOG_DIR)
-	@FILE=$$(ls -1t $(LOG_DIR)
+	@if [ -f "$(LOG_DIR)/gpu_backend.log" ]; then \
+		echo "📋 GPU Backend Log (Ctrl+C to exit):"; \
+		echo ""; \
+		tail -f $(LOG_DIR)/gpu_backend.log; \
+	else \
+		echo "⚠️  GPU Backend log not found: $(LOG_DIR)/gpu_backend.log"; \
+		echo ""; \
+		echo "💡 Available logs:"; \
+		ls -lh $(LOG_DIR)/ 2>/dev/null || echo "  (no logs yet)"; \
+		echo ""; \
+		echo "💡 Start services with: make start-inference"; \
+	fi
+
+log-gpu:
+	@tail -f $(LOG_DIR)/gpu_backend.log
+
+log-web:
+	@tail -f $(LOG_DIR)/web_ui.log
+
+log-tail:
+	@echo "📊 Tailing all logs (Ctrl+C to exit)..."
+	@mkdir -p $(LOG_DIR)
+	@tmux new-session -d -s neurx_logs
+	@tmux send-keys -t neurx_logs "echo '📍 GPU Backend Log:'; tail -f $(LOG_DIR)/gpu_backend.log" Enter
+	@sleep 1
+	@tmux split-window -t neurx_logs -h
+	@tmux send-keys -t neurx_logs "echo '📍 Web UI Log:'; tail -f $(LOG_DIR)/web_ui.log" Enter
+	@tmux attach-session -t neurx_logs 2>/dev/null || ( \
+		echo "📝 Logs:"; \
+		echo "  GPU Backend: $(LOG_DIR)/gpu_backend.log"; \
+		echo "  Web UI:      $(LOG_DIR)/web_ui.log"; \
+	)
 
 MULTIMODAL_BUILD_DIR := $(CURDIR_UNIX)/artifact/build/multimodal
 
