@@ -10,8 +10,12 @@ struct hf_model_config {
     int head_dim
     int layers
     int vocabulary_size
+    int max_position_embeddings
     float rms_epsilon
     float rope_theta
+    bool attention_bias
+    bool mlp_bias
+    bool tie_word_embeddings
     string error_code
 }
 
@@ -70,8 +74,16 @@ func hf_json_float(string text, string key, float fallback) float {
     value
 }
 
+func hf_json_bool(string text, string key, bool fallback) bool {
+    int position = hf_json_number_start(text, key)
+    if position < 0 || position >= len(text) { return fallback }
+    if position + 4 <= len(text) && text[position] == 116 && text[position + 1] == 114 && text[position + 2] == 117 && text[position + 3] == 101 { return true }
+    if position + 5 <= len(text) && text[position] == 102 && text[position + 1] == 97 && text[position + 2] == 108 && text[position + 3] == 115 && text[position + 4] == 101 { return false }
+    fallback
+}
+
 func invalid_hf_config(string code) hf_model_config {
-    hf_model_config { valid: false, hidden_size: 0, intermediate_size: 0, attention_heads: 0, kv_heads: 0, head_dim: 0, layers: 0, vocabulary_size: 0, rms_epsilon: 0.00001, rope_theta: 10000.0, error_code: code }
+    hf_model_config { valid: false, hidden_size: 0, intermediate_size: 0, attention_heads: 0, kv_heads: 0, head_dim: 0, layers: 0, vocabulary_size: 0, max_position_embeddings: 0, rms_epsilon: 0.00001, rope_theta: 10000.0, attention_bias: false, mlp_bias: false, tie_word_embeddings: false, error_code: code }
 }
 
 func parse_hf_config(string text) hf_model_config {
@@ -81,7 +93,8 @@ func parse_hf_config(string text) hf_model_config {
     int kv_heads = hf_json_int(text, "num_key_value_heads", heads)
     int layers = hf_json_int(text, "num_hidden_layers", 0)
     int vocabulary = hf_json_int(text, "vocab_size", 0)
-    if hidden <= 0 || intermediate <= 0 || heads <= 0 || kv_heads <= 0 || layers <= 0 || vocabulary <= 0 { return invalid_hf_config("invalid_hf_config") }
+    int context = hf_json_int(text, "max_position_embeddings", 0)
+    if hidden <= 0 || intermediate <= 0 || heads <= 0 || kv_heads <= 0 || layers <= 0 || vocabulary <= 0 || context <= 0 { return invalid_hf_config("invalid_hf_config") }
     if hidden % heads != 0 || heads % kv_heads != 0 { return invalid_hf_config("unsupported_head_layout") }
     hf_model_config {
         valid: true,
@@ -92,8 +105,12 @@ func parse_hf_config(string text) hf_model_config {
         head_dim: hidden / heads,
         layers: layers,
         vocabulary_size: vocabulary,
+        max_position_embeddings: context,
         rms_epsilon: hf_json_float(text, "rms_norm_eps", 0.00001),
         rope_theta: hf_json_float(text, "rope_theta", 10000.0),
+        attention_bias: hf_json_bool(text, "attention_bias", true),
+        mlp_bias: hf_json_bool(text, "mlp_bias", false),
+        tie_word_embeddings: hf_json_bool(text, "tie_word_embeddings", false),
         error_code: "",
     }
 }

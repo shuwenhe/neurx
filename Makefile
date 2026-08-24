@@ -945,9 +945,11 @@ $(PRODUCTION_S_BACKEND): backends/cpu/inference_server.s src/inference/extension
 	@echo "✓ LMCache Phase 2-4 modules included: hash_table (O(1) lookup), storage_backend (L1/L2/L3), lru_linked_list (O(1) evict), distributed_cache, performance_optimization, advanced_cache_engine"
 	@touch '$(PRODUCTION_S_BACKEND)'
 
-$(PRODUCTION_S_GPU_BACKEND): backends/cuda/inference_server.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_GPU_BACKEND): backends/cuda/inference_server.s src/models/formats/hf_config.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX GPU Backend (Pure S Language + GPU Acceleration)..."
-	@$(S_SEED_COMPILER) backends/cuda/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir' || { \
+	@$(S_SEED_COMPILER) backends/cuda/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_entry.ir' && \
+		$(S_SEED_COMPILER) src/models/formats/hf_config.s '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' && \
+		$(S_SEED_COMPILER) --link-ir '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir' '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_entry.ir' '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' || { \
 		echo "❌ GPU Backend compilation failed!"; \
 		exit 1; \
 	}
@@ -958,9 +960,11 @@ $(PRODUCTION_S_GPU_BACKEND): backends/cuda/inference_server.s | $(PRODUCTION_S_I
 	@echo "✓ GPU backend compiled: $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir"
 	@touch '$(PRODUCTION_S_GPU_BACKEND)'
 
-$(PRODUCTION_S_GPU_BACKEND_ENHANCED): experimental/inference/cuda_server_candidate.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_GPU_BACKEND_ENHANCED): backends/cuda/inference_server.s src/models/formats/hf_config.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX GPU Backend Enhanced (Real Inference + Streaming MatMul)..."
-	@$(S_SEED_COMPILER) experimental/inference/cuda_server_candidate.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir' || { \
+	@$(S_SEED_COMPILER) backends/cuda/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced_entry.ir' && \
+		$(S_SEED_COMPILER) src/models/formats/hf_config.s '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' && \
+		$(S_SEED_COMPILER) --link-ir '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir' '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced_entry.ir' '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' || { \
 		echo "❌ GPU Backend Enhanced compilation failed!"; \
 		exit 1; \
 	}
@@ -1336,24 +1340,13 @@ backend-cpu: build-production-s-inference
 
 frontend: build-production-s-inference
 	@echo ""
-	@echo "🌐 NeurX Web UI Frontend Ready"
-	@echo ""
-	@echo "To start the frontend, run in a terminal:"
-	@echo ""
-	@echo "  $$ '$(S_RUNNER_BIN)' '$(WEB_UI_SERVER_IR)'"
-	@echo ""
-	@echo "Then access at: http://127.0.0.1:8081"
-	@echo ""
-	@echo "Or run:"
-	@echo "  $$ make start-frontend"
-	@echo ""
-
-start-frontend: build-production-s-inference
-	@pkill -9 -f "s_ir_runner.*web_ui_server" 2>/dev/null || true
 	@echo "🌐 Starting Web UI on port 8081 (Ctrl+C to stop)..."
-	@'$(S_RUNNER_BIN)' '$(WEB_UI_SERVER_IR)' >/tmp/neurx_frontend.log 2>&1 &
-	@sleep 2
-	@lsof -i :8081 2>/dev/null | grep LISTEN >/dev/null && echo "✅ Frontend is running at http://127.0.0.1:8081" || echo "❌ Failed to start"
+	@echo "💡 Open your browser: http://127.0.0.1:8081"
+	@NEURX_ROOT='$(CURDIR_UNIX)' \
+		'$(S_RUNNER_BIN)' '$(WEB_UI_SERVER_IR)'
+
+# Backward-compatible alias. Prefer `make frontend`.
+start-frontend: frontend
 
 frontend-stop:
 	@echo "🛑 Stopping NeurX Web UI Frontend..."

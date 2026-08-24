@@ -49,6 +49,8 @@ class hf_cuda_kv_cache {
 class hf_decoder_cuda {
  public:
   explicit hf_decoder_cuda(const std::string& model_directory, int device = 0);
+  hf_decoder_cuda(const std::string& model_directory,
+                  const runtime::model::hf_config& config, int device = 0);
   ~hf_decoder_cuda();
   hf_decoder_cuda(hf_decoder_cuda&&) noexcept;
   hf_decoder_cuda& operator=(hf_decoder_cuda&&) noexcept;

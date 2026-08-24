@@ -243,8 +243,12 @@ struct hf_decoder_cuda::impl {
   device_buffer final_norm;
   device_buffer lm_head;
   impl(const std::string& directory, int device_id)
-      : config(runtime::model::hf_config::from_file(directory + "/config.json")),
-        device(device_id) {
+      : impl(directory, runtime::model::hf_config::from_file(directory + "/config.json"),
+             device_id) {}
+  impl(const std::string& directory, const runtime::model::hf_config& parsed_config,
+       int device_id)
+      : config(parsed_config), device(device_id) {
+    config.validate();
     check_cuda(cudaSetDevice(device), "cudaSetDevice");
     check_cublas(cublasCreate(&handle), "cublasCreate");
     const auto store = runtime::model::hf_weight_store::open(directory);
@@ -859,6 +863,9 @@ struct hf_decoder_cuda::impl {
 };
 hf_decoder_cuda::hf_decoder_cuda(const std::string& directory, int device)
     : impl_(new impl(directory, device)) {}
+hf_decoder_cuda::hf_decoder_cuda(const std::string& directory,
+                                 const runtime::model::hf_config& config, int device)
+    : impl_(new impl(directory, config, device)) {}
 hf_decoder_cuda::~hf_decoder_cuda() = default;
 hf_decoder_cuda::hf_decoder_cuda(hf_decoder_cuda&&) noexcept = default;
 hf_decoder_cuda& hf_decoder_cuda::operator=(hf_decoder_cuda&&) noexcept = default;

@@ -25,6 +25,9 @@ std::vector<int32_t> g_stop_tokens;
 std::string g_output;
 std::string g_error;
 std::string g_device_name;
+std::string g_pending_directory;
+int g_pending_device = 0;
+neurx::runtime::model::hf_config g_pending_config;
 
 void set_error(const std::exception& error) { g_error = error.what(); }
 
@@ -72,6 +75,85 @@ extern "C" int neurx_s_cuda_initialize(const char* model_directory, int device) 
 
     g_tokenizer = std::make_unique<bpe_tokenizer>(bpe_tokenizer::from_directory(directory));
     g_model = std::make_unique<hf_decoder_cuda>(directory, device);
+    g_cache = std::make_unique<hf_cuda_kv_cache>();
+    g_stop_tokens.clear();
+    for (const char* marker : {"<|endoftext|>", "<|im_end|>"}) {
+      const int32_t id = g_tokenizer->token_id(marker);
+      if (id >= 0) g_stop_tokens.push_back(id);
+    }
+    if (g_stop_tokens.empty()) throw std::runtime_error("Qwen stop tokens are missing");
+    return 0;
+  } catch (const std::exception& error) {
+    set_error(error);
+    g_model.reset();
+    g_tokenizer.reset();
+    g_cache.reset();
+    return -1;
+  }
+}
+
+extern "C" int neurx_s_cuda_config_dimensions(
+    const char* model_directory, int device, int vocab_size, int hidden_size,
+    int intermediate_size, int num_hidden_layers) {
+  try {
+    g_error.clear();
+    g_pending_directory = model_directory == nullptr ? "" : model_directory;
+    if (g_pending_directory.empty()) throw std::runtime_error("NEURX_MODEL_DIR is required");
+    g_pending_device = device;
+    g_pending_config = neurx::runtime::model::hf_config{};
+    g_pending_config.architecture = neurx::runtime::model::model_architecture::base_model;
+    g_pending_config.model_type = "s-configured-causal-lm";
+    g_pending_config.vocab_size = vocab_size;
+    g_pending_config.hidden_size = hidden_size;
+    g_pending_config.intermediate_size = intermediate_size;
+    g_pending_config.num_hidden_layers = num_hidden_layers;
+    return 0;
+  } catch (const std::exception& error) {
+    set_error(error);
+    return -1;
+  }
+}
+
+extern "C" int neurx_s_cuda_config_attention(int num_attention_heads,
+                                               int num_key_value_heads,
+                                               int head_dimension,
+                                               int max_position_embeddings) {
+  g_pending_config.num_attention_heads = num_attention_heads;
+  g_pending_config.num_key_value_heads = num_key_value_heads;
+  g_pending_config.head_dimension = head_dimension;
+  g_pending_config.max_position_embeddings = max_position_embeddings;
+  return 0;
+}
+
+extern "C" int neurx_s_cuda_config_finalize(double rms_norm_eps, double rope_theta,
+                                              int attention_bias, int mlp_bias,
+                                              int tie_word_embeddings) {
+  try {
+    g_error.clear();
+    int count = 0;
+    const cudaError_t count_status = cudaGetDeviceCount(&count);
+    if (count_status != cudaSuccess || count <= 0) {
+      throw std::runtime_error("no local CUDA GPU is available");
+    }
+    if (g_pending_device < 0 || g_pending_device >= count) {
+      throw std::runtime_error("NEURX_CUDA_DEVICE is outside the local GPU range");
+    }
+    cudaDeviceProp properties{};
+    if (cudaGetDeviceProperties(&properties, g_pending_device) != cudaSuccess) {
+      throw std::runtime_error("failed to query the local CUDA GPU");
+    }
+    g_device_name = properties.name;
+    g_pending_config.rms_norm_eps = rms_norm_eps;
+    g_pending_config.rope_theta = rope_theta;
+    g_pending_config.attention_bias = attention_bias != 0;
+    g_pending_config.mlp_bias = mlp_bias != 0;
+    g_pending_config.tie_word_embeddings = tie_word_embeddings != 0;
+    g_pending_config.validate();
+
+    g_tokenizer = std::make_unique<bpe_tokenizer>(
+        bpe_tokenizer::from_directory(g_pending_directory));
+    g_model = std::make_unique<hf_decoder_cuda>(
+        g_pending_directory, g_pending_config, g_pending_device);
     g_cache = std::make_unique<hf_cuda_kv_cache>();
     g_stop_tokens.clear();
     for (const char* marker : {"<|endoftext|>", "<|im_end|>"}) {
