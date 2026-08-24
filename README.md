@@ -64,7 +64,7 @@ neurx/
 │   └── training/         # Training infrastructure
 ├── test/                # Contract and unit tests
 ├── config/              # Configuration examples
-├── benchmarks/           # Performance benchmarking
+├── benchmark/           # Performance benchmarking
 ├── cmd/                  # Command-line entry points
 │   ├── train/           # Training command
 │   ├── serve/           # Inference serving command
@@ -213,7 +213,7 @@ make benchmark-kernels
 make benchmark-compare
 ```
 
-Results are saved to `benchmarks/results/`:
+Results are saved to `benchmark/results/`:
 ```json
 {
   "schema_version": "1.0",
