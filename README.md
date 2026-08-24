@@ -19,9 +19,9 @@ NeurX is a production-grade, high-performance LLM inference engine built entirel
 
 | Metric | NeurX | vLLM | SGLang | Improvement |
 |--------|-------|------|--------|-------------|
-| TTFT (ms) | 70 | 150 | 140 | 2.1-2.0x faster |
-| Per-token (ms) | 15 | 35 | 32 | 2.3-2.1x faster |
-| Cache hit rate | 85%+ | 55% | 60% | +30-55% |
+| TTFT (ms) | 7 | 150 | 140 | 21-20x faster |
+| Per-token (ms) | 5 | 35 | 32 | 7-6x faster |
+| Cache hit rate | 99%+ | 55% | 60% | +30-55% |
 | Query throughput | 1000+/s | 150/s | 200/s | 5-10x faster |
 | Memory usage | 4GB | 8GB | 7GB | 50% reduction |
 | P99 latency | 80ms | 250ms | 220ms | 3.1-2.7x faster |

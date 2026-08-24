@@ -89,13 +89,13 @@ func proxy_to_backend(string method, string path, string request_body) string {
         return "{\"error\": \"Socket creation failed\"}"
     }
 
-    if __sys_connect(backend_sock, "127.0.0.1", 18081, 2) < 0 {
+    if __sys_connect(backend_sock, "127.0.0.1", 18084, 2) < 0 {
         _ = __sys_close(backend_sock)
         return "{\"error\": \"Backend connection failed\"}"
     }
 
     string backend_request = method + " " + path + " HTTP/1.1\r\n"
-    backend_request = backend_request + "Host: 127.0.0.1:18081\r\n"
+    backend_request = backend_request + "Host: 127.0.0.1:18084\r\n"
     backend_request = backend_request + "Content-Type: application/json\r\n"
     backend_request = backend_request + "Content-Length: " + int_to_string(len(request_body)) + "\r\n"
     backend_request = backend_request + "Connection: close\r\n"
