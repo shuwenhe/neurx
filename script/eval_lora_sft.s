@@ -65,7 +65,7 @@ func main() {
     string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/home/shuwen/shuwen/dataset/medical/train.json")
     string runner = runtime_env_get(
         "NEURX_POSTTRAIN_EVAL_RUNNER",
-        root + "/artifacts/build/real_inference/real_inference"
+        root + "/artifact/build/real_inference/real_inference"
     )
     string max_tokens_text = runtime_env_get("NEURX_POSTTRAIN_EVAL_MAX_NEW_TOKENS", "64")
     string model_file = model_dir

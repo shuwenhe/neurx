@@ -1,6 +1,6 @@
 use neurx.agent
 use neurx.runtime.io.{runtime_write_text_file, runtime_file_exists}
-string out_prefix = "artifacts/checkpoints/agent/skills"
+string out_prefix = "artifact/checkpoints/agent/skills"
 string snapshot_path = out_prefix + "/snapshot.txt"
 string report_path   = out_prefix + "/report.txt"
 string trace_path    = out_prefix + "/trace.txt"

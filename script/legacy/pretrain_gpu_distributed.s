@@ -18,7 +18,7 @@ struct distributed_pretrain_config {
 func main() {
     println("[PRETRAIN-GPU-DDP] === Multi-GPU Distributed Training with DDP ===")
     string project_root = runtime_env_get("NEURX_ROOT", ".")
-    string shard_list_file = runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", project_root + "/artifacts/build/run_large_pretrain/shard_list.txt")
+    string shard_list_file = runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", project_root + "/artifact/build/run_large_pretrain/shard_list.txt")
     string output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/checkpoint/NeurX-1.3")
     string config_path = runtime_env_get("NEURX_PRETRAIN_CONFIG", project_root + "/pretrain/pretrain_config.toml")
     string progress_file = runtime_env_get("NEURX_PRETRAIN_PROGRESS_FILE", "")

@@ -3,4 +3,4 @@ image_size: 224
 max_steps: 1000
 lr: 0.0003
 dataset_manifest: "src/training/data/vision/classification/mini_manifest.json"
-output_dir: "artifacts/checkpoints/vision/classification"
+output_dir: "artifact/checkpoints/vision/classification"

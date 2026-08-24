@@ -8,7 +8,7 @@ func main() {
     println("")
     println("Project root: " + project_root)
     println("")
-    println("  checkpoint dir : " + check_path("artifacts/checkpoints"))
+    println("  checkpoint dir : " + check_path("artifact/checkpoints"))
     println("  log dir        : " + check_path("logs"))
     println("  bin dir        : " + check_path("bin"))
     println("")

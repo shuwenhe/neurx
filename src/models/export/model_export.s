@@ -28,8 +28,8 @@ struct model_export_artifact {
 func default_model_export_config() model_export_config {
     model_export_config {
         model_name: "neurx-model",
-        source_model_dir: "artifacts/model",
-        export_dir: "artifacts/export",
+        source_model_dir: "artifact/model",
+        export_dir: "artifact/export",
         export_format: "custom",
         target_runtime: "neurx",
         include_tokenizer: true,
@@ -159,7 +159,7 @@ func model_export_suggest_backend(model_export_config config) string {
 func prepare_model_export_bundle(model_export_config config) model_export_artifact {
     string root = trim(config.export_dir)
     if root == "" {
-        root = "artifacts/export"
+        root = "artifact/export"
     }
     runtime_make_dirs(root)
     model_export_artifact artifact = model_export_artifact_paths(root)

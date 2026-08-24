@@ -135,7 +135,7 @@ deployment:
     level: "INFO"
     format: "json"
     output: "file"
-    log_dir: "artifacts/logs"
+    log_dir: "artifact/logs"
   metrics:
     enable_prometheus: true
     port: 9090

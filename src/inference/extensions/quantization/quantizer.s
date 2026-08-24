@@ -283,7 +283,7 @@ func export_quantized_model(
 ) () {
     string root = trim(export_path)
     if root == "" {
-        root = "artifacts/quantized_model"
+        root = "artifact/quantized_model"
     }
     runtime_make_dirs(root)
     string manifest_path = concat2(root, "/quantized_model.manifest")
@@ -300,7 +300,7 @@ func load_quantized_model(
 ) (vector, quantization_config) {
     string root = trim(model_path)
     if root == "" {
-        root = "artifacts/quantized_model"
+        root = "artifact/quantized_model"
     }
     vector layers = allocate_vector(0, 0.0)
     quantization_config config = new_quantization_config(INT8_DYNAMIC)

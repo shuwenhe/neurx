@@ -11,8 +11,8 @@ func main() {
 
     let neurx_root = get_env_or("NEURX_ROOT", ".")
 
-    let frontend_ir = neurx_root + "/artifacts/build/production_s_inference/web_ui_server.ir"
-    let s_runner = neurx_root + "/artifacts/build/s_runner/s_ir_runner"
+    let frontend_ir = neurx_root + "/artifact/build/production_s_inference/web_ui_server.ir"
+    let s_runner = neurx_root + "/artifact/build/s_runner/s_ir_runner"
 
     println("Starting frontend process...")
 

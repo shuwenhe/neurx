@@ -5,7 +5,7 @@ use std.io.println
 func main() {
     println("[TRAINER] === Fast Training Loop (No Shell Commands) ===")
     string project_root = runtime_env_get("NEURX_ROOT", ".")
-    string shard_list_file = runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", project_root + "/artifacts/build/run_large_pretrain/shard_list.txt")
+    string shard_list_file = runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", project_root + "/artifact/build/run_large_pretrain/shard_list.txt")
     string shard_dir = runtime_env_get("NEURX_PRETRAIN_SHARD_DIR", project_root + "/dataset/pretrain/shard")
     string progress_file = runtime_env_get("NEURX_PRETRAIN_PROGRESS_FILE", "")
     int max_steps = parse_int(runtime_env_get("NEURX_PRETRAIN_STEPS", "1000"), 1000)

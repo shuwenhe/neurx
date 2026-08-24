@@ -5,7 +5,7 @@ use std.io.println
 func main() {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let source_file = runtime_env_get("NEURX_SMALL_MODEL_SOURCE", project_root + "/train/train_llm.s")
-    let checkpoint_dir = runtime_env_get("NEURX_SMALL_MODEL_CHECKPOINT_DIR", project_root + "/artifacts/checkpoints/llm_s_pretrain")
+    let checkpoint_dir = runtime_env_get("NEURX_SMALL_MODEL_CHECKPOINT_DIR", project_root + "/artifact/checkpoints/llm_s_pretrain")
     println("NeurX Small model Training (S Lang)")
     println("")
     println("Project root : " + project_root)

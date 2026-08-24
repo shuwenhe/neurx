@@ -13,7 +13,7 @@ func main() {
     println("  ✓ Loading complete")
     println("")
     println("📖 Loading LoRA adapter...")
-    println("  Path: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
+    println("  Path: /home/shuwen/shuwen/train/neurx/artifact/checkpoints/lora_sft")
     println("  ✓ Loading complete")
     println("")
     println("🔗 Merging weights...")

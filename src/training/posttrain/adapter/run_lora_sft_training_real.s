@@ -137,7 +137,7 @@ func create_training_state(int total_examples) training_state {
 func main() {
     string project_root = "/home/shuwen/shuwen/train/neurx"
     string data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl"
-    string output_dir = "/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft"
+    string output_dir = "/home/shuwen/shuwen/train/neurx/artifact/checkpoints/lora_sft"
     int hidden_dim = 32
     int rank = 8
     float alpha = 16.0

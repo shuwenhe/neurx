@@ -5,9 +5,9 @@ use neurx.deployment.chain.{default_model_deployment_config}
 
 func main() {
     compression_release_config config = compression_release_config {
-        release_dir: "artifacts/release",
-        quantization_manifest_path: "artifacts/quantized_model/quantized_model.manifest",
-        distillation_manifest_path: "artifacts/distillation/distillation.manifest",
+        release_dir: "artifact/release",
+        quantization_manifest_path: "artifact/quantized_model/quantized_model.manifest",
+        distillation_manifest_path: "artifact/distillation/distillation.manifest",
         export_config: default_model_export_config(),
         deployment_config: default_model_deployment_config(),
     }

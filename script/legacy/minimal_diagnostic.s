@@ -10,7 +10,7 @@ func main() {
     println("")
     println("  script dir  : " + check_path("script"))
     println("  artifacts   : " + check_path("artifacts"))
-    println("  logs dir    : " + check_path("artifacts/logs"))
+    println("  logs dir    : " + check_path("artifact/logs"))
     println("")
     println("This S entrypoint centralizes the minimal diagnostic status layer.")
     0

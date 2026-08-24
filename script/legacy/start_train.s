@@ -4,7 +4,7 @@ use std.io.println
 
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    string log_dir = project_root + "/artifacts/logs"
+    string log_dir = project_root + "/artifact/logs"
     println("════════════════════════════════════════════════════════════════")
     println("🚀 start NeurX training")
     println("════════════════════════════════════════════════════════════════")

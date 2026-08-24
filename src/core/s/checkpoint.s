@@ -161,8 +161,8 @@ func resolve_checkpoint_path(string path) string {
             return resolved + ".neurx"
         }
     }
-    if !has_prefix(target, "artifacts/") && !has_prefix(target, "build/") {
-        string relative_target = path_join("artifacts/checkpoints", target)
+    if !has_prefix(target, "artifact/") && !has_prefix(target, "build/") {
+        string relative_target = path_join("artifact/checkpoints", target)
         if runtime_file_exists(relative_target) {
             return relative_target
         }
@@ -488,8 +488,8 @@ func normalize_checkpoint_path(string path) string {
     if has_prefix(target, "/") {
         return target
     }
-    if !has_prefix(target, "artifacts/") && !has_prefix(target, "build/") {
-        target = neurx.strings.concat2("artifacts/checkpoints/", target)
+    if !has_prefix(target, "artifact/") && !has_prefix(target, "build/") {
+        target = neurx.strings.concat2("artifact/checkpoints/", target)
     }
     if !has_suffix(target, ".neurx") && !has_suffix(target, ".txt") && !has_suffix(path_basename(target), "latest") {
         target = neurx.strings.concat2(target, ".neurx")

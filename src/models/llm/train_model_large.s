@@ -343,7 +343,7 @@ func default_training_config() gpt_large_training_config {
         log_interval: clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_LOG_INTERVAL", "8")), 8), 1, 1000000),
         eval_interval: clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_EVAL_INTERVAL", "16")), 16), 1, 1000000),
         save_interval: clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_SAVE_INTERVAL", "32")), 32), 1, 1000000),
-        output_dir: trim(runtime_env_get("NEURX_LLM_OUTPUT_DIR", "artifacts/checkpoints/model_llm_gpt_large")),
+        output_dir: trim(runtime_env_get("NEURX_LLM_OUTPUT_DIR", "artifact/checkpoints/model_llm_gpt_large")),
     }
 }
 

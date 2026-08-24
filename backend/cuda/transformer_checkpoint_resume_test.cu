@@ -33,7 +33,7 @@ float max_state_difference(model &a, model &b) {
 }
 int main() {
   constexpr int k_total_steps = 6, k_checkpoint_step = 2;
-  const std::string directory = "artifacts/build/transformer_cuda/checkpoint_resume";
+  const std::string directory = "artifact/build/transformer_cuda/checkpoint_resume";
   std::filesystem::remove_all(directory);
   tokenizer tokenizer;
   model uninterrupted(256, 4, 8, 2, 16, 1);

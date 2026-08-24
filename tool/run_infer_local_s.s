@@ -9,7 +9,7 @@ func main() {
     string source_file = runtime_env_get("NEURX_INFER_SOURCE", project_root + "/tool/infer_llm_checkpoint.s")
     string build_dir = runtime_env_get("NEURX_INFER_BUILD_DIR", project_root + "/build")
     string ir_file = build_dir + "/infer_llm.ir"
-    string runner_bin = runtime_env_get("NEURX_INFER_RUNNER_BIN", project_root + "/artifacts/build/s_runner/s_ir_runner")
+    string runner_bin = runtime_env_get("NEURX_INFER_RUNNER_BIN", project_root + "/artifact/build/s_runner/s_ir_runner")
     println("Building local S inference runner")
     println("  project root : " + project_root)
     println("  S root       : " + s_root)

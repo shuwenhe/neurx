@@ -10,7 +10,7 @@ func main() {
     println("")
     println("  launch script : " + check_path("script/legacy/cluster_launch.s"))
     println("  deployment dir : " + check_path("production_deployment"))
-    println("  checkpoints   : " + check_path("artifacts/checkpoints"))
+    println("  checkpoints   : " + check_path("artifact/checkpoints"))
     println("")
     println("This S entrypoint centralizes the cluster launch status layer.")
     0

@@ -8,7 +8,7 @@ func main() {
     let val_split = runtime_env_get("NEURX_VAL_SPLIT_PATH", project_root + "/dataset/pretrain/cleaned/val.jsonl")
     let test_split = runtime_env_get("NEURX_TEST_SPLIT_PATH", project_root + "/dataset/pretrain/cleaned/test.jsonl")
     let manifest = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
-    let output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/artifacts/checkpoints/llm_s_pretrain")
+    let output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/artifact/checkpoints/llm_s_pretrain")
     println("NeurX LLM Training Orchestrator (S Lang)")
     println("")
     println("Project root: " + project_root)

@@ -49,7 +49,7 @@ func launch_on_host(string host, int rank, config multi_node_config_2) {
         "MASTER_PORT=" + config.masterPort,
         "CUDA_VISIBLE_DEVICES=0",
     )
-    cmd := exec.command(config.root + "/artifacts/build/cuda_train/neurx_cuda_train_bridge")
+    cmd := exec.command(config.root + "/artifact/build/cuda_train/neurx_cuda_train_bridge")
     cmd.Env = env
     cmd.Dir = config.root
     cmd.Stdout = os.Stdout
@@ -78,7 +78,7 @@ func main() {
         config.masterPort = "29500"
     }
     if config.sharedId == "" {
-        config.sharedId = root + "/artifacts/nccl/unique_id"
+        config.sharedId = root + "/artifact/nccl/unique_id"
     }
     if config.output == "" {
         config.output = root + "/checkpoint/NeurX-1.3"

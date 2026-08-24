@@ -9,7 +9,7 @@ func main() {
     println("Project root: " + project_root)
     println("")
     println("  train script : " + check_path("script/legacy/run_training.s"))
-    println("  log dir      : " + check_path("artifacts/logs"))
+    println("  log dir      : " + check_path("artifact/logs"))
     println("  build dir    : " + check_path("build"))
     println("")
     println("This S entrypoint centralizes the run-with-logs status layer.")

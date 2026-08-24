@@ -12,7 +12,7 @@ func main() {
     }
     string max_steps = default_if_empty(yaml_value(config, "max_steps"), "100")
     string dataset_manifest = default_if_empty(yaml_value(config, "dataset_manifest"), "src/training/data/agent/memory/mini_manifest.json")
-    string output_dir = default_if_empty(yaml_value(config, "output_dir"), "artifacts/checkpoints/agent/memory")
+    string output_dir = default_if_empty(yaml_value(config, "output_dir"), "artifact/checkpoints/agent/memory")
     if steps_override != "" {
         max_steps = steps_override
     }

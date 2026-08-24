@@ -86,7 +86,7 @@ func string_char(int code) string {
     println("")
     println("✓ LoRA SFT training simulation completed")
     println("Best loss     : " + best_loss)
-    println("Checkpoint dir: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
+    println("Checkpoint dir: /home/shuwen/shuwen/train/neurx/artifact/checkpoints/lora_sft")
     println("")
     0
 }

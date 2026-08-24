@@ -98,7 +98,7 @@ func main() {
     )
     string runner = runtime_env_get(
         "NEURX_CHAT_INFERENCE_RUNNER",
-        root + "/artifacts/build/real_inference/real_inference"
+        root + "/artifact/build/real_inference/real_inference"
     )
     string prompt_path = runtime_env_get(
         "NEURX_CHAT_PROMPT_PATH",

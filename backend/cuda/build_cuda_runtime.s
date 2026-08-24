@@ -11,7 +11,7 @@ use neurx.runtime.io.{
 func main() {
     println("[CUDA Runtime] Building CUDA Runtime Library")
     println("")
-    string build_dir = "./artifacts/build/cuda_runtime"
+    string build_dir = "./artifact/build/cuda_runtime"
     create_dir(build_dir)
     string cuda_home = get_cuda_home()
     string cuda_lib = cuda_home + "/lib64"

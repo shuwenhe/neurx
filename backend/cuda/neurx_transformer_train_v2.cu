@@ -378,7 +378,7 @@ int main(){
   }
   neurx_training::lr_config lr_config{peak_lr,min_lr,warmup_steps,total_optimizer_steps,schedule};
   neurx_training::gradient_policy gradient_policy{max_grad_norm,1e-6};
-  std::string shard_list_path=env_str("NEURX_PRETRAIN_SHARD_LIST_FILE",root+"/artifacts/build/run_large_pretrain/shard_list.txt");
+  std::string shard_list_path=env_str("NEURX_PRETRAIN_SHARD_LIST_FILE",root+"/artifact/build/run_large_pretrain/shard_list.txt");
   if(dim%heads){std::fprintf(stderr,"hidden size must be divisible by heads\n");return 2;}model model(tok.size(),seq,dim,heads,ffn,nl,seed);train_cache cache(model);jsonl_stream reader;reader.tok=&tok;if(!reader.load_list(shard_list_path)){std::fprintf(stderr,"empty shard list\n");return 3;}
   if(dist.world>1){std::vector<std::string>local;for(size_t i=dist.rank;i<reader.shards.size();i+=dist.world)local.push_back(reader.shards[i]);reader.shards.swap(local);if(reader.shards.empty())return 3;}
   jsonl_stream validation;validation.tok=&tok;

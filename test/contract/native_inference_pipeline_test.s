@@ -17,7 +17,7 @@ func main() {
     result = serve_native_inference(request, 1, 1)
     if result.ok || result.error_code != "capacity_exhausted" { return 1 }
 
-    request.model = "artifacts/build/commands/native-test/embedding.safetensors"
+    request.model = "artifact/build/commands/native-test/embedding.safetensors"
     request.prompt = "AB"
     request.max_tokens = 2
     result = serve_native_inference(request, 4, 0)

@@ -65,7 +65,7 @@ func main() {
 func build_cuda_runtime(build_config cfg) {
     println("[BUILD] CUDA runtime library")
     println("")
-    string build_dir = "./artifacts/build/cuda_runtime"
+    string build_dir = "./artifact/build/cuda_runtime"
     create_directory(build_dir)
     println("[1/3] Compiling C wrapper with gcc...")
     build_result result = compile_cuda_runtime(cfg, build_dir)
@@ -89,7 +89,7 @@ func build_cuda_runtime(build_config cfg) {
 func build_cuda_kernels(build_config cfg) {
     println("[BUILD] CUDA Kernels Library")
     println("")
-    string build_dir = "./artifacts/build/cuda_kernels"
+    string build_dir = "./artifact/build/cuda_kernels"
     create_directory(build_dir)
     println("[1/4] Generating PTX code...")
     build_result result = compile_kernels_ptx(cfg, build_dir)
@@ -118,8 +118,8 @@ func build_cuda_kernels(build_config cfg) {
 func build_verify_env(build_config cfg) {
     println("[BUILD] Environment Verification Tool")
     println("")
-    string ir_path = "./artifacts/build/verify_env/verify_env.ir"
-    create_directory("./artifacts/build/verify_env")
+    string ir_path = "./artifact/build/verify_env/verify_env.ir"
+    create_directory("./artifact/build/verify_env")
     string s_compiler = runtime_env_get("S_COMPILER", "/home/shuwen/.local/bin/s")
     if !runtime_file_exists(s_compiler) {
         println("[WARNING] S compiler not found at " + s_compiler)
@@ -268,8 +268,8 @@ func create_cuda_wrapper(string build_dir) {
 
 func clean_build_artifacts() {
     println("[CLEAN] Removing build artifacts...")
-    runtime_run_command_output("rm -rf ./artifacts/build/cuda_runtime 2>&1")
-    runtime_run_command_output("rm -rf ./artifacts/build/cuda_kernels 2>&1")
+    runtime_run_command_output("rm -rf ./artifact/build/cuda_runtime 2>&1")
+    runtime_run_command_output("rm -rf ./artifact/build/cuda_kernels 2>&1")
     println("[SUCCESS] Cleaned")
 }
 

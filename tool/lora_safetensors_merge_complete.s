@@ -274,7 +274,7 @@ func main() {
     cfg.base_model_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH",
         project_root + "/../model/base-model-7B")
     cfg.adapter_dir = runtime_env_get("NEURX_LORA_ADAPTER_DIR",
-        project_root + "/artifacts/checkpoints/lora_adapter")
+        project_root + "/artifact/checkpoints/lora_adapter")
     cfg.output_dir = runtime_env_get("NEURX_MERGED_MODEL_DIR",
         project_root + "/../posttrain")
     cfg.alpha = 16.0

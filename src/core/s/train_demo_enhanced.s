@@ -457,7 +457,7 @@ func run_training(gptconfig config) training_result {
     println("")
     println("[5/5] Saving final checkpoints...")
     string final_ckpt = save_checkpoint_v2(
-        "artifacts/checkpoints",
+        "artifact/checkpoints",
         config.max_steps, state.loss_history[config.max_steps - 1],
         state.best_loss, state.best_step, model, config,
         recent_losses
@@ -465,14 +465,14 @@ func run_training(gptconfig config) training_result {
     if not final_ckpt.startswith("[ERROR]"):
         append(checkpoints_saved, final_ckpt)
     string best_ckpt = save_checkpoint_v2(
-        "artifacts/checkpoints",
+        "artifact/checkpoints",
         state.best_step, state.best_loss,
         state.best_loss, state.best_step, model, config,
         recent_losses
     )
-    rename_file(best_ckpt, "artifacts/checkpoints/best_model.neurx")
-    append(checkpoints_saved, "artifacts/checkpoints/best_model.neurx")
-    save_manifest("artifacts/checkpoints/latest_checkpoint.txt", checkpoints_saved)
+    rename_file(best_ckpt, "artifact/checkpoints/best_model.neurx")
+    append(checkpoints_saved, "artifact/checkpoints/best_model.neurx")
+    save_manifest("artifact/checkpoints/latest_checkpoint.txt", checkpoints_saved)
     println("")
     println("╔══════════════════════════════════════════════════╗")
     println("║              Training Complete!                  ║")

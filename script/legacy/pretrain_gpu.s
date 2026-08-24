@@ -15,10 +15,10 @@ struct training_state {
 func main() {
     println("[PRETRAIN-GPU] === NVIDIA CUDA Runtime/cuBLAS Pretraining (S launcher) ===")
     string project_root = runtime_env_get("NEURX_ROOT", ".")
-    string shard_list_file = runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", project_root + "/artifacts/build/run_large_pretrain/shard_list.txt")
+    string shard_list_file = runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", project_root + "/artifact/build/run_large_pretrain/shard_list.txt")
     string output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/checkpoint/NeurX-1.3")
     string progress_file = runtime_env_get("NEURX_PRETRAIN_PROGRESS_FILE", "")
-    string bridge = runtime_env_get("NEURX_CUDA_TRAIN_BRIDGE", project_root + "/artifacts/build/cuda_train/neurx_cuda_train_bridge")
+    string bridge = runtime_env_get("NEURX_CUDA_TRAIN_BRIDGE", project_root + "/artifact/build/cuda_train/neurx_cuda_train_bridge")
     string resume_mode = runtime_env_get("NEURX_PRETRAIN_RESUME", "auto")
     int max_steps = parse_int(runtime_env_get("NEURX_PRETRAIN_STEPS", "1000000000"), 1000000000)
     int log_interval = parse_int(runtime_env_get("NEURX_PRETRAIN_LOG_INTERVAL", "1"), 1)

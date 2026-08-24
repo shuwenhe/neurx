@@ -1076,7 +1076,7 @@ func new_gpt_large_pretrain_config() pretrain_config {
 }
 
 func new_gpt_large_pretrain_state() gpt_large_pretrain_state {
-    new_gpt_large_pretrain_state_with_params_and_output(8, 16, 64, 0.00015, 128, 0.00003, 0.1, 8, 16, 32, "dataset/pretrain/manifest.json", "artifacts/checkpoints/run_20260518_001")
+    new_gpt_large_pretrain_state_with_params_and_output(8, 16, 64, 0.00015, 128, 0.00003, 0.1, 8, 16, 32, "dataset/pretrain/manifest.json", "artifact/checkpoints/run_20260518_001")
 }
 
 func new_gpt_large_pretrain_state_with_params_and_output(int micro_batch_size, int seq_len, int max_steps, float lr, int warmup_steps, float min_lr, float weight_decay, int log_interval, int eval_interval, int save_interval, string dataset_manifest, string output_dir) gpt_large_pretrain_state {
@@ -1207,13 +1207,13 @@ func new_gpt_large_pretrain_state_with_params_and_output(int micro_batch_size, i
 }
 
 func new_gpt_large_pretrain_state_with_params(int micro_batch_size, int seq_len, int max_steps, float lr, int log_interval, int eval_interval, int save_interval) gpt_large_pretrain_state {
-    new_gpt_large_pretrain_state_with_params_and_output(micro_batch_size, seq_len, max_steps, lr, 128, 0.00003, 0.1, log_interval, eval_interval, save_interval, "dataset/pretrain/manifest.json", "artifacts/checkpoints/run_20260518_001")
+    new_gpt_large_pretrain_state_with_params_and_output(micro_batch_size, seq_len, max_steps, lr, 128, 0.00003, 0.1, log_interval, eval_interval, save_interval, "dataset/pretrain/manifest.json", "artifact/checkpoints/run_20260518_001")
 }
 
 func gpt_large_pretrain_checkpoint_path(gpt_large_pretrain_state state) string {
     string run_root = state.checkpoint.root
     if trim(run_root) == "" {
-        run_root = "artifacts/checkpoints/run_20260518_001"
+        run_root = "artifact/checkpoints/run_20260518_001"
     }
     run_root + "/step_" + zero_pad_int(state.loop.global_step, 7) + "/latest/" + state.checkpoint.run_name
 }
@@ -1221,7 +1221,7 @@ func gpt_large_pretrain_checkpoint_path(gpt_large_pretrain_state state) string {
 func gpt_large_pretrain_checkpoint_dir(gpt_large_pretrain_state state) string {
     string run_root = state.checkpoint.root
     if trim(run_root) == "" {
-        run_root = "artifacts/checkpoints/run_20260518_001"
+        run_root = "artifact/checkpoints/run_20260518_001"
     }
     run_root + "/step_" + zero_pad_int(state.loop.global_step, 7) + "/latest"
 }
@@ -2086,7 +2086,7 @@ func gpt_large_pretrain_expected_world_size() int {
 func gpt_large_pretrain_run_from_env() gpt_large_pretrain_state {
     bool is_1t = gpt_large_pretrain_is_1t_mode()
     string manifest_default = "dataset/pretrain/manifest.json"
-    string output_default = "artifacts/checkpoints/gpt_large_pretrain"
+    string output_default = "artifact/checkpoints/gpt_large_pretrain"
     int micro_batch_default = 8
     int seq_len_default = 16
     int max_steps_default = 64

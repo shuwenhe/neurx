@@ -44,7 +44,7 @@ func main() {
 
     print("Backend:    src/inference/native/production_gpu_backend.s\n")
 
-    print("Compiled:   artifacts/build/production_s_inference/gpu_backend.ir\n")
+    print("Compiled:   artifact/build/production_s_inference/gpu_backend.ir\n")
 
     print("Test:       script/test_gpu_backend.s\n")
 
@@ -56,9 +56,9 @@ func main() {
 
     print("$ cd /home/shuwen/shuwen/neurx\n")
 
-    print("$ ./artifacts/build/s_runner/s_ir_runner \\\n")
+    print("$ ./artifact/build/s_runner/s_ir_runner \\\n")
 
-    print("  ./artifacts/build/production_s_inference/gpu_backend.ir\n\n")
+    print("  ./artifact/build/production_s_inference/gpu_backend.ir\n\n")
 
     print("✓ Expected Output:\n")
 

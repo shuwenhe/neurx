@@ -267,7 +267,7 @@ func cluster_parse_node_record(string line) cluster_node_spec {
 }
 
 func cluster_node_manifest_path() string {
-    "./artifacts/cluster_nodes.manifest"
+    "./artifact/cluster_nodes.manifest"
 }
 
 func cluster_discover_nodes_from_manifest() []cluster_node_spec {
@@ -676,9 +676,9 @@ func main() {
         29500,
         len(state.nodes),
         cluster_recommended_world_size(state),
-        "./artifacts/checkpoints",
+        "./artifact/checkpoints",
         "./dataset/pretrain",
-        "./artifacts/train_output"
+        "./artifact/train_output"
     )
     state = cluster_write_deployment_bundle(state, spec)
     state = cluster_write_launch_plan(state, spec)

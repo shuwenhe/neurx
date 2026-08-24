@@ -289,7 +289,7 @@ func main() void {
     report.avg_tokens_per_sec = avg_throughput
     report.notes = "Benchmark completed successfully"
     var report_md = format_benchmark_report(report)
-    var output_dir = runtime_env_get("NEURX_TEST_OUTPUT_DIR", "/home/shuwen/shuwen/neurx/artifacts/posttrain_benchmark")
+    var output_dir = runtime_env_get("NEURX_TEST_OUTPUT_DIR", "/home/shuwen/shuwen/neurx/artifact/posttrain_benchmark")
     runtime_make_dirs(output_dir)
     var report_path = output_dir + "/benchmark_report.md"
     runtime_write_text_file(report_path, report_md)

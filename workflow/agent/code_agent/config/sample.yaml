@@ -4,4 +4,4 @@ max_steps: 16
 model_path: ""
 build_command: "make s-compile-runtime"
 test_command: "make test"
-output_dir: "artifacts/checkpoints/agent/code_agent"
+output_dir: "artifact/checkpoints/agent/code_agent"

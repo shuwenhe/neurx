@@ -7,4 +7,4 @@ allowed_tools:
   - search
   - retrieve
   - infer
-output_dir: "artifacts/checkpoints/agent/skills"
+output_dir: "artifact/checkpoints/agent/skills"

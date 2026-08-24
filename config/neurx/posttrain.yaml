@@ -8,9 +8,9 @@ data:
   data_format: sft
   dataset_type: medmcqa
 output:
-  adapter_output_dir: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft
+  adapter_output_dir: /home/shuwen/shuwen/train/neurx/artifact/checkpoints/lora_sft
   merged_model_output_dir: /home/shuwen/shuwen/train/model/base-model-posttrain
-  log_dir: /home/shuwen/shuwen/train/neurx/artifacts/logs
+  log_dir: /home/shuwen/shuwen/train/neurx/artifact/logs
 lora:
   rank: 8
   alpha: 16

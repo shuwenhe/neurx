@@ -15,7 +15,7 @@ func main() {
     string retire_threshold = default_if_empty(yaml_value(config, "retire_threshold"), "20.0")
     string min_success_rate = default_if_empty(yaml_value(config, "min_success_rate"), "0.80")
     string max_avg_steps = default_if_empty(yaml_value(config, "max_avg_steps"), "12")
-    string output_dir = default_if_empty(yaml_value(config, "output_dir"), "artifacts/checkpoints/agent/skills")
+    string output_dir = default_if_empty(yaml_value(config, "output_dir"), "artifact/checkpoints/agent/skills")
     if generations_override != "" {
         max_generations = generations_override
     }

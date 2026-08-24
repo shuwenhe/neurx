@@ -488,7 +488,7 @@ func main() {
     int max_steps = parse_int(runtime_env_get("NEURX_TINY_STEPS", "120"), 120)
     float learning_rate = parse_float(runtime_env_get("NEURX_TINY_LR", "0.005"))
     float weight_decay = parse_float(runtime_env_get("NEURX_TINY_WEIGHT_DECAY", "0.001"))
-    string output_dir = runtime_env_get("NEURX_TINY_OUTPUT_DIR", "artifacts/checkpoints/tiny_s_transformer")
+    string output_dir = runtime_env_get("NEURX_TINY_OUTPUT_DIR", "artifact/checkpoints/tiny_s_transformer")
     string checkpoint_path = output_dir + "/checkpoint.sckpt"
     bool resume = parse_int(runtime_env_get("NEURX_TINY_RESUME", "1"), 1) > 0
     _ = runtime_run_command_output("mkdir -p " + shell_escape(output_dir))

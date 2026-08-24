@@ -2,7 +2,7 @@ package main
 use neurx.models.formats.safetensors_embedding.{safetensors_embedding, embedding_lookup_result, load_f32_embedding, lookup_f32_embedding}
 
 func main() {
-    safetensors_embedding embedding = load_f32_embedding("artifacts/build/commands/model-format-test/embedding.safetensors", "embedding.weight")
+    safetensors_embedding embedding = load_f32_embedding("artifact/build/commands/model-format-test/embedding.safetensors", "embedding.weight")
     if !embedding.valid || embedding.rows != 2 || embedding.columns != 4 { return 1 }
     embedding_lookup_result row = lookup_f32_embedding(embedding, 1)
     if !row.ok || len(row.values) != 4 { return 1 }

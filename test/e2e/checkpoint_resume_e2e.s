@@ -65,7 +65,7 @@ func main() {
         script_dir: scriptDir,
         project_root: projectRoot,
         checkpoint_dir: projectRoot + "/checkpoint/NeurX-1.3-test",
-        test_log: projectRoot + "/artifacts/logs/checkpoint_resume_test_" + time.Now().Format("20060102_150405") + ".log",
+        test_log: projectRoot + "/artifact/logs/checkpoint_resume_test_" + time.Now().Format("20060102_150405") + ".log",
         steps_phase_1: 10,
         steps_phase_2: 20,
     }

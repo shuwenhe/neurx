@@ -338,7 +338,7 @@ int main() {
     std::string project_root = env_str("NEURX_ROOT", ".");
     std::string shard_list_file = env_str(
         "NEURX_PRETRAIN_SHARD_LIST_FILE",
-        project_root + "/artifacts/build/run_large_pretrain/shard_list.txt");
+        project_root + "/artifact/build/run_large_pretrain/shard_list.txt");
     std::string output_dir = env_str(
         "NEURX_PRETRAIN_OUTPUT_DIR",
         project_root + "/checkpoint/NeurX-1.3");

@@ -5,7 +5,7 @@ use std.io.println
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/checkpoint/NeurX-1.3")
-    string output_dir = runtime_env_get("NEURX_OUTPUT_DIR", project_root + "/artifacts/inference_output/NeurX-1.3")
+    string output_dir = runtime_env_get("NEURX_OUTPUT_DIR", project_root + "/artifact/inference_output/NeurX-1.3")
     println("╔════════════════════════════════════════════════════╗")
     println("║   NeurX-1.3 model Test (S Language Implementation) ║")
     println("╚════════════════════════════════════════════════════╝")
@@ -40,7 +40,7 @@ func main() {
     }
     println("")
     println("Phase 3: Preparing Directories...")
-    string cmd = "mkdir -p \"" + output_dir + "\" \"" + project_root + "/artifacts/logs\""
+    string cmd = "mkdir -p \"" + output_dir + "\" \"" + project_root + "/artifact/logs\""
     runtime_run_command(cmd)
     println("  ✓ Output directories created")
     println("")

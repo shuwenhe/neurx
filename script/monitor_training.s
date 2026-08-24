@@ -40,7 +40,7 @@ func main() {
     }
     artifact_log_dir := os.Getenv("ARTIFACT_LOG_DIR")
     if artifact_log_dir == "" {
-        artifact_log_dir = neurx_root + "/artifacts/logs"
+        artifact_log_dir = neurx_root + "/artifact/logs"
     }
     log_file := find_latest_log(artifact_log_dir)
     if log_file == "" {

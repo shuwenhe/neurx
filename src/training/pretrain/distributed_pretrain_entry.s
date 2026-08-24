@@ -124,7 +124,7 @@ func parse_config() training_config {
         learning_rate: 0.0002,
         total_steps: 50000,
         save_interval: 5000,
-        log_dir: "./artifacts/logs",
+        log_dir: "./artifact/logs",
     }
 }
 

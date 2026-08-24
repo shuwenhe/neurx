@@ -435,7 +435,7 @@ func generate_text_from_checkpoint(string checkpoint_path, int vocab_size, tenso
 }
 
 func main() {
-    string checkpoint_path = runtime_env_get("NEURX_INFER_CHECKPOINT_PATH", "artifacts/checkpoints/llm_s_pretrain/final_model.neurx")
+    string checkpoint_path = runtime_env_get("NEURX_INFER_CHECKPOINT_PATH", "artifact/checkpoints/llm_s_pretrain/final_model.neurx")
     string validate_only = runtime_env_get("NEURX_INFER_VALIDATE_ONLY", "")
     if !runtime_file_exists(checkpoint_path) {
         println("checkpoint file not found: " + checkpoint_path)

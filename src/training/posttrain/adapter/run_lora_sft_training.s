@@ -95,7 +95,7 @@ func main() {
     string project_root = "/home/shuwen/shuwen/train/neurx"
     string model_path = "/home/shuwen/shuwen/train/model/base-model"
     string data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl"
-    string output_dir = "/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft"
+    string output_dir = "/home/shuwen/shuwen/train/neurx/artifact/checkpoints/lora_sft"
     string format_type = "sft"
     int epochs = 3
     int feature_dim = 32

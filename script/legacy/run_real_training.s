@@ -5,7 +5,7 @@ use neurx.pretrain.llm.real_training_loop.{run_training_loop}
 func main() {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let manifest = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
-    let output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/artifacts/checkpoints/llm_training")
+    let output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/artifact/checkpoints/llm_training")
     let batch_size = clamp_int(str_to_int(runtime_env_get("NEURX_PRETRAIN_MICRO_BATCH", runtime_env_get("NEURX_LLM_BATCH_SIZE", "8")), 8), 1, 1024)
     let seq_len = clamp_int(str_to_int(runtime_env_get("NEURX_PRETRAIN_SEQ_LEN", runtime_env_get("NEURX_LLM_SEQ_LEN", "16")), 16), 1, 4096)
     let steps = clamp_int(str_to_int(runtime_env_get("NEURX_PRETRAIN_STEPS", runtime_env_get("NEURX_LLM_STEPS", "64")), 64), 1, 1000000)

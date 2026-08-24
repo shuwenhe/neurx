@@ -15,7 +15,7 @@ func main() {
     string model_name = runtime_env_get("NEURX_PRETRAIN_MODEL_NAME", "NeurX-1.3")
     string manifest_path = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
     println("[TRAINER] manifest: " + manifest_path)
-    string shard_list_file = runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", project_root + "/artifacts/build/run_large_pretrain/shard_list.sample.txt")
+    string shard_list_file = runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", project_root + "/artifact/build/run_large_pretrain/shard_list.sample.txt")
     string shard_dir = project_root + "/dataset/pretrain/shard"
     string output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/checkpoint/" + model_name)
     int batch_size = parse_int(runtime_env_get("NEURX_PRETRAIN_MICRO_BATCH", runtime_env_get("NEURX_PRETRAIN_BATCH_SIZE", "32")), 32)

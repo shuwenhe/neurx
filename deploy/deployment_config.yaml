@@ -107,7 +107,7 @@ deployment:
   enable_rest_api: true
 
   log_level: "INFO"
-  log_dir: "/home/shuwen/shuwen/neurx/artifacts/logs"
+  log_dir: "/home/shuwen/shuwen/neurx/artifact/logs"
 
   enable_metrics: true
   metrics_port: 9090
@@ -155,7 +155,7 @@ chat:
   max_input_length: 2048
 
 checkpoint:
-  checkpoint_dir: "/home/shuwen/shuwen/neurx/artifacts/checkpoints"
+  checkpoint_dir: "/home/shuwen/shuwen/neurx/artifact/checkpoints"
 
   resume_from_checkpoint: false
   checkpoint_path: ""

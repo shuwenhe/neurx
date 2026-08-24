@@ -10,7 +10,7 @@ func main() {
     println("")
     println("  integration script : " + check_path("script/legacy/run_integration_tests.s"))
     println("  core modules       : " + check_path("distributed"))
-    println("  checkpoints dir    : " + check_path("artifacts/checkpoints"))
+    println("  checkpoints dir    : " + check_path("artifact/checkpoints"))
     println("")
     println("This S entrypoint centralizes the integration test status layer.")
     0

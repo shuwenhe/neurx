@@ -19,7 +19,7 @@ struct training_config {
 func setup_training_config(string train_bin) (*training_config, error) {
     script_dir := core.ResolveScriptDir()
     neurx_dir := core.ResolveRelativePath(script_dir, "../neurx")
-    checkpoint_dir := filepath.Join(neurx_dir, "artifacts/checkpoints")
+    checkpoint_dir := filepath.Join(neurx_dir, "artifact/checkpoints")
     if train_bin == "" {
         train_bin = "/tmp/neurx_train"
     }

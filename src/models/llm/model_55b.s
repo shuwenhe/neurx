@@ -113,7 +113,7 @@ func gpt_5_5_spec_default() gpt_5_5_model_spec {
         tokenizer_manifest: "src/training/data/tokenizer.manifest",
         data_manifest: "dataset/pretrain/manifest.json",
         checkpoint_dir: "checkpoints/gpt_5_5",
-        output_dir: "artifacts/gpt_5_5",
+        output_dir: "artifact/gpt_5_5",
     }
 }
 

@@ -1,6 +1,6 @@
 dataset_manifest: "src/training/data/pretrain/mini_manifest.json"
-output_dir: "artifacts/checkpoints/run_20260518_001"
-checkpoint_root: "artifacts/checkpoints/two_t_pretrain"
+output_dir: "artifact/checkpoints/run_20260518_001"
+checkpoint_root: "artifact/checkpoints/two_t_pretrain"
 micro_batch_size: 8
 seq_len: 16
 max_steps: 64

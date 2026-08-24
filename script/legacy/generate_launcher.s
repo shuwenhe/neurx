@@ -45,7 +45,7 @@ func load_config_from_env() training_config {
     }
     cfg.nccl_id_file = os::getenv("NEURX_SHARED_NCCL_ID_FILE")
     if cfg.nccl_id_file == "" {
-        cfg.nccl_id_file = root + "/artifacts/nccl/unique_id"
+        cfg.nccl_id_file = root + "/artifact/nccl/unique_id"
     }
     cfg.master_addr = os::getenv("MASTER_ADDR")
     if cfg.master_addr == "" {
@@ -78,7 +78,7 @@ func load_config_from_env() training_config {
     }
     cfg.shard_list_file = os::getenv("NEURX_PRETRAIN_SHARD_LIST_FILE")
     if cfg.shard_list_file == "" {
-        cfg.shard_list_file = root + "/artifacts/build/run_large_pretrain/shard_list.txt"
+        cfg.shard_list_file = root + "/artifact/build/run_large_pretrain/shard_list.txt"
     }
     return cfg
 }
@@ -194,7 +194,7 @@ func generate_launcher_script(training_config cfg, []string hosts) string {
     script = script + "    cmd=(\"env\" \"${base_env[@]}\" \"RANK=$rank\" \"LOCAL_RANK=$local\"\n"
     script = script + "      \"CUDA_VISIBLE_DEVICES=$local\"\n"
     script = script + "      \"NEURX_PRETRAIN_RESUME_FROM=$ckpt_path\"\n"
-    script = script + "      \"$ROOT/artifacts/build/cuda_train/neurx_cuda_train_bridge\")\n"
+    script = script + "      \"$ROOT/artifact/build/cuda_train/neurx_cuda_train_bridge\")\n"
     script = script + "    echo \"[multinode] rank=$rank host=$host local_rank=$local checkpoint=$ckpt_path\"\n"
     script = script + "    if [[ \"$host\" == \"localhost\" || \"$host\" == \"127.0.0.1\" || \"$host\" == \"$(hostname)\" ]]; then\n"
     script = script + "      \"${cmd[@]}\" 2>&1 | tee -a \"${OUT}/rank_${rank}.log\" &\n"

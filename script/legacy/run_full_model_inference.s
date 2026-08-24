@@ -30,7 +30,7 @@ func main() {
     println("")
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/checkpoint/NeurX-1.3")
-    let output_dir = runtime_env_get("NEURX_INFER_OUTPUT_DIR", project_root + "/artifacts/inference_output")
+    let output_dir = runtime_env_get("NEURX_INFER_OUTPUT_DIR", project_root + "/artifact/inference_output")
     println("Configuration:")
     println("  Project root     : " + project_root)
     println("  checkpoint dir   : " + checkpoint_dir)

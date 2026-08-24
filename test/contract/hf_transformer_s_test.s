@@ -55,7 +55,7 @@ func main() {
     if result.hidden[0] == second[0] { return 1 }
     hf_model_config parsed = parse_hf_config("{\"hidden_size\":4,\"intermediate_size\":4,\"num_attention_heads\":2,\"num_key_value_heads\":1,\"num_hidden_layers\":2,\"vocab_size\":2,\"max_position_embeddings\":128,\"rms_norm_eps\":0.00001,\"rope_theta\":10000}")
     if !parsed.valid || parsed.layers != 2 || parsed.head_dim != 2 { println("FAIL config"); return 1 }
-    safetensors_embedding embedding = load_f32_embedding("artifacts/build/commands/native-test/embedding.safetensors", "embedding.weight")
+    safetensors_embedding embedding = load_f32_embedding("artifact/build/commands/native-test/embedding.safetensors", "embedding.weight")
     f32_tensor_result embedding_values = read_f32_tensor(embedding)
     hf_model_weights model = hf_model_weights { valid: true, config: parsed, embedding: embedding, input_norm: ones(8), q_proj: matrix(8, 4, 1.0, 0.0), k_proj: matrix(4, 4, 1.0, 0.0), v_proj: matrix(4, 4, 1.0, 0.0), o_proj: matrix(8, 4, 1.0, 0.0), post_norm: ones(8), gate_proj: matrix(8, 4, 1.0, 0.0), up_proj: matrix(8, 4, 1.0, 0.0), down_proj: matrix(8, 4, 1.0, 0.0), final_norm: ones(4), lm_head: embedding_values.values, error_code: "" }
     []int prompt = []int{cap: 2}

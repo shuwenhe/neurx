@@ -1,4 +1,4 @@
 max_steps: 100
 memory_size: 4096
 dataset_manifest: "src/training/data/agent/memory/mini_manifest.json"
-output_dir: "artifacts/checkpoints/agent/memory"
+output_dir: "artifact/checkpoints/agent/memory"

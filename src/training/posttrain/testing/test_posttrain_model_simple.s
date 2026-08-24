@@ -75,7 +75,7 @@ func test_data_files() string {
 }
 
 func test_output_directory() string {
-    string output_path = runtime_env_get("NEURX_TEST_OUTPUT_DIR", "/home/shuwen/shuwen/neurx/artifacts/posttrain_test")
+    string output_path = runtime_env_get("NEURX_TEST_OUTPUT_DIR", "/home/shuwen/shuwen/neurx/artifact/posttrain_test")
     return "✓ [setup] output_directory: PASSED\n  → Output directory configured: " + output_path
 }
 

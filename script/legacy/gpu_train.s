@@ -64,7 +64,7 @@ func main() {
     }
     println("[GPU] Context initialized successfully")
     println("")
-    string shard_list_file = runtime_env_get("NEURX_SHARD_LIST", "artifacts/build/run_large_pretrain/shard_list.txt")
+    string shard_list_file = runtime_env_get("NEURX_SHARD_LIST", "artifact/build/run_large_pretrain/shard_list.txt")
     if !runtime_file_exists(shard_list_file) {
         println("[ERROR] Shard list not found: " + shard_list_file)
         return

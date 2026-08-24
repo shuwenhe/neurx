@@ -23,7 +23,7 @@ func main() {
     println("[INFO] CUDA Version: " + cuda_version)
     println("[INFO] GPU Architecture: sm_" + gpu_arch)
     println("")
-    string build_dir = "./artifacts/build/cuda_kernels"
+    string build_dir = "./artifact/build/cuda_kernels"
     create_dir(build_dir)
     string cuda_home = get_cuda_home()
     string cuda_lib = cuda_home + "/lib64"

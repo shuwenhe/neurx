@@ -287,7 +287,7 @@ func test_output_directory() test_result {
     print_header("[Test 6] Output Directory Structure")
     string output_dir = runtime_env_get("NEURX_TEST_OUTPUT_DIR")
     if output_dir == "" {
-        output_dir = "/home/shuwen/shuwen/neurx/artifacts/posttrain_test"
+        output_dir = "/home/shuwen/shuwen/neurx/artifact/posttrain_test"
     }
     test_result result
     result.name = "directory_structure"

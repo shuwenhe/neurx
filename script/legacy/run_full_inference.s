@@ -5,9 +5,9 @@ use std.io.println
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string mode = runtime_env_get("NEURX_INFER_MODE", "batch")
-    string checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/artifacts/checkpoints/llm_training")
-    string output_dir = runtime_env_get("NEURX_OUTPUT_DIR", project_root + "/artifacts/inference_output")
-    string log_dir = runtime_env_get("NEURX_LOG_DIR", project_root + "/artifacts/logs")
+    string checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/artifact/checkpoints/llm_training")
+    string output_dir = runtime_env_get("NEURX_OUTPUT_DIR", project_root + "/artifact/inference_output")
+    string log_dir = runtime_env_get("NEURX_LOG_DIR", project_root + "/artifact/logs")
     println("NeurX Full Inference Pipeline (S Lang)")
     println("")
     println("Project root  : " + project_root)

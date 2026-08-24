@@ -4,7 +4,7 @@ use std.io.println
 
 func main() {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    let output_dir = runtime_env_get("NEURX_S_PRETRAIN_OUTPUT_DIR", project_root + "/artifacts/checkpoints/llm_s_pretrain")
+    let output_dir = runtime_env_get("NEURX_S_PRETRAIN_OUTPUT_DIR", project_root + "/artifact/checkpoints/llm_s_pretrain")
     let manifest = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
     let steps = runtime_env_get("NEURX_S_PRETRAIN_STEPS", "50")
     let warmup = runtime_env_get("NEURX_S_PRETRAIN_WARMUP_STEPS", "10")

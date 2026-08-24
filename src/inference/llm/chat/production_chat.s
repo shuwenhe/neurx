@@ -310,10 +310,10 @@ func main() {
         return 1
     }
 
-    string default_backend = root + "/artifacts/build/production_s_inference/gpu_backend.ir"
+    string default_backend = root + "/artifact/build/production_s_inference/gpu_backend.ir"
     string gpu_enhanced = runtime_env_get("NEURX_GPU_ENHANCED", "false")
     if gpu_enhanced == "true" {
-        default_backend = root + "/artifacts/build/production_s_inference/gpu_backend_enhanced.ir"
+        default_backend = root + "/artifact/build/production_s_inference/gpu_backend_enhanced.ir"
     }
 
     string backend = runtime_env_get(
@@ -352,7 +352,7 @@ func main() {
         }
     }
     if !backend_ready(host, port_number) {
-        string runner = runtime_env_get("NEURX_S_RUNNER_BIN", root + "/artifacts/build/s_runner/s_ir_runner")
+        string runner = runtime_env_get("NEURX_S_RUNNER_BIN", root + "/artifact/build/s_runner/s_ir_runner")
         string backend_cmd = backend
         if ends_with(backend, ".ir") {
             backend_cmd = runner + " " + shell_escape(backend)

@@ -17,7 +17,7 @@ struct sft_state {
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string data_path = runtime_env_get("NEURX_SFT_DATA_FILE", project_root + "/data/sft/instruction_data.jsonl")
-    string output_dir = runtime_env_get("NEURX_SFT_OUTPUT_DIR", project_root + "/artifacts/checkpoints/sft")
+    string output_dir = runtime_env_get("NEURX_SFT_OUTPUT_DIR", project_root + "/artifact/checkpoints/sft")
     int epochs = parse_int(runtime_env_get("NEURX_SFT_EPOCHS", "3"), 3)
     int batch_size = parse_int(runtime_env_get("NEURX_SFT_BATCH_SIZE", "4"), 4)
     float learning_rate = parse_float(runtime_env_get("NEURX_SFT_LR", "0.001"))

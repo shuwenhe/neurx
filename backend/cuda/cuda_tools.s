@@ -68,7 +68,7 @@ func verify(string root) int {
     println("[OK] CUDA directory: " + root + "/cuda")
     runtime_run_command("find " + shell_escape(root + "/cuda") + " -maxdepth 1 \\( -name '*.cu' -o -name '*.h' -o -name '*.s' -o -name 'CMakeLists.txt' \\) -type f")
     header("Compilation Test")
-    string test_dir = root + "/artifacts/build/cuda_verify"
+    string test_dir = root + "/artifact/build/cuda_verify"
     runtime_make_dirs(test_dir)
     string test_src = test_dir + "/test.cu"
     runtime_write_text_file(test_src, "#include <cuda_runtime.h>\n#include <stdio.h>\n__global__ void test_kernel(data* float) { int idx = blockIdx.x * blockDim.x + threadIdx.x; data[idx] = 42.0f; }\nint main() { printf(\"CUDA test kernel compiled successfully\\n\"); return 0; }\n")
@@ -104,7 +104,7 @@ func build_cmake_runtime(string root) int {
 func build_runtime_library(string root) int {
     header("Build CUDA Runtime Shared Library")
     if !require_command("nvcc", "Install NVIDIA CUDA Toolkit first.") { return 1 }
-    string build_dir = root + "/artifacts/build/cuda_runtime"
+    string build_dir = root + "/artifact/build/cuda_runtime"
     runtime_make_dirs(build_dir)
     string arch = detect_gpu_arch("89")
     string obj = build_dir + "/cuda_runtime_binding.o"
@@ -126,7 +126,7 @@ func build_runtime_library(string root) int {
 func build_runtime_alt(string root) int {
     header("Build CUDA Runtime Alternative")
     if !require_command("nvcc", "Install NVIDIA CUDA Toolkit first.") { return 1 }
-    string build_dir = root + "/artifacts/build/cuda_runtime"
+    string build_dir = root + "/artifact/build/cuda_runtime"
     runtime_make_dirs(build_dir)
     string lib = build_dir + "/libcuda_runtime.so"
     string code = "#include <cuda_runtime.h>\n#include <cublas_v2.h>\n#include <stdint.h>\nextern \"C\" int64_t cuda_malloc(int size) { void *ptr = 0; cudaMalloc(&ptr, size); return (int64_t)ptr; }\nextern \"C\" int cuda_free(int64_t ptr) { cudaFree((void*)ptr); return 0; }\nextern \"C\" int cuda_device_synchronize() { cudaDeviceSynchronize(); return 0; }\nextern \"C\" int64_t cublas_create_api() { cublasHandle_t h; cublasCreate_v2(&h); return (int64_t)h; }\nextern \"C\" int cublas_destroy_api(int64_t h) { cublasDestroy_v2((cublasHandle_t)h); return 0; }\n"
@@ -141,7 +141,7 @@ func build_runtime_alt(string root) int {
 func build_kernels(string root, bool simple) int {
     header("Build CUDA Kernels")
     if !require_command("nvcc", "Install NVIDIA CUDA Toolkit first.") { return 1 }
-    string build_dir = root + "/artifacts/build/cuda_kernels"
+    string build_dir = root + "/artifact/build/cuda_kernels"
     runtime_make_dirs(build_dir)
     string arch = detect_gpu_arch("89")
     string src = root + "/cuda/cuda_kernels.cu"

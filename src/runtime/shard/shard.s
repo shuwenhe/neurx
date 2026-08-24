@@ -101,8 +101,8 @@ func default_manifest(string root) string {
 func run_wikipedia() int {
     var root = default_neurx_root()
     var script_dir = env_get("NEURX_SHARD_SCRIPT_DIR", root + "/shard")
-    var build_dir = root + "/artifacts/build/shard"
-    var runner_bin = root + "/artifacts/build/s_runner/s_ir_runner"
+    var build_dir = root + "/artifact/build/shard"
+    var runner_bin = root + "/artifact/build/s_runner/s_ir_runner"
     var compiler = env_get("S_COMPILER", "/home/shuwen/s/bin/s")
     var input = env_get("ENWIKI_BZ2_FILE", root + "/dataset/pretrain/raw/enwiki-latest-pages-articles.xml.bz2")
     var output_dir = env_get("ENWIKI_SHARD_DIR", root + "/dataset/pretrain/shard")

@@ -20,7 +20,7 @@ func default_training_config() real_training_config {
     real_training_config {
         manifest_path: runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json"),
         data_dir: data_root,
-        output_dir: runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/artifacts/checkpoints/llm_training"),
+        output_dir: runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/artifact/checkpoints/llm_training"),
         batch_size: clamp_int(str_to_int(runtime_env_get("NEURX_PRETRAIN_MICRO_BATCH", runtime_env_get("NEURX_LLM_BATCH_SIZE", "8")), 8), 1, 1024),
         seq_length: clamp_int(str_to_int(runtime_env_get("NEURX_PRETRAIN_SEQ_LEN", runtime_env_get("NEURX_LLM_SEQ_LEN", "16")), 16), 1, 4096),
         vocab_size: clamp_int(str_to_int(runtime_env_get("NEURX_LLM_VOCAB_SIZE", "50257"), 50257), 256, 262144),

@@ -45,7 +45,7 @@ func create_default_config() download_config {
         verify_checksums: true,
         resume_download: true,
         max_retries: 3,
-        log_file: "/app/shuwen/neurx/artifacts/download_model.log"
+        log_file: "/app/shuwen/neurx/artifact/download_model.log"
     }
 }
 

@@ -28,7 +28,7 @@ func main() {
     string min_lr = default_if_empty(yaml_value(config, "min_lr"), "0.00003")
     string weight_decay = default_if_empty(yaml_value(config, "weight_decay"), "0.1")
     string dataset_manifest = default_if_empty(yaml_value(config, "dataset_manifest"), "src/training/data/pretrain/mini_manifest.json")
-    string output_dir = default_if_empty(yaml_value(config, "output_dir"), "artifacts/checkpoints/run_20260518_001")
+    string output_dir = default_if_empty(yaml_value(config, "output_dir"), "artifact/checkpoints/run_20260518_001")
     string checkpoint_root = default_if_empty(yaml_value(config, "checkpoint_root"), output_dir)
     string log_interval = default_if_empty(yaml_value(config, "log_interval"), "8")
     string eval_interval = default_if_empty(yaml_value(config, "eval_interval"), "16")

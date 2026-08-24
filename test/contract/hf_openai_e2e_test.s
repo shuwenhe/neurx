@@ -18,7 +18,7 @@ func contains(string text, string pattern) bool {
 }
 
 func main() {
-    string model_dir = "artifacts/build/commands/native-test/hf-tiny"
+    string model_dir = "artifact/build/commands/native-test/hf-tiny"
     hf_model_weights model = load_hf_model(model_dir)
     hf_bpe_tokenizer tokenizer = load_hf_bpe_tokenizer(model_dir)
     if !model.valid || !tokenizer.valid || tokenizer.eos_id != 6 || !tokenizer.byte_level_trim_offsets { return 1 }

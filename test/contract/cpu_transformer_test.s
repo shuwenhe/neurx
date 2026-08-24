@@ -11,7 +11,7 @@ func main() {
     if cpu_abs(normalized[0] - 0.848528) > 0.001 { return 1 }
     if cpu_abs(normalized[1] - 1.131371) > 0.001 { return 1 }
 
-    safetensors_embedding embedding = load_f32_embedding("artifacts/build/commands/native-test/embedding.safetensors", "embedding.weight")
+    safetensors_embedding embedding = load_f32_embedding("artifact/build/commands/native-test/embedding.safetensors", "embedding.weight")
     []int tokens = []int{cap: 2}
     tokens[0] = 1
     tokens[1] = 0

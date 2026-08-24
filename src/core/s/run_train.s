@@ -5,7 +5,7 @@ use std.io.println
 func main() {
     string train_bin = runtime_env_get("NEURX_TRAIN_BIN", "/tmp/neurx_train")
     string script_dir = runtime_env_get("NEURX_ROOT", ".")
-    string checkpoint_dir = script_dir + "/artifacts/checkpoints"
+    string checkpoint_dir = script_dir + "/artifact/checkpoints"
     _ = runtime_run_command("mkdir -p " + runtime_shell_escape(checkpoint_dir))
     println("========================================")
     println("NeurX Training Pipeline")
@@ -33,11 +33,11 @@ func main() {
     }
     println("")
     println("--- Generating checkpoint Files ---")
-    string materializer = runtime_env_get("NEURX_MATERIALIZE_BIN", script_dir + "/artifacts/build/materialize_llm_checkpoint")
+    string materializer = runtime_env_get("NEURX_MATERIALIZE_BIN", script_dir + "/artifact/build/materialize_llm_checkpoint")
     string materializer_source = script_dir + "/tool/materialize_llm_checkpoint.s"
     string compiler = runtime_env_get("S_COMPILER", script_dir + "/../s/.local/bin/s")
     if !runtime_run_command("test -x " + runtime_shell_escape(materializer)).ok {
-        _ = runtime_run_command("mkdir -p " + runtime_shell_escape(script_dir + "/artifacts/build"))
+        _ = runtime_run_command("mkdir -p " + runtime_shell_escape(script_dir + "/artifact/build"))
         string materializer_ir = materializer + ".ir"
         string compiler_cwd = runtime_env_get("S_COMPILER_EMIT_CWD", script_dir + "/../s")
         string compile_cmd = "cd " + runtime_shell_escape(script_dir)

@@ -93,7 +93,7 @@ func main() {
     println("Step |  Loss   | Best    | GradNorm | LR       | Note")
     println("-----|---------|---------|----------|----------|-----")
     IO.TrainState state = IO.initial_train_state()
-    string output_dir = "artifacts/checkpoints"
+    string output_dir = "artifact/checkpoints"
     int step = 0
     while step < cfg.max_steps {
         []int input_ids = get_batch(train_data, step, cfg.batch_size * cfg.seq_len)

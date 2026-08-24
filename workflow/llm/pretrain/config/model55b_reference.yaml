@@ -1,6 +1,6 @@
 dataset_manifest: "src/training/data/pretrain/mini_manifest.json"
-output_dir: "artifacts/checkpoints/gpt55_reference_run"
-checkpoint_root: "artifacts/checkpoints/gpt55_reference_run"
+output_dir: "artifact/checkpoints/gpt55_reference_run"
+checkpoint_root: "artifact/checkpoints/gpt55_reference_run"
 micro_batch_size: 4
 seq_len: 4096
 max_steps: 20000

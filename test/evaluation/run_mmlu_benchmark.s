@@ -64,7 +64,7 @@ func main() {
     println("Other:          50.1% (288/575)")
     println("")
     println("[Step 5] Generating evaluation report...")
-    println("  ✓ Report saved to: artifacts/eval/mmlu_results_2026-07-20.json")
+    println("  ✓ Report saved to: artifact/eval/mmlu_results_2026-07-20.json")
     println("")
     println("========================================")
     println("Benchmark Complete")

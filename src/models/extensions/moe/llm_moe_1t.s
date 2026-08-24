@@ -156,7 +156,7 @@ func moe_1t_training_layout(moe_1t_scale_profile scale, moe_1t_parallel_plan par
         tokenizer_path: "src/training/data/tokenizer.manifest",
         data_manifest_path: "dataset/pretrain/manifest.json",
         checkpoint_dir: "checkpoints/moe_1t",
-        output_dir: "artifacts/moe_1t",
+        output_dir: "artifact/moe_1t",
         warmup_steps: warmup_steps,
         total_steps: total_steps,
         save_steps: save_steps,

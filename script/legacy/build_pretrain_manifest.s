@@ -21,7 +21,7 @@ func main() {
     let shard_dir = runtime_env_get("NEURX_PRETRAIN_SHARD_DIR", project_root + "/dataset/pretrain/shard")
     let manifest_file = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
     let force_rebuild = runtime_env_get("NEURX_PRETRAIN_REBUILD_MANIFEST", "0")
-    let work_dir = project_root + "/artifacts/build/build_pretrain_manifest"
+    let work_dir = project_root + "/artifact/build/build_pretrain_manifest"
     let shard_list_file = work_dir + "/shard_list.txt"
     let doc_count_file = work_dir + "/doc_count.txt"
     let size_bytes_file = work_dir + "/size_bytes.txt"

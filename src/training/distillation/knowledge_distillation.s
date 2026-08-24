@@ -43,7 +43,7 @@ func default_distillation_config() distillation_config {
         compression_ratio: 4.0,
         teacher_name: "teacher",
         student_name: "student",
-        output_dir: "artifacts/distillation",
+        output_dir: "artifact/distillation",
     }
 }
 

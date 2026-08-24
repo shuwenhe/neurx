@@ -74,7 +74,7 @@ func test_cuda_binary(string bin) {
 
 func main() {
     curdir := "/home/shuwen/shuwen/train/neurx"
-    cuda_train_bin := curdir + "/artifacts/build/cuda_train/neurx_cuda_train_bridge"
+    cuda_train_bin := curdir + "/artifact/build/cuda_train/neurx_cuda_train_bridge"
     io.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     io.Println("🔍 NeurX CUDA Training Environment Diagnostic")
     io.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -91,7 +91,7 @@ func main() {
     check_required_files([]string{
         curdir + "/data/corpus/vocab.json",
         curdir + "/data/corpus/merges.txt",
-        curdir + "/artifacts/build/run_large_pretrain/shard_list.txt",
+        curdir + "/artifact/build/run_large_pretrain/shard_list.txt",
     })
     io.Println("")
     io.Println("📌 Step 4: Testing CUDA binary (timeout 30s)...")

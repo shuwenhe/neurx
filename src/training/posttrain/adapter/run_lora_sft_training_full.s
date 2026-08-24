@@ -107,7 +107,7 @@ func load_config() training_config {
     cfg.base_model_path = "/home/shuwen/shuwen/train/model/base-model"
     cfg.train_data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl"
     cfg.val_data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/val.jsonl"
-    cfg.output_dir = "/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft"
+    cfg.output_dir = "/home/shuwen/shuwen/train/neurx/artifact/checkpoints/lora_sft"
     cfg.num_epochs = 3
     cfg.batch_size = 32
     cfg.gradient_accumulation_steps = 1
@@ -271,7 +271,7 @@ func main() {
     println("  complete轮number: " + int_to_str(metrics.current_epoch))
     println("")
     println("💾 outputfile:")
-    println("  LoRA Checkpoint: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/")
+    println("  LoRA Checkpoint: /home/shuwen/shuwen/train/neurx/artifact/checkpoints/lora_sft/")
     println("    • adapter_model.safetensors")
     println("    • adapter_config.json")
     println("")

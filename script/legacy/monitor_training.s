@@ -3,7 +3,7 @@ use neurx.runtime.io.{runtime_env_get, runtime_run_command_output, runtime_shell
 
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/app/shuwen/neurx")
-    string log_dir = project_root + "/artifacts/logs"
+    string log_dir = project_root + "/artifact/logs"
     string latest_log = latest_phase2a_log(log_dir)
     println("==========================================")
     println("NeurX PostTrain Training Monitor (S)")

@@ -40,11 +40,11 @@ func default_model_deployment_config() model_deployment_config {
         cluster_name: "neurx-prod",
         image_name: "neurx:latest",
         backend: "nccl",
-        export_dir: "artifacts/export",
-        deployment_dir: "artifacts/deployment",
-        checkpoint_dir: "artifacts/checkpoints",
+        export_dir: "artifact/export",
+        deployment_dir: "artifact/deployment",
+        checkpoint_dir: "artifact/checkpoints",
         data_dir: "data",
-        output_dir: "artifacts/results",
+        output_dir: "artifact/results",
         num_nodes: 2,
         gpus_per_node: 4,
         batch_size_per_gpu: 16,
@@ -224,7 +224,7 @@ func model_deployment_summary_text(model_deployment_config config, model_deploym
 func prepare_model_deployment_bundle(model_deployment_config config) model_deployment_artifact {
     string root = trim(config.deployment_dir)
     if root == "" {
-        root = "artifacts/deployment"
+        root = "artifact/deployment"
     }
     runtime_make_dirs(root)
     model_deployment_artifact artifact = model_deployment_artifact_paths(root)

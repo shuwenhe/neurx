@@ -52,7 +52,7 @@ func compile_one(string compiler, string script_dir, string build_dir, string sh
 
 func main() {
     string script_dir = getenv("SHARD_SCRIPT_DIR", ".")
-    string build_dir = getenv("SHARD_BUILD_DIR", "../artifacts/build/shard")
+    string build_dir = getenv("SHARD_BUILD_DIR", "../artifact/build/shard")
     string compiler = getenv("S_COMPILER", "/home/shuwen/s/bin/s")
     println("Build directory: " + build_dir)
     println("Compiler: " + compiler)

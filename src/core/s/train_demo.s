@@ -120,8 +120,8 @@ func format_checkpoint_content(int step, float loss, float best_loss, int best_s
 }
 
 func save_checkpoint_to_file(int step, float loss, float best_loss, int best_step, bool trained, int param_count, string name) string {
-    string file_path = "artifacts/checkpoints/" + name + ".neurx"
-    string manifest_path = "artifacts/checkpoints/latest_checkpoint.txt"
+    string file_path = "artifact/checkpoints/" + name + ".neurx"
+    string manifest_path = "artifact/checkpoints/latest_checkpoint.txt"
     string content = format_checkpoint_content(step, loss, best_loss, best_step, trained, param_count)
     var r1 = fs_write(file_path, content)
     if r1.is_ok() {
@@ -178,7 +178,7 @@ func run_training(training_config tconfig) training_context {
             " seq_len=", tconfig.seq_len,
             " steps=", tconfig.max_steps,
             " lr=", tconfig.learning_rate)
-    println("Output: artifacts/checkpoints/")
+    println("Output: artifact/checkpoints/")
     println("----------------------------------------")
     model_config mconfig = new_model_config()
     training_state state = new_training_state()
@@ -233,10 +233,10 @@ func main() {
     println("status:        ", result.trained)
     println("")
     println("Files saved:")
-    println("  artifacts/checkpoints/final_model.neurx")
-    println("  artifacts/checkpoints/best_model.neurx")
-    println("  artifacts/checkpoints/step_*.neurx")
-    println("  artifacts/checkpoints/latest_checkpoint.txt")
+    println("  artifact/checkpoints/final_model.neurx")
+    println("  artifact/checkpoints/best_model.neurx")
+    println("  artifact/checkpoints/step_*.neurx")
+    println("  artifact/checkpoints/latest_checkpoint.txt")
     println("========================================")
     println("")
     println("NeurX Training Complete!")

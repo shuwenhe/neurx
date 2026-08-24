@@ -20,7 +20,7 @@ struct compression_release_artifact {
 
 func default_compression_release_config() compression_release_config {
     compression_release_config {
-        release_dir: "artifacts/release",
+        release_dir: "artifact/release",
         quantization_manifest_path: "",
         distillation_manifest_path: "",
         export_config: model_export_config {},
@@ -31,7 +31,7 @@ func default_compression_release_config() compression_release_config {
 func prepare_compression_release(compression_release_config config) compression_release_artifact {
     string root = trim(config.release_dir)
     if root == "" {
-        root = "artifacts/release"
+        root = "artifact/release"
     }
     runtime_make_dirs(root)
     model_export_config export_cfg = config.export_config

@@ -16,8 +16,8 @@ func main() {
     let device = get_env_or("NEURX_INFER_DEVICE", "gpu")
     let port = get_env_or("NEURX_S_PORT", "18084")
 
-    let backend_ir = neurx_root + "/artifacts/build/production_s_inference/gpu_backend.ir"
-    let s_runner = neurx_root + "/artifacts/build/s_runner/s_ir_runner"
+    let backend_ir = neurx_root + "/artifact/build/production_s_inference/gpu_backend.ir"
+    let s_runner = neurx_root + "/artifact/build/s_runner/s_ir_runner"
 
     println("Starting backend process...")
 

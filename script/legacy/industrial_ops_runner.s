@@ -472,7 +472,7 @@ func ops_print_help() {
 }
 pub func main([]string args) i32 {
     parsed := ops_parse_args(args)
-    output_dir := ops_get_arg(parsed.options, "output-dir", "artifacts/industrial_ops")
+    output_dir := ops_get_arg(parsed.options, "output-dir", "artifact/industrial_ops")
     match parsed.command {
         case "dpo":
             preference := ops_get_arg(parsed.options, "preference", "dataset/dpo/preferences.jsonl")

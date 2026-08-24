@@ -47,7 +47,7 @@ func parse_args() launcher_config {
         micro_batch_size: 8,
         gradient_accum_steps: 8,
         num_epochs: 1,
-        log_dir: "./artifacts/logs/distributed_pretrain",
+        log_dir: "./artifact/logs/distributed_pretrain",
         log_file: "",
         verbose: true,
     }
@@ -88,7 +88,7 @@ func setup_directories(launcher_config config) bool {
         print("[ERROR] Failed to create checkpoint directory")
         return false
     }
-    if !create_directory("artifacts/logs") {
+    if !create_directory("artifact/logs") {
         print("[ERROR] Failed to create artifacts directory")
         return false
     }
