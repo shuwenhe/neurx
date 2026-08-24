@@ -2260,7 +2260,7 @@ industrial-ops: build-industrial-ops
 build-s-ir-runner: check-bash
 	@echo "Building generic S IR runner..."
 	@mkdir -p $(S_RUNNER_BUILD_DIR)
-	@'$(CC)' -D_GNU_SOURCE -std=c11 -O2 -Wall -Wextra -Werror \
+	@'$(CC)' -D_GNU_SOURCE -D'SEED_COMPILE_ONLY' -std=c11 -O2 -Wall -Wextra -Werror \
 		-I'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed' \
 		-o '$(S_RUNNER_BIN)' \
 		'$(S_RUNNER_C_SRC)' \
