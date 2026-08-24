@@ -1256,12 +1256,41 @@ web-ui: build-production-s-inference
 	@NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(WEB_UI_SERVER_IR)'
 
-backend: build-production-s-inference
-	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' -o -f '$(CHAT_MODEL_PATH)/model.safetensors.index.json' || { \
-		echo "Model weights not found in $(CHAT_MODEL_PATH)"; \
+backend: build-s-ir-runner build-s-gpu-cuda-runtime $(PRODUCTION_S_GPU_BACKEND_ENHANCED)
+	@test -f '/model/Qwen2.5-0.5B-Instruct/model.safetensors' || { \
+		echo "Model weights not found in /model/Qwen2.5-0.5B-Instruct"; \
 		exit 1; \
 	}
-	@NEURX_ROOT='$(CURDIR_UNIX)' NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' '$(S_RUNNER_BIN)' '$(START_BACKEND_IR)'
+	@if curl -sf 'http://127.0.0.1:$(GPU_BACKEND_PORT)/health' >/dev/null 2>&1; then \
+		echo "✅ GPU backend is already running on port $(GPU_BACKEND_PORT)"; \
+		exit 0; \
+	fi; \
+	echo "🚀 Starting NeurX GPU Backend on port $(GPU_BACKEND_PORT)..."; \
+	LD_PRELOAD='$(S_GPU_RUNTIME_LIB)' \
+	NEURX_ROOT='$(CURDIR_UNIX)' \
+	NEURX_MODEL_DIR='/model/Qwen2.5-0.5B-Instruct' \
+	NEURX_INFER_DEVICE='gpu' \
+	NEURX_CUDA_DEVICE='0' \
+	NEURX_S_HOST='127.0.0.1' \
+	NEURX_S_PORT='$(GPU_BACKEND_PORT)' \
+	nohup '$(S_RUNNER_BIN)' '$(PRODUCTION_S_GPU_BACKEND_ENHANCED)' \
+		>'/tmp/neurx_gpu_backend.log' 2>&1 < /dev/null & \
+	backend_pid=$$!; \
+	printf '%s\n' "$$backend_pid" > '$(GPU_BACKEND_PID_FILE)'; \
+	echo "⏳ Loading model onto GPU (PID $$backend_pid)..."; \
+	ready=0; \
+	for attempt in $$(seq 1 90); do \
+		if curl -sf 'http://127.0.0.1:$(GPU_BACKEND_PORT)/health' >/dev/null 2>&1; then ready=1; break; fi; \
+		if ! kill -0 "$$backend_pid" 2>/dev/null; then break; fi; \
+		sleep 1; \
+	done; \
+	if [ "$$ready" -ne 1 ]; then \
+		echo "❌ GPU backend failed to become ready"; \
+		tail -50 '/tmp/neurx_gpu_backend.log'; \
+		exit 1; \
+	fi; \
+	echo "✅ GPU backend is ready: http://127.0.0.1:$(GPU_BACKEND_PORT)"; \
+	echo "📋 Log: tail -f /tmp/neurx_gpu_backend.log"
 
 backend-stop:
 	@echo "🛑 Stopping NeurX GPU Backend..."

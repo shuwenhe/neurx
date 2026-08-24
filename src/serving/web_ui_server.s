@@ -38,7 +38,7 @@ func get_html() string {
     html = html + "</head>\n"
     html = html + "<body>\n"
     html = html + "<div class=\"container\">\n"
-    html = html + "<h1>🧠 NeurX AI Inference Engine</h1>\n"
+    html = html + "<h1>🧠 NeurX AI Training & Inference Engine</h1>\n"
     html = html + "<div class=\"form-group\">\n"
     html = html + "<label for=\"prompt\">Prompt:</label>\n"
     html = html + "<textarea id=\"prompt\" rows=\"6\" placeholder=\"Enter your prompt here...\">What is artificial intelligence?</textarea>\n"

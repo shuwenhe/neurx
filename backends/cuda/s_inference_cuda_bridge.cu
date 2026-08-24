@@ -1,5 +1,5 @@
 #include "hf_decoder_cuda.h"
-#include "../runtime/model/bpe_tokenizer.h"
+#include "../../src/runtime/model/bpe_tokenizer.h"
 
 #include <cuda_runtime.h>
 
