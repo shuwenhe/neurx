@@ -95,7 +95,7 @@ func new_scalar_value(int id, string dtype, string name) scalar_value {
     }
 }
 
-func (vt: &value_type) total_elements() int {
+func (value_type* vt) total_elements() int {
     int total = 1
     for i in vt.shape {
         total = total * i
@@ -103,7 +103,7 @@ func (vt: &value_type) total_elements() int {
     total
 }
 
-func (vt: &value_type) memory_bytes() int {
+func (value_type* vt) memory_bytes() int {
     int element_size = match vt.dtype {
         "float32": 4,
         "int32": 4,
@@ -114,7 +114,7 @@ func (vt: &value_type) memory_bytes() int {
     vt.total_elements() * element_size
 }
 
-func (vt: &value_type) shape_str() string {
+func (value_type* vt) shape_str() string {
     string s = "["
     for i, dim in vt.shape {
         if i > 0 {

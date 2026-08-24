@@ -12,7 +12,7 @@ struct fusion_error {
 
 struct weight_update {
     module_name: string
-    delta: &vec[vec[float]]
+    delta: *vec[vec[float]]
     scale: float
 }
 
@@ -33,8 +33,8 @@ func weight_fusion_engine::new(lora_rank: int, lora_alpha: float) weight_fusion_
 }
 
 func compute_lora_delta(
-    lora_a: &vec[vec[float]],
-    lora_b: &vec[vec[float]],
+    lora_a: *vec[vec[float]],
+    lora_b: *vec[vec[float]],
     scaling: float
 ) result[&vec[vec[float]], fusion_error] {
     if lora_a.len() == 0 || lora_b.len() == 0 {
@@ -88,10 +88,10 @@ func compute_lora_delta(
     result::ok(delta)
 }
 
-func (engine: &mut weight_fusion_engine) fuse_weights(
+func (mut weight_fusion_engine* engine) fuse_weights(
     module_name: string,
-    original_weights: &vec[vec[float]],
-    lora_delta: &vec[vec[float]]
+    original_weights: *vec[vec[float]],
+    lora_delta: *vec[vec[float]]
 ) result[(), fusion_error] {
     if original_weights.len() != lora_delta.len() {
         return result::err(fusion_error {
@@ -129,10 +129,10 @@ func (engine: &mut weight_fusion_engine) fuse_weights(
     result::ok(())
 }
 
-func (engine: &mut weight_fusion_engine) unfuse_weights(
+func (mut weight_fusion_engine* engine) unfuse_weights(
     module_name: string,
-    fused_weights: &vec[vec[float]],
-    lora_delta: &vec[vec[float]]
+    fused_weights: *vec[vec[float]],
+    lora_delta: *vec[vec[float]]
 ) result[&vec[vec[float]], fusion_error] {
     if fused_weights.len() != lora_delta.len() {
         return result::err(fusion_error {
@@ -163,17 +163,17 @@ func (engine: &mut weight_fusion_engine) unfuse_weights(
     result::ok(original)
 }
 
-func (engine: &weight_fusion_engine) get_fused_weights(
+func (weight_fusion_engine* engine) get_fused_weights(
     module_name: string
 ) option[&vec[vec[float]]] {
     engine.fused.get(module_name)
 }
 
-func (engine: &weight_fusion_engine) is_fused(module_name: string) bool {
+func (weight_fusion_engine* engine) is_fused(module_name: string) bool {
     engine.fused.contains(module_name)
 }
 
-func (engine: &weight_fusion_engine) get_fused_modules() &vec[string] {
+func (weight_fusion_engine* engine) get_fused_modules() &vec[string] {
     let mut modules = vec[string]()
 
     for name in engine.fused.keys() {
@@ -183,11 +183,11 @@ func (engine: &weight_fusion_engine) get_fused_modules() &vec[string] {
     modules
 }
 
-func (engine: &mut weight_fusion_engine) clear_fused_weights() {
+func (mut weight_fusion_engine* engine) clear_fused_weights() {
     engine.fused.clear()
 }
 
-func (engine: &weight_fusion_engine) get_fused_weights_size_mb() int {
+func (weight_fusion_engine* engine) get_fused_weights_size_mb() int {
     let mut total_size = 0
 
     for name in engine.fused.keys() {
@@ -206,9 +206,9 @@ func (engine: &weight_fusion_engine) get_fused_weights_size_mb() int {
 }
 
 func fuse_multiple_adapters(
-    original_weights: &map[string, &vec[vec[float]]],
-    lora_deltas: &vec[&map[string, &vec[vec[float]]]],
-    adapter_scales: &vec[float]
+    original_weights: *map[string, &vec[vec[float]]],
+    lora_deltas: *vec[&map[string, &vec[vec[float]]]],
+    adapter_scales: *vec[float]
 ) result[&map[string, &vec[vec[float]]], fusion_error] {
     if lora_deltas.len() != adapter_scales.len() {
         return result::err(fusion_error {

@@ -9,7 +9,7 @@ struct lora_config {
     lora_rank: int
     lora_alpha: float
     lora_dropout: float
-    target_modules: &vec[string]
+    target_modules: *vec[string]
     bias: string
     task_type: string
     modules_to_save: option[&vec[string]]
@@ -34,7 +34,7 @@ func lora_config::default() lora_config {
     }
 }
 
-func (config: &lora_config) validate() result[(), lora_config_error] {
+func (lora_config* config) validate() result[(), lora_config_error] {
 
     if config.lora_rank <= 0 || config.lora_rank > 1024 {
         return result::err(lora_config_error {
@@ -78,7 +78,7 @@ func (config: &lora_config) validate() result[(), lora_config_error] {
 }
 
 func lora_config::from_dict(
-    config_dict: &map[string, string]
+    config_dict: *map[string, string]
 ) result[lora_config, lora_config_error] {
     let mut config = lora_config::default()
 
@@ -152,11 +152,11 @@ func lora_config::from_dict(
     result::ok(config)
 }
 
-func (config: &lora_config) get_lora_scaling() float {
+func (lora_config* config) get_lora_scaling() float {
     config.lora_alpha / config.lora_rank as float
 }
 
-func (config: &lora_config) is_target_module(module_name: string) bool {
+func (lora_config* config) is_target_module(module_name: string) bool {
     for target in config.target_modules.iter() {
         if target == module_name {
             return true
@@ -165,7 +165,7 @@ func (config: &lora_config) is_target_module(module_name: string) bool {
     false
 }
 
-func (config: &lora_config) should_save_full_weights(module_name: string) bool {
+func (lora_config* config) should_save_full_weights(module_name: string) bool {
     switch config.modules_to_save {
         option::some(modules) : {
             for module in modules.iter() {
@@ -179,7 +179,7 @@ func (config: &lora_config) should_save_full_weights(module_name: string) bool {
     }
 }
 
-func (config: &lora_config) summary() string {
+func (lora_config* config) summary() string {
     let mut s = "LoRA Configuration:\n"
     s = s + "  rank: " + config.lora_rank.to_string() + "\n"
     s = s + "  alpha: " + config.lora_alpha.to_string() + "\n"

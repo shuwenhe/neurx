@@ -126,7 +126,7 @@ struct generation_metadata {
     api_calls_made: int
     errors_encountered: int
 }
-class outline_planner {
+struct outline_planner {
     config: long_writer_config
     llm_client: any
     init(config: long_writer_config, llm_client: any) {
@@ -285,7 +285,7 @@ Now create the outline:"""
         return root
     }
 }
-class content_generator {
+struct content_generator {
     config: long_writer_config
     llm_client: any
     quality_checker: QualityChecker?
@@ -431,7 +431,7 @@ struct post_process_result {
     text: string
     formatting_changes: list<string>
 }
-class quality_checker {
+struct quality_checker {
     config: long_writer_config
     llm_client: any
     init(config: long_writer_config, llm_client: any) {
@@ -529,7 +529,7 @@ struct coherence_check_result {
     smooth_transition: bool
     has_bridge_phrase: bool
 }
-class long_writer_engine {
+struct long_writer_engine {
     config: long_writer_config
     llm_client: any
     planner: OutlinePlanner
@@ -769,7 +769,7 @@ async function test_long_writer() {
     print("\n✅ All LongWriter Tests Passed!")
     return true
 }
-class mock_llm_client {
+struct mock_llm_client {
     async generate(string prompt, temperature?: float, max_tokens?: int,
                    response_format?: string, stop_sequences?: list<string>) {
         content_length = min(max_tokens ?? 256, 300)

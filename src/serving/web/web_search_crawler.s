@@ -108,7 +108,7 @@ struct engine_search_result {
     has_more: bool
     error?: string
 }
-class google_search_engine implements search_engine_interface {
+struct google_search_engine implements search_engine_interface {
     name = "google"
     api_key: string?
     cx_id: string?
@@ -201,7 +201,7 @@ class google_search_engine implements search_engine_interface {
         }
     }
 }
-class bing_search_engine implements search_engine_interface {
+struct bing_search_engine implements search_engine_interface {
     name = "bing"
     api_key: string?
     init(api_key?: string) {
@@ -268,7 +268,7 @@ class bing_search_engine implements search_engine_interface {
         }
     }
 }
-class web_crawler {
+struct web_crawler {
     config: web_search_config
     session: HTTPSession
     cache: LRUCache<string, crawled_content>
@@ -338,7 +338,7 @@ class web_crawler {
         return age_hours > this.config.cache_ttl_hours
     }
 }
-class main_content_extractor {
+struct main_content_extractor {
     config: web_search_config
     init(config: web_search_config) {
         this.config = config
@@ -492,7 +492,7 @@ class main_content_extractor {
         sections: list<page_section>
     }
 }
-class html_cleaner {
+struct html_cleaner {
     config: web_search_config
     init(config: web_search_config) {
         this.config = config
@@ -512,7 +512,7 @@ class html_cleaner {
         return text
     }
 }
-class web_search_system {
+struct web_search_system {
     config: web_search_config
     engines: map<string, search_engine_interface>
     crawler: WebCrawler
@@ -728,7 +728,7 @@ struct search_options {
     verbose: bool = true
     corrected_query?: string
 }
-class result_aggregator {
+struct result_aggregator {
     config: web_search_config
     init(config: web_search_config) {
         this.config = config

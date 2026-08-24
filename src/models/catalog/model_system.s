@@ -77,7 +77,7 @@ func create_model_system(model_system_config* config) *model_system {
 		inference_engines: make(map[string]*inference_engine),
 		tokenizers: make(map[string]*tokenizer_interface),
 		config: config,
-		health: &model_system_health{
+		health: *model_system_health{
 			status: "initializing",
 			healthy: true,
 			last_health_check: time.Now(),

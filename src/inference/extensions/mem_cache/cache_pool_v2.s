@@ -56,7 +56,7 @@ func new_cache_pool_v2(int64 pool_size, int32 initial_blocks, eviction_policy po
 
     cache_pool_v2 {
         blocks: blocks,
-        prefix_cache_mgr: &prefix_cache,
+        prefix_cache_mgr: *prefix_cache,
         allocation_map: map[string, int64]{},
         pool_size: pool_size,
         allocated_size: 0,

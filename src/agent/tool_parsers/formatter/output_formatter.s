@@ -297,19 +297,19 @@ func create_streaming_builder() streaming_json_builder {
     return builder
 }
 
-func start_object(builder: &streaming_json_builder) {
+func start_object(builder: *streaming_json_builder) {
     builder.buffer = builder.buffer + "{"
     builder.in_object = true
     builder.is_first = true
 }
 
-func start_array(builder: &streaming_json_builder) {
+func start_array(builder: *streaming_json_builder) {
     builder.buffer = builder.buffer + "["
     builder.in_array = true
     builder.is_first = true
 }
 
-func add_field(builder: &streaming_json_builder, key: string, value: string) {
+func add_field(builder: *streaming_json_builder, key: string, value: string) {
     if builder.is_first == false {
         builder.buffer = builder.buffer + ", "
     }
@@ -317,7 +317,7 @@ func add_field(builder: &streaming_json_builder, key: string, value: string) {
     builder.is_first = false
 }
 
-func add_item(builder: &streaming_json_builder, value: string) {
+func add_item(builder: *streaming_json_builder, value: string) {
     if builder.is_first == false {
         builder.buffer = builder.buffer + ", "
     }
@@ -325,16 +325,16 @@ func add_item(builder: &streaming_json_builder, value: string) {
     builder.is_first = false
 }
 
-func end_object(builder: &streaming_json_builder) {
+func end_object(builder: *streaming_json_builder) {
     builder.buffer = builder.buffer + "}"
     builder.in_object = false
 }
 
-func end_array(builder: &streaming_json_builder) {
+func end_array(builder: *streaming_json_builder) {
     builder.buffer = builder.buffer + "]"
     builder.in_array = false
 }
 
-func get_buffer(builder: &streaming_json_builder) string {
+func get_buffer(builder: *streaming_json_builder) string {
     return builder.buffer
 }

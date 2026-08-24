@@ -81,7 +81,7 @@ func create_v1_request(string request_id, string prompt) v1_request* {
         start_time: 0,
         finish_time: 0,
         status: status_pending,
-        sampling: &sampling_params{
+        sampling: *sampling_params{
             method: method_greedy,
             temperature: 0.8,
             top_k: 50,

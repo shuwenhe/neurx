@@ -32,14 +32,14 @@ func new_computation_graph(string name) computation_graph {
     }
 }
 
-func (g: &mut computation_graph) add_value(value_type vt) int {
+func (mut computation_graph* g) add_value(value_type vt) int {
     int value_id = g.next_value_id
     g.next_value_id = g.next_value_id + 1
     g.values.push(vt)
     value_id
 }
 
-func (g: &mut computation_graph) add_operation(op_type op_kind, string op_name, int[] input_ids, int[] output_ids) int {
+func (mut computation_graph* g) add_operation(op_type op_kind, string op_name, int[] input_ids, int[] output_ids) int {
     int op_id = g.next_op_id
     g.next_op_id = g.next_op_id + 1
     op = operation {
@@ -54,19 +54,19 @@ func (g: &mut computation_graph) add_operation(op_type op_kind, string op_name, 
     op_id
 }
 
-func (g: &mut computation_graph) add_input(int value_id) int {
+func (mut computation_graph* g) add_input(int value_id) int {
     input_op_id = g.add_operation(op_type::input, "input_" + value_id as string, new int[0], new int[]{value_id})
     g.input_ids.push(value_id)
     input_op_id
 }
 
-func (g: &mut computation_graph) add_output(int value_id) int {
+func (mut computation_graph* g) add_output(int value_id) int {
     output_op_id = g.add_operation(op_type::output, "output_" + value_id as string, new int[]{value_id}, new int[0])
     g.output_ids.push(value_id)
     output_op_id
 }
 
-func (g: &computation_graph) get_value(int value_id) option[value_type] {
+func (computation_graph* g) get_value(int value_id) option[value_type] {
     if value_id >= 0 && value_id < g.values.len() {
         option::some(g.values[value_id])
     } else {
@@ -74,7 +74,7 @@ func (g: &computation_graph) get_value(int value_id) option[value_type] {
     }
 }
 
-func (g: &computation_graph) get_operation(int op_id) option[operation] {
+func (computation_graph* g) get_operation(int op_id) option[operation] {
     if op_id >= 0 && op_id < g.operations.len() {
         option::some(g.operations[op_id])
     } else {
@@ -82,7 +82,7 @@ func (g: &computation_graph) get_operation(int op_id) option[operation] {
     }
 }
 
-func (g: &computation_graph) get_operation_by_name(string name) option[operation] {
+func (computation_graph* g) get_operation_by_name(string name) option[operation] {
     for op in g.operations {
         if op.name == name {
             return option::some(op)
@@ -91,23 +91,23 @@ func (g: &computation_graph) get_operation_by_name(string name) option[operation
     option::none
 }
 
-func (g: &computation_graph) operation_count() int {
+func (computation_graph* g) operation_count() int {
     g.operations.len()
 }
 
-func (g: &computation_graph) value_count() int {
+func (computation_graph* g) value_count() int {
     g.values.len()
 }
 
-func (g: &computation_graph) input_count() int {
+func (computation_graph* g) input_count() int {
     g.input_ids.len()
 }
 
-func (g: &computation_graph) output_count() int {
+func (computation_graph* g) output_count() int {
     g.output_ids.len()
 }
 
-func (g: &computation_graph) total_memory_bytes() int {
+func (computation_graph* g) total_memory_bytes() int {
     int total = 0
     for vt in g.values {
         total = total + vt.memory_bytes()
@@ -115,7 +115,7 @@ func (g: &computation_graph) total_memory_bytes() int {
     total
 }
 
-func (g: &computation_graph) is_valid() bool {
+func (computation_graph* g) is_valid() bool {
     for op in g.operations {
         for input_id in op.input_ids {
             if input_id < 0 || input_id >= g.values.len() {
@@ -131,7 +131,7 @@ func (g: &computation_graph) is_valid() bool {
     true
 }
 
-func (g: &computation_graph) find_producers(int value_id) vec[operation] {
+func (computation_graph* g) find_producers(int value_id) vec[operation] {
     producers = vec[operation]()
     for op in g.operations {
         for output_id in op.output_ids {
@@ -143,7 +143,7 @@ func (g: &computation_graph) find_producers(int value_id) vec[operation] {
     producers
 }
 
-func (g: &computation_graph) find_consumers(int value_id) vec[operation] {
+func (computation_graph* g) find_consumers(int value_id) vec[operation] {
     consumers = vec[operation]()
     for op in g.operations {
         for input_id in op.input_ids {
@@ -155,7 +155,7 @@ func (g: &computation_graph) find_consumers(int value_id) vec[operation] {
     consumers
 }
 
-func (g: &computation_graph) topological_sort() vec[int] {
+func (computation_graph* g) topological_sort() vec[int] {
     sorted_ops = vec[int]()
     in_degree = new int[g.operations.len()]
     for i in range(g.operations.len()) {

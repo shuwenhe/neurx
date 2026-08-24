@@ -34,8 +34,8 @@ func NewAudioProcessor(
     }
 }
 
-func (p: &AudioProcessor) Resample(
-    audio: &types.AudioData
+func (AudioProcessor* p) Resample(
+    audio: *types.AudioData
 ) &types.AudioData {
     if audio.sample_rate == p.target_sample_rate {
         return audio
@@ -69,8 +69,8 @@ func (p: &AudioProcessor) Resample(
     }
 }
 
-func (p: &AudioProcessor) Normalize(
-    audio: &types.AudioData
+func (AudioProcessor* p) Normalize(
+    audio: *types.AudioData
 ) &types.AudioData {
     if len(audio.samples) == 0 {
         return audio
@@ -103,8 +103,8 @@ func (p: &AudioProcessor) Normalize(
     }
 }
 
-func (p: &AudioProcessor) MelSpectrogram(
-    audio: &types.AudioData
+func (AudioProcessor* p) MelSpectrogram(
+    audio: *types.AudioData
 ) &types.Tensor {
     num_frames := (i32(len(audio.samples)) - p.frame_length) / p.hop_length + 1
 
@@ -137,8 +137,8 @@ func (p: &AudioProcessor) MelSpectrogram(
     }
 }
 
-func (p: &AudioProcessor) ExtractFrames(
-    audio: &types.AudioData
+func (AudioProcessor* p) ExtractFrames(
+    audio: *types.AudioData
 ) []&types.Tensor {
     num_frames := (i32(len(audio.samples)) - p.frame_length) / p.hop_length
     frames := make([]&types.Tensor, num_frames)
@@ -164,8 +164,8 @@ func (p: &AudioProcessor) ExtractFrames(
     return frames
 }
 
-func (p: &AudioProcessor) Process(
-    audio: &types.AudioData
+func (AudioProcessor* p) Process(
+    audio: *types.AudioData
 ) &types.Tensor {
     resampled := p.Resample(audio)
 
@@ -176,7 +176,7 @@ func (p: &AudioProcessor) Process(
     return mel_spec
 }
 
-func (p: &AudioProcessor) ProcessBatch(
+func (AudioProcessor* p) ProcessBatch(
     audios: []types.AudioData
 ) []types.Tensor {
     results := make([]types.Tensor, len(audios))
@@ -188,8 +188,8 @@ func (p: &AudioProcessor) ProcessBatch(
     return results
 }
 
-func (p: &AudioProcessor) GetAudioDuration(
-    audio: &types.AudioData
+func (AudioProcessor* p) GetAudioDuration(
+    audio: *types.AudioData
 ) i32 {
     if audio.sample_rate == 0 {
         return 0
@@ -197,14 +197,14 @@ func (p: &AudioProcessor) GetAudioDuration(
     return i32(len(audio.samples) * 1000 / audio.sample_rate)
 }
 
-func (p: &AudioProcessor) GetNumFrames(
-    audio: &types.AudioData
+func (AudioProcessor* p) GetNumFrames(
+    audio: *types.AudioData
 ) i32 {
     return (i32(len(audio.samples)) - p.frame_length) / p.hop_length + 1
 }
 
-func (p: &AudioProcessor) ApplyWindow(
-    frame: &types.Tensor,
+func (AudioProcessor* p) ApplyWindow(
+    frame: *types.Tensor,
     window_type: string
 ) &types.Tensor {
     windowed := make([]f32, len(frame.data))

@@ -267,7 +267,7 @@ func (long_context_handler* handler) print_stats() {
 func new_long_context_handler(config long_context_config) *long_context_handler {
     return &long_context_handler{
         config: config,
-        positional_encoding: &ro_pepositional_encoding{
+        positional_encoding: *ro_pepositional_encoding{
             theta: 10000.0,
             dimensions: config.rope_dimensions,
             max_seq_length: config.max_seq_length,

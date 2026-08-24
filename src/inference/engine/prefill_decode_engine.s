@@ -71,14 +71,14 @@ func new_prefill_decode_engine(batch_config config) prefill_decode_engine {
     }
 }
 
-func (engine: &mut prefill_decode_engine) enqueue_request(req: request_state) {
+func (mut prefill_decode_engine* engine) enqueue_request(req: request_state) {
     let mut new_req = req
     new_req.status = request_status.pending
     new_req.arrival_time_ms = engine.total_time_ms
     engine.pending_requests.push(new_req)
 }
 
-func (engine: &mut prefill_decode_engine) schedule_prefill() bool {
+func (mut prefill_decode_engine* engine) schedule_prefill() bool {
     if engine.pending_requests.is_empty() {
         return false
     }
@@ -115,7 +115,7 @@ func (engine: &mut prefill_decode_engine) schedule_prefill() bool {
     return prefill_count > 0
 }
 
-func (engine: &mut prefill_decode_engine) schedule_decode() bool {
+func (mut prefill_decode_engine* engine) schedule_decode() bool {
     if engine.prefilling_requests.is_empty() && engine.decoding_requests.is_empty() {
         return false
     }
@@ -173,7 +173,7 @@ func (engine: &mut prefill_decode_engine) schedule_decode() bool {
     return decode_batch_size > 0
 }
 
-func (engine: &mut prefill_decode_engine) iteration() {
+func (mut prefill_decode_engine* engine) iteration() {
     engine.current_iteration += 1
 
     let prefill_scheduled = engine.schedule_prefill()
@@ -189,7 +189,7 @@ func (engine: &mut prefill_decode_engine) iteration() {
     engine.total_time_ms += 10
 }
 
-func (engine: &mut prefill_decode_engine) run_one_step() {
+func (mut prefill_decode_engine* engine) run_one_step() {
 
     engine.iteration()
 }
@@ -204,7 +204,7 @@ struct engine_stats {
     float total_throughput_req_per_sec
 }
 
-func (engine: &prefill_decode_engine) get_stats() engine_stats {
+func (prefill_decode_engine* engine) get_stats() engine_stats {
     let total_tokens = engine.total_prefilled_tokens + engine.total_decoded_tokens
     let avg_prefill_latency = if engine.prefilling_requests.len() > 0 {
         (engine.total_time_ms as f32) / (engine.current_iteration as f32)

@@ -70,7 +70,7 @@ func NewDistributedInferenceCoordinator(config coordinator_config) *distributed_
         request_queue:     []*distributed_request{},
         active_requests:   make(map[int64]*distributed_request),
         completed_requests: []*distributed_request{},
-        load_state: &load_balance_state{
+        load_state: *load_balance_state{
             gpu_loads:       make([]float32, config.total_gpus),
             node_loads:      make([]float32, config.num_nodes),
             queue_lengths:   make([]int32, config.num_nodes),

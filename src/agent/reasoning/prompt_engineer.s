@@ -37,7 +37,7 @@ func new_prompt_engineer(cot_config config) prompt_engineer {
     }
 }
 
-func (pe: &prompt_engineer) get_initial_prompt(string user_prompt) string {
+func (prompt_engineer* pe) get_initial_prompt(string user_prompt) string {
     string result = ""
 
     result = result + pe.config.system_prompt_template
@@ -66,7 +66,7 @@ func (pe: &prompt_engineer) get_initial_prompt(string user_prompt) string {
     result
 }
 
-func (pe: &prompt_engineer) get_step_prompt(string reasoning_so_far, string intermediate_result, int step_num) string {
+func (prompt_engineer* pe) get_step_prompt(string reasoning_so_far, string intermediate_result, int step_num) string {
     string result = "\nStep " + string(step_num) + ": " + pe.templates["step_separator"]
 
     if reasoning_so_far != "" {
@@ -83,7 +83,7 @@ func (pe: &prompt_engineer) get_step_prompt(string reasoning_so_far, string inte
     result
 }
 
-func (pe: &prompt_engineer) get_verification_prompt(string previous_reasoning, string result) string {
+func (prompt_engineer* pe) get_verification_prompt(string previous_reasoning, string result) string {
     string prompt = "Now let's verify this reasoning:\n"
     prompt = prompt + "Previous step: " + previous_reasoning + "\n"
     prompt = prompt + "Result obtained: " + result + "\n"
@@ -91,7 +91,7 @@ func (pe: &prompt_engineer) get_verification_prompt(string previous_reasoning, s
     prompt
 }
 
-func (pe: &prompt_engineer) get_checkpoint_prompt([]string previous_steps, string current_result) string {
+func (prompt_engineer* pe) get_checkpoint_prompt([]string previous_steps, string current_result) string {
     string prompt = "Checkpoint - Current understanding:\n"
 
     i := 0
@@ -105,26 +105,26 @@ func (pe: &prompt_engineer) get_checkpoint_prompt([]string previous_steps, strin
     prompt
 }
 
-func (pe: &prompt_engineer) get_backtrack_prompt(int backtrack_to_step) string {
+func (prompt_engineer* pe) get_backtrack_prompt(int backtrack_to_step) string {
     string prompt = pe.templates["backtrack_prefix"]
     prompt = prompt + "Let me go back to step " + string(backtrack_to_step) + " and reconsider.\n"
     prompt
 }
 
-func (pe: &prompt_engineer) get_branching_prompt(int current_branch) string {
+func (prompt_engineer* pe) get_branching_prompt(int current_branch) string {
     string prompt = pe.templates["branch_prefix"]
     prompt = prompt + "Alternative approach " + string(current_branch) + ":\n"
     prompt
 }
 
-func (pe: &prompt_engineer) get_final_answer_prompt(string reasoning_summary) string {
+func (prompt_engineer* pe) get_final_answer_prompt(string reasoning_summary) string {
     string prompt = "\nBased on all the reasoning above:\n"
     prompt = prompt + reasoning_summary + "\n"
     prompt = prompt + pe.templates["final_answer_prefix"]
     prompt
 }
 
-func (pe: &prompt_engineer) get_summary_prompt([]string steps) string {
+func (prompt_engineer* pe) get_summary_prompt([]string steps) string {
     string prompt = pe.templates["summary_prefix"]
 
     i := 0
@@ -137,12 +137,12 @@ func (pe: &prompt_engineer) get_summary_prompt([]string steps) string {
     prompt
 }
 
-func (pe: &prompt_engineer) add_template(string key, string template) prompt_engineer {
+func (prompt_engineer* pe) add_template(string key, string template) prompt_engineer {
     pe.templates[key] = template
     pe
 }
 
-func (pe: &prompt_engineer) get_template(string key) string {
+func (prompt_engineer* pe) get_template(string key) string {
     if value, exists := pe.templates[key]; exists {
         return value
     }
@@ -154,7 +154,7 @@ func replace_string(string text, string placeholder, string value) string {
     text
 }
 
-func (pe: &prompt_engineer) format_reasoning_step(string step_type, string content, float confidence) string {
+func (prompt_engineer* pe) format_reasoning_step(string step_type, string content, float confidence) string {
     string result = ""
 
     match step_type {
@@ -176,7 +176,7 @@ func (pe: &prompt_engineer) format_reasoning_step(string step_type, string conte
     result
 }
 
-func (pe: &prompt_engineer) generate_full_reasoning_prompt(string user_prompt, []string previous_steps, bool include_checkpoints) string {
+func (prompt_engineer* pe) generate_full_reasoning_prompt(string user_prompt, []string previous_steps, bool include_checkpoints) string {
     string prompt = pe.get_initial_prompt(user_prompt)
 
     i := 0
@@ -193,12 +193,12 @@ func (pe: &prompt_engineer) generate_full_reasoning_prompt(string user_prompt, [
     prompt
 }
 
-func (pe: &prompt_engineer) extract_reasoning_from_response(string response) string {
+func (prompt_engineer* pe) extract_reasoning_from_response(string response) string {
 
     response
 }
 
-func (pe: &prompt_engineer) validate_reasoning_consistency([]string steps) bool {
+func (prompt_engineer* pe) validate_reasoning_consistency([]string steps) bool {
 
     if len(steps) == 0 {
         return false

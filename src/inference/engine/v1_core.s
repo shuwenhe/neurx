@@ -36,7 +36,7 @@ func create_v1_core(sampler* sampler_inst, kv_cache_interface* cache) v1_core* {
     return &v1_core{
         sampler_instance: sampler_inst,
         kv_cache: cache,
-        gen_ctx: &generation_context{
+        gen_ctx: *generation_context{
             mode: mode_auto_regressive,
             num_tokens_generated: 0,
             max_new_tokens: 512,

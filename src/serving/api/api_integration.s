@@ -373,7 +373,7 @@ func create_openai_api_middleware() openai_api_middleware {
 		validator:      &create_default_validator(),
 		error_handler:  &create_error_handler(),
 		usage_tracker:  &create_usage_tracker(),
-		error_recovery: &create_error_recovery(),
+		error_recovery: *create_error_recovery(),
 		mu:             sync.Mutex{},
 	}
 }

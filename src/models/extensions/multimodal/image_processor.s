@@ -29,8 +29,8 @@ func NewImageProcessor(
     }
 }
 
-func (p: &ImageProcessor) Resize(
-    img: &types.ImageData
+func (ImageProcessor* p) Resize(
+    img: *types.ImageData
 ) &types.ImageData {
     target_w, target_h := p.target_size
 
@@ -61,8 +61,8 @@ func (p: &ImageProcessor) Resize(
     }
 }
 
-func (p: &ImageProcessor) Pad(
-    img: &types.ImageData
+func (ImageProcessor* p) Pad(
+    img: *types.ImageData
 ) &types.ImageData {
     target_w, target_h := p.target_size
 
@@ -101,8 +101,8 @@ func (p: &ImageProcessor) Pad(
     }
 }
 
-func (p: &ImageProcessor) Normalize(
-    img: &types.ImageData
+func (ImageProcessor* p) Normalize(
+    img: *types.ImageData
 ) &types.Tensor {
 
     size := len(img.raw_data)
@@ -126,8 +126,8 @@ func (p: &ImageProcessor) Normalize(
     }
 }
 
-func (p: &ImageProcessor) CenterCrop(
-    img: &types.ImageData
+func (ImageProcessor* p) CenterCrop(
+    img: *types.ImageData
 ) &types.ImageData {
     target_w, target_h := p.target_size
 
@@ -162,8 +162,8 @@ func (p: &ImageProcessor) CenterCrop(
     }
 }
 
-func (p: &ImageProcessor) Process(
-    img: &types.ImageData
+func (ImageProcessor* p) Process(
+    img: *types.ImageData
 ) &types.Tensor {
 
     resized := p.Resize(img)
@@ -175,7 +175,7 @@ func (p: &ImageProcessor) Process(
     return tensor
 }
 
-func (p: &ImageProcessor) ProcessBatch(
+func (ImageProcessor* p) ProcessBatch(
     images: []types.ImageData
 ) []types.Tensor {
     results := make([]types.Tensor, len(images))
@@ -219,7 +219,7 @@ func resizeImage(
     return result
 }
 
-func GetImageStats(img: &types.ImageData) (f32, f32, f32) {
+func GetImageStats(img: *types.ImageData) (f32, f32, f32) {
     if len(img.raw_data) == 0 {
         return 0.0, 0.0, 0.0
     }

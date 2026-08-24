@@ -36,8 +36,8 @@ func NewVisionEncoder(
     return encoder
 }
 
-func (e: &VisionEncoder) ExtractPatches(
-    image_tensor: &types.Tensor
+func (VisionEncoder* e) ExtractPatches(
+    image_tensor: *types.Tensor
 ) ([]&types.Tensor, types.PatchInfo) {
 
     h := image_tensor.shape[0]
@@ -93,8 +93,8 @@ func (e: &VisionEncoder) ExtractPatches(
     return patches, patch_info
 }
 
-func (e: &VisionEncoder) EncodePatch(
-    patch: &types.Tensor
+func (VisionEncoder* e) EncodePatch(
+    patch: *types.Tensor
 ) &types.Tensor {
 
     patch_flat_size := patch.shape[0] * patch.shape[1] * patch.shape[2]
@@ -116,9 +116,9 @@ func (e: &VisionEncoder) EncodePatch(
     }
 }
 
-func (e: &VisionEncoder) Encode(
-    image_data: &types.ImageData,
-    image_tensor: &types.Tensor
+func (VisionEncoder* e) Encode(
+    image_data: *types.ImageData,
+    image_tensor: *types.Tensor
 ) &types.ImageFeatures {
 
     if e.cache_enabled {
@@ -179,7 +179,7 @@ func (e: &VisionEncoder) Encode(
     }
 }
 
-func (e: &VisionEncoder) EncodeBatch(
+func (VisionEncoder* e) EncodeBatch(
     images: []types.ImageData,
     tensors: []types.Tensor
 ) []types.ImageFeatures {
@@ -192,8 +192,8 @@ func (e: &VisionEncoder) EncodeBatch(
     return results
 }
 
-func (e: &VisionEncoder) GetPatchEmbeddings(
-    features: &types.ImageFeatures
+func (VisionEncoder* e) GetPatchEmbeddings(
+    features: *types.ImageFeatures
 ) &types.Tensor {
 
     num_patches := features.patch_info.num_patches - 1
@@ -212,8 +212,8 @@ func (e: &VisionEncoder) GetPatchEmbeddings(
     }
 }
 
-func (e: &VisionEncoder) GetClsToken(
-    features: &types.ImageFeatures
+func (VisionEncoder* e) GetClsToken(
+    features: *types.ImageFeatures
 ) &types.Tensor {
     cls_token := make([]f32, e.hidden_size)
 
@@ -228,11 +228,11 @@ func (e: &VisionEncoder) GetClsToken(
     }
 }
 
-func (e: &VisionEncoder) ClearCache() {
+func (VisionEncoder* e) ClearCache() {
     e.feature_cache = make(map[string, &types.Tensor])
 }
 
-func (e: &VisionEncoder) GetCacheSize() i32 {
+func (VisionEncoder* e) GetCacheSize() i32 {
     size := i32(0)
     for _, tensor := range e.feature_cache {
         size += i32(len(tensor.data) * 4)

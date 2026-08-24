@@ -16,7 +16,7 @@ struct fold_result {
     bool success
 }
 
-func can_fold_operation(op: &operation) bool {
+func can_fold_operation(op: *operation) bool {
     match op.op_kind {
         op_type::add | op_type::subtract | op_type::multiply | op_type::divide => true,
         op_type::reduce_sum | op_type::reduce_mean => true,
@@ -24,7 +24,7 @@ func can_fold_operation(op: &operation) bool {
     }
 }
 
-func find_folding_candidates(g: &computation_graph) vec[folding_candidate] {
+func find_folding_candidates(g: *computation_graph) vec[folding_candidate] {
     candidates = vec[folding_candidate]()
 
     for op in g.operations {
@@ -56,7 +56,7 @@ func find_folding_candidates(g: &computation_graph) vec[folding_candidate] {
     candidates
 }
 
-func apply_constant_folding(g: &mut computation_graph) fold_result {
+func apply_constant_folding(g: *mut computation_graph) fold_result {
     candidates = find_folding_candidates(g)
     int folded_count = 0
 
@@ -73,7 +73,7 @@ func apply_constant_folding(g: &mut computation_graph) fold_result {
     }
 }
 
-func should_fold(op: &operation, g: &computation_graph) bool {
+func should_fold(op: *operation, g: *computation_graph) bool {
     if !can_fold_operation(op) {
         return false
     }

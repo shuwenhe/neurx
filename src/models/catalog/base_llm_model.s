@@ -178,7 +178,7 @@ func new_base_llm_model(model_config config) *base_llm_model {
     }
     for i := int32(0); i < config.num_hidden_layers; i++ {
         layer := &transformer_layer{
-            self_attn: &attention_layer{
+            self_attn: *attention_layer{
                 hidden_size:         config.hidden_size,
                 num_heads:           config.num_attention_heads,
                 num_key_value_heads: config.num_key_value_heads,
@@ -186,14 +186,14 @@ func new_base_llm_model(model_config config) *base_llm_model {
                 attention_type:      config.attention_type,
                 dropout:             0.1,
             },
-            feed_forward: &ffn_layer{
+            feed_forward: *ffn_layer{
                 activation: config.hidden_act,
             },
-            norm1: &layer_norm{
+            norm1: *layer_norm{
                 eps:              config.layer_norm_eps,
                 normalized_shape: []int{int(config.hidden_size)},
             },
-            norm2: &layer_norm{
+            norm2: *layer_norm{
                 eps:              config.layer_norm_eps,
                 normalized_shape: []int{int(config.hidden_size)},
             },

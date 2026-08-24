@@ -10,8 +10,8 @@ import (
 )
 
 struct KernelLauncher {
-    device_manager: &cuda_primitives.CUDADeviceManager,
-    event_manager: &cuda_primitives.CUDAEventManager,
+    device_manager: *cuda_primitives.CUDADeviceManager,
+    event_manager: *cuda_primitives.CUDAEventManager,
     kernel_cache: map[string, i32],
     execution_queue: []string,
     kernel_stats: map[string, types.KernelStats]
@@ -30,7 +30,7 @@ func NewKernelLauncher(device_id: i32) &KernelLauncher {
     }
 }
 
-func (l: &KernelLauncher) ComputeOptimalBlockSize(
+func (KernelLauncher* l) ComputeOptimalBlockSize(
     problem_size: i32,
     threads_per_element: i32
 ) i32 {
@@ -49,7 +49,7 @@ func (l: &KernelLauncher) ComputeOptimalBlockSize(
     return 32
 }
 
-func (l: &KernelLauncher) ComputeGridSize(
+func (KernelLauncher* l) ComputeGridSize(
     problem_size: i32,
     block_size: i32
 ) i32 {
@@ -63,7 +63,7 @@ func (l: &KernelLauncher) ComputeGridSize(
     return grid_size
 }
 
-func (l: &KernelLauncher) CreateLaunchConfig(
+func (KernelLauncher* l) CreateLaunchConfig(
     problem_size: i32,
     threads_per_element: i32,
     stream_id: i32
@@ -82,7 +82,7 @@ func (l: &KernelLauncher) CreateLaunchConfig(
     }
 }
 
-func (l: &KernelLauncher) LaunchMatrixKernel(
+func (KernelLauncher* l) LaunchMatrixKernel(
     kernel_name: string,
     config: types.KernelConfig,
     m: i32,
@@ -117,7 +117,7 @@ func (l: &KernelLauncher) LaunchMatrixKernel(
     }
 }
 
-func (l: &KernelLauncher) LaunchAttentionKernel(
+func (KernelLauncher* l) LaunchAttentionKernel(
     kernel_name: string,
     config: types.KernelConfig,
     params: types.AttentionParams
@@ -151,7 +151,7 @@ func (l: &KernelLauncher) LaunchAttentionKernel(
     }
 }
 
-func (l: &KernelLauncher) LaunchBatch(
+func (KernelLauncher* l) LaunchBatch(
     kernel_names: []string,
     configs: []types.KernelConfig
 ) []types.KernelResult {
@@ -180,7 +180,7 @@ func (l: &KernelLauncher) LaunchBatch(
     return results
 }
 
-func (l: &KernelLauncher) LaunchAsync(
+func (KernelLauncher* l) LaunchAsync(
     kernel_name: string,
     config: types.KernelConfig,
     callback_id: i32
@@ -193,7 +193,7 @@ func (l: &KernelLauncher) LaunchAsync(
     return true
 }
 
-func (l: &KernelLauncher) Synchronize() types.KernelResult {
+func (KernelLauncher* l) Synchronize() types.KernelResult {
 
     total_time := f32(0.0)
 
@@ -222,7 +222,7 @@ func (l: &KernelLauncher) Synchronize() types.KernelResult {
     }
 }
 
-func (l: &KernelLauncher) GetKernelStats(kernel_name: string) types.KernelStats {
+func (KernelLauncher* l) GetKernelStats(kernel_name: string) types.KernelStats {
     if stats, exists := l.kernel_stats[kernel_name]; exists {
         return stats
     }
@@ -238,7 +238,7 @@ func (l: &KernelLauncher) GetKernelStats(kernel_name: string) types.KernelStats 
     }
 }
 
-func (l: &KernelLauncher) RecordStats(stats: types.KernelStats) {
+func (KernelLauncher* l) RecordStats(stats: types.KernelStats) {
     if existing, exists := l.kernel_stats[stats.name]; exists {
 
         existing.execution_time_ms += stats.execution_time_ms
@@ -253,13 +253,13 @@ func (l: &KernelLauncher) RecordStats(stats: types.KernelStats) {
     }
 }
 
-func (l: &KernelLauncher) ClearCache() {
+func (KernelLauncher* l) ClearCache() {
     l.kernel_cache = make(map[string, i32])
     l.kernel_stats = make(map[string, types.KernelStats])
     l.execution_queue = make([]string, 0)
 }
 
-func (l: &KernelLauncher) GetPerformanceReport() string {
+func (KernelLauncher* l) GetPerformanceReport() string {
     result := ""
     result = result + "Kernel Performance Report:\n"
     result = result + "============================\n"

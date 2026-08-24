@@ -7,8 +7,8 @@ use std.map.map
 
 struct lora_request_state {
     request_id: string
-    adapter_names: &vec[string]
-    adapter_scales: &vec[float]
+    adapter_names: *vec[string]
+    adapter_scales: *vec[float]
     is_active: bool
     created_at: int
     updated_at: int
@@ -35,10 +35,10 @@ func lora_state_manager::new(max_adapters: int) lora_state_manager {
     }
 }
 
-func (manager: &mut lora_state_manager) create_request_state(
+func (mut lora_state_manager* manager) create_request_state(
     request_id: string,
-    adapter_names: &vec[string],
-    adapter_scales: &vec[float]
+    adapter_names: *vec[string],
+    adapter_scales: *vec[float]
 ) result[(), lora_state_error] {
 
     if request_id.len() == 0 {
@@ -97,15 +97,15 @@ func (manager: &mut lora_state_manager) create_request_state(
     result::ok(())
 }
 
-func (manager: &lora_state_manager) get_request_state(
+func (lora_state_manager* manager) get_request_state(
     request_id: string
 ) option[lora_request_state] {
     manager.request_states.get(request_id)
 }
 
-func (manager: &mut lora_state_manager) update_adapter_scales(
+func (mut lora_state_manager* manager) update_adapter_scales(
     request_id: string,
-    new_scales: &vec[float]
+    new_scales: *vec[float]
 ) result[(), lora_state_error] {
     switch manager.request_states.get(request_id) {
         option::some(mut state) : {
@@ -131,10 +131,10 @@ func (manager: &mut lora_state_manager) update_adapter_scales(
     }
 }
 
-func (manager: &mut lora_state_manager) switch_adapters(
+func (mut lora_state_manager* manager) switch_adapters(
     request_id: string,
-    new_adapter_names: &vec[string],
-    new_scales: &vec[float]
+    new_adapter_names: *vec[string],
+    new_scales: *vec[float]
 ) result[(), lora_state_error] {
     if new_adapter_names.len() != new_scales.len() {
         return result::err(lora_state_error {
@@ -171,7 +171,7 @@ func (manager: &mut lora_state_manager) switch_adapters(
     }
 }
 
-func (manager: &mut lora_state_manager) remove_request_state(
+func (mut lora_state_manager* manager) remove_request_state(
     request_id: string
 ) result[(), lora_state_error] {
     if !manager.request_states.contains(request_id) {
@@ -187,7 +187,7 @@ func (manager: &mut lora_state_manager) remove_request_state(
     result::ok(())
 }
 
-func (manager: &mut lora_state_manager) activate_request(
+func (mut lora_state_manager* manager) activate_request(
     request_id: string
 ) result[(), lora_state_error] {
     switch manager.request_states.get(request_id) {
@@ -206,7 +206,7 @@ func (manager: &mut lora_state_manager) activate_request(
     }
 }
 
-func (manager: &mut lora_state_manager) deactivate_request(
+func (mut lora_state_manager* manager) deactivate_request(
     request_id: string
 ) result[(), lora_state_error] {
     switch manager.request_states.get(request_id) {
@@ -225,14 +225,14 @@ func (manager: &mut lora_state_manager) deactivate_request(
     }
 }
 
-func (manager: &lora_state_manager) is_request_active(request_id: string) bool {
+func (lora_state_manager* manager) is_request_active(request_id: string) bool {
     switch manager.request_states.get(request_id) {
         option::some(state) : state.is_active,
         option::none : false,
     }
 }
 
-func (manager: &lora_state_manager) get_active_requests() &vec[string] {
+func (lora_state_manager* manager) get_active_requests() &vec[string] {
     let mut active = vec[string]()
 
     for req_id in manager.request_states.keys() {
@@ -249,9 +249,9 @@ func (manager: &lora_state_manager) get_active_requests() &vec[string] {
     active
 }
 
-func (manager: &mut lora_state_manager) cache_fused_weights(
+func (mut lora_state_manager* manager) cache_fused_weights(
     cache_key: string,
-    weights: &vec[vec[float]]
+    weights: *vec[vec[float]]
 ) result[(), lora_state_error] {
     if !manager.enable_cache {
         return result::ok(())
@@ -268,13 +268,13 @@ func (manager: &mut lora_state_manager) cache_fused_weights(
     result::ok(())
 }
 
-func (manager: &lora_state_manager) get_cached_weights(
+func (lora_state_manager* manager) get_cached_weights(
     cache_key: string
 ) option[&vec[vec[float]]] {
     manager.adapter_cache.get(cache_key)
 }
 
-func (manager: &mut lora_state_manager) clear_request_cache(
+func (mut lora_state_manager* manager) clear_request_cache(
     request_id: string
 ) result[(), lora_state_error] {
     let mut keys_to_remove = vec[string]()
@@ -294,15 +294,15 @@ func (manager: &mut lora_state_manager) clear_request_cache(
     result::ok(())
 }
 
-func (manager: &mut lora_state_manager) clear_all_cache() {
+func (mut lora_state_manager* manager) clear_all_cache() {
     manager.adapter_cache.clear()
 }
 
-func (manager: &mut lora_state_manager) set_cache_enabled(enabled: bool) {
+func (mut lora_state_manager* manager) set_cache_enabled(enabled: bool) {
     manager.enable_cache = enabled
 }
 
-func (manager: &lora_state_manager) get_cache_stats() (int, int) {
+func (lora_state_manager* manager) get_cache_stats() (int, int) {
     let mut total_size_mb = 0
 
     for key in manager.adapter_cache.keys() {
@@ -319,11 +319,11 @@ func (manager: &lora_state_manager) get_cache_stats() (int, int) {
     (manager.adapter_cache.keys().len(), total_size_mb / 1024 / 1024)
 }
 
-func (manager: &lora_state_manager) get_request_count() int {
+func (lora_state_manager* manager) get_request_count() int {
     manager.request_states.len()
 }
 
-func (manager: &lora_state_manager) get_active_request_count() int {
+func (lora_state_manager* manager) get_active_request_count() int {
     let count = manager.get_active_requests()
     count.len()
 }

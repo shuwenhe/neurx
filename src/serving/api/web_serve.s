@@ -139,7 +139,7 @@ func (web_server* ws) handle_request(http_request* req) http_response* {
     return &http_response{
         status: http_not_found,
         headers: make(map[string]string),
-        body: &error_response{
+        body: *error_response{
             error: "not_found",
             code: 404,
             message: "Route not found",

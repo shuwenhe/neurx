@@ -52,7 +52,7 @@ func new_prefix_cache(int64 max_size, eviction_policy policy) prefix_cache {
     tree := new_radix_tree()
 
     prefix_cache {
-        tree: &tree,
+        tree: *tree,
         entries: map[string, cache_entry]{},
         policy: policy,
         max_cache_size: max_size,

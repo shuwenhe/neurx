@@ -43,7 +43,7 @@ func NewMemoryManager(device: types.DeviceType, total_mem: i64) &MemoryManager {
     }
 }
 
-func (m: &MemoryManager) Allocate(size: i64) i64 {
+func (MemoryManager* m) Allocate(size: i64) i64 {
     if size <= 0 {
         return -1
     }
@@ -63,7 +63,7 @@ func (m: &MemoryManager) Allocate(size: i64) i64 {
     return address
 }
 
-func (m: &MemoryManager) Free(address: i64) bool {
+func (MemoryManager* m) Free(address: i64) bool {
     if _, exists := m.allocated_blocks[address]; exists {
         delete(m.allocated_blocks, address)
         m.free_blocks = append(m.free_blocks, address)
@@ -72,7 +72,7 @@ func (m: &MemoryManager) Free(address: i64) bool {
     return false
 }
 
-func (m: &MemoryManager) GetMemoryInfo() types.MemoryInfo {
+func (MemoryManager* m) GetMemoryInfo() types.MemoryInfo {
     allocated := i64(0)
     for _, size := range m.allocated_blocks {
         allocated += size
@@ -89,7 +89,7 @@ func (m: &MemoryManager) GetMemoryInfo() types.MemoryInfo {
     }
 }
 
-func (m: &MemoryManager) GetFreeMemory() i64 {
+func (MemoryManager* m) GetFreeMemory() i64 {
     allocated := i64(0)
     for _, size := range m.allocated_blocks {
         allocated += size
@@ -97,7 +97,7 @@ func (m: &MemoryManager) GetFreeMemory() i64 {
     return m.total_memory - allocated
 }
 
-func (m: &MemoryManager) GetAllocatedMemory() i64 {
+func (MemoryManager* m) GetAllocatedMemory() i64 {
     allocated := i64(0)
     for _, size := range m.allocated_blocks {
         allocated += size
@@ -105,7 +105,7 @@ func (m: &MemoryManager) GetAllocatedMemory() i64 {
     return allocated
 }
 
-func (m: &MemoryManager) ComputeFragmentation() f32 {
+func (MemoryManager* m) ComputeFragmentation() f32 {
     free_mem := m.GetFreeMemory()
     if free_mem == 0 {
         m.fragmentation_ratio = 0.0
@@ -128,18 +128,18 @@ func (m: &MemoryManager) ComputeFragmentation() f32 {
     return m.fragmentation_ratio
 }
 
-func (m: &MemoryManager) Defragment() bool {
+func (MemoryManager* m) Defragment() bool {
 
     m.free_blocks = make([]i64, 0)
     return true
 }
 
-func (m: &MemoryManager) ClearAll() {
+func (MemoryManager* m) ClearAll() {
     m.allocated_blocks = make(map[i64, i64])
     m.free_blocks = make([]i64, 0)
 }
 
-func (m: &MemoryManager) GetStats() string {
+func (MemoryManager* m) GetStats() string {
     info := m.GetMemoryInfo()
     fragmentation := m.ComputeFragmentation()
 
@@ -164,7 +164,7 @@ func NewMemoryPool(device: types.DeviceType, pool_size: i64) &MemoryPool {
     }
 }
 
-func (p: &MemoryPool) AllocateFromPool(size: i64) i64 {
+func (MemoryPool* p) AllocateFromPool(size: i64) i64 {
     if size > p.available || size < p.min_block_size {
         return -1
     }
@@ -184,7 +184,7 @@ func (p: &MemoryPool) AllocateFromPool(size: i64) i64 {
     return address
 }
 
-func (p: &MemoryPool) FreeToPool(address: i64, size: i64) bool {
+func (MemoryPool* p) FreeToPool(address: i64, size: i64) bool {
     for i := 0; i < len(p.blocks); i += 1 {
         if p.blocks[i].address == address {
             p.blocks[i].is_free = true
@@ -195,7 +195,7 @@ func (p: &MemoryPool) FreeToPool(address: i64, size: i64) bool {
     return false
 }
 
-func (p: &MemoryPool) GetPoolStatus() types.MemoryInfo {
+func (MemoryPool* p) GetPoolStatus() types.MemoryInfo {
     used := p.pool_size - p.available
 
     return types.MemoryInfo{

@@ -19,7 +19,7 @@ struct execution_result {
     string error_message
 }
 
-func create_execution_context(g: &computation_graph) execution_context {
+func create_execution_context(g: *computation_graph) execution_context {
     plan = create_execution_plan(g)
     memory = allocate_for_graph(g)
 
@@ -31,7 +31,7 @@ func create_execution_context(g: &computation_graph) execution_context {
     }
 }
 
-func (ctx: &execution_context) execute_next_task() bool {
+func (execution_context* ctx) execute_next_task() bool {
     if ctx.current_task_index >= ctx.plan.tasks.len() {
         return false
     }
@@ -42,7 +42,7 @@ func (ctx: &execution_context) execute_next_task() bool {
     true
 }
 
-func (ctx: &execution_context) execute_all() execution_result {
+func (execution_context* ctx) execute_all() execution_result {
     int executed = 0
 
     while ctx.current_task_index < ctx.plan.tasks.len() {
@@ -61,18 +61,18 @@ func (ctx: &execution_context) execute_all() execution_result {
     }
 }
 
-func (ctx: &execution_context) get_progress() float {
+func (execution_context* ctx) get_progress() float {
     if ctx.plan.tasks.len() == 0 {
         return 1.0
     }
     ctx.current_task_index as float / ctx.plan.tasks.len() as float
 }
 
-func (ctx: &execution_context) reset() {
+func (execution_context* ctx) reset() {
     ctx.current_task_index = 0
 }
 
-func simulate_operation_execution(op: &operation) int {
+func simulate_operation_execution(op: *operation) int {
     match op.op_kind {
         op_type::add | op_type::subtract | op_type::multiply => 1,
         op_type::matrix_multiply => 5,
@@ -83,7 +83,7 @@ func simulate_operation_execution(op: &operation) int {
     }
 }
 
-func execute_operation_sequence(g: &computation_graph) execution_result {
+func execute_operation_sequence(g: *computation_graph) execution_result {
     int total_time = 0
     int executed = 0
 
@@ -104,7 +104,7 @@ func execute_operation_sequence(g: &computation_graph) execution_result {
     }
 }
 
-func (result: &execution_result) summary_string() string {
+func (execution_result* result) summary_string() string {
     s = ""
     s = s + "Execution Result\n"
     s = s + "Success: " + result.success as string + "\n"

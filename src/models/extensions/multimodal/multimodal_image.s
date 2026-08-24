@@ -67,7 +67,7 @@ func (image_processor* proc) resize_image(image_data* img, int32 new_width, int3
 
     new_img := &image_data{
         raw_data: make(vec[uint8]),
-        metadata: &image_metadata{
+        metadata: *image_metadata{
             width: new_width,
             height: new_height,
             channels: img.metadata.channels,
@@ -96,7 +96,7 @@ func (image_processor* proc) convert_format(image_data* img, image_format new_fo
 
     new_img := &image_data{
         raw_data: img.raw_data,
-        metadata: &image_metadata{
+        metadata: *image_metadata{
             width: img.metadata.width,
             height: img.metadata.height,
             channels: img.metadata.channels,
@@ -120,7 +120,7 @@ func (image_processor* proc) convert_color_space(image_data* img, color_space ne
 
     new_img := &image_data{
         raw_data: img.raw_data,
-        metadata: &image_metadata{
+        metadata: *image_metadata{
             width: img.metadata.width,
             height: img.metadata.height,
             channels: img.metadata.channels,

@@ -16,7 +16,7 @@ struct attention_config {
     int softmax_scale
     bool use_gradient_checkpointing
 }
-class neurx_attention {
+struct neurx_attention {
     attention_config config
     tensor q_proj_weight
     tensor k_proj_weight
@@ -240,7 +240,7 @@ func _flash_attention_forward(
         l[:, :, i_start:i_end, :] = li
         m[:, :, i_start:i_end, :] = mi
     return output
-class mask_builder {
+struct mask_builder {
     func build_prefix_lm_mask(
         int batch_size,
         int total_seq_len,

@@ -39,7 +39,7 @@ func new_radix_tree() radix_tree {
     root := new_radix_node_internal("root", vec[int32]{}, nil)
 
     radix_tree {
-        root: &root,
+        root: *root,
         total_nodes: 1,
         total_cached_tokens: 0,
         max_depth: 0,

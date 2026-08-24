@@ -25,11 +25,11 @@ func new_test_logger() test_logger {
     }
 }
 
-func (logger: &test_logger) add_result(test_result result) {
+func (test_logger* logger) add_result(test_result result) {
     logger.results = append(logger.results, result)
 }
 
-func (logger: &test_logger) get_summary() string {
+func (test_logger* logger) get_summary() string {
     passed := 0
     failed := 0
 

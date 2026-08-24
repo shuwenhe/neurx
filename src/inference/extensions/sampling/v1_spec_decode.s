@@ -41,7 +41,7 @@ func create_v1_spec_decode(int32 num_spec_tokens) v1_spec_decode* {
         accepted_tokens: 0,
         rejected_tokens: 0,
         total_tokens_generated: 0,
-        spec_tokens: &speculative_tokens{
+        spec_tokens: *speculative_tokens{
             tokens: make(vec[int32]),
             probabilities: make(vec[float32]),
             num_speculated: 0,

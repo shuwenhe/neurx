@@ -15,7 +15,7 @@ func new_model_executor(device: string) model_executor {
     }
 }
 
-func (executor: &mut model_executor) load_model(model_name: string, device: string) bool {
+func (mut model_executor* executor) load_model(model_name: string, device: string) bool {
 
     if model_name == "llama-7b" {
         executor.current_model = model_name
@@ -42,9 +42,9 @@ struct forward_output {
     compute_time_ms: int
 }
 
-func (executor: &model_executor) forward_pass(
+func (model_executor* executor) forward_pass(
     model_name: string,
-    input_ids: &[]int,
+    input_ids: *[]int,
     attention_mask: option[&[]int]
 ) forward_output {
     let batch_size = 1
@@ -72,9 +72,9 @@ struct distributed_config {
 }
 
 func prepare_distributed_model(
-    executor: &model_executor,
+    executor: *model_executor,
     model_name: string,
-    config: &distributed_config
+    config: *distributed_config
 ) bool {
     if config.world_size == 1 {
         return true
@@ -92,7 +92,7 @@ struct execution_stats {
 }
 
 func collect_execution_stats(
-    executor: &model_executor,
+    executor: *model_executor,
     model_name: string
 ) execution_stats {
     execution_stats {
@@ -105,7 +105,7 @@ func collect_execution_stats(
     }
 }
 
-func (executor: &mut model_executor) switch_model(model_name: string) bool {
+func (mut model_executor* executor) switch_model(model_name: string) bool {
     if model_name == "llama-7b" || model_name == "qwen2-7b" ||
        model_name == "mistral-7b" || model_name == "deepseek-7b" {
         executor.current_model = model_name
@@ -114,11 +114,11 @@ func (executor: &mut model_executor) switch_model(model_name: string) bool {
     return false
 }
 
-func (executor: &model_executor) get_current_model() string {
+func (model_executor* executor) get_current_model() string {
     return executor.current_model
 }
 
-func (executor: &mut model_executor) unload_model(model_name: string) bool {
+func (mut model_executor* executor) unload_model(model_name: string) bool {
     if executor.current_model == model_name {
         executor.current_model = ""
     }

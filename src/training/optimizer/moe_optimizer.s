@@ -71,7 +71,7 @@ struct moe_router {
             this.noise = new normal(mean=0.0, std=config.jitter_noise)
     }
 }
-class load_balance_loss_computer {
+struct load_balance_loss_computer {
     config: moe_config
     init(config: moe_config) {
         this.config = config
@@ -91,7 +91,7 @@ class load_balance_loss_computer {
         return (load_balance_loss * this.config.loss_coef, aux_loss * this.config.aux_loss_coef)
     }
 }
-class mo_effn_layer {
+struct mo_effn_layer {
     config: moe_config
     experts: list<moe_expert>
     shared_experts: list<moe_expert>
@@ -312,7 +312,7 @@ class mo_effn_layer {
         }
     }
 }
-class expert_specializer {
+struct expert_specializer {
     config: moe_config
     moe_layer: MoEFFNLayer?
     init(config: moe_config) {
@@ -429,7 +429,7 @@ struct individual_expert_report {
     specialization_score: float
     importance_weight: float
 }
-class expert_manager {
+struct expert_manager {
     moe_layers: list<mo_effn_layer>
     specializer: ExpertSpecializer
     config: moe_config

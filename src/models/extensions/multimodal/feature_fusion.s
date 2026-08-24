@@ -36,7 +36,7 @@ func NewFeatureFusion(
     }
 }
 
-func (f: &FeatureFusion) FuseConcatenation(
+func (FeatureFusion* f) FuseConcatenation(
     embeddings: map[types.Modality, &types.Tensor]
 ) &types.Tensor {
     var total_dim i32 = 0
@@ -78,7 +78,7 @@ func (f: &FeatureFusion) FuseConcatenation(
     }
 }
 
-func (f: &FeatureFusion) FuseAddition(
+func (FeatureFusion* f) FuseAddition(
     embeddings: map[types.Modality, &types.Tensor]
 ) &types.Tensor {
     var fused &types.Tensor
@@ -113,7 +113,7 @@ func (f: &FeatureFusion) FuseAddition(
     return fused
 }
 
-func (f: &FeatureFusion) FuseAttention(
+func (FeatureFusion* f) FuseAttention(
     embeddings: map[types.Modality, &types.Tensor],
     query_modality: types.Modality
 ) &types.Tensor {
@@ -171,7 +171,7 @@ func (f: &FeatureFusion) FuseAttention(
     }
 }
 
-func (f: &FeatureFusion) FuseGating(
+func (FeatureFusion* f) FuseGating(
     embeddings: map[types.Modality, &types.Tensor]
 ) &types.Tensor {
 
@@ -214,8 +214,8 @@ func (f: &FeatureFusion) FuseGating(
     }
 }
 
-func (f: &FeatureFusion) ApplyLayerNorm(
-    tensor: &types.Tensor,
+func (FeatureFusion* f) ApplyLayerNorm(
+    tensor: *types.Tensor,
     eps: f32
 ) &types.Tensor {
     seq_len := tensor.shape[0]
@@ -253,7 +253,7 @@ func (f: &FeatureFusion) ApplyLayerNorm(
     }
 }
 
-func (f: &FeatureFusion) Fuse(
+func (FeatureFusion* f) Fuse(
     embeddings: map[types.Modality, &types.Tensor]
 ) &types.FusedFeatures {
     var fused_embedding &types.Tensor
@@ -295,7 +295,7 @@ func Sqrt(x: f64) f64 {
     return result
 }
 
-func (f: &FeatureFusion) GetFusionDimension(
+func (FeatureFusion* f) GetFusionDimension(
     input_embeddings: map[types.Modality, &types.Tensor]
 ) i32 {
     if f.fusion_strategy == FusionStrategy.concatenation {

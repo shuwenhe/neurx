@@ -66,13 +66,13 @@ func create_lora_model(string adapter_name, lora_config config) lora_model* {
 
 func (lora_model* model) add_lora_layer(string layer_name, int32 in_features, int32 out_features) {
     layer := &lora_layer{
-        lora_a: &lora_matrix{
+        lora_a: *lora_matrix{
             weights: make(vec[vec[float32]]),
             rows: model.config.rank,
             cols: in_features,
             dtype: lora_dtype_fp32,
         },
-        lora_b: &lora_matrix{
+        lora_b: *lora_matrix{
             weights: make(vec[vec[float32]]),
             rows: out_features,
             cols: model.config.rank,

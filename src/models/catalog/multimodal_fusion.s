@@ -100,7 +100,7 @@ struct multimodal_fusion_engine {
 func create_multimodal_fusion_engine(strategy fusion_strategy, output_dim int32) *multimodal_fusion_engine {
 	mfe := &multimodal_fusion_engine{
 		strategy:                 strategy,
-		config: &fusion_config{
+		config: *fusion_config{
 			fusion_type:         strategy,
 			hidden_dim:          768,
 			dropout_rate:        0.1,
@@ -114,13 +114,13 @@ func create_multimodal_fusion_engine(strategy fusion_strategy, output_dim int32)
 			modality_projections: make(map[string][]float32),
 			created_at:           time.Now(),
 		},
-		late_fuser: &late_fusion{
+		late_fuser: *late_fusion{
 			output_dim:      output_dim,
 			modality_models: make(map[string]*model_interface),
 			modality_weights: make(map[string]float32),
 			created_at:      time.Now(),
 		},
-		hybrid_fuser: &hybrid_fusion{
+		hybrid_fuser: *hybrid_fusion{
 			early_stage:      &early_fusion{output_dim: output_dim / 2, modality_projections: make(map[string][]float32), created_at: time.Now()},
 			late_stage:       &late_fusion{output_dim: output_dim / 2, modality_models: make(map[string]*model_interface), modality_weights: make(map[string]float32), created_at: time.Now()},
 			intermediate_dim: output_dim / 2,
@@ -128,7 +128,7 @@ func create_multimodal_fusion_engine(strategy fusion_strategy, output_dim int32)
 			late_weight:      0.5,
 			created_at:       time.Now(),
 		},
-		cross_modal_attn: &cross_modal_attention{
+		cross_modal_attn: *cross_modal_attention{
 			attention_type:      ATTENTION_CROSS_MODAL,
 			num_heads:           8,
 			heads:               make([]attention_head, 8),

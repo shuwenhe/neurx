@@ -83,9 +83,9 @@ func new_tensorrt_engine(tensorrt_config config) -> tensorrt_engine {
     }
     return tensorrt_engine{
         config: config,
-        runtime: &runtime,
+        runtime: *runtime,
         engine: engine,
-        decoder: &decoder,
+        decoder: *decoder,
         kv_cache_manager: kv_cache_manager,
         lora_manager: lora_manager,
         active_adapters: {},

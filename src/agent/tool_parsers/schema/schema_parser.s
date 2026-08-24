@@ -10,7 +10,7 @@ func parse_schema_from_json(json_str: string) json_schema {
     return schema
 }
 
-func parse_schema_object(json_str: string, start_pos: int, schema: &json_schema) json_schema {
+func parse_schema_object(json_str: string, start_pos: int, schema: *json_schema) json_schema {
     let result = *schema
 
     let title_end = find_json_string_value(json_str, "\"title\"", start_pos)
@@ -144,7 +144,7 @@ func extract_string_array(json_str: string, pos: int) []string {
     return result
 }
 
-func extract_properties(json_str: string, pos: int, required: &[]string) []json_property {
+func extract_properties(json_str: string, pos: int, required: *[]string) []json_property {
     let result = vec_new()
     let i = pos
 
@@ -194,7 +194,7 @@ func extract_properties(json_str: string, pos: int, required: &[]string) []json_
     return result
 }
 
-func is_property_required(name: string, required: &[]string) bool {
+func is_property_required(name: string, required: *[]string) bool {
     let i = 0
     while i < len(*required) {
         if (*required)[i] == name {
@@ -257,7 +257,7 @@ func create_object_schema(properties: []json_property, required: []string) json_
     return schema
 }
 
-func create_array_schema(item_schema: &json_schema, min_items: int, max_items: int) json_schema {
+func create_array_schema(item_schema: *json_schema, min_items: int, max_items: int) json_schema {
     let schema = schema_types.create_empty_schema()
     schema.type_name = schema_types.TYPE_ARRAY
     schema.items = item_schema

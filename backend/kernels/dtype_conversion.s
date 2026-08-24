@@ -14,9 +14,9 @@ func NewDTypeConversionKernels(config: types.KernelConfig) &DTypeConversionKerne
     }
 }
 
-func (k: &DTypeConversionKernels) Float32ToFloat16(
+func (DTypeConversionKernels* k) Float32ToFloat16(
     input: []f32,
-    output: &[]i16
+    output: *[]i16
 ) types.KernelResult {
 
     if len(input) == 0 || len(*output) < len(input) {
@@ -66,9 +66,9 @@ func (k: &DTypeConversionKernels) Float32ToFloat16(
     }
 }
 
-func (k: &DTypeConversionKernels) Float16ToFloat32(
+func (DTypeConversionKernels* k) Float16ToFloat32(
     input: []i16,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     if len(input) == 0 || len(*output) < len(input) {
@@ -110,9 +110,9 @@ func (k: &DTypeConversionKernels) Float16ToFloat32(
     }
 }
 
-func (k: &DTypeConversionKernels) Float32ToBFloat16(
+func (DTypeConversionKernels* k) Float32ToBFloat16(
     input: []f32,
-    output: &[]i16
+    output: *[]i16
 ) types.KernelResult {
 
     if len(input) == 0 || len(*output) < len(input) {
@@ -162,9 +162,9 @@ func (k: &DTypeConversionKernels) Float32ToBFloat16(
     }
 }
 
-func (k: &DTypeConversionKernels) BFloat16ToFloat32(
+func (DTypeConversionKernels* k) BFloat16ToFloat32(
     input: []i16,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     if len(input) == 0 || len(*output) < len(input) {
@@ -206,11 +206,11 @@ func (k: &DTypeConversionKernels) BFloat16ToFloat32(
     }
 }
 
-func (k: &DTypeConversionKernels) Float32ToInt8(
+func (DTypeConversionKernels* k) Float32ToInt8(
     input: []f32,
     scale: f32,
     zero_point: i8,
-    output: &[]i8
+    output: *[]i8
 ) types.KernelResult {
 
     if len(input) == 0 || len(*output) < len(input) {
@@ -265,11 +265,11 @@ func (k: &DTypeConversionKernels) Float32ToInt8(
     }
 }
 
-func (k: &DTypeConversionKernels) Int8ToFloat32(
+func (DTypeConversionKernels* k) Int8ToFloat32(
     input: []i8,
     scale: f32,
     zero_point: i8,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     if len(input) == 0 || len(*output) < len(input) {
@@ -316,10 +316,10 @@ func (k: &DTypeConversionKernels) Int8ToFloat32(
     }
 }
 
-func (k: &DTypeConversionKernels) Convert(
+func (DTypeConversionKernels* k) Convert(
     params: types.DTypeConversionParams,
     input_data: []f32,
-    output_data: &[]f32
+    output_data: *[]f32
 ) types.KernelResult {
 
     for i := 0; i < len(input_data); i += 1 {

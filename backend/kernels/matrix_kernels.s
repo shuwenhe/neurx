@@ -24,7 +24,7 @@ func NewMatrixKernels(config: types.KernelConfig) &MatrixKernels {
     }
 }
 
-func (k: &MatrixKernels) GEMM(
+func (MatrixKernels* k) GEMM(
     m: i32,
     n: i32,
     kk: i32,
@@ -34,7 +34,7 @@ func (k: &MatrixKernels) GEMM(
     B: []f32,
     ldb: i32,
     beta: f32,
-    C: &[]f32,
+    C: *[]f32,
     ldc: i32
 ) types.KernelResult {
 
@@ -81,7 +81,7 @@ func (k: &MatrixKernels) GEMM(
     }
 }
 
-func (k: &MatrixKernels) BatchGEMM(
+func (MatrixKernels* k) BatchGEMM(
     batch_size: i32,
     m: i32,
     n: i32,
@@ -90,7 +90,7 @@ func (k: &MatrixKernels) BatchGEMM(
     A_batch: [][]f32,
     B_batch: [][]f32,
     beta: f32,
-    C_batch: &[][]f32
+    C_batch: *[][]f32
 ) types.KernelResult {
 
     for batch := i32(0); batch < batch_size; batch += 1 {
@@ -111,11 +111,11 @@ func (k: &MatrixKernels) BatchGEMM(
     }
 }
 
-func (k: &MatrixKernels) Transpose(
+func (MatrixKernels* k) Transpose(
     m: i32,
     n: i32,
     A: []f32,
-    B: &[]f32
+    B: *[]f32
 ) types.KernelResult {
 
     if m <= 0 || n <= 0 {
@@ -151,14 +151,14 @@ func (k: &MatrixKernels) Transpose(
     }
 }
 
-func (k: &MatrixKernels) Add(
+func (MatrixKernels* k) Add(
     m: i32,
     n: i32,
     alpha: f32,
     A: []f32,
     beta: f32,
     B: []f32,
-    C: &[]f32
+    C: *[]f32
 ) types.KernelResult {
 
     if m <= 0 || n <= 0 {
@@ -190,11 +190,11 @@ func (k: &MatrixKernels) Add(
     }
 }
 
-func (k: &MatrixKernels) Scale(
+func (MatrixKernels* k) Scale(
     m: i32,
     n: i32,
     alpha: f32,
-    A: &[]f32
+    A: *[]f32
 ) types.KernelResult {
 
     if m <= 0 || n <= 0 {
@@ -225,14 +225,14 @@ func (k: &MatrixKernels) Scale(
     }
 }
 
-func (k: &MatrixKernels) GEMV(
+func (MatrixKernels* k) GEMV(
     m: i32,
     n: i32,
     alpha: f32,
     A: []f32,
     x: []f32,
     beta: f32,
-    y: &[]f32
+    y: *[]f32
 ) types.KernelResult {
 
     if m <= 0 || n <= 0 {
@@ -269,13 +269,13 @@ func (k: &MatrixKernels) GEMV(
     }
 }
 
-func (k: &MatrixKernels) OuterProduct(
+func (MatrixKernels* k) OuterProduct(
     m: i32,
     n: i32,
     alpha: f32,
     x: []f32,
     y: []f32,
-    A: &[]f32
+    A: *[]f32
 ) types.KernelResult {
 
     if m <= 0 || n <= 0 {

@@ -93,7 +93,7 @@ struct dbstatus {
     is_initialized: bool
     last_updated: float
 }
-class in_memory_vector_db implements vector_db_interface {
+struct in_memory_vector_db implements vector_db_interface {
     config: retrieval_system_config
     embeddings: map<str, tensor>
     documents: map<str, document_chunk>
@@ -183,7 +183,7 @@ class in_memory_vector_db implements vector_db_interface {
         }
     }
 }
-class faiss_vector_db implements vector_db_interface {
+struct faiss_vector_db implements vector_db_interface {
     config: retrieval_system_config
     index: any
     id_to_chunk: map<int, document_chunk>
@@ -327,7 +327,7 @@ class faiss_vector_db implements vector_db_interface {
         }
     }
 }
-class embedding_service {
+struct embedding_service {
     model_name: string
     model: any
     tokenizer: any
@@ -426,7 +426,7 @@ class embedding_service {
         return result
     }
 }
-class lru_cache<K, V> {
+struct lru_cache<K, V> {
     capacity: int
     cache: OrderedDict<K, V>
     init(int capacity) {
@@ -451,7 +451,7 @@ class lru_cache<K, V> {
         return this.cache.size()
     }
 }
-class document_processor {
+struct document_processor {
     config: retrieval_system_config
     splitter: TextSplitter
     init(config: retrieval_system_config) {
@@ -484,7 +484,7 @@ class document_processor {
         return all_chunks
     }
 }
-class recursive_character_text_splitter {
+struct recursive_character_text_splitter {
     chunk_size: int
     chunk_overlap: int
     separators: list<string>
@@ -542,7 +542,7 @@ class recursive_character_text_splitter {
         return chunks
     }
 }
-class query_expander {
+struct query_expander {
     llm_client: any
     enabled: bool
     init(llm_client: any, bool enabled = true) {
@@ -610,7 +610,7 @@ struct query_expansion_result {
     original: string
     expanded: list<string>
 }
-class b_m_25_retriever {
+struct b_m_25_retriever {
     corpus: list<string>
     doc_ids: list<string>
     df: map<string, int>
@@ -689,7 +689,7 @@ struct bm25_result {
     chunk_id: string
     score: float
 }
-class cross_encoder_reranker {
+struct cross_encoder_reranker {
     model: any
     tokenizer: any
     model_name: string
@@ -737,7 +737,7 @@ struct reranked_result {
     chunk: document_chunk
     rerank_score: float
 }
-class hybrid_fusion_engine {
+struct hybrid_fusion_engine {
     vector_weight: float
     keyword_weight: float
     normalization_method: string = "rrf"
@@ -830,7 +830,7 @@ struct fused_result {
     chunk_id: string
     fused_score: float
 }
-class retrieval_engine {
+struct retrieval_engine {
     config: retrieval_system_config
     vector_db: VectorDBInterface
     embedding_service: EmbeddingService

@@ -27,8 +27,8 @@ func NewImageValidator() &ImageValidator {
     }
 }
 
-func (v: &ImageValidator) ValidateImage(
-    img: &types.ImageData
+func (ImageValidator* v) ValidateImage(
+    img: *types.ImageData
 ) bool {
 
     if img.width < v.min_width || img.width > v.max_width {
@@ -74,8 +74,8 @@ func NewAudioValidator() &AudioValidator {
     }
 }
 
-func (v: &AudioValidator) ValidateAudio(
-    audio: &types.AudioData
+func (AudioValidator* v) ValidateAudio(
+    audio: *types.AudioData
 ) bool {
 
     if audio.sample_rate < v.min_sample_rate ||
@@ -116,8 +116,8 @@ func NewStatisticsCollector() &StatisticsCollector {
     }
 }
 
-func (s: &StatisticsCollector) RecordImageProcessing(
-    img: &types.ImageData,
+func (StatisticsCollector* s) RecordImageProcessing(
+    img: *types.ImageData,
     encoding_time_ms: f32
 ) {
     size := i64(len(img.raw_data))
@@ -144,7 +144,7 @@ func (s: &StatisticsCollector) RecordImageProcessing(
     s.stats[types.Modality.image] = stat
 }
 
-func (s: &StatisticsCollector) GetStatistics(
+func (StatisticsCollector* s) GetStatistics(
     modality: types.Modality
 ) ModalityStatistics {
     if stat, exists := s.stats[modality]; exists {
@@ -174,7 +174,7 @@ func NewBatchProcessor(batch_size: i32) &BatchProcessor {
     }
 }
 
-func (b: &BatchProcessor) CanAddToBatch(
+func (BatchProcessor* b) CanAddToBatch(
     current_size: i32,
     current_memory_mb: i64,
     new_item_memory_mb: i64
@@ -257,8 +257,8 @@ func ConcatenateEmbeddings(
 }
 
 func ComputeSimilarity(
-    emb1: &types.Tensor,
-    emb2: &types.Tensor
+    emb1: *types.Tensor,
+    emb2: *types.Tensor
 ) f32 {
     if len(emb1.data) != len(emb2.data) {
         return 0.0
@@ -294,7 +294,7 @@ func Sqrt(x: f64) f64 {
 }
 
 func NormalizeEmbedding(
-    embedding: &types.Tensor
+    embedding: *types.Tensor
 ) &types.Tensor {
     norm := f32(0.0)
 

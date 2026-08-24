@@ -197,7 +197,7 @@ func (inference_engine* e) generate_streaming(
         kv_cache_slot: nil,
         state: req_state_submitted,
         is_streaming: true,
-        stream: &token_stream{
+        stream: *token_stream{
             request_id: request_id,
             token_buffer: make(vec[int32]),
             buffer_cursor: 0,

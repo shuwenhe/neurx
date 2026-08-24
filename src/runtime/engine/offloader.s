@@ -52,19 +52,19 @@ struct tensor_buffer_cache {
 
 func create_gpu_memory_offloader(offload_config* config) gpu_memory_offloader* {
     return &gpu_memory_offloader{
-        gpu_tier: &memory_tier{
+        gpu_tier: *memory_tier{
             tier_name: "GPU",
             total_capacity: int64(80) * int64(1024) * int64(1024) * int64(1024),
             used_capacity: 0,
             bandwidth_gb_per_sec: 100.0,
         },
-        cpu_tier: &memory_tier{
+        cpu_tier: *memory_tier{
             tier_name: "CPU",
             total_capacity: int64(512) * int64(1024) * int64(1024) * int64(1024),
             used_capacity: 0,
             bandwidth_gb_per_sec: 10.0,
         },
-        nvme_tier: &memory_tier{
+        nvme_tier: *memory_tier{
             tier_name: "NVMe",
             total_capacity: int64(4) * int64(1024) * int64(1024) * int64(1024) * int64(1024),
             used_capacity: 0,

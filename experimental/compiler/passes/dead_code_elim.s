@@ -8,11 +8,11 @@ struct dead_code_result {
     bool success
 }
 
-func is_output_op(op: &operation) bool {
+func is_output_op(op: *operation) bool {
     op.op_kind == op_type::output
 }
 
-func mark_used_values(g: &computation_graph) vec[bool] {
+func mark_used_values(g: *computation_graph) vec[bool] {
     used = new bool[g.values.len()]
     for i in range(g.values.len()) {
         used[i] = false
@@ -33,7 +33,7 @@ func mark_used_values(g: &computation_graph) vec[bool] {
     used
 }
 
-func mark_live_operations(g: &computation_graph, used: &vec[bool]) vec[bool] {
+func mark_live_operations(g: *computation_graph, used: *vec[bool]) vec[bool] {
     live = new bool[g.operations.len()]
     for i in range(g.operations.len()) {
         live[i] = false
@@ -61,7 +61,7 @@ func mark_live_operations(g: &computation_graph, used: &vec[bool]) vec[bool] {
     live
 }
 
-func find_dead_operations(g: &computation_graph) vec[int] {
+func find_dead_operations(g: *computation_graph) vec[int] {
     dead_ops = vec[int]()
 
     used_values = mark_used_values(g)
@@ -76,7 +76,7 @@ func find_dead_operations(g: &computation_graph) vec[int] {
     dead_ops
 }
 
-func remove_dead_code(g: &mut computation_graph) dead_code_result {
+func remove_dead_code(g: *mut computation_graph) dead_code_result {
     dead_ops = find_dead_operations(g)
 
     dead_code_result {
@@ -86,7 +86,7 @@ func remove_dead_code(g: &mut computation_graph) dead_code_result {
     }
 }
 
-func has_side_effects(op: &operation) bool {
+func has_side_effects(op: *operation) bool {
     match op.op_kind {
         op_type::output => true,
         op_type::input => true,
@@ -94,7 +94,7 @@ func has_side_effects(op: &operation) bool {
     }
 }
 
-func can_remove_operation(op: &operation, g: &computation_graph) bool {
+func can_remove_operation(op: *operation, g: *computation_graph) bool {
     if has_side_effects(op) {
         return false
     }

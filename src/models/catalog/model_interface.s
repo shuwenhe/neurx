@@ -230,13 +230,13 @@ func create_model_interface(model_id string, model_name string, model_type model
 		model_name: model_name,
 		model_type: model_type,
 		state: STATE_UNINITIALIZED,
-		metadata: &model_metadata{
+		metadata: *model_metadata{
 			model_id: model_id,
 			model_name: model_name,
 			created_at: time.Now(),
 			capabilities_map: make(map[string]interface{}),
 		},
-		generation_config: &model_generation_config{
+		generation_config: *model_generation_config{
 			max_tokens: 2048,
 			temperature: 0.7,
 			top_k: 50,
@@ -244,12 +244,12 @@ func create_model_interface(model_id string, model_name string, model_type model
 			repetition_penalty: 1.0,
 			num_beams: 1,
 		},
-		memory_config: &model_memory_config{
+		memory_config: *model_memory_config{
 			max_memory_gb: 8.0,
 			cache_size_gb: 4.0,
 			enable_offloading: false,
 		},
-		stats: &model_stats{
+		stats: *model_stats{
 			loaded_at: time.Now(),
 		},
 		max_batch_size: 32,

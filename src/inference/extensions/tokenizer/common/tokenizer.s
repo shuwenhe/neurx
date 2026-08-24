@@ -36,7 +36,7 @@ func NewBaseTokenizer(config: types.TokenizerConfig) &BaseTokenizer {
     return tokenizer
 }
 
-func (t: &BaseTokenizer) Encode(text: string) types.TokenizerResult {
+func (BaseTokenizer* t) Encode(text: string) types.TokenizerResult {
     return t.EncodeWithOptions(text, types.EncodingOptions{
         add_special_tokens: true,
         truncation: false,
@@ -44,7 +44,7 @@ func (t: &BaseTokenizer) Encode(text: string) types.TokenizerResult {
     })
 }
 
-func (t: &BaseTokenizer) EncodeWithOptions(text: string, opts: types.EncodingOptions) types.TokenizerResult {
+func (BaseTokenizer* t) EncodeWithOptions(text: string, opts: types.EncodingOptions) types.TokenizerResult {
     t.stats.total_encodings += 1
 
     if t.config.cache_enabled {
@@ -112,7 +112,7 @@ func (t: &BaseTokenizer) EncodeWithOptions(text: string, opts: types.EncodingOpt
     }
 }
 
-func (t: &BaseTokenizer) EncodeBatch(texts: vec[string]) vec[types.TokenizerResult] {
+func (BaseTokenizer* t) EncodeBatch(texts: vec[string]) vec[types.TokenizerResult] {
     results := make(vec[types.TokenizerResult], len(texts))
     for i := 0; i < len(texts); i += 1 {
         results[i] = t.Encode(texts[i])
@@ -120,14 +120,14 @@ func (t: &BaseTokenizer) EncodeBatch(texts: vec[string]) vec[types.TokenizerResu
     return results
 }
 
-func (t: &BaseTokenizer) Decode(token_ids: vec[i32]) types.TokenizerResult {
+func (BaseTokenizer* t) Decode(token_ids: vec[i32]) types.TokenizerResult {
     return t.DecodeWithOptions(token_ids, types.DecodingOptions{
         skip_special_tokens: false,
         clean_up_tokenization_spaces: true,
     })
 }
 
-func (t: &BaseTokenizer) DecodeWithOptions(token_ids: vec[i32], opts: types.DecodingOptions) types.TokenizerResult {
+func (BaseTokenizer* t) DecodeWithOptions(token_ids: vec[i32], opts: types.DecodingOptions) types.TokenizerResult {
     t.stats.total_decodings += 1
 
     text_parts := make(vec[string], len(token_ids))
@@ -156,7 +156,7 @@ func (t: &BaseTokenizer) DecodeWithOptions(token_ids: vec[i32], opts: types.Deco
     }
 }
 
-func (t: &BaseTokenizer) DecodeBatch(token_sequences: vec[vec[i32]]) vec[types.TokenizerResult] {
+func (BaseTokenizer* t) DecodeBatch(token_sequences: vec[vec[i32]]) vec[types.TokenizerResult] {
     results := make(vec[types.TokenizerResult], len(token_sequences))
     for i := 0; i < len(token_sequences); i += 1 {
         results[i] = t.Decode(token_sequences[i])
@@ -164,12 +164,12 @@ func (t: &BaseTokenizer) DecodeBatch(token_sequences: vec[vec[i32]]) vec[types.T
     return results
 }
 
-func (t: &BaseTokenizer) SetSpecialTokens(special: types.SpecialTokens) {
+func (BaseTokenizer* t) SetSpecialTokens(special: types.SpecialTokens) {
     t.special_tokens = special
     t.vocab.num_special_tokens = 7
 }
 
-func (t: &BaseTokenizer) GetSpecialToken(name: string) i32 {
+func (BaseTokenizer* t) GetSpecialToken(name: string) i32 {
     switch name {
     case "bos":
         return t.special_tokens.bos_token_id
@@ -184,29 +184,29 @@ func (t: &BaseTokenizer) GetSpecialToken(name: string) i32 {
     }
 }
 
-func (t: &BaseTokenizer) IsSpecialToken(token_id: i32) bool {
+func (BaseTokenizer* t) IsSpecialToken(token_id: i32) bool {
     return t.is_special_token(token_id)
 }
 
-func (t: &BaseTokenizer) GetVocabularySize() i32 {
+func (BaseTokenizer* t) GetVocabularySize() i32 {
     return t.vocab.size
 }
 
-func (t: &BaseTokenizer) GetTokenText(token_id: i32) string {
+func (BaseTokenizer* t) GetTokenText(token_id: i32) string {
     if token_text, ok := t.vocab_id_to_text[token_id]; ok {
         return token_text
     }
     return "<unk>"
 }
 
-func (t: &BaseTokenizer) GetTokenId(text: string) i32 {
+func (BaseTokenizer* t) GetTokenId(text: string) i32 {
     if token_id, ok := t.vocab_text_to_id[text]; ok {
         return token_id
     }
     return t.special_tokens.unk_token_id
 }
 
-func (t: &BaseTokenizer) tokenize_internal(text: string) vec[i32] {
+func (BaseTokenizer* t) tokenize_internal(text: string) vec[i32] {
     tokens := make(vec[i32], 0)
 
     words := split_string(text, " ")
@@ -231,7 +231,7 @@ func (t: &BaseTokenizer) tokenize_internal(text: string) vec[i32] {
     return tokens
 }
 
-func (t: &BaseTokenizer) add_special_tokens_internal(tokens: vec[i32]) vec[i32] {
+func (BaseTokenizer* t) add_special_tokens_internal(tokens: vec[i32]) vec[i32] {
     result := make(vec[i32], 0)
 
     if t.config.add_bos {
@@ -247,7 +247,7 @@ func (t: &BaseTokenizer) add_special_tokens_internal(tokens: vec[i32]) vec[i32] 
     return result
 }
 
-func (t: &BaseTokenizer) is_special_token(token_id: i32) bool {
+func (BaseTokenizer* t) is_special_token(token_id: i32) bool {
     return token_id == t.special_tokens.bos_token_id ||
            token_id == t.special_tokens.eos_token_id ||
            token_id == t.special_tokens.pad_token_id ||
@@ -257,7 +257,7 @@ func (t: &BaseTokenizer) is_special_token(token_id: i32) bool {
            token_id == t.special_tokens.mask_token_id
 }
 
-func (t: &BaseTokenizer) join_tokens(tokens: vec[string], clean_spaces: bool) string {
+func (BaseTokenizer* t) join_tokens(tokens: vec[string], clean_spaces: bool) string {
     if len(tokens) == 0 {
         return ""
     }
@@ -273,25 +273,25 @@ func (t: &BaseTokenizer) join_tokens(tokens: vec[string], clean_spaces: bool) st
     return result
 }
 
-func (t: &BaseTokenizer) GetStatistics() types.TokenizerStats {
+func (BaseTokenizer* t) GetStatistics() types.TokenizerStats {
     if t.stats.total_encodings > 0 {
         t.stats.avg_tokens_per_sequence = f32(t.stats.bytes_processed) / f32(t.stats.total_encodings)
     }
     return t.stats
 }
 
-func (t: &BaseTokenizer) ResetStatistics() {
+func (BaseTokenizer* t) ResetStatistics() {
     t.stats = types.TokenizerStats{}
 }
 
-func (t: &BaseTokenizer) ClearCache() {
+func (BaseTokenizer* t) ClearCache() {
     for key := range t.cache {
         delete(t.cache, key)
     }
     t.cache_size_bytes = 0
 }
 
-func (t: &BaseTokenizer) GetCacheStatistics() map[string]i64 {
+func (BaseTokenizer* t) GetCacheStatistics() map[string]i64 {
     stats := make(map[string]i64)
     stats["cache_size_bytes"] = i64(t.cache_size_bytes)
     stats["cache_entries"] = i64(len(t.cache))

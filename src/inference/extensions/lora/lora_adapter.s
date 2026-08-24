@@ -15,7 +15,7 @@ struct lora_adapter_error {
 
 struct lora_adapter {
     name: string
-    config: &lora_config
+    config: *lora_config
     weights: map[string, (vec[vec[float]], vec[vec[float]])]
     is_loaded: bool
     fused: bool
@@ -25,7 +25,7 @@ struct lora_adapter {
 
 impl lora_adapter {
 
-    func new(name: string, config: &lora_config) lora_adapter {
+    func new(name: string, config: *lora_config) lora_adapter {
         lora_adapter {
             name: name,
             config: config,
@@ -37,10 +37,10 @@ impl lora_adapter {
         }
     }
 
-    func (adapter: &mut lora_adapter) add_module_weights(
+    func (mut lora_adapter* adapter) add_module_weights(
         module_name: string,
-        lora_a: &vec[vec[float]],
-        lora_b: &vec[vec[float]]
+        lora_a: *vec[vec[float]],
+        lora_b: *vec[vec[float]]
     ) result[(), lora_adapter_error] {
         if !adapter.config.is_target_module(module_name) {
             return result::err(lora_adapter_error {
@@ -60,13 +60,13 @@ impl lora_adapter {
         result::ok(())
     }
 
-    func (adapter: &lora_adapter) get_module_weights(
+    func (lora_adapter* adapter) get_module_weights(
         module_name: string
     ) option[(vec[vec[float]], vec[vec[float]])] {
         adapter.weights.get(module_name)
     }
 
-    func (adapter: &mut lora_adapter) remove_module_weights(
+    func (mut lora_adapter* adapter) remove_module_weights(
         module_name: string
     ) result[(), lora_adapter_error] {
         if !adapter.weights.contains(module_name) {
@@ -80,9 +80,9 @@ impl lora_adapter {
         result::ok(())
     }
 
-    func (adapter: &lora_adapter) apply_lora(
+    func (lora_adapter* adapter) apply_lora(
         module_name: string,
-        input: &vec[float],
+        input: *vec[float],
         scale: float
     ) result[&vec[float], lora_adapter_error] {
         switch adapter.weights.get(module_name) {
@@ -131,9 +131,9 @@ impl lora_adapter {
         }
     }
 
-    func (adapter: &lora_adapter) apply_lora_batch(
+    func (lora_adapter* adapter) apply_lora_batch(
         module_name: string,
-        inputs: &vec[&vec[float]],
+        inputs: *vec[&vec[float]],
         scale: float
     ) result[&vec[&vec[float]], lora_adapter_error] {
         let mut outputs = vec[&vec[float]]()
@@ -148,8 +148,8 @@ impl lora_adapter {
         result::ok(outputs)
     }
 
-    func (adapter: &mut lora_adapter) fuse_weights(
-        original_weights: &map[string, &vec[vec[float]]]
+    func (mut lora_adapter* adapter) fuse_weights(
+        original_weights: *map[string, &vec[vec[float]]]
     ) result[(), lora_adapter_error] {
         if adapter.fused {
             return result::err(lora_adapter_error {
@@ -191,8 +191,8 @@ impl lora_adapter {
         result::ok(())
     }
 
-    func (adapter: &mut lora_adapter) unfuse_weights(
-        original_weights: &map[string, &vec[vec[float]]]
+    func (mut lora_adapter* adapter) unfuse_weights(
+        original_weights: *map[string, &vec[vec[float]]]
     ) result[(), lora_adapter_error] {
         if !adapter.fused {
             return result::err(lora_adapter_error {
@@ -207,11 +207,11 @@ impl lora_adapter {
         result::ok(())
     }
 
-    func (adapter: &lora_adapter) is_fused() bool {
+    func (lora_adapter* adapter) is_fused() bool {
         adapter.fused
     }
 
-    func (adapter: &lora_adapter) get_info() string {
+    func (lora_adapter* adapter) get_info() string {
         let mut info = "LoRA Adapter: " + adapter.name + "\n"
         info = info + "  Config: rank=" + adapter.config.lora_rank.to_string() +
                       ", alpha=" + adapter.config.lora_alpha.to_string() + "\n"
@@ -220,7 +220,7 @@ impl lora_adapter {
         info
     }
 
-    func (adapter: &lora_adapter) get_size_mb() int {
+    func (lora_adapter* adapter) get_size_mb() int {
         let mut total = 0
 
         for module_name in adapter.weights.keys() {
@@ -239,7 +239,7 @@ impl lora_adapter {
         total / 1024 / 1024
     }
 
-    func (adapter: &lora_adapter) get_module_names() &vec[string] {
+    func (lora_adapter* adapter) get_module_names() &vec[string] {
         let mut names = vec[string]()
         for name in adapter.weights.keys() {
             names.push(name)
@@ -247,15 +247,15 @@ impl lora_adapter {
         names
     }
 
-    func (adapter: &mut lora_adapter) set_metadata(key: string, value: string) {
+    func (mut lora_adapter* adapter) set_metadata(key: string, value: string) {
         adapter.metadata.insert(key, value)
     }
 
-    func (adapter: &lora_adapter) get_metadata(key: string) option[string] {
+    func (lora_adapter* adapter) get_metadata(key: string) option[string] {
         adapter.metadata.get(key)
     }
 
-    func (adapter: &lora_adapter) validate() result[(), lora_adapter_error] {
+    func (lora_adapter* adapter) validate() result[(), lora_adapter_error] {
         if adapter.name.len() == 0 {
             return result::err(lora_adapter_error {
                 code: "INVALID_NAME",

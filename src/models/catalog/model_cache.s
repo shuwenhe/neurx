@@ -88,7 +88,7 @@ func create_model_cache(cache_config* config) *model_cache {
 		max_size_bytes: config.max_size_bytes,
 		eviction_policy: config.eviction_policy,
 		ttl_seconds: config.ttl_seconds,
-		stats: &cache_statistics{},
+		stats: *cache_statistics{},
 	}
 }
 

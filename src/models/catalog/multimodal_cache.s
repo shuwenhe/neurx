@@ -56,7 +56,7 @@ func create_multimodal_cache(max_size int64) *multimodal_cache {
 	cache := &multimodal_cache{
 		entries:          make(map[string]*mm_cache_entry),
 		modality_index:   make(map[string][]string),
-		stats: &mm_cache_statistics{
+		stats: *mm_cache_statistics{
 			total_cache_size: 0,
 			num_entries:      0,
 			max_entries:      10000,

@@ -63,7 +63,7 @@ struct code_block {
     code: string
     filename: string?
 }
-class sandbox_environment {
+struct sandbox_environment {
     config: code_interpreter_config
     session_id: string
     working_dir: string
@@ -241,7 +241,7 @@ struct security_check_result {
     allowed: bool
     reason: string
 }
-class session_state {
+struct session_state {
     session_id: string
     created_at: float
     last_execution_time: float = 0
@@ -298,7 +298,7 @@ struct session_summary {
     variable_names: list<string>
     success_rate: float
 }
-class python_runtime {
+struct python_runtime {
     sandbox_dir: string
     memory_limit: int
     timeout: int
@@ -429,7 +429,7 @@ struct error_info {
     message: string
     traceback: list<string>
 }
-class java_script_runtime {
+struct java_script_runtime {
     vm_context: any
     init() {
         this.vm_context = create_javascript_vm()
@@ -474,7 +474,7 @@ class java_script_runtime {
         }
     }
 }
-class shell_runtime {
+struct shell_runtime {
     allow_network: bool
     allowed_commands: set<string>
     init(bool allow_network) {
@@ -537,7 +537,7 @@ class shell_runtime {
         }
     }
 }
-class sql_runtime {
+struct sql_runtime {
     db_path: string
     connection: DatabaseConnection?
     init(string db_path) {
@@ -611,7 +611,7 @@ struct sql_query_result {
     rows: list<list<any>>
     row_count: int
 }
-class result_formatter {
+struct result_formatter {
     config: code_interpreter_config
     init(config: code_interpreter_config) {
         this.config = config
@@ -685,7 +685,7 @@ struct formatted_output {
     has_visualizations: bool
     has_files: bool
 }
-class data_analysis_helper {
+struct data_analysis_helper {
     sandbox: sandbox_environment
     formatter: result_formatter
     init(sandbox: sandbox_environment) {
@@ -843,7 +843,7 @@ else:
         return this.sandbox.execute(code_block)
     }
 }
-class code_interpreter {
+struct code_interpreter {
     config: code_interpreter_config
     sandbox: sandbox_environment?
     data_helper: data_analysis_helper?

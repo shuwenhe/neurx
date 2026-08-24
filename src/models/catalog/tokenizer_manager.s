@@ -90,7 +90,7 @@ func create_tokenizer(tokenizer_id string, model_id string, tokenizer_type token
 		tokenizer_id: tokenizer_id,
 		model_id: model_id,
 		tokenizer_type: tokenizer_type,
-		config: &tokenizer_config{
+		config: *tokenizer_config{
 			tokenizer_type: tokenizer_type,
 			vocabulary_size: 32000,
 			max_sequence_length: 4096,
@@ -104,7 +104,7 @@ func create_tokenizer(tokenizer_id string, model_id string, tokenizer_type token
 			add_prefix_space: false,
 			add_special_tokens: true,
 		},
-		stats: &tokenizer_stats{
+		stats: *tokenizer_stats{
 			loaded_at: time.Now(),
 		},
 		vocab: make(map[string]int32),

@@ -76,7 +76,7 @@ func create_model_adapter_registry() *model_adapter_registry {
 
 func create_qwen_adapter(model_id string, model_name string, version string) *qwen_adapter {
 	return &qwen_adapter{
-		base: &model_adapter_base{
+		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
 			model_type: TYPE_QWEN,
@@ -90,7 +90,7 @@ func create_qwen_adapter(model_id string, model_name string, version string) *qw
 
 func create_llama_adapter(model_id string, model_name string, context_length int32) *llama_adapter {
 	return &llama_adapter{
-		base: &model_adapter_base{
+		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
 			model_type: TYPE_LLAMA,
@@ -104,7 +104,7 @@ func create_llama_adapter(model_id string, model_name string, context_length int
 
 func create_mixtral_adapter(model_id string, model_name string, num_experts int32) *mixtral_adapter {
 	return &mixtral_adapter{
-		base: &model_adapter_base{
+		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
 			model_type: TYPE_MIXTRAL,
@@ -118,7 +118,7 @@ func create_mixtral_adapter(model_id string, model_name string, num_experts int3
 
 func create_chatglm_adapter(model_id string, model_name string, generation_mode string) *chatglm_adapter {
 	return &chatglm_adapter{
-		base: &model_adapter_base{
+		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
 			model_type: TYPE_CHATGLM,
@@ -131,7 +131,7 @@ func create_chatglm_adapter(model_id string, model_name string, generation_mode 
 
 func create_baichuan_adapter(model_id string, model_name string) *baichuan_adapter {
 	return &baichuan_adapter{
-		base: &model_adapter_base{
+		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
 			model_type: TYPE_BAICHUAN,
@@ -144,7 +144,7 @@ func create_baichuan_adapter(model_id string, model_name string) *baichuan_adapt
 
 func create_internlm_adapter(model_id string, model_name string) *internlm_adapter {
 	return &internlm_adapter{
-		base: &model_adapter_base{
+		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
 			model_type: TYPE_INTERNLM,
@@ -157,7 +157,7 @@ func create_internlm_adapter(model_id string, model_name string) *internlm_adapt
 
 func create_falcon_adapter(model_id string, model_name string, num_heads int32) *falcon_adapter {
 	return &falcon_adapter{
-		base: &model_adapter_base{
+		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
 			model_type: TYPE_FALCON,
@@ -171,7 +171,7 @@ func create_falcon_adapter(model_id string, model_name string, num_heads int32) 
 
 func create_mpt_adapter(model_id string, model_name string, n_layers int32) *mpt_adapter {
 	return &mpt_adapter{
-		base: &model_adapter_base{
+		base: *model_adapter_base{
 			model_id: model_id,
 			model_name: model_name,
 			model_type: TYPE_MPT,

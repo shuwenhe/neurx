@@ -46,7 +46,7 @@ func new_transformer_block(config transformer_config) *transformer_block {
     head_dim := hidden_dim / num_heads
     inner_dim := config.inner_dim
     return &transformer_block{
-        attention: &multi_head_attention{
+        attention: *multi_head_attention{
             query_proj: tensor.Randn(hidden_dim, head_dim*num_heads),
             key_proj:   tensor.Randn(hidden_dim, head_dim*num_heads),
             value_proj: tensor.Randn(hidden_dim, head_dim*num_heads),
@@ -55,20 +55,20 @@ func new_transformer_block(config transformer_config) *transformer_block {
             head_dim:   head_dim,
             scale:     1.0 / sqrt(float32(head_dim)),
         },
-        ffn: &feed_forward_network{
+        ffn: *feed_forward_network{
             proj1:     tensor.Randn(hidden_dim, inner_dim),
             proj2:     tensor.Randn(inner_dim, hidden_dim),
             gate_proj:  tensor.Randn(hidden_dim, inner_dim),
             inner_dim:  inner_dim,
             hidden_dim: hidden_dim,
         },
-        norm1: &layer_norm{
+        norm1: *layer_norm{
             weight:    tensor.Ones(hidden_dim),
             bias:      tensor.Zeros(hidden_dim),
             eps:       1e-5,
             hidden_dim: hidden_dim,
         },
-        norm2: &layer_norm{
+        norm2: *layer_norm{
             weight:    tensor.Ones(hidden_dim),
             bias:      tensor.Zeros(hidden_dim),
             eps:       1e-5,

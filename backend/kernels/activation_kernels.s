@@ -14,9 +14,9 @@ func NewActivationKernels(config: types.KernelConfig) &ActivationKernels {
     }
 }
 
-func (k: &ActivationKernels) ReLU(
+func (ActivationKernels* k) ReLU(
     input: []f32,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     for i := 0; i < len(input); i += 1 {
@@ -44,8 +44,8 @@ func (k: &ActivationKernels) ReLU(
     }
 }
 
-func (k: &ActivationKernels) ReLUInplace(
-    data: &[]f32
+func (ActivationKernels* k) ReLUInplace(
+    data: *[]f32
 ) types.KernelResult {
 
     for i := 0; i < len(*data); i += 1 {
@@ -71,10 +71,10 @@ func (k: &ActivationKernels) ReLUInplace(
     }
 }
 
-func (k: &ActivationKernels) GELU(
+func (ActivationKernels* k) GELU(
     input: []f32,
     approximate: bool,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     const_cdf := f32(0.7978845608)
@@ -112,9 +112,9 @@ func (k: &ActivationKernels) GELU(
     }
 }
 
-func (k: &ActivationKernels) SiLU(
+func (ActivationKernels* k) SiLU(
     input: []f32,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     for i := 0; i < len(input); i += 1 {
@@ -140,9 +140,9 @@ func (k: &ActivationKernels) SiLU(
     }
 }
 
-func (k: &ActivationKernels) Sigmoid(
+func (ActivationKernels* k) Sigmoid(
     input: []f32,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     for i := 0; i < len(input); i += 1 {
@@ -167,9 +167,9 @@ func (k: &ActivationKernels) Sigmoid(
     }
 }
 
-func (k: &ActivationKernels) Tanh(
+func (ActivationKernels* k) Tanh(
     input: []f32,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     for i := 0; i < len(input); i += 1 {
@@ -196,10 +196,10 @@ func (k: &ActivationKernels) Tanh(
     }
 }
 
-func (k: &ActivationKernels) Softmax(
+func (ActivationKernels* k) Softmax(
     input: []f32,
     dim: i32,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     if dim < 0 || dim > 3 {
@@ -259,10 +259,10 @@ func (k: &ActivationKernels) Softmax(
     }
 }
 
-func (k: &ActivationKernels) LogSoftmax(
+func (ActivationKernels* k) LogSoftmax(
     input: []f32,
     dim: i32,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     softmax_result := make([]f32, len(input))
@@ -295,10 +295,10 @@ func (k: &ActivationKernels) LogSoftmax(
     }
 }
 
-func (k: &ActivationKernels) ApplyActivation(
+func (ActivationKernels* k) ApplyActivation(
     activation: types.ActivationType,
     input: []f32,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     switch activation {

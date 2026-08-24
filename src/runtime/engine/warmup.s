@@ -52,7 +52,7 @@ struct model_warmup_engine {
 func create_model_warmup_engine(warmup_config* config) model_warmup_engine* {
     return &model_warmup_engine{
         config: config,
-        profile: &warmup_profile{
+        profile: *warmup_profile{
             kernel_profiles: make([]warmup_kernel_info*, 0),
             layer_profiles: make([]warmup_layer_info*, 0),
             overall_stats: warmup_stats{},

@@ -175,7 +175,7 @@ func new_operation(int id, op_type op_kind, string name, int[] input_ids, int[] 
     }
 }
 
-func (op: &mut operation) add_attribute(string key, string value) {
+func (mut operation* op) add_attribute(string key, string value) {
     attr = attr_value {
         key: key,
         value_str: value,
@@ -183,7 +183,7 @@ func (op: &mut operation) add_attribute(string key, string value) {
     op.attributes.push(attr)
 }
 
-func (op: &operation) get_attribute(string key) option[string] {
+func (operation* op) get_attribute(string key) option[string] {
     for attr in op.attributes {
         if attr.key == key {
             return option::some(attr.value_str)
@@ -192,10 +192,10 @@ func (op: &operation) get_attribute(string key) option[string] {
     option::none
 }
 
-func (op: &operation) num_inputs() int {
+func (operation* op) num_inputs() int {
     op.input_ids.len()
 }
 
-func (op: &operation) num_outputs() int {
+func (operation* op) num_outputs() int {
     op.output_ids.len()
 }

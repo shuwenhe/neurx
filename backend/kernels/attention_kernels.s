@@ -7,7 +7,7 @@ import (
 
 struct AttentionKernels {
     config: types.KernelConfig,
-    matrix_kernels: &matrix_kernels.MatrixKernels
+    matrix_kernels: *matrix_kernels.MatrixKernels
 }
 
 func NewAttentionKernels(config: types.KernelConfig) &AttentionKernels {
@@ -17,12 +17,12 @@ func NewAttentionKernels(config: types.KernelConfig) &AttentionKernels {
     }
 }
 
-func (k: &AttentionKernels) SoftmaxAttention(
+func (AttentionKernels* k) SoftmaxAttention(
     params: types.AttentionParams,
     Q: []f32,
     K: []f32,
     V: []f32,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     batch_size := params.batch_size
@@ -119,12 +119,12 @@ func (k: &AttentionKernels) SoftmaxAttention(
     }
 }
 
-func (k: &AttentionKernels) CausalAttention(
+func (AttentionKernels* k) CausalAttention(
     params: types.AttentionParams,
     Q: []f32,
     K: []f32,
     V: []f32,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     batch_size := params.batch_size
@@ -184,12 +184,12 @@ func (k: &AttentionKernels) CausalAttention(
     }
 }
 
-func (k: &AttentionKernels) FlashAttentionV2(
+func (AttentionKernels* k) FlashAttentionV2(
     params: types.AttentionParams,
     Q: []f32,
     K: []f32,
     V: []f32,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     if params.is_causal {
@@ -199,7 +199,7 @@ func (k: &AttentionKernels) FlashAttentionV2(
     }
 }
 
-func (k: &AttentionKernels) MultiHeadAttention(
+func (AttentionKernels* k) MultiHeadAttention(
     batch_size: i32,
     num_heads: i32,
     seq_len: i32,
@@ -207,7 +207,7 @@ func (k: &AttentionKernels) MultiHeadAttention(
     Q: []f32,
     K: []f32,
     V: []f32,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     params := types.AttentionParams{
@@ -223,7 +223,7 @@ func (k: &AttentionKernels) MultiHeadAttention(
     return k.SoftmaxAttention(params, Q, K, V, output)
 }
 
-func (k: &AttentionKernels) GroupedQueryAttention(
+func (AttentionKernels* k) GroupedQueryAttention(
     batch_size: i32,
     num_query_heads: i32,
     num_kv_heads: i32,
@@ -232,7 +232,7 @@ func (k: &AttentionKernels) GroupedQueryAttention(
     Q: []f32,
     K: []f32,
     V: []f32,
-    output: &[]f32
+    output: *[]f32
 ) types.KernelResult {
 
     groups_per_head := num_query_heads / num_kv_heads

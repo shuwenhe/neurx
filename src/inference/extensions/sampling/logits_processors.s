@@ -14,7 +14,7 @@ struct temperature_processor {
     temperature: float
 }
 
-func (tp: &temperature_processor) apply(logits: &vec[float]) result[vec[float], processor_error] {
+func (temperature_processor* tp) apply(logits: *vec[float]) result[vec[float], processor_error] {
     if tp.temperature <= 0.0 {
         return result::err(processor_error {
             code: "INVALID_TEMPERATURE",
@@ -37,7 +37,7 @@ struct top_k_processor {
     k: int
 }
 
-func find_kth_largest(logits: &vec[float], k: int) float {
+func find_kth_largest(logits: *vec[float], k: int) float {
     if k >= logits.len() {
         return logits[0]
     }
@@ -54,7 +54,7 @@ func find_kth_largest(logits: &vec[float], k: int) float {
     max_val
 }
 
-func (tp: &top_k_processor) apply(logits: &vec[float]) result[vec[float], processor_error] {
+func (top_k_processor* tp) apply(logits: *vec[float]) result[vec[float], processor_error] {
     if tp.k <= 0 {
         return result::err(processor_error {
             code: "INVALID_K",
@@ -86,7 +86,7 @@ struct nucleus_processor {
     top_p: float
 }
 
-func softmax(logits: &vec[float]) vec[float] {
+func softmax(logits: *vec[float]) vec[float] {
     let max_logit = logits[0]
     let i = 1
     while i < logits.len() {
@@ -117,7 +117,7 @@ func softmax(logits: &vec[float]) vec[float] {
     probs
 }
 
-func (np: &nucleus_processor) apply(logits: &vec[float]) result[vec[float], processor_error] {
+func (nucleus_processor* np) apply(logits: *vec[float]) result[vec[float], processor_error] {
     if np.top_p <= 0.0 || np.top_p > 1.0 {
         return result::err(processor_error {
             code: "INVALID_TOP_P",
@@ -162,10 +162,10 @@ func (np: &nucleus_processor) apply(logits: &vec[float]) result[vec[float], proc
 
 struct frequency_penalty_processor {
     penalty: float
-    token_counts: &map[int, int]
+    token_counts: *map[int, int]
 }
 
-func (fp: &frequency_penalty_processor) apply(logits: &vec[float]) result[vec[float], processor_error] {
+func (frequency_penalty_processor* fp) apply(logits: *vec[float]) result[vec[float], processor_error] {
     if fp.penalty < 0.0 {
         return result::err(processor_error {
             code: "INVALID_PENALTY",
@@ -193,7 +193,7 @@ struct length_penalty_processor {
     penalty: float
 }
 
-func (lp: &length_penalty_processor) apply(logits: &vec[float]) result[vec[float], processor_error] {
+func (length_penalty_processor* lp) apply(logits: *vec[float]) result[vec[float], processor_error] {
     if lp.penalty < 0.0 {
         return result::err(processor_error {
             code: "INVALID_PENALTY",
@@ -214,10 +214,10 @@ func (lp: &length_penalty_processor) apply(logits: &vec[float]) result[vec[float
 
 struct repetition_penalty_processor {
     penalty: float
-    previous_tokens: &vec[int]
+    previous_tokens: *vec[int]
 }
 
-func (rp: &repetition_penalty_processor) apply(logits: &vec[float]) result[vec[float], processor_error] {
+func (repetition_penalty_processor* rp) apply(logits: *vec[float]) result[vec[float], processor_error] {
     if rp.penalty < 1.0 {
         return result::err(processor_error {
             code: "INVALID_PENALTY",
@@ -282,7 +282,7 @@ func logits_processor_pipeline::new() logits_processor_pipeline {
     }
 }
 
-func (pipeline: &mut logits_processor_pipeline) with_temperature(
+func (mut logits_processor_pipeline* pipeline) with_temperature(
     temperature: float
 ) result[(), processor_error] {
     if temperature <= 0.0 {
@@ -296,7 +296,7 @@ func (pipeline: &mut logits_processor_pipeline) with_temperature(
     result::ok(())
 }
 
-func (pipeline: &mut logits_processor_pipeline) with_top_k(
+func (mut logits_processor_pipeline* pipeline) with_top_k(
     k: int
 ) result[(), processor_error] {
     if k <= 0 {
@@ -310,7 +310,7 @@ func (pipeline: &mut logits_processor_pipeline) with_top_k(
     result::ok(())
 }
 
-func (pipeline: &mut logits_processor_pipeline) with_nucleus(
+func (mut logits_processor_pipeline* pipeline) with_nucleus(
     top_p: float
 ) result[(), processor_error] {
     if top_p <= 0.0 || top_p > 1.0 {
@@ -324,8 +324,8 @@ func (pipeline: &mut logits_processor_pipeline) with_nucleus(
     result::ok(())
 }
 
-func (pipeline: &logits_processor_pipeline) process(
-    logits: &vec[float]
+func (logits_processor_pipeline* pipeline) process(
+    logits: *vec[float]
 ) result[vec[float], processor_error] {
     let mut result_logits = logits
 

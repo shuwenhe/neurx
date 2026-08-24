@@ -19,7 +19,7 @@ func create_contrastive_search_state(float32 alpha, int32 k, bool degenerate) co
 		alpha: alpha,
 		k: k,
 		degenerate_to_greedy: degenerate,
-		embedding_cache: &embedding_cache{
+		embedding_cache: *embedding_cache{
 			token_embeddings: make(map[int32]vec[float32]),
 			model_embeddings: make(vec[vec[float32]]),
 		},

@@ -53,21 +53,21 @@ func new_compilation_unit(string name, computation_graph g) compilation_unit {
     }
 }
 
-func (cu: &compilation_unit) get_optimization_ratio() float {
+func (compilation_unit* cu) get_optimization_ratio() float {
     if cu.stats.original_op_count == 0 {
         return 1.0
     }
     (cu.stats.original_op_count - cu.stats.optimized_op_count) as float / cu.stats.original_op_count as float
 }
 
-func (cu: &compilation_unit) get_memory_saving_ratio() float {
+func (compilation_unit* cu) get_memory_saving_ratio() float {
     if cu.stats.original_memory == 0 {
         return 0.0
     }
     (cu.stats.original_memory - cu.stats.optimized_memory) as float / cu.stats.original_memory as float
 }
 
-func (cu: &compilation_unit) speedup_estimate() float {
+func (compilation_unit* cu) speedup_estimate() float {
     ratio = cu.get_optimization_ratio()
     if ratio < 0.1 {
         return 1.5
@@ -78,11 +78,11 @@ func (cu: &compilation_unit) speedup_estimate() float {
     }
 }
 
-func (cu: &compilation_unit) is_valid() bool {
+func (compilation_unit* cu) is_valid() bool {
     cu.optimized_graph.is_valid()
 }
 
-func (cu: &compilation_unit) summary_string() string {
+func (compilation_unit* cu) summary_string() string {
     s = ""
     s = s + "Compilation Unit: " + cu.unit_name + "\n"
     s = s + "Original ops: " + cu.stats.original_op_count as string + "\n"

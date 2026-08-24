@@ -29,7 +29,7 @@ func NewDynamicResolutionProcessor(
     }
 }
 
-func (p: &DynamicResolutionProcessor) CalculateTargetResolution(
+func (DynamicResolutionProcessor* p) CalculateTargetResolution(
     height: i32,
     width: i32
 ) (i32, i32) {
@@ -68,7 +68,7 @@ func (p: &DynamicResolutionProcessor) CalculateTargetResolution(
     return target_h, target_w
 }
 
-func (p: &DynamicResolutionProcessor) GetPatchCount(
+func (DynamicResolutionProcessor* p) GetPatchCount(
     height: i32,
     width: i32
 ) i32 {
@@ -77,8 +77,8 @@ func (p: &DynamicResolutionProcessor) GetPatchCount(
     return patch_h * patch_w + 1
 }
 
-func (p: &DynamicResolutionProcessor) CreateVariableResolutionPatches(
-    image_tensor: &types.Tensor
+func (DynamicResolutionProcessor* p) CreateVariableResolutionPatches(
+    image_tensor: *types.Tensor
 ) []ResolutionPatch {
     h := image_tensor.shape[0]
     w := image_tensor.shape[1]
@@ -137,8 +137,8 @@ struct ResolutionPatch {
     scale_factor: f32
 }
 
-func (p: &DynamicResolutionProcessor) MultiCropProcess(
-    image_tensor: &types.Tensor,
+func (DynamicResolutionProcessor* p) MultiCropProcess(
+    image_tensor: *types.Tensor,
     num_crops: i32
 ) []&types.Tensor {
     h := image_tensor.shape[0]
@@ -220,7 +220,7 @@ struct ResolutionInfo {
     scale_factor: f32
 }
 
-func (p: &DynamicResolutionProcessor) GetInfo(
+func (DynamicResolutionProcessor* p) GetInfo(
     height: i32,
     width: i32
 ) ResolutionInfo {
@@ -238,7 +238,7 @@ func (p: &DynamicResolutionProcessor) GetInfo(
     }
 }
 
-func (p: &DynamicResolutionProcessor) CanProcessImage(
+func (DynamicResolutionProcessor* p) CanProcessImage(
     height: i32,
     width: i32
 ) bool {

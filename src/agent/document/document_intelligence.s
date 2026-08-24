@@ -117,7 +117,7 @@ struct document_statistics {
     link_count: int
     estimated_reading_time_minutes: float
 }
-class document_parser {
+struct document_parser {
     config: document_parser_config
     pdf_parser: PDFParser?
     html_parser: HTMLParser?
@@ -279,7 +279,7 @@ class document_parser {
         }
     }
 }
-class pdf_parser {
+struct pdf_parser {
     config: document_parser_config
     init(config: document_parser_config) {
         this.config = config
@@ -372,7 +372,7 @@ class pdf_parser {
         return null
     }
 }
-class html_parser {
+struct html_parser {
     config: document_parser_config
     init(config: document_parser_config) {
         this.config = config
@@ -605,7 +605,7 @@ struct table_conversion_result {
     table: extracted_table
     markdown: string
 }
-class markdown_parser {
+struct markdown_parser {
     config: document_parser_config
     init(config: document_parser_config) {
         this.config = config
@@ -756,7 +756,7 @@ class markdown_parser {
         return parts
     }
 }
-class office_document_parser {
+struct office_document_parser {
     config: document_parser_config
     init(config: document_parser_config) {
         this.config = config

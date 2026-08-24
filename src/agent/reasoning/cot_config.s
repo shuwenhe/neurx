@@ -90,7 +90,7 @@ func new_hierarchical_cot_config() cot_config {
     cfg
 }
 
-func (cfg: &cot_config) validate() bool {
+func (cot_config* cfg) validate() bool {
     if cfg.max_steps <= 0 {
         return false
     }
@@ -115,7 +115,7 @@ func (cfg: &cot_config) validate() bool {
     true
 }
 
-func (cfg: &cot_config) get_style_string() string {
+func (cot_config* cfg) get_style_string() string {
     match cfg.style {
         reasoning_style.step_by_step: "step-by-step",
         reasoning_style.detailed: "detailed",
@@ -125,7 +125,7 @@ func (cfg: &cot_config) get_style_string() string {
     }
 }
 
-func (cfg: &cot_config) get_validation_string() string {
+func (cot_config* cfg) get_validation_string() string {
     match cfg.validation {
         validation_strategy.none: "none",
         validation_strategy.consistency: "consistency",
@@ -135,14 +135,14 @@ func (cfg: &cot_config) get_validation_string() string {
     }
 }
 
-func (cfg: &cot_config) set_max_steps(int steps) cot_config {
+func (cot_config* cfg) set_max_steps(int steps) cot_config {
     if steps > 0 {
         cfg.max_steps = steps
     }
     cfg
 }
 
-func (cfg: &cot_config) set_max_tokens(int per_step, int total) cot_config {
+func (cot_config* cfg) set_max_tokens(int per_step, int total) cot_config {
     if per_step > 0 {
         cfg.max_tokens_per_step = per_step
     }
@@ -152,7 +152,7 @@ func (cfg: &cot_config) set_max_tokens(int per_step, int total) cot_config {
     cfg
 }
 
-func (cfg: &cot_config) clone() cot_config {
+func (cot_config* cfg) clone() cot_config {
     cot_config {
         enabled: cfg.enabled,
         style: cfg.style,

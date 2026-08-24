@@ -39,7 +39,7 @@ func new_memory_arena(int total_size) memory_arena {
     }
 }
 
-func (arena: &mut memory_arena) allocate(int size) allocation_result {
+func (mut memory_arena* arena) allocate(int size) allocation_result {
     for i, block in arena.blocks {
         if !block.allocated && block.size >= size {
             arena.blocks[i].allocated = true
@@ -72,7 +72,7 @@ func (arena: &mut memory_arena) allocate(int size) allocation_result {
     }
 }
 
-func (arena: &mut memory_arena) deallocate(int block_id) bool {
+func (mut memory_arena* arena) deallocate(int block_id) bool {
     for i, block in arena.blocks {
         if block.block_id == block_id && block.allocated {
             arena.blocks[i].allocated = false
@@ -82,7 +82,7 @@ func (arena: &mut memory_arena) deallocate(int block_id) bool {
     false
 }
 
-func (arena: &memory_arena) get_used_memory() int {
+func (memory_arena* arena) get_used_memory() int {
     int used = 0
     for block in arena.blocks {
         if block.allocated {
@@ -92,11 +92,11 @@ func (arena: &memory_arena) get_used_memory() int {
     used
 }
 
-func (arena: &memory_arena) get_free_memory() int {
+func (memory_arena* arena) get_free_memory() int {
     arena.total_size - arena.get_used_memory()
 }
 
-func (arena: &memory_arena) get_fragmentation_ratio() float {
+func (memory_arena* arena) get_fragmentation_ratio() float {
     if arena.total_size == 0 {
         return 0.0
     }
@@ -111,7 +111,7 @@ func (arena: &memory_arena) get_fragmentation_ratio() float {
     1.0 - (largest_free as float / arena.get_free_memory() as float)
 }
 
-func allocate_for_graph(g: &computation_graph) memory_arena {
+func allocate_for_graph(g: *computation_graph) memory_arena {
     total_memory = g.total_memory_bytes()
     arena = new_memory_arena(total_memory)
 
@@ -126,7 +126,7 @@ func allocate_for_graph(g: &computation_graph) memory_arena {
     arena
 }
 
-func (arena: &memory_arena) summary_string() string {
+func (memory_arena* arena) summary_string() string {
     s = ""
     s = s + "Memory Arena Summary\n"
     s = s + "Total memory: " + arena.total_size as string + " bytes\n"

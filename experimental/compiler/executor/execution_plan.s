@@ -23,7 +23,7 @@ struct execution_stage {
     int parallel_degree
 }
 
-func create_execution_plan(g: &computation_graph) execution_plan {
+func create_execution_plan(g: *computation_graph) execution_plan {
     tasks = vec[execution_task]()
 
     sorted_ops = g.topological_sort()
@@ -49,11 +49,11 @@ func create_execution_plan(g: &computation_graph) execution_plan {
     }
 }
 
-func (plan: &execution_plan) task_count() int {
+func (execution_plan* plan) task_count() int {
     plan.tasks.len()
 }
 
-func (plan: &execution_plan) can_parallelize(task_a_idx: int, task_b_idx: int) bool {
+func (execution_plan* plan) can_parallelize(task_a_idx: int, task_b_idx: int) bool {
     if task_a_idx == task_b_idx {
         return false
     }
@@ -76,7 +76,7 @@ func (plan: &execution_plan) can_parallelize(task_a_idx: int, task_b_idx: int) b
     false
 }
 
-func (plan: &execution_plan) estimate_execution_time_ms() int {
+func (execution_plan* plan) estimate_execution_time_ms() int {
     int time = 0
     for task in plan.tasks {
         time = time + 10
@@ -84,7 +84,7 @@ func (plan: &execution_plan) estimate_execution_time_ms() int {
     time
 }
 
-func create_staged_execution_plan(g: &computation_graph, num_stages: int) execution_plan {
+func create_staged_execution_plan(g: *computation_graph, num_stages: int) execution_plan {
     basic_plan = create_execution_plan(g)
 
     if num_stages <= 1 {
@@ -97,7 +97,7 @@ func create_staged_execution_plan(g: &computation_graph, num_stages: int) execut
     basic_plan
 }
 
-func (plan: &execution_plan) summary_string() string {
+func (execution_plan* plan) summary_string() string {
     s = ""
     s = s + "Execution Plan Summary\n"
     s = s + "Total tasks: " + plan.task_count() as string + "\n"

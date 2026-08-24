@@ -69,7 +69,7 @@ func create_audio_video_aligner() *audio_video_aligner {
 		pair_cache:            make(map[string]*audio_video_pair),
 		latest_sync_results:   make(map[string]*sync_result),
 		alignments:            make(map[string][]temporal_alignment),
-		stats: &sync_statistics{
+		stats: *sync_statistics{
 			num_alignment_points:     0,
 			max_time_offset_ms:       0,
 			mean_time_offset_ms:      0,

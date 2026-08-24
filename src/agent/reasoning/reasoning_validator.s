@@ -24,7 +24,7 @@ func new_reasoning_validator(cot_config config) reasoning_validator {
     }
 }
 
-func (validator: &reasoning_validator) validate_chain(reasoning_chain chain) validation_result {
+func (reasoning_validator* validator) validate_chain(reasoning_chain chain) validation_result {
     match validator.config.validation {
         validation_strategy.none: {
             return validation_result {
@@ -56,7 +56,7 @@ func (validator: &reasoning_validator) validate_chain(reasoning_chain chain) val
     }
 }
 
-func (validator: &reasoning_validator) validate_consistency(reasoning_chain chain) validation_result {
+func (reasoning_validator* validator) validate_consistency(reasoning_chain chain) validation_result {
     []string issues = []string{}
     float min_confidence = 1.0
 
@@ -97,7 +97,7 @@ func (validator: &reasoning_validator) validate_consistency(reasoning_chain chai
     }
 }
 
-func (validator: &reasoning_validator) validate_logical_flow(reasoning_chain chain) validation_result {
+func (reasoning_validator* validator) validate_logical_flow(reasoning_chain chain) validation_result {
     result := validator.validate_consistency(chain)
 
     []string additional_issues = []string{}
@@ -124,7 +124,7 @@ func (validator: &reasoning_validator) validate_logical_flow(reasoning_chain cha
     result
 }
 
-func (validator: &reasoning_validator) validate_semantic(reasoning_chain chain) validation_result {
+func (reasoning_validator* validator) validate_semantic(reasoning_chain chain) validation_result {
     result := validator.validate_logical_flow(chain)
 
     if !validator.is_reasoning_complete(chain) {
@@ -140,7 +140,7 @@ func (validator: &reasoning_validator) validate_semantic(reasoning_chain chain) 
     result
 }
 
-func (validator: &reasoning_validator) has_circular_reasoning(reasoning_chain chain) bool {
+func (reasoning_validator* validator) has_circular_reasoning(reasoning_chain chain) bool {
 
     seen_results := map[string]int{}
 
@@ -164,7 +164,7 @@ func (validator: &reasoning_validator) has_circular_reasoning(reasoning_chain ch
     false
 }
 
-func (validator: &reasoning_validator) is_reasoning_complete(reasoning_chain chain) bool {
+func (reasoning_validator* validator) is_reasoning_complete(reasoning_chain chain) bool {
     if len(chain.steps) == 0 {
         return false
     }
@@ -177,7 +177,7 @@ func (validator: &reasoning_validator) is_reasoning_complete(reasoning_chain cha
     true
 }
 
-func (validator: &reasoning_validator) validate_step(reasoning_step step) validation_result {
+func (reasoning_validator* validator) validate_step(reasoning_step step) validation_result {
     []string issues = []string{}
 
     if step.reasoning == "" {
@@ -207,7 +207,7 @@ func (validator: &reasoning_validator) validate_step(reasoning_step step) valida
     }
 }
 
-func (validator: &reasoning_validator) check_limits(reasoning_chain chain) validation_result {
+func (reasoning_validator* validator) check_limits(reasoning_chain chain) validation_result {
     []string issues = []string{}
 
     if chain.has_exceeded_max_steps() {
@@ -229,7 +229,7 @@ func (validator: &reasoning_validator) check_limits(reasoning_chain chain) valid
     }
 }
 
-func (validator: &reasoning_validator) generate_report(reasoning_chain chain) string {
+func (reasoning_validator* validator) generate_report(reasoning_chain chain) string {
     result := validator.validate_chain(chain)
 
     string report = "=== Reasoning Chain Validation Report ===\n"
@@ -250,7 +250,7 @@ func (validator: &reasoning_validator) generate_report(reasoning_chain chain) st
     report
 }
 
-func (validator: &reasoning_validator) auto_fix_issues(reasoning_chain chain) reasoning_chain {
+func (reasoning_validator* validator) auto_fix_issues(reasoning_chain chain) reasoning_chain {
 
     valid_steps := []reasoning_step{}
     i := 0

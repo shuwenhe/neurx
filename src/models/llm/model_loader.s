@@ -48,7 +48,7 @@ func new_gpt(config gptconfig) (*gptmodel, error) {
     model := &gptmodel{
         config: config,
         layers: make([]*transformer.transformer_block, config.num_layers),
-        optimizer: &optimizer_2{
+        optimizer: *optimizer_2{
             learning_rate: config.learning_rate,
             adam_beta_1:    0.9,
             adam_beta_2:    0.95,

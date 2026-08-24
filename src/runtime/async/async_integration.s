@@ -100,9 +100,9 @@ func create_async_engine() async_engine {
 
 	return async_engine{
 		config:         config,
-		request_queue: &create_queue(config.max_queue_capacity, config.batch_size),
+		request_queue: *create_queue(config.max_queue_capacity, config.batch_size),
 		executor:      &create_executor(config.max_concurrent_tasks, config.worker_pool_size),
-		connection_pool: &create_connection_pool(config.max_connections),
+		connection_pool: *create_connection_pool(config.max_connections),
 		stream_states: make(map[string]stream_state),
 		is_running:   false,
 		stats:        engine_statistics{},

@@ -149,7 +149,7 @@ struct LaunchConfig {
     block_dim: [3]i32,
     grid_dim: [3]i32,
     shared_memory_bytes: i32,
-    stream: &CUDAStream
+    stream: *CUDAStream
 }
 
 func main() {

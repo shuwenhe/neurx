@@ -84,7 +84,7 @@ func create_inference_engine(model_id string, model *model_interface) *inference
 		request_queue: []*inference_request{},
 		response_map: make(map[string]*inference_response),
 		max_queue_size: 1000,
-		stats: &inference_statistics{},
+		stats: *inference_statistics{},
 		batch_enabled: true,
 		max_batch_size: 32,
 		batch_timeout_ms: 100,

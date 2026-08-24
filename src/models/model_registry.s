@@ -255,7 +255,7 @@ struct compatibility_report {
 }
 
 func check_model_compatibility(
-    adapter: &model_adapter,
+    adapter: *model_adapter,
     target_device: string,
     available_memory_gb: int
 ) compatibility_report {
@@ -301,7 +301,7 @@ struct model_diagnostics {
     performance_profile: string
 }
 
-func get_model_diagnostics(adapter: &model_adapter) model_diagnostics {
+func get_model_diagnostics(adapter: *model_adapter) model_diagnostics {
     let param_count = adapter.model_spec.hidden_size *
                      adapter.model_spec.num_hidden_layers *
                      adapter.model_spec.vocab_size

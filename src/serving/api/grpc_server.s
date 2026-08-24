@@ -172,7 +172,7 @@ func (grpc_server* srv) chat_completion(chat_completion_request_pb* req) (chat_c
 
     choice := &chat_completion_choice_pb{
         index: 0,
-        message: &chat_message_pb{
+        message: *chat_message_pb{
             role: "assistant",
             content: "",
         },

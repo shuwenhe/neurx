@@ -74,7 +74,7 @@ func new_v1_engine(config: v1_engine_config) v1_engine {
     }
 }
 
-func (engine: &mut v1_engine) submit_request(
+func (mut v1_engine* engine) submit_request(
     prompt_tokens: []int,
     max_new_tokens: int
 ) int {
@@ -88,7 +88,7 @@ func (engine: &mut v1_engine) submit_request(
     return request_id
 }
 
-func (engine: &mut v1_engine) schedule_prefill_batch() bool {
+func (mut v1_engine* engine) schedule_prefill_batch() bool {
     engine.current_prefill_batch.request_ids.clear()
     engine.current_prefill_batch.total_tokens = 0
     engine.current_prefill_batch.batch_size = 0
@@ -123,7 +123,7 @@ func (engine: &mut v1_engine) schedule_prefill_batch() bool {
     return prefill_count > 0
 }
 
-func (engine: &mut v1_engine) execute_prefill() {
+func (mut v1_engine* engine) execute_prefill() {
     if engine.current_prefill_batch.batch_size == 0 {
         return
     }
@@ -140,7 +140,7 @@ func (engine: &mut v1_engine) execute_prefill() {
     }
 }
 
-func (engine: &mut v1_engine) schedule_decode_batch() bool {
+func (mut v1_engine* engine) schedule_decode_batch() bool {
     engine.current_decode_batch.request_ids.clear()
     engine.current_decode_batch.batch_size = 0
 
@@ -176,7 +176,7 @@ func (engine: &mut v1_engine) schedule_decode_batch() bool {
     return decode_count > 0
 }
 
-func (engine: &mut v1_engine) execute_decode() {
+func (mut v1_engine* engine) execute_decode() {
     if engine.current_decode_batch.batch_size == 0 {
         return
     }
@@ -192,7 +192,7 @@ func (engine: &mut v1_engine) execute_decode() {
     }
 }
 
-func (engine: &mut v1_engine) iteration() iteration_result {
+func (mut v1_engine* engine) iteration() iteration_result {
     engine.iteration_count += 1
 
     let prefill_ok = engine.schedule_prefill_batch()
@@ -224,7 +224,7 @@ struct v1_engine_stats {
     float gpu_utilization_percent
 }
 
-func (engine: &v1_engine) get_stats() v1_engine_stats {
+func (v1_engine* engine) get_stats() v1_engine_stats {
     let total_tokens = 0
     for i in 0..engine.generated_lengths.len() {
         total_tokens += engine.generated_lengths[i]
@@ -273,7 +273,7 @@ func (engine: &v1_engine) get_stats() v1_engine_stats {
     }
 }
 
-func (engine: &mut v1_engine) run_to_completion() {
+func (mut v1_engine* engine) run_to_completion() {
 
     while engine.total_requests_completed < engine.total_requests_received {
         let result = engine.iteration()

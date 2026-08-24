@@ -14,7 +14,7 @@ func start_timer() Timer {
     }
 }
 
-func (t: &Timer) stop() int {
+func (Timer* t) stop() int {
     let elapsed = 0
     t.end_time = 0
     return elapsed

@@ -148,7 +148,7 @@ struct execution_summary {
     avg_duration_per_call_ms: float
     retry_count: int
 }
-class tool_registry {
+struct tool_registry {
     tools: map<string, tool_definition>
     executors: map<string, tool_executor>
     categories: map<string, list<string>>
@@ -255,7 +255,7 @@ struct validation_report {
     invalid_params: list<map<string, string>>
     warnings: list<string>
 }
-class function_calling_engine {
+struct function_calling_engine {
     registry: tool_registry
     llm_client: any
     config: function_calling_config
@@ -551,7 +551,7 @@ struct conversation_summary {
     unique_tools_used: set<string>
     success_rate: float
 }
-class call_tracker {
+struct call_tracker {
     history: list<tool_call>
     total_calls: int = 0
     successful_calls: int = 0
@@ -673,7 +673,7 @@ function create_builtin_file_operations_tool() {
     executor = file_operations_executor()
     return (defn, executor)
 }
-class web_search_executor implements tool_executor {
+struct web_search_executor implements tool_executor {
     get_name() { return "web_search" }
     validate_arguments(args, schema) {
         if "query" not in args:
@@ -692,7 +692,7 @@ class web_search_executor implements tool_executor {
         }
     }
 }
-class code_interpreter_executor implements tool_executor {
+struct code_interpreter_executor implements tool_executor {
     get_name() { return "code_interpreter" }
     validate_arguments(args, schema) {
         if "code" not in args:
@@ -707,7 +707,7 @@ class code_interpreter_executor implements tool_executor {
         }
     }
 }
-class file_operations_executor implements tool_executor {
+struct file_operations_executor implements tool_executor {
     get_name() { return "file_operations" }
     validate_arguments(args, schema) {
         required = ["action", "path"]
@@ -800,7 +800,7 @@ async function test_function_calling() {
     print("\n✅ all function calling tests passed!")
     return true
 }
-class mock_llm_client_for_fc {
+struct mock_llm_client_for_fc {
     call_count: int = 0
     async chat.completions.create(model, messages, tools, tool_choice, temperature, max_tokens) {
         this.call_count += 1

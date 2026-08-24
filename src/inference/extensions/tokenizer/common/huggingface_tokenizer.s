@@ -4,7 +4,7 @@ import "std/string"
 import "std/vector"
 
 struct HFTokenizer {
-    base: &tokenizer.BaseTokenizer,
+    base: *tokenizer.BaseTokenizer,
     model_path: string,
     tokenizer_type: string,
     subword_prefix: string,
@@ -27,7 +27,7 @@ func NewHFTokenizer(config: types.TokenizerConfig, model_path: string) &HFTokeni
     return hf
 }
 
-func (h: &HFTokenizer) LoadVocabulary(vocab_file: string) types.TokenizerResult {
+func (HFTokenizer* h) LoadVocabulary(vocab_file: string) types.TokenizerResult {
     h.vocab_file = vocab_file
 
     if contains_string(vocab_file, "llama") || contains_string(vocab_file, "Llama") {
@@ -47,7 +47,7 @@ func (h: &HFTokenizer) LoadVocabulary(vocab_file: string) types.TokenizerResult 
     }
 }
 
-func (h: &HFTokenizer) LoadMerges(merges_file: string) types.TokenizerResult {
+func (HFTokenizer* h) LoadMerges(merges_file: string) types.TokenizerResult {
     h.merges_file = merges_file
 
     return types.TokenizerResult{
@@ -57,7 +57,7 @@ func (h: &HFTokenizer) LoadMerges(merges_file: string) types.TokenizerResult {
     }
 }
 
-func (h: &HFTokenizer) Encode(text: string) types.TokenizerResult {
+func (HFTokenizer* h) Encode(text: string) types.TokenizerResult {
     return h.EncodeWithOptions(text, types.EncodingOptions{
         add_special_tokens: true,
         truncation: false,
@@ -66,7 +66,7 @@ func (h: &HFTokenizer) Encode(text: string) types.TokenizerResult {
     })
 }
 
-func (h: &HFTokenizer) EncodeWithOptions(text: string, opts: types.EncodingOptions) types.TokenizerResult {
+func (HFTokenizer* h) EncodeWithOptions(text: string, opts: types.EncodingOptions) types.TokenizerResult {
 
     if h.lowercase {
         text = lowercase_string(text)
@@ -120,7 +120,7 @@ func (h: &HFTokenizer) EncodeWithOptions(text: string, opts: types.EncodingOptio
     }
 }
 
-func (h: &HFTokenizer) EncodeMultiSentences(text_a: string, text_b: string) types.TokenizerResult {
+func (HFTokenizer* h) EncodeMultiSentences(text_a: string, text_b: string) types.TokenizerResult {
 
     tokens_a := h.tokenize_internal(text_a)
 
@@ -141,7 +141,7 @@ func (h: &HFTokenizer) EncodeMultiSentences(text_a: string, text_b: string) type
     }
 }
 
-func (h: &HFTokenizer) Decode(token_ids: vec[i32]) string {
+func (HFTokenizer* h) Decode(token_ids: vec[i32]) string {
     result := h.base.DecodeWithOptions(token_ids, types.DecodingOptions{
         skip_special_tokens: true,
         clean_up_tokenization_spaces: true,
@@ -149,7 +149,7 @@ func (h: &HFTokenizer) Decode(token_ids: vec[i32]) string {
     return result.text
 }
 
-func (h: &HFTokenizer) basic_tokenize(text: string) vec[string] {
+func (HFTokenizer* h) basic_tokenize(text: string) vec[string] {
     tokens := make(vec[string], 0)
     current := ""
 
@@ -179,7 +179,7 @@ func (h: &HFTokenizer) basic_tokenize(text: string) vec[string] {
     return tokens
 }
 
-func (h: &HFTokenizer) wordpiece_tokenize(tokens: vec[string]) vec[string] {
+func (HFTokenizer* h) wordpiece_tokenize(tokens: vec[string]) vec[string] {
     output := make(vec[string], 0)
 
     for i := 0; i < len(tokens); i += 1 {
@@ -199,7 +199,7 @@ func (h: &HFTokenizer) wordpiece_tokenize(tokens: vec[string]) vec[string] {
     return output
 }
 
-func (h: &HFTokenizer) split_subwords(word: string) vec[string] {
+func (HFTokenizer* h) split_subwords(word: string) vec[string] {
     subwords := make(vec[string], 0)
     start := 0
 
@@ -236,7 +236,7 @@ func (h: &HFTokenizer) split_subwords(word: string) vec[string] {
     return subwords
 }
 
-func (h: &HFTokenizer) add_special_tokens_hf(tokens: vec[i32]) vec[i32] {
+func (HFTokenizer* h) add_special_tokens_hf(tokens: vec[i32]) vec[i32] {
     result := make(vec[i32], 0)
 
     result = append(result, h.base.GetSpecialToken("cls"))
@@ -248,7 +248,7 @@ func (h: &HFTokenizer) add_special_tokens_hf(tokens: vec[i32]) vec[i32] {
     return result
 }
 
-func (h: &HFTokenizer) truncate_tokens(tokens: vec[i32], max_length: i32, side: string) vec[i32] {
+func (HFTokenizer* h) truncate_tokens(tokens: vec[i32], max_length: i32, side: string) vec[i32] {
     if i32(len(tokens)) <= max_length {
         return tokens
     }
@@ -261,7 +261,7 @@ func (h: &HFTokenizer) truncate_tokens(tokens: vec[i32], max_length: i32, side: 
     return tokens[0:max_length]
 }
 
-func (h: &HFTokenizer) add_spaces_around_chinese(text: string) string {
+func (HFTokenizer* h) add_spaces_around_chinese(text: string) string {
     result := ""
     for i := 0; i < len(text); i += 1 {
         char := text[i]
@@ -271,12 +271,12 @@ func (h: &HFTokenizer) add_spaces_around_chinese(text: string) string {
     return result
 }
 
-func (h: &HFTokenizer) remove_accents(text: string) string {
+func (HFTokenizer* h) remove_accents(text: string) string {
 
     return text
 }
 
-func (h: &HFTokenizer) tokenize_internal(text: string) vec[i32] {
+func (HFTokenizer* h) tokenize_internal(text: string) vec[i32] {
     basic_tokens := h.basic_tokenize(text)
     wordpiece_tokens := h.wordpiece_tokenize(basic_tokens)
 
@@ -288,27 +288,27 @@ func (h: &HFTokenizer) tokenize_internal(text: string) vec[i32] {
     return result
 }
 
-func (h: &HFTokenizer) load_llama_vocab() {
+func (HFTokenizer* h) load_llama_vocab() {
     h.base.vocab.size = types.LLAMA_VOCAB_SIZE
     h.tokenizer_type = "bpe"
     h.subword_prefix = ""
 
 }
 
-func (h: &HFTokenizer) load_qwen_vocab() {
+func (HFTokenizer* h) load_qwen_vocab() {
     h.base.vocab.size = types.QWEN_VOCAB_SIZE
     h.tokenizer_type = "bpe"
     h.subword_prefix = ""
 }
 
-func (h: &HFTokenizer) load_bert_vocab() {
+func (HFTokenizer* h) load_bert_vocab() {
     h.base.vocab.size = 30522
     h.tokenizer_type = "wordpiece"
     h.subword_prefix = "##"
     h.lowercase = true
 }
 
-func (h: &HFTokenizer) load_generic_vocab() {
+func (HFTokenizer* h) load_generic_vocab() {
     h.base.vocab.size = types.DEFAULT_VOCAB_SIZE
     h.tokenizer_type = "bpe"
 }

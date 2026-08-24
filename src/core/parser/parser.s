@@ -26,7 +26,7 @@ func create_default_parser() ParserInstance {
     return create_parser(create_default_config())
 }
 
-func (p: &ParserInstance) parse(text: string) ParseResult {
+func (ParserInstance* p) parse(text: string) ParseResult {
     let start_time = 0
 
     if p.config.cache_intermediate {
@@ -155,7 +155,7 @@ func parse_auto_format(text: string) ParseResult {
     return parse_with_format(text, detection.detected_format)
 }
 
-func (p: &ParserInstance) parse_stream(chunks: []string) []ParseResult {
+func (ParserInstance* p) parse_stream(chunks: []string) []ParseResult {
     let results = []ParseResult{}
     let builder = create_stream_builder()
 
@@ -182,11 +182,11 @@ func (p: ParserInstance) get_stats() ParserStats {
     return p.stats
 }
 
-func (p: &ParserInstance) reset_stats() {
+func (ParserInstance* p) reset_stats() {
     p.stats = create_parser_stats()
 }
 
-func (p: &ParserInstance) clear_cache() {
+func (ParserInstance* p) clear_cache() {
     p.cache = map[string]ParseResult{}
 }
 
@@ -194,7 +194,7 @@ func (p: ParserInstance) get_last_error() string {
     return p.last_error
 }
 
-func (p: &ParserInstance) set_config(config: ParserConfig) {
+func (ParserInstance* p) set_config(config: ParserConfig) {
     p.config = config
     p.clear_cache()
 }
@@ -253,7 +253,7 @@ func (r: ParseResult) to_string() string {
     return result
 }
 
-func (p: &ParserInstance) parse_and_get(text: string, key: string) string {
+func (ParserInstance* p) parse_and_get(text: string, key: string) string {
     let result = p.parse(text)
 
     if result.status != 0 && result.status != 4 {
@@ -273,7 +273,7 @@ func (p: &ParserInstance) parse_and_get(text: string, key: string) string {
     return ""
 }
 
-func (p: &ParserInstance) parse_batch(texts: []string) []ParseResult {
+func (ParserInstance* p) parse_batch(texts: []string) []ParseResult {
     let results = []ParseResult{}
 
     for text in texts {

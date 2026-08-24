@@ -41,7 +41,7 @@ func new_reasoning_chain(string chain_id, string prompt, cot_config config) reas
     }
 }
 
-func (chain: &reasoning_chain) add_step(reasoning_step step) reasoning_chain {
+func (reasoning_chain* chain) add_step(reasoning_step step) reasoning_chain {
     if chain.state != chain_state.running && chain.state != chain_state.initialized {
         return chain
     }
@@ -58,7 +58,7 @@ func (chain: &reasoning_chain) add_step(reasoning_step step) reasoning_chain {
     chain
 }
 
-func (chain: &reasoning_chain) start() reasoning_chain {
+func (reasoning_chain* chain) start() reasoning_chain {
     if chain.state != chain_state.initialized {
         chain.error_message = "Chain is not in initialized state"
         return chain
@@ -68,29 +68,29 @@ func (chain: &reasoning_chain) start() reasoning_chain {
     chain
 }
 
-func (chain: &reasoning_chain) complete(string answer) reasoning_chain {
+func (reasoning_chain* chain) complete(string answer) reasoning_chain {
     chain.state = chain_state.completed
     chain.final_answer = answer
     chain.overall_confidence = chain.calculate_overall_confidence()
     chain
 }
 
-func (chain: &reasoning_chain) fail(string error) reasoning_chain {
+func (reasoning_chain* chain) fail(string error) reasoning_chain {
     chain.state = chain_state.failed
     chain.error_message = error
     chain
 }
 
-func (chain: &reasoning_chain) cancel() reasoning_chain {
+func (reasoning_chain* chain) cancel() reasoning_chain {
     chain.state = chain_state.cancelled
     chain
 }
 
-func (chain: &reasoning_chain) get_step_count() int {
+func (reasoning_chain* chain) get_step_count() int {
     len(chain.steps)
 }
 
-func (chain: &reasoning_chain) get_current_step() reasoning_step {
+func (reasoning_chain* chain) get_current_step() reasoning_step {
     if chain.current_step_index >= 0 && chain.current_step_index < len(chain.steps) {
         return chain.steps[chain.current_step_index]
     }
@@ -113,14 +113,14 @@ func (chain: &reasoning_chain) get_current_step() reasoning_step {
     }
 }
 
-func (chain: &reasoning_chain) next_step() reasoning_chain {
+func (reasoning_chain* chain) next_step() reasoning_chain {
     if chain.current_step_index + 1 < len(chain.steps) {
         chain.current_step_index = chain.current_step_index + 1
     }
     chain
 }
 
-func (chain: &reasoning_chain) get_state_string() string {
+func (reasoning_chain* chain) get_state_string() string {
     match chain.state {
         chain_state.initialized: "initialized",
         chain_state.running: "running",
@@ -131,15 +131,15 @@ func (chain: &reasoning_chain) get_state_string() string {
     }
 }
 
-func (chain: &reasoning_chain) is_completed() bool {
+func (reasoning_chain* chain) is_completed() bool {
     chain.state == chain_state.completed
 }
 
-func (chain: &reasoning_chain) is_failed() bool {
+func (reasoning_chain* chain) is_failed() bool {
     chain.state == chain_state.failed
 }
 
-func (chain: &reasoning_chain) calculate_overall_confidence() float {
+func (reasoning_chain* chain) calculate_overall_confidence() float {
     if len(chain.steps) == 0 {
         return 0.0
     }
@@ -156,24 +156,24 @@ func (chain: &reasoning_chain) calculate_overall_confidence() float {
     sum / float(len(chain.steps))
 }
 
-func (chain: &reasoning_chain) has_exceeded_max_steps() bool {
+func (reasoning_chain* chain) has_exceeded_max_steps() bool {
     len(chain.steps) >= chain.config.max_steps
 }
 
-func (chain: &reasoning_chain) has_exceeded_token_limit() bool {
+func (reasoning_chain* chain) has_exceeded_token_limit() bool {
     chain.total_token_count >= chain.config.max_tokens_total
 }
 
-func (chain: &reasoning_chain) update_token_count(int count) reasoning_chain {
+func (reasoning_chain* chain) update_token_count(int count) reasoning_chain {
     chain.total_token_count = chain.total_token_count + count
     chain
 }
 
-func (chain: &reasoning_chain) can_backtrack() bool {
+func (reasoning_chain* chain) can_backtrack() bool {
     chain.config.enable_backtracking && chain.current_step_index > 0
 }
 
-func (chain: &reasoning_chain) backtrack(int depth) reasoning_chain {
+func (reasoning_chain* chain) backtrack(int depth) reasoning_chain {
     if !chain.can_backtrack() {
         return chain
     }
@@ -195,11 +195,11 @@ func (chain: &reasoning_chain) backtrack(int depth) reasoning_chain {
     chain
 }
 
-func (chain: &reasoning_chain) can_branch() bool {
+func (reasoning_chain* chain) can_branch() bool {
     chain.config.enable_branching
 }
 
-func (chain: &reasoning_chain) get_reasoning_text() string {
+func (reasoning_chain* chain) get_reasoning_text() string {
     string text = "# Reasoning Chain: " + chain.chain_id + "\n"
     text = text + "Original Prompt: " + chain.original_prompt + "\n\n"
 
@@ -216,7 +216,7 @@ func (chain: &reasoning_chain) get_reasoning_text() string {
     text
 }
 
-func (chain: &reasoning_chain) clone() reasoning_chain {
+func (reasoning_chain* chain) clone() reasoning_chain {
     steps := []reasoning_step{cap: len(chain.steps)}
     i := 0
     while i < len(chain.steps) {

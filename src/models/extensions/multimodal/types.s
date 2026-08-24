@@ -62,7 +62,7 @@ struct VideoData {
 
 struct DepthData {
     id: string,
-    depth_map: &types.Tensor,
+    depth_map: *types.Tensor,
     intrinsics: [9]f32,
     min_depth: f32,
     max_depth: f32
@@ -81,7 +81,7 @@ struct MultimodalInput {
 
 struct ImageFeatures {
     id: string,
-    embeddings: &types.Tensor,
+    embeddings: *types.Tensor,
     patch_info: PatchInfo,
     spatial_resolution: (i32, i32),
     temporal_index: i32
@@ -98,7 +98,7 @@ struct PatchInfo {
 
 struct AudioFeatures {
     id: string,
-    embeddings: &types.Tensor,
+    embeddings: *types.Tensor,
     frame_rate: i32,
     num_frames: i32,
     segment_length: i32
@@ -107,13 +107,13 @@ struct AudioFeatures {
 struct VideoFeatures {
     id: string,
     frame_features: []ImageFeatures,
-    temporal_embeddings: &types.Tensor,
-    video_embedding: &types.Tensor
+    temporal_embeddings: *types.Tensor,
+    video_embedding: *types.Tensor
 }
 
 struct FusedFeatures {
     id: string,
-    fused_embedding: &types.Tensor,
+    fused_embedding: *types.Tensor,
     modality_embeddings: map[Modality, &types.Tensor],
     attention_weights: map[Modality, &types.Tensor],
     fusion_type: string

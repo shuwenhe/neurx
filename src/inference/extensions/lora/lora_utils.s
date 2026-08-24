@@ -75,7 +75,7 @@ func gaussian_random(std: float) float {
 }
 
 func load_lora_weights_from_dict(
-    weights_dict: &map[string, &vec[vec[float]]]
+    weights_dict: *map[string, &vec[vec[float]]]
 ) result[&map[string, (vec[vec[float]], vec[vec[float]])], lora_utils_error] {
     let mut result_weights = map[string, (vec[vec[float]], vec[vec[float]])]()
 
@@ -94,7 +94,7 @@ func load_lora_weights_from_dict(
 
 func save_lora_weights_to_file(
     output_path: string,
-    weights: &map[string, (vec[vec[float]], vec[vec[float]])]
+    weights: *map[string, (vec[vec[float]], vec[vec[float]])]
 ) result[(), lora_utils_error] {
     if output_path.len() == 0 {
         return result::err(lora_utils_error {
@@ -122,7 +122,7 @@ func load_lora_weights_from_file(
 }
 
 func estimate_lora_rank(
-    delta_weights: &vec[vec[float]],
+    delta_weights: *vec[vec[float]],
     threshold: float
 ) result[int, lora_utils_error] {
     if delta_weights.len() == 0 {
@@ -162,7 +162,7 @@ func estimate_lora_rank(
 }
 
 func merge_lora_configs(
-    configs: &vec[&map[string, string]]
+    configs: *vec[&map[string, string]]
 ) result[&map[string, string], lora_utils_error] {
     if configs.len() == 0 {
         return result::err(lora_utils_error {
@@ -187,8 +187,8 @@ func merge_lora_configs(
 }
 
 func validate_lora_weight_shapes(
-    lora_a: &vec[vec[float]],
-    lora_b: &vec[vec[float]],
+    lora_a: *vec[vec[float]],
+    lora_b: *vec[vec[float]],
     expected_in_features: int,
     expected_out_features: int,
     expected_rank: int
@@ -230,8 +230,8 @@ func validate_lora_weight_shapes(
 }
 
 func calculate_lora_memory_mb(
-    lora_a: &vec[vec[float]],
-    lora_b: &vec[vec[float]]
+    lora_a: *vec[vec[float]],
+    lora_b: *vec[vec[float]]
 ) int {
     let a_size = lora_a.len() * (if lora_a.len() > 0 { lora_a[0].len() } else { 0 })
     let b_size = lora_b.len() * (if lora_b.len() > 0 { lora_b[0].len() } else { 0 })
@@ -240,8 +240,8 @@ func calculate_lora_memory_mb(
 }
 
 func normalize_lora_weights(
-    lora_a: &vec[vec[float]],
-    lora_b: &vec[vec[float]]
+    lora_a: *vec[vec[float]],
+    lora_b: *vec[vec[float]]
 ) result[(vec[vec[float]], vec[vec[float]]), lora_utils_error] {
     if lora_a.len() == 0 || lora_b.len() == 0 {
         return result::err(lora_utils_error {
@@ -322,8 +322,8 @@ func normalize_lora_weights(
 }
 
 func check_lora_weights_validity(
-    lora_a: &vec[vec[float]],
-    lora_b: &vec[vec[float]]
+    lora_a: *vec[vec[float]],
+    lora_b: *vec[vec[float]]
 ) result[(), lora_utils_error] {
     let i = 0
     while i < lora_a.len() {

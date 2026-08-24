@@ -45,7 +45,7 @@ func get_fusion_pattern(first_op: op_type, second_op: op_type) option[fusion_pat
     }
 }
 
-func find_fusion_candidates(g: &computation_graph) vec[fusion_candidate] {
+func find_fusion_candidates(g: *computation_graph) vec[fusion_candidate] {
     candidates = vec[fusion_candidate]()
 
     for i in range(g.operations.len() - 1) {
@@ -75,7 +75,7 @@ func find_fusion_candidates(g: &computation_graph) vec[fusion_candidate] {
     candidates
 }
 
-func apply_op_fusion(g: &mut computation_graph) fusion_result {
+func apply_op_fusion(g: *mut computation_graph) fusion_result {
     candidates = find_fusion_candidates(g)
     removed = vec[int]()
 
@@ -97,7 +97,7 @@ func should_fuse_before_activation(op_type op_kind) bool {
     }
 }
 
-func is_memory_efficient_to_fuse(g: &computation_graph, first_id: int, second_id: int) bool {
+func is_memory_efficient_to_fuse(g: *computation_graph, first_id: int, second_id: int) bool {
     switch g.get_operation(first_id) {
         option::some(first_op): {
             switch g.get_operation(second_id) {

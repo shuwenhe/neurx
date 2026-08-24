@@ -292,27 +292,27 @@ func create_model_config(model_name: string) result[model_config, model_loader_e
     }
 }
 
-func (config: &model_config) get_num_layers() int {
+func (model_config* config) get_num_layers() int {
     config.num_hidden_layers
 }
 
-func (config: &model_config) get_hidden_size() int {
+func (model_config* config) get_hidden_size() int {
     config.hidden_size
 }
 
-func (config: &model_config) get_vocab_size() int {
+func (model_config* config) get_vocab_size() int {
     config.vocab_size
 }
 
-func (config: &model_config) get_num_heads() int {
+func (model_config* config) get_num_heads() int {
     config.num_attention_heads
 }
 
-func (config: &model_config) get_intermediate_size() int {
+func (model_config* config) get_intermediate_size() int {
     config.intermediate_size
 }
 
-func (config: &model_config) is_valid() result[(), model_loader_error] {
+func (model_config* config) is_valid() result[(), model_loader_error] {
     if config.hidden_size <= 0 {
         return result::err(model_loader_error {
             code: "INVALID_CONFIG",

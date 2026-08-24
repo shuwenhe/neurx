@@ -77,7 +77,7 @@ func create_multimodal_system(model_system* model_sys) *multimodal_system {
 		inference_engine: inference_engine,
 		cache:           create_multimodal_cache(10737418240),
 		config:          config,
-		health: &multimodal_system_health{
+		health: *multimodal_system_health{
 			status:                      "initialized",
 			healthy:                     true,
 			uptime_seconds:              0,

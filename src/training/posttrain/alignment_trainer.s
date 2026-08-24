@@ -150,7 +150,7 @@ func create_sft_config() alignment_config {
         output_dir: "./checkpoints/sft/"
     }
 }
-class sft_trainer {
+struct sft_trainer {
     neurx_model model
     tokenizer_state tokenizer
     adam_w optimizer
@@ -288,7 +288,7 @@ func prepare_sft_batch(
         "attention_mask": attention_mask,
         "labels": labels
     }
-class dpotrainer {
+struct dpotrainer {
     neurx_model model
     tokenizer_state tokenizer
     alignment_config config
@@ -358,7 +358,7 @@ def compute_log_probs(
     masked_log_probs = (token_log_probs * mask).sum(dim=-1) / (mask.sum(dim=-1) + 1e-9)
     int total_tokens = int(mask.sum().item())
     return (masked_log_probs, total_tokens)
-class grpo_trainer {
+struct grpo_trainer {
     neurx_model model
     tokenizer_state tokenizer
     alignment_config config
@@ -493,7 +493,7 @@ def score_response_grpo(
             return score
         case _:
             raise value_error(f"Unknown scoring method: {scoring_method}")
-class ppotrainer {
+struct ppotrainer {
     neurx_model policy_model
     neurx_model reference_model
     reward_model reward_model

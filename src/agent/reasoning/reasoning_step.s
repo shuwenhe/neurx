@@ -54,12 +54,12 @@ func new_reasoning_step(int id, int order, step_type step_type) reasoning_step {
     }
 }
 
-func (step: &reasoning_step) start_processing() reasoning_step {
+func (reasoning_step* step) start_processing() reasoning_step {
     step.state = step_state.processing
     step
 }
 
-func (step: &reasoning_step) complete(string reasoning, string result, float confidence) reasoning_step {
+func (reasoning_step* step) complete(string reasoning, string result, float confidence) reasoning_step {
     step.state = step_state.completed
     step.reasoning = reasoning
     step.intermediate_result = result
@@ -67,30 +67,30 @@ func (step: &reasoning_step) complete(string reasoning, string result, float con
     step
 }
 
-func (step: &reasoning_step) fail(string error) reasoning_step {
+func (reasoning_step* step) fail(string error) reasoning_step {
     step.state = step_state.failed
     step.error_message = error
     step.retry_count = step.retry_count + 1
     step
 }
 
-func (step: &reasoning_step) mark_backtracked() reasoning_step {
+func (reasoning_step* step) mark_backtracked() reasoning_step {
     step.state = step_state.backtracked
     step
 }
 
-func (step: &reasoning_step) validate(bool is_valid, string message) reasoning_step {
+func (reasoning_step* step) validate(bool is_valid, string message) reasoning_step {
     step.is_valid = is_valid
     step.validation_message = message
     step
 }
 
-func (step: &reasoning_step) update_token_count(int count) reasoning_step {
+func (reasoning_step* step) update_token_count(int count) reasoning_step {
     step.token_count = count
     step
 }
 
-func (step: &reasoning_step) get_state_string() string {
+func (reasoning_step* step) get_state_string() string {
     match step.state {
         step_state.pending: "pending",
         step_state.processing: "processing",
@@ -101,7 +101,7 @@ func (step: &reasoning_step) get_state_string() string {
     }
 }
 
-func (step: &reasoning_step) get_type_string() string {
+func (reasoning_step* step) get_type_string() string {
     match step.step_type {
         step_type.analysis: "analysis",
         step_type.deduction: "deduction",
@@ -112,15 +112,15 @@ func (step: &reasoning_step) get_type_string() string {
     }
 }
 
-func (step: &reasoning_step) can_retry(int max_retries) bool {
+func (reasoning_step* step) can_retry(int max_retries) bool {
     step.state == step_state.failed && step.retry_count < max_retries
 }
 
-func (step: &reasoning_step) is_completed() bool {
+func (reasoning_step* step) is_completed() bool {
     step.state == step_state.completed && step.is_valid
 }
 
-func (step: &reasoning_step) add_child_step(int child_id) reasoning_step {
+func (reasoning_step* step) add_child_step(int child_id) reasoning_step {
     child_ids := []int{cap: len(step.child_step_ids) + 1}
     i := 0
     while i < len(step.child_step_ids) {
@@ -132,7 +132,7 @@ func (step: &reasoning_step) add_child_step(int child_id) reasoning_step {
     step
 }
 
-func (step: &reasoning_step) clone() reasoning_step {
+func (reasoning_step* step) clone() reasoning_step {
     child_ids := []int{cap: len(step.child_step_ids)}
     i := 0
     while i < len(step.child_step_ids) {
@@ -159,7 +159,7 @@ func (step: &reasoning_step) clone() reasoning_step {
     }
 }
 
-func (step: &reasoning_step) format_step() string {
+func (reasoning_step* step) format_step() string {
     string result = "Step " + string(step.order) + ": " + step.get_type_string() + "\n"
     result = result + "State: " + step.get_state_string() + "\n"
     if step.reasoning != "" {

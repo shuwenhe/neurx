@@ -71,7 +71,7 @@ func (audio_processor* proc) resample_audio(audio_data* audio, int32 new_sample_
 
     resampled := &audio_data{
         samples: make(vec[float32]),
-        metadata: &audio_metadata{
+        metadata: *audio_metadata{
             sample_rate: new_sample_rate,
             num_channels: audio.metadata.num_channels,
             bits_per_sample: audio.metadata.bits_per_sample,

@@ -21,7 +21,7 @@ struct json_schema {
     min_properties: int
     max_properties: int
 
-    items: &json_schema
+    items: *json_schema
     min_items: int
     max_items: int
     unique_items: bool
@@ -85,7 +85,7 @@ const CONSTRAINT_WARNING = "warning"
 
 struct sampler_state {
     mode: string
-    schema: &json_schema
+    schema: *json_schema
     context: parse_context
     allowed_next: []int
     rejected_count: int
@@ -164,7 +164,7 @@ func create_empty_constraint() token_constraint {
     return constraint
 }
 
-func create_sampler_state(mode: string, schema: &json_schema) sampler_state {
+func create_sampler_state(mode: string, schema: *json_schema) sampler_state {
     let state = sampler_state{
         mode: mode,
         schema: schema,

@@ -38,7 +38,7 @@ struct multimodal_hasher {
 func create_multimodal_hasher() multimodal_hasher* {
     return &multimodal_hasher{
         algorithm: algo_sha256,
-        matcher: &hash_matcher{
+        matcher: *hash_matcher{
             enable_fuzzy_matching: true,
             similarity_threshold: 0.95,
             hash_cache_size: 10000,

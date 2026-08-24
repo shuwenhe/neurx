@@ -16,7 +16,7 @@ struct field_error {
     error_code: string
 }
 
-func validate_against_schema(json_str: string, schema: &json_schema) validation_result {
+func validate_against_schema(json_str: string, schema: *json_schema) validation_result {
     let result = validation_result{
         is_valid: true,
         errors: vec_new(),
@@ -41,7 +41,7 @@ func validate_against_schema(json_str: string, schema: &json_schema) validation_
     return result
 }
 
-func validate_object(json_str: string, schema: &json_schema, result: &validation_result, path: string) validation_result {
+func validate_object(json_str: string, schema: *json_schema, result: *validation_result, path: string) validation_result {
 
     if len(json_str) < 2 || json_str[0] != '{' || json_str[len(json_str) - 1] != '}' {
         result.errors.append("Expected object at " + path + ", got " + json_str)
@@ -76,7 +76,7 @@ func validate_object(json_str: string, schema: &json_schema, result: &validation
     return *result
 }
 
-func validate_array(json_str: string, schema: &json_schema, result: &validation_result, path: string) validation_result {
+func validate_array(json_str: string, schema: *json_schema, result: *validation_result, path: string) validation_result {
 
     if len(json_str) < 2 || json_str[0] != '[' || json_str[len(json_str) - 1] != ']' {
         result.errors.append("Expected array at " + path + ", got " + json_str)
@@ -96,7 +96,7 @@ func validate_array(json_str: string, schema: &json_schema, result: &validation_
     return *result
 }
 
-func validate_string(json_str: string, schema: &json_schema, result: &validation_result, path: string) validation_result {
+func validate_string(json_str: string, schema: *json_schema, result: *validation_result, path: string) validation_result {
 
     let s = json_str
     if len(s) >= 2 && s[0] == '"' && s[len(s) - 1] == '"' {
@@ -129,7 +129,7 @@ func validate_string(json_str: string, schema: &json_schema, result: &validation
     return *result
 }
 
-func validate_number(json_str: string, schema: &json_schema, result: &validation_result, path: string) validation_result {
+func validate_number(json_str: string, schema: *json_schema, result: *validation_result, path: string) validation_result {
     let num = string_to_float(json_str)
 
     if schema.type_name == schema_types.TYPE_INTEGER {
@@ -165,7 +165,7 @@ func validate_number(json_str: string, schema: &json_schema, result: &validation
     return *result
 }
 
-func validate_boolean(json_str: string, schema: &json_schema, result: &validation_result, path: string) validation_result {
+func validate_boolean(json_str: string, schema: *json_schema, result: *validation_result, path: string) validation_result {
     if json_str != "true" && json_str != "false" {
         result.errors.append("Expected boolean at " + path + ", got " + json_str)
     }
@@ -234,7 +234,7 @@ func count_array_items(json_str: string) int {
     return count
 }
 
-func contains_string_in_array(s: string, arr: &[]string) bool {
+func contains_string_in_array(s: string, arr: *[]string) bool {
     let i = 0
     while i < len(*arr) {
         if (*arr)[i] == s {
@@ -332,7 +332,7 @@ func is_integer(s: string) bool {
     return true
 }
 
-func validation_result_to_string(result: &validation_result) string {
+func validation_result_to_string(result: *validation_result) string {
     let output = ""
 
     if result.is_valid {

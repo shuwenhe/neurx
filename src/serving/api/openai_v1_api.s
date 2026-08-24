@@ -149,7 +149,7 @@ func (openai_api_server* srv) create_chat_completion(chat_completion_request* re
 
     choice := &chat_completion_choice{
         index: 0,
-        message: &chat_completion_message{
+        message: *chat_completion_message{
             role: role_assistant,
             content: "",
         },

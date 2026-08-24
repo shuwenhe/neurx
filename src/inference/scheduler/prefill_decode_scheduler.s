@@ -65,11 +65,11 @@ func new_scheduler_state(scheduler_config config) scheduler_state {
     }
 }
 
-func (sched: &mut scheduler_state) add_request(metrics: request_metrics) {
+func (mut scheduler_state* sched) add_request(metrics: request_metrics) {
     sched.pending_metrics.push(metrics)
 }
 
-func min_latency_schedule(sched: &scheduler_state) scheduling_decision {
+func min_latency_schedule(sched: *scheduler_state) scheduling_decision {
     let mut decision = scheduling_decision {
         prefill_request_ids: vec[](),
         decode_request_ids: vec[](),
@@ -110,7 +110,7 @@ func min_latency_schedule(sched: &scheduler_state) scheduling_decision {
     decision
 }
 
-func max_throughput_schedule(sched: &scheduler_state) scheduling_decision {
+func max_throughput_schedule(sched: *scheduler_state) scheduling_decision {
     let mut decision = scheduling_decision {
         prefill_request_ids: vec[](),
         decode_request_ids: vec[](),
@@ -151,7 +151,7 @@ func max_throughput_schedule(sched: &scheduler_state) scheduling_decision {
     decision
 }
 
-func priority_schedule(sched: &scheduler_state) scheduling_decision {
+func priority_schedule(sched: *scheduler_state) scheduling_decision {
     let mut decision = scheduling_decision {
         prefill_request_ids: vec[](),
         decode_request_ids: vec[](),
@@ -213,7 +213,7 @@ func priority_schedule(sched: &scheduler_state) scheduling_decision {
     decision
 }
 
-func balanced_schedule(sched: &scheduler_state) scheduling_decision {
+func balanced_schedule(sched: *scheduler_state) scheduling_decision {
     let mut decision = scheduling_decision {
         prefill_request_ids: vec[](),
         decode_request_ids: vec[](),
@@ -259,8 +259,8 @@ func balanced_schedule(sched: &scheduler_state) scheduling_decision {
 }
 
 func check_and_apply_preemption(
-    sched: &mut scheduler_state,
-    decision: &mut scheduling_decision
+    sched: *mut scheduler_state,
+    decision: *mut scheduling_decision
 ) {
     if !sched.config.enable_preemption {
         return
@@ -292,7 +292,7 @@ func check_and_apply_preemption(
     }
 }
 
-func (sched: &mut scheduler_state) make_decision() scheduling_decision {
+func (mut scheduler_state* sched) make_decision() scheduling_decision {
     let mut decision = match sched.config.strategy {
         scheduling_strategy.min_latency => min_latency_schedule(sched),
         scheduling_strategy.max_throughput => max_throughput_schedule(sched),
@@ -324,7 +324,7 @@ struct scheduler_stats {
     float total_throughput
 }
 
-func (sched: &scheduler_state) get_stats() scheduler_stats {
+func (scheduler_state* sched) get_stats() scheduler_stats {
     let total_requests = sched.completed_metrics.len()
 
     scheduler_stats {

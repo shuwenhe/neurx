@@ -16,7 +16,7 @@ func create_v1_async_wrapper(v1_engine interface{}) v1_async_engine_wrapper {
 
 	return v1_async_engine_wrapper{
 		v1_engine:    v1_engine,
-		async_engine: &async_eng,
+		async_engine: *async_eng,
 		enabled:      true,
 	}
 }

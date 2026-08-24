@@ -72,16 +72,16 @@ func kv_cache_pool::new(config: cache_config) kv_cache_pool {
     }
 }
 
-func calculate_entry_size(k: &vec[float], v: &vec[float]) int {
+func calculate_entry_size(k: *vec[float], v: *vec[float]) int {
     (k.len() + v.len()) * 4
 }
 
-func (pool: &mut kv_cache_pool) put_kv(
+func (mut kv_cache_pool* pool) put_kv(
     sequence_id: int,
     layer_id: int,
     token_position: int,
-    key: &vec[float],
-    value: &vec[float]
+    key: *vec[float],
+    value: *vec[float]
 ) result[(), error] {
     let cache_key = sequence_id * 1000000 + layer_id * 1000 + token_position
     let entry_size = calculate_entry_size(key, value)
@@ -116,7 +116,7 @@ func (pool: &mut kv_cache_pool) put_kv(
     result::ok(())
 }
 
-func (pool: &mut kv_cache_pool) get_kv(
+func (mut kv_cache_pool* pool) get_kv(
     sequence_id: int,
     layer_id: int,
     token_position: int
@@ -148,7 +148,7 @@ func (pool: &mut kv_cache_pool) get_kv(
     }
 }
 
-func (pool: &mut kv_cache_pool) try_offload_to_cpu() result[(), error] {
+func (mut kv_cache_pool* pool) try_offload_to_cpu() result[(), error] {
     let gpu_entries = pool.gpu_cache
 
     let mut oldest_key = 0
@@ -188,7 +188,7 @@ func (pool: &mut kv_cache_pool) try_offload_to_cpu() result[(), error] {
     }
 }
 
-func (pool: &mut kv_cache_pool) restore_from_cpu(cache_key: int) result[(), error] {
+func (mut kv_cache_pool* pool) restore_from_cpu(cache_key: int) result[(), error] {
     switch pool.cpu_cache.get(cache_key) {
         option::some(entry) : {
             pool.gpu_cache.insert(cache_key, entry)
@@ -207,18 +207,18 @@ func (pool: &mut kv_cache_pool) restore_from_cpu(cache_key: int) result[(), erro
     }
 }
 
-func (pool: &pool) get_stats() kv_cache_stats {
+func (pool* pool) get_stats() kv_cache_stats {
     pool.stats
 }
 
-func (pool: &pool) get_memory_usage_percent() float {
+func (pool* pool) get_memory_usage_percent() float {
     let total_used = pool.stats.gpu_used_mb + pool.stats.cpu_used_mb
     let total_available = pool.config.max_gpu_memory_mb + pool.config.max_cpu_memory_mb
 
     (total_used as float) / (total_available as float) * 100.0
 }
 
-func (pool: &pool) get_cache_hit_rate() float {
+func (pool* pool) get_cache_hit_rate() float {
     let total_accesses = pool.stats.offload_count + pool.stats.restore_count
 
     if total_accesses == 0 {
@@ -228,7 +228,7 @@ func (pool: &pool) get_cache_hit_rate() float {
     (pool.stats.restore_count as float) / (total_accesses as float)
 }
 
-func (pool: &mut kv_cache_pool) clear_sequence_cache(sequence_id: int) result[(), error] {
+func (mut kv_cache_pool* pool) clear_sequence_cache(sequence_id: int) result[(), error] {
     let keys_to_remove = vec[int]()
 
     for key in pool.gpu_cache.keys() {
@@ -257,7 +257,7 @@ func (pool: &mut kv_cache_pool) clear_sequence_cache(sequence_id: int) result[()
     result::ok(())
 }
 
-func (pool: &mut kv_cache_pool) clear_all() result[(), error] {
+func (mut kv_cache_pool* pool) clear_all() result[(), error] {
     pool.gpu_cache = map[int, kv_cache_entry]()
     pool.cpu_cache = map[int, kv_cache_entry]()
     pool.metadata_map = map[int, cache_metadata]()
