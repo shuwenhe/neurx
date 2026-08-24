@@ -53,7 +53,7 @@ func main() {
     result = hf_cpu_layer(config, weights, second, result.cache, 1)
     if !result.ok || result.cache.length != 2 || len(result.hidden) != 4 { return 1 }
     if result.hidden[0] == second[0] { return 1 }
-    hf_model_config parsed = parse_hf_config("{\"hidden_size\":4,\"intermediate_size\":4,\"num_attention_heads\":2,\"num_key_value_heads\":1,\"num_hidden_layers\":2,\"vocab_size\":2,\"rms_norm_eps\":0.00001,\"rope_theta\":10000}")
+    hf_model_config parsed = parse_hf_config("{\"hidden_size\":4,\"intermediate_size\":4,\"num_attention_heads\":2,\"num_key_value_heads\":1,\"num_hidden_layers\":2,\"vocab_size\":2,\"max_position_embeddings\":128,\"rms_norm_eps\":0.00001,\"rope_theta\":10000}")
     if !parsed.valid || parsed.layers != 2 || parsed.head_dim != 2 { println("FAIL config"); return 1 }
     safetensors_embedding embedding = load_f32_embedding("artifacts/build/commands/native-test/embedding.safetensors", "embedding.weight")
     f32_tensor_result embedding_values = read_f32_tensor(embedding)

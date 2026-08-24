@@ -16,7 +16,7 @@ extern "libc:neurx_s_cuda_last_error" func neurx_s_cuda_last_error() string
 extern "libc:neurx_s_cuda_initialize" func neurx_s_cuda_initialize(string model_path, int device_id) int
 extern "libc:neurx_s_cuda_config_dimensions" func neurx_s_cuda_config_dimensions(string model_path, int device_id, int vocab_size, int hidden_size, int intermediate_size, int num_hidden_layers) int
 extern "libc:neurx_s_cuda_config_attention" func neurx_s_cuda_config_attention(int num_attention_heads, int num_key_value_heads, int head_dimension, int max_position_embeddings) int
-extern "libc:neurx_s_cuda_config_finalize" func neurx_s_cuda_config_finalize(float rms_norm_eps, float rope_theta, int attention_bias, int mlp_bias, int tie_word_embeddings) int
+extern "libc:neurx_s_cuda_config_finalize" func neurx_s_cuda_config_finalize(string rms_norm_eps, string rope_theta, int attention_bias, int mlp_bias, int tie_word_embeddings) int
 extern "libc:neurx_s_cuda_begin" func neurx_s_cuda_begin(string prompt, int max_new_tokens) int
 extern "libc:neurx_s_cuda_next" func neurx_s_cuda_next() int
 extern "libc:neurx_s_cuda_result" func neurx_s_cuda_result() string
@@ -1035,7 +1035,7 @@ func main() {
         print("ERROR: NeurX CUDA attention configuration failed: " + neurx_s_cuda_last_error() + "\n")
         return
     }
-    if neurx_s_cuda_config_finalize(model_config.rms_epsilon, model_config.rope_theta, attention_bias, mlp_bias, tie_word_embeddings) != 0 {
+    if neurx_s_cuda_config_finalize(model_config.rms_epsilon_text, model_config.rope_theta_text, attention_bias, mlp_bias, tie_word_embeddings) != 0 {
         print("ERROR: NeurX CUDA initialization failed: " + neurx_s_cuda_last_error() + "\n")
         return
     }

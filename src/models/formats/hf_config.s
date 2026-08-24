@@ -13,6 +13,8 @@ struct hf_model_config {
     int max_position_embeddings
     float rms_epsilon
     float rope_theta
+    string rms_epsilon_text
+    string rope_theta_text
     bool attention_bias
     bool mlp_bias
     bool tie_word_embeddings
@@ -74,6 +76,19 @@ func hf_json_float(string text, string key, float fallback) float {
     value
 }
 
+func hf_json_number_text(string text, string key, string fallback) string {
+    int position = hf_json_number_start(text, key)
+    if position < 0 || position >= len(text) { return fallback }
+    string value = ""
+    while position < len(text) {
+        int ch = text[position]
+        bool numeric = (ch >= 48 && ch <= 57) || ch == 46 || ch == 43 || ch == 45 || ch == 69 || ch == 101
+        if numeric { value = value + string(ch); position = position + 1 } else { position = len(text) }
+    }
+    if value == "" { return fallback }
+    value
+}
+
 func hf_json_bool(string text, string key, bool fallback) bool {
     int position = hf_json_number_start(text, key)
     if position < 0 || position >= len(text) { return fallback }
@@ -83,7 +98,7 @@ func hf_json_bool(string text, string key, bool fallback) bool {
 }
 
 func invalid_hf_config(string code) hf_model_config {
-    hf_model_config { valid: false, hidden_size: 0, intermediate_size: 0, attention_heads: 0, kv_heads: 0, head_dim: 0, layers: 0, vocabulary_size: 0, max_position_embeddings: 0, rms_epsilon: 0.00001, rope_theta: 10000.0, attention_bias: false, mlp_bias: false, tie_word_embeddings: false, error_code: code }
+    hf_model_config { valid: false, hidden_size: 0, intermediate_size: 0, attention_heads: 0, kv_heads: 0, head_dim: 0, layers: 0, vocabulary_size: 0, max_position_embeddings: 0, rms_epsilon: 0.00001, rope_theta: 10000.0, rms_epsilon_text: "0.00001", rope_theta_text: "10000.0", attention_bias: false, mlp_bias: false, tie_word_embeddings: false, error_code: code }
 }
 
 func parse_hf_config(string text) hf_model_config {
@@ -108,6 +123,8 @@ func parse_hf_config(string text) hf_model_config {
         max_position_embeddings: context,
         rms_epsilon: hf_json_float(text, "rms_norm_eps", 0.00001),
         rope_theta: hf_json_float(text, "rope_theta", 10000.0),
+        rms_epsilon_text: hf_json_number_text(text, "rms_norm_eps", "0.00001"),
+        rope_theta_text: hf_json_number_text(text, "rope_theta", "10000.0"),
         attention_bias: hf_json_bool(text, "attention_bias", true),
         mlp_bias: hf_json_bool(text, "mlp_bias", false),
         tie_word_embeddings: hf_json_bool(text, "tie_word_embeddings", false),

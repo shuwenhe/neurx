@@ -125,7 +125,8 @@ extern "C" int neurx_s_cuda_config_attention(int num_attention_heads,
   return 0;
 }
 
-extern "C" int neurx_s_cuda_config_finalize(double rms_norm_eps, double rope_theta,
+extern "C" int neurx_s_cuda_config_finalize(const char* rms_norm_eps_text,
+                                              const char* rope_theta_text,
                                               int attention_bias, int mlp_bias,
                                               int tie_word_embeddings) {
   try {
@@ -143,8 +144,11 @@ extern "C" int neurx_s_cuda_config_finalize(double rms_norm_eps, double rope_the
       throw std::runtime_error("failed to query the local CUDA GPU");
     }
     g_device_name = properties.name;
-    g_pending_config.rms_norm_eps = rms_norm_eps;
-    g_pending_config.rope_theta = rope_theta;
+    if (rms_norm_eps_text == nullptr || rope_theta_text == nullptr) {
+      throw std::runtime_error("S model configuration numeric text is missing");
+    }
+    g_pending_config.rms_norm_eps = std::stod(rms_norm_eps_text);
+    g_pending_config.rope_theta = std::stod(rope_theta_text);
     g_pending_config.attention_bias = attention_bias != 0;
     g_pending_config.mlp_bias = mlp_bias != 0;
     g_pending_config.tie_word_embeddings = tie_word_embeddings != 0;

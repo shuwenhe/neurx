@@ -179,6 +179,24 @@ $(S_REPO_ROOT)/bin/s_seed:
 
 build-commands test-native-inference test-model-formats build-production-s-inference: $(S_REPO_ROOT)/bin/s_seed
 
+.PHONY: device-abi-contract-test
+device-abi-contract-test: build-s-ir-runner $(S_REPO_ROOT)/bin/s_seed
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/device_abi_test'
+	@$(S_SEED_COMPILER) tests/contract/device_transformer_abi_test.s artifacts/build/device_abi_test/device_transformer_abi_test.ir
+	@$(S_SEED_COMPILER) src/runtime/device/device_abi.s artifacts/build/device_abi_test/device_abi.ir
+	@$(S_SEED_COMPILER) src/runtime/device/device_tensor.s artifacts/build/device_abi_test/device_tensor.ir
+	@$(S_SEED_COMPILER) src/runtime/device/device_ops.s artifacts/build/device_abi_test/device_ops.ir
+	@$(S_SEED_COMPILER) src/runtime/device/vendor_lowering.s artifacts/build/device_abi_test/vendor_lowering.ir
+	@$(S_SEED_COMPILER) src/inference/runtime/device_transformer.s artifacts/build/device_abi_test/device_transformer.ir
+	@$(S_SEED_COMPILER) --link-ir artifacts/build/device_abi_test/linked.ir \
+		artifacts/build/device_abi_test/device_transformer_abi_test.ir \
+		artifacts/build/device_abi_test/device_abi.ir \
+		artifacts/build/device_abi_test/device_tensor.ir \
+		artifacts/build/device_abi_test/device_ops.ir \
+		artifacts/build/device_abi_test/vendor_lowering.ir \
+		artifacts/build/device_abi_test/device_transformer.ir
+	@'$(S_RUNNER_BIN)' artifacts/build/device_abi_test/linked.ir
+
 help:
 	@echo ""
 	@echo "  make shard"
