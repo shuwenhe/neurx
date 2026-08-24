@@ -6,7 +6,7 @@ func main() {
     string ascend_home = runtime_env_get("ASCEND_HOME_PATH", "/usr/local/Ascend/ascend-toolkit/latest")
     if !runtime_file_exists(ascend_home) {
         println("Ascend toolkit not found: " + ascend_home)
-        println("Set ASCEND_HOME_PATH before using backend/cann/env.s")
+        println("Set ASCEND_HOME_PATH before using backend/platform/cann/env.s")
         return 1
     }
     println("export ASCEND_HOME_PATH=\"" + ascend_home + "\"")

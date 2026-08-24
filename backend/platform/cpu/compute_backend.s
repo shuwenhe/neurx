@@ -1,4 +1,4 @@
-package neurx.cpu.compute_backend
+package neurx.platform.cpu.compute_backend
 
 struct device_info {
     string backend

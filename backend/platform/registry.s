@@ -72,6 +72,18 @@ func platform_capability_for(string platform) platform_capability {
     if platform == "cpu" {
         return platform_capability {platform: platform, device_type: "cpu", available: true, supports_graph_capture: false, supports_speculative_decode: false, supports_multimodal: true, supports_fp8: false, supports_int4: true, supports_distributed: true, distributed_backend: "gloo"}
     }
+    if platform == "npu" {
+        return platform_capability {platform: platform, device_type: "npu", available: true, supports_graph_capture: true, supports_speculative_decode: false, supports_multimodal: true, supports_fp8: true, supports_int4: true, supports_distributed: true, distributed_backend: "hccl"}
+    }
+    if platform == "musa" {
+        return platform_capability {platform: platform, device_type: "gpu", available: true, supports_graph_capture: false, supports_speculative_decode: true, supports_multimodal: true, supports_fp8: true, supports_int4: true, supports_distributed: true, distributed_backend: "nccl_musa"}
+    }
+    if platform == "mlx" {
+        return platform_capability {platform: platform, device_type: "accelerator", available: true, supports_graph_capture: false, supports_speculative_decode: true, supports_multimodal: true, supports_fp8: false, supports_int4: true, supports_distributed: false, distributed_backend: ""}
+    }
+    if platform == "zen" {
+        return platform_capability {platform: platform, device_type: "cpu", available: true, supports_graph_capture: false, supports_speculative_decode: false, supports_multimodal: true, supports_fp8: false, supports_int4: true, supports_distributed: true, distributed_backend: "gloo"}
+    }
     platform_capability {platform: platform, device_type: "unknown", available: false, supports_graph_capture: false, supports_speculative_decode: false, supports_multimodal: false, supports_fp8: false, supports_int4: false, supports_distributed: false, distributed_backend: ""}
 }
 
@@ -92,6 +104,21 @@ func select_platform(platform_request request) platform_selection {
     }
     if request.platform == "cpu" {
         if platform_requirement_enabled(request.requirements, platform_require_graph_capture()) || platform_requirement_enabled(request.requirements, platform_require_speculative_decode()) || platform_requirement_enabled(request.requirements, platform_require_fp8()) { return platform_selection {distributed_backend: platform_backend_gloo(), supported: false, error_code: 2} }
+        return platform_selection {distributed_backend: platform_backend_gloo(), supported: true, error_code: 0}
+    }
+    if request.platform == "npu" {
+        if platform_requirement_enabled(request.requirements, platform_require_speculative_decode()) { return platform_selection {distributed_backend: platform_backend_hccl(), supported: false, error_code: 2} }
+        return platform_selection {distributed_backend: platform_backend_hccl(), supported: true, error_code: 0}
+    }
+    if request.platform == "musa" {
+        return platform_selection {distributed_backend: platform_backend_nccl(), supported: true, error_code: 0}
+    }
+    if request.platform == "mlx" {
+        if platform_requirement_enabled(request.requirements, platform_require_distributed()) { return platform_selection {distributed_backend: platform_backend_none(), supported: false, error_code: 2} }
+        return platform_selection {distributed_backend: platform_backend_none(), supported: true, error_code: 0}
+    }
+    if request.platform == "zen" {
+        if platform_requirement_enabled(request.requirements, platform_require_graph_capture()) || platform_requirement_enabled(request.requirements, platform_require_fp8()) { return platform_selection {distributed_backend: platform_backend_gloo(), supported: false, error_code: 2} }
         return platform_selection {distributed_backend: platform_backend_gloo(), supported: true, error_code: 0}
     }
     platform_selection {distributed_backend: platform_backend_none(), supported: false, error_code: 1}

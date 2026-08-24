@@ -1,4 +1,4 @@
-package neurx.cpu.cuda_core
+package neurx.platform.cpu.cuda_core
 extern func neurx_cuda_get_device_count() int
 extern func neurx_cuda_set_device(int device_id) int
 extern func neurx_cuda_get_device_name(int device_id) string

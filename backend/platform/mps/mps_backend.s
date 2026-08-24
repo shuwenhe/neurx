@@ -1,4 +1,4 @@
-package neurx.mps
+package neurx.platform.mps
 import "Foundation"
 import "Metal"
 import "MetalPerformanceShaders"

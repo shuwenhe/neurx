@@ -1,0 +1,118 @@
+.PHONY: all build clean test install help
+
+ROCM_HOME ?= /opt/rocm
+HIP_PATH ?= $(ROCM_HOME)
+HIPCC ?= $(HIP_PATH)/bin/hipcc
+S_COMPILER ?= sglang
+
+BUILD_DIR ?= build
+INSTALL_DIR ?= /usr/local/neurx
+
+CXXFLAGS = -O3 -march=native -Wall -Wextra -fPIC
+HIPFLAGS = -std=c++17 --offload-arch=gfx906 --offload-arch=gfx908 --offload-arch=gfx90a --offload-arch=gfx940 --offload-arch=gfx941 --offload-arch=gfx942
+LDFLAGS = -L$(HIP_PATH)/lib -lhip_hcc -lrocblas -lmiopen -lrccl
+
+S_FILES = device_manager_rocm.s rocm_runtime.s attention_rocm.s rocm_kernels.s moe_kernels_rdna.s inference_server_rocm.s memory_manager_rocm.s rccl_integration.s
+CPP_FILES = rocm_runtime_binding.cpp
+HIP_FILES = rocm_kernels_impl.hip attention_kernels_impl.hip
+
+HEADERS = *.h *.hpp
+
+all: build
+
+build: $(BUILD_DIR) compile_s compile_cpp compile_hip link
+
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+compile_s:
+	@echo "Compiling S language files..."
+	@for f in $(S_FILES); do \
+		echo "  Compiling $$f..."; \
+		$(S_COMPILER) $$f -o $(BUILD_DIR)/$${f%.s}.o || true; \
+	done
+
+compile_cpp:
+	@echo "Compiling C++ files..."
+	@for f in $(CPP_FILES); do \
+		echo "  Compiling $$f..."; \
+		g++ $(CXXFLAGS) -I$(HIP_PATH)/include -c $$f -o $(BUILD_DIR)/$${f%.cpp}.o; \
+	done
+
+compile_hip:
+	@echo "Compiling HIP files..."
+	@for f in $(HIP_FILES); do \
+		echo "  Compiling $$f..."; \
+		$(HIPCC) $(HIPFLAGS) $(CXXFLAGS) -I$(HIP_PATH)/include -c $$f -o $(BUILD_DIR)/$${f%.hip}.o; \
+	done
+
+link:
+	@echo "Linking neurx_rocm_runtime..."
+	$(HIPCC) -shared $(BUILD_DIR)/*.o $(LDFLAGS) -o $(BUILD_DIR)/libneurx_rocm_runtime.so
+
+test: build
+	@echo "Running tests..."
+	@cd tests && make -f Makefile.rocm test
+
+install: build
+	@echo "Installing to $(INSTALL_DIR)..."
+	mkdir -p $(INSTALL_DIR)/lib $(INSTALL_DIR)/include
+	cp $(BUILD_DIR)/libneurx_rocm_runtime.so $(INSTALL_DIR)/lib/
+	cp $(HEADERS) $(INSTALL_DIR)/include/
+
+clean:
+	@echo "Cleaning build artifacts..."
+	rm -rf $(BUILD_DIR)
+	@cd tests && make -f Makefile.rocm clean || true
+
+help:
+	@echo "NeurX ROCm Backend Build System"
+	@echo ""
+	@echo "Targets:"
+	@echo "  make all          - Build everything (default)"
+	@echo "  make build        - Build libraries"
+	@echo "  make test         - Run tests"
+	@echo "  make install      - Install to $(INSTALL_DIR)"
+	@echo "  make clean        - Clean build artifacts"
+	@echo "  make help         - Show this help"
+	@echo ""
+	@echo "Variables:"
+	@echo "  ROCM_HOME=$(ROCM_HOME)"
+	@echo "  BUILD_DIR=$(BUILD_DIR)"
+	@echo "  INSTALL_DIR=$(INSTALL_DIR)"
+	@echo ""
+	@echo "Example:"
+	@echo "  make ROCM_HOME=/opt/rocm-6.0 BUILD_DIR=build_rocm6 all"
+
+check-rocm:
+	@echo "Checking ROCm installation..."
+	@which rocm-smi > /dev/null && echo "✓ rocm-smi found" || echo "✗ rocm-smi not found"
+	@which hipcc > /dev/null && echo "✓ hipcc found" || echo "✗ hipcc not found"
+	@which rocblas-info > /dev/null && echo "✓ rocBLAS found" || echo "✗ rocBLAS not found"
+	@test -d $(HIP_PATH) && echo "✓ HIP_PATH=$(HIP_PATH)" || echo "✗ HIP_PATH not found"
+
+list-targets:
+	@echo "Supported Target Architectures:"
+	@echo "  gfx906  - Instinct MI50, Instinct MI60"
+	@echo "  gfx908  - Instinct MI100"
+	@echo "  gfx90a  - Instinct MI200 series"
+	@echo "  gfx940  - Instinct MI300 (early access)"
+	@echo "  gfx941  - Instinct MI300X"
+	@echo "  gfx942  - Instinct MI325X"
+	@echo "  gfx1100 - RDNA 3 (RX 7000, RX 9000 early)"
+	@echo "  gfx1150 - RDNA 3.5 APU (Strix Point)"
+	@echo "  gfx1151 - RDNA 3.5 APU (Strix Halo)"
+	@echo "  gfx1201 - RDNA 4 (RX 9070 XT, etc.)"
+
+info:
+	@echo "NeurX ROCm Backend Configuration"
+	@echo "=================================="
+	@echo "ROCM_HOME:     $(ROCM_HOME)"
+	@echo "HIP_PATH:      $(HIP_PATH)"
+	@echo "HIPCC:         $(HIPCC)"
+	@echo "Build dir:     $(BUILD_DIR)"
+	@echo "Install dir:   $(INSTALL_DIR)"
+	@echo ""
+	@echo "S Files:       $(S_FILES)"
+	@echo "C++ Files:     $(CPP_FILES)"
+	@echo "HIP Files:     $(HIP_FILES)"

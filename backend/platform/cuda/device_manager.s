@@ -1,4 +1,4 @@
-package neurx.cuda
+package neurx.platform.cuda
 
 struct cuda_device {
     int id

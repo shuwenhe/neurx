@@ -1,4 +1,4 @@
-package neurx.cuda_bindings
+package neurx.platform.cuda_bindings
 use std.io.println
 extern func cuda_malloc(int size) int64
 extern func cuda_free(int64 ptr) int

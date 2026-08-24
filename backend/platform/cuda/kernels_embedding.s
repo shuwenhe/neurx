@@ -1,4 +1,4 @@
-package neurx.cuda
+package neurx.platform.cuda
 
 struct embedding_config {
     int num_embeddings
