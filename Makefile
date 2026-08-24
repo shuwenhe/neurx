@@ -2272,6 +2272,7 @@ build-s-ir-runner: check-bash
 		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/semantic/analyzer.c' \
 		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/intermediate/ir.c' \
 		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/code/generator.c' \
+		'$(S_COMPILER_EMIT_CWD)/src/cmd/compile/seed/s_seed.c' \
 		2>&1 && \
 		chmod +x '$(S_RUNNER_BIN)' && \
 		test -f '$(S_RUNNER_BIN)'
