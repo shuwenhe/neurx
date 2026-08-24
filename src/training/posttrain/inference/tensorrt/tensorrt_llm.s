@@ -1,6 +1,6 @@
 import "tensor/tensor.s"
 import "src/inference/inference_engine.s"
-import "src/inference/extensions/attention/attention.s"
+import "src/inference/extension/attention/attention.s"
 
 struct tensorrt_config {
     model_dir: string

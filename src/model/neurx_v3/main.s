@@ -369,7 +369,7 @@ func main() {
     println("")
     println("Files:")
     println("  neurx/model/neurx/mla.s")
-    println("  src/models/extensions/moe/fine_grained_moe.s")
+    println("  src/model/extensions/moe/fine_grained_moe.s")
     println("  neurx/model/neurx/mtp.s")
     println("  neurx/model/neurx/fp8_training.s")
     println("  neurx/alignment/neurx_r1_grpo.s")

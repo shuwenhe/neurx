@@ -63,7 +63,7 @@ func show_directory_structure() {
     print("📁 EXPECTED DIRECTORY STRUCTURE\n")
     print("═════════════════════════════════════════════════════════\n\n")
     print("/home/shuwen/shuwen/\n")
-    print("├── src/models/\n")
+    print("├── src/model/\n")
     print("│   └── Qwen2.5-0.5B-Instruct/          (Model files)\n")
     print("│       ├── model.safetensors          (1.9 GB)\n")
     print("│       ├── config.json                (~1 KB)\n")

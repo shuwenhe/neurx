@@ -104,7 +104,7 @@ func step2_merge() int {
     println("🔗 Startmerge...")
     println("")
     println("📖 Loading base model...")
-    println("  Path: /home/shuwen/shuwen/train/model/base-src/models/model.safetensors")
+    println("  Path: /home/shuwen/shuwen/train/model/base-src/model/model.safetensors")
     println("  Size: ~1.5 GB")
     println("  ✓ Loading complete")
     println("")

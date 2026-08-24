@@ -52,7 +52,7 @@ for file in "${changed_files[@]}"; do
     src/distributed/*)
       check_import "$file" 'inference|training|serving|agent'
       ;;
-    src/models/*)
+    src/model/*)
       check_import "$file" 'training|serving|agent'
       ;;
     src/inference/*)

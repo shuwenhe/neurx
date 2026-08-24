@@ -31,7 +31,7 @@ func download_model_from_huggingface(
     print("\n⚙️ Download Strategy\n")
     print("─────────────────────────────────────────────\n")
     print("Method: huggingface-hub library via system command\n")
-    print("Cache: ~/.src/inference/extensions/cache/huggingface/hub/\n")
+    print("Cache: ~/.src/inference/extension/cache/huggingface/hub/\n")
     print("Resume: Automatic (incremental download)\n\n")
     print("💾 Space Requirements\n")
     print("─────────────────────────────────────────────\n")

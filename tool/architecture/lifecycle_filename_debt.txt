@@ -1,10 +1,10 @@
 # Existing naming debt. Remove entries as files are consolidated; do not add new entries.
 src/inference/compute/transformer/transformer_real.s
-src/inference/extensions/attention/attention_complete.s
-src/inference/extensions/attention/paged_attention_memory_fixed.s
-src/inference/extensions/tokenizer/common/bpe_complete.s
+src/inference/extension/attention/attention_complete.s
+src/inference/extension/attention/paged_attention_memory_fixed.s
+src/inference/extension/tokenizer/common/bpe_complete.s
 src/inference/llm/chat/production_chat_enhanced.s
-src/inference/llm/utils/v1_api_complete.s
+src/inference/llm/util/v1_api_complete.s
 src/inference/memory/model_loader/safetensors_real_loader.s
 src/inference/multimodal/multimodal_complete.s
 src/inference/runtime/transformer_real_inference.s

@@ -182,7 +182,7 @@ func current_neurx_frontier_capabilities() []frontier_capability {
         "partial",
         "p0",
         true,
-        "src/inference/extensions/tokenizer/data_pipeline.s",
+        "src/inference/extension/tokenizer/data_pipeline.s",
         "replace placeholder whitespace paths with production BPE/SentencePiece flow"
     )
     caps[2] = make_capability(
@@ -200,7 +200,7 @@ func current_neurx_frontier_capabilities() []frontier_capability {
         "partial",
         "p0",
         true,
-        "src/models/llm/gpt_moe_1t.s",
+        "src/model/llm/gpt_moe_1t.s",
         "finish top-k routing, expert capacity handling, and load-balance loss"
     )
     caps[4] = make_capability(
@@ -209,7 +209,7 @@ func current_neurx_frontier_capabilities() []frontier_capability {
         "partial",
         "p0",
         true,
-        "src/models/transformer/rope_scaling.s",
+        "src/model/transformer/rope_scaling.s",
         "validate 128k context with RoPE scaling, KV cache layout, and evals"
     )
     caps[5] = make_capability(
@@ -281,7 +281,7 @@ func current_neurx_frontier_capabilities() []frontier_capability {
         "missing",
         "p1",
         false,
-        "src/models/multimodal/minimal_fusion.s",
+        "src/model/multimodal/minimal_fusion.s",
         "replace minimal fusion with image/audio/video encoders and interleaved data"
     )
     caps[13] = make_capability(

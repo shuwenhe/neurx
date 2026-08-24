@@ -149,7 +149,7 @@ func grpo_training_new(
 ) grpo_training_state {
     generative_reward_model reward_model = generative_reward_model {
         base_model: dpo_state.base_model,
-        reward_head_path: "src/models/catalog/grpo_reward_head.pt",
+        reward_head_path: "src/model/catalog/grpo_reward_head.pt",
         hidden_dim: 2048,
         reward_scale: 1.0,
     }

@@ -32,9 +32,9 @@ fi
 required_dirs=(
   cmd/train cmd/serve cmd/worker cmd/controller cmd/benchmark
   src/core/tensor src/core/ops src/core/autograd src/core/memory src/core/contracts
-  src/compiler/frontend src/compiler/ir src/compiler/passes src/compiler/lowering src/compiler/codegen
+  src/compiler/frontend src/compiler/ir src/compiler/pass src/compiler/lowering src/compiler/codegen
   src/runtime/executor src/runtime/dispatch src/runtime/memory src/runtime/task src/runtime/system
-  src/models/registry src/models/loaders src/models/formats src/models/families
+  src/model/registry src/model/loaders src/model/formats src/model/families
   src/training/api src/training/engine src/training/strategy src/training/optimizer
   src/training/checkpoint src/training/data src/training/pretrain src/training/posttrain
   src/inference/api src/inference/engine src/inference/scheduler src/inference/executor

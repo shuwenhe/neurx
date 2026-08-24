@@ -302,9 +302,9 @@ hybrid-moe-s: check-bash build-s-ir-runner
 	@cd '$(CURDIR_UNIX)' && \
 		bash tool/bundle_s_modules.sh \
 			'artifact/build/hybrid_moe_s/hybrid_moe.bundle.s' \
-			'src/models/extensions/moe/hybrid_moe.s' \
-			'src/models/extensions/moe/moe_core.s' \
-			'src/inference/extensions/attention/nda.s' && \
+			'src/model/extensions/moe/hybrid_moe.s' \
+			'src/model/extensions/moe/moe_core.s' \
+			'src/inference/extension/attention/nda.s' && \
 		'$(S_COMPILER)' \
 			'artifact/build/hybrid_moe_s/hybrid_moe.bundle.s' \
 			'artifact/build/hybrid_moe_s/hybrid_moe.ir'
@@ -1010,7 +1010,7 @@ build-real-chat-s:
 $(PRODUCTION_S_INFERENCE_DIR):
 	@mkdir -p '$(PRODUCTION_S_INFERENCE_DIR)'
 
-$(PRODUCTION_S_BACKEND): backend/cpu/inference_server.s src/inference/extensions/cache/kv_cache_block.s src/inference/extensions/cache/cache_index.s src/inference/extensions/cache/kv_cache_engine.s src/inference/extensions/cache/kv_cache_integration.s src/inference/extensions/cache/hash_table.s src/inference/extensions/cache/storage_backend.s src/inference/extensions/cache/lru_linked_list.s src/inference/extensions/cache/distributed_cache.s src/inference/extensions/cache/performance_optimization.s src/inference/extensions/cache/advanced_cache_engine.s src/inference/extensions/cache/advanced_cache_integration.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_BACKEND): backend/cpu/inference_server.s src/inference/extension/cache/kv_cache_block.s src/inference/extension/cache/cache_index.s src/inference/extension/cache/kv_cache_engine.s src/inference/extension/cache/kv_cache_integration.s src/inference/extension/cache/hash_table.s src/inference/extension/cache/storage_backend.s src/inference/extension/cache/lru_linked_list.s src/inference/extension/cache/distributed_cache.s src/inference/extension/cache/performance_optimization.s src/inference/extension/cache/advanced_cache_engine.s src/inference/extension/cache/advanced_cache_integration.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX CPU Backend (Pure S Language)..."
 	@echo "  Phase 1 (Legacy): kv_cache_block.s, cache_index.s, kv_cache_engine.s, kv_cache_integration.s"
 	@echo "  Phase 2-4 (Advanced): hash_table.s, storage_backend.s, lru_linked_list.s, distributed_cache.s, performance_optimization.s, advanced_cache_engine.s, advanced_cache_integration.s"
@@ -1027,10 +1027,10 @@ $(PRODUCTION_S_BACKEND): backend/cpu/inference_server.s src/inference/extensions
 	@echo "✓ LMCache Phase 2-4 modules included: hash_table (O(1) lookup), storage_backend (L1/L2/L3), lru_linked_list (O(1) evict), distributed_cache, performance_optimization, advanced_cache_engine"
 	@touch '$(PRODUCTION_S_BACKEND)'
 
-$(PRODUCTION_S_GPU_BACKEND): backend/cuda/inference_server.s src/models/formats/hf_config.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_GPU_BACKEND): backend/cuda/inference_server.s src/model/formats/hf_config.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX GPU Backend (Pure S Language + GPU Acceleration)..."
 	@$(S_SEED_COMPILER) backend/cuda/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_entry.ir' && \
-		$(S_SEED_COMPILER) src/models/formats/hf_config.s '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' && \
+		$(S_SEED_COMPILER) src/model/formats/hf_config.s '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' && \
 		$(S_SEED_COMPILER) --link-ir '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir' '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_entry.ir' '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' || { \
 		echo "❌ GPU Backend compilation failed!"; \
 		exit 1; \
@@ -1042,10 +1042,10 @@ $(PRODUCTION_S_GPU_BACKEND): backend/cuda/inference_server.s src/models/formats/
 	@echo "✓ GPU backend compiled: $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir"
 	@touch '$(PRODUCTION_S_GPU_BACKEND)'
 
-$(PRODUCTION_S_GPU_BACKEND_ENHANCED): backend/cuda/inference_server.s src/models/formats/hf_config.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_GPU_BACKEND_ENHANCED): backend/cuda/inference_server.s src/model/formats/hf_config.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX GPU Backend Enhanced (Real Inference + Streaming MatMul)..."
 	@$(S_SEED_COMPILER) backend/cuda/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced_entry.ir' && \
-		$(S_SEED_COMPILER) src/models/formats/hf_config.s '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' && \
+		$(S_SEED_COMPILER) src/model/formats/hf_config.s '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' && \
 		$(S_SEED_COMPILER) --link-ir '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir' '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced_entry.ir' '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' || { \
 		echo "❌ GPU Backend Enhanced compilation failed!"; \
 		exit 1; \
@@ -1675,7 +1675,7 @@ production-inference: build-production-inference-engine-s
 	@echo "╚════════════════════════════════════════════════════════════════╝"
 	@echo ""
 	@NEURX_MODEL_PATH='$(CHAT_MODEL_PATH)/model.safetensors' \
-		NEURX_TOKENIZER_PATH='$(CHAT_MODEL_PATH)/../model/base-src/models/tokenizer.json' \
+		NEURX_TOKENIZER_PATH='$(CHAT_MODEL_PATH)/../model/base-src/model/tokenizer.json' \
 		NEURX_PROMPT='Hello, I am' \
 		NEURX_MAX_TOKENS=128 \
 		'$(S_RUNNER_BIN)' artifact/build/production_inference_engine/production_inference_engine.ir
@@ -1688,7 +1688,7 @@ production-chat: build-production-hpc-chat-s
 	@echo "╚════════════════════════════════════════════════════════════════╝"
 	@echo ""
 	@NEURX_MODEL_PATH='$(CHAT_MODEL_PATH)/model.safetensors' \
-		NEURX_TOKENIZER_PATH='$(CHAT_MODEL_PATH)/../model/base-src/models/tokenizer.json' \
+		NEURX_TOKENIZER_PATH='$(CHAT_MODEL_PATH)/../model/base-src/model/tokenizer.json' \
 		'$(S_RUNNER_BIN)' artifact/build/production_hpc_chat/production_hpc_chat.ir
 
 benchmark-production-inference: build-production-inference-engine-s
@@ -2291,7 +2291,7 @@ build-s-ir-runner: check-bash
 		chmod +x '$(S_RUNNER_BIN)' && \
 		test -f '$(S_RUNNER_BIN)'
 build-posttrain-sft-native: check-bash
-	@echo "Building native model src/inference/extensions/tokenizer/SFT batch probe..."
+	@echo "Building native model src/inference/extension/tokenizer/SFT batch probe..."
 	@mkdir -p '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)'
 	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror \
 		'src/training/posttrain/native/sft_batch_probe.cpp' \
@@ -3210,7 +3210,7 @@ MULTIMODAL_BUILD_DIR := $(CURDIR_UNIX)/artifact/build/multimodal
 compile-multimodal-audio:
 	@echo "🎵 Compiling Audio Features (Pure S)..."
 	@mkdir -p $(MULTIMODAL_BUILD_DIR)
-	@$(S_SEED_COMPILER) src/models/extensions/multimodal/audio.s $(MULTIMODAL_BUILD_DIR)/audio.ir || { \
+	@$(S_SEED_COMPILER) src/model/extensions/multimodal/audio.s $(MULTIMODAL_BUILD_DIR)/audio.ir || { \
 		echo "❌ Audio compilation failed!"; \
 		exit 1; \
 	}
@@ -3220,7 +3220,7 @@ compile-multimodal-audio:
 compile-multimodal-video:
 	@echo "🎬 Compiling Video Encoding (Pure S)..."
 	@mkdir -p $(MULTIMODAL_BUILD_DIR)
-	@$(S_SEED_COMPILER) src/models/extensions/multimodal/video.s $(MULTIMODAL_BUILD_DIR)/video.ir || { \
+	@$(S_SEED_COMPILER) src/model/extensions/multimodal/video.s $(MULTIMODAL_BUILD_DIR)/video.ir || { \
 		echo "❌ Video compilation failed!"; \
 		exit 1; \
 	}
@@ -3230,7 +3230,7 @@ compile-multimodal-video:
 compile-multimodal-fusion:
 	@echo "🔀 Compiling Fusion Engine (Pure S)..."
 	@mkdir -p $(MULTIMODAL_BUILD_DIR)
-	@$(S_SEED_COMPILER) src/models/extensions/multimodal/fusion.s $(MULTIMODAL_BUILD_DIR)/fusion.ir || { \
+	@$(S_SEED_COMPILER) src/model/extensions/multimodal/fusion.s $(MULTIMODAL_BUILD_DIR)/fusion.ir || { \
 		echo "❌ Fusion compilation failed!"; \
 		exit 1; \
 	}
@@ -3240,7 +3240,7 @@ compile-multimodal-fusion:
 test-multimodal: build-s-ir-runner
 	@echo "🧪 Compiling Multimodal Test Suite (Pure S)..."
 	@mkdir -p $(MULTIMODAL_BUILD_DIR)
-	@$(S_SEED_COMPILER) src/models/extensions/multimodal/test.s $(MULTIMODAL_BUILD_DIR)/test.ir || { \
+	@$(S_SEED_COMPILER) src/model/extensions/multimodal/test.s $(MULTIMODAL_BUILD_DIR)/test.ir || { \
 		echo "❌ Test compilation failed!"; \
 		exit 1; \
 	}

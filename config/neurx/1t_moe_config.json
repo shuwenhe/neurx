@@ -78,7 +78,7 @@
     "dataset_root": "src/training/data/pretrain",
     "manifest_path": "src/training/data/pretrain/manifest.json",
     "tokenizer_name": "neurx-bpe-128k",
-    "tokenizer_model_path": "src/inference/extensions/tokenizer/neurx_bpe_128k.model",
+    "tokenizer_model_path": "src/inference/extension/tokenizer/neurx_bpe_128k.model",
     "total_tokens_needed": 1000000000000
   },
 

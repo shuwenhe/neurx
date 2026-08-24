@@ -18,7 +18,7 @@ func generate_response(string prompt, int max_tokens) string {
 
 func main() {
     string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain/model.safetensors")
-    string tokenizer_path = runtime_env_get("NEURX_TOKENIZER_PATH", "/home/shuwen/shuwen/model/base-src/models/tokenizer.json")
+    string tokenizer_path = runtime_env_get("NEURX_TOKENIZER_PATH", "/home/shuwen/shuwen/model/base-src/model/tokenizer.json")
     print("🚀 NeurX Phase 2B: Real Transformer Inference Engine\n")
     print("✓ Model: Language Model 0.5B Instruct\n")
     print("✓ Pure S Language Implementation\n")

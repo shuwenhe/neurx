@@ -110,9 +110,9 @@
     "epoch_sampling": true,
     "shuffle_buffer_size": 10000,
     "tokenizer_name": "neurx-bpe",
-    "tokenizer_model_path": "src/inference/extensions/tokenizer/neurx_bpe_128k.model",
-    "tokenizer_merges_path": "src/inference/extensions/tokenizer/neurx_bpe_128k.merges",
-    "tokenizer_vocab_path": "src/inference/extensions/tokenizer/neurx_bpe_128k.vocab",
+    "tokenizer_model_path": "src/inference/extension/tokenizer/neurx_bpe_128k.model",
+    "tokenizer_merges_path": "src/inference/extension/tokenizer/neurx_bpe_128k.merges",
+    "tokenizer_vocab_path": "src/inference/extension/tokenizer/neurx_bpe_128k.vocab",
     "tokenizer_manifest_path": "src/training/data/tokenizer.manifest"
   },
   "checkpoint": {

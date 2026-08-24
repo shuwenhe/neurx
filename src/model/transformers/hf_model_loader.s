@@ -50,7 +50,7 @@ func default_hf_load_options() hf_load_options {
 func create_hf_model_loader(model_id: string) hf_model_loader {
     hf_model_loader {
         model_id: model_id,
-        cache_dir: "~/.src/inference/extensions/cache/huggingface/hub",
+        cache_dir: "~/.src/inference/extension/cache/huggingface/hub",
         device: "cpu",
         dtype: "float32",
         load_in_8bit: false,

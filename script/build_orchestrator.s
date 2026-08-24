@@ -117,7 +117,7 @@ func (build_orchestrator* b) build_core() error {
     components := []string{
         "core/tensor.s",
         "core/autograd.s",
-        "src/inference/extensions/tokenizer/model_bpe.s",
+        "src/inference/extension/tokenizer/model_bpe.s",
         "src/training/optimizer/adamw.s",
     }
     s_compiler := b.get_s_compiler()

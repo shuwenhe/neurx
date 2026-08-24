@@ -43,11 +43,11 @@ func main() {
     println("Megatron-LM-like stack")
     println("  Transformer core and parallel-training layout are present in NeurX.")
     int megatron_ready = 0
-    if print_path(root, "src/models/transformer/transformer.s") { megatron_ready = megatron_ready + 1 }
-    if print_path(root, "src/models/transformer/model_class.s") { megatron_ready = megatron_ready + 1 }
+    if print_path(root, "src/model/transformer/transformer.s") { megatron_ready = megatron_ready + 1 }
+    if print_path(root, "src/model/transformer/model_class.s") { megatron_ready = megatron_ready + 1 }
     if print_path(root, "src/runtime/distributed/tp/tp.s") { megatron_ready = megatron_ready + 1 }
     if print_path(root, "src/runtime/distributed/pp/pp.s") { megatron_ready = megatron_ready + 1 }
-    if print_path(root, "src/models/extensions/moe/transformer_moe.s") { megatron_ready = megatron_ready + 1 }
+    if print_path(root, "src/model/extensions/moe/transformer_moe.s") { megatron_ready = megatron_ready + 1 }
     string megatron_status = "PARTIAL"
     if megatron_ready == 5 {
         megatron_status = "PASS"
@@ -89,8 +89,8 @@ func main() {
     int tvm_ready = 0
     if print_path(root, "src/compiler/compiler.s") { tvm_ready = tvm_ready + 1 }
     if print_path(root, "src/compiler/optimization_pipeline.s") { tvm_ready = tvm_ready + 1 }
-    if print_path(root, "src/compiler/passes/fusion.s") { tvm_ready = tvm_ready + 1 }
-    if print_path(root, "src/compiler/passes/elimination.s") { tvm_ready = tvm_ready + 1 }
+    if print_path(root, "src/compiler/pass/fusion.s") { tvm_ready = tvm_ready + 1 }
+    if print_path(root, "src/compiler/pass/elimination.s") { tvm_ready = tvm_ready + 1 }
     if print_path(root, "src/compiler/executor/execution_engine.s") { tvm_ready = tvm_ready + 1 }
     string tvm_status = "PARTIAL"
     if tvm_ready == 5 {
@@ -102,7 +102,7 @@ func main() {
     println("ONNX Runtime-like stack")
     println("  Model loading and runtime data structures are present in NeurX.")
     int onnx_ready = 0
-    if print_path(root, "src/models/llm/model_loader.s") { onnx_ready = onnx_ready + 1 }
+    if print_path(root, "src/model/llm/model_loader.s") { onnx_ready = onnx_ready + 1 }
     if print_path(root, "src/runtime/model/hf_model.h") { onnx_ready = onnx_ready + 1 }
     if print_path(root, "src/runtime/model/safetensors.h") { onnx_ready = onnx_ready + 1 }
     if print_path(root, "src/runtime/model/bpe_tokenizer.h") { onnx_ready = onnx_ready + 1 }

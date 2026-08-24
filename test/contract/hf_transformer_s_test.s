@@ -64,8 +64,8 @@ func main() {
     hf_generation_result generation = hf_generate(model, prompt, 2)
     if !generation.ok { println("FAIL generation: " + generation.error_code); return 1 }
     if len(generation.token_ids) != 2 { println("FAIL generated length"); return 1 }
-    if hf_resolve_tensor_path("test/fixtures/hf_sharded", "model.embed_tokens.weight") != "test/fixtures/hf_sharded/model-00001-of-00002.safetensors" { return 1 }
-    if hf_resolve_tensor_path("test/fixtures/hf_sharded", "model.norm.weight") != "test/fixtures/hf_sharded/model-00002-of-00002.safetensors" { return 1 }
+    if hf_resolve_tensor_path("test/fixture/hf_sharded", "model.embed_tokens.weight") != "test/fixture/hf_sharded/model-00001-of-00002.safetensors" { return 1 }
+    if hf_resolve_tensor_path("test/fixture/hf_sharded", "model.norm.weight") != "test/fixture/hf_sharded/model-00002-of-00002.safetensors" { return 1 }
     println("PASS pure S HF Transformer GQA RoPE KV contract")
     0
 }

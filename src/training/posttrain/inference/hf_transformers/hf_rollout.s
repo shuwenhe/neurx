@@ -1,5 +1,5 @@
 import "tensor/tensor.s"
-import "src/inference/extensions/tokenizer/tokenizer.s"
+import "src/inference/extension/tokenizer/tokenizer.s"
 import "src/inference/sampling_strategies.s"
 
 struct hf_transformers_config {

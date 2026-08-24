@@ -28,7 +28,7 @@ func main() {
     println("\n" + "============================================================")
     println("SafeTensors Weight Modifier - LoRA Merge Tool")
     println("============================================================\n")
-    string base_model_file = "/home/shuwen/shuwen/train/model/base-src/models/model.safetensors"
+    string base_model_file = "/home/shuwen/shuwen/train/model/base-src/model/model.safetensors"
     string output_model_file = "/home/shuwen/shuwen/posttrain/model.safetensors"
     println("📖 Reading base model...")
     println("  Source: " + base_model_file)

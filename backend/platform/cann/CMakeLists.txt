@@ -7,9 +7,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(neurx_cann_runtime STATIC
   src/runtime/acl_runtime.cpp
-  src/inference/extensions/cache/paged_kv_cache.cpp
-  src/inference/extensions/cache/prefix_cache.cpp
-  src/models/nxtrfmv2_loader.cpp
+  src/inference/extension/cache/paged_kv_cache.cpp
+  src/inference/extension/cache/prefix_cache.cpp
+  src/model/nxtrfmv2_loader.cpp
     operators/aclnn_matmul_wrapper.cpp
   operators/matmul_bridge.cpp
   operators/operator_library.cpp
