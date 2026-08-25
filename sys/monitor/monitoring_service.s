@@ -43,14 +43,14 @@ struct monitoring_service {
 }
 
 func create_monitoring_service(int interval_ms) (monitoring_service, string) {
-    let buffer = metric_buffer {
+    buffer := metric_buffer {
         metrics: vec[metric](),
         buffer_size: 10000,
         write_pos: 0,
         is_full: false
     }
     
-    let health = system_health {
+    health := system_health {
         healthy_gpus: 1,
         total_gpus: 1,
         avg_temperature: 45.0,
@@ -58,7 +58,7 @@ func create_monitoring_service(int interval_ms) (monitoring_service, string) {
         network_utilization: 0.0
     }
     
-    let service = monitoring_service {
+    service := monitoring_service {
         service_id: 0,
         num_metrics: 0,
         sampling_interval_ms: interval_ms,
@@ -87,7 +87,7 @@ func collect_metric(monitoring_service* service, metric* metric_val) (int, strin
 }
 
 func collect_metrics(monitoring_service* service) (int, string) {
-    let latency_metric = metric {
+        latency_metric := metric {
         metric_type: metric_type::latency,
         value: 25.5,
         unit: "ms",
@@ -97,7 +97,7 @@ func collect_metrics(monitoring_service* service) (int, string) {
     service->buffer->metrics->push(latency_metric)
     service->num_metrics = service->num_metrics + 1
     
-    let gpu_metric = metric {
+        gpu_metric := metric {
         metric_type: metric_type::gpu_utilization,
         value: 72.3,
         unit: "percent",
@@ -107,7 +107,7 @@ func collect_metrics(monitoring_service* service) (int, string) {
     service->buffer->metrics->push(gpu_metric)
     service->num_metrics = service->num_metrics + 1
     
-    let mem_metric = metric {
+        mem_metric := metric {
         metric_type: metric_type::memory_usage,
         value: 8192.0,
         unit: "mb",
@@ -135,7 +135,7 @@ func get_system_health(monitoring_service* service) system_health {
 }
 
 func flush_metrics(monitoring_service* service) (int, string) {
-    let flushed = service->buffer->write_pos
+    flushed := service->buffer->write_pos
     
     service->buffer->write_pos = 0
     service->buffer->is_full = false
@@ -143,10 +143,10 @@ func flush_metrics(monitoring_service* service) (int, string) {
 }
 
 func query_metrics(monitoring_service* service, int start_us, int end_us) (vec[metric], string) {
-    let results = vec[metric]()
+    results := vec[metric]()
     
     for i in 0..service->buffer->metrics->len() {
-        let m = service->buffer->metrics->get(i)
+        m := service->buffer->metrics->get(i)
         
         if m.timestamp_us >= start_us && m.timestamp_us <= end_us {
             results.push(m)

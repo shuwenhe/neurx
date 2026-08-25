@@ -27,17 +27,17 @@ struct core_system {
 }
 
 func kernel_main() (core_system, string) {
-    let hal_cap = hal::detect_platform_capability()?
+    hal_cap := hal::detect_platform_capability()?
     
-    let mem_pool = allocator::create_memory_pool(16384)?
+    mem_pool := allocator::create_memory_pool(16384)?
     
-    let task_scheduler = sched::create_scheduler()?
+    task_scheduler := sched::create_scheduler()?
     
-    let monitor_service = monitor::create_monitoring_service(1000)?
+    monitor_service := monitor::create_monitoring_service(1000)?
     
-    let rpc_srv = rpc_framework::create_rpc_server(8080)?
+    rpc_srv := rpc_framework::create_rpc_server(8080)?
     
-    let state = system_state {
+    state := system_state {
         is_running: true,
         active_task_count: 0,
         memory_usage_mb: 0,
@@ -46,7 +46,7 @@ func kernel_main() (core_system, string) {
         training_task_count: 0
     }
     
-    let core = core_system {
+    core := core_system {
         state: &mut state,
         mem_pool: mem_pool,
         task_scheduler: task_scheduler,
@@ -60,7 +60,7 @@ func kernel_main() (core_system, string) {
 
 func run_main_event_loop(core_system* core) (int, string) {
     while core->state->is_running {
-        let scheduled_task = sched::schedule_next_task(core->task_scheduler)?
+        scheduled_task := sched::schedule_next_task(core->task_scheduler)?
         
         if scheduled_task > 0 {
             core->state->active_task_count = core->state->active_task_count + 1
@@ -76,7 +76,7 @@ func run_main_event_loop(core_system* core) (int, string) {
 }
 
 func init_platform_backends(core_system* core) (int, string) {
-    let hal_cap = hal::detect_platform_capability()?
+    hal_cap := hal::detect_platform_capability()?
     
     if hal_cap.gpu_count > 0 {
         backend_selector::select_and_init_gpu_backend(&hal_cap)?
@@ -89,7 +89,7 @@ func init_platform_backends(core_system* core) (int, string) {
 }
 
 func add_system_task(core_system* core, int task_type_id, int priority) (int, string) {
-    let task_id = sched::schedule_task(core->task_scheduler, task_type_id, priority)?
+    task_id := sched::schedule_task(core->task_scheduler, task_type_id, priority)?
     
     core->state->active_task_count = core->state->active_task_count + 1
     task_id, ""

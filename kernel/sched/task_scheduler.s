@@ -46,16 +46,16 @@ struct scheduler {
 }
 
 func create_scheduler() (scheduler, string) {
-    let ready_queue = task_queue {
+    ready_queue := task_queue {
         queue: vec[task](),
         write_index: 0,
         read_index: 0
     }
     
-    let running_tasks = vec[task]()
-    let completed_tasks = vec[task]()
+    running_tasks := vec[task]()
+    completed_tasks := vec[task]()
     
-    let sched = scheduler {
+    sched := scheduler {
         ready_queue: &mut ready_queue,
         running_tasks: &mut running_tasks,
         completed_tasks: &mut completed_tasks,
@@ -69,10 +69,10 @@ func create_scheduler() (scheduler, string) {
 }
 
 func schedule_training_task(scheduler* sched, int priority) (int, string) {
-    let task_id = sched->current_task_id
+    task_id := sched->current_task_id
     sched->current_task_id = sched->current_task_id + 1
     
-    let new_task = task {
+    new_task := task {
         task_id: task_id,
         task_type: task_type::training_task,
         state: task_state::ready,
@@ -90,10 +90,10 @@ func schedule_training_task(scheduler* sched, int priority) (int, string) {
 }
 
 func schedule_inference_task(scheduler* sched, int priority) (int, string) {
-    let task_id = sched->current_task_id
+    task_id := sched->current_task_id
     sched->current_task_id = sched->current_task_id + 1
     
-    let new_task = task {
+    new_task := task {
         task_id: task_id,
         task_type: task_type::inference_task,
         state: task_state::ready,
@@ -111,10 +111,10 @@ func schedule_inference_task(scheduler* sched, int priority) (int, string) {
 }
 
 func schedule_system_task(scheduler* sched, int priority) (int, string) {
-    let task_id = sched->current_task_id
+    task_id := sched->current_task_id
     sched->current_task_id = sched->current_task_id + 1
     
-    let new_task = task {
+    new_task := task {
         task_id: task_id,
         task_type: task_type::system_task,
         state: task_state::ready,
@@ -146,14 +146,15 @@ func schedule_next_task(scheduler* sched) (int, string) {
         return 0, ""
     }
     
-    let selected_idx = find_highest_priority_task(sched)?
+    selected_idx := find_highest_priority_task(sched)?
     
     if selected_idx < 0 {
         return 0, ""
     }
     
-    let next_task = sched->ready_queue->queue->get(selected_idx)
-    let next_task_id = next_task.task_id
+    next_task := sched->ready_queue->queue->get(selected_idx)
+    
+    next_task_id := next_task.task_id
     
     sched->ready_queue->queue->remove(selected_idx)
     sched->running_tasks->push(next_task)
@@ -163,11 +164,11 @@ func schedule_next_task(scheduler* sched) (int, string) {
 }
 
 func find_highest_priority_task(scheduler* sched) (int, string) {
-    let highest_priority = -1
-    let highest_idx = -1
+    highest_priority := -1
+    highest_idx := -1
     
     for i in 0..sched->ready_queue->queue->len() {
-        let t = sched->ready_queue->queue->get(i)
+        t := sched->ready_queue->queue->get(i)
         
         if t.priority > highest_priority {
             highest_priority = t.priority
@@ -178,20 +179,20 @@ func find_highest_priority_task(scheduler* sched) (int, string) {
 }
 
 func context_switch(scheduler* sched, int from_task_id, int to_task_id) (int, string) {
-    let from_idx = find_task_in_running(sched, from_task_id)?
+    from_idx := find_task_in_running(sched, from_task_id)?
     
     if from_idx >= 0 {
-        let mut from_task = sched->running_tasks->get(from_idx)
+        mut from_task := sched->running_tasks->get(from_idx)
         from_task.state = task_state::ready
         
         sched->running_tasks->remove(from_idx)
         sched->ready_queue->queue->push(from_task)
     }
     
-    let to_idx = find_task_in_queue(sched, to_task_id)?
+    to_idx := find_task_in_queue(sched, to_task_id)?
     
     if to_idx >= 0 {
-        let mut to_task = sched->ready_queue->queue->get(to_idx)
+        mut to_task := sched->ready_queue->queue->get(to_idx)
         to_task.state = task_state::running
         to_task.start_time_ms = sched->current_time_ms
         
@@ -203,7 +204,7 @@ func context_switch(scheduler* sched, int from_task_id, int to_task_id) (int, st
 
 func find_task_in_running(scheduler* sched, int task_id) (int, string) {
     for i in 0..sched->running_tasks->len() {
-        let t = sched->running_tasks->get(i)
+        t := sched->running_tasks->get(i)
         if t.task_id == task_id {
             return i, ""
         }
@@ -213,7 +214,7 @@ func find_task_in_running(scheduler* sched, int task_id) (int, string) {
 
 func find_task_in_queue(scheduler* sched, int task_id) (int, string) {
     for i in 0..sched->ready_queue->queue->len() {
-        let t = sched->ready_queue->queue->get(i)
+        t := sched->ready_queue->queue->get(i)
         if t.task_id == task_id {
             return i, ""
         }
@@ -222,13 +223,13 @@ func find_task_in_queue(scheduler* sched, int task_id) (int, string) {
 }
 
 func check_deadline_violations(scheduler* sched) (int, string) {
-    let violation_count = 0
+    violation_count := 0
     
     for i in 0..sched->running_tasks->len() {
-        let t = sched->running_tasks->get(i)
+        t := sched->running_tasks->get(i)
         
         if t.deadline_ms > 0 {
-            let elapsed = sched->current_time_ms - t.start_time_ms
+            elapsed := sched->current_time_ms - t.start_time_ms
             
             if elapsed > t.deadline_ms {
                 violation_count = violation_count + 1
@@ -243,7 +244,7 @@ func advance_scheduler_clock(scheduler* sched) (int, string) {
     sched->current_time_ms = sched->current_time_ms + 1
     
     for i in 0..sched->running_tasks->len() {
-        let mut t = sched->running_tasks->get(i)
+        mut t := sched->running_tasks->get(i)
         t.cpu_time_used_ms = t.cpu_time_used_ms + 1
     }
     
@@ -254,10 +255,10 @@ func advance_scheduler_clock(scheduler* sched) (int, string) {
 }
 
 func complete_task(scheduler* sched, int task_id) (int, string) {
-    let idx = find_task_in_running(sched, task_id)?
+    idx := find_task_in_running(sched, task_id)?
     
     if idx >= 0 {
-        let mut t = sched->running_tasks->get(idx)
+        mut t := sched->running_tasks->get(idx)
         t.state = task_state::completed
         
         sched->running_tasks->remove(idx)
@@ -267,10 +268,10 @@ func complete_task(scheduler* sched, int task_id) (int, string) {
 }
 
 func fail_task(scheduler* sched, int task_id) (int, string) {
-    let idx = find_task_in_running(sched, task_id)?
+    idx := find_task_in_running(sched, task_id)?
     
     if idx >= 0 {
-        let mut t = sched->running_tasks->get(idx)
+        mut t := sched->running_tasks->get(idx)
         t.state = task_state::failed
         
         sched->running_tasks->remove(idx)
@@ -285,7 +286,7 @@ func get_scheduler_stats(scheduler* sched) scheduler {
 
 func shutdown_scheduler(scheduler* sched) (int, string) {
     for i in 0..sched->running_tasks->len() {
-        let t = sched->running_tasks->get(i)
+        t := sched->running_tasks->get(i)
         complete_task(sched, t.task_id)?
     }
     sched->total_scheduled_count, ""

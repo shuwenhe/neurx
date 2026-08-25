@@ -39,13 +39,13 @@ struct rpc_client {
 }
 
 func create_rpc_server(int port) (rpc_server, string) {
-    let request_queue = rpc_request_queue {
+    request_queue := rpc_request_queue {
         queue: vec[rpc_message](),
         queue_size: 1000,
         write_pos: 0
     }
     
-    let server = rpc_server {
+    server := rpc_server {
         server_id: 0,
         port: port,
         active_connections: 0,
@@ -68,7 +68,7 @@ func stop_rpc_server(rpc_server* server) (int, string) {
 }
 
 func create_rpc_client(string* address, int port) (rpc_client, string) {
-    let client = rpc_client {
+    client := rpc_client {
         client_id: 0,
         server_address: address,
         server_port: port,
@@ -83,7 +83,7 @@ func send_rpc_call(rpc_client* client, string* method, int* payload, int payload
         return 0, "Client not connected"
     }
     
-    let message = rpc_message {
+    message := rpc_message {
         message_id: get_next_message_id(),
         call_type: rpc_call_type::request,
         method_name: method,
@@ -94,7 +94,7 @@ func send_rpc_call(rpc_client* client, string* method, int* payload, int payload
 }
 
 func receive_rpc_response(rpc_client* client) (rpc_message, string) {
-    let response = rpc_message {
+    response := rpc_message {
         message_id: 0,
         call_type: rpc_call_type::response,
         method_name: "response",
@@ -105,11 +105,11 @@ func receive_rpc_response(rpc_client* client) (rpc_message, string) {
 }
 
 func process_rpc_requests(rpc_server* server) (int, string) {
-    let processed = 0
+    processed := 0
     
     while server->request_queue->write_pos > 0 && processed < 100 {
         if server->request_queue->queue->len() > 0 {
-            let msg = server->request_queue->queue->get(0)
+            msg := server->request_queue->queue->get(0)
             server->request_queue->queue->remove(0)
             
             handle_rpc_request(server, &msg)?

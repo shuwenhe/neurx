@@ -38,18 +38,18 @@ struct allocation_result {
 }
 
 func create_memory_pool(int size_mb) (memory_pool, string) {
-    let total_bytes = size_mb * 1024 * 1024
-    let base_addr = 1000000
+    total_bytes := size_mb * 1024 * 1024
+    base_addr := 1000000
     
-    let initial_free_block = free_block {
+    initial_free_block := free_block {
         block_ptr: base_addr,
         size_bytes: total_bytes,
         next_block_ptr: 0
     }
     
-    let allocated_list = vec[allocated_block]()
+    allocated_list := vec[allocated_block]()
     
-    let pool = memory_pool {
+    pool := memory_pool {
         pool_id: 0,
         total_size_mb: size_mb,
         allocated_size_mb: 0,
@@ -71,23 +71,23 @@ func create_tensor_allocator(memory_pool* pool) tensor_allocator {
 }
 
 func allocate_tensor(tensor_allocator* allocator, memory_pool* pool, int size_mb) (allocation_result, string) {
-    let size_bytes = size_mb * 1024 * 1024
-    let aligned_size = align_size(size_bytes, allocator->alignment_bytes)
+    size_bytes := size_mb * 1024 * 1024
+    aligned_size := align_size(size_bytes, allocator->alignment_bytes)
     
-    let result = find_free_block(pool, aligned_size)?
+    result := find_free_block(pool, aligned_size)?
     
     if result.block_ptr == 0 {
-        let freed = garbage_collection(pool)?
+        freed := garbage_collection(pool)?
         if freed < aligned_size {
             return 0, "Insufficient memory after GC"
         }
-        let result2 = find_free_block(pool, aligned_size)?
+        result2 := find_free_block(pool, aligned_size)?
         if result2.block_ptr == 0 {
             return 0, "Memory allocation failed"
         }
     }
     
-    let allocated_block = allocated_block {
+    allocated_block := allocated_block {
         block_ptr: result.block_ptr,
         size_bytes: aligned_size,
         allocate_time_us: get_current_time_us()
@@ -108,11 +108,11 @@ func allocate_tensor(tensor_allocator* allocator, memory_pool* pool, int size_mb
 }
 
 func deallocate_tensor(tensor_allocator* allocator, memory_pool* pool, int ptr) (int, string) {
-    let found_idx = -1
-    let found_size = 0
+    found_idx := -1
+    found_size := 0
     
     for i in 0..pool->allocated_list->len() {
-        let block = pool->allocated_list->get(i)
+        block := pool->allocated_list->get(i)
         if block.block_ptr == ptr {
             found_idx = i
             found_size = block.size_bytes
@@ -143,7 +143,7 @@ func get_pool_stats(memory_pool* pool) memory_pool {
 }
 
 func find_free_block(memory_pool* pool, int size_needed) (allocation_result, string) {
-    let current_block = pool->free_list_head
+    current_block := pool->free_list_head
     
     while current_block != 0 as free_block* {
         if current_block->size_bytes >= size_needed {
@@ -169,7 +169,7 @@ func find_free_block(memory_pool* pool, int size_needed) (allocation_result, str
 }
 
 func add_free_block(memory_pool* pool, int block_ptr, int size_bytes) (int, string) {
-    let new_block = free_block {
+    new_block := free_block {
         block_ptr: block_ptr,
         size_bytes: size_bytes,
         next_block_ptr: pool->free_list_head as int
@@ -180,12 +180,12 @@ func add_free_block(memory_pool* pool, int block_ptr, int size_bytes) (int, stri
 }
 
 func coalesce_free_blocks(memory_pool* pool) (int, string) {
-    let current = pool->free_list_head
-    let coalesced = 0
+    current := pool->free_list_head
+    coalesced := 0
     
     while current != 0 as free_block* {
         if current->next_block_ptr != 0 {
-            let next = current->next_block_ptr as free_block*
+            next := current->next_block_ptr as free_block*
             
             if current->block_ptr + current->size_bytes == next->block_ptr {
                 current->size_bytes = current->size_bytes + next->size_bytes
@@ -204,13 +204,13 @@ func coalesce_free_blocks(memory_pool* pool) (int, string) {
 }
 
 func garbage_collection(memory_pool* pool) (int, string) {
-    let freed = 0
+    freed := 0
     
-    let candidates = vec[allocated_block]()
+    candidates := vec[allocated_block]()
     
     for i in 0..pool->allocated_list->len() {
-        let block = pool->allocated_list->get(i)
-        let age = get_current_time_us() - block.allocate_time_us
+        block := pool->allocated_list->get(i)
+        age := get_current_time_us() - block.allocate_time_us
         
         if age > 60000000 {
             candidates.push(block)
@@ -219,7 +219,7 @@ func garbage_collection(memory_pool* pool) (int, string) {
     }
     
     for i in 0..candidates.len() {
-        let block = candidates.get(i)
+        block := candidates.get(i)
         deallocate_tensor_internal(pool, block.block_ptr)?
     }
     
@@ -230,11 +230,11 @@ func garbage_collection(memory_pool* pool) (int, string) {
 }
 
 func deallocate_tensor_internal(memory_pool* pool, int ptr) (int, string) {
-    let found_idx = -1
-    let found_size = 0
+    found_idx := -1
+    found_size := 0
     
     for i in 0..pool->allocated_list->len() {
-        let block = pool->allocated_list->get(i)
+        block := pool->allocated_list->get(i)
         if block.block_ptr == ptr {
             found_idx = i
             found_size = block.size_bytes

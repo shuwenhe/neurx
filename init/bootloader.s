@@ -12,7 +12,7 @@ struct boot_context {
 }
 
 func init_system() boot_context {
-    let ctx = boot_context {
+    ctx := boot_context {
         cpu_count: detect_cpu_count(),
         gpu_count: detect_gpu_count(),
         mem_total_gb: detect_total_memory(),
