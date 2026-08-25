@@ -3326,4 +3326,21 @@ ai-os-status:
 	@echo "   • config/ai_os_config.yaml"
 	@echo ""
 
+phase1-demo: build-s-ir-runner
+	@echo "🎯 Running NeurX Phase 1 - AI OS Integration Demo..."
+	@mkdir -p $(CURDIR_UNIX)/artifact/build/phase1
+	@$(S_SEED_COMPILER) kernel/phase1_integrated_demo.s $(CURDIR_UNIX)/artifact/build/phase1/phase1_demo.ir || { \
+		echo "❌ Phase 1 demo compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Phase 1 demo compiled"
+	@$(S_RUNNER_BIN) $(CURDIR_UNIX)/artifact/build/phase1/phase1_demo.ir 2>&1 | tee $(LOG_DIR)/phase1_demo_$(shell date +%Y%m%d_%H%M%S).log
+	@echo ""
+	@echo "✅ Phase 1 Demo Complete!"
+	@echo "   ✓ Advanced Scheduler: 140-level priority queue, 8 CPUs"
+	@echo "   ✓ IPC Pipes: Buffer-based inter-process communication"
+	@echo "   ✓ Message Queues: Priority-based async messaging"
+	@echo "   ✓ Process Manager: Unix-style process hierarchy"
+	@echo ""
+
 include build/mk/deploy.mk
