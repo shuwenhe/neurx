@@ -59,25 +59,25 @@ func kernel_main() result[core_system, string] {
     result::ok(core)
 }
 
-func run_main_event_loop(core: core_system*) result[int, string] {
-    while core*.state*.is_running {
-        let scheduled_task = sched::schedule_next_task(core*.task_scheduler)?
+func run_main_event_loop(core_system* core) result[int, string] {
+    while core->state->is_running {
+        let scheduled_task = sched::schedule_next_task(core->task_scheduler)?
         
         if scheduled_task > 0 {
-            core*.state*.active_task_count = core*.state*.active_task_count + 1
+            core->state->active_task_count = core->state->active_task_count + 1
         }
         
-        monitor::collect_metrics(core*.monitor_service)?
+        monitor::collect_metrics(core->monitor_service)?
         
-        rpc_framework::process_rpc_requests(core*.rpc_srv)?
+        rpc_framework::process_rpc_requests(core->rpc_srv)?
         
-        sched::advance_scheduler_clock(core*.task_scheduler)?
+        sched::advance_scheduler_clock(core->task_scheduler)?
     }
     
     result::ok(0)
 }
 
-func init_platform_backends(core: core_system*) result[int, string] {
+func init_platform_backends(core_system* core) result[int, string] {
     let hal_cap = hal::detect_platform_capability()?
     
     if hal_cap.gpu_count > 0 {
@@ -91,33 +91,33 @@ func init_platform_backends(core: core_system*) result[int, string] {
     result::ok(0)
 }
 
-func add_system_task(core: core_system*, task_type_id: int, priority: int) result[int, string] {
-    let task_id = sched::schedule_task(core*.task_scheduler, task_type_id, priority)?
+func add_system_task(core_system* core, int task_type_id, int priority) result[int, string] {
+    let task_id = sched::schedule_task(core->task_scheduler, task_type_id, priority)?
     
-    core*.state*.active_task_count = core*.state*.active_task_count + 1
+    core->state->active_task_count = core->state->active_task_count + 1
     
     result::ok(task_id)
 }
 
-func shutdown_system(core: core_system*) result[int, string] {
-    core*.state*.is_running = false
+func shutdown_system(core_system* core) result[int, string] {
+    core->state->is_running = false
     
-    monitor::flush_metrics(core*.monitor_service)?
+    monitor::flush_metrics(core->monitor_service)?
     
-    rpc_framework::stop_rpc_server(core*.rpc_srv)?
+    rpc_framework::stop_rpc_server(core->rpc_srv)?
     
-    sched::shutdown_scheduler(core*.task_scheduler)?
+    sched::shutdown_scheduler(core->task_scheduler)?
     
-    allocator::cleanup_memory_pool(core*.mem_pool)?
+    allocator::cleanup_memory_pool(core->mem_pool)?
     
     result::ok(0)
 }
 
-func get_system_status(core: core_system*) system_state {
-    core*.state*
+func get_system_status(core_system* core) system_state {
+    core->state*
 }
 
-func update_system_metrics(core: core_system*, inference_count: int, training_count: int) {
-    core*.state*.inference_request_count = inference_count
-    core*.state*.training_task_count = training_count
+func update_system_metrics(core_system* core, int inference_count, int training_count) {
+    core->state->inference_request_count = inference_count
+    core->state->training_task_count = training_count
 }

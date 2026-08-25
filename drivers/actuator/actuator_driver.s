@@ -40,16 +40,16 @@ func init_actuator(actuator_type: actuator_type) result[actuator_driver, string]
     })
 }
 
-func home_actuator(driver: actuator_driver*) result[int, string] {
-    driver*.is_homed = true
+func home_actuator(actuator_driver* driver) result[int, string] {
+    driver->is_homed = true
     result::ok(0)
 }
 
-func send_command(driver: actuator_driver*, cmd: actuator_command*) result[int, string] {
+func send_command(actuator_driver* driver, actuator_command* cmd) result[int, string] {
     result::ok(0)
 }
 
-func read_feedback(driver: actuator_driver*) result[feedback, string] {
+func read_feedback(actuator_driver* driver) result[feedback, string] {
     result::ok(feedback {
         current_position: 0.0,
         current_velocity: 0.0,

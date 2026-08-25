@@ -70,25 +70,25 @@ func create_monitoring_service(interval_ms: int) result[monitoring_service, stri
     result::ok(service)
 }
 
-func start_monitoring(service: monitoring_service*) result[int, string] {
-    service*.is_running = true
+func start_monitoring(monitoring_service* service) result[int, string] {
+    service->is_running = true
     result::ok(0)
 }
 
-func collect_metric(service: monitoring_service*, metric_val: metric*) result[int, string] {
-    service*.num_metrics = service*.num_metrics + 1
+func collect_metric(monitoring_service* service, metric* metric_val) result[int, string] {
+    service->num_metrics = service->num_metrics + 1
     
-    if service*.buffer*.write_pos < service*.buffer*.buffer_size {
-        service*.buffer*.metrics*.push(metric_val*)
-        service*.buffer*.write_pos = service*.buffer*.write_pos + 1
+    if service->buffer->write_pos < service->buffer->buffer_size {
+        service->buffer->metrics->push(metric_val*)
+        service->buffer->write_pos = service->buffer->write_pos + 1
     } else {
-        service*.buffer*.is_full = true
+        service->buffer->is_full = true
     }
     
-    result::ok(service*.num_metrics)
+    result::ok(service->num_metrics)
 }
 
-func collect_metrics(service: monitoring_service*) result[int, string] {
+func collect_metrics(monitoring_service* service) result[int, string] {
     let latency_metric = metric {
         metric_type: metric_type::latency,
         value: 25.5,
@@ -96,8 +96,8 @@ func collect_metrics(service: monitoring_service*) result[int, string] {
         timestamp_us: get_time_us()
     }
     
-    service*.buffer*.metrics*.push(latency_metric)
-    service*.num_metrics = service*.num_metrics + 1
+    service->buffer->metrics->push(latency_metric)
+    service->num_metrics = service->num_metrics + 1
     
     let gpu_metric = metric {
         metric_type: metric_type::gpu_utilization,
@@ -106,8 +106,8 @@ func collect_metrics(service: monitoring_service*) result[int, string] {
         timestamp_us: get_time_us()
     }
     
-    service*.buffer*.metrics*.push(gpu_metric)
-    service*.num_metrics = service*.num_metrics + 1
+    service->buffer->metrics->push(gpu_metric)
+    service->num_metrics = service->num_metrics + 1
     
     let mem_metric = metric {
         metric_type: metric_type::memory_usage,
@@ -116,42 +116,42 @@ func collect_metrics(service: monitoring_service*) result[int, string] {
         timestamp_us: get_time_us()
     }
     
-    service*.buffer*.metrics*.push(mem_metric)
-    service*.num_metrics = service*.num_metrics + 1
+    service->buffer->metrics->push(mem_metric)
+    service->num_metrics = service->num_metrics + 1
     
     update_system_health(service)?
     
-    result::ok(service*.num_metrics)
+    result::ok(service->num_metrics)
 }
 
-func update_system_health(service: monitoring_service*) result[int, string] {
-    service*.health*.healthy_gpus = 1
-    service*.health*.total_gpus = 1
-    service*.health*.avg_temperature = 52.0
-    service*.health*.memory_utilization = 51.2
-    service*.health*.network_utilization = 23.5
+func update_system_health(monitoring_service* service) result[int, string] {
+    service->health->healthy_gpus = 1
+    service->health->total_gpus = 1
+    service->health->avg_temperature = 52.0
+    service->health->memory_utilization = 51.2
+    service->health->network_utilization = 23.5
     
     result::ok(0)
 }
 
-func get_system_health(service: monitoring_service*) system_health {
-    service*.health*
+func get_system_health(monitoring_service* service) system_health {
+    service->health*
 }
 
-func flush_metrics(service: monitoring_service*) result[int, string] {
-    let flushed = service*.buffer*.write_pos
+func flush_metrics(monitoring_service* service) result[int, string] {
+    let flushed = service->buffer->write_pos
     
-    service*.buffer*.write_pos = 0
-    service*.buffer*.is_full = false
+    service->buffer->write_pos = 0
+    service->buffer->is_full = false
     
     result::ok(flushed)
 }
 
-func query_metrics(service: monitoring_service*, start_us: int, end_us: int) result[vec[metric], string] {
+func query_metrics(monitoring_service* service, start_us: int, end_us: int) result[vec[metric], string] {
     let results = vec[metric]()
     
-    for i in 0..service*.buffer*.metrics*.len() {
-        let m = service*.buffer*.metrics*.get(i)
+    for i in 0..service->buffer->metrics->len() {
+        let m = service->buffer->metrics->get(i)
         
         if m.timestamp_us >= start_us && m.timestamp_us <= end_us {
             results.push(m)
@@ -165,7 +165,7 @@ func get_time_us() int {
     0
 }
 
-func stop_monitoring(service: monitoring_service*) result[int, string] {
-    service*.is_running = false
+func stop_monitoring(monitoring_service* service) result[int, string] {
+    service->is_running = false
     result::ok(0)
 }

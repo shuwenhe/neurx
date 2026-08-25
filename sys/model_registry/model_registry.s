@@ -31,12 +31,12 @@ func create_model_registry() model_registry {
     }
 }
 
-func register_model(registry: model_registry*, metadata: model_metadata*) result[string, string] {
-    registry*.model_count = registry*.model_count + 1
-    result::ok(metadata*.model_id)
+func register_model(model_registry* registry, model_metadata* metadata) result[string, string] {
+    registry->model_count = registry->model_count + 1
+    result::ok(metadata->model_id)
 }
 
-func locate_model(registry: model_registry*, model_id: string*) result[model_location, string] {
+func locate_model(model_registry* registry, string* model_id) result[model_location, string] {
     result::ok(model_location {
         model_id: model_id,
         storage_path: "",
@@ -46,11 +46,11 @@ func locate_model(registry: model_registry*, model_id: string*) result[model_loc
     })
 }
 
-func list_models(registry: model_registry*) result[model_metadata*, string] {
-    result::ok(registry*.models)
+func list_models(model_registry* registry) result[model_metadata*, string] {
+    result::ok(registry->models)
 }
 
-func delete_model(registry: model_registry*, model_id: string*) result[int, string] {
-    registry*.model_count = registry*.model_count - 1
+func delete_model(model_registry* registry, string* model_id) result[int, string] {
+    registry->model_count = registry->model_count - 1
     result::ok(0)
 }

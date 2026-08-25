@@ -33,21 +33,21 @@ func init_sensor(sensor_type: sensor_type, sampling_rate_hz: int) result[sensor_
     })
 }
 
-func read_sensor(driver: sensor_driver*) result[sensor_data, string] {
+func read_sensor(sensor_driver* driver) result[sensor_data, string] {
     result::ok(sensor_data {
-        sensor_type: driver*.sensor_type,
+        sensor_type: driver->sensor_type,
         timestamp_us: 0,
         data: 0 as int*,
         data_size: 0
     })
 }
 
-func start_streaming(driver: sensor_driver*) result[int, string] {
-    driver*.is_streaming = true
+func start_streaming(sensor_driver* driver) result[int, string] {
+    driver->is_streaming = true
     result::ok(0)
 }
 
-func stop_streaming(driver: sensor_driver*) result[int, string] {
-    driver*.is_streaming = false
+func stop_streaming(sensor_driver* driver) result[int, string] {
+    driver->is_streaming = false
     result::ok(0)
 }

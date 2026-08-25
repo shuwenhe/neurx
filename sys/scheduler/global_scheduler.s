@@ -31,7 +31,7 @@ func create_global_scheduler() int {
     0
 }
 
-func evaluate_workload(workload: workload*, resource: resource_request*) schedule_result {
+func evaluate_workload(workload* workload, resource_request* resource) schedule_result {
     schedule_result {
         can_schedule: true,
         suggested_node_id: 0,
@@ -39,6 +39,6 @@ func evaluate_workload(workload: workload*, resource: resource_request*) schedul
     }
 }
 
-func allocate_resources(workload_id: string*, gpu_count: int, memory_gb: int) result[int, string] {
+func allocate_resources(string* workload_id, gpu_count: int, memory_gb: int) result[int, string] {
     result::ok(0)
 }

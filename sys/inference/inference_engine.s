@@ -39,21 +39,21 @@ func create_inference_engine() inference_engine {
     }
 }
 
-func load_model(engine: inference_engine*, model_id: string*, precision: model_precision) result[int, string] {
-    engine*.model_count = engine*.model_count + 1
-    result::ok(engine*.model_count)
+func load_model(inference_engine* engine, string* model_id, precision: model_precision) result[int, string] {
+    engine->model_count = engine->model_count + 1
+    result::ok(engine->model_count)
 }
 
-func infer(engine: inference_engine*, request: inference_request*) result[inference_response, string] {
+func infer(inference_engine* engine, inference_request* request) result[inference_response, string] {
     result::ok(inference_response {
         completion: "",
         tokens_generated: 0,
         latency_ms: 0,
-        model_id: request*.model_id
+        model_id: request->model_id
     })
 }
 
-func unload_model(engine: inference_engine*, model_id: string*) result[int, string] {
-    engine*.model_count = engine*.model_count - 1
+func unload_model(inference_engine* engine, string* model_id) result[int, string] {
+    engine->model_count = engine->model_count - 1
     result::ok(0)
 }

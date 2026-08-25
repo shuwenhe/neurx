@@ -56,19 +56,19 @@ func create_rpc_server(port: int) result[rpc_server, string] {
     result::ok(server)
 }
 
-func start_rpc_server(server: rpc_server*) result[int, string] {
-    server*.is_running = true
-    server*.active_connections = 1
-    result::ok(server*.port)
+func start_rpc_server(rpc_server* server) result[int, string] {
+    server->is_running = true
+    server->active_connections = 1
+    result::ok(server->port)
 }
 
-func stop_rpc_server(server: rpc_server*) result[int, string] {
-    server*.is_running = false
-    server*.active_connections = 0
+func stop_rpc_server(rpc_server* server) result[int, string] {
+    server->is_running = false
+    server->active_connections = 0
     result::ok(0)
 }
 
-func create_rpc_client(address: string*, port: int) result[rpc_client, string] {
+func create_rpc_client(string* address, port: int) result[rpc_client, string] {
     let client = rpc_client {
         client_id: 0,
         server_address: address,
@@ -80,8 +80,8 @@ func create_rpc_client(address: string*, port: int) result[rpc_client, string] {
     result::ok(client)
 }
 
-func send_rpc_call(client: rpc_client*, method: string*, payload: int*, payload_size: int) result[rpc_message, string] {
-    if !client*.is_connected {
+func send_rpc_call(rpc_client* client, string* method, int* payload, payload_size: int) result[rpc_message, string] {
+    if !client->is_connected {
         return result::err("Client not connected")
     }
     
@@ -96,7 +96,7 @@ func send_rpc_call(client: rpc_client*, method: string*, payload: int*, payload_
     result::ok(message)
 }
 
-func receive_rpc_response(client: rpc_client*) result[rpc_message, string] {
+func receive_rpc_response(rpc_client* client) result[rpc_message, string] {
     let response = rpc_message {
         message_id: 0,
         call_type: rpc_call_type::response,
@@ -108,52 +108,52 @@ func receive_rpc_response(client: rpc_client*) result[rpc_message, string] {
     result::ok(response)
 }
 
-func process_rpc_requests(server: rpc_server*) result[int, string] {
+func process_rpc_requests(rpc_server* server) result[int, string] {
     let processed = 0
     
-    while server*.request_queue*.write_pos > 0 && processed < 100 {
-        if server*.request_queue*.queue*.len() > 0 {
-            let msg = server*.request_queue*.queue*.get(0)
-            server*.request_queue*.queue*.remove(0)
+    while server->request_queue->write_pos > 0 && processed < 100 {
+        if server->request_queue->queue->len() > 0 {
+            let msg = server->request_queue->queue->get(0)
+            server->request_queue->queue->remove(0)
             
             handle_rpc_request(server, &msg)?
             
             processed = processed + 1
-            server*.request_queue*.write_pos = server*.request_queue*.write_pos - 1
+            server->request_queue->write_pos = server->request_queue->write_pos - 1
         }
     }
     
     result::ok(processed)
 }
 
-func handle_rpc_request(server: rpc_server*, message: rpc_message*) result[int, string] {
-    if message*.method_name == "infer" {
+func handle_rpc_request(rpc_server* server, rpc_message* message) result[int, string] {
+    if message->method_name == "infer" {
         return result::ok(1)
     }
     
-    if message*.method_name == "train" {
+    if message->method_name == "train" {
         return result::ok(2)
     }
     
-    if message*.method_name == "status" {
+    if message->method_name == "status" {
         return result::ok(3)
     }
     
     result::ok(0)
 }
 
-func enqueue_rpc_request(server: rpc_server*, message: rpc_message*) result[int, string] {
-    if server*.request_queue*.write_pos >= server*.request_queue*.queue_size {
+func enqueue_rpc_request(rpc_server* server, rpc_message* message) result[int, string] {
+    if server->request_queue->write_pos >= server->request_queue->queue_size {
         return result::err("Request queue full")
     }
     
-    server*.request_queue*.queue*.push(message*)
-    server*.request_queue*.write_pos = server*.request_queue*.write_pos + 1
+    server->request_queue->queue->push(message*)
+    server->request_queue->write_pos = server->request_queue->write_pos + 1
     
-    result::ok(server*.request_queue*.write_pos)
+    result::ok(server->request_queue->write_pos)
 }
 
-func get_rpc_server_status(server: rpc_server*) rpc_server {
+func get_rpc_server_status(rpc_server* server) rpc_server {
     server*
 }
 

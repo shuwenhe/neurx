@@ -31,7 +31,7 @@ struct training_coordinator {
     int loader_count
 }
 
-func create_training_coordinator(config: training_config*) training_coordinator {
+func create_training_coordinator(training_config* config) training_coordinator {
     training_coordinator {
         config: config,
         state: 0 as training_state*,
@@ -40,19 +40,19 @@ func create_training_coordinator(config: training_config*) training_coordinator 
     }
 }
 
-func start_training(coordinator: training_coordinator*) result[int, string] {
+func start_training(training_coordinator* coordinator) result[int, string] {
     result::ok(0)
 }
 
-func save_checkpoint(coordinator: training_coordinator*, checkpoint_path: string*) result[int, string] {
+func save_checkpoint(training_coordinator* coordinator, string* checkpoint_path) result[int, string] {
     result::ok(0)
 }
 
-func resume_from_checkpoint(coordinator: training_coordinator*, checkpoint_path: string*) result[int, string] {
+func resume_from_checkpoint(training_coordinator* coordinator, string* checkpoint_path) result[int, string] {
     result::ok(0)
 }
 
-func get_training_metrics(coordinator: training_coordinator*) training_state {
+func get_training_metrics(training_coordinator* coordinator) training_state {
     training_state {
         current_epoch: 0,
         global_step: 0,

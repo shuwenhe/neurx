@@ -30,14 +30,14 @@ func init_network_driver(protocol: network_protocol, device_count: int) result[n
     })
 }
 
-func send_packet(device: network_device*, data_ptr: int, data_size: int) result[int, string] {
+func send_packet(network_device* device, data_ptr: int, data_size: int) result[int, string] {
     result::ok(data_size)
 }
 
-func receive_packet(device: network_device*) result[int, string] {
+func receive_packet(network_device* device) result[int, string] {
     result::ok(0)
 }
 
-func enable_rdma(device: network_device*) result[int, string] {
+func enable_rdma(network_device* device) result[int, string] {
     result::ok(0)
 }
