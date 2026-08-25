@@ -1,5 +1,5 @@
 #pragma once
-#include "../../src/runtime/model/hf_model.h"
+#include "../../../src/runtime/model/hf_model.h"
 #include <cstdint>
 #include <memory>
 #include <string>

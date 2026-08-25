@@ -1203,9 +1203,9 @@ build-s-gpu-cuda-runtime: check-nvcc
 	@echo "Building NeurX S local CUDA runtime..."
 	@mkdir -p '$(S_GPU_RUNTIME_BUILD_DIR)'
 	@$(CUDA_NVCC) -O2 -std=c++17 -Xcompiler -fPIC -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		backend/cuda/hf_decoder_cuda.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/hf_decoder_cuda.o'
+		backend/platform/cuda/hf_decoder_cuda.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/hf_decoder_cuda.o'
 	@$(CUDA_NVCC) -O2 -std=c++17 -Xcompiler -fPIC -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
-		backend/cuda/s_inference_cuda_bridge.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/s_inference_cuda_bridge.o'
+		backend/platform/cuda/s_inference_cuda_bridge.cu -o '$(S_GPU_RUNTIME_BUILD_DIR)/s_inference_cuda_bridge.o'
 	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c src/runtime/model/json.cpp \
 		-o '$(S_GPU_RUNTIME_BUILD_DIR)/json.o'
 	@$(CXX) -O2 -std=c++17 -fPIC -Wall -Wextra -Werror -c src/runtime/model/safetensors.cpp \
