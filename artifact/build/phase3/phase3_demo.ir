@@ -1,0 +1,872 @@
+SSEED-TARGET-V1
+MOV|t0|"t0"|_
+MOV|t0.__type|"mutex"|_
+MOV|t0.state|"int"|_
+MOV|t0.owner_pid|"int"|_
+MOV|t0.contention_count|"int"|_
+MOV|mutex|t0|_
+MOV|t1|"t1"|_
+MOV|t1.__type|"semaphore"|_
+MOV|t1.count|"int"|_
+MOV|t1.initial_count|"int"|_
+MOV|t1.acquired_count|"int"|_
+MOV|t1.released_count|"int"|_
+MOV|t1.wait_queue_depth|"int"|_
+MOV|semaphore|t1|_
+MOV|t2|"t2"|_
+MOV|t2.__type|"spinlock"|_
+MOV|t2.locked|"int"|_
+MOV|t2.spin_count|"int"|_
+MOV|t2.lock_acquisitions|"int"|_
+MOV|t2.owner_cpu|"int"|_
+MOV|spinlock|t2|_
+MOV|t3|"t3"|_
+MOV|t3.__type|"rw_lock"|_
+MOV|t3.read_count|"int"|_
+MOV|t3.write_locked|"int"|_
+MOV|t3.write_waiters|"int"|_
+MOV|t3.reader_acquisitions|"int"|_
+MOV|t3.writer_acquisitions|"int"|_
+MOV|rw_lock|t3|_
+MOV|t4|"t4"|_
+MOV|t4.__type|"atomic_int"|_
+MOV|t4.value|"int"|_
+MOV|t4.increment_count|"int"|_
+MOV|t4.decrement_count|"int"|_
+MOV|t4.compare_swap_count|"int"|_
+MOV|atomic_int|t4|_
+MOV|t5|"t5"|_
+MOV|t5.__type|"inode"|_
+MOV|t5.ino|"int"|_
+MOV|t5.size|"int"|_
+MOV|t5.mode|"int"|_
+MOV|t5.nlink|"int"|_
+MOV|t5.uid|"int"|_
+MOV|t5.gid|"int"|_
+MOV|t5.atime|"int"|_
+MOV|t5.mtime|"int"|_
+MOV|t5.ctime|"int"|_
+MOV|inode|t5|_
+MOV|t6|"t6"|_
+MOV|t6.__type|"dentry"|_
+MOV|t6.name|"string"|_
+MOV|t6.inode_no|"int"|_
+MOV|t6.parent_ino|"int"|_
+MOV|t6.valid|"int"|_
+MOV|dentry|t6|_
+MOV|t7|"t7"|_
+MOV|t7.__type|"file"|_
+MOV|t7.f_inode|"int"|_
+MOV|t7.f_flags|"int"|_
+MOV|t7.f_offset|"int"|_
+MOV|t7.f_mode|"int"|_
+MOV|t7.f_refcount|"int"|_
+MOV|file|t7|_
+MOV|t8|"t8"|_
+MOV|t8.__type|"super_block"|_
+MOV|t8.fs_name|"string"|_
+MOV|t8.block_size|"int"|_
+MOV|t8.total_blocks|"int"|_
+MOV|t8.free_blocks|"int"|_
+MOV|t8.inode_count|"int"|_
+MOV|t8.free_inodes|"int"|_
+MOV|t8.mounted|"int"|_
+MOV|super_block|t8|_
+MOV|t9|"t9"|_
+MOV|t9.__type|"inode_cache"|_
+MOV|t9.max_cached_inodes|"int"|_
+MOV|t9.cached_inodes|"int"|_
+MOV|t9.cache_hits|"int"|_
+MOV|t9.cache_misses|"int"|_
+MOV|t9.evictions|"int"|_
+MOV|t9.total_lookups|"int"|_
+MOV|inode_cache|t9|_
+MOV|t10|"t10"|_
+MOV|t10.__type|"dentry_cache"|_
+MOV|t10.max_cached_entries|"int"|_
+MOV|t10.cached_entries|"int"|_
+MOV|t10.dcache_hits|"int"|_
+MOV|t10.dcache_misses|"int"|_
+MOV|t10.total_path_lookups|"int"|_
+MOV|t10.evictions|"int"|_
+MOV|dentry_cache|t10|_
+MOV|t11|"t11"|_
+MOV|t11.__type|"socket"|_
+MOV|t11.sock_fd|"int"|_
+MOV|t11.type|"int"|_
+MOV|t11.state|"int"|_
+MOV|t11.family|"int"|_
+MOV|t11.local_port|"int"|_
+MOV|t11.remote_port|"int"|_
+MOV|t11.backlog|"int"|_
+MOV|socket|t11|_
+MOV|t12|"t12"|_
+MOV|t12.__type|"socket_manager"|_
+MOV|t12.total_sockets|"int"|_
+MOV|t12.active_sockets|"int"|_
+MOV|t12.total_connects|"int"|_
+MOV|t12.total_disconnects|"int"|_
+MOV|t12.socket_errors|"int"|_
+MOV|socket_manager|t12|_
+MOV|t13|"t13"|_
+MOV|t13.__type|"tcp_sock"|_
+MOV|t13.sock_id|"int"|_
+MOV|t13.state|"int"|_
+MOV|t13.snd_nxt|"int"|_
+MOV|t13.rcv_nxt|"int"|_
+MOV|t13.snd_una|"int"|_
+MOV|t13.cwnd|"int"|_
+MOV|t13.ssthresh|"int"|_
+MOV|t13.rtt|"int"|_
+MOV|t13.rto|"int"|_
+MOV|tcp_sock|t13|_
+MOV|t14|"t14"|_
+MOV|t14.__type|"tcp_stack"|_
+MOV|t14.total_connections|"int"|_
+MOV|t14.active_connections|"int"|_
+MOV|t14.packets_sent|"int"|_
+MOV|t14.packets_received|"int"|_
+MOV|t14.retransmissions|"int"|_
+MOV|t14.connection_errors|"int"|_
+MOV|tcp_stack|t14|_
+FUNC_BEGIN|create_mutex|_|_
+MOV|t15|"t15"|_
+MOV|t15.__type|"mutex"|_
+MOV|t15.state|0|_
+MOV|t15.owner_pid|0|_
+MOV|t15.contention_count|0|_
+RET|t15|_|_
+FUNC_END|create_mutex|_|_
+FUNC_BEGIN|create_semaphore|_|_
+PARAM|initial_value|_|_
+MOV|t16|"t16"|_
+MOV|t16.__type|"semaphore"|_
+MOV|t16.count|initial_value|_
+MOV|t16.initial_count|initial_value|_
+MOV|t16.acquired_count|0|_
+MOV|t16.released_count|0|_
+MOV|t16.wait_queue_depth|0|_
+RET|t16|_|_
+FUNC_END|create_semaphore|_|_
+FUNC_BEGIN|create_spinlock|_|_
+MOV|t17|"t17"|_
+MOV|t17.__type|"spinlock"|_
+MOV|t17.locked|0|_
+MOV|t17.spin_count|0|_
+MOV|t17.lock_acquisitions|0|_
+SUB|t18|0|1
+MOV|t17.owner_cpu|t18|_
+RET|t17|_|_
+FUNC_END|create_spinlock|_|_
+FUNC_BEGIN|create_rw_lock|_|_
+MOV|t19|"t19"|_
+MOV|t19.__type|"rw_lock"|_
+MOV|t19.read_count|0|_
+MOV|t19.write_locked|0|_
+MOV|t19.write_waiters|0|_
+MOV|t19.reader_acquisitions|0|_
+MOV|t19.writer_acquisitions|0|_
+RET|t19|_|_
+FUNC_END|create_rw_lock|_|_
+FUNC_BEGIN|create_atomic|_|_
+PARAM|initial_value|_|_
+MOV|t20|"t20"|_
+MOV|t20.__type|"atomic_int"|_
+MOV|t20.value|initial_value|_
+MOV|t20.increment_count|0|_
+MOV|t20.decrement_count|0|_
+MOV|t20.compare_swap_count|0|_
+RET|t20|_|_
+FUNC_END|create_atomic|_|_
+FUNC_BEGIN|create_super_block|_|_
+PARAM|fs_name|_|_
+PARAM|block_size|_|_
+PARAM|total_blocks|_|_
+MOV|t21|"t21"|_
+MOV|t21.__type|"super_block"|_
+MOV|t21.fs_name|fs_name|_
+MOV|t21.block_size|block_size|_
+MOV|t21.total_blocks|total_blocks|_
+MOV|t21.free_blocks|total_blocks|_
+DIV|t22|total_blocks|4
+MOV|t21.inode_count|t22|_
+DIV|t23|total_blocks|4
+MOV|t21.free_inodes|t23|_
+MOV|t21.mounted|0|_
+RET|t21|_|_
+FUNC_END|create_super_block|_|_
+FUNC_BEGIN|create_inode_cache|_|_
+PARAM|max_size|_|_
+MOV|t24|"t24"|_
+MOV|t24.__type|"inode_cache"|_
+MOV|t24.max_cached_inodes|max_size|_
+MOV|t24.cached_inodes|0|_
+MOV|t24.cache_hits|0|_
+MOV|t24.cache_misses|0|_
+MOV|t24.evictions|0|_
+MOV|t24.total_lookups|0|_
+RET|t24|_|_
+FUNC_END|create_inode_cache|_|_
+FUNC_BEGIN|create_dentry_cache|_|_
+PARAM|max_size|_|_
+MOV|t25|"t25"|_
+MOV|t25.__type|"dentry_cache"|_
+MOV|t25.max_cached_entries|max_size|_
+MOV|t25.cached_entries|0|_
+MOV|t25.dcache_hits|0|_
+MOV|t25.dcache_misses|0|_
+MOV|t25.total_path_lookups|0|_
+MOV|t25.evictions|0|_
+RET|t25|_|_
+FUNC_END|create_dentry_cache|_|_
+FUNC_BEGIN|create_socket_manager|_|_
+MOV|t26|"t26"|_
+MOV|t26.__type|"socket_manager"|_
+MOV|t26.total_sockets|0|_
+MOV|t26.active_sockets|0|_
+MOV|t26.total_connects|0|_
+MOV|t26.total_disconnects|0|_
+MOV|t26.socket_errors|0|_
+RET|t26|_|_
+FUNC_END|create_socket_manager|_|_
+FUNC_BEGIN|create_tcp_stack|_|_
+MOV|t27|"t27"|_
+MOV|t27.__type|"tcp_stack"|_
+MOV|t27.total_connections|0|_
+MOV|t27.active_connections|0|_
+MOV|t27.packets_sent|0|_
+MOV|t27.packets_received|0|_
+MOV|t27.retransmissions|0|_
+MOV|t27.connection_errors|0|_
+RET|t27|_|_
+FUNC_END|create_tcp_stack|_|_
+FUNC_BEGIN|print_mutex_info|_|_
+PARAM|m|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t28|print|1
+ARG|"║               NeurX Mutex - Status Report                  ║"|_|_
+CALL|t29|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t30|print|1
+ARG|""|_|_
+CALL|t31|print|1
+ARG|"📊 Mutex State:"|_|_
+CALL|t32|print|1
+CMP_EQ|t33|m.state|0
+JUMP_IF_FALSE|L0|t33|_
+ARG|"   • Status: 🟢 Unlocked"|_|_
+CALL|t34|print|1
+JUMP|L1|_|_
+LABEL|L0|_|_
+ARG|"   • Status: 🔴 Locked"|_|_
+CALL|t35|print|1
+LABEL|L1|_|_
+ARG|"   • Owner PID: "|_|_
+CALL|t36|print|1
+ARG|m.owner_pid|_|_
+CALL|t37|print|1
+ARG|"   • Contention Count: "|_|_
+CALL|t38|print|1
+ARG|m.contention_count|_|_
+CALL|t39|print|1
+ARG|""|_|_
+CALL|t40|print|1
+ARG|"✅ Mutex operational!"|_|_
+CALL|t41|print|1
+ARG|""|_|_
+CALL|t42|print|1
+FUNC_END|print_mutex_info|_|_
+FUNC_BEGIN|print_semaphore_info|_|_
+PARAM|s|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t43|print|1
+ARG|"║            NeurX Semaphore - Status Report                 ║"|_|_
+CALL|t44|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t45|print|1
+ARG|""|_|_
+CALL|t46|print|1
+ARG|"📊 Semaphore Configuration:"|_|_
+CALL|t47|print|1
+ARG|"   • Initial Count: "|_|_
+CALL|t48|print|1
+ARG|s.initial_count|_|_
+CALL|t49|print|1
+ARG|"   • Current Count: "|_|_
+CALL|t50|print|1
+ARG|s.count|_|_
+CALL|t51|print|1
+ARG|""|_|_
+CALL|t52|print|1
+ARG|"📈 Statistics:"|_|_
+CALL|t53|print|1
+ARG|"   • Total Acquired: "|_|_
+CALL|t54|print|1
+ARG|s.acquired_count|_|_
+CALL|t55|print|1
+ARG|"   • Total Released: "|_|_
+CALL|t56|print|1
+ARG|s.released_count|_|_
+CALL|t57|print|1
+ARG|"   • Waiters in Queue: "|_|_
+CALL|t58|print|1
+ARG|s.wait_queue_depth|_|_
+CALL|t59|print|1
+ARG|""|_|_
+CALL|t60|print|1
+ARG|"✅ Semaphore operational!"|_|_
+CALL|t61|print|1
+ARG|""|_|_
+CALL|t62|print|1
+FUNC_END|print_semaphore_info|_|_
+FUNC_BEGIN|print_spinlock_info|_|_
+PARAM|s|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t63|print|1
+ARG|"║              NeurX Spinlock - Status Report                ║"|_|_
+CALL|t64|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t65|print|1
+ARG|""|_|_
+CALL|t66|print|1
+ARG|"📊 Spinlock State:"|_|_
+CALL|t67|print|1
+CMP_EQ|t68|s.locked|0
+JUMP_IF_FALSE|L2|t68|_
+ARG|"   • Status: 🟢 Unlocked"|_|_
+CALL|t69|print|1
+JUMP|L3|_|_
+LABEL|L2|_|_
+ARG|"   • Status: 🔴 Locked"|_|_
+CALL|t70|print|1
+LABEL|L3|_|_
+ARG|"   • Owner CPU: "|_|_
+CALL|t71|print|1
+ARG|s.owner_cpu|_|_
+CALL|t72|print|1
+ARG|""|_|_
+CALL|t73|print|1
+ARG|"📈 Statistics:"|_|_
+CALL|t74|print|1
+ARG|"   • Total Spins: "|_|_
+CALL|t75|print|1
+ARG|s.spin_count|_|_
+CALL|t76|print|1
+ARG|"   • Lock Acquisitions: "|_|_
+CALL|t77|print|1
+ARG|s.lock_acquisitions|_|_
+CALL|t78|print|1
+ARG|""|_|_
+CALL|t79|print|1
+ARG|"✅ Spinlock operational!"|_|_
+CALL|t80|print|1
+ARG|""|_|_
+CALL|t81|print|1
+FUNC_END|print_spinlock_info|_|_
+FUNC_BEGIN|print_rw_lock_info|_|_
+PARAM|r|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t82|print|1
+ARG|"║            NeurX RW-Lock - Status Report                   ║"|_|_
+CALL|t83|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t84|print|1
+ARG|""|_|_
+CALL|t85|print|1
+ARG|"📊 RW-Lock State:"|_|_
+CALL|t86|print|1
+ARG|"   • Active Readers: "|_|_
+CALL|t87|print|1
+ARG|r.read_count|_|_
+CALL|t88|print|1
+CMP_EQ|t89|r.write_locked|0
+JUMP_IF_FALSE|L4|t89|_
+ARG|"   • Write Lock: 🟢 Unlocked"|_|_
+CALL|t90|print|1
+JUMP|L5|_|_
+LABEL|L4|_|_
+ARG|"   • Write Lock: 🔴 Locked"|_|_
+CALL|t91|print|1
+LABEL|L5|_|_
+ARG|"   • Write Waiters: "|_|_
+CALL|t92|print|1
+ARG|r.write_waiters|_|_
+CALL|t93|print|1
+ARG|""|_|_
+CALL|t94|print|1
+ARG|"📈 Statistics:"|_|_
+CALL|t95|print|1
+ARG|"   • Reader Acquisitions: "|_|_
+CALL|t96|print|1
+ARG|r.reader_acquisitions|_|_
+CALL|t97|print|1
+ARG|"   • Writer Acquisitions: "|_|_
+CALL|t98|print|1
+ARG|r.writer_acquisitions|_|_
+CALL|t99|print|1
+ARG|""|_|_
+CALL|t100|print|1
+ARG|"✅ RW-Lock operational!"|_|_
+CALL|t101|print|1
+ARG|""|_|_
+CALL|t102|print|1
+FUNC_END|print_rw_lock_info|_|_
+FUNC_BEGIN|print_atomic_info|_|_
+PARAM|a|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t103|print|1
+ARG|"║             NeurX Atomic - Status Report                   ║"|_|_
+CALL|t104|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t105|print|1
+ARG|""|_|_
+CALL|t106|print|1
+ARG|"📊 Atomic Value:"|_|_
+CALL|t107|print|1
+ARG|"   • Current Value: "|_|_
+CALL|t108|print|1
+ARG|a.value|_|_
+CALL|t109|print|1
+ARG|""|_|_
+CALL|t110|print|1
+ARG|"📈 Statistics:"|_|_
+CALL|t111|print|1
+ARG|"   • Increments: "|_|_
+CALL|t112|print|1
+ARG|a.increment_count|_|_
+CALL|t113|print|1
+ARG|"   • Decrements: "|_|_
+CALL|t114|print|1
+ARG|a.decrement_count|_|_
+CALL|t115|print|1
+ARG|"   • CAS Operations: "|_|_
+CALL|t116|print|1
+ARG|a.compare_swap_count|_|_
+CALL|t117|print|1
+ARG|""|_|_
+CALL|t118|print|1
+ARG|"✅ Atomic operations operational!"|_|_
+CALL|t119|print|1
+ARG|""|_|_
+CALL|t120|print|1
+FUNC_END|print_atomic_info|_|_
+FUNC_BEGIN|print_vfs_info|_|_
+PARAM|sb|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t121|print|1
+ARG|"║              NeurX VFS Layer - Status Report               ║"|_|_
+CALL|t122|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t123|print|1
+ARG|""|_|_
+CALL|t124|print|1
+ARG|"📊 Filesystem: "|_|_
+CALL|t125|print|1
+ARG|sb.fs_name|_|_
+CALL|t126|print|1
+ARG|"   • Block Size: "|_|_
+CALL|t127|print|1
+ARG|sb.block_size|_|_
+CALL|t128|print|1
+ARG|"   • Total Blocks: "|_|_
+CALL|t129|print|1
+ARG|sb.total_blocks|_|_
+CALL|t130|print|1
+ARG|"   • Free Blocks: "|_|_
+CALL|t131|print|1
+ARG|sb.free_blocks|_|_
+CALL|t132|print|1
+ARG|""|_|_
+CALL|t133|print|1
+ARG|"   • Total Inodes: "|_|_
+CALL|t134|print|1
+ARG|sb.inode_count|_|_
+CALL|t135|print|1
+ARG|"   • Free Inodes: "|_|_
+CALL|t136|print|1
+ARG|sb.free_inodes|_|_
+CALL|t137|print|1
+ARG|""|_|_
+CALL|t138|print|1
+CMP_EQ|t139|sb.mounted|1
+JUMP_IF_FALSE|L6|t139|_
+ARG|"   • Mounted: 🟢 Yes"|_|_
+CALL|t140|print|1
+JUMP|L7|_|_
+LABEL|L6|_|_
+ARG|"   • Mounted: 🔴 No"|_|_
+CALL|t141|print|1
+LABEL|L7|_|_
+ARG|""|_|_
+CALL|t142|print|1
+ARG|"✅ VFS layer operational!"|_|_
+CALL|t143|print|1
+ARG|""|_|_
+CALL|t144|print|1
+FUNC_END|print_vfs_info|_|_
+FUNC_BEGIN|print_inode_cache_info|_|_
+PARAM|cache|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t145|print|1
+ARG|"║            NeurX Inode Cache - Status Report               ║"|_|_
+CALL|t146|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t147|print|1
+ARG|""|_|_
+CALL|t148|print|1
+ARG|"📊 Cache Configuration:"|_|_
+CALL|t149|print|1
+ARG|"   • Max Cached Inodes: "|_|_
+CALL|t150|print|1
+ARG|cache.max_cached_inodes|_|_
+CALL|t151|print|1
+ARG|"   • Currently Cached: "|_|_
+CALL|t152|print|1
+ARG|cache.cached_inodes|_|_
+CALL|t153|print|1
+ARG|""|_|_
+CALL|t154|print|1
+ARG|"📈 Cache Statistics:"|_|_
+CALL|t155|print|1
+ARG|"   • Cache Hits: "|_|_
+CALL|t156|print|1
+ARG|cache.cache_hits|_|_
+CALL|t157|print|1
+ARG|"   • Cache Misses: "|_|_
+CALL|t158|print|1
+ARG|cache.cache_misses|_|_
+CALL|t159|print|1
+ARG|"   • Total Lookups: "|_|_
+CALL|t160|print|1
+ARG|cache.total_lookups|_|_
+CALL|t161|print|1
+ARG|"   • Evictions: "|_|_
+CALL|t162|print|1
+ARG|cache.evictions|_|_
+CALL|t163|print|1
+ARG|""|_|_
+CALL|t164|print|1
+ARG|"✅ Inode cache operational!"|_|_
+CALL|t165|print|1
+ARG|""|_|_
+CALL|t166|print|1
+FUNC_END|print_inode_cache_info|_|_
+FUNC_BEGIN|print_dentry_cache_info|_|_
+PARAM|cache|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t167|print|1
+ARG|"║           NeurX Dentry Cache - Status Report               ║"|_|_
+CALL|t168|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t169|print|1
+ARG|""|_|_
+CALL|t170|print|1
+ARG|"📊 Dentry Cache Configuration:"|_|_
+CALL|t171|print|1
+ARG|"   • Max Cached Entries: "|_|_
+CALL|t172|print|1
+ARG|cache.max_cached_entries|_|_
+CALL|t173|print|1
+ARG|"   • Currently Cached: "|_|_
+CALL|t174|print|1
+ARG|cache.cached_entries|_|_
+CALL|t175|print|1
+ARG|""|_|_
+CALL|t176|print|1
+ARG|"📈 Dentry Cache Statistics:"|_|_
+CALL|t177|print|1
+ARG|"   • Dcache Hits: "|_|_
+CALL|t178|print|1
+ARG|cache.dcache_hits|_|_
+CALL|t179|print|1
+ARG|"   • Dcache Misses: "|_|_
+CALL|t180|print|1
+ARG|cache.dcache_misses|_|_
+CALL|t181|print|1
+ARG|"   • Total Path Lookups: "|_|_
+CALL|t182|print|1
+ARG|cache.total_path_lookups|_|_
+CALL|t183|print|1
+ARG|"   • Evictions: "|_|_
+CALL|t184|print|1
+ARG|cache.evictions|_|_
+CALL|t185|print|1
+ARG|""|_|_
+CALL|t186|print|1
+ARG|"✅ Dentry cache operational!"|_|_
+CALL|t187|print|1
+ARG|""|_|_
+CALL|t188|print|1
+FUNC_END|print_dentry_cache_info|_|_
+FUNC_BEGIN|print_socket_manager_info|_|_
+PARAM|mgr|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t189|print|1
+ARG|"║          NeurX Socket Manager - Status Report              ║"|_|_
+CALL|t190|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t191|print|1
+ARG|""|_|_
+CALL|t192|print|1
+ARG|"📊 Socket Configuration:"|_|_
+CALL|t193|print|1
+ARG|"   • Total Sockets Created: "|_|_
+CALL|t194|print|1
+ARG|mgr.total_sockets|_|_
+CALL|t195|print|1
+ARG|"   • Active Sockets: "|_|_
+CALL|t196|print|1
+ARG|mgr.active_sockets|_|_
+CALL|t197|print|1
+ARG|""|_|_
+CALL|t198|print|1
+ARG|"📈 Socket Statistics:"|_|_
+CALL|t199|print|1
+ARG|"   • Total Connections: "|_|_
+CALL|t200|print|1
+ARG|mgr.total_connects|_|_
+CALL|t201|print|1
+ARG|"   • Total Disconnections: "|_|_
+CALL|t202|print|1
+ARG|mgr.total_disconnects|_|_
+CALL|t203|print|1
+ARG|"   • Socket Errors: "|_|_
+CALL|t204|print|1
+ARG|mgr.socket_errors|_|_
+CALL|t205|print|1
+ARG|""|_|_
+CALL|t206|print|1
+ARG|"✅ Socket layer operational!"|_|_
+CALL|t207|print|1
+ARG|""|_|_
+CALL|t208|print|1
+FUNC_END|print_socket_manager_info|_|_
+FUNC_BEGIN|print_tcp_stack_info|_|_
+PARAM|stack|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t209|print|1
+ARG|"║             NeurX TCP/IP Stack - Status Report             ║"|_|_
+CALL|t210|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t211|print|1
+ARG|""|_|_
+CALL|t212|print|1
+ARG|"📊 TCP Connection Configuration:"|_|_
+CALL|t213|print|1
+ARG|"   • Total Connections: "|_|_
+CALL|t214|print|1
+ARG|stack.total_connections|_|_
+CALL|t215|print|1
+ARG|"   • Active Connections: "|_|_
+CALL|t216|print|1
+ARG|stack.active_connections|_|_
+CALL|t217|print|1
+ARG|""|_|_
+CALL|t218|print|1
+ARG|"📈 TCP Statistics:"|_|_
+CALL|t219|print|1
+ARG|"   • Packets Sent: "|_|_
+CALL|t220|print|1
+ARG|stack.packets_sent|_|_
+CALL|t221|print|1
+ARG|"   • Packets Received: "|_|_
+CALL|t222|print|1
+ARG|stack.packets_received|_|_
+CALL|t223|print|1
+ARG|"   • Retransmissions: "|_|_
+CALL|t224|print|1
+ARG|stack.retransmissions|_|_
+CALL|t225|print|1
+ARG|"   • Connection Errors: "|_|_
+CALL|t226|print|1
+ARG|stack.connection_errors|_|_
+CALL|t227|print|1
+ARG|""|_|_
+CALL|t228|print|1
+ARG|"✅ TCP/IP stack operational!"|_|_
+CALL|t229|print|1
+ARG|""|_|_
+CALL|t230|print|1
+FUNC_END|print_tcp_stack_info|_|_
+FUNC_BEGIN|demonstrate_mutex|_|_
+ARG|""|_|_
+CALL|t231|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t232|print|1
+ARG|"  🔒 Demonstrating Mutex Lock Mechanism"|_|_
+CALL|t233|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t234|print|1
+CALL|t235|create_mutex|0
+MOV|m|t235|_
+ARG|m|_|_
+CALL|t236|print_mutex_info|1
+FUNC_END|demonstrate_mutex|_|_
+FUNC_BEGIN|demonstrate_semaphore|_|_
+ARG|""|_|_
+CALL|t237|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t238|print|1
+ARG|"  🚦 Demonstrating Semaphore Synchronization"|_|_
+CALL|t239|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t240|print|1
+ARG|3|_|_
+CALL|t241|create_semaphore|1
+MOV|sem|t241|_
+ARG|sem|_|_
+CALL|t242|print_semaphore_info|1
+FUNC_END|demonstrate_semaphore|_|_
+FUNC_BEGIN|demonstrate_spinlock|_|_
+ARG|""|_|_
+CALL|t243|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t244|print|1
+ARG|"  ⚡ Demonstrating Spinlock (CPU Busy-Wait)"|_|_
+CALL|t245|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t246|print|1
+CALL|t247|create_spinlock|0
+MOV|sl|t247|_
+ARG|sl|_|_
+CALL|t248|print_spinlock_info|1
+FUNC_END|demonstrate_spinlock|_|_
+FUNC_BEGIN|demonstrate_rw_lock|_|_
+ARG|""|_|_
+CALL|t249|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t250|print|1
+ARG|"  📖 Demonstrating Reader-Writer Lock"|_|_
+CALL|t251|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t252|print|1
+CALL|t253|create_rw_lock|0
+MOV|rwl|t253|_
+ARG|rwl|_|_
+CALL|t254|print_rw_lock_info|1
+FUNC_END|demonstrate_rw_lock|_|_
+FUNC_BEGIN|demonstrate_atomic|_|_
+ARG|""|_|_
+CALL|t255|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t256|print|1
+ARG|"  ⚛️  Demonstrating Atomic Operations"|_|_
+CALL|t257|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t258|print|1
+ARG|0|_|_
+CALL|t259|create_atomic|1
+MOV|atom|t259|_
+ARG|atom|_|_
+CALL|t260|print_atomic_info|1
+FUNC_END|demonstrate_atomic|_|_
+FUNC_BEGIN|demonstrate_vfs|_|_
+ARG|""|_|_
+CALL|t261|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t262|print|1
+ARG|"  📂 Demonstrating VFS Layer (Virtual File System)"|_|_
+CALL|t263|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t264|print|1
+ARG|"ext4"|_|_
+ARG|4096|_|_
+ARG|1000000|_|_
+CALL|t265|create_super_block|3
+MOV|sb|t265|_
+ARG|sb|_|_
+CALL|t266|print_vfs_info|1
+FUNC_END|demonstrate_vfs|_|_
+FUNC_BEGIN|demonstrate_inode_cache|_|_
+ARG|""|_|_
+CALL|t267|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t268|print|1
+ARG|"  🗂️  Demonstrating Inode Cache Management"|_|_
+CALL|t269|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t270|print|1
+ARG|10000|_|_
+CALL|t271|create_inode_cache|1
+MOV|ic|t271|_
+ARG|ic|_|_
+CALL|t272|print_inode_cache_info|1
+FUNC_END|demonstrate_inode_cache|_|_
+FUNC_BEGIN|demonstrate_dentry_cache|_|_
+ARG|""|_|_
+CALL|t273|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t274|print|1
+ARG|"  📋 Demonstrating Dentry (Directory Entry) Cache"|_|_
+CALL|t275|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t276|print|1
+ARG|5000|_|_
+CALL|t277|create_dentry_cache|1
+MOV|dc|t277|_
+ARG|dc|_|_
+CALL|t278|print_dentry_cache_info|1
+FUNC_END|demonstrate_dentry_cache|_|_
+FUNC_BEGIN|demonstrate_socket_layer|_|_
+ARG|""|_|_
+CALL|t279|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t280|print|1
+ARG|"  🔌 Demonstrating Socket Layer (BSD Sockets)"|_|_
+CALL|t281|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t282|print|1
+CALL|t283|create_socket_manager|0
+MOV|mgr|t283|_
+ARG|mgr|_|_
+CALL|t284|print_socket_manager_info|1
+FUNC_END|demonstrate_socket_layer|_|_
+FUNC_BEGIN|demonstrate_tcp_stack|_|_
+ARG|""|_|_
+CALL|t285|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t286|print|1
+ARG|"  🌐 Demonstrating TCP/IP Protocol Stack"|_|_
+CALL|t287|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t288|print|1
+CALL|t289|create_tcp_stack|0
+MOV|tcp_stack|t289|_
+ARG|tcp_stack|_|_
+CALL|t290|print_tcp_stack_info|1
+FUNC_END|demonstrate_tcp_stack|_|_
+FUNC_BEGIN|main|_|_
+ARG|""|_|_
+CALL|t291|print|1
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t292|print|1
+ARG|"║     NeurX Phase 3 - AI OS Locking + VFS + Network Demo     ║"|_|_
+CALL|t293|print|1
+ARG|"║  Mutex + Semaphore + Spinlock + RW-Lock + Atomic + VFS +   ║"|_|_
+CALL|t294|print|1
+ARG|"║          Inode-Cache + Dentry-Cache + Socket + TCP/IP      ║"|_|_
+CALL|t295|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t296|print|1
+CALL|t297|demonstrate_mutex|0
+CALL|t298|demonstrate_semaphore|0
+CALL|t299|demonstrate_spinlock|0
+CALL|t300|demonstrate_rw_lock|0
+CALL|t301|demonstrate_atomic|0
+CALL|t302|demonstrate_vfs|0
+CALL|t303|demonstrate_inode_cache|0
+CALL|t304|demonstrate_dentry_cache|0
+CALL|t305|demonstrate_socket_layer|0
+ARG|""|_|_
+CALL|t306|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t307|print|1
+ARG|"✅ Phase 3 Demonstration Complete!"|_|_
+CALL|t308|print|1
+ARG|"All locking, filesystem, and network systems operational"|_|_
+CALL|t309|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t310|print|1
+ARG|""|_|_
+CALL|t311|print|1
+FUNC_END|main|_|_
