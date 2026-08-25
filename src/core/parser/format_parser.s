@@ -4,7 +4,7 @@ use neurx.parser.types
 use neurx.parser.text_parser
 
 func detect_format(text: string) FormatDetectionResult {
-    let trimmed = trim_string(text)
+    trimmed := trim_string(text)
 
     if len(trimmed) == 0 {
         return FormatDetectionResult{
@@ -15,8 +15,8 @@ func detect_format(text: string) FormatDetectionResult {
         }
     }
 
-    let first_char = trimmed[0]
-    let indicators = []string{}
+    first_char := trimmed[0]
+    indicators := []string{}
 
     if first_char == '{' || first_char == '[' {
         if is_valid_json_structure(trimmed) {
@@ -85,23 +85,23 @@ func detect_format(text: string) FormatDetectionResult {
 }
 
 func is_valid_json_structure(text: string) bool {
-    let trimmed = trim_string(text)
+    trimmed := trim_string(text)
     if len(trimmed) < 2 {
         return false
     }
 
-    let first = trimmed[0]
-    let last = trimmed[len(trimmed) - 1]
+    first := trimmed[0]
+    last := trimmed[len(trimmed) - 1]
 
     if (first == '{' && last == '}') || (first == '[' && last == ']') {
 
-        let brace_count = 0
-        let bracket_count = 0
-        let i = 0
-        let in_string = false
+        brace_count := 0
+        bracket_count := 0
+        i := 0
+        in_string := false
 
         while i < len(trimmed) {
-            let ch = trimmed[i]
+            ch := trimmed[i]
 
             if ch == '"' && (i == 0 || trimmed[i - 1] != '\\') {
                 in_string = !in_string
@@ -127,20 +127,20 @@ func is_valid_json_structure(text: string) bool {
 }
 
 func is_valid_xml_structure(text: string) bool {
-    let trimmed = trim_string(text)
+    trimmed := trim_string(text)
 
     if len(trimmed) < 3 || trimmed[0] != '<' {
         return false
     }
 
-    let tag_start = 0
-    let tag_end = find_substring(trimmed, ">", tag_start)
+    tag_start := 0
+    tag_end := find_substring(trimmed, ">", tag_start)
 
     if tag_end < 0 {
         return false
     }
 
-    let closing_pattern = "</"
+    closing_pattern := "</"
     if find_substring(trimmed, closing_pattern, tag_end) >= 0 {
         return true
     }
@@ -181,21 +181,21 @@ func has_markdown_markers(text: string) bool {
 }
 
 func is_yaml_like(text: string) bool {
-    let lines = split_lines(text)
+    lines := split_lines(text)
 
     if len(lines) == 0 {
         return false
     }
 
-    let yaml_count = 0
-    let i = 0
+    yaml_count := 0
+    i := 0
 
     while i < len(lines) && i < 10 {
-        let line = trim_string(lines[i])
+        line := trim_string(lines[i])
 
         if len(line) > 0 && line[0] != '#' {
 
-            let colon_pos = find_substring(line, ":", 0)
+            colon_pos := find_substring(line, ":", 0)
             if colon_pos > 0 && colon_pos < len(line) - 1 {
 
                 if colon_pos < 5 || (line[colon_pos - 1] != '/' && line[colon_pos - 2] != '/') {
@@ -211,22 +211,22 @@ func is_yaml_like(text: string) bool {
 }
 
 func is_csv_like(text: string) bool {
-    let lines = split_lines(text)
+    lines := split_lines(text)
 
     if len(lines) < 2 {
         return false
     }
 
-    let first_line = lines[0]
-    let comma_count = count_occurrences(first_line, ",")
+    first_line := lines[0]
+    comma_count := count_occurrences(first_line, ",")
 
     if comma_count < 1 {
         return false
     }
 
     if len(lines) > 1 {
-        let second_line = lines[1]
-        let second_comma_count = count_occurrences(second_line, ",")
+        second_line := lines[1]
+        second_comma_count := count_occurrences(second_line, ",")
 
         if second_comma_count >= comma_count - 1 && second_comma_count <= comma_count + 1 {
             return true
@@ -238,8 +238,8 @@ func is_csv_like(text: string) bool {
 
 func has_html_tags(text: string) bool {
 
-    let html_tags = []string{"<html", "<div", "<span", "<p>", "<h1", "<h2", "<table", "<body"}
-    let i = 0
+    html_tags := []string{"<html", "<div", "<span", "<p>", "<h1", "<h2", "<table", "<body"}
+    i := 0
 
     while i < len(html_tags) {
         if find_substring(to_lowercase(text), html_tags[i], 0) >= 0 {
@@ -256,11 +256,11 @@ func has_html_tags(text: string) bool {
 }
 
 func parse_json_output(text: string) ParseResult {
-    let result = create_parse_result()
+    result := create_parse_result()
     result.format = 1
     result.raw_output = text
 
-    let trimmed = trim_string(text)
+    trimmed := trim_string(text)
 
     if len(trimmed) == 0 {
         result.status = 3
@@ -287,13 +287,13 @@ func parse_json_output(text: string) ParseResult {
 }
 
 func parse_xml_output(text: string) ParseResult {
-    let result = create_parse_result()
+    result := create_parse_result()
     result.format = 2
     result.raw_output = text
 
-    let trimmed = trim_string(text)
+    trimmed := trim_string(text)
 
-    let root_name = extract_tag_name(trimmed)
+    root_name := extract_tag_name(trimmed)
     if len(root_name) > 0 {
         result.value = create_object_value([]string{root_name}, []ParsedValue{})
         result.status = 0
@@ -308,11 +308,11 @@ func parse_xml_output(text: string) ParseResult {
 }
 
 func parse_markdown_output(text: string) ParseResult {
-    let result = create_parse_result()
+    result := create_parse_result()
     result.format = 3
     result.raw_output = text
 
-    let lines = split_lines(text)
+    lines := split_lines(text)
     result.value = create_array_value([]ParsedValue{})
 
     result.status = 0
@@ -323,11 +323,11 @@ func parse_markdown_output(text: string) ParseResult {
 }
 
 func parse_csv_output(text: string) ParseResult {
-    let result = create_parse_result()
+    result := create_parse_result()
     result.format = 5
     result.raw_output = text
 
-    let lines = split_lines(text)
+    lines := split_lines(text)
     if len(lines) > 0 {
         result.value = create_array_value([]ParsedValue{})
         result.status = 0
@@ -346,8 +346,8 @@ func extract_tag_name(xml: string) string {
         return ""
     }
 
-    let i = 1
-    let tag_name = ""
+    i := 1
+    tag_name := ""
 
     while i < len(xml) && xml[i] != '>' && xml[i] != ' ' && xml[i] != '\t' {
         tag_name = tag_name + string(xml[i])
@@ -366,12 +366,12 @@ func extract_string_value(quoted: string) string {
         return quoted
     }
 
-    let result = ""
-    let i = 1
+    result := ""
+    i := 1
 
     while i < len(quoted) && quoted[i] != '"' {
         if quoted[i] == '\\' && i + 1 < len(quoted) {
-            let next_char = quoted[i + 1]
+            next_char := quoted[i + 1]
             if next_char == '"' {
                 result = result + "\""
                 i = i + 2

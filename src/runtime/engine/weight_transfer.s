@@ -76,7 +76,7 @@ func (weight_manager* wm) register_weight(string weight_id, int64 total_size) er
     chunk_size := int64(wm.config.chunk_size_mb) * int64(1024) * int64(1024)
     num_chunks := (total_size + chunk_size - 1) / chunk_size
 
-    var i int32 = 0
+    i := 0
     for i < int32(num_chunks) {
         chunk_id := weight_id + "_chunk_" + core.int_to_string(i)
         chunk := &weight_chunk{

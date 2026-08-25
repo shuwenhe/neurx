@@ -4,8 +4,8 @@ use std.env.args as host_args
 use std.io.println
 
 func main() {
-    let args = host_args()
-    let cmd = toolchain_command(args)
+    args := host_args()
+    cmd := toolchain_command(args)
     if cmd == "status" {
         return toolchain_status()
     }
@@ -24,7 +24,7 @@ func main() {
 }
 
 func toolchain_command([]string args) string {
-    let env_cmd = runtime_env_get("TOOLCHAIN_CMD", "")
+    env_cmd := runtime_env_get("TOOLCHAIN_CMD", "")
     if env_cmd != "" {
         return env_cmd
     }

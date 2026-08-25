@@ -82,7 +82,7 @@ func (ActivationKernels* k) GELU(
 
     for i := 0; i < len(input); i += 1 {
         x := input[i]
-        var result := f32(0.0)
+        result := = f32(0.0)
 
         if approximate {
             tanh_arg := const_cdf * (x + const_0_044 * x * x * x)

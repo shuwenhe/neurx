@@ -64,7 +64,7 @@ func (mut lora_state_manager* manager) create_request_state(
         })
     }
 
-    let i = 0
+    i := 0
     while i < adapter_scales.len() {
         if adapter_scales[i] < 0.0 {
             return (lora_state_error {
@@ -82,9 +82,9 @@ func (mut lora_state_manager* manager) create_request_state(
         })
     }
 
-    let now = 0
+    now := 0
 
-    let state = lora_request_state {
+    state := lora_request_state {
         request_id: request_id,
         adapter_names: adapter_names,
         adapter_scales: adapter_scales,
@@ -233,7 +233,7 @@ func (lora_state_manager* manager) is_request_active(request_id: string) bool {
 }
 
 func (lora_state_manager* manager) get_active_requests() &vec[string] {
-    let mut active = vec[string]()
+    active := vec[string]()
 
     for req_id in manager.request_states.keys() {
         switch manager.request_states.get(req_id) {
@@ -277,7 +277,7 @@ func (lora_state_manager* manager) get_cached_weights(
 func (mut lora_state_manager* manager) clear_request_cache(
     request_id: string
 ) result[(), lora_state_error] {
-    let mut keys_to_remove = vec[string]()
+    keys_to_remove := vec[string]()
 
     for key in manager.adapter_cache.keys() {
         if key.starts_with(request_id + "_") {
@@ -285,7 +285,7 @@ func (mut lora_state_manager* manager) clear_request_cache(
         }
     }
 
-    let i = 0
+    i := 0
     while i < keys_to_remove.len() {
         manager.adapter_cache.remove(keys_to_remove[i])
         i = i + 1
@@ -303,13 +303,13 @@ func (mut lora_state_manager* manager) set_cache_enabled(enabled: bool) {
 }
 
 func (lora_state_manager* manager) get_cache_stats() (int, int) {
-    let mut total_size_mb = 0
+    total_size_mb := 0
 
     for key in manager.adapter_cache.keys() {
         switch manager.adapter_cache.get(key) {
             option::some(weights) : {
-                let rows = weights.len()
-                let cols = if rows > 0 { weights[0].len() } else { 0 }
+                rows := weights.len()
+                cols := if rows > 0 { weights[0].len() } else { 0 }
                 total_size_mb = total_size_mb + rows * cols * 4
             },
             option::none : {},
@@ -324,6 +324,6 @@ func (lora_state_manager* manager) get_request_count() int {
 }
 
 func (lora_state_manager* manager) get_active_request_count() int {
-    let count = manager.get_active_requests()
+    count := manager.get_active_requests()
     count.len()
 }

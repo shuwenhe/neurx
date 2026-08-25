@@ -80,14 +80,14 @@ struct vi_t_encoder {
         this.dropout = new dropout(p=0.0)
     }
     forward(pixel_values: tensor) {
-        let embeddings_output = this.embeddings.forward(pixel_values)
-        let encoder_output = this.encoder.forward(
+        embeddings_output := this.embeddings.forward(pixel_values)
+        encoder_output := this.encoder.forward(
             hidden_states=embeddings_output.hidden_states,
             attention_mask=embeddings_output.attention_mask
         )
-        let normalized = this.layernorm.forward(encoder_output.last_hidden_state)
-        let pooled = this.pooler.forward(normalized)
-        let spatial_features = normalized[:, 1:, :]
+        normalized := this.layernorm.forward(encoder_output.last_hidden_state)
+        pooled := this.pooler.forward(normalized)
+        spatial_features := normalized[:, 1:, :]
         return vision_output {
             image_features=normalized,
             pooled_features=pooled,
@@ -139,12 +139,12 @@ struct vi_t_patch_embeddings {
     }
     forward(pixel_values: tensor) {
         batch_size = pixel_values.shape[0]
-        let x = this.projection.forward(pixel_values)
-        let patches = x.flatten(start_dim=2).transpose(1, 2)
-        let cls_tokens = this.cls_token.expand(batch_size, -1, -1)
-        let embeddings = concatenate([cls_tokens, patches], dim=1)
-        let embeddings_with_pos = embeddings + this.position_embeddings
-        let attention_mask = ones((batch_size, this.num_patches + 1))
+        x := this.projection.forward(pixel_values)
+        patches := x.flatten(start_dim=2).transpose(1, 2)
+        cls_tokens := this.cls_token.expand(batch_size, -1, -1)
+        embeddings := concatenate([cls_tokens, patches], dim=1)
+        embeddings_with_pos := embeddings + this.position_embeddings
+        attention_mask := ones((batch_size, this.num_patches + 1))
         return embeddings_output {
             hidden_states=embeddings_with_pos,
             attention_mask=attention_mask
@@ -209,12 +209,12 @@ struct vi_t_layer {
         this.layernorm_after = new layer_norm(hidden_size, eps=1e-6)
     }
     forward(hidden_states: tensor, attention_mask: tensor?) {
-        let normalized = this.layernorm_before.forward(hidden_states)
-        let attention_output = this.attention.forward(normalized, attention_mask)
-        let residual = hidden_states + attention_output.hidden_states
-        let normalized2 = this.layernorm_after.forward(residual)
-        let intermediate_output = this.intermediate.forward(normalized2)
-        let ffn_output = this.output.forward(intermediate_output, residual)
+        normalized := this.layernorm_before.forward(hidden_states)
+        attention_output := this.attention.forward(normalized, attention_mask)
+        residual := hidden_states + attention_output.hidden_states
+        normalized2 := this.layernorm_after.forward(residual)
+        intermediate_output := this.intermediate.forward(normalized2)
+        ffn_output := this.output.forward(intermediate_output, residual)
         return layer_output {
             hidden_states=ffn_output,
             attention=attention_output.attention_weights
@@ -245,21 +245,21 @@ struct vi_t_attention {
     }
     forward(hidden_states: tensor, attention_mask: tensor?) {
         batch_size, seq_len, _ = hidden_states.shape
-        let q = this.query.forward(hidden_states)
-        let k = this.key.forward(hidden_states)
-        let v = this.value.forward(hidden_states)
-        let q_reshaped = q.reshape(batch_size, seq_len, this.num_heads, this.head_dim).transpose(1, 2)
-        let k_reshaped = k.reshape(batch_size, seq_len, this.num_heads, this.head_dim).transpose(1, 2)
-        let v_reshaped = v.reshape(batch_size, seq_len, this.num_heads, this.head_dim).transpose(1, 2)
-        let attn_scores = matmul(q_reshaped, k_reshaped.transpose(-2, -1)) * this.scale
+        q := this.query.forward(hidden_states)
+        k := this.key.forward(hidden_states)
+        v := this.value.forward(hidden_states)
+        q_reshaped := q.reshape(batch_size, seq_len, this.num_heads, this.head_dim).transpose(1, 2)
+        k_reshaped := k.reshape(batch_size, seq_len, this.num_heads, this.head_dim).transpose(1, 2)
+        v_reshaped := v.reshape(batch_size, seq_len, this.num_heads, this.head_dim).transpose(1, 2)
+        attn_scores := matmul(q_reshaped, k_reshaped.transpose(-2, -1)) * this.scale
         if attention_mask != null {
-            let expanded_mask = attention_mask.unsqueeze(1).unsqueeze(2)
+            expanded_mask := attention_mask.unsqueeze(1).unsqueeze(2)
             attn_scores = attn_scores.masked_fill(expanded_mask == 0, float('-inf'))
         }
-        let attn_probs = softmax(attn_scores, dim=-1)
-        let context = matmul(attn_probs, v_reshaped)
-        let context_concat = context.transpose(1, 2).reshape(batch_size, seq_len, -1)
-        let output = this.output_proj.forward(context_concat)
+        attn_probs := softmax(attn_scores, dim=-1)
+        context := matmul(attn_probs, v_reshaped)
+        context_concat := context.transpose(1, 2).reshape(batch_size, seq_len, -1)
+        output := this.output_proj.forward(context_concat)
         return attention_output {
             hidden_states=output,
             attention_weights=attn_probs.detach()
@@ -279,7 +279,7 @@ struct intermediate {
         this.activation = new GELU(approximate='none')
     }
     forward(hidden_states: tensor) {
-        let x = this.dense.forward(hidden_states)
+        x := this.dense.forward(hidden_states)
         return this.activation.forward(x)
     }
 }
@@ -291,7 +291,7 @@ struct output {
         this.dropout = new dropout(p=0.0)
     }
     forward(hidden_states: tensor, residual: tensor) {
-        let x = this.dense.forward(hidden_states)
+        x := this.dense.forward(hidden_states)
         x = this.dropout.forward(x)
         return x + residual
     }
@@ -345,8 +345,8 @@ struct learnable_attention_pool {
     }
     forward(hidden_states: tensor) {
         batch_size = hidden_states.shape[0]
-        let q = this.query.expand(batch_size, -1, -1)
-        let output = this.attention.forward(q, null)
+        q := this.query.expand(batch_size, -1, -1)
+        output := this.attention.forward(q, null)
         return output.hidden_states.squeeze(1)
     }
 }
@@ -369,8 +369,8 @@ struct visual_adapter {
         this.layer_norm = new layer_norm(output_dim, eps=1e-6)
     }
     forward(vision_features: tensor) {
-        let projected = this.layers.forward(vision_features)
-        let normalized = this.layer_norm.forward(projected)
+        projected := this.layers.forward(vision_features)
+        normalized := this.layer_norm.forward(projected)
         return normalized
     }
 }
@@ -403,16 +403,16 @@ struct clip_contrastive_model {
         this.logit_scale = parameter(tensor([0.07]).log())
     }
     forward(image_input: image_input, string text_input) {
-        let vision_out = this.vision_encoder.forward(image_input.pixel_values)
-        let image_features = this.vision_projection.forward(vision_out.pooled_features)
-        let text_features = this.text_encoder.forward(text_input)
-        let text_embeds = this.text_projection.forward(text_features)
-        let image_norm = l2_normalize(image_features, dim=-1)
-        let text_norm = l2_normalize(text_embeds, dim=-1)
+        vision_out := this.vision_encoder.forward(image_input.pixel_values)
+        image_features := this.vision_projection.forward(vision_out.pooled_features)
+        text_features := this.text_encoder.forward(text_input)
+        text_embeds := this.text_projection.forward(text_features)
+        image_norm := l2_normalize(image_features, dim=-1)
+        text_norm := l2_normalize(text_embeds, dim=-1)
         logit_scale = this.logit_scale.exp()
-        let logits_per_image = matmul(image_norm, text_norm.transpose(0, 1)) * logit_scale
-        let logits_per_text = logits_per_image.transpose(0, 1)
-        let loss = this._contrastive_loss(logits_per_image, logits_per_text)
+        logits_per_image := matmul(image_norm, text_norm.transpose(0, 1)) * logit_scale
+        logits_per_text := logits_per_image.transpose(0, 1)
+        loss := this._contrastive_loss(logits_per_image, logits_per_text)
         return clipoutput {
             image_features=image_norm,
             text_features=text_norm,
@@ -425,8 +425,8 @@ struct clip_contrastive_model {
     _contrastive_loss(logits_per_image: tensor, logits_per_text: tensor) {
         batch_size = logits_per_image.shape[0]
         labels = arange(batch_size).to(device=logits_per_image.device)
-        let loss_i2t = cross_entropy(logits_per_image, labels)
-        let loss_t2i = cross_entropy(logits_per_text, labels)
+        loss_i2t := cross_entropy(logits_per_image, labels)
+        loss_t2i := cross_entropy(logits_per_text, labels)
         return (loss_i2t + loss_t2i) / 2
     }
 }
@@ -467,14 +467,14 @@ struct clip_text_encoder {
         this.text_projection = new linear(in_features=embed_dim, out_features=embed_dim, bias=False)
     }
     forward(string text) {
-        let tokens = this._tokenize(text)
-        let x = this.token_embedding.forward(tokens) + this.positional_embedding
-        let causal_mask = this._create_causal_mask(x.shape[0])
+        tokens := this._tokenize(text)
+        x := this.token_embedding.forward(tokens) + this.positional_embedding
+        causal_mask := this._create_causal_mask(x.shape[0])
         for block in this.transformer_blocks {
             x = block.forward(x, attention_mask=causal_mask)
         }
         x = this.final_layer_norm.forward(x)
-        let text_features = x[-1, :]
+        text_features := x[-1, :]
         return this.text_projection.forward(text_features)
     }
     _tokenize(string text) {
@@ -504,11 +504,11 @@ struct clip_transformer_block {
         this.layer_norm2 = new layer_norm(embed_dim, eps=1e-6)
     }
     forward(hidden_states: tensor, attention_mask: tensor) {
-        let normed = this.layer_norm1.forward(hidden_states)
-        let attn_out = this.self_attn.forward(normed, normed, normed, attention_mask)
-        let residual = hidden_states + attn_out
-        let normed2 = this.layer_norm2.forward(residual)
-        let mlp_out = this.mlp.forward(normed2)
+        normed := this.layer_norm1.forward(hidden_states)
+        attn_out := this.self_attn.forward(normed, normed, normed, attention_mask)
+        residual := hidden_states + attn_out
+        normed2 := this.layer_norm2.forward(residual)
+        mlp_out := this.mlp.forward(normed2)
         return residual + mlp_out
     }
 }
@@ -529,16 +529,16 @@ struct video_processor {
         )
     }
     process_video(video_input: video_input, vit_encoder: ViTEncoder) {
-        let sampled_frames = this.frame_sampler.sample_frames(video_input)
+        sampled_frames := this.frame_sampler.sample_frames(video_input)
         frame_features: list<tensor> = []
         for frame in sampled_frames {
-            let frame_batch = frame.unsqueeze(0)
-            let vit_output = vit_encoder.forward(frame_batch)
+            frame_batch := frame.unsqueeze(0)
+            vit_output := vit_encoder.forward(frame_batch)
             frame_features.append(vit_output.pooled_features.squeeze(0))
         }
-        let all_frame_features = stack(frame_features, dim=0)
-        let temporal_features = this.temporal_encoder.forward(all_frame_features)
-        let video_pooled = temporal_features.mean(dim=0)
+        all_frame_features := stack(frame_features, dim=0)
+        temporal_features := this.temporal_encoder.forward(all_frame_features)
+        video_pooled := temporal_features.mean(dim=0)
         return video_vision_output {
             per_frame_features=all_frame_features,
             temporal_encoded=temporal_features,
@@ -603,7 +603,7 @@ struct temporal_encoder {
     }
     forward(frame_features: tensor) {
         num_frames = frame_features.shape[0]
-        let x = frame_features + this.position_embedding[:num_frames, :]
+        x := frame_features + this.position_embedding[:num_frames, :]
         for layer in this.transformer_layers {
             x = layer.forward(x)
         }
@@ -622,10 +622,10 @@ struct temporal_transformer_block {
         this.norm2 = new layer_norm(embed_dim)
     }
     forward(x: tensor) {
-        let normed = this.norm1.forward(x)
-        let attn_out = this.self_attn.forward(normed, normed, normed, null)
+        normed := this.norm1.forward(x)
+        attn_out := this.self_attn.forward(normed, normed, normed, null)
         x = x + attn_out
-        let normed2 = this.norm2.forward(x)
+        normed2 := this.norm2.forward(x)
         x = x + this.mlp.forward(normed2)
         return x
     }
@@ -654,18 +654,18 @@ struct multi_image_processor {
         assert images.length <= this.config.max_images, "Too many images"
         image_results: list<vision_output> = []
         for img in images {
-            let result = this.vit_encoder.forward(img.pixel_values)
+            result := this.vit_encoder.forward(img.pixel_values)
             image_results.append(result)
         }
         adapted_features: list<tensor> = []
         for result in image_results {
             if result.spatial_features != null {
-                let adapted = this.visual_adapter.forward(result.spatial_features!)
+                adapted := this.visual_adapter.forward(result.spatial_features!)
                 adapted_features.append(adapted)
             }
         }
         if this.cross_image_attention != null && adapted_features.length > 1 {
-            let fused = this.cross_image_attention!.forward(adapted_features)
+            fused := this.cross_image_attention!.forward(adapted_features)
             return multimodal_embedding_result {
                 per_image_features=adapted_features,
                 fused_multimodal_embedding=fused,
@@ -673,7 +673,7 @@ struct multi_image_processor {
                 metadata=image_results[0].metadata
             }
         } else {
-            let concatenated = concatenate(adapted_features, dim=1) if adapted_features.length > 0 else null
+            concatenated := concatenate(adapted_features, dim=1) if adapted_features.length > 0 else null
             return multimodal_embedding_result {
                 per_image_features=adapted_features,
                 fused_multimodal_embedding=concatenated,
@@ -708,15 +708,15 @@ struct cross_image_attention {
         this.output_proj = new linear(embed_dim, embed_dim)
     }
     forward(image_features_list: list<tensor>) {
-        let concatenated = concatenate(image_features_list, dim=1)
+        concatenated := concatenate(image_features_list, dim=1)
         batch_size, total_patches, _ = concatenated.shape
-        let q = this.query.forward(concatenated).reshape(batch_size, total_patches, this.num_heads, this.head_dim).transpose(1, 2)
-        let k = this.key.forward(concatenated).reshape(batch_size, total_patches, this.num_heads, this.head_dim).transpose(1, 2)
-        let v = this.value.forward(concatenated).reshape(batch_size, total_patches, this.num_heads, this.head_dim).transpose(1, 2)
-        let attn_scores = matmul(q, k.transpose(-2, -1)) * this.scale
-        let attn_probs = softmax(attn_scores, dim=-1)
-        let context = matmul(attn_probs, v)
-        let output = context.transpose(1, 2).reshape(batch_size, total_patches, -1)
+        q := this.query.forward(concatenated).reshape(batch_size, total_patches, this.num_heads, this.head_dim).transpose(1, 2)
+        k := this.key.forward(concatenated).reshape(batch_size, total_patches, this.num_heads, this.head_dim).transpose(1, 2)
+        v := this.value.forward(concatenated).reshape(batch_size, total_patches, this.num_heads, this.head_dim).transpose(1, 2)
+        attn_scores := matmul(q, k.transpose(-2, -1)) * this.scale
+        attn_probs := softmax(attn_scores, dim=-1)
+        context := matmul(attn_probs, v)
+        output := context.transpose(1, 2).reshape(batch_size, total_patches, -1)
         return this.output_proj.forward(output)
     }
 }
@@ -737,7 +737,7 @@ struct image_preprocessor {
         for transform in this.transforms {
             image = transform.apply(image)
         }
-        let pixel_values = image.unsqueeze(0)
+        pixel_values := image.unsqueeze(0)
         return image_input {
             pixel_values=pixel_values,
             image_path=image_path,
@@ -747,7 +747,7 @@ struct image_preprocessor {
     preprocess_batch(images: list<string>, bool adaptive_resolution = false) {
         processed: list<tensor> = []
         for path in images {
-            let img_input = this.preprocess(path)
+            img_input := this.preprocess(path)
             processed.append(img_input.pixel_values)
             if adaptive_resolution && this.config.image_resolution_adaptive {
                 pass
@@ -786,11 +786,11 @@ struct multimodal_vision_model {
         }
     }
     understand_image(string image_path, string question) {
-        let img_input = this.image_preprocessor.preprocess(image_path)
-        let vision_out = this.vision_encoder.forward(img_input.pixel_values)
-        let visual_tokens = this.visual_adapter.forward(vision_out.spatial_features!)
-        let prompt = this._build_multimodal_prompt(question, visual_tokens)
-        let response = this.language_model.generate(prompt)
+        img_input := this.image_preprocessor.preprocess(image_path)
+        vision_out := this.vision_encoder.forward(img_input.pixel_values)
+        visual_tokens := this.visual_adapter.forward(vision_out.spatial_features!)
+        prompt := this._build_multimodal_prompt(question, visual_tokens)
+        response := this.language_model.generate(prompt)
         return vision_language_output {
             answer=response.text,
             visual_tokens=visual_tokens,
@@ -802,12 +802,12 @@ struct multimodal_vision_model {
         assert this.multi_image_processor != null, "Multi-image processing not enabled"
         images: list<image_input> = []
         for path in image_paths {
-            let img = this.image_preprocessor.preprocess(path)
+            img := this.image_preprocessor.preprocess(path)
             images.append(img)
         }
-        let multi_result = this.multi_image_processor!.process_multiple_images(images)
-        let prompt = this._build_multi_image_prompt(question, multi_result)
-        let response = this.language_model.generate(prompt)
+        multi_result := this.multi_image_processor!.process_multiple_images(images)
+        prompt := this._build_multi_image_prompt(question, multi_result)
+        response := this.language_model.generate(prompt)
         return vision_language_output {
             answer=response.text,
             visual_tokens=multi_result.fused_multimodal_embedding!,
@@ -817,13 +817,13 @@ struct multimodal_vision_model {
     }
     understand_video(string video_path, string question) {
         assert this.video_processor != null, "Video processing not enabled"
-        let video = this._load_video(video_path)
-        let video_result = this.video_processor!.process_video(video, this.vision_encoder)
-        let video_tokens = this.visual_adapter.forward(
+        video := this._load_video(video_path)
+        video_result := this.video_processor!.process_video(video, this.vision_encoder)
+        video_tokens := this.visual_adapter.forward(
             video_result.per_frame_features.unsqueeze(0)
         )
-        let prompt = this._build_video_prompt(question, video_result, video_tokens)
-        let response = this.language_model.generate(prompt)
+        prompt := this._build_video_prompt(question, video_result, video_tokens)
+        response := this.language_model.generate(prompt)
         return vision_language_output {
             answer=response.text,
             visual_tokens=video_tokens,

@@ -47,10 +47,10 @@ func (model_executor* executor) forward_pass(
     input_ids: *[]int,
     attention_mask: option[&[]int]
 ) forward_output {
-    let batch_size = 1
-    let seq_len = input_ids.len()
+    batch_size := 1
+    seq_len := input_ids.len()
 
-    let output = forward_output {
+    output := forward_output {
         logits: []f32,
         kv_cache_updated: true,
         compute_time_ms: 0,
@@ -187,13 +187,13 @@ func main() {
     println("=====================================")
     println("")
 
-    let mut executor = new_model_executor("cuda")
+    executor := new_model_executor("cuda")
 
     println("📥 加载模型:")
-    let models_to_load = ["llama-7b", "qwen2-7b", "mistral-7b", "deepseek-7b"]
+    models_to_load := ["llama-7b", "qwen2-7b", "mistral-7b", "deepseek-7b"]
 
     for model_name in models_to_load.iter() {
-        let success = executor.load_model(model_name, "cuda")
+        success := executor.load_model(model_name, "cuda")
         if success {
             println(f"  ✓ 已加载 {model_name}")
         } else {
@@ -204,7 +204,7 @@ func main() {
     println("")
     println("📊 已加载模型列表:")
     for model_name in models_to_load.iter() {
-        let info_opt = get_model_info(model_name)
+        info_opt := get_model_info(model_name)
         match info_opt {
             Some(info) => {
                 println(f"  {info.name}:")

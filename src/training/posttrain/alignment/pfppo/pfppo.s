@@ -65,10 +65,10 @@ func (replay_buffer* buffer) sample(i32 n) -> []experience {
     if buffer.current_size == 0 {
         return []
     }
-    let sample_size = min(n, buffer.current_size)
-    let sampled: []experience = []
+    sample_size := min(n, buffer.current_size)
+    sampled := []
     for i in 0..sample_size {
-        let idx = random_int(0, buffer.current_size)
+        idx := random_int(0, buffer.current_size)
         sampled.push(buffer.experiences[idx])
     }
     return sampled
@@ -78,15 +78,15 @@ func (replay_buffer* buffer) filter_by_reward(f32 threshold, f32 percentile) {
     if buffer.current_size == 0 {
         return
     }
-    let actual_threshold = threshold
+    actual_threshold := threshold
     if percentile > 0.0 {
-        let sorted_rewards = buffer.rewards[..buffer.current_size].clone()
+        sorted_rewards := buffer.rewards[..buffer.current_size].clone()
         sorted_rewards.sort()
-        let percentile_idx = i32((100.0 - percentile) / 100.0 * f32(sorted_rewards.len()))
+        percentile_idx := i32((100.0 - percentile) / 100.0 * f32(sorted_rewards.len()))
         actual_threshold = sorted_rewards[percentile_idx]
     }
-    let filtered_exps: []experience = []
-    let filtered_rewards: []f32 = []
+    filtered_exps := []
+    filtered_rewards := []
     for i in 0..buffer.current_size {
         if buffer.rewards[i] >= actual_threshold {
             filtered_exps.push(buffer.experiences[i])
@@ -103,9 +103,9 @@ func (replay_buffer* buffer) get_statistics() -> (f32, f32, f32) {
     if buffer.current_size == 0 {
         return 0.0, 0.0, 0.0
     }
-    let mean = compute_mean(buffer.rewards[..buffer.current_size])
-    let std = compute_std(buffer.rewards[..buffer.current_size], mean)
-    let max_reward = buffer.rewards[0]
+    mean := compute_mean(buffer.rewards[..buffer.current_size])
+    std := compute_std(buffer.rewards[..buffer.current_size], mean)
+    max_reward := buffer.rewards[0]
     for r in buffer.rewards[..buffer.current_size] {
         if r > max_reward {
             max_reward = r
@@ -132,11 +132,11 @@ func new_pfppo_trainer(
     *model value,
     *model reference
 ) -> pfppo_trainer {
-    let optimizer = adamw_optimizer(
+    optimizer := adamw_optimizer(
         policy.parameters() + value.parameters(),
         config.learning_rate
     )
-    let buffer = new_replay_buffer(config.replay_buffer_size)
+    buffer := new_replay_buffer(config.replay_buffer_size)
     return pfppo_trainer{
         config: config,
         policy_model: policy,
@@ -151,17 +151,17 @@ func new_pfppo_trainer(
 }
 
 func (pfppo_trainer* trainer) collect_experiences([]tensor prompts) -> []experience {
-    let experiences: []experience = []
+    experiences := []
     for prompt in prompts {
-        let response, log_probs = trainer.policy_model.generate(
+        response, log_probs  := trainer.policy_model.generate(
             prompt,
             temperature: 1.0,
             return_log_probs: true
         )
-        let input = concat(prompt, response)
-        let values = trainer.value_model.forward(input)
-        let reward = compute_reward(prompt, response)
-        let exp = experience{
+        input := concat(prompt, response)
+        values := trainer.value_model.forward(input)
+        reward := compute_reward(prompt, response)
+        exp := experience{
             prompt: prompt,
             response: response,
             log_probs: log_probs,
@@ -189,15 +189,15 @@ func (pfppo_trainer* trainer) collect_experiences([]tensor prompts) -> []experie
 
 func (pfppo_trainer* trainer) compute_gae([]experience experiences) {
     for exp in experiences {
-        let T = exp.rewards.shape[0]
-        let advantages = tensor_zeros([T])
-        let returns = tensor_zeros([T])
-        let gae: f32 = 0.0
-        let next_value: f32 = 0.0
+        T := exp.rewards.shape[0]
+        advantages := tensor_zeros([T])
+        returns := tensor_zeros([T])
+        gae := 0.0
+        next_value := 0.0
         for t in (T-1)..0 by -1 {
-            let reward = exp.rewards[t].item()
-            let value = exp.values[t].item()
-            let delta = reward + trainer.config.gamma * next_value - value
+            reward := exp.rewards[t].item()
+            value := exp.values[t].item()
+            delta := reward + trainer.config.gamma * next_value - value
             gae = delta + trainer.config.gamma * trainer.config.gae_lambda * gae
             advantages[t] = tensor_scalar(gae)
             returns[t] = tensor_scalar(gae + value)
@@ -209,43 +209,43 @@ func (pfppo_trainer* trainer) compute_gae([]experience experiences) {
 }
 
 func (pfppo_trainer* trainer) train_step([]tensor new_prompts) -> (f32, f32, f32) {
-    let new_experiences = trainer.collect_experiences(new_prompts)
-    let buffer_sample_size = i32(
+    new_experiences := trainer.collect_experiences(new_prompts)
+    buffer_sample_size := i32(
         f32(new_experiences.len()) * trainer.config.buffer_sample_ratio
     )
-    let buffer_experiences = trainer.replay_buffer.sample(buffer_sample_size)
-    let all_experiences = new_experiences + buffer_experiences
+    buffer_experiences := trainer.replay_buffer.sample(buffer_sample_size)
+    all_experiences := new_experiences + buffer_experiences
     trainer.compute_gae(all_experiences)
-    let total_policy_loss: f32 = 0.0
-    let total_value_loss: f32 = 0.0
-    let total_kl: f32 = 0.0
+    total_policy_loss := 0.0
+    total_value_loss := 0.0
+    total_kl := 0.0
     for epoch in 0..trainer.config.num_epochs {
         all_experiences.shuffle()
         for exp in all_experiences {
-            let input = concat(exp.prompt, exp.response)
-            let logits = trainer.policy_model.forward(input)
-            let current_log_probs = log_softmax(logits, dim: -1)
-            let current_values = trainer.value_model.forward(input)
-            let ratio = exp((current_log_probs - exp.log_probs).sum())
-            let surr1 = ratio * exp.advantages
-            let surr2 = clamp(
+            input := concat(exp.prompt, exp.response)
+            logits := trainer.policy_model.forward(input)
+            current_log_probs := log_softmax(logits, dim: -1)
+            current_values := trainer.value_model.forward(input)
+            ratio := exp((current_log_probs - exp.log_probs).sum())
+            surr1 := ratio * exp.advantages
+            surr2 := clamp(
                 ratio,
                 1.0 - trainer.config.clip_epsilon,
                 1.0 + trainer.config.clip_epsilon
             ) * exp.advantages
-            let policy_loss = -minimum(surr1, surr2).mean()
-            let value_pred_clipped = exp.values + clamp(
+            policy_loss := -minimum(surr1, surr2).mean()
+            value_pred_clipped := exp.values + clamp(
                 current_values - exp.values,
                 -trainer.config.value_clip_epsilon,
                 trainer.config.value_clip_epsilon
             )
-            let value_loss1 = (current_values - exp.returns).pow(2)
-            let value_loss2 = (value_pred_clipped - exp.returns).pow(2)
-            let value_loss = maximum(value_loss1, value_loss2).mean()
-            let ref_logits = trainer.reference_model.forward(input)
-            let ref_log_probs = log_softmax(ref_logits, dim: -1)
-            let kl = (exp(ref_log_probs) * (ref_log_probs - current_log_probs)).sum()
-            let loss = policy_loss + 0.5 * value_loss + trainer.config.kl_coeff * kl
+            value_loss1 := (current_values - exp.returns).pow(2)
+            value_loss2 := (value_pred_clipped - exp.returns).pow(2)
+            value_loss := maximum(value_loss1, value_loss2).mean()
+            ref_logits := trainer.reference_model.forward(input)
+            ref_log_probs := log_softmax(ref_logits, dim: -1)
+            kl := (exp(ref_log_probs) * (ref_log_probs - current_log_probs)).sum()
+            loss := policy_loss + 0.5 * value_loss + trainer.config.kl_coeff * kl
             loss.backward()
             total_policy_loss += policy_loss.item()
             total_value_loss += value_loss.item()
@@ -264,7 +264,7 @@ func (pfppo_trainer* trainer) train_step([]tensor new_prompts) -> (f32, f32, f32
             trainer.config.reward_percentile
         )
     }
-    let num_updates = all_experiences.len() * trainer.config.num_epochs
+    num_updates := all_experiences.len() * trainer.config.num_epochs
     return (
         total_policy_loss / f32(num_updates),
         total_value_loss / f32(num_updates),
@@ -273,14 +273,14 @@ func (pfppo_trainer* trainer) train_step([]tensor new_prompts) -> (f32, f32, f32
 }
 
 func (pfppo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
-    let policy_losses: []f32 = []
-    let value_losses: []f32 = []
+    policy_losses := []
+    value_losses := []
     for batch in train_data {
-        let policy_loss, value_loss, kl = trainer.train_step(batch.prompts)
+        policy_loss, value_loss, kl  := trainer.train_step(batch.prompts)
         policy_losses.push(policy_loss)
         value_losses.push(value_loss)
         if policy_losses.len() % 10 == 0 {
-            let buf_mean, buf_std, buf_max = trainer.replay_buffer.get_statistics()
+            buf_mean, buf_std, buf_max  := trainer.replay_buffer.get_statistics()
             println(f"Step {policy_losses.len()}: " +
                    f"Policy Loss = {policy_loss:.4f}, " +
                    f"Value Loss = {value_loss:.4f}, " +

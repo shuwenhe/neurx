@@ -6,26 +6,26 @@ func string_char(int c) string {
 }
 
 func trim(string s) string {
-    var begin = 0
+    begin := 0
     while begin < len(s) {
-        var ch = string_char(s[begin])
+        ch := string_char(s[begin])
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
             begin = begin + 1
         } else {
             break
         }
     }
-    var end = len(s)
+    end := len(s)
     while end > begin {
-        var ch = string_char(s[end - 1])
+        ch := string_char(s[end - 1])
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
             end = end - 1
         } else {
             break
         }
     }
-    var out = ""
-    var i = begin
+    out := ""
+    i := begin
     while i < end {
         out = out + string_char(s[i])
         i = i + 1
@@ -34,10 +34,10 @@ func trim(string s) string {
 }
 
 func shell_escape(string s) string {
-    var out = "'"
-    var i = 0
+    out := "'"
+    i := 0
     while i < len(s) {
-        var ch = string_char(s[i])
+        ch := string_char(s[i])
         if ch == "'" {
             out = out + "'\"'\"'"
         } else {
@@ -54,20 +54,20 @@ func get_neurx_home() string {
 }
 
 func get_input_file() string {
-    var neurx_home = get_neurx_home()
-    var dataset_root = neurx_home + "/dataset/pretrain"
+    neurx_home := get_neurx_home()
+    dataset_root := neurx_home + "/dataset/pretrain"
     runtime_env_get("ENWIKI_BZ2_FILE", dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2")
 }
 
 func get_output_dir() string {
-    var neurx_home = get_neurx_home()
-    var dataset_root = neurx_home + "/dataset/pretrain"
+    neurx_home := get_neurx_home()
+    dataset_root := neurx_home + "/dataset/pretrain"
     runtime_env_get("ENWIKI_SHARD_DIR", dataset_root + "/shard")
 }
 
 func get_manifest_file() string {
-    var neurx_home = get_neurx_home()
-    var dataset_root = neurx_home + "/dataset/pretrain"
+    neurx_home := get_neurx_home()
+    dataset_root := neurx_home + "/dataset/pretrain"
     runtime_env_get("ENWIKI_MANIFEST_FILE", dataset_root + "/manifest.json")
 }
 
@@ -87,16 +87,16 @@ func main() {
     println("")
     println("[*] NeurX Wikipedia Shard Processing")
     println("")
-    var input_file = get_input_file()
-    var output_dir = get_output_dir()
-    var manifest_file = get_manifest_file()
-    var docs_per_shard = get_docs_per_shard()
-    var max_pages = get_max_pages()
-    var progress_log = runtime_env_get("NEURX_SHARD_PROGRESS_LOG", "")
-    var resume = runtime_env_get("NEURX_SHARD_RESUME", "1")
-    var force_rebuild = runtime_env_get("NEURX_SHARD_FORCE_REBUILD", "0")
-    var completion_file = output_dir + "/.wikipedia_shard_complete"
-    var state_file = output_dir + "/.wikipedia_shard_state"
+    input_file := get_input_file()
+    output_dir := get_output_dir()
+    manifest_file := get_manifest_file()
+    docs_per_shard := get_docs_per_shard()
+    max_pages := get_max_pages()
+    progress_log := runtime_env_get("NEURX_SHARD_PROGRESS_LOG", "")
+    resume := runtime_env_get("NEURX_SHARD_RESUME", "1")
+    force_rebuild := runtime_env_get("NEURX_SHARD_FORCE_REBUILD", "0")
+    completion_file := output_dir + "/.wikipedia_shard_complete"
+    state_file := output_dir + "/.wikipedia_shard_state"
     println("Configuration:")
     println("  Input file    : " + input_file)
     println("  Output dir    : " + output_dir)
@@ -110,21 +110,21 @@ func main() {
         println("Error: input file not found: " + input_file)
         return 1
     }
-    var mkdir_out = runtime_run_command_output("mkdir -p " + shell_escape(output_dir))
+    mkdir_out := runtime_run_command_output("mkdir -p " + shell_escape(output_dir))
     if len(trim(mkdir_out)) > 0 {
         println(mkdir_out)
     }
     if force_rebuild == "1" || resume != "1" {
-          var cleanup_cmd = "rm -f " + shell_escape(output_dir) + "/shard_*.jsonl " +
+          cleanup_cmd := "rm -f " + shell_escape(output_dir) + "/shard_*.jsonl " +
               shell_escape(output_dir + "/.wikipedia_dump.xml") + " " + shell_escape(manifest_file) + " " +
               shell_escape(state_file) + " " + shell_escape(completion_file)
-          var cleanup_out = runtime_run_command_output("sh -c " + shell_escape(cleanup_cmd))
+          cleanup_out := runtime_run_command_output("sh -c " + shell_escape(cleanup_cmd))
           if len(trim(cleanup_out)) > 0 {
               println(cleanup_out)
           }
     }
-    var created_at = trim(runtime_run_command_output("date -u +%Y-%m-%dT%H:%M:%SZ"))
-    var awk_program = ""
+    created_at := trim(runtime_run_command_output("date -u +%Y-%m-%dT%H:%M:%SZ"))
+    awk_program := ""
     awk_program = awk_program + "function json_escape(s,   t) { "
     awk_program = awk_program + "t = s; "
     awk_program = awk_program + "gsub(/\\\\/, \"\\\\\\\\\", t); "
@@ -195,7 +195,7 @@ func main() {
     awk_program = awk_program + "print \"}\" >> manifest_tmp; "
     awk_program = awk_program + "emit_line(\"[shard] generated \" doc_count \" documents into \" total_shards \" shards\") "
     awk_program = awk_program + "} "
-    var process_cmd = ""
+    process_cmd := ""
     process_cmd = process_cmd + "set -e; "
     process_cmd = process_cmd + "rm -f " + shell_escape(completion_file) + " " + shell_escape(completion_file + ".tmp") + " " + shell_escape(manifest_file + ".tmp") + "; "
     process_cmd = process_cmd + "created_at=" + shell_escape(created_at) + "; "

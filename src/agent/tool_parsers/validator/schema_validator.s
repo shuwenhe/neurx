@@ -17,7 +17,7 @@ struct field_error {
 }
 
 func validate_against_schema(json_str: string, schema: *json_schema) validation_result {
-    let result = validation_result{
+    result := validation_result{
         is_valid: true,
         errors: vec_new(),
         warnings: vec_new(),
@@ -48,11 +48,11 @@ func validate_object(json_str: string, schema: *json_schema, result: *validation
         return *result
     }
 
-    let i = 0
+    i := 0
     while i < len(schema.required) {
-        let required_field = schema.required[i]
+        required_field := schema.required[i]
         if contains_field(json_str, required_field) == false {
-            let field_err = field_error{
+            field_err := field_error{
                 field_path: path + "." + required_field,
                 error_message: "Required field missing: " + required_field,
                 error_code: "REQUIRED_FIELD_MISSING"
@@ -63,7 +63,7 @@ func validate_object(json_str: string, schema: *json_schema, result: *validation
         i = i + 1
     }
 
-    let prop_count = count_fields(json_str)
+    prop_count := count_fields(json_str)
     if prop_count < schema.min_properties {
         result.errors.append("Object has " + int_to_string(prop_count) +
                            " properties, minimum is " + int_to_string(schema.min_properties))
@@ -83,7 +83,7 @@ func validate_array(json_str: string, schema: *json_schema, result: *validation_
         return *result
     }
 
-    let item_count = count_array_items(json_str)
+    item_count := count_array_items(json_str)
     if item_count < schema.min_items {
         result.errors.append("Array has " + int_to_string(item_count) +
                            " items, minimum is " + int_to_string(schema.min_items))
@@ -98,7 +98,7 @@ func validate_array(json_str: string, schema: *json_schema, result: *validation_
 
 func validate_string(json_str: string, schema: *json_schema, result: *validation_result, path: string) validation_result {
 
-    let s = json_str
+    s := json_str
     if len(s) >= 2 && s[0] == '"' && s[len(s) - 1] == '"' {
         s = substring(s, 1, len(s) - 1)
     }
@@ -130,7 +130,7 @@ func validate_string(json_str: string, schema: *json_schema, result: *validation
 }
 
 func validate_number(json_str: string, schema: *json_schema, result: *validation_result, path: string) validation_result {
-    let num = string_to_float(json_str)
+    num := string_to_float(json_str)
 
     if schema.type_name == schema_types.TYPE_INTEGER {
         if is_integer(json_str) == false {
@@ -173,10 +173,10 @@ func validate_boolean(json_str: string, schema: *json_schema, result: *validatio
 }
 
 func contains_field(json_str: string, field_name: string) bool {
-    let search = "\"" + field_name + "\""
-    let i = 0
+    search := "\"" + field_name + "\""
+    i := 0
     while i < len(json_str) - len(search) {
-        let substr = substring(json_str, i, i + len(search))
+        substr := substring(json_str, i, i + len(search))
         if substr == search {
             return true
         }
@@ -186,8 +186,8 @@ func contains_field(json_str: string, field_name: string) bool {
 }
 
 func count_fields(json_str: string) int {
-    let count = 0
-    let i = 0
+    count := 0
+    i := 0
     while i < len(json_str) {
         if json_str[i] == ':' {
             count = count + 1
@@ -202,11 +202,11 @@ func count_array_items(json_str: string) int {
         return 0
     }
 
-    let count = 1
-    let i = 1
-    let in_string = false
-    let bracket_depth = 0
-    let brace_depth = 0
+    count := 1
+    i := 1
+    in_string := false
+    bracket_depth := 0
+    brace_depth := 0
 
     while i < len(json_str) - 1 {
         if json_str[i] == '"' && (i == 0 || json_str[i - 1] != '\\') {
@@ -235,7 +235,7 @@ func count_array_items(json_str: string) int {
 }
 
 func contains_string_in_array(s: string, arr: *[]string) bool {
-    let i = 0
+    i := 0
     while i < len(*arr) {
         if (*arr)[i] == s {
             return true
@@ -254,8 +254,8 @@ func substring(s: string, start: int, end: int) string {
     if start < 0 || end > len(s) || start > end {
         return ""
     }
-    let result = ""
-    let i = start
+    result := ""
+    i := start
     while i < end {
         result = result + string(int(s[i]))
         i = i + 1
@@ -265,9 +265,9 @@ func substring(s: string, start: int, end: int) string {
 
 func string_to_float(s: string) float {
 
-    let result = 0.0
-    let i = 0
-    let is_negative = false
+    result := 0.0
+    i := 0
+    is_negative := false
 
     if s[i] == '-' {
         is_negative = true
@@ -288,7 +288,7 @@ func string_to_float(s: string) float {
 
 func float_to_string(f: float) string {
 
-    let int_part = int(f)
+    int_part := int(f)
     return int_to_string(int_part)
 }
 
@@ -297,13 +297,13 @@ func int_to_string(n: int) string {
         return "0"
     }
 
-    let is_negative = n < 0
-    let abs_n = n
+    is_negative := n < 0
+    abs_n := n
     if is_negative {
         abs_n = 0 - n
     }
 
-    let result = ""
+    result := ""
     while abs_n > 0 {
         result = string(abs_n % 10) + result
         abs_n = abs_n / 10
@@ -317,7 +317,7 @@ func int_to_string(n: int) string {
 }
 
 func is_integer(s: string) bool {
-    let i = 0
+    i := 0
     if s[i] == '-' {
         i = i + 1
     }
@@ -333,7 +333,7 @@ func is_integer(s: string) bool {
 }
 
 func validation_result_to_string(result: *validation_result) string {
-    let output = ""
+    output := ""
 
     if result.is_valid {
         output = "✅ VALID\n"
@@ -343,7 +343,7 @@ func validation_result_to_string(result: *validation_result) string {
 
     if len(result.errors) > 0 {
         output = output + "\nErrors:\n"
-        let i = 0
+        i := 0
         while i < len(result.errors) {
             output = output + "  • " + result.errors[i] + "\n"
             i = i + 1
@@ -352,7 +352,7 @@ func validation_result_to_string(result: *validation_result) string {
 
     if len(result.warnings) > 0 {
         output = output + "\nWarnings:\n"
-        let i = 0
+        i := 0
         while i < len(result.warnings) {
             output = output + "  ⚠ " + result.warnings[i] + "\n"
             i = i + 1
@@ -361,7 +361,7 @@ func validation_result_to_string(result: *validation_result) string {
 
     if len(result.field_errors) > 0 {
         output = output + "\nField Errors:\n"
-        let i = 0
+        i := 0
         while i < len(result.field_errors) {
             output = output + "  • " + result.field_errors[i].field_path +
                     ": " + result.field_errors[i].error_message + "\n"

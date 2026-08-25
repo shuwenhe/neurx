@@ -72,7 +72,7 @@ func new_prefill_decode_engine(batch_config config) prefill_decode_engine {
 }
 
 func (mut prefill_decode_engine* engine) enqueue_request(req: request_state) {
-    let mut new_req = req
+    new_req := req
     new_req.status = request_status.pending
     new_req.arrival_time_ms = engine.total_time_ms
     engine.pending_requests.push(new_req)
@@ -83,16 +83,16 @@ func (mut prefill_decode_engine* engine) schedule_prefill() bool {
         return false
     }
 
-    let mut prefill_count = 0
-    let mut total_prompt_tokens = 0
+    prefill_count := 0
+    total_prompt_tokens := 0
 
     for i in 0..engine.pending_requests.len() {
         if prefill_count >= engine.config.max_prefill_batch_size {
             break
         }
 
-        let req = engine.pending_requests[i]
-        let prompt_len = req.prompt_tokens.len()
+        req := engine.pending_requests[i]
+        prompt_len := req.prompt_tokens.len()
 
         if total_prompt_tokens + prompt_len > engine.config.prefill_token_budget {
             break
@@ -100,7 +100,7 @@ func (mut prefill_decode_engine* engine) schedule_prefill() bool {
 
         total_prompt_tokens += prompt_len
 
-        let mut prefill_req = req
+        prefill_req := req
         prefill_req.status = request_status.prefilling
         prefill_req.start_time_ms = engine.total_time_ms
         engine.prefilling_requests.push(prefill_req)
@@ -133,17 +133,17 @@ func (mut prefill_decode_engine* engine) schedule_decode() bool {
 
     engine.prefilling_requests.clear()
 
-    let mut decoded_token_count = 0
-    let max_decode_batch = engine.config.max_batch_size
+    decoded_token_count := 0
+    max_decode_batch := engine.config.max_batch_size
 
-    let decode_batch_size = if engine.decoding_requests.len() > max_decode_batch {
+    decode_batch_size := if engine.decoding_requests.len() > max_decode_batch {
         max_decode_batch
     } else {
         engine.decoding_requests.len()
     }
 
     for i in 0..decode_batch_size {
-        let req = engine.decoding_requests[i]
+        req := engine.decoding_requests[i]
 
         if req.generated_tokens.len() < req.max_new_tokens {
 
@@ -155,11 +155,11 @@ func (mut prefill_decode_engine* engine) schedule_decode() bool {
 
     engine.total_decoded_tokens += decoded_token_count
 
-    let mut finished_indices = vec[]()
+    finished_indices := vec[]()
     for i in 0..engine.decoding_requests.len() {
-        let req = engine.decoding_requests[i]
+        req := engine.decoding_requests[i]
         if req.generated_tokens.len() >= req.max_new_tokens {
-            let mut finished_req = req
+            finished_req := req
             finished_req.status = request_status.finished
             engine.finished_requests.push(finished_req)
             finished_indices.push(i)
@@ -176,11 +176,11 @@ func (mut prefill_decode_engine* engine) schedule_decode() bool {
 func (mut prefill_decode_engine* engine) iteration() {
     engine.current_iteration += 1
 
-    let prefill_scheduled = engine.schedule_prefill()
+    prefill_scheduled := engine.schedule_prefill()
 
-    let decode_scheduled = engine.schedule_decode()
+    decode_scheduled := engine.schedule_decode()
 
-    let prefill_tokens = engine.prefilling_requests.len() *
+    prefill_tokens := engine.prefilling_requests.len() *
         (if engine.prefilling_requests.len() > 0 {
             engine.prefilling_requests[0].prompt_tokens.len()
          } else { 0 })
@@ -205,20 +205,20 @@ struct engine_stats {
 }
 
 func (prefill_decode_engine* engine) get_stats() engine_stats {
-    let total_tokens = engine.total_prefilled_tokens + engine.total_decoded_tokens
-    let avg_prefill_latency = if engine.prefilling_requests.len() > 0 {
+    total_tokens := engine.total_prefilled_tokens + engine.total_decoded_tokens
+    avg_prefill_latency := if engine.prefilling_requests.len() > 0 {
         (engine.total_time_ms as f32) / (engine.current_iteration as f32)
     } else {
         0.0
     }
 
-    let avg_decode_latency = if engine.decoding_requests.len() > 0 {
+    avg_decode_latency := if engine.decoding_requests.len() > 0 {
         (engine.total_time_ms as f32) / (engine.current_iteration as f32)
     } else {
         0.0
     }
 
-    let throughput = if engine.total_time_ms > 0 {
+    throughput := if engine.total_time_ms > 0 {
         (engine.finished_requests.len() as f32) / ((engine.total_time_ms as f32) / 1000.0)
     } else {
         0.0
@@ -244,7 +244,7 @@ func main() {
     println("🚀 Prefill/Decode 分离架构 - 核心引擎")
     println("========================================")
 
-    let config = batch_config {
+    config := batch_config {
         max_batch_size: 32,
         max_total_tokens: 4096,
         max_prefill_batch_size: 8,
@@ -253,10 +253,10 @@ func main() {
         prefill_ratio: 0.5,
     }
 
-    let mut engine = new_prefill_decode_engine(config)
+    engine := new_prefill_decode_engine(config)
 
     for i in 0..4 {
-        let req = request_state {
+        req := request_state {
             request_id: i,
             prompt_tokens: vec[1, 2, 3, 4, 5],
             generated_tokens: vec[](),
@@ -282,7 +282,7 @@ func main() {
         println("")
     }
 
-    let stats = engine.get_stats()
+    stats := engine.get_stats()
     println("📊 引擎统计:")
     println(f"  总迭代数: {stats.total_iterations}")
     println(f"  Prefill Token: {stats.total_prefilled_tokens}")

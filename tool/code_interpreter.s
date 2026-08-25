@@ -102,8 +102,8 @@ struct sandbox_environment {
         }
     }
     execute(code_block: code_block) {
-        let start_time = current_time_millis()
-        let security_result = this._security_check(code_block.code)
+        start_time := current_time_millis()
+        security_result := this._security_check(code_block.code)
         if !security_result.allowed {
             return execution_result{
                 success=false,
@@ -192,7 +192,7 @@ struct sandbox_environment {
     }
     _post_process(result: execution_result, code_block: code_block) {
         if this.config.persist_files_between_calls {
-            let files = scan_directory_for_new_files(
+            files := scan_directory_for_new_files(
                 this.working_dir,
                 since=this.state.last_execution_time
             )
@@ -313,10 +313,10 @@ struct python_runtime {
         }
     }
     execute(string code, string filename?) {
-        let script_path = this.sandbox_dir + (filename ?? "execution_" + generate_short_uuid() + ".py")
+        script_path := this.sandbox_dir + (filename ?? "execution_" + generate_short_uuid() + ".py")
         write_file(script_path, code)
         try {
-            let cmd = [
+            cmd := [
                 this.interpreter_path,
                 "-u",
                 "-B",
@@ -328,7 +328,7 @@ struct python_runtime {
                 "TMPDIR": this.sandbox_dir,
                 "PYTHONDONTWRITEBYTECODE": "1"
             }
-            let proc = subprocess_run(
+            proc := subprocess_run(
                 cmd,
                 capture_output=true,
                 text=true,
@@ -339,7 +339,7 @@ struct python_runtime {
             output = proc.stdout
             error_output = proc.stderr
             if proc.returncode != 0 {
-                let error_info = this._parse_python_error(error_output)
+                error_info := this._parse_python_error(error_output)
                 return execution_result{
                     success=false,
                     output=output,
@@ -438,7 +438,7 @@ struct java_script_runtime {
         try {
             wrapped_code = """
                 (function() {
-                    let __output = [];
+                    __output := [];
                     const originalLog = console.log;
                     console.log = (...args) => { __output.push(args.join(' ')); };
                     try {
@@ -452,7 +452,7 @@ struct java_script_runtime {
                     }
                 })();
             """
-            let result = run_in_vm(this.vm_context, wrapped_code)
+            result := run_in_vm(this.vm_context, wrapped_code)
             return execution_result{
                 success=true,
                 output=result.output,
@@ -500,7 +500,7 @@ struct shell_runtime {
             }
         }
         try {
-            let proc = subprocess_run(
+            proc := subprocess_run(
                 ["bash", "-c", command],
                 capture_output=true,
                 text=true,
@@ -549,7 +549,7 @@ struct sql_runtime {
             query_type = detect_sql_query_type(query)
             match query_type {
                 "SELECT" | "SHOW" | "DESCRIBE" | "EXPLAIN" => {
-                    let cursor = this.connection!.execute(query)
+                    cursor := this.connection!.execute(query)
                     columns = cursor.column_names
                     rows = cursor.fetchall()
                     output = format_sql_table(columns, rows)
@@ -725,8 +725,8 @@ print("=" * 60)
 mem = df.memory_usage(deep=True)
 print(f"total: {{mem.sum() / 1024 / 1024:.2f}} MB")
 """
-        let code_block = code_block{language="python", code=code}
-        let result = this.sandbox.execute(code_block)
+        code_block := code_block{language="python", code=code}
+        result := this.sandbox.execute(code_block)
         return result
     }
     visualize_data(string csv_path, string chart_type, string x_col, string y_col?,
@@ -805,7 +805,7 @@ print("Chart saved as chart_correlation.png")
             }
         }
         code = viz_templates[chart_type.to_lower()]
-        let code_block = code_block{language="python", code=code}
+        code_block := code_block{language="python", code=code}
         return this.sandbox.execute(code_block)
     }
     run_statistical_test(string csv_path, string test_type, string col1, string col2?) {
@@ -839,7 +839,7 @@ elif test_type == "pearson":
 else:
     print(f"Unknown test type: {{test_type}}")
 """
-        let code_block = code_block{language="python", code=code}
+        code_block := code_block{language="python", code=code}
         return this.sandbox.execute(code_block)
     }
 }
@@ -858,17 +858,17 @@ struct code_interpreter {
         this.data_helper = new data_analysis_helper(this.default_session!)
     }
     create_session(string session_name) {
-        let session = new sandbox_environment(config=this.config)
+        session := new sandbox_environment(config=this.config)
         this.active_sessions[session_name] = session
         return session
     }
     execute_code(string code, language?: string, session?: string) {
-        let target_session = this.active_sessions[session ?? "default"] ?? this.default_session!
-        let code_block = code_block{
+        target_session := this.active_sessions[session ?? "default"] ?? this.default_session!
+        code_block := code_block{
             language=language ?? this.config.default_language,
             code=code
         }
-        let result = target_session.execute(code_block)
+        result := target_session.execute(code_block)
         return this.formatter.format_for_llm(result)
     }
     run_python(string code) {
@@ -884,23 +884,23 @@ struct code_interpreter {
         return this.execute_code(query, "sql")
     }
     analyze_csv(string csv_path) {
-        let result = this.data_helper!.explore_dataset(csv_path)
+        result := this.data_helper!.explore_dataset(csv_path)
         return this.formatter.format_for_llm(result)
     }
     plot_chart(string csv_path, string chart_type, string x, y?: string,
                group_by?: string) {
-        let result = this.data_helper!.visualize_data(csv_path, chart_type, x, y, group_by)
+        result := this.data_helper!.visualize_data(csv_path, chart_type, x, y, group_by)
         return this.formatter.format_for_llm(result)
     }
     statistical_test(string csv_path, string test, string col1, col2?: string) {
-        let result = this.data_helper!.run_statistical_test(csv_path, test, col1, col2)
+        result := this.data_helper!.run_statistical_test(csv_path, test, col1, col2)
         return this.formatter.format_for_llm(result)
     }
     list_sessions() {
         return list(this.active_sessions.keys())
     }
     get_session_summary(string session_name) {
-        let session = this.active_sessions[session_name] ?? this.default_session!
+        session := this.active_sessions[session_name] ?? this.default_session!
         return session.get_session_state().get_summary()
     }
     reset_session(string session_name) {

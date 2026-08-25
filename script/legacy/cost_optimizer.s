@@ -250,8 +250,8 @@ func (cost_optimizer* co) get_cost_report() {
     }
     first := co.metrics_history[0]
     last := co.metrics_history[len(co.metrics_history)-1]
-    var avg_util float64 = 0.0
-    var total_cost float64 = 0.0
+    avg_util := 0.0
+    total_cost := 0.0
     for _, metric := range co.metrics_history {
         avg_util += metric.gpu_utilization
         total_cost += metric.cost_per_step

@@ -131,9 +131,9 @@ func (ragintegration* rag) cosine_similarity(vec1 []float64, vec2 []float64) flo
     if len(vec1) != len(vec2) {
         return 0.0
     }
-    var dot_product float64 = 0.0
-    var norm1 float64 = 0.0
-    var norm2 float64 = 0.0
+    dot_product := 0.0
+    norm1 := 0.0
+    norm2 := 0.0
     for i := 0; i < len(vec1); i++ {
         dot_product += vec1[i] * vec2[i]
         norm1 += vec1[i] * vec1[i]
@@ -231,7 +231,7 @@ func (ragintegration* rag) record_retrieval_metrics(
     retrieved_count int,
     top_similarity float64,
     retrieval_time_ms int) {
-    var avg_similarity float64 = top_similarity * 0.8
+    avg_similarity := top_similarity * 0.8
     metric := ragmetrics{
         step:              int64(len(rag.metrics_history)),
         query:             query,
@@ -248,9 +248,9 @@ func (ragintegration* rag) get_rag_statistics() {
     fmt.Printf("│  RAG Performance Statistics            │\n")
     fmt.Printf("└────────────────────────────────────────┘\n\n")
     if len(rag.metrics_history) > 0 {
-        var avg_similarity float64 = 0.0
-        var avg_time float64 = 0.0
-        var total_retrieved int = 0
+        avg_similarity := 0.0
+        avg_time := 0.0
+        total_retrieved := 0
         for _, metric := range rag.metrics_history {
             avg_similarity += metric.top_similarity
             avg_time += float64(metric.retrieval_time_ms)
@@ -307,7 +307,7 @@ func (ragintegration* rag) run_complete_rag_cycle() {
         rag.display_retrieval_results(results)
         augmented := rag.augment_context(query, results)
         fmt.Printf("  Augmented context size: %d chars\n", len(augmented))
-        var top_sim float64 = 0.0
+        top_sim := 0.0
         if len(results) > 0 {
             top_sim = results[0].similarity_score
         }

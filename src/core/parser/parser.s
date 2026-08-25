@@ -27,10 +27,10 @@ func create_default_parser() ParserInstance {
 }
 
 func (ParserInstance* p) parse(text: string) ParseResult {
-    let start_time = 0
+    start_time := 0
 
     if p.config.cache_intermediate {
-        let cached = p.cache[text]
+        cached := p.cache[text]
         if len(cached.raw_output) > 0 {
             p.stats.cache_hits = p.stats.cache_hits + 1
             return cached
@@ -51,16 +51,16 @@ func (ParserInstance* p) parse(text: string) ParseResult {
     p.stats.total_parses = p.stats.total_parses + 1
     p.stats.total_bytes_parsed = p.stats.total_bytes_parsed + len(text)
 
-    let format = p.config.format
+    format := p.config.format
     if p.config.auto_format_detect && p.config.format == 7 {
-        let detection = detect_format(text)
+        detection := detect_format(text)
         format = detection.detected_format
     }
 
-    let result = parse_with_format(text, format)
+    result := parse_with_format(text, format)
 
     if result.status == 3 && p.config.error_recovery != 0 {
-        let recovery_strategy = suggest_recovery_strategy(result.error_msg, text)
+        recovery_strategy := suggest_recovery_strategy(result.error_msg, text)
         result = attempt_recovery(result.error_msg, text, recovery_strategy)
 
         if result.status == 4 {
@@ -74,8 +74,8 @@ func (ParserInstance* p) parse(text: string) ParseResult {
         p.stats.failed_parses = p.stats.failed_parses + 1
     }
 
-    let format_name = format_to_string(result.format)
-    let current_count = 0
+    format_name := format_to_string(result.format)
+    current_count := 0
     if format_name in p.stats.formats_detected {
         current_count = p.stats.formats_detected[format_name]
     }
@@ -103,7 +103,7 @@ func parse_with_format(text: string, format: int) ParseResult {
 }
 
 func parse_text_format(text: string) ParseResult {
-    let result = create_parse_result()
+    result := create_parse_result()
     result.format = 0
     result.raw_output = text
     result.status = 0
@@ -115,7 +115,7 @@ func parse_text_format(text: string) ParseResult {
 }
 
 func parse_yaml_format(text: string) ParseResult {
-    let result = create_parse_result()
+    result := create_parse_result()
     result.format = 4
     result.raw_output = text
 
@@ -133,7 +133,7 @@ func parse_yaml_format(text: string) ParseResult {
 }
 
 func parse_html_format(text: string) ParseResult {
-    let result = create_parse_result()
+    result := create_parse_result()
     result.format = 6
     result.raw_output = text
 
@@ -151,13 +151,13 @@ func parse_html_format(text: string) ParseResult {
 }
 
 func parse_auto_format(text: string) ParseResult {
-    let detection = detect_format(text)
+    detection := detect_format(text)
     return parse_with_format(text, detection.detected_format)
 }
 
 func (ParserInstance* p) parse_stream(chunks: []string) []ParseResult {
-    let results = []ParseResult{}
-    let builder = create_stream_builder()
+    results := []ParseResult{}
+    builder := create_stream_builder()
 
     for chunk in chunks {
         builder.add_chunk(chunk)
@@ -167,7 +167,7 @@ func (ParserInstance* p) parse_stream(chunks: []string) []ParseResult {
         }
     }
 
-    let final_result = builder.get_final_result()
+    final_result := builder.get_final_result()
     results = append(results, final_result)
 
     p.stats.total_parses = p.stats.total_parses + 1
@@ -225,7 +225,7 @@ func strategy_to_string(strategy: int) string {
 }
 
 func (r: ParseResult) to_string() string {
-    let status_str = match r.status {
+    status_str := match r.status {
         0 => "SUCCESS"
         1 => "PARTIAL"
         2 => "INCOMPLETE"
@@ -234,7 +234,7 @@ func (r: ParseResult) to_string() string {
         _ => "UNKNOWN"
     }
 
-    let result = "ParseResult {\n"
+    result := "ParseResult {\n"
     result = result + "  status: " + status_str + "\n"
     result = result + "  format: " + format_to_string(r.format) + "\n"
     result = result + "  confidence: " + string(r.confidence) + "\n"
@@ -254,14 +254,14 @@ func (r: ParseResult) to_string() string {
 }
 
 func (ParserInstance* p) parse_and_get(text: string, key: string) string {
-    let result = p.parse(text)
+    result := p.parse(text)
 
     if result.status != 0 && result.status != 4 {
         return ""
     }
 
     if result.value.is_object() {
-        let i = 0
+        i := 0
         while i < len(result.value.object_keys) {
             if result.value.object_keys[i] == key {
                 return result.value.object_values[i].string_value
@@ -274,7 +274,7 @@ func (ParserInstance* p) parse_and_get(text: string, key: string) string {
 }
 
 func (ParserInstance* p) parse_batch(texts: []string) []ParseResult {
-    let results = []ParseResult{}
+    results := []ParseResult{}
 
     for text in texts {
         results = append(results, p.parse(text))

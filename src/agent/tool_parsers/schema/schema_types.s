@@ -112,7 +112,7 @@ func is_valid_json_type(type_name: string) bool {
 }
 
 func create_empty_schema() json_schema {
-    let schema = json_schema{
+    schema := json_schema{
         title: "",
         description: "",
         type_name: TYPE_OBJECT,
@@ -141,7 +141,7 @@ func create_empty_schema() json_schema {
 }
 
 func create_empty_parse_context() parse_context {
-    let ctx = parse_context{
+    ctx := parse_context{
         current_path: vec_new(),
         current_value: "",
         depth: 0,
@@ -154,7 +154,7 @@ func create_empty_parse_context() parse_context {
 }
 
 func create_empty_constraint() token_constraint {
-    let constraint = token_constraint{
+    constraint := token_constraint{
         allowed_tokens: vec_new(),
         forbidden_tokens: vec_new(),
         state: 0,
@@ -165,7 +165,7 @@ func create_empty_constraint() token_constraint {
 }
 
 func create_sampler_state(mode: string, schema: *json_schema) sampler_state {
-    let state = sampler_state{
+    state := sampler_state{
         mode: mode,
         schema: schema,
         context: create_empty_parse_context(),

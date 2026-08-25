@@ -47,8 +47,8 @@ func close_client_connection(int client_fd) int {
 }
 
 func create_http_server(string host, int port) http_server {
-    let listener_res = listen_tcp(host, port)
-    let listener = switch listener_res {
+    listener_res := listen_tcp(host, port)
+    listener := switch listener_res {
         (value, "") : value,
         (0, err) : {
             print("error: failed to listen: " + err.message + "\n")
@@ -93,7 +93,7 @@ func handle_connection(int client_fd, func(http_request) http_response handler) 
 func server_accept_loop(http_server server, func(http_request) http_response handler) {
     tcp_listener listener = listener_from_server(server)
     while server.running {
-        let conn_res = listener.accept()
+        conn_res := listener.accept()
         switch conn_res {
             (conn, "") : {
                 handle_connection(conn.fd, handler)

@@ -22,8 +22,8 @@ func main() {
     println("║     NeurX Wikipedia Shard Processing (S Language)        ║")
     println("╚══════════════════════════════════════════════════════════╝")
     println("")
-    let neurx_home = getenv("NEURX_HOME", ".")
-    let dataset_root = neurx_home + "/dataset/pretrain"
+    neurx_home := getenv("NEURX_HOME", ".")
+    dataset_root := neurx_home + "/dataset/pretrain"
     enwiki_shard_config config
     config.input_bz2_file = getenv("ENWIKI_BZ2_FILE", dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2")
     config.temp_xml_file = getenv("ENWIKI_TEMP_XML", dataset_root + "/tmp/enwiki-latest-pages-articles.xml")
@@ -50,8 +50,8 @@ func main() {
 
 func process_enwiki_dataset(enwiki_shard_config config) bool {
     println("🔍 Checking input file...")
-    let check_cmd = "test -f \"" + config.input_bz2_file + "\""
-    let (_, exit_code) = command(check_cmd)
+    check_cmd := "test -f \"" + config.input_bz2_file + "\""
+    (_, exit_code) := command(check_cmd)
     if exit_code != 0 {
         println("❌ Error: Input file not found: " + config.input_bz2_file)
         return false
@@ -59,8 +59,8 @@ func process_enwiki_dataset(enwiki_shard_config config) bool {
     println("  ✓ Input file exists")
     println("")
     println("📁 Creating directories...")
-    let mkdir_cmd = "mkdir -p \"" + config.shard_dir + "\" \"$(dirname \"" + config.temp_xml_file + "\")\""
-    let (_, exit_code) = command(mkdir_cmd)
+    mkdir_cmd := "mkdir -p \"" + config.shard_dir + "\" \"$(dirname \"" + config.temp_xml_file + "\")\""
+    (_, exit_code) := command(mkdir_cmd)
     if exit_code != 0 {
         println("❌ Error: Failed to create directories")
         return false
@@ -68,8 +68,8 @@ func process_enwiki_dataset(enwiki_shard_config config) bool {
     println("  ✓ Directories created")
     println("")
     println("📦 Decompressing bz2 file...")
-    let bunzip_cmd = "bzip2 -d -c \"" + config.input_bz2_file + "\" > \"" + config.temp_xml_file + "\""
-    let (output, exit_code) = command(bunzip_cmd)
+    bunzip_cmd := "bzip2 -d -c \"" + config.input_bz2_file + "\" > \"" + config.temp_xml_file + "\""
+    (output, exit_code) := command(bunzip_cmd)
     if exit_code != 0 {
         println("❌ Error: Failed to decompress bz2 file")
         println("  Output: " + output)
@@ -78,11 +78,11 @@ func process_enwiki_dataset(enwiki_shard_config config) bool {
     println("  ✓ Decompression complete")
     println("")
     println("📊 Analyzing file...")
-    let size_cmd = "stat -f%z \"" + config.temp_xml_file + "\" 2>/dev/null || stat -c%s \"" + config.temp_xml_file + "\""
-    let (size_output, _) = command(size_cmd)
-    let file_size_mb = atoi(size_output) / (1024 * 1024)
+    size_cmd := "stat -f%z \"" + config.temp_xml_file + "\" 2>/dev/null || stat -c%s \"" + config.temp_xml_file + "\""
+    (size_output, _) := command(size_cmd)
+    file_size_mb := atoi(size_output) / (1024 * 1024)
     println("  • XML file size: " + itoa(file_size_mb) + " MB")
-    let shard_count = max(1, file_size_mb / config.target_shard_size_mb + 1)
+    shard_count := max(1, file_size_mb / config.target_shard_size_mb + 1)
     println("  • Estimated shards: " + itoa(shard_count))
     println("")
     println("✂️ Splitting into shards...")
@@ -101,8 +101,8 @@ func process_enwiki_dataset(enwiki_shard_config config) bool {
     println("")
     if config.cleanup_temp {
         println("🧹 Cleaning up temporary files...")
-        let rm_cmd = "rm -f \"" + config.temp_xml_file + "\""
-        let (_, _) = command(rm_cmd)
+        rm_cmd := "rm -f \"" + config.temp_xml_file + "\""
+        (_, _) := command(rm_cmd)
         println("  ✓ Cleanup complete")
         println("")
     }
@@ -110,31 +110,31 @@ func process_enwiki_dataset(enwiki_shard_config config) bool {
 }
 
 func split_xml_into_shards(enwiki_shard_config config, int shard_count) bool {
-    let target_size = itoa(config.target_shard_size_mb * 1024)
-    let split_cmd = "split -b " + target_size + "M \"" + config.temp_xml_file + "\" \"" + config.shard_dir + "/shard_\""
-    let (output, exit_code) = command(split_cmd)
+    target_size := itoa(config.target_shard_size_mb * 1024)
+    split_cmd := "split -b " + target_size + "M \"" + config.temp_xml_file + "\" \"" + config.shard_dir + "/shard_\""
+    (output, exit_code) := command(split_cmd)
     if exit_code != 0 {
         println("  Error during split: " + output)
         return false
     }
-    let list_cmd = "ls -lh \"" + config.shard_dir + "/shard_\"* 2>/dev/null | wc -l"
-    let (count_output, _) = command(list_cmd)
+    list_cmd := "ls -lh \"" + config.shard_dir + "/shard_\"* 2>/dev/null | wc -l"
+    (count_output, _) := command(list_cmd)
     println("  • Generated shards: " + count_output)
-    let rename_cmd = "cd \"" + config.shard_dir + "\" && for f in shard_*; do [ ! -f \"${f}.xml\" ] && mv \"$f\" \"${f}.xml\"; done"
-    let (_, _) = command(rename_cmd)
+    rename_cmd := "cd \"" + config.shard_dir + "\" && for f in shard_*; do [ ! -f \"${f}.xml\" ] && mv \"$f\" \"${f}.xml\"; done"
+    (_, _) := command(rename_cmd)
     return true
 }
 
 func generate_enwiki_manifest(enwiki_shard_config config, int shard_count) bool {
-    let count_cmd = "ls -1 \"" + config.shard_dir + "/shard_\"*.xml 2>/dev/null | wc -l"
-    let (count_output, _) = command(count_cmd)
-    let actual_shard_count = atoi(count_output)
-    let size_cmd = "du -sb \"" + config.shard_dir + "\" | awk '{print $1}'"
-    let (total_size_str, _) = command(size_cmd)
-    let total_size_bytes = atoi(total_size_str)
-    let total_size_mb = total_size_bytes / (1024 * 1024)
-    let date_cmd = "date -u +%Y-%m-%dT%H:%M:%SZ"
-    let (timestamp, _) = command(date_cmd)
+    count_cmd := "ls -1 \"" + config.shard_dir + "/shard_\"*.xml 2>/dev/null | wc -l"
+    (count_output, _) := command(count_cmd)
+    actual_shard_count := atoi(count_output)
+    size_cmd := "du -sb \"" + config.shard_dir + "\" | awk '{print $1}'"
+    (total_size_str, _) := command(size_cmd)
+    total_size_bytes := atoi(total_size_str)
+    total_size_mb := total_size_bytes / (1024 * 1024)
+    date_cmd := "date -u +%Y-%m-%dT%H:%M:%SZ"
+    (timestamp, _) := command(date_cmd)
     string manifest = "{" + "\n"
     manifest = manifest + "  \"dataset_name\": \"enwiki-latest\",\n"
     manifest = manifest + "  \"dataset_version\": \"latest\",\n"
@@ -149,8 +149,8 @@ func generate_enwiki_manifest(enwiki_shard_config config, int shard_count) bool 
     manifest = manifest + "  \"shards\": [\n"
     manifest = manifest + "  \"shards\": []\n"
     manifest = manifest + "}\n"
-    let write_cmd = "cat > \"" + config.manifest_file + "\" << 'EOF'\n" + manifest + "EOF"
-    let (output, exit_code) = command(write_cmd)
+    write_cmd := "cat > \"" + config.manifest_file + "\" << 'EOF'\n" + manifest + "EOF"
+    (output, exit_code) := command(write_cmd)
     if exit_code != 0 {
         println("  Error writing manifest: " + output)
         return false
@@ -162,12 +162,12 @@ func generate_enwiki_manifest(enwiki_shard_config config, int shard_count) bool 
 }
 
 func atoi(string s) int {
-    let mut result = 0
-    let mut i = 0
+    result := 0
+    i := 0
     while i < len(s) && (string_char(s[i]) == " " || s[i] == 9) {
         i = i + 1
     }
-    let negative = i < len(s) && string_char(s[i]) == "-"
+    negative := i < len(s) && string_char(s[i]) == "-"
     if negative || (i < len(s) && string_char(s[i]) == "+") {
         i = i + 1
     }
@@ -185,12 +185,12 @@ func itoa(int n) string {
     if n == 0 {
         "0"
     }
-    let negative = n < 0
-    let mut n = if negative { -n } else { n }
-    let mut result = ""
+    negative := n < 0
+    n := if negative { -n } else { n }
+    result := ""
     while n > 0 {
-        let mut digit = n
-        let mut quotient = 0
+        digit := n
+        quotient := 0
         while digit >= 10 {
             digit = digit - 10
             quotient = quotient + 1

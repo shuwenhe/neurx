@@ -5,13 +5,13 @@ use std.map.map
 use neurx.lora.lora_config::{lora_config}
 
 func preset_lightweight() lora_config {
-    let mut config = lora_config::default()
+    config := lora_config::default()
     config.lora_rank = 4
     config.lora_alpha = 8.0
     config.lora_dropout = 0.01
     config.bias = "none"
 
-    let mut targets = vec[string]()
+    targets := vec[string]()
     targets.push("q_proj")
     targets.push("v_proj")
     config.target_modules = targets
@@ -20,13 +20,13 @@ func preset_lightweight() lora_config {
 }
 
 func preset_balanced() lora_config {
-    let mut config = lora_config::default()
+    config := lora_config::default()
     config.lora_rank = 16
     config.lora_alpha = 32.0
     config.lora_dropout = 0.05
     config.bias = "lora_only"
 
-    let mut targets = vec[string]()
+    targets := vec[string]()
     targets.push("q_proj")
     targets.push("k_proj")
     targets.push("v_proj")
@@ -37,13 +37,13 @@ func preset_balanced() lora_config {
 }
 
 func preset_high_quality() lora_config {
-    let mut config = lora_config::default()
+    config := lora_config::default()
     config.lora_rank = 64
     config.lora_alpha = 128.0
     config.lora_dropout = 0.1
     config.bias = "all"
 
-    let mut targets = vec[string]()
+    targets := vec[string]()
     targets.push("q_proj")
     targets.push("k_proj")
     targets.push("v_proj")
@@ -55,11 +55,11 @@ func preset_high_quality() lora_config {
 }
 
 func preset_text_classification() lora_config {
-    let mut config = preset_balanced()
+    config := preset_balanced()
     config.task_type = "SEQUENCE_CLASSIFICATION"
     config.lora_rank = 8
 
-    let mut targets = vec[string]()
+    targets := vec[string]()
     targets.push("q_proj")
     targets.push("v_proj")
     config.target_modules = targets
@@ -68,11 +68,11 @@ func preset_text_classification() lora_config {
 }
 
 func preset_question_answering() lora_config {
-    let mut config = preset_balanced()
+    config := preset_balanced()
     config.task_type = "QUESTION_ANSWERING"
     config.lora_rank = 16
 
-    let mut targets = vec[string]()
+    targets := vec[string]()
     targets.push("q_proj")
     targets.push("k_proj")
     targets.push("v_proj")
@@ -83,12 +83,12 @@ func preset_question_answering() lora_config {
 }
 
 func preset_machine_translation() lora_config {
-    let mut config = preset_high_quality()
+    config := preset_high_quality()
     config.task_type = "TRANSLATION"
     config.lora_rank = 32
     config.lora_alpha = 64.0
 
-    let mut targets = vec[string]()
+    targets := vec[string]()
     targets.push("q_proj")
     targets.push("k_proj")
     targets.push("v_proj")
@@ -100,12 +100,12 @@ func preset_machine_translation() lora_config {
 }
 
 func preset_code_generation() lora_config {
-    let mut config = preset_high_quality()
+    config := preset_high_quality()
     config.task_type = "CAUSAL_LM"
     config.lora_rank = 64
     config.lora_alpha = 128.0
 
-    let mut targets = vec[string]()
+    targets := vec[string]()
     targets.push("q_proj")
     targets.push("v_proj")
     targets.push("dense")
@@ -115,12 +115,12 @@ func preset_code_generation() lora_config {
 }
 
 func preset_instruction_following() lora_config {
-    let mut config = preset_balanced()
+    config := preset_balanced()
     config.task_type = "CAUSAL_LM"
     config.lora_rank = 16
     config.lora_alpha = 32.0
 
-    let mut targets = vec[string]()
+    targets := vec[string]()
     targets.push("q_proj")
     targets.push("v_proj")
     config.target_modules = targets
@@ -129,12 +129,12 @@ func preset_instruction_following() lora_config {
 }
 
 func preset_conversational() lora_config {
-    let mut config = preset_balanced()
+    config := preset_balanced()
     config.task_type = "CAUSAL_LM"
     config.lora_rank = 32
     config.lora_alpha = 64.0
 
-    let mut targets = vec[string]()
+    targets := vec[string]()
     targets.push("q_proj")
     targets.push("k_proj")
     targets.push("v_proj")
@@ -186,7 +186,7 @@ func load_preset_by_name(name: string) option[lora_config] {
 }
 
 func get_available_presets() vec[string] {
-    let presets = vec[string]()
+    presets := vec[string]()
     presets.push("lightweight")
     presets.push("balanced")
     presets.push("high_quality")
@@ -329,7 +329,7 @@ func get_performance_info(preset: preset_type) preset_performance {
 func demo_presets() {
     println("=== LoRA 预设配置演示 ===\n")
 
-    let presets = get_available_presets()
+    presets := get_available_presets()
 
     for preset_name in presets.iter() {
         println("配置名: " + preset_name)

@@ -123,9 +123,9 @@ func save_checkpoint_to_file(int step, float loss, float best_loss, int best_ste
     string file_path = "artifact/checkpoints/" + name + ".neurx"
     string manifest_path = "artifact/checkpoints/latest_checkpoint.txt"
     string content = format_checkpoint_content(step, loss, best_loss, best_step, trained, param_count)
-    var r1 = fs_write(file_path, content)
+    r1 := fs_write(file_path, content)
     if r1.is_ok() {
-        var r2 = fs_write(manifest_path, file_path + "\n")
+        r2 := fs_write(manifest_path, file_path + "\n")
         if r2.is_ok() {
             println("  -> Saved: ", file_path)
             return file_path

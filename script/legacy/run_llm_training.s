@@ -3,12 +3,12 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.io.println
 
 func main() {
-    let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    let train_split = runtime_env_get("NEURX_TRAIN_SPLIT_PATH", project_root + "/dataset/pretrain/cleaned/train.jsonl")
-    let val_split = runtime_env_get("NEURX_VAL_SPLIT_PATH", project_root + "/dataset/pretrain/cleaned/val.jsonl")
-    let test_split = runtime_env_get("NEURX_TEST_SPLIT_PATH", project_root + "/dataset/pretrain/cleaned/test.jsonl")
-    let manifest = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
-    let output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/artifact/checkpoints/llm_s_pretrain")
+    project_root := runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
+    train_split := runtime_env_get("NEURX_TRAIN_SPLIT_PATH", project_root + "/dataset/pretrain/cleaned/train.jsonl")
+    val_split := runtime_env_get("NEURX_VAL_SPLIT_PATH", project_root + "/dataset/pretrain/cleaned/val.jsonl")
+    test_split := runtime_env_get("NEURX_TEST_SPLIT_PATH", project_root + "/dataset/pretrain/cleaned/test.jsonl")
+    manifest := runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
+    output_dir := runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/artifact/checkpoints/llm_s_pretrain")
     println("NeurX LLM Training Orchestrator (S Lang)")
     println("")
     println("Project root: " + project_root)

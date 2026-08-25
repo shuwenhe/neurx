@@ -340,7 +340,7 @@ func transform_chain_to_jaxpr(transform_chain chain, string name) ir_graph {
     }
 }
 type ir_pass = ir_graph
-var ir_pass_registry = map[string]ir_pass{}
+ir_pass_registry := map[string]ir_pass{}
 
 func register_ir_pass(string name, ir_pass pass) void {
     ir_pass_registry[name] = pass

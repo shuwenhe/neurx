@@ -17,16 +17,16 @@ func compute_token_is_weights(
     ISThreshold threshold,
     Tensor response_mask
 ) -> ISWeights {
-    let batch_size = new_log_probs.shape[0]
-    let seq_len = new_log_probs.shape[1]
-    let log_ratio = new_log_probs - rollout_log_probs
-    let ratio = exp(log_ratio)
-    let clipped_weights: Tensor
-    let is_clipped: Tensor
+    batch_size := new_log_probs.shape[0]
+    seq_len := new_log_probs.shape[1]
+    log_ratio := new_log_probs - rollout_log_probs
+    ratio := exp(log_ratio)
+    clipped_weights := Tensor()
+    is_clipped := Tensor()
     if threshold.is_icepop {
-        let below_lower = (ratio < threshold.lower).to_float()
-        let above_upper = (ratio > threshold.upper).to_float()
-        let outside_range = below_lower + above_upper
+        below_lower := (ratio < threshold.lower).to_float()
+        above_upper := (ratio > threshold.upper).to_float()
+        outside_range := below_lower + above_upper
         clipped_weights = ratio * (1.0 - outside_range)
         is_clipped = outside_range.to_bool()
     } else {
@@ -34,12 +34,12 @@ func compute_token_is_weights(
         is_clipped = ((ratio < threshold.lower) | (ratio > threshold.upper))
     }
     clipped_weights = clipped_weights * response_mask
-    let valid_count = response_mask.sum()
-    let clip_fraction = (is_clipped.to_float() * response_mask).sum() / (valid_count + 1e-8)
-    let masked_weights = clipped_weights * response_mask
-    let mean_weight = masked_weights.sum() / (valid_count + 1e-8)
-    let max_weight = masked_weights.max()
-    let min_weight = masked_weights.min()
+    valid_count := response_mask.sum()
+    clip_fraction := (is_clipped.to_float() * response_mask).sum() / (valid_count + 1e-8)
+    masked_weights := clipped_weights * response_mask
+    mean_weight := masked_weights.sum() / (valid_count + 1e-8)
+    max_weight := masked_weights.max()
+    min_weight := masked_weights.min()
     return is_weights{
         weights: clipped_weights,
         level: ISAggregationLevel.TOKEN,
@@ -57,28 +57,28 @@ func compute_sequence_is_weights(
     ISThreshold threshold,
     Tensor response_mask
 ) -> ISWeights {
-    let batch_size = new_log_probs.shape[0]
-    let seq_len = new_log_probs.shape[1]
-    let log_ratio = new_log_probs - rollout_log_probs
-    let masked_log_ratio = log_ratio * response_mask
-    let seq_log_ratio = masked_log_ratio.sum(dim: 1)
-    let seq_ratio = exp(seq_log_ratio)
-    let clipped_weights: Tensor
-    let is_clipped: Tensor
+    batch_size := new_log_probs.shape[0]
+    seq_len := new_log_probs.shape[1]
+    log_ratio := new_log_probs - rollout_log_probs
+    masked_log_ratio := log_ratio * response_mask
+    seq_log_ratio := masked_log_ratio.sum(dim: 1)
+    seq_ratio := exp(seq_log_ratio)
+    clipped_weights := Tensor()
+    is_clipped := Tensor()
     if threshold.is_icepop {
-        let below_lower = (seq_ratio < threshold.lower).to_float()
-        let above_upper = (seq_ratio > threshold.upper).to_float()
-        let outside_range = below_lower + above_upper
+        below_lower := (seq_ratio < threshold.lower).to_float()
+        above_upper := (seq_ratio > threshold.upper).to_float()
+        outside_range := below_lower + above_upper
         clipped_weights = seq_ratio * (1.0 - outside_range)
         is_clipped = outside_range.to_bool()
     } else {
         clipped_weights = clamp(seq_ratio, threshold.lower, threshold.upper)
         is_clipped = ((seq_ratio < threshold.lower) | (seq_ratio > threshold.upper))
     }
-    let clip_fraction = is_clipped.to_float().mean()
-    let mean_weight = clipped_weights.mean()
-    let max_weight = clipped_weights.max()
-    let min_weight = clipped_weights.min()
+    clip_fraction := is_clipped.to_float().mean()
+    mean_weight := clipped_weights.mean()
+    max_weight := clipped_weights.max()
+    min_weight := clipped_weights.min()
     return is_weights{
         weights: clipped_weights,
         level: ISAggregationLevel.SEQUENCE,
@@ -91,12 +91,12 @@ func compute_sequence_is_weights(
 }
 
 func batch_normalize_is_weights(ISWeights is_weights) -> ISWeights {
-    let normalized_weights: Tensor
+    normalized_weights := Tensor()
     if is_weights.level == is_aggregation_level.TOKEN {
-        let mean = is_weights.weights.mean()
+        mean := is_weights.weights.mean()
         normalized_weights = is_weights.weights / (mean + 1e-8)
     } else if is_weights.level == is_aggregation_level.SEQUENCE {
-        let mean = is_weights.weights.mean()
+        mean := is_weights.weights.mean()
         normalized_weights = is_weights.weights / (mean + 1e-8)
     } else {
         normalized_weights = is_weights.weights
@@ -119,16 +119,16 @@ func compute_is_weights(
     RolloutCorrectionConfig config,
     Tensor response_mask
 ) -> ISWeights {
-    let reference_log_probs: Tensor
+    reference_log_probs := Tensor()
     if config.bypass_mode {
         reference_log_probs = rollout_log_probs
     } else {
         reference_log_probs = old_log_probs
     }
-    let is_weights: ISWeights
+    is_weights := ISWeights()
     match config.is_level {
         is_aggregation_level.NONE => {
-            let weights = tensor_ones_like(new_log_probs)
+            weights := tensor_ones_like(new_log_probs)
             is_weights = is_weights{
                 weights: weights,
                 level: ISAggregationLevel.NONE,
@@ -170,9 +170,9 @@ func apply_is_weights_to_loss(
     if is_weights.level == is_aggregation_level.TOKEN {
         return loss * is_weights.weights * response_mask
     } else if is_weights.level == is_aggregation_level.SEQUENCE {
-        let batch_size = loss.shape[0]
-        let seq_len = loss.shape[1]
-        let expanded_weights = is_weights.weights.unsqueeze(1).expand([batch_size, seq_len])
+        batch_size := loss.shape[0]
+        seq_len := loss.shape[1]
+        expanded_weights := is_weights.weights.unsqueeze(1).expand([batch_size, seq_len])
         return loss * expanded_weights * response_mask
     } else {
         return loss * response_mask
@@ -188,7 +188,7 @@ func apply_is_weights_to_advantages(
 }
 
 func compute_is_statistics(ISWeights is_weights) -> map[string]f32 {
-    let stats = map[string]f32{}
+    stats := map[string]f32{}
     stats["is_mean"] = is_weights.mean_weight
     stats["is_max"] = is_weights.max_weight
     stats["is_min"] = is_weights.min_weight

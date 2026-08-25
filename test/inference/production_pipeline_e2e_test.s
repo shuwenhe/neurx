@@ -39,12 +39,12 @@ func test_basic_inference() test_result {
         execution_time_ms: 0.0,
     }
     
-    var pipeline = create_production_pipeline(
+    pipeline := create_production_pipeline(
         "/home/shuwen/shuwen/posttrain/model.safetensors",
         "CUDA"
     )
     
-    var request = inference_request {
+    request := inference_request {
         prompt: "What is machine learning?",
         max_tokens: 100,
         temperature: 0.7,
@@ -53,7 +53,7 @@ func test_basic_inference() test_result {
         request_id: 1,
     }
     
-    var response = execute_inference_pipeline(pipeline, request)
+    response := execute_inference_pipeline(pipeline, request)
     
     if validate_pipeline_output(response) {
         result.passed = true
@@ -78,7 +78,7 @@ func test_batch_inference() test_result {
         execution_time_ms: 0.0,
     }
     
-    var pipeline = create_production_pipeline(
+    pipeline := create_production_pipeline(
         "/home/shuwen/shuwen/posttrain/model.safetensors",
         "CUDA"
     )
@@ -113,7 +113,7 @@ func test_batch_inference() test_result {
     int successful = 0
     int i = 0
     while i < len(requests) {
-        var response = execute_inference_pipeline(pipeline, requests[i])
+        response := execute_inference_pipeline(pipeline, requests[i])
         if validate_pipeline_output(response) {
             successful = successful + 1
         }
@@ -154,7 +154,7 @@ func test_tokenization_correctness() test_result {
     
     int i = 0
     while i < len(test_inputs) {
-        var tokens = tokenize_prompt(test_inputs[i])
+        tokens := tokenize_prompt(test_inputs[i])
         if len(tokens) > 0 {
             print("✓ Input: \"" + test_inputs[i] + "\" -> " + string(len(tokens)) + " tokens\n")
         } else {
@@ -209,7 +209,7 @@ func test_generation_quality() test_result {
     
     int i = 0
     while i < len(temperatures) {
-        var generated = generate_tokens(50, temperatures[i])
+        generated := generate_tokens(50, temperatures[i])
         if len(generated) == 50 {
             print("✓ Temperature " + string(temperatures[i]) + ": Generated 50 tokens\n")
         } else {
@@ -237,7 +237,7 @@ func test_detokenization() test_result {
     }
     
     []int tokens = [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100]
-    var output = detokenize_output(tokens)
+    output := detokenize_output(tokens)
     
     if len(output) > 0 {
         result.passed = true
@@ -261,7 +261,7 @@ func test_error_handling() test_result {
         execution_time_ms: 0.0,
     }
     
-    var invalid_request1 = inference_request {
+    invalid_request1 := inference_request {
         prompt: "",
         max_tokens: 100,
         temperature: 0.7,
@@ -276,7 +276,7 @@ func test_error_handling() test_result {
     }
     print("✓ Correctly rejected empty prompt\n")
     
-    var invalid_request2 = inference_request {
+    invalid_request2 := inference_request {
         prompt: "Valid prompt",
         max_tokens: 50000,
         temperature: 0.7,
@@ -291,7 +291,7 @@ func test_error_handling() test_result {
     }
     print("✓ Correctly rejected excessive max_tokens\n")
     
-    var invalid_request3 = inference_request {
+    invalid_request3 := inference_request {
         prompt: "Valid prompt",
         max_tokens: 100,
         temperature: 3.0,
@@ -337,7 +337,7 @@ func run_all_production_tests() {
     
     int i = 0
     while i < len(results) {
-        var test = results[i]
+        test := results[i]
         if test.passed {
             print("✅ [PASS] " + test.test_name + ": " + test.message + "\n")
             passed_tests = passed_tests + 1

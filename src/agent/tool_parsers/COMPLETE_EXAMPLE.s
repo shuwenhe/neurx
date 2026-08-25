@@ -10,13 +10,13 @@ func main() {
     println("║           40+ Model-Specific Tool Parsers (S Lang)            ║")
     println("╚════════════════════════════════════════════════════════════════╝\n")
 
-    let registry = get_global_registry()
-    let available = list_available_parsers()
+    registry := get_global_registry()
+    available := list_available_parsers()
 
     println("Available Parsers: " + int_to_string(len(available)) + " models")
     println("─────────────────────────────────────────────────────────────\n")
 
-    let mut i = 0
+    i := 0
     while i < len(available) {
         print("  • " + available[i])
         if (i + 1) % 3 == 0 {
@@ -40,15 +40,15 @@ func test_deepseek_parser() {
     println("TEST 1: DeepSeek V3 Parser")
     println("═════════════════════════════════════════════════════════════════\n")
 
-    let model_output = "The search query is: weather\n<｜tool▁calls▁begin｜>\n<｜tool▁call▁begin｜>\nsearch_web\n<｜tool▁sep｜>\n```json\n{\"query\": \"weather today\"}\n```\n<｜tool▁call▁end｜>\n<｜tool▁calls▁end｜>"
+    model_output := "The search query is: weather\n<｜tool▁calls▁begin｜>\n<｜tool▁call▁begin｜>\nsearch_web\n<｜tool▁sep｜>\n```json\n{\"query\": \"weather today\"}\n```\n<｜tool▁call▁end｜>\n<｜tool▁calls▁end｜>"
 
-    let tools = vec![
+    tools := vec![
         "search_web",
         "get_time",
         "calculator"
     ]
 
-    let result = extract_tool_calls("deepseek-v3", model_output, tools)
+    result := extract_tool_calls("deepseek-v3", model_output, tools)
 
     println("Input model output:\n" + model_output + "\n")
     println("Parser: DeepSeek V3")
@@ -76,15 +76,15 @@ func test_qwen_parser() {
     println("TEST 2: Qwen3 Parser")
     println("═════════════════════════════════════════════════════════════════\n")
 
-    let model_output = "I'll help you with that.\n{\"function\": \"system_info\", \"arguments\": {\"type\": \"cpu\", \"detailed\": true}}\n\nLet me check the details."
+    model_output := "I'll help you with that.\n{\"function\": \"system_info\", \"arguments\": {\"type\": \"cpu\", \"detailed\": true}}\n\nLet me check the details."
 
-    let tools = vec![
+    tools := vec![
         "system_info",
         "file_read",
         "network_test"
     ]
 
-    let result = extract_tool_calls("qwen3-32b", model_output, tools)
+    result := extract_tool_calls("qwen3-32b", model_output, tools)
 
     println("Input model output:\n" + model_output + "\n")
     println("Parser: Qwen3")
@@ -107,15 +107,15 @@ func test_mistral_parser() {
     println("TEST 3: Mistral Parser")
     println("═════════════════════════════════════════════════════════════════\n")
 
-    let model_output = "I'll search for information.\n[TOOL_CALLS]\n[TOOL_CALL]search(query=\"AI trends 2024\")[/TOOL_CALL]\n[/TOOL_CALLS]\n\nHere are the results..."
+    model_output := "I'll search for information.\n[TOOL_CALLS]\n[TOOL_CALL]search(query=\"AI trends 2024\")[/TOOL_CALL]\n[/TOOL_CALLS]\n\nHere are the results..."
 
-    let tools = vec![
+    tools := vec![
         "search",
         "summarize",
         "translate"
     ]
 
-    let result = extract_tool_calls("mistral-large", model_output, tools)
+    result := extract_tool_calls("mistral-large", model_output, tools)
 
     println("Input model output:\n" + model_output + "\n")
     println("Parser: Mistral")
@@ -138,15 +138,15 @@ func test_gemma_parser() {
     println("TEST 4: Gemma4 Parser")
     println("═════════════════════════════════════════════════════════════════\n")
 
-    let model_output = "Let me process your request.\n{\"function_name\": \"calculate\", \"function_arguments\": {\"expression\": \"2 + 2 * 3\"}}\n\nThe calculation is complete."
+    model_output := "Let me process your request.\n{\"function_name\": \"calculate\", \"function_arguments\": {\"expression\": \"2 + 2 * 3\"}}\n\nThe calculation is complete."
 
-    let tools = vec![
+    tools := vec![
         "calculate",
         "plot",
         "solve_equation"
     ]
 
-    let result = extract_tool_calls("gemma-4-9b", model_output, tools)
+    result := extract_tool_calls("gemma-4-9b", model_output, tools)
 
     println("Input model output:\n" + model_output + "\n")
     println("Parser: Gemma4")
@@ -169,16 +169,16 @@ func test_custom_extraction() {
     println("TEST 5: Tool Call Validation & Filtering")
     println("═════════════════════════════════════════════════════════════════\n")
 
-    let model_output = "{\"function\": \"query_database\", \"arguments\": {\"table\": \"users\"}}\n{\"function\": \"invalid_tool\", \"arguments\": {\"param\": \"value\"}}"
+    model_output := "{\"function\": \"query_database\", \"arguments\": {\"table\": \"users\"}}\n{\"function\": \"invalid_tool\", \"arguments\": {\"param\": \"value\"}}"
 
-    let tools = vec![
+    tools := vec![
         "query_database",
         "write_file",
         "send_email"
     ]
 
-    let result = extract_tool_calls("qwen3", model_output, tools)
-    let validated = validate_tool_calls(result.tool_calls, tools)
+    result := extract_tool_calls("qwen3", model_output, tools)
+    validated := validate_tool_calls(result.tool_calls, tools)
 
     println("Input model output:\n" + model_output + "\n")
     println("\nExtracted tool calls: " + int_to_string(len(result.tool_calls)))
@@ -197,8 +197,8 @@ func test_custom_extraction() {
     println("\n\nExtraction utils examples:")
     println("─────────────────────────────────────────────────────────────")
 
-    let test_xml = "<tool_call>{\"name\": \"func1\"}</tool_call><tool_call>{\"name\": \"func2\"}</tool_call>"
-    let extracted = ToolExtractorUtils::extract_xml_elements(test_xml, "tool_call")
+    test_xml := "<tool_call>{\"name\": \"func1\"}</tool_call><tool_call>{\"name\": \"func2\"}</tool_call>"
+    extracted := ToolExtractorUtils::extract_xml_elements(test_xml, "tool_call")
 
     println("XML extraction test:")
     println("  Input: " + test_xml)
@@ -211,14 +211,14 @@ func test_custom_extraction() {
     println("\n\nValidation examples:")
     println("─────────────────────────────────────────────────────────────")
 
-    let test_json = "{\"valid\": true, \"nested\": {\"data\": [1, 2, 3]}}"
-    let is_valid = ToolExtractorUtils::validate_json_structure(test_json)
+    test_json := "{\"valid\": true, \"nested\": {\"data\": [1, 2, 3]}}"
+    is_valid := ToolExtractorUtils::validate_json_structure(test_json)
     println("JSON structure validation:")
     println("  Input: " + test_json)
     println("  Valid: " + bool_to_string(is_valid))
 
-    let invalid_json = "{\"missing\": closing brace"
-    let is_invalid = ToolExtractorUtils::validate_json_structure(invalid_json)
+    invalid_json := "{\"missing\": closing brace"
+    is_invalid := ToolExtractorUtils::validate_json_structure(invalid_json)
     println("\n  Input: " + invalid_json)
     println("  Valid: " + bool_to_string(is_invalid))
 

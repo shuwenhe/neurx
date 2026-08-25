@@ -20,9 +20,9 @@ func main() {
         io.println("English text: data_loader <shard_dir> [max_samples_per_shard] [max_shards]")
         os.exit(1)
     }
-    var string shard_dir = os.args()[1]
-    var max_samples_per_shard: i64 = 500
-    var max_shards: i64 = 10
+    shard_dir := os.args()[1]
+    max_samples_per_shard := 500
+    max_shards := 10
     if len(os.args()) > 2 {
         max_samples_per_shard = strings.to_i64(os.args()[2])
     }
@@ -36,21 +36,21 @@ func main() {
     io.println("English text: " + strings.from_i64(max_samples_per_shard))
     io.println("English text: " + strings.from_i64(max_shards))
     io.println("")
-    var total_samples: i64 = 0
-    var shard_count: i64 = 0
+    total_samples := 0
+    shard_count := 0
     io.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     io.println("loadEnglish textdata")
     io.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    var i: i64 = 0
+    i := 0
     while i < max_shards && i < 10 {
-        var shard_num_str: string = ""
+        shard_num_str := ""
         if i < 10 {
             shard_num_str = "0" + strings.from_i64(i)
         } else {
             shard_num_str = strings.from_i64(i)
         }
-        var shard_file: string = shard_dir + "/training_data-" + shard_num_str + ".jsonl.gz"
-        var samples_in_shard: i64 = 1200 + i * 100
+        shard_file := shard_dir + "/training_data-" + shard_num_str + ".jsonl.gz"
+        samples_in_shard := 1200 + i * 100
         if samples_in_shard > max_samples_per_shard {
             samples_in_shard = max_samples_per_shard
         }

@@ -65,9 +65,9 @@ func muon_set_learning_rate(muon_optimizer opt, float new_lr) muon_optimizer {
 
 func compute_vector_norm([]float v, int size) float {
     float sum_sq = 0.0
-    var i = 0
+    i := 0
     while i < size {
-        let val = v[i]
+        val := v[i]
         sum_sq = sum_sq + (val * val)
         i = i + 1
     }
@@ -81,10 +81,10 @@ func whiten_gradient(
     int param_size,
     float epsilon
 ) {
-    var i = 0
+    i := 0
     while i < param_size {
-        var j = 0
-        let cov_sum = 0.0
+        j := 0
+        cov_sum := 0.0
         while j < param_size {
             cov_sum = cov_sum + grad_cov[i][j] * grad[j]
             j = j + 1
@@ -104,14 +104,14 @@ func muon_update_param(
     int param_size
 ) muon_param_state {
     state.step = state.step + 1
-    let step = float(state.step)
-    let grad_norm = compute_vector_norm(gradients, param_size)
-    let epsilon = 1e-8
-    var i = 0
+    step := float(state.step)
+    grad_norm := compute_vector_norm(gradients, param_size)
+    epsilon := 1e-8
+    i := 0
     while i < param_size {
-        var j = 0
+        j := 0
         while j < param_size {
-            let grad_outer = gradients[i] * gradients[j]
+            grad_outer := gradients[i] * gradients[j]
             state.grad_cov[i][j] = beta * state.grad_cov[i][j] + (1.0 - beta) * grad_outer
             j = j + 1
         }
@@ -120,9 +120,9 @@ func muon_update_param(
     whiten_gradient(gradients, state.grad_cov, state.whitened_grad, param_size, epsilon)
     i = 0
     while i < param_size {
-        let g = state.whitened_grad[i]
+        g := state.whitened_grad[i]
         state.momentum[i] = beta * state.momentum[i] + (1.0 - beta) * g
-        let param_update = state.momentum[i] + c * weight_decay * state.param[i]
+        param_update := state.momentum[i] + c * weight_decay * state.param[i]
         state.param[i] = state.param[i] - learning_rate * param_update
         i = i + 1
     }
@@ -137,7 +137,7 @@ func muon_step(
 ) muon_optimizer {
     opt.current_lr = muon_compute_lr(opt)
     opt.global_step = opt.global_step + 1
-    var p = 0
+    p := 0
     while p < num_params {
         opt.param_states[p] = muon_update_param(
             opt.param_states[p],

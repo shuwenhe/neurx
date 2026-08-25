@@ -29,7 +29,7 @@ struct batch_reward_manager {
 }
 
 func new_batch_reward_manager(batch_reward_manager_config config, *model model) -> batch_reward_manager {
-    let workers: []worker = []
+    workers := []
     for i in 0..config.num_workers {
         workers.push(new_worker(i))
     }
@@ -50,7 +50,7 @@ func (batch_reward_manager* manager) compute_reward_async(
     tensor response,
     fn(f32) callback
 ) {
-    let request = reward_request{
+    request := reward_request{
         request_id: generate_uuid(),
         prompt: prompt,
         response: response,
@@ -71,22 +71,22 @@ func (batch_reward_manager* manager) process_batch() {
         manager.queue_mutex.unlock()
         return
     }
-    let batch_size = min(manager.config.batch_size, manager.request_queue.len())
-    let batch_requests = manager.request_queue[..batch_size]
+    batch_size := min(manager.config.batch_size, manager.request_queue.len())
+    batch_requests := manager.request_queue[..batch_size]
     manager.request_queue = manager.request_queue[batch_size..]
     manager.queue_mutex.unlock()
-    let prompts: []tensor = []
-    let responses: []tensor = []
+    prompts := []
+    responses := []
     for req in batch_requests {
         prompts.push(req.prompt)
         responses.push(req.response)
     }
-    let batched_prompts = stack_and_pad(prompts)
-    let batched_responses = stack_and_pad(responses)
-    let inputs = concat(batched_prompts, batched_responses, dim: 1)
-    let rewards = manager.reward_model.forward(inputs).squeeze(-1)
+    batched_prompts := stack_and_pad(prompts)
+    batched_responses := stack_and_pad(responses)
+    inputs := concat(batched_prompts, batched_responses, dim: 1)
+    rewards := manager.reward_model.forward(inputs).squeeze(-1)
     for i, req in batch_requests {
-        let reward = rewards[i].item()
+        reward := rewards[i].item()
         req.callback(reward)
     }
     manager.total_batches += 1
@@ -147,7 +147,7 @@ func (rate_limited_reward_manager* manager) compute_reward(
         return manager.compute_reward_internal(prompt, response)
     } else {
         manager.rate_limited_count += 1
-        let wait_time = 1000.0 / manager.config.max_requests_per_second
+        wait_time := 1000.0 / manager.config.max_requests_per_second
         sleep_ms(i64(wait_time))
         manager.refill_tokens()
         manager.tokens -= 1.0
@@ -156,9 +156,9 @@ func (rate_limited_reward_manager* manager) compute_reward(
 }
 
 func (rate_limited_reward_manager* manager) refill_tokens() {
-    let now = get_time_ms()
-    let elapsed = f32(now - manager.last_refill_time) / 1000.0
-    let tokens_to_add = elapsed * manager.config.max_requests_per_second
+    now := get_time_ms()
+    elapsed := f32(now - manager.last_refill_time) / 1000.0
+    tokens_to_add := elapsed * manager.config.max_requests_per_second
     manager.tokens = min(
         manager.tokens + tokens_to_add,
         f32(manager.config.burst_size)
@@ -170,8 +170,8 @@ func (rate_limited_reward_manager* manager) compute_reward_internal(
     tensor prompt,
     tensor response
 ) -> f32 {
-    let input = concat(prompt, response)
-    let reward = manager.reward_model.forward(input)
+    input := concat(prompt, response)
+    reward := manager.reward_model.forward(input)
     return reward.item()
 }
 
@@ -204,20 +204,20 @@ func (dapo_reward_manager* manager) compute_reward(
     tensor response,
     string ground_truth
 ) -> (f32, map[string]f32) {
-    let response_text = decode_tokens(response)
-    let format_score = manager.format_checker.check(response_text)
-    let accuracy_score = manager.accuracy_verifier.verify(response_text, ground_truth)
-    let reasoning_score = manager.reasoning_scorer.score(response_text)
-    let total_reward = (
+    response_text := decode_tokens(response)
+    format_score := manager.format_checker.check(response_text)
+    accuracy_score := manager.accuracy_verifier.verify(response_text, ground_truth)
+    reasoning_score := manager.reasoning_scorer.score(response_text)
+    total_reward := (
         manager.config.format_weight * format_score +
         manager.config.accuracy_weight * accuracy_score +
         manager.config.reasoning_weight * reasoning_score
     )
-    let weight_sum = manager.config.format_weight +
+    weight_sum := manager.config.format_weight +
                      manager.config.accuracy_weight +
                      manager.config.reasoning_weight
     total_reward /= weight_sum
-    let breakdown = {
+    breakdown := {
         "format": format_score,
         "accuracy": accuracy_score,
         "reasoning": reasoning_score,
@@ -256,17 +256,17 @@ func (prime_reward_manager* manager) compute_reward(
     tensor response,
     []string steps
 ) -> (f32, []f32) {
-    let step_rewards: []f32 = []
+    step_rewards := []
     for step_text in steps {
-        let step_tokens = encode_text(step_text)
-        let step_input = concat(prompt, step_tokens)
-        let step_reward = manager.step_reward_model.forward(step_input).item()
+        step_tokens := encode_text(step_text)
+        step_input := concat(prompt, step_tokens)
+        step_reward := manager.step_reward_model.forward(step_input).item()
         step_rewards.push(step_reward)
     }
-    let final_input = concat(prompt, response)
-    let final_reward = manager.final_reward_model.forward(final_input).item()
-    let avg_step_reward = compute_mean(step_rewards)
-    let total_reward = (
+    final_input := concat(prompt, response)
+    final_reward := manager.final_reward_model.forward(final_input).item()
+    avg_step_reward := compute_mean(step_rewards)
+    total_reward := (
         manager.config.step_reward_weight * avg_step_reward +
         manager.config.final_reward_weight * final_reward
     )
@@ -274,16 +274,16 @@ func (prime_reward_manager* manager) compute_reward(
 }
 
 func stack_and_pad([]tensor tensors) -> tensor {
-    let max_len = 0
+    max_len := 0
     for t in tensors {
         if t.shape[0] > max_len {
             max_len = t.shape[0]
         }
     }
-    let padded: []tensor = []
+    padded := []
     for t in tensors {
         if t.shape[0] < max_len {
-            let padding = tensor_zeros([max_len - t.shape[0]])
+            padding := tensor_zeros([max_len - t.shape[0]])
             padded.push(concat(t, padding))
         } else {
             padded.push(t)
@@ -307,7 +307,7 @@ func compute_mean([]f32 values) -> f32 {
     if values.len() == 0 {
         return 0.0
     }
-    let sum: f32 = 0.0
+    sum := 0.0
     for v in values {
         sum += v
     }

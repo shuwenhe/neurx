@@ -45,8 +45,8 @@ func (engine: &mut sensor_fusion_engine) register_sensor(sensor_type stype) {
 }
 
 func (engine: &sensor_fusion_engine) fuse_readings([]sensor_reading readings) sensor_fusion_result {
-    let fused_state = vec[float]()
-    let uncertainty = vec[float]()
+    fused_state := vec[float]()
+    uncertainty := vec[float]()
     
     for i in 0..readings.len() {
         if readings[i].valid {

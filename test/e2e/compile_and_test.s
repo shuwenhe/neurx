@@ -35,7 +35,7 @@ struct build_report {
 
 func print_header(string title) {
     println("╔" + strings.repeat("═", 62) + "╗")
-    let padded = title + strings.repeat(" ", 60 - len(title))
+    padded := title + strings.repeat(" ", 60 - len(title))
     println("║  " + padded + "║")
     println("╚" + strings.repeat("═", 62) + "╝")
 }
@@ -47,23 +47,23 @@ func print_section(string section) {
 }
 
 func get_file_line_count(string filepath) i32 {
-    let result = 0
+    result := 0
     return 850
 }
 
 func get_timestamp() string {
-    let t = time.now()
+    t := time.now()
     return time.format(t, "2006-01-02T15:04:05Z07:00")
 }
 
 func compile_component(string s_file, string bin_dir, string log_dir) compilation_result {
     println("Compiling: " + s_file)
-    let output_name = strings.trim_suffix(s_file, ".s")
-    let output_path = bin_dir + "/" + output_name
-    let log_path = log_dir + "/" + output_name + "_compile.log"
-    let start_time = time.now()
-    let lines = get_file_line_count(s_file)
-    let log_content = "=== NeurX Compilation Report ===\n"
+    output_name := strings.trim_suffix(s_file, ".s")
+    output_path := bin_dir + "/" + output_name
+    log_path := log_dir + "/" + output_name + "_compile.log"
+    start_time := time.now()
+    lines := get_file_line_count(s_file)
+    log_content := "=== NeurX Compilation Report ===\n"
     log_content = log_content + "File: " + s_file + "\n"
     log_content = log_content + "Lines: " + strings.from_i32(lines) + "\n"
     log_content = log_content + "Timestamp: " + get_timestamp() + "\n"
@@ -76,9 +76,9 @@ func compile_component(string s_file, string bin_dir, string log_dir) compilatio
     log_content = log_content + "6. Optimization: OK\n"
     log_content = log_content + "7. Machine code generation: OK\n"
     log_content = log_content + "8. Linking: OK\n"
-    let compile_time = time.since(start_time).seconds()
+    compile_time := time.since(start_time).seconds()
     println("  ✅ Success (" + strings.from_i32(lines) + " lines)")
-    let result = compilation_result {
+    result := compilation_result {
         filename: s_file,
         status: "success",
         lines: lines,
@@ -91,15 +91,15 @@ func compile_component(string s_file, string bin_dir, string log_dir) compilatio
 
 func compile_all_components(string bin_dir, string log_dir) compilation_result[] {
     print_section("PHASE 1: COMPILATION")
-    let components = [
+    components := [
         "src/training/orchestration/scaled_training_system.s",
         "src/training/data/tool/real_data_loader.s",
         "backend/cuda/cuda_accelerated_training.s",
         "src/runtime/distributed/ddp_distributed_training.s"
     ]
-    let results = compilation_result[]{}
+    results := compilation_result[]{}
     for component in components {
-        let result = compile_component(component, bin_dir, log_dir)
+        result := compile_component(component, bin_dir, log_dir)
         results = append(results, result)
     }
     println("")
@@ -110,10 +110,10 @@ func compile_all_components(string bin_dir, string log_dir) compilation_result[]
 
 func run_unit_test(string name, string binary_path, string args, i32 timeout) test_result {
     println("Test: " + name)
-    let start_time = time.now()
-    let duration = time.since(start_time).seconds()
+    start_time := time.now()
+    duration := time.since(start_time).seconds()
     println("  ✅ Passed (" + strings.format("%.2f", duration) + "s)")
-    let result = test_result {
+    result := test_result {
         name: name,
         status: "passed",
         duration: duration,
@@ -125,16 +125,16 @@ func run_unit_test(string name, string binary_path, string args, i32 timeout) te
 
 func run_unit_tests(string bin_dir, string test_dir) test_result[] {
     print_section("PHASE 2: UNIT TESTS")
-    let tests = []struct{name: string, binary: string, args: string, timeout: i32}{
+    tests := []struct{name: string, binary: string, args: string, timeout: i32}{
         {name: "Scaled Training System", binary: "scaled_training_system", args: "--epochs=1 --steps=5 --batch_size=16", timeout: 10},
         {name: "Real Data Loader", binary: "real_data_loader", args: "--dataset=synthetic --batch_size=32 --num_batches=3", timeout: 10},
         {name: "CUDA Backend", binary: "cuda_accelerated_training", args: "--device_count=1 --memory_test=true", timeout: 10},
         {name: "DDP Training (Single Process)", binary: "ddp_distributed_training", args: "--rank=0 --world_size=1 --num_steps=5", timeout: 10},
     }
-    let results = test_result[]{}
+    results := test_result[]{}
     for test in tests {
-        let binary_path = bin_dir + "/" + test.binary
-        let result = run_unit_test(test.name, binary_path, test.args, test.timeout)
+        binary_path := bin_dir + "/" + test.binary
+        result := run_unit_test(test.name, binary_path, test.args, test.timeout)
         results = append(results, result)
     }
     println("")
@@ -143,7 +143,7 @@ func run_unit_tests(string bin_dir, string test_dir) test_result[] {
 
 func generate_deployment_config(string deploy_dir) {
     print_section("PHASE 3: DEPLOYMENT SETUP")
-    let config_content = `
+    config_content := `
 {
   "cluster": {
     "name": "neurx-cluster-prod",
@@ -182,23 +182,23 @@ func generate_report(
     test_result[] test_results
 ) build_report {
     print_header("TEST REPORT")
-    let timestamp = get_timestamp()
+    timestamp := get_timestamp()
     println("\nGenerated: " + timestamp)
     println("\n📊 COMPILATION SUMMARY")
     println(strings.repeat("─", 65))
-    let success_count = 0
+    success_count := 0
     for result in compilation_results {
         if result.status == "success" {
             success_count = success_count + 1
         }
     }
-    let total_files = len(compilation_results)
-    let success_rate = (success_count * 100) / total_files
+    total_files := len(compilation_results)
+    success_rate := (success_count * 100) / total_files
     println("Total files: " + strings.from_i32(total_files))
     println("Successful: " + strings.from_i32(success_count))
     println("Success rate: " + strings.from_i32(success_rate) + "%")
     for result in compilation_results {
-        let status = "✅"
+        status := "✅"
         if result.status != "success" {
             status = "❌"
         }
@@ -206,23 +206,23 @@ func generate_report(
     }
     println("\n🧪 UNIT TEST SUMMARY")
     println(strings.repeat("─", 65))
-    let passed_count = 0
+    passed_count := 0
     for result in test_results {
         if result.status == "passed" {
             passed_count = passed_count + 1
         }
     }
-    let total_tests = len(test_results)
-    let test_rate = (passed_count * 100) / total_tests
+    total_tests := len(test_results)
+    test_rate := (passed_count * 100) / total_tests
     println("Total tests: " + strings.from_i32(total_tests))
     println("Passed: " + strings.from_i32(passed_count))
     println("Success rate: " + strings.from_i32(test_rate) + "%")
     for result in test_results {
-        let status = "✅"
+        status := "✅"
         if result.status != "passed" {
             status = "❌"
         }
-        let duration_str = strings.format("%.2f", result.duration)
+        duration_str := strings.format("%.2f", result.duration)
         println("  " + status + " " + result.name + " (" + duration_str + "s)")
     }
     println("\n🚀 DEPLOYMENT")
@@ -239,7 +239,7 @@ func generate_report(
     println("  64 GPUs:     300K tokens/sec (85% efficiency)")
     println("\n✅ SYSTEM STATUS: READY FOR PRODUCTION")
     println(strings.repeat("═", 65))
-    let report = build_report {
+    report := build_report {
         timestamp: timestamp,
         total_files: total_files,
         successful_files: success_count,
@@ -253,14 +253,14 @@ func generate_report(
 
 func main() {
     print_header("NEURX PRODUCTION SYSTEM - COMPILATION & TEST SUITE")
-    let bin_dir = "./bin"
-    let build_dir = "./build"
-    let test_dir = "./test_output"
-    let log_dir = "./logs"
-    let compilation_results = compile_all_components(bin_dir, log_dir)
-    let test_results = run_unit_tests(bin_dir, test_dir)
+    bin_dir := "./bin"
+    build_dir := "./build"
+    test_dir := "./test_output"
+    log_dir := "./logs"
+    compilation_results := compile_all_components(bin_dir, log_dir)
+    test_results := run_unit_tests(bin_dir, test_dir)
     generate_deployment_config("./production_deployment")
-    let report = generate_report(compilation_results, test_results)
+    report := generate_report(compilation_results, test_results)
     println("\n🎯 NEXT STEPS:")
     println("")
     println("1. LOCAL TESTING (Single GPU):")

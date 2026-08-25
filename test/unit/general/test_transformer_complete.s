@@ -73,14 +73,14 @@ func test_layer_norm_forward_basic() {
         epsilon: 1e-6,
         use_bias: true,
     }
-    var ln = new_layer_norm(cfg)
+    ln := new_layer_norm(cfg)
     []float input = []float{cap: 16}
     int i = 0
     while i < 16 {
         input[i] = 1.0 + (i * 1.0) / 16.0
         i = i + 1
     }
-    var output = layer_normalize(ln, input, 2, 1)
+    output := layer_normalize(ln, input, 2, 1)
     float mean = 0.0
     i = 0
     while i < 8 {
@@ -97,7 +97,7 @@ func test_layer_norm_with_gamma_beta() {
         epsilon: 1e-6,
         use_bias: true,
     }
-    var ln = new_layer_norm(cfg)
+    ln := new_layer_norm(cfg)
     ln.gamma = []float{cap: 4}
     ln.beta = []float{cap: 4}
     int i = 0
@@ -107,7 +107,7 @@ func test_layer_norm_with_gamma_beta() {
         i = i + 1
     }
     []float input = allocate_vector(4, 1.0)
-    var output = layer_normalize(ln, input, 1, 1)
+    output := layer_normalize(ln, input, 1, 1)
     assert_equal("layer_norm_gamma", output.normalized[0], 0.5, 0.1)
 }
 
@@ -117,7 +117,7 @@ func test_rms_norm_basic() {
         epsilon: 1e-6,
         use_bias: false,
     }
-    var rn = new_rms_norm(cfg)
+    rn := new_rms_norm(cfg)
 }
 
 func test_absolute_position_encoding() {
@@ -127,8 +127,8 @@ func test_absolute_position_encoding() {
         encoding_type: "absolute",
         rope_base: 10000.0,
     }
-    var pos_enc = new_absolute_position_encoding(cfg)
-    var encoding = get_position_encoding(pos_enc, 0, 4)
+    pos_enc := new_absolute_position_encoding(cfg)
+    encoding := get_position_encoding(pos_enc, 0, 4)
     assert_equal("pos_encoding_size", (0.0 + len(encoding)), 32.0, 1.0)
 }
 
@@ -139,9 +139,9 @@ func test_position_encoding_periodicity() {
         encoding_type: "absolute",
         rope_base: 10000.0,
     }
-    var pos_enc = new_absolute_position_encoding(cfg)
-    var enc1 = get_position_encoding(pos_enc, 0, 1)
-    var enc2 = get_position_encoding(pos_enc, 1, 1)
+    pos_enc := new_absolute_position_encoding(cfg)
+    enc1 := get_position_encoding(pos_enc, 0, 1)
+    enc2 := get_position_encoding(pos_enc, 1, 1)
 }
 
 func test_embed_tokens_basic() {
@@ -156,7 +156,7 @@ func test_embed_tokens_basic() {
         token_ids[i] = i % vocab_size
         i = i + 1
     }
-    var embedded = embed_tokens(embedding, token_ids, batch_size, seq_len, hidden_dim)
+    embedded := embed_tokens(embedding, token_ids, batch_size, seq_len, hidden_dim)
     assert_equal("embed_tokens_shape", (0.0 + len(embedded)), (0.0 + batch_size * seq_len * hidden_dim), 1.0)
 }
 
@@ -175,7 +175,7 @@ func test_embed_tokens_correct_values() {
     []int token_ids = []int{cap: 2}
     token_ids[0] = 0
     token_ids[1] = 1
-    var embedded = embed_tokens(embedding, token_ids, batch_size, seq_len, hidden_dim)
+    embedded := embed_tokens(embedding, token_ids, batch_size, seq_len, hidden_dim)
     i = 0
     while i < hidden_dim {
         assert_equal("embed_token_0", embedded[i], 1.0 + (i * 1.0), 0.01)
@@ -206,7 +206,7 @@ func test_feed_forward_forward_basic() {
         norm2: new_layer_norm(layer_norm_config { hidden_dim: hidden_dim, epsilon: 1e-6, use_bias: true }),
     }
     []float hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.1)
-    var output = feed_forward_forward(layer, hidden, batch_size, seq_len, hidden_dim, intermediate_dim)
+    output := feed_forward_forward(layer, hidden, batch_size, seq_len, hidden_dim, intermediate_dim)
     assert_equal("ffn_output_shape", (0.0 + len(output)), (0.0 + batch_size * seq_len * hidden_dim), 1.0)
 }
 
@@ -220,7 +220,7 @@ func test_cross_entropy_loss_gradient() {
     targets[1] = 2
     targets[2] = 3
     targets[3] = 0
-    var result = compute_cross_entropy_loss_with_gradient(logits, targets, batch_size, seq_len, vocab_size)
+    result := compute_cross_entropy_loss_with_gradient(logits, targets, batch_size, seq_len, vocab_size)
     []float loss = result[0]
     []float grad = result[1]
     assert_equal("loss_shape", (0.0 + len(loss)), (0.0 + batch_size * seq_len), 1.0)
@@ -235,7 +235,7 @@ func test_lm_head_backward() {
     []float grad_logits = allocate_vector(batch_size * seq_len * vocab_size, 0.1)
     []float hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.1)
     []float lm_head_weight = allocate_vector(vocab_size * hidden_dim, 0.1)
-    var result = lm_head_backward(grad_logits, hidden, lm_head_weight, batch_size, seq_len, hidden_dim, vocab_size)
+    result := lm_head_backward(grad_logits, hidden, lm_head_weight, batch_size, seq_len, hidden_dim, vocab_size)
     []float grad_hidden = result[0]
     []float grad_weight = result[1]
     assert_equal("lm_head_grad_hidden_shape", (0.0 + len(grad_hidden)), (0.0 + batch_size * seq_len * hidden_dim), 1.0)
@@ -251,7 +251,7 @@ func test_feed_forward_backward() {
     []float hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.1)
     []float w_up = allocate_vector(intermediate_dim * hidden_dim, 0.1)
     []float w_down = allocate_vector(hidden_dim * intermediate_dim, 0.1)
-    var result = feed_forward_backward(grad_output, hidden, w_up, w_down, batch_size, seq_len, hidden_dim, intermediate_dim)
+    result := feed_forward_backward(grad_output, hidden, w_up, w_down, batch_size, seq_len, hidden_dim, intermediate_dim)
     []float grad_hidden_out = result[0]
     []float grad_w_up = result[1]
     []float grad_w_down = result[2]
@@ -282,7 +282,7 @@ func test_transformer_layer_forward_backward() {
         norm2: new_layer_norm(layer_norm_config { hidden_dim: hidden_dim, epsilon: 1e-6, use_bias: true }),
     }
     []float hidden_in = allocate_vector(batch_size * seq_len * hidden_dim, 0.1)
-    var hidden_out = transformer_layer_forward(layer, hidden_in, batch_size, seq_len, hidden_dim, num_heads, intermediate_dim, false, false)
+    hidden_out := transformer_layer_forward(layer, hidden_in, batch_size, seq_len, hidden_dim, num_heads, intermediate_dim, false, false)
     assert_equal("transformer_layer_output", (0.0 + len(hidden_out)), (0.0 + batch_size * seq_len * hidden_dim), 1.0)
 }
 

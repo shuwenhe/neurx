@@ -24,11 +24,11 @@ struct gpu_config {
 }
 
 func generate_slurm_script(deployment_config config, string output_path) bool {
-    let num_nodes = config.num_nodes
-    let gpus_per_node = config.gpus_per_node
-    let total_tasks = num_nodes * gpus_per_node
-    let batch_size = config.batch_size_per_gpu * total_tasks
-    let slurm_script = `
+    num_nodes := config.num_nodes
+    gpus_per_node := config.gpus_per_node
+    total_tasks := num_nodes * gpus_per_node
+    batch_size := config.batch_size_per_gpu * total_tasks
+    slurm_script := `
 module load backend/cuda/11.8
 module load nccl/2.16.2
 module load gcc/11.2.0
@@ -71,14 +71,14 @@ echo "Training completed!"
 }
 
 func generate_docker_compose(deployment_config config, string output_path) bool {
-    let num_nodes = config.num_nodes
-    let gpus_per_node = config.gpus_per_node
-    let docker_compose = `version: '3.8'
+    num_nodes := config.num_nodes
+    gpus_per_node := config.gpus_per_node
+    docker_compose := `version: '3.8'
 services:
 `
     for i in 0 to num_nodes {
-        let service_name = "training-node-" + strings.from_i32(i)
-        let rank = i * gpus_per_node
+        service_name := "training-node-" + strings.from_i32(i)
+        rank := i * gpus_per_node
         docker_compose = docker_compose + `
   ` + service_name + `:
     image: neurx:latest
@@ -118,10 +118,10 @@ networks:
 }
 
 func generate_kubernetes_deployment(deployment_config config, string output_path) bool {
-    let num_nodes = config.num_nodes
-    let gpus_per_node = config.gpus_per_node
-    let total_replicas = num_nodes
-    let k8s_yaml = `api_version: batch/v1
+    num_nodes := config.num_nodes
+    gpus_per_node := config.gpus_per_node
+    total_replicas := num_nodes
+    k8s_yaml := `api_version: batch/v1
 kind: Job
 metadata:
   name: neurx-training
@@ -251,8 +251,8 @@ spec:
 }
 
 func generate_cluster_config(deployment_config config, string output_path) bool {
-    let total_batch = config.batch_size_per_gpu * config.num_nodes * 4
-    let config_json = `{
+    total_batch := config.batch_size_per_gpu * config.num_nodes * 4
+    config_json := `{
   "cluster": {
     "name": "` + config.cluster_name + `",
     "nodes": ` + strings.from_i32(config.num_nodes) + `,
@@ -301,7 +301,7 @@ func main() {
     println("║  NEURX DEPLOYMENT CONFIGURATION GENERATOR               ║")
     println("╚" + strings.repeat("═", 62) + "╝")
     println("")
-    let config = deployment_config {
+    config := deployment_config {
         cluster_name: "neurx-prod",
         num_nodes: 4,
         gpus_per_node: 4,
@@ -328,22 +328,22 @@ func main() {
     println("🔧 GENERATING DEPLOYMENT ARTIFACTS:")
     println("─" + strings.repeat("─", 61))
     println("")
-    let slurm_ok = generate_slurm_script(config, "deploy/production/script/slurm_submit.sh")
+    slurm_ok := generate_slurm_script(config, "deploy/production/script/slurm_submit.sh")
     if slurm_ok {
         println("  ✅ SLURM job script generated")
     }
     println("")
-    let docker_ok = generate_docker_compose(config, "deploy/production/docker-compose.yml")
+    docker_ok := generate_docker_compose(config, "deploy/production/docker-compose.yml")
     if docker_ok {
         println("  ✅ Docker Compose configuration generated")
     }
     println("")
-    let k8s_ok = generate_kubernetes_deployment(config, "deploy/production/kubernetes_deployment.yaml")
+    k8s_ok := generate_kubernetes_deployment(config, "deploy/production/kubernetes_deployment.yaml")
     if k8s_ok {
         println("  ✅ Kubernetes deployment manifest generated")
     }
     println("")
-    let cluster_ok = generate_cluster_config(config, "deploy/production/config/cluster_config.json")
+    cluster_ok := generate_cluster_config(config, "deploy/production/config/cluster_config.json")
     if cluster_ok {
         println("  ✅ Cluster configuration generated")
     }

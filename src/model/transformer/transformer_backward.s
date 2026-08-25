@@ -325,7 +325,7 @@ func transformer_layer_backward(
     bool pre_norm
 ) [][]float {
     []float grad_input = copy_vector(grad_output)
-    var ffn_grads = feed_forward_backward(
+    ffn_grads := feed_forward_backward(
         grad_output,
         hidden_states_out,
         w_up,
@@ -340,7 +340,7 @@ func transformer_layer_backward(
         grad_input[i] = grad_input[i] + ffn_grads[0][i]
         i = i + 1
     }
-    var attn_grads = attention_backward(
+    attn_grads := attention_backward(
         grad_input,
         hidden_states_in,
         wq,
@@ -382,7 +382,7 @@ func transformer_backward_pass(
 ) backward_pass_output {
     []float grad_hidden = copy_vector(loss_gradient)
     [][]float grad_layer_weights = [][]float{cap: num_layers}
-    var lm_grads = lm_head_backward(
+    lm_grads := lm_head_backward(
         grad_hidden,
         layer_outputs[num_layers - 1],
         lm_head_weight,

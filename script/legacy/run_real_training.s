@@ -3,15 +3,15 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use neurx.pretrain.llm.real_training_loop.{run_training_loop}
 
 func main() {
-    let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    let manifest = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
-    let output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/artifact/checkpoints/llm_training")
-    let batch_size = clamp_int(str_to_int(runtime_env_get("NEURX_PRETRAIN_MICRO_BATCH", runtime_env_get("NEURX_LLM_BATCH_SIZE", "8")), 8), 1, 1024)
-    let seq_len = clamp_int(str_to_int(runtime_env_get("NEURX_PRETRAIN_SEQ_LEN", runtime_env_get("NEURX_LLM_SEQ_LEN", "16")), 16), 1, 4096)
-    let steps = clamp_int(str_to_int(runtime_env_get("NEURX_PRETRAIN_STEPS", runtime_env_get("NEURX_LLM_STEPS", "64")), 64), 1, 1000000)
-    let vocab_size = clamp_int(str_to_int(runtime_env_get("NEURX_LLM_VOCAB_SIZE", "50257"), 50257), 256, 262144)
-    let hidden_dim = clamp_int(str_to_int(runtime_env_get("NEURX_LLM_HIDDEN_SIZE", "4096"), 4096), 256, 32768)
-    let learning_rate = str_to_float(runtime_env_get("NEURX_PRETRAIN_LR", runtime_env_get("NEURX_LLM_LR", "0.00015")))
+    project_root := runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
+    manifest := runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
+    output_dir := runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/artifact/checkpoints/llm_training")
+    batch_size := clamp_int(str_to_int(runtime_env_get("NEURX_PRETRAIN_MICRO_BATCH", runtime_env_get("NEURX_LLM_BATCH_SIZE", "8")), 8), 1, 1024)
+    seq_len := clamp_int(str_to_int(runtime_env_get("NEURX_PRETRAIN_SEQ_LEN", runtime_env_get("NEURX_LLM_SEQ_LEN", "16")), 16), 1, 4096)
+    steps := clamp_int(str_to_int(runtime_env_get("NEURX_PRETRAIN_STEPS", runtime_env_get("NEURX_LLM_STEPS", "64")), 64), 1, 1000000)
+    vocab_size := clamp_int(str_to_int(runtime_env_get("NEURX_LLM_VOCAB_SIZE", "50257"), 50257), 256, 262144)
+    hidden_dim := clamp_int(str_to_int(runtime_env_get("NEURX_LLM_HIDDEN_SIZE", "4096"), 4096), 256, 32768)
+    learning_rate := str_to_float(runtime_env_get("NEURX_PRETRAIN_LR", runtime_env_get("NEURX_LLM_LR", "0.00015")))
     println("═══════════════════════════════════════════════════════════")
     println("🚀 NeurX Real Training entry")
     println("═══════════════════════════════════════════════════════════")
@@ -30,7 +30,7 @@ func main() {
         println("Missing manifest: " + manifest)
         return 1
     }
-    let final_state = run_training_loop(manifest, steps, batch_size, seq_len, vocab_size, hidden_dim, learning_rate)
+    final_state := run_training_loop(manifest, steps, batch_size, seq_len, vocab_size, hidden_dim, learning_rate)
     println("")
     println("═══════════════════════════════════════════════════════════")
     println("Training finished")

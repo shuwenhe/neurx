@@ -65,14 +65,14 @@ func get_base_model() model_config {
 
 func benchmark_single_gpu(model_config model) gpu_benchmark {
     println("Benchmarking: Single GPU (A100)")
-    let forward_time = 6.0
-    let backward_time = 12.0
-    let optimizer_time = 2.0
-    let step_time = forward_time + backward_time + optimizer_time
-    let tokens_per_step = model.batch_size * model.seq_length
-    let tokens_per_sec = (tokens_per_step * 1000.0) / step_time
-    let memory_usage = 2.0 + 0.4
-    let benchmark = gpu_benchmark {
+    forward_time := 6.0
+    backward_time := 12.0
+    optimizer_time := 2.0
+    step_time := forward_time + backward_time + optimizer_time
+    tokens_per_step := model.batch_size * model.seq_length
+    tokens_per_sec := (tokens_per_step * 1000.0) / step_time
+    memory_usage := 2.0 + 0.4
+    benchmark := gpu_benchmark {
         gpu_count: 1,
         batch_size: model.batch_size,
         tokens_per_sec: tokens_per_sec,
@@ -86,21 +86,21 @@ func benchmark_single_gpu(model_config model) gpu_benchmark {
 
 func benchmark_multi_gpu(model_config model, i32 gpu_count) gpu_benchmark {
     println("Benchmarking: " + strings.from_i32(gpu_count) + " GPUs (DDP)")
-    let forward_time = 6.0
-    let backward_time = 12.0
-    let optimizer_time = 2.0
-    let base_comm = 0.58
-    let comm_overhead = (base_comm * math.log(math.from_i32(gpu_count)) * 1.5)
-    let step_time = forward_time + backward_time + optimizer_time + comm_overhead
-    let single_gpu_throughput = (model.batch_size * model.seq_length * 1000.0) / (forward_time + backward_time + optimizer_time)
-    let multi_gpu_throughput = (model.batch_size * model.seq_length * math.from_i32(gpu_count) * 1000.0) / step_time
-    let efficiency = (multi_gpu_throughput / (single_gpu_throughput * math.from_i32(gpu_count))) * 100.0
-    let adjusted_efficiency = efficiency
+    forward_time := 6.0
+    backward_time := 12.0
+    optimizer_time := 2.0
+    base_comm := 0.58
+    comm_overhead := (base_comm * math.log(math.from_i32(gpu_count)) * 1.5)
+    step_time := forward_time + backward_time + optimizer_time + comm_overhead
+    single_gpu_throughput := (model.batch_size * model.seq_length * 1000.0) / (forward_time + backward_time + optimizer_time)
+    multi_gpu_throughput := (model.batch_size * model.seq_length * math.from_i32(gpu_count) * 1000.0) / step_time
+    efficiency := (multi_gpu_throughput / (single_gpu_throughput * math.from_i32(gpu_count))) * 100.0
+    adjusted_efficiency := efficiency
     if gpu_count > 16 {
         adjusted_efficiency = efficiency * (100.0 / 105.0)
     }
-    let memory_usage = 2.0 + 0.4
-    let benchmark = gpu_benchmark {
+    memory_usage := 2.0 + 0.4
+    benchmark := gpu_benchmark {
         gpu_count: gpu_count,
         batch_size: model.batch_size * gpu_count,
         tokens_per_sec: (model.batch_size * model.seq_length * 1000.0) / (forward_time + backward_time + optimizer_time),
@@ -126,28 +126,28 @@ func benchmark_model(model_config model) performance_report {
     println("  FF dimension: " + strings.from_i32(model.ff_dim))
     println("  Total parameters: " + format_large_number(model.num_params))
     println("")
-    let benchmarks = gpu_benchmark[]{}
-    let gpu_counts = [1, 4, 16, 64]
+    benchmarks := gpu_benchmark[]{}
+    gpu_counts := [1, 4, 16, 64]
     for count in gpu_counts {
-        let benchmark = benchmark_multi_gpu(model, count)
+        benchmark := benchmark_multi_gpu(model, count)
         benchmarks = append(benchmarks, benchmark)
-        let efficiency_str = strings.format("%.1f", benchmark.efficiency)
-        let throughput_str = strings.format("%.0f", benchmark.throughput)
+        efficiency_str := strings.format("%.1f", benchmark.efficiency)
+        throughput_str := strings.format("%.0f", benchmark.throughput)
         println("  " + strings.from_i32(count) + " GPU(s): " + throughput_str + " tokens/sec (" + efficiency_str + "% efficiency)")
     }
     println("")
-    let peak_throughput = 0.0
+    peak_throughput := 0.0
     for benchmark in benchmarks {
         if benchmark.throughput > peak_throughput {
             peak_throughput = benchmark.throughput
         }
     }
-    let total_efficiency = 0.0
+    total_efficiency := 0.0
     for benchmark in benchmarks {
         total_efficiency = total_efficiency + benchmark.efficiency
     }
-    let avg_efficiency = total_efficiency / math.from_i32(len(benchmarks))
-    let report = performance_report {
+    avg_efficiency := total_efficiency / math.from_i32(len(benchmarks))
+    report := performance_report {
         timestamp: time.format(time.now(), "2006-01-02T15:04:05Z07:00"),
         model: model,
         benchmarks: benchmarks,
@@ -194,10 +194,10 @@ func print_scaling_analysis(performance_report report) {
     println("GPU Count │ Throughput    │ Efficiency │ Comm Overhead")
     println("─" + strings.repeat("─", 60))
     for benchmark in report.benchmarks {
-        let gpu_str = strings.from_i32(benchmark.gpu_count) + " GPU" + (if benchmark.gpu_count > 1 then "s" else "")
-        let throughput_str = strings.format("%.0f", benchmark.throughput) + " toks/s"
-        let efficiency_str = strings.format("%.1f", benchmark.efficiency) + "%"
-        let comm_str = strings.format("%.1f", benchmark.communication_overhead) + " ms"
+        gpu_str := strings.from_i32(benchmark.gpu_count) + " GPU" + (if benchmark.gpu_count > 1 then "s" else "")
+        throughput_str := strings.format("%.0f", benchmark.throughput) + " toks/s"
+        efficiency_str := strings.format("%.1f", benchmark.efficiency) + "%"
+        comm_str := strings.format("%.1f", benchmark.communication_overhead) + " ms"
         println(gpu_str + strings.repeat(" ", 10 - len(gpu_str)) + "│ " + throughput_str + strings.repeat(" ", 14 - len(throughput_str)) + "│ " + efficiency_str + strings.repeat(" ", 11 - len(efficiency_str)) + "│ " + comm_str)
     }
     println("")
@@ -244,8 +244,8 @@ func main() {
     println("║  NEURX PRODUCTION SYSTEM - PERFORMANCE BENCHMARKING   ║")
     println("╚" + strings.repeat("═", 61) + "╝")
     println("")
-    let scaled_model = get_scaled_model()
-    let scaled_report = benchmark_model(scaled_model)
+    scaled_model := get_scaled_model()
+    scaled_report := benchmark_model(scaled_model)
     print_scaling_analysis(scaled_report)
     validate_performance_targets()
     println("═" + strings.repeat("═", 61))

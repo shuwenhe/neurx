@@ -110,7 +110,7 @@ func (TokenCache* c) evict_one() {
         return
     }
 
-    var key_to_evict string
+    key_to_evict := string()
     var min_value i32 = i32(2147483647)
 
     if c.eviction_policy == "lru" {

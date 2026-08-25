@@ -108,7 +108,7 @@ func (multimodal_cache* cache) evict_one() string {
         return ""
     }
 
-    var evict_key string
+    evict_key := string()
 
     if cache.policy == policy_lru {
         min_time := int64(9223372036854775807)

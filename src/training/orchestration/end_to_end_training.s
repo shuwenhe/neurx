@@ -493,7 +493,7 @@ func verify_training_progress([]float64 losses) {
 func is_nan(float64 x) bool {
     x != x
 }
-var random_seed: int = 42
+random_seed := 42
 
 func seed_rng(int s) {
     random_seed = s

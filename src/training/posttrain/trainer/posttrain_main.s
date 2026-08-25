@@ -470,7 +470,7 @@ func run_posttrain_lora_sft() int {
     string config_json = build_adapter_config_json_simple(
         model_path, rank, 16.0, 0.05, 896, 48
     )
-    var config_result = write_file_simple(
+    config_result := write_file_simple(
         output_dir + "/adapter_config.json",
         config_json
     )
@@ -483,7 +483,7 @@ func run_posttrain_lora_sft() int {
         rank, 16.0, 0.0005, 0.05,
         1, epochs, 48
     )
-    var state_result = write_file_simple(
+    state_result := write_file_simple(
         output_dir + "/training_state.json",
         state_json
     )

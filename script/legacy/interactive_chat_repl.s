@@ -181,8 +181,8 @@ func main() {
     println("║   NeurX-1.3 Inference & Chat System (S Lang)      ║")
     println("╚════════════════════════════════════════════════════╝")
     println("")
-    let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    let checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/checkpoint/NeurX-1.3")
+    project_root := runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
+    checkpoint_dir := runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/checkpoint/NeurX-1.3")
     println("Phase 1: Loading model...")
     inference_context ctx = initialize_inference_context(checkpoint_dir)
     if ctx.model_loaded {

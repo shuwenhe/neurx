@@ -25,7 +25,7 @@ func compile_neurx_code(compile_config config) (bool, ir_module) {
     println("║ STAGE 1: COMPILE & IR GENERATION                     ║")
     println("╚════════════════════════════════════════════════════════╝")
     println("")
-    let start_time = time.now()
+    start_time := time.now()
     println("📋 Compilation config:")
     println("   Source: " + config.source_file)
     println("   Target: " + config.output_binary)
@@ -52,7 +52,7 @@ func compile_neurx_code(compile_config config) (bool, ir_module) {
     println("   ✓ Function inlining: 12 functions inlined")
     println("   ✓ Loop unrolling: 5 loops optimized")
     println("")
-    var ir: ir_module
+    ir := ir_module
     ir.name = "train_forward_backward"
     ir.version = "1.0"
     ir.optimization_level = config.optimization_level
@@ -65,7 +65,7 @@ func compile_neurx_code(compile_config config) (bool, ir_module) {
     ir.instructions = append(ir.instructions, "compute_loss()")
     ir.instructions = append(ir.instructions, "backward_pass()")
     ir.instructions = append(ir.instructions, "adamw_update()")
-    let compile_time = time.since(start_time)
+    compile_time := time.since(start_time)
     println("✅ Compilation successful!")
     println("   Binary: " + config.output_binary)
     println("   Size: 2.34 MB")
@@ -94,11 +94,11 @@ func bundle_training_data(i32 batch_size, i32 seq_len, i32 vocab_size) data_bund
     println("╚════════════════════════════════════════════════════════╝")
     println("")
     println("📦 Preparing Training Data:")
-    var input_data: []f64 = []f64{}
+    input_data := []f64{}
     for i := 0; i < batch_size * seq_len; i = i + 1 {
         input_data = append(input_data, f64((i * 7 + 13) % vocab_size))
     }
-    var input_tensor: tensor_2
+    input_tensor := tensor_2
     input_tensor.data = input_data
     input_tensor.shape = []i32{batch_size, seq_len}
     input_tensor.dtype = "INT32"
@@ -107,11 +107,11 @@ func bundle_training_data(i32 batch_size, i32 seq_len, i32 vocab_size) data_bund
     println("   Input Size: " + strings.format_size(i64(len(input_data)) * 4) + " bytes")
     println("   Input Device: GPU (CUDA)")
     println("")
-    var target_data: []f64 = []f64{}
+    target_data := []f64{}
     for i := 0; i < batch_size * seq_len; i = i + 1 {
         target_data = append(target_data, f64(((i + 1) * 7 + 13) % vocab_size))
     }
-    var target_tensor: tensor_2
+    target_tensor := tensor_2
     target_tensor.data = target_data
     target_tensor.shape = []i32{batch_size, seq_len}
     target_tensor.dtype = "INT32"
@@ -120,7 +120,7 @@ func bundle_training_data(i32 batch_size, i32 seq_len, i32 vocab_size) data_bund
     println("   Target Size: " + strings.format_size(i64(len(target_data)) * 4) + " bytes")
     println("   Target Device: GPU (CUDA)")
     println("")
-    var bundle: data_bundle
+    bundle := data_bundle
     bundle.batch_id = 0
     bundle.input_tensor = input_tensor
     bundle.target_tensor = target_tensor
@@ -163,10 +163,10 @@ func init_runner(model_config config, data_bundle batch, f64 learning_rate) runn
     println("   Num Heads: " + strings.from_i32(config.num_heads))
     println("   FFN Dimension: " + strings.from_i32(config.ffn_dim))
     println("")
-    let total_params = config.vocab_size * config.hidden_dim +
+    total_params := config.vocab_size * config.hidden_dim +
                        config.num_layers * config.hidden_dim * config.num_heads +
                        config.num_layers * config.ffn_dim * config.hidden_dim
-    var model_params: tensor_2
+    model_params := tensor_2
     model_params.shape = []i32{total_params}
     model_params.dtype = "FP32"
     model_params.device = "CUDA"
@@ -175,14 +175,14 @@ func init_runner(model_config config, data_bundle batch, f64 learning_rate) runn
     println("   Total Params: " + strings.format_large_number(i64(total_params)))
     println("   Parameter Memory: " + strings.format_size(i64(total_params) * 4) + " MB")
     println("")
-    var optimizer_state: map[string]tensor_2 = map[string]tensor_2{}
-    var m_tensor: tensor_2
+    optimizer_state := map[string]tensor_2{}
+    m_tensor := tensor_2
     m_tensor.shape = model_params.shape
     m_tensor.dtype = "FP32"
     m_tensor.device = "CUDA"
     m_tensor.data = []f64{}
     optimizer_state["m"] = m_tensor
-    var v_tensor: tensor_2
+    v_tensor := tensor_2
     v_tensor.shape = model_params.shape
     v_tensor.dtype = "FP32"
     v_tensor.device = "CUDA"
@@ -193,13 +193,13 @@ func init_runner(model_config config, data_bundle batch, f64 learning_rate) runn
     println("   v (variance): " + strings.format_size(i64(total_params) * 4) + " MB")
     println("   Total optimizer_2 Memory: " + strings.format_size(i64(total_params) * 8) + " MB")
     println("")
-    var state: training_state
+    state := training_state
     state.step = 0
     state.model_params = model_params
     state.optimizer_state = optimizer_state
     state.learning_rate = learning_rate
     state.warmup_steps = 10
-    var runner: runner
+    runner := runner
     runner.config = config
     runner.state = state
     runner.batch = batch
@@ -220,7 +220,7 @@ func forward_pass(runner runner) (forward_output, f64) {
     println("║ STAGE 4: FORWARD PASS                                 ║")
     println("╚════════════════════════════════════════════════════════╝")
     println("")
-    let start_time = time.now()
+    start_time := time.now()
     println("🔄 Forward Pass Execution:")
     println("")
     println("   1️⃣  embedding Layer")
@@ -244,8 +244,8 @@ func forward_pass(runner runner) (forward_output, f64) {
                    strings.from_i32(runner.config.vocab_size) + "]")
     println("      ✓ Complete")
     println("")
-    var output: forward_output
-    var logits: tensor_2
+    output := forward_output
+    logits := tensor_2
     logits.shape = []i32{runner.batch.input_tensor.shape[0], runner.batch.input_tensor.shape[1], runner.config.vocab_size}
     logits.dtype = "FP32"
     logits.device = "CUDA"
@@ -255,7 +255,7 @@ func forward_pass(runner runner) (forward_output, f64) {
     }
     output.logits = logits
     output.cache = map[string]tensor_2{}
-    let forward_time = time.since(start_time)
+    forward_time := time.since(start_time)
     println("✅ Forward Pass Complete")
     println("   Output Logits Shape: [32, 2048, 32000]")
     println("   Output Memory: ~8.19 GB")
@@ -277,7 +277,7 @@ func compute_loss(forward_output output, tensor_2 targets) (loss_metrics, f64) {
     println("║ STAGE 5: LOSS COMPUTATION                             ║")
     println("╚════════════════════════════════════════════════════════╝")
     println("")
-    let start_time = time.now()
+    start_time := time.now()
     println("📉 Loss Computation:")
     println("")
     println("   Cross-Entropy Loss Calculation")
@@ -285,14 +285,14 @@ func compute_loss(forward_output output, tensor_2 targets) (loss_metrics, f64) {
     println("   - Log probability of target tokens")
     println("   - Reduce mean over sequence")
     println("")
-    let avg_logit = 0.5
-    let total_loss = -math.log(avg_logit + 0.01)
-    var metrics: loss_metrics
+    avg_logit := 0.5
+    total_loss := -math.log(avg_logit + 0.01)
+    metrics := loss_metrics
     metrics.total_loss = total_loss
     metrics.avg_logit = avg_logit
     metrics.max_logit = 2.34
     metrics.min_logit = -1.56
-    let loss_time = time.since(start_time)
+    loss_time := time.since(start_time)
     println("   Statistics:")
     println("   - Total Loss: " + strings.format_float(metrics.total_loss, 4))
     println("   - Avg Logit: " + strings.format_float(metrics.avg_logit, 4))
@@ -319,7 +319,7 @@ func backward_pass(runner runner, forward_output output, f64 loss) (gradient_inf
     println("║ STAGE 6: BACKWARD PASS                                ║")
     println("╚════════════════════════════════════════════════════════╝")
     println("")
-    let start_time = time.now()
+    start_time := time.now()
     println("🔙 Backward Pass Execution:")
     println("")
     println("   Gradient Computation:")
@@ -328,16 +328,16 @@ func backward_pass(runner runner, forward_output output, f64 loss) (gradient_inf
     println("   3. Through embedding layer")
     println("   4. Gradient accumulation for all parameters")
     println("")
-    let num_params = runner.state.model_params.shape[0]
-    let total_norm_sq = 0.234
-    let total_norm = math.sqrt(total_norm_sq)
-    var grad_info: gradient_info
+    num_params := runner.state.model_params.shape[0]
+    total_norm_sq := 0.234
+    total_norm := math.sqrt(total_norm_sq)
+    grad_info := gradient_info
     grad_info.num_gradients = num_params
     grad_info.total_norm = total_norm
     grad_info.max_grad = 0.045
     grad_info.min_grad = -0.038
     grad_info.grad_overflow = false
-    let backward_time = time.since(start_time)
+    backward_time := time.since(start_time)
     println("   Gradient Statistics:")
     println("   - Total Parameters: " + strings.format_large_number(i64(grad_info.num_gradients)))
     println("   - Gradient Norm: " + strings.format_float(grad_info.total_norm, 4))
@@ -345,8 +345,8 @@ func backward_pass(runner runner, forward_output output, f64 loss) (gradient_inf
     println("   - Min Gradient: " + strings.format_float(grad_info.min_grad, 4))
     println("   - Overflow Detected: No")
     println("")
-    let max_grad_norm = 1.0
-    let grad_norm_after_clip = if grad_info.total_norm > max_grad_norm {
+    max_grad_norm := 1.0
+    grad_norm_after_clip := if grad_info.total_norm > max_grad_norm {
         max_grad_norm
     } else {
         grad_info.total_norm
@@ -376,11 +376,11 @@ func adamw_optimizer_step(runner runner, gradient_info grad_info, i32 step) (opt
     println("║ STAGE 7: OPTIMIZER UPDATE (adam_w)                     ║")
     println("╚════════════════════════════════════════════════════════╝")
     println("")
-    let start_time = time.now()
+    start_time := time.now()
     println("⚙️ adam_w optimizer_2 Step:")
     println("")
-    let warmup_steps = runner.state.warmup_steps
-    var lr = runner.state.learning_rate
+    warmup_steps := runner.state.warmup_steps
+    lr := runner.state.learning_rate
     if step < warmup_steps {
         lr = runner.state.learning_rate * f64(step) / f64(warmup_steps)
     }
@@ -396,10 +396,10 @@ func adamw_optimizer_step(runner runner, gradient_info grad_info, i32 step) (opt
         println("   - Adjusted LR: " + strings.format_float(lr, 6))
     }
     println("")
-    let beta1 = 0.9
-    let beta2 = 0.999
-    let epsilon = 1e-8
-    let weight_decay = 0.01
+    beta1 := 0.9
+    beta2 := 0.999
+    epsilon := 1e-8
+    weight_decay := 0.01
     println("   adam_w Hyperparameters:")
     println("   - β₁ (momentum): " + strings.format_float(beta1, 3))
     println("   - β₂ (variance): " + strings.format_float(beta2, 5))
@@ -414,24 +414,24 @@ func adamw_optimizer_step(runner runner, gradient_info grad_info, i32 step) (opt
     println("   4. v̂_t = v_t / (1 - β₂ᵗ)")
     println("   5. θ_t = θ_{t-1} - α * (m̂_t / (√v̂_t + ε) + λ * θ_{t-1})")
     println("")
-    let bias_correction1 = 1.0 - math.pow(beta1, f64(step + 1))
-    let bias_correction2 = 1.0 - math.pow(beta2, f64(step + 1))
+    bias_correction1 := 1.0 - math.pow(beta1, f64(step + 1))
+    bias_correction2 := 1.0 - math.pow(beta2, f64(step + 1))
     println("   Bias Correction:")
     println("   - m̂_t correction factor: " + strings.format_float(bias_correction1, 4))
     println("   - v̂_t correction factor: " + strings.format_float(bias_correction2, 4))
     println("")
-    let param_update_norm = lr * grad_info.total_norm * 0.01
+    param_update_norm := lr * grad_info.total_norm * 0.01
     println("   Update Statistics:")
     println("   - Estimated Update Norm: " + strings.format_float(param_update_norm, 4))
     println("   - Gradient Norm: " + strings.format_float(grad_info.total_norm, 4))
     println("   - Weight Decay Applied: Yes")
     println("")
-    var update: optimizer_update
+    update := optimizer_update
     update.step_count = step + 1
     update.learning_rate_adjusted = lr
     update.param_update_norm = param_update_norm
     update.weight_decay_applied = true
-    let optimizer_time = time.since(start_time)
+    optimizer_time := time.since(start_time)
     println("✅ optimizer_2 Update Complete")
     println("   Step Count: " + strings.from_i32(update.step_count))
     println("   Learning Rate: " + strings.format_float(update.learning_rate_adjusted, 6))
@@ -463,7 +463,7 @@ func exit_and_summarize(
     f64 backward_time,
     f64 optimizer_time
 ) training_step {
-    let total_time = compile_time + forward_time + loss_time + backward_time + optimizer_time
+    total_time := compile_time + forward_time + loss_time + backward_time + optimizer_time
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 8: EXIT & SUMMARY                               ║")
     println("╚════════════════════════════════════════════════════════╝")
@@ -493,7 +493,7 @@ func exit_and_summarize(
     println("   Compile → IR → Bundle → runner → Forward → Loss → Backward → adam_w → Exit")
     println("   ✓ SUCCESS")
     println("")
-    var step: training_step
+    step := training_step
     step.step_id = step_id
     step.total_time = total_time
     step.compile_time = compile_time
@@ -513,31 +513,31 @@ func main() {
     println("║   Backward → adam_w → Exit                            ║")
     println("╚════════════════════════════════════════════════════════╝")
     println("")
-    let pipeline_start = time.now()
-    var compile_config: compile_config
+    pipeline_start := time.now()
+    compile_config := compile_config
     compile_config.source_file = "workflow/llm/train_and_infer.s"
     compile_config.output_binary = "bin/train_and_infer"
     compile_config.optimization_level = 2
     compile_config.debug_mode = false
-    let (compile_success, ir_module) = compile_neurx_code(compile_config)
+    (compile_success, ir_module) := compile_neurx_code(compile_config)
     if !compile_success {
         println("❌ Compilation failed!")
         return
     }
-    let data_bundle = bundle_training_data(32, 2048, 32000)
-    var model_config: model_config
+    data_bundle := bundle_training_data(32, 2048, 32000)
+    model_config := model_config
     model_config.hidden_dim = 256
     model_config.num_layers = 6
     model_config.num_heads = 8
     model_config.ffn_dim = 1024
     model_config.vocab_size = 32000
-    let runner = init_runner(model_config, data_bundle, 0.0005)
-    let (forward_output, forward_time) = forward_pass(runner)
-    let (loss_metrics, loss_time) = compute_loss(forward_output, data_bundle.target_tensor)
-    let (grad_info, backward_time) = backward_pass(runner, forward_output, loss_metrics.total_loss)
-    let (optimizer_update, optimizer_time) = adamw_optimizer_step(runner, grad_info, 0)
-    let compile_time = 0.5
-    let training_step = exit_and_summarize(
+    runner := init_runner(model_config, data_bundle, 0.0005)
+    (forward_output, forward_time) := forward_pass(runner)
+    (loss_metrics, loss_time) := compute_loss(forward_output, data_bundle.target_tensor)
+    (grad_info, backward_time) := backward_pass(runner, forward_output, loss_metrics.total_loss)
+    (optimizer_update, optimizer_time) := adamw_optimizer_step(runner, grad_info, 0)
+    compile_time := 0.5
+    training_step := exit_and_summarize(
         0,
         loss_metrics.total_loss,
         optimizer_update.learning_rate_adjusted,
@@ -547,7 +547,7 @@ func main() {
         backward_time,
         optimizer_time
     )
-    let pipeline_time = time.since(pipeline_start)
+    pipeline_time := time.since(pipeline_start)
     println("═════════════════════════════════════════════════════════")
     println("COMPLETE PIPELINE SUMMARY")
     println("═════════════════════════════════════════════════════════")

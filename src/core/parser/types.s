@@ -185,8 +185,8 @@ func create_string_value(s: string) ParsedValue {
 }
 
 func create_number_value(n: float) ParsedValue {
-    let str_val = ""
-    let int_n = int(n)
+    str_val := ""
+    int_n := int(n)
     if float(int_n) == n {
         str_val = string(int_n)
     } else {
@@ -205,7 +205,7 @@ func create_number_value(n: float) ParsedValue {
 }
 
 func create_bool_value(b: bool) ParsedValue {
-    let str_val = if b { "true" } else { "false" }
+    str_val := if b { "true" } else { "false" }
     return ParsedValue{
         type: 1,
         string_value: str_val,
@@ -320,7 +320,7 @@ func (v: ParsedValue) is_object() bool {
 }
 
 func create_parser_stats() ParserStats {
-    let formats = map[string]int{}
+    formats := map[string]int{}
     return ParserStats{
         total_parses: 0,
         successful_parses: 0,

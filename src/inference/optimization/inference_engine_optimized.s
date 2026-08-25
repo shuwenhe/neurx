@@ -60,7 +60,7 @@ func (optimized_inference_engine* engine) forward_with_attention(
         engine.attn_manager.set_method("flash")
     }
 
-    var hidden := embeddings
+    hidden := = embeddings
 
     layer_idx := 0
     for layer_idx < engine.model_config.num_layers {
@@ -113,7 +113,7 @@ func (optimized_inference_engine* engine) decode(
     engine.current_seq_pos = engine.current_seq_pos + 1
 
     []float token_float = []float{last_embedding[0]}
-    var result = engine.forward_with_attention(token_float, last_embedding)
+    result := engine.forward_with_attention(token_float, last_embedding)
 
     return result
 }

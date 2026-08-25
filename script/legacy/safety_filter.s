@@ -152,7 +152,7 @@ func (safety_filter* filter) check_safety(text string) safety_check_result {
     }
     toxicity := filter.calculate_toxicity_score(text)
     result.toxicity_score = toxicity
-    var safety_score float64
+    safety_score := float64()
     var categories []string
     if filter.config.use_model_based {
         safety_score, categories = filter.model_based_safety_check(text)

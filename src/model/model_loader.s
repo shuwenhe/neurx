@@ -49,7 +49,7 @@ func create_llama_config() model_config {
 }
 
 func create_llama2_config() model_config {
-    let mut config = create_llama_config()
+    config := create_llama_config()
     config.max_position_embeddings = 4096
     config
 }
@@ -72,7 +72,7 @@ func create_qwen_config() model_config {
 }
 
 func create_qwen2_config() model_config {
-    let mut config = create_qwen_config()
+    config := create_qwen_config()
     config.num_hidden_layers = 24
     config.hidden_size = 1024
     config.intermediate_size = 2816
@@ -352,7 +352,7 @@ func (model_config* config) is_valid() result[(), model_loader_error] {
 }
 
 func load_model_architecture(model_name: string) result[model_architecture, model_loader_error] {
-    let config = create_model_config(model_name)?
+    config := create_model_config(model_name)?
     config.is_valid()?
 
     (model_architecture {
@@ -363,16 +363,16 @@ func load_model_architecture(model_name: string) result[model_architecture, mode
 }
 
 func main() {
-    let model_names = vec[string]()
+    model_names := vec[string]()
     model_names.push("llama")
     model_names.push("qwen")
     model_names.push("deepseek")
     model_names.push("mistral")
     model_names.push("phi")
 
-    let i = 0
+    i := 0
     while i < model_names.len() {
-        let name = model_names[i]
+        name := model_names[i]
         switch load_model_architecture(name) {
             (arch, "") : {
                 ""

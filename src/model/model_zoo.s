@@ -43,7 +43,7 @@ func create_llama_7b() model_spec {
 }
 
 func create_llama_13b() model_spec {
-    let mut spec = create_llama_7b()
+    spec := create_llama_7b()
     spec.name = "llama-13b"
     spec.hidden_size = 5120
     spec.num_hidden_layers = 40
@@ -54,7 +54,7 @@ func create_llama_13b() model_spec {
 }
 
 func create_llama2_7b() model_spec {
-    let mut spec = create_llama_7b()
+    spec := create_llama_7b()
     spec.name = "llama2-7b"
     spec.model_type = "llama2"
     spec.max_position_embeddings = 4096
@@ -62,7 +62,7 @@ func create_llama2_7b() model_spec {
 }
 
 func create_llama2_13b() model_spec {
-    let mut spec = create_llama2_7b()
+    spec := create_llama2_7b()
     spec.name = "llama2-13b"
     spec.hidden_size = 5120
     spec.num_hidden_layers = 40
@@ -115,7 +115,7 @@ func create_qwen_7b() model_spec {
 }
 
 func create_qwen_14b() model_spec {
-    let mut spec = create_qwen_7b()
+    spec := create_qwen_7b()
     spec.name = "qwen-14b"
     spec.hidden_size = 5120
     spec.num_hidden_layers = 40
@@ -356,7 +356,7 @@ func create_phi3_mini() model_spec {
 }
 
 func create_phi3_small() model_spec {
-    let mut spec = create_phi3_mini()
+    spec := create_phi3_mini()
     spec.name = "phi3-small"
     spec.hidden_size = 3840
     spec.num_hidden_layers = 36
@@ -642,7 +642,7 @@ func get_all_models() []model_spec {
 }
 
 func get_model_by_name(name: string) option[model_spec] {
-    let models = get_all_models()
+    models := get_all_models()
     for model in models.iter() {
         if model.name == name {
             return some(model)
@@ -652,8 +652,8 @@ func get_model_by_name(name: string) option[model_spec] {
 }
 
 func get_model_by_type(model_type: string) []model_spec {
-    let models = get_all_models()
-    let mut result = vec[]()
+    models := get_all_models()
+    result := vec[]()
     for model in models.iter() {
         if model.model_type == model_type {
             result.push(model)
@@ -663,8 +663,8 @@ func get_model_by_type(model_type: string) []model_spec {
 }
 
 func list_all_model_names() []string {
-    let models = get_all_models()
-    let mut names = vec[]()
+    models := get_all_models()
+    names := vec[]()
     for model in models.iter() {
         names.push(model.name)
     }
@@ -675,27 +675,27 @@ func main() {
     println("🚀 Model Zoo - 30+ 种模型配置库")
     println("==================================")
 
-    let models = get_all_models()
+    models := get_all_models()
     println(f"✅ 总模型数: {models.len()}")
     println("")
 
     println("📊 模型类型统计:")
-    let llama_models = get_model_by_type("llama")
+    llama_models := get_model_by_type("llama")
     println(f"  LLaMA 系列: {llama_models.len()}")
 
-    let qwen_models = get_model_by_type("qwen")
-    let qwen2_models = get_model_by_type("qwen2")
-    let qwen25_models = get_model_by_type("qwen2.5")
+    qwen_models := get_model_by_type("qwen")
+    qwen2_models := get_model_by_type("qwen2")
+    qwen25_models := get_model_by_type("qwen2.5")
     println(f"  Qwen 系列: {qwen_models.len() + qwen2_models.len() + qwen25_models.len()}")
 
-    let mistral_models = get_model_by_type("mistral")
-    let mixtral_models = get_model_by_type("mixtral")
+    mistral_models := get_model_by_type("mistral")
+    mixtral_models := get_model_by_type("mixtral")
     println(f"  Mistral 系列: {mistral_models.len() + mixtral_models.len()}")
 
     println("")
     println("📋 完整模型列表:")
     for i in 0..models.len() {
-        let model = models[i]
+        model := models[i]
         println(f"  {i + 1:2}. {model.name:20} ({model.model_type})")
     }
 

@@ -88,14 +88,14 @@ impl lora_adapter {
         switch adapter.weights.get(module_name) {
             option::some((lora_a, lora_b)) : {
 
-                let scaling = adapter.config.get_lora_scaling() * scale
+                scaling := adapter.config.get_lora_scaling() * scale
 
-                let mut intermediate = vec[float]()
+                intermediate := vec[float]()
                 if lora_a.len() > 0 && input.len() > 0 {
-                    let j = 0
+                    j := 0
                     while j < lora_a[0].len() {
-                        let mut sum = 0.0
-                        let k = 0
+                        sum := 0.0
+                        k := 0
                         while k < input.len() && k < lora_a.len() {
                             sum = sum + input[k] * lora_a[k][j]
                             k = k + 1
@@ -105,12 +105,12 @@ impl lora_adapter {
                     }
                 }
 
-                let mut output = vec[float]()
+                output := vec[float]()
                 if lora_b.len() > 0 {
-                    let j = 0
+                    j := 0
                     while j < lora_b[0].len() {
-                        let mut sum = 0.0
-                        let k = 0
+                        sum := 0.0
+                        k := 0
                         while k < intermediate.len() && k < lora_b.len() {
                             sum = sum + intermediate[k] * lora_b[k][j]
                             k = k + 1
@@ -136,11 +136,11 @@ impl lora_adapter {
         inputs: *vec[&vec[float]],
         scale: float
     ) result[&vec[&vec[float]], lora_adapter_error] {
-        let mut outputs = vec[&vec[float]]()
+        outputs := vec[&vec[float]]()
 
-        let i = 0
+        i := 0
         while i < inputs.len() {
-            let output = adapter.apply_lora(module_name, inputs[i], scale)?
+            output := adapter.apply_lora(module_name, inputs[i], scale)?
             outputs.push(output)
             i = i + 1
         }
@@ -158,7 +158,7 @@ impl lora_adapter {
             })
         }
 
-        let mut engine = weight_fusion_engine::new(
+        engine := weight_fusion_engine::new(
             adapter.config.lora_rank,
             adapter.config.lora_alpha as float
         )
@@ -167,8 +167,8 @@ impl lora_adapter {
             switch adapter.weights.get(module_name) {
                 option::some((lora_a, lora_b)) : {
 
-                    let scaling = adapter.config.get_lora_scaling()
-                    let delta = compute_lora_delta(lora_a, lora_b, scaling)?
+                    scaling := adapter.config.get_lora_scaling()
+                    delta := compute_lora_delta(lora_a, lora_b, scaling)?
 
                     switch original_weights.get(module_name) {
                         option::some(orig) : {
@@ -212,7 +212,7 @@ impl lora_adapter {
     }
 
     func (lora_adapter* adapter) get_info() string {
-        let mut info = "LoRA Adapter: " + adapter.name + "\n"
+        info := "LoRA Adapter: " + adapter.name + "\n"
         info = info + "  Config: rank=" + adapter.config.lora_rank.to_string() +
                       ", alpha=" + adapter.config.lora_alpha.to_string() + "\n"
         info = info + "  Modules: " + adapter.weights.len().to_string() + "\n"
@@ -221,14 +221,14 @@ impl lora_adapter {
     }
 
     func (lora_adapter* adapter) get_size_mb() int {
-        let mut total = 0
+        total := 0
 
         for module_name in adapter.weights.keys() {
             switch adapter.weights.get(module_name) {
                 option::some((lora_a, lora_b)) : {
-                    let a_size = lora_a.len() *
+                    a_size := lora_a.len() *
                                  (if lora_a.len() > 0 { lora_a[0].len() } else { 0 }) * 4
-                    let b_size = lora_b.len() *
+                    b_size := lora_b.len() *
                                  (if lora_b.len() > 0 { lora_b[0].len() } else { 0 }) * 4
                     total = total + a_size + b_size
                 },
@@ -240,7 +240,7 @@ impl lora_adapter {
     }
 
     func (lora_adapter* adapter) get_module_names() &vec[string] {
-        let mut names = vec[string]()
+        names := vec[string]()
         for name in adapter.weights.keys() {
             names.push(name)
         }

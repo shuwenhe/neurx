@@ -23,6 +23,6 @@ func shell_escape(string s) string {
 
 func main() {
     string neurx_root = getenv("NEURX_HOME", ".")
-    let (_, code) = command("make -C " + shell_escape(neurx_root) + " shard")
+    (_, code) := command("make -C " + shell_escape(neurx_root) + " shard")
     code
 }

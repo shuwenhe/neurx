@@ -439,8 +439,8 @@ func format_shard_filename(string dir, int index) string {
 }
 
 func write_shard_manifest(string path, shards []shard_metadata) error {
-    var total_docs int64
-    var total_size int64
+    total_docs := int64()
+    total_size := int64()
     for _, shard := range shards {
         total_docs += shard.NumDocuments
         total_size += shard.SizeBytes
@@ -509,7 +509,7 @@ func get_env(key, string default_val) string {
 
 func get_env_int(string key, int default_val) int {
     if val := os.Getenv(key); val != "" {
-        var num int
+        num := int()
         fmt.Sscanf(val, "%d", &num)
         return num
     }

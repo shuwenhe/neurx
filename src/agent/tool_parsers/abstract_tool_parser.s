@@ -138,16 +138,16 @@ func create_extraction_context() -> ToolExtractionContext {
 }
 
 func find_json_boundaries(text: str, start: i32) -> (i32, i32) {
-    let mut brace_depth = 0
-    let mut in_string = false
-    let mut escaped = false
-    let mut start_pos = -1
-    let mut end_pos = -1
+    brace_depth := 0
+    in_string := false
+    escaped := false
+    start_pos := -1
+    end_pos := -1
 
-    let chars = strings::chars(text)
-    let i = start
+    chars := strings::chars(text)
+    i := start
     while i < len(chars) {
-        let c = chars[i]
+        c := chars[i]
 
         if escaped {
             escaped = false
@@ -187,8 +187,8 @@ func find_json_boundaries(text: str, start: i32) -> (i32, i32) {
 }
 
 func extract_json_field(json_str: str, field_name: str) -> str {
-    let pattern = "\"" + field_name + "\"\\s*:\\s*\"([^\"]*)\""
-    let re = regex::compile(pattern)
+    pattern := "\"" + field_name + "\"\\s*:\\s*\"([^\"]*)\""
+    re := regex::compile(pattern)
     match re::find_string(re, json_str) {
         Some(m) => m.group(1).to_string(),
         None => ""
@@ -196,7 +196,7 @@ func extract_json_field(json_str: str, field_name: str) -> str {
 }
 
 func validate_tool_call(tool_call: ToolCall, available_tools: Vec<str>) -> bool {
-    let mut found = false
+    found := false
     for tool_name in available_tools {
         if tool_name == tool_call.function.name {
             found = true

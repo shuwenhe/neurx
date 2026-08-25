@@ -38,7 +38,7 @@ func new_functional_safety_monitor(safety_level level) functional_safety_monitor
 }
 
 func (monitor: &mut functional_safety_monitor) report_fault(failure_mode mode) {
-    let mode_id = 0
+    mode_id := 0
     switch mode {
         failure_mode::sensor_fault: mode_id = 1,
         failure_mode::compute_fault: mode_id = 2,

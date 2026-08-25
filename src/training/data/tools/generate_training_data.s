@@ -10,7 +10,7 @@ func main() {
     io.println("🚀 NeurXEnglish textLLMtrainingdatagenerateEnglish text (Slanguageimplementation)")
     io.println("")
     output_file: string = "src/training/data/training_data.jsonl"
-    var training_data: []training_data
+    training_data := []training_data
     training_data = append(training_data, training_data{
         text: "PythonEnglish textexample: implementationEnglish textLRUcache.class LRUCache:\n    def __init__(self, capacity):\n        self.capacity = capacity\n        self.cache = {}\n        self.order = []\n    \n    def get(self, key):\n        if key in self.cache:\n            self.order.remove(key)\n            self.order.append(key)\n            return self.cache[key]\n        return -1\n    \n    def put(self, key, value):\n        if key in self.cache:\n            self.order.remove(key)\n        elif len(self.cache) == self.capacity:\n            removed = self.order.pop(0)\n            del self.cache[removed]\n        self.cache[key] = value\n        self.order.append(key)",
     })

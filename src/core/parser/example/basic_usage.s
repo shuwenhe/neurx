@@ -31,12 +31,12 @@ func demo_json_parsing() {
     print("Example 1: JSON Parsing\n")
     print("="*60 + "\n\n")
 
-    let parser = create_default_parser()
+    parser := create_default_parser()
 
-    let json_output = "{\"name\": \"Alice\", \"age\": 30, \"email\": \"alice@example.com\"}"
+    json_output := "{\"name\": \"Alice\", \"age\": 30, \"email\": \"alice@example.com\"}"
     print("Input JSON:\n  " + json_output + "\n\n")
 
-    let result = parser.parse(json_output)
+    result := parser.parse(json_output)
 
     print("Parse Result:\n")
     print("  Status: SUCCESS\n")
@@ -51,21 +51,21 @@ func demo_format_detection() {
     print("Example 2: Automatic Format Detection\n")
     print("="*60 + "\n\n")
 
-    let test_cases = []string{
+    test_cases := []string{
         "{\"key\": \"value\"}",
         "<root><name>Alice</name></root>",
         "# Hello World\n\nThis is **bold** text",
         "name: Alice\nage: 30",
     }
 
-    let format_names = []string{"JSON", "XML", "Markdown", "YAML"}
-    let i = 0
+    format_names := []string{"JSON", "XML", "Markdown", "YAML"}
+    i := 0
 
     while i < len(test_cases) {
         print("Test " + string(i + 1) + ": " + format_names[i] + "\n")
         print("  Input: " + test_cases[i] + "\n")
 
-        let detection = detect_format(test_cases[i])
+        detection := detect_format(test_cases[i])
         print("  Detected: " + format_to_string(detection.detected_format) + "\n")
         print("  Confidence: " + string(detection.confidence) + "\n\n")
 
@@ -78,12 +78,12 @@ func demo_error_recovery() {
     print("Example 3: Error Recovery\n")
     print("="*60 + "\n\n")
 
-    let parser = create_default_parser()
+    parser := create_default_parser()
 
-    let malformed_json = "{\"name\": \"Bob\", \"age\": 25"
+    malformed_json := "{\"name\": \"Bob\", \"age\": 25"
     print("Malformed Input:\n  " + malformed_json + "\n\n")
 
-    let result = parser.parse(malformed_json)
+    result := parser.parse(malformed_json)
 
     print("Parse Result:\n")
     print("  Status: " + status_to_string(result.status) + "\n")
@@ -102,9 +102,9 @@ func demo_stream_parsing() {
     print("Example 4: Stream Parsing\n")
     print("="*60 + "\n\n")
 
-    let parser = create_default_parser()
+    parser := create_default_parser()
 
-    let chunks = []string{
+    chunks := []string{
         "{\"name\": ",
         "\"Alice\", ",
         "\"age\": 30, ",
@@ -119,10 +119,10 @@ func demo_stream_parsing() {
     }
     print("\n")
 
-    let results = parser.parse_stream(chunks)
+    results := parser.parse_stream(chunks)
 
     if len(results) > 0 {
-        let final_result = results[len(results) - 1]
+        final_result := results[len(results) - 1]
         print("Final Result:\n")
         print("  Status: " + status_to_string(final_result.status) + "\n")
         print("  Complete Output: " + final_result.parsed_output + "\n\n")
@@ -134,9 +134,9 @@ func demo_batch_parsing() {
     print("Example 5: Batch Parsing\n")
     print("="*60 + "\n\n")
 
-    let parser = create_default_parser()
+    parser := create_default_parser()
 
-    let outputs = []string{
+    outputs := []string{
         "{\"id\": 1, \"status\": \"success\"}",
         "<response><code>200</code></response>",
         "# Result\n\nProcessing completed",
@@ -144,12 +144,12 @@ func demo_batch_parsing() {
 
     print("Parsing batch of " + string(len(outputs)) + " outputs...\n\n")
 
-    let results = parser.parse_batch(outputs)
+    results := parser.parse_batch(outputs)
 
     print("Results:\n")
-    let i = 0
+    i := 0
     while i < len(results) {
-        let result = results[i]
+        result := results[i]
         print("  [" + string(i + 1) + "] " + format_to_string(result.format))
         print(" - " + status_to_string(result.status))
         print(" (conf: " + string(result.confidence) + ")\n")
@@ -157,7 +157,7 @@ func demo_batch_parsing() {
     }
     print("\n")
 
-    let stats = parser.get_stats()
+    stats := parser.get_stats()
     print("Parser Statistics:\n")
     print("  Total Parses: " + string(stats.total_parses) + "\n")
     print("  Successful: " + string(stats.successful_parses) + "\n")

@@ -40,11 +40,11 @@ func new_sapo_trainer(
     *model value,
     *model reference
 ) -> SAPOTrainer {
-    let params = policy.parameters()
+    params := policy.parameters()
     if config.use_value_loss {
         params = params + value.parameters()
     }
-    let optimizer = adamw_optimizer(params, config.learning_rate)
+    optimizer := adamw_optimizer(params, config.learning_rate)
     return sapo_trainer{
         config: config,
         policy_model: policy,
@@ -62,10 +62,10 @@ func new_sapo_trainer(
 }
 
 func (sapo_trainer* trainer) smooth_clip(Tensor x, f32 lower, f32 upper) -> Tensor {
-    let tau = trainer.config.tau
-    let lower_weight = sigmoid((x - lower) / tau)
-    let upper_weight = sigmoid((upper - x) / tau)
-    let smooth_clipped = x * lower_weight * upper_weight +
+    tau := trainer.config.tau
+    lower_weight := sigmoid((x - lower) / tau)
+    upper_weight := sigmoid((upper - x) / tau)
+    smooth_clipped := x * lower_weight * upper_weight +
                          lower * (1.0 - lower_weight) +
                          upper * (1.0 - upper_weight)
     return smooth_clipped
@@ -76,14 +76,14 @@ func (sapo_trainer* trainer) compute_smooth_surrogate(
     Tensor advantage
 ) -> Tensor {
     if trainer.config.use_smooth_clipping {
-        let clipped_ratio = trainer.smooth_clip(ratio, 0.8, 1.2)
+        clipped_ratio := trainer.smooth_clip(ratio, 0.8, 1.2)
         return clipped_ratio * advantage
     } else {
-        let tau = trainer.config.tau
-        let unclipped = ratio * advantage
-        let clipped = clamp(ratio, 0.8, 1.2) * advantage
-        let weight = sigmoid((ratio - 1.0) / tau)
-        let smooth_obj = weight * unclipped + (1.0 - weight) * clipped
+        tau := trainer.config.tau
+        unclipped := ratio * advantage
+        clipped := clamp(ratio, 0.8, 1.2) * advantage
+        weight := sigmoid((ratio - 1.0) / tau)
+        smooth_obj := weight * unclipped + (1.0 - weight) * clipped
         return smooth_obj
     }
 }
@@ -93,20 +93,20 @@ func (sapo_trainer* trainer) compute_gae(
     []tensor values,
     []tensor dones
 ) -> ([]tensor, []tensor) {
-    let batch_size = rewards.len()
-    let advantages: []tensor = []
-    let returns: []tensor = []
+    batch_size := rewards.len()
+    advantages := []
+    returns := []
     for b in 0..batch_size {
-        let seq_len = rewards[b].shape[0]
-        let seq_advantages = tensor_zeros([seq_len])
-        let seq_returns = tensor_zeros([seq_len])
-        let gae: f32 = 0.0
-        let next_value: f32 = 0.0
+        seq_len := rewards[b].shape[0]
+        seq_advantages := tensor_zeros([seq_len])
+        seq_returns := tensor_zeros([seq_len])
+        gae := 0.0
+        next_value := 0.0
         for t in (seq_len - 1)..0 by -1 {
-            let reward = rewards[b][t].item()
-            let value = values[b][t].item()
-            let done = dones[b][t].item()
-            let delta = reward + trainer.config.gamma * next_value * (1.0 - done) - value
+            reward := rewards[b][t].item()
+            value := values[b][t].item()
+            done := dones[b][t].item()
+            delta := reward + trainer.config.gamma * next_value * (1.0 - done) - value
             gae = delta + trainer.config.gamma * trainer.config.gae_lambda * (1.0 - done) * gae
             seq_advantages[t] = tensor_scalar(gae)
             seq_returns[t] = tensor_scalar(gae + value)
@@ -122,7 +122,7 @@ func (sapo_trainer* trainer) normalize_advantages([]tensor advantages) -> []tens
     if !trainer.config.normalize_advantages {
         return advantages
     }
-    let all_advantages: []f32 = []
+    all_advantages := []
     for adv in advantages {
         for i in 0..adv.numel() {
             all_advantages.push(adv.flatten()[i].item())
@@ -130,16 +130,16 @@ func (sapo_trainer* trainer) normalize_advantages([]tensor advantages) -> []tens
     }
     trainer.advantage_stats.mean = compute_mean(all_advantages)
     trainer.advantage_stats.std = compute_std(all_advantages, trainer.advantage_stats.mean)
-    let max_abs: f32 = 0.0
+    max_abs := 0.0
     for v in all_advantages {
         if abs(v) > max_abs {
             max_abs = abs(v)
         }
     }
     trainer.advantage_stats.max_abs = max_abs
-    let normalized: []tensor = []
+    normalized := []
     for adv in advantages {
-        let norm_adv = (adv - trainer.advantage_stats.mean) /
+        norm_adv := (adv - trainer.advantage_stats.mean) /
                        (trainer.advantage_stats.std + trainer.config.advantage_epsilon)
         normalized.push(norm_adv)
     }
@@ -151,59 +151,59 @@ func (sapo_trainer* trainer) train_step(
     []tensor responses,
     []tensor rewards
 ) -> (f32, f32, f32) {
-    let batch_size = prompts.len()
-    let inputs: []tensor = []
+    batch_size := prompts.len()
+    inputs := []
     for i in 0..batch_size {
         inputs.push(concat(prompts[i], responses[i]))
     }
-    let values: []tensor = []
+    values := []
     for input in inputs {
-        let value = trainer.value_model.forward(input)
+        value := trainer.value_model.forward(input)
         values.push(value)
     }
-    let dones: []tensor = []
+    dones := []
     for resp in responses {
-        let seq_len = resp.shape[0]
-        let done = tensor_zeros([seq_len])
+        seq_len := resp.shape[0]
+        done := tensor_zeros([seq_len])
         done[-1] = tensor_scalar(1.0)
         dones.push(done)
     }
-    let advantages, returns = trainer.compute_gae(rewards, values, dones)
-    let normalized_advantages = trainer.normalize_advantages(advantages)
-    let old_log_probs: []tensor = []
+    advantages, returns  := trainer.compute_gae(rewards, values, dones)
+    normalized_advantages := trainer.normalize_advantages(advantages)
+    old_log_probs := []
     for input in inputs {
-        let logits = trainer.policy_model.forward(input)
-        let log_probs = log_softmax(logits, dim: -1)
+        logits := trainer.policy_model.forward(input)
+        log_probs := log_softmax(logits, dim: -1)
         old_log_probs.push(log_probs)
     }
-    let ref_log_probs: []tensor = []
+    ref_log_probs := []
     for input in inputs {
-        let logits = trainer.reference_model.forward(input)
-        let log_probs = log_softmax(logits, dim: -1)
+        logits := trainer.reference_model.forward(input)
+        log_probs := log_softmax(logits, dim: -1)
         ref_log_probs.push(log_probs)
     }
-    let total_policy_loss: f32 = 0.0
-    let total_value_loss: f32 = 0.0
-    let total_kl: f32 = 0.0
-    let num_updates = 0
+    total_policy_loss := 0.0
+    total_value_loss := 0.0
+    total_kl := 0.0
+    num_updates := 0
     for epoch in 0..trainer.config.num_epochs {
         for i in 0..batch_size {
-            let logits = trainer.policy_model.forward(inputs[i])
-            let new_log_probs = log_softmax(logits, dim: -1)
-            let ratio = exp(new_log_probs.sum() - old_log_probs[i].sum())
-            let surrogate = trainer.compute_smooth_surrogate(
+            logits := trainer.policy_model.forward(inputs[i])
+            new_log_probs := log_softmax(logits, dim: -1)
+            ratio := exp(new_log_probs.sum() - old_log_probs[i].sum())
+            surrogate := trainer.compute_smooth_surrogate(
                 ratio,
                 normalized_advantages[i]
             )
-            let policy_loss = -surrogate.mean()
-            let value_loss = tensor_zeros([1])
+            policy_loss := -surrogate.mean()
+            value_loss := tensor_zeros([1])
             if trainer.config.use_value_loss {
-                let new_values = trainer.value_model.forward(inputs[i])
+                new_values := trainer.value_model.forward(inputs[i])
                 value_loss = (new_values - returns[i]).pow(2).mean()
             }
-            let kl = (exp(ref_log_probs[i]) *
+            kl := (exp(ref_log_probs[i]) *
                      (ref_log_probs[i] - new_log_probs)).sum()
-            let loss = policy_loss +
+            loss := policy_loss +
                       trainer.config.value_loss_coeff * value_loss +
                       trainer.config.kl_coeff * kl
             loss.backward()
@@ -229,10 +229,10 @@ func (sapo_trainer* trainer) train_step(
 }
 
 func (sapo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
-    let policy_losses: []f32 = []
-    let value_losses: []f32 = []
+    policy_losses := []
+    value_losses := []
     for batch in train_data {
-        let policy_loss, value_loss, kl = trainer.train_step(
+        policy_loss, value_loss, kl  := trainer.train_step(
             batch.prompts,
             batch.responses,
             batch.rewards
@@ -260,7 +260,7 @@ func compute_mean([]f32 values) -> f32 {
     if values.len() == 0 {
         return 0.0
     }
-    let sum: f32 = 0.0
+    sum := 0.0
     for v in values {
         sum += v
     }
@@ -271,7 +271,7 @@ func compute_std([]f32 values, f32 mean) -> f32 {
     if values.len() == 0 {
         return 1.0
     }
-    let sum_sq: f32 = 0.0
+    sum_sq := 0.0
     for v in values {
         sum_sq += (v - mean) * (v - mean)
     }

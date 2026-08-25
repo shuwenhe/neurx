@@ -13,9 +13,9 @@ func compute_k1_divergence(
     Tensor new_log_probs,
     Tensor rollout_log_probs
 ) -> Tensor {
-    let log_ratio = new_log_probs - rollout_log_probs
-    let ratio = exp(log_ratio)
-    let neg_log_r = -log(clamp(ratio, 1e-10, 1e10))
+    log_ratio := new_log_probs - rollout_log_probs
+    ratio := exp(log_ratio)
+    neg_log_r := -log(clamp(ratio, 1e-10, 1e10))
     return neg_log_r
 }
 
@@ -23,7 +23,7 @@ func compute_k2_divergence(
     Tensor new_log_probs,
     Tensor rollout_log_probs
 ) -> Tensor {
-    let log_ratio = new_log_probs - rollout_log_probs
+    log_ratio := new_log_probs - rollout_log_probs
     return 0.5 * (log_ratio * log_ratio)
 }
 
@@ -31,8 +31,8 @@ func compute_k3_divergence(
     Tensor new_log_probs,
     Tensor rollout_log_probs
 ) -> Tensor {
-    let log_ratio = new_log_probs - rollout_log_probs
-    let ratio = exp(log_ratio)
+    log_ratio := new_log_probs - rollout_log_probs
+    ratio := exp(log_ratio)
     return ratio - 1.0 - log_ratio
 }
 
@@ -43,7 +43,7 @@ func compute_token_rejection(
     RSThreshold threshold,
     Tensor response_mask
 ) -> RSResult {
-    let divergence: Tensor
+    divergence := Tensor()
     match mode {
         rejection_mode.TOKEN_K1 => {
             divergence = compute_k1_divergence(new_log_probs, rollout_log_probs)
@@ -58,18 +58,18 @@ func compute_token_rejection(
             panic("Invalid token-level rejection mode")
         }
     }
-    let masked_divergence = divergence * response_mask
-    let rejection_mask: Tensor
+    masked_divergence := divergence * response_mask
+    rejection_mask := Tensor()
     if mode == rejection_mode.TOKEN_K1 {
-        let ratio = exp(new_log_probs - rollout_log_probs)
+        ratio := exp(new_log_probs - rollout_log_probs)
         rejection_mask = ((ratio < threshold.lower) | (ratio > threshold.upper))
     } else {
         rejection_mask = (masked_divergence > threshold.upper)
     }
-    let valid_count = response_mask.sum()
-    let rejection_rate = (rejection_mask.to_float() * response_mask).sum() / (valid_count + 1e-8)
-    let mean_score = masked_divergence.sum() / (valid_count + 1e-8)
-    let max_score = masked_divergence.max()
+    valid_count := response_mask.sum()
+    rejection_rate := (rejection_mask.to_float() * response_mask).sum() / (valid_count + 1e-8)
+    mean_score := masked_divergence.sum() / (valid_count + 1e-8)
+    max_score := masked_divergence.max()
     return rs_result{
         rejection_mask: rejection_mask,
         rejection_scores: masked_divergence,
@@ -86,9 +86,9 @@ func compute_sequence_rejection(
     RSThreshold threshold,
     Tensor response_mask
 ) -> RSResult {
-    let batch_size = new_log_probs.shape[0]
-    let seq_len = new_log_probs.shape[1]
-    let token_divergence: Tensor
+    batch_size := new_log_probs.shape[0]
+    seq_len := new_log_probs.shape[1]
+    token_divergence := Tensor()
     match mode {
         rejection_mode.SEQ_SUM_K1 | rejection_mode.SEQ_MEAN_K1 | rejection_mode.SEQ_MAX_K2 => {
             if mode == rejection_mode.SEQ_MEAN_K1 {
@@ -107,38 +107,38 @@ func compute_sequence_rejection(
             panic("Invalid sequence-level rejection mode")
         }
     }
-    let masked_divergence = token_divergence * response_mask
-    let seq_divergence: Tensor
+    masked_divergence := token_divergence * response_mask
+    seq_divergence := Tensor()
     match mode {
         rejection_mode.SEQ_SUM_K1 | rejection_mode.SEQ_SUM_K2 | rejection_mode.SEQ_SUM_K3 => {
             seq_divergence = masked_divergence.sum(dim: 1)
         },
         rejection_mode.SEQ_MEAN_K1 | rejection_mode.SEQ_MEAN_K2 | rejection_mode.SEQ_MEAN_K3 => {
-            let seq_len_per_sample = response_mask.sum(dim: 1)
+            seq_len_per_sample := response_mask.sum(dim: 1)
             seq_divergence = masked_divergence.sum(dim: 1) / (seq_len_per_sample + 1e-8)
         },
         rejection_mode.SEQ_MAX_K2 | rejection_mode.SEQ_MAX_K3 => {
-            let large_neg = tensor_full_like(masked_divergence, -1e10)
-            let divergence_for_max = where(response_mask.to_bool(), masked_divergence, large_neg)
+            large_neg := tensor_full_like(masked_divergence, -1e10)
+            divergence_for_max := where(response_mask.to_bool(), masked_divergence, large_neg)
             seq_divergence = divergence_for_max.max(dim: 1)
         },
         _ => {
             seq_divergence = tensor_zeros([batch_size])
         }
     }
-    let rejection_mask: Tensor
+    rejection_mask := Tensor()
     if mode == rejection_mode.SEQ_MEAN_K1 || mode == rejection_mode.SEQ_SUM_K1 {
-        let log_ratio_sum = (new_log_probs - rollout_log_probs) * response_mask
-        let seq_log_ratio = log_ratio_sum.sum(dim: 1) / (response_mask.sum(dim: 1) + 1e-8)
-        let ratio = exp(seq_log_ratio)
+        log_ratio_sum := (new_log_probs - rollout_log_probs) * response_mask
+        seq_log_ratio := log_ratio_sum.sum(dim: 1) / (response_mask.sum(dim: 1) + 1e-8)
+        ratio := exp(seq_log_ratio)
         rejection_mask = ((ratio < threshold.lower) | (ratio > threshold.upper))
     } else {
         rejection_mask = (seq_divergence > threshold.upper)
     }
-    let expanded_rejection_mask = rejection_mask.unsqueeze(1).expand([batch_size, seq_len])
-    let rejection_rate = rejection_mask.to_float().mean()
-    let mean_score = seq_divergence.mean()
-    let max_score = seq_divergence.max()
+    expanded_rejection_mask := rejection_mask.unsqueeze(1).expand([batch_size, seq_len])
+    rejection_rate := rejection_mask.to_float().mean()
+    mean_score := seq_divergence.mean()
+    max_score := seq_divergence.max()
     return rs_result{
         rejection_mask: expanded_rejection_mask,
         rejection_scores: seq_divergence,
@@ -155,20 +155,20 @@ func compute_rejection_sampling(
     RolloutCorrectionConfig config,
     Tensor response_mask
 ) -> []rs_result {
-    let results: []rs_result = []
+    results := []
     if config.rs_modes.len() == 0 {
         return results
     }
-    let reference_log_probs: Tensor
+    reference_log_probs := Tensor()
     if config.bypass_mode {
         reference_log_probs = rollout_log_probs
     } else {
         reference_log_probs = old_log_probs
     }
     for i in 0..config.rs_modes.len() {
-        let mode = config.rs_modes[i]
-        let threshold = config.rs_thresholds[i]
-        let result: RSResult
+        mode := config.rs_modes[i]
+        threshold := config.rs_thresholds[i]
+        result := RSResult()
         match mode {
             rejection_mode.TOKEN_K1 | rejection_mode.TOKEN_K2 | rejection_mode.TOKEN_K3 => {
                 result = compute_token_rejection(
@@ -207,13 +207,13 @@ func combine_rejection_results([]rs_result results) -> RSResult {
     if results.len() == 1 {
         return results[0]
     }
-    let combined_mask = results[0].rejection_mask
+    combined_mask := results[0].rejection_mask
     for i in 1..results.len() {
         combined_mask = combined_mask | results[i].rejection_mask
     }
-    let total_rejection_rate: f32 = 0.0
-    let total_mean_score: f32 = 0.0
-    let max_score: f32 = results[0].max_score
+    total_rejection_rate := 0.0
+    total_mean_score := 0.0
+    max_score := results[0].max_score
     for result in results {
         total_rejection_rate += result.rejection_rate
         total_mean_score += result.mean_score
@@ -238,15 +238,15 @@ func apply_rejection_to_mask(
 }
 
 func compute_rs_statistics([]rs_result results) -> map[string]f32 {
-    let stats = map[string]f32{}
+    stats := map[string]f32{}
     for i in 0..results.len() {
-        let prefix = f"rs_mode_{i}"
+        prefix := f"rs_mode_{i}"
         stats[prefix + "_rejection_rate"] = results[i].rejection_rate
         stats[prefix + "_mean_score"] = results[i].mean_score
         stats[prefix + "_max_score"] = results[i].max_score
     }
     if results.len() > 0 {
-        let combined = combine_rejection_results(results)
+        combined := combine_rejection_results(results)
         stats["rs_combined_rejection_rate"] = combined.rejection_rate
     }
     return stats

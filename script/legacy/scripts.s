@@ -3,7 +3,7 @@ use neurx.runtime.io.{runtime_env_get}
 use std.io.println
 
 func main() {
-    let cmd = runtime_env_get("NEURX_SCRIPTS_CMD", "help")
+    cmd := runtime_env_get("NEURX_SCRIPTS_CMD", "help")
     if cmd == "clean" {
         println("")
         println("==================================================")

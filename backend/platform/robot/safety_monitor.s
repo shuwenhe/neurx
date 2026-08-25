@@ -38,7 +38,7 @@ func (monitor: &mut safety_monitor) check_joint_limits([]float positions, []floa
     }
     
     for i in 0..positions.len() {
-        let margin = (limits_max[i] - limits_min[i]) * monitor.joint_limits_margin
+        margin := (limits_max[i] - limits_min[i]) * monitor.joint_limits_margin
         if positions[i] < limits_min[i] + margin || positions[i] > limits_max[i] - margin {
             monitor.state = safety_state::warning
             return false

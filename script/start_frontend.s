@@ -4,11 +4,11 @@ func main() {
     println("🧹 Cleaning up old processes...")
     _ = system_exec("pkill -9 -f s_ir_runner.*web_ui_server 2>/dev/null || true")
     system_sleep(1)
-    let neurx_root = get_env_or("NEURX_ROOT", ".")
-    let frontend_ir = neurx_root + "/artifact/build/production_s_inference/web_ui_server.ir"
-    let s_runner = neurx_root + "/artifact/build/s_runner/s_ir_runner"
+    neurx_root := get_env_or("NEURX_ROOT", ".")
+    frontend_ir := neurx_root + "/artifact/build/production_s_inference/web_ui_server.ir"
+    s_runner := neurx_root + "/artifact/build/s_runner/s_ir_runner"
     println("Starting frontend process...")
-    let cmd = "cd '" + neurx_root + "' && NEURX_ROOT='" + neurx_root +
+    cmd := "cd '" + neurx_root + "' && NEURX_ROOT='" + neurx_root +
               "' nohup '" + s_runner + "' '" + frontend_ir +
               "' >/tmp/neurx_frontend.log 2>&1 &"
     _ = system_exec(cmd)
@@ -40,7 +40,7 @@ func get_env_or(string key, string default_val) string {
 }
 
 func verify_port_listening(int port) bool {
-    let check_cmd = "lsof -i :" + int_to_string(port) + " 2>/dev/null | grep -q LISTEN"
+    check_cmd := "lsof -i :" + int_to_string(port) + " 2>/dev/null | grep -q LISTEN"
     return system_exec(check_cmd) == 0
 }
 

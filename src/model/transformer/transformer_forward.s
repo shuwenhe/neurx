@@ -412,8 +412,8 @@ func transformer_layer_forward(
 ) []float {
     []float output = copy_vector(hidden_states)
     if pre_norm {
-        var normalized = layer_normalize(layer.norm1, hidden_states, batch_size, seq_len)
-        var attn_output = multi_head_attention_forward(
+        normalized := layer_normalize(layer.norm1, hidden_states, batch_size, seq_len)
+        attn_output := multi_head_attention_forward(
             layer,
             normalized.normalized,
             batch_size,
@@ -430,7 +430,7 @@ func transformer_layer_forward(
             i = i + 1
         }
         normalized = layer_normalize(layer.norm2, output, batch_size, seq_len)
-        var ffn_output = feed_forward_forward(
+        ffn_output := feed_forward_forward(
             layer,
             normalized.normalized,
             batch_size,
@@ -444,7 +444,7 @@ func transformer_layer_forward(
             i = i + 1
         }
     } else {
-        var attn_output = multi_head_attention_forward(
+        attn_output := multi_head_attention_forward(
             layer,
             hidden_states,
             batch_size,
@@ -460,9 +460,9 @@ func transformer_layer_forward(
             output[i] = hidden_states[i] + attn_output[i]
             i = i + 1
         }
-        var normalized = layer_normalize(layer.norm1, output, batch_size, seq_len)
+        normalized := layer_normalize(layer.norm1, output, batch_size, seq_len)
         output = copy_vector(normalized.normalized)
-        var ffn_output = feed_forward_forward(
+        ffn_output := feed_forward_forward(
             layer,
             output,
             batch_size,
@@ -489,7 +489,7 @@ func transformer_forward_pass(
 ) forward_pass_output {
     int hidden_dim = model_state.hidden_dim
     int num_layers = model_state.num_layers
-    var hidden_states = embed_tokens(
+    hidden_states := embed_tokens(
         model_state.token_embedding,
         input_ids,
         batch_size,
@@ -498,7 +498,7 @@ func transformer_forward_pass(
     )
     bool use_rope = model_state.config.position_encoding_type == "rope"
     if !use_rope {
-        var pos_encoding = get_position_encoding(
+        pos_encoding := get_position_encoding(
             model_state.pos_encoding_abs,
             0,
             seq_len
@@ -535,7 +535,7 @@ func transformer_forward_pass(
         layer_output_offset = layer_output_offset + batch_size * seq_len * hidden_dim
         layer_idx = layer_idx + 1
     }
-    var final_norm_output = layer_normalize(
+    final_norm_output := layer_normalize(
         model_state.final_norm,
         hidden_states,
         batch_size,

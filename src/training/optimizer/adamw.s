@@ -73,20 +73,20 @@ func adamw_update_param(
     int param_size
 ) adamw_param_state {
     state.step = state.step + 1
-    let step = float(state.step)
-    let bias_correction1 = 1.0 - pow_approx(beta1, step)
-    let bias_correction2 = 1.0 - pow_approx(beta2, step)
-    let corrected_lr = learning_rate * sqrt_approx(bias_correction2) / bias_correction1
-    var i = 0
+    step := float(state.step)
+    bias_correction1 := 1.0 - pow_approx(beta1, step)
+    bias_correction2 := 1.0 - pow_approx(beta2, step)
+    corrected_lr := learning_rate * sqrt_approx(bias_correction2) / bias_correction1
+    i := 0
     while i < param_size {
-        let grad = gradients[i]
+        grad := gradients[i]
         state.momentum[i] = beta1 * state.momentum[i] + (1.0 - beta1) * grad
-        let grad_sq = grad * grad
+        grad_sq := grad * grad
         state.variance[i] = beta2 * state.variance[i] + (1.0 - beta2) * grad_sq
-        let m_hat = state.momentum[i]
-        let v_hat = state.variance[i]
-        let denom = sqrt_approx(v_hat) + epsilon
-        let step_size = corrected_lr / denom
+        m_hat := state.momentum[i]
+        v_hat := state.variance[i]
+        denom := sqrt_approx(v_hat) + epsilon
+        step_size := corrected_lr / denom
         state.param[i] = state.param[i] - step_size * m_hat
         state.param[i] = state.param[i] * (1.0 - weight_decay * learning_rate)
         i = i + 1
@@ -101,10 +101,10 @@ func adamw_step(
 ) adamw_optimizer {
     opt.current_lr = adamw_compute_lr(opt)
     opt.global_step = opt.global_step + 1
-    var param_idx = 0
+    param_idx := 0
     while param_idx < len(opt.param_states) {
-        let param_size = param_sizes[param_idx]
-        let grad = gradients[param_idx]
+        param_size := param_sizes[param_idx]
+        grad := gradients[param_idx]
         opt.param_states[param_idx] = adamw_update_param(
             opt.param_states[param_idx],
             grad,
@@ -158,7 +158,7 @@ func adamw_load_state_dict(
 
 func allocate_float_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
-    var i = 0
+    i := 0
     while i < size {
         v.push(init_val)
         i = i + 1
@@ -173,7 +173,7 @@ func pow_approx(float x, float y) float {
     if y == 2.0 {
         return x * x
     }
-    let ln_x = log_approx(x)
+    ln_x := log_approx(x)
     return exp_approx(y * ln_x)
 }
 
@@ -184,9 +184,9 @@ func log_approx(float x) float {
     if x == 1.0 {
         return 0.0
     }
-    let t = (x - 1.0) / (x + 1.0)
-    let t2 = t * t
-    let result = 2.0 * (t + t2 * t / 3.0 + t2 * t2 * t / 5.0 + t2 * t2 * t2 * t / 7.0)
+    t := (x - 1.0) / (x + 1.0)
+    t2 := t * t
+    result := 2.0 * (t + t2 * t / 3.0 + t2 * t2 * t / 5.0 + t2 * t2 * t2 * t / 7.0)
     return result
 }
 
@@ -197,12 +197,12 @@ func exp_approx(float x) float {
     if x < -20.0 {
         return 0.0000001
     }
-    let result = 1.0
-    let term = 1.0
-    var i = 1
+    result := 1.0
+    term := 1.0
+    i := 1
     while i <= 15 {
-        let term_new = term * x / float(i)
-        let result_new = result + term_new
+        term_new := term * x / float(i)
+        result_new := result + term_new
         if abs_approx(term_new) < 1e-10 {
             return result_new
         }
@@ -217,11 +217,11 @@ func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
     }
-    let guess = x / 2.0
-    var result = guess
-    var i = 0
+    guess := x / 2.0
+    result := guess
+    i := 0
     while i < 10 {
-        let new_guess = (result + x / result) / 2.0
+        new_guess := (result + x / result) / 2.0
         if abs_approx(new_guess - result) < 1e-10 {
             return new_guess
         }

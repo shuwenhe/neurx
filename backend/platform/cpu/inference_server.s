@@ -344,12 +344,12 @@ struct weight_cache {
     int miss_count
     bool enabled
 }
-var g_cache_tensors = []cached_tensor{}
-var g_cache_count = 0
-var g_cache_capacity = 2000
-var g_cache_hit_count = 0
-var g_cache_miss_count = 0
-var g_cache_enabled = true
+g_cache_tensors := []cached_tensor{}
+g_cache_count := 0
+g_cache_capacity := 2000
+g_cache_hit_count := 0
+g_cache_miss_count := 0
+g_cache_enabled := true
 
 func get_cache_stats() weight_cache {
     []cached_tensor tensors = []cached_tensor{cap: 2000}
@@ -412,7 +412,7 @@ func float_to_string_simple(float value) string {
 func load_shard_index(string model_dir) string {
     string index_file = model_dir + "/model.safetensors.index.json"
     print("[ShardLoader] Loading index from: " + index_file + "\n")
-    let index_content = read_index_json(index_file)
+    index_content := read_index_json(index_file)
     if len(index_content) == 0 {
         print("[ShardLoader] Failed to read index file\n")
         return ""
@@ -461,7 +461,7 @@ func find_char_after(string text, int char_code, int start_pos) int {
 func get_tensor_shard(string json_content, string tensor_name) string {
     print("[ShardLoader] Looking up tensor: " + tensor_name + "\n")
     if contains_keyword(json_content, tensor_name) {
-        let idx = find_substring(json_content, tensor_name)
+        idx := find_substring(json_content, tensor_name)
         if idx >= 0 {
             print("[ShardLoader] Found tensor in index\n")
         }
@@ -1275,8 +1275,8 @@ func parse_tensor_index([]int metadata_bytes, string tensor_name) []int {
 func load_model_metadata(string model_path) []int {
     []int empty = []int{cap: 0}
     print("[DEBUG] Reading model metadata\n")
-    let model_dir = get_model_directory(model_path)
-    let index_file = model_dir + "/model.safetensors.index.json"
+    model_dir := get_model_directory(model_path)
+    index_file := model_dir + "/model.safetensors.index.json"
     if runtime_file_exists(index_file) {
         print("[DEBUG] Detected sharded model, using shard loader\n")
         return load_model_metadata_sharded(model_dir)
@@ -1365,8 +1365,8 @@ func read_tensor_range(string model_path, int offset, int size) []int {
     if size <= 0 || size > 100000000 {
         return []int{cap: 0}
     }
-    let model_dir = get_model_directory(model_path)
-    let index_file = model_dir + "/model.safetensors.index.json"
+    model_dir := get_model_directory(model_path)
+    index_file := model_dir + "/model.safetensors.index.json"
     if runtime_file_exists(index_file) {
         return read_tensor_range_sharded(model_dir, offset, size)
     }
@@ -1410,8 +1410,8 @@ func tensor_absolute_offset(string model_path, []int metadata_bytes, string tens
     if tensor_idx[2] == 0 {
         return -1
     }
-    let model_dir = get_model_directory(model_path)
-    let index_file = model_dir + "/model.safetensors.index.json"
+    model_dir := get_model_directory(model_path)
+    index_file := model_dir + "/model.safetensors.index.json"
     if runtime_file_exists(index_file) {
         return tensor_idx[0]
     }
@@ -2481,13 +2481,13 @@ func generate_response(string prompt, int max_tokens) string {
     print("[Inference] Max tokens to generate = " + int_to_string(max_tokens) + "\n")
     print("[Inference] Optimization mode = " + optimize_mode + "\n")
     print_cache_stats()
-    let index_file = model_dir + "/model.safetensors.index.json"
+    index_file := model_dir + "/model.safetensors.index.json"
     string model_file = ""
     if runtime_file_exists(index_file) {
         print("[Inference] Detected sharded model at: " + model_dir + "\n")
         model_file = index_file
     } else {
-        let single_file = model_dir + "/model.safetensors"
+        single_file := model_dir + "/model.safetensors"
         if runtime_file_exists(single_file) {
             model_file = single_file
             print("[Inference] Using single model file: " + model_file + "\n")

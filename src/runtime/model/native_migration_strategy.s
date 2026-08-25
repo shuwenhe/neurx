@@ -39,7 +39,7 @@ external func __tokenizer_decode(int handle, int[] tokens) string
 external func __tokenizer_free(int handle) void
 
 func new_tokenizer(string vocab_file) native_tokenizer_handle {
-    let handle_id = __tokenizer_init(vocab_file)
+    handle_id := __tokenizer_init(vocab_file)
     return native_tokenizer_handle {
         handle_id: handle_id,
         initialized: handle_id > 0,

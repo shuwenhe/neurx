@@ -51,7 +51,7 @@ func compute_lora_delta(
         })
     }
 
-    let rank = lora_a[0].len()
+    rank := lora_a[0].len()
     if lora_b.len() != rank {
         return (fusion_error {
             code: "DIMENSION_MISMATCH",
@@ -60,18 +60,18 @@ func compute_lora_delta(
         })
     }
 
-    let mut delta = vec[vec[float]]()
+    delta := vec[vec[float]]()
 
-    let i = 0
+    i := 0
     while i < lora_a.len() {
-        let row_a = lora_a[i]
-        let mut delta_row = vec[float]()
+        row_a := lora_a[i]
+        delta_row := vec[float]()
 
-        let j = 0
+        j := 0
         while j < lora_b[0].len() {
-            let mut sum = 0.0
+            sum := 0.0
 
-            let k = 0
+            k := 0
             while k < rank {
                 sum = sum + row_a[k] * lora_b[k][j]
                 k = k + 1
@@ -107,15 +107,15 @@ func (mut weight_fusion_engine* engine) fuse_weights(
         })
     }
 
-    let mut fused = vec[vec[float]]()
+    fused := vec[vec[float]]()
 
-    let i = 0
+    i := 0
     while i < original_weights.len() {
-        let orig_row = original_weights[i]
-        let delta_row = lora_delta[i]
-        let mut fused_row = vec[float]()
+        orig_row := original_weights[i]
+        delta_row := lora_delta[i]
+        fused_row := vec[float]()
 
-        let j = 0
+        j := 0
         while j < orig_row.len() {
             fused_row.push(orig_row[j] + delta_row[j])
             j = j + 1
@@ -141,15 +141,15 @@ func (mut weight_fusion_engine* engine) unfuse_weights(
         })
     }
 
-    let mut original = vec[vec[float]]()
+    original := vec[vec[float]]()
 
-    let i = 0
+    i := 0
     while i < fused_weights.len() {
-        let fused_row = fused_weights[i]
-        let delta_row = lora_delta[i]
-        let mut orig_row = vec[float]()
+        fused_row := fused_weights[i]
+        delta_row := lora_delta[i]
+        orig_row := vec[float]()
 
-        let j = 0
+        j := 0
         while j < fused_row.len() {
             orig_row.push(fused_row[j] - delta_row[j])
             j = j + 1
@@ -174,7 +174,7 @@ func (weight_fusion_engine* engine) is_fused(module_name: string) bool {
 }
 
 func (weight_fusion_engine* engine) get_fused_modules() &vec[string] {
-    let mut modules = vec[string]()
+    modules := vec[string]()
 
     for name in engine.fused.keys() {
         modules.push(name)
@@ -188,13 +188,13 @@ func (mut weight_fusion_engine* engine) clear_fused_weights() {
 }
 
 func (weight_fusion_engine* engine) get_fused_weights_size_mb() int {
-    let mut total_size = 0
+    total_size := 0
 
     for name in engine.fused.keys() {
         switch engine.fused.get(name) {
             option::some(weights) : {
-                let rows = weights.len()
-                let cols = if rows > 0 { weights[0].len() } else { 0 }
+                rows := weights.len()
+                cols := if rows > 0 { weights[0].len() } else { 0 }
 
                 total_size = total_size + rows * cols * 4
             },
@@ -217,17 +217,17 @@ func fuse_multiple_adapters(
         })
     }
 
-    let mut result_weights = map[string, &vec[vec[float]]]()
+    result_weights := map[string, &vec[vec[float]]]()
 
     for module_name in original_weights.keys() {
         switch original_weights.get(module_name) {
             option::some(orig) : {
-                let mut combined_delta = vec[vec[float]]()
+                combined_delta := vec[vec[float]]()
 
-                let i = 0
+                i := 0
                 while i < orig.len() {
-                    let mut row = vec[float]()
-                    let j = 0
+                    row := vec[float]()
+                    j := 0
                     while j < orig[0].len() {
                         row.push(0.0)
                         j = j + 1
@@ -236,16 +236,16 @@ func fuse_multiple_adapters(
                     i = i + 1
                 }
 
-                let adapter_idx = 0
+                adapter_idx := 0
                 while adapter_idx < lora_deltas.len() {
-                    let deltas = lora_deltas[adapter_idx]
-                    let scale = adapter_scales[adapter_idx]
+                    deltas := lora_deltas[adapter_idx]
+                    scale := adapter_scales[adapter_idx]
 
                     switch deltas.get(module_name) {
                         option::some(delta) : {
-                            let i = 0
+                            i := 0
                             while i < delta.len() {
-                                let j = 0
+                                j := 0
                                 while j < delta[0].len() {
                                     combined_delta[i][j] = combined_delta[i][j] + delta[i][j] * scale
                                     j = j + 1
@@ -259,11 +259,11 @@ func fuse_multiple_adapters(
                     adapter_idx = adapter_idx + 1
                 }
 
-                let mut fused = vec[vec[float]]()
-                let i = 0
+                fused := vec[vec[float]]()
+                i := 0
                 while i < orig.len() {
-                    let mut row = vec[float]()
-                    let j = 0
+                    row := vec[float]()
+                    j := 0
                     while j < orig[0].len() {
                         row.push(orig[i][j] + combined_delta[i][j])
                         j = j + 1

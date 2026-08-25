@@ -15,7 +15,7 @@ struct ToolParserManagerInstance {
     instance: ToolParserManager
 }
 
-var _TOOL_PARSER_MANAGER: ToolParserManagerInstance = ToolParserManagerInstance {
+_TOOL_PARSER_MANAGER := ToolParserManagerInstance {
     instance: ToolParserManager {
         parsers: map::new(),
         lazy_parsers: map::new(),
@@ -55,7 +55,7 @@ impl ToolParserManager {
     }
 
     func list_parsers(self) -> Vec<str> {
-        let mut names = Vec::new()
+        names := Vec::new()
         for (name, _) in self.parsers.iter() {
             names.push(name.clone())
         }
@@ -66,7 +66,7 @@ impl ToolParserManager {
     }
 
     func get_parser_for_model(self, model_name: str) -> Option<ToolParser> {
-        let parser_name = infer_parser_from_model_name(model_name)
+        parser_name := infer_parser_from_model_name(model_name)
         self.get_parser(parser_name)
     }
 }

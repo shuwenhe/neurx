@@ -20,9 +20,9 @@ struct inference_response {
     float latency_ms
 }
 
-var g_cached_engine real_text_engine_state = real_text_engine_state{}
-var g_cached_engine_path string = ""
-var g_cached_engine_loaded bool = false
+g_cached_engine := real_text_engine_state{}
+g_cached_engine_path := ""
+g_cached_engine_loaded := false
 
 func parse_json_string(string json_str, string key) string {
     start_key := "\"" + key + "\":"

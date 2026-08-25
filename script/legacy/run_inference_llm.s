@@ -3,10 +3,10 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.io.println
 
 func main() {
-    let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    let inference_source = runtime_env_get("NEURX_INFERENCE_SOURCE", project_root + "/inference/production_inference.s")
-    let checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", runtime_env_get("NEURX_INFER_CHECKPOINT", project_root + "/checkpoint/NeurX-1.3"))
-    let output_dir = runtime_env_get("NEURX_INFER_OUTPUT_DIR", project_root + "/artifact/inference_output")
+    project_root := runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
+    inference_source := runtime_env_get("NEURX_INFERENCE_SOURCE", project_root + "/inference/production_inference.s")
+    checkpoint_dir := runtime_env_get("NEURX_CHECKPOINT_DIR", runtime_env_get("NEURX_INFER_CHECKPOINT", project_root + "/checkpoint/NeurX-1.3"))
+    output_dir := runtime_env_get("NEURX_INFER_OUTPUT_DIR", project_root + "/artifact/inference_output")
     println("NeurX LLM Inference Orchestrator (S Lang)")
     println("")
     println("Project root  : " + project_root)

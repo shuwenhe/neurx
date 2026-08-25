@@ -21,31 +21,31 @@ func apply_rollout_correction_to_advantages(
     Tensor response_mask,
     RolloutCorrectionConfig config
 ) -> RolloutCorrectionResult {
-    let is_weights = compute_is_weights(
+    is_weights := compute_is_weights(
         new_log_probs,
         rollout_log_probs,
         old_log_probs,
         config,
         response_mask
     )
-    let rs_results = compute_rejection_sampling(
+    rs_results := compute_rejection_sampling(
         new_log_probs,
         rollout_log_probs,
         old_log_probs,
         config,
         response_mask
     )
-    let corrected_mask = response_mask
+    corrected_mask := response_mask
     if rs_results.len() > 0 {
-        let combined_rs = combine_rejection_results(rs_results)
+        combined_rs := combine_rejection_results(rs_results)
         corrected_mask = apply_rejection_to_mask(response_mask, combined_rs)
     }
-    let corrected_advantages = apply_is_weights_to_advantages(
+    corrected_advantages := apply_is_weights_to_advantages(
         advantages,
         is_weights,
         corrected_mask
     )
-    let statistics = collect_statistics(is_weights, rs_results, corrected_mask, response_mask)
+    statistics := collect_statistics(is_weights, rs_results, corrected_mask, response_mask)
     return rollout_correction_result{
         is_weights: is_weights,
         rs_results: rs_results,
@@ -64,31 +64,31 @@ func apply_rollout_correction_to_loss(
     Tensor response_mask,
     RolloutCorrectionConfig config
 ) -> RolloutCorrectionResult {
-    let is_weights = compute_is_weights(
+    is_weights := compute_is_weights(
         new_log_probs,
         rollout_log_probs,
         old_log_probs,
         config,
         response_mask
     )
-    let rs_results = compute_rejection_sampling(
+    rs_results := compute_rejection_sampling(
         new_log_probs,
         rollout_log_probs,
         old_log_probs,
         config,
         response_mask
     )
-    let corrected_mask = response_mask
+    corrected_mask := response_mask
     if rs_results.len() > 0 {
-        let combined_rs = combine_rejection_results(rs_results)
+        combined_rs := combine_rejection_results(rs_results)
         corrected_mask = apply_rejection_to_mask(response_mask, combined_rs)
     }
-    let corrected_loss = apply_is_weights_to_loss(
+    corrected_loss := apply_is_weights_to_loss(
         policy_loss,
         is_weights,
         corrected_mask
     )
-    let statistics = collect_statistics(is_weights, rs_results, corrected_mask, response_mask)
+    statistics := collect_statistics(is_weights, rs_results, corrected_mask, response_mask)
     return rollout_correction_result{
         is_weights: is_weights,
         rs_results: rs_results,
@@ -107,20 +107,20 @@ func compute_policy_loss_bypass_mode(
     RolloutCorrectionConfig config,
     f32 clip_epsilon
 ) -> (tensor, rollout_correction_result) {
-    let ratio = exp(new_log_probs - rollout_log_probs)
-    let policy_loss: Tensor
+    ratio := exp(new_log_probs - rollout_log_probs)
+    policy_loss := Tensor()
     match config.loss_type {
         loss_type.PPO_CLIP => {
-            let surr1 = ratio * advantages
-            let surr2 = clamp(ratio, 1.0 - clip_epsilon, 1.0 + clip_epsilon) * advantages
+            surr1 := ratio * advantages
+            surr2 := clamp(ratio, 1.0 - clip_epsilon, 1.0 + clip_epsilon) * advantages
             policy_loss = -minimum(surr1, surr2)
         },
         loss_type.REINFORCE => {
             policy_loss = -new_log_probs * advantages
         }
     }
-    let old_log_probs = rollout_log_probs
-    let correction_result = apply_rollout_correction_to_loss(
+    old_log_probs := rollout_log_probs
+    correction_result := apply_rollout_correction_to_loss(
         policy_loss,
         new_log_probs,
         rollout_log_probs,
@@ -140,11 +140,11 @@ func compute_policy_loss_decoupled_mode(
     RolloutCorrectionConfig config,
     f32 clip_epsilon
 ) -> (tensor, rollout_correction_result) {
-    let ratio = exp(new_log_probs - old_log_probs)
-    let surr1 = ratio * advantages
-    let surr2 = clamp(ratio, 1.0 - clip_epsilon, 1.0 + clip_epsilon) * advantages
-    let policy_loss = -minimum(surr1, surr2)
-    let correction_result = apply_rollout_correction_to_loss(
+    ratio := exp(new_log_probs - old_log_probs)
+    surr1 := ratio * advantages
+    surr2 := clamp(ratio, 1.0 - clip_epsilon, 1.0 + clip_epsilon) * advantages
+    policy_loss := -minimum(surr1, surr2)
+    correction_result := apply_rollout_correction_to_loss(
         policy_loss,
         new_log_probs,
         rollout_log_probs,
@@ -161,18 +161,18 @@ func collect_statistics(
     Tensor corrected_mask,
     Tensor original_mask
 ) -> map[string]f32 {
-    let stats = map[string]f32{}
-    let is_stats = compute_is_statistics(is_weights)
+    stats := map[string]f32{}
+    is_stats := compute_is_statistics(is_weights)
     for key, value in is_stats {
         stats[key] = value
     }
-    let rs_stats = compute_rs_statistics(rs_results)
+    rs_stats := compute_rs_statistics(rs_results)
     for key, value in rs_stats {
         stats[key] = value
     }
-    let original_count = original_mask.sum()
-    let corrected_count = corrected_mask.sum()
-    let total_rejection_rate = 1.0 - (corrected_count / (original_count + 1e-8))
+    original_count := original_mask.sum()
+    corrected_count := corrected_mask.sum()
+    total_rejection_rate := 1.0 - (corrected_count / (original_count + 1e-8))
     stats["rc_original_tokens"] = original_count.item()
     stats["rc_corrected_tokens"] = corrected_count.item()
     stats["rc_total_rejection_rate"] = total_rejection_rate.item()

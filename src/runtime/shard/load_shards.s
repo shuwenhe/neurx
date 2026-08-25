@@ -95,13 +95,13 @@ func main() {
     println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     println("loadEnglish textdata")
     println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    let (dir_check, dir_code) = command("test -d " + shell_escape(shard_dir))
+    (dir_check, dir_code) := command("test -d " + shell_escape(shard_dir))
     if dir_code != 0 {
         println("Error: Shard directory not found: " + shard_dir)
         return 1
     }
     string list_cmd = "sh -c " + shell_escape("ls -1 " + shard_dir + "/training_data-*.jsonl.gz 2>/dev/null | sort | head -n " + int_to_str(max_shards))
-    let (list_output, _) = command(list_cmd)
+    (list_output, _) := command(list_cmd)
     string shard_list = trim(list_output)
     int total_samples = 0
     int shard_count = 0
@@ -123,7 +123,7 @@ func main() {
         }
         shard_count = shard_count + 1
         string count_cmd = "sh -c " + shell_escape("gzip -dc " + shell_escape(shard_file) + " 2>/dev/null | wc -l")
-        let (count_output, _) = command(count_cmd)
+        (count_output, _) := command(count_cmd)
         int samples_in_shard = parse_int(count_output, 0)
         if samples_in_shard > max_samples_per_shard {
             samples_in_shard = max_samples_per_shard
@@ -131,7 +131,7 @@ func main() {
         total_samples = total_samples + samples_in_shard
         if len(first_sample) == 0 {
             string preview_cmd = "sh -c " + shell_escape("gzip -dc " + shell_escape(shard_file) + " 2>/dev/null | head -1 | cut -c1-80")
-            let (preview_output, _) = command(preview_cmd)
+            (preview_output, _) := command(preview_cmd)
             first_sample = trim(preview_output)
         }
         println("  [" + int_to_str(shard_count) + "] " + shard_file)

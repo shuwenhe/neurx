@@ -66,9 +66,9 @@ func test_model_presets() bool {
 }
 
 func test_foundation_model_runtime_materialization() bool {
-    var model7 = new_foundation_model("7B", "rope")
-    var model13 = new_foundation_model("13B", "learned")
-    var model70 = new_foundation_model("70B", "rope")
+    model7 := new_foundation_model("7B", "rope")
+    model13 := new_foundation_model("13B", "learned")
+    model70 := new_foundation_model("70B", "rope")
     []float input7 = build_hidden_states(1, 2, 8)
     []float input13 = build_hidden_states(1, 2, 8)
     []float input70 = build_hidden_states(1, 2, 8)
@@ -88,7 +88,7 @@ func test_foundation_model_runtime_materialization() bool {
 }
 
 func test_end_to_end_forward() bool {
-    var model = new_foundation_model("7B", "rope")
+    model := new_foundation_model("7B", "rope")
     int batch_size = 1
     int seq_len = 2
     []float input = build_hidden_states(batch_size, seq_len, 8)

@@ -104,7 +104,7 @@ struct mo_effn_layer {
         this.training = true
         this.experts = []
         for i in range(config.num_experts):
-            let expert = moe_expert{
+            expert := moe_expert{
                 id=i,
                 up_proj=new linear(config.hidden_size, config.intermediate_size),
                 down_proj=new linear(config.intermediate_size, config.hidden_size),
@@ -115,7 +115,7 @@ struct mo_effn_layer {
         this.shared_experts = []
         if config.num_shared_experts > 0:
             for i in range(config.num_shared_experts) {
-                let shared_exp = moe_expert{
+                shared_exp := moe_expert{
                     id=config.num_experts + i,
                     up_proj=new linear(config.hidden_size, config.intermediate_size),
                     down_proj=new linear(config.intermediate_size, config.hidden_size),

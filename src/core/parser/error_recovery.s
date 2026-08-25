@@ -4,7 +4,7 @@ use neurx.parser.types
 use neurx.parser.text_parser
 
 func attempt_recovery(error_msg: string, text: string, strategy: int) ParseResult {
-    let result = create_parse_result()
+    result := create_parse_result()
     result.raw_output = text
     result.error_msg = error_msg
 
@@ -19,17 +19,17 @@ func attempt_recovery(error_msg: string, text: string, strategy: int) ParseResul
 }
 
 func skip_invalid(text: string) ParseResult {
-    let result = create_parse_result()
+    result := create_parse_result()
     result.raw_output = text
     result.recovery_applied = true
     result.recovery_method = "skip_invalid"
 
-    let recovered = ""
-    let i = 0
-    let valid_count = 0
+    recovered := ""
+    i := 0
+    valid_count := 0
 
     while i < len(text) {
-        let ch = text[i]
+        ch := text[i]
 
         if (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
            (ch >= '0' && ch <= '9') || ch == ' ' || ch == '\n' ||
@@ -54,11 +54,11 @@ func skip_invalid(text: string) ParseResult {
 }
 
 func attempt_fix(text: string) ParseResult {
-    let result = create_parse_result()
+    result := create_parse_result()
     result.raw_output = text
     result.recovery_applied = true
 
-    let trimmed = trim_string(text)
+    trimmed := trim_string(text)
 
     if trimmed[0] == '{' || trimmed[0] == '[' {
         return fix_json(text)
@@ -72,12 +72,12 @@ func attempt_fix(text: string) ParseResult {
 }
 
 func fix_json(text: string) ParseResult {
-    let result = create_parse_result()
+    result := create_parse_result()
     result.recovery_method = "fix_json"
     result.raw_output = text
 
-    let trimmed = trim_string(text)
-    let fixed = ""
+    trimmed := trim_string(text)
+    fixed := ""
 
     if trimmed[0] != '{' && trimmed[0] != '[' {
         if contains_json_content(trimmed) {
@@ -97,8 +97,8 @@ func fix_json(text: string) ParseResult {
         }
     }
 
-    let quote_count = 0
-    let i = 0
+    quote_count := 0
+    i := 0
     while i < len(fixed) {
         if fixed[i] == '"' {
             quote_count = quote_count + 1
@@ -118,38 +118,38 @@ func fix_json(text: string) ParseResult {
 }
 
 func contains_json_content(text: string) bool {
-    let has_colon = find_substring(text, ":", 0) >= 0
-    let has_comma = find_substring(text, ",", 0) >= 0
-    let has_quotes = find_substring(text, "\"", 0) >= 0
+    has_colon := find_substring(text, ":", 0) >= 0
+    has_comma := find_substring(text, ",", 0) >= 0
+    has_quotes := find_substring(text, "\"", 0) >= 0
 
     return has_colon || (has_comma && has_quotes)
 }
 
 func fix_xml(text: string) ParseResult {
-    let result = create_parse_result()
+    result := create_parse_result()
     result.recovery_method = "fix_xml"
     result.raw_output = text
 
-    let trimmed = trim_string(text)
-    let fixed = trimmed
+    trimmed := trim_string(text)
+    fixed := trimmed
 
-    let open_tags = count_occurrences(fixed, "<")
-    let close_tags = count_occurrences(fixed, ">")
+    open_tags := count_occurrences(fixed, "<")
+    close_tags := count_occurrences(fixed, ">")
 
     if close_tags < open_tags {
-        let i = 0
+        i := 0
         while i < len(fixed) - open_tags + close_tags {
             fixed = fixed + ">"
             i = i + 1
         }
     }
 
-    let closing_slashes = count_occurrences(fixed, "</")
-    let opening_tags = count_occurrences(fixed, "<") - count_occurrences(fixed, "</")
+    closing_slashes := count_occurrences(fixed, "</")
+    opening_tags := count_occurrences(fixed, "<") - count_occurrences(fixed, "</")
 
     if opening_tags > closing_slashes {
 
-        let last_tag = extract_last_tag(fixed)
+        last_tag := extract_last_tag(fixed)
         if len(last_tag) > 0 {
             fixed = fixed + "</" + last_tag + ">"
         }
@@ -163,11 +163,11 @@ func fix_xml(text: string) ParseResult {
 }
 
 func fix_common_issues(text: string) ParseResult {
-    let result = create_parse_result()
+    result := create_parse_result()
     result.recovery_method = "fix_common_issues"
     result.raw_output = text
 
-    let fixed = text
+    fixed := text
 
     fixed = replace_all(fixed, """, "\"")
     fixed = replace_all(fixed, """, "\"")
@@ -188,22 +188,22 @@ func fix_common_issues(text: string) ParseResult {
 }
 
 func truncate_at_error(text: string, error_msg: string) ParseResult {
-    let result = create_parse_result()
+    result := create_parse_result()
     result.recovery_method = "truncate"
     result.raw_output = text
 
-    let error_pos = 0
+    error_pos := 0
 
-    let pos_patterns = []string{"position ", "at ", "line "}
-    let i = 0
+    pos_patterns := []string{"position ", "at ", "line "}
+    i := 0
 
     while i < len(pos_patterns) {
-        let pos = find_substring(error_msg, pos_patterns[i], 0)
+        pos := find_substring(error_msg, pos_patterns[i], 0)
         if pos >= 0 {
 
-            let num_start = pos + len(pos_patterns[i])
-            let num_str = ""
-            let j = num_start
+            num_start := pos + len(pos_patterns[i])
+            num_str := ""
+            j := num_start
 
             while j < len(error_msg) && error_msg[j] >= '0' && error_msg[j] <= '9' {
                 num_str = num_str + string(error_msg[j])
@@ -234,9 +234,9 @@ func truncate_at_error(text: string, error_msg: string) ParseResult {
 
 func truncate_at_last_token(text: string) string {
 
-    let last_space = -1
-    let last_newline = -1
-    let i = 0
+    last_space := -1
+    last_newline := -1
+    i := 0
 
     while i < len(text) {
         if text[i] == ' ' {
@@ -257,12 +257,12 @@ func truncate_at_last_token(text: string) string {
 }
 
 func fallback_to_text(text: string) ParseResult {
-    let result = create_parse_result()
+    result := create_parse_result()
     result.recovery_method = "fallback_to_text"
     result.raw_output = text
     result.format = 0
 
-    let paragraphs = split_paragraphs(text)
+    paragraphs := split_paragraphs(text)
 
     result.parsed_output = text
     result.status = 4
@@ -272,9 +272,9 @@ func fallback_to_text(text: string) ParseResult {
 }
 
 func extract_last_tag(xml: string) string {
-    let last_tag_start = -1
-    let last_tag_end = -1
-    let i = 0
+    last_tag_start := -1
+    last_tag_end := -1
+    i := 0
 
     while i < len(xml) {
         if xml[i] == '<' && (i == 0 || xml[i - 1] != '<') {
@@ -286,9 +286,9 @@ func extract_last_tag(xml: string) string {
     }
 
     if last_tag_start >= 0 && last_tag_end > last_tag_start {
-        let tag_content = xml[last_tag_start + 1:last_tag_end]
+        tag_content := xml[last_tag_start + 1:last_tag_end]
 
-        let space_pos = find_substring(tag_content, " ", 0)
+        space_pos := find_substring(tag_content, " ", 0)
         if space_pos > 0 {
             return tag_content[0:space_pos]
         } else {
@@ -300,8 +300,8 @@ func extract_last_tag(xml: string) string {
 }
 
 func parse_int(s: string) int {
-    let result = 0
-    let i = 0
+    result := 0
+    i := 0
 
     while i < len(s) && s[i] >= '0' && s[i] <= '9' {
         result = result * 10 + int(s[i] - '0')

@@ -15,8 +15,8 @@ struct real_training_config {
 }
 
 func default_training_config() real_training_config {
-    let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    let data_root = runtime_env_get("NEURX_PRETRAIN_DATA_DIR", project_root + "/dataset/pretrain")
+    project_root := runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
+    data_root := runtime_env_get("NEURX_PRETRAIN_DATA_DIR", project_root + "/dataset/pretrain")
     real_training_config {
         manifest_path: runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json"),
         data_dir: data_root,
@@ -52,7 +52,7 @@ func run_real_training_loop(real_training_config config) int {
             return 1
         }
     }
-    let state = run_training_loop(manifest_path, config.max_steps, config.batch_size, config.seq_length, config.vocab_size, config.hidden_dim, config.learning_rate)
+    state := run_training_loop(manifest_path, config.max_steps, config.batch_size, config.seq_length, config.vocab_size, config.hidden_dim, config.learning_rate)
     println("Final step: " + int_to_str(state.step, 0))
     println("Tokens seen: " + int_to_str(state.tokens_seen, 0))
     0

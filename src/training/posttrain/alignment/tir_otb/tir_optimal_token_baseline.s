@@ -50,8 +50,8 @@ func new_tir_otb_trainer(
     *model value,
     *model reference
 ) -> TIROptimalTokenBaselineTrainer {
-    let optimizer = adamw_optimizer(policy.parameters(), config.learning_rate)
-    let value_optimizer: *optimizer = nil
+    optimizer := adamw_optimizer(policy.parameters(), config.learning_rate)
+    value_optimizer := nil
     if config.use_learned_baseline {
         value_optimizer = adamw_optimizer(value.parameters(), config.learning_rate * 0.1)
     }
@@ -84,16 +84,16 @@ func (tir_optimal_token_baseline_trainer* trainer) compute_tir_token_baseline(
     Tensor is_weights,
     Tensor positions
 ) -> Tensor {
-    let batch_size = tokens.shape[0]
-    let seq_len = tokens.shape[1]
-    let baselines = tensor_zeros([batch_size, seq_len])
+    batch_size := tokens.shape[0]
+    seq_len := tokens.shape[1]
+    baselines := tensor_zeros([batch_size, seq_len])
     for b in 0..batch_size {
         for t in 0..seq_len {
-            let token_id = tokens[b][t].item_i64()
-            let position = positions[b][t].item_i64()
-            let reward = rewards[b][t].item()
-            let is_weight = is_weights[b][t].item()
-            let weighted_reward = reward * is_weight
+            token_id := tokens[b][t].item_i64()
+            position := positions[b][t].item_i64()
+            reward := rewards[b][t].item()
+            is_weight := is_weights[b][t].item()
+            weighted_reward := reward * is_weight
             let key: i64
             if trainer.config.use_position_baseline {
                 key = position
@@ -101,8 +101,8 @@ func (tir_optimal_token_baseline_trainer* trainer) compute_tir_token_baseline(
                 key = token_id
             }
             if key in trainer.token_baselines {
-                let old_baseline = trainer.token_baselines[key]
-                let new_baseline = trainer.config.baseline_ema_alpha * weighted_reward +
+                old_baseline := trainer.token_baselines[key]
+                new_baseline := trainer.config.baseline_ema_alpha * weighted_reward +
                                  (1.0 - trainer.config.baseline_ema_alpha) * old_baseline
                 trainer.token_baselines[key] = new_baseline
                 baselines[b][t] = tensor_scalar(new_baseline)
@@ -121,7 +121,7 @@ func (tir_optimal_token_baseline_trainer* trainer) compute_tir_advantages(
     Tensor is_weights,
     Tensor positions
 ) -> Tensor {
-    let baselines: Tensor
+    baselines := Tensor()
     if trainer.config.use_learned_baseline {
         baselines = trainer.value_model.forward(tokens)
     } else {
@@ -130,7 +130,7 @@ func (tir_optimal_token_baseline_trainer* trainer) compute_tir_advantages(
     if trainer.config.compute_variance_reduction {
         trainer.variance_before = compute_variance_tensor(rewards)
     }
-    let advantages = (rewards - baselines) * is_weights
+    advantages := (rewards - baselines) * is_weights
     if trainer.config.compute_variance_reduction {
         trainer.variance_after = compute_variance_tensor(advantages)
         trainer.variance_reduction_ratio =
@@ -138,8 +138,8 @@ func (tir_optimal_token_baseline_trainer* trainer) compute_tir_advantages(
             (trainer.variance_before + 1e-8)
     }
     if trainer.config.use_whitening {
-        let adv_mean = advantages.mean()
-        let adv_std = advantages.std()
+        adv_mean := advantages.mean()
+        adv_std := advantages.std()
         advantages = (advantages - adv_mean) / (adv_std + 1e-8)
     }
     return advantages
@@ -151,66 +151,66 @@ func (tir_optimal_token_baseline_trainer* trainer) train_step(
     []tensor rollout_log_probs,
     []tensor rewards
 ) -> (f32, f32, f32, f32) {
-    let batch_size = prompts.len()
-    let inputs: []tensor = []
-    let all_tokens: []tensor = []
-    let positions: []tensor = []
+    batch_size := prompts.len()
+    inputs := []
+    all_tokens := []
+    positions := []
     for i in 0..batch_size {
-        let input = concat(prompts[i], responses[i])
+        input := concat(prompts[i], responses[i])
         inputs.push(input)
         all_tokens.push(responses[i])
-        let seq_len = responses[i].shape[0]
-        let pos = tensor_arange(seq_len)
+        seq_len := responses[i].shape[0]
+        pos := tensor_arange(seq_len)
         positions.push(pos)
     }
-    let ref_log_probs: []tensor = []
+    ref_log_probs := []
     for input in inputs {
-        let logits = trainer.reference_model.forward(input)
-        let log_probs = log_softmax(logits, dim: -1)
+        logits := trainer.reference_model.forward(input)
+        log_probs := log_softmax(logits, dim: -1)
         ref_log_probs.push(log_probs)
     }
-    let total_policy_loss: f32 = 0.0
-    let total_value_loss: f32 = 0.0
-    let total_entropy: f32 = 0.0
-    let total_is_weight: f32 = 0.0
-    let num_updates = 0
+    total_policy_loss := 0.0
+    total_value_loss := 0.0
+    total_entropy := 0.0
+    total_is_weight := 0.0
+    num_updates := 0
     for epoch in 0..trainer.config.num_epochs {
         for i in 0..batch_size {
-            let logits = trainer.policy_model.forward(inputs[i])
-            let new_log_probs = log_softmax(logits, dim: -1)
-            let log_ratio = new_log_probs - ref_log_probs[i]
-            let ratio = exp(log_ratio)
-            let is_weights = clamp(ratio, 1.0 / trainer.config.is_threshold, trainer.config.is_threshold)
+            logits := trainer.policy_model.forward(inputs[i])
+            new_log_probs := log_softmax(logits, dim: -1)
+            log_ratio := new_log_probs - ref_log_probs[i]
+            ratio := exp(log_ratio)
+            is_weights := clamp(ratio, 1.0 / trainer.config.is_threshold, trainer.config.is_threshold)
             if trainer.config.use_is_batch_normalize {
-                let mean_weight = is_weights.mean()
+                mean_weight := is_weights.mean()
                 is_weights = is_weights / (mean_weight + 1e-8)
             }
             trainer.update_is_weight_stats(is_weights)
-            let advantages = trainer.compute_tir_advantages(
+            advantages := trainer.compute_tir_advantages(
                 all_tokens[i],
                 rewards[i],
                 is_weights,
                 positions[i]
             )
-            let policy_obj: Tensor
+            policy_obj := Tensor()
             if trainer.config.use_clipping {
-                let old_log_probs = rollout_log_probs[i]
-                let ratio = exp(new_log_probs - old_log_probs)
-                let surr1 = ratio * advantages
-                let surr2 = clamp(ratio, 1.0 - trainer.config.clip_epsilon, 1.0 + trainer.config.clip_epsilon) * advantages
+                old_log_probs := rollout_log_probs[i]
+                ratio := exp(new_log_probs - old_log_probs)
+                surr1 := ratio * advantages
+                surr2 := clamp(ratio, 1.0 - trainer.config.clip_epsilon, 1.0 + trainer.config.clip_epsilon) * advantages
                 policy_obj = minimum(surr1, surr2)
             } else {
                 policy_obj = new_log_probs * advantages
             }
-            let policy_loss = -policy_obj.mean()
-            let probs = exp(new_log_probs)
-            let entropy = -(probs * new_log_probs).sum()
-            let value_loss = tensor_zeros([1])
+            policy_loss := -policy_obj.mean()
+            probs := exp(new_log_probs)
+            entropy := -(probs * new_log_probs).sum()
+            value_loss := tensor_zeros([1])
             if trainer.config.use_learned_baseline {
-                let predicted_values = trainer.value_model.forward(all_tokens[i])
+                predicted_values := trainer.value_model.forward(all_tokens[i])
                 value_loss = (predicted_values - rewards[i]).pow(2).mean()
             }
-            let loss = policy_loss - trainer.config.entropy_coeff * entropy
+            loss := policy_loss - trainer.config.entropy_coeff * entropy
             loss.backward()
             if trainer.config.use_learned_baseline {
                 value_loss.backward()
@@ -240,12 +240,12 @@ func (tir_optimal_token_baseline_trainer* trainer) train_step(
 }
 
 func (tir_optimal_token_baseline_trainer* trainer) update_is_weight_stats(Tensor is_weights) {
-    let values = is_weights.flatten()
+    values := is_weights.flatten()
     trainer.is_weight_stats.mean = values.mean().item()
     trainer.is_weight_stats.std = values.std().item()
     trainer.is_weight_stats.min = values.min().item()
     trainer.is_weight_stats.max = values.max().item()
-    let clipped = ((is_weights < 1.0 / trainer.config.is_threshold) |
+    clipped := ((is_weights < 1.0 / trainer.config.is_threshold) |
                    (is_weights > trainer.config.is_threshold)).to_float()
     trainer.is_weight_stats.clip_fraction = clipped.mean().item()
 }
@@ -255,8 +255,8 @@ func (tir_optimal_token_baseline_trainer* trainer) get_variance_reduction() -> f
 }
 
 func compute_variance_tensor(Tensor x) -> f32 {
-    let mean = x.mean()
-    let variance = (x - mean).pow(2).mean()
+    mean := x.mean()
+    variance := (x - mean).pow(2).mean()
     return variance.item()
 }
 

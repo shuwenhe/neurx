@@ -57,7 +57,7 @@ func (lora_config* config) validate() result[(), lora_config_error] {
         })
     }
 
-    let valid_bias = config.bias == "none" ||
+    valid_bias := config.bias == "none" ||
                      config.bias == "lora_only" ||
                      config.bias == "all"
     if !valid_bias {
@@ -80,7 +80,7 @@ func (lora_config* config) validate() result[(), lora_config_error] {
 func lora_config::from_dict(
     config_dict: *map[string, string]
 ) result[lora_config, lora_config_error] {
-    let mut config = lora_config::default()
+    config := lora_config::default()
 
     switch config_dict.get("lora_rank") {
         option::some(val) : {
@@ -180,7 +180,7 @@ func (lora_config* config) should_save_full_weights(module_name: string) bool {
 }
 
 func (lora_config* config) summary() string {
-    let mut s = "LoRA Configuration:\n"
+    s := "LoRA Configuration:\n"
     s = s + "  rank: " + config.lora_rank.to_string() + "\n"
     s = s + "  alpha: " + config.lora_alpha.to_string() + "\n"
     s = s + "  dropout: " + config.lora_dropout.to_string() + "\n"

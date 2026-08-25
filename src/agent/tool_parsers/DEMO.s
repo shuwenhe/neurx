@@ -20,35 +20,35 @@ func main() {
     print("PART 1: JSON Schema Parsing\n")
     print("="*60 + "\n\n")
 
-    let simple_schema = schema_parser.create_string_schema(1, 100, "")
+    simple_schema := schema_parser.create_string_schema(1, 100, "")
     print("Simple String Schema:\n")
     print("  Type: " + simple_schema.type_name + "\n")
     print("  Min length: " + int_to_string(simple_schema.min_length) + "\n")
     print("  Max length: " + int_to_string(simple_schema.max_length) + "\n\n")
 
-    let prop1 = schema_types.json_property{
+    prop1 := schema_types.json_property{
         name: "name",
         schema: schema_parser.create_string_schema(1, 50, ""),
         required: true,
         description: "User name"
     }
 
-    let prop2 = schema_types.json_property{
+    prop2 := schema_types.json_property{
         name: "email",
         schema: schema_parser.create_string_schema(5, 100, ""),
         required: true,
         description: "Email address"
     }
 
-    let obj_props = vec_new()
+    obj_props := vec_new()
     obj_props.append(prop1)
     obj_props.append(prop2)
 
-    let obj_required = vec_new()
+    obj_required := vec_new()
     obj_required.append("name")
     obj_required.append("email")
 
-    let object_schema = schema_parser.create_object_schema(obj_props, obj_required)
+    object_schema := schema_parser.create_object_schema(obj_props, obj_required)
 
     print("Object Schema (User):\n")
     print("  Type: " + object_schema.type_name + "\n")
@@ -59,14 +59,14 @@ func main() {
     print("PART 2: Token Constraint Generation\n")
     print("="*60 + "\n\n")
 
-    let init_constraint = constraint_generator.generate_initial_constraint(&object_schema)
+    init_constraint := constraint_generator.generate_initial_constraint(&object_schema)
     print("Initial constraint for object schema:\n")
     print("  Allowed tokens: " + int_to_string(len(init_constraint.allowed_tokens)) + "\n")
     print("  Context: " + init_constraint.context + "\n")
     print("  State: " + int_to_string(init_constraint.state) + "\n\n")
 
-    let partial_output = "{\"name\": \""
-    let next_constraint = constraint_generator.get_next_constraint(
+    partial_output := "{\"name\": \""
+    next_constraint := constraint_generator.get_next_constraint(
         partial_output,
         &object_schema,
         &schema_types.create_empty_parse_context()
@@ -79,7 +79,7 @@ func main() {
     print("PART 3: Structured Sampling with Constraints\n")
     print("="*60 + "\n\n")
 
-    let sampler = structured_sampler.create_structured_sampler(
+    sampler := structured_sampler.create_structured_sampler(
         &object_schema,
         schema_types.CONSTRAINT_STRICT
     )
@@ -87,8 +87,8 @@ func main() {
     print("  Mode: " + sampler.mode + "\n")
     print("  Initial allowed tokens: " + int_to_string(len(sampler.allowed_next)) + "\n\n")
 
-    let sample_logits = vec_new()
-    let i = 0
+    sample_logits := vec_new()
+    i := 0
     while i < 256 {
         sample_logits.append(1.0)
         i = i + 1
@@ -99,7 +99,7 @@ func main() {
     print("  Before filtering:\n")
     print("    - All logits: 1.0\n")
 
-    let filtered_logits = structured_sampler.filter_logits(&sampler, sample_logits)
+    filtered_logits := structured_sampler.filter_logits(&sampler, sample_logits)
     print("  After constraint filtering:\n")
     print("    - Allowed positions: normal logit\n")
     print("    - Disallowed positions: -1000000.0\n\n")
@@ -108,13 +108,13 @@ func main() {
     print("PART 4: Function Calling Support\n")
     print("="*60 + "\n\n")
 
-    let func_schema = structured_sampler.create_function_call_schema()
+    func_schema := structured_sampler.create_function_call_schema()
     print("Function Call Schema:\n")
     print("  Type: " + func_schema.type_name + "\n")
     print("  Properties: " + int_to_string(len(func_schema.properties)) + "\n")
     print("  Required: " + int_to_string(len(func_schema.required)) + "\n\n")
 
-    let func_output = "{\"name\": \"send_email\", \"arguments\": \"{\\\"to\\\": \\\"user@example.com\\\"}\"}"
+    func_output := "{\"name\": \"send_email\", \"arguments\": \"{\\\"to\\\": \\\"user@example.com\\\"}\"}"
     print("Example function call output:\n")
     print(func_output + "\n\n")
 
@@ -122,28 +122,28 @@ func main() {
     print("PART 5: Multi-Format Output\n")
     print("="*60 + "\n\n")
 
-    let json_output = "{\"name\": \"Alice\", \"email\": \"alice@example.com\"}"
+    json_output := "{\"name\": \"Alice\", \"email\": \"alice@example.com\"}"
 
     print("JSON Format:\n")
     print(json_output + "\n\n")
 
     print("Prettified JSON:\n")
-    let pretty_json = output_formatter.prettify_json(json_output)
+    pretty_json := output_formatter.prettify_json(json_output)
     print(pretty_json + "\n\n")
 
     print("Minified JSON:\n")
-    let minified = output_formatter.minify_json(json_output)
+    minified := output_formatter.minify_json(json_output)
     print(minified + "\n\n")
 
     print("="*60 + "\n")
     print("PART 6: Output Validation\n")
     print("="*60 + "\n\n")
 
-    let valid_output = "{\"name\": \"Bob\", \"email\": \"bob@example.com\"}"
+    valid_output := "{\"name\": \"Bob\", \"email\": \"bob@example.com\"}"
     print("Test 1: Valid output\n")
     print("  Output: " + valid_output + "\n")
 
-    let valid_result = schema_validator.validate_against_schema(valid_output, &object_schema)
+    valid_result := schema_validator.validate_against_schema(valid_output, &object_schema)
     print("  Result: ")
     if valid_result.is_valid {
         print("✅ VALID\n")
@@ -152,11 +152,11 @@ func main() {
     }
     print("  Errors: " + int_to_string(len(valid_result.errors)) + "\n\n")
 
-    let invalid_output = "{\"name\": \"Charlie\"}"
+    invalid_output := "{\"name\": \"Charlie\"}"
     print("Test 2: Missing required field\n")
     print("  Output: " + invalid_output + "\n")
 
-    let invalid_result = schema_validator.validate_against_schema(invalid_output, &object_schema)
+    invalid_result := schema_validator.validate_against_schema(invalid_output, &object_schema)
     print("  Result: ")
     if invalid_result.is_valid {
         print("✅ VALID\n")
@@ -173,21 +173,21 @@ func main() {
     print("PART 7: Batch Constraint Processing\n")
     print("="*60 + "\n\n")
 
-    let samplers = vec_new()
-    let j = 0
+    samplers := vec_new()
+    j := 0
     while j < 4 {
-        let s = structured_sampler.create_structured_sampler(&object_schema, schema_types.CONSTRAINT_STRICT)
+        s := structured_sampler.create_structured_sampler(&object_schema, schema_types.CONSTRAINT_STRICT)
         samplers.append(s)
         j = j + 1
     }
 
     print("Created batch of 4 samplers\n\n")
 
-    let batch_logits = vec_new()
-    let b = 0
+    batch_logits := vec_new()
+    b := 0
     while b < 4 {
-        let seq_logits = vec_new()
-        let v = 0
+        seq_logits := vec_new()
+        v := 0
         while v < 256 {
             seq_logits.append(1.0)
             v = v + 1
@@ -196,7 +196,7 @@ func main() {
         b = b + 1
     }
 
-    let filtered_batch = structured_sampler.process_batch(&samplers, batch_logits)
+    filtered_batch := structured_sampler.process_batch(&samplers, batch_logits)
     print("Filtered batch logits:\n")
     print("  Batch size: " + int_to_string(len(filtered_batch)) + "\n")
     print("  Vocab size per sequence: " + int_to_string(len(filtered_batch[0])) + "\n\n")
@@ -205,14 +205,14 @@ func main() {
     print("PART 8: Streaming Output Building\n")
     print("="*60 + "\n\n")
 
-    let builder = output_formatter.create_streaming_builder()
+    builder := output_formatter.create_streaming_builder()
     output_formatter.start_object(&builder)
     output_formatter.add_field(&builder, "name", "\"David\"")
     output_formatter.add_field(&builder, "email", "\"david@example.com\"")
     output_formatter.add_field(&builder, "age", "30")
     output_formatter.end_object(&builder)
 
-    let streaming_output = output_formatter.get_buffer(&builder)
+    streaming_output := output_formatter.get_buffer(&builder)
     print("Built incrementally:\n")
     print(streaming_output + "\n\n")
 
@@ -291,13 +291,13 @@ func int_to_string(n: int) string {
         return "0"
     }
 
-    let is_negative = n < 0
-    let abs_n = n
+    is_negative := n < 0
+    abs_n := n
     if is_negative {
         abs_n = 0 - n
     }
 
-    let result = ""
+    result := ""
     while abs_n > 0 {
         result = string(abs_n % 10) + result
         abs_n = abs_n / 10
@@ -311,6 +311,6 @@ func int_to_string(n: int) string {
 }
 
 func vec_new() []string {
-    let v = vec_new()
+    v := vec_new()
     return v
 }

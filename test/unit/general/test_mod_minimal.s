@@ -1,5 +1,5 @@
 func main() {
-    let x = 10
-    let y = 3
-    let z = x % y
+    x := 10
+    y := 3
+    z := x % y
 }

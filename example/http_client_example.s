@@ -80,7 +80,7 @@ func http_request_to_server(string host, int port, string path) result[http_resp
         (fd, "") : {
             switch socket_connect(fd, host, port) {
                 (_, "") : {
-                    let request = create_http_get_request(host, port, path)
+                    request := create_http_get_request(host, port, path)
                     switch socket_send(fd, request) {
                         (_, "") : {
                             switch socket_recv(fd, 4096) {

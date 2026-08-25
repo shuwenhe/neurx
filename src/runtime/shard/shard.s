@@ -54,14 +54,14 @@ func int_to_str(int n) string {
     if n == 0 {
         return "0"
     }
-    var value = n
-    var negative = n < 0
+    value := n
+    negative := n < 0
     if negative {
         value = 0 - value
     }
-    var out = ""
+    out := ""
     while value > 0 {
-        var digit = value - (value / 10) * 10
+        digit := value - (value / 10) * 10
         out = string_char(digit + 48) + out
         value = value / 10
     }
@@ -99,44 +99,44 @@ func default_manifest(string root) string {
 }
 
 func run_wikipedia() int {
-    var root = default_neurx_root()
-    var script_dir = env_get("NEURX_SHARD_SCRIPT_DIR", root + "/shard")
-    var build_dir = root + "/artifact/build/shard"
-    var runner_bin = root + "/artifact/build/s_runner/s_ir_runner"
-    var compiler = env_get("S_COMPILER", "/home/shuwen/s/bin/s")
-    var input = env_get("ENWIKI_BZ2_FILE", root + "/dataset/pretrain/raw/enwiki-latest-pages-articles.xml.bz2")
-    var output_dir = env_get("ENWIKI_SHARD_DIR", root + "/dataset/pretrain/shard")
-    var manifest = env_get("ENWIKI_MANIFEST_FILE", root + "/dataset/pretrain/manifest.json")
-    var docs_per_shard = env_get("DOCS_PER_SHARD", "5000")
-    var max_pages = env_get("MAX_PAGES", "0")
-    var resume = env_get("NEURX_SHARD_RESUME", "1")
-    var force_rebuild = env_get("NEURX_SHARD_FORCE_REBUILD", "0")
-    var completion_file = output_dir + "/.wikipedia_shard_complete"
+    root := default_neurx_root()
+    script_dir := env_get("NEURX_SHARD_SCRIPT_DIR", root + "/shard")
+    build_dir := root + "/artifact/build/shard"
+    runner_bin := root + "/artifact/build/s_runner/s_ir_runner"
+    compiler := env_get("S_COMPILER", "/home/shuwen/s/bin/s")
+    input := env_get("ENWIKI_BZ2_FILE", root + "/dataset/pretrain/raw/enwiki-latest-pages-articles.xml.bz2")
+    output_dir := env_get("ENWIKI_SHARD_DIR", root + "/dataset/pretrain/shard")
+    manifest := env_get("ENWIKI_MANIFEST_FILE", root + "/dataset/pretrain/manifest.json")
+    docs_per_shard := env_get("DOCS_PER_SHARD", "5000")
+    max_pages := env_get("MAX_PAGES", "0")
+    resume := env_get("NEURX_SHARD_RESUME", "1")
+    force_rebuild := env_get("NEURX_SHARD_FORCE_REBUILD", "0")
+    completion_file := output_dir + "/.wikipedia_shard_complete"
     if !runtime_file_exists(input) {
         println("Error: input file not found: " + input)
         return 1
     }
-    var mkdir_output = runtime_run_command_output("mkdir -p " + shell_escape(build_dir))
+    mkdir_output := runtime_run_command_output("mkdir -p " + shell_escape(build_dir))
     if len(trim(mkdir_output)) > 0 {
         println(mkdir_output)
     }
-    var compile_cmd = "if " + shell_escape(compiler) + " --help 2>&1 | grep -q \"<input.s> <output.ir>\"; then " +
+    compile_cmd := "if " + shell_escape(compiler) + " --help 2>&1 | grep -q \"<input.s> <output.ir>\"; then " +
         shell_escape(compiler) + " " + shell_escape(script_dir + "/shard_wikipedia_simple.s") + " " + shell_escape(build_dir + "/shard_wikipedia_simple.ir") + "; else " +
         shell_escape(compiler) + " ir " + shell_escape(script_dir + "/shard_wikipedia_simple.s") + " -o " + shell_escape(build_dir + "/shard_wikipedia_simple.ir") + "; fi"
-    var compile_output = runtime_run_command_output(compile_cmd)
+    compile_output := runtime_run_command_output(compile_cmd)
     if !runtime_file_exists(build_dir + "/shard_wikipedia_simple.ir") {
         println("Error: failed to compile shard_wikipedia_simple.s")
         return 1
     }
     if !runtime_file_exists(runner_bin) {
-        var runner_output = runtime_run_command_output("make -C " + shell_escape(root) + " build-s-ir-runner")
+        runner_output := runtime_run_command_output("make -C " + shell_escape(root) + " build-s-ir-runner")
         if !runtime_file_exists(runner_bin) {
             println("Error: failed to build S IR runner")
             return 1
         }
     }
     runtime_run_command_output("rm -f " + shell_escape(completion_file))
-    var run_command =
+    run_command := 
         "NEURX_HOME=" + shell_escape(root) +
         " S_COMPILER=" + shell_escape(compiler) +
         " S_COMPILER_EMIT_CWD=" + shell_escape(env_get("S_COMPILER_EMIT_CWD", root + "/../s")) +
@@ -161,19 +161,19 @@ func run_wikipedia() int {
 }
 
 func run_verify() int {
-    var root = default_neurx_root()
-    var shard_dir = default_shard_dir(root)
+    root := default_neurx_root()
+    shard_dir := default_shard_dir(root)
     if !runtime_file_exists(shard_dir) {
         println("Shard directory not found: " + shard_dir)
         return 1
     }
-    var verify_cmd = "for shard_file in " + shell_escape(shard_dir) + "/shard_*.jsonl; do " +
+    verify_cmd := "for shard_file in " + shell_escape(shard_dir) + "/shard_*.jsonl; do " +
         "if [ ! -f \"$shard_file\" ]; then continue; fi; " +
         "line_count=$(wc -l < \"$shard_file\"); " +
         "if tail -n 5 \"$shard_file\" | python3 -c 'import sys, json; [json.loads(line) for line in sys.stdin]' 2>/dev/null; then " +
         "echo \"$(basename \"$shard_file\")\": ${line_count} documents\"; " +
         "else echo \"$(basename \"$shard_file\")\": Invalid JSON detected\"; exit 1; fi; done"
-    var verify_output = runtime_run_command_output("sh -c " + shell_escape(verify_cmd))
+    verify_output := runtime_run_command_output("sh -c " + shell_escape(verify_cmd))
     if len(trim(verify_output)) > 0 {
         println(verify_output)
     }
@@ -181,15 +181,15 @@ func run_verify() int {
 }
 
 func run_list() int {
-    var root = default_neurx_root()
-    var shard_dir = default_shard_dir(root)
+    root := default_neurx_root()
+    shard_dir := default_shard_dir(root)
     if !runtime_file_exists(shard_dir) {
         println("Shard directory not found: " + shard_dir)
         return 1
     }
-    var list_cmd = "sh -c " +
+    list_cmd := "sh -c " +
         shell_escape("printf '%-30s %10s %15s\n' 'Shard File' 'Lines' 'Size (MB)'; printf '%-30s %10s %15s\n' '--------------------' '----------' '---------------'; total_size=0; total_lines=0; for shard_file in " + shell_escape(shard_dir) + "/shard_*.jsonl; do [ -f \"$shard_file\" ] || continue; filename=$(basename \"$shard_file\"); line_count=$(wc -l < \"$shard_file\"); file_size=$((($(stat -c%s \"$shard_file\" 2>/dev/null || stat -f%z \"$shard_file\") / 1024 / 1024))); printf '%-30s %10d %15d\n' \"$filename\" \"$line_count\" \"$file_size\"; total_size=$((total_size + file_size)); total_lines=$((total_lines + line_count)); done; printf '%-30s %10d %15d\n' 'TOTAL' \"$total_lines\" \"$total_size\"")
-    var list_output = runtime_run_command_output(list_cmd)
+    list_output := runtime_run_command_output(list_cmd)
     if len(trim(list_output)) > 0 {
         println(list_output)
     }
@@ -197,13 +197,13 @@ func run_list() int {
 }
 
 func run_clean() int {
-    var root = default_neurx_root()
-    var shard_dir = default_shard_dir(root)
+    root := default_neurx_root()
+    shard_dir := default_shard_dir(root)
     if !runtime_file_exists(shard_dir) {
         println("Shard directory not found: " + shard_dir)
         return 1
     }
-    var clean_output = runtime_run_command_output("sh -c " + shell_escape("rm -f " + shell_escape(shard_dir) + "/shard_*.jsonl"))
+    clean_output := runtime_run_command_output("sh -c " + shell_escape("rm -f " + shell_escape(shard_dir) + "/shard_*.jsonl"))
     if len(trim(clean_output)) > 0 {
         println(clean_output)
     }
@@ -211,7 +211,7 @@ func run_clean() int {
 }
 
 func main() {
-    var cmd = env_get("NEURX_SHARD_CMD", "help")
+    cmd := env_get("NEURX_SHARD_CMD", "help")
     if cmd == "wikipedia" || cmd == "shard" {
         return run_wikipedia()
     }

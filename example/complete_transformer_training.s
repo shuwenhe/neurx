@@ -118,7 +118,7 @@ func initialize_transformer_state(transformer_forward_config cfg) transformer_fo
         encoding_type: "absolute",
         rope_base: 10000.0,
     }
-    var pos_enc = new_absolute_position_encoding(pos_cfg)
+    pos_enc := new_absolute_position_encoding(pos_cfg)
     layer_norm_config ln_cfg = layer_norm_config {
         hidden_dim: cfg.hidden_dim,
         epsilon: 1e-6,
@@ -178,14 +178,14 @@ func training_step(
 ) []float {
     int batch_size = batch.batch_size
     int seq_len = batch.seq_len
-    var forward_output = transformer_forward_pass(
+    forward_output := transformer_forward_pass(
         transformer,
         batch.input_ids,
         batch_size,
         seq_len
     )
     []float logits = forward_output.logits
-    var loss_result = compute_cross_entropy_loss_with_gradient(
+    loss_result := compute_cross_entropy_loss_with_gradient(
         logits,
         batch.target_ids,
         batch_size,
@@ -201,7 +201,7 @@ func training_step(
         i = i + 1
     }
     total_loss = total_loss / (batch_size * seq_len * 1.0)
-    var backward_output = transformer_backward_pass(
+    backward_output := transformer_backward_pass(
         grad_logits,
         forward_output.layer_outputs,
         transformer.token_embedding,
@@ -221,24 +221,24 @@ func training_step(
 }
 
 func example_small_transformer_training() {
-    var transformer_cfg = create_small_transformer_config()
-    var transformer = initialize_transformer_state(transformer_cfg)
+    transformer_cfg := create_small_transformer_config()
+    transformer := initialize_transformer_state(transformer_cfg)
     float learning_rate = 0.001
     int num_steps = 5
     int batch_size = 2
     int seq_len = 8
     int step = 0
     while step < num_steps {
-        var batch = create_dummy_batch(batch_size, seq_len, transformer_cfg.vocab_size)
-        var metrics = training_step(transformer, batch, learning_rate)
+        batch := create_dummy_batch(batch_size, seq_len, transformer_cfg.vocab_size)
+        metrics := training_step(transformer, batch, learning_rate)
         float loss = metrics[0]
         step = step + 1
     }
 }
 
 func example_inference_forward_pass() {
-    var transformer_cfg = create_medium_transformer_config()
-    var transformer = initialize_transformer_state(transformer_cfg)
+    transformer_cfg := create_medium_transformer_config()
+    transformer := initialize_transformer_state(transformer_cfg)
     int batch_size = 1
     int seq_len = 16
     []int input_ids = allocate_vector(batch_size * seq_len, 1)
@@ -247,7 +247,7 @@ func example_inference_forward_pass() {
         input_ids[i] = i % transformer_cfg.vocab_size
         i = i + 1
     }
-    var output = transformer_forward_pass(
+    output := transformer_forward_pass(
         transformer,
         input_ids,
         batch_size,
@@ -272,8 +272,8 @@ func example_inference_forward_pass() {
 }
 
 func example_multi_batch_training() {
-    var transformer_cfg = create_small_transformer_config()
-    var transformer = initialize_transformer_state(transformer_cfg)
+    transformer_cfg := create_small_transformer_config()
+    transformer := initialize_transformer_state(transformer_cfg)
     float learning_rate = 0.0005
     int num_epochs = 2
     int batches_per_epoch = 3
@@ -285,8 +285,8 @@ func example_multi_batch_training() {
         int batch_count = 0
         int batch_idx = 0
         while batch_idx < batches_per_epoch {
-            var batch = create_dummy_batch(batch_size, seq_len, transformer_cfg.vocab_size)
-            var metrics = training_step(transformer, batch, learning_rate)
+            batch := create_dummy_batch(batch_size, seq_len, transformer_cfg.vocab_size)
+            metrics := training_step(transformer, batch, learning_rate)
             float loss = metrics[0]
             epoch_loss = epoch_loss + loss
             batch_count = batch_count + 1

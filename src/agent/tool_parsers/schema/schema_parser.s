@@ -5,55 +5,55 @@ use std.conv.string_to_int
 use std.vec
 
 func parse_schema_from_json(json_str: string) json_schema {
-    let schema = schema_types.create_empty_schema()
+    schema := schema_types.create_empty_schema()
     schema = parse_schema_object(json_str, 0, &schema)
     return schema
 }
 
 func parse_schema_object(json_str: string, start_pos: int, schema: *json_schema) json_schema {
-    let result = *schema
+    result := *schema
 
-    let title_end = find_json_string_value(json_str, "\"title\"", start_pos)
+    title_end := find_json_string_value(json_str, "\"title\"", start_pos)
     if title_end > start_pos {
         result.title = extract_string_value(json_str, title_end)
     }
 
-    let type_end = find_json_string_value(json_str, "\"type\"", start_pos)
+    type_end := find_json_string_value(json_str, "\"type\"", start_pos)
     if type_end > start_pos {
         result.type_name = extract_type_value(json_str, type_end)
     }
 
-    let desc_end = find_json_string_value(json_str, "\"description\"", start_pos)
+    desc_end := find_json_string_value(json_str, "\"description\"", start_pos)
     if desc_end > start_pos {
         result.description = extract_string_value(json_str, desc_end)
     }
 
-    let required_end = find_json_string_value(json_str, "\"required\"", start_pos)
+    required_end := find_json_string_value(json_str, "\"required\"", start_pos)
     if required_end > start_pos {
         result.required = extract_string_array(json_str, required_end)
     }
 
-    let props_end = find_json_string_value(json_str, "\"properties\"", start_pos)
+    props_end := find_json_string_value(json_str, "\"properties\"", start_pos)
     if props_end > start_pos {
         result.properties = extract_properties(json_str, props_end, &result.required)
     }
 
-    let min_len_end = find_json_string_value(json_str, "\"minLength\"", start_pos)
+    min_len_end := find_json_string_value(json_str, "\"minLength\"", start_pos)
     if min_len_end > start_pos {
         result.min_length = extract_int_value(json_str, min_len_end)
     }
 
-    let max_len_end = find_json_string_value(json_str, "\"maxLength\"", start_pos)
+    max_len_end := find_json_string_value(json_str, "\"maxLength\"", start_pos)
     if max_len_end > start_pos {
         result.max_length = extract_int_value(json_str, max_len_end)
     }
 
-    let pattern_end = find_json_string_value(json_str, "\"pattern\"", start_pos)
+    pattern_end := find_json_string_value(json_str, "\"pattern\"", start_pos)
     if pattern_end > start_pos {
         result.pattern = extract_string_value(json_str, pattern_end)
     }
 
-    let enum_end = find_json_string_value(json_str, "\"enum\"", start_pos)
+    enum_end := find_json_string_value(json_str, "\"enum\"", start_pos)
     if enum_end > start_pos {
         result.enum_values = extract_string_array(json_str, enum_end)
     }
@@ -62,13 +62,13 @@ func parse_schema_object(json_str: string, start_pos: int, schema: *json_schema)
 }
 
 func find_json_string_value(json_str: string, key: string, start_pos: int) int {
-    let i = start_pos
+    i := start_pos
     while i < len(json_str) {
         if i + len(key) <= len(json_str) {
-            let substr = substring(json_str, i, i + len(key))
+            substr := substring(json_str, i, i + len(key))
             if substr == key {
 
-                let j = i + len(key)
+                j := i + len(key)
 
                 while j < len(json_str) && (json_str[j] == ' ' || json_str[j] == ':' || json_str[j] == '\t') {
                     j = j + 1
@@ -82,13 +82,13 @@ func find_json_string_value(json_str: string, key: string, start_pos: int) int {
 }
 
 func extract_string_value(json_str: string, pos: int) string {
-    let i = pos
+    i := pos
 
     if i < len(json_str) && json_str[i] == '"' {
         i = i + 1
     }
 
-    let result = ""
+    result := ""
     while i < len(json_str) && json_str[i] != '"' {
         result = result + string_from_char(json_str[i])
         i = i + 1
@@ -101,8 +101,8 @@ func extract_type_value(json_str: string, pos: int) string {
 }
 
 func extract_int_value(json_str: string, pos: int) int {
-    let i = pos
-    let result = ""
+    i := pos
+    result := ""
     while i < len(json_str) && json_str[i] >= '0' && json_str[i] <= '9' {
         result = result + string_from_char(json_str[i])
         i = i + 1
@@ -111,8 +111,8 @@ func extract_int_value(json_str: string, pos: int) int {
 }
 
 func extract_string_array(json_str: string, pos: int) []string {
-    let result = vec_new()
-    let i = pos
+    result := vec_new()
+    i := pos
 
     while i < len(json_str) && json_str[i] != '[' {
         i = i + 1
@@ -122,8 +122,8 @@ func extract_string_array(json_str: string, pos: int) []string {
     }
     i = i + 1
 
-    let in_string = false
-    let current_str = ""
+    in_string := false
+    current_str := ""
     while i < len(json_str) && json_str[i] != ']' {
         if json_str[i] == '"' {
             if in_string {
@@ -145,8 +145,8 @@ func extract_string_array(json_str: string, pos: int) []string {
 }
 
 func extract_properties(json_str: string, pos: int, required: *[]string) []json_property {
-    let result = vec_new()
-    let i = pos
+    result := vec_new()
+    i := pos
 
     while i < len(json_str) && json_str[i] != '{' {
         i = i + 1
@@ -156,10 +156,10 @@ func extract_properties(json_str: string, pos: int, required: *[]string) []json_
     }
     i = i + 1
 
-    let brace_count = 1
-    let in_string = false
-    let prop_name = ""
-    let capturing_name = false
+    brace_count := 1
+    in_string := false
+    prop_name := ""
+    capturing_name := false
 
     while i < len(json_str) && brace_count > 0 {
         if json_str[i] == '"' && !in_string {
@@ -170,8 +170,8 @@ func extract_properties(json_str: string, pos: int, required: *[]string) []json_
             in_string = false
             if capturing_name {
 
-                let is_req = is_property_required(prop_name, required)
-                let prop = json_property{
+                is_req := is_property_required(prop_name, required)
+                prop := json_property{
                     name: prop_name,
                     schema: schema_types.create_empty_schema(),
                     required: is_req,
@@ -195,7 +195,7 @@ func extract_properties(json_str: string, pos: int, required: *[]string) []json_
 }
 
 func is_property_required(name: string, required: *[]string) bool {
-    let i = 0
+    i := 0
     while i < len(*required) {
         if (*required)[i] == name {
             return true
@@ -209,8 +209,8 @@ func substring(s: string, start: int, end: int) string {
     if start < 0 || end > len(s) || start > end {
         return ""
     }
-    let result = ""
-    let i = start
+    result := ""
+    i := start
     while i < end {
         result = result + string_from_char(s[i])
         i = i + 1
@@ -220,7 +220,7 @@ func substring(s: string, start: int, end: int) string {
 
 func string_from_char(c: int) string {
 
-    let result = ""
+    result := ""
     if c == 32 { result = " " }
     else if c == 34 { result = "\"" }
     else if c == 39 { result = "'" }
@@ -241,7 +241,7 @@ func string_from_char(c: int) string {
 }
 
 func create_string_schema(min_len: int, max_len: int, pattern: string) json_schema {
-    let schema = schema_types.create_empty_schema()
+    schema := schema_types.create_empty_schema()
     schema.type_name = schema_types.TYPE_STRING
     schema.min_length = min_len
     schema.max_length = max_len
@@ -250,7 +250,7 @@ func create_string_schema(min_len: int, max_len: int, pattern: string) json_sche
 }
 
 func create_object_schema(properties: []json_property, required: []string) json_schema {
-    let schema = schema_types.create_empty_schema()
+    schema := schema_types.create_empty_schema()
     schema.type_name = schema_types.TYPE_OBJECT
     schema.properties = properties
     schema.required = required
@@ -258,7 +258,7 @@ func create_object_schema(properties: []json_property, required: []string) json_
 }
 
 func create_array_schema(item_schema: *json_schema, min_items: int, max_items: int) json_schema {
-    let schema = schema_types.create_empty_schema()
+    schema := schema_types.create_empty_schema()
     schema.type_name = schema_types.TYPE_ARRAY
     schema.items = item_schema
     schema.min_items = min_items
@@ -267,7 +267,7 @@ func create_array_schema(item_schema: *json_schema, min_items: int, max_items: i
 }
 
 func create_enum_schema(values: []string) json_schema {
-    let schema = schema_types.create_empty_schema()
+    schema := schema_types.create_empty_schema()
     schema.type_name = schema_types.TYPE_STRING
     schema.enum_values = values
     return schema

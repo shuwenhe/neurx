@@ -141,8 +141,8 @@ func (gpu_memory_offloader* gmo) get_tensor_location(string tensor_id) int32 {
 }
 
 func (gpu_memory_offloader* gmo) evict_lru_tensor() error {
-    var oldest_time int64
-    var oldest_tensor_id string
+    oldest_time := int64()
+    oldest_tensor_id := string()
 
     for id, metadata := range gmo.tensor_locations {
         if metadata.last_access_time < oldest_time {

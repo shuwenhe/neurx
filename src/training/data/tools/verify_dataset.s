@@ -3,9 +3,9 @@ use neurx.runtime.io.{runtime_env_get, runtime_dir_exists, runtime_file_exists}
 use std.io.println
 
 func main() {
-    let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    let shards_dir = runtime_env_get("VERIFY_DATASET_DIR", project_root + "/dataset/pretrain/shard")
-    let sample_file = shards_dir + "/shard_00000.jsonl"
+    project_root := runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
+    shards_dir := runtime_env_get("VERIFY_DATASET_DIR", project_root + "/dataset/pretrain/shard")
+    sample_file := shards_dir + "/shard_00000.jsonl"
     println("NeurX Dataset Verification (S Lang)")
     println("")
     println("Project root: " + project_root)

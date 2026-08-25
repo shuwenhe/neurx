@@ -56,15 +56,15 @@ func (engine: &mut rt_inference_engine) load_model(string model_name) bool {
 
 func (engine: &mut rt_inference_engine) preload_all_models([]string model_names) {
     for i in 0..model_names.len() {
-        let _ = engine.load_model(model_names[i])
+        _ := engine.load_model(model_names[i])
     }
 }
 
 func (engine: &mut rt_inference_engine) run_inference(rt_inference_request request) rt_inference_result {
     engine.total_inferences = engine.total_inferences + 1
     
-    let actions = vec[float]()
-    let result = rt_inference_result{
+    actions := vec[float]()
+    result := rt_inference_result{
         request_id: request.request_id,
         actions: actions,
         success: true,

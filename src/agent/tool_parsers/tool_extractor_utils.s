@@ -12,23 +12,23 @@ impl ToolExtractorUtils {
         start_marker: str,
         end_marker: str
     ) -> Vec<str> {
-        let mut results = Vec::new()
-        let mut search_pos = 0
+        results := Vec::new()
+        search_pos := 0
 
         while search_pos < strings::len(text) {
-            let start_pos = strings::index_of_from(text, start_marker, search_pos)
+            start_pos := strings::index_of_from(text, start_marker, search_pos)
             if start_pos < 0 {
                 break
             }
 
-            let content_start = start_pos + strings::len(start_marker)
-            let end_pos = strings::index_of_from(text, end_marker, content_start)
+            content_start := start_pos + strings::len(start_marker)
+            end_pos := strings::index_of_from(text, end_marker, content_start)
 
             if end_pos < 0 {
                 break
             }
 
-            let json_str = strings::substring(text, content_start, end_pos)
+            json_str := strings::substring(text, content_start, end_pos)
             results.push(json_str)
 
             search_pos = end_pos + strings::len(end_marker)
@@ -41,8 +41,8 @@ impl ToolExtractorUtils {
         text: str,
         tag_name: str
     ) -> Vec<str> {
-        let start_tag = "<" + tag_name + ">"
-        let end_tag = "</" + tag_name + ">"
+        start_tag := "<" + tag_name + ">"
+        end_tag := "</" + tag_name + ">"
 
         ToolExtractorUtils::extract_json_between_markers(text, start_tag, end_tag)
     }
@@ -51,40 +51,40 @@ impl ToolExtractorUtils {
         text: str,
         tag_prefix: str
     ) -> Vec<(str, str)> {
-        let mut results = Vec::new()
-        let mut search_pos = 0
-        let open_pattern = "<" + tag_prefix + " name=\""
-        let close_tag = "</" + tag_prefix + ">"
+        results := Vec::new()
+        search_pos := 0
+        open_pattern := "<" + tag_prefix + " name=\""
+        close_tag := "</" + tag_prefix + ">"
 
         while search_pos < strings::len(text) {
-            let open_pos = strings::index_of_from(text, open_pattern, search_pos)
+            open_pos := strings::index_of_from(text, open_pattern, search_pos)
             if open_pos < 0 {
                 break
             }
 
-            let name_start = open_pos + strings::len(open_pattern)
-            let name_end = strings::index_of_from(text, "\"", name_start)
+            name_start := open_pos + strings::len(open_pattern)
+            name_end := strings::index_of_from(text, "\"", name_start)
 
             if name_end < 0 {
                 search_pos = open_pos + strings::len(open_pattern)
                 continue
             }
 
-            let element_name = strings::substring(text, name_start, name_end)
+            element_name := strings::substring(text, name_start, name_end)
 
-            let tag_end = strings::index_of_from(text, ">", name_end)
+            tag_end := strings::index_of_from(text, ">", name_end)
             if tag_end < 0 {
                 search_pos = name_end
                 continue
             }
 
-            let close_pos = strings::index_of_from(text, close_tag, tag_end)
+            close_pos := strings::index_of_from(text, close_tag, tag_end)
             if close_pos < 0 {
                 search_pos = tag_end
                 continue
             }
 
-            let element_content = strings::substring(text, tag_end + 1, close_pos)
+            element_content := strings::substring(text, tag_end + 1, close_pos)
             results.push((element_name, element_content))
 
             search_pos = close_pos + strings::len(close_tag)
@@ -94,15 +94,15 @@ impl ToolExtractorUtils {
     }
 
     func find_bracket_pair(text: str, start_index: i32) -> (i32, i32) {
-        let mut depth = 0
-        let mut in_string = false
-        let mut escaped = false
+        depth := 0
+        in_string := false
+        escaped := false
 
-        let chars = strings::chars(text)
-        let mut i = start_index
+        chars := strings::chars(text)
+        i := start_index
 
         while i < len(chars) {
-            let c = chars[i]
+            c := chars[i]
 
             if escaped {
                 escaped = false
@@ -123,10 +123,10 @@ impl ToolExtractorUtils {
             if !in_string {
                 if c == '{' {
                     if depth == 0 {
-                        let open_pos = i
-                        let j = i + 1
+                        open_pos := i
+                        j := i + 1
                         while j < len(chars) {
-                            let c2 = chars[j]
+                            c2 := chars[j]
 
                             if c2 == '\\' && in_string {
                                 j = j + 2
@@ -175,7 +175,7 @@ impl ToolExtractorUtils {
     }
 
     func extract_regex_group(text: str, pattern: str, group_index: i32) -> str {
-        let re = regex::compile(pattern)
+        re := regex::compile(pattern)
         match regex::find_string(re, text) {
             Some(m) => {
                 match group_index {
@@ -188,9 +188,9 @@ impl ToolExtractorUtils {
     }
 
     func find_all_regex_matches(text: str, pattern: str) -> Vec<str> {
-        let mut results = Vec::new()
-        let re = regex::compile(pattern)
-        let mut search_pos = 0
+        results := Vec::new()
+        re := regex::compile(pattern)
+        search_pos := 0
 
         while search_pos < strings::len(text) {
             match regex::find_at(re, text, search_pos) {
@@ -209,13 +209,13 @@ impl ToolExtractorUtils {
         text: str,
         tool_start_marker: str
     ) -> str {
-        let tool_pos = strings::index_of(text, tool_start_marker)
+        tool_pos := strings::index_of(text, tool_start_marker)
 
         if tool_pos < 0 {
             return ""
         }
 
-        let mut content_end = tool_pos - 1
+        content_end := tool_pos - 1
         while content_end >= 0 && (text[content_end] == ' ' || text[content_end] == '\n' || text[content_end] == '\r') {
             content_end = content_end - 1
         }
@@ -228,12 +228,12 @@ impl ToolExtractorUtils {
     }
 
     func validate_json_structure(json_str: str) -> bool {
-        let mut brace_depth = 0
-        let mut bracket_depth = 0
-        let mut in_string = false
-        let mut escaped = false
+        brace_depth := 0
+        bracket_depth := 0
+        in_string := false
+        escaped := false
 
-        let chars = strings::chars(json_str)
+        chars := strings::chars(json_str)
 
         for c in chars {
             if escaped {
@@ -308,7 +308,7 @@ impl ToolCallValidator {
             return true
         }
 
-        let mut found = false
+        found := false
         for tool_name in self.available_tools {
             if tool_name == tool_call.function.name {
                 found = true
@@ -333,7 +333,7 @@ impl ToolCallValidator {
     }
 
     func validate_tool_calls(self, tool_calls: Vec<ToolCall>) -> Vec<ToolCall> {
-        let mut valid_calls = Vec::new()
+        valid_calls := Vec::new()
 
         for tc in tool_calls {
             if self.validate_tool_call(tc) {

@@ -3,9 +3,9 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.io.println
 
 func main() {
-    let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    let source_file = runtime_env_get("NEURX_SMALL_MODEL_SOURCE", project_root + "/train/train_llm.s")
-    let checkpoint_dir = runtime_env_get("NEURX_SMALL_MODEL_CHECKPOINT_DIR", project_root + "/artifact/checkpoints/llm_s_pretrain")
+    project_root := runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
+    source_file := runtime_env_get("NEURX_SMALL_MODEL_SOURCE", project_root + "/train/train_llm.s")
+    checkpoint_dir := runtime_env_get("NEURX_SMALL_MODEL_CHECKPOINT_DIR", project_root + "/artifact/checkpoints/llm_s_pretrain")
     println("NeurX Small model Training (S Lang)")
     println("")
     println("Project root : " + project_root)

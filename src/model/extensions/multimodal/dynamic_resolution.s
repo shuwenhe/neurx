@@ -255,7 +255,7 @@ struct ResolutionStats {
     min_patches_used: i32
 }
 
-var resolution_stats = ResolutionStats{
+resolution_stats := ResolutionStats{
     processed_images: 0,
     avg_patches: 0.0,
     max_patches_used: 0,

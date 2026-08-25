@@ -31,12 +31,12 @@ func count_lines(string text) int {
 }
 
 func main() {
-    let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    let shard_dir = runtime_env_get("NEURX_PRETRAIN_SHARD_DIR", project_root + "/dataset/pretrain/shard")
-    let manifest_file = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
-    let force_rebuild = runtime_env_get("NEURX_PRETRAIN_REBUILD_MANIFEST", "0")
-    let work_dir = project_root + "/artifact/build/build_pretrain_manifest"
-    let shard_list_file = runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", work_dir + "/shard_list.txt")
+    project_root := runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
+    shard_dir := runtime_env_get("NEURX_PRETRAIN_SHARD_DIR", project_root + "/dataset/pretrain/shard")
+    manifest_file := runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
+    force_rebuild := runtime_env_get("NEURX_PRETRAIN_REBUILD_MANIFEST", "0")
+    work_dir := project_root + "/artifact/build/build_pretrain_manifest"
+    shard_list_file := runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", work_dir + "/shard_list.txt")
     manifest_log("NeurX Pretrain manifest Builder (S Lang)")
     manifest_log("")
     manifest_log("Project root : " + project_root)
@@ -55,7 +55,7 @@ func main() {
         manifest_log("❌ shard list file not found: " + shard_list_file)
         return 1
     }
-    let shard_output = trim(runtime_read_text_file(shard_list_file))
+    shard_output := trim(runtime_read_text_file(shard_list_file))
     if shard_output == "" {
         manifest_log("❌ no shard files found in: " + shard_dir)
         return 1
@@ -69,12 +69,12 @@ func main() {
     manifest_text = manifest_text + "  \"source_dir\": " + json_escape(shard_dir) + ",\n"
     manifest_text = manifest_text + "  \"shards\": [\n"
     int i = 0
-    let current_path = ""
+    current_path := ""
     while i <= len(shard_output) {
         bool at_end = i == len(shard_output)
         bool at_newline = !at_end && shard_output[i] == 10
         if at_end || at_newline {
-            let shard_path = trim(current_path)
+            shard_path := trim(current_path)
             current_path = ""
             if shard_path != "" {
                 string shard_text = runtime_read_text_file(shard_path)

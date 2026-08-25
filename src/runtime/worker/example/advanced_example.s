@@ -213,7 +213,7 @@ func PipelineParallelismExample() {
     manager := NewWorkerManager(6, policy)
 
     for i := 0; i < 6; i++ {
-        var stage string
+        stage := string()
         match i / 2 {
         case 0:
             stage = "prefill"

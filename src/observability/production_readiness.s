@@ -356,7 +356,7 @@ func print_production_readiness_report(production_readiness_report report) {
     string current_category = ""
     int i = 0
     while i < len(report.checks) {
-        var check = report.checks[i]
+        check := report.checks[i]
         
         if check.category != current_category {
             print("\n📌 " + check.category + ":\n")
@@ -399,7 +399,7 @@ func print_production_readiness_report(production_readiness_report report) {
 }
 
 func main() {
-    var report = create_empty_report()
+    report := create_empty_report()
     
     verify_architecture_checks(report)
     verify_inference_pipeline_checks(report)

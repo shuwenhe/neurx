@@ -8,7 +8,7 @@ struct ToolParserRegistry {
 
 impl ToolParserRegistry {
     func new() -> ToolParserRegistry {
-        let mut registry = ToolParserRegistry {
+        registry := ToolParserRegistry {
             parsers: map::new()
         }
         registry.register_default_parsers()
@@ -76,12 +76,12 @@ impl ToolParserRegistry {
     }
 
     func get_parser_for_model(self, model_name: str) -> Option<ToolParser> {
-        let parser_name = infer_parser_from_model_name(model_name)
+        parser_name := infer_parser_from_model_name(model_name)
         self.get_parser(parser_name)
     }
 
     func list_available_parsers(self) -> Vec<str> {
-        let mut names = Vec::new()
+        names := Vec::new()
         for (name, _) in self.parsers.iter() {
             names.push(name.clone())
         }
@@ -89,7 +89,7 @@ impl ToolParserRegistry {
     }
 }
 
-var _GLOBAL_PARSER_REGISTRY: Option<ToolParserRegistry> = None
+_GLOBAL_PARSER_REGISTRY := None
 
 func get_global_registry() -> ToolParserRegistry {
     match _GLOBAL_PARSER_REGISTRY {
@@ -102,12 +102,12 @@ func get_global_registry() -> ToolParserRegistry {
 }
 
 func get_parser_for_model(model_name: str) -> Option<ToolParser> {
-    let registry = get_global_registry()
+    registry := get_global_registry()
     registry.get_parser_for_model(model_name)
 }
 
 func list_available_parsers() -> Vec<str> {
-    let registry = get_global_registry()
+    registry := get_global_registry()
     registry.list_available_parsers()
 }
 
@@ -118,7 +118,7 @@ func extract_tool_calls(
 ) -> ExtractedToolCallInformation {
     match get_parser_for_model(model_name) {
         Some(parser) => {
-            let request = ParserRequest {
+            request := ParserRequest {
                 messages: Vec::new(),
                 tools: tools,
                 tool_choice: "auto",
@@ -140,7 +140,7 @@ func validate_tool_calls(
     tool_calls: Vec<ToolCall>,
     available_tools: Vec<str>
 ) -> Vec<ToolCall> {
-    let validator = ToolCallValidator::new(available_tools, true)
+    validator := ToolCallValidator::new(available_tools, true)
     validator.validate_tool_calls(tool_calls)
 }
 

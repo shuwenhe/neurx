@@ -12,9 +12,9 @@ func format_as_json(obj: string) string {
 }
 
 func create_json_object(fields: []json_field) string {
-    let result = "{"
+    result := "{"
 
-    let i = 0
+    i := 0
     while i < len(fields) {
         if i > 0 {
             result = result + ", "
@@ -29,9 +29,9 @@ func create_json_object(fields: []json_field) string {
 }
 
 func create_json_array(items: []string) string {
-    let result = "["
+    result := "["
 
-    let i = 0
+    i := 0
     while i < len(items) {
         if i > 0 {
             result = result + ", "
@@ -45,7 +45,7 @@ func create_json_array(items: []string) string {
 }
 
 func format_as_xml(json_str: string) string {
-    let result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    result := "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     result = result + "<root>\n"
     result = result + json_to_xml_inner(json_str, 1)
     result = result + "</root>"
@@ -53,15 +53,15 @@ func format_as_xml(json_str: string) string {
 }
 
 func json_to_xml_inner(json_str: string, depth: int) string {
-    let result = ""
-    let indent = get_indent(depth)
+    result := ""
+    indent := get_indent(depth)
 
     if json_str[0] == '{' {
 
-        let i = 1
-        let in_key = false
-        let key = ""
-        let value_start = 0
+        i := 1
+        in_key := false
+        key := ""
+        value_start := 0
 
         while i < len(json_str) && json_str[i] != '}' {
             if json_str[i] == '"' && (i == 0 || json_str[i - 1] != '\\') {
@@ -69,7 +69,7 @@ func json_to_xml_inner(json_str: string, depth: int) string {
 
                     in_key = false
 
-                    let j = i + 1
+                    j := i + 1
                     while j < len(json_str) && json_str[j] != ':' {
                         j = j + 1
                     }
@@ -78,7 +78,7 @@ func json_to_xml_inner(json_str: string, depth: int) string {
 
                     in_key = true
                     key = ""
-                    let j = i + 1
+                    j := i + 1
                     while j < len(json_str) && json_str[j] != '"' {
                         key = key + string_from_code(int(json_str[j]))
                         j = j + 1
@@ -100,8 +100,8 @@ func format_as_yaml(json_str: string) string {
 }
 
 func json_to_yaml(json_str: string, depth: int) string {
-    let result = ""
-    let indent = get_indent(depth)
+    result := ""
+    indent := get_indent(depth)
 
     if json_str[0] == '{' {
 
@@ -121,24 +121,24 @@ func json_to_yaml(json_str: string, depth: int) string {
 }
 
 func parse_yaml_object(json_str: string, depth: int) string {
-    let result = ""
-    let indent = get_indent(depth)
-    let next_indent = get_indent(depth + 1)
+    result := ""
+    indent := get_indent(depth)
+    next_indent := get_indent(depth + 1)
 
     return result
 }
 
 func parse_yaml_array(json_str: string, depth: int) string {
-    let result = ""
-    let indent = get_indent(depth)
-    let next_indent = get_indent(depth + 1)
+    result := ""
+    indent := get_indent(depth)
+    next_indent := get_indent(depth + 1)
 
     return result
 }
 
 func convert_format(input: string, from_format: string, to_format: string) string {
 
-    let json_form = input
+    json_form := input
     if from_format == FORMAT_XML {
         json_form = xml_to_json(input)
     } else if from_format == FORMAT_YAML {
@@ -171,15 +171,15 @@ func prettify_json(json_str: string) string {
 }
 
 func prettify_json_inner(json_str: string, depth: int) string {
-    let result = ""
-    let indent = get_indent(depth)
-    let next_indent = get_indent(depth + 1)
+    result := ""
+    indent := get_indent(depth)
+    next_indent := get_indent(depth + 1)
 
-    let i = 0
-    let in_string = false
+    i := 0
+    in_string := false
 
     while i < len(json_str) {
-        let c = json_str[i]
+        c := json_str[i]
 
         if c == '"' && (i == 0 || json_str[i - 1] != '\\') {
             in_string = !in_string
@@ -209,12 +209,12 @@ func prettify_json_inner(json_str: string, depth: int) string {
 }
 
 func minify_json(json_str: string) string {
-    let result = ""
-    let in_string = false
+    result := ""
+    in_string := false
 
-    let i = 0
+    i := 0
     while i < len(json_str) {
-        let c = json_str[i]
+        c := json_str[i]
 
         if c == '"' && (i == 0 || json_str[i - 1] != '\\') {
             in_string = !in_string
@@ -237,8 +237,8 @@ struct json_field {
 }
 
 func get_indent(level: int) string {
-    let result = ""
-    let i = 0
+    result := ""
+    i := 0
     while i < level * 2 {
         result = result + " "
         i = i + 1
@@ -266,12 +266,12 @@ func string_from_code(code: int) string {
 }
 
 func extract_string_value(s: string, start: int) string {
-    let i = start
+    i := start
     if i < len(s) && s[i] == '"' {
         i = i + 1
     }
 
-    let result = ""
+    result := ""
     while i < len(s) && s[i] != '"' {
         result = result + string_from_code(int(s[i]))
         i = i + 1
@@ -288,7 +288,7 @@ struct streaming_json_builder {
 }
 
 func create_streaming_builder() streaming_json_builder {
-    let builder = streaming_json_builder{
+    builder := streaming_json_builder{
         buffer: "",
         is_first: true,
         in_object: false,

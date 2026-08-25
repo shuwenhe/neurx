@@ -49,7 +49,7 @@ func new_lightweight_client(lightweight_client_config cfg) lightweight_client_co
 }
 
 func (cfg: &lightweight_client_config) infer(inference_request req) inference_response {
-    let response = inference_response {
+    response := inference_response {
         result: "",
         tokens_generated: 0,
         latency_ms: 0,
@@ -121,10 +121,10 @@ func calculate_storage_requirement(
     int cache_replicas
 ) int {
     
-    let central_storage = central_nodes * 10 * avg_model_size_gb
+    central_storage := central_nodes * 10 * avg_model_size_gb
     
     
-    let edge_storage = edge_nodes * avg_model_size_gb * cache_replicas / 100
+    edge_storage := edge_nodes * avg_model_size_gb * cache_replicas / 100
     
     central_storage + edge_storage
 }
@@ -135,12 +135,12 @@ func estimate_network_traffic(
     int edge_nodes,
     float edge_percentage
 ) {
-    let central_qps = total_qps * (1.0 - edge_percentage)
-    let edge_qps = total_qps * edge_percentage
+    central_qps := total_qps * (1.0 - edge_percentage)
+    edge_qps := total_qps * edge_percentage
     
     
-    let central_bandwidth_gbps = (central_qps * 3) / 1000 / 1000
-    let edge_bandwidth_gbps = (edge_qps * 3) / 1000 / 1000
+    central_bandwidth_gbps := (central_qps * 3) / 1000 / 1000
+    edge_bandwidth_gbps := (edge_qps * 3) / 1000 / 1000
     
     println("中央服务器总带宽: " + central_bandwidth_gbps as string + " Gbps")
     println("边缘节点总带宽: " + edge_bandwidth_gbps as string + " Gbps")

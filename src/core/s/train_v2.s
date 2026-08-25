@@ -110,7 +110,7 @@ func main() {
         int wi = mod(step, len(state.loss_history))
         state.loss_history[wi] = loss_val
         AG.zero_grad(model.all_params)
-        var grads = AG.backward(loss_tensor)
+        grads := AG.backward(loss_tensor)
         float grad_norm = AG.clip_grad_norm_(model.all_params, 1.0)
         state.grad_norm = grad_norm
         if cfg.optimizer == "adam" { AG.adam_step(opt, model.all_params) }
@@ -125,7 +125,7 @@ func main() {
                         grad_norm, opt.lr, 0, note)
         }
         if should_save(step + 1, cfg.save_every) {
-            var weights = AG.export_weights(model.all_params)
+            weights := AG.export_weights(model.all_params)
             NN.ModelConfigSnapshot snap = NN.make_config_snapshot(
                 cfg.vocab_size, cfg.embed_dim, cfg.num_heads, cfg.ffn_dim,
                 cfg.num_layers, cfg.max_seq_len, cfg.dropout_prob, total_params
@@ -141,7 +141,7 @@ func main() {
     }
     println("")
     println("[5/5] Saving final checkpoints...")
-    var final_weights = AG.export_weights(model.all_params)
+    final_weights := AG.export_weights(model.all_params)
     NN.ModelConfigSnapshot final_snap = NN.make_config_snapshot(
         cfg.vocab_size, cfg.embed_dim, cfg.num_heads, cfg.ffn_dim,
         cfg.num_layers, cfg.max_seq_len, cfg.dropout_prob, total_params

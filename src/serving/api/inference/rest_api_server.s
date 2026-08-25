@@ -29,14 +29,14 @@ struct inference_response {
     bool success
     string error
 }
-var g_cached_engine real_text_engine_state = real_text_engine_state{}
-var g_cached_engine_path string = ""
-var g_cached_engine_loaded bool = false
-var g_stream_client_fd int = -1
-var g_stream_request_id string = ""
-var g_stream_model string = ""
-var g_stream_tokens_sent int = 0
-var g_stream_max_tokens int = 0
+g_cached_engine := real_text_engine_state{}
+g_cached_engine_path := ""
+g_cached_engine_loaded := false
+g_stream_client_fd := -1
+g_stream_request_id := ""
+g_stream_model := ""
+g_stream_tokens_sent := 0
+g_stream_max_tokens := 0
 func json_escape(string s) string {
     string result = ""
     int i = 0

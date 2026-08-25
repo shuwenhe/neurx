@@ -42,17 +42,17 @@ func compute_cosine_lr(
     if current_step < warmup_steps {
         return compute_warmup_lr(base_lr, warmup_steps, current_step)
     }
-    let steps_after_warmup = float(current_step - warmup_steps)
-    let total_decay_steps = float(total_steps - warmup_steps)
+    steps_after_warmup := float(current_step - warmup_steps)
+    total_decay_steps := float(total_steps - warmup_steps)
     if total_decay_steps <= 0.0 {
         return base_lr
     }
-    let progress = steps_after_warmup / total_decay_steps
+    progress := steps_after_warmup / total_decay_steps
     if progress >= 1.0 {
         return min_lr
     }
-    let cos_val = cosine_approx(3.14159 * progress)
-    let lr = min_lr + 0.5 * (base_lr - min_lr) * (1.0 + cos_val)
+    cos_val := cosine_approx(3.14159 * progress)
+    lr := min_lr + 0.5 * (base_lr - min_lr) * (1.0 + cos_val)
     return max_approx(lr, min_lr)
 }
 
@@ -66,16 +66,16 @@ func compute_linear_lr(
     if current_step < warmup_steps {
         return compute_warmup_lr(base_lr, warmup_steps, current_step)
     }
-    let steps_after_warmup = float(current_step - warmup_steps)
-    let total_decay_steps = float(total_steps - warmup_steps)
+    steps_after_warmup := float(current_step - warmup_steps)
+    total_decay_steps := float(total_steps - warmup_steps)
     if total_decay_steps <= 0.0 {
         return base_lr
     }
-    let progress = steps_after_warmup / total_decay_steps
+    progress := steps_after_warmup / total_decay_steps
     if progress >= 1.0 {
         return min_lr
     }
-    let lr = base_lr + (min_lr - base_lr) * progress
+    lr := base_lr + (min_lr - base_lr) * progress
     return max_approx(lr, min_lr)
 }
 
@@ -87,9 +87,9 @@ func compute_constant_lr(float base_lr, int warmup_steps, int current_step) floa
 }
 
 func lr_scheduler_step(lr_scheduler sched) lr_scheduler {
-    let current_step = sched.current_step
-    let cfg = sched.config
-    var new_lr = cfg.base_lr
+    current_step := sched.current_step
+    cfg := sched.config
+    new_lr := cfg.base_lr
     if cfg.schedule_type == "cosine" {
         new_lr = compute_cosine_lr(
             cfg.base_lr,
@@ -128,9 +128,9 @@ func new_llm_scheduler(
     float base_lr,
     int total_steps
 ) lr_scheduler {
-    let warmup_steps = total_steps / 40
-    let min_lr = base_lr / 10.0
-    let cfg = lr_schedule_config {
+    warmup_steps := total_steps / 40
+    min_lr := base_lr / 10.0
+    cfg := lr_schedule_config {
         base_lr: base_lr,
         min_lr: min_lr,
         warmup_steps: warmup_steps,
@@ -144,8 +144,8 @@ func new_finetune_scheduler(
     float base_lr,
     int total_steps
 ) lr_scheduler {
-    let warmup_steps = total_steps / 10
-    let cfg = lr_schedule_config {
+    warmup_steps := total_steps / 10
+    cfg := lr_schedule_config {
         base_lr: base_lr,
         min_lr: 0.0,
         warmup_steps: warmup_steps,
@@ -156,15 +156,15 @@ func new_finetune_scheduler(
 }
 
 func cosine_approx(float x) float {
-    var x_reduced = x
+    x_reduced := x
     while x_reduced > 3.14159 {
         x_reduced = x_reduced - 6.28318
     }
     while x_reduced < -3.14159 {
         x_reduced = x_reduced + 6.28318
     }
-    let x2 = x_reduced * x_reduced
-    let result = 1.0
+    x2 := x_reduced * x_reduced
+    result := 1.0
             - x2 / 2.0
             + (x2 * x2) / 24.0
             - (x2 * x2 * x2) / 720.0

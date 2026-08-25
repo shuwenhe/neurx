@@ -70,7 +70,7 @@ func (mut scheduler_state* sched) add_request(metrics: request_metrics) {
 }
 
 func min_latency_schedule(sched: *scheduler_state) scheduling_decision {
-    let mut decision = scheduling_decision {
+    decision := scheduling_decision {
         prefill_request_ids: vec[](),
         decode_request_ids: vec[](),
         preempt_request_ids: vec[](),
@@ -78,7 +78,7 @@ func min_latency_schedule(sched: *scheduler_state) scheduling_decision {
         total_token_budget_used: 0,
     }
 
-    let mut token_budget = sched.config.max_token_per_iteration
+    token_budget := sched.config.max_token_per_iteration
 
     for metrics in sched.running_metrics.iter() {
         if metrics.tokens_generated < metrics.total_tokens_needed {
@@ -92,13 +92,13 @@ func min_latency_schedule(sched: *scheduler_state) scheduling_decision {
         }
     }
 
-    let mut prefill_count = 0
+    prefill_count := 0
     for metrics in sched.pending_metrics.iter() {
         if prefill_count >= sched.config.max_prefill_batch_size {
             break
         }
 
-        let prompt_len = metrics.total_tokens_needed
+        prompt_len := metrics.total_tokens_needed
         if token_budget >= prompt_len {
             decision.prefill_request_ids.push(metrics.request_id)
             token_budget -= prompt_len
@@ -111,7 +111,7 @@ func min_latency_schedule(sched: *scheduler_state) scheduling_decision {
 }
 
 func max_throughput_schedule(sched: *scheduler_state) scheduling_decision {
-    let mut decision = scheduling_decision {
+    decision := scheduling_decision {
         prefill_request_ids: vec[](),
         decode_request_ids: vec[](),
         preempt_request_ids: vec[](),
@@ -119,15 +119,15 @@ func max_throughput_schedule(sched: *scheduler_state) scheduling_decision {
         total_token_budget_used: 0,
     }
 
-    let mut token_budget = sched.config.max_token_per_iteration
+    token_budget := sched.config.max_token_per_iteration
 
-    let mut prefill_count = 0
+    prefill_count := 0
     for metrics in sched.pending_metrics.iter() {
         if prefill_count >= sched.config.max_prefill_batch_size {
             break
         }
 
-        let prompt_len = metrics.total_tokens_needed
+        prompt_len := metrics.total_tokens_needed
         if token_budget >= prompt_len {
             decision.prefill_request_ids.push(metrics.request_id)
             token_budget -= prompt_len
@@ -152,7 +152,7 @@ func max_throughput_schedule(sched: *scheduler_state) scheduling_decision {
 }
 
 func priority_schedule(sched: *scheduler_state) scheduling_decision {
-    let mut decision = scheduling_decision {
+    decision := scheduling_decision {
         prefill_request_ids: vec[](),
         decode_request_ids: vec[](),
         preempt_request_ids: vec[](),
@@ -160,12 +160,12 @@ func priority_schedule(sched: *scheduler_state) scheduling_decision {
         total_token_budget_used: 0,
     }
 
-    let mut token_budget = sched.config.max_token_per_iteration
+    token_budget := sched.config.max_token_per_iteration
 
-    let mut sorted_pending = sched.pending_metrics.clone()
+    sorted_pending := sched.pending_metrics.clone()
     sorted_pending.sort_by(|a, b| {
-        let a_prio = priority_value(a.priority)
-        let b_prio = priority_value(b.priority)
+        a_prio := priority_value(a.priority)
+        b_prio := priority_value(b.priority)
         if a_prio != b_prio {
             return b_prio - a_prio
         }
@@ -173,13 +173,13 @@ func priority_schedule(sched: *scheduler_state) scheduling_decision {
         a.arrival_time_ms - b.arrival_time_ms
     })
 
-    let mut prefill_count = 0
+    prefill_count := 0
     for metrics in sorted_pending.iter() {
         if prefill_count >= sched.config.max_prefill_batch_size {
             break
         }
 
-        let prompt_len = metrics.total_tokens_needed
+        prompt_len := metrics.total_tokens_needed
         if token_budget >= prompt_len {
             decision.prefill_request_ids.push(metrics.request_id)
             token_budget -= prompt_len
@@ -188,10 +188,10 @@ func priority_schedule(sched: *scheduler_state) scheduling_decision {
         }
     }
 
-    let mut sorted_running = sched.running_metrics.clone()
+    sorted_running := sched.running_metrics.clone()
     sorted_running.sort_by(|a, b| {
-        let a_prio = priority_value(a.priority)
-        let b_prio = priority_value(b.priority)
+        a_prio := priority_value(a.priority)
+        b_prio := priority_value(b.priority)
         if a_prio != b_prio {
             return b_prio - a_prio
         }
@@ -214,7 +214,7 @@ func priority_schedule(sched: *scheduler_state) scheduling_decision {
 }
 
 func balanced_schedule(sched: *scheduler_state) scheduling_decision {
-    let mut decision = scheduling_decision {
+    decision := scheduling_decision {
         prefill_request_ids: vec[](),
         decode_request_ids: vec[](),
         preempt_request_ids: vec[](),
@@ -222,20 +222,20 @@ func balanced_schedule(sched: *scheduler_state) scheduling_decision {
         total_token_budget_used: 0,
     }
 
-    let total_budget = sched.config.max_token_per_iteration
-    let prefill_budget = (total_budget * 50) / 100
-    let decode_budget = total_budget - prefill_budget
+    total_budget := sched.config.max_token_per_iteration
+    prefill_budget := (total_budget * 50) / 100
+    decode_budget := total_budget - prefill_budget
 
-    let mut prefill_used = 0
-    let mut decode_used = 0
+    prefill_used := 0
+    decode_used := 0
 
-    let mut prefill_count = 0
+    prefill_count := 0
     for metrics in sched.pending_metrics.iter() {
         if prefill_count >= sched.config.max_prefill_batch_size {
             break
         }
 
-        let prompt_len = metrics.total_tokens_needed
+        prompt_len := metrics.total_tokens_needed
         if prefill_used + prompt_len <= prefill_budget {
             decision.prefill_request_ids.push(metrics.request_id)
             prefill_used += prompt_len
@@ -266,17 +266,17 @@ func check_and_apply_preemption(
         return
     }
 
-    let high_priority_waiting = sched.pending_metrics.iter().any(|m| m.priority == request_priority.high)
+    high_priority_waiting := sched.pending_metrics.iter().any(|m| m.priority == request_priority.high)
 
     if high_priority_waiting && decision.decode_request_ids.len() > 0 {
 
-        let mut min_idx = 0
-        let mut min_priority = 999
+        min_idx := 0
+        min_priority := 999
 
         for i in 0..decision.decode_request_ids.len() {
-            let req_id = decision.decode_request_ids[i]
+            req_id := decision.decode_request_ids[i]
             if let Some(metrics) = sched.running_metrics.iter().find(|m| m.request_id == req_id) {
-                let prio = priority_value(metrics.priority)
+                prio := priority_value(metrics.priority)
                 if prio < min_priority {
                     min_priority = prio
                     min_idx = i
@@ -285,7 +285,7 @@ func check_and_apply_preemption(
         }
 
         if min_priority < 2 {
-            let preempted_id = decision.decode_request_ids[min_idx]
+            preempted_id := decision.decode_request_ids[min_idx]
             decision.preempt_request_ids.push(preempted_id)
             decision.decode_request_ids.remove(min_idx)
         }
@@ -293,7 +293,7 @@ func check_and_apply_preemption(
 }
 
 func (mut scheduler_state* sched) make_decision() scheduling_decision {
-    let mut decision = match sched.config.strategy {
+    decision := match sched.config.strategy {
         scheduling_strategy.min_latency => min_latency_schedule(sched),
         scheduling_strategy.max_throughput => max_throughput_schedule(sched),
         scheduling_strategy.priority => priority_schedule(sched),
@@ -325,7 +325,7 @@ struct scheduler_stats {
 }
 
 func (scheduler_state* sched) get_stats() scheduler_stats {
-    let total_requests = sched.completed_metrics.len()
+    total_requests := sched.completed_metrics.len()
 
     scheduler_stats {
         total_iterations: sched.current_iteration,
@@ -341,7 +341,7 @@ func main() {
     println("🎯 Prefill/Decode 高级调度策略")
     println("================================")
 
-    let config = scheduler_config {
+    config := scheduler_config {
         strategy: scheduling_strategy.balanced,
         max_prefill_batch_size: 8,
         max_decode_batch_size: 32,
@@ -351,10 +351,10 @@ func main() {
         enable_priority: true,
     }
 
-    let mut sched = new_scheduler_state(config)
+    sched := new_scheduler_state(config)
 
     for i in 0..6 {
-        let metrics = request_metrics {
+        metrics := request_metrics {
             request_id: i,
             arrival_time_ms: (i as i32) * 100,
             tokens_prefilled: 0,
@@ -368,7 +368,7 @@ func main() {
     }
 
     for iter in 0..3 {
-        let decision = sched.make_decision()
+        decision := sched.make_decision()
         println(f"Iteration {iter + 1}:")
         println(f"  Prefill: {decision.prefill_request_ids.len()} requests")
         println(f"  Decode: {decision.decode_request_ids.len()} requests")

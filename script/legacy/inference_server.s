@@ -67,7 +67,7 @@ struct server_metrics {
 	memory_usage        int64   `json:"memory_usage_mb"`
 	uptime_seconds      int64   `json:"uptime_seconds"`
 }
-var g_config = &inference_server_config{
+g_config := &inference_server_config{
 	server_name: "neurx-inference",
 	host: "0.0.0.0",
 	port: 8080,
@@ -85,7 +85,7 @@ var g_config = &inference_server_config{
 	log_level: "INFO",
 	worker_threads: 4,
 }
-var g_metrics = &server_metrics{
+g_metrics := &server_metrics{
 	total_requests: 0,
 	successful_requests: 0,
 	failed_requests: 0,
@@ -94,7 +94,7 @@ var g_metrics = &server_metrics{
 	min_latency: 999999.0,
 	uptime_seconds: 0,
 }
-var g_server_start_time = time.Now()
+g_server_start_time := time.Now()
 
 func load_config_from_env() {
 	if home := os.Getenv("NEURX_HOME"); home != "" {

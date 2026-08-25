@@ -305,7 +305,7 @@ func main() {
     print("\n🚀 NEURX S PRODUCTION INFERENCE MAINCHAIN VALIDATOR\n")
     print("   Version 1.0 | Compiled 2026-08-24 | Language S\n\n")
     
-    var validator = create_validator()
+    validator := create_validator()
     
     validate_mainchain_step_1(validator)
     validate_mainchain_step_2(validator)

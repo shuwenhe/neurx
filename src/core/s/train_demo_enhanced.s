@@ -346,7 +346,7 @@ func save_checkpoint_v2(string output_dir, int step, float loss, float best_loss
     int param_count = count_params(model)
     string content = format_checkpoint_v2(step, loss, best_loss, best_step,
                                             param_count, config, loss_window)
-    var r = write_text_file(filepath, content)
+    r := write_text_file(filepath, content)
     if r.is_ok() {
         println("  ✓ Saved checkpoint: ", filepath)
         return filepath
@@ -424,7 +424,7 @@ func run_training(gptconfig config) training_result {
         auto_grad_tensor loss_tensor = compute_cross_entropy_loss(logits, target_ids)
         float loss_val = item(loss_tensor.data)
         zero_grad(model.all_parameters)
-        var grads = backward(loss_tensor)
+        grads := backward(loss_tensor)
         float grad_norm = clip_grad_norm_(model.all_parameters, 1.0)
         bool is_adam_opt = config.optimizer == "adam"
         bool is_adamw_opt = config.optimizer == "adamw"

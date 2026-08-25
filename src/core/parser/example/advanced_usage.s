@@ -33,7 +33,7 @@ func demo_custom_config() {
     print("Example 1: Custom Parser Configuration\n")
     print("="*60 + "\n\n")
 
-    let config = ParserConfig{
+    config := ParserConfig{
         mode: 0,
         format: 1,
         max_depth: 50,
@@ -50,24 +50,24 @@ func demo_custom_config() {
         cache_intermediate: false,
     }
 
-    let parser = create_parser(config)
+    parser := create_parser(config)
 
-    let valid_json = "{\"items\": [1, 2, 3]}"
+    valid_json := "{\"items\": [1, 2, 3]}"
     print("Configuration: STRICT JSON mode\n")
     print("Input: " + valid_json + "\n\n")
 
-    let result = parser.parse(valid_json)
+    result := parser.parse(valid_json)
     print("Result: " + status_to_string(result.status) + "\n")
     print("Confidence: " + string(result.confidence) + "\n\n")
 
-    let lenient_config = create_default_config()
+    lenient_config := create_default_config()
     parser.set_config(lenient_config)
 
-    let malformed = "{items: [1, 2, 3"
+    malformed := "{items: [1, 2, 3"
     print("Configuration: LENIENT mode (with error recovery)\n")
     print("Input: " + malformed + "\n\n")
 
-    let result2 = parser.parse(malformed)
+    result2 := parser.parse(malformed)
     print("Result: " + status_to_string(result2.status) + "\n")
     print("Confidence: " + string(result2.confidence) + "\n")
 
@@ -82,17 +82,17 @@ func demo_format_conversion() {
     print("Example 2: Multi-Format Conversion\n")
     print("="*60 + "\n\n")
 
-    let json_data = "{\"name\": \"Alice\", \"age\": 30}"
+    json_data := "{\"name\": \"Alice\", \"age\": 30}"
 
     print("Original JSON:\n  " + json_data + "\n\n")
 
-    let xml_form = convert_format(json_data, 1, 2)
+    xml_form := convert_format(json_data, 1, 2)
     print("Converted to XML:\n  " + xml_form + "\n\n")
 
-    let yaml_form = convert_format(json_data, 1, 4)
+    yaml_form := convert_format(json_data, 1, 4)
     print("Converted to YAML:\n  " + yaml_form + "\n\n")
 
-    let text_form = normalize_format(json_data, 0)
+    text_form := normalize_format(json_data, 0)
     print("Normalized to TEXT:\n  " + text_form + "\n\n")
 }
 
@@ -101,11 +101,11 @@ func demo_realtime_parsing() {
     print("Example 3: Real-time LLM Output Parsing\n")
     print("="*60 + "\n\n")
 
-    let parser = create_default_parser()
+    parser := create_default_parser()
 
     print("Simulating LLM real-time response...\n\n")
 
-    let chunks = []string{
+    chunks := []string{
         "I think the answer is ",
         "{\"reasoning\": \"Let me work through this\", ",
         "\"steps\": [\"First\", \"Second\", \"Third\"], ",
@@ -118,10 +118,10 @@ func demo_realtime_parsing() {
     }
     print("\n")
 
-    let results = parser.parse_stream(chunks)
+    results := parser.parse_stream(chunks)
 
     print("Parsing progress:\n")
-    let final_result = results[len(results) - 1]
+    final_result := results[len(results) - 1]
     print("  Final status: " + status_to_string(final_result.status) + "\n")
     print("  Detected format: " + format_to_string(final_result.format) + "\n")
     print("  Confidence: " + string(final_result.confidence) + "\n")
@@ -133,20 +133,20 @@ func demo_function_calling() {
     print("Example 4: Function Calling Output\n")
     print("="*60 + "\n\n")
 
-    let parser = create_default_parser()
+    parser := create_default_parser()
 
-    let func_response = "{\"function\": \"send_email\", \"parameters\": {\"to\": \"user@example.com\", \"subject\": \"Hello\", \"body\": \"This is a test\"}}"
+    func_response := "{\"function\": \"send_email\", \"parameters\": {\"to\": \"user@example.com\", \"subject\": \"Hello\", \"body\": \"This is a test\"}}"
 
     print("Function Calling Response:\n  " + func_response + "\n\n")
 
-    let result = parser.parse(func_response)
+    result := parser.parse(func_response)
 
     print("Parsed Result:\n")
     print("  Status: " + status_to_string(result.status) + "\n")
     print("  Format: " + format_to_string(result.format) + "\n")
     print("  Output: " + result.parsed_output + "\n\n")
 
-    let function_name = parser.parse_and_get(func_response, "function")
+    function_name := parser.parse_and_get(func_response, "function")
     print("Extracted function name: " + function_name + "\n\n")
 }
 
@@ -155,21 +155,21 @@ func demo_structured_extraction() {
     print("Example 5: Structured Data Extraction\n")
     print("="*60 + "\n\n")
 
-    let parser = create_default_parser()
+    parser := create_default_parser()
 
-    let markdown_table = "| Name | Age | City |\n| --- | --- | --- |\n| Alice | 30 | NYC |\n| Bob | 25 | LA |"
+    markdown_table := "| Name | Age | City |\n| --- | --- | --- |\n| Alice | 30 | NYC |\n| Bob | 25 | LA |"
 
     print("Markdown Table:\n")
     print(markdown_table + "\n\n")
 
-    let result = parser.parse(markdown_table)
+    result := parser.parse(markdown_table)
 
     print("Parse Result:\n")
     print("  Format: " + format_to_string(result.format) + "\n")
     print("  Status: " + status_to_string(result.status) + "\n")
     print("  Parsed: " + result.parsed_output + "\n\n")
 
-    let quality = estimate_quality_score(result)
+    quality := estimate_quality_score(result)
     print("Quality Score: " + string(quality) + "\n\n")
 }
 

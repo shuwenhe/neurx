@@ -3,12 +3,12 @@ use std.fs.write_text_file as write_file
 use std.fs.read_to_string as read_file
 
 func checkpoint_save(string path, string content) bool {
-    var result = write_file(path, content)
+    result := write_file(path, content)
     result.is_ok()
 }
 
 func checkpoint_load(string path) string {
-    var result = read_file(path)
+    result := read_file(path)
     if result.is_ok() {
         return result.unwrap()
     }
@@ -16,7 +16,7 @@ func checkpoint_load(string path) string {
 }
 
 func file_exists(string path) bool {
-    var result = read_file(path)
+    result := read_file(path)
     result.is_ok()
 }
 

@@ -33,18 +33,18 @@ struct platform_capability {
 }
 
 func detect_platform_capability() result[platform_capability, string] {
-    let cpu_count = detect_cpu_count()?
-    let gpu_count = detect_gpu_count()?
-    let total_memory = detect_total_memory()?
+    cpu_count := detect_cpu_count()?
+    gpu_count := detect_gpu_count()?
+    total_memory := detect_total_memory()?
     
-    let accelerators = vec[device_capability]()
+    accelerators := vec[device_capability]()
     
     for i in 0..gpu_count {
-        let gpu_cap = detect_compute_device(i)?
+        gpu_cap := detect_compute_device(i)?
         accelerators.push(gpu_cap)
     }
     
-    let platform = platform_capability {
+    platform := platform_capability {
         socket_count: 1,
         cpus_per_socket: cpu_count,
         numa_nodes: 1,
@@ -59,7 +59,7 @@ func detect_platform_capability() result[platform_capability, string] {
 }
 
 func detect_cpu_count() result[int, string] {
-    let cpu_count = query_cpuid_count()
+    cpu_count := query_cpuid_count()
     
     if cpu_count <= 0 {
         cpu_count = 8
@@ -69,7 +69,7 @@ func detect_cpu_count() result[int, string] {
 }
 
 func detect_gpu_count() result[int, string] {
-    let gpu_count = query_nvidia_gpu_count()
+    gpu_count := query_nvidia_gpu_count()
     
     if gpu_count == 0 {
         gpu_count = query_amd_gpu_count()
@@ -83,7 +83,7 @@ func detect_gpu_count() result[int, string] {
 }
 
 func detect_total_memory() result[int, string] {
-    let memory_gb = query_system_memory_gb()
+    memory_gb := query_system_memory_gb()
     
     if memory_gb <= 0 {
         memory_gb = 16
@@ -141,19 +141,19 @@ func get_device_capability(device_id: int) result[device_capability, string] {
 }
 
 func is_gpu_available() result[bool, string] {
-    let gpu_count = detect_gpu_count()?
+    gpu_count := detect_gpu_count()?
     (gpu_count > 0, "")
 }
 
 func is_nvidia_gpu_available() result[bool, string] {
-    let count = query_nvidia_gpu_count()
+    count := query_nvidia_gpu_count()
     (count > 0, "")
 }
 
 func get_total_compute_capability() result[int, string] {
-    let platform = detect_platform_capability()?
+    platform := detect_platform_capability()?
     
-    let total_tflops = platform.accelerators*.len() * 89100
+    total_tflops := platform.accelerators*.len() * 89100
     
     (total_tflops, "")
 }

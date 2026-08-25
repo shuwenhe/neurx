@@ -127,7 +127,7 @@ struct in_memory_vector_db implements vector_db_interface {
     search(query_embedding: tensor, int top_k) {
         results: list<search_result_item> = []
         for chunk_id, doc_emb in this.embeddings {
-            let score = compute_similarity(query_embedding, doc_emb, this.config.metric)
+            score := compute_similarity(query_embedding, doc_emb, this.config.metric)
             if score >= this.config.similarity_threshold {
                 results.append(search_result_item{
                     chunk_id=chunk_id,
@@ -156,7 +156,7 @@ struct in_memory_vector_db implements vector_db_interface {
         data = read_json_file(path)
         this.config = deserialize(data["config"])
         for doc_data in data["documents"]:
-            let doc = deserialize(doc_data)
+            doc := deserialize(doc_data)
             this.documents[doc.id] = doc
         for id_str, emb_array in data["embeddings"] {
             this.embeddings[id_str] = tensor(emb_array)
@@ -478,7 +478,7 @@ struct document_processor {
     process_documents(documents: list<{string content, metadata: document_metadata}>) {
         all_chunks: list<document_chunk> = []
         for doc in documents {
-            let chunks = this.process_document(doc.content, doc.metadata)
+            chunks := this.process_document(doc.content, doc.metadata)
             all_chunks.extend(chunks)
         }
         return all_chunks
@@ -1016,7 +1016,7 @@ struct retrieval_engine {
         this.vector_db.load(path + "_vectordb")
         state = read_json_file(path + "_state.json")
         for doc_data in state["documents"]:
-            let doc = deserialize(doc_data)
+            doc := deserialize(doc_data)
             this.documents_store[doc.id] = doc
         }
     }

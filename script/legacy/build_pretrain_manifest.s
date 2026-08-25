@@ -17,18 +17,18 @@ func string_char(int c) string {
 }
 
 func main() {
-    let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    let shard_dir = runtime_env_get("NEURX_PRETRAIN_SHARD_DIR", project_root + "/dataset/pretrain/shard")
-    let manifest_file = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
-    let force_rebuild = runtime_env_get("NEURX_PRETRAIN_REBUILD_MANIFEST", "0")
-    let work_dir = project_root + "/artifact/build/build_pretrain_manifest"
-    let shard_list_file = work_dir + "/shard_list.txt"
-    let doc_count_file = work_dir + "/doc_count.txt"
-    let size_bytes_file = work_dir + "/size_bytes.txt"
-    let shard_count_file = work_dir + "/shard_count.txt"
-    let total_documents_file = work_dir + "/total_documents.txt"
-    let total_size_bytes_file = work_dir + "/total_size_bytes.txt"
-    let average_docs_file = work_dir + "/average_docs.txt"
+    project_root := runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
+    shard_dir := runtime_env_get("NEURX_PRETRAIN_SHARD_DIR", project_root + "/dataset/pretrain/shard")
+    manifest_file := runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
+    force_rebuild := runtime_env_get("NEURX_PRETRAIN_REBUILD_MANIFEST", "0")
+    work_dir := project_root + "/artifact/build/build_pretrain_manifest"
+    shard_list_file := work_dir + "/shard_list.txt"
+    doc_count_file := work_dir + "/doc_count.txt"
+    size_bytes_file := work_dir + "/size_bytes.txt"
+    shard_count_file := work_dir + "/shard_count.txt"
+    total_documents_file := work_dir + "/total_documents.txt"
+    total_size_bytes_file := work_dir + "/total_size_bytes.txt"
+    average_docs_file := work_dir + "/average_docs.txt"
     manifest_log("NeurX Pretrain manifest Builder (S Lang)")
     manifest_log("")
     manifest_log("Project root : " + project_root)
@@ -56,14 +56,14 @@ func main() {
         manifest_log("❌ failed to enumerate shards in: " + shard_dir)
         return 1
     }
-    let shard_output = trim(runtime_read_text_file(shard_list_file))
+    shard_output := trim(runtime_read_text_file(shard_list_file))
     if shard_output == "" {
         manifest_log("❌ no shard files found in: " + shard_dir)
         return 1
     }
     int total_documents = 0
     int total_size_bytes = 0
-    let json_header = "{\n"
+    json_header := "{\n"
     json_header = json_header + "  \"dataset_name\": \"neurx-pretrain-wikipedia\",\n"
     json_header = json_header + "  \"version\": \"1.0\",\n"
     json_header = json_header + "  \"source_dir\": " + json_escape(shard_dir) + ",\n"
@@ -71,18 +71,18 @@ func main() {
     runtime_write_text_file(manifest_file, json_header)
     int shard_count = 0
     int i = 0
-    let current_path = ""
+    current_path := ""
     while i <= len(shard_output) {
         bool at_end = i == len(shard_output)
         bool at_newline = !at_end && shard_output[i] == 10
         if at_end || at_newline {
-            let shard_path = trim(current_path)
+            shard_path := trim(current_path)
             current_path = ""
             if shard_path != "" {
                 _ = runtime_run_command_output("wc -l < " + shell_escape(shard_path) + " > " + shell_escape(doc_count_file) + "; printf ok")
                 _ = runtime_run_command_output("wc -c < " + shell_escape(shard_path) + " > " + shell_escape(size_bytes_file) + "; printf ok")
-                let doc_count_text = trim(runtime_read_text_file(doc_count_file))
-                let size_bytes_text = trim(runtime_read_text_file(size_bytes_file))
+                doc_count_text := trim(runtime_read_text_file(doc_count_file))
+                size_bytes_text := trim(runtime_read_text_file(size_bytes_file))
                 if doc_count_text == "" {
                     doc_count_text = "0"
                 }
@@ -94,7 +94,7 @@ func main() {
                 _ = runtime_run_command_output("sh -c " + shell_escape("count=$(cat " + shell_escape(shard_count_file) + "); new=$((count + 1)); printf '%s\\n' \"$new\" > " + shell_escape(shard_count_file) + "; printf ok"))
                 _ = runtime_run_command_output("sh -c " + shell_escape("total=$(cat " + shell_escape(total_documents_file) + "); new=$((total + " + doc_count_text + ")); printf '%s\\n' \"$new\" > " + shell_escape(total_documents_file) + "; printf ok"))
                 _ = runtime_run_command_output("sh -c " + shell_escape("total=$(cat " + shell_escape(total_size_bytes_file) + "); new=$((total + " + size_bytes_text + ")); printf '%s\\n' \"$new\" > " + shell_escape(total_size_bytes_file) + "; printf ok"))
-                let shard_json = ""
+                shard_json := ""
                 if shard_count > 0 {
                     shard_json = ",\n"
                 }
@@ -112,9 +112,9 @@ func main() {
         }
         i = i + 1
     }
-    let shard_count_text = trim(runtime_read_text_file(shard_count_file))
-    let total_documents_text = trim(runtime_read_text_file(total_documents_file))
-    let total_size_bytes_text = trim(runtime_read_text_file(total_size_bytes_file))
+    shard_count_text := trim(runtime_read_text_file(shard_count_file))
+    total_documents_text := trim(runtime_read_text_file(total_documents_file))
+    total_size_bytes_text := trim(runtime_read_text_file(total_size_bytes_file))
     if shard_count_text == "" {
         shard_count_text = "0"
     }
@@ -127,11 +127,11 @@ func main() {
     if parse_int(shard_count_text, 0) > 0 {
         _ = runtime_run_command_output("sh -c " + shell_escape("total=$(cat " + shell_escape(total_documents_file) + "); count=$(cat " + shell_escape(shard_count_file) + "); avg=$((total / count)); printf '%s\\n' \"$avg\" > " + shell_escape(average_docs_file) + "; printf ok"))
     }
-    let average_docs_text = trim(runtime_read_text_file(average_docs_file))
+    average_docs_text := trim(runtime_read_text_file(average_docs_file))
     if average_docs_text == "" {
         average_docs_text = "0"
     }
-    let json_footer = "\n  ],\n"
+    json_footer := "\n  ],\n"
     json_footer = json_footer + "  \"total_shards\": " + shard_count_text + ",\n"
     json_footer = json_footer + "  \"total_documents\": " + total_documents_text + ",\n"
     json_footer = json_footer + "  \"total_size_bytes\": " + total_size_bytes_text + ",\n"

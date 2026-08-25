@@ -37,8 +37,8 @@ func new_otb_trainer(
     *model policy,
     *model baseline
 ) -> OTBTrainer {
-    let optimizer = adamw_optimizer(policy.parameters(), config.learning_rate)
-    let baseline_optimizer: *optimizer = nil
+    optimizer := adamw_optimizer(policy.parameters(), config.learning_rate)
+    baseline_optimizer := nil
     if config.use_learned_baseline {
         baseline_optimizer = adamw_optimizer(
             baseline.parameters(),
@@ -62,16 +62,16 @@ func (otb_trainer* trainer) compute_token_baseline(
     Tensor tokens,
     Tensor rewards
 ) -> Tensor {
-    let seq_len = tokens.shape[0]
-    let baselines = tensor_zeros([seq_len])
+    seq_len := tokens.shape[0]
+    baselines := tensor_zeros([seq_len])
     match trainer.config.baseline_type {
         "optimal" => {
             for t in 0..seq_len {
-                let token_id = tokens[t].item_i64()
-                let reward = rewards[t].item()
+                token_id := tokens[t].item_i64()
+                reward := rewards[t].item()
                 if token_id in trainer.token_ema_baselines {
-                    let old_baseline = trainer.token_ema_baselines[token_id]
-                    let new_baseline = trainer.config.ema_alpha * reward +
+                    old_baseline := trainer.token_ema_baselines[token_id]
+                    new_baseline := trainer.config.ema_alpha * reward +
                                      (1.0 - trainer.config.ema_alpha) * old_baseline
                     trainer.token_ema_baselines[token_id] = new_baseline
                     baselines[t] = tensor_scalar(new_baseline)
@@ -82,16 +82,16 @@ func (otb_trainer* trainer) compute_token_baseline(
             }
         },
         "mean" => {
-            let mean_reward = rewards.mean()
+            mean_reward := rewards.mean()
             baselines = tensor_full([seq_len], mean_reward.item())
         },
         "ema" => {
             for t in 0..seq_len {
-                let position_key = i64(1000000 + t)
-                let reward = rewards[t].item()
+                position_key := i64(1000000 + t)
+                reward := rewards[t].item()
                 if position_key in trainer.token_ema_baselines {
-                    let old_baseline = trainer.token_ema_baselines[position_key]
-                    let new_baseline = trainer.config.ema_alpha * reward +
+                    old_baseline := trainer.token_ema_baselines[position_key]
+                    new_baseline := trainer.config.ema_alpha * reward +
                                      (1.0 - trainer.config.ema_alpha) * old_baseline
                     trainer.token_ema_baselines[position_key] = new_baseline
                     baselines[t] = tensor_scalar(new_baseline)
@@ -119,18 +119,18 @@ func (otb_trainer* trainer) compute_advantages(
     Tensor tokens,
     Tensor rewards
 ) -> Tensor {
-    let baselines = trainer.compute_token_baseline(tokens, rewards)
-    let raw_advantages = rewards.clone()
+    baselines := trainer.compute_token_baseline(tokens, rewards)
+    raw_advantages := rewards.clone()
     if trainer.config.compute_variance {
         trainer.advantage_variance_before = compute_variance_tensor(raw_advantages)
     }
-    let advantages = rewards - baselines
+    advantages := rewards - baselines
     if trainer.config.compute_variance {
         trainer.advantage_variance_after = compute_variance_tensor(advantages)
     }
     if trainer.config.use_whitening {
-        let adv_mean = advantages.mean()
-        let adv_std = advantages.std()
+        adv_mean := advantages.mean()
+        adv_std := advantages.std()
         advantages = (advantages - adv_mean) / (adv_std + 1e-8)
     }
     return advantages
@@ -141,39 +141,39 @@ func (otb_trainer* trainer) train_step(
     []tensor responses,
     []tensor rewards
 ) -> (f32, f32, f32) {
-    let batch_size = prompts.len()
-    let inputs: []tensor = []
+    batch_size := prompts.len()
+    inputs := []
     for i in 0..batch_size {
         inputs.push(concat(prompts[i], responses[i]))
     }
-    let total_policy_loss: f32 = 0.0
-    let total_baseline_loss: f32 = 0.0
-    let total_entropy: f32 = 0.0
-    let num_updates = 0
+    total_policy_loss := 0.0
+    total_baseline_loss := 0.0
+    total_entropy := 0.0
+    num_updates := 0
     for epoch in 0..trainer.config.num_epochs {
         for i in 0..batch_size {
-            let advantages = trainer.compute_advantages(
+            advantages := trainer.compute_advantages(
                 responses[i],
                 rewards[i]
             )
-            let logits = trainer.policy_model.forward(inputs[i])
-            let log_probs = log_softmax(logits, dim: -1)
-            let policy_obj: Tensor
+            logits := trainer.policy_model.forward(inputs[i])
+            log_probs := log_softmax(logits, dim: -1)
+            policy_obj := Tensor()
             if trainer.config.use_clipping {
                 policy_obj = log_probs * advantages
             } else {
                 policy_obj = log_probs * advantages
             }
-            let policy_loss = -policy_obj.mean()
-            let probs = exp(log_probs)
-            let entropy = -(probs * log_probs).sum()
-            let loss = policy_loss - trainer.config.entropy_coeff * entropy
+            policy_loss := -policy_obj.mean()
+            probs := exp(log_probs)
+            entropy := -(probs * log_probs).sum()
+            loss := policy_loss - trainer.config.entropy_coeff * entropy
             loss.backward()
             total_policy_loss += policy_loss.item()
             total_entropy += entropy.item()
-            let baseline_loss = tensor_zeros([1])
+            baseline_loss := tensor_zeros([1])
             if trainer.config.use_learned_baseline {
-                let predicted_baseline = trainer.baseline_model.forward(responses[i])
+                predicted_baseline := trainer.baseline_model.forward(responses[i])
                 baseline_loss = (predicted_baseline - rewards[i]).pow(2).mean()
                 baseline_loss = baseline_loss * trainer.config.baseline_loss_coeff
                 baseline_loss.backward()
@@ -199,9 +199,9 @@ func (otb_trainer* trainer) train_step(
 }
 
 func (otb_trainer* trainer) train(DataLoader train_data) -> []f32 {
-    let policy_losses: []f32 = []
+    policy_losses := []
     for batch in train_data {
-        let policy_loss, baseline_loss, entropy = trainer.train_step(
+        policy_loss, baseline_loss, entropy  := trainer.train_step(
             batch.prompts,
             batch.responses,
             batch.rewards
@@ -215,7 +215,7 @@ func (otb_trainer* trainer) train(DataLoader train_data) -> []f32 {
                 println(f"  Baseline Loss = {baseline_loss:.4f}")
             }
             if trainer.config.compute_variance {
-                let variance_reduction =
+                variance_reduction := 
                     (trainer.advantage_variance_before - trainer.advantage_variance_after) /
                     (trainer.advantage_variance_before + 1e-8)
                 println(f"  Variance Reduction = {variance_reduction:.2%}")
@@ -237,8 +237,8 @@ func (otb_trainer* trainer) get_variance_reduction() -> f32 {
 }
 
 func compute_variance_tensor(Tensor x) -> f32 {
-    let mean = x.mean()
-    let variance = (x - mean).pow(2).mean()
+    mean := x.mean()
+    variance := (x - mean).pow(2).mean()
     return variance.item()
 }
 
@@ -246,7 +246,7 @@ func compute_mean([]f32 values) -> f32 {
     if values.len() == 0 {
         return 0.0
     }
-    let sum: f32 = 0.0
+    sum := 0.0
     for v in values {
         sum += v
     }
@@ -257,7 +257,7 @@ func compute_variance([]f32 values, f32 mean) -> f32 {
     if values.len() == 0 {
         return 0.0
     }
-    let sum_sq: f32 = 0.0
+    sum_sq := 0.0
     for v in values {
         sum_sq += (v - mean) * (v - mean)
     }

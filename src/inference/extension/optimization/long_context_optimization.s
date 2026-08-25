@@ -40,7 +40,7 @@ func NewChunkedPrefillProcessor(config chunk_config) *chunked_prefill_processor 
 func (chunked_prefill_processor* cpp) PrepareChunks(total_tokens int32) {
     chunk_size := cpp.config.chunk_size
     overlap := cpp.config.overlap_size
-    var current_start int32 = 0
+    current_start := 0
     chunk_id := int32(0)
     for current_start < total_tokens {
         current_end := current_start + chunk_size

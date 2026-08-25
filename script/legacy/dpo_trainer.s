@@ -112,7 +112,7 @@ func sigmoid(x float64) float64 {
 }
 
 func (dpotrainer* trainer) compute_batch_loss(batch []preference_pair) float64 {
-    var total_loss float64 = 0.0
+    total_loss := 0.0
     for _, pair := range batch {
         loss := trainer.compute_dpo_loss(pair)
         total_loss += loss
@@ -131,7 +131,7 @@ func (dpotrainer* trainer) train_dpo_step(
         rejected_logit = trainer.model_logits[batch[0].rejected_response]
         margin = chosen_logit - rejected_logit
     }
-    var correct int = 0
+    correct := 0
     for _, pair := range batch {
         if trainer.model_logits[pair.chosen_response] > trainer.model_logits[pair.rejected_response] {
             correct++
@@ -161,8 +161,8 @@ func (dpotrainer* trainer) train_dpo_step(
 func (dpotrainer* trainer) evaluate_dpo(test_pairs []preference_pair) float64 {
     fmt.Printf("\n[Evaluation] Evaluating DPO model\n")
     fmt.Printf("  Test Pairs: %d\n", len(test_pairs))
-    var correct int = 0
-    var total_loss float64 = 0.0
+    correct := 0
+    total_loss := 0.0
     for _, pair := range test_pairs {
         loss := trainer.compute_dpo_loss(pair)
         total_loss += loss

@@ -25,9 +25,9 @@ struct global_deployment_plan {
 }
 
 func new_zone_deployment(string zone_id, string zone_name, int total_nodes) zone_deployment_config {
-    let central_per_zone = 10              
-    let edge_per_zone = total_nodes / 10   
-    let client_per_zone = total_nodes - central_per_zone - edge_per_zone
+    central_per_zone := 10              
+    edge_per_zone := total_nodes / 10   
+    client_per_zone := total_nodes - central_per_zone - edge_per_zone
     
     return zone_deployment_config {
         zone_id: zone_id,
@@ -43,12 +43,12 @@ func new_zone_deployment(string zone_id, string zone_name, int total_nodes) zone
 
 func get_1m_global_deployment_plan() global_deployment_plan {
     
-    let zones = vec[zone_deployment_config]()
+    zones := vec[zone_deployment_config]()
     
     for i in 0..100 {
-        let zone_id = "zone-" + (i + 1) as string
-        let zone_name = "Region-" + (i + 1) as string
-        let zone = new_zone_deployment(zone_id, zone_name, 10000)
+        zone_id := "zone-" + (i + 1) as string
+        zone_name := "Region-" + (i + 1) as string
+        zone := new_zone_deployment(zone_id, zone_name, 10000)
         zones.push(zone)
     }
     
@@ -123,10 +123,10 @@ func print_deployment_comparison() {
     println("╚════════════════════════════════════════════════════════════════╝")
     println("")
     
-    let tier0 = get_tier_0_central_server()
-    let tier1 = get_tier_1_regional_gateway()
-    let tier2 = get_tier_2_edge_inference()
-    let tier3 = get_tier_3_lightweight_client()
+    tier0 := get_tier_0_central_server()
+    tier1 := get_tier_1_regional_gateway()
+    tier2 := get_tier_2_edge_inference()
+    tier3 := get_tier_3_lightweight_client()
     
     println("┌─ Tier-0: 全球中央服务器")
     println("│  ├─ 数量: 1,000 台")

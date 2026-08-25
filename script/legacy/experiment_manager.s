@@ -182,12 +182,12 @@ func (experiment_manager* manager) compare_experiments(
         winner:         "",
         significance:   0.0,
     }
-    var best_value float64 = math.MaxFloat64
-    var best_exp string = ""
-    var second_best float64 = math.MaxFloat64
+    best_value := math.MaxFloat64
+    best_exp := ""
+    second_best := math.MaxFloat64
     for _, exp_id := range exp_ids {
         if result, exists := manager.experiments[exp_id]; exists {
-            var value float64 = 0.0
+            value := 0.0
             if metric == "loss" && len(result.metrics_history) > 0 {
                 value = result.best_loss
             } else if metric == "perplexity" && len(result.metrics_history) > 0 {
@@ -267,8 +267,8 @@ func (experiment_manager* manager) export_experiment_config(experiment_id string
 }
 
 func (experiment_manager* manager) find_best_experiment() string {
-    var best_exp string = ""
-    var best_ppl float64 = math.MaxFloat64
+    best_exp := ""
+    best_ppl := math.MaxFloat64
     fmt.Println("\n[Analysis] Finding best experiment...")
     for exp_id, result := range manager.experiments {
         if result.converged && result.best_perplexity < best_ppl {

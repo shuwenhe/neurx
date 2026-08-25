@@ -15,7 +15,7 @@ struct TestResult {
     execution_time: f32
 }
 
-var test_results: []TestResult = make([]TestResult, 0)
+test_results := make([]TestResult, 0)
 
 func LogTest(name: string, passed: bool, message: string, time: f32) {
     result := TestResult{

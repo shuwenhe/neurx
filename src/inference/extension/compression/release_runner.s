@@ -11,7 +11,7 @@ func main() {
         export_config: default_model_export_config(),
         deployment_config: default_model_deployment_config(),
     }
-    var artifact = prepare_compression_release(config)
+    artifact := prepare_compression_release(config)
     println("Compression release prepared at: " + artifact.release_dir)
     println("  export: " + artifact.export_artifact.export_dir)
     println("  deployment: " + artifact.deployment_artifact.deployment_dir)

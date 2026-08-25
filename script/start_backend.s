@@ -11,17 +11,17 @@ func main() {
 
     system_sleep(2)
 
-    let neurx_root = get_env_or("NEURX_ROOT", ".")
-    let model_path = get_env_or("NEURX_CHAT_MODEL_PATH", "/model/Qwen2.5-VL-7B")
-    let device = get_env_or("NEURX_INFER_DEVICE", "gpu")
-    let port = get_env_or("NEURX_S_PORT", "18084")
+    neurx_root := get_env_or("NEURX_ROOT", ".")
+    model_path := get_env_or("NEURX_CHAT_MODEL_PATH", "/model/Qwen2.5-VL-7B")
+    device := get_env_or("NEURX_INFER_DEVICE", "gpu")
+    port := get_env_or("NEURX_S_PORT", "18084")
 
-    let backend_ir = neurx_root + "/artifact/build/production_s_inference/gpu_backend.ir"
-    let s_runner = neurx_root + "/artifact/build/s_runner/s_ir_runner"
+    backend_ir := neurx_root + "/artifact/build/production_s_inference/gpu_backend.ir"
+    s_runner := neurx_root + "/artifact/build/s_runner/s_ir_runner"
 
     println("Starting backend process...")
 
-    let cmd = "cd '" + neurx_root + "' && NEURX_ROOT='" + neurx_root +
+    cmd := "cd '" + neurx_root + "' && NEURX_ROOT='" + neurx_root +
               "' NEURX_CHAT_MODEL_PATH='" + model_path +
               "' NEURX_INFER_DEVICE='" + device +
               "' NEURX_S_PORT='" + port +
@@ -63,7 +63,7 @@ func get_env_or(string key, string default_val) string {
 
 func verify_port_listening(int port) bool {
 
-    let check_cmd = "lsof -i :" + int_to_string(port) + " 2>/dev/null | grep -q LISTEN"
+    check_cmd := "lsof -i :" + int_to_string(port) + " 2>/dev/null | grep -q LISTEN"
     return system_exec(check_cmd) == 0
 }
 

@@ -41,7 +41,7 @@ func compile_one(string compiler, string script_dir, string build_dir, string sh
     }
     string output_path = build_dir + "/" + base_name + ".ir"
     string cmd = compiler + " ir " + shell_escape(input_path) + " -o " + shell_escape(output_path)
-    let (_, code) = command(cmd)
+    (_, code) := command(cmd)
     if code == 0 {
         println("✓ " + shard_file + " -> " + output_path)
         return true
@@ -57,12 +57,12 @@ func main() {
     println("Build directory: " + build_dir)
     println("Compiler: " + compiler)
     println("")
-    let (_, compiler_code) = command("test -x " + shell_escape(compiler))
+    (_, compiler_code) := command("test -x " + shell_escape(compiler))
     if compiler_code != 0 {
         println("Error: S compiler not found: " + compiler)
         return 1
     }
-    let (_, mkdir_code) = command("mkdir -p " + shell_escape(build_dir))
+    (_, mkdir_code) := command("mkdir -p " + shell_escape(build_dir))
     if mkdir_code != 0 {
         println("Error: Failed to create build directory")
         return 1

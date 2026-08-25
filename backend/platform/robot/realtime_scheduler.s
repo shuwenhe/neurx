@@ -31,7 +31,7 @@ func new_realtime_scheduler(int hz) realtime_scheduler {
 }
 
 func (scheduler: &mut realtime_scheduler) register_task(string name, func() int callback, int period_us, int priority) {
-    let task = realtime_task{
+    task := realtime_task{
         name: name,
         callback: callback,
         period_us: period_us,

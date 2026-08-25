@@ -26,7 +26,7 @@ struct gspo_trainer {
 }
 
 func new_gspo_trainer(gspo_config config, *model model, *model ref_model) -> gspo_trainer {
-    let optimizer = adamw_optimizer(model.parameters(), config.learning_rate)
+    optimizer := adamw_optimizer(model.parameters(), config.learning_rate)
     return gspo_trainer{
         config: config,
         policy_model: model,
@@ -47,10 +47,10 @@ func (gspo_trainer* trainer) group_sequences([]tensor sequences) -> [][]tensor {
 }
 
 func (gspo_trainer* trainer) group_by_length([]tensor sequences) -> [][]tensor {
-    let sorted_seqs = sequences.clone()
+    sorted_seqs := sequences.clone()
     sorted_seqs.sort(|a, b| a.shape[0] - b.shape[0])
-    let groups: [][]tensor = []
-    let current_group: []tensor = []
+    groups := []
+    current_group := []
     for i, seq in sorted_seqs {
         current_group.push(seq)
         if current_group.len() >= trainer.config.group_size {
@@ -65,14 +65,14 @@ func (gspo_trainer* trainer) group_by_length([]tensor sequences) -> [][]tensor {
 }
 
 func (gspo_trainer* trainer) group_by_similarity([]tensor sequences) -> [][]tensor {
-    let embeddings: []tensor = []
+    embeddings := []
     for seq in sequences {
-        let emb = trainer.policy_model.encode(seq)
+        emb := trainer.policy_model.encode(seq)
         embeddings.push(emb.mean(dim: 0))
     }
-    let num_groups = sequences.len() / trainer.config.group_size
-    let cluster_assignments = kmeans_clustering(embeddings, num_groups)
-    let groups: [][]tensor = []
+    num_groups := sequences.len() / trainer.config.group_size
+    cluster_assignments := kmeans_clustering(embeddings, num_groups)
+    groups := []
     for i in 0..num_groups {
         groups.push([])
     }
@@ -83,10 +83,10 @@ func (gspo_trainer* trainer) group_by_similarity([]tensor sequences) -> [][]tens
 }
 
 func (gspo_trainer* trainer) group_randomly([]tensor sequences) -> [][]tensor {
-    let shuffled = sequences.clone()
+    shuffled := sequences.clone()
     shuffled.shuffle()
-    let groups: [][]tensor = []
-    let current_group: []tensor = []
+    groups := []
+    current_group := []
     for seq in shuffled {
         current_group.push(seq)
         if current_group.len() >= trainer.config.group_size {
@@ -104,48 +104,48 @@ func (gspo_trainer* trainer) compute_sequence_advantages(
     []tensor group,
     []f32 rewards
 ) -> []f32 {
-    let mean_reward: f32 = 0.0
+    mean_reward := 0.0
     for r in rewards {
         mean_reward += r
     }
     mean_reward /= f32(rewards.len())
-    let std_reward: f32 = 0.0
+    std_reward := 0.0
     for r in rewards {
         std_reward += (r - mean_reward) * (r - mean_reward)
     }
     std_reward = sqrt(std_reward / f32(rewards.len()))
-    let advantages: []f32 = []
+    advantages := []
     for r in rewards {
-        let adv = (r - mean_reward) / (std_reward + 1e-8)
+        adv := (r - mean_reward) / (std_reward + 1e-8)
         advantages.push(adv)
     }
     return advantages
 }
 
 func (gspo_trainer* trainer) compute_load_balance_loss(tensor router_logits) -> tensor {
-    let batch_size = router_logits.shape[0]
-    let seq_len = router_logits.shape[1]
-    let num_experts = router_logits.shape[2]
-    let routing_probs = softmax(router_logits, dim: -1)
-    let expert_fractions = routing_probs.mean(dim: [0, 1])
-    let ideal_fraction = 1.0 / f32(num_experts)
-    let lb_loss = expert_fractions.var() * f32(num_experts)
+    batch_size := router_logits.shape[0]
+    seq_len := router_logits.shape[1]
+    num_experts := router_logits.shape[2]
+    routing_probs := softmax(router_logits, dim: -1)
+    expert_fractions := routing_probs.mean(dim: [0, 1])
+    ideal_fraction := 1.0 / f32(num_experts)
+    lb_loss := expert_fractions.var() * f32(num_experts)
     return lb_loss * trainer.config.moe_load_balance_coeff
 }
 
 func (gspo_trainer* trainer) train_step(Batch batch) -> (f32, f32) {
-    let prompts = batch.prompts
-    let rewards = batch.rewards
-    let groups = trainer.group_sequences(prompts)
-    let total_policy_loss: f32 = 0.0
-    let total_lb_loss: f32 = 0.0
-    let num_groups = groups.len()
+    prompts := batch.prompts
+    rewards := batch.rewards
+    groups := trainer.group_sequences(prompts)
+    total_policy_loss := 0.0
+    total_lb_loss := 0.0
+    num_groups := groups.len()
     for group in groups {
-        let responses: []tensor = []
-        let log_probs_list: []tensor = []
-        let router_logits_list: []tensor = []
+        responses := []
+        log_probs_list := []
+        router_logits_list := []
         for prompt in group {
-            let resp, log_probs, router_logits = trainer.policy_model.generate(
+            resp, log_probs, router_logits  := trainer.policy_model.generate(
                 prompt,
                 temperature: 1.0,
                 return_log_probs: true,
@@ -155,20 +155,20 @@ func (gspo_trainer* trainer) train_step(Batch batch) -> (f32, f32) {
             log_probs_list.push(log_probs)
             router_logits_list.push(router_logits)
         }
-        let group_rewards: []f32 = []
+        group_rewards := []
         for i, resp in responses {
-            let r = compute_reward(group[i], resp)
+            r := compute_reward(group[i], resp)
             group_rewards.push(r)
         }
-        let advantages = trainer.compute_sequence_advantages(group, group_rewards)
-        let group_policy_loss = tensor_zeros([1])
+        advantages := trainer.compute_sequence_advantages(group, group_rewards)
+        group_policy_loss := tensor_zeros([1])
         for i in 0..group.len() {
-            let log_probs = log_probs_list[i]
-            let advantage = advantages[i]
-            let seq_loss = -log_probs.sum() * advantage
+            log_probs := log_probs_list[i]
+            advantage := advantages[i]
+            seq_loss := -log_probs.sum() * advantage
             group_policy_loss = group_policy_loss + seq_loss
             if trainer.config.use_aux_loss {
-                let lb_loss = trainer.compute_load_balance_loss(router_logits_list[i])
+                lb_loss := trainer.compute_load_balance_loss(router_logits_list[i])
                 group_policy_loss = group_policy_loss + lb_loss
                 total_lb_loss += lb_loss.item()
             }
@@ -186,12 +186,12 @@ func (gspo_trainer* trainer) train_step(Batch batch) -> (f32, f32) {
 }
 
 func (gspo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
-    let policy_losses: []f32 = []
-    let lb_losses: []f32 = []
+    policy_losses := []
+    lb_losses := []
     for epoch in 0..trainer.config.num_epochs {
         println(f"GSPO Epoch {epoch + 1}/{trainer.config.num_epochs}")
         for batch in train_data {
-            let policy_loss, lb_loss = trainer.train_step(batch)
+            policy_loss, lb_loss  := trainer.train_step(batch)
             policy_losses.push(policy_loss)
             lb_losses.push(lb_loss)
             if policy_losses.len() % 100 == 0 {
@@ -203,20 +203,20 @@ func (gspo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
 }
 
 func kmeans_clustering([]tensor embeddings, i32 k) -> []i32 {
-    let n = embeddings.len()
-    let dim = embeddings[0].shape[0]
-    let centroids: []tensor = []
-    let indices = random_permutation(n)
+    n := embeddings.len()
+    dim := embeddings[0].shape[0]
+    centroids := []
+    indices := random_permutation(n)
     for i in 0..k {
         centroids.push(embeddings[indices[i]])
     }
-    let assignments: []i32 = array_filled(n, 0)
+    assignments := array_filled(n, 0)
     for iter in 0..10 {
         for i in 0..n {
-            let min_dist = f32.MAX
-            let best_cluster = 0
+            min_dist := f32.MAX
+            best_cluster := 0
             for j in 0..k {
-                let dist = (embeddings[i] - centroids[j]).pow(2).sum().item()
+                dist := (embeddings[i] - centroids[j]).pow(2).sum().item()
                 if dist < min_dist {
                     min_dist = dist
                     best_cluster = j
@@ -225,7 +225,7 @@ func kmeans_clustering([]tensor embeddings, i32 k) -> []i32 {
             assignments[i] = best_cluster
         }
         for j in 0..k {
-            let cluster_points: []tensor = []
+            cluster_points := []
             for i in 0..n {
                 if assignments[i] == j {
                     cluster_points.push(embeddings[i])

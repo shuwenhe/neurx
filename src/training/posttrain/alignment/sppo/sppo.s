@@ -33,7 +33,7 @@ struct trajectory {
 }
 
 func new_sppo_trainer(sppo_config config, *model model, *model ref_model) -> sppo_trainer {
-    let optimizer = adamw_optimizer(model.parameters(), config.learning_rate)
+    optimizer := adamw_optimizer(model.parameters(), config.learning_rate)
     return sppo_trainer{
         config: config,
         policy_model: model,
@@ -46,18 +46,18 @@ func new_sppo_trainer(sppo_config config, *model model, *model ref_model) -> spp
 }
 
 func (sppo_trainer* trainer) self_play_rollout(tensor prompts, i32 num_samples) -> []trajectory {
-    let trajectories: []trajectory = []
+    trajectories := []
     for i in 0..prompts.shape[0] {
-        let prompt = prompts[i]
+        prompt := prompts[i]
         for j in 0..num_samples {
-            let response, log_probs = trainer.policy_model.generate(
+            response, log_probs  := trainer.policy_model.generate(
                 prompt,
                 temperature: 1.0,
                 top_p: 0.95,
                 return_log_probs: true
             )
-            let reward = trainer.compute_self_play_reward(prompt, response)
-            let traj = trajectory{
+            reward := trainer.compute_self_play_reward(prompt, response)
+            traj := trajectory{
                 prompt: prompt,
                 response: response,
                 log_probs: log_probs,
@@ -71,17 +71,17 @@ func (sppo_trainer* trainer) self_play_rollout(tensor prompts, i32 num_samples) 
 }
 
 func (sppo_trainer* trainer) compute_self_play_reward(tensor prompt, tensor response) -> f32 {
-    let logits = trainer.policy_model.forward(concat(prompt, response))
-    let ref_logits = trainer.reference_model.forward(concat(prompt, response))
-    let kl_div = compute_kl_divergence(logits, ref_logits)
+    logits := trainer.policy_model.forward(concat(prompt, response))
+    ref_logits := trainer.reference_model.forward(concat(prompt, response))
+    kl_div := compute_kl_divergence(logits, ref_logits)
     return -kl_div
 }
 
 func (sppo_trainer* trainer) compute_win_rates([]trajectory trajectories) -> []trajectory {
-    let n = trajectories.len()
+    n := trajectories.len()
     for i in 0..n {
-        let wins = 0
-        let total = 0
+        wins := 0
+        total := 0
         for j in 0..n {
             if i == j {
                 continue
@@ -101,11 +101,11 @@ func (sppo_trainer* trainer) compute_win_rates([]trajectory trajectories) -> []t
 }
 
 func (sppo_trainer* trainer) create_preference_pairs([]trajectory trajectories) -> ([]trajectory, []trajectory) {
-    let chosen: []trajectory = []
-    let rejected: []trajectory = []
-    let prompt_groups: map[string][]trajectory = {}
+    chosen := []
+    rejected := []
+    prompt_groups := {}
     for traj in trajectories {
-        let key = traj.prompt.to_string()
+        key := traj.prompt.to_string()
         if key not in prompt_groups {
             prompt_groups[key] = []
         }
@@ -113,7 +113,7 @@ func (sppo_trainer* trainer) create_preference_pairs([]trajectory trajectories) 
     }
     for _, group in prompt_groups {
         group.sort(|a, b| b.win_rate - a.win_rate)
-        let mid = group.len() / 2
+        mid := group.len() / 2
         for i in 0..mid {
             chosen.push(group[i])
             rejected.push(group[group.len() - 1 - i])
@@ -126,24 +126,24 @@ func (sppo_trainer* trainer) compute_sppo_loss(
     []trajectory chosen,
     []trajectory rejected
 ) -> tensor {
-    let batch_size = chosen.len()
-    let total_loss = tensor_zeros([1])
+    batch_size := chosen.len()
+    total_loss := tensor_zeros([1])
     for i in 0..batch_size {
-        let chosen_traj = chosen[i]
-        let rejected_traj = rejected[i]
-        let chosen_input = concat(chosen_traj.prompt, chosen_traj.response)
-        let chosen_logits = trainer.policy_model.forward(chosen_input)
-        let chosen_log_probs = log_softmax(chosen_logits, dim: -1)
-        let rejected_input = concat(rejected_traj.prompt, rejected_traj.response)
-        let rejected_logits = trainer.policy_model.forward(rejected_input)
-        let rejected_log_probs = log_softmax(rejected_logits, dim: -1)
-        let ref_chosen_logits = trainer.reference_model.forward(chosen_input)
-        let ref_chosen_log_probs = log_softmax(ref_chosen_logits, dim: -1)
-        let ref_rejected_logits = trainer.reference_model.forward(rejected_input)
-        let ref_rejected_log_probs = log_softmax(ref_rejected_logits, dim: -1)
-        let chosen_log_ratio = (chosen_log_probs - ref_chosen_log_probs).sum()
-        let rejected_log_ratio = (rejected_log_probs - ref_rejected_log_probs).sum()
-        let logits_diff = chosen_log_ratio - rejected_log_ratio
+        chosen_traj := chosen[i]
+        rejected_traj := rejected[i]
+        chosen_input := concat(chosen_traj.prompt, chosen_traj.response)
+        chosen_logits := trainer.policy_model.forward(chosen_input)
+        chosen_log_probs := log_softmax(chosen_logits, dim: -1)
+        rejected_input := concat(rejected_traj.prompt, rejected_traj.response)
+        rejected_logits := trainer.policy_model.forward(rejected_input)
+        rejected_log_probs := log_softmax(rejected_logits, dim: -1)
+        ref_chosen_logits := trainer.reference_model.forward(chosen_input)
+        ref_chosen_log_probs := log_softmax(ref_chosen_logits, dim: -1)
+        ref_rejected_logits := trainer.reference_model.forward(rejected_input)
+        ref_rejected_log_probs := log_softmax(ref_rejected_logits, dim: -1)
+        chosen_log_ratio := (chosen_log_probs - ref_chosen_log_probs).sum()
+        rejected_log_ratio := (rejected_log_probs - ref_rejected_log_probs).sum()
+        logits_diff := chosen_log_ratio - rejected_log_ratio
         let loss: tensor
         if trainer.config.use_margin {
             loss = -log_sigmoid(trainer.config.beta * logits_diff - trainer.config.margin)
@@ -156,11 +156,11 @@ func (sppo_trainer* trainer) compute_sppo_loss(
 }
 
 func (sppo_trainer* trainer) train_step(tensor prompts) -> f32 {
-    let trajectories = trainer.self_play_rollout(prompts, num_samples: 4)
+    trajectories := trainer.self_play_rollout(prompts, num_samples: 4)
     trajectories = trainer.compute_win_rates(trajectories)
-    let chosen, rejected = trainer.create_preference_pairs(trajectories)
-    let filtered_chosen: []trajectory = []
-    let filtered_rejected: []trajectory = []
+    chosen, rejected  := trainer.create_preference_pairs(trajectories)
+    filtered_chosen := []
+    filtered_rejected := []
     for i in 0..chosen.len() {
         if chosen[i].win_rate >= trainer.config.win_rate_threshold {
             filtered_chosen.push(chosen[i])
@@ -170,7 +170,7 @@ func (sppo_trainer* trainer) train_step(tensor prompts) -> f32 {
     if filtered_chosen.len() == 0 {
         return 0.0
     }
-    let loss = trainer.compute_sppo_loss(filtered_chosen, filtered_rejected)
+    loss := trainer.compute_sppo_loss(filtered_chosen, filtered_rejected)
     loss.backward()
     clip_grad_norm(trainer.policy_model.parameters(), trainer.config.max_grad_norm)
     trainer.optimizer.step()
@@ -180,10 +180,10 @@ func (sppo_trainer* trainer) train_step(tensor prompts) -> f32 {
 }
 
 func (sppo_trainer* trainer) train(DataLoader train_data) -> []f32 {
-    let losses: []f32 = []
+    losses := []
     for batch in train_data {
-        let prompts = batch.prompts
-        let loss = trainer.train_step(prompts)
+        prompts := batch.prompts
+        loss := trainer.train_step(prompts)
         losses.push(loss)
         if trainer.iteration % 100 == 0 {
             println(f"Iteration {trainer.iteration}, Loss: {loss}")
@@ -193,10 +193,10 @@ func (sppo_trainer* trainer) train(DataLoader train_data) -> []f32 {
 }
 
 func compute_kl_divergence(tensor p_logits, tensor q_logits) -> f32 {
-    let p = softmax(p_logits, dim: -1)
-    let log_p = log_softmax(p_logits, dim: -1)
-    let log_q = log_softmax(q_logits, dim: -1)
-    let kl = (p * (log_p - log_q)).sum()
+    p := softmax(p_logits, dim: -1)
+    log_p := log_softmax(p_logits, dim: -1)
+    log_q := log_softmax(q_logits, dim: -1)
+    kl := (p * (log_p - log_q)).sum()
     return kl.item()
 }
 

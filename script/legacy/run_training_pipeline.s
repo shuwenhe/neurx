@@ -4,7 +4,7 @@ use neurx.runtime.io.{runtime_file_exists}
 use std.io.println
 
 func main() {
-    let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
+    project_root := runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     println("NeurX Training Pipeline (S Lang)")
     println("")
     println("Project root: " + project_root)

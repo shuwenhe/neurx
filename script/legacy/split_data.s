@@ -3,9 +3,9 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.io.println
 
 func main() {
-    let dataset_root = runtime_env_get("NEURX_SPLIT_DATASET_ROOT", "dataset/pretrain")
-    let source_file = runtime_env_get("NEURX_SPLIT_SOURCE_FILE", dataset_root + "/cleaned/train.jsonl")
-    let output_dir = runtime_env_get("NEURX_SPLIT_OUTPUT_DIR", dataset_root + "/split")
+    dataset_root := runtime_env_get("NEURX_SPLIT_DATASET_ROOT", "dataset/pretrain")
+    source_file := runtime_env_get("NEURX_SPLIT_SOURCE_FILE", dataset_root + "/cleaned/train.jsonl")
+    output_dir := runtime_env_get("NEURX_SPLIT_OUTPUT_DIR", dataset_root + "/split")
     println("NeurX Dataset Split entry (S Lang)")
     println("")
     println("  source file : " + check_path(source_file))

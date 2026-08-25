@@ -171,7 +171,7 @@ struct tool_registry {
             print(f"✓ Registered tool: {definition.name} (category: {cat})")
     unregister(string tool_name) {
         if tool_name in this.tools:
-            let defn = this.tools[tool_name]
+            defn := this.tools[tool_name]
             cat = defn.category ?? "uncategorized"
             if cat in this.categories:
                 this.categories[cat] = [t for t in this.categories[cat] if t != tool_name]

@@ -17,7 +17,7 @@ struct structured_sampler {
 }
 
 func create_structured_sampler(schema: *json_schema, mode: string) structured_sampler {
-    let sampler = structured_sampler{
+    sampler := structured_sampler{
         schema: *schema,
         mode: mode,
         allowed_next: vec_new(),
@@ -28,18 +28,18 @@ func create_structured_sampler(schema: *json_schema, mode: string) structured_sa
         warnings: vec_new()
     }
 
-    let init_constraint = constraint_generator.generate_initial_constraint(schema)
+    init_constraint := constraint_generator.generate_initial_constraint(schema)
     sampler.allowed_next = init_constraint.allowed_tokens
 
     return sampler
 }
 
 func filter_logits(sampler: *structured_sampler, logits: []float) []float {
-    let result = logits
+    result := logits
 
-    let i = 0
+    i := 0
     while i < len(result) {
-        let allowed = is_token_allowed(i, &sampler.allowed_next)
+        allowed := is_token_allowed(i, &sampler.allowed_next)
 
         if allowed == false {
             if sampler.mode == schema_types.CONSTRAINT_STRICT {
@@ -61,13 +61,13 @@ func update_after_token(sampler: *structured_sampler, token_id: int, token_str: 
 
     sampler.current_output = sampler.current_output + token_str
 
-    let was_allowed = is_token_allowed(token_id, &sampler.allowed_next)
+    was_allowed := is_token_allowed(token_id, &sampler.allowed_next)
     if was_allowed == false {
         sampler.violations = sampler.violations + 1
         sampler.warnings.append("Token ID " + int_to_string(token_id) + " not in allowed set")
     }
 
-    let constraint = constraint_generator.get_next_constraint(
+    constraint := constraint_generator.get_next_constraint(
         sampler.current_output,
         &sampler.schema,
         &sampler.parse_context
@@ -108,8 +108,8 @@ func is_complete_json_object(s: string) bool {
         return false
     }
 
-    let count = 0
-    let i = 0
+    count := 0
+    i := 0
     while i < len(s) {
         if s[i] == '{' {
             count = count + 1
@@ -132,8 +132,8 @@ func is_complete_json_array(s: string) bool {
         return false
     }
 
-    let count = 0
-    let i = 0
+    count := 0
+    i := 0
     while i < len(s) {
         if s[i] == '[' {
             count = count + 1
@@ -153,7 +153,7 @@ func is_valid_json_number(s: string) bool {
         return false
     }
 
-    let i = 0
+    i := 0
 
     if s[i] == '-' {
         i = i + 1
@@ -198,11 +198,11 @@ func is_valid_json_number(s: string) bool {
 }
 
 func process_batch(samplers: *[]structured_sampler, logits_batch: [][]float) [][]float {
-    let result = vec_new()
+    result := vec_new()
 
-    let i = 0
+    i := 0
     while i < len(logits_batch) {
-        let constrained = filter_logits(&(*samplers)[i], logits_batch[i])
+        constrained := filter_logits(&(*samplers)[i], logits_batch[i])
         result.append(constrained)
         i = i + 1
     }
@@ -211,7 +211,7 @@ func process_batch(samplers: *[]structured_sampler, logits_batch: [][]float) [][
 }
 
 func get_sampler_stats(sampler: *structured_sampler) string {
-    let stats = "Structured Sampler Stats:\n"
+    stats := "Structured Sampler Stats:\n"
     stats = stats + "  Current output: " + sampler.current_output + "\n"
     stats = stats + "  Mode: " + sampler.mode + "\n"
     stats = stats + "  State: " + int_to_string(sampler.state) + "\n"
@@ -227,7 +227,7 @@ func print_sampler_debug(sampler: *structured_sampler) {
 
     if len(sampler.warnings) > 0 {
         print("  Warnings:\n")
-        let i = 0
+        i := 0
         while i < len(sampler.warnings) {
             print("    - " + sampler.warnings[i] + "\n")
             i = i + 1
@@ -236,7 +236,7 @@ func print_sampler_debug(sampler: *structured_sampler) {
 }
 
 func is_token_allowed(token_id: int, allowed: *[]int) bool {
-    let i = 0
+    i := 0
     while i < len(*allowed) {
         if (*allowed)[i] == token_id {
             return true
@@ -251,13 +251,13 @@ func int_to_string(n: int) string {
         return "0"
     }
 
-    let is_negative = n < 0
-    let abs_n = n
+    is_negative := n < 0
+    abs_n := n
     if is_negative {
         abs_n = 0 - n
     }
 
-    let result = ""
+    result := ""
     while abs_n > 0 {
         result = string(abs_n % 10) + result
         abs_n = abs_n / 10
@@ -271,25 +271,25 @@ func int_to_string(n: int) string {
 }
 
 func create_function_call_schema() json_schema {
-    let func_name_prop = json_property{
+    func_name_prop := json_property{
         name: "name",
         schema: schema_parser.create_string_schema(1, 100, ""),
         required: true,
         description: "Function name"
     }
 
-    let func_args_prop = json_property{
+    func_args_prop := json_property{
         name: "arguments",
         schema: schema_parser.create_string_schema(0, 10000, ""),
         required: true,
         description: "Function arguments as JSON string"
     }
 
-    let props = vec_new()
+    props := vec_new()
     props.append(func_name_prop)
     props.append(func_args_prop)
 
-    let required = vec_new()
+    required := vec_new()
     required.append("name")
     required.append("arguments")
 
@@ -301,6 +301,6 @@ func create_json_object_schema() json_schema {
 }
 
 func create_json_array_schema() json_schema {
-    let item_schema = schema_parser.create_string_schema(0, 10000, "")
+    item_schema := schema_parser.create_string_schema(0, 10000, "")
     return schema_parser.create_array_schema(&item_schema, 0, 1000)
 }

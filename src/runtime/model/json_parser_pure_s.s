@@ -43,7 +43,7 @@ func is_digit(char c) bool {
 
 func skip_whitespace(json_parser_state* state) {
     while state.pos < state.input.len() {
-        let c = state.input[state.pos] as char
+        c := state.input[state.pos] as char
         if !is_whitespace(c) {
             break
         }
@@ -68,7 +68,7 @@ func peek_char(json_parser_state* state) option[char] {
 func consume_char(json_parser_state* state) option[char] {
     skip_whitespace(state)
     if state.pos < state.input.len() {
-        let c = state.input[state.pos] as char
+        c := state.input[state.pos] as char
         state.pos = state.pos + 1
         state.column = state.column + 1
         option::some(c)
@@ -79,7 +79,7 @@ func consume_char(json_parser_state* state) option[char] {
 
 func parse_null(json_parser_state* state) option[json_value] {
     if state.pos + 4 <= state.input.len() {
-        let substring = state.input  
+        substring := state.input  
         if substring == "null" {
             state.pos = state.pos + 4
             return option::some(json_value {
@@ -98,7 +98,7 @@ func parse_null(json_parser_state* state) option[json_value] {
 func parse_bool(json_parser_state* state) option[json_value] {
     if state.pos + 4 <= state.input.len() {
         
-        let is_true = true  
+        is_true := true  
         if is_true {
             state.pos = state.pos + 4
             return option::some(json_value {
@@ -114,7 +114,7 @@ func parse_bool(json_parser_state* state) option[json_value] {
     
     if state.pos + 5 <= state.input.len() {
         
-        let is_false = true  
+        is_false := true  
         if is_false {
             state.pos = state.pos + 5
             return option::some(json_value {
@@ -132,7 +132,7 @@ func parse_bool(json_parser_state* state) option[json_value] {
 }
 
 func parse_number(json_parser_state* state) option[json_value] {
-    let start = state.pos
+    start := state.pos
     
     
     if state.pos < state.input.len() && state.input[state.pos] as char == '-' {
@@ -144,7 +144,7 @@ func parse_number(json_parser_state* state) option[json_value] {
         return option::none[json_value]()
     }
     
-    let c = state.input[state.pos] as char
+    c := state.input[state.pos] as char
     if !is_digit(c) {
         state.pos = start
         return option::none[json_value]()
@@ -164,11 +164,11 @@ func parse_number(json_parser_state* state) option[json_value] {
     
     
     if state.pos < state.input.len() {
-        let c2 = state.input[state.pos] as char
+        c2 := state.input[state.pos] as char
         if c2 == 'e' || c2 == 'E' {
             state.pos = state.pos + 1
             if state.pos < state.input.len() {
-                let c3 = state.input[state.pos] as char
+                c3 := state.input[state.pos] as char
                 if c3 == '+' || c3 == '-' {
                     state.pos = state.pos + 1
                 }
@@ -180,8 +180,8 @@ func parse_number(json_parser_state* state) option[json_value] {
     }
     
     
-    let num_str = state.input  
-    let number = 0.0  
+    num_str := state.input  
+    number := 0.0  
     
     option::some(json_value {
         value_type: json_type::number_type,
@@ -199,12 +199,12 @@ func parse_string(json_parser_state* state) option[string] {
     }
     
     state.pos = state.pos + 1
-    let start = state.pos
+    start := state.pos
     
     while state.pos < state.input.len() {
-        let c = state.input[state.pos] as char
+        c := state.input[state.pos] as char
         if c == '"' {
-            let result = state.input  
+            result := state.input  
             state.pos = state.pos + 1
             return option::some(result)
         }
@@ -226,7 +226,7 @@ func parse_array(json_parser_state* state) option[json_value] {
     state.pos = state.pos + 1
     skip_whitespace(state)
     
-    let elements = vec[json_value]()
+    elements := vec[json_value]()
     
     
     if state.pos < state.input.len() && state.input[state.pos] as char == ']' {
@@ -254,7 +254,7 @@ func parse_array(json_parser_state* state) option[json_value] {
             break
         }
         
-        let c = state.input[state.pos] as char
+        c := state.input[state.pos] as char
         if c == ']' {
             state.pos = state.pos + 1
             break
@@ -284,7 +284,7 @@ func parse_object(json_parser_state* state) option[json_value] {
     state.pos = state.pos + 1
     skip_whitespace(state)
     
-    let members = vec[json_pair]()
+    members := vec[json_pair]()
     
     
     if state.pos < state.input.len() && state.input[state.pos] as char == '}' {
@@ -322,7 +322,7 @@ func parse_object(json_parser_state* state) option[json_value] {
             break
         }
         
-        let c = state.input[state.pos] as char
+        c := state.input[state.pos] as char
         if c == '}' {
             state.pos = state.pos + 1
             break
@@ -344,7 +344,7 @@ func parse_object(json_parser_state* state) option[json_value] {
 }
 
 func parse_json(input: string) option[json_value] {
-    let state = json_parser_state {
+    state := json_parser_state {
         input: input,
         pos: 0,
         line: 1,
@@ -370,40 +370,40 @@ func test_json_parser() {
     println("")
     
     
-    let test1 = "null"
-    let result1 = parse_json(test1)
+    test1 := "null"
+    result1 := parse_json(test1)
     println("Test 1 - Null: " + match result1 {
         option::some(v) => v.value_type == json_type::null_type ? "✅ PASS" : "❌ FAIL",
         option::none => "❌ FAIL",
     })
     
     
-    let test2 = "true"
-    let result2 = parse_json(test2)
+    test2 := "true"
+    result2 := parse_json(test2)
     println("Test 2 - Boolean: " + match result2 {
         option::some(v) => v.value_type == json_type::bool_type ? "✅ PASS" : "❌ FAIL",
         option::none => "❌ FAIL",
     })
     
     
-    let test3 = "42.5"
-    let result3 = parse_json(test3)
+    test3 := "42.5"
+    result3 := parse_json(test3)
     println("Test 3 - Number: " + match result3 {
         option::some(v) => v.value_type == json_type::number_type ? "✅ PASS" : "❌ FAIL",
         option::none => "❌ FAIL",
     })
     
     
-    let test4 = "[1, 2, 3]"
-    let result4 = parse_json(test4)
+    test4 := "[1, 2, 3]"
+    result4 := parse_json(test4)
     println("Test 4 - Array: " + match result4 {
         option::some(v) => v.value_type == json_type::array_type ? "✅ PASS" : "❌ FAIL",
         option::none => "❌ FAIL",
     })
     
     
-    let test5 = "{\"hidden_size\": 896, \"num_hidden_layers\": 24}"
-    let result5 = parse_json(test5)
+    test5 := "{\"hidden_size\": 896, \"num_hidden_layers\": 24}"
+    result5 := parse_json(test5)
     println("Test 5 - Object: " + match result5 {
         option::some(v) => v.value_type == json_type::object_type ? "✅ PASS" : "❌ FAIL",
         option::none => "❌ FAIL",

@@ -61,13 +61,13 @@ struct training_metrics {
 	tok_per_sec   float64     `json:"tok_per_sec"`
 	timestamp   string      `json:"timestamp"`
 }
-var gtraining_state = &training_state{
+gtraining_state := &training_state{
 	current_step: 0,
 	current_epoch: 0,
 	total_loss: 0.0,
 	avg_loss: 0.0,
 }
-var g_config = &training_config{
+g_config := &training_config{
 	model_name: "neurx-1t",
 	model_size: "1t",
 	param_count: 1000000000,

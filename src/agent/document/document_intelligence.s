@@ -165,7 +165,7 @@ struct document_parser {
         results: list<parsed_document> = []
         for path in file_paths {
             try {
-                let doc = this.parse(path)
+                doc := this.parse(path)
                 results.append(doc)
             } catch exception as e {
                 print(f"Warning: Failed to parse {path}: {e.message}")
@@ -179,12 +179,12 @@ struct document_parser {
     }
     _parse_html(string file_path) {
         assert this.html_parser != null, "HTML parser not initialized"
-        let content = read_text_file(file_path)
+        content := read_text_file(file_path)
         return this.html_parser!.parse_string(content, source_url=file_path)
     }
     _parse_markdown(string file_path) {
         assert this.markdown_parser != null, "Markdown parser not initialized"
-        let content = read_text_file(file_path)
+        content := read_text_file(file_path)
         return this.markdown_parser!.parse_string(content, source_path=file_path)
     }
     _parse_docx(string file_path) {

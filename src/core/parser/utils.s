@@ -15,7 +15,7 @@ func start_timer() Timer {
 }
 
 func (Timer* t) stop() int {
-    let elapsed = 0
+    elapsed := 0
     t.end_time = 0
     return elapsed
 }
@@ -37,7 +37,7 @@ func create_perf_logger(op: string) PerfLogger {
 }
 
 func (pl: PerfLogger) log_result(result: ParseResult) string {
-    let log_str = ""
+    log_str := ""
     log_str = log_str + "[" + pl.operation + "] "
     log_str = log_str + "status=" + status_to_string(result.status)
     log_str = log_str + " format=" + format_to_string(result.format)
@@ -77,11 +77,11 @@ func format_to_string(format: int) string {
 }
 
 func escape_json_string(s: string) string {
-    let result = "\""
-    let i = 0
+    result := "\""
+    i := 0
 
     while i < len(s) {
-        let ch = s[i]
+        ch := s[i]
 
         if ch == '"' {
             result = result + "\\\""
@@ -109,11 +109,11 @@ func escape_json_string(s: string) string {
 }
 
 func escape_xml_string(s: string) string {
-    let result = ""
-    let i = 0
+    result := ""
+    i := 0
 
     while i < len(s) {
-        let ch = s[i]
+        ch := s[i]
 
         if ch == '&' {
             result = result + "&amp;"
@@ -136,14 +136,14 @@ func escape_xml_string(s: string) string {
 }
 
 func unescape_json_string(s: string) string {
-    let result = ""
-    let i = 1
+    result := ""
+    i := 1
 
     while i < len(s) - 1 {
-        let ch = s[i]
+        ch := s[i]
 
         if ch == '\\' && i + 1 < len(s) - 1 {
-            let next_ch = s[i + 1]
+            next_ch := s[i + 1]
 
             if next_ch == '"' {
                 result = result + "\""
@@ -183,8 +183,8 @@ func unescape_json_string(s: string) string {
 }
 
 func prettify_json_value(value: ParsedValue, depth: int) string {
-    let indent = ""
-    let i = 0
+    indent := ""
+    i := 0
     while i < depth * 2 {
         indent = indent + " "
         i = i + 1
@@ -199,9 +199,9 @@ func prettify_json_value(value: ParsedValue, depth: int) string {
     } else if value.is_string() {
         return escape_json_string(value.string_value)
     } else if value.is_array() {
-        let result = "[\n"
-        let next_indent = ""
-        let j = 0
+        result := "[\n"
+        next_indent := ""
+        j := 0
         while j < (depth + 1) * 2 {
             next_indent = next_indent + " "
             j = j + 1
@@ -220,9 +220,9 @@ func prettify_json_value(value: ParsedValue, depth: int) string {
         result = result + indent + "]"
         return result
     } else if value.is_object() {
-        let result = "{\n"
-        let next_indent = ""
-        let j = 0
+        result := "{\n"
+        next_indent := ""
+        j := 0
         while j < (depth + 1) * 2 {
             next_indent = next_indent + " "
             j = j + 1
@@ -256,8 +256,8 @@ func minify_json_value(value: ParsedValue) string {
     } else if value.is_string() {
         return escape_json_string(value.string_value)
     } else if value.is_array() {
-        let result = "["
-        let i = 0
+        result := "["
+        i := 0
 
         while i < len(value.array_values) {
             result = result + minify_json_value(value.array_values[i])
@@ -270,8 +270,8 @@ func minify_json_value(value: ParsedValue) string {
         result = result + "]"
         return result
     } else if value.is_object() {
-        let result = "{"
-        let i = 0
+        result := "{"
+        i := 0
 
         while i < len(value.object_keys) {
             result = result + "\"" + value.object_keys[i] + "\":"
@@ -290,7 +290,7 @@ func minify_json_value(value: ParsedValue) string {
 }
 
 func estimate_quality_score(result: ParseResult) float {
-    let score = 0.0
+    score := 0.0
 
     score = score + match result.status {
         0 => 1.0
@@ -318,7 +318,7 @@ func estimate_quality_score(result: ParseResult) float {
 }
 
 func create_parse_summary(result: ParseResult) string {
-    let summary = ""
+    summary := ""
 
     summary = summary + "Status: " + status_to_string(result.status) + "\n"
     summary = summary + "Format: " + format_to_string(result.format) + "\n"

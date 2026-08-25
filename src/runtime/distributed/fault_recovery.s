@@ -57,7 +57,7 @@ func new_checkpoint_manager(
     int save_interval,
     int max_keep
 ): checkpoint_manager {
-    var manager: checkpoint_manager
+    manager := checkpoint_manager
     manager.base_path = base_path
     manager.save_interval = save_interval
     manager.max_checkpoints_to_keep = max_keep
@@ -83,7 +83,7 @@ func save_full_checkpoint(
     int num_ranks,
     int rank
 ): checkpoint_metadata {
-    var metadata: checkpoint_metadata
+    metadata := checkpoint_metadata
     metadata.checkpoint_id = global_step
     metadata.global_step = global_step
     metadata.epoch = epoch
@@ -93,15 +93,15 @@ func save_full_checkpoint(
     metadata.num_ranks = num_ranks
     metadata.num_restarts = 0
     if rank == 0 {
-        var string ckpt_dir = manager.base_path + "/checkpoint_" + str(global_step)
+        ckpt_dir := manager.base_path + "/checkpoint_" + str(global_step)
         create_directory(ckpt_dir)
-        var metadata_file: string = ckpt_dir + "/metadata.json"
+        metadata_file := ckpt_dir + "/metadata.json"
         save_metadata(metadata, metadata_file)
     }
-    var vector rank_data = collect_rank_checkpoint_data(
+    rank_data := collect_rank_checkpoint_data(
         model_params, optimizer_state, training_state, rank, num_ranks
     )
-    var string rank_file = manager.base_path + "/checkpoint_" + str(global_step) +
+    rank_file := manager.base_path + "/checkpoint_" + str(global_step) +
                             "/rank_" + str(rank) + ".ckpt"
     if manager.use_compression {
         compress_and_save(rank_data, rank_file, manager.compression_level)
@@ -133,23 +133,23 @@ func save_incremental_checkpoint(
     int num_ranks,
     int rank
 ): checkpoint_metadata {
-    var vector changed_indices = allocate_vector(100, 0.0)
-    var num_changed: int = 0
+    changed_indices := allocate_vector(100, 0.0)
+    num_changed := 0
     for i in range(0, min(length(model_params), length(model_params_prev))) {
         if abs(model_params[i] - model_params_prev[i]) > 1e-6 {
             changed_indices[num_changed] = float(i)
             num_changed = num_changed + 1
         }
     }
-    var vector incremental_data = allocate_vector(num_changed + 100, 0.0)
+    incremental_data := allocate_vector(num_changed + 100, 0.0)
     for i in range(0, num_changed) {
-        var int idx = int(changed_indices[i])
+        idx := int(changed_indices[i])
         incremental_data[i] = model_params[idx]
     }
-    var string ckpt_dir = manager.base_path + "/checkpoint_" + str(global_step)
-    var string incremental_file = ckpt_dir + "/rank_" + str(rank) + "_incremental.ckpt"
+    ckpt_dir := manager.base_path + "/checkpoint_" + str(global_step)
+    incremental_file := ckpt_dir + "/rank_" + str(rank) + "_incremental.ckpt"
     save_binary(incremental_data, incremental_file)
-    var metadata: checkpoint_metadata
+    metadata := checkpoint_metadata
     metadata.checkpoint_id = global_step
     metadata.global_step = global_step
     metadata.timestamp = get_time()
@@ -162,9 +162,9 @@ func load_checkpoint_for_recovery(
     int num_ranks,
     int rank
 ): (vector, vector, vector, checkpoint_metadata) {
-    var string ckpt_dir = manager.base_path + "/checkpoint_" + str(checkpoint_id)
-    var string rank_file = ckpt_dir + "/rank_" + str(rank) + ".ckpt"
-    var vector rank_data = allocate_vector(1, 0.0)
+    ckpt_dir := manager.base_path + "/checkpoint_" + str(checkpoint_id)
+    rank_file := ckpt_dir + "/rank_" + str(rank) + ".ckpt"
+    rank_data := allocate_vector(1, 0.0)
     if file_exists(rank_file) {
         if is_compressed(rank_file) {
             rank_data = decompress_and_load(rank_file)
@@ -175,15 +175,15 @@ func load_checkpoint_for_recovery(
         rank_data = reconstruct_from_incremental(ckpt_dir, rank)
     }
     barrier_all_ranks(num_ranks, rank)
-    var metadata: checkpoint_metadata
+    metadata := checkpoint_metadata
     if rank == 0 {
-        var metadata_file: string = ckpt_dir + "/metadata.json"
+        metadata_file := ckpt_dir + "/metadata.json"
         metadata = load_metadata(metadata_file)
     }
     broadcast_metadata(metadata, num_ranks, rank)
-    var vector model_params = extract_model_params(rank_data)
-    var vector optimizer_state = extract_optimizer_state(rank_data)
-    var vector training_state = extract_training_state(rank_data)
+    model_params := extract_model_params(rank_data)
+    optimizer_state := extract_optimizer_state(rank_data)
+    training_state := extract_training_state(rank_data)
     return (model_params, optimizer_state, training_state, metadata)
 }
 
@@ -194,12 +194,12 @@ func verify_checkpoint_integrity(
     int num_ranks,
     int rank
 ): bool {
-    var is_valid: bool = true
-    var int local_checksum = compute_checkpoint_checksum(model_params, optimizer_state)
+    is_valid := true
+    local_checksum := compute_checkpoint_checksum(model_params, optimizer_state)
     if local_checksum != expected_metadata.checksum  rank == 0 {
         is_valid = false
     }
-    var has_nan: bool = false
+    has_nan := false
     for i in range(0, length(model_params)) {
         if is_nan(model_params[i]) || is_inf(model_params[i]) {
             has_nan = true
@@ -209,7 +209,7 @@ func verify_checkpoint_integrity(
     if has_nan {
         is_valid = false
     }
-    var bool global_valid = all_reduce_and(is_valid, num_ranks, rank)
+    global_valid := all_reduce_and(is_valid, num_ranks, rank)
     return global_valid
 }
 
@@ -221,8 +221,8 @@ func detect_and_handle_failure(
     int rank,
     recovery_state recovery_state
 ): bool {
-    var should_recover: bool = false
-    var failure_reason: string = ""
+    should_recover := false
+    failure_reason := ""
     if current_loss > prev_loss * 10.0 {
         should_recover = true
         failure_reason = "Loss divergence detected"
@@ -231,7 +231,7 @@ func detect_and_handle_failure(
         should_recover = true
         failure_reason = "NaN/Inf in loss"
     }
-    var max_grad: float = 0.0
+    max_grad := 0.0
     for i in range(0, length(gradients)) {
         if abs(gradients[i]) > max_grad {
             max_grad = abs(gradients[i])
@@ -241,7 +241,7 @@ func detect_and_handle_failure(
         should_recover = true
         failure_reason = "Gradient explosion"
     }
-    var bool comm_healthy = check_communication_health(num_ranks, rank)
+    comm_healthy := check_communication_health(num_ranks, rank)
     if !comm_healthy {
         should_recover = true
         failure_reason = "Communication failure"
@@ -262,18 +262,18 @@ func execute_recovery(
     int rank,
     recovery_strategy recovery_strategy_type
 ): (vector, vector, vector, checkpoint_metadata) {
-    var (model_params, optimizer_state, training_state, metadata) =
+    (model_params, optimizer_state, training_state, metadata) := 
         load_checkpoint_for_recovery(last_checkpoint_id, manager, num_ranks, rank)
-    var bool is_valid = verify_checkpoint_integrity(
+    is_valid := verify_checkpoint_integrity(
         model_params, optimizer_state, metadata, num_ranks, rank
     )
     if !is_valid {
         if rank == 0 {
-            var int older_checkpoint = find_previous_valid_checkpoint(
+            older_checkpoint := find_previous_valid_checkpoint(
                 last_checkpoint_id, manager, num_ranks, rank
             )
             if older_checkpoint >= 0 {
-                var (params_old, opt_state_old, train_state_old, metadata_old) =
+                (params_old, opt_state_old, train_state_old, metadata_old) := 
                     load_checkpoint_for_recovery(older_checkpoint, manager, num_ranks, rank)
                 model_params = params_old
                 optimizer_state = opt_state_old
@@ -304,22 +304,22 @@ func distributed_training_with_recovery(
     int num_ranks,
     int rank
 ): (vector, vector) {
-    var current_params: vector = model_params
-    var current_optimizer_state: vector = optimizer_state
-    var current_loss: float = 0.0
-    var prev_loss: float = 0.0
-    var recovery_state: recovery_state
+    current_params := model_params
+    current_optimizer_state := optimizer_state
+    current_loss := 0.0
+    prev_loss := 0.0
+    recovery_state := recovery_state
     recovery_state.is_recovering = false
     recovery_state.recovery_step = 0
-    var global_step: int = 0
+    global_step := 0
     while global_step < training_steps {
-        var vector predictions = model_forward(current_params)
+        predictions := model_forward(current_params)
         prev_loss = current_loss
         current_loss = compute_loss_func(predictions, targets)
-        var vector gradients = backward_pass(current_loss)
+        gradients := backward_pass(current_loss)
         if detect_and_handle_failure(current_loss, prev_loss, gradients, num_ranks, rank, recovery_state) {
             if rank == 0 {
-                var (recovered_params, recovered_optimizer_state, _, _) =
+                (recovered_params, recovered_optimizer_state, _, _) := 
                     execute_recovery(
                         ((global_step - 1) / checkpoint_interval) * checkpoint_interval,
                         manager, num_ranks, rank, IMMEDIATE
@@ -338,7 +338,7 @@ func distributed_training_with_recovery(
             learning_rate
         )
         if g(global_step - (global_step / checkpoint_interval) * checkpoint_interval) == 0  rank == 0 {
-            var metadata: checkpoint_metadata = save_full_checkpoint(
+            metadata := save_full_checkpoint(
                 global_step, 0, current_loss, learning_rate,
                 current_params, current_optimizer_state, allocate_vector(1, 0.0),
                 manager, num_ranks, rank
@@ -350,7 +350,7 @@ func distributed_training_with_recovery(
 }
 
 func compute_checkpoint_checksum(vector model_params, vector optimizer_state): int {
-    var checksum: int = 0
+    checksum := 0
     for i in range(0, length(model_params)) {
         checksum = checksum + int(model_params[i] * 1000000.0)
     }
@@ -364,9 +364,9 @@ func collect_rank_checkpoint_data(
     vector model_params, vector optimizer_state, vector training_state,
     int rank, int num_ranks
 ): vector {
-    var int total_size = length(model_params) + length(optimizer_state) + length(training_state)
-    var vector data = allocate_vector(total_size, 0.0)
-    var idx: int = 0
+    total_size := length(model_params) + length(optimizer_state) + length(training_state)
+    data := allocate_vector(total_size, 0.0)
+    idx := 0
     for i in range(0, min(length(model_params), total_size / 3)) {
         data[idx] = model_params[i]
         idx = idx + 1
@@ -407,7 +407,7 @@ func file_exists(string file): bool {
 }
 
 func load_metadata(string file): checkpoint_metadata {
-    var metadata: checkpoint_metadata
+    metadata := checkpoint_metadata
     return metadata
 }
 

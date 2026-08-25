@@ -62,16 +62,16 @@ func new_rollout_correction_config() -> RolloutCorrectionConfig {
 
 func parse_threshold(string threshold_str) -> (f32, f32) {
     if threshold_str.contains("_") {
-        let parts = threshold_str.split("_")
+        parts := threshold_str.split("_")
         if parts.len() != 2 {
             panic("Invalid threshold format, expected 'lower_upper'")
         }
-        let lower = parse_f32(parts[0])
-        let upper = parse_f32(parts[1])
+        lower := parse_f32(parts[0])
+        upper := parse_f32(parts[1])
         return lower, upper
     } else {
-        let upper = parse_f32(threshold_str)
-        let lower = 1.0 / upper
+        upper := parse_f32(threshold_str)
+        lower := 1.0 / upper
         return lower, upper
     }
 }

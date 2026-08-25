@@ -23,8 +23,8 @@ struct system_health_check {
 }
 
 func verify_component(string name, string file_path, i32 expected_lines) component_status {
-    let exists = true
-    let component = component_status {
+    exists := true
+    component := component_status {
         name: name,
         file_path: file_path,
         size_bytes: expected_lines * 50,
@@ -36,50 +36,50 @@ func verify_component(string name, string file_path, i32 expected_lines) compone
 }
 
 func check_all_components() component_status[] {
-    let components = component_status[]{}
-    let scaled = verify_component(
+    components := component_status[]{}
+    scaled := verify_component(
         "Scaled Training System",
         "src/training/orchestration/scaled_training_system.s",
         850
     )
     scaled.description = "6-layer transformer_2, 256-dim, 100M params"
     components = append(components, scaled)
-    let data = verify_component(
+    data := verify_component(
         "Real Data Loader",
         "src/training/data/tool/real_data_loader.s",
         650
     )
     data.description = "WikiText-2, C4, 32K BPE tokenizer"
     components = append(components, data)
-    let cuda = verify_component(
+    cuda := verify_component(
         "CUDA Accelerated Training",
         "backend/cuda/cuda_accelerated_training.s",
         750
     )
     cuda.description = "GPU memory, transfers, kernels"
     components = append(components, cuda)
-    let ddp = verify_component(
+    ddp := verify_component(
         "DDP Distributed Training",
         "src/runtime/distributed/ddp_distributed_training.s",
         800
     )
     ddp.description = "NCCL AllReduce, process groups"
     components = append(components, ddp)
-    let compile = verify_component(
+    compile := verify_component(
         "Compilation & Testing",
         "test/compile_and_test.s",
         300
     )
     compile.description = "Full test suite"
     components = append(components, compile)
-    let deploy = verify_component(
+    deploy := verify_component(
         "Deployment Configuration",
         "deploy/generate_deployment_configs.s",
         400
     )
     deploy.description = "SLURM, Docker, Kubernetes"
     components = append(components, deploy)
-    let perf = verify_component(
+    perf := verify_component(
         "Performance Benchmark",
         "workflow/benchmark/performance_benchmark.s",
         350
@@ -90,7 +90,7 @@ func check_all_components() component_status[] {
 }
 
 func calculate_health_score(component_status[] components) f64 {
-    let ready = 0
+    ready := 0
     for component in components {
         if component.status == "ready" {
             ready = ready + 1
@@ -100,7 +100,7 @@ func calculate_health_score(component_status[] components) f64 {
 }
 
 func print_component_status(component_status component) {
-    let status_icon = "✅"
+    status_icon := "✅"
     if component.status != "ready" {
         status_icon = "❌"
     }
@@ -117,15 +117,15 @@ func perform_system_check() system_health_check {
     println("║  SYSTEM HEALTH CHECK & VERIFICATION                   ║")
     println("╚" + strings.repeat("═", 61) + "╝")
     println("")
-    let components = check_all_components()
-    let health_score = calculate_health_score(components)
+    components := check_all_components()
+    health_score := calculate_health_score(components)
     println("📊 COMPONENT STATUS")
     println("─" + strings.repeat("─", 60))
     println("")
     for component in components {
         print_component_status(component)
     }
-    let ready = 0
+    ready := 0
     for component in components {
         if component.status == "ready" {
             ready = ready + 1
@@ -136,11 +136,11 @@ func perform_system_check() system_health_check {
     println("Ready components: " + strings.from_i32(ready) + "/" + strings.from_i32(len(components)))
     println("Health score: " + strings.format("%.1f", health_score) + "%")
     println("")
-    let recommendations = []string{}
+    recommendations := []string{}
     if health_score < 100.0 {
         recommendations = append(recommendations, "All components should be present for production deployment")
     }
-    let check = system_health_check {
+    check := system_health_check {
         timestamp: time.format(time.now(), "2006-01-02T15:04:05Z07:00"),
         total_components: len(components),
         ready_components: ready,
@@ -268,7 +268,7 @@ func print_final_report() {
 }
 
 func main() {
-    let health = perform_system_check()
+    health := perform_system_check()
     verify_integration()
     check_deployment_readiness()
     print_final_report()

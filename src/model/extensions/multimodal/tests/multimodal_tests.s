@@ -17,7 +17,7 @@ struct TestResult {
     duration_ms: f32
 }
 
-var test_results = make([]TestResult, 0)
+test_results := make([]TestResult, 0)
 
 func assert(condition: bool, message: string) {
     if !condition {

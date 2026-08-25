@@ -3,11 +3,11 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_
 use std.io.println
 
 func main() {
-    let ir_path = runtime_env_get("S_IR_RUNNER_INPUT", "")
-    let entry = runtime_env_get("S_IR_RUNNER_ENTRY", "main")
-    let compiler = runtime_env_get("S_COMPILER", "s")
-    let compiler_cwd = runtime_env_get("S_COMPILER_EMIT_CWD", "")
-    let binary_path = ir_path + ".runner.bin"
+    ir_path := runtime_env_get("S_IR_RUNNER_INPUT", "")
+    entry := runtime_env_get("S_IR_RUNNER_ENTRY", "main")
+    compiler := runtime_env_get("S_COMPILER", "s")
+    compiler_cwd := runtime_env_get("S_COMPILER_EMIT_CWD", "")
+    binary_path := ir_path + ".runner.bin"
     if ir_path == "" {
         println("usage: s_ir_runner <input.ir> [entry]")
         return 2

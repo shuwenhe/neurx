@@ -78,7 +78,7 @@ func (mut v1_engine* engine) submit_request(
     prompt_tokens: []int,
     max_new_tokens: int
 ) int {
-    let request_id = engine.total_requests_received
+    request_id := engine.total_requests_received
     engine.total_requests_received += 1
 
     engine.request_phases.push(request_phase.waiting_prefill)
@@ -93,8 +93,8 @@ func (mut v1_engine* engine) schedule_prefill_batch() bool {
     engine.current_prefill_batch.total_tokens = 0
     engine.current_prefill_batch.batch_size = 0
 
-    let mut prefill_count = 0
-    let mut total_tokens = 0
+    prefill_count := 0
+    total_tokens := 0
 
     for i in 0..engine.request_phases.len() {
         if engine.request_phases[i] != request_phase.waiting_prefill {
@@ -105,7 +105,7 @@ func (mut v1_engine* engine) schedule_prefill_batch() bool {
             break
         }
 
-        let prompt_len = engine.prompt_lengths[i]
+        prompt_len := engine.prompt_lengths[i]
         if total_tokens + prompt_len > engine.config.prefill_token_budget {
             break
         }
@@ -128,10 +128,10 @@ func (mut v1_engine* engine) execute_prefill() {
         return
     }
 
-    let batch_size = engine.current_prefill_batch.batch_size
-    let total_tokens = engine.current_prefill_batch.total_tokens
+    batch_size := engine.current_prefill_batch.batch_size
+    total_tokens := engine.current_prefill_batch.total_tokens
 
-    let estimated_time_ms = (batch_size * total_tokens * 2) / 1000
+    estimated_time_ms := (batch_size * total_tokens * 2) / 1000
 
     engine.total_compute_time_ms += estimated_time_ms
 
@@ -144,8 +144,8 @@ func (mut v1_engine* engine) schedule_decode_batch() bool {
     engine.current_decode_batch.request_ids.clear()
     engine.current_decode_batch.batch_size = 0
 
-    let mut decode_count = 0
-    let mut tokens_budget = engine.config.decode_token_budget
+    decode_count := 0
+    tokens_budget := engine.config.decode_token_budget
 
     for i in 0..engine.request_phases.len() {
         if engine.request_phases[i] != request_phase.waiting_decode &&
@@ -181,9 +181,9 @@ func (mut v1_engine* engine) execute_decode() {
         return
     }
 
-    let batch_size = engine.current_decode_batch.batch_size
+    batch_size := engine.current_decode_batch.batch_size
 
-    let estimated_time_ms = (batch_size * 10) / 100
+    estimated_time_ms := (batch_size * 10) / 100
 
     engine.total_compute_time_ms += estimated_time_ms
 
@@ -195,12 +195,12 @@ func (mut v1_engine* engine) execute_decode() {
 func (mut v1_engine* engine) iteration() iteration_result {
     engine.iteration_count += 1
 
-    let prefill_ok = engine.schedule_prefill_batch()
+    prefill_ok := engine.schedule_prefill_batch()
     if prefill_ok {
         engine.execute_prefill()
     }
 
-    let decode_ok = engine.schedule_decode_batch()
+    decode_ok := engine.schedule_decode_batch()
     if decode_ok {
         engine.execute_decode()
     }
@@ -225,37 +225,37 @@ struct v1_engine_stats {
 }
 
 func (v1_engine* engine) get_stats() v1_engine_stats {
-    let total_tokens = 0
+    total_tokens := 0
     for i in 0..engine.generated_lengths.len() {
         total_tokens += engine.generated_lengths[i]
     }
 
-    let avg_batch_size = if engine.iteration_count > 0 {
+    avg_batch_size := if engine.iteration_count > 0 {
         engine.total_requests_completed as f32 / engine.iteration_count as f32
     } else {
         0.0
     }
 
-    let avg_iteration_time_ms = if engine.iteration_count > 0 {
+    avg_iteration_time_ms := if engine.iteration_count > 0 {
         engine.total_compute_time_ms as f32 / engine.iteration_count as f32
     } else {
         0.0
     }
 
-    let total_time_sec = engine.total_compute_time_ms as f32 / 1000.0
-    let throughput_req_per_sec = if total_time_sec > 0.0 {
+    total_time_sec := engine.total_compute_time_ms as f32 / 1000.0
+    throughput_req_per_sec := if total_time_sec > 0.0 {
         engine.total_requests_completed as f32 / total_time_sec
     } else {
         0.0
     }
 
-    let throughput_tok_per_sec = if total_time_sec > 0.0 {
+    throughput_tok_per_sec := if total_time_sec > 0.0 {
         total_tokens as f32 / total_time_sec
     } else {
         0.0
     }
 
-    let gpu_util = if engine.total_requests_completed > 0 {
+    gpu_util := if engine.total_requests_completed > 0 {
         (engine.total_requests_completed as f32 / engine.total_requests_received as f32) * 100.0
     } else {
         0.0
@@ -276,7 +276,7 @@ func (v1_engine* engine) get_stats() v1_engine_stats {
 func (mut v1_engine* engine) run_to_completion() {
 
     while engine.total_requests_completed < engine.total_requests_received {
-        let result = engine.iteration()
+        result := engine.iteration()
 
         if result.prefill_count == 0 && result.decode_count == 0 {
 
@@ -290,7 +290,7 @@ func main() {
     println("=========================================")
     println("")
 
-    let config = v1_engine_config {
+    config := v1_engine_config {
         max_batch_size: 32,
         max_total_tokens: 4096,
         max_prefill_batch_size: 8,
@@ -301,12 +301,12 @@ func main() {
         enable_prefix_cache: true,
     }
 
-    let mut engine = new_v1_engine(config)
+    engine := new_v1_engine(config)
 
     println("📥 提交请求:")
     for i in 0..12 {
-        let prompt = vec[1, 2, 3, 4, 5]
-        let req_id = engine.submit_request(prompt, 128)
+        prompt := vec[1, 2, 3, 4, 5]
+        req_id := engine.submit_request(prompt, 128)
         if i % 3 == 0 {
             println(f"  Request {req_id} submitted (5 tokens)")
         }
@@ -315,7 +315,7 @@ func main() {
 
     println("⚙️ 运行推理循环:")
     for iter in 0..20 {
-        let result = engine.iteration()
+        result := engine.iteration()
 
         if iter % 5 == 0 {
             println(f"Iteration {iter + 1}:")
@@ -331,7 +331,7 @@ func main() {
         }
     }
 
-    let stats = engine.get_stats()
+    stats := engine.get_stats()
     println("📊 性能统计:")
     println(f"  总迭代数: {stats.total_iterations}")
     println(f"  完成请求: {stats.total_requests_completed}")

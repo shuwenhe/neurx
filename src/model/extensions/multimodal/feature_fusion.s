@@ -134,7 +134,7 @@ func (FeatureFusion* f) FuseAttention(
 
     for seq := 0; seq < seq_len; seq += 1 {
 
-        var total_context = make([]f32, output_dim)
+        total_context := make([]f32, output_dim)
         var total_weight f32 = 0.0
 
         for modality, embedding := range embeddings {

@@ -148,18 +148,18 @@ func create_default_adapter(spec: model_spec) model_adapter {
 }
 
 func create_adapter_for_model(model_name: string) option[model_adapter] {
-    let spec_opt = get_model_by_name(model_name)
+    spec_opt := get_model_by_name(model_name)
     if spec_opt == none {
         return none
     }
 
-    let spec = match spec_opt {
+    spec := match spec_opt {
         Some(s) => s,
         None => return none,
     }
 
-    let model_type = spec.model_type
-    let adapter = if model_type == "llama" || model_type == "llama2" || model_type == "llama3" {
+    model_type := spec.model_type
+    adapter := if model_type == "llama" || model_type == "llama2" || model_type == "llama3" {
         create_llama_adapter(spec)
     } else if model_type == "qwen" || model_type == "qwen2" || model_type == "qwen2.5" {
         create_qwen_adapter(spec)
@@ -198,7 +198,7 @@ func get_rope_params_for_model(model_type: string, seq_len: int) rope_scaling_pa
     }
 
     if model_type == "deepseek" {
-        let factor = if seq_len > 4096 { seq_len as f32 / 4096.0 } else { 1.0 }
+        factor := if seq_len > 4096 { seq_len as f32 / 4096.0 } else { 1.0 }
         return rope_scaling_params {
             rope_type: "linear",
             factor: factor,
@@ -207,7 +207,7 @@ func get_rope_params_for_model(model_type: string, seq_len: int) rope_scaling_pa
     }
 
     if model_type == "baichuan" || model_type == "baichuan2" {
-        let factor = if seq_len > 4096 { seq_len as f32 / 4096.0 } else { 1.0 }
+        factor := if seq_len > 4096 { seq_len as f32 / 4096.0 } else { 1.0 }
         return rope_scaling_params {
             rope_type: "linear",
             factor: factor,
@@ -259,16 +259,16 @@ func check_model_compatibility(
     target_device: string,
     available_memory_gb: int
 ) compatibility_report {
-    let mut warnings = vec[]()
-    let mut requirements = vec[]()
-    let mut is_compatible = true
+    warnings := vec[]()
+    requirements := vec[]()
+    is_compatible := true
 
-    let est_memory_gb = (adapter.model_spec.hidden_size *
+    est_memory_gb := (adapter.model_spec.hidden_size *
                         adapter.model_spec.num_hidden_layers * 4) / 1024
 
     if est_memory_gb > available_memory_gb {
         is_compatible = false
-        let msg = f"模型需要 ~{est_memory_gb}GB 显存，但仅有 {available_memory_gb}GB"
+        msg := f"模型需要 ~{est_memory_gb}GB 显存，但仅有 {available_memory_gb}GB"
         requirements.push(msg)
     }
 
@@ -302,13 +302,13 @@ struct model_diagnostics {
 }
 
 func get_model_diagnostics(adapter: *model_adapter) model_diagnostics {
-    let param_count = adapter.model_spec.hidden_size *
+    param_count := adapter.model_spec.hidden_size *
                      adapter.model_spec.num_hidden_layers *
                      adapter.model_spec.vocab_size
 
-    let memory_gb = param_count as f32 / (1024 * 1024 * 1024) * 2.0
+    memory_gb := param_count as f32 / (1024 * 1024 * 1024) * 2.0
 
-    let mut opt_count = 0
+    opt_count := 0
     if adapter.optimization.use_flash_attn { opt_count += 1 }
     if adapter.optimization.use_paged_attn { opt_count += 1 }
     if adapter.optimization.use_kv_cache_quantization { opt_count += 1 }
@@ -348,13 +348,13 @@ func main() {
     println("==========================================")
     println("")
 
-    let all_models = get_all_models()
+    all_models := get_all_models()
     println(f"📦 总模型数: {all_models.len()}")
     println("")
 
     println("🔧 模型适配器演示:")
 
-    let model_names = [
+    model_names := [
         "llama-7b",
         "qwen2-7b",
         "deepseek-7b",
@@ -363,7 +363,7 @@ func main() {
 
     for name in model_names.iter() {
         if let Some(adapter) = create_adapter_for_model(name) {
-            let diag = get_model_diagnostics(&adapter)
+            diag := get_model_diagnostics(&adapter)
 
             println(f"\n✅ {name}:")
             println(f"   参数: {diag.parameter_count / 1e9:.1f}B")
@@ -372,7 +372,7 @@ func main() {
             println(f"   激活函数: {diag.activation}")
             println(f"   启用优化: {diag.optimizations_enabled} 项")
 
-            let report = check_model_compatibility(&adapter, "cuda", 80)
+            report := check_model_compatibility(&adapter, "cuda", 80)
             if report.is_compatible {
                 println("   ✓ 兼容 A100 (80GB)")
             } else {

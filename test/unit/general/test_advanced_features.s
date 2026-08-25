@@ -11,8 +11,8 @@ func test_vectorization_basic() bool {
     var []float B = []float(4)
     A[0] = 1.0; A[1] = 2.0; A[2] = 3.0; A[3] = 4.0
     B[0] = 2.0; B[1] = 2.0; B[2] = 2.0; B[3] = 2.0
-    var C = vectorization.element_wise_add(A, B)
-    var D = vectorization.element_wise_mul(A, B)
+    C := vectorization.element_wise_add(A, B)
+    D := vectorization.element_wise_mul(A, B)
     return C[0] == 3.0 && D[0] == 2.0
 }
 
@@ -21,33 +21,33 @@ func test_vectorization_dot_product() bool {
     var []float B = []float(3)
     A[0] = 1.0; A[1] = 2.0; A[2] = 3.0
     B[0] = 4.0; B[1] = 5.0; B[2] = 6.0
-    var result = vectorization.dot_product(A, B)
+    result := vectorization.dot_product(A, B)
     return result == 32.0
 }
 
 func test_vectorization_vector_norm() bool {
     var []float A = []float(3)
     A[0] = 3.0; A[1] = 4.0; A[2] = 0.0
-    var norm = vectorization.vector_norm(A)
+    norm := vectorization.vector_norm(A)
     return norm >= 4.9 && norm <= 5.1
 }
 
 func test_vectorization_reduce_sum() bool {
     var []float A = []float(4)
     A[0] = 1.0; A[1] = 2.0; A[2] = 3.0; A[3] = 4.0
-    var sum = vectorization.reduce_sum(A)
+    sum := vectorization.reduce_sum(A)
     return sum == 10.0
 }
 
 func test_mixed_precision_config() bool {
-    var config = mixed_precision.new_mixed_precision_config()
+    config := mixed_precision.new_mixed_precision_config()
     return config.use_mixed_precision == true &&
            config.compute_dtype == "float32" &&
            config.loss_scale == 65536.0
 }
 
 func test_mixed_precision_state() bool {
-    var state = mixed_precision.new_mixed_precision_state(100)
+    state := mixed_precision.new_mixed_precision_state(100)
     return len(state.master_weights) == 100 &&
            len(state.compute_weights) == 100 &&
            state.overflow_count == 0 &&
@@ -55,42 +55,42 @@ func test_mixed_precision_state() bool {
 }
 
 func test_loss_scale_scheduler() bool {
-    var scheduler = mixed_precision.new_loss_scale_scheduler(65536.0, 2000, 2.0, 0.5)
-    var initial_scale = scheduler.current_scale
+    scheduler := mixed_precision.new_loss_scale_scheduler(65536.0, 2000, 2.0, 0.5)
+    initial_scale := scheduler.current_scale
     scheduler = mixed_precision.update_loss_scale(scheduler, true)
-    var after_overflow = scheduler.current_scale
+    after_overflow := scheduler.current_scale
     return after_overflow < initial_scale && after_overflow == initial_scale * 0.5
 }
 
 func test_overflow_detection() bool {
-    var gradients: [][]float = [][]float(5)
+    gradients := [][]float(5)
     gradients[0] = 0.1
     gradients[1] = 0.2
     gradients[2] = 0.3
     gradients[3] = 0.4
     gradients[4] = 0.5
-    var has_overflow = mixed_precision.detect_overflow(gradients)
+    has_overflow := mixed_precision.detect_overflow(gradients)
     return has_overflow == false
 }
 
 func test_gradient_scaling() bool {
-    var gradients: [][]float = [][]float(2)
+    gradients := [][]float(2)
     gradients[0] = 0.1
     gradients[1] = 0.2
-    var scaled = mixed_precision.scale_gradients(gradients, 1000.0)
+    scaled := mixed_precision.scale_gradients(gradients, 1000.0)
     return scaled[0] == 0.0001 && scaled[1] == 0.0002
 }
 
 func test_accumulation_basic() bool {
-    var accum = gradient_accumulation.new_accumulated_gradients(10)
+    accum := gradient_accumulation.new_accumulated_gradients(10)
     return accum.steps_accumulated == 0 &&
            accum.loss_sum == 0.0 &&
            accum.is_ready == false
 }
 
 func test_accumulate_gradients() bool {
-    var accum = gradient_accumulation.new_accumulated_gradients(3)
-    var step_grad: [][]float = [][]float(3)
+    accum := gradient_accumulation.new_accumulated_gradients(3)
+    step_grad := [][]float(3)
     step_grad[0] = 0.1; step_grad[1] = 0.2; step_grad[2] = 0.3
     accum = gradient_accumulation.accumulate_gradients(accum, step_grad, 0.5, 0.5)
     return accum.steps_accumulated == 1 &&
@@ -99,9 +99,9 @@ func test_accumulate_gradients() bool {
 }
 
 func test_accumulation_complete() bool {
-    var accum = gradient_accumulation.new_accumulated_gradients(5)
-    var step_grad: [][]float = [][]float(5)
-    var i = 0
+    accum := gradient_accumulation.new_accumulated_gradients(5)
+    step_grad := [][]float(5)
+    i := 0
     while i < 5 { step_grad[i] = 0.1; i = i + 1 }
     i = 0
     while i < 3 {
@@ -116,13 +116,13 @@ func test_accumulation_complete() bool {
 }
 
 func test_effective_batch_size() bool {
-    var eff_batch = gradient_accumulation.effective_batch_size(32, 4)
+    eff_batch := gradient_accumulation.effective_batch_size(32, 4)
     return eff_batch == 128
 }
 
 func test_accumulation_reset() bool {
-    var accum = gradient_accumulation.new_accumulated_gradients(3)
-    var step_grad: [][]float = [][]float(3)
+    accum := gradient_accumulation.new_accumulated_gradients(3)
+    step_grad := [][]float(3)
     step_grad[0] = 0.1; step_grad[1] = 0.2; step_grad[2] = 0.3
     accum = gradient_accumulation.accumulate_gradients(accum, step_grad, 0.5, 1.0)
     accum = gradient_accumulation.reset_accumulation(accum)
@@ -132,7 +132,7 @@ func test_accumulation_reset() bool {
 }
 
 func test_distributed_state() bool {
-    var state = tensor_parallel.new_distributed_state(0, 8, 4)
+    state := tensor_parallel.new_distributed_state(0, 8, 4)
     return state.global_rank == 0 &&
            state.world_size == 8 &&
            state.tp_rank == 0 &&
@@ -142,27 +142,27 @@ func test_distributed_state() bool {
 }
 
 func test_distributed_state_rank1() bool {
-    var state = tensor_parallel.new_distributed_state(1, 8, 4)
+    state := tensor_parallel.new_distributed_state(1, 8, 4)
     return state.tp_rank == 1 &&
            state.dp_rank == 0
 }
 
 func test_tensor_parallel_config() bool {
-    var config = tensor_parallel.new_tensor_parallel_config(4, 0)
+    config := tensor_parallel.new_tensor_parallel_config(4, 0)
     return config.tp_degree == 4 &&
            config.tp_rank == 0 &&
            config.sharding_strategy == "column_wise"
 }
 
 func test_communication_stats() bool {
-    var stats = tensor_parallel.new_communication_stats()
+    stats := tensor_parallel.new_communication_stats()
     return stats.allreduce_calls == 0 &&
            stats.broadcast_calls == 0 &&
            stats.total_bytes_sent == 0
 }
 
 func test_update_communication_stats() bool {
-    var stats = tensor_parallel.new_communication_stats()
+    stats := tensor_parallel.new_communication_stats()
     stats = tensor_parallel.update_communication_stats(stats, "allreduce", 1000, 10.0)
     return stats.allreduce_calls == 1 &&
            stats.total_bytes_sent == 1000 &&
@@ -170,10 +170,10 @@ func test_update_communication_stats() bool {
 }
 
 func test_mixed_training_config() bool {
-    var vec_config = vectorization.new_vectorization_stats()
-    var mp_config = mixed_precision.new_mixed_precision_config()
-    var accum_config = gradient_accumulation.new_gradient_accumulation_config()
-    var tp_config = tensor_parallel.new_tensor_parallel_config(4, 0)
+    vec_config := vectorization.new_vectorization_stats()
+    mp_config := mixed_precision.new_mixed_precision_config()
+    accum_config := gradient_accumulation.new_gradient_accumulation_config()
+    tp_config := tensor_parallel.new_tensor_parallel_config(4, 0)
     return mp_config.use_mixed_precision == true &&
            accum_config.accumulation_steps >= 1 &&
            tp_config.tp_degree == 4
@@ -182,16 +182,16 @@ func test_mixed_training_config() bool {
 func test_vectorization_with_mixed_precision() bool {
     var []float A = []float(4)
     A[0] = 1.0; A[1] = 2.0; A[2] = 3.0; A[3] = 4.0
-    var sum = vectorization.reduce_sum(A)
-    var gradients: [][]float = [][]float(4)
+    sum := vectorization.reduce_sum(A)
+    gradients := [][]float(4)
     gradients[0] = 0.01; gradients[1] = 0.02; gradients[2] = 0.03; gradients[3] = 0.04
-    var scaled = mixed_precision.scale_gradients(gradients, 1000.0)
+    scaled := mixed_precision.scale_gradients(gradients, 1000.0)
     return sum == 10.0 && scaled[0] == 0.00001
 }
 
 func run_all_advanced_tests() int {
-    var passed = 0
-    var total = 0
+    passed := 0
+    total := 0
     total = total + 1
     if test_vectorization_basic() { passed = passed + 1 }
     total = total + 1
@@ -238,8 +238,8 @@ func run_all_advanced_tests() int {
 }
 
 func main() {
-    var passed = run_all_advanced_tests()
-    var total = 20
+    passed := run_all_advanced_tests()
+    total := 20
     print("Advanced Features Tests:")
     print("Passed: " + string(passed) + " / " + string(total))
     if passed == total {

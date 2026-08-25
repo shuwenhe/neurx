@@ -24,7 +24,7 @@ func is_runnable_candidate(string candidate) bool {
 }
 
 func find_s_binary(string root_dir) string {
-    var candidate string
+    candidate := string()
     if s_bin := os.Getenv("S_BIN"); s_bin != "" {
         if is_runnable_candidate(s_bin) {
             return s_bin
