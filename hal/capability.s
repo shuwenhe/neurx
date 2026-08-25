@@ -1,5 +1,7 @@
 package neurx.hal
 
+use std.vec.vec
+
 enum compute_capability {
     cpu_only,
     gpu_nvidia,
@@ -23,24 +25,87 @@ struct platform_capability {
     int socket_count
     int cpus_per_socket
     int numa_nodes
-    vec[device_capability]* accelerators
+    int gpu_count
+    int cpu_count
     int total_memory_gb
     int network_bandwidth_gbps
+    vec[device_capability]* accelerators
 }
 
-func detect_platform_capability() platform_capability {
-    platform_capability {
-        socket_count: 1,
-        cpus_per_socket: 8,
-        numa_nodes: 1,
-        accelerators: vec[device_capability](),
-        total_memory_gb: 16,
-        network_bandwidth_gbps: 10
+func detect_platform_capability() result[platform_capability, string] {
+    let cpu_count = detect_cpu_count()?
+    let gpu_count = detect_gpu_count()?
+    let total_memory = detect_total_memory()?
+    
+    let accelerators = vec[device_capability]()
+    
+    for i in 0..gpu_count {
+        let gpu_cap = detect_compute_device(i)?
+        accelerators.push(gpu_cap)
     }
+    
+    let platform = platform_capability {
+        socket_count: 1,
+        cpus_per_socket: cpu_count,
+        numa_nodes: 1,
+        gpu_count: gpu_count,
+        cpu_count: cpu_count,
+        total_memory_gb: total_memory,
+        network_bandwidth_gbps: 10,
+        accelerators: &mut accelerators
+    }
+    
+    result::ok(platform)
 }
 
-func detect_compute_device(index: int) device_capability {
-    device_capability {
+func detect_cpu_count() result[int, string] {
+    let cpu_count = query_cpuid_count()
+    
+    if cpu_count <= 0 {
+        cpu_count = 8
+    }
+    
+    result::ok(cpu_count)
+}
+
+func detect_gpu_count() result[int, string] {
+    let gpu_count = query_nvidia_gpu_count()
+    
+    if gpu_count == 0 {
+        gpu_count = query_amd_gpu_count()
+    }
+    
+    if gpu_count == 0 {
+        gpu_count = query_intel_gpu_count()
+    }
+    
+    result::ok(gpu_count)
+}
+
+func detect_total_memory() result[int, string] {
+    let memory_gb = query_system_memory_gb()
+    
+    if memory_gb <= 0 {
+        memory_gb = 16
+    }
+    
+    result::ok(memory_gb)
+}
+
+func detect_compute_device(index: int) result[device_capability, string] {
+    if index == 0 {
+        return result::ok(device_capability {
+            compute_type: compute_capability::gpu_nvidia,
+            compute_cores: 8192,
+            memory_gb: 80,
+            memory_bandwidth_gbps: 864,
+            peak_fp32_tflops: 89100,
+            peak_fp16_tflops: 178200,
+            peak_int8_tops: 357600
+        })
+    }
+    
+    result::ok(device_capability {
         compute_type: compute_capability::cpu_only,
         compute_cores: 8,
         memory_gb: 16,
@@ -48,5 +113,47 @@ func detect_compute_device(index: int) device_capability {
         peak_fp32_tflops: 100,
         peak_fp16_tflops: 200,
         peak_int8_tops: 400
-    }
+    })
+}
+
+func query_cpuid_count() int {
+    8
+}
+
+func query_nvidia_gpu_count() int {
+    1
+}
+
+func query_amd_gpu_count() int {
+    0
+}
+
+func query_intel_gpu_count() int {
+    0
+}
+
+func query_system_memory_gb() int {
+    16
+}
+
+func get_device_capability(device_id: int) result[device_capability, string] {
+    detect_compute_device(device_id)
+}
+
+func is_gpu_available() result[bool, string] {
+    let gpu_count = detect_gpu_count()?
+    result::ok(gpu_count > 0)
+}
+
+func is_nvidia_gpu_available() result[bool, string] {
+    let count = query_nvidia_gpu_count()
+    result::ok(count > 0)
+}
+
+func get_total_compute_capability() result[int, string] {
+    let platform = detect_platform_capability()?
+    
+    let total_tflops = platform.accelerators*.len() * 89100
+    
+    result::ok(total_tflops)
 }
