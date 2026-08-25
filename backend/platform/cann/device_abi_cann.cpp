@@ -139,7 +139,7 @@ int op_launch(int handle, int operation, int stream_resource, const char* bindin
       buffer.push_back(neurx_cann_buffer_binding_v1{name.back().c_str(), found->second.address, found->second.bytes});
     } else { if (!scalar.empty()) scalar += ";"; scalar += item.first + "=" + item.second; }
   }
-  // name storage may move while growing; repair pointers after construction.
+  
   for (std::size_t index = 0; index < buffer.size(); ++index) buffer[index].name = name[index].c_str();
   neurx_cann_kernel_request_v1 request{NEURX_CANN_KERNEL_ABI_VERSION, sizeof(neurx_cann_kernel_request_v1),
       operation_found->second.descriptor.c_str(), scalar.c_str(), buffer.data(), static_cast<int32_t>(buffer.size()), native_stream};

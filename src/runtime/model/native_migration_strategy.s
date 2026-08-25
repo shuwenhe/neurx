@@ -3,31 +3,31 @@ package neurx.runtime.model.native_migration
 use std.vec.vec
 use std.io.println
 
-// ============================================================================
-// 建议 1: 逐步迁移 C++ 到 pure S
-// ============================================================================
-// 当前: json.cpp (C++) → 目标: json.s (pure S)
-// 估计工作量: 1-2 周
-// 复杂度: ⭐ 低
-// 收益: 移除 C++ 依赖，简化编译
-// ============================================================================
+
+
+
+
+
+
+
+
 
 struct json_value {
-    string type_name    // "null", "bool", "number", "string", "array", "object"
+    string type_name    
     string string_value
     float number_value
     bool bool_value
     []json_value array_value
 }
 
-// 纯 S JSON 解析器 (替代 json.cpp)
+
 func parse_json(string input) option[json_value] {
-    // TODO: 完整实现 JSON 解析器
-    // 步骤:
-    // 1. 跳过空白字符
-    // 2. 识别类型 (null/bool/number/string/array/object)
-    // 3. 递归解析嵌套结构
-    // 4. 返回 parsed value
+    
+    
+    
+    
+    
+    
     
     option::some(json_value {
         type_name: "null",
@@ -38,19 +38,19 @@ func parse_json(string input) option[json_value] {
     })
 }
 
-// ============================================================================
-// 建议 2: 原生 → S 的 FFI (Foreign Function Interface) 模式
-// ============================================================================
-// 对于复杂的原生代码 (如 BPE Tokenizer)，不强行迁移到 S
-// 而是创建干净的 S 包装层
-// ============================================================================
+
+
+
+
+
+
 
 struct native_tokenizer_handle {
     int handle_id
     bool initialized
 }
 
-// S 包装器 - 调用 C++ tokenizer
+
 external func __tokenizer_init(string vocab_file) int
 external func __tokenizer_encode(int handle, string text) int[]
 external func __tokenizer_decode(int handle, int[] tokens) string
@@ -85,17 +85,17 @@ func (t: &mut native_tokenizer_handle) cleanup() {
     }
 }
 
-// ============================================================================
-// 建议 3: 编译优化 - 隔离原生代码
-// ============================================================================
-// 目标: 减少编译时间，隔离原生代码的复杂性
-// ============================================================================
+
+
+
+
+
 
 struct compilation_strategy {
     string name
-    []string pure_s_modules     // 可以快速编译
-    []string native_modules      // 需要 CUDA/C++ 编译
-    []string external_modules    // 通过 FFI 调用
+    []string pure_s_modules     
+    []string native_modules      
+    []string external_modules    
     int estimated_compile_time_sec
 }
 
@@ -103,28 +103,28 @@ func get_current_compilation_strategy() compilation_strategy {
     return compilation_strategy {
         name: "hybrid_modular",
         pure_s_modules: vec[string]{
-            "inference/api",           // 路由层
-            "inference/cache",         // 缓存管理
-            "inference/scheduler",     // 调度层
-            "serving/web_ui_server",   // Web 界面
-            "inference/logits_processors",  // 采样层
+            "inference/api",           
+            "inference/cache",         
+            "inference/scheduler",     
+            "serving/web_ui_server",   
+            "inference/logits_processors",  
         },
         native_modules: vec[string]{
-            "backend/platform/cuda/kernels_gemm",      // 矩阵乘法
-            "backend/platform/cuda/device_manager",    // GPU 管理
-            "runtime/native/tensor_runtime",           // 张量操作
+            "backend/platform/cuda/kernels_gemm",      
+            "backend/platform/cuda/device_manager",    
+            "runtime/native/tensor_runtime",           
         },
         external_modules: vec[string]{
-            "runtime/model/bpe_tokenizer",    // BPE 分词 (C++ FFI)
-            "runtime/model/hf_model",         // HF 加载 (迁移中)
+            "runtime/model/bpe_tokenizer",    
+            "runtime/model/hf_model",         
         },
-        estimated_compile_time_sec: 120,  // 2 分钟
+        estimated_compile_time_sec: 120,  
     }
 }
 
-// ============================================================================
-// 建议 4: 代码质量 - 纯 S 部分的最佳实践
-// ============================================================================
+
+
+
 
 struct code_quality_metrics {
     int total_s_lines
@@ -132,23 +132,23 @@ struct code_quality_metrics {
     float pure_s_percentage
     int cyclomatic_complexity_avg
     int test_coverage_percent
-    string maintainability_index  // "Good" / "Fair" / "Poor"
+    string maintainability_index  
 }
 
 func get_quality_targets() code_quality_metrics {
     return code_quality_metrics {
-        total_s_lines: 50000,            // 目标
-        total_native_lines: 1894,        // 当前 (尽量不增加)
-        pure_s_percentage: 96.5,         // 目标
-        cyclomatic_complexity_avg: 4,    // 函数平均复杂度
-        test_coverage_percent: 85,       // 单元测试覆盖率
+        total_s_lines: 50000,            
+        total_native_lines: 1894,        
+        pure_s_percentage: 96.5,         
+        cyclomatic_complexity_avg: 4,    
+        test_coverage_percent: 85,       
         maintainability_index: "Good",
     }
 }
 
-// ============================================================================
-// 建议 5: 演进路径 - 从混合到纯 S
-// ============================================================================
+
+
+
 
 struct evolution_roadmap {
     string phase_name

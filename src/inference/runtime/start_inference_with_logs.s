@@ -37,7 +37,7 @@ func main() {
     system("sleep 2")
     
     print("   ✓ GPU 后端启动\n")
-    print("   📍 地址: http://127.0.0.1:18084\n")
+    print("   📍 地址: http:
     
     print("\n")
     print("🎯 启动 Web UI 服务器...\n")
@@ -50,7 +50,7 @@ func main() {
     system("sleep 2")
     
     print("   ✓ Web UI 启动\n")
-    print("   📍 地址: http://127.0.0.1:8081\n")
+    print("   📍 地址: http:
     
     print("\n")
     print("════════════════════════════════════════════\n")
@@ -64,8 +64,8 @@ func main() {
     print("   make logs         # 列出所有日志文件\n")
     print("\n")
     print("🔗 访问服务:\n")
-    print("   - GPU 推理: http://127.0.0.1:18084/v1/generate\n")
-    print("   - Web UI:   http://127.0.0.1:8081\n")
+    print("   - GPU 推理: http:
+    print("   - Web UI:   http:
     print("\n")
 }
 

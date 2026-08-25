@@ -25,8 +25,8 @@ struct global_deployment_plan {
 }
 
 func new_zone_deployment(string zone_id, string zone_name, int total_nodes) zone_deployment_config {
-    let central_per_zone = 10              // 每个区域10台中央服务器
-    let edge_per_zone = total_nodes / 10   // 10% 边缘节点
+    let central_per_zone = 10              
+    let edge_per_zone = total_nodes / 10   
     let client_per_zone = total_nodes - central_per_zone - edge_per_zone
     
     return zone_deployment_config {
@@ -42,7 +42,7 @@ func new_zone_deployment(string zone_id, string zone_name, int total_nodes) zone
 }
 
 func get_1m_global_deployment_plan() global_deployment_plan {
-    // 100万台机器 = 100个区域 (每个区域1万台)
+    
     let zones = vec[zone_deployment_config]()
     
     for i in 0..100 {
@@ -54,16 +54,16 @@ func get_1m_global_deployment_plan() global_deployment_plan {
     
     return global_deployment_plan {
         total_machines: 1000000,
-        central_nodes: 1000,          // 1000 台中央服务器 (100 regions * 10)
-        edge_nodes: 100000,            // 10% 边缘节点
-        client_nodes: 899000,          // 89.9% 客户端节点
+        central_nodes: 1000,          
+        edge_nodes: 100000,            
+        client_nodes: 899000,          
         total_zones: 100,
         zones: zones,
         deployment_strategy: "hierarchical_hybrid",
     }
 }
 
-// 每个区域的部署模式
+
 struct regional_tier_architecture {
     string tier_name
     int nodes
@@ -110,14 +110,14 @@ func get_tier_3_lightweight_client() regional_tier_architecture {
     return regional_tier_architecture {
         tier_name: "Tier-3: 轻量级客户端 (899k 个)",
         nodes: 899000,
-        neurx_installed: false,      // ❌ 不需要安装完整的NeurX
+        neurx_installed: false,      
         gpu_required: false,
         deployment_method: "lightweight_sdk_only",
         avg_latency_ms: 15.0,
     }
 }
 
-// 部署需求对比
+
 func print_deployment_comparison() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")
@@ -179,7 +179,7 @@ func print_deployment_comparison() {
     println("")
 }
 
-// 成本估算
+
 func cost_estimation() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")

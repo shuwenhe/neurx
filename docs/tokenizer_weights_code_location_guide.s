@@ -2,9 +2,9 @@ package neurx.docs.tokenizer_weights_loading_guide
 
 use std.io.println
 
-// ============================================================================
-// 分词 (Tokenizer) 和权重加载 (Weights Loading) 代码位置完整指南
-// ============================================================================
+
+
+
 
 func print_complete_guide() {
     println("")

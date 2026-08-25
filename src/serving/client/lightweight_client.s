@@ -44,12 +44,12 @@ struct distribution_strategy {
     float edge_traffic_percent
 }
 
-// 轻量级客户端 - 只负责请求转发
+
 func new_lightweight_client(lightweight_client_config cfg) lightweight_client_config {
     cfg
 }
 
-// 推理请求
+
 func (cfg: &lightweight_client_config) infer(inference_request req) inference_response {
     let response = inference_response {
         result: "",
@@ -61,18 +61,18 @@ func (cfg: &lightweight_client_config) infer(inference_request req) inference_re
     response
 }
 
-// 100万台机器部署策略
+
 func deployment_plan_1m_machines() distribution_strategy {
     distribution_strategy {
         mode: deployment_mode::hybrid,
-        central_nodes: 1000,          // 中央服务器
-        edge_nodes: 100000,            // 边缘推理节点
-        client_nodes: 899000,          // 轻量级客户端
-        edge_traffic_percent: 0.7,    // 70% 业务经边缘推理
+        central_nodes: 1000,          
+        edge_nodes: 100000,            
+        client_nodes: 899000,          
+        edge_traffic_percent: 0.7,    
     }
 }
 
-// 分阶段部署计划
+
 func phased_deployment_schedule() {
     println("=== NeurX 1M 机器分阶段部署计划 ===")
     println("")
@@ -102,7 +102,7 @@ func phased_deployment_schedule() {
     println("")
 }
 
-// 存储优化: 共享模型缓存
+
 struct shared_model_cache {
     string cache_dir
     []string cached_models
@@ -119,23 +119,23 @@ func new_shared_model_cache(string cache_dir, int replicas) shared_model_cache {
     }
 }
 
-// 计算存储需求
+
 func calculate_storage_requirement(
     int central_nodes,
     int edge_nodes,
     int avg_model_size_gb,
     int cache_replicas
 ) int {
-    // 中央服务器: 每个 10 模型 * 平均大小
+    
     let central_storage = central_nodes * 10 * avg_model_size_gb
     
-    // 边缘节点: 共享缓存 (不是完全复制)
+    
     let edge_storage = edge_nodes * avg_model_size_gb * cache_replicas / 100
     
     central_storage + edge_storage
 }
 
-// 网络流量估算 (100万QPS)
+
 func estimate_network_traffic(
     int total_qps,
     int central_nodes,
@@ -145,7 +145,7 @@ func estimate_network_traffic(
     let central_qps = total_qps * (1.0 - edge_percentage)
     let edge_qps = total_qps * edge_percentage
     
-    // 每个请求 ~1KB input + 2KB output = 3KB
+    
     let central_bandwidth_gbps = (central_qps * 3) / 1000 / 1000
     let edge_bandwidth_gbps = (edge_qps * 3) / 1000 / 1000
     

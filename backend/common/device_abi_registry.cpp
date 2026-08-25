@@ -125,7 +125,7 @@ bool translate_bindings(int context, const char* bindings, std::string* output) 
   }
   return true;
 }
-}  // namespace
+}  
 
 extern "C" int neurx_device_probe(const char* backend) {
   std::lock_guard<std::mutex> lock(registry_mutex);

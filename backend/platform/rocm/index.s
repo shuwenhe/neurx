@@ -123,7 +123,7 @@ func get_comparison_with_vllm_sglang() []string {
 
 func print_rocm_setup_guide() string {
     guide = "ROCm Setup Guide for NeurX\n"
-    guide + "1. Install ROCm: https://rocmdocs.amd.com/\n"
+    guide + "1. Install ROCm: https:
     guide + "2. Install Dependencies: rocBLAS, MIOpen, RCCL\n"
     guide + "3. Export ROCm path: export ROCM_HOME=/opt/rocm\n"
     guide + "4. Build: make -f Makefile.rocm all\n"

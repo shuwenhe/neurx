@@ -2,7 +2,7 @@ package neurx.deployment.1m_deployment_guide
 
 use std.io.println
 
-// 100万台机器分布式部署完整指南
+
 
 func print_deployment_guide() {
     println("")
@@ -197,7 +197,7 @@ func print_deployment_steps() {
     println("")
     println("  4.3 客户端代码示例:")
     println("      from neurx_client import NeurXClient")
-    println("      client = NeurXClient('grpc://edge-01.region-1.neurx.io:50051')")
+    println("      client = NeurXClient('grpc:
     println("      response = client.infer(")
     println("          prompt='你好，NeurX',")
     println("          max_tokens=256,")
@@ -241,7 +241,7 @@ func print_validation_checklist() {
     println("")
 }
 
-// 部署脚本入口
+
 func main() {
     print_deployment_guide()
 }

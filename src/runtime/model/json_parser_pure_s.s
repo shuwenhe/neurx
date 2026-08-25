@@ -3,13 +3,13 @@ package neurx.runtime.model.json_parser
 use std.vec.vec
 use std.io.println
 
-// ============================================================================
-// Pure S JSON Parser (替代 json.cpp)
-// 
-// 目的: 移除 C++ 依赖，完全用 S 实现 JSON 解析
-// 预期: 性能相同或更好 (S 编译为原生机器码)
-// 测试: 与 HF config.json 兼容性验证
-// ============================================================================
+
+
+
+
+
+
+
 
 enum json_type {
     null_type,
@@ -41,9 +41,9 @@ struct json_parser_state {
     int column
 }
 
-// ============================================================================
-// 基础解析函数
-// ============================================================================
+
+
+
 
 func is_whitespace(char c) bool {
     c == ' ' || c == '\t' || c == '\n' || c == '\r'
@@ -89,13 +89,13 @@ func consume_char(json_parser_state* state) option[char] {
     }
 }
 
-// ============================================================================
-// 值解析
-// ============================================================================
+
+
+
 
 func parse_null(json_parser_state* state) option[json_value] {
     if state.pos + 4 <= state.input.len() {
-        let substring = state.input  // TODO: 实现 substring
+        let substring = state.input  
         if substring == "null" {
             state.pos = state.pos + 4
             return option::some(json_value {
@@ -113,8 +113,8 @@ func parse_null(json_parser_state* state) option[json_value] {
 
 func parse_bool(json_parser_state* state) option[json_value] {
     if state.pos + 4 <= state.input.len() {
-        // 检查 "true"
-        let is_true = true  // TODO: 实现字符串比较
+        
+        let is_true = true  
         if is_true {
             state.pos = state.pos + 4
             return option::some(json_value {
@@ -129,8 +129,8 @@ func parse_bool(json_parser_state* state) option[json_value] {
     }
     
     if state.pos + 5 <= state.input.len() {
-        // 检查 "false"
-        let is_false = true  // TODO: 实现字符串比较
+        
+        let is_false = true  
         if is_false {
             state.pos = state.pos + 5
             return option::some(json_value {
@@ -150,12 +150,12 @@ func parse_bool(json_parser_state* state) option[json_value] {
 func parse_number(json_parser_state* state) option[json_value] {
     let start = state.pos
     
-    // 可选负号
+    
     if state.pos < state.input.len() && state.input[state.pos] as char == '-' {
         state.pos = state.pos + 1
     }
     
-    // 整数部分
+    
     if state.pos >= state.input.len() {
         return option::none[json_value]()
     }
@@ -170,7 +170,7 @@ func parse_number(json_parser_state* state) option[json_value] {
         state.pos = state.pos + 1
     }
     
-    // 小数部分 (可选)
+    
     if state.pos < state.input.len() && state.input[state.pos] as char == '.' {
         state.pos = state.pos + 1
         while state.pos < state.input.len() && is_digit(state.input[state.pos] as char) {
@@ -178,7 +178,7 @@ func parse_number(json_parser_state* state) option[json_value] {
         }
     }
     
-    // 指数部分 (可选)
+    
     if state.pos < state.input.len() {
         let c2 = state.input[state.pos] as char
         if c2 == 'e' || c2 == 'E' {
@@ -195,9 +195,9 @@ func parse_number(json_parser_state* state) option[json_value] {
         }
     }
     
-    // TODO: 字符串转 float
-    let num_str = state.input  // substring(start, state.pos)
-    let number = 0.0  // strtof(num_str)
+    
+    let num_str = state.input  
+    let number = 0.0  
     
     option::some(json_value {
         value_type: json_type::number_type,
@@ -220,7 +220,7 @@ func parse_string(json_parser_state* state) option[string] {
     while state.pos < state.input.len() {
         let c = state.input[state.pos] as char
         if c == '"' {
-            let result = state.input  // substring(start, state.pos)
+            let result = state.input  
             state.pos = state.pos + 1
             return option::some(result)
         }
@@ -244,7 +244,7 @@ func parse_array(json_parser_state* state) option[json_value] {
     
     let elements = vec[json_value]()
     
-    // 检查空数组
+    
     if state.pos < state.input.len() && state.input[state.pos] as char == ']' {
         state.pos = state.pos + 1
         return option::some(json_value {
@@ -257,15 +257,15 @@ func parse_array(json_parser_state* state) option[json_value] {
         })
     }
     
-    // 解析数组元素
+    
     loop {
-        // 递归解析值
-        // let value_opt = parse_value(state)
-        // 如果失败则返回错误
+        
+        
+        
         
         skip_whitespace(state)
         
-        // 检查逗号或右括号
+        
         if state.pos >= state.input.len() {
             break
         }
@@ -302,7 +302,7 @@ func parse_object(json_parser_state* state) option[json_value] {
     
     let members = vec[json_pair]()
     
-    // 检查空对象
+    
     if state.pos < state.input.len() && state.input[state.pos] as char == '}' {
         state.pos = state.pos + 1
         return option::some(json_value {
@@ -315,25 +315,25 @@ func parse_object(json_parser_state* state) option[json_value] {
         })
     }
     
-    // 解析键值对
+    
     loop {
         skip_whitespace(state)
         
-        // 解析 key (必须是字符串)
-        // let key_opt = parse_string(state)
+        
+        
         
         skip_whitespace(state)
         
-        // 期望冒号
-        // if state.input[state.pos] != ':' break
+        
+        
         state.pos = state.pos + 1
         
-        // 解析值
-        // let value_opt = parse_value(state)
+        
+        
         
         skip_whitespace(state)
         
-        // 检查逗号或右大括号
+        
         if state.pos >= state.input.len() {
             break
         }
@@ -359,9 +359,9 @@ func parse_object(json_parser_state* state) option[json_value] {
     })
 }
 
-// ============================================================================
-// 主解析函数
-// ============================================================================
+
+
+
 
 func parse_json(input: string) option[json_value] {
     let state = json_parser_state {
@@ -371,21 +371,21 @@ func parse_json(input: string) option[json_value] {
         column: 0,
     }
     
-    // TODO: 实现 parse_value 递归函数
-    // parse_value(state) 应该尝试:
-    // 1. parse_null()
-    // 2. parse_bool()
-    // 3. parse_number()
-    // 4. parse_string() (作为单独值)
-    // 5. parse_array()
-    // 6. parse_object()
+    
+    
+    
+    
+    
+    
+    
+    
     
     option::none[json_value]()
 }
 
-// ============================================================================
-// 使用示例 & 测试
-// ============================================================================
+
+
+
 
 func test_json_parser() {
     println("╔════════════════════════════════════════════════════════════════╗")
@@ -393,7 +393,7 @@ func test_json_parser() {
     println("╚════════════════════════════════════════════════════════════════╝")
     println("")
     
-    // 测试 1: Null
+    
     let test1 = "null"
     let result1 = parse_json(test1)
     println("Test 1 - Null: " + match result1 {
@@ -401,7 +401,7 @@ func test_json_parser() {
         option::none => "❌ FAIL",
     })
     
-    // 测试 2: Boolean
+    
     let test2 = "true"
     let result2 = parse_json(test2)
     println("Test 2 - Boolean: " + match result2 {
@@ -409,7 +409,7 @@ func test_json_parser() {
         option::none => "❌ FAIL",
     })
     
-    // 测试 3: Number
+    
     let test3 = "42.5"
     let result3 = parse_json(test3)
     println("Test 3 - Number: " + match result3 {
@@ -417,7 +417,7 @@ func test_json_parser() {
         option::none => "❌ FAIL",
     })
     
-    // 测试 4: Array
+    
     let test4 = "[1, 2, 3]"
     let result4 = parse_json(test4)
     println("Test 4 - Array: " + match result4 {
@@ -425,7 +425,7 @@ func test_json_parser() {
         option::none => "❌ FAIL",
     })
     
-    // 测试 5: Object (HF config.json 示例)
+    
     let test5 = "{\"hidden_size\": 896, \"num_hidden_layers\": 24}"
     let result5 = parse_json(test5)
     println("Test 5 - Object: " + match result5 {
