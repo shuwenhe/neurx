@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NeurX 模型推理 - Web UI</title>
+  <title>NeurX - AI推理引擎</title>
   <style>
     * {
       margin: 0;
@@ -11,156 +11,253 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --primary: #10a37f;
+      --primary-dark: #0d8659;
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #212121;
+      --bg-tertiary: #2a2a2a;
+      --text-primary: #ffffff;
+      --text-secondary: #b0b0b0;
+      --border-color: #404040;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: #000000;
-      min-height: 100vh;
-      padding: 20px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
+    .app-container {
+      display: flex;
+      height: 100%;
     }
 
-    .header {
-      text-align: center;
-      color: white;
-      margin-bottom: 40px;
-    }
-
-    .header h1 {
-      font-size: 2.5em;
-      margin-bottom: 10px;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    }
-
-    .header p {
-      font-size: 1.1em;
-      opacity: 0.95;
-    }
-
-    .main-content {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
-      margin-bottom: 30px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(10px);
-    }
-
-    .card h2 {
-      color: #333;
-      margin-bottom: 20px;
-      font-size: 1.5em;
-      border-bottom: 2px solid #667eea;
-      padding-bottom: 10px;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      color: #555;
-      font-weight: 500;
-      font-size: 0.95em;
-    }
-
-    input[type="text"],
-    textarea,
-    select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 0.95em;
-      font-family: inherit;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-
-    input[type="text"]:focus,
-    textarea:focus,
-    select:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
-    button {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      padding: 12px 30px;
-      border-radius: 6px;
-      font-size: 1em;
-      cursor: pointer;
-      font-weight: 600;
-      transition: transform 0.2s, box-shadow 0.2s;
-      width: 100%;
-    }
-
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-    }
-
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    button.secondary {
-      background: #e0e0e0;
-      color: #333;
-      margin-top: 10px;
-    }
-
-    button.secondary:hover {
-      background: #d0d0d0;
-    }
-
-    .response-area {
-      background: #f5f5f5;
-      border-radius: 6px;
-      padding: 20px;
-      min-height: 200px;
-      max-height: 400px;
+    /* 侧边栏 */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
       overflow-y: auto;
-      border: 1px solid #ddd;
-      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-      font-size: 0.9em;
-      line-height: 1.6;
-      white-space: pre-wrap;
-      word-break: break-word;
+      padding: 16px;
     }
 
-    .response-area.empty {
-      color: #999;
-    }
-
-    .message {
-      margin-bottom: 15px;
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       padding: 12px;
-      border-radius: 6px;
-      animation: slideIn 0.3s ease-out;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
     }
 
-    @keyframes slideIn {
+    .sidebar-header:hover {
+      background: var(--border-color);
+    }
+
+    .new-chat-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+
+    .new-chat-btn:hover {
+      background: var(--border-color);
+    }
+
+    .chat-history {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .chat-history::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .chat-history::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .chat-history::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    .chat-item {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 14px;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .chat-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .chat-item.active {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-color: var(--primary);
+    }
+
+    .sidebar-footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 16px;
+      padding-bottom: 0;
+    }
+
+    .sidebar-footer-item {
+      padding: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-footer-item:hover {
+      color: var(--text-primary);
+      background: var(--bg-tertiary);
+    }
+
+    /* 主聊天区域 */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-primary);
+    }
+
+    .chat-header {
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-header-title {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 4px 12px;
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+
+    .status-indicator.offline {
+      background: #ef4444;
+    }
+
+    .status-indicator.loading {
+      background: #f59e0b;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* 聊天消息区域 */
+    .messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .messages-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .messages-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .messages-container::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      opacity: 0.3;
+    }
+
+    .empty-state-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .empty-state-subtitle {
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    /* 消息样式 */
+    .message {
+      display: flex;
+      gap: 12px;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
       from {
         opacity: 0;
         transform: translateY(10px);
@@ -171,212 +268,411 @@
       }
     }
 
-    .message.user {
-      background: #e3f2fd;
-      color: #1565c0;
-      margin-left: 20px;
-      text-align: right;
-    }
-
-    .message.assistant {
-      background: #f3e5f5;
-      color: #6a1b9a;
-    }
-
-    .message.error {
-      background: #ffebee;
-      color: #c62828;
-    }
-
-    .message.success {
-      background: #e8f5e9;
-      color: #2e7d32;
-    }
-
-    .status {
+    .message-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      background: var(--bg-tertiary);
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 15px;
-      border-radius: 6px;
-      margin-bottom: 20px;
-      font-size: 0.95em;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
     }
 
-    .status.ok {
-      background: #e8f5e9;
-      color: #2e7d32;
-      border-left: 4px solid #4caf50;
+    .message.user {
+      justify-content: flex-end;
     }
 
-    .status.error {
-      background: #ffebee;
-      color: #c62828;
-      border-left: 4px solid #f44336;
+    .message.user .message-avatar {
+      background: var(--primary);
+      order: 2;
     }
 
-    .status.loading {
-      background: #e3f2fd;
-      color: #1565c0;
-      border-left: 4px solid #2196f3;
+    .message.user .message-content {
+      order: 1;
     }
 
-    .status-dot {
-      width: 10px;
-      height: 10px;
+    .message-content {
+      max-width: 70%;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 12px 16px;
+      line-height: 1.5;
+      font-size: 15px;
+      word-wrap: break-word;
+    }
+
+    .message.user .message-content {
+      background: var(--primary);
+      color: white;
+    }
+
+    .message.error .message-content {
+      background: #7f1d1d;
+      border-left: 3px solid #ef4444;
+      padding-left: 13px;
+    }
+
+    .message.loading .message-content {
+      background: transparent;
+      padding: 0;
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .typing-indicator span {
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      display: inline-block;
+      background: var(--text-secondary);
+      animation: bounce 1.4s infinite;
     }
 
-    .status.ok .status-dot {
-      background: #4caf50;
+    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
     }
 
-    .status.error .status-dot {
-      background: #f44336;
+    /* 输入区域 */
+    .input-area {
+      border-top: 1px solid var(--border-color);
+      padding: 24px 32px;
+      background: var(--bg-primary);
     }
 
-    .status.loading .status-dot {
-      background: #2196f3;
-      animation: pulse 1.5s ease-in-out infinite;
+    .input-wrapper {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+    .input-field-container {
+      flex: 1;
+      display: flex;
+      gap: 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 12px 16px;
+      transition: border-color 0.2s;
     }
 
-    .param-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
+    .input-field-container:focus-within {
+      border-color: var(--primary);
+    }
+
+    #messageInput {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 15px;
+      outline: none;
+      resize: none;
+      max-height: 100px;
+      font-family: inherit;
+    }
+
+    #messageInput::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .input-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .send-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: var(--primary);
+      border: none;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.2s;
+    }
+
+    .send-btn:hover:not(:disabled) {
+      background: var(--primary-dark);
+      transform: scale(1.05);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* 参数面板 */
+    .params-panel {
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 300px;
+      height: 100%;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border-color);
+      padding: 20px;
+      overflow-y: auto;
+      transform: translateX(100%);
+      transition: transform 0.3s;
+      z-index: 1000;
+    }
+
+    .params-panel.open {
+      transform: translateX(0);
+    }
+
+    .params-close {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+
+    .param-group {
       margin-bottom: 20px;
     }
 
-    .slider-group {
-      margin-bottom: 20px;
+    .param-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .param-value {
+      font-size: 13px;
+      color: var(--text-primary);
+      font-weight: 500;
+      margin-bottom: 8px;
     }
 
     input[type="range"] {
       width: 100%;
       height: 6px;
       border-radius: 3px;
-      background: #ddd;
+      background: var(--bg-tertiary);
       outline: none;
       -webkit-appearance: none;
+      cursor: pointer;
     }
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
-      background: #667eea;
+      background: var(--primary);
       cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 
     input[type="range"]::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
-      background: #667eea;
+      background: var(--primary);
       cursor: pointer;
       border: none;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 
-    .value-display {
-      text-align: right;
-      color: #667eea;
-      font-weight: 600;
+    select {
+      width: 100%;
+      padding: 8px;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-bottom: 12px;
     }
 
-    .footer {
-      text-align: center;
-      color: white;
-      margin-top: 40px;
-      opacity: 0.9;
-      font-size: 0.95em;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      border-bottom: 2px solid #ddd;
-    }
-
-    .tab {
-      padding: 10px 20px;
-      border: none;
-      background: none;
-      color: #666;
-      cursor: pointer;
-      font-weight: 600;
-      border-bottom: 2px solid transparent;
-      transition: all 0.3s;
-    }
-
-    .tab.active {
-      color: #667eea;
-      border-bottom-color: #667eea;
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
+    /* 响应式 */
     @media (max-width: 768px) {
-      .main-content {
-        grid-template-columns: 1fr;
+      .sidebar {
+        display: none;
       }
 
-      .header h1 {
-        font-size: 1.8em;
+      .message-content {
+        max-width: 90%;
       }
 
-      .param-grid {
-        grid-template-columns: 1fr;
+      .messages-container {
+        padding: 16px;
       }
-    }
 
-    .loading-spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(102, 126, 234, 0.3);
-      border-radius: 50%;
-      border-top-color: #667eea;
-      animation: spin 1s linear infinite;
-    }
+      .input-area {
+        padding: 16px;
+      }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+      .params-panel {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="app"></div>
-  <script type="module">
+  <div class="app-container">
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+      <button class="new-chat-btn" onclick="app.newChat()">
+        <span>➕</span>
+        <span>新对话</span>
+      </button>
+
+      <div class="chat-history" id="chatHistory"></div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-item" onclick="app.toggleParams()">
+          <span>⚙️</span>
+          <span>参数设置</span>
+        </div>
+        <div class="sidebar-footer-item" onclick="app.clearChat()">
+          <span>🗑️</span>
+          <span>清空聊天</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主聊天区域 -->
+    <div class="main-content">
+      <div class="chat-header">
+        <div class="chat-header-title">NeurX AI推理引擎</div>
+        <div class="header-info">
+          <div class="status-indicator" id="statusIndicator"></div>
+          <span id="statusText">检查连接...</span>
+        </div>
+      </div>
+
+      <div class="messages-container" id="messagesContainer">
+        <div class="empty-state">
+          <div class="empty-state-icon">🤖</div>
+          <div class="empty-state-title">NeurX AI助手</div>
+          <div class="empty-state-subtitle">高性能LLM推理引擎 · 实时对话</div>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <div class="input-wrapper">
+          <div class="input-field-container">
+            <input
+              type="text"
+              id="messageInput"
+              placeholder="输入消息或按 Shift + Enter 换行..."
+              onkeydown="if(event.key==='Enter' && !event.shiftKey) { event.preventDefault(); app.sendMessage(); }"
+            />
+            <div class="input-actions">
+              <button class="icon-btn" title="附件" onclick="alert('功能开发中')">📎</button>
+            </div>
+          </div>
+          <button class="send-btn" id="sendBtn" onclick="app.sendMessage()" title="发送">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 参数面板 -->
+    <div class="params-panel" id="paramsPanel">
+      <button class="params-close" onclick="app.toggleParams()">✕</button>
+
+      <div class="param-group">
+        <div class="param-label">模型</div>
+        <select id="modelSelect" onchange="app.state.model = this.value">
+          <option value="default">NeurX Default</option>
+          <option value="gpu">GPU加速</option>
+          <option value="cpu">CPU</option>
+        </select>
+      </div>
+
+      <div class="param-group">
+        <div class="param-label">温度 (Temperature)</div>
+        <div class="param-value" id="tempValue">0.7</div>
+        <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7"
+          oninput="document.getElementById('tempValue').textContent = this.value; app.state.temperature = parseFloat(this.value);"
+        />
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">控制回应的创意程度</div>
+      </div>
+
+      <div class="param-group">
+        <div class="param-label">最大长度 (Max Tokens)</div>
+        <div class="param-value" id="maxTokensValue">256</div>
+        <input type="range" id="maxTokens" min="50" max="2048" step="50" value="256"
+          oninput="document.getElementById('maxTokensValue').textContent = this.value; app.state.maxTokens = parseInt(this.value);"
+        />
+      </div>
+
+      <div class="param-group">
+        <div class="param-label">Top P</div>
+        <div class="param-value" id="topPValue">0.9</div>
+        <input type="range" id="topP" min="0" max="1" step="0.05" value="0.9"
+          oninput="document.getElementById('topPValue').textContent = this.value; app.state.topP = parseFloat(this.value);"
+        />
+      </div>
+
+      <div class="param-group">
+        <div class="param-label">Top K</div>
+        <div class="param-value" id="topKValue">40</div>
+        <input type="range" id="topK" min="0" max="100" step="5" value="40"
+          oninput="document.getElementById('topKValue').textContent = this.value; app.state.topK = parseInt(this.value);"
+        />
+      </div>
+    </div>
+  </div>
+
+  <script>
     const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8000' : '';
 
-    const app = {
+    window.app = {
       state: {
         messages: [],
-        userInput: '',
         isLoading: false,
         backendStatus: 'checking',
         temperature: 0.7,
-        maxTokens: 200,
+        maxTokens: 256,
         topP: 0.9,
         topK: 40,
-        currentTab: 'chat'
+        model: 'default'
+      },
+
+      async init() {
+        this.checkBackendStatus();
+        setInterval(() => this.checkBackendStatus(), 5000);
+        this.render();
+        document.getElementById('messageInput').focus();
       },
 
       async checkBackendStatus() {
@@ -386,23 +682,54 @@
             headers: { 'Content-Type': 'application/json' }
           });
           if (response.ok) {
-            const data = await response.json();
-            this.state.backendStatus = data.backend || 'ok';
-            return true;
+            this.state.backendStatus = 'online';
+          } else {
+            this.state.backendStatus = 'error';
           }
         } catch (e) {
           this.state.backendStatus = 'offline';
         }
-        return false;
+        this.updateStatus();
+      },
+
+      updateStatus() {
+        const indicator = document.getElementById('statusIndicator');
+        const text = document.getElementById('statusText');
+        const status = this.state.backendStatus;
+
+        indicator?.classList.remove('offline', 'loading');
+        if (status === 'online') {
+          text.textContent = '后端在线';
+        } else if (status === 'offline') {
+          indicator?.classList.add('offline');
+          text.textContent = '后端离线';
+        } else {
+          indicator?.classList.add('loading');
+          text.textContent = '检查连接...';
+        }
       },
 
       async sendMessage() {
-        if (!this.state.userInput.trim() || this.state.isLoading) return;
+        const input = document.getElementById('messageInput');
+        const message = input.value.trim();
 
-        const userMessage = this.state.userInput.trim();
-        this.state.userInput = '';
-        this.state.messages.push({ role: 'user', content: userMessage });
+        if (!message || this.state.isLoading) return;
+
+        input.value = '';
+        input.focus();
+
+        this.state.messages.push({
+          role: 'user',
+          content: message
+        });
+        this.render();
+
         this.state.isLoading = true;
+        this.state.messages.push({
+          role: 'assistant',
+          content: '...',
+          loading: true
+        });
         this.render();
 
         try {
@@ -410,8 +737,8 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              model: 'default',
-              messages: this.state.messages.filter(m => m.role !== 'error'),
+              model: this.state.model,
+              messages: this.state.messages.filter(m => m.role !== 'error' && !m.loading),
               max_tokens: this.state.maxTokens,
               temperature: this.state.temperature,
               top_p: this.state.topP,
@@ -421,163 +748,88 @@
 
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const data = await response.json();
-          const assistantMessage = data.choices[0]?.message?.content || 'No response';
-          this.state.messages.push({ role: 'assistant', content: assistantMessage });
+          const assistantMessage = data.choices?.[0]?.message?.content || '抱歉，未能获得回复';
+
+          this.state.messages[this.state.messages.length - 1] = {
+            role: 'assistant',
+            content: assistantMessage
+          };
         } catch (error) {
-          this.state.messages.push({
+          this.state.messages[this.state.messages.length - 1] = {
             role: 'error',
-            content: `Error: ${error.message || 'Failed to get response'}`
-          });
+            content: `❌ ${error.message || '发送失败，请检查后端连接'}`
+          };
         } finally {
           this.state.isLoading = false;
           this.render();
         }
       },
 
-      async tryClearChat() {
-        if (confirm('确定要清空聊天历史吗？')) {
+      newChat() {
+        if (confirm('要开始新对话吗？')) {
           this.state.messages = [];
-          this.state.userInput = '';
           this.render();
         }
       },
 
-      setTab(tab) {
-        this.state.currentTab = tab;
-        this.render();
+      clearChat() {
+        if (confirm('确定要清空所有聊天吗？')) {
+          this.state.messages = [];
+          this.render();
+        }
+      },
+
+      toggleParams() {
+        const panel = document.getElementById('paramsPanel');
+        panel?.classList.toggle('open');
       },
 
       render() {
-        document.body.innerHTML = `
-          <div class="container">
-            <div class="header">
-              <h1>🤖 NeurX 模型推理</h1>
-              <p>利用 AI 的力量进行智能对话</p>
+        const container = document.getElementById('messagesContainer');
+        if (!container) return;
+
+        if (this.state.messages.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🤖</div>
+              <div class="empty-state-title">NeurX AI助手</div>
+              <div class="empty-state-subtitle">高性能LLM推理引擎 · 实时对话</div>
             </div>
-
-            <div class="main-content">
-              <div class="card">
-                <h2>对话</h2>
-                <div class="status ${this.state.backendStatus === 'ok' || this.state.backendStatus === 'neurx-s-cpu' ? 'ok' : this.state.backendStatus === 'checking' ? 'loading' : 'error'}">
-                  <span class="status-dot"></span>
-                  <span>${
-                    this.state.backendStatus === 'checking' ? '检查后端...' :
-                    this.state.backendStatus === 'offline' ? '后端离线' :
-                    `后端在线 (${this.state.backendStatus})`
-                  }</span>
-                </div>
-
-                <div class="response-area ${this.state.messages.length === 0 ? 'empty' : ''}">
-                  ${this.state.messages.map(msg => `
-                    <div class="message ${msg.role}">
-                      ${msg.role === 'user' ? '👤 ' : msg.role === 'error' ? '❌ ' : '🤖 '}${msg.content}
+          `;
+        } else {
+          container.innerHTML = this.state.messages.map(msg => {
+            if (msg.loading) {
+              return `
+                <div class="message loading">
+                  <div class="message-avatar">🤖</div>
+                  <div class="message-content">
+                    <div class="typing-indicator">
+                      <span></span><span></span><span></span>
                     </div>
-                  `).join('') || '对话内容将显示在这里...'}
-                </div>
-
-                <div style="margin-top: 20px;">
-                  <div class="form-group">
-                    <textarea
-                      id="userInput"
-                      placeholder="输入您的问题或消息..."
-                      value="${this.state.userInput}"
-                      onkeypress="if(event.key==='Enter' && !event.shiftKey) { event.preventDefault(); app.sendMessage(); }"
-                      oninput="app.state.userInput = event.target.value; app.render();"
-                      ${this.state.isLoading ? 'disabled' : ''}
-                    ></textarea>
                   </div>
-                  <button
-                    onclick="app.sendMessage()"
-                    ${this.state.isLoading || !this.state.userInput.trim() ? 'disabled' : ''}
-                  >
-                    ${this.state.isLoading ? '<span class="loading-spinner"></span> 思考中...' : '📤 发送'}
-                  </button>
-                  <button class="secondary" onclick="app.tryClearChat()">🗑️ 清空聊天</button>
                 </div>
+              `;
+            }
+            return `
+              <div class="message ${msg.role}">
+                <div class="message-avatar">${msg.role === 'user' ? '👤' : msg.role === 'error' ? '❌' : '🤖'}</div>
+                <div class="message-content">${msg.content}</div>
               </div>
+            `;
+          }).join('');
 
-              <div class="card">
-                <h2>⚙️ 参数配置</h2>
+          container.scrollTop = container.scrollHeight;
+        }
 
-                <div class="slider-group">
-                  <label>温度 (Temperature): ${this.state.temperature.toFixed(2)}</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="2"
-                    step="0.1"
-                    value="${this.state.temperature}"
-                    oninput="app.state.temperature = parseFloat(event.target.value); app.render();"
-                  >
-                  <small style="color: #999;">越高越随机 (0.0-2.0)</small>
-                </div>
-
-                <div class="slider-group">
-                  <label>最大 Tokens: ${this.state.maxTokens}</label>
-                  <input
-                    type="range"
-                    min="10"
-                    max="2048"
-                    step="10"
-                    value="${this.state.maxTokens}"
-                    oninput="app.state.maxTokens = parseInt(event.target.value); app.render();"
-                  >
-                  <small style="color: #999;">生成内容的最大长度</small>
-                </div>
-
-                <div class="param-grid">
-                  <div class="slider-group" style="margin-bottom: 0;">
-                    <label>核采样 (Top P): ${this.state.topP.toFixed(2)}</label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.05"
-                      value="${this.state.topP}"
-                      oninput="app.state.topP = parseFloat(event.target.value); app.render();"
-                    >
-                  </div>
-
-                  <div class="slider-group" style="margin-bottom: 0;">
-                    <label>Top K: ${this.state.topK}</label>
-                    <input
-                      type="range"
-                      min="1"
-                      max="100"
-                      step="1"
-                      value="${this.state.topK}"
-                      oninput="app.state.topK = parseInt(event.target.value); app.render();"
-                    >
-                  </div>
-                </div>
-
-                <div style="margin-top: 30px;">
-                  <h3 style="color: #333; margin-bottom: 15px;">📊 模型信息</h3>
-                  <div style="background: #f5f5f5; padding: 15px; border-radius: 6px; font-size: 0.9em;">
-                    <p><strong>模型名称:</strong> Qwen2.5-0.5B-Instruct</p>
-                    <p><strong>模型大小:</strong> 0.5B 参数</p>
-                    <p><strong>推理方式:</strong> ${this.state.backendStatus}</p>
-                    <p><strong>API 地址:</strong> ${API_BASE || 'http://localhost:8000'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="footer">
-              <p>💡 提示: 在文本框中输入您的问题，按 Enter 或点击发送按钮即可提交。</p>
-              <p>🔗 API 地址: ${API_BASE || 'http://localhost:8000'} | 📚 详见文档: ONE_CLICK_DEPLOY.md</p>
-            </div>
-          </div>
-        `;
-
-        const textarea = document.getElementById('userInput');
-        if (textarea) textarea.focus();
+        const sendBtn = document.getElementById('sendBtn');
+        const input = document.getElementById('messageInput');
+        if (sendBtn) {
+          sendBtn.disabled = this.state.isLoading || !input?.value.trim();
+        }
       }
     };
 
-    app.checkBackendStatus().then(() => app.render());
-    setInterval(() => app.checkBackendStatus(), 5000);
-    window.app = app;
+    app.init();
   </script>
 </body>
 </html>
