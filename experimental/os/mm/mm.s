@@ -50,7 +50,7 @@ func mem_alloc(ms mem_state, int region_id, int size_bytes) (mem_state, mem_allo
     int align = 256
     int aligned = ((size_bytes + align - 1) / align) * align
     int i = 0
-    while i < len(ms.regions) {
+    for i < len(ms.regions) {
         if ms.regions[i].region_id == region_id {
             if ms.regions[i].used_bytes + aligned > ms.regions[i].total_bytes {
                 return (ms, mem_alloc_result{ok: false, err: "OOM"})
@@ -72,7 +72,7 @@ func mem_alloc(ms mem_state, int region_id, int size_bytes) (mem_state, mem_allo
 
 func mem_free(ms mem_state, int region_id, int size_bytes) mem_state {
     int i = 0
-    while i < len(ms.regions) {
+    for i < len(ms.regions) {
         if ms.regions[i].region_id == region_id {
             if ms.regions[i].used_bytes >= size_bytes {
                 ms.regions[i].used_bytes = ms.regions[i].used_bytes - size_bytes
@@ -87,7 +87,7 @@ func mem_pressure(ms mem_state) float {
     int total = 0
     int used  = 0
     int i = 0
-    while i < len(ms.regions) {
+    for i < len(ms.regions) {
         if ms.regions[i].domain == HOST_MEM {
             total = total + ms.regions[i].total_bytes
             used  = used  + ms.regions[i].used_bytes

@@ -35,11 +35,11 @@ func initialize_optimizer_state_s([][]float params, adamw_state_s state) adamw_s
     [][]float m = make([][]float, 0)
     [][]float v = make([][]float, 0)
     int i = 0
-    while i < len(params) {
+    for i < len(params) {
         []float m_i = make([]float, 0)
         []float v_i = make([]float, 0)
         int j = 0
-        while j < len(params[i]) {
+        for j < len(params[i]) {
             m_i = append(m_i, 0.0)
             v_i = append(v_i, 0.0)
             j = j + 1
@@ -63,7 +63,7 @@ func initialize_optimizer_state_s([][]float params, adamw_state_s state) adamw_s
 func compute_bias_correction_s(float beta, int step) float {
     float beta_t = 1.0
     int i = 0
-    while i < step {
+    for i < step {
         beta_t = beta_t * beta
         i = i + 1
     }
@@ -82,14 +82,14 @@ func adamw_step_s(
     float grad_norm = 0.0
     float param_norm = 0.0
     int i = 0
-    while i < len(params) {
+    for i < len(params) {
         []float param_i = params[i]
         []float grad_i = gradients[i]
         []float m_i = state.first_moment[i]
         []float v_i = state.second_moment[i]
         []float updated_param = make([]float, 0)
         int j = 0
-        while j < len(param_i) {
+        for j < len(param_i) {
             float param = param_i[j]
             float grad = grad_i[j]
             float m = m_i[j]
@@ -125,9 +125,9 @@ func adamw_step_s(
 func clip_grad_norm_s([][]float gradients, float max_norm) [][]float {
     float grad_norm = 0.0
     int i = 0
-    while i < len(gradients) {
+    for i < len(gradients) {
         int j = 0
-        while j < len(gradients[i]) {
+        for j < len(gradients[i]) {
             float g = gradients[i][j]
             grad_norm = grad_norm + g * g
             j = j + 1
@@ -143,11 +143,11 @@ func clip_grad_norm_s([][]float gradients, float max_norm) [][]float {
     }
     [][]float clipped = make([][]float, 0)
     i = 0
-    while i < len(gradients) {
+    for i < len(gradients) {
         []float grad_i = gradients[i]
         []float clipped_grad = make([]float, 0)
         int j = 0
-        while j < len(grad_i) {
+        for j < len(grad_i) {
             clipped_grad = append(clipped_grad, grad_i[j] * clip_coef)
             j = j + 1
         }

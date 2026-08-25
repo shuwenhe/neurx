@@ -31,7 +31,7 @@ func test_softmax_simple() int {
     float[] probs = compute_softmax(scores)
     float sum = 0.0
     int i = 0
-    while i < len(probs) {
+    for i < len(probs) {
         sum = sum + probs[i]
         i = i + 1
     }
@@ -75,9 +75,9 @@ func test_paged_kv_write_and_attention() int {
     float[] keys = make([]float, seq_len * kv_stride)
     float[] values = make([]float, seq_len * kv_stride)
     int t = 0
-    while t < seq_len {
+    for t < seq_len {
         int d = 0
-        while d < kv_stride {
+        for d < kv_stride {
             keys[t * kv_stride + d] = float(t + 1) * 0.1
             values[t * kv_stride + d] = float(t + 1) * 0.2
             d = d + 1
@@ -91,7 +91,7 @@ func test_paged_kv_write_and_attention() int {
     int q_stride = num_heads * head_size
     float[] queries = make([]float, seq_len * q_stride)
     int qi = 0
-    while qi < seq_len * q_stride {
+    for qi < seq_len * q_stride {
         queries[qi] = 0.1
         qi = qi + 1
     }

@@ -113,7 +113,7 @@ func run_posttrain_steps(posttrain_pipeline_state state, int steps) posttrain_pi
     }
     posttrain_pipeline_state current = state
     int i = 0
-    while i < total {
+    for i < total {
         current = posttrain_step_from_inputs(
             current,
             current.metrics.reward,

@@ -215,7 +215,7 @@ func cpu_count() string {
 func one_line(string text) string {
     int i = 0
     string out = ""
-    while i < len(text) {
+    for i < len(text) {
         if text[i] == 10 || text[i] == 13 {
             return out
         }
@@ -232,7 +232,7 @@ func parse_int(string s, int fallback) int {
     }
     int value = 0
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         int digit = text[i] - 48
         if digit < 0 || digit > 9 {
             return fallback
@@ -249,10 +249,10 @@ func int_to_str(int n) string {
     }
     int value = n
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int quotient = 0
         int digit = value
-        while digit >= 10 {
+        for digit >= 10 {
             digit = digit - 10
             quotient = quotient + 1
         }
@@ -265,7 +265,7 @@ func int_to_str(int n) string {
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         if s[i] == 39 {
             out = out + "'\"'\"'"
         } else {

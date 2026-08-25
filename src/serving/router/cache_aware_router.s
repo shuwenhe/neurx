@@ -45,7 +45,7 @@ struct cache_route_result {
 func cache_router_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -66,7 +66,7 @@ func new_cache_aware_router(cache_aware_router_config config) cache_aware_router
 
 func cache_router_find_worker(cache_aware_router_state state, int worker_id) int {
     int i = 0
-    while i < state.worker_count {
+    for i < state.worker_count {
         if state.worker_ids[i] == worker_id { return i }
         i = i + 1
     }
@@ -104,7 +104,7 @@ func cache_router_worker_matches(cache_aware_router_state state, int index, int 
 func cache_router_upsert_affinity(cache_aware_router_state state, int pool_id, int model_id, int prefix_hash, int prefix_tokens, int worker_id) cache_aware_router_state {
     state.logical_clock = state.logical_clock + 1
     int i = 0
-    while i < state.affinity_count {
+    for i < state.affinity_count {
         if state.affinity_pool_ids[i] == pool_id && state.affinity_model_ids[i] == model_id && state.affinity_prefix_hashes[i] == prefix_hash {
             state.affinity_prefix_tokens[i] = prefix_tokens
             state.affinity_worker_ids[i] = worker_id
@@ -117,7 +117,7 @@ func cache_router_upsert_affinity(cache_aware_router_state state, int pool_id, i
     if slot >= state.config.max_affinity_entries {
         slot = 0
         i = 1
-        while i < state.affinity_count {
+        for i < state.affinity_count {
             if state.affinity_last_access[i] < state.affinity_last_access[slot] { slot = i }
             i = i + 1
         }
@@ -139,7 +139,7 @@ func cache_router_route(cache_aware_router_state state, int pool_id, int model_i
     int max_load = 0
     int eligible = 0
     int i = 0
-    while i < state.worker_count {
+    for i < state.worker_count {
         if cache_router_worker_matches(state, i, pool_id, model_id) {
             eligible = eligible + 1
             if state.worker_loads[i] < min_load { min_load = state.worker_loads[i]; selected = i }
@@ -153,7 +153,7 @@ func cache_router_route(cache_aware_router_state state, int pool_id, int model_i
     int strategy = cache_route_load()
     if !imbalanced && prefix_hash != 0 && prompt_tokens > 0 {
         i = 0
-        while i < state.affinity_count {
+        for i < state.affinity_count {
             int worker_index = cache_router_find_worker(state, state.affinity_worker_ids[i])
             if state.affinity_pool_ids[i] == pool_id && state.affinity_model_ids[i] == model_id && state.affinity_prefix_hashes[i] == prefix_hash && cache_router_worker_matches(state, worker_index, pool_id, model_id) && state.affinity_prefix_tokens[i] * 1000 > prompt_tokens * state.config.cache_threshold_per_mille {
                 selected = worker_index

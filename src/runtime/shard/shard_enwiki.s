@@ -164,14 +164,14 @@ func generate_enwiki_manifest(enwiki_shard_config config, int shard_count) bool 
 func atoi(string s) int {
     result := 0
     i := 0
-    while i < len(s) && (string_char(s[i]) == " " || s[i] == 9) {
+    for i < len(s) && (string_char(s[i]) == " " || s[i] == 9) {
         i = i + 1
     }
     negative := i < len(s) && string_char(s[i]) == "-"
     if negative || (i < len(s) && string_char(s[i]) == "+") {
         i = i + 1
     }
-    while i < len(s) && s[i] >= 48 && s[i] <= 57 {
+    for i < len(s) && s[i] >= 48 && s[i] <= 57 {
         result = result * 10 + (s[i] - 48)
         i = i + 1
     }
@@ -188,10 +188,10 @@ func itoa(int n) string {
     negative := n < 0
     n := if negative { -n } else { n }
     result := ""
-    while n > 0 {
+    for n > 0 {
         digit := n
         quotient := 0
-        while digit >= 10 {
+        for digit >= 10 {
             digit = digit - 10
             quotient = quotient + 1
         }

@@ -95,7 +95,7 @@ func main() {
     IO.TrainState state = IO.initial_train_state()
     string output_dir = "artifact/checkpoints"
     int step = 0
-    while step < cfg.max_steps {
+    for step < cfg.max_steps {
         []int input_ids = get_batch(train_data, step, cfg.batch_size * cfg.seq_len)
         []int target_ids = get_batch(train_data, step + 1, cfg.batch_size * cfg.seq_len)
         AG.AGTensor logits = NN.forward(model, input_ids, cfg.batch_size, cfg.seq_len)
@@ -175,7 +175,7 @@ func generate_data(int n_tokens, int vocab_size) []int {
     int pattern_len = 8
     int seed = 42
     int i = 0
-    while i < n_tokens {
+    for i < n_tokens {
         if mod(i, pattern_len * 3) < pattern_len {
             data[i] = pattern[mod(i, pattern_len)]
         } else {
@@ -191,7 +191,7 @@ func get_batch([]int data, int offset, int count) []int {
     []int batch = new int[count]
     int actual_offset = o(offset - (offset / (len(data) - count)) * (len(data) - count))
     int i = 0
-    while i < count {
+    for i < count {
         batch[i] = data[actual_offset + i]
         i = i + 1
     }
@@ -201,7 +201,7 @@ func get_batch([]int data, int offset, int count) []int {
 func make_targets([]int token_ids, int batch_size) []int {
     []int targets = new int[batch_size]
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         targets[i] = token_ids[i]
         if targets[i] > 255 { targets[i] = t(targets[i] - (targets[i] / 256) * 256) }
         i = i + 1
@@ -231,7 +231,7 @@ func int_to_str(int n) string {
     bool neg = n < 0
     if neg { n = -n }
     string s = ""
-    while n > 0 {
+    for n > 0 {
         s = string((n * (n - (n / 10) * 10)) + 48) + s
         n = n / 10
     }
@@ -245,7 +245,7 @@ func format_int(int n) string {
     if neg { n = -n }
     string s = ""
     int count = 0
-    while n > 0 {
+    for n > 0 {
         int digit = n - (n / 10) * 10
         s = string(digit + 48) + s
         n = n / 10
@@ -260,12 +260,12 @@ func format_int(int n) string {
 
 func pad_float(float val, int w, int d) string {
     string s = M.fmt_float(val, d)
-    while len(s) < w { s = " " + s }
+    for len(s) < w { s = " " + s }
     s
 }
 
 func pad_int(int n, int w) string {
     string s = int_to_str(n)
-    while len(s) < w { s = " " + s }
+    for len(s) < w { s = " " + s }
     s
 }

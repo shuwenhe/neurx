@@ -99,7 +99,7 @@ func inference_enhanced_batch(
     if updated_sys.config.enable_speculative_decode {
         batch_input_ids := [][]int{}
         i := 0
-        while i < prompts.len {
+        for i < prompts.len {
             tokens := tokenize_prompt(prompts[i])
             batch_input_ids = append(batch_input_ids, tokens)
             i = i + 1
@@ -111,7 +111,7 @@ func inference_enhanced_batch(
         )
         updated_sys.speculative_sys = updated_speculative_sys
         i = 0
-        while i < batch_output_ids.len {
+        for i < batch_output_ids.len {
             output_text := decode_tokens(batch_output_ids[i])
             outputs = append(outputs, output_text)
             i = i + 1
@@ -188,7 +188,7 @@ func disable_speculative_mode(inference_system_enhanced sys) inference_system_en
 func tokenize_prompt(string prompt) []int {
     tokens := []int{}
     i := 0
-    while i < prompt.len {
+    for i < prompt.len {
         tokens = append(tokens, i)
         i = i + 1
     }
@@ -198,7 +198,7 @@ func tokenize_prompt(string prompt) []int {
 func decode_tokens([]int tokens) string {
     result := ""
     i := 0
-    while i < tokens.len {
+    for i < tokens.len {
         result = result + "token_" + int_to_str(tokens[i]) + " "
         i = i + 1
     }
@@ -218,7 +218,7 @@ func int_to_str(int n) string {
         n = -n
     }
     s := ""
-    while n > 0 {
+    for n > 0 {
         s = string((n % 10) + 48) + s
         n = n / 10
     }

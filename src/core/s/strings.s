@@ -3,7 +3,7 @@ package neurx.strings
 func copy_strings([]string values) []string {
     []string out = []string{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }
@@ -16,7 +16,7 @@ func strings_eq(string a, string b) bool {
     }
     bool eq = true
     int i = 0
-    while i < len(a) {
+    for i < len(a) {
         if a[i] != b[i] {
             eq = false
         }
@@ -46,7 +46,7 @@ func substring(string s, int start, int end) string {
     int n = end - start
     string out = ""
     int i = 0
-    while i < n {
+    for i < n {
         out = out + string(s[start + i])
         i = i + 1
     }
@@ -59,12 +59,12 @@ func concat2(string a, string b) string {
     int total = n1 + n2
     string out = ""
     int i = 0
-    while i < n1 {
+    for i < n1 {
         out = out + string(a[i])
         i = i + 1
     }
     i = 0
-    while i < n2 {
+    for i < n2 {
         out = out + string(b[i])
         i = i + 1
     }

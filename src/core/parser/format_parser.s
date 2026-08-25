@@ -100,7 +100,7 @@ func is_valid_json_structure(string text) bool {
         i := 0
         in_string := false
 
-        while i < len(trimmed) {
+        for i < len(trimmed) {
             ch := trimmed[i]
 
             if ch == '"' && (i == 0 || trimmed[i - 1] != '\\') {
@@ -190,7 +190,7 @@ func is_yaml_like(string text) bool {
     yaml_count := 0
     i := 0
 
-    while i < len(lines) && i < 10 {
+    for i < len(lines) && i < 10 {
         line := trim_string(lines[i])
 
         if len(line) > 0 && line[0] != '#' {
@@ -241,7 +241,7 @@ func has_html_tags(string text) bool {
     html_tags := []string{"<html", "<div", "<span", "<p>", "<h1", "<h2", "<table", "<body"}
     i := 0
 
-    while i < len(html_tags) {
+    for i < len(html_tags) {
         if find_substring(to_lowercase(text), html_tags[i], 0) >= 0 {
             return true
         }
@@ -349,7 +349,7 @@ func extract_tag_name(string xml) string {
     i := 1
     tag_name := ""
 
-    while i < len(xml) && xml[i] != '>' && xml[i] != ' ' && xml[i] != '\t' {
+    for i < len(xml) && xml[i] != '>' && xml[i] != ' ' && xml[i] != '\t' {
         tag_name = tag_name + string(xml[i])
         i = i + 1
     }
@@ -369,7 +369,7 @@ func extract_string_value(string quoted) string {
     result := ""
     i := 1
 
-    while i < len(quoted) && quoted[i] != '"' {
+    for i < len(quoted) && quoted[i] != '"' {
         if quoted[i] == '\\' && i + 1 < len(quoted) {
             next_char := quoted[i + 1]
             if next_char == '"' {

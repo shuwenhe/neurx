@@ -169,7 +169,7 @@ func compute_topological_order(computation_graph g) computation_graph {
     }
     []int order = []
     int count = 0
-    while len(queue) > 0 {
+    for len(queue) > 0 {
         int u = queue.pop_front()
         order.push(u)
         count = count + 1

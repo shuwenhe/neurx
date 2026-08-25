@@ -132,7 +132,7 @@ func extract_reasoning_steps(string solution) []string {
     []string steps = []string{}
     []string lines = split(solution, "\n")
     int i = 0
-    while i < lines.len {
+    for i < lines.len {
         string line = trim_whitespace(lines[i])
         if len(line) > 10 {
             steps[steps.len] = line
@@ -151,7 +151,7 @@ func evaluate_reasoning_steps(
     }
     int valid_steps = 0
     int i = 0
-    while i < steps.len {
+    for i < steps.len {
         bool has_math = contains(steps[i], "=") ||
                        contains(steps[i], "+") ||
                        contains(steps[i], "-") ||
@@ -181,7 +181,7 @@ func compute_output_similarity(string output, string expected) float {
     int matches = 0
     int total = expected.len
     int i = 0
-    while i < expected.len && i < output.len {
+    for i < expected.len && i < output.len {
         if expected[i] == output[i] {
             matches = matches + 1
         }

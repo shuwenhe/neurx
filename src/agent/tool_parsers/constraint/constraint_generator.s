@@ -140,7 +140,7 @@ func get_number_constraint(string current_output, *json_schema schema, *schema_t
 
 func add_digit_tokens(*[]int tokens) {
     i := 48
-    while i <= 57 {
+    for i <= 57 {
         tokens.append(i)
         i = i + 1
     }
@@ -149,13 +149,13 @@ func add_digit_tokens(*[]int tokens) {
 func add_letter_tokens(*[]int tokens) {
 
     i := 97
-    while i <= 122 {
+    for i <= 122 {
         tokens.append(i)
         i = i + 1
     }
 
     i = 65
-    while i <= 90 {
+    for i <= 90 {
         tokens.append(i)
         i = i + 1
     }
@@ -178,7 +178,7 @@ func ends_with(string s, string suffix) bool {
     }
     start := len(s) - len(suffix)
     i := 0
-    while i < len(suffix) {
+    for i < len(suffix) {
         if s[start + i] != suffix[i] {
             return false
         }
@@ -189,7 +189,7 @@ func ends_with(string s, string suffix) bool {
 
 func contains_char(string s, int c) bool {
     i := 0
-    while i < len(s) {
+    for i < len(s) {
         if int(s[i]) == c {
             return true
         }
@@ -201,7 +201,7 @@ func contains_char(string s, int c) bool {
 func count_unclosed_braces(string s) int {
     count := 0
     i := 0
-    while i < len(s) {
+    for i < len(s) {
         if s[i] == '{' || s[i] == '[' {
             count = count + 1
         } else if s[i] == '}' || s[i] == ']' {
@@ -218,7 +218,7 @@ func is_valid_number(string s) bool {
     }
     has_dot := false
     i := 0
-    while i < len(s) {
+    for i < len(s) {
         if s[i] == '.' {
             if has_dot {
                 return false
@@ -244,7 +244,7 @@ func update_parse_context(string output, *schema_types.parse_context context) {
 
     i := 0
     in_string := false
-    while i < len(output) {
+    for i < len(output) {
         if output[i] == '"' && (i == 0 || output[i - 1] != '\\') {
             in_string = !in_string
         }
@@ -258,7 +258,7 @@ func apply_constraint_to_logits([]float logits, *token_constraint constraint) []
     result := logits
 
     i := 0
-    while i < len(result) {
+    for i < len(result) {
         is_allowed := is_token_allowed(i, &constraint.allowed_tokens)
         if is_allowed == false {
             result[i] = -1000000.0
@@ -271,7 +271,7 @@ func apply_constraint_to_logits([]float logits, *token_constraint constraint) []
 
 func is_token_allowed(int token_id, *[]int allowed_tokens) bool {
     i := 0
-    while i < len(*allowed_tokens) {
+    for i < len(*allowed_tokens) {
         if (*allowed_tokens)[i] == token_id {
             return true
         }

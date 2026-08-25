@@ -162,14 +162,14 @@ func compute_group_advantages(
     int G = len(outputs)
     float sum_rewards = 0.0
     int i = 0
-    while i < G {
+    for i < G {
         sum_rewards = sum_rewards + outputs[i].total_reward
         i = i + 1
     }
     float mean_reward = sum_rewards / float_of_int(G)
     float sum_sq = 0.0
     i = 0
-    while i < G {
+    for i < G {
         float diff = outputs[i].total_reward - mean_reward
         sum_sq = sum_sq + diff * diff
         i = i + 1
@@ -181,7 +181,7 @@ func compute_group_advantages(
     }
     []float advantages = []float{}
     i = 0
-    while i < G {
+    for i < G {
         float adv = (outputs[i].total_reward - mean_reward) / std_reward
         append_float(ref advantages, adv)
         i = i + 1
@@ -212,7 +212,7 @@ func compute_grpo_loss(
     float total_kl = 0.0
     int clipped = 0
     int i = 0
-    while i < G {
+    for i < G {
         float log_ratio = new_log_probs_sum - old_log_probs_sum
         float ratio = exp_approx_grpo(log_ratio)
         float advantage = advantages[i]
@@ -302,7 +302,7 @@ func grpo_training_step(
     )
     float avg_adv_mag = 0.0
     int i = 0
-    while i < len(advantages) {
+    for i < len(advantages) {
         float adv_abs = advantages[i]
         if adv_abs < 0.0 { adv_abs = 0.0 - adv_abs }
         avg_adv_mag = avg_adv_mag + adv_abs
@@ -335,7 +335,7 @@ func start_grpo_training(
         print_grpo_config(cfg)
     }
     int step = 0
-    while step < cfg.total_training_steps {
+    for step < cfg.total_training_steps {
         trainer.current_learning_rate = compute_grpo_learning_rate(
             trainer,
             step,
@@ -433,7 +433,7 @@ func sqrt_approx(float x) float {
     if x == 0.0 { return 0.0 }
     float guess = x / 2.0
     int i = 0
-    while i < 10 {
+    for i < 10 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }
@@ -446,7 +446,7 @@ func exp_approx_grpo(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 20 {
+    for i <= 20 {
         term = term * x / float_of_int(i)
         result = result + term
         i = i + 1

@@ -95,7 +95,7 @@ func (batch_reward_manager* manager) process_batch() {
 }
 
 func (batch_reward_manager* manager) flush() {
-    while manager.request_queue.len() > 0 {
+    for manager.request_queue.len() > 0 {
         manager.process_batch()
     }
 }

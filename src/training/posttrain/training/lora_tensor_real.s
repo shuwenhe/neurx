@@ -34,7 +34,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / float(i)
         result = result + term
         i = i + 1
@@ -50,7 +50,7 @@ func log_approx(float x) float {
     float result = 0.0
     float term = y
     int i = 0
-    while i < 10 {
+    for i < 10 {
         result = result + term / float(2 * i + 1)
         term = term * y2
         i = i + 1
@@ -135,7 +135,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -158,7 +158,7 @@ func float_to_str(float value, int decimals) string {
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -166,10 +166,10 @@ func float_to_str(float value, int decimals) string {
     if negative { out = "-" }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }
@@ -241,12 +241,12 @@ func main() {
     int total_steps = 0
     float current_loss = 0.0
     int epoch = 0
-    while epoch < epochs {
+    for epoch < epochs {
         println("====================================================")
         println("[Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + "]")
         println("====================================================")
         int step = 0
-        while step < steps_per_epoch {
+        for step < steps_per_epoch {
             total_steps = total_steps + 1
             float input0 = 1.0
             float input1 = 1.0

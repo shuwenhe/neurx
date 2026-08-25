@@ -15,7 +15,7 @@ struct text_corpus_state {
 func copy_ints([]int values) []int {
     []int out = []int{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }
@@ -24,7 +24,7 @@ func copy_ints([]int values) []int {
 
 func has_string([]string values, string target) bool {
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if strings_eq(string_at(values, i), target) {
             return true
         }
@@ -38,7 +38,7 @@ func count_lines(string text) int {
     int lines = 0
     int i = 0
     bool has_content = false
-    while i < n {
+    for i < n {
         string ch = substring(text, i, i + 1)
         if strings_eq(ch, "\n") {
             lines = lines + 1
@@ -64,7 +64,7 @@ func split_lines(string text) []string {
     string current = ""
     int i = 0
     int line_idx = 0
-    while i < n {
+    for i < n {
         string ch = substring(text, i, i + 1)
         if strings_eq(ch, "\n") {
             string cleaned = trim(current)
@@ -92,7 +92,7 @@ func split_lines(string text) []string {
     }
     []string out = []string{cap: line_idx}
     int j = 0
-    while j < line_idx {
+    for j < line_idx {
         string_set(out, j, string_at(lines, j))
         j = j + 1
     }
@@ -104,7 +104,7 @@ func build_vocab(string text) []string {
     []string vocab = []string{cap: n}
     int i = 0
     int vocab_len = 0
-    while i < n {
+    for i < n {
         string ch = substring(text, i, i + 1)
         if !strings_eq(ch, "\r") && !has_string(vocab, ch) {
             vocab[vocab_len] = ch
@@ -117,7 +117,7 @@ func build_vocab(string text) []string {
 
 func vocab_index([]string vocab, string ch) int {
     int i = 0
-    while i < len(vocab) {
+    for i < len(vocab) {
         if strings_eq(string_at(vocab, i), ch) {
             return i
         }
@@ -131,7 +131,7 @@ func encode_text(string text, []string vocab) []int {
     []int token_ids = []int{cap: n}
     int i = 0
     int token_idx = 0
-    while i < n {
+    for i < n {
         string ch = substring(text, i, i + 1)
         if !strings_eq(ch, "\r") {
             int idx = vocab_index(vocab, ch)

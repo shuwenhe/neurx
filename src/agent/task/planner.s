@@ -65,7 +65,7 @@ func agent_plan_enqueue_task(agent_plan_state state, string task) agent_plan_sta
     int size = len(state.task_queue)
     []string queue = []string{cap: size + 1}
     int i = 0
-    while i < size {
+    for i < size {
         queue[i] = state.task_queue[i]
         i = i + 1
     }
@@ -90,11 +90,11 @@ func agent_plan_enqueue_tasks(agent_plan_state state, []string tasks) agent_plan
     int add_size = len(tasks)
     []string queue = []string{cap: old_size + add_size}
     int i = 0
-    while i < old_size {
+    for i < old_size {
         queue[i] = state.task_queue[i]
         i = i + 1
     }
-    while i < old_size + add_size {
+    for i < old_size + add_size {
         queue[i] = tasks[i - old_size]
         i = i + 1
     }
@@ -121,7 +121,7 @@ func agent_plan_dequeue_to_current(agent_plan_state state) agent_plan_state {
     int rest_size = len(state.task_queue) - 1
     []string rest = []string{cap: rest_size}
     int ri = 0
-    while ri < rest_size {
+    for ri < rest_size {
         rest[ri] = state.task_queue[ri + 1]
         ri = ri + 1
     }
@@ -226,7 +226,7 @@ func agent_plan_next(agent_plan_state state, agent_tool_registry_state tools, ag
             int q_size = len(next_queue) - 1
             []string trimmed = []string{cap: q_size}
             int qi = 0
-            while qi < q_size {
+            for qi < q_size {
                 trimmed[qi] = next_queue[qi + 1]
                 qi = qi + 1
             }

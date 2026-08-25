@@ -6,7 +6,7 @@ func exp_taylor_s(float x) float {
     float term = 1.0
     int i = 1
     int max_terms = 10
-    while i <= max_terms {
+    for i <= max_terms {
         term = term * x / float_from_int_math(i)
         result = result + term
         float abs_term = term
@@ -40,11 +40,11 @@ func ln_series_s(float x) float {
     float result = 0.0
     float original_x = x
     int exponent = 0
-    while x >= 2.0 {
+    for x >= 2.0 {
         x = x / 2.0
         exponent = exponent + 1
     }
-    while x < 1.0 {
+    for x < 1.0 {
         x = x * 2.0
         exponent = exponent - 1
     }
@@ -52,7 +52,7 @@ func ln_series_s(float x) float {
     float ln_x = 0.0
     float term = z
     int i = 1
-    while i <= 15 {
+    for i <= 15 {
         if i % 2 == 1 {
             ln_x = ln_x + term / float_from_int_math(i)
         } else {
@@ -86,7 +86,7 @@ func sqrt_s(float x) float {
     float guess = x / 2.0
     if guess < 0.5 { guess = 0.5 }
     int iterations = 0
-    while iterations < 20 {
+    for iterations < 20 {
         float next_guess = (guess + x / guess) / 2.0
         float diff = next_guess - guess
         if diff < 0.0 { diff = 0.0 - diff }
@@ -114,16 +114,16 @@ func rsqrt_s(float x) float {
 func sin_s(float x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
-    while x > pi {
+    for x > pi {
         x = x - two_pi
     }
-    while x < -pi {
+    for x < -pi {
         x = x + two_pi
     }
     float result = 0.0
     float term = x
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         result = result + term
         term = term * x * x / float_from_int_math(2 * i) / float_from_int_math(2 * i + 1)
         term = 0.0 - term
@@ -140,16 +140,16 @@ func sin_s(float x) float {
 func cos_s(float x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
-    while x > pi {
+    for x > pi {
         x = x - two_pi
     }
-    while x < -pi {
+    for x < -pi {
         x = x + two_pi
     }
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x * x / float_from_int_math(2 * i - 1) / float_from_int_math(2 * i)
         term = 0.0 - term
         result = result + term
@@ -205,7 +205,7 @@ func pow_int_s(float x, int n) float {
     if n < 0 { return 1.0 / pow_int_s(x, 0 - n) }
     float result = 1.0
     int i = 0
-    while i < n {
+    for i < n {
         result = result * x
         i = i + 1
     }
@@ -239,7 +239,7 @@ func float_from_int_math(int n) float {
     bool neg = false
     if n < 0 { neg = true; n = 0 - n }
     int i = 0
-    while i < n {
+    for i < n {
         result = result + 1.0
         i = i + 1
     }
@@ -273,7 +273,7 @@ func float_to_str_math(float x) string {
 
 func int_from_float_math(float x) int {
     int result = 0
-    while float_from_int_math(result + 1) <= x {
+    for float_from_int_math(result + 1) <= x {
         result = result + 1
     }
     result
@@ -284,7 +284,7 @@ func int_to_str_math(int n) string {
     string result = ""
     int orig = n
     if n < 0 { n = 0 - n }
-    while n > 0 {
+    for n > 0 {
         int digit = n - (n / 10) * 10
         if digit == 0 { result = "0" + result }
         else if digit == 1 { result = "1" + result }

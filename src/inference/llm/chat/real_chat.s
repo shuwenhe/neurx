@@ -66,7 +66,7 @@ func main() {
     print("    Convert token IDs back to text\n\n")
     print("Type 'exit' or 'quit' to stop\n\n")
     print("════════════════════════════════════════════════════════════════\n\n")
-    while true {
+    for true {
         print("You: ")
         string user_input = read_user_line()
         print(user_input + "\n")

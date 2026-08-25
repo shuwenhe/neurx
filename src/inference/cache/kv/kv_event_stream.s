@@ -54,7 +54,7 @@ struct kv_event_poll_result {
 func kv_event_zero_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -85,7 +85,7 @@ func init_kv_event_stream(kv_event_stream_config config) kv_event_stream_state {
 func kv_event_worker_marker(int worker_id) int {
     int marker = 1
     int i = 0
-    while i < worker_id { marker = marker * 2; i = i + 1 }
+    for i < worker_id { marker = marker * 2; i = i + 1 }
     marker
 }
 
@@ -96,7 +96,7 @@ func kv_event_marker_present(int mask, int marker) bool {
 
 func kv_event_worker_mask_complete(int mask, int worker_count) bool {
     int worker = 0
-    while worker < worker_count {
+    for worker < worker_count {
         if !kv_event_marker_present(mask, kv_event_worker_marker(worker)) { return false }
         worker = worker + 1
     }
@@ -105,7 +105,7 @@ func kv_event_worker_mask_complete(int mask, int worker_count) bool {
 
 func kv_event_shift_left(kv_event_stream_state state) kv_event_stream_state {
     int i = 1
-    while i < state.event_count {
+    for i < state.event_count {
         state.sequences[i - 1] = state.sequences[i]
         state.event_types[i - 1] = state.event_types[i]
         state.block_hashes[i - 1] = state.block_hashes[i]
@@ -126,7 +126,7 @@ func publish_kv_event(kv_event_stream_state state, int event_type, int block_has
         return kv_event_publish_result {state: current, sequence: 0, published: false}
     }
     int i = 0
-    while i < current.event_count {
+    for i < current.event_count {
         if current.event_types[i] == event_type && current.block_hashes[i] == block_hash && current.mediums[i] == medium && current.group_indices[i] == group_index {
             int marker = kv_event_worker_marker(worker_id)
             if !kv_event_marker_present(current.worker_masks[i], marker) { current.worker_masks[i] = current.worker_masks[i] + marker }
@@ -158,7 +158,7 @@ func poll_kv_events(kv_event_stream_state state, int after_sequence, bool common
     int count = 0
     int high_watermark = after_sequence
     int i = 0
-    while i < state.event_count {
+    for i < state.event_count {
         bool common = kv_event_worker_mask_complete(state.worker_masks[i], state.config.worker_count)
         if state.sequences[i] > after_sequence && (!common_only || common) {
             sequences[count] = state.sequences[i]

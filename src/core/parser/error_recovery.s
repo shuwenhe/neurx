@@ -28,7 +28,7 @@ func skip_invalid(string text) ParseResult {
     i := 0
     valid_count := 0
 
-    while i < len(text) {
+    for i < len(text) {
         ch := text[i]
 
         if (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
@@ -99,7 +99,7 @@ func fix_json(string text) ParseResult {
 
     quote_count := 0
     i := 0
-    while i < len(fixed) {
+    for i < len(fixed) {
         if fixed[i] == '"' {
             quote_count = quote_count + 1
         }
@@ -138,7 +138,7 @@ func fix_xml(string text) ParseResult {
 
     if close_tags < open_tags {
         i := 0
-        while i < len(fixed) - open_tags + close_tags {
+        for i < len(fixed) - open_tags + close_tags {
             fixed = fixed + ">"
             i = i + 1
         }
@@ -197,7 +197,7 @@ func truncate_at_error(string text, string error_msg) ParseResult {
     pos_patterns := []string{"position ", "at ", "line "}
     i := 0
 
-    while i < len(pos_patterns) {
+    for i < len(pos_patterns) {
         pos := find_substring(error_msg, pos_patterns[i], 0)
         if pos >= 0 {
 
@@ -205,7 +205,7 @@ func truncate_at_error(string text, string error_msg) ParseResult {
             num_str := ""
             j := num_start
 
-            while j < len(error_msg) && error_msg[j] >= '0' && error_msg[j] <= '9' {
+            for j < len(error_msg) && error_msg[j] >= '0' && error_msg[j] <= '9' {
                 num_str = num_str + string(error_msg[j])
                 j = j + 1
             }
@@ -238,7 +238,7 @@ func truncate_at_last_token(string text) string {
     last_newline := -1
     i := 0
 
-    while i < len(text) {
+    for i < len(text) {
         if text[i] == ' ' {
             last_space = i
         } else if text[i] == '\n' {
@@ -276,7 +276,7 @@ func extract_last_tag(string xml) string {
     last_tag_end := -1
     i := 0
 
-    while i < len(xml) {
+    for i < len(xml) {
         if xml[i] == '<' && (i == 0 || xml[i - 1] != '<') {
             last_tag_start = i
         } else if xml[i] == '>' {
@@ -303,7 +303,7 @@ func parse_int(string s) int {
     result := 0
     i := 0
 
-    while i < len(s) && s[i] >= '0' && s[i] <= '9' {
+    for i < len(s) && s[i] >= '0' && s[i] <= '9' {
         result = result * 10 + int(s[i] - '0')
         i = i + 1
     }

@@ -21,7 +21,7 @@ func generate_adamw_golden() {
     string output_dir = "test/golden/adamw"
     save_float_to_file(param, output_dir + "/param_step0.bin")
     int step = 1
-    while step <= 10 {
+    for step <= 10 {
         float grad = 0.1
         momentum = beta1 * momentum + (1.0 - beta1) * grad
         variance = beta2 * variance + (1.0 - beta2) * grad * grad
@@ -97,7 +97,7 @@ func generate_embedding_golden() {
     []float embedding_weight = []
     int total = vocab_size * hidden_dim
     int i = 0
-    while i < total {
+    for i < total {
         float val = simple_randn(i + 42) * 0.02
         embedding_weight = append(embedding_weight, val)
         i = i + 1
@@ -112,10 +112,10 @@ func generate_embedding_golden() {
 func process_embedding_test([]float embedding_weight, []int input_ids, int test_id, int hidden_dim, string output_dir) {
     []float output = []
     int j = 0
-    while j < len(input_ids) {
+    for j < len(input_ids) {
         int token_id = input_ids[j]
         int k = 0
-        while k < hidden_dim {
+        for k < hidden_dim {
             int idx = token_id * hidden_dim + k
             output = append(output, embedding_weight[idx])
             k = k + 1
@@ -178,7 +178,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int n = 1
-    while n < 10 {
+    for n < 10 {
         term = term * x / float_from_int(n)
         result = result + term
         n = n + 1
@@ -198,7 +198,7 @@ func log_approx(float x) float {
     float result = 0.0
     float term = y
     int n = 1
-    while n < 10 {
+    for n < 10 {
         result = result + term / float_from_int(n)
         term = term * y2
         n = n + 2
@@ -212,7 +212,7 @@ func sqrt_approx(float x) float {
     }
     float guess = x / 2.0
     int i = 0
-    while i < 10 {
+    for i < 10 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }

@@ -24,7 +24,7 @@ func load_embedding_weights(string path, int vocab_size, int hidden_size) []floa
     []float embedding
     int total_size = vocab_size * hidden_size
     int i = 0
-    while i < total_size {
+    for i < total_size {
         embedding = append(embedding, 0.01)
         i = i + 1
     }
@@ -36,7 +36,7 @@ func load_projection_weights(string path, int out_dim, int in_dim) []float {
     []float weights
     int total = out_dim * in_dim
     int i = 0
-    while i < total {
+    for i < total {
         weights = append(weights, 0.001)
         i = i + 1
     }
@@ -48,7 +48,7 @@ func int_to_str(int n) string {
     bool negative = n < 0
     if negative { n = 0 - n }
     string result = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n - (n / 10) * 10
         result = string(byte(48 + digit)) + result
         n = n / 10

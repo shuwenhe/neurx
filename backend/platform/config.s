@@ -112,7 +112,7 @@ func is_digit_char(string ch) bool {
 func config_substring(string s, int from, int to) string {
     string result = ""
     int i = from
-    while i < to && i < len(s) {
+    for i < to && i < len(s) {
         result = result + string(s[i])
         i = i + 1
     }
@@ -133,7 +133,7 @@ func is_valid_int_literal(string value) bool {
         start = 1
     }
     int i = start
-    while i < len(v) {
+    for i < len(v) {
         string digit_char = config_substring(v, i, i + 1)
         if !is_digit_char(digit_char) {
             return false

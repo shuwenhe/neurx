@@ -32,7 +32,7 @@ func mse_loss_forward(vector pred, vector target) float {
     }
     float sum = 0.0
     int i = 0
-    while i < pred.size {
+    for i < pred.size {
         float diff = pred.data[i] - target.data[i]
         sum = sum + diff * diff
         i = i + 1
@@ -47,7 +47,7 @@ func mse_loss_backward(vector pred, vector target) vector {
     vector grad = create_vector(pred.size)
     float scale = 2.0 / (pred.size as float)
     int i = 0
-    while i < pred.size {
+    for i < pred.size {
         grad.data[i] = scale * (pred.data[i] - target.data[i])
         i = i + 1
     }
@@ -67,7 +67,7 @@ func cross_entropy_loss_forward(vector pred, vector target) float {
     }
     float loss = 0.0
     int i = 0
-    while i < pred.size {
+    for i < pred.size {
         float p = pred.data[i]
         if p < 0.0000001 {
             p = 0.0000001
@@ -81,7 +81,7 @@ func cross_entropy_loss_forward(vector pred, vector target) float {
             log_p = x
             int j = 2
             float term = x
-            while j < 5 {
+            for j < 5 {
                 term = term * x
                 int sign = 1
                 if j % 2 == 0 {
@@ -104,7 +104,7 @@ func cross_entropy_loss_backward(vector pred, vector target) vector {
     vector grad = create_vector(pred.size)
     float scale = 1.0 / (pred.size as float)
     int i = 0
-    while i < pred.size {
+    for i < pred.size {
         grad.data[i] = scale * (pred.data[i] - target.data[i])
         i = i + 1
     }
@@ -124,7 +124,7 @@ func bce_loss_forward(vector pred, vector target) float {
     }
     float loss = 0.0
     int i = 0
-    while i < pred.size {
+    for i < pred.size {
         float p = pred.data[i]
         if p < 0.0000001 {
             p = 0.0000001
@@ -139,7 +139,7 @@ func bce_loss_forward(vector pred, vector target) float {
             log_p = x
             int j = 2
             float term = x
-            while j < 5 {
+            for j < 5 {
                 term = term * x
                 int sign = 1
                 if j % 2 == 0 {
@@ -156,7 +156,7 @@ func bce_loss_forward(vector pred, vector target) float {
             log_1_p = x
             int j = 2
             float term = x
-            while j < 5 {
+            for j < 5 {
                 term = term * x
                 int sign = 1
                 if j % 2 == 0 {
@@ -185,7 +185,7 @@ func smooth_l1_loss_forward(vector pred, vector target) float {
     }
     float loss = 0.0
     int i = 0
-    while i < pred.size {
+    for i < pred.size {
         float diff = pred.data[i] - target.data[i]
         if diff < 0.0 {
             diff = 0.0 - diff
@@ -237,7 +237,7 @@ func sgd_step(sgd_optimizer opt, vector params, vector grads) vector {
     }
     vector updated = create_vector(params.size)
     int i = 0
-    while i < params.size {
+    for i < params.size {
         float grad = grads.data[i] + opt.weight_decay * params.data[i]
         opt.velocity.data[i] = opt.momentum * opt.velocity.data[i] - opt.learning_rate * grad
         updated.data[i] = params.data[i] + opt.velocity.data[i]
@@ -267,7 +267,7 @@ func adam_step(adam_optimizer opt, vector params, vector grads) vector {
     opt.step_count = opt.step_count + 1
     vector updated = create_vector(params.size)
     int i = 0
-    while i < params.size {
+    for i < params.size {
         opt.m.data[i] = opt.beta1 * opt.m.data[i] + (1.0 - opt.beta1) * grads.data[i]
         float grad_sq = grads.data[i] * grads.data[i]
         opt.v.data[i] = opt.beta2 * opt.v.data[i] + (1.0 - opt.beta2) * grad_sq
@@ -275,7 +275,7 @@ func adam_step(adam_optimizer opt, vector params, vector grads) vector {
         float v_hat = opt.v.data[i] / (1.0 - (opt.beta2 ^ (opt.step_count as float)))
         float sqrt_v_hat = v_hat
         int j = 0
-        while j < 10 {
+        for j < 10 {
             sqrt_v_hat = (sqrt_v_hat + v_hat / sqrt_v_hat) * 0.5
             j = j + 1
         }
@@ -309,12 +309,12 @@ func rmsprop_step(rmsprop_optimizer opt, vector params, vector grads) vector {
     }
     vector updated = create_vector(params.size)
     int i = 0
-    while i < params.size {
+    for i < params.size {
         float grad_sq = grads.data[i] * grads.data[i]
         opt.mean_square.data[i] = opt.alpha * opt.mean_square.data[i] + (1.0 - opt.alpha) * grad_sq
         float sqrt_mean_sq = opt.mean_square.data[i]
         int j = 0
-        while j < 10 {
+        for j < 10 {
             sqrt_mean_sq = (sqrt_mean_sq + opt.mean_square.data[i] / sqrt_mean_sq) * 0.5
             j = j + 1
         }

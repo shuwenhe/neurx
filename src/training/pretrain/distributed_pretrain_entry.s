@@ -59,13 +59,13 @@ func main() {
     int global_step = 0
     int optimizer_step = 0
     int epoch = 0
-    while epoch < config.num_epochs {
+    for epoch < config.num_epochs {
         int shard_idx = 0
-        while shard_idx < len(launcher.shard_paths) {
+        for shard_idx < len(launcher.shard_paths) {
             string shard_path = launcher.shard_paths[shard_idx]
             int line_idx = 0
             int accum_step = 0
-            while line_idx < 1024 {
+            for line_idx < 1024 {
                 []float batch_data = load_batch(shard_path, line_idx)
                 float loss = forward_pass(batch_data)
                 []float gradients = backward_pass(loss)
@@ -131,7 +131,7 @@ func parse_config() training_config {
 func load_batch(string shard_path, int line_idx) []float {
     []float batch = []float{cap: 8 * 2048}
     int i = 0
-    while i < len(batch) {
+    for i < len(batch) {
         batch[i] = float(i % 256) / 256.0
         i = i + 1
     }
@@ -141,7 +141,7 @@ func load_batch(string shard_path, int line_idx) []float {
 func forward_pass([]float batch_data) float {
     float loss = 0.0
     int i = 0
-    while i < len(batch_data) {
+    for i < len(batch_data) {
         loss = loss + batch_data[i]
         i = i + 1
     }
@@ -151,7 +151,7 @@ func forward_pass([]float batch_data) float {
 func backward_pass(float loss) []float {
     []float gradients = []float{cap: 1024}
     int i = 0
-    while i < len(gradients) {
+    for i < len(gradients) {
         gradients[i] = loss * 0.01
         i = i + 1
     }
@@ -179,7 +179,7 @@ func itoa(int n) string {
         s = "-"
         num = -num
     }
-    while num > 0 {
+    for num > 0 {
         byte digit = byte('0' + (num % 10))
         s = string(digit) + s
         num = num / 10

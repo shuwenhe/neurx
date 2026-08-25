@@ -93,10 +93,10 @@ impl lora_adapter {
                 intermediate := vec[float]()
                 if lora_a.len() > 0 && input.len() > 0 {
                     j := 0
-                    while j < lora_a[0].len() {
+                    for j < lora_a[0].len() {
                         sum := 0.0
                         k := 0
-                        while k < input.len() && k < lora_a.len() {
+                        for k < input.len() && k < lora_a.len() {
                             sum = sum + input[k] * lora_a[k][j]
                             k = k + 1
                         }
@@ -108,10 +108,10 @@ impl lora_adapter {
                 output := vec[float]()
                 if lora_b.len() > 0 {
                     j := 0
-                    while j < lora_b[0].len() {
+                    for j < lora_b[0].len() {
                         sum := 0.0
                         k := 0
-                        while k < intermediate.len() && k < lora_b.len() {
+                        for k < intermediate.len() && k < lora_b.len() {
                             sum = sum + intermediate[k] * lora_b[k][j]
                             k = k + 1
                         }
@@ -139,7 +139,7 @@ impl lora_adapter {
         outputs := vec[&vec[float]]()
 
         i := 0
-        while i < inputs.len() {
+        for i < inputs.len() {
             output := adapter.apply_lora(module_name, inputs[i], scale)
             outputs.push(output)
             i = i + 1

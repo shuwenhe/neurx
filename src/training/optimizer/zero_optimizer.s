@@ -34,10 +34,10 @@ func zero_mod_nonneg(int value, int divisor) int {
         return 0
     }
     int current = value
-    while current >= divisor {
+    for current >= divisor {
         current = current - divisor
     }
-    while current < 0 {
+    for current < 0 {
         current = current + divisor
     }
     current
@@ -59,7 +59,7 @@ func new_zero_stage_1_optimizer(
     state.local_v = []float{cap: state.local_param_count}
     state.local_param_grads = []float{cap: state.local_param_count}
     int i = 0
-    while i < state.local_param_count {
+    for i < state.local_param_count {
         state.local_params[i] = 0.0
         state.local_m[i] = 0.0
         state.local_v[i] = 0.0
@@ -77,7 +77,7 @@ func zero_stage_1_all_reduce_grads(
     []int dp_group) []float {
     []float full_grads = []float{cap: len(local_grads)}
     int i = 0
-    while i < len(local_grads) {
+    for i < len(local_grads) {
         full_grads[i] = local_grads[i]
         if dp_degree > 1 {
             full_grads[i] = full_grads[i] / dp_degree
@@ -90,7 +90,7 @@ func zero_stage_1_all_reduce_grads(
 func zero_pow(float base, int exp) float {
     float out = 1.0
     int i = 0
-    while i < exp {
+    for i < exp {
         out = out * base
         i = i + 1
     }
@@ -103,7 +103,7 @@ func zero_sqrt(float x) float {
     }
     float guess = x
     int i = 0
-    while i < 8 {
+    for i < 8 {
         guess = 0.5 * (guess + x / guess)
         i = i + 1
     }
@@ -119,7 +119,7 @@ func zero_stage_1_optimizer_step(
     float epsilon) {
     state.step = state.step + 1
     int param_idx = 0
-    while param_idx < state.local_param_count {
+    for param_idx < state.local_param_count {
         float grad = full_grads[param_idx]
         state.local_m[param_idx] = beta1 * state.local_m[param_idx] + (1.0 - beta1) * grad
         state.local_v[param_idx] = beta2 * state.local_v[param_idx] + (1.0 - beta2) * grad * grad
@@ -166,7 +166,7 @@ func zero_stage_2_reduce_scatter_grads(
     }
     []float local_grads = []float{cap: count}
     int i = 0
-    while i < count {
+    for i < count {
         local_grads[i] = full_grads[start + i]
         if dp_degree > 1 {
             local_grads[i] = local_grads[i] / dp_degree
@@ -185,7 +185,7 @@ func zero_stage_2_optimizer_step(
     float epsilon) {
     state.stage_1.step = state.stage_1.step + 1
     int param_idx = 0
-    while param_idx < state.stage_1.local_param_count {
+    for param_idx < state.stage_1.local_param_count {
         float grad = local_grads[param_idx]
         state.stage_1.local_m[param_idx] = beta1 * state.stage_1.local_m[param_idx] + (1.0 - beta1) * grad
         state.stage_1.local_v[param_idx] = beta2 * state.stage_1.local_v[param_idx] + (1.0 - beta2) * grad * grad
@@ -220,11 +220,11 @@ func zero_stage_3_all_gather_params(
     []int dp_group) []float {
     []float full_params = []float{cap: 0}
     int r = 0
-    while r < dp_degree {
+    for r < dp_degree {
         int row = 0
-        while row < len(local_params) {
+        for row < len(local_params) {
             int i = 0
-            while i < len(local_params[row]) {
+            for i < len(local_params[row]) {
                 full_params.push(local_params[row][i])
                 i = i + 1
             }
@@ -244,7 +244,7 @@ func zero_stage_3_forward(
     []float full_params = zero_stage_3_all_gather_params(local_params, dp_degree, dp_rank, dp_group)
     []float output = []float{cap: len(input)}
     int i = 0
-    while i < len(input) {
+    for i < len(input) {
         output[i] = input[i]
         i = i + 1
     }
@@ -261,7 +261,7 @@ func zero_stage_3_backward(
     []float full_params = zero_stage_3_all_gather_params(local_params, dp_degree, dp_rank, dp_group)
     []float input_grad = []float{cap: len(output_grad)}
     int i = 0
-    while i < len(output_grad) {
+    for i < len(output_grad) {
         input_grad[i] = output_grad[i]
         i = i + 1
     }

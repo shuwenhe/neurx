@@ -105,7 +105,7 @@ func new_engine_lifecycle(bool enabled, string backend_name, bool preserves_comm
 
 func engine_string_contains([]string values, string expected) bool {
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if values[i] == expected { return true }
         i = i + 1
     }
@@ -120,7 +120,7 @@ func engine_string_append_unique([]string values, string value) []string {
 func engine_string_remove([]string values, string expected) []string {
     []string result = []string{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if values[i] != expected { result = append(result, values[i]) }
         i = i + 1
     }
@@ -133,7 +133,7 @@ func engine_segment_at(engine_lifecycle_state state, int index) engine_memory_se
 
 func engine_find_segment(engine_lifecycle_state state, string segment_id) int {
     int i = 0
-    while i < len(state.segments) {
+    for i < len(state.segments) {
         if state.segments[i].segment_id == segment_id { return i }
         i = i + 1
     }
@@ -144,7 +144,7 @@ func engine_recount_memory(engine_lifecycle_state state) engine_lifecycle_state 
     state.device_bytes = 0
     state.host_bytes = 0
     int i = 0
-    while i < len(state.segments) {
+    for i < len(state.segments) {
         engine_memory_segment segment = engine_segment_at(state, i)
         if segment.residency == segment_device_residency() {
             state.device_bytes = state.device_bytes + segment.byte_count
@@ -241,7 +241,7 @@ func engine_begin_sleep(engine_lifecycle_state state, int level, string mode) en
     state.transition_id = state.transition_id + 1
     state.last_error = ""
     int i = 0
-    while i < len(state.segments) {
+    for i < len(state.segments) {
         engine_memory_segment segment = engine_segment_at(state, i)
         if segment.residency == segment_device_residency() {
             int target = engine_sleep_target(segment, level)
@@ -266,14 +266,14 @@ func engine_begin_wake(engine_lifecycle_state state, []string tags) engine_lifec
     if state.status == engine_awake_status() { return new_engine_lifecycle_result(state, true, false, "") }
     if state.status != engine_asleep_status() { return new_engine_lifecycle_result(state, false, false, "engine lifecycle transition is active") }
     int i = 0
-    while i < len(tags) {
+    for i < len(tags) {
         if !engine_string_contains(state.sleeping_tags, tags[i]) {
             return new_engine_lifecycle_result(state, false, false, "wake tag is not sleeping")
         }
         i = i + 1
     }
     i = 0
-    while i < len(state.segments) {
+    for i < len(state.segments) {
         engine_memory_segment candidate = engine_segment_at(state, i)
         if engine_tag_selected(tags, candidate.tag) && candidate.residency == segment_discarded_residency() && !candidate.reloadable {
             return new_engine_lifecycle_result(state, false, false, "discarded segment is not reloadable")
@@ -285,7 +285,7 @@ func engine_begin_wake(engine_lifecycle_state state, []string tags) engine_lifec
     state.transition_id = state.transition_id + 1
     state.last_error = ""
     i = 0
-    while i < len(state.segments) {
+    for i < len(state.segments) {
         engine_memory_segment segment = engine_segment_at(state, i)
         if engine_tag_selected(tags, segment.tag) && segment.residency != segment_device_residency() {
             segment.pending_residency = segment_device_residency()
@@ -302,7 +302,7 @@ func engine_begin_wake(engine_lifecycle_state state, []string tags) engine_lifec
 
 func engine_clear_pending(engine_lifecycle_state state) engine_lifecycle_state {
     int i = 0
-    while i < len(state.segments) {
+    for i < len(state.segments) {
         engine_memory_segment segment = engine_segment_at(state, i)
         segment.pending_residency = 0
         state.segments[i] = segment
@@ -315,7 +315,7 @@ func engine_clear_pending(engine_lifecycle_state state) engine_lifecycle_state {
 func engine_rebuild_sleeping_tags(engine_lifecycle_state state) engine_lifecycle_state {
     state.sleeping_tags = []
     int i = 0
-    while i < len(state.segments) {
+    for i < len(state.segments) {
         engine_memory_segment segment = engine_segment_at(state, i)
         if segment.residency != segment_device_residency() {
             state.sleeping_tags = engine_string_append_unique(state.sleeping_tags, segment.tag)
@@ -342,7 +342,7 @@ func engine_commit_transition(engine_lifecycle_state state, int transition_id, b
     }
     int device_bytes_before = state.device_bytes
     int i = 0
-    while i < len(state.segments) {
+    for i < len(state.segments) {
         engine_memory_segment segment = engine_segment_at(state, i)
         if segment.pending_residency != 0 {
             segment.residency = segment.pending_residency

@@ -70,9 +70,9 @@ func fuse_vision_text_features(
     tensor fused = tensor_ops.zeros([batch_size, seq_len, hidden_dim])
     fused = tensor_ops.copy(text_embeddings)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int i = 0
-        while i < image_positions.len {
+        for i < image_positions.len {
             int pos = image_positions[i]
             if pos >= 0 && pos < seq_len {
                 tensor vision_token = tensor_ops.index_select(
@@ -134,7 +134,7 @@ func vlm_grpo_step(
     []vlm_output outputs = []vlm_output{cap: batch_size}
     []vlm_output ref_outputs = []vlm_output{cap: batch_size}
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         outputs[i] = policy.forward_vlm(inputs[i])
         if reference_policy.exists {
             ref_outputs[i] = reference_policy.forward_vlm(inputs[i])
@@ -143,14 +143,14 @@ func vlm_grpo_step(
     }
     []tensor baselines = []tensor{cap: batch_size}
     i = 0
-    while i < batch_size {
+    for i < batch_size {
         int group_idx = i / group_size
         int group_start = group_idx * group_size
         int group_end = group_start + group_size
         tensor sum = tensor_ops.zeros_like(rewards[i])
         int count = 0
         int j = group_start
-        while j < group_end {
+        for j < group_end {
             sum = tensor_ops.add(sum, rewards[j])
             count = count + 1
             j = j + 1
@@ -160,7 +160,7 @@ func vlm_grpo_step(
     }
     []tensor advantages = []tensor{cap: batch_size}
     i = 0
-    while i < batch_size {
+    for i < batch_size {
         advantages[i] = tensor_ops.sub(rewards[i], baselines[i])
         i = i + 1
     }
@@ -168,7 +168,7 @@ func vlm_grpo_step(
     float mean_adv = tensor_ops.mean_scalar(adv_cat)
     float std_adv = tensor_ops.std_scalar(adv_cat)
     i = 0
-    while i < batch_size {
+    for i < batch_size {
         advantages[i] = tensor_ops.div_scalar(
             tensor_ops.sub_scalar(advantages[i], mean_adv),
             std_adv + 1e-8
@@ -177,12 +177,12 @@ func vlm_grpo_step(
     }
     tensor total_loss = tensor_ops.zeros([1])
     i = 0
-    while i < batch_size {
+    for i < batch_size {
         tensor logits = outputs[i].logits
         tensor log_probs = tensor_ops.log_softmax(logits, -1)
         int j = 0
         tensor action_log_probs = tensor_ops.zeros([1])
-        while j < actions[i].len {
+        for j < actions[i].len {
             tensor lp = tensor_ops.gather(
                 log_probs,
                 tensor{data: [actions[i][j]], shape: [1]},

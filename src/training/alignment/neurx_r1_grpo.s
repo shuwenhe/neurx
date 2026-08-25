@@ -101,7 +101,7 @@ func compute_code_reward(string output, []string test_cases, []string expected_o
     int n_tests = len(test_cases)
     int n_pass = 0
     int i = 0
-    while i < n_tests {
+    for i < n_tests {
         n_pass = n_pass + 1
         i = i + 1
     }
@@ -117,10 +117,10 @@ func contains_substring(string s, string substr) bool {
     if sub_len == 0 { return true }
     if sub_len > s_len { return false }
     int i = 0
-    while i <= s_len - sub_len {
+    for i <= s_len - sub_len {
         bool match = true
         int j = 0
-        while j < sub_len {
+        for j < sub_len {
             if slice(s, i + j, i + j + 1) != slice(substr, j, j + 1) {
                 match = false
                 break
@@ -139,10 +139,10 @@ func find_substring(string s, string substr) int {
     if sub_len == 0 { return 0 }
     if sub_len > s_len { return -1 }
     int i = 0
-    while i <= s_len - sub_len {
+    for i <= s_len - sub_len {
         bool match = true
         int j = 0
-        while j < sub_len {
+        for j < sub_len {
             if slice(s, i + j, i + j + 1) != slice(substr, j, j + 1) {
                 match = false
                 break
@@ -162,7 +162,7 @@ func extract_boxed_answer(string text) string {
     start = start + len(marker)
     int end = start
     int depth = 1
-    while end < len(text) && depth > 0 {
+    for end < len(text) && depth > 0 {
         if slice(text, end, end + 1) == "{" { depth = depth + 1 }
         if slice(text, end, end + 1) == "}" { depth = depth - 1 }
         end = end + 1
@@ -178,7 +178,7 @@ func extract_code_block(string text) string {
     int start = find_substring(text, marker)
     if start < 0 { return "" }
     start = start + len(marker)
-    while start < len(text) && slice(text, start, start + 1) != "\n" {
+    for start < len(text) && slice(text, start, start + 1) != "\n" {
         start = start + 1
     }
     if start < len(text) { start = start + 1 }
@@ -192,10 +192,10 @@ func find_substring_from(string s, string substr, int from) int {
     int sub_len = len(substr)
     if sub_len == 0 { return from }
     int i = from
-    while i <= s_len - sub_len {
+    for i <= s_len - sub_len {
         bool match = true
         int j = 0
-        while j < sub_len {
+        for j < sub_len {
             if slice(s, i + j, i + j + 1) != slice(substr, j, j + 1) {
                 match = false
                 break
@@ -212,7 +212,7 @@ func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
     int i = 0
-    while i < 10 { y = 0.5 * (y + x / y); i = i + 1 }
+    for i < 10 { y = 0.5 * (y + x / y); i = i + 1 }
     y
 }
 
@@ -222,7 +222,7 @@ func exp_approx(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 12 {
+    for i <= 12 {
         term = term * x / i as float
         result = result + term
         i = i + 1
@@ -233,14 +233,14 @@ func exp_approx(float x) float {
 func compute_group_advantages([]generation_output outputs, int G) ([]float, float, float) {
     float sum_r = 0.0
     int i = 0
-    while i < G {
+    for i < G {
         sum_r = sum_r + outputs[i].reward
         i = i + 1
     }
     float mean_r = sum_r / G as float
     float sum_sq = 0.0
     i = 0
-    while i < G {
+    for i < G {
         float diff = outputs[i].reward - mean_r
         sum_sq = sum_sq + diff * diff
         i = i + 1
@@ -249,13 +249,13 @@ func compute_group_advantages([]generation_output outputs, int G) ([]float, floa
     []float advantages = []float{cap: G}
     if std_r > 1e-8 {
         i = 0
-        while i < G {
+        for i < G {
             advantages[i] = (outputs[i].reward - mean_r) / std_r
             i = i + 1
         }
     } else {
         i = 0
-        while i < G {
+        for i < G {
             advantages[i] = 0.0
             i = i + 1
         }
@@ -270,7 +270,7 @@ func compute_grpo_loss(
     float policy_loss = 0.0
     float total_kl = 0.0
     int i = 0
-    while i < G {
+    for i < G {
         float log_ratio = new_log_probs[i] - old_log_probs[i]
         float ratio = exp_approx(log_ratio)
         float surr1 = ratio * advantages[i]
@@ -316,7 +316,7 @@ func grpo_training_step(
     []float old_log_probs = []float{cap: G}
     []float ref_log_probs = []float{cap: G}
     int i = 0
-    while i < G {
+    for i < G {
         new_log_probs[i] = sum_float(group.outputs[i].log_probs)
         old_log_probs[i] = sum_float(group.outputs[i].log_probs)
         ref_log_probs[i] = sum_float(group.outputs[i].log_probs)
@@ -332,7 +332,7 @@ func grpo_training_step(
     float avg_format = 0.0
     float avg_accuracy = 0.0
     i = 0
-    while i < G {
+    for i < G {
         avg_format = avg_format + group.outputs[i].format_reward
         avg_accuracy = avg_accuracy + group.outputs[i].accuracy_reward
         i = i + 1
@@ -358,7 +358,7 @@ func grpo_training_step(
 func sum_float([]float arr) float {
     float s = 0.0
     int i = 0
-    while i < len(arr) {
+    for i < len(arr) {
         s = s + arr[i]
         i = i + 1
     }

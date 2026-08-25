@@ -65,7 +65,7 @@ func create_simpo_state(simpo_config cfg) simpo_state {
 func compute_log_prob_sum([]float log_probs) float {
     float sum_log_prob = 0.0
     int i = 0
-    while i < len_array_ex(log_probs) {
+    for i < len_array_ex(log_probs) {
         sum_log_prob = sum_log_prob + log_probs[i]
         i = i + 1
     }
@@ -102,7 +102,7 @@ func exp_simple(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 8 {
+    for i <= 8 {
         term = term * x / (i as float)
         result = result + term
         i = i + 1
@@ -118,7 +118,7 @@ func log_simple(float x) float {
     float result = 0.0
     float term = y
     int i = 0
-    while i < 15 {
+    for i < 15 {
         result = result + term / (2.0 * i as float + 1.0)
         term = term * y2
         i = i + 1
@@ -133,17 +133,17 @@ func compute_simpo_batch_loss(
     simpo_config cfg = state.config
     float total_loss = 0.0
     int i = 0
-    while i < batch.size {
+    for i < batch.size {
         simpo_preference_pair pair = batch.pairs[i]
         []float chosen_log_probs = []float{cap: len_tokens_ex(pair.chosen_tokens)}
         []float rejected_log_probs = []float{cap: len_tokens_ex(pair.rejected_tokens)}
         int j = 0
-        while j < len_tokens_ex(pair.chosen_tokens) {
+        for j < len_tokens_ex(pair.chosen_tokens) {
             chosen_log_probs = append_lp(chosen_log_probs, -2.3 + (j as float) * 0.05)
             j = j + 1
         }
         j = 0
-        while j < len_tokens_ex(pair.rejected_tokens) {
+        for j < len_tokens_ex(pair.rejected_tokens) {
             rejected_log_probs = append_lp(rejected_log_probs, -3.1 + (j as float) * 0.03)
             j = j + 1
         }
@@ -186,13 +186,13 @@ func start_simpo_training(
     print("  Beta (margin scale): " + float_to_string_ex(cfg.beta))
     print("")
     int epoch = 0
-    while epoch < cfg.num_epochs {
+    for epoch < cfg.num_epochs {
         state.epoch = epoch
         state.num_batches_processed = 0
         print("[SimPO Epoch " + int_to_string_ex(epoch + 1) + "/" +
               int_to_string_ex(cfg.num_epochs) + "]")
         int batch_idx = 0
-        while batch_idx < len_batch_ex(batches) {
+        for batch_idx < len_batch_ex(batches) {
             simpo_batch batch = batches[batch_idx]
             state = simpo_training_step(state, batch, cfg.learning_rate)
             if (batch_idx + 1) % 5 == 0 {

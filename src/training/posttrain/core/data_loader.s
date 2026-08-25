@@ -71,13 +71,13 @@ func create_batch_s([]tokenized_example_s examples, int batch_size, int max_seq_
 func pad_sequence_s([]int seq, int target_len, int pad_token) []int {
     []int result
     int i = 0
-    while i < len(seq) {
+    for i < len(seq) {
         if i < target_len {
             result = append(result, seq[i])
         }
         i = i + 1
     }
-    while len(result) < target_len {
+    for len(result) < target_len {
         result = append(result, pad_token)
     }
     result

@@ -243,7 +243,7 @@ func extract_text_from_jsonl(string jsonl_line) string {
         return ""
     }
     i := start_idx + 6
-    while i < len(jsonl_line) && jsonl_line[i] != '"' {
+    for i < len(jsonl_line) && jsonl_line[i] != '"' {
         i = i + 1
     }
     if i >= len(jsonl_line) {
@@ -251,7 +251,7 @@ func extract_text_from_jsonl(string jsonl_line) string {
     }
     i = i + 1
     text_start := i
-    while i < len(jsonl_line) {
+    for i < len(jsonl_line) {
         if jsonl_line[i] == '"' && (i == 0 || jsonl_line[i - 1] != '\\') {
             break
         }

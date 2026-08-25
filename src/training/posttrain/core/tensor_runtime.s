@@ -23,7 +23,7 @@ struct tensor_metadata_s {
 func new_tensor_s([]float data_ptr, []int shape_list) tensor_s {
     int total = 1
     int i = 0
-    while i < len(shape_list) {
+    for i < len(shape_list) {
         total = total * shape_list[i]
         i = i + 1
     }
@@ -46,7 +46,7 @@ func compute_strides_s([]int shape_list) []int {
     }
     int stride = 1
     int i = len(shape_list) - 1
-    while i >= 0 {
+    for i >= 0 {
         strides = append(strides, stride)
         stride = stride * shape_list[i]
         i = i - 1
@@ -57,7 +57,7 @@ func compute_strides_s([]int shape_list) []int {
 func reverse_int_array_s([]int arr) []int {
     []int reversed
     int i = len(arr) - 1
-    while i >= 0 {
+    for i >= 0 {
         reversed = append(reversed, arr[i])
         i = i - 1
     }
@@ -67,7 +67,7 @@ func reverse_int_array_s([]int arr) []int {
 func tensor_get_flat_index_s(tensor_s t, []int indices) int {
     int index = 0
     int i = 0
-    while i < len(indices) {
+    for i < len(indices) {
         if i < len(t.strides) {
             index = index + indices[i] * t.strides[i]
         }
@@ -79,7 +79,7 @@ func tensor_get_flat_index_s(tensor_s t, []int indices) int {
 func tensor_reshape_s(tensor_s t, []int new_shape) tensor_s {
     int new_total = 1
     int i = 0
-    while i < len(new_shape) {
+    for i < len(new_shape) {
         new_total = new_total * new_shape[i]
         i = i + 1
     }
@@ -125,7 +125,7 @@ func tensor_slice_s(tensor_s t, int start, int end) tensor_s {
     }
     []float sliced_data = make([]float, 0)
     int i = start
-    while i < end {
+    for i < end {
         sliced_data = append(sliced_data, t.data[i])
         i = i + 1
     }
@@ -149,18 +149,18 @@ func tensor_cat_s(tensor_s t1, tensor_s t2, int dim) tensor_s {
     }
     []float combined = make([]float, 0)
     int i = 0
-    while i < len(t1.data) {
+    for i < len(t1.data) {
         combined = append(combined, t1.data[i])
         i = i + 1
     }
     i = 0
-    while i < len(t2.data) {
+    for i < len(t2.data) {
         combined = append(combined, t2.data[i])
         i = i + 1
     }
     []int new_shape = make([]int, 0)
     int j = 0
-    while j < len(t1.shape) {
+    for j < len(t1.shape) {
         if j == dim {
             new_shape = append(new_shape, t1.shape[j] + t2.shape[j])
         } else {
@@ -182,7 +182,7 @@ func tensor_cat_s(tensor_s t1, tensor_s t2, int dim) tensor_s {
 func tensor_to_string_s(tensor_s t) string {
     string result = "Tensor("
     int i = 0
-    while i < len(t.shape) {
+    for i < len(t.shape) {
         result = result + int_to_str(t.shape[i])
         if i < len(t.shape) - 1 {
             result = result + ", "
@@ -198,7 +198,7 @@ func int_to_str(int n) string {
     string result = ""
     bool neg = false
     if n < 0 { neg = true; n = 0 - n }
-    while n > 0 {
+    for n > 0 {
         int d = n - (n / 10) * 10
         if d == 0 { result = "0" + result }
         else if d == 1 { result = "1" + result }
@@ -219,13 +219,13 @@ func int_to_str(int n) string {
 func tensor_copy_s(tensor_s t) tensor_s {
     []float new_data = make([]float, len(t.data))
     int i = 0
-    while i < len(t.data) {
+    for i < len(t.data) {
         new_data[i] = t.data[i]
         i = i + 1
     }
     []int new_shape = make([]int, len(t.shape))
     i = 0
-    while i < len(t.shape) {
+    for i < len(t.shape) {
         new_shape[i] = t.shape[i]
         i = i + 1
     }
@@ -242,7 +242,7 @@ func tensor_copy_s(tensor_s t) tensor_s {
 
 func tensor_fill_s(tensor_s t, float value) tensor_s {
     int i = 0
-    while i < len(t.data) {
+    for i < len(t.data) {
         t.data[i] = value
         i = i + 1
     }
@@ -256,7 +256,7 @@ func tensor_transpose_nd_s(tensor_s t, []int axes) tensor_s {
     }
     []int new_shape = make([]int, t.rank)
     int i = 0
-    while i < len(axes) {
+    for i < len(axes) {
         if axes[i] < 0 || axes[i] >= t.rank {
             println("[ERROR] transpose_nd: invalid axis index")
             return t
@@ -266,7 +266,7 @@ func tensor_transpose_nd_s(tensor_s t, []int axes) tensor_s {
     }
     []int new_strides = make([]int, t.rank)
     i = 0
-    while i < len(axes) {
+    for i < len(axes) {
         new_strides[i] = t.strides[axes[i]]
         i = i + 1
     }
@@ -284,7 +284,7 @@ func tensor_transpose_nd_s(tensor_s t, []int axes) tensor_s {
 func tensor_expand_s(tensor_s t, []int new_shape) tensor_s {
     int new_total = 1
     int i = 0
-    while i < len(new_shape) {
+    for i < len(new_shape) {
         new_total = new_total * new_shape[i]
         i = i + 1
     }
@@ -300,7 +300,7 @@ func tensor_expand_s(tensor_s t, []int new_shape) tensor_s {
     }
     []int new_strides = make([]int, len(new_shape))
     i = 0
-    while i < len(new_shape) {
+    for i < len(new_shape) {
         if i < len(t.strides) && t.shape[i] == new_shape[i] {
             new_strides[i] = t.strides[i]
         } else if i < len(t.strides) && t.shape[i] == 1 {
@@ -328,7 +328,7 @@ func tensor_sum_s(tensor_s t, int axis) tensor_s {
     }
     []int result_shape = make([]int, 0)
     int i = 0
-    while i < t.rank {
+    for i < t.rank {
         if i != axis {
             result_shape = append(result_shape, t.shape[i])
         }
@@ -336,7 +336,7 @@ func tensor_sum_s(tensor_s t, int axis) tensor_s {
     }
     int result_size = 1
     i = 0
-    while i < len(result_shape) {
+    for i < len(result_shape) {
         result_size = result_size * result_shape[i]
         i = i + 1
     }
@@ -344,17 +344,17 @@ func tensor_sum_s(tensor_s t, int axis) tensor_s {
     int axis_size = t.shape[axis]
     int other_size = 1
     i = 0
-    while i < t.rank {
+    for i < t.rank {
         if i != axis {
             other_size = other_size * t.shape[i]
         }
         i = i + 1
     }
     i = 0
-    while i < result_size {
+    for i < result_size {
         float sum_val = 0.0
         int j = 0
-        while j < axis_size {
+        for j < axis_size {
             int flat_idx = i + j * other_size
             if flat_idx < len(t.data) {
                 sum_val = sum_val + t.data[flat_idx]
@@ -379,7 +379,7 @@ func tensor_mean_s(tensor_s t, int axis) tensor_s {
     tensor_s sum_result = tensor_sum_s(t, axis)
     float count = float_from_int(t.shape[axis])
     int i = 0
-    while i < len(sum_result.data) {
+    for i < len(sum_result.data) {
         if count > 0.0 {
             sum_result.data[i] = sum_result.data[i] / count
         }
@@ -391,7 +391,7 @@ func tensor_mean_s(tensor_s t, int axis) tensor_s {
 func float_from_int_ext(int n) float {
     float result = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         result = result + 1.0
         i = i + 1
     }
@@ -405,7 +405,7 @@ func tensor_softmax_s(tensor_s t, int axis) tensor_s {
     }
     []float result = make([]float, len(t.data))
     int i = 0
-    while i < len(t.data) {
+    for i < len(t.data) {
         result[i] = t.data[i]
         i = i + 1
     }
@@ -423,7 +423,7 @@ func tensor_softmax_s(tensor_s t, int axis) tensor_s {
 func tensor_apply_s(tensor_s t, string op) tensor_s {
     []float result = make([]float, len(t.data))
     int i = 0
-    while i < len(t.data) {
+    for i < len(t.data) {
         if op == "relu" {
             if t.data[i] > 0.0 {
                 result[i] = t.data[i]

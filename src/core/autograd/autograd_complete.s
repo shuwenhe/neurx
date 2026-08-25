@@ -43,7 +43,7 @@ func add_node(gradient_tape tape, tensor value, string op, []int inputs) (gradie
 func ad_add(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor) {
     tensor result = zeros(a.shape)
     int i = 0
-    while i < len(a.data) {
+    for i < len(a.data) {
         result.data[i] = a.data[i] + b.data[i]
         i = i + 1
     }
@@ -55,7 +55,7 @@ func ad_add(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor)
 func ad_mul(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor) {
     tensor result = zeros(a.shape)
     int i = 0
-    while i < len(a.data) {
+    for i < len(a.data) {
         result.data[i] = a.data[i] * b.data[i]
         i = i + 1
     }
@@ -70,12 +70,12 @@ func ad_matmul(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tens
     int p = b.shape[1]
     tensor result = zeros([m, p])
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < p {
+        for j < p {
             float sum = 0.0
             int k = 0
-            while k < n {
+            for k < n {
                 sum = sum + a.data[i * n + k] * b.data[k * p + j]
                 k = k + 1
             }
@@ -94,9 +94,9 @@ func ad_transpose(gradient_tape tape, tensor a) (gradient_tape, int, tensor) {
     int n = a.shape[1]
     tensor result = zeros([n, m])
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             result.data[j * m + i] = a.data[i * n + j]
             j = j + 1
         }
@@ -111,7 +111,7 @@ func ad_softmax(gradient_tape tape, tensor logits) (gradient_tape, int, tensor) 
     tensor exp_logits = zeros(logits.shape)
     float max_val = logits.data[0]
     int i = 0
-    while i < len(logits.data) {
+    for i < len(logits.data) {
         if logits.data[i] > max_val {
             max_val = logits.data[i]
         }
@@ -119,14 +119,14 @@ func ad_softmax(gradient_tape tape, tensor logits) (gradient_tape, int, tensor) 
     }
     float sum_exp = 0.0
     i = 0
-    while i < len(logits.data) {
+    for i < len(logits.data) {
         exp_logits.data[i] = exp_approx(logits.data[i] - max_val)
         sum_exp = sum_exp + exp_logits.data[i]
         i = i + 1
     }
     tensor result = zeros(logits.shape)
     i = 0
-    while i < len(exp_logits.data) {
+    for i < len(exp_logits.data) {
         result.data[i] = exp_logits.data[i] / sum_exp
         i = i + 1
     }
@@ -138,7 +138,7 @@ func ad_softmax(gradient_tape tape, tensor logits) (gradient_tape, int, tensor) 
 func ad_relu(gradient_tape tape, tensor x) (gradient_tape, int, tensor) {
     tensor result = zeros(x.shape)
     int i = 0
-    while i < len(x.data) {
+    for i < len(x.data) {
         if x.data[i] > 0.0 {
             result.data[i] = x.data[i]
         } else {
@@ -154,14 +154,14 @@ func ad_relu(gradient_tape tape, tensor x) (gradient_tape, int, tensor) {
 func ad_layer_norm(gradient_tape tape, tensor x, float eps) (gradient_tape, int, tensor) {
     float mean = 0.0
     int i = 0
-    while i < len(x.data) {
+    for i < len(x.data) {
         mean = mean + x.data[i]
         i = i + 1
     }
     mean = mean / float_from_int(len(x.data))
     float variance = 0.0
     i = 0
-    while i < len(x.data) {
+    for i < len(x.data) {
         float diff = x.data[i] - mean
         variance = variance + diff * diff
         i = i + 1
@@ -169,7 +169,7 @@ func ad_layer_norm(gradient_tape tape, tensor x, float eps) (gradient_tape, int,
     variance = variance / float_from_int(len(x.data))
     tensor result = zeros(x.shape)
     i = 0
-    while i < len(x.data) {
+    for i < len(x.data) {
         result.data[i] = (x.data[i] - mean) / sqrt_approx(variance + eps)
         i = i + 1
     }
@@ -180,7 +180,7 @@ func ad_layer_norm(gradient_tape tape, tensor x, float eps) (gradient_tape, int,
 
 func backward_add(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b) (tensor, tensor) {
     int i = 0
-    while i < len(grad.data) {
+    for i < len(grad.data) {
         grad_a.data[i] = grad_a.data[i] + grad.data[i]
         grad_b.data[i] = grad_b.data[i] + grad.data[i]
         i = i + 1
@@ -190,7 +190,7 @@ func backward_add(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b)
 
 func backward_mul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b) (tensor, tensor) {
     int i = 0
-    while i < len(grad.data) {
+    for i < len(grad.data) {
         grad_a.data[i] = grad_a.data[i] + grad.data[i] * b.data[i]
         grad_b.data[i] = grad_b.data[i] + grad.data[i] * a.data[i]
         i = i + 1
@@ -203,12 +203,12 @@ func backward_matmul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad
     int n = a.shape[1]
     int p = b.shape[1]
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = 0.0
             int k = 0
-            while k < p {
+            for k < p {
                 sum = sum + grad.data[i * p + k] * b.data[j * p + k]
                 k = k + 1
             }
@@ -218,12 +218,12 @@ func backward_matmul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad
         i = i + 1
     }
     i = 0
-    while i < n {
+    for i < n {
         int j = 0
-        while j < p {
+        for j < p {
             float sum = 0.0
             int k = 0
-            while k < m {
+            for k < m {
                 sum = sum + a.data[k * n + i] * grad.data[k * p + j]
                 k = k + 1
             }
@@ -237,10 +237,10 @@ func backward_matmul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad
 
 func backward_softmax(tensor grad, tensor softmax_output, tensor grad_input) tensor {
     int i = 0
-    while i < len(grad.data) {
+    for i < len(grad.data) {
         float grad_dot_softmax = 0.0
         int j = 0
-        while j < len(grad.data) {
+        for j < len(grad.data) {
             grad_dot_softmax = grad_dot_softmax + softmax_output.data[j] * grad.data[j]
             j = j + 1
         }
@@ -253,7 +253,7 @@ func backward_softmax(tensor grad, tensor softmax_output, tensor grad_input) ten
 
 func backward_relu(tensor grad, tensor x, tensor grad_input) tensor {
     int i = 0
-    while i < len(grad.data) {
+    for i < len(grad.data) {
         if x.data[i] > 0.0 {
             grad_input.data[i] = grad_input.data[i] + grad.data[i]
         }
@@ -269,12 +269,12 @@ func backward_tape(
     int num_nodes = tape.node_counter
     []tensor gradients = []tensor{cap: num_nodes}
     int i = 0
-    while i < num_nodes {
+    for i < num_nodes {
         gradients.push(zeros(tape.nodes[i].value.shape))
         i = i + 1
     }
     i = num_nodes - 1
-    while i >= 0 {
+    for i >= 0 {
         gradient_node node = tape.nodes[i]
         tensor grad = gradients[i]
         if node.operation == "add" {
@@ -323,7 +323,7 @@ func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
     int i = 0
-    while i < 10 {
+    for i < 10 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -336,7 +336,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 12 {
+    for i <= 12 {
         term = term * x / float_from_int(i)
         result = result + term
         i = i + 1

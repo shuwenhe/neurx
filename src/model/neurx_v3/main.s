@@ -124,7 +124,7 @@ func demonstrate_moe() {
     int n_tokens = 4
     []float h = moe.zeros(n_tokens * cfg.hidden_dim)
     int i = 0
-    while i < n_tokens * cfg.hidden_dim {
+    for i < n_tokens * cfg.hidden_dim {
         h[i] = 0.1
         i = i + 1
     }
@@ -163,7 +163,7 @@ func demonstrate_mtp() {
     int d = cfg.hidden_dim
     []float main_hidden = mla.zeros(seq_len * d)
     int i = 0
-    while i < seq_len * d {
+    for i < seq_len * d {
         main_hidden[i] = 0.1
         i = i + 1
     }
@@ -176,7 +176,7 @@ func demonstrate_mtp() {
     println("Forward test:")
     println("  Total loss: " + float_to_string(out.total_loss))
     int j = 0
-    while j < cfg.num_mtp_layers {
+    for j < cfg.num_mtp_layers {
         println("  Module " + int_to_string(j) + " loss: " + float_to_string(out.per_module_loss[j]))
         j = j + 1
     }
@@ -202,17 +202,17 @@ func demonstrate_grpo() {
     int G = cfg.group_size
     []neurx_r1_grpo.generation_output outputs = []neurx_r1_grpo.generation_output{cap: G}
     int i = 0
-    while i < G {
+    for i < G {
         float quality = (i as float + 1.0) / G as float * 2.0
         []float log_probs = []float{cap: 10}
         int j = 0
-        while j < 10 {
+        for j < 10 {
             log_probs[j] = -0.1 * quality + (j as float - 5.0) * 0.05
             j = j + 1
         }
         []int token_ids = []int{cap: 10}
         j = 0
-        while j < 10 {
+        for j < 10 {
             token_ids[j] = j * 10 + i
             j = j + 1
         }
@@ -231,7 +231,7 @@ func demonstrate_grpo() {
     println("  mean = " + float_to_string(mean_r) + ", std = " + float_to_string(std_r))
     println("")
     i = 0
-    while i < G {
+    for i < G {
         println("  Output " + int_to_string(i) + ": reward=" + float_to_string(outputs[i].reward) +
                 ", advantage=" + float_to_string(advantages[i]))
         i = i + 1
@@ -298,7 +298,7 @@ func int_to_string(int n) string {
     int num = n
     bool is_neg = n < 0
     if is_neg { num = -num }
-    while num > 0 {
+    for num > 0 {
         int digit = num % 10
         result = digit_to_char(digit) + result
         num = num / 10
@@ -332,7 +332,7 @@ func float_to_string(float x) string {
     result = result + "."
     float frac = x - int_part as float
     int d = 0
-    while d < 4 {
+    for d < 4 {
         frac = frac * 10.0
         int digit = frac as int
         result = result + digit_to_char(digit)

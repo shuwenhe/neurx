@@ -36,7 +36,7 @@ struct dllm_step_result {
 func dllm_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -51,7 +51,7 @@ func new_dllm_state(dllm_config config, []int prompt_tokens) dllm_state {
     int prompt = len(prompt_tokens)
     if prompt > config.sequence_length { prompt = config.sequence_length }
     int i = 0
-    while i < config.sequence_length {
+    for i < config.sequence_length {
         if i < prompt { tokens[i] = prompt_tokens[i]; masks[i] = 0; confidence[i] = 1000 }
         else { masks[i] = 1; confidence[i] = 0 }
         i = i + 1
@@ -75,7 +75,7 @@ func dllm_position_allowed(dllm_state state, int position) bool {
 
 func dllm_selected_contains([]int selected, int selected_count, int position) bool {
     int i = 0
-    while i < selected_count {
+    for i < selected_count {
         if selected[i] == position { return true }
         i = i + 1
     }
@@ -88,7 +88,7 @@ func dllm_decode_step(dllm_state state) dllm_step_result {
     int i = 0
     if state.config.remask_strategy == dllm_strategy_random() {
         int offset = (state.step * 17 + 3) % state.config.sequence_length
-        while i < state.config.sequence_length && selected_count < state.config.tokens_per_step {
+        for i < state.config.sequence_length && selected_count < state.config.tokens_per_step {
             int position = (offset + i) % state.config.sequence_length
             if dllm_position_allowed(state, position) {
                 selected[selected_count] = position
@@ -97,10 +97,10 @@ func dllm_decode_step(dllm_state state) dllm_step_result {
             i = i + 1
         }
     } else {
-        while selected_count < state.config.tokens_per_step {
+        for selected_count < state.config.tokens_per_step {
             int best = 0 - 1
             i = 0
-            while i < state.config.sequence_length {
+            for i < state.config.sequence_length {
                 bool threshold_match = state.confidences[i] >= state.config.confidence_threshold_per_mille
                 if dllm_position_allowed(state, i) && threshold_match && !dllm_selected_contains(selected, selected_count, i) && (best < 0 || state.confidences[i] > state.confidences[best]) { best = i }
                 i = i + 1
@@ -113,14 +113,14 @@ func dllm_decode_step(dllm_state state) dllm_step_result {
     if selected_count == 0 {
         int best = 0 - 1
         i = 0
-        while i < state.config.sequence_length {
+        for i < state.config.sequence_length {
             if dllm_position_allowed(state, i) && (best < 0 || state.confidences[i] > state.confidences[best]) { best = i }
             i = i + 1
         }
         if best >= 0 { selected[0] = best; selected_count = 1 }
     }
     i = 0
-    while i < selected_count {
+    for i < selected_count {
         int position = selected[i]
         state.masked[position] = 0
         state.masked_count = state.masked_count - 1

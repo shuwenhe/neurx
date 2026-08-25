@@ -36,7 +36,7 @@ struct tbo_stage_schedule {
 func tbo_int_array(int capacity, int value) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = value; i = i + 1 }
+    for i < capacity { values[i] = value; i = i + 1 }
     values
 }
 
@@ -47,7 +47,7 @@ func tbo_empty_plan() tbo_plan {
 func tbo_sum([]int values) int {
     int total = 0
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if values[i] > 0 { total = total + values[i] }
         i = i + 1
     }
@@ -62,7 +62,7 @@ func tbo_balanced_boundary([]int lengths) int {
     int best = 1
     int best_diff = 2147483647
     int i = 1
-    while i < count {
+    for i < count {
         if lengths[i - 1] > 0 { left = left + lengths[i - 1] }
         int diff = total - left - left
         if diff < 0 { diff = 0 - diff }
@@ -75,7 +75,7 @@ func tbo_balanced_boundary([]int lengths) int {
 func tbo_prefix_sum([]int values, int end) int {
     int total = 0
     int i = 0
-    while i < end && i < len(values) {
+    for i < end && i < len(values) {
         if values[i] > 0 { total = total + values[i] }
         i = i + 1
     }
@@ -96,7 +96,7 @@ func tbo_split_extend(tbo_config config, []int extend_lengths) tbo_plan {
         int half = total / 2
         int cumulative = 0
         int split_sequence = 0
-        while split_sequence < count && cumulative + extend_lengths[split_sequence] < half {
+        for split_sequence < count && cumulative + extend_lengths[split_sequence] < half {
             cumulative = cumulative + extend_lengths[split_sequence]
             split_sequence = split_sequence + 1
         }
@@ -139,9 +139,9 @@ func tbo_schedule_stages(int stages_a, int stages_b, int delta_stages) tbo_stage
     int tick = 0
     int a = 0
     int b = 0
-    while a < delta { a_trace[tick] = a; a = a + 1; tick = tick + 1 }
-    while a < stages_a && b < stages_b { a_trace[tick] = a; b_trace[tick] = b; a = a + 1; b = b + 1; tick = tick + 1 }
-    while a < stages_a { a_trace[tick] = a; a = a + 1; tick = tick + 1 }
-    while b < stages_b { b_trace[tick] = b; b = b + 1; tick = tick + 1 }
+    for a < delta { a_trace[tick] = a; a = a + 1; tick = tick + 1 }
+    for a < stages_a && b < stages_b { a_trace[tick] = a; b_trace[tick] = b; a = a + 1; b = b + 1; tick = tick + 1 }
+    for a < stages_a { a_trace[tick] = a; a = a + 1; tick = tick + 1 }
+    for b < stages_b { b_trace[tick] = b; b = b + 1; tick = tick + 1 }
     tbo_stage_schedule {child_a_stages: a_trace, child_b_stages: b_trace, tick_count: tick, valid: true}
 }

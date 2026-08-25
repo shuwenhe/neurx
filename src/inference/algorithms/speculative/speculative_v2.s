@@ -70,12 +70,12 @@ func speculative_decode(
     []int all_generated = []int{cap: max_new_tokens}
     []int current_context = []int{cap: len(prompt_tokens)}
     int i = 0
-    while i < len(prompt_tokens) {
+    for i < len(prompt_tokens) {
         current_context.push(prompt_tokens[i])
         i = i + 1
     }
     int generated_count = 0
-    while generated_count < max_new_tokens {
+    for generated_count < max_new_tokens {
         int draft_start_time = get_time_ms()
         []int draft_tokens = draft_model_generate(
             state.draft_model,
@@ -96,7 +96,7 @@ func speculative_decode(
         state.total_draft_tokens = state.total_draft_tokens + len(draft_tokens)
         state.total_accepted_tokens = state.total_accepted_tokens + len(result.accepted_tokens)
         int j = 0
-        while j < len(result.accepted_tokens) && generated_count < max_new_tokens {
+        for j < len(result.accepted_tokens) && generated_count < max_new_tokens {
             all_generated.push(result.accepted_tokens[j])
             current_context.push(result.accepted_tokens[j])
             generated_count = generated_count + 1
@@ -128,12 +128,12 @@ func draft_model_generate(
     []int draft_tokens = []int{cap: num_tokens}
     []int current_ctx = []int{cap: len(context)}
     int i = 0
-    while i < len(context) {
+    for i < len(context) {
         current_ctx.push(context[i])
         i = i + 1
     }
     int gen_count = 0
-    while gen_count < num_tokens {
+    for gen_count < num_tokens {
         []float logits = draft_model_forward(model, current_ctx)
         int next_token = sample_token(logits, 1.0, 0.9, 50)
         draft_tokens.push(next_token)
@@ -150,7 +150,7 @@ func verify_draft_tokens(
     float acceptance_threshold) speculation_result {
     []int extended_context = []int{cap: len(context) + len(draft_tokens)}
     int i = 0
-    while i < len(context) {
+    for i < len(context) {
         extended_context.push(context[i])
         i = i + 1
     }
@@ -158,7 +158,7 @@ func verify_draft_tokens(
     []int accepted = []int{cap: len(draft_tokens)}
     []int rejected = []int{cap: len(draft_tokens)}
     int draft_idx = 0
-    while draft_idx < len(draft_tokens) {
+    for draft_idx < len(draft_tokens) {
         int draft_token = draft_tokens[draft_idx]
         int logit_offset = draft_idx * model.vocab_size
         float draft_prob = softmax_prob(all_logits, logit_offset, draft_token, model.vocab_size)
@@ -188,7 +188,7 @@ func draft_model_forward(
     []int tokens) []float {
     []float logits = []float{cap: model.vocab_size}
     int i = 0
-    while i < model.vocab_size {
+    for i < model.vocab_size {
         float logit_val = float(i) * 0.01
         logits.push(logit_val)
         i = i + 1
@@ -203,9 +203,9 @@ func target_model_forward_sequence(
     int total_positions = len(draft_tokens)
     []float all_logits = []float{cap: total_positions * model.vocab_size}
     int pos = 0
-    while pos < total_positions {
+    for pos < total_positions {
         int i = 0
-        while i < model.vocab_size {
+        for i < model.vocab_size {
             float logit_val = float(i) * 0.01
             all_logits.push(logit_val)
             i = i + 1
@@ -220,7 +220,7 @@ func target_model_generate_single(
     []int context) int {
     []float logits = []float{cap: model.vocab_size}
     int i = 0
-    while i < model.vocab_size {
+    for i < model.vocab_size {
         logits.push(float(i) * 0.01)
         i = i + 1
     }
@@ -234,7 +234,7 @@ func softmax_prob(
     int vocab_size) float {
     float max_logit = logits[offset]
     int i = offset + 1
-    while i < offset + vocab_size {
+    for i < offset + vocab_size {
         if logits[i] > max_logit {
             max_logit = logits[i]
         }
@@ -242,7 +242,7 @@ func softmax_prob(
     }
     float sum_exp = 0.0
     i = offset
-    while i < offset + vocab_size {
+    for i < offset + vocab_size {
         sum_exp = sum_exp + exp_approx(logits[i] - max_logit)
         i = i + 1
     }
@@ -258,7 +258,7 @@ func sample_token(
     int vocab_size = len(logits)
     float max_logit = logits[0]
     int i = 1
-    while i < vocab_size {
+    for i < vocab_size {
         if logits[i] > max_logit {
             max_logit = logits[i]
         }
@@ -267,7 +267,7 @@ func sample_token(
     int sampled_token = 0
     float max_score = logits[0]
     i = 1
-    while i < vocab_size {
+    for i < vocab_size {
         if logits[i] > max_score {
             max_score = logits[i]
             sampled_token = i
@@ -287,7 +287,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / float(i)
         result = result + term
         i = i + 1

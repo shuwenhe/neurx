@@ -58,7 +58,7 @@ struct hicache_prefix_result {
 func hicache_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -79,7 +79,7 @@ func new_hicache(hicache_config config) hicache_state {
 
 func hicache_find_page(hicache_state state, int key_hash, int pool_id) int {
     int i = 0
-    while i < state.page_count {
+    for i < state.page_count {
         if state.key_hashes[i] == key_hash && state.pool_ids[i] == pool_id { return i }
         i = i + 1
     }
@@ -186,9 +186,9 @@ func hicache_page_available(hicache_state state, int key_hash, int pool_id) bool
 
 func hicache_match_prefix(hicache_state state, []int kv_keys, int kv_pool_id, []int auxiliary_keys, int auxiliary_pool_id) hicache_prefix_result {
     int kv_hit = 0
-    while kv_hit < len(kv_keys) && hicache_page_available(state, kv_keys[kv_hit], kv_pool_id) { kv_hit = kv_hit + 1 }
+    for kv_hit < len(kv_keys) && hicache_page_available(state, kv_keys[kv_hit], kv_pool_id) { kv_hit = kv_hit + 1 }
     int auxiliary_hit = 0
-    while auxiliary_hit < len(auxiliary_keys) && hicache_page_available(state, auxiliary_keys[auxiliary_hit], auxiliary_pool_id) { auxiliary_hit = auxiliary_hit + 1 }
+    for auxiliary_hit < len(auxiliary_keys) && hicache_page_available(state, auxiliary_keys[auxiliary_hit], auxiliary_pool_id) { auxiliary_hit = auxiliary_hit + 1 }
     int usable = kv_hit
     if len(auxiliary_keys) > 0 && auxiliary_hit < usable { usable = auxiliary_hit }
     hicache_prefix_result {kv_hit_pages: kv_hit, auxiliary_hit_pages: auxiliary_hit, usable_pages: usable}

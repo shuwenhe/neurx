@@ -47,12 +47,12 @@ func compute_block_attention(
     float* output = alloc(float, block_size_q * head_dim)
     float* attention_scores = alloc(float, block_size_q * block_size_k)
     int i = 0
-    while i < block_size_q {
+    for i < block_size_q {
         int j = 0
-        while j < block_size_k {
+        for j < block_size_k {
             float score = 0.0
             int k = 0
-            while k < head_dim {
+            for k < head_dim {
                 score = score + query_block[i * head_dim + k] *
                                key_block[j * head_dim + k]
                 k = k + 1
@@ -65,10 +65,10 @@ func compute_block_attention(
     }
     float* softmax_output = alloc(float, block_size_q * block_size_k)
     i = 0
-    while i < block_size_q {
+    for i < block_size_q {
         float row_max = attention_scores[i * block_size_k]
         int j = 0
-        while j < block_size_k {
+        for j < block_size_k {
             if attention_scores[i * block_size_k + j] > row_max {
                 row_max = attention_scores[i * block_size_k + j]
             }
@@ -76,26 +76,26 @@ func compute_block_attention(
         }
         float row_sum = 0.0
         j = 0
-        while j < block_size_k {
+        for j < block_size_k {
             float exp_val = exp_f(attention_scores[i * block_size_k + j] - row_max)
             softmax_output[i * block_size_k + j] = exp_val
             row_sum = row_sum + exp_val
             j = j + 1
         }
         j = 0
-        while j < block_size_k {
+        for j < block_size_k {
             softmax_output[i * block_size_k + j] = softmax_output[i * block_size_k + j] / row_sum
             j = j + 1
         }
         i = i + 1
     }
     i = 0
-    while i < block_size_q {
+    for i < block_size_q {
         int j = 0
-        while j < head_dim {
+        for j < head_dim {
             float sum = 0.0
             int k = 0
-            while k < block_size_k {
+            for k < block_size_k {
                 sum = sum + softmax_output[i * block_size_k + k] *
                            value_block[k * head_dim + j]
                 k = k + 1
@@ -130,18 +130,18 @@ func add_to_paged_kv_cache(
     int token_count
 ) paged_kv_cache {
     int tokens_added = 0
-    while tokens_added < token_count {
+    for tokens_added < token_count {
         int available_space = cache.page_size - cache.tokens_in_current_page
         int tokens_to_add = token_count - tokens_added
         if tokens_to_add > available_space {
             tokens_to_add = available_space
         }
         int i = 0
-        while i < tokens_to_add {
+        for i < tokens_to_add {
             int source_idx = tokens_added + i
             int dest_idx = cache.current_page_idx * cache.page_size + cache.tokens_in_current_page + i
             int j = 0
-            while j < 64 {
+            for j < 64 {
                 cache.key_pages[dest_idx * 64 + j] = new_keys[source_idx * 64 + j]
                 cache.value_pages[dest_idx * 64 + j] = new_values[source_idx * 64 + j]
                 j = j + 1
@@ -195,7 +195,7 @@ func flash_attention_v3_forward(
 ) float* {
     float* output = alloc(float, batch_size * seq_len * engine.config.head_dim)
     int q_block_idx = 0
-    while q_block_idx * engine.config.block_size_q < seq_len {
+    for q_block_idx * engine.config.block_size_q < seq_len {
         int q_start = q_block_idx * engine.config.block_size_q
         int q_end = q_start + engine.config.block_size_q
         if q_end > seq_len {
@@ -205,7 +205,7 @@ func flash_attention_v3_forward(
         float* block_output = alloc(float, q_size * engine.config.head_dim)
         float* block_sum = alloc(float, q_size)
         int kv_block_idx = 0
-        while kv_block_idx * engine.config.block_size_k < seq_len {
+        for kv_block_idx * engine.config.block_size_k < seq_len {
             int kv_start = kv_block_idx * engine.config.block_size_k
             int kv_end = kv_start + engine.config.block_size_k
             if kv_end > seq_len {
@@ -222,9 +222,9 @@ func flash_attention_v3_forward(
             float* key_block = alloc(float, kv_size * engine.config.head_dim)
             float* value_block = alloc(float, kv_size * engine.config.head_dim)
             int i = 0
-            while i < q_size {
+            for i < q_size {
                 int j = 0
-                while j < engine.config.head_dim {
+                for j < engine.config.head_dim {
                     query_block[i * engine.config.head_dim + j] =
                         query[(q_start + i) * engine.config.head_dim + j]
                     j = j + 1
@@ -232,9 +232,9 @@ func flash_attention_v3_forward(
                 i = i + 1
             }
             i = 0
-            while i < kv_size {
+            for i < kv_size {
                 int j = 0
-                while j < engine.config.head_dim {
+                for j < engine.config.head_dim {
                     key_block[i * engine.config.head_dim + j] =
                         key[(kv_start + i) * engine.config.head_dim + j]
                     value_block[i * engine.config.head_dim + j] =
@@ -248,9 +248,9 @@ func flash_attention_v3_forward(
                 q_size, kv_size, engine.config.head_dim
             )
             i = 0
-            while i < q_size {
+            for i < q_size {
                 int j = 0
-                while j < engine.config.head_dim {
+                for j < engine.config.head_dim {
                     block_output[i * engine.config.head_dim + j] =
                         block_output[i * engine.config.head_dim + j] +
                         block_attn[i * engine.config.head_dim + j]
@@ -261,9 +261,9 @@ func flash_attention_v3_forward(
             kv_block_idx = kv_block_idx + 1
         }
         int i = 0
-        while i < q_size {
+        for i < q_size {
             int j = 0
-            while j < engine.config.head_dim {
+            for j < engine.config.head_dim {
                 output[(q_start + i) * engine.config.head_dim + j] =
                     block_output[i * engine.config.head_dim + j]
                 j = j + 1
@@ -282,7 +282,7 @@ func generate_draft_tokens(
     speculative_decoding speculative
 ) speculative_decoding {
     int i = 0
-    while i < draft_count {
+    for i < draft_count {
         speculative.draft_tokens[i] = 0
         speculative.draft_probabilities[i] = 0.95
         i = i + 1
@@ -299,7 +299,7 @@ func verify_draft_tokens(
 ) bool {
     int accepted = 0
     int i = 0
-    while i < draft_count {
+    for i < draft_count {
         float accept_prob = 0.95
         if accept_prob > 0.5 {
             accepted = accepted + 1
@@ -319,7 +319,7 @@ func batched_inference(
 ) float* {
     float* output = alloc(float, batch_size * seq_len * engine.config.head_dim)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         float* batch_output = flash_attention_v3_forward(
             query_batch + b * seq_len * engine.config.head_dim,
             key_batch + b * seq_len * engine.config.head_dim,
@@ -329,7 +329,7 @@ func batched_inference(
             engine
         )
         int i = 0
-        while i < seq_len * engine.config.head_dim {
+        for i < seq_len * engine.config.head_dim {
             output[b * seq_len * engine.config.head_dim + i] = batch_output[i]
             i = i + 1
         }
@@ -344,7 +344,7 @@ func sqrt_f(float x) float {
     }
     float guess = x / 2.0
     int i = 0
-    while i < 10 {
+    for i < 10 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }

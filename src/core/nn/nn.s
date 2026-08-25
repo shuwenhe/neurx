@@ -19,7 +19,7 @@ func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -30,7 +30,7 @@ func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -61,7 +61,7 @@ func shape3(int a, int b, int c) []int {
 func numel([]int shape) int {
     int n = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         n = n * shape[i]
         i = i + 1
     }
@@ -86,7 +86,7 @@ func sqrt_approx(float x) float {
     }
     float guess = v
     int i = 0
-    while i < 6 {
+    for i < 6 {
         guess = 0.5 * (guess + v / guess)
         i = i + 1
     }
@@ -103,12 +103,12 @@ func matmul2d(tensor a, tensor b) tensor {
     int cols = b.shape[1]
     []float out = []float{cap: rows * cols}
     int r = 0
-    while r < rows {
+    for r < rows {
         int c = 0
-        while c < cols {
+        for c < cols {
             float acc = 0.0
             int i = 0
-            while i < inner {
+            for i < inner {
                 acc = acc + a.data[r * inner + i] * b.data[i * cols + c]
                 i = i + 1
             }
@@ -125,7 +125,7 @@ func softmax_1d([]float values) []float {
     []float out = []float{cap: n}
     float max_v = values[0]
     int i = 1
-    while i < n {
+    for i < n {
         if values[i] > max_v {
             max_v = values[i]
         }
@@ -133,13 +133,13 @@ func softmax_1d([]float values) []float {
     }
     float denom = 0.0
     i = 0
-    while i < n {
+    for i < n {
         float shifted = values[i] - max_v
         float v = 1.0 / (1.0 + 0.0)
         v = 1.0
         int j = 0
         float term = 1.0
-        while j < 6 {
+        for j < 6 {
             term = term * shifted / (j + 1)
             v = v + term
             j = j + 1
@@ -152,7 +152,7 @@ func softmax_1d([]float values) []float {
         denom = 1.0
     }
     i = 0
-    while i < n {
+    for i < n {
         out[i] = out[i] / denom
         i = i + 1
     }
@@ -167,36 +167,36 @@ func layer_norm_impl(tensor input, tensor weight, tensor bias, int normalized_di
     }
     int outer = 1
     int i = 0
-    while i < start {
+    for i < start {
         outer = outer * input.shape[i]
         i = i + 1
     }
     int inner = 1
-    while i < ndim {
+    for i < ndim {
         inner = inner * input.shape[i]
         i = i + 1
     }
     []float out = []float{cap: len(input.data)}
     int o = 0
-    while o < outer {
+    for o < outer {
         int base = o * inner
         float mean = 0.0
         int j = 0
-        while j < inner {
+        for j < inner {
             mean = mean + input.data[base + j]
             j = j + 1
         }
         mean = mean / inner
         float variance = 0.0
         j = 0
-        while j < inner {
+        for j < inner {
             float diff = input.data[base + j] - mean
             variance = variance + diff * diff
             j = j + 1
         }
         variance = variance / inner
         j = 0
-        while j < inner {
+        for j < inner {
             float norm = (input.data[base + j] - mean) / sqrt_approx(variance + eps)
             out[base + j] = norm * weight.data[j] + bias.data[j]
             j = j + 1
@@ -214,22 +214,22 @@ func rms_norm_impl(tensor input, tensor weight, tensor bias, int normalized_dims
     }
     int outer = 1
     int i = 0
-    while i < start {
+    for i < start {
         outer = outer * input.shape[i]
         i = i + 1
     }
     int inner = 1
-    while i < ndim {
+    for i < ndim {
         inner = inner * input.shape[i]
         i = i + 1
     }
     []float out = []float{cap: len(input.data)}
     int o = 0
-    while o < outer {
+    for o < outer {
         int base = o * inner
         float mean_sq = 0.0
         int j = 0
-        while j < inner {
+        for j < inner {
             float v = input.data[base + j]
             mean_sq = mean_sq + v * v
             j = j + 1
@@ -237,7 +237,7 @@ func rms_norm_impl(tensor input, tensor weight, tensor bias, int normalized_dims
         mean_sq = mean_sq / inner
         float denom = mean_sq + eps
         j = 0
-        while j < inner {
+        for j < inner {
             float norm = input.data[base + j] / sqrt_approx(denom)
             out[base + j] = norm * weight.data[j] + bias.data[j]
             j = j + 1
@@ -253,12 +253,12 @@ func mlp_block_impl(tensor input, tensor fc1_weight, tensor fc1_bias, tensor fc2
     int hidden_features = fc1_bias.shape[0]
     []float hidden = []float{cap: batch * hidden_features}
     int b = 0
-    while b < batch {
+    for b < batch {
         int j = 0
-        while j < hidden_features {
+        for j < hidden_features {
             float acc = fc1_bias.data[j]
             int i = 0
-            while i < in_features {
+            for i < in_features {
                 acc = acc + input.data[b * in_features + i] * fc1_weight.data[i * hidden_features + j]
                 i = i + 1
             }
@@ -271,12 +271,12 @@ func mlp_block_impl(tensor input, tensor fc1_weight, tensor fc1_bias, tensor fc2
     int out_features = fc2_bias.shape[0]
     []float out = []float{cap: batch * out_features}
     b = 0
-    while b < batch {
+    for b < batch {
         int j = 0
-        while j < out_features {
+        for j < out_features {
             float acc = fc2_bias.data[j]
             int i = 0
-            while i < hidden_features {
+            for i < hidden_features {
                 acc = acc + hidden[b * hidden_features + i] * fc2_weight.data[i * out_features + j]
                 i = i + 1
             }
@@ -296,14 +296,14 @@ func qkv_projection_impl(tensor input, tensor weight, tensor bias, int n_heads) 
     int proj_channels = channels * 3
     []float out = []float{cap: batch * seq_len * proj_channels}
     int b = 0
-    while b < batch {
+    for b < batch {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int c = 0
-            while c < proj_channels {
+            for c < proj_channels {
                 float acc = bias.data[c]
                 int i = 0
-                while i < channels {
+                for i < channels {
                     acc = acc + input.data[(b * seq_len + s) * channels + i] * weight.data[i * proj_channels + c]
                     i = i + 1
                 }
@@ -321,7 +321,7 @@ func rope_apply_impl(tensor input, tensor cos, tensor sin) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         if i + 1 < n {
             out[i] = input.data[i] * cos.data[i] - input.data[i + 1] * sin.data[i]
             out[i + 1] = input.data[i] * sin.data[i] + input.data[i + 1] * cos.data[i]
@@ -339,7 +339,7 @@ func embedding_lookup_impl(tensor weight, tensor input_ids, int padding_idx) ten
     int n = len(input_ids.data)
     []float out = []float{cap: n * dim}
     int i = 0
-    while i < n {
+    for i < n {
         int idx = input_ids.data[i]
         if idx == padding_idx {
             idx = 0
@@ -351,7 +351,7 @@ func embedding_lookup_impl(tensor weight, tensor input_ids, int padding_idx) ten
             idx = vocab - 1
         }
         int d = 0
-        while d < dim {
+        for d < dim {
             out[i * dim + d] = weight.data[idx * dim + d]
             d = d + 1
         }
@@ -365,12 +365,12 @@ func new_linear(int in_features, int out_features) linear {
     []float weight = []float{cap: weight_size}
     []float bias = []float{cap: out_features}
     int i = 0
-    while i < weight_size {
+    for i < weight_size {
         weight[i] = 0.0
         i = i + 1
     }
     i = 0
-    while i < out_features {
+    for i < out_features {
         bias[i] = 0.0
         i = i + 1
     }
@@ -477,18 +477,18 @@ func transformer_block_forward(tensor input, tensor ln1_weight, tensor ln1_bias,
     tensor proj = clone_tensor(attn)
     tensor resid1 = clone_tensor(input)
     int i = 0
-    while i < len(proj.data) && i < len(out_weight.data) {
+    for i < len(proj.data) && i < len(out_weight.data) {
         proj.data[i] = proj.data[i] * out_weight.data[i]
         i = i + 1
     }
     i = 0
-    while i < len(proj.data) && i < len(out_bias.data) {
+    for i < len(proj.data) && i < len(out_bias.data) {
         proj.data[i] = proj.data[i] + out_bias.data[i]
         i = i + 1
     }
     tensor x = clone_tensor(resid1)
     i = 0
-    while i < len(x.data) && i < len(proj.data) {
+    for i < len(x.data) && i < len(proj.data) {
         x.data[i] = x.data[i] + proj.data[i]
         i = i + 1
     }
@@ -496,7 +496,7 @@ func transformer_block_forward(tensor input, tensor ln1_weight, tensor ln1_bias,
     tensor mlp = mlp_block_impl(norm2, fc1_weight, fc1_bias, fc2_weight, fc2_bias)
     tensor out = clone_tensor(x)
     i = 0
-    while i < len(out.data) && i < len(mlp.data) {
+    for i < len(out.data) && i < len(mlp.data) {
         out.data[i] = out.data[i] + mlp.data[i]
         i = i + 1
     }
@@ -524,7 +524,7 @@ func embedding_bag(tensor weight, tensor input_ids, tensor offsets, int padding_
     int dim = weight.shape[1]
     []float out = []float{cap: bag_count * dim}
     int b = 0
-    while b < bag_count {
+    for b < bag_count {
         int start = offsets.data[b]
         int end = len(input_ids.data)
         if b + 1 < bag_count {
@@ -541,10 +541,10 @@ func embedding_bag(tensor weight, tensor input_ids, tensor offsets, int padding_
             count = 1
         }
         int d = 0
-        while d < dim {
+        for d < dim {
             float acc = 0.0
             int i = start
-            while i < end {
+            for i < end {
                 acc = acc + embedded.data[i * dim + d]
                 i = i + 1
             }
@@ -639,7 +639,7 @@ func dropout(tensor input, float p, bool training) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         int bucket = i - (i / 10) * 10
         float keep = 1.0
         if bucket < p * 10.0 {
@@ -675,7 +675,7 @@ func alpha_dropout(tensor input, float p, bool training) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         int bucket = i - (i / 10) * 10
         if bucket < p * 10.0 {
             out[i] = alpha_prime
@@ -695,7 +695,7 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
     int channels = input.shape[1]
     []float out = []float{cap: len(input.data)}
     int c = 0
-    while c < channels {
+    for c < channels {
         float mean = 0.0
         float variance = 0.0
         int per_channel = 0
@@ -703,14 +703,14 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
             int batch = input.shape[0]
             per_channel = batch
             int b = 0
-            while b < batch {
+            for b < batch {
                 float v = input.data[b * channels + c]
                 mean = mean + v
                 b = b + 1
             }
             mean = mean / per_channel
             b = 0
-            while b < batch {
+            for b < batch {
                 float v = input.data[b * channels + c] - mean
                 variance = variance + v * v
                 b = b + 1
@@ -721,9 +721,9 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
                 int length = input.shape[2]
                 per_channel = batch * length
                 int b = 0
-                while b < batch {
+                for b < batch {
                     int l = 0
-                    while l < length {
+                    for l < length {
                         float v = input.data[(b * channels + c) * length + l]
                         mean = mean + v
                         l = l + 1
@@ -732,9 +732,9 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
                 }
                 mean = mean / per_channel
                 b = 0
-                while b < batch {
+                for b < batch {
                     int l = 0
-                    while l < length {
+                    for l < length {
                         float v = input.data[(b * channels + c) * length + l] - mean
                         variance = variance + v * v
                         l = l + 1
@@ -748,11 +748,11 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
                     int width = input.shape[3]
                     per_channel = batch * height * width
                     int b = 0
-                    while b < batch {
+                    for b < batch {
                         int h = 0
-                        while h < height {
+                        for h < height {
                             int w = 0
-                            while w < width {
+                            for w < width {
                                 float v = input.data[((b * channels + c) * height + h) * width + w]
                                 mean = mean + v
                                 w = w + 1
@@ -763,11 +763,11 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
                     }
                     mean = mean / per_channel
                     b = 0
-                    while b < batch {
+                    for b < batch {
                         int h = 0
-                        while h < height {
+                        for h < height {
                             int w = 0
-                            while w < width {
+                            for w < width {
                                 float v = input.data[((b * channels + c) * height + h) * width + w] - mean
                                 variance = variance + v * v
                                 w = w + 1
@@ -793,7 +793,7 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
         if ndim == 2 {
             int batch = input.shape[0]
             int b = 0
-            while b < batch {
+            for b < batch {
                 int idx = b * channels + c
                 float scale = 1.0
                 float shift = 0.0
@@ -811,9 +811,9 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
                 int batch = input.shape[0]
                 int length = input.shape[2]
                 int b = 0
-                while b < batch {
+                for b < batch {
                     int l = 0
-                    while l < length {
+                    for l < length {
                         int idx = (b * channels + c) * length + l
                         float scale = 1.0
                         float shift = 0.0
@@ -834,11 +834,11 @@ func batch_norm(tensor input, tensor weight, tensor bias, tensor running_mean, t
                     int height = input.shape[2]
                     int width = input.shape[3]
                     int b = 0
-                    while b < batch {
+                    for b < batch {
                         int h = 0
-                        while h < height {
+                        for h < height {
                             int w = 0
-                            while w < width {
+                            for w < width {
                                 int idx = ((b * channels + c) * height + h) * width + w
                                 float scale = 1.0
                                 float shift = 0.0
@@ -884,30 +884,30 @@ func group_norm(tensor input, tensor weight, tensor bias, int num_groups, float 
     if groups > channels {
         groups = channels
     }
-    while channels / groups * groups != channels && groups > 1 {
+    for channels / groups * groups != channels && groups > 1 {
         groups = groups - 1
     }
     int group_channels = channels / groups
     int spatial = 1
     int i = 2
-    while i < ndim {
+    for i < ndim {
         spatial = spatial * input.shape[i]
         i = i + 1
     }
     []float out = []float{cap: len(input.data)}
     int b = 0
-    while b < batch {
+    for b < batch {
         int g = 0
-        while g < groups {
+        for g < groups {
             int c_start = g * group_channels
             int c_end = c_start + group_channels
             float mean = 0.0
             float variance = 0.0
             int count = group_channels * spatial
             int c = c_start
-            while c < c_end {
+            for c < c_end {
                 int s = 0
-                while s < spatial {
+                for s < spatial {
                     int idx = 0
                     if ndim == 2 {
                         idx = b * channels + c
@@ -932,9 +932,9 @@ func group_norm(tensor input, tensor weight, tensor bias, int num_groups, float 
             }
             mean = mean / count
             c = c_start
-            while c < c_end {
+            for c < c_end {
                 int s = 0
-                while s < spatial {
+                for s < spatial {
                     int idx = 0
                     if ndim == 2 {
                         idx = b * channels + c
@@ -956,7 +956,7 @@ func group_norm(tensor input, tensor weight, tensor bias, int num_groups, float 
             variance = variance / count
             float denom = neurx.tensor.sqrt(neurx.tensor.scalar_tensor(variance + eps)).data[0]
             c = c_start
-            while c < c_end {
+            for c < c_end {
                 float scale = 1.0
                 float shift = 0.0
                 if len(weight.data) > c {
@@ -966,7 +966,7 @@ func group_norm(tensor input, tensor weight, tensor bias, int num_groups, float 
                     shift = bias.data[c]
                 }
                 int s = 0
-                while s < spatial {
+                for s < spatial {
                     int idx = 0
                     if ndim == 2 {
                         idx = b * channels + c

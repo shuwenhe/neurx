@@ -84,7 +84,7 @@ func schedule_fcfs(
 ) []scheduled_request {
     batch := []scheduled_request{}
     i := 0
-    while i < sched.queue.len && batch.len < batch_size {
+    for i < sched.queue.len && batch.len < batch_size {
         if sched.inflight_count + batch.len < sched.max_inflight {
             batch = append_request(batch, sched.queue[i])
             i = i + 1
@@ -102,7 +102,7 @@ func schedule_sjf(
     batch := []scheduled_request{}
     sorted := sort_requests_by_tokens(sched.queue)
     i := 0
-    while i < sorted.len && batch.len < batch_size {
+    for i < sorted.len && batch.len < batch_size {
         if sched.inflight_count + batch.len < sched.max_inflight {
             batch = append_request(batch, sorted[i])
             i = i + 1
@@ -121,7 +121,7 @@ func mark_request_complete(
     sched.stats.total_completed = sched.stats.total_completed + 1
     new_queue := []scheduled_request{}
     i := 0
-    while i < sched.queue.len {
+    for i < sched.queue.len {
         if sched.queue[i].request_id != request_id {
             new_queue = append_request(new_queue, sched.queue[i])
         }
@@ -138,7 +138,7 @@ func preempt_request(
     sched.stats.total_preempted = sched.stats.total_preempted + 1
     new_queue := []scheduled_request{}
     i := 0
-    while i < sched.queue.len {
+    for i < sched.queue.len {
         curr := sched.queue[i]
         if curr.request_id == request_id && curr.preemptible {
             i = i + 1
@@ -165,9 +165,9 @@ func get_scheduler_stats(request_scheduler sched) scheduler_stats {
 func sort_requests_by_tokens([]scheduled_request reqs) []scheduled_request {
     sorted := reqs
     i := 0
-    while i < sorted.len {
+    for i < sorted.len {
         j := i + 1
-        while j < sorted.len {
+        for j < sorted.len {
             if sorted[i].estimated_tokens > sorted[j].estimated_tokens {
                 temp := sorted[i]
                 sorted[i] = sorted[j]
@@ -183,7 +183,7 @@ func sort_requests_by_tokens([]scheduled_request reqs) []scheduled_request {
 func append_request([]scheduled_request slice, scheduled_request elem) []scheduled_request {
     new_slice := make_request_slice(slice.len + 1)
     i := 0
-    while i < slice.len {
+    for i < slice.len {
         new_slice[i] = slice[i]
         i = i + 1
     }

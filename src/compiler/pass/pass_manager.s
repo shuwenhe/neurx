@@ -51,7 +51,7 @@ func apply_pass_plan(compile_state state, pass_plan_state plan) compile_state {
     compile_state next = state
     int i = 0
     int passes_len = pass_count(plan)
-    while i < passes_len {
+    for i < passes_len {
         string pass_name = get_pass(plan, i)
         next = compile_add_pass(next, pass_name)
         if pass_name == "shape_infer" {

@@ -255,7 +255,7 @@ func write_checkpoint_to_disk(
     string directory
 ) bool {
     int retries = 0
-    while retries < mgr.config.max_retries {
+    for retries < mgr.config.max_retries {
         if attempt_write_checkpoint(mgr, ckpt, directory, retries == 0) {
             return true
         }
@@ -311,7 +311,7 @@ func save_model_parameters(
 ) bool {
     int num_shards = len(ckpt.param_shards)
     int shard_idx = 0
-    while shard_idx < num_shards {
+    for shard_idx < num_shards {
         tensor_shard shard = ckpt.param_shards[shard_idx]
         if mgr.config.incremental_enabled && !shard.has_changed {
             shard_idx = shard_idx + 1
@@ -433,7 +433,7 @@ func restore_training_state(
 }
 
 func background_writer_loop(ref checkpoint_manager mgr) {
-    while true {
+    for true {
         checkpoint_task task = dequeue_task(mgr)
         if task.is_cancelled {
             continue
@@ -456,7 +456,7 @@ func cleanup_old_checkpoints(ref checkpoint_manager mgr) {
     []string all_ckpts = list_all_checkpoints(mgr.config.base_directory)
     sort_checkpoints_by_step_desc(all_ckpts)
     int idx = keep_n
-    while idx < len(all_ckpts) {
+    for idx < len(all_ckpts) {
         string old_path = all_ckpts[idx]
         delete_directory_recursive(old_path)
         log_info("Deleted old checkpoint: " + old_path)
@@ -470,7 +470,7 @@ func find_latest_checkpoint(string base_dir) string {
     string latest = all_ckpts[0]
     int latest_step = -1
     int i = 0
-    while i < len(all_ckpts) {
+    for i < len(all_ckpts) {
         int step = extract_step_from_path(all_ckpts[i])
         if step > latest_step {
             latest_step = step
@@ -497,7 +497,7 @@ func build_checkpoint_path(checkpoint_manager mgr, int step) string {
 
 func pad_with_zeros(int value, int width) string {
     string s = string(value)
-    while len(s) < width {
+    for len(s) < width {
         s = "0" + s
     }
     return s

@@ -10,10 +10,10 @@ func contains_keyword(string text, string keyword) bool {
         return false
     }
     int i = 0
-    while i <= text_len - keyword_len {
+    for i <= text_len - keyword_len {
         bool match = true
         int j = 0
-        while j < keyword_len {
+        for j < keyword_len {
             string text_char = __host_slice(text, i + j, i + j + 1)
             string keyword_char = __host_slice(keyword, j, j + 1)
             if text_char != keyword_char {
@@ -47,11 +47,11 @@ func generate_response(string prompt) string {
 
 func trim(string s) string {
     int i = 0
-    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
     int j = len(s) - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
     if j < i {
@@ -73,7 +73,7 @@ func main() {
     print("\n")
     print("Type medical questions (or /exit to quit)\n")
     print("════════════════════════════════════════════════════════════════\n\n")
-    while true {
+    for true {
         print("You: ")
         string input = trim(__sys_read_string(0, 512))
         if input == "/exit" || input == "exit" {

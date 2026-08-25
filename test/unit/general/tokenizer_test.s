@@ -22,7 +22,7 @@ func run_all_tests() int {
     int passed = 0
     int failed = 0
     int i = 0
-    while i < len(test_results) {
+    for i < len(test_results) {
         test_result_2 tr = test_results[i]
         string status = "PASS"
         if !tr.passed {
@@ -157,7 +157,7 @@ func str_int(int n) string {
         n = -n
     }
     string result = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n % 10
         if digit == 0 { result = "0" + result }
         else if digit == 1 { result = "1" + result }

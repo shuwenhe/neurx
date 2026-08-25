@@ -27,7 +27,7 @@ func lookup_embedding(int token_id) []float {
     if token_id < 0 || token_id >= len(GLOBAL_EMBEDDING) {
         []float zeros = []float{cap: 896}
         int i = 0
-        while i < 896 { zeros[i] = 0.0; i = i + 1 }
+        for i < 896 { zeros[i] = 0.0; i = i + 1 }
         return zeros
     }
     GLOBAL_EMBEDDING[token_id]
@@ -36,7 +36,7 @@ func lookup_embedding(int token_id) []float {
 func embed_tokens([]int token_ids) [][]float {
     [][]float result = [][]float{cap: len(token_ids)}
     int i = 0
-    while i < len(token_ids) {
+    for i < len(token_ids) {
         result.push(lookup_embedding(token_ids[i]))
         i = i + 1
     }

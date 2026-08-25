@@ -157,10 +157,10 @@ func new_finetune_scheduler(
 
 func cosine_approx(float x) float {
     x_reduced := x
-    while x_reduced > 3.14159 {
+    for x_reduced > 3.14159 {
         x_reduced = x_reduced - 6.28318
     }
-    while x_reduced < -3.14159 {
+    for x_reduced < -3.14159 {
         x_reduced = x_reduced + 6.28318
     }
     x2 := x_reduced * x_reduced

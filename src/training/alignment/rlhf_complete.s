@@ -35,9 +35,9 @@ func sft_training_step(
 ) float {
     float loss = 0.0
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         int j = 0
-        while j < seq_len {
+        for j < seq_len {
             int target_idx = target_tokens[i * seq_len + j]
             float log_prob = model_logits[i * seq_len * vocab_size + j * vocab_size + target_idx]
             float sample_loss = -log_prob
@@ -82,7 +82,7 @@ func ranknet_loss(
 ) float {
     float loss = 0.0
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         float score_diff = chosen_scores[i] - rejected_scores[i]
         float sigmoid_val = 1.0 / (1.0 + exp_f(-score_diff))
         float sample_loss = -log_f(sigmoid_val)
@@ -136,7 +136,7 @@ func compute_advantages(
     float* returns = alloc(float, trajectory_length)
     float gae = 0.0
     int t = trajectory_length - 1
-    while t >= 0 {
+    for t >= 0 {
         float delta = 0.0
         if t == trajectory_length - 1 {
             delta = rewards[t] - values[t]
@@ -160,7 +160,7 @@ func ppo_policy_loss(
 ) float {
     float loss = 0.0
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         float ratio = exp_f(log_probs_new[i] - log_probs_old[i])
         float clipped_ratio = ratio
         if ratio > 1.0 + epsilon {
@@ -183,7 +183,7 @@ func ppo_value_loss(
 ) float {
     float loss = 0.0
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         float diff = value_predictions[i] - returns[i]
         loss = loss + diff * diff
         i = i + 1
@@ -198,7 +198,7 @@ func compute_kl_divergence(
 ) float {
     float kl = 0.0
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         float sample_kl = log_probs_old[i] - log_probs_new[i]
         kl = kl + sample_kl
         i = i + 1

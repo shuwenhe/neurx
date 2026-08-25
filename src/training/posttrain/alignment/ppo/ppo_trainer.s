@@ -95,7 +95,7 @@ func collect_trajectory(
     traj.episode_length = 0
     int prompt_len = len(prompt)
     int t = 0
-    while t < config.horizon {
+    for t < config.horizon {
         ppo_step step
         step.step_id = t
         step.tokens = []float{cap: 4}
@@ -129,7 +129,7 @@ func compute_gae_advantages(ppo_trajectory traj, ppo_config config) ppo_trajecto
     []float returns = make_float_array(T, 0.0)
     float gae = 0.0
     int t = T - 1
-    while t >= 0 {
+    for t >= 0 {
         float next_value = 0.0
         if t < T - 1 {
             next_value = traj.steps[t + 1].value_estimate
@@ -146,14 +146,14 @@ func compute_gae_advantages(ppo_trajectory traj, ppo_config config) ppo_trajecto
     }
     float mean_advantage = 0.0
     int i = 0
-    while i < len(advantages) {
+    for i < len(advantages) {
         mean_advantage = mean_advantage + advantages[i]
         i = i + 1
     }
     mean_advantage = mean_advantage / float(T)
     float std_advantage = 0.0
     i = 0
-    while i < len(advantages) {
+    for i < len(advantages) {
         float diff = advantages[i] - mean_advantage
         std_advantage = std_advantage + diff * diff
         i = i + 1
@@ -161,7 +161,7 @@ func compute_gae_advantages(ppo_trajectory traj, ppo_config config) ppo_trajecto
     std_advantage = sqrt_approx(std_advantage / float(T))
     if std_advantage > 0.0001 {
         i = 0
-        while i < len(advantages) {
+        for i < len(advantages) {
             traj.steps[i].advantage = (traj.steps[i].advantage - mean_advantage) / std_advantage
             i = i + 1
         }
@@ -203,7 +203,7 @@ func compute_entropy([]float logits) float {
     []float probs = softmax_approx(logits)
     float entropy = 0.0
     int i = 0
-    while i < len(probs) {
+    for i < len(probs) {
         if probs[i] > 0.00001 {
             entropy = entropy - probs[i] * log_approx(probs[i])
         }
@@ -236,7 +236,7 @@ func ppo_training_step(
     float total_ratio = 0.0
     float total_advantage = 0.0
     int i = 0
-    while i < len(trajectory.steps) {
+    for i < len(trajectory.steps) {
         ppo_step step = trajectory.steps[i]
         float log_prob_new = compute_log_prob(step.logits)
         float value_pred = compute_value_estimate(step.tokens, state.config)
@@ -292,14 +292,14 @@ func compute_explained_variance(ppo_trajectory traj) float {
     }
     float mean_return = 0.0
     int i = 0
-    while i < len(traj.steps) {
+    for i < len(traj.steps) {
         mean_return = mean_return + traj.steps[i].return_value
         i = i + 1
     }
     mean_return = mean_return / float(len(traj.steps))
     float var_return = 0.0
     i = 0
-    while i < len(traj.steps) {
+    for i < len(traj.steps) {
         float diff = traj.steps[i].return_value - mean_return
         var_return = var_return + diff * diff
         i = i + 1
@@ -307,7 +307,7 @@ func compute_explained_variance(ppo_trajectory traj) float {
     var_return = var_return / float(len(traj.steps))
     float mean_resid = 0.0
     i = 0
-    while i < len(traj.steps) {
+    for i < len(traj.steps) {
         float resid = traj.steps[i].return_value - traj.steps[i].value_estimate
         mean_resid = mean_resid + resid
         i = i + 1
@@ -315,7 +315,7 @@ func compute_explained_variance(ppo_trajectory traj) float {
     mean_resid = mean_resid / float(len(traj.steps))
     float var_resid = 0.0
     i = 0
-    while i < len(traj.steps) {
+    for i < len(traj.steps) {
         float resid = traj.steps[i].return_value - traj.steps[i].value_estimate
         float diff = resid - mean_resid
         var_resid = var_resid + diff * diff
@@ -363,14 +363,14 @@ func start_ppo_training(
         }
     }
     int step = 0
-    while step < num_training_steps {
+    for step < num_training_steps {
         ppo_trajectory trajectory = collect_trajectory(
             "sample prompt",
             config
         )
         state.total_trajectories = state.total_trajectories + 1
         int epoch = 0
-        while epoch < config.num_epochs {
+        for epoch < config.num_epochs {
             ppo_training_result result = ppo_training_step(trajectory, state)
             state.avg_policy_loss = 0.9 * state.avg_policy_loss + 0.1 * result.policy_loss
             state.avg_value_loss = 0.9 * state.avg_value_loss + 0.1 * result.value_loss
@@ -424,7 +424,7 @@ func print_ppo_evaluation(ppo_state state, int step) {
 func make_float_array(int size, float init_value) []float {
     []float arr = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         arr[i] = init_value
         i = i + 1
     }
@@ -442,7 +442,7 @@ func compute_log_prob([]float logits) float {
     }
     float log_prob = 0.0
     int i = 0
-    while i < len(logits) {
+    for i < len(logits) {
         log_prob = log_prob + logits[i]
         i = i + 1
     }
@@ -455,7 +455,7 @@ func compute_value_estimate([]float tokens, ppo_config config) float {
     }
     float value = 0.0
     int i = 0
-    while i < len(tokens) {
+    for i < len(tokens) {
         value = value + tokens[i]
         i = i + 1
     }
@@ -480,7 +480,7 @@ func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float guess = x / 2.0
     int i = 0
-    while i < 5 {
+    for i < 5 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }
@@ -506,7 +506,7 @@ func softmax_approx([]float logits) []float {
     }
     float max_logit = logits[0]
     int i = 0
-    while i < n {
+    for i < n {
         if logits[i] > max_logit {
             max_logit = logits[i]
         }
@@ -514,7 +514,7 @@ func softmax_approx([]float logits) []float {
     }
     float total = 0.0
     i = 0
-    while i < n {
+    for i < n {
         probs[i] = exp_approx(logits[i] - max_logit)
         total = total + probs[i]
         i = i + 1
@@ -522,14 +522,14 @@ func softmax_approx([]float logits) []float {
     if total <= 0.0 {
         float inv_n = 1.0 / float(n)
         i = 0
-        while i < n {
+        for i < n {
             probs[i] = inv_n
             i = i + 1
         }
         return probs
     }
     i = 0
-    while i < n {
+    for i < n {
         probs[i] = probs[i] / total
         i = i + 1
     }
@@ -551,10 +551,10 @@ func mod_int(int a, int b) int {
         return 0
     }
     int value = a
-    while value < 0 {
+    for value < 0 {
         value = value + b
     }
-    while value >= b {
+    for value >= b {
         value = value - b
     }
     value

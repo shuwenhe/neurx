@@ -64,7 +64,7 @@ func demonstrate_pipes() {
     
     print("✓ Writing 5 integers to pipe...")
     int i = 0
-    while i < 5 {
+    for i < 5 {
         write_pipe(&pipe_mgr, pipe_id, 100 + i)
         i = i + 1
     }
@@ -72,7 +72,7 @@ func demonstrate_pipes() {
     
     print("✓ Reading from pipe:")
     int j = 0
-    while j < 5 {
+    for j < 5 {
         val, _ := read_pipe(&pipe_mgr, pipe_id)
         print("  Data: ")
         print(val as string)
@@ -103,7 +103,7 @@ func demonstrate_msgqueue() {
     
     print("✓ Sending 5 messages...")
     int i = 0
-    while i < 5 {
+    for i < 5 {
         send_message(&mgr, queue_id, 1000 + i, 1, 10 + i)
         i = i + 1
     }
@@ -111,7 +111,7 @@ func demonstrate_msgqueue() {
     
     print("✓ Receiving messages:")
     int j = 0
-    while j < 5 {
+    for j < 5 {
         msg, _ := receive_message(&mgr, queue_id, 2000)
         print("  Message ID: ")
         print(msg.msg_id as string)

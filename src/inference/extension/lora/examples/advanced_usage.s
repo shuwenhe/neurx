@@ -25,10 +25,10 @@ func example_weight_fusion() result[(), string] {
 
     lora_a := vec[vec[float]]()
     i := 0
-    while i < 128 {
+    for i < 128 {
         row := vec[float]()
         j := 0
-        while j < 8 {
+        for j < 8 {
             row.push(0.01)
             j = j + 1
         }
@@ -38,10 +38,10 @@ func example_weight_fusion() result[(), string] {
 
     lora_b := vec[vec[float]]()
     i := 0
-    while i < 8 {
+    for i < 8 {
         row := vec[float]()
         j := 0
-        while j < 128 {
+        for j < 128 {
             row.push(0.01)
             j = j + 1
         }
@@ -54,10 +54,10 @@ func example_weight_fusion() result[(), string] {
     original_weights := map[string, &vec[vec[float]]]()
     orig_weight := vec[vec[float]]()
     i := 0
-    while i < 128 {
+    for i < 128 {
         row := vec[float]()
         j := 0
-        while j < 128 {
+        for j < 128 {
             row.push(1.0)
             j = j + 1
         }
@@ -135,10 +135,10 @@ func example_multi_adapter_caching() result[(), string] {
 
     cached_weight := vec[vec[float]]()
     i := 0
-    while i < 64 {
+    for i < 64 {
         row := vec[float]()
         j := 0
-        while j < 64 {
+        for j < 64 {
             row.push(1.5)
             j = j + 1
         }
@@ -225,10 +225,10 @@ func example_weight_computation_perf() result[(), string] {
 
     lora_a := vec[vec[float]]()
     i := 0
-    while i < 256 {
+    for i < 256 {
         row := vec[float]()
         j := 0
-        while j < 8 {
+        for j < 8 {
             row.push(0.01)
             j = j + 1
         }
@@ -238,10 +238,10 @@ func example_weight_computation_perf() result[(), string] {
 
     lora_b := vec[vec[float]]()
     i := 0
-    while i < 8 {
+    for i < 8 {
         row := vec[float]()
         j := 0
-        while j < 256 {
+        for j < 256 {
             row.push(0.01)
             j = j + 1
         }

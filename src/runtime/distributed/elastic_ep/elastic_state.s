@@ -46,7 +46,7 @@ func elastic_ep_config_valid(elastic_ep_config config) bool {
 func elastic_rank_range(int count) []int {
     []int ranks = []int{cap: count}
     int i = 0
-    while i < count {
+    for i < count {
         ranks[i] = i
         i = i + 1
     }
@@ -56,7 +56,7 @@ func elastic_rank_range(int count) []int {
 func elastic_copy_ranks([]int ranks) []int {
     []int copied = []int{cap: len(ranks)}
     int i = 0
-    while i < len(ranks) {
+    for i < len(ranks) {
         copied[i] = ranks[i]
         i = i + 1
     }

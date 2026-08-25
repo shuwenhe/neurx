@@ -21,7 +21,7 @@ func main() {
     float base_lr = 0.0002
     float min_lr = 0.00002
     int warmup_steps = 100
-    while step < total_steps {
+    for step < total_steps {
         float progress = (step * 1.0) / (total_steps * 1.0)
         float decay = 1.0 - (progress * progress * progress)
         if decay < 0.05 {
@@ -53,7 +53,7 @@ func main() {
 func fmt_progress(float p, int decimals) string {
     int int_part = 0
     float v = p
-    while v >= 1.0 {
+    for v >= 1.0 {
         v = v - 1.0
         int_part = int_part + 1
     }
@@ -87,7 +87,7 @@ func fmt_progress(float p, int decimals) string {
 func fmt_loss(float loss) string {
     float v = loss
     int int_part = 0
-    while v >= 1.0 {
+    for v >= 1.0 {
         v = v - 1.0
         int_part = int_part + 1
     }
@@ -95,28 +95,28 @@ func fmt_loss(float loss) string {
     s = digit(int_part) + "."
     v = v * 10.0
     int d1 = 0
-    while v >= 1.0 {
+    for v >= 1.0 {
         v = v - 1.0
         d1 = d1 + 1
     }
     s = s + digit(d1)
     v = v * 10.0
     int d2 = 0
-    while v >= 1.0 {
+    for v >= 1.0 {
         v = v - 1.0
         d2 = d2 + 1
     }
     s = s + digit(d2)
     v = v * 10.0
     int d3 = 0
-    while v >= 1.0 {
+    for v >= 1.0 {
         v = v - 1.0
         d3 = d3 + 1
     }
     s = s + digit(d3)
     v = v * 10.0
     int d4 = 0
-    while v >= 1.0 {
+    for v >= 1.0 {
         v = v - 1.0
         d4 = d4 + 1
     }
@@ -127,7 +127,7 @@ func fmt_loss(float loss) string {
 func fmt_lr(float lr) string {
     float v = lr * 100000000.0
     int int_part = 0
-    while v >= 1.0 {
+    for v >= 1.0 {
         v = v - 1.0
         int_part = int_part + 1
     }

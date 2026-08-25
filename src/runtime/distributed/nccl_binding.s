@@ -210,7 +210,7 @@ func estimate_collective_bandwidth(
 func log2(int n) int {
     result := 0
     val := 1
-    while val < n {
+    for val < n {
         val = val * 2
         result = result + 1
     }

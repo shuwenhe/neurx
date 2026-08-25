@@ -7,7 +7,7 @@ func check_prefix(string text, int pos, string prefix) bool {
         return false
     }
     int i = 0
-    while i < len(prefix) {
+    for i < len(prefix) {
         if byte(text[pos + i]) != byte(prefix[i]) {
             return false
         }
@@ -18,7 +18,7 @@ func check_prefix(string text, int pos, string prefix) bool {
 
 func skip_whitespace(string text, int pos) int {
     int current = pos
-    while current < len(text) {
+    for current < len(text) {
         byte ch = byte(text[current])
         if ch == byte(32) || ch == byte(9) || ch == byte(10) || ch == byte(13) {
             current = current + 1
@@ -56,12 +56,12 @@ func parse_number(string text, int pos) int {
     if current < len(text) && byte(text[current]) == byte(45) {
         current = current + 1
     }
-    while current < len(text) && byte(text[current]) >= byte(48) && byte(text[current]) <= byte(57) {
+    for current < len(text) && byte(text[current]) >= byte(48) && byte(text[current]) <= byte(57) {
         current = current + 1
     }
     if current < len(text) && byte(text[current]) == byte(46) {
         current = current + 1
-        while current < len(text) && byte(text[current]) >= byte(48) && byte(text[current]) <= byte(57) {
+        for current < len(text) && byte(text[current]) >= byte(48) && byte(text[current]) <= byte(57) {
             current = current + 1
         }
     }
@@ -76,7 +76,7 @@ func parse_string(string text, int pos) int {
         return -1
     }
     int current = pos + 1
-    while current < len(text) {
+    for current < len(text) {
         byte ch = byte(text[current])
         if ch == byte(34) {
             return current + 1
@@ -100,7 +100,7 @@ func parse_array(string text, int pos) int {
         return current + 1
     }
     bool first = true
-    while true {
+    for true {
         if !first {
             if current >= len(text) || byte(text[current]) != byte(44) {
                 return -1
@@ -138,7 +138,7 @@ func parse_object(string text, int pos) int {
         return current + 1
     }
     bool first = true
-    while true {
+    for true {
         if !first {
             if current >= len(text) || byte(text[current]) != byte(44) {
                 return -1

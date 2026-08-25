@@ -14,7 +14,7 @@ func strip_comments(string text) string {
     bool in_line = false
     bool in_block = false
     bool escape = false
-    while i < n {
+    for i < n {
         int c = text[i]
         int nc = -1
         if i + 1 < n {

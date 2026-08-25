@@ -72,7 +72,7 @@ func main() {
     int shard_count = 0
     int i = 0
     current_path := ""
-    while i <= len(shard_output) {
+    for i <= len(shard_output) {
         bool at_end = i == len(shard_output)
         bool at_newline = !at_end && shard_output[i] == 10
         if at_end || at_newline {
@@ -148,7 +148,7 @@ func main() {
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         string ch = string_char(s[i])
         if ch == "'" {
             out = out + "'\"'\"'"
@@ -163,7 +163,7 @@ func shell_escape(string s) string {
 func json_escape(string s) string {
     string out = "\""
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         string ch = string_char(s[i])
         if ch == "\"" {
             out = out + "\\\""
@@ -181,7 +181,7 @@ func json_escape(string s) string {
 func path_basename(string path) string {
     int last = -1
     int i = 0
-    while i < len(path) {
+    for i < len(path) {
         if path[i] == 47 {
             last = i
         }
@@ -195,7 +195,7 @@ func path_basename(string path) string {
     }
     string out = ""
     int j = last + 1
-    while j < len(path) {
+    for j < len(path) {
         out = out + string_char(path[j])
         j = j + 1
     }
@@ -205,7 +205,7 @@ func path_basename(string path) string {
 func path_dirname(string path) string {
     int last = -1
     int i = 0
-    while i < len(path) {
+    for i < len(path) {
         if path[i] == 47 {
             last = i
         }
@@ -219,7 +219,7 @@ func path_dirname(string path) string {
     }
     string out = ""
     int j = 0
-    while j < last {
+    for j < last {
         out = out + string_char(path[j])
         j = j + 1
     }

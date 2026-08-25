@@ -78,7 +78,7 @@ func adamw_update_param(
     bias_correction2 := 1.0 - pow_approx(beta2, step)
     corrected_lr := learning_rate * sqrt_approx(bias_correction2) / bias_correction1
     i := 0
-    while i < param_size {
+    for i < param_size {
         grad := gradients[i]
         state.momentum[i] = beta1 * state.momentum[i] + (1.0 - beta1) * grad
         grad_sq := grad * grad
@@ -102,7 +102,7 @@ func adamw_step(
     opt.current_lr = adamw_compute_lr(opt)
     opt.global_step = opt.global_step + 1
     param_idx := 0
-    while param_idx < len(opt.param_states) {
+    for param_idx < len(opt.param_states) {
         param_size := param_sizes[param_idx]
         grad := gradients[param_idx]
         opt.param_states[param_idx] = adamw_update_param(
@@ -159,7 +159,7 @@ func adamw_load_state_dict(
 func allocate_float_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     i := 0
-    while i < size {
+    for i < size {
         v.push(init_val)
         i = i + 1
     }
@@ -200,7 +200,7 @@ func exp_approx(float x) float {
     result := 1.0
     term := 1.0
     i := 1
-    while i <= 15 {
+    for i <= 15 {
         term_new := term * x / float(i)
         result_new := result + term_new
         if abs_approx(term_new) < 1e-10 {
@@ -220,7 +220,7 @@ func sqrt_approx(float x) float {
     guess := x / 2.0
     result := guess
     i := 0
-    while i < 10 {
+    for i < 10 {
         new_guess := (result + x / result) / 2.0
         if abs_approx(new_guess - result) < 1e-10 {
             return new_guess

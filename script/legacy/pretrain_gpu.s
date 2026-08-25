@@ -199,9 +199,9 @@ func index_of(string s, string needle) int {
         return -1
     }
     int i = 0
-    while i <= s_len - n_len {
+    for i <= s_len - n_len {
         int j = 0
-        while j < n_len && s[i + j] == needle[j] {
+        for j < n_len && s[i + j] == needle[j] {
             j = j + 1
         }
         if j == n_len {
@@ -215,7 +215,7 @@ func index_of(string s, string needle) int {
 func parse_int_at(string s, int start) int {
     int i = start
     int value = 0
-    while i < str_len(s) {
+    for i < str_len(s) {
         int c = s[i]
         if c >= 48 && c <= 57 {
             value = value * 10 + (c - 48)
@@ -240,7 +240,7 @@ func int(float f) int {
 func initialize_gpu_contexts(int num_gpus) {
     println("[PRETRAIN-GPU] Initializing " + int_to_str(num_gpus) + " GPU context(s)...")
     int i = 0
-    while i < num_gpus {
+    for i < num_gpus {
         println("  [GPU " + int_to_str(i) + "] CUDA context scheduled")
         i = i + 1
     }
@@ -253,7 +253,7 @@ func process_shard_on_gpu(int gpu_id, int shard_idx, int shard_count, string sha
     bool done = false
     string shard_name = extract_filename(shard_path)
     println("[GPU " + int_to_str(gpu_id) + "] assign shard=" + int_to_str(shard_idx + 1) + "/" + int_to_str(shard_count) + " file=" + shard_name)
-    while !done && processed < step_budget && processed < doc_budget {
+    for !done && processed < step_budget && processed < doc_budget {
         chunk = chunk + 1
         int last_line = next_line + line_chunk - 1
         string cmd = "sed -n '" + int_to_str(next_line) + "," + int_to_str(last_line) + "p' " + shell_escape(shard_path)
@@ -280,7 +280,7 @@ func process_shard_on_gpu(int gpu_id, int shard_idx, int shard_count, string sha
 func synchronize_all_gpus(int num_gpus) {
     println("[PRETRAIN-GPU] Synchronizing all GPU streams...")
     int i = 0
-    while i < num_gpus {
+    for i < num_gpus {
         println("  [GPU " + int_to_str(i) + "] synchronized")
         i = i + 1
     }
@@ -289,7 +289,7 @@ func synchronize_all_gpus(int num_gpus) {
 func extract_filename(string path) string {
     int last_slash = -1
     int i = 0
-    while i < str_len(path) {
+    for i < str_len(path) {
         if path[i] == 47 {
             last_slash = i
         }
@@ -304,7 +304,7 @@ func extract_filename(string path) string {
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
-    while i < str_len(s) {
+    for i < str_len(s) {
         string ch = string_char(s[i])
         if ch == "'" {
             out = out + "'\"'\"'"
@@ -330,7 +330,7 @@ func should_log_step(int step, int log_interval) bool {
 func count_lines(string text) int {
     int count = 0
     int i = 0
-    while i < str_len(text) {
+    for i < str_len(text) {
         if text[i] == 10 {
             count = count + 1
         }
@@ -344,7 +344,7 @@ func get_shard_path(string list_text, int index) string {
     int start = 0
     int i = 0
     int n = str_len(list_text)
-    while i <= n {
+    for i <= n {
         bool end_of_line = i == n || list_text[i] == 10
         if end_of_line {
             string path = trim(substring(list_text, start, i))
@@ -363,11 +363,11 @@ func get_shard_path(string list_text, int index) string {
 
 func trim(string s) string {
     int i = 0
-    while i < str_len(s) && is_space(s[i]) {
+    for i < str_len(s) && is_space(s[i]) {
         i = i + 1
     }
     int j = str_len(s) - 1
-    while j >= 0 && is_space(s[j]) {
+    for j >= 0 && is_space(s[j]) {
         j = j - 1
     }
     if j < i {
@@ -390,7 +390,7 @@ func substring(string s, int start, int end) string {
     }
     string out = ""
     int i = s_start
-    while i < s_end {
+    for i < s_end {
         out = out + string_char(s[i])
         i = i + 1
     }
@@ -411,10 +411,10 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int quotient = 0
         int digit = value
-        while digit >= 10 {
+        for digit >= 10 {
             digit = digit - 10
             quotient = quotient + 1
         }
@@ -444,7 +444,7 @@ func detect_gpus() int {
 func initialize_gpu_contexts(int num_gpus) {
     println("[PRETRAIN-GPU] Initializing " + int_to_str(num_gpus) + " GPU context(s)...")
     int i = 0
-    while i < num_gpus {
+    for i < num_gpus {
         println("  [GPU " + int_to_str(i) + "] CUDA context scheduled")
         i = i + 1
     }
@@ -457,7 +457,7 @@ func process_shard_on_gpu(int gpu_id, int shard_idx, int shard_count, string sha
     bool done = false
     string shard_name = extract_filename(shard_path)
     println("[GPU " + int_to_str(gpu_id) + "] assign shard=" + int_to_str(shard_idx + 1) + "/" + int_to_str(shard_count) + " file=" + shard_name)
-    while !done && processed < step_budget && processed < doc_budget {
+    for !done && processed < step_budget && processed < doc_budget {
         chunk = chunk + 1
         int last_line = next_line + line_chunk - 1
         string cmd = "sed -n '" + int_to_str(next_line) + "," + int_to_str(last_line) + "p' " + shell_escape(shard_path)
@@ -484,7 +484,7 @@ func process_shard_on_gpu(int gpu_id, int shard_idx, int shard_count, string sha
 func synchronize_all_gpus(int num_gpus) {
     println("[PRETRAIN-GPU] Synchronizing all GPU streams...")
     int i = 0
-    while i < num_gpus {
+    for i < num_gpus {
         println("  [GPU " + int_to_str(i) + "] synchronized")
         i = i + 1
     }
@@ -493,7 +493,7 @@ func synchronize_all_gpus(int num_gpus) {
 func extract_filename(string path) string {
     int last_slash = -1
     int i = 0
-    while i < str_len(path) {
+    for i < str_len(path) {
         if path[i] == 47 {
             last_slash = i
         }
@@ -508,7 +508,7 @@ func extract_filename(string path) string {
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
-    while i < str_len(s) {
+    for i < str_len(s) {
         string ch = string_char(s[i])
         if ch == "'" {
             out = out + "'\"'\"'"
@@ -534,7 +534,7 @@ func should_log_step(int step, int log_interval) bool {
 func count_lines(string text) int {
     int count = 0
     int i = 0
-    while i < str_len(text) {
+    for i < str_len(text) {
         if text[i] == 10 {
             count = count + 1
         }
@@ -548,7 +548,7 @@ func get_shard_path(string list_text, int index) string {
     int start = 0
     int i = 0
     int n = str_len(list_text)
-    while i <= n {
+    for i <= n {
         bool end_of_line = i == n || list_text[i] == 10
         if end_of_line {
             string path = trim(substring(list_text, start, i))
@@ -567,11 +567,11 @@ func get_shard_path(string list_text, int index) string {
 
 func trim(string s) string {
     int i = 0
-    while i < str_len(s) && is_space(s[i]) {
+    for i < str_len(s) && is_space(s[i]) {
         i = i + 1
     }
     int j = str_len(s) - 1
-    while j >= 0 && is_space(s[j]) {
+    for j >= 0 && is_space(s[j]) {
         j = j - 1
     }
     if j < i {
@@ -594,7 +594,7 @@ func substring(string s, int start, int end) string {
     }
     string out = ""
     int i = s_start
-    while i < s_end {
+    for i < s_end {
         out = out + string_char(s[i])
         i = i + 1
     }
@@ -615,10 +615,10 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int quotient = 0
         int digit = value
-        while digit >= 10 {
+        for digit >= 10 {
             digit = digit - 10
             quotient = quotient + 1
         }
@@ -637,7 +637,7 @@ func string_char(int c) string {
 
 func str_len(string s) int {
     int n = 0
-    while s[n] != 0 {
+    for s[n] != 0 {
         n = n + 1
     }
     n

@@ -20,7 +20,7 @@ func exp_fn(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 15 {
+    for i <= 15 {
         term = term * x / float(i)
         result = result + term
         i = i + 1
@@ -38,7 +38,7 @@ func ln_fn(float x) float {
         float y2 = y * y
         float term = y
         int i = 0
-        while i < 20 {
+        for i < 20 {
             result = result + term / float(2 * i + 1)
             term = term * y2
             i = i + 1
@@ -93,7 +93,7 @@ func train_20_steps() float {
     println("Initial: w1=0.5, w2=0.3, b1=0.0, x=2.0, target=1.0, lr=0.1")
     println("")
     int step = 0
-    while step < 20 {
+    for step < 20 {
         float pred = forward_simple(w1, w2, b1, x)
         float loss = bce_loss_fn(pred, target)
         float z = w1 * x + w2 * 0.1 + b1

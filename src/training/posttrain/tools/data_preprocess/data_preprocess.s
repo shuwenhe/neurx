@@ -30,7 +30,7 @@ struct preference_pair {
 func convert_conversation_to_prompt(conversation conv) string {
     string prompt = ""
     int i = 0
-    while i < conv.messages.len {
+    for i < conv.messages.len {
         message msg = conv.messages[i]
         if msg.role == "system" {
             prompt = prompt + "System: " + msg.content + "\n"
@@ -52,7 +52,7 @@ func create_grpo_groups(
 ) []rl_sample {
     []rl_sample samples = []rl_sample{}
     int i = 0
-    while i < prompts.len {
+    for i < prompts.len {
         int group_id = i / group_size
         rl_sample sample = rl_sample {
             prompt: prompts[i],
@@ -75,9 +75,9 @@ func create_preference_pairs_from_rankings(
     []preference_pair pairs = []preference_pair{}
     []int indices = argsort_descending(scores)
     int i = 0
-    while i < completions.len {
+    for i < completions.len {
         int j = i + 1
-        while j < completions.len {
+        for j < completions.len {
             int idx_i = indices[i]
             int idx_j = indices[j]
             preference_pair pair = preference_pair {
@@ -101,7 +101,7 @@ func format_prompt_with_examples(
 ) string {
     string prompt = instruction + "\n\n"
     int i = 0
-    while i < examples.len {
+    for i < examples.len {
         prompt = prompt + "Example " + int_to_string(i + 1) + ":\n"
         prompt = prompt + examples[i] + "\n\n"
         i = i + 1
@@ -134,18 +134,18 @@ func tokenize_with_padding(
 ) [][]int {
     [][]int tokenized = [][]int{cap: texts.len}
     int i = 0
-    while i < texts.len {
+    for i < texts.len {
         []int tokens = tokenize_text(texts[i])
         if tokens.len > max_length {
             []int truncated = []int{cap: max_length}
             int j = 0
-            while j < max_length {
+            for j < max_length {
                 truncated[j] = tokens[j]
                 j = j + 1
             }
             tokens = truncated
         }
-        while tokens.len < max_length {
+        for tokens.len < max_length {
             tokens[tokens.len] = pad_token_id
         }
         tokenized[i] = tokens
@@ -160,10 +160,10 @@ func create_attention_masks(
 ) [][]int {
     [][]int masks = [][]int{cap: token_ids.len}
     int i = 0
-    while i < token_ids.len {
+    for i < token_ids.len {
         []int mask = []int{cap: token_ids[i].len}
         int j = 0
-        while j < token_ids[i].len {
+        for j < token_ids[i].len {
             if token_ids[i][j] == pad_token_id {
                 mask[j] = 0
             } else {
@@ -184,7 +184,7 @@ func batch_samples(
     int num_batches = (samples.len + batch_size - 1) / batch_size
     [][]rl_sample batches = [][]rl_sample{cap: num_batches}
     int b = 0
-    while b < num_batches {
+    for b < num_batches {
         int start = b * batch_size
         int end = start + batch_size
         if end > samples.len {
@@ -192,7 +192,7 @@ func batch_samples(
         }
         []rl_sample batch = []rl_sample{cap: end - start}
         int i = start
-        while i < end {
+        for i < end {
             batch[i - start] = samples[i]
             i = i + 1
         }

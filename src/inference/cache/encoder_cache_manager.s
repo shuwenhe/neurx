@@ -31,7 +31,7 @@ struct encoder_cache_result {
 func encoder_cache_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -44,7 +44,7 @@ func new_encoder_cache(encoder_cache_config config) encoder_cache_state {
 
 func encoder_cache_find(encoder_cache_state state, int media_hash) int {
     int i = 0
-    while i < state.config.maximum_entries {
+    for i < state.config.maximum_entries {
         if state.active[i] == 1 && state.media_hashes[i] == media_hash { return i }
         i = i + 1
     }
@@ -53,7 +53,7 @@ func encoder_cache_find(encoder_cache_state state, int media_hash) int {
 
 func encoder_cache_free_slot(encoder_cache_state state) int {
     int i = 0
-    while i < state.config.maximum_entries {
+    for i < state.config.maximum_entries {
         if state.active[i] == 0 { return i }
         i = i + 1
     }
@@ -63,7 +63,7 @@ func encoder_cache_free_slot(encoder_cache_state state) int {
 func encoder_cache_oldest_freeable(encoder_cache_state state) int {
     int selected = 0 - 1
     int i = 0
-    while i < state.config.maximum_entries {
+    for i < state.config.maximum_entries {
         if state.active[i] == 1 && state.reference_counts[i] == 0 {
             if selected < 0 || state.last_used_steps[i] < state.last_used_steps[selected] { selected = i }
         }
@@ -75,7 +75,7 @@ func encoder_cache_oldest_freeable(encoder_cache_state state) int {
 func encoder_cache_reclaimable_embeddings(encoder_cache_state state) int {
     int total = state.free_embeddings
     int i = 0
-    while i < state.config.maximum_entries {
+    for i < state.config.maximum_entries {
         if state.active[i] == 1 && state.reference_counts[i] == 0 { total = total + state.embedding_counts[i] }
         i = i + 1
     }
@@ -98,7 +98,7 @@ func encoder_cache_acquire(encoder_cache_state state, int media_hash, int embedd
     state.misses = state.misses + 1
     if embedding_count > encoder_cache_reclaimable_embeddings(state) { return encoder_cache_result {state: state, slot: 0 - 1, evicted_hash: 0, hit: false, accepted: false} }
     int evicted_hash = 0
-    while embedding_count > state.free_embeddings || encoder_cache_free_slot(state) < 0 {
+    for embedding_count > state.free_embeddings || encoder_cache_free_slot(state) < 0 {
         int victim = encoder_cache_oldest_freeable(state)
         if victim < 0 { return encoder_cache_result {state: state, slot: 0 - 1, evicted_hash: evicted_hash, hit: false, accepted: false} }
         evicted_hash = state.media_hashes[victim]

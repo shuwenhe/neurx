@@ -35,7 +35,7 @@ func neurx_queue_enqueue(neurx_request_queue_state state, string request_id, int
     []int prefill = []int{cap: len(state.prefill_tokens) + 1}
     []int remain = []int{cap: len(state.remaining_tokens) + 1}
     int i = 0
-    while i < len(state.request_ids) {
+    for i < len(state.request_ids) {
         ids[i] = state.request_ids[i]
         prefill[i] = state.prefill_tokens[i]
         remain[i] = state.remaining_tokens[i]
@@ -79,7 +79,7 @@ func neurx_queue_remove_at(neurx_request_queue_state state, int index) neurx_que
     []int remain = []int{cap: next_len}
     int i = 0
     int j = 0
-    while i < len(state.request_ids) {
+    for i < len(state.request_ids) {
         if i != index {
             ids[j] = state.request_ids[i]
             prefill[j] = state.prefill_tokens[i]
@@ -112,7 +112,7 @@ func neurx_queue_shortest_index(neurx_request_queue_state state) int {
     int best_idx = 0
     int best_value = state.remaining_tokens[0]
     int i = 1
-    while i < len(state.remaining_tokens) {
+    for i < len(state.remaining_tokens) {
         if state.remaining_tokens[i] < best_value {
             best_value = state.remaining_tokens[i]
             best_idx = i

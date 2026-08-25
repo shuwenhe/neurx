@@ -51,7 +51,7 @@ func normalize_dim(int dim, int ndim) int {
 func shape_prod([]int shape) int {
     int n = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         n = n * shape[i]
         i = i + 1
     }
@@ -62,13 +62,13 @@ func unravel_index(int flat_index, []int shape) []int {
     int ndim = len(shape)
     []int coords = []int{cap: ndim}
     int i = 0
-    while i < ndim {
+    for i < ndim {
         coords[i] = 0
         i = i + 1
     }
     int remaining = flat_index
     i = ndim - 1
-    while i >= 0 {
+    for i >= 0 {
         int size = shape[i]
         int coord = 0
         if size > 0 {
@@ -86,7 +86,7 @@ func ravel_index([]int coords, []int shape) int {
     int flat = 0
     int stride = 1
     int i = ndim - 1
-    while i >= 0 {
+    for i >= 0 {
         flat = flat + coords[i] * stride
         stride = stride * shape[i]
         i = i - 1
@@ -103,7 +103,7 @@ func reduce_output_shape([]int shape, int dim) []int {
     []int out = []int{cap: ndim - 1}
     int i = 0
     int j = 0
-    while i < ndim {
+    for i < ndim {
         if i != axis {
             out[j] = shape[i]
             j = j + 1
@@ -117,10 +117,10 @@ func sorted_pair([]float values, bool descending) tensor {
     int n = len(values)
     []float out = copy_float(values)
     int i = 0
-    while i < n {
+    for i < n {
         int best = i
         int j = i + 1
-        while j < n {
+        for j < n {
             if descending {
                 if out[j] > out[best] {
                     best = j
@@ -161,10 +161,10 @@ func replace_dim_shape([]int shape, int dim, int size) []int {
 func sort_slice_values([]float values, bool descending) []float {
     int n = len(values)
     int i = 0
-    while i < n {
+    for i < n {
         int best = i
         int j = i + 1
-        while j < n {
+        for j < n {
             if descending {
                 if values[j] > values[best] {
                     best = j
@@ -189,10 +189,10 @@ func sort_slice_values([]float values, bool descending) []float {
 func sort_slice_values_and_indices([]float values, []float indices, bool descending) {
     int n = len(values)
     int i = 0
-    while i < n {
+    for i < n {
         int best = i
         int j = i + 1
-        while j < n {
+        for j < n {
             if descending {
                 if values[j] > values[best] {
                     best = j
@@ -220,7 +220,7 @@ func slice_sorted_value(tensor a, []int coords, int axis, int rank, bool descend
     int axis_len = a.shape[axis]
     []float values = []float{cap: axis_len}
     int i = 0
-    while i < axis_len {
+    for i < axis_len {
         []int src_coords = copy_int(coords)
         src_coords[axis] = i
         values[i] = a.data[ravel_index(src_coords, a.shape)]
@@ -235,7 +235,7 @@ func slice_sorted_index(tensor a, []int coords, int axis, int rank, bool descend
     []float values = []float{cap: axis_len}
     []float indices = []float{cap: axis_len}
     int i = 0
-    while i < axis_len {
+    for i < axis_len {
         []int src_coords = copy_int(coords)
         src_coords[axis] = i
         values[i] = a.data[ravel_index(src_coords, a.shape)]
@@ -250,7 +250,7 @@ func slice_values(tensor a, []int coords, int axis) []float {
     int axis_len = a.shape[axis]
     []float values = []float{cap: axis_len}
     int i = 0
-    while i < axis_len {
+    for i < axis_len {
         []int src_coords = copy_int(coords)
         src_coords[axis] = i
         values[i] = a.data[ravel_index(src_coords, a.shape)]
@@ -271,7 +271,7 @@ func sort(tensor a, int dim) tensor {
     int total = shape_prod(a.shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, a.shape)
         out[flat] = slice_sorted_value(a, coords, axis, coords[axis], false)
         flat = flat + 1
@@ -291,7 +291,7 @@ func argsort(tensor a, int dim) tensor {
         []float values = copy_float(a.data)
         []float idx = []float{cap: n}
         int i = 0
-        while i < n {
+        for i < n {
             idx[i] = i
             i = i + 1
         }
@@ -309,7 +309,7 @@ func argsort(tensor a, int dim) tensor {
         []float values = copy_float(a.data)
         []float idx = []float{cap: n}
         int i = 0
-        while i < n {
+        for i < n {
             idx[i] = i
             i = i + 1
         }
@@ -324,7 +324,7 @@ func argsort(tensor a, int dim) tensor {
     int total = shape_prod(a.shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, a.shape)
         out[flat] = slice_sorted_index(a, coords, axis, coords[axis], false)
         flat = flat + 1
@@ -346,7 +346,7 @@ func topk(tensor a, int k) tensor {
     }
     []float out = []float{cap: count}
     int i = 0
-    while i < count {
+    for i < count {
         out[i] = sorted.data[i]
         i = i + 1
     }
@@ -374,7 +374,7 @@ func topk_dim(tensor a, int k, int dim) tensor {
     int total = shape_prod(out_shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, out_shape)
         out[flat] = slice_sorted_value(a, coords, axis, coords[axis], true)
         flat = flat + 1
@@ -396,12 +396,12 @@ func cumsum_dim(tensor a, int dim) tensor {
     int total = shape_prod(a.shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, a.shape)
         int inner = coords[axis]
         float acc = 0.0
         int i = 0
-        while i <= inner {
+        for i <= inner {
             coords[axis] = i
             acc = acc + a.data[ravel_index(coords, a.shape)]
             i = i + 1
@@ -426,12 +426,12 @@ func cumprod_dim(tensor a, int dim) tensor {
     int total = shape_prod(a.shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, a.shape)
         int inner = coords[axis]
         float acc = 1.0
         int i = 0
-        while i <= inner {
+        for i <= inner {
             coords[axis] = i
             acc = acc * a.data[ravel_index(coords, a.shape)]
             i = i + 1
@@ -457,12 +457,12 @@ func prod_dim(tensor a, int dim) tensor {
     int total = shape_prod(out_shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, out_shape)
         []int src_coords = []int{cap: ndim}
         int i = 0
         int j = 0
-        while i < ndim {
+        for i < ndim {
             src_coords[i] = 0
             if i != axis {
                 src_coords[i] = coords[j]
@@ -472,7 +472,7 @@ func prod_dim(tensor a, int dim) tensor {
         }
         float acc = 1.0
         int red = 0
-        while red < a.shape[axis] {
+        for red < a.shape[axis] {
             src_coords[axis] = red
             acc = acc * a.data[ravel_index(src_coords, a.shape)]
             red = red + 1
@@ -493,10 +493,10 @@ func unique(tensor a) tensor {
     []float out = []float{cap: n}
     int count = 0
     int i = 0
-    while i < n {
+    for i < n {
         bool seen = false
         int j = 0
-        while j < count {
+        for j < count {
             if out[j] == a.data[i] {
                 seen = true
             }
@@ -510,7 +510,7 @@ func unique(tensor a) tensor {
     }
     []float trimmed = []float{cap: count}
     i = 0
-    while i < count {
+    for i < count {
         trimmed[i] = out[i]
         i = i + 1
     }
@@ -533,17 +533,17 @@ func unique_dim(tensor a, int dim) tensor {
     int total = shape_prod(out_shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         out[flat] = 0.0
         flat = flat + 1
     }
     flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, out_shape)
         int i = 0
         int j = 0
         []int src_coords = []int{cap: ndim}
-        while i < ndim {
+        for i < ndim {
             src_coords[i] = 0
             if i != axis {
                 src_coords[i] = coords[j]
@@ -555,10 +555,10 @@ func unique_dim(tensor a, int dim) tensor {
         []float uniques = []float{cap: axis_len}
         int unique_count = 0
         int v = 0
-        while v < len(values) {
+        for v < len(values) {
             bool seen = false
             int u = 0
-            while u < unique_count {
+            for u < unique_count {
                 if uniques[u] == values[v] {
                     seen = true
                 }
@@ -571,7 +571,7 @@ func unique_dim(tensor a, int dim) tensor {
             v = v + 1
         }
         int pos = 0
-        while pos < unique_count {
+        for pos < unique_count {
             src_coords[axis] = pos
             out[ravel_index(src_coords, out_shape)] = uniques[pos]
             pos = pos + 1
@@ -618,12 +618,12 @@ func median_dim(tensor a, int dim) tensor {
     int total = shape_prod(out_shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, out_shape)
         []int src_coords = []int{cap: ndim}
         int i = 0
         int j = 0
-        while i < ndim {
+        for i < ndim {
             src_coords[i] = 0
             if i != axis {
                 src_coords[i] = coords[j]
@@ -659,10 +659,10 @@ func mode(tensor a) tensor {
     float best_value = 0.0
     int best_count = 0
     int i = 0
-    while i < n {
+    for i < n {
         int count = 0
         int j = 0
-        while j < n {
+        for j < n {
             if a.data[j] == a.data[i] {
                 count = count + 1
             }
@@ -694,12 +694,12 @@ func mode_dim(tensor a, int dim) tensor {
     int total = shape_prod(out_shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, out_shape)
         []int src_coords = []int{cap: ndim}
         int i = 0
         int j = 0
-        while i < ndim {
+        for i < ndim {
             src_coords[i] = 0
             if i != axis {
                 src_coords[i] = coords[j]
@@ -711,10 +711,10 @@ func mode_dim(tensor a, int dim) tensor {
         float best_value = 0.0
         int best_count = 0
         int i2 = 0
-        while i2 < len(values) {
+        for i2 < len(values) {
             int count = 0
             int j2 = 0
-            while j2 < len(values) {
+            for j2 < len(values) {
                 if values[j2] == values[i2] {
                     count = count + 1
                 }
@@ -771,12 +771,12 @@ func quantile_dim(tensor a, float q, int dim) tensor {
     int total = shape_prod(out_shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, out_shape)
         []int src_coords = []int{cap: ndim}
         int i = 0
         int j = 0
-        while i < ndim {
+        for i < ndim {
             src_coords[i] = 0
             if i != axis {
                 src_coords[i] = coords[j]
@@ -812,7 +812,7 @@ func quantile_dim(tensor a, float q, int dim) tensor {
 func sum(tensor a) tensor {
     float acc = 0.0
     int i = 0
-    while i < len(a.data) {
+    for i < len(a.data) {
         acc = acc + a.data[i]
         i = i + 1
     }
@@ -830,7 +830,7 @@ func mean(tensor a) tensor {
     int n = len(a.data)
     float acc = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         acc = acc + a.data[i]
         i = i + 1
     }
@@ -854,7 +854,7 @@ func max(tensor a) tensor {
         best = a.data[0]
     }
     int i = 1
-    while i < n {
+    for i < n {
         if a.data[i] > best {
             best = a.data[i]
         }
@@ -877,7 +877,7 @@ func min(tensor a) tensor {
         best = a.data[0]
     }
     int i = 1
-    while i < n {
+    for i < n {
         if a.data[i] < best {
             best = a.data[i]
         }
@@ -901,7 +901,7 @@ func argmax(tensor a) tensor {
         best = a.data[0]
     }
     int i = 1
-    while i < n {
+    for i < n {
         if a.data[i] > best {
             best = a.data[i]
             best_idx = i
@@ -926,7 +926,7 @@ func argmin(tensor a) tensor {
         best = a.data[0]
     }
     int i = 1
-    while i < n {
+    for i < n {
         if a.data[i] < best {
             best = a.data[i]
             best_idx = i
@@ -953,12 +953,12 @@ func sum_dim(tensor a, int dim) tensor {
     int total = shape_prod(out_shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, out_shape)
         []int src_coords = []int{cap: ndim}
         int i = 0
         int j = 0
-        while i < ndim {
+        for i < ndim {
             src_coords[i] = 0
             if i != axis {
                 src_coords[i] = coords[j]
@@ -968,7 +968,7 @@ func sum_dim(tensor a, int dim) tensor {
         }
         float acc = 0.0
         int red = 0
-        while red < a.shape[axis] {
+        for red < a.shape[axis] {
             src_coords[axis] = red
             acc = acc + a.data[ravel_index(src_coords, a.shape)]
             red = red + 1
@@ -994,12 +994,12 @@ func mean_dim(tensor a, int dim) tensor {
     int total = shape_prod(out_shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, out_shape)
         []int src_coords = []int{cap: ndim}
         int i = 0
         int j = 0
-        while i < ndim {
+        for i < ndim {
             src_coords[i] = 0
             if i != axis {
                 src_coords[i] = coords[j]
@@ -1009,7 +1009,7 @@ func mean_dim(tensor a, int dim) tensor {
         }
         float acc = 0.0
         int red = 0
-        while red < a.shape[axis] {
+        for red < a.shape[axis] {
             src_coords[axis] = red
             acc = acc + a.data[ravel_index(src_coords, a.shape)]
             red = red + 1
@@ -1038,12 +1038,12 @@ func max_dim(tensor a, int dim) tensor {
     int total = shape_prod(out_shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, out_shape)
         []int src_coords = []int{cap: ndim}
         int i = 0
         int j = 0
-        while i < ndim {
+        for i < ndim {
             src_coords[i] = 0
             if i != axis {
                 src_coords[i] = coords[j]
@@ -1054,7 +1054,7 @@ func max_dim(tensor a, int dim) tensor {
         src_coords[axis] = 0
         float best = a.data[ravel_index(src_coords, a.shape)]
         int red = 1
-        while red < a.shape[axis] {
+        for red < a.shape[axis] {
             src_coords[axis] = red
             float value = a.data[ravel_index(src_coords, a.shape)]
             if value > best {
@@ -1083,12 +1083,12 @@ func min_dim(tensor a, int dim) tensor {
     int total = shape_prod(out_shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, out_shape)
         []int src_coords = []int{cap: ndim}
         int i = 0
         int j = 0
-        while i < ndim {
+        for i < ndim {
             src_coords[i] = 0
             if i != axis {
                 src_coords[i] = coords[j]
@@ -1099,7 +1099,7 @@ func min_dim(tensor a, int dim) tensor {
         src_coords[axis] = 0
         float best = a.data[ravel_index(src_coords, a.shape)]
         int red = 1
-        while red < a.shape[axis] {
+        for red < a.shape[axis] {
             src_coords[axis] = red
             float value = a.data[ravel_index(src_coords, a.shape)]
             if value < best {
@@ -1128,12 +1128,12 @@ func argmax_dim(tensor a, int dim) tensor {
     int total = shape_prod(out_shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, out_shape)
         []int src_coords = []int{cap: ndim}
         int i = 0
         int j = 0
-        while i < ndim {
+        for i < ndim {
             src_coords[i] = 0
             if i != axis {
                 src_coords[i] = coords[j]
@@ -1145,7 +1145,7 @@ func argmax_dim(tensor a, int dim) tensor {
         float best = a.data[ravel_index(src_coords, a.shape)]
         float best_idx = 0.0
         int red = 1
-        while red < a.shape[axis] {
+        for red < a.shape[axis] {
             src_coords[axis] = red
             float value = a.data[ravel_index(src_coords, a.shape)]
             if value > best {
@@ -1175,12 +1175,12 @@ func argmin_dim(tensor a, int dim) tensor {
     int total = shape_prod(out_shape)
     []float out = []float{cap: total}
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, out_shape)
         []int src_coords = []int{cap: ndim}
         int i = 0
         int j = 0
-        while i < ndim {
+        for i < ndim {
             src_coords[i] = 0
             if i != axis {
                 src_coords[i] = coords[j]
@@ -1192,7 +1192,7 @@ func argmin_dim(tensor a, int dim) tensor {
         float best = a.data[ravel_index(src_coords, a.shape)]
         float best_idx = 0.0
         int red = 1
-        while red < a.shape[axis] {
+        for red < a.shape[axis] {
             src_coords[axis] = red
             float value = a.data[ravel_index(src_coords, a.shape)]
             if value < best {
@@ -1229,7 +1229,7 @@ func prod(tensor a, int dim) tensor {
     int n = len(a.data)
     float acc = 1.0
     int i = 0
-    while i < n {
+    for i < n {
         acc = acc * a.data[i]
         i = i + 1
     }

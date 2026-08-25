@@ -61,7 +61,7 @@ func (reasoning_validator* validator) validate_consistency(reasoning_chain chain
     float min_confidence = 1.0
 
     i := 0
-    while i < len(chain.steps) {
+    for i < len(chain.steps) {
         step := chain.steps[i]
 
         if step.state == step_state.failed {
@@ -103,7 +103,7 @@ func (reasoning_validator* validator) validate_logical_flow(reasoning_chain chai
     []string additional_issues = []string{}
 
     i := 0
-    while i < len(chain.steps) {
+    for i < len(chain.steps) {
         if chain.steps[i].order != i {
             additional_issues = append(additional_issues, "Step order mismatch at index " + string(i))
         }
@@ -115,7 +115,7 @@ func (reasoning_validator* validator) validate_logical_flow(reasoning_chain chai
     }
 
     i = 0
-    while i < len(additional_issues) {
+    for i < len(additional_issues) {
         result.issues = append(result.issues, additional_issues[i])
         i = i + 1
     }
@@ -145,7 +145,7 @@ func (reasoning_validator* validator) has_circular_reasoning(reasoning_chain cha
     seen_results := map[string]int{}
 
     i := 0
-    while i < len(chain.steps) {
+    for i < len(chain.steps) {
         result := chain.steps[i].intermediate_result
         if result != "" {
 
@@ -241,7 +241,7 @@ func (reasoning_validator* validator) generate_report(reasoning_chain chain) str
     if len(result.issues) > 0 {
         report = report + "\nIssues Found:\n"
         i := 0
-        while i < len(result.issues) {
+        for i < len(result.issues) {
             report = report + "  - " + result.issues[i] + "\n"
             i = i + 1
         }
@@ -254,7 +254,7 @@ func (reasoning_validator* validator) auto_fix_issues(reasoning_chain chain) rea
 
     valid_steps := []reasoning_step{}
     i := 0
-    while i < len(chain.steps) {
+    for i < len(chain.steps) {
         if chain.steps[i].state != step_state.failed {
             valid_steps = append(valid_steps, chain.steps[i])
         }

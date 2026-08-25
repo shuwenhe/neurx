@@ -37,7 +37,7 @@ func adagrad_step(adagrad_optimizer optimizer, tensor params, tensor grads) adag
     float clr = optimizer.lr / (1.0 + float(optimizer.step - 1) * optimizer.lr_decay)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float grad = grads.data[i]
         if optimizer.weight_decay != 0.0 {
             grad = grad + optimizer.weight_decay * params.data[i]
@@ -61,7 +61,7 @@ struct adagrad_optimizer_step_output {
 func ensure_adagrad_state([]float values, int n, float initial_value) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         if i < len(values) {
             out[i] = values[i]
         } else {
@@ -81,7 +81,7 @@ func adagrad_sqrt(float x) float {
         y = x
     }
     int i = 0
-    while i < 32 {
+    for i < 32 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }

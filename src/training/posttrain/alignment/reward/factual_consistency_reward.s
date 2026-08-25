@@ -65,7 +65,7 @@ func extract_facts(string text, factual_config config) factual_content {
     content.total_facts = 0
     []string sentences = split_sentences(text)
     int i = 0
-    while i < len(sentences) && content.total_facts < config.max_facts_per_doc {
+    for i < len(sentences) && content.total_facts < config.max_facts_per_doc {
         string sent = sentences[i]
         if len(sent) < 10 {
             i = i + 1
@@ -180,7 +180,7 @@ func verify_factual_consistency(
     report.consistent_facts = 0
     report.inconsistent_facts = 0
     int i = 0
-    while i < len(reference_content.facts) {
+    for i < len(reference_content.facts) {
         fact ref_fact = reference_content.facts[i]
         fact_pair best_match = find_best_matching_fact(ref_fact, generated_content.facts, config)
         if best_match.similarity >= config.similarity_threshold {
@@ -194,11 +194,11 @@ func verify_factual_consistency(
     }
     if config.detect_hallucinations {
         i = 0
-        while i < len(generated_content.facts) {
+        for i < len(generated_content.facts) {
             fact gen_fact = generated_content.facts[i]
             bool found = false
             int j = 0
-            while j < len(reference_content.facts) {
+            for j < len(reference_content.facts) {
                 if fact_similarity(gen_fact, reference_content.facts[j]) > config.similarity_threshold {
                     found = true
                 }
@@ -246,7 +246,7 @@ func find_best_matching_fact(
     best_pair.similarity = 0.0
     best_pair.is_consistent = false
     int i = 0
-    while i < len(candidates) {
+    for i < len(candidates) {
         float sim = fact_similarity(reference, candidates[i])
         if sim > best_pair.similarity {
             best_pair.similarity = sim
@@ -315,7 +315,7 @@ func is_likely_hallucination(fact f, factual_content reference, factual_config c
 
 func temporal_is_compatible(string fact_temporal, []string reference_temporals) bool {
     int i = 0
-    while i < len(reference_temporals) {
+    for i < len(reference_temporals) {
         if contains_substring(fact_temporal, reference_temporals[i]) {
             return true
         }
@@ -361,7 +361,7 @@ func compute_factual_consistency_reward(
 func compute_citation_coverage(string text) float {
     int citation_count = 0
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         if contains_substring(substring(text, i, i+1), "[") {
             citation_count = citation_count + 1
         }
@@ -392,7 +392,7 @@ func generate_detailed_report(consistency_report report) string {
     if len(report.hallucinated_facts) > 0 {
         output = output + "[⚠️ Hallucinated Facts]\n"
         int i = 0
-        while i < len(report.hallucinated_facts) && i < 5 {
+        for i < len(report.hallucinated_facts) && i < 5 {
             output = output + "  - " + report.hallucinated_facts[i] + "\n"
             i = i + 1
         }
@@ -401,7 +401,7 @@ func generate_detailed_report(consistency_report report) string {
     if len(report.missing_facts) > 0 {
         output = output + "[❌ Missing Facts]\n"
         int i = 0
-        while i < len(report.missing_facts) && i < 5 {
+        for i < len(report.missing_facts) && i < 5 {
             output = output + "  - " + report.missing_facts[i] + "\n"
             i = i + 1
         }
@@ -410,7 +410,7 @@ func generate_detailed_report(consistency_report report) string {
     if len(report.contradictions) > 0 {
         output = output + "[🔄 Contradictions]\n"
         int i = 0
-        while i < len(report.contradictions) && i < 5 {
+        for i < len(report.contradictions) && i < 5 {
             output = output + "  - " + report.contradictions[i] + "\n"
             i = i + 1
         }
@@ -424,7 +424,7 @@ func split_sentences(string text) []string {
     []string sentences = []string{}
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = substring(text, i, i+1)
         current = current + ch
         if string_equals(ch, ".") || string_equals(ch, "!") || string_equals(ch, "") {
@@ -445,7 +445,7 @@ func split_words(string text) []string {
     []string words = []string{}
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = substring(text, i, i+1)
         if string_equals(ch, " ") || string_equals(ch, "\n") || string_equals(ch, "\t") {
             if len(current) > 0 {
@@ -467,10 +467,10 @@ func contains_substring(string text, string substr) bool {
     if len(substr) == 0 { return true }
     if len(text) < len(substr) { return false }
     int i = 0
-    while i <= len(text) - len(substr) {
+    for i <= len(text) - len(substr) {
         bool match = true
         int j = 0
-        while j < len(substr) {
+        for j < len(substr) {
             if !string_equals(substring(text, i+j, i+j+1), substring(substr, j, j+1)) {
                 match = false
             }
@@ -488,10 +488,10 @@ func find_substring(string text, string substr) int {
     if len(substr) == 0 { return 0 }
     if len(text) < len(substr) { return -1 }
     int i = 0
-    while i <= len(text) - len(substr) {
+    for i <= len(text) - len(substr) {
         bool match = true
         int j = 0
-        while j < len(substr) {
+        for j < len(substr) {
             if !string_equals(substring(text, i+j, i+j+1), substring(substr, j, j+1)) {
                 match = false
             }
@@ -511,7 +511,7 @@ func substring(string text, int start, int end) string {
     if start >= end { return "" }
     string result = ""
     int i = start
-    while i < end {
+    for i < end {
         result = result + substring(text, i, i+1)
         i = i + 1
     }
@@ -521,7 +521,7 @@ func substring(string text, int start, int end) string {
 func string_equals(string s1, string s2) bool {
     if len(s1) != len(s2) { return false }
     int i = 0
-    while i < len(s1) {
+    for i < len(s1) {
         if !string_equals(substring(s1, i, i+1), substring(s2, i, i+1)) {
             return false
         }
@@ -532,7 +532,7 @@ func string_equals(string s1, string s2) bool {
 
 func contains_string([]string arr, string s) bool {
     int i = 0
-    while i < len(arr) {
+    for i < len(arr) {
         if string_equals(arr[i], s) {
             return true
         }
@@ -601,7 +601,7 @@ func contains_uncertainty_words(string s) bool {
 
 func is_rare_combination(fact f, factual_content reference) bool {
     int i = 0
-    while i < len(reference.facts) {
+    for i < len(reference.facts) {
         if string_equals(reference.facts[i].subject, f.subject) &&
            string_equals(reference.facts[i].predicate, f.predicate) {
             return false

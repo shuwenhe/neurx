@@ -6,7 +6,7 @@ func int_to_str(int n) string {
     bool neg = false
     if value < 0 { neg = true; value = 0 - value }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - ((value / 10) * 10)
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -33,7 +33,7 @@ func fmt_float(float f, int precision) string {
     string int_str = int_to_str(i_part)
     string frac_str = ""
     int p = 0
-    while p < precision {
+    for p < precision {
         f_part = f_part * 10.0
         int digit = (f_part as int)
         if digit == 0 { frac_str = frac_str + "0" }

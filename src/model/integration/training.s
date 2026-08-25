@@ -111,7 +111,7 @@ func train_epoch(
     double epoch_loss = 0.0
     int num_batches = len(batches)
     int batch_idx = 0
-    while batch_idx < num_batches {
+    for batch_idx < num_batches {
         training_batch batch = batches[batch_idx]
         double loss = training_step(trainer, batch)
         epoch_loss = epoch_loss + loss

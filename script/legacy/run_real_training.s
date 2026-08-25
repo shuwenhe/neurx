@@ -58,7 +58,7 @@ func str_to_int(string s, int fallback) int {
         i = 1
     }
     int value = 0
-    while i < len(text) {
+    for i < len(text) {
         int digit = text[i] - 48
         if digit < 0 || digit > 9 {
             return fallback
@@ -81,7 +81,7 @@ func str_to_float(string s) float {
         i = 1
     }
     float whole = 0.0
-    while i < len(text) && text[i] >= 48 && text[i] <= 57 {
+    for i < len(text) && text[i] >= 48 && text[i] <= 57 {
         whole = whole * 10.0 + (text[i] - 48) * 1.0
         i = i + 1
     }
@@ -89,7 +89,7 @@ func str_to_float(string s) float {
     float scale = 1.0
     if i < len(text) && text[i] == 46 {
         i = i + 1
-        while i < len(text) && text[i] >= 48 && text[i] <= 57 {
+        for i < len(text) && text[i] >= 48 && text[i] <= 57 {
             frac = frac * 10.0 + (text[i] - 48) * 1.0
             scale = scale * 10.0
             i = i + 1
@@ -114,11 +114,11 @@ func clamp_int(int value, int min_value, int max_value) int {
 
 func trim(string s) string {
     int i = 0
-    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
     int j = len(s) - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
     if j < i {
@@ -126,7 +126,7 @@ func trim(string s) string {
     }
     string out = ""
     int k = i
-    while k <= j {
+    for k <= j {
         out = out + string_char(s[k])
         k = k + 1
     }
@@ -143,7 +143,7 @@ func int_to_str(int n, int fallback) string {
         value = -value
     }
     string s = ""
-    while value > 0 {
+    for value > 0 {
         s = string_char(value - (value / 10) * 10 + 48) + s
         value = value / 10
     }
@@ -164,7 +164,7 @@ func fmt_float(float val, int decimals) string {
     }
     int int_part = 0
     float whole = value
-    while whole >= 1.0 {
+    for whole >= 1.0 {
         whole = whole - 1.0
         int_part = int_part + 1
     }
@@ -175,11 +175,11 @@ func fmt_float(float val, int decimals) string {
     }
     s = s + int_to_str(int_part, 0) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         frac = frac * 10.0
         int digit = 0
         float tmp = frac
-        while tmp >= 1.0 {
+        for tmp >= 1.0 {
             tmp = tmp - 1.0
             digit = digit + 1
         }

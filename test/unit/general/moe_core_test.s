@@ -20,7 +20,7 @@ func test_int_to_string(int value) string {
     }
     int current = value
     string out = ""
-    while current > 0 {
+    for current > 0 {
         int digit = current - (current / 10) * 10
         out = test_string_char(digit + 48) + out
         current = current / 10

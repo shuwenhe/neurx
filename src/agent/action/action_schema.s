@@ -31,7 +31,7 @@ func new_agent_action_state() agent_action_state {
 func agent_action_parse_json_string_token(string raw, int start) string {
     string out = ""
     int i = start
-    while i < len(raw) {
+    for i < len(raw) {
         string ch = string(raw[i])
         if ch == "\"" {
             return out
@@ -59,10 +59,10 @@ func agent_action_parse_json_string_token(string raw, int start) string {
 func agent_action_extract_json_string(string raw, string key) string {
     string marker = "\"" + key + "\""
     int i = 0
-    while i <= len(raw) - len(marker) {
+    for i <= len(raw) - len(marker) {
         int j = 0
         bool match = true
-        while j < len(marker) {
+        for j < len(marker) {
             if raw[i + j] != marker[j] {
                 match = false
                 break
@@ -71,13 +71,13 @@ func agent_action_extract_json_string(string raw, string key) string {
         }
         if match {
             int pos = i + len(marker)
-            while pos < len(raw) && (string(raw[pos]) == " " || string(raw[pos]) == "\n" || string(raw[pos]) == "\r" || string(raw[pos]) == "\t") {
+            for pos < len(raw) && (string(raw[pos]) == " " || string(raw[pos]) == "\n" || string(raw[pos]) == "\r" || string(raw[pos]) == "\t") {
                 pos = pos + 1
             }
             if pos < len(raw) && string(raw[pos]) == ":" {
                 pos = pos + 1
             }
-            while pos < len(raw) && (string(raw[pos]) == " " || string(raw[pos]) == "\n" || string(raw[pos]) == "\r" || string(raw[pos]) == "\t") {
+            for pos < len(raw) && (string(raw[pos]) == " " || string(raw[pos]) == "\n" || string(raw[pos]) == "\r" || string(raw[pos]) == "\t") {
                 pos = pos + 1
             }
             if pos < len(raw) && string(raw[pos]) == "\"" {
@@ -92,10 +92,10 @@ func agent_action_extract_json_string(string raw, string key) string {
 func agent_action_extract_json_bool(string raw, string key) string {
     string marker = "\"" + key + "\""
     int i = 0
-    while i <= len(raw) - len(marker) {
+    for i <= len(raw) - len(marker) {
         int j = 0
         bool match = true
-        while j < len(marker) {
+        for j < len(marker) {
             if raw[i + j] != marker[j] {
                 match = false
                 break
@@ -104,17 +104,17 @@ func agent_action_extract_json_bool(string raw, string key) string {
         }
         if match {
             int pos = i + len(marker)
-            while pos < len(raw) && (string(raw[pos]) == " " || string(raw[pos]) == "\n" || string(raw[pos]) == "\r" || string(raw[pos]) == "\t") {
+            for pos < len(raw) && (string(raw[pos]) == " " || string(raw[pos]) == "\n" || string(raw[pos]) == "\r" || string(raw[pos]) == "\t") {
                 pos = pos + 1
             }
             if pos < len(raw) && string(raw[pos]) == ":" {
                 pos = pos + 1
             }
-            while pos < len(raw) && (string(raw[pos]) == " " || string(raw[pos]) == "\n" || string(raw[pos]) == "\r" || string(raw[pos]) == "\t") {
+            for pos < len(raw) && (string(raw[pos]) == " " || string(raw[pos]) == "\n" || string(raw[pos]) == "\r" || string(raw[pos]) == "\t") {
                 pos = pos + 1
             }
             string val = ""
-            while pos < len(raw) {
+            for pos < len(raw) {
                 string ch = lower(string(raw[pos]))
                 if ch == "," || ch == "}" || ch == "\n" || ch == "\r" || ch == " " || ch == "\t" {
                     break
@@ -132,10 +132,10 @@ func agent_action_extract_json_bool(string raw, string key) string {
 func agent_action_extract_block(string raw, string begin_marker, string end_marker) string {
     int start = -1
     int i = 0
-    while i <= len(raw) - len(begin_marker) {
+    for i <= len(raw) - len(begin_marker) {
         int j = 0
         bool match = true
-        while j < len(begin_marker) {
+        for j < len(begin_marker) {
             if raw[i + j] != begin_marker[j] {
                 match = false
                 break
@@ -156,10 +156,10 @@ func agent_action_extract_block(string raw, string begin_marker, string end_mark
     }
     int end = len(raw)
     i = start
-    while i <= len(raw) - len(end_marker) {
+    for i <= len(raw) - len(end_marker) {
         int j = 0
         bool match = true
-        while j < len(end_marker) {
+        for j < len(end_marker) {
             if raw[i + j] != end_marker[j] {
                 match = false
                 break
@@ -177,7 +177,7 @@ func agent_action_extract_block(string raw, string begin_marker, string end_mark
     }
     string out = ""
     i = start
-    while i < end {
+    for i < end {
         out = out + string(raw[i])
         i = i + 1
     }
@@ -196,10 +196,10 @@ func agent_action_text_contains(string text, string pattern) bool {
         return false
     }
     int i = 0
-    while i <= hay_len - nee_len {
+    for i <= hay_len - nee_len {
         int j = 0
         bool match = true
-        while j < nee_len {
+        for j < nee_len {
             if haystack[i + j] != needle[j] {
                 match = false
                 break
@@ -223,10 +223,10 @@ func agent_action_extract_field(string raw, string key) string {
     }
     int start = -1
     int i = 0
-    while i <= raw_len - marker_len {
+    for i <= raw_len - marker_len {
         int j = 0
         bool match = true
-        while j < marker_len {
+        for j < marker_len {
             if raw[i + j] != marker[j] {
                 match = false
                 break
@@ -244,14 +244,14 @@ func agent_action_extract_field(string raw, string key) string {
     }
     string value = ""
     i = start
-    while i < raw_len {
+    for i < raw_len {
         if string(raw[i]) == "\n" {
             break
         }
         if string(raw[i]) == " " {
             bool next_is_field = false
             int look = i + 1
-            while look < raw_len && string(raw[look]) != " " && string(raw[look]) != "\n" {
+            for look < raw_len && string(raw[look]) != " " && string(raw[look]) != "\n" {
                 if string(raw[look]) == "=" {
                     next_is_field = true
                     break

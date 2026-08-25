@@ -173,7 +173,7 @@ func new_kv_cache(string cache_id, string dtype, vec[int64] shape, bool is_paged
         cache.page_size = 4096
         total_elements := 1
         i := 0
-        while i < shape.len() {
+        for i < shape.len() {
             total_elements = total_elements * shape[i]
             i = i + 1
         }

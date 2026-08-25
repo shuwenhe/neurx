@@ -26,7 +26,7 @@ struct gradient_accumulator {
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }
@@ -36,7 +36,7 @@ func allocate_vector(int size, float init_val) []float {
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
-    while i < len(src) {
+    for i < len(src) {
         out[i] = src[i]
         i = i + 1
     }
@@ -46,7 +46,7 @@ func copy_vector([]float src) []float {
 func add_vectors([]float a, []float b) []float {
     []float out = copy_vector(a)
     int i = 0
-    while i < len(out) {
+    for i < len(out) {
         out[i] = out[i] + b[i]
         i = i + 1
     }
@@ -56,7 +56,7 @@ func add_vectors([]float a, []float b) []float {
 func scale_vector([]float v, float scale) []float {
     []float out = copy_vector(v)
     int i = 0
-    while i < len(out) {
+    for i < len(out) {
         out[i] = out[i] * scale
         i = i + 1
     }
@@ -74,16 +74,16 @@ func compute_cross_entropy_loss_with_gradient(
     []float grad_logits = allocate_vector(batch_size * seq_len * vocab_size, 0.0)
     float total_loss = 0.0
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int logit_idx = (b * seq_len + s) * vocab_size
             int target_idx = b * seq_len + s
             int target_id = target_ids[target_idx]
             if target_id >= 0 && target_id < vocab_size {
                 float max_logit = logits[logit_idx]
                 int v = 1
-                while v < vocab_size {
+                for v < vocab_size {
                     if logits[logit_idx + v] > max_logit {
                         max_logit = logits[logit_idx + v]
                     }
@@ -91,7 +91,7 @@ func compute_cross_entropy_loss_with_gradient(
                 }
                 float sum_exp = 0.0
                 v = 0
-                while v < vocab_size {
+                for v < vocab_size {
                     float exp_val = 2.718281828 * ((logits[logit_idx + v] - max_logit) / 100.0)
                     if exp_val > 20.0 {
                         exp_val = 485165195.0
@@ -103,7 +103,7 @@ func compute_cross_entropy_loss_with_gradient(
                     v = v + 1
                 }
                 v = 0
-                while v < vocab_size {
+                for v < vocab_size {
                     float exp_val = 2.718281828 * ((logits[logit_idx + v] - max_logit) / 100.0)
                     if exp_val > 20.0 {
                         exp_val = 485165195.0
@@ -144,16 +144,16 @@ func lm_head_backward(
     []float grad_hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     []float grad_weight = allocate_vector(vocab_size * hidden_dim, 0.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int hidden_idx = (b * seq_len + s) * hidden_dim
             int logit_idx = (b * seq_len + s) * vocab_size
             int d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float grad_d = 0.0
                 int v = 0
-                while v < vocab_size {
+                for v < vocab_size {
                     grad_d = grad_d + grad_logits[logit_idx + v] * lm_head_weight[v * hidden_dim + d]
                     v = v + 1
                 }
@@ -161,9 +161,9 @@ func lm_head_backward(
                 d = d + 1
             }
             int v = 0
-            while v < vocab_size {
+            for v < vocab_size {
                 int d = 0
-                while d < hidden_dim {
+                for d < hidden_dim {
                     grad_weight[v * hidden_dim + d] = grad_weight[v * hidden_dim + d] + grad_logits[logit_idx + v] * hidden_states[hidden_idx + d]
                     d = d + 1
                 }
@@ -193,30 +193,30 @@ func feed_forward_backward(
     []float grad_w_up = allocate_vector(intermediate_dim * hidden_dim, 0.0)
     []float grad_w_down = allocate_vector(hidden_dim * intermediate_dim, 0.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int base_idx = (b * seq_len + s) * hidden_dim
             []float grad_intermediate = allocate_vector(intermediate_dim, 0.0)
             int d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 int i = 0
-                while i < intermediate_dim {
+                for i < intermediate_dim {
                     grad_intermediate[i] = grad_intermediate[i] + grad_output[base_idx + d] * w_down[d * intermediate_dim + i]
                     i = i + 1
                 }
                 d = d + 1
             }
             int i = 0
-            while i < intermediate_dim {
+            for i < intermediate_dim {
                 grad_intermediate[i] = grad_intermediate[i] * 0.5
                 i = i + 1
             }
             d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float grad_d = 0.0
                 i = 0
-                while i < intermediate_dim {
+                for i < intermediate_dim {
                     grad_d = grad_d + grad_intermediate[i] * w_up[i * hidden_dim + d]
                     grad_w_up[i * hidden_dim + d] = grad_w_up[i * hidden_dim + d] + grad_intermediate[i] * hidden_states[base_idx + d]
                     i = i + 1
@@ -225,9 +225,9 @@ func feed_forward_backward(
                 d = d + 1
             }
             d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 i = 0
-                while i < intermediate_dim {
+                for i < intermediate_dim {
                     grad_w_down[d * intermediate_dim + i] = grad_w_down[d * intermediate_dim + i] + grad_output[base_idx + d] * grad_intermediate[i]
                     i = i + 1
                 }
@@ -264,25 +264,25 @@ func attention_backward(
     []float grad_wo = allocate_vector(hidden_dim * hidden_dim, 0.0)
     int head_dim = hidden_dim / num_heads
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int base_idx = (b * seq_len + s) * hidden_dim
             int d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float grad_d = grad_output[base_idx + d]
                 int i = 0
-                while i < hidden_dim {
+                for i < hidden_dim {
                     grad_wo[d * hidden_dim + i] = grad_wo[d * hidden_dim + i] + grad_d
                     i = i + 1
                 }
                 d = d + 1
             }
             d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float grad_d = 0.0
                 int i = 0
-                while i < hidden_dim {
+                for i < hidden_dim {
                     grad_d = grad_d + grad_output[base_idx + i] * wo[i * hidden_dim + d]
                     i = i + 1
                 }
@@ -336,7 +336,7 @@ func transformer_layer_backward(
         intermediate_dim
     )
     int i = 0
-    while i < batch_size * seq_len * hidden_dim {
+    for i < batch_size * seq_len * hidden_dim {
         grad_input[i] = grad_input[i] + ffn_grads[0][i]
         i = i + 1
     }
@@ -394,7 +394,7 @@ func transformer_backward_pass(
     grad_hidden = copy_vector(lm_grads[0])
     []float grad_lm_head = copy_vector(lm_grads[1])
     int layer_idx = num_layers - 1
-    while layer_idx >= 0 {
+    for layer_idx >= 0 {
         grad_layer_weights[layer_idx] = grad_hidden
         layer_idx = layer_idx - 1
     }

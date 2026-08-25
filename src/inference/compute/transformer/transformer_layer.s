@@ -37,7 +37,7 @@ func sqrt_approx(float value) float {
     }
     float estimate = value
     int i = 0
-    while i < 8 {
+    for i < 8 {
         estimate = 0.5 * (estimate + value / estimate)
         i = i + 1
     }
@@ -51,7 +51,7 @@ func rms_norm([]float hidden, int hidden_size) []float {
     }
     float sum_squares = 0.0
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         float x = hidden[i]
         sum_squares = sum_squares + (x * x)
         i = i + 1
@@ -64,7 +64,7 @@ func rms_norm([]float hidden, int hidden_size) []float {
     []float output = []float{cap: hidden_size}
     float scale = 1.0 / rms
     i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         output[i] = hidden[i] * scale
         i = i + 1
     }
@@ -79,7 +79,7 @@ func compute_query_key_value_stub(
     print("  Q, K, V projections ready\n")
     []float result = []float{cap: hidden_size}
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         float current = hidden[i]
         float left = current
         float right = current
@@ -110,7 +110,7 @@ func multihead_attention(
     print("  Computing attention for each head...\n")
     []float output = []float{cap: hidden_size}
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         float mix = (q[i] + k[i] + v[i]) / 3.0
         output[i] = mix + float(i - (i / num_heads) * num_heads) / float(num_heads + 1)
         i = i + 1
@@ -128,7 +128,7 @@ func attention_output_projection(
     print("  W_o shape: [" + int_to_string(hidden_size) + ", " + int_to_string(hidden_size) + "]\n")
     []float output = []float{cap: hidden_size}
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         float bias = float(i - (i / 13) * 13) * 0.01
         output[i] = attn_output[i] * 0.9 + bias
         i = i + 1
@@ -154,7 +154,7 @@ func feedforward_network(
     print("  Down proj: [" + int_to_string(ffn_dim) + "] @ [" + int_to_string(ffn_dim) + ", " + int_to_string(hidden_size) + "]\n")
     []float output = []float{cap: hidden_size}
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         gate[i] = hidden[i] * 0.75
         up[i] = hidden[i] * 1.25
         gated[i] = gate[i] * up[i] / float(ffn_dim + 1)
@@ -199,7 +199,7 @@ func transformer_layer_1_forward(
     print("  + Attn output: [" + int_to_string(hidden_size) + "]\n")
     []float residual_attn = []float{cap: hidden_size}
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         residual_attn[i] = input_hidden[i] + attn_proj[i]
         i = i + 1
     }
@@ -215,7 +215,7 @@ func transformer_layer_1_forward(
     print("  + FFN output: [" + int_to_string(hidden_size) + "]\n")
     []float output = []float{cap: hidden_size}
     i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         output[i] = residual_attn[i] + ffn_output[i]
         i = i + 1
     }

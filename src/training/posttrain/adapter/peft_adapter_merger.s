@@ -64,13 +64,13 @@ func apply_lora_to_weight(
     []float ba = matmul_lora(lora_b, lora_a, out_dim, rank, in_dim)
     float scaling = alpha / (rank as float)
     int i = 0
-    while i < len(ba) {
+    for i < len(ba) {
         ba[i] = ba[i] * scaling
         i = i + 1
     }
     []float result = []float{}
     int j = 0
-    while j < len(base_weight) {
+    for j < len(base_weight) {
         result = append(result, base_weight[j] + ba[j])
         j = j + 1
     }
@@ -80,12 +80,12 @@ func apply_lora_to_weight(
 func matmul_lora([]float a, []float b, int m, int r, int n) []float {
     []float c = []float{cap: m * n}
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = 0.0
             int k = 0
-            while k < r {
+            for k < r {
                 sum = sum + a[i*r+k] * b[k*n+j]
                 k = k + 1
             }
@@ -157,7 +157,7 @@ func create_merged_model(
     int num_layers
 ) merged_model_state {
     int layer = 0
-    while layer < num_layers {
+    for layer < num_layers {
         []string projections = []string{"q_proj", "v_proj", "o_proj", "k_proj"}
         layer = layer + 1
     }
@@ -179,7 +179,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value % 10
         out = digit_to_str(digit) + out
         value = value / 10
@@ -206,7 +206,7 @@ func fmt_float(float value, int decimals) string {
     bool neg = current < 0.0
     if neg { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -214,10 +214,10 @@ func fmt_float(float value, int decimals) string {
     if neg { out = "-" }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }

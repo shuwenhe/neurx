@@ -6,7 +6,7 @@ func int_to_str(int n) string {
     bool neg = false
     if value < 0 { neg = true; value = 0 - value }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - ((value / 10) * 10)
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -33,7 +33,7 @@ func fmt_float(float f, int precision) string {
     string int_str = int_to_str(i_part)
     string frac_str = ""
     int p = 0
-    while p < precision {
+    for p < precision {
         f_part = f_part * 10.0
         int digit = (f_part as int)
         if digit == 0 { frac_str = frac_str + "0" }
@@ -75,10 +75,10 @@ func main() {
     int total_steps = 0
     int epoch = 0
     println("🚀 Training Phase:")
-    while epoch < num_epochs {
+    for epoch < num_epochs {
         float epoch_loss = 0.0
         int batch = 0
-        while batch < batch_size {
+        for batch < batch_size {
             float batch_loss = best_loss - ((epoch as float) * 0.0002)
             epoch_loss = epoch_loss + batch_loss
             current_loss = batch_loss

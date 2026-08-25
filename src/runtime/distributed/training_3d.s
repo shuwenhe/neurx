@@ -189,13 +189,13 @@ func init_orchestrator(
     int remaining_layers = model_cfg.num_layers % pp
     []pipeline_stage_state stages = []pipeline_stage_state{cap: pp}
     int s = 0
-    while s < pp {
+    for s < pp {
         int start_layer = s * layers_per_stage + min_int(s, remaining_layers)
         int end_layer = start_layer + layers_per_stage - 1
         if s < remaining_layers { end_layer = end_layer + 1 }
         []int layer_ids = []int{cap: end_layer - start_layer + 1}
         int l = start_layer
-        while l <= end_layer {
+        for l <= end_layer {
             layer_ids = append(layer_ids, l)
             l = l + 1
         }
@@ -240,7 +240,7 @@ func append([]int arr, int val) []int {
     int n = len(arr)
     []float new_arr = []int{cap: n + 1}
     int i = 0
-    while i < n { new_arr[i] = arr[i]; i = i + 1 }
+    for i < n { new_arr[i] = arr[i]; i = i + 1 }
     new_arr[n] = val
     new_arr
 }
@@ -258,7 +258,7 @@ func max_int(int a, int b) int {
 func float_of_int(int n) float {
     float r = 0.0
     int i = 0
-    while i < n { r = r + 1.0; i = i + 1 }
+    for i < n { r = r + 1.0; i = i + 1 }
     return r
 }
 
@@ -271,9 +271,9 @@ func build_1f1b_schedule(int num_stages, int num_micro_batches) pipeline_schedul
     []schedule_instruction instrs = []schedule_instruction{}
     int instruction_id = 0
     int mb = 0
-    while mb < num_warmup && mb < num_micro_batches {
+    for mb < num_warmup && mb < num_micro_batches {
         int s = 0
-        while s <= mb {
+        for s <= mb {
             schedule_instruction fwd_instr
             fwd_instr.action = MICRO_FORWARD
             fwd_instr.micro_batch_id = mb
@@ -286,9 +286,9 @@ func build_1f1b_schedule(int num_stages, int num_micro_batches) pipeline_schedul
         mb = mb + 1
     }
     int steady_mb = num_warmup
-    while steady_mb < num_warmup + num_steady && steady_mb < num_micro_batches {
+    for steady_mb < num_warmup + num_steady && steady_mb < num_micro_batches {
         int s = 0
-        while s < num_stages {
+        for s < num_stages {
             schedule_instruction fwd_instr
             fwd_instr.action = MICRO_FORWARD
             fwd_instr.micro_batch_id = steady_mb
@@ -312,9 +312,9 @@ func build_1f1b_schedule(int num_stages, int num_micro_batches) pipeline_schedul
         steady_mb = steady_mb + 1
     }
     int cooldown_mb = max_int(num_warmup + num_steady, 0)
-    while cooldown_mb < num_micro_batches + num_cooldown {
+    for cooldown_mb < num_micro_batches + num_cooldown {
         int s = num_stages - 1
-        while s >= 0 {
+        for s >= 0 {
             int bw_mb = cooldown_mb - num_warmup
             if bw_mb >= 0 && bw_mb < num_micro_batches {
                 schedule_instruction bwd_instr
@@ -344,7 +344,7 @@ func training_step(ref orchestrator_state orch, batch_data data) float {
     orch.current_phase = PHASE_FORWARD
     float step_time_start = get_current_time_ms()
     int micro_batch_id = 0
-    while micro_batch_id < orch.train_cfg.gradient_accum_steps {
+    for micro_batch_id < orch.train_cfg.gradient_accum_steps {
         micro_batch_data micro_data = get_micro_batch(data, micro_batch_id)
         execute_pipeline_forward(orch, micro_data, micro_batch_id)
         float loss = compute_loss(orch)
@@ -414,7 +414,7 @@ func run_stage_forward(
     int num_layers_in_stage = len(stage.layer_indices)
     [][]float current_hidden = input
     int idx = 0
-    while idx < num_layers_in_stage {
+    for idx < num_layers_in_stage {
         int layer_idx = stage.layer_indices[idx]
         current_hidden = transformer_layer_forward(
             orch.model_cfg,
@@ -462,7 +462,7 @@ func execute_pipeline_backward(ref orchestrator_state orch, int micro_batch_id) 
 func synchronize_gradients_across_dp(ref orchestrator_state orch) {
     parallel dims = orch.model_cfg.dims
     int p = 0
-    while p < get_num_parameters(orch) {
+    for p < get_num_parameters(orch) {
         []float grad = get_parameter_grad(orch, p)
         if is_fsdp_enabled(orch) {
             grad = reduce_scatter_across_dp(grad, dims.dp_group_id, dims.dp_degree)
@@ -477,7 +477,7 @@ func synchronize_gradients_across_dp(ref orchestrator_state orch) {
 func clip_gradients(ref orchestrator_state orch, float max_norm) {
     float total_norm = 0.0
     int p = 0
-    while p < get_num_parameters(orch) {
+    for p < get_num_parameters(orch) {
         []float grad = get_parameter_grad(orch, p)
         float norm = vector_l2_norm(grad)
         total_norm = total_norm + norm * norm
@@ -487,7 +487,7 @@ func clip_gradients(ref orchestrator_state orch, float max_norm) {
     if total_norm > max_norm {
         float scale = max_norm / total_norm
         p = 0
-        while p < get_num_parameters(orch) {
+        for p < get_num_parameters(orch) {
             scale_vector(get_parameter_grad_ref(orch, p), scale)
             p = p + 1
         }
@@ -498,7 +498,7 @@ func optimizer_step(ref orchestrator_state orch) {
     training_config tc = orch.train_cfg
     int t = orch.current_step + 1
     int p = 0
-    while p < get_num_parameters(orch) {
+    for p < get_num_parameters(orch) {
         []float param = get_parameter(orch, p)
         []float grad = get_parameter_grad(orch, p)
         []float exp_avg = get_exp_avg(orch, p)
@@ -507,7 +507,7 @@ func optimizer_step(ref orchestrator_state orch) {
         float bias_corr2 = 1.0 - pow_float(tc.adam_beta2, float_of_int(t))
         float step_size = tc.learning_rate / bias_corr1
         int i = 0
-        while i < len(param) {
+        for i < len(param) {
             exp_avg[i] = tc.adam_beta1 * exp_avg[i] + (1.0 - tc.adam_beta1) * grad[i]
             exp_avg_sq[i] = tc.adam_beta2 * exp_avg_sq[i] + (1.0 - tc.adam_beta2) * grad[i] * grad[i]
             float denom = sqrt_approx(exp_avg_sq[i] / bias_corr2) + tc.adam_epsilon
@@ -524,10 +524,10 @@ func optimizer_step(ref orchestrator_state orch) {
 
 func zero_grads(ref orchestrator_state orch) {
     int p = 0
-    while p < get_num_parameters(orch) {
+    for p < get_num_parameters(orch) {
         []float grad = get_parameter_grad(orch, p)
         int i = 0
-        while i < len(grad) {
+        for i < len(grad) {
             grad[i] = 0.0
             i = i + 1
         }
@@ -603,7 +603,7 @@ func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float g = x * 0.5
     int iter = 0
-    while iter < 20 {
+    for iter < 20 {
         float ng = (g + x / g) * 0.5
         if ng == g { break }
         g = ng
@@ -619,7 +619,7 @@ func pow_float(float base, float exp) float {
     bool neg = exp < 0.0
     if neg { exp = -exp }
     float e = 0.0
-    while e < exp { result = result * base; e = e + 1.0 }
+    for e < exp { result = result * base; e = e + 1.0 }
     if neg { result = 1.0 / result }
     return result
 }
@@ -629,7 +629,7 @@ func cos_approx(float x) float {
     float result = 1.0
     float xx = x * x
     int n = 1
-    while n <= 12 {
+    for n <= 12 {
         term = -term * xx / float_of_int((2*n-1) * (2*n))
         result = result + term
         n = n + 1
@@ -640,13 +640,13 @@ func cos_approx(float x) float {
 func vector_l2_norm([]float v) float {
     float sum_sq = 0.0
     int i = 0
-    while i < len(v) { sum_sq = sum_sq + v[i] * v[i]; i = i + 1 }
+    for i < len(v) { sum_sq = sum_sq + v[i] * v[i]; i = i + 1 }
     return sqrt_approx(sum_sq)
 }
 
 func scale_vector(ref []float v, float s) {
     int i = 0
-    while i < len(v) { v[i] = v[i] * s; i = i + 1 }
+    for i < len(v) { v[i] = v[i] * s; i = i + 1 }
 }
 
 func recv_activation_from_previous_stage(int from_stage, int mb_id) [][]float { return allocate_2d(128, 8192) }
@@ -660,7 +660,7 @@ func all_reduce_sum_across_dp([]float g, int group, int degree) []float { return
 func allocate_2d(int r, int c) [][]float {
     [][]float t = [][]float{cap: r}
     int i = 0
-    while i < r { t[i] = []float{cap: c}; i = i + 1 }
+    for i < r { t[i] = []float{cap: c}; i = i + 1 }
     return t
 }
 

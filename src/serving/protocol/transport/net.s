@@ -84,7 +84,7 @@ func net_socket(ns net_state, int proto, int owner_pid) (net_state, int) {
 
 func net_connect(ns net_state, int sock_id, remote net_addr) net_state {
     int i = 0
-    while i < len(ns.sockets) {
+    for i < len(ns.sockets) {
         if ns.sockets[i].sock_id == sock_id {
             ns.sockets[i].remote_addr = remote
             if ns.sockets[i].proto == PROTO_LOCAL {
@@ -103,7 +103,7 @@ func net_send(ns net_state, int sock_id, string payload, int pkt_type) (net_stat
     string dst_host = ""
     int dst_port = 0
     int i = 0
-    while i < len(ns.sockets) {
+    for i < len(ns.sockets) {
         if ns.sockets[i].sock_id == sock_id {
             src_port = ns.sockets[i].local_addr.port
             dst_host = ns.sockets[i].remote_addr.host
@@ -132,12 +132,12 @@ func net_send(ns net_state, int sock_id, string payload, int pkt_type) (net_stat
 
 func net_recv(ns net_state, int sock_id) (net_state, sk_buff, bool) {
     int i = 0
-    while i < len(ns.recv_queue) {
+    for i < len(ns.recv_queue) {
         if ns.recv_queue[i].sock_id == sock_id {
             sk_buff pkt = ns.recv_queue[i]
             []sk_buff remaining = []
             int j = 0
-            while j < len(ns.recv_queue) {
+            for j < len(ns.recv_queue) {
                 if j != i {
                     remaining = append(remaining, ns.recv_queue[j])
                 }
@@ -158,7 +158,7 @@ func net_deliver(ns net_state, pkt sk_buff) net_state {
 
 func net_close(ns net_state, int sock_id) net_state {
     int i = 0
-    while i < len(ns.sockets) {
+    for i < len(ns.sockets) {
         if ns.sockets[i].sock_id == sock_id {
             ns.sockets[i].state = SOCK_CLOSING
         }

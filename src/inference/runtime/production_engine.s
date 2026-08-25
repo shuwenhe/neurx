@@ -231,7 +231,7 @@ func engine_request_at(production_engine_state state, int index) production_requ
 
 func engine_find_request(production_engine_state state, string request_id) int {
     int i = 0
-    while i < len(state.requests) {
+    for i < len(state.requests) {
         if state.requests[i].request_id == request_id { return i }
         i = i + 1
     }
@@ -240,7 +240,7 @@ func engine_find_request(production_engine_state state, string request_id) int {
 
 func engine_find_execution(production_engine_state state, int execution_id) int {
     int i = 0
-    while i < len(state.inflight) {
+    for i < len(state.inflight) {
         if state.inflight[i].execution_id == execution_id { return i }
         i = i + 1
     }
@@ -254,7 +254,7 @@ func engine_execution_at(production_engine_state state, int index) gpu_execution
 func engine_remove_execution([]gpu_execution_command commands, int remove_index) []gpu_execution_command {
     []gpu_execution_command filtered = []gpu_execution_command{cap: len(commands)}
     int i = 0
-    while i < len(commands) {
+    for i < len(commands) {
         if i != remove_index { filtered = append(filtered, commands[i]) }
         i = i + 1
     }
@@ -318,7 +318,7 @@ func engine_submit(production_engine_state state, string request_id, string mode
 func engine_select_data_rank(production_engine_state state) int {
     int attempts = 0
     int rank = state.next_data_rank
-    while attempts < state.config.topology.data_parallel_size {
+    for attempts < state.config.topology.data_parallel_size {
         if worker_replica_ready(state.cluster, rank) { return rank }
         rank = rank + 1
         if rank >= state.config.topology.data_parallel_size { rank = 0 }
@@ -330,7 +330,7 @@ func engine_select_data_rank(production_engine_state state) int {
 func engine_replica_worker_ids(production_engine_state state, int data_rank) []string {
     []string worker_ids = []string{cap: state.config.topology.tensor_parallel_size * state.config.topology.pipeline_parallel_size}
     int i = 0
-    while i < len(state.cluster.workers) {
+    for i < len(state.cluster.workers) {
         inference_worker worker = state.cluster.workers[i]
         if worker.data_rank == data_rank && (worker.status == worker_ready_status() || worker.status == worker_busy_status()) {
             worker_ids = append(worker_ids, worker.worker_id)
@@ -342,7 +342,7 @@ func engine_replica_worker_ids(production_engine_state state, int data_rank) []s
 
 func engine_assign_workers(production_engine_state state, []string worker_ids, string request_id) production_engine_result {
     int i = 0
-    while i < len(worker_ids) {
+    for i < len(worker_ids) {
         worker_cluster_result assigned = worker_assign(state.cluster, worker_ids[i], request_id)
         state.cluster = assigned.state
         if !assigned.success { return engine_result(state, engine_empty_request(), false, assigned.error_message) }
@@ -378,7 +378,7 @@ func engine_schedule(production_engine_state state, int now_ms) production_engin
     batch.batch_id = state.next_batch_id
     batch.scheduled_tokens = scheduled.output.scheduled_tokens
     int i = 0
-    while i < len(scheduled.output.requests) {
+    for i < len(scheduled.output.requests) {
         scheduled_request request = scheduled_request_at(scheduled.output.requests, i)
         int data_rank = engine_select_data_rank(state)
         if data_rank < 0 {
@@ -418,7 +418,7 @@ func engine_schedule(production_engine_state state, int now_ms) production_engin
 
 func engine_release_command_workers(production_engine_state state, gpu_execution_command command) production_engine_state {
     int i = 0
-    while i < len(command.worker_ids) {
+    for i < len(command.worker_ids) {
         worker_cluster_result released = worker_release(state.cluster, command.worker_ids[i], command.request_id)
         state.cluster = released.state
         i = i + 1
@@ -429,7 +429,7 @@ func engine_release_command_workers(production_engine_state state, gpu_execution
 func engine_invalidate_request_executions(production_engine_state state, string request_id) production_engine_state {
     []gpu_execution_command retained = []gpu_execution_command{cap: len(state.inflight)}
     int i = 0
-    while i < len(state.inflight) {
+    for i < len(state.inflight) {
         gpu_execution_command command = engine_execution_at(state, i)
         if command.request_id == request_id {
             state = engine_release_command_workers(state, command)
@@ -518,7 +518,7 @@ func engine_fail_worker(production_engine_state state, string worker_id, string 
     state.cluster = failed.state
     if !failed.success { return engine_result(state, engine_empty_request(), false, failed.error_message) }
     int i = 0
-    while i < len(failed.affected_request_ids) {
+    for i < len(failed.affected_request_ids) {
         state = engine_preempt_request(state, worker_string_at(failed.affected_request_ids, i))
         i = i + 1
     }
@@ -530,7 +530,7 @@ func engine_check_workers(production_engine_state state, int now_ms) production_
     worker_cluster_result expired = worker_expire_heartbeats(state.cluster, now_ms)
     state.cluster = expired.state
     int i = 0
-    while i < len(expired.affected_request_ids) {
+    for i < len(expired.affected_request_ids) {
         state = engine_preempt_request(state, worker_string_at(expired.affected_request_ids, i))
         i = i + 1
     }
@@ -579,7 +579,7 @@ func engine_create_kv_transfer(production_engine_state state, string request_id,
 
 func engine_complete_kv_transfer(production_engine_state state, int ticket_id, int checksum, bool success, string error_message) production_engine_result {
     int i = 0
-    while i < len(state.kv_transfers) {
+    for i < len(state.kv_transfers) {
         kv_transfer_ticket ticket = state.kv_transfers[i]
         if ticket.ticket_id == ticket_id {
             if ticket.status != engine_kv_transfer_pending_status() {

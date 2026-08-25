@@ -34,7 +34,7 @@ func robotics_trajectory_copy_float([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = values[i]
         i = i + 1
     }
@@ -45,7 +45,7 @@ func robotics_trajectory_copy_int([]int values) []int {
     int n = len(values)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = values[i]
         i = i + 1
     }
@@ -119,7 +119,7 @@ func robotics_trajectory_train_load_state_dict(robotics_trajectory_train_state s
 func robotics_trajectory_observation(int sample_index, int obs_dim) []float {
     []float obs = []float{cap: obs_dim}
     int i = 0
-    while i < obs_dim {
+    for i < obs_dim {
         int basis = sample_index + (i + 1)
         int mod = basis - (basis / 7) * 7
         obs[i] = ((mod as float) - 3.0) / 3.0
@@ -131,10 +131,10 @@ func robotics_trajectory_observation(int sample_index, int obs_dim) []float {
 func robotics_trajectory_target_action([]float observation, int act_dim) []float {
     []float target = []float{cap: act_dim}
     int a = 0
-    while a < act_dim {
+    for a < act_dim {
         float acc = 0.0
         int i = 0
-        while i < len(observation) {
+        for i < len(observation) {
             acc = acc + observation[i] * linear_target_weight(a, i)
             i = i + 1
         }
@@ -157,7 +157,7 @@ func robotics_trajectory_mse([]float prediction, []float target) float {
     }
     float total = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float diff = prediction[i]
         if i < len(target) {
             diff = diff - target[i]
@@ -197,7 +197,7 @@ func robotics_trajectory_train_step(robotics_trajectory_train_state state) robot
     }
     []float grad_action = []float{cap: state.config.act_dim}
     int a = 0
-    while a < state.config.act_dim {
+    for a < state.config.act_dim {
         float diff = prediction[a] - target_action[a]
         action_error = action_error + diff * diff
         grad_action[a] = (2.0 * diff) / (act_dim as float)
@@ -209,9 +209,9 @@ func robotics_trajectory_train_step(robotics_trajectory_train_state state) robot
     []float next_policy_bias = robotics_trajectory_copy_float(next_policy.bias)
     []float grad_latent = []float{cap: state.config.latent_dim}
     a = 0
-    while a < state.config.act_dim {
+    for a < state.config.act_dim {
         int i = 0
-        while i < state.config.latent_dim {
+        for i < state.config.latent_dim {
             int weight_idx = a * state.config.latent_dim + i
             grad_latent[i] = grad_latent[i] + next_policy_weight[weight_idx] * grad_action[a]
             next_policy_weight[weight_idx] = next_policy_weight[weight_idx] - lr * grad_action[a] * latent[i]
@@ -224,9 +224,9 @@ func robotics_trajectory_train_step(robotics_trajectory_train_state state) robot
     []float next_perception_weight = robotics_trajectory_copy_float(next_perception.weight)
     []float next_perception_bias = robotics_trajectory_copy_float(next_perception.bias)
     int latent_index = 0
-    while latent_index < state.config.latent_dim {
+    for latent_index < state.config.latent_dim {
         int obs_index = 0
-        while obs_index < state.config.obs_dim {
+        for obs_index < state.config.obs_dim {
             int weight_idx = latent_index * state.config.obs_dim + obs_index
             next_perception_weight[weight_idx] = next_perception_weight[weight_idx] - lr * grad_latent[latent_index] * observation[obs_index]
             obs_index = obs_index + 1
@@ -276,7 +276,7 @@ func robotics_trajectory_train_run(robotics_trajectory_train_state state, int st
     }
     robotics_trajectory_train_state current = state
     int i = 0
-    while i < loops {
+    for i < loops {
         current = robotics_trajectory_train_step(current)
         i = i + 1
         if current.finished {

@@ -59,10 +59,10 @@ func extract_json_int(string json_text, string key) int {
     int found_at = -1
     string temp_text = json_text
     int i = 0
-    while i < len(temp_text) - len(pattern) {
+    for i < len(temp_text) - len(pattern) {
         int j = 0
         bool matches = true
-        while j < len(pattern) {
+        for j < len(pattern) {
             string ch_str = string(temp_text[i + j])
             string pattern_ch_str = string(pattern[j])
             if ch_str != pattern_ch_str {
@@ -80,7 +80,7 @@ func extract_json_int(string json_text, string key) int {
     if found_at == -1 {
         return 0
     }
-    while found_at < len(temp_text) {
+    for found_at < len(temp_text) {
         string ch_str = string(temp_text[found_at])
         if ch_str == " " || ch_str == "\t" || ch_str == "\n" || ch_str == "\r" {
             found_at = found_at + 1
@@ -97,7 +97,7 @@ func extract_json_int(string json_text, string key) int {
             found_at = found_at + 1
         }
     }
-    while found_at < len(temp_text) {
+    for found_at < len(temp_text) {
         string ch_str = string(temp_text[found_at])
         if ch_str == "0" {
             result = result * 10 + 0
@@ -134,10 +134,10 @@ func extract_json_float(string json_text, string key) float {
     string pattern = "\"" + key + "\":"
     int found_at = -1
     int i = 0
-    while i < len(json_text) - len(pattern) {
+    for i < len(json_text) - len(pattern) {
         int j = 0
         bool matches = true
-        while j < len(pattern) {
+        for j < len(pattern) {
             if string(json_text[i + j]) != string(pattern[j]) {
                 matches = false
                 break
@@ -153,7 +153,7 @@ func extract_json_float(string json_text, string key) float {
     if found_at == -1 {
         return 0.0
     }
-    while found_at < len(json_text) {
+    for found_at < len(json_text) {
         string ch = string(json_text[found_at])
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
             found_at = found_at + 1
@@ -171,7 +171,7 @@ func extract_json_float(string json_text, string key) float {
         }
     }
     int int_part = 0
-    while found_at < len(json_text) {
+    for found_at < len(json_text) {
         string ch = string(json_text[found_at])
         if ch == "0" {
             int_part = int_part * 10
@@ -204,7 +204,7 @@ func extract_json_float(string json_text, string key) float {
         if ch == "." {
             found_at = found_at + 1
             float frac_divisor = 10.0
-            while found_at < len(json_text) {
+            for found_at < len(json_text) {
                 ch = string(json_text[found_at])
                 if ch == "0" {
                 } else if ch == "1" {
@@ -243,10 +243,10 @@ func extract_json_string(string json_text, string key) string {
     string pattern = "\"" + key + "\":"
     int found_at = -1
     int i = 0
-    while i < len(json_text) - len(pattern) {
+    for i < len(json_text) - len(pattern) {
         int j = 0
         bool matches = true
-        while j < len(pattern) {
+        for j < len(pattern) {
             if string(json_text[i + j]) != string(pattern[j]) {
                 matches = false
                 break
@@ -262,7 +262,7 @@ func extract_json_string(string json_text, string key) string {
     if found_at == -1 {
         return ""
     }
-    while found_at < len(json_text) {
+    for found_at < len(json_text) {
         string ch = string(json_text[found_at])
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
             found_at = found_at + 1
@@ -275,7 +275,7 @@ func extract_json_string(string json_text, string key) string {
     }
     found_at = found_at + 1
     string result = ""
-    while found_at < len(json_text) {
+    for found_at < len(json_text) {
         string ch = string(json_text[found_at])
         if ch == "\"" {
             break
@@ -290,10 +290,10 @@ func extract_json_bool(string json_text, string key) bool {
     string pattern = "\"" + key + "\":"
     int found_at = -1
     int i = 0
-    while i < len(json_text) - len(pattern) {
+    for i < len(json_text) - len(pattern) {
         int j = 0
         bool matches = true
-        while j < len(pattern) {
+        for j < len(pattern) {
             if string(json_text[i + j]) != string(pattern[j]) {
                 matches = false
                 break
@@ -309,7 +309,7 @@ func extract_json_bool(string json_text, string key) bool {
     if found_at == -1 {
         return false
     }
-    while found_at < len(json_text) {
+    for found_at < len(json_text) {
         string ch = string(json_text[found_at])
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
             found_at = found_at + 1
@@ -320,7 +320,7 @@ func extract_json_bool(string json_text, string key) bool {
     if found_at + 4 <= len(json_text) {
         string word = ""
         int j = 0
-        while j < 4 && found_at + j < len(json_text) {
+        for j < 4 && found_at + j < len(json_text) {
             word = word + string(json_text[found_at + j])
             j = j + 1
         }
@@ -331,7 +331,7 @@ func extract_json_bool(string json_text, string key) bool {
     if found_at + 5 <= len(json_text) {
         string word = ""
         int j = 0
-        while j < 5 && found_at + j < len(json_text) {
+        for j < 5 && found_at + j < len(json_text) {
             word = word + string(json_text[found_at + j])
             j = j + 1
         }

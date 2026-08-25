@@ -263,7 +263,7 @@ func constitutional_ai_new() constitutional_ai_state {
         overall_alignment_score: 0.0,
     }
     int i = 0
-    while i < 7 {
+    for i < 7 {
         state.principle_compliance_scores[i] = 1.0
         state.principle_violation_counts[i] = 0
         i = i + 1
@@ -279,7 +279,7 @@ func constitutional_ai_evaluate_response(
     float total_score = 0.0
     float total_weight = 0.0
     int i = 0
-    while i < len(state.principles) {
+    for i < len(state.principles) {
         constitution_principle principle = state.principles[i]
         float score = 0.9
         total_score = total_score + score * principle.importance_weight

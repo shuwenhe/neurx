@@ -6,7 +6,7 @@ func sqrt_app(float x) float {
     }
     float g = x * 0.5
     int j = 0
-    while j < 3 {
+    for j < 3 {
         g = (g + x / g) * 0.5
         j = j + 1
     }

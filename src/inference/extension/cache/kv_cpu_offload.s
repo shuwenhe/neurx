@@ -239,7 +239,7 @@ func (mut kv_cache_pool* pool) clear_sequence_cache(int sequence_id) result[(), 
     }
 
     i := 0
-    while i < keys_to_remove.len() {
+    for i < keys_to_remove.len() {
         key := keys_to_remove[i]
 
         switch pool.gpu_cache.get(key) {
@@ -288,7 +288,7 @@ func main() {
     value := vec[float]()
 
     i := 0
-    while i < 1024 {
+    for i < 1024 {
         key.push(0.1)
         value.push(0.2)
         i = i + 1

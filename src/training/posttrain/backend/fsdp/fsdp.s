@@ -52,7 +52,7 @@ func fsdp_shard_parameters(
 ) []tensor {
     []tensor sharded = []tensor{cap: params.len}
     int i = 0
-    while i < params.len {
+    for i < params.len {
         tensor param = params[i]
         int total_size = param.shape[0]
         int shard_size = (total_size + world_size - 1) / world_size
@@ -74,7 +74,7 @@ func fsdp_gather_parameters(
 ) []tensor {
     []tensor gathered = []tensor{cap: sharded_params.len}
     int i = 0
-    while i < sharded_params.len {
+    for i < sharded_params.len {
         tensor shard = sharded_params[i]
         tensor full_param = ctx.all_gather(shard)
         gathered[i] = full_param
@@ -89,7 +89,7 @@ func fsdp_reduce_scatter_gradients(
 ) []tensor {
     []tensor reduced = []tensor{cap: param_grads.len}
     int i = 0
-    while i < param_grads.len {
+    for i < param_grads.len {
         tensor grad = param_grads[i]
         tensor reduced_grad = ctx.reduce_scatter(grad)
         reduced[i] = reduced_grad

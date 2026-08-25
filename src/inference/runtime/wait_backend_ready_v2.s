@@ -10,7 +10,7 @@ func parse_int_or_default(string s, int default_val) int {
     }
     int result = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         int ch = s[i]
         if ch >= 48 && ch <= 57 {
             result = result * 10 + (ch - 48)
@@ -28,14 +28,14 @@ func main() {
     int max_attempts = 300
     int attempt = 0
     print("[HealthCheck] Waiting for backend at " + host + ":" + runtime_env_get("NEURX_S_PORT", "18083") + "\n")
-    while attempt < max_attempts {
+    for attempt < max_attempts {
         attempt = attempt + 1
 
         int sock = __sys_socket(2, 1, 6)
         if sock < 0 {
 
             int wait = 0
-            while wait < 50000 { wait = wait + 1 }
+            for wait < 50000 { wait = wait + 1 }
             continue
         }
 
@@ -51,7 +51,7 @@ func main() {
         }
 
         int wait = 0
-        while wait < 50000 { wait = wait + 1 }
+        for wait < 50000 { wait = wait + 1 }
 
         if attempt % 50 == 0 || attempt <= 5 {
             print("[HealthCheck] Attempt ")

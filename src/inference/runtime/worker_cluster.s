@@ -125,7 +125,7 @@ func worker_at(worker_cluster_state state, int index) inference_worker {
 
 func worker_find(worker_cluster_state state, string worker_id) int {
     int i = 0
-    while i < len(state.workers) {
+    for i < len(state.workers) {
         if state.workers[i].worker_id == worker_id { return i }
         i = i + 1
     }
@@ -134,7 +134,7 @@ func worker_find(worker_cluster_state state, string worker_id) int {
 
 func worker_find_rank(worker_cluster_state state, int global_rank) int {
     int i = 0
-    while i < len(state.workers) {
+    for i < len(state.workers) {
         if state.workers[i].global_rank == global_rank { return i }
         i = i + 1
     }
@@ -143,7 +143,7 @@ func worker_find_rank(worker_cluster_state state, int global_rank) int {
 
 func worker_string_contains([]string values, string value) bool {
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if values[i] == value { return true }
         i = i + 1
     }
@@ -157,7 +157,7 @@ func worker_string_at([]string values, int index) string {
 func worker_string_remove([]string values, string value) []string {
     []string filtered = []string{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if values[i] != value { filtered = append(filtered, values[i]) }
         i = i + 1
     }
@@ -290,12 +290,12 @@ func worker_begin_recovery(worker_cluster_state state, string worker_id, int now
 func worker_expire_heartbeats(worker_cluster_state state, int now_ms) worker_cluster_result {
     worker_cluster_result result = worker_new_result(state, worker_empty(), true, "")
     int i = 0
-    while i < len(state.workers) {
+    for i < len(state.workers) {
         inference_worker worker = worker_at(state, i)
         bool active = worker.status == worker_ready_status() || worker.status == worker_busy_status() || worker.status == worker_starting_status() || worker.status == worker_recovering_status()
         if active && now_ms - worker.last_heartbeat_ms > state.heartbeat_timeout_ms {
             int j = 0
-            while j < len(worker.request_ids) {
+            for j < len(worker.request_ids) {
                 string request_id = worker_string_at(worker.request_ids, j)
                 if !worker_string_contains(result.affected_request_ids, request_id) {
                     result.affected_request_ids = append(result.affected_request_ids, request_id)
@@ -317,7 +317,7 @@ func worker_expire_heartbeats(worker_cluster_state state, int now_ms) worker_clu
 func worker_ready_count(worker_cluster_state state) int {
     int count = 0
     int i = 0
-    while i < len(state.workers) {
+    for i < len(state.workers) {
         int status = state.workers[i].status
         if status == worker_ready_status() || status == worker_busy_status() { count = count + 1 }
         i = i + 1
@@ -334,7 +334,7 @@ func worker_replica_ready(worker_cluster_state state, int data_rank) bool {
     int expected = state.topology.tensor_parallel_size * state.topology.pipeline_parallel_size
     int count = 0
     int i = 0
-    while i < len(state.workers) {
+    for i < len(state.workers) {
         inference_worker worker = state.workers[i]
         if worker.data_rank == data_rank && (worker.status == worker_ready_status() || worker.status == worker_busy_status()) { count = count + 1 }
         i = i + 1

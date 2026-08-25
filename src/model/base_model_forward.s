@@ -27,7 +27,7 @@ func model_forward(
     )
     eprintln("[Model Forward] Step 2/4: Processing " + int_to_str(num_layers) + " transformer layers")
     int layer_idx = 0
-    while layer_idx < num_layers {
+    for layer_idx < num_layers {
         if layer_idx == 0 or layer_idx == num_layers - 1 {
             eprintln("[Model Forward]   Layer " + int_to_str(layer_idx + 1) + "/" + int_to_str(num_layers))
         }
@@ -105,7 +105,7 @@ func int_to_str(int x) string {
     if x < 0 { return "-" + int_to_str(0 - x) }
     string result = ""
     int num = x
-    while num > 0 {
+    for num > 0 {
         int digit = num - ((num / 10) * 10)
         if digit == 0 { result = "0" + result }
         if digit == 1 { result = "1" + result }

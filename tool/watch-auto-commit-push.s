@@ -14,7 +14,7 @@ func main() {
     }
     println("watcher: monitoring branch '" + branch + "'")
     println("watcher: prefix '" + prefix + "'")
-    while true {
+    for true {
         if runtime_run_command("git diff --quiet && git diff --cached --quiet").ok {
             _ = runtime_run_command("sleep " + interval)
             continue
@@ -52,7 +52,7 @@ func generate_commit_message(string prefix, string changed, string added, string
 
 func contains(string text, string needle) bool {
     int i = 0
-    while i + len(needle) <= len(text) {
+    for i + len(needle) <= len(text) {
         if slice(text, i, i + len(needle)) == needle {
             return true
         }
@@ -79,7 +79,7 @@ func second_field(string text) string {
 
 func index_of_space(string text) int {
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         if char_at(text, i) == " " {
             return i
         }

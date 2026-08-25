@@ -7,7 +7,7 @@ extern "intrinsic" func __sys_read_string(int fd, int count) string
 func shell_escape(string value) string {
     string out = "'"
     int i = 0
-    while i < len(value) {
+    for i < len(value) {
         string ch = __host_slice(value, i, i + 1)
         if ch == "'" {
             out = out + "'\"'\"'"
@@ -25,7 +25,7 @@ func ends_with(string value, string suffix) bool {
     }
     int offset = len(value) - len(suffix)
     int i = 0
-    while i < len(suffix) {
+    for i < len(suffix) {
         if __host_slice(value, offset + i, offset + i + 1) != __host_slice(suffix, i, i + 1) {
             return false
         }
@@ -55,9 +55,9 @@ func last_index_of(string text, string needle) int {
         return -1
     }
     int i = len(text) - len(needle)
-    while i >= 0 {
+    for i >= 0 {
         int j = 0
-        while j < len(needle) && __host_slice(text, i + j, i + j + 1) == __host_slice(needle, j, j + 1) {
+        for j < len(needle) && __host_slice(text, i + j, i + j + 1) == __host_slice(needle, j, j + 1) {
             j = j + 1
         }
         if j == len(needle) {
@@ -132,7 +132,7 @@ func main() {
     print("Inference engine: " + runner + "\n")
     print("Type /exit to quit, /reset to clear history.\n\n")
     string history = "System: " + system_prompt + "\n"
-    while true {
+    for true {
         print("You: ")
         string user_text = read_user_line()
         if len(user_text) == 0 {

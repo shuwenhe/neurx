@@ -47,7 +47,7 @@ func main() {
     }
     float prev = start_loss
     int i = 1
-    while i < len(loss_history) {
+    for i < len(loss_history) {
         float current = loss_history[i]
         if current - prev > MAX_LOSS_STEP_INCREASE {
             println("error: loss increased at step " + int_to_str(i) + ": prev=" + float_to_str(prev, 6) + " current=" + float_to_str(current, 6))
@@ -100,12 +100,12 @@ func extract_json_number_field(string json_text, string field_name, string fallb
         return fallback
     }
     pos = pos + len(needle)
-    while pos < len(json_text) && (json_text[pos] == 32 || json_text[pos] == 9 || json_text[pos] == 10 || json_text[pos] == 13 || json_text[pos] == 58) {
+    for pos < len(json_text) && (json_text[pos] == 32 || json_text[pos] == 9 || json_text[pos] == 10 || json_text[pos] == 13 || json_text[pos] == 58) {
         pos = pos + 1
     }
     string token = ""
     bool started = false
-    while pos < len(json_text) {
+    for pos < len(json_text) {
         int ch = json_text[pos]
         if is_number_token_char(ch) {
             token = token + string_char(ch)
@@ -129,7 +129,7 @@ func extract_json_array_values(string json_text, string field_name) []float {
         return values
     }
     pos = pos + len(needle)
-    while pos < len(json_text) && json_text[pos] != 91 {
+    for pos < len(json_text) && json_text[pos] != 91 {
         pos = pos + 1
     }
     if pos >= len(json_text) {
@@ -137,7 +137,7 @@ func extract_json_array_values(string json_text, string field_name) []float {
     }
     pos = pos + 1
     string token = ""
-    while pos < len(json_text) {
+    for pos < len(json_text) {
         int ch = json_text[pos]
         if ch == 93 {
             if token != "" {
@@ -172,7 +172,7 @@ func parse_float(string s, float fallback) float {
         i = 1
     }
     float value = 0.0
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if ch == 46 {
             i = i + 1
@@ -185,7 +185,7 @@ func parse_float(string s, float fallback) float {
         i = i + 1
     }
     float frac = 0.1
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if ch == 101 || ch == 69 {
             break
@@ -207,7 +207,7 @@ func parse_float(string s, float fallback) float {
         } else if i < len(text) && text[i] == 43 {
             i = i + 1
         }
-        while i < len(text) {
+        for i < len(text) {
             int ch = text[i]
             if ch < 48 || ch > 57 {
                 break
@@ -220,13 +220,13 @@ func parse_float(string s, float fallback) float {
     int scaled_exp = exp * exp_sign
     if scaled_exp > 0 {
         int j = 0
-        while j < scaled_exp {
+        for j < scaled_exp {
             result = result * 10.0
             j = j + 1
         }
     } else if scaled_exp < 0 {
         int j = 0
-        while j < 0 - scaled_exp {
+        for j < 0 - scaled_exp {
             result = result / 10.0
             j = j + 1
         }
@@ -243,10 +243,10 @@ func find_substring(string text, string pattern) int {
         return -1
     }
     int i = 0
-    while i <= len(text) - len(pattern) {
+    for i <= len(text) - len(pattern) {
         bool match = true
         int j = 0
-        while j < len(pattern) {
+        for j < len(pattern) {
             if text[i + j] != pattern[j] {
                 match = false
                 break
@@ -265,7 +265,7 @@ func read_u64_le([]int bytes, int offset) int {
     int value = 0
     int i = 0
     int shift = 1
-    while i < 8 {
+    for i < 8 {
         value = value + bytes[offset + i] * shift
         shift = shift * 256
         i = i + 1
@@ -288,7 +288,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -315,7 +315,7 @@ func float_to_str(float value, int decimals) string {
         current = 0.0 - current
     }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -325,10 +325,10 @@ func float_to_str(float value, int decimals) string {
     }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }
@@ -350,7 +350,7 @@ func float_to_str(float value, int decimals) string {
 func shell_escape(string value) string {
     string out = "'"
     int i = 0
-    while i < len(value) {
+    for i < len(value) {
         string ch = string_char(value[i])
         if ch == "'" {
             out = out + "'\"'\"'"

@@ -54,9 +54,9 @@ func reasoning_config_for(int backend) reasoning_parser_config {
 func reasoning_find(string text, string pattern, int start) int {
     if len(pattern) == 0 || start < 0 { return 0 - 1 }
     int i = start
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
-        while j < len(pattern) && text[i + j] == pattern[j] { j = j + 1 }
+        for j < len(pattern) && text[i + j] == pattern[j] { j = j + 1 }
         if j == len(pattern) { return i }
         i = i + 1
     }
@@ -70,7 +70,7 @@ func reasoning_copy_range(string text, int start, int end) string {
     if from < 0 { from = 0 }
     if to > len(text) { to = len(text) }
     int i = from
-    while i < to { output = output + string(text[i]); i = i + 1 }
+    for i < to { output = output + string(text[i]); i = i + 1 }
     output
 }
 

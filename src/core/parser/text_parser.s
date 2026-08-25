@@ -8,7 +8,7 @@ func tokenize(string input) []string {
     current_token := ""
     i := 0
 
-    while i < len(input) {
+    for i < len(input) {
         ch := input[i]
 
         if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
@@ -57,7 +57,7 @@ func split_lines(string text) []string {
     current_line := ""
     i := 0
 
-    while i < len(text) {
+    for i < len(text) {
         ch := text[i]
 
         if ch == '\n' {
@@ -91,7 +91,7 @@ func split_paragraphs(string text) []string {
     current_para := ""
     i := 0
 
-    while i < len(lines) {
+    for i < len(lines) {
         line := lines[i]
 
         if trim_string(line) == "" {
@@ -157,7 +157,7 @@ func find_all_substring(string text, string pattern) []int {
     positions := []int{}
     pos := 0
 
-    while pos < len(text) {
+    for pos < len(text) {
         found_pos := find_substring(text, pattern, pos)
         if found_pos < 0 {
             break
@@ -175,9 +175,9 @@ func find_substring(string text, string substring, int start_pos) int {
     }
 
     i := start_pos
-    while i <= len(text) - len(substring) {
+    for i <= len(text) - len(substring) {
         j := 0
-        while j < len(substring) && text[i + j] == substring[j] {
+        for j < len(substring) && text[i + j] == substring[j] {
             j = j + 1
         }
 
@@ -197,7 +197,7 @@ func replace_all(string text, string pattern, string replacement) string {
     last_pos := 0
     i := 0
 
-    while i < len(positions) {
+    for i < len(positions) {
         pos := positions[i]
         result = result + text[last_pos:pos] + replacement
         last_pos = pos + len(pattern)
@@ -228,7 +228,7 @@ func normalize_whitespace(string text) string {
     last_was_space := false
     i := 0
 
-    while i < len(text) {
+    for i < len(text) {
         ch := text[i]
 
         if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
@@ -251,7 +251,7 @@ func to_lowercase(string text) string {
     result := ""
     i := 0
 
-    while i < len(text) {
+    for i < len(text) {
         ch := text[i]
 
         if ch >= 'A' && ch <= 'Z' {
@@ -270,7 +270,7 @@ func to_uppercase(string text) string {
     result := ""
     i := 0
 
-    while i < len(text) {
+    for i < len(text) {
         ch := text[i]
 
         if ch >= 'a' && ch <= 'z' {
@@ -317,7 +317,7 @@ func extract_words(string text) []string {
     current_word := ""
     i := 0
 
-    while i < len(text) {
+    for i < len(text) {
         ch := text[i]
 
         if (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') {
@@ -361,7 +361,7 @@ func split_string(string text, string delimiter) []string {
     if len(delimiter) == 0 {
         chars := []string{}
         i := 0
-        while i < len(text) {
+        for i < len(text) {
             chars = append(chars, string(text[i]))
             i = i + 1
         }
@@ -372,7 +372,7 @@ func split_string(string text, string delimiter) []string {
     current_part := ""
     i := 0
 
-    while i < len(text) {
+    for i < len(text) {
         if i + len(delimiter) <= len(text) && text[i:i + len(delimiter)] == delimiter {
             parts = append(parts, current_part)
             current_part = ""
@@ -391,7 +391,7 @@ func join_strings([]string strings, string separator) string {
     result := ""
     i := 0
 
-    while i < len(strings) {
+    for i < len(strings) {
         if i > 0 {
             result = result + separator
         }

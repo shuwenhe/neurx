@@ -17,7 +17,7 @@ func (kv_cache_manager* mgr) init_kv_cache(int num_layers, int num_kv_heads, int
 func (kv_cache_manager* mgr) get_memory_usage() int64 {
     int total = 0
     int i = 0
-    while i < 10 {
+    for i < 10 {
         total = total + 1024
         i = i + 1
     }

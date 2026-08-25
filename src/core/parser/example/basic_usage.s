@@ -61,7 +61,7 @@ func demo_format_detection() {
     format_names := []string{"JSON", "XML", "Markdown", "YAML"}
     i := 0
 
-    while i < len(test_cases) {
+    for i < len(test_cases) {
         print("Test " + string(i + 1) + ": " + format_names[i] + "\n")
         print("  Input: " + test_cases[i] + "\n")
 
@@ -148,7 +148,7 @@ func demo_batch_parsing() {
 
     print("Results:\n")
     i := 0
-    while i < len(results) {
+    for i < len(results) {
         result := results[i]
         print("  [" + string(i + 1) + "] " + format_to_string(result.format))
         print(" - " + status_to_string(result.status))

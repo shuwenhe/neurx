@@ -24,7 +24,7 @@ func read_u64_le([]int bytes, int offset) int {
     int value = 0
     int mul = 1
     int i = 0
-    while i < 8 {
+    for i < 8 {
         int b = bytes[offset + i]
         if b < 0 {
             b = b + 256
@@ -59,7 +59,7 @@ func parse_safetensors_header(string model_path) safetensors_file {
 
     string header_json = ""
     int i = 0
-    while i < len(header_bytes) {
+    for i < len(header_bytes) {
         int b = header_bytes[i]
         if b < 0 {
             b = b + 256
@@ -111,7 +111,7 @@ func load_embeddings(string model_path, int vocab_size, int hidden_dim) []float 
 
     int idx = 0
     int i = 0
-    while i < vocab_size * hidden_dim && idx < len(weight_data) {
+    for i < vocab_size * hidden_dim && idx < len(weight_data) {
 
         int raw = weight_data[idx]
         if raw < 0 {
@@ -137,7 +137,7 @@ func int_to_string(int value) string {
     if current < 0 {
         current = 0 - current
     }
-    while current > 0 {
+    for current > 0 {
         int digit = current - (current / 10) * 10
         if digit == 0 { result = "0" + result }
         else if digit == 1 { result = "1" + result }
@@ -162,10 +162,10 @@ func contains_substring(string haystack, string needle) bool {
         return false
     }
     int i = 0
-    while i <= len(haystack) - len(needle) {
+    for i <= len(haystack) - len(needle) {
         bool matches = true
         int j = 0
-        while j < len(needle) {
+        for j < len(needle) {
             if haystack[i + j] != needle[j] {
                 matches = false
             }

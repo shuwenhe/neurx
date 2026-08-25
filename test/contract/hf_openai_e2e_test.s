@@ -7,10 +7,10 @@ use neurx.serving.api.native_openai.{native_openai_response, serve_native_openai
 
 func contains(string text, string pattern) bool {
     int i = 0
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
         bool same = true
-        while j < len(pattern) { if text[i + j] != pattern[j] { same = false; j = len(pattern) } else { j = j + 1 } }
+        for j < len(pattern) { if text[i + j] != pattern[j] { same = false; j = len(pattern) } else { j = j + 1 } }
         if same { return true }
         i = i + 1
     }

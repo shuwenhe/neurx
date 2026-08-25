@@ -19,7 +19,7 @@ func int_to_string(int n) string {
         num = 0 - num
     }
 
-    while num > 0 {
+    for num > 0 {
         int digit = num % 10
         string digit_str = ""
 
@@ -77,7 +77,7 @@ func escape_json_string(string s) string {
     string result = ""
     int i = 0
 
-    while i < len(s) {
+    for i < len(s) {
         int c = s[i]
 
         if c == 34 {

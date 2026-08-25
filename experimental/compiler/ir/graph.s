@@ -178,7 +178,7 @@ func (computation_graph* g) topological_sort() vec[int] {
         }
     }
 
-    while queue.len() > 0 {
+    for queue.len() > 0 {
         op_idx = queue[0]
         sorted_ops.push(op_idx)
 

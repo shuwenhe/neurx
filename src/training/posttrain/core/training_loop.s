@@ -148,7 +148,7 @@ func int_to_str(int n) string {
     string result = ""
     bool neg = false
     if n < 0 { neg = true; n = 0 - n }
-    while n > 0 {
+    for n > 0 {
         int d = n - (n / 10) * 10
         if d == 0 { result = "0" + result }
         else if d == 1 { result = "1" + result }
@@ -171,16 +171,16 @@ func float_to_str(float f, int decimals) string {
         return "-" + float_to_str(0.0 - f, decimals)
     }
     int whole = 0
-    while f >= 1.0 {
+    for f >= 1.0 {
         f = f - 1.0
         whole = whole + 1
     }
     string result = int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         f = f * 10.0
         int digit = 0
-        while f >= 1.0 {
+        for f >= 1.0 {
             f = f - 1.0
             digit = digit + 1
         }

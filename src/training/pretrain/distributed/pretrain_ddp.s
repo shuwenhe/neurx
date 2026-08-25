@@ -21,7 +21,7 @@ struct pretrain_ddp_sync_result {
 func copy_float([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }
@@ -31,7 +31,7 @@ func copy_float([]float values) []float {
 func copy_int([]int values) []int {
     []int out = []int{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }
@@ -120,7 +120,7 @@ func pretrain_ddp_sync_tensor(pretrain_ddp_state state, tensor value) tensor {
         world_size = 1
     }
     int i = 0
-    while i < len(reduced) {
+    for i < len(reduced) {
         reduced[i] = reduced[i] / world_size
         i = i + 1
     }

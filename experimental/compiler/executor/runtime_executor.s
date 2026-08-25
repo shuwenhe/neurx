@@ -45,7 +45,7 @@ func (execution_context* ctx) execute_next_task() bool {
 func (execution_context* ctx) execute_all() execution_result {
     int executed = 0
 
-    while ctx.current_task_index < ctx.plan.tasks.len() {
+    for ctx.current_task_index < ctx.plan.tasks.len() {
         if ctx.execute_next_task() {
             executed = executed + 1
         } else {

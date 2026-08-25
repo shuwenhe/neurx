@@ -226,12 +226,12 @@ func int_from_float(float x) int {
     int n = 0
     float y = x
     if y < 0.0 {
-        while y < 0.0 {
+        for y < 0.0 {
             y = y + 1.0
             n = n - 1
         }
     }
-    while y >= 1.0 {
+    for y >= 1.0 {
         y = y - 1.0
         n = n + 1
     }

@@ -18,10 +18,10 @@ func gap_close(float actual, float expected) bool {
 
 func gap_contains(string text, string pattern) bool {
     int i = 0
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
         bool matches = true
-        while j < len(pattern) {
+        for j < len(pattern) {
             if text[i + j] != pattern[j] {
                 matches = false
                 break

@@ -100,7 +100,7 @@ func new_language_model_gpt_config config) gptmodel {
     model.pos_embed = new_embedding(config.max_seq_len, config.embed_dim, -1)
     model.blocks = new transformer_block[config.num_layers]
     int i = 0
-    while i < config.num_layers {
+    for i < config.num_layers {
         model.blocks[i] = new_transformer_block(
             config.embed_dim,
             config.num_heads,
@@ -119,31 +119,31 @@ func new_language_model_gpt_config config) gptmodel {
 func collect_gpt_parameters(gptmodel model) []auto_grad_tensor {
     []auto_grad_tensor params = []auto_grad_tensor{}
     int i = 0
-    while i < len(model.token_embed.parameters) {
+    for i < len(model.token_embed.parameters) {
         append(params, model.token_embed.parameters[i])
         i = i + 1
     }
     i = 0
-    while i < len(model.pos_embed.parameters) {
+    for i < len(model.pos_embed.parameters) {
         append(params, model.pos_embed.parameters[i])
         i = i + 1
     }
     i = 0
-    while i < len(model.blocks) {
+    for i < len(model.blocks) {
         int j = 0
-        while j < len(model.blocks[i].parameters) {
+        for j < len(model.blocks[i].parameters) {
             append(params, model.blocks[i].parameters[j])
             j = j + 1
         }
         i = i + 1
     }
     i = 0
-    while i < len(model.final_norm.parameters) {
+    for i < len(model.final_norm.parameters) {
         append(params, model.final_norm.parameters[i])
         i = i + 1
     }
     i = 0
-    while i < len(model.output_head.parameters) {
+    for i < len(model.output_head.parameters) {
         append(params, model.output_head.parameters[i])
         i = i + 1
     }
@@ -157,14 +157,14 @@ func forward(gptmodel self, []int token_ids) auto_grad_tensor {
     auto_grad_tensor token_emb = forward(self.token_embed, token_ids, batch_size, seq_len)
     []int pos_ids = new int[batch_size * seq_len]
     int idx = 0
-    while idx < batch_size * seq_len {
+    for idx < batch_size * seq_len {
         pos_ids[idx] = mod(idx, seq_len)
         idx = idx + 1
     }
     auto_grad_tensor pos_emb = forward(self.pos_embed, pos_ids, batch_size, seq_len)
     auto_grad_tensor x = add(token_emb, pos_emb)
     int i = 0
-    while i < len(self.blocks) {
+    for i < len(self.blocks) {
         x = forward(self.blocks[i], x)
         i = i + 1
     }
@@ -176,7 +176,7 @@ func forward(gptmodel self, []int token_ids) auto_grad_tensor {
 func count_params(gptmodel self) int {
     int total = 0
     int i = 0
-    while i < len(self.all_parameters) {
+    for i < len(self.all_parameters) {
         total = total + len(self.all_parameters[i].data)
         i = i + 1
     }
@@ -193,7 +193,7 @@ func print_model_summary(gptmodel self) void {
     int pos_params = count_parameters(self.pos_embed)
     int block_params = 0
     int i = 0
-    while i < len(self.blocks) {
+    for i < len(self.blocks) {
         block_params = block_params + count_parameters(self.blocks[i])
         i = i + 1
     }
@@ -266,7 +266,7 @@ func generate_synthetic_data(int n_tokens, int vocab_size) []int {
     int pattern_len = 8
     int seed = 42
     int i = 0
-    while i < n_tokens {
+    for i < n_tokens {
         if mod(i, pattern_len * 3) < pattern_len {
             data[i] = pattern[mod(i, pattern_len)]
         } else {
@@ -319,7 +319,7 @@ func format_checkpoint_v2(int step, float loss, float best_loss, int best_step,
     content = content + "best_step=" + string(best_step) + "\n"
     content = content + "loss_history=["
     int i = 0
-    while i < len(loss_window) {
+    for i < len(loss_window) {
         if i > 0 { content = content + ", " }
         content = content + format_float(loss_window[i], 4)
         i = i + 1
@@ -415,7 +415,7 @@ func run_training(gptconfig config) training_result {
     println("-----|----------|---------|----------|----------|--------")
     int start_time = get_time_ms()
     int step = 0
-    while step < config.max_steps {
+    for step < config.max_steps {
         int step_start = get_time_ms()
         next_batch(dataloader)
         []int input_ids = []int{}

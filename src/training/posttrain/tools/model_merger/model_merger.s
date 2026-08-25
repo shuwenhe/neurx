@@ -36,7 +36,7 @@ func compute_model_delta(
     []tensor deltas = []tensor{cap: ft_params.len}
     []string names = []string{cap: ft_params.len}
     int i = 0
-    while i < ft_params.len {
+    for i < ft_params.len {
         tensor delta = tensor_ops.sub(ft_params[i], base_params[i])
         deltas[i] = delta
         names[i] = finetuned.param_names[i]
@@ -57,23 +57,23 @@ func merge_models_average(
     }
     float weight_sum = 0.0
     int i = 0
-    while i < weights.len {
+    for i < weights.len {
         weight_sum = weight_sum + weights[i]
         i = i + 1
     }
     []float norm_weights = []float{cap: weights.len}
     i = 0
-    while i < weights.len {
+    for i < weights.len {
         norm_weights[i] = weights[i] / weight_sum
         i = i + 1
     }
     module result = models[0].clone()
     []tensor result_params = result.parameters()
     int p = 0
-    while p < result_params.len {
+    for p < result_params.len {
         tensor avg_param = tensor_ops.zeros_like(result_params[p])
         int m = 0
-        while m < models.len {
+        for m < models.len {
             []tensor model_params = models[m].parameters()
             tensor weighted = tensor_ops.mul_scalar(
                 model_params[p],
@@ -98,10 +98,10 @@ func merge_task_arithmetic(
     module result = base.clone()
     []tensor result_params = result.parameters()
     int p = 0
-    while p < result_params.len {
+    for p < result_params.len {
         tensor merged_delta = tensor_ops.zeros_like(result_params[p])
         int d = 0
-        while d < deltas.len {
+        for d < deltas.len {
             tensor weighted_delta = tensor_ops.mul_scalar(
                 deltas[d].param_deltas[p],
                 weights[d]
@@ -129,10 +129,10 @@ func merge_ties(
     module result = base.clone()
     []tensor result_params = result.parameters()
     int p = 0
-    while p < result_params.len {
+    for p < result_params.len {
         []tensor param_deltas = []tensor{cap: deltas.len}
         int d = 0
-        while d < deltas.len {
+        for d < deltas.len {
             param_deltas[d] = deltas[d].param_deltas[p]
             d = d + 1
         }
@@ -158,10 +158,10 @@ func merge_dare(
     module result = base.clone()
     []tensor result_params = result.parameters()
     int p = 0
-    while p < result_params.len {
+    for p < result_params.len {
         tensor merged_delta = tensor_ops.zeros_like(result_params[p])
         int d = 0
-        while d < deltas.len {
+        for d < deltas.len {
             tensor delta = deltas[d].param_deltas[p]
             tensor mask = random_dropout_mask(delta, drop_rate)
             float scale = 1.0 / (1.0 - drop_rate)
@@ -204,7 +204,7 @@ func elect_sign(tensor trimmed) tensor {
 func weighted_average(tensor values, []float weights) tensor {
     tensor result = tensor_ops.zeros_like(values)
     int i = 0
-    while i < weights.len {
+    for i < weights.len {
         tensor weighted = tensor_ops.mul_scalar(
             tensor_ops.index_select(values, 0, i),
             weights[i]

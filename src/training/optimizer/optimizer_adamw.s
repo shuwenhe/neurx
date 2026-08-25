@@ -30,7 +30,7 @@ func init_adam_state(
     []tensor m_states = []tensor{cap: len(parameters)}
     []tensor v_states = []tensor{cap: len(parameters)}
     int i = 0
-    while i < len(parameters) {
+    for i < len(parameters) {
         m_states.push(zeros(parameters[i].shape))
         v_states.push(zeros(parameters[i].shape))
         i = i + 1
@@ -76,9 +76,9 @@ func get_learning_rate(
 func clip_grad_norm([]tensor gradients, float max_norm) []tensor {
     float total_norm = 0.0
     int i = 0
-    while i < len(gradients) {
+    for i < len(gradients) {
         int j = 0
-        while j < len(gradients[i].data) {
+        for j < len(gradients[i].data) {
             total_norm = total_norm + gradients[i].data[j] * gradients[i].data[j]
             j = j + 1
         }
@@ -90,9 +90,9 @@ func clip_grad_norm([]tensor gradients, float max_norm) []tensor {
         scale = max_norm / total_norm
     }
     i = 0
-    while i < len(gradients) {
+    for i < len(gradients) {
         int j = 0
-        while j < len(gradients[i].data) {
+        for j < len(gradients[i].data) {
             gradients[i].data[j] = gradients[i].data[j] * scale
             j = j + 1
         }
@@ -116,7 +116,7 @@ func adam_step_param(
     float bias_correction1 = 1.0 - pow_approx(beta1, float_from_int(timestep))
     float bias_correction2 = 1.0 - pow_approx(beta2, float_from_int(timestep))
     int i = 0
-    while i < len(param.data) {
+    for i < len(param.data) {
         m.data[i] = beta1 * m.data[i] + (1.0 - beta1) * grad.data[i]
         v.data[i] = beta2 * v.data[i] + (1.0 - beta2) * grad.data[i] * grad.data[i]
         float m_hat = m.data[i] / bias_correction1
@@ -148,7 +148,7 @@ func adam_step(
     )
     []tensor clipped_grads = clip_grad_norm(gradients, max_grad_norm)
     int i = 0
-    while i < len(state.param) {
+    for i < len(state.param) {
         (state.param[i], state.m[i], state.v[i]) = adam_step_param(
             state.param[i],
             clipped_grads[i],
@@ -216,7 +216,7 @@ func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
     int i = 0
-    while i < 10 {
+    for i < 10 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -246,7 +246,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 12 {
+    for i <= 12 {
         term = term * x / float_from_int(i)
         result = result + term
         i = i + 1
@@ -270,12 +270,12 @@ func int_from_float(float x) int {
     int n = 0
     float y = x
     if y < 0.0 {
-        while y < 0.0 {
+        for y < 0.0 {
             y = y + 1.0
             n = n - 1
         }
     }
-    while y >= 1.0 {
+    for y >= 1.0 {
         y = y - 1.0
         n = n + 1
     }

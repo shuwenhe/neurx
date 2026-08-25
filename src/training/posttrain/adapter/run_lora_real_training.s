@@ -308,7 +308,7 @@ func int_to_string(int n) string {
         is_negative = 1
         n = -n
     }
-    while n > 0 {
+    for n > 0 {
         int digit = n % 10
         result = (digit + '0') + result
         n = n / 10

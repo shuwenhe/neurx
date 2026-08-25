@@ -9,7 +9,7 @@ func string_char(int c) string {
 
 func trim(string s) string {
     int begin = 0
-    while begin < len(s) {
+    for begin < len(s) {
         string ch = string_char(s[begin])
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
             begin = begin + 1
@@ -18,7 +18,7 @@ func trim(string s) string {
         }
     }
     int end = len(s)
-    while end > begin {
+    for end > begin {
         string ch = string_char(s[end - 1])
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
             end = end - 1
@@ -28,7 +28,7 @@ func trim(string s) string {
     }
     string out = ""
     int i = begin
-    while i < end {
+    for i < end {
         out = out + string_char(s[i])
         i = i + 1
     }
@@ -44,7 +44,7 @@ func int_to_str(int n) string {
         n = 0 - n
     }
     string out = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n - (n / 10) * 10
         out = string_char(digit + 48) + out
         n = n / 10
@@ -58,7 +58,7 @@ func int_to_str(int n) string {
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         string ch = string_char(s[i])
         if ch == "'" {
             out = out + "'\"'\"'"
@@ -74,7 +74,7 @@ func shell_escape(string s) string {
 func basename(string path) string {
     int last = -1
     int i = 0
-    while i < len(path) {
+    for i < len(path) {
         if string_char(path[i]) == "/" {
             last = i
         }
@@ -88,7 +88,7 @@ func basename(string path) string {
     }
     string out = ""
     i = last + 1
-    while i < len(path) {
+    for i < len(path) {
         out = out + string_char(path[i])
         i = i + 1
     }
@@ -98,7 +98,7 @@ func basename(string path) string {
 func parent_dir(string path) string {
     int last = -1
     int i = 0
-    while i < len(path) {
+    for i < len(path) {
         if string_char(path[i]) == "/" {
             last = i
         }
@@ -109,7 +109,7 @@ func parent_dir(string path) string {
     }
     string out = ""
     i = 0
-    while i < last {
+    for i < last {
         out = out + string_char(path[i])
         i = i + 1
     }
@@ -138,7 +138,7 @@ func read_command_output(string cmd) string {
 
 func shard_name(int index) string {
     string s = int_to_str(index)
-    while len(s) < 5 {
+    for len(s) < 5 {
         s = "0" + s
     }
     "shard_" + s + ".jsonl"
@@ -147,7 +147,7 @@ func shard_name(int index) string {
 func json_escape(string s) string {
     string out = "\""
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         string ch = string_char(s[i])
         if ch == "\"" {
             out = out + "\\\""
@@ -249,7 +249,7 @@ func process_wikipedia(string input_bz2_file, string output_dir, string manifest
     perl_script = perl_script + "print {$mf} \"  \\\"total_pages\\\": $count,\\n\";\n"
     perl_script = perl_script + "print {$mf} \"  \\\"total_shards\\\": \" . ($shard + 1) . \",\\n\";\n"
     perl_script = perl_script + "print {$mf} \"  \\\"shards\\\": [\\n\";\n"
-    perl_script = perl_script + "for my $i (0 .. $shard) { my $path = sprintf('%s/shard_%05d.jsonl', $out_dir, $i); open my $sf, '<', $path or next; my $lines = 0; $lines++ while (<$sf>); close $sf; my $size = -s $path; print {$mf} '    {\"shard_id\": ' . sprintf('\"%s\"', sprintf('shard_%05d.jsonl', $i)) . ', \"file_path\": ' . sprintf('\"%s\"', $path) . ', \"num_documents\": ' . $lines . ', \"size_bytes\": ' . $size . '}'; print {$mf} \",\\n\" if $i < $shard; }\n"
+    perl_script = perl_script + "for my $i (0 .. $shard) { my $path = sprintf('%s/shard_%05d.jsonl', $out_dir, $i); open my $sf, '<', $path or next; my $lines = 0; $lines++ for (<$sf>); close $sf; my $size = -s $path; print {$mf} '    {\"shard_id\": ' . sprintf('\"%s\"', sprintf('shard_%05d.jsonl', $i)) . ', \"file_path\": ' . sprintf('\"%s\"', $path) . ', \"num_documents\": ' . $lines . ', \"size_bytes\": ' . $size . '}'; print {$mf} \",\\n\" if $i < $shard; }\n"
     perl_script = perl_script + "print {$mf} \"  ]\\n\";\n"
     perl_script = perl_script + "print {$mf} \"}\\n\";\n"
     perl_script = perl_script + "close $mf;\n"

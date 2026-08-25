@@ -17,11 +17,11 @@ struct runtime_command_result {
 
 func trim(string s) string {
     int i = 0
-    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
     int j = len(s) - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
     if j < i {
@@ -29,7 +29,7 @@ func trim(string s) string {
     }
     string out = ""
     int k = i
-    while k <= j {
+    for k <= j {
         out = out + string(s[k])
         k = k + 1
     }
@@ -39,7 +39,7 @@ func trim(string s) string {
 func runtime_shell_escape(string value) string {
     string out = "'"
     int i = 0
-    while i < len(value) {
+    for i < len(value) {
         string ch = string(value[i])
         if int(ch) == 39 {
             out = neurx.strings.concat2(out, "'\"'\"'")
@@ -213,7 +213,7 @@ func tensor_buffer_new(int capacity) tensor_buffer {
 
 func tensor_buffer_write_bytes(tensor_buffer buf, []byte data) () {
     int i = 0
-    while i < len(data) {
+    for i < len(data) {
         if buf.pos >= len(buf.buffer) {
             break
         }
@@ -227,7 +227,7 @@ func tensor_buffer_write_u64_le(tensor_buffer buf, int value) () {
     []byte bytes = []byte{cap: 8}
     int v = value
     int i = 0
-    while i < 8 {
+    for i < 8 {
         int idx = i
         int remainder = v - (v / 256) * 256
         bytes[idx] = byte(remainder)
@@ -258,7 +258,7 @@ func tensor_buffer_write_f32_le(tensor_buffer buf, float value) () {
 
 func tensor_buffer_write_string(tensor_buffer buf, string s) () {
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         if buf.pos >= len(buf.buffer) {
             break
         }
@@ -275,7 +275,7 @@ func tensor_buffer_len(tensor_buffer buf) int {
 func tensor_buffer_slice(tensor_buffer buf) []byte {
     []byte result = []byte{cap: buf.pos}
     int i = 0
-    while i < buf.pos {
+    for i < buf.pos {
         result[i] = buf.buffer[i]
         i = i + 1
     }
@@ -293,11 +293,11 @@ func float_to_bits_internal(float f) int {
     }
     int exp = 127
     float mantissa_f = abs_f
-    while mantissa_f >= 2.0 {
+    for mantissa_f >= 2.0 {
         mantissa_f = mantissa_f / 2.0
         exp = exp + 1
     }
-    while mantissa_f < 1.0 && exp > 0 {
+    for mantissa_f < 1.0 && exp > 0 {
         mantissa_f = mantissa_f * 2.0
         exp = exp - 1
     }
@@ -330,7 +330,7 @@ func safetensors_writer_new(string filepath) safetensors_writer {
 func safetensors_writer_add_tensor(safetensors_writer w, tensor t) () {
     int data_size = 0
     int i = 0
-    while i < t.shape_count {
+    for i < t.shape_count {
         if data_size == 0 {
             data_size = 1
         }
@@ -349,7 +349,7 @@ func safetensors_writer_build_header(safetensors_writer w) string {
     string header = "{"
     int offset = 0
     int idx = 0
-    while idx < w.tensor_count {
+    for idx < w.tensor_count {
         if idx > 0 {
             header = header + ","
         }
@@ -358,7 +358,7 @@ func safetensors_writer_build_header(safetensors_writer w) string {
         header = header + "\"dtype\":\"" + t.dtype + "\""
         header = header + ",\"shape\":["
         int shape_idx = 0
-        while shape_idx < t.shape_count {
+        for shape_idx < t.shape_count {
             if shape_idx > 0 {
                 header = header + ","
             }
@@ -368,7 +368,7 @@ func safetensors_writer_build_header(safetensors_writer w) string {
         header = header + "]"
         int tensor_size = 1
         int si = 0
-        while si < t.shape_count {
+        for si < t.shape_count {
             tensor_size = tensor_size * t.shape[si]
             si = si + 1
         }
@@ -394,7 +394,7 @@ func int_to_str_json_internal(int n) string {
         val = 0 - val
     }
     string digits = ""
-    while val > 0 {
+    for val > 0 {
         int digit = val - (val / 10) * 10
         string ch = ""
         if digit == 0 { ch = "0" }
@@ -423,16 +423,16 @@ func safetensors_writer_finish(safetensors_writer w) bool {
     tensor_buffer_write_u64_le(buf, header_size)
     tensor_buffer_write_string(buf, header)
     int tidx = 0
-    while tidx < w.tensor_count {
+    for tidx < w.tensor_count {
         tensor t = w.tensors[tidx]
         int data_len = 1
         int sidx = 0
-        while sidx < t.shape_count {
+        for sidx < t.shape_count {
             data_len = data_len * t.shape[sidx]
             sidx = sidx + 1
         }
         int didx = 0
-        while didx < data_len {
+        for didx < data_len {
             if didx < t.data_count {
                 tensor_buffer_write_f32_le(buf, t.data[didx])
             } else {

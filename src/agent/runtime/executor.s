@@ -33,10 +33,10 @@ func agent_text_contains(string text, string pattern) bool {
         return false
     }
     int i = 0
-    while i <= hay_len - nee_len {
+    for i <= hay_len - nee_len {
         int j = 0
         bool match = true
-        while j < nee_len {
+        for j < nee_len {
             if haystack[i + j] != needle[j] {
                 match = false
                 break
@@ -65,7 +65,7 @@ func agent_execute_clip(string text, int max_chars) string {
     }
     string out = ""
     int i = 0
-    while i < max_chars {
+    for i < max_chars {
         out = out + string(text[i])
         i = i + 1
     }
@@ -76,10 +76,10 @@ func agent_execute_observation_value(string observation, string key) string {
     string raw = trim(observation)
     string needle = key + "="
     int i = 0
-    while i < len(raw) {
+    for i < len(raw) {
         bool matched = true
         int j = 0
-        while j < len(needle) {
+        for j < len(needle) {
             if i + j >= len(raw) || string(raw[i + j]) != string(needle[j]) {
                 matched = false
                 break
@@ -90,7 +90,7 @@ func agent_execute_observation_value(string observation, string key) string {
             int start = i + len(needle)
             string value = ""
             int k = start
-            while k < len(raw) {
+            for k < len(raw) {
                 string ch = string(raw[k])
                 if ch == ";" || ch == "\n" {
                     break
@@ -535,7 +535,7 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
                 int files_written = 0
                 string written_paths = ""
                 bool all_ok = true
-                while mf_pos < mf_len {
+                for mf_pos < mf_len {
                     int next_file = agent_model_str_find(multi_files, file_sep, mf_pos)
                     if next_file < 0 {
                         break
@@ -547,7 +547,7 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
                     }
                     string mf_path = ""
                     int pi = path_start
-                    while pi < content_pos {
+                    for pi < content_pos {
                         mf_path = mf_path + string(multi_files[pi])
                         pi = pi + 1
                     }
@@ -559,7 +559,7 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
                     }
                     string mf_content = ""
                     int ci = content_start
-                    while ci < content_end {
+                    for ci < content_end {
                         mf_content = mf_content + string(multi_files[ci])
                         ci = ci + 1
                     }
@@ -865,7 +865,7 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
                 next_memory = agent_memory_write_long(next_memory, "verify_summary", verify_response)
                 string first_line = ""
                 int vri = 0
-                while vri < len(verify_response) {
+                for vri < len(verify_response) {
                     if string(verify_response[vri]) == "\n" {
                         break
                     }
@@ -967,7 +967,7 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             int sai = 0
             string sub_agg = ""
             agent_memory_lookup_result sub_check = agent_memory_lookup_long(next_memory, "subagent_result_sub_0")
-            while sub_check.found && sub_check.value != "" {
+            for sub_check.found && sub_check.value != "" {
                 if sub_agg != "" {
                     sub_agg = sub_agg + "\n"
                 }

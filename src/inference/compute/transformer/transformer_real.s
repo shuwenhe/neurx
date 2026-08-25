@@ -23,9 +23,9 @@ func rope_init(int max_seq_len, int hidden_dim) rope_cache {
     []float sin_cache = []float{cap: max_seq_len * head_dim}
 
     int pos = 0
-    while pos < max_seq_len {
+    for pos < max_seq_len {
         int dim = 0
-        while dim < head_dim {
+        for dim < head_dim {
             float theta = 1000000.0
             float exp_i = float(dim) / float(head_dim)
             theta = theta * exp_approx(0.0 - exp_i * 0.69314718)
@@ -46,10 +46,10 @@ func rope_init(int max_seq_len, int hidden_dim) rope_cache {
 }
 
 func cos_approx(float x) float {
-    while x > 6.28318531 {
+    for x > 6.28318531 {
         x = x - 6.28318531
     }
-    while x < 0.0 {
+    for x < 0.0 {
         x = x + 6.28318531
     }
 
@@ -61,10 +61,10 @@ func cos_approx(float x) float {
 }
 
 func sin_approx(float x) float {
-    while x > 6.28318531 {
+    for x > 6.28318531 {
         x = x - 6.28318531
     }
-    while x < 0.0 {
+    for x < 0.0 {
         x = x + 6.28318531
     }
 
@@ -99,7 +99,7 @@ func apply_rope([]float q, []float k, rope_cache rope, int position) ([]float, [
     []float k_rot = []float{cap: len(k)}
 
     int i = 0
-    while i < len(q) {
+    for i < len(q) {
         int head_idx = i / head_dim
         int dim_idx = i - head_idx * head_dim
 
@@ -149,10 +149,10 @@ func project_linear([]float input, []float weights, int output_dim) []float {
     []float output = []float{cap: output_dim}
 
     int i = 0
-    while i < output_dim {
+    for i < output_dim {
         float sum = 0.0
         int j = 0
-        while j < len(input) && i * len(input) + j < len(weights) {
+        for j < len(input) && i * len(input) + j < len(weights) {
             sum = sum + input[j] * weights[i * len(input) + j]
             j = j + 1
         }
@@ -167,12 +167,12 @@ func compute_attention_scores([]float query, []float key, int head_dim, int num_
     []float scores = []float{cap: len(query) * len(key)}
 
     int i = 0
-    while i < len(query) {
+    for i < len(query) {
         int j = 0
-        while j < len(key) {
+        for j < len(key) {
             float dot = 0.0
             int k = 0
-            while k < head_dim && i + k < len(query) && j + k < len(key) {
+            for k < head_dim && i + k < len(query) && j + k < len(key) {
                 dot = dot + query[i + k] * key[j + k]
                 k = k + 1
             }
@@ -192,7 +192,7 @@ func sqrt_approx(float x) float {
     }
     float guess = x
     int i = 0
-    while i < 3 {
+    for i < 3 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }
@@ -203,10 +203,10 @@ func matrix_mult_weighted([]float values, []float weights, int output_dim) []flo
     []float output = []float{cap: output_dim}
 
     int i = 0
-    while i < output_dim {
+    for i < output_dim {
         float sum = 0.0
         int j = 0
-        while j < len(weights) && i + j < len(values) {
+        for j < len(weights) && i + j < len(values) {
             sum = sum + values[i + j] * weights[j]
             j = j + 1
         }
@@ -227,7 +227,7 @@ func softmax([]float logits) []float {
 
     float maxv = logits[0]
     int i = 1
-    while i < n {
+    for i < n {
         if logits[i] > maxv {
             maxv = logits[i]
         }
@@ -236,7 +236,7 @@ func softmax([]float logits) []float {
 
     float sum = 0.0
     i = 0
-    while i < n {
+    for i < n {
         float p = exp_approx(logits[i] - maxv)
         probs[i] = p
         sum = sum + p
@@ -248,7 +248,7 @@ func softmax([]float logits) []float {
     }
 
     i = 0
-    while i < n {
+    for i < n {
         probs[i] = probs[i] / sum
         i = i + 1
     }
@@ -261,7 +261,7 @@ func feed_forward([]float input, []float weights_up, []float weights_down, int i
     []float hidden = project_linear(input, weights_up, intermediate_size)
 
     int i = 0
-    while i < len(hidden) {
+    for i < len(hidden) {
         float x = hidden[i]
         float sig = 1.0 / (1.0 + exp_approx(0.0 - x))
         hidden[i] = x * sig
@@ -278,7 +278,7 @@ func rms_norm([]float input, []float gamma, float eps) []float {
 
     float sum_sq = 0.0
     int i = 0
-    while i < len(input) {
+    for i < len(input) {
         float x = input[i]
         sum_sq = sum_sq + x * x
         i = i + 1
@@ -288,7 +288,7 @@ func rms_norm([]float input, []float gamma, float eps) []float {
     float rms = sqrt_approx(mean_sq + eps)
 
     i = 0
-    while i < len(input) {
+    for i < len(input) {
         output[i] = (input[i] / rms) * gamma[i]
         i = i + 1
     }
@@ -312,11 +312,11 @@ func transformer_layer([]float input, []float attn_weights, []float ffn_weights,
 func add_vectors([]float a, []float b) []float {
     []float result = []float{cap: len(a)}
     int i = 0
-    while i < len(a) && i < len(b) {
+    for i < len(a) && i < len(b) {
         result[i] = a[i] + b[i]
         i = i + 1
     }
-    while i < len(a) {
+    for i < len(a) {
         result[i] = a[i]
         i = i + 1
     }
@@ -328,7 +328,7 @@ func int_to_string(int value) string {
     string result = ""
     int current = value
     if current < 0 { current = 0 - current }
-    while current > 0 {
+    for current > 0 {
         int digit = current - (current / 10) * 10
         if digit == 0 { result = "0" + result }
         else if digit == 1 { result = "1" + result }

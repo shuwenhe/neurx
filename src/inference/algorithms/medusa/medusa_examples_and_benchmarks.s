@@ -62,10 +62,10 @@ func example_basic_medusa_generation() string {
 
     hidden_states := [][]float{}
     i := 0
-    while i < 10 {
+    for i < 10 {
         hidden := []float{}
         j := 0
-        while j < 4096 {
+        for j < 4096 {
             hidden = append(hidden, 0.1)
             j = j + 1
         }
@@ -79,7 +79,7 @@ func example_basic_medusa_generation() string {
     accepted_count := 0
     position := 0
 
-    while position < 50 {
+    for position < 50 {
         (prefill_pipeline, draft_tokens) := medusa_decode_step(
             prefill_pipeline,
             last_hidden,
@@ -136,7 +136,7 @@ func example_batch_inference_with_medusa() string {
 
     total_tokens := 0
     i := 0
-    while i < output.num_tokens_generated.len {
+    for i < output.num_tokens_generated.len {
         total_tokens = total_tokens + output.num_tokens_generated[i]
         i = i + 1
     }
@@ -157,7 +157,7 @@ func example_adaptive_temperature() string {
     temperatures := []float{0.7, 0.8, 0.9, 1.0, 1.1}
 
     temp_idx := 0
-    while temp_idx < temperatures.len {
+    for temp_idx < temperatures.len {
         temp := temperatures[temp_idx]
 
         acceptance_rate := 0.75 + (1.0 - temp) * 0.1
@@ -169,7 +169,7 @@ func example_adaptive_temperature() string {
     best_temp_idx := 0
     best_acceptance := acceptance_rates[0]
     i := 1
-    while i < acceptance_rates.len {
+    for i < acceptance_rates.len {
         if acceptance_rates[i] > best_acceptance {
             best_acceptance = acceptance_rates[i]
             best_temp_idx = i
@@ -195,7 +195,7 @@ func example_progressive_medusa_training() string {
 
     stage := 1
     step := 0
-    while step < 1000 {
+    for step < 1000 {
 
         step = step + 100
     }
@@ -203,7 +203,7 @@ func example_progressive_medusa_training() string {
 
     stage = stage + 1
     step = 0
-    while step < 500 {
+    for step < 500 {
 
         step = step + 50
     }
@@ -211,7 +211,7 @@ func example_progressive_medusa_training() string {
 
     stage = stage + 1
     step = 0
-    while step < 300 {
+    for step < 300 {
 
         step = step + 30
     }
@@ -236,7 +236,7 @@ func example_quality_vs_speed_tradeoff() string {
     result := "Medusa Configuration Trade-offs:\n\n"
 
     i := 0
-    while i < configs.len {
+    for i < configs.len {
         result = result + config_names[i] + ":\n"
         result = result + "  Heads: " + int_string(configs[i].num_heads) + "\n"
         result = result + "  Expected speedup: " + float_string(expected_speedups[i]) + "x\n"
@@ -271,7 +271,7 @@ func benchmark_medusa_vs_standard(
     acceptance_rates := []float{}
 
     iter := 0
-    while iter < num_iterations {
+    for iter < num_iterations {
 
         latency_standard := 100.0
         total_time_standard = total_time_standard + latency_standard
@@ -292,7 +292,7 @@ func benchmark_medusa_vs_standard(
 
     avg_acceptance := 0.0
     i := 0
-    while i < acceptance_rates.len {
+    for i < acceptance_rates.len {
         avg_acceptance = avg_acceptance + acceptance_rates[i]
         i = i + 1
     }

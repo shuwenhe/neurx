@@ -531,7 +531,7 @@ struct recursive_character_text_splitter {
     _split_by_length(string text) {
         chunks: list<string> = []
         start = 0
-        while start < text.length {
+        for start < text.length {
             end = start + this.chunk_size
             chunks.append(text[start:end])
             if this.chunk_overlap > 0 && end < text.length:

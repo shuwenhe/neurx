@@ -75,7 +75,7 @@ func math_exp(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i < 24 {
+    for i < 24 {
         term = term * x / float(i)
         result = result + term
         if term < 0.0 {
@@ -93,7 +93,7 @@ func apply_temperature([]float logits, float temp, int vocab_size) []float {
     []float out = make([]float, vocab_size)
     float inv = 1.0 / temp
     int i = 0
-    while i < vocab_size {
+    for i < vocab_size {
         out[i] = logits[i] * inv
         i = i + 1
     }
@@ -107,7 +107,7 @@ func softmax([]float logits, int size) []float {
     }
     float max_val = logits[0]
     int i = 1
-    while i < size {
+    for i < size {
         if logits[i] > max_val {
             max_val = logits[i]
         }
@@ -115,7 +115,7 @@ func softmax([]float logits, int size) []float {
     }
     float sum = 0.0
     i = 0
-    while i < size {
+    for i < size {
         probs[i] = math_exp(logits[i] - max_val)
         sum = sum + probs[i]
         i = i + 1
@@ -124,7 +124,7 @@ func softmax([]float logits, int size) []float {
         return probs
     }
     i = 0
-    while i < size {
+    for i < size {
         probs[i] = probs[i] / sum
         i = i + 1
     }
@@ -138,7 +138,7 @@ func argmax([]float arr, int size) int {
     int best = 0
     float best_val = arr[0]
     int i = 1
-    while i < size {
+    for i < size {
         if arr[i] > best_val {
             best_val = arr[i]
             best = i
@@ -156,15 +156,15 @@ struct index_score {
 func argsort_desc([]float arr, int size) []index_score {
     []index_score items = []index_score{}
     int i = 0
-    while i < size {
+    for i < size {
         items = append(items, index_score{idx: i, score: arr[i]})
         i = i + 1
     }
     int n = len(items)
     int outer = 0
-    while outer < n {
+    for outer < n {
         int inner = 0
-        while inner < n - 1 - outer {
+        for inner < n - 1 - outer {
             if items[inner].score < items[inner + 1].score {
                 index_score tmp = items[inner]
                 items[inner] = items[inner + 1]
@@ -184,12 +184,12 @@ func top_k_filter([]float logits, int vocab_size, int k) []float {
     []index_score sorted = argsort_desc(logits, vocab_size)
     []float filtered = make([]float, vocab_size)
     int i = 0
-    while i < vocab_size {
+    for i < vocab_size {
         filtered[i] = -1.0e30
         i = i + 1
     }
     i = 0
-    while i < k && i < len(sorted) {
+    for i < k && i < len(sorted) {
         filtered[sorted[i].idx] = logits[sorted[i].idx]
         i = i + 1
     }
@@ -205,7 +205,7 @@ func top_p_filter([]float logits, int vocab_size, float p) []float {
     float cum = 0.0
     []bool keep = make([]bool, vocab_size)
     int i = 0
-    while i < len(sorted) {
+    for i < len(sorted) {
         cum = cum + probs[sorted[i].idx]
         keep[sorted[i].idx] = true
         if cum >= p {
@@ -215,7 +215,7 @@ func top_p_filter([]float logits, int vocab_size, float p) []float {
     }
     []float filtered = make([]float, vocab_size)
     i = 0
-    while i < vocab_size {
+    for i < vocab_size {
         if keep[i] {
             filtered[i] = logits[i]
         } else {
@@ -230,7 +230,7 @@ func sample_from_probs([]float probs, int size, rng_state rng) (int, rng_state) 
     (float r, rng_state r2) = next_float(rng)
     float cum = 0.0
     int i = 0
-    while i < size {
+    for i < size {
         cum = cum + probs[i]
         if r < cum {
             return (i, r2)

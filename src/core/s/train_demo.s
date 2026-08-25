@@ -69,8 +69,8 @@ func new_model_config() model_config {
 func my_mod(int a, int b) int {
     if b <= 0 { return 0 }
     int result = a
-    while result >= b { result = result - b }
-    while result < 0 { result = result + b }
+    for result >= b { result = result - b }
+    for result < 0 { result = result + b }
     result
 }
 
@@ -147,7 +147,7 @@ func do_train_step(training_state state, training_config tconfig) training_state
     bool trained = next_step >= tconfig.max_steps
     bool should_log = false
     int check_log = next_step
-    while check_log >= 10 {
+    for check_log >= 10 {
         if check_log == 10 || my_mod(check_log, 10) == 0 {
             should_log = true
         }
@@ -185,7 +185,7 @@ func run_training(training_config tconfig) training_context {
     println("model initialized: ", mconfig.param_count, " parameters")
     println("")
     int i = 0
-    while i < tconfig.max_steps {
+    for i < tconfig.max_steps {
         state = do_train_step(state, tconfig)
         if check_should_save(state.step, tconfig.save_every_n_steps) {
             string step_name = "step_" + string(state.step)

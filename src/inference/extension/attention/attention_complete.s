@@ -43,7 +43,7 @@ func xavier_init_attention(int in_dim, int out_dim) tensor {
     int total = in_dim * out_dim
     []float data = []float{cap: total}
     int i = 0
-    while i < total {
+    for i < total {
         float val = limit * (2.0 * (float_from_int(i % 1000) / 1000.0) - 1.0)
         data.push(val)
         i = i + 1
@@ -112,14 +112,14 @@ func linear_forward(tensor x, tensor w, tensor b) tensor {
     int rank = len(x.shape)
     int leading = 1
     int i = 0
-    while i < rank - 1 {
+    for i < rank - 1 {
         leading = leading * x.shape[i]
         i = i + 1
     }
     tensor flat_input = reshape(x, [leading, x.shape[rank - 1]])
     tensor output = matmul_2d(flat_input, w)
     i = 0
-    while i < len(output.data) {
+    for i < len(output.data) {
         output.data[i] = output.data[i] + b.data[i % len(b.data)]
         i = i + 1
     }
@@ -225,14 +225,14 @@ func sum_columns(tensor x) tensor {
     int cols = x.shape[1]
     []float out = []float{cap: cols}
     int j = 0
-    while j < cols {
+    for j < cols {
         out[j] = 0.0
         j = j + 1
     }
     int i = 0
-    while i < x.shape[0] {
+    for i < x.shape[0] {
         j = 0
-        while j < cols {
+        for j < cols {
             out[j] = out[j] + x.data[i * cols + j]
             j = j + 1
         }
@@ -264,7 +264,7 @@ func sqrt(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
     int i = 0
-    while i < 10 {
+    for i < 10 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }

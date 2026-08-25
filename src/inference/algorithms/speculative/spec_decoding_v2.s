@@ -115,7 +115,7 @@ func (draft_generator* gen) generate_draft_tokens(int num_tokens) draft_sequence
     tokens := vec[draft_token]{}
 
     i := 0
-    while i < num_tokens {
+    for i < num_tokens {
         token := draft_token {
             token_id: i + 1000,
             confidence: 0.8,
@@ -158,7 +158,7 @@ func (token_verifier* verifier) verify_tokens(draft_sequence draft_tokens, vec[f
 
     i := 0
     all_accepted := true
-    while i < draft_tokens.tokens.len() {
+    for i < draft_tokens.tokens.len() {
         draft := draft_tokens.tokens[i]
 
         if draft.confidence > verifier.acceptance_threshold && i < target_logits.len() {
@@ -225,7 +225,7 @@ func (speculative_decoder* decoder) generate_and_verify(int sequence_length) boo
 
     target_logits := vec[float]{}
     i := 0
-    while i < draft_seq.num_tokens {
+    for i < draft_seq.num_tokens {
         target_logits.push(0.9)
         i = i + 1
     }

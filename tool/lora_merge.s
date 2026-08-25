@@ -27,7 +27,7 @@ func path_join(string dir, string filename) string {
 
 func basename(string path) string {
     int i = len(path) - 1
-    while i >= 0 && path[i] != 47 {
+    for i >= 0 && path[i] != 47 {
         i = i - 1
     }
     if i < 0 {
@@ -35,7 +35,7 @@ func basename(string path) string {
     }
     string result = ""
     int j = i + 1
-    while j < len(path) {
+    for j < len(path) {
         result = result + string{path[j]}
         j = j + 1
     }
@@ -47,10 +47,10 @@ func string_contains(string s, string substr) bool {
         return false
     }
     int i = 0
-    while i <= len(s) - len(substr) {
+    for i <= len(s) - len(substr) {
         bool matches = true
         int j = 0
-        while j < len(substr) {
+        for j < len(substr) {
             if s[i+j] != substr[j] {
                 matches = false
             }
@@ -160,7 +160,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         out = digit_to_str(digit) + out
         value = value / 10
@@ -178,7 +178,7 @@ func fmt_float(float value, int decimals) string {
         current = 0.0 - current
     }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -188,10 +188,10 @@ func fmt_float(float value, int decimals) string {
     }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }

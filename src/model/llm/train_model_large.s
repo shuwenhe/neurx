@@ -5,11 +5,11 @@ use neurx.util.math.{exp_approx}
 
 func trim(string s) string {
     int i = 0
-    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
     int j = len(s) - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
     if j < i {
@@ -17,7 +17,7 @@ func trim(string s) string {
     }
     string out = ""
     int k = i
-    while k <= j {
+    for k <= j {
         out = out + string_char(s[k])
         k = k + 1
     }
@@ -33,7 +33,7 @@ func starts_with(string s, string prefix) bool {
         return false
     }
     int i = 0
-    while i < len(prefix) {
+    for i < len(prefix) {
         if s[i] != prefix[i] {
             return false
         }
@@ -45,7 +45,7 @@ func starts_with(string s, string prefix) bool {
 func substr(string s, int from, int to) string {
     string out = ""
     int i = from
-    while i < to && i < len(s) {
+    for i < to && i < len(s) {
         out = out + string_char(s[i])
         i = i + 1
     }
@@ -69,7 +69,7 @@ func int_to_str(int n, int fallback) string {
         value = -value
     }
     string s = ""
-    while value > 0 {
+    for value > 0 {
         s = string_char(value % 10 + 48) + s
         value = value / 10
     }
@@ -90,7 +90,7 @@ func str_to_int(string s, int fallback) int {
         i = 1
     }
     int value = 0
-    while i < len(s) {
+    for i < len(s) {
         int digit = s[i] - 48
         if digit < 0 || digit > 9 {
             return fallback
@@ -112,7 +112,7 @@ func str_to_float(string s) float {
         i = 1
     }
     float int_part = 0.0
-    while i < len(s) && s[i] >= 48 && s[i] <= 57 {
+    for i < len(s) && s[i] >= 48 && s[i] <= 57 {
         int_part = int_part * 10.0 + (s[i] - 48) * 1.0
         i = i + 1
     }
@@ -120,7 +120,7 @@ func str_to_float(string s) float {
     float div = 1.0
     if i < len(s) && s[i] == 46 {
         i = i + 1
-        while i < len(s) && s[i] >= 48 && s[i] <= 57 {
+        for i < len(s) && s[i] >= 48 && s[i] <= 57 {
             frac = frac * 10.0 + (s[i] - 48) * 1.0
             div = div * 10.0
             i = i + 1
@@ -137,12 +137,12 @@ func float_to_int(float x) int {
     int n = 0
     float y = x
     if y < 0.0 {
-        while y < 0.0 {
+        for y < 0.0 {
             y = y + 1.0
             n = n - 1
         }
     }
-    while y >= 1.0 {
+    for y >= 1.0 {
         y = y - 1.0
         n = n + 1
     }
@@ -170,7 +170,7 @@ func fmt_float(float val, int decimals) string {
     }
     s = s + int_to_str(int_part, 0) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         frac = frac * 10.0
         int digit = float_to_int(frac)
         s = s + string_char(digit + 48)
@@ -182,7 +182,7 @@ func fmt_float(float val, int decimals) string {
 
 func pad_float(float val, int w, int d) string {
     string s = fmt_float(val, d)
-    while len(s) < w {
+    for len(s) < w {
         s = " " + s
     }
     s
@@ -191,7 +191,7 @@ func pad_float(float val, int w, int d) string {
 func split_lines(string s) []string {
     int capacity = 1
     int j = 0
-    while j < len(s) {
+    for j < len(s) {
         if s[j] == 10 {
             capacity = capacity + 1
         }
@@ -201,7 +201,7 @@ func split_lines(string s) []string {
     string line = ""
     int idx = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         if s[i] == 10 || s[i] == 13 {
             if len(line) > 0 {
                 out[idx] = line
@@ -222,7 +222,7 @@ func split_lines(string s) []string {
 
 func line_value([]string lines, string key, string fallback) string {
     int i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         if starts_with(lines[i], key) {
             return trim(substr(lines[i], len(key), len(lines[i])))
         }
@@ -242,7 +242,7 @@ func line_value_float([]string lines, string key, float fallback) float {
 func join_documents([]string docs) string {
     string out = ""
     int i = 0
-    while i < len(docs) {
+    for i < len(docs) {
         string doc = trim(docs[i])
         if doc != "" {
             if out != "" {
@@ -271,7 +271,7 @@ func cos_approx(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = -term * x2 / to_float(i * (i + 1 - 1))
         result = result + term
         i = i + 2
@@ -598,7 +598,7 @@ func gpt_large_training_step(gpt_large_state state, gpt_large_training_config cf
 func gpt_large_training_run(gpt_large_state state, gpt_large_training_config cfg) gpt_large_state {
     gpt_large_state current = state
     int step = state.training_steps
-    while step < cfg.max_steps {
+    for step < cfg.max_steps {
         current = gpt_large_training_step(current, cfg, step)
         if current.training_steps % cfg.log_interval == 0 || current.training_steps == 1 {
             println("step=" + int_to_str(current.training_steps, 0) + " lr=" + pad_float(current.learning_rate, 8, 8) + " train_loss=" + pad_float(current.train_loss, 8, 6) + " val_loss=" + pad_float(current.validation_loss, 8, 6))

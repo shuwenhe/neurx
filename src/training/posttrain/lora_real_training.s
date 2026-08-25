@@ -20,7 +20,7 @@ func exp_fn(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 15 {
+    for i <= 15 {
         term = term * x / float(i)
         result = result + term
         i = i + 1
@@ -38,7 +38,7 @@ func ln_fn(float x) float {
         float y2 = y * y
         float term = y
         int i = 0
-        while i < 20 {
+        for i < 20 {
             result = result + term / float(2 * i + 1)
             term = term * y2
             i = i + 1

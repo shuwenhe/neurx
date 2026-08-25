@@ -25,26 +25,26 @@ func matrix_multiply_blocked(float[] result, float[] matrix_a, float[] matrix_b,
     }
 
     int i = 0
-    while i < m {
+    for i < m {
         int i_end = i + block_size
         if i_end > m {
             i_end = m
         }
 
         int j = 0
-        while j < n {
+        for j < n {
             int j_end = j + block_size
             if j_end > n {
                 j_end = n
             }
 
             int ii = i
-            while ii < i_end {
+            for ii < i_end {
                 int jj = j
-                while jj < j_end {
+                for jj < j_end {
                     float sum = 0.0
                     int kk = 0
-                    while kk < k {
+                    for kk < k {
                         int a_idx = ii * k + kk
                         int b_idx = kk * n + jj
                         sum = sum + (matrix_a[a_idx] * matrix_b[b_idx])
@@ -68,10 +68,10 @@ func matrix_multiply_blocked(float[] result, float[] matrix_a, float[] matrix_b,
 
 func matrix_vector_multiply_optimized(float[] result, float[] matrix, float[] vector, int rows, int cols) bool {
     int i = 0
-    while i < rows {
+    for i < rows {
         float sum = 0.0
         int j = 0
-        while j < cols {
+        for j < cols {
             int idx = i * cols + j
             sum = sum + (matrix[idx] * vector[j])
             j = j + 1
@@ -85,12 +85,12 @@ func matrix_vector_multiply_optimized(float[] result, float[] matrix, float[] ve
 
 func fused_matmul_add(float[] result, float[] a, float[] b, float[] bias, int m, int n, int k) bool {
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = bias[j]
             int p = 0
-            while p < k {
+            for p < k {
                 int a_idx = i * k + p
                 int b_idx = p * n + j
                 sum = sum + (a[a_idx] * b[b_idx])
@@ -125,9 +125,9 @@ func memory_efficient_gemm(float[] result, float[] a, float[] b, int m, int n, i
 
 func transpose_optimized(float[] result, float[] input, int rows, int cols) bool {
     int i = 0
-    while i < rows {
+    for i < rows {
         int j = 0
-        while j < cols {
+        for j < cols {
             int src_idx = i * cols + j
             int dst_idx = j * rows + i
             result[dst_idx] = input[src_idx]
@@ -146,7 +146,7 @@ func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
 
     float max_val = logits[0]
     int i = 1
-    while i < size {
+    for i < size {
         if logits[i] > max_val {
             max_val = logits[i]
         }
@@ -155,7 +155,7 @@ func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
 
     float sum = 0.0
     i = 0
-    while i < size {
+    for i < size {
         float exp_val = logits[i] - max_val
         if exp_val < -20.0 {
             exp_val = -20.0
@@ -165,7 +165,7 @@ func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
     }
 
     i = 0
-    while i < size {
+    for i < size {
         float exp_approx = 1.0 + result[i] + (result[i] * result[i] / 2.0)
         if exp_approx < 0.0 {
             exp_approx = 0.0
@@ -177,7 +177,7 @@ func compute_softmax_optimized(float[] result, float[] logits, int size) bool {
 
     if sum > 0.0 {
         i = 0
-        while i < size {
+        for i < size {
             result[i] = result[i] / sum
             i = i + 1
         }

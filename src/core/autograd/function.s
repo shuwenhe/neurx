@@ -40,7 +40,7 @@ func copy_eqns([]jaxpr_eqn values) []jaxpr_eqn {
 func join_strings([]string values) string {
     string out = ""
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if i > 0 {
             out = out + ","
         }
@@ -80,7 +80,7 @@ func same_shape(tensor a, tensor b) bool {
         return false
     }
     int i = 0
-    while i < len(a.shape) {
+    for i < len(a.shape) {
         if a.shape[i] != b.shape[i] {
             return false
         }
@@ -217,7 +217,7 @@ func get_transform_step(transform_chain chain, int index) string {
 
 func transform_chain_has_step(transform_chain chain, string step) bool {
     int i = 0
-    while i < len(chain.steps) {
+    for i < len(chain.steps) {
         string s = get_transform_step(chain, i)
         if s == step {
             return true
@@ -379,7 +379,7 @@ func get_function_param(function_record f, int index) string {
 
 func function_has_tag(function_record f, string tag) bool {
     int i = 0
-    while i < len(f.tags) {
+    for i < len(f.tags) {
         string t = get_function_tag(f, i)
         if t == tag {
             return true
@@ -391,7 +391,7 @@ func function_has_tag(function_record f, string tag) bool {
 
 func function_has_param(function_record f, string param) bool {
     int i = 0
-    while i < len(f.params) {
+    for i < len(f.params) {
         string p = get_function_param(f, i)
         if p == param {
             return true
@@ -537,7 +537,7 @@ func function_load_state_dict(function_record f, function_record other) function
 func function_transform_chain(function_record f) transform_chain {
     []jaxpr_eqn eqns = []jaxpr_eqn{cap: len(f.tags)}
     int i = 0
-    while i < len(f.tags) {
+    for i < len(f.tags) {
         []string params = []string{cap: 0}
         string param_val = get_function_param(f, i)
         if i < len(f.params) && param_val != "" {
@@ -571,7 +571,7 @@ func transform_chain_to_function(transform_chain chain, string name, int arity) 
         params = []string{cap: len(chain.eqns)}
         tags = []string{cap: len(chain.eqns)}
         int i = 0
-        while i < len(chain.eqns) {
+        for i < len(chain.eqns) {
             tags[i] = chain.eqns[i].primitive
             params[i] = join_strings(chain.eqns[i].params)
             i = i + 1

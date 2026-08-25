@@ -52,7 +52,7 @@ func sparse_coo_add_entry(sparse_tensor_coo tensor, int i, int j, float val) spa
 func sparse_coo_to_dense(sparse_tensor_coo tensor) [][]float {
     [][]float dense = allocate_dense_matrix(tensor.num_rows, tensor.num_cols)
     int k = 0
-    while k < tensor.nnz {
+    for k < tensor.nnz {
         int i = tensor.indices_i[k]
         int j = tensor.indices_j[k]
         dense[i][j] = tensor.values[k]
@@ -67,14 +67,14 @@ func sparse_coo_to_csr(sparse_tensor_coo coo) sparse_tensor_csr {
     []float values = []float{cap: coo.nnz}
     []int row_counts = allocate_int_array(coo.num_rows)
     int k = 0
-    while k < coo.nnz {
+    for k < coo.nnz {
         int row = coo.indices_i[k]
         row_counts[row] = row_counts[row] + 1
         k = k + 1
     }
     int cumsum = 0
     int i = 0
-    while i <= coo.num_rows {
+    for i <= coo.num_rows {
         row_ptr[i] = cumsum
         if i < coo.num_rows {
             cumsum = cumsum + row_counts[i]
@@ -83,7 +83,7 @@ func sparse_coo_to_csr(sparse_tensor_coo coo) sparse_tensor_csr {
     }
     []int row_offsets = allocate_int_array(coo.num_rows)
     k = 0
-    while k < coo.nnz {
+    for k < coo.nnz {
         int row = coo.indices_i[k]
         int col = coo.indices_j[k]
         float val = coo.values[k]
@@ -106,12 +106,12 @@ func sparse_coo_to_csr(sparse_tensor_coo coo) sparse_tensor_csr {
 func sparse_csr_matrix_vector_mul(sparse_tensor_csr csr, []float vec) []float {
     []float result = allocate_float_array(csr.num_rows)
     int i = 0
-    while i < csr.num_rows {
+    for i < csr.num_rows {
         float sum = 0.0
         int ptr_start = csr.row_ptr[i]
         int ptr_end = csr.row_ptr[i + 1]
         int k = ptr_start
-        while k < ptr_end {
+        for k < ptr_end {
             int col = csr.col_indices[k]
             float val = csr.values[k]
             sum = sum + val * vec[col]
@@ -128,7 +128,7 @@ func sparse_csr_get_row(sparse_tensor_csr csr, int row_idx) []float {
     int ptr_start = csr.row_ptr[row_idx]
     int ptr_end = csr.row_ptr[row_idx + 1]
     int k = ptr_start
-    while k < ptr_end {
+    for k < ptr_end {
         int col = csr.col_indices[k]
         float val = csr.values[k]
         row_values[col] = val
@@ -139,7 +139,7 @@ func sparse_csr_get_row(sparse_tensor_csr csr, int row_idx) []float {
 
 func sparse_csr_add_scaled(sparse_tensor_csr csr, []float update, float scale) sparse_tensor_csr {
     int k = 0
-    while k < len(csr.values) {
+    for k < len(csr.values) {
         csr.values[k] = csr.values[k] + scale * update[k]
         k = k + 1
     }
@@ -149,7 +149,7 @@ func sparse_csr_add_scaled(sparse_tensor_csr csr, []float update, float scale) s
 func allocate_dense_matrix(int num_rows, int num_cols) [][]float {
     [][]float matrix = make([][]float, 0)
     int i = 0
-    while i < num_rows {
+    for i < num_rows {
         matrix = append(matrix, allocate_float_array(num_cols))
         i = i + 1
     }
@@ -159,7 +159,7 @@ func allocate_dense_matrix(int num_rows, int num_cols) [][]float {
 func allocate_float_array(int n) []float {
     []float arr = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         arr[i] = 0.0
         i = i + 1
     }
@@ -169,7 +169,7 @@ func allocate_float_array(int n) []float {
 func allocate_int_array(int n) []int {
     []int arr = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         arr[i] = 0
         i = i + 1
     }

@@ -43,7 +43,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         out = digit_to_str(digit) + out
         value = value / 10
@@ -61,7 +61,7 @@ func fmt_float(float value, int decimals) string {
         current = 0.0 - current
     }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -71,10 +71,10 @@ func fmt_float(float value, int decimals) string {
     }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }
@@ -138,13 +138,13 @@ func main() {
     int tokens_seen = 0
     float adapter_scale = alpha / (rank as float)
     int epoch = 0
-    while epoch < epochs {
+    for epoch < epochs {
         println("")
         println("Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs))
         float epoch_loss = 0.0
         int epoch_examples = 0
         int sample = 0
-        while sample < 4 {
+        for sample < 4 {
             float x = 0.02 * ((sample + 1) as float)
             float y = 0.01 * ((sample + 1) as float)
             if sample < 2 {

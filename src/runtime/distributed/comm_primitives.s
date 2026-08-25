@@ -45,13 +45,13 @@ func all_gather(comm_context ctx, []float local_data) []float {
     int total_size = len(local_data) * ctx.world_size
     []float gathered_data = []
     int i = 0
-    while i < total_size {
+    for i < total_size {
         gathered_data = append(gathered_data, 0.0)
         i = i + 1
     }
     int local_start = ctx.rank * len(local_data)
     i = 0
-    while i < len(local_data) {
+    for i < len(local_data) {
         gathered_data[local_start + i] = local_data[i]
         i = i + 1
     }
@@ -74,7 +74,7 @@ func reduce_scatter(comm_context ctx, []float data) []float {
     int start = ctx.rank * chunk_size
     int end = start + chunk_size
     int i = start
-    while i < end {
+    for i < end {
         local_chunk = append(local_chunk, data[i])
         i = i + 1
     }

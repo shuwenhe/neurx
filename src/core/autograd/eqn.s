@@ -20,7 +20,7 @@ func copy_eqn(ir_eqn eqn) ir_eqn {
 func copy_eqns([]ir_eqn values) []ir_eqn {
     []ir_eqn out = []ir_eqn{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = copy_eqn(values[i])
         i = i + 1
     }

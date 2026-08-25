@@ -37,7 +37,7 @@ func agent_perception_starts_with(string text, string prefix) bool {
         return false
     }
     int i = 0
-    while i < pl {
+    for i < pl {
         if text[i] != prefix[i] {
             return false
         }
@@ -48,7 +48,7 @@ func agent_perception_starts_with(string text, string prefix) bool {
 
 func agent_perception_contains_kv(string text) bool {
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         if text[i] == '=' {
             return true
         }
@@ -86,7 +86,7 @@ func agent_perception_parse_kv(string raw) agent_perception_result {
     []string values = []
     int i = 0
     string item = ""
-    while i <= len(text) {
+    for i <= len(text) {
         bool split = i == len(text)
         if !split {
             string ch = string(text[i])
@@ -97,7 +97,7 @@ func agent_perception_parse_kv(string raw) agent_perception_result {
             if pair != "" {
                 int eq = -1
                 int j = 0
-                while j < len(pair) {
+                for j < len(pair) {
                     if pair[j] == '=' {
                         eq = j
                         break
@@ -136,7 +136,7 @@ func agent_perceive(string raw, string source) agent_perception_result {
 
 func agent_perception_get_field(agent_perception_result result, string key) string {
     int i = 0
-    while i < result.field_count {
+    for i < result.field_count {
         if get_key(result, i) == key {
             return get_value(result, i)
         }

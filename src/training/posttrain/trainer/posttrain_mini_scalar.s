@@ -19,7 +19,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -46,7 +46,7 @@ func float_to_str(float value, int decimals) string {
         current = 0.0 - current
     }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -56,10 +56,10 @@ func float_to_str(float value, int decimals) string {
     }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }
@@ -102,7 +102,7 @@ func run_mini_scalar_posttrain() int {
     float loss1 = 0.0
     float loss2 = 0.0
     int step = 0
-    while step < 3 {
+    for step < 3 {
         float pred = w * x
         float diff = pred - y
         float loss = diff * diff

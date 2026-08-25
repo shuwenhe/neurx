@@ -52,7 +52,7 @@ func copy_stage(pipeline_stage stage) pipeline_stage {
 func copy_stages([]pipeline_stage values) []pipeline_stage {
     []pipeline_stage out = []pipeline_stage{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = copy_stage(values[i])
         i = i + 1
     }
@@ -274,7 +274,7 @@ func pipeline_add_stage(pipeline_plan plan, pipeline_stage stage) pipeline_plan 
 func pipeline_with_default_stages(pipeline_plan plan, int world_size, string device) pipeline_plan {
     pipeline_plan current = pipeline_plan_state_dict(plan)
     int i = 0
-    while i < current.num_stages {
+    for i < current.num_stages {
         pipeline_stage stage = build_stage(current, i, i, world_size, device)
         current = pipeline_add_stage(current, stage)
         i = i + 1
@@ -412,12 +412,12 @@ func new_schedule_gpipe(pipeline_plan plan) pipeline_schedule_state {
     int n = plan.chunks
     []string ops = []string{cap: 2 * n}
     int i = 0
-    while i < n {
+    for i < n {
         ops[i] = "forward"
         i = i + 1
     }
     int j = 0
-    while j < n {
+    for j < n {
         ops[n + j] = "backward"
         j = j + 1
     }
@@ -428,12 +428,12 @@ func new_schedule_gpipe_for_stage(pipeline_plan plan, int stage_index) pipeline_
     int n = plan.chunks
     []string ops = []string{cap: 2 * n}
     int i = 0
-    while i < n {
+    for i < n {
         ops[i] = "forward"
         i = i + 1
     }
     int j = 0
-    while j < n {
+    for j < n {
         ops[n + j] = "backward"
         j = j + 1
     }
@@ -451,17 +451,17 @@ func new_schedule_1f1b_for_stage(pipeline_plan plan, int stage_index) pipeline_s
     int flush = schedule_flush_steps(plan, stage_index)
     []string ops = []string{cap: warmup + steady + flush}
     int i = 0
-    while i < warmup {
+    for i < warmup {
         ops[i] = "forward"
         i = i + 1
     }
     int j = 0
-    while j < steady {
+    for j < steady {
         ops[warmup + j] = "fwd_bwd"
         j = j + 1
     }
     int k = 0
-    while k < flush {
+    for k < flush {
         ops[warmup + steady + k] = "backward"
         k = k + 1
     }

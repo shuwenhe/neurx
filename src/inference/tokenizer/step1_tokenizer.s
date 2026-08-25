@@ -14,7 +14,7 @@ func simple_tokenize(string text) []int {
     []int tokens = make([]int, 0)
     append(tokens, 151644)
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         append(tokens, 256 + i)
         i = i + 1
     }

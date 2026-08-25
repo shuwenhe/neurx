@@ -23,10 +23,10 @@ struct hf_model_config {
 
 func hf_json_find(string text, string pattern) int {
     int i = 0
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
         bool match = true
-        while j < len(pattern) {
+        for j < len(pattern) {
             if text[i + j] != pattern[j] { match = false; j = len(pattern) } else { j = j + 1 }
         }
         if match { return i }
@@ -39,9 +39,9 @@ func hf_json_number_start(string text, string key) int {
     int position = hf_json_find(text, "\"" + key + "\"")
     if position < 0 { return -1 }
     position = position + len(key) + 2
-    while position < len(text) && text[position] != 58 { position = position + 1 }
+    for position < len(text) && text[position] != 58 { position = position + 1 }
     position = position + 1
-    while position < len(text) && (text[position] == 32 || text[position] == 9 || text[position] == 10 || text[position] == 13) { position = position + 1 }
+    for position < len(text) && (text[position] == 32 || text[position] == 9 || text[position] == 10 || text[position] == 13) { position = position + 1 }
     position
 }
 
@@ -50,7 +50,7 @@ func hf_json_int(string text, string key, int fallback) int {
     if position < 0 || position >= len(text) { return fallback }
     int value = 0
     bool found = false
-    while position < len(text) {
+    for position < len(text) {
         int ch = text[position]
         if ch < 48 || ch > 57 { position = len(text) } else { found = true; value = value * 10 + ch - 48; position = position + 1 }
     }
@@ -63,7 +63,7 @@ func hf_json_float(string text, string key, float fallback) float {
     if position < 0 || position >= len(text) { return fallback }
     float value = 0.0
     float scale = 0.0
-    while position < len(text) {
+    for position < len(text) {
         int ch = text[position]
         if ch >= 48 && ch <= 57 {
             if scale == 0.0 { value = value * 10.0 + (ch - 48) * 1.0 } else { scale = scale * 10.0; value = value + (ch - 48) * 1.0 / scale }
@@ -80,7 +80,7 @@ func hf_json_number_text(string text, string key, string fallback) string {
     int position = hf_json_number_start(text, key)
     if position < 0 || position >= len(text) { return fallback }
     string value = ""
-    while position < len(text) {
+    for position < len(text) {
         int ch = text[position]
         bool numeric = (ch >= 48 && ch <= 57) || ch == 46 || ch == 43 || ch == 45 || ch == 69 || ch == 101
         if numeric { value = value + string(ch); position = position + 1 } else { position = len(text) }
@@ -137,6 +137,6 @@ func load_hf_config(string model_dir) hf_model_config {
     if len(bytes) == 0 { return invalid_hf_config("config_not_found") }
     string content = ""
     int i = 0
-    while i < len(bytes) { content = content + string(bytes[i]); i = i + 1 }
+    for i < len(bytes) { content = content + string(bytes[i]); i = i + 1 }
     parse_hf_config(content)
 }

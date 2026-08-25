@@ -35,7 +35,7 @@ func agent_reasoning_append(agent_reasoning_state state, string thought, string 
     int n = state.count
     []agent_reasoning_step steps = []agent_reasoning_step{cap: n + 1}
     int i = 0
-    while i < n {
+    for i < n {
         steps[i] = state.steps[i]
         i = i + 1
     }

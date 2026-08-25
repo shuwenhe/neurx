@@ -69,11 +69,11 @@ struct moe_1t_orchestrator {
 
 func moe_1t_trim(string s) string {
     int i = 0
-    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
     int j = len(s) - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
     if j < i {
@@ -81,7 +81,7 @@ func moe_1t_trim(string s) string {
     }
     string out = ""
     int k = i
-    while k <= j {
+    for k <= j {
         out = out + chr(s[k])
         k = k + 1
     }
@@ -93,7 +93,7 @@ func moe_1t_split_lines(string text) []string {
     string current = ""
     bool ends_with_newline = false
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if ch == 10 {
             lines.push(current)
@@ -151,7 +151,7 @@ func moe_1t_text_to_tokens(string text, int batch_size_tokens, int seed) []int {
     int token_count = 0
     int rolling = seed + 17
     int i = 0
-    while i < len(text) && token_count < batch_size_tokens {
+    for i < len(text) && token_count < batch_size_tokens {
         int ch = text[i]
         rolling = rolling * 131 + ch + i + seed
         if ch == 32 || ch == 9 || ch == 10 || ch == 13 {
@@ -163,14 +163,14 @@ func moe_1t_text_to_tokens(string text, int batch_size_tokens, int seed) []int {
     }
     if token_count == 0 {
         int j = 0
-        while j < len(text) && token_count < batch_size_tokens {
+        for j < len(text) && token_count < batch_size_tokens {
             rolling = rolling * 131 + text[j] + j + seed
             tokens[token_count] = moe_1t_positive_mod(rolling, 128000)
             token_count = token_count + 1
             j = j + 1
         }
     }
-    while token_count < batch_size_tokens {
+    for token_count < batch_size_tokens {
         rolling = rolling * 1664525 + 1013904223 + token_count + seed
         tokens[token_count] = moe_1t_positive_mod(rolling, 128000)
         token_count = token_count + 1
@@ -191,7 +191,7 @@ func moe_1t_shard_tokens(string shard_path, int batch_size_tokens, int seed) []i
     } else {
         []string docs = gpt_large_pretrain_documents_for_ref_with_seed(shard_path, seed)
         int i = 0
-        while i < len(docs) {
+        for i < len(docs) {
             if moe_1t_trim(docs[i]) != "" {
                 if shard_text != "" {
                     shard_text = shard_text + "\n"
@@ -211,7 +211,7 @@ func moe_1t_build_labels([]int batch_tokens, int vocab_size) []int {
         return labels
     }
     int i = 0
-    while i < count {
+    for i < count {
         int next_idx = i + 1
         if next_idx >= count {
             next_idx = 0
@@ -234,7 +234,7 @@ func moe_1t_build_top1_routing(
     []int expert_indices = []int{cap: count}
     []float expert_weights = []float{cap: count}
     int i = 0
-    while i < count {
+    for i < count {
         expert_indices[i] = moe_1t_positive_mod(batch_tokens[i] + orch.world_rank + i, num_experts)
         expert_weights[i] = 1.0
         i = i + 1
@@ -248,7 +248,7 @@ func moe_1t_average_abs([]float values) float {
     }
     float total = 0.0
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if values[i] < 0.0 {
             total = total - values[i]
         } else {
@@ -427,11 +427,11 @@ func moe_1t_forward_pass(
     []float hidden = make([]float, batch_size * local_hidden_dim)
     int layer = 0
     int num_layers = orch.model_config.base.n_layer
-    while layer < num_layers {
+    for layer < num_layers {
         if layer % orch.model_config.moe_frequency == 0 {
             int top_k = orch.model_config.moe.top_k
             int token_idx = 0
-            while token_idx < batch_size {
+            for token_idx < batch_size {
                 int local_expert = moe_1t_positive_mod(batch_tokens[token_idx] + layer + orch.world_rank, orch.model_config.moe.num_experts)
                 int target_ep_rank = moe_1t_positive_mod(local_expert, ep_size)
                 if target_ep_rank >= ep_size {
@@ -446,7 +446,7 @@ func moe_1t_forward_pass(
     []int expert_load = make([]int, orch.model_config.moe.num_experts)
     []int ep_load = make([]int, ep_size)
     int token_idx = 0
-    while token_idx < batch_size {
+    for token_idx < batch_size {
         int expert_idx = moe_1t_positive_mod(batch_tokens[token_idx] + seq_len + orch.world_rank, orch.model_config.moe.num_experts)
         int target_ep_rank = moe_1t_positive_mod(expert_idx, ep_size)
         ep_load[target_ep_rank] = ep_load[target_ep_rank] + 1
@@ -456,7 +456,7 @@ func moe_1t_forward_pass(
     int max_load = 0
     int load_sum = 0
     int load_idx = 0
-    while load_idx < len(expert_load) {
+    for load_idx < len(expert_load) {
         int load = expert_load[load_idx]
         load_sum = load_sum + load
         if load > max_load {
@@ -474,7 +474,7 @@ func moe_1t_forward_pass(
     []float expert_load_ratio = make([]float, orch.model_config.moe.num_experts)
     float aux_loss = 0.0
     int ratio_idx = 0
-    while ratio_idx < len(expert_load) {
+    for ratio_idx < len(expert_load) {
         float ratio = 0.0
         if load_sum > 0 {
             ratio = float(expert_load[ratio_idx]) / float(load_sum)
@@ -486,17 +486,17 @@ func moe_1t_forward_pass(
     int local_offset = hidden_offset
     float projection_scale = 1.0 / float(global_hidden_dim)
     int h = 0
-    while h < local_hidden_dim {
+    for h < local_hidden_dim {
         int global_h = local_offset + h
         if global_h >= global_hidden_dim {
             break
         }
         int token = 0
-        while token < batch_size {
+        for token < batch_size {
             int hidden_idx = token * local_hidden_dim + h
             int logit_base = token * orch.model_config.base.vocab_size
             int vocab_idx = 0
-            while vocab_idx < orch.model_config.base.vocab_size {
+            for vocab_idx < orch.model_config.base.vocab_size {
                 float vocab_scale = float(vocab_idx + 1) * projection_scale
                 logits[logit_base + vocab_idx] = logits[logit_base + vocab_idx] + hidden[hidden_idx] * vocab_scale
                 vocab_idx = vocab_idx + 1
@@ -507,7 +507,7 @@ func moe_1t_forward_pass(
     }
     if tp_size > 1 {
         int i = 0
-        while i < len(logits) {
+        for i < len(logits) {
             logits[i] = logits[i] / float(tp_size)
             i = i + 1
         }
@@ -530,7 +530,7 @@ func moe_1t_allreduce_gradients(
 ) int {
     if orch.world_size > 1 {
         int i = 0
-        while i < len(gradients) {
+        for i < len(gradients) {
             gradients[i] = gradients[i] / float(orch.world_size)
             i = i + 1
         }
@@ -581,7 +581,7 @@ func moe_1t_zero_pad_int(int value, int width) string {
     }
     string out = ""
     int pad = width - len(text)
-    while pad > 0 {
+    for pad > 0 {
         out = out + "0"
         pad = pad - 1
     }
@@ -685,7 +685,7 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
     (state, global_step) = moe_1t_load_checkpoint(state, "")
     int total_steps = state.framework.training.total_steps
     int save_interval = state.framework.training.save_steps
-    while global_step < total_steps && state.should_stop == 0 {
+    for global_step < total_steps && state.should_stop == 0 {
         int current_step = state.training_step
         int batch_tokens_per_gpu = 512
         int seq_len = 4096
@@ -756,7 +756,7 @@ func string_to_int(string s) int {
     int result = 0
     int i = 0
     int len_s = len(s)
-    while i < len_s {
+    for i < len_s {
         int digit = int(s[i]) - 48
         if digit < 0 || digit > 9 {
             return result
@@ -778,7 +778,7 @@ func int_to_string(int n) string {
         val = -val
     }
     string result = ""
-    while val > 0 {
+    for val > 0 {
         int digit = val % 10
         result = chr(digit + 48) + result
         val = val / 10

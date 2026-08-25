@@ -43,7 +43,7 @@ func run_agent_memory_workflow(int max_steps, string output_dir, string dataset_
     int hit_count = 0
     string key_report = ""
     int ki = 0
-    while ki < len(expected_keys) {
+    for ki < len(expected_keys) {
         bool found = agent_memory_has(phase2, expected_keys[ki])
         string hit_str = "miss"
         if found {

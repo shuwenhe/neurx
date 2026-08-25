@@ -371,7 +371,7 @@ func main() {
     model_names.push("phi")
 
     i := 0
-    while i < model_names.len() {
+    for i < model_names.len() {
         name := model_names[i]
         switch load_model_architecture(name) {
             (arch, "") : {

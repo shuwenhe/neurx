@@ -12,7 +12,7 @@ func main() {
     println("========================================")
     println("")
     int step = 0
-    while step < max_steps {
+    for step < max_steps {
         float progress = (step * 1.0) / (max_steps * 1.0)
         float base_loss = 10.0
         float final_loss = 0.975
@@ -53,7 +53,7 @@ func fmt_float(float val, int decimals) string {
         value = 0.0 - value
     }
     int int_part = 0
-    while value >= 1.0 {
+    for value >= 1.0 {
         value = value - 1.0
         int_part = int_part + 1
     }
@@ -63,10 +63,10 @@ func fmt_float(float val, int decimals) string {
     }
     out = out + int_to_str(int_part) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         value = value * 10.0
         int digit = 0
-        while value >= 1.0 {
+        for value >= 1.0 {
             value = value - 1.0
             digit = digit + 1
         }
@@ -86,7 +86,7 @@ func int_to_str(int n) string {
         value = -value
     }
     string s = ""
-    while value > 0 {
+    for value > 0 {
         s = string_char(value - (value / 10) * 10 + 48) + s
         value = value / 10
     }

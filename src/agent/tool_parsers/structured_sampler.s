@@ -38,7 +38,7 @@ func filter_logits(*structured_sampler sampler, []float logits) []float {
     result := logits
 
     i := 0
-    while i < len(result) {
+    for i < len(result) {
         allowed := is_token_allowed(i, &sampler.allowed_next)
 
         if allowed == false {
@@ -110,7 +110,7 @@ func is_complete_json_object(string s) bool {
 
     count := 0
     i := 0
-    while i < len(s) {
+    for i < len(s) {
         if s[i] == '{' {
             count = count + 1
         } else if s[i] == '}' {
@@ -134,7 +134,7 @@ func is_complete_json_array(string s) bool {
 
     count := 0
     i := 0
-    while i < len(s) {
+    for i < len(s) {
         if s[i] == '[' {
             count = count + 1
         } else if s[i] == ']' {
@@ -167,7 +167,7 @@ func is_valid_json_number(string s) bool {
         return false
     }
 
-    while i < len(s) && s[i] >= '0' && s[i] <= '9' {
+    for i < len(s) && s[i] >= '0' && s[i] <= '9' {
         i = i + 1
     }
 
@@ -176,7 +176,7 @@ func is_valid_json_number(string s) bool {
         if i >= len(s) || s[i] < '0' || s[i] > '9' {
             return false
         }
-        while i < len(s) && s[i] >= '0' && s[i] <= '9' {
+        for i < len(s) && s[i] >= '0' && s[i] <= '9' {
             i = i + 1
         }
     }
@@ -189,7 +189,7 @@ func is_valid_json_number(string s) bool {
         if i >= len(s) || s[i] < '0' || s[i] > '9' {
             return false
         }
-        while i < len(s) && s[i] >= '0' && s[i] <= '9' {
+        for i < len(s) && s[i] >= '0' && s[i] <= '9' {
             i = i + 1
         }
     }
@@ -201,7 +201,7 @@ func process_batch(*[]structured_sampler samplers, [][]float logits_batch) [][]f
     result := vec_new()
 
     i := 0
-    while i < len(logits_batch) {
+    for i < len(logits_batch) {
         constrained := filter_logits(&(*samplers)[i], logits_batch[i])
         result.append(constrained)
         i = i + 1
@@ -228,7 +228,7 @@ func print_sampler_debug(*structured_sampler sampler) {
     if len(sampler.warnings) > 0 {
         print("  Warnings:\n")
         i := 0
-        while i < len(sampler.warnings) {
+        for i < len(sampler.warnings) {
             print("    - " + sampler.warnings[i] + "\n")
             i = i + 1
         }
@@ -237,7 +237,7 @@ func print_sampler_debug(*structured_sampler sampler) {
 
 func is_token_allowed(int token_id, *[]int allowed) bool {
     i := 0
-    while i < len(*allowed) {
+    for i < len(*allowed) {
         if (*allowed)[i] == token_id {
             return true
         }
@@ -258,7 +258,7 @@ func int_to_string(int n) string {
     }
 
     result := ""
-    while abs_n > 0 {
+    for abs_n > 0 {
         result = string(abs_n % 10) + result
         abs_n = abs_n / 10
     }

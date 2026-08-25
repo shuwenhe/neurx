@@ -371,7 +371,7 @@ func run_training(training_config cfg) {
         int epoch_batches = 0
         float epoch_start_time = current_time_seconds()
         (batch b, bool epoch_done) = next_batch(state.train_loader)
-        while !epoch_done {
+        for !epoch_done {
             if cfg.max_train_steps > 0 && state.global_step >= cfg.max_train_steps {
                 println("\nReached max_train_steps (" + str(cfg.max_train_steps) + "). Stopping.")
                 break
@@ -652,7 +652,7 @@ func make_tensor([]float data, []int shape, bool requires_grad) tensor:
 func copy_int_shape([]int shape) []int:
     []int out = []int{cap: len(shape)}
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         out[i] = shape[i]
         i = i + 1
     }
@@ -666,7 +666,7 @@ func embedding_lookup(tensor emb, []int ids) tensor:
     int emb_dim = emb.shape[1]
     []float out_data = []float{cap: len(ids) * emb_dim}
     int row = 0
-    while row < len(ids) {
+    for row < len(ids) {
         int token_id = ids[row]
         if token_id < 0 {
             token_id = 0
@@ -675,7 +675,7 @@ func embedding_lookup(tensor emb, []int ids) tensor:
             token_id = token_id - (token_id / vocab_size) * vocab_size
         }
         int col = 0
-        while col < emb_dim {
+        for col < emb_dim {
             out_data[row * emb_dim + col] = emb.data[token_id * emb_dim + col]
             col = col + 1
         }
@@ -687,7 +687,7 @@ func add_tensors(tensor a, tensor b) tensor:
     if len(a.data) == len(b.data) {
         []float out_data = []float{cap: len(a.data)}
         int i = 0
-        while i < len(a.data) {
+        for i < len(a.data) {
             out_data[i] = a.data[i] + b.data[i]
             i = i + 1
         }
@@ -698,7 +698,7 @@ func add_tensors(tensor a, tensor b) tensor:
         int d = b.shape[0]
         []float out_data = []float{cap: total}
         int i = 0
-        while i < total {
+        for i < total {
             out_data[i] = a.data[i] + b.data[i - (i / d) * d]
             i = i + 1
         }
@@ -716,7 +716,7 @@ func apply_dropout(tensor x, float p) tensor:
     }
     []float out_data = []float{cap: len(x.data)}
     int i = 0
-    while i < len(x.data) {
+    for i < len(x.data) {
         if (i - (i / 7) * 7) == 0 {
             out_data[i] = 0.0
         } else {
@@ -738,18 +738,18 @@ func layer_norm(tensor x, tensor params) tensor:
     []float out_data = []float{cap: len(x.data)}
     float eps = 0.00001
     int row = 0
-    while row < outer {
+    for row < outer {
         int base = row * hidden
         float mean = 0.0
         int col = 0
-        while col < hidden {
+        for col < hidden {
             mean = mean + x.data[base + col]
             col = col + 1
         }
         mean = mean / hidden
         float variance = 0.0
         col = 0
-        while col < hidden {
+        for col < hidden {
             float diff = x.data[base + col] - mean
             variance = variance + diff * diff
             col = col + 1
@@ -757,7 +757,7 @@ func layer_norm(tensor x, tensor params) tensor:
         variance = variance / hidden
         float denom = sqrt(variance + eps)
         col = 0
-        while col < hidden {
+        for col < hidden {
             float scale = 1.0
             if len(params.data) == hidden {
                 scale = params.data[col]
@@ -782,12 +782,12 @@ func matmul(tensor a, tensor b) tensor:
     int outer = len(a.data) / a_inner
     []float out_data = []float{cap: outer * out_cols}
     int row = 0
-    while row < outer {
+    for row < outer {
         int col = 0
-        while col < out_cols {
+        for col < out_cols {
             float acc = 0.0
             int k = 0
-            while k < a_inner {
+            for k < a_inner {
                 acc = acc + a.data[row * a_inner + k] * b.data[k * out_cols + col]
                 k = k + 1
             }
@@ -798,7 +798,7 @@ func matmul(tensor a, tensor b) tensor:
     }
     []int out_shape = []int{cap: len(a.shape)}
     int i = 0
-    while i < len(a.shape) - 1 {
+    for i < len(a.shape) - 1 {
         out_shape[i] = a.shape[i]
         i = i + 1
     }
@@ -815,18 +815,18 @@ func multi_head_attention(tensor q, tensor k, tensor v, int n_heads, []int mask)
     []float out_data = []float{cap: len(q.data)}
     float inv_scale = 1.0 / sqrt(hidden * 1.0)
     int b = 0
-    while b < batch {
+    for b < batch {
         int i = 0
-        while i < seq_len {
+        for i < seq_len {
             []float scores = []float{cap: seq_len}
             float max_score = -1000000000.0
             int j = 0
-            while j < seq_len {
+            for j < seq_len {
                 int idx_q = (b * seq_len + i) * hidden
                 int idx_k = (b * seq_len + j) * hidden
                 float dot = 0.0
                 int d = 0
-                while d < hidden {
+                for d < hidden {
                     dot = dot + q.data[idx_q + d] * k.data[idx_k + d]
                     d = d + 1
                 }
@@ -845,7 +845,7 @@ func multi_head_attention(tensor q, tensor k, tensor v, int n_heads, []int mask)
             }
             float denom = 0.0
             j = 0
-            while j < seq_len {
+            for j < seq_len {
                 scores[j] = exp(scores[j] - max_score)
                 denom = denom + scores[j]
                 j = j + 1
@@ -854,10 +854,10 @@ func multi_head_attention(tensor q, tensor k, tensor v, int n_heads, []int mask)
                 denom = 1.0
             }
             int d = 0
-            while d < hidden {
+            for d < hidden {
                 float acc = 0.0
                 j = 0
-                while j < seq_len {
+                for j < seq_len {
                     float weight = scores[j] / denom
                     int idx_v = (b * seq_len + j) * hidden
                     acc = acc + weight * v.data[idx_v + d]
@@ -875,7 +875,7 @@ func swiglu(tensor gate, tensor up) tensor:
     """SwiGLU activation: gate * SiLU(up)"""
     []float out_data = []float{cap: len(gate.data)}
     int i = 0
-    while i < len(gate.data) {
+    for i < len(gate.data) {
         float x = up.data[i]
         float silu = x / (1.0 + exp(-x))
         out_data[i] = gate.data[i] * silu
@@ -892,7 +892,7 @@ func cross_entropy_loss(tensor logits, tensor labels, []int mask) tensor:
     float loss = 0.0
     int count = 0
     int pos = 0
-    while pos < positions {
+    for pos < positions {
         if len(mask) > pos && mask[pos] == 0 {
             pos = pos + 1
             continue
@@ -908,7 +908,7 @@ func cross_entropy_loss(tensor logits, tensor labels, []int mask) tensor:
         int base = pos * vocab
         float max_logit = logits.data[base]
         int j = 1
-        while j < vocab {
+        for j < vocab {
             if logits.data[base + j] > max_logit {
                 max_logit = logits.data[base + j]
             }
@@ -916,7 +916,7 @@ func cross_entropy_loss(tensor logits, tensor labels, []int mask) tensor:
         }
         float denom = 0.0
         j = 0
-        while j < vocab {
+        for j < vocab {
             denom = denom + exp(logits.data[base + j] - max_logit)
             j = j + 1
         }
@@ -943,7 +943,7 @@ func slice_tensor(tensor t, []int start, []int end) tensor:
         int n = finish - begin
         []float out_data = []float{cap: n}
         int i = 0
-        while i < n {
+        for i < n {
             out_data[i] = t.data[begin + i]
             i = i + 1
         }
@@ -964,11 +964,11 @@ func slice_tensor(tensor t, []int start, []int end) tensor:
         int out_v = v1 - v0
         []float out_data = []float{cap: out_b * out_t * out_v}
         int bb = 0
-        while bb < out_b {
+        for bb < out_b {
             int tt = 0
-            while tt < out_t {
+            for tt < out_t {
                 int vv = 0
-                while vv < out_v {
+                for vv < out_v {
                     int src = ((b0 + bb) * t.shape[1] + (t0 + tt)) * t.shape[2] + (v0 + vv)
                     int dst = (bb * out_t + tt) * out_v + vv
                     out_data[dst] = t.data[src]
@@ -985,7 +985,7 @@ func create_labels_from_tokens([]int tokens, int offset) tensor:
     """Create label tensor shifted by offset positions"""
     []float label_data = []float{cap: len(tokens)}
     int i = 0
-    while i < len(tokens) {
+    for i < len(tokens) {
         if i + offset < len(tokens) {
             label_data[i] = float(tokens[i + offset])
         } else {
@@ -998,7 +998,7 @@ func create_position_indices(int length) tensor:
     """Create position index tensor [0, 1, 2, ..., length-1]"""
     []float pos_data = []float{cap: length}
     int i = 0
-    while i < length {
+    for i < length {
         pos_data[i] = float(i)
         i = i + 1
     }
@@ -1022,7 +1022,7 @@ func compute_global_gradient_norm([]tensor grads) float:
     float norm_sq = 0.0
     for g in grads {
         int i = 0
-        while i < len(g.data) {
+        for i < len(g.data) {
             norm_sq = norm_sq + g.data[i] * g.data[i]
             i = i + 1
         }
@@ -1041,7 +1041,7 @@ func extract_last_token_logits(tensor logits) []float:
     int start = (seq_len - 1) * vocab_size
     []float out = []float{cap: vocab_size}
     int i = 0
-    while i < vocab_size {
+    for i < vocab_size {
         out[i] = logits.data[start + i]
         i = i + 1
     }
@@ -1051,7 +1051,7 @@ func flatten_gradients([]tensor grads) []float:
     []float flat = []
     for g in grads {
         int i = 0
-        while i < len(g.data) {
+        for i < len(g.data) {
             flat.push(g.data[i])
             i = i + 1
         }

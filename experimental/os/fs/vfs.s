@@ -59,7 +59,7 @@ func vfs_create(vfs vfs_state, string path, int inode_type, int size_bytes, stri
 
 func vfs_lookup(vfs vfs_state, string path) (inode, bool) {
     int i = 0
-    while i < len(vfs.inodes) {
+    for i < len(vfs.inodes) {
         if vfs.inodes[i].path == path {
             return (vfs.inodes[i], true)
         }
@@ -70,7 +70,7 @@ func vfs_lookup(vfs vfs_state, string path) (inode, bool) {
 
 func vfs_open(vfs vfs_state, int ino) vfs_state {
     int i = 0
-    while i < len(vfs.inodes) {
+    for i < len(vfs.inodes) {
         if vfs.inodes[i].ino == ino {
             vfs.inodes[i].ref_count = vfs.inodes[i].ref_count + 1
         }
@@ -81,7 +81,7 @@ func vfs_open(vfs vfs_state, int ino) vfs_state {
 
 func vfs_close(vfs vfs_state, int ino) vfs_state {
     int i = 0
-    while i < len(vfs.inodes) {
+    for i < len(vfs.inodes) {
         if vfs.inodes[i].ino == ino && vfs.inodes[i].ref_count > 0 {
             vfs.inodes[i].ref_count = vfs.inodes[i].ref_count - 1
         }

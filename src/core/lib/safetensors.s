@@ -41,10 +41,10 @@ func find_json_value(string json, string key) (int, int) {
     int pos = 0
     int start = -1
     int end = -1
-    while pos + search_key.length < json.length {
+    for pos + search_key.length < json.length {
         int match = 1
         int i = 0
-        while i < search_key.length && pos + i < json.length {
+        for i < search_key.length && pos + i < json.length {
             if json[pos + i] != search_key[i] {
                 match = 0
                 break
@@ -60,19 +60,19 @@ func find_json_value(string json, string key) (int, int) {
     if start == -1 {
         return -1, 0
     }
-    while start < json.length && json[start] == ' ' {
+    for start < json.length && json[start] == ' ' {
         start = start + 1
     }
     if json[start] == '"' {
         start = start + 1
         end = start
-        while end < json.length && json[end] != '"' {
+        for end < json.length && json[end] != '"' {
             end = end + 1
         }
     } else if json[start] == '[' {
         int bracket_count = 1
         end = start + 1
-        while end < json.length && bracket_count > 0 {
+        for end < json.length && bracket_count > 0 {
             if json[end] == '[' {
                 bracket_count = bracket_count + 1
             } else if json[end] == ']' {
@@ -82,7 +82,7 @@ func find_json_value(string json, string key) (int, int) {
         }
     } else {
         end = start
-        while end < json.length && json[end] != ',' && json[end] != '}' {
+        for end < json.length && json[end] != ',' && json[end] != '}' {
             end = end + 1
         }
     }
@@ -97,19 +97,19 @@ func parse_json_array(string json, int start, int length) []int {
     []int result = []
     string array_str = json.substring(start, start + length)
     int i = 0
-    while i < array_str.length {
-        while i < array_str.length && (array_str[i] == ' ' || array_str[i] == '[' || array_str[i] == ']' || array_str[i] == ',') {
+    for i < array_str.length {
+        for i < array_str.length && (array_str[i] == ' ' || array_str[i] == '[' || array_str[i] == ']' || array_str[i] == ',') {
             i = i + 1
         }
         if i < array_str.length && array_str[i] >= '0' && array_str[i] <= '9' {
             string num_str = ""
-            while i < array_str.length && array_str[i] >= '0' && array_str[i] <= '9' {
+            for i < array_str.length && array_str[i] >= '0' && array_str[i] <= '9' {
                 num_str = num_str + array_str[i]
                 i = i + 1
             }
             int num = 0
             int j = 0
-            while j < num_str.length {
+            for j < num_str.length {
                 num = num * 10 + (num_str[j] - '0')
                 j = j + 1
             }
@@ -176,7 +176,7 @@ func int_to_string(int n) string {
         is_negative = 1
         n = -n
     }
-    while n > 0 {
+    for n > 0 {
         int digit = n % 10
         result = (digit + '0') + result
         n = n / 10

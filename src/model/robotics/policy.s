@@ -14,7 +14,7 @@ func robotics_policy_copy_float([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = values[i]
         i = i + 1
     }
@@ -24,7 +24,7 @@ func robotics_policy_copy_float([]float values) []float {
 func robotics_policy_ramp_values(int n, float scale) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = scale * ((i + 1) as float) / ((n + 1) as float)
         i = i + 1
     }
@@ -83,10 +83,10 @@ func robotics_policy_mark_trained(robotics_policy_state state) robotics_policy_s
 func robotics_policy_forward(robotics_policy_state state, []float input) []float {
     []float action = []float{cap: state.act_dim}
     int a = 0
-    while a < state.act_dim {
+    for a < state.act_dim {
         float acc = state.bias[a]
         int i = 0
-        while i < state.input_dim {
+        for i < state.input_dim {
             int weight_idx = a * state.input_dim + i
             float value = 0.0
             if i < len(input) {

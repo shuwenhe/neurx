@@ -35,7 +35,7 @@ struct gpu_input_batch_view {
 func input_batch_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -50,7 +50,7 @@ func new_gpu_input_batch(gpu_input_batch_config config) gpu_input_batch_state {
 
 func input_batch_find(gpu_input_batch_state state, int request_id) int {
     int i = 0
-    while i < state.config.maximum_requests {
+    for i < state.config.maximum_requests {
         if state.active[i] == 1 && state.request_ids[i] == request_id { return i }
         i = i + 1
     }
@@ -61,7 +61,7 @@ func input_batch_add_request(gpu_input_batch_state state, int request_id, int se
     if request_id <= 0 || sequence_length < 0 || computed_tokens < 0 || computed_tokens > sequence_length || scheduled_tokens <= 0 || input_batch_find(state, request_id) >= 0 || state.request_count >= state.config.maximum_requests { return state }
     int slot = 0 - 1
     int i = 0
-    while i < state.config.maximum_requests {
+    for i < state.config.maximum_requests {
         if slot < 0 && state.active[i] == 0 { slot = i }
         i = i + 1
     }
@@ -101,12 +101,12 @@ func input_batch_build(gpu_input_batch_state state) gpu_input_batch_view {
     int token_index = 0
     bool valid = true
     int slot = 0
-    while slot < state.config.maximum_requests {
+    for slot < state.config.maximum_requests {
         if state.active[slot] == 1 {
             batch_ids[request_index] = state.request_ids[slot]
             query_starts[request_index] = token_index
             int local = 0
-            while local < state.scheduled_tokens[slot] {
+            for local < state.scheduled_tokens[slot] {
                 if token_index >= state.config.maximum_tokens {
                     valid = false
                     break

@@ -96,7 +96,7 @@ func speech_int_string(int value) string {
     string prefix = ""
     if current < 0 { prefix = "-"; current = 0 - current }
     string digits = ""
-    while current > 0 {
+    for current > 0 {
         int digit = current - (current / 10) * 10
         digits = speech_digit_string(digit) + digits
         current = current / 10
@@ -151,7 +151,7 @@ func speech_openai_json(speech_to_text_state state, bool verbose) string {
 func anthropic_safe_json(string value) string {
     string output = ""
     int i = 0
-    while i < len(value) {
+    for i < len(value) {
         int ch = value[i]
         if ch == 34 { output = output + "\\\"" }
         else if ch == 92 { output = output + "\\\\" }

@@ -52,7 +52,7 @@ func create_progress_bar(int percent, int width) string {
     }
     string bar = "["
     int i = 0
-    while i < width {
+    for i < width {
         if i < filled {
             bar = bar + "="
         } else if i == filled && percent < 100 {
@@ -125,11 +125,11 @@ struct gpt_large_pretrain_eval_result {
 
 func trim(string s) string {
     int i = 0
-    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
     int j = len(s) - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
     if j < i {
@@ -137,7 +137,7 @@ func trim(string s) string {
     }
     string out = ""
     int k = i
-    while k <= j {
+    for k <= j {
         out = out + string_char(s[k])
         k = k + 1
     }
@@ -158,7 +158,7 @@ func int_to_str(int n, int fallback) string {
         value = -value
     }
     string s = ""
-    while value > 0 {
+    for value > 0 {
         s = string_char(value - (value / 10) * 10 + 48) + s
         value = value / 10
     }
@@ -171,7 +171,7 @@ func int_to_str(int n, int fallback) string {
 func join_ints([]int values) string {
     string out = ""
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if i > 0 {
             out = out + ","
         }
@@ -257,7 +257,7 @@ func gpt_large_pretrain_shuffle_ints([]int values, int seed) []int {
     []int out = copy_int(values)
     int i = len(out) - 1
     int state = seed
-    while i > 0 {
+    for i > 0 {
         state = state * 1664525 + 1013904223
         int j = gpt_large_pretrain_positive_mod(state, i + 1)
         int tmp = out[i]
@@ -274,7 +274,7 @@ func gpt_large_pretrain_build_shard_order(int shard_count, int shard_seed, int s
     }
     []int order = []int{cap: shard_count}
     int i = 0
-    while i < shard_count {
+    for i < shard_count {
         order[i] = i
         i = i + 1
     }
@@ -284,13 +284,13 @@ func gpt_large_pretrain_build_shard_order(int shard_count, int shard_seed, int s
 func gpt_large_pretrain_shuffle_strings([]string values, int seed) []string {
     []string out = []string{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }
     int j = len(out) - 1
     int state = seed
-    while j > 0 {
+    for j > 0 {
         state = state * 1664525 + 1013904223
         int k = gpt_large_pretrain_positive_mod(state, j + 1)
         string tmp = out[j]
@@ -319,7 +319,7 @@ func gpt_large_pretrain_slice_strings([]string values, int start, int end) []str
     []string out = []string{cap: hi - lo}
     int i = lo
     int j = 0
-    while i < hi {
+    for i < hi {
         out[j] = values[i]
         i = i + 1
         j = j + 1
@@ -349,7 +349,7 @@ func gpt_large_pretrain_split_shard_refs([]string refs, int seed) gpt_large_pret
             test_count = 1
         }
         int assigned = train_count + valid_count + test_count
-        while assigned > total {
+        for assigned > total {
             if test_count > 1 {
                 test_count = test_count - 1
             } else if valid_count > 1 {
@@ -386,7 +386,7 @@ func gpt_large_pretrain_substring(string text, int start, int end) string {
     }
     string result = ""
     int i = begin
-    while i < finish {
+    for i < finish {
         result = result + string_char(text[i])
         i = i + 1
     }
@@ -395,7 +395,7 @@ func gpt_large_pretrain_substring(string text, int start, int end) string {
 
 func gpt_large_pretrain_basename(string path) string {
     int i = len(path) - 1
-    while i >= 0 {
+    for i >= 0 {
         if path[i] == 47 {
             return gpt_large_pretrain_substring(path, i + 1, len(path))
         }
@@ -413,7 +413,7 @@ func gpt_large_pretrain_split_csv(string value) []string {
     int count = 0
     int start = 0
     int i = 0
-    while i <= len(text) {
+    for i <= len(text) {
         bool at_end = i == len(text)
         if at_end || text[i] == 44 {
             string part = trim(gpt_large_pretrain_substring(text, start, i))
@@ -430,7 +430,7 @@ func gpt_large_pretrain_split_csv(string value) []string {
     }
     []string out = []string{cap: count}
     int j = 0
-    while j < count {
+    for j < count {
         out[j] = parts[j]
         j = j + 1
     }
@@ -466,11 +466,11 @@ func gpt_large_pretrain_filter_shard_refs([]string refs, string selection_csv) [
     []string out = []string{cap: len(refs)}
     int out_len = 0
     int i = 0
-    while i < len(refs) {
+    for i < len(refs) {
         string shard_path = refs[i]
         int j = 0
         bool matched = false
-        while j < len(selection) {
+        for j < len(selection) {
             if gpt_large_pretrain_string_matches_shard(selection[j], shard_path) {
                 matched = true
                 break
@@ -488,7 +488,7 @@ func gpt_large_pretrain_filter_shard_refs([]string refs, string selection_csv) [
     }
     []string filtered = []string{cap: out_len}
     int k = 0
-    while k < out_len {
+    for k < out_len {
         filtered[k] = out[k]
         k = k + 1
     }
@@ -506,7 +506,7 @@ func fmt_float(float val, int decimals) string {
     }
     int int_part = 0
     float whole = value
-    while whole >= 1.0 {
+    for whole >= 1.0 {
         whole = whole - 1.0
         int_part = int_part + 1
     }
@@ -517,11 +517,11 @@ func fmt_float(float val, int decimals) string {
     }
     s = s + int_to_str(int_part, 0) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         frac = frac * 10.0
         int digit = 0
         float tmp = frac
-        while tmp >= 1.0 {
+        for tmp >= 1.0 {
             tmp = tmp - 1.0
             digit = digit + 1
         }
@@ -543,7 +543,7 @@ func str_to_int(string s, int fallback) int {
         i = 1
     }
     int value = 0
-    while i < len(s) {
+    for i < len(s) {
         int digit = s[i] - 48
         if digit < 0 || digit > 9 {
             return fallback
@@ -565,7 +565,7 @@ func str_to_float(string s) float {
         i = 1
     }
     float int_part = 0.0
-    while i < len(s) && s[i] >= 48 && s[i] <= 57 {
+    for i < len(s) && s[i] >= 48 && s[i] <= 57 {
         int_part = int_part * 10.0 + (s[i] - 48) * 1.0
         i = i + 1
     }
@@ -573,7 +573,7 @@ func str_to_float(string s) float {
     float div = 1.0
     if i < len(s) && s[i] == 46 {
         i = i + 1
-        while i < len(s) && s[i] >= 48 && s[i] <= 57 {
+        for i < len(s) && s[i] >= 48 && s[i] <= 57 {
             frac = frac * 10.0 + (s[i] - 48) * 1.0
             div = div * 10.0
             i = i + 1
@@ -601,7 +601,7 @@ func copy_tensor(tensor value) tensor {
 func tensor_numel([]int shape) int {
     int n = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         n = n * shape[i]
         i = i + 1
     }
@@ -612,7 +612,7 @@ func tensor_from_ints([]int values, []int shape) tensor {
     int n = len(values)
     []float data = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         data[i] = values[i]
         i = i + 1
     }
@@ -629,7 +629,7 @@ func scale_tensor(tensor value, float scale) tensor {
     int n = len(value.data)
     []float data = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         data[i] = value.data[i] * scale
         i = i + 1
     }
@@ -644,7 +644,7 @@ func zero_pad_int(int value, int width) string {
         missing = 0
     }
     int i = 0
-    while i < missing {
+    for i < missing {
         prefix = prefix + "0"
         i = i + 1
     }
@@ -658,7 +658,7 @@ func split_lines(string text) []string {
     int text_len = len(text)
     int last_progress = 0
     println("[split] counting lines... (scanning " + format_bytes(text_len) + ")")
-    while i < text_len {
+    for i < text_len {
         if text[i] == 10 || text[i] == 13 {
             if in_line {
                 count = count + 1
@@ -686,7 +686,7 @@ func split_lines(string text) []string {
     int out_idx = 0
     i = 0
     last_progress = 0
-    while i < text_len {
+    for i < text_len {
         if text[i] == 10 || text[i] == 13 {
             if i > line_start {
                 lines[out_idx] = gpt_large_pretrain_substring(text, line_start, i)
@@ -713,14 +713,14 @@ func line_after(string line, string prefix) string {
         return ""
     }
     int i = 0
-    while i < len(prefix) {
+    for i < len(prefix) {
         if line[i] != prefix[i] {
             return ""
         }
         i = i + 1
     }
     string out = ""
-    while i < len(line) {
+    for i < len(line) {
         out = out + string_char(line[i])
         i = i + 1
     }
@@ -730,7 +730,7 @@ func line_after(string line, string prefix) string {
 func line_before(string line, int stop_char) string {
     string out = ""
     int i = 0
-    while i < len(line) {
+    for i < len(line) {
         if line[i] == stop_char {
             return out
         }
@@ -744,24 +744,24 @@ func gpt_large_pretrain_json_string_value(string text, string key, string fallba
     []string lines = split_lines(text)
     string needle = "\"" + key + "\""
     int i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line = trim(lines[i])
         if line != "" {
             int key_idx = gpt_large_pretrain_find_substring(line, needle)
             if key_idx >= 0 {
                 int colon_idx = key_idx + len(needle)
-                while colon_idx < len(line) && line[colon_idx] != 58 {
+                for colon_idx < len(line) && line[colon_idx] != 58 {
                     colon_idx = colon_idx + 1
                 }
                 if colon_idx < len(line) {
                     int value_start = colon_idx + 1
-                    while value_start < len(line) && (line[value_start] == 32 || line[value_start] == 9) {
+                    for value_start < len(line) && (line[value_start] == 32 || line[value_start] == 9) {
                         value_start = value_start + 1
                     }
                     if value_start < len(line) && line[value_start] == 34 {
                         value_start = value_start + 1
                         string value = ""
-                        while value_start < len(line) {
+                        for value_start < len(line) {
                             if line[value_start] == 34 {
                                 return value
                             }
@@ -785,9 +785,9 @@ func gpt_large_pretrain_find_substring(string text, string pattern) int {
         return 0
     }
     int i = 0
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
-        while j < len(pattern) && text[i + j] == pattern[j] {
+        for j < len(pattern) && text[i + j] == pattern[j] {
             j = j + 1
         }
         if j == len(pattern) {
@@ -818,7 +818,7 @@ func gpt_large_pretrain_manifest_refs(string manifest_path) []string {
     }
     string line = ""
     int i = 0
-    while i < len(manifest_text) {
+    for i < len(manifest_text) {
         if manifest_text[i] == 10 || manifest_text[i] == 13 {
             string ref = trim(line)
             if ref != "" {
@@ -867,7 +867,7 @@ func gpt_large_pretrain_manifest_refs(string manifest_path) []string {
     }
     line = ""
     i = 0
-    while i < len(manifest_text) {
+    for i < len(manifest_text) {
         if manifest_text[i] == 10 || manifest_text[i] == 13 {
             string ref = trim(line)
             if ref != "" {
@@ -938,7 +938,7 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
     int i = 0
     int total_lines = len(lines)
     int last_progress = 0
-    while i < total_lines {
+    for i < total_lines {
         line_count = line_count + 1
         string line = trim(lines[i])
         if line != "" {
@@ -952,7 +952,7 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
                 int docs_push_len = len(docs)
                 []string docs_push_tmp = []string{cap: docs_push_len + 1}
                 int docs_push_i = 0
-                while docs_push_i < docs_push_len {
+                for docs_push_i < docs_push_len {
                     docs_push_tmp[docs_push_i] = docs[docs_push_i]
                     docs_push_i = docs_push_i + 1
                 }
@@ -976,16 +976,16 @@ func gpt_large_pretrain_documents_for_refs([]string shard_refs) []string {
     println("[init] collecting documents from shard set: " + int_to_str(len(shard_refs), 0))
     []string documents = []string{cap: 0}
     int i = 0
-    while i < len(shard_refs) {
+    for i < len(shard_refs) {
         string shard_ref = gpt_large_pretrain_string_at(shard_refs, i)
         println("[init] loading shard " + int_to_str(i + 1, 0) + "/" + int_to_str(len(shard_refs), 0) + ": " + shard_ref)
         []string shard_documents = gpt_large_pretrain_documents_for_ref(shard_ref)
         int j = 0
-            while j < len(shard_documents) {
+            for j < len(shard_documents) {
             int documents_push_len = len(documents)
             []string documents_push_tmp = []string{cap: documents_push_len + 1}
             int documents_push_i = 0
-            while documents_push_i < documents_push_len {
+            for documents_push_i < documents_push_len {
                 documents_push_tmp[documents_push_i] = documents[documents_push_i]
                 documents_push_i = documents_push_i + 1
             }
@@ -1238,7 +1238,7 @@ func gpt_large_pretrain_checkpoint_params(gpt_large_pretrain_state state) []tens
     params[idx] = state.training.lm_head_bias
     idx = idx + 1
     int i = 0
-    while i < layer_count {
+    for i < layer_count {
         params[idx] = state.training.backbone.layers[i].w_q
         idx = idx + 1
         params[idx] = state.training.backbone.layers[i].w_k
@@ -1617,7 +1617,7 @@ func gpt_large_pretrain_advance_epoch_shard(gpt_large_pretrain_state state) gpt_
 func gpt_large_pretrain_metadata_value(string text, string key, string fallback) string {
     []string lines = split_lines(text)
     int i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string value = line_after(lines[i], key + "=")
         if value != "" {
             return value
@@ -1735,7 +1735,7 @@ func gpt_large_pretrain_save_optimizer_state(gpt_large_pretrain_state state) () 
     runtime_write_text_file(gpt_large_pretrain_optimizer_manifest_path(base_path), manifest)
     runtime_write_text_file(gpt_large_pretrain_optimizer_head_path(base_path), gpt_large_pretrain_adamw_metadata_text("head", state.training.optimizer))
     int i = 0
-    while i < len(state.training.backbone_optimizers) {
+    for i < len(state.training.backbone_optimizers) {
         transformer_layer_optimizer_state layer_opt = layer_optimizer_state_at(state.training.backbone_optimizers, i)
         string prefix = "layer." + int_to_str(i, 0)
         string layer_text = ""
@@ -1803,7 +1803,7 @@ func gpt_large_pretrain_optimizer_files_ready(gpt_large_pretrain_state state, st
         return false
     }
     int i = 0
-    while i < len(state.training.backbone_optimizers) {
+    for i < len(state.training.backbone_optimizers) {
         if !runtime_file_exists(gpt_large_pretrain_optimizer_layer_path(base_path, i)) {
             return false
         }
@@ -1842,7 +1842,7 @@ func gpt_large_pretrain_restore_optimizer_state(gpt_large_pretrain_state state, 
     string head_text = runtime_read_text_file(head_path)
     restored.training.optimizer = gpt_large_pretrain_adamw_from_metadata(head_text, "head", restored.training.optimizer)
     int i = 0
-    while i < len(restored.training.backbone_optimizers) {
+    for i < len(restored.training.backbone_optimizers) {
         string layer_path = gpt_large_pretrain_optimizer_layer_path(base_path, i)
         if !runtime_file_exists(layer_path) {
             runtime_write_text_file(state.output_dir + "/checkpoint_validation.txt", gpt_large_pretrain_optimizer_validation_text(state, checkpoint_path, "missing layer optimizer " + int_to_str(i, 0), false))
@@ -1883,7 +1883,7 @@ func gpt_large_pretrain_apply_checkpoint_params(gpt_large_pretrain_state state, 
         cursor = cursor + 1
     }
     int layer_idx = 0
-    while layer_idx < len(state.training.backbone.layers) && cursor + 10 <= len(params) {
+    for layer_idx < len(state.training.backbone.layers) && cursor + 10 <= len(params) {
         transformer_layer layer = transformer_layer_at(state.training.backbone.layers, layer_idx)
         layer.w_q = copy_tensor(params[cursor]); cursor = cursor + 1
         layer.w_k = copy_tensor(params[cursor]); cursor = cursor + 1
@@ -2198,20 +2198,20 @@ func embedding_grad_tensor(tensor token_ids, tensor grad_hidden, int vocab_size,
     []float data = []float{cap: vocab_size * hidden_size}
     int token_count = len(token_ids.data)
     int i = 0
-    while i < token_count {
+    for i < token_count {
         int token_id = token_ids.data[i] as int
         if token_id < 0 {
             token_id = 0
         }
         if vocab_size > 0 {
-            while token_id >= vocab_size {
+            for token_id >= vocab_size {
                 token_id = token_id - vocab_size
             }
         } else {
             token_id = 0
         }
         int h = 0
-        while h < hidden_size && i * hidden_size + h < len(grad_hidden.data) {
+        for h < hidden_size && i * hidden_size + h < len(grad_hidden.data) {
             int dst = token_id * hidden_size + h
             data[dst] = data[dst] + grad_hidden.data[i * hidden_size + h]
             h = h + 1
@@ -2564,7 +2564,7 @@ func gpt_large_pretrain_run(gpt_large_pretrain_state state, int steps) gpt_large
     if loops > 10 {
         progress_interval = loops / 10
     }
-    while i < loops {
+    for i < loops {
         current = gpt_large_pretrain_step(current)
         i = i + 1
         if i % progress_interval == 0 || i == 1 {
@@ -2619,7 +2619,7 @@ func gpt_large_pretrain_launch() int {
         preview_count = 5
     }
     int idx = 0
-    while idx < preview_count {
+    for idx < preview_count {
         println("  - " + gpt_large_pretrain_string_at(state.train_shard_refs, idx))
         idx = idx + 1
     }

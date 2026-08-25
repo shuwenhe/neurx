@@ -36,7 +36,7 @@ func agent_session_add_turn(agent_session_state state, string role, string conte
     int n = state.count
     []agent_session_turn turns = []agent_session_turn{cap: n + 1}
     int i = 0
-    while i < n {
+    for i < n {
         turns[i] = state.turns[i]
         i = i + 1
     }
@@ -64,7 +64,7 @@ func agent_session_system(agent_session_state state, string content) agent_sessi
 
 func agent_session_last_user_input(agent_session_state state) string {
     int i = state.count - 1
-    while i >= 0 {
+    for i >= 0 {
         if state.turns[i].role == "user" {
             return state.turns[i].content
         }
@@ -86,7 +86,7 @@ func agent_session_close(agent_session_state state) agent_session_state {
 func agent_session_to_prompt(agent_session_state state) string {
     string out = "system: " + state.system_prompt
     int i = 0
-    while i < state.count {
+    for i < state.count {
         agent_session_turn t = state.turns[i]
         out = out + "\n" + t.role + ": " + t.content
         i = i + 1

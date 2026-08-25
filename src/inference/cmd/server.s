@@ -41,7 +41,7 @@ func main() {
     close_http_server(server)
     print("✅ Server shutdown complete\n")
 func handle_requests(http_server server) {
-    while server.running {
+    for server.running {
         string prompt = __host_readline("neurx> ")
         if prompt == "quit" || prompt == "exit" {
             break

@@ -90,7 +90,7 @@ func rlhf_training_loop(rlhf_trainer trainer,
                          []human_preference preferences,
                          int num_iterations) rlhf_trainer {
     int i = 0
-    while i < num_iterations {
+    for i < num_iterations {
         trainer.training_steps = trainer.training_steps + 1
         i = i + 1
     }

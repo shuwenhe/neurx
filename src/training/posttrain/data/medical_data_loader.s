@@ -48,7 +48,7 @@ func load_medical_dataset_from_json(string file_path, int max_samples) medical_d
 func tokenize_text(string text, int vocab_size) []int {
     []int token_ids = []int{}
     int i = 0
-    while i < len(text) && len(token_ids) < 512 {
+    for i < len(text) && len(token_ids) < 512 {
         string ch = substring(text, i, i + 1)
         int token_id = 1000 + ((i as int) % vocab_size)
         token_ids.push(token_id)
@@ -62,10 +62,10 @@ func create_batch_from_samples([]medical_sample samples, int batch_size, int seq
     int batch_count = 0
     []int current_batch = []int{}
     int sample_idx = 0
-    while sample_idx < len(samples) {
+    for sample_idx < len(samples) {
         []int input_ids = tokenize_text(samples[sample_idx].question + " " + samples[sample_idx].answer, vocab_size)
         int pos = 0
-        while pos < len(input_ids) && len(current_batch) < batch_size * seq_len {
+        for pos < len(input_ids) && len(current_batch) < batch_size * seq_len {
             current_batch.push(input_ids[pos])
             pos = pos + 1
         }

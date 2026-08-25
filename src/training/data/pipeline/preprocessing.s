@@ -72,7 +72,7 @@ func passes_quality_filter(string text, preprocessing_config cfg) bool {
 func new_batch_mixer([]data_source sources, string strategy) batch_mixer {
     []int weights = []int{cap: len(sources)}
     int i = 0
-    while i < len(sources) {
+    for i < len(sources) {
         if strategy == "uniform" {
             weights[i] = 1
         }

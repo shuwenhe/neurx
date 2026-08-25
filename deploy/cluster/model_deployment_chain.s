@@ -105,7 +105,7 @@ func model_deployment_docker_text(model_deployment_config config) string {
     string out = ""
     out = out + "version: '3.8'\n\nservices:\n"
     int node = 0
-    while node < config.num_nodes {
+    for node < config.num_nodes {
         string service = "  training-node-" + strings.from_i32(node) + ":\n"
         service = service + "    image: " + config.image_name + "\n"
         service = service + "    environment:\n"

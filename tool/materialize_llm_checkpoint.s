@@ -5,7 +5,7 @@ func parse_int(string text, int fallback) int {
     if len(text) == 0 { return fallback }
     int value = 0
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         int digit = text[i] - 48
         if digit < 0 || digit > 9 { return fallback }
         value = value * 10 + digit
@@ -31,7 +31,7 @@ func int_to_string(int value) string {
     if value == 0 { return "0" }
     string out = ""
     int current = value
-    while current > 0 {
+    for current > 0 {
         out = digit_string(current % 10) + out
         current = current / 10
     }
@@ -43,16 +43,16 @@ func fixed6(float value) string {
     bool negative = current < 0.0
     if negative { current = -current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
     string digits = ""
     int i = 0
-    while i < 6 {
+    for i < 6 {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }
@@ -68,7 +68,7 @@ func serialize_weights(int vocab_size) string {
     string out = ""
     int total = vocab_size * vocab_size
     int i = 0
-    while i < total {
+    for i < total {
         float value = ((i % 23 - 11) as float) / 500.0
         if i > 0 { out = out + "," }
         out = out + fixed6(value)
@@ -80,7 +80,7 @@ func serialize_weights(int vocab_size) string {
 func serialize_bias(int vocab_size) string {
     string out = ""
     int i = 0
-    while i < vocab_size {
+    for i < vocab_size {
         if i > 0 { out = out + "," }
         out = out + "0.000000"
         i = i + 1

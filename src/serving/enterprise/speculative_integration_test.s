@@ -153,7 +153,7 @@ func run_all_speculative_integration_tests() {
         test_config_update(),
     }
     i := 0
-    while i < tests.len {
+    for i < tests.len {
         if tests[i] {
             tests_passed = tests_passed + 1
         }

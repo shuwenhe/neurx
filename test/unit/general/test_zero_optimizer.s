@@ -32,7 +32,7 @@ func test_multi_gpu() {
     println("Creating ZeRO states for " + int_to_string(world_size) + " GPUs:")
     println("  Total params: " + int_to_string(total_params))
     int rank = 0
-    while rank < world_size {
+    for rank < world_size {
         int local_count = total_params / world_size
         int remainder = total_params - (local_count * world_size)
         if rank < remainder {
@@ -85,7 +85,7 @@ func int_to_string(int n) string {
     }
     string result = ""
     int remaining = n
-    while remaining >= 10 {
+    for remaining >= 10 {
         int digit = remaining - ((remaining / 10) * 10)
         remaining = remaining / 10
         if digit == 0 { result = "0" + result }

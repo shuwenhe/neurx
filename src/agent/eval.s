@@ -34,10 +34,10 @@ func agent_eval_text_contains(string haystack, string needle) bool {
         return false
     }
     int i = 0
-    while i <= hl - nl {
+    for i <= hl - nl {
         int j = 0
         bool match = true
-        while j < nl {
+        for j < nl {
             if h[i + j] != n[j] {
                 match = false
                 break
@@ -66,7 +66,7 @@ func agent_eval_add_result(agent_eval_state state, string task, string actual, s
     []string new_expecteds = []string{cap: n + 1}
     []int new_steps = []int{cap: n + 1}
     int i = 0
-    while i < n {
+    for i < n {
         new_tasks[i] = state.tasks[i]
         new_actuals[i] = state.actuals[i]
         new_expecteds[i] = state.expecteds[i]
@@ -118,7 +118,7 @@ func agent_eval_case_passed(agent_eval_state state, int idx) bool {
 func agent_eval_export(agent_eval_state state) string {
     string out = "eval;count=" + string(state.count) + ";passed=" + string(state.passed) + ";failed=" + string(state.failed) + "\n"
     int i = 0
-    while i < state.count {
+    for i < state.count {
         string pstr = "fail"
         if agent_eval_case_passed(state, i) {
             pstr = "pass"

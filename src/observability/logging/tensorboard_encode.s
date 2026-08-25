@@ -41,7 +41,7 @@ func int_to_string(int x) string {
         x = -x
     }
     []byte digits = []
-    while x > 0 {
+    for x > 0 {
         digits.push('0' + byte(x % 10))
         x = x / 10
     }

@@ -118,7 +118,7 @@ func offload_to_cpu(offload_memory_pool pool) offload_memory_pool {
     lru_idx := 0
     min_time := 2147483647
     i := 0
-    while i < pool.layer_states.len {
+    for i < pool.layer_states.len {
         if pool.layer_states[i].on_gpu && pool.layer_states[i].last_access_time < min_time {
             min_time = pool.layer_states[i].last_access_time
             lru_idx = i
@@ -140,7 +140,7 @@ func prefetch_layer(
     int layer_id,
 ) offload_memory_pool {
     i := 0
-    while i < pool.layer_states.len {
+    for i < pool.layer_states.len {
         if pool.layer_states[i].layer_id == layer_id {
             pool.layer_states[i].last_access_time = get_current_time()
         }
@@ -160,7 +160,7 @@ func get_memory_utilization(offload_memory_pool pool) float {
 
 func get_layer_location(offload_memory_pool pool, int layer_id) string {
     i := 0
-    while i < pool.layer_states.len {
+    for i < pool.layer_states.len {
         if pool.layer_states[i].layer_id == layer_id {
             if pool.layer_states[i].on_gpu {
                 return "gpu"
@@ -202,7 +202,7 @@ func print_memory_stats(offload_memory_pool pool) string {
 func compute_tensor_size([]int shape, string dtype) int {
     size := 1
     i := 0
-    while i < shape.len {
+    for i < shape.len {
         size = size * shape[i]
         i = i + 1
     }
@@ -221,7 +221,7 @@ func compute_tensor_size([]int shape, string dtype) int {
 func append_layer_state([]layer_offload_state slice, layer_offload_state elem) []layer_offload_state {
     new_slice := []layer_offload_state{}
     i := 0
-    while i < slice.len {
+    for i < slice.len {
         new_slice = append_layer_state(new_slice, slice[i])
         i = i + 1
     }

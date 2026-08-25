@@ -63,14 +63,14 @@ func parse_schema_object(string json_str, int start_pos, *json_schema schema) js
 
 func find_json_string_value(string json_str, string key, int start_pos) int {
     i := start_pos
-    while i < len(json_str) {
+    for i < len(json_str) {
         if i + len(key) <= len(json_str) {
             substr := substring(json_str, i, i + len(key))
             if substr == key {
 
                 j := i + len(key)
 
-                while j < len(json_str) && (json_str[j] == ' ' || json_str[j] == ':' || json_str[j] == '\t') {
+                for j < len(json_str) && (json_str[j] == ' ' || json_str[j] == ':' || json_str[j] == '\t') {
                     j = j + 1
                 }
                 return j
@@ -89,7 +89,7 @@ func extract_string_value(string json_str, int pos) string {
     }
 
     result := ""
-    while i < len(json_str) && json_str[i] != '"' {
+    for i < len(json_str) && json_str[i] != '"' {
         result = result + string_from_char(json_str[i])
         i = i + 1
     }
@@ -103,7 +103,7 @@ func extract_type_value(string json_str, int pos) string {
 func extract_int_value(string json_str, int pos) int {
     i := pos
     result := ""
-    while i < len(json_str) && json_str[i] >= '0' && json_str[i] <= '9' {
+    for i < len(json_str) && json_str[i] >= '0' && json_str[i] <= '9' {
         result = result + string_from_char(json_str[i])
         i = i + 1
     }
@@ -114,7 +114,7 @@ func extract_string_array(string json_str, int pos) []string {
     result := vec_new()
     i := pos
 
-    while i < len(json_str) && json_str[i] != '[' {
+    for i < len(json_str) && json_str[i] != '[' {
         i = i + 1
     }
     if i >= len(json_str) {
@@ -124,7 +124,7 @@ func extract_string_array(string json_str, int pos) []string {
 
     in_string := false
     current_str := ""
-    while i < len(json_str) && json_str[i] != ']' {
+    for i < len(json_str) && json_str[i] != ']' {
         if json_str[i] == '"' {
             if in_string {
 
@@ -148,7 +148,7 @@ func extract_properties(string json_str, int pos, *[]string required) []json_pro
     result := vec_new()
     i := pos
 
-    while i < len(json_str) && json_str[i] != '{' {
+    for i < len(json_str) && json_str[i] != '{' {
         i = i + 1
     }
     if i >= len(json_str) {
@@ -161,7 +161,7 @@ func extract_properties(string json_str, int pos, *[]string required) []json_pro
     prop_name := ""
     capturing_name := false
 
-    while i < len(json_str) && brace_count > 0 {
+    for i < len(json_str) && brace_count > 0 {
         if json_str[i] == '"' && !in_string {
             in_string = true
             capturing_name = true
@@ -196,7 +196,7 @@ func extract_properties(string json_str, int pos, *[]string required) []json_pro
 
 func is_property_required(string name, *[]string required) bool {
     i := 0
-    while i < len(*required) {
+    for i < len(*required) {
         if (*required)[i] == name {
             return true
         }
@@ -211,7 +211,7 @@ func substring(string s, int start, int end) string {
     }
     result := ""
     i := start
-    while i < end {
+    for i < end {
         result = result + string_from_char(s[i])
         i = i + 1
     }

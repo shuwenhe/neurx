@@ -218,7 +218,7 @@ func dpo_training_step(
     float total_rejected_reward = 0.0
     int batch_size = len(batch)
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         dpo_preference_pair pair = batch[i]
         float chosen_logp = 0.0
         float rejected_logp = 0.0
@@ -271,7 +271,7 @@ func start_dpo_training(
         print_dpo_dataset_stats(trainer.dataset)
     }
     int step = 0
-    while step < cfg.total_training_steps {
+    for step < cfg.total_training_steps {
         trainer.current_learning_rate = compute_learning_rate(trainer, step, cfg.total_training_steps)
         []dpo_preference_pair batch = []dpo_preference_pair{}
         if len(batch) > 0 {

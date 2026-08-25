@@ -400,7 +400,7 @@ func int_to_string(int n): string {
         value = 0 - value
     }
     result := ""
-    while value > 0 {
+    for value > 0 {
         digit := value - (value / 10) * 10
         result = string(digit + 48) + result
         value = value / 10
@@ -419,7 +419,7 @@ func float_to_string(float value): string {
     }
     frac_digits := int(frac * 1000.0)
     frac_str := int_to_string(frac_digits)
-    while len(frac_str) < 3 {
+    for len(frac_str) < 3 {
         frac_str = "0" + frac_str
     }
     return int_to_string(whole) + "." + frac_str

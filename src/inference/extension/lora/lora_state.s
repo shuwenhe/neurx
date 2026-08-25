@@ -65,7 +65,7 @@ func (mut lora_state_manager* manager) create_request_state(
     }
 
     i := 0
-    while i < adapter_scales.len() {
+    for i < adapter_scales.len() {
         if adapter_scales[i] < 0.0 {
             return (lora_state_error {
                 code: "INVALID_SCALE",
@@ -286,7 +286,7 @@ func (mut lora_state_manager* manager) clear_request_cache(
     }
 
     i := 0
-    while i < keys_to_remove.len() {
+    for i < keys_to_remove.len() {
         manager.adapter_cache.remove(keys_to_remove[i])
         i = i + 1
     }

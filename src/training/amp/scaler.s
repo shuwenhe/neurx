@@ -45,7 +45,7 @@ func is_nan_or_inf(float value) bool {
 
 func check_gradient_overflow(float* gradients, int gradient_count) bool {
     int i = 0
-    while i < gradient_count {
+    for i < gradient_count {
         if is_nan_or_inf(gradients[i]) {
             return true
         }
@@ -91,7 +91,7 @@ func scale_gradients(
     result.scaled_gradients = alloc(float, gradient_count)
     result.gradient_count = gradient_count
     int i = 0
-    while i < gradient_count {
+    for i < gradient_count {
         result.scaled_gradients[i] = gradients[i] * scale_factor
         i = i + 1
     }
@@ -106,7 +106,7 @@ func clip_gradients(
     float* clipped = alloc(float, gradient_count)
     float norm = 0.0
     int i = 0
-    while i < gradient_count {
+    for i < gradient_count {
         norm = norm + gradients[i] * gradients[i]
         i = i + 1
     }
@@ -116,7 +116,7 @@ func clip_gradients(
         clip_coeff = max_norm / (norm + 1e-6)
     }
     i = 0
-    while i < gradient_count {
+    for i < gradient_count {
         clipped[i] = gradients[i] * clip_coeff
         i = i + 1
     }
@@ -179,7 +179,7 @@ func mixed_precision_adam_step(
     }
     float* clipped_gradients = clip_gradients(gradients, optimizer.parameter_count, optimizer.amp_config.grad_clip_value)
     int i = 0
-    while i < optimizer.parameter_count {
+    for i < optimizer.parameter_count {
         optimizer.m[i] = optimizer.betas_1 * optimizer.m[i] +
                         (1.0 - optimizer.betas_1) * clipped_gradients[i]
         optimizer.v[i] = optimizer.betas_2 * optimizer.v[i] +
@@ -212,7 +212,7 @@ func save_gradient_checkpoint(
     checkpoint.checkpoint_size = size
     checkpoint.needs_recompute = false
     int i = 0
-    while i < size {
+    for i < size {
         checkpoint.activation_snapshots[i] = activations[i]
         i = i + 1
     }
@@ -222,7 +222,7 @@ func save_gradient_checkpoint(
 func restore_gradient_checkpoint(checkpoint gradient_checkpoint) float* {
     float* restored = alloc(float, checkpoint.checkpoint_size)
     int i = 0
-    while i < checkpoint.checkpoint_size {
+    for i < checkpoint.checkpoint_size {
         restored[i] = checkpoint.activation_snapshots[i]
         i = i + 1
     }
@@ -248,7 +248,7 @@ func synchronize_gradients(
     }
     float* synchronized = alloc(float, gradient_count)
     int i = 0
-    while i < gradient_count {
+    for i < gradient_count {
         float sum = gradients[i]
         synchronized[i] = sum / float(state.world_size)
         i = i + 1
@@ -264,7 +264,7 @@ func accumulate_gradients(
 ) float* {
     float* result = alloc(float, gradient_count)
     int i = 0
-    while i < gradient_count {
+    for i < gradient_count {
         result[i] = accumulated_gradients[i] + current_gradients[i]
         i = i + 1
     }
@@ -351,7 +351,7 @@ func sqrt_f(float x) float {
     }
     float guess = x / 2.0
     int i = 0
-    while i < 10 {
+    for i < 10 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }

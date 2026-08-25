@@ -31,7 +31,7 @@ func main() {
     println("-" + "-" + "-" + "-" + "-" + "-" + "-" + "-" + "-" + "-" + "-" + "-" + "-" + "-")
     int step = 0
     float total_loss = 10.0
-    while step < max_steps {
+    for step < max_steps {
         float progress = (step * 1.0) / (max_steps * 1.0)
         float loss = compute_realistic_loss(progress)
         float current_lr = base_lr
@@ -110,7 +110,7 @@ func int_to_str(int n) string {
         n = -n
     }
     string digits = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n - (n / 10) * 10
         digits = digit_to_char(digit) + digits
         n = n / 10

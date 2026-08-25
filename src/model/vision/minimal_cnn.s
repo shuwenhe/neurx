@@ -41,7 +41,7 @@ func minimal_cnn_score(minimal_cnn_state state, []float input) float {
     if limit > len(state.weight) {
         limit = len(state.weight)
     }
-    while i < limit {
+    for i < limit {
         score = score + input[i] * state.weight[i]
         i = i + 1
     }

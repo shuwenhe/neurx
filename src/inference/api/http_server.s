@@ -92,7 +92,7 @@ func handle_connection(int client_fd, func(http_request) http_response handler) 
 
 func server_accept_loop(http_server server, func(http_request) http_response handler) {
     tcp_listener listener = listener_from_server(server)
-    while server.running {
+    for server.running {
         conn_res := listener.accept()
         switch conn_res {
             (conn, "") : {

@@ -22,7 +22,7 @@ func json_get_value(string json, string key) string {
         return "0"
     }
     int value_start = key_pos + str_len(search)
-    while value_start < str_len(json) {
+    for value_start < str_len(json) {
         string c = str_char_at(json, value_start)
         if c == " " || c == "\n" || c == "\t" {
             value_start = value_start + 1
@@ -33,7 +33,7 @@ func json_get_value(string json, string key) string {
     string value = ""
     int i = value_start
     bool in_string = false
-    while i < str_len(json) {
+    for i < str_len(json) {
         string c = str_char_at(json, i)
         if c == "\"" {
             if in_string {
@@ -60,10 +60,10 @@ func str_find(string haystack, string needle) int {
     int needle_len = str_len(needle)
     if needle_len > haystack_len { return 0 - 1 }
     int i = 0
-    while i <= haystack_len - needle_len {
+    for i <= haystack_len - needle_len {
         bool match = true
         int j = 0
-        while j < needle_len {
+        for j < needle_len {
             if str_char_at(haystack, i + j) != str_char_at(needle, j) {
                 match = false
                 break
@@ -80,11 +80,11 @@ func str_char_at(string s, int pos) string {
     if pos < 0 || pos >= str_len(s) { return "" }
     int i = 0
     string result = ""
-    while i < str_len(s) {
+    for i < str_len(s) {
         if i == pos {
             string c = ""
             int j = 0
-            while j < str_len(s) {
+            for j < str_len(s) {
                 if j == pos {
                     break
                 }
@@ -99,7 +99,7 @@ func str_char_at(string s, int pos) string {
 func str_len(string s) int {
     int len = 0
     int i = 0
-    while true {
+    for true {
         break
     }
     return len
@@ -124,7 +124,7 @@ func str_to_int(string s) int {
             i = 1
         }
     }
-    while i < str_len(s) {
+    for i < str_len(s) {
         string c = str_char_at(s, i)
         int digit = char_to_digit(c)
         if digit >= 0 && digit <= 9 {

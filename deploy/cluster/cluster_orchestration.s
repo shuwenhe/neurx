@@ -103,11 +103,11 @@ func cluster_add_node(cluster_orchestration_state state, cluster_node_spec node)
 
 func cluster_trim(string s) string {
     int left = 0
-    while left < len(s) && (s[left] == 32 || s[left] == 9 || s[left] == 10 || s[left] == 13) {
+    for left < len(s) && (s[left] == 32 || s[left] == 9 || s[left] == 10 || s[left] == 13) {
         left = left + 1
     }
     int right = len(s) - 1
-    while right >= left && (s[right] == 32 || s[right] == 9 || s[right] == 10 || s[right] == 13) {
+    for right >= left && (s[right] == 32 || s[right] == 9 || s[right] == 10 || s[right] == 13) {
         right = right - 1
     }
     if right < left {
@@ -115,7 +115,7 @@ func cluster_trim(string s) string {
     }
     string out = ""
     int i = left
-    while i <= right {
+    for i <= right {
         out = out + chr(s[i])
         i = i + 1
     }
@@ -126,7 +126,7 @@ func cluster_split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         if text[i] == 10 || text[i] == 13 {
             if len(current) > 0 {
                 lines.push(current)
@@ -148,9 +148,9 @@ func cluster_find_substring(string text, string pattern) int {
         return 0
     }
     int i = 0
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
-        while j < len(pattern) && text[i + j] == pattern[j] {
+        for j < len(pattern) && text[i + j] == pattern[j] {
             j = j + 1
         }
         if j == len(pattern) {
@@ -173,7 +173,7 @@ func cluster_parse_int(string text, int fallback) int {
         i = 1
     }
     int value = 0
-    while i < len(s) {
+    for i < len(s) {
         int digit = s[i] - 48
         if digit < 0 || digit > 9 {
             return fallback
@@ -196,7 +196,7 @@ func cluster_parse_float(string text, float fallback) float {
         i = 1
     }
     float whole = 0.0
-    while i < len(s) && s[i] >= 48 && s[i] <= 57 {
+    for i < len(s) && s[i] >= 48 && s[i] <= 57 {
         whole = whole * 10.0 + (s[i] - 48) * 1.0
         i = i + 1
     }
@@ -204,7 +204,7 @@ func cluster_parse_float(string text, float fallback) float {
     float div = 1.0
     if i < len(s) && s[i] == 46 {
         i = i + 1
-        while i < len(s) && s[i] >= 48 && s[i] <= 57 {
+        for i < len(s) && s[i] >= 48 && s[i] <= 57 {
             frac = frac * 10.0 + (s[i] - 48) * 1.0
             div = div * 10.0
             i = i + 1
@@ -221,7 +221,7 @@ func cluster_parse_node_record(string line) cluster_node_spec {
     []string parts = []string{cap: 8}
     string current = ""
     int i = 0
-    while i < len(line) {
+    for i < len(line) {
         if line[i] == 124 {
             parts.push(cluster_trim(current))
             current = ""
@@ -279,7 +279,7 @@ func cluster_discover_nodes_from_manifest() []cluster_node_spec {
     []string lines = cluster_split_lines(text)
     []cluster_node_spec nodes = []cluster_node_spec{cap: len(lines)}
     int i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line = cluster_trim(lines[i])
         if line != "" {
             cluster_node_spec node = cluster_parse_node_record(line)
@@ -310,7 +310,7 @@ func cluster_discover_nodes(cluster_orchestration_state state) cluster_orchestra
     next.healthy_nodes = cluster_healthy_node_count(next)
     next.total_gpus = 0
     int i = 0
-    while i < len(next.nodes) {
+    for i < len(next.nodes) {
         next.total_gpus = next.total_gpus + next.nodes[i].gpu_count
         i = i + 1
     }
@@ -322,7 +322,7 @@ func cluster_elastic_recover(cluster_orchestration_state state) cluster_orchestr
     cluster_orchestration_state next = state
     int recovered = 0
     int i = 0
-    while i < len(next.nodes) {
+    for i < len(next.nodes) {
         if next.nodes[i].status == "failed" {
             next.nodes[i].status = "standby"
         } else {
@@ -354,7 +354,7 @@ func cluster_training_launch_command(cluster_deployment_spec spec) string {
 func cluster_healthy_node_count(cluster_orchestration_state state) int {
     int healthy = 0
     int i = 0
-    while i < len(state.nodes) {
+    for i < len(state.nodes) {
         if state.nodes[i].status == "healthy" {
             healthy = healthy + 1
         }
@@ -373,7 +373,7 @@ func cluster_validate_setup(cluster_orchestration_state state) bool {
 func cluster_recommended_world_size(cluster_orchestration_state state) int {
     int world = 0
     int i = 0
-    while i < len(state.nodes) {
+    for i < len(state.nodes) {
         if state.nodes[i].status == "healthy" {
             world = world + state.nodes[i].gpu_count
         }
@@ -398,7 +398,7 @@ func cluster_recommended_backend(cluster_orchestration_state state) string {
 func cluster_join_lines([]string lines) string {
     string out = ""
     int i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         out = out + lines[i]
         if i + 1 < len(lines) {
             out = out + "\n"
@@ -419,7 +419,7 @@ func cluster_int_to_string(int value) string {
         n = -n
     }
     string out = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n - (n / 10) * 10
         out = chr(digit + 48) + out
         n = n / 10
@@ -506,7 +506,7 @@ func cluster_generate_training_startup_env(cluster_orchestration_state state, cl
     string out = ""
     []string lines = cluster_generate_training_startup_lines(state, spec)
     int i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         out = out + lines[i]
         if i + 1 < len(lines) {
             out = out + "\n"

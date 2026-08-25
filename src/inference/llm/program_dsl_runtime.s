@@ -66,7 +66,7 @@ struct dsl_step_result {
 func dsl_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -96,7 +96,7 @@ func dsl_add_operation(dsl_program_runtime runtime, int operation_type, int dest
 
 func dsl_all_threads_terminal(dsl_program_runtime runtime) bool {
     int i = 0
-    while i < runtime.thread_count {
+    for i < runtime.thread_count {
         if runtime.thread_statuses[i] == dsl_thread_ready() || runtime.thread_statuses[i] == dsl_thread_waiting() { return false }
         i = i + 1
     }
@@ -105,7 +105,7 @@ func dsl_all_threads_terminal(dsl_program_runtime runtime) bool {
 
 func dsl_next_ready_thread(dsl_program_runtime runtime) int {
     int i = 0
-    while i < runtime.thread_count {
+    for i < runtime.thread_count {
         if runtime.thread_statuses[i] == dsl_thread_ready() { return i }
         i = i + 1
     }
@@ -114,7 +114,7 @@ func dsl_next_ready_thread(dsl_program_runtime runtime) int {
 
 func dsl_wake_joiners(dsl_program_runtime runtime) dsl_program_runtime {
     int thread = 0
-    while thread < runtime.thread_count {
+    for thread < runtime.thread_count {
         int encoded_child = runtime.join_threads[thread]
         if runtime.thread_statuses[thread] == dsl_thread_waiting() && encoded_child > 0 {
             int child = encoded_child - 1
@@ -134,7 +134,7 @@ func dsl_step(dsl_program_runtime runtime) dsl_step_result {
         return dsl_step_result {runtime: runtime, thread_id: 0 - 1, operation_type: 0, external_request_id: 0, progressed: false, needs_external_result: false}
     }
     int joiner = 0
-    while joiner < runtime.thread_count {
+    for joiner < runtime.thread_count {
         int encoded_child = runtime.join_threads[joiner]
         if runtime.thread_statuses[joiner] == dsl_thread_waiting() && encoded_child > 0 {
             int joined_child = encoded_child - 1

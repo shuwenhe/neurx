@@ -84,7 +84,7 @@ struct forward_pass_cache {
 
 func write_slice([]float dst, int dst_offset, []float src) {
     int i = 0
-    while i < len(src) {
+    for i < len(src) {
         dst[dst_offset + i] = src[i]
         i = i + 1
     }
@@ -101,19 +101,19 @@ func apply_rope_batch(
     []float q_out = copy_vector(q)
     []float k_out = copy_vector(k)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int offset = b * seq_len * hidden_dim
         []float q_slice = allocate_vector(seq_len * hidden_dim, 0.0)
         []float k_slice = allocate_vector(seq_len * hidden_dim, 0.0)
         int i = 0
-        while i < seq_len * hidden_dim {
+        for i < seq_len * hidden_dim {
             q_slice[i] = q_out[offset + i]
             k_slice[i] = k_out[offset + i]
             i = i + 1
         }
         [][]float rope_applied = apply_rope_position(rope_encoding, q_slice, k_slice, seq_len, 0)
         i = 0
-        while i < seq_len * hidden_dim {
+        for i < seq_len * hidden_dim {
             q_out[offset + i] = rope_applied[0][i]
             k_out[offset + i] = rope_applied[1][i]
             i = i + 1
@@ -129,7 +129,7 @@ func apply_rope_batch(
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }
@@ -139,7 +139,7 @@ func allocate_vector(int size, float init_val) []float {
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
-    while i < len(src) {
+    for i < len(src) {
         out[i] = src[i]
         i = i + 1
     }
@@ -149,7 +149,7 @@ func copy_vector([]float src) []float {
 func transformer_layer_at([]transformer_layer_state layers, int index) transformer_layer_state {
     int i = 0
     transformer_layer_state out = layers[0]
-    while i < len(layers) {
+    for i < len(layers) {
         if i == index {
             out = layers[i]
             i = len(layers)
@@ -165,7 +165,7 @@ func sqrt_approx(float x) float {
     }
     float y = x
     int i = 0
-    while i < 10 {
+    for i < 10 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -182,7 +182,7 @@ func exp_approx(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 12 {
+    for i <= 12 {
         term = term * x / (i * 1.0)
         result = result + term
         i = i + 1
@@ -194,7 +194,7 @@ func softmax([]float scores, int seq_len) []float {
     []float output = copy_vector(scores)
     float max_score = scores[0]
     int i = 1
-    while i < seq_len {
+    for i < seq_len {
         if scores[i] > max_score {
             max_score = scores[i]
         }
@@ -202,13 +202,13 @@ func softmax([]float scores, int seq_len) []float {
     }
     float sum_exp = 0.0
     i = 0
-    while i < seq_len {
+    for i < seq_len {
         output[i] = exp_approx(scores[i] - max_score)
         sum_exp = sum_exp + output[i]
         i = i + 1
     }
     i = 0
-    while i < seq_len {
+    for i < seq_len {
         output[i] = output[i] / sum_exp
         i = i + 1
     }
@@ -232,17 +232,17 @@ func project_rows(
 ) []float {
     []float output = allocate_vector(token_count * out_dim, 0.0)
     int token = 0
-    while token < token_count {
+    for token < token_count {
         int input_base = token * in_dim
         int output_base = token * out_dim
         int o = 0
-        while o < out_dim {
+        for o < out_dim {
             float sum = 0.0
             if len(bias) > o {
                 sum = bias[o]
             }
             int i = 0
-            while i < in_dim {
+            for i < in_dim {
                 sum = sum + input[input_base + i] * weight[o * in_dim + i]
                 i = i + 1
             }
@@ -263,15 +263,15 @@ func embed_tokens(
 ) []float {
     []float output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int token_id = token_ids[b * seq_len + s]
             if token_id >= 0 && token_id < 32000 {
                 int src_base = token_id * hidden_dim
                 int dst_base = (b * seq_len + s) * hidden_dim
                 int d = 0
-                while d < hidden_dim {
+                for d < hidden_dim {
                     output[dst_base + d] = token_embedding[src_base + d]
                     d = d + 1
                 }
@@ -311,23 +311,23 @@ func multi_head_attention_forward(
     []float output = allocate_vector(token_count * hidden_dim, 0.0)
     float scale = 1.0 / sqrt_approx(head_dim * 1.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int token_idx = b * seq_len + s
             int q_base = token_idx * hidden_dim
             int h = 0
-            while h < num_heads {
+            for h < num_heads {
                 int head_offset = h * head_dim
                 []float scores = allocate_vector(seq_len, -1.0e9)
                 int t = 0
-                while t < seq_len {
+                for t < seq_len {
                     if !use_causal_mask || t <= s {
                         int key_token_idx = b * seq_len + t
                         int k_base = key_token_idx * hidden_dim + head_offset
                         float score = 0.0
                         int d = 0
-                        while d < head_dim {
+                        for d < head_dim {
                             score = score + q[q_base + head_offset + d] * k[k_base + d]
                             d = d + 1
                         }
@@ -337,10 +337,10 @@ func multi_head_attention_forward(
                 }
                 []float probs = softmax(scores, seq_len)
                 int d = 0
-                while d < head_dim {
+                for d < head_dim {
                     float acc = 0.0
                     int t2 = 0
-                    while t2 < seq_len {
+                    for t2 < seq_len {
                         if !use_causal_mask || t2 <= s {
                             int value_token_idx = b * seq_len + t2
                             int v_base = value_token_idx * hidden_dim + head_offset
@@ -371,15 +371,15 @@ func feed_forward_forward(
 ) []float {
     []float output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int base_idx = (b * seq_len + s) * hidden_dim
             int i = 0
-            while i < intermediate_dim {
+            for i < intermediate_dim {
                 float val = 0.0
                 int d = 0
-                while d < hidden_dim {
+                for d < hidden_dim {
                     val = val + hidden_states[base_idx + d] * layer.w_up[i * hidden_dim + d]
                     d = d + 1
                 }
@@ -425,7 +425,7 @@ func transformer_layer_forward(
             rope_encoding
         )
         int i = 0
-        while i < batch_size * seq_len * hidden_dim {
+        for i < batch_size * seq_len * hidden_dim {
             output[i] = hidden_states[i] + attn_output[i]
             i = i + 1
         }
@@ -439,7 +439,7 @@ func transformer_layer_forward(
             intermediate_dim
         )
         i = 0
-        while i < batch_size * seq_len * hidden_dim {
+        for i < batch_size * seq_len * hidden_dim {
             output[i] = output[i] + ffn_output[i]
             i = i + 1
         }
@@ -456,7 +456,7 @@ func transformer_layer_forward(
             rope_encoding
         )
         int i = 0
-        while i < batch_size * seq_len * hidden_dim {
+        for i < batch_size * seq_len * hidden_dim {
             output[i] = hidden_states[i] + attn_output[i]
             i = i + 1
         }
@@ -471,7 +471,7 @@ func transformer_layer_forward(
             intermediate_dim
         )
         i = 0
-        while i < batch_size * seq_len * hidden_dim {
+        for i < batch_size * seq_len * hidden_dim {
             output[i] = output[i] + ffn_output[i]
             i = i + 1
         }
@@ -514,7 +514,7 @@ func transformer_forward_pass(
     []float layer_outputs = allocate_vector(num_layers * 2 * batch_size * seq_len * hidden_dim, 0.0)
     int layer_output_offset = 0
     int layer_idx = 0
-    while layer_idx < num_layers {
+    for layer_idx < num_layers {
         transformer_layer_state layer = transformer_layer_at(model_state.layers, layer_idx)
         write_slice(layer_outputs, layer_output_offset, hidden_states)
         hidden_states = transformer_layer_forward(
@@ -544,16 +544,16 @@ func transformer_forward_pass(
     hidden_states = copy_vector(final_norm_output.normalized)
     []float logits = allocate_vector(batch_size * seq_len * model_state.vocab_size, 0.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int src_idx = (b * seq_len + s) * hidden_dim
             int dst_idx = (b * seq_len + s) * model_state.vocab_size
             int v = 0
-            while v < model_state.vocab_size {
+            for v < model_state.vocab_size {
                 float val = 0.0
                 int d = 0
-                while d < hidden_dim {
+                for d < hidden_dim {
                     val = val + hidden_states[src_idx + d] * model_state.lm_head_weight[v * hidden_dim + d]
                     d = d + 1
                 }

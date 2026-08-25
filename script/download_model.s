@@ -42,7 +42,7 @@ func create_default_config() download_config {
 func string_slice(string text, int start, int end) string {
     string result = ""
     int i = start
-    while i < end && i < len(text) {
+    for i < end && i < len(text) {
         result = result + string_char(text[i])
         i = i + 1
     }
@@ -57,11 +57,11 @@ func string_char(int code) string {
     ""
 func trim_string(string s) string {
     int start = 0
-    while start < len(s) && (s[start] == 32 || s[start] == 9 || s[start] == 10 || s[start] == 13) {
+    for start < len(s) && (s[start] == 32 || s[start] == 9 || s[start] == 10 || s[start] == 13) {
         start = start + 1
     }
     int end = len(s) - 1
-    while end >= start && (s[end] == 32 || s[end] == 9 || s[end] == 10 || s[end] == 13) {
+    for end >= start && (s[end] == 32 || s[end] == 9 || s[end] == 10 || s[end] == 13) {
         end = end - 1
     }
     if end < start {
@@ -140,7 +140,7 @@ func verify_downloaded_files(download_config config, []model_file_info files) (i
     int verified = 0
     int failed = 0
     int i = 0
-    while i < len(files) {
+    for i < len(files) {
         string file_path = config.model_dir + "/" + files[i].name
         if check_file_exists(file_path) {
             verified = verified + 1
@@ -155,7 +155,7 @@ func verify_downloaded_files(download_config config, []model_file_info files) (i
 func calculate_total_size([]model_file_info files) int {
     int total = 0
     int i = 0
-    while i < len(files) {
+    for i < len(files) {
         if files[i].downloaded {
             total = total + files[i].size_bytes
         }
@@ -177,7 +177,7 @@ func print_download_status(download_config config, []model_file_info files) {
     int i = 0
     int downloaded = 0
     int skipped = 0
-    while i < len(files) {
+    for i < len(files) {
         string status = "⏳"
         if files[i].downloaded {
             status = "✓"
@@ -225,7 +225,7 @@ func main() {
     int skipped = 0
     int failed = 0
     int i = 0
-    while i < len(files) {
+    for i < len(files) {
         if download_file(config, files[i], 0) {
             files[i].downloaded = true
             downloaded = downloaded + 1
@@ -276,7 +276,7 @@ func main() {
     int skipped = 0
     int failed = 0
     int i = 0
-    while i < len(files) {
+    for i < len(files) {
         if download_file(config, files[i], 0) {
             files[i].downloaded = true
             downloaded = downloaded + 1

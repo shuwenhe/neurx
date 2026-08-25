@@ -136,7 +136,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int n = 1
-    while n < 10 {
+    for n < 10 {
         term = term * x / float(n)
         result = result + term
         n = n + 1
@@ -156,7 +156,7 @@ func log_approx(float x) float {
     float result = 0.0
     float term = y
     int n = 1
-    while n < 10 {
+    for n < 10 {
         result = result + term / float(n)
         term = term * y2
         n = n + 2
@@ -170,7 +170,7 @@ func sqrt_approx(float x) float {
     }
     float guess = x / 2.0
     int i = 0
-    while i < 10 {
+    for i < 10 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }

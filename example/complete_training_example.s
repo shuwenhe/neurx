@@ -35,10 +35,10 @@ func initialize_model() model.transformer_state {
          model_state.intermediate_dim * model_state.hidden_dim)
     )
     i := 0
-    while i < len(model_state.weight_matrices) {
+    for i < len(model_state.weight_matrices) {
         model_state.weight_matrices[i] = []float(768)
         j := 0
-        while j < 768 {
+        for j < 768 {
             model_state.weight_matrices[i][j] = 0.001
             j = j + 1
         }
@@ -96,12 +96,12 @@ func run_complete_training() {
     print_header("Training Pipeline Initialized")
     print_config(training_config, mp_config, ga_config)
     epoch := 0
-    while epoch < training_config.max_epochs {
+    for epoch < training_config.max_epochs {
         print_epoch_header(epoch)
         step := 0
         step_loss := 0.0
         step_count := 0
-        while step < 1000 {
+        for step < 1000 {
             var []int batch_input_ids = create_dummy_batch(training_config.batch_size, 512)
             var []int batch_target_ids = create_dummy_batch(training_config.batch_size, 512)
             forward_result := 
@@ -191,7 +191,7 @@ func evaluate_model(
 ) float {
     total_loss := 0.0
     batch := 0
-    while batch < num_eval_batches {
+    for batch < num_eval_batches {
         var []int input_ids = create_dummy_batch(eval_batch_size, 512)
         var []int target_ids = create_dummy_batch(eval_batch_size, 512)
         forward_result := 
@@ -210,7 +210,7 @@ func evaluate_model(
 func create_dummy_batch(int batch_size, int seq_len) []int {
     var []int batch = []int(batch_size * seq_len)
     i := 0
-    while i < batch_size * seq_len {
+    for i < batch_size * seq_len {
         batch[i] = 1000 + i % 50000
         i = i + 1
     }

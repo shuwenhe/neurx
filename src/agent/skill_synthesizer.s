@@ -13,7 +13,7 @@ func agent_skill_signal_action(string signal) string {
     }
     string out = ""
     int i = 0
-    while i < len(raw) {
+    for i < len(raw) {
         string ch = string(raw[i])
         if ch == ":" || ch == ";" || ch == " " {
             break
@@ -31,7 +31,7 @@ func agent_skill_append_unique([]string items, string value) []string {
     }
     int size = len(items)
     int i = 0
-    while i < size {
+    for i < size {
         if items[i] == v {
             return items
         }
@@ -39,7 +39,7 @@ func agent_skill_append_unique([]string items, string value) []string {
     }
     []string out = []string{cap: size + 1}
     i = 0
-    while i < size {
+    for i < size {
         out[i] = items[i]
         i = i + 1
     }

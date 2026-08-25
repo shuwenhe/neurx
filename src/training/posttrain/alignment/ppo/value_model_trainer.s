@@ -99,9 +99,9 @@ func create_value_network(value_config cfg) value_network {
     []float o_w = make_array(hidden_size, 0.0)
     float o_b = 0.0
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         int j = 0
-        while j < seq_len {
+        for j < seq_len {
             float val = (i * seq_len + j) as float / (hidden_size * seq_len) as float
             h_w[i][j] = (val - 0.5) * 0.02
             j = j + 1
@@ -158,10 +158,10 @@ func value_network_forward(value_network net, []float observation) float {
     int hidden_size = net.hidden_size
     []float hidden = make_array(hidden_size, 0.0)
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         float h = net.hidden_bias[i]
         int j = 0
-        while j < net.seq_len {
+        for j < net.seq_len {
             if j < len(observation) {
                 h = h + net.hidden_weights[i][j] * observation[j]
             }
@@ -172,7 +172,7 @@ func value_network_forward(value_network net, []float observation) float {
     }
     float value = net.output_bias
     i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         value = value + net.output_weight[i] * hidden[i]
         i = i + 1
     }
@@ -182,7 +182,7 @@ func value_network_forward(value_network net, []float observation) float {
 func value_network_forward_batch(value_network net, [][]float observations) []float {
     []float values = make_array(len(observations), 0.0)
     int i = 0
-    while i < len(observations) {
+    for i < len(observations) {
         values[i] = value_network_forward(net, observations[i])
         i = i + 1
     }
@@ -212,7 +212,7 @@ func compute_gae_advantages(
     []float advantages = make_array(T, 0.0)
     float gae = 0.0
     int t = T - 1
-    while t >= 0 {
+    for t >= 0 {
         float delta = 0.0
         if t < T - 1 {
             delta = compute_td_residual(
@@ -239,7 +239,7 @@ func compute_returns(
     int T = len(steps)
     []float returns = make_array(T, 0.0)
     int t = 0
-    while t < T {
+    for t < T {
         returns[t] = advantages[t] + steps[t].value_estimate
         t = t + 1
     }
@@ -253,7 +253,7 @@ func compute_value_loss(
     float loss = 0.0
     int n = len(value_predictions)
     int i = 0
-    while i < n {
+    for i < n {
         float error = value_predictions[i] - return_targets[i]
         loss = loss + error * error
         i = i + 1
@@ -264,16 +264,16 @@ func compute_value_loss(
 func compute_regularization_loss(value_network net, float weight_decay) float {
     float loss = 0.0
     int i = 0
-    while i < net.hidden_size {
+    for i < net.hidden_size {
         int j = 0
-        while j < net.seq_len {
+        for j < net.seq_len {
             loss = loss + net.hidden_weights[i][j] * net.hidden_weights[i][j]
             j = j + 1
         }
         i = i + 1
     }
     i = 0
-    while i < net.hidden_size {
+    for i < net.hidden_size {
         loss = loss + net.output_weight[i] * net.output_weight[i]
         i = i + 1
     }
@@ -321,10 +321,10 @@ func value_training_step(
     float total_loss = value_loss + reg_loss
     float grad_scale = 1.0 / (len(observations) as float)
     int i = 0
-    while i < len(observations) {
+    for i < len(observations) {
         float error = value_predictions[i] - target_returns[i]
         int j = 0
-        while j < cfg.seq_len {
+        for j < cfg.seq_len {
             if j < len(observations[i]) {
                 float grad = 2.0 * error * observations[i][j] * grad_scale
                 int h = i % net.hidden_size
@@ -354,7 +354,7 @@ func process_trajectory(
     )
     []float returns = compute_returns(trajectory.steps, advantages)
     int i = 0
-    while i < len(trajectory.steps) {
+    for i < len(trajectory.steps) {
         trajectory.steps[i].advantage = advantages[i]
         trajectory.steps[i].return_value = returns[i]
         i = i + 1
@@ -363,7 +363,7 @@ func process_trajectory(
     float max_adv = -999999.0
     float min_adv = 999999.0
     int i = 0
-    while i < len(advantages) {
+    for i < len(advantages) {
         sum_advantage = sum_advantage + advantages[i]
         if advantages[i] > max_adv {
             max_adv = advantages[i]
@@ -388,17 +388,17 @@ func start_value_training(
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
     int epoch = 0
-    while epoch < cfg.num_epochs {
+    for epoch < cfg.num_epochs {
         float total_epoch_loss = 0.0
         int trajectories_in_epoch = 0
         int t = 0
-        while t < len(trajectories) {
+        for t < len(trajectories) {
             value_trajectory traj = trajectories[t]
             traj = process_trajectory(state, traj)
             [][]float observations = make_matrix(len(traj.steps), cfg.seq_len, 0.0)
             []float targets = make_array(len(traj.steps), 0.0)
             int s = 0
-            while s < len(traj.steps) {
+            for s < len(traj.steps) {
                 if s < len(traj.steps) {
                     observations[s] = traj.steps[s].observation
                     targets[s] = traj.steps[s].return_value
@@ -438,7 +438,7 @@ func evaluate_value_network(
     float mae = 0.0
     float max_abs_error = 0.0
     int i = 0
-    while i < len(predictions) {
+    for i < len(predictions) {
         float error = predictions[i] - test_returns[i]
         mse = mse + error * error
         float abs_error = if error < 0.0 { -error } else { error }
@@ -453,14 +453,14 @@ func evaluate_value_network(
     mae = mae / (n as float)
     float mean_target = 0.0
     i = 0
-    while i < len(test_returns) {
+    for i < len(test_returns) {
         mean_target = mean_target + test_returns[i]
         i = i + 1
     }
     mean_target = mean_target / (n as float)
     float ss_tot = 0.0
     i = 0
-    while i < len(test_returns) {
+    for i < len(test_returns) {
         float diff = test_returns[i] - mean_target
         ss_tot = ss_tot + diff * diff
         i = i + 1
@@ -485,7 +485,7 @@ func evaluate_value_network(
 func make_array(int n, float v) []float {
     []float arr = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         arr = append_float(arr, v)
         i = i + 1
     }
@@ -495,7 +495,7 @@ func make_array(int n, float v) []float {
 func make_matrix(int m, int n, float v) [][]float {
     [][]float mat = [][]float{cap: m}
     int i = 0
-    while i < m {
+    for i < m {
         []float row = make_array(n, v)
         mat = append_matrix(mat, row)
         i = i + 1
@@ -524,7 +524,7 @@ func exp_approx(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / (i as float)
         result = result + term
         i = i + 1
@@ -536,7 +536,7 @@ func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
     int i = 0
-    while i < 15 {
+    for i < 15 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }

@@ -18,7 +18,7 @@ func int_to_string(int value) string {
         n = 0 - n
     }
     string out = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n - (n / 10) * 10
         out = string(digit + 48) + out
         n = n / 10
@@ -35,7 +35,7 @@ func read_line() string {
 func json_escape(string value) string {
     string output = ""
     int i = 0
-    while i < len(value) {
+    for i < len(value) {
         string ch = __host_slice(value, i, i + 1)
         if ch == "\\" { output = output + "\\\\" }
         else if ch == "\"" { output = output + "\\\"" }
@@ -75,7 +75,7 @@ func main() {
     int max_tokens = 256
     string history = ""
 
-    while true {
+    for true {
         _ = __sys_write_string(1, "You: ")
         string user_input = read_line()
 
@@ -120,7 +120,7 @@ func main() {
         bool in_body = false
         bool first_token = true
 
-        while i < len(response) {
+        for i < len(response) {
             if !in_body {
                 string chunk = __host_slice(response, i, i + 4)
                 if chunk == "\r\n\r\n" {

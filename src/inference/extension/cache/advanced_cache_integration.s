@@ -41,7 +41,7 @@ func advanced_cache_store_kv([]int prompt_tokens, []float kv_data) int {
     
     []int block_ids = []int{cap: 24}
     int i = 0
-    while i < 24 {
+    for i < 24 {
         block_ids[i] = i
         i = i + 1
     }

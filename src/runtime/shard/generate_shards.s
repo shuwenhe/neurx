@@ -8,7 +8,7 @@ func string_char(int c) string {
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         string ch = string_char(s[i])
         if ch == "'" {
             out = out + "'\"'\"'"

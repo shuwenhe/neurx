@@ -191,7 +191,7 @@ func sse_serve_stream(int client_fd, sse_session session, generation_callback_st
     sse_session current = session
     generation_callback_state current_gen = gen
     write_client_data(client_fd, sse_header())
-    while !current_gen.done && current.tokens_sent < current.max_tokens {
+    for !current_gen.done && current.tokens_sent < current.max_tokens {
         current_gen = next_token(current_gen)
         if current_gen.done {
             break
@@ -207,7 +207,7 @@ func sse_serve_stream(int client_fd, sse_session session, generation_callback_st
 func non_stream_response(sse_session session, generation_callback_state gen) string {
     string full = ""
     generation_callback_state current_gen = gen
-    while !current_gen.done {
+    for !current_gen.done {
         current_gen = next_token(current_gen)
         if current_gen.done {
             break
@@ -223,7 +223,7 @@ func non_stream_response(sse_session session, generation_callback_state gen) str
 func sse_serve_non_stream(int client_fd, sse_session session, generation_callback_state gen) sse_session {
     sse_session current = session
     generation_callback_state current_gen = gen
-    while !current_gen.done && current.tokens_sent < current.max_tokens {
+    for !current_gen.done && current.tokens_sent < current.max_tokens {
         current_gen = next_token(current_gen)
         if current_gen.done {
             break
@@ -238,7 +238,7 @@ func sse_serve_non_stream(int client_fd, sse_session session, generation_callbac
 func extract_request_id(string path) string {
     int slash = -1
     int i = 0
-    while i < len(path) {
+    for i < len(path) {
         if path[i] == 47 {
             slash = i
         }
@@ -288,7 +288,7 @@ func split_to_tokens(string text) []string {
     }
     string cur = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         int ch = int(text[i])
         if ch == 32 {
             if len(cur) > 0 {
@@ -312,7 +312,7 @@ func start_sse_server(sse_server_config config) {
         return
     }
     print("sse server: streaming at http:
-    while server.running {
+    for server.running {
         int client_fd = neurx_net_accept(server.listen_fd)
         if client_fd >= 0 {
             handle_socket_connection(client_fd, config)
@@ -327,7 +327,7 @@ func start_sse_server(sse_server_config config) {
         return
     }
     print("sse server: streaming at http:
-    while server.running {
+    for server.running {
         int client_fd = neurx_net_accept(server.listen_fd)
         if client_fd >= 0 {
             handle_socket_connection(client_fd, config)

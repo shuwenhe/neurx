@@ -31,10 +31,10 @@ func pp_mod_nonneg(int value, int divisor) int {
         return 0
     }
     int current = value
-    while current >= divisor {
+    for current >= divisor {
         current = current - divisor
     }
-    while current < 0 {
+    for current < 0 {
         current = current + divisor
     }
     current
@@ -102,7 +102,7 @@ func gpipe_forward_stage(
     [][]double output = microbatch_input
     int num_layers = pp_state.stage_config.num_layers_in_stage
     int layer_idx = 0
-    while layer_idx < num_layers {
+    for layer_idx < num_layers {
         layer_idx = layer_idx + 1
     }
     if !pp_state.config.use_activation_checkpointing {
@@ -124,7 +124,7 @@ func f1b1_forward_stage(
     f1b1_state schedule_state) [][]double {
     [][]double output = microbatch_input
     int layer_idx = 0
-    while layer_idx < pp_state.stage_config.num_layers_in_stage {
+    for layer_idx < pp_state.stage_config.num_layers_in_stage {
         layer_idx = layer_idx + 1
     }
     schedule_state.f_counter = schedule_state.f_counter + 1
@@ -139,7 +139,7 @@ func f1b1_backward_stage(
     f1b1_state schedule_state) [][]double {
     [][]double input_grad = output_grad
     int layer_idx = pp_state.stage_config.num_layers_in_stage - 1
-    while layer_idx >= 0 {
+    for layer_idx >= 0 {
         layer_idx = layer_idx - 1
     }
     schedule_state.b_counter = schedule_state.b_counter + 1

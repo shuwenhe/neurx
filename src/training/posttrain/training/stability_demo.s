@@ -33,7 +33,7 @@ func demo_gradient_clipping() {
     []float grads = []float{1.0, 2.0, 3.0, 4.0, 5.0}
     float norm_sq = 0.0
     int i = 0
-    while i < len(grads) {
+    for i < len(grads) {
         norm_sq = norm_sq + grads[i] * grads[i]
         i = i + 1
     }
@@ -46,7 +46,7 @@ func demo_gradient_clipping() {
         print("Clipping with scale: ")
         println(float_to_str_4(scale))
         i = 0
-        while i < len(grads) {
+        for i < len(grads) {
             grads[i] = grads[i] * scale
             i = i + 1
         }
@@ -80,7 +80,7 @@ func float_to_str_n(float value, int decimals) string {
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -88,10 +88,10 @@ func float_to_str_n(float value, int decimals) string {
     if decimals > 0 {
         result = result + "."
         int i = 0
-        while i < decimals {
+        for i < decimals {
             current = current * 10.0
             int digit = 0
-            while current >= 1.0 {
+            for current >= 1.0 {
                 current = current - 1.0
                 digit = digit + 1
             }
@@ -112,7 +112,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }

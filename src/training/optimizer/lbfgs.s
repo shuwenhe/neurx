@@ -52,7 +52,7 @@ func lbfgs_step(lbfgs_optimizer optimizer, tensor params, tensor grads) lbfgs_op
     []float direction = []float{cap: n}
     if optimizer.step == 1 {
         int i = 0
-        while i < n {
+        for i < n {
             direction[i] = 0.0 - flat_grad[i]
             i = i + 1
         }
@@ -60,7 +60,7 @@ func lbfgs_step(lbfgs_optimizer optimizer, tensor params, tensor grads) lbfgs_op
         []float y = []float{cap: n}
         []float s = []float{cap: n}
         int i = 0
-        while i < n {
+        for i < n {
             y[i] = flat_grad[i] - optimizer.prev_flat_grad[i]
             s[i] = params.data[i] - optimizer.prev_params[i]
             i = i + 1
@@ -82,7 +82,7 @@ func lbfgs_step(lbfgs_optimizer optimizer, tensor params, tensor grads) lbfgs_op
     }
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = params.data[i] + optimizer.lr * direction[i]
         i = i + 1
     }
@@ -103,37 +103,37 @@ func two_loop_recursion(
     int num_old = len(optimizer.old_dirs)
     []float q = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         q[i] = 0.0 - flat_grad[i]
         i = i + 1
     }
     []float alpha = []float{cap: num_old}
     int j = 0
-    while j < num_old {
+    for j < num_old {
         alpha[j] = 0.0
         j = j + 1
     }
     int k = num_old - 1
-    while k >= 0 {
+    for k >= 0 {
         float a = optimizer.rho[k] * lbfgs_dot(optimizer.old_stps[k], q, n)
         alpha[k] = a
         i = 0
-        while i < n {
+        for i < n {
             q[i] = q[i] - a * optimizer.old_dirs[k][i]
             i = i + 1
         }
         k = k - 1
     }
     i = 0
-    while i < n {
+    for i < n {
         q[i] = q[i] * h_diag
         i = i + 1
     }
     k = 0
-    while k < num_old {
+    for k < num_old {
         float beta = optimizer.rho[k] * lbfgs_dot(optimizer.old_dirs[k], q, n)
         i = 0
-        while i < n {
+        for i < n {
             q[i] = q[i] + (alpha[k] - beta) * optimizer.old_stps[k][i]
             i = i + 1
         }
@@ -150,7 +150,7 @@ struct lbfgs_optimizer_step_output {
 func copy_float_array([]float src, int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = src[i]
         i = i + 1
     }
@@ -160,7 +160,7 @@ func copy_float_array([]float src, int n) []float {
 func lbfgs_dot([]float a, []float b, int n) float {
     float sum = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         sum = sum + a[i] * b[i]
         i = i + 1
     }
@@ -170,7 +170,7 @@ func lbfgs_dot([]float a, []float b, int n) float {
 func lbfgs_abs_max([]float values, int n) float {
     float max_val = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float v = values[i]
         if v < 0.0 {
             v = 0.0 - v
@@ -186,7 +186,7 @@ func lbfgs_abs_max([]float values, int n) float {
 func pop_front_2d([][]float arr) [][]float {
     [][]float out = [][]float{cap: len(arr) - 1}
     int i = 1
-    while i < len(arr) {
+    for i < len(arr) {
         out[i - 1] = arr[i]
         i = i + 1
     }
@@ -196,7 +196,7 @@ func pop_front_2d([][]float arr) [][]float {
 func pop_front_1d([]float arr) []float {
     []float out = []float{cap: len(arr) - 1}
     int i = 1
-    while i < len(arr) {
+    for i < len(arr) {
         out[i - 1] = arr[i]
         i = i + 1
     }

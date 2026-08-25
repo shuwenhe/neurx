@@ -121,7 +121,7 @@ func new_paged_kv_cache(long_context_config config) paged_kv_cache {
         block_mapping: math.allocate_int(config.max_context_length / config.kv_cache_block_size, -1),
     }
     int i = 0
-    while i < config.num_kv_blocks {
+    for i < config.num_kv_blocks {
         cache.blocks.push(new_kv_cache_block(config.kv_cache_block_size, num_heads, head_dim))
         cache.blocks[i].block_id = i
         i = i + 1
@@ -145,7 +145,7 @@ func compute_dynamic_position_encoding(int position, int segment_id, long_contex
     float base = config.rope_base * math.exp_approx(float(segment_id) * 0.5)
     float scale = config.rope_scale * (1.0 + float(segment_id) * 0.1)
     int dim = 0
-    while dim < hidden_dim {
+    for dim < hidden_dim {
         float inv_freq = 1.0 / math.exp_approx(float(dim) * math.log_approx(base) / float(hidden_dim))
         float pos_embedding = float(position) * inv_freq * scale
         if dim % 2 == 0 {
@@ -162,7 +162,7 @@ func compute_segment_embedding(int segment_id, int hidden_dim) []float {
     []float embedding = math.allocate_float(hidden_dim, 0.0)
     float base = 10000.0
     int dim = 0
-    while dim < hidden_dim {
+    for dim < hidden_dim {
         float inv_freq = 1.0 / math.exp_approx(float(dim) * math.log_approx(base) / float(hidden_dim))
         float seg_embedding = float(segment_id) * inv_freq
         if dim % 2 == 0 {
@@ -183,17 +183,17 @@ func sliding_window_attention([]float queries, []float keys, []float values,
     int effective_seq_len = math.min_int(seq_len, window_size)
     int start_pos = math.max_int(0, current_position - window_size + 1)
     int head = 0
-    while head < num_heads {
+    for head < num_heads {
         int i = 0
-        while i < seq_len {
+        for i < seq_len {
             int q_pos = current_position - seq_len + 1 + i
             []float attention_scores = math.allocate_float(effective_seq_len, 0.0)
             int j = 0
-            while j < effective_seq_len {
+            for j < effective_seq_len {
                 int k_pos = start_pos + j
                 float score = 0.0
                 int d = 0
-                while d < head_dim {
+                for d < head_dim {
                     score = score + queries[i * hidden_dim + head * head_dim + d] *
                                     keys[k_pos * hidden_dim + head * head_dim + d]
                     d = d + 1
@@ -203,10 +203,10 @@ func sliding_window_attention([]float queries, []float keys, []float values,
             }
             []float softmax_scores = math.softmax_1d(attention_scores)
             int d = 0
-            while d < head_dim {
+            for d < head_dim {
                 float out_val = 0.0
                 j = 0
-                while j < effective_seq_len {
+                for j < effective_seq_len {
                     int k_pos = start_pos + j
                     out_val = out_val + softmax_scores[j] * values[k_pos * hidden_dim + head * head_dim + d]
                     j = j + 1
@@ -231,7 +231,7 @@ func paged_kv_cache_append(paged_kv_cache cache, []float new_keys, []float new_v
     int pos = start_position
     int data_idx = 0
     int block_idx = start_block
-    while block_idx <= end_block {
+    for block_idx <= end_block {
         int block_offset = pos % block_size
         int remaining_in_block = block_size - block_offset
         int copy_size = math.min_int(remaining_in_block, seq_len - (pos - start_position))
@@ -245,7 +245,7 @@ func paged_kv_cache_append(paged_kv_cache cache, []float new_keys, []float new_v
         block.end_position = (block_idx + 1) * block_size - 1
         block.is_valid = true
         int d = 0
-        while d < copy_size * num_heads * head_dim {
+        for d < copy_size * num_heads * head_dim {
             int block_pos = block_offset * num_heads * head_dim + d
             int data_pos = data_idx * num_heads * head_dim + d
             if block_pos < len(block.keys) && data_pos < len(new_keys) {
@@ -277,9 +277,9 @@ func paged_kv_cache_attention([]float queries, paged_kv_cache cache, int query_p
     []float output = math.allocate_float(seq_len * hidden_dim, 0.0)
     int window_size = cache.block_size * 4
     int head = 0
-    while head < num_heads {
+    for head < num_heads {
         int i = 0
-        while i < seq_len {
+        for i < seq_len {
             int q_pos = query_position - seq_len + 1 + i
             int start_pos = math.max_int(0, q_pos - window_size + 1)
             int effective_len = q_pos - start_pos + 1
@@ -287,23 +287,23 @@ func paged_kv_cache_attention([]float queries, paged_kv_cache cache, int query_p
             []float v_buffer = math.allocate_float(effective_len * head_dim, 0.0)
             int k_pos = start_pos
             int idx = 0
-            while k_pos <= q_pos {
+            for k_pos <= q_pos {
                 kv_cache_block block = paged_kv_cache_get_block(cache, k_pos)
                 int block_start = math.max_int(block.start_position, k_pos)
                 int block_end = math.min_int(block.end_position, q_pos)
                 int b_pos = block_start
-                while b_pos <= block_end {
+                for b_pos <= block_end {
                     int block_offset = b_pos - block.start_position
                     float score = 0.0
                     int d = 0
-                    while d < head_dim {
+                    for d < head_dim {
                         score = score + queries[i * hidden_dim + head * head_dim + d] *
                                         block.keys[block_offset * num_heads * head_dim + head * head_dim + d]
                         d = d + 1
                     }
                     attention_scores[idx] = score / math.sqrt_approx(float(head_dim))
                     d = 0
-                    while d < head_dim {
+                    for d < head_dim {
                         v_buffer[idx * head_dim + d] = block.values[block_offset * num_heads * head_dim + head * head_dim + d]
                         d = d + 1
                     }
@@ -314,10 +314,10 @@ func paged_kv_cache_attention([]float queries, paged_kv_cache cache, int query_p
             }
             []float softmax_scores = math.softmax_1d(attention_scores)
             int d = 0
-            while d < head_dim {
+            for d < head_dim {
                 float out_val = 0.0
                 idx = 0
-                while idx < effective_len {
+                for idx < effective_len {
                     out_val = out_val + softmax_scores[idx] * v_buffer[idx * head_dim + d]
                     idx = idx + 1
                 }
@@ -345,15 +345,15 @@ func long_context_attention(long_context_state state, []float queries, []float k
     int hidden_dim = num_heads * head_dim
     []float output = math.allocate_float(seq_len * hidden_dim, 0.0)
     int head = 0
-    while head < num_heads {
+    for head < num_heads {
         int i = 0
-        while i < seq_len {
+        for i < seq_len {
             []float attention_scores = math.allocate_float(seq_len, 0.0)
             int j = 0
-            while j < seq_len {
+            for j < seq_len {
                 float score = 0.0
                 int d = 0
-                while d < head_dim {
+                for d < head_dim {
                     score = score + queries[i * hidden_dim + head * head_dim + d] *
                                     keys[j * hidden_dim + head * head_dim + d]
                     d = d + 1
@@ -363,10 +363,10 @@ func long_context_attention(long_context_state state, []float queries, []float k
             }
             []float softmax_scores = math.softmax_1d(attention_scores)
             int d = 0
-            while d < head_dim {
+            for d < head_dim {
                 float out_val = 0.0
                 j = 0
-                while j < seq_len {
+                for j < seq_len {
                     out_val = out_val + softmax_scores[j] * values[j * hidden_dim + head * head_dim + d]
                     j = j + 1
                 }
@@ -386,27 +386,27 @@ func chunked_attention([]float queries, []float keys, []float values,
     []float output = math.allocate_float(seq_len * hidden_dim, 0.0)
     int num_chunks = (seq_len + chunk_size - 1) / chunk_size
     int head = 0
-    while head < num_heads {
+    for head < num_heads {
         int i = 0
-        while i < seq_len {
+        for i < seq_len {
             []float attention_scores = math.allocate_float(seq_len, 0.0)
             []float v_buffer = math.allocate_float(seq_len * head_dim, 0.0)
             int chunk_idx = 0
-            while chunk_idx < num_chunks {
+            for chunk_idx < num_chunks {
                 int chunk_start = chunk_idx * chunk_size
                 int chunk_end = math.min_int((chunk_idx + 1) * chunk_size, seq_len)
                 int j = chunk_start
-                while j < chunk_end {
+                for j < chunk_end {
                     float score = 0.0
                     int d = 0
-                    while d < head_dim {
+                    for d < head_dim {
                         score = score + queries[i * hidden_dim + head * head_dim + d] *
                                         keys[j * hidden_dim + head * head_dim + d]
                         d = d + 1
                     }
                     attention_scores[j] = score / math.sqrt_approx(float(head_dim))
                     d = 0
-                    while d < head_dim {
+                    for d < head_dim {
                         v_buffer[j * head_dim + d] = values[j * hidden_dim + head * head_dim + d]
                         d = d + 1
                     }
@@ -416,10 +416,10 @@ func chunked_attention([]float queries, []float keys, []float values,
             }
             []float softmax_scores = math.softmax_1d(attention_scores)
             int d = 0
-            while d < head_dim {
+            for d < head_dim {
                 float out_val = 0.0
                 int j = 0
-                while j < seq_len {
+                for j < seq_len {
                     out_val = out_val + softmax_scores[j] * v_buffer[j * head_dim + d]
                     j = j + 1
                 }
@@ -436,7 +436,7 @@ func chunked_attention([]float queries, []float keys, []float values,
 func long_context_compute_position_ids(int start_pos, int seq_len, long_context_config config) []int {
     []int position_ids = math.allocate_int(seq_len, 0)
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         position_ids[i] = start_pos + i
         i = i + 1
     }
@@ -446,7 +446,7 @@ func long_context_compute_position_ids(int start_pos, int seq_len, long_context_
 func long_context_compute_segment_ids(int start_pos, int seq_len, int segment_size) []int {
     []int segment_ids = math.allocate_int(seq_len, 0)
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         segment_ids[i] = (start_pos + i) / segment_size
         i = i + 1
     }
@@ -460,7 +460,7 @@ func long_context_update_state(long_context_state state, int new_position) long_
         state.sw_state.buffer_start = (state.sw_state.buffer_start + 1) % state.sw_state.window_size
     }
     int i = 0
-    while i < state.sw_state.window_size {
+    for i < state.sw_state.window_size {
         int actual_pos = (state.sw_state.buffer_start + i) % state.sw_state.window_size
         state.sw_state.position_map[actual_pos] = new_position - state.sw_state.window_size + 1 + i
         i = i + 1
@@ -486,13 +486,13 @@ func long_context_reset(long_context_state state) long_context_state {
     state.sw_state.buffer_start = 0
     state.sw_state.buffer_end = 0
     int i = 0
-    while i < len(state.sw_state.position_map) {
+    for i < len(state.sw_state.position_map) {
         state.sw_state.position_map[i] = -1
         i = i + 1
     }
     state.kv_cache.current_block_idx = 0
     i = 0
-    while i < len(state.kv_cache.block_mapping) {
+    for i < len(state.kv_cache.block_mapping) {
         state.kv_cache.block_mapping[i] = -1
         i = i + 1
     }

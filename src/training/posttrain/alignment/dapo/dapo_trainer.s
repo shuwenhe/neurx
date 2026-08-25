@@ -79,7 +79,7 @@ func dapo_trainer_train_step(
     }
     int epoch = 0
     dapo_state final_state = dapo_state{}
-    while epoch < trainer.config.num_epochs {
+    for epoch < trainer.config.num_epochs {
         dapo_state state = dapo_step(
             trainer.policy,
             trainer.value_model,
@@ -128,7 +128,7 @@ func dapo_trainer_train(
 ) (dapo_trainer, []dapo_train_result) {
     []dapo_train_result results = []dapo_train_result{cap: num_iterations}
     int iteration = 0
-    while iteration < num_iterations {
+    for iteration < num_iterations {
         dapo_rollout_result rollouts = dapo_rollout_result {
             states: []tensor{},
             actions: []tensor{},

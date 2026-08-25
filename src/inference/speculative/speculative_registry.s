@@ -107,7 +107,7 @@ func speculative_copy_prefix([]int values, int count) []int {
     if output_count > len(values) { output_count = len(values) }
     []int output = []int{cap: output_count}
     int i = 0
-    while i < output_count {
+    for i < output_count {
         output[i] = values[i]
         i = i + 1
     }
@@ -140,13 +140,13 @@ func verify_speculative_tokens(speculative_backend_state state, []int proposed, 
     if len(target) < limit { limit = len(target) }
     if state.current_speculative_tokens < limit { limit = state.current_speculative_tokens }
     int accepted = 0
-    while accepted < limit && proposed[accepted] == target[accepted] {
+    for accepted < limit && proposed[accepted] == target[accepted] {
         accepted = accepted + 1
     }
     int output_count = accepted + 1
     []int output = []int{cap: output_count}
     int i = 0
-    while i < accepted {
+    for i < accepted {
         output[i] = proposed[i]
         i = i + 1
     }

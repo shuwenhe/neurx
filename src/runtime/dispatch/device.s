@@ -65,7 +65,7 @@ func register_device(dispatch_state ds, register_device_params params) dispatch_
 func pick_device(dispatch_state ds, string op_type, int tensor_size_mb) device_pick_result {
     if op_type == "control" || op_type == "scalar" {
         int i = 0
-        while i < len(ds.devices) {
+        for i < len(ds.devices) {
             if ds.devices[i].dev_type == DEV_CPU && ds.devices[i].available {
                 device_pick_result result = device_pick_result{
                     device: ds.devices[i],
@@ -79,7 +79,7 @@ func pick_device(dispatch_state ds, string op_type, int tensor_size_mb) device_p
     if tensor_size_mb > 1 {
         if op_type == "attention" || op_type == "matmul" {
             int i = 0
-            while i < len(ds.devices) {
+            for i < len(ds.devices) {
                 if ((ds.devices[i].dev_type == DEV_GPU || ds.devices[i].dev_type == DEV_NPU) &&
                     ds.devices[i].available &&
                     ds.devices[i].free_mem_mb >= tensor_size_mb) {
@@ -94,7 +94,7 @@ func pick_device(dispatch_state ds, string op_type, int tensor_size_mb) device_p
         }
     }
     int i = 0
-    while i < len(ds.devices) {
+    for i < len(ds.devices) {
         if ds.devices[i].dev_type == DEV_CPU && ds.devices[i].available {
             device_pick_result result = device_pick_result{
                 device: ds.devices[i],
@@ -123,7 +123,7 @@ func pick_device(dispatch_state ds, string op_type, int tensor_size_mb) device_p
 
 func update_device_mem(dispatch_state ds, string name, int delta_mb) dispatch_state {
     int i = 0
-    while i < len(ds.devices) {
+    for i < len(ds.devices) {
         if ds.devices[i].name == name {
             ds.devices[i].free_mem_mb = ds.devices[i].free_mem_mb + delta_mb
         }

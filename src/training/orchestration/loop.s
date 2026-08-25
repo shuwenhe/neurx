@@ -228,7 +228,7 @@ func run_epoch(training_loop loop, func get_train_batch, func get_val_batch) tra
     loop.state.epoch = loop.state.epoch + 1
     float epoch_loss = 0.0
     int num_batches = 0
-    while loop.state.step < loop.config.total_steps / loop.config.epochs {
+    for loop.state.step < loop.config.total_steps / loop.config.epochs {
         []autograd.tensor batch, []int labels = get_train_batch()
         float loss = train_step(loop, batch, labels)
         epoch_loss = epoch_loss + loss
@@ -353,7 +353,7 @@ func exp(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 12 {
+    for i <= 12 {
         term = term * x / (i * 1.0)
         result = result + term
         i = i + 1
@@ -365,11 +365,11 @@ func cos(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         int sign = if i % 2 == 0 { 1 } else { -1 }
         float fact = 1.0
         int j = 1
-        while j <= 2*i {
+        for j <= 2*i {
             fact = fact * j * 1.0
             j = j + 1
         }

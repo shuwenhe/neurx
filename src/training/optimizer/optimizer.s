@@ -29,7 +29,7 @@ struct optimizer {
 func copy_tensors([]tensor values) []tensor {
     []tensor out = []tensor{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = neurx.tensor.clone(values[i])
         i = i + 1
     }
@@ -39,7 +39,7 @@ func copy_tensors([]tensor values) []tensor {
 func copy_float([]float data) []float {
     []float out = []float{cap: len(data)}
     int i = 0
-    while i < len(data) {
+    for i < len(data) {
         out[i] = data[i]
         i = i + 1
     }
@@ -49,7 +49,7 @@ func copy_float([]float data) []float {
 func copy_int([]int data) []int {
     []int out = []int{cap: len(data)}
     int i = 0
-    while i < len(data) {
+    for i < len(data) {
         out[i] = data[i]
         i = i + 1
     }
@@ -60,7 +60,7 @@ func optimizer_zero_moment(tensor value) tensor {
     int n = len(value.data)
     []float data = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         data[i] = 0.0
         i = i + 1
     }
@@ -87,7 +87,7 @@ func copy_param_group(optimizer_param_group group) optimizer_param_group {
 func copy_param_groups([]optimizer_param_group groups) []optimizer_param_group {
     []optimizer_param_group out = []optimizer_param_group{cap: len(groups)}
     int i = 0
-    while i < len(groups) {
+    for i < len(groups) {
         out[i] = copy_param_group(groups[i])
         i = i + 1
     }
@@ -112,7 +112,7 @@ func optimizer_make_group([]tensor params, float lr, float weight_decay, float b
     []float beta1_pows = []float{cap: n}
     []float beta2_pows = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         first_moments[i] = optimizer_zero_moment(params[i])
         second_moments[i] = optimizer_zero_moment(params[i])
         param_steps[i] = 0
@@ -164,7 +164,7 @@ func optimizer_step_scheduler(optimizer opt, int epoch) optimizer {
     next.scheduler = scheduler_step(next.scheduler, epoch)
     float lr = scheduler_current_lr(next.scheduler)
     int i = 0
-    while i < len(next.param_groups) {
+    for i < len(next.param_groups) {
         next.param_groups[i].lr = lr
         i = i + 1
     }
@@ -174,7 +174,7 @@ func optimizer_step_scheduler(optimizer opt, int epoch) optimizer {
 func optimizer_sync_group_lrs(optimizer opt, float lr) optimizer {
     optimizer next = optimizer_state_dict(opt)
     int i = 0
-    while i < len(next.param_groups) {
+    for i < len(next.param_groups) {
         next.param_groups[i].lr = lr
         i = i + 1
     }
@@ -203,7 +203,7 @@ func optimizer_zero_grad_tensor(tensor value) tensor {
 func optimizer_zero_grad_group(optimizer_param_group group) optimizer_param_group {
     optimizer_param_group next = copy_param_group(group)
     int i = 0
-    while i < len(next.params) {
+    for i < len(next.params) {
         next.params[i] = optimizer_zero_grad_tensor(next.params[i])
         i = i + 1
     }
@@ -213,7 +213,7 @@ func optimizer_zero_grad_group(optimizer_param_group group) optimizer_param_grou
 func optimizer_zero_grad(optimizer opt) optimizer {
     optimizer next = optimizer_state_dict(opt)
     int i = 0
-    while i < len(next.param_groups) {
+    for i < len(next.param_groups) {
         next.param_groups[i] = optimizer_zero_grad_group(next.param_groups[i])
         i = i + 1
     }
@@ -228,7 +228,7 @@ func optimizer_step_tensor_group_from(optimizer_param_group group, []tensor grad
     optimizer_param_group next = copy_param_group(group)
     int i = 0
     int g = start
-    while i < len(next.params) && g < len(grads) {
+    for i < len(next.params) && g < len(grads) {
         tensor param = next.params[i]
         tensor grad = grads[g]
         float lr = group.lr
@@ -300,7 +300,7 @@ func optimizer_step(optimizer opt, []tensor grads) optimizer {
     float lr_override = optimizer_current_lr(next)
     int offset = 0
     int i = 0
-    while i < len(next.param_groups) {
+    for i < len(next.param_groups) {
         next.param_groups[i] = optimizer_step_tensor_group_from(next.param_groups[i], grads, offset, lr_override)
         offset = offset + len(next.param_groups[i].params)
         i = i + 1
@@ -361,7 +361,7 @@ func optimizer_num_groups(optimizer opt) int {
 func optimizer_num_parameters(optimizer opt) int {
     int total = 0
     int i = 0
-    while i < len(opt.param_groups) {
+    for i < len(opt.param_groups) {
         total = total + len(opt.param_groups[i].params)
         i = i + 1
     }

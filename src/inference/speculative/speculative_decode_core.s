@@ -91,7 +91,7 @@ func compute_logits_probability([]float logits, float temperature) []float {
     probs := []float{}
     max_logit := -1000000.0
     i := 0
-    while i < logits.len {
+    for i < logits.len {
         if logits[i] > max_logit {
             max_logit = logits[i]
         }
@@ -99,7 +99,7 @@ func compute_logits_probability([]float logits, float temperature) []float {
     }
     sum_exp := 0.0
     i = 0
-    while i < logits.len {
+    for i < logits.len {
         scaled := (logits[i] - max_logit) / temperature
         exp_val := 2.718281828 ^ scaled
         probs = append(probs, exp_val)
@@ -107,7 +107,7 @@ func compute_logits_probability([]float logits, float temperature) []float {
         i = i + 1
     }
     i = 0
-    while i < probs.len {
+    for i < probs.len {
         probs[i] = probs[i] / sum_exp
         i = i + 1
     }
@@ -119,7 +119,7 @@ func sample_top_k([]float logits, int k, float temperature) int {
     top_k_indices := []int{}
     top_k_probs := []float{}
     i := 0
-    while i < logits.len {
+    for i < logits.len {
         if i < k || i == 0 {
             top_k_indices = append(top_k_indices, i)
             top_k_probs = append(top_k_probs, probs[i])
@@ -127,7 +127,7 @@ func sample_top_k([]float logits, int k, float temperature) int {
             min_prob := top_k_probs[0]
             min_idx := 0
             j := 1
-            while j < top_k_probs.len {
+            for j < top_k_probs.len {
                 if top_k_probs[j] < min_prob {
                     min_prob = top_k_probs[j]
                     min_idx = j
@@ -145,7 +145,7 @@ func sample_top_k([]float logits, int k, float temperature) int {
     rand_val := 0.5
     cumsum := 0.0
     i = 0
-    while i < top_k_probs.len {
+    for i < top_k_probs.len {
         cumsum = cumsum + top_k_probs[i]
         if cumsum >= rand_val {
             selected_idx = i
@@ -168,7 +168,7 @@ func verify_token_match([]float draft_logits, []float verify_logits, float tempe
     max_draft := draft_probs[0]
     max_verify := verify_probs[0]
     i := 1
-    while i < draft_probs.len {
+    for i < draft_probs.len {
         if draft_probs[i] > max_draft {
             max_draft = draft_probs[i]
             draft_top = i
@@ -186,7 +186,7 @@ func compute_confidence_score([]float logits) float {
     probs := compute_logits_probability(logits, 1.0)
     max_prob := probs[0]
     i := 1
-    while i < probs.len {
+    for i < probs.len {
         if probs[i] > max_prob {
             max_prob = probs[i]
         }
@@ -198,7 +198,7 @@ func compute_confidence_score([]float logits) float {
 func filter_predictions_by_confidence([]draft_token predictions, float threshold) []draft_token {
     filtered := []draft_token{}
     i := 0
-    while i < predictions.len {
+    for i < predictions.len {
         if predictions[i].confidence >= threshold {
             filtered = append(filtered, predictions[i])
         }
@@ -224,7 +224,7 @@ func new_speculative_statistics() speculative_statistics {
 func update_statistics(speculative_statistics stats, speculative_batch batch) speculative_statistics {
     updated := stats
     i := 0
-    while i < batch.verification_results.len {
+    for i < batch.verification_results.len {
         updated.total_verified_tokens = updated.total_verified_tokens + 1
         if batch.verification_results[i].accepted {
             updated.total_accepted_tokens = updated.total_accepted_tokens + batch.verification_results[i].num_accepted_tokens

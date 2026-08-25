@@ -21,7 +21,7 @@ func main() {
     int step = 0
     int docs_seen = 0
     int shard_index = 0
-    while shard_index < shard_count && step < max_steps && docs_seen < max_docs {
+    for shard_index < shard_count && step < max_steps && docs_seen < max_docs {
         string shard_path = get_shard_path(shard_list_text, shard_index)
         if !runtime_file_exists(shard_path) {
             println("[ERROR] Shard not found: " + shard_path)
@@ -34,7 +34,7 @@ func main() {
         int shard_lines = 0
         int shard_steps_before = step
         int i = 0
-        while i < content_len && step < max_steps && docs_seen < max_docs {
+        for i < content_len && step < max_steps && docs_seen < max_docs {
             if full_content[i] == 10 {
                 shard_lines = shard_lines + 1
                 docs_seen = docs_seen + 1
@@ -60,7 +60,7 @@ func main() {
 func count_lines(string text) int {
     int count = 0
     int i = 0
-    while i < str_len(text) {
+    for i < str_len(text) {
         if text[i] == 10 {
             count = count + 1
         }
@@ -74,12 +74,12 @@ func get_shard_path(string list_text, int index) string {
     int line_start = 0
     int i = 0
     int list_len = str_len(list_text)
-    while i < list_len && current_line <= index {
+    for i < list_len && current_line <= index {
         if list_text[i] == 10 {
             if current_line == index {
                 string result = ""
                 int j = line_start
-                while j < i && list_text[j] != 10 {
+                for j < i && list_text[j] != 10 {
                     result = result + string_char(list_text[j])
                     j = j + 1
                 }
@@ -93,7 +93,7 @@ func get_shard_path(string list_text, int index) string {
     if current_line == index {
         string result = ""
         int j = line_start
-        while j < list_len {
+        for j < list_len {
             result = result + string_char(list_text[j])
             j = j + 1
         }
@@ -104,12 +104,12 @@ func get_shard_path(string list_text, int index) string {
 
 func extract_filename(string path) string {
     int i = str_len(path) - 1
-    while i >= 0 && path[i] != 47 {
+    for i >= 0 && path[i] != 47 {
         i = i - 1
     }
     i = i + 1
     string result = ""
-    while i < str_len(path) && path[i] != 0 {
+    for i < str_len(path) && path[i] != 0 {
         result = result + string_char(path[i])
         i = i + 1
     }
@@ -140,7 +140,7 @@ func parse_int(string s, int default_val) int {
         neg = true
         i = 1
     }
-    while i < str_len(s) && s[i] >= 48 && s[i] <= 57 {
+    for i < str_len(s) && s[i] >= 48 && s[i] <= 57 {
         result = result * 10 + (s[i] - 48)
         i = i + 1
     }
@@ -156,7 +156,7 @@ func int_to_str(int v) string {
 
 func str_len(string s) int {
     int i = 0
-    while i < 1000000000 {
+    for i < 1000000000 {
         if s[i] == 0 {
             return i
         }

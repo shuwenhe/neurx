@@ -36,7 +36,7 @@ func create_validator() s_mainchain_validator {
 func tokenize_input(prompt string) []int {
     int i = 0
     []int token_ids = []
-    while i < len(prompt) {
+    for i < len(prompt) {
         token_ids.push(int(prompt[i]))
         i = i + 1
     }
@@ -46,10 +46,10 @@ func tokenize_input(prompt string) []int {
 func embed_tokens([]int token_ids) [][]float {
     [][]float embeddings = []
     int i = 0
-    while i < len(token_ids) {
+    for i < len(token_ids) {
         []float emb = []
         int j = 0
-        while j < 512 {
+        for j < 512 {
             emb.push(float(token_ids[i]) * 0.001)
             j = j + 1
         }
@@ -62,13 +62,13 @@ func embed_tokens([]int token_ids) [][]float {
 func transformer_forward([][]float embeddings, int num_layers) [][]float {
     [][]float output = []
     int layer = 0
-    while layer < num_layers {
+    for layer < num_layers {
         int i = 0
         [][]float layer_output = []
-        while i < len(embeddings) {
+        for i < len(embeddings) {
             []float hidden = []
             int j = 0
-            while j < len(embeddings[i]) {
+            for j < len(embeddings[i]) {
                 hidden.push(embeddings[i][j] * (1.0 - float(layer) * 0.01))
                 j = j + 1
             }
@@ -85,7 +85,7 @@ func sample_next_token([]float logits, float temperature, float top_p) int {
     float max_logit = 0.0
     int max_idx = 0
     int i = 0
-    while i < len(logits) {
+    for i < len(logits) {
         if logits[i] > max_logit {
             max_logit = logits[i]
             max_idx = i
@@ -98,7 +98,7 @@ func sample_next_token([]float logits, float temperature, float top_p) int {
 func detokenize_output([]int token_ids) string {
     string result = ""
     int i = 0
-    while i < len(token_ids) {
+    for i < len(token_ids) {
         if token_ids[i] > 32 && token_ids[i] < 127 {
             result = result + string(token_ids[i])
         }
@@ -125,7 +125,7 @@ func execute_inference_pipeline(inference_request request) inference_response {
     print("  4️⃣  Generating tokens...\n")
     []int output_tokens = []
     int gen_count = 0
-    while gen_count < request.max_tokens {
+    for gen_count < request.max_tokens {
         if len(embeddings) > 0 && len(embeddings[0]) > 0 {
             []float last_hidden = embeddings[len(embeddings) - 1]
             int next_token = sample_next_token(last_hidden, request.temperature, request.top_p)
@@ -201,7 +201,7 @@ func validate_mainchain_step_4(s_mainchain_validator validator) {
     
     []float logits = []
     int i = 0
-    while i < 50 {
+    for i < 50 {
         logits.push(float(i) * 0.1)
         i = i + 1
     }

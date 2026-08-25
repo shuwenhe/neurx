@@ -41,7 +41,7 @@ func scheduler_print_if_verbose(scheduler_base sched, string msg) {
 func clone_lr_array([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }

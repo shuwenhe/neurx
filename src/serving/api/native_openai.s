@@ -26,7 +26,7 @@ func native_openai_stream(inference_request request, native_execution_result res
     if !tokenizer.valid { return "data: " + openai_error_json("failed to load tokenizer.json", "tokenizer_error", 500) + "\n\n" + openai_sse_done() }
     string body = ""
     int i = 0
-    while i < len(result.token_ids) {
+    for i < len(result.token_ids) {
         []int single = []int{cap: 1}
         single[0] = result.token_ids[i]
         hf_bpe_decode_result decoded = hf_bpe_decode_generated(tokenizer, single)

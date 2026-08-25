@@ -69,7 +69,7 @@ func sqrt_approx(float x) float {
     }
     float g = x
     int i = 0
-    while i < 8 {
+    for i < 8 {
         g = 0.5 * (g + x / g)
         i = i + 1
     }
@@ -80,7 +80,7 @@ func math_sin(float x) float {
     float result = 0.0
     float term = x
     int n = 1
-    while n < 12 {
+    for n < 12 {
         result = result + term
         float factor = 0.0 - float((2 * n) * (2 * n + 1))
         term = term * x * x / factor
@@ -93,7 +93,7 @@ func math_cos(float x) float {
     float result = 1.0
     float term = 1.0
     int n = 1
-    while n < 12 {
+    for n < 12 {
         float factor = 0.0 - float((2 * n - 1) * (2 * n))
         term = term * x * x / factor
         result = result + term
@@ -106,14 +106,14 @@ func rms_norm([]float hidden, []float weight, int hidden_size, float eps) []floa
     []float output = make([]float, hidden_size)
     float sum_sq = 0.0
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         sum_sq = sum_sq + hidden[i] * hidden[i]
         i = i + 1
     }
     float rms = sqrt_approx(sum_sq / float(hidden_size) + eps)
     float inv = 1.0 / rms
     i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         float w = 1.0
         if i < len(weight) {
             w = weight[i]
@@ -127,10 +127,10 @@ func rms_norm([]float hidden, []float weight, int hidden_size, float eps) []floa
 func matmul_vec([]float x, []float w, int in_dim, int out_dim) []float {
     []float output = make([]float, out_dim)
     int o = 0
-    while o < out_dim {
+    for o < out_dim {
         float acc = 0.0
         int i = 0
-        while i < in_dim {
+        for i < in_dim {
             acc = acc + x[i] * w[o * in_dim + i]
             i = i + 1
         }
@@ -143,13 +143,13 @@ func matmul_vec([]float x, []float w, int in_dim, int out_dim) []float {
 func apply_rope([]float qk, int num_heads, int head_size, int position, float theta) []float {
     []float output = make([]float, len(qk))
     int h = 0
-    while h < num_heads {
+    for h < num_heads {
         int base = h * head_size
         int d = 0
-        while d < head_size / 2 {
+        for d < head_size / 2 {
             float freq = 1.0
             int p = 0
-            while p < d {
+            for p < d {
                 freq = freq / theta
                 p = p + 1
             }
@@ -183,7 +183,7 @@ func math_exp_neg(float x) float {
     float result = 1.0
     float neg_x = 0.0 - x
     int i = 1
-    while i < 24 {
+    for i < 24 {
         term = term * neg_x / float(i)
         result = result + term
         if term < 0.0 {
@@ -202,7 +202,7 @@ func swiglu_ffn([]float hidden, []float gate_w, []float up_w, []float down_w, in
     []float up = matmul_vec(hidden, up_w, hidden_size, inter_dim)
     []float act = make([]float, inter_dim)
     int i = 0
-    while i < inter_dim {
+    for i < inter_dim {
         act[i] = silu(gate[i]) * up[i]
         i = i + 1
     }
@@ -215,11 +215,11 @@ func moe_route([]float hidden, []float gate_weight, int hidden_size, int num_exp
     []float weights = make([]float, top_k)
     bool[] used = make([]bool, num_experts)
     int k = 0
-    while k < top_k {
+    for k < top_k {
         float best = -1.0e30
         int best_idx = 0
         int e = 0
-        while e < num_experts {
+        for e < num_experts {
             if !used[e] && logits[e] > best {
                 best = logits[e]
                 best_idx = e
@@ -232,7 +232,7 @@ func moe_route([]float hidden, []float gate_weight, int hidden_size, int num_exp
     }
     float max_logit = logits[selected[0]]
     int j = 1
-    while j < top_k {
+    for j < top_k {
         if logits[selected[j]] > max_logit {
             max_logit = logits[selected[j]]
         }
@@ -240,7 +240,7 @@ func moe_route([]float hidden, []float gate_weight, int hidden_size, int num_exp
     }
     float sum_exp = 0.0
     j = 0
-    while j < top_k {
+    for j < top_k {
         float e_val = math_exp_neg(logits[selected[j]] - max_logit)
         weights[j] = e_val
         sum_exp = sum_exp + e_val
@@ -250,7 +250,7 @@ func moe_route([]float hidden, []float gate_weight, int hidden_size, int num_exp
         sum_exp = 1.0
     }
     j = 0
-    while j < top_k {
+    for j < top_k {
         weights[j] = weights[j] / sum_exp
         j = j + 1
     }
@@ -261,7 +261,7 @@ func moe_ffn([]float hidden, transformer_layer_weights weights, transformer_laye
     int inter = config.intermediate_size
     []float output = make([]float, config.hidden_size)
     int k = 0
-    while k < route.num_selected {
+    for k < route.num_selected {
         int expert_idx = route.selected_experts[k]
         float weight = route.weights[k]
         if expert_idx < 0 || expert_idx >= len(weights.expert_gate_weights) {
@@ -275,13 +275,13 @@ func moe_ffn([]float hidden, transformer_layer_weights weights, transformer_laye
         []float up = matmul_vec(hidden, up_w, config.hidden_size, inter)
         []float act = make([]float, inter)
         int i = 0
-        while i < inter {
+        for i < inter {
             act[i] = silu(gate[i]) * up[i]
             i = i + 1
         }
         []float expert_out = matmul_vec(act, down_w, inter, config.hidden_size)
         int j = 0
-        while j < config.hidden_size {
+        for j < config.hidden_size {
             output[j] = output[j] + weight * expert_out[j]
             j = j + 1
         }
@@ -327,7 +327,7 @@ func transformer_layer_forward(
     []float attn_proj = matmul_vec(attn_out, weights.w_o, num_heads * head_size, hidden_size)
     []float residual = make([]float, hidden_size)
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         residual[i] = hidden[i] + attn_proj[i]
         i = i + 1
     }
@@ -341,7 +341,7 @@ func transformer_layer_forward(
     }
     []float output = make([]float, hidden_size)
     i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         output[i] = residual[i] + ffn_out[i]
         i = i + 1
     }
@@ -359,7 +359,7 @@ func make_identity_weights(transformer_layer_config config) transformer_layer_we
     }
     []float norm_w = make([]float, hidden)
     int i = 0
-    while i < hidden {
+    for i < hidden {
         norm_w[i] = 1.0
         i = i + 1
     }
@@ -372,9 +372,9 @@ func make_identity_weights(transformer_layer_config config) transformer_layer_we
     []float down_w = identity_matrix(inter, hidden)
     []float moe_gate = make([]float, hidden * total_experts)
     int e = 0
-    while e < total_experts {
+    for e < total_experts {
         int j = 0
-        while j < hidden && j < total_experts {
+        for j < hidden && j < total_experts {
             if j == e {
                 moe_gate[e * hidden + j] = 1.0
             }
@@ -386,7 +386,7 @@ func make_identity_weights(transformer_layer_config config) transformer_layer_we
     [][]float expert_up = make([][]float, total_experts)
     [][]float expert_down = make([][]float, total_experts)
     e = 0
-    while e < total_experts {
+    for e < total_experts {
         expert_gate[e] = identity_matrix(hidden, inter)
         expert_up[e] = identity_matrix(hidden, inter)
         expert_down[e] = identity_matrix(inter, hidden)
@@ -413,7 +413,7 @@ func make_identity_weights(transformer_layer_config config) transformer_layer_we
 func identity_matrix(int in_dim, int out_dim) []float {
     []float w = make([]float, out_dim * in_dim)
     int i = 0
-    while i < out_dim && i < in_dim {
+    for i < out_dim && i < in_dim {
         w[i * in_dim + i] = 1.0
         i = i + 1
     }

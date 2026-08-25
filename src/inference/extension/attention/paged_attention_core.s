@@ -99,7 +99,7 @@ func reserve_tokens(cache paged_kv_cache, int num_new_tokens) paged_kv_cache {
     }
     []slot_mapping slots = cache.token_to_slot
     int added = 0
-    while added < num_new_tokens {
+    for added < num_new_tokens {
         int logical_pos = current_tokens + added
         int block_id = logical_pos / cache.block_size
         int offset_in_block = mod_int(logical_pos, cache.block_size)
@@ -203,7 +203,7 @@ func write_kv_to_cache(
         int base_src = token_offset * kv_stride
         int base_dst = offset_in_block * kv_stride
         int i = 0
-        while i < kv_stride && base_src + i < len(keys) && base_dst + i < len(block.key_data) {
+        for i < kv_stride && base_src + i < len(keys) && base_dst + i < len(block.key_data) {
             block.key_data[base_dst + i] = keys[base_src + i]
             block.value_data[base_dst + i] = values[base_src + i]
             i = i + 1
@@ -235,9 +235,9 @@ func compute_paged_attention(
     int context_len = len(slot_mappings)
     int kv_stride = cache.num_kv_heads * cache.head_size
     int q_idx = 0
-    while q_idx < num_query_tokens {
+    for q_idx < num_query_tokens {
         int h = 0
-        while h < num_heads {
+        for h < num_heads {
             int kv_head = h
             if kv_head >= cache.num_kv_heads {
                 kv_head = mod_int(kv_head, cache.num_kv_heads)
@@ -245,7 +245,7 @@ func compute_paged_attention(
             int q_head_base = q_idx * q_stride + h * head_size
             float[] scores = make([]float, context_len)
             int k_pos = 0
-            while k_pos < context_len {
+            for k_pos < context_len {
                 if k_pos > q_idx {
                     scores[k_pos] = -1.0e30
                     k_pos = k_pos + 1
@@ -263,7 +263,7 @@ func compute_paged_attention(
                 int kv_base = offset_in_block * kv_stride + kv_head * head_size
                 float qk = 0.0
                 int d = 0
-                while d < head_size {
+                for d < head_size {
                     float q_val = queries[q_head_base + d]
                     float k_val = 0.0
                     if kv_base + d < len(block.key_data) {
@@ -278,10 +278,10 @@ func compute_paged_attention(
             float[] probs = compute_softmax(scores)
             int out_base = q_head_base
             int d = 0
-            while d < head_size {
+            for d < head_size {
                 float acc = 0.0
                 int k_pos2 = 0
-                while k_pos2 < context_len {
+                for k_pos2 < context_len {
                     slot_mapping slot = slot_mappings[k_pos2]
                     int block_id = slot.block_id
                     int offset_in_block = slot.offset_in_block
@@ -298,7 +298,7 @@ func compute_paged_attention(
                     acc = acc + probs[k_pos2] * v_val
                     k_pos2 = k_pos2 + 1
                 }
-                while out_base + d >= len(output) {
+                for out_base + d >= len(output) {
                     output = append(output, 0.0)
                 }
                 output[out_base + d] = acc
@@ -370,7 +370,7 @@ func math_exp(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i < 24 {
+    for i < 24 {
         term = term * x / float(i)
         result = result + term
         if term < 0.0 {
@@ -390,7 +390,7 @@ func factorial(int n) float {
     }
     float result = 1.0
     int i = 2
-    while i <= n {
+    for i <= n {
         result = result * float(i)
         i = i + 1
     }
@@ -454,14 +454,14 @@ func compute_paged_attention_gqa(
     int context_len = len(slot_mappings)
     int kv_stride = num_kv_heads * head_size
     int q_idx = 0
-    while q_idx < num_query_tokens {
+    for q_idx < num_query_tokens {
         int h = 0
-        while h < num_heads {
+        for h < num_heads {
             int kv_head = h / group_size
             int q_head_base = q_idx * q_stride + h * head_size
             float[] scores = make([]float, context_len)
             int k_pos = 0
-            while k_pos < context_len {
+            for k_pos < context_len {
                 if k_pos > q_idx {
                     scores[k_pos] = -1.0e30
                     k_pos = k_pos + 1
@@ -479,7 +479,7 @@ func compute_paged_attention_gqa(
                 int kv_base = offset_in_block * kv_stride + kv_head * head_size
                 float qk = 0.0
                 int d = 0
-                while d < head_size {
+                for d < head_size {
                     float q_val = queries[q_head_base + d]
                     float k_val = 0.0
                     if kv_base + d < len(block.key_data) {
@@ -494,10 +494,10 @@ func compute_paged_attention_gqa(
             float[] probs = compute_softmax(scores)
             int out_base = q_head_base
             int d = 0
-            while d < head_size {
+            for d < head_size {
                 float acc = 0.0
                 int k_pos2 = 0
-                while k_pos2 < context_len {
+                for k_pos2 < context_len {
                     slot_mapping slot = slot_mappings[k_pos2]
                     int block_id = slot.block_id
                     int offset_in_block = slot.offset_in_block
@@ -514,7 +514,7 @@ func compute_paged_attention_gqa(
                     acc = acc + probs[k_pos2] * v_val
                     k_pos2 = k_pos2 + 1
                 }
-                while out_base + d >= len(output) {
+                for out_base + d >= len(output) {
                     output = append(output, 0.0)
                 }
                 output[out_base + d] = acc

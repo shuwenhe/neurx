@@ -35,14 +35,14 @@ struct reward_batch_scores {
 func rm_alloc(int n, float v) []float {
     []float arr = []float{cap: n}
     int i = 0
-    while i < n { arr[i] = v; i = i + 1 }
+    for i < n { arr[i] = v; i = i + 1 }
     arr
 }
 
 func rm_init_head(int n_embd) []float {
     []float head = rm_alloc(n_embd, 0.0)
     int i = 0
-    while i < n_embd {
+    for i < n_embd {
         float t = (i * 1.0 + 1.0) / (n_embd * 1.0)
         head[i] = (t - 0.5) * 0.02
         i = i + 1
@@ -97,7 +97,7 @@ func rm_exp(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 14 {
+    for i <= 14 {
         term = term * x / (i * 1.0)
         result = result + term
         i = i + 1
@@ -110,13 +110,13 @@ func rm_log(float x) float {
     float v = x
     float adj = 0.0
     float ln2 = 0.6931471805599453
-    while v >= 2.0 { v = v * 0.5; adj = adj + ln2 }
-    while v < 1.0 { v = v * 2.0; adj = adj - ln2 }
+    for v >= 2.0 { v = v * 0.5; adj = adj + ln2 }
+    for v < 1.0 { v = v * 2.0; adj = adj - ln2 }
     float z = v - 1.0
     float s = z
     float term = z
     int i = 2
-    while i <= 16 {
+    for i <= 16 {
         term = term * (-z)
         s = s + term / (i * 1.0)
         i = i + 1
@@ -132,26 +132,26 @@ func rm_sqrt(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
     int i = 0
-    while i < 15 { y = 0.5 * (y + x / y); i = i + 1 }
+    for i < 15 { y = 0.5 * (y + x / y); i = i + 1 }
     y
 }
 
 func rm_pow(float base, int exp) float {
     float r = 1.0
     int e = exp
-    while e > 0 { r = r * base; e = e - 1 }
+    for e > 0 { r = r * base; e = e - 1 }
     r
 }
 
 func rm_pool_last_hidden([]float last_hidden, int batch_size, int seq_len, int n_embd) []float {
     []float pooled = rm_alloc(batch_size * n_embd, 0.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int last_tok = b * seq_len + (seq_len - 1)
         int src = last_tok * n_embd
         int dst = b * n_embd
         int d = 0
-        while d < n_embd {
+        for d < n_embd {
             pooled[dst + d] = last_hidden[src + d]
             d = d + 1
         }
@@ -165,10 +165,10 @@ func rm_score_batch(reward_model rm, []int token_ids, int batch_size, int seq_le
     []float pooled = rm_pool_last_hidden(out.last_hidden, batch_size, seq_len, rm.n_embd)
     []float rewards = rm_alloc(batch_size, 0.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         float r = rm.bias
         int d = 0
-        while d < rm.n_embd {
+        for d < rm.n_embd {
             r = r + rm.head[d] * pooled[b * rm.n_embd + d]
             d = d + 1
         }
@@ -186,7 +186,7 @@ func reward_model_score(reward_model rm, []int token_ids, int seq_len) float {
 func rm_bradley_terry_loss([]float chosen_r, []float rejected_r, int batch_size) float {
     float loss = 0.0
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         float d = chosen_r[i] - rejected_r[i]
         float p = rm_sigmoid(d)
         loss = loss - rm_log(p)
@@ -209,11 +209,11 @@ func reward_model_train_step(
     []float reward_c = rm_alloc(batch_size, 0.0)
     []float reward_r = rm_alloc(batch_size, 0.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         float rc = rm.bias
         float rr = rm.bias
         int d = 0
-        while d < rm.n_embd {
+        for d < rm.n_embd {
             rc = rc + rm.head[d] * pooled_c[b * rm.n_embd + d]
             rr = rr + rm.head[d] * pooled_r[b * rm.n_embd + d]
             d = d + 1
@@ -227,14 +227,14 @@ func reward_model_train_step(
     float margin_sum = 0.0
     []float grad_head = rm_alloc(rm.n_embd, 0.0)
     b = 0
-    while b < batch_size {
+    for b < batch_size {
         float d_val = reward_c[b] - reward_r[b]
         float p = rm_sigmoid(d_val)
         float coeff = (1.0 - p)
         margin_sum = margin_sum + d_val
         if d_val > 0.0 { correct = correct + 1 }
         int d = 0
-        while d < rm.n_embd {
+        for d < rm.n_embd {
             float diff = pooled_r[b * rm.n_embd + d] - pooled_c[b * rm.n_embd + d]
             grad_head[d] = grad_head[d] + coeff * diff
             d = d + 1
@@ -243,7 +243,7 @@ func reward_model_train_step(
     }
     float inv_b = 1.0 / (batch_size * 1.0)
     int g = 0
-    while g < rm.n_embd {
+    for g < rm.n_embd {
         grad_head[g] = grad_head[g] * inv_b
         g = g + 1
     }
@@ -251,7 +251,7 @@ func reward_model_train_step(
     float bc1 = 1.0 - rm_pow(rm.beta1, rm.step)
     float bc2 = 1.0 - rm_pow(rm.beta2, rm.step)
     int i = 0
-    while i < rm.n_embd {
+    for i < rm.n_embd {
         rm.head_m[i] = rm.beta1 * rm.head_m[i] + (1.0 - rm.beta1) * grad_head[i]
         rm.head_v[i] = rm.beta2 * rm.head_v[i] + (1.0 - rm.beta2) * grad_head[i] * grad_head[i]
         float m_hat = rm.head_m[i] / bc1
@@ -281,7 +281,7 @@ func reward_model_eval_accuracy(
     reward_batch_scores sr = rm_score_batch(rm, rejected_ids, batch_size, seq_len)
     int correct = 0
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         if sc.rewards[b] > sr.rewards[b] {
             correct = correct + 1
         }

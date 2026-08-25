@@ -64,7 +64,7 @@ struct transfer_adapter_result {
 func transfer_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -79,7 +79,7 @@ func new_transfer_adapter_state(transfer_adapter_config config) transfer_adapter
 
 func transfer_find(transfer_adapter_state state, int transfer_id) int {
     int i = 0
-    while i < state.transfer_count {
+    for i < state.transfer_count {
         if state.transfer_ids[i] == transfer_id { return i }
         i = i + 1
     }

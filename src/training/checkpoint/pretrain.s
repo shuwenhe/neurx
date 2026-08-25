@@ -58,11 +58,11 @@ func new_pretrain_checkpoint_bundle_state(checkpoint pretrain_checkpoint_state, 
 
 func pretrain_checkpoint_trim(string s) string {
     int i = 0
-    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
     int j = len(s) - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
     if j < i {
@@ -70,7 +70,7 @@ func pretrain_checkpoint_trim(string s) string {
     }
     string out = ""
     int k = i
-    while k <= j {
+    for k <= j {
         out = out + pretrain_checkpoint_chr(s[k])
         k = k + 1
     }
@@ -86,7 +86,7 @@ func pretrain_checkpoint_split_lines(string text) []string {
     string current = ""
     bool ends_with_newline = false
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if ch == 10 {
             lines.push(current)
@@ -116,7 +116,7 @@ func pretrain_checkpoint_string_to_int(string s, int fallback) int {
         i = 1
     }
     int value = 0
-    while i < len(text) {
+    for i < len(text) {
         int digit = text[i] - 48
         if digit < 0 || digit > 9 {
             return fallback
@@ -139,7 +139,7 @@ func pretrain_checkpoint_int_to_string(int value) string {
         value = -value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value % 10
         out = pretrain_checkpoint_chr(digit + 48) + out
         value = value / 10
@@ -160,7 +160,7 @@ func pretrain_checkpoint_float_to_string(float value) string {
         x = -x
     }
     int whole = 0
-    while x >= 1.0 {
+    for x >= 1.0 {
         x = x - 1.0
         whole = whole + 1
     }
@@ -177,13 +177,13 @@ func pretrain_checkpoint_float_to_string(float value) string {
     }
     int digits = 0
     int tmp = frac
-    while tmp > 0 {
+    for tmp > 0 {
         digits = digits + 1
         tmp = tmp / 10
     }
     int leading = pad - digits
     int j = 0
-    while j < leading {
+    for j < leading {
         out = out + "0"
         j = j + 1
     }
@@ -235,12 +235,12 @@ func pretrain_checkpoint_metadata_value(string text, string key, string fallback
     []string lines = pretrain_checkpoint_split_lines(text)
     string prefix = key + "="
     int i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line = pretrain_checkpoint_trim(lines[i])
         if len(line) >= len(prefix) {
             bool match = true
             int j = 0
-            while j < len(prefix) && match {
+            for j < len(prefix) && match {
                 if line[j] != prefix[j] {
                     match = false
                 } else {
@@ -250,7 +250,7 @@ func pretrain_checkpoint_metadata_value(string text, string key, string fallback
             if match {
                 string value = ""
                 int k = len(prefix)
-                while k < len(line) {
+                for k < len(line) {
                     value = value + pretrain_checkpoint_chr(line[k])
                     k = k + 1
                 }
@@ -278,7 +278,7 @@ func pretrain_checkpoint_metadata_float(string text, string key, float fallback)
         i = 1
     }
     float whole = 0.0
-    while i < len(raw) && raw[i] != 46 {
+    for i < len(raw) && raw[i] != 46 {
         int digit = raw[i] - 48
         if digit < 0 || digit > 9 {
             return fallback
@@ -290,7 +290,7 @@ func pretrain_checkpoint_metadata_float(string text, string key, float fallback)
     float denom = 10.0
     if i < len(raw) && raw[i] == 46 {
         i = i + 1
-        while i < len(raw) {
+        for i < len(raw) {
             int digit = raw[i] - 48
             if digit < 0 || digit > 9 {
                 return fallback
@@ -309,7 +309,7 @@ func pretrain_checkpoint_metadata_float(string text, string key, float fallback)
 
 func pretrain_checkpoint_path_dir(string path) string {
     int i = len(path) - 1
-    while i >= 0 {
+    for i >= 0 {
         if path[i] == 47 {
             break
         }
@@ -323,7 +323,7 @@ func pretrain_checkpoint_path_dir(string path) string {
     }
     string out = ""
     int j = 0
-    while j < i {
+    for j < i {
         out = out + pretrain_checkpoint_chr(path[j])
         j = j + 1
     }

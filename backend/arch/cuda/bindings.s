@@ -9,7 +9,7 @@ struct device_array {
 func copy_float_values([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }
@@ -35,7 +35,7 @@ func add_device(device_array left, device_array right) device_array {
     }
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = left.data[i] + right.data[i]
         i = i + 1
     }
@@ -53,7 +53,7 @@ func mul_device(device_array left, device_array right) device_array {
     }
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = left.data[i] * right.data[i]
         i = i + 1
     }
@@ -71,7 +71,7 @@ func add_bias_device(device_array values, device_array bias, int rows, int cols)
     }
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         int c = i % cols
         float b = 0.0
         if c < bias.size {

@@ -49,7 +49,7 @@ func embed_image_patches(int num_patches, int hidden_dim) int {
 func vision_encoder_forward(int num_patches, int hidden_dim, int num_layers) int {
     int output_dim = num_patches * hidden_dim
     int layer = 0
-    while layer < num_layers {
+    for layer < num_layers {
         layer = layer + 1
     }
     output_dim

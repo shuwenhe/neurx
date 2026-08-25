@@ -148,7 +148,7 @@ func process_let_line(string line) string {
 
 func get_indent(string line) string {
     i := 0
-    while i < string_len(line) && (string_char_at(line, i) == ' ' || string_char_at(line, i) == '\t') {
+    for i < string_len(line) && (string_char_at(line, i) == ' ' || string_char_at(line, i) == '\t') {
         i = i + 1
     }
     string_substring(line, 0, i)
@@ -183,7 +183,7 @@ func count_substring_occurrences(string text, string substring) int {
     count := 0
     pos := 0
     
-    while pos < string_len(text) {
+    for pos < string_len(text) {
         idx := string_index_of_from(text, substring, pos)
         if idx == -1 {
             break
@@ -203,7 +203,7 @@ func count_to_string(int n) string {
     } else {
         result := ""
         temp := n
-        while temp > 0 {
+        for temp > 0 {
             digit := temp % 10
             result = string_from_char('0' as int + digit) + result
             temp = temp / 10
@@ -214,7 +214,7 @@ func count_to_string(int n) string {
 
 func string_trim_left(string s, string chars) string {
     i := 0
-    while i < string_len(s) && string_contains(chars, string_char_at(s, i)) {
+    for i < string_len(s) && string_contains(chars, string_char_at(s, i)) {
         i = i + 1
     }
     string_substring(s, i, string_len(s))
@@ -222,7 +222,7 @@ func string_trim_left(string s, string chars) string {
 
 func string_trim_right(string s, string chars) string {
     i := string_len(s) - 1
-    while i >= 0 && string_contains(chars, string_char_at(s, i)) {
+    for i >= 0 && string_contains(chars, string_char_at(s, i)) {
         i = i - 1
     }
     string_substring(s, 0, i + 1)
@@ -230,7 +230,7 @@ func string_trim_right(string s, string chars) string {
 
 func string_contains(string s, char c) bool {
     i := 0
-    while i < string_len(s) {
+    for i < string_len(s) {
         if string_char_at(s, i) == c {
             return true
         }
@@ -248,7 +248,7 @@ func string_split(string s, string delimiter) vec[string] {
     current := ""
     i := 0
     
-    while i < string_len(s) {
+    for i < string_len(s) {
         if i + string_len(delimiter) <= string_len(s) && string_substring(s, i, i + string_len(delimiter)) == delimiter {
             result.push(current)
             current = ""
@@ -271,7 +271,7 @@ func string_join(vec[string] arr, string delimiter) string {
     result := arr[0]
     i := 1
     
-    while i < arr.len() {
+    for i < arr.len() {
         result = result + delimiter + arr[i]
         i = i + 1
     }
@@ -303,7 +303,7 @@ func string_index_of_from(string s, string substring, int from) int {
     }
     
     i := from
-    while i <= string_len(s) - string_len(substring) {
+    for i <= string_len(s) - string_len(substring) {
         if string_substring(s, i, i + string_len(substring)) == substring {
             return i
         }
@@ -326,7 +326,7 @@ func string_substring(string s, int start, int end) string {
     
     result := ""
     i := start
-    while i < end {
+    for i < end {
         result = result + string_from_char(string_char_at(s, i))
         i = i + 1
     }

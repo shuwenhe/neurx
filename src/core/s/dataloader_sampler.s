@@ -222,7 +222,7 @@ func draw_weighted_sample(weighted_sampler ws) int {
 func binary_search_cumsum([]float cumsum, float target) int {
     int lo = 0
     int hi = len(cumsum) - 1
-    while lo < hi {
+    for lo < hi {
         int mid = (lo + hi) / 2
         if cumsum[mid] < target {
             lo = mid + 1

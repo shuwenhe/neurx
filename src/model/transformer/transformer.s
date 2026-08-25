@@ -71,7 +71,7 @@ struct transformer_block {
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }
@@ -81,7 +81,7 @@ func allocate_vector(int size, float init_val) []float {
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
-    while i < len(src) {
+    for i < len(src) {
         out[i] = src[i]
         i = i + 1
     }
@@ -91,7 +91,7 @@ func copy_vector([]float src) []float {
 func add_vectors([]float a, []float b) []float {
     []float out = copy_vector(a)
     int i = 0
-    while i < len(out) {
+    for i < len(out) {
         out[i] = out[i] + b[i]
         i = i + 1
     }
@@ -101,12 +101,12 @@ func add_vectors([]float a, []float b) []float {
 func matmul_flat([]float a, []float b, int m, int k, int n) []float {
     []float result = allocate_vector(m * n, 0.0)
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = 0.0
             int l = 0
-            while l < k {
+            for l < k {
                 sum = sum + a[i * k + l] * b[l * n + j]
                 l = l + 1
             }
@@ -121,7 +121,7 @@ func matmul_flat([]float a, []float b, int m, int k, int n) []float {
 func fill_ramp(int size, float scale) []float {
     []float values = allocate_vector(size, 0.0)
     int i = 0
-    while i < size {
+    for i < size {
         values[i] = scale * ((i + 1) * 1.0) / ((size + 1) * 1.0)
         i = i + 1
     }
@@ -198,7 +198,7 @@ func new_transformer_layer(transformer_layer_config cfg) transformer_layer {
 func new_transformer_model(transformer_config cfg) transformer_model {
     []transformer_layer layers = []transformer_layer{cap: cfg.num_layers}
     int i = 0
-    while i < cfg.num_layers {
+    for i < cfg.num_layers {
         transformer_layer_config layer_cfg = new_transformer_layer_config()
         layer_cfg.hidden_dim = cfg.hidden_dim
         layer_cfg.num_attention_heads = cfg.num_attention_heads
@@ -254,7 +254,7 @@ func apply_transformer_norm2(transformer_layer layer, []float hidden_states, int
 func transformer_layer_at([]transformer_layer layers, int index) transformer_layer {
     transformer_layer value = layers[0]
     int i = 0
-    while i < len(layers) {
+    for i < len(layers) {
         if i == index {
             value = layers[i]
         }
@@ -350,7 +350,7 @@ func forward_transformer(
         x = add_vectors(x, get_learned_position_embedding(pos_embed, seq_len))
     }
     int layer_idx = 0
-    while layer_idx < model.num_layers {
+    for layer_idx < model.num_layers {
         x = forward_transformer_layer(transformer_layer_at(model.layers, layer_idx), x, batch_size, seq_len)
         layer_idx = layer_idx + 1
     }
@@ -371,11 +371,11 @@ func compute_lm_loss(
     float loss = 0.0
     int total = batch_size * seq_len
     int i = 0
-    while i < total {
+    for i < total {
         int base = i * vocab_size
         float max_logit = logits[base]
         int j = 1
-        while j < vocab_size {
+        for j < vocab_size {
             if logits[base + j] > max_logit {
                 max_logit = logits[base + j]
             }
@@ -383,11 +383,11 @@ func compute_lm_loss(
         }
         float sum_exp = 0.0
         j = 0
-        while j < vocab_size {
+        for j < vocab_size {
             float value = logits[base + j] - max_logit
             float e = 1.0
             int k = 0
-            while k < 8 {
+            for k < 8 {
                 e = e * value / ((k + 1) * 1.0) + 1.0
                 k = k + 1
             }

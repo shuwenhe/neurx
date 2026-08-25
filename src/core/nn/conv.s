@@ -5,7 +5,7 @@ func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -16,7 +16,7 @@ func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -67,13 +67,13 @@ func new_conv1d(int in_channels, int out_channels, int kernel_size, int stride, 
     int w_size = out_channels * in_channels * kernel_size
     []float weight = []float{cap: w_size}
     int i = 0
-    while i < w_size {
+    for i < w_size {
         weight[i] = 0.0
         i = i + 1
     }
     []float bias = []float{cap: out_channels}
     i = 0
-    while i < out_channels {
+    for i < out_channels {
         bias[i] = 0.0
         i = i + 1
     }
@@ -102,19 +102,19 @@ func conv1d_forward(conv1d_state layer, tensor input) tensor {
     int out_len = out_size(length, ks, stride, pad, dil)
     []float out = []float{cap: batch * out_ch * out_len}
     int b = 0
-    while b < batch {
+    for b < batch {
         int oc = 0
-        while oc < out_ch {
+        for oc < out_ch {
             int ol = 0
-            while ol < out_len {
+            for ol < out_len {
                 float acc = 0.0
                 if layer.use_bias {
                     acc = layer.bias[oc]
                 }
                 int ic = 0
-                while ic < in_ch {
+                for ic < in_ch {
                     int k = 0
-                    while k < ks {
+                    for k < ks {
                         int pos = ol * stride - pad + k * dil
                         if pos >= 0 && pos < length {
                             float x = input.data[(b * in_ch + ic) * length + pos]
@@ -155,13 +155,13 @@ func new_conv2d(int in_channels, int out_channels, int kernel_h, int kernel_w, i
     int w_size = out_channels * in_channels * kernel_h * kernel_w
     []float weight = []float{cap: w_size}
     int i = 0
-    while i < w_size {
+    for i < w_size {
         weight[i] = 0.0
         i = i + 1
     }
     []float bias = []float{cap: out_channels}
     i = 0
-    while i < out_channels {
+    for i < out_channels {
         bias[i] = 0.0
         i = i + 1
     }
@@ -194,23 +194,23 @@ func conv2d_forward(conv2d_state layer, tensor input) tensor {
     int out_w = out_size(in_w, kw, layer.stride_w, layer.pad_w, layer.dil_w)
     []float out = []float{cap: batch * out_ch * out_h * out_w}
     int b = 0
-    while b < batch {
+    for b < batch {
         int oc = 0
-        while oc < out_ch {
+        for oc < out_ch {
             int oh = 0
-            while oh < out_h {
+            for oh < out_h {
                 int ow = 0
-                while ow < out_w {
+                for ow < out_w {
                     float acc = 0.0
                     if layer.use_bias {
                         acc = layer.bias[oc]
                     }
                     int ic = 0
-                    while ic < in_ch {
+                    for ic < in_ch {
                         int khi = 0
-                        while khi < kh {
+                        for khi < kh {
                             int kwi = 0
-                            while kwi < kw {
+                            for kwi < kw {
                                 int ih = oh * layer.stride_h - layer.pad_h + khi * layer.dil_h
                                 int iw = ow * layer.stride_w - layer.pad_w + kwi * layer.dil_w
                                 if ih >= 0 && ih < in_h && iw >= 0 && iw < in_w {
@@ -253,13 +253,13 @@ func new_convtranspose1d(int in_channels, int out_channels, int kernel_size, int
     int w_size = in_channels * out_channels * kernel_size
     []float weight = []float{cap: w_size}
     int i = 0
-    while i < w_size {
+    for i < w_size {
         weight[i] = 0.0
         i = i + 1
     }
     []float bias = []float{cap: out_channels}
     i = 0
-    while i < out_channels {
+    for i < out_channels {
         bias[i] = 0.0
         i = i + 1
     }
@@ -289,16 +289,16 @@ func convtranspose1d_forward(convtranspose1d_state layer, tensor input) tensor {
     }
     []float out = []float{cap: batch * out_ch * out_len}
     int b = 0
-    while b < batch {
+    for b < batch {
         int ic = 0
-        while ic < in_ch {
+        for ic < in_ch {
             int il = 0
-            while il < in_len {
+            for il < in_len {
                 float x = input.data[(b * in_ch + ic) * in_len + il]
                 int oc = 0
-                while oc < out_ch {
+                for oc < out_ch {
                     int k = 0
-                    while k < ks {
+                    for k < ks {
                         int ol = il * layer.stride - layer.padding + k * layer.dilation
                         if ol >= 0 && ol < out_len {
                             int widx = ((ic * out_ch + oc) * ks) + k
@@ -314,9 +314,9 @@ func convtranspose1d_forward(convtranspose1d_state layer, tensor input) tensor {
         }
         if layer.use_bias {
             int oc2 = 0
-            while oc2 < out_ch {
+            for oc2 < out_ch {
                 int ol2 = 0
-                while ol2 < out_len {
+                for ol2 < out_len {
                     out[(b * out_ch + oc2) * out_len + ol2] = out[(b * out_ch + oc2) * out_len + ol2] + layer.bias[oc2]
                     ol2 = ol2 + 1
                 }
@@ -350,13 +350,13 @@ func new_convtranspose2d(int in_channels, int out_channels, int kernel_h, int ke
     int w_size = in_channels * out_channels * kernel_h * kernel_w
     []float weight = []float{cap: w_size}
     int i = 0
-    while i < w_size {
+    for i < w_size {
         weight[i] = 0.0
         i = i + 1
     }
     []float bias = []float{cap: out_channels}
     i = 0
-    while i < out_channels {
+    for i < out_channels {
         bias[i] = 0.0
         i = i + 1
     }
@@ -397,20 +397,20 @@ func convtranspose2d_forward(convtranspose2d_state layer, tensor input) tensor {
     }
     []float out = []float{cap: batch * out_ch * out_h * out_w}
     int b = 0
-    while b < batch {
+    for b < batch {
         int ic = 0
-        while ic < in_ch {
+        for ic < in_ch {
             int ih = 0
-            while ih < in_h {
+            for ih < in_h {
                 int iw = 0
-                while iw < in_w {
+                for iw < in_w {
                     float x = input.data[((b * in_ch + ic) * in_h + ih) * in_w + iw]
                     int oc = 0
-                    while oc < out_ch {
+                    for oc < out_ch {
                         int khi = 0
-                        while khi < kh {
+                        for khi < kh {
                             int kwi = 0
-                            while kwi < kw {
+                            for kwi < kw {
                                 int oh = ih * layer.stride_h - layer.pad_h + khi * layer.dil_h
                                 int ow = iw * layer.stride_w - layer.pad_w + kwi * layer.dil_w
                                 if oh >= 0 && oh < out_h && ow >= 0 && ow < out_w {
@@ -431,11 +431,11 @@ func convtranspose2d_forward(convtranspose2d_state layer, tensor input) tensor {
         }
         if layer.use_bias {
             int oc2 = 0
-            while oc2 < out_ch {
+            for oc2 < out_ch {
                 int oh2 = 0
-                while oh2 < out_h {
+                for oh2 < out_h {
                     int ow2 = 0
-                    while ow2 < out_w {
+                    for ow2 < out_w {
                         out[((b * out_ch + oc2) * out_h + oh2) * out_w + ow2] = out[((b * out_ch + oc2) * out_h + oh2) * out_w + ow2] + layer.bias[oc2]
                         ow2 = ow2 + 1
                     }

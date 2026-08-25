@@ -4,7 +4,7 @@ func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -22,7 +22,7 @@ func normalize_dim(int dim, int ndim) int {
 func normalize_axes([]int axes, int ndim) []int {
     []int out = copy_int(axes)
     int i = 0
-    while i < len(out) {
+    for i < len(out) {
         out[i] = normalize_dim(out[i], ndim)
         i = i + 1
     }
@@ -38,14 +38,14 @@ func broadcast_shape([]int a, []int b) []int {
     }
     []int out = []int{cap: ndim}
     int i = 0
-    while i < ndim {
+    for i < ndim {
         out[i] = 1
         i = i + 1
     }
     int ia = ndim_a - 1
     int ib = ndim_b - 1
     int out_i = ndim - 1
-    while out_i >= 0 {
+    for out_i >= 0 {
         int dim_a = 1
         int dim_b = 1
         if ia >= 0 {
@@ -109,13 +109,13 @@ func expand_shape([]int shape, int dim) []int {
     }
     []int out = []int{cap: ndim + 1}
     int i = 0
-    while i < axis {
+    for i < axis {
         out[i] = shape[i]
         i = i + 1
     }
     out[i] = 1
     i = i + 1
-    while i < len(out) {
+    for i < len(out) {
         out[i] = shape[i - 1]
         i = i + 1
     }
@@ -125,7 +125,7 @@ func expand_shape([]int shape, int dim) []int {
 func squeeze_shape([]int shape) []int {
     []int out = []int{cap: len(shape)}
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         if shape[i] != 1 {
             out[i] = shape[i]
         }
@@ -149,7 +149,7 @@ func infer_reduce_shape([]int shape, int dim, bool keepdim) []int {
     []int out = []int{cap: ndim - 1}
     int i = 0
     int j = 0
-    while i < ndim {
+    for i < ndim {
         if i != axis {
             out[j] = shape[i]
             j = j + 1
@@ -188,19 +188,19 @@ func flatten_shape([]int shape, int start_dim, int end_dim) []int {
     []int out = []int{cap: out_ndim}
     int i = 0
     int j = 0
-    while i < start {
+    for i < start {
         out[j] = shape[i]
         i = i + 1
         j = j + 1
     }
     int flat = 1
-    while i <= end {
+    for i <= end {
         flat = flat * shape[i]
         i = i + 1
     }
     out[j] = flat
     j = j + 1
-    while i < ndim {
+    for i < ndim {
         out[j] = shape[i]
         j = j + 1
         i = i + 1

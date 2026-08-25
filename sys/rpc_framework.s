@@ -107,7 +107,7 @@ func receive_rpc_response(rpc_client* client) (rpc_message, string) {
 func process_rpc_requests(rpc_server* server) (int, string) {
     processed := 0
     
-    while server.request_queue.write_pos > 0 && processed < 100 {
+    for server.request_queue.write_pos > 0 && processed < 100 {
         if server.request_queue.queue.len() > 0 {
             msg := server.request_queue.queue.get(0)
             server.request_queue.queue.remove(0)

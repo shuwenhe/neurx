@@ -19,7 +19,7 @@ struct hash_table {
 func hash_function(string key, int table_size) int {
     int hash = 0
     int i = 0
-    while i < len(key) {
+    for i < len(key) {
         int byte_val = __host_slice(key, i, i + 1)[0]
         hash = (hash * 31 + byte_val) % 2147483647
         i = i + 1
@@ -41,7 +41,7 @@ func create_hash_table(int bucket_count, int max_entries_val) hash_table {
     ht.buckets = []hash_entry{cap: bucket_count * 10}
     
     int i = 0
-    while i < bucket_count {
+    for i < bucket_count {
         hash_entry entry = hash_entry{}
         entry.key = ""
         entry.block_ids = []int{cap: 32}
@@ -67,7 +67,7 @@ func hash_table_insert(hash_table ht, string key, []int block_ids) int {
     int entry_idx = index
     int prev_idx = -1
     
-    while entry_idx >= 0 && entry_idx < len(ht.buckets) {
+    for entry_idx >= 0 && entry_idx < len(ht.buckets) {
         hash_entry current = ht.buckets[entry_idx]
         
         if len(current.key) == 0 {
@@ -119,7 +119,7 @@ func hash_table_lookup(hash_table ht, string key) []int {
     int index = hash_function(key, ht.num_buckets)
     
     int entry_idx = index
-    while entry_idx >= 0 && entry_idx < len(ht.buckets) {
+    for entry_idx >= 0 && entry_idx < len(ht.buckets) {
         hash_entry current = ht.buckets[entry_idx]
         
         if current.key == key {
@@ -142,7 +142,7 @@ func hash_table_remove(hash_table ht, string key) int {
     int entry_idx = index
     int prev_idx = -1
     
-    while entry_idx >= 0 && entry_idx < len(ht.buckets) {
+    for entry_idx >= 0 && entry_idx < len(ht.buckets) {
         hash_entry current = ht.buckets[entry_idx]
         
         if current.key == key {
@@ -186,7 +186,7 @@ func hash_table_get_stats(hash_table ht) string {
 
 func hash_table_clear(hash_table ht) {
     int i = 0
-    while i < len(ht.buckets) {
+    for i < len(ht.buckets) {
         ht.buckets[i].key = ""
         ht.buckets[i].next_idx = -1
         ht.buckets[i].access_count = 0
@@ -215,7 +215,7 @@ func hash_table_get_lru_entry(hash_table ht) string {
     int64 oldest_time = ht.buckets[0].timestamp
     
     int i = 1
-    while i < ht.num_buckets {
+    for i < ht.num_buckets {
         if len(ht.buckets[i].key) > 0 && ht.buckets[i].timestamp < oldest_time {
             oldest_time = ht.buckets[i].timestamp
             lru_idx = i

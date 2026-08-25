@@ -124,9 +124,9 @@ func test_gqa_attention_matches_mqa() int {
     []float keys = make([]float, seq_len * kv_stride)
     []float values = make([]float, seq_len * kv_stride)
     int t = 0
-    while t < seq_len {
+    for t < seq_len {
         int d = 0
-        while d < kv_stride {
+        for d < kv_stride {
             keys[t * kv_stride + d] = float(t + 1) * 0.1
             values[t * kv_stride + d] = float(t + 1) * 0.2
             d = d + 1
@@ -137,7 +137,7 @@ func test_gqa_attention_matches_mqa() int {
     int q_stride = num_heads * head_size
     []float queries = make([]float, seq_len * q_stride)
     int qi = 0
-    while qi < len(queries) {
+    for qi < len(queries) {
         queries[qi] = 0.1
         qi = qi + 1
     }
@@ -158,7 +158,7 @@ func test_gqa_group_assignment() int {
     int fail = 0
     fail = fail + expect(group_size == 4, "group size = 4 for 8 heads / 2 kv heads")
     int h = 0
-    while h < num_heads {
+    for h < num_heads {
         int expected_kv = h / group_size
         fail = fail + expect(h / group_size == expected_kv, "q head maps to correct kv head group")
         h = h + 1
@@ -176,7 +176,7 @@ func test_softmax_sums_to_one() int {
     int fail = 0
     float sum = 0.0
     int i = 0
-    while i < 4 {
+    for i < 4 {
         sum = sum + probs[i]
         i = i + 1
     }
@@ -270,7 +270,7 @@ func test_rng_float_range() int {
     rng_state rng = new_rng(123)
     int fail = 0
     int i = 0
-    while i < 100 {
+    for i < 100 {
         (float f, rng_state r) = next_float(rng)
         rng = r
         fail = fail + expect(f >= 0.0 && f < 1.0, "rng float in [0, 1)")

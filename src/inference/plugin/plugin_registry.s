@@ -49,7 +49,7 @@ struct plugin_registration_result {
 func plugin_zero_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -61,7 +61,7 @@ func plugin_tasks_intersect(int required, int supported) bool {
     if required == 0 { return true }
     int flag = 1
     int i = 0
-    while i < 30 {
+    for i < 30 {
         int required_bit = (required / flag) - (required / flag / 2) * 2
         int supported_bit = (supported / flag) - (supported / flag / 2) * 2
         if required_bit == 1 && supported_bit == 1 { return true }
@@ -74,7 +74,7 @@ func plugin_tasks_intersect(int required, int supported) bool {
 func register_plugin(plugin_registry_state state, int plugin_id, int group, int required_task_mask, bool allowlisted) plugin_registration_result {
     if !state.initialized || plugin_id <= 0 || group < plugin_group_general() || group > plugin_group_lora_resolver() { return plugin_registration_result {state: state, slot: 0 - 1, registered: false, error_code: 1} }
     int i = 0
-    while i < state.plugin_count {
+    for i < state.plugin_count {
         if state.plugin_ids[i] == plugin_id && state.groups[i] == group { return plugin_registration_result {state: state, slot: i, registered: false, error_code: 2} }
         i = i + 1
     }

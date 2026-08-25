@@ -101,7 +101,7 @@ func create_orpo_state(orpo_config cfg) orpo_state {
 func compute_log_odds([]float log_probs) float {
     float log_odds = 0.0
     int i = 0
-    while i < len(log_probs) {
+    for i < len(log_probs) {
         log_odds = log_odds + log_probs[i]
         i = i + 1
     }
@@ -152,7 +152,7 @@ func exp_approx_ex(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / (i as float)
         result = result + term
         i = i + 1
@@ -168,7 +168,7 @@ func log_approx_ex(float x) float {
     float result = 0.0
     float term = y
     int i = 0
-    while i < 20 {
+    for i < 20 {
         result = result + term / (2.0 * i as float + 1.0)
         term = term * y2
         i = i + 1
@@ -183,7 +183,7 @@ func compute_orpo_batch_loss(
     orpo_config cfg = state.config
     float total_loss = 0.0
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         float pair_confidence = 1.0
         float log_odds_chosen = 0.5 + (i as float) * 0.01
         float log_odds_rejected = 0.3 + (i as float) * 0.01
@@ -238,13 +238,13 @@ func start_orpo_training(
     print("  Learning rate: " + float_to_string_ex(cfg.learning_rate))
     print("")
     int epoch = 0
-    while epoch < cfg.num_epochs {
+    for epoch < cfg.num_epochs {
         state.epoch = epoch
         state.num_batches = 0
         print("[ORPO Epoch " + int_to_string_ex(epoch + 1) + "/" +
               int_to_string_ex(cfg.num_epochs) + "]")
         int batch_idx = 0
-        while batch_idx * cfg.batch_size < len(trajectories) {
+        for batch_idx * cfg.batch_size < len(trajectories) {
             orpo_batch batch = orpo_batch {
                 pairs: []orpo_preference_pair{cap: cfg.batch_size},
                 prompt_embeddings: [][]float{cap: cfg.batch_size},
@@ -258,7 +258,7 @@ func start_orpo_training(
                 end_idx = len(trajectories)
             }
             int traj_idx = start_idx
-            while traj_idx < end_idx {
+            for traj_idx < end_idx {
                 batch.size = batch.size + 1
                 traj_idx = traj_idx + 1
             }
@@ -304,10 +304,10 @@ func mod_int_ex(int a, int b) int {
         return 0
     }
     int value = a
-    while value < 0 {
+    for value < 0 {
         value = value + b
     }
-    while value >= b {
+    for value >= b {
         value = value - b
     }
     value

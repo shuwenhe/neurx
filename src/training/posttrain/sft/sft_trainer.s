@@ -275,7 +275,7 @@ func prepare_sft_batch(
     []string texts = []string{cap: len(examples)}
     int total_tokens = 0
     int i = 0
-    while i < len(examples) {
+    for i < len(examples) {
         sft_example example = examples[i]
         string formatted = format_sft_example(example, config.instruction_format)
         texts[i] = formatted
@@ -393,13 +393,13 @@ func start_sft_training(
     runtime_make_dirs(trainer.config.output_dir)
     runtime_make_dirs(trainer.config.checkpoint_dir)
     int epoch = 0
-    while epoch < trainer.config.num_epochs {
+    for epoch < trainer.config.num_epochs {
         trainer.current_epoch = epoch
         if trainer.global_rank == 0 {
             println("[SFT] Starting epoch " + int_to_str(epoch + 1) + "/" + int_to_str(trainer.config.num_epochs))
         }
         int step_in_epoch = 0
-        while step_in_epoch < len(trainer.dataset.train_examples) {
+        for step_in_epoch < len(trainer.dataset.train_examples) {
             int batch_end = step_in_epoch + trainer.config.batch_size
             if batch_end > len(trainer.dataset.train_examples) {
                 batch_end = len(trainer.dataset.train_examples)
@@ -407,7 +407,7 @@ func start_sft_training(
             []sft_example batch_examples = []sft_example{cap: batch_end - step_in_epoch}
             int i = step_in_epoch
             int j = 0
-            while i < batch_end {
+            for i < batch_end {
                 batch_examples[j] = trainer.dataset.train_examples[i]
                 i = i + 1
                 j = j + 1
@@ -536,7 +536,7 @@ func parse_pipe_example(string line) sft_example {
 
 func str_len(string s) int {
     int n = 0
-    while n < len(s) {
+    for n < len(s) {
         n = n + 1
     }
     n
@@ -553,10 +553,10 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value
         int q = 0
-        while digit >= 10 {
+        for digit >= 10 {
             digit = digit - 10
             q = q + 1
         }
@@ -575,7 +575,7 @@ func fmt_float(float value, int decimals) string {
         value = 0.0 - value
     }
     int whole = 0
-    while value >= 1.0 {
+    for value >= 1.0 {
         value = value - 1.0
         whole = whole + 1
     }
@@ -585,10 +585,10 @@ func fmt_float(float value, int decimals) string {
     }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         value = value * 10.0
         int digit = 0
-        while value >= 1.0 {
+        for value >= 1.0 {
             value = value - 1.0
             digit = digit + 1
         }
@@ -603,10 +603,10 @@ func mod_int(int a, int b) int {
         return 0
     }
     int value = a
-    while value < 0 {
+    for value < 0 {
         value = value + b
     }
-    while value >= b {
+    for value >= b {
         value = value - b
     }
     value

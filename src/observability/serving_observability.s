@@ -72,7 +72,7 @@ func serving_trace_start(serving_observability_state state, string trace_id, str
 
 func serving_trace_finish(serving_observability_state state, string trace_id, int now_ms, bool ok) serving_observability_state {
     int i = len(state.trace_ids) - 1
-    while i >= 0 {
+    for i >= 0 {
         if state.trace_ids[i] == trace_id && state.span_status[i] == "running" {
             state.span_duration_ms[i] = now_ms - state.span_start_ms[i]
             if state.span_duration_ms[i] < 0 { state.span_duration_ms[i] = 0 }

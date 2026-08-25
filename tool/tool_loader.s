@@ -4,7 +4,7 @@ use neurx.runtime.io.{runtime_read_text_file, runtime_file_exists}
 
 func agent_tool_loader_find_colon(string text, int start) int {
     int i = start
-    while i < len(text) {
+    for i < len(text) {
         if string(text[i]) == ":" {
             return i
         }
@@ -16,7 +16,7 @@ func agent_tool_loader_find_colon(string text, int start) int {
 func agent_tool_loader_substring(string text, int from, int to) string {
     string out = ""
     int i = from
-    while i < to {
+    for i < to {
         if i < len(text) {
             out = out + string(text[i])
         }
@@ -44,7 +44,7 @@ func agent_tool_loader_parse_int(string s) int {
     string t = trim(s)
     int result = 0
     int i = 0
-    while i < len(t) {
+    for i < len(t) {
         result = result * 10 + agent_tool_loader_digit_val(t, i)
         i = i + 1
     }
@@ -112,7 +112,7 @@ func agent_tool_loader_load_config(agent_tool_registry_state init_reg, string co
     agent_tool_registry_state current = agent_tool_loader_identity(init_reg)
     string line = ""
     int i = 0
-    while i < len(config) {
+    for i < len(config) {
         if string(config[i]) == "\n" {
             current = agent_tool_loader_apply_line(current, line)
             line = ""

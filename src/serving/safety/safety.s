@@ -37,10 +37,10 @@ func agent_safety_text_contains(string text, string pattern) bool {
         return false
     }
     int i = 0
-    while i <= hl - nl {
+    for i <= hl - nl {
         int j = 0
         bool ok = true
-        while j < nl {
+        for j < nl {
             if h[i + j] != n[j] {
                 ok = false
                 break

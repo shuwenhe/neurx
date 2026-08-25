@@ -76,7 +76,7 @@ func reshape_for_attention(
     []float reshaped = allocate_vector(total_size, 0.0)
     int idx = 0
     int i = 0
-    while i < seq_len * num_heads * head_dim {
+    for i < seq_len * num_heads * head_dim {
         reshaped[i] = x[idx]
         idx = idx + 1
         i = i + 1
@@ -98,21 +98,21 @@ func scaled_dot_product_attention(
     []float output = allocate_vector(total_size, 0.0)
     float scale = 1.0 / sqrt_float(head_dim * 1.0)
     int h = 0
-    while h < num_heads {
+    for h < num_heads {
         int q_offset = h * size_per_head
         int k_offset = h * size_per_head
         int v_offset = h * size_per_head
         int i = 0
-        while i < seq_len {
+        for i < seq_len {
             []float scores = allocate_vector(seq_len, 0.0)
             int j = 0
-            while j < seq_len {
+            for j < seq_len {
                 if use_causal_mask && j > i {
                     scores[j] = -10000.0
                 } else {
                     float score = 0.0
                     int d = 0
-                    while d < head_dim {
+                    for d < head_dim {
                         int q_idx = q_offset + i * head_dim + d
                         int k_idx = k_offset + j * head_dim + d
                         score = score + query[q_idx] * key[k_idx]
@@ -124,10 +124,10 @@ func scaled_dot_product_attention(
             }
             []float attn_weights = softmax_stable(scores, seq_len)
             int d = 0
-            while d < head_dim {
+            for d < head_dim {
                 float sum_val = 0.0
                 j = 0
-                while j < seq_len {
+                for j < seq_len {
                     int v_idx = v_offset + j * head_dim + d
                     sum_val = sum_val + attn_weights[j] * value[v_idx]
                     j = j + 1
@@ -176,7 +176,7 @@ func softmax_stable([]float scores, int size) []float {
     []float probs = allocate_vector(size, 0.0)
     float max_score = scores[0]
     int i = 1
-    while i < size {
+    for i < size {
         if scores[i] > max_score {
             max_score = scores[i]
         }
@@ -184,14 +184,14 @@ func softmax_stable([]float scores, int size) []float {
     }
     float sum_exp = 0.0
     i = 0
-    while i < size {
+    for i < size {
         float exp_val = exp_float(scores[i] - max_score)
         probs[i] = exp_val
         sum_exp = sum_exp + exp_val
         i = i + 1
     }
     i = 0
-    while i < size {
+    for i < size {
         probs[i] = probs[i] / sum_exp
         i = i + 1
     }
@@ -201,12 +201,12 @@ func softmax_stable([]float scores, int size) []float {
 func matrix_multiply([]float a, []float b, int m, int k, int n) []float {
     []float result = allocate_vector(m * n, 0.0)
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = 0.0
             int l = 0
-            while l < k {
+            for l < k {
                 int a_idx = i * k + l
                 int b_idx = l * n + j
                 sum = sum + a[a_idx] * b[b_idx]
@@ -225,7 +225,7 @@ func reshape_from_heads([]float x, int seq_len, int num_heads, int head_dim) []f
     int hidden_dim = num_heads * head_dim
     []float reshaped = allocate_vector(seq_len * hidden_dim, 0.0)
     int i = 0
-    while i < seq_len * hidden_dim {
+    for i < seq_len * hidden_dim {
         reshaped[i] = x[i]
         i = i + 1
     }
@@ -237,7 +237,7 @@ func allocate_weights(int rows, int cols) []float {
     []float w = allocate_vector(size, 0.0)
     float limit = sqrt_float(6.0 / (rows + cols * 1.0))
     int i = 0
-    while i < size {
+    for i < size {
         w[i] = limit / 2.0
         i = i + 1
     }
@@ -247,7 +247,7 @@ func allocate_weights(int rows, int cols) []float {
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v.push(init_val)
         i = i + 1
     }
@@ -264,7 +264,7 @@ func exp_float(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 15 {
+    for i <= 15 {
         term = term * x / (i * 1.0)
         result = result + term
         i = i + 1
@@ -278,7 +278,7 @@ func sqrt_float(float x) float {
     }
     float guess = x / 2.0
     int i = 0
-    while i < 10 {
+    for i < 10 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }

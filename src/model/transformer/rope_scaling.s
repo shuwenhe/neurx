@@ -58,7 +58,7 @@ func pow_float(float base, float exp) float {
     bool negative = exp < 0.0
     if negative { exp = -exp }
     float e = 0.0
-    while e < exp {
+    for e < exp {
         result = result * base
         e = e + 1.0
     }
@@ -70,12 +70,12 @@ func log_approx(float x) float {
     if x <= 0.0 { return -1000000.0 }
     float y = 0.0
     if x > 1.5 {
-        while x > 1.5 {
+        for x > 1.5 {
             x = x * 0.5
             y = y + 0.6931471805599453
         }
     } else if x < 0.7 && x > 0.0 {
-        while x < 0.7 {
+        for x < 0.7 {
             x = x * 2.0
             y = y - 0.6931471805599453
         }
@@ -85,7 +85,7 @@ func log_approx(float x) float {
     float series = z
     float term = z
     int i = 3
-    while i <= 15 {
+    for i <= 15 {
         term = term * z2
         series = series + term / float_of_int(i)
         i = i + 2
@@ -96,7 +96,7 @@ func log_approx(float x) float {
 func float_of_int(int n) float {
     float result = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         result = result + 1.0
         i = i + 1
     }
@@ -127,7 +127,7 @@ func compute_rope_frequencies(int seq_len, int dim, float base) []float {
     int half_dim = dim / 2
     []float freqs = []float{cap: half_dim}
     int i = 0
-    while i < half_dim {
+    for i < half_dim {
         float exponent = float_of_int(i * 2) / float_of_int(dim)
         freqs[i] = 1.0 / pow_float(base, exponent)
         i = i + 1
@@ -145,7 +145,7 @@ func rope_linear_scaling(
     []float freqs = compute_rope_frequencies(cfg.original_max_seq_len, cfg.dim, cfg.base)
     []float angles = []float{cap: half_dim}
     int i = 0
-    while i < half_dim {
+    for i < half_dim {
         angles[i] = scaled_pos * freqs[i]
         i = i + 1
     }
@@ -170,14 +170,14 @@ func rope_ntk_scaling(
     }
     []float freqs = []float{cap: half_dim}
     int i = 0
-    while i < half_dim {
+    for i < half_dim {
         float exponent = float_of_int(i * 2) / float_of_int(cfg.dim)
         freqs[i] = 1.0 / pow_float(new_base, exponent)
         i = i + 1
     }
     []float angles = []float{cap: half_dim}
     i = 0
-    while i < half_dim {
+    for i < half_dim {
         angles[i] = float_of_int(position) * freqs[i]
         i = i + 1
     }
@@ -194,7 +194,7 @@ func rope_yarn_scaling(
     float inv_beta_fast = 1.0 / cfg.yarn_beta_fast
     float inv_beta_slow = 1.0 / cfg.yarn_beta_slow
     int i = 0
-    while i < half_dim {
+    for i < half_dim {
         float t = freqs[i]
         float log_t = log_approx(max_float(t, 1e-10))
         float decay = 0.5 * (1.0 + tanh_approx(log_t * inv_beta_fast))
@@ -204,7 +204,7 @@ func rope_yarn_scaling(
     }
     []float angles = []float{cap: half_dim}
     i = 0
-    while i < half_dim {
+    for i < half_dim {
         float scaled_freq = freqs[i] * (1.0 - lambdas[i]) +
                             freqs[i] * cfg.yarn_scale * lambdas[i]
         angles[i] = float_of_int(position) * scaled_freq
@@ -242,7 +242,7 @@ func get_rope_angles(
     []float cos_vals = []float{cap: half_dim}
     []float sin_vals = []float{cap: half_dim}
     int i = 0
-    while i < half_dim {
+    for i < half_dim {
         cos_vals[i] = cos_approx(angles[i])
         sin_vals[i] = sin_approx(angles[i])
         i = i + 1
@@ -271,7 +271,7 @@ func build_rope_cache(rope_scaling_config cfg, int seq_len) rope_cache {
     [][]float sin_table = [][]float{cap: seq_len}
     float attn_scale = 1.0
     int pos = 0
-    while pos < seq_len {
+    for pos < seq_len {
         rope_result r = get_rope_angles(cfg, pos)
         cos_table[pos] = r.cos_values
         sin_table[pos] = r.sin_values
@@ -294,7 +294,7 @@ func apply_rope_single(
     int half_d = d / 2
     []float out = []float{cap: d}
     int i = 0
-    while i < half_d {
+    for i < half_d {
         float x0 = x[2 * i]
         float x1 = x[2 * i + 1]
         float cos_val = angles.cos_values[i]
@@ -318,13 +318,13 @@ func apply_rope_batch(
     int half_d = head_dim / 2
     [][][]float out = [][][]float{cap: seq_len}
     int s = 0
-    while s < seq_len {
+    for s < seq_len {
         out[s] = [][][]float{cap: num_heads}
         int h = 0
-        while h < num_heads {
+        for h < num_heads {
             out[s][h] = []float{cap: head_dim}
             int i = 0
-            while i < half_d {
+            for i < half_d {
                 float x0 = x[s][h][2 * i]
                 float x1 = x[s][h][2 * i + 1]
                 float cos_val = cache.all_cos[s][i]
@@ -343,7 +343,7 @@ func apply_rope_batch(
 func cos_approx(float x) float {
     float pi = 3.141592653589793
     float two_pi = 2.0 * pi
-    while x > pi || x < -pi {
+    for x > pi || x < -pi {
         if x > pi { x = x - two_pi }
         if x < -pi { x = x + two_pi }
     }
@@ -351,7 +351,7 @@ func cos_approx(float x) float {
     float result = 1.0
     float xx = x * x
     int n = 1
-    while n <= 12 {
+    for n <= 12 {
         term = -term * xx / float_of_int((2 * n - 1) * (2 * n))
         result = result + term
         n = n + 1
@@ -362,7 +362,7 @@ func cos_approx(float x) float {
 func sin_approx(float x) float {
     float pi = 3.141592653589793
     float two_pi = 2.0 * pi
-    while x > pi || x < -pi {
+    for x > pi || x < -pi {
         if x > pi { x = x - two_pi }
         if x < -pi { x = x + two_pi }
     }
@@ -370,7 +370,7 @@ func sin_approx(float x) float {
     float result = x
     float xx = x * x
     int n = 1
-    while n <= 12 {
+    for n <= 12 {
         term = -term * xx / float_of_int((2 * n) * (2 * n + 1))
         result = result + term
         n = n + 1
@@ -413,10 +413,10 @@ func validate_rope_scaling(
 ) bool {
     bool passed = true
     int p = 0
-    while p < test_positions_count {
+    for p < test_positions_count {
         rope_result r = get_rope_angles(cfg, p)
         int i = 0
-        while i < len(r.cos_values) {
+        for i < len(r.cos_values) {
             float val = r.cos_values[i] * r.cos_values[i] +
                         r.sin_values[i] * r.sin_values[i]
             if val < 0.99 || val > 1.01 {

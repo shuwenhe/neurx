@@ -47,7 +47,7 @@ func init_stateless_group(stateless_group_config config) stateless_group_state {
 func stateless_copy_payload([]int payload) []int {
     []int copied = []int{cap: len(payload)}
     int i = 0
-    while i < len(payload) { copied[i] = payload[i]; i = i + 1 }
+    for i < len(payload) { copied[i] = payload[i]; i = i + 1 }
     copied
 }
 

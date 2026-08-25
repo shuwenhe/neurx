@@ -30,7 +30,7 @@ func create_partition_info(int total_params, int num_partitions, int partition_i
 func get_local_partition([]float global_data, partition_info info) []float {
     []float local_data = []
     int i = info.start_idx
-    while i < info.end_idx {
+    for i < info.end_idx {
         if i < len(global_data) {
             local_data = append(local_data, global_data[i])
         }
@@ -42,13 +42,13 @@ func get_local_partition([]float global_data, partition_info info) []float {
 func scatter_partition([]float local_data, partition_info info, int total_size) []float {
     []float global_data = []
     int i = 0
-    while i < total_size {
+    for i < total_size {
         global_data = append(global_data, 0.0)
         i = i + 1
     }
     i = 0
     int idx = info.start_idx
-    while i < len(local_data) && idx < info.end_idx {
+    for i < len(local_data) && idx < info.end_idx {
         if idx < total_size {
             global_data[idx] = local_data[i]
         }
@@ -83,7 +83,7 @@ func int_to_string(int n) string {
     }
     string result = ""
     int remaining = n
-    while remaining >= 10 {
+    for remaining >= 10 {
         int digit = remaining - ((remaining / 10) * 10)
         remaining = remaining / 10
         if digit == 0 { result = "0" + result }

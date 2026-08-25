@@ -22,7 +22,7 @@ struct pipeline_parallel_state {
 func copy_ints([]int values) []int {
     []int out = []int{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }
@@ -61,10 +61,10 @@ func mod_nonneg(int value, int divisor) int {
         return 0
     }
     int current = value
-    while current >= divisor {
+    for current >= divisor {
         current = current - divisor
     }
-    while current < 0 {
+    for current < 0 {
         current = current + divisor
     }
     current
@@ -264,7 +264,7 @@ func pp_add_schedule_step(pipeline_parallel_state state, string step_name) pipel
 func pp_assign_default_stage_ranks(pipeline_parallel_state state) pipeline_parallel_state {
     []int stage_ranks = []int{cap: state.num_stages}
     int i = 0
-    while i < state.num_stages {
+    for i < state.num_stages {
         stage_ranks[i] = mod_nonneg(i, state.world_size)
         i = i + 1
     }
@@ -303,12 +303,12 @@ func pp_stage_owner(pipeline_parallel_state state, int stage_idx) int {
 func pp_prepare_schedule(pipeline_parallel_state state) pipeline_parallel_state {
     []string schedule = []string{cap: 2 * state.chunks}
     int i = 0
-    while i < state.chunks {
+    for i < state.chunks {
         schedule[i] = "forward"
         i = i + 1
     }
     int j = 0
-    while j < state.chunks {
+    for j < state.chunks {
         schedule[state.chunks + j] = "backward"
         j = j + 1
     }

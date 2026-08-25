@@ -69,7 +69,7 @@ func load_nccl_id_from_shared_storage(
     string id_file = shared_storage_path + "/nccl_unique_id.txt"
     int elapsed = 0
     int poll_interval = 1
-    while elapsed < timeout_seconds {
+    for elapsed < timeout_seconds {
         if file_exists(id_file) {
             string content = runtime_read_text_file(id_file)
             []string lines = split_string(content, "\n")
@@ -158,7 +158,7 @@ func split_string(string s, string sep) []string {
     int part_idx = 0
     int i = 0
     string current = ""
-    while i < len(s) {
+    for i < len(s) {
         if i + len(sep) <= len(s) {
             string substr = s[i : i + len(sep)]
             if substr == sep {
@@ -197,7 +197,7 @@ func itoa(int n) string {
         s = "-"
         num = -num
     }
-    while num > 0 {
+    for num > 0 {
         byte digit = byte('0' + (num % 10))
         s = string(digit) + s
         num = num / 10

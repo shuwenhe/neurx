@@ -23,7 +23,7 @@ func sequential_add_layer(sequential_module seq, string name, string layer_type)
 
 func sequential_get_layer_index(sequential_module seq, string name) int {
     int i = 0
-    while i < len(seq.layer_names) {
+    for i < len(seq.layer_names) {
         if seq.layer_names[i] == name {
             return i
         }
@@ -99,7 +99,7 @@ func module_dict_get(module_dict md, string key) string {
 
 func module_dict_index_of(module_dict md, string key) int {
     int i = 0
-    while i < len(md.module_keys) {
+    for i < len(md.module_keys) {
         if md.module_keys[i] == key {
             return i
         }

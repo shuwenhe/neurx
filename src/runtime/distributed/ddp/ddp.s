@@ -22,7 +22,7 @@ struct ddp_state {
 func copy_ints([]int values) []int {
     []int out = []int{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }
@@ -38,7 +38,7 @@ func clamp_positive(int value, int fallback) int {
 
 func has_string([]string values, string value) bool {
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if values[i] == value {
             return true
         }

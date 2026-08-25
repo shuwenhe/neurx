@@ -87,7 +87,7 @@ func new_gpt_moe_model(gpt_moe_config cfg) gpt_moe_model {
     []gpt_moe_block blocks = []gpt_moe_block{cap: nl}
     int num_moe = 0
     int l = 0
-    while l < nl {
+    for l < nl {
         bool is_moe = (l - (l / moe_freq) * moe_freq == 0)
         transformer_layer_config_local lc = default_moe_layer_config(cfg.base)
         lc.hidden_dim = H
@@ -129,7 +129,7 @@ func default_moe_layer_config(model_config base) transformer_layer_config_local 
 func gpt_moe_block_at([]gpt_moe_block blocks, int idx) gpt_moe_block {
     gpt_moe_block val = blocks[0]
     int i = 0
-    while i < len(blocks) {
+    for i < len(blocks) {
         if i == idx { val = blocks[i] }
         i = i + 1
     }
@@ -162,14 +162,14 @@ func gpt_moe_block_forward(
     []float qr = gpt_copy(q)
     []float kr = gpt_copy(k)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int tok = b * seq_len + s
             int h = 0
-            while h < nh {
+            for h < nh {
                 int p = 0
-                while p < pair_dim {
+                for p < pair_dim {
                     float angle = (s * 1.0) * rope_freqs[p]
                     float cv = gpt_cos(angle)
                     float sv = gpt_sin(angle)
@@ -182,9 +182,9 @@ func gpt_moe_block_forward(
                 h = h + 1
             }
             int hk = 0
-            while hk < nkv {
+            for hk < nkv {
                 int p = 0
-                while p < pair_dim {
+                for p < pair_dim {
                     float angle = (s * 1.0) * rope_freqs[p]
                     float cv = gpt_cos(angle)
                     float sv = gpt_sin(angle)
@@ -202,19 +202,19 @@ func gpt_moe_block_forward(
     }
     []float attn_out = gpt_alloc(total * H, 0.0)
     b = 0
-    while b < batch_size {
+    for b < batch_size {
         int off_q = b * seq_len * H
         int off_k = b * seq_len * kv_d
         []float qb = gpt_alloc(seq_len * H, 0.0)
         []float kb = gpt_alloc(seq_len * kv_d, 0.0)
         []float vb = gpt_alloc(seq_len * kv_d, 0.0)
         int i = 0
-        while i < seq_len * H    { qb[i] = qr[off_q + i]; i = i+1 }
+        for i < seq_len * H    { qb[i] = qr[off_q + i]; i = i+1 }
         i = 0
-        while i < seq_len * kv_d { kb[i] = kr[off_k + i]; vb[i] = v[off_k + i]; i = i+1 }
+        for i < seq_len * kv_d { kb[i] = kr[off_k + i]; vb[i] = v[off_k + i]; i = i+1 }
         []float sdpa = gpt_causal_sdpa(qb, kb, vb, seq_len, nh, nkv, hd)
         i = 0
-        while i < seq_len * H { attn_out[b*seq_len*H + i] = sdpa[i]; i = i+1 }
+        for i < seq_len * H { attn_out[b*seq_len*H + i] = sdpa[i]; i = i+1 }
         b = b + 1
     }
     []float attn_proj = gpt_matmul(attn_out, block.dense_block.attn.output_weight, total, H, H)
@@ -238,20 +238,20 @@ func gpt_dense_ffn_forward(transformer_layer layer, []float normed2, int total) 
     []float gate = gpt_matmul(normed2, layer.ffn.glu_ffn.gate_weight, total, H, ffn_d)
     []float val  = gpt_matmul(normed2, layer.ffn.glu_ffn.value_weight, total, H, ffn_d)
     int i = 0
-    while i < total * ffn_d {
+    for i < total * ffn_d {
         gate[i] = gate[i] + layer.ffn.glu_ffn.gate_bias[i % ffn_d]
         val[i]  = val[i]  + layer.ffn.glu_ffn.value_bias[i % ffn_d]
         i = i + 1
     }
     []float gv = gpt_alloc(total * ffn_d, 0.0)
     i = 0
-    while i < total * ffn_d {
+    for i < total * ffn_d {
         gv[i] = gpt_swish(gate[i]) * val[i]
         i = i + 1
     }
     []float down = gpt_matmul(gv, layer.ffn.glu_ffn.down_weight, total, ffn_d, H)
     i = 0
-    while i < total * H {
+    for i < total * H {
         down[i] = down[i] + layer.ffn.glu_ffn.down_bias[i % H]
         i = i + 1
     }
@@ -270,7 +270,7 @@ func gpt_moe_forward(
     []float hidden = embed_tokens(model.wte, model.wpe, token_ids, batch_size, seq_len, H)
     float total_aux = 0.0
     int l = 0
-    while l < model.n_layer {
+    for l < model.n_layer {
         gpt_moe_block block = gpt_moe_block_at(model.blocks, l)
         gpt_moe_block_forward_ret _ret = gpt_moe_block_forward(block, hidden, batch_size, seq_len, model.rope_freqs)
         []float next_hidden = _ret.output

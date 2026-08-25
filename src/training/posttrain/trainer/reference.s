@@ -28,7 +28,7 @@ func reference_init_lora_matrices(int rank, int hidden_size, int v_out) referenc
 
 func reference_simulate_updates(reference_trainer trainer) reference_trainer {
     int i = 0
-    while i < trainer.state.q_b_len {
+    for i < trainer.state.q_b_len {
         float step = 0.000001 * ((i + 1) as float)
         if i - (i / 2) * 2 == 1 {
             step = 0.0 - step
@@ -37,7 +37,7 @@ func reference_simulate_updates(reference_trainer trainer) reference_trainer {
         i = i + 1
     }
     i = 0
-    while i < trainer.state.v_b_len {
+    for i < trainer.state.v_b_len {
         float step = 0.000001 * ((i + 1) as float)
         if i - (i / 2) * 2 == 1 {
             step = 0.0 - step
@@ -56,7 +56,7 @@ func reference_compute_adapter_stats(reference_trainer trainer) reference_traine
     int adapter_total = trainer.state.q_a_len + trainer.state.q_b_len +
                         trainer.state.v_a_len + trainer.state.v_b_len
     int i = 0
-    while i < trainer.state.q_b_len {
+    for i < trainer.state.q_b_len {
         float value = trainer.state.lora_q_b[i]
         float abs_value = abs_float(value)
         adapter_l1 = adapter_l1 + abs_value
@@ -67,7 +67,7 @@ func reference_compute_adapter_stats(reference_trainer trainer) reference_traine
         i = i + 1
     }
     i = 0
-    while i < trainer.state.v_b_len {
+    for i < trainer.state.v_b_len {
         float value = trainer.state.lora_v_b[i]
         float abs_value = abs_float(value)
         adapter_l1 = adapter_l1 + abs_value
@@ -190,7 +190,7 @@ func sqrt_lora(float x) float {
     }
     float guess = x
     int i = 0
-    while i < 10 {
+    for i < 10 {
         float next = (guess + x / guess) / 2.0
         if abs_float(next - guess) < 0.00001 {
             return next
@@ -204,7 +204,7 @@ func sqrt_lora(float x) float {
 func reference_fill_f32(int size, float value) []float {
     []float arr = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         arr[i] = value
         i = i + 1
     }
@@ -222,7 +222,7 @@ func int_to_str(int n) string {
         n = 0 - n
     }
     []string digits = []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
-    while n > 0 {
+    for n > 0 {
         int digit = n - (n / 10) * 10
         result = digits[digit] + result
         n = n / 10
@@ -241,7 +241,7 @@ func float_to_str(float f, int precision) string {
     }
     string result = int_to_str(int_part) + "."
     int i = 0
-    while i < precision {
+    for i < precision {
         frac_part = frac_part * 10.0
         int digit = frac_part as int
         result = result + int_to_str(digit)

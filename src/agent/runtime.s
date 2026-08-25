@@ -83,7 +83,7 @@ func agent_runtime_repair_attempt_count(agent_memory_state memory_state) int {
     string raw = count_result.value
     int value = 0
     int i = 0
-    while i < len(raw) {
+    for i < len(raw) {
         if s_char_is_digit(raw, i) {
             value = value * 10 + s_char_digit_val(raw, i)
         }
@@ -240,7 +240,7 @@ func agent_runtime_pending_count(agent_memory_state memory_state) int {
     string raw = count_result.value
     int value = 0
     int i = 0
-    while i < len(raw) {
+    for i < len(raw) {
         if s_char_is_digit(raw, i) {
             value = value * 10 + s_char_digit_val(raw, i)
         }
@@ -302,7 +302,7 @@ func agent_runtime_pending_summary(agent_memory_state memory_state) string {
     }
     string out = agent_runtime_observation("show_pending_changes", "ok", "pending_change_count=" + string(count))
     int i = 0
-    while i < count {
+    for i < count {
         string idx = string(i)
         agent_memory_lookup_result action_result = agent_memory_lookup_long(memory_state, "pending_change_action_" + idx)
         agent_memory_lookup_result input_result = agent_memory_lookup_long(action_result.state, "pending_change_input_" + idx)
@@ -368,7 +368,7 @@ func agent_runtime_clear_pending_changes(agent_memory_state memory_state) agent_
     int count = agent_runtime_pending_count(memory_state)
     agent_memory_state next = memory_state
     int i = 0
-    while i < count {
+    for i < count {
         string idx = string(i)
         next = agent_memory_delete(next, "pending_change_action_" + idx)
         next = agent_memory_delete(next, "pending_change_input_" + idx)
@@ -392,7 +392,7 @@ func agent_runtime_apply_pending_changes(agent_memory_state memory_state) agent_
     bool all_ok = true
     int changed_count = 0
     int i = 0
-    while i < count {
+    for i < count {
         string idx = string(i)
         agent_memory_lookup_result action_result = agent_memory_lookup_long(memory_state, "pending_change_action_" + idx)
         agent_memory_lookup_result input_result = agent_memory_lookup_long(action_result.state, "pending_change_input_" + idx)
@@ -688,7 +688,7 @@ func agent_runtime_code_agent_task_queue(agent_tool_registry_state tools) []stri
 func agent_runtime_plan_with_task_queue(agent_plan_state plan, []string tasks) agent_plan_state {
     agent_plan_state next = plan
     int i = 0
-    while i < len(tasks) {
+    for i < len(tasks) {
         next = agent_plan_enqueue_task(next, tasks[i])
         i = i + 1
     }
@@ -1000,7 +1000,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
             string smsr = spawn_steps_raw.value
             int smsv = 0
             int si = 0
-            while si < len(smsr) {
+            for si < len(smsr) {
                 if s_char_is_digit(smsr, si) {
                     smsv = smsv * 10 + s_char_digit_val(smsr, si)
                 }
@@ -1085,7 +1085,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
             string pq = pq_result.value
             int pq_start = 0
             int pi = 0
-            while pi < len(pq) {
+            for pi < len(pq) {
                 if string(pq[pi]) == "[" {
                     pq_start = pi + 1
                     break
@@ -1094,7 +1094,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
             }
             int pq_end = len(pq)
             pi = pq_end - 1
-            while pi >= 0 {
+            for pi >= 0 {
                 if string(pq[pi]) == "]" {
                     pq_end = pi
                     break
@@ -1103,7 +1103,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
             }
             string token = ""
             pi = pq_start
-            while pi <= pq_end {
+            for pi <= pq_end {
                 bool at_sep = pi == pq_end || string(pq[pi]) == ","
                 if at_sep {
                     string t = trim(token)
@@ -1207,7 +1207,7 @@ func agent_runtime_run_pending_subagents(agent_runtime_state state) agent_runtim
     }
     agent_memory_state merged_memory = state.memory
     int i = 0
-    while i < n {
+    for i < n {
         agent_subagent_task t = registry.tasks[i]
         if t.status == "pending" {
             agent_runtime_state sub_state = new_agent_runtime_state_with_model(t.goal, "analyze", t.max_steps, state.model_path)
@@ -1256,7 +1256,7 @@ func run_agent_steps(agent_runtime_state state, string input, int max_steps) age
     }
     agent_runtime_state current = state
     int i = 0
-    while i < total {
+    for i < total {
         current = agent_runtime_step(current, input)
         if !agent_subagent_all_done(current.subagents) {
             current = agent_runtime_run_pending_subagents(current)
@@ -1278,7 +1278,7 @@ func run_agent_steps(agent_runtime_state state, string input, int max_steps) age
 func run_agent_steps_batch(agent_runtime_state state, []string inputs, int max_steps_per_input) agent_runtime_state {
     agent_runtime_state current = state
     int ni = 0
-    while ni < len(inputs) {
+    for ni < len(inputs) {
         current = run_agent_steps(current, inputs[ni], max_steps_per_input)
         if current.finished {
             return current
@@ -1291,7 +1291,7 @@ func run_agent_steps_batch(agent_runtime_state state, []string inputs, int max_s
 func agent_runtime_replay_line_value(string line) string {
     int eq = 0
     int li = 0
-    while li < len(line) {
+    for li < len(line) {
         if string(line[li]) == "=" {
             eq = li + 1
             break
@@ -1304,7 +1304,7 @@ func agent_runtime_replay_line_value(string line) string {
     int val_len = len(line) - eq
     string val = ""
     int vi = 0
-    while vi < val_len {
+    for vi < val_len {
         val = val + string(line[eq + vi])
         vi = vi + 1
     }
@@ -1326,7 +1326,7 @@ func agent_runtime_replay_trajectory(agent_runtime_state state, string path) age
     int cur_step = 0
     string cur_line = ""
     int ci = 0
-    while ci <= content_len {
+    for ci <= content_len {
         bool at_end = ci == content_len
         bool at_newline = !at_end && string(content[ci]) == "\n"
         if at_newline || at_end {
@@ -1347,7 +1347,7 @@ func agent_runtime_replay_trajectory(agent_runtime_state state, string path) age
                 } else if agent_text_contains(ln, "step[") {
                     int step_val = 0
                     int si = 0
-                    while si < len(val) {
+                    for si < len(val) {
                         if s_char_is_digit(val, si) {
                             step_val = step_val * 10 + s_char_digit_val(val, si)
                         }
@@ -1411,7 +1411,7 @@ func agent_runtime_import_skill_snapshot(agent_runtime_state state, string path)
     int cur_step = 0
     string cur_line = ""
     int ci = 0
-    while ci <= content_len {
+    for ci <= content_len {
         bool at_end = ci == content_len
         bool at_newline = !at_end && string(content[ci]) == "\n"
         if at_newline || at_end {
@@ -1430,7 +1430,7 @@ func agent_runtime_import_skill_snapshot(agent_runtime_state state, string path)
                 } else if agent_text_contains(ln, ".created_step=") {
                     int sv = 0
                     int si = 0
-                    while si < len(val) {
+                    for si < len(val) {
                         if s_char_is_digit(val, si) {
                             sv = sv * 10 + s_char_digit_val(val, si)
                         }
@@ -1443,7 +1443,7 @@ func agent_runtime_import_skill_snapshot(agent_runtime_state state, string path)
                     int int_part = 0
                     bool past_dot = false
                     float frac = 0.1
-                    while si < len(val) {
+                    for si < len(val) {
                         if s_char_is_digit(val, si) {
                             if past_dot {
                                 fv = fv + float(s_char_digit_val(val, si)) * frac
@@ -1467,7 +1467,7 @@ func agent_runtime_import_skill_snapshot(agent_runtime_state state, string path)
                     int int_part = 0
                     bool past_dot = false
                     float frac = 0.1
-                    while si < len(val) {
+                    for si < len(val) {
                         if s_char_is_digit(val, si) {
                             if past_dot {
                                 fv = fv + float(s_char_digit_val(val, si)) * frac
@@ -1491,7 +1491,7 @@ func agent_runtime_import_skill_snapshot(agent_runtime_state state, string path)
                     int int_part = 0
                     bool past_dot = false
                     float frac = 0.1
-                    while si < len(val) {
+                    for si < len(val) {
                         if s_char_is_digit(val, si) {
                             if past_dot {
                                 fv = fv + float(s_char_digit_val(val, si)) * frac
@@ -1734,14 +1734,14 @@ func agent_runtime_is_stalled(agent_runtime_state state) bool {
     int start = size - 3
     string ref_task = state.trace.tasks[start]
     int i = start + 1
-    while i < size {
+    for i < size {
         if state.trace.tasks[i] != ref_task {
             return false
         }
         i = i + 1
     }
     i = start
-    while i < size {
+    for i < size {
         if state.trace.ok_flags[i] {
             return false
         }
@@ -1765,7 +1765,7 @@ func agent_runtime_restore_checkpoint(string goal, string dir) agent_runtime_sta
 func agent_runtime_run_until_stalled(agent_runtime_state state, string input, int max_steps) agent_runtime_state {
     agent_runtime_state current = state
     int i = 0
-    while i < max_steps {
+    for i < max_steps {
         if current.finished {
             return current
         }
@@ -1781,12 +1781,12 @@ func agent_runtime_run_until_stalled(agent_runtime_state state, string input, in
 func agent_runtime_merge_memory(agent_runtime_state state, agent_runtime_state other) agent_runtime_state {
     agent_memory_state merged = state.memory
     int si = 0
-    while si < len(other.memory.short_keys) {
+    for si < len(other.memory.short_keys) {
         merged = agent_memory_write_short(merged, other.memory.short_keys[si], other.memory.short_values[si])
         si = si + 1
     }
     int li = 0
-    while li < len(other.memory.long_keys) {
+    for li < len(other.memory.long_keys) {
         merged = agent_memory_write_long(merged, other.memory.long_keys[li], other.memory.long_values[li])
         li = li + 1
     }

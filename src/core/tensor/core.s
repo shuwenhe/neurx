@@ -75,7 +75,7 @@ func copy_int([]int values) []int {
     int n = len(values)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = values[i]
         i = i + 1
     }
@@ -86,7 +86,7 @@ func copy_float([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = values[i]
         i = i + 1
     }
@@ -96,7 +96,7 @@ func copy_float([]float values) []float {
 func zeros_float(int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = 0.0
         i = i + 1
     }
@@ -106,7 +106,7 @@ func zeros_float(int n) []float {
 func shape_numel([]int shape) int {
     int n = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         n = n * shape[i]
         i = i + 1
     }
@@ -118,7 +118,7 @@ func contiguous_strides([]int shape) []int {
     []int strides = []int{cap: ndim}
     int stride = 1
     int i = ndim - 1
-    while i >= 0 {
+    for i >= 0 {
         strides[i] = stride
         stride = stride * shape[i]
         i = i - 1
@@ -131,7 +131,7 @@ func same_ints([]int a, []int b) bool {
         return false
     }
     int i = 0
-    while i < len(a) {
+    for i < len(a) {
         if a[i] != b[i] {
             return false
         }
@@ -158,14 +158,14 @@ func broadcast_shape([]int a, []int b) []int {
     }
     []int out = []int{cap: ndim}
     int i = 0
-    while i < ndim {
+    for i < ndim {
         out[i] = 1
         i = i + 1
     }
     int ia = ndim_a - 1
     int ib = ndim_b - 1
     int io = ndim - 1
-    while io >= 0 {
+    for io >= 0 {
         int dim_a = 1
         int dim_b = 1
         if ia >= 0 {
@@ -200,7 +200,7 @@ func broadcastable_shape([]int a, []int b) bool {
     int ia = ndim_a - 1
     int ib = ndim_b - 1
     int i = ndim - 1
-    while i >= 0 {
+    for i >= 0 {
         int dim_a = 1
         int dim_b = 1
         if ia >= 0 {
@@ -232,17 +232,17 @@ func sum_to_shape(tensor src, []int target_shape) tensor {
     tensor out = empty(out_shape, input.desc.dtype, input.desc.device, input.desc.requires_grad)
     int total = input.desc.numel
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int src_coords = unravel_index(flat, input.desc.shape)
         []int dst_coords = []int{cap: target_rank}
         int i = 0
-        while i < target_rank {
+        for i < target_rank {
             dst_coords[i] = 0
             i = i + 1
         }
         int src_axis = input_rank - 1
         int dst_axis = target_rank - 1
-        while dst_axis >= 0 {
+        for dst_axis >= 0 {
             int src_dim = 1
             int dst_dim = target_shape[dst_axis]
             if src_axis >= 0 {
@@ -273,13 +273,13 @@ func unravel_index(int flat_index, []int shape) []int {
     int ndim = len(shape)
     []int coords = []int{cap: ndim}
     int i = 0
-    while i < ndim {
+    for i < ndim {
         coords[i] = 0
         i = i + 1
     }
     int remaining = flat_index
     i = ndim - 1
-    while i >= 0 {
+    for i >= 0 {
         int size = shape[i]
         int coord = 0
         if size > 0 {
@@ -297,7 +297,7 @@ func ravel_index([]int coords, []int shape) int {
     int flat = 0
     int stride = 1
     int i = ndim - 1
-    while i >= 0 {
+    for i >= 0 {
         flat = flat + coords[i] * stride
         stride = stride * shape[i]
         i = i - 1
@@ -353,7 +353,7 @@ func empty([]int shape, string dtype, string device, bool requires_grad) tensor 
 func full([]int shape, float value, string dtype, string device, bool requires_grad) tensor {
     tensor out = empty(shape, dtype, device, requires_grad)
     int i = 0
-    while i < out.desc.numel {
+    for i < out.desc.numel {
         out.storage[i] = value
         i = i + 1
     }
@@ -372,7 +372,7 @@ func from_data([]float data, []int shape, string dtype, string device, bool requ
     tensor_desc desc = make_desc(shape, dtype, device, requires_grad)
     []float storage = zeros_float(desc.numel)
     int i = 0
-    while i < desc.numel && i < len(data) {
+    for i < desc.numel && i < len(data) {
         storage[i] = data[i]
         i = i + 1
     }
@@ -392,7 +392,7 @@ func storage_offset_for_linear(tensor t, int linear_index) int {
     int remaining = linear_index
     int offset = t.desc.storage_offset
     int i = len(t.desc.shape) - 1
-    while i >= 0 {
+    for i >= 0 {
         int dim = t.desc.shape[i]
         int coord = 0
         if dim > 0 {
@@ -467,7 +467,7 @@ func broadcast_offset(tensor t, []int out_coords) int {
     int src_axis = src_ndim - 1
     int out_axis = out_ndim - 1
     int offset = t.desc.storage_offset
-    while out_axis >= 0 {
+    for out_axis >= 0 {
         if src_axis >= 0 {
             int dim = t.desc.shape[src_axis]
             int coord = out_coords[out_axis]
@@ -494,7 +494,7 @@ func elementwise_binary(tensor a, tensor b, string op) tensor {
     tensor out = empty(out_shape, left.desc.dtype, left.desc.device, left.desc.requires_grad || right.desc.requires_grad)
     int total = out.desc.numel
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, out_shape)
         int left_off = broadcast_offset(left, coords)
         int right_off = broadcast_offset(right, coords)
@@ -526,7 +526,7 @@ func broadcast_to(tensor a, []int target_shape) tensor {
     tensor out = empty(target_shape, src.desc.dtype, src.desc.device, src.desc.requires_grad)
     int total = out.desc.numel
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int dst_coords = unravel_index(flat, target_shape)
         int src_off = broadcast_offset(src, dst_coords)
         out.storage[flat] = src.storage[src_off]
@@ -541,7 +541,7 @@ func contiguous(tensor t) tensor {
     }
     tensor out = empty(t.desc.shape, t.desc.dtype, t.desc.device, t.desc.requires_grad)
     int i = 0
-    while i < t.desc.numel {
+    for i < t.desc.numel {
         out.storage[i] = get(t, i)
         i = i + 1
     }
@@ -572,7 +572,7 @@ func tanh_approx(float x) float {
 func fill_like(tensor like, float value) tensor {
     tensor out = empty(like.desc.shape, like.desc.dtype, like.desc.device, like.desc.requires_grad)
     int i = 0
-    while i < out.desc.numel {
+    for i < out.desc.numel {
         out.storage[i] = value
         i = i + 1
     }
@@ -591,7 +591,7 @@ func unary_elementwise(tensor a, string op) tensor {
     tensor src = contiguous(a)
     tensor out = empty(src.desc.shape, src.desc.dtype, src.desc.device, src.desc.requires_grad)
     int i = 0
-    while i < src.desc.numel {
+    for i < src.desc.numel {
         float v = src.storage[i]
         if op == "relu" {
             if v < 0.0 {
@@ -601,7 +601,7 @@ func unary_elementwise(tensor a, string op) tensor {
             float term = 1.0
             float sum = 1.0
             int k = 1
-            while k <= 6 {
+            for k <= 6 {
                 term = term * v / int_to_float(k)
                 sum = sum + term
                 k = k + 1
@@ -627,7 +627,7 @@ func unary_elementwise(tensor a, string op) tensor {
                 guess = 1.0
             }
             int k2 = 0
-            while k2 < 6 {
+            for k2 < 6 {
                 guess = 0.5 * (guess + x2 / guess)
                 k2 = k2 + 1
             }
@@ -666,7 +666,7 @@ func gelu(tensor a) tensor {
     tensor src = contiguous(a)
     tensor out = empty(src.desc.shape, src.desc.dtype, src.desc.device, src.desc.requires_grad)
     int i = 0
-    while i < src.desc.numel {
+    for i < src.desc.numel {
         float x = src.storage[i]
         float inner = 0.7978845608 * (x + 0.044715 * x * x * x)
         out.storage[i] = 0.5 * x * (1.0 + tanh_approx(inner))
@@ -692,19 +692,19 @@ func softmax(tensor a, int dim) tensor {
     tensor out = empty(out_shape, src.desc.dtype, src.desc.device, src.desc.requires_grad)
     int outer = 1
     int i = 0
-    while i < ndim {
+    for i < ndim {
         if i != axis {
             outer = outer * src.desc.shape[i]
         }
         i = i + 1
     }
     int outer_index = 0
-    while outer_index < outer {
+    for outer_index < outer {
         []int base = unravel_index(outer_index, out_shape)
         []int coords = []int{cap: ndim}
         int j = 0
         int k = 0
-        while j < ndim {
+        for j < ndim {
             if j == axis {
                 coords[j] = 0
             } else {
@@ -716,7 +716,7 @@ func softmax(tensor a, int dim) tensor {
         float max_v = src.storage[ravel_index(coords, src.desc.shape)]
         int axis_size = src.desc.shape[axis]
         int aidx = 1
-        while aidx < axis_size {
+        for aidx < axis_size {
             coords[axis] = aidx
             float v = src.storage[ravel_index(coords, src.desc.shape)]
             if v > max_v {
@@ -726,7 +726,7 @@ func softmax(tensor a, int dim) tensor {
         }
         float denom = 0.0
         aidx = 0
-        while aidx < axis_size {
+        for aidx < axis_size {
             coords[axis] = aidx
             int dst = ravel_index(coords, src.desc.shape)
             float v = exp_approx(src.storage[dst] - max_v)
@@ -738,7 +738,7 @@ func softmax(tensor a, int dim) tensor {
             denom = 1.0
         }
         aidx = 0
-        while aidx < axis_size {
+        for aidx < axis_size {
             coords[axis] = aidx
             int dst2 = ravel_index(coords, src.desc.shape)
             out.storage[dst2] = out.storage[dst2] / denom
@@ -788,7 +788,7 @@ func sum_all(tensor a) tensor {
     scalar_shape[0] = 1
     tensor out = zeros(scalar_shape, src.desc.dtype, src.desc.device, src.desc.requires_grad)
     int i = 0
-    while i < src.desc.numel {
+    for i < src.desc.numel {
         out.storage[0] = out.storage[0] + src.storage[i]
         i = i + 1
     }
@@ -817,7 +817,7 @@ func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
             out_shape = []int{cap: ndim - 1}
             int i = 0
             int j = 0
-            while i < ndim {
+            for i < ndim {
                 if i != axis {
                     out_shape[j] = src.desc.shape[i]
                     j = j + 1
@@ -829,7 +829,7 @@ func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
     tensor out = empty(out_shape, src.desc.dtype, src.desc.device, src.desc.requires_grad)
     int total = out.desc.numel
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = unravel_index(flat, out_shape)
         float acc = 0.0
         if mode == "max" || mode == "min" {
@@ -843,7 +843,7 @@ func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
                 []int base_coords2 = []int{cap: ndim}
                 int i2 = 0
                 int j2 = 0
-                while i2 < ndim {
+                for i2 < ndim {
                     if i2 == axis {
                         base_coords2[i2] = 0
                     } else {
@@ -855,7 +855,7 @@ func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
                 first_off = broadcast_offset(src, base_coords2)
             }
             acc = src.storage[first_off]
-            while red < src.desc.shape[axis] {
+            for red < src.desc.shape[axis] {
                 int src_off
                 if keepdim {
                     []int base_coords3 = copy_int(coords)
@@ -865,7 +865,7 @@ func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
                     []int base_coords4 = []int{cap: ndim}
                     int i3 = 0
                     int j3 = 0
-                    while i3 < ndim {
+                    for i3 < ndim {
                         if i3 == axis {
                             base_coords4[i3] = red
                         } else {
@@ -890,7 +890,7 @@ func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
         } else if mode == "prod" {
             acc = 1.0
             int red2 = 0
-            while red2 < src.desc.shape[axis] {
+            for red2 < src.desc.shape[axis] {
                 int src_off2
                 if keepdim {
                     []int base_coords5 = copy_int(coords)
@@ -900,7 +900,7 @@ func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
                     []int base_coords6 = []int{cap: ndim}
                     int i4 = 0
                     int j4 = 0
-                    while i4 < ndim {
+                    for i4 < ndim {
                         if i4 == axis {
                             base_coords6[i4] = red2
                         } else {
@@ -916,7 +916,7 @@ func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
             }
         } else {
             int red3 = 0
-            while red3 < src.desc.shape[axis] {
+            for red3 < src.desc.shape[axis] {
                 int src_off3
                 if keepdim {
                     []int base_coords7 = copy_int(coords)
@@ -926,7 +926,7 @@ func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
                     []int base_coords8 = []int{cap: ndim}
                     int i5 = 0
                     int j5 = 0
-                    while i5 < ndim {
+                    for i5 < ndim {
                         if i5 == axis {
                             base_coords8[i5] = red3
                         } else {
@@ -998,12 +998,12 @@ func matmul2d(tensor a, tensor b) tensor {
     shape[1] = n
     tensor out = zeros(shape, left.desc.dtype, left.desc.device, left.desc.requires_grad || right.desc.requires_grad)
     int row = 0
-    while row < m {
+    for row < m {
         int col = 0
-        while col < n {
+        for col < n {
             float acc = 0.0
             int p = 0
-            while p < k {
+            for p < k {
                 acc = acc + left.storage[row * k + p] * right.storage[p * n + col]
                 p = p + 1
             }

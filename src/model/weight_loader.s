@@ -51,7 +51,7 @@ func parse_f32_le([]int bytes, int offset) float {
 func load_tensor_simple([]int file_bytes, int tensor_offset, int num_elements) []float {
     []float data = []float{cap: num_elements}
     int i = 0
-    while i < num_elements {
+    for i < num_elements {
         float val = parse_f32_le(file_bytes, tensor_offset + i * 4)
         data[i] = val
         i = i + 1
@@ -68,7 +68,7 @@ func load_model_weights_mock(string model_dir, int hidden_size, int num_layers) 
     int intermediate_size = 4864
     []layer_weights layers = []layer_weights{cap: num_layers}
     int i = 0
-    while i < num_layers {
+    for i < num_layers {
         layers[i] = layer_weights{
             q_proj: init_gaussian(hidden_size * hidden_size, 0.02),
             k_proj: init_gaussian(hidden_size * hidden_size, 0.02),
@@ -102,7 +102,7 @@ func load_model_weights_real(string model_dir) model_weights {
     eprintln("[Weight Loader] Initializing layer weights...")
     []layer_weights layers = []layer_weights{cap: num_layers}
     int i = 0
-    while i < num_layers {
+    for i < num_layers {
         layers[i] = layer_weights{
             q_proj: init_gaussian(hidden_size * hidden_size, 0.02),
             k_proj: init_gaussian(hidden_size * hidden_size, 0.02),
@@ -132,7 +132,7 @@ func load_model_weights_real(string model_dir) model_weights {
 func init_gaussian(int size, float std) []float {
     []float arr = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         float val = ((i * 12345 + 67890) - ((i * 12345 + 67890) / 100000) * 100000) as float
         val = (val / 100000.0 - 0.5) * std * 2.0
         arr[i] = val
@@ -144,7 +144,7 @@ func init_gaussian(int size, float std) []float {
 func ones_array(int size) []float {
     []float arr = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         arr[i] = 1.0
         i = i + 1
     }
@@ -156,7 +156,7 @@ func int_to_str(int x) string {
     if x < 0 { return "-" + int_to_str(0 - x) }
     string result = ""
     int num = x
-    while num > 0 {
+    for num > 0 {
         int digit = num - ((num / 10) * 10)
         if digit == 0 { result = "0" + result }
         if digit == 1 { result = "1" + result }

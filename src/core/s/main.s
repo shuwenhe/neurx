@@ -9,7 +9,7 @@ func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -20,7 +20,7 @@ func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }

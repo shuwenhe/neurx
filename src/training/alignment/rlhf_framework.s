@@ -93,7 +93,7 @@ func train_sft_epoch(
     sft_train_state state = init_sft_state()
     int batch_idx = 0
     float total_train_loss = 0.0
-    while batch_idx * config.sft_batch_size < train_size {
+    for batch_idx * config.sft_batch_size < train_size {
         int batch_start = batch_idx * config.sft_batch_size
         int batch_end = batch_start + config.sft_batch_size
         if batch_end > train_size {
@@ -102,7 +102,7 @@ func train_sft_epoch(
         instruction_data* batch = alloc(instruction_data, config.sft_batch_size)
         int batch_size = batch_end - batch_start
         int i = 0
-        while i < batch_size {
+        for i < batch_size {
             batch[i] = train_data[batch_start + i]
             i = i + 1
         }
@@ -116,7 +116,7 @@ func train_sft_epoch(
     float total_eval_loss = 0.0
     int eval_batches = 0
     batch_idx = 0
-    while batch_idx * config.sft_batch_size < eval_size {
+    for batch_idx * config.sft_batch_size < eval_size {
         int batch_start = batch_idx * config.sft_batch_size
         int batch_end = batch_start + config.sft_batch_size
         if batch_end > eval_size {
@@ -125,7 +125,7 @@ func train_sft_epoch(
         int batch_size = batch_end - batch_start
         instruction_data* batch = alloc(instruction_data, batch_size)
         int i = 0
-        while i < batch_size {
+        for i < batch_size {
             batch[i] = eval_data[batch_start + i]
             i = i + 1
         }
@@ -143,7 +143,7 @@ func train_sft_epoch(
 func sft_forward_pass(instruction_data* batch, int batch_size, rlhf_config config) float {
     float total_loss = 0.0
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         instruction_data sample = batch[i]
         float logits = 1.0
         float loss = 0.1
@@ -181,7 +181,7 @@ func train_reward_model_epoch(
     int batch_idx = 0
     float total_train_loss = 0.0
     int correct_predictions = 0
-    while batch_idx * config.reward_batch_size < train_size {
+    for batch_idx * config.reward_batch_size < train_size {
         int batch_start = batch_idx * config.reward_batch_size
         int batch_end = batch_start + config.reward_batch_size
         if batch_end > train_size {
@@ -190,14 +190,14 @@ func train_reward_model_epoch(
         int batch_size = batch_end - batch_start
         preference_data* batch = alloc(preference_data, batch_size)
         int i = 0
-        while i < batch_size {
+        for i < batch_size {
             batch[i] = train_data[batch_start + i]
             i = i + 1
         }
         float batch_loss = 0.0
         int batch_correct = 0
         i = 0
-        while i < batch_size {
+        for i < batch_size {
             preference_data sample = batch[i]
             float reward_a = reward_model_forward(sample.response_a, config)
             float reward_b = reward_model_forward(sample.response_b, config)
@@ -227,7 +227,7 @@ func train_reward_model_epoch(
     float total_eval_loss = 0.0
     int eval_correct = 0
     int eval_batches = 0
-    while batch_idx * config.reward_batch_size < eval_size {
+    for batch_idx * config.reward_batch_size < eval_size {
         int batch_start = batch_idx * config.reward_batch_size
         int batch_end = batch_start + config.reward_batch_size
         if batch_end > eval_size {
@@ -236,14 +236,14 @@ func train_reward_model_epoch(
         int batch_size = batch_end - batch_start
         preference_data* batch = alloc(preference_data, batch_size)
         int i = 0
-        while i < batch_size {
+        for i < batch_size {
             batch[i] = eval_data[batch_start + i]
             i = i + 1
         }
         float batch_loss = 0.0
         int batch_correct = 0
         i = 0
-        while i < batch_size {
+        for i < batch_size {
             float reward_a = reward_model_forward(batch[i].response_a, config)
             float reward_b = reward_model_forward(batch[i].response_b, config)
             float loss = ranking_loss(reward_a, reward_b, batch[i].preference)
@@ -378,7 +378,7 @@ func evaluate_consistency(string prompt, string response) float {
 func strlen(string s) int {
     int count = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         count = count + 1
         i = i + 1
     }

@@ -218,7 +218,7 @@ func industrial_int_to_string(int n) string {
         val = -val
     }
     string result = ""
-    while val > 0 {
+    for val > 0 {
         int digit = val % 10
         result = industrial_chr(digit + 48) + result
         val = val / 10
@@ -239,7 +239,7 @@ func industrial_int_from_float(float x) int {
         value = -value
     }
     int whole = 0
-    while value >= 1.0 {
+    for value >= 1.0 {
         whole = whole + 1
         value = value - 1.0
     }
@@ -292,11 +292,11 @@ func industrial_float_to_string_safe(float x) string {
         value = -value
     }
     int exp = 0
-    while value >= 10.0 {
+    for value >= 10.0 {
         value = value / 10.0
         exp = exp + 1
     }
-    while value < 1.0 {
+    for value < 1.0 {
         value = value * 10.0
         exp = exp - 1
     }
@@ -329,14 +329,14 @@ func industrial_float_to_string_safe(float x) string {
 func industrial_trim(string text) string {
     int start = 0
     int end = len(text) - 1
-    while start < len(text) {
+    for start < len(text) {
         int ch = text[start]
         if ch != 32 && ch != 10 && ch != 13 && ch != 9 {
             break
         }
         start = start + 1
     }
-    while end >= start {
+    for end >= start {
         int ch = text[end]
         if ch != 32 && ch != 10 && ch != 13 && ch != 9 {
             break
@@ -348,7 +348,7 @@ func industrial_trim(string text) string {
     }
     string result = ""
     int i = start
-    while i <= end {
+    for i <= end {
         result = result + industrial_chr(text[i])
         i = i + 1
     }
@@ -358,7 +358,7 @@ func industrial_trim(string text) string {
 func industrial_split_lines(string text) []string {
     int count = 1
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         if text[i] == 10 {
             count = count + 1
         }
@@ -368,7 +368,7 @@ func industrial_split_lines(string text) []string {
     string current = ""
     int line_idx = 0
     i = 0
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if ch == 10 {
             lines[line_idx] = industrial_trim(current)
@@ -387,7 +387,7 @@ func industrial_split_words(string text) []string {
     int count = 0
     bool in_word = false
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         bool is_space = ch == 32 || ch == 10 || ch == 13 || ch == 9
         if is_space {
@@ -407,7 +407,7 @@ func industrial_split_words(string text) []string {
     string current = ""
     int word_idx = 0
     i = 0
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if ch == 32 || ch == 10 || ch == 13 || ch == 9 {
             if len(current) > 0 {
@@ -440,7 +440,7 @@ func industrial_substring(string text, int start, int end) string {
     }
     string result = ""
     int i = begin
-    while i < finish {
+    for i < finish {
         result = result + industrial_chr(text[i])
         i = i + 1
     }
@@ -453,7 +453,7 @@ func industrial_hash_token(string token, int vocab_size) int {
     }
     int h = 0
     int i = 0
-    while i < len(token) {
+    for i < len(token) {
         h = (h * 131 + 1) % vocab_size
         i = i + 1
     }
@@ -475,7 +475,7 @@ func industrial_parse_int(string text) int {
         i = 1
     }
     int value = 0
-    while i < len(s) {
+    for i < len(s) {
         int ch = s[i]
         if ch < 48 || ch > 57 {
             return 0
@@ -502,7 +502,7 @@ func industrial_parse_float(string text) float {
         i = 1
     }
     float value = 0.0
-    while i < len(s) {
+    for i < len(s) {
         int ch = s[i]
         if ch == 46 {
             i = i + 1
@@ -519,7 +519,7 @@ func industrial_parse_float(string text) float {
         i = i + 1
     }
     float frac = 0.1
-    while i < len(s) {
+    for i < len(s) {
         int ch = s[i]
         if ch == 101 || ch == 69 {
             break
@@ -545,7 +545,7 @@ func industrial_parse_float(string text) float {
         } else if i < len(s) && s[i] == 43 {
             i = i + 1
         }
-        while i < len(s) {
+        for i < len(s) {
             int ch = s[i]
             if ch < 48 || ch > 57 {
                 break
@@ -559,11 +559,11 @@ func industrial_parse_float(string text) float {
         }
     }
     int scale = exp * exp_sign
-    while scale > 0 {
+    for scale > 0 {
         value = value * 10.0
         scale = scale - 1
     }
-    while scale < 0 {
+    for scale < 0 {
         value = value / 10.0
         scale = scale + 1
     }
@@ -605,7 +605,7 @@ func industrial_sqrt_approx(float x) float {
     float guess = x / 2.0
     float current = guess
     int i = 0
-    while i < 10 {
+    for i < 10 {
         float next = (current + x / current) / 2.0
         if industrial_abs_float(next - current) < 1e-10 {
             return next
@@ -622,7 +622,7 @@ func industrial_pow_int(float base, int exponent) float {
     }
     float result = 1.0
     int i = 0
-    while i < exponent {
+    for i < exponent {
         result = result * base
         i = i + 1
     }
@@ -634,7 +634,7 @@ func industrial_string_has_prefix(string text, string prefix) bool {
         return false
     }
     int i = 0
-    while i < len(prefix) {
+    for i < len(prefix) {
         if text[i] != prefix[i] {
             return false
         }
@@ -649,7 +649,7 @@ func industrial_string_has_suffix(string text, string suffix) bool {
     }
     int offset = len(text) - len(suffix)
     int i = 0
-    while i < len(suffix) {
+    for i < len(suffix) {
         if text[offset + i] != suffix[i] {
             return false
         }
@@ -666,10 +666,10 @@ func industrial_find_substring(string text, string needle) int {
         return -1
     }
     int i = 0
-    while i <= len(text) - len(needle) {
+    for i <= len(text) - len(needle) {
         int j = 0
         bool matched = true
-        while j < len(needle) {
+        for j < len(needle) {
             if text[i + j] != needle[j] {
                 matched = false
                 break
@@ -691,14 +691,14 @@ func industrial_extract_json_string_field(string json_line, string field_name) s
         return ""
     }
     int i = pos + len(needle)
-    while i < len(json_line) {
+    for i < len(json_line) {
         if json_line[i] == 58 {
             i = i + 1
             break
         }
         i = i + 1
     }
-    while i < len(json_line) {
+    for i < len(json_line) {
         if json_line[i] != 32 && json_line[i] != 9 {
             break
         }
@@ -712,7 +712,7 @@ func industrial_extract_json_string_field(string json_line, string field_name) s
     }
     i = i + 1
     string out = ""
-    while i < len(json_line) {
+    for i < len(json_line) {
         if json_line[i] == 34 {
             return out
         }
@@ -747,7 +747,7 @@ func industrial_extract_json_string_field(string json_line, string field_name) s
 func industrial_path_basename(string path) string {
     int last = -1
     int i = 0
-    while i < len(path) {
+    for i < len(path) {
         if path[i] == 47 {
             last = i
         }
@@ -762,7 +762,7 @@ func industrial_path_basename(string path) string {
 func industrial_path_dirname(string path) string {
     int last = -1
     int i = 0
-    while i < len(path) {
+    for i < len(path) {
         if path[i] == 47 {
             last = i
         }
@@ -810,21 +810,21 @@ func industrial_json_string_value(string text, string key) string {
         return ""
     }
     int colon = key_pos + len(key)
-    while colon < len(text) && text[colon] != 58 {
+    for colon < len(text) && text[colon] != 58 {
         colon = colon + 1
     }
     if colon >= len(text) {
         return ""
     }
     int start = colon + 1
-    while start < len(text) && text[start] != 34 {
+    for start < len(text) && text[start] != 34 {
         start = start + 1
     }
     if start >= len(text) {
         return ""
     }
     int finish = start + 1
-    while finish < len(text) && text[finish] != 34 {
+    for finish < len(text) && text[finish] != 34 {
         finish = finish + 1
     }
     if finish >= len(text) {
@@ -854,7 +854,7 @@ func industrial_manifest_paths_from_json(string manifest_path, string manifest) 
     []string lines = industrial_split_lines(manifest)
     int count = 0
     int i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line = industrial_trim(lines[i])
         if industrial_find_substring(line, "\"file\"") >= 0 {
             count = count + 1
@@ -867,7 +867,7 @@ func industrial_manifest_paths_from_json(string manifest_path, string manifest) 
     paths = []string{cap: count}
     int path_idx = 0
     i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line = industrial_trim(lines[i])
         if industrial_find_substring(line, "\"file\"") >= 0 {
             string entry = industrial_json_string_value(line, "\"file\"")
@@ -882,7 +882,7 @@ func industrial_manifest_paths_from_json(string manifest_path, string manifest) 
     if path_idx < len(paths) {
         []string compact = []string{cap: path_idx}
         i = 0
-        while i < path_idx {
+        for i < path_idx {
             compact[i] = paths[i]
             i = i + 1
         }
@@ -898,7 +898,7 @@ func industrial_init_params(int param_count) []float {
     }
     []float params = []float{cap: count}
     int i = 0
-    while i < count {
+    for i < count {
         params[i] = 0.01 + industrial_float_from_int(i) * 0.0001
         i = i + 1
     }
@@ -925,7 +925,7 @@ func industrial_manifest_paths(string manifest_path) []string {
     []string lines = industrial_split_lines(manifest)
     int count = 0
     int i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line = industrial_manifest_path_normalize(lines[i])
         if len(line) > 0 && line[0] != 35 {
             count = count + 1
@@ -935,7 +935,7 @@ func industrial_manifest_paths(string manifest_path) []string {
     paths = []string{cap: count}
     int path_idx = 0
     i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line = industrial_manifest_path_normalize(lines[i])
         if len(line) > 0 && line[0] != 35 {
             string resolved = industrial_manifest_entry_resolve(manifest_path, line)
@@ -949,7 +949,7 @@ func industrial_manifest_paths(string manifest_path) []string {
     if path_idx < len(paths) {
         []string compact = []string{cap: path_idx}
         i = 0
-        while i < path_idx {
+        for i < path_idx {
             compact[i] = paths[i]
             i = i + 1
         }
@@ -985,7 +985,7 @@ func industrial_tokenize_text(string text, int vocab_size) []int {
     }
     []int token_ids = []int{cap: len(words)}
     int i = 0
-    while i < len(words) {
+    for i < len(words) {
         token_ids[i] = industrial_hash_token(words[i], vocab_size)
         i = i + 1
     }
@@ -995,7 +995,7 @@ func industrial_tokenize_text(string text, int vocab_size) []int {
 func industrial_generate_synthetic_text(int shard_index, int seq_len) string {
     string text = ""
     int i = 0
-    while i < seq_len * 2 {
+    for i < seq_len * 2 {
         text = text + "tok" + industrial_int_to_string((shard_index * 7919 + i * 17) % 100000) + " "
         i = i + 1
     }
@@ -1024,7 +1024,7 @@ func industrial_pack_batch(
     []int labels = []int{cap: total}
     int i = 0
     int token_count = len(token_ids)
-    while i < total {
+    for i < total {
         int src = 0
         int next = 0
         if token_count > 0 {
@@ -1122,7 +1122,7 @@ func industrial_partition_batch(
     []int labels = []int{cap: local_tokens}
     int i = 0
     int total_tokens = batch.batch_size * batch.seq_len
-    while i < local_tokens {
+    for i < local_tokens {
         int src = (start * batch.seq_len + i) % total_tokens
         tokens[i] = batch.tokens[src]
         labels[i] = batch.labels[src]
@@ -1143,7 +1143,7 @@ func industrial_average_vector([]float values, int value_count, int world_size) 
         scale = 1.0 / industrial_float_from_int(world_size)
     }
     int i = 0
-    while i < value_count {
+    for i < value_count {
         out[i] = values[i] * scale
         i = i + 1
     }
@@ -1225,7 +1225,7 @@ func industrial_lr_schedule(float base_lr, int step_idx, int total_steps, int wa
 func industrial_vector_norm([]float values, int value_count) float {
     float sum = 0.0
     int i = 0
-    while i < value_count {
+    for i < value_count {
         sum = sum + values[i] * values[i]
         i = i + 1
     }
@@ -1240,7 +1240,7 @@ func industrial_clip_gradients([]float grads, int grad_count, float max_norm) []
     }
     []float clipped = []float{cap: grad_count}
     int i = 0
-    while i < grad_count {
+    for i < grad_count {
         clipped[i] = grads[i] * scale
         i = i + 1
     }
@@ -1255,7 +1255,7 @@ func industrial_model_forward(
     float loss = 0.0
     int i = 0
     int total = batch.batch_size * batch.seq_len
-    while i < total {
+    for i < total {
         int token = batch.tokens[i] % param_count
         float prediction = params[token] * 0.001 + industrial_float_from_int(batch.tokens[i]) / industrial_float_from_int(industrial_min_int(param_count, 100000))
         float target = industrial_float_from_int(batch.labels[i]) / industrial_float_from_int(industrial_min_int(param_count, 100000))
@@ -1279,7 +1279,7 @@ func industrial_model_backward(
     []float grads = []float{cap: param_count}
     int i = 0
     int total = batch.batch_size * batch.seq_len
-    while i < total {
+    for i < total {
         int idx = batch.tokens[i] % param_count
         float token_term = industrial_float_from_int(batch.tokens[i]) * 0.0001
         float label_term = industrial_float_from_int(batch.labels[i]) * 0.0001
@@ -1293,7 +1293,7 @@ func industrial_model_forward_scalar(float param, industrial_batch batch) float 
     float loss = 0.0
     int total = batch.batch_size * batch.seq_len
     int i = 0
-    while i < total {
+    for i < total {
         float prediction = param * 0.001 + industrial_float_from_int(batch.tokens[i]) / industrial_float_from_int(industrial_min_int(batch.seq_len, 100000))
         float target = industrial_float_from_int(batch.labels[i]) / industrial_float_from_int(industrial_min_int(batch.seq_len, 100000))
         float diff = prediction - target
@@ -1311,7 +1311,7 @@ func industrial_model_backward_scalar(float param, industrial_batch batch, float
     float grad = 0.0
     int total = batch.batch_size * batch.seq_len
     int i = 0
-    while i < total {
+    for i < total {
         float token_term = industrial_float_from_int(batch.tokens[i]) * 0.0001
         float label_term = industrial_float_from_int(batch.labels[i]) * 0.0001
         grad = grad + (token_term - label_term) * loss_scale
@@ -1402,7 +1402,7 @@ func industrial_adamw_step(
     opt.step = opt.step + 1
     []float updated = []float{cap: param_count}
     int i = 0
-    while i < param_count {
+    for i < param_count {
         float g = grads[i]
         float update = opt.learning_rate * g
         float wd = opt.weight_decay * params[i]
@@ -1430,7 +1430,7 @@ func industrial_mixed_precision_step(
     grads = industrial_clip_gradients(grads, param_count, 1.0)
     bool overflow = false
     int i = 0
-    while i < param_count {
+    for i < param_count {
         if grads[i] != grads[i] || industrial_abs_float(grads[i]) > 1e12 {
             overflow = true
             break
@@ -1557,7 +1557,7 @@ func industrial_checkpoint_write_text(
     payload = payload + "data.shard_index=" + industrial_int_to_string(data_shard_index) + "\n"
     payload = payload + "data.line_index=" + industrial_int_to_string(data_line_index) + "\n"
     int i = 0
-    while i < param_count {
+    for i < param_count {
         payload = payload + "param_" + industrial_int_to_string(i) + "=" + industrial_float_to_string_safe(params[i]) + "\n"
         payload = payload + "momentum_" + industrial_int_to_string(i) + "=" + industrial_float_to_string_safe(opt.m[i]) + "\n"
         payload = payload + "variance_" + industrial_int_to_string(i) + "=" + industrial_float_to_string_safe(opt.v[i]) + "\n"
@@ -1684,11 +1684,11 @@ func industrial_checkpoint_load(
         scalar_variance: 0.0,
     }
     int i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line = industrial_trim(lines[i])
         if len(line) > 0 && line[0] != 35 {
             int eq = 0
-            while eq < len(line) && line[eq] != 61 {
+            for eq < len(line) && line[eq] != 61 {
                 eq = eq + 1
             }
             if eq < len(line) {
@@ -1791,11 +1791,11 @@ func industrial_checkpoint_load(
     []float m = []float{cap: param_count}
     []float v = []float{cap: param_count}
     i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line = industrial_trim(lines[i])
         if len(line) > 0 && line[0] != 35 {
             int eq = 0
-            while eq < len(line) && line[eq] != 61 {
+            for eq < len(line) && line[eq] != 61 {
                 eq = eq + 1
             }
             if eq < len(line) {
@@ -1956,7 +1956,7 @@ func industrial_run_training(
         tokens_seen = current.tokens_seen
     }
     float loss = 0.0
-    while step_idx < total_steps {
+    for step_idx < total_steps {
         industrial_batch_result batch_result = industrial_next_batch(dataset)
         dataset = batch_result.dataset
         industrial_batch batch = industrial_partition_batch(batch_result.batch, current.dist)
@@ -2017,7 +2017,7 @@ func industrial_exp_approx(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 18 {
+    for i <= 18 {
         term = term * x / industrial_float_from_int(i)
         result = result + term
         i = i + 1
@@ -2039,7 +2039,7 @@ func industrial_enterprise_evaluate(
     }
     industrial_dataset_state current_dataset = dataset
     int i = 0
-    while i < eval_steps {
+    for i < eval_steps {
         industrial_batch_result batch_result = industrial_next_batch(current_dataset)
         current_dataset = batch_result.dataset
         industrial_batch batch = batch_result.batch
@@ -2069,7 +2069,7 @@ func industrial_quantize_params_text(
 ) string {
     int levels = 1
     int i = 0
-    while i < quant_bits {
+    for i < quant_bits {
         levels = levels * 2
         i = i + 1
     }
@@ -2079,7 +2079,7 @@ func industrial_quantize_params_text(
     float min_val = params[0]
     float max_val = params[0]
     i = 0
-    while i < param_count {
+    for i < param_count {
         if params[i] < min_val {
             min_val = params[i]
         }
@@ -2104,7 +2104,7 @@ func industrial_quantize_params_text(
     out = out + "quant.max=" + industrial_float_to_string_safe(max_val) + "\n"
     out = out + "quant.scale=" + industrial_float_to_string_safe(scale) + "\n"
     i = 0
-    while i < param_count {
+    for i < param_count {
         int q = industrial_int_from_float((params[i] - min_val) / scale)
         if q < 0 {
             q = 0
@@ -2133,7 +2133,7 @@ func industrial_distill_params_text(
     out = out + "distill.teacher_count=" + industrial_int_to_string(teacher_count) + "\n"
     out = out + "distill.student_count=" + industrial_int_to_string(effective_student_count) + "\n"
     int i = 0
-    while i < effective_student_count {
+    for i < effective_student_count {
         int start = (i * teacher_count) / effective_student_count
         int end = ((i + 1) * teacher_count) / effective_student_count
         if end <= start {
@@ -2145,7 +2145,7 @@ func industrial_distill_params_text(
         float sum = 0.0
         int count = 0
         int j = start
-        while j < end {
+        for j < end {
             sum = sum + teacher_params[j]
             count = count + 1
             j = j + 1

@@ -10,7 +10,7 @@ func be_exp(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 14 {
+    for i <= 14 {
         term = term * x / (i * 1.0)
         result = result + term
         i = i + 1
@@ -23,13 +23,13 @@ func be_log(float x) float {
     float v = x
     float adj = 0.0
     float ln2 = 0.6931471805599453
-    while v >= 2.0 { v = v * 0.5; adj = adj + ln2 }
-    while v < 1.0 { v = v * 2.0; adj = adj - ln2 }
+    for v >= 2.0 { v = v * 0.5; adj = adj + ln2 }
+    for v < 1.0 { v = v * 2.0; adj = adj - ln2 }
     float z = v - 1.0
     float s = z
     float term = z
     int i = 2
-    while i <= 16 {
+    for i <= 16 {
         term = term * (-z)
         s = s + term / (i * 1.0)
         i = i + 1
@@ -57,14 +57,14 @@ func gpt_sequence_logprob(
     float total_logprob = 0.0
     int num_tokens = 0
     int t = prompt_len
-    while t < seq_len {
+    for t < seq_len {
         int logit_base = (t - 1) * vocab
         int target = full_tokens[t]
         if target < 0 { target = 0 }
         if target >= vocab { target = vocab - 1 }
         float max_l = out.logits[logit_base]
         int j = 1
-        while j < vocab {
+        for j < vocab {
             if out.logits[logit_base + j] > max_l {
                 max_l = out.logits[logit_base + j]
             }
@@ -72,7 +72,7 @@ func gpt_sequence_logprob(
         }
         float sum_exp = 0.0
         j = 0
-        while j < vocab {
+        for j < vocab {
             sum_exp = sum_exp + be_exp(out.logits[logit_base + j] - max_l)
             j = j + 1
         }
@@ -115,7 +115,7 @@ func mc_predict(language_model model, mc_question q) int {
     int best_idx = 0
     float best_score = -1000000000.0
     int c = 0
-    while c < q.num_choices {
+    for c < q.num_choices {
         []int full = mc_concat(q.prompt_tokens, q.choices[c].continuation_tokens)
         logprob_result lp = gpt_sequence_logprob(model, full, len(q.prompt_tokens))
         float score = lp.avg_logprob
@@ -132,9 +132,9 @@ func mc_concat([]int a, []int b) []int {
     int n = len(a) + len(b)
     []int out = []int{cap: n}
     int i = 0
-    while i < len(a) { out[i] = a[i]; i = i + 1 }
+    for i < len(a) { out[i] = a[i]; i = i + 1 }
     int j = 0
-    while j < len(b) { out[len(a) + j] = b[j]; j = j + 1 }
+    for j < len(b) { out[len(a) + j] = b[j]; j = j + 1 }
     out
 }
 
@@ -143,13 +143,13 @@ func evaluate_multiple_choice(language_model model, []mc_question questions) mc_
     int correct = 0
     float conf_sum = 0.0
     int i = 0
-    while i < total {
+    for i < total {
         mc_question q = questions[i]
         float best = -1000000000.0
         float second = -1000000000.0
         int best_idx = 0
         int c = 0
-        while c < q.num_choices {
+        for c < q.num_choices {
             []int full = mc_concat(q.prompt_tokens, q.choices[c].continuation_tokens)
             logprob_result lp = gpt_sequence_logprob(model, full, len(q.prompt_tokens))
             float score = lp.avg_logprob
@@ -192,7 +192,7 @@ func evaluate_perplexity(language_model model, [][]int sequences) ppl_result {
     float total_loss = 0.0
     int total_tokens = 0
     int s = 0
-    while s < len(sequences) {
+    for s < len(sequences) {
         []int seq = sequences[s]
         int seq_len = len(seq)
         if seq_len < 2 {
@@ -233,10 +233,10 @@ func gen_contains_answer([]int generated, []int answer) bool {
     if a == 0 { return true }
     if a > g { return false }
     int i = 0
-    while i <= g - a {
+    for i <= g - a {
         bool match = true
         int j = 0
-        while j < a {
+        for j < a {
             if generated[i + j] != answer[j] {
                 match = false
                 break
@@ -253,7 +253,7 @@ func evaluate_generative(language_model model, []gen_question questions) gen_eva
     int total = len(questions)
     int correct = 0
     int i = 0
-    while i < total {
+    for i < total {
         gen_question q = questions[i]
         []int generated = gpt_generate_greedy(model, q.prompt_tokens, q.max_new_tokens)
         if gen_contains_answer(generated, q.answer_tokens) {
@@ -320,7 +320,7 @@ func be_int_str(int n) string {
     int v = n
     if neg { v = -v }
     string s = ""
-    while v > 0 {
+    for v > 0 {
         int d = v - (v / 10) * 10
         s = string(d + 48) + s
         v = v / 10
@@ -332,7 +332,7 @@ func be_int_str(int n) string {
 func be_pct(float acc) string {
     int pct = 0
     float v = acc * 100.0
-    while v >= 1.0 {
+    for v >= 1.0 {
         v = v - 1.0
         pct = pct + 1
     }

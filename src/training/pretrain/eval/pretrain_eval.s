@@ -54,27 +54,27 @@ func pretrain_eval_perplexity_from_loss(float loss) float {
     }
     float reduced = loss
     int power_of_two = 0
-    while reduced > 0.34657359027997265 {
+    for reduced > 0.34657359027997265 {
         reduced = reduced - 0.6931471805599453
         power_of_two = power_of_two + 1
     }
-    while reduced < -0.34657359027997265 {
+    for reduced < -0.34657359027997265 {
         reduced = reduced + 0.6931471805599453
         power_of_two = power_of_two - 1
     }
     float term = 1.0
     float result = 1.0
     int order = 1
-    while order <= 12 {
+    for order <= 12 {
         term = term * reduced / order
         result = result + term
         order = order + 1
     }
-    while power_of_two > 0 {
+    for power_of_two > 0 {
         result = result * 2.0
         power_of_two = power_of_two - 1
     }
-    while power_of_two < 0 {
+    for power_of_two < 0 {
         result = result * 0.5
         power_of_two = power_of_two + 1
     }
@@ -107,7 +107,7 @@ func int_to_str(int n) string {
         value = -value
     }
     string s = ""
-    while value > 0 {
+    for value > 0 {
         s = string_char(value % 10 + 48) + s
         value = value / 10
     }
@@ -128,7 +128,7 @@ func fmt_float(float val, int decimals) string {
     }
     int int_part = 0
     float whole = value
-    while whole >= 1.0 {
+    for whole >= 1.0 {
         whole = whole - 1.0
         int_part = int_part + 1
     }
@@ -139,11 +139,11 @@ func fmt_float(float val, int decimals) string {
     }
     s = s + string_char(int_part + 48) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         frac = frac * 10.0
         int digit = 0
         float tmp = frac
-        while tmp >= 1.0 {
+        for tmp >= 1.0 {
             tmp = tmp - 1.0
             digit = digit + 1
         }

@@ -146,7 +146,7 @@ func find_json_boundaries(str text, i32 start) . (i32, i32) {
 
     chars := strings::chars(text)
     i := start
-    while i < len(chars) {
+    for i < len(chars) {
         c := chars[i]
 
         if escaped {

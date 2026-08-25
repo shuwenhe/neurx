@@ -39,7 +39,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -62,7 +62,7 @@ func float_to_str(float value, int decimals) string {
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -70,10 +70,10 @@ func float_to_str(float value, int decimals) string {
     if decimals > 0 {
         result = result + "."
         int i = 0
-        while i < decimals {
+        for i < decimals {
             current = current * 10.0
             int digit = 0
-            while current >= 1.0 {
+            for current >= 1.0 {
                 current = current - 1.0
                 digit = digit + 1
             }
@@ -161,11 +161,11 @@ func run_phase2a_training_pipeline(training_config cfg) training_result {
     int epoch = 0
     float best_loss = 999.9
     float current_loss = 2.5
-    while epoch < cfg.epochs {
+    for epoch < cfg.epochs {
         println("[Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(cfg.epochs) + "]")
         int step = 0
         int steps_per_epoch = 10
-        while step < steps_per_epoch {
+        for step < steps_per_epoch {
             int global_step = epoch * steps_per_epoch + step + 1
             current_loss = current_loss - 0.12
             if current_loss < 0.5 { current_loss = 0.5 }

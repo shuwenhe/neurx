@@ -184,7 +184,7 @@ func update_moe_metrics(
     float sum_load = 0.0
     float active_experts = 0.0
     int e = 0
-    while e < len(expert_load) {
+    for e < len(expert_load) {
         if expert_load[e] > 0.0 {
             active_experts = active_experts + 1.0
         }
@@ -296,7 +296,7 @@ func append_frame([]metrics_frame frames, metrics_frame f) []metrics_frame {
     int n = len(frames)
     []metrics_frame out = []metrics_frame{cap: n + 1}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = frames[i]
         i = i + 1
     }
@@ -314,7 +314,7 @@ func exp(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i < 12 {
+    for i < 12 {
         term = term * x / float(i)
         result = result + term
         i = i + 1
@@ -333,7 +333,7 @@ func int_to_string(int x) string {
         value = -value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value % 10
         out = string(digit + 48) + out
         value = value / 10
@@ -356,7 +356,7 @@ func trim_history([]metrics_frame frames, int limit) []metrics_frame {
     []metrics_frame out = []metrics_frame{cap: limit}
     int start = n - limit
     int i = 0
-    while i < limit {
+    for i < limit {
         out[i] = frames[start + i]
         i = i + 1
     }
@@ -366,7 +366,7 @@ func trim_history([]metrics_frame frames, int limit) []metrics_frame {
 func metrics_to_csv(metrics_collector collector) string {
     string out = "step,rank,timestamp_ms,loss,loss_ce,loss_aux,loss_kl,perplexity,learning_rate,gradient_norm,weight_norm,gradient_flow,load_balance_ratio,expert_diversity,allgather_bytes,allreduce_bytes,reduce_scatter_bytes,allgather_time_ms,allreduce_time_ms,reduce_scatter_time_ms,overlap_ratio,gpu_memory_used_bytes,gpu_memory_total_bytes,gpu_memory_percent,gpu_power_watts,gpu_temperature_celsius,throughput_tokens_per_sec,wall_clock_time_ms,iteration_time_ms\n"
     int i = 0
-    while i < len(collector.frames_history) {
+    for i < len(collector.frames_history) {
         metrics_frame f = collector.frames_history[i]
         out = out + int_to_string(f.step) + ","
         out = out + int_to_string(f.global_rank) + ","
@@ -428,7 +428,7 @@ func parse_int_str(string s) int {
         i = 1
     }
     int value = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = string(text[i])
         if ch < "0" || ch > "9" {
             return 0

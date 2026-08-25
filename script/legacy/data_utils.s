@@ -40,7 +40,7 @@ func json_decode_string(string s) string {
     inner := s[1 : len(s) - 1]
     result := ""
     i := 0
-    while i < len(inner) {
+    for i < len(inner) {
         if inner[i] == '\\' && i + 1 < len(inner) {
             match inner[i + 1] {
                 case '"':

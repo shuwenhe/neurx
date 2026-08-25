@@ -455,7 +455,7 @@ func run_auto_diagnosis(
     if len(issues) > 0 {
         status = "warning"
         int i = 0
-        while i < len(issues) {
+        for i < len(issues) {
             if issues[i].impact_score >= 8.0 {
                 status = "critical"
                 break
@@ -468,7 +468,7 @@ func run_auto_diagnosis(
         summary = summary + ". Found " + string(len(issues)) + " issue(s): "
         if len(issues) <= 3 {
             int j = 0
-            while j < len(issues) {
+            for j < len(issues) {
                 if j > 0 { summary = summary + "; " }
                 summary = summary + issues[j].description
                 j = j + 1
@@ -570,7 +570,7 @@ func trigger_alert(
 
 func send_alert_notification(monitoring_manager mgr, alert_info alert) {
     int ch_idx = 0
-    while ch_idx < len(mgr.config.alert_channels) {
+    for ch_idx < len(mgr.config.alert_channels) {
         alert_channel ch = mgr.config.alert_channels[ch_idx]
         if ch == ALERT_WEBHOOK && len(mgr.config.webhook_url) > 0 {
             send_webhook_alert(mgr.config.webhook_url, alert)
@@ -652,7 +652,7 @@ func compute_moving_average(moving_window win) float {
     float sum = 0.0
     int count = 0
     int i = 0
-    while i < win.window_size {
+    for i < win.window_size {
         sum = sum + win.values[i]
         count = count + 1
         i = i + 1
@@ -667,7 +667,7 @@ func compute_variance(moving_window win) float {
     float var_sum = 0.0
     int count = 0
     int i = 0
-    while i < win.window_size {
+    for i < win.window_size {
         float diff = win.values[i] - avg
         var_sum = var_sum + diff * diff
         count = count + 1
@@ -683,7 +683,7 @@ func detect_stagnation(moving_window win, float threshold) bool {
     float second_half_avg = 0.0
     int half = win.window_size / 2
     int i = 0
-    while i < half {
+    for i < half {
         first_half_avg = first_half_avg + win.values[i]
         second_half_avg = second_half_avg + win.values[half + i]
         i = i + 1
@@ -701,7 +701,7 @@ func detect_divergence(moving_window win) bool {
     float recent_avg = 0.0
     int quarter = win.window_size / 4
     int i = 0
-    while i < quarter {
+    for i < quarter {
         early_avg = early_avg + win.values[i]
         recent_avg = recent_avg + win.values[win.window_size - quarter + i]
         i = i + 1
@@ -719,7 +719,7 @@ func compute_histogram_statistics([]float values, ref histogram_metric hist) {
     float min_val = values[0]
     float max_val = values[0]
     int i = 0
-    while i < n {
+    for i < n {
         sum = sum + values[i]
         if values[i] < min_val { min_val = values[i] }
         if values[i] > max_val { max_val = values[i] }
@@ -728,7 +728,7 @@ func compute_histogram_statistics([]float values, ref histogram_metric hist) {
     float mean = sum / float_of_int(n)
     float var_sum = 0.0
     i = 0
-    while i < n {
+    for i < n {
         float d = values[i] - mean
         var_sum = var_sum + d * d
         i = i + 1
@@ -745,14 +745,14 @@ func compute_histogram_statistics([]float values, ref histogram_metric hist) {
     if range == 0 { range = 1.0 }
     float bin_width = range / float_of_int(num_bins)
     int b = 0
-    while b < num_bins {
+    for b < num_bins {
         hist.bins[b] = min_val + float_of_int(b) * bin_width
         hist.counts[b] = 0
         b = b + 1
     }
     hist.bins[num_bins] = max_val
     i = 0
-    while i < n {
+    for i < n {
         int bin_idx = int((values[i] - min_val) / bin_width)
         if bin_idx >= num_bins { bin_idx = num_bins - 1 }
         if bin_idx < 0 { bin_idx = 0 }
@@ -768,9 +768,9 @@ func compute_histogram_statistics([]float values, ref histogram_metric hist) {
 func sort_float_array(ref []float arr) {
     int n = len(arr)
     int i = 0
-    while i < n - 1 {
+    for i < n - 1 {
         int j = 0
-        while j < n - i - 1 {
+        for j < n - i - 1 {
             if arr[j] > arr[j+1] {
                 float temp = arr[j]
                 arr[j] = arr[j+1]
@@ -799,7 +799,7 @@ func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float g = x * 0.5
     int iter = 0
-    while iter < 20 {
+    for iter < 20 {
         float ng = (g + x / g) * 0.5
         if ng == g { break }
         g = ng
@@ -811,7 +811,7 @@ func sqrt_approx(float x) float {
 func float_of_int(int n) float {
     float r = 0.0
     int i = 0
-    while i < n { r = r + 1.0; i = i + 1 }
+    for i < n { r = r + 1.0; i = i + 1 }
     return r
 }
 

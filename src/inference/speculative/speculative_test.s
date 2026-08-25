@@ -44,7 +44,7 @@ func test_compute_logits_probability() bool {
     probs := compute_logits_probability(logits, 1.0)
     sum_prob := 0.0
     i := 0
-    while i < probs.len {
+    for i < probs.len {
         sum_prob = sum_prob + probs[i]
         i = i + 1
     }
@@ -248,7 +248,7 @@ func run_all_speculative_tests() {
         test_compute_acceptance_rate_batch(),
     }
     i := 0
-    while i < tests.len {
+    for i < tests.len {
         if tests[i] {
             tests_passed = tests_passed + 1
         }

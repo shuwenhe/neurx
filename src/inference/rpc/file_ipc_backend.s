@@ -10,10 +10,10 @@ func contains_keyword(string text, string keyword) bool {
         return false
     }
     int i = 0
-    while i <= text_len - keyword_len {
+    for i <= text_len - keyword_len {
         bool match = true
         int j = 0
-        while j < keyword_len {
+        for j < keyword_len {
             string text_char = __host_slice(text, i + j, i + j + 1)
             string keyword_char = __host_slice(keyword, j, j + 1)
             if text_char != keyword_char {
@@ -54,7 +54,7 @@ func main() {
     print("Listening on: /tmp/neurx_request.txt\n")
     print("Will write response to: /tmp/neurx_response.json\n\n")
     int sleep_count = 0
-    while true {
+    for true {
         _ = runtime_run_command_output("sleep 0.1")
         sleep_count = sleep_count + 1
         if sleep_count % 10 == 0 {

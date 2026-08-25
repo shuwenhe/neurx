@@ -213,7 +213,7 @@ func int_to_string(int val) string {
     }
     string result = ""
     int current = val
-    while current > 0 {
+    for current > 0 {
         int digit = current - (current / 10) * 10
         char_str := ""
         if digit == 0 { char_str = "0" }

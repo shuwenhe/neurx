@@ -84,7 +84,7 @@ func dapo_compute_advantages(
     []tensor returns = []tensor{cap: T}
     tensor gae = tensor_ops.zeros_like(values[T - 1])
     int t = T - 1
-    while t >= 0 {
+    for t >= 0 {
         tensor reward = rewards[t]
         tensor value = values[t]
         bool done = dones[t]
@@ -126,15 +126,15 @@ func dapo_select_top_k_trajectories(
     }
     []int indices = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         indices[i] = i
         i = i + 1
     }
     i = 0
-    while i < k {
+    for i < k {
         int max_idx = i
         int j = i + 1
-        while j < n {
+        for j < n {
             float reward_i = tensor_ops.sum(rollouts.rewards[indices[max_idx]])
             float reward_j = tensor_ops.sum(rollouts.rewards[indices[j]])
             if reward_j > reward_i {
@@ -154,7 +154,7 @@ func dapo_select_top_k_trajectories(
     []tensor top_values = []tensor{cap: k}
     []bool top_dones = []bool{cap: k}
     i = 0
-    while i < k {
+    for i < k {
         int idx = indices[i]
         top_states[i] = rollouts.states[idx]
         top_actions[i] = rollouts.actions[idx]
@@ -254,7 +254,7 @@ func dapo_step(
         float mean_adv = tensor_ops.mean_scalar(all_adv)
         float std_adv = tensor_ops.std_scalar(all_adv)
         int i = 0
-        while i < advantages.len {
+        for i < advantages.len {
             advantages[i] = tensor_ops.div_scalar(
                 tensor_ops.sub_scalar(advantages[i], mean_adv),
                 std_adv + 1e-8

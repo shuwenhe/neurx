@@ -55,14 +55,14 @@ func reinforce_pp_compute_baseline(
     int n = rewards.len
     []tensor group_means = []tensor{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         int group_idx = i / num_samples_per_prompt
         int group_start = group_idx * num_samples_per_prompt
         int group_end = group_start + num_samples_per_prompt
         tensor sum = tensor_ops.zeros_like(rewards[i])
         int count = 0
         int j = group_start
-        while j < group_end {
+        for j < group_end {
             sum = tensor_ops.add(sum, rewards[j])
             count = count + 1
             j = j + 1
@@ -87,7 +87,7 @@ func reinforce_pp_step(
     reinforce_pp_config cfg
 ) reinforce_pp_state {
     int i = 0
-    while i < rewards.len {
+    for i < rewards.len {
         rewards[i] = tensor_ops.clip_scalar(
             rewards[i],
             -cfg.clip_range_reward,

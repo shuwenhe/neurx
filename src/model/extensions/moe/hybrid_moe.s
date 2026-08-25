@@ -97,7 +97,7 @@ func production_hybrid_moe_shape() hybrid_moe_config {
 func zeros(int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = 0.0
         i = i + 1
     }
@@ -107,7 +107,7 @@ func zeros(int n) []float {
 func zeros_int(int n) []int {
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = 0
         i = i + 1
     }
@@ -117,7 +117,7 @@ func zeros_int(int n) []int {
 func deterministic_weights(int n, int salt, float scale) []float {
     []float out = zeros(n)
     int i = 0
-    while i < n {
+    for i < n {
         int raw = (i * 37 + salt * 19 + 11)
         int centered = raw - (raw / 29) * 29 - 14
         out[i] = (centered as float) * scale
@@ -129,7 +129,7 @@ func deterministic_weights(int n, int salt, float scale) []float {
 func copy_floats([]float values) []float {
     []float out = zeros(len(values))
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }
@@ -145,7 +145,7 @@ func sqrt_approx(float x) float {
         result = x
     }
     int i = 0
-    while i < 20 {
+    for i < 20 {
         result = 0.5 * (result + x / result)
         i = i + 1
     }
@@ -163,7 +163,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 24 {
+    for i <= 24 {
         term = term * value / (i as float)
         result = result + term
         i = i + 1
@@ -192,17 +192,17 @@ func situ(float x) float {
 func rms_norm_tokens([]float input, int tokens, int hidden) []float {
     []float out = zeros(tokens * hidden)
     int t = 0
-    while t < tokens {
+    for t < tokens {
         float sum_sq = 0.0
         int h = 0
-        while h < hidden {
+        for h < hidden {
             float value = input[t * hidden + h]
             sum_sq = sum_sq + value * value
             h = h + 1
         }
         float scale = 1.0 / sqrt_approx(sum_sq / (hidden as float) + 0.000001)
         h = 0
-        while h < hidden {
+        for h < hidden {
             out[t * hidden + h] = input[t * hidden + h] * scale
             h = h + 1
         }
@@ -214,12 +214,12 @@ func rms_norm_tokens([]float input, int tokens, int hidden) []float {
 func linear([]float input, []float weight, int rows, int in_dim, int out_dim) []float {
     []float out = zeros(rows * out_dim)
     int r = 0
-    while r < rows {
+    for r < rows {
         int o = 0
-        while o < out_dim {
+        for o < out_dim {
             float sum = 0.0
             int i = 0
-            while i < in_dim {
+            for i < in_dim {
                 sum = sum + input[r * in_dim + i] * weight[i * out_dim + o]
                 i = i + 1
             }
@@ -234,7 +234,7 @@ func linear([]float input, []float weight, int rows, int in_dim, int out_dim) []
 func add_arrays([]float a, []float b) []float {
     []float out = zeros(len(a))
     int i = 0
-    while i < len(a) {
+    for i < len(a) {
         out[i] = a[i] + b[i]
         i = i + 1
     }
@@ -268,13 +268,13 @@ func gated_mla_forward(gated_mla_weights weights, []float input, int tokens) gat
     []float context = zeros(tokens * h)
     float scale = 1.0 / sqrt_approx(h as float)
     int t = 0
-    while t < tokens {
+    for t < tokens {
         []float scores = zeros(tokens)
         float max_score = -1000000.0
         int s = 0
-        while s <= t {
+        for s <= t {
             int i = 0
-            while i < h {
+            for i < h {
                 scores[s] = scores[s] + q[t * h + i] * k[s * h + i] * scale
                 i = i + 1
             }
@@ -285,17 +285,17 @@ func gated_mla_forward(gated_mla_weights weights, []float input, int tokens) gat
         }
         float normalizer = 0.0
         s = 0
-        while s <= t {
+        for s <= t {
             scores[s] = exp_approx(scores[s] - max_score)
             normalizer = normalizer + scores[s]
             s = s + 1
         }
         s = 0
-        while s <= t {
+        for s <= t {
             float probability = scores[s] / normalizer
             attention[t * tokens + s] = probability
             int i = 0
-            while i < h {
+            for i < h {
                 context[t * h + i] = context[t * h + i] + probability * v[s * h + i]
                 i = i + 1
             }
@@ -306,7 +306,7 @@ func gated_mla_forward(gated_mla_weights weights, []float input, int tokens) gat
     []float gate_logits = linear(input, weights.w_gate, tokens, h, h)
     []float gated = zeros(tokens * h)
     int i = 0
-    while i < tokens * h {
+    for i < tokens * h {
         gated[i] = context[i] * sigmoid(gate_logits[i])
         i = i + 1
     }
@@ -337,13 +337,13 @@ func attention_residual(
     []float output = zeros(tokens * h)
     []float probabilities = zeros(tokens * history_count)
     int t = 0
-    while t < tokens {
+    for t < tokens {
         []float scores = zeros(history_count)
         float max_score = -1000000.0
         int depth = 0
-        while depth < history_count {
+        for depth < history_count {
             int channel = 0
-            while channel < h {
+            for channel < h {
                 float q = query[t * h + channel] * weights.query_scale[channel]
                 float key = weights.depth_keys[depth * h + channel]
                 int history_index = depth * tokens * h + t * h + channel
@@ -358,17 +358,17 @@ func attention_residual(
         }
         float normalizer = 0.0
         depth = 0
-        while depth < history_count {
+        for depth < history_count {
             scores[depth] = exp_approx(scores[depth] - max_score)
             normalizer = normalizer + scores[depth]
             depth = depth + 1
         }
         depth = 0
-        while depth < history_count {
+        for depth < history_count {
             float probability = scores[depth] / normalizer
             probabilities[t * history_count + depth] = probability
             int channel = 0
-            while channel < h {
+            for channel < h {
                 output[t * h + channel] = output[t * h + channel] +
                     probability * history[depth * tokens * h + t * h + channel]
                 channel = channel + 1
@@ -386,7 +386,7 @@ func attention_residual(
 func store_history([]float history, []float values, int depth, int width) []float {
     []float out = copy_floats(history)
     int i = 0
-    while i < width {
+    for i < width {
         out[depth * width + i] = values[i]
         i = i + 1
     }
@@ -429,9 +429,9 @@ func hybrid_moe_forward(hybrid_moe_model model, []float embeddings, int tokens) 
     []int last_indices = []
     []float last_expert_weights = []
     int group = 0
-    while group < cfg.groups {
+    for group < cfg.groups {
         int layer = 0
-        while layer < cfg.nda_per_group {
+        for layer < cfg.nda_per_group {
             attnres_result retrieved = attention_residual(model.residual, current, history, history_count, tokens)
             nda_result mixed = nda_forward(model.nda, rms_norm_tokens(retrieved.output, tokens, cfg.hidden_dim), tokens, state)
             state = mixed.final_state
@@ -476,7 +476,7 @@ func hybrid_moe_forward(hybrid_moe_model model, []float embeddings, int tokens) 
 
 func finite_array([]float values) bool {
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if values[i] != values[i] || values[i] > 1000000000.0 || values[i] < -1000000000.0 {
             return false
         }
@@ -488,7 +488,7 @@ func finite_array([]float values) bool {
 func sum_range([]float values, int offset, int count) float {
     float sum = 0.0
     int i = 0
-    while i < count {
+    for i < count {
         sum = sum + values[offset + i]
         i = i + 1
     }
@@ -522,7 +522,7 @@ func main() {
     failures = failures + assert_true(finite_array(nda.output) && finite_array(nda.final_state), "NDA numerical stability")
     gated_mla_result mla = gated_mla_forward(model.mla, embeddings, tokens)
     int t = 0
-    while t < tokens {
+    for t < tokens {
         failures = failures + assert_true(
             abs_float(sum_range(mla.attention, t * tokens, t + 1) - 1.0) < 0.001,
             "Gated MLA causal attention normalization"
@@ -531,7 +531,7 @@ func main() {
     }
     moe_result moe = moe_forward(model.moe, embeddings, tokens)
     t = 0
-    while t < tokens {
+    for t < tokens {
         failures = failures + assert_true(
             abs_float(sum_range(moe.expert_weights, t * cfg.top_k, cfg.top_k) - 1.0) < 0.001,
             "Stable LatentMoE top-k normalization"
@@ -547,7 +547,7 @@ func main() {
     failures = failures + assert_true(finite_array(result.output), "K3 backbone numerical stability")
     failures = failures + assert_true(result.history_count == 1 + (cfg.nda_per_group * 2 + 2) * cfg.groups, "3:1 hybrid history topology")
     t = 0
-    while t < tokens {
+    for t < tokens {
         failures = failures + assert_true(
             abs_float(sum_range(result.last_residual_weights, t * result.history_count, result.history_count) - 1.0) < 0.001,
             "AttnRes depth weights normalization"
@@ -576,7 +576,7 @@ func int_to_string(int value) string {
     }
     int current = value
     string out = ""
-    while current > 0 {
+    for current > 0 {
         int digit = current - (current / 10) * 10
         out = string_char(digit + 48) + out
         current = current / 10

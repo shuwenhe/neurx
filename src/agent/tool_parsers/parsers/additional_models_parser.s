@@ -199,7 +199,7 @@ func extract_xml_tools(str model_output, str tag) . ExtractedToolCallInformation
     tool_calls := Vec::new()
     search_pos := 0
 
-    while search_pos < strings::len(model_output) {
+    for search_pos < strings::len(model_output) {
         call_start := strings::index_of_from(model_output, start_tag, search_pos)
         if call_start < 0 {
             break
@@ -253,7 +253,7 @@ func extract_xml_function_tools(str model_output) . ExtractedToolCallInformation
     tool_calls := Vec::new()
     search_pos := 0
 
-    while search_pos < strings::len(model_output) {
+    for search_pos < strings::len(model_output) {
         call_start := strings::index_of_from(model_output, start_tag, search_pos)
         if call_start < 0 {
             break

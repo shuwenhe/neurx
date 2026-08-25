@@ -35,13 +35,13 @@ func main() {
     total_tokens = 0
     correct_tokens = 0
     total_clips = 0
-    while epoch < 3 {
+    for epoch < 3 {
         println("====================================================")
         println("[Epoch " + int_to_str(epoch + 1) + "/3]")
         println("====================================================")
         int step
         step = 0
-        while step < 100 {
+        for step < 100 {
             total_steps = total_steps + 1
             step = step + 1
             loss = loss - 0.08
@@ -50,7 +50,7 @@ func main() {
             []float layer2_grad
             int i
             i = 0
-            while i < 10 {
+            for i < 10 {
                 float grad_val
                 grad_val = 0.5 + ((total_steps + i) as float) * 0.01
                 if total_steps == (total_steps / 50) * 50 {
@@ -131,7 +131,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -154,17 +154,17 @@ func float_to_str_2(float value) string {
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
     string result = int_to_str(whole)
     result = result + "."
     int i = 0
-    while i < 2 {
+    for i < 2 {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }

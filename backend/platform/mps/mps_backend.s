@@ -306,7 +306,7 @@ func exp(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 12 {
+    for i <= 12 {
         term = term * x / (i * 1.0)
         result = result + term
         i = i + 1

@@ -49,7 +49,7 @@ func nadam_step(nadam_optimizer optimizer, tensor params, tensor grads) nadam_op
     float mu_product_next = optimizer.mu_product * mu_next
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float grad = grads.data[i]
         if optimizer.weight_decay != 0.0 {
             grad = grad + optimizer.weight_decay * params.data[i]
@@ -76,7 +76,7 @@ struct nadam_optimizer_step_output {
 func ensure_nadam_state([]float values, int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         if i < len(values) {
             out[i] = values[i]
         } else {
@@ -96,7 +96,7 @@ func nadam_sqrt(float x) float {
         y = x
     }
     int i = 0
-    while i < 32 {
+    for i < 32 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -106,7 +106,7 @@ func nadam_sqrt(float x) float {
 func nadam_pow_int(float base, int exponent) float {
     float result = 1.0
     int i = 0
-    while i < exponent {
+    for i < exponent {
         result = result * base
         i = i + 1
     }
@@ -124,7 +124,7 @@ func nadam_exp(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i < 25 {
+    for i < 25 {
         term = term * x / float(i)
         result = result + term
         i = i + 1
@@ -141,7 +141,7 @@ func nadam_ln(float x) float {
     float result = 0.0
     float term = y
     int i = 0
-    while i < 20 {
+    for i < 20 {
         result = result + term / float(2 * i + 1)
         term = term * y_sq
         i = i + 1

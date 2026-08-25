@@ -162,7 +162,7 @@ struct attention_layer_stack {
 func new_attention_layer_stack(int num_layers, int num_heads, int head_dim) attention_layer_stack {
     layers := vec[attention_layer]{}
     i := 0
-    while i < num_layers {
+    for i < num_layers {
         layer_id := "attn_layer_" + string(i)
         layer := new_attention_layer(layer_id, i, num_heads, head_dim)
         layers.push(layer)
@@ -179,7 +179,7 @@ func new_attention_layer_stack(int num_layers, int num_heads, int head_dim) atte
 
 func (attention_layer_stack* stack) initialize_all() bool {
     i := 0
-    while i < stack.layers.len() {
+    for i < stack.layers.len() {
         if !stack.layers[i].initialize() {
             false
         }
@@ -191,7 +191,7 @@ func (attention_layer_stack* stack) initialize_all() bool {
 
 func (attention_layer_stack* stack) finalize_all() bool {
     i := 0
-    while i < stack.layers.len() {
+    for i < stack.layers.len() {
         if !stack.layers[i].finalize() {
             false
         }
@@ -203,7 +203,7 @@ func (attention_layer_stack* stack) finalize_all() bool {
 
 func (attention_layer_stack* stack) set_all_backend(string backend_name) bool {
     i := 0
-    while i < stack.layers.len() {
+    for i < stack.layers.len() {
         if !stack.layers[i].set_active_backend(backend_name) {
             false
         }

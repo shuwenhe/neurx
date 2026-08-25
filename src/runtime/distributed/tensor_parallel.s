@@ -21,10 +21,10 @@ func tp_mod_nonneg(int value, int divisor) int {
         return 0
     }
     int current = value
-    while current >= divisor {
+    for current >= divisor {
         current = current - divisor
     }
-    while current < 0 {
+    for current < 0 {
         current = current + divisor
     }
     current

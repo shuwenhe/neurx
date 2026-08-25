@@ -6,7 +6,7 @@ func pooling_copy_row([]float hidden_states, int sequence_length, int hidden_siz
         return output
     }
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         output[i] = hidden_states[row * hidden_size + i]
         i = i + 1
     }
@@ -21,7 +21,7 @@ func pooling_last([]float hidden_states, []int attention_mask, int sequence_leng
     int row = sequence_length - 1
     if len(attention_mask) >= sequence_length {
         int i = sequence_length - 1
-        while i >= 0 {
+        for i >= 0 {
             if attention_mask[i] > 0 {
                 row = i
                 break
@@ -39,14 +39,14 @@ func pooling_mean([]float hidden_states, []int attention_mask, int sequence_leng
     }
     int token_count = 0
     int token = 0
-    while token < sequence_length {
+    for token < sequence_length {
         bool include = true
         if len(attention_mask) >= sequence_length {
             include = attention_mask[token] > 0
         }
         if include {
             int i = 0
-            while i < hidden_size {
+            for i < hidden_size {
                 output[i] = output[i] + hidden_states[token * hidden_size + i]
                 i = i + 1
             }
@@ -56,7 +56,7 @@ func pooling_mean([]float hidden_states, []int attention_mask, int sequence_leng
     }
     if token_count > 0 {
         int i = 0
-        while i < hidden_size {
+        for i < hidden_size {
             output[i] = output[i] / float(token_count)
             i = i + 1
         }
@@ -68,7 +68,7 @@ func pooling_l2_normalize([]float embedding) []float {
     []float output = []float{cap: len(embedding)}
     float squared_norm = 0.0
     int i = 0
-    while i < len(embedding) {
+    for i < len(embedding) {
         squared_norm = squared_norm + embedding[i] * embedding[i]
         i = i + 1
     }
@@ -77,7 +77,7 @@ func pooling_l2_normalize([]float embedding) []float {
     }
     float norm = sqrt(squared_norm)
     i = 0
-    while i < len(embedding) {
+    for i < len(embedding) {
         output[i] = embedding[i] / norm
         i = i + 1
     }
@@ -93,7 +93,7 @@ func pooling_cosine_similarity([]float left, []float right) float {
     float left_norm = 0.0
     float right_norm = 0.0
     int i = 0
-    while i < length {
+    for i < length {
         dot = dot + left[i] * right[i]
         left_norm = left_norm + left[i] * left[i]
         right_norm = right_norm + right[i] * right[i]
@@ -111,13 +111,13 @@ func pooling_linear_head([]float embedding, []float weights, []float bias, int l
         return logits
     }
     int label = 0
-    while label < label_count {
+    for label < label_count {
         float score = 0.0
         if label < len(bias) {
             score = bias[label]
         }
         int i = 0
-        while i < len(embedding) {
+        for i < len(embedding) {
             score = score + weights[label * len(embedding) + i] * embedding[i]
             i = i + 1
         }
@@ -133,12 +133,12 @@ func pooling_rerank([]float query_embedding, []float document_embeddings, int do
         return scores
     }
     int document = 0
-    while document < document_count {
+    for document < document_count {
         float dot = 0.0
         float query_norm = 0.0
         float document_norm = 0.0
         int i = 0
-        while i < embedding_size && i < len(query_embedding) {
+        for i < embedding_size && i < len(query_embedding) {
             float query_value = query_embedding[i]
             float document_value = document_embeddings[document * embedding_size + i]
             dot = dot + query_value * document_value

@@ -24,7 +24,7 @@ func (temperature_processor* tp) apply(*vec[float] logits) result[vec[float], pr
 
     result_logits := vec[float]()
     i := 0
-    while i < logits.len() {
+    for i < logits.len() {
         scaled := logits[i] / tp.temperature
         result_logits.push(scaled)
         i = i + 1
@@ -44,7 +44,7 @@ func find_kth_largest(*vec[float] logits, int k) float {
 
     max_val := logits[0]
     i := 1
-    while i < logits.len() {
+    for i < logits.len() {
         if logits[i] > max_val {
             max_val = logits[i]
         }
@@ -70,7 +70,7 @@ func (top_k_processor* tp) apply(*vec[float] logits) result[vec[float], processo
 
     result_logits := vec[float]()
     i := 0
-    while i < logits.len() {
+    for i < logits.len() {
         if logits[i] >= threshold {
             result_logits.push(logits[i])
         } else {
@@ -89,7 +89,7 @@ struct nucleus_processor {
 func softmax(*vec[float] logits) vec[float] {
     max_logit := logits[0]
     i := 1
-    while i < logits.len() {
+    for i < logits.len() {
         if logits[i] > max_logit {
             max_logit = logits[i]
         }
@@ -99,7 +99,7 @@ func softmax(*vec[float] logits) vec[float] {
     exps := vec[float]()
     sum_exp := 0.0
     i := 0
-    while i < logits.len() {
+    for i < logits.len() {
         exp_val := exp(logits[i] - max_logit)
         exps.push(exp_val)
         sum_exp = sum_exp + exp_val
@@ -108,7 +108,7 @@ func softmax(*vec[float] logits) vec[float] {
 
     probs := vec[float]()
     i := 0
-    while i < exps.len() {
+    for i < exps.len() {
         prob := exps[i] / sum_exp
         probs.push(prob)
         i = i + 1
@@ -130,7 +130,7 @@ func (nucleus_processor* np) apply(*vec[float] logits) result[vec[float], proces
     cumsum := vec[float]()
     cum := 0.0
     i := 0
-    while i < probs.len() {
+    for i < probs.len() {
         cum = cum + probs[i]
         cumsum.push(cum)
         i = i + 1
@@ -138,7 +138,7 @@ func (nucleus_processor* np) apply(*vec[float] logits) result[vec[float], proces
 
     threshold := 0.0
     i := 0
-    while i < cumsum.len() {
+    for i < cumsum.len() {
         if cumsum[i] >= np.top_p {
             threshold = logits[i]
             break
@@ -148,7 +148,7 @@ func (nucleus_processor* np) apply(*vec[float] logits) result[vec[float], proces
 
     result_logits := vec[float]()
     i := 0
-    while i < logits.len() {
+    for i < logits.len() {
         if logits[i] >= threshold {
             result_logits.push(logits[i])
         } else {
@@ -175,7 +175,7 @@ func (frequency_penalty_processor* fp) apply(*vec[float] logits) result[vec[floa
 
     result_logits := vec[float]()
     i := 0
-    while i < logits.len() {
+    for i < logits.len() {
         count := 0
         if fp.token_counts.contains(i) {
             count = fp.token_counts.get(i)
@@ -203,7 +203,7 @@ func (length_penalty_processor* lp) apply(*vec[float] logits) result[vec[float],
 
     result_logits := vec[float]()
     i := 0
-    while i < logits.len() {
+    for i < logits.len() {
         adjusted := logits[i] / (1.0 + lp.penalty)
         result_logits.push(adjusted)
         i = i + 1
@@ -227,10 +227,10 @@ func (repetition_penalty_processor* rp) apply(*vec[float] logits) result[vec[flo
 
     result_logits := vec[float]()
     i := 0
-    while i < logits.len() {
+    for i < logits.len() {
         is_repeated := false
         j := 0
-        while j < rp.previous_tokens.len() {
+        for j < rp.previous_tokens.len() {
             if rp.previous_tokens[j] == i {
                 is_repeated = true
                 break

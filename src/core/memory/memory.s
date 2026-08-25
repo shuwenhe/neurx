@@ -79,7 +79,7 @@ func agent_memory_write_short(agent_memory_state state, string key, string value
     []string keys = []string{cap: out_size}
     []string values = []string{cap: out_size}
     int i = 0
-    while i < old_size - start {
+    for i < old_size - start {
         keys[i] = get_short_key(state, i + start)
         values[i] = get_short_value(state, i + start)
         i = i + 1
@@ -113,7 +113,7 @@ func agent_memory_write_long(agent_memory_state state, string key, string value)
     []string keys = []string{cap: out_size}
     []string values = []string{cap: out_size}
     int i = 0
-    while i < old_size - start {
+    for i < old_size - start {
         keys[i] = get_long_key(state, i + start)
         values[i] = get_long_value(state, i + start)
         i = i + 1
@@ -136,7 +136,7 @@ func agent_memory_lookup_short(agent_memory_state src, string key) agent_memory_
     int i = len(src.short_keys) - 1
     bool found = false
     string found_val = ""
-    while i >= 0 {
+    for i >= 0 {
         if get_short_key(src, i) == key {
             found = true
             found_val = get_short_value(src, i)
@@ -164,7 +164,7 @@ func agent_memory_lookup_long(agent_memory_state src, string key) agent_memory_l
     int i = len(src.long_keys) - 1
     bool found = false
     string found_val = ""
-    while i >= 0 {
+    for i >= 0 {
         if get_long_key(src, i) == key {
             found = true
             found_val = get_long_value(src, i)
@@ -234,7 +234,7 @@ func agent_memory_short_keys(agent_memory_state state) []string {
     int size = len(state.short_keys)
     []string out = []string{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         out[i] = state.short_keys[i]
         i = i + 1
     }
@@ -245,7 +245,7 @@ func agent_memory_long_keys(agent_memory_state state) []string {
     int size = len(state.long_keys)
     []string out = []string{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         out[i] = state.long_keys[i]
         i = i + 1
     }
@@ -262,7 +262,7 @@ func agent_memory_delete(agent_memory_state state, string key) agent_memory_stat
     int l_size = len(state.long_keys)
     int s_keep = 0
     int i = 0
-    while i < s_size {
+    for i < s_size {
         if get_short_key(state, i) != key {
             s_keep = s_keep + 1
         }
@@ -272,7 +272,7 @@ func agent_memory_delete(agent_memory_state state, string key) agent_memory_stat
     []string short_v = []string{cap: s_keep}
     int wi = 0
     i = 0
-    while i < s_size {
+    for i < s_size {
         if get_short_key(state, i) != key {
             short_k[wi] = get_short_key(state, i)
             short_v[wi] = get_short_value(state, i)
@@ -282,7 +282,7 @@ func agent_memory_delete(agent_memory_state state, string key) agent_memory_stat
     }
     int l_keep = 0
     i = 0
-    while i < l_size {
+    for i < l_size {
         if get_long_key(state, i) != key {
             l_keep = l_keep + 1
         }
@@ -292,7 +292,7 @@ func agent_memory_delete(agent_memory_state state, string key) agent_memory_stat
     []string long_v = []string{cap: l_keep}
     wi = 0
     i = 0
-    while i < l_size {
+    for i < l_size {
         if get_long_key(state, i) != key {
             long_k[wi] = get_long_key(state, i)
             long_v[wi] = get_long_value(state, i)
@@ -315,12 +315,12 @@ func agent_memory_delete(agent_memory_state state, string key) agent_memory_stat
 func agent_memory_export(agent_memory_state state) string {
     string out = ""
     int i = 0
-    while i < len(state.short_keys) {
+    for i < len(state.short_keys) {
         out = out + "short:" + get_short_key(state, i) + "=" + get_short_value(state, i) + "\n"
         i = i + 1
     }
     i = 0
-    while i < len(state.long_keys) {
+    for i < len(state.long_keys) {
         out = out + "long:" + get_long_key(state, i) + "=" + get_long_value(state, i) + "\n"
         i = i + 1
     }
@@ -341,7 +341,7 @@ func agent_memory_restore(string path) agent_memory_state {
     int content_len = len(content)
     string cur_line = ""
     int ci = 0
-    while ci <= content_len {
+    for ci <= content_len {
         bool at_end = ci == content_len
         bool at_newline = !at_end && string(content[ci]) == "\n"
         if at_newline || at_end {
@@ -359,7 +359,7 @@ func agent_memory_restore(string path) agent_memory_state {
                 if prefix_len > 0 {
                     string rest = ""
                     int ri = prefix_len
-                    while ri < len(ln) {
+                    for ri < len(ln) {
                         rest = rest + string(ln[ri])
                         ri = ri + 1
                     }
@@ -367,7 +367,7 @@ func agent_memory_restore(string path) agent_memory_state {
                     string kv_val = ""
                     bool past_eq = false
                     int ki = 0
-                    while ki < len(rest) {
+                    for ki < len(rest) {
                         if !past_eq && string(rest[ki]) == "=" {
                             past_eq = true
                         } else if past_eq {

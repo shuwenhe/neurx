@@ -20,7 +20,7 @@ struct jump_forward_result {
 func jump_forward_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -42,7 +42,7 @@ func jump_forward_add_edge(jump_forward_fsm fsm, int from_state, int to_state, i
 
 func jump_forward_add_final(jump_forward_fsm fsm, int state) jump_forward_fsm {
     int i = 0
-    while i < fsm.final_count {
+    for i < fsm.final_count {
         if fsm.final_states[i] == state { return fsm }
         i = i + 1
     }
@@ -54,7 +54,7 @@ func jump_forward_add_final(jump_forward_fsm fsm, int state) jump_forward_fsm {
 
 func jump_forward_is_final(jump_forward_fsm fsm, int state) bool {
     int i = 0
-    while i < fsm.final_count {
+    for i < fsm.final_count {
         if fsm.final_states[i] == state { return true }
         i = i + 1
     }
@@ -65,7 +65,7 @@ func jump_forward_unique_edge(jump_forward_fsm fsm, int state) int {
     int found = 0 - 1
     int count = 0
     int i = 0
-    while i < fsm.edge_count {
+    for i < fsm.edge_count {
         if fsm.from_states[i] == state { found = i; count = count + 1 }
         i = i + 1
     }
@@ -75,7 +75,7 @@ func jump_forward_unique_edge(jump_forward_fsm fsm, int state) int {
 
 func jump_forward_contains_state([]int states, int count, int state) bool {
     int i = 0
-    while i < count {
+    for i < count {
         if states[i] == state { return true }
         i = i + 1
     }
@@ -88,7 +88,7 @@ func jump_forward_try(jump_forward_fsm fsm, int initial_state) jump_forward_resu
     int visited_count = 0
     int current = initial_state
     int steps = 0
-    while steps < fsm.max_jump_steps && !jump_forward_is_final(fsm, current) && !jump_forward_contains_state(visited, visited_count, current) {
+    for steps < fsm.max_jump_steps && !jump_forward_is_final(fsm, current) && !jump_forward_contains_state(visited, visited_count, current) {
         visited[visited_count] = current
         visited_count = visited_count + 1
         int edge_index = jump_forward_unique_edge(fsm, current)
@@ -99,6 +99,6 @@ func jump_forward_try(jump_forward_fsm fsm, int initial_state) jump_forward_resu
     }
     []int result_bytes = jump_forward_int_array(steps)
     int i = 0
-    while i < steps { result_bytes[i] = bytes[i]; i = i + 1 }
+    for i < steps { result_bytes[i] = bytes[i]; i = i + 1 }
     jump_forward_result {bytes: result_bytes, next_state: current, step_count: steps, jumped: steps > 1}
 }

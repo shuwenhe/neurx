@@ -10,7 +10,7 @@ struct gradient_accumulator {
 func new_gradient_accumulator(int num_params, int accumulation_steps) gradient_accumulator {
     [][]float grads = make([][]float, 0)
     int i = 0
-    while i < num_params {
+    for i < num_params {
         grads = append(grads, make_zero_array(1))
         i = i + 1
     }
@@ -27,7 +27,7 @@ func accumulate_gradients(
     []float batch_grads
 ) gradient_accumulator {
     int i = 0
-    while i < len(batch_grads) {
+    for i < len(batch_grads) {
         if i < len(acc.accumulated_grads) {
             acc.accumulated_grads[i][0] = acc.accumulated_grads[i][0] + batch_grads[i]
         }
@@ -44,7 +44,7 @@ func should_update_params(gradient_accumulator acc) bool {
 func get_accumulated_grads(gradient_accumulator acc) []float {
     []float grads = []float{cap: len(acc.accumulated_grads)}
     int i = 0
-    while i < len(acc.accumulated_grads) {
+    for i < len(acc.accumulated_grads) {
         grads[i] = acc.accumulated_grads[i][0]
         i = i + 1
     }
@@ -58,7 +58,7 @@ func average_accumulated_grads(gradient_accumulator acc) []float {
         denom = 1.0
     }
     int i = 0
-    while i < len(acc.accumulated_grads) {
+    for i < len(acc.accumulated_grads) {
         grads[i] = acc.accumulated_grads[i][0] / denom
         i = i + 1
     }
@@ -67,7 +67,7 @@ func average_accumulated_grads(gradient_accumulator acc) []float {
 
 func reset_accumulator(gradient_accumulator acc) gradient_accumulator {
     int i = 0
-    while i < len(acc.accumulated_grads) {
+    for i < len(acc.accumulated_grads) {
         acc.accumulated_grads[i][0] = 0.0
         i = i + 1
     }
@@ -78,7 +78,7 @@ func reset_accumulator(gradient_accumulator acc) gradient_accumulator {
 func make_zero_array(int n) []float {
     []float arr = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         arr[i] = 0.0
         i = i + 1
     }

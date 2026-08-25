@@ -5,7 +5,7 @@ func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -16,7 +16,7 @@ func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -51,15 +51,15 @@ func max_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     int out_len = out_size(length, kernel_size, stride, padding)
     []float out = []float{cap: batch * channels * out_len}
     int b = 0
-    while b < batch {
+    for b < batch {
         int ch = 0
-        while ch < channels {
+        for ch < channels {
             int ol = 0
-            while ol < out_len {
+            for ol < out_len {
                 int start = ol * stride - padding
                 float max_v = -999999999999999999999999999999.0
                 int k = 0
-                while k < kernel_size {
+                for k < kernel_size {
                     int pos = start + k
                     if pos >= 0 && pos < length {
                         float v = input.data[(b * channels + ch) * length + pos]
@@ -86,16 +86,16 @@ func avg_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     int out_len = out_size(length, kernel_size, stride, padding)
     []float out = []float{cap: batch * channels * out_len}
     int b = 0
-    while b < batch {
+    for b < batch {
         int ch = 0
-        while ch < channels {
+        for ch < channels {
             int ol = 0
-            while ol < out_len {
+            for ol < out_len {
                 int start = ol * stride - padding
                 float sum_v = 0.0
                 int count = 0
                 int k = 0
-                while k < kernel_size {
+                for k < kernel_size {
                     int pos = start + k
                     if pos >= 0 && pos < length {
                         sum_v = sum_v + input.data[(b * channels + ch) * length + pos]
@@ -123,11 +123,11 @@ func adaptive_avg_pool1d(tensor input, int out_len) tensor {
     int in_len = input.shape[2]
     []float out = []float{cap: batch * channels * out_len}
     int b = 0
-    while b < batch {
+    for b < batch {
         int ch = 0
-        while ch < channels {
+        for ch < channels {
             int ol = 0
-            while ol < out_len {
+            for ol < out_len {
                 int start = ol * in_len / out_len
                 int end = (ol + 1) * in_len / out_len
                 if end <= start {
@@ -136,7 +136,7 @@ func adaptive_avg_pool1d(tensor input, int out_len) tensor {
                 float sum_v = 0.0
                 int count = 0
                 int idx = start
-                while idx < end {
+                for idx < end {
                     sum_v = sum_v + input.data[(b * channels + ch) * in_len + idx]
                     count = count + 1
                     idx = idx + 1
@@ -161,11 +161,11 @@ func adaptive_max_pool1d(tensor input, int out_len) tensor {
     int in_len = input.shape[2]
     []float out = []float{cap: batch * channels * out_len}
     int b = 0
-    while b < batch {
+    for b < batch {
         int ch = 0
-        while ch < channels {
+        for ch < channels {
             int ol = 0
-            while ol < out_len {
+            for ol < out_len {
                 int start = ol * in_len / out_len
                 int end = (ol + 1) * in_len / out_len
                 if end <= start {
@@ -173,7 +173,7 @@ func adaptive_max_pool1d(tensor input, int out_len) tensor {
                 }
                 float max_v = -999999999999999999999999999999.0
                 int idx = start
-                while idx < end {
+                for idx < end {
                     float v = input.data[(b * channels + ch) * in_len + idx]
                     if v > max_v {
                         max_v = v
@@ -199,20 +199,20 @@ func max_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stri
     int out_w = out_size(in_w, kernel_w, stride_w, pad_w)
     []float out = []float{cap: batch * channels * out_h * out_w}
     int b = 0
-    while b < batch {
+    for b < batch {
         int ch = 0
-        while ch < channels {
+        for ch < channels {
             int oh = 0
-            while oh < out_h {
+            for oh < out_h {
                 int ow = 0
-                while ow < out_w {
+                for ow < out_w {
                     int h_start = oh * stride_h - pad_h
                     int w_start = ow * stride_w - pad_w
                     float max_v = -999999999999999999999999999999.0
                     int khi = 0
-                    while khi < kernel_h {
+                    for khi < kernel_h {
                         int kwi = 0
-                        while kwi < kernel_w {
+                        for kwi < kernel_w {
                             int ih = h_start + khi
                             int iw = w_start + kwi
                             if ih >= 0 && ih < in_h && iw >= 0 && iw < in_w {
@@ -246,21 +246,21 @@ func avg_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stri
     int out_w = out_size(in_w, kernel_w, stride_w, pad_w)
     []float out = []float{cap: batch * channels * out_h * out_w}
     int b = 0
-    while b < batch {
+    for b < batch {
         int ch = 0
-        while ch < channels {
+        for ch < channels {
             int oh = 0
-            while oh < out_h {
+            for oh < out_h {
                 int ow = 0
-                while ow < out_w {
+                for ow < out_w {
                     int h_start = oh * stride_h - pad_h
                     int w_start = ow * stride_w - pad_w
                     float sum_v = 0.0
                     int count = 0
                     int khi = 0
-                    while khi < kernel_h {
+                    for khi < kernel_h {
                         int kwi = 0
-                        while kwi < kernel_w {
+                        for kwi < kernel_w {
                             int ih = h_start + khi
                             int iw = w_start + kwi
                             if ih >= 0 && ih < in_h && iw >= 0 && iw < in_w {
@@ -294,13 +294,13 @@ func adaptive_avg_pool2d(tensor input, int out_h, int out_w) tensor {
     int in_w = input.shape[3]
     []float out = []float{cap: batch * channels * out_h * out_w}
     int b = 0
-    while b < batch {
+    for b < batch {
         int ch = 0
-        while ch < channels {
+        for ch < channels {
             int oh = 0
-            while oh < out_h {
+            for oh < out_h {
                 int ow = 0
-                while ow < out_w {
+                for ow < out_w {
                     int h_start = oh * in_h / out_h
                     int h_end = (oh + 1) * in_h / out_h
                     int w_start = ow * in_w / out_w
@@ -314,9 +314,9 @@ func adaptive_avg_pool2d(tensor input, int out_h, int out_w) tensor {
                     float sum_v = 0.0
                     int count = 0
                     int ih = h_start
-                    while ih < h_end {
+                    for ih < h_end {
                         int iw = w_start
-                        while iw < w_end {
+                        for iw < w_end {
                             sum_v = sum_v + input.data[((b * channels + ch) * in_h + ih) * in_w + iw]
                             count = count + 1
                             iw = iw + 1
@@ -346,13 +346,13 @@ func adaptive_max_pool2d(tensor input, int out_h, int out_w) tensor {
     int in_w = input.shape[3]
     []float out = []float{cap: batch * channels * out_h * out_w}
     int b = 0
-    while b < batch {
+    for b < batch {
         int ch = 0
-        while ch < channels {
+        for ch < channels {
             int oh = 0
-            while oh < out_h {
+            for oh < out_h {
                 int ow = 0
-                while ow < out_w {
+                for ow < out_w {
                     int h_start = oh * in_h / out_h
                     int h_end = (oh + 1) * in_h / out_h
                     int w_start = ow * in_w / out_w
@@ -365,9 +365,9 @@ func adaptive_max_pool2d(tensor input, int out_h, int out_w) tensor {
                     }
                     float max_v = -999999999999999999999999999999.0
                     int ih = h_start
-                    while ih < h_end {
+                    for ih < h_end {
                         int iw = w_start
-                        while iw < w_end {
+                        for iw < w_end {
                             float v = input.data[((b * channels + ch) * in_h + ih) * in_w + iw]
                             if v > max_v {
                                 max_v = v
@@ -397,11 +397,11 @@ func interpolate1d(tensor input, int out_len) tensor {
     }
     []float out = []float{cap: batch * channels * out_len}
     int b = 0
-    while b < batch {
+    for b < batch {
         int ch = 0
-        while ch < channels {
+        for ch < channels {
             int ol = 0
-            while ol < out_len {
+            for ol < out_len {
                 int src = ol * in_len / out_len
                 if src < 0 {
                     src = 0
@@ -429,11 +429,11 @@ func interpolate2d(tensor input, int out_h, int out_w) tensor {
     }
     []float out = []float{cap: batch * channels * out_h * out_w}
     int b = 0
-    while b < batch {
+    for b < batch {
         int ch = 0
-        while ch < channels {
+        for ch < channels {
             int oh = 0
-            while oh < out_h {
+            for oh < out_h {
                 int src_h = oh * in_h / out_h
                 if src_h < 0 {
                     src_h = 0
@@ -442,7 +442,7 @@ func interpolate2d(tensor input, int out_h, int out_w) tensor {
                     src_h = in_h - 1
                 }
                 int ow = 0
-                while ow < out_w {
+                for ow < out_w {
                     int src_w = ow * in_w / out_w
                     if src_w < 0 {
                         src_w = 0

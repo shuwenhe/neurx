@@ -95,7 +95,7 @@ func remax_step(
     []tensor returns = []tensor{cap: T}
     tensor gae = tensor_ops.zeros_like(old_values[T - 1])
     int t = T - 1
-    while t >= 0 {
+    for t >= 0 {
         tensor reward = rewards[t]
         tensor value = old_values[t]
         bool done = dones[t]
@@ -129,7 +129,7 @@ func remax_step(
         float mean_adv = tensor_ops.mean_scalar(all_adv)
         float std_adv = tensor_ops.std_scalar(all_adv)
         int i = 0
-        while i < advantages.len {
+        for i < advantages.len {
             advantages[i] = tensor_ops.div_scalar(
                 tensor_ops.sub_scalar(advantages[i], mean_adv),
                 std_adv + 1e-8

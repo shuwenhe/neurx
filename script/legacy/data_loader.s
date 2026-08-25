@@ -42,7 +42,7 @@ func main() {
     io.println("loadEnglish textdata")
     io.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     i := 0
-    while i < max_shards && i < 10 {
+    for i < max_shards && i < 10 {
         shard_num_str := ""
         if i < 10 {
             shard_num_str = "0" + strings.from_i64(i)

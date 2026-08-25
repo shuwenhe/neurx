@@ -3,7 +3,7 @@ package neurx.inference.kv_cache_manager
 func kv_cache_remove_int([]int values, int expected) []int {
     []int result = []int{}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if values[i] != expected {
             result = append(result, values[i])
         }
@@ -14,7 +14,7 @@ func kv_cache_remove_int([]int values, int expected) []int {
 
 func kv_cache_contains_int([]int values, int expected) bool {
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if values[i] == expected {
             return true
         }
@@ -37,7 +37,7 @@ func kv_cache_find_oldest_page_from_list(paged_kv_cache cache, []int page_ids) i
     int oldest_page = page_ids[0]
     int oldest_step = cache.pages[oldest_page].last_accessed_step
     int i = 1
-    while i < len(page_ids) {
+    for i < len(page_ids) {
         int page_id = page_ids[i]
         int step = cache.pages[page_id].last_accessed_step
         if step < oldest_step {
@@ -98,7 +98,7 @@ func new_paged_kv_cache(kv_cache_config cfg) paged_kv_cache {
     []cache_page pages = []cache_page{cap: num_pages}
     []int free_pages = []int{cap: num_pages}
     int i = 0
-    while i < num_pages {
+    for i < num_pages {
         pages[i] = cache_page {
             page_id: i,
             used_tokens: 0,
@@ -134,7 +134,7 @@ func allocate_pages(paged_kv_cache cache, int num_tokens_needed) []int {
     []int free_pool = kv_cache_remove_int(cache.free_pages, -1)
     []int allocated_pool = kv_cache_remove_int(cache.allocated_pages, -1)
     int i = 0
-    while i < pages_needed {
+    for i < pages_needed {
         int page_id = -1
         if len(free_pool) > 0 {
             page_id = free_pool[len(free_pool) - 1]
@@ -156,7 +156,7 @@ func allocate_pages(paged_kv_cache cache, int num_tokens_needed) []int {
 
 func free_pages(paged_kv_cache cache, []int page_ids) paged_kv_cache {
     int i = 0
-    while i < len(page_ids) {
+    for i < len(page_ids) {
         int page_id = page_ids[i]
         if page_id >= 0 && page_id < len(cache.pages) {
             cache.total_allocated_tokens = cache.total_allocated_tokens - cache.pages[page_id].used_tokens
@@ -184,7 +184,7 @@ func evict_page(paged_kv_cache cache) int {
     int oldest_page = cache.allocated_pages[0]
     int oldest_step = cache.pages[oldest_page].last_accessed_step
     int i = 1
-    while i < len(cache.allocated_pages) {
+    for i < len(cache.allocated_pages) {
         int page_id = cache.allocated_pages[i]
         int step = cache.pages[page_id].last_accessed_step
         if step < oldest_step {
@@ -227,7 +227,7 @@ func compress_kv_cache(paged_kv_cache cache) paged_kv_cache {
     []int rebuilt_allocated = []int{}
     int total_tokens = 0
     int i = 0
-    while i < len(cache.pages) {
+    for i < len(cache.pages) {
         int used_tokens = cache.pages[i].used_tokens
         if used_tokens < 0 {
             used_tokens = 0
@@ -258,7 +258,7 @@ func prefill_cache(paged_kv_cache cache, []int prompt_tokens) paged_kv_cache {
     }
     []int page_ids = allocate_pages(cache, tokens_remaining)
     int i = 0
-    while i < len(page_ids) && tokens_remaining > 0 {
+    for i < len(page_ids) && tokens_remaining > 0 {
         int page_id = page_ids[i]
         int write_tokens = tokens_remaining
         if write_tokens > cache.pages[page_id].capacity_tokens {

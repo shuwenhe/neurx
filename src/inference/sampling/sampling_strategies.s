@@ -40,7 +40,7 @@ func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -51,7 +51,7 @@ func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -61,7 +61,7 @@ func copy_int([]int data) []int {
 func make_one_hot(int idx, int size) []float {
     []float out = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         out[i] = 0.0
         i = i + 1
     }
@@ -92,7 +92,7 @@ func exp_approx(float x) float {
     float term = 1.0
     float sum = 1.0
     int i = 1
-    while i < 10 {
+    for i < 10 {
         term = term * x / i
         sum = sum + term
         i = i + 1
@@ -127,7 +127,7 @@ func softmax([]float logits) []float {
     }
     float max_val = logits[0]
     int i = 1
-    while i < n {
+    for i < n {
         if logits[i] > max_val {
             max_val = logits[i]
         }
@@ -136,7 +136,7 @@ func softmax([]float logits) []float {
     []float probs = []float{cap: n}
     float sum_exp = 0.0
     i = 0
-    while i < n {
+    for i < n {
         float val = exp_approx(logits[i] - max_val)
         probs[i] = val
         sum_exp = sum_exp + val
@@ -145,14 +145,14 @@ func softmax([]float logits) []float {
     if sum_exp <= 0.0 {
         float uniform = 1.0 / n
         i = 0
-        while i < n {
+        for i < n {
             probs[i] = uniform
             i = i + 1
         }
         return probs
     }
     i = 0
-    while i < n {
+    for i < n {
         probs[i] = probs[i] / sum_exp
         i = i + 1
     }
@@ -166,7 +166,7 @@ func normalize([]float arr) []float {
     }
     float sum = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         sum = sum + arr[i]
         i = i + 1
     }
@@ -174,14 +174,14 @@ func normalize([]float arr) []float {
     if sum <= 0.0 {
         float uniform = 1.0 / n
         i = 0
-        while i < n {
+        for i < n {
             out[i] = uniform
             i = i + 1
         }
         return out
     }
     i = 0
-    while i < n {
+    for i < n {
         out[i] = arr[i] / sum
         i = i + 1
     }
@@ -196,7 +196,7 @@ func argmax([]float arr) int {
     int best_idx = 0
     float best_val = arr[0]
     int i = 1
-    while i < n {
+    for i < n {
         if arr[i] > best_val {
             best_idx = i
             best_val = arr[i]
@@ -210,15 +210,15 @@ func argsort_descending([]float arr) []int {
     int n = len(arr)
     []int indices = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         indices[i] = i
         i = i + 1
     }
     i = 0
-    while i < n {
+    for i < n {
         int best = i
         int j = i + 1
-        while j < n {
+        for j < n {
             if arr[indices[j]] > arr[indices[best]] {
                 best = j
             }
@@ -238,15 +238,15 @@ func argsort_ascending([]float arr) []int {
     int n = len(arr)
     []int indices = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         indices[i] = i
         i = i + 1
     }
     i = 0
-    while i < n {
+    for i < n {
         int best = i
         int j = i + 1
-        while j < n {
+        for j < n {
             if arr[indices[j]] < arr[indices[best]] {
                 best = j
             }
@@ -348,7 +348,7 @@ func apply_temperature([]float logits, float temperature) []float {
     []float out = []float{cap: n}
     float inv = 1.0 / temperature
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = logits[i] * inv
         i = i + 1
     }
@@ -362,7 +362,7 @@ func apply_repetition_penalty([]float logits, []int past_tokens, float penalty) 
     }
     []float out = copy_float(logits)
     int i = 0
-    while i < len(past_tokens) {
+    for i < len(past_tokens) {
         int token = past_tokens[i]
         if token >= 0 && token < n {
             if out[token] > 0.0 {
@@ -389,12 +389,12 @@ func apply_presence_frequency_penalties(
     []float out = copy_float(logits)
     []int counts = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         counts[i] = 0
         i = i + 1
     }
     i = 0
-    while i < len(past_tokens) {
+    for i < len(past_tokens) {
         int token = past_tokens[i]
         if token >= 0 && token < n {
             counts[token] = counts[token] + 1
@@ -402,7 +402,7 @@ func apply_presence_frequency_penalties(
         i = i + 1
     }
     i = 0
-    while i < n {
+    for i < n {
         if counts[i] > 0 {
             if presence_penalty != 0.0 {
                 out[i] = out[i] - presence_penalty
@@ -424,16 +424,16 @@ func get_blocked_tokens([]int past_tokens, int ngram_size, int vocab_size) []int
     int recent_start = len(past_tokens) - prefix_len
     []int blocked = []int{cap: vocab_size}
     int i = 0
-    while i < vocab_size {
+    for i < vocab_size {
         blocked[i] = 0
         i = i + 1
     }
     int pos = 0
     int stop = len(past_tokens) - ngram_size
-    while pos <= stop {
+    for pos <= stop {
         bool match = true
         int j = 0
-        while j < prefix_len {
+        for j < prefix_len {
             if past_tokens[pos + j] != past_tokens[recent_start + j] {
                 match = false
                 break
@@ -450,7 +450,7 @@ func get_blocked_tokens([]int past_tokens, int ngram_size, int vocab_size) []int
     }
     []int out = []int{cap: vocab_size}
     i = 0
-    while i < vocab_size {
+    for i < vocab_size {
         if blocked[i] == 1 {
             out.push(i)
         }
@@ -470,7 +470,7 @@ func apply_ngram_blocking([]float logits, []int past_tokens, int ngram_size) []f
     }
     []float out = copy_float(logits)
     int i = 0
-    while i < len(blocked) {
+    for i < len(blocked) {
         int token = blocked[i]
         if token >= 0 && token < n {
             out[token] = -10000000000.0
@@ -489,12 +489,12 @@ func apply_top_k([]float logits, int k) []float {
     []int sorted = argsort_descending(probs)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = -10000000000.0
         i = i + 1
     }
     i = 0
-    while i < k {
+    for i < k {
         int token = sorted[i]
         out[token] = logits[token]
         i = i + 1
@@ -511,13 +511,13 @@ func apply_top_p([]float logits, float p) []float {
     []int sorted = argsort_descending(probs)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = -10000000000.0
         i = i + 1
     }
     float cumsum = 0.0
     i = 0
-    while i < n {
+    for i < n {
         int token = sorted[i]
         cumsum = cumsum + probs[token]
         out[token] = logits[token]
@@ -537,7 +537,7 @@ func apply_typical_p([]float logits, float p) []float {
     []float probs = softmax(logits)
     float entropy = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         if probs[i] > 0.0 {
             entropy = entropy - probs[i] * log_approx(probs[i])
         }
@@ -545,20 +545,20 @@ func apply_typical_p([]float logits, float p) []float {
     }
     []float deviations = []float{cap: n}
     i = 0
-    while i < n {
+    for i < n {
         deviations[i] = abs_float((0.0 - log_approx(probs[i])) - entropy)
         i = i + 1
     }
     []int sorted = argsort_ascending(deviations)
     []float out = []float{cap: n}
     i = 0
-    while i < n {
+    for i < n {
         out[i] = -10000000000.0
         i = i + 1
     }
     float cumsum = 0.0
     i = 0
-    while i < n {
+    for i < n {
         int token = sorted[i]
         cumsum = cumsum + probs[token]
         out[token] = logits[token]
@@ -576,7 +576,7 @@ func contrastive_candidate_penalty(int token, []int past_tokens) float {
     }
     float penalty = 0.0
     int i = 0
-    while i < len(past_tokens) {
+    for i < len(past_tokens) {
         if past_tokens[i] == token {
             penalty = penalty + 1.0
             if i == len(past_tokens) - 1 {
@@ -605,7 +605,7 @@ func contrastive_search_token([]float logits, []int past_tokens, sampling_config
     int best_token = ranked[0]
     float best_score = processed[best_token]
     int i = 0
-    while i < k {
+    for i < k {
         int token = ranked[i]
         float penalty = contrastive_candidate_penalty(token, past_tokens)
         float score = (1.0 - config.penalty_alpha) * processed[token] - config.penalty_alpha * penalty
@@ -655,7 +655,7 @@ func sample_from_distribution([]float probs, uint64 rng_state) (int, uint64) {
     float r = random_float_01(rng_state)
     float cumsum = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         cumsum = cumsum + probs[i]
         if r < cumsum {
             return (i, advance_rng(rng_state))
@@ -673,7 +673,7 @@ func sample_from_distribution_index([]float probs, uint64 rng_state) int {
     float r = random_float_01(rng_state)
     float cumsum = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         cumsum = cumsum + probs[i]
         if r < cumsum {
             return i
@@ -751,10 +751,10 @@ func select_top_beams([]beam_state candidates, int k) []beam_state {
         return candidates
     }
     int i = 0
-    while i < k {
+    for i < k {
         int best = i
         int j = i + 1
-        while j < n {
+        for j < n {
             if candidates[j].score > candidates[best].score {
                 best = j
             }
@@ -769,7 +769,7 @@ func select_top_beams([]beam_state candidates, int k) []beam_state {
     }
     []beam_state out = []beam_state{cap: k}
     i = 0
-    while i < k {
+    for i < k {
         out.push(candidates[i])
         i = i + 1
     }
@@ -787,7 +787,7 @@ func best_beam([]beam_state beams) beam_state {
     int best = 0
     float best_score = beams[0].score
     int i = 1
-    while i < len(beams) {
+    for i < len(beams) {
         if beams[i].score > best_score {
             best = i
             best_score = beams[i].score
@@ -810,7 +810,7 @@ func beam_search_decode(
         if config.max_length > 0 && config.max_length < max_steps {
             max_steps = config.max_length
         }
-        while step < max_steps {
+        for step < max_steps {
             []float logits = copy_float(all_logits[step])
             logits = process_logits(logits, greedy, config)
             int token = greedy_sample(logits)
@@ -834,13 +834,13 @@ func beam_search_decode(
     if config.max_length > 0 && config.max_length < max_steps {
         max_steps = config.max_length
     }
-    while step < max_steps {
+    for step < max_steps {
         if len(beams) == 0 {
             break
         }
         []beam_state candidates = []beam_state{cap: num_beams * len(beams)}
         int b = 0
-        while b < len(beams) {
+        for b < len(beams) {
             beam_state beam = beams[b]
             if beam.is_finished {
                 candidates.push(beam)
@@ -853,7 +853,7 @@ func beam_search_decode(
                     expand = len(ranked)
                 }
                 int i = 0
-                while i < expand {
+                for i < expand {
                     int token = ranked[i]
                     []int new_tokens = copy_int(beam.token_ids)
                     new_tokens.push(token)
@@ -874,7 +874,7 @@ func beam_search_decode(
         []beam_state selected = select_top_beams(candidates, num_beams)
         beams = []beam_state{cap: num_beams}
         int i = 0
-        while i < len(selected) {
+        for i < len(selected) {
             if selected[i].is_finished {
                 finished.push(selected[i])
             } else if len(beams) < num_beams {
@@ -888,7 +888,7 @@ func beam_search_decode(
         step = step + 1
     }
     int i = 0
-    while i < len(beams) {
+    for i < len(beams) {
         finished.push(beams[i])
         i = i + 1
     }

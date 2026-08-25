@@ -69,7 +69,7 @@ func extended_thinking_append(extended_thinking_state state, string thought, str
     int n = state.thought_count
     []extended_thought next = []extended_thought{cap: n + 1}
     int i = 0
-    while i < n {
+    for i < n {
         next[i] = state.thoughts[i]
         i = i + 1
     }
@@ -146,7 +146,7 @@ func extended_thinking_parse_thought(string response) string {
     int i = 0
     bool in_tag = false
     string thought_content = ""
-    while i < len(response) - 6 {
+    for i < len(response) - 6 {
         if string(response[i]) == "<" && string(response[i+1]) == "t" && string(response[i+2]) == "h" {
             in_tag = true
             i = i + 8
@@ -167,7 +167,7 @@ func extended_thinking_parse_thought(string response) string {
     }
     string out = ""
     int j = 0
-    while j < 200 {
+    for j < 200 {
         out = out + string(response[j])
         j = j + 1
     }
@@ -178,7 +178,7 @@ func extended_thinking_parse_conclusion(string response) string {
     int i = 0
     bool in_tag = false
     string content = ""
-    while i < len(response) - 10 {
+    for i < len(response) - 10 {
         if string(response[i]) == "<" && string(response[i+1]) == "c" && string(response[i+2]) == "o" {
             in_tag = true
             i = i + 12
@@ -197,7 +197,7 @@ func extended_thinking_parse_conclusion(string response) string {
     string last_line = ""
     string cur_line = ""
     int j = 0
-    while j < len(response) {
+    for j < len(response) {
         if string(response[j]) == "\n" {
             if trim(cur_line) != "" {
                 last_line = trim(cur_line)
@@ -227,7 +227,7 @@ func extended_thinking_run(extended_thinking_state state, string input, string m
     memory = agent_memory_write_short(memory, "goal", state.goal)
     extended_thinking_state et = state
     int step = 0
-    while step < state.budget_steps {
+    for step < state.budget_steps {
         if extended_thinking_over_budget(et) {
             break
         }
@@ -272,7 +272,7 @@ func extended_thinking_export(extended_thinking_state state) string {
     out = out + "tokens_used=" + string(state.tokens_used) + "\n"
     out = out + "budget_exceeded=" + string(state.budget_exceeded) + "\n"
     int i = 0
-    while i < state.thought_count {
+    for i < state.thought_count {
         out = out + "[" + string(i) + "] " + state.thoughts[i].thought + "\n"
         out = out + "  . " + state.thoughts[i].conclusion + "\n"
         i = i + 1
@@ -297,7 +297,7 @@ func agent_thinking_clip(string s, int max_len) string {
     }
     string out = ""
     int i = 0
-    while i < max_len {
+    for i < max_len {
         out = out + string(s[i])
         i = i + 1
     }

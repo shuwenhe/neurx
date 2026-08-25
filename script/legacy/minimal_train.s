@@ -98,7 +98,7 @@ func main() {
     int shard_index = 0
     int last_shard_no = 0
     string last_shard = ""
-    while shard_index < shard_count && step < max_steps {
+    for shard_index < shard_count && step < max_steps {
         string shard_path = shard_path_for_index(shard_list_text, shard_list_file, shard_dir, shard_index, shard_index_mode)
         last_shard = shard_path
         last_shard_no = shard_index + 1
@@ -119,7 +119,7 @@ func main() {
         int next_line = 1
         int chunk_count = 0
         bool shard_done = false
-        while !shard_done && step < max_steps && docs_seen < max_docs {
+        for !shard_done && step < max_steps && docs_seen < max_docs {
             chunk_count = chunk_count + 1
             int last_line = next_line + line_chunk_size - 1
             string chunk_cmd = ""
@@ -139,7 +139,7 @@ func main() {
             } else {
                 int i = 0
                 int lines_counted = 0
-                while i < chunk_len && step < max_steps && docs_seen < max_docs {
+                for i < chunk_len && step < max_steps && docs_seen < max_docs {
                     if chunk_text[i] == 10 {
                         lines_counted = lines_counted + 1
                         docs_seen = docs_seen + 1
@@ -263,12 +263,12 @@ func shard_progress_bar(int done, int total, int width) string {
     }
     string out = "["
     int i = 0
-    while i < filled {
+    for i < filled {
         out = out + "="
         i = i + 1
     }
     i = filled
-    while i < bar_width {
+    for i < bar_width {
         out = out + "-"
         i = i + 1
     }
@@ -279,7 +279,7 @@ func shard_progress_bar(int done, int total, int width) string {
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
-    while i < str_len(s) {
+    for i < str_len(s) {
         string ch = string_char(s[i])
         if ch == "'" {
             out = out + "'\"'\"'"
@@ -297,7 +297,7 @@ func count_non_empty_lines(string text) int {
     int i = 0
     int n = str_len(text)
     bool in_line = false
-    while i < n {
+    for i < n {
         if text[i] == 10 {
             if in_line {
                 count = count + 1
@@ -317,7 +317,7 @@ func count_non_empty_lines(string text) int {
 func has_non_space(string text) bool {
     int i = 0
     int n = str_len(text)
-    while i < n {
+    for i < n {
         if !is_space(text[i]) {
             return true
         }
@@ -331,7 +331,7 @@ func shard_path_at(string shard_list, int index) string {
     int start = 0
     int i = 0
     int n = str_len(shard_list)
-    while i <= n {
+    for i <= n {
         bool end_of_line = i == n || shard_list[i] == 10
         if end_of_line {
             string path = trim(substring(shard_list, start, i))
@@ -363,7 +363,7 @@ func zero_pad_int(int value, int width) string {
     string out = ""
     int missing = width - str_len(digits)
     int i = 0
-    while i < missing {
+    for i < missing {
         out = out + "0"
         i = i + 1
     }
@@ -373,7 +373,7 @@ func zero_pad_int(int value, int width) string {
 func extract_filename(string path) string {
     int last_slash = -1
     int i = 0
-    while i < str_len(path) {
+    for i < str_len(path) {
         if path[i] == 47 {
             last_slash = i
         }
@@ -388,7 +388,7 @@ func extract_filename(string path) string {
 func hash_token(string word, int vocab_size) int {
     int h = 5381
     int i = 0
-    while i < str_len(word) {
+    for i < str_len(word) {
         h = h * 33 + word[i]
         i = i + 1
     }
@@ -413,7 +413,7 @@ func extract_json_string_field_prefix(string json_line, string field, int scan_l
         return ""
     }
     int i = pos + str_len(pattern)
-    while i < json_len && is_space(json_line[i]) {
+    for i < json_len && is_space(json_line[i]) {
         i = i + 1
     }
     if i >= json_len || json_line[i] != 34 {
@@ -421,7 +421,7 @@ func extract_json_string_field_prefix(string json_line, string field, int scan_l
     }
     i = i + 1
     string out = ""
-    while i < json_len {
+    for i < json_len {
         int c = json_line[i]
         if c == 34 {
             return out
@@ -457,10 +457,10 @@ func extract_json_string_field_prefix(string json_line, string field, int scan_l
 
 func find_string_prefix(string s, string pattern, int start, int limit) int {
     int i = start
-    while i + str_len(pattern) <= limit {
+    for i + str_len(pattern) <= limit {
         int j = 0
         bool match = true
-        while j < str_len(pattern) {
+        for j < str_len(pattern) {
             if s[i + j] != pattern[j] {
                 match = false
                 j = str_len(pattern)
@@ -477,11 +477,11 @@ func find_string_prefix(string s, string pattern, int start, int limit) int {
 
 func trim(string s) string {
     int i = 0
-    while i < str_len(s) && is_space(s[i]) {
+    for i < str_len(s) && is_space(s[i]) {
         i = i + 1
     }
     int j = str_len(s) - 1
-    while j >= 0 && is_space(s[j]) {
+    for j >= 0 && is_space(s[j]) {
         j = j - 1
     }
     if j < i {
@@ -504,7 +504,7 @@ func substring(string s, int start, int end) string {
     }
     string out = ""
     int i = s_start
-    while i < s_end {
+    for i < s_end {
         out = out + string_char(s[i])
         i = i + 1
     }
@@ -520,10 +520,10 @@ func mod_int(int a, int b) int {
         return 0
     }
     int value = a
-    while value < 0 {
+    for value < 0 {
         value = value + b
     }
-    while value >= b {
+    for value >= b {
         value = value - b
     }
     value
@@ -545,7 +545,7 @@ func parse_float(string s) float {
         i = 1
     }
     float whole = 0.0
-    while i < str_len(text) && text[i] >= 48 && text[i] <= 57 {
+    for i < str_len(text) && text[i] >= 48 && text[i] <= 57 {
         whole = whole * 10.0 + (text[i] - 48) as float
         i = i + 1
     }
@@ -553,7 +553,7 @@ func parse_float(string s) float {
     float scale = 1.0
     if i < str_len(text) && text[i] == 46 {
         i = i + 1
-        while i < str_len(text) && text[i] >= 48 && text[i] <= 57 {
+        for i < str_len(text) && text[i] >= 48 && text[i] <= 57 {
             frac = frac * 10.0 + (text[i] - 48) as float
             scale = scale * 10.0
             i = i + 1
@@ -580,7 +580,7 @@ func fmt_float(float value, int decimals) string {
         val = 0.0 - val
     }
     int whole = 0
-    while val >= 1.0 {
+    for val >= 1.0 {
         val = val - 1.0
         whole = whole + 1
     }
@@ -590,10 +590,10 @@ func fmt_float(float value, int decimals) string {
     }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         val = val * 10.0
         int digit = 0
-        while val >= 1.0 {
+        for val >= 1.0 {
             val = val - 1.0
             digit = digit + 1
         }
@@ -613,10 +613,10 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int quotient = 0
         int digit = value
-        while digit >= 10 {
+        for digit >= 10 {
             digit = digit - 10
             quotient = quotient + 1
         }
@@ -654,11 +654,11 @@ func progress_bar(int done, int total, int width) string {
     }
     string out = "["
     int i = 0
-    while i < filled {
+    for i < filled {
         out = out + "#"
         i = i + 1
     }
-    while i < w {
+    for i < w {
         out = out + "-"
         i = i + 1
     }
@@ -678,7 +678,7 @@ func sqrt_approx(float x) float {
     }
     float guess = x
     int i = 0
-    while i < 8 {
+    for i < 8 {
         guess = 0.5 * (guess + x / guess)
         i = i + 1
     }
@@ -687,7 +687,7 @@ func sqrt_approx(float x) float {
 
 func str_len(string s) int {
     int n = 0
-    while s[n] != 0 {
+    for s[n] != 0 {
         n = n + 1
     }
     n

@@ -20,7 +20,7 @@ func read_jsonl_file(string filepath) []jsonl_document {
     []string lines = split_lines(content)
     int i = 0
     long doc_id = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line = trim_string(lines[i])
         if len(line) > 0 {
             jsonl_document doc = parse_json_document(line)
@@ -126,7 +126,7 @@ func get_shard_indices_for_rank(
 ) []int {
     []int shard_indices = []int{cap: 0}
     int shard = dp_rank
-    while shard < num_shards {
+    for shard < num_shards {
         shard_indices = append_int(shard_indices, shard)
         shard = shard + dp_size
     }
@@ -142,11 +142,11 @@ func pack_tokens_into_batch(
     []int batch_token_ids = []int{cap: batch_size * seq_len}
     []int batch_attention_mask = []int{cap: batch_size * seq_len}
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         []int tokens = []int{cap: seq_len}
         []int mask = []int{cap: seq_len}
         int j = 0
-        while j < seq_len {
+        for j < seq_len {
             int token_idx = i * seq_len + j
             if token_idx < len(token_sequence) {
                 tokens[j] = token_sequence[token_idx]
@@ -159,7 +159,7 @@ func pack_tokens_into_batch(
         }
         int base = i * seq_len
         int k = 0
-        while k < seq_len {
+        for k < seq_len {
             batch_token_ids[base + k] = tokens[k]
             batch_attention_mask[base + k] = mask[k]
             k = k + 1
@@ -182,7 +182,7 @@ func get_next_batch(
         load_next_shard(loader)
     }
     []int accumulated_tokens = []int{cap: 0}
-    while len(accumulated_tokens) < (loader.config.batch_size * loader.config.seq_len) {
+    for len(accumulated_tokens) < (loader.config.batch_size * loader.config.seq_len) {
         if loader.current_doc_idx >= len(loader.current_shard_docs) {
             load_next_shard(loader)
             if len(loader.current_shard_docs) == 0 {
@@ -194,13 +194,13 @@ func get_next_batch(
         []int doc_tokens = []int{cap: 0}
         doc_tokens = append_int(doc_tokens, loader.tokenizer.bos_token_id)
         int i = 0
-        while i < len(tokens) {
+        for i < len(tokens) {
             doc_tokens = append_int(doc_tokens, tokens[i])
             i = i + 1
         }
         doc_tokens = append_int(doc_tokens, loader.tokenizer.eos_token_id)
         i = 0
-        while i < len(doc_tokens) {
+        for i < len(doc_tokens) {
             if len(accumulated_tokens) < loader.config.batch_size * loader.config.seq_len {
                 accumulated_tokens = append_int(accumulated_tokens, doc_tokens[i])
             }
@@ -247,7 +247,7 @@ func get_loader_stats(jsonl_data_loader loader) string {
 func append_int([]int arr, int val) []int {
     []int out = []int{cap: len(arr) + 1}
     int i = 0
-    while i < len(arr) {
+    for i < len(arr) {
         out.push(arr[i])
         i = i + 1
     }
@@ -258,7 +258,7 @@ func append_int([]int arr, int val) []int {
 func append_string([]string arr, string val) []string {
     []string out = []string{cap: len(arr) + 1}
     int i = 0
-    while i < len(arr) {
+    for i < len(arr) {
         out.push(arr[i])
         i = i + 1
     }
@@ -277,7 +277,7 @@ func int_to_string(int x) string {
         value = -value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value % 10
         out = string(digit + 48) + out
         value = value / 10
@@ -297,7 +297,7 @@ func split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = neurx.strings.substring(text, i, i + 1)
         if ch == "\n" || ch == "\r" {
             if len(current) > 0 {
@@ -318,14 +318,14 @@ func split_lines(string text) []string {
 func trim_string(string text) string {
     int left = 0
     int right = len(text) - 1
-    while left < len(text) {
+    for left < len(text) {
         string ch = neurx.strings.substring(text, left, left + 1)
         if ch != " " && ch != "\t" && ch != "\n" && ch != "\r" {
             break
         }
         left = left + 1
     }
-    while right >= left {
+    for right >= left {
         string ch = neurx.strings.substring(text, right, right + 1)
         if ch != " " && ch != "\t" && ch != "\n" && ch != "\r" {
             break
@@ -345,7 +345,7 @@ func extract_json_string_field(string json_line, string field_name) string {
         return ""
     }
     int i = pos + len(needle)
-    while i < len(json_line) {
+    for i < len(json_line) {
         string ch = neurx.strings.substring(json_line, i, i + 1)
         if ch == ":" {
             i = i + 1
@@ -353,7 +353,7 @@ func extract_json_string_field(string json_line, string field_name) string {
         }
         i = i + 1
     }
-    while i < len(json_line) {
+    for i < len(json_line) {
         string ch = neurx.strings.substring(json_line, i, i + 1)
         if ch != " " && ch != "\t" {
             break
@@ -368,7 +368,7 @@ func extract_json_string_field(string json_line, string field_name) string {
     }
     i = i + 1
     string out = ""
-    while i < len(json_line) {
+    for i < len(json_line) {
         string ch = neurx.strings.substring(json_line, i, i + 1)
         if ch == "\"" {
             return out
@@ -407,9 +407,9 @@ func find_substring(string text, string pattern) int {
         return 0
     }
     int i = 0
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
-        while j < len(pattern) {
+        for j < len(pattern) {
             if neurx.strings.substring(text, i + j, i + j + 1) != neurx.strings.substring(pattern, j, j + 1) {
                 break
             }
@@ -430,7 +430,7 @@ func build_default_vocab() []string {
     vocab.push("<eos>")
     vocab.push("<unk>")
     int c = 32
-    while c <= 126 {
+    for c <= 126 {
         vocab.push(string(c))
         c = c + 1
     }

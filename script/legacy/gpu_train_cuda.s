@@ -109,7 +109,7 @@ func main() {
     string manifest_content = runtime_read_text_file(manifest_path)
     int shard_count = count_lines(manifest_content)
     int shard_idx = 0
-    while shard_idx < shard_count && state.step < max_steps {
+    for shard_idx < shard_count && state.step < max_steps {
         string shard_file = "/home/shuwen/shuwen/train/neurx/dataset/pretrain/shard/" + int_to_str(shard_idx) + ".jsonl"
         if !runtime_file_exists(shard_file) {
             shard_idx = shard_idx + 1
@@ -119,8 +119,8 @@ func main() {
         int line_start = 0
         int line_end = 0
         int line_idx = 0
-        while line_idx < 1000 && state.step < max_steps {
-            while line_end < str_len(shard_content) && shard_content[line_end] != 10 {
+        for line_idx < 1000 && state.step < max_steps {
+            for line_end < str_len(shard_content) && shard_content[line_end] != 10 {
                 line_end = line_end + 1
             }
             string line = substring(shard_content, line_start, line_end)
@@ -173,19 +173,19 @@ func gpu_forward_backward_pass(int64 cublas_handle, gpu_model model,
     []int tokens = new int[seq_len]
     int token_count = 0
     int i = 0
-    while i < str_len(document) && token_count < seq_len {
+    for i < str_len(document) && token_count < seq_len {
         tokens[token_count] = document[i]
         token_count = token_count + 1
         i = i + 1
     }
-    while token_count < seq_len {
+    for token_count < seq_len {
         tokens[token_count] = 0
         token_count = token_count + 1
     }
     int64 batch_x_gpu = cuda_malloc(batch_size * seq_len * model.embedding_size * 4)
     int64 hidden_gpu = batch_x_gpu
     int layer = 0
-    while layer < model.num_layers {
+    for layer < model.num_layers {
         int64 layer_output_gpu = cuda_malloc(batch_size * seq_len * model.embedding_size * 4)
         int64 q_gpu = linear_forward(batch_size * seq_len, model.embedding_size,
                                      model.num_heads * 64,
@@ -219,7 +219,7 @@ func gpu_forward_backward_pass(int64 cublas_handle, gpu_model model,
 func count_lines(string s) int {
     int count = 0
     int i = 0
-    while i < str_len(s) {
+    for i < str_len(s) {
         if s[i] == 10 { count = count + 1 }
         i = i + 1
     }
@@ -237,7 +237,7 @@ func float_to_str(float f) string {
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
-    while i < end && i < str_len(s) {
+    for i < end && i < str_len(s) {
         out = out + string_char(s[i])
         i = i + 1
     }
@@ -250,7 +250,7 @@ func string_char(int c) string {
 
 func str_len(string s) int {
     int n = 0
-    while s[n] != 0 {
+    for s[n] != 0 {
         n = n + 1
     }
     n

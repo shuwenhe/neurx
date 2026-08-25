@@ -37,7 +37,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -60,7 +60,7 @@ func float_to_str(float value, int decimals) string {
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -68,10 +68,10 @@ func float_to_str(float value, int decimals) string {
     if decimals > 0 {
         result = result + "."
         int i = 0
-        while i < decimals {
+        for i < decimals {
             current = current * 10.0
             int digit = 0
-            while current >= 1.0 {
+            for current >= 1.0 {
                 current = current - 1.0
                 digit = digit + 1
             }
@@ -95,7 +95,7 @@ func float_to_str(float value, int decimals) string {
 func repeat_char(string ch, int count) string {
     string result = ""
     int i = 0
-    while i < count {
+    for i < count {
         result = result + ch
         i = i + 1
     }

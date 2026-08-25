@@ -43,7 +43,7 @@ func checkpoint_clear_activation(checkpoint_context ctx, int layer_id) checkpoin
 func checkpoint_get_memory_saved(checkpoint_context ctx) int {
     int total = 0
     int i = 0
-    while i < len(ctx.saved_activations) {
+    for i < len(ctx.saved_activations) {
         if !ctx.is_checkpoint_required[i] {
             total = total + len(ctx.saved_activations[i])
         }
@@ -55,7 +55,7 @@ func checkpoint_get_memory_saved(checkpoint_context ctx) int {
 func clone_activation([]float act) []float {
     []float cloned = []float{cap: len(act)}
     int i = 0
-    while i < len(act) {
+    for i < len(act) {
         cloned[i] = act[i]
         i = i + 1
     }

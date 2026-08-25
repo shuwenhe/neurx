@@ -24,7 +24,7 @@ func last_boxed_only_string(string s) string {
     int right_brace_idx = -1
     int num_left_braces_open = 0
     int s_len = len(s)
-    while i < s_len {
+    for i < s_len {
         int c = char_at(s, i)
         if c == 123 {
             num_left_braces_open = num_left_braces_open + 1
@@ -143,7 +143,7 @@ func replace_all(string s, string old_str, string new_str) string {
     int i = 0
     int s_len = len(s)
     int old_len = len(old_str)
-    while i < s_len {
+    for i < s_len {
         if i <= s_len - old_len {
             if substring(s, i, i + old_len) == old_str {
                 result = result + new_str

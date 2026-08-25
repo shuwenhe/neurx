@@ -8,10 +8,10 @@ func contains_keyword(string text, string keyword) bool {
         return false
     }
     int i = 0
-    while i <= text_len - keyword_len {
+    for i <= text_len - keyword_len {
         bool match = true
         int j = 0
-        while j < keyword_len {
+        for j < keyword_len {
             string text_char = __host_slice(text, i + j, i + j + 1)
             string keyword_char = __host_slice(keyword, j, j + 1)
             if text_char != keyword_char {

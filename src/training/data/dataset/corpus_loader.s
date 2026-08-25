@@ -94,7 +94,7 @@ func new_corpus_state(corpus_config cfg) corpus_state {
     bpe_tokenizer_state tok = init_bpe_tokenizer(default_llm_tokenizer_config())
     []streaming_reader_state readers = []streaming_reader_state{cap: cfg.num_sources}
     int i = 0
-    while i < cfg.num_sources {
+    for i < cfg.num_sources {
         stream_reader_config rc = default_tb_stream_reader_config()
         rc.seq_len = cfg.seq_len
         if runtime_file_exists(cfg.sources[i].path) {
@@ -137,7 +137,7 @@ func new_corpus_state_from_paths([]string paths, int batch_size, int seq_len, bo
     }
     []data_source sources = []data_source{cap: len(paths)}
     int i = 0
-    while i < len(paths) {
+    for i < len(paths) {
         data_source src = data_source {
             name: "source_" + int_to_string(i),
             path: paths[i],
@@ -160,7 +160,7 @@ func jsonl_extract_text(string line, string field) string {
         return ""
     }
     int start = pos + plen
-    while start < llen && line[start] == 32 {
+    for start < llen && line[start] == 32 {
         start = start + 1
     }
     if start >= llen {
@@ -172,7 +172,7 @@ func jsonl_extract_text(string line, string field) string {
     start = start + 1
     string result = ""
     int i = start
-    while i < llen {
+    for i < llen {
         int c = line[i]
         if c == 34 { break }
         if c == 92 && i + 1 < llen {
@@ -193,10 +193,10 @@ func cl_find(string s, string pattern, int start) int {
     int slen = len(s)
     int plen = len(pattern)
     int i = start
-    while i <= slen - plen {
+    for i <= slen - plen {
         bool match = true
         int j = 0
-        while j < plen {
+        for j < plen {
             if s[i + j] != pattern[j] { match = false; break }
             j = j + 1
         }
@@ -217,7 +217,7 @@ func compute_quality_score(string text) float {
     bool in_word = false
     int total_word_len = 0
     int i = 0
-    while i < n {
+    for i < n {
         int c = text[i]
         if c >= 32 && c < 127 {
             printable = printable + 1
@@ -260,7 +260,7 @@ func compute_quality_score(string text) float {
 func doc_hash(string text) int {
     int h = 2166136261
     int i = 0
-    while i < len(text) && i < 2048 {
+    for i < len(text) && i < 2048 {
         h = h * 16777619
         h = h + text[i]
         if h < 0 { h = -h }
@@ -271,7 +271,7 @@ func doc_hash(string text) int {
 
 func corpus_is_duplicate(corpus_state state, int hash) bool {
     int i = 0
-    while i < state.total_docs_seen && i < len(state.dedup_hashes) {
+    for i < state.total_docs_seen && i < len(state.dedup_hashes) {
         if state.dedup_hashes[i] == hash { return true }
         i = i + 1
     }
@@ -304,7 +304,7 @@ func pb_is_full(packing_buffer buf) bool {
 func pb_flush(packing_buffer buf) []int {
     []int out = []int{cap: buf.capacity}
     int i = 0
-    while i < buf.capacity {
+    for i < buf.capacity {
         if i < buf.length {
             out[i] = buf.tokens[i]
         } else {
@@ -327,7 +327,7 @@ func corpus_select_source(corpus_state state) corpus_source_selection {
     float r = (r_mod * 1.0) / 1000000.0
     float cumulative = 0.0
     int i = 0
-    while i < state.config.num_sources {
+    for i < state.config.num_sources {
         cumulative = cumulative + state.config.sources[i].weight
         if r < cumulative {
             corpus_source_selection {
@@ -378,7 +378,7 @@ struct corpus_token_stream_result {
 func corpus_read_document(corpus_state state) corpus_document_result {
     int attempts = 0
     int max_attempts = 20
-    while attempts < max_attempts {
+    for attempts < max_attempts {
         int src_idx
         corpus_source_selection source_selection = corpus_select_source(state)
         src_idx = source_selection.source_index
@@ -443,7 +443,7 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
     []string src_names = []string{cap: batch_size}
     packing_buffer buf = new_packing_buffer(seq_len)
     int seqs_ready = 0
-    while seqs_ready < batch_size {
+    for seqs_ready < batch_size {
         string doc_text
         bool ok
         corpus_document_result doc_result = corpus_read_document(state)
@@ -451,10 +451,10 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
         state = doc_result.state
         ok = doc_result.ok
         if !ok {
-            while seqs_ready < batch_size {
+            for seqs_ready < batch_size {
                 int pos = seqs_ready * seq_len
                 int t = 0
-                while t < seq_len {
+                for t < seq_len {
                     all_input[pos + t] = state.config.pad_token_id
                     all_target[pos + t] = -1
                     t = t + 1
@@ -468,13 +468,13 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
         state.total_tokens_seen = state.total_tokens_seen + len(token_ids)
         buf = pb_append(buf, bos)
         int i = 0
-        while i < len(token_ids) {
+        for i < len(token_ids) {
             buf = pb_append(buf, token_ids[i])
             if pb_is_full(buf) {
                 []int seq = pb_flush(buf)
                 int pos = seqs_ready * seq_len
                 int t = 0
-                while t < seq_len {
+                for t < seq_len {
                     all_input[pos + t] = seq[t]
                     if t + 1 < seq_len {
                         all_target[pos + t] = seq[t + 1]
@@ -514,12 +514,12 @@ func corpus_collect_token_ids(corpus_state state, int max_tokens) corpus_token_s
     if target_tokens < 0 {
         target_tokens = 0
     }
-    while tokens_collected < target_tokens {
+    for tokens_collected < target_tokens {
         corpus_batch_result batch_result = corpus_next_batch(state)
         state = batch_result.state
         []int batch_tokens = batch_result.batch.input_ids
         int i = 0
-        while i < len(batch_tokens) && tokens_collected < target_tokens {
+        for i < len(batch_tokens) && tokens_collected < target_tokens {
             collected.push(batch_tokens[i])
             tokens_collected = tokens_collected + 1
             i = i + 1
@@ -573,7 +573,7 @@ func corpus_get_stats(corpus_state state) corpus_stats {
 func cl_substring(string s, int start, int end) string {
     string out = ""
     int i = start
-    while i < end && i < len(s) {
+    for i < end && i < len(s) {
         out = out + string(s[i])
         i = i + 1
     }

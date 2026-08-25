@@ -59,7 +59,7 @@ func kernel_main() (core_system) {
 }
 
 func run_main_event_loop(core_system* core) (int, string) {
-    while core.state.is_running {
+    for core.state.is_running {
         scheduled_task := sched::schedule_next_task(core.task_scheduler)
         
         if scheduled_task > 0 {

@@ -40,7 +40,7 @@ func module_named_parameter_tensors(nn.module m) []named_tensor {
     }
     []named_tensor out = []named_tensor{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = named_tensor {
             name: names[i],
             value: values[i],
@@ -59,7 +59,7 @@ func module_named_buffer_tensors(nn.module m) []named_tensor {
     }
     []named_tensor out = []named_tensor{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = named_tensor {
             name: names[i],
             value: values[i],

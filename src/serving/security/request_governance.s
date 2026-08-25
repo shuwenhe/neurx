@@ -28,7 +28,7 @@ func governance_constant_time_fingerprint_equal(string left, string right) bool 
     if len(left) != 64 || len(right) != 64 { return false }
     int difference = 0
     int i = 0
-    while i < 64 {
+    for i < 64 {
         difference = difference | (left[i] ^ right[i])
         i = i + 1
     }
@@ -76,7 +76,7 @@ func governance_deny(governance_state state, int status, string reason, bool quo
 func governance_authorize(governance_state state, string key_fingerprint, string permission, int requested_tokens, int now_ms) governance_decision {
     int index = -1
     int i = 0
-    while i < len(state.key_fingerprints) {
+    for i < len(state.key_fingerprints) {
         if state.enabled[i] && governance_constant_time_fingerprint_equal(state.key_fingerprints[i], key_fingerprint) { index = i }
         i = i + 1
     }
@@ -105,7 +105,7 @@ func governance_authorize(governance_state state, string key_fingerprint, string
 
 func governance_disable_tenant(governance_state state, string tenant_id) governance_state {
     int i = 0
-    while i < len(state.tenant_ids) {
+    for i < len(state.tenant_ids) {
         if state.tenant_ids[i] == tenant_id { state.enabled[i] = false }
         i = i + 1
     }

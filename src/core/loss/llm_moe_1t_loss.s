@@ -66,13 +66,13 @@ func compute_ce_loss(
     int num_tokens = batch_size * seq_len
     []float per_token_loss = make([]float, num_tokens)
     int t = 0
-    while t < num_tokens {
+    for t < num_tokens {
         int label = labels[t]
         float label_logit = logits[t * vocab_size + label]
         float max_logit = find_max(logits, t * vocab_size, t * vocab_size + vocab_size)
         float sum_exp = 0.0
         int v = 0
-        while v < vocab_size {
+        for v < vocab_size {
             float logit = logits[t * vocab_size + v] - max_logit
             sum_exp = sum_exp + exp(logit)
             v = v + 1
@@ -100,9 +100,9 @@ func compute_moe_aux_loss(
     []float expert_load = make([]float, num_experts)
     []float expert_importance = make([]float, num_experts)
     int t = 0
-    while t < num_tokens {
+    for t < num_tokens {
         int k = 0
-        while k < top_k {
+        for k < top_k {
             int expert_id = expert_indices[t * top_k + k]
             float weight = expert_weights[t * top_k + k]
             expert_load[expert_id] = expert_load[expert_id] + weight
@@ -114,7 +114,7 @@ func compute_moe_aux_loss(
     float avg_load = float(num_tokens * top_k) / float(num_experts)
     float aux_loss = 0.0
     int e = 0
-    while e < num_experts {
+    for e < num_experts {
         float diff = expert_load[e] - avg_load
         aux_loss = aux_loss + diff * diff
         e = e + 1
@@ -135,12 +135,12 @@ func compute_kl_divergence(
     int num_tokens = batch_size * seq_len
     []float per_token_kl = make([]float, num_tokens)
     int t = 0
-    while t < num_tokens {
+    for t < num_tokens {
         []float probs_target = softmax(logits_target, t * vocab_size, (t+1) * vocab_size, temperature)
         []float probs_base = softmax(logits_base, t * vocab_size, (t+1) * vocab_size, temperature)
         float kl = 0.0
         int v = 0
-        while v < vocab_size {
+        for v < vocab_size {
             float p_target = probs_target[v]
             float p_base = probs_base[v]
             if p_target > 1e-8 {
@@ -170,7 +170,7 @@ func compute_total_loss(
     )
     float ce_loss = 0.0
     int i = 0
-    while i < len(ce_per_token) {
+    for i < len(ce_per_token) {
         ce_loss = ce_loss + ce_per_token[i]
         i = i + 1
     }
@@ -202,10 +202,10 @@ func compute_ce_gradient(
     int num_tokens = batch_size * seq_len
     []float grad_logits = make([]float, num_tokens * vocab_size)
     int t = 0
-    while t < num_tokens {
+    for t < num_tokens {
         []float probs = softmax(logits, t * vocab_size, (t+1) * vocab_size, 1.0)
         int v = 0
-        while v < vocab_size {
+        for v < vocab_size {
             grad_logits[t * vocab_size + v] = probs[v]
             v = v + 1
         }
@@ -254,7 +254,7 @@ func apply_loss_scale(
     float loss_scale
 ) {
     int i = 0
-    while i < len(gradients) {
+    for i < len(gradients) {
         gradients[i] = gradients[i] * loss_scale
         i = i + 1
     }
@@ -271,7 +271,7 @@ func softmax(
     float max_val = find_max(logits, start_idx, end_idx)
     float sum_exp = 0.0
     int i = 0
-    while i < size {
+    for i < size {
         float val = (logits[start_idx + i] - max_val) / temperature
         float exp_val = exp(val)
         result[i] = exp_val
@@ -279,7 +279,7 @@ func softmax(
         i = i + 1
     }
     i = 0
-    while i < size {
+    for i < size {
         if sum_exp > 0.0 {
             result[i] = result[i] / sum_exp
         }
@@ -291,7 +291,7 @@ func softmax(
 func find_max([]float arr, int start_idx, int end_idx) float {
     float max_val = arr[start_idx]
     int i = start_idx + 1
-    while i < end_idx {
+    for i < end_idx {
         if arr[i] > max_val {
             max_val = arr[i]
         }

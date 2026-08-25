@@ -58,7 +58,7 @@ func new_robotics_training_metrics() robotics_training_metrics {
 func robotics_training_corpus() []int {
     []int token_ids = []int{cap: 16}
     int i = 0
-    while i < 16 {
+    for i < 16 {
         token_ids[i] = i - (i / 8) * 8
         i = i + 1
     }
@@ -166,7 +166,7 @@ func robotics_training_run(robotics_training_state state, int steps) robotics_tr
     }
     robotics_training_state current = state
     int i = 0
-    while i < loops {
+    for i < loops {
         current = robotics_training_step(current)
         i = i + 1
         if current.finished {

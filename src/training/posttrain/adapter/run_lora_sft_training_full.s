@@ -45,7 +45,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         string d = ""
         if digit == 0 { d = "0" }
@@ -70,7 +70,7 @@ func float_to_str(float value, int decimals) string {
     bool neg = current < 0.0
     if neg { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -78,10 +78,10 @@ func float_to_str(float value, int decimals) string {
     if neg { out = "-" }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }
@@ -130,12 +130,12 @@ func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) mod
     []float lora_a
     []float lora_b
     int i1 = 0
-    while i1 < input_dim * rank {
+    for i1 < input_dim * rank {
         lora_a[i1] = 0.01
         i1 = i1 + 1
     }
     int i2 = 0
-    while i2 < rank * output_dim {
+    for i2 < rank * output_dim {
         lora_b[i2] = 0.0
         i2 = i2 + 1
     }
@@ -143,7 +143,7 @@ func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) mod
     state.lora_b = lora_b
     []float base_weights
     int i3 = 0
-    while i3 < output_dim * input_dim {
+    for i3 < output_dim * input_dim {
         base_weights[i3] = 0.1
         i3 = i3 + 1
     }
@@ -178,16 +178,16 @@ func run_training(training_config cfg) training_metrics {
     println("🎓 Trainingenterlinein...")
     println("")
     int epoch = 0
-    while epoch < cfg.num_epochs {
+    for epoch < cfg.num_epochs {
         println("📊 Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(cfg.num_epochs))
         float epoch_loss = 0.0
         int epoch_samples = 0
         int batch = 0
-        while batch < 10 {
+        for batch < 10 {
             float batch_loss = 0.0
             int batch_samples = cfg.batch_size
             int sample = 0
-            while sample < batch_samples {
+            for sample < batch_samples {
                 float random_val = ((batch * batch_samples + sample) as float) * 0.001
                 float pred_loss = random_val * random_val
                 batch_loss = batch_loss + pred_loss
@@ -199,7 +199,7 @@ func run_training(training_config cfg) training_metrics {
             float learning_rate = cfg.learning_rate
             float wd_loss = 0.0
             int w = 0
-            while w < len(model.lora_a) {
+            for w < len(model.lora_a) {
                 wd_loss = wd_loss + model.lora_a[w] * model.lora_a[w]
                 w = w + 1
             }

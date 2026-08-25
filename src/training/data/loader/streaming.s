@@ -134,7 +134,7 @@ func buffer_read(streaming_buffer buf) (string, streaming_buffer) {
 func tokenize_line(string line, int seq_len) []int {
     []int tokens = []int{cap: seq_len}
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         tokens.push(i % 10000)
         i = i + 1
     }
@@ -145,7 +145,7 @@ func fill_buffer(streaming_reader reader, func tokenizer) streaming_reader {
     if reader.eof {
         return reader
     }
-    while !reader.buffer.full {
+    for !reader.buffer.full {
         if reader.current_file_idx >= len(reader.file_paths) {
             reader.eof = true
             break
@@ -165,7 +165,7 @@ func fill_buffer(streaming_reader reader, func tokenizer) streaming_reader {
 func build_document_stream(streaming_reader reader, func tokenizer) []int {
     []int stream = []int{}
     (string line, reader.buffer) = buffer_read(reader.buffer)
-    while line != "" {
+    for line != "" {
         []int tokens = tokenizer(line)
         stream = stream + tokens
         (line, reader.buffer) = buffer_read(reader.buffer)
@@ -186,20 +186,20 @@ func create_batch_from_stream([]int stream, int batch_size, int seq_len) (batch_
         return (batch, stream)
     }
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         []int input = stream[b * seq_len..(b+1) * seq_len]
         []int label = stream[b * seq_len + 1..(b+1) * seq_len + 1]
         if len(label) < seq_len {
             int pad_len = seq_len - len(label)
             int i = 0
-            while i < pad_len {
+            for i < pad_len {
                 label.push(0)
                 i = i + 1
             }
         }
         []int mask = []int{cap: seq_len}
         int i = 0
-        while i < seq_len {
+        for i < seq_len {
             mask.push(1)
             i = i + 1
         }
@@ -221,7 +221,7 @@ func dataloader_next_batch(streaming_dataloader loader, func tokenizer) (batch_d
     }
     batch_data batch = loader.prefetch_queue[0]
     int i = 0
-    while i < loader.queue_size - 1 {
+    for i < loader.queue_size - 1 {
         loader.prefetch_queue[i] = loader.prefetch_queue[i+1]
         i = i + 1
     }
@@ -232,7 +232,7 @@ func dataloader_next_batch(streaming_dataloader loader, func tokenizer) (batch_d
 
 func prefetch_batches(streaming_dataloader loader, func tokenizer) streaming_dataloader {
     []int stream = build_document_stream(loader.reader, tokenizer)
-    while loader.queue_size < loader.config.prefetch_size {
+    for loader.queue_size < loader.config.prefetch_size {
         (batch_data batch, stream) = create_batch_from_stream(stream, loader.config.batch_size, loader.config.seq_len)
         if len(batch.input_ids) == 0 {
             break
@@ -256,7 +256,7 @@ func dataloader_shuffle_files(streaming_reader reader) streaming_reader {
         return reader
     }
     int i = len(reader.file_paths) - 1
-    while i > 0 {
+    for i > 0 {
         int j = random_int(0, i)
         string temp = reader.file_paths[i]
         reader.file_paths[i] = reader.file_paths[j]
@@ -305,7 +305,7 @@ func dataloader_statistics(streaming_dataloader loader) string {
 func split_long_sequence([]int tokens, int max_len) [][]int {
     [][]int chunks = [][]int{}
     int i = 0
-    while i < len(tokens) {
+    for i < len(tokens) {
         int end = min(i + max_len, len(tokens))
         chunks.push(tokens[i..end])
         i = end
@@ -325,7 +325,7 @@ func pad_sequence([]int seq, int length) []int {
         return seq[0..length]
     }
     []int padded = copy_int(seq)
-    while len(padded) < length {
+    for len(padded) < length {
         padded.push(0)
     }
     padded

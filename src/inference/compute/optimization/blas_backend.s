@@ -24,17 +24,17 @@ func blas_sgemm_native_s(
     if K != K2 || M != M2 || N != N2 { return C }
     []float out = []float{cap: M * N}
     int i = 0
-    while i < M * N {
+    for i < M * N {
         out[i] = C[i] * beta
         i = i + 1
     }
     int m = 0
-    while m < M {
+    for m < M {
         int n = 0
-        while n < N {
+        for n < N {
             float sum = 0.0
             int k = 0
-            while k < K {
+            for k < K {
                 float a_val = A[m * K + k]
                 float b_val = B[k * N + n]
                 sum = sum + a_val * b_val
@@ -51,10 +51,10 @@ func blas_sgemm_native_s(
 func blas_sgemv([]float A, int M, int N, []float x, float alpha, float beta) []float {
     []float y = []float{cap: M}
     int i = 0
-    while i < M {
+    for i < M {
         float sum = 0.0
         int j = 0
-        while j < N {
+        for j < N {
             sum = sum + A[i * N + j] * x[j]
             j = j + 1
         }
@@ -67,7 +67,7 @@ func blas_sgemv([]float A, int M, int N, []float x, float alpha, float beta) []f
 func blas_sdot([]float x, []float y) float {
     float result = 0.0
     int i = 0
-    while i < len(x) {
+    for i < len(x) {
         result = result + x[i] * y[i]
         i = i + 1
     }
@@ -77,7 +77,7 @@ func blas_sdot([]float x, []float y) float {
 func blas_saxpy([]float x, []float y, float alpha) []float {
     []float out = []float{cap: len(y)}
     int i = 0
-    while i < len(y) {
+    for i < len(y) {
         out[i] = alpha * x[i] + y[i]
         i = i + 1
     }

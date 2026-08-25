@@ -11,7 +11,7 @@ func training_loop_with_stability() {
     println("")
     int num_steps = 10
     int step = 0
-    while step < num_steps {
+    for step < num_steps {
         println("[Step " + int_to_str(step + 1) + "/" + int_to_str(num_steps) + "]")
         float loss = 2.5 - ((step as float)) * 0.2
         []float layer1_grads = make_float_array(3)
@@ -54,7 +54,7 @@ func main() {
 func make_float_array(int size) []float {
     []float arr = []float{}
     int i = 0
-    while i < size {
+    for i < size {
         arr = append(arr, 0.0)
         i = i + 1
     }
@@ -64,7 +64,7 @@ func make_float_array(int size) []float {
 func make_2d_array(int size) [][]float {
     [][]float arr = [][]float{}
     int i = 0
-    while i < size {
+    for i < size {
         arr = append(arr, []float{})
         i = i + 1
     }
@@ -80,7 +80,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -111,7 +111,7 @@ func float_to_str_n(float value, int decimals) string {
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -119,10 +119,10 @@ func float_to_str_n(float value, int decimals) string {
     if decimals > 0 {
         result = result + "."
         int i = 0
-        while i < decimals {
+        for i < decimals {
             current = current * 10.0
             int digit = 0
-            while current >= 1.0 {
+            for current >= 1.0 {
                 current = current - 1.0
                 digit = digit + 1
             }

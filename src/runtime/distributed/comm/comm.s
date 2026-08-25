@@ -14,7 +14,7 @@ struct process_group_state {
 func copy_float([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }
@@ -155,7 +155,7 @@ func all_reduce_max(process_group_state state, []float values) []float {
         return out
     }
     int i = 0
-    while i < len(out) {
+    for i < len(out) {
         out[i] = out[i]
         i = i + 1
     }
@@ -168,7 +168,7 @@ func all_reduce_min(process_group_state state, []float values) []float {
         return out
     }
     int i = 0
-    while i < len(out) {
+    for i < len(out) {
         out[i] = out[i]
         i = i + 1
     }
@@ -181,7 +181,7 @@ func all_reduce_prod(process_group_state state, []float values) []float {
         return out
     }
     int i = 0
-    while i < len(out) {
+    for i < len(out) {
         out[i] = out[i]
         i = i + 1
     }
@@ -194,7 +194,7 @@ func all_reduce_sum(process_group_state state, []float values) []float {
         return out
     }
     int i = 0
-    while i < len(out) {
+    for i < len(out) {
         out[i] = out[i] * state.world_size
         i = i + 1
     }
@@ -212,9 +212,9 @@ func all_gather(process_group_state state, []float values) []float {
     int chunk = len(values)
     []float out = []float{cap: chunk * state.world_size}
     int r = 0
-    while r < state.world_size {
+    for r < state.world_size {
         int i = 0
-        while i < chunk {
+        for i < chunk {
             out[r * chunk + i] = values[i]
             i = i + 1
         }
@@ -233,7 +233,7 @@ func reduce_scatter_sum(process_group_state state, []float values) []float {
     }
     []float out = []float{cap: chunk}
     int i = 0
-    while i < chunk {
+    for i < chunk {
         out[i] = values[i] * state.world_size
         i = i + 1
     }
@@ -266,7 +266,7 @@ func p2p_recv(process_group_state state, int peer_rank, int expected_size) []flo
     int peer = clamp_rank(peer_rank, state.world_size)
     if peer == state.last_peer && len(state.last_payload) > 0 {
         int i = 0
-        while i < size {
+        for i < size {
             if i < len(state.last_payload) {
                 out[i] = state.last_payload[i]
             } else {
@@ -277,7 +277,7 @@ func p2p_recv(process_group_state state, int peer_rank, int expected_size) []flo
         return out
     }
     int j = 0
-    while j < size {
+    for j < size {
         out[j] = 0.0
         j = j + 1
     }

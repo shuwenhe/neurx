@@ -32,7 +32,7 @@ func int_to_string(int value) string {
 
     string out = ""
 
-    while n > 0 {
+    for n > 0 {
 
         int digit = n - (n / 10) * 10
 
@@ -54,7 +54,7 @@ func json_escape(string value) string {
 
     int i = 0
 
-    while i < len(value) {
+    for i < len(value) {
 
         string ch = __host_slice(value, i, i + 1)
 
@@ -100,7 +100,7 @@ func string_to_int(string text) int {
 
     int i = start
 
-    while i < len(trimmed) {
+    for i < len(trimmed) {
 
         string ch = __host_slice(trimmed, i, i + 1)
 
@@ -156,13 +156,13 @@ func extract_json_string(string json, string key) string {
 
     int i = 0
 
-    while i < len(json) {
+    for i < len(json) {
 
         bool match = true
 
         int j = 0
 
-        while j < len(search) && i + j < len(json) {
+        for j < len(search) && i + j < len(json) {
 
             string ch = __host_slice(json, i + j, i + j + 1)
 
@@ -198,7 +198,7 @@ func extract_json_string(string json, string key) string {
 
     int start = pos
 
-    while start < len(json) {
+    for start < len(json) {
 
         string ch = __host_slice(json, start, start + 1)
 
@@ -220,7 +220,7 @@ func extract_json_string(string json, string key) string {
     bool escaped = false
     string result = ""
 
-    while cursor < len(json) {
+    for cursor < len(json) {
         string ch = __host_slice(json, cursor, cursor + 1)
         if escaped {
             if ch == "n" {
@@ -280,7 +280,7 @@ func http_request(string host, int port, string method, string path, string body
 
     int offset = 0
 
-    while offset < len(request) {
+    for offset < len(request) {
 
         string remaining = __host_slice(request, offset, len(request))
 
@@ -300,7 +300,7 @@ func http_request(string host, int port, string method, string path, string body
 
     string response = ""
 
-    while true {
+    for true {
 
         string chunk = __sys_read_string(conn_fd, 65536)
 
@@ -346,7 +346,7 @@ func starts_with(string text, string prefix) bool {
 
     int i = 0
 
-    while i < len(prefix) {
+    for i < len(prefix) {
 
         if __host_slice(text, i, i + 1) != __host_slice(prefix, i, i + 1) {
 
@@ -370,13 +370,13 @@ func index_of(string text, string needle) int {
 
     int i = 0
 
-    while i <= len(text) - len(needle) {
+    for i <= len(text) - len(needle) {
 
         bool match = true
 
         int j = 0
 
-        while j < len(needle) {
+        for j < len(needle) {
 
             if __host_slice(text, i + j, i + j + 1) != __host_slice(needle, j, j + 1) {
 
@@ -448,7 +448,7 @@ func main() {
 
     int max_health_retries = 3
 
-    while len(health_response) == 0 && health_check_retries < max_health_retries {
+    for len(health_response) == 0 && health_check_retries < max_health_retries {
 
         health_response = http_request(host, port, "GET", "/health", "", "")
 
@@ -462,7 +462,7 @@ func main() {
 
                 int wait_ms = 500000
 
-                while wait_ms > 0 { wait_ms = wait_ms - 1 }
+                for wait_ms > 0 { wait_ms = wait_ms - 1 }
 
             }
 
@@ -490,7 +490,7 @@ func main() {
 
     int empty_attempts = 0
 
-    while true {
+    for true {
 
         print("You: ")
 

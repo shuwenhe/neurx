@@ -26,7 +26,7 @@ func copy_float([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = values[i]
         i = i + 1
     }
@@ -37,7 +37,7 @@ func copy_int([]int values) []int {
     int n = len(values)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = values[i]
         i = i + 1
     }
@@ -81,7 +81,7 @@ func copy_concat(concat_dataset_state state) concat_dataset_state {
     []dataset_state datasets = []dataset_state{cap: len(state.datasets)}
     int i = 0
     int datasets_len = len(state.datasets)
-    while i < datasets_len {
+    for i < datasets_len {
         dataset_state ds = get_dataset(state, i)
         datasets[i] = copy_dataset(ds)
         i = i + 1
@@ -137,7 +137,7 @@ func dataset_slice(dataset_state state, int start, int stop) dataset_state {
     []float items = []float{cap: stop - start}
     int i = start
     int j = 0
-    while i < stop {
+    for i < stop {
         items[j] = state.items[i]
         i = i + 1
         j = j + 1
@@ -148,7 +148,7 @@ func dataset_slice(dataset_state state, int start, int stop) dataset_state {
 func dataset_take(dataset_state state, []int indices) dataset_state {
     []float items = []float{cap: len(indices)}
     int i = 0
-    while i < len(indices) {
+    for i < len(indices) {
         int normalized = normalize_index(indices[i], len(state.items))
         if normalized < 0 {
             items[i] = 0.0
@@ -163,12 +163,12 @@ func dataset_take(dataset_state state, []int indices) dataset_state {
 func dataset_extend(dataset_state state, dataset_state other) dataset_state {
     []float items = []float{cap: len(state.items) + len(other.items)}
     int i = 0
-    while i < len(state.items) {
+    for i < len(state.items) {
         items[i] = state.items[i]
         i = i + 1
     }
     int j = 0
-    while j < len(other.items) {
+    for j < len(other.items) {
         items[i + j] = other.items[j]
         j = j + 1
     }
@@ -275,7 +275,7 @@ func new_concat_dataset([]dataset_state datasets) concat_dataset_state {
     []int cumulative_sizes = []int{cap: len(datasets)}
     []dataset_state copied = []dataset_state{cap: len(datasets)}
     int i = 0
-    while i < len(datasets) {
+    for i < len(datasets) {
         total = total + len(datasets[i].items)
         cumulative_sizes[i] = total
         copied[i] = copy_dataset(datasets[i])
@@ -303,7 +303,7 @@ func concat_dataset_getitem(concat_dataset_state state, int index) float {
         return 0.0
     }
     int dataset_idx = 0
-    while dataset_idx < len(state.cumulative_sizes) && index >= state.cumulative_sizes[dataset_idx] {
+    for dataset_idx < len(state.cumulative_sizes) && index >= state.cumulative_sizes[dataset_idx] {
         dataset_idx = dataset_idx + 1
     }
     int sample_idx = index
@@ -327,7 +327,7 @@ func random_split(dataset_state dataset, []int lengths, int seed) []subset_state
     int total = dataset_len(dataset)
     int sum = 0
     int i = 0
-    while i < len(lengths) {
+    for i < len(lengths) {
         sum = sum + lengths[i]
         i = i + 1
     }
@@ -337,11 +337,11 @@ func random_split(dataset_state dataset, []int lengths, int seed) []subset_state
     int offset = 0
     []subset_state splits = []subset_state{cap: len(lengths)}
     i = 0
-    while i < len(lengths) {
+    for i < len(lengths) {
         int length = lengths[i]
         []int indices = []int{cap: length}
         int j = 0
-        while j < length {
+        for j < length {
             indices[j] = offset + j
             j = j + 1
         }
@@ -362,7 +362,7 @@ func random_split_equal(dataset_state dataset, int parts, int seed) []subset_sta
     int remainder = total - base * parts
     []int lengths = []int{cap: parts}
     int i = 0
-    while i < parts {
+    for i < parts {
         int length = base
         if i < remainder {
             length = length + 1

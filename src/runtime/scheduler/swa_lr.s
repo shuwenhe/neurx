@@ -68,7 +68,7 @@ func swa_lr_step(swa_lr_state sched) swa_lr_state {
     float t = swa_clamp_01(float(step) / denom)
     float alpha = swa_anneal_func(sched.anneal_strategy, t)
     int i = 0
-    while i < len(sched.current_lrs) {
+    for i < len(sched.current_lrs) {
         float prev_initial = swa_get_initial_lr(sched.current_lrs[i], sched.swa_lrs[i], prev_alpha)
         sched.current_lrs[i] = sched.swa_lrs[i] * alpha + prev_initial * (1.0 - alpha)
         i = i + 1
@@ -89,7 +89,7 @@ func swa_lr_get_lr(swa_lr_state sched, int group_index) float {
 func clone_float_array([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }

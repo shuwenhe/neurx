@@ -34,7 +34,7 @@ struct rms_norm_output {
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }
@@ -44,7 +44,7 @@ func allocate_vector(int size, float init_val) []float {
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
-    while i < len(src) {
+    for i < len(src) {
         out[i] = src[i]
         i = i + 1
     }
@@ -57,7 +57,7 @@ func sqrt_approx(float x) float {
     }
     float y = x
     int i = 0
-    while i < 10 {
+    for i < 10 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -85,21 +85,21 @@ func layer_normalize(
     []float mean_out = allocate_vector(batch_size * seq_len, 0.0)
     []float var_out = allocate_vector(batch_size * seq_len, 0.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int base_idx = (b * seq_len + s) * hidden_dim
             int stat_idx = b * seq_len + s
             float mean = 0.0
             int d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 mean = mean + input[base_idx + d]
                 d = d + 1
             }
             mean = mean / (hidden_dim * 1.0)
             float variance = 0.0
             d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float diff = input[base_idx + d] - mean
                 variance = variance + diff * diff
                 d = d + 1
@@ -109,7 +109,7 @@ func layer_normalize(
             var_out[stat_idx] = variance
             float std_dev = sqrt_approx(variance + ln.epsilon)
             d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float normalized = (input[base_idx + d] - mean) / std_dev
                 float scaled = normalized * ln.gamma[d]
                 if ln.use_bias {
@@ -143,16 +143,16 @@ func layer_norm_backward(
     []float grad_gamma = allocate_vector(hidden_dim, 0.0)
     []float grad_beta = allocate_vector(hidden_dim, 0.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int base_idx = (b * seq_len + s) * hidden_dim
             int stat_idx = b * seq_len + s
             float mean_val = mean[stat_idx]
             float var_val = variance[stat_idx]
             float std_dev = sqrt_approx(var_val + ln.epsilon)
             int d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float normalized = (input[base_idx + d] - mean_val) / std_dev
                 grad_gamma[d] = grad_gamma[d] + grad_output[base_idx + d] * normalized
                 if ln.use_bias {
@@ -163,14 +163,14 @@ func layer_norm_backward(
             float sum1 = 0.0
             float sum2 = 0.0
             d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float normalized = (input[base_idx + d] - mean_val) / std_dev
                 sum1 = sum1 + grad_output[base_idx + d] * ln.gamma[d]
                 sum2 = sum2 + grad_output[base_idx + d] * ln.gamma[d] * normalized
                 d = d + 1
             }
             d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float normalized = (input[base_idx + d] - mean_val) / std_dev
                 float g = sum1 - sum2 * normalized / (hidden_dim * 1.0)
                 grad_input[base_idx + d] = g / (std_dev * hidden_dim * 1.0)
@@ -205,14 +205,14 @@ func rms_normalize(
     []float output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     []float var_out = allocate_vector(batch_size * seq_len, 0.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int base_idx = (b * seq_len + s) * hidden_dim
             int stat_idx = b * seq_len + s
             float rms = 0.0
             int d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 rms = rms + input[base_idx + d] * input[base_idx + d]
                 d = d + 1
             }
@@ -220,7 +220,7 @@ func rms_normalize(
             rms = sqrt_approx(rms + rn.epsilon)
             var_out[stat_idx] = rms
             d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float normalized = input[base_idx + d] / rms
                 output[base_idx + d] = normalized * rn.gamma[d]
                 d = d + 1
@@ -247,28 +247,28 @@ func rms_norm_backward(
     []float grad_input = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     []float grad_gamma = allocate_vector(hidden_dim, 0.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int base_idx = (b * seq_len + s) * hidden_dim
             int stat_idx = b * seq_len + s
             float rms_val = variance[stat_idx]
             int d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float normalized = input[base_idx + d] / rms_val
                 grad_gamma[d] = grad_gamma[d] + grad_output[base_idx + d] * normalized
                 d = d + 1
             }
             float sum_val = 0.0
             d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float normalized = input[base_idx + d] / rms_val
                 sum_val = sum_val + grad_output[base_idx + d] * rn.gamma[d] * input[base_idx + d]
                 d = d + 1
             }
             sum_val = sum_val / (rms_val * rms_val)
             d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float grad = (grad_output[base_idx + d] * rn.gamma[d] - input[base_idx + d] * sum_val / (hidden_dim * 1.0)) / rms_val
                 grad_input[base_idx + d] = grad
                 d = d + 1

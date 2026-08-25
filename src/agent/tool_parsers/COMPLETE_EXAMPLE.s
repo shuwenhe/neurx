@@ -17,7 +17,7 @@ func main() {
     println("─────────────────────────────────────────────────────────────\n")
 
     i := 0
-    while i < len(available) {
+    for i < len(available) {
         print("  • " + available[i])
         if (i + 1) % 3 == 0 {
             print("\n")

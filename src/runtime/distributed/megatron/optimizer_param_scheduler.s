@@ -167,10 +167,10 @@ func sqrt_approx(float x) float {
 func cos_approx(float x) float {
     float two_pi = 2.0 * pi_value()
     float t = x
-    while t > pi_value() {
+    for t > pi_value() {
         t = t - two_pi
     }
-    while t < 0.0 - pi_value() {
+    for t < 0.0 - pi_value() {
         t = t + two_pi
     }
     float result = 1.0

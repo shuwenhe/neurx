@@ -23,14 +23,14 @@ func native_int_string(int value) string {
     if value == 0 { return "0" }
     string output = ""
     int current = value
-    while current > 0 { output = string(48 + current % 10) + output; current = current / 10 }
+    for current > 0 { output = string(48 + current % 10) + output; current = current / 10 }
     output
 }
 
 func native_token_ids([]int values) string {
     string output = ""
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if i > 0 { output = output + "," }
         output = output + native_int_string(values[i])
         i = i + 1
@@ -42,7 +42,7 @@ func native_ends_with(string value, string suffix) bool {
     if len(value) < len(suffix) { return false }
     int offset = len(value) - len(suffix)
     int i = 0
-    while i < len(suffix) {
+    for i < len(suffix) {
         if value[offset + i] != suffix[i] { return false }
         i = i + 1
     }

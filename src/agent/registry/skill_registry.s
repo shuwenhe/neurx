@@ -28,7 +28,7 @@ func agent_skill_registry_count(agent_skill_registry_state state) int {
 func agent_skill_registry_copy_records([]agent_skill_record records) []agent_skill_record {
     []agent_skill_record out = []agent_skill_record{cap: len(records)}
     int i = 0
-    while i < len(records) {
+    for i < len(records) {
         out[i] = agent_skill_record_state_dict(records[i])
         i = i + 1
     }
@@ -39,7 +39,7 @@ func agent_skill_registry_add(agent_skill_registry_state state, agent_skill_reco
     int size = len(state.records)
     []agent_skill_record records = []agent_skill_record{cap: size + 1}
     int i = 0
-    while i < size {
+    for i < size {
         records[i] = state.records[i]
         i = i + 1
     }
@@ -59,7 +59,7 @@ func agent_skill_registry_add(agent_skill_registry_state state, agent_skill_reco
 
 func agent_skill_registry_find_index(agent_skill_registry_state state, string name) int {
     int i = 0
-    while i < len(state.records) {
+    for i < len(state.records) {
         if state.records[i].spec.name == name {
             return i
         }
@@ -241,7 +241,7 @@ func agent_skill_registry_active(agent_skill_registry_state state) agent_skill_r
 func agent_skill_registry_snapshot(agent_skill_registry_state state) string {
     string out = "skills=" + string(len(state.records)) + " version=" + string(state.version)
     int i = 0
-    while i < len(state.records) {
+    for i < len(state.records) {
         agent_skill_record rec = state.records[i]
     out = out + "\nskill[" + string(i) + "]=" + rec.spec.name + " status=" + rec.spec.status + " success=" + string(rec.success_count) + " fail=" + string(rec.fail_count)
         i = i + 1
@@ -253,7 +253,7 @@ func agent_skill_registry_best_promoted_index(agent_skill_registry_state state) 
     int best = -1
     float best_score = -1000000.0
     int i = 0
-    while i < len(state.records) {
+    for i < len(state.records) {
         agent_skill_record rec = state.records[i]
         if rec.promoted && !rec.retired && rec.score >= best_score {
             best = i
@@ -317,7 +317,7 @@ func agent_skill_registry_load_state_dict(agent_skill_registry_state state, agen
 func agent_skill_registry_names(agent_skill_registry_state state) []string {
     []string names = []string{cap: len(state.records)}
     int i = 0
-    while i < len(state.records) {
+    for i < len(state.records) {
         names[i] = state.records[i].spec.name
         i = i + 1
     }
@@ -340,7 +340,7 @@ func agent_skill_registry_success_rate(agent_skill_registry_state state, string 
 func agent_skill_registry_promoted_names(agent_skill_registry_state state) []string {
     int count = 0
     int i = 0
-    while i < len(state.records) {
+    for i < len(state.records) {
         if state.records[i].promoted && !state.records[i].retired {
             count = count + 1
         }
@@ -349,7 +349,7 @@ func agent_skill_registry_promoted_names(agent_skill_registry_state state) []str
     []string names = []string{cap: count}
     i = 0
     int out_i = 0
-    while i < len(state.records) {
+    for i < len(state.records) {
         if state.records[i].promoted && !state.records[i].retired {
             names[out_i] = state.records[i].spec.name
             out_i = out_i + 1
@@ -362,7 +362,7 @@ func agent_skill_registry_promoted_names(agent_skill_registry_state state) []str
 func agent_skill_registry_prune(agent_skill_registry_state state) agent_skill_registry_state {
     int keep = 0
     int i = 0
-    while i < len(state.records) {
+    for i < len(state.records) {
         if !state.records[i].retired {
             keep = keep + 1
         }
@@ -372,7 +372,7 @@ func agent_skill_registry_prune(agent_skill_registry_state state) agent_skill_re
     i = 0
     int out_i = 0
     int active_index = -1
-    while i < len(state.records) {
+    for i < len(state.records) {
         if !state.records[i].retired {
             records[out_i] = agent_skill_record_state_dict(state.records[i])
             if i == state.active_index {

@@ -18,7 +18,7 @@ func get_session_turns(string session_id) int {
 func batch_prompts([]string prompts) []string {
     results := []string{}
     i := 0
-    while i < len(prompts) {
+    for i < len(prompts) {
         result := "response_" + int_to_string(i)
         results = append(results, result)
         i = i + 1
@@ -38,7 +38,7 @@ func int_to_string(int n) string {
         n = 0 - n
     }
     string tmp = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n - (n / 10) * 10
         tmp = string(48 + digit) + tmp
         n = n / 10

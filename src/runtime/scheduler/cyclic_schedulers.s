@@ -88,7 +88,7 @@ func cosine_warm_restarts_compute(cosine_warm_restarts_state sched, int step) fl
         int n = 0
         int accumulated = 0
         int current_len = sched.t_0
-        while accumulated + current_len <= step {
+        for accumulated + current_len <= step {
             accumulated = accumulated + current_len
             current_len = current_len * sched.t_mult
             n = n + 1
@@ -121,7 +121,7 @@ func cyclic_pi() float {
 func cyclic_pow_int(float base, int exponent) float {
     float result = 1.0
     int i = 0
-    while i < exponent {
+    for i < exponent {
         result = result * base
         i = i + 1
     }
@@ -131,17 +131,17 @@ func cyclic_pow_int(float base, int exponent) float {
 func cyclic_cos(float x) float {
     float two_pi = 2.0 * cyclic_pi()
     float t = x
-    while t > cyclic_pi() {
+    for t > cyclic_pi() {
         t = t - two_pi
     }
-    while t < 0.0 - cyclic_pi() {
+    for t < 0.0 - cyclic_pi() {
         t = t + two_pi
     }
     float result = 1.0
     float term = 1.0
     float t_sq = t * t
     int n = 1
-    while n < 12 {
+    for n < 12 {
         term = term * (0.0 - t_sq) / float((2 * n - 1) * (2 * n))
         result = result + term
         n = n + 1

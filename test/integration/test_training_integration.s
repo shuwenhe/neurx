@@ -14,10 +14,10 @@ func test_batch_preparation() {
     println("Test 2: batch_2 preparation")
     [][]int data = [][]int{cap: 5}
     i := 0
-    while i < 5 {
+    for i < 5 {
         []int seq = []int{cap: 10}
         j := 0
-        while j < 10 {
+        for j < 10 {
             seq.push(j)
             j = j + 1
         }
@@ -134,7 +134,7 @@ func test_loss_tracking() {
     losses.push(0.4)
     is_improving := true
     i := 1
-    while i < len(losses) {
+    for i < len(losses) {
         if losses[i] > losses[i-1] {
             is_improving = false
         }
@@ -195,9 +195,9 @@ func test_training_loop() {
     total_steps := 0
     epoch := 0
     total := 0
-    while epoch < num_epochs {
+    for epoch < num_epochs {
         step := 0
-        while step < steps_per_epoch {
+        for step < steps_per_epoch {
             total = total + 1
             step = step + 1
         }

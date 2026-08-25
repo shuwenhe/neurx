@@ -64,7 +64,7 @@ func tokenize_input(string text) []i32 {
     tokens := []i32
     var []string words = strings.split(text, " ")
     i := 0
-    while i < len(words) {
+    for i < len(words) {
         var i32 word_id = i32(math.abs_i64(i64(i) * 73856093)) % 32000
         tokens = append(tokens, word_id)
         i = i + 1
@@ -79,7 +79,7 @@ func generate_token(simple_transformer model, []i32 context) i32 {
     var i32 last_token = context[len(context) - 1]
     context_score := 0.0
     i := 0
-    while i < len(context) {
+    for i < len(context) {
         context_score = context_score + f64(context[i]) / f64(len(context))
         i = i + 1
     }
@@ -106,7 +106,7 @@ func generate_token(simple_transformer model, []i32 context) i32 {
 func decode_tokens([]i32 tokens) string {
     result := ""
     i := 0
-    while i < len(tokens) {
+    for i < len(tokens) {
         token_id := tokens[i]
         text := ""
         if token_id == 123 {
@@ -174,17 +174,17 @@ func process_chat_request(simple_transformer model, chat_request request) chat_r
     input_tokens := tokenize_input(request.user_input)
     context_tokens := []i32
     i := 0
-    while i < len(request.conversation_history) {
+    for i < len(request.conversation_history) {
         hist_tokens := tokenize_input(request.conversation_history[i])
         j := 0
-        while j < len(hist_tokens) {
+        for j < len(hist_tokens) {
             context_tokens = append(context_tokens, hist_tokens[j])
             j = j + 1
         }
         i = i + 1
     }
     j := 0
-    while j < len(input_tokens) {
+    for j < len(input_tokens) {
         context_tokens = append(context_tokens, input_tokens[j])
         j = j + 1
     }
@@ -194,7 +194,7 @@ func process_chat_request(simple_transformer model, chat_request request) chat_r
     }
     generated_tokens := []i32
     token_count := 0
-    while token_count < max_tokens {
+    for token_count < max_tokens {
         var i32 next_token = generate_token(model, context_tokens)
         generated_tokens = append(generated_tokens, next_token)
         context_tokens = append(context_tokens, next_token)

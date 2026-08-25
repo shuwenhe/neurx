@@ -28,7 +28,7 @@ func copy_int([]int data) []int {
 func shape_prod([]int shape) int {
     int n = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         n = n * shape[i]
         i = i + 1
     }
@@ -47,13 +47,13 @@ func unravel_index(int flat_index, []int shape) []int {
     int ndim = len(shape)
     []int coords = []int{cap: ndim}
     int i = 0
-    while i < ndim {
+    for i < ndim {
         coords.push(0)
         i = i + 1
     }
     int remaining = flat_index
     i = ndim - 1
-    while i >= 0 {
+    for i >= 0 {
         int size = shape[i]
         int coord = remaining - (remaining / size) * size
         coords[i] = coord
@@ -68,7 +68,7 @@ func ravel_index([]int coords, []int shape) int {
     int flat = 0
     int stride = 1
     int i = ndim - 1
-    while i >= 0 {
+    for i >= 0 {
         flat = flat + coords[i] * stride
         stride = stride * shape[i]
         i = i - 1
@@ -80,7 +80,7 @@ func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -94,7 +94,7 @@ func index_select(tensor a, int dim, []int indices) tensor {
         int n = len(indices)
         []float out = []float{cap: n}
         int i = 0
-        while i < n {
+        for i < n {
             out[i] = a.data[indices[i]]
             i = i + 1
         }
@@ -114,10 +114,10 @@ func index_select(tensor a, int dim, []int indices) tensor {
         int row_size = a.shape[1]
         []float out = []float{cap: rows * row_size}
         int r = 0
-        while r < rows {
+        for r < rows {
             int src_row = indices[r]
             int c = 0
-            while c < row_size {
+            for c < row_size {
                 out[r * row_size + c] = a.data[src_row * row_size + c]
                 c = c + 1
             }
@@ -138,7 +138,7 @@ func masked_select(tensor a, tensor mask) tensor {
     int n = len(a.data)
     int count = 0
     int i = 0
-    while i < n {
+    for i < n {
         if mask.data[i] != 0.0 {
             count = count + 1
         }
@@ -147,7 +147,7 @@ func masked_select(tensor a, tensor mask) tensor {
     []float out = []float{cap: count}
     int cursor = 0
     i = 0
-    while i < n {
+    for i < n {
         if mask.data[i] != 0.0 {
             out[cursor] = a.data[i]
             cursor = cursor + 1
@@ -168,7 +168,7 @@ func masked_fill(tensor a, tensor mask, float value) tensor {
     tensor out = clone(a)
     int n = len(out.data)
     int i = 0
-    while i < n {
+    for i < n {
         if mask.data[i] != 0.0 {
             out.data[i] = value
         }
@@ -182,7 +182,7 @@ func masked_scatter(tensor a, tensor mask, tensor source) tensor {
     int n = len(out.data)
     int cursor = 0
     int i = 0
-    while i < n {
+    for i < n {
         if mask.data[i] != 0.0 {
             if cursor < len(source.data) {
                 out.data[i] = source.data[cursor]
@@ -198,7 +198,7 @@ func nonzero(tensor a) tensor {
     int n = len(a.data)
     int count = 0
     int i = 0
-    while i < n {
+    for i < n {
         if a.data[i] != 0.0 {
             count = count + 1
         }
@@ -207,7 +207,7 @@ func nonzero(tensor a) tensor {
     []float out = []float{cap: count}
     int cursor = 0
     i = 0
-    while i < n {
+    for i < n {
         if a.data[i] != 0.0 {
             out[cursor] = i
             cursor = cursor + 1
@@ -232,9 +232,9 @@ func repeat_interleave(tensor a, int repeats) tensor {
     []float out = []float{cap: n * repeats}
     int cursor = 0
     int i = 0
-    while i < n {
+    for i < n {
         int r = 0
-        while r < repeats {
+        for r < repeats {
             out[cursor] = a.data[i]
             cursor = cursor + 1
             r = r + 1
@@ -255,7 +255,7 @@ func where(tensor condition, tensor x, tensor y) tensor {
     int n = len(x.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         if condition.data[i] != 0.0 {
             out[i] = x.data[i]
         } else {
@@ -281,16 +281,16 @@ func cat([]tensor tensors, int dim) tensor {
         }
         int total = 0
         int i = 0
-        while i < len(tensors) {
+        for i < len(tensors) {
             total = total + len(tensors[i].data)
             i = i + 1
         }
         []float out = []float{cap: total}
         int cursor = 0
         i = 0
-        while i < len(tensors) {
+        for i < len(tensors) {
             int j = 0
-            while j < len(tensors[i].data) {
+            for j < len(tensors[i].data) {
                 out[cursor] = tensors[i].data[j]
                 cursor = cursor + 1
                 j = j + 1
@@ -300,7 +300,7 @@ func cat([]tensor tensors, int dim) tensor {
         []int shape = copy_int(tensors[0].shape)
         shape[axis] = 0
         i = 0
-        while i < len(tensors) {
+        for i < len(tensors) {
             shape[axis] = shape[axis] + tensors[i].shape[axis]
             i = i + 1
         }
@@ -324,7 +324,7 @@ func split(tensor a, int sections) tensor {
     }
     []float out = []float{cap: chunk}
     int i = 0
-    while i < chunk && i < n {
+    for i < chunk && i < n {
         out[i] = a.data[i]
         i = i + 1
     }
@@ -354,16 +354,16 @@ func stack([]tensor tensors, int dim) tensor {
         }
         int total = 0
         int i = 0
-        while i < n {
+        for i < n {
             total = total + len(tensors[i].data)
             i = i + 1
         }
         []float out = []float{cap: total}
         int cursor = 0
         i = 0
-        while i < n {
+        for i < n {
             int j = 0
-            while j < len(tensors[i].data) {
+            for j < len(tensors[i].data) {
                 out[cursor] = tensors[i].data[j]
                 cursor = cursor + 1
                 j = j + 1
@@ -373,7 +373,7 @@ func stack([]tensor tensors, int dim) tensor {
         []int shape = []int{cap: base_ndim + 1}
         shape[0] = n
         i = 0
-        while i < base_ndim {
+        for i < base_ndim {
             shape[i + 1] = tensors[0].shape[i]
             i = i + 1
         }
@@ -397,17 +397,17 @@ func pad(tensor a, int before, int after, float value) tensor {
     int total = before + n + after
     []float out = []float{cap: total}
     int i = 0
-    while i < before {
+    for i < before {
         out[i] = value
         i = i + 1
     }
     int cursor = before
-    while cursor < before + n {
+    for cursor < before + n {
         out[cursor] = a.data[cursor - before]
         cursor = cursor + 1
     }
     i = before + n
-    while i < total {
+    for i < total {
         out[i] = value
         i = i + 1
     }
@@ -437,7 +437,7 @@ func slice(tensor a, int start, int end) tensor {
     int total = e - s
     []float out = []float{cap: total}
     int i = 0
-    while i < total {
+    for i < total {
         out[i] = a.data[s + i]
         i = i + 1
     }
@@ -455,7 +455,7 @@ func gather(tensor a, []int indices) tensor {
     int n = len(indices)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = a.data[indices[i]]
         i = i + 1
     }

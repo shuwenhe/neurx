@@ -79,7 +79,7 @@ func check_graph_connectivity(*computation_graph g) bool {
     }
 
     changed = true
-    while changed {
+    for changed {
         changed = false
         for i in range(g.operations.len()) {
             if visited[i] {

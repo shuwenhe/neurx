@@ -40,7 +40,7 @@ g_stream_max_tokens := 0
 func json_escape(string s) string {
     string result = ""
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         int c = s[i]
         if c == 34 {
             result = result + "\\\""
@@ -68,11 +68,11 @@ func split_string(string s, string sep) []string {
     string current = ""
     int i = 0
     int sep_len = len(sep)
-    while i < len(s) {
+    for i < len(s) {
         bool found = true
         if i + sep_len <= len(s) {
             int j = 0
-            while j < sep_len {
+            for j < sep_len {
                 if s[i + j] != sep[j] {
                     found = false
                     break
@@ -99,10 +99,10 @@ func extract_json_string(string json, string key) string {
     string search_key = "\"" + key + "\":"
     int key_pos = -1
     int i = 0
-    while i + len(search_key) <= len(json) {
+    for i + len(search_key) <= len(json) {
         bool found = true
         int j = 0
-        while j < len(search_key) {
+        for j < len(search_key) {
             if json[i + j] != search_key[j] {
                 found = false
                 break
@@ -119,7 +119,7 @@ func extract_json_string(string json, string key) string {
         return ""
     }
     int start = key_pos + len(search_key)
-    while start < len(json) && (json[start] == 32 || json[start] == 9) {
+    for start < len(json) && (json[start] == 32 || json[start] == 9) {
         start = start + 1
     }
     if start >= len(json) || json[start] != 34 {
@@ -128,7 +128,7 @@ func extract_json_string(string json, string key) string {
     start = start + 1
     string result = ""
     int idx = start
-    while idx < len(json) {
+    for idx < len(json) {
         int c = json[idx]
         if c == 34 {
             return result
@@ -153,10 +153,10 @@ func extract_user_message_from_json(string json_body) string {
     string search = "\"role\": \"user\""
     int user_pos = -1
     int i = 0
-    while i + len(search) <= len(json_body) {
+    for i + len(search) <= len(json_body) {
         bool found = true
         int j = 0
-        while j < len(search) {
+        for j < len(search) {
             if json_body[i + j] != search[j] {
                 found = false
                 break
@@ -176,10 +176,10 @@ func extract_user_message_from_json(string json_body) string {
     string content_search = "\"content\":"
     int content_pos = -1
     int idx = search_start
-    while idx + len(content_search) <= len(json_body) {
+    for idx + len(content_search) <= len(json_body) {
         bool found = true
         int j = 0
-        while j < len(content_search) {
+        for j < len(content_search) {
             if json_body[idx + j] != content_search[j] {
                 found = false
                 break
@@ -196,7 +196,7 @@ func extract_user_message_from_json(string json_body) string {
         return "You are a helpful AI assistant."
     }
     int quote_start = content_pos + len(content_search)
-    while quote_start < len(json_body) && json_body[quote_start] != 34 {
+    for quote_start < len(json_body) && json_body[quote_start] != 34 {
         quote_start = quote_start + 1
     }
     if quote_start >= len(json_body) {
@@ -205,7 +205,7 @@ func extract_user_message_from_json(string json_body) string {
     quote_start = quote_start + 1
     string content = ""
     int cidx = quote_start
-    while cidx < len(json_body) {
+    for cidx < len(json_body) {
         int c = json_body[cidx]
         if c == 34 {
             return content
@@ -263,7 +263,7 @@ func stream_openai_token(string token) bool {
 func extract_request_id(string path) string {
     int slash = -1
     int i = 0
-    while i < len(path) {
+    for i < len(path) {
         if int(path[i]) == 47 {
             slash = i
         }
@@ -488,7 +488,7 @@ func main() {
     print("  curl -X POST http:
     print("  curl -N -X POST http:
     print("\n")
-    while server.running {
+    for server.running {
         int client_fd = neurx_net_accept(server.listen_fd)
         if client_fd >= 0 {
             handle_socket_connection(client_fd)
@@ -525,7 +525,7 @@ func main() {
     print("  curl -X POST http:
     print("  curl -N -X POST http:
     print("\n")
-    while server.running {
+    for server.running {
         int client_fd = neurx_net_accept(server.listen_fd)
         if client_fd >= 0 {
             handle_socket_connection(client_fd)

@@ -12,7 +12,7 @@ func int_to_string(int n) string {
         return "0"
     }
     string result = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n % 10
         string digit_char = ""
         if digit == 0 { digit_char = "0" }

@@ -53,14 +53,14 @@ func drgrpo_compute_group_baselines(
     int n = rewards.len
     []tensor baselines = []tensor{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         int group_idx = i / group_size
         int group_start = group_idx * group_size
         int group_end = group_start + group_size
         tensor sum = tensor_ops.zeros_like(rewards[i])
         int count = 0
         int j = group_start
-        while j < group_end {
+        for j < group_end {
             sum = tensor_ops.add(sum, rewards[j])
             count = count + 1
             j = j + 1
@@ -80,7 +80,7 @@ func drgrpo_compute_divergence(
     int num_groups = batch_size / group_size
     []tensor divergences = []tensor{cap: num_groups}
     int g = 0
-    while g < num_groups {
+    for g < num_groups {
         int start = g * group_size
         int end = start + group_size
         tensor group_lp = tensor_ops.slice(log_probs, 0, start, end)
@@ -114,7 +114,7 @@ func drgrpo_step(
     )
     []tensor advantages = []tensor{cap: rewards.len}
     int i = 0
-    while i < rewards.len {
+    for i < rewards.len {
         advantages[i] = tensor_ops.sub(rewards[i], baselines[i])
         i = i + 1
     }
@@ -122,7 +122,7 @@ func drgrpo_step(
     float mean_adv = tensor_ops.mean_scalar(adv_cat)
     float std_adv = tensor_ops.std_scalar(adv_cat)
     i = 0
-    while i < advantages.len {
+    for i < advantages.len {
         advantages[i] = tensor_ops.div_scalar(
             tensor_ops.sub_scalar(advantages[i], mean_adv),
             std_adv + 1e-8

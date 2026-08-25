@@ -157,7 +157,7 @@ func (distributed_tensor_manager* mgr) all_gather_tensor(string tensor_id) bool 
 
     recv_tensors := vec[tensor_handle]{}
     i := 0
-    while i < mgr.ctx.get_world_size() {
+    for i < mgr.ctx.get_world_size() {
         recv_tensors.push(dtensor.local_shard)
         i = i + 1
     }

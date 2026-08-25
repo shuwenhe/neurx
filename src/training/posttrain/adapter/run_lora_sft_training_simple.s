@@ -12,7 +12,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         int char_code = digit + 48
         out = string_char(char_code) + out
@@ -56,12 +56,12 @@ func string_char(int code) string {
     float best_loss = 1000.0
     float adapter_scale = alpha / (rank as float)
     int epoch = 0
-    while epoch < epochs {
+    for epoch < epochs {
         println("Epoch " + epoch + "/" + epochs)
         float epoch_loss = 0.0
         int num_samples = 4
         int sample = 0
-        while sample < num_samples {
+        for sample < num_samples {
             float x = 0.02 * ((sample + 1) as float)
             float y = 0.01 * ((sample + 1) as float)
             float pred = base_weight * x + adapter_scale * adapter_a * adapter_b * x

@@ -61,7 +61,7 @@ func example_principle_library() {
     print("[Default Constitution - 8 Principles]")
     print("")
     int i = 0
-    while i < constitution_obj.num_principles {
+    for i < constitution_obj.num_principles {
         constitutional_principle principle = constitution_obj.principles[i]
         print("Principle " + int_to_string_ex(i + 1) + ": " + principle.id)
         print("  Description: " + principle.description)

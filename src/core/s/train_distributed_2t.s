@@ -97,7 +97,7 @@ func print_startup_banner(training_orchestrator_config config, int ws) {
 }
 
 func lpad(string s, int width) string {
-    while len(s) < width {
+    for len(s) < width {
         s = " " + s
     }
     return s
@@ -150,7 +150,7 @@ func get_microbatch(data_loader dl, int step) []int {
     int seq_len = dl.seq_len
     []int tokens = []int{cap: seq_len}
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         tokens[i] = orch_mod((dl.samples_yielded + i) * 17 + dl.dp_rank * 31, 128000)
         i = i + 1
     }

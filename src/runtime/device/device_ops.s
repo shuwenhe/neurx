@@ -5,7 +5,7 @@ func op_int_string(int value) string {
     if value == 0 { return "0" }
     string output = ""
     int current = value
-    while current > 0 { output = string(48 + current % 10) + output; current = current / 10 }
+    for current > 0 { output = string(48 + current % 10) + output; current = current / 10 }
     output
 }
 

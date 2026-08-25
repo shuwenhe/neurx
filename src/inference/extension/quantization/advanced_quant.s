@@ -67,7 +67,7 @@ func quantize_with_awq(
     qzeros := []int{}
     scales := []float{}
     g := 0
-    while g < num_groups {
+    for g < num_groups {
         start := g * group_size
         end := start + group_size
         if end > weights.len {
@@ -76,7 +76,7 @@ func quantize_with_awq(
         group_min := weights[start]
         group_max := weights[start]
         i := start
-        while i < end {
+        for i < end {
             if weights[i] < group_min {
                 group_min = weights[i]
             }
@@ -96,7 +96,7 @@ func quantize_with_awq(
         }
         qzeros = append_int(qzeros, zero_point)
         i = start
-        while i < end {
+        for i < end {
             normalized := (weights[i] - group_min) / scale
             if normalized < 0.0 {
                 normalized = 0.0
@@ -134,7 +134,7 @@ func quantize_with_gptq(
     scales := []float{}
     h := []float{}
     g := 0
-    while g < num_groups {
+    for g < num_groups {
         start := g * group_size
         end := start + group_size
         if end > weights.len {
@@ -143,7 +143,7 @@ func quantize_with_gptq(
         group_min := weights[start]
         group_max := weights[start]
         i := start
-        while i < end {
+        for i < end {
             if weights[i] < group_min {
                 group_min = weights[i]
             }
@@ -160,14 +160,14 @@ func quantize_with_gptq(
         zero_point := int((group_max + group_min) / (2.0 * scale))
         qzeros = append_int(qzeros, zero_point)
         i = start
-        while i < end {
+        for i < end {
             normalized := (weights[i] - group_min) / scale
             quantized := int(normalized + 0.5)
             qweight = append_int(qweight, quantized)
             i = i + 1
         }
         i = start
-        while i < end {
+        for i < end {
             h = append_float(h, weights[i] * weights[i])
             i = i + 1
         }
@@ -187,7 +187,7 @@ func dequantize_awq(awq_quantized_weight quant) []float {
     deq := []float{}
     group_idx := 0
     i := 0
-    while i < quant.qweight.len {
+    for i < quant.qweight.len {
         if i > 0 && i % quant.group_size == 0 {
             group_idx = group_idx + 1
         }
@@ -204,7 +204,7 @@ func dequantize_gptq(gptq_quantized_weight quant) []float {
     deq := []float{}
     group_idx := 0
     i := 0
-    while i < quant.qweight.len {
+    for i < quant.qweight.len {
         if i > 0 && i % quant.group_size == 0 {
             group_idx = group_idx + 1
         }
@@ -232,7 +232,7 @@ func get_gptq_compression_ratio(gptq_quantized_weight quant) float {
 func append_float([]float slice, float elem) []float {
     new_slice := []float{}
     i := 0
-    while i < slice.len {
+    for i < slice.len {
         new_slice = append_float(new_slice, slice[i])
         i = i + 1
     }
@@ -243,7 +243,7 @@ func append_float([]float slice, float elem) []float {
 func append_int([]int slice, int elem) []int {
     new_slice := []int{}
     i := 0
-    while i < slice.len {
+    for i < slice.len {
         new_slice = append_int(new_slice, slice[i])
         i = i + 1
     }

@@ -13,13 +13,13 @@ func test_basic_attention_forward() {
     head_dim := 4
     []float input = []float{}
     i := 0
-    while i < seq_len * hidden_dim {
+    for i < seq_len * hidden_dim {
         input.push(0.1)
         i = i + 1
     }
     []float wq = []float{}
     i = 0
-    while i < hidden_dim * hidden_dim {
+    for i < hidden_dim * hidden_dim {
         if i % (hidden_dim + 1) == 0 {
             wq.push(1.0)
         } else {
@@ -36,9 +36,9 @@ func test_attention_causal_mask() {
     num_heads := 2
     []float attn_weights = []float{}
     i := 0
-    while i < seq_len {
+    for i < seq_len {
         j := 0
-        while j < seq_len {
+        for j < seq_len {
             if j <= i {
                 attn_weights.push(1.0 / float(i + 1))
             } else {
@@ -68,7 +68,7 @@ func test_attention_output_shape() {
     hidden_dim := 16
     []float input = []float{}
     i := 0
-    while i < batch_size * seq_len * hidden_dim {
+    for i < batch_size * seq_len * hidden_dim {
         input.push(0.5)
         i = i + 1
     }
@@ -106,7 +106,7 @@ func test_attention_gradient_shape() {
     hidden_dim := 8
     []float d_output = []float{}
     i := 0
-    while i < seq_len * hidden_dim {
+    for i < seq_len * hidden_dim {
         d_output.push(0.01)
         i = i + 1
     }
@@ -121,7 +121,7 @@ func test_multiple_heads() {
     head_dim := 8
     total_size := 0
     h := 0
-    while h < num_heads {
+    for h < num_heads {
         total_size = total_size + seq_len * head_dim
         h = h + 1
     }
@@ -148,7 +148,7 @@ func sqrt_approx(float x) float {
     guess := x / 2.0
     result := guess
     i := 0
-    while i < 5 {
+    for i < 5 {
         result = (result + x / result) / 2.0
         i = i + 1
     }

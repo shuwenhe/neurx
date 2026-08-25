@@ -54,7 +54,7 @@ func create_zero_state(int total_params, int world_size, int rank) zero_state {
     state.params = []
     state.grads = []
     int i = 0
-    while i < state.local_param_count {
+    for i < state.local_param_count {
         state.local_momentum = append(state.local_momentum, 0.0)
         state.local_variance = append(state.local_variance, 0.0)
         i = i + 1
@@ -77,7 +77,7 @@ func zero_step(zero_state state, zero_config cfg) zero_state {
     float bias_correction1 = 1.0 - pow_approx(cfg.beta1, step_float)
     float bias_correction2 = 1.0 - pow_approx(cfg.beta2, step_float)
     int i = 0
-    while i < state.local_param_count {
+    for i < state.local_param_count {
         int global_idx = local_start + i
         if global_idx >= len(state.grads) {
             i = i + 1
@@ -114,7 +114,7 @@ func sqrt_approx(float x) float {
     }
     float guess = x / 2.0
     int iterations = 0
-    while iterations < 10 {
+    for iterations < 10 {
         guess = (guess + x / guess) / 2.0
         iterations = iterations + 1
     }
@@ -131,7 +131,7 @@ func pow_approx(float base, float exp) float {
     float result = 1.0
     int exp_int = int_from_float(exp)
     int i = 0
-    while i < exp_int {
+    for i < exp_int {
         result = result * base
         i = i + 1
     }
@@ -141,7 +141,7 @@ func pow_approx(float base, float exp) float {
 func float_from_int(int n) float {
     float result = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         result = result + 1.0
         i = i + 1
     }
@@ -151,7 +151,7 @@ func float_from_int(int n) float {
 func int_from_float(float f) int {
     int result = 0
     float remaining = f
-    while remaining >= 1.0 {
+    for remaining >= 1.0 {
         result = result + 1
         remaining = remaining - 1.0
     }
@@ -173,7 +173,7 @@ func int_to_string(int n) string {
     }
     string result = ""
     int remaining = n
-    while remaining >= 10 {
+    for remaining >= 10 {
         int digit = remaining - ((remaining / 10) * 10)
         remaining = remaining / 10
         if digit == 0 { result = "0" + result }

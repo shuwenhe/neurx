@@ -48,12 +48,12 @@ func softmax_backward(
     []float output_grad = allocate_vector(seq_len, 0.0)
     float sum_grad_softmax = 0.0
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         sum_grad_softmax = sum_grad_softmax + input_grad[i] * softmax_output[i]
         i = i + 1
     }
     i = 0
-    while i < seq_len {
+    for i < seq_len {
         output_grad[i] = softmax_output[i] * (input_grad[i] - sum_grad_softmax)
         i = i + 1
     }
@@ -73,18 +73,18 @@ func scaled_dot_product_attention_backward(
     []float d_key = allocate_vector(seq_len * num_heads * head_dim, 0.0)
     []float d_value = allocate_vector(seq_len * num_heads * head_dim, 0.0)
     int h = 0
-    while h < num_heads {
+    for h < num_heads {
         int q_offset = h * size_per_head
         int k_offset = h * size_per_head
         int v_offset = h * size_per_head
         int i = 0
-        while i < seq_len {
+        for i < seq_len {
             int j = 0
-            while j < seq_len {
+            for j < seq_len {
                 int attn_idx = h * seq_len * seq_len + i * seq_len + j
                 float attn_weight = cache.attention_weights[attn_idx]
                 int d = 0
-                while d < head_dim {
+                for d < head_dim {
                     int v_idx = v_offset + j * head_dim + d
                     int out_idx = q_offset + i * head_dim + d
                     d_value[v_idx] = d_value[v_idx] + attn_weight * d_output[out_idx]
@@ -94,12 +94,12 @@ func scaled_dot_product_attention_backward(
             }
             []float d_scores = allocate_vector(seq_len, 0.0)
             j = 0
-            while j < seq_len {
+            for j < seq_len {
                 int attn_idx = h * seq_len * seq_len + i * seq_len + j
                 float attn_weight = cache.attention_weights[attn_idx]
                 int d = 0
                 float grad_sum = 0.0
-                while d < head_dim {
+                for d < head_dim {
                     int out_idx = q_offset + i * head_dim + d
                     int v_idx = v_offset + j * head_dim + d
                     grad_sum = grad_sum + d_output[out_idx] * cache.value_reshaped[v_idx]
@@ -110,10 +110,10 @@ func scaled_dot_product_attention_backward(
             }
             []float d_attn = softmax_backward(d_scores, slice_row(cache.attention_weights, h * seq_len * seq_len + i * seq_len, seq_len), seq_len)
             j = 0
-            while j < seq_len {
+            for j < seq_len {
                 float d_score = d_attn[j] * scale
                 int d = 0
-                while d < head_dim {
+                for d < head_dim {
                     int q_idx = q_offset + i * head_dim + d
                     int k_idx = k_offset + j * head_dim + d
                     d_query[q_idx] = d_query[q_idx] + d_score * cache.key_reshaped[k_idx]
@@ -183,7 +183,7 @@ func attention_backward(
     []float d_wv = v_grads.d_weights
     []float d_hidden_states = allocate_vector(seq_len * hidden_dim, 0.0)
     int i = 0
-    while i < seq_len * hidden_dim {
+    for i < seq_len * hidden_dim {
         d_hidden_states[i] = d_hidden_q[i] + d_hidden_k[i] + d_hidden_v[i]
         i = i + 1
     }
@@ -202,7 +202,7 @@ func attention_backward(
 func slice_row([]float matrix, int row_start, int row_len) []float {
     []float row = allocate_vector(row_len, 0.0)
     int i = 0
-    while i < row_len {
+    for i < row_len {
         row[i] = matrix[row_start + i]
         i = i + 1
     }
@@ -212,12 +212,12 @@ func slice_row([]float matrix, int row_start, int row_len) []float {
 func matrix_multiply_transpose([]float a, []float b, int m, int k, int n) []float {
     []float result = allocate_vector(m * n, 0.0)
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = 0.0
             int l = 0
-            while l < k {
+            for l < k {
                 int a_idx = i * k + l
                 int b_idx = j * k + l
                 sum = sum + a[a_idx] * b[b_idx]
@@ -234,12 +234,12 @@ func matrix_multiply_transpose([]float a, []float b, int m, int k, int n) []floa
 func matrix_multiply_transpose_lhs([]float a, []float b, int m, int k, int n) []float {
     []float result = allocate_vector(m * n, 0.0)
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = 0.0
             int l = 0
-            while l < k {
+            for l < k {
                 int a_idx = l * m + i
                 int b_idx = l * n + j
                 sum = sum + a[a_idx] * b[b_idx]
@@ -257,7 +257,7 @@ func reshape_for_heads([]float x, int seq_len, int num_heads, int head_dim) []fl
     int size = seq_len * num_heads * head_dim
     []float reshaped = allocate_vector(size, 0.0)
     int i = 0
-    while i < size {
+    for i < size {
         reshaped[i] = x[i]
         i = i + 1
     }
@@ -269,7 +269,7 @@ func reshape_from_heads([]float x, int seq_len, int num_heads, int head_dim) []f
     int size = seq_len * hidden_dim
     []float reshaped = allocate_vector(size, 0.0)
     int i = 0
-    while i < size {
+    for i < size {
         reshaped[i] = x[i]
         i = i + 1
     }
@@ -279,7 +279,7 @@ func reshape_from_heads([]float x, int seq_len, int num_heads, int head_dim) []f
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v.push(init_val)
         i = i + 1
     }

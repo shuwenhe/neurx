@@ -5,7 +5,7 @@ func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -15,7 +15,7 @@ func copy_int([]int data) []int {
 func shape_prod([]int shape) int {
     int n = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         n = n * shape[i]
         i = i + 1
     }
@@ -79,7 +79,7 @@ func reduce_step(float acc, float value, int mode) float {
 func reduce_all(tensor a, int mode) tensor {
     float acc = reduce_init_value(a, mode)
     int i = 0
-    while i < len(a.storage) {
+    for i < len(a.storage) {
         acc = reduce_step(acc, a.storage[i], mode)
         i = i + 1
     }
@@ -138,7 +138,7 @@ func reduce_arg_all(tensor a, int mode) tensor {
     float best = 0.0
     float best_idx = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float value = a.storage[i]
         if i == 0 {
             best = value
@@ -195,7 +195,7 @@ func reduce_output_shape([]int shape, int dim, bool keepdim) []int {
     []int out = []int{cap: ndim - 1}
     int i = 0
     int j = 0
-    while i < ndim {
+    for i < ndim {
         if i != axis {
             out[j] = shape[i]
             j = j + 1
@@ -220,12 +220,12 @@ func reduce_dim_all(tensor a, int dim, bool keepdim, int mode) tensor {
     tensor out = neurx.tensor.core.empty(out_shape, input.desc.dtype, input.desc.device, input.desc.requires_grad)
     int axis_size = input.desc.shape[axis]
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = neurx.tensor.core.unravel_index(flat, out_shape)
         []int src_coords = []int{cap: ndim}
         int i = 0
         int j = 0
-        while i < ndim {
+        for i < ndim {
             src_coords[i] = 0
             if i != axis {
                 src_coords[i] = coords[j]
@@ -239,7 +239,7 @@ func reduce_dim_all(tensor a, int dim, bool keepdim, int mode) tensor {
             acc = input.storage[neurx.tensor.core.ravel_index(src_coords, input.desc.shape)]
         }
         int red = 0
-        while red < axis_size {
+        for red < axis_size {
             src_coords[axis] = red
             float value = input.storage[neurx.tensor.core.ravel_index(src_coords, input.desc.shape)]
             acc = reduce_step(acc, value, mode)
@@ -313,12 +313,12 @@ func reduce_arg_dim_all(tensor a, int dim, bool keepdim, int mode) tensor {
     tensor out = neurx.tensor.core.empty(out_shape, input.desc.dtype, input.desc.device, input.desc.requires_grad)
     int axis_size = input.desc.shape[axis]
     int flat = 0
-    while flat < total {
+    for flat < total {
         []int coords = neurx.tensor.core.unravel_index(flat, out_shape)
         []int src_coords = []int{cap: ndim}
         int i = 0
         int j = 0
-        while i < ndim {
+        for i < ndim {
             src_coords[i] = 0
             if i != axis {
                 src_coords[i] = coords[j]
@@ -329,7 +329,7 @@ func reduce_arg_dim_all(tensor a, int dim, bool keepdim, int mode) tensor {
         float best = 0.0
         float best_idx = 0.0
         int red = 0
-        while red < axis_size {
+        for red < axis_size {
             src_coords[axis] = red
             float value = input.storage[neurx.tensor.core.ravel_index(src_coords, input.desc.shape)]
             if red == 0 {

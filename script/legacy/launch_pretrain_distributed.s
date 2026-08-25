@@ -69,7 +69,7 @@ func check_gpu_availability(int num_gpus) (bool, int) {
     []gpu_info gpus = query_gpu_info()
     int available_count = 0
     int i = 0
-    while i < len(gpus) {
+    for i < len(gpus) {
         if gpus[i].available {
             available_count = available_count + 1
         }
@@ -155,7 +155,7 @@ func launch_all_processes(
 ) []process_handle {
     []process_handle handles = []process_handle{cap: world_size}
     int rank = 0
-    while rank < world_size {
+    for rank < world_size {
         process_handle handle = launch_rank_process(config, rank, world_size)
         handles[rank] = handle
         if config.verbose {
@@ -171,7 +171,7 @@ func wait_all_processes(
 ) int {
     int overall_exit_code = 0
     int rank = 0
-    while rank < len(handles) {
+    for rank < len(handles) {
         process_handle handle = handles[rank]
         if handle.running {
             print("[INFO] Waiting for rank " + itoa(handle.rank) + " (PID " + itoa(handle.pid) + ")...")
@@ -191,7 +191,7 @@ func wait_all_processes(
 func aggregate_logs(launcher_config config, []process_handle handles) {
     print("[INFO] Aggregating logs from all ranks...")
     int rank = 0
-    while rank < len(handles) {
+    for rank < len(handles) {
         string rank_log = handles[rank].log_file
         if file_exists(rank_log) {
             print("[INFO] Rank " + itoa(rank) + " log: " + rank_log)
@@ -244,7 +244,7 @@ func main() {
 func parse_int(string s) int {
     int result = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         byte b = s[i]
         if b >= '0' && b <= '9' {
             result = result * 10 + int(b - '0')
@@ -264,7 +264,7 @@ func itoa(int n) string {
         s = "-"
         num = -num
     }
-    while num > 0 {
+    for num > 0 {
         byte digit = byte('0' + (num % 10))
         s = string(digit) + s
         num = num / 10

@@ -101,7 +101,7 @@ func reduce_gradients_simulate(
 ) []float {
     []float reduced = []float{cap: len(gradients)}
     int i = 0
-    while i < len(gradients) {
+    for i < len(gradients) {
         float sum = gradients[i]
         if rank == 0 {
             sum = gradients[i] * float(world_size)
@@ -136,7 +136,7 @@ func cuda_bridge_reduce_scatter(
     int local_size = len(gradients) / cb.world_size
     []float local_result = []float{cap: local_size}
     int i = 0
-    while i < local_size {
+    for i < local_size {
         local_result[i] = gradients[i + (cb.rank * local_size)]
         i = i + 1
     }
@@ -227,7 +227,7 @@ func itoa(int n) string {
         s = "-"
         num = -num
     }
-    while num > 0 {
+    for num > 0 {
         byte digit = byte('0' + (num % 10))
         s = string(digit) + s
         num = num / 10

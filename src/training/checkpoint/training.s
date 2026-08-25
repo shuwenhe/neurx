@@ -216,7 +216,7 @@ func checkpoint_save_final(checkpoint_manager manager, pointer model, opt.adamw_
 }
 
 func checkpoint_delete_old(checkpoint_manager manager) checkpoint_manager {
-    while len(manager.checkpoints) > manager.config.max_checkpoints {
+    for len(manager.checkpoints) > manager.config.max_checkpoints {
         manager.checkpoints = manager.checkpoints[1..len(manager.checkpoints)]
     }
     manager

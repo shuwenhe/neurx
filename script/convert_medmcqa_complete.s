@@ -79,7 +79,7 @@ func extract_options_from_json(string line) []string {
         int count = 0
         int i = 0
         string current = ""
-        while i < len(options_str) && count < 4 {
+        for i < len(options_str) && count < 4 {
             if options_str[i] == 34 {
                 if len(current) > 0 {
                     opts = opts + [current]
@@ -92,7 +92,7 @@ func extract_options_from_json(string line) []string {
             i = i + 1
         }
     }
-    while len(opts) < 4 {
+    for len(opts) < 4 {
         opts = opts + ["Option placeholder"]
     }
     opts
@@ -159,7 +159,7 @@ func substring(string text, int start, int end) string {
 func unescape_json_string(string s) string {
     string result = ""
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         if s[i] == 92 && i+1 < len(s) {
             if s[i+1] == 110 {
                 result = result + "\n"
@@ -193,7 +193,7 @@ func parse_int(string s) int {
         negative = true
         i = 1
     }
-    while i < len(s) {
+    for i < len(s) {
         int ch = s[i] as int
         if ch >= 48 && ch <= 57 {
             result = result * 10 + (ch - 48)

@@ -51,7 +51,7 @@ func zero_stage3_new(
     }
     []gradient_partition partitions = make([]gradient_partition, world_size)
     int i = 0
-    while i < world_size {
+    for i < world_size {
         int start_idx = i * cfg.partition_size
         int end_idx = start_idx + cfg.partition_size
         if i == world_size - 1 {
@@ -90,7 +90,7 @@ func zero_stage3_accumulate_gradients(
     int param_end_idx
 ) {
     int i = 0
-    while i < len(state.partitions) {
+    for i < len(state.partitions) {
         gradient_partition partition = state.partitions[i]
         if param_start_idx < partition.end_param_idx && param_end_idx > partition.start_param_idx {
             int overlap_start = param_start_idx
@@ -102,7 +102,7 @@ func zero_stage3_accumulate_gradients(
                 overlap_end = partition.end_param_idx
             }
             int j = overlap_start
-            while j < overlap_end {
+            for j < overlap_end {
                 int partition_offset = j - partition.start_param_idx
                 int gradient_offset = j - param_start_idx
                 partition.accumulated_grad[partition_offset] =
@@ -129,10 +129,10 @@ func zero_stage3_allreduce_reduce_scatter(
     }
     int total_params = len(state.gradient_buffer_full)
     int p = 0
-    while p < len(state.partitions) {
+    for p < len(state.partitions) {
         gradient_partition partition = state.partitions[p]
         int i = 0
-        while i < partition.num_params {
+        for i < partition.num_params {
             state.gradient_buffer_full[partition.start_param_idx + i] =
                 partition.gradients[i]
             i = i + 1
@@ -155,10 +155,10 @@ func zero_stage3_finalize_reduce_scatter(
         return
     }
     int i = 0
-    while i < len(state.partitions) {
+    for i < len(state.partitions) {
         gradient_partition partition = state.partitions[i]
         int j = 0
-        while j < partition.num_params {
+        for j < partition.num_params {
             partition.gradients[j] =
                 state.gradient_buffer_full[partition.start_param_idx + j]
             j = j + 1
@@ -176,10 +176,10 @@ func zero_stage3_start_async_reduce(
 ) int {
     int total_params = len(state.gradient_buffer_full)
     int p = 0
-    while p < len(state.partitions) {
+    for p < len(state.partitions) {
         gradient_partition partition = state.partitions[p]
         int i = 0
-        while i < partition.num_params {
+        for i < partition.num_params {
             state.gradient_buffer_full[partition.start_param_idx + i] =
                 partition.gradients[i]
             i = i + 1
@@ -211,7 +211,7 @@ func zero_stage3_compute_local_grad_norm(
     gradient_partition partition = state.partitions[partition_id]
     float norm_sq = 0.0
     int i = 0
-    while i < len(partition.gradients) {
+    for i < len(partition.gradients) {
         norm_sq = norm_sq + partition.gradients[i] * partition.gradients[i]
         i = i + 1
     }
@@ -229,13 +229,13 @@ func zero_stage3_compute_global_grad_norm(
 ) float {
     []float local_norms_sq = make([]float, len(state.partitions))
     int i = 0
-    while i < len(state.partitions) {
+    for i < len(state.partitions) {
         local_norms_sq[i] = state.partitions[i].grad_norm_local * state.partitions[i].grad_norm_local
         i = i + 1
     }
     float total_norm_sq = 0.0
     i = 0
-    while i < len(local_norms_sq) {
+    for i < len(local_norms_sq) {
         total_norm_sq = total_norm_sq + local_norms_sq[i]
         i = i + 1
     }
@@ -257,10 +257,10 @@ func zero_stage3_clip_gradients(
         clip_coeff = max_grad_norm / global_norm
     }
     int i = 0
-    while i < len(state.partitions) {
+    for i < len(state.partitions) {
         gradient_partition partition = state.partitions[i]
         int j = 0
-        while j < len(partition.gradients) {
+        for j < len(partition.gradients) {
             partition.gradients[j] = partition.gradients[j] * clip_coeff
             j = j + 1
         }
@@ -278,10 +278,10 @@ func zero_stage3_optimizer_step(
     float weight_decay
 ) {
     int i = 0
-    while i < len(state.partitions) {
+    for i < len(state.partitions) {
         gradient_partition partition = state.partitions[i]
         int j = 0
-        while j < partition.num_params {
+        for j < partition.num_params {
             int param_idx = partition.start_param_idx + j
             float grad = partition.gradients[j]
             float param = parameters[param_idx]

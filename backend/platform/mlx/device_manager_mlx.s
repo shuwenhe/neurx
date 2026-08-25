@@ -90,7 +90,7 @@ func mlx_get_memory_info(mlx_device device) [int64, int64] {
 func mlx_array_create([]int shape, string dtype) mlx_array {
     size = int64(1)
     i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         size = size * int64(shape[i])
         i = i + 1
     }

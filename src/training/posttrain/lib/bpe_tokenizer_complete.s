@@ -34,7 +34,7 @@ func pretokenize(string text) []string {
     []string tokens
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = string(text[i])
         int val = int(byte(text[i]))
         if is_ascii_space(val) {
@@ -62,7 +62,7 @@ func pretokenize(string text) []string {
 func word_to_byte_tokens(string word) []string {
     []string tokens
     int i = 0
-    while i < len(word) {
+    for i < len(word) {
         string ch = string(word[i])
         int val = normalize_byte(int(byte(word[i])))
         if val < 10 {
@@ -82,12 +82,12 @@ func word_to_byte_tokens(string word) []string {
 func apply_bpe([]string tokens, map[string]int merge_rank) []string {
     []string result = tokens
     int iteration = 0
-    while iteration < 100 {
+    for iteration < 100 {
         int best_rank = 999999
         int best_pos = -1
         string best_pair = ""
         int i = 0
-        while i < len(result) - 1 {
+        for i < len(result) - 1 {
             string pair = result[i] + "," + result[i + 1]
             int rank = 999999
             if merge_rank[pair] > 0 {
@@ -103,7 +103,7 @@ func apply_bpe([]string tokens, map[string]int merge_rank) []string {
         if best_pos == -1 { break }
         []string new_result
         i = 0
-        while i < len(result) {
+        for i < len(result) {
             if i == best_pos {
                 string merged = result[i] + result[i + 1]
                 new_result = append(new_result, merged)
@@ -127,12 +127,12 @@ func encode(bpe_tokenizer tokenizer, string text) []int {
     string normalized = normalize_text(text)
     []string words = pretokenize(normalized)
     int w = 0
-    while w < len(words) {
+    for w < len(words) {
         string word = words[w]
         []string word_tokens = word_to_byte_tokens(word)
         []string merged = apply_bpe(word_tokens, tokenizer.bpe_merges)
         int t = 0
-        while t < len(merged) {
+        for t < len(merged) {
             string token = merged[t]
             int token_id = tokenizer.unk_token_id
             if tokenizer.vocab[token] > 0 {
@@ -152,7 +152,7 @@ func encode(bpe_tokenizer tokenizer, string text) []int {
 func decode(bpe_tokenizer tokenizer, []int token_ids) string {
     string result = ""
     int i = 0
-    while i < len(token_ids) {
+    for i < len(token_ids) {
         int token_id = token_ids[i]
         if token_id == tokenizer.bos_token_id {
         } else if token_id == tokenizer.eos_token_id {
@@ -164,7 +164,7 @@ func decode(bpe_tokenizer tokenizer, []int token_ids) string {
             if len(token) > 0 && string(token[0]) == "<" && string(token[len(token) - 1]) == ">" {
                 string inner = ""
                 int j = 1
-                while j < len(token) - 1 {
+                for j < len(token) - 1 {
                     inner = inner + string(token[j])
                     j = j + 1
                 }
@@ -220,7 +220,7 @@ func load_tokenizer_hf(string directory) bpe_tokenizer {
     int vocab_size = extract_vocab_size(tokenizer_json)
     eprintln("✓ Vocabulary size: " + int_to_str(vocab_size))
     int i = 0
-    while i < vocab_size && i < 10000 {
+    for i < vocab_size && i < 10000 {
         tokenizer.id_to_token = append(tokenizer.id_to_token, "[token_" + int_to_str(i) + "]")
         i = i + 1
     }
@@ -231,10 +231,10 @@ func extract_vocab_size(string json) int {
     string search = "\"vocab_size\":"
     int pos = 0
     int i = 0
-    while i < len(json) - len(search) {
+    for i < len(json) - len(search) {
         bool match = true
         int j = 0
-        while j < len(search) {
+        for j < len(search) {
             if byte(json[i + j]) != byte(search[j]) {
                 match = false
                 break
@@ -249,7 +249,7 @@ func extract_vocab_size(string json) int {
     }
     if pos == 0 { return 32000 }
     string num_str = ""
-    while pos < len(json) && byte(json[pos]) >= byte(48) && byte(json[pos]) <= byte(57) {
+    for pos < len(json) && byte(json[pos]) >= byte(48) && byte(json[pos]) <= byte(57) {
         num_str = num_str + string(json[pos])
         pos = pos + 1
     }
@@ -259,7 +259,7 @@ func extract_vocab_size(string json) int {
 func parse_int(string text) int {
     int result = 0
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         byte b = byte(text[i])
         int digit = int(b) - int(byte(48))
         if digit < 0 || digit > 9 { break }
@@ -274,7 +274,7 @@ func int_to_str(int n) string {
     bool negative = n < 0
     if negative { n = 0 - n }
     string result = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n - (n / 10) * 10
         result = string(byte(48 + digit)) + result
         n = n / 10

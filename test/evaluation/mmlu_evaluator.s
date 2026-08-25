@@ -45,7 +45,7 @@ func build_mmlu_fewshot_prompt(
 ) string {
     string prompt = ""
     int i = 0
-    while i < len(examples) {
+    for i < len(examples) {
         prompt = prompt + format_mmlu_question(examples[i], true)
         prompt = prompt + "\n"
         i = i + 1
@@ -96,7 +96,7 @@ func evaluate_mmlu_task(
     int total = 0
     int correct = 0
     int q_idx = 0
-    while q_idx < len(test_questions) {
+    for q_idx < len(test_questions) {
         mmlu_data.mmlu_question test_q = test_questions[q_idx]
         string prompt = build_mmlu_fewshot_prompt(dev_examples, test_q)
         []int prompt_tokens = tokenize_prompt(prompt)
@@ -104,7 +104,7 @@ func evaluate_mmlu_task(
         string best_choice = "A"
         string choice = "A"
         int choice_idx = 0
-        while choice_idx < 4 {
+        for choice_idx < 4 {
             []int choice_tokens = mmlu_get_choice_tokens(choice, true)
             []int full_seq = concat_token_sequences(prompt_tokens, choice_tokens)
             benchmark_eval.logprob_result lp = benchmark_eval.gpt_sequence_logprob(
@@ -161,7 +161,7 @@ func evaluate_mmlu_benchmark(
     int total_correct = 0
     []mmlu_data.mmlu_task tasks = mmlu_data.mmlu_task_list()
     int task_idx = 0
-    while task_idx < len(tasks) {
+    for task_idx < len(tasks) {
         mmlu_data.mmlu_task t = tasks[task_idx]
         if t.is_included {
             []mmlu_data.mmlu_question dev = dataset.dev_by_task[t.name]
@@ -200,11 +200,11 @@ func evaluate_mmlu_benchmark(
     float humanities_acc = 0.0; int humanities_total = 0; int humanities_correct = 0
     float other_acc = 0.0; int other_total = 0; int other_correct = 0
     int r_idx = 0
-    while r_idx < len(results) {
+    for r_idx < len(results) {
         mmlu_task_result r = results[r_idx]
         int t_idx = 0
         string category = "Other"
-        while t_idx < len(tasks) {
+        for t_idx < len(tasks) {
             if tasks[t_idx].name == r.task_name {
                 category = tasks[t_idx].category
                 break
@@ -255,7 +255,7 @@ func evaluate_mmlu_benchmark(
 func tokenize_prompt(string prompt) []int {
     []int tokens = []int{}
     int i = 0
-    while i < len(prompt) && i < 4096 {
+    for i < len(prompt) && i < 4096 {
         tokens = append(tokens, i)
         i = i + 1
     }
@@ -265,12 +265,12 @@ func tokenize_prompt(string prompt) []int {
 func concat_token_sequences([]int a, []int b) []int {
     []int result = []int{}
     int i = 0
-    while i < len(a) {
+    for i < len(a) {
         result = append(result, a[i])
         i = i + 1
     }
     i = 0
-    while i < len(b) {
+    for i < len(b) {
         result = append(result, b[i])
         i = i + 1
     }
@@ -286,7 +286,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value % 10
         out = digit_to_str(digit) + out
         value = value / 10
@@ -313,7 +313,7 @@ func fmt_float(float value, int decimals) string {
     bool neg = current < 0.0
     if neg { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -321,10 +321,10 @@ func fmt_float(float value, int decimals) string {
     if neg { out = "-" }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }

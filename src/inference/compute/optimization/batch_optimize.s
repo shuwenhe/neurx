@@ -51,7 +51,7 @@ struct batch_statistics {
 func string_slice(string text, int start, int end) string {
     string result = ""
     int i = start
-    while i < end && i < len(text) {
+    for i < end && i < len(text) {
         result = result + string_char(text[i])
         i = i + 1
     }
@@ -109,7 +109,7 @@ func get_next_batch(batch_scheduler* scheduler) batch_request {
     }
 
     int batch_idx = 0
-    while batch_idx < scheduler.config.max_batch_size && batch_idx < len(scheduler.queue) {
+    for batch_idx < scheduler.config.max_batch_size && batch_idx < len(scheduler.queue) {
         inference_request req = scheduler.queue[batch_idx]
 
         int new_total = batch.total_tokens + req.seq_length + req.max_new_tokens
@@ -127,7 +127,7 @@ func get_next_batch(batch_scheduler* scheduler) batch_request {
     }
 
     int i = 0
-    while i < batch.batch_size && i < len(scheduler.queue) {
+    for i < batch.batch_size && i < len(scheduler.queue) {
         i = i + 1
     }
 
@@ -178,13 +178,13 @@ func merge_batches(batch_request batch1, batch_request batch2) batch_request {
     }
 
     int i = 0
-    while i < len(batch1.requests) {
+    for i < len(batch1.requests) {
         merged.requests = append(merged.requests, batch1.requests[i])
         i = i + 1
     }
 
     int j = 0
-    while j < len(batch2.requests) {
+    for j < len(batch2.requests) {
         merged.requests = append(merged.requests, batch2.requests[j])
         if batch2.requests[j].seq_length > merged.max_length {
             merged.max_length = batch2.requests[j].seq_length
@@ -262,7 +262,7 @@ func main() {
     println("─────────────────────────────────────────────────────────────")
 
     int i = 0
-    while i < 50 {
+    for i < 50 {
         inference_request req = inference_request{
             request_id: i,
             prompt: "Request " + int_to_string(i),
@@ -285,7 +285,7 @@ func main() {
     println("─────────────────────────────────────────────────────────────")
 
     int batch_count = 0
-    while len(scheduler.queue) > 0 {
+    for len(scheduler.queue) > 0 {
         batch_request batch = get_next_batch(scheduler)
 
         if batch.batch_size > 0 {

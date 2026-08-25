@@ -117,12 +117,12 @@ func dequantize_nf4(nf4_tensor t) []float {
 func matmul_lora([]float a, []float b, int M, int K, int N, bool transpose_b) []float {
     []float c = []float{cap: M * N}
     int i = 0
-    while i < M {
+    for i < M {
         int j = 0
-        while j < N {
+        for j < N {
             float s = 0.0
             int kk = 0
-            while kk < K {
+            for kk < K {
                 float bv = 0.0
                 if transpose_b {
                     bv = b[j*K+kk]
@@ -153,7 +153,7 @@ func sqrt_lora(float x) float {
 func pow_approx(float base, int exp) float {
     float result = 1.0
     int i = 0
-    while i < exp {
+    for i < exp {
         result = result * base
         i = i + 1
     }
@@ -221,12 +221,12 @@ func lora_forward(lora_linear layer, []float x, int batch) lora_linear {
     []float ax = []float{}
     int in_dim = layer.in_dim
     int b = 0
-    while b < batch {
+    for b < batch {
         int r = 0
-        while r < layer.rank {
+        for r < layer.rank {
             float ax_sum = 0.0
             int i = 0
-            while i < in_dim {
+            for i < in_dim {
                 ax_sum = ax_sum + x[b*in_dim+i] * layer.lora_A[r*in_dim+i]
                 i = i + 1
             }
@@ -234,17 +234,17 @@ func lora_forward(lora_linear layer, []float x, int batch) lora_linear {
             r = r + 1
         }
         int o = 0
-        while o < layer.out_dim {
+        for o < layer.out_dim {
             float sum = 0.0
             int i2 = 0
-            while i2 < in_dim {
+            for i2 < in_dim {
                 float base_w = layer.base_weight[o*in_dim+i2]
                 sum = sum + x[b*in_dim+i2] * base_w
                 i2 = i2 + 1
             }
             int r2 = 0
             float lora_sum = 0.0
-            while r2 < layer.rank {
+            for r2 < layer.rank {
                 lora_sum = lora_sum + ax[b*layer.rank+r2] * layer.lora_B[o*layer.rank+r2]
                 r2 = r2 + 1
             }
@@ -269,12 +269,12 @@ func lora_forward_with_output(lora_linear layer, []float x, int batch) lora_forw
     []float ax = []float{}
     int in_dim = layer.in_dim
     int b = 0
-    while b < batch {
+    for b < batch {
         int r = 0
-        while r < layer.rank {
+        for r < layer.rank {
             float ax_sum = 0.0
             int i = 0
-            while i < in_dim {
+            for i < in_dim {
                 ax_sum = ax_sum + x[b*in_dim+i] * layer.lora_A[r*in_dim+i]
                 i = i + 1
             }
@@ -282,17 +282,17 @@ func lora_forward_with_output(lora_linear layer, []float x, int batch) lora_forw
             r = r + 1
         }
         int o = 0
-        while o < layer.out_dim {
+        for o < layer.out_dim {
             float sum = 0.0
             int i2 = 0
-            while i2 < in_dim {
+            for i2 < in_dim {
                 float base_w = layer.base_weight[o*in_dim+i2]
                 sum = sum + x[b*in_dim+i2] * base_w
                 i2 = i2 + 1
             }
             int r2 = 0
             float lora_sum = 0.0
-            while r2 < layer.rank {
+            for r2 < layer.rank {
                 lora_sum = lora_sum + ax[b*layer.rank+r2] * layer.lora_B[o*layer.rank+r2]
                 r2 = r2 + 1
             }
@@ -322,44 +322,44 @@ func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_resul
     x = layer.last_input
     ax = layer.last_Ax
     int fill_d = 0
-    while fill_d < layer.out_dim * layer.rank {
+    for fill_d < layer.out_dim * layer.rank {
         d_b = append(d_b, 0.0)
         fill_d = fill_d + 1
     }
     fill_d = 0
-    while fill_d < layer.rank * in_dim {
+    for fill_d < layer.rank * in_dim {
         d_a = append(d_a, 0.0)
         fill_d = fill_d + 1
     }
     fill_d = 0
-    while fill_d < batch * in_dim {
+    for fill_d < batch * in_dim {
         dx = append(dx, 0.0)
         fill_d = fill_d + 1
     }
     int b = 0
-    while b < batch {
+    for b < batch {
         int o = 0
-        while o < layer.out_dim {
+        for o < layer.out_dim {
             float dy_scaled = dy[b*layer.out_dim+o] * layer.scaling
             int r = 0
-            while r < layer.rank {
+            for r < layer.rank {
                 d_b[o*layer.rank+r] = d_b[o*layer.rank+r] + dy_scaled * ax[b*layer.rank+r]
                 r = r + 1
             }
             int i = 0
-            while i < in_dim {
+            for i < in_dim {
                 dx[b*in_dim+i] = dx[b*in_dim+i] + dy_scaled * layer.base_weight[o*in_dim+i]
                 i = i + 1
             }
             o = o + 1
         }
         int r2 = 0
-        while r2 < rank {
+        for r2 < rank {
             int i2 = 0
-            while i2 < in_dim {
+            for i2 < in_dim {
                 float accum = 0.0
                 int o2 = 0
-                while o2 < layer.out_dim {
+                for o2 < layer.out_dim {
                     accum = accum + dy[b*layer.out_dim+o2] * layer.scaling * layer.lora_B[o2*layer.rank+r2]
                     o2 = o2 + 1
                 }
@@ -449,17 +449,17 @@ func lora_merge_weights(lora_linear layer) lora_linear {
     []float merged = []float{}
     int in_dim = layer.in_dim
     int fill_m = 0
-    while fill_m < layer.out_dim * in_dim {
+    for fill_m < layer.out_dim * in_dim {
         merged = append(merged, 0.0)
         fill_m = fill_m + 1
     }
     int o = 0
-    while o < layer.out_dim {
+    for o < layer.out_dim {
         int i = 0
-        while i < in_dim {
+        for i < in_dim {
             float sum = layer.base_weight[o*in_dim+i]
             int r = 0
-            while r < layer.rank {
+            for r < layer.rank {
                 sum = sum + layer.lora_B[o*layer.rank+r] * layer.lora_A[r*in_dim+i] * layer.scaling
                 r = r + 1
             }

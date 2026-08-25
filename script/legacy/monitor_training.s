@@ -96,7 +96,7 @@ func count_matches(string path, string pattern) string {
 func print_indented_block(string text) {
     int i = 0
     string line = ""
-    while i <= len(text) {
+    for i <= len(text) {
         bool at_end = i == len(text)
         bool at_newline = !at_end && string(text[i]) == "\n"
         if at_end || at_newline {

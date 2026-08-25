@@ -69,7 +69,7 @@ func format_step(int step) string {
     string padded = step_str
     int padding_needed = 6 - current_len
     int i = 0
-    while i < padding_needed {
+    for i < padding_needed {
         padded = "0" + padded
         i = i + 1
     }
@@ -106,7 +106,7 @@ func int_to_str(int n) string {
         negative = true
         value = 0 - value
     }
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }

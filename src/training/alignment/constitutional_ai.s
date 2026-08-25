@@ -98,9 +98,9 @@ func cai_concat([]int a, []int b) []int {
     int n = len(a) + len(b)
     []int out = []int{cap: n}
     int i = 0
-    while i < len(a) { out[i] = a[i]; i = i + 1 }
+    for i < len(a) { out[i] = a[i]; i = i + 1 }
     int j = 0
-    while j < len(b) { out[len(a) + j] = b[j]; j = j + 1 }
+    for j < len(b) { out[len(a) + j] = b[j]; j = j + 1 }
     out
 }
 
@@ -160,7 +160,7 @@ func cai_generate_preferences(
     []cai_preference_pair pairs = []cai_preference_pair{cap: n}
     int num_revised = 0
     int i = 0
-    while i < n {
+    for i < n {
         int pidx = i - (i / consti.num_principles) * consti.num_principles
         constitutional_principle principle = consti.principles[pidx]
         cai_preference_pair pair = cai_critique_revise(
@@ -195,18 +195,18 @@ func cai_pad_sequence([]int prompt, []int response, int seq_len, int pad_id) []i
     []int seq = []int{cap: seq_len}
     int idx = 0
     int i = 0
-    while i < len(prompt) && idx < seq_len {
+    for i < len(prompt) && idx < seq_len {
         seq[idx] = prompt[i]
         idx = idx + 1
         i = i + 1
     }
     int j = 0
-    while j < len(response) && idx < seq_len {
+    for j < len(response) && idx < seq_len {
         seq[idx] = response[j]
         idx = idx + 1
         j = j + 1
     }
-    while idx < seq_len {
+    for idx < seq_len {
         seq[idx] = pad_id
         idx = idx + 1
     }
@@ -218,12 +218,12 @@ func cai_to_flat_batch(cai_batch batch, int seq_len, int pad_id) cai_flat_batch 
     []int chosen_ids = []int{cap: n * seq_len}
     []int rejected_ids = []int{cap: n * seq_len}
     int b = 0
-    while b < n {
+    for b < n {
         cai_preference_pair pair = batch.pairs[b]
         []int chosen_seq = cai_pad_sequence(pair.prompt_tokens, pair.chosen_tokens, seq_len, pad_id)
         []int rejected_seq = cai_pad_sequence(pair.prompt_tokens, pair.rejected_tokens, seq_len, pad_id)
         int t = 0
-        while t < seq_len {
+        for t < seq_len {
             chosen_ids[b * seq_len + t] = chosen_seq[t]
             rejected_ids[b * seq_len + t] = rejected_seq[t]
             t = t + 1
@@ -260,7 +260,7 @@ func cai_compute_stats(cai_batch batch) cai_stats {
     float sum_strength = 0.0
     float sum_weighted = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         cai_preference_pair pair = batch.pairs[i]
         sum_strength = sum_strength + pair.critique_strength
         sum_weighted = sum_weighted + pair.critique_strength * (pair.severity * 1.0)

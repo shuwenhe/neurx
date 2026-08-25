@@ -62,8 +62,8 @@ func float_to_e4m3(float x) int {
     if x < 0.001953125 { return 0 }
     int exp = 0
     float val = x
-    while val >= 2.0 { val = val / 2.0; exp = exp + 1 }
-    while val < 1.0 && exp > -9 { val = val * 2.0; exp = exp - 1 }
+    for val >= 2.0 { val = val / 2.0; exp = exp + 1 }
+    for val < 1.0 && exp > -9 { val = val * 2.0; exp = exp - 1 }
     if exp < -9 { return 0 }
     int biased_exp = exp + 7
     if biased_exp > 15 { return 0x_7_e }
@@ -81,8 +81,8 @@ func float_to_e5m2(float x) int {
     if x < 0.0000076 { return 0 }
     int exp = 0
     float val = x
-    while val >= 2.0 { val = val / 2.0; exp = exp + 1 }
-    while val < 1.0 && exp > -17 { val = val * 2.0; exp = exp - 1 }
+    for val >= 2.0 { val = val / 2.0; exp = exp + 1 }
+    for val < 1.0 && exp > -17 { val = val * 2.0; exp = exp - 1 }
     if exp < -17 { return 0 }
     int biased_exp = exp + 15
     if biased_exp > 30 { return 0x_7_b }
@@ -133,10 +133,10 @@ func pow2(int n) float {
     float result = 1.0
     if n >= 0 {
         int i = 0
-        while i < n { result = result * 2.0; i = i + 1 }
+        for i < n { result = result * 2.0; i = i + 1 }
     } else {
         int i = 0
-        while i < -n { result = result / 2.0; i = i + 1 }
+        for i < -n { result = result / 2.0; i = i + 1 }
     }
     result
 }
@@ -145,7 +145,7 @@ func tile_abs_max([]float data, int start, int length) float {
     float max_val = 0.0
     int i = start
     int end = start + length
-    while i < end {
+    for i < end {
         float abs_val = data[i]
         if abs_val < 0.0 { abs_val = -abs_val }
         if abs_val > max_val { max_val = abs_val }
@@ -174,12 +174,12 @@ func quantize_matrix_blockwise(
         dtype_min = 0.00006103515625
     }
     int ti = 0
-    while ti < tiles_m {
+    for ti < tiles_m {
         int m_start = ti * tile_m
         int m_end = m_start + tile_m
         if m_end > M { m_end = M }
         int tj = 0
-        while tj < tiles_n {
+        for tj < tiles_n {
             int n_start = tj * tile_n
             int n_end = n_start + tile_n
             if n_end > N { n_end = N }
@@ -187,9 +187,9 @@ func quantize_matrix_blockwise(
             []float tile_data = []float{cap: tile_elems}
             int idx = 0
             int mi = m_start
-            while mi < m_end {
+            for mi < m_end {
                 int nj = n_start
-                while nj < n_end {
+                for nj < n_end {
                     tile_data[idx] = data[mi * N + nj]
                     idx = idx + 1
                     nj = nj + 1
@@ -206,9 +206,9 @@ func quantize_matrix_blockwise(
             float inv_scale = 1.0 / scale
             idx = 0
             mi = m_start
-            while mi < m_end {
+            for mi < m_end {
                 int nj = n_start
-                while nj < n_end {
+                for nj < n_end {
                     float val = data[mi * N + nj] * inv_scale
                     if val > dtype_max { overflow_count = overflow_count + 1 }
                     if val < dtype_min && val > -dtype_min { underflow_count = underflow_count + 1 }
@@ -251,20 +251,20 @@ func dequantize_matrix_blockwise(fp8_tensor t, bool is_e5m2) []float {
     int tiles_n = (N + t.tile_n - 1) / t.tile_n
     []float result = []float{cap: M * N}
     int ti = 0
-    while ti < tiles_m {
+    for ti < tiles_m {
         int m_start = ti * t.tile_m
         int m_end = m_start + t.tile_m
         if m_end > M { m_end = M }
         int tj = 0
-        while tj < tiles_n {
+        for tj < tiles_n {
             int n_start = tj * t.tile_n
             int n_end = n_start + t.tile_n
             if n_end > N { n_end = N }
             float scale = t.scale[ti * tiles_n + tj]
             int mi = m_start
-            while mi < m_end {
+            for mi < m_end {
                 int nj = n_start
-                while nj < n_end {
+                for nj < n_end {
                     float val = 0.0
                     if is_e5m2 {
                         val = e5m2_to_float(t.data[mi * N + nj])
@@ -289,16 +289,16 @@ func fp8_gemm(
 ) []float {
     []float c = []float{cap: M * N}
     int idx = 0
-    while idx < M * N { c[idx] = 0.0; idx = idx + 1 }
+    for idx < M * N { c[idx] = 0.0; idx = idx + 1 }
     int tiles_m = (M + a.tile_m - 1) / a.tile_m
     int tiles_n = (N + b.tile_n - 1) / b.tile_n
     int tiles_k = (K + a.tile_n - 1) / a.tile_n
     int ti = 0
-    while ti < tiles_m {
+    for ti < tiles_m {
         int tj = 0
-        while tj < tiles_n {
+        for tj < tiles_n {
             int tk = 0
-            while tk < tiles_k {
+            for tk < tiles_k {
                 float scale_a = a.scale[ti * tiles_k + tk]
                 float scale_b = b.scale[tk * tiles_n + tj]
                 float combined_scale = scale_a * scale_b
@@ -309,14 +309,14 @@ func fp8_gemm(
                 int k_end = k_start + a.tile_n
                 if k_end > K { k_end = K }
                 int mi = m_start
-                while mi < m_end {
+                for mi < m_end {
                     int nj = tj * b.tile_n
                     int nj_end = nj + b.tile_n
                     if nj_end > N { nj_end = N }
-                    while nj < nj_end {
+                    for nj < nj_end {
                         float dot = 0.0
                         int ki = k_start
-                        while ki < k_end {
+                        for ki < k_end {
                             float a_val = 0.0
                             float b_val = 0.0
                             if is_e5m2 {
@@ -404,7 +404,7 @@ func fp8_get_monitor(fp8_training_state state, int total_elems) fp8_monitor {
     float avg_underflow = 0.0
     int n_stats = len(state.quant_stats_history)
     int i = 0
-    while i < n_stats {
+    for i < n_stats {
         fp8_quant_stats s = state.quant_stats_history[i]
         avg_overflow = avg_overflow + s.overflow_count as float
         avg_underflow = avg_underflow + s.underflow_count as float
@@ -426,7 +426,7 @@ func fp8_get_monitor(fp8_training_state state, int total_elems) fp8_monitor {
 
 func should_skip_quantization(string module_name, fp8_config cfg) bool {
     int i = 0
-    while i < len(cfg.no_quant_modules) {
+    for i < len(cfg.no_quant_modules) {
         if contains_string(module_name, cfg.no_quant_modules[i]) {
             return true
         }
@@ -440,10 +440,10 @@ func contains_string(string s, string substr) bool {
     int sub_len = len(substr)
     if sub_len > s_len { return false }
     int i = 0
-    while i <= s_len - sub_len {
+    for i <= s_len - sub_len {
         bool match = true
         int j = 0
-        while j < sub_len {
+        for j < sub_len {
             if slice(s, i + j, i + j + 1) != slice(substr, j, j + 1) {
                 match = false
                 break

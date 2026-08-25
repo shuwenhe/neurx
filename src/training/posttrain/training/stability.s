@@ -3,9 +3,9 @@ package neurx.posttrain.training.stability
 func clip_all_gradients([][]float all_grads, float max_norm) float {
     float total = 0.0
     int layer = 0
-    while layer < len(all_grads) {
+    for layer < len(all_grads) {
         int i = 0
-        while i < len(all_grads[layer]) {
+        for i < len(all_grads[layer]) {
             float g = all_grads[layer][i]
             total = total + g * g
             i = i + 1
@@ -16,9 +16,9 @@ func clip_all_gradients([][]float all_grads, float max_norm) float {
     if global_norm > max_norm {
         float scale = max_norm / global_norm
         layer = 0
-        while layer < len(all_grads) {
+        for layer < len(all_grads) {
             int i = 0
-            while i < len(all_grads[layer]) {
+            for i < len(all_grads[layer]) {
                 all_grads[layer][i] = all_grads[layer][i] * scale
                 i = i + 1
             }
@@ -40,9 +40,9 @@ func has_inf(float x) bool {
 
 func check_grads_healthy([][]float all_grads) bool {
     int layer = 0
-    while layer < len(all_grads) {
+    for layer < len(all_grads) {
         int i = 0
-        while i < len(all_grads[layer]) {
+        for i < len(all_grads[layer]) {
             float g = all_grads[layer][i]
             if has_nan(g) {
                 println("[ERROR] NaN detected in gradients!")
@@ -63,13 +63,13 @@ func compute_accuracy([][][]float logits, [][]int targets) float {
     int correct = 0
     int total = 0
     int b = 0
-    while b < len(logits) {
+    for b < len(logits) {
         int t = 0
-        while t < len(logits[b]) {
+        for t < len(logits[b]) {
             int pred = 0
             float max_val = logits[b][t][0]
             int v = 1
-            while v < len(logits[b][t]) {
+            for v < len(logits[b][t]) {
                 if logits[b][t][v] > max_val {
                     max_val = logits[b][t][v]
                     pred = v

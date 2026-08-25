@@ -108,7 +108,7 @@ func parse_mmlu_csv_line(string line, string task_name, int qid) mmlu_question {
 func load_mmlu_dev_examples(string data_root, string task_name, int num_examples) []mmlu_question {
     []mmlu_question dev = []mmlu_question{}
     int i = 0
-    while i < num_examples {
+    for i < num_examples {
         dev = append(dev, mmlu_question{
             task_name: task_name,
             question: "Example " + int_to_str(i+1) + ": " + task_name + " question",
@@ -127,7 +127,7 @@ func load_mmlu_dev_examples(string data_root, string task_name, int num_examples
 func load_mmlu_test_questions(string data_root, string task_name) []mmlu_question {
     []mmlu_question test = []mmlu_question{}
     int i = 0
-    while i < 10 {
+    for i < 10 {
         test = append(test, mmlu_question{
             task_name: task_name,
             question: task_name + " question " + int_to_str(i+1) + "",
@@ -148,7 +148,7 @@ func load_mmlu_dataset(string data_root) mmlu_dataset_state {
     println("[MMLU Loader] Loading MMLU dataset from " + data_root)
     []mmlu_task tasks = mmlu_task_list()
     int task_idx = 0
-    while task_idx < len(tasks) {
+    for task_idx < len(tasks) {
         mmlu_task t = tasks[task_idx]
         if t.is_included {
             []mmlu_question dev = load_mmlu_dev_examples(data_root, t.name, 5)
@@ -176,7 +176,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value % 10
         out = digit_to_str(digit) + out
         value = value / 10

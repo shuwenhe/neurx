@@ -19,11 +19,11 @@ struct inference_context {
 
 func trim(string s) string {
     int i = 0
-    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
     int j = len(s) - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
     if j < i {
@@ -31,7 +31,7 @@ func trim(string s) string {
     }
     string out = ""
     int k = i
-    while k <= j {
+    for k <= j {
         out = out + string(s[k])
         k = k + 1
     }
@@ -45,9 +45,9 @@ func contains_string(string haystack, string needle) bool {
         return false
     }
     int i = 0
-    while i <= h_len - n_len {
+    for i <= h_len - n_len {
         int j = 0
-        while j < n_len && haystack[i + j] == needle[j] {
+        for j < n_len && haystack[i + j] == needle[j] {
             j = j + 1
         }
         if j == n_len {
@@ -87,7 +87,7 @@ func tokenize_input(string text) int {
     int hash = 0
     int len_text = len(text)
     int i = 0
-    while i < len_text {
+    for i < len_text {
         hash = hash + int(text[i])
         i = i + 1
     }
@@ -119,7 +119,7 @@ func model_generate_response(inference_context ctx, string user_input) string {
     int current_token = input_token
     int token_count = 0
     int max_gen_tokens = 20
-    while token_count < max_gen_tokens {
+    for token_count < max_gen_tokens {
         int next_token = model_forward(ctx, current_token)
         model_response = model_response + decode_token(next_token)
         current_token = next_token
@@ -213,7 +213,7 @@ func main() {
     println("Commands: 'quit', 'exit', 'bye', or 'English text' to stop")
     println("")
     bool running = true
-    while running {
+    for running {
         println("You: ")
         string user_input = read_stdin_line()
         if trim(user_input) == "quit" || trim(user_input) == "exit" || trim(user_input) == "bye" || trim(user_input) == "English text" {

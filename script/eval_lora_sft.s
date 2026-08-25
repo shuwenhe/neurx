@@ -5,7 +5,7 @@ extern "intrinsic" func __host_slice(string text, int start, int end) string
 func shell_escape(string value) string {
     string out = "'"
     int i = 0
-    while i < len(value) {
+    for i < len(value) {
         string ch = __host_slice(value, i, i + 1)
         if ch == "'" {
             out = out + "'\"'\"'"
@@ -40,7 +40,7 @@ func extract_json_int_field(string json_text, string field_name, int default_val
         i = 1
     }
     int value = 0
-    while i < len(text) {
+    for i < len(text) {
         int digit = text[i] - 48
         if digit < 0 || digit > 9 {
             return default_value

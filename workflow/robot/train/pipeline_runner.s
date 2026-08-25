@@ -111,7 +111,7 @@ func run_robotics_training_schedule_state(int obs_dim, int latent_dim, int act_d
         last_eval_step: 0,
         last_save_step: 0,
     }
-    while !workflow.training.finished {
+    for !workflow.training.finished {
         robotics_trajectory_train_state next_training = robotics_robot_train_step(workflow.training)
         int step = next_training.metrics.step
         int eval_count = workflow.eval_count

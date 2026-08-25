@@ -39,7 +39,7 @@ func (io_ring* ring) io_ring_submit(int request_id) int {
 func (io_ring* ring) io_ring_wait_completion(int timeout) int {
     completed := 0
     i := ring.head
-    while i < ring.tail {
+    for i < ring.tail {
         completed = completed + 1
         i = i + 1
     }

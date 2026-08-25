@@ -34,7 +34,7 @@ func agent_tool_registry_add_with_capability(agent_tool_registry_state state, st
     []int retry_values = []int{cap: size + 1}
     []string caps = []string{cap: size + 1}
     int i = 0
-    while i < size {
+    for i < size {
         names[i] = state.tool_names[i]
         enabled[i] = state.enabled[i]
         timeouts[i] = state.timeout_ms[i]
@@ -66,7 +66,7 @@ func agent_tool_registry_add_with_capability(agent_tool_registry_state state, st
 
 func agent_tool_registry_has_enabled(agent_tool_registry_state state, string tool_name) bool {
     int i = 0
-    while i < len(state.tool_names) {
+    for i < len(state.tool_names) {
         if state.tool_names[i] == tool_name {
             return state.enabled[i]
         }
@@ -77,7 +77,7 @@ func agent_tool_registry_has_enabled(agent_tool_registry_state state, string too
 
 func agent_tool_registry_timeout_ms(agent_tool_registry_state state, string tool_name) int {
     int i = 0
-    while i < len(state.tool_names) {
+    for i < len(state.tool_names) {
         if state.tool_names[i] == tool_name {
             return state.timeout_ms[i]
         }
@@ -88,7 +88,7 @@ func agent_tool_registry_timeout_ms(agent_tool_registry_state state, string tool
 
 func agent_tool_registry_retries(agent_tool_registry_state state, string tool_name) int {
     int i = 0
-    while i < len(state.tool_names) {
+    for i < len(state.tool_names) {
         if state.tool_names[i] == tool_name {
             return state.retries[i]
         }
@@ -99,7 +99,7 @@ func agent_tool_registry_retries(agent_tool_registry_state state, string tool_na
 
 func agent_tool_registry_capability(agent_tool_registry_state state, string tool_name) string {
     int i = 0
-    while i < len(state.tool_names) {
+    for i < len(state.tool_names) {
         if state.tool_names[i] == tool_name {
             return state.capabilities[i]
         }
@@ -110,7 +110,7 @@ func agent_tool_registry_capability(agent_tool_registry_state state, string tool
 
 func agent_tool_registry_find_by_capability(agent_tool_registry_state state, string capability) string {
     int i = 0
-    while i < len(state.tool_names) {
+    for i < len(state.tool_names) {
         if state.enabled[i] && state.capabilities[i] == capability {
             return state.tool_names[i]
         }
@@ -123,7 +123,7 @@ func agent_tool_registry_set_enabled(agent_tool_registry_state state, string too
     int size = len(state.tool_names)
     int index = -1
     int i = 0
-    while i < size {
+    for i < size {
         if state.tool_names[i] == tool_name {
             index = i
             break
@@ -135,7 +135,7 @@ func agent_tool_registry_set_enabled(agent_tool_registry_state state, string too
     }
     []bool enabled = []bool{cap: size}
     i = 0
-    while i < size {
+    for i < size {
         enabled[i] = state.enabled[i]
         i = i + 1
     }
@@ -168,7 +168,7 @@ func agent_tool_registry_load_state_dict(agent_tool_registry_state state, agent_
 func agent_tool_registry_enabled_names(agent_tool_registry_state state) []string {
     int count = 0
     int i = 0
-    while i < len(state.tool_names) {
+    for i < len(state.tool_names) {
         if state.enabled[i] {
             count = count + 1
         }
@@ -177,7 +177,7 @@ func agent_tool_registry_enabled_names(agent_tool_registry_state state) []string
     []string out = []string{cap: count}
     int wi = 0
     i = 0
-    while i < len(state.tool_names) {
+    for i < len(state.tool_names) {
         if state.enabled[i] {
             out[wi] = state.tool_names[i]
             wi = wi + 1
@@ -190,7 +190,7 @@ func agent_tool_registry_enabled_names(agent_tool_registry_state state) []string
 func agent_tool_registry_summary(agent_tool_registry_state state) string {
     string out = "tools=" + string(len(state.tool_names))
     int i = 0
-    while i < len(state.tool_names) {
+    for i < len(state.tool_names) {
         string flag = "off"
         if state.enabled[i] {
             flag = "on"
@@ -205,7 +205,7 @@ func agent_tool_registry_set_retries(agent_tool_registry_state state, string too
     int size = len(state.tool_names)
     int index = -1
     int i = 0
-    while i < size {
+    for i < size {
         if state.tool_names[i] == tool_name {
             index = i
             break
@@ -221,7 +221,7 @@ func agent_tool_registry_set_retries(agent_tool_registry_state state, string too
     }
     []int retry_values = []int{cap: size}
     i = 0
-    while i < size {
+    for i < size {
         retry_values[i] = state.retries[i]
         i = i + 1
     }
@@ -239,7 +239,7 @@ func agent_tool_registry_set_timeout(agent_tool_registry_state state, string too
     int size = len(state.tool_names)
     int index = -1
     int i = 0
-    while i < size {
+    for i < size {
         if state.tool_names[i] == tool_name {
             index = i
             break
@@ -255,7 +255,7 @@ func agent_tool_registry_set_timeout(agent_tool_registry_state state, string too
     }
     []int timeouts = []int{cap: size}
     i = 0
-    while i < size {
+    for i < size {
         timeouts[i] = state.timeout_ms[i]
         i = i + 1
     }

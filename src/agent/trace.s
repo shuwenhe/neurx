@@ -44,7 +44,7 @@ func agent_trace_append(agent_trace_state state, int step, string task, string i
     []int tool_retries = []int{cap: size + 1}
     []bool ok_flags = []bool{cap: size + 1}
     int i = 0
-    while i < size {
+    for i < size {
         steps[i] = state.steps[i]
         tasks[i] = state.tasks[i]
         inputs[i] = state.inputs[i]
@@ -128,7 +128,7 @@ func agent_trace_last_ok(agent_trace_state state) bool {
 
 func agent_trace_last_progress_observation(agent_trace_state state) string {
     int i = len(state.observations) - 1
-    while i >= 0 {
+    for i >= 0 {
         agent_observation_state parsed = agent_observation_parse(state.observations[i])
         if parsed.ok || parsed.terminal {
             return state.observations[i]
@@ -141,7 +141,7 @@ func agent_trace_last_progress_observation(agent_trace_state state) string {
 func agent_trace_export(agent_trace_state state) string {
     string out = "trace_count=" + string(state.count)
     int i = 0
-    while i < len(state.steps) {
+    for i < len(state.steps) {
         agent_observation_state parsed = agent_observation_parse(state.observations[i])
         out = out + "\nstep[" + string(i) + "]=" + string(state.steps[i])
         out = out + "\ntask[" + string(i) + "]=" + state.tasks[i]
@@ -193,7 +193,7 @@ func agent_trace_window(agent_trace_state state, int max_entries) agent_trace_st
     []int tool_retries = []int{cap: keep}
     []bool ok_flags = []bool{cap: keep}
     int i = 0
-    while i < keep {
+    for i < keep {
         steps[i] = state.steps[start + i]
         tasks[i] = state.tasks[start + i]
         inputs[i] = state.inputs[start + i]
@@ -244,7 +244,7 @@ func agent_trace_ok_rate(agent_trace_state state) float {
     }
     int ok_count = 0
     int i = 0
-    while i < size {
+    for i < size {
         agent_observation_state parsed = agent_observation_parse(state.observations[i])
         if parsed.ok || parsed.terminal {
             ok_count = ok_count + 1
@@ -257,7 +257,7 @@ func agent_trace_ok_rate(agent_trace_state state) float {
 func agent_trace_filter_task_obs(agent_trace_state state, string task) []string {
     int count = 0
     int i = 0
-    while i < len(state.tasks) {
+    for i < len(state.tasks) {
         if state.tasks[i] == task {
             count = count + 1
         }
@@ -266,7 +266,7 @@ func agent_trace_filter_task_obs(agent_trace_state state, string task) []string 
     []string out = []string{cap: count}
     int wi = 0
     i = 0
-    while i < len(state.tasks) {
+    for i < len(state.tasks) {
         if state.tasks[i] == task {
             out[wi] = state.observations[i]
             wi = wi + 1

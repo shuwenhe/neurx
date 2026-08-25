@@ -8,7 +8,7 @@ func string_char(int c) string {
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         string ch = string_char(s[i])
         if ch == "'" {
             out = out + "'\"'\"'"
@@ -26,7 +26,7 @@ func compile_one(string compiler, string script_dir, string build_dir, string sh
     string output_name = shard_file
     int dot = len(output_name)
     int i = 0
-    while i < len(output_name) {
+    for i < len(output_name) {
         if string_char(output_name[i]) == "." {
             dot = i
             break
@@ -35,7 +35,7 @@ func compile_one(string compiler, string script_dir, string build_dir, string sh
     }
     string base_name = ""
     i = 0
-    while i < dot {
+    for i < dot {
         base_name = base_name + string_char(output_name[i])
         i = i + 1
     }

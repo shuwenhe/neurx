@@ -209,7 +209,7 @@ func tensor_numel([]int shape) int {
     if len(shape) == 0 { return 0 }
     int elements = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         if shape[i] <= 0 { return 0 }
         elements = elements * shape[i]
         i = i + 1
@@ -221,7 +221,7 @@ func tensor_contiguous_strides([]int shape) []int {
     []int strides = []int{cap: len(shape)}
     int stride = 1
     int i = len(shape) - 1
-    while i >= 0 {
+    for i >= 0 {
         strides[i] = stride
         stride = stride * shape[i]
         i = i - 1
@@ -263,7 +263,7 @@ func op_int_string(int value) string {
     if value == 0 { return "0" }
     string output = ""
     int current = value
-    while current > 0 { output = string(48 + current % 10) + output; current = current / 10 }
+    for current > 0 { output = string(48 + current % 10) + output; current = current / 10 }
     output
 }
 
@@ -426,17 +426,17 @@ func transformer_descriptor_plan_compile(device_context context, string backend,
     int count = len(descriptor)
     []int compiled = []int{cap: count}
     int index = 0
-    while index < count {
+    for index < count {
         if len(descriptor[index]) == 0 {
             int release_index = 0
-            while release_index < index { device_operation_close_handle(context.handle, compiled[release_index]); release_index = release_index + 1 }
+            for release_index < index { device_operation_close_handle(context.handle, compiled[release_index]); release_index = release_index + 1 }
             device_stream_close_handle(context.handle, stream_handle)
             return transformer_plan_invalid(backend, "empty_descriptor")
         }
         int operation_handle = device_operation_open_handle(context.handle, descriptor[index])
         if operation_handle <= 0 {
             int release_index = 0
-            while release_index < index { device_operation_close_handle(context.handle, compiled[release_index]); release_index = release_index + 1 }
+            for release_index < index { device_operation_close_handle(context.handle, compiled[release_index]); release_index = release_index + 1 }
             device_stream_close_handle(context.handle, stream_handle)
             return transformer_plan_invalid(backend, "operation_compile_failed_at_" + string(index))
         }
@@ -456,7 +456,7 @@ func transformer_plan_execute(transformer_execution_plan plan, []string binding,
         return transformer_execution_result {success: false, completed_operations: 0, failed_operation: -1, error_message: "binding_count_mismatch"}
     }
     int index = 0
-    while index < plan.operation_count {
+    for index < plan.operation_count {
         if len(binding[index]) == 0 {
             return transformer_execution_result {success: false, completed_operations: index, failed_operation: index, error_message: "empty_binding"}
         }
@@ -484,7 +484,7 @@ func transformer_plan_release(transformer_execution_plan plan) int {
     if !plan.valid { return 0 }
     int status = 0
     int index = plan.operation_count - 1
-    while index >= 0 {
+    for index >= 0 {
         if device_operation_close_handle(plan.context_handle, plan.operation_handle[index]) != 0 { status = -1 }
         index = index - 1
     }
@@ -553,7 +553,7 @@ struct production_admission_result {
 func production_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int index = 0
-    while index < capacity { values[index] = 0; index = index + 1 }
+    for index < capacity { values[index] = 0; index = index + 1 }
     values
 }
 
@@ -573,7 +573,7 @@ func production_page_offset(production_batch_runtime runtime, int slot, int page
 
 func production_find_free_slot(production_batch_runtime runtime) int {
     int slot = 0
-    while slot < runtime.config.request_capacity {
+    for slot < runtime.config.request_capacity {
         if runtime.status[slot] == production_request_free() || runtime.status[slot] == production_request_finished() || runtime.status[slot] == production_request_cancelled() { return slot }
         slot = slot + 1
     }
@@ -586,7 +586,7 @@ func production_free_page_count(production_batch_runtime runtime) int {
 
 func production_release_slot_pages(production_batch_runtime runtime, int slot) production_batch_runtime {
     int page_index = 0
-    while page_index < runtime.page_count[slot] {
+    for page_index < runtime.page_count[slot] {
         int offset = production_page_offset(runtime, slot, page_index)
         int page = runtime.page_id[offset]
         if page >= 0 && page < runtime.config.page_capacity && runtime.page_owner[page] == slot + 1 {
@@ -615,7 +615,7 @@ func production_admit(production_batch_runtime runtime, int session_id, int requ
     next = production_release_slot_pages(next, slot)
     int allocated = 0
     int page = 0
-    while page < next.config.page_capacity && allocated < required_pages {
+    for page < next.config.page_capacity && allocated < required_pages {
         if next.page_owner[page] == 0 {
             next.page_owner[page] = slot + 1
             next.page_id[production_page_offset(next, slot, allocated)] = page
@@ -642,7 +642,7 @@ func production_schedule(production_batch_runtime runtime) production_batch_sele
     int decode_count = 0
     int token_budget = runtime.config.maximum_batch_tokens
     int slot = 0
-    while slot < runtime.config.request_capacity && prefill_count < runtime.config.maximum_batch_sequences {
+    for slot < runtime.config.request_capacity && prefill_count < runtime.config.maximum_batch_sequences {
         if runtime.status[slot] == production_request_waiting() && runtime.prompt_tokens[slot] <= token_budget {
             prefill[prefill_count] = slot
             prefill_count = prefill_count + 1
@@ -654,7 +654,7 @@ func production_schedule(production_batch_runtime runtime) production_batch_sele
         slot = slot + 1
     }
     slot = 0
-    while slot < runtime.config.request_capacity && decode_count + prefill_count < runtime.config.maximum_batch_sequences && token_budget > 0 {
+    for slot < runtime.config.request_capacity && decode_count + prefill_count < runtime.config.maximum_batch_sequences && token_budget > 0 {
         if runtime.status[slot] == production_request_decode() {
             decode[decode_count] = slot
             decode_count = decode_count + 1
@@ -664,14 +664,14 @@ func production_schedule(production_batch_runtime runtime) production_batch_sele
     }
     int prefill_token_count = 0
     int index = 0
-    while index < prefill_count { prefill_token_count = prefill_token_count + runtime.prompt_tokens[prefill[index]]; index = index + 1 }
+    for index < prefill_count { prefill_token_count = prefill_token_count + runtime.prompt_tokens[prefill[index]]; index = index + 1 }
     runtime.scheduling_round = runtime.scheduling_round + 1
     production_batch_selection {runtime: runtime, prefill_slot: prefill, decode_slot: decode, prefill_count: prefill_count, decode_count: decode_count, prefill_tokens: prefill_token_count, decode_tokens: decode_count, selected: prefill_count + decode_count > 0}
 }
 
 func production_mark_prefill_complete(production_batch_runtime runtime, []int slots, int count) production_batch_runtime {
     int index = 0
-    while index < count {
+    for index < count {
         int slot = slots[index]
         if slot >= 0 && slot < runtime.config.request_capacity && runtime.status[slot] == production_request_prefill() { runtime.status[slot] = production_request_decode() }
         index = index + 1
@@ -695,7 +695,7 @@ func production_record_decode(production_batch_runtime runtime, int slot, int to
 func production_cancel(production_batch_runtime runtime, int session_id) production_batch_runtime {
     production_batch_runtime next = runtime
     int slot = 0
-    while slot < next.config.request_capacity {
+    for slot < next.config.request_capacity {
         if next.session_id[slot] == session_id && next.status[slot] != production_request_free() && next.status[slot] != production_request_finished() {
             if next.status[slot] == production_request_waiting() { next.queued_requests = next.queued_requests - 1 }
             else { next.active_requests = next.active_requests - 1 }
@@ -763,7 +763,7 @@ func physical_paged_kv_release(physical_paged_kv cache) int {
 
 func batch_write_i32(int context, int host, []int values) int {
     int index = 0
-    while index < len(values) {
+    for index < len(values) {
         if neurx_device_write_i32(context, host, index, values[index]) != 0 { return -1 }
         index = index + 1
     }
@@ -793,7 +793,7 @@ func pack_batch_tensor(device_context context, production_batch_runtime runtime,
     }
     int total = 0
     int sequence = 0
-    while sequence < selected_count { total = total + token_count[sequence]; sequence = sequence + 1 }
+    for sequence < selected_count { total = total + token_count[sequence]; sequence = sequence + 1 }
     []int tokens = []int{cap: total}
     []int positions = []int{cap: total}
     []int slots = []int{cap: total}
@@ -801,11 +801,11 @@ func pack_batch_tensor(device_context context, production_batch_runtime runtime,
     []int table = []int{cap: selected_count * runtime.config.maximum_pages_per_request}
     int packed = 0
     sequence = 0
-    while sequence < selected_count {
+    for sequence < selected_count {
         offsets[sequence] = packed
         int runtime_slot = selected_slot[sequence]
         int local = 0
-        while local < token_count[sequence] {
+        for local < token_count[sequence] {
             tokens[packed] = token_id[token_start[sequence] + local]
             positions[packed] = runtime.prompt_tokens[runtime_slot] + runtime.generated_tokens[runtime_slot] - token_count[sequence] + local
             if positions[packed] < 0 { positions[packed] = local }
@@ -816,7 +816,7 @@ func pack_batch_tensor(device_context context, production_batch_runtime runtime,
             local = local + 1
         }
         int page_index = 0
-        while page_index < runtime.config.maximum_pages_per_request {
+        for page_index < runtime.config.maximum_pages_per_request {
             int page_value = -1
             if page_index < runtime.page_count[runtime_slot] { page_value = runtime.page_id[production_page_offset(runtime, runtime_slot, page_index)] }
             table[sequence * runtime.config.maximum_pages_per_request + page_index] = page_value
@@ -871,7 +871,7 @@ func new_model_weight_registry(int context, string backend, string dtype, int ca
 
 func model_weight_find(model_weight_registry registry, string name) int {
     int index = 0
-    while index < registry.count {
+    for index < registry.count {
         if registry.name[index] == name { return index }
         index = index + 1
     }
@@ -945,7 +945,7 @@ func transformer_schedule_build(string backend, bool available, transformer_devi
     int operation_index = 0
     operations[operation_index] = lower_device_op(backend, available, op_embedding(config.dtype, config.hidden)); operation_index = operation_index + 1
     int layer = 0
-    while layer < config.layers {
+    for layer < config.layers {
         operations[operation_index] = lower_device_op(backend, available, op_rms_norm(config.dtype, config.hidden, config.rms_epsilon)); operation_index = operation_index + 1
         operations[operation_index] = lower_device_op(backend, available, op_linear(config.dtype, config.hidden, config.query_heads * config.head_dim, config.attention_bias)); operation_index = operation_index + 1
         operations[operation_index] = lower_device_op(backend, available, op_linear(config.dtype, config.hidden, config.kv_heads * config.head_dim, config.attention_bias)); operation_index = operation_index + 1
@@ -968,7 +968,7 @@ func transformer_schedule_build(string backend, bool available, transformer_devi
     operations[operation_index] = lower_device_op(backend, available, op_linear(config.dtype, config.hidden, config.vocabulary, false)); operation_index = operation_index + 1
     vendor_operations[0] = lower_vendor_name(backend, "embedding")
     int vendor_layer = 0
-    while vendor_layer < config.layers {
+    for vendor_layer < config.layers {
         int base = 1 + vendor_layer * 16
         vendor_operations[base] = lower_vendor_name(backend, "rms_norm")
         vendor_operations[base + 1] = lower_vendor_name(backend, "linear")
@@ -1053,7 +1053,7 @@ func transformer_batch_binding_build(transformer_device_config config, model_wei
     binding[index] = embedding_binding(batch.token.buffer, embedding, buffer.hidden, batch.token_count)
     index = index + 1
     int layer = 0
-    while layer < config.layers {
+    for layer < config.layers {
         int input_norm = batch_weight_buffer(weight, batch_layer_name(layer, "input_layernorm.weight"))
         int query_weight = batch_weight_buffer(weight, batch_layer_name(layer, "self_attn.q_proj.weight"))
         int key_weight = batch_weight_buffer(weight, batch_layer_name(layer, "self_attn.k_proj.weight"))

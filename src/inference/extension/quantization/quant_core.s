@@ -116,7 +116,7 @@ func compute_tensor_stats([]float values) quantization_stats {
     stats.maximum = values[0]
     float sum = 0.0
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         float value = values[i]
         if value < stats.minimum { stats.minimum = value }
         if value > stats.maximum { stats.maximum = value }
@@ -155,7 +155,7 @@ func quantize_int8([]float values) quantization_result {
     tensor.scales = append(tensor.scales, scale)
     tensor.zero_points = append(tensor.zero_points, 0)
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         int value = quant_clamp(quant_round(values[i] / scale), -127, 127)
         tensor.values = append(tensor.values, value)
         i = i + 1
@@ -177,12 +177,12 @@ func quantize_int4_groupwise([]float values, int group_size) quantization_result
     tensor.group_size = group_size
     tensor.packed = true
     int group_start = 0
-    while group_start < len(values) {
+    for group_start < len(values) {
         int group_end = group_start + group_size
         if group_end > len(values) { group_end = len(values) }
         float maximum_absolute = 0.0
         int i = group_start
-        while i < group_end {
+        for i < group_end {
             maximum_absolute = quant_max(maximum_absolute, quant_abs(values[i]))
             i = i + 1
         }
@@ -191,7 +191,7 @@ func quantize_int4_groupwise([]float values, int group_size) quantization_result
         tensor.scales = append(tensor.scales, scale)
         tensor.zero_points = append(tensor.zero_points, 0)
         i = group_start
-        while i < group_end {
+        for i < group_end {
             int low = quant_clamp(quant_round(values[i] / scale), -7, 7) + 8
             int high = 8
             if i + 1 < group_end {
@@ -218,7 +218,7 @@ func dequantize_tensor(quantized_tensor tensor) []float {
     if tensor.element_count <= 0 || len(tensor.scales) == 0 { return output }
     if tensor.quant_type == quant_type_int8() {
         int i = 0
-        while i < len(tensor.values) && i < tensor.element_count {
+        for i < len(tensor.values) && i < tensor.element_count {
             output = append(output, float(tensor.values[i]) * tensor.scales[0])
             i = i + 1
         }
@@ -227,7 +227,7 @@ func dequantize_tensor(quantized_tensor tensor) []float {
     if tensor.quant_type != quant_type_int4() || tensor.group_size <= 0 { return output }
     int element_index = 0
     int packed_index = 0
-    while element_index < tensor.element_count && packed_index < len(tensor.values) {
+    for element_index < tensor.element_count && packed_index < len(tensor.values) {
         int group_index = element_index / tensor.group_size
         if group_index >= len(tensor.scales) { return [] }
         int packed = tensor.values[packed_index]
@@ -262,7 +262,7 @@ func quantization_mean_squared_error([]float original, quantized_tensor tensor) 
     if len(original) == 0 || len(restored) != len(original) { return -1.0 }
     float error = 0.0
     int i = 0
-    while i < len(original) {
+    for i < len(original) {
         float difference = original[i] - restored[i]
         error = error + difference * difference
         i = i + 1

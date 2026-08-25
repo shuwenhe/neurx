@@ -77,7 +77,7 @@ func backend_string_at([]string values, int index) string {
 
 func backend_contains([]string values, string expected) bool {
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         string value = backend_string_at(values, i)
         if value == expected {
             return true
@@ -92,7 +92,7 @@ func backend_register(backend_registry_state state, inference_backend_capability
         return state
     }
     int i = 0
-    while i < len(state.backends) {
+    for i < len(state.backends) {
         inference_backend_capability existing = backend_capability_at(state, i)
         if existing.backend_name == backend.backend_name {
             state.backends[i] = backend
@@ -106,7 +106,7 @@ func backend_register(backend_registry_state state, inference_backend_capability
 
 func backend_set_available(backend_registry_state state, string backend_name, bool available) backend_registry_state {
     int i = 0
-    while i < len(state.backends) {
+    for i < len(state.backends) {
         inference_backend_capability backend = backend_capability_at(state, i)
         if backend.backend_name == backend_name {
             backend.available = available
@@ -153,7 +153,7 @@ func backend_select(backend_registry_state state, backend_requirement requiremen
     int selected_index = -1
     int selected_priority = -2147483647
     int i = 0
-    while i < len(state.backends) {
+    for i < len(state.backends) {
         inference_backend_capability backend = backend_capability_at(state, i)
         if backend_matches(backend, requirement) && backend.priority > selected_priority {
             selected_index = i

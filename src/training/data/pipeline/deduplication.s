@@ -38,7 +38,7 @@ func init_bloom_filter(int expected_documents, float false_positive_rate) bloom_
     bf.hash_functions = 7
     bf.insertions = 0
     int i = 0
-    while i < size {
+    for i < size {
         bf.bits[i] = false
         i = i + 1
     }
@@ -49,7 +49,7 @@ func hash_function_1(string text) int {
     int hash = 5381
     int i = 0
     int len = strlen(text)
-    while i < len {
+    for i < len {
         hash = ((hash << 5) + hash) + text[i]
         i = i + 1
     }
@@ -63,7 +63,7 @@ func hash_function_2(string text) int {
     int hash = 33
     int i = 0
     int len = strlen(text)
-    while i < len {
+    for i < len {
         hash = hash * 31 + text[i]
         i = i + 1
     }
@@ -77,7 +77,7 @@ func hash_function_3(string text) int {
     int hash = 1
     int i = 0
     int len = strlen(text)
-    while i < len {
+    for i < len {
         hash = hash * 37 + text[i]
         i = i + 1
     }
@@ -113,17 +113,17 @@ func generate_minhash_signature(string text, int num_hashes) min_hash_signature 
     sig.hash_values = alloc(int, num_hashes)
     sig.doc_length = strlen(text)
     int i = 0
-    while i < num_hashes {
+    for i < num_hashes {
         sig.hash_values[i] = 2147483647
         i = i + 1
     }
     int text_len = strlen(text)
     i = 0
-    while i < text_len - 1 {
+    for i < text_len - 1 {
         string gram = ""
         gram = char_to_string(text[i]) + char_to_string(text[i + 1])
         int j = 0
-        while j < num_hashes {
+        for j < num_hashes {
             int hash_value = compute_hash(gram, j * 17) % 2147483647
             if hash_value < sig.hash_values[j] {
                 sig.hash_values[j] = hash_value
@@ -139,7 +139,7 @@ func compute_hash(string text, int seed) int {
     int hash = seed
     int i = 0
     int len = strlen(text)
-    while i < len {
+    for i < len {
         hash = ((hash << 5) + hash) ^ text[i]
         i = i + 1
     }
@@ -155,7 +155,7 @@ func jaccard_similarity(min_hash_signature sig1, min_hash_signature sig2) float 
     }
     int matches = 0
     int i = 0
-    while i < sig1.num_hashes {
+    for i < sig1.num_hashes {
         if sig1.hash_values[i] == sig2.hash_values[i] {
             matches = matches + 1
         }
@@ -168,17 +168,17 @@ func jaccard_similarity(min_hash_signature sig1, min_hash_signature sig2) float 
 func find_exact_duplicates(string* documents, int doc_count) bool* {
     bool* is_duplicate = alloc(bool, doc_count)
     int i = 0
-    while i < doc_count {
+    for i < doc_count {
         is_duplicate[i] = false
         i = i + 1
     }
     bloom_filter bf = init_bloom_filter(doc_count, 0.001)
     i = 0
-    while i < doc_count {
+    for i < doc_count {
         string text = documents[i]
         if bloom_contains(bf, text) {
             int j = 0
-            while j < i {
+            for j < i {
                 if str_equals(text, documents[j]) {
                     is_duplicate[i] = true
                     j = doc_count
@@ -197,14 +197,14 @@ func find_similar_duplicates(string* documents, int doc_count, float similarity_
     int similarity_count = 0
     min_hash_signature* signatures = alloc(min_hash_signature, doc_count)
     int i = 0
-    while i < doc_count {
+    for i < doc_count {
         signatures[i] = generate_minhash_signature(documents[i], 128)
         i = i + 1
     }
     i = 0
-    while i < doc_count {
+    for i < doc_count {
         int j = i + 1
-        while j < doc_count {
+        for j < doc_count {
             float sim = jaccard_similarity(signatures[i], signatures[j])
             if sim >= similarity_threshold {
                 document_similarity ds
@@ -230,7 +230,7 @@ func deduplicate_documents(string* documents, int doc_count, float similarity_th
     document_similarity* similar_dups = find_similar_duplicates(documents, doc_count, similarity_threshold)
     int unique_count = 0
     int i = 0
-    while i < doc_count {
+    for i < doc_count {
         if !exact_dups[i] {
             unique_count = unique_count + 1
         }
@@ -246,7 +246,7 @@ func deduplicate_documents(string* documents, int doc_count, float similarity_th
 func filter_unique_documents(string* documents, int doc_count, bool* is_duplicate) string* {
     int unique_count = 0
     int i = 0
-    while i < doc_count {
+    for i < doc_count {
         if !is_duplicate[i] {
             unique_count = unique_count + 1
         }
@@ -255,7 +255,7 @@ func filter_unique_documents(string* documents, int doc_count, bool* is_duplicat
     string* unique_docs = alloc(string, unique_count)
     int unique_idx = 0
     i = 0
-    while i < doc_count {
+    for i < doc_count {
         if !is_duplicate[i] {
             unique_docs[unique_idx] = documents[i]
             unique_idx = unique_idx + 1
@@ -270,7 +270,7 @@ func str_equals(string s1, string s2) bool {
         return false
     }
     int i = 0
-    while i < strlen(s1) {
+    for i < strlen(s1) {
         if s1[i] != s2[i] {
             return false
         }
@@ -282,7 +282,7 @@ func str_equals(string s1, string s2) bool {
 func strlen(string s) int {
     int count = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         count = count + 1
         i = i + 1
     }
@@ -299,7 +299,7 @@ func int_to_string(int n) string {
     }
     string result = ""
     int num = n
-    while num > 0 {
+    for num > 0 {
         int digit = num % 10
         result = char_to_string(digit + 48) + result
         num = num / 10

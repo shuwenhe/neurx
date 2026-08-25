@@ -12,7 +12,7 @@ func int_to_string(int n) string {
         num = 0 - num
     }
 
-    while num > 0 {
+    for num > 0 {
         int digit = num % 10
         string digit_str = ""
 
@@ -47,7 +47,7 @@ func starts_with(string str, string prefix) bool {
     }
 
     int i = 0
-    while i < prefix_len {
+    for i < prefix_len {
         if str[i] != prefix[i] {
             return false
         }
@@ -65,11 +65,11 @@ func contains(string str, string substring) bool {
     }
 
     int i = 0
-    while i <= str_len - sub_len {
+    for i <= str_len - sub_len {
         int j = 0
         bool match = true
 
-        while j < sub_len {
+        for j < sub_len {
             if str[i + j] != substring[j] {
                 match = false
                 break
@@ -100,7 +100,7 @@ func extract_path(string request) string {
     int second_space = -1
     int i = 0
 
-    while i < len(request) {
+    for i < len(request) {
         if request[i] == 32 {
             if first_space < 0 {
                 first_space = i
@@ -129,7 +129,7 @@ func extract_path(string request) string {
             path = "/"
             idx = idx + 1
 
-            while idx < second_space {
+            for idx < second_space {
                 if request[idx] == 118 {
                     path = "/v1"
                     break

@@ -70,12 +70,12 @@ func create_embedding(int vocab_size, int hidden_size) embedding_layer {
 func embedding_forward(embedding_layer emb, []int token_ids) [][]float {
     [][]float embeddings = [][]float{}
     int i = 0
-    while i < len(token_ids) {
+    for i < len(token_ids) {
         int token_id = token_ids[i]
         if token_id >= 0 && token_id < emb.vocab_size {
             []float embedding = fill_model_tensor(emb.hidden_size, 0.0)
             int j = 0
-            while j < emb.hidden_size {
+            for j < emb.hidden_size {
                 int idx = token_id * emb.hidden_size + j
                 if idx < len(emb.weight) {
                     embedding[j] = emb.weight[idx]
@@ -102,13 +102,13 @@ func rms_norm_forward(rms_norm norm, []float hidden_state) []float {
     []float normalized = fill_model_tensor(len(hidden_state), 0.0)
     float sum_sq = 0.0
     int i = 0
-    while i < len(hidden_state) {
+    for i < len(hidden_state) {
         sum_sq = sum_sq + hidden_state[i] * hidden_state[i]
         i = i + 1
     }
     float rms = sqrt((sum_sq / ((len(hidden_state) as float))) + norm.epsilon)
     i = 0
-    while i < len(hidden_state) {
+    for i < len(hidden_state) {
         normalized[i] = (hidden_state[i] / rms) * norm.weight[i] + norm.bias[i]
         i = i + 1
     }
@@ -127,10 +127,10 @@ func create_linear(int in_features, int out_features) linear_layer {
 func linear_forward(linear_layer layer, []float input) []float {
     []float output = fill_model_tensor(layer.out_features, 0.0)
     int out_idx = 0
-    while out_idx < layer.out_features {
+    for out_idx < layer.out_features {
         float sum = layer.bias[out_idx]
         int in_idx = 0
-        while in_idx < layer.in_features && in_idx < len(input) {
+        for in_idx < layer.in_features && in_idx < len(input) {
             int w_idx = out_idx * layer.in_features + in_idx
             if w_idx < len(layer.weight) {
                 sum = sum + input[in_idx] * layer.weight[w_idx]
@@ -154,7 +154,7 @@ func create_rope_config(int dim, int max_seq_len) rope_config {
 func rope_apply(rope_config config, []float query, int position) []float {
     []float rotated = fill_model_tensor(len(query), 0.0)
     int i = 0
-    while i < len(query) && i < config.dim {
+    for i < len(query) && i < config.dim {
         float freq = 1.0 / (pow(config.base, (((i as float) / (config.dim as float)) * 2.0)))
         float angle = (position as float) * freq
         if i - (i / 2) * 2 == 0 {
@@ -165,7 +165,7 @@ func rope_apply(rope_config config, []float query, int position) []float {
         i = i + 2
     }
     int j = i
-    while j < len(query) {
+    for j < len(query) {
         rotated[j] = query[j]
         j = j + 1
     }
@@ -188,14 +188,14 @@ func scaled_dot_product_attention([]float query, []float key, []float value, flo
     []float attention = fill_model_tensor(len(query), 0.0)
     float dot_product = 0.0
     int i = 0
-    while i < len(query) && i < len(key) {
+    for i < len(query) && i < len(key) {
         dot_product = dot_product + query[i] * key[i]
         i = i + 1
     }
     dot_product = dot_product * scale
     float attention_weight = exp(dot_product)
     int j = 0
-    while j < len(value) {
+    for j < len(value) {
         attention[j] = attention_weight * value[j]
         j = j + 1
     }
@@ -227,7 +227,7 @@ func mlp_forward(mlp_layer mlp, []float hidden_state) []float {
     []float up = linear_forward(mlp.up_proj, hidden_state)
     []float gated = fill_model_tensor(len(gate), 0.0)
     int i = 0
-    while i < len(gate) {
+    for i < len(gate) {
         gated[i] = gate[i] * up[i]
         i = i + 1
     }
@@ -250,7 +250,7 @@ func transformer_block_forward(transformer_block block, []float hidden_state) []
     []float attention_output = multi_head_attention_forward(block.attention, normed_hidden, normed_hidden)
     []float residual1 = fill_model_tensor(len(hidden_state), 0.0)
     int i = 0
-    while i < len(hidden_state) {
+    for i < len(hidden_state) {
         residual1[i] = hidden_state[i] + attention_output[i]
         i = i + 1
     }
@@ -258,7 +258,7 @@ func transformer_block_forward(transformer_block block, []float hidden_state) []
     []float mlp_output = mlp_forward(block.mlp, normed_residual1)
     []float final_output = fill_model_tensor(len(residual1), 0.0)
     i = 0
-    while i < len(residual1) {
+    for i < len(residual1) {
         final_output[i] = residual1[i] + mlp_output[i]
         i = i + 1
     }

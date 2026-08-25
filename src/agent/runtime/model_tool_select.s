@@ -10,7 +10,7 @@ func agent_model_clip(string text, int max_chars) string {
     }
     string out = ""
     int i = 0
-    while i < max_chars {
+    for i < max_chars {
         out = out + string(text[i])
         i = i + 1
     }
@@ -24,7 +24,7 @@ func agent_model_route_line_starts_with(string line, string prefix) bool {
         return false
     }
     int i = 0
-    while i < pl {
+    for i < pl {
         if string(line[i]) != string(prefix[i]) {
             return false
         }
@@ -36,7 +36,7 @@ func agent_model_route_line_starts_with(string line, string prefix) bool {
 func agent_model_route_extract_value(string line, int key_len) string {
     int ll = len(line)
     int start = key_len
-    while start < ll {
+    for start < ll {
         string ch = string(line[start])
         if ch != ":" && ch != " " {
             break
@@ -45,7 +45,7 @@ func agent_model_route_extract_value(string line, int key_len) string {
     }
     string val = ""
     int i = start
-    while i < ll {
+    for i < ll {
         string ch = string(line[i])
         if ch == " " || ch == "\r" || ch == "\n" {
             break
@@ -60,7 +60,7 @@ func agent_model_route_scan_response(string response) string {
     int resp_len = len(response)
     string cur_line = ""
     int i = 0
-    while i <= resp_len {
+    for i <= resp_len {
         bool at_end = i == resp_len
         bool at_newline = !at_end && string(response[i]) == "\n"
         if at_newline || at_end {
@@ -213,7 +213,7 @@ func agent_model_parse_field(string response, string key) string {
     int resp_len = len(response)
     string cur_line = ""
     int i = 0
-    while i <= resp_len {
+    for i <= resp_len {
         bool at_end = i == resp_len
         bool at_newline = !at_end && string(response[i]) == "\n"
         if at_newline || at_end {
@@ -245,10 +245,10 @@ func agent_model_str_find(string text, string pattern, int start) int {
         return -1
     }
     int i = start
-    while i <= tl - pl {
+    for i <= tl - pl {
         int j = 0
         bool match = true
-        while j < pl {
+        for j < pl {
             if text[i + j] != pattern[j] {
                 match = false
                 break
@@ -282,7 +282,7 @@ func agent_model_parse_block(string response, string begin_marker, string end_ma
     }
     string out = ""
     int i = content_start
-    while i < content_end {
+    for i < content_end {
         out = out + string(response[i])
         i = i + 1
     }
@@ -507,18 +507,18 @@ func agent_model_code_parse_all_files(string response) string {
     int path_prefix_len = len(path_prefix)
     int begin_len = len(begin_marker)
     int end_len = len(end_marker)
-    while pos < resp_len {
+    for pos < resp_len {
         int path_start = agent_model_str_find(response, path_prefix, pos)
         if path_start < 0 {
             break
         }
         int line_end = path_start + path_prefix_len
-        while line_end < resp_len && string(response[line_end]) != "\n" {
+        for line_end < resp_len && string(response[line_end]) != "\n" {
             line_end = line_end + 1
         }
         string raw_path = ""
         int pi = path_start + path_prefix_len
-        while pi < line_end {
+        for pi < line_end {
             raw_path = raw_path + string(response[pi])
             pi = pi + 1
         }
@@ -537,7 +537,7 @@ func agent_model_code_parse_all_files(string response) string {
         }
         string content = ""
         int ci = content_start
-        while ci < end_pos {
+        for ci < end_pos {
             content = content + string(response[ci])
             ci = ci + 1
         }

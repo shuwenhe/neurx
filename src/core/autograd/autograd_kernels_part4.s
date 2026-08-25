@@ -214,11 +214,11 @@ func log_approx(float x) float {
     float ln2 = 0.6931471805599453
     float m = x
     int k = 0
-    while m >= 1.5 {
+    for m >= 1.5 {
         m = m / 2.0
         k = k + 1
     }
-    while m < 0.75 {
+    for m < 0.75 {
         m = m * 2.0
         k = k - 1
     }

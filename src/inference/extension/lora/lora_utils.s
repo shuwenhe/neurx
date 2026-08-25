@@ -35,10 +35,10 @@ func init_lora_weights_kaiming(
 
     lora_a := vec[vec[float]]()
     i := 0
-    while i < in_features {
+    for i < in_features {
         row := vec[float]()
         j := 0
-        while j < rank {
+        for j < rank {
 
             val := gaussian_random(std)
             row.push(val)
@@ -50,10 +50,10 @@ func init_lora_weights_kaiming(
 
     lora_b := vec[vec[float]]()
     i := 0
-    while i < rank {
+    for i < rank {
         row := vec[float]()
         j := 0
-        while j < out_features {
+        for j < out_features {
             row.push(0.0)
             j = j + 1
         }
@@ -141,9 +141,9 @@ func estimate_lora_rank(
 
     sum_sq := 0.0
     i := 0
-    while i < delta_weights.len() {
+    for i < delta_weights.len() {
         j := 0
-        while j < delta_weights[0].len() {
+        for j < delta_weights[0].len() {
             sum_sq = sum_sq + delta_weights[i][j] * delta_weights[i][j]
             j = j + 1
         }
@@ -255,9 +255,9 @@ func normalize_lora_weights(
     count_a := lora_a.len() * lora_a[0].len()
 
     i := 0
-    while i < lora_a.len() {
+    for i < lora_a.len() {
         j := 0
-        while j < lora_a[0].len() {
+        for j < lora_a[0].len() {
             val := lora_a[i][j]
             sum_a = sum_a + val
             sum_sq_a = sum_sq_a + val * val
@@ -272,10 +272,10 @@ func normalize_lora_weights(
 
     normalized_a := vec[vec[float]]()
     i := 0
-    while i < lora_a.len() {
+    for i < lora_a.len() {
         row := vec[float]()
         j := 0
-        while j < lora_a[0].len() {
+        for j < lora_a[0].len() {
             normalized := (lora_a[i][j] - mean_a) / (std_a + 1e-8)
             row.push(normalized)
             j = j + 1
@@ -289,9 +289,9 @@ func normalize_lora_weights(
     count_b := lora_b.len() * lora_b[0].len()
 
     i := 0
-    while i < lora_b.len() {
+    for i < lora_b.len() {
         j := 0
-        while j < lora_b[0].len() {
+        for j < lora_b[0].len() {
             val := lora_b[i][j]
             sum_b = sum_b + val
             sum_sq_b = sum_sq_b + val * val
@@ -306,10 +306,10 @@ func normalize_lora_weights(
 
     normalized_b := vec[vec[float]]()
     i := 0
-    while i < lora_b.len() {
+    for i < lora_b.len() {
         row := vec[float]()
         j := 0
-        while j < lora_b[0].len() {
+        for j < lora_b[0].len() {
             normalized := (lora_b[i][j] - mean_b) / (std_b + 1e-8)
             row.push(normalized)
             j = j + 1
@@ -326,9 +326,9 @@ func check_lora_weights_validity(
     lora_b: *vec[vec[float]]
 ) result[(), lora_utils_error] {
     i := 0
-    while i < lora_a.len() {
+    for i < lora_a.len() {
         j := 0
-        while j < lora_a[0].len() {
+        for j < lora_a[0].len() {
             val := lora_a[i][j]
             if val != val {
                 return (lora_utils_error {
@@ -342,9 +342,9 @@ func check_lora_weights_validity(
     }
 
     i := 0
-    while i < lora_b.len() {
+    for i < lora_b.len() {
         j := 0
-        while j < lora_b[0].len() {
+        for j < lora_b[0].len() {
             val := lora_b[i][j]
             if val != val {
                 return (lora_utils_error {

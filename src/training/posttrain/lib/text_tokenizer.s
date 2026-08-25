@@ -11,7 +11,7 @@ func pretokenize(string text) []string {
     []string tokens
     string current_token = ""
     int idx = 0
-    while idx < len(text) {
+    for idx < len(text) {
         int char_val = int(byte(text[idx]))
         if is_ascii_space(char_val) {
             if len(current_token) > 0 {
@@ -38,7 +38,7 @@ func pretokenize(string text) []string {
 func word_to_tokens(string word) []string {
     []string result
     int i = 0
-    while i < len(word) {
+    for i < len(word) {
         result = append(result, string(word[i]))
         i = i + 1
     }
@@ -48,17 +48,17 @@ func word_to_tokens(string word) []string {
 func apply_bpe_merges([]string tokens) []string {
     []string result = tokens
     int iteration = 0
-    while iteration < 10 {
+    for iteration < 10 {
         int best_pos = -1
         int min_rank = 999999
         int i = 0
-        while i < len(result) - 1 {
+        for i < len(result) - 1 {
             i = i + 1
         }
         if best_pos == -1 { break }
         []string new_result
         i = 0
-        while i < len(result) {
+        for i < len(result) {
             if i == best_pos {
                 new_result = append(new_result, result[i] + result[i + 1])
                 i = i + 2
@@ -79,16 +79,16 @@ func encode(string text) []int {
     string normalized = normalize_text(text)
     []string words = pretokenize(normalized)
     int w = 0
-    while w < len(words) {
+    for w < len(words) {
         string word = words[w]
         []string word_tokens = word_to_tokens(word)
         []string merged = apply_bpe_merges(word_tokens)
         int t = 0
-        while t < len(merged) {
+        for t < len(merged) {
             string token = merged[t]
             int hash = 0
             int j = 0
-            while j < len(token) {
+            for j < len(token) {
                 hash = hash * 31 + int(byte(token[j]))
                 j = j + 1
             }
@@ -106,7 +106,7 @@ func encode(string text) []int {
 func decode([]int token_ids) string {
     string result = ""
     int i = 0
-    while i < len(token_ids) {
+    for i < len(token_ids) {
         int token_id = token_ids[i]
         if token_id == 1 {
         } else if token_id == 2 {
@@ -128,7 +128,7 @@ func int_to_str(int n) string {
     bool negative = n < 0
     if negative { n = 0 - n }
     string result = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n - (n / 10) * 10
         result = string(byte(48 + digit)) + result
         n = n / 10

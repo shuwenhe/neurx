@@ -127,7 +127,7 @@ func warmup_should_warmup(performance_cache pc, int64 current_time) int {
 func warmup_preload_batch(performance_cache pc, []string cache_keys, int batch_size) int {
     int preloaded = 0
     int i = 0
-    while i < len(cache_keys) && i < batch_size {
+    for i < len(cache_keys) && i < batch_size {
         pc.warmup.total_preloaded = pc.warmup.total_preloaded + 1
         preloaded = preloaded + 1
         i = i + 1

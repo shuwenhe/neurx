@@ -127,7 +127,7 @@ func extract_qwen_json_tools(str model_output) . ExtractedToolCallInformation {
     search_pos := 0
     content_end := strings::len(model_output)
 
-    while search_pos < content_end {
+    for search_pos < content_end {
         match regex::find_at(re, model_output, search_pos) {
             Some(m) => {
                 json_str := strings::substring(model_output, m.start, m.end)
@@ -182,7 +182,7 @@ func extract_qwen_xml_tools(str model_output) . ExtractedToolCallInformation {
     tool_calls := Vec::new()
     search_pos := 0
 
-    while search_pos < strings::len(model_output) {
+    for search_pos < strings::len(model_output) {
         call_start := strings::index_of_from(model_output, start_tag, search_pos)
         if call_start < 0 {
             break

@@ -60,7 +60,7 @@ func copy_eqn(ir_eqn eqn) ir_eqn {
 func copy_eqns([]ir_eqn values) []ir_eqn {
     []ir_eqn out = []ir_eqn{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = copy_eqn(values[i])
         i = i + 1
     }
@@ -120,7 +120,7 @@ func tracer_eqn_count(tracer_state state) int {
 
 func tracer_has_op(tracer_state state, string op) bool {
     int i = 0
-    while i < len(state.ops) {
+    for i < len(state.ops) {
         if get_op(state, i) == op {
             return true
         }
@@ -131,7 +131,7 @@ func tracer_has_op(tracer_state state, string op) bool {
 
 func tracer_has_param(tracer_state state, string param) bool {
     int i = 0
-    while i < len(state.params) {
+    for i < len(state.params) {
         if get_param_string(state, i) == param {
             return true
         }
@@ -142,7 +142,7 @@ func tracer_has_param(tracer_state state, string param) bool {
 
 func tracer_has_input(tracer_state state, string input) bool {
     int i = 0
-    while i < len(state.inputs) {
+    for i < len(state.inputs) {
         if get_input(state, i) == input {
             return true
         }
@@ -153,7 +153,7 @@ func tracer_has_input(tracer_state state, string input) bool {
 
 func tracer_has_output(tracer_state state, string output) bool {
     int i = 0
-    while i < len(state.outputs) {
+    for i < len(state.outputs) {
         if get_output(state, i) == output {
             return true
         }
@@ -164,7 +164,7 @@ func tracer_has_output(tracer_state state, string output) bool {
 
 func tracer_has_eqn(tracer_state state, string primitive) bool {
     int i = 0
-    while i < len(state.eqns) {
+    for i < len(state.eqns) {
         ir_eqn eqn = get_eqn(state, i)
         if eqn.primitive == primitive {
             return true
@@ -176,7 +176,7 @@ func tracer_has_eqn(tracer_state state, string primitive) bool {
 
 func tracer_has_tag(tracer_state state, string tag) bool {
     int i = 0
-    while i < len(state.tags) {
+    for i < len(state.tags) {
         if get_tag(state, i) == tag {
             return true
         }
@@ -272,12 +272,12 @@ func tracer_add_eqn_with_io(tracer_state state, string primitive, []string param
     ops.push(primitive)
     param_list.push(join_params(params))
     int i = 0
-    while i < len(inputs) {
+    for i < len(inputs) {
         input_list.push(inputs[i])
         i = i + 1
     }
     i = 0
-    while i < len(outputs) {
+    for i < len(outputs) {
         output_list.push(outputs[i])
         i = i + 1
     }
@@ -451,7 +451,7 @@ func transform_chain_to_tracer(transform_chain chain, string name) tracer_state 
     if len(eqns) == 0 {
         eqns = []ir_eqn{cap: len(chain.steps)}
         int i = 0
-        while i < len(chain.steps) {
+        for i < len(chain.steps) {
             string step = get_chain_step(chain, i)
             eqns[i] = ir_eqn {
                 primitive: step,

@@ -22,7 +22,7 @@ func binary_search_vocab([]vocab_entry entries, int token_id) vocab_entry {
     int left = 0
     int right = len(entries) - 1
 
-    while left <= right {
+    for left <= right {
         int mid = left + (right - left) / 2
         vocab_entry mid_entry = entries[mid]
 
@@ -63,7 +63,7 @@ func load_vocab_from_file(string vocab_file_path) bool {
     int line_start = 0
     int i = 0
 
-    while i < len(content) {
+    for i < len(content) {
         int ch = content[i]
 
         if ch == 10 {
@@ -123,10 +123,10 @@ func index_of(string text, string needle) int {
     }
 
     int i = 0
-    while i <= len(text) - len(needle) {
+    for i <= len(text) - len(needle) {
         bool matched = true
         int j = 0
-        while j < len(needle) {
+        for j < len(needle) {
             if __host_slice(text, i + j, i + j + 1) != __host_slice(needle, j, j + 1) {
                 matched = false
                 break
@@ -147,7 +147,7 @@ func parse_int(string text) int {
     int result = 0
     int i = 0
 
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if ch >= 48 && ch <= 57 {
             result = result * 10 + (ch - 48)
@@ -162,7 +162,7 @@ func unescape_string(string text) string {
     string result = ""
     int i = 0
 
-    while i < len(text) {
+    for i < len(text) {
         if __host_slice(text, i, i + 1) == "\\" && i + 1 < len(text) {
             string next_char = __host_slice(text, i + 1, i + 2)
 

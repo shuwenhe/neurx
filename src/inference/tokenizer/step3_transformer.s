@@ -86,7 +86,7 @@ func exp_approx(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / float(i)
         result = result + term
         i = i + 1
@@ -99,13 +99,13 @@ func softmax_row([]float scores, int length) []float {
     if length == 0 { return out }
     float maxv = scores[0]
     int i = 1
-    while i < length {
+    for i < length {
         if scores[i] > maxv { maxv = scores[i] }
         i = i + 1
     }
     float sumexp = 0.0
     i = 0
-    while i < length {
+    for i < length {
         float v = scores[i] - maxv
         float e = exp_approx(v)
         out[i] = e
@@ -114,7 +114,7 @@ func softmax_row([]float scores, int length) []float {
     }
     if sumexp == 0.0 { return out }
     i = 0
-    while i < length {
+    for i < length {
         out[i] = out[i] / sumexp
         i = i + 1
     }
@@ -130,9 +130,9 @@ func compute_matrix_stats([][]float mat) matrix_stats {
     int tot = R * C
     float sum = 0.0
     int r = 0
-    while r < R {
+    for r < R {
         int c = 0
-        while c < C {
+        for c < C {
             sum = sum + mat[r][c]
             c = c + 1
         }
@@ -142,9 +142,9 @@ func compute_matrix_stats([][]float mat) matrix_stats {
     float sample = 0.0
     int count = 0
     r = 0
-    while r < R && count < 8 {
+    for r < R && count < 8 {
         int c = 0
-        while c < C && count < 8 {
+        for c < C && count < 8 {
             sample = sample + mat[r][c]
             c = c + 1
             count = count + 1
@@ -162,9 +162,9 @@ func flatten_mat([][]float mat) []float {
     if C == 0 { return []float{} }
     []float out = []float{cap: R * C}
     int r = 0
-    while r < R {
+    for r < R {
         int c = 0
-        while c < C {
+        for c < C {
             out[r * C + c] = mat[r][c]
             c = c + 1
         }
@@ -180,9 +180,9 @@ func transformer_forward([][]float embeddings) [][]float {
     string model_file = "/home/shuwen/shuwen/posttrain/model.safetensors"
     []float A = []float{cap: seq_len * hidden}
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         int j = 0
-        while j < hidden {
+        for j < hidden {
             A[i * hidden + j] = embeddings[i][j]
             j = j + 1
         }
@@ -192,7 +192,7 @@ func transformer_forward([][]float embeddings) [][]float {
     int layer = 0
     int total_ops = 0
     print("[TRANSFORMER INFERENCE START]\n")
-    while layer < num_layers {
+    for layer < num_layers {
         map[string][][]float weights = load_transformer_layer(model_file, layer, hidden, 14)
         string base = "model.layers." + int_to_string(layer) + "."
         [][]float Wq = weights[base + "self_attn.q_proj.weight"]
@@ -241,17 +241,17 @@ func transformer_forward([][]float embeddings) [][]float {
         []float Out = []float{cap: seq_len * hidden}
         int qi = 0
         float scale = 1.0 / pow_f(float(head_dim), 0.5)
-        while qi < seq_len {
+        for qi < seq_len {
             int h = 0
-            while h < num_heads {
+            for h < num_heads {
                 int q_off = qi * hidden + h * head_dim
                 []float scores = []float{cap: seq_len}
                 int kj = 0
-                while kj < seq_len {
+                for kj < seq_len {
                     int k_off = kj * hidden + h * head_dim
                     float dot = 0.0
                     int d = 0
-                    while d < head_dim {
+                    for d < head_dim {
                         dot = dot + Q[q_off + d] * K[k_off + d]
                         d = d + 1
                     }
@@ -263,10 +263,10 @@ func transformer_forward([][]float embeddings) [][]float {
                 []float probs = []float{cap: seq_len}
                 fast_softmax(scores, probs, seq_len)
                 int d2 = 0
-                while d2 < head_dim {
+                for d2 < head_dim {
                     float acc = 0.0
                     int k2 = 0
-                    while k2 < seq_len {
+                    for k2 < seq_len {
                         int v_off = k2 * hidden + h * head_dim + d2
                         acc = acc + probs[k2] * V[v_off]
                         k2 = k2 + 1
@@ -280,7 +280,7 @@ func transformer_forward([][]float embeddings) [][]float {
         }
         []float AttnProjected = fast_matmul_flat_opt(Out, fo, seq_len, hidden, hidden)
         int idx = 0
-        while idx < seq_len * hidden {
+        for idx < seq_len * hidden {
             A[idx] = A[idx] + AttnProjected[idx]
             idx = idx + 1
         }
@@ -288,9 +288,9 @@ func transformer_forward([][]float embeddings) [][]float {
         []float Up = fast_matmul_flat_opt(A, fup, seq_len, hidden, 4864)
         []float Gated = []float{cap: seq_len * 4864}
         int ii = 0
-        while ii < seq_len {
+        for ii < seq_len {
             int jj = 0
-            while jj < 4864 {
+            for jj < 4864 {
                 int pos = ii * 4864 + jj
                 Gated[pos] = Up[pos] * fast_gelu(Gate[pos])
                 jj = jj + 1
@@ -299,7 +299,7 @@ func transformer_forward([][]float embeddings) [][]float {
         }
         []float FfnOut = fast_matmul_flat_opt(Gated, fdown, seq_len, 4864, hidden)
         int kk = 0
-        while kk < seq_len * hidden {
+        for kk < seq_len * hidden {
             A[kk] = A[kk] + FfnOut[kk]
             kk = kk + 1
         }
@@ -311,10 +311,10 @@ func transformer_forward([][]float embeddings) [][]float {
     print("[TRANSFORMER INFERENCE END] total_ops=" + int_to_string(total_ops / 1000000000) + "B\n\n")
     [][]float result = [][]float{cap: seq_len}
     int r = 0
-    while r < seq_len {
+    for r < seq_len {
         []float row = []float{cap: hidden}
         int c = 0
-        while c < hidden {
+        for c < hidden {
             row.push(A[r * hidden + c])
             c = c + 1
         }

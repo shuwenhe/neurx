@@ -139,7 +139,7 @@ func moe_1t_assign_shard_partition(
     }
     []int assigned_shards = make([]int, shards_per_dp)
     int i = 0
-    while i < shards_per_dp {
+    for i < shards_per_dp {
         assigned_shards[i] = start_shard + i
         i = i + 1
     }
@@ -152,7 +152,7 @@ func moe_1t_validate_tokens(
 ) int {
     int errors = 0
     int i = 0
-    while i < len(tokens) {
+    for i < len(tokens) {
         if tokens[i] < 0 || tokens[i] >= vocab_size {
             errors = errors + 1
         }
@@ -168,7 +168,7 @@ func moe_1t_dedup_tokens(
     int write_idx = 0
     int i = 0
     int consecutive_same = 1
-    while i < len(tokens) {
+    for i < len(tokens) {
         if i > 0 && tokens[i] == tokens[i-1] {
             consecutive_same = consecutive_same + 1
         } else {
@@ -182,7 +182,7 @@ func moe_1t_dedup_tokens(
     }
     []int result = make([]int, write_idx)
     int j = 0
-    while j < write_idx {
+    for j < write_idx {
         result[j] = tokens[j]
         j = j + 1
     }
@@ -195,7 +195,7 @@ func moe_1t_compute_importance_weights(
 ) float {
     float avg_loss = 0.0
     int i = 0
-    while i < len(per_token_loss) {
+    for i < len(per_token_loss) {
         avg_loss = avg_loss + per_token_loss[i]
         i = i + 1
     }
@@ -220,7 +220,7 @@ func moe_1t_prefetch_next_batch(
     int seq_len = loader.seq_len
     []int token_ids = make([]int, batch_size)
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         token_ids[i] = i % 128000
         i = i + 1
     }
@@ -263,7 +263,7 @@ func moe_1t_assemble_context_window(
         num_windows = 1
     }
     int w = 0
-    while w <= num_windows {
+    for w <= num_windows {
         int start = w * stride
         int end = start + window_len
         if end > len(token_stream) {
@@ -272,7 +272,7 @@ func moe_1t_assemble_context_window(
         []int window = make([]int, end - start)
         int i = start
         int j = 0
-        while i < end {
+        for i < end {
             window[j] = token_stream[i]
             i = i + 1
             j = j + 1
@@ -325,7 +325,7 @@ func int_to_string(int n) string {
         val = -val
     }
     string result = ""
-    while val > 0 {
+    for val > 0 {
         int digit = val % 10
         result = chr(digit + 48) + result
         val = val / 10

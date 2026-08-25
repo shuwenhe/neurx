@@ -22,7 +22,7 @@ func int_to_string(int value) string {
     if current < 0 {
         current = 0 - current
     }
-    while current > 0 {
+    for current > 0 {
         int digit = current - (current / 10) * 10
         if digit == 0 { result = "0" + result }
         else if digit == 1 { result = "1" + result }
@@ -80,10 +80,10 @@ func contains_substring(string haystack, string needle) bool {
         return false
     }
     int i = 0
-    while i <= len(haystack) - len(needle) {
+    for i <= len(haystack) - len(needle) {
         bool matches = true
         int j = 0
-        while j < len(needle) {
+        for j < len(needle) {
             if haystack[i + j] != needle[j] {
                 matches = false
             }
@@ -101,7 +101,7 @@ func parse_int_or_default(string s, int default_val) int {
     }
     int result = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         string ch = __host_slice(s, i, i + 1)
         if ch[0] >= 48 && ch[0] <= 57 {
             result = result * 10 + (ch[0] - 48)
@@ -146,7 +146,7 @@ func extract_json_field(string json, string field_name) string {
     int key_idx = 0
     bool found = false
     int i = 0
-    while i < len(json) - len(search_key) {
+    for i < len(json) - len(search_key) {
         if __host_slice(json, i, i + len(search_key)) == search_key {
             found = true
             key_idx = i + len(search_key)
@@ -157,7 +157,7 @@ func extract_json_field(string json, string field_name) string {
     if !found {
         return ""
     }
-    while key_idx < len(json) && (json[key_idx] == 32 || json[key_idx] == 9) {
+    for key_idx < len(json) && (json[key_idx] == 32 || json[key_idx] == 9) {
         key_idx = key_idx + 1
     }
     if key_idx >= len(json) {
@@ -166,14 +166,14 @@ func extract_json_field(string json, string field_name) string {
     if json[key_idx] == 34 {
         key_idx = key_idx + 1
         string result = ""
-        while key_idx < len(json) && json[key_idx] != 34 {
+        for key_idx < len(json) && json[key_idx] != 34 {
             result = result + string(json[key_idx])
             key_idx = key_idx + 1
         }
         return result
     } else {
         string result = ""
-        while key_idx < len(json) && json[key_idx] != 44 && json[key_idx] != 125 {
+        for key_idx < len(json) && json[key_idx] != 44 && json[key_idx] != 125 {
             result = result + string(json[key_idx])
             key_idx = key_idx + 1
         }
@@ -185,7 +185,7 @@ func generate_response_for_prompt(string prompt) string {
     string first_word = "unknown"
     if len(prompt) > 0 {
         int space_idx = 0
-        while space_idx < len(prompt) && prompt[space_idx] != 32 {
+        for space_idx < len(prompt) && prompt[space_idx] != 32 {
             space_idx = space_idx + 1
         }
         first_word = __host_slice(prompt, 0, space_idx)
@@ -294,7 +294,7 @@ func main() {
     print("✓ Backend ready file: " + ready_file + "\n\n")
     int consecutive_errors = 0
     int max_consecutive_errors = 10
-    while true {
+    for true {
         int client_fd = __sys_accept(listener_fd)
         if client_fd < 0 {
             consecutive_errors = consecutive_errors + 1
@@ -361,7 +361,7 @@ func main() {
     print("✓ Backend ready file: " + ready_file + "\n\n")
     int consecutive_errors = 0
     int max_consecutive_errors = 10
-    while true {
+    for true {
         int client_fd = __sys_accept(listener_fd)
         if client_fd < 0 {
             consecutive_errors = consecutive_errors + 1

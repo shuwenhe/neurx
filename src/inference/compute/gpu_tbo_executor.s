@@ -65,7 +65,7 @@ struct gpu_tbo_execution_result {
 func gpu_tbo_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -82,7 +82,7 @@ func new_gpu_tbo_executor(gpu_tbo_config config) gpu_tbo_executor_state {
 
 func gpu_tbo_find_operation(gpu_tbo_executor_state state, int operation_id) int {
     int i = 0
-    while i < state.operation_count {
+    for i < state.operation_count {
         if state.operation_ids[i] == operation_id { return i }
         i = i + 1
     }
@@ -125,7 +125,7 @@ func gpu_tbo_backend_available(gpu_tbo_executor_state state, int operation_type)
 func gpu_tbo_next_ready(gpu_tbo_executor_state state) int {
     int selected = 0 - 1
     int i = 0
-    while i < state.operation_count {
+    for i < state.operation_count {
         if selected < 0 && state.statuses[i] == gpu_exec_pending() && gpu_tbo_dependency_ready(state, state.dependency_ids[i]) { selected = i }
         i = i + 1
     }

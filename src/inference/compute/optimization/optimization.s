@@ -92,7 +92,7 @@ func flash_attention_forward(
     output.output = alloc(float, seq_len * hidden_dim)
     int output_idx = 0
     int q_block_idx = 0
-    while q_block_idx * block_size < seq_len {
+    for q_block_idx * block_size < seq_len {
         int q_start = q_block_idx * block_size
         int q_end = q_start + block_size
         if q_end > seq_len {
@@ -100,7 +100,7 @@ func flash_attention_forward(
         }
         float* block_output = alloc(float, (q_end - q_start) * hidden_dim)
         int kv_block_idx = 0
-        while kv_block_idx * block_size < seq_len {
+        for kv_block_idx * block_size < seq_len {
             int kv_start = kv_block_idx * block_size
             int kv_end = kv_start + block_size
             if kv_end > seq_len {
@@ -117,7 +117,7 @@ func flash_attention_forward(
             kv_block_idx = kv_block_idx + 1
         }
         int i = 0
-        while i < (q_end - q_start) * hidden_dim {
+        for i < (q_end - q_start) * hidden_dim {
             output.output[output_idx + i] = block_output[i]
             i = i + 1
         }
@@ -141,16 +141,16 @@ func compute_block_attention(
     int attention_size = q_block_size * kv_block_size * num_heads
     float* attention = alloc(float, attention_size)
     int head_idx = 0
-    while head_idx < num_heads {
+    for head_idx < num_heads {
         int q_offset = q_start * head_dim + head_idx * head_dim
         int k_offset = kv_start * head_dim + head_idx * head_dim
         int i = 0
-        while i < q_block_size {
+        for i < q_block_size {
             int j = 0
-            while j < kv_block_size {
+            for j < kv_block_size {
                 float score = 0.0
                 int k = 0
-                while k < head_dim {
+                for k < head_dim {
                     float q_val = query[q_offset + i * head_dim + k]
                     float k_val = key[k_offset + j * head_dim + k]
                     score = score + q_val * k_val
@@ -191,10 +191,10 @@ func update_kv_cache(kvcache cache, float* new_keys, float* new_values, int toke
         return
     }
     int i = 0
-    while i < token_count {
+    for i < token_count {
         int offset = (cache.cache_size + i) * 1024
         int j = 0
-        while j < 1024 {
+        for j < 1024 {
             cache.key_cache[offset + j] = new_keys[i * 1024 + j]
             cache.value_cache[offset + j] = new_values[i * 1024 + j]
             j = j + 1
@@ -236,7 +236,7 @@ func schedule_next_batch(batch_scheduler scheduler) int {
           scheduler.pending_count > 0 {
         scheduler.active_requests[batch_count] = scheduler.pending_requests[0]
         int i = 0
-        while i < scheduler.pending_count - 1 {
+        for i < scheduler.pending_count - 1 {
             scheduler.pending_requests[i] = scheduler.pending_requests[i + 1]
             i = i + 1
         }
@@ -253,7 +253,7 @@ func run_inference_step(batch_scheduler scheduler, flash_attention_config attent
     }
     int batch_size = scheduler.active_count
     int req_idx = 0
-    while req_idx < batch_size {
+    for req_idx < batch_size {
         inference_request req = scheduler.active_requests[req_idx]
         int next_token = sample_token_from_logits(
             req.temperature,
@@ -277,7 +277,7 @@ func optimized_inference(inference_request req, flash_attention_config attention
     state.is_complete = false
     kvcache cache = init_kv_cache(4096, 768, 0)
     int step = 0
-    while step < req.max_tokens && !state.is_complete {
+    for step < req.max_tokens && !state.is_complete {
         int next_token = sample_token_from_logits(req.temperature, req.top_p, 0)
         if is_stop_token(next_token, req.stop_sequences, req.stop_count) {
             state.is_complete = true
@@ -307,7 +307,7 @@ func sqrt_f(float x) float {
     }
     float guess = x / 2.0
     int i = 0
-    while i < 10 {
+    for i < 10 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }
@@ -321,7 +321,7 @@ func get_time_ms() int {
 func strlen(string s) int {
     int count = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         count = count + 1
         i = i + 1
     }

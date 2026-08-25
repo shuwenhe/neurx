@@ -40,7 +40,7 @@ func demo_or_classifier_predict(demo_or_classifier_state state, []float input) i
     if limit > len(state.weight) {
         limit = len(state.weight)
     }
-    while i < limit {
+    for i < limit {
         score = score + input[i] * state.weight[i]
         i = i + 1
     }

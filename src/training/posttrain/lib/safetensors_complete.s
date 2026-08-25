@@ -33,7 +33,7 @@ func dtype_size(string dtype) int {
 func shape_numel([]int shape) int {
     int result = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         result = result * shape[i]
         i = i + 1
     }
@@ -57,7 +57,7 @@ func bytes_to_float(string data, int offset) float {
     float mant_value = 1.0 + float(mantissa) / 8388608.0
     int i = 0
     float result = mant_value
-    while i < int(exp_value) {
+    for i < int(exp_value) {
         result = result * 2.0
         i = i + 1
     }
@@ -72,7 +72,7 @@ func extract_json_header(string data) string {
     }
     string json = ""
     int i = 0
-    while i < header_size && 8 + i < len(data) {
+    for i < header_size && 8 + i < len(data) {
         json = json + string(data[8 + i])
         i = i + 1
     }
@@ -83,10 +83,10 @@ func find_json_key_value(string json, string key) string {
     string search_key = "\"" + key + "\":"
     int pos = 0
     int i = 0
-    while i < len(json) - len(search_key) {
+    for i < len(json) - len(search_key) {
         bool match = true
         int j = 0
-        while j < len(search_key) {
+        for j < len(search_key) {
             if byte(json[i + j]) != byte(search_key[j]) {
                 match = false
                 break
@@ -100,13 +100,13 @@ func find_json_key_value(string json, string key) string {
         i = i + 1
     }
     if pos == 0 { return "" }
-    while pos < len(json) && (byte(json[pos]) == byte(32) || byte(json[pos]) == byte(9)) {
+    for pos < len(json) && (byte(json[pos]) == byte(32) || byte(json[pos]) == byte(9)) {
         pos = pos + 1
     }
     string value = ""
     if byte(json[pos]) == byte(34) {
         pos = pos + 1
-        while pos < len(json) && byte(json[pos]) != byte(34) {
+        for pos < len(json) && byte(json[pos]) != byte(34) {
             value = value + string(json[pos])
             pos = pos + 1
         }
@@ -114,14 +114,14 @@ func find_json_key_value(string json, string key) string {
         int bracket_count = 1
         pos = pos + 1
         value = "["
-        while pos < len(json) && bracket_count > 0 {
+        for pos < len(json) && bracket_count > 0 {
             if byte(json[pos]) == byte(91) { bracket_count = bracket_count + 1 }
             if byte(json[pos]) == byte(93) { bracket_count = bracket_count - 1 }
             value = value + string(json[pos])
             pos = pos + 1
         }
     } else {
-        while pos < len(json) && byte(json[pos]) != byte(44) && byte(json[pos]) != byte(125) {
+        for pos < len(json) && byte(json[pos]) != byte(44) && byte(json[pos]) != byte(125) {
             value = value + string(json[pos])
             pos = pos + 1
         }
@@ -139,10 +139,10 @@ func parse_tensor_info(string json, string tensor_name) safe_tensor_info {
     string search = "\"" + tensor_name + "\""
     int pos = 0
     int i = 0
-    while i < len(json) - len(search) {
+    for i < len(json) - len(search) {
         bool match = true
         int j = 0
-        while j < len(search) {
+        for j < len(search) {
             if byte(json[i + j]) != byte(search[j]) {
                 match = false
                 break
@@ -158,7 +158,7 @@ func parse_tensor_info(string json, string tensor_name) safe_tensor_info {
     if pos == 0 { return info }
     string substr = ""
     int j = pos
-    while j < len(json) && j < pos + 200 {
+    for j < len(json) && j < pos + 200 {
         substr = substr + string(json[j])
         j = j + 1
     }
@@ -172,11 +172,11 @@ func parse_tensor_info(string json, string tensor_name) safe_tensor_info {
 func parse_safetensors_header(string json_header) map[string]safe_tensor_info {
     map[string]safe_tensor_info tensors
     int i = 0
-    while i < len(json_header) {
+    for i < len(json_header) {
         if byte(json_header[i]) == byte(34) {
             i = i + 1
             string name = ""
-            while i < len(json_header) && byte(json_header[i]) != byte(34) {
+            for i < len(json_header) && byte(json_header[i]) != byte(34) {
                 name = name + string(json_header[i])
                 i = i + 1
             }
@@ -217,7 +217,7 @@ func load_tensor_float(safe_tensor_file file, safe_tensor_info info) []float {
     int num_elements = shape_numel(info.shape)
     int element_size = dtype_size(info.dtype)
     int i = 0
-    while i < num_elements && file.data_offset + info.byte_start + i * element_size + element_size <= len(data) {
+    for i < num_elements && file.data_offset + info.byte_start + i * element_size + element_size <= len(data) {
         if info.dtype == "F32" {
             float val = bytes_to_float(data, file.data_offset + info.byte_start + i * 4)
             result = append(result, val)
@@ -238,10 +238,10 @@ func contains_tensor(safe_tensor_file file, string name) bool {
     string json = extract_json_header(data)
     string search = "\"" + name + "\""
     int i = 0
-    while i < len(json) - len(search) {
+    for i < len(json) - len(search) {
         bool match = true
         int j = 0
-        while j < len(search) {
+        for j < len(search) {
             if byte(json[i + j]) != byte(search[j]) {
                 match = false
                 break

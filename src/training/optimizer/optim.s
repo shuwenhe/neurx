@@ -53,7 +53,7 @@ struct rmsprop_optimizer {
 func ensure_size([]float values, int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         if i < len(values) {
             out[i] = values[i]
         } else {
@@ -80,7 +80,7 @@ func sqrt_approx(float x) float {
         y = x
     }
     int i = 0
-    while i < 32 {
+    for i < 32 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -133,7 +133,7 @@ func step_tensor(sgd_optimizer optimizer, tensor params, tensor grads) tensor {
     int n = len(params.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = params.data[i] - optimizer.lr * grads.data[i]
         i = i + 1
     }
@@ -157,7 +157,7 @@ func adam_step_state(adam_optimizer optimizer, tensor params, tensor grads) adam
         bias_c2 = 1.0
     }
     int i = 0
-    while i < n {
+    for i < n {
         float g = grads.data[i]
         m[i] = optimizer.beta1 * m[i] + (1.0 - optimizer.beta1) * g
         v[i] = optimizer.beta2 * v[i] + (1.0 - optimizer.beta2) * g * g
@@ -199,7 +199,7 @@ func rmsprop_step(rmsprop_optimizer optimizer, tensor params, tensor grads) tens
     []float avg = ensure_size(optimizer.avg, n)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float g = grads.data[i]
         avg[i] = optimizer.alpha * avg[i] + (1.0 - optimizer.alpha) * g * g
         float denom = sqrt_approx(avg[i]) + optimizer.eps
@@ -212,7 +212,7 @@ func rmsprop_step(rmsprop_optimizer optimizer, tensor params, tensor grads) tens
 func tensor_l2_norm(tensor value) float {
     float total_sq = 0.0
     int i = 0
-    while i < len(value.data) {
+    for i < len(value.data) {
         float v = value.data[i]
         total_sq = total_sq + v * v
         i = i + 1
@@ -227,7 +227,7 @@ func scale_tensor(tensor value, float scale) tensor {
     int n = len(value.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = value.data[i] * scale
         i = i + 1
     }
@@ -263,7 +263,7 @@ func adamw_step_state(adamw_optimizer optimizer, tensor params, tensor grads) ad
         bias_c2 = 1.0
     }
     int i = 0
-    while i < n {
+    for i < n {
         float g = grads.data[i]
         m[i] = optimizer.beta1 * m[i] + (1.0 - optimizer.beta1) * g
         v[i] = optimizer.beta2 * v[i] + (1.0 - optimizer.beta2) * g * g
@@ -295,9 +295,9 @@ func adamw_step_state(adamw_optimizer optimizer, tensor params, tensor grads) ad
 func clip_grad_norm([]tensor params, float max_norm, float eps) float {
     float total_sq = 0.0
     int p = 0
-    while p < len(params) {
+    for p < len(params) {
         int i = 0
-        while i < len(params[p].data) {
+        for i < len(params[p].data) {
             float g = params[p].data[i]
             total_sq = total_sq + g * g
             i = i + 1

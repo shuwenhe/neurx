@@ -34,7 +34,7 @@ func example_1_basic_lora_finetuning() {
     }
     []lora_trajectory trajectories = []lora_trajectory{}
     int i = 0
-    while i < 10 {
+    for i < 10 {
         []float input_ids = init_gaussian(cfg.seq_len * cfg.hidden_size, 0.1)
         []float targets = init_gaussian(cfg.seq_len * cfg.hidden_size, 0.1)
         lora_trajectory traj = lora_trajectory {
@@ -70,7 +70,7 @@ func example_2_rank_tradeoff() {
     base_cfg.total_steps = 1000
     []lora_trajectory trajectories = []lora_trajectory{}
     int i = 0
-    while i < 5 {
+    for i < 5 {
         []float input_ids = init_gaussian(base_cfg.seq_len * base_cfg.hidden_size, 0.1)
         []float targets = init_gaussian(base_cfg.seq_len * base_cfg.hidden_size, 0.1)
         lora_trajectory traj = lora_trajectory {
@@ -84,7 +84,7 @@ func example_2_rank_tradeoff() {
     println("| Rank | LoRA Params | Trainable % | Memory Saved % |")
     println("|------|-------------|------------|-----------------|")
     int rank_idx = 0
-    while rank_idx < len(ranks) {
+    for rank_idx < len(ranks) {
         int rank = ranks[rank_idx]
         lora_config cfg = base_cfg
         cfg.rank = rank
@@ -135,7 +135,7 @@ func example_3_multilayer_lora() {
     println("✓ Trainable ratio: " + fmt_float(stats.trainable_ratio, 2) + "%")
     println("\nTraining progress:")
     int step = 0
-    while step < 100 {
+    for step < 100 {
         []float input_ids = init_gaussian(cfg.seq_len * cfg.hidden_size, 0.1)
         []float targets = init_gaussian(cfg.seq_len * cfg.hidden_size, 0.1)
         state = lora_training_step(state, input_ids, targets)
@@ -159,7 +159,7 @@ func example_4_task_specific_lora() {
     println("| task | Rank | Learning Rate | Memory Efficiency |")
     println("|------|------|---------------|-------------------|")
     int i = 0
-    while i < len(tasks) {
+    for i < len(tasks) {
         string task = tasks[i]
         int rank = task_ranks[i]
         float lr = task_lrs[i]
@@ -279,7 +279,7 @@ func int_to_str(int n) string {
         result = "-"
         num = -num
     }
-    while num > 0 {
+    for num > 0 {
         int digit = num % 10
         string digit_str = ""
         if digit == 0 { digit_str = "0" }
@@ -309,7 +309,7 @@ func fmt_float(float val, float precision) string {
     if precision > 0.0 {
         result = result + "."
         int i = 0
-        while i < 4 && precision > 0.0 {
+        for i < 4 && precision > 0.0 {
             frac_part = frac_part * 10.0
             int digit = (frac_part as int)
             if digit == 0 { result = result + "0" }

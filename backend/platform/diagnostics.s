@@ -76,7 +76,7 @@ func doctor(bool require_cuda, bool require_mps) []check_result {
 func format_doctor_report([]check_result results) string {
     string out = "neurx doctor report"
     int i = 0
-    while i < len(results) {
+    for i < len(results) {
         check_result item = results[i]
         string status = "FAIL"
         if item.passed {

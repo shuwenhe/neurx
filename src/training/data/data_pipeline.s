@@ -164,11 +164,11 @@ func estimate_text_tokens(string text, int fallback) int {
 
 func data_pipeline_trim(string s) string {
     int left = 0
-    while left < len(s) && (s[left] == 32 || s[left] == 9 || s[left] == 10 || s[left] == 13) {
+    for left < len(s) && (s[left] == 32 || s[left] == 9 || s[left] == 10 || s[left] == 13) {
         left = left + 1
     }
     int right = len(s) - 1
-    while right >= left && (s[right] == 32 || s[right] == 9 || s[right] == 10 || s[right] == 13) {
+    for right >= left && (s[right] == 32 || s[right] == 9 || s[right] == 10 || s[right] == 13) {
         right = right - 1
     }
     if right < left {
@@ -176,7 +176,7 @@ func data_pipeline_trim(string s) string {
     }
     string out = ""
     int i = left
-    while i <= right {
+    for i <= right {
         out = out + chr(s[i])
         i = i + 1
     }
@@ -187,7 +187,7 @@ func data_pipeline_split_lines(string text) []string {
     []string lines = []string{cap: 1}
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         if text[i] == 10 || text[i] == 13 {
             if len(current) > 0 {
                 lines.push(current)
@@ -209,9 +209,9 @@ func data_pipeline_find_substring(string text, string pattern) int {
         return 0
     }
     int i = 0
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
-        while j < len(pattern) && text[i + j] == pattern[j] {
+        for j < len(pattern) && text[i + j] == pattern[j] {
             j = j + 1
         }
         if j == len(pattern) {
@@ -232,14 +232,14 @@ func data_pipeline_extract_jsonl_text(string line) string {
         return data_pipeline_trim(text)
     }
     int colon_idx = key_idx
-    while colon_idx < len(text) && text[colon_idx] != 58 {
+    for colon_idx < len(text) && text[colon_idx] != 58 {
         colon_idx = colon_idx + 1
     }
     if colon_idx >= len(text) {
         return data_pipeline_trim(text)
     }
     int i = colon_idx + 1
-    while i < len(text) && (text[i] == 32 || text[i] == 9) {
+    for i < len(text) && (text[i] == 32 || text[i] == 9) {
         i = i + 1
     }
     if i >= len(text) {
@@ -248,7 +248,7 @@ func data_pipeline_extract_jsonl_text(string line) string {
     string value = ""
     if text[i] == 34 {
         i = i + 1
-        while i < len(text) {
+        for i < len(text) {
             if text[i] == 34 {
                 break
             }
@@ -260,7 +260,7 @@ func data_pipeline_extract_jsonl_text(string line) string {
         }
         return data_pipeline_trim(value)
     }
-    while i < len(text) && text[i] != 44 && text[i] != 125 {
+    for i < len(text) && text[i] != 44 && text[i] != 125 {
         value = value + chr(text[i])
         i = i + 1
     }
@@ -297,23 +297,23 @@ func data_pipeline_extract_json_manifest_paths(string text, string key) []string
     []string lines = data_pipeline_split_lines(text)
     string needle = "\"" + key + "\""
     int i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line = data_pipeline_trim(lines[i])
         int key_idx = data_pipeline_find_substring(line, needle)
         if key_idx >= 0 {
             int colon_idx = key_idx + len(needle)
-            while colon_idx < len(line) && line[colon_idx] != 58 {
+            for colon_idx < len(line) && line[colon_idx] != 58 {
                 colon_idx = colon_idx + 1
             }
             if colon_idx < len(line) {
                 int value_start = colon_idx + 1
-                while value_start < len(line) && (line[value_start] == 32 || line[value_start] == 9) {
+                for value_start < len(line) && (line[value_start] == 32 || line[value_start] == 9) {
                     value_start = value_start + 1
                 }
                 if value_start < len(line) && line[value_start] == 34 {
                     value_start = value_start + 1
                     string value = ""
-                    while value_start < len(line) && line[value_start] != 34 {
+                    for value_start < len(line) && line[value_start] != 34 {
                         value = value + chr(line[value_start])
                         value_start = value_start + 1
                     }
@@ -333,23 +333,23 @@ func data_pipeline_extract_json_manifest_value(string text, string key, string f
     []string lines = data_pipeline_split_lines(text)
     string needle = "\"" + key + "\""
     int i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line = data_pipeline_trim(lines[i])
         int key_idx = data_pipeline_find_substring(/home/shuwen/shuwen/train/neurxline, needle)
         if key_idx >= 0 {
             int colon_idx = key_idx + len(needle)
-            while colon_idx < len(line) && line[colon_idx] != 58 {
+            for colon_idx < len(line) && line[colon_idx] != 58 {
                 colon_idx = colon_idx + 1
             }
             if colon_idx < len(line) {
                 int value_start = colon_idx + 1
-                while value_start < len(line) && (line[value_start] == 32 || line[value_start] == 9) {
+                for value_start < len(line) && (line[value_start] == 32 || line[value_start] == 9) {
                     value_start = value_start + 1
                 }
                 if value_start < len(line) && line[value_start] == 34 {
                     value_start = value_start + 1
                     string value = ""
-                    while value_start < len(line) && line[value_start] != 34 {
+                    for value_start < len(line) && line[value_start] != 34 {
                         value = value + chr(line[value_start])
                         value_start = value_start + 1
                     }
@@ -414,7 +414,7 @@ func data_pipeline_parse_directory_shards(string dir_path) []string {
     []string paths = []string{cap: 8}
     string current = ""
     int i = 0
-    while i < len(raw) {
+    for i < len(raw) {
         if raw[i] == 10 || raw[i] == 13 {
             if len(current) > 0 {
                 paths.push(current)
@@ -446,13 +446,13 @@ func data_pipeline_positive_mod(int value, int modulus) int {
 func data_pipeline_shuffle_ints([]int values, int seed) []int {
     []int out = []int{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }
     int j = len(out) - 1
     int state = seed
-    while j > 0 {
+    for j > 0 {
         state = state * 1664525 + 1013904223
         int k = data_pipeline_positive_mod(state, j + 1)
         int tmp = out[j]
@@ -469,7 +469,7 @@ func data_pipeline_build_shard_order(int shard_count, int seed, int epoch) []int
     }
     []int order = []int{cap: shard_count}
     int i = 0
-    while i < shard_count {
+    for i < shard_count {
         order[i] = i
         i = i + 1
     }
@@ -497,7 +497,7 @@ func data_pipeline_jsonl_to_documents(string text) []string {
     []string lines = data_pipeline_split_lines(text)
     []string docs = []string{cap: len(lines)}
     int i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string doc = data_pipeline_extract_jsonl_text(lines[i])
         doc = data_pipeline_trim(doc)
         if doc != "" {
@@ -511,11 +511,11 @@ func data_pipeline_jsonl_to_documents(string text) []string {
 func data_pipeline_documents_to_tokens([]string documents) []int {
     []int tokens = []int{cap: 0}
     int i = 0
-    while i < len(documents) {
+    for i < len(documents) {
         string doc = data_pipeline_trim(documents[i])
         if doc != "" {
             int j = 0
-            while j < len(doc) {
+            for j < len(doc) {
                 tokens.push(doc[j])
                 j = j + 1
             }
@@ -648,7 +648,7 @@ func get_next_batch_with_state(data_pipeline pipeline) data_pipeline_batch_resul
     int target_tokens = result.pipeline.pipeline_cfg.batch_size * seq_len
     int token_idx = result.pipeline.shard_token_cursor
     int seq_id = 0
-    while token_idx < len(result.pipeline.active_token_stream) && len(sequences) < result.pipeline.pipeline_cfg.batch_size {
+    for token_idx < len(result.pipeline.active_token_stream) && len(sequences) < result.pipeline.pipeline_cfg.batch_size {
         int remaining = len(result.pipeline.active_token_stream) - token_idx
         int current_len = seq_len
         if remaining < current_len {
@@ -741,7 +741,7 @@ func get_pipeline_stats(data_pipeline pipeline) data_pipeline_stats {
 func warmup_pipeline(data_pipeline pipeline, int num_batches) data_pipeline {
     int i = 0
     data_pipeline current = pipeline
-    while i < num_batches {
+    for i < num_batches {
         data_pipeline_batch_result batch_result = get_next_batch_with_state(current)
         current = batch_result.pipeline
         i = i + 1
@@ -773,7 +773,7 @@ func verify_data_integrity(data_pipeline pipeline) bool {
         return false
     }
     int i = 0
-    while i < len(pipeline.shard_paths) {
+    for i < len(pipeline.shard_paths) {
         if !runtime_file_exists(pipeline.shard_paths[i]) {
             return false
         }

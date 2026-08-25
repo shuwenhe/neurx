@@ -150,10 +150,10 @@ func initialize_model(training_system_config cfg) model_state {
     int total_params = 0
     [][]float embeddings = []
     int i = 0
-    while i < cfg.vocab_size {
+    for i < cfg.vocab_size {
         []float emb = []
         int j = 0
-        while j < cfg.hidden_dim {
+        for j < cfg.hidden_dim {
             emb = append(emb, randn() * 0.02)
             j = j + 1
         }
@@ -163,7 +163,7 @@ func initialize_model(training_system_config cfg) model_state {
     total_params = total_params + cfg.vocab_size * cfg.hidden_dim
     []layer_weights layers = []
     int layer_idx = 0
-    while layer_idx < cfg.num_layers {
+    for layer_idx < cfg.num_layers {
         layer_weights layer = initialize_layer_weights(cfg)
         layers = append(layers, layer)
         total_params = total_params + count_layer_params(cfg)
@@ -171,7 +171,7 @@ func initialize_model(training_system_config cfg) model_state {
     }
     []float output_weights = []
     i = 0
-    while i < cfg.hidden_dim * cfg.vocab_size {
+    for i < cfg.hidden_dim * cfg.vocab_size {
         output_weights = append(output_weights, randn() * 0.02)
         i = i + 1
     }
@@ -188,7 +188,7 @@ func initialize_layer_weights(training_system_config cfg) layer_weights {
     int qkv_size = cfg.hidden_dim * cfg.hidden_dim * 3
     [][]float attention_qkv = []
     int i = 0
-    while i < qkv_size {
+    for i < qkv_size {
         []float row = []
         row = append(row, randn() * 0.02)
         attention_qkv = append(attention_qkv, row)
@@ -197,7 +197,7 @@ func initialize_layer_weights(training_system_config cfg) layer_weights {
     int attn_out_size = cfg.hidden_dim * cfg.hidden_dim
     [][]float attention_output = []
     i = 0
-    while i < attn_out_size {
+    for i < attn_out_size {
         []float row = []
         row = append(row, randn() * 0.02)
         attention_output = append(attention_output, row)
@@ -210,7 +210,7 @@ func initialize_layer_weights(training_system_config cfg) layer_weights {
     []float layernorm_1 = []
     []float layernorm_2 = []
     i = 0
-    while i < cfg.hidden_dim {
+    for i < cfg.hidden_dim {
         layernorm_1 = append(layernorm_1, 1.0)
         layernorm_2 = append(layernorm_2, 1.0)
         i = i + 1
@@ -229,7 +229,7 @@ func initialize_layer_weights(training_system_config cfg) layer_weights {
 func create_weight_matrix(int size) [][]float {
     [][]float matrix = []
     int i = 0
-    while i < size {
+    for i < size {
         []float row = []
         row = append(row, randn() * 0.02)
         matrix = append(matrix, row)
@@ -254,7 +254,7 @@ func initialize_optimizer(
     [][]float param_momentum = []
     [][]float param_variance = []
     int i = 0
-    while i < total_params {
+    for i < total_params {
         []float m = []
         []float v = []
         m = append(m, 0.0)
@@ -282,13 +282,13 @@ func forward_pass(
     int seq_len = len(input_ids[0])
     [][]float hidden = []
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         []float h = []
         int t = 0
-        while t < seq_len {
+        for t < seq_len {
             int token_id = input_ids[b][t]
             int d = 0
-            while d < cfg.hidden_dim {
+            for d < cfg.hidden_dim {
                 h = append(h, model.embeddings[token_id][d])
                 d = d + 1
             }
@@ -298,7 +298,7 @@ func forward_pass(
         b = b + 1
     }
     int layer_idx = 0
-    while layer_idx < len(model.layers) {
+    for layer_idx < len(model.layers) {
         hidden = layer_forward(hidden, model.layers[layer_idx], cfg)
         layer_idx = layer_idx + 1
     }
@@ -342,10 +342,10 @@ func ffn_forward(
 func add_residual([][]float x, [][]float y) [][]float {
     [][]float result = []
     int i = 0
-    while i < len(x) {
+    for i < len(x) {
         []float row = []
         int j = 0
-        while j < len(x[i]) {
+        for j < len(x[i]) {
             row = append(row, x[i][j] + y[i][j])
             j = j + 1
         }
@@ -361,10 +361,10 @@ func compute_logits(
     training_system_config cfg) [][]float {
     [][]float logits = []
     int i = 0
-    while i < len(hidden) {
+    for i < len(hidden) {
         []float logit_row = []
         int v = 0
-        while v < cfg.vocab_size {
+        for v < cfg.vocab_size {
             logit_row = append(logit_row, 0.0)
             v = v + 1
         }
@@ -380,9 +380,9 @@ func compute_loss(
     float total_loss = 0.0
     int count = 0
     int b = 0
-    while b < len(logits) {
+    for b < len(logits) {
         int t = 0
-        while t < len(logits[b]) {
+        for t < len(logits[b]) {
             int label = labels[b][t]
             float logit = logits[b][label]
             float loss = -log_approx(softmax_single(logits[b], label))
@@ -398,7 +398,7 @@ func compute_loss(
 func softmax_single([]float logits, int idx) float {
     float max_logit = logits[0]
     int i = 1
-    while i < len(logits) {
+    for i < len(logits) {
         if logits[i] > max_logit {
             max_logit = logits[i]
         }
@@ -406,7 +406,7 @@ func softmax_single([]float logits, int idx) float {
     }
     float sum_exp = 0.0
     i = 0
-    while i < len(logits) {
+    for i < len(logits) {
         sum_exp = sum_exp + exp_approx(logits[i] - max_logit)
         i = i + 1
     }
@@ -419,7 +419,7 @@ func backward_pass(
     training_system_config cfg) [][]float {
     [][]float gradients = []
     int i = 0
-    while i < model.total_params {
+    for i < model.total_params {
         []float g = []
         g = append(g, randn() * 0.01)
         gradients = append(gradients, g)
@@ -438,7 +438,7 @@ func optimizer_step(
     float bias_correction_1 = 1.0 - pow_approx(optimizer.beta1, float(optimizer.step))
     float bias_correction_2 = 1.0 - pow_approx(optimizer.beta2, float(optimizer.step))
     int param_idx = 0
-    while param_idx < len(gradients) {
+    for param_idx < len(gradients) {
         float grad = gradients[param_idx][0]
         optimizer.param_momentum[param_idx][0] =
             optimizer.beta1 * optimizer.param_momentum[param_idx][0] +
@@ -468,7 +468,7 @@ func get_learning_rate(int step, training_system_config cfg) float {
 func clip_gradients([][]float gradients, float max_norm) float {
     float total_norm = 0.0
     int i = 0
-    while i < len(gradients) {
+    for i < len(gradients) {
         float g = gradients[i][0]
         total_norm = total_norm + g * g
         i = i + 1
@@ -477,7 +477,7 @@ func clip_gradients([][]float gradients, float max_norm) float {
     if total_norm > max_norm {
         float clip_coef = max_norm / total_norm
         i = 0
-        while i < len(gradients) {
+        for i < len(gradients) {
             gradients[i][0] = gradients[i][0] * clip_coef
             i = i + 1
         }
@@ -545,7 +545,7 @@ func ddp_all_reduce_gradients(
         return gradients
     }
     int i = 0
-    while i < len(gradients) {
+    for i < len(gradients) {
         gradients[i][0] = gradients[i][0] / float(ddp.world_size)
         i = i + 1
     }
@@ -575,7 +575,7 @@ func zero_reduce_scatter_gradients(
     int end_idx = start_idx + shard_size
     [][]float sharded_grads = []
     int i = start_idx
-    while i < end_idx {
+    for i < end_idx {
         sharded_grads = append(sharded_grads, gradients[i])
         i = i + 1
     }
@@ -621,13 +621,13 @@ func training_loop(training_system_config cfg) {
     println("Starting training...")
     println("")
     int start_time = get_time_ms()
-    while state.global_step < cfg.max_steps && state.is_training {
+    for state.global_step < cfg.max_steps && state.is_training {
         int step_start = get_time_ms()
         [][]int input_batch = generate_dummy_batch(cfg)
         [][]int label_batch = generate_dummy_labels(cfg)
         float accumulated_loss = 0.0
         int micro_idx = 0
-        while micro_idx < cfg.gradient_accumulation_steps {
+        for micro_idx < cfg.gradient_accumulation_steps {
             forward_result fwd = forward_pass(state.model, input_batch, cfg)
             float loss = compute_loss(fwd.logits, label_batch)
             accumulated_loss = accumulated_loss + loss
@@ -683,10 +683,10 @@ func training_loop(training_system_config cfg) {
 func generate_dummy_batch(training_system_config cfg) [][]int {
     [][]int batch = []
     int b = 0
-    while b < cfg.batch_size {
+    for b < cfg.batch_size {
         []int seq = []
         int t = 0
-        while t < cfg.max_seq_len {
+        for t < cfg.max_seq_len {
             seq = append(seq, rand_int(cfg.vocab_size))
             t = t + 1
         }
@@ -714,7 +714,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / float(i)
         result = result + term
         i = i + 1
@@ -729,7 +729,7 @@ func log_approx(float x) float {
     float result = 0.0
     float term = y
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         result = result + term / float(i)
         term = term * y
         i = i + 1
@@ -741,7 +741,7 @@ func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float guess = x / 2.0
     int i = 0
-    while i < 10 {
+    for i < 10 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }
@@ -756,7 +756,7 @@ func cos_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = -term * x * x / float(2 * i * (2 * i - 1))
         result = result + term
         i = i + 1

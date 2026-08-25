@@ -27,10 +27,10 @@ func example_create_basic_adapter() result[(), string] {
 
     lora_a := vec[vec[float]]()
     i := 0
-    while i < 768 {
+    for i < 768 {
         row := vec[float]()
         j := 0
-        while j < 8 {
+        for j < 8 {
             row.push(0.01)
             j = j + 1
         }
@@ -40,10 +40,10 @@ func example_create_basic_adapter() result[(), string] {
 
     lora_b := vec[vec[float]]()
     i := 0
-    while i < 8 {
+    for i < 8 {
         row := vec[float]()
         j := 0
-        while j < 768 {
+        for j < 768 {
             row.push(0.0)
             j = j + 1
         }
@@ -76,10 +76,10 @@ func example_apply_lora() result[(), string] {
 
     lora_a := vec[vec[float]]()
     i := 0
-    while i < 64 {
+    for i < 64 {
         row := vec[float]()
         j := 0
-        while j < 4 {
+        for j < 4 {
             row.push(0.01 * j as float)
             j = j + 1
         }
@@ -89,10 +89,10 @@ func example_apply_lora() result[(), string] {
 
     lora_b := vec[vec[float]]()
     i := 0
-    while i < 4 {
+    for i < 4 {
         row := vec[float]()
         j := 0
-        while j < 32 {
+        for j < 32 {
             row.push(0.02)
             j = j + 1
         }
@@ -104,7 +104,7 @@ func example_apply_lora() result[(), string] {
 
     input := vec[float]()
     i := 0
-    while i < 64 {
+    for i < 64 {
         input.push(1.0)
         i = i + 1
     }
@@ -166,10 +166,10 @@ func example_batch_apply_lora() result[(), string] {
 
     lora_a := vec[vec[float]]()
     i := 0
-    while i < 32 {
+    for i < 32 {
         row := vec[float]()
         j := 0
-        while j < 4 {
+        for j < 4 {
             row.push(0.01)
             j = j + 1
         }
@@ -179,10 +179,10 @@ func example_batch_apply_lora() result[(), string] {
 
     lora_b := vec[vec[float]]()
     i := 0
-    while i < 4 {
+    for i < 4 {
         row := vec[float]()
         j := 0
-        while j < 16 {
+        for j < 16 {
             row.push(0.02)
             j = j + 1
         }
@@ -197,10 +197,10 @@ func example_batch_apply_lora() result[(), string] {
     seq_len := 32
 
     b := 0
-    while b < batch_size {
+    for b < batch_size {
         input := vec[float]()
         s := 0
-        while s < seq_len {
+        for s < seq_len {
             input.push(1.0)
             s = s + 1
         }

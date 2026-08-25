@@ -66,7 +66,7 @@ func muon_set_learning_rate(muon_optimizer opt, float new_lr) muon_optimizer {
 func compute_vector_norm([]float v, int size) float {
     float sum_sq = 0.0
     i := 0
-    while i < size {
+    for i < size {
         val := v[i]
         sum_sq = sum_sq + (val * val)
         i = i + 1
@@ -82,10 +82,10 @@ func whiten_gradient(
     float epsilon
 ) {
     i := 0
-    while i < param_size {
+    for i < param_size {
         j := 0
         cov_sum := 0.0
-        while j < param_size {
+        for j < param_size {
             cov_sum = cov_sum + grad_cov[i][j] * grad[j]
             j = j + 1
         }
@@ -108,9 +108,9 @@ func muon_update_param(
     grad_norm := compute_vector_norm(gradients, param_size)
     epsilon := 1e-8
     i := 0
-    while i < param_size {
+    for i < param_size {
         j := 0
-        while j < param_size {
+        for j < param_size {
             grad_outer := gradients[i] * gradients[j]
             state.grad_cov[i][j] = beta * state.grad_cov[i][j] + (1.0 - beta) * grad_outer
             j = j + 1
@@ -119,7 +119,7 @@ func muon_update_param(
     }
     whiten_gradient(gradients, state.grad_cov, state.whitened_grad, param_size, epsilon)
     i = 0
-    while i < param_size {
+    for i < param_size {
         g := state.whitened_grad[i]
         state.momentum[i] = beta * state.momentum[i] + (1.0 - beta) * g
         param_update := state.momentum[i] + c * weight_decay * state.param[i]
@@ -138,7 +138,7 @@ func muon_step(
     opt.current_lr = muon_compute_lr(opt)
     opt.global_step = opt.global_step + 1
     p := 0
-    while p < num_params {
+    for p < num_params {
         opt.param_states[p] = muon_update_param(
             opt.param_states[p],
             all_gradients[p],

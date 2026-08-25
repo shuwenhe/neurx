@@ -23,7 +23,7 @@ func tensor_buffer_new(int capacity) tensor_buffer {
 
 func tensor_buffer_write_bytes(tensor_buffer buf, []byte data) () {
     int i = 0
-    while i < len(data) {
+    for i < len(data) {
         if buf.pos >= len(buf.buffer) {
             break
         }
@@ -37,7 +37,7 @@ func tensor_buffer_write_u64_le(tensor_buffer buf, int value) () {
     []byte bytes = []byte{cap: 8}
     int v = value
     int i = 0
-    while i < 8 {
+    for i < 8 {
         int idx = i
         int remainder = v - (v / 256) * 256
         bytes[idx] = byte(remainder)
@@ -68,7 +68,7 @@ func tensor_buffer_write_f32_le(tensor_buffer buf, float value) () {
 
 func tensor_buffer_write_string(tensor_buffer buf, string s) () {
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         if buf.pos >= len(buf.buffer) {
             break
         }
@@ -85,7 +85,7 @@ func tensor_buffer_len(tensor_buffer buf) int {
 func tensor_buffer_slice(tensor_buffer buf) []byte {
     []byte result = []byte{cap: buf.pos}
     int i = 0
-    while i < buf.pos {
+    for i < buf.pos {
         result[i] = buf.buffer[i]
         i = i + 1
     }
@@ -103,11 +103,11 @@ func float_to_bits(float f) int {
     }
     int exp = 127
     float mantissa_f = abs_f
-    while mantissa_f >= 2.0 {
+    for mantissa_f >= 2.0 {
         mantissa_f = mantissa_f / 2.0
         exp = exp + 1
     }
-    while mantissa_f < 1.0 && exp > 0 {
+    for mantissa_f < 1.0 && exp > 0 {
         mantissa_f = mantissa_f * 2.0
         exp = exp - 1
     }

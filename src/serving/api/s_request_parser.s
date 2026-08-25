@@ -91,7 +91,7 @@ func char_to_string(int ch) string {
         num = 0 - num
     }
 
-    while num > 0 {
+    for num > 0 {
         int digit = num % 10
         string digit_str = ""
 
@@ -122,12 +122,12 @@ func extract_json_value(string json_body, string key) string {
     int key_len = len(key)
     int json_len = len(json_body)
 
-    while i < json_len {
+    for i < json_len {
         if json_body[i] == 34 {
             int j = 0
             bool match = true
 
-            while j < key_len {
+            for j < key_len {
                 int check_pos = i + 1 + j
                 if check_pos >= json_len {
                     match = false
@@ -147,14 +147,14 @@ func extract_json_value(string json_body, string key) string {
                 if quote_pos < json_len && json_body[quote_pos] == 34 {
                     int colon_pos = quote_pos + 1
 
-                    while colon_pos < json_len && json_body[colon_pos] == 32 {
+                    for colon_pos < json_len && json_body[colon_pos] == 32 {
                         colon_pos = colon_pos + 1
                     }
 
                     if colon_pos < json_len && json_body[colon_pos] == 58 {
                         int val_pos = colon_pos + 1
 
-                        while val_pos < json_len && json_body[val_pos] == 32 {
+                        for val_pos < json_len && json_body[val_pos] == 32 {
                             val_pos = val_pos + 1
                         }
 
@@ -163,14 +163,14 @@ func extract_json_value(string json_body, string key) string {
                                 val_pos = val_pos + 1
                                 int end_pos = val_pos
 
-                                while end_pos < json_len && json_body[end_pos] != 34 {
+                                for end_pos < json_len && json_body[end_pos] != 34 {
                                     end_pos = end_pos + 1
                                 }
 
                                 string value = ""
                                 int idx = val_pos
 
-                                while idx < end_pos {
+                                for idx < end_pos {
                                     value = value + json_body[idx]
                                     idx = idx + 1
                                 }
@@ -180,7 +180,7 @@ func extract_json_value(string json_body, string key) string {
                             else if json_body[val_pos] >= 48 && json_body[val_pos] <= 57 {
                                 int num_end = val_pos
 
-                                while num_end < json_len {
+                                for num_end < json_len {
                                     int ch = json_body[num_end]
 
                                     if ch >= 48 && ch <= 57 {
@@ -197,7 +197,7 @@ func extract_json_value(string json_body, string key) string {
                                 string value = ""
                                 int idx = val_pos
 
-                                while idx < num_end {
+                                for idx < num_end {
                                     value = value + json_body[idx]
                                     idx = idx + 1
                                 }
@@ -220,7 +220,7 @@ func validate_json_braces(string json_body) bool {
     int i = 0
     int brace_count = 0
 
-    while i < len(json_body) {
+    for i < len(json_body) {
         int ch = json_body[i]
 
         if ch == 123 {

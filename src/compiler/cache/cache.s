@@ -43,7 +43,7 @@ func get_entry(compile_cache_state cache, int index) string {
 
 func cache_find_index(compile_cache_state cache, string key) int {
     int i = 0
-    while i < len(cache.keys) {
+    for i < len(cache.keys) {
         if get_key(cache, i) == key {
             return i
         }

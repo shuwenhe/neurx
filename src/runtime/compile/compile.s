@@ -31,7 +31,7 @@ struct compile_state {
 func join_strings([]string values) string {
     string out = ""
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if i > 0 {
             out = out + ","
         }
@@ -166,7 +166,7 @@ func compile_edge_count(compile_state state) int {
 
 func compile_has_node(compile_state state, string node) bool {
     int i = 0
-    while i < len(state.nodes) {
+    for i < len(state.nodes) {
         if get_compile_state_node(state, i) == node {
             return true
         }
@@ -177,7 +177,7 @@ func compile_has_node(compile_state state, string node) bool {
 
 func compile_has_edge(compile_state state, string edge) bool {
     int i = 0
-    while i < len(state.edges) {
+    for i < len(state.edges) {
         if get_compile_state_edge(state, i) == edge {
             return true
         }
@@ -188,7 +188,7 @@ func compile_has_edge(compile_state state, string edge) bool {
 
 func compile_has_pass(compile_state state, string pass) bool {
     int i = 0
-    while i < len(state.passes) {
+    for i < len(state.passes) {
         if get_compile_state_pass(state, i) == pass {
             return true
         }
@@ -199,7 +199,7 @@ func compile_has_pass(compile_state state, string pass) bool {
 
 func compile_has_cache_key(compile_state state, string key) bool {
     int i = 0
-    while i < len(state.cache_keys) {
+    for i < len(state.cache_keys) {
         if get_compile_state_cache_key(state, i) == key {
             return true
         }
@@ -251,12 +251,12 @@ func compile_add_node_with_io(compile_state state, string node, string op, []str
     ops.push(op)
     param_list.push(join_strings(params))
     int i = 0
-    while i < len(inputs) {
+    for i < len(inputs) {
         input_list.push(inputs[i])
         i = i + 1
     }
     i = 0
-    while i < len(outputs) {
+    for i < len(outputs) {
         output_list.push(outputs[i])
         i = i + 1
     }

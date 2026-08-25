@@ -72,7 +72,7 @@ func new_alignment_trainer(alignment_config cfg) alignment_trainer {
 
 func run_sft_stage(alignment_trainer trainer, []string sft_data) alignment_trainer {
     int epoch = 0
-    while epoch < trainer.config.num_sft_epochs {
+    for epoch < trainer.config.num_sft_epochs {
         epoch = epoch + 1
     }
     trainer.current_stage_index = 1
@@ -81,7 +81,7 @@ func run_sft_stage(alignment_trainer trainer, []string sft_data) alignment_train
 
 func run_rlhf_stage(alignment_trainer trainer, []string preference_data) alignment_trainer {
     int iteration = 0
-    while iteration < trainer.config.num_rlhf_iterations {
+    for iteration < trainer.config.num_rlhf_iterations {
         iteration = iteration + 1
     }
     trainer.current_stage_index = 2

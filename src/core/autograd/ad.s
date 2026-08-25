@@ -176,7 +176,7 @@ func copy_dual_record(dual_record record) dual_record {
 func copy_dual_records([]dual_record records) []dual_record {
     []dual_record out = []dual_record{cap: len(records)}
     int i = 0
-    while i < len(records) {
+    for i < len(records) {
         out[i] = copy_dual_record(records[i])
         i = i + 1
     }
@@ -255,7 +255,7 @@ func linearize_record_count(linearize_state state) int {
 
 func linearize_has_record(linearize_state state, int id) bool {
     int i = 0
-    while i < len(state.records) {
+    for i < len(state.records) {
         if state.records[i].id == id {
             return true
         }
@@ -266,7 +266,7 @@ func linearize_has_record(linearize_state state, int id) bool {
 
 func linearize_shape_of(linearize_state state, int id) []int {
     int i = 0
-    while i < len(state.records) {
+    for i < len(state.records) {
         if state.records[i].id == id {
             return copy_int(state.records[i].shape)
         }
@@ -277,7 +277,7 @@ func linearize_shape_of(linearize_state state, int id) []int {
 
 func linearize_requires_grad(linearize_state state, int id) bool {
     int i = 0
-    while i < len(state.records) {
+    for i < len(state.records) {
         if state.records[i].id == id {
             return state.records[i].requires_grad
         }
@@ -288,7 +288,7 @@ func linearize_requires_grad(linearize_state state, int id) bool {
 
 func linearize_primal_of(linearize_state state, int id) []float {
     int i = 0
-    while i < len(state.records) {
+    for i < len(state.records) {
         if state.records[i].id == id {
             return copy_float(state.records[i].primal)
         }
@@ -299,7 +299,7 @@ func linearize_primal_of(linearize_state state, int id) []float {
 
 func linearize_tangent_of(linearize_state state, int id) []float {
     int i = 0
-    while i < len(state.records) {
+    for i < len(state.records) {
         if state.records[i].id == id {
             return copy_float(state.records[i].tangent)
         }
@@ -310,7 +310,7 @@ func linearize_tangent_of(linearize_state state, int id) []float {
 
 func linearize_cotangent_of(linearize_state state, int id) []float {
     int i = 0
-    while i < len(state.records) {
+    for i < len(state.records) {
         if state.records[i].id == id {
             return copy_float(state.records[i].cotangent)
         }
@@ -322,7 +322,7 @@ func linearize_cotangent_of(linearize_state state, int id) []float {
 func set_linearize_primal(linearize_state state, int id, []float primal) linearize_state {
     []dual_record records = state.records
     int i = 0
-    while i < len(records) {
+    for i < len(records) {
         if records[i].id == id {
             records[i].primal = primal
         }
@@ -338,7 +338,7 @@ func set_linearize_primal(linearize_state state, int id, []float primal) lineari
 func set_linearize_tangent(linearize_state state, int id, []float tangent) linearize_state {
     []dual_record records = state.records
     int i = 0
-    while i < len(records) {
+    for i < len(records) {
         if records[i].id == id {
             records[i].tangent = tangent
         }
@@ -354,7 +354,7 @@ func set_linearize_tangent(linearize_state state, int id, []float tangent) linea
 func set_linearize_cotangent(linearize_state state, int id, []float cotangent) linearize_state {
     []dual_record records = state.records
     int i = 0
-    while i < len(records) {
+    for i < len(records) {
         if records[i].id == id {
             records[i].cotangent = cotangent
         }
@@ -370,12 +370,12 @@ func set_linearize_cotangent(linearize_state state, int id, []float cotangent) l
 func accumulate_linearize_tangent(linearize_state state, int id, []float tangent) linearize_state {
     []dual_record records = state.records
     int i = 0
-    while i < len(records) {
+    for i < len(records) {
         if records[i].id == id {
             int n = len(records[i].tangent)
             if n == len(tangent) {
                 int j = 0
-                while j < n {
+                for j < n {
                     records[i].tangent[j] = records[i].tangent[j] + tangent[j]
                     j = j + 1
                 }
@@ -393,12 +393,12 @@ func accumulate_linearize_tangent(linearize_state state, int id, []float tangent
 func accumulate_linearize_cotangent(linearize_state state, int id, []float cotangent) linearize_state {
     []dual_record records = state.records
     int i = 0
-    while i < len(records) {
+    for i < len(records) {
         if records[i].id == id {
             int n = len(records[i].cotangent)
             if n == len(cotangent) {
                 int j = 0
-                while j < n {
+                for j < n {
                     records[i].cotangent[j] = records[i].cotangent[j] + cotangent[j]
                     j = j + 1
                 }
@@ -807,9 +807,9 @@ func build_causal_mask(tensor scores) tensor {
     int cols = scores.shape[1]
     tensor mask = neurx.tensor.tensor.zeros_like(scores)
     int r = 0
-    while r < rows {
+    for r < rows {
         int c = r + 1
-        while c < cols {
+        for c < cols {
             mask.data[r * cols + c] = 1.0
             c = c + 1
         }

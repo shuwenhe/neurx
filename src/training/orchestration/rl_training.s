@@ -142,11 +142,11 @@ func collect_rollout(rl_state state, []float model_output, []float rewards, int 
     int action_dim = state.config.seq_len
     int start_idx = int(state.current_step)
     int i = 0
-    while i < steps {
+    for i < steps {
         int idx = start_idx + i
         if idx < state.config.horizon {
             int j = 0
-            while j < obs_dim {
+            for j < obs_dim {
                 state.buffer.observations[idx * obs_dim + j] = model_output[i * obs_dim + j]
                 state.buffer.actions[idx * action_dim + j] = model_output[i * obs_dim + j]
                 j = j + 1
@@ -170,7 +170,7 @@ func compute_log_prob([]float logits, int dim) float {
     []float probs = math.softmax_1d(logits)
     float log_prob = 0.0
     int i = 0
-    while i < dim {
+    for i < dim {
         if probs[i] > 0.0 {
             log_prob = log_prob + probs[i] * math.log_approx(probs[i])
         }
@@ -183,7 +183,7 @@ func compute_value_estimate([]float hidden_states) float {
     float value = 0.0
     int n = len(hidden_states)
     int i = 0
-    while i < n {
+    for i < n {
         value = value + hidden_states[i]
         i = i + 1
     }
@@ -197,7 +197,7 @@ func compute_advantages(rollout_data buffer, rl_config config) rollout_data {
     float running_advantage = 0.0
     float running_return = 0.0
     int i = horizon - 1
-    while i >= 0 {
+    for i >= 0 {
         float mask = 1.0
         if !buffer.masks[i] {
             mask = 0.0
@@ -215,7 +215,7 @@ func compute_advantages(rollout_data buffer, rl_config config) rollout_data {
         float std = math.sqrt_approx(var)
         if std > 1e-8 {
             i = 0
-            while i < horizon {
+            for i < horizon {
                 buffer.advantages[i] = (buffer.advantages[i] - mean) / std
                 i = i + 1
             }
@@ -234,9 +234,9 @@ func ppo_update(rl_state state) rl_state {
     float total_entropy_loss = 0.0
     int clip_count = 0
     int epoch = 0
-    while epoch < config.num_epochs {
+    for epoch < config.num_epochs {
         int mb_idx = 0
-        while mb_idx < config.num_mini_batches {
+        for mb_idx < config.num_mini_batches {
             int start = mb_idx * mini_batch_size
             int end = start + mini_batch_size
             []float old_log_probs = buffer.log_probs[start..end]
@@ -246,7 +246,7 @@ func ppo_update(rl_state state) rl_state {
             []float new_log_probs = math.allocate_float(end - start, 0.0)
             []float new_values = math.allocate_float(end - start, 0.0)
             int i = 0
-            while i < end - start {
+            for i < end - start {
                 int global_idx = start + i
                 []float obs_slice = buffer.observations[global_idx * config.seq_len..(global_idx+1) * config.seq_len]
                 new_log_probs[i] = compute_log_prob(obs_slice, config.seq_len)
@@ -257,7 +257,7 @@ func ppo_update(rl_state state) rl_state {
             float value_loss = 0.0
             float entropy_loss = 0.0
             i = 0
-            while i < end - start {
+            for i < end - start {
                 float ratio = math.exp_approx(new_log_probs[i] - old_log_probs[i])
                 float clipped_ratio = math.clamp_float(ratio, 1.0 - config.clip_epsilon, 1.0 + config.clip_epsilon)
                 float surr1 = ratio * advantages[i]
@@ -281,7 +281,7 @@ func ppo_update(rl_state state) rl_state {
             []float log_probs = new_log_probs
             float ent = 0.0
             i = 0
-            while i < end - start {
+            for i < end - start {
                 float prob = math.exp_approx(log_probs[i])
                 if prob > 0.0 {
                     ent = ent - prob * math.log_approx(prob)
@@ -317,7 +317,7 @@ func vapo_update(rl_state state) rl_state {
     float beta = config.vapo_beta
     float value_advantage = 0.0
     int i = 0
-    while i < horizon {
+    for i < horizon {
         value_advantage = value_advantage + buffer.returns[i] - buffer.values[i]
         i = i + 1
     }
@@ -325,7 +325,7 @@ func vapo_update(rl_state state) rl_state {
     float adjusted_advantage = beta * buffer.avg_advantage + alpha * value_advantage
     []float vapo_advantages = math.copy_float(buffer.advantages)
     i = 0
-    while i < horizon {
+    for i < horizon {
         vapo_advantages[i] = buffer.advantages[i] + adjusted_advantage
         i = i + 1
     }
@@ -342,12 +342,12 @@ func dapo_update(rl_state state) rl_state {
     int num_workers = 4
     int chunk_size = horizon / num_workers
     int worker = 0
-    while worker < num_workers {
+    for worker < num_workers {
         int start = worker * chunk_size
         int end = start + chunk_size
         float local_mean = math.mean_float(buffer.advantages[start..end])
         int i = start
-        while i < end {
+        for i < end {
             distributed_advantages[i] = buffer.advantages[i] - local_mean
             i = i + 1
         }
@@ -355,7 +355,7 @@ func dapo_update(rl_state state) rl_state {
     }
     float global_mean = math.mean_float(distributed_advantages)
     i = 0
-    while i < horizon {
+    for i < horizon {
         distributed_advantages[i] = distributed_advantages[i] + global_mean
         i = i + 1
     }
@@ -369,7 +369,7 @@ func rlaif_collect_feedback(rl_state state, []float responses, []float reference
     []float rewards = math.allocate_float(num_responses, 0.0)
     []float preferences = math.allocate_float(num_responses, 0.0)
     int i = 0
-    while i < num_responses {
+    for i < num_responses {
         []float response = responses[i * state.config.seq_len..(i+1) * state.config.seq_len]
         []float reference = reference_responses[i * state.config.seq_len..(i+1) * state.config.seq_len]
         float similarity = compute_cosine_similarity(response, reference, state.config.seq_len)
@@ -390,7 +390,7 @@ func compute_cosine_similarity([]float a, []float b, int dim) float {
     float norm_a = 0.0
     float norm_b = 0.0
     int i = 0
-    while i < dim {
+    for i < dim {
         dot = dot + a[i] * b[i]
         norm_a = norm_a + a[i] * a[i]
         norm_b = norm_b + b[i] * b[i]
@@ -408,7 +408,7 @@ func compute_response_quality([]float response, int dim) float {
     float quality = 0.0
     int count = 0
     int i = 0
-    while i < dim {
+    for i < dim {
         if response[i] > 0.1 {
             quality = quality + response[i]
             count = count + 1

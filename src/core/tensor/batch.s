@@ -17,7 +17,7 @@ struct batch_state {
 func join_strings([]string values) string {
     string out = ""
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if i > 0 {
             out = out + ","
         }
@@ -32,7 +32,7 @@ func copy_shape_tail(tensor a) []int {
     []int shape = []int{cap: ndim}
     int i = 1
     int out_i = 1
-    while i < ndim {
+    for i < ndim {
         shape[out_i] = a.shape[i]
         out_i = out_i + 1
         i = i + 1
@@ -50,14 +50,14 @@ func slice_axis0(tensor a, int index) tensor {
     }
     int slice_size = 1
     int i = 1
-    while i < ndim {
+    for i < ndim {
         slice_size = slice_size * a.shape[i]
         i = i + 1
     }
     []float out = []float{cap: slice_size}
     int start = index * slice_size
     i = 0
-    while i < slice_size {
+    for i < slice_size {
         out[i] = a.data[start + i]
         i = i + 1
     }
@@ -68,7 +68,7 @@ func batch_reduce_scalar(tensor a, int mode) tensor {
     int batch = a.shape[0]
     []float out = []float{cap: batch}
     int i = 0
-    while i < batch {
+    for i < batch {
         tensor slice = slice_axis0(a, i)
         tensor reduced = neurx.tensor.tensor.sum(slice)
         if mode == 1 {
@@ -113,19 +113,19 @@ func batch_matmul(tensor a, tensor b) tensor {
     []int out_shape = []int{cap: len(first_out.shape) + 1}
     out_shape[0] = batch
     int j = 0
-    while j < len(first_out.shape) {
+    for j < len(first_out.shape) {
         out_shape[j + 1] = first_out.shape[j]
         j = j + 1
     }
     int slice_size = len(first_out.data)
     []float out = []float{cap: batch * slice_size}
     int k = 0
-    while k < slice_size {
+    for k < slice_size {
         out[k] = first_out.data[k]
         k = k + 1
     }
     int batch_index = 1
-    while batch_index < batch {
+    for batch_index < batch {
         tensor slice_a = a
         tensor slice_b = b
         if batch_a {
@@ -137,7 +137,7 @@ func batch_matmul(tensor a, tensor b) tensor {
         tensor slice_out = neurx.tensor.tensor.matmul(slice_a, slice_b)
         int offset = batch_index * slice_size
         int m = 0
-        while m < slice_size {
+        for m < slice_size {
             out[offset + m] = slice_out.data[m]
             m = m + 1
         }
@@ -183,7 +183,7 @@ func batch_param_count(batch_state state) int {
 
 func batch_has_primitive(batch_state state, string primitive) bool {
     int i = 0
-    while i < len(state.primitives) {
+    for i < len(state.primitives) {
         if neurx.strings.strings_eq(neurx.strings.string_at(state.primitives, i), primitive) {
             return true
         }
@@ -194,7 +194,7 @@ func batch_has_primitive(batch_state state, string primitive) bool {
 
 func batch_has_param(batch_state state, string param) bool {
     int i = 0
-    while i < len(state.params) {
+    for i < len(state.params) {
         if neurx.strings.strings_eq(neurx.strings.string_at(state.params, i), param) {
             return true
         }
@@ -208,7 +208,7 @@ func batch_add_primitive(batch_state state, string primitive) batch_state {
     int n = len(primitives)
     []string next = []string{cap: n + 1}
     int i = 0
-    while i < n {
+    for i < n {
         next[i] = primitives[i]
         i = i + 1
     }
@@ -228,7 +228,7 @@ func batch_add_param(batch_state state, string param) batch_state {
     int n = len(params)
     []string next = []string{cap: n + 1}
     int i = 0
-    while i < n {
+    for i < n {
         next[i] = params[i]
         i = i + 1
     }

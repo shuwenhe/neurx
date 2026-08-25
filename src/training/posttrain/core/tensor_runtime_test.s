@@ -76,7 +76,7 @@ func print_test_results_s(test_suite_s suite) {
     println("Failed: " + int_to_str_test(suite.failed_tests))
     println("")
     int i = 0
-    while i < len(suite.results) {
+    for i < len(suite.results) {
         test_result_s result = suite.results[i]
         if result.passed {
             println("[PASS] " + result.test_name)
@@ -94,7 +94,7 @@ func int_to_str_test(int n) string {
     bool neg = false
     int num = n
     if num < 0 { neg = true; num = 0 - num }
-    while num > 0 {
+    for num > 0 {
         int d = num - (num / 10) * 10
         if d == 0 { result = "0" + result }
         else if d == 1 { result = "1" + result }
@@ -144,7 +144,7 @@ func test_new_tensor_2d_s(test_suite_s suite) test_suite_s {
 func test_new_tensor_3d_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 24)
     int i = 0
-    while i < 24 {
+    for i < 24 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -162,7 +162,7 @@ func test_new_tensor_3d_s(test_suite_s suite) test_suite_s {
 func float_from_int(int n) float {
     float result = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         result = result + 1.0
         i = i + 1
     }
@@ -216,7 +216,7 @@ func test_tensor_device_default_s(test_suite_s suite) test_suite_s {
 func test_tensor_large_1d_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 1000)
     int i = 0
-    while i < 1000 {
+    for i < 1000 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -307,7 +307,7 @@ func test_flat_index_1d_s(test_suite_s suite) test_suite_s {
 func test_flat_index_2d_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 6)
     int i = 0
-    while i < 6 {
+    for i < 6 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -331,7 +331,7 @@ func test_flat_index_2d_s(test_suite_s suite) test_suite_s {
 func test_flat_index_3d_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 24)
     int i = 0
-    while i < 24 {
+    for i < 24 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -374,7 +374,7 @@ func test_strides_consistency_s(test_suite_s suite) test_suite_s {
 func test_reshape_1d_to_2d_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 6)
     int i = 0
-    while i < 6 {
+    for i < 6 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -396,7 +396,7 @@ func test_reshape_1d_to_2d_s(test_suite_s suite) test_suite_s {
 func test_reshape_2d_to_1d_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 6)
     int i = 0
-    while i < 6 {
+    for i < 6 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -417,7 +417,7 @@ func test_reshape_2d_to_1d_s(test_suite_s suite) test_suite_s {
 func test_reshape_2d_to_3d_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 24)
     int i = 0
-    while i < 24 {
+    for i < 24 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -456,7 +456,7 @@ func test_reshape_preserves_data_s(test_suite_s suite) test_suite_s {
 func test_reshape_invalid_total_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 6)
     int i = 0
-    while i < 6 {
+    for i < 6 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -474,7 +474,7 @@ func test_reshape_invalid_total_s(test_suite_s suite) test_suite_s {
 func test_reshape_same_shape_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 6)
     int i = 0
-    while i < 6 {
+    for i < 6 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -512,7 +512,7 @@ func test_reshape_to_single_element_s(test_suite_s suite) test_suite_s {
 func test_reshape_complex_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 120)
     int i = 0
-    while i < 120 {
+    for i < 120 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -567,7 +567,7 @@ func test_transpose_square_s(test_suite_s suite) test_suite_s {
 func test_transpose_1xn_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 5)
     int i = 0
-    while i < 5 {
+    for i < 5 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -585,7 +585,7 @@ func test_transpose_1xn_s(test_suite_s suite) test_suite_s {
 func test_transpose_nx1_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 5)
     int i = 0
-    while i < 5 {
+    for i < 5 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -603,7 +603,7 @@ func test_transpose_nx1_s(test_suite_s suite) test_suite_s {
 func test_transpose_preserves_total_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 12)
     int i = 0
-    while i < 12 {
+    for i < 12 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -634,7 +634,7 @@ func test_transpose_preserves_data_s(test_suite_s suite) test_suite_s {
 func test_slice_basic_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 10)
     int i = 0
-    while i < 10 {
+    for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -652,7 +652,7 @@ func test_slice_basic_s(test_suite_s suite) test_suite_s {
 func test_slice_from_start_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 10)
     int i = 0
-    while i < 10 {
+    for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -669,7 +669,7 @@ func test_slice_from_start_s(test_suite_s suite) test_suite_s {
 func test_slice_to_end_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 10)
     int i = 0
-    while i < 10 {
+    for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -687,7 +687,7 @@ func test_slice_to_end_s(test_suite_s suite) test_suite_s {
 func test_slice_single_element_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 10)
     int i = 0
-    while i < 10 {
+    for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -704,7 +704,7 @@ func test_slice_single_element_s(test_suite_s suite) test_suite_s {
 func test_slice_full_range_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 10)
     int i = 0
-    while i < 10 {
+    for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -720,7 +720,7 @@ func test_slice_full_range_s(test_suite_s suite) test_suite_s {
 func test_slice_invalid_negative_start_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 10)
     int i = 0
-    while i < 10 {
+    for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -736,7 +736,7 @@ func test_slice_invalid_negative_start_s(test_suite_s suite) test_suite_s {
 func test_slice_invalid_out_of_bounds_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 10)
     int i = 0
-    while i < 10 {
+    for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -752,7 +752,7 @@ func test_slice_invalid_out_of_bounds_s(test_suite_s suite) test_suite_s {
 func test_slice_invalid_inverted_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 10)
     int i = 0
-    while i < 10 {
+    for i < 10 {
         data[i] = float_from_int(i)
         i = i + 1
     }
@@ -869,7 +869,7 @@ func test_to_string_1d_s(test_suite_s suite) test_suite_s {
 func test_to_string_2d_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 6)
     int i = 0
-    while i < 6 {
+    for i < 6 {
         data[i] = float_from_int(i)
         i = i + 1
     }

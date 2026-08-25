@@ -21,14 +21,14 @@ func forward_through_transformer(int token_id) string {
     print("  Lookup embedding[" + int_to_string(token_id) + "] → [1, 896]\n")
     []float hidden_state
     int i = 0
-    while i < 10 {
+    for i < 10 {
         hidden_state
         i = i + 1
     }
     print("  ✓ Embedding shape: [896]\n")
     print("\nSTEP 2: Transformer Layers (24 × Attention + MLP)\n")
     int layer = 0
-    while layer < 24 {
+    for layer < 24 {
         print("  Layer " + int_to_string(layer) + ": RMSNorm → MultiHeadAttn(14×64) → Residual\n")
         print("           → RMSNorm → FFN(4864) → Residual → [896]\n")
         layer = layer + 1
@@ -56,7 +56,7 @@ func forward_through_transformer(int token_id) string {
 func float(int val) float {
     float result = 0.0
     int i = 0
-    while i < val {
+    for i < val {
         result = result + 1.0
         i = i + 1
     }

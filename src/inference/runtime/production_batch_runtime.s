@@ -62,7 +62,7 @@ struct production_admission_result {
 func production_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int index = 0
-    while index < capacity { values[index] = 0; index = index + 1 }
+    for index < capacity { values[index] = 0; index = index + 1 }
     values
 }
 
@@ -82,7 +82,7 @@ func production_page_offset(production_batch_runtime runtime, int slot, int page
 
 func production_find_free_slot(production_batch_runtime runtime) int {
     int slot = 0
-    while slot < runtime.config.request_capacity {
+    for slot < runtime.config.request_capacity {
         if runtime.status[slot] == production_request_free() || runtime.status[slot] == production_request_finished() || runtime.status[slot] == production_request_cancelled() { return slot }
         slot = slot + 1
     }
@@ -95,7 +95,7 @@ func production_free_page_count(production_batch_runtime runtime) int {
 
 func production_release_slot_pages(production_batch_runtime runtime, int slot) production_batch_runtime {
     int page_index = 0
-    while page_index < runtime.page_count[slot] {
+    for page_index < runtime.page_count[slot] {
         int offset = production_page_offset(runtime, slot, page_index)
         int page = runtime.page_id[offset]
         if page >= 0 && page < runtime.config.page_capacity && runtime.page_owner[page] == slot + 1 {
@@ -124,7 +124,7 @@ func production_admit(production_batch_runtime runtime, int session_id, int requ
     next = production_release_slot_pages(next, slot)
     int allocated = 0
     int page = 0
-    while page < next.config.page_capacity && allocated < required_pages {
+    for page < next.config.page_capacity && allocated < required_pages {
         if next.page_owner[page] == 0 {
             next.page_owner[page] = slot + 1
             next.page_id[production_page_offset(next, slot, allocated)] = page
@@ -151,7 +151,7 @@ func production_schedule(production_batch_runtime runtime) production_batch_sele
     int decode_count = 0
     int token_budget = runtime.config.maximum_batch_tokens
     int slot = 0
-    while slot < runtime.config.request_capacity && prefill_count < runtime.config.maximum_batch_sequences {
+    for slot < runtime.config.request_capacity && prefill_count < runtime.config.maximum_batch_sequences {
         if runtime.status[slot] == production_request_waiting() && runtime.prompt_tokens[slot] <= token_budget {
             prefill[prefill_count] = slot
             prefill_count = prefill_count + 1
@@ -163,7 +163,7 @@ func production_schedule(production_batch_runtime runtime) production_batch_sele
         slot = slot + 1
     }
     slot = 0
-    while slot < runtime.config.request_capacity && decode_count + prefill_count < runtime.config.maximum_batch_sequences && token_budget > 0 {
+    for slot < runtime.config.request_capacity && decode_count + prefill_count < runtime.config.maximum_batch_sequences && token_budget > 0 {
         if runtime.status[slot] == production_request_decode() {
             decode[decode_count] = slot
             decode_count = decode_count + 1
@@ -173,14 +173,14 @@ func production_schedule(production_batch_runtime runtime) production_batch_sele
     }
     int prefill_token_count = 0
     int index = 0
-    while index < prefill_count { prefill_token_count = prefill_token_count + runtime.prompt_tokens[prefill[index]]; index = index + 1 }
+    for index < prefill_count { prefill_token_count = prefill_token_count + runtime.prompt_tokens[prefill[index]]; index = index + 1 }
     runtime.scheduling_round = runtime.scheduling_round + 1
     production_batch_selection {runtime: runtime, prefill_slot: prefill, decode_slot: decode, prefill_count: prefill_count, decode_count: decode_count, prefill_tokens: prefill_token_count, decode_tokens: decode_count, selected: prefill_count + decode_count > 0}
 }
 
 func production_mark_prefill_complete(production_batch_runtime runtime, []int slots, int count) production_batch_runtime {
     int index = 0
-    while index < count {
+    for index < count {
         int slot = slots[index]
         if slot >= 0 && slot < runtime.config.request_capacity && runtime.status[slot] == production_request_prefill() { runtime.status[slot] = production_request_decode() }
         index = index + 1
@@ -204,7 +204,7 @@ func production_record_decode(production_batch_runtime runtime, int slot, int to
 func production_cancel(production_batch_runtime runtime, int session_id) production_batch_runtime {
     production_batch_runtime next = runtime
     int slot = 0
-    while slot < next.config.request_capacity {
+    for slot < next.config.request_capacity {
         if next.session_id[slot] == session_id && next.status[slot] != production_request_free() && next.status[slot] != production_request_finished() {
             if next.status[slot] == production_request_waiting() { next.queued_requests = next.queued_requests - 1 }
             else { next.active_requests = next.active_requests - 1 }

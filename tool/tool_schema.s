@@ -55,7 +55,7 @@ func tool_schema_add_param(tool_schema schema, tool_param_schema param) tool_sch
     int n = schema.param_count
     []tool_param_schema next = []tool_param_schema{cap: n + 1}
     int i = 0
-    while i < n {
+    for i < n {
         next[i] = schema.params[i]
         i = i + 1
     }
@@ -79,7 +79,7 @@ func tool_schema_registry_register(tool_schema_registry reg, tool_schema schema)
     int n = reg.count
     []tool_schema next = []tool_schema{cap: n + 1}
     int i = 0
-    while i < n {
+    for i < n {
         next[i] = reg.schemas[i]
         i = i + 1
     }
@@ -92,7 +92,7 @@ func tool_schema_registry_register(tool_schema_registry reg, tool_schema schema)
 
 func tool_schema_registry_find(tool_schema_registry reg, string name) tool_schema {
     int i = 0
-    while i < reg.count {
+    for i < reg.count {
         if reg.schemas[i].name == name {
             return reg.schemas[i]
         }
@@ -103,7 +103,7 @@ func tool_schema_registry_find(tool_schema_registry reg, string name) tool_schem
 
 func tool_schema_registry_has(tool_schema_registry reg, string name) bool {
     int i = 0
-    while i < reg.count {
+    for i < reg.count {
         if reg.schemas[i].name == name {
             return true
         }
@@ -169,10 +169,10 @@ func tool_schema_text_contains(string text, string pattern) bool {
         return false
     }
     int i = 0
-    while i <= tl - pl {
+    for i <= tl - pl {
         int j = 0
         bool match = true
-        while j < pl {
+        for j < pl {
             if text[i + j] != pattern[j] {
                 match = false
                 break
@@ -197,7 +197,7 @@ func tool_schema_validate(tool_schema_registry reg, string tool_name, string raw
     }
     tool_schema schema = tool_schema_registry_find(reg, tool_name)
     int i = 0
-    while i < schema.param_count {
+    for i < schema.param_count {
         tool_param_schema p = schema.params[i]
         if p.required {
             bool present = tool_schema_text_contains(raw_input, p.name)
@@ -224,7 +224,7 @@ func tool_schema_to_prompt_block(tool_schema schema) string {
     if schema.param_count > 0 {
         out = out + "  params:\n"
         int i = 0
-        while i < schema.param_count {
+        for i < schema.param_count {
             tool_param_schema p = schema.params[i]
             string req_str = "optional"
             if p.required {
@@ -240,7 +240,7 @@ func tool_schema_to_prompt_block(tool_schema schema) string {
 func tool_schema_registry_to_prompt(tool_schema_registry reg) string {
     string out = "=== available tools ===\n"
     int i = 0
-    while i < reg.count {
+    for i < reg.count {
         out = out + tool_schema_to_prompt_block(reg.schemas[i])
         i = i + 1
     }

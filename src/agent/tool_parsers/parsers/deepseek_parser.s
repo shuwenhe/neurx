@@ -51,7 +51,7 @@ impl DeepSeekV3Parser {
             )
 
             search_pos := 0
-            while search_pos < strings::len(tool_section) {
+            for search_pos < strings::len(tool_section) {
                 call_start_pos := strings::index_of_from(tool_section, single_call_start, search_pos)
                 if call_start_pos < 0 {
                     break

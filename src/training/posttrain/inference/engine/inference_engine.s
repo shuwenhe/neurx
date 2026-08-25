@@ -76,7 +76,7 @@ func new_inference_config() inference_config {
 func allocate_block(block_cache_table table, bool is_gpu) int {
     if is_gpu && table.num_free_gpu_blocks > 0 {
         int i = 0
-        while i < table.blocks.len {
+        for i < table.blocks.len {
             if table.blocks[i].is_gpu && table.blocks[i].ref_count == 0 {
                 table.blocks[i].ref_count = 1
                 table.num_free_gpu_blocks = table.num_free_gpu_blocks - 1
@@ -86,7 +86,7 @@ func allocate_block(block_cache_table table, bool is_gpu) int {
         }
     } else if !is_gpu && table.num_free_cpu_blocks > 0 {
         int i = 0
-        while i < table.blocks.len {
+        for i < table.blocks.len {
             if !table.blocks[i].is_gpu && table.blocks[i].ref_count == 0 {
                 table.blocks[i].ref_count = 1
                 table.num_free_cpu_blocks = table.num_free_cpu_blocks - 1
@@ -119,7 +119,7 @@ func schedule_sequences(
     int total_tokens = 0
     bool is_prompt = false
     int i = 0
-    while i < engine.sequences.len {
+    for i < engine.sequences.len {
         inference_sequence seq = engine.sequences[i]
         if seq.finished {
             i = i + 1
@@ -161,13 +161,13 @@ func paged_attention(
     int head_dim = query.shape[2]
     tensor output = tensor_ops.zeros([batch_size, num_heads, head_dim])
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         []int blocks = block_tables[b]
         int context_len = context_lens[b]
         int num_blocks = (context_len + block_size - 1) / block_size
         []tensor attn_scores = []tensor{cap: num_blocks}
         int block_idx = 0
-        while block_idx < num_blocks {
+        for block_idx < num_blocks {
             int block_id = blocks[block_idx]
             tensor k_block = tensor_ops.index_select(
                 key_cache,
@@ -193,7 +193,7 @@ func paged_attention(
         tensor attn_weights = tensor_ops.softmax(all_scores, -1)
         tensor attn_output = tensor_ops.zeros([num_heads, head_dim])
         block_idx = 0
-        while block_idx < num_blocks {
+        for block_idx < num_blocks {
             int block_id = blocks[block_idx]
             tensor v_block = tensor_ops.index_select(
                 value_cache,
@@ -226,7 +226,7 @@ func generate(
     float top_p
 ) [][]int {
     int i = 0
-    while i < prompts.len {
+    for i < prompts.len {
         inference_sequence seq = inference_sequence {
             seq_id: engine.next_seq_id,
             token_ids: prompts[i],
@@ -243,14 +243,14 @@ func generate(
         i = i + 1
     }
     bool all_finished = false
-    while !all_finished {
+    for !all_finished {
         scheduler_output sched = schedule_sequences(engine)
         if sched.scheduled_seq_ids.len == 0 {
             break
         }
         all_finished = true
         int j = 0
-        while j < engine.sequences.len {
+        for j < engine.sequences.len {
             if !engine.sequences[j].finished {
                 all_finished = false
                 break
@@ -260,7 +260,7 @@ func generate(
     }
     [][]int outputs = [][]int{cap: prompts.len}
     i = 0
-    while i < engine.sequences.len {
+    for i < engine.sequences.len {
         outputs[i] = engine.sequences[i].token_ids
         i = i + 1
     }
@@ -270,7 +270,7 @@ func generate(
 func new_inference_engine(module model, inference_config config) inference_engine {
     []cache_block blocks = []cache_block{cap: config.num_gpu_blocks + config.num_cpu_blocks}
     int i = 0
-    while i < config.num_gpu_blocks {
+    for i < config.num_gpu_blocks {
         blocks[i] = cache_block {
             block_id: i,
             token_ids: []int{cap: config.block_size},
@@ -279,7 +279,7 @@ func new_inference_engine(module model, inference_config config) inference_engin
         }
         i = i + 1
     }
-    while i < config.num_gpu_blocks + config.num_cpu_blocks {
+    for i < config.num_gpu_blocks + config.num_cpu_blocks {
         blocks[i] = cache_block {
             block_id: i,
             token_ids: []int{cap: config.block_size},

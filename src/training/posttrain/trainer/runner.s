@@ -92,7 +92,7 @@ func run_reference_training(trainer_config config) int {
         state.lora_v_a = reference_fill_f32(v_a_len, 0.0)
         state.lora_v_b = reference_fill_f32(v_b_len, 0.0)
         int i = 0
-        while i < q_b_len {
+        for i < q_b_len {
             float step = 0.000001 * ((i + 1) as float)
             if i - (i / 2) * 2 == 1 {
                 step = 0.0 - step
@@ -101,7 +101,7 @@ func run_reference_training(trainer_config config) int {
             i = i + 1
         }
         i = 0
-        while i < v_b_len {
+        for i < v_b_len {
             float step = 0.000001 * ((i + 1) as float)
             if i - (i / 2) * 2 == 1 {
                 step = 0.0 - step
@@ -121,7 +121,7 @@ func run_reference_training(trainer_config config) int {
         int adapter_nonzero = q_b_len + v_b_len
         int adapter_total = q_a_len + q_b_len + v_a_len + v_b_len
         i = 0
-        while i < q_b_len {
+        for i < q_b_len {
             float value = 0.000001 * ((i + 1) as float)
             if i - (i / 2) * 2 == 1 {
                 value = 0.0 - value
@@ -135,7 +135,7 @@ func run_reference_training(trainer_config config) int {
             i = i + 1
         }
         i = 0
-        while i < v_b_len {
+        for i < v_b_len {
             float value = 0.000001 * ((i + 1) as float)
             if i - (i / 2) * 2 == 1 {
                 value = 0.0 - value
@@ -229,7 +229,7 @@ struct runtime_module_step_result {
 func runtime_fill_f32(int size, float value) []float {
     []float arr = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         arr[i] = value
         i = i + 1
     }
@@ -239,7 +239,7 @@ func runtime_fill_f32(int size, float value) []float {
 func runtime_json_escape(string s) string {
     string out = "\""
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         int ch = s[i]
         if ch == 34 {
             out = out + "\\\""
@@ -353,7 +353,7 @@ func runtime_collect_samples(string dataset_text, int limit) runtime_sample_batc
     batch.count = 0
     string current_line = ""
     int i = 0
-    while i < len(dataset_text) {
+    for i < len(dataset_text) {
         string ch = dataset_text[i:i+1]
         if ch == "\n" {
             string trimmed = trim(current_line)
@@ -395,17 +395,17 @@ func runtime_text_vector(string text, int size, float scale, int salt) []float {
     if cursor < 0 {
         cursor = 0 - cursor
     }
-    while cursor >= size {
+    for cursor >= size {
         cursor = cursor - size
     }
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         int bucket = cursor
         float magnitude = ((ch - (ch / 17) * 17) + 1) as float
         vec[bucket] = vec[bucket] + magnitude * scale
         cursor = cursor + ch + 7 + i
-        while cursor >= size {
+        for cursor >= size {
             cursor = cursor - size
         }
         i = i + 1
@@ -418,7 +418,7 @@ func runtime_text_vector(string text, int size, float scale, int salt) []float {
         denom = 32.0
     }
     i = 0
-    while i < size {
+    for i < size {
         vec[i] = vec[i] / denom
         i = i + 1
     }
@@ -441,7 +441,7 @@ func runtime_init_lora_module(string name, int layer_index, int in_dim, int out_
     module.initial_A = runtime_fill_f32(a_len, 0.0)
     module.initial_B = runtime_fill_f32(b_len, 0.0)
     int i = 0
-    while i < a_len {
+    for i < a_len {
         float value = ((seed + i + 1) as float) / ((a_len + 1) as float)
         if i - (i / 2) * 2 == 1 {
             value = 0.0 - value
@@ -452,7 +452,7 @@ func runtime_init_lora_module(string name, int layer_index, int in_dim, int out_
         i = i + 1
     }
     i = 0
-    while i < b_len {
+    for i < b_len {
         module.lora_B[i] = 0.0
         module.initial_B[i] = 0.0
         i = i + 1
@@ -466,7 +466,7 @@ func runtime_mse_loss([]float pred, []float target) float {
     }
     float loss = 0.0
     int i = 0
-    while i < len(pred) {
+    for i < len(pred) {
         float diff = pred[i] - target[i]
         loss = loss + diff * diff
         i = i + 1
@@ -480,10 +480,10 @@ func runtime_lora_step(runtime_lora_module module, []float input_vec, []float ta
     int rank = module.rank
     []float ax = runtime_fill_f32(rank, 0.0)
     int r = 0
-    while r < rank {
+    for r < rank {
         float sum = 0.0
         int i = 0
-        while i < in_dim && i < len(input_vec) {
+        for i < in_dim && i < len(input_vec) {
             sum = sum + module.lora_A[r * in_dim + i] * input_vec[i]
             i = i + 1
         }
@@ -492,10 +492,10 @@ func runtime_lora_step(runtime_lora_module module, []float input_vec, []float ta
     }
     []float output = runtime_fill_f32(out_dim, 0.0)
     int o = 0
-    while o < out_dim {
+    for o < out_dim {
         float sum = 0.0
         r = 0
-        while r < rank {
+        for r < rank {
             sum = sum + module.lora_B[o * rank + r] * ax[r]
             r = r + 1
         }
@@ -506,7 +506,7 @@ func runtime_lora_step(runtime_lora_module module, []float input_vec, []float ta
     []float grad_output = runtime_fill_f32(out_dim, 0.0)
     float out_scale = 2.0 / (out_dim as float)
     o = 0
-    while o < out_dim {
+    for o < out_dim {
         grad_output[o] = out_scale * (output[o] - target_vec[o])
         o = o + 1
     }
@@ -514,9 +514,9 @@ func runtime_lora_step(runtime_lora_module module, []float input_vec, []float ta
     []float grad_b = runtime_fill_f32(out_dim * rank, 0.0)
     float grad_norm_sq = 0.0
     o = 0
-    while o < out_dim {
+    for o < out_dim {
         r = 0
-        while r < rank {
+        for r < rank {
             int idx = o * rank + r
             float g = module.scaling * grad_output[o] * ax[r]
             grad_b[idx] = g
@@ -527,10 +527,10 @@ func runtime_lora_step(runtime_lora_module module, []float input_vec, []float ta
     }
     []float grad_hidden = runtime_fill_f32(rank, 0.0)
     r = 0
-    while r < rank {
+    for r < rank {
         float sum = 0.0
         o = 0
-        while o < out_dim {
+        for o < out_dim {
             sum = sum + grad_output[o] * module.lora_B[o * rank + r]
             o = o + 1
         }
@@ -538,9 +538,9 @@ func runtime_lora_step(runtime_lora_module module, []float input_vec, []float ta
         r = r + 1
     }
     r = 0
-    while r < rank {
+    for r < rank {
         int i = 0
-        while i < in_dim {
+        for i < in_dim {
             float g = grad_hidden[r] * input_vec[i]
             grad_a[r * in_dim + i] = g
             grad_norm_sq = grad_norm_sq + g * g
@@ -554,12 +554,12 @@ func runtime_lora_step(runtime_lora_module module, []float input_vec, []float ta
         clip_scale = max_grad_norm / grad_norm
     }
     int j = 0
-    while j < len(module.lora_A) {
+    for j < len(module.lora_A) {
         module.lora_A[j] = module.lora_A[j] - lr * clip_scale * grad_a[j]
         j = j + 1
     }
     j = 0
-    while j < len(module.lora_B) {
+    for j < len(module.lora_B) {
         module.lora_B[j] = module.lora_B[j] - lr * clip_scale * grad_b[j]
         j = j + 1
     }
@@ -577,10 +577,10 @@ func runtime_compute_adapter_stats([]runtime_lora_module modules) adapter_stats 
     int nonzero = 0
     int total = 0
     int module_idx = 0
-    while module_idx < len(modules) {
+    for module_idx < len(modules) {
         runtime_lora_module module = modules[module_idx]
         int i = 0
-        while i < len(module.lora_A) {
+        for i < len(module.lora_A) {
             float value = module.lora_A[i]
             float abs_value = abs_float(value)
             l1 = l1 + abs_value
@@ -595,7 +595,7 @@ func runtime_compute_adapter_stats([]runtime_lora_module modules) adapter_stats 
             i = i + 1
         }
         i = 0
-        while i < len(module.lora_B) {
+        for i < len(module.lora_B) {
             float value = module.lora_B[i]
             float abs_value = abs_float(value)
             l1 = l1 + abs_value
@@ -627,10 +627,10 @@ func runtime_compute_delta_stats([]runtime_lora_module modules) weight_delta_sta
     int changed = 0
     int total = 0
     int module_idx = 0
-    while module_idx < len(modules) {
+    for module_idx < len(modules) {
         runtime_lora_module module = modules[module_idx]
         int i = 0
-        while i < len(module.lora_A) {
+        for i < len(module.lora_A) {
             float delta = module.lora_A[i] - module.initial_A[i]
             float abs_delta = abs_float(delta)
             l1 = l1 + abs_delta
@@ -645,7 +645,7 @@ func runtime_compute_delta_stats([]runtime_lora_module modules) weight_delta_sta
             i = i + 1
         }
         i = 0
-        while i < len(module.lora_B) {
+        for i < len(module.lora_B) {
             float delta = module.lora_B[i] - module.initial_B[i]
             float abs_delta = abs_float(delta)
             l1 = l1 + abs_delta
@@ -672,7 +672,7 @@ func runtime_compute_delta_stats([]runtime_lora_module modules) weight_delta_sta
 func runtime_float_array_json([]float values) string {
     string json = "["
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if i > 0 {
             json = json + ", "
         }
@@ -763,14 +763,14 @@ func runtime_write_adapter_checkpoint(
     string adapter_path = config.output_dir + "/adapter_model.safetensors"
     safetensors_writer writer = safetensors_writer_new(adapter_path)
     int module_idx = 0
-    while module_idx < len(modules) {
+    for module_idx < len(modules) {
         runtime_lora_module module = modules[module_idx]
         []int a_shape = []int{cap: 2}
         a_shape[0] = module.rank
         a_shape[1] = module.in_dim
         []float a_data = runtime_fill_f32(len(module.lora_A), 0.0)
         int i = 0
-        while i < len(module.lora_A) {
+        for i < len(module.lora_A) {
             a_data[i] = module.lora_A[i]
             i = i + 1
         }
@@ -787,7 +787,7 @@ func runtime_write_adapter_checkpoint(
         b_shape[1] = module.rank
         []float b_data = runtime_fill_f32(len(module.lora_B), 0.0)
         i = 0
-        while i < len(module.lora_B) {
+        for i < len(module.lora_B) {
             b_data[i] = module.lora_B[i]
             i = i + 1
         }
@@ -857,7 +857,7 @@ func run_runtime_training(trainer_config config) int {
     []runtime_lora_module modules = []runtime_lora_module{cap: module_count}
     int layer_idx = 0
     int module_idx = 0
-    while layer_idx < config.num_layers {
+    for layer_idx < config.num_layers {
         string q_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.q_proj"
         string v_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.v_proj"
         modules[module_idx] = runtime_init_lora_module(q_name, layer_idx, config.hidden_size, config.hidden_size, config.rank, config.alpha, layer_idx * 31 + 7)
@@ -880,15 +880,15 @@ func run_runtime_training(trainer_config config) int {
     }
     int step = 0
     int epoch = 0
-    while epoch < config.num_epochs && step < config.total_steps {
+    for epoch < config.num_epochs && step < config.total_steps {
         int sample_idx = 0
-        while sample_idx < batch.count && step < config.total_steps {
+        for sample_idx < batch.count && step < config.total_steps {
             runtime_training_sample sample = batch.samples[sample_idx]
             []float prompt_vec = runtime_text_vector(sample.prompt_text, config.hidden_size, 1.0, 17)
             []float target_vec = runtime_text_vector(sample.target_text, config.hidden_size, 1.0, 29)
             float step_loss = 0.0
             module_idx = 0
-            while module_idx < len(modules) {
+            for module_idx < len(modules) {
                 runtime_module_step_result result = runtime_lora_step(modules[module_idx], prompt_vec, target_vec, effective_lr, config.max_grad_norm)
                 modules[module_idx] = result.module
                 step_loss = step_loss + result.loss
@@ -917,7 +917,7 @@ func run_runtime_training(trainer_config config) int {
     }
     []float trimmed_loss_history = []float{cap: step}
     int loss_idx = 0
-    while loss_idx < step {
+    for loss_idx < step {
         trimmed_loss_history[loss_idx] = loss_history[loss_idx]
         loss_idx = loss_idx + 1
     }
@@ -998,7 +998,7 @@ func sqrt_lora(float x) float {
     }
     float guess = x
     int i = 0
-    while i < 10 {
+    for i < 10 {
         float next = (guess + x / guess) / 2.0
         if abs_float(next - guess) < 0.00001 {
             return next
@@ -1012,7 +1012,7 @@ func sqrt_lora(float x) float {
 func reference_fill_f32(int size, float value) []float {
     []float arr = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         arr[i] = value
         i = i + 1
     }
@@ -1030,7 +1030,7 @@ func int_to_str(int n) string {
         n = 0 - n
     }
     []string digits = []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
-    while n > 0 {
+    for n > 0 {
         int digit = n - (n / 10) * 10
         result = digits[digit] + result
         n = n / 10
@@ -1049,7 +1049,7 @@ func float_to_str(float f, int precision) string {
     }
     string result = int_to_str(int_part) + "."
     int i = 0
-    while i < precision {
+    for i < precision {
         frac_part = frac_part * 10.0
         int digit = frac_part as int
         result = result + int_to_str(digit)

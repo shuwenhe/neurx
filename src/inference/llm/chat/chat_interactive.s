@@ -6,7 +6,7 @@ func main() {
     print("║  NeurX Interactive model Chat (Pure S)       ║\n")
     print("║  Type questions, get medical responses       ║\n")
     print("╚═══════════════════════════════════════════════╝\n\n")
-    while true {
+    for true {
         print("You: ")
         string cmd = "read -t 5 line && echo \"$line\" || echo \"\""
         string input = runtime_run_command_output(cmd)

@@ -44,7 +44,7 @@ func request_irq(is irq_state, int irq_num, string name, int priority, string ha
 
 func raise_irq(is irq_state, int irq_num) irq_state {
     int i = 0
-    while i < len(is.descriptors) {
+    for i < len(is.descriptors) {
         if is.descriptors[i].irq_num == irq_num && is.descriptors[i].enabled {
             is.descriptors[i].triggered_count = is.descriptors[i].triggered_count + 1
             int p = is.descriptors[i].priority

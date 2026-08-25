@@ -35,7 +35,7 @@ func int_to_str(int n) string {
         n = -n
     }
     string s = ""
-    while n > 0 {
+    for n > 0 {
         s = string(mod(n, 10) + 48) + s
         n = n / 10
     }
@@ -51,7 +51,7 @@ func fmt_float(float val, int decimals) string {
         val = -val
     }
     int whole = 0
-    while val >= 1.0 {
+    for val >= 1.0 {
         val = val - 1.0
         whole = whole + 1
     }
@@ -61,10 +61,10 @@ func fmt_float(float val, int decimals) string {
     }
     s = s + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         val = val * 10.0
         int digit = 0
-        while val >= 1.0 {
+        for val >= 1.0 {
             val = val - 1.0
             digit = digit + 1
         }
@@ -77,7 +77,7 @@ func fmt_float(float val, int decimals) string {
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
-    while i < end {
+    for i < end {
         out = out + string(s[i])
         i = i + 1
     }
@@ -86,7 +86,7 @@ func substring(string s, int start, int end) string {
 
 func trim(string s) string {
     int begin = 0
-    while begin < len(s) {
+    for begin < len(s) {
         string ch = string(s[begin])
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
             begin = begin + 1
@@ -95,7 +95,7 @@ func trim(string s) string {
         }
     }
     int finish = len(s)
-    while finish > begin {
+    for finish > begin {
         string ch = string(s[finish - 1])
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
             finish = finish - 1
@@ -109,7 +109,7 @@ func trim(string s) string {
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         string ch = string(s[i])
         if ch == "'" {
             out = out + "'\"'\"'"
@@ -167,7 +167,7 @@ func parse_int_str(string s) int {
         i = 1
     }
     int value = 0
-    while i < len(text) {
+    for i < len(text) {
         int digit = digit_value(string(text[i]))
         if digit < 0 {
             return 0
@@ -190,7 +190,7 @@ func parse_float_str(string s) float {
         i = 1
     }
     float whole = 0.0
-    while i < len(text) && string(text[i]) != "." {
+    for i < len(text) && string(text[i]) != "." {
         int digit = digit_value(string(text[i]))
         if digit < 0 {
             return 0.0
@@ -202,7 +202,7 @@ func parse_float_str(string s) float {
     float scale = 1.0
     if i < len(text) && string(text[i]) == "." {
         i = i + 1
-        while i < len(text) {
+        for i < len(text) {
             int digit = digit_value(string(text[i]))
             if digit < 0 {
                 return 0.0
@@ -223,7 +223,7 @@ func parse_pair_left(string text) int {
     string trimmed = trim(text)
     int comma = -1
     int i = 0
-    while i < len(trimmed) {
+    for i < len(trimmed) {
         if string(trimmed[i]) == "," {
             comma = i
             i = len(trimmed)
@@ -240,7 +240,7 @@ func parse_pair_right(string text) int {
     string trimmed = trim(text)
     int comma = -1
     int i = 0
-    while i < len(trimmed) {
+    for i < len(trimmed) {
         if string(trimmed[i]) == "," {
             comma = i
             i = len(trimmed)
@@ -258,7 +258,7 @@ func parse_csv_floats_fixed(string text, int expected_count) tensor {
     string current = ""
     int i = 0
     int out_i = 0
-    while i < len(text) && out_i < expected_count {
+    for i < len(text) && out_i < expected_count {
         string ch = string(text[i])
         if ch == "," {
             data[out_i] = parse_float_str(current)
@@ -403,7 +403,7 @@ func argmax_next_token(tensor weight_row, tensor bias, int vocab_size) int {
     float best_logit = weight_row.data[0] + bias.data[0]
     int best_id = 0
     int c = 1
-    while c < vocab_size {
+    for c < vocab_size {
         float logit = weight_row.data[c] + bias.data[c]
         if logit > best_logit {
             best_logit = logit
@@ -421,7 +421,7 @@ func generate_text_from_checkpoint(string checkpoint_path, int vocab_size, tenso
         current_id = mod(ascii_code(seed, len(seed) - 1), vocab_size)
     }
     int n = 0
-    while n < max_new_chars {
+    for n < max_new_chars {
         tensor weight_row = load_weight_row_from_file(checkpoint_path, current_id, vocab_size)
         if weight_row.size < vocab_size {
             return output

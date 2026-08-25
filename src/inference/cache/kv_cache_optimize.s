@@ -45,7 +45,7 @@ struct kv_cache_optimizer {
 func string_slice(string text, int start, int end) string {
     string result = ""
     int i = start
-    while i < end && i < len(text) {
+    for i < end && i < len(text) {
         result = result + string_char(text[i])
         i = i + 1
     }
@@ -90,7 +90,7 @@ func create_kv_cache_optimizer(kv_cache_config config) kv_cache_optimizer {
     }
 
     int i = 0
-    while i < config.max_pages {
+    for i < config.max_pages {
         opt.free_page_list = append(opt.free_page_list, i)
         i = i + 1
     }
@@ -150,7 +150,7 @@ func find_lru_page(kv_cache_optimizer opt) int {
     int min_step = opt.pages[0].last_accessed_step
 
     int i = 1
-    while i < len(opt.pages) {
+    for i < len(opt.pages) {
         if opt.pages[i].last_accessed_step < min_step && opt.pages[i].used_tokens > 0 {
             min_step = opt.pages[i].last_accessed_step
             lru_page = i
@@ -224,7 +224,7 @@ func update_cache_statistics(kv_cache_optimizer* opt) {
     int total_age = 0
 
     int i = 0
-    while i < len(opt.pages) {
+    for i < len(opt.pages) {
         if opt.pages[i].used_tokens > 0 {
             total_tokens = total_tokens + opt.pages[i].used_tokens
             int age = opt.current_step - opt.pages[i].last_accessed_step
@@ -260,7 +260,7 @@ func optimize_cache_layout(kv_cache_optimizer* opt) {
         int pages_to_evict = (opt.stats.active_pages / 4)
 
         int i = 0
-        while i < pages_to_evict && i < len(opt.pages) {
+        for i < pages_to_evict && i < len(opt.pages) {
             if opt.pages[i].used_tokens > 0 {
                 free_kv_page(opt, i)
             }
@@ -284,7 +284,7 @@ func reset_cache(kv_cache_optimizer* opt) {
     opt.stats.total_evictions = 0
 
     int i = 0
-    while i < opt.config.max_pages {
+    for i < opt.config.max_pages {
         opt.free_page_list = append(opt.free_page_list, i)
         i = i + 1
     }
@@ -334,7 +334,7 @@ func main() {
 
     int pages_to_allocate = 32
     int i = 0
-    while i < pages_to_allocate {
+    for i < pages_to_allocate {
         int page_id = allocate_kv_page(opt)
         if page_id >= 0 {
             println("  ✓ Allocated page " + int_to_string(page_id))
@@ -350,7 +350,7 @@ func main() {
     []float dummy_values = []float{cap: 1024}
 
     int j = 0
-    while j < 10 {
+    for j < 10 {
         if add_kv_tokens(opt, dummy_keys, dummy_values) {
             println("  ✓ Added KV tokens for sequence " + int_to_string(j))
         }

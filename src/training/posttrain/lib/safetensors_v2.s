@@ -40,7 +40,7 @@ func dtype_size(string dtype) int {
 func shape_numel([]int shape) int {
     int result = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         result = result * shape[i]
         i = i + 1
     }

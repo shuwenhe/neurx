@@ -44,7 +44,7 @@ func lsm_register(ls lsm_state, ctx security_context) lsm_state {
 
 func lsm_find_context(ls lsm_state, int agent_pid) (security_context, bool) {
     int i = 0
-    while i < len(ls.contexts) {
+    for i < len(ls.contexts) {
         if ls.contexts[i].agent_pid == agent_pid {
             return (ls.contexts[i], true)
         }
@@ -69,7 +69,7 @@ func lsm_check_tool_call(ls lsm_state, int agent_pid, string tool_name) (lsm_sta
     if len(ctx.allowed_tools) > 0 {
         bool ok = false
         int j = 0
-        while j < len(ctx.allowed_tools) {
+        for j < len(ctx.allowed_tools) {
             if get_allowed_tool(ctx, j) == tool_name {
                 ok = true
             }

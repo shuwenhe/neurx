@@ -48,7 +48,7 @@ func (reasoning_chain* chain) add_step(reasoning_step step) reasoning_chain {
 
     steps := []reasoning_step{cap: len(chain.steps) + 1}
     i := 0
-    while i < len(chain.steps) {
+    for i < len(chain.steps) {
         steps[i] = chain.steps[i]
         i = i + 1
     }
@@ -146,7 +146,7 @@ func (reasoning_chain* chain) calculate_overall_confidence() float {
 
     float sum = 0.0
     i := 0
-    while i < len(chain.steps) {
+    for i < len(chain.steps) {
         if chain.steps[i].is_valid {
             sum = sum + chain.steps[i].confidence
         }
@@ -184,7 +184,7 @@ func (reasoning_chain* chain) backtrack(int depth) reasoning_chain {
     }
 
     i := target
-    while i < len(chain.steps) {
+    for i < len(chain.steps) {
         if chain.steps[i].state != step_state.backtracked {
             chain.steps[i] = chain.steps[i].mark_backtracked()
         }
@@ -204,7 +204,7 @@ func (reasoning_chain* chain) get_reasoning_text() string {
     text = text + "Original Prompt: " + chain.original_prompt + "\n\n"
 
     i := 0
-    while i < len(chain.steps) {
+    for i < len(chain.steps) {
         text = text + chain.steps[i].format_step() + "\n"
         i = i + 1
     }
@@ -219,7 +219,7 @@ func (reasoning_chain* chain) get_reasoning_text() string {
 func (reasoning_chain* chain) clone() reasoning_chain {
     steps := []reasoning_step{cap: len(chain.steps)}
     i := 0
-    while i < len(chain.steps) {
+    for i < len(chain.steps) {
         steps[i] = chain.steps[i].clone()
         i = i + 1
     }

@@ -35,20 +35,20 @@ func example_basic_simpo_training() {
     print("[Creating sample Batches]")
     []simpo_batch batches = []simpo_batch{cap: 10}
     int b = 0
-    while b < 10 {
+    for b < 10 {
         simpo_batch batch = simpo_batch {
             pairs: []simpo_preference_pair{cap: cfg.batch_size},
             size: cfg.batch_size,
         }
         int p = 0
-        while p < cfg.batch_size {
+        for p < cfg.batch_size {
             simpo_preference_pair pair = simpo_preference_pair {
                 chosen_tokens: []int{cap: 128},
                 rejected_tokens: []int{cap: 128},
                 confidence: 0.8,
             }
             int t = 0
-            while t < 128 {
+            for t < 128 {
                 pair.chosen_tokens = append_int_ex(pair.chosen_tokens, t)
                 pair.rejected_tokens = append_int_ex(pair.rejected_tokens, t)
                 t = t + 1

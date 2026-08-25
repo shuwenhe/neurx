@@ -178,7 +178,7 @@ struct sandbox_environment {
                 issues.append(message)
             }
         }
-        if "while True:" in code || "while(1)" in code || "while(true)" in code {
+        if "for True:" in code || "while(1)" in code || "while(true)" in code {
             if "break" not in code && "return" not in code:
                 issues.append("Potential infinite loop without break condition")
         }

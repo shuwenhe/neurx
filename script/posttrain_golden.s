@@ -165,7 +165,7 @@ func first_non_empty_line(string path) string {
     string content = runtime_read_text_file(path)
     string current = ""
     int i = 0
-    while i <= len(content) {
+    for i <= len(content) {
         bool at_end = i == len(content)
         bool at_newline = !at_end && content[i] == 10
         if at_end || at_newline {
@@ -189,7 +189,7 @@ func extract_json_string_field(string json_text, string field_name) string {
         return ""
     }
     pos = pos + len(needle)
-    while pos < len(json_text) && (json_text[pos] == 32 || json_text[pos] == 9 || json_text[pos] == 10 || json_text[pos] == 13 || json_text[pos] == 58) {
+    for pos < len(json_text) && (json_text[pos] == 32 || json_text[pos] == 9 || json_text[pos] == 10 || json_text[pos] == 13 || json_text[pos] == 58) {
         pos = pos + 1
     }
     if pos >= len(json_text) || json_text[pos] != 34 {
@@ -197,7 +197,7 @@ func extract_json_string_field(string json_text, string field_name) string {
     }
     pos = pos + 1
     string out = ""
-    while pos < len(json_text) {
+    for pos < len(json_text) {
         int ch = json_text[pos]
         if ch == 34 {
             break
@@ -232,12 +232,12 @@ func extract_json_int_field(string json_text, string field_name, int fallback) i
         return fallback
     }
     pos = pos + len(needle)
-    while pos < len(json_text) && (json_text[pos] == 32 || json_text[pos] == 9 || json_text[pos] == 10 || json_text[pos] == 13 || json_text[pos] == 58) {
+    for pos < len(json_text) && (json_text[pos] == 32 || json_text[pos] == 9 || json_text[pos] == 10 || json_text[pos] == 13 || json_text[pos] == 58) {
         pos = pos + 1
     }
     string token = ""
     bool started = false
-    while pos < len(json_text) {
+    for pos < len(json_text) {
         int ch = json_text[pos]
         if ch == 45 || ch >= 48 && ch <= 57 {
             token = token + string_char(ch)
@@ -258,10 +258,10 @@ func find_substring(string text, string pattern) int {
         return -1
     }
     int i = 0
-    while i <= len(text) - len(pattern) {
+    for i <= len(text) - len(pattern) {
         bool match = true
         int j = 0
-        while j < len(pattern) {
+        for j < len(pattern) {
             if text[i + j] != pattern[j] {
                 match = false
                 break
@@ -291,7 +291,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -314,7 +314,7 @@ func int_to_str(int n) string {
 func json_escape(string s) string {
     string out = "\""
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         int ch = s[i]
         if ch == 34 {
             out = out + "\\\""
@@ -340,10 +340,10 @@ func find_substring_from(string text, string pattern, int start) int {
         return -1
     }
     int i = start
-    while i <= len(text) - len(pattern) {
+    for i <= len(text) - len(pattern) {
         bool match = true
         int j = 0
-        while j < len(pattern) {
+        for j < len(pattern) {
             if text[i + j] != pattern[j] {
                 match = false
                 break

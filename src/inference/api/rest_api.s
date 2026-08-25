@@ -50,7 +50,7 @@ func parse_json_int(string json_str, string key) int {
     }
     start_idx = start_idx + len(start_key)
     end_idx := start_idx
-    while end_idx < len(json_str) && (json_str[end_idx] >= '0' && json_str[end_idx] <= '9') {
+    for end_idx < len(json_str) && (json_str[end_idx] >= '0' && json_str[end_idx] <= '9') {
         end_idx = end_idx + 1
     }
     if end_idx > start_idx {

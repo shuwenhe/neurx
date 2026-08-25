@@ -28,7 +28,7 @@ func test_moe_layer() {
     int hidden_dim = config.hidden_dim
     []float hidden_states = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     int i = 0
-    while i < batch_size * seq_len * hidden_dim {
+    for i < batch_size * seq_len * hidden_dim {
         hidden_states[i] = 0.1 * (i % 100)
         i = i + 1
     }
@@ -54,7 +54,7 @@ func test_flash_attention() {
     int seq_len = 512
     []float hidden_states = allocate_vector(seq_len * 768, 0.0)
     int i = 0
-    while i < seq_len * 768 {
+    for i < seq_len * 768 {
         hidden_states[i] = 0.1 * (i % 100)
         i = i + 1
     }
@@ -76,7 +76,7 @@ func test_streaming_dataloader() {
     func mock_tokenizer(string text) []int {
         []int tokens = []int{cap: 512}
         int i = 0
-        while i < 512 {
+        for i < 512 {
             tokens.push(i % 1000)
             i = i + 1
         }
@@ -133,7 +133,7 @@ func test_bpe_tokenizer() {
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }

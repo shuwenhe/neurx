@@ -18,7 +18,7 @@ func parse_tokenizer_json(string json_text) []json_token {
     int i = 0
     int len_text = len(json_text)
 
-    while i < len_text {
+    for i < len_text {
 
         int quote_start = find_char(json_text, '"', i)
         if quote_start < 0 { break }
@@ -32,12 +32,12 @@ func parse_tokenizer_json(string json_text) []json_token {
         if colon_pos < 0 { break }
 
         int value_start = colon_pos + 1
-        while value_start < len_text && (json_text[value_start] == 32 || json_text[value_start] == 9) {
+        for value_start < len_text && (json_text[value_start] == 32 || json_text[value_start] == 9) {
             value_start = value_start + 1
         }
 
         int value_end = value_start
-        while value_end < len_text && json_text[value_end] >= 48 && json_text[value_end] <= 57 {
+        for value_end < len_text && json_text[value_end] >= 48 && json_text[value_end] <= 57 {
             value_end = value_end + 1
         }
 
@@ -59,7 +59,7 @@ func parse_tokenizer_json(string json_text) []json_token {
 
     []json_token result = []json_token{cap: token_count}
     int j = 0
-    while j < token_count {
+    for j < token_count {
         result[j] = tokens[j]
         j = j + 1
     }
@@ -69,7 +69,7 @@ func parse_tokenizer_json(string json_text) []json_token {
 
 func find_char(string text, int target_char, int start_pos) int {
     int i = start_pos
-    while i < len(text) {
+    for i < len(text) {
         if text[i] == target_char {
             return i
         }
@@ -82,7 +82,7 @@ func parse_int(string text) int {
     int result = 0
     int i = 0
 
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if ch >= 48 && ch <= 57 {
             result = result * 10 + (ch - 48)
@@ -97,7 +97,7 @@ func escape_string(string text) string {
     string result = ""
     int i = 0
 
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
 
         if ch == 10 {
@@ -141,7 +141,7 @@ func write_vocab_file([]json_token tokens, string output_file_path) bool {
 
     string output = ""
     int i = 0
-    while i < len(tokens) {
+    for i < len(tokens) {
         if tokens[i].valid {
             string escaped_key = escape_string(tokens[i].key)
             output = output + int_to_string(tokens[i].value) + "|" + escaped_key + "\n"
@@ -156,9 +156,9 @@ func sort_tokens_by_id([]json_token tokens) {
     int n = len(tokens)
     int i = 0
 
-    while i < n {
+    for i < n {
         int j = 0
-        while j < n - i - 1 {
+        for j < n - i - 1 {
             if tokens[j].value > tokens[j + 1].value {
 
                 json_token temp = tokens[j]

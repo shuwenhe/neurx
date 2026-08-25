@@ -88,7 +88,7 @@ func new_fsdp_state(int rank, int world_size, nccl_backend.nccl_comm comm) fsdp_
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }
@@ -114,7 +114,7 @@ func fsdp_init(pointer model, fsdp_state state) fsdp_module {
         local_params: local_size,
     }
     int i = 0
-    while i < local_size && global_offset + i < total_params {
+    for i < local_size && global_offset + i < total_params {
         module.flattened_params[i] = all_params[global_offset + i]
         i = i + 1
     }
@@ -133,10 +133,10 @@ func fsdp_all_gather_params(fsdp_module module) fsdp_module {
         module.state.comm,
     )
     int i = 0
-    while i < len(module.params) {
+    for i < len(module.params) {
         fsdp_param param = module.params[i]
         int j = 0
-        while j < param.local_size {
+        for j < param.local_size {
             param.local_data[j] = full_params[param.global_offset + j]
             j = j + 1
         }
@@ -152,10 +152,10 @@ func fsdp_scatter_params(fsdp_module module) fsdp_module {
     }
     []float full_params = allocate_vector(module.total_params, 0.0)
     int i = 0
-    while i < len(module.params) {
+    for i < len(module.params) {
         fsdp_param param = module.params[i]
         int j = 0
-        while j < param.local_size {
+        for j < param.local_size {
             full_params[param.global_offset + j] = param.local_data[j]
             j = j + 1
         }
@@ -177,10 +177,10 @@ func fsdp_reduce_scatter_grads(fsdp_module module) fsdp_module {
     }
     []float full_grads = allocate_vector(module.total_params, 0.0)
     int i = 0
-    while i < len(module.params) {
+    for i < len(module.params) {
         fsdp_param param = module.params[i]
         int j = 0
-        while j < param.local_size {
+        for j < param.local_size {
             full_grads[param.global_offset + j] = param.grad[j]
             j = j + 1
         }
@@ -196,7 +196,7 @@ func fsdp_reduce_scatter_grads(fsdp_module module) fsdp_module {
     )
     float scale = module.state.config.gradient_predivide_factor / module.state.world_size
     i = 0
-    while i < module.local_params {
+    for i < module.local_params {
         module.flattened_grads[i] = module.flattened_grads[i] * scale
         i = i + 1
     }
@@ -212,7 +212,7 @@ func fsdp_all_reduce_grads(fsdp_module module) fsdp_module {
     )
     float scale = 1.0 / module.state.world_size
     int i = 0
-    while i < module.local_params {
+    for i < module.local_params {
         module.flattened_grads[i] = module.flattened_grads[i] * scale
         i = i + 1
     }
@@ -252,13 +252,13 @@ func fsdp_optimizer_step_post_hook(fsdp_module module) fsdp_module {
 func fsdp_flatten_params(fsdp_module module) fsdp_module {
     int offset = 0
     int i = 0
-    while i < len(module.params) {
+    for i < len(module.params) {
         fsdp_param param = module.params[i]
         param.global_offset = offset
         param.local_size = len(param.local_data)
         param.shard_size = param.local_size / module.state.world_size
         int j = 0
-        while j < param.local_size && offset + j < module.total_params {
+        for j < param.local_size && offset + j < module.total_params {
             module.flattened_params[offset + j] = param.local_data[j]
             j = j + 1
         }
@@ -272,10 +272,10 @@ func fsdp_flatten_params(fsdp_module module) fsdp_module {
 func fsdp_unflatten_params(fsdp_module module) fsdp_module {
     int offset = 0
     int i = 0
-    while i < len(module.params) {
+    for i < len(module.params) {
         fsdp_param param = module.params[i]
         int j = 0
-        while j < param.local_size && offset + j < module.total_params {
+        for j < param.local_size && offset + j < module.total_params {
             param.local_data[j] = module.flattened_params[offset + j]
             j = j + 1
         }
@@ -290,7 +290,7 @@ func fsdp_save_checkpoint(fsdp_module module, string path) bool {
     if module.state.is_root {
         module = fsdp_all_gather_params(module)
         int i = 0
-        while i < module.total_params {
+        for i < module.total_params {
             write_float_to_file(path, module.flattened_params[i])
             i = i + 1
         }
@@ -303,7 +303,7 @@ func fsdp_load_checkpoint(fsdp_module module, string path) bool {
     if module.state.is_root {
         []float full_params = allocate_vector(module.total_params, 0.0)
         int i = 0
-        while i < module.total_params {
+        for i < module.total_params {
             full_params[i] = read_float_from_file(path, i)
             i = i + 1
         }
@@ -348,15 +348,15 @@ func fsdp_module_gradients(fsdp_module module) []float {
 
 func fsdp_zero_grad(fsdp_module module) fsdp_module {
     int i = 0
-    while i < module.local_params {
+    for i < module.local_params {
         module.flattened_grads[i] = 0.0
         i = i + 1
     }
     int j = 0
-    while j < len(module.params) {
+    for j < len(module.params) {
         fsdp_param param = module.params[j]
         int k = 0
-        while k < len(param.grad) {
+        for k < len(param.grad) {
             param.grad[k] = 0.0
             k = k + 1
         }
@@ -375,7 +375,7 @@ func min(int a, int b) int {
 
 func fsdp_set_gradients(fsdp_module module, []float grads) fsdp_module {
     int i = 0
-    while i < min(len(grads), module.local_params) {
+    for i < min(len(grads), module.local_params) {
         module.flattened_grads[i] = grads[i]
         i = i + 1
     }

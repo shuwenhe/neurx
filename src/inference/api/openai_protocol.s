@@ -25,7 +25,7 @@ struct openai_request_result {
 func openai_substring(string text, int start, int end) string {
     string result = ""
     int i = start
-    while i < end && i < len(text) {
+    for i < end && i < len(text) {
         result = result + string(text[i])
         i = i + 1
     }
@@ -34,10 +34,10 @@ func openai_substring(string text, int start, int end) string {
 
 func openai_find(string text, string pattern, int start) int {
     int i = start
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
         bool matches = true
-        while j < len(pattern) {
+        for j < len(pattern) {
             if text[i + j] != pattern[j] {
                 matches = false
                 break
@@ -58,7 +58,7 @@ func openai_is_space(int ch) bool {
 
 func openai_skip_space(string text, int start) int {
     int i = start
-    while i < len(text) && openai_is_space(int(text[i])) {
+    for i < len(text) && openai_is_space(int(text[i])) {
         i = i + 1
     }
     i
@@ -84,7 +84,7 @@ func openai_json_string(string body, string key) string {
     string value = ""
     bool escaped = false
     int i = start + 1
-    while i < len(body) {
+    for i < len(body) {
         int ch = int(body[i])
         if escaped {
             value = value + string(body[i])
@@ -114,7 +114,7 @@ func openai_json_int(string body, string key, int default_value) int {
     int value = 0
     bool found = false
     int i = start
-    while i < len(body) && int(body[i]) >= 48 && int(body[i]) <= 57 {
+    for i < len(body) && int(body[i]) >= 48 && int(body[i]) <= 57 {
         value = value * 10 + int(body[i]) - 48
         found = true
         i = i + 1
@@ -155,7 +155,7 @@ func openai_json_decimal_milli(string body, string key, int default_value) int {
     int whole = 0
     bool found = false
     int i = start
-    while i < len(body) && int(body[i]) >= 48 && int(body[i]) <= 57 {
+    for i < len(body) && int(body[i]) >= 48 && int(body[i]) <= 57 {
         whole = whole * 10 + int(body[i]) - 48
         found = true
         i = i + 1
@@ -164,7 +164,7 @@ func openai_json_decimal_milli(string body, string key, int default_value) int {
     int digits = 0
     if i < len(body) && int(body[i]) == 46 {
         i = i + 1
-        while i < len(body) && int(body[i]) >= 48 && int(body[i]) <= 57 && digits < 3 {
+        for i < len(body) && int(body[i]) >= 48 && int(body[i]) <= 57 && digits < 3 {
             fraction = fraction * 10 + int(body[i]) - 48
             digits = digits + 1
             i = i + 1
@@ -173,7 +173,7 @@ func openai_json_decimal_milli(string body, string key, int default_value) int {
     if !found {
         return default_value
     }
-    while digits < 3 {
+    for digits < 3 {
         fraction = fraction * 10
         digits = digits + 1
     }
@@ -192,7 +192,7 @@ func openai_latest_message_content(string body) string {
     string latest = ""
     int search_from = messages
     int content = openai_find(body, "\"content\"", search_from)
-    while content >= 0 {
+    for content >= 0 {
         string tail = openai_substring(body, content, len(body))
         string value = openai_json_string(tail, "content")
         if value != "" {
@@ -229,7 +229,7 @@ func openai_chat_template(string body, string model) string {
     string conversation = ""
     int search_from = messages
 
-    while true {
+    for true {
         int role_pos = openai_find(body, "\"role\"", search_from)
         if role_pos < 0 {
             break
@@ -321,7 +321,7 @@ func parse_openai_request(string body, string request_id) openai_request_result 
 func openai_json_escape(string text) string {
     string escaped = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         int ch = int(text[i])
         if ch == 34 {
             escaped = escaped + "\\\""
@@ -361,7 +361,7 @@ func openai_error_body(string message, string error_type, string code) string {
 func openai_embedding_body(string model, []float embedding, int prompt_tokens) string {
     string values = ""
     int i = 0
-    while i < len(embedding) {
+    for i < len(embedding) {
         if i > 0 {
             values = values + ","
         }

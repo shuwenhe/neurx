@@ -11,7 +11,7 @@ func int_to_string(int val) string {
         num = 0 - num
     }
     string digits = ""
-    while num > 0 {
+    for num > 0 {
         int digit = num % 10
         if digit == 0 { digits = "0" + digits }
         else if digit == 1 { digits = "1" + digits }
@@ -108,12 +108,12 @@ func main() {
     print("func heap_sort(int[] arr) {\n")
     print("    int n = len(arr)\n")
     print("    int i = n / 2 - 1\n")
-    print("    while i >= 0 {\n")
+    print("    for i >= 0 {\n")
     print("        heapify(arr, n, i)\n")
     print("        i = i - 1\n")
     print("    }\n")
     print("    i = n - 1\n")
-    print("    while i > 0 {\n")
+    print("    for i > 0 {\n")
     print("        swap(arr[0], arr[i])\n")
     print("        heapify(arr, i, 0)\n")
     print("        i = i - 1\n")

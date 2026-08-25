@@ -84,7 +84,7 @@ func io_submit(ss storage_state, op int, path string, offset int,
 
 func io_complete(ss storage_state, int req_id, string err) storage_state {
     int i = 0
-    while i < len(ss.ring.submission_queue) {
+    for i < len(ss.ring.submission_queue) {
         if ss.ring.submission_queue[i].req_id == req_id {
             io_request r = ss.ring.submission_queue[i]
             if err == "" {
@@ -96,7 +96,7 @@ func io_complete(ss storage_state, int req_id, string err) storage_state {
             ss.ring.completion_queue = append(ss.ring.completion_queue, r)
             []io_request sq = []
             int j = 0
-            while j < len(ss.ring.submission_queue) {
+            for j < len(ss.ring.submission_queue) {
                 if j != i {
                     sq = append(sq, ss.ring.submission_queue[j])
                 }
@@ -114,7 +114,7 @@ func io_poll(ss storage_state, int owner_pid) (storage_state, []io_request) {
     []io_request done = []
     []io_request remaining = []
     int i = 0
-    while i < len(ss.ring.completion_queue) {
+    for i < len(ss.ring.completion_queue) {
         if ss.ring.completion_queue[i].owner_pid == owner_pid {
             done = append(done, ss.ring.completion_queue[i])
         } else {

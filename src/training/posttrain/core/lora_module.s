@@ -29,10 +29,10 @@ func new_lora_module_s(int input_dim, int output_dim, int rank, float alpha) lor
     [][]float lora_a = make([][]float, 0)
     [][]float lora_b = make([][]float, 0)
     int i = 0
-    while i < input_dim {
+    for i < input_dim {
         []float row_a = make([]float, 0)
         int j = 0
-        while j < rank {
+        for j < rank {
             row_a = append(row_a, 0.02)
             j = j + 1
         }
@@ -40,10 +40,10 @@ func new_lora_module_s(int input_dim, int output_dim, int rank, float alpha) lor
         i = i + 1
     }
     i = 0
-    while i < rank {
+    for i < rank {
         []float row_b = make([]float, 0)
         int j = 0
-        while j < output_dim {
+        for j < output_dim {
             row_b = append(row_b, 0.0)
             j = j + 1
         }
@@ -64,16 +64,16 @@ func new_lora_module_s(int input_dim, int output_dim, int rank, float alpha) lor
 func matrix_multiply_s([][]float a, [][]float b) [][]float {
     [][]float result = make([][]float, 0)
     int i = 0
-    while i < len(a) {
+    for i < len(a) {
         []float row_result = make([]float, 0)
         if len(b) == 0 {
             i = i + 1
         } else {
             int j = 0
-            while j < len(b[0]) {
+            for j < len(b[0]) {
                 float sum_val = 0.0
                 int k = 0
-                while k < len(b) {
+                for k < len(b) {
                     sum_val = sum_val + a[i][k] * b[k][j]
                     k = k + 1
                 }
@@ -92,11 +92,11 @@ func lora_forward_s([][]float x, lora_module_s lora) lora_forward_result_s {
     lora_out = matrix_multiply_s(lora_out, lora.lora_b)
     [][]float scaled_out = make([][]float, 0)
     int i = 0
-    while i < len(lora_out) {
+    for i < len(lora_out) {
         []float row = lora_out[i]
         []float scaled_row = make([]float, 0)
         int j = 0
-        while j < len(row) {
+        for j < len(row) {
             scaled_row = append(scaled_row, row[j] * lora.scale_factor)
             j = j + 1
         }
@@ -114,11 +114,11 @@ func lora_merge_to_weight_s([][]float original_weight, lora_module_s lora) [][]f
     [][]float lora_delta = matrix_multiply_s(lora.lora_b, lora.lora_a)
     [][]float merged = make([][]float, 0)
     int i = 0
-    while i < len(original_weight) {
+    for i < len(original_weight) {
         []float row = original_weight[i]
         []float merged_row = make([]float, 0)
         int j = 0
-        while j < len(row) {
+        for j < len(row) {
             float delta_val = 0.0
             if i < len(lora_delta) && j < len(lora_delta[i]) {
                 delta_val = lora_delta[i][j] * lora.scale_factor

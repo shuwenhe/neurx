@@ -102,9 +102,9 @@ func test_accumulation_complete() bool {
     accum := gradient_accumulation.new_accumulated_gradients(5)
     step_grad := [][]float(5)
     i := 0
-    while i < 5 { step_grad[i] = 0.1; i = i + 1 }
+    for i < 5 { step_grad[i] = 0.1; i = i + 1 }
     i = 0
-    while i < 3 {
+    for i < 3 {
         accum = gradient_accumulation.accumulate_gradients(accum, step_grad, 1.0, 1.0)
         i = i + 1
     }

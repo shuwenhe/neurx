@@ -41,7 +41,7 @@ func int_to_string(int n) string {
         is_negative = 1
         n = 0 - n
     }
-    while n > 0 {
+    for n > 0 {
         int remainder = n - ((n / 10) * 10)
         int digit = remainder
         string ch = ""
@@ -96,7 +96,7 @@ func float_to_string(float f) string {
 func repeat_string(string s, int count) string {
     string result = ""
     int i = 0
-    while i < count {
+    for i < count {
         result = result + s
         i = i + 1
     }
@@ -107,7 +107,7 @@ func create_vector(int size, float value) tensor_2 {
     tensor_2 t
     t.data = []
     int i = 0
-    while i < size {
+    for i < size {
         t.data = append(t.data, value)
         i = i + 1
     }
@@ -120,7 +120,7 @@ func create_matrix(int rows, int cols, float value) tensor_2 {
     t.data = []
     int total = rows * cols
     int i = 0
-    while i < total {
+    for i < total {
         t.data = append(t.data, value)
         i = i + 1
     }
@@ -162,7 +162,7 @@ func train_epoch(training_config config, training_state state) float {
     float epoch_loss = 0.0
     int batch_size = 4
     int batch_idx = 0
-    while batch_idx < batch_size {
+    for batch_idx < batch_size {
         println("  batch_2 " + int_to_string(batch_idx + 1) + "/" + int_to_string(batch_size))
         float batch_loss = 0.0046
         epoch_loss = epoch_loss + batch_loss
@@ -188,7 +188,7 @@ func train_model(training_config config) training_state {
     println("Real LoRA SFT Training")
     println(repeat_string("=", 50))
     int epoch = 0
-    while epoch < config.num_epochs {
+    for epoch < config.num_epochs {
         state.current_epoch = epoch
         float epoch_loss = train_epoch(config, state)
         println("Epoch " + int_to_string(epoch + 1) + " complete")

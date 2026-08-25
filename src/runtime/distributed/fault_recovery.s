@@ -312,7 +312,7 @@ func distributed_training_with_recovery(
     recovery_state.is_recovering = false
     recovery_state.recovery_step = 0
     global_step := 0
-    while global_step < training_steps {
+    for global_step < training_steps {
         predictions := model_forward(current_params)
         prev_loss = current_loss
         current_loss = compute_loss_func(predictions, targets)

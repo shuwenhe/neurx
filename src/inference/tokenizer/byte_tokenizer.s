@@ -14,7 +14,7 @@ func tokenize_bytes(string prompt, int vocabulary_size, int maximum_tokens) byte
     if count > maximum_tokens { count = maximum_tokens }
     []int token_ids = []int{cap: count}
     int i = 0
-    while i < count {
+    for i < count {
         int value = int(prompt[i])
         if value < 0 { value = -value }
         token_ids[i] = value % vocabulary_size

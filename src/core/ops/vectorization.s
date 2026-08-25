@@ -28,14 +28,14 @@ func batch_matmul([][]float A, [][]float B, int batch_size, int M, int K, int N)
     output := [][]float(batch_size * M * N)
     idx := 0
     b := 0
-    while b < batch_size {
+    for b < batch_size {
         i := 0
-        while i < M {
+        for i < M {
             j := 0
-            while j < N {
+            for j < N {
                 sum := 0.0
                 k := 0
-                while k < K {
+                for k < K {
                     a_idx := b * M * K + i * K + k
                     b_idx := b * K * N + k * N + j
                     sum = sum + A[a_idx] * B[b_idx]
@@ -60,37 +60,37 @@ func batch_matmul_blocked([][]float A, [][]float B, int batch_size, int M, int K
     result := batch_matmul_result
     output := [][]float(batch_size * M * N)
     idx := 0
-    while idx < batch_size * M * N {
+    for idx < batch_size * M * N {
         output[idx] = 0.0
         idx = idx + 1
     }
     b := 0
-    while b < batch_size {
+    for b < batch_size {
         k_block := 0
-        while k_block < K {
+        for k_block < K {
             k_end := k_block + block_size
             if k_end > K {
                 k_end = K
             }
             i_block := 0
-            while i_block < M {
+            for i_block < M {
                 i_end := i_block + block_size
                 if i_end > M {
                     i_end = M
                 }
                 j_block := 0
-                while j_block < N {
+                for j_block < N {
                     j_end := j_block + block_size
                     if j_end > N {
                         j_end = N
                     }
                     i := i_block
-                    while i < i_end {
+                    for i < i_end {
                         j := j_block
-                        while j < j_end {
+                        for j < j_end {
                             sum := output[b * M * N + i * N + j]
                             k := k_block
-                            while k < k_end {
+                            for k < k_end {
                                 a_idx := b * M * K + i * K + k
                                 b_idx := b * K * N + k * N + j
                                 sum = sum + A[a_idx] * B[b_idx]
@@ -119,7 +119,7 @@ func batch_matmul_blocked([][]float A, [][]float B, int batch_size, int M, int K
 func element_wise_add([]float A, []float B) []float {
     var []float result = []float(len(A))
     i := 0
-    while i < len(A) {
+    for i < len(A) {
         result[i] = A[i] + B[i]
         i = i + 1
     }
@@ -129,7 +129,7 @@ func element_wise_add([]float A, []float B) []float {
 func element_wise_mul([]float A, []float B) []float {
     var []float result = []float(len(A))
     i := 0
-    while i < len(A) {
+    for i < len(A) {
         result[i] = A[i] * B[i]
         i = i + 1
     }
@@ -139,7 +139,7 @@ func element_wise_mul([]float A, []float B) []float {
 func element_wise_div([]float A, []float B, float epsilon) []float {
     var []float result = []float(len(A))
     i := 0
-    while i < len(A) {
+    for i < len(A) {
         if B[i] < 0.0 {
             if B[i] > -epsilon {
                 B[i] = -epsilon
@@ -158,7 +158,7 @@ func element_wise_div([]float A, []float B, float epsilon) []float {
 func element_wise_apply([]float A, func(float) float func_ptr) []float {
     var []float result = []float(len(A))
     i := 0
-    while i < len(A) {
+    for i < len(A) {
         result[i] = func_ptr(A[i])
         i = i + 1
     }
@@ -169,9 +169,9 @@ func batch_element_wise_add([][]float A, [][]float B, int batch_size, int size_p
     result := [][]float(len(A))
     idx := 0
     b := 0
-    while b < batch_size {
+    for b < batch_size {
         i := 0
-        while i < size_per_batch {
+        for i < size_per_batch {
             result[idx] = A[idx] + B[idx]
             i = i + 1
             idx = idx + 1
@@ -185,9 +185,9 @@ func batch_element_wise_mul([][]float A, [][]float B, int batch_size, int size_p
     result := [][]float(len(A))
     idx := 0
     b := 0
-    while b < batch_size {
+    for b < batch_size {
         i := 0
-        while i < size_per_batch {
+        for i < size_per_batch {
             result[idx] = A[idx] * B[idx]
             i = i + 1
             idx = idx + 1
@@ -200,7 +200,7 @@ func batch_element_wise_mul([][]float A, [][]float B, int batch_size, int size_p
 func reduce_sum([]float A) float {
     sum := 0.0
     i := 0
-    while i < len(A) {
+    for i < len(A) {
         sum = sum + A[i]
         i = i + 1
     }
@@ -220,7 +220,7 @@ func reduce_max([]float A) float {
     }
     max_val := A[0]
     i := 1
-    while i < len(A) {
+    for i < len(A) {
         if A[i] > max_val {
             max_val = A[i]
         }
@@ -232,10 +232,10 @@ func reduce_max([]float A) float {
 func reduce_sum_batch([][]float A, int batch_size, int size_per_batch) []float {
     var []float result = []float(batch_size)
     b := 0
-    while b < batch_size {
+    for b < batch_size {
         sum := 0.0
         i := 0
-        while i < size_per_batch {
+        for i < size_per_batch {
             sum = sum + A[b * size_per_batch + i]
             i = i + 1
         }
@@ -249,9 +249,9 @@ func broadcast_add([][]float A, []float b, int rows, int cols) [][]float {
     result := [][]float(len(A))
     idx := 0
     r := 0
-    while r < rows {
+    for r < rows {
         c := 0
-        while c < cols {
+        for c < cols {
             result[idx] = A[idx] + b[c]
             idx = idx + 1
             c = c + 1
@@ -265,9 +265,9 @@ func broadcast_mul([][]float A, []float b, int rows, int cols) [][]float {
     result := [][]float(len(A))
     idx := 0
     r := 0
-    while r < rows {
+    for r < rows {
         c := 0
-        while c < cols {
+        for c < cols {
             result[idx] = A[idx] * b[c]
             idx = idx + 1
             c = c + 1
@@ -311,35 +311,35 @@ func new_vectorization_stats() vectorization_stats {
 func gemm_blocked([][]float A, [][]float B, int M, int K, int N, int block_size) [][]float {
     C := [][]float(M * N)
     i := 0
-    while i < M * N {
+    for i < M * N {
         C[i] = 0.0
         i = i + 1
     }
     k_block := 0
-    while k_block < K {
+    for k_block < K {
         k_end := k_block + block_size
         if k_end > K {
             k_end = K
         }
         i_block := 0
-        while i_block < M {
+        for i_block < M {
             i_end := i_block + block_size
             if i_end > M {
                 i_end = M
             }
             j_block := 0
-            while j_block < N {
+            for j_block < N {
                 j_end := j_block + block_size
                 if j_end > N {
                     j_end = N
                 }
                 i = i_block
-                while i < i_end {
+                for i < i_end {
                     j := j_block
-                    while j < j_end {
+                    for j < j_end {
                         sum := C[i * N + j]
                         k := k_block
-                        while k < k_end {
+                        for k < k_end {
                             sum = sum + A[i * K + k] * B[k * N + j]
                             k = k + 1
                         }
@@ -359,9 +359,9 @@ func gemm_blocked([][]float A, [][]float B, int M, int K, int N, int block_size)
 
 func transpose_in_place([][]float A, int N) [][]float {
     i := 0
-    while i < N {
+    for i < N {
         j := i + 1
-        while j < N {
+        for j < N {
             temp := A[i * N + j]
             A[i * N + j] = A[j * N + i]
             A[j * N + i] = temp
@@ -375,7 +375,7 @@ func transpose_in_place([][]float A, int N) [][]float {
 func scale_vector([]float A, float scalar) []float {
     var []float result = []float(len(A))
     i := 0
-    while i < len(A) {
+    for i < len(A) {
         result[i] = A[i] * scalar
         i = i + 1
     }
@@ -385,7 +385,7 @@ func scale_vector([]float A, float scalar) []float {
 func dot_product([]float A, []float B) float {
     result := 0.0
     i := 0
-    while i < len(A) {
+    for i < len(A) {
         result = result + A[i] * B[i]
         i = i + 1
     }
@@ -395,7 +395,7 @@ func dot_product([]float A, []float B) float {
 func vector_norm([]float A) float {
     sum := 0.0
     i := 0
-    while i < len(A) {
+    for i < len(A) {
         sum = sum + A[i] * A[i]
         i = i + 1
     }
@@ -405,7 +405,7 @@ func vector_norm([]float A) float {
     result := 0.0
     x := sum
     i_iter := 0
-    while i_iter < 10 {
+    for i_iter < 10 {
         if x == 0.0 {
             break
         }

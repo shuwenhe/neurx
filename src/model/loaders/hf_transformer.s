@@ -40,7 +40,7 @@ func hf_int_string(int value) string {
     if value == 0 { return "0" }
     string output = ""
     int current = value
-    while current > 0 { output = string(48 + current % 10) + output; current = current / 10 }
+    for current > 0 { output = string(48 + current % 10) + output; current = current / 10 }
     output
 }
 
@@ -52,16 +52,16 @@ func hf_load_values(string path, string name) f32_tensor_result {
 func hf_bytes_string([]int bytes) string {
     string output = ""
     int i = 0
-    while i < len(bytes) { output = output + string(bytes[i]); i = i + 1 }
+    for i < len(bytes) { output = output + string(bytes[i]); i = i + 1 }
     output
 }
 
 func hf_find(string text, string pattern, int start) int {
     int i = start
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
         bool match = true
-        while j < len(pattern) { if text[i + j] != pattern[j] { match = false; j = len(pattern) } else { j = j + 1 } }
+        for j < len(pattern) { if text[i + j] != pattern[j] { match = false; j = len(pattern) } else { j = j + 1 } }
         if match { return i }
         i = i + 1
     }
@@ -82,7 +82,7 @@ func hf_resolve_tensor_path(string model_dir, string name) string {
     if colon < 0 || quote < 0 || end < 0 { return "" }
     string shard = ""
     int i = quote + 1
-    while i < end { shard = shard + string(index[i]); i = i + 1 }
+    for i < end { shard = shard + string(index[i]); i = i + 1 }
     model_dir + "/" + shard
 }
 
@@ -135,7 +135,7 @@ func invalid_hf_model(hf_model_config config, string code) hf_model_weights {
 
 func hf_copy_layer([]float target, int offset, []float source) {
     int i = 0
-    while i < len(source) { target[offset + i] = source[i]; i = i + 1 }
+    for i < len(source) { target[offset + i] = source[i]; i = i + 1 }
 }
 
 func load_hf_model(string model_dir) hf_model_weights {
@@ -158,17 +158,17 @@ func load_hf_model(string model_dir) hf_model_weights {
     []float up_proj = []float{cap: config.layers * mlp_size}
     []float down_proj = []float{cap: config.layers * mlp_size}
     int layer = 0
-    while layer < config.layers {
+    for layer < config.layers {
         hf_layer_weights weights = load_hf_model_layer(model_dir, layer)
         if !weights.valid { return invalid_hf_model(config, "layer_" + hf_int_string(layer) + "_" + weights.error_code) }
         int i = 0
-        while i < config.hidden_size { input_norm[layer * config.hidden_size + i] = weights.input_norm[i]; post_norm[layer * config.hidden_size + i] = weights.post_norm[i]; i = i + 1 }
+        for i < config.hidden_size { input_norm[layer * config.hidden_size + i] = weights.input_norm[i]; post_norm[layer * config.hidden_size + i] = weights.post_norm[i]; i = i + 1 }
         i = 0
-        while i < hidden_square { q_proj[layer * hidden_square + i] = weights.q_proj[i]; o_proj[layer * hidden_square + i] = weights.o_proj[i]; i = i + 1 }
+        for i < hidden_square { q_proj[layer * hidden_square + i] = weights.q_proj[i]; o_proj[layer * hidden_square + i] = weights.o_proj[i]; i = i + 1 }
         i = 0
-        while i < kv_size { k_proj[layer * kv_size + i] = weights.k_proj[i]; v_proj[layer * kv_size + i] = weights.v_proj[i]; i = i + 1 }
+        for i < kv_size { k_proj[layer * kv_size + i] = weights.k_proj[i]; v_proj[layer * kv_size + i] = weights.v_proj[i]; i = i + 1 }
         i = 0
-        while i < mlp_size { gate_proj[layer * mlp_size + i] = weights.gate_proj[i]; up_proj[layer * mlp_size + i] = weights.up_proj[i]; down_proj[layer * mlp_size + i] = weights.down_proj[i]; i = i + 1 }
+        for i < mlp_size { gate_proj[layer * mlp_size + i] = weights.gate_proj[i]; up_proj[layer * mlp_size + i] = weights.up_proj[i]; down_proj[layer * mlp_size + i] = weights.down_proj[i]; i = i + 1 }
         layer = layer + 1
     }
     f32_tensor_result final_norm = hf_load_model_values(model_dir, "model.norm.weight")

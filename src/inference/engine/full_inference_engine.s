@@ -40,7 +40,7 @@ func tokenize_simple(string text) []int {
     int i = 0
     int word_start = 0
 
-    while i <= len(text) {
+    for i <= len(text) {
         bool is_space = false
         if i < len(text) {
             string ch = __host_slice(text, i, i + 1)
@@ -68,7 +68,7 @@ func get_token_embedding(int token_id, int hidden_size) []float {
     []float embedding = []float{cap: hidden_size}
 
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         int seed = (token_id * 73 + i * 37) % 1000
         float val = float((seed % 100) - 50) / 100.0
         embedding[i] = val
@@ -82,10 +82,10 @@ func stack_embeddings([]int token_ids, int hidden_size) []float {
     []float batch_embeddings = []float{cap: len(token_ids) * hidden_size}
 
     int token_idx = 0
-    while token_idx < len(token_ids) {
+    for token_idx < len(token_ids) {
         []float emb = get_token_embedding(token_ids[token_idx], hidden_size)
         int i = 0
-        while i < len(emb) {
+        for i < len(emb) {
             batch_embeddings[token_idx * hidden_size + i] = emb[i]
             i = i + 1
         }
@@ -107,7 +107,7 @@ func load_layer_weights(string model_path, int layer_idx, int hidden_size, int i
     []float norm = []float{cap: weight_size}
 
     int i = 0
-    while i < weight_size {
+    for i < weight_size {
         int seed = (layer_idx * 1000 + i * 73) % 1000
         float val = float((seed % 100) - 50) / 10000.0
         q[i] = val
@@ -135,10 +135,10 @@ func linear_transform([]float input, []float weights, int output_dim) []float {
     []float output = []float{cap: output_dim}
 
     int i = 0
-    while i < output_dim {
+    for i < output_dim {
         float sum = 0.0
         int j = 0
-        while j < len(input) && i * len(input) + j < len(weights) {
+        for j < len(input) && i * len(input) + j < len(weights) {
             sum = sum + input[j] * weights[i * len(input) + j]
             j = j + 1
         }
@@ -159,10 +159,10 @@ func forward_transformer_layer([]float hidden_state, layer_weights weights, int 
 
     []float attn_scores = []float{cap: hidden_size}
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         float score = 0.0
         int j = 0
-        while j < hidden_size {
+        for j < hidden_size {
             score = score + query[i] * key[j]
             j = j + 1
         }
@@ -174,10 +174,10 @@ func forward_transformer_layer([]float hidden_state, layer_weights weights, int 
 
     []float attn_output = []float{cap: hidden_size}
     i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         float val = 0.0
         int j = 0
-        while j < hidden_size {
+        for j < hidden_size {
             val = val + attn_weights[j] * value[j]
             j = j + 1
         }
@@ -193,7 +193,7 @@ func forward_transformer_layer([]float hidden_state, layer_weights weights, int 
     []float ffn_hidden = linear_transform(normed2, weights.mlp_up_weight, intermediate_size)
 
     i = 0
-    while i < len(ffn_hidden) {
+    for i < len(ffn_hidden) {
         float x = ffn_hidden[i]
         float sig = 1.0 / (1.0 + exp_approx(0.0 - x))
         ffn_hidden[i] = x * sig
@@ -211,7 +211,7 @@ func forward_all_layers([]float embeddings, string model_path, model_config conf
     []float hidden_state = embeddings
 
     int layer_idx = 0
-    while layer_idx < config.num_hidden_layers && layer_idx < 2 {
+    for layer_idx < config.num_hidden_layers && layer_idx < 2 {
         print("[Forward] Layer " + int_to_string(layer_idx) + " / " + int_to_string(config.num_hidden_layers) + "\n")
 
         layer_weights weights = load_layer_weights(model_path, layer_idx, config.hidden_size, config.intermediate_size)
@@ -227,10 +227,10 @@ func get_logits([]float last_hidden, int vocab_size, int hidden_size) []float {
     []float logits = []float{cap: vocab_size}
 
     int i = 0
-    while i < vocab_size && i < 1000 {
+    for i < vocab_size && i < 1000 {
         float score = 0.0
         int j = 0
-        while j < hidden_size {
+        for j < hidden_size {
             int seed = (i * 73 + j * 37) % 1000
             float weight = float((seed % 100) - 50) / 1000.0
             score = score + last_hidden[j] * weight
@@ -252,7 +252,7 @@ func sample_next_token_greedy([]float logits) int {
     float best_val = logits[0]
 
     int i = 1
-    while i < len(logits) {
+    for i < len(logits) {
         if logits[i] > best_val {
             best_idx = i
             best_val = logits[i]
@@ -296,7 +296,7 @@ func generate_response(string prompt, string model_path, int max_tokens) string 
     string response = ""
     int token_count = 0
 
-    while token_count < max_tokens {
+    for token_count < max_tokens {
 
         []float logits = get_logits(hidden_state, config.vocab_size, config.hidden_size)
 
@@ -320,7 +320,7 @@ func int_to_string(int value) string {
     string result = ""
     int current = value
     if current < 0 { current = 0 - current }
-    while current > 0 {
+    for current > 0 {
         int digit = current - (current / 10) * 10
         if digit == 0 { result = "0" + result }
         else if digit == 1 { result = "1" + result }
@@ -341,7 +341,7 @@ func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float guess = x
     int i = 0
-    while i < 3 {
+    for i < 3 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }
@@ -364,14 +364,14 @@ func softmax([]float logits) []float {
 
     float maxv = logits[0]
     int i = 1
-    while i < n {
+    for i < n {
         if logits[i] > maxv { maxv = logits[i] }
         i = i + 1
     }
 
     float sum = 0.0
     i = 0
-    while i < n {
+    for i < n {
         float p = exp_approx(logits[i] - maxv)
         probs[i] = p
         sum = sum + p
@@ -381,7 +381,7 @@ func softmax([]float logits) []float {
     if sum == 0.0 { sum = 1.0 }
 
     i = 0
-    while i < n {
+    for i < n {
         probs[i] = probs[i] / sum
         i = i + 1
     }
@@ -394,7 +394,7 @@ func rms_norm([]float input, []float gamma, float eps) []float {
 
     float sum_sq = 0.0
     int i = 0
-    while i < len(input) {
+    for i < len(input) {
         float x = input[i]
         sum_sq = sum_sq + x * x
         i = i + 1
@@ -404,7 +404,7 @@ func rms_norm([]float input, []float gamma, float eps) []float {
     float rms = sqrt_approx(mean_sq + eps)
 
     i = 0
-    while i < len(input) {
+    for i < len(input) {
         if i < len(gamma) {
             output[i] = (input[i] / rms) * gamma[i]
         } else {
@@ -419,11 +419,11 @@ func rms_norm([]float input, []float gamma, float eps) []float {
 func add_vectors([]float a, []float b) []float {
     []float result = []float{cap: len(a)}
     int i = 0
-    while i < len(a) && i < len(b) {
+    for i < len(a) && i < len(b) {
         result[i] = a[i] + b[i]
         i = i + 1
     }
-    while i < len(a) {
+    for i < len(a) {
         result[i] = a[i]
         i = i + 1
     }

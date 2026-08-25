@@ -94,10 +94,10 @@ func float_to_bytes(float val, int byte_order) []int {
 func write_float_tensor_data([]float data, int count) []int {
     []int binary = []int{}
     int i = 0
-    while i < count {
+    for i < count {
         []int bytes = float_to_bytes(data[i], 0)
         int j = 0
-        while j < 4 {
+        for j < 4 {
             binary = append(binary, bytes[j])
             j = j + 1
         }
@@ -228,7 +228,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value % 10
         out = digit_to_str(digit) + out
         value = value / 10
@@ -255,7 +255,7 @@ func fmt_float(float value, int decimals) string {
     bool neg = current < 0.0
     if neg { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -263,10 +263,10 @@ func fmt_float(float value, int decimals) string {
     if neg { out = "-" }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }

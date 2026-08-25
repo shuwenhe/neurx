@@ -275,7 +275,7 @@ func (v1_engine* engine) get_stats() v1_engine_stats {
 
 func (mut v1_engine* engine) run_to_completion() {
 
-    while engine.total_requests_completed < engine.total_requests_received {
+    for engine.total_requests_completed < engine.total_requests_received {
         result := engine.iteration()
 
         if result.prefill_count == 0 && result.decode_count == 0 {

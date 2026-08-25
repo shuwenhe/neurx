@@ -39,19 +39,19 @@ func new_pretrain_optimizer_state(float lr, float min_lr, int warmup_steps, int 
 func pretrain_optimizer_global_norm3(tensor a, tensor b, tensor c) float {
     float total_sq = 0.0
     int i = 0
-    while i < len(a.data) {
+    for i < len(a.data) {
         float v = a.data[i]
         total_sq = total_sq + v * v
         i = i + 1
     }
     i = 0
-    while i < len(b.data) {
+    for i < len(b.data) {
         float v = b.data[i]
         total_sq = total_sq + v * v
         i = i + 1
     }
     i = 0
-    while i < len(c.data) {
+    for i < len(c.data) {
         float v = c.data[i]
         total_sq = total_sq + v * v
         i = i + 1
@@ -64,7 +64,7 @@ func pretrain_optimizer_global_norm3(tensor a, tensor b, tensor c) float {
         guess = 1.0
     }
     int j = 0
-    while j < 6 {
+    for j < 6 {
         guess = 0.5 * (guess + total_sq / guess)
         j = j + 1
     }

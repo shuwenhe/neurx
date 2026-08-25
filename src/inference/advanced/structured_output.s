@@ -48,7 +48,7 @@ func new_structured_validation_result(bool valid, string error_message, string n
 func structured_substring(string text, int start, int end) string {
     string result = ""
     int i = start
-    while i < end && i < len(text) {
+    for i < end && i < len(text) {
         result = result + string(text[i])
         i = i + 1
     }
@@ -87,7 +87,7 @@ func structured_stack_pop(string stack) string {
     }
     string result = ""
     int i = 0
-    while i < len(stack) - 1 {
+    for i < len(stack) - 1 {
         result = result + string(stack[i])
         i = i + 1
     }
@@ -99,7 +99,7 @@ func json_stream_consume(json_stream_state state, string chunk) json_stream_stat
         return state
     }
     int i = 0
-    while i < len(chunk) {
+    for i < len(chunk) {
         int ch = int(chunk[i])
         if state.complete {
             if !structured_is_space(ch) {
@@ -201,10 +201,10 @@ func structured_find_substring(string text, string pattern, int start) int {
         return start
     }
     int i = start
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
         bool matches = true
-        while j < len(pattern) {
+        for j < len(pattern) {
             if text[i + j] != pattern[j] {
                 matches = false
                 break
@@ -221,7 +221,7 @@ func structured_find_substring(string text, string pattern, int start) int {
 
 func structured_skip_space(string text, int start) int {
     int i = start
-    while i < len(text) && structured_is_space(int(text[i])) {
+    for i < len(text) && structured_is_space(int(text[i])) {
         i = i + 1
     }
     i
@@ -252,7 +252,7 @@ func structured_value_type(string text, int start) string {
     if ch == 110 { return "null" }
     if ch == 45 || (ch >= 48 && ch <= 57) {
         int i = start
-        while i < len(text) {
+        for i < len(text) {
             if int(text[i]) == 46 || int(text[i]) == 101 || int(text[i]) == 69 {
                 return "number"
             }
@@ -273,7 +273,7 @@ func structured_read_string(string text, int start) string {
     string value = ""
     bool escaped = false
     int i = start + 1
-    while i < len(text) {
+    for i < len(text) {
         int ch = int(text[i])
         if escaped {
             value = value + string(text[i])
@@ -292,7 +292,7 @@ func structured_read_string(string text, int start) string {
 
 func structured_enum_contains([]string values, string value) bool {
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if values[i] == value {
             return true
         }
@@ -307,7 +307,7 @@ func structured_field_at(structured_schema schema, int index) structured_field_r
 
 func structured_schema_has_field(structured_schema schema, string field_name) bool {
     int i = 0
-    while i < len(schema.fields) {
+    for i < len(schema.fields) {
         structured_field_rule field = structured_field_at(schema, i)
         if field.field_name == field_name {
             return true
@@ -324,7 +324,7 @@ func structured_unknown_top_level_field(structured_schema schema, string text) s
     bool escaped = false
     int string_start = -1
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         int ch = int(text[i])
         if in_string {
             if escaped {
@@ -380,7 +380,7 @@ func validate_structured_output(structured_schema schema, string text) structure
         }
     }
     int i = 0
-    while i < len(schema.fields) {
+    for i < len(schema.fields) {
         structured_field_rule rule = schema.fields[i]
         int value_start = structured_value_start(text, rule.field_name)
         if value_start < 0 {

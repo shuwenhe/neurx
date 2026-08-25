@@ -65,14 +65,14 @@ func new_zero_infinity_state(
         nvme_buf.used_mb = 0
         nvme_buf.block_mapping = []int{cap: total_params}
         int i = 0
-        while i < total_params {
+        for i < total_params {
             nvme_buf.block_mapping[i] = -1
             i = i + 1
         }
     }
     []offload_param_metadata metadata = []offload_param_metadata{cap: total_params}
     int param_idx = 0
-    while param_idx < total_params {
+    for param_idx < total_params {
         metadata[param_idx] = offload_param_metadata {
             param_id: param_idx,
             size_bytes: 4,
@@ -112,7 +112,7 @@ func zero_infinity_offload_param_to_cpu(
     }
     int cpu_offset = state.cpu_buffer.used
     int i = 0
-    while i < param_size {
+    for i < param_size {
         state.cpu_buffer.data[cpu_offset + i] = gpu_param[i]
         i = i + 1
     }
@@ -133,7 +133,7 @@ func zero_infinity_evict_cpu_to_nvme(
     int[] lru_candidates = []int{cap: state.total_params}
     int candidate_count = 0
     int param_idx = 0
-    while param_idx < state.total_params {
+    for param_idx < state.total_params {
         if state.param_metadata[param_idx].on_cpu &&
            !state.param_metadata[param_idx].on_gpu {
             lru_candidates[candidate_count] = param_idx
@@ -143,7 +143,7 @@ func zero_infinity_evict_cpu_to_nvme(
     }
     int evicted_space = 0
     int cand_idx = 0
-    while cand_idx < candidate_count && evicted_space < required_space {
+    for cand_idx < candidate_count && evicted_space < required_space {
         int target_param = lru_candidates[cand_idx]
         state = zero_infinity_write_to_nvme(state, target_param)
         int param_size = state.param_metadata[target_param].size_bytes / 4
@@ -190,7 +190,7 @@ func zero_infinity_prefetch_param(
     if meta.on_cpu {
         int cpu_offset = meta.cpu_offset
         int i = 0
-        while i < param_size {
+        for i < param_size {
             param_data[i] = state.cpu_buffer.data[cpu_offset + i]
             i = i + 1
         }
@@ -198,7 +198,7 @@ func zero_infinity_prefetch_param(
         state = zero_infinity_read_from_nvme(state, param_idx)
         int cpu_offset = meta.cpu_offset
         int i = 0
-        while i < param_size {
+        for i < param_size {
             param_data[i] = state.cpu_buffer.data[cpu_offset + i]
             i = i + 1
         }
@@ -231,7 +231,7 @@ func zero_infinity_get_memory_stats(
     int cpu_params = 0
     int nvme_params = 0
     int i = 0
-    while i < state.total_params {
+    for i < state.total_params {
         if state.param_metadata[i].on_gpu {
             gpu_params = gpu_params + 1
         }

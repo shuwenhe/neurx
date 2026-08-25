@@ -42,7 +42,7 @@ impl JsonToolParser {
         re := regex::compile(pattern)
 
         search_start := start_pos
-        while search_start >= 0 && search_start < strings::len(model_output) {
+        for search_start >= 0 && search_start < strings::len(model_output) {
             match regex::find_at(re, model_output, search_start) {
                 Some(m) => {
                     json_str := strings::substring(model_output, m.start, m.end)

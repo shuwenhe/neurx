@@ -27,7 +27,7 @@ struct stage_state {
 func join_strings([]string values) string {
     string out = ""
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if i > 0 {
             out = out + ","
         }
@@ -96,7 +96,7 @@ func stage_param_count(stage_state state) int {
 
 func stage_has_stage(stage_state state, string value) bool {
     int i = 0
-    while i < len(state.stages) {
+    for i < len(state.stages) {
         if neurx.strings.strings_eq(state.stages[i], value) {
             return true
         }
@@ -107,7 +107,7 @@ func stage_has_stage(stage_state state, string value) bool {
 
 func stage_has_param(stage_state state, string value) bool {
     int i = 0
-    while i < len(state.params) {
+    for i < len(state.params) {
         if neurx.strings.strings_eq(state.params[i], value) {
             return true
         }
@@ -318,7 +318,7 @@ func stage_control_param_count(stage_state state) int {
 
 func stage_has_control_branch(stage_state state, string branch) bool {
     int i = 0
-    while i < len(state.control_branches) {
+    for i < len(state.control_branches) {
         if neurx.strings.strings_eq(state.control_branches[i], branch) {
             return true
         }
@@ -329,7 +329,7 @@ func stage_has_control_branch(stage_state state, string branch) bool {
 
 func stage_has_control_param(stage_state state, string param) bool {
     int i = 0
-    while i < len(state.control_params) {
+    for i < len(state.control_params) {
         if neurx.strings.strings_eq(state.control_params[i], param) {
             return true
         }
@@ -648,7 +648,7 @@ func execute(stage_state state) stage_state {
 func stage_to_transform_chain(stage_state state) transform_chain {
     transform_chain chain = neurx.autograd.function.new_transform_chain()
     int i = 0
-    while i < len(state.stages) {
+    for i < len(state.stages) {
         string param = neurx.strings.string_at(state.params, i)
         if param != "" {
             chain = neurx.autograd.function.transform_chain_add_step_with_param(chain, state.stages[i], param)
@@ -659,7 +659,7 @@ func stage_to_transform_chain(stage_state state) transform_chain {
     }
     if state.control_enabled || state.control_cond_enabled || state.control_loop_enabled || state.control_scan_enabled || len(state.control_branches) > 0 || len(state.control_params) > 0 {
         int j = 0
-        while j < len(state.control_branches) {
+        for j < len(state.control_branches) {
             string branch = neurx.strings.string_at(state.control_branches, j)
             string param = neurx.strings.string_at(state.control_params, j)
             if param != "" {
@@ -670,7 +670,7 @@ func stage_to_transform_chain(stage_state state) transform_chain {
             j = j + 1
         }
         int k = len(state.control_branches)
-        while k < len(state.control_params) {
+        for k < len(state.control_params) {
             chain = neurx.autograd.function.transform_chain_add_step_with_param(chain, "control_param", neurx.strings.string_at(state.control_params, k))
             k = k + 1
         }
@@ -694,7 +694,7 @@ func transform_chain_to_stage(transform_chain chain, string name, string backend
         stages = []string{cap: len(chain.eqns)}
         params = []string{cap: len(chain.eqns)}
         int i = 0
-        while i < len(chain.eqns) {
+        for i < len(chain.eqns) {
             string primitive = chain.eqns[i].primitive
             string joined = join_strings(chain.eqns[i].params)
             if primitive == "jit" || primitive == "lower" || primitive == "compile" || primitive == "execute" {
@@ -731,7 +731,7 @@ func transform_chain_to_stage(transform_chain chain, string name, string backend
     bool compiled = false
     bool executed = false
     int i = 0
-    while i < len(stages) {
+    for i < len(stages) {
         if stages[i] == "jit" {
             jit_enabled = true
         }

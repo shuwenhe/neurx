@@ -29,7 +29,7 @@ use neurx.model.transformer.transformer_backward.{
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }
@@ -39,7 +39,7 @@ func allocate_vector(int size, float init_val) []float {
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
-    while i < len(src) {
+    for i < len(src) {
         out[i] = src[i]
         i = i + 1
     }
@@ -106,7 +106,7 @@ func initialize_transformer_state(transformer_forward_config cfg) transformer_fo
     int head_dim = cfg.hidden_dim / cfg.num_heads
     []transformer_layer_state layers = []transformer_layer_state{cap: cfg.num_layers}
     int layer_idx = 0
-    while layer_idx < cfg.num_layers {
+    for layer_idx < cfg.num_layers {
         layers[layer_idx] = initialize_transformer_layer(cfg.hidden_dim, cfg.intermediate_dim)
         layer_idx = layer_idx + 1
     }
@@ -153,9 +153,9 @@ func create_dummy_batch(int batch_size, int seq_len, int vocab_size) training_ba
     []int input_ids = allocate_vector(batch_size * seq_len, 1)
     []int target_ids = allocate_vector(batch_size * seq_len, 1)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int idx = b * seq_len + s
             input_ids[idx] = (idx * 7) % vocab_size
             target_ids[idx] = (idx * 11 + 1) % vocab_size
@@ -196,7 +196,7 @@ func training_step(
     []float grad_logits = loss_result[1]
     float total_loss = 0.0
     int i = 0
-    while i < batch_size * seq_len {
+    for i < batch_size * seq_len {
         total_loss = total_loss + loss_values[i]
         i = i + 1
     }
@@ -228,7 +228,7 @@ func example_small_transformer_training() {
     int batch_size = 2
     int seq_len = 8
     int step = 0
-    while step < num_steps {
+    for step < num_steps {
         batch := create_dummy_batch(batch_size, seq_len, transformer_cfg.vocab_size)
         metrics := training_step(transformer, batch, learning_rate)
         float loss = metrics[0]
@@ -243,7 +243,7 @@ func example_inference_forward_pass() {
     int seq_len = 16
     []int input_ids = allocate_vector(batch_size * seq_len, 1)
     int i = 0
-    while i < batch_size * seq_len {
+    for i < batch_size * seq_len {
         input_ids[i] = i % transformer_cfg.vocab_size
         i = i + 1
     }
@@ -255,12 +255,12 @@ func example_inference_forward_pass() {
     )
     []float logits = output.logits
     int seq_idx = 0
-    while seq_idx < seq_len {
+    for seq_idx < seq_len {
         int logit_idx = seq_idx * transformer_cfg.vocab_size
         float max_logit = logits[logit_idx]
         int max_vocab_idx = 0
         int v = 1
-        while v < transformer_cfg.vocab_size {
+        for v < transformer_cfg.vocab_size {
             if logits[logit_idx + v] > max_logit {
                 max_logit = logits[logit_idx + v]
                 max_vocab_idx = v
@@ -280,11 +280,11 @@ func example_multi_batch_training() {
     int batch_size = 4
     int seq_len = 16
     int epoch = 0
-    while epoch < num_epochs {
+    for epoch < num_epochs {
         float epoch_loss = 0.0
         int batch_count = 0
         int batch_idx = 0
-        while batch_idx < batches_per_epoch {
+        for batch_idx < batches_per_epoch {
             batch := create_dummy_batch(batch_size, seq_len, transformer_cfg.vocab_size)
             metrics := training_step(transformer, batch, learning_rate)
             float loss = metrics[0]

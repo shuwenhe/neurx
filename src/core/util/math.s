@@ -9,27 +9,27 @@ func exp_approx(float x) float {
     }
     float reduced = x
     int power_of_two = 0
-    while reduced > 0.34657359027997265 {
+    for reduced > 0.34657359027997265 {
         reduced = reduced - 0.6931471805599453
         power_of_two = power_of_two + 1
     }
-    while reduced < -0.34657359027997265 {
+    for reduced < -0.34657359027997265 {
         reduced = reduced + 0.6931471805599453
         power_of_two = power_of_two - 1
     }
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 12 {
+    for i <= 12 {
         term = term * reduced / i
         result = result + term
         i = i + 1
     }
-    while power_of_two > 0 {
+    for power_of_two > 0 {
         result = result * 2.0
         power_of_two = power_of_two - 1
     }
-    while power_of_two < 0 {
+    for power_of_two < 0 {
         result = result * 0.5
         power_of_two = power_of_two + 1
     }
@@ -42,7 +42,7 @@ func sqrt_approx(float x) float {
     }
     float guess = x
     int i = 0
-    while i < 8 {
+    for i < 8 {
         guess = 0.5 * (guess + x / guess)
         i = i + 1
     }
@@ -58,7 +58,7 @@ func log_approx(float x) float {
     float result = z
     float term = z
     int k = 1
-    while k < 20 {
+    for k < 20 {
         term = term * z2
         result = result + term / (2 * k + 1)
         k = k + 1
@@ -81,7 +81,7 @@ func cos_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int n = 0
-    while n <= 25 {
+    for n <= 25 {
         if n > 0 {
             term = term * (-x2) / float((2*n-1)*2*n)
         }
@@ -96,7 +96,7 @@ func sin_approx(float x) float {
     float result = x
     float term = x
     int n = 1
-    while n <= 25 {
+    for n <= 25 {
         term = term * (-x2) / float((2*n)*(2*n+1))
         result = result + term
         n = n + 1
@@ -109,7 +109,7 @@ func softmax_1d([]float values) []float {
     []float out = []float{cap: n}
     float max_v = values[0]
     int i = 1
-    while i < n {
+    for i < n {
         if values[i] > max_v {
             max_v = values[i]
         }
@@ -117,7 +117,7 @@ func softmax_1d([]float values) []float {
     }
     float denom = 0.0
     i = 0
-    while i < n {
+    for i < n {
         float v = exp_approx(values[i] - max_v)
         out[i] = v
         denom = denom + v
@@ -127,7 +127,7 @@ func softmax_1d([]float values) []float {
         denom = 1.0
     }
     i = 0
-    while i < n {
+    for i < n {
         out[i] = out[i] / denom
         i = i + 1
     }
@@ -143,7 +143,7 @@ func gelu_approx(float x) float {
 func allocate_float(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }
@@ -153,7 +153,7 @@ func allocate_float(int size, float init_val) []float {
 func allocate_int(int size, int init_val) []int {
     []int v = []int{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }
@@ -163,7 +163,7 @@ func allocate_int(int size, int init_val) []int {
 func allocate_bool(int size, bool init_val) []bool {
     []bool v = []bool{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }
@@ -174,7 +174,7 @@ func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -185,7 +185,7 @@ func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -234,7 +234,7 @@ func clamp_float(float x, float min_val, float max_val) float {
 func sum_float([]float data) float {
     float acc = 0.0
     int i = 0
-    while i < len(data) {
+    for i < len(data) {
         acc = acc + data[i]
         i = i + 1
     }
@@ -252,11 +252,11 @@ func mean_float([]float data) float {
 func matmul_flat([]float a, []float b, int m, int n, int p) []float {
     []float result = allocate_float(m * p, 0.0)
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < p {
+        for j < p {
             int k = 0
-            while k < n {
+            for k < n {
                 result[i * p + j] = result[i * p + j] + a[i * n + k] * b[k * p + j]
                 k = k + 1
             }
@@ -269,9 +269,9 @@ func matmul_flat([]float a, []float b, int m, int n, int p) []float {
 
 func apply_bias([]float input, []float bias, int batch_size, int dim) []float {
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         int j = 0
-        while j < dim {
+        for j < dim {
             input[i * dim + j] = input[i * dim + j] + bias[j]
             j = j + 1
         }
@@ -283,12 +283,12 @@ func apply_bias([]float input, []float bias, int batch_size, int dim) []float {
 func matmul_bias([]float a, []float w, []float b, int m, int n, int p) []float {
     []float result = allocate_float(m * p, 0.0)
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < p {
+        for j < p {
             result[i * p + j] = b[j]
             int k = 0
-            while k < n {
+            for k < n {
                 result[i * p + j] = result[i * p + j] + a[i * n + k] * w[k * p + j]
                 k = k + 1
             }
@@ -304,11 +304,11 @@ func top_k_select([]float probs, int size, int k) ([]int, []float) {
     []float values = allocate_float(k, 0.0)
     []bool selected = allocate_bool(size, false)
     int idx = 0
-    while idx < k {
+    for idx < k {
         float max_val = -1.0
         int max_idx = -1
         int i = 0
-        while i < size {
+        for i < size {
             if !selected[i] && probs[i] > max_val {
                 max_val = probs[i]
                 max_idx = i
@@ -328,7 +328,7 @@ func top_k_select([]float probs, int size, int k) ([]int, []float) {
 func compute_entropy([]float probs, int size) float {
     float entropy = 0.0
     int i = 0
-    while i < size {
+    for i < size {
         if probs[i] > 0.0 {
             entropy = entropy - probs[i] * log_approx(probs[i])
         }
@@ -341,7 +341,7 @@ func compute_variance([]float data, int size) float {
     float mean = mean_float(data)
     float variance = 0.0
     int i = 0
-    while i < size {
+    for i < size {
         variance = variance + (data[i] - mean) * (data[i] - mean)
         i = i + 1
     }

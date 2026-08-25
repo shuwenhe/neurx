@@ -54,7 +54,7 @@ func test_rms_norm_unit_vector() int {
     []float x = make([]float, n)
     []float w = make([]float, n)
     int i = 0
-    while i < n {
+    for i < n {
         x[i] = 1.0
         w[i] = 1.0
         i = i + 1
@@ -74,7 +74,7 @@ func test_matmul_identity() int {
     x[1] = 3.0
     []float w = make([]float, out_dim * in_dim)
     int i = 0
-    while i < out_dim && i < in_dim {
+    for i < out_dim && i < in_dim {
         w[i * in_dim + i] = 1.0
         i = i + 1
     }
@@ -175,7 +175,7 @@ func test_generation_engine_end_to_end() int {
     fail = fail + expect(len(result.token_strings) == result.num_generated, "token_strings length matches num_generated")
     []int all_ids = encode(engine.tokenizer, "hello")
     int i = 0
-    while i < result.num_generated {
+    for i < result.num_generated {
         all_ids = append(all_ids, result.token_ids[i])
         i = i + 1
     }
@@ -196,10 +196,10 @@ func test_generation_engine_callback_state() int {
 
 func string_contains(string text, string pattern) bool {
     int i = 0
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
         bool matches = true
-        while j < len(pattern) {
+        for j < len(pattern) {
             if text[i + j] != pattern[j] {
                 matches = false
                 break

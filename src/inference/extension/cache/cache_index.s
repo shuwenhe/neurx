@@ -35,7 +35,7 @@ func compute_prefix_hash([]int tokens, int max_tokens) string {
     int limit = len(tokens)
     if limit > max_tokens { limit = max_tokens }
     
-    while i < limit {
+    for i < limit {
         int token = tokens[i]
         hash_seed = (hash_seed * 31 + token) % 2147483647
         i = i + 1
@@ -47,7 +47,7 @@ func compute_prefix_hash([]int tokens, int max_tokens) string {
 
 func cache_index_find_entry(cache_index idx, string prefix_hash) int {
     int i = 0
-    while i < idx.num_entries {
+    for i < idx.num_entries {
         if idx.entries[i].prefix_hash == prefix_hash {
             return i
         }
@@ -107,7 +107,7 @@ func cache_index_store_blocks(cache_index idx, string prefix_hash, []int block_i
 func cache_index_get_stats(cache_index idx) string {
     int total_hits = 0
     int i = 0
-    while i < idx.num_entries {
+    for i < idx.num_entries {
         total_hits = total_hits + idx.entries[i].access_count
         i = i + 1
     }
@@ -125,7 +125,7 @@ func cache_index_evict_lru(cache_index idx) string {
     int64 oldest_time = idx.entries[0].last_access_time
     
     int i = 1
-    while i < idx.num_entries {
+    for i < idx.num_entries {
         if idx.entries[i].last_access_time < oldest_time {
             oldest_time = idx.entries[i].last_access_time
             lru_idx = i
@@ -137,7 +137,7 @@ func cache_index_evict_lru(cache_index idx) string {
     print("[CacheIndex] Evicting LRU entry: " + evicted_hash + "\n")
     
     i = lru_idx
-    while i < idx.num_entries - 1 {
+    for i < idx.num_entries - 1 {
         idx.entries[i] = idx.entries[i + 1]
         i = i + 1
     }

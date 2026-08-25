@@ -48,7 +48,7 @@ func new_moe_config(
 func moe_zeros(int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = 0.0
         i = i + 1
     }
@@ -58,7 +58,7 @@ func moe_zeros(int n) []float {
 func moe_zeros_int(int n) []int {
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = 0
         i = i + 1
     }
@@ -68,7 +68,7 @@ func moe_zeros_int(int n) []int {
 func moe_deterministic_weights(int n, int salt, float scale) []float {
     []float out = moe_zeros(n)
     int i = 0
-    while i < n {
+    for i < n {
         int raw = i * 37 + salt * 19 + 11
         int centered = raw - (raw / 29) * 29 - 14
         out[i] = (centered as float) * scale
@@ -88,7 +88,7 @@ func moe_exp(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 24 {
+    for i <= 24 {
         term = term * value / (i as float)
         result = result + term
         i = i + 1
@@ -113,11 +113,11 @@ func moe_situ(float x) float {
 func moe_linear([]float input, []float weight, int rows, int in_dim, int out_dim) []float {
     []float out = moe_zeros(rows * out_dim)
     int row = 0
-    while row < rows {
+    for row < rows {
         int o = 0
-        while o < out_dim {
+        for o < out_dim {
             int i = 0
-            while i < in_dim {
+            for i < in_dim {
                 out[row * out_dim + o] = out[row * out_dim + o] +
                     input[row * in_dim + i] * weight[i * out_dim + o]
                 i = i + 1
@@ -150,17 +150,17 @@ func moe_top_k_indices([]float scores, int offset, int count, int top_k) []int {
     []int indices = moe_zeros_int(top_k)
     []float selected = moe_zeros(top_k)
     int k = 0
-    while k < top_k {
+    for k < top_k {
         selected[k] = -1000000.0
         indices[k] = -1
         k = k + 1
     }
     int expert = 0
-    while expert < count {
+    for expert < count {
         float score = scores[offset + expert]
         int insert = -1
         k = 0
-        while k < top_k && insert < 0 {
+        for k < top_k && insert < 0 {
             if score > selected[k] {
                 insert = k
             }
@@ -168,7 +168,7 @@ func moe_top_k_indices([]float scores, int offset, int count, int top_k) []int {
         }
         if insert >= 0 {
             k = top_k - 1
-            while k > insert {
+            for k > insert {
                 selected[k] = selected[k - 1]
                 indices[k] = indices[k - 1]
                 k = k - 1
@@ -192,9 +192,9 @@ func moe_expert_ffn(
 ) []float {
     []float middle = moe_zeros(ffn)
     int f = 0
-    while f < ffn {
+    for f < ffn {
         int h = 0
-        while h < hidden {
+        for h < hidden {
             middle[f] = middle[f] + input[h] * w1[w1_offset + h * ffn + f]
             h = h + 1
         }
@@ -203,9 +203,9 @@ func moe_expert_ffn(
     }
     []float out = moe_zeros(hidden)
     int h = 0
-    while h < hidden {
+    for h < hidden {
         f = 0
-        while f < ffn {
+        for f < ffn {
             out[h] = out[h] + middle[f] * w2[w2_offset + f * hidden + h]
             f = f + 1
         }
@@ -227,10 +227,10 @@ func moe_forward(moe_weights weights, []float input, int tokens) moe_result {
     []float route_weights = moe_zeros(tokens * top_k)
     []float load = moe_zeros(expert_count)
     int token = 0
-    while token < tokens {
+    for token < tokens {
         float mean_score = 0.0
         int expert = 0
-        while expert < expert_count {
+        for expert < expert_count {
             int score_index = token * expert_count + expert
             scores[score_index] = scores[score_index] + weights.router_balance_bias[expert]
             mean_score = mean_score + scores[score_index]
@@ -238,7 +238,7 @@ func moe_forward(moe_weights weights, []float input, int tokens) moe_result {
         }
         mean_score = mean_score / (expert_count as float)
         expert = 0
-        while expert < expert_count {
+        for expert < expert_count {
             scores[token * expert_count + expert] =
                 scores[token * expert_count + expert] - mean_score
             expert = expert + 1
@@ -246,7 +246,7 @@ func moe_forward(moe_weights weights, []float input, int tokens) moe_result {
         []int chosen = moe_top_k_indices(scores, token * expert_count, expert_count, top_k)
         float route_sum = 0.0
         int k = 0
-        while k < top_k {
+        for k < top_k {
             expert = chosen[k]
             float route = moe_sigmoid(scores[token * expert_count + expert])
             indices[token * top_k + k] = expert
@@ -256,14 +256,14 @@ func moe_forward(moe_weights weights, []float input, int tokens) moe_result {
             k = k + 1
         }
         k = 0
-        while k < top_k {
+        for k < top_k {
             route_weights[token * top_k + k] =
                 route_weights[token * top_k + k] / route_sum
             k = k + 1
         }
         []float token_input = moe_zeros(h)
         int channel = 0
-        while channel < h {
+        for channel < h {
             token_input[channel] = input[token * h + channel]
             channel = channel + 1
         }
@@ -271,12 +271,12 @@ func moe_forward(moe_weights weights, []float input, int tokens) moe_result {
             token_input, weights.shared_w1, weights.shared_w2, 0, 0, h, cfg.ffn_dim
         )
         channel = 0
-        while channel < h {
+        for channel < h {
             output[token * h + channel] = shared[channel]
             channel = channel + 1
         }
         k = 0
-        while k < top_k {
+        for k < top_k {
             expert = indices[token * top_k + k]
             []float routed = moe_expert_ffn(
                 token_input,
@@ -288,7 +288,7 @@ func moe_forward(moe_weights weights, []float input, int tokens) moe_result {
                 cfg.ffn_dim
             )
             channel = 0
-            while channel < h {
+            for channel < h {
                 output[token * h + channel] = output[token * h + channel] +
                     route_weights[token * top_k + k] * routed[channel]
                 channel = channel + 1
@@ -308,7 +308,7 @@ func moe_forward(moe_weights weights, []float input, int tokens) moe_result {
 func moe_sum([]float values, int offset, int count) float {
     float result = 0.0
     int i = 0
-    while i < count {
+    for i < count {
         result = result + values[offset + i]
         i = i + 1
     }
@@ -328,7 +328,7 @@ func moe_core_self_test() int {
     []float input = moe_deterministic_weights(16, 51, 0.03)
     moe_result result = moe_forward(weights, input, 4)
     int token = 0
-    while token < 4 {
+    for token < 4 {
         if moe_abs(moe_sum(result.expert_weights, token * cfg.top_k, cfg.top_k) - 1.0) > 0.001 {
             return 1
         }

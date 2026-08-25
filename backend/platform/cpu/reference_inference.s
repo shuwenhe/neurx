@@ -10,7 +10,7 @@ func cpu_reference_generate(string model, string prompt, int max_tokens) backend
     if limit > max_tokens { limit = max_tokens }
     string output = ""
     int i = 0
-    while i < limit {
+    for i < limit {
         output = output + string(prompt[i])
         i = i + 1
     }

@@ -42,13 +42,13 @@ func main() {
     roots.push("app")
     roots.push("web")
     int r = 0
-    while r < len(roots) {
+    for r < len(roots) {
         string root_name = roots[r]
         if runtime_file_exists(root_name) {
             string list = runtime_run_command_output("find " + runtime_shell_escape(root_name) + " -type f -name '*.s' | sort")
             []string srcs = split_lines(list)
             int j = 0
-            while j < len(srcs) {
+            for j < len(srcs) {
                 string src = trim(srcs[j])
                 if src != "" {
                     if !compile_one(s_bin, legacy_mode, src) {
@@ -71,7 +71,7 @@ func main() {
     manifest = manifest + "  \"ir_files\": [\n"
     int k = 0
     int count = 0
-    while k < len(manifest_files) {
+    for k < len(manifest_files) {
         string file = trim(manifest_files[k])
         if file != "" {
             if count > 0 {
@@ -176,7 +176,7 @@ func split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = char_at(text, i)
         if ch == "\n" {
             string line = trim(current)
@@ -227,7 +227,7 @@ func dirname_of(string path) string {
 func last_index_of(string text, string pattern) int {
     int last = -1
     int i = 0
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         if slice(text, i, i + len(pattern)) == pattern {
             last = i
         }
@@ -241,7 +241,7 @@ func contains_text(string text, string pattern) bool {
         return true
     }
     int i = 0
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         if slice(text, i, i + len(pattern)) == pattern {
             return true
         }
@@ -253,7 +253,7 @@ func contains_text(string text, string pattern) bool {
 func json_escape(string s) string {
     string out = "\""
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         string ch = char_at(s, i)
         if ch == "\"" {
             out = out + "\\\""

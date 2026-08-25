@@ -112,7 +112,7 @@ func test_batch_inference() test_result {
     
     int successful = 0
     int i = 0
-    while i < len(requests) {
+    for i < len(requests) {
         response := execute_inference_pipeline(pipeline, requests[i])
         if validate_pipeline_output(response) {
             successful = successful + 1
@@ -153,7 +153,7 @@ func test_tokenization_correctness() test_result {
     ]
     
     int i = 0
-    while i < len(test_inputs) {
+    for i < len(test_inputs) {
         tokens := tokenize_prompt(test_inputs[i])
         if len(tokens) > 0 {
             print("✓ Input: \"" + test_inputs[i] + "\" . " + string(len(tokens)) + " tokens\n")
@@ -208,7 +208,7 @@ func test_generation_quality() test_result {
     []float temperatures = [0.1, 0.7, 1.5]
     
     int i = 0
-    while i < len(temperatures) {
+    for i < len(temperatures) {
         generated := generate_tokens(50, temperatures[i])
         if len(generated) == 50 {
             print("✓ Temperature " + string(temperatures[i]) + ": Generated 50 tokens\n")
@@ -336,7 +336,7 @@ func run_all_production_tests() {
     int passed_tests = 0
     
     int i = 0
-    while i < len(results) {
+    for i < len(results) {
         test := results[i]
         if test.passed {
             print("✅ [PASS] " + test.test_name + ": " + test.message + "\n")

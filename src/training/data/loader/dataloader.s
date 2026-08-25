@@ -260,7 +260,7 @@ func estimate_total_samples([]string files) int {
 func generate_shuffled_indices(int n, uint64 seed) []int {
     []int indices = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         indices[i] = i;
         i = i + 1
     }
@@ -268,7 +268,7 @@ func generate_shuffled_indices(int n, uint64 seed) []int {
     rng.state = seed
     rng.inc = 6364136223846793005
     i = n - 1
-    while i > 0 {
+    for i > 0 {
         int j = random_int_range(&rng, 0, i)
         int temp = indices[i]
         indices[i] = indices[j]
@@ -291,7 +291,7 @@ func get_next_batch(ref dataloader loader) training_batch {
 func prepare_next_batches(ref dataloader loader) {
     int batches_to_prepare = loader.config.prefetch_factor - len(loader.gpu_queue)
     int b = 0
-    while b < batches_to_prepare && !loader.epoch_completed {
+    for b < batches_to_prepare && !loader.epoch_completed {
         []tokenized_sample samples = fetch_samples_from_tokenized_buffer(loader, loader.config.batch_size)
         if len(samples) == 0 {
             refill_tokenized_buffer(loader)
@@ -311,13 +311,13 @@ func fetch_samples_from_tokenized_buffer(dataloader loader, int count) []tokeniz
     []tokenized_sample result = []tokenized_sample{cap: count}
     int available = min_int(count, loader.tokenized_buffer.count)
     int i = 0
-    while i < available {
+    for i < available {
         result[i] = loader.tokenized_buffer.samples[i]
         i = i + 1
     }
     int remaining = loader.tokenized_buffer.count - available
     int j = 0
-    while j < remaining {
+    for j < remaining {
         loader.tokenized_buffer.samples[j] = loader.tokenized_buffer.samples[j + available]
         j = j + 1
     }
@@ -328,7 +328,7 @@ func fetch_samples_from_tokenized_buffer(dataloader loader, int count) []tokeniz
 func refill_tokenized_buffer(ref dataloader loader) {
     refill_raw_buffer(loader)
     int i = 0
-    while i < loader.raw_buffer.count && loader.tokenized_buffer.count < loader.tokenized_buffer.capacity {
+    for i < loader.raw_buffer.count && loader.tokenized_buffer.count < loader.tokenized_buffer.capacity {
         raw_sample raw = loader.raw_buffer.samples[i]
         tokenized_sample tok = tokenize_single(raw, loader.config)
         if passes_quality_filter(tok, loader.config) {
@@ -346,7 +346,7 @@ func refill_raw_buffer(ref dataloader loader) {
     if loader.raw_buffer.is_full { return }
     int to_load = loader.raw_buffer.capacity - loader.raw_buffer.count
     int loaded = 0
-    while loaded < to_load && !loader.epoch_completed {
+    for loaded < to_load && !loader.epoch_completed {
         raw_sample sample = read_next_sample(loader)
         if sample.text == "" {
             loader.current_file_index = loader.current_file_index + 1
@@ -401,14 +401,14 @@ func run_tokenizer(string text, dataloader_config cfg) []int {
     int estimated_len = len(text) / 4
     []int ids = []int{cap: estimated_len}
     int i = 0
-    while i < estimated_len { ids[i] = i % 128000; i = i + 1 }
+    for i < estimated_len { ids[i] = i % 128000; i = i + 1 }
     return ids
 }
 
 func truncate([]int ids, int max_len) []int {
     []int result = []int{cap: max_len}
     int i = 0
-    while i < max_len && i < len(ids) { result[i] = ids[i]; i = i + 1 }
+    for i < max_len && i < len(ids) { result[i] = ids[i]; i = i + 1 }
     return result
 }
 
@@ -417,7 +417,7 @@ func add_special_tokens([]int ids) []int {
     []int result = []int{cap: new_len}
     result[0] = 1
     int i = 0
-    while i < len(ids) { result[i+1] = ids[i]; i = i + 1 }
+    for i < len(ids) { result[i+1] = ids[i]; i = i + 1 }
     result[new_len-1] = 2
     return result
 }
@@ -425,14 +425,14 @@ func add_special_tokens([]int ids) []int {
 func create_attention_mask(int seq_len) []int {
     []int mask = []int{cap: seq_len}
     int i = 0
-    while i < seq_len { mask[i] = 1; i = i + 1 }
+    for i < seq_len { mask[i] = 1; i = i + 1 }
     return mask
 }
 
 func create_position_ids(int seq_len) []int {
     []int pos = []int{cap: seq_len}
     int i = 0
-    while i < seq_len { pos[i] = i; i = i + 1 }
+    for i < seq_len { pos[i] = i; i = i + 1 }
     return pos
 }
 
@@ -448,7 +448,7 @@ func build_standard_batch(dataloader loader, []tokenized_sample samples) trainin
     int batch_size = len(samples)
     int max_len_in_batch = 0
     int s = 0
-    while s < batch_size {
+    for s < batch_size {
         if samples[s].seq_len > max_len_in_batch {
             max_len_in_batch = samples[s].seq_len
         }
@@ -461,15 +461,15 @@ func build_standard_batch(dataloader loader, []tokenized_sample samples) trainin
     [][]int attention_mask = allocate_2d_int(batch_size, max_len_in_batch)
     [][]int position_ids = allocate_2d_int(batch_size, max_len_in_batch)
     s = 0
-    while s < batch_size {
+    for s < batch_size {
         int t = 0
-        while t < samples[s].seq_len && t < max_len_in_batch {
+        for t < samples[s].seq_len && t < max_len_in_batch {
             input_ids[s][t] = samples[s].token_ids[t]
             attention_mask[s][t] = samples[s].attention_mask[t]
             position_ids[s][t] = samples[s].position_ids[t]
             t = t + 1
         }
-        while t < max_len_in_batch {
+        for t < max_len_in_batch {
             input_ids[s][t] = 0
             attention_mask[s][t] = 0
             position_ids[s][t] = 0
@@ -480,7 +480,7 @@ func build_standard_batch(dataloader loader, []tokenized_sample samples) trainin
     []float labels = build_labels(input_ids, batch_size, max_len_in_batch)
     float total_real_tokens = 0.0
     s = 0
-    while s < batch_size {
+    for s < batch_size {
         total_real_tokens = total_real_tokens + float_of_int(min_int(samples[s].seq_len, max_len_in_batch))
         s = s + 1
     }
@@ -507,9 +507,9 @@ func build_packed_batch(dataloader loader, []tokenized_sample samples) training_
     [][]int packed_position_ids = allocate_2d_int(batch_size, target_len)
     int packed_idx = 0
     int sample_idx = 0
-    while packed_idx < batch_size && sample_idx < len(samples) {
+    for packed_idx < batch_size && sample_idx < len(samples) {
         int offset = 0
-        while offset < target_len && sample_idx < len(samples) {
+        for offset < target_len && sample_idx < len(samples) {
             tokenized_sample sample = samples[sample_idx]
             int remaining_space = target_len - offset
             if sample.seq_len <= remaining_space {
@@ -527,7 +527,7 @@ func build_packed_batch(dataloader loader, []tokenized_sample samples) training_
                 offset = offset + 1
             }
         }
-        while offset < target_len {
+        for offset < target_len {
             packed_input_ids[packed_idx][offset] = 0
             packed_attention_mask[packed_idx][offset] = 0
             packed_position_ids[packed_idx][offset] = 0
@@ -572,7 +572,7 @@ func calculate_token_repetition_ratio([]int tokens) float {
     if len(tokens) == 0 { return 0.0 }
     map(int, int) freq_map
     int i = 0
-    while i < len(tokens) {
+    for i < len(tokens) {
         freq_map[tokens[i]] = freq_map[tokens[i]] + 1
         i = i + 1
     }
@@ -588,7 +588,7 @@ func calculate_token_repetition_ratio([]int tokens) float {
 func get_local_samples_for_rank(distributed_sampler samp, int num_samples_needed) []int {
     []int local_indices = []int{cap: num_samples_needed}
     int fetched = 0
-    while fetched < num_samples_needed {
+    for fetched < num_samples_needed {
         int global_idx = samp.shuffled_indices[samp.current_index]
         if global_idx % samp.world_size == samp.rank {
             local_indices[fetched] = global_idx
@@ -641,7 +641,7 @@ func max_int(int a, int b) int { if a > b { return a }; return b }
 func float_of_int(int n) float {
     float r = 0.0;
     int i = 0;
-    while i < n { r = r + 1.0; i = i + 1 };
+    for i < n { r = r + 1.0; i = i + 1 };
     return r
 }
 
@@ -650,32 +650,32 @@ func string(int i) string { return "" }
 func allocate_2d_int(int rows, int cols) [][]int {
     [][]int m = [][]int{cap: rows}
     int i = 0
-    while i < rows { m[i] = []int{cap: cols}; i = i + 1 }
+    for i < rows { m[i] = []int{cap: cols}; i = i + 1 }
     return m
 }
 
 func copy_tokens([]int dst, []int src, int offset, int count) {
     int i = 0
-    while i < count { dst[offset+i] = src[i]; i = i + 1 }
+    for i < count { dst[offset+i] = src[i]; i = i + 1 }
 }
 
 func set_range([]int arr, int start, int count, int val) {
     int i = 0
-    while i < count { arr[start+i] = val; i = i + 1 }
+    for i < count { arr[start+i] = val; i = i + 1 }
 }
 
 func set_consecutive([]int arr, int start, int count, int from_val) {
     int i = 0
-    while i < count { arr[start+i] = from_val+i; i = i + 1 }
+    for i < count { arr[start+i] = from_val+i; i = i + 1 }
 }
 
 func build_labels([][][]int input_ids, int batch, int seq) []float {
     int total = batch * seq
     []float labels = []float{cap: total}
     int b = 0
-    while b < batch {
+    for b < batch {
         int t = 0
-        while t < seq - 1 {
+        for t < seq - 1 {
             labels[b * seq + t] = float_of_int(input_ids[b][t + 1])
             t = t + 1
         }
@@ -688,9 +688,9 @@ func build_labels([][][]int input_ids, int batch, int seq) []float {
 func calculate_real_token_count([][][]int mask, int batch, int seq) float {
     float sum = 0.0
     int b = 0
-    while b < batch {
+    for b < batch {
         int t = 0
-        while t < seq {
+        for t < seq {
             if mask[b][t] != 0 { sum = sum + 1.0 }
             t = t + 1
         }

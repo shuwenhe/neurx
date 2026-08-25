@@ -13,7 +13,7 @@ extern "intrinsic" func __sys_connect(int sockfd, string ip, int port, int famil
 func shell_escape(string value) string {
     string output = "'"
     int index = 0
-    while index < len(value) {
+    for index < len(value) {
         string character = __host_slice(value, index, index + 1)
         if character == "'" {
             output = output + "'\"'\"'"
@@ -40,7 +40,7 @@ func int_to_string(int value) string {
         n = 0 - n
     }
     string out = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n - (n / 10) * 10
         out = __host_slice("0123456789", digit, digit + 1) + out
         n = n / 10
@@ -79,7 +79,7 @@ func parse_int_or_default(string text, int fallback) int {
         return fallback
     }
     int value = 0
-    while index < len(text) {
+    for index < len(text) {
         int digit = decimal_digit_value(__host_slice(text, index, index + 1))
         if digit < 0 {
             return fallback
@@ -103,7 +103,7 @@ func index_of(string text, string needle) int {
         return -1
     }
     int index = 0
-    while index <= len(text) - len(needle) {
+    for index <= len(text) - len(needle) {
         int inner = 0
         while inner < len(needle) &&
               __host_slice(text, index + inner, index + inner + 1) ==
@@ -144,7 +144,7 @@ func http_request(string host, int port, string method, string path, string body
         "Content-Length: " + int_to_string(len(body)) + "\r\n" +
         extra_headers + "\r\n" + body
     int offset = 0
-    while offset < len(request) {
+    for offset < len(request) {
         string remaining = __host_slice(request, offset, len(request))
         int written = __sys_write_string(conn_fd, remaining)
         if written <= 0 {
@@ -154,7 +154,7 @@ func http_request(string host, int port, string method, string path, string body
         offset = offset + written
     }
     string response = ""
-    while true {
+    for true {
         string chunk = __sys_read_string(conn_fd, 65536)
         if len(chunk) == 0 {
             break
@@ -243,7 +243,7 @@ func ends_with(string text, string suffix) bool {
     }
     int offset = text_len - suffix_len
     int i = 0
-    while i < suffix_len {
+    for i < suffix_len {
         if text[offset + i] != suffix[i] {
             return false
         }
@@ -260,7 +260,7 @@ func extract_json_string(string json, string key) string {
     }
 
     int cursor = start_pos + len(search)
-    while cursor < len(json) && __host_slice(json, cursor, cursor + 1) != "\"" {
+    for cursor < len(json) && __host_slice(json, cursor, cursor + 1) != "\"" {
         cursor = cursor + 1
     }
     if cursor >= len(json) {
@@ -270,7 +270,7 @@ func extract_json_string(string json, string key) string {
     cursor = cursor + 1
     string result = ""
     bool escaped = false
-    while cursor < len(json) {
+    for cursor < len(json) {
         string ch = __host_slice(json, cursor, cursor + 1)
         if escaped {
             if ch == "n" {
@@ -361,7 +361,7 @@ func main() {
         int max_launch_attempts = 5
         bool backend_started = false
         string launch = ""
-        while launch_attempt < max_launch_attempts && !backend_started {
+        for launch_attempt < max_launch_attempts && !backend_started {
             _ = __host_write_text_file(meta_file, backend_signature(model, threads))
             _ = runtime_run_command_output("rm -f " + shell_escape(ready_file) + " " + shell_escape(pid_file) + " && fuser -k " + port + "/tcp 2>/dev/null || true; sleep 2")
             launch = "bash -c 'exec " + backend_cmd + " >/tmp/neurx_s_inference_" + port + ".log 2>&1 & echo $! >" + shell_escape(pid_file) + "'"
@@ -370,7 +370,7 @@ func main() {
             int attempts = 0
             int max_attempts = 300
             print("[DEBUG] Starting health check attempts for backend at " + host + ":" + int_to_string(port_number) + "\n")
-            while attempts < max_attempts && !backend_ready(host, port_number) {
+            for attempts < max_attempts && !backend_ready(host, port_number) {
                 attempts = attempts + 1
                 if attempts == 1 {
                     string debug_response = http_request(host, port_number, "GET", "/health", "", "")
@@ -426,7 +426,7 @@ func main() {
     print("Python: disabled\n")
     print("Type /exit to quit, /reset to clear history.\n\n")
     string history = "<|im_start|>system\n" + system_prompt + "<|im_end|>\n"
-    while true {
+    for true {
         print("You: ")
         string user_text = read_user_line()
         if len(user_text) == 0 || user_text == "/exit" || user_text == "exit" || user_text == "quit" {

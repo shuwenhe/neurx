@@ -176,7 +176,7 @@ func robotics_workflow_example_run(robotics_workflow_example_state state, int st
     }
     robotics_workflow_example_state current = state
     int i = 0
-    while i < loops {
+    for i < loops {
         current = robotics_workflow_example_step(current, enable_domain_randomization)
         i = i + 1
         if current.finished {

@@ -54,7 +54,7 @@ func sqrt_approx(float value) float {
     }
     float guess = value
     int i = 0
-    while i < 6 {
+    for i < 6 {
         guess = 0.5 * (guess + value / guess)
         i = i + 1
     }
@@ -80,10 +80,10 @@ func last_index_of(string text, string needle) int {
         return -1
     }
     int index = len(text) - len(needle)
-    while index >= 0 {
+    for index >= 0 {
         int cursor = 0
         bool matched = true
-        while cursor < len(needle) {
+        for cursor < len(needle) {
             if __host_slice(text, index + cursor, index + cursor + 1) != __host_slice(needle, cursor, cursor + 1) {
                 matched = false
                 break
@@ -103,10 +103,10 @@ func index_of(string text, string needle) int {
         return -1
     }
     int index = 0
-    while index <= len(text) - len(needle) {
+    for index <= len(text) - len(needle) {
         int cursor = 0
         bool matched = true
-        while cursor < len(needle) {
+        for cursor < len(needle) {
             if __host_slice(text, index + cursor, index + cursor + 1) != __host_slice(needle, cursor, cursor + 1) {
                 matched = false
                 break
@@ -129,10 +129,10 @@ func index_of_from(string text, string needle, int start) int {
         return -1
     }
     int index = start
-    while index <= len(text) - len(needle) {
+    for index <= len(text) - len(needle) {
         int cursor = 0
         bool matched = true
-        while cursor < len(needle) {
+        for cursor < len(needle) {
             if __host_slice(text, index + cursor, index + cursor + 1) != __host_slice(needle, cursor, cursor + 1) {
                 matched = false
                 break
@@ -164,7 +164,7 @@ func ends_with(string text, string suffix) bool {
 func lower_ascii(string text) string {
     string output = ""
     int index = 0
-    while index < len(text) {
+    for index < len(text) {
         int ch = text[index]
         if ch >= 65 && ch <= 90 {
             ch = ch + 32
@@ -189,7 +189,7 @@ func bool_to_string(bool value) string {
 func json_escape(string value) string {
     string output = ""
     int index = 0
-    while index < len(value) {
+    for index < len(value) {
         string ch = __host_slice(value, index, index + 1)
         if ch == "\"" {
             output = output + "\\\""
@@ -356,7 +356,7 @@ func word_to_token(string word) int {
     if word == "server" { return 125 }
     int hash = 0
     int index = 0
-    while index < len(word) {
+    for index < len(word) {
         hash = hash * 31 + word[index]
         index = index + 1
     }
@@ -374,7 +374,7 @@ func tokenize_prompt(string text) []int {
     count = count + 1
     string word = ""
     int index = 0
-    while index < len(text) {
+    for index < len(text) {
         int ch = text[index]
         bool boundary = false
         if ch == 32 || ch == 10 || ch == 9 || ch == 13 || ch == 44 || ch == 46 || ch == 63 || ch == 33 || ch == 58 || ch == 59 || ch == 40 || ch == 41 || ch == 91 || ch == 93 || ch == 123 || ch == 125 || ch == 47 || ch == 92 || ch == 45 {
@@ -407,7 +407,7 @@ func tokenize_prompt(string text) []int {
     count = count + 1
     []int output = []int{cap: count}
     index = 0
-    while index < count {
+    for index < count {
         output[index] = tokens[index]
         index = index + 1
     }
@@ -417,7 +417,7 @@ func tokenize_prompt(string text) []int {
 func prompt_signature([]int tokens) int {
     int signature = 17
     int index = 0
-    while index < len(tokens) {
+    for index < len(tokens) {
         signature = signature * 31 + tokens[index]
         index = index + 1
     }
@@ -462,7 +462,7 @@ func prompt_is_greeting(string text) bool {
 func count_token_occurrences([]int tokens, int token_id) int {
     int count = 0
     int index = 0
-    while index < len(tokens) {
+    for index < len(tokens) {
         if tokens[index] == token_id {
             count = count + 1
         }
@@ -476,7 +476,7 @@ func count_repeated_words(string text) int {
     string previous = ""
     string current = ""
     int index = 0
-    while index <= len(text) {
+    for index <= len(text) {
         bool at_end = index == len(text)
         int ch = 0
         if !at_end {
@@ -504,7 +504,7 @@ func count_distinct_words(string text) int {
     int count = 0
     string current = ""
     int index = 0
-    while index <= len(text) {
+    for index <= len(text) {
         bool at_end = index == len(text)
         int ch = 0
         if !at_end {
@@ -515,7 +515,7 @@ func count_distinct_words(string text) int {
             if len(current) > 0 {
                 bool seen = false
                 int i = 0
-                while i < count {
+                for i < count {
                     if words[i] == current {
                         seen = true
                         break
@@ -578,7 +578,7 @@ func score_candidate_text(string prompt, string response_text, int generated_tok
 func stream_text_words(string text, func(string) bool on_token) bool {
     string current = ""
     int index = 0
-    while index <= len(text) {
+    for index <= len(text) {
         bool at_end = index == len(text)
         int ch = 0
         if !at_end {
@@ -631,7 +631,7 @@ func generate_response_candidate(real_text_engine_state state, string prompt, in
     []paged_kv_cache caches = make_layer_caches(state, total_tokens)
     []float hidden = []float{}
     int position = 0
-    while position < len(prompt_tokens) {
+    for position < len(prompt_tokens) {
         int current_token = prompt_tokens[position]
         if len(hidden) == 0 {
             hidden = load_embedding_row(state.model, "model.embed_tokens.weight", current_token, safe_hidden_size(state), safe_vocab_size(state))
@@ -650,7 +650,7 @@ func generate_response_candidate(real_text_engine_state state, string prompt, in
     []int generated_history = []int{cap: max_new_tokens}
     string response_text = ""
     int vocab_size = safe_vocab_size(state)
-    while generated_count < max_new_tokens {
+    for generated_count < max_new_tokens {
         []float logits = project_logits(state, hidden)
         if len(logits) == 0 {
             break
@@ -708,7 +708,7 @@ func insert_top_candidate([]float scores, []int tokens, int count, float score, 
         tokens[count - 1] = token_id
     }
     int index = count - 1
-    while index > 0 && scores[index] > scores[index - 1] {
+    for index > 0 && scores[index] > scores[index - 1] {
         float tmp_score = scores[index]
         int tmp_token = tokens[index]
         scores[index] = scores[index - 1]
@@ -732,7 +732,7 @@ func sample_token_from_logits([]float logits, []int history, int seed) int {
     []int top_tokens = []int{cap: top_k}
     int count = 0
     int index = 0
-    while index < len(logits) {
+    for index < len(logits) {
         float score = logits[index]
         int seen = count_token_occurrences(history, index)
         if seen > 0 {
@@ -753,7 +753,7 @@ func sample_token_from_logits([]float logits, []int history, int seed) int {
     []int weights = []int{cap: count}
     int total_weight = 0
     index = 0
-    while index < count {
+    for index < count {
         float adjusted = top_scores[index] - min_score + 0.05
         if adjusted < 0.05 {
             adjusted = 0.05
@@ -772,7 +772,7 @@ func sample_token_from_logits([]float logits, []int history, int seed) int {
     }
     int cumulative = 0
     index = 0
-    while index < count {
+    for index < count {
         cumulative = cumulative + weights[index]
         if pick < cumulative {
             return top_tokens[index]
@@ -787,7 +787,7 @@ func load_embedding_row(safetensors_model model, string tensor_name, int token_i
     []int raw = read_tensor_elements(model, tensor_name, normalized_token * hidden_size, hidden_size)
     []float row = []float{cap: hidden_size}
     int index = 0
-    while index < hidden_size {
+    for index < hidden_size {
         row[index] = bf16_at(raw, index)
         index = index + 1
     }
@@ -796,7 +796,7 @@ func load_embedding_row(safetensors_model model, string tensor_name, int token_i
 
 func add_in_place([]float target, []float source, float scale) {
     int index = 0
-    while index < len(target) && index < len(source) {
+    for index < len(target) && index < len(source) {
         target[index] = target[index] + source[index] * scale
         index = index + 1
     }
@@ -805,7 +805,7 @@ func add_in_place([]float target, []float source, float scale) {
 func copy_vector([]float source) []float {
     []float output = []float{cap: len(source)}
     int index = 0
-    while index < len(source) {
+    for index < len(source) {
         output[index] = source[index]
         index = index + 1
     }
@@ -840,7 +840,7 @@ func make_layer_caches(real_text_engine_state state, int total_tokens) []paged_k
     int layer_count = safe_num_layers(state)
     []paged_kv_cache caches = []paged_kv_cache{cap: layer_count}
     int layer = 0
-    while layer < layer_count {
+    for layer < layer_count {
         caches[layer] = make_layer_cache(state, total_tokens)
         layer = layer + 1
     }
@@ -851,7 +851,7 @@ func blend_vectors([]float left, []float right, float left_scale, float right_sc
     int size = min_int(len(left), len(right))
     []float output = []float{cap: size}
     int index = 0
-    while index < size {
+    for index < size {
         output[index] = left[index] * left_scale + right[index] * right_scale
         index = index + 1
     }
@@ -889,7 +889,7 @@ func run_transformer_layer(real_text_engine_state state, int layer, []float hidd
     }
     []float attn_mix = []float{cap: hidden_size}
     int index = 0
-    while index < hidden_size {
+    for index < hidden_size {
         attn_mix[index] = (q[index] + k[index] + v[index]) / 3.0
         index = index + 1
     }
@@ -898,7 +898,7 @@ func run_transformer_layer(real_text_engine_state state, int layer, []float hidd
         return hidden
     }
     index = 0
-    while index < hidden_size {
+    for index < hidden_size {
         hidden[index] = hidden[index] + attention[index] * 0.25
         index = index + 1
     }
@@ -918,7 +918,7 @@ func run_transformer_layer(real_text_engine_state state, int layer, []float hidd
     }
     []float activated = []float{cap: intermediate_size}
     index = 0
-    while index < intermediate_size {
+    for index < intermediate_size {
         activated[index] = approx_silu(gate[index]) * up[index]
         index = index + 1
     }
@@ -927,7 +927,7 @@ func run_transformer_layer(real_text_engine_state state, int layer, []float hidd
         return hidden
     }
     index = 0
-    while index < hidden_size {
+    for index < hidden_size {
         hidden[index] = hidden[index] + down[index] * 0.25
         index = index + 1
     }
@@ -968,7 +968,7 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, []flo
         return (hidden, cache)
     }
     int index = 0
-    while index < hidden_size {
+    for index < hidden_size {
         hidden[index] = hidden[index] + attention[index] * 0.25
         index = index + 1
     }
@@ -988,7 +988,7 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, []flo
     }
     []float activated = []float{cap: intermediate_size}
     index = 0
-    while index < intermediate_size {
+    for index < intermediate_size {
         activated[index] = approx_silu(gate[index]) * up[index]
         index = index + 1
     }
@@ -997,7 +997,7 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, []flo
         return (hidden, cache)
     }
     index = 0
-    while index < hidden_size {
+    for index < hidden_size {
         hidden[index] = hidden[index] + down[index] * 0.25
         index = index + 1
     }
@@ -1007,7 +1007,7 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, []flo
 func run_transformer_stack_cached(real_text_engine_state state, []float hidden, []paged_kv_cache caches, int position) ([]float, []paged_kv_cache) {
     int layer_count = safe_num_layers(state)
     int layer = 0
-    while layer < layer_count {
+    for layer < layer_count {
         ([]float updated_hidden, paged_kv_cache updated_cache) = run_transformer_layer_cached(state, layer, hidden, caches[layer], position)
         hidden = updated_hidden
         caches[layer] = updated_cache
@@ -1036,7 +1036,7 @@ func advance_hidden_state_cached(real_text_engine_state state, []float hidden, i
 func run_transformer_stack(real_text_engine_state state, []float hidden) []float {
     int layer_count = safe_num_layers(state)
     int layer = 0
-    while layer < layer_count {
+    for layer < layer_count {
         hidden = run_transformer_layer(state, layer, hidden)
         layer = layer + 1
     }
@@ -1072,7 +1072,7 @@ func argmax_float([]float values) int {
     int best_index = 0
     float best_value = values[0]
     int index = 1
-    while index < len(values) {
+    for index < len(values) {
         if values[index] > best_value {
             best_value = values[index]
             best_index = index
@@ -1166,7 +1166,7 @@ func encode_prompt_state(real_text_engine_state state, []int prompt_tokens) []fl
     }
     []float hidden = load_embedding_row(state.model, "model.embed_tokens.weight", first_token, hidden_size, vocab_size)
     int index = 1
-    while index < len(prompt_tokens) {
+    for index < len(prompt_tokens) {
         []float row = load_embedding_row(state.model, "model.embed_tokens.weight", prompt_tokens[index], hidden_size, vocab_size)
         if len(row) == hidden_size {
             hidden = blend_vectors(hidden, row, 0.80, 0.20)
@@ -1190,7 +1190,7 @@ func advance_hidden_state(real_text_engine_state state, []float hidden, int toke
 func decode_generated_tokens([]int tokens) string {
     string output = ""
     int index = 0
-    while index < len(tokens) {
+    for index < len(tokens) {
         int token = tokens[index]
         if token == 151645 || token == 0 {
             break
@@ -1226,7 +1226,7 @@ func generate_response_stream(real_text_engine_state state, string prompt, int m
     real_generation_result best_result = real_generation_result{}
     int best_score = -2147483647
     int seed_bias = 0
-    while seed_bias < candidate_count {
+    for seed_bias < candidate_count {
         real_generation_result candidate = generate_response_candidate(state, prompt, max_new_tokens, seed_bias + 1)
         int score = score_candidate_text(prompt, candidate.text, candidate.generated_tokens)
         if score > best_score {
@@ -1331,14 +1331,14 @@ func resolve_prompt_from_body(string body) string {
         int colon = index_of_from(body, ":", prompt_pos + len(prompt_key))
         if colon >= 0 {
             int start = colon + 1
-            while start < len(body) && (body[start] == 32 || body[start] == 9 || body[start] == 10 || body[start] == 13) {
+            for start < len(body) && (body[start] == 32 || body[start] == 9 || body[start] == 10 || body[start] == 13) {
                 start = start + 1
             }
             if start < len(body) && body[start] == 34 {
                 start = start + 1
                 int end = start
                 bool escaped = false
-                while end < len(body) {
+                for end < len(body) {
                     int ch = body[end]
                     if escaped {
                         escaped = false
@@ -1358,14 +1358,14 @@ func resolve_prompt_from_body(string body) string {
         int colon = index_of_from(body, ":", content_pos + len(content_key))
         if colon >= 0 {
             int start = colon + 1
-            while start < len(body) && (body[start] == 32 || body[start] == 9 || body[start] == 10 || body[start] == 13) {
+            for start < len(body) && (body[start] == 32 || body[start] == 9 || body[start] == 10 || body[start] == 13) {
                 start = start + 1
             }
             if start < len(body) && body[start] == 34 {
                 start = start + 1
                 int end = start
                 bool escaped = false
-                while end < len(body) {
+                for end < len(body) {
                     int ch = body[end]
                     if escaped {
                         escaped = false
@@ -1393,12 +1393,12 @@ func parse_max_tokens(string body, int fallback) int {
         return fallback
     }
     int start = colon + 1
-    while start < len(body) && (body[start] == 32 || body[start] == 9 || body[start] == 10 || body[start] == 13) {
+    for start < len(body) && (body[start] == 32 || body[start] == 9 || body[start] == 10 || body[start] == 13) {
         start = start + 1
     }
     int value = 0
     bool found = false
-    while start < len(body) && body[start] >= 48 && body[start] <= 57 {
+    for start < len(body) && body[start] >= 48 && body[start] <= 57 {
         value = value * 10 + (body[start] - 48)
         found = true
         start = start + 1
@@ -1419,7 +1419,7 @@ func parse_bool(string body, string key, bool fallback) bool {
         return fallback
     }
     int start = colon + 1
-    while start < len(body) && (body[start] == 32 || body[start] == 9 || body[start] == 10 || body[start] == 13) {
+    for start < len(body) && (body[start] == 32 || body[start] == 9 || body[start] == 10 || body[start] == 13) {
         start = start + 1
     }
     if starts_with(__host_slice(body, start, len(body)), "true") {

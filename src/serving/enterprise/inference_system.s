@@ -90,7 +90,7 @@ func inference_single(
     cuda_core.cuda_memcpy_h2d(sys.gpu_context, []float{}, input_matrix.cuda_buffer, input_tokens.len * 4)
     []int generated_tokens = []int{}
     int token_idx = 0
-    while token_idx < max_new_tokens {
+    for token_idx < max_new_tokens {
         cuda_matmul.matmul_config config = cuda_matmul.matmul_config{
             compute_type: "float32",
             use_tensor_cores: true,
@@ -126,7 +126,7 @@ func inference_batch(
     sys.system_metrics.requests_in_progress.value = float(batch_size)
     []string outputs = []string{}
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         string output = inference_single(sys, prompts[i], max_new_tokens, 0.7)
         outputs = append_str(outputs, output)
         i = i + 1
@@ -150,7 +150,7 @@ func inference_distributed(
     if sys.dist_context.config.rank != 0 {
         input_tokens = []int{}
         int i = 0
-        while i < input_len {
+        for i < input_len {
             input_tokens = append_int(input_tokens, 0)
             i = i + 1
         }
@@ -226,7 +226,7 @@ func get_health_status(enterprise_inference_system sys) metrics.health_status {
 func tokenize_prompt(string prompt) []int {
     []int tokens = []int{}
     int i = 0
-    while i < prompt.len {
+    for i < prompt.len {
         tokens = append_int(tokens, i)
         i = i + 1
     }
@@ -236,7 +236,7 @@ func tokenize_prompt(string prompt) []int {
 func decode_tokens([]int tokens) string {
     string result = ""
     int i = 0
-    while i < tokens.len {
+    for i < tokens.len {
         result = result + "token_" + int_to_str(tokens[i]) + " "
         i = i + 1
     }
@@ -250,7 +250,7 @@ func get_timestamp() int {
 func append_int([]int slice, int elem) []int {
     new_slice := make_int(slice.len + 1)
     int i = 0
-    while i < slice.len {
+    for i < slice.len {
         new_slice[i] = slice[i]
         i = i + 1
     }
@@ -261,7 +261,7 @@ func append_int([]int slice, int elem) []int {
 func append_str([]string slice, string elem) []string {
     new_slice := make_str(slice.len + 1)
     int i = 0
-    while i < slice.len {
+    for i < slice.len {
         new_slice[i] = slice[i]
         i = i + 1
     }
@@ -286,7 +286,7 @@ func int_to_str(int n) string {
         n = -n
     }
     string s = ""
-    while n > 0 {
+    for n > 0 {
         s = string((n % 10) + 48) + s
         n = n / 10
     }

@@ -25,7 +25,7 @@ struct backward_state {
 func copy_float([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }
@@ -202,7 +202,7 @@ func backward_execute_state(backward_state state, tensor a, tensor b, tensor ups
     next = backward_set_seeded(next, true)
     int i = len(state.steps) - 1
     backward_rule rule = backward_rule_add(a, b, upstream)
-    while i >= 0 {
+    for i >= 0 {
         rule = backward_rule_from_op(get_step(state, i), a, b, upstream)
         next = backward_add_tag(next, backward_rule_op(rule))
         i = i - 1
@@ -256,7 +256,7 @@ func backward_tag_count(backward_state state) int {
 
 func backward_has_step(backward_state state, string step) bool {
     int i = 0
-    while i < len(state.steps) {
+    for i < len(state.steps) {
         if get_step(state, i) == step {
             return true
         }
@@ -267,7 +267,7 @@ func backward_has_step(backward_state state, string step) bool {
 
 func backward_has_param(backward_state state, string param) bool {
     int i = 0
-    while i < len(state.params) {
+    for i < len(state.params) {
         if get_param(state, i) == param {
             return true
         }
@@ -278,7 +278,7 @@ func backward_has_param(backward_state state, string param) bool {
 
 func backward_has_input(backward_state state, string input) bool {
     int i = 0
-    while i < len(state.inputs) {
+    for i < len(state.inputs) {
         if get_input(state, i) == input {
             return true
         }
@@ -289,7 +289,7 @@ func backward_has_input(backward_state state, string input) bool {
 
 func backward_has_output(backward_state state, string output) bool {
     int i = 0
-    while i < len(state.outputs) {
+    for i < len(state.outputs) {
         if get_output(state, i) == output {
             return true
         }
@@ -300,7 +300,7 @@ func backward_has_output(backward_state state, string output) bool {
 
 func backward_has_tag(backward_state state, string tag) bool {
     int i = 0
-    while i < len(state.tags) {
+    for i < len(state.tags) {
         if get_tag(state, i) == tag {
             return true
         }

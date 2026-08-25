@@ -34,17 +34,17 @@ func transformer_descriptor_plan_compile(device_context context, string backend,
     int count = len(descriptor)
     []int compiled = []int{cap: count}
     int index = 0
-    while index < count {
+    for index < count {
         if len(descriptor[index]) == 0 {
             int release_index = 0
-            while release_index < index { device_operation_close_handle(context.handle, compiled[release_index]); release_index = release_index + 1 }
+            for release_index < index { device_operation_close_handle(context.handle, compiled[release_index]); release_index = release_index + 1 }
             device_stream_close_handle(context.handle, stream_handle)
             return transformer_plan_invalid(backend, "empty_descriptor")
         }
         int operation_handle = device_operation_open_handle(context.handle, descriptor[index])
         if operation_handle <= 0 {
             int release_index = 0
-            while release_index < index { device_operation_close_handle(context.handle, compiled[release_index]); release_index = release_index + 1 }
+            for release_index < index { device_operation_close_handle(context.handle, compiled[release_index]); release_index = release_index + 1 }
             device_stream_close_handle(context.handle, stream_handle)
             return transformer_plan_invalid(backend, "operation_compile_failed_at_" + string(index))
         }
@@ -64,7 +64,7 @@ func transformer_plan_execute(transformer_execution_plan plan, []string binding,
         return transformer_execution_result {success: false, completed_operations: 0, failed_operation: -1, error_message: "binding_count_mismatch"}
     }
     int index = 0
-    while index < plan.operation_count {
+    for index < plan.operation_count {
         if len(binding[index]) == 0 {
             return transformer_execution_result {success: false, completed_operations: index, failed_operation: index, error_message: "empty_binding"}
         }
@@ -92,7 +92,7 @@ func transformer_plan_release(transformer_execution_plan plan) int {
     if !plan.valid { return 0 }
     int status = 0
     int index = plan.operation_count - 1
-    while index >= 0 {
+    for index >= 0 {
         if device_operation_close_handle(plan.context_handle, plan.operation_handle[index]) != 0 { status = -1 }
         index = index - 1
     }

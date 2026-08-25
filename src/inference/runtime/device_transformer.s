@@ -35,7 +35,7 @@ func transformer_schedule_build(string backend, bool available, transformer_devi
     int operation_index = 0
     operations[operation_index] = lower_device_op(backend, available, op_embedding(config.dtype, config.hidden)); operation_index = operation_index + 1
     int layer = 0
-    while layer < config.layers {
+    for layer < config.layers {
         operations[operation_index] = lower_device_op(backend, available, op_rms_norm(config.dtype, config.hidden, config.rms_epsilon)); operation_index = operation_index + 1
         operations[operation_index] = lower_device_op(backend, available, op_linear(config.dtype, config.hidden, config.query_heads * config.head_dim, config.attention_bias)); operation_index = operation_index + 1
         operations[operation_index] = lower_device_op(backend, available, op_linear(config.dtype, config.hidden, config.kv_heads * config.head_dim, config.attention_bias)); operation_index = operation_index + 1
@@ -56,7 +56,7 @@ func transformer_schedule_build(string backend, bool available, transformer_devi
     operations[operation_index] = lower_device_op(backend, available, op_linear(config.dtype, config.hidden, config.vocabulary, false)); operation_index = operation_index + 1
     vendor_operations[0] = lower_vendor_name(backend, "embedding")
     int vendor_layer = 0
-    while vendor_layer < config.layers {
+    for vendor_layer < config.layers {
         int base = 1 + vendor_layer * 14
         vendor_operations[base] = lower_vendor_name(backend, "rms_norm")
         vendor_operations[base + 1] = lower_vendor_name(backend, "linear")

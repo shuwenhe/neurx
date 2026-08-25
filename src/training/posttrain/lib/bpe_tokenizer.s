@@ -24,7 +24,7 @@ func pretokenize(string text) []string {
     []string tokens
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = string(text[i])
         if ch == " " || ch == "\t" || ch == "\n" {
             if current != "" {
@@ -43,7 +43,7 @@ func pretokenize(string text) []string {
 func bytes_to_symbols(string s) []string {
     []string symbols
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         string ch = string(s[i])
         i = i + 1
     }
@@ -61,7 +61,7 @@ func encode(bpe_tokenizer tokenizer, string text) []int {
     []string pretokens = pretokenize(normalized)
     [][]string byte_seqs
     int i = 0
-    while i < len(pretokens) {
+    for i < len(pretokens) {
         i = i + 1
     }
     return result
@@ -70,7 +70,7 @@ func encode(bpe_tokenizer tokenizer, string text) []int {
 func decode(bpe_tokenizer tokenizer, []int token_ids) string {
     string result = ""
     int i = 0
-    while i < len(token_ids) {
+    for i < len(token_ids) {
         int token_id = token_ids[i]
         if token_id >= 0 && token_id < len(tokenizer.id_to_token) {
             string token = tokenizer.id_to_token[token_id]

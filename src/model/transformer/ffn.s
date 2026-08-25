@@ -44,7 +44,7 @@ struct ffn_layer {
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }
@@ -54,7 +54,7 @@ func allocate_vector(int size, float init_val) []float {
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
-    while i < len(src) {
+    for i < len(src) {
         out[i] = src[i]
         i = i + 1
     }
@@ -71,7 +71,7 @@ func exp_approx(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 12 {
+    for i <= 12 {
         term = term * x / (i * 1.0)
         result = result + term
         i = i + 1
@@ -85,7 +85,7 @@ func sqrt_approx(float x) float {
     }
     float y = x
     int i = 0
-    while i < 10 {
+    for i < 10 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -142,7 +142,7 @@ func new_ffn_layer(int hidden_dim, string activation_type) ffn_layer {
 func build_ramp(int size, float scale) []float {
     []float values = allocate_vector(size, 0.0)
     int i = 0
-    while i < size {
+    for i < size {
         values[i] = scale * ((i + 1) * 1.0) / ((size + 1) * 1.0)
         i = i + 1
     }
@@ -188,12 +188,12 @@ func new_glu_ffn(ffn_config cfg) feed_forward_network {
 func matmul_flat([]float a, []float b, int m, int k, int n) []float {
     []float result = allocate_vector(m * n, 0.0)
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = 0.0
             int l = 0
-            while l < k {
+            for l < k {
                 sum = sum + a[i * k + l] * b[l * n + j]
                 l = l + 1
             }
@@ -211,7 +211,7 @@ func apply_activation(
 ) []float {
     []float out = copy_vector(hidden)
     int i = 0
-    while i < len(out) {
+    for i < len(out) {
         if activation_type == "relu" {
             out[i] = relu(out[i])
         } else if activation_type == "gelu" {
@@ -235,14 +235,14 @@ func forward_standard_ffn(
     int intermediate_dim = ffn.standard_ffn.intermediate_dim
     []float up = matmul_flat(hidden_states, ffn.standard_ffn.up_weight, tokens, hidden_dim, intermediate_dim)
     int i = 0
-    while i < len(up) {
+    for i < len(up) {
         up[i] = up[i] + ffn.standard_ffn.up_bias[i % intermediate_dim]
         i = i + 1
     }
     up = apply_activation(up, ffn.config.activation_type)
     []float down = matmul_flat(up, ffn.standard_ffn.down_weight, tokens, intermediate_dim, hidden_dim)
     i = 0
-    while i < len(down) {
+    for i < len(down) {
         down[i] = down[i] + ffn.standard_ffn.down_bias[i % hidden_dim]
         i = i + 1
     }
@@ -270,7 +270,7 @@ func forward_glu_ffn(
     []float gate = matmul_flat(hidden_states, ffn.glu_ffn.gate_weight, tokens, hidden_dim, intermediate_dim)
     []float value = matmul_flat(hidden_states, ffn.glu_ffn.value_weight, tokens, hidden_dim, intermediate_dim)
     int i = 0
-    while i < len(gate) {
+    for i < len(gate) {
         gate[i] = sigmoid(gate[i] + ffn.glu_ffn.gate_bias[i % intermediate_dim])
         value[i] = swish(value[i] + ffn.glu_ffn.value_bias[i % intermediate_dim])
         value[i] = value[i] * gate[i]
@@ -278,7 +278,7 @@ func forward_glu_ffn(
     }
     []float down = matmul_flat(value, ffn.glu_ffn.down_weight, tokens, intermediate_dim, hidden_dim)
     i = 0
-    while i < len(down) {
+    for i < len(down) {
         down[i] = down[i] + ffn.glu_ffn.down_bias[i % hidden_dim]
         i = i + 1
     }
@@ -295,7 +295,7 @@ func forward_swiglu_ffn(
     []float gate = matmul_flat(hidden_states, ffn.glu_ffn.gate_weight, tokens, hidden_dim, intermediate_dim)
     []float value = matmul_flat(hidden_states, ffn.glu_ffn.value_weight, tokens, hidden_dim, intermediate_dim)
     int i = 0
-    while i < len(gate) {
+    for i < len(gate) {
         gate[i] = swish(gate[i] + ffn.glu_ffn.gate_bias[i % intermediate_dim])
         value[i] = value[i] + ffn.glu_ffn.value_bias[i % intermediate_dim]
         value[i] = value[i] * gate[i]
@@ -303,7 +303,7 @@ func forward_swiglu_ffn(
     }
     []float down = matmul_flat(value, ffn.glu_ffn.down_weight, tokens, intermediate_dim, hidden_dim)
     i = 0
-    while i < len(down) {
+    for i < len(down) {
         down[i] = down[i] + ffn.glu_ffn.down_bias[i % hidden_dim]
         i = i + 1
     }
@@ -321,7 +321,7 @@ func apply_dropout(
     []float out = copy_vector(hidden)
     float keep_scale = 1.0 / (1.0 - dropout_rate)
     int i = 0
-    while i < len(out) {
+    for i < len(out) {
         int bucket = (seed + i * 1315423911) % 1000
         if bucket < (dropout_rate * 1000.0) {
             out[i] = 0.0
@@ -342,11 +342,11 @@ func compute_router_probs(
     int total = seq_len * num_experts
     []float probs = allocate_vector(total, 0.0)
     int s = 0
-    while s < seq_len {
+    for s < seq_len {
         int base = s * num_experts
         float max_score = router_logits[base]
         int e = 1
-        while e < num_experts {
+        for e < num_experts {
             if router_logits[base + e] > max_score {
                 max_score = router_logits[base + e]
             }
@@ -354,7 +354,7 @@ func compute_router_probs(
         }
         float sum_exp = 0.0
         e = 0
-        while e < num_experts {
+        for e < num_experts {
             float value = exp_approx(router_logits[base + e] - max_score)
             probs[base + e] = value
             sum_exp = sum_exp + value
@@ -362,7 +362,7 @@ func compute_router_probs(
         }
         if sum_exp > 0.0 {
             e = 0
-            while e < num_experts {
+            for e < num_experts {
                 probs[base + e] = probs[base + e] / sum_exp
                 e = e + 1
             }
@@ -383,7 +383,7 @@ func compute_load_balancing_loss(
     float mean = 1.0 / (num_experts * 1.0)
     float total = 0.0
     int i = 0
-    while i < len(router_probs) {
+    for i < len(router_probs) {
         float diff = router_probs[i] - mean
         total = total + diff * diff
         i = i + 1

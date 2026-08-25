@@ -49,7 +49,7 @@ func validate_model_files(string model_type) bool {
         print("  Checking weights: " + weights_path + "\n")
     } else {
         int i = 1
-        while i <= 5 {
+        for i <= 5 {
             string weights_path = get_model_weights_path(model_type, i)
             print("  Checking shard " + int_to_string(i) + ": " + weights_path + "\n")
             i = i + 1
@@ -110,12 +110,12 @@ func print_model_loading_status(string model_type, int progress_percent) {
     int filled = progress_percent / 10
     int empty = 10 - filled
     int i = 0
-    while i < filled {
+    for i < filled {
         print("█")
         i = i + 1
     }
     i = 0
-    while i < empty {
+    for i < empty {
         print("░")
         i = i + 1
     }
@@ -130,7 +130,7 @@ func load_model_weights(string model_type, string precision) bool {
         print("  Total size: ~1 GB (Text Model)\n")
         print("  Loading: ")
         int progress = 0
-        while progress <= 100 {
+        for progress <= 100 {
             print_model_loading_status(model_type, progress)
             progress = progress + 20
         }
@@ -139,7 +139,7 @@ func load_model_weights(string model_type, string precision) bool {
         print("  Total size: ~15 GB (VL Model - 5 shards)\n")
         print("  Shards:\n")
         int shard = 1
-        while shard <= 5 {
+        for shard <= 5 {
             print("    Shard " + int_to_string(shard) + "/5: ")
             print_model_loading_status(model_type, shard * 20)
             print("\n")

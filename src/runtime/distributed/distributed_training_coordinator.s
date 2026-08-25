@@ -36,10 +36,10 @@ func dtc_mod_nonneg(int value, int divisor) int {
         return 0
     }
     int current = value
-    while current >= divisor {
+    for current >= divisor {
         current = current - divisor
     }
-    while current < 0 {
+    for current < 0 {
         current = current + divisor
     }
     current
@@ -81,21 +81,21 @@ func new_distributed_training_state(
     state.sp_rank = dtc_mod_nonneg(state.tp_rank, config.sp_degree)
     int tp_group_id = state.pp_rank * config.dp_degree + state.dp_rank
     int i = 0
-    while i < config.tp_degree {
+    for i < config.tp_degree {
         int member_rank = i + tp_group_id * config.tp_degree
         state.tp_group[i] = member_rank
         i = i + 1
     }
     int pp_group_id = state.tp_rank * config.dp_degree + state.dp_rank
     i = 0
-    while i < config.pp_degree {
+    for i < config.pp_degree {
         int member_rank = state.tp_rank + i * config.tp_degree * config.dp_degree + state.dp_rank * config.tp_degree
         state.pp_group[i] = member_rank
         i = i + 1
     }
     int dp_group_id = state.tp_rank * config.pp_degree + state.pp_rank
     i = 0
-    while i < config.dp_degree {
+    for i < config.dp_degree {
         int member_rank = state.tp_rank + state.pp_rank * config.tp_degree + i * config.tp_degree * config.pp_degree
         state.dp_group[i] = member_rank
         i = i + 1
@@ -112,7 +112,7 @@ func distributed_forward_pass(
     [][]double layer_output = embeddings
     int layer_idx = 0
     int total_layers = 160
-    while layer_idx < total_layers {
+    for layer_idx < total_layers {
         if (l(layer_idx - (layer_idx / config.pp_degree) * config.pp_degree)) == dist_state.pp_rank {
             if dist_state.pp_rank < (config.pp_degree - 1) {
                 int next_stage = (((dist_state.pp_rank + 1) - ((dist_state.pp_rank + 1) / config.pp_degree) * config.pp_degree)
@@ -134,7 +134,7 @@ func distributed_backward_pass(
     distributed_training_config config = dist_state.config
     [][]double current_grad = loss_grad
     int layer_idx = 159
-    while layer_idx >= 0 {
+    for layer_idx >= 0 {
         if (l(layer_idx - (layer_idx / config.pp_degree) * config.pp_degree)) == dist_state.pp_rank {
             if layer_idx > 0  dtc_mod_nonneg(layer_idx - 1, config.pp_degree) != dist_state.pp_rank {
                 int prev_stage = dtc_mod_nonneg((layer_idx - 1) / config.pp_degree, config.pp_degree)
@@ -219,7 +219,7 @@ func distributed_training_loop_2t(
     double learning_rate,
     int log_interval) {
     int step = 0
-    while step < num_steps {
+    for step < num_steps {
         [][]double logits = distributed_forward_pass(model_params, model_params, dist_state)
         double loss = 0.0
         [][]double loss_grad

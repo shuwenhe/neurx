@@ -30,7 +30,7 @@ func agent_search_count_lines(string text) int {
     }
     int count = 1
     int i = 0
-    while i < len(trimmed) {
+    for i < len(trimmed) {
         if string(trimmed[i]) == "\n" {
             count = count + 1
         }

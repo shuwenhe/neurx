@@ -31,7 +31,7 @@ struct adamw_state {
 func zeros(int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = 0.0
         i = i + 1
     }
@@ -45,7 +45,7 @@ func initial_parameters(int vocab_size, int hidden_size) []float {
     int count = embedding_count + matrix_count * 3 + lm_head_count
     []float out = zeros(count)
     int i = 0
-    while i < count {
+    for i < count {
         int centered = (i * 37 + 17) - ((i * 37 + 17) / 23) * 23 - 11
         out[i] = (centered as float) * 0.007
         i = i + 1
@@ -84,7 +84,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 24 {
+    for i <= 24 {
         term = term * value / (i as float)
         result = result + term
         i = i + 1
@@ -101,11 +101,11 @@ func log_approx(float x) float {
     }
     float scaled = x
     int exponent = 0
-    while scaled > 2.0 {
+    for scaled > 2.0 {
         scaled = scaled * 0.5
         exponent = exponent + 1
     }
-    while scaled < 0.5 {
+    for scaled < 0.5 {
         scaled = scaled * 2.0
         exponent = exponent - 1
     }
@@ -115,7 +115,7 @@ func log_approx(float x) float {
     float series = 0.0
     int denominator = 1
     int i = 0
-    while i < 18 {
+    for i < 18 {
         series = series + power / (denominator as float)
         power = power * z2
         denominator = denominator + 2
@@ -133,7 +133,7 @@ func sqrt_approx(float x) float {
         result = x
     }
     int i = 0
-    while i < 24 {
+    for i < 24 {
         result = 0.5 * (result + x / result)
         i = i + 1
     }
@@ -156,23 +156,23 @@ func forward(
     []float context = zeros(seq_len * hidden_size)
     []float probabilities = zeros(seq_len * vocab_size)
     int t = 0
-    while t < seq_len {
+    for t < seq_len {
         int h = 0
-        while h < hidden_size {
+        for h < hidden_size {
             x[t * hidden_size + h] = params[embedding_offset() + inputs[t] * hidden_size + h]
             h = h + 1
         }
         t = t + 1
     }
     t = 0
-    while t < seq_len {
+    for t < seq_len {
         int o = 0
-        while o < hidden_size {
+        for o < hidden_size {
             float q_value = 0.0
             float k_value = 0.0
             float v_value = 0.0
             int i = 0
-            while i < hidden_size {
+            for i < hidden_size {
                 float input_value = x[t * hidden_size + i]
                 q_value = q_value + input_value * params[q_offset(vocab_size, hidden_size) + i * hidden_size + o]
                 k_value = k_value + input_value * params[k_offset(vocab_size, hidden_size) + i * hidden_size + o]
@@ -188,14 +188,14 @@ func forward(
     }
     float scale = 1.0 / sqrt_approx(hidden_size as float)
     t = 0
-    while t < seq_len {
+    for t < seq_len {
         []float scores = zeros(seq_len)
         float max_score = -1000000.0
         int s = 0
-        while s <= t {
+        for s <= t {
             float score = 0.0
             int h = 0
-            while h < hidden_size {
+            for h < hidden_size {
                 score = score + q[t * hidden_size + h] * k[s * hidden_size + h]
                 h = h + 1
             }
@@ -207,17 +207,17 @@ func forward(
         }
         float normalizer = 0.0
         s = 0
-        while s <= t {
+        for s <= t {
             scores[s] = exp_approx(scores[s] - max_score)
             normalizer = normalizer + scores[s]
             s = s + 1
         }
         s = 0
-        while s <= t {
+        for s <= t {
             float probability = scores[s] / normalizer
             attention[t * seq_len + s] = probability
             int h = 0
-            while h < hidden_size {
+            for h < hidden_size {
                 context[t * hidden_size + h] = context[t * hidden_size + h] + probability * v[s * hidden_size + h]
                 h = h + 1
             }
@@ -227,14 +227,14 @@ func forward(
     }
     float loss = 0.0
     t = 0
-    while t < seq_len {
+    for t < seq_len {
         []float logits = zeros(vocab_size)
         float max_logit = -1000000.0
         int token = 0
-        while token < vocab_size {
+        for token < vocab_size {
             float logit = 0.0
             int h = 0
-            while h < hidden_size {
+            for h < hidden_size {
                 logit = logit + context[t * hidden_size + h] * params[lm_head_offset(vocab_size, hidden_size) + h * vocab_size + token]
                 h = h + 1
             }
@@ -246,13 +246,13 @@ func forward(
         }
         float normalizer = 0.0
         token = 0
-        while token < vocab_size {
+        for token < vocab_size {
             logits[token] = exp_approx(logits[token] - max_logit)
             normalizer = normalizer + logits[token]
             token = token + 1
         }
         token = 0
-        while token < vocab_size {
+        for token < vocab_size {
             probabilities[t * vocab_size + token] = logits[token] / normalizer
             token = token + 1
         }
@@ -287,16 +287,16 @@ func backward(
     []float d_v = zeros(seq_len * hidden_size)
     []float d_x = zeros(seq_len * hidden_size)
     int t = 0
-    while t < seq_len {
+    for t < seq_len {
         int token = 0
-        while token < vocab_size {
+        for token < vocab_size {
             float d_logit = cache.probabilities[t * vocab_size + token]
             if token == targets[t] {
                 d_logit = d_logit - 1.0
             }
             d_logit = d_logit / (seq_len as float)
             int h = 0
-            while h < hidden_size {
+            for h < hidden_size {
                 int lm_index = lm_head_offset(vocab_size, hidden_size) + h * vocab_size + token
                 grads[lm_index] = grads[lm_index] + cache.context[t * hidden_size + h] * d_logit
                 d_context[t * hidden_size + h] = d_context[t * hidden_size + h] + params[lm_index] * d_logit
@@ -308,12 +308,12 @@ func backward(
     }
     float scale = 1.0 / sqrt_approx(hidden_size as float)
     t = 0
-    while t < seq_len {
+    for t < seq_len {
         []float d_attention = zeros(seq_len)
         int s = 0
-        while s <= t {
+        for s <= t {
             int h = 0
-            while h < hidden_size {
+            for h < hidden_size {
                 d_v[s * hidden_size + h] = d_v[s * hidden_size + h] +
                     cache.attention[t * seq_len + s] * d_context[t * hidden_size + h]
                 d_attention[s] = d_attention[s] +
@@ -324,15 +324,15 @@ func backward(
         }
         float weighted = 0.0
         s = 0
-        while s <= t {
+        for s <= t {
             weighted = weighted + cache.attention[t * seq_len + s] * d_attention[s]
             s = s + 1
         }
         s = 0
-        while s <= t {
+        for s <= t {
             float d_score = cache.attention[t * seq_len + s] * (d_attention[s] - weighted)
             int h = 0
-            while h < hidden_size {
+            for h < hidden_size {
                 d_q[t * hidden_size + h] = d_q[t * hidden_size + h] +
                     d_score * cache.k[s * hidden_size + h] * scale
                 d_k[s * hidden_size + h] = d_k[s * hidden_size + h] +
@@ -344,11 +344,11 @@ func backward(
         t = t + 1
     }
     t = 0
-    while t < seq_len {
+    for t < seq_len {
         int i = 0
-        while i < hidden_size {
+        for i < hidden_size {
             int o = 0
-            while o < hidden_size {
+            for o < hidden_size {
                 int q_index = q_offset(vocab_size, hidden_size) + i * hidden_size + o
                 int k_index = k_offset(vocab_size, hidden_size) + i * hidden_size + o
                 int v_index = v_offset(vocab_size, hidden_size) + i * hidden_size + o
@@ -380,7 +380,7 @@ func adamw_update(adamw_state state, []float grads, float loss, float learning_r
     []float first = zeros(len(state.params))
     []float second = zeros(len(state.params))
     int i = 0
-    while i < len(state.params) {
+    for i < len(state.params) {
         first[i] = beta1 * state.first_moment[i] + (1.0 - beta1) * grads[i]
         second[i] = beta2 * state.second_moment[i] + (1.0 - beta2) * grads[i] * grads[i]
         float first_hat = first[i] / (1.0 - beta1_power)
@@ -411,7 +411,7 @@ func gradient_relative_error(
     float epsilon = 0.001
     float worst = 0.0
     int i = 0
-    while i < len(params) {
+    for i < len(params) {
         []float plus = copy_floats(params)
         []float minus = copy_floats(params)
         plus[i] = plus[i] + epsilon
@@ -514,7 +514,7 @@ func main() {
         return 2
     }
     float start_loss = initial_cache.loss
-    while state.step < max_steps {
+    for state.step < max_steps {
         train_cache cache = forward(state.params, inputs, targets, vocab_size, hidden_size)
         []float grads = backward(state.params, cache, inputs, targets, vocab_size, hidden_size)
         state = adamw_update(state, grads, cache.loss, learning_rate, weight_decay)
@@ -537,7 +537,7 @@ func main() {
 func copy_floats([]float values) []float {
     []float out = zeros(len(values))
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }
@@ -554,7 +554,7 @@ func abs_float(float value) float {
 func floats_to_string([]float values) string {
     string out = ""
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if i > 0 {
             out = out + ","
         }
@@ -569,7 +569,7 @@ func parse_float_list(string text, int expected) []float {
     int count = 0
     int start = 0
     int i = 0
-    while i <= len(text) {
+    for i <= len(text) {
         if i == len(text) || text[i] == 44 {
             string item = substring(text, start, i)
             if len(item) > 0 && count < expected {
@@ -590,7 +590,7 @@ func value_for_key(string text, string key) string {
     string prefix = key + "="
     int line_start = 0
     int i = 0
-    while i <= len(text) {
+    for i <= len(text) {
         if i == len(text) || text[i] == 10 {
             string line = substring(text, line_start, i)
             if starts_with(line, prefix) {
@@ -608,7 +608,7 @@ func starts_with(string text, string prefix) bool {
         return false
     }
     int i = 0
-    while i < len(prefix) {
+    for i < len(prefix) {
         if text[i] != prefix[i] {
             return false
         }
@@ -620,7 +620,7 @@ func starts_with(string text, string prefix) bool {
 func substring(string text, int start, int end) string {
     string out = ""
     int i = start
-    while i < end && i < len(text) {
+    for i < end && i < len(text) {
         out = out + string_char(text[i])
         i = i + 1
     }
@@ -640,7 +640,7 @@ func parse_float(string text) float {
         negative = true
         i = 1
     }
-    while i < len(text) {
+    for i < len(text) {
         if text[i] == 46 {
             fraction = true
         } else if text[i] >= 48 && text[i] <= 57 {
@@ -669,7 +669,7 @@ func int_to_string(int value) string {
         current = 0 - current
     }
     string out = ""
-    while current > 0 {
+    for current > 0 {
         int digit = current - (current / 10) * 10
         out = string_char(digit + 48) + out
         current = current / 10
@@ -688,16 +688,16 @@ func float_to_string(float value, int decimals) string {
         current = 0.0 - current
     }
     int whole = 0
-    while current >= 1.0 && whole < 1000000 {
+    for current >= 1.0 && whole < 1000000 {
         current = current - 1.0
         whole = whole + 1
     }
     out = out + int_to_string(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 && digit < 9 {
+        for current >= 1.0 && digit < 9 {
             current = current - 1.0
             digit = digit + 1
         }
@@ -714,7 +714,7 @@ func string_char(int code) string {
 func shell_escape(string text) string {
     string out = "'"
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         if text[i] == 39 {
             out = out + "'\"'\"'"
         } else {

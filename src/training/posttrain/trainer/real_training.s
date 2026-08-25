@@ -70,7 +70,7 @@ func run_real_training() int {
     [][]float lora_a_matrices = [][]float{cap: 7}
     [][]float lora_b_matrices = [][]float{cap: 7}
     int adapter_i = 0
-    while adapter_i < 7 {
+    for adapter_i < 7 {
         lora_a_matrices[adapter_i] = init_gaussian(config.hidden_size * config.lora_rank, 0.02)
         lora_b_matrices[adapter_i] = init_gaussian(config.lora_rank * config.hidden_size, 0.02)
         adapter_i = adapter_i + 1
@@ -89,10 +89,10 @@ func run_real_training() int {
     eprintln("[Step 4/6] Starting REAL training loop with LM loss")
     int epoch = 0
     int total_steps = 0
-    while epoch < config.num_epochs {
+    for epoch < config.num_epochs {
         eprintln("[Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(config.num_epochs) + "]")
         int step = 0
-        while step < config.steps_per_epoch {
+        for step < config.steps_per_epoch {
             eprintln("  [Step " + int_to_str(step + 1) + "/" + int_to_str(config.steps_per_epoch) + "]")
             eprintln("    Forward pass (real model forward)...")
             []float logits = model_forward(
@@ -193,7 +193,7 @@ func mean([]float arr) float {
     if len(arr) == 0 { return 0.0 }
     float sum = 0.0
     int i = 0
-    while i < len(arr) {
+    for i < len(arr) {
         sum = sum + arr[i]
         i = i + 1
     }
@@ -205,7 +205,7 @@ func int_to_str(int x) string {
     if x < 0 { return "-" + int_to_str(0 - x) }
     string result = ""
     int num = x
-    while num > 0 {
+    for num > 0 {
         int digit = num - ((num / 10) * 10)
         if digit == 0 { result = "0" + result }
         if digit == 1 { result = "1" + result }
@@ -230,7 +230,7 @@ func float_to_str(float x, int precision) string {
     }
     string result = int_to_str(integer_part) + "."
     int i = 0
-    while i < precision {
+    for i < precision {
         decimal_part = decimal_part * 10.0
         int digit = decimal_part as int
         result = result + int_to_str(digit)

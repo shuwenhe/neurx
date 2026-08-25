@@ -21,9 +21,9 @@ func transpose_2d(tensor A) tensor {
     int n = A.shape[1]
     tensor result = zeros([n, m])
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             result.data[j * m + i] = A.data[i * n + j]
             j = j + 1
         }
@@ -35,7 +35,7 @@ func transpose_2d(tensor A) tensor {
 func scale_tensor(tensor A, float scale) tensor {
     tensor result = zeros(A.shape)
     int i = 0
-    while i < len(A.data) {
+    for i < len(A.data) {
         result.data[i] = A.data[i] * scale
         i = i + 1
     }
@@ -45,7 +45,7 @@ func scale_tensor(tensor A, float scale) tensor {
 func add_tensors(tensor A, tensor B) tensor {
     tensor result = zeros(A.shape)
     int i = 0
-    while i < len(A.data) {
+    for i < len(A.data) {
         result.data[i] = A.data[i] + B.data[i]
         i = i + 1
     }
@@ -55,7 +55,7 @@ func add_tensors(tensor A, tensor B) tensor {
 func sub_tensors(tensor A, tensor B) tensor {
     tensor result = zeros(A.shape)
     int i = 0
-    while i < len(A.data) {
+    for i < len(A.data) {
         result.data[i] = A.data[i] - B.data[i]
         i = i + 1
     }
@@ -65,7 +65,7 @@ func sub_tensors(tensor A, tensor B) tensor {
 func mul_element_wise(tensor A, tensor B) tensor {
     tensor result = zeros(A.shape)
     int i = 0
-    while i < len(A.data) {
+    for i < len(A.data) {
         result.data[i] = A.data[i] * B.data[i]
         i = i + 1
     }
@@ -75,7 +75,7 @@ func mul_element_wise(tensor A, tensor B) tensor {
 func relu(tensor X) tensor {
     tensor result = zeros(X.shape)
     int i = 0
-    while i < len(X.data) {
+    for i < len(X.data) {
         if X.data[i] > 0.0 {
             result.data[i] = X.data[i]
         } else {
@@ -89,7 +89,7 @@ func relu(tensor X) tensor {
 func relu_backward(tensor d_y, tensor X) tensor {
     tensor result = zeros(X.shape)
     int i = 0
-    while i < len(d_y.data) {
+    for i < len(d_y.data) {
         if X.data[i] > 0.0 {
             result.data[i] = d_y.data[i]
         } else {
@@ -105,7 +105,7 @@ func gelu(tensor X) tensor {
     float c1 = 0.7978845608
     float c2 = 0.044715
     int i = 0
-    while i < len(X.data) {
+    for i < len(X.data) {
         float x = X.data[i]
         float x3 = x * x * x
         float tanh_arg = c1 * (x + c2 * x3)
@@ -119,7 +119,7 @@ func gelu(tensor X) tensor {
 func softmax(tensor logits) tensor {
     float max_val = logits.data[0]
     int i = 0
-    while i < len(logits.data) {
+    for i < len(logits.data) {
         if logits.data[i] > max_val {
             max_val = logits.data[i]
         }
@@ -128,14 +128,14 @@ func softmax(tensor logits) tensor {
     float sum_exp = 0.0
     tensor exp_vals = zeros(logits.shape)
     i = 0
-    while i < len(logits.data) {
+    for i < len(logits.data) {
         exp_vals.data[i] = exp_approx(logits.data[i] - max_val)
         sum_exp = sum_exp + exp_vals.data[i]
         i = i + 1
     }
     tensor result = zeros(logits.shape)
     i = 0
-    while i < len(exp_vals.data) {
+    for i < len(exp_vals.data) {
         result.data[i] = exp_vals.data[i] / sum_exp
         i = i + 1
     }
@@ -146,12 +146,12 @@ func softmax_backward(tensor grad_output, tensor softmax_output) tensor {
     tensor result = zeros(grad_output.shape)
     float sum_term = 0.0
     int i = 0
-    while i < len(softmax_output.data) {
+    for i < len(softmax_output.data) {
         sum_term = sum_term + softmax_output.data[i] * grad_output.data[i]
         i = i + 1
     }
     i = 0
-    while i < len(grad_output.data) {
+    for i < len(grad_output.data) {
         result.data[i] = softmax_output.data[i] * (grad_output.data[i] - sum_term)
         i = i + 1
     }
@@ -161,14 +161,14 @@ func softmax_backward(tensor grad_output, tensor softmax_output) tensor {
 func layer_norm(tensor X, float eps) tensor {
     float mean = 0.0
     int i = 0
-    while i < len(X.data) {
+    for i < len(X.data) {
         mean = mean + X.data[i]
         i = i + 1
     }
     mean = mean / float_from_int(len(X.data))
     float variance = 0.0
     i = 0
-    while i < len(X.data) {
+    for i < len(X.data) {
         float diff = X.data[i] - mean
         variance = variance + diff * diff
         i = i + 1
@@ -176,7 +176,7 @@ func layer_norm(tensor X, float eps) tensor {
     variance = variance / float_from_int(len(X.data))
     tensor result = zeros(X.shape)
     i = 0
-    while i < len(X.data) {
+    for i < len(X.data) {
         result.data[i] = (X.data[i] - mean) / sqrt_approx(variance + eps)
         i = i + 1
     }
@@ -186,7 +186,7 @@ func layer_norm(tensor X, float eps) tensor {
 func cross_entropy_loss(tensor logits, tensor targets) float {
     float loss = 0.0
     int i = 0
-    while i < len(logits.data) {
+    for i < len(logits.data) {
         if targets.data[i] > 0.0 {
             float prob = logits.data[i]
             if prob < 0.0000001 { prob = 0.0000001 }
@@ -200,7 +200,7 @@ func cross_entropy_loss(tensor logits, tensor targets) float {
 func mse_loss(tensor predictions, tensor targets) float {
     float loss = 0.0
     int i = 0
-    while i < len(predictions.data) {
+    for i < len(predictions.data) {
         float diff = predictions.data[i] - targets.data[i]
         loss = loss + diff * diff
         i = i + 1
@@ -216,7 +216,7 @@ func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
     int i = 0
-    while i < 10 {
+    for i < 10 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -229,7 +229,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 12 {
+    for i <= 12 {
         term = term * x / float_from_int(i)
         result = result + term
         i = i + 1
@@ -268,12 +268,12 @@ func int_from_float(float x) int {
     int n = 0
     float y = x
     if y < 0.0 {
-        while y < 0.0 {
+        for y < 0.0 {
             y = y + 1.0
             n = n - 1
         }
     }
-    while y >= 1.0 {
+    for y >= 1.0 {
         y = y - 1.0
         n = n + 1
     }

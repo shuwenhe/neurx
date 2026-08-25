@@ -16,7 +16,7 @@ struct safetensors_file {
 }
 
 func skip_whitespace(string json, int pos) int {
-    while pos < json.length && (json[pos] == ' ' || json[pos] == '\n' || json[pos] == '\t' || json[pos] == '\r') {
+    for pos < json.length && (json[pos] == ' ' || json[pos] == '\n' || json[pos] == '\t' || json[pos] == '\r') {
         pos = pos + 1
     }
     return pos
@@ -25,11 +25,11 @@ func skip_whitespace(string json, int pos) int {
 func extract_string_value(string json, int start_pos) (string, int) {
     int i = start_pos
     string result = ""
-    while i < json.length && json[i] != '"' {
+    for i < json.length && json[i] != '"' {
         i = i + 1
     }
     i = i + 1
-    while i < json.length && json[i] != '"' {
+    for i < json.length && json[i] != '"' {
         result = result + json[i]
         i = i + 1
     }
@@ -40,7 +40,7 @@ func extract_string_value(string json, int start_pos) (string, int) {
 func extract_number_value(string json, int start_pos) (int64, int) {
     int i = start_pos
     string num_str = ""
-    while i < json.length && ((json[i] >= '0' && json[i] <= '9') || json[i] == '-') {
+    for i < json.length && ((json[i] >= '0' && json[i] <= '9') || json[i] == '-') {
         num_str = num_str + json[i]
         i = i + 1
     }
@@ -51,7 +51,7 @@ func extract_number_value(string json, int start_pos) (int64, int) {
         sign = -1
         j = 1
     }
-    while j < num_str.length {
+    for j < num_str.length {
         result = result * 10 + (num_str[j] - '0')
         j = j + 1
     }
@@ -61,27 +61,27 @@ func extract_number_value(string json, int start_pos) (int64, int) {
 func extract_array_values(string json, int start_pos) ([]int, int) {
     []int result = []
     int i = start_pos
-    while i < json.length && json[i] != '[' {
+    for i < json.length && json[i] != '[' {
         i = i + 1
     }
     i = i + 1
-    while i < json.length && json[i] != ']' {
+    for i < json.length && json[i] != ']' {
         i = skip_whitespace(json, i)
         if json[i] >= '0' && json[i] <= '9' {
             string num_str = ""
-            while i < json.length && json[i] >= '0' && json[i] <= '9' {
+            for i < json.length && json[i] >= '0' && json[i] <= '9' {
                 num_str = num_str + json[i]
                 i = i + 1
             }
             int num = 0
             int k = 0
-            while k < num_str.length {
+            for k < num_str.length {
                 num = num * 10 + (num_str[k] - '0')
                 k = k + 1
             }
             result = append(result, num)
         }
-        while i < json.length && (json[i] == ',' || json[i] == ' ' || json[i] == '\t') {
+        for i < json.length && (json[i] == ',' || json[i] == ' ' || json[i] == '\t') {
             i = i + 1
         }
     }
@@ -142,7 +142,7 @@ func int_to_string(int n) string {
         is_negative = 1
         abs_n = -n
     }
-    while abs_n > 0 {
+    for abs_n > 0 {
         int digit = abs_n % 10
         result = digit + "0" + result
         abs_n = abs_n / 10
@@ -159,7 +159,7 @@ func int_to_hex(int n) string {
     if n == 0 {
         return "0x0"
     }
-    while n > 0 {
+    for n > 0 {
         int digit = n % 16
         result = hex_chars[digit] + result
         n = n / 16

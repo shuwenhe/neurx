@@ -75,7 +75,7 @@ func get_all_backends() []backend_info {
 func get_backend_by_name(string name) backend_info {
     backends = get_all_backends()
     i = 0
-    while i < len(backends) {
+    for i < len(backends) {
         if backends[i].name == name {
             return backends[i]
         }

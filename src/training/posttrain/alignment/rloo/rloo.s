@@ -49,14 +49,14 @@ func rloo_compute_loo_baselines(
     int n = rewards.len
     []tensor baselines = []tensor{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         int group_idx = i / num_samples
         int group_start = group_idx * num_samples
         int group_end = group_start + num_samples
         tensor sum_others = tensor_ops.zeros_like(rewards[i])
         int count = 0
         int j = group_start
-        while j < group_end {
+        for j < group_end {
             if j != i {
                 sum_others = tensor_ops.add(sum_others, rewards[j])
                 count = count + 1
@@ -108,7 +108,7 @@ func rloo_step(
     rloo_config cfg
 ) rloo_state {
     int i = 0
-    while i < rewards.len {
+    for i < rewards.len {
         rewards[i] = tensor_ops.clip_scalar(
             rewards[i],
             -cfg.clip_range_reward,
@@ -122,7 +122,7 @@ func rloo_step(
     )
     []tensor advantages = []tensor{cap: rewards.len}
     i = 0
-    while i < rewards.len {
+    for i < rewards.len {
         advantages[i] = tensor_ops.sub(rewards[i], baselines[i])
         i = i + 1
     }
@@ -131,7 +131,7 @@ func rloo_step(
         float mean_adv = tensor_ops.mean_scalar(all_adv)
         float std_adv = tensor_ops.std_scalar(all_adv)
         i = 0
-        while i < advantages.len {
+        for i < advantages.len {
             advantages[i] = tensor_ops.div_scalar(
                 tensor_ops.sub_scalar(advantages[i], mean_adv),
                 std_adv + 1e-8

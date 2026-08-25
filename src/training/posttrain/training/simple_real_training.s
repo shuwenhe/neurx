@@ -10,7 +10,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -33,7 +33,7 @@ func float_to_str(float value, int decimals) string {
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -41,10 +41,10 @@ func float_to_str(float value, int decimals) string {
     if decimals > 0 {
         result = result + "."
         int i = 0
-        while i < decimals {
+        for i < decimals {
             current = current * 10.0
             int digit = 0
-            while current >= 1.0 {
+            for current >= 1.0 {
                 current = current - 1.0
                 digit = digit + 1
             }
@@ -95,7 +95,7 @@ func main() {
     []float lora_b = []float{cap: lora_b_size}
     int seed = 42
     int i = 0
-    while i < lora_a_size {
+    for i < lora_a_size {
         seed = seed * 1103515245 + 12345
         if seed < 0 { seed = 0 - seed }
         int remainder = seed - (seed / 10000) * 10000
@@ -104,7 +104,7 @@ func main() {
         i = i + 1
     }
     i = 0
-    while i < lora_b_size {
+    for i < lora_b_size {
         lora_b = append(lora_b, 0.0)
         i = i + 1
     }
@@ -114,13 +114,13 @@ func main() {
     float current_loss = 10.0
     float best_loss = 999.0
     int epoch = 0
-    while epoch < num_epochs {
+    for epoch < num_epochs {
         println("====================================================")
         println("[Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(num_epochs) + "]")
         println("====================================================")
         int step = 0
         int steps_per_epoch = 100
-        while step < steps_per_epoch {
+        for step < steps_per_epoch {
             total_steps = total_steps + 1
             seed = seed + total_steps * 999
             if seed < 0 { seed = 0 - seed }
@@ -153,12 +153,12 @@ func main() {
     string lora_path = output_dir + "/adapter_model.bin"
     []byte buffer = []byte{cap: (lora_a_size + lora_b_size) * 4 + 16}
     i = 0
-    while i < 16 {
+    for i < 16 {
         buffer = append(buffer, byte(0))
         i = i + 1
     }
     i = 0
-    while i < lora_a_size {
+    for i < lora_a_size {
         int val_int = int(lora_a[i] * 1000000.0)
         buffer = append(buffer, byte(val_int))
         buffer = append(buffer, byte(val_int / 256))
@@ -167,7 +167,7 @@ func main() {
         i = i + 1
     }
     i = 0
-    while i < lora_b_size {
+    for i < lora_b_size {
         int val_int = int(lora_b[i] * 1000000.0)
         buffer = append(buffer, byte(val_int))
         buffer = append(buffer, byte(val_int / 256))
@@ -180,7 +180,7 @@ func main() {
     string config_json = "{\"lora_rank\":" + int_to_str(lora_rank) + ",\"lora_alpha\":" + float_to_str(lora_alpha, 1) + ",\"learning_rate\":" + float_to_str(learning_rate, 6) + "}"
     []byte config_bytes = []byte{cap: len(config_json)}
     i = 0
-    while i < len(config_json) {
+    for i < len(config_json) {
         config_bytes = append(config_bytes, byte(config_json[i]))
         i = i + 1
     }

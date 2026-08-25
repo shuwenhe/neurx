@@ -3,11 +3,11 @@ use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_file_exis
 
 func trim(string s) string {
     int i = 0
-    while i < len(s) && (string(s[i]) == " " || string(s[i]) == "\t" || string(s[i]) == "\r" || string(s[i]) == "\n") {
+    for i < len(s) && (string(s[i]) == " " || string(s[i]) == "\t" || string(s[i]) == "\r" || string(s[i]) == "\n") {
         i = i + 1
     }
     int j = len(s) - 1
-    while j >= 0 && (string(s[j]) == " " || string(s[j]) == "\t" || string(s[j]) == "\r" || string(s[j]) == "\n") {
+    for j >= 0 && (string(s[j]) == " " || string(s[j]) == "\t" || string(s[j]) == "\r" || string(s[j]) == "\n") {
         j = j - 1
     }
     if j < i {
@@ -15,7 +15,7 @@ func trim(string s) string {
     }
     string out = ""
     int k = i
-    while k <= j {
+    for k <= j {
         out = out + string(s[k])
         k = k + 1
     }
@@ -25,7 +25,7 @@ func trim(string s) string {
 func starts_with(string s, string p) bool {
     if len(p) > len(s) { return false }
     int i = 0
-    while i < len(p) {
+    for i < len(p) {
         if string(s[i]) != string(p[i]) {
             return false
         }
@@ -37,7 +37,7 @@ func starts_with(string s, string p) bool {
 func substr(string s, int from, int to) string {
     string out = ""
     int i = from
-    while i < to && i < len(s) {
+    for i < to && i < len(s) {
         out = out + string(s[i])
         i = i + 1
     }
@@ -53,7 +53,7 @@ func int_to_str(int n, int fallback) string {
         n = -n
     }
     string s = ""
-    while n > 0 {
+    for n > 0 {
         s = string(n - (n / 10) * 10 + 48) + s
         n = n / 10
     }
@@ -79,7 +79,7 @@ func fmt_float(float val, int decimals) string {
     }
     s = s + int_to_str(int_part, 0) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         frac = frac * 10.0
         int digit = float_to_int(frac)
         s = s + string(digit + 48)
@@ -91,7 +91,7 @@ func fmt_float(float val, int decimals) string {
 
 func pad_float(float val, int w, int d) string {
     string s = fmt_float(val, d)
-    while len(s) < w {
+    for len(s) < w {
         s = " " + s
     }
     s
@@ -100,7 +100,7 @@ func pad_float(float val, int w, int d) string {
 func split_lines(string s) []string {
     int capacity = 1
     int j = 0
-    while j < len(s) {
+    for j < len(s) {
         if string(s[j]) == "\n" {
             capacity = capacity + 1
         }
@@ -110,7 +110,7 @@ func split_lines(string s) []string {
     string line = ""
     int idx = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         if string(s[i]) == "\n" || string(s[i]) == "\r" {
             if len(line) > 0 {
                 out[idx] = line
@@ -132,7 +132,7 @@ func split_lines(string s) []string {
 func parse_csv_floats(string s) []float {
     int capacity = 1
     int j = 0
-    while j < len(s) {
+    for j < len(s) {
         if string(s[j]) == "," {
             capacity = capacity + 1
         }
@@ -142,7 +142,7 @@ func parse_csv_floats(string s) []float {
     string cur = ""
     int idx = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         if string(s[i]) == "," {
             if len(cur) > 0 {
                 out[idx] = str_to_float(trim(cur))
@@ -163,7 +163,7 @@ func parse_csv_floats(string s) []float {
 func parse_csv_ints(string s) []int {
     int capacity = 1
     int j = 0
-    while j < len(s) {
+    for j < len(s) {
         if string(s[j]) == "," {
             capacity = capacity + 1
         }
@@ -173,7 +173,7 @@ func parse_csv_ints(string s) []int {
     string cur = ""
     int idx = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         if string(s[i]) == "," {
             if len(cur) > 0 {
                 out[idx] = str_to_int(trim(cur), 0)
@@ -197,7 +197,7 @@ func str_to_int(string s, int fallback) int {
     int i = 0
     if s[0] == 45 { sign = -1; i = 1 }
     int value = 0
-    while i < len(s) {
+    for i < len(s) {
         int digit = s[i] - 48
         if digit < 0 || digit > 9 { return fallback }
         value = value * 10 + digit
@@ -212,7 +212,7 @@ func str_to_float(string s) float {
     int i = 0
     if s[0] == 45 { neg = true; i = 1 }
     float int_part = 0.0
-    while i < len(s) && s[i] >= 48 && s[i] <= 57 {
+    for i < len(s) && s[i] >= 48 && s[i] <= 57 {
         int_part = int_part * 10.0 + (s[i] - 48) * 1.0
         i = i + 1
     }
@@ -220,7 +220,7 @@ func str_to_float(string s) float {
     float div = 1.0
     if i < len(s) && s[i] == 46 {
         i = i + 1
-        while i < len(s) && s[i] >= 48 && s[i] <= 57 {
+        for i < len(s) && s[i] >= 48 && s[i] <= 57 {
             frac = frac * 10.0 + (s[i] - 48) * 1.0
             div = div * 10.0
             i = i + 1
@@ -235,12 +235,12 @@ func float_to_int(float x) int {
     int n = 0
     float y = x
     if y < 0.0 {
-        while y < 0.0 {
+        for y < 0.0 {
             y = y + 1.0
             n = n - 1
         }
     }
-    while y >= 1.0 {
+    for y >= 1.0 {
         y = y - 1.0
         n = n + 1
     }
@@ -250,7 +250,7 @@ func float_to_int(float x) int {
 func shell_escape(string value) string {
     string out = "'"
     int i = 0
-    while i < len(value) {
+    for i < len(value) {
         string ch = string(value[i])
         if ch == "'" {
             out = out + "'\"'\"'"
@@ -288,7 +288,7 @@ func extract_weight_row_csv(string checkpoint_path, int row_id, int vocab_size) 
 func csv_first_int(string s) int {
     string cur = ""
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         if string(s[i]) == "," {
             break
         }
@@ -302,7 +302,7 @@ func csv_second_int(string s) int {
     string cur = ""
     int i = 0
     bool seen_first = false
-    while i < len(s) {
+    for i < len(s) {
         if string(s[i]) == "," {
             seen_first = true
             i = i + 1
@@ -310,7 +310,7 @@ func csv_second_int(string s) int {
         }
         i = i + 1
     }
-    while i < len(s) {
+    for i < len(s) {
         cur = cur + string(s[i])
         i = i + 1
     }
@@ -324,7 +324,7 @@ func argmax_next_row([]float weights_row, []float bias, int vocab_size) int {
     int best_id = 0
     float best_logit = weights_row[0] + bias[0]
     int i = 1
-    while i < vocab_size {
+    for i < vocab_size {
         float logit = weights_row[i] + bias[i]
         if logit > best_logit {
             best_logit = logit
@@ -392,7 +392,7 @@ func main() {
     int cached_row_id = -1
     []float cached_row = []float{cap: 0}
     int token = 0
-    while token < max_new {
+    for token < max_new {
         if cached_row_id != prev_id {
             string row_csv = extract_weight_row_csv(checkpoint_path, prev_id, vocab)
             cached_row = parse_csv_floats(row_csv)

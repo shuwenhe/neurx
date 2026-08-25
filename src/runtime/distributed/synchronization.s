@@ -29,7 +29,7 @@ struct synchronization_state {
 func new_synchronization_state(int world_size, string backend) synchronization_state {
     []rank_state ranks = []rank_state{cap: world_size}
     int i = 0
-    while i < world_size {
+    for i < world_size {
         ranks[i] = rank_state {
             rank_id: i,
             world_size: world_size,
@@ -63,7 +63,7 @@ func allreduce_with_timeout(synchronization_state state, string tensor_name, int
 func detect_deadlock(synchronization_state state) bool {
     int current_time_ms = 0
     int i = 0
-    while i < len(state.ranks) {
+    for i < len(state.ranks) {
         rank_state rank = state.ranks[i]
         int time_since_heartbeat = current_time_ms - rank.last_heartbeat_timestamp_ms
         if time_since_heartbeat > state.config.timeout_ms {

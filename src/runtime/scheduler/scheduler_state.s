@@ -34,7 +34,7 @@ func scheduler_state_dict_get_state(
     string key
 ) []float {
     int i = 0
-    while i < len(state.state_keys) {
+    for i < len(state.state_keys) {
         if state.state_keys[i] == key {
             return clone_lr_array(state.state_values[i])
         }
@@ -60,7 +60,7 @@ func scheduler_get_last_lr([]float current_lrs) []float {
 func clone_lr_array([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }

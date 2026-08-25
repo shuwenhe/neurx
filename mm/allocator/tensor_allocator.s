@@ -145,7 +145,7 @@ func get_pool_stats(memory_pool* pool) memory_pool {
 func find_free_block(memory_pool* pool, int size_needed) (allocation_result, string) {
     current_block := pool.free_list_head
     
-    while current_block != 0 as free_block* {
+    for current_block != 0 as free_block* {
         if current_block.size_bytes >= size_needed {
             return (allocation_result {
                 ptr: current_block.block_ptr,
@@ -183,7 +183,7 @@ func coalesce_free_blocks(memory_pool* pool) (int, string) {
     current := pool.free_list_head
     coalesced := 0
     
-    while current != 0 as free_block* {
+    for current != 0 as free_block* {
         if current.next_block_ptr != 0 {
             next := current.next_block_ptr as free_block*
             

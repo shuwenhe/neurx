@@ -61,7 +61,7 @@ struct alibi_apply_result {
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }
@@ -71,7 +71,7 @@ func allocate_vector(int size, float init_val) []float {
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
-    while i < len(src) {
+    for i < len(src) {
         out[i] = src[i]
         i = i + 1
     }
@@ -84,7 +84,7 @@ func sqrt_approx(float x) float {
     }
     float y = x
     int i = 0
-    while i < 10 {
+    for i < 10 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -101,7 +101,7 @@ func exp_approx(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 12 {
+    for i <= 12 {
         term = term * x / (i * 1.0)
         result = result + term
         i = i + 1
@@ -113,17 +113,17 @@ func cos_approx(float x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
     float value = x
-    while value > pi {
+    for value > pi {
         value = value - two_pi
     }
-    while value < -pi {
+    for value < -pi {
         value = value + two_pi
     }
     float x2 = value * value
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = -term * x2 / ((2 * i - 1) * (2 * i) * 1.0)
         result = result + term
         i = i + 1
@@ -135,17 +135,17 @@ func sin_approx(float x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
     float value = x
-    while value > pi {
+    for value > pi {
         value = value - two_pi
     }
-    while value < -pi {
+    for value < -pi {
         value = value + two_pi
     }
     float x2 = value * value
     float term = value
     float result = value
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = -term * x2 / ((2 * i) * (2 * i + 1) * 1.0)
         result = result + term
         i = i + 1
@@ -180,20 +180,20 @@ func layer_normalize(
     int hidden_dim = ln.hidden_dim
     []float output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int base = (b * seq_len + s) * hidden_dim
             float mean = 0.0
             int d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 mean = mean + input[base + d]
                 d = d + 1
             }
             mean = mean / (hidden_dim * 1.0)
             float variance = 0.0
             d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float diff = input[base + d] - mean
                 variance = variance + diff * diff
                 d = d + 1
@@ -201,7 +201,7 @@ func layer_normalize(
             variance = variance / (hidden_dim * 1.0)
             float denom = sqrt_approx(variance + ln.epsilon)
             d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float normalized = (input[base + d] - mean) / denom
                 float scaled = normalized * ln.gamma[d]
                 if ln.use_bias {
@@ -226,13 +226,13 @@ func rms_normalize(
     int hidden_dim = rn.hidden_dim
     []float output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int base = (b * seq_len + s) * hidden_dim
             float sq_sum = 0.0
             int d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 float x = input[base + d]
                 sq_sum = sq_sum + x * x
                 d = d + 1
@@ -240,7 +240,7 @@ func rms_normalize(
             float rms = sqrt_approx(sq_sum / (hidden_dim * 1.0))
             float denom = rms + rn.epsilon
             d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 output[base + d] = (input[base + d] / denom) * rn.gamma[d]
                 d = d + 1
             }
@@ -255,9 +255,9 @@ func new_absolute_position_embedding(position_embedding_config cfg) []float {
     int total = cfg.max_seq_len * cfg.hidden_dim
     []float embedding = allocate_vector(total, 0.0)
     int pos = 0
-    while pos < cfg.max_seq_len {
+    for pos < cfg.max_seq_len {
         int d = 0
-        while d < cfg.hidden_dim {
+        for d < cfg.hidden_dim {
             float exponent = (d * 1.0) / (cfg.hidden_dim * 1.0)
             float div_term = exp_approx(-exponent * 9.210340371976184)
             float angle = pos * 1.0 * div_term
@@ -278,9 +278,9 @@ func new_learned_position_embedding(position_embedding_config cfg) learned_posit
     int total = cfg.max_seq_len * cfg.hidden_dim
     []float weight = allocate_vector(total, 0.0)
     int pos = 0
-    while pos < cfg.max_seq_len {
+    for pos < cfg.max_seq_len {
         int d = 0
-        while d < cfg.hidden_dim {
+        for d < cfg.hidden_dim {
             int idx = pos * cfg.hidden_dim + d
             weight[idx] = ((pos + 1) * (d + 3) * 1.0) / ((cfg.max_seq_len + cfg.hidden_dim + 1) * 1.0)
             d = d + 1
@@ -302,7 +302,7 @@ func get_position_embedding(
     int total = seq_len * hidden_dim
     []float out = allocate_vector(total, 0.0)
     int i = 0
-    while i < total {
+    for i < total {
         out[i] = embedding[i]
         i = i + 1
     }
@@ -316,7 +316,7 @@ func get_learned_position_embedding(
     int total = seq_len * embedding.hidden_dim
     []float out = allocate_vector(total, 0.0)
     int i = 0
-    while i < total && i < len(embedding.weight) {
+    for i < total && i < len(embedding.weight) {
         out[i] = embedding.weight[i]
         i = i + 1
     }
@@ -327,7 +327,7 @@ func new_rope_embedding(position_embedding_config cfg) rope_embedding {
     int half_dim = cfg.hidden_dim / 2
     []float frequencies = allocate_vector(half_dim, 0.0)
     int i = 0
-    while i < half_dim {
+    for i < half_dim {
         float ratio = (2 * i * 1.0) / (cfg.hidden_dim * 1.0)
         frequencies[i] = exp_approx(-ratio * 9.210340371976184)
         i = i + 1
@@ -356,13 +356,13 @@ func apply_rope(
     []float rotated_key = copy_vector(key)
     int pair_dim = head_dim / 2
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int h = 0
-        while h < num_heads {
+        for h < num_heads {
             int s = 0
-            while s < seq_len {
+            for s < seq_len {
                 int pair = 0
-                while pair < pair_dim {
+                for pair < pair_dim {
                     int token_base = (b * seq_len + s) * (num_heads * head_dim)
                     int base = token_base + h * head_dim + pair * 2
                     int cache_idx = s * pair_dim + pair
@@ -396,7 +396,7 @@ func apply_rope(
 func new_alibi_embedding(position_embedding_config cfg, int num_heads) alibi_embedding {
     []float slopes = allocate_vector(num_heads, 0.0)
     int h = 0
-    while h < num_heads {
+    for h < num_heads {
         slopes[h] = exp_approx(-(h + 1) * 0.5 * 0.6931471805599453)
         h = h + 1
     }
@@ -415,13 +415,13 @@ func apply_alibi_bias(
 ) alibi_apply_result {
     []float out = copy_vector(attention_scores)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int h = 0
-        while h < num_heads {
+        for h < num_heads {
             int i = 0
-            while i < seq_len {
+            for i < seq_len {
                 int j = 0
-                while j < seq_len {
+                for j < seq_len {
                     int idx = (((b * num_heads + h) * seq_len + i) * seq_len) + j
                     float distance = i - j
                     if distance < 0.0 {

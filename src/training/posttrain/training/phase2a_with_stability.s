@@ -11,7 +11,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -34,7 +34,7 @@ func float_to_str(float value, int decimals) string {
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -42,10 +42,10 @@ func float_to_str(float value, int decimals) string {
     if decimals > 0 {
         result = result + "."
         int i = 0
-        while i < decimals {
+        for i < decimals {
             current = current * 10.0
             int digit = 0
-            while current >= 1.0 {
+            for current >= 1.0 {
                 current = current - 1.0
                 digit = digit + 1
             }
@@ -95,14 +95,14 @@ func main() {
     int total_gradient_clips = 0
     float best_loss = 999999.0
     int best_step = 0
-    while epoch < 3 {
+    for epoch < 3 {
         println("")
         println("====================================================")
         println("[Epoch " + int_to_str(epoch + 1) + "/3]")
         println("====================================================")
         int step_in_epoch = 0
         int steps_per_epoch = 100
-        while step_in_epoch < steps_per_epoch {
+        for step_in_epoch < steps_per_epoch {
             total_steps = total_steps + 1
             step_in_epoch = step_in_epoch + 1
             loss_value = loss_value - 0.08
@@ -113,7 +113,7 @@ func main() {
             [][]float simulated_grads
             int grad_idx
             grad_idx = 0
-            while grad_idx < 10 {
+            for grad_idx < 10 {
                 float grad_val
                 grad_val = 0.5 + ((total_steps + grad_idx) as float) * 0.01
                 if total_steps == (total_steps / 50) * 50 {

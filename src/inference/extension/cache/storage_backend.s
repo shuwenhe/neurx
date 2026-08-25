@@ -188,7 +188,7 @@ func tiered_storage_get_stats(tiered_storage ts) string {
     string stats = "[TieredStorage] Total=" + int_to_string(ts.total_used) + "/" + int_to_string(ts.total_capacity) + " bytes\n"
     
     int i = 0
-    while i < ts.num_tiers {
+    for i < ts.num_tiers {
         storage_tier tier = ts.tiers[i]
         int percent = int(tier.used_bytes * 100 / (tier.capacity_bytes + 1))
         stats = stats + "  " + tier.tier_name + ": " + int_to_string(tier.current_blocks) + "/" + int_to_string(tier.max_blocks) + 
@@ -201,7 +201,7 @@ func tiered_storage_get_stats(tiered_storage ts) string {
 
 func tiered_storage_clear(tiered_storage ts) {
     int i = 0
-    while i < ts.num_tiers {
+    for i < ts.num_tiers {
         ts.tiers[i].used_bytes = 0
         ts.tiers[i].current_blocks = 0
         ts.tiers[i].hit_count = 0

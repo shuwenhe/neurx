@@ -23,7 +23,7 @@ func update_averaged_model(averaged_model_state state, tensor model_params) aver
     []float out = []float{cap: n}
     if state.num_averaged == 0 {
         int i0 = 0
-        while i0 < n {
+        for i0 < n {
             out[i0] = model_params.data[i0]
             i0 = i0 + 1
         }
@@ -34,14 +34,14 @@ func update_averaged_model(averaged_model_state state, tensor model_params) aver
     if state.avg_mode == "ema" {
         float d = state.ema_decay
         int i1 = 0
-        while i1 < n {
+        for i1 < n {
             out[i1] = state.averaged_params.data[i1] * d + model_params.data[i1] * (1.0 - d)
             i1 = i1 + 1
         }
     } else {
         float t = float(state.num_averaged)
         int i2 = 0
-        while i2 < n {
+        for i2 < n {
             out[i2] = (state.averaged_params.data[i2] * t + model_params.data[i2]) / (t + 1.0)
             i2 = i2 + 1
         }

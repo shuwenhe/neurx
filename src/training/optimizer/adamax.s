@@ -35,7 +35,7 @@ func adamax_step(adamax_optimizer optimizer, tensor params, tensor grads) adamax
     float clr = optimizer.lr / bias_correction
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float grad = grads.data[i]
         if optimizer.weight_decay != 0.0 {
             grad = grad + optimizer.weight_decay * params.data[i]
@@ -61,7 +61,7 @@ struct adamax_optimizer_step_output {
 func ensure_adamax_state([]float values, int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         if i < len(values) {
             out[i] = values[i]
         } else {
@@ -89,7 +89,7 @@ func adamax_max(float a, float b) float {
 func adamax_pow(float base, int exponent) float {
     float result = 1.0
     int i = 0
-    while i < exponent {
+    for i < exponent {
         result = result * base
         i = i + 1
     }

@@ -21,7 +21,7 @@ func argmax([]float logits) int {
     int max_idx = 0
     float max_val = logits[0]
     int i = 1
-    while i < len(logits) {
+    for i < len(logits) {
         if logits[i] > max_val {
             max_val = logits[i]
             max_idx = i
@@ -46,7 +46,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int n = 1
-    while n <= 10 {
+    for n <= 10 {
         term = term * x / (n as float)
         result = result + term
         n = n + 1
@@ -141,7 +141,7 @@ func int_to_str(int n) string {
         negative = true
         value = 0 - value
     }
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -176,7 +176,7 @@ func float_to_str_n(float value, int decimals) string {
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -184,10 +184,10 @@ func float_to_str_n(float value, int decimals) string {
     if decimals > 0 {
         result = result + "."
         int i = 0
-        while i < decimals {
+        for i < decimals {
             current = current * 10.0
             int digit = 0
-            while current >= 1.0 {
+            for current >= 1.0 {
                 current = current - 1.0
                 digit = digit + 1
             }

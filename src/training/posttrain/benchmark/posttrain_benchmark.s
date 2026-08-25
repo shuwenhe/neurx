@@ -59,7 +59,7 @@ func int_to_str(int n) string {
     }
     result := ""
     num := n
-    while num > 0 {
+    for num > 0 {
         digit := num % 10
         ch := ""
         if digit == 0 { ch = "0" }
@@ -86,7 +86,7 @@ func float_to_str(float f, int decimals) string {
     frac_part := int((f - float(int_part)) * pow_10(decimals))
     result := int_to_str(int_part) + "."
     frac_str := int_to_str(frac_part)
-    while len(frac_str) < decimals {
+    for len(frac_str) < decimals {
         frac_str = "0" + frac_str
     }
     result + frac_str
@@ -95,7 +95,7 @@ func float_to_str(float f, int decimals) string {
 func pow_10(int exp) float {
     result := 1.0
     i := 0
-    while i < exp {
+    for i < exp {
         result = result * 10.0
         i = i + 1
     }
@@ -105,7 +105,7 @@ func pow_10(int exp) float {
 func len(string s) int {
     count := 0
     i := 0
-    while i < len_bytes(s) {
+    for i < len_bytes(s) {
         count = count + 1
         i = i + 1
     }
@@ -155,7 +155,7 @@ func benchmark_model_loading() benchmark_metrics {
 func benchmark_forward_pass(int num_steps, int batch_size, int seq_length) benchmark_metrics {
     total_time := int64(0)
     i := 0
-    while i < num_steps {
+    for i < num_steps {
         timer := timer_start("forward", i)
         timer = timer_end(timer)
         total_time = total_time + timer_elapsed_ms(timer)
@@ -178,7 +178,7 @@ func benchmark_forward_pass(int num_steps, int batch_size, int seq_length) bench
 func benchmark_backward_pass(int num_steps, int batch_size, int seq_length) benchmark_metrics {
     total_time := int64(0)
     i := 0
-    while i < num_steps {
+    for i < num_steps {
         timer := timer_start("backward", i)
         timer = timer_end(timer)
         total_time = total_time + timer_elapsed_ms(timer)
@@ -201,7 +201,7 @@ func benchmark_backward_pass(int num_steps, int batch_size, int seq_length) benc
 func benchmark_optimizer_step(int num_steps, int batch_size) benchmark_metrics {
     total_time := int64(0)
     i := 0
-    while i < num_steps {
+    for i < num_steps {
         timer := timer_start("optimizer", i)
         timer = timer_end(timer)
         total_time = total_time + timer_elapsed_ms(timer)
@@ -234,7 +234,7 @@ func format_benchmark_report(benchmark_report report) string {
     result = result + "| Phase | Time (ms) | Throughput (tokens/s) | Memory Peak (MB) | GPU% |\n"
     result = result + "|-------|-----------|----------------------|------------------|------|\n"
     i := 0
-    while i < len(report.phases) {
+    for i < len(report.phases) {
         phase := report.phases[i]
         time_str := int_to_str(int(phase.total_time_ms))
         throughput_str := float_to_str(phase.tokens_per_sec, 2)

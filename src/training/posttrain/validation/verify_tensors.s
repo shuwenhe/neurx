@@ -163,7 +163,7 @@ func read_tensor_sample([]int file_bytes, string header, string tensor_name) ten
 func decode_f32_values([]int bytes, int start, int end) []float {
     []float values = []float{}
     int i = start
-    while i + 3 < end {
+    for i + 3 < end {
         values = append(values, f32_from_le_bytes(bytes, i))
         i = i + 4
     }
@@ -206,13 +206,13 @@ func pow2_int(int exponent) float {
     int e = exponent
     if e >= 0 {
         int i = 0
-        while i < e {
+        for i < e {
             value = value * 2.0
             i = i + 1
         }
     } else {
         int i = 0
-        while i < 0 - e {
+        for i < 0 - e {
             value = value / 2.0
             i = i + 1
         }
@@ -238,7 +238,7 @@ func compute_stats([]float values) tensor_stats {
     float max_v = values[0]
     int nonzero = 0
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         float v = values[i]
         sum = sum + v
         sq = sq + v * v
@@ -256,7 +256,7 @@ func compute_stats([]float values) tensor_stats {
     float mean = sum / (len(values) as float)
     float variance = 0.0
     i = 0
-    while i < len(values) {
+    for i < len(values) {
         float diff = values[i] - mean
         variance = variance + diff * diff
         i = i + 1
@@ -279,7 +279,7 @@ func sqrt_approx(float x) float {
     }
     float guess = x
     int i = 0
-    while i < 12 {
+    for i < 12 {
         guess = 0.5 * (guess + x / guess)
         i = i + 1
     }
@@ -291,10 +291,10 @@ func find_substring(string text, string pattern) int {
         return -1
     }
     int i = 0
-    while i <= len(text) - len(pattern) {
+    for i <= len(text) - len(pattern) {
         bool match = true
         int j = 0
-        while j < len(pattern) {
+        for j < len(pattern) {
             if text[i + j] != pattern[j] {
                 match = false
                 break
@@ -314,10 +314,10 @@ func find_substring_from(string text, string pattern, int start) int {
         return -1
     }
     int i = start
-    while i <= len(text) - len(pattern) {
+    for i <= len(text) - len(pattern) {
         bool match = true
         int j = 0
-        while j < len(pattern) {
+        for j < len(pattern) {
             if text[i + j] != pattern[j] {
                 match = false
                 break
@@ -334,7 +334,7 @@ func find_substring_from(string text, string pattern, int start) int {
 
 func find_char_from(string text, string ch, int start) int {
     int i = start
-    while i < len(text) {
+    for i < len(text) {
         if text[i] == ch[0] {
             return i
         }
@@ -349,7 +349,7 @@ func substring(string text, int start, int end) string {
     }
     string result = ""
     int i = start
-    while i < end {
+    for i < end {
         result = result + string_char(text[i])
         i = i + 1
     }
@@ -371,7 +371,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -398,7 +398,7 @@ func float_to_str(float value, int decimals) string {
         current = 0.0 - current
     }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -408,10 +408,10 @@ func float_to_str(float value, int decimals) string {
     }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }

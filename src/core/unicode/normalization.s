@@ -102,7 +102,7 @@ func unicode_nfc(unicode_database database, string text) string {
     if !database.valid { return text }
     string output = ""
     int position = 0
-    while position < len(text) {
+    for position < len(text) {
         int current = unicode_decode_at(text, position)
         position = position + unicode_width(text[position])
         if position < len(text) {
@@ -139,7 +139,7 @@ func unicode_nfkc(unicode_database database, string text) string {
     if !database.valid { return text }
     string compatible = ""
     int position = 0
-    while position < len(text) {
+    for position < len(text) {
         int codepoint = unicode_decode_at(text, position)
         if codepoint >= 65281 && codepoint <= 65374 {
             compatible = compatible + unicode_utf8(codepoint - 65248)

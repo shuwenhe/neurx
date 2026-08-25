@@ -31,7 +31,7 @@ func adadelta_step(adadelta_optimizer optimizer, tensor params, tensor grads) ad
     optimizer.acc_delta = ensure_adadelta_state(optimizer.acc_delta, n)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float grad = grads.data[i]
         if optimizer.weight_decay != 0.0 {
             grad = grad + optimizer.weight_decay * params.data[i]
@@ -57,7 +57,7 @@ struct adadelta_optimizer_step_output {
 func ensure_adadelta_state([]float values, int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         if i < len(values) {
             out[i] = values[i]
         } else {
@@ -77,7 +77,7 @@ func adadelta_sqrt(float x) float {
         y = x
     }
     int i = 0
-    while i < 32 {
+    for i < 32 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }

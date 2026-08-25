@@ -42,7 +42,7 @@ func new_nda_config(int hidden, int state, int latent, int kernel) nda_config {
 func nda_zeros(int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = 0.0
         i = i + 1
     }
@@ -52,7 +52,7 @@ func nda_zeros(int n) []float {
 func nda_deterministic_weights(int n, int salt, float scale) []float {
     []float out = nda_zeros(n)
     int i = 0
-    while i < n {
+    for i < n {
         int raw = (i * 37 + salt * 19 + 11)
         int centered = raw - (raw / 29) * 29 - 14
         out[i] = (centered as float) * scale
@@ -64,7 +64,7 @@ func nda_deterministic_weights(int n, int salt, float scale) []float {
 func nda_copy_floats([]float values) []float {
     []float out = nda_zeros(len(values))
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }
@@ -80,7 +80,7 @@ func nda_sqrt_approx(float x) float {
         result = x
     }
     int i = 0
-    while i < 20 {
+    for i < 20 {
         result = 0.5 * (result + x / result)
         i = i + 1
     }
@@ -98,7 +98,7 @@ func nda_exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 24 {
+    for i <= 24 {
         term = term * value / (i as float)
         result = result + term
         i = i + 1
@@ -120,17 +120,17 @@ func nda_swish(float x) float {
 func nda_rms_norm_tokens([]float input, int tokens, int hidden) []float {
     []float out = nda_zeros(tokens * hidden)
     int t = 0
-    while t < tokens {
+    for t < tokens {
         float sum_sq = 0.0
         int h = 0
-        while h < hidden {
+        for h < hidden {
             float value = input[t * hidden + h]
             sum_sq = sum_sq + value * value
             h = h + 1
         }
         float scale = 1.0 / nda_sqrt_approx(sum_sq / (hidden as float) + 0.000001)
         h = 0
-        while h < hidden {
+        for h < hidden {
             out[t * hidden + h] = input[t * hidden + h] * scale
             h = h + 1
         }
@@ -142,17 +142,17 @@ func nda_rms_norm_tokens([]float input, int tokens, int hidden) []float {
 func nda_l2_normalize_channels([]float input, int tokens, int width) []float {
     []float out = nda_zeros(tokens * width)
     int t = 0
-    while t < tokens {
+    for t < tokens {
         float sum_sq = 0.0
         int i = 0
-        while i < width {
+        for i < width {
             float value = input[t * width + i]
             sum_sq = sum_sq + value * value
             i = i + 1
         }
         float scale = 1.0 / nda_sqrt_approx(sum_sq + 0.000001)
         i = 0
-        while i < width {
+        for i < width {
             out[t * width + i] = input[t * width + i] * scale
             i = i + 1
         }
@@ -164,12 +164,12 @@ func nda_l2_normalize_channels([]float input, int tokens, int width) []float {
 func nda_linear([]float input, []float weight, int rows, int in_dim, int out_dim) []float {
     []float out = nda_zeros(rows * out_dim)
     int r = 0
-    while r < rows {
+    for r < rows {
         int o = 0
-        while o < out_dim {
+        for o < out_dim {
             float sum = 0.0
             int i = 0
-            while i < in_dim {
+            for i < in_dim {
                 sum = sum + input[r * in_dim + i] * weight[i * out_dim + o]
                 i = i + 1
             }
@@ -184,12 +184,12 @@ func nda_linear([]float input, []float weight, int rows, int in_dim, int out_dim
 func nda_short_conv([]float input, []float kernel, int tokens, int channels, int kernel_size) []float {
     []float out = nda_zeros(tokens * channels)
     int t = 0
-    while t < tokens {
+    for t < tokens {
         int c = 0
-        while c < channels {
+        for c < channels {
             float sum = 0.0
             int tap = 0
-            while tap < kernel_size {
+            for tap < kernel_size {
                 int source = t - tap
                 if source >= 0 {
                     sum = sum + input[source * channels + c] * kernel[c * kernel_size + tap]
@@ -207,7 +207,7 @@ func nda_short_conv([]float input, []float kernel, int tokens, int channels, int
 func nda_activate_swish([]float input) []float {
     []float out = nda_zeros(len(input))
     int i = 0
-    while i < len(input) {
+    for i < len(input) {
         out[i] = nda_swish(input[i])
         i = i + 1
     }
@@ -258,9 +258,9 @@ func nda_forward(nda_weights weights, []float input, int tokens, []float initial
     []float alpha_values = nda_zeros(tokens * d)
     []float beta_values = nda_zeros(tokens)
     int t = 0
-    while t < tokens {
+    for t < tokens {
         int i = 0
-        while i < d {
+        for i < d {
             alpha_values[t * d + i] = nda_sigmoid(alpha_logits[t * d + i])
             i = i + 1
         }
@@ -268,9 +268,9 @@ func nda_forward(nda_weights weights, []float input, int tokens, []float initial
         beta_values[t] = beta
         []float decayed = nda_zeros(d * d)
         i = 0
-        while i < d {
+        for i < d {
             int j = 0
-            while j < d {
+            for j < d {
                 decayed[i * d + j] = alpha_values[t * d + i] * state[i * d + j]
                 j = j + 1
             }
@@ -278,18 +278,18 @@ func nda_forward(nda_weights weights, []float input, int tokens, []float initial
         }
         []float prediction = nda_zeros(d)
         int j = 0
-        while j < d {
+        for j < d {
             i = 0
-            while i < d {
+            for i < d {
                 prediction[j] = prediction[j] + k[t * d + i] * decayed[i * d + j]
                 i = i + 1
             }
             j = j + 1
         }
         i = 0
-        while i < d {
+        for i < d {
             j = 0
-            while j < d {
+            for j < d {
                 float error = v_values[t * d + j] - prediction[j]
                 state[i * d + j] = decayed[i * d + j] + beta * k[t * d + i] * error
                 j = j + 1
@@ -297,9 +297,9 @@ func nda_forward(nda_weights weights, []float input, int tokens, []float initial
             i = i + 1
         }
         j = 0
-        while j < d {
+        for j < d {
             i = 0
-            while i < d {
+            for i < d {
                 recurrent[t * d + j] = recurrent[t * d + j] + q[t * d + i] * state[i * d + j]
                 i = i + 1
             }

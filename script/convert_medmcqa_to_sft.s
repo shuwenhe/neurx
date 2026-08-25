@@ -63,7 +63,7 @@ func extract_int_value(string line, string key) int {
     }
     start = start + len(search_key)
     int end = start
-    while end < len(line) && line[end] != 44 && line[end] != 125 {
+    for end < len(line) && line[end] != 44 && line[end] != 125 {
         end = end + 1
     }
     int result = 0

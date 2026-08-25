@@ -66,7 +66,7 @@ func cpu_spawn_worker(cs cpu_state, int cpu_affinity, int numa_affinity) (cpu_st
 
 func cpu_assign_task(cs cpu_state, int worker_id, string task_name) (cpu_state, bool) {
     int i = 0
-    while i < len(cs.workers) {
+    for i < len(cs.workers) {
         if cs.workers[i].worker_id == worker_id && !cs.workers[i].busy {
             cs.workers[i].busy         = true
             cs.workers[i].current_task = task_name
@@ -79,7 +79,7 @@ func cpu_assign_task(cs cpu_state, int worker_id, string task_name) (cpu_state, 
 
 func cpu_complete_task(cs cpu_state, int worker_id) cpu_state {
     int i = 0
-    while i < len(cs.workers) {
+    for i < len(cs.workers) {
         if cs.workers[i].worker_id == worker_id {
             cs.workers[i].busy            = false
             cs.workers[i].current_task    = ""
@@ -92,7 +92,7 @@ func cpu_complete_task(cs cpu_state, int worker_id) cpu_state {
 
 func cpu_pick_idle_worker(cs cpu_state, int prefer_cpu, int prefer_numa) (worker, bool) {
     int i = 0
-    while i < len(cs.workers) {
+    for i < len(cs.workers) {
         worker w = cs.workers[i]
         if !w.busy && w.cpu_affinity == prefer_cpu {
             return (w, true)
@@ -100,7 +100,7 @@ func cpu_pick_idle_worker(cs cpu_state, int prefer_cpu, int prefer_numa) (worker
         i = i + 1
     }
     i = 0
-    while i < len(cs.workers) {
+    for i < len(cs.workers) {
         worker w = cs.workers[i]
         if !w.busy && w.numa_affinity == prefer_numa {
             return (w, true)
@@ -108,7 +108,7 @@ func cpu_pick_idle_worker(cs cpu_state, int prefer_cpu, int prefer_numa) (worker
         i = i + 1
     }
     i = 0
-    while i < len(cs.workers) {
+    for i < len(cs.workers) {
         if !cs.workers[i].busy {
             return (cs.workers[i], true)
         }
@@ -119,7 +119,7 @@ func cpu_pick_idle_worker(cs cpu_state, int prefer_cpu, int prefer_numa) (worker
 
 func cpu_set_governor(cs cpu_state, int cpu_id, int governor) cpu_state {
     int i = 0
-    while i < len(cs.cpus) {
+    for i < len(cs.cpus) {
         if cs.cpus[i].cpu_id == cpu_id {
             cs.cpus[i].governor = governor
             if governor == CPUFREQ_PERFORMANCE {

@@ -64,7 +64,7 @@ func compute_resharding_plan(
     []int param_indices = []int{}
     []int sizes = []int{}
     int i = 0
-    while i < src.params.len {
+    for i < src.params.len {
         tensor param = src.params[i]
         int src_rank_start = (i % src_tp) * (param.shape[0] / src_tp)
         int src_rank_end = src_rank_start + (param.shape[0] / src_tp)
@@ -93,7 +93,7 @@ func execute_resharding(
     if target_mode == "train" {
         if engine.plan.use_alltoall {
             int i = 0
-            while i < engine.gen_partition.params.len {
+            for i < engine.gen_partition.params.len {
                 tensor param = engine.gen_partition.params[i]
                 tensor resharded = engine.ctx.all_to_all(
                     param,
@@ -105,7 +105,7 @@ func execute_resharding(
             }
         } else {
             int i = 0
-            while i < engine.plan.param_indices.len {
+            for i < engine.plan.param_indices.len {
                 int param_idx = engine.plan.param_indices[i]
                 int src_rank = engine.plan.src_ranks[i]
                 int dst_rank = engine.plan.dst_ranks[i]
@@ -123,7 +123,7 @@ func execute_resharding(
     } else if target_mode == "gen" {
         if engine.plan.use_alltoall {
             int i = 0
-            while i < engine.train_partition.params.len {
+            for i < engine.train_partition.params.len {
                 tensor param = engine.train_partition.params[i]
                 tensor resharded = engine.ctx.all_to_all(
                     param,
@@ -135,7 +135,7 @@ func execute_resharding(
             }
         } else {
             int i = 0
-            while i < engine.plan.param_indices.len {
+            for i < engine.plan.param_indices.len {
                 int param_idx = engine.plan.param_indices[i]
                 int src_rank = engine.plan.dst_ranks[i]
                 int dst_rank = engine.plan.src_ranks[i]

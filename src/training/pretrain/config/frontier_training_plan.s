@@ -332,7 +332,7 @@ func audit_frontier_readiness([]frontier_capability caps) frontier_audit {
     int blockers = 0
     int score = 0
     int i = 0
-    while i < total {
+    for i < total {
         score = score + frontier_status_score(caps[i].status)
         if caps[i].status == "ready" {
             ready = ready + 1
@@ -380,7 +380,7 @@ func next_frontier_p0_work(frontier_audit audit) []frontier_capability {
     []frontier_capability work = []frontier_capability{cap: audit.total}
     int out = 0
     int i = 0
-    while i < audit.total {
+    for i < audit.total {
         frontier_capability cap = audit.capabilities[i]
         if cap.priority == "p0" && cap.status != "ready" {
             work[out] = cap

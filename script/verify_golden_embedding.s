@@ -20,7 +20,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -43,7 +43,7 @@ func float_to_str(float value, int decimals) string {
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -51,10 +51,10 @@ func float_to_str(float value, int decimals) string {
     if decimals > 0 {
         result = result + "."
         int i = 0
-        while i < decimals {
+        for i < decimals {
             current = current * 10.0
             int digit = 0
-            while current >= 1.0 {
+            for current >= 1.0 {
                 current = current - 1.0
                 digit = digit + 1
             }
@@ -82,12 +82,12 @@ func float_to_scientific(float value) string {
     int exponent = 0
     float mantissa = abs_val
     if abs_val >= 10.0 {
-        while mantissa >= 10.0 {
+        for mantissa >= 10.0 {
             mantissa = mantissa / 10.0
             exponent = exponent + 1
         }
     } else if abs_val < 1.0 {
-        while mantissa < 1.0 {
+        for mantissa < 1.0 {
             mantissa = mantissa * 10.0
             exponent = exponent - 1
         }
@@ -163,7 +163,7 @@ func main() {
     int failed = 0
     int skipped = 0
     int i = 0
-    while i < len(test_cases) {
+    for i < len(test_cases) {
         embedding_test_result result = verify_embedding_test(
             test_cases[i],
             golden_dir,

@@ -6,7 +6,7 @@ func build_hidden_states(int batch_size, int seq_len, int hidden_dim) []float {
     int total = batch_size * seq_len * hidden_dim
     []float values = []float{cap: total}
     int i = 0
-    while i < total {
+    for i < total {
         values[i] = ((i % hidden_dim) + 1) * 0.01
         i = i + 1
     }

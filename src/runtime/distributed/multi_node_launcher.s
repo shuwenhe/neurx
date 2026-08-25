@@ -80,9 +80,9 @@ func generate_launch_plan(
     []rank_info ranks = []rank_info{cap: config.world_size}
     int rank_idx = 0
     int node = 0
-    while node < config.num_nodes {
+    for node < config.num_nodes {
         int gpu = 0
-        while gpu < config.gpus_per_node {
+        for gpu < config.gpus_per_node {
             ranks[rank_idx] = rank_info {
                 global_rank: rank_idx,
                 local_rank: gpu,
@@ -119,7 +119,7 @@ func synchronize_across_nodes(
           " reached barrier at " + barrier_dir)
     int timeout = 300
     int elapsed = 0
-    while elapsed < timeout {
+    for elapsed < timeout {
         sleep_seconds(1)
         elapsed = elapsed + 1
     }
@@ -167,7 +167,7 @@ func detect_failed_ranks(
     []int failed_ranks = []int{cap: 10}
     int failed_count = 0
     int rank = 0
-    while rank < world_size {
+    for rank < world_size {
         string heartbeat_file = shared_storage_path + "/heartbeat/rank_" + itoa(rank)
         rank = rank + 1
     }
@@ -229,7 +229,7 @@ func load_distributed_checkpoint(
 func parse_int(string s, int fallback) int {
     int result = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         byte b = s[i]
         if b >= '0' && b <= '9' {
             result = result * 10 + int(b - '0')
@@ -252,7 +252,7 @@ func itoa(int n) string {
         s = "-"
         num = -num
     }
-    while num > 0 {
+    for num > 0 {
         byte digit = byte('0' + (num % 10))
         s = string(digit) + s
         num = num / 10

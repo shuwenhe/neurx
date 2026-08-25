@@ -200,7 +200,7 @@ func train_gpt_large(gpt_large_state state, gpt_large_train_config config) gpt_l
     }
     int i = 0
     gpt_large_state current = state
-    while i < config.steps {
+    for i < config.steps {
         current = gpt_large_train_step(current, config, i)
         i = i + 1
     }

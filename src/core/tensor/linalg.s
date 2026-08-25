@@ -29,7 +29,7 @@ func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -52,7 +52,7 @@ func shape2(int m, int n) []int {
 func identity(int n) tensor {
     []float out = []float{cap: n * n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i * n + i] = 1.0
         i = i + 1
     }
@@ -70,12 +70,12 @@ func matmul2d(tensor a, tensor b) tensor {
     int cols = b.shape[1]
     []float out = []float{cap: rows * cols}
     int r = 0
-    while r < rows {
+    for r < rows {
         int c = 0
-        while c < cols {
+        for c < cols {
             float acc = 0.0
             int i = 0
-            while i < inner {
+            for i < inner {
                 acc = acc + a.data[r * inner + i] * b.data[i * cols + c]
                 i = i + 1
             }
@@ -99,7 +99,7 @@ func matrix_rank(tensor a) int {
     }
     if ndim == 1 {
         int i = 0
-        while i < len(a.data) {
+        for i < len(a.data) {
             if a.data[i] != 0.0 {
                 return 1
             }
@@ -210,7 +210,7 @@ func solve(tensor a, tensor b) tensor {
         }
         []float out = []float{cap: len(b.data)}
         int i = 0
-        while i < len(b.data) {
+        for i < len(b.data) {
             out[i] = b.data[i] / denom
             i = i + 1
         }
@@ -254,9 +254,9 @@ func outer(tensor a, tensor b) tensor {
     int m = len(b.data)
     []float out = []float{cap: n * m}
     int i = 0
-    while i < n {
+    for i < n {
         int j = 0
-        while j < m {
+        for j < m {
             out[i * m + j] = a.data[i] * b.data[j]
             j = j + 1
         }
@@ -274,7 +274,7 @@ func inner(tensor a, tensor b) tensor {
     int n = len(a.data)
     float acc = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         acc = acc + a.data[i] * b.data[i]
         i = i + 1
     }
@@ -299,7 +299,7 @@ func matrix_power(tensor a, int n) tensor {
         tensor base = inv(a)
         int exp = 0 - n
         tensor result = identity(a.shape[0])
-        while exp > 0 {
+        for exp > 0 {
             if exp > 0 {
                 result = matmul2d(result, base)
             }
@@ -309,7 +309,7 @@ func matrix_power(tensor a, int n) tensor {
     }
     tensor result = identity(a.shape[0])
     int i = 0
-    while i < n {
+    for i < n {
         result = matmul2d(result, a)
         i = i + 1
     }

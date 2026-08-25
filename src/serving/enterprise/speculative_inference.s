@@ -98,7 +98,7 @@ func speculative_inference_batch(
     batch_outputs := [][]int{}
     batch := speculative_runtime.new_generation_batch()
     i := 0
-    while i < batch_input_ids.len {
+    for i < batch_input_ids.len {
         request := speculative_runtime.new_generation_request(i, batch_input_ids[i], max_tokens)
         batch.batch_requests = append(batch.batch_requests, request)
         i = i + 1

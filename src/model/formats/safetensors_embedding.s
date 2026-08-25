@@ -30,10 +30,10 @@ struct f32_tensor_result {
 func st_find(string text, string pattern, int start) int {
     if pattern == "" { return start }
     int i = start
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
         bool matches = true
-        while j < len(pattern) {
+        for j < len(pattern) {
             if text[i + j] != pattern[j] { matches = false; j = len(pattern) } else { j = j + 1 }
         }
         if matches { return i }
@@ -46,7 +46,7 @@ func st_parse_uint(string text, int start) int {
     int value = 0
     int i = start
     bool found = false
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if ch >= 48 && ch <= 57 { found = true; value = value * 10 + ch - 48; i = i + 1 } else { i = len(text) }
     }
@@ -57,7 +57,7 @@ func st_parse_uint(string text, int start) int {
 func st_bytes_to_string([]int bytes) string {
     string text = ""
     int i = 0
-    while i < len(bytes) { text = text + string(bytes[i]); i = i + 1 }
+    for i < len(bytes) { text = text + string(bytes[i]); i = i + 1 }
     text
 }
 
@@ -66,7 +66,7 @@ func st_u64_le([]int bytes) int {
     int value = 0
     int scale = 1
     int i = 0
-    while i < 8 { value = value + bytes[i] * scale; scale = scale * 256; i = i + 1 }
+    for i < 8 { value = value + bytes[i] * scale; scale = scale * 256; i = i + 1 }
     value
 }
 
@@ -74,9 +74,9 @@ func st_pow2(int exponent) float {
     float value = 1.0
     int i = 0
     if exponent >= 0 {
-        while i < exponent { value = value * 2.0; i = i + 1 }
+        for i < exponent { value = value * 2.0; i = i + 1 }
     } else {
-        while i > exponent { value = value * 0.5; i = i - 1 }
+        for i > exponent { value = value * 0.5; i = i - 1 }
     }
     value
 }
@@ -138,7 +138,7 @@ func load_f32_tensor(string path, string tensor_name) safetensors_embedding {
     int dtype_end = st_find(header, "\"", dtype_start)
     string dtype = ""
     int dtype_cursor = dtype_start
-    while dtype_cursor < dtype_end { dtype = dtype + string(header[dtype_cursor]); dtype_cursor = dtype_cursor + 1 }
+    for dtype_cursor < dtype_end { dtype = dtype + string(header[dtype_cursor]); dtype_cursor = dtype_cursor + 1 }
     int element_bytes = 4
     if dtype == "F16" || dtype == "BF16" { element_bytes = 2 } else if dtype != "F32" { return invalid_safetensors_embedding(path, "unsupported_dtype") }
     int shape = st_find(header, "\"shape\":[", dtype_end)
@@ -169,7 +169,7 @@ func lookup_f32_embedding(safetensors_embedding embedding, int token_id) embeddi
     if len(bytes) != embedding.columns * embedding.element_bytes { return embedding_lookup_result { ok: false, values: [], error_code: "truncated_tensor" } }
     []float values = []float{cap: embedding.columns}
     int i = 0
-    while i < embedding.columns { values[i] = st_decode(bytes, i * embedding.element_bytes, embedding.dtype); i = i + 1 }
+    for i < embedding.columns { values[i] = st_decode(bytes, i * embedding.element_bytes, embedding.dtype); i = i + 1 }
     embedding_lookup_result { ok: true, values: values, error_code: "" }
 }
 
@@ -180,6 +180,6 @@ func read_f32_tensor(safetensors_embedding tensor) f32_tensor_result {
     int count = tensor.rows * tensor.columns
     []float values = []float{cap: count}
     int i = 0
-    while i < count { values[i] = st_decode(bytes, i * tensor.element_bytes, tensor.dtype); i = i + 1 }
+    for i < count { values[i] = st_decode(bytes, i * tensor.element_bytes, tensor.dtype); i = i + 1 }
     f32_tensor_result { ok: true, tensor: tensor, values: values, error_code: "" }
 }

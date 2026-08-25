@@ -104,10 +104,10 @@ func model_find(string text, string pattern, int start) int {
     if len(pattern) == 0 { return start }
     int i = start
     if i < 0 { i = 0 }
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
         bool matched = true
-        while j < len(pattern) {
+        for j < len(pattern) {
             if text[i + j] != pattern[j] {
                 matched = false
                 break
@@ -127,7 +127,7 @@ func model_slice(string text, int start, int end) string {
     if begin < 0 { begin = 0 }
     if stop > len(text) { stop = len(text) }
     int i = begin
-    while i < stop {
+    for i < stop {
         result = result + string(text[i])
         i = i + 1
     }
@@ -136,7 +136,7 @@ func model_slice(string text, int start, int end) string {
 
 func model_skip_space(string text, int start) int {
     int i = start
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if ch != 32 && ch != 9 && ch != 10 && ch != 13 { return i }
         i = i + 1
@@ -158,7 +158,7 @@ func model_json_string(string text, string key) string {
     string result = ""
     int i = start + 1
     bool escaped = false
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if escaped {
             result = result + string(ch)
@@ -196,7 +196,7 @@ func model_json_int(string text, string key, int fallback) int {
     int value = 0
     bool found = false
     int i = start
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if ch < 48 || ch > 57 { break }
         value = value * 10 + ch - 48
@@ -211,12 +211,12 @@ func model_pow10(int exponent) float {
     float value = 1.0
     int i = 0
     if exponent >= 0 {
-        while i < exponent {
+        for i < exponent {
             value = value * 10.0
             i = i + 1
         }
     } else {
-        while i < 0 - exponent {
+        for i < 0 - exponent {
             value = value / 10.0
             i = i + 1
         }
@@ -235,7 +235,7 @@ func model_json_float(string text, string key, float fallback) float {
     float value = 0.0
     bool found = false
     int i = start
-    while i < len(text) && text[i] >= 48 && text[i] <= 57 {
+    for i < len(text) && text[i] >= 48 && text[i] <= 57 {
         value = value * 10.0 + float(text[i] - 48)
         found = true
         i = i + 1
@@ -243,7 +243,7 @@ func model_json_float(string text, string key, float fallback) float {
     if i < len(text) && text[i] == 46 {
         i = i + 1
         float scale = 0.1
-        while i < len(text) && text[i] >= 48 && text[i] <= 57 {
+        for i < len(text) && text[i] >= 48 && text[i] <= 57 {
             value = value + float(text[i] - 48) * scale
             scale = scale * 0.1
             found = true
@@ -260,7 +260,7 @@ func model_json_float(string text, string key, float fallback) float {
         } else if i < len(text) && text[i] == 43 {
             i = i + 1
         }
-        while i < len(text) && text[i] >= 48 && text[i] <= 57 {
+        for i < len(text) && text[i] >= 48 && text[i] <= 57 {
             exponent = exponent * 10 + text[i] - 48
             i = i + 1
         }
@@ -312,7 +312,7 @@ func model_architecture_supported(hf_model_config config) bool {
 func model_parse_positive_int(string text) int {
     int value = 0
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if ch >= 48 && ch <= 57 { value = value * 10 + ch - 48 }
         i = i + 1
@@ -330,7 +330,7 @@ func model_u64_le([]int bytes, int offset) int {
     int value = 0
     int multiplier = 1
     int i = 0
-    while i < 8 {
+    for i < 8 {
         int current = bytes[offset + i]
         if current < 0 { current = current + 256 }
         value = value + current * multiplier
@@ -345,7 +345,7 @@ func model_matching_end(string text, int start, int open_char, int close_char) i
     bool in_string = false
     bool escaped = false
     int i = start
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if in_string {
             if escaped {
@@ -375,18 +375,18 @@ func model_json_int_array(string object_text, string key) []int {
     int end = model_matching_end(object_text, start, 91, 93)
     if end < 0 { return [] }
     int i = start + 1
-    while i < end {
+    for i < end {
         i = model_skip_space(object_text, i)
         if i >= end { break }
         int value = 0
         bool found = false
-        while i < end && object_text[i] >= 48 && object_text[i] <= 57 {
+        for i < end && object_text[i] >= 48 && object_text[i] <= 57 {
             value = value * 10 + object_text[i] - 48
             found = true
             i = i + 1
         }
         if found { values = append(values, value) }
-        while i < end && object_text[i] != 44 { i = i + 1 }
+        for i < end && object_text[i] != 44 { i = i + 1 }
         if i < end { i = i + 1 }
     }
     values
@@ -433,7 +433,7 @@ func model_parse_archive(string path) safetensors_archive_manifest {
         return archive
     }
     cursor = cursor + 1
-    while cursor < len(header) {
+    for cursor < len(header) {
         cursor = model_skip_space(header, cursor)
         if cursor >= len(header) || header[cursor] == 125 { break }
         if header[cursor] != 34 {
@@ -485,10 +485,10 @@ func model_parse_archive(string path) safetensors_archive_manifest {
 func model_find_tensor(hf_model_manifest manifest, string name) int {
     int flat_index = 0
     int archive_index = 0
-    while archive_index < len(manifest.archives) {
+    for archive_index < len(manifest.archives) {
         safetensors_archive_manifest archive = manifest.archives[archive_index]
         int tensor_index = 0
-        while tensor_index < len(archive.tensors) {
+        for tensor_index < len(archive.tensors) {
             if archive.tensors[tensor_index].name == name { return flat_index }
             flat_index = flat_index + 1
             tensor_index = tensor_index + 1

@@ -106,7 +106,7 @@ func (communicator* comm) all_gather(tensor_handle send_tensor, vec[tensor_handl
 
     total_bytes := 0
     i := 0
-    while i < recv_tensors.len() {
+    for i < recv_tensors.len() {
         total_bytes = total_bytes + recv_tensors[i].size
         i = i + 1
     }
@@ -146,7 +146,7 @@ func (communicator* comm) reduce_scatter(vec[tensor_handle] send_tensors, tensor
 
     total_bytes := 0
     i := 0
-    while i < send_tensors.len() {
+    for i < send_tensors.len() {
         total_bytes = total_bytes + send_tensors[i].size
         i = i + 1
     }

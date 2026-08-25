@@ -12,7 +12,7 @@ func cross_entropy_loss(
     float total_loss = 0.0
     int valid_count = 0
     int i = 0
-    while i < batch_size * seq_len {
+    for i < batch_size * seq_len {
         int label = labels[i]
         if label == ignore_index {
             i = i + 1
@@ -23,7 +23,7 @@ func cross_entropy_loss(
         int logits_offset = i * vocab_size
         float max_logit = logits[logits_offset]
         int j = 1
-        while j < vocab_size {
+        for j < vocab_size {
             if logits[logits_offset + j] > max_logit {
                 max_logit = logits[logits_offset + j]
             }
@@ -31,7 +31,7 @@ func cross_entropy_loss(
         }
         float sum_exp = 0.0
         j = 0
-        while j < vocab_size {
+        for j < vocab_size {
             float exp_val = exp_approx(logits[logits_offset + j] - max_logit)
             sum_exp = sum_exp + exp_val
             j = j + 1
@@ -52,7 +52,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / (i as float)
         result = result + term
         i = i + 1
@@ -68,7 +68,7 @@ func log_approx(float x) float {
     float result = y
     float term = y
     int i = 1
-    while i < 10 {
+    for i < 10 {
         term = term * y2
         result = result + term / ((2 * i + 1) as float)
         i = i + 1
@@ -86,12 +86,12 @@ func cross_entropy_gradient(
 ) []float {
     []float grad = []float{cap: batch_size * seq_len * vocab_size}
     int i = 0
-    while i < batch_size * seq_len {
+    for i < batch_size * seq_len {
         int label = labels[i]
         int logits_offset = i * vocab_size
         if label == ignore_index {
             int j = 0
-            while j < vocab_size {
+            for j < vocab_size {
                 grad[logits_offset + j] = 0.0
                 j = j + 1
             }
@@ -102,7 +102,7 @@ func cross_entropy_gradient(
         if label >= vocab_size { label = vocab_size - 1 }
         float max_logit = logits[logits_offset]
         int j = 1
-        while j < vocab_size {
+        for j < vocab_size {
             if logits[logits_offset + j] > max_logit {
                 max_logit = logits[logits_offset + j]
             }
@@ -110,13 +110,13 @@ func cross_entropy_gradient(
         }
         float sum_exp = 0.0
         j = 0
-        while j < vocab_size {
+        for j < vocab_size {
             float exp_val = exp_approx(logits[logits_offset + j] - max_logit)
             sum_exp = sum_exp + exp_val
             j = j + 1
         }
         j = 0
-        while j < vocab_size {
+        for j < vocab_size {
             float prob = exp_approx(logits[logits_offset + j] - max_logit) / sum_exp
             if j == label {
                 grad[logits_offset + j] = prob - 1.0

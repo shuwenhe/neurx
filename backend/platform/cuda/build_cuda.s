@@ -124,10 +124,10 @@ func contains_string(string haystack, string needle) bool {
         return false
     }
     int i = 0
-    while i <= h_len - n_len {
+    for i <= h_len - n_len {
         int j = 0
         bool match = true
-        while j < n_len && match {
+        for j < n_len && match {
             if haystack[i + j] != needle[j] {
                 match = false
             }
@@ -148,7 +148,7 @@ func eq_string(string a, string b) bool {
         return false
     }
     int i = 0
-    while i < a_len {
+    for i < a_len {
         if a[i] != b[i] {
             return false
         }
@@ -159,7 +159,7 @@ func eq_string(string a, string b) bool {
 
 func str_len(string s) int {
     int n = 0
-    while n < 10000000 && s[n] != 0 {
+    for n < 10000000 && s[n] != 0 {
         n = n + 1
     }
     n
@@ -168,11 +168,11 @@ func str_len(string s) int {
 func trim(string s) string {
     int len = str_len(s)
     int i = 0
-    while i < len && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < len && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
     int j = len - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
     if j < i {
@@ -185,7 +185,7 @@ func substring(string s, int start, int end) string {
     string out = ""
     int i = start
     int len = str_len(s)
-    while i < end && i < len {
+    for i < end && i < len {
         out = out + chr(s[i])
         i = i + 1
     }

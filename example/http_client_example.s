@@ -43,7 +43,7 @@ func int_to_string(int value) string {
     }
 
     string temp = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n % 10
         temp = string_index(digits, digit) + temp
         n = n / 10

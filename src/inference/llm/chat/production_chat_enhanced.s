@@ -7,11 +7,11 @@ extern "intrinsic" func __host_slice(string text, int start, int end) string
 
 func trim(string s) string {
     int i = 0
-    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
     int j = len(s) - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
     if j < i {
@@ -73,7 +73,7 @@ func main() {
     }
     string conversation_history = ""
     int turn_count = 0
-    while true {
+    for true {
         print("You: ")
         string user_input = read_user_line()
         if len(user_input) == 0 {

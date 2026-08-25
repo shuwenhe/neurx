@@ -25,7 +25,7 @@ func dtype_name_to_size(string dtype_name) int {
 func read_uint64_le(interface file_bytes, int offset) int {
     int result = 0
     int i = 0
-    while i < 8 {
+    for i < 8 {
         int byte_val = 0
         result = result + (byte_val * pow(256, i))
         i = i + 1
@@ -36,7 +36,7 @@ func read_uint64_le(interface file_bytes, int offset) int {
 func pow(int base, int exp) int {
     int result = 1
     int i = 0
-    while i < exp {
+    for i < exp {
         result = result * base
         i = i + 1
     }
@@ -51,7 +51,7 @@ func parse_shape_from_json(string json_text, string tensor_name) []int {
 func shape_to_numel([]int shape) int {
     int numel = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         numel = numel * shape[i]
         i = i + 1
     }

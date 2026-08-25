@@ -139,10 +139,10 @@ func test_openai_chunk_format() int {
 
 func string_contains(string text, string pattern) bool {
     int i = 0
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
         bool matches = true
-        while j < len(pattern) {
+        for j < len(pattern) {
             if text[i + j] != pattern[j] {
                 matches = false
                 break
@@ -162,7 +162,7 @@ func string_starts_with(string text, string prefix) bool {
         return false
     }
     int i = 0
-    while i < len(prefix) {
+    for i < len(prefix) {
         if text[i] != prefix[i] {
             return false
         }

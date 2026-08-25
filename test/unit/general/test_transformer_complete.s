@@ -33,7 +33,7 @@ use neurx.model.transformer.transformer_backward.{
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }
@@ -43,7 +43,7 @@ func allocate_vector(int size, float init_val) []float {
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
-    while i < len(src) {
+    for i < len(src) {
         out[i] = src[i]
         i = i + 1
     }
@@ -76,14 +76,14 @@ func test_layer_norm_forward_basic() {
     ln := new_layer_norm(cfg)
     []float input = []float{cap: 16}
     int i = 0
-    while i < 16 {
+    for i < 16 {
         input[i] = 1.0 + (i * 1.0) / 16.0
         i = i + 1
     }
     output := layer_normalize(ln, input, 2, 1)
     float mean = 0.0
     i = 0
-    while i < 8 {
+    for i < 8 {
         mean = mean + output.normalized[i]
         i = i + 1
     }
@@ -101,7 +101,7 @@ func test_layer_norm_with_gamma_beta() {
     ln.gamma = []float{cap: 4}
     ln.beta = []float{cap: 4}
     int i = 0
-    while i < 4 {
+    for i < 4 {
         ln.gamma[i] = 2.0
         ln.beta[i] = 0.5
         i = i + 1
@@ -152,7 +152,7 @@ func test_embed_tokens_basic() {
     []float embedding = allocate_vector(vocab_size * hidden_dim, 0.1)
     []int token_ids = []int{cap: batch_size * seq_len}
     int i = 0
-    while i < batch_size * seq_len {
+    for i < batch_size * seq_len {
         token_ids[i] = i % vocab_size
         i = i + 1
     }
@@ -167,7 +167,7 @@ func test_embed_tokens_correct_values() {
     int seq_len = 2
     []float embedding = allocate_vector(vocab_size * hidden_dim, 0.0)
     int i = 0
-    while i < hidden_dim {
+    for i < hidden_dim {
         embedding[i] = 1.0 + (i * 1.0)
         embedding[hidden_dim + i] = 2.0 + (i * 1.0)
         i = i + 1
@@ -177,7 +177,7 @@ func test_embed_tokens_correct_values() {
     token_ids[1] = 1
     embedded := embed_tokens(embedding, token_ids, batch_size, seq_len, hidden_dim)
     i = 0
-    while i < hidden_dim {
+    for i < hidden_dim {
         assert_equal("embed_token_0", embedded[i], 1.0 + (i * 1.0), 0.01)
         assert_equal("embed_token_1", embedded[hidden_dim + i], 2.0 + (i * 1.0), 0.01)
         i = i + 1
@@ -295,13 +295,13 @@ func test_complete_forward_backward_cycle() {
     int num_layers = 2
     []int input_ids = allocate_vector(batch_size * seq_len, 1)
     int i = 0
-    while i < batch_size * seq_len {
+    for i < batch_size * seq_len {
         input_ids[i] = i % vocab_size
         i = i + 1
     }
     []int target_ids = allocate_vector(batch_size * seq_len, 2)
     i = 0
-    while i < batch_size * seq_len {
+    for i < batch_size * seq_len {
         target_ids[i] = (i + 1) % vocab_size
         i = i + 1
     }

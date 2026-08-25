@@ -347,7 +347,7 @@ func int_to_str(int n) string {
         negative = true
         value = 0 - value
     }
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }

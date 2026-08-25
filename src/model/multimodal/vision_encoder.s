@@ -98,7 +98,7 @@ func new_vision_encoder(vision_encoder_config config) vision_encoder {
         scale_projection_biases: math.allocate_float(config.num_scales * config.hidden_dim, 0.0),
     }
     int i = 0
-    while i < num_patches {
+    for i < num_patches {
         encoder.positional_embeddings[i * config.hidden_dim..(i+1) * config.hidden_dim] =
             compute_2d_rope_embedding(i / (config.image_size / config.patch_size), i % (config.image_size / config.patch_size), config)
         i = i + 1
@@ -112,9 +112,9 @@ func compute_2d_rope_embedding(int row, int col, vision_encoder_config config) [
     float scale = config.rope_scale
     int head_dim = config.hidden_dim / config.num_heads
     int head = 0
-    while head < config.num_heads {
+    for head < config.num_heads {
         int dim = 0
-        while dim < head_dim {
+        for dim < head_dim {
             float inv_freq = 1.0 / math.exp_approx(float(dim) * math.log_approx(theta) / float(head_dim))
             float row_embedding = float(row) * inv_freq * scale
             float col_embedding = float(col) * inv_freq * scale
@@ -154,13 +154,13 @@ func adaptive_resolution_scaling([]float image, int original_width, int original
     int num_pixels = new_width * new_height * config.num_channels
     []float scaled_image = math.allocate_float(num_pixels, 0.0)
     int y = 0
-    while y < new_height {
+    for y < new_height {
         int x = 0
-        while x < new_width {
+        for x < new_width {
             int orig_y = int(float(y) * float(original_height) / float(new_height))
             int orig_x = int(float(x) * float(original_width) / float(new_width))
             int c = 0
-            while c < config.num_channels {
+            for c < config.num_channels {
                 int orig_idx = (orig_y * original_width + orig_x) * config.num_channels + c
                 int new_idx = (y * new_width + x) * config.num_channels + c
                 if orig_idx < len(image) && new_idx < len(scaled_image) {
@@ -184,17 +184,17 @@ func patchify_image([]float image, int width, int height, vision_encoder_config 
     int num_patches = num_patches_x * num_patches_y
     []float patches = math.allocate_float(num_patches * hidden_dim, 0.0)
     int py = 0
-    while py < num_patches_y {
+    for py < num_patches_y {
         int px = 0
-        while px < num_patches_x {
+        for px < num_patches_x {
             int patch_idx = py * num_patches_x + px
             []float patch = math.allocate_float(patch_size * patch_size * num_channels, 0.0)
             int y = 0
-            while y < patch_size {
+            for y < patch_size {
                 int x = 0
-                while x < patch_size {
+                for x < patch_size {
                     int c = 0
-                    while c < num_channels {
+                    for c < num_channels {
                         int img_idx = ((py * patch_size + y) * width + (px * patch_size + x)) * num_channels + c
                         int patch_idx_ = (y * patch_size + x) * num_channels + c
                         if img_idx < len(image) && patch_idx_ < len(patch) {
@@ -208,10 +208,10 @@ func patchify_image([]float image, int width, int height, vision_encoder_config 
             }
             []float patch_embedding = math.allocate_float(hidden_dim, 0.0)
             int i = 0
-            while i < hidden_dim {
+            for i < hidden_dim {
                 patch_embedding[i] = config.patch_embedding_biases[i]
                 int j = 0
-                while j < patch_size * patch_size * num_channels {
+                for j < patch_size * patch_size * num_channels {
                     patch_embedding[i] = patch_embedding[i] + patch[j] * config.patch_embedding_weights[j * hidden_dim + i]
                     j = j + 1
                 }
@@ -231,14 +231,14 @@ func multihead_attention_2d([]float queries, []float keys, []float values,
     int hidden_dim = num_heads * head_dim
     []float output = math.allocate_float(seq_len * hidden_dim, 0.0)
     int head = 0
-    while head < num_heads {
+    for head < num_heads {
         []float q_head = math.allocate_float(seq_len * head_dim, 0.0)
         []float k_head = math.allocate_float(seq_len * head_dim, 0.0)
         []float v_head = math.allocate_float(seq_len * head_dim, 0.0)
         int i = 0
-        while i < seq_len {
+        for i < seq_len {
             int j = 0
-            while j < head_dim {
+            for j < head_dim {
                 q_head[i * head_dim + j] = queries[i * hidden_dim + head * head_dim + j]
                 k_head[i * head_dim + j] = keys[i * hidden_dim + head * head_dim + j]
                 v_head[i * head_dim + j] = values[i * hidden_dim + head * head_dim + j]
@@ -248,12 +248,12 @@ func multihead_attention_2d([]float queries, []float keys, []float values,
         }
         []float attention_scores = math.allocate_float(seq_len * seq_len, 0.0)
         i = 0
-        while i < seq_len {
+        for i < seq_len {
             int j = 0
-            while j < seq_len {
+            for j < seq_len {
                 float score = 0.0
                 int k = 0
-                while k < head_dim {
+                for k < head_dim {
                     score = score + q_head[i * head_dim + k] * k_head[j * head_dim + k]
                     k = k + 1
                 }
@@ -270,11 +270,11 @@ func multihead_attention_2d([]float queries, []float keys, []float values,
         }
         []float head_output = math.allocate_float(seq_len * head_dim, 0.0)
         i = 0
-        while i < seq_len {
+        for i < seq_len {
             int j = 0
-            while j < seq_len {
+            for j < seq_len {
                 int k = 0
-                while k < head_dim {
+                for k < head_dim {
                     head_output[i * head_dim + k] = head_output[i * head_dim + k] +
                                                    attention_scores[i * seq_len + j] * v_head[j * head_dim + k]
                     k = k + 1
@@ -284,9 +284,9 @@ func multihead_attention_2d([]float queries, []float keys, []float values,
             i = i + 1
         }
         i = 0
-        while i < seq_len {
+        for i < seq_len {
             int j = 0
-            while j < head_dim {
+            for j < head_dim {
                 output[i * hidden_dim + head * head_dim + j] = head_output[i * head_dim + j]
                 j = j + 1
             }
@@ -306,9 +306,9 @@ func transformer_layer_forward([]float input, []float weights_qkv, []float weigh
     []float keys = math.allocate_float(seq_len * hidden_dim, 0.0)
     []float values = math.allocate_float(seq_len * hidden_dim, 0.0)
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         int j = 0
-        while j < hidden_dim {
+        for j < hidden_dim {
             queries[i * hidden_dim + j] = qkv[i * hidden_dim * 3 + j]
             keys[i * hidden_dim + j] = qkv[i * hidden_dim * 3 + hidden_dim + j]
             values[i * hidden_dim + j] = qkv[i * hidden_dim * 3 + hidden_dim * 2 + j]
@@ -319,7 +319,7 @@ func transformer_layer_forward([]float input, []float weights_qkv, []float weigh
     []float attention_output = multihead_attention_2d(queries, keys, values, num_heads, head_dim, seq_len)
     []float output = math.matmul_bias(attention_output, weights_out, biases_out, seq_len, hidden_dim, hidden_dim)
     i = 0
-    while i < seq_len * hidden_dim {
+    for i < seq_len * hidden_dim {
         output[i] = output[i] + input[i]
         output[i] = math.gelu_approx(output[i])
         i = i + 1
@@ -335,7 +335,7 @@ func extract_multi_scale_features([]float features, int width, int height,
     int num_patches_x = width / config.patch_size
     int num_patches_y = height / config.patch_size
     int scale = 0
-    while scale < num_scales {
+    for scale < num_scales {
         float scale_factor = math.exp_approx(-float(scale) * 0.5)
         int center_x = num_patches_x / 2
         int center_y = num_patches_y / 2
@@ -343,12 +343,12 @@ func extract_multi_scale_features([]float features, int width, int height,
         []float scale_feature = math.allocate_float(hidden_dim, 0.0)
         int count = 0
         int y = math.max_int(0, center_y - radius)
-        while y < math.min_int(num_patches_y, center_y + radius) {
+        for y < math.min_int(num_patches_y, center_y + radius) {
             int x = math.max_int(0, center_x - radius)
-            while x < math.min_int(num_patches_x, center_x + radius) {
+            for x < math.min_int(num_patches_x, center_x + radius) {
                 int patch_idx = y * num_patches_x + x
                 int d = 0
-                while d < hidden_dim {
+                for d < hidden_dim {
                     scale_feature[d] = scale_feature[d] + features[patch_idx * hidden_dim + d]
                     d = d + 1
                 }
@@ -359,7 +359,7 @@ func extract_multi_scale_features([]float features, int width, int height,
         }
         if count > 0 {
             int d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 scale_feature[d] = scale_feature[d] / float(count)
                 d = d + 1
             }
@@ -380,7 +380,7 @@ func encode_image(vision_encoder encoder, []float image, int original_width, int
     []float features = math.copy_float(patches)
     features = math.apply_bias(features, encoder.positional_embeddings, num_patches, config.hidden_dim)
     int layer = 0
-    while layer < config.num_layers {
+    for layer < config.num_layers {
         []float weights_qkv = encoder.transformer_weights[layer * config.hidden_dim * config.hidden_dim..(layer+1) * config.hidden_dim * config.hidden_dim]
         []float weights_out = encoder.transformer_weights[(layer + config.num_layers) * config.hidden_dim * config.hidden_dim..(layer + config.num_layers + 1) * config.hidden_dim * config.hidden_dim]
         []float biases_qkv = encoder.transformer_biases[layer * config.hidden_dim..(layer+1) * config.hidden_dim]
@@ -424,9 +424,9 @@ func vision_encoder_compute_spatial_positions(int width, int height, int patch_s
     int num_patches = num_patches_x * num_patches_y
     []int positions = math.allocate_int(num_patches * 2, 0)
     int y = 0
-    while y < num_patches_y {
+    for y < num_patches_y {
         int x = 0
-        while x < num_patches_x {
+        for x < num_patches_x {
             int idx = y * num_patches_x + x
             positions[idx * 2] = x
             positions[idx * 2 + 1] = y

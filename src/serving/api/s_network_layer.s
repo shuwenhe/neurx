@@ -12,7 +12,7 @@ func int_to_string_net(int n) string {
         num = 0 - num
     }
 
-    while num > 0 {
+    for num > 0 {
         int digit = num % 10
         string digit_str = ""
 
@@ -47,7 +47,7 @@ func starts_with(string str, string prefix) bool {
     }
 
     int i = 0
-    while i < prefix_len {
+    for i < prefix_len {
         if str[i] != prefix[i] {
             return false
         }
@@ -82,7 +82,7 @@ func extract_path_from_request(string request) string {
     int second_space = -1
     int i = 0
 
-    while i < len(request) {
+    for i < len(request) {
         if request[i] == 32 {
             if first_space == -1 {
                 first_space = i
@@ -111,7 +111,7 @@ func extract_path_from_request(string request) string {
             path = "/"
             idx = idx + 1
 
-            while idx < second_space {
+            for idx < second_space {
                 if request[idx] == 118 {
                     path = "/v1"
                     break

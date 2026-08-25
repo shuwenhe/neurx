@@ -80,7 +80,7 @@ func main() {
     int save_interval = parse_int(runtime_env_get("NEURX_PRETRAIN_SAVE_INTERVAL", "5000"), 5000)
     int log_interval = parse_int(runtime_env_get("NEURX_PRETRAIN_LOG_INTERVAL", "100"), 100)
     int step = resume_step
-    while step < max_steps {
+    for step < max_steps {
         float loss = simulate_training_step(step)
         if step % log_interval == 0 && rank.global_rank == 0 {
             print("[TRAIN] step=" + itoa(step) + " loss=" + ftoa(loss))
@@ -127,7 +127,7 @@ func itoa(int n) string {
         s = "-"
         num = -num
     }
-    while num > 0 {
+    for num > 0 {
         byte digit = byte('0' + (num % 10))
         s = string(digit) + s
         num = num / 10

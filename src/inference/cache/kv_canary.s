@@ -40,7 +40,7 @@ struct kv_canary_result {
 func canary_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -54,7 +54,7 @@ func new_kv_canary(kv_canary_config config) kv_canary_state {
 
 func canary_find(kv_canary_state state, int page_id) int {
     int i = 0
-    while i < state.page_count {
+    for i < state.page_count {
         if state.page_ids[i] == page_id { return i }
         i = i + 1
     }

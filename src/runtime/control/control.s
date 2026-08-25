@@ -16,7 +16,7 @@ struct control_state {
 func join_strings([]string values) string {
     string out = ""
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if i > 0 {
             out = out + ","
         }
@@ -68,7 +68,7 @@ func control_param_count(control_state state) int {
 
 func control_has_branch(control_state state, string branch) bool {
     int i = 0
-    while i < len(state.branches) {
+    for i < len(state.branches) {
         if neurx.strings.strings_eq(state.branches[i], branch) {
             return true
         }
@@ -79,7 +79,7 @@ func control_has_branch(control_state state, string branch) bool {
 
 func control_has_param(control_state state, string param) bool {
     int i = 0
-    while i < len(state.params) {
+    for i < len(state.params) {
         if neurx.strings.strings_eq(state.params[i], param) {
             return true
         }
@@ -221,7 +221,7 @@ func while_loop(control_state state, tensor value, int steps, string op) tensor 
     del state
     tensor current = value
     int i = 0
-    while i < steps {
+    for i < steps {
         if op == "add" {
             current = neurx.tensor.tensor.add(current, neurx.tensor.tensor.ones_like(current))
         } else {
@@ -248,7 +248,7 @@ func scan_sum(control_state state, tensor value) tensor {
     []float out = []float{cap: n}
     float acc = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         acc = acc + value.data[i]
         out[i] = acc
         i = i + 1
@@ -262,7 +262,7 @@ func scan_prod(control_state state, tensor value) tensor {
     []float out = []float{cap: n}
     float acc = 1.0
     int i = 0
-    while i < n {
+    for i < n {
         acc = acc * value.data[i]
         out[i] = acc
         i = i + 1
@@ -273,7 +273,7 @@ func scan_prod(control_state state, tensor value) tensor {
 func control_to_transform_chain(control_state state) transform_chain {
     transform_chain chain = neurx.autograd.function.new_transform_chain()
     int i = 0
-    while i < len(state.branches) {
+    for i < len(state.branches) {
         string param = neurx.strings.string_at(state.params, i)
         if param != "" {
             chain = neurx.autograd.function.transform_chain_add_step_with_param(chain, state.branches[i], param)
@@ -294,7 +294,7 @@ func transform_chain_to_control(transform_chain chain, string name, int iteratio
         branches = []string{cap: len(chain.eqns)}
         params = []string{cap: len(chain.eqns)}
         int i = 0
-        while i < len(chain.eqns) {
+        for i < len(chain.eqns) {
             branches[i] = chain.eqns[i].primitive
             params[i] = join_strings(chain.eqns[i].params)
             i = i + 1
@@ -304,7 +304,7 @@ func transform_chain_to_control(transform_chain chain, string name, int iteratio
     bool loop_enabled = false
     bool scan_enabled = false
     int i = 0
-    while i < len(branches) {
+    for i < len(branches) {
         if neurx.strings.strings_eq(branches[i], "cond") {
             cond_enabled = true
         }

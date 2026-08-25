@@ -67,7 +67,7 @@ func parse_json_incremental(*IncrementalParseState state) {
     buffer := state.buffer
     pos := state.position
 
-    while pos < len(buffer) {
+    for pos < len(buffer) {
         ch := buffer[pos]
 
         if ch == '{' || ch == '[' {
@@ -96,7 +96,7 @@ func parse_xml_incremental(*IncrementalParseState state) {
     in_tag := false
     tag_depth := 0
 
-    while pos < len(buffer) {
+    for pos < len(buffer) {
         ch := buffer[pos]
 
         if ch == '<' {
@@ -142,7 +142,7 @@ func count_character(string text, byte ch) int {
     count := 0
     i := 0
 
-    while i < len(text) {
+    for i < len(text) {
         if text[i] == ch {
             count = count + 1
         }
@@ -214,7 +214,7 @@ func extract_lines_from_stream(IncrementalParseState state, int max_lines) []str
 
     result := []string{}
     i := 0
-    while i < max_lines && i < len(lines) {
+    for i < max_lines && i < len(lines) {
         result = append(result, lines[i])
         i = i + 1
     }

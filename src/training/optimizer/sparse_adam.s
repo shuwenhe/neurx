@@ -39,12 +39,12 @@ func sparse_adam_step(
     optimizer.step_count = ensure_sparse_adam_step_count(optimizer.step_count, n)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = params.data[i]
         i = i + 1
     }
     int k = 0
-    while k < len(sparse_indices) {
+    for k < len(sparse_indices) {
         int idx = sparse_indices[k]
         float grad = grads.data[idx]
         optimizer.step_count[idx] = optimizer.step_count[idx] + 1
@@ -72,7 +72,7 @@ struct sparse_adam_optimizer_step_output {
 func ensure_sparse_adam_state([]float values, int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         if i < len(values) {
             out[i] = values[i]
         } else {
@@ -86,7 +86,7 @@ func ensure_sparse_adam_state([]float values, int n) []float {
 func ensure_sparse_adam_step_count([]int values, int n) []int {
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         if i < len(values) {
             out[i] = values[i]
         } else {
@@ -106,7 +106,7 @@ func sparse_adam_sqrt(float x) float {
         y = x
     }
     int i = 0
-    while i < 32 {
+    for i < 32 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -116,7 +116,7 @@ func sparse_adam_sqrt(float x) float {
 func sparse_adam_pow(float base, int exponent) float {
     float result = 1.0
     int i = 0
-    while i < exponent {
+    for i < exponent {
         result = result * base
         i = i + 1
     }

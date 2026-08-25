@@ -90,7 +90,7 @@ func access_cache_entry_lru(
     string prefix_hash,
 ) lru_cache_eviction {
     i := 0
-    while i < cache.entries.len {
+    for i < cache.entries.len {
         if cache.entries[i].prefix_hash == prefix_hash {
             cache.entries[i].access_count = cache.entries[i].access_count + 1
             cache.entries[i].last_access_time = get_time()
@@ -106,7 +106,7 @@ func access_cache_entry_lfu(
     string prefix_hash,
 ) lfu_cache_eviction {
     i := 0
-    while i < cache.entries.len {
+    for i < cache.entries.len {
         if cache.entries[i].prefix_hash == prefix_hash {
             cache.entries[i].access_count = cache.entries[i].access_count + 1
             cache.entries[i].last_access_time = get_time()
@@ -124,7 +124,7 @@ func evict_lru(lru_cache_eviction cache) lru_cache_eviction {
     lru_idx := 0
     min_time := cache.entries[0].last_access_time
     i := 1
-    while i < cache.entries.len {
+    for i < cache.entries.len {
         if cache.entries[i].last_access_time < min_time {
             min_time = cache.entries[i].last_access_time
             lru_idx = i
@@ -136,7 +136,7 @@ func evict_lru(lru_cache_eviction cache) lru_cache_eviction {
     cache.eviction_count = cache.eviction_count + 1
     new_entries := []cache_entry{}
     i = 0
-    while i < cache.entries.len {
+    for i < cache.entries.len {
         if i != lru_idx {
             new_entries = append_cache_entry(new_entries, cache.entries[i])
         }
@@ -153,7 +153,7 @@ func evict_lfu_strategy(lfu_cache_eviction cache) lfu_cache_eviction {
     lfu_idx := 0
     min_access := cache.entries[0].access_count
     i := 1
-    while i < cache.entries.len {
+    for i < cache.entries.len {
         if cache.entries[i].access_count < min_access {
             min_access = cache.entries[i].access_count
             lfu_idx = i
@@ -165,7 +165,7 @@ func evict_lfu_strategy(lfu_cache_eviction cache) lfu_cache_eviction {
     cache.eviction_count = cache.eviction_count + 1
     new_entries := []cache_entry{}
     i = 0
-    while i < cache.entries.len {
+    for i < cache.entries.len {
         if i != lfu_idx {
             new_entries = append_cache_entry_lfu(new_entries, cache.entries[i])
         }
@@ -194,7 +194,7 @@ func get_cache_stats_lfu(lfu_cache_eviction cache) string {
 func append_cache_entry([]cache_entry slice, cache_entry elem) []cache_entry {
     new_slice := []cache_entry{}
     i := 0
-    while i < slice.len {
+    for i < slice.len {
         new_slice = append_cache_entry(new_slice, slice[i])
         i = i + 1
     }
@@ -205,7 +205,7 @@ func append_cache_entry([]cache_entry slice, cache_entry elem) []cache_entry {
 func append_cache_entry_lfu([]cache_entry slice, cache_entry elem) []cache_entry {
     new_slice := []cache_entry{}
     i := 0
-    while i < slice.len {
+    for i < slice.len {
         new_slice = append_cache_entry_lfu(new_slice, slice[i])
         i = i + 1
     }

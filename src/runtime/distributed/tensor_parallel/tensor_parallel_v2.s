@@ -34,8 +34,8 @@ struct tp_v2_state {
 func tp_mod(int val, int div) int {
     if div <= 0 { return 0 }
     int r = val
-    while r >= div { r = r - div }
-    while r < 0 { r = r + div }
+    for r >= div { r = r - div }
+    for r < 0 { r = r + div }
     return r
 }
 
@@ -62,7 +62,7 @@ func init_tp_v2(tp_v2_config cfg) tp_v2_state {
     state.norm1_gamma = []double{cap: h}
     state.norm2_gamma = []double{cap: h}
     int i = 0
-    while i < h {
+    for i < h {
         state.norm1_gamma[i] = 1.0
         state.norm2_gamma[i] = 1.0
         i = i + 1
@@ -76,7 +76,7 @@ func init_tp_v2(tp_v2_config cfg) tp_v2_state {
 func alloc_matrix(int rows, int cols) [][]double {
     [][]double m = [][][]double{cap: rows}
     int i = 0
-    while i < rows {
+    for i < rows {
         m[i] = []double{cap: cols}
         i = i + 1
     }
@@ -107,10 +107,10 @@ func tp_attention_forward(
     int n_kv_groups = nh / nkh
     [][]double attn_out = [][][]double{cap: batch_size}
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         attn_out[b] = [][][]double{cap: nh}
         int h_idx = 0
-        while h_idx < nh {
+        for h_idx < nh {
             int kv_h_idx = h_idx / n_kv_groups
             [][]double scores = compute_attn_scores(q_heads[b][h_idx], k_heads[b][kv_h_idx], seq_len, d)
             double scale = 1.0 / sqrt_double(double(d))
@@ -170,12 +170,12 @@ func matmul2d([][]double a, [][]double b) [][]double {
     int N = len(b)
     [][]double c = alloc_matrix(M, N)
     int i = 0
-    while i < M {
+    for i < M {
         int j = 0
-        while j < N {
+        for j < N {
             double sum = 0.0
             int k = 0
-            while k < K {
+            for k < K {
                 sum = sum + a[i][k] * b[j][k]
                 k = k + 1
             }
@@ -193,9 +193,9 @@ func transpose_matrix([][]double m) [][]double {
     if rows > 0 { cols = len(m[0]) }
     [][]double t = alloc_matrix(cols, rows)
     int i = 0
-    while i < rows {
+    for i < rows {
         int j = 0
-        while j < cols {
+        for j < cols {
             t[j][i] = m[i][j]
             j = j + 1
         }
@@ -210,9 +210,9 @@ func add_matrices([][]double a, [][]double b) [][]double {
     if rows > 0 { cols = len(a[0]) }
     [][]double c = alloc_matrix(rows, cols)
     int i = 0
-    while i < rows {
+    for i < rows {
         int j = 0
-        while j < cols {
+        for j < cols {
             c[i][j] = a[i][j] + b[i][j]
             j = j + 1
         }
@@ -227,9 +227,9 @@ func elementwise_mul([][]double a, [][]double b) [][]double {
     if rows > 0 { cols = len(a[0]) }
     [][]double c = alloc_matrix(rows, cols)
     int i = 0
-    while i < rows {
+    for i < rows {
         int j = 0
-        while j < cols {
+        for j < cols {
             c[i][j] = a[i][j] * b[i][j]
             j = j + 1
         }
@@ -241,9 +241,9 @@ func elementwise_mul([][]double a, [][]double b) [][]double {
 func scale_matrix([][]double m, double scalar) [][]double {
     int rows = len(m)
     int i = 0
-    while i < rows {
+    for i < rows {
         int j = 0
-        while j < len(m[i]) {
+        for j < len(m[i]) {
             m[i][j] = m[i][j] * scalar
             j = j + 1
         }
@@ -258,17 +258,17 @@ func rmsnorm_forward([][]double input, []double gamma, double eps) [][]double {
     if rows > 0 { cols = len(input[0]) }
     [][]double output = alloc_matrix(rows, cols)
     int i = 0
-    while i < rows {
+    for i < rows {
         double sum_sq = 0.0
         int j = 0
-        while j < cols {
+        for j < cols {
             sum_sq = sum_sq + input[i][j] * input[i][j]
             j = j + 1
         }
         double mean_sq = sum_sq / double(cols)
         double inv_norm = 1.0 / sqrt_double(mean_sq + eps)
         int k = 0
-        while k < cols {
+        for k < cols {
             output[i][k] = input[i][k] * inv_norm * gamma[k]
             k = k + 1
         }
@@ -280,9 +280,9 @@ func rmsnorm_forward([][]double input, []double gamma, double eps) [][]double {
 func silu_activation([][]double m) [][]double {
     int rows = len(m)
     int i = 0
-    while i < rows {
+    for i < rows {
         int j = 0
-        while j < len(m[i]) {
+        for j < len(m[i]) {
             double x = m[i][j]
             double sig = 1.0 / (1.0 + exp_approx(-x))
             m[i][j] = x * sig
@@ -299,7 +299,7 @@ func exp_approx(double x) double {
     double result = 1.0
     double term = 1.0
     int n = 1
-    while n <= 15 {
+    for n <= 15 {
         term = term * x / double(n)
         result = result + term
         n = n + 1
@@ -311,7 +311,7 @@ func sqrt_double(double x) double {
     if x <= 0.0 { return 0.0 }
     double g = x / 2.0
     int iter = 0
-    while iter < 20 {
+    for iter < 20 {
         double ng = (g + x / g) / 2.0
         if ng == g { break }
         g = ng
@@ -326,22 +326,22 @@ func softmax_2d([][]double logits, int axis) [][]double {
     if rows > 0 { cols = len(logits[0]) }
     [][]double output = alloc_matrix(rows, cols)
     int i = 0
-    while i < rows {
+    for i < rows {
         double max_val = logits[i][0]
         int j = 1
-        while j < cols {
+        for j < cols {
             if logits[i][j] > max_val { max_val = logits[i][j] }
             j = j + 1
         }
         double sum_exp = 0.0
         int k = 0
-        while k < cols {
+        for k < cols {
             output[i][k] = exp_approx(logits[i][k] - max_val)
             sum_exp = sum_exp + output[i][k]
             k = k + 1
         }
         int m = 0
-        while m < cols {
+        for m < cols {
             output[i][m] = output[i][m] / sum_exp
             m = m + 1
         }
@@ -353,16 +353,16 @@ func softmax_2d([][]double logits, int axis) [][]double {
 func reshape_to_heads([][]double x, int B, int S, int nh, int d) [][][]double {
     [][][]double result = [][][]double{cap: B}
     int b = 0
-    while b < B {
+    for b < B {
         result[b] = [][][]double{cap: nh}
         int h = 0
-        while h < nh {
+        for h < nh {
             result[b][h] = [][]double{cap: S}
             int s = 0
-            while s < S {
+            for s < S {
                 result[b][h][s] = []double{cap: d}
                 int dd = 0
-                while dd < d {
+                for dd < d {
                     int src_idx = s * (nh * d) + h * d + dd
                     if src_idx < len(x[b]) {
                         result[b][h][s][dd] = x[b][src_idx]
@@ -381,13 +381,13 @@ func reshape_to_heads([][]double x, int B, int S, int nh, int d) [][][]double {
 func concat_heads([][][]double x, int B, int S, int nh, int d) [][]double {
     [][]double result = alloc_matrix(B, S * nh * d)
     int b = 0
-    while b < B {
+    for b < B {
         int h = 0
-        while h < nh {
+        for h < nh {
             int s = 0
-            while s < S {
+            for s < S {
                 int dd = 0
-                while dd < d {
+                for dd < d {
                     int dst_idx = s * (nh * d) + h * d + dd
                     if dst_idx < len(result[b]) {
                         result[b][dst_idx] = x[b][h][s][dd]
@@ -405,9 +405,9 @@ func concat_heads([][][]double x, int B, int S, int nh, int d) [][]double {
 
 func apply_causal_mask([][]double scores, int seq_len) [][]double {
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         int j = 0
-        while j < seq_len {
+        for j < seq_len {
             if j > i {
                 scores[i][j] = -1e9
             }
@@ -421,12 +421,12 @@ func apply_causal_mask([][]double scores, int seq_len) [][]double {
 func compute_attn_scores([][]double q_head, [][]double k_head, int seq_len, int d) [][]double {
     [][]double scores = alloc_matrix(seq_len, seq_len)
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         int j = 0
-        while j < seq_len {
+        for j < seq_len {
             double dot = 0.0
             int dd = 0
-            while dd < d {
+            for dd < d {
                 dot = dot + q_head[i][dd] * k_head[j][dd]
                 dd = dd + 1
             }
@@ -441,13 +441,13 @@ func compute_attn_scores([][]double q_head, [][]double k_head, int seq_len, int 
 func apply_rope([][][]double x, int B, int S, int nh, int d, tp_v2_config cfg) [][][]double {
     int half_d = d / 2
     int b = 0
-    while b < B {
+    for b < B {
         int h = 0
-        while h < nh {
+        for h < nh {
             int s = 0
-            while s < S {
+            for s < S {
                 int i = 0
-                while i < half_d {
+                for i < half_d {
                     double freq = 1.0 / pow_dbl(10000.0, double(2*i) / double(d))
                     double angle = double(s) * freq
                     double cos_a = cos_approx(angle)
@@ -472,7 +472,7 @@ func cos_approx(double x) double {
     double result = 1.0
     double xx = x * x
     int n = 1
-    while n <= 10 {
+    for n <= 10 {
         term = -term * xx / double((2*n-1) * (2*n))
         result = result + term
         n = n + 1
@@ -485,7 +485,7 @@ func sin_approx(double x) double {
     double result = x
     double xx = x * x
     int n = 1
-    while n <= 10 {
+    for n <= 10 {
         term = -term * xx / double((2*n) * (2*n+1))
         result = result + term
         n = n + 1
@@ -499,7 +499,7 @@ func pow_dbl(double base, double exp) double {
     bool negative = exp < 0.0
     if negative { exp = -exp }
     double e = 0.0
-    while e < exp {
+    for e < exp {
         result = result * base
         e = e + 1.0
     }

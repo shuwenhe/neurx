@@ -170,7 +170,7 @@ func step_lr_compute(float base_lr, float gamma, int step_size, int step) float 
     int n_decays = step / step_size
     float lr = base_lr
     int i = 0
-    while i < n_decays {
+    for i < n_decays {
         lr = lr * gamma
         i = i + 1
     }

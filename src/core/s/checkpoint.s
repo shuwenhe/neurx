@@ -7,7 +7,7 @@ func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -18,7 +18,7 @@ func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -36,7 +36,7 @@ func has_prefix(string value, string prefix) bool {
         return false
     }
     int i = 0
-    while i < prefix_len {
+    for i < prefix_len {
         if value[i] != prefix[i] {
             return false
         }
@@ -53,7 +53,7 @@ func has_suffix(string value, string suffix) bool {
     }
     int offset = value_len - suffix_len
     int i = 0
-    while i < suffix_len {
+    for i < suffix_len {
         if value[offset + i] != suffix[i] {
             return false
         }
@@ -64,7 +64,7 @@ func has_suffix(string value, string suffix) bool {
 
 func last_path_separator_index(string path) int {
     int i = len(path) - 1
-    while i >= 0 {
+    for i >= 0 {
         int ch = int(string(path[i]))
         if ch == 47 {
             return i
@@ -139,7 +139,7 @@ func resolve_checkpoint_path(string path) string {
     if target == "" {
         target = "latest"
     }
-    while has_suffix(target, "/") {
+    for has_suffix(target, "/") {
         target = neurx.strings.substring(target, 0, len(target) - 1)
     }
     if runtime_file_exists(target) {
@@ -185,7 +185,7 @@ func split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current = ""
     int i = 0
-    while i < n {
+    for i < n {
         string ch = text[i]
         int chi = int(string(ch))
         if chi == 10 {
@@ -211,7 +211,7 @@ func csv_tokens(string text) []string {
     []string tokens = []string{cap: 0}
     string current = ""
     int i = 0
-    while i < n {
+    for i < n {
         string ch = text[i]
         int chi = int(string(ch))
         if chi == 44 {
@@ -231,7 +231,7 @@ func csv_tokens(string text) []string {
 func join_ints([]int values) string {
     string out = ""
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if i > 0 {
             out = out + ","
         }
@@ -244,7 +244,7 @@ func join_ints([]int values) string {
 func join_floats([]float values) string {
     string out = ""
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if i > 0 {
             out = out + ","
         }
@@ -258,7 +258,7 @@ func parse_int_list(string value) []int {
     []string parts = csv_tokens(value)
     []int out = []int{cap: 0}
     int i = 0
-    while i < len(parts) {
+    for i < len(parts) {
         string token = trim(parts[i])
         if token != "" {
             out.push(int(token))
@@ -272,7 +272,7 @@ func parse_float_list(string value) []float {
     []string parts = csv_tokens(value)
     []float out = []float{cap: 0}
     int i = 0
-    while i < len(parts) {
+    for i < len(parts) {
         string token = trim(parts[i])
         if token != "" {
             out.push(float(token))
@@ -309,7 +309,7 @@ func tensor_to_checkpoint_lines_from_params([]tensor params, int index) []string
     tensor t = new(empty_data, empty_shape, false)
     if index < len(params) {
         int k = 0
-        while k < len(params) {
+        for k < len(params) {
             if k == index {
                 t = params[k]
                 k = len(params)
@@ -329,10 +329,10 @@ func checkpoint_to_text(checkpoint state) string {
     out = neurx.strings.concat2(out, loss_line)
     out = neurx.strings.concat2(out, count_line)
     int i = 0
-    while i < len(state.params) {
+    for i < len(state.params) {
         []string lines = tensor_to_checkpoint_lines_from_params(state.params, i)
         int j = 0
-        while j < len(lines) {
+        for j < len(lines) {
             string line_j = neurx.string_at(lines, j)
             out = neurx.strings.concat3(out, line_j, "\n")
             j = j + 1
@@ -353,7 +353,7 @@ func parse_checkpoint_lines([]string lines) checkpoint {
     float loss = 0.0
     int param_count = 0
     int i = 1
-    while i < len(lines) {
+    for i < len(lines) {
         string line = lines[i]
         if has_prefix(line, "step=") {
             step = int(neurx.strings.substring(line, len("step="), len(line)))
@@ -366,12 +366,12 @@ func parse_checkpoint_lines([]string lines) checkpoint {
     }
     []tensor params = []tensor{cap: 0}
     i = 1
-    while i < len(lines) {
+    for i < len(lines) {
         string line = lines[i]
         if has_prefix(line, "param") {
             int eq_pos = -1
             int j = 0
-            while j < len(line) {
+            for j < len(line) {
                 if int(string(line[j])) == 61 {
                     eq_pos = j
                     j = len(line)
@@ -383,7 +383,7 @@ func parse_checkpoint_lines([]string lines) checkpoint {
                 string flag = neurx.strings.substring(line, eq_pos + 1, len(line))
                 int dot_pos = -1
                 j = 0
-                while j < len(head) {
+                for j < len(head) {
                     if int(string(head[j])) == 46 {
                         dot_pos = j
                         j = len(head)
@@ -399,7 +399,7 @@ func parse_checkpoint_lines([]string lines) checkpoint {
                     []int shape = []int{cap: 0}
                     []float data = []float{cap: 0}
                     int k = 0
-                    while k < len(lines) {
+                    for k < len(lines) {
                         string candidate = lines[k]
                         if has_prefix(candidate, shape_key) {
                             shape = parse_int_list(neurx.strings.substring(candidate, len(shape_key), len(candidate)))
@@ -422,7 +422,7 @@ func copy_params([]tensor params) []tensor {
     int n = len(params)
     []tensor out = []tensor{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = copy_tensor(params[i])
         i = i + 1
     }
@@ -482,7 +482,7 @@ func normalize_checkpoint_path(string path) string {
     if target == "" {
         target = "latest"
     }
-    while has_suffix(target, "/") {
+    for has_suffix(target, "/") {
         target = neurx.strings.substring(target, 0, len(target) - 1)
     }
     if has_prefix(target, "/") {

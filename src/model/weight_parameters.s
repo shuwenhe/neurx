@@ -77,7 +77,7 @@ struct weight_parameter {
 func new_parameter_metadata(string name, vec[int64] shape, parameter_dtype dtype) parameter_metadata {
     total_elements := 1
     i := 0
-    while i < shape.len() {
+    for i < shape.len() {
         total_elements = total_elements * shape[i]
         i = i + 1
     }

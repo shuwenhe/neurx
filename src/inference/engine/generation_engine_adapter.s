@@ -71,13 +71,13 @@ func new_generation_engine(int num_layers) generation_engine {
     int vocab = tok.vocab_size
     float[] emb = make([]float, vocab * hidden)
     int i = 0
-    while i < vocab && i < hidden {
+    for i < vocab && i < hidden {
         emb[i * hidden + i] = 1.0
         i = i + 1
     }
     float[] head = make([]float, hidden * vocab)
     int j = 0
-    while j < hidden && j < vocab {
+    for j < hidden && j < vocab {
         head[j * vocab + j] = 1.0
         j = j + 1
     }
@@ -103,7 +103,7 @@ func embed_token(generation_engine engine, int token_id) []float {
     }
     int base = token_id * engine.hidden_size
     int i = 0
-    while i < engine.hidden_size {
+    for i < engine.hidden_size {
         if base + i < len(engine.embedding_table) {
             hidden[i] = engine.embedding_table[base + i]
         }
@@ -119,7 +119,7 @@ func argmax_logits([]float logits, int vocab_size) int {
     float best = logits[0]
     int best_idx = 0
     int i = 1
-    while i < vocab_size {
+    for i < vocab_size {
         if logits[i] > best {
             best = logits[i]
             best_idx = i
@@ -132,10 +132,10 @@ func argmax_logits([]float logits, int vocab_size) int {
 func compute_logits([]float hidden, float[] lm_head, int hidden_size, int vocab_size) []float {
     []float logits = make([]float, vocab_size)
     int v = 0
-    while v < vocab_size {
+    for v < vocab_size {
         float acc = 0.0
         int h = 0
-        while h < hidden_size {
+        for h < hidden_size {
             acc = acc + hidden[h] * lm_head[h * vocab_size + v]
             h = h + 1
         }
@@ -149,7 +149,7 @@ func run_layer_stack(generation_engine engine, []float hidden, int position) ([]
     paged_kv_cache cache = engine.cache
     []float current = hidden
     int layer = 0
-    while layer < engine.num_layers {
+    for layer < engine.num_layers {
         ([]float out, paged_kv_cache c) = transformer_layer_forward(current, engine.weights, engine.layer_config, cache, engine.slots, position)
         current = out
         cache = c
@@ -164,7 +164,7 @@ func generate(generation_engine engine, string prompt, int max_new_tokens) gener
     engine.cache = reserve_tokens(engine.cache, len(prompt_ids) + max_new_tokens)
     []slot_mapping slots = []slot_mapping{}
     int t = 0
-    while t < len(prompt_ids) + max_new_tokens {
+    for t < len(prompt_ids) + max_new_tokens {
         int block_id = t / engine.layer_config.block_size
         int offset = t - (t / engine.layer_config.block_size) * engine.layer_config.block_size
         slots = append(slots, slot_mapping{block_id: block_id, offset_in_block: offset})
@@ -173,7 +173,7 @@ func generate(generation_engine engine, string prompt, int max_new_tokens) gener
     engine.slots = slots
     []float hidden
     int position = 0
-    while position < len(prompt_ids) {
+    for position < len(prompt_ids) {
         hidden = embed_token(engine, prompt_ids[position])
         hidden = run_layer_stack(engine, hidden, position)
         position = position + 1
@@ -182,7 +182,7 @@ func generate(generation_engine engine, string prompt, int max_new_tokens) gener
     []string token_strings = []string{}
     rng_state rng = engine.rng
     int step = 0
-    while step < max_new_tokens {
+    for step < max_new_tokens {
         if len(hidden) == 0 {
             hidden = embed_token(engine, engine.tokenizer.eos_id)
         }

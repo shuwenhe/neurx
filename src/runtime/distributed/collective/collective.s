@@ -81,7 +81,7 @@ func new_process_group(int pg_id, []int ranks, int my_rank, int backend) process
 func create_default_world_group(int world_size, int my_rank) process_group {
     []int all_ranks = []int{cap: world_size}
     int i = 0
-    while i < world_size {
+    for i < world_size {
         all_ranks[i] = i
         i = i + 1
     }
@@ -92,7 +92,7 @@ func split_process_group(process_group parent_pg, int color, int key) process_gr
     []int subgroup_ranks = []int{cap: parent_pg.world_size}
     int count = 0
     int i = 0
-    while i < len(parent_pg.ranks) {
+    for i < len(parent_pg.ranks) {
         if c_mod_nonneg(parent_pg.ranks[i], color + 1) == c_mod_nonneg(parent_pg.my_rank, color + 1) {
             subgroup_ranks[count] = parent_pg.ranks[i]
             count = count + 1
@@ -101,7 +101,7 @@ func split_process_group(process_group parent_pg, int color, int key) process_gr
     }
     []int final_ranks = []int{cap: count}
     int j = 0
-    while j < count {
+    for j < count {
         final_ranks[j] = subgroup_ranks[j]
         j = j + 1
     }
@@ -116,8 +116,8 @@ func destroy_process_group(process_group pg) {
 func c_mod_nonneg(int value, int divisor) int {
     if divisor <= 0 { return 0 }
     int current = value
-    while current >= divisor { current = current - divisor }
-    while current < 0 { current = current + divisor }
+    for current >= divisor { current = current - divisor }
+    for current < 0 { current = current + divisor }
     return current
 }
 
@@ -138,7 +138,7 @@ func make_comm_tensor([]float data, []int shape, int dtype) comm_tensor {
     t.dtype = dtype
     int n = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         n = n * shape[i]
         i = i + 1
     }
@@ -228,7 +228,7 @@ func wait_request(comm_request req) comm_request {
 
 func wait_all_requests([]comm_request requests) []comm_request {
     int i = 0
-    while i < len(requests) {
+    for i < len(requests) {
         requests[i].is_completed = true
         requests[i].elapsed_ms = 0.002
         i = i + 1
@@ -281,7 +281,7 @@ func local_identical_allreduce(process_group pg, comm_tensor tensor, int reduce_
     }
     []float out = []float{cap: tensor.numel}
     int i = 0
-    while i < tensor.numel {
+    for i < tensor.numel {
         float v = tensor.data[i]
         if reduce_op == OP_SUM {
             out[i] = v * world_size
@@ -290,7 +290,7 @@ func local_identical_allreduce(process_group pg, comm_tensor tensor, int reduce_
         } else if reduce_op == OP_PROD {
             float prod = 1.0
             int r = 0
-            while r < world_size {
+            for r < world_size {
                 prod = prod * v
                 r = r + 1
             }
@@ -320,7 +320,7 @@ func ring_allreduce_impl(
     []int chunk_sizes = []int{cap: world_size}
     int offset = 0
     int i = 0
-    while i < world_size {
+    for i < world_size {
         int sz = base_chunk_size
         if i < remainder { sz = sz + 1 }
         chunk_sizes[i] = sz
@@ -329,20 +329,20 @@ func ring_allreduce_impl(
     }
     []float output_data = []float{cap: numel}
     int k = 0
-    while k < numel {
+    for k < numel {
         output_data[k] = tensor.data[k]
         k = k + 1
     }
     int send_dst = c_mod_nonneg((rank + 1), world_size)
     int recv_src = c_mod_nonneg((rank - 1 + world_size), world_size)
     int round = 0
-    while round < world_size - 1 {
+    for round < world_size - 1 {
         int send_chunk_idx = c_mod_nonneg((rank - round + world_size), world_size)
         int recv_chunk_idx = c_mod_nonneg((rank - round - 1 + world_size), world_size)
         int send_offset = compute_chunk_offset(chunk_sizes, send_chunk_idx)
         int recv_offset = compute_chunk_offset(chunk_sizes, recv_chunk_idx)
         int j = 0
-        while j < chunk_sizes[recv_chunk_idx] {
+        for j < chunk_sizes[recv_chunk_idx] {
             int idx = recv_offset + j
             float neighbor_val = output_data[idx]
             output_data[idx] = apply_reduce_op(output_data[idx], neighbor_val, reduce_op)
@@ -351,13 +351,13 @@ func ring_allreduce_impl(
         round = round + 1
     }
     round = 0
-    while round < world_size - 1 {
+    for round < world_size - 1 {
         int send_chunk_idx = c_mod_nonneg((rank - round + 1 + world_size), world_size)
         int recv_chunk_idx = c_mod_nonneg((rank - round + world_size), world_size)
         int send_offset = compute_chunk_offset(chunk_sizes, send_chunk_idx)
         int recv_offset = compute_chunk_offset(chunk_sizes, recv_chunk_idx)
         int j = 0
-        while j < chunk_sizes[recv_chunk_idx] {
+        for j < chunk_sizes[recv_chunk_idx] {
             output_data[recv_offset + j] = output_data[recv_offset + j]
             j = j + 1
         }
@@ -378,17 +378,17 @@ func tree_allreduce_impl(
     if world_size <= 1 { return tensor }
     []float output_data = []float{cap: numel}
     int k = 0
-    while k < numel {
+    for k < numel {
         output_data[k] = tensor.data[k]
         k = k + 1
     }
     int step = 1
-    while step < world_size {
+    for step < world_size {
         int partner = rank + step
         if partner < world_size && c_mod_nonneg(rank, step) == 0 {
             if rank < partner {
                 int j = 0
-                while j < numel {
+                for j < numel {
                     float partner_val = output_data[j]
                     output_data[j] = apply_reduce_op(output_data[j], partner_val, reduce_op)
                     j = j + 1
@@ -398,7 +398,7 @@ func tree_allreduce_impl(
         step = step * 2
     }
     step = step / 2
-    while step > 0 {
+    for step > 0 {
         int partner = rank + step
         if partner < world_size && c_mod_nonneg(rank, step) == 0 {
             if rank < partner {
@@ -423,16 +423,16 @@ func allgather(
     []float gathered_data = []float{cap: total_numel}
     int local_start = rank * numel
     int i = 0
-    while i < numel {
+    for i < numel {
         gathered_data[local_start + i] = tensor.data[i]
         i = i + 1
     }
     int r = 0
-    while r < world_size {
+    for r < world_size {
         if r != rank {
             int remote_start = r * numel
             int j = 0
-            while j < numel {
+            for j < numel {
                 gathered_data[remote_start + j] = tensor.data[j]
                 j = j + 1
             }
@@ -445,7 +445,7 @@ func allgather(
     if len(tensor.shape) > 0 {
         result.shape[0] = tensor.shape[0] * world_size
         int s = 1
-        while s < len(tensor.shape) {
+        for s < len(tensor.shape) {
             result.shape = append(result.shape, tensor.shape[s])
             s = s + 1
         }
@@ -478,7 +478,7 @@ func reducescatter(
     []float scattered_data = []float{cap: my_count}
     comm_tensor reduced = local_identical_allreduce(pg, tensor, reduce_op)
     int i = 0
-    while i < my_count {
+    for i < my_count {
         if my_start + i < total_numel {
             scattered_data[i] = reduced.data[my_start + i]
         }
@@ -511,7 +511,7 @@ func scatter(
     int my_count = my_end - my_start
     []float my_data = []float{cap: my_count}
     int i = 0
-    while i < my_count {
+    for i < my_count {
         my_data[i] = tensor.data[my_start + i]
         i = i + 1
     }
@@ -536,10 +536,10 @@ func gather(
         int total_numel = numel * world_size
         []float gathered = []float{cap: total_numel}
         int r = 0
-        while r < world_size {
+        for r < world_size {
             int offset = r * numel
             int i = 0
-            while i < numel {
+            for i < numel {
                 if r == rank {
                     gathered[offset + i] = tensor.data[i]
                 } else {
@@ -573,11 +573,11 @@ func alltoall(
     int dtype_sz = dtype_bytes(tensor.dtype)
     []float out_data = []float{cap: total_numel}
     int j = 0
-    while j < world_size {
+    for j < world_size {
         int src_start = j * chunk_size
         int dst_start = rank * chunk_size
         int k = 0
-        while k < chunk_size {
+        for k < chunk_size {
             if src_start + k < total_numel && dst_start + k < total_numel {
                 out_data[dst_start + k] = tensor.data[src_start + k]
             }
@@ -661,7 +661,7 @@ func apply_reduce_op(float a, float b, int op) float {
 func compute_chunk_offset([]int chunk_sizes, int chunk_idx) int {
     int offset = 0
     int i = 0
-    while i < chunk_idx {
+    for i < chunk_idx {
         offset = offset + chunk_sizes[i]
         i = i + 1
     }

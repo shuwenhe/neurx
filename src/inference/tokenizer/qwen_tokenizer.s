@@ -13,7 +13,7 @@ func init_tokenizer() tokenizer {
 func hash_word(string word) int {
     int hash = 0
     int i = 0
-    while i < len(word) {
+    for i < len(word) {
         hash = (hash * 31 + (word[i * 1] as int)) % 150000
         i = i + 1
     }
@@ -48,7 +48,7 @@ func tokenize(tokenizer tok, string text) []int {
 
     string current_word = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = __host_slice(text, i, i + 1)
 
         if ch == " " || ch == "." || ch == "," || ch == "!" {
@@ -81,7 +81,7 @@ func tokenize(tokenizer tok, string text) []int {
 
     []int result = []int{cap: token_count}
     int j = 0
-    while j < token_count {
+    for j < token_count {
         result[j] = tokens[j]
         j = j + 1
     }
@@ -92,7 +92,7 @@ func tokenize(tokenizer tok, string text) []int {
 func decode_tokens(tokenizer tok, []int token_ids) string {
     string result = ""
     int i = 0
-    while i < len(token_ids) {
+    for i < len(token_ids) {
         int token_id = token_ids[i]
         string token_str = "["
         token_str = token_str + int_to_string(token_id)
@@ -115,7 +115,7 @@ func int_to_string(int value) string {
     string result = ""
     int current = value
     if current < 0 { current = 0 - current }
-    while current > 0 {
+    for current > 0 {
         int digit = current - (current / 10) * 10
         if digit == 0 { result = "0" + result }
         else if digit == 1 { result = "1" + result }

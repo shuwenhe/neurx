@@ -52,10 +52,10 @@ func create_lora_linear(int in_dim, int out_dim, int rank, float alpha, float dr
 func lora_linear_forward(lora_linear layer, []float input) []float {
     []float output = fill_model_tensor(layer.out_dim, 0.0)
     int out_idx = 0
-    while out_idx < layer.out_dim {
+    for out_idx < layer.out_dim {
         float sum = 0.0
         int in_idx = 0
-        while in_idx < layer.in_dim && in_idx < len(input) {
+        for in_idx < layer.in_dim && in_idx < len(input) {
             int w_idx = out_idx * layer.in_dim + in_idx
             if w_idx < len(layer.base_weight) {
                 sum = sum + input[in_idx] * layer.base_weight[w_idx]
@@ -63,10 +63,10 @@ func lora_linear_forward(lora_linear layer, []float input) []float {
             in_idx = in_idx + 1
         }
         int r = 0
-        while r < layer.rank {
+        for r < layer.rank {
             float lora_out = 0.0
             int in_idx = 0
-            while in_idx < layer.in_dim && in_idx < len(input) {
+            for in_idx < layer.in_dim && in_idx < len(input) {
                 int a_idx = r * layer.in_dim + in_idx
                 if a_idx < len(layer.lora_a) {
                     lora_out = lora_out + input[in_idx] * layer.lora_a[a_idx]
@@ -88,7 +88,7 @@ func lora_linear_forward(lora_linear layer, []float input) []float {
 func lora_linear_backward(lora_linear layer, []float input, []float grad_output) float {
     float loss = 0.0
     int out_idx = 0
-    while out_idx < len(grad_output) {
+    for out_idx < len(grad_output) {
         loss = loss + grad_output[out_idx] * grad_output[out_idx]
         out_idx = out_idx + 1
     }
@@ -97,12 +97,12 @@ func lora_linear_backward(lora_linear layer, []float input, []float grad_output)
 
 func update_lora_weights(lora_linear layer, []float gradients, float learning_rate) lora_linear {
     int i = 0
-    while i < len(layer.lora_a) && i < len(gradients) {
+    for i < len(layer.lora_a) && i < len(gradients) {
         layer.lora_a[i] = layer.lora_a[i] - learning_rate * gradients[i]
         i = i + 1
     }
     i = 0
-    while i < len(layer.lora_b) && i < len(gradients) {
+    for i < len(layer.lora_b) && i < len(gradients) {
         int offset = len(layer.lora_a)
         if offset + i < len(gradients) {
             layer.lora_b[i] = layer.lora_b[i] - learning_rate * gradients[offset + i]
@@ -127,7 +127,7 @@ func create_lora_adapter(int num_layers, int hidden_size, int intermediate_size,
     adapter.up_proj_lora = []lora_linear{}
     adapter.down_proj_lora = []lora_linear{}
     int i = 0
-    while i < num_layers {
+    for i < num_layers {
         adapter.q_proj_lora.push(create_lora_linear(hidden_size, hidden_size, rank, alpha, dropout_rate))
         adapter.k_proj_lora.push(create_lora_linear(hidden_size, hidden_size, rank, alpha, dropout_rate))
         adapter.v_proj_lora.push(create_lora_linear(hidden_size, hidden_size, rank, alpha, dropout_rate))
@@ -143,13 +143,13 @@ func create_lora_adapter(int num_layers, int hidden_size, int intermediate_size,
 func get_total_lora_params(lora_adapter adapter) int {
     int total = 0
     int i = 0
-    while i < len(adapter.q_proj_lora) {
+    for i < len(adapter.q_proj_lora) {
         total = total + adapter.q_proj_lora[i].rank * adapter.q_proj_lora[i].in_dim
         total = total + adapter.q_proj_lora[i].out_dim * adapter.q_proj_lora[i].rank
         i = i + 1
     }
     i = 0
-    while i < len(adapter.v_proj_lora) {
+    for i < len(adapter.v_proj_lora) {
         total = total + adapter.v_proj_lora[i].rank * adapter.v_proj_lora[i].in_dim
         total = total + adapter.v_proj_lora[i].out_dim * adapter.v_proj_lora[i].rank
         i = i + 1

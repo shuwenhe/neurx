@@ -164,7 +164,7 @@ func (reasoning_manager* mgr) cleanup_completed_chains() int {
     }
 
     i := 0
-    while i < len(to_delete) {
+    for i < len(to_delete) {
         delete(mgr.chains, to_delete[i])
         i = i + 1
     }
@@ -176,7 +176,7 @@ func (reasoning_manager* mgr) save_to_history(string chain_id, reasoning_chain c
     step_history := map[string]string{}
 
     i := 0
-    while i < len(chain.steps) {
+    for i < len(chain.steps) {
         step := chain.steps[i]
         key := "step_" + string(i)
         step_history[key] = step.format_step()
@@ -223,7 +223,7 @@ func (reasoning_manager* mgr) batch_start_reasoning([]string prompts, cot_config
     chains := []reasoning_chain{}
 
     i := 0
-    while i < len(prompts) {
+    for i < len(prompts) {
         chain := mgr.start_reasoning_chain(prompts[i], config)
         chains = append(chains, chain)
         i = i + 1

@@ -17,11 +17,11 @@ struct command_args {
 
 func ops_trim(string s) string {
     int left := 0
-    while left < len(s) && (s[left] == 32 || s[left] == 9 || s[left] == 10 || s[left] == 13) {
+    for left < len(s) && (s[left] == 32 || s[left] == 9 || s[left] == 10 || s[left] == 13) {
         left = left + 1
     }
     int right := len(s) - 1
-    while right >= left && (s[right] == 32 || s[right] == 9 || s[right] == 10 || s[right] == 13) {
+    for right >= left && (s[right] == 32 || s[right] == 9 || s[right] == 10 || s[right] == 13) {
         right = right - 1
     }
     if right < left {
@@ -29,7 +29,7 @@ func ops_trim(string s) string {
     }
     string out := ""
     int i := left
-    while i <= right {
+    for i <= right {
         out = out + chr(s[i])
         i = i + 1
     }
@@ -40,7 +40,7 @@ func ops_split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current := ""
     int i := 0
-    while i < len(text) {
+    for i < len(text) {
         int ch := text[i]
         if ch == 10 {
             lines.push(current)
@@ -59,7 +59,7 @@ func ops_split_lines(string text) []string {
 func ops_hash(string text) int {
     int h := 5381
     int i := 0
-    while i < len(text) {
+    for i < len(text) {
         h = h * 33 + int(text[i]) + i
         i = i + 1
     }
@@ -81,7 +81,7 @@ func ops_extract_json_string(string text, string key) string {
     string needle := "\"" + key + "\""
     int start := -1
     int i := 0
-    while i + len(needle) <= len(text) {
+    for i + len(needle) <= len(text) {
         if text[i:i+len(needle)] == needle {
             start = i + len(needle)
             break
@@ -91,7 +91,7 @@ func ops_extract_json_string(string text, string key) string {
     if start < 0 {
         return ""
     }
-    while start < len(text) && text[start] != 34 {
+    for start < len(text) && text[start] != 34 {
         start = start + 1
     }
     if start >= len(text) {
@@ -99,7 +99,7 @@ func ops_extract_json_string(string text, string key) string {
     }
     start = start + 1
     int end := start
-    while end < len(text) && text[end] != 34 {
+    for end < len(text) && text[end] != 34 {
         end = end + 1
     }
     if end <= start {
@@ -112,7 +112,7 @@ func ops_extract_json_float(string text, string key, float64 fallback) float64 {
     string needle := "\"" + key + "\""
     int start := -1
     int i := 0
-    while i + len(needle) <= len(text) {
+    for i + len(needle) <= len(text) {
         if text[i:i+len(needle)] == needle {
             start = i + len(needle)
             break
@@ -122,7 +122,7 @@ func ops_extract_json_float(string text, string key, float64 fallback) float64 {
     if start < 0 {
         return fallback
     }
-    while start < len(text) && text[start] != 58 {
+    for start < len(text) && text[start] != 58 {
         start = start + 1
     }
     if start >= len(text) {
@@ -130,7 +130,7 @@ func ops_extract_json_float(string text, string key, float64 fallback) float64 {
     }
     start = start + 1
     string num := ""
-    while start < len(text) {
+    for start < len(text) {
         int ch := text[start]
         if (ch >= 48 && ch <= 57) || ch == 46 || ch == 45 {
             num = num + chr(ch)
@@ -153,9 +153,9 @@ func ops_overlap_score(string left, string right) float64 {
     []string right_words = ops_split_lines(right)
     int matches := 0
     int i := 0
-    while i < len(left_words) {
+    for i < len(left_words) {
         int j := 0
-        while j < len(right_words) {
+        for j < len(right_words) {
             if ops_trim(left_words[i]) != "" && left_words[i] == right_words[j] {
                 matches = matches + 1
                 break
@@ -204,7 +204,7 @@ func int_to_string(int n) string {
         value = -value
     }
     string out := ""
-    while value > 0 {
+    for value > 0 {
         int digit := value % 10
         out = chr(digit + 48) + out
         value = value / 10
@@ -254,7 +254,7 @@ func dpo_execute_from_jsonl(string preference_path, string output_dir) industria
     float64 avg_loss := 0.0
     string report := "DPO run\ninput=" + preference_path + "\n"
     int i := 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line := ops_trim(lines[i])
         if line == "" {
             i = i + 1
@@ -296,7 +296,7 @@ func rag_execute_from_corpus(string corpus_path, string query, string output_dir
     int selected_count := 0
     float64 best_score := 0.0
     int i := 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line := ops_trim(lines[i])
         if line == "" {
             i = i + 1
@@ -316,7 +316,7 @@ func rag_execute_from_corpus(string corpus_path, string query, string output_dir
     }
     string context := "Query: " + query + "\n"
     int j := 0
-    while j < selected_count {
+    for j < selected_count {
         context = context + "- " + selected[j] + "\n"
         j = j + 1
     }
@@ -341,7 +341,7 @@ func governance_execute_from_dataset(string dataset_path, string output_dir) ind
     []int seen_hashes := []int{cap: 2048}
     int seen_count := 0
     int i := 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line := ops_trim(lines[i])
         if line == "" {
             i = i + 1
@@ -353,7 +353,7 @@ func governance_execute_from_dataset(string dataset_path, string output_dir) ind
         int h := ops_positive_mod(ops_hash(line), 2048)
         bool duplicate := false
         int j := 0
-        while j < seen_count {
+        for j < seen_count {
             if seen_hashes[j] == h {
                 duplicate = true
                 break
@@ -424,12 +424,12 @@ func ops_parse_args([]string args) command_args {
     string command := args[1]
     map[string]string options := map[string]string{}
     int i := 2
-    while i < len(args) {
+    for i < len(args) {
         string arg := args[i]
         if len(arg) > 2 && arg[0] == 45 && arg[1] == 45 {
             int eq := -1
             int j := 2
-            while j < len(arg) {
+            for j < len(arg) {
                 if arg[j] == 61 {
                     eq = j
                     break

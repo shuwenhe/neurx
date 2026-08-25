@@ -275,7 +275,7 @@ func clean_build_artifacts() {
 
 func str_len(string s) int {
     int n = 0
-    while n < 1000000 && s[n] != 0 {
+    for n < 1000000 && s[n] != 0 {
         n = n + 1
     }
     n
@@ -284,11 +284,11 @@ func str_len(string s) int {
 func trim(string s) string {
     int i = 0
     int len = str_len(s)
-    while i < len && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < len && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
     int j = len - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
     if j < i {
@@ -300,7 +300,7 @@ func trim(string s) string {
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
-    while i < end && i < str_len(s) {
+    for i < end && i < str_len(s) {
         out = out + string_char(s[i])
         i = i + 1
     }
@@ -321,10 +321,10 @@ func contains_string(string haystack, string needle) bool {
         return false
     }
     int i = 0
-    while i <= h_len - n_len {
+    for i <= h_len - n_len {
         int j = 0
         bool match = true
-        while j < n_len {
+        for j < n_len {
             if haystack[i + j] != needle[j] {
                 match = false
                 j = n_len
@@ -351,7 +351,7 @@ func to_lower(string s) string {
     string out = ""
     int i = 0
     int len = str_len(s)
-    while i < len {
+    for i < len {
         int c = s[i]
         if c >= 65 && c <= 90 {
             c = c + 32

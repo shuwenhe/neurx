@@ -95,7 +95,7 @@ func (prompt_engineer* pe) get_checkpoint_prompt([]string previous_steps, string
     string prompt = "Checkpoint - Current understanding:\n"
 
     i := 0
-    while i < len(previous_steps) {
+    for i < len(previous_steps) {
         prompt = prompt + "  Step " + string(i+1) + ": " + previous_steps[i] + "\n"
         i = i + 1
     }
@@ -128,7 +128,7 @@ func (prompt_engineer* pe) get_summary_prompt([]string steps) string {
     string prompt = pe.templates["summary_prefix"]
 
     i := 0
-    while i < len(steps) {
+    for i < len(steps) {
         prompt = prompt + "- Step " + string(i+1) + ": " + steps[i] + "\n"
         i = i + 1
     }
@@ -180,7 +180,7 @@ func (prompt_engineer* pe) generate_full_reasoning_prompt(string user_prompt, []
     string prompt = pe.get_initial_prompt(user_prompt)
 
     i := 0
-    while i < len(previous_steps) {
+    for i < len(previous_steps) {
         prompt = prompt + "\nStep " + string(i+1) + ": " + previous_steps[i]
 
         if include_checkpoints && i > 0 && i % pe.config.checkpoint_interval == 0 {
@@ -205,7 +205,7 @@ func (prompt_engineer* pe) validate_reasoning_consistency([]string steps) bool {
     }
 
     i := 1
-    while i < len(steps) {
+    for i < len(steps) {
         if steps[i] == "" {
             return false
         }

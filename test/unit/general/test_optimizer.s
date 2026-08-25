@@ -107,7 +107,7 @@ func test_scheduler_step_advancement() {
     warmup_steps := 1000
     total_steps := 10000
     step := 0
-    while step < 1000 {
+    for step < 1000 {
         step = step + 1
     }
     if step == 1000 {

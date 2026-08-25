@@ -57,7 +57,7 @@ func optimize_graph_progressive(optimization_pipeline pipeline, ir_graph input_g
     int max_iterations = 5
     int iteration = 0
     int prev_node_count = 0
-    while iteration < max_iterations {
+    for iteration < max_iterations {
         int before_nodes = 0
         result = apply_elimination_passes(result, pipeline.elim_cfg)
         result = apply_memory_passes(result, pipeline.mem_cfg)

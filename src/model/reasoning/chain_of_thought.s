@@ -146,14 +146,14 @@ func step_by_step_reasoning(cot_state state, []int input_tokens, int seq_len) re
     []int current_input = math.copy_int(input_tokens)
     []thought_step steps = []thought_step{cap: config.max_steps}
     int step = 0
-    while step < config.max_steps {
+    for step < config.max_steps {
         []int next_tokens = generate_next_step(current_input, seq_len + step * 64, config)
         float confidence = compute_confidence(next_tokens, config)
         float reward = compute_reward(next_tokens, config)
         thought_step ts = new_thought_step(next_tokens, confidence, reward, step, confidence >= config.confidence_threshold)
         steps.push(ts)
         int i = 0
-        while i < len(next_tokens) {
+        for i < len(next_tokens) {
             current_input.push(next_tokens[i])
             i = i + 1
         }
@@ -164,7 +164,7 @@ func step_by_step_reasoning(cot_state state, []int input_tokens, int seq_len) re
     }
     float total_confidence = 0.0
     int i = 0
-    while i < len(steps) {
+    for i < len(steps) {
         total_confidence = total_confidence + steps[i].confidence
         i = i + 1
     }
@@ -184,7 +184,7 @@ func generate_next_step([]int input_tokens, int seq_len, cot_config config) []in
     int output_len = 64
     []int next_tokens = math.allocate_int(output_len, 0)
     int i = 0
-    while i < output_len {
+    for i < output_len {
         float rand_val = float(i) / float(output_len)
         next_tokens[i] = int(rand_val * 1000.0)
         i = i + 1
@@ -206,7 +206,7 @@ func compute_reward([]int tokens, cot_config config) float {
 func compute_final_score([]thought_step steps, cot_config config) float {
     float score = 0.0
     int i = 0
-    while i < len(steps) {
+    for i < len(steps) {
         score = score + steps[i].confidence * steps[i].reward
         i = i + 1
     }
@@ -217,14 +217,14 @@ func self_consistency_reasoning(cot_state state, []int input_tokens, int seq_len
     cot_config config = state.config
     []reasoning_result samples = []reasoning_result{cap: config.num_samples}
     int sample = 0
-    while sample < config.num_samples {
+    for sample < config.num_samples {
         reasoning_result result = step_by_step_reasoning(state, input_tokens, seq_len)
         samples.push(result)
         sample = sample + 1
     }
     []float confidences = math.allocate_float(config.num_samples, 0.0)
     int i = 0
-    while i < len(samples) {
+    for i < len(samples) {
         confidences[i] = samples[i].confidence
         i = i + 1
     }
@@ -232,7 +232,7 @@ func self_consistency_reasoning(cot_state state, []int input_tokens, int seq_len
     int best_idx = 0
     float best_score = -1e10
     i = 0
-    while i < len(samples) {
+    for i < len(samples) {
         float weighted_score = weights[i] * samples[i].score
         if weighted_score > best_score {
             best_score = weighted_score
@@ -259,9 +259,9 @@ func compute_consistency([]reasoning_result samples, cot_config config) float {
     float total_similarity = 0.0
     int count = 0
     int i = 0
-    while i < len(samples) {
+    for i < len(samples) {
         int j = i + 1
-        while j < len(samples) {
+        for j < len(samples) {
             float similarity = compute_sequence_similarity(samples[i].final_tokens, samples[j].final_tokens)
             total_similarity = total_similarity + similarity
             count = count + 1
@@ -279,7 +279,7 @@ func compute_sequence_similarity([]int a, []int b) float {
     int common = 0
     int max_len = math.max_int(len(a), len(b))
     int i = 0
-    while i < len(a) && i < len(b) {
+    for i < len(a) && i < len(b) {
         if a[i] == b[i] {
             common = common + 1
         }
@@ -294,7 +294,7 @@ func tree_search_reasoning(cot_state state, []int input_tokens, int seq_len) rea
     []int best_path = select_best_path(root)
     []int final_tokens = math.copy_int(input_tokens)
     int i = 0
-    while i < len(best_path) {
+    for i < len(best_path) {
         final_tokens.push(best_path[i])
         i = i + 1
     }
@@ -324,7 +324,7 @@ func expand_tree(reasoning_tree node, []int input_tokens, int seq_len, cot_confi
     []int next_tokens = generate_next_step(input_tokens, seq_len, config)
     ([]int top_tokens, []float top_probs) = math.top_k_select(next_tokens, len(next_tokens), config.tree_width)
     int i = 0
-    while i < len(top_tokens) {
+    for i < len(top_tokens) {
         float adjusted_prob = top_probs[i]
         if config.temperature > 0 {
             adjusted_prob = math.exp_approx(math.log_approx(top_probs[i]) / config.temperature)
@@ -341,11 +341,11 @@ func expand_tree(reasoning_tree node, []int input_tokens, int seq_len, cot_confi
 func select_best_path(reasoning_tree root) []int {
     []int path = []int{cap: 10}
     reasoning_tree curr = root
-    while len(curr.children) > 0 {
+    for len(curr.children) > 0 {
         float best_score = -1e10
         int best_idx = -1
         int i = 0
-        while i < len(curr.children) {
+        for i < len(curr.children) {
             if curr.children[i].score > best_score {
                 best_score = curr.children[i].score
                 best_idx = i
@@ -368,12 +368,12 @@ func decomposition_reasoning(cot_state state, []int input_tokens, int seq_len) r
     []int final_tokens = math.copy_int(input_tokens)
     []thought_step steps = []thought_step{cap: 10}
     int i = 0
-    while i < len(decomp.sub_problems) {
+    for i < len(decomp.sub_problems) {
         int sub_idx = decomp.sub_problem_order[i]
         []int sub_input = math.copy_int(input_tokens)
         reasoning_result sub_result = step_by_step_reasoning(state, sub_input, seq_len)
         int j = 0
-        while j < len(sub_result.final_tokens) {
+        for j < len(sub_result.final_tokens) {
             final_tokens.push(sub_result.final_tokens[j])
             j = j + 1
         }
@@ -384,7 +384,7 @@ func decomposition_reasoning(cot_state state, []int input_tokens, int seq_len) r
     }
     float total_confidence = 0.0
     i = 0
-    while i < len(steps) {
+    for i < len(steps) {
         total_confidence = total_confidence + steps[i].confidence
         i = i + 1
     }
@@ -408,7 +408,7 @@ func decompose_problem([]int input_tokens, cot_config config) decomposition_resu
         sub_problem_order: math.allocate_int(num_sub_problems, 0),
     }
     int i = 0
-    while i < num_sub_problems {
+    for i < num_sub_problems {
         decomp.sub_problems.push("sub_problem_" + string(i))
         decomp.sub_problem_difficulty[i] = float(i) / float(num_sub_problems)
         decomp.sub_problem_order[i] = i
@@ -422,7 +422,7 @@ func reflection_reasoning(cot_state state, []int input_tokens, int seq_len) reas
     []int current_tokens = math.copy_int(input_tokens)
     []reflection_result reflections = []reflection_result{cap: config.num_reflection_rounds}
     int round_idx = 0
-    while round_idx < config.num_reflection_rounds {
+    for round_idx < config.num_reflection_rounds {
         []int original_tokens = math.copy_int(current_tokens)
         reasoning_result initial_result = step_by_step_reasoning(state, current_tokens, seq_len)
         []int revised_tokens = revise_reasoning(initial_result, config)
@@ -459,7 +459,7 @@ func revise_reasoning(reasoning_result result, cot_config config) []int {
     []int revised = math.copy_int(result.final_tokens)
     float noise = 0.01
     int i = 0
-    while i < len(revised) {
+    for i < len(revised) {
         if float(i) / float(len(revised)) > 0.5 {
             revised[i] = revised[i] + int(noise * 100.0)
         }
@@ -497,7 +497,7 @@ func multi_part_reasoning(cot_state state, []int input_tokens, int seq_len) reas
     decomposition_result decomp = decompose_problem(input_tokens, state.config)
     []reasoning_result results = []reasoning_result{cap: len(decomp.sub_problems)}
     int i = 0
-    while i < len(decomp.sub_problems) {
+    for i < len(decomp.sub_problems) {
         reasoning_result result = self_consistency_reasoning(state, input_tokens, seq_len)
         results.push(result)
         i = i + 1
@@ -506,9 +506,9 @@ func multi_part_reasoning(cot_state state, []int input_tokens, int seq_len) reas
     float total_confidence = 0.0
     int total_steps = 0
     i = 0
-    while i < len(results) {
+    for i < len(results) {
         int j = 0
-        while j < len(results[i].final_tokens) {
+        for j < len(results[i].final_tokens) {
             final_tokens.push(results[i].final_tokens[j])
             j = j + 1
         }
@@ -540,7 +540,7 @@ func cot_get_best_result(cot_state state) reasoning_result {
         is_consistent: false,
     }
     int i = 0
-    while i < len(state.steps) {
+    for i < len(state.steps) {
         float step_score = state.steps[i].confidence * state.steps[i].reward
         if step_score > best_score {
             best_score = step_score

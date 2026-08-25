@@ -21,7 +21,7 @@ func agent_summarize_to_result(string text, int max_chars) agent_summary_result 
     }
     string out = ""
     int i = 0
-    while i < max_chars {
+    for i < max_chars {
         out = out + string(text[i])
         i = i + 1
     }
@@ -49,7 +49,7 @@ func agent_summarize_count_sentences(string text) int {
     int count = 0
     int i = 0
     int n = len(text)
-    while i < n - 1 {
+    for i < n - 1 {
         if string(text[i]) == "." {
             if string(text[i + 1]) == " " {
                 count = count + 1
@@ -65,7 +65,7 @@ func agent_summarize_first_sentence(string text) string {
     int i = 0
     int n = len(text)
     bool done = false
-    while i < n {
+    for i < n {
         out = out + string(text[i])
         if string(text[i]) == "." {
             done = true
@@ -88,10 +88,10 @@ func agent_summarize_keyword_line(string text, string keyword) string {
         return ""
     }
     int i = 0
-    while i <= hl - kl {
+    for i <= hl - kl {
         int j = 0
         bool match = true
-        while j < kl {
+        for j < kl {
             if haystack[i + j] != kw[j] {
                 match = false
                 break
@@ -109,7 +109,7 @@ func agent_summarize_keyword_line(string text, string keyword) string {
             }
             string snippet = ""
             int k = start
-            while k < end {
+            for k < end {
                 snippet = snippet + string(text[k])
                 k = k + 1
             }

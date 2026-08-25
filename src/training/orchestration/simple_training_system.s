@@ -57,14 +57,14 @@ func initialize_simple_model(simple_config cfg) simple_model {
     int out_size = cfg.vocab_size * cfg.hidden_dim
     []float embeddings = []
     int i = 0
-    while i < emb_size {
+    for i < emb_size {
         float val = simple_randn(i) * 0.02
         embeddings = append(embeddings, val)
         i = i + 1
     }
     []float output_weights = []
     i = 0
-    while i < out_size {
+    for i < out_size {
         float val = simple_randn(i + emb_size) * 0.02
         output_weights = append(output_weights, val)
         i = i + 1
@@ -82,7 +82,7 @@ func initialize_simple_optimizer(simple_model model, simple_config cfg) simple_o
     []float momentum = []
     []float variance = []
     int i = 0
-    while i < total_params {
+    for i < total_params {
         momentum = append(momentum, 0.0)
         variance = append(variance, 0.0)
         i = i + 1
@@ -103,7 +103,7 @@ func simple_forward(simple_model model, []int input_ids, simple_config cfg) floa
     float total_loss = 0.0
     int num_tokens = batch_size * seq_len
     int t = 0
-    while t < num_tokens {
+    for t < num_tokens {
         int token_id = input_ids[t]
         if token_id < 0 || token_id >= vocab_size {
             token_id = 0
@@ -112,12 +112,12 @@ func simple_forward(simple_model model, []int input_ids, simple_config cfg) floa
         float correct_logit = 0.0
         float sum_exp = 0.0
         int v = 0
-        while v < vocab_size {
+        for v < vocab_size {
             int emb_idx = token_id * hidden_dim
             int out_idx = v * hidden_dim
             float logit = 0.0
             int h = 0
-            while h < hidden_dim {
+            for h < hidden_dim {
                 if emb_idx + h < len(model.embeddings) && out_idx + h < len(model.output_weights) {
                     logit = logit + model.embeddings[emb_idx + h] * model.output_weights[out_idx + h]
                 }
@@ -142,7 +142,7 @@ func simple_backward(simple_model model, float loss) []float {
     int total_params = len(model.embeddings) + len(model.output_weights)
     []float gradients = []
     int i = 0
-    while i < total_params {
+    for i < total_params {
         float grad = 0.0
         if i < len(model.embeddings) {
             grad = model.embeddings[i] * 0.01
@@ -168,7 +168,7 @@ func simple_optimizer_step(simple_optimizer opt, []float gradients, simple_model
     float bias_correction1 = 1.0 - pow_approx(beta1, float(step))
     float bias_correction2 = 1.0 - pow_approx(beta2, float(step))
     int i = 0
-    while i < len(gradients) {
+    for i < len(gradients) {
         float grad = gradients[i]
         opt.momentum[i] = beta1 * opt.momentum[i] + (1.0 - beta1) * grad
         opt.variance[i] = beta2 * opt.variance[i] + (1.0 - beta2) * grad * grad
@@ -198,10 +198,10 @@ func simple_training_loop(simple_config cfg) {
     println("Starting training...")
     println("")
     int step = 0
-    while step < cfg.max_steps {
+    for step < cfg.max_steps {
         []int dummy_input = []
         int i = 0
-        while i < cfg.batch_size * cfg.max_seq_len {
+        for i < cfg.batch_size * cfg.max_seq_len {
             int token = simple_rand(step * 1000 + i) / (cfg.vocab_size + 1)
             if token < 0 {
                 token = 0
@@ -263,7 +263,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int n = 1
-    while n < 10 {
+    for n < 10 {
         term = term * x / float(n)
         result = result + term
         n = n + 1
@@ -283,7 +283,7 @@ func log_approx(float x) float {
     float result = 0.0
     float term = y
     int n = 1
-    while n < 10 {
+    for n < 10 {
         result = result + term / float(n)
         term = term * y2
         n = n + 2
@@ -297,7 +297,7 @@ func sqrt_approx(float x) float {
     }
     float guess = x / 2.0
     int i = 0
-    while i < 10 {
+    for i < 10 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }

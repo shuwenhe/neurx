@@ -61,7 +61,7 @@ func init_distributed_env() distributed_env {
 func parse_int(string s) int {
     int result = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         byte b = s[i]
         if b >= '0' && b <= '9' {
             result = result * 10 + int(b - '0')
@@ -123,7 +123,7 @@ func generate_shard_distribution(
     []string my_shards = []string{cap: (len(all_shards) / world_size) + 1}
     int shard_idx = 0
     int i = rank
-    while i < len(all_shards) {
+    for i < len(all_shards) {
         my_shards[shard_idx] = all_shards[i]
         shard_idx = shard_idx + 1
         i = i + world_size
@@ -134,7 +134,7 @@ func generate_shard_distribution(
 func load_shard_list(string config_path) []string {
     []string shards = []string{cap: 5131}
     int i = 0
-    while i < 5131 {
+    for i < 5131 {
         string shard_path = format_string(
             "dataset/pretrain/shard/shard_%05d.jsonl",
             i,
@@ -159,7 +159,7 @@ func (distributed_pretrain_launcher* launcher) sync_gradients_nccl(
     int world_size = launcher.env.world_size
     int i = 0
     []float averaged_grads = []float{cap: len(reduced_grads)}
-    while i < len(reduced_grads) {
+    for i < len(reduced_grads) {
         averaged_grads[i] = reduced_grads[i] / float(world_size)
         i = i + 1
     }
@@ -207,7 +207,7 @@ func itoa(int n) string {
         s = "-"
         num = -num
     }
-    while num > 0 {
+    for num > 0 {
         byte digit = byte('0' + (num % 10))
         s = string(digit) + s
         num = num / 10

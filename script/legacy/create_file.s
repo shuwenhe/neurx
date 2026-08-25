@@ -5,14 +5,14 @@ use std.io.println
 func parent_path(string path) string {
     int slash = -1
     int i = 0
-    while i < len(path) {
+    for i < len(path) {
         if path[i] == 47 { slash = i }
         i = i + 1
     }
     if slash <= 0 { return "." }
     string out = ""
     i = 0
-    while i < slash {
+    for i < slash {
         out = out + string_char(path[i])
         i = i + 1
     }

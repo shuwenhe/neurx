@@ -16,7 +16,7 @@ func list_ir_files() []string {
     int n = len(manifest)
     string current_line = ""
     int i = 0
-    while i < n {
+    for i < n {
         string ch = neurx.strings.substring(manifest, i, i + 1)
         int chi = int(string(ch))
         if chi == 10 {
@@ -24,7 +24,7 @@ func list_ir_files() []string {
             bool has_dot_ir = false
             int slen = len(s)
             int k = 0
-            while k < slen - 2 {
+            for k < slen - 2 {
                 string c1 = neurx.strings.substring(s, k, k + 1)
                 string c2 = neurx.strings.substring(s, k + 1, k + 2)
                 string c3 = neurx.strings.substring(s, k + 2, k + 3)
@@ -56,7 +56,7 @@ func trim_simple(string s) string {
     }
     int start = 0
     int end = n
-    while start < end {
+    for start < end {
         string fc = neurx.strings.substring(s, start, start + 1)
         int fci = int(string(fc))
         if fci == 32 || fci == 9 || fci == 34 {
@@ -65,7 +65,7 @@ func trim_simple(string s) string {
             break
         }
     }
-    while end > start {
+    for end > start {
         string lc = neurx.strings.substring(s, end - 1, end)
         int lci = int(string(lc))
         if lci == 32 || lci == 9 || lci == 34 || lci == 44 {

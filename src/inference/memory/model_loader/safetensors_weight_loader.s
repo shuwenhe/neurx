@@ -56,7 +56,7 @@ func load_safetensors_header(string path) safetensors_header {
 }
 
 func skip_ws(string json, int pos) int {
-    while pos < len(json) {
+    for pos < len(json) {
         int ch = int(json[pos])
         if ch == 32 || ch == 10 || ch == 13 || ch == 9 {
             pos = pos + 1
@@ -74,7 +74,7 @@ func parse_header_json(string json) []tensor_meta {
         return tensors
     }
     pos = pos + 1
-    while pos < len(json) {
+    for pos < len(json) {
         pos = skip_ws(json, pos)
         if pos >= len(json) {
             break
@@ -117,7 +117,7 @@ func parse_header_json(string json) []tensor_meta {
 
 func parse_json_string(string json, int start) (string, int) {
     int pos = start
-    while pos < len(json) && int(json[pos]) != 34 {
+    for pos < len(json) && int(json[pos]) != 34 {
         pos = pos + 1
     }
     if pos >= len(json) {
@@ -125,7 +125,7 @@ func parse_json_string(string json, int start) (string, int) {
     }
     pos = pos + 1
     string result = ""
-    while pos < len(json) && int(json[pos]) != 34 {
+    for pos < len(json) && int(json[pos]) != 34 {
         if int(json[pos]) == 92 && pos + 1 < len(json) {
             pos = pos + 1
         }
@@ -141,7 +141,7 @@ func parse_json_string(string json, int start) (string, int) {
 func parse_tensor_object(string json, int start, string name) tensor_meta {
     tensor_meta t = tensor_meta{name: name, shape: []int{}, dtype: "", data_offset: 0, data_length: 0, num_elements: 0}
     int pos = start + 1
-    while pos < len(json) {
+    for pos < len(json) {
         pos = skip_ws(json, pos)
         if pos >= len(json) {
             break
@@ -181,7 +181,7 @@ func parse_tensor_object(string json, int start, string name) tensor_meta {
     }
     int nelem = 1
     int i = 0
-    while i < len(t.shape) {
+    for i < len(t.shape) {
         nelem = nelem * t.shape[i]
         i = i + 1
     }
@@ -192,14 +192,14 @@ func parse_tensor_object(string json, int start, string name) tensor_meta {
 func parse_int_array(string json, int start) ([]int, int) {
     int[] result = []int{}
     int pos = start
-    while pos < len(json) && int(json[pos]) != 91 {
+    for pos < len(json) && int(json[pos]) != 91 {
         pos = pos + 1
     }
     if pos >= len(json) {
         return (result, pos)
     }
     pos = pos + 1
-    while pos < len(json) && int(json[pos]) != 93 {
+    for pos < len(json) && int(json[pos]) != 93 {
         pos = skip_ws(json, pos)
         if pos >= len(json) || int(json[pos]) == 93 {
             break
@@ -211,7 +211,7 @@ func parse_int_array(string json, int start) ([]int, int) {
         }
         int val = 0
         bool found = false
-        while pos < len(json) && int(json[pos]) >= 48 && int(json[pos]) <= 57 {
+        for pos < len(json) && int(json[pos]) >= 48 && int(json[pos]) <= 57 {
             val = val * 10 + int(json[pos]) - 48
             found = true
             pos = pos + 1
@@ -236,7 +236,7 @@ func parse_int_array(string json, int start) ([]int, int) {
 func find_object_end(string json, int start) int {
     int depth = 0
     int pos = start
-    while pos < len(json) {
+    for pos < len(json) {
         int ch = int(json[pos])
         if ch == 123 {
             depth = depth + 1
@@ -265,7 +265,7 @@ func skip_value(string json, int pos) int {
     }
     if ch == 91 {
         int depth = 0
-        while pos < len(json) {
+        for pos < len(json) {
             int c = int(json[pos])
             if c == 91 {
                 depth = depth + 1
@@ -279,7 +279,7 @@ func skip_value(string json, int pos) int {
         }
         return pos
     }
-    while pos < len(json) {
+    for pos < len(json) {
         int c = int(json[pos])
         if c == 44 || c == 125 || c == 93 {
             break
@@ -291,7 +291,7 @@ func skip_value(string json, int pos) int {
 
 func find_tensor(safetensors_header hdr, string name) int {
     int i = 0
-    while i < hdr.total_tensors {
+    for i < hdr.total_tensors {
         if hdr.tensors[i].name == name {
             return i
         }
@@ -316,7 +316,7 @@ func load_tensor_floats(safetensors_header hdr, string name) []float {
         dtype_size = 4
     }
     int i = 0
-    while i < meta.num_elements && i * dtype_size + 3 < len(raw) {
+    for i < meta.num_elements && i * dtype_size + 3 < len(raw) {
         int b0 = raw[i * dtype_size]
         int b1 = raw[i * dtype_size + 1]
         int b2 = raw[i * dtype_size + 2]
@@ -355,13 +355,13 @@ func pow2(int n) float {
     float result = 1.0
     if n > 0 {
         int i = 0
-        while i < n {
+        for i < n {
             result = result * 2.0
             i = i + 1
         }
     } else {
         int i = n
-        while i < 0 {
+        for i < 0 {
             result = result / 2.0
             i = i + 1
         }
@@ -376,7 +376,7 @@ func has_tensor(safetensors_header hdr, string name) bool {
 func tensor_names(safetensors_header hdr) []string {
     []string names = []string{}
     int i = 0
-    while i < hdr.total_tensors {
+    for i < hdr.total_tensors {
         names = append(names, hdr.tensors[i].name)
         i = i + 1
     }

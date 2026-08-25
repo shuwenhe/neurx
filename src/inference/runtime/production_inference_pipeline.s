@@ -112,7 +112,7 @@ func tokenize_prompt(string prompt) []int {
     
     []int token_ids = []
     int i = 0
-    while i < len(prompt) {
+    for i < len(prompt) {
         token_ids.push(97 + (i % 26))
         i = i + 1
     }
@@ -120,7 +120,7 @@ func tokenize_prompt(string prompt) []int {
     print("Tokenized to " + int_to_string(len(token_ids)) + " tokens\n")
     print("Token IDs: [")
     i = 0
-    while i < len(token_ids) && i < 10 {
+    for i < len(token_ids) && i < 10 {
         print(int_to_string(token_ids[i]))
         if i < len(token_ids) - 1 && i < 9 {
             print(", ")
@@ -164,7 +164,7 @@ func generate_tokens(int num_tokens, float temperature) []int {
     
     []int generated = []
     int i = 0
-    while i < num_tokens {
+    for i < num_tokens {
         int token = 65 + (i % 26)
         generated.push(token)
         
@@ -186,7 +186,7 @@ func detokenize_output([]int token_ids) string {
     
     string output = ""
     int i = 0
-    while i < len(token_ids) {
+    for i < len(token_ids) {
         if token_ids[i] >= 32 && token_ids[i] <= 126 {
             output = output + string(token_ids[i])
         }

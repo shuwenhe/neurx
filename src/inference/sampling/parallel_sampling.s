@@ -36,14 +36,14 @@ struct parallel_sampling_result {
 func parallel_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
 func parallel_float_array(int capacity) []float {
     []float values = []float{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0.0; i = i + 1 }
+    for i < capacity { values[i] = 0.0; i = i + 1 }
     values
 }
 
@@ -57,7 +57,7 @@ func new_parallel_sampling_state(parallel_sampling_config config) parallel_sampl
 
 func parallel_parent_find(parallel_sampling_state state, int parent_request_id) int {
     int i = 0
-    while i < state.config.maximum_parents {
+    for i < state.config.maximum_parents {
         if state.active[i] == 1 && state.parent_request_ids[i] == parent_request_id { return i }
         i = i + 1
     }
@@ -76,7 +76,7 @@ func parallel_sampling_create(parallel_sampling_state state, int parent_request_
     if parent_request_id <= 0 || child_count <= 0 || child_count > state.config.maximum_children || parallel_parent_find(state, parent_request_id) >= 0 || state.parent_count >= state.config.maximum_parents { return state }
     int slot = 0 - 1
     int i = 0
-    while i < state.config.maximum_parents {
+    for i < state.config.maximum_parents {
         if slot < 0 && state.active[i] == 0 { slot = i }
         i = i + 1
     }
@@ -92,7 +92,7 @@ func parallel_sampling_create(parallel_sampling_state state, int parent_request_
 func parallel_best_child(parallel_sampling_state state, int parent_slot) int {
     int best = 0 - 1
     int child = 0
-    while child < state.child_counts[parent_slot] {
+    for child < state.child_counts[parent_slot] {
         int offset = parallel_child_offset(state, parent_slot, child)
         if state.child_finished[offset] == 1 && state.child_cancelled[offset] == 0 {
             if best < 0 || state.child_scores[offset] > state.child_scores[parallel_child_offset(state, parent_slot, best)] { best = child }
@@ -122,7 +122,7 @@ func parallel_sampling_cancel_remaining(parallel_sampling_state state, int paren
     int slot = parallel_parent_find(state, parent_request_id)
     if slot < 0 { return state }
     int child = 0
-    while child < state.child_counts[slot] {
+    for child < state.child_counts[slot] {
         int offset = parallel_child_offset(state, slot, child)
         if state.child_finished[offset] == 0 && state.child_cancelled[offset] == 0 {
             state.child_cancelled[offset] = 1

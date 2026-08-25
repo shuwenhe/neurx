@@ -48,13 +48,13 @@ func (rollout_generator* rg) generate_single(
     sample.log_probs = []float{}
     sample.values = []float{}
     int i = 0
-    while i < len(prompt_token_ids) {
+    for i < len(prompt_token_ids) {
         sample.token_ids = append(sample.token_ids, prompt_token_ids[i])
         i = i + 1
     }
     int generated_tokens = 0
     bool finished = false
-    while !finished && generated_tokens < rg.config.max_seq_len {
+    for !finished && generated_tokens < rg.config.max_seq_len {
         []float logits = get_model_logits_placeholder(sample.token_ids, rg.vocab_size)
         if rg.config.temperature != 1.0 {
             logits = apply_temperature(logits, rg.config.temperature)
@@ -100,9 +100,9 @@ func (rollout_generator* rg) generate_batch(
     float total_log_prob = 0.0
     int total_tokens = 0
     int i = 0
-    while i < len(prompts) {
+    for i < len(prompts) {
         int j = 0
-        while j < rg.config.num_return_sequences {
+        for j < rg.config.num_return_sequences {
             rollout_sample sample = rg.generate_single(
                 prompts[i],
                 prompt_token_ids_batch[i]
@@ -111,7 +111,7 @@ func (rollout_generator* rg) generate_batch(
             total_length = total_length + sample.length
             total_tokens = total_tokens + len(sample.token_ids)
             int k = 0
-            while k < len(sample.log_probs) {
+            for k < len(sample.log_probs) {
                 total_log_prob = total_log_prob + sample.log_probs[k]
                 k = k + 1
             }
@@ -124,7 +124,7 @@ func (rollout_generator* rg) generate_batch(
         batch.avg_length = ((total_length as float)) / ((num_samples as float))
         int total_generated_tokens = 0
         int idx = 0
-        while idx < num_samples {
+        for idx < num_samples {
             total_generated_tokens = total_generated_tokens + len(batch.samples[idx].log_probs)
             idx = idx + 1
         }
@@ -139,7 +139,7 @@ func (rollout_generator* rg) generate_batch(
 func apply_temperature([]float logits, float temperature) []float {
     []float scaled = []float{}
     int i = 0
-    while i < len(logits) {
+    for i < len(logits) {
         scaled = append(scaled, logits[i] / temperature)
         i = i + 1
     }
@@ -154,7 +154,7 @@ func apply_top_k_filtering([]float logits, int k) []float {
     float threshold = sorted_logits[k - 1]
     []float filtered = []float{}
     int i = 0
-    while i < n {
+    for i < n {
         if logits[i] >= threshold {
             filtered = append(filtered, logits[i])
         } else {
@@ -171,7 +171,7 @@ func apply_top_p_filtering([]float logits, float top_p) []float {
     float cumsum = 0.0
     []bool keep_mask = make_bool_array(len(probs), false)
     int i = 0
-    while i < len(sorted_indices) {
+    for i < len(sorted_indices) {
         int idx = sorted_indices[i]
         cumsum = cumsum + probs[idx]
         keep_mask[idx] = true
@@ -182,7 +182,7 @@ func apply_top_p_filtering([]float logits, float top_p) []float {
     }
     []float filtered = []float{}
     int j = 0
-    while j < len(logits) {
+    for j < len(logits) {
         if keep_mask[j] {
             filtered = append(filtered, logits[j])
         } else {
@@ -198,7 +198,7 @@ func softmax([]float logits) []float {
     if n == 0 { return []float{} }
     float max_logit = logits[0]
     int i = 1
-    while i < n {
+    for i < n {
         if logits[i] > max_logit {
             max_logit = logits[i]
         }
@@ -207,7 +207,7 @@ func softmax([]float logits) []float {
     []float exp_logits = []float{}
     float sum_exp = 0.0
     i = 0
-    while i < n {
+    for i < n {
         float exp_val = exp(logits[i] - max_logit)
         exp_logits = append(exp_logits, exp_val)
         sum_exp = sum_exp + exp_val
@@ -215,7 +215,7 @@ func softmax([]float logits) []float {
     }
     []float probs = []float{}
     i = 0
-    while i < n {
+    for i < n {
         probs = append(probs, exp_logits[i] / sum_exp)
         i = i + 1
     }
@@ -226,14 +226,14 @@ func sample_from_distribution([]float probs) int {
     []float cumsum = []float{}
     float sum = 0.0
     int i = 0
-    while i < len(probs) {
+    for i < len(probs) {
         sum = sum + probs[i]
         cumsum = append(cumsum, sum)
         i = i + 1
     }
     float rand = get_random_float()
     i = 0
-    while i < len(cumsum) {
+    for i < len(cumsum) {
         if cumsum[i] >= rand {
             return i
         }
@@ -247,7 +247,7 @@ func argmax([]float arr) int {
     int max_idx = 0
     float max_val = arr[0]
     int i = 1
-    while i < len(arr) {
+    for i < len(arr) {
         if arr[i] > max_val {
             max_val = arr[i]
             max_idx = i
@@ -260,7 +260,7 @@ func argmax([]float arr) int {
 func get_model_logits_placeholder([]int token_ids, int vocab_size) []float {
     []float logits = []float{}
     int i = 0
-    while i < vocab_size {
+    for i < vocab_size {
         logits = append(logits, 0.0)
         i = i + 1
     }
@@ -278,7 +278,7 @@ func get_random_float() float {
 func copy_float_array([]float arr) []float {
     []float copy = []float{}
     int i = 0
-    while i < len(arr) {
+    for i < len(arr) {
         copy = append(copy, arr[i])
         i = i + 1
     }
@@ -288,9 +288,9 @@ func copy_float_array([]float arr) []float {
 func sort_float_array_desc([]float arr) {
     int n = len(arr)
     int i = 0
-    while i < n - 1 {
+    for i < n - 1 {
         int j = 0
-        while j < n - i - 1 {
+        for j < n - i - 1 {
             if arr[j] < arr[j + 1] {
                 float temp = arr[j]
                 arr[j] = arr[j + 1]
@@ -306,14 +306,14 @@ func argsort_desc([]float arr) []int {
     int n = len(arr)
     []int indices = []int{}
     int i = 0
-    while i < n {
+    for i < n {
         indices = append(indices, i)
         i = i + 1
     }
     i = 0
-    while i < n - 1 {
+    for i < n - 1 {
         int j = 0
-        while j < n - i - 1 {
+        for j < n - i - 1 {
             if arr[indices[j]] < arr[indices[j + 1]] {
                 int temp = indices[j]
                 indices[j] = indices[j + 1]
@@ -329,7 +329,7 @@ func argsort_desc([]float arr) []int {
 func make_bool_array(int size, bool default_val) []bool {
     []bool arr = []bool{}
     int i = 0
-    while i < size {
+    for i < size {
         arr = append(arr, default_val)
         i = i + 1
     }
@@ -357,7 +357,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -388,7 +388,7 @@ func float_to_str_n(float value, int decimals) string {
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -396,10 +396,10 @@ func float_to_str_n(float value, int decimals) string {
     if decimals > 0 {
         result = result + "."
         int i = 0
-        while i < decimals {
+        for i < decimals {
             current = current * 10.0
             int digit = 0
-            while current >= 1.0 {
+            for current >= 1.0 {
                 current = current - 1.0
                 digit = digit + 1
             }

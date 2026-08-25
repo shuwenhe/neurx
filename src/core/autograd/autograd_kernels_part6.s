@@ -61,15 +61,15 @@ func backward_rope(node n, tensor grad_output) backward_result {
 
 func cos_approx(float x) float {
     float pi = 3.141592653589793
-    while x > pi { x = x - 2.0 * pi }
-    while x < -pi { x = x + 2.0 * pi }
+    for x > pi { x = x - 2.0 * pi }
+    for x < -pi { x = x + 2.0 * pi }
     1.0 - x*x/2.0 + x*x*x*x/24.0 - x*x*x*x*x*x/720.0
 }
 
 func sin_approx(float x) float {
     float pi = 3.141592653589793
-    while x > pi { x = x - 2.0 * pi }
-    while x < -pi { x = x + 2.0 * pi }
+    for x > pi { x = x - 2.0 * pi }
+    for x < -pi { x = x + 2.0 * pi }
     x - x*x*x/6.0 + x*x*x*x*x/120.0 - x*x*x*x*x*x*x/5040.0
 }
 

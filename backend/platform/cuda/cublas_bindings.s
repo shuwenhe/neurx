@@ -222,10 +222,10 @@ func int_to_str(int n) string {
     bool neg = value < 0
     if neg { value = 0 - value }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int quotient = 0
         int digit = value
-        while digit >= 10 {
+        for digit >= 10 {
             digit = digit - 10
             quotient = quotient + 1
         }

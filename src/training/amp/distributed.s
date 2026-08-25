@@ -65,7 +65,7 @@ func make_mp_tensor([]double data, []int shape, int storage_dtype) mp_tensor {
     t.compute_dtype = PRECISION_FP32
     int n = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         n = n * shape[i]
         i = i + 1
     }
@@ -125,7 +125,7 @@ func new_loss_scaler_dynamic(double init_scale, double max_scale) loss_scaler_st
 func check_gradients_for_overflow(mp_tensor grad_tensor) bool {
     bool has_overflow = false
     int i = 0
-    while i < grad_tensor.numel {
+    for i < grad_tensor.numel {
         double v = grad_tensor.data[i]
         if v > 1e30 || v < -1e30 {
             has_overflow = true
@@ -144,7 +144,7 @@ func scale_loss(loss_scaler_state scaler, double loss) double {
 
 func unscale_gradients(loss_scaler_state scaler, ref mp_tensor grad_tensor) {
     int i = 0
-    while i < grad_tensor.numel {
+    for i < grad_tensor.numel {
         grad_tensor.data[i] = grad_tensor.data[i] / scaler.current_scale
         i = i + 1
     }
@@ -185,13 +185,13 @@ func create_master_weights([]double initial_params, int storage_precision) maste
     state.storage_precision = storage_precision
     state.fp32_weights = []double{cap: state.num_elements}
     int i = 0
-    while i < state.num_elements {
+    for i < state.num_elements {
         state.fp32_weights[i] = initial_params[i]
         i = i + 1
     }
     state.low_precision_params = []double{cap: state.num_elements}
     i = 0
-    while i < state.num_elements {
+    for i < state.num_elements {
         state.low_precision_params[i] = cast_to_low_precision(initial_params[i], storage_precision)
         i = i + 1
     }
@@ -214,17 +214,17 @@ func round_to_significant(double value, int sig_digits) double {
     double magnitude = 1.0
     double abs_val = value
     if abs_val < 0.0 { abs_val = -abs_val }
-    while abs_val >= 10.0  magnitude < 1000000000.0 {
+    for abs_val >= 10.0  magnitude < 1000000000.0 {
         abs_val = abs_val / 10.0
         magnitude = magnitude * 10.0
     }
-    while abs_val < 1.0  abs_val > 0.0  magnitude > 0.000000001 {
+    for abs_val < 1.0  abs_val > 0.0  magnitude > 0.000000001 {
         abs_val = abs_val * 10.0
         magnitude = magnitude / 10.0
     }
     double multiplier = 1.0
     int d = 0
-    while d < sig_digits {
+    for d < sig_digits {
         multiplier = multiplier * 10.0
         d = d + 1
     }
@@ -236,7 +236,7 @@ func round_to_significant(double value, int sig_digits) double {
 
 func sync_master_from_lp(ref master_weight_state state) {
     int i = 0
-    while i < state.num_elements {
+    for i < state.num_elements {
         state.fp32_weights[i] = state.low_precision_params[i]
         i = i + 1
     }
@@ -248,7 +248,7 @@ func get_fp32_master(master_weight_state state) []double {
 
 func update_lp_from_master(ref master_weight_state state) {
     int i = 0
-    while i < state.num_elements {
+    for i < state.num_elements {
         state.low_precision_params[i] = cast_to_low_precision(
             state.fp32_weights[i], state.storage_precision)
         i = i + 1

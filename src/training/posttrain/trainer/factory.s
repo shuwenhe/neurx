@@ -142,7 +142,7 @@ func int_to_str(int n) string {
         n = 0 - n
     }
     []string digits = []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
-    while n > 0 {
+    for n > 0 {
         int digit = n - (n / 10) * 10
         result = digits[digit] + result
         n = n / 10
@@ -161,7 +161,7 @@ func float_to_str(float f, int precision) string {
     }
     string result = int_to_str(int_part) + "."
     int i = 0
-    while i < precision {
+    for i < precision {
         frac_part = frac_part * 10.0
         int digit = frac_part as int
         result = result + int_to_str(digit)

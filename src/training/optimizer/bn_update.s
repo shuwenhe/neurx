@@ -18,7 +18,7 @@ func new_batch_norm_stats(int num_features) batch_norm_stats {
 
 func reset_running_stats(batch_norm_stats stats) batch_norm_stats {
     int i = 0
-    while i < len(stats.running_mean) {
+    for i < len(stats.running_mean) {
         stats.running_mean[i] = 0.0
         stats.running_var[i] = 1.0
         i = i + 1
@@ -39,11 +39,11 @@ func update_batch_norm_from_batch(
     []float batch_mean = make_zeros(num_features)
     []float batch_var = make_zeros(num_features)
     int f = 0
-    while f < num_features {
+    for f < num_features {
         float sum_f = 0.0
         int count_f = 0
         int i = 0
-        while i < batch_size {
+        for i < batch_size {
             int idx = i * num_features + f
             if idx < len(batch_data.data) {
                 sum_f = sum_f + batch_data.data[idx]
@@ -57,11 +57,11 @@ func update_batch_norm_from_batch(
         f = f + 1
     }
     f = 0
-    while f < num_features {
+    for f < num_features {
         float sum_sq = 0.0
         int count_sq = 0
         int i = 0
-        while i < batch_size {
+        for i < batch_size {
             int idx = i * num_features + f
             if idx < len(batch_data.data) {
                 float diff = batch_data.data[idx] - batch_mean[f]
@@ -77,7 +77,7 @@ func update_batch_norm_from_batch(
     }
     float momentum = 0.1
     f = 0
-    while f < num_features {
+    for f < num_features {
         stats.running_mean[f] = stats.running_mean[f] * (1.0 - momentum) + batch_mean[f] * momentum
         stats.running_var[f] = stats.running_var[f] * (1.0 - momentum) + batch_var[f] * momentum
         f = f + 1
@@ -94,9 +94,9 @@ func apply_batch_norm(
     int num_features = len(stats.running_mean)
     []float out = make_zeros(batch_size)
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         int f = 0
-        while f < num_features {
+        for f < num_features {
             int idx = i * num_features + f
             if idx < len(input_data.data) {
                 float normalized = (input_data.data[idx] - stats.running_mean[f]) /
@@ -113,7 +113,7 @@ func apply_batch_norm(
 func make_zeros(int n) []float {
     []float arr = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         arr[i] = 0.0
         i = i + 1
     }
@@ -123,7 +123,7 @@ func make_zeros(int n) []float {
 func make_ones(int n) []float {
     []float arr = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         arr[i] = 1.0
         i = i + 1
     }
@@ -139,7 +139,7 @@ func sqrt_approx(float x) float {
         y = x
     }
     int i = 0
-    while i < 32 {
+    for i < 32 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }

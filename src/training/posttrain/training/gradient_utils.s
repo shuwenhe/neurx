@@ -10,10 +10,10 @@ struct global_gradient_stats {
 func compute_global_grad_norm([][]float all_layer_grads) float {
     float total_norm_squared = 0.0
     int layer_idx = 0
-    while layer_idx < len(all_layer_grads) {
+    for layer_idx < len(all_layer_grads) {
         []float layer_grad = all_layer_grads[layer_idx]
         int i = 0
-        while i < len(layer_grad) {
+        for i < len(layer_grad) {
             float g = layer_grad[i]
             total_norm_squared = total_norm_squared + g * g
             i = i + 1
@@ -30,10 +30,10 @@ func clip_gradients_global([][]float all_layer_grads, float max_norm) global_gra
     if clip_coef < 1.0 {
         was_clipped = true
         int layer_idx = 0
-        while layer_idx < len(all_layer_grads) {
+        for layer_idx < len(all_layer_grads) {
             []float layer_grad = all_layer_grads[layer_idx]
             int i = 0
-            while i < len(layer_grad) {
+            for i < len(layer_grad) {
                 layer_grad[i] = layer_grad[i] * clip_coef
                 i = i + 1
             }
@@ -42,7 +42,7 @@ func clip_gradients_global([][]float all_layer_grads, float max_norm) global_gra
     }
     int total_params = 0
     int idx = 0
-    while idx < len(all_layer_grads) {
+    for idx < len(all_layer_grads) {
         total_params = total_params + len(all_layer_grads[idx])
         idx = idx + 1
     }
@@ -85,14 +85,14 @@ func check_gradients_nan_inf([][]float all_layer_grads, []string layer_names) na
     stats.first_nan_layer = ""
     stats.first_inf_layer = ""
     int layer_idx = 0
-    while layer_idx < len(all_layer_grads) {
+    for layer_idx < len(all_layer_grads) {
         []float layer_grad = all_layer_grads[layer_idx]
         string layer_name = ""
         if layer_idx < len(layer_names) {
             layer_name = layer_names[layer_idx]
         }
         int i = 0
-        while i < len(layer_grad) {
+        for i < len(layer_grad) {
             float g = layer_grad[i]
             stats.total_checked = stats.total_checked + 1
             if is_nan(g) {
@@ -141,7 +141,7 @@ func compute_gradient_statistics([]float gradients) gradient_statistics {
     float max_val = gradients[0]
     int zero_cnt = 0
     int i = 0
-    while i < n {
+    for i < n {
         float g = gradients[i]
         sum = sum + g
         if g < min_val { min_val = g }
@@ -155,7 +155,7 @@ func compute_gradient_statistics([]float gradients) gradient_statistics {
     float var_sum = 0.0
     float l2_sum = 0.0
     i = 0
-    while i < n {
+    for i < n {
         float g = gradients[i]
         float diff = g - mean
         var_sum = var_sum + diff * diff
@@ -233,7 +233,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -256,16 +256,16 @@ func float_to_str_4(float value) string {
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
     string result = int_to_str(whole) + "."
     int i = 0
-    while i < 4 {
+    for i < 4 {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }

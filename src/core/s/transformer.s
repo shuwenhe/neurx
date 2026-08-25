@@ -77,7 +77,7 @@ struct transformer {
 func transformer_init(cfg transformer_config) transformer {
     []transformer_layer mut_layers = []transformer_layer{cap: transformer_config.num_layers}
     int i = 0
-    while i < transformer_config.num_layers {
+    for i < transformer_config.num_layers {
         []int shape_dmd = make_int_array_2(transformer_config.d_model, transformer_config.d_model)
         []int shape_dmff = make_int_array_2(transformer_config.d_model, transformer_config.d_ff)
         []int shape_ffdm = make_int_array_2(transformer_config.d_ff, transformer_config.d_model)
@@ -132,7 +132,7 @@ func rng_next(rng_state state) float {
 
 func rng_randn(rng_state state) float {
     float u1 = rng_next(state)
-    while u1 < 0.0000000001 {
+    for u1 < 0.0000000001 {
         u1 = rng_next(state)
     }
     float u2 = rng_next(state)
@@ -157,7 +157,7 @@ func kaiming_uniform([]int shape, int fan_in_mode) tensor {
     rng_state rng = new_rng(42)
     []float data = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float v = (rng_next(rng) * 2.0 - 1.0) * bound
         data[i] = v
         i = i + 1
@@ -180,7 +180,7 @@ func xavier_uniform([]int shape) tensor {
     rng_state rng = new_rng(42)
     []float data = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float v = (rng_next(rng) * 2.0 - 1.0) * bound
         data[i] = v
         i = i + 1
@@ -204,7 +204,7 @@ func kaiming_normal([]int shape, int fan_in_mode) tensor {
     rng_state rng = new_rng(42)
     []float data = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float v = rng_randn(rng) * std
         data[i] = v
         i = i + 1
@@ -218,7 +218,7 @@ func embedding_init([]int shape) tensor {
     rng_state rng = new_rng(42)
     []float data = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float v = rng_randn(rng) * std
         data[i] = v
         i = i + 1
@@ -273,7 +273,7 @@ func transformer_forward(m transformer, x tensor) tensor {
     int i = 0
     tensor out = x
     []transformer_layer layers_copy = copy_layers(m.layers)
-    while i < m.config.num_layers {
+    for i < m.config.num_layers {
         if i < len(layers_copy) {
             out = transformer_layer_forward(layers_copy[i], out, m.config)
         }
@@ -316,7 +316,7 @@ func silu(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float x = input.data[i]
         float sig = 1.0 / (1.0 + exp_approx(-x))
         out[i] = x * sig
@@ -363,24 +363,24 @@ func flash_attention_forward(
     float scale = 1.0 / sqrt_approx(float(head_dim))
     []float output_data = []float{cap: batch_heads * seq_len * head_dim}
     int init_i = 0
-    while init_i < batch_heads * seq_len * head_dim {
+    for init_i < batch_heads * seq_len * head_dim {
         output_data[init_i] = 0.0
         init_i = init_i + 1
     }
     int q_block_start = 0
-    while q_block_start < seq_len {
+    for q_block_start < seq_len {
         int q_block_end = min(q_block_start + config.block_size_q, seq_len)
         int q_block_size = q_block_end - q_block_start
         []float row_max = []float{cap: batch_heads * q_block_size}
         []float row_sum = []float{cap: batch_heads * q_block_size}
         int ri = 0
-        while ri < batch_heads * q_block_size {
+        for ri < batch_heads * q_block_size {
             row_max[ri] = -1e9
             row_sum[ri] = 0.0
             ri = ri + 1
         }
         int kv_block_start = 0
-        while kv_block_start < seq_len {
+        for kv_block_start < seq_len {
             int kv_block_end = min(kv_block_start + config.block_size_kv, seq_len)
             int kv_block_size = kv_block_end - kv_block_start
             compute_flash_scores(
@@ -410,16 +410,16 @@ func compute_flash_scores(
     int total_seq_len
 ) void {
     int h = 0
-    while h < batch_heads {
+    for h < batch_heads {
         int qi = 0
-        while qi < q_size {
+        for qi < q_size {
             int row_idx = h * q_size + qi
             float old_max = row_max[row_idx]
             int ki = 0
-            while ki < kv_size {
+            for ki < kv_size {
                 float score = 0.0
                 int di = 0
-                while di < head_dim {
+                for di < head_dim {
                     int q_idx = ((h * total_seq_len + (q_start + qi)) * head_dim + di)
                     int k_idx = ((h * total_seq_len + (kv_start + ki)) * head_dim + di)
                     if q_idx < len(q.data)  k_idx < len(k.data) {
@@ -439,7 +439,7 @@ func compute_flash_scores(
                 float exp_score = exp_approx(score - row_max[row_idx])
                 row_sum[row_idx] = row_sum[row_idx] + exp_score
                 int vi = 0
-                while vi < head_dim {
+                for vi < head_dim {
                     int v_idx = ((h * total_seq_len + (kv_start + ki)) * head_dim + vi)
                     int out_idx = ((h * total_seq_len + (q_start + qi)) * head_dim + vi)
                     if v_idx < len(v.data)  out_idx < len(output_data) {
@@ -464,15 +464,15 @@ func normalize_flash_output(
     int total_seq_len
 ) void {
     int h = 0
-    while h < batch_heads {
+    for h < batch_heads {
         int qi = 0
-        while qi < q_size {
+        for qi < q_size {
             int row_idx = h * q_size + qi
             float norm = row_sum[row_idx]
             if norm > 1e-8 {
                 float inv_norm = 1.0 / norm
                 int di = 0
-                while di < head_dim {
+                for di < head_dim {
                     int out_idx = ((h * total_seq_len + (q_start + qi)) * head_dim + di)
                     if out_idx < len(output_data) {
                         output_data[out_idx] = output_data[out_idx] * inv_norm
@@ -515,9 +515,9 @@ func make_causal_mask(int seq_len) tensor {
     int total = seq_len * seq_len
     []float data = []float{cap: total}
     int r = 0
-    while r < seq_len {
+    for r < seq_len {
         int c = 0
-        while c < seq_len {
+        for c < seq_len {
             if c <= r {
                 data[r * seq_len + c] = 0.0
             } else {
@@ -552,12 +552,12 @@ func scaled_dot_product_attention_causal(tensor q, tensor k, tensor v, int num_h
     tensor scores = matmul(q, kt)
     int n_scores = len(scores.data)
     int si = 0
-    while si < n_scores {
+    for si < n_scores {
         scores.data[si] = scores.data[si] * scale
         si = si + 1
     }
     int mi = 0
-    while mi < n_scores {
+    for mi < n_scores {
         scores.data[mi] = scores.data[mi] + mask.data[mi]
         mi = mi + 1
     }
@@ -582,7 +582,7 @@ func softmax_1d_tensor(tensor input) tensor {
     []float out = []float{cap: n}
     float max_v = input.data[0]
     int i = 1
-    while i < n {
+    for i < n {
         if input.data[i] > max_v {
             max_v = input.data[i]
         }
@@ -590,7 +590,7 @@ func softmax_1d_tensor(tensor input) tensor {
     }
     float denom = 0.0
     i = 0
-    while i < n {
+    for i < n {
         float v = exp_approx(input.data[i] - max_v)
         out[i] = v
         denom = denom + v
@@ -600,7 +600,7 @@ func softmax_1d_tensor(tensor input) tensor {
         denom = 1.0
     }
     i = 0
-    while i < n {
+    for i < n {
         out[i] = out[i] / denom
         i = i + 1
     }
@@ -612,11 +612,11 @@ func softmax_2d_last(tensor input) tensor {
     int cols = input.shape[1]
     []float out = []float{cap: rows * cols}
     int r = 0
-    while r < rows {
+    for r < rows {
         int base = r * cols
         float max_v = input.data[base]
         int c = 1
-        while c < cols {
+        for c < cols {
             if input.data[base + c] > max_v {
                 max_v = input.data[base + c]
             }
@@ -624,7 +624,7 @@ func softmax_2d_last(tensor input) tensor {
         }
         float denom = 0.0
         c = 0
-        while c < cols {
+        for c < cols {
             float v = exp_approx(input.data[base + c] - max_v)
             out[base + c] = v
             denom = denom + v
@@ -634,7 +634,7 @@ func softmax_2d_last(tensor input) tensor {
             denom = 1.0
         }
         c = 0
-        while c < cols {
+        for c < cols {
             out[base + c] = out[base + c] / denom
             c = c + 1
         }
@@ -650,13 +650,13 @@ func softmax_3d_last(tensor input) tensor {
     int stride = d2
     []float out = []float{cap: d0 * d1 * d2}
     int a = 0
-    while a < d0 {
+    for a < d0 {
         int b = 0
-        while b < d1 {
+        for b < d1 {
             int base = (a * d1 + b) * d2
             float max_v = input.data[base]
             int c = 1
-            while c < d2 {
+            for c < d2 {
                 if input.data[base + c] > max_v {
                     max_v = input.data[base + c]
                 }
@@ -664,7 +664,7 @@ func softmax_3d_last(tensor input) tensor {
             }
             float denom = 0.0
             c = 0
-            while c < d2 {
+            for c < d2 {
                 float v = exp_approx(input.data[base + c] - max_v)
                 out[base + c] = v
                 denom = denom + v
@@ -674,7 +674,7 @@ func softmax_3d_last(tensor input) tensor {
                 denom = 1.0
             }
             c = 0
-            while c < d2 {
+            for c < d2 {
                 out[base + c] = out[base + c] / denom
                 c = c + 1
             }
@@ -699,7 +699,7 @@ func precompute_rope(int max_seq_len, int head_dim) rope_cache {
     }
     []float freqs = []float{cap: half_dim}
     int i = 0
-    while i < half_dim {
+    for i < half_dim {
         float exponent = -2.0 * float(i) / float(head_dim)
         float ln_base = log_approx(10000.0)
         float theta_val = exp_approx(exponent * ln_base)
@@ -709,9 +709,9 @@ func precompute_rope(int max_seq_len, int head_dim) rope_cache {
     []float cos_data = []float{cap: max_seq_len * half_dim}
     []float sin_data = []float{cap: max_seq_len * half_dim}
     int pos = 0
-    while pos < max_seq_len {
+    for pos < max_seq_len {
         int j = 0
-        while j < half_dim {
+        for j < half_dim {
             float angle = float(pos) * freqs[j]
             cos_data[pos * half_dim + j] = rope_cos(angle)
             sin_data[pos * half_dim + j] = rope_sin(angle)
@@ -751,7 +751,7 @@ func apply_rope(tensor input, rope_cache cache, int start_pos) tensor {
     }
     []float out = []float{cap: n}
     int flat = 0
-    while flat < n {
+    for flat < n {
         int local_idx = f(flat - (flat / last_dim) * last_dim)
         int pair_idx = local_idx / 2
         int pos_in_pair = l(local_idx - (local_idx / 2) * 2)

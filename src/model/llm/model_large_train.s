@@ -126,7 +126,7 @@ func new_backbone_optimizer_states(transformer backbone, float lr, float beta1, 
     int n = len(backbone.layers)
     []transformer_layer_optimizer_state out = []transformer_layer_optimizer_state{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = new_layer_optimizer_state(transformer_layer_at(backbone.layers, i), lr, beta1, beta2, eps, weight_decay)
         i = i + 1
     }
@@ -136,7 +136,7 @@ func new_backbone_optimizer_states(transformer backbone, float lr, float beta1, 
 func layer_optimizer_state_at([]transformer_layer_optimizer_state states, int index) transformer_layer_optimizer_state {
     int i = 0
     transformer_layer_optimizer_state out = states[0]
-    while i < len(states) {
+    for i < len(states) {
         if i == index {
             out = states[i]
             i = len(states)
@@ -148,7 +148,7 @@ func layer_optimizer_state_at([]transformer_layer_optimizer_state states, int in
 
 func layer_optimizer_state_set([]transformer_layer_optimizer_state states, int index, transformer_layer_optimizer_state value) []transformer_layer_optimizer_state {
     int i = 0
-    while i < len(states) {
+    for i < len(states) {
         if i == index {
             states[i] = value
             i = len(states)
@@ -161,7 +161,7 @@ func layer_optimizer_state_set([]transformer_layer_optimizer_state states, int i
 func copy_backbone_optimizer_states([]transformer_layer_optimizer_state states) []transformer_layer_optimizer_state {
     []transformer_layer_optimizer_state out = []transformer_layer_optimizer_state{cap: len(states)}
     int i = 0
-    while i < len(states) {
+    for i < len(states) {
         out = layer_optimizer_state_set(out, i, copy_layer_optimizer_state(layer_optimizer_state_at(states, i)))
         i = i + 1
     }
@@ -171,7 +171,7 @@ func copy_backbone_optimizer_states([]transformer_layer_optimizer_state states) 
 func transformer_layer_at([]transformer_layer layers, int index) transformer_layer {
     int i = 0
     transformer_layer out = layers[0]
-    while i < len(layers) {
+    for i < len(layers) {
         if i == index {
             out = layers[i]
             i = len(layers)
@@ -183,7 +183,7 @@ func transformer_layer_at([]transformer_layer layers, int index) transformer_lay
 
 func transformer_layer_set([]transformer_layer layers, int index, transformer_layer value) []transformer_layer {
     int i = 0
-    while i < len(layers) {
+    for i < len(layers) {
         if i == index {
             layers[i] = value
             i = len(layers)
@@ -196,7 +196,7 @@ func transformer_layer_set([]transformer_layer layers, int index, transformer_la
 func tensor_numel([]int shape) int {
     int n = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         n = n * shape[i]
         i = i + 1
     }
@@ -207,7 +207,7 @@ func tensor_from_ints([]int values, []int shape) tensor {
     int n = len(values)
     []float data = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         data[i] = values[i]
         i = i + 1
     }
@@ -222,7 +222,7 @@ func zero_tensor([]int shape) tensor {
     int n = tensor_numel(shape)
     []float data = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         data[i] = 0.0
         i = i + 1
     }
@@ -236,7 +236,7 @@ func ramp_tensor([]int shape, float scale) tensor {
         return new(data, copy_int(shape), true)
     }
     int i = 0
-    while i < n {
+    for i < n {
         data[i] = scale * ((i + 1) as float) / ((n + 1) as float)
         i = i + 1
     }
@@ -246,7 +246,7 @@ func ramp_tensor([]int shape, float scale) tensor {
 func join_documents([]string documents) string {
     string out = ""
     int i = 0
-    while i < len(documents) {
+    for i < len(documents) {
         string doc = trim(documents[i])
         if doc != "" {
             if out != "" {
@@ -269,7 +269,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / i
         result = result + term
         i = i + 1
@@ -282,10 +282,10 @@ func normalize_token_id(int token_id, int vocab_size) int {
     if vocab_size <= 0 {
         return 0
     }
-    while normalized < 0 {
+    for normalized < 0 {
         normalized = normalized + vocab_size
     }
-    while normalized >= vocab_size {
+    for normalized >= vocab_size {
         normalized = normalized - vocab_size
     }
     normalized
@@ -295,7 +295,7 @@ func one_hot_tensor(tensor ids, int vocab_size) tensor {
     int n = len(ids.data)
     []float data = []float{cap: n * vocab_size}
     int i = 0
-    while i < n {
+    for i < n {
         int token_id = normalize_token_id(ids.data[i] as int, vocab_size)
         int offset = i * vocab_size
         if token_id >= 0 && token_id < vocab_size {
@@ -310,7 +310,7 @@ func scale_tensor(tensor value, float scale) tensor {
     int n = len(value.data)
     []float data = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         data[i] = value.data[i] * scale
         i = i + 1
     }
@@ -335,7 +335,7 @@ func transformer_backward(
     layer_inputs[0] = input_hidden
     tensor current = input_hidden
     int li = 0
-    while li < num_layers {
+    for li < num_layers {
         transformer_layer layer = transformer_layer_at(backbone.layers, li)
         layer_inputs[li + 1] = current
         current = transformer_layer_forward(layer, current, backbone.config)
@@ -345,7 +345,7 @@ func transformer_backward(
     tensor grad_current = grad_output
     []transformer_layer_optimizer_state current_optimizers = layer_optimizers
     int bi = num_layers - 1
-    while bi >= 0 {
+    for bi >= 0 {
         transformer_layer layer = transformer_layer_at(backbone.layers, bi)
         transformer_layer_optimizer_state layer_optimizer = layer_optimizer_state_at(current_optimizers, bi)
         tensor x_input = layer_inputs[bi + 1]
@@ -513,7 +513,7 @@ func relu_backward_mask(tensor input) tensor {
     int n = len(input.data)
     []float data = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         if input.data[i] > 0.0 {
             data[i] = 1.0
         } else {
@@ -528,7 +528,7 @@ func tensor_ones_like(tensor input) tensor {
     int n = len(input.data)
     []float data = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         data[i] = 1.0
         i = i + 1
     }
@@ -596,10 +596,10 @@ func embedding_apply_grad(tensor embedding, tensor token_ids, tensor grad_hidden
     int hidden_size = next.shape[1]
     int token_count = len(token_ids.data)
     int i = 0
-    while i < token_count {
+    for i < token_count {
         int token_id = normalize_token_id(token_ids.data[i] as int, vocab_size)
         int h = 0
-        while h < hidden_size {
+        for h < hidden_size {
             int dst = token_id * hidden_size + h
             int src = i * hidden_size + h
             if dst >= 0 && dst < len(next.data) && src < len(grad_hidden.data) {
@@ -905,7 +905,7 @@ func gpt_large_training_run(gpt_large_training_state state, int steps) gpt_large
     }
     gpt_large_training_state current = state
     int i = 0
-    while i < loops {
+    for i < loops {
         current = gpt_large_training_step(current)
         i = i + 1
         if current.finished {

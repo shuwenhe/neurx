@@ -62,10 +62,10 @@ func new_verifier_executor(verifier_config config) verifier_executor {
 func initialize_verifier_embeddings(verifier_executor executor, int vocab_size, int embed_dim) verifier_executor {
     updated := executor
     i := 0
-    while i < vocab_size {
+    for i < vocab_size {
         embedding := []float{}
         j := 0
-        while j < embed_dim {
+        for j < embed_dim {
             embedding = append(embedding, 0.02)
             j = j + 1
         }
@@ -86,10 +86,10 @@ func verifier_embedding_lookup(verifier_executor executor, int token_id) []float
 func verifier_layer_forward([]float input, []float layer_weight, int hidden_dim) []float {
     output := []float{}
     i := 0
-    while i < hidden_dim {
+    for i < hidden_dim {
         val := 0.0
         j := 0
-        while j < input.len {
+        for j < input.len {
             idx := i * input.len + j
             if idx < layer_weight.len {
                 val = val + input[j] * layer_weight[idx]
@@ -105,7 +105,7 @@ func verifier_layer_forward([]float input, []float layer_weight, int hidden_dim)
 func verifier_apply_residual([]float original, []float transformed) []float {
     result := []float{}
     i := 0
-    while i < original.len && i < transformed.len {
+    for i < original.len && i < transformed.len {
         result = append(result, original[i] + transformed[i])
         i = i + 1
     }
@@ -118,7 +118,7 @@ func verifier_forward_single(verifier_executor executor, int token_id, int hidde
         return []float{}
     }
     i := 0
-    while i < executor.model_weights.len && i < 24 {
+    for i < executor.model_weights.len && i < 24 {
         residual := hidden
         hidden = verifier_layer_forward(hidden, executor.model_weights[i], hidden_dim)
         hidden = draft_apply_activation(hidden)
@@ -131,10 +131,10 @@ func verifier_forward_single(verifier_executor executor, int token_id, int hidde
 func verifier_output_logits([]float hidden_states, int vocab_size) []float {
     logits := []float{}
     i := 0
-    while i < vocab_size {
+    for i < vocab_size {
         score := 0.0
         j := 0
-        while j < hidden_states.len {
+        for j < hidden_states.len {
             idx := (i * hidden_states.len + j) % (hidden_states.len * 16)
             if idx < hidden_states.len {
                 score = score + hidden_states[idx] * 0.1
@@ -160,7 +160,7 @@ func verify_single_draft(verifier_executor executor, draft_token draft) verifica
         if logits.len > 0 {
             max_logit := logits[0]
             j := 1
-            while j < logits.len {
+            for j < logits.len {
                 if logits[j] > max_logit {
                     max_logit = logits[j]
                     fallback_token = j
@@ -177,7 +177,7 @@ func verify_single_draft(verifier_executor executor, draft_token draft) verifica
 func verify_draft_sequence(verifier_executor executor, []draft_token draft_sequence) []verification_result {
     results := []verification_result{}
     i := 0
-    while i < draft_sequence.len {
+    for i < draft_sequence.len {
         result := verify_single_draft(executor, draft_sequence[i])
         results = append(results, result)
         if result.accepted {
@@ -199,7 +199,7 @@ func verify_with_confidence_filtering(verifier_executor executor, []draft_token 
 func compute_acceptance_rate([]verification_result results) float {
     accepted := 0
     i := 0
-    while i < results.len {
+    for i < results.len {
         if results[i].accepted {
             accepted = accepted + 1
         }

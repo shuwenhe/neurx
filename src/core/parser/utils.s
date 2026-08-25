@@ -80,7 +80,7 @@ func escape_json_string(string s) string {
     result := "\""
     i := 0
 
-    while i < len(s) {
+    for i < len(s) {
         ch := s[i]
 
         if ch == '"' {
@@ -112,7 +112,7 @@ func escape_xml_string(string s) string {
     result := ""
     i := 0
 
-    while i < len(s) {
+    for i < len(s) {
         ch := s[i]
 
         if ch == '&' {
@@ -139,7 +139,7 @@ func unescape_json_string(string s) string {
     result := ""
     i := 1
 
-    while i < len(s) - 1 {
+    for i < len(s) - 1 {
         ch := s[i]
 
         if ch == '\\' && i + 1 < len(s) - 1 {
@@ -185,7 +185,7 @@ func unescape_json_string(string s) string {
 func prettify_json_value(ParsedValue value, int depth) string {
     indent := ""
     i := 0
-    while i < depth * 2 {
+    for i < depth * 2 {
         indent = indent + " "
         i = i + 1
     }
@@ -202,13 +202,13 @@ func prettify_json_value(ParsedValue value, int depth) string {
         result := "[\n"
         next_indent := ""
         j := 0
-        while j < (depth + 1) * 2 {
+        for j < (depth + 1) * 2 {
             next_indent = next_indent + " "
             j = j + 1
         }
 
         i = 0
-        while i < len(value.array_values) {
+        for i < len(value.array_values) {
             result = result + next_indent + prettify_json_value(value.array_values[i], depth + 1)
             if i < len(value.array_values) - 1 {
                 result = result + ","
@@ -223,13 +223,13 @@ func prettify_json_value(ParsedValue value, int depth) string {
         result := "{\n"
         next_indent := ""
         j := 0
-        while j < (depth + 1) * 2 {
+        for j < (depth + 1) * 2 {
             next_indent = next_indent + " "
             j = j + 1
         }
 
         i = 0
-        while i < len(value.object_keys) {
+        for i < len(value.object_keys) {
             result = result + next_indent + "\"" + value.object_keys[i] + "\": "
             result = result + prettify_json_value(value.object_values[i], depth + 1)
             if i < len(value.object_keys) - 1 {
@@ -259,7 +259,7 @@ func minify_json_value(ParsedValue value) string {
         result := "["
         i := 0
 
-        while i < len(value.array_values) {
+        for i < len(value.array_values) {
             result = result + minify_json_value(value.array_values[i])
             if i < len(value.array_values) - 1 {
                 result = result + ","
@@ -273,7 +273,7 @@ func minify_json_value(ParsedValue value) string {
         result := "{"
         i := 0
 
-        while i < len(value.object_keys) {
+        for i < len(value.object_keys) {
             result = result + "\"" + value.object_keys[i] + "\":"
             result = result + minify_json_value(value.object_values[i])
             if i < len(value.object_keys) - 1 {

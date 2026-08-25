@@ -4,11 +4,11 @@ use std.io.println
 
 func trim(string s) string {
     int i = 0
-    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
     int j = len(s) - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
     if j < i {
@@ -16,7 +16,7 @@ func trim(string s) string {
     }
     string out = ""
     int k = i
-    while k <= j {
+    for k <= j {
         out = out + string(s[k])
         k = k + 1
     }
@@ -77,7 +77,7 @@ func main() {
     println("    - Context length : 256")
     println("  ✓ Loading transformer layers:")
     int layer = 0
-    while layer < 24 {
+    for layer < 24 {
         if layer == 0 || layer == 4 || layer == 8 || layer == 12 || layer == 16 || layer == 20 {
             println("    - Loading layer " + int_to_str(layer))
         }

@@ -119,7 +119,7 @@ func string_find(string s, string substr) int {
 func string_replace(string s, string old_str, string new_str) string {
     string result
     int pos = 0
-    while true {
+    for true {
         int idx = string_find(s, old_str)
         if idx == -1 {
             result = result + string_substring(s, pos, len(s))

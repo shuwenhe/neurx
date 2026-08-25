@@ -91,7 +91,7 @@ func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float guess = x * 0.5
     int iter = 0
-    while iter < 20 {
+    for iter < 20 {
         float ng = (guess + x / guess) * 0.5
         if ng == guess { break }
         guess = ng
@@ -103,7 +103,7 @@ func sqrt_approx(float x) float {
 func float_of_int(int n) float {
     float result = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         result = result + 1.0
         i = i + 1
     }
@@ -123,8 +123,8 @@ func min_int(int a, int b) int {
 func mod_ring(int val, int div) int {
     if div <= 0 { return 0 }
     int r = val
-    while r >= div { r = r - div }
-    while r < 0 { r = r + div }
+    for r >= div { r = r - div }
+    for r < 0 { r = r + div }
     return r
 }
 
@@ -142,7 +142,7 @@ func exp_stable(float x) float {
 func zeros(int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out = append(out, 0.0)
         i = i + 1
     }
@@ -152,7 +152,7 @@ func zeros(int n) []float {
 func fill(int n, float val) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out = append(out, val)
         i = i + 1
     }
@@ -162,7 +162,7 @@ func fill(int n, float val) []float {
 func allocate_2d_tensor(int rows, int cols) [][]float {
     [][]float t = [][]float{cap: rows}
     int i = 0
-    while i < rows {
+    for i < rows {
         t[i] = fill(cols, 0.0)
         i = i + 1
     }
@@ -172,7 +172,7 @@ func allocate_2d_tensor(int rows, int cols) [][]float {
 func allocate_3d_tensor(int d1, int d2, int d3) [][][]float {
     [][][]float t = [][][]float{cap: d1}
     int i = 0
-    while i < d1 {
+    for i < d1 {
         t[i] = allocate_2d_tensor(d2, d3)
         i = i + 1
     }
@@ -195,11 +195,11 @@ func ring_attention_forward(
     state.local_k = k_input
     state.local_v = v_input
     int h = 0
-    while h < H {
+    for h < H {
         int s = 0
-        while s < L {
+        for s < L {
             int d = 0
-            while d < D {
+            for d < D {
                 state.attn_output[h][s][d] = 0.0
                 d = d + 1
             }
@@ -210,7 +210,7 @@ func ring_attention_forward(
         h = h + 1
     }
     int step = 0
-    while step < P {
+    for step < P {
         int source_rank = mod_ring(rank - step, P)
         [][]float current_k
         [][]float current_v
@@ -222,7 +222,7 @@ func ring_attention_forward(
             current_v = state.remote_v_buffer
         }
         h = 0
-        while h < H {
+        for h < H {
             int kv_h = h
             if hkv > 0 && hkv < H {
                 kv_h = h / (H / Hkv)
@@ -252,15 +252,15 @@ func ring_attention_forward(
         step = step + 1
     }
     h = 0
-    while h < H {
+    for h < H {
         int s = 0
-        while s < L {
+        for s < L {
             float inv_sum = 1.0
             if state.row_sum_accum[h][s][0] > 1e-10 {
                 inv_sum = 1.0 / state.row_sum_accum[h][s][0]
             }
             int d = 0
-            while d < D {
+            for d < D {
                 state.attn_output[h][s][d] = state.attn_output[h][s][d] * inv_sum
                 d = d + 1
             }
@@ -291,15 +291,15 @@ func ring_attn_update_step(
     int global_offset = (source_rank - rank) * L
     if global_offset < 0 { global_offset = 0 }
     int qi = 0
-    while qi < L {
+    for qi < L {
         float old_max = state.row_max_accum[head_idx][qi][0]
         float old_sum = state.row_max_accum[head_idx][qi][0]
         []float scores = fill(kv_l, 0.0)
         int kj = 0
-        while kj < kv_l && kj < L {
+        for kj < kv_l && kj < L {
             float dot = 0.0
             int d = 0
-            while d < D {
+            for d < D {
                 dot = dot + q_local[qi][d] * kv_block[kj][d]
                 d = d + 1
             }
@@ -309,7 +309,7 @@ func ring_attn_update_step(
         if causal {
             int qi_global = rank * L + qi
             kj = 0
-            while kj < kv_l && kj < L {
+            for kj < kv_l && kj < L {
                 int kj_global = source_rank * L + kj
                 if kj_global > qi_global {
                     scores[kj] = -1e9
@@ -319,7 +319,7 @@ func ring_attn_update_step(
         }
         float new_max = old_max
         kj = 0
-        while kj < kv_l && kj < L {
+        for kj < kv_l && kj < L {
             if scores[kj] > new_max {
                 new_max = scores[kj]
             }
@@ -328,17 +328,17 @@ func ring_attn_update_step(
         float rescale = exp_stable(old_max - new_max)
         state.row_sum_accum[head_idx][qi][0] = state.row_sum_accum[head_idx][qi][0] * rescale
         int d = 0
-        while d < D {
+        for d < D {
             state.attn_output[head_idx][qi][d] = state.attn_output[head_idx][qi][d] * rescale
             d = d + 1
         }
         float row_lsum = 0.0
         kj = 0
-        while kj < kv_l && kj < L {
+        for kj < kv_l && kj < L {
             float p = exp_stable(scores[kj] - new_max)
             row_lsum = row_lsum + p
             d = 0
-            while d < D {
+            for d < D {
                 state.attn_output[head_idx][qi][d] = state.attn_output[head_idx][qi][d] +
                                                        p * v_block[kj][d]
                 d = d + 1
@@ -360,9 +360,9 @@ func prepare_next_ring_comm(ref ring_attn_state state, int current_source_rank) 
         int L = state.config.local_seq_len
         int D = state.config.head_dim
         int s = 0
-        while s < L {
+        for s < L {
             int d = 0
-            while d < D {
+            for d < D {
                 state.remote_k_buffer[s][d] = state.local_k[0][s][d]
                 state.remote_v_buffer[s][d] = state.local_v[0][s][d]
                 d = d + 1
@@ -427,12 +427,12 @@ func simulate_allgather(sequence_parallel_config sp_cfg, [][]float input, int L,
     [][]float gathered = allocate_2d_tensor(total_l, H)
     int rank = sp_cfg.sp_rank
     int r = 0
-    while r < P {
+    for r < P {
         int offset = r * L
         int s = 0
-        while s < L {
+        for s < L {
             int d = 0
-            while d < H {
+            for d < H {
                 if r == rank {
                     gathered[offset + s][d] = input[s][d]
                 } else {
@@ -451,17 +451,17 @@ func layernorm_full_sequence([][]float x, int seq_len, int dim) [][]float {
     float eps = 1e-6
     [][]float out = allocate_2d_tensor(seq_len, dim)
     int s = 0
-    while s < seq_len {
+    for s < seq_len {
         float mean = 0.0
         int d = 0
-        while d < dim {
+        for d < dim {
             mean = mean + x[s][d]
             d = d + 1
         }
         mean = mean / float_of_int(dim)
         float var = 0.0
         d = 0
-        while d < dim {
+        for d < dim {
             float diff = x[s][d] - mean
             var = var + diff * diff
             d = d + 1
@@ -469,7 +469,7 @@ func layernorm_full_sequence([][]float x, int seq_len, int dim) [][]float {
         var = var / float_of_int(dim)
         float inv_std = 1.0 / sqrt_approx(var + eps)
         d = 0
-        while d < dim {
+        for d < dim {
             out[s][d] = (x[s][d] - mean) * inv_std
             d = d + 1
         }
@@ -482,9 +482,9 @@ func extract_local_portion([][]float full, int rank, int L, int H) [][]float {
     int offset = rank * L
     [][]float local = allocate_2d_tensor(L, H)
     int s = 0
-    while s < L {
+    for s < L {
         int d = 0
-        while d < H {
+        for d < H {
             local[s][d] = full[offset + s][d]
             d = d + 1
         }
@@ -503,9 +503,9 @@ func sp_layernorm_ring_reduce(
     []float local_sum = fill(H, 0.0)
     []float local_sq_sum = fill(H, 0.0)
     int s = 0
-    while s < L {
+    for s < L {
         int d = 0
-        while d < H {
+        for d < H {
             local_sum[d] = local_sum[d] + local_hidden[s][d]
             local_sq_sum[d] = local_sq_sum[d] + local_hidden[s][d] * local_hidden[s][d]
             d = d + 1
@@ -518,12 +518,12 @@ func sp_layernorm_ring_reduce(
     [][]float out = allocate_2d_tensor(L, H)
     float eps = 1e-6
     int d = 0
-    while d < H {
+    for d < H {
         float global_mean = global_sum[d] / float_of_int(total_seq_len)
         float global_var = global_sq_sum[d] / float_of_int(total_seq_len) - global_mean * global_mean
         float inv_std = 1.0 / sqrt_approx(global_var + eps)
         s = 0
-        while s < L {
+        for s < L {
             out[s][d] = (local_hidden[s][d] - global_mean) * inv_std
             s = s + 1
         }
@@ -537,7 +537,7 @@ func ring_allreduce_sum([]float input, sequence_parallel_config sp_cfg) []float 
     int N = len(input)
     []float result = fill(N, 0.0)
     int i = 0
-    while i < N {
+    for i < N {
         result[i] = input[i] * float_of_int(P)
         i = i + 1
     }

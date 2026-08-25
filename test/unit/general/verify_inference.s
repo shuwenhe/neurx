@@ -51,7 +51,7 @@ func string_char(string text, int index) string {
 func string_slice(string text, int start, int end) string {
     string result = ""
     int i = start
-    while i < end && i < len(text) {
+    for i < end && i < len(text) {
         result = result + string_char_from_code(text[i])
         i = i + 1
     }
@@ -194,7 +194,7 @@ func run_all_tests([]inference_test_case test_cases) inference_verification_repo
     }
 
     int i = 0
-    while i < len(test_cases) {
+    for i < len(test_cases) {
         inference_test_result result = run_inference_test(test_cases[i])
         report.results = append(report.results, result)
         report.total_tests = report.total_tests + 1
@@ -228,7 +228,7 @@ func print_verification_report(inference_verification_report report) {
 
     println("Test Results:")
     int i = 0
-    while i < len(report.results) {
+    for i < len(report.results) {
         inference_test_result result = report.results[i]
         string status = "✗"
         if result.passed {

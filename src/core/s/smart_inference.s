@@ -27,7 +27,7 @@ struct inference_config {
 func strlen(string s) int {
     int count = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         count = count + 1
         i = i + 1
     }
@@ -39,10 +39,10 @@ func str_contains(string s, string substr) bool {
         return false
     }
     int i = 0
-    while i + strlen(substr) <= strlen(s) {
+    for i + strlen(substr) <= strlen(s) {
         bool match = true
         int j = 0
-        while j < strlen(substr) {
+        for j < strlen(substr) {
             if s[i + j] != substr[j] {
                 match = false
                 j = strlen(substr)
@@ -60,7 +60,7 @@ func str_contains(string s, string substr) bool {
 func str_to_lower(string s) string {
     string result = ""
     int i = 0
-    while i < strlen(s) {
+    for i < strlen(s) {
         int c = s[i]
         if c >= 65 && c <= 90 {
             c = c + 32
@@ -79,10 +79,10 @@ func char_to_string(int c) string {
 func count_word_occurrences(string text, string word) int {
     int count = 0
     int i = 0
-    while i <= strlen(text) - strlen(word) {
+    for i <= strlen(text) - strlen(word) {
         bool match = true
         int j = 0
-        while j < strlen(word) {
+        for j < strlen(word) {
             if i + j >= strlen(text) || text[i + j] != word[j] {
                 match = false
                 j = strlen(word)
@@ -156,7 +156,7 @@ func calculate_similarity(string query, string doc) float {
         score = 0.8
     } else {
         int i = 0
-        while i < strlen(q_lower) {
+        for i < strlen(q_lower) {
             if d_lower[i] == q_lower[i] {
                 score = score + 0.01
             }
@@ -171,7 +171,7 @@ func find_relevant_documents(string question, int top_k) {
     float best_score = 0.0
     int best_doc = -1
     int i = 0
-    while i < kb_size {
+    for i < kb_size {
         string doc = get_knowledge_item(i)
         float score = calculate_similarity(question, doc)
         if score > best_score {
@@ -320,7 +320,7 @@ func run_interactive_mode() {
     println("💡 prompt: input 'quit' English text, 'help' English text")
     println("")
     int turn = 1
-    while turn <= 10 {
+    for turn <= 10 {
         print_text("[English text " + int_to_string(turn) + "] English text: ")
         string user_input = ""
         if turn == 1 {
@@ -371,7 +371,7 @@ func int_to_string(int n) string {
         n = -n
     }
     string result = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n % 10
         result = string(digit + 48) + result
         n = n / 10

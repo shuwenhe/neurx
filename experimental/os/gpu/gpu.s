@@ -125,7 +125,7 @@ func gpu_submit_job(gs gpu_state, stream_id int, kernel_name string,
     gs.jobs = append(gs.jobs, j)
     gs.next_job_id = gs.next_job_id + 1
     int i = 0
-    while i < len(gs.streams) {
+    for i < len(gs.streams) {
         if gs.streams[i].stream_id == stream_id {
             gs.streams[i].pending_jobs = gs.streams[i].pending_jobs + 1
         }
@@ -144,20 +144,20 @@ func gpu_record_fence(gs gpu_state, int stream_id) (gpu_state, int) {
 
 func gpu_complete_job(gs gpu_state, int job_id) gpu_state {
     int i = 0
-    while i < len(gs.jobs) {
+    for i < len(gs.jobs) {
         if gs.jobs[i].job_id == job_id {
             gs.jobs[i].state           = JOB_DONE
             gs.jobs[i].completed_at_ms = 0
             int sid = gs.jobs[i].stream_id
             int j = 0
-            while j < len(gs.fences) {
+            for j < len(gs.fences) {
                 if gs.fences[j].stream_id == sid {
                     gs.fences[j].signaled = true
                 }
                 j = j + 1
             }
             int k = 0
-            while k < len(gs.streams) {
+            for k < len(gs.streams) {
                 if gs.streams[k].stream_id == sid {
                     gs.streams[k].pending_jobs   = gs.streams[k].pending_jobs - 1
                     gs.streams[k].completed_jobs = gs.streams[k].completed_jobs + 1
@@ -172,7 +172,7 @@ func gpu_complete_job(gs gpu_state, int job_id) gpu_state {
 
 func gpu_fence_query(gs gpu_state, int fence_id) bool {
     int i = 0
-    while i < len(gs.fences) {
+    for i < len(gs.fences) {
         if gs.fences[i].fence_id == fence_id {
             return gs.fences[i].signaled
         }

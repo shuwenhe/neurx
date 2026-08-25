@@ -35,7 +35,7 @@ func dtype_element_size(string dtype) int {
 func tensor_element_count([]int shape) int {
     int count = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         count = count * shape[i]
         i = i + 1
     }

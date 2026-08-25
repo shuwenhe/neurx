@@ -52,7 +52,7 @@ struct session_update_result {
 func session_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -69,7 +69,7 @@ func new_streaming_session_state(streaming_session_config config) streaming_sess
 
 func session_find(streaming_session_state state, int session_id) int {
     int i = 0
-    while i < state.config.capacity {
+    for i < state.config.capacity {
         if state.active[i] == 1 && state.session_ids[i] == session_id { return i }
         i = i + 1
     }
@@ -84,7 +84,7 @@ func session_open(streaming_session_state state, int session_id, bool streaming,
     if session_id <= 0 || session_find(state, session_id) >= 0 { state.rejected = state.rejected + 1; return session_result(state, 0 - 1, 0, session_duplicate(), false, false) }
     int slot = 0 - 1
     int i = 0
-    while i < state.config.capacity {
+    for i < state.config.capacity {
         if slot < 0 && state.active[i] == 0 { slot = i }
         i = i + 1
     }
@@ -172,7 +172,7 @@ func session_close(streaming_session_state state, int session_id) session_update
 func session_reap_timeouts(streaming_session_state state, int now_ms) streaming_session_state {
     streaming_session_state current = state
     int i = 0
-    while i < current.config.capacity {
+    for i < current.config.capacity {
         if current.active[i] == 1 && current.timeout_ms[i] > 0 && now_ms - current.last_active_ms[i] > current.timeout_ms[i] {
             current.timed_out = current.timed_out + 1
             if current.inflight[i] == 1 { current.close_on_finish[i] = 1 }

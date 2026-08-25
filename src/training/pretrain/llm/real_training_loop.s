@@ -42,32 +42,32 @@ func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr
     []float head_data = []float{cap: hidden_dim * vocab_size}
     int i = 0
     float scale = 2.0 / (hidden_dim as float)
-    while i < len(embed_data) {
+    for i < len(embed_data) {
         embed_data[i] = (i - (i / 100) * 100) as float * 0.01 - 0.5
         i = i + 1
     }
     i = 0
-    while i < len(q_data) {
+    for i < len(q_data) {
         q_data[i] = (i - (i / 50) * 50) as float * 0.01 - 0.25
         i = i + 1
     }
     i = 0
-    while i < len(k_data) {
+    for i < len(k_data) {
         k_data[i] = (i - (i / 50) * 50) as float * 0.01 - 0.25
         i = i + 1
     }
     i = 0
-    while i < len(v_data) {
+    for i < len(v_data) {
         v_data[i] = (i - (i / 50) * 50) as float * 0.01 - 0.25
         i = i + 1
     }
     i = 0
-    while i < len(out_data) {
+    for i < len(out_data) {
         out_data[i] = (i - (i / 50) * 50) as float * 0.01 - 0.25
         i = i + 1
     }
     i = 0
-    while i < len(head_data) {
+    for i < len(head_data) {
         head_data[i] = (i - (i / 100) * 100) as float * 0.01 - 0.5
         i = i + 1
     }
@@ -110,7 +110,7 @@ func update_parameters(real_training_state state, tensor hidden, tensor grad) re
     int i = 0
     int n = len(state.lm_head.data)
     []float next_head = []float{cap: n}
-    while i < n {
+    for i < n {
         float g = 0.0
         if i < len(grad_lm_head.data) {
             g = grad_lm_head.data[i]
@@ -168,7 +168,7 @@ func run_training_loop(
     []string data_paths = gpt_large_pretrain_manifest_refs(manifest_path)
     corpus_state corpus = new_corpus_state_from_paths(data_paths, batch_size, seq_len, true)
     int step = 0
-    while step < num_steps {
+    for step < num_steps {
         corpus_batch_result batch_result = corpus_next_batch(corpus)
         corpus = batch_result.state
         if len(batch_result.batch.input_ids) == 0 {
@@ -195,7 +195,7 @@ func one_hot_from_ints([]int values, int vocab_size) tensor {
     int n = len(values)
     []float data = []float{cap: n * vocab_size}
     int i = 0
-    while i < n {
+    for i < n {
         int id = values[i]
         if id < 0 {
             id = 0
@@ -212,7 +212,7 @@ func one_hot_from_ints([]int values, int vocab_size) tensor {
 func new_from_ints([]int values, []int shape) tensor {
     []float data = []float{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         data[i] = values[i] as float
         i = i + 1
     }

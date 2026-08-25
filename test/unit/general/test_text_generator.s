@@ -13,7 +13,7 @@ func dummy_forward([]int token_ids) []float {
     int n = 8
     []float logits = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         logits[i] = -5.0
         i = i + 1
     }
@@ -30,7 +30,7 @@ func contrastive_forward([]int token_ids) []float {
     int n = 6
     []float logits = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         logits[i] = -6.0
         i = i + 1
     }
@@ -48,7 +48,7 @@ func ngram_forward([]int token_ids) []float {
     int n = 6
     []float logits = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         logits[i] = -6.0
         i = i + 1
     }

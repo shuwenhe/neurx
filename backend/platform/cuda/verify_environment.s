@@ -118,11 +118,11 @@ func print_warning(string text, string color, string NC) {
 
 func trim(string s) string {
     int i = 0
-    while i < str_len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < str_len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
     int j = str_len(s) - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
     if j < i {
@@ -134,7 +134,7 @@ func trim(string s) string {
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
-    while i < end && i < str_len(s) {
+    for i < end && i < str_len(s) {
         out = out + string_char(s[i])
         i = i + 1
     }
@@ -147,7 +147,7 @@ func string_char(int c) string {
 
 func str_len(string s) int {
     int n = 0
-    while n < 1000000 && s[n] != 0 {
+    for n < 1000000 && s[n] != 0 {
         n = n + 1
     }
     n
@@ -163,10 +163,10 @@ func contains_string(string haystack, string needle) bool {
         return false
     }
     int i = 0
-    while i <= h_len - n_len {
+    for i <= h_len - n_len {
         int j = 0
         bool match = true
-        while j < n_len {
+        for j < n_len {
             if haystack[i + j] != needle[j] {
                 match = false
                 j = n_len
@@ -185,7 +185,7 @@ func count_lines(string text) int {
     int count = 0
     int i = 0
     int n = str_len(text)
-    while i < n {
+    for i < n {
         if text[i] == 10 {
             count = count + 1
         }
@@ -207,10 +207,10 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int quotient = 0
         int digit = value
-        while digit >= 10 {
+        for digit >= 10 {
             digit = digit - 10
             quotient = quotient + 1
         }

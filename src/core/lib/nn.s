@@ -50,7 +50,7 @@ func create_linear_layer(int in_features, int out_features, float lr, int seed) 
     float x = in_features as float
     float result = x
     int i = 0
-    while i < 10 {
+    for i < 10 {
         result = (result + x / result) * 0.5
         i = i + 1
     }
@@ -117,7 +117,7 @@ func embedding_lookup(embedding_layer layer, int token_id) vector {
         return result
     }
     int i = 0
-    while i < layer.embedding_dim {
+    for i < layer.embedding_dim {
         result.data[i] = layer.embeddings.data[token_id * layer.embedding_dim + i]
         i = i + 1
     }
@@ -130,7 +130,7 @@ func create_layer_norm(int hidden_size) layer_norm {
     ln.epsilon = 0.00001
     ln.gamma = create_vector(hidden_size)
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         ln.gamma.data[i] = 1.0
         i = i + 1
     }
@@ -141,14 +141,14 @@ func create_layer_norm(int hidden_size) layer_norm {
 func layer_norm_forward(layer_norm ln, vector x) vector {
     float mean = 0.0
     int i = 0
-    while i < ln.hidden_size {
+    for i < ln.hidden_size {
         mean = mean + x.data[i]
         i = i + 1
     }
     mean = mean / (ln.hidden_size as float)
     float variance = 0.0
     i = 0
-    while i < ln.hidden_size {
+    for i < ln.hidden_size {
         float diff = x.data[i] - mean
         variance = variance + diff * diff
         i = i + 1
@@ -157,20 +157,20 @@ func layer_norm_forward(layer_norm ln, vector x) vector {
     float std_dev = variance
     float sqrt_result = std_dev
     int j = 0
-    while j < 10 {
+    for j < 10 {
         sqrt_result = (sqrt_result + std_dev / sqrt_result) * 0.5
         j = j + 1
     }
     std_dev = sqrt_result
     vector normalized = create_vector(ln.hidden_size)
     i = 0
-    while i < ln.hidden_size {
+    for i < ln.hidden_size {
         normalized.data[i] = (x.data[i] - mean) / (std_dev + ln.epsilon)
         i = i + 1
     }
     vector output = create_vector(ln.hidden_size)
     i = 0
-    while i < ln.hidden_size {
+    for i < ln.hidden_size {
         output.data[i] = ln.gamma.data[i] * normalized.data[i] + ln.beta.data[i]
         i = i + 1
     }
@@ -181,7 +181,7 @@ func dropout(vector x, float dropout_rate, int seed) vector {
     vector result = create_vector(x.size)
     int state = seed
     int i = 0
-    while i < x.size {
+    for i < x.size {
         state = (state * 1103515245 + 12345) - ((state * 1103515245 + 12345) / 2147483648) * 2147483648
         if state < 0 {
             state = 0 - state
@@ -211,7 +211,7 @@ func create_batch_norm_stats(int feature_size) batch_norm_stats {
     stats.running_mean = create_vector(feature_size)
     stats.running_var = create_vector(feature_size)
     int i = 0
-    while i < feature_size {
+    for i < feature_size {
         stats.running_var.data[i] = 1.0
         i = i + 1
     }

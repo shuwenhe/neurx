@@ -139,7 +139,7 @@ func kv_cache_engine_evict_lru_block(kv_cache_engine engine) int {
     int64 oldest_time = engine.memory_pool.blocks[0].timestamp
     
     int i = 1
-    while i < engine.memory_pool.num_blocks {
+    for i < engine.memory_pool.num_blocks {
         if engine.memory_pool.blocks[i].timestamp < oldest_time {
             oldest_time = engine.memory_pool.blocks[i].timestamp
             lru_block_idx = i
@@ -151,7 +151,7 @@ func kv_cache_engine_evict_lru_block(kv_cache_engine engine) int {
     engine.memory_pool.used_memory_bytes = engine.memory_pool.used_memory_bytes - cache_block_size_bytes(evicted_block)
     
     i = lru_block_idx
-    while i < engine.memory_pool.num_blocks - 1 {
+    for i < engine.memory_pool.num_blocks - 1 {
         engine.memory_pool.blocks[i] = engine.memory_pool.blocks[i + 1]
         i = i + 1
     }

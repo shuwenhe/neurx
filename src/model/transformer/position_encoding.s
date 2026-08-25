@@ -29,7 +29,7 @@ struct rope_position_encoding {
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }
@@ -39,7 +39,7 @@ func allocate_vector(int size, float init_val) []float {
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
-    while i < len(src) {
+    for i < len(src) {
         out[i] = src[i]
         i = i + 1
     }
@@ -50,17 +50,17 @@ func sin_approx(float x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
     float value = x
-    while value > pi {
+    for value > pi {
         value = value - two_pi
     }
-    while value < -pi {
+    for value < -pi {
         value = value + two_pi
     }
     float x2 = value * value
     float term = value
     float result = value
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = -term * x2 / ((2 * i) * (2 * i + 1) * 1.0)
         result = result + term
         i = i + 1
@@ -72,17 +72,17 @@ func cos_approx(float x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
     float value = x
-    while value > pi {
+    for value > pi {
         value = value - two_pi
     }
-    while value < -pi {
+    for value < -pi {
         value = value + two_pi
     }
     float x2 = value * value
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = -term * x2 / ((2 * i - 1) * (2 * i) * 1.0)
         result = result + term
         i = i + 1
@@ -100,7 +100,7 @@ func exp_approx(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 12 {
+    for i <= 12 {
         term = term * x / (i * 1.0)
         result = result + term
         i = i + 1
@@ -114,7 +114,7 @@ func sqrt_approx(float x) float {
     }
     float y = x
     int i = 0
-    while i < 10 {
+    for i < 10 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -134,7 +134,7 @@ func log_approx(float x) float {
     float term = z
     float result = z
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * z2
         result = result + term * 1.0 / (2 * i + 1)
         i = i + 1
@@ -150,9 +150,9 @@ func new_absolute_position_encoding(position_encoding_config cfg) absolute_posit
     float pi = 3.141592653589793
     float log_10000 = log_approx(10000.0)
     int pos = 0
-    while pos < max_seq_len {
+    for pos < max_seq_len {
         int dim = 0
-        while dim < hidden_dim {
+        for dim < hidden_dim {
             float freq = exp_approx(-log_10000 * (dim * 1.0) / (hidden_dim * 1.0))
             float angle = (pos * 1.0) * freq
             if dim % 2 == 0 {
@@ -182,13 +182,13 @@ func get_position_encoding(
     int hidden_dim = enc.hidden_dim
     []float output = allocate_vector(seq_len * hidden_dim, 0.0)
     int pos = 0
-    while pos < seq_len {
+    for pos < seq_len {
         int actual_pos = position + pos
         if actual_pos >= enc.max_seq_len {
             actual_pos = enc.max_seq_len - 1
         }
         int dim = 0
-        while dim < hidden_dim {
+        for dim < hidden_dim {
             int out_idx = pos * hidden_dim + dim
             int enc_idx = actual_pos * hidden_dim + dim
             if dim % 2 == 0 {
@@ -222,13 +222,13 @@ func get_learned_position_encoding(
     int hidden_dim = enc.hidden_dim
     []float output = allocate_vector(seq_len * hidden_dim, 0.0)
     int pos = 0
-    while pos < seq_len {
+    for pos < seq_len {
         int actual_pos = position + pos
         if actual_pos >= enc.max_seq_len {
             actual_pos = enc.max_seq_len - 1
         }
         int dim = 0
-        while dim < hidden_dim {
+        for dim < hidden_dim {
             int out_idx = pos * hidden_dim + dim
             int enc_idx = actual_pos * hidden_dim + dim
             output[out_idx] = enc.embeddings[enc_idx]
@@ -244,7 +244,7 @@ func new_rope_position_encoding(position_encoding_config cfg) rope_position_enco
     float rope_base = cfg.rope_base
     []float frequencies = allocate_vector(hidden_dim / 2, 0.0)
     int i = 0
-    while i < hidden_dim / 2 {
+    for i < hidden_dim / 2 {
         float inv_freq = 1.0 / exp_approx(2.0 * log_approx(rope_base) * (i * 1.0) / (hidden_dim * 1.0))
         frequencies[i] = inv_freq
         i = i + 1
@@ -267,11 +267,11 @@ func apply_rope_position(
     []float q_out = copy_vector(query)
     []float k_out = copy_vector(key)
     int pos = 0
-    while pos < seq_len {
+    for pos < seq_len {
         int actual_pos = position + pos
         float theta_i = (actual_pos * 1.0)
         int d = 0
-        while d < hidden_dim / 2 {
+        for d < hidden_dim / 2 {
             float angle = theta_i * enc.frequencies[d]
             float cos_angle = cos_approx(angle)
             float sin_angle = sin_approx(angle)
@@ -306,11 +306,11 @@ func add_position_encoding_to_hidden(
 ) []float {
     []float output = copy_vector(hidden_states)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 int hidden_idx = (b * seq_len + s) * hidden_dim + d
                 int pos_idx = s * hidden_dim + d
                 output[hidden_idx] = output[hidden_idx] + position_encoding[pos_idx]

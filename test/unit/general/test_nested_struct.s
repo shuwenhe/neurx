@@ -67,7 +67,7 @@ func test_function_param(outer_data param) {
 func test_loop_iteration() {
     []outer_data arr = []outer_data{cap: 3}
     int i = 0
-    while i < 3 {
+    for i < 3 {
         arr[i].name = "item" + int_to_str(i)
         arr[i].data.value = i * 10
         i = i + 1
@@ -75,7 +75,7 @@ func test_loop_iteration() {
     println("")
     println("[Test 5] Loop iteration with nested access:")
     i = 0
-    while i < 3 {
+    for i < 3 {
         outer_data item = arr[i]
         int val = item.data.value
         println("  arr[" + int_to_str(i) + "].data.value = " + int_to_str(val))

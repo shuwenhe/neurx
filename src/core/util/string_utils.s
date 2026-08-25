@@ -16,7 +16,7 @@ func string_split(string text, string delimiter) []string {
     int start = 0
     int i = 0
     int delim_len = len(delimiter)
-    while i <= len(text) - delim_len {
+    for i <= len(text) - delim_len {
         if __host_slice(text, i, i + delim_len) == delimiter {
             if i > start || result_count == 0 {
                 string part = __host_slice(text, start, i)
@@ -50,7 +50,7 @@ func string_index_of(string text, string substr) int {
     int i = 0
     int text_len = len(text)
     int substr_len = len(substr)
-    while i <= text_len - substr_len {
+    for i <= text_len - substr_len {
         if __host_slice(text, i, i + substr_len) == substr {
             return i
         }
@@ -62,7 +62,7 @@ func string_index_of(string text, string substr) int {
 func string_last_index_of(string text, string ch) int {
     int last_idx = -1
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         if __host_slice(text, i, i + 1) == ch {
             last_idx = i
         }
@@ -74,14 +74,14 @@ func string_last_index_of(string text, string ch) int {
 func string_trim(string text) string {
     int start = 0
     int end = len(text)
-    while start < end {
+    for start < end {
         string ch = __host_slice(text, start, start + 1)
         if ch != " " && ch != "\t" && ch != "\n" && ch != "\r" {
             break
         }
         start = start + 1
     }
-    while end > start {
+    for end > start {
         string ch = __host_slice(text, end - 1, end)
         if ch != " " && ch != "\t" && ch != "\n" && ch != "\r" {
             break
@@ -108,7 +108,7 @@ func string_ends_with(string text, string suffix) bool {
 func string_to_lower(string text) string {
     string result = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = __host_slice(text, i, i + 1)
         int ascii = int(ch[0])
         if ascii >= 65 && ascii <= 90 {
@@ -124,7 +124,7 @@ func string_to_lower(string text) string {
 func string_to_upper(string text) string {
     string result = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = __host_slice(text, i, i + 1)
         int ascii = int(ch[0])
         if ascii >= 97 && ascii <= 122 {
@@ -150,16 +150,16 @@ func int_to_string(int num) string {
     string digits = "0123456789"
     int temp = n
     int digit_count = 0
-    while temp > 0 {
+    for temp > 0 {
         digit_count = digit_count + 1
         temp = temp / 10
     }
     int idx = 0
-    while idx < digit_count {
+    for idx < digit_count {
         int power = 1
         int p = digit_count - idx - 1
         int count_p = 0
-        while count_p < p {
+        for count_p < p {
             power = power * 10
             count_p = count_p + 1
         }
@@ -173,7 +173,7 @@ func int_to_string(int num) string {
 func string_join([]string parts, string separator) string {
     string result = ""
     int i = 0
-    while i < len(parts) {
+    for i < len(parts) {
         if i > 0 {
             result = result + separator
         }
@@ -187,7 +187,7 @@ func string_replace(string text, string old_str, string new_str) string {
     string result = ""
     int i = 0
     int old_len = len(old_str)
-    while i < len(text) {
+    for i < len(text) {
         if i <= len(text) - old_len && __host_slice(text, i, i + old_len) == old_str {
             result = result + new_str
             i = i + old_len

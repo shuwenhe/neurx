@@ -62,7 +62,7 @@ func copy_ids([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -76,7 +76,7 @@ func extract_generated_part([]int full_ids, int prompt_length) []int {
     }
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = full_ids[prompt_length + i]
         i = i + 1
     }
@@ -85,7 +85,7 @@ func extract_generated_part([]int full_ids, int prompt_length) []int {
 
 func has_eos([]int seq, int eos_id) bool {
     int i = 0
-    while i < len(seq) {
+    for i < len(seq) {
         if seq[i] == eos_id {
             return true
         }
@@ -99,7 +99,7 @@ func check_all_finished([][]int sequences, int eos_id) bool {
         return false
     }
     int i = 0
-    while i < len(sequences) {
+    for i < len(sequences) {
         if !has_eos(sequences[i], eos_id) {
             return false
         }
@@ -129,7 +129,7 @@ func compute_avg_score([]float scores) float {
     }
     float total = 0.0
     int i = 0
-    while i < len(scores) {
+    for i < len(scores) {
         total = total + scores[i]
         i = i + 1
     }
@@ -139,7 +139,7 @@ func compute_avg_score([]float scores) float {
 func generator_vocab_size([]int prompt_ids, generator_config cfg) int {
     int vocab = max(cfg.eos_token_id + 4, 16)
     int i = 0
-    while i < len(prompt_ids) {
+    for i < len(prompt_ids) {
         if prompt_ids[i] + 4 > vocab {
             vocab = prompt_ids[i] + 4
         }
@@ -161,7 +161,7 @@ func stub_next_logits(
     []float logits = []float{cap: vocab_size}
     int signature = (len(current_ids) + 1) * 97 + step * 31 + max_steps * 11
     int i = 0
-    while i < len(current_ids) {
+    for i < len(current_ids) {
         signature = signature + current_ids[i] * (i + 1)
         i = i + 1
     }
@@ -173,7 +173,7 @@ func stub_next_logits(
     int secondary = (preferred + 7 + cfg.top_k) - (((preferred + 7 + cfg.top_k) / vocab_size) * vocab_size)
     int tertiary = (preferred + 13 + step) - (((preferred + 13 + step) / vocab_size) * vocab_size)
     i = 0
-    while i < vocab_size {
+    for i < vocab_size {
         logits[i] = -8.0 + float((i + signature) - (((i + signature) / 9) * 9)) * 0.15
         i = i + 1
     }
@@ -181,7 +181,7 @@ func stub_next_logits(
     logits[secondary] = 6.0 + float(len(current_ids))
     logits[tertiary] = 3.0 + float(cfg.top_k) * 0.05
     i = 0
-    while i < len(current_ids) {
+    for i < len(current_ids) {
         int token = current_ids[i]
         int penalized = token - ((token / vocab_size) * vocab_size)
         if penalized < 0 {
@@ -206,7 +206,7 @@ func take_generation_output([]int prompt_ids, []int generated_ids, bool return_f
     if return_full_text {
         []int full = copy_ids(prompt_ids)
         int i = 0
-        while i < len(generated_ids) {
+        for i < len(generated_ids) {
             full.push(generated_ids[i])
             i = i + 1
         }
@@ -222,7 +222,7 @@ func log_softmax([]float logits) []float {
     }
     float max_val = logits[0]
     int i = 1
-    while i < n {
+    for i < n {
         if logits[i] > max_val {
             max_val = logits[i]
         }
@@ -230,14 +230,14 @@ func log_softmax([]float logits) []float {
     }
     float sum_exp = 0.0
     i = 0
-    while i < n {
+    for i < n {
         sum_exp = sum_exp + neurx.inference.sampling_strategies.exp_approx(logits[i] - max_val)
         i = i + 1
     }
     float log_sum_exp = neurx.inference.sampling_strategies.log_approx(sum_exp) + max_val
     []float out = []float{cap: n}
     i = 0
-    while i < n {
+    for i < n {
         out[i] = logits[i] - log_sum_exp
         i = i + 1
     }
@@ -255,7 +255,7 @@ func collect_top_logprobs([]float log_probs, int top_n) []top_logprob_candidate 
     }
     []top_logprob_candidate out = []top_logprob_candidate{cap: top_n}
     int i = 0
-    while i < top_n {
+    for i < top_n {
         int token_id = ranked[i]
         out.push(top_logprob_candidate {
             token_id: token_id,
@@ -280,7 +280,7 @@ func generate_one_sequence(
     if cfg.sampling.strategy == "beam_search" && cfg.sampling.num_beams > 1 {
         [][]float all_logits = [][]float{cap: max_steps}
         int step = 0
-        while step < max_steps {
+        for step < max_steps {
             all_logits.push(stub_next_logits(current_ids, cfg, step, max_steps, vocab_size))
             step = step + 1
         }
@@ -290,7 +290,7 @@ func generate_one_sequence(
             cfg.eos_token_id
         )
         int i = 0
-        while i < len(beam_tokens) {
+        for i < len(beam_tokens) {
             current_ids.push(beam_tokens[i])
             if beam_tokens[i] == cfg.eos_token_id && i + 1 >= cfg.min_new_tokens {
                 finished = true
@@ -315,7 +315,7 @@ func generate_one_sequence(
     int step = 0
     []float step_logprobs = []float{cap: max_steps}
     [][]top_logprob_candidate step_top_logprobs = [][]top_logprob_candidate{cap: max_steps}
-    while step < max_steps {
+    for step < max_steps {
         []float raw_logits = stub_next_logits(current_ids, cfg, step, max_steps, vocab_size)
         []int gen_part = extract_generated_part(current_ids, len(prompt_ids))
         []float processed = neurx.inference.sampling_strategies.process_logits(raw_logits, gen_part, cfg.sampling)
@@ -373,7 +373,7 @@ func generate_one_sequence_with_forward(
     if cfg.sampling.strategy == "beam_search" && cfg.sampling.num_beams > 1 {
         [][]float all_logits = [][]float{cap: max_steps}
         int step = 0
-        while step < max_steps {
+        for step < max_steps {
             []float step_logits = forward_fn(current_ids)
             all_logits.push(step_logits)
             current_ids.push(0)
@@ -386,7 +386,7 @@ func generate_one_sequence_with_forward(
             cfg.eos_token_id
         )
         int i = 0
-        while i < len(beam_tokens) {
+        for i < len(beam_tokens) {
             current_ids.push(beam_tokens[i])
             if beam_tokens[i] == cfg.eos_token_id && i + 1 >= cfg.min_new_tokens {
                 finished = true
@@ -411,7 +411,7 @@ func generate_one_sequence_with_forward(
     int step = 0
     []float step_logprobs = []float{cap: max_steps}
     [][]top_logprob_candidate step_top_logprobs = [][]top_logprob_candidate{cap: max_steps}
-    while step < max_steps {
+    for step < max_steps {
         []float raw_logits = forward_fn(current_ids)
         []int gen_part = extract_generated_part(current_ids, len(prompt_ids))
         []float processed = neurx.inference.sampling_strategies.process_logits(raw_logits, gen_part, cfg.sampling)
@@ -466,7 +466,7 @@ func generate(
     uint64 rng = cfg.sampling.seed
     bool all_finished = true
     int i = 0
-    while i < count {
+    for i < count {
         ([]int seq, float score, []float token_logprobs, [][]top_logprob_candidate top_logprobs, bool finished, uint64 next_rng) = generate_one_sequence(prompt_ids, cfg, rng)
         all_sequences.push(seq)
         if cfg.return_scores {
@@ -509,7 +509,7 @@ func generate_with_forward(
     uint64 rng = cfg.sampling.seed
     bool all_finished = true
     int i = 0
-    while i < count {
+    for i < count {
         ([]int seq, float score, []float token_logprobs, [][]top_logprob_candidate top_logprobs, bool finished, uint64 next_rng) = generate_one_sequence_with_forward(
             prompt_ids,
             forward_fn,

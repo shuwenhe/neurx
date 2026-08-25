@@ -26,7 +26,7 @@ func new_ipc_state() ipc_state {
 
 func msgget(is ipc_state, string name, int max_depth) (ipc_state, int) {
     int i = 0
-    while i < len(is.queues) {
+    for i < len(is.queues) {
         if is.queues[i].name == name {
             return (is, is.queues[i].qid)
         }
@@ -41,7 +41,7 @@ func msgget(is ipc_state, string name, int max_depth) (ipc_state, int) {
 
 func msgsnd(is ipc_state, int qid, int from_pid, int to_pid, string msg_type, string payload) ipc_state {
     int i = 0
-    while i < len(is.queues) {
+    for i < len(is.queues) {
         if is.queues[i].qid == qid {
             ipc_message m = ipc_message{
                 msg_id:    is.next_msg_id,
@@ -61,15 +61,15 @@ func msgsnd(is ipc_state, int qid, int from_pid, int to_pid, string msg_type, st
 
 func msgrcv(is ipc_state, int qid, int to_pid) (ipc_state, ipc_message, bool) {
     int qi = 0
-    while qi < len(is.queues) {
+    for qi < len(is.queues) {
         if is.queues[qi].qid == qid {
             int mi = 0
-            while mi < len(is.queues[qi].messages) {
+            for mi < len(is.queues[qi].messages) {
                 ipc_message m = is.queues[qi].messages[mi]
                 if m.to_pid == to_pid || m.to_pid == -1 {
                     []ipc_message remaining = []
                     int k = 0
-                    while k < len(is.queues[qi].messages) {
+                    for k < len(is.queues[qi].messages) {
                         if k != mi {
                             remaining = append(remaining, is.queues[qi].messages[k])
                         }
@@ -112,7 +112,7 @@ func sem_create(ss sem_state, string name, int initial, int max_val) (sem_state,
 
 func sem_down(ss sem_state, int sem_id) (sem_state, bool) {
     int i = 0
-    while i < len(ss.sems) {
+    for i < len(ss.sems) {
         if ss.sems[i].sem_id == sem_id {
             if ss.sems[i].value > 0 {
                 ss.sems[i].value = ss.sems[i].value - 1
@@ -127,7 +127,7 @@ func sem_down(ss sem_state, int sem_id) (sem_state, bool) {
 
 func sem_up(ss sem_state, int sem_id) sem_state {
     int i = 0
-    while i < len(ss.sems) {
+    for i < len(ss.sems) {
         if ss.sems[i].sem_id == sem_id {
             if ss.sems[i].value < ss.sems[i].max_value {
                 ss.sems[i].value = ss.sems[i].value + 1

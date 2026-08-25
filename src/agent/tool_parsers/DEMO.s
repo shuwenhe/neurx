@@ -89,7 +89,7 @@ func main() {
 
     sample_logits := vec_new()
     i := 0
-    while i < 256 {
+    for i < 256 {
         sample_logits.append(1.0)
         i = i + 1
     }
@@ -175,7 +175,7 @@ func main() {
 
     samplers := vec_new()
     j := 0
-    while j < 4 {
+    for j < 4 {
         s := structured_sampler.create_structured_sampler(&object_schema, schema_types.CONSTRAINT_STRICT)
         samplers.append(s)
         j = j + 1
@@ -185,10 +185,10 @@ func main() {
 
     batch_logits := vec_new()
     b := 0
-    while b < 4 {
+    for b < 4 {
         seq_logits := vec_new()
         v := 0
-        while v < 256 {
+        for v < 256 {
             seq_logits.append(1.0)
             v = v + 1
         }
@@ -298,7 +298,7 @@ func int_to_string(int n) string {
     }
 
     result := ""
-    while abs_n > 0 {
+    for abs_n > 0 {
         result = string(abs_n % 10) + result
         abs_n = abs_n / 10
     }

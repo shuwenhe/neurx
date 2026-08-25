@@ -58,7 +58,7 @@ struct model_kernel_selection {
 func kernel_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -70,7 +70,7 @@ func new_model_kernel_registry(model_kernel_registry_config config) model_kernel
 
 func kernel_find(model_kernel_registry_state state, int kernel_id) int {
     int i = 0
-    while i < state.kernel_count {
+    for i < state.kernel_count {
         if state.kernel_ids[i] == kernel_id { return i }
         i = i + 1
     }
@@ -98,7 +98,7 @@ func kernel_register(model_kernel_registry_state state, int kernel_id, int model
 func kernel_platform_matches(int kernel_mask, int runtime_mask) bool {
     int left = kernel_mask
     int right = runtime_mask
-    while left > 0 || right > 0 {
+    for left > 0 || right > 0 {
         if left % 2 == 1 && right % 2 == 1 { return true }
         left = left / 2
         right = right / 2
@@ -113,7 +113,7 @@ func kernel_select(model_kernel_registry_state state, int model_family, int kern
     int generic_priority = 0 - 2147483647
     bool fallback = false
     int i = 0
-    while i < state.kernel_count {
+    for i < state.kernel_count {
         bool family_match = state.model_families[i] == model_family
         bool generic_match = state.model_families[i] == model_family_generic()
         bool mode_match = (prefill && state.supports_prefill[i] == 1) || (!prefill && state.supports_decode[i] == 1)

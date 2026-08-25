@@ -54,7 +54,7 @@ func compute_rope_frequencies(
     int dim = config.dim
     []float freqs = []float{cap: dim / 2}
     int i = 0
-    while i < dim / 2 {
+    for i < dim / 2 {
         float exp = -2.0 * float(i) / float(dim)
         float freq = pow(config.base, exp)
         freqs[i] = freq
@@ -75,7 +75,7 @@ func apply_ntk_scaling(
         alpha = pow(ratio, float(config.dim) / float(config.dim - 2))
     }
     int i = 0
-    while i < len(freqs) {
+    for i < len(freqs) {
         scaled_freqs[i] = freqs[i] / alpha
         i = i + 1
     }
@@ -90,7 +90,7 @@ func apply_linear_interpolation_scaling(
     []float scaled_freqs = []float{cap: len(freqs)}
     float scale = float(context_len) / float(config.max_seq_len)
     int i = 0
-    while i < len(freqs) {
+    for i < len(freqs) {
         float freq_idx_normalized = float(i) / float(len(freqs))
         if freq_idx_normalized < 0.25 {
             scaled_freqs[i] = freqs[i]
@@ -113,9 +113,9 @@ func precompute_rope_cache(
     []float cos_cache = []float{cap: cache_size}
     []float sin_cache = []float{cap: cache_size}
     int m = 0
-    while m < max_seq_len {
+    for m < max_seq_len {
         int i = 0
-        while i < freq_dim {
+        for i < freq_dim {
             float angle = float(m) * scaled_freqs[i]
             int idx = m * freq_dim + i
             cos_cache[idx] = cos(angle)
@@ -144,14 +144,14 @@ func apply_rope_to_qk(
     []float rotated_q = []float{cap: len(query)}
     []float rotated_k = []float{cap: len(key)}
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int pos = b * seq_len + s
             int h = 0
-            while h < num_heads {
+            for h < num_heads {
                 int d = 0
-                while d < head_dim / 2 {
+                for d < head_dim / 2 {
                     int cache_idx = s * rope.cache.freq_dim + d
                     float cos_val = rope.cache.cos_cache[cache_idx]
                     float sin_val = rope.cache.sin_cache[cache_idx]
@@ -225,7 +225,7 @@ func cos(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i < 10 {
+    for i < 10 {
         term = term * (-x2) / float(2 * i * (2 * i - 1))
         result = result + term
         i = i + 1
@@ -238,7 +238,7 @@ func sin(float x) float {
     float result = x
     float term = x
     int i = 1
-    while i < 10 {
+    for i < 10 {
         term = term * (-x2) / float((2 * i + 1) * (2 * i))
         result = result + term
         i = i + 1
@@ -271,7 +271,7 @@ func exp_func(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i < 20 {
+    for i < 20 {
         term = term * x / float(i)
         result = result + term
         i = i + 1
@@ -294,7 +294,7 @@ func int_to_string(int x) string {
         value = -value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value % 10
         out = string(digit + 48) + out
         value = value / 10

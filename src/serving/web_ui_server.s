@@ -107,7 +107,7 @@ func int_to_string(int value) string {
     string result = ""
     int n = value
     if n < 0 { n = 0 - n }
-    while n > 0 {
+    for n > 0 {
         result = string(48 + (n - (n / 10) * 10)) + result
         n = n / 10
     }
@@ -134,7 +134,7 @@ func proxy_to_backend(string method, string path, string request_body) string {
     _ = __sys_write_string(backend_sock, backend_request)
     string response = ""
     string chunk = __sys_read_string(backend_sock, 4096)
-    while len(chunk) > 0 {
+    for len(chunk) > 0 {
         response = response + chunk
         chunk = __sys_read_string(backend_sock, 4096)
     }
@@ -160,7 +160,7 @@ func proxy_stream_to_backend(int client_fd, string request_body) {
     backend_request = backend_request + "Connection: close\r\n\r\n" + request_body
     _ = __sys_write_string(backend_sock, backend_request)
     string chunk = __sys_read_string(backend_sock, 4096)
-    while len(chunk) > 0 {
+    for len(chunk) > 0 {
         _ = __sys_write_string(client_fd, chunk)
         chunk = __sys_read_string(backend_sock, 4096)
     }
@@ -169,7 +169,7 @@ func proxy_stream_to_backend(int client_fd, string request_body) {
 
 func parse_json_response(string http_response) string {
     int idx = 0
-    while idx < len(http_response) {
+    for idx < len(http_response) {
         if idx + 3 < len(http_response) {
             if __host_slice(http_response, idx, idx + 4) == "\r\n\r\n" {
                 return __host_slice(http_response, idx + 4, len(http_response))
@@ -198,7 +198,7 @@ func main() {
     }
     _ = __sys_write_string(1, "✅ Web UI running at http://127.0.0.1:8081\n")
     _ = __sys_write_string(1, "📌 Make sure backend is running: make chat-cpu\n")
-    while true {
+    for true {
         int client = __sys_accept(listener)
         if client < 0 { continue }
         string request = __sys_read_string(client, 4096)
@@ -213,7 +213,7 @@ func main() {
         } else if __host_slice(request, 0, 16) == "POST /api/infer " {
             int body_start = 0
             int idx = 0
-            while idx < len(request) - 3 {
+            for idx < len(request) - 3 {
                 if __host_slice(request, idx, idx + 4) == "\r\n\r\n" {
                     body_start = idx + 4
                     break

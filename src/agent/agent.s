@@ -280,7 +280,7 @@ func agent_observation_history(agent_runtime_state state, int n) string {
     }
     string out = ""
     int i = start
-    while i < size {
+    for i < size {
         if out != "" {
             out = out + "\n"
         }
@@ -436,7 +436,7 @@ func agent_task_queue_peek_all(agent_runtime_state state) []string {
     int size = len(state.plan.task_queue)
     []string out = []string{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         out[i] = state.plan.task_queue[i]
         i = i + 1
     }
@@ -451,7 +451,7 @@ func agent_trace_last_n_summary(agent_runtime_state state, int n) string {
     }
     string out = ""
     int i = start
-    while i < size {
+    for i < size {
         if out != "" {
             out = out + "\n"
         }
@@ -501,11 +501,11 @@ func agent_memory_keys(agent_runtime_state state) []string {
     int l = len(long_k)
     []string out = []string{cap: s + l}
     int i = 0
-    while i < s {
+    for i < s {
         out[i] = short_k[i]
         i = i + 1
     }
-    while i < s + l {
+    for i < s + l {
         out[i] = long_k[i - s]
         i = i + 1
     }

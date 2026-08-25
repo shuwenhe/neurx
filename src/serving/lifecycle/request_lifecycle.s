@@ -27,7 +27,7 @@ func new_lifecycle_state() lifecycle_state {
 
 func lifecycle_find(lifecycle_state state, string request_id) int {
     int i = 0
-    while i < len(state.request_ids) {
+    for i < len(state.request_ids) {
         if state.request_ids[i] == request_id { return i }
         i = i + 1
     }
@@ -51,7 +51,7 @@ func lifecycle_register(lifecycle_state state, string request_id, int now_ms, in
 func lifecycle_backoff_ms(int attempt) int {
     int delay = 100
     int i = 1
-    while i < attempt && delay < 5000 {
+    for i < attempt && delay < 5000 {
         delay = delay * 2
         i = i + 1
     }
@@ -77,7 +77,7 @@ func lifecycle_fail_attempt(lifecycle_state state, string request_id, int now_ms
 
 func lifecycle_tick(lifecycle_state state, int now_ms) lifecycle_state {
     int i = 0
-    while i < len(state.request_ids) {
+    for i < len(state.request_ids) {
         if (state.statuses[i] == "running" || state.statuses[i] == "retry_wait") && now_ms >= state.deadlines_ms[i] {
             state.statuses[i] = "timed_out"
             state.active_requests = state.active_requests - 1

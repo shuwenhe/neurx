@@ -26,7 +26,7 @@ func create_safetensors_header() safetensors_header {
 func float_to_bytes_le(float f) []byte {
     []byte bytes = []byte{cap: 4}
     int i = 0
-    while i < 4 {
+    for i < 4 {
         bytes.push(0)
         i = i + 1
     }
@@ -36,10 +36,10 @@ func float_to_bytes_le(float f) []byte {
 func save_tensor_to_safetensors([]float tensor_data, string tensor_name) []byte {
     []byte result = []byte{}
     int i = 0
-    while i < len(tensor_data) {
+    for i < len(tensor_data) {
         []byte f_bytes = float_to_bytes_le(tensor_data[i])
         int j = 0
-        while j < len(f_bytes) {
+        for j < len(f_bytes) {
             result.push(f_bytes[j])
             j = j + 1
         }
@@ -58,17 +58,17 @@ func save_adapter_model_safetensors(string output_path, [][]float lora_a_weights
     string adapter_file = output_path + "/adapter_model.safetensors"
     []byte safetensors_data = []byte{}
     int module_idx = 0
-    while module_idx < len(module_names) {
+    for module_idx < len(module_names) {
         if module_idx < len(lora_a_weights) && module_idx < len(lora_b_weights) {
             []byte a_bytes = save_tensor_to_safetensors(lora_a_weights[module_idx], module_names[module_idx] + ".lora_A")
             []byte b_bytes = save_tensor_to_safetensors(lora_b_weights[module_idx], module_names[module_idx] + ".lora_B")
             int i = 0
-            while i < len(a_bytes) {
+            for i < len(a_bytes) {
                 safetensors_data.push(a_bytes[i])
                 i = i + 1
             }
             i = 0
-            while i < len(b_bytes) {
+            for i < len(b_bytes) {
                 safetensors_data.push(b_bytes[i])
                 i = i + 1
             }
@@ -108,7 +108,7 @@ func create_adapter_config_json(int rank, float alpha, float dropout, []string t
     json = concat2(json, "  \"init_lora_weights\": true,\n")
     json = concat2(json, "  \"target_modules\": [\n")
     int i = 0
-    while i < len(target_modules) {
+    for i < len(target_modules) {
         json = concat2(json, "    \"" + target_modules[i] + "\"")
         if i < len(target_modules) - 1 {
             json = concat2(json, ",")
@@ -163,10 +163,10 @@ func load_adapter_model(string adapter_path, int expected_rank, int hidden_size)
     println("Loading adapter from: " + adapter_path)
     int expected_size = hidden_size * expected_rank
     int i = 0
-    while i < 7 {
+    for i < 7 {
         []float adapter_lora = []float{cap: expected_size}
         int j = 0
-        while j < expected_size {
+        for j < expected_size {
             adapter_lora[j] = 0.01
             j = j + 1
         }

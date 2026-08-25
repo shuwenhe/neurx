@@ -64,10 +64,10 @@ func new_medusa_head(int head_id, int layer_depth, int hidden_dim, int vocab_siz
 func initialize_medusa_head_weights(medusa_head head) medusa_head {
     updated := head
     i := 0
-    while i < head.vocab_size {
+    for i < head.vocab_size {
         row := []float{}
         j := 0
-        while j < head.hidden_dim {
+        for j < head.hidden_dim {
             val := (2.0 / float(head.hidden_dim)) ^ 0.5 * (2.0 * 0.5 - 1.0) * 0.1
             row = append(row, val)
             j = j + 1
@@ -82,7 +82,7 @@ func initialize_medusa_head_weights(medusa_head head) medusa_head {
 func initialize_medusa_heads(medusa_heads_config config) []medusa_head {
     heads := []medusa_head{}
     i := 0
-    while i < config.num_heads {
+    for i < config.num_heads {
         layer_idx := 0
         if i < config.attach_layers.len {
             layer_idx = config.attach_layers[i]
@@ -103,10 +103,10 @@ func medusa_head_forward(
 ) []int {
     logits := []float{}
     i := 0
-    while i < head.vocab_size {
+    for i < head.vocab_size {
         logit := head.bias[i]
         j := 0
-        while j < head.hidden_dim {
+        for j < head.hidden_dim {
             if i < head.weights.len  j < head.weights[i].len {
                 logit = logit + hidden_state[j] * head.weights[i][j]
             }
@@ -117,7 +117,7 @@ func medusa_head_forward(
     }
     if temperature > 0.0 {
         i = 0
-        while i < logits.len {
+        for i < logits.len {
             logits[i] = logits[i] / temperature
             i = i + 1
         }
@@ -131,11 +131,11 @@ func sample_top_k_from_logits([]float logits, int k) []int {
     top_k_indices := []int{}
     top_k_probs := []float{}
     i := 0
-    while i < logits.len {
+    for i < logits.len {
         prob := probs[i]
         inserted := false
         j := 0
-        while j < top_k_indices.len  j < k {
+        for j < top_k_indices.len  j < k {
             if prob > top_k_probs[j] {
                 top_k_indices = insert_at(top_k_indices, j, i)
                 top_k_probs = insert_at_float(top_k_probs, j, prob)
@@ -160,7 +160,7 @@ func sample_top_k_from_logits([]float logits, int k) []int {
 func softmax_stable([]float logits) []float {
     max_logit := -1000000.0
     i := 0
-    while i < logits.len {
+    for i < logits.len {
         if logits[i] > max_logit {
             max_logit = logits[i]
         }
@@ -169,7 +169,7 @@ func softmax_stable([]float logits) []float {
     exp_logits := []float{}
     sum_exp := 0.0
     i = 0
-    while i < logits.len {
+    for i < logits.len {
         val := exp_approx(logits[i] - max_logit)
         exp_logits = append(exp_logits, val)
         sum_exp = sum_exp + val
@@ -177,7 +177,7 @@ func softmax_stable([]float logits) []float {
     }
     probs := []float{}
     i = 0
-    while i < exp_logits.len {
+    for i < exp_logits.len {
         probs = append(probs, exp_logits[i] / sum_exp)
         i = i + 1
     }
@@ -198,7 +198,7 @@ func generate_medusa_candidate_tree(
         branching_factor: config.top_k,
     }
     depth := 0
-    while depth < tree_depth  depth < heads.len {
+    for depth < tree_depth  depth < heads.len {
         level_tokens := [][]int{}
         level_probs := [][]float{}
         head_idx := depth
@@ -212,7 +212,7 @@ func generate_medusa_candidate_tree(
             level_tokens = append(level_tokens, candidates)
             probs := []float{}
             i := 0
-            while i < candidates.len {
+            for i < candidates.len {
                 probs = append(probs, 1.0 / float(candidates.len))
                 i = i + 1
             }
@@ -232,12 +232,12 @@ func verify_medusa_candidates(
 ) [][]bool {
     results := [][]bool{}
     i := 0
-    while i < candidate_sequences.len {
+    for i < candidate_sequences.len {
         candidate_seq := candidate_sequences[i]
         verifier_logit := verifier_logits[i]
         verified := []bool{}
         j := 0
-        while j < candidate_seq.len {
+        for j < candidate_seq.len {
             token_id := candidate_seq[j]
             if token_id >= 0  token_id < verifier_logit.len {
                 logit_val := verifier_logit[token_id]
@@ -289,7 +289,7 @@ func rejection_sample_medusa_tokens(
 ) []int {
     accepted_tokens := []int{}
     i := 0
-    while i < candidate_logits.len {
+    for i < candidate_logits.len {
         candidate_logit := candidate_logits[i]
         verifier_logit := verifier_logits[i]
         candidate_prob := softmax_stable(candidate_logit)[0]
@@ -360,7 +360,7 @@ func medusa_decode_step(
     updated := pipeline
     draft_sequences := [][]int{}
     i := 0
-    while i < pipeline.heads.len  i < max_draft_tokens {
+    for i < pipeline.heads.len  i < max_draft_tokens {
         head := pipeline.heads[i]
         candidates := medusa_head_forward(
             head,
@@ -400,7 +400,7 @@ func medusa_adaptive_draft_length(
 func insert_at([]int arr, int idx, int val) []int {
     result := []int{}
     i := 0
-    while i < arr.len {
+    for i < arr.len {
         if i == idx {
             result = append(result, val)
         }
@@ -416,7 +416,7 @@ func insert_at([]int arr, int idx, int val) []int {
 func insert_at_float([]float arr, int idx, float val) []float {
     result := []float{}
     i := 0
-    while i < arr.len {
+    for i < arr.len {
         if i == idx {
             result = append(result, val)
         }
@@ -432,7 +432,7 @@ func insert_at_float([]float arr, int idx, float val) []float {
 func slice_array_int([]int arr, int start, int end) []int {
     result := []int{}
     i := start
-    while i < end  i < arr.len {
+    for i < end  i < arr.len {
         result = append(result, arr[i])
         i = i + 1
     }
@@ -442,7 +442,7 @@ func slice_array_int([]int arr, int start, int end) []int {
 func slice_array_float([]float arr, int start, int end) []float {
     result := []float{}
     i := start
-    while i < end  i < arr.len {
+    for i < end  i < arr.len {
         result = append(result, arr[i])
         i = i + 1
     }

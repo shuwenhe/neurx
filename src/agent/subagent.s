@@ -42,7 +42,7 @@ func agent_subagent_spawn(agent_subagent_registry_state state, string goal, stri
     int n = state.count
     []agent_subagent_task tasks = []agent_subagent_task{cap: n + 1}
     int i = 0
-    while i < n {
+    for i < n {
         tasks[i] = state.tasks[i]
         i = i + 1
     }
@@ -61,7 +61,7 @@ func agent_subagent_complete(agent_subagent_registry_state state, string id, str
     int new_completed = state.completed
     int new_failed = state.failed
     int i = 0
-    while i < n {
+    for i < n {
         agent_subagent_task t = state.tasks[i]
         if t.id == id {
             string status = "failed"
@@ -99,7 +99,7 @@ func agent_subagent_all_done(agent_subagent_registry_state state) bool {
 func agent_subagent_aggregate_results(agent_subagent_registry_state state) string {
     string out = ""
     int i = 0
-    while i < state.count {
+    for i < state.count {
         agent_subagent_task t = state.tasks[i]
         if t.status == "done" {
             if out != "" {

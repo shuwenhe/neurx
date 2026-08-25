@@ -68,7 +68,7 @@ func compute_quantization_stats(float* tensor, int size) quantization_stats {
     stats.max_value = tensor[0]
     float sum = 0.0
     int i = 0
-    while i < size {
+    for i < size {
         float val = tensor[i]
         if val < stats.min_value {
             stats.min_value = val
@@ -82,7 +82,7 @@ func compute_quantization_stats(float* tensor, int size) quantization_stats {
     stats.mean_value = sum / float(size)
     float variance_sum = 0.0
     i = 0
-    while i < size {
+    for i < size {
         float diff = tensor[i] - stats.mean_value
         variance_sum = variance_sum + diff * diff
         i = i + 1
@@ -110,7 +110,7 @@ func quantize_int8_symmetric(float* tensor, int size) quantized_tensor {
     quantized.zero_point = alloc(int8, 1)
     quantized.zero_point[0] = 0
     int i = 0
-    while i < size {
+    for i < size {
         float scaled_val = tensor[i] / scale
         int quantized_val = round_f(scaled_val)
         if quantized_val > 127 {
@@ -149,7 +149,7 @@ func quantize_int8_asymmetric(float* tensor, int size) quantized_tensor {
     quantized.zero_point = alloc(int8, 1)
     quantized.zero_point[0] = zero_point
     int i = 0
-    while i < size {
+    for i < size {
         float scaled_val = tensor[i] / scale + float(zero_point)
         int quantized_val = round_f(scaled_val)
         if quantized_val > 255 {
@@ -172,7 +172,7 @@ func quantize_int4(float* tensor, int size) quantized_tensor {
     quantized_tensor int8_quantized = quantize_int8_symmetric(tensor, size)
     quantized.data_int4 = alloc(int4, size / 2)
     int i = 0
-    while i < size {
+    for i < size {
         int8 val1 = int8_quantized.data_int8[i]
         int8 val2 = 0
         if i + 1 < size {
@@ -200,7 +200,7 @@ func dequantize_int8(quantized_tensor quantized) dequantized_tensor {
     float scale = quantized.scale[0]
     int8 zero_point = quantized.zero_point[0]
     int i = 0
-    while i < quantized.size {
+    for i < quantized.size {
         float value = float(quantized.data_int8[i] - zero_point) * scale
         result.data[i] = value
         i = i + 1
@@ -217,7 +217,7 @@ func dequantize_int4(quantized_tensor quantized) dequantized_tensor {
     float scale = quantized.scale[0]
     int8 zero_point = quantized.zero_point[0]
     int i = 0
-    while i < quantized.size {
+    for i < quantized.size {
         int8 packed = quantized.data_int4[i / 2]
         int8 val1 = (packed >> 4) & 15
         int8 val2 = packed & 15
@@ -253,7 +253,7 @@ func calibrate_quantization(
         bin_width = 1.0
     }
     int i = 0
-    while i < size {
+    for i < size {
         float val = tensor[i]
         int bin = (val - stats.min_value) / bin_width
         if bin < 0 {
@@ -267,7 +267,7 @@ func calibrate_quantization(
     }
     float threshold = stats.max_value
     int j = 0
-    while j < size {
+    for j < size {
         float val = tensor[j]
         if val > threshold {
             tensor[j] = threshold
@@ -292,7 +292,7 @@ func quantize_per_layer(
     calib.scale_values = alloc(float, num_layers)
     calib.zero_points = alloc(int8, num_layers)
     int layer_idx = 0
-    while layer_idx < num_layers {
+    for layer_idx < num_layers {
         int layer_size = size / num_layers
         quantization_stats stats = compute_quantization_stats(
             layer_weights + layer_idx * layer_size,
@@ -313,7 +313,7 @@ func gptq_quantize(float* layer_weights, int layer_size, gptqconfig config) quan
     quantized_tensor quantized
     int block_size = config.block_size
     int block_idx = 0
-    while block_idx * block_size < layer_size {
+    for block_idx * block_size < layer_size {
         int block_start = block_idx * block_size
         int block_end = block_start + block_size
         if block_end > layer_size {
@@ -324,7 +324,7 @@ func gptq_quantize(float* layer_weights, int layer_size, gptqconfig config) quan
         float best_scale = 1.0
         float best_error = 999999.0
         float scale_candidate = 0.1
-        while scale_candidate <= 10.0 {
+        for scale_candidate <= 10.0 {
             float error = compute_quantization_error(
                 block_weights, block_actual_size,
                 scale_candidate
@@ -344,7 +344,7 @@ func gptq_quantize(float* layer_weights, int layer_size, gptqconfig config) quan
 func compute_quantization_error(float* weights, int size, float scale) float {
     float total_error = 0.0
     int i = 0
-    while i < size {
+    for i < size {
         float quantized = floor_f(weights[i] / scale) * scale
         float error = weights[i] - quantized
         total_error = total_error + error * error
@@ -360,7 +360,7 @@ func compute_quantization_metrics(
     quantization_metrics metrics
     float rmse = 0.0
     int i = 0
-    while i < original_size && i < quantized_size {
+    for i < original_size && i < quantized_size {
         float diff = original_output[i] - quantized_output[i]
         rmse = rmse + diff * diff
         i = i + 1
@@ -393,7 +393,7 @@ func sqrt_f(float x) float {
     }
     float guess = x / 2.0
     int i = 0
-    while i < 10 {
+    for i < 10 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }
@@ -412,7 +412,7 @@ func get_time_ms() int {
 func strlen(string s) int {
     int count = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         count = count + 1
         i = i + 1
     }
@@ -436,7 +436,7 @@ func main() {
     config.per_channel_quantization = false
     float* tensor = alloc(float, 1000)
     int i = 0
-    while i < 1000 {
+    for i < 1000 {
         tensor[i] = 0.5
         i = i + 1
     }

@@ -84,7 +84,7 @@ func create_data_shards(string dataset_dir, int num_ranks, int rank_id) []data_s
             shards
         } else {
             int i = 0
-            while i < len(shard_files) {
+            for i < len(shard_files) {
                 data_shard shard
                 []string paths = []string{cap: 1}
                 paths.push(shard_files[i])
@@ -108,7 +108,7 @@ func list_data_shard_files(string dataset_dir) []string {
     string raw_gz = runtime_run_command_output(gz_scan_cmd)
     int i = 0
     string line = ""
-    while i < len(raw_gz) {
+    for i < len(raw_gz) {
         if raw_gz[i] == 10 {
             if len(line) > 0 {
                 files.push(line)
@@ -129,7 +129,7 @@ func list_data_shard_files(string dataset_dir) []string {
     string raw_jsonl = runtime_run_command_output(jsonl_scan_cmd)
     i = 0
     line = ""
-    while i < len(raw_jsonl) {
+    for i < len(raw_jsonl) {
         if raw_jsonl[i] == 10 {
             if len(line) > 0 {
                 files.push(line)

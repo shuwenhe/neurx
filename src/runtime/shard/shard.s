@@ -8,7 +8,7 @@ func string_char(int c) string {
 
 func trim(string s) string {
     int begin = 0
-    while begin < len(s) {
+    for begin < len(s) {
         string ch = string_char(s[begin])
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
             begin = begin + 1
@@ -17,7 +17,7 @@ func trim(string s) string {
         }
     }
     int end = len(s)
-    while end > begin {
+    for end > begin {
         string ch = string_char(s[end - 1])
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
             end = end - 1
@@ -27,7 +27,7 @@ func trim(string s) string {
     }
     string out = ""
     int i = begin
-    while i < end {
+    for i < end {
         out = out + string_char(s[i])
         i = i + 1
     }
@@ -37,7 +37,7 @@ func trim(string s) string {
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         string ch = string_char(s[i])
         if ch == "'" {
             out = out + "'\"'\"'"
@@ -60,7 +60,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     out := ""
-    while value > 0 {
+    for value > 0 {
         digit := value - (value / 10) * 10
         out = string_char(digit + 48) + out
         value = value / 10

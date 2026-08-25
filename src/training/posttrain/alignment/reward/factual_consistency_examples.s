@@ -70,7 +70,7 @@ func example_hallucination_detection() {
     if len(report.hallucinated_facts) > 0 {
         print("Detected Hallucinations:")
         int i = 0
-        while i < len(report.hallucinated_facts) {
+        for i < len(report.hallucinated_facts) {
             print("  - " + report.hallucinated_facts[i])
             i = i + 1
         }

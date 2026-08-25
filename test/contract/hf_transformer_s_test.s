@@ -7,9 +7,9 @@ use neurx.models.formats.safetensors_embedding.{safetensors_embedding, load_f32_
 func matrix(int rows, int columns, float diagonal, float other) []float {
     []float values = []float{cap: rows * columns}
     int row = 0
-    while row < rows {
+    for row < rows {
         int column = 0
-        while column < columns {
+        for column < columns {
             values[row * columns + column] = other
             if row == column { values[row * columns + column] = diagonal }
             column = column + 1
@@ -22,7 +22,7 @@ func matrix(int rows, int columns, float diagonal, float other) []float {
 func ones(int count) []float {
     []float values = []float{cap: count}
     int i = 0
-    while i < count { values[i] = 1.0; i = i + 1 }
+    for i < count { values[i] = 1.0; i = i + 1 }
     values
 }
 

@@ -22,7 +22,7 @@ func agent_event_record(agent_event_state state, string kind, string payload, in
     []string new_payloads = []string{cap: n + 1}
     []int new_steps = []int{cap: n + 1}
     int i = 0
-    while i < n {
+    for i < n {
         new_kinds[i] = state.kinds[i]
         new_payloads[i] = state.payloads[i]
         new_steps[i] = state.steps[i]
@@ -56,7 +56,7 @@ func agent_event_last_payload(agent_event_state state) string {
 func agent_event_count_by_kind(agent_event_state state, string kind) int {
     int total = 0
     int i = 0
-    while i < state.count {
+    for i < state.count {
         if state.kinds[i] == kind {
             total = total + 1
         }
@@ -67,7 +67,7 @@ func agent_event_count_by_kind(agent_event_state state, string kind) int {
 
 func agent_event_has_kind(agent_event_state state, string kind) bool {
     int i = 0
-    while i < state.count {
+    for i < state.count {
         if state.kinds[i] == kind {
             return true
         }
@@ -107,7 +107,7 @@ func agent_event_record_answer_ready(agent_event_state state, int step) agent_ev
 func agent_event_export(agent_event_state state) string {
     string out = "events;count=" + string(state.count) + "\n"
     int i = 0
-    while i < state.count {
+    for i < state.count {
         out = out + "event[" + string(i) + "]=" + state.kinds[i] + ";payload=" + state.payloads[i] + ";step=" + string(state.steps[i]) + "\n"
         i = i + 1
     }

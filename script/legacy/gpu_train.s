@@ -77,7 +77,7 @@ func main() {
     int log_interval = parse_int(runtime_env_get("NEURX_PRETRAIN_LOG_INTERVAL", "100"), 100)
     string current_shard = ""
     int line_idx = 0
-    while line_idx < shard_count && total_steps < max_steps {
+    for line_idx < shard_count && total_steps < max_steps {
         current_shard = get_line(shard_list_content, line_idx)
         if str_len(trim(current_shard)) == 0 {
             line_idx = line_idx + 1
@@ -167,7 +167,7 @@ func process_shard_gpu(
     int batch_idx = 0
     int total_processed = 0
     int steps = 0
-    while batch_idx < line_count && (start_step + steps) < max_steps {
+    for batch_idx < line_count && (start_step + steps) < max_steps {
         gpu_buffer batch_input = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
         gpu_buffer batch_target = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
         gpu_buffer batch_output = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
@@ -231,7 +231,7 @@ func parse_int(string s, int default_val) int {
     int i = 0
     int len = str_len(s)
     bool neg = false
-    while i < len && (s[i] == 32 || s[i] == 9) {
+    for i < len && (s[i] == 32 || s[i] == 9) {
         i = i + 1
     }
     if i < len && s[i] == 45 {
@@ -239,7 +239,7 @@ func parse_int(string s, int default_val) int {
         i = i + 1
     }
     result = 0
-    while i < len && s[i] >= 48 && s[i] <= 57 {
+    for i < len && s[i] >= 48 && s[i] <= 57 {
         result = result * 10 + (s[i] - 48)
         i = i + 1
     }
@@ -251,11 +251,11 @@ func parse_float(string s, float default_val) float {
     float result = default_val
     int i = 0
     int len = str_len(s)
-    while i < len && (s[i] == 32 || s[i] == 9) {
+    for i < len && (s[i] == 32 || s[i] == 9) {
         i = i + 1
     }
     int start = i
-    while i < len && ((s[i] >= 48 && s[i] <= 57) || s[i] == 46 || s[i] == 45) {
+    for i < len && ((s[i] >= 48 && s[i] <= 57) || s[i] == 46 || s[i] == 45) {
         i = i + 1
     }
     if i > start {
@@ -266,7 +266,7 @@ func parse_float(string s, float default_val) float {
 
 func str_len(string s) int {
     int n = 0
-    while n < 1000000 && s[n] != 0 {
+    for n < 1000000 && s[n] != 0 {
         n = n + 1
     }
     n
@@ -275,7 +275,7 @@ func str_len(string s) int {
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
-    while i < end && i < str_len(s) {
+    for i < end && i < str_len(s) {
         out = out + string_char(s[i])
         i = i + 1
     }
@@ -289,11 +289,11 @@ func string_char(int c) string {
 func trim(string s) string {
     int i = 0
     int len = str_len(s)
-    while i < len && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < len && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
     int j = len - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
     if j < i {
@@ -308,10 +308,10 @@ func int_to_str(int n) string {
     bool neg = value < 0
     if neg { value = 0 - value }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int quotient = 0
         int digit = value
-        while digit >= 10 {
+        for digit >= 10 {
             digit = digit - 10
             quotient = quotient + 1
         }
@@ -328,10 +328,10 @@ func int64_to_str(int64 n) string {
     bool neg = value < 0
     if neg { value = 0 - value }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int64 quotient = 0
         int64 digit = value
-        while digit >= 10 {
+        for digit >= 10 {
             digit = digit - 10
             quotient = quotient + 1
         }
@@ -352,7 +352,7 @@ func count_lines(string text) int {
     int count = 0
     int i = 0
     int len = str_len(text)
-    while i < len {
+    for i < len {
         if text[i] == 10 {
             count = count + 1
         }
@@ -369,7 +369,7 @@ func get_line(string text, int line_num) string {
     int start = 0
     int i = 0
     int len = str_len(text)
-    while i < len {
+    for i < len {
         if text[i] == 10 {
             if current_line == line_num {
                 return substring(text, start, i)
@@ -387,7 +387,7 @@ func get_line(string text, int line_num) string {
 
 func basename(string path) string {
     int i = str_len(path) - 1
-    while i >= 0 && path[i] != 47 && path[i] != 92 {
+    for i >= 0 && path[i] != 47 && path[i] != 92 {
         i = i - 1
     }
     if i < 0 {

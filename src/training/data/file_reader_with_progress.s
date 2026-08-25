@@ -4,11 +4,11 @@ use neurx.runtime.io.{runtime_read_text_file, runtime_file_exists}
 func trim(string s) string {
     int i = 0
     int len_s = len(s)
-    while i < len_s && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+    for i < len_s && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
     int j = len_s - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+    for j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
     if j < i {
@@ -26,7 +26,7 @@ func int_to_str(int n, int fallback) string {
         n = -n
     }
     string result = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n % 10
         result = string(48 + digit) + result
         n = n / 10
@@ -49,7 +49,7 @@ func parse_int(string s, int fallback) int {
         neg = true
         i = 1
     }
-    while i < len(trimmed) {
+    for i < len(trimmed) {
         int c = trimmed[i]
         if c >= 48 && c <= 57 {
             result = result * 10 + (c - 48)
@@ -71,7 +71,7 @@ func format_float(double d, int width, int precision) string {
     if precision > 0 {
         result = result + "."
         int p = 0
-        while p < precision {
+        for p < precision {
             frac_part = frac_part * 10.0
             int digit = int(frac_part)
             result = result + string(48 + digit)
@@ -124,7 +124,7 @@ func create_progress_bar(int percent, int width) string {
     }
     string bar = "["
     int i = 0
-    while i < width {
+    for i < width {
         if i < filled {
             bar = bar + "="
         } else if i == filled && percent < 100 {

@@ -27,10 +27,10 @@ func agent_retrieval_text_contains(string haystack, string needle) bool {
         return false
     }
     int i = 0
-    while i <= hl - nl {
+    for i <= hl - nl {
         int j = 0
         bool match = true
-        while j < nl {
+        for j < nl {
             if haystack[i + j] != needle[j] {
                 match = false
                 break
@@ -76,7 +76,7 @@ func agent_retrieval_search(agent_memory_state memory, string query, int top_k) 
     []int out_scores = []int{cap: cap}
     int found = 0
     int i = 0
-    while i < n {
+    for i < n {
         if found < limit {
             agent_memory_lookup_result lr = agent_memory_lookup_long(memory, long_keys[i])
             int sc = agent_retrieval_score(query, long_keys[i] + " " + lr.value)
@@ -113,7 +113,7 @@ func agent_retrieval_search_short(agent_memory_state memory, string query, int t
     []int out_scores = []int{cap: cap}
     int found = 0
     int i = 0
-    while i < n {
+    for i < n {
         if found < limit {
             agent_memory_lookup_result lr = agent_memory_lookup_short(memory, short_keys[i])
             int sc = agent_retrieval_score(query, short_keys[i] + " " + lr.value)
@@ -151,7 +151,7 @@ func agent_retrieval_top_value(agent_retrieval_result result) string {
 func agent_retrieval_export(agent_retrieval_result result) string {
     string out = "retrieval;count=" + string(result.count) + "\n"
     int i = 0
-    while i < result.count {
+    for i < result.count {
         out = out + "hit[" + string(i) + "].key=" + result.keys[i] + ";score=" + string(result.scores[i]) + ";value=" + result.values[i] + "\n"
         i = i + 1
     }

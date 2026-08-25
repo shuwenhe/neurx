@@ -16,7 +16,7 @@ func sin_approx(float x) float {
     float result = x
     float term = x
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * (-x * x) / float((2 * i + 1) * (2 * i))
         result = result + term
         i = i + 1

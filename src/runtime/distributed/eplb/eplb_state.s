@@ -36,14 +36,14 @@ func eplb_config_valid(eplb_config config) bool {
 func eplb_zero_array(int count) []int {
     []int values = []int{cap: count}
     int i = 0
-    while i < count { values[i] = 0; i = i + 1 }
+    for i < count { values[i] = 0; i = i + 1 }
     values
 }
 
 func eplb_initial_placement(int expert_count, int rank_count) []int {
     []int placement = []int{cap: expert_count}
     int i = 0
-    while i < expert_count {
+    for i < expert_count {
         placement[i] = i - (i / rank_count) * rank_count
         i = i + 1
     }
@@ -78,7 +78,7 @@ func eplb_record_routing(eplb_state state, int expert_id, int token_count) eplb_
 func eplb_heaviest_rank(eplb_state state) int {
     int result = 0
     int i = 1
-    while i < len(state.rank_load) {
+    for i < len(state.rank_load) {
         if state.rank_load[i] > state.rank_load[result] { result = i }
         i = i + 1
     }
@@ -88,7 +88,7 @@ func eplb_heaviest_rank(eplb_state state) int {
 func eplb_lightest_rank(eplb_state state) int {
     int result = 0
     int i = 1
-    while i < len(state.rank_load) {
+    for i < len(state.rank_load) {
         if state.rank_load[i] < state.rank_load[result] { result = i }
         i = i + 1
     }
@@ -112,7 +112,7 @@ func eplb_plan_rebalance(eplb_state state) eplb_rebalance_plan {
     int expert = 0 - 1
     int expert_load = 0 - 1
     int i = 0
-    while i < len(state.expert_rank) {
+    for i < len(state.expert_rank) {
         if state.expert_rank[i] == source && state.expert_load[i] > expert_load {
             expert = i
             expert_load = state.expert_load[i]

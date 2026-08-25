@@ -17,10 +17,10 @@ func extract_json_string(string json, string key) string {
     int start_pos = -1
     int i = 0
 
-    while i < len(json) {
+    for i < len(json) {
         bool found = true
         int j = 0
-        while j < len(search) && i + j < len(json) {
+        for j < len(search) && i + j < len(json) {
             if json[i + j] != search[j] {
                 found = false
             }
@@ -43,7 +43,7 @@ func extract_json_string(string json, string key) string {
     bool in_string = false
     bool escaped = false
 
-    while k < len(json) {
+    for k < len(json) {
         string c = json[k]
 
         if escaped {
@@ -80,10 +80,10 @@ func extract_json_number(string json, string key) int {
     int start_pos = -1
     int i = 0
 
-    while i < len(json) {
+    for i < len(json) {
         bool found = true
         int j = 0
-        while j < len(search) && i + j < len(json) {
+        for j < len(search) && i + j < len(json) {
             if json[i + j] != search[j] {
                 found = false
             }
@@ -104,7 +104,7 @@ func extract_json_number(string json, string key) int {
     string num_str = ""
     int k = start_pos
 
-    while k < len(json) {
+    for k < len(json) {
         string c = json[k]
         if c >= "0" && c <= "9" {
             num_str = num_str + c
@@ -116,7 +116,7 @@ func extract_json_number(string json, string key) int {
 
     int result = 0
     int m = 0
-    while m < len(num_str) {
+    for m < len(num_str) {
         string digit = num_str[m]
         int digit_val = 0
 
@@ -142,7 +142,7 @@ func escape_json_string(string s) string {
     string result = ""
     int i = 0
 
-    while i < len(s) {
+    for i < len(s) {
         string c = s[i]
 
         if c == "\"" {
@@ -178,7 +178,7 @@ func int_to_string(int n) string {
         n = 0 - n
     }
 
-    while n > 0 {
+    for n > 0 {
         int digit = n % 10
         string digit_str = ""
 

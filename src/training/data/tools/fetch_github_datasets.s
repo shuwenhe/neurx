@@ -22,7 +22,7 @@ func main() {
     []string items = split_commas(keys)
     int rc = 0
     int i = 0
-    while i < len(items) {
+    for i < len(items) {
         string key = trim(items[i])
         string url = known_repo(key)
         if url == "" {
@@ -61,7 +61,7 @@ func clone_from_file(string root, string list_file, bool force) int {
     string list_text = runtime_run_command_output("cat " + runtime_shell_escape(list_file))
     []string lines = split_lines(list_text)
     int i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line = trim(lines[i])
         if line != "" {
             string repo = first_token(line)
@@ -87,7 +87,7 @@ func split_commas(string text) []string {
     []string out = []string{cap: 0}
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = char_at(text, i)
         if ch == "," {
             if current != "" {
@@ -149,7 +149,7 @@ func handle_mbpp(string root, string dest) {
 func normalize_name(string key) string {
     int i = 0
     string out = ""
-    while i < len(key) {
+    for i < len(key) {
         string ch = char_at(key, i)
         if ch == "_" {
             out = out + "-"
@@ -178,7 +178,7 @@ func split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = char_at(text, i)
         if ch == "\n" {
             string line = trim(current)
@@ -200,7 +200,7 @@ func split_lines(string text) []string {
 
 func first_token(string text) string {
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         if char_at(text, i) == " " || char_at(text, i) == "\t" {
             return slice(text, 0, i)
         }
@@ -216,7 +216,7 @@ func starts_with(string text, string prefix) bool {
 func last_index_of(string text, string pattern) int {
     int last = -1
     int i = 0
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         if slice(text, i, i + len(pattern)) == pattern {
             last = i
         }

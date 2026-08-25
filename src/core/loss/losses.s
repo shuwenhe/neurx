@@ -16,7 +16,7 @@ func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -27,7 +27,7 @@ func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -44,7 +44,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / i
         result = result + term
         i = i + 1
@@ -114,11 +114,11 @@ func cross_entropy_loss(tensor input, tensor target) tensor {
         float total_loss = 0.0
         int valid_count = 0
         int b = 0
-        while b < batch_size {
+        for b < batch_size {
             int base = b * num_classes
             float max_v = input.data[base]
             int c = 1
-            while c < num_classes {
+            for c < num_classes {
                 if input.data[base + c] > max_v {
                     max_v = input.data[base + c]
                 }
@@ -127,7 +127,7 @@ func cross_entropy_loss(tensor input, tensor target) tensor {
             float log_sum_exp = 0.0
             float sum_exp = 0.0
             c = 0
-            while c < num_classes {
+            for c < num_classes {
                 float e = exp_approx(input.data[base + c] - max_v)
                 sum_exp = sum_exp + e
                 c = c + 1
@@ -155,7 +155,7 @@ func cross_entropy_loss(tensor input, tensor target) tensor {
     } else {
         float total = 0.0
         int i = 0
-        while i < n {
+        for i < n {
             float x = input.data[i]
             float t = 0.0
             if i < len(target.data) {
@@ -201,7 +201,7 @@ func bce_loss(tensor input, tensor target) tensor {
     int n = len(input.data)
     float total = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float p = input.data[i]
         if p < 0.0000001 {
             p = 0.0000001
@@ -223,7 +223,7 @@ func bce_with_logits_loss(tensor input, tensor target) tensor {
     int n = len(input.data)
     float total = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float logit = input.data[i]
         float t = 0.0
         if i < len(target.data) {
@@ -245,7 +245,7 @@ func l1_loss(tensor input, tensor target) tensor {
     int n = len(input.data)
     float total = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float t = 0.0
         if i < len(target.data) {
             t = target.data[i]
@@ -260,7 +260,7 @@ func mse_loss(tensor input, tensor target) tensor {
     int n = len(input.data)
     float total = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float diff = input.data[i]
         if i < len(target.data) {
             diff = diff - target.data[i]
@@ -275,7 +275,7 @@ func smooth_l1_loss(tensor input, tensor target) tensor {
     int n = len(input.data)
     float total = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float diff = input.data[i]
         if i < len(target.data) {
             diff = diff - target.data[i]
@@ -295,7 +295,7 @@ func kl_div_loss(tensor input, tensor target) tensor {
     int n = len(input.data)
     float total = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float t = 0.0
         if i < len(target.data) {
             t = target.data[i]
@@ -320,7 +320,7 @@ func poisson_nll_loss(tensor input, tensor target) tensor {
     int n = len(input.data)
     float total = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float x = input.data[i]
         float t = 0.0
         if i < len(target.data) {
@@ -344,7 +344,7 @@ func margin_ranking_loss(tensor input1, tensor input2, tensor target) tensor {
     int n = len(input1.data)
     float total = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float diff = input1.data[i] - input2.data[i]
         float t = 1.0
         if i < len(target.data) {
@@ -364,7 +364,7 @@ func triplet_margin_loss(tensor anchor, tensor positive, tensor negative) tensor
     int n = len(anchor.data)
     float total = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float pos = anchor.data[i] - positive.data[i]
         float neg = anchor.data[i] - negative.data[i]
         float margin = 1.0 + abs(pos) - abs(neg)

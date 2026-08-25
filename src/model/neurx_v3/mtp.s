@@ -48,14 +48,14 @@ struct mtp_weights {
 func zeros(int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n { out[i] = 0.0; i = i + 1 }
+    for i < n { out[i] = 0.0; i = i + 1 }
     out
 }
 
 func fill_ramp(int n, float scale) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = scale * (i + 1) as float / (n + 1) as float
         i = i + 1
     }
@@ -68,7 +68,7 @@ func exp_approx(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 12 {
+    for i <= 12 {
         term = term * x / i as float
         result = result + term
         i = i + 1
@@ -80,7 +80,7 @@ func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
     int i = 0
-    while i < 10 { y = 0.5 * (y + x / y); i = i + 1 }
+    for i < 10 { y = 0.5 * (y + x / y); i = i + 1 }
     y
 }
 
@@ -96,12 +96,12 @@ func gelu(float x) float {
 func matmul_2d([]float a, []float b, int m, int k, int n) []float {
     []float result = zeros(m * n)
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = 0.0
             int l = 0
-            while l < k {
+            for l < k {
                 sum = sum + a[i * k + l] * b[l * n + j]
                 l = l + 1
             }
@@ -117,13 +117,13 @@ func rms_norm([]float x, int n, []float weight, float eps) []float {
     []float out = []float{cap: n}
     float sum_sq = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         sum_sq = sum_sq + x[i] * x[i]
         i = i + 1
     }
     float rms = sqrt_approx(sum_sq / n as float + eps)
     i = 0
-    while i < n {
+    for i < n {
         out[i] = x[i] * weight[i] / rms
         i = i + 1
     }
@@ -159,7 +159,7 @@ func new_mtp_weights(mtp_config cfg) mtp_weights {
     int v = cfg.vocab_size
     []mtp_module_weights modules = []mtp_module_weights{cap: D}
     int i = 0
-    while i < D {
+    for i < D {
         modules[i] = new_mtp_module_weights(cfg)
         i = i + 1
     }
@@ -187,10 +187,10 @@ func mtp_module_forward(
     int hd = n_h * d_h
     []float emb_input = zeros(seq_len * d)
     int s = 0
-    while s < seq_len {
+    for s < seq_len {
         int token = prev_tokens[s]
         int dim = 0
-        while dim < d {
+        for dim < d {
             emb_input[s * d + dim] = shared_embed[token * d + dim]
             dim = dim + 1
         }
@@ -201,7 +201,7 @@ func mtp_module_forward(
     []float combined_emb = matmul_2d(emb_normed, w.proj_emb, seq_len, d, d)
     []float combined = zeros(seq_len * d)
     int i = 0
-    while i < seq_len * d {
+    for i < seq_len * d {
         combined[i] = combined_h[i] + combined_emb[i]
         i = i + 1
     }
@@ -213,21 +213,21 @@ func mtp_module_forward(
     []float attn_proj = matmul_2d(attn_out, w.o_weight, seq_len, hd, d)
     []float attn_residual = zeros(seq_len * d)
     i = 0
-    while i < seq_len * d {
+    for i < seq_len * d {
         attn_residual[i] = combined[i] + attn_proj[i]
         i = i + 1
     }
     []float ffn_normed = rms_norm(attn_residual, seq_len * d, w.ffn_norm_weight, 1e-6)
     []float ffn_hidden = matmul_2d(ffn_normed, w.ffn_w1, seq_len, d, cfg.ff_intermediate_dim)
     i = 0
-    while i < seq_len * cfg.ff_intermediate_dim {
+    for i < seq_len * cfg.ff_intermediate_dim {
         ffn_hidden[i] = gelu(ffn_hidden[i])
         i = i + 1
     }
     []float ffn_out = matmul_2d(ffn_hidden, w.ffn_w2, seq_len, cfg.ff_intermediate_dim, d)
     []float ffn_residual = zeros(seq_len * d)
     i = 0
-    while i < seq_len * d {
+    for i < seq_len * d {
         ffn_residual[i] = attn_residual[i] + ffn_out[i]
         i = i + 1
     }
@@ -246,17 +246,17 @@ func multi_head_attention(
     float scale = 1.0 / sqrt_approx(d_h as float)
     []float output = zeros(seq_len * hd)
     int h = 0
-    while h < n_h {
+    for h < n_h {
         int h_off = h * d_h
         int i = 0
-        while i < seq_len {
+        for i < seq_len {
             []float scores = []float{cap: seq_len}
             float max_s = -1e9
             int j = 0
-            while j < seq_len {
+            for j < seq_len {
                 float dot = 0.0
                 int d_idx = 0
-                while d_idx < d_h {
+                for d_idx < d_h {
                     dot = dot + q[i * hd + h_off + d_idx] * k[j * hd + h_off + d_idx]
                     d_idx = d_idx + 1
                 }
@@ -268,7 +268,7 @@ func multi_head_attention(
             }
             float sum_exp = 0.0
             j = 0
-            while j < seq_len {
+            for j < seq_len {
                 float w_v = exp_approx(scores[j] - max_s)
                 scores[j] = w_v
                 sum_exp = sum_exp + w_v
@@ -276,16 +276,16 @@ func multi_head_attention(
             }
             if sum_exp > 0.0 {
                 j = 0
-                while j < seq_len {
+                for j < seq_len {
                     scores[j] = scores[j] / sum_exp
                     j = j + 1
                 }
             }
             int d_idx = 0
-            while d_idx < d_h {
+            for d_idx < d_h {
                 float sum_v = 0.0
                 j = 0
-                while j < seq_len {
+                for j < seq_len {
                     sum_v = sum_v + scores[j] * v[j * hd + h_off + d_idx]
                     j = j + 1
                 }
@@ -317,11 +317,11 @@ func mtp_forward(
     []float per_loss = zeros(D)
     []float prev_hidden = main_hidden
     int mtp_idx = 0
-    while mtp_idx < D {
+    for mtp_idx < D {
         mtp_module_weights mw = w.modules[mtp_idx]
         []int prev_tokens = []int{cap: seq_len}
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             prev_tokens[s] = target_tokens[s]
             s = s + 1
         }
@@ -338,7 +338,7 @@ func mtp_forward(
     }
     float total_loss = 0.0
     mtp_idx = 0
-    while mtp_idx < D {
+    for mtp_idx < D {
         total_loss = total_loss + per_loss[mtp_idx]
         mtp_idx = mtp_idx + 1
     }
@@ -354,11 +354,11 @@ func mtp_forward(
 func cross_entropy_loss([]float logits, []int targets, int seq_len, int vocab_size) float {
     float total_loss = 0.0
     int s = 0
-    while s < seq_len {
+    for s < seq_len {
         int target = targets[s]
         float max_logit = logits[s * vocab_size]
         int i = 1
-        while i < vocab_size {
+        for i < vocab_size {
             if logits[s * vocab_size + i] > max_logit {
                 max_logit = logits[s * vocab_size + i]
             }
@@ -366,7 +366,7 @@ func cross_entropy_loss([]float logits, []int targets, int seq_len, int vocab_si
         }
         float sum_exp = 0.0
         i = 0
-        while i < vocab_size {
+        for i < vocab_size {
             sum_exp = sum_exp + exp_approx(logits[s * vocab_size + i] - max_logit)
             i = i + 1
         }
@@ -406,7 +406,7 @@ func mtp_inference(
     []int prev_tokens = []int{cap: 1}
     prev_tokens[0] = prev_token
     int mtp_idx = 0
-    while mtp_idx < D {
+    for mtp_idx < D {
         mtp_module_weights mw = w.modules[mtp_idx]
         mtp_module_output mtp_out = mtp_module_forward(
             mw, prev_hidden, prev_tokens, 1, mtp_idx,
@@ -415,7 +415,7 @@ func mtp_inference(
         int best_token = 0
         float best_logit = -1e9
         int i = 0
-        while i < v {
+        for i < v {
             if mtp_out.logits[i] > best_logit {
                 best_logit = mtp_out.logits[i]
                 best_token = i
@@ -427,13 +427,13 @@ func mtp_inference(
         predicted[mtp_idx] = pred_row
         float max_logit = mtp_out.logits[0]
         i = 1
-        while i < v {
+        for i < v {
             if mtp_out.logits[i] > max_logit { max_logit = mtp_out.logits[i] }
             i = i + 1
         }
         float sum_exp = 0.0
         i = 0
-        while i < v {
+        for i < v {
             sum_exp = sum_exp + exp_approx(mtp_out.logits[i] - max_logit)
             i = i + 1
         }

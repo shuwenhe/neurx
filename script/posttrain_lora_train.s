@@ -128,7 +128,7 @@ func run_posttrain_lora_sft() int {
     println("Vectorizing question")
     []float input_vec = fill_lora(hidden_size, 0.0)
     int input_idx = 0
-    while input_idx < hidden_size {
+    for input_idx < hidden_size {
         float value = ((input_idx + 1) as float) / ((hidden_size + 1) as float)
         if input_idx - (input_idx / 2) * 2 == 1 {
             value = 0.0 - value
@@ -139,7 +139,7 @@ func run_posttrain_lora_sft() int {
     println("Vectorizing target q")
     []float target_q = fill_lora(hidden_size, 0.0)
     int target_q_idx = 0
-    while target_q_idx < hidden_size {
+    for target_q_idx < hidden_size {
         float value = ((target_q_idx + 1) as float) / ((hidden_size + 1) as float)
         if target_q_idx - (target_q_idx / 2) * 2 == 1 {
             value = 0.0 - value
@@ -150,7 +150,7 @@ func run_posttrain_lora_sft() int {
     println("Vectorizing target v")
     []float target_v = fill_lora(v_out, 0.0)
     int target_v_idx = 0
-    while target_v_idx < v_out {
+    for target_v_idx < v_out {
         float value = ((target_v_idx + 1) as float) / ((v_out + 1) as float)
         if target_v_idx - (target_v_idx / 2) * 2 == 1 {
             value = 0.0 - value
@@ -173,7 +173,7 @@ func run_posttrain_lora_sft() int {
     []float v_b = fill_lora(v_b_len, 0.0)
     println("Vector allocations done")
     int q_idx = 0
-    while q_idx < q_b_len {
+    for q_idx < q_b_len {
         float step = 0.000001 * ((q_idx + 1) as float)
         if q_idx - (q_idx / 2) * 2 == 1 {
             step = 0.0 - step
@@ -182,7 +182,7 @@ func run_posttrain_lora_sft() int {
         q_idx = q_idx + 1
     }
     int v_idx = 0
-    while v_idx < v_b_len {
+    for v_idx < v_b_len {
         float step = 0.000001 * ((v_idx + 1) as float)
         if v_idx - (v_idx / 2) * 2 == 1 {
             step = 0.0 - step
@@ -202,7 +202,7 @@ func run_posttrain_lora_sft() int {
     int adapter_nonzero = q_b_len + v_b_len
     int adapter_total = q_a_len + q_b_len + v_a_len + v_b_len
     int i = 0
-    while i < q_b_len {
+    for i < q_b_len {
         float value = 0.000001 * ((i + 1) as float)
         if i - (i / 2) * 2 == 1 {
             value = 0.0 - value
@@ -216,7 +216,7 @@ func run_posttrain_lora_sft() int {
         i = i + 1
     }
     i = 0
-    while i < v_b_len {
+    for i < v_b_len {
         float value = 0.000001 * ((i + 1) as float)
         if i - (i / 2) * 2 == 1 {
             value = 0.0 - value
@@ -272,7 +272,7 @@ func run_posttrain_lora_sft() int {
     []named_lora_module modules = []named_lora_module{cap: num_layers * 2}
     int layer_idx = 0
     int module_idx = 0
-    while layer_idx < num_layers {
+    for layer_idx < num_layers {
         string q_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.q_proj"
         string v_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.v_proj"
         named_lora_module q_module
@@ -290,13 +290,13 @@ func run_posttrain_lora_sft() int {
         q_module.layer = q_layer
         q_module.initial_a = []float{cap: rank * hidden_size}
         int q_a_idx = 0
-        while q_a_idx < rank * hidden_size {
+        for q_a_idx < rank * hidden_size {
             q_module.initial_a[q_a_idx] = q_layer.lora_A[q_a_idx]
             q_a_idx = q_a_idx + 1
         }
         q_module.initial_b = []float{cap: hidden_size * rank}
         int q_b_idx = 0
-        while q_b_idx < hidden_size * rank {
+        for q_b_idx < hidden_size * rank {
             q_module.initial_b[q_b_idx] = q_layer.lora_B[q_b_idx]
             q_b_idx = q_b_idx + 1
         }
@@ -317,13 +317,13 @@ func run_posttrain_lora_sft() int {
         v_module.layer = v_layer
         v_module.initial_a = []float{cap: rank * hidden_size}
         int v_a_idx = 0
-        while v_a_idx < rank * hidden_size {
+        for v_a_idx < rank * hidden_size {
             v_module.initial_a[v_a_idx] = v_layer.lora_A[v_a_idx]
             v_a_idx = v_a_idx + 1
         }
         v_module.initial_b = []float{cap: v_out * rank}
         int v_b_idx = 0
-        while v_b_idx < v_out * rank {
+        for v_b_idx < v_out * rank {
             v_module.initial_b[v_b_idx] = v_layer.lora_B[v_b_idx]
             v_b_idx = v_b_idx + 1
         }
@@ -335,7 +335,7 @@ func run_posttrain_lora_sft() int {
     println("Vectorizing question")
     []float input_vec = fill_lora(hidden_size, 0.0)
     int input_idx = 0
-    while input_idx < hidden_size {
+    for input_idx < hidden_size {
         float value = ((input_idx + 1) as float) / ((hidden_size + 1) as float)
         if input_idx - (input_idx / 2) * 2 == 1 {
             value = 0.0 - value
@@ -346,7 +346,7 @@ func run_posttrain_lora_sft() int {
     println("Vectorizing target q")
     []float target_q = fill_lora(hidden_size, 0.0)
     int target_q_idx = 0
-    while target_q_idx < hidden_size {
+    for target_q_idx < hidden_size {
         float value = ((target_q_idx + 1) as float) / ((hidden_size + 1) as float)
         if target_q_idx - (target_q_idx / 2) * 2 == 1 {
             value = 0.0 - value
@@ -357,7 +357,7 @@ func run_posttrain_lora_sft() int {
     println("Vectorizing target v")
     []float target_v = fill_lora(v_out, 0.0)
     int target_v_idx = 0
-    while target_v_idx < v_out {
+    for target_v_idx < v_out {
         float value = ((target_v_idx + 1) as float) / ((v_out + 1) as float)
         if target_v_idx - (target_v_idx / 2) * 2 == 1 {
             value = 0.0 - value
@@ -368,11 +368,11 @@ func run_posttrain_lora_sft() int {
     []float loss_history = []float{cap: epochs}
     int epoch = 0
     println("Training loop start")
-    while epoch < epochs {
+    for epoch < epochs {
         int sample = 0
-        while sample < samples_per_epoch {
+        for sample < samples_per_epoch {
             int module_idx = 0
-            while module_idx < len(modules) {
+            for module_idx < len(modules) {
                 named_lora_module module = modules[module_idx]
                 []float target = target_q
                 if module.layer.out_dim == v_out {
@@ -435,10 +435,10 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
     int a_len = module.layer.rank * module.layer.in_dim
     int b_len = module.layer.out_dim * module.layer.rank
     int out_idx = 0
-    while out_idx < module.layer.out_dim {
+    for out_idx < module.layer.out_dim {
         float sum = 0.0
         int in_idx = 0
-        while in_idx < module.layer.in_dim && in_idx < len(input_vec) {
+        for in_idx < module.layer.in_dim && in_idx < len(input_vec) {
             int w_idx = out_idx * module.layer.in_dim + in_idx
             if w_idx < base_len {
                 sum = sum + input_vec[in_idx] * module.layer.base_weight[w_idx]
@@ -446,12 +446,12 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
             in_idx = in_idx + 1
         }
         int a_idx = 0
-        while a_idx < a_len {
+        for a_idx < a_len {
             sum = sum + module.layer.lora_A[a_idx] * 0.000001
             a_idx = a_idx + 1
         }
         int b_idx = 0
-        while b_idx < b_len {
+        for b_idx < b_len {
             sum = sum + module.layer.lora_B[b_idx] * 0.000001
             b_idx = b_idx + 1
         }
@@ -460,7 +460,7 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
     }
     float error_scale = 0.0
     int i = 0
-    while i < len(output) && i < len(target_vec) {
+    for i < len(output) && i < len(target_vec) {
         float diff = output[i] - target_vec[i]
         if diff < 0.0 {
             diff = 0.0 - diff
@@ -473,7 +473,7 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
     }
     float step_scale = lr * error_scale * 0.0001
     int a_idx = 0
-    while a_idx < a_len {
+    for a_idx < a_len {
         float direction = 1.0
         if a_idx - (a_idx / 2) * 2 == 1 {
             direction = 0.0 - direction
@@ -482,7 +482,7 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
         a_idx = a_idx + 1
     }
     int update_idx = 0
-    while update_idx < b_len {
+    for update_idx < b_len {
         float direction = 1.0
         if update_idx - (update_idx / 2) * 2 == 1 {
             direction = 0.0 - direction
@@ -496,7 +496,7 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
 func fill_lora(int n, float val) []float {
     []float result = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         result[i] = val
         i = i + 1
     }
@@ -506,7 +506,7 @@ func fill_lora(int n, float val) []float {
 func init_gaussian(int n, float std) []float {
     []float result = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float val = ((i + 1) as float) * std * 0.001
         if i - (i / 2) * 2 == 1 {
             val = 0.0 - val
@@ -523,7 +523,7 @@ func sqrt_lora(float x) float {
     }
     float guess = 1.0
     int iter = 0
-    while iter < 5 {
+    for iter < 5 {
         guess = 0.5 * (guess + x / guess)
         iter = iter + 1
     }
@@ -533,11 +533,11 @@ func sqrt_lora(float x) float {
 func guarantee_nonzero_modules([]named_lora_module modules, []float input_vec, []float target_q, []float target_v, float lr) []named_lora_module {
     int module_idx = 0
     bool has_nonzero = false
-    while module_idx < len(modules) && !has_nonzero {
+    for module_idx < len(modules) && !has_nonzero {
         named_lora_module module = modules[module_idx]
         int j = 0
         int b_len = module.layer.out_dim * module.layer.rank
-        while j < b_len {
+        for j < b_len {
             if module.layer.lora_B[j] != 0.0 {
                 has_nonzero = true
                 break
@@ -550,7 +550,7 @@ func guarantee_nonzero_modules([]named_lora_module modules, []float input_vec, [
         return modules
     }
     int idx = 0
-    while idx < len(modules) {
+    for idx < len(modules) {
         named_lora_module module = modules[idx]
         []float target = target_q
         if module.layer.out_dim == len(target_v) {
@@ -734,11 +734,11 @@ func compute_stats([]named_lora_module modules) adapter_stats {
     int nonzero = 0
     int total = 0
     int module_idx = 0
-    while module_idx < len(modules) {
+    for module_idx < len(modules) {
         named_lora_module module = modules[module_idx]
         int i = 0
         int a_len = module.layer.rank * module.layer.in_dim
-        while i < a_len {
+        for i < a_len {
             float value = module.layer.lora_A[i]
             float abs_value = abs_float(value)
             l1 = l1 + abs_value
@@ -754,7 +754,7 @@ func compute_stats([]named_lora_module modules) adapter_stats {
         }
         i = 0
         int b_len = module.layer.out_dim * module.layer.rank
-        while i < b_len {
+        for i < b_len {
             float value = module.layer.lora_B[i]
             float abs_value = abs_float(value)
             l1 = l1 + abs_value
@@ -785,11 +785,11 @@ func compute_delta_stats([]named_lora_module modules) delta_stats {
     float max_abs = 0.0
     int changed = 0
     int module_idx = 0
-    while module_idx < len(modules) {
+    for module_idx < len(modules) {
         named_lora_module module = modules[module_idx]
         int i = 0
         int a_len = module.layer.rank * module.layer.in_dim
-        while i < a_len {
+        for i < a_len {
             float delta = module.layer.lora_A[i] - module.initial_a[i]
             float abs_delta = abs_float(delta)
             l1 = l1 + abs_delta
@@ -804,7 +804,7 @@ func compute_delta_stats([]named_lora_module modules) delta_stats {
         }
         i = 0
         int b_len = module.layer.out_dim * module.layer.rank
-        while i < b_len {
+        for i < b_len {
             float delta = module.layer.lora_B[i] - module.initial_b[i]
             float abs_delta = abs_float(delta)
             l1 = l1 + abs_delta
@@ -846,19 +846,19 @@ func write_adapter_checkpoint(
     string adapter_path = output_dir + "/adapter_model.safetensors"
     safetensors_writer writer = safetensors_writer_new(adapter_path)
     int module_idx = 0
-    while module_idx < len(modules) {
+    for module_idx < len(modules) {
         named_lora_module module = modules[module_idx]
         int a_len = module.layer.rank * module.layer.in_dim
         int b_len = module.layer.out_dim * module.layer.rank
         []float a_data = []float{cap: a_len}
         int a_idx = 0
-        while a_idx < a_len {
+        for a_idx < a_len {
             a_data[a_idx] = module.layer.lora_A[a_idx]
             a_idx = a_idx + 1
         }
         []float b_data = []float{cap: b_len}
         int b_idx = 0
-        while b_idx < b_len {
+        for b_idx < b_len {
             b_data[b_idx] = module.layer.lora_B[b_idx]
             b_idx = b_idx + 1
         }
@@ -956,7 +956,7 @@ func build_training_state_json(
     json = json + "  \"best_loss\": " + float_to_str(loss_history[len(loss_history) - 1], 12) + ",\n"
     json = json + "  \"loss_history\": [\n"
     int i = 0
-    while i < len(loss_history) {
+    for i < len(loss_history) {
         json = json + "    " + float_to_str(loss_history[i], 12)
         if i + 1 < len(loss_history) {
             json = json + ",\n"
@@ -986,7 +986,7 @@ func text_to_vector(string text, int dim) []float {
     []float vec = fill_lora(dim, 0.0)
     int i = 0
     float length_scale = (dim as float + 1.0) * 0.0001
-    while i < len(vec) {
+    for i < len(vec) {
         float value = ((i + 1) as float) / ((dim + 1) as float)
         if i - (i / 2) * 2 == 1 {
             value = 0.0 - value
@@ -1004,7 +1004,7 @@ func mse_loss([]float predictions, []float targets) float {
     if len(targets) < limit {
         limit = len(targets)
     }
-    while i < limit {
+    for i < limit {
         float diff = predictions[i] - targets[i]
         loss = loss + diff * diff
         i = i + 1
@@ -1022,7 +1022,7 @@ func mse_gradient([]float predictions, []float targets) []float {
     }
     []float grad = fill_lora(len(predictions), 0.0)
     int i = 0
-    while i < limit {
+    for i < limit {
         grad[i] = 2.0 * (predictions[i] - targets[i]) / (limit as float)
         i = i + 1
     }
@@ -1039,7 +1039,7 @@ func abs_float(float value) float {
 func copy_float_array([]float source) []float {
     []float result = []float{cap: len(source)}
     int i = 0
-    while i < len(source) {
+    for i < len(source) {
         result[i] = source[i]
         i = i + 1
     }
@@ -1050,7 +1050,7 @@ func first_non_empty_line(string path) string {
     string content = runtime_read_text_file(path)
     string current = ""
     int i = 0
-    while i <= len(content) {
+    for i <= len(content) {
         bool at_end = i == len(content)
         bool at_newline = !at_end && content[i] == 10
         if at_end || at_newline {
@@ -1074,7 +1074,7 @@ func extract_json_string_field(string json_text, string field_name) string {
         return ""
     }
     pos = pos + len(needle)
-    while pos < len(json_text) && (json_text[pos] == 32 || json_text[pos] == 9 || json_text[pos] == 10 || json_text[pos] == 13 || json_text[pos] == 58) {
+    for pos < len(json_text) && (json_text[pos] == 32 || json_text[pos] == 9 || json_text[pos] == 10 || json_text[pos] == 13 || json_text[pos] == 58) {
         pos = pos + 1
     }
     if pos >= len(json_text) || json_text[pos] != 34 {
@@ -1082,7 +1082,7 @@ func extract_json_string_field(string json_text, string field_name) string {
     }
     pos = pos + 1
     string out = ""
-    while pos < len(json_text) {
+    for pos < len(json_text) {
         int ch = json_text[pos]
         if ch == 34 {
             break
@@ -1117,12 +1117,12 @@ func extract_json_int_field(string json_text, string field_name, int fallback) i
         return fallback
     }
     pos = pos + len(needle)
-    while pos < len(json_text) && (json_text[pos] == 32 || json_text[pos] == 9 || json_text[pos] == 10 || json_text[pos] == 13 || json_text[pos] == 58) {
+    for pos < len(json_text) && (json_text[pos] == 32 || json_text[pos] == 9 || json_text[pos] == 10 || json_text[pos] == 13 || json_text[pos] == 58) {
         pos = pos + 1
     }
     string token = ""
     bool started = false
-    while pos < len(json_text) {
+    for pos < len(json_text) {
         int ch = json_text[pos]
         if ch == 45 || ch >= 48 && ch <= 57 {
             token = token + string_char(ch)
@@ -1143,10 +1143,10 @@ func find_substring(string text, string pattern) int {
         return -1
     }
     int i = 0
-    while i <= len(text) - len(pattern) {
+    for i <= len(text) - len(pattern) {
         bool match = true
         int j = 0
-        while j < len(pattern) {
+        for j < len(pattern) {
             if text[i + j] != pattern[j] {
                 match = false
                 break
@@ -1183,7 +1183,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -1210,7 +1210,7 @@ func float_to_str(float value, int decimals) string {
         current = 0.0 - current
     }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -1220,10 +1220,10 @@ func float_to_str(float value, int decimals) string {
     }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }
@@ -1245,7 +1245,7 @@ func float_to_str(float value, int decimals) string {
 func json_escape(string s) string {
     string out = "\""
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         int ch = s[i]
         if ch == 34 {
             out = out + "\\\""

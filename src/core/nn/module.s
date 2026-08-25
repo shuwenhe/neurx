@@ -338,7 +338,7 @@ func copy_parameter(parameter p) parameter {
 func copy_parameters([]parameter params) []parameter {
     []parameter out = []parameter{cap: len(params)}
     int i = 0
-    while i < len(params) {
+    for i < len(params) {
         out[i] = copy_parameter(params[i])
         i = i + 1
     }
@@ -348,7 +348,7 @@ func copy_parameters([]parameter params) []parameter {
 func copy_tensors([]tensor values) []tensor {
     []tensor out = []tensor{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = neurx.tensor.clone(values[i])
         i = i + 1
     }
@@ -358,7 +358,7 @@ func copy_tensors([]tensor values) []tensor {
 func copy_modules([]module children) []module {
     []module out = []module{cap: len(children)}
     int i = 0
-    while i < len(children) {
+    for i < len(children) {
         out[i] = module_state_dict(children[i])
         i = i + 1
     }
@@ -402,7 +402,7 @@ func module_train(module m) module {
     module next = module_state_dict(m)
     next.training = true
     int i = 0
-    while i < len(next.children) {
+    for i < len(next.children) {
         next.children[i] = module_train(next.children[i])
         i = i + 1
     }
@@ -413,7 +413,7 @@ func module_eval(module m) module {
     module next = module_state_dict(m)
     next.training = false
     int i = 0
-    while i < len(next.children) {
+    for i < len(next.children) {
         next.children[i] = module_eval(next.children[i])
         i = i + 1
     }
@@ -424,7 +424,7 @@ func module_register_parameter(module m, string name, parameter p) module {
     module next = module_state_dict(m)
     int i = 0
     bool replaced = false
-    while i < len(next.parameter_names) {
+    for i < len(next.parameter_names) {
         if next.parameter_names[i] == name {
             next.parameters[i] = copy_parameter(p)
             replaced = true
@@ -442,7 +442,7 @@ func module_register_buffer(module m, string name, tensor value) module {
     module next = module_state_dict(m)
     int i = 0
     bool replaced = false
-    while i < len(next.buffer_names) {
+    for i < len(next.buffer_names) {
         if next.buffer_names[i] == name {
             next.buffers[i] = neurx.tensor.clone(value)
             replaced = true
@@ -460,7 +460,7 @@ func module_register_child(module m, string name, module child) module {
     module next = module_state_dict(m)
     int i = 0
     bool replaced = false
-    while i < len(next.child_names) {
+    for i < len(next.child_names) {
         if next.child_names[i] == name {
             next.children[i] = module_state_dict(child)
             replaced = true
@@ -477,15 +477,15 @@ func module_register_child(module m, string name, module child) module {
 func module_parameters(module m) []tensor {
     []tensor out = []tensor{cap: 0}
     int i = 0
-    while i < len(m.parameters) {
+    for i < len(m.parameters) {
         out.push(parameter_tensor(m.parameters[i]))
         i = i + 1
     }
     int j = 0
-    while j < len(m.children) {
+    for j < len(m.children) {
         []tensor child_params = module_parameters(m.children[j])
         int k = 0
-        while k < len(child_params) {
+        for k < len(child_params) {
             out.push(child_params[k])
             k = k + 1
         }
@@ -531,7 +531,7 @@ func module_load_state_dict(module m, module other) module {
 func module_parameter_count(module m) int {
     int count = len(m.parameters)
     int i = 0
-    while i < len(m.children) {
+    for i < len(m.children) {
         count = count + module_parameter_count(m.children[i])
         i = i + 1
     }
@@ -549,7 +549,7 @@ func module_child_count(module m) int {
 func copy_strings([]string values) []string {
     []string out = []string{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }
@@ -572,7 +572,7 @@ func module_first_parameter(module m) tensor {
         return parameter_tensor(m.parameters[0])
     }
     int i = 0
-    while i < len(m.children) {
+    for i < len(m.children) {
         tensor child_first = module_first_parameter(m.children[i])
         if len(child_first.data) > 0 {
             return child_first
@@ -588,10 +588,10 @@ func module_first_parameter(module m) tensor {
 func module_named_parameters(module m) []string {
     []string names = copy_strings(m.parameter_names)
     int i = 0
-    while i < len(m.children) {
+    for i < len(m.children) {
         []string child_names = module_named_parameters(m.children[i])
         int j = 0
-        while j < len(child_names) {
+        for j < len(child_names) {
             names.push(m.child_names[i] + "." + child_names[j])
             j = j + 1
         }
@@ -603,10 +603,10 @@ func module_named_parameters(module m) []string {
 func module_named_buffers(module m) []string {
     []string names = copy_strings(m.buffer_names)
     int i = 0
-    while i < len(m.children) {
+    for i < len(m.children) {
         []string child_names = module_named_buffers(m.children[i])
         int j = 0
-        while j < len(child_names) {
+        for j < len(child_names) {
             names.push(m.child_names[i] + "." + child_names[j])
             j = j + 1
         }
@@ -633,7 +633,7 @@ func module_add_child(module m, string name, module child) module {
 
 func module_find_parameter_index(module m, string name) int {
     int i = 0
-    while i < len(m.parameter_names) {
+    for i < len(m.parameter_names) {
         if m.parameter_names[i] == name {
             return i
         }
@@ -644,7 +644,7 @@ func module_find_parameter_index(module m, string name) int {
 
 func module_find_buffer_index(module m, string name) int {
     int i = 0
-    while i < len(m.buffer_names) {
+    for i < len(m.buffer_names) {
         if m.buffer_names[i] == name {
             return i
         }
@@ -655,7 +655,7 @@ func module_find_buffer_index(module m, string name) int {
 
 func module_find_child_index(module m, string name) int {
     int i = 0
-    while i < len(m.child_names) {
+    for i < len(m.child_names) {
         if m.child_names[i] == name {
             return i
         }
@@ -709,13 +709,13 @@ func module_has_child(module m, string name) bool {
 func module_set_trainable(module m, bool trainable) module {
     module next = module_state_dict(m)
     int i = 0
-    while i < len(next.parameters) {
+    for i < len(next.parameters) {
         next.parameters[i].trainable = trainable
         next.parameters[i].value = neurx.tensor.requires_grad_(next.parameters[i].value, trainable)
         i = i + 1
     }
     i = 0
-    while i < len(next.children) {
+    for i < len(next.children) {
         next.children[i] = module_set_trainable(next.children[i], trainable)
         i = i + 1
     }
@@ -749,7 +749,7 @@ func parameter_list_load_state_dict(parameter_list plist, parameter_list other) 
 func parameter_list_tensors(parameter_list plist) []tensor {
     []tensor out = []tensor{cap: len(plist.items)}
     int i = 0
-    while i < len(plist.items) {
+    for i < len(plist.items) {
         out[i] = parameter_tensor(plist.items[i])
         i = i + 1
     }
@@ -759,7 +759,7 @@ func parameter_list_tensors(parameter_list plist) []tensor {
 func parameter_list_names(parameter_list plist) []string {
     []string out = []string{cap: len(plist.items)}
     int i = 0
-    while i < len(plist.items) {
+    for i < len(plist.items) {
         out[i] = plist.items[i].name
         i = i + 1
     }
@@ -793,7 +793,7 @@ func module_list_load_state_dict(module_list list, module_list other) module_lis
 func module_list_names(module_list list) []string {
     []string out = []string{cap: len(list.items)}
     int i = 0
-    while i < len(list.items) {
+    for i < len(list.items) {
         out[i] = list.items[i].name
         i = i + 1
     }
@@ -825,7 +825,7 @@ func module_int_to_string(int value) string {
         n = 0 - n
     }
     string out = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n - (n / 10) * 10
         out = string(digit + 48) + out
         n = n / 10
@@ -845,7 +845,7 @@ func sequential_new() sequential {
 func sequential_from_modules([]module layers) sequential {
     sequential seq = sequential_new()
     int i = 0
-    while i < len(layers) {
+    for i < len(layers) {
         seq.root = module_add_child(seq.root, "layer_" + module_int_to_string(i), layers[i])
         i = i + 1
     }
@@ -876,7 +876,7 @@ func new_embedding_layer(int vocab_size, int embedding_dim, int padding_idx) emb
     int total = vocab_size * embedding_dim
     []float weight_data = []float{cap: total}
     int i = 0
-    while i < total {
+    for i < total {
         weight_data[i] = 0.0
         i = i + 1
     }
@@ -925,7 +925,7 @@ func new_embedding_bag_layer(int vocab_size, int embedding_dim, int padding_idx,
     int total = vocab_size * embedding_dim
     []float weight_data = []float{cap: total}
     int i = 0
-    while i < total {
+    for i < total {
         weight_data[i] = 0.0
         i = i + 1
     }
@@ -972,7 +972,7 @@ func new_layer_norm_layer(int normalized_dims, float eps, int hidden_size) layer
     []float weight_data = []float{cap: hidden_size}
     []float bias_data = []float{cap: hidden_size}
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         weight_data[i] = 1.0
         bias_data[i] = 0.0
         i = i + 1
@@ -1019,7 +1019,7 @@ func new_rms_norm_layer(int normalized_dims, float eps, int hidden_size) rms_nor
     []float weight_data = []float{cap: hidden_size}
     []float bias_data = []float{cap: hidden_size}
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         weight_data[i] = 1.0
         bias_data[i] = 0.0
         i = i + 1
@@ -1068,7 +1068,7 @@ func new_batch_norm_layer(int num_features, float eps, float momentum, bool trac
     []float running_mean_data = []float{cap: num_features}
     []float running_var_data = []float{cap: num_features}
     int i = 0
-    while i < num_features {
+    for i < num_features {
         weight_data[i] = 1.0
         bias_data[i] = 0.0
         running_mean_data[i] = 0.0
@@ -1133,7 +1133,7 @@ func new_sync_batch_norm_layer(int num_features, float eps, float momentum, int 
     []float running_mean_data = []float{cap: num_features}
     []float running_var_data = []float{cap: num_features}
     int i = 0
-    while i < num_features {
+    for i < num_features {
         weight_data[i] = 1.0
         bias_data[i] = 0.0
         running_mean_data[i] = 0.0
@@ -1200,7 +1200,7 @@ func new_group_norm_layer(int num_groups, int num_channels, float eps) group_nor
     []float weight_data = []float{cap: num_channels}
     []float bias_data = []float{cap: num_channels}
     int i = 0
-    while i < num_channels {
+    for i < num_channels {
         weight_data[i] = 1.0
         bias_data[i] = 0.0
         i = i + 1
@@ -1243,7 +1243,7 @@ func new_instance_norm_layer(int num_features, float eps, float momentum, bool t
     []float running_mean_data = []float{cap: num_features}
     []float running_var_data = []float{cap: num_features}
     int i = 0
-    while i < num_features {
+    for i < num_features {
         weight_data[i] = 1.0
         bias_data[i] = 0.0
         running_mean_data[i] = 0.0
@@ -1471,7 +1471,7 @@ func new_parameter_dict() parameter_dict {
 
 func parameter_dict_find(parameter_dict dict, string key) int {
     int i = 0
-    while i < len(dict.keys) {
+    for i < len(dict.keys) {
         if dict.keys[i] == key {
             return i
         }
@@ -1529,7 +1529,7 @@ func parameter_dict_keys(parameter_dict dict) []string {
 func parameter_dict_tensors(parameter_dict dict) []tensor {
     []tensor out = []tensor{cap: len(dict.values)}
     int i = 0
-    while i < len(dict.values) {
+    for i < len(dict.values) {
         out[i] = parameter_tensor(dict.values[i])
         i = i + 1
     }
@@ -1545,7 +1545,7 @@ func new_module_dict() module_dict {
 
 func module_dict_find(module_dict dict, string key) int {
     int i = 0
-    while i < len(dict.keys) {
+    for i < len(dict.keys) {
         if dict.keys[i] == key {
             return i
         }
@@ -2195,7 +2195,7 @@ func lazy_layer_norm_materialize(lazy_layer_norm_layer layer, tensor input) lazy
     }
     int hidden_size = 1
     int i = start
-    while i < ndim {
+    for i < ndim {
         hidden_size = hidden_size * input.shape[i]
         i = i + 1
     }
@@ -2259,7 +2259,7 @@ func lazy_rms_norm_materialize(lazy_rms_norm_layer layer, tensor input) lazy_rms
     }
     int hidden_size = 1
     int i = start
-    while i < ndim {
+    for i < ndim {
         hidden_size = hidden_size * input.shape[i]
         i = i + 1
     }

@@ -78,12 +78,12 @@ func extract_json_int(string json_text, string key) int {
     string search = "\"" + key + "\":"
     int pos = 0
     int found = -1
-    while pos < len(json_text) {
+    for pos < len(json_text) {
         if json_text[pos] == byte(34) {
             if pos + len(key) + 2 <= len(json_text) {
                 bool match = true
                 int i = 0
-                while i < len(key) {
+                for i < len(key) {
                     if byte(json_text[pos + 1 + i]) != byte(key[i]) {
                         match = false
                         break
@@ -93,7 +93,7 @@ func extract_json_int(string json_text, string key) int {
                 if match && byte(json_text[pos + 1 + len(key)]) == byte(34) {
                     if byte(json_text[pos + 2 + len(key)]) == byte(58) {
                         int value_pos = pos + 3 + len(key)
-                        while value_pos < len(json_text) {
+                        for value_pos < len(json_text) {
                             byte ch = byte(json_text[value_pos])
                             if ch == byte(32) || ch == byte(10) || ch == byte(13) || ch == byte(9) {
                                 value_pos = value_pos + 1
@@ -121,7 +121,7 @@ func extract_json_int(string json_text, string key) int {
         negative = true
         parse_pos = parse_pos + 1
     }
-    while parse_pos < len(json_text) {
+    for parse_pos < len(json_text) {
         byte ch = byte(json_text[parse_pos])
         if ch >= byte(48) && ch <= byte(57) {
             result = result * 10 + int(ch - byte(48))
@@ -140,12 +140,12 @@ func extract_json_float(string json_text, string key) float {
     string search = "\"" + key + "\":"
     int pos = 0
     int found = -1
-    while pos < len(json_text) {
+    for pos < len(json_text) {
         if json_text[pos] == byte(34) {
             if pos + len(key) + 2 <= len(json_text) {
                 bool match = true
                 int i = 0
-                while i < len(key) {
+                for i < len(key) {
                     if byte(json_text[pos + 1 + i]) != byte(key[i]) {
                         match = false
                         break
@@ -155,7 +155,7 @@ func extract_json_float(string json_text, string key) float {
                 if match && byte(json_text[pos + 1 + len(key)]) == byte(34) {
                     if byte(json_text[pos + 2 + len(key)]) == byte(58) {
                         int value_pos = pos + 3 + len(key)
-                        while value_pos < len(json_text) {
+                        for value_pos < len(json_text) {
                             byte ch = byte(json_text[value_pos])
                             if ch == byte(32) || ch == byte(10) || ch == byte(13) || ch == byte(9) {
                                 value_pos = value_pos + 1
@@ -184,7 +184,7 @@ func extract_json_float(string json_text, string key) float {
         parse_pos = parse_pos + 1
     }
     int int_part = 0
-    while parse_pos < len(json_text) {
+    for parse_pos < len(json_text) {
         byte ch = byte(json_text[parse_pos])
         if ch >= byte(48) && ch <= byte(57) {
             int_part = int_part * 10 + int(ch - byte(48))
@@ -198,7 +198,7 @@ func extract_json_float(string json_text, string key) float {
         parse_pos = parse_pos + 1
         float frac = 0.0
         float divisor = 10.0
-        while parse_pos < len(json_text) {
+        for parse_pos < len(json_text) {
             byte ch = byte(json_text[parse_pos])
             if ch >= byte(48) && ch <= byte(57) {
                 frac = frac + float(int(ch - byte(48))) / divisor
@@ -220,12 +220,12 @@ func extract_json_string(string json_text, string key) string {
     string search = "\"" + key + "\":"
     int pos = 0
     int found = -1
-    while pos < len(json_text) {
+    for pos < len(json_text) {
         if json_text[pos] == byte(34) {
             if pos + len(key) + 2 <= len(json_text) {
                 bool match = true
                 int i = 0
-                while i < len(key) {
+                for i < len(key) {
                     if byte(json_text[pos + 1 + i]) != byte(key[i]) {
                         match = false
                         break
@@ -235,7 +235,7 @@ func extract_json_string(string json_text, string key) string {
                 if match && byte(json_text[pos + 1 + len(key)]) == byte(34) {
                     if byte(json_text[pos + 2 + len(key)]) == byte(58) {
                         int value_pos = pos + 3 + len(key)
-                        while value_pos < len(json_text) {
+                        for value_pos < len(json_text) {
                             byte ch = byte(json_text[value_pos])
                             if ch == byte(32) || ch == byte(10) || ch == byte(13) || ch == byte(9) {
                                 value_pos = value_pos + 1
@@ -258,7 +258,7 @@ func extract_json_string(string json_text, string key) string {
     }
     string result = ""
     int parse_pos = found + 1
-    while parse_pos < len(json_text) {
+    for parse_pos < len(json_text) {
         byte ch = byte(json_text[parse_pos])
         if ch == byte(34) {
             break
@@ -273,12 +273,12 @@ func extract_json_bool(string json_text, string key) bool {
     string search = "\"" + key + "\":"
     int pos = 0
     int found = -1
-    while pos < len(json_text) {
+    for pos < len(json_text) {
         if json_text[pos] == byte(34) {
             if pos + len(key) + 2 <= len(json_text) {
                 bool match = true
                 int i = 0
-                while i < len(key) {
+                for i < len(key) {
                     if byte(json_text[pos + 1 + i]) != byte(key[i]) {
                         match = false
                         break
@@ -288,7 +288,7 @@ func extract_json_bool(string json_text, string key) bool {
                 if match && byte(json_text[pos + 1 + len(key)]) == byte(34) {
                     if byte(json_text[pos + 2 + len(key)]) == byte(58) {
                         int value_pos = pos + 3 + len(key)
-                        while value_pos < len(json_text) {
+                        for value_pos < len(json_text) {
                             byte ch = byte(json_text[value_pos])
                             if ch == byte(32) || ch == byte(10) || ch == byte(13) || ch == byte(9) {
                                 value_pos = value_pos + 1
@@ -311,7 +311,7 @@ func extract_json_bool(string json_text, string key) bool {
     }
     string value_str = ""
     int parse_pos = found
-    while parse_pos < len(json_text) && len(value_str) < 5 {
+    for parse_pos < len(json_text) && len(value_str) < 5 {
         byte ch = byte(json_text[parse_pos])
         if ch == byte(44) || ch == byte(125) || ch == byte(10) {
             break

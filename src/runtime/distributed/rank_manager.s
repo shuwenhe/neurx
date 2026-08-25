@@ -122,7 +122,7 @@ func empty_rank_group(int kind) rank_group {
 func build_world_group(parallel_topology topology, rank_coordinates coordinates) rank_group {
     rank_group group = empty_rank_group(group_world())
     int rank = 0
-    while rank < topology.world_size {
+    for rank < topology.world_size {
         group.ranks = append(group.ranks, rank)
         rank = rank + 1
     }
@@ -137,7 +137,7 @@ func build_tensor_group(parallel_topology topology, rank_coordinates coordinates
     int model_parallel_size = topology.tensor_parallel_size * topology.pipeline_parallel_size
     int base = coordinates.data_parallel_rank * model_parallel_size + coordinates.pipeline_parallel_rank * topology.tensor_parallel_size
     int rank = 0
-    while rank < topology.tensor_parallel_size {
+    for rank < topology.tensor_parallel_size {
         group.ranks = append(group.ranks, base + rank)
         rank = rank + 1
     }
@@ -152,7 +152,7 @@ func build_pipeline_group(parallel_topology topology, rank_coordinates coordinat
     int model_parallel_size = topology.tensor_parallel_size * topology.pipeline_parallel_size
     int data_base = coordinates.data_parallel_rank * model_parallel_size
     int stage = 0
-    while stage < topology.pipeline_parallel_size {
+    for stage < topology.pipeline_parallel_size {
         group.ranks = append(group.ranks, data_base + stage * topology.tensor_parallel_size + coordinates.tensor_parallel_rank)
         stage = stage + 1
     }
@@ -167,7 +167,7 @@ func build_data_group(parallel_topology topology, rank_coordinates coordinates) 
     int model_parallel_size = topology.tensor_parallel_size * topology.pipeline_parallel_size
     int model_offset = coordinates.pipeline_parallel_rank * topology.tensor_parallel_size + coordinates.tensor_parallel_rank
     int data_rank = 0
-    while data_rank < topology.data_parallel_size {
+    for data_rank < topology.data_parallel_size {
         group.ranks = append(group.ranks, data_rank * model_parallel_size + model_offset)
         data_rank = data_rank + 1
     }
@@ -182,7 +182,7 @@ func build_expert_group(parallel_topology topology, rank_coordinates coordinates
     int linear_rank = coordinates.data_parallel_rank * topology.tensor_parallel_size + coordinates.tensor_parallel_rank
     int expert_group_index = linear_rank / topology.expert_parallel_size
     int member = 0
-    while member < topology.expert_parallel_size {
+    for member < topology.expert_parallel_size {
         int member_linear_rank = expert_group_index * topology.expert_parallel_size + member
         int member_data_rank = member_linear_rank / topology.tensor_parallel_size
         int member_tensor_rank = member_linear_rank - member_data_rank * topology.tensor_parallel_size
@@ -299,7 +299,7 @@ func distributed_topology_contract_valid(parallel_topology requested) bool {
     parallel_topology topology = normalize_parallel_topology(requested)
     if !parallel_topology_valid(topology) { return false }
     int rank = 0
-    while rank < topology.world_size {
+    for rank < topology.world_size {
         rank_coordinates coordinates = rank_coordinates_for(topology, rank, rank)
         if coordinates.global_rank != rank || coordinates.tensor_parallel_rank < 0 || coordinates.pipeline_parallel_rank < 0 || coordinates.data_parallel_rank < 0 || coordinates.expert_parallel_rank < 0 { return false }
         rank = rank + 1

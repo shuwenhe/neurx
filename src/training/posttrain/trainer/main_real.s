@@ -23,7 +23,7 @@ func int_to_str(int x) string {
     if x < 0 { return "-" + int_to_str(0 - x) }
     string result = ""
     int num = x
-    while num > 0 {
+    for num > 0 {
         int digit = num - ((num / 10) * 10)
         if digit == 0 { result = "0" + result }
         if digit == 1 { result = "1" + result }

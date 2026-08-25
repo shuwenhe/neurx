@@ -59,7 +59,7 @@ func launch_cluster_training(
     print("  - Working directory: " + config.working_dir)
     []node_process_handle handles = []node_process_handle{cap: config.num_nodes}
     int node_idx = 0
-    while node_idx < config.num_nodes {
+    for node_idx < config.num_nodes {
         string node_addr = config.node_addresses[node_idx]
         print("[CLUSTER] Launching node " + itoa(node_idx) + " (" + node_addr + ")...")
         string cmd = build_launch_command(
@@ -134,7 +134,7 @@ func monitor_cluster_processes(
     int alive_count = 0
     int dead_count = 0
     int i = 0
-    while i < len(handles) {
+    for i < len(handles) {
         node_process_handle h = handles[i]
         bool still_running = check_remote_process(
             config,
@@ -174,7 +174,7 @@ func collect_cluster_logs(
     string aggregated_log = config.log_dir + "/cluster_aggregated.log"
     print("[LOGS] Aggregating logs to: " + aggregated_log)
     int i = 0
-    while i < len(handles) {
+    for i < len(handles) {
         node_process_handle h = handles[i]
         string node_log = config.log_dir + "/node_" + itoa(h.node_id) + ".log"
         string scp_cmd = "scp -i " + config.ssh_key_path +
@@ -194,7 +194,7 @@ func kill_cluster_training(
     print("[CLEANUP] Terminating all training processes...")
     int killed = 0
     int i = 0
-    while i < len(handles) {
+    for i < len(handles) {
         node_process_handle h = handles[i]
         string cmd = "ssh -i " + config.ssh_key_path +
                      " " + config.ssh_user + "@" + h.node_address +
@@ -223,7 +223,7 @@ func split_string(string s, string sep) []string {
     int part_idx = 0
     int i = 0
     string current = ""
-    while i < len(s) {
+    for i < len(s) {
         if i + len(sep) <= len(s) {
             string substr = s[i : i + len(sep)]
             if substr == sep {
@@ -248,7 +248,7 @@ func split_string(string s, string sep) []string {
 func string_join([]string parts, string sep) string {
     string result = ""
     int i = 0
-    while i < len(parts) {
+    for i < len(parts) {
         result = result + parts[i]
         if i < len(parts) - 1 {
             result = result + sep
@@ -268,7 +268,7 @@ func itoa(int n) string {
         s = "-"
         num = -num
     }
-    while num > 0 {
+    for num > 0 {
         byte digit = byte('0' + (num % 10))
         s = string(digit) + s
         num = num / 10

@@ -67,7 +67,7 @@ func test_compilation() test_result {
         "neurx/attention/flash_attention_v3.s",
     ]
     int i = 0
-    while i < 4 {
+    for i < 4 {
         string file = files[i]
         bool exists = true
         test_result_assert_true(&result, exists, "fileEnglish text: " + file)
@@ -218,7 +218,7 @@ func test_memory() test_result {
     println("configuration                        English text (GB)     English text")
     println("------------------------------------------------------------")
     int i = 0
-    while i < 5 {
+    for i < 5 {
         memory_config cfg = configs[i]
         float memory = estimate_memory_usage(cfg)
         println(cfg.name + "              " + float_to_str(memory, 1) + "GB")
@@ -239,7 +239,7 @@ func test_sft() test_result {
     []float losses = [2.5, 1.8, 1.2, 0.8, 0.5]
     bool decreasing = true
     int i = 0
-    while i < 4 {
+    for i < 4 {
         if losses[i] <= losses[i + 1] {
             decreasing = false
         }
@@ -259,7 +259,7 @@ func test_reward_model() test_result {
     []float aucs = [0.55, 0.65, 0.72, 0.76, 0.78]
     bool increasing = true
     int i = 0
-    while i < 4 {
+    for i < 4 {
         if aucs[i] >= aucs[i + 1] {
             increasing = false
         }
@@ -287,7 +287,7 @@ func test_ppo() test_result {
     []float kls = [0.012, 0.010, 0.008, 0.007, 0.006]
     float max_kl = kls[0]
     int i = 1
-    while i < 5 {
+    for i < 5 {
         if kls[i] > max_kl {
             max_kl = kls[i]
         }
@@ -347,7 +347,7 @@ func test_inference_benchmark() {
     []string configs = ["7B BS=32", "7B BS=128", "13B BS=32", "70B BS=32"]
     []int throughputs = [800, 1000, 600, 120]
     int i = 0
-    while i < 4 {
+    for i < 4 {
         println("  " + configs[i] + ": " + int_to_str(throughputs[i]) + " t/s")
         i = i + 1
     }
@@ -359,7 +359,7 @@ func test_training_benchmark() {
     []string configs = ["7B 1x GPU", "7B 8x GPU", "70B TP-4 + DP-2", "175B TP-8"]
     []int throughputs = [500, 3700, 2000, 800]
     int i = 0
-    while i < 4 {
+    for i < 4 {
         println("  " + configs[i] + ": " + int_to_str(throughputs[i]) + " t/s")
         i = i + 1
     }
@@ -371,7 +371,7 @@ func test_latency_benchmark() {
     []string configs = ["7B BS=1", "7B BS=32", "70B BS=1", "70B BS=32"]
     []int latencies = [25, 45, 80, 120]
     int i = 0
-    while i < 4 {
+    for i < 4 {
         println("  " + configs[i] + ": " + int_to_str(latencies[i]) + " ms")
         i = i + 1
     }
@@ -399,7 +399,7 @@ func int_to_str(int n) string {
         n = -n
     }
     string s = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n % 10
         s = string(digit + 48) + s
         n = n / 10
@@ -417,7 +417,7 @@ func float_to_str(float f, int decimals) string {
     if decimals > 0 {
         s = s + "."
         int d = 0
-        while d < decimals {
+        for d < decimals {
             frac = frac * 10.0
             int digit = int(frac)
             s = s + string(digit + 48)

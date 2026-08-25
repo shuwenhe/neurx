@@ -58,7 +58,7 @@ func prime_compute_process_rewards(
 ) []tensor {
     []tensor step_rewards = []tensor{cap: states.len}
     int i = 0
-    while i < states.len {
+    for i < states.len {
         int step_idx = i % rm.num_steps
         tensor embeddings = rm.backbone.forward(states[i])
         tensor reward = rm.step_heads[step_idx].forward(embeddings)
@@ -77,7 +77,7 @@ func prime_compute_cumulative_rewards(
     []tensor cumulative = []tensor{cap: n}
     tensor running_reward = tensor_ops.zeros_like(step_rewards[n - 1])
     int i = n - 1
-    while i >= 0 {
+    for i >= 0 {
         running_reward = tensor_ops.add(
             tensor_ops.mul_scalar(step_rewards[i], intermediate_weight),
             tensor_ops.mul_scalar(running_reward, gamma)
@@ -108,7 +108,7 @@ func prime_step(
         )
     } else {
         int i = 0
-        while i < states.len {
+        for i < states.len {
             step_rewards[i] = tensor_ops.zeros([1])
             i = i + 1
         }
@@ -122,7 +122,7 @@ func prime_step(
     []tensor returns = []tensor{cap: states.len}
     tensor gae = tensor_ops.zeros_like(old_values[states.len - 1])
     int t = states.len - 1
-    while t >= 0 {
+    for t >= 0 {
         tensor reward = cumulative_rewards[t]
         tensor value = old_values[t]
         bool done = dones[t]

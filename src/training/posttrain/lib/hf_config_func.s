@@ -5,10 +5,10 @@ use std.io.readfile
 func find_json_key(string json_text, string key) int {
     string pattern = "\"" + key + "\":"
     int i = 0
-    while i <= len(json_text) - len(pattern) {
+    for i <= len(json_text) - len(pattern) {
         int j = 0
         bool match = true
-        while j < len(pattern) {
+        for j < len(pattern) {
             if string(json_text[i + j]) != string(pattern[j]) {
                 match = false
                 break
@@ -17,7 +17,7 @@ func find_json_key(string json_text, string key) int {
         }
         if match {
             int pos = i + len(pattern)
-            while pos < len(json_text) {
+            for pos < len(json_text) {
                 string ch = string(json_text[pos])
                 if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
                     pos = pos + 1
@@ -43,7 +43,7 @@ func extract_int(string json_text, string key) int {
         pos = pos + 1
     }
     int result = 0
-    while pos < len(json_text) {
+    for pos < len(json_text) {
         string ch = string(json_text[pos])
         if ch == "0" {
             result = result * 10
@@ -86,7 +86,7 @@ func extract_string(string json_text, string key) string {
     }
     pos = pos + 1
     string result = ""
-    while pos < len(json_text) {
+    for pos < len(json_text) {
         string ch = string(json_text[pos])
         if ch == "\"" {
             return result
@@ -108,7 +108,7 @@ func extract_float(string json_text, string key) float {
         pos = pos + 1
     }
     int int_part = 0
-    while pos < len(json_text) {
+    for pos < len(json_text) {
         string ch = string(json_text[pos])
         if ch == "0" {
             int_part = int_part * 10
@@ -152,7 +152,7 @@ func extract_bool(string json_text, string key) bool {
     if pos + 4 <= len(json_text) {
         string word = ""
         int i = 0
-        while i < 4 {
+        for i < 4 {
             word = word + string(json_text[pos + i])
             i = i + 1
         }
@@ -163,7 +163,7 @@ func extract_bool(string json_text, string key) bool {
     if pos + 5 <= len(json_text) {
         word = ""
         i = 0
-        while i < 5 {
+        for i < 5 {
             word = word + string(json_text[pos + i])
             i = i + 1
         }

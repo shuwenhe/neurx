@@ -8,7 +8,7 @@ func vec_add([]float a, []float b) []float {
     int min_len_inner = len_a
     if len_b < min_len_inner { min_len_inner = len_b }
     int i_inner = 0
-    while i_inner < min_len_inner {
+    for i_inner < min_len_inner {
         result = append(result, a[i_inner] + b[i_inner])
         i_inner = i_inner + 1
     }
@@ -18,7 +18,7 @@ func vec_add([]float a, []float b) []float {
 func vec_mul_scalar([]float v, float scalar) []float {
     []float result
     int i = 0
-    while i < len(v) {
+    for i < len(v) {
         result = append(result, v[i] * scalar)
         i = i + 1
     }
@@ -30,7 +30,7 @@ func vec_dot([]float a, []float b) float {
     int min_len = len(a)
     if len(b) < min_len { min_len = len(b) }
     int i = 0
-    while i < min_len {
+    for i < min_len {
         result = result + a[i] * b[i]
         i = i + 1
     }
@@ -41,13 +41,13 @@ func rms_norm([]float x, []float weight, float epsilon) []float {
     []float result
     float sum_sq = 0.0
     int i = 0
-    while i < len(x) {
+    for i < len(x) {
         sum_sq = sum_sq + x[i] * x[i]
         i = i + 1
     }
     float rms = sqrt_approx(sum_sq / float(len(x)) + epsilon)
     i = 0
-    while i < len(x) {
+    for i < len(x) {
         float normalized = x[i] / rms
         if i < len(weight) {
             result = append(result, normalized * weight[i])
@@ -64,7 +64,7 @@ func sqrt_approx(float x) float {
     if x == 1.0 { return 1.0 }
     float guess = x / 2.0
     int iter = 0
-    while iter < 5 {
+    for iter < 5 {
         guess = (guess + x / guess) / 2.0
         iter = iter + 1
     }
@@ -77,7 +77,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / float(i)
         result = result + term
         i = i + 1
@@ -89,13 +89,13 @@ func softmax([]float logits) []float {
     []float result
     float max_val = 0.0
     int i = 0
-    while i < len(logits) {
+    for i < len(logits) {
         if logits[i] > max_val { max_val = logits[i] }
         i = i + 1
     }
     float exp_sum = 0.0
     i = 0
-    while i < len(logits) {
+    for i < len(logits) {
         float exp_val = exp_approx(logits[i] - max_val)
         result = append(result, exp_val)
         exp_sum = exp_sum + exp_val
@@ -103,7 +103,7 @@ func softmax([]float logits) []float {
     }
     if exp_sum > 0.0 {
         i = 0
-        while i < len(result) {
+        for i < len(result) {
             result[i] = result[i] / exp_sum
             i = i + 1
         }
@@ -114,10 +114,10 @@ func softmax([]float logits) []float {
 func matvec([]float matrix, []vector float, int rows, int cols) []float {
     []float result
     int i = 0
-    while i < rows {
+    for i < rows {
         float dot = 0.0
         int j = 0
-        while j < cols {
+        for j < cols {
             if i * cols + j < len(matrix) && j < len(vector) {
                 dot = dot + matrix[i * cols + j] * vector[j]
             }
@@ -133,7 +133,7 @@ func embedding_lookup([]float embed_weight, int token_id, int hidden_size) []flo
     []float result
     int start = token_id * hidden_size
     int i = 0
-    while i < hidden_size && start + i < len(embed_weight) {
+    for i < hidden_size && start + i < len(embed_weight) {
         result = append(result, embed_weight[start + i])
         i = i + 1
     }
@@ -155,20 +155,20 @@ func attention_forward(
     int seq_len = len(query) / head_dim
     int kv_len = len(key) / head_dim
     int head = 0
-    while head < num_heads {
+    for head < num_heads {
         int head_start = head * head_dim
         []float q_head
         int i = 0
-        while i < head_dim && head_start + i < len(query) {
+        for i < head_dim && head_start + i < len(query) {
             q_head = append(q_head, query[head_start + i])
             i = i + 1
         }
         []float scores
         i = 0
-        while i < kv_len {
+        for i < kv_len {
             []float k_head
             int j = 0
-            while j < head_dim && i * head_dim + head_start + j < len(key) {
+            for j < head_dim && i * head_dim + head_start + j < len(key) {
                 k_head = append(k_head, key[i * head_dim + head_start + j])
                 j = j + 1
             }
@@ -179,10 +179,10 @@ func attention_forward(
         []float attn_weights = softmax(scores)
         []float head_out
         i = 0
-        while i < head_dim {
+        for i < head_dim {
             float sum = 0.0
             int v = 0
-            while v < len(attn_weights) && v < kv_len {
+            for v < len(attn_weights) && v < kv_len {
                 if v * head_dim + head_start + i < len(value) {
                     sum = sum + attn_weights[v] * value[v * head_dim + head_start + i]
                 }
@@ -203,7 +203,7 @@ func ffn([]float x, []float gate_w, []float up_w, []float down_w, int hidden_siz
     []float up = matvec(up_w, x, intermediate_size, hidden_size)
     []float gated
     int i = 0
-    while i < len(up) && i < len(gate) {
+    for i < len(up) && i < len(gate) {
         float sigmoid_val = 1.0 / (1.0 + exp_approx(-1.702 * gate[i]))
         gated = append(gated, up[i] * sigmoid_val)
         i = i + 1
@@ -252,7 +252,7 @@ func model_forward(
 ) []float {
     []float hidden = embedding_lookup(embed_weight, token_id, hidden_size)
     int layer = 0
-    while layer < num_layers && layer < len(layer_weights) {
+    for layer < num_layers && layer < len(layer_weights) {
         hidden = transformer_block_forward(
             hidden,
             layer_weights[layer],

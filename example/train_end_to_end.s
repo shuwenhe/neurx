@@ -16,7 +16,7 @@ func train_demo() float {
     float first_loss = 0.0
     float last_loss = 0.0
     int step = 0
-    while step < 100 {
+    for step < 100 {
         float x = 1.0
         float target = 5.0
         float pred = simple_forward(w, b, x)

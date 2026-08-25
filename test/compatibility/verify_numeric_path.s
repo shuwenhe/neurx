@@ -21,9 +21,9 @@ func compute_matrix_stats([][]float mat) matrix_stats {
     int tot = R * C
     float sum = 0.0
     int r = 0
-    while r < R {
+    for r < R {
         int c = 0
-        while c < C {
+        for c < C {
             sum = sum + mat[r][c]
             c = c + 1
         }
@@ -33,9 +33,9 @@ func compute_matrix_stats([][]float mat) matrix_stats {
     float sample = 0.0
     int count = 0
     r = 0
-    while r < R && count < 8 {
+    for r < R && count < 8 {
         int c = 0
-        while c < C && count < 8 {
+        for c < C && count < 8 {
             sample = sample + mat[r][c]
             c = c + 1
             count = count + 1
@@ -48,10 +48,10 @@ func compute_matrix_stats([][]float mat) matrix_stats {
 func create_test_matrix(int rows, int cols, float scale) [][]float {
     [][]float mat = [][]float{cap: rows}
     int r = 0
-    while r < rows {
+    for r < rows {
         []float row = []float{cap: cols}
         int c = 0
-        while c < cols {
+        for c < cols {
             float val = scale * float(r * cols + c) / 1000.0
             row.push(val)
             c = c + 1
@@ -71,9 +71,9 @@ func test_matmul_numeric() {
     [][]float B_mat = create_test_matrix(N, P, 0.5)
     []float A = []float{cap: M * N}
     int i = 0
-    while i < M {
+    for i < M {
         int j = 0
-        while j < N {
+        for j < N {
             A[i * N + j] = A_mat[i][j]
             j = j + 1
         }
@@ -81,9 +81,9 @@ func test_matmul_numeric() {
     }
     []float B = []float{cap: N * P}
     i = 0
-    while i < N {
+    for i < N {
         int j = 0
-        while j < P {
+        for j < P {
             B[i * P + j] = B_mat[i][j]
             j = j + 1
         }
@@ -99,7 +99,7 @@ func test_matmul_numeric() {
     print("C = A @ B (" + int_to_string(M) + "x" + int_to_string(P) + "): ")
     print("[")
     int k = 0
-    while k < M * P && k < 8 {
+    for k < M * P && k < 8 {
         print(float_to_string(C[k]))
         if k < 7 { print(", ") }
         k = k + 1
@@ -123,7 +123,7 @@ func test_softmax_numeric() {
     fast_softmax(logits, probs, len_x)
     print("logits: [")
     int i = 0
-    while i < len_x {
+    for i < len_x {
         print(float_to_string(logits[i]))
         if i < len_x - 1 { print(", ") }
         i = i + 1
@@ -132,7 +132,7 @@ func test_softmax_numeric() {
     print("probs:  [")
     i = 0
     float sum_probs = 0.0
-    while i < len_x {
+    for i < len_x {
         print(float_to_string(probs[i]))
         sum_probs = sum_probs + probs[i]
         if i < len_x - 1 { print(", ") }
@@ -152,7 +152,7 @@ func test_gelu_numeric() {
     test_vals[4] = 2.0
     print("GELU outputs:\n")
     int i = 0
-    while i < 5 {
+    for i < 5 {
         float out = fast_gelu(test_vals[i])
         print("  gelu(" + float_to_string(test_vals[i]) + ") = " + float_to_string(out) + "\n")
         i = i + 1
@@ -168,9 +168,9 @@ func test_attention_numeric() {
     []float Q = []float{cap: seq_len * head_dim}
     []float K = []float{cap: seq_len * head_dim}
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         int j = 0
-        while j < head_dim {
+        for j < head_dim {
             Q[i * head_dim + j] = Q_mat[i][j]
             K[i * head_dim + j] = K_mat[i][j]
             j = j + 1
@@ -181,12 +181,12 @@ func test_attention_numeric() {
     print("scale = 1/sqrt(" + int_to_string(head_dim) + ") = " + float_to_string(scale) + "\n")
     print("\nAttention scores (with causal mask):\n")
     int qi = 0
-    while qi < seq_len {
+    for qi < seq_len {
         int kj = 0
-        while kj < seq_len {
+        for kj < seq_len {
             float dot = 0.0
             int d = 0
-            while d < head_dim {
+            for d < head_dim {
                 dot = dot + Q[qi * head_dim + d] * K[kj * head_dim + d]
                 d = d + 1
             }

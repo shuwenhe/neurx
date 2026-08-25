@@ -68,7 +68,7 @@ func run_golden_tests_s(regression_test_suite_s suite) regression_test_suite_s {
     int passed = 0
     int failed = 0
     int i = 0
-    while i < len(suite.test_cases) {
+    for i < len(suite.test_cases) {
         golden_test_case_s test = suite.test_cases[i]
         bool result = run_single_test_s(test)
         if result {
@@ -118,7 +118,7 @@ func compare_tensors_s(tensor_s t1, tensor_s t2, float tolerance) bool {
         return false
     }
     int i = 0
-    while i < len(t1.data) {
+    for i < len(t1.data) {
         float diff = t1.data[i] - t2.data[i]
         if diff < 0.0 { diff = 0.0 - diff }
         if diff > tolerance {
@@ -139,7 +139,7 @@ func numerical_gradient_check_s(
     float max_diff = 0.0
     float rel_error = 0.0
     int i = 0
-    while i < len(analytical.data) {
+    for i < len(analytical.data) {
         float diff = analytical.data[i] - numerical.data[i]
         if diff < 0.0 { diff = 0.0 - diff }
         if diff > max_diff {
@@ -165,7 +165,7 @@ func compute_analytical_gradient_s(string op, tensor_s input) tensor_s {
 func compute_numerical_gradient_s(string op, tensor_s input, float epsilon) tensor_s {
     []float grad = make([]float, 0)
     int i = 0
-    while i < len(input.data) {
+    for i < len(input.data) {
         tensor_s input_plus = copy_tensor_s(input)
         input_plus.data[i] = input_plus.data[i] + epsilon
         tensor_s input_minus = copy_tensor_s(input)
@@ -194,7 +194,7 @@ func matmul_forward_s(tensor_s a, tensor_s b) tensor_s {
 func add_forward_s(tensor_s a, tensor_s b) tensor_s {
     []float result = make([]float, 0)
     int i = 0
-    while i < len(a.data) {
+    for i < len(a.data) {
         result = append(result, a.data[i] + b.data[i])
         i = i + 1
     }
@@ -212,7 +212,7 @@ func add_forward_s(tensor_s a, tensor_s b) tensor_s {
 func mul_forward_s(tensor_s a, tensor_s b) tensor_s {
     []float result = make([]float, 0)
     int i = 0
-    while i < len(a.data) {
+    for i < len(a.data) {
         result = append(result, a.data[i] * b.data[i])
         i = i + 1
     }
@@ -234,7 +234,7 @@ func softmax_forward_s(tensor_s a) tensor_s {
 func make_zeros_like_s(tensor_s t) tensor_s {
     []float zeros = make([]float, 0)
     int i = 0
-    while i < t.total_elements {
+    for i < t.total_elements {
         zeros = append(zeros, 0.0)
         i = i + 1
     }
@@ -252,7 +252,7 @@ func make_zeros_like_s(tensor_s t) tensor_s {
 func copy_tensor_s(tensor_s t) tensor_s {
     []float copied = make([]float, 0)
     int i = 0
-    while i < len(t.data) {
+    for i < len(t.data) {
         copied = append(copied, t.data[i])
         i = i + 1
     }
@@ -272,7 +272,7 @@ func int_to_str(int n) string {
     string result = ""
     bool neg = false
     if n < 0 { neg = true; n = 0 - n }
-    while n > 0 {
+    for n > 0 {
         int d = n - (n / 10) * 10
         if d == 0 { result = "0" + result }
         else if d == 1 { result = "1" + result }

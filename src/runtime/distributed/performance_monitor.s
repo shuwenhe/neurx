@@ -59,7 +59,7 @@ func analyze_communication_bottleneck(performance_monitor monitor) float {
     float total_compute_time = 0.0
     float total_comm_time = 0.0
     int i = 0
-    while i < len(monitor.metrics) {
+    for i < len(monitor.metrics) {
         total_compute_time = total_compute_time + float(monitor.metrics[i].compute_time_ms)
         total_comm_time = total_comm_time + float(monitor.metrics[i].communication_time_ms)
         i = i + 1

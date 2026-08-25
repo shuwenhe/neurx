@@ -85,7 +85,7 @@ func copy_float([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = values[i]
         i = i + 1
     }
@@ -96,7 +96,7 @@ func copy_int([]int values) []int {
     int n = len(values)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = values[i]
         i = i + 1
     }
@@ -110,7 +110,7 @@ func copy_tensor(tensor value) tensor {
 func two_t_copy_backbone_optimizers([]transformer_layer_optimizer_state states) []transformer_layer_optimizer_state {
     []transformer_layer_optimizer_state out = []transformer_layer_optimizer_state{cap: len(states)}
     int i = 0
-    while i < len(states) {
+    for i < len(states) {
         out[i] = copy_layer_optimizer_state(states[i])
         i = i + 1
     }
@@ -127,7 +127,7 @@ func two_t_first_checkpoint_tensor(checkpoint saved) tensor {
     []tensor params = checkpoint_params(saved)
     tensor out = params[0]
     int i = 0
-    while i < len(params) {
+    for i < len(params) {
         if i == 0 {
             out = params[i]
             i = len(params)
@@ -155,7 +155,7 @@ func two_t_layer_optimizer_text(string prefix, transformer_layer_optimizer_state
 func two_t_backbone_optimizer_text([]transformer_layer_optimizer_state states) string {
     string out = ""
     int i = 0
-    while i < len(states) {
+    for i < len(states) {
         out = out + two_t_layer_optimizer_text("backbone.layer" + string(i) + ".", states[i])
         i = i + 1
     }
@@ -180,7 +180,7 @@ func two_t_layer_optimizer_from_text([]string lines, string prefix, transformer_
 func two_t_backbone_optimizer_from_text([]string lines, []transformer_layer_optimizer_state fallback) []transformer_layer_optimizer_state {
     []transformer_layer_optimizer_state out = []transformer_layer_optimizer_state{cap: len(fallback)}
     int i = 0
-    while i < len(fallback) {
+    for i < len(fallback) {
         out[i] = two_t_layer_optimizer_from_text(lines, "backbone.layer" + string(i) + ".", fallback[i])
         i = i + 1
     }
@@ -206,7 +206,7 @@ func copy_float_slice([]float values, int start, int end) []float {
     []float out = []float{cap: safe_end - safe_start}
     int i = safe_start
     int j = 0
-    while i < safe_end {
+    for i < safe_end {
         out[j] = values[i]
         i = i + 1
         j = j + 1
@@ -233,7 +233,7 @@ func copy_int_slice([]int values, int start, int end) []int {
     []int out = []int{cap: safe_end - safe_start}
     int i = safe_start
     int j = 0
-    while i < safe_end {
+    for i < safe_end {
         out[j] = values[i]
         i = i + 1
         j = j + 1
@@ -244,7 +244,7 @@ func copy_int_slice([]int values, int start, int end) []int {
 func tensor_numel_from_shape([]int shape) int {
     int total = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         total = total * shape[i]
         i = i + 1
     }
@@ -260,12 +260,12 @@ func tensor_1d_concat(tensor left, tensor right) tensor {
     int right_n = len(right.data)
     []float out = []float{cap: left_n + right_n}
     int i = 0
-    while i < left_n {
+    for i < left_n {
         out[i] = left.data[i]
         i = i + 1
     }
     int j = 0
-    while j < right_n {
+    for j < right_n {
         out[left_n + j] = right.data[j]
         j = j + 1
     }
@@ -293,9 +293,9 @@ func tensor_2d_row_slice(tensor value, int row_start, int row_end) tensor {
     []float out = []float{cap: total}
     int r = safe_start
     int idx = 0
-    while r < safe_end {
+    for r < safe_end {
         int c = 0
-        while c < cols {
+        for c < cols {
             out[idx] = value.data[r * cols + c]
             idx = idx + 1
             c = c + 1
@@ -326,9 +326,9 @@ func tensor_2d_col_slice(tensor value, int col_start, int col_end) tensor {
     []float out = []float{cap: rows * local_cols}
     int r = 0
     int idx = 0
-    while r < rows {
+    for r < rows {
         int c = safe_start
-        while c < safe_end {
+        for c < safe_end {
             out[idx] = value.data[r * cols + c]
             idx = idx + 1
             c = c + 1
@@ -350,9 +350,9 @@ func tensor_2d_col_update(tensor base, tensor shard, int col_start, int col_end)
     }
     []float out = copy_float(base.data)
     int r = 0
-    while r < rows {
+    for r < rows {
         int c = 0
-        while c < local_cols {
+        for c < local_cols {
             int dst = r * cols + (col_start + c)
             int src = r * local_cols + c
             if dst >= 0  dst < len(out)  src >= 0  src < len(shard.data) {
@@ -385,9 +385,9 @@ func tensor_2d_row_update(tensor base, tensor shard, int row_start, int row_end)
     []float out = copy_float(base.data)
     int local_rows = safe_end - safe_start
     int r = 0
-    while r < local_rows {
+    for r < local_rows {
         int c = 0
-        while c < cols {
+        for c < cols {
             int dst = (safe_start + r) * cols + c
             int src = r * cols + c
             if dst >= 0  dst < len(out)  src >= 0  src < len(shard.data) {
@@ -407,7 +407,7 @@ func tensor_1d_update(tensor base, tensor shard, int start, int end) tensor {
     }
     []float out = copy_float(base.data)
     int i = 0
-    while i < local {
+    for i < local {
         int dst = start + i
         if dst >= 0  dst < len(out)  i < len(shard.data) {
             out[dst] = shard.data[i]
@@ -444,7 +444,7 @@ func make_int_array_2(int a, int b) []int {
 func make_int_sequence(int count, int start, int modulo) []int {
     []int values = []int{cap: count}
     int i = 0
-    while i < count {
+    for i < count {
         int next = start + i
         if modulo > 0 {
             next = two_t_mod_nonneg(next, modulo)
@@ -940,7 +940,7 @@ func two_t_collect_tp_shard_params(two_t_runtime_state state) []tensor {
     params.push(tensor_2d_col_slice(state.lm_head_weight, col_range[0], col_range[1]))
     params.push(tensor_from_flat_slice(state.lm_head_bias, vocab_range[0], vocab_range[1]))
     int i = 0
-    while i < len(state.backbone.layers) {
+    for i < len(state.backbone.layers) {
         params.push(tensor_2d_col_slice(state.backbone.layers[i].w_q, col_range[0], col_range[1]))
         params.push(tensor_2d_col_slice(state.backbone.layers[i].w_k, col_range[0], col_range[1]))
         params.push(tensor_2d_col_slice(state.backbone.layers[i].w_v, col_range[0], col_range[1]))
@@ -980,7 +980,7 @@ func two_t_apply_tp_shard_params(two_t_runtime_state state, []tensor params) two
     []int col_range = two_t_tp_col_range(state)
     []int row_range = two_t_tp_row_range(state)
     int layer_index = 0
-    while layer_index < len(next_backbone.layers) {
+    for layer_index < len(next_backbone.layers) {
         if idx < len(params) {
             next_backbone.layers[layer_index].w_q = tensor_2d_col_update(next_backbone.layers[layer_index].w_q, params[idx], col_range[0], col_range[1])
         }
@@ -1161,7 +1161,7 @@ func two_t_apply_backbone_layer_shard_params(two_t_runtime_state state, int laye
 func two_t_join_ints([]int values) string {
     string out = ""
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if i > 0 {
             out = out + ","
         }
@@ -1174,7 +1174,7 @@ func two_t_join_ints([]int values) string {
 func two_t_join_floats([]float values) string {
     string out = ""
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         if i > 0 {
             out = out + ","
         }
@@ -1188,7 +1188,7 @@ func two_t_parse_int_list(string text) []int {
     []int out = []int{cap: 0}
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = neurx.strings.substring(text, i, i + 1)
         int chi = int(string(ch))
         if chi == 44 {
@@ -1211,7 +1211,7 @@ func two_t_parse_float_list(string text) []float {
     []float out = []float{cap: 0}
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = neurx.strings.substring(text, i, i + 1)
         int chi = int(string(ch))
         if chi == 44 {
@@ -1234,7 +1234,7 @@ func two_t_split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = neurx.strings.substring(text, i, i + 1)
         int chi = int(string(ch))
         if chi == 10 {
@@ -1364,7 +1364,7 @@ func two_t_checkpoint_payload_paths(two_t_runtime_state state) []string {
     paths.push(two_t_checkpoint_head_bias_params_path(state))
     paths.push(two_t_checkpoint_head_bias_optimizer_path(state))
     int layer_index = 0
-    while layer_index < len(state.backbone.layers) {
+    for layer_index < len(state.backbone.layers) {
         paths.push(two_t_checkpoint_backbone_layer_params_path(state, layer_index))
         paths.push(two_t_checkpoint_backbone_layer_optimizer_path(state, layer_index))
         layer_index = layer_index + 1
@@ -1376,7 +1376,7 @@ func two_t_checkpoint_missing_paths(two_t_runtime_state state) []string {
     []string missing = []string{cap: 0}
     []string paths = two_t_checkpoint_payload_paths(state)
     int i = 0
-    while i < len(paths) {
+    for i < len(paths) {
         string path = paths[i]
         if path != ""  !runtime_file_exists(path) {
             missing.push(path)
@@ -1409,7 +1409,7 @@ func two_t_checkpoint_manifest_text(two_t_runtime_state state) string {
     out = out + "payload_count=" + string(len(two_t_checkpoint_payload_paths(state))) + "\n"
     []string paths = two_t_checkpoint_payload_paths(state)
     int i = 0
-    while i < len(paths) {
+    for i < len(paths) {
         out = out + "file=" + paths[i] + "\n"
         i = i + 1
     }
@@ -1438,7 +1438,7 @@ func two_t_checkpoint_resume_status_text(two_t_runtime_state state) string {
     }
     string out = "missing_shards\n"
     int i = 0
-    while i < len(missing) {
+    for i < len(missing) {
         out = out + missing[i] + "\n"
         i = i + 1
     }
@@ -1600,7 +1600,7 @@ func two_t_write_checkpoint(two_t_runtime_state state) two_t_runtime_state {
     save_checkpoint(two_t_checkpoint_head_bias_params_path(state), state.step, state.last_loss, two_t_single_tensor_params(state.lm_head_bias))
     runtime_write_text_file(two_t_checkpoint_head_bias_optimizer_path(state), two_t_adamw_optimizer_text("head_bias.", state.head_bias_optimizer))
     int layer_index = 0
-    while layer_index < len(state.backbone.layers) {
+    for layer_index < len(state.backbone.layers) {
         string layer_dir = two_t_checkpoint_backbone_layer_dir(state, layer_index)
         if layer_dir != "" {
             runtime_make_dirs(layer_dir)
@@ -1672,7 +1672,7 @@ func two_t_restore_optimizer_from_meta(two_t_runtime_state state, []string lines
 
 func two_t_line_value([]string lines, string key, string fallback) string {
     int i = 0
-    while i < len(lines) {
+    for i < len(lines) {
         string line = lines[i]
         int key_len = len(key)
         if len(line) >= key_len {
@@ -1739,7 +1739,7 @@ func two_t_runtime_load_checkpoint(two_t_runtime_state state) two_t_runtime_stat
         params_state.lm_head_bias = two_t_first_checkpoint_tensor(head_bias_saved)
     }
     int layer_index = 0
-    while layer_index < len(params_state.backbone.layers) {
+    for layer_index < len(params_state.backbone.layers) {
         string layer_path = two_t_checkpoint_backbone_layer_params_path(state, layer_index)
         checkpoint layer_saved = load_checkpoint(layer_path)
         if len(checkpoint_params(layer_saved)) > 0 {
@@ -1768,7 +1768,7 @@ func two_t_runtime_load_checkpoint(two_t_runtime_state state) two_t_runtime_stat
         params_state.head_bias_optimizer = two_t_adamw_optimizer_from_text(two_t_split_lines(runtime_read_text_file(two_t_checkpoint_head_bias_optimizer_path(state))), "head_bias.", params_state.head_bias_optimizer)
     }
     layer_index = 0
-    while layer_index < len(params_state.backbone_optimizers) {
+    for layer_index < len(params_state.backbone_optimizers) {
         string layer_optim_path = two_t_checkpoint_backbone_layer_optimizer_path(state, layer_index)
         if runtime_file_exists(layer_optim_path) {
             params_state.backbone_optimizers[layer_index] = two_t_layer_optimizer_from_text(two_t_split_lines(runtime_read_text_file(layer_optim_path)), "layer.", layer_optimizer_state_at(params_state.backbone_optimizers, layer_index))
@@ -1909,7 +1909,7 @@ func two_t_runtime_train(two_t_runtime_state state, int steps) two_t_runtime_sta
     }
     two_t_runtime_state current = state
     int i = 0
-    while i < loops {
+    for i < loops {
         current = two_t_runtime_step(current)
         current.plan = two_t_training_plan_step(current.plan)
         i = i + 1

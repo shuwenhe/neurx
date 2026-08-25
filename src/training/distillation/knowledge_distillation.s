@@ -65,7 +65,7 @@ func distillation_softmax([]float logits, float temperature) []float {
     }
     float scaled_max = logits[0] / temperature
     int i = 1
-    while i < n {
+    for i < n {
         float scaled = logits[i] / temperature
         if scaled > scaled_max {
             scaled_max = scaled
@@ -74,7 +74,7 @@ func distillation_softmax([]float logits, float temperature) []float {
     }
     float exp_sum = 0.0
     i = 0
-    while i < n {
+    for i < n {
         float exp_val = exp_approx((logits[i] / temperature) - scaled_max)
         probs[i] = exp_val
         exp_sum = exp_sum + exp_val
@@ -83,14 +83,14 @@ func distillation_softmax([]float logits, float temperature) []float {
     if exp_sum <= 0.0 {
         float uniform = 1.0 / float(n)
         i = 0
-        while i < n {
+        for i < n {
             probs[i] = uniform
             i = i + 1
         }
         return probs
     }
     i = 0
-    while i < n {
+    for i < n {
         probs[i] = probs[i] / exp_sum
         i = i + 1
     }
@@ -106,7 +106,7 @@ func distillation_kl_divergence([]float student_logits, []float teacher_logits, 
     }
     float kl = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float tp = teacher_probs[i]
         float sp = student_probs[i]
         if tp > 1e-12 && sp > 1e-12 {
@@ -124,7 +124,7 @@ func distillation_cross_entropy([]float logits, []int target_ids) float {
     []float probs = distillation_softmax(logits, 1.0)
     float loss = 0.0
     int i = 0
-    while i < len(target_ids) {
+    for i < len(target_ids) {
         int target = target_ids[i]
         if target >= 0 && target < len(probs) {
             float p = probs[target]
@@ -248,7 +248,7 @@ func exp_approx(float x) float {
     float sum = 1.0
     float term = 1.0
     int i = 1
-    while i < 12 {
+    for i < 12 {
         term = term * x / float(i)
         sum = sum + term
         i = i + 1
@@ -265,7 +265,7 @@ func log_approx(float x) float {
     float acc = 0.0
     float term = y
     int k = 1
-    while k < 11 {
+    for k < 11 {
         acc = acc + term / float(k)
         term = term * y2
         k = k + 2

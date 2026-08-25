@@ -53,8 +53,8 @@ struct pipeline_state {
 func pp_mod(int val, int div) int {
     if div <= 0 { return 0 }
     int r = val
-    while r >= div { r = r - div }
-    while r < 0 { r = r + div }
+    for r >= div { r = r - div }
+    for r < 0 { r = r + div }
     return r
 }
 
@@ -79,7 +79,7 @@ func init_pipeline(pipeline_config cfg) pipeline_state {
     int num_mb = cfg.num_microbatches
     state.mb_states = []microbatch_state{cap: num_mb}
     int i = 0
-    while i < num_mb {
+    for i < num_mb {
         state.mb_states[i] = microbatch_state{
             microbatch_id: i,
             forward_done: false,
@@ -99,7 +99,7 @@ func init_pipeline(pipeline_config cfg) pipeline_state {
     state.peak_memory_bytes = 0.0
     state.layer_weights = [][][][]double{cap: state.stage_info.num_layers_local}
     int w = 0
-    while w < state.stage_info.num_layers_local {
+    for w < state.stage_info.num_layers_local {
         state.layer_weights[w] = [][][]double{cap: 10}
         w = w + 1
     }
@@ -127,7 +127,7 @@ func execute_1f1b_step(
     if warmup_count < 0 { warmup_count = 0 }
     if warmup_count > M { warmup_count = M }
     int fwd_idx = 0
-    while fwd_idx < warmup_count  state.forward_counter < M {
+    for fwd_idx < warmup_count  state.forward_counter < M {
         int mb_id = state.forward_counter
         [][]double mb_input
         if is_first_stage {
@@ -153,7 +153,7 @@ func execute_1f1b_step(
     int steady_count = M - P + 1
     if steady_count < 0 { steady_count = 0 }
     int ss_idx = 0
-    while ss_idx < steady_count {
+    for ss_idx < steady_count {
         if state.forward_counter < M {
             int fwd_mb_id = state.forward_counter
             [][]double fwd_input
@@ -200,7 +200,7 @@ func execute_1f1b_step(
         }
         ss_idx = ss_idx + 1
     }
-    while state.backward_counter < M {
+    for state.backward_counter < M {
         int cool_mb_id = state.backward_counter
         [][]double cool_grad
         if is_last_stage {
@@ -231,7 +231,7 @@ func run_forward_stage(pipeline_state state, [][]double input, int mb_id) [][]do
         state.mb_states[mb_id].input_activation = copy_tensor(input)
     }
     int layer_idx = 0
-    while layer_idx < state.stage_info.num_layers_local {
+    for layer_idx < state.stage_info.num_layers_local {
         layer_idx = layer_idx + 1
     }
     return current
@@ -240,7 +240,7 @@ func run_forward_stage(pipeline_state state, [][]double input, int mb_id) [][]do
 func run_backward_stage(pipeline_state state, [][]double grad_output, int mb_id) [][]double {
     [][]double current_grad = grad_output
     int layer_idx = state.stage_info.num_layers_local - 1
-    while layer_idx >= 0 {
+    for layer_idx >= 0 {
         layer_idx = layer_idx - 1
     }
     return current_grad
@@ -275,10 +275,10 @@ func copy_tensor([][]double src) [][]double {
     int cols = len(src[0])
     [][]double dst = [][]double{cap: rows}
     int i = 0
-    while i < rows {
+    for i < rows {
         dst[i] = []double{cap: cols}
         int j = 0
-        while j < cols {
+        for j < cols {
             dst[i][j] = src[i][j]
             j = j + 1
         }

@@ -18,7 +18,7 @@ func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -29,7 +29,7 @@ func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -48,7 +48,7 @@ func copy_record(grad_record record) grad_record {
 func copy_records([]grad_record records) []grad_record {
     []grad_record out = []grad_record{cap: len(records)}
     int i = 0
-    while i < len(records) {
+    for i < len(records) {
         out[i] = copy_record(records[i])
         i = i + 1
     }
@@ -149,7 +149,7 @@ func record_count(autograd_state state) int {
 
 func has_record(autograd_state state, int id) bool {
     int i = 0
-    while i < len(state.records) {
+    for i < len(state.records) {
         if state.records[i].id == id {
             return true
         }
@@ -176,7 +176,7 @@ func set_grad(autograd_state state, int id, []float grad) autograd_state {
 func clear_grad(autograd_state state, int id) autograd_state {
     []grad_record records = state.records
     int i = 0
-    while i < len(records) {
+    for i < len(records) {
         if records[i].id == id {
             records[i].grad = zeros_like(records[i].grad)
         }
@@ -192,7 +192,7 @@ func clear_grad(autograd_state state, int id) autograd_state {
 func zero_grad(autograd_state state) autograd_state {
     []grad_record records = state.records
     int i = 0
-    while i < len(records) {
+    for i < len(records) {
         records[i].grad = zeros_like(records[i].grad)
         i = i + 1
     }

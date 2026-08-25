@@ -34,7 +34,7 @@ func asgd_step(asgd_optimizer optimizer, tensor params, tensor grads) asgd_optim
     optimizer.ax = ensure_asgd_state(optimizer.ax, n)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float grad = grads.data[i]
         if optimizer.weight_decay != 0.0 {
             grad = grad + optimizer.weight_decay * params.data[i]
@@ -65,7 +65,7 @@ struct asgd_optimizer_step_output {
 func ensure_asgd_state([]float values, int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         if i < len(values) {
             out[i] = values[i]
         } else {
@@ -94,7 +94,7 @@ func asgd_exp(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i < 25 {
+    for i < 25 {
         term = term * x / float(i)
         result = result + term
         i = i + 1
@@ -111,7 +111,7 @@ func asgd_ln(float x) float {
     float result = 0.0
     float term = y
     int i = 0
-    while i < 20 {
+    for i < 20 {
         result = result + term / float(2 * i + 1)
         term = term * y_sq
         i = i + 1

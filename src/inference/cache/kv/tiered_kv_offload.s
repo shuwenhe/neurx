@@ -61,7 +61,7 @@ struct offload_lookup_result {
 func offload_zero_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -87,7 +87,7 @@ func init_tiered_kv_offload(tiered_kv_offload_config config) tiered_kv_offload_s
 
 func offload_find_slot(tiered_kv_offload_state state, int block_hash, int group_index) int {
     int i = 0
-    while i < state.config.capacity_blocks {
+    for i < state.config.capacity_blocks {
         if state.statuses[i] != offload_status_empty() && state.block_hashes[i] == block_hash && state.group_indices[i] == group_index { return i }
         i = i + 1
     }
@@ -96,13 +96,13 @@ func offload_find_slot(tiered_kv_offload_state state, int block_hash, int group_
 
 func offload_find_insert_slot(tiered_kv_offload_state state) int {
     int i = 0
-    while i < state.config.capacity_blocks {
+    for i < state.config.capacity_blocks {
         if state.statuses[i] == offload_status_empty() { return i }
         i = i + 1
     }
     int candidate = 0 - 1
     i = 0
-    while i < state.config.capacity_blocks {
+    for i < state.config.capacity_blocks {
         if state.pinned[i] == 0 && state.statuses[i] == offload_status_ready() && (candidate < 0 || state.last_access[i] < state.last_access[candidate]) { candidate = i }
         i = i + 1
     }

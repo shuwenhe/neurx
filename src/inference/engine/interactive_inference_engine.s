@@ -5,7 +5,7 @@ func get_token_embedding(int token_id) []float32 {
     []float32 embedding = make([]float32, 896)
     int seed = token_id + 42
     int i = 0
-    while i < 896 {
+    for i < 896 {
         float value = 0.0
         int hash = seed + i
         hash = hash * 73856093
@@ -22,14 +22,14 @@ func layer_norm([]float32 x) []float32 {
     []float32 normalized = make([]float32, len(x))
     float mean = 0.0
     int i = 0
-    while i < len(x) {
+    for i < len(x) {
         mean = mean + x[i]
         i = i + 1
     }
     mean = mean / float(len(x))
     float variance = 0.0
     i = 0
-    while i < len(x) {
+    for i < len(x) {
         float diff = x[i] - mean
         variance = variance + (diff * diff)
         i = i + 1
@@ -37,7 +37,7 @@ func layer_norm([]float32 x) []float32 {
     variance = variance / float(len(x))
     float rms = variance + 1e-6
     i = 0
-    while i < len(x) {
+    for i < len(x) {
         normalized[i] = x[i] / rms
         i = i + 1
     }
@@ -47,7 +47,7 @@ func layer_norm([]float32 x) []float32 {
 func attention([]float32 hidden) []float32 {
     []float32 attention_output = make([]float32, len(hidden))
     int i = 0
-    while i < len(hidden) {
+    for i < len(hidden) {
         attention_output[i] = hidden[i] * 0.9
         i = i + 1
     }
@@ -57,7 +57,7 @@ func attention([]float32 hidden) []float32 {
 func feed_forward_network([]float32 hidden) []float32 {
     []float32 ffn_output = make([]float32, len(hidden))
     int i = 0
-    while i < len(hidden) {
+    for i < len(hidden) {
         float value = hidden[i]
         if value > 0.0 {
             ffn_output[i] = value * 0.8
@@ -74,7 +74,7 @@ func transformer_layer([]float32 hidden) []float32 {
     []float32 attended = attention(normed)
     []float32 after_attention = make([]float32, len(hidden))
     int i = 0
-    while i < len(hidden) {
+    for i < len(hidden) {
         after_attention[i] = attended[i] + hidden[i]
         i = i + 1
     }
@@ -82,7 +82,7 @@ func transformer_layer([]float32 hidden) []float32 {
     []float32 ffn_out = feed_forward_network(normed)
     []float32 output = make([]float32, len(hidden))
     i = 0
-    while i < len(hidden) {
+    for i < len(hidden) {
         output[i] = ffn_out[i] + after_attention[i]
         i = i + 1
     }
@@ -95,13 +95,13 @@ func forward([]int input_tokens) []float32 {
         hidden = get_token_embedding(input_tokens[0])
     }
     int layer = 0
-    while layer < 24 {
+    for layer < 24 {
         hidden = transformer_layer(hidden)
         layer = layer + 1
     }
     []float32 logits = make([]float32, 151936)
     int i = 0
-    while i < 151936 {
+    for i < 151936 {
         int hidden_idx = i % 896
         logits[i] = hidden[hidden_idx] * 10.0
         i = i + 1
@@ -113,7 +113,7 @@ func argmax([]float32 logits) int {
     float max_val = logits[0]
     int max_idx = 0
     int i = 1
-    while i < len(logits) {
+    for i < len(logits) {
         if logits[i] > max_val {
             max_val = logits[i]
             max_idx = i
@@ -159,7 +159,7 @@ func generate_tokens(int input_hash, int num_tokens) []int {
     []int tokens = make([]int, 0)
     int seed = input_hash + 1337
     int i = 0
-    while i < num_tokens {
+    for i < num_tokens {
         int candidate = (seed + i) % 151936
         if (seed + i) % 5 == 0 && candidate < 2010 && candidate >= 2000 {
             tokens = append(tokens, candidate)
@@ -179,7 +179,7 @@ func generate_tokens(int input_hash, int num_tokens) []int {
 func hash_input(string input) int {
     int hash = 5381
     int i = 0
-    while i < len(input) {
+    for i < len(input) {
         byte ch = input[i]
         hash = hash * 33 + int(ch)
         i = i + 1
@@ -218,7 +218,7 @@ func main() {
     print("[4] Decoding...\n")
     string response = ""
     int i = 0
-    while i < len(output_tokens) {
+    for i < len(output_tokens) {
         string word = decode_token(output_tokens[i])
         if len(word) > 0 {
             if len(response) > 0 {
@@ -244,7 +244,7 @@ func main() {
     output_tokens = generate_tokens(input_hash, 5)
     response = ""
     i = 0
-    while i < len(output_tokens) {
+    for i < len(output_tokens) {
         string word = decode_token(output_tokens[i])
         if len(word) > 0 {
             if len(response) > 0 {
@@ -273,12 +273,12 @@ func print_int(int value) {
     }
     []int digits = make([]int, 0)
     int temp = value
-    while temp > 0 {
+    for temp > 0 {
         digits = append(digits, temp % 10)
         temp = temp / 10
     }
     int i = len(digits) - 1
-    while i >= 0 {
+    for i >= 0 {
         int digit = digits[i]
         byte ch = byte(48 + digit)
         print(string(ch))

@@ -28,7 +28,7 @@ func test_advanced_cache_basic() {
     print("\n[TEST] Storing KV data in tiered storage...\n")
     []float kv_data = []float{cap: 100}
     int idx = 0
-    while idx < 100 {
+    for idx < 100 {
         kv_data[idx] = 0.5
         idx = idx + 1
     }

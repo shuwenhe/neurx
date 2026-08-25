@@ -9,12 +9,12 @@ func format_scientific(float value) string {
     }
     int exponent = 0
     if value >= 1.0 {
-        while value >= 10.0 {
+        for value >= 10.0 {
             value = value / 10.0
             exponent = exponent + 1
         }
     } else if value < 1.0 {
-        while value < 1.0 {
+        for value < 1.0 {
             value = value * 10.0
             exponent = exponent - 1
         }

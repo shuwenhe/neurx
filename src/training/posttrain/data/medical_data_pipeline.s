@@ -255,7 +255,7 @@ func hamming_distance(int hash1, int hash2) int {
         xor = hash1
     }
     int distance = 0
-    while xor > 0 {
+    for xor > 0 {
         distance = distance + (xor % 2)
         xor = xor / 2
     }

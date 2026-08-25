@@ -84,7 +84,7 @@ func agent_skill_execute(agent_skill_registry_state registry, string task) agent
     if active.spec.name != "none" && active.spec.status != "retired" && active.metrics.success_rate >= 0.5 {
         int matched_step = -1
         int si = 0
-        while si < len(active.spec.steps) {
+        for si < len(active.spec.steps) {
             if agent_skill_step_matches_task(active.spec.steps[si], task) {
                 matched_step = si
                 break
@@ -96,7 +96,7 @@ func agent_skill_execute(agent_skill_registry_state registry, string task) agent
         } else {
             int ti = 0
             bool trigger_match = false
-            while ti < len(active.spec.triggers) {
+            for ti < len(active.spec.triggers) {
                 if agent_skill_trigger_matches_task(active.spec.triggers[ti], task) {
                     trigger_match = true
                     break

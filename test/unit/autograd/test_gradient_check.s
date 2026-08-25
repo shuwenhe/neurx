@@ -100,7 +100,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int n = 1
-    while n < 10 {
+    for n < 10 {
         term = term * x / float(n)
         result = result + term
         n = n + 1

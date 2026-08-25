@@ -23,7 +23,7 @@ func create_vector(int size) vector {
     v.size = size
     []float data
     int i = 0
-    while i < size {
+    for i < size {
         data[i] = 0.0
         i = i + 1
     }
@@ -44,7 +44,7 @@ func create_matrix(int rows, int cols) matrix {
     m.cols = cols
     []float data
     int i = 0
-    while i < rows * cols {
+    for i < rows * cols {
         data[i] = 0.0
         i = i + 1
     }
@@ -55,9 +55,9 @@ func create_matrix(int rows, int cols) matrix {
 func identity_matrix(int size) matrix {
     matrix m = create_matrix(size, size)
     int i = 0
-    while i < size {
+    for i < size {
         int j = 0
-        while j < size {
+        for j < size {
             if i == j {
                 m.data[i * size + j] = 1.0
             } else {
@@ -74,7 +74,7 @@ func random_matrix(int rows, int cols, int seed) matrix {
     matrix m = create_matrix(rows, cols)
     int state = seed
     int i = 0
-    while i < rows * cols {
+    for i < rows * cols {
         state = (state * 1103515245 + 12345) - ((state * 1103515245 + 12345) / 2147483648) * 2147483648
         if state < 0 {
             state = 0 - state
@@ -121,7 +121,7 @@ func dot_product(vector a, vector b) float {
     }
     float result = 0.0
     int i = 0
-    while i < a.size {
+    for i < a.size {
         result = result + a.data[i] * b.data[i]
         i = i + 1
     }
@@ -134,7 +134,7 @@ func vector_add(vector a, vector b) vector {
     }
     vector result = create_vector(a.size)
     int i = 0
-    while i < a.size {
+    for i < a.size {
         result.data[i] = a.data[i] + b.data[i]
         i = i + 1
     }
@@ -147,7 +147,7 @@ func vector_subtract(vector a, vector b) vector {
     }
     vector result = create_vector(a.size)
     int i = 0
-    while i < a.size {
+    for i < a.size {
         result.data[i] = a.data[i] - b.data[i]
         i = i + 1
     }
@@ -157,7 +157,7 @@ func vector_subtract(vector a, vector b) vector {
 func vector_scale(vector v, float scalar) vector {
     vector result = create_vector(v.size)
     int i = 0
-    while i < v.size {
+    for i < v.size {
         result.data[i] = v.data[i] * scalar
         i = i + 1
     }
@@ -170,7 +170,7 @@ func matrix_add(matrix a, matrix b) matrix {
     }
     matrix result = create_matrix(a.rows, a.cols)
     int i = 0
-    while i < a.rows * a.cols {
+    for i < a.rows * a.cols {
         result.data[i] = a.data[i] + b.data[i]
         i = i + 1
     }
@@ -183,7 +183,7 @@ func matrix_subtract(matrix a, matrix b) matrix {
     }
     matrix result = create_matrix(a.rows, a.cols)
     int i = 0
-    while i < a.rows * a.cols {
+    for i < a.rows * a.cols {
         result.data[i] = a.data[i] - b.data[i]
         i = i + 1
     }
@@ -193,7 +193,7 @@ func matrix_subtract(matrix a, matrix b) matrix {
 func matrix_scale(matrix m, float scalar) matrix {
     matrix result = create_matrix(m.rows, m.cols)
     int i = 0
-    while i < m.rows * m.cols {
+    for i < m.rows * m.cols {
         result.data[i] = m.data[i] * scalar
         i = i + 1
     }
@@ -206,12 +206,12 @@ func matrix_multiply(matrix a, matrix b) matrix {
     }
     matrix result = create_matrix(a.rows, b.cols)
     int i = 0
-    while i < a.rows {
+    for i < a.rows {
         int j = 0
-        while j < b.cols {
+        for j < b.cols {
             float sum = 0.0
             int k = 0
-            while k < a.cols {
+            for k < a.cols {
                 sum = sum + a.data[i * a.cols + k] * b.data[k * b.cols + j]
                 k = k + 1
             }
@@ -229,10 +229,10 @@ func matrix_vector_multiply(matrix a, vector v) vector {
     }
     vector result = create_vector(a.rows)
     int i = 0
-    while i < a.rows {
+    for i < a.rows {
         float sum = 0.0
         int j = 0
-        while j < a.cols {
+        for j < a.cols {
             sum = sum + a.data[i * a.cols + j] * v.data[j]
             j = j + 1
         }
@@ -245,9 +245,9 @@ func matrix_vector_multiply(matrix a, vector v) vector {
 func matrix_transpose(matrix m) matrix {
     matrix result = create_matrix(m.cols, m.rows)
     int i = 0
-    while i < m.rows {
+    for i < m.rows {
         int j = 0
-        while j < m.cols {
+        for j < m.cols {
             result.data[j * m.rows + i] = m.data[i * m.cols + j]
             j = j + 1
         }
@@ -266,7 +266,7 @@ func relu(float x) float {
 func vector_relu(vector v) vector {
     vector result = create_vector(v.size)
     int i = 0
-    while i < v.size {
+    for i < v.size {
         result.data[i] = relu(v.data[i])
         i = i + 1
     }
@@ -278,7 +278,7 @@ func tanh_activation(float x) float {
     float x2 = x * 2.0
     int i = 0
     float term = 1.0
-    while i < 10 {
+    for i < 10 {
         term = term * x2 / ((i + 1) as float)
         exp_2x = exp_2x + term
         i = i + 1
@@ -296,7 +296,7 @@ func sigmoid(float x) float {
         float exp_neg_x = 1.0
         int i = 0
         float term = 1.0
-        while i < 10 {
+        for i < 10 {
             term = term * (0.0 - x) / ((i + 1) as float)
             exp_neg_x = exp_neg_x + term
             i = i + 1
@@ -306,7 +306,7 @@ func sigmoid(float x) float {
         float exp_x = 1.0
         int i = 0
         float term = 1.0
-        while i < 10 {
+        for i < 10 {
             term = term * x / ((i + 1) as float)
             exp_x = exp_x + term
             i = i + 1
@@ -318,7 +318,7 @@ func sigmoid(float x) float {
 func vector_softmax(vector v) vector {
     float max_val = v.data[0]
     int i = 1
-    while i < v.size {
+    for i < v.size {
         if v.data[i] > max_val {
             max_val = v.data[i]
         }
@@ -327,12 +327,12 @@ func vector_softmax(vector v) vector {
     []float exp_vals
     float sum = 0.0
     i = 0
-    while i < v.size {
+    for i < v.size {
         float exp_val = 1.0
         float diff = v.data[i] - max_val
         int j = 0
         float term = 1.0
-        while j < 10 {
+        for j < 10 {
             term = term * diff / ((j + 1) as float)
             exp_val = exp_val + term
             j = j + 1
@@ -346,7 +346,7 @@ func vector_softmax(vector v) vector {
     }
     vector result = create_vector(v.size)
     i = 0
-    while i < v.size {
+    for i < v.size {
         if sum > 0.0 {
             result.data[i] = exp_vals[i] / sum
         } else {
@@ -360,7 +360,7 @@ func vector_softmax(vector v) vector {
 func vector_norm(vector v) float {
     float sum = 0.0
     int i = 0
-    while i < v.size {
+    for i < v.size {
         sum = sum + v.data[i] * v.data[i]
         i = i + 1
     }
@@ -370,7 +370,7 @@ func vector_norm(vector v) float {
     float x = sum
     float result = x
     int i_iter = 0
-    while i_iter < 10 {
+    for i_iter < 10 {
         result = (result + x / result) * 0.5
         i_iter = i_iter + 1
     }
@@ -388,9 +388,9 @@ func vector_normalize(vector v) vector {
 func outer_product(vector a, vector b) matrix {
     matrix result = create_matrix(a.size, b.size)
     int i = 0
-    while i < a.size {
+    for i < a.size {
         int j = 0
-        while j < b.size {
+        for j < b.size {
             result.data[i * b.size + j] = a.data[i] * b.data[j]
             j = j + 1
         }
@@ -405,7 +405,7 @@ func matrix_hadamard(matrix a, matrix b) matrix {
     }
     matrix result = create_matrix(a.rows, a.cols)
     int i = 0
-    while i < a.rows * a.cols {
+    for i < a.rows * a.cols {
         result.data[i] = a.data[i] * b.data[i]
         i = i + 1
     }
@@ -415,7 +415,7 @@ func matrix_hadamard(matrix a, matrix b) matrix {
 func matrix_frobenius_norm(matrix m) float {
     float sum = 0.0
     int i = 0
-    while i < m.rows * m.cols {
+    for i < m.rows * m.cols {
         sum = sum + m.data[i] * m.data[i]
         i = i + 1
     }
@@ -425,7 +425,7 @@ func matrix_frobenius_norm(matrix m) float {
     float x = sum
     float result = x
     int i_iter = 0
-    while i_iter < 10 {
+    for i_iter < 10 {
         result = (result + x / result) * 0.5
         i_iter = i_iter + 1
     }
@@ -435,10 +435,10 @@ func matrix_frobenius_norm(matrix m) float {
 func matrix_row_mean(matrix m) vector {
     vector result = create_vector(m.rows)
     int i = 0
-    while i < m.rows {
+    for i < m.rows {
         float sum = 0.0
         int j = 0
-        while j < m.cols {
+        for j < m.cols {
             sum = sum + m.data[i * m.cols + j]
             j = j + 1
         }

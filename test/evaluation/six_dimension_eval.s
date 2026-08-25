@@ -396,7 +396,7 @@ func estimate_token_count(string text) int {
 func count_pattern_occurrences(string text, string pattern) int {
     int count = 0
     int search_pos = 0
-    while search_pos < len(text) {
+    for search_pos < len(text) {
         int pos = find_substring(text, pattern, search_pos)
         if pos < 0 {
             break

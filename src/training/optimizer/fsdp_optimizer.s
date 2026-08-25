@@ -62,8 +62,8 @@ struct fsdp_unit_state {
 func mod_fsdn(int val, int div) int {
     if div <= 0 { return 0 }
     int r = val
-    while r >= div { r = r - div }
-    while r < 0 { r = r + div }
+    for r >= div { r = r - div }
+    for r < 0 { r = r + div }
     return r
 }
 
@@ -105,7 +105,7 @@ func init_fsdp(
     state.time_in_reducescatter_ms = 0.0
     int total_global = 0
     int i = 0
-    while i < len(param_sizes) {
+    for i < len(param_sizes) {
         total_global = total_global + param_sizes[i]
         i = i + 1
     }
@@ -119,7 +119,7 @@ func init_fsdp(
     state.total_local_elements = my_local_count
     int my_start_offset = 0
     int j = 0
-    while j < cfg.dp_rank {
+    for j < cfg.dp_rank {
         int cnt = base_count
         if j < remainder { cnt = cnt + 1 }
         my_start_offset = my_start_offset + cnt
@@ -128,7 +128,7 @@ func init_fsdp(
     state.local_param_shard = []double{cap: my_local_count}
     state.local_grad_shard = []double{cap: my_local_count}
     int k = 0
-    while k < my_local_count {
+    for k < my_local_count {
         if cfg.dp_rank == 0 {
             state.local_param_shard[k] = initial_model_params[my_start_offset + k]
         } else {
@@ -140,7 +140,7 @@ func init_fsdp(
     int running_global_offset = 0
     int running_local_offset = 0
     int m = 0
-    while m < len(param_sizes) {
+    for m < len(param_sizes) {
         fsdp_param_shard ps
         ps.name = param_names[m]
         ps.global_offset = running_global_offset
@@ -175,7 +175,7 @@ func pre_forward_allgather(
     if state.config.sharding_policy != SHARDING_FULL_SHARD { return }
     double t_start = 0.0
     int idx = 0
-    while idx < len(param_names_needed) {
+    for idx < len(param_names_needed) {
         int pidx = find_param_idx(state, param_names_needed[idx])
         if pidx >= 0 {
             state.param_shards[pidx].is_currently_gathered = true
@@ -196,7 +196,7 @@ func post_forward_unshard(
     []string param_names_released) {
     if state.config.sharding_policy != SHARDING_FULL_SHARD { return }
     int idx = 0
-    while idx < len(param_names_released) {
+    for idx < len(param_names_released) {
         int pidx = find_param_idx(state, param_names_released[idx])
         if pidx >= 0 {
             state.param_shards[pidx].gather_refcount =
@@ -209,7 +209,7 @@ func post_forward_unshard(
     }
     bool any_gathered = false
     int j = 0
-    while j < len(state.param_shards) {
+    for j < len(state.param_shards) {
         if state.param_shards[j].is_currently_gathered { any_gathered = true }
         j = j + 1
     }
@@ -228,7 +228,7 @@ func get_full_param(fsdp_unit_state state, string param_name) []double {
     }
     []double result = []double{cap: ps.num_elements}
     int k = 0
-    while k < ps.num_elements {
+    for k < ps.num_elements {
         result[k] = state.full_param_buffer[ps.global_offset + k]
         k = k + 1
     }
@@ -242,7 +242,7 @@ func post_backward_reducescatter(
     if state.config.sharding_policy == SHARDING_NO_SHARD { return }
     double t_start = 0.0
     int idx = 0
-    while idx < len(full_grad_tensors) {
+    for idx < len(full_grad_tensors) {
         idx = idx + 1
     }
     perform_reducescatter(state, full_grad_tensors)
@@ -264,7 +264,7 @@ func fsdp_optimizer_step(
     double bias_correction2 = 1.0 - pow_dbl(beta2, double(t))
     double sqrt_bias_corr2 = sqrt_dbl(bias_correction2)
     int i = 0
-    while i < state.total_local_elements {
+    for i < state.total_local_elements {
         double param = state.local_param_shard[i]
         double grad = state.local_grad_shard[i]
         if weight_decay != 0.0 {
@@ -281,7 +281,7 @@ func fsdp_optimizer_step(
         i = i + 1
     }
     i = 0
-    while i < state.total_local_elements {
+    for i < state.total_local_elements {
         state.local_grad_shard[i] = 0.0
         i = i + 1
     }
@@ -294,25 +294,25 @@ func perform_allgather(ref fsdp_unit_state state) {
     int global_n = state.total_global_elements
     int my_base_offset = 0
     int j = 0
-    while j < rank {
+    for j < rank {
         int sz = global_n / world_size
         if j < mod_fsdn(global_n, world_size) { sz = sz + 1 }
         my_base_offset = my_base_offset + sz
         j = j + 1
     }
     int k = 0
-    while k < local_n {
+    for k < local_n {
         if (my_base_offset + k) < global_n {
             state.full_param_buffer[my_base_offset + k] = state.local_param_shard[k]
         }
         k = k + 1
     }
     int r = 0
-    while r < world_size {
+    for r < world_size {
         if r != rank {
             int their_base = 0
             int jj = 0
-            while jj < r {
+            for jj < r {
                 int sz = global_n / world_size
                 if jj < mod_fsdn(global_n, world_size) { sz = sz + 1 }
                 their_base = their_base + sz
@@ -321,7 +321,7 @@ func perform_allgather(ref fsdp_unit_state state) {
             int their_n = global_n / world_size
             if r < mod_fsdn(global_n, world_size) { their_n = their_n + 1 }
             int kk = 0
-            while kk < their_n {
+            for kk < their_n {
                 if (their_base + kk) < global_n {
                     state.full_param_buffer[their_base + kk] = 0.0
                 }
@@ -337,7 +337,7 @@ func perform_reducescatter(ref fsdp_unit_state state, [][]double full_grads) {
     int rank = state.pg_my_rank
     int local_n = state.total_local_elements
     int i = 0
-    while i < local_n {
+    for i < local_n {
         if len(full_grads) > 0  len(full_grads[0]) > i {
             state.local_grad_shard[i] = full_grads[0][i]
         } else {
@@ -346,7 +346,7 @@ func perform_reducescatter(ref fsdp_unit_state state, [][]double full_grads) {
         i = i + 1
     }
     i = 0
-    while i < local_n {
+    for i < local_n {
         state.local_grad_shard[i] = 0.0
         i = i + 1
     }
@@ -354,7 +354,7 @@ func perform_reducescatter(ref fsdp_unit_state state, [][]double full_grads) {
 
 func find_param_idx(fsdp_unit_state state, string name) int {
     int i = 0
-    while i < len(state.param_shards) {
+    for i < len(state.param_shards) {
         if state.param_shards[i].name == name { return i }
         i = i + 1
     }
@@ -364,7 +364,7 @@ func find_param_idx(fsdp_unit_state state, string name) int {
 func pow_dbl(double base, double exp) double {
     double result = 1.0
     double e = 0.0
-    while e < exp {
+    for e < exp {
         result = result * base
         e = e + 1.0
     }
@@ -375,7 +375,7 @@ func sqrt_dbl(double x) double {
     if x <= 0.0 { return 0.0 }
     double guess = x / 2.0
     int iter = 0
-    while iter < 20 {
+    for iter < 20 {
         double new_guess = (guess + x / guess) / 2.0
         if new_guess == guess { break }
         guess = new_guess

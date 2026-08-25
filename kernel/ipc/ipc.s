@@ -44,7 +44,7 @@ func (msg_queue* mq) msg_receive(int msg_type) message {    i := 0
         payload: ""
     }
     
-    while i < mq.messages.len() {
+    for i < mq.messages.len() {
         msg := mq.messages[i]
         if msg.msg_type == msg_type {
             mq.messages[i] = empty_msg

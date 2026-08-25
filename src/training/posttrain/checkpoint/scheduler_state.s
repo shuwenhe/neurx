@@ -85,10 +85,10 @@ func print_scheduler_state_fields(
 func cos_approx(float x) float {
     float pi = 3.14159265359
     float normalized = x
-    while normalized > pi {
+    for normalized > pi {
         normalized = normalized - 2.0 * pi
     }
-    while normalized < 0.0 - pi {
+    for normalized < 0.0 - pi {
         normalized = normalized + 2.0 * pi
     }
     float x2 = normalized * normalized
@@ -112,7 +112,7 @@ func int_to_str(int n) string {
         negative = true
         value = 0 - value
     }
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -135,17 +135,17 @@ func float_to_str(float value) string {
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
     string result = int_to_str(whole)
     result = result + "."
     int i = 0
-    while i < 8 {
+    for i < 8 {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }

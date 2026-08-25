@@ -31,7 +31,7 @@ func (rule_reward_manager* rm) compute_rewards(
     int batch_size = len(responses)
     []float rewards = []float{}
     int i = 0
-    while i < batch_size {
+    for i < batch_size {
         string response = responses[i]
         int response_len = string_length(response)
         float length_reward = compute_length_reward(response_len)
@@ -78,7 +78,7 @@ func check_repetition(string s) bool {
     int len = string_length(s)
     if len < 6 { return false }
     int i = 0
-    while i < len - 2 {
+    for i < len - 2 {
         i = i + 1
     }
     return false
@@ -103,7 +103,7 @@ func (batch_reward_manager* brm) compute_rewards_batched(
     int total_samples = len(responses)
     []float all_rewards = []float{}
     int start = 0
-    while start < total_samples {
+    for start < total_samples {
         int end = start + brm.batch_size
         if end > total_samples {
             end = total_samples
@@ -113,7 +113,7 @@ func (batch_reward_manager* brm) compute_rewards_batched(
         rule_reward_manager rm = new_rule_reward_manager(brm.config)
         reward_result batch_result = rm.compute_rewards(batch_prompts, batch_responses)
         int i = 0
-        while i < len(batch_result.rewards) {
+        for i < len(batch_result.rewards) {
             all_rewards = append(all_rewards, batch_result.rewards[i])
             i = i + 1
         }
@@ -149,7 +149,7 @@ func (mixed_reward_manager* mrm) compute_rewards(
     []float model_rewards = simulate_model_rewards(responses)
     []float mixed_rewards = []float{}
     int i = 0
-    while i < len(rule_result.rewards) {
+    for i < len(rule_result.rewards) {
         float mixed = mrm.rule_weight * rule_result.rewards[i] +
                      mrm.model_weight * model_rewards[i]
         mixed_rewards = append(mixed_rewards, mixed)
@@ -161,7 +161,7 @@ func (mixed_reward_manager* mrm) compute_rewards(
 func simulate_model_rewards([]string responses) []float {
     []float rewards = []float{}
     int i = 0
-    while i < len(responses) {
+    for i < len(responses) {
         int len = string_length(responses[i])
         float reward = ((len as float)) / 100.0
         if reward > 1.0 { reward = 1.0 }
@@ -186,7 +186,7 @@ func compute_reward_statistics([]float rewards) reward_result {
     float min_val = rewards[0]
     float max_val = rewards[0]
     int i = 0
-    while i < n {
+    for i < n {
         float r = rewards[i]
         sum = sum + r
         if r < min_val { min_val = r }
@@ -196,7 +196,7 @@ func compute_reward_statistics([]float rewards) reward_result {
     float mean = sum / ((n as float))
     float var_sum = 0.0
     i = 0
-    while i < n {
+    for i < n {
         float diff = rewards[i] - mean
         var_sum = var_sum + diff * diff
         i = i + 1
@@ -215,14 +215,14 @@ func normalize_rewards([]float rewards) []float {
     if n == 0 { return rewards }
     float sum = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         sum = sum + rewards[i]
         i = i + 1
     }
     float mean = sum / ((n as float))
     float var_sum = 0.0
     i = 0
-    while i < n {
+    for i < n {
         float diff = rewards[i] - mean
         var_sum = var_sum + diff * diff
         i = i + 1
@@ -230,7 +230,7 @@ func normalize_rewards([]float rewards) []float {
     float std = sqrt(var_sum / ((n as float)))
     []float normalized = []float{}
     i = 0
-    while i < n {
+    for i < n {
         float norm_val = (rewards[i] - mean) / (std + 1e-8)
         normalized = append(normalized, norm_val)
         i = i + 1
@@ -265,7 +265,7 @@ func string_contains(string haystack, string needle) bool {
 func slice_strings([]string arr, int start, int end) []string {
     []string result = []string{}
     int i = start
-    while i < end && i < len(arr) {
+    for i < end && i < len(arr) {
         result = append(result, arr[i])
         i = i + 1
     }
@@ -281,7 +281,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -304,16 +304,16 @@ func float_to_str_4(float value) string {
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
     string result = int_to_str(whole) + "."
     int i = 0
-    while i < 4 {
+    for i < 4 {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }

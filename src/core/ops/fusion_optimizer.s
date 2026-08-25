@@ -35,7 +35,7 @@ func detect_fusion_opportunities(operation_registry reg, vec[string] operation_s
     opportunities := vec[kernel_fusion_opportunity]{}
 
     i := 0
-    while i < operation_sequence.len() - 1 {
+    for i < operation_sequence.len() - 1 {
         op_id1 := operation_sequence[i]
         op_id2 := operation_sequence[i + 1]
 
@@ -126,7 +126,7 @@ func (operation_scheduler* sched) optimize_schedule() vec[string] {
     opportunities := detect_fusion_opportunities(sched.registry, sched.operation_queue)
 
     i := 0
-    while i < opportunities.len() {
+    for i < opportunities.len() {
         fused_idx := ""
         for op_id in opportunities[i].fusible_ops {
             if fused_idx == "" {
@@ -152,7 +152,7 @@ func (operation_scheduler* sched) execute_schedule(compute_capability hw) bool {
     schedule := sched.optimize_schedule()
 
     i := 0
-    while i < schedule.len() {
+    for i < schedule.len() {
         op_id := schedule[i]
         op := sched.registry.get_operation(op_id)
 

@@ -69,8 +69,8 @@ func truncate([]int tokens, int max_len) []int {
 func trim_whitespace(string s) string {
     int start = 0
     int end = len(s) - 1
-    while start <= end  is_space(s[start]) { start = start + 1 }
-    while end >= start  is_space(s[end]) { end = end - 1 }
+    for start <= end  is_space(s[start]) { start = start + 1 }
+    for end >= start  is_space(s[end]) { end = end - 1 }
     if start > end { return "" }
     substring(s, start, end - start + 1)
 }

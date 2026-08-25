@@ -209,7 +209,7 @@ func tensor_numel([]int shape) int {
     if len(shape) == 0 { return 0 }
     int elements = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         if shape[i] <= 0 { return 0 }
         elements = elements * shape[i]
         i = i + 1
@@ -221,7 +221,7 @@ func tensor_contiguous_strides([]int shape) []int {
     []int strides = []int{cap: len(shape)}
     int stride = 1
     int i = len(shape) - 1
-    while i >= 0 {
+    for i >= 0 {
         strides[i] = stride
         stride = stride * shape[i]
         i = i - 1
@@ -288,7 +288,7 @@ func new_model_weight_registry(int context, string backend, string dtype, int ca
 
 func model_weight_find(model_weight_registry registry, string name) int {
     int index = 0
-    while index < registry.count {
+    for index < registry.count {
         if registry.name[index] == name { return index }
         index = index + 1
     }

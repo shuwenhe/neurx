@@ -71,7 +71,7 @@ func run_posttrain_lora_sft() int {
     []named_lora_module modules = []named_lora_module{cap: num_layers * 2}
     int layer_idx = 0
     int module_idx = 0
-    while layer_idx < num_layers {
+    for layer_idx < num_layers {
         string q_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.q_proj"
         string v_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.v_proj"
         named_lora_module q_module = init_lora_module(q_name, hidden_size, hidden_size, rank, alpha, 0.02, 0.01)
@@ -89,18 +89,18 @@ func run_posttrain_lora_sft() int {
     []float loss_history = []float{cap: epochs}
     float best_loss = 0.0
     int epoch = 0
-    while epoch < epochs {
+    for epoch < epochs {
         float epoch_loss = 0.0
         int epoch_items = 0
         int sample_idx = 0
-        while sample_idx < sample_count {
+        for sample_idx < sample_count {
             int prompt_offset = sample_idx * hidden_size
             int target_v_offset = sample_idx * v_out
             []float prompt = extract_vector(prompt_data, prompt_offset, hidden_size)
             []float target_q = extract_vector(target_q_data, prompt_offset, hidden_size)
             []float target_v = extract_vector(target_v_data, target_v_offset, v_out)
             int m = 0
-            while m < len(modules) {
+            for m < len(modules) {
                 named_lora_module module = modules[m]
                 []float target = target_q
                 if module.out_dim == v_out {
@@ -181,9 +181,9 @@ func runtime_forward_named_module(named_lora_module module, []float input_vec) [
     []float output = fill_vec(module.out_dim, 0.0)
     []float hidden = fill_vec(module.rank, 0.0)
     int r = 0
-    while r < module.rank {
+    for r < module.rank {
         int in_idx = 0
-        while in_idx < module.in_dim && in_idx < len(input_vec) {
+        for in_idx < module.in_dim && in_idx < len(input_vec) {
             int a_idx = r * module.in_dim + in_idx
             if a_idx < len(module.lora_A) {
                 hidden[r] = hidden[r] + module.lora_A[a_idx] * input_vec[in_idx]
@@ -193,10 +193,10 @@ func runtime_forward_named_module(named_lora_module module, []float input_vec) [
         r = r + 1
     }
     int out_idx = 0
-    while out_idx < module.out_dim {
+    for out_idx < module.out_dim {
         float sum = 0.0
         int in_idx = 0
-        while in_idx < module.in_dim && in_idx < len(input_vec) {
+        for in_idx < module.in_dim && in_idx < len(input_vec) {
             int w_idx = out_idx * module.in_dim + in_idx
             if w_idx < len(module.base_weight) {
                 sum = sum + input_vec[in_idx] * module.base_weight[w_idx]
@@ -204,7 +204,7 @@ func runtime_forward_named_module(named_lora_module module, []float input_vec) [
             in_idx = in_idx + 1
         }
         int rank_idx = 0
-        while rank_idx < module.rank {
+        for rank_idx < module.rank {
             int b_idx = out_idx * module.rank + rank_idx
             if b_idx < len(module.lora_B) {
                 sum = sum + module.scaling * module.lora_B[b_idx] * hidden[rank_idx]
@@ -220,9 +220,9 @@ func runtime_forward_named_module(named_lora_module module, []float input_vec) [
 func train_named_module(named_lora_module module, []float input_vec, []float target_vec, float lr) named_lora_module {
     []float hidden = fill_vec(module.rank, 0.0)
     int r = 0
-    while r < module.rank {
+    for r < module.rank {
         int in_idx = 0
-        while in_idx < module.in_dim && in_idx < len(input_vec) {
+        for in_idx < module.in_dim && in_idx < len(input_vec) {
             int a_idx = r * module.in_dim + in_idx
             if a_idx < len(module.lora_A) {
                 hidden[r] = hidden[r] + module.lora_A[a_idx] * input_vec[in_idx]
@@ -236,9 +236,9 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
     []float b_snapshot = copy_float_array(module.lora_B)
     float step_scale = lr * module.scaling
     int out_idx = 0
-    while out_idx < module.out_dim {
+    for out_idx < module.out_dim {
         r = 0
-        while r < module.rank {
+        for r < module.rank {
             int b_idx = out_idx * module.rank + r
             if b_idx < len(module.lora_B) {
                 float grad_b = grad_out[out_idx] * hidden[r]
@@ -249,12 +249,12 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
         out_idx = out_idx + 1
     }
     r = 0
-    while r < module.rank {
+    for r < module.rank {
         int in_idx = 0
-        while in_idx < module.in_dim && in_idx < len(input_vec) {
+        for in_idx < module.in_dim && in_idx < len(input_vec) {
             float grad_a = 0.0
             out_idx = 0
-            while out_idx < module.out_dim {
+            for out_idx < module.out_dim {
                 int b_idx = out_idx * module.rank + r
                 if b_idx < len(b_snapshot) {
                     grad_a = grad_a + grad_out[out_idx] * b_snapshot[b_idx]
@@ -279,11 +279,11 @@ func compute_stats([]named_lora_module modules) adapter_stats {
     int nonzero = 0
     int total = 0
     int module_idx = 0
-    while module_idx < len(modules) {
+    for module_idx < len(modules) {
         named_lora_module module = modules[module_idx]
         int i = 0
         int a_len = module.rank * module.in_dim
-        while i < a_len {
+        for i < a_len {
             float value = module.lora_A[i]
             float abs_value = abs_float(value)
             l1 = l1 + abs_value
@@ -299,7 +299,7 @@ func compute_stats([]named_lora_module modules) adapter_stats {
         }
         i = 0
         int b_len = module.out_dim * module.rank
-        while i < b_len {
+        for i < b_len {
             float value = module.lora_B[i]
             float abs_value = abs_float(value)
             l1 = l1 + abs_value
@@ -330,11 +330,11 @@ func compute_delta_stats([]named_lora_module modules) delta_stats {
     float max_abs = 0.0
     int changed = 0
     int module_idx = 0
-    while module_idx < len(modules) {
+    for module_idx < len(modules) {
         named_lora_module module = modules[module_idx]
         int i = 0
         int a_len = module.rank * module.in_dim
-        while i < a_len {
+        for i < a_len {
             float delta = module.lora_A[i] - module.initial_a[i]
             float abs_delta = abs_float(delta)
             l1 = l1 + abs_delta
@@ -349,7 +349,7 @@ func compute_delta_stats([]named_lora_module modules) delta_stats {
         }
         i = 0
         int b_len = module.out_dim * module.rank
-        while i < b_len {
+        for i < b_len {
             float delta = module.lora_B[i] - module.initial_b[i]
             float abs_delta = abs_float(delta)
             l1 = l1 + abs_delta
@@ -389,19 +389,19 @@ func write_adapter_checkpoint(
     string adapter_path = output_dir + "/adapter_model.safetensors"
     safetensors_writer writer = safetensors_writer_new(adapter_path)
     int module_idx = 0
-    while module_idx < len(modules) {
+    for module_idx < len(modules) {
         named_lora_module module = modules[module_idx]
         int a_len = module.rank * module.in_dim
         int b_len = module.out_dim * module.rank
         []float a_data = []float{cap: a_len}
         int i = 0
-        while i < a_len {
+        for i < a_len {
             a_data[i] = module.lora_A[i]
             i = i + 1
         }
         []float b_data = []float{cap: b_len}
         i = 0
-        while i < b_len {
+        for i < b_len {
             b_data[i] = module.lora_B[i]
             i = i + 1
         }
@@ -470,7 +470,7 @@ func build_training_state_json(string model_path, []float loss_history, adapter_
     json = json + "  \"best_loss\": " + float_to_str(loss_history[len(loss_history) - 1], 12) + ",\n"
     json = json + "  \"loss_history\": ["
     int i = 0
-    while i < len(loss_history) {
+    for i < len(loss_history) {
         json = json + float_to_str(loss_history[i], 12)
         if i + 1 < len(loss_history) {
             json = json + ", "
@@ -497,7 +497,7 @@ func build_training_state_json(string model_path, []float loss_history, adapter_
 func fill_vec(int n, float value) []float {
     []float v = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         v[i] = value
         i = i + 1
     }
@@ -507,7 +507,7 @@ func fill_vec(int n, float value) []float {
 func extract_vector([]float source, int start, int n) []float {
     []float v = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         int src_idx = start + i
         v[i] = source[src_idx]
         i = i + 1
@@ -524,7 +524,7 @@ func parse_float_list_fixed(string text) []float {
     int count = 0
     bool in_token = false
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if is_number_token_char(ch) {
             if !in_token {
@@ -540,7 +540,7 @@ func parse_float_list_fixed(string text) []float {
     string token = ""
     int out_idx = 0
     i = 0
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if is_number_token_char(ch) {
             token = token + string(ch)
@@ -571,7 +571,7 @@ func parse_float(string text, float fallback) float {
         i = 1
     }
     float value = 0.0
-    while i < len(s) {
+    for i < len(s) {
         int ch = s[i]
         if ch == 46 {
             i = i + 1
@@ -584,7 +584,7 @@ func parse_float(string text, float fallback) float {
         i = i + 1
     }
     float frac = 0.1
-    while i < len(s) {
+    for i < len(s) {
         int ch = s[i]
         if ch == 101 || ch == 69 {
             break
@@ -606,7 +606,7 @@ func parse_float(string text, float fallback) float {
         } else if i < len(s) && s[i] == 43 {
             i = i + 1
         }
-        while i < len(s) {
+        for i < len(s) {
             int ch = s[i]
             if ch < 48 || ch > 57 {
                 break
@@ -619,13 +619,13 @@ func parse_float(string text, float fallback) float {
     int scaled_exp = exp * exp_sign
     if scaled_exp > 0 {
         int j = 0
-        while j < scaled_exp {
+        for j < scaled_exp {
             result = result * 10.0
             j = j + 1
         }
     } else if scaled_exp < 0 {
         int j = 0
-        while j < 0 - scaled_exp {
+        for j < 0 - scaled_exp {
             result = result / 10.0
             j = j + 1
         }
@@ -640,7 +640,7 @@ func is_number_token_char(int ch) bool {
 func init_pattern(int n, float scale) []float {
     []float v = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float x = ((i + 1) as float) * scale * 0.001
         if i - (i / 2) * 2 == 1 {
             x = 0.0 - x
@@ -662,7 +662,7 @@ func mse_loss([]float predictions, []float targets) float {
         limit = len(targets)
     }
     int i = 0
-    while i < limit {
+    for i < limit {
         float diff = predictions[i] - targets[i]
         loss = loss + diff * diff
         i = i + 1
@@ -680,7 +680,7 @@ func mse_gradient([]float predictions, []float targets) []float {
     }
     []float grad = fill_vec(len(predictions), 0.0)
     int i = 0
-    while i < limit {
+    for i < limit {
         grad[i] = 2.0 * (predictions[i] - targets[i]) / (limit as float)
         i = i + 1
     }
@@ -697,7 +697,7 @@ func abs_float(float value) float {
 func copy_float_array([]float source) []float {
     []float result = []float{cap: len(source)}
     int i = 0
-    while i < len(source) {
+    for i < len(source) {
         result[i] = source[i]
         i = i + 1
     }
@@ -710,7 +710,7 @@ func sqrt_lora(float x) float {
     }
     float guess = 1.0
     int i = 0
-    while i < 6 {
+    for i < 6 {
         guess = 0.5 * (guess + x / guess)
         i = i + 1
     }
@@ -728,7 +728,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -755,7 +755,7 @@ func float_to_str(float value, int decimals) string {
         current = 0.0 - current
     }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -765,10 +765,10 @@ func float_to_str(float value, int decimals) string {
     }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }
@@ -799,7 +799,7 @@ func build_simple_training_state_json(string model_path, []float loss_history, f
     json = json + "  \"best_loss\": " + float_to_str(loss_history[len(loss_history) - 1], 12) + ",\n"
     json = json + "  \"loss_history\": ["
     int i = 0
-    while i < len(loss_history) {
+    for i < len(loss_history) {
         json = json + float_to_str(loss_history[i], 12)
         if i + 1 < len(loss_history) {
             json = json + ", "
@@ -862,15 +862,15 @@ func run_posttrain_lora_sft_flat() int {
     []float loss_history = []float{cap: epochs}
     float best_loss = 0.0
     int epoch = 0
-    while epoch < epochs {
+    for epoch < epochs {
         []float prompt = extract_vector(prompt_data, 0, hidden_size)
         []float target_q = extract_vector(target_q_data, 0, hidden_size)
         []float target_v = extract_vector(target_v_data, 0, v_out)
         []float q_hidden = fill_vec(rank, 0.0)
         int r = 0
-        while r < rank {
+        for r < rank {
             int in_idx = 0
-            while in_idx < hidden_size {
+            for in_idx < hidden_size {
                 int a_idx = r * hidden_size + in_idx
                 q_hidden[r] = q_hidden[r] + q_lora_a[a_idx] * prompt[in_idx]
                 in_idx = in_idx + 1
@@ -879,16 +879,16 @@ func run_posttrain_lora_sft_flat() int {
         }
         []float q_output = fill_vec(hidden_size, 0.0)
         int out_idx = 0
-        while out_idx < hidden_size {
+        for out_idx < hidden_size {
             float sum = 0.0
             int in_idx = 0
-            while in_idx < hidden_size {
+            for in_idx < hidden_size {
                 int w_idx = out_idx * hidden_size + in_idx
                 sum = sum + prompt[in_idx] * q_base_weight[w_idx]
                 in_idx = in_idx + 1
             }
             int rank_idx = 0
-            while rank_idx < rank {
+            for rank_idx < rank {
                 int b_idx = out_idx * rank + rank_idx
                 sum = sum + scaling * q_lora_b[b_idx] * q_hidden[rank_idx]
                 rank_idx = rank_idx + 1
@@ -900,9 +900,9 @@ func run_posttrain_lora_sft_flat() int {
         []float q_grad = mse_gradient(q_output, target_q)
         []float q_b_snapshot = copy_float_array(q_lora_b)
         out_idx = 0
-        while out_idx < hidden_size {
+        for out_idx < hidden_size {
             r = 0
-            while r < rank {
+            for r < rank {
                 int b_idx = out_idx * rank + r
                 q_lora_b[b_idx] = q_lora_b[b_idx] - learning_rate * scaling * q_grad[out_idx] * q_hidden[r]
                 r = r + 1
@@ -910,12 +910,12 @@ func run_posttrain_lora_sft_flat() int {
             out_idx = out_idx + 1
         }
         r = 0
-        while r < rank {
+        for r < rank {
             int in_idx = 0
-            while in_idx < hidden_size {
+            for in_idx < hidden_size {
                 float grad_a = 0.0
                 out_idx = 0
-                while out_idx < hidden_size {
+                for out_idx < hidden_size {
                     int b_idx = out_idx * rank + r
                     grad_a = grad_a + q_grad[out_idx] * q_b_snapshot[b_idx]
                     out_idx = out_idx + 1
@@ -928,9 +928,9 @@ func run_posttrain_lora_sft_flat() int {
         }
         []float v_hidden = fill_vec(rank, 0.0)
         r = 0
-        while r < rank {
+        for r < rank {
             int in_idx = 0
-            while in_idx < hidden_size {
+            for in_idx < hidden_size {
                 int a_idx = r * hidden_size + in_idx
                 v_hidden[r] = v_hidden[r] + v_lora_a[a_idx] * prompt[in_idx]
                 in_idx = in_idx + 1
@@ -939,16 +939,16 @@ func run_posttrain_lora_sft_flat() int {
         }
         []float v_output = fill_vec(v_out, 0.0)
         out_idx = 0
-        while out_idx < v_out {
+        for out_idx < v_out {
             float sum = 0.0
             int in_idx = 0
-            while in_idx < hidden_size {
+            for in_idx < hidden_size {
                 int w_idx = out_idx * hidden_size + in_idx
                 sum = sum + prompt[in_idx] * v_base_weight[w_idx]
                 in_idx = in_idx + 1
             }
             int rank_idx = 0
-            while rank_idx < rank {
+            for rank_idx < rank {
                 int b_idx = out_idx * rank + rank_idx
                 sum = sum + scaling * v_lora_b[b_idx] * v_hidden[rank_idx]
                 rank_idx = rank_idx + 1
@@ -960,9 +960,9 @@ func run_posttrain_lora_sft_flat() int {
         []float v_grad = mse_gradient(v_output, target_v)
         []float v_b_snapshot = copy_float_array(v_lora_b)
         out_idx = 0
-        while out_idx < v_out {
+        for out_idx < v_out {
             r = 0
-            while r < rank {
+            for r < rank {
                 int b_idx = out_idx * rank + r
                 v_lora_b[b_idx] = v_lora_b[b_idx] - learning_rate * scaling * v_grad[out_idx] * v_hidden[r]
                 r = r + 1
@@ -970,12 +970,12 @@ func run_posttrain_lora_sft_flat() int {
             out_idx = out_idx + 1
         }
         r = 0
-        while r < rank {
+        for r < rank {
             int in_idx = 0
-            while in_idx < hidden_size {
+            for in_idx < hidden_size {
                 float grad_a = 0.0
                 out_idx = 0
-                while out_idx < v_out {
+                for out_idx < v_out {
                     int b_idx = out_idx * rank + r
                     grad_a = grad_a + v_grad[out_idx] * v_b_snapshot[b_idx]
                     out_idx = out_idx + 1

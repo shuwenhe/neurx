@@ -18,7 +18,7 @@ func tokenize_text(string text) []int {
     []int tokens = []int{}
     append(tokens, 151644)
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         append(tokens, 100 + i)
         i = i + 1
     }
@@ -29,7 +29,7 @@ func tokenize_text(string text) []int {
 func get_embeddings([]int token_ids) []float {
     []float embeddings = []float{cap: 896}
     int j = 0
-    while j < 896 {
+    for j < 896 {
         embeddings[j] = 0.5
         j = j + 1
     }
@@ -53,7 +53,7 @@ func sample_token([]float logits) int {
     int max_idx = 0
     float max_val = logits[0]
     int i = 1
-    while i < len(logits) {
+    for i < len(logits) {
         if logits[i] > max_val {
             max_val = logits[i]
             max_idx = i
@@ -83,7 +83,7 @@ func generate_response(string prompt, int max_tokens) string {
     []float logits = lm_head_forward(hidden_states)
     string generated_text = ""
     int tokens_generated = 0
-    while tokens_generated < max_tokens && len(logits) > 0 {
+    for tokens_generated < max_tokens && len(logits) > 0 {
         int next_token = sample_token(logits)
         if next_token == 151643 {
             tokens_generated = max_tokens

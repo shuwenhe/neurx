@@ -44,7 +44,7 @@ struct pd_room_result {
 func pd_room_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -58,7 +58,7 @@ func new_pd_bootstrap_state(pd_bootstrap_config config) pd_bootstrap_state {
 
 func pd_find_room(pd_bootstrap_state state, int room_id) int {
     int i = 0
-    while i < state.config.capacity {
+    for i < state.config.capacity {
         if state.statuses[i] != pd_room_empty() && state.room_ids[i] == room_id { return i }
         i = i + 1
     }
@@ -75,7 +75,7 @@ func pd_create_room(pd_bootstrap_state state, int room_id, int request_id, int e
     if room_id <= 0 || request_id <= 0 || expected_peers <= 0 || reserved_pages < 0 || pd_find_room(state, room_id) >= 0 { return pd_room_result_of(state, -1, false) }
     int slot = 0 - 1
     int i = 0
-    while i < state.config.capacity {
+    for i < state.config.capacity {
         if slot < 0 && state.statuses[i] == pd_room_empty() { slot = i }
         i = i + 1
     }

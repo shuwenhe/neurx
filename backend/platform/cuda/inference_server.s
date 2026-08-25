@@ -52,7 +52,7 @@ func int_to_string(int value) string {
     if current < 0 {
         current = 0 - current
     }
-    while current > 0 {
+    for current > 0 {
         int digit = current - (current / 10) * 10
         if digit == 0 { result = "0" + result }
         else if digit == 1 { result = "1" + result }
@@ -80,10 +80,10 @@ func contains_substring(string haystack, string needle) bool {
         return false
     }
     int i = 0
-    while i <= len(haystack) - len(needle) {
+    for i <= len(haystack) - len(needle) {
         bool matches = true
         int j = 0
-        while j < len(needle) {
+        for j < len(needle) {
             if haystack[i + j] != needle[j] {
                 matches = false
             }
@@ -103,7 +103,7 @@ func parse_int_or_default(string s, int default_val) int {
     }
     int result = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         string ch = __host_slice(s, i, i + 1)
         if ch[0] >= 48 && ch[0] <= 57 {
             result = result * 10 + (ch[0] - 48)
@@ -117,7 +117,7 @@ func parse_int_or_default(string s, int default_val) int {
 
 func find_substring(string text, string pattern) int {
     int i = 0
-    while i <= len(text) - len(pattern) {
+    for i <= len(text) - len(pattern) {
         if __host_slice(text, i, i + len(pattern)) == pattern {
             return i
         }
@@ -129,7 +129,7 @@ func find_substring(string text, string pattern) int {
 func json_escape(string value) string {
     string output = ""
     int i = 0
-    while i < len(value) {
+    for i < len(value) {
         string ch = __host_slice(value, i, i + 1)
         if ch == "\\" {
             output = output + "\\\\"
@@ -156,14 +156,14 @@ func extract_json_string(string json, string key) string {
         return ""
     }
     int i = marker_pos + len(marker)
-    while i < len(json) && __host_slice(json, i, i + 1) != ":" {
+    for i < len(json) && __host_slice(json, i, i + 1) != ":" {
         i = i + 1
     }
     if i >= len(json) {
         return ""
     }
     i = i + 1
-    while i < len(json) && (__host_slice(json, i, i + 1) == " " || __host_slice(json, i, i + 1) == "\n" || __host_slice(json, i, i + 1) == "\r" || __host_slice(json, i, i + 1) == "\t") {
+    for i < len(json) && (__host_slice(json, i, i + 1) == " " || __host_slice(json, i, i + 1) == "\n" || __host_slice(json, i, i + 1) == "\r" || __host_slice(json, i, i + 1) == "\t") {
         i = i + 1
     }
     if i >= len(json) || __host_slice(json, i, i + 1) != "\"" {
@@ -172,7 +172,7 @@ func extract_json_string(string json, string key) string {
     i = i + 1
     string value = ""
     bool escaped = false
-    while i < len(json) {
+    for i < len(json) {
         string ch = __host_slice(json, i, i + 1)
         if escaped {
             if ch == "n" {
@@ -205,7 +205,7 @@ func extract_max_new_tokens(string request) int {
         marker_pos = find_substring(request, marker)
         if marker_pos >= 0 {
             int colon = marker_pos + len(marker)
-            while colon < len(request) && __host_slice(request, colon, colon + 1) != ":" {
+            for colon < len(request) && __host_slice(request, colon, colon + 1) != ":" {
                 colon = colon + 1
             }
             marker_pos = colon
@@ -216,11 +216,11 @@ func extract_max_new_tokens(string request) int {
         return 128
     }
     int i = marker_pos + len(marker)
-    while i < len(request) && (__host_slice(request, i, i + 1) == " " || __host_slice(request, i, i + 1) == "\t") {
+    for i < len(request) && (__host_slice(request, i, i + 1) == " " || __host_slice(request, i, i + 1) == "\t") {
         i = i + 1
     }
     string digits = ""
-    while i < len(request) {
+    for i < len(request) {
         string ch = __host_slice(request, i, i + 1)
         if ch < "0" || ch > "9" {
             break
@@ -253,7 +253,7 @@ func u64_le_bytes([]int bytes, int offset) int {
     int value = 0
     int multiplier = 1
     int i = 0
-    while i < 8 {
+    for i < 8 {
         value = value + normalize_byte(bytes[offset + i]) * multiplier
         multiplier = multiplier * 256
         i = i + 1
@@ -272,7 +272,7 @@ func pow2_int(int exponent) float {
     float result = 1.0
     if exponent > 0 {
         int i = 0
-        while i < exponent {
+        for i < exponent {
             result = result * 2.0
             i = i + 1
         }
@@ -281,7 +281,7 @@ func pow2_int(int exponent) float {
     if exponent < 0 {
         int i = 0
         int limit = 0 - exponent
-        while i < limit {
+        for i < limit {
             result = result * 0.5
             i = i + 1
         }
@@ -364,7 +364,7 @@ func tokenize_text(string text) []int {
     int i = 0
     int token_count = 0
     int word_start = 0
-    while i <= len(text) {
+    for i <= len(text) {
         bool is_space = false
         if i < len(text) {
             string ch = __host_slice(text, i, i + 1)
@@ -410,7 +410,7 @@ func streaming_matmul_bf16(string model_path, []int metadata_bytes, string tenso
     print("[MatMul] Processing " + int_to_string(actual_out) + " output dimensions\n")
     int CHUNK_SIZE = 8
     int out_idx = 0
-    while out_idx < actual_out {
+    for out_idx < actual_out {
         int chunk_end = out_idx + CHUNK_SIZE
         if chunk_end > actual_out {
             chunk_end = actual_out
@@ -423,11 +423,11 @@ func streaming_matmul_bf16(string model_path, []int metadata_bytes, string tenso
             break
         }
         int local_out = 0
-        while local_out < chunk_rows && out_idx + local_out < len(output) {
+        for local_out < chunk_rows && out_idx + local_out < len(output) {
             float sum = 0.0
             int in_idx = 0
             int w_idx = local_out * in_dim * 2
-            while in_idx < in_dim && in_idx < len(input) {
+            for in_idx < in_dim && in_idx < len(input) {
                 if w_idx + 1 < len(raw_weights) {
                     float weight = decode_bf16_at(raw_weights, w_idx)
                     sum = sum + weight * input[in_idx]
@@ -448,7 +448,7 @@ func simple_transformer_layer([]float input, int hidden_dim, int layer_idx) []fl
     print("[Layer " + int_to_string(layer_idx) + "] Processing input of size " + int_to_string(len(input)) + "\n")
     []float output = []float{cap: safe_allocate_float_array(hidden_dim)}
     int i = 0
-    while i < len(output) && i < len(input) {
+    for i < len(output) && i < len(input) {
         output[i] = input[i] * 0.99 + 0.01
         i = i + 1
     }
@@ -460,7 +460,7 @@ func run_transformer_forward([]float embeddings, int num_layers, int hidden_dim)
     print("[Inference] Starting " + int_to_string(num_layers) + " transformer layers\n")
     []float state = embeddings
     int layer = 0
-    while layer < num_layers && len(state) > 0 {
+    for layer < num_layers && len(state) > 0 {
         print("[Inference] Layer " + int_to_string(layer) + " / " + int_to_string(num_layers) + "\n")
         state = simple_transformer_layer(state, hidden_dim, layer)
         layer = layer + 1
@@ -490,7 +490,7 @@ func softmax([]float logits) []float {
     }
     float maxv = logits[0]
     int i = 1
-    while i < n {
+    for i < n {
         if logits[i] > maxv {
             maxv = logits[i]
         }
@@ -498,7 +498,7 @@ func softmax([]float logits) []float {
     }
     float sum = 0.0
     i = 0
-    while i < n {
+    for i < n {
         float p = exp_approx(logits[i] - maxv)
         probs[i] = p
         sum = sum + p
@@ -506,14 +506,14 @@ func softmax([]float logits) []float {
     }
     if sum == 0.0 {
         i = 0
-        while i < n {
+        for i < n {
             probs[i] = 1.0 / (n as float)
             i = i + 1
         }
         return probs
     }
     i = 0
-    while i < n {
+    for i < n {
         probs[i] = probs[i] / sum
         i = i + 1
     }
@@ -527,7 +527,7 @@ func argmax([]float v) int {
     }
     int best = 0
     int i = 1
-    while i < n {
+    for i < n {
         if v[i] > v[best] {
             best = i
         }
@@ -585,16 +585,16 @@ func top_k_indices([]float logits, int k) []int {
     }
     []int idx = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         idx[i] = i
         i = i + 1
     }
 
     int out = 0
-    while out < kk {
+    for out < kk {
         int best = out
         int j = out + 1
-        while j < n {
+        for j < n {
             if logits[idx[j]] > logits[idx[best]] {
                 best = j
             }
@@ -608,7 +608,7 @@ func top_k_indices([]float logits, int k) []int {
     }
     []int topk = []int{cap: kk}
     i = 0
-    while i < kk {
+    for i < kk {
         topk[i] = idx[i]
         i = i + 1
     }
@@ -649,7 +649,7 @@ func perform_inference_gpu(string prompt, int max_tokens, int hidden_dim, int nu
     }
     print("[GPU Inference] Prompt tokens: " + int_to_string(prompt_tokens) + "\n")
     int generated = 0
-    while generated < max_tokens {
+    for generated < max_tokens {
         int token_id = neurx_s_cuda_session_next(session_id)
         if token_id == -1 {
             break
@@ -697,7 +697,7 @@ func perform_inference_gpu_stream(int client_fd, string prompt, int max_tokens) 
 
     int generated = 0
     int emitted_chars = 0
-    while generated < max_tokens {
+    for generated < max_tokens {
         int token_id = neurx_s_cuda_session_next(session_id)
         if token_id == -1 { break }
         if token_id < -1 {
@@ -724,7 +724,7 @@ func perform_inference_gpu_stream(int client_fd, string prompt, int max_tokens) 
 func greedy_decode_tokens([]float logits, int num_tokens_to_generate, int vocab_size) string {
     string generated = ""
     int gen_step = 0
-    while gen_step < num_tokens_to_generate {
+    for gen_step < num_tokens_to_generate {
         int token_id = argmax(logits)
         if token_id >= vocab_size {
             token_id = token_id - (token_id / vocab_size) * vocab_size
@@ -757,11 +757,11 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
 
     []float input_hidden = []float{cap: seq_len * hidden_dim}
     int tok_idx = 0
-    while tok_idx < seq_len {
+    for tok_idx < seq_len {
         int token_id = input_tokens[tok_idx]
         int h_start = tok_idx * hidden_dim
         int i = 0
-        while i < hidden_dim {
+        for i < hidden_dim {
             int seed = (token_id * 73 + i * 37 + tok_idx * 11) % 10000
             float val = float((seed % 1000) - 500) / 1000.0
             if h_start + i < len(input_hidden) {
@@ -778,19 +778,19 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
     int active_layers = num_layers
     if active_layers > 1 { active_layers = 1 }
 
-    while layer_idx < active_layers {
+    for layer_idx < active_layers {
 
         []float attn_hidden = []float{cap: len(current_hidden)}
         tok_idx = 0
-        while tok_idx < seq_len {
+        for tok_idx < seq_len {
             int h_idx = tok_idx * hidden_dim
 
             []float attn_scores = []float{cap: seq_len}
             int pos = 0
-            while pos < seq_len {
+            for pos < seq_len {
                 float dot_product = 0.0
                 int j = 0
-                while j < hidden_dim {
+                for j < hidden_dim {
                     if j % 16 == 0 {
                         int h_pos_idx = pos * hidden_dim + j
                         if h_pos_idx < len(current_hidden) {
@@ -804,11 +804,11 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
             }
 
             int i = 0
-            while i < hidden_dim {
+            for i < hidden_dim {
                 if i % 16 == 0 {
                     float attn_val = 0.0
                     pos = 0
-                    while pos < seq_len {
+                    for pos < seq_len {
                         int h_pos_idx = pos * hidden_dim + i
                         if h_pos_idx < len(current_hidden) {
                             attn_val = attn_val + (attn_scores[pos] / float(seq_len)) * current_hidden[h_pos_idx]
@@ -824,10 +824,10 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
 
         []float ffn_hidden = []float{cap: len(current_hidden)}
         tok_idx = 0
-        while tok_idx < seq_len {
+        for tok_idx < seq_len {
             int h_idx = tok_idx * hidden_dim
             int i = 0
-            while i < hidden_dim {
+            for i < hidden_dim {
                 float val = attn_hidden[h_idx + i] * 2.0
                 if val < 0.0 { val = 0.0 }
                 ffn_hidden[h_idx + i] = val
@@ -837,10 +837,10 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
         }
 
         tok_idx = 0
-        while tok_idx < seq_len {
+        for tok_idx < seq_len {
             int h_idx = tok_idx * hidden_dim
             int i = 0
-            while i < hidden_dim {
+            for i < hidden_dim {
                 current_hidden[h_idx + i] = current_hidden[h_idx + i] * 0.5 + ffn_hidden[h_idx + i] * 0.5
                 i = i + 1
             }
@@ -856,12 +856,12 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
 
     int prompt_hash = 0
     int p_idx = 0
-    while p_idx < len(prompt) {
+    for p_idx < len(prompt) {
         prompt_hash = (prompt_hash * 31 + (prompt[p_idx * 1] as int)) % 10000
         p_idx = p_idx + 1
     }
 
-    while gen_token < max_tokens {
+    for gen_token < max_tokens {
 
         int last_tok_idx = seq_len - 1
         if last_tok_idx < 0 { last_tok_idx = 0 }
@@ -871,11 +871,11 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
         float best_logit = -9999999.0
         int vocab_idx = 0
         int vocab_limit = 30
-        while vocab_idx < vocab_limit {
+        for vocab_idx < vocab_limit {
             float logit = 0.0
             int i = 0
             int hidden_limit = hidden_dim / 4
-            while i < hidden_limit {
+            for i < hidden_limit {
                 if last_h_idx + i * 4 < len(current_hidden) {
                     float h_val = current_hidden[last_h_idx + i * 4]
                     int vocab_seed = (vocab_idx * 127 + i * 23 + prompt_hash * 19 + gen_token * 31) % 100000
@@ -911,7 +911,7 @@ func generate_response_from_prompt(string prompt, int max_tokens, int num_layers
         int new_h_idx = seq_len * hidden_dim
         if new_h_idx + hidden_dim <= len(current_hidden) {
             int i = 0
-            while i < hidden_dim {
+            for i < hidden_dim {
                 int seed = (next_token * 73 + i * 37 + gen_token * 11 + prompt_hash) % 10000
                 current_hidden[new_h_idx + i] = float((seed % 1000) - 500) / 1000.0
                 i = i + 1
@@ -935,7 +935,7 @@ func nucleus_sample_real([]float logits, float top_p, float temperature) int {
     int best_idx = 0
     float best_logit = logits[0]
     int i = 1
-    while i < len(logits) {
+    for i < len(logits) {
         if logits[i] > best_logit {
             best_logit = logits[i]
             best_idx = i
@@ -953,7 +953,7 @@ func generate_response_from_prompt_v2(string prompt, int max_tokens, int num_lay
 func write_complete(int fd, string data) {
     int total_written = 0
     int data_len = len(data)
-    while total_written < data_len {
+    for total_written < data_len {
         int chunk_size = data_len - total_written
         if chunk_size > 2048 {
             chunk_size = 2048
@@ -1093,7 +1093,7 @@ func main() {
     int bind_result = -1
     int bind_attempt = 0
     int max_bind_attempts = 5
-    while bind_attempt < max_bind_attempts && bind_result != 0 {
+    for bind_attempt < max_bind_attempts && bind_result != 0 {
         bind_attempt = bind_attempt + 1
         print("[Socket] Attempt " + int_to_string(bind_attempt) + "/" + int_to_string(max_bind_attempts) + ": Bind " + host + ":" + int_to_string(port) + " (family=2)\n")
         bind_result = bind_backend_socket(listener_fd, host, port)
@@ -1107,7 +1107,7 @@ func main() {
         if bind_attempt < max_bind_attempts {
             print("[Socket] Waiting 500ms before retry...\n")
             int wait_ms = 0
-            while wait_ms < 500000 {
+            for wait_ms < 500000 {
                 wait_ms = wait_ms + 1
             }
         }
@@ -1133,7 +1133,7 @@ func main() {
     print("HTTP server listening on " + host + ":" + port_str + "\n")
     print("[Socket] Ready to accept connections\n\n")
     int connection_count = 0
-    while true {
+    for true {
         int client_fd = __sys_accept(listener_fd)
         if client_fd < 0 {
             continue
@@ -1159,7 +1159,7 @@ func load_embedding_weights(string model_path, int vocab_size, int hidden_size) 
     }
 
     int i = 0
-    while i < vocab_size && i < 10000 {
+    for i < vocab_size && i < 10000 {
         int seed = (i * 73 + 37) % 1000
         float val = float((seed % 100) - 50) / 100.0
         embeddings[i] = val
@@ -1181,7 +1181,7 @@ func tokenize_with_vocab(string text) []int {
     int token_count = 0
 
     int i = 0
-    while i < len(text) && token_count < 512 {
+    for i < len(text) && token_count < 512 {
 
         if i + 4 <= len(text) {
             string word = __host_slice(text, i, i + 4)
@@ -1214,7 +1214,7 @@ func tokenize_with_vocab(string text) []int {
 func hash_to_token(string word, int max_token) int {
     int hash = 0
     int i = 0
-    while i < len(word) {
+    for i < len(word) {
         hash = (hash * 31 + word[i]) % max_token
         i = i + 1
     }
@@ -1236,16 +1236,16 @@ func nucleus_sample([]float logits, float p, int seed) int {
 
     []int sorted_indices = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         sorted_indices[i] = i
         i = i + 1
     }
 
     int j = 0
-    while j < n {
+    for j < n {
         int best = j
         int k = j + 1
-        while k < n {
+        for k < n {
             if logits[sorted_indices[k]] > logits[sorted_indices[best]] {
                 best = k
             }
@@ -1260,7 +1260,7 @@ func nucleus_sample([]float logits, float p, int seed) int {
     float cum_sum = 0.0
     int nucleus_size = 0
     i = 0
-    while i < n {
+    for i < n {
         float logit_val = logits[sorted_indices[i]]
 
         float approx_prob = logit_val / 100.0
@@ -1295,7 +1295,7 @@ func temperature_scale([]float logits, float temperature) []float {
     }
 
     int i = 0
-    while i < len(logits) {
+    for i < len(logits) {
         scaled[i] = logits[i] / temp_val
         i = i + 1
     }
@@ -1310,7 +1310,7 @@ func init_kv_cache(int num_layers, int max_seq_len, int hidden_size) kv_cache {
     print("[Cache] Initializing KV cache: " + int_to_string(num_layers) + " layers, seq_len=" + int_to_string(max_seq_len) + "\n")
 
     int i = 0
-    while i < cache_size {
+    for i < cache_size {
         cache_data[i] = 0.0
         i = i + 1
     }
@@ -1331,7 +1331,7 @@ func update_kv_cache(kv_cache cache, int layer_idx, []float new_data) kv_cache {
 
     int offset = layer_idx * cache.cache_size_per_layer
     int i = 0
-    while i < len(new_data) && offset + i < len(cache.cache_data) {
+    for i < len(new_data) && offset + i < len(cache.cache_data) {
         cache.cache_data[offset + i] = new_data[i]
         i = i + 1
     }

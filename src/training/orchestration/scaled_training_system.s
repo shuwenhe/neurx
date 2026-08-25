@@ -53,7 +53,7 @@ func scaled_positive_mod(int value, int modulus) int {
 func scaled_hash_token(string token, int vocab_size) int {
     int hash = 5381
     int i = 0
-    while i < len(token) {
+    for i < len(token) {
         hash = hash * 33 + int(token[i]) + i
         i = i + 1
     }
@@ -64,7 +64,7 @@ func scaled_split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         int ch = text[i]
         if ch == 10 {
             lines.push(current)
@@ -98,7 +98,7 @@ func scaled_bundle_from_text(
     labels := make([][]int, batch_size)
     attention_mask := make([][]int, batch_size)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         input_ids[b] = make([]int, seq_len)
         labels[b] = make([]int, seq_len)
         attention_mask[b] = make([]int, seq_len)
@@ -106,7 +106,7 @@ func scaled_bundle_from_text(
         int token_index = 0
         string current = ""
         int i = 0
-        while i <= len(line) && token_index < seq_len {
+        for i <= len(line) && token_index < seq_len {
             int ch = 32
             if i < len(line) {
                 ch = line[i]
@@ -125,7 +125,7 @@ func scaled_bundle_from_text(
             }
             i = i + 1
         }
-        while token_index < seq_len {
+        for token_index < seq_len {
             int token_id = scaled_positive_mod(b * seq_len + token_index, vocab_size)
             input_ids[b][token_index] = token_id
             labels[b][token_index] = scaled_positive_mod(token_id + 1, vocab_size)

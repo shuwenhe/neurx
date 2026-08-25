@@ -262,7 +262,7 @@ func (ParserInstance* p) parse_and_get(string text, string key) string {
 
     if result.value.is_object() {
         i := 0
-        while i < len(result.value.object_keys) {
+        for i < len(result.value.object_keys) {
             if result.value.object_keys[i] == key {
                 return result.value.object_values[i].string_value
             }

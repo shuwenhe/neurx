@@ -15,7 +15,7 @@ struct optimization_result {
 func string_slice(string text, int start, int end) string {
     string result = ""
     int i = start
-    while i < end && i < len(text) {
+    for i < end && i < len(text) {
         result = result + string_char(text[i])
         i = i + 1
     }

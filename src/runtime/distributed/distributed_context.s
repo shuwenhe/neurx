@@ -55,7 +55,7 @@ func (distributed_context* ctx) finalize() bool {
 
     groups := ctx.group_manager.list_groups()
     i := 0
-    while i < groups.len() {
+    for i < groups.len() {
         g := ctx.group_manager.get_group(groups[i])
         g.finalize()
         ctx.group_manager.delete_group(groups[i])

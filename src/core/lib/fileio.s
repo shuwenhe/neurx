@@ -62,13 +62,13 @@ func split_string(string text, string delim) []string {
     int count = 0
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         int delimiter_pos = -1
         int delim_len = len(delim)
         if i + delim_len <= len(text) {
             int j = 0
             bool matches = true
-            while j < delim_len {
+            for j < delim_len {
                 int txt_char = 0
                 int delim_char = 0
                 string text_sub = text[i + j : i + j + 1]
@@ -136,7 +136,7 @@ func trim_string(string text) string {
     int start = 0
     int end = len(text)
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = text[i : i + 1]
         bool is_space = false
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
@@ -149,7 +149,7 @@ func trim_string(string text) string {
         i = i + 1
     }
     i = len(text) - 1
-    while i >= 0 {
+    for i >= 0 {
         string ch = text[i : i + 1]
         bool is_space = false
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
@@ -195,10 +195,10 @@ func replace_string(string text, string old, string new_str) string {
     }
     string result = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         bool found = true
         int j = 0
-        while j < len(old) {
+        for j < len(old) {
             if i + j >= len(text) {
                 found = false
                 break
@@ -226,7 +226,7 @@ func replace_string(string text, string old, string new_str) string {
 func join_strings([]string parts, string sep) string {
     string result = ""
     int i = 0
-    while i < len(parts) {
+    for i < len(parts) {
         if i > 0 {
             result = result + sep
         }

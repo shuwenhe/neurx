@@ -52,24 +52,24 @@ func main() {
         best_eval_loss: 999999.0,
     }
     int epoch = 0
-    while epoch < epochs {
+    for epoch < epochs {
         println("")
         println("Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs))
         int sample_index = 0
         float epoch_loss = 0.0
         int epoch_examples = 0
-        while sample_index < len(samples) {
+        for sample_index < len(samples) {
             int batch_end = sample_index + batch_size
             if batch_end > len(samples) {
                 batch_end = len(samples)
             }
             int item = sample_index
-            while item < batch_end {
+            for item < batch_end {
                 string formatted = samples[item]
                 int pos = 0
                 float sample_loss = 0.0
                 int pair_count = 0
-                while pos + 1 < str_len(formatted) {
+                for pos + 1 < str_len(formatted) {
                     int prev_token = formatted[pos]
                     int next_token = formatted[pos + 1]
                     float x = (prev_token as float) / 255.0
@@ -100,13 +100,13 @@ func main() {
         float eval_loss = 0.0
         int eval_valid = 0
         int eval_i = 0
-        while eval_i < len(samples) {
+        for eval_i < len(samples) {
             string eval_text = samples[eval_i]
             if str_len(eval_text) >= 2 {
                 int eval_pos = 0
                 float eval_sample_loss = 0.0
                 int eval_pairs = 0
-                while eval_pos + 1 < str_len(eval_text) {
+                for eval_pos + 1 < str_len(eval_text) {
                     int prev_token = eval_text[eval_pos]
                     int next_token = eval_text[eval_pos + 1]
                     float x = (prev_token as float) / 255.0
@@ -218,11 +218,11 @@ func format_sft_text(string instruction, string input_text, string output_text) 
 
 func trim(string s) string {
     int start = 0
-    while start < str_len(s) && is_space(s[start]) {
+    for start < str_len(s) && is_space(s[start]) {
         start = start + 1
     }
     int end = str_len(s) - 1
-    while end >= start && is_space(s[end]) {
+    for end >= start && is_space(s[end]) {
         end = end - 1
     }
     if end < start {
@@ -247,7 +247,7 @@ func substring(string s, int start, int end) string {
     }
     string out = ""
     int i = start
-    while i < end {
+    for i < end {
         out = out + string(s[i])
         i = i + 1
     }
@@ -256,7 +256,7 @@ func substring(string s, int start, int end) string {
 
 func str_len(string s) int {
     int n = 0
-    while n < len(s) {
+    for n < len(s) {
         n = n + 1
     }
     n
@@ -273,10 +273,10 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value
         int q = 0
-        while digit >= 10 {
+        for digit >= 10 {
             digit = digit - 10
             q = q + 1
         }
@@ -295,7 +295,7 @@ func fmt_float(float value, int decimals) string {
         value = 0.0 - value
     }
     int whole = 0
-    while value >= 1.0 {
+    for value >= 1.0 {
         value = value - 1.0
         whole = whole + 1
     }
@@ -305,10 +305,10 @@ func fmt_float(float value, int decimals) string {
     }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         value = value * 10.0
         int digit = 0
-        while value >= 1.0 {
+        for value >= 1.0 {
             value = value - 1.0
             digit = digit + 1
         }
@@ -330,7 +330,7 @@ func parse_float(string s) float {
         i = 1
     }
     float whole = 0.0
-    while i < str_len(text) && text[i] >= 48 && text[i] <= 57 {
+    for i < str_len(text) && text[i] >= 48 && text[i] <= 57 {
         whole = whole * 10.0 + ((text[i] - 48) as float)
         i = i + 1
     }
@@ -338,7 +338,7 @@ func parse_float(string s) float {
     float scale = 1.0
     if i < str_len(text) && text[i] == 46 {
         i = i + 1
-        while i < str_len(text) && text[i] >= 48 && text[i] <= 57 {
+        for i < str_len(text) && text[i] >= 48 && text[i] <= 57 {
             frac = frac * 10.0 + ((text[i] - 48) as float)
             scale = scale * 10.0
             i = i + 1

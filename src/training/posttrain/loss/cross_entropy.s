@@ -14,7 +14,7 @@ func softmax([]float logits) []float {
     []float softmax_probs = fill_model_tensor(len(logits), 0.0)
     float max_logit = logits[0]
     int i = 0
-    while i < len(logits) {
+    for i < len(logits) {
         if logits[i] > max_logit {
             max_logit = logits[i]
         }
@@ -22,7 +22,7 @@ func softmax([]float logits) []float {
     }
     float sum_exp = 0.0
     i = 0
-    while i < len(logits) {
+    for i < len(logits) {
         float exp_logit = exp(logits[i] - max_logit)
         softmax_probs[i] = exp_logit
         sum_exp = sum_exp + exp_logit
@@ -30,7 +30,7 @@ func softmax([]float logits) []float {
     }
     if sum_exp > 0.0 {
         i = 0
-        while i < len(softmax_probs) {
+        for i < len(softmax_probs) {
             softmax_probs[i] = softmax_probs[i] / sum_exp
             i = i + 1
         }
@@ -58,7 +58,7 @@ func cross_entropy_loss_batch([][]float logits_batch, []int target_ids) loss_bat
     result.num_tokens = len(target_ids)
     result.total_loss = 0.0
     int i = 0
-    while i < len(logits_batch) && i < len(target_ids) {
+    for i < len(logits_batch) && i < len(target_ids) {
         float token_loss = cross_entropy_loss_single(logits_batch[i], target_ids[i])
         result.loss_per_token.push(token_loss)
         result.total_loss = result.total_loss + token_loss
@@ -76,7 +76,7 @@ func cross_entropy_loss_with_ignore_index([][]float logits_batch, []int target_i
     result.num_tokens = 0
     result.total_loss = 0.0
     int i = 0
-    while i < len(logits_batch) && i < len(target_ids) {
+    for i < len(logits_batch) && i < len(target_ids) {
         if target_ids[i] != ignore_index {
             float token_loss = cross_entropy_loss_single(logits_batch[i], target_ids[i])
             result.loss_per_token.push(token_loss)
@@ -100,7 +100,7 @@ func label_smoothing_cross_entropy([][]float logits_batch, []int target_ids, flo
     float target_prob = 1.0 - smoothing
     float smooth_prob = smoothing / ((vocab_size as float))
     int i = 0
-    while i < len(logits_batch) && i < len(target_ids) {
+    for i < len(logits_batch) && i < len(target_ids) {
         []float probs = softmax(logits_batch[i])
         float loss = 0.0
         if target_ids[i] >= 0 && target_ids[i] < len(probs) {
@@ -129,11 +129,11 @@ func compute_token_accuracy([][]float logits_batch, []int target_ids) float {
     }
     int correct = 0
     int i = 0
-    while i < len(logits_batch) && i < len(target_ids) {
+    for i < len(logits_batch) && i < len(target_ids) {
         float max_logit = logits_batch[i][0]
         int predicted_id = 0
         int j = 1
-        while j < len(logits_batch[i]) {
+        for j < len(logits_batch[i]) {
             if logits_batch[i][j] > max_logit {
                 max_logit = logits_batch[i][j]
                 predicted_id = j

@@ -35,7 +35,7 @@ func int_to_string(int n) string {
         n = 0 - n
     }
 
-    while n > 0 {
+    for n > 0 {
         int digit = n % 10
         string digit_str = ""
 

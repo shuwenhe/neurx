@@ -137,7 +137,7 @@ func (custom_operation* op) set_metadata(operation_metadata meta) () {
 
 func (custom_operation* op) get_kernel_for_hardware(compute_capability hw) operation_kernel {
     i := 0
-    while i < op.kernels.len() {
+    for i < op.kernels.len() {
         if op.kernels[i].target_hardware == hw {
             op.kernels[i]
         }
@@ -247,7 +247,7 @@ func (operation_registry* reg) find_operations_for_hardware(compute_capability h
     for op_id in reg.operations.keys() {
         op := reg.get_operation(op_id)
         i := 0
-        while i < op.metadata.supported_hardware.len() {
+        for i < op.metadata.supported_hardware.len() {
             if op.metadata.supported_hardware[i] == hw {
                 result.push(op_id)
             }

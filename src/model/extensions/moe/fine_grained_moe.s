@@ -37,14 +37,14 @@ struct neurx_moe_weights {
 func zeros(int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n { out[i] = 0.0; i = i + 1 }
+    for i < n { out[i] = 0.0; i = i + 1 }
     out
 }
 
 func fill_ramp(int n, float scale) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = scale * (i + 1) as float / (n + 1) as float
         i = i + 1
     }
@@ -57,7 +57,7 @@ func exp_approx(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 12 {
+    for i <= 12 {
         term = term * x / i as float
         result = result + term
         i = i + 1
@@ -68,12 +68,12 @@ func exp_approx(float x) float {
 func matmul_2d([]float a, []float b, int m, int k, int n) []float {
     []float result = zeros(m * n)
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = 0.0
             int l = 0
-            while l < k {
+            for l < k {
                 sum = sum + a[i * k + l] * b[l * n + j]
                 l = l + 1
             }
@@ -104,7 +104,7 @@ func new_neurx_moe_weights(neurx_moe_config cfg) neurx_moe_weights {
     [][]float r_w1 = [][]float{cap: n_r}
     [][]float r_w2 = [][]float{cap: n_r}
     int e = 0
-    while e < n_r {
+    for e < n_r {
         r_w1[e] = fill_ramp(d * df, 0.02)
         r_w2[e] = fill_ramp(df * d, 0.02)
         e = e + 1
@@ -128,7 +128,7 @@ func update_expert_bias(
 ) []float {
     []float new_bias = []float{cap: n_experts}
     int i = 0
-    while i < n_experts {
+    for i < n_experts {
         if expert_load[i] > avg_load * 1.2 {
             new_bias[i] = bias[i] - gamma
         } else if expert_load[i] < avg_load * 0.8 {
@@ -157,9 +157,9 @@ func route_tokens_neurx(
     int top_k = cfg.n_activated_experts
     []float logits = matmul_2d(hidden_states, w.gate_weight, n_tokens, d, n_r)
     int t = 0
-    while t < n_tokens {
+    for t < n_tokens {
         int e = 0
-        while e < n_r {
+        for e < n_r {
             logits[t * n_r + e] = logits[t * n_r + e] + w.expert_bias[e]
             e = e + 1
         }
@@ -167,16 +167,16 @@ func route_tokens_neurx(
     }
     []float probs = []float{cap: n_tokens * n_r}
     t = 0
-    while t < n_tokens {
+    for t < n_tokens {
         float max_val = logits[t * n_r]
         int e = 1
-        while e < n_r {
+        for e < n_r {
             if logits[t * n_r + e] > max_val { max_val = logits[t * n_r + e] }
             e = e + 1
         }
         float sum_exp = 0.0
         e = 0
-        while e < n_r {
+        for e < n_r {
             float p = exp_approx(logits[t * n_r + e] - max_val)
             probs[t * n_r + e] = p
             sum_exp = sum_exp + p
@@ -184,7 +184,7 @@ func route_tokens_neurx(
         }
         if sum_exp > 0.0 {
             e = 0
-            while e < n_r {
+            for e < n_r {
                 probs[t * n_r + e] = probs[t * n_r + e] / sum_exp
                 e = e + 1
             }
@@ -195,10 +195,10 @@ func route_tokens_neurx(
     []float weights = []float{cap: n_tokens * top_k}
     []float load = zeros(n_r)
     t = 0
-    while t < n_tokens {
+    for t < n_tokens {
         []int top_idx = top_k_indices_single(probs, t * n_r, n_r, top_k)
         int k = 0
-        while k < top_k {
+        for k < top_k {
             int e = top_idx[k]
             indices[t * top_k + k] = e
             weights[t * top_k + k] = probs[t * n_r + e]
@@ -207,13 +207,13 @@ func route_tokens_neurx(
         }
         float w_sum = 0.0
         k = 0
-        while k < top_k {
+        for k < top_k {
             w_sum = w_sum + weights[t * top_k + k]
             k = k + 1
         }
         if w_sum > 0.0 {
             k = 0
-            while k < top_k {
+            for k < top_k {
                 weights[t * top_k + k] = weights[t * top_k + k] / w_sum
                 k = k + 1
             }
@@ -231,13 +231,13 @@ func top_k_indices_single([]float probs, int offset, int n_experts, int k) []int
     []int result = []int{cap: k}
     []bool used = []bool{cap: n_experts}
     int i = 0
-    while i < n_experts { used[i] = false; i = i + 1 }
+    for i < n_experts { used[i] = false; i = i + 1 }
     i = 0
-    while i < k {
+    for i < k {
         float max_val = -1e9
         int max_idx = 0
         int e = 0
-        while e < n_experts {
+        for e < n_experts {
             if !used[e] && probs[offset + e] > max_val {
                 max_val = probs[offset + e]
                 max_idx = e
@@ -261,11 +261,11 @@ func shared_experts_forward(
     int s_dim = df * n_s
     []float hidden = matmul_2d(hidden_states, w.shared_w1, n_tokens, d, s_dim)
     int t = 0
-    while t < n_tokens {
+    for t < n_tokens {
         int e = 0
-        while e < n_s {
+        for e < n_s {
             int dim = 0
-            while dim < df {
+            for dim < df {
                 int idx = t * s_dim + e * df + dim
                 hidden[idx] = gelu(hidden[idx])
                 dim = dim + 1
@@ -288,26 +288,26 @@ func routed_experts_forward(
     int top_k = cfg.n_activated_experts
     []float output = zeros(n_tokens * d)
     int t = 0
-    while t < n_tokens {
+    for t < n_tokens {
         int k = 0
-        while k < top_k {
+        for k < top_k {
             int e = route.expert_indices[t * top_k + k]
             float gate_w = route.expert_weights[t * top_k + k]
             []float h_t = []float{cap: d}
             int dim = 0
-            while dim < d {
+            for dim < d {
                 h_t[dim] = hidden_states[t * d + dim]
                 dim = dim + 1
             }
             []float e_hidden = matmul_2d(h_t, w.routed_w1[e], 1, d, df)
             dim = 0
-            while dim < df {
+            for dim < df {
                 e_hidden[dim] = gelu(e_hidden[dim])
                 dim = dim + 1
             }
             []float e_out = matmul_2d(e_hidden, w.routed_w2[e], 1, df, d)
             dim = 0
-            while dim < d {
+            for dim < d {
                 output[t * d + dim] = output[t * d + dim] + e_out[dim] * gate_w
                 dim = dim + 1
             }
@@ -334,7 +334,7 @@ func neurx_moe_forward(
     []float routed_out = routed_experts_forward(w, hidden_states, route, n_tokens)
     []float output = zeros(n_tokens * d)
     int i = 0
-    while i < n_tokens * d {
+    for i < n_tokens * d {
         output[i] = shared_out[i] + routed_out[i]
         i = i + 1
     }
@@ -369,7 +369,7 @@ func compute_load_stats([]float load, int n_experts, int n_tokens, int top_k) lo
     float sum_l = 0.0
     int active = 0
     int i = 0
-    while i < n_experts {
+    for i < n_experts {
         sum_l = sum_l + load[i]
         if load[i] > max_l { max_l = load[i] }
         if load[i] < min_l { min_l = load[i] }

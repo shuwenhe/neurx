@@ -63,7 +63,7 @@ func distributed_cache_compute_replica_nodes(distributed_cache dc, string cache_
     
     int hash = 0
     int i = 0
-    while i < len(cache_key) {
+    for i < len(cache_key) {
         int byte_val = __host_slice(cache_key, i, i + 1)[0]
         hash = (hash * 31 + byte_val) % 2147483647
         i = i + 1
@@ -74,7 +74,7 @@ func distributed_cache_compute_replica_nodes(distributed_cache dc, string cache_
     
     int replica_count = 0
     int attempt = 0
-    while replica_count < dc.replication_factor && attempt < dc.num_peers {
+    for replica_count < dc.replication_factor && attempt < dc.num_peers {
         int peer_idx = (start_peer + attempt) % dc.num_peers
         
         if dc.peers[peer_idx].is_healthy == 1 {
@@ -95,7 +95,7 @@ func distributed_cache_get_responsible_node(distributed_cache dc, string cache_k
     
     int hash = 0
     int i = 0
-    while i < len(cache_key) {
+    for i < len(cache_key) {
         int byte_val = __host_slice(cache_key, i, i + 1)[0]
         hash = (hash * 31 + byte_val) % 2147483647
         i = i + 1
@@ -109,7 +109,7 @@ func distributed_cache_get_responsible_node(distributed_cache dc, string cache_k
 
 func distributed_cache_check_peer_health(distributed_cache dc) {
     int i = 0
-    while i < dc.num_peers {
+    for i < dc.num_peers {
         remote_cache_node peer = dc.peers[i]
         int64 time_since_heartbeat = dc.current_time - peer.last_heartbeat
         
@@ -131,7 +131,7 @@ func distributed_cache_check_peer_health(distributed_cache dc) {
 
 func distributed_cache_record_heartbeat(distributed_cache dc, string peer_id) {
     int i = 0
-    while i < dc.num_peers {
+    for i < dc.num_peers {
         if dc.peers[i].node_id == peer_id {
             dc.peers[i].last_heartbeat = dc.current_time
             dc.peers[i].is_healthy = 1
@@ -144,7 +144,7 @@ func distributed_cache_record_heartbeat(distributed_cache dc, string peer_id) {
 
 func distributed_cache_update_peer_capacity(distributed_cache dc, string peer_id, int64 total, int64 available) {
     int i = 0
-    while i < dc.num_peers {
+    for i < dc.num_peers {
         if dc.peers[i].node_id == peer_id {
             dc.peers[i].total_blocks = total
             dc.peers[i].available_blocks = available
@@ -163,9 +163,9 @@ func distributed_cache_find_best_replica_node(distributed_cache dc, []string rep
     int64 max_available = 0
     
     int i = 0
-    while i < len(replicas) {
+    for i < len(replicas) {
         int j = 0
-        while j < dc.num_peers {
+        for j < dc.num_peers {
             if dc.peers[j].node_id == replicas[i] {
                 if dc.peers[j].available_blocks > max_available {
                     max_available = dc.peers[j].available_blocks
@@ -187,7 +187,7 @@ func distributed_cache_get_stats(distributed_cache dc) string {
     int64 available_blocks = 0
     
     int i = 0
-    while i < dc.num_peers {
+    for i < dc.num_peers {
         if dc.peers[i].is_healthy == 1 {
             healthy_peers = healthy_peers + 1
         }
@@ -206,7 +206,7 @@ func distributed_cache_get_stats(distributed_cache dc) string {
 
 func distributed_cache_handle_node_failure(distributed_cache dc, string failed_node_id) {
     int i = 0
-    while i < dc.num_peers {
+    for i < dc.num_peers {
         if dc.peers[i].node_id == failed_node_id {
             dc.peers[i].is_healthy = 0
             dc.peers[i].status = "failed"

@@ -38,7 +38,7 @@ func code_agent_parse_int(string s, int default_val) int {
     int result = 0
     int i = 0
     bool valid = true
-    while i < len(trimmed) {
+    for i < len(trimmed) {
         string ch = string(trimmed[i])
         if ch == "0" {
             result = result * 10 + 0
@@ -78,7 +78,7 @@ func code_agent_clip(string s, int max_len) string {
     }
     string out = ""
     int i = 0
-    while i < max_len {
+    for i < max_len {
         out = out + string(s[i])
         i = i + 1
     }
@@ -108,7 +108,7 @@ func code_agent_step_label(string action, string observation) string {
         obs_short = observation
     } else {
         int i = 0
-        while i < max_obs {
+        for i < max_obs {
             obs_short = obs_short + string(observation[i])
             i = i + 1
         }
@@ -127,10 +127,10 @@ func code_agent_find(string text, string pattern, int start) int {
         return -1
     }
     int i = start
-    while i <= tl - pl {
+    for i <= tl - pl {
         int j = 0
         bool match = true
-        while j < pl {
+        for j < pl {
             if text[i + j] != pattern[j] {
                 match = false
                 break
@@ -150,7 +150,7 @@ func code_agent_starts_with(string text, string prefix) bool {
         return false
     }
     int i = 0
-    while i < len(prefix) {
+    for i < len(prefix) {
         if text[i] != prefix[i] {
             return false
         }
@@ -167,7 +167,7 @@ func code_agent_extract_trailing_field(string observation, string marker) string
     int start = pos + len(marker)
     string out = ""
     int i = start
-    while i < len(observation) {
+    for i < len(observation) {
         out = out + string(observation[i])
         i = i + 1
     }
@@ -188,7 +188,7 @@ func code_agent_slice(string text, int start, int end) string {
     }
     string out = ""
     int i = lo
-    while i < hi {
+    for i < hi {
         out = out + string(text[i])
         i = i + 1
     }
@@ -198,7 +198,7 @@ func code_agent_slice(string text, int start, int end) string {
 func code_agent_shell_escape(string text) string {
     string out = "'"
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = string(text[i])
         if ch == "'" {
             out = out + "'\"'\"'"
@@ -362,7 +362,7 @@ func code_agent_run(string task, string model_path, int max_steps, bool full_aut
     agent_runtime_state state = new_code_agent_runtime_state_with_model(task, max_steps, model_path, build_command, test_command)
     int steps_done = 0
     agent_runtime_state current = state
-    while !current.finished && steps_done < max_steps {
+    for !current.finished && steps_done < max_steps {
         if current.interrupt.pending && full_auto {
             current = agent_runtime_step(current, "yes")
             steps_done = steps_done + 1

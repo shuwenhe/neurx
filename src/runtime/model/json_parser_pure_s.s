@@ -42,7 +42,7 @@ func is_digit(char c) bool {
 }
 
 func skip_whitespace(json_parser_state* state) {
-    while state.pos < state.input.len() {
+    for state.pos < state.input.len() {
         c := state.input[state.pos] as char
         if !is_whitespace(c) {
             break
@@ -150,14 +150,14 @@ func parse_number(json_parser_state* state) option[json_value] {
         return option::none[json_value]()
     }
     
-    while state.pos < state.input.len() && is_digit(state.input[state.pos] as char) {
+    for state.pos < state.input.len() && is_digit(state.input[state.pos] as char) {
         state.pos = state.pos + 1
     }
     
     
     if state.pos < state.input.len() && state.input[state.pos] as char == '.' {
         state.pos = state.pos + 1
-        while state.pos < state.input.len() && is_digit(state.input[state.pos] as char) {
+        for state.pos < state.input.len() && is_digit(state.input[state.pos] as char) {
             state.pos = state.pos + 1
         }
     }
@@ -173,7 +173,7 @@ func parse_number(json_parser_state* state) option[json_value] {
                     state.pos = state.pos + 1
                 }
             }
-            while state.pos < state.input.len() && is_digit(state.input[state.pos] as char) {
+            for state.pos < state.input.len() && is_digit(state.input[state.pos] as char) {
                 state.pos = state.pos + 1
             }
         }
@@ -201,7 +201,7 @@ func parse_string(json_parser_state* state) option[string] {
     state.pos = state.pos + 1
     start := state.pos
     
-    while state.pos < state.input.len() {
+    for state.pos < state.input.len() {
         c := state.input[state.pos] as char
         if c == '"' {
             result := state.input  

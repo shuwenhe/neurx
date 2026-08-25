@@ -29,7 +29,7 @@ func new_tool_cache(int capacity) tool_cache_state {
     }
     []tool_cache_entry entries = []tool_cache_entry{cap: cap_val}
     int i = 0
-    while i < cap_val {
+    for i < cap_val {
         entries[i] = tool_cache_entry {
             key:       "",
             value:     "",
@@ -64,7 +64,7 @@ func tool_cache_text_eq(string a, string b) bool {
         return false
     }
     int i = 0
-    while i < la {
+    for i < la {
         if a[i] != b[i] {
             return false
         }
@@ -76,7 +76,7 @@ func tool_cache_text_eq(string a, string b) bool {
 func tool_cache_get(tool_cache_state state, string tool_name, string input) tool_cache_result {
     string key = tool_cache_make_key(tool_name, input)
     int i = 0
-    while i < state.capacity {
+    for i < state.capacity {
         if state.entries[i].valid && tool_cache_text_eq(state.entries[i].key, key) {
             return tool_cache_result { hit: true, value: state.entries[i].value }
         }
@@ -89,7 +89,7 @@ func tool_cache_record_hit(tool_cache_state state, string tool_name, string inpu
     string key = tool_cache_make_key(tool_name, input)
     []tool_cache_entry next = []tool_cache_entry{cap: state.capacity}
     int i = 0
-    while i < state.capacity {
+    for i < state.capacity {
         next[i] = state.entries[i]
         if state.entries[i].valid && tool_cache_text_eq(state.entries[i].key, key) {
             next[i] = tool_cache_entry {
@@ -128,7 +128,7 @@ func tool_cache_put(tool_cache_state state, string tool_name, string input, stri
     string key = tool_cache_make_key(tool_name, input)
     int found_idx = -1
     int i = 0
-    while i < state.capacity {
+    for i < state.capacity {
         if state.entries[i].valid && tool_cache_text_eq(state.entries[i].key, key) {
             found_idx = i
             break
@@ -137,7 +137,7 @@ func tool_cache_put(tool_cache_state state, string tool_name, string input, stri
     }
     []tool_cache_entry next = []tool_cache_entry{cap: state.capacity}
     int j = 0
-    while j < state.capacity {
+    for j < state.capacity {
         next[j] = state.entries[j]
         j = j + 1
     }
@@ -160,7 +160,7 @@ func tool_cache_put(tool_cache_state state, string tool_name, string input, stri
     }
     int slot = -1
     int k = 0
-    while k < state.capacity {
+    for k < state.capacity {
         if !state.entries[k].valid {
             slot = k
             break
@@ -205,7 +205,7 @@ func tool_cache_invalidate_tool(tool_cache_state state, string tool_name) tool_c
     []tool_cache_entry next = []tool_cache_entry{cap: state.capacity}
     int new_size = state.size
     int i = 0
-    while i < state.capacity {
+    for i < state.capacity {
         next[i] = state.entries[i]
         if state.entries[i].valid {
             bool starts = true
@@ -213,7 +213,7 @@ func tool_cache_invalidate_tool(tool_cache_state state, string tool_name) tool_c
                 starts = false
             } else {
                 int j = 0
-                while j < prefix_len {
+                for j < prefix_len {
                     if state.entries[i].key[j] != prefix[j] {
                         starts = false
                         break

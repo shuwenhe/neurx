@@ -14,7 +14,7 @@ struct tensor {
 func shape_numel([]int shape) int {
     int n = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         n = n * shape[i]
         i = i + 1
     }
@@ -26,7 +26,7 @@ func contiguous_strides([]int shape) []int {
     []int strides = []int{cap: ndim}
     int stride = 1
     int i = ndim - 1
-    while i >= 0 {
+    for i >= 0 {
         strides[i] = stride
         stride = stride * shape[i]
         i = i - 1
@@ -37,7 +37,7 @@ func contiguous_strides([]int shape) []int {
 func zeros_float(int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = 0.0
         i = i + 1
     }
@@ -48,7 +48,7 @@ func from_data([]float data, []int shape) tensor {
     int n = shape_numel(shape)
     []float storage = zeros_float(n)
     int i = 0
-    while i < n {
+    for i < n {
         storage[i] = data[i]
         i = i + 1
     }
@@ -68,7 +68,7 @@ func add(tensor a, tensor b) tensor {
     []float bdata = b.storage
     []float storage = zeros_float(ad.numel)
     int i = 0
-    while i < ad.numel {
+    for i < ad.numel {
         storage[i] = adata[i] + bdata[i]
         i = i + 1
     }
@@ -93,12 +93,12 @@ func matmul2d(tensor a, tensor b) tensor {
     shape[1] = n
     []float storage = zeros_float(m * n)
     int row = 0
-    while row < m {
+    for row < m {
         int col = 0
-        while col < n {
+        for col < n {
             float acc = 0.0
             int p = 0
-            while p < k {
+            for p < k {
                 acc = acc + adata[row * k + p] * bdata[p * n + col]
                 p = p + 1
             }

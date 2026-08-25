@@ -40,7 +40,7 @@ func create_dynamic_batch([]sequence_info sequences, int target_tokens) optimize
         avg_loss_weight: 1.0,
     }
     int i = 0
-    while i < len(sequences)  batch.total_tokens < target_tokens {
+    for i < len(sequences)  batch.total_tokens < target_tokens {
         batch.sequences[batch.sequences_in_batch] = sequences[i]
         batch.total_tokens = batch.total_tokens + sequences[i].num_tokens
         batch.sequences_in_batch = batch.sequences_in_batch + 1
@@ -58,7 +58,7 @@ func greedy_pack_sequences([]sequence_info sequences, int max_seq_len) optimized
     }
     int used_tokens = 0
     int i = 0
-    while i < len(sequences) {
+    for i < len(sequences) {
         if used_tokens + sequences[i].num_tokens <= max_seq_len {
             packed.sequences[packed.sequences_in_batch] = sequences[i]
             packed.total_tokens = packed.total_tokens + sequences[i].num_tokens
@@ -84,7 +84,7 @@ func first_fit_decreasing_pack([]sequence_info sequences, int max_seq_len) optim
 func compute_loss_weights([]sequence_info sequences, int target_seq_len) []float {
     []float weights = []float{cap: len(sequences)}
     int i = 0
-    while i < len(sequences) {
+    for i < len(sequences) {
         float length_ratio = float(sequences[i].num_tokens) / float(target_seq_len)
         weights[i] = length_ratio
         i = i + 1

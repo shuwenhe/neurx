@@ -124,11 +124,11 @@ func string_char(int c) string {
 
 func trim(string s) string {
     int i = 0
-    while i < str_len(s) && is_space(s[i]) {
+    for i < str_len(s) && is_space(s[i]) {
         i = i + 1
     }
     int j = str_len(s) - 1
-    while j >= 0 && is_space(s[j]) {
+    for j >= 0 && is_space(s[j]) {
         j = j - 1
     }
     if j < i { return "" }
@@ -138,7 +138,7 @@ func trim(string s) string {
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
-    while i < end && i < str_len(s) {
+    for i < end && i < str_len(s) {
         out = out + string_char(s[i])
         i = i + 1
     }
@@ -151,7 +151,7 @@ func is_space(int c) bool {
 
 func str_len(string s) int {
     int n = 0
-    while s[n] != 0 {
+    for s[n] != 0 {
         n = n + 1
     }
     n
@@ -167,7 +167,7 @@ func parse_int(string s, int fallback) int {
         i = 1
     }
     int value = 0
-    while i < str_len(text) {
+    for i < str_len(text) {
         int digit = text[i] - 48
         if digit < 0 || digit > 9 { return fallback }
         value = value * 10 + digit

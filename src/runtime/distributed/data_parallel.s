@@ -55,7 +55,7 @@ func init_data_parallel(
     state.gradient_buckets = alloc(float, gradient_count)
     state.bucket_sizes = alloc(int, state.num_buckets)
     int i = 0
-    while i < state.num_buckets {
+    for i < state.num_buckets {
         state.bucket_sizes[i] = config.bucket_size_mb * 1024
         if i == state.num_buckets - 1 {
             state.bucket_sizes[i] = gradient_count - i * config.bucket_size_mb * 1024
@@ -74,14 +74,14 @@ func allreduce_gradients(
     float* synchronized = alloc(float, gradient_count)
     if state.world_size <= 1 {
         int i = 0
-        while i < gradient_count {
+        for i < gradient_count {
             synchronized[i] = gradients[i]
             i = i + 1
         }
         return synchronized
     }
     int bucket_idx = 0
-    while bucket_idx < state.num_buckets {
+    for bucket_idx < state.num_buckets {
         int bucket_start = bucket_idx * 256
         int bucket_size = state.bucket_sizes[bucket_idx]
         if bucket_start + bucket_size > gradient_count {
@@ -89,13 +89,13 @@ func allreduce_gradients(
         }
         float bucket_sum = 0.0
         int i = bucket_start
-        while i < bucket_start + bucket_size {
+        for i < bucket_start + bucket_size {
             bucket_sum = bucket_sum + gradients[i]
             i = i + 1
         }
         float bucket_avg = bucket_sum / float(state.world_size)
         i = bucket_start
-        while i < bucket_start + bucket_size {
+        for i < bucket_start + bucket_size {
             synchronized[i] = bucket_avg
             i = i + 1
         }
@@ -112,7 +112,7 @@ func async_allreduce_gradients(
 ) float* {
     float* result = alloc(float, gradient_count)
     int i = 0
-    while i < gradient_count {
+    for i < gradient_count {
         result[i] = gradients[i]
         i = i + 1
     }
@@ -128,7 +128,7 @@ func accumulate_gradients(
 ) float* {
     float* result = alloc(float, gradient_count)
     int i = 0
-    while i < gradient_count {
+    for i < gradient_count {
         result[i] = accumulated_gradients[i] + current_gradients[i]
         i = i + 1
     }
@@ -140,7 +140,7 @@ func accumulate_gradients(
 func reset_accumulated_gradients(float* accumulated_gradients, int gradient_count) float* {
     float* result = alloc(float, gradient_count)
     int i = 0
-    while i < gradient_count {
+    for i < gradient_count {
         result[i] = 0.0
         i = i + 1
     }
@@ -156,20 +156,20 @@ func bucket_gradients(
     float* bucketed = alloc(float, gradient_count)
     int bucket_idx = 0
     int position = 0
-    while position < gradient_count {
+    for position < gradient_count {
         int current_bucket_size = bucket_size
         if position + bucket_size > gradient_count {
             current_bucket_size = gradient_count - position
         }
         float bucket_sum = 0.0
         int i = 0
-        while i < current_bucket_size {
+        for i < current_bucket_size {
             bucket_sum = bucket_sum + gradients[position + i]
             i = i + 1
         }
         float bucket_avg = bucket_sum / float(state.world_size)
         i = 0
-        while i < current_bucket_size {
+        for i < current_bucket_size {
             bucketed[position + i] = bucket_avg
             i = i + 1
         }
@@ -184,7 +184,7 @@ func check_gradient_quality(
     int gradient_count
 ) bool {
     int i = 0
-    while i < gradient_count {
+    for i < gradient_count {
         float g = gradients[i]
         if g != g {
             return false
@@ -204,14 +204,14 @@ func compute_gradient_stats(
     float* stats = alloc(float, 5)
     float sum = 0.0
     int i = 0
-    while i < gradient_count {
+    for i < gradient_count {
         sum = sum + gradients[i]
         i = i + 1
     }
     stats[0] = sum / float(gradient_count)
     float var = 0.0
     i = 0
-    while i < gradient_count {
+    for i < gradient_count {
         float diff = gradients[i] - stats[0]
         var = var + diff * diff
         i = i + 1
@@ -220,7 +220,7 @@ func compute_gradient_stats(
     stats[1] = sqrt_f(var)
     stats[2] = gradients[0]
     i = 0
-    while i < gradient_count {
+    for i < gradient_count {
         if gradients[i] < stats[2] {
             stats[2] = gradients[i]
         }
@@ -228,7 +228,7 @@ func compute_gradient_stats(
     }
     stats[3] = gradients[0]
     i = 0
-    while i < gradient_count {
+    for i < gradient_count {
         if gradients[i] > stats[3] {
             stats[3] = gradients[i]
         }
@@ -236,7 +236,7 @@ func compute_gradient_stats(
     }
     float norm = 0.0
     i = 0
-    while i < gradient_count {
+    for i < gradient_count {
         norm = norm + gradients[i] * gradients[i]
         i = i + 1
     }
@@ -267,7 +267,7 @@ func data_parallel_training_step(
         current_step
     )
     int i = 0
-    while i < state.gradient_count {
+    for i < state.gradient_count {
         state.accumulated_gradients[i] = accumulated[i]
         i = i + 1
     }
@@ -306,7 +306,7 @@ func sqrt_f(float x) float {
     }
     float guess = x / 2.0
     int i = 0
-    while i < 10 {
+    for i < 10 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }

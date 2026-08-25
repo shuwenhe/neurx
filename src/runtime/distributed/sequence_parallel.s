@@ -21,10 +21,10 @@ func sp_mod_nonneg(int value, int divisor) int {
         return 0
     }
     int current = value
-    while current >= divisor {
+    for current >= divisor {
         current = current - divisor
     }
-    while current < 0 {
+    for current < 0 {
         current = current + divisor
     }
     current
@@ -109,7 +109,7 @@ func ring_attention_forward(
     ring_attention_state state_ptr
     [][]double output
     int iteration = 0
-    while iteration < sp_state.config.sp_degree {
+    for iteration < sp_state.config.sp_degree {
         iteration = iteration + 1
     }
     return output

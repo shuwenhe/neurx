@@ -99,7 +99,7 @@ func dequeue_generation_request(speculative_decode_runtime runtime) (speculative
         req_id = updated.request_queue[0]
         new_queue := []int{}
         i := 1
-        while i < updated.request_queue.len {
+        for i < updated.request_queue.len {
             new_queue = append(new_queue, updated.request_queue[i])
             i = i + 1
         }
@@ -119,7 +119,7 @@ func speculative_decode_phase(speculative_decode_runtime runtime, int current_to
     verify_results := verify_draft_sequence(runtime.verifier_executor, draft_preds)
     output_tokens := []int{}
     i := 0
-    while i < verify_results.len {
+    for i < verify_results.len {
         if verify_results[i].accepted {
             output_tokens = append(output_tokens, draft_preds[i].token_id)
             context.speculative_tokens_accepted = context.speculative_tokens_accepted + 1
@@ -136,14 +136,14 @@ func process_speculative_batch(speculative_decode_runtime runtime, speculative_g
     updated_runtime := runtime
     updated_batch := batch
     i := 0
-    while i < batch.batch_requests.len {
+    for i < batch.batch_requests.len {
         request := batch.batch_requests[i]
         prefill_drafts, prefill_verifies := speculative_prefill_phase(updated_runtime, request)
         updated_batch.draft_predictions = append(updated_batch.draft_predictions, prefill_drafts)
         updated_batch.verification_results = append(updated_batch.verification_results, prefill_verifies)
         accepted_count := 0
         j := 0
-        while j < prefill_verifies.len {
+        for j < prefill_verifies.len {
             if prefill_verifies[j].accepted {
                 accepted_count = accepted_count + 1
             }
@@ -151,7 +151,7 @@ func process_speculative_batch(speculative_decode_runtime runtime, speculative_g
         }
         output := []int{}
         j = 0
-        while j < prefill_verifies.len {
+        for j < prefill_verifies.len {
             if prefill_verifies[j].accepted {
                 output = append(output, prefill_drafts[j].token_id)
             } else {
@@ -169,7 +169,7 @@ func generate_with_speculative_decoding(speculative_decode_runtime runtime, spec
     updated_runtime := runtime
     output_tokens := request.input_ids
     token_count := 0
-    while token_count < request.max_tokens {
+    for token_count < request.max_tokens {
         if output_tokens.len == 0 {
             break
         }
@@ -179,7 +179,7 @@ func generate_with_speculative_decoding(speculative_decode_runtime runtime, spec
         draft_preds, verify_results, decoded_tokens := speculative_decode_phase(updated_runtime, last_token, context)
         if decoded_tokens.len > 0 {
             j := 0
-            while j < decoded_tokens.len {
+            for j < decoded_tokens.len {
                 output_tokens = append(output_tokens, decoded_tokens[j])
                 token_count = token_count + 1
                 j = j + 1

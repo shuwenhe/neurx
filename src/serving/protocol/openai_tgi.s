@@ -3,7 +3,7 @@ package neurx.serving.protocol.openai_tgi
 func serving_json_escape(string value) string {
     string out = ""
     int i = 0
-    while i < len(value) {
+    for i < len(value) {
         string ch = string(value[i])
         if ch == "\\" {
             out = out + "\\\\"

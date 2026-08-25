@@ -16,7 +16,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i < 15 {
+    for i < 15 {
         term = term * x / float(i)
         result = result + term
         i = i + 1
@@ -40,10 +40,10 @@ func train_steps() float {
     float lr = 0.1
     float total_loss = 0.0
     int step = 0
-    while step < 100 {
+    for step < 100 {
         int i = 0
         float loss_sum = 0.0
-        while i < 10 {
+        for i < 10 {
             float x = float(i) * 0.1
             float y = 1.0
             if i < 5 {
@@ -94,7 +94,7 @@ func ln_approx(float x) float {
         float y2 = y * y
         float term = y
         int i = 0
-        while i < 20 {
+        for i < 20 {
             result = result + term / float(2 * i + 1)
             term = term * y2
             i = i + 1

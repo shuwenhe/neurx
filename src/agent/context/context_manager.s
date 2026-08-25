@@ -52,7 +52,7 @@ func agent_context_append(agent_context_state state, string text) agent_context_
     []string segs = []string{cap: n + 1}
     []int seg_tokens = []int{cap: n + 1}
     int i = 0
-    while i < n {
+    for i < n {
         segs[i] = state.segments[i]
         seg_tokens[i] = state.segment_tokens[i]
         i = i + 1
@@ -84,7 +84,7 @@ func agent_context_compress(agent_context_state state, int keep_last) agent_cont
     []int seg_tokens = []int{cap: keep}
     int new_total = 0
     int i = 0
-    while i < keep {
+    for i < keep {
         segs[i] = state.segments[start + i]
         seg_tokens[i] = state.segment_tokens[start + i]
         new_total = new_total + seg_tokens[i]
@@ -121,7 +121,7 @@ func agent_context_extract_dropped(agent_context_state state, int keep_last) str
     int drop_count = total - keep
     string out = ""
     int i = 0
-    while i < drop_count {
+    for i < drop_count {
         if i > 0 {
             out = out + "\n"
         }
@@ -149,7 +149,7 @@ func agent_context_compress_with_summary(agent_context_state state, string summa
     int start = total - keep
     int new_total = seg_tokens[0]
     int i = 0
-    while i < keep {
+    for i < keep {
         segs[i + 1] = state.segments[start + i]
         seg_tokens[i + 1] = state.segment_tokens[start + i]
         new_total = new_total + seg_tokens[i + 1]
@@ -193,7 +193,7 @@ func agent_context_to_string(agent_context_state state) string {
     int n = len(state.segments)
     string out = ""
     int i = 0
-    while i < n {
+    for i < n {
         if i > 0 {
             out = out + "\n"
         }

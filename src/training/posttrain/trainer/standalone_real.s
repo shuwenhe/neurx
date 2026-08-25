@@ -29,7 +29,7 @@ func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float guess = x / 2.0
     int i = 0
-    while i < 5 {
+    for i < 5 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }
@@ -42,7 +42,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / (i as float)
         result = result + term
         i = i + 1
@@ -53,7 +53,7 @@ func exp_approx(float x) float {
 func init_weights(int size, float std) []float {
     []float arr = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         float val = ((i * 12345 + 67890) - ((i * 12345 + 67890) / 100000) * 100000) as float
         val = (val / 100000.0 - 0.5) * std * 2.0
         arr[i] = val
@@ -65,12 +65,12 @@ func init_weights(int size, float std) []float {
 func matmul([]float A, []float B, int M, int K, int N) []float {
     []float C = []float{cap: M * N}
     int m = 0
-    while m < M {
+    for m < M {
         int n = 0
-        while n < N {
+        for n < N {
             float sum = 0.0
             int k = 0
-            while k < K {
+            for k < K {
                 sum = sum + A[m * K + k] * B[k * N + n]
                 k = k + 1
             }
@@ -85,18 +85,18 @@ func matmul([]float A, []float B, int M, int K, int N) []float {
 func rms_norm([]float x, []float weight, int batch_seq, int hidden) []float {
     []float output = []float{cap: batch_seq * hidden}
     int i = 0
-    while i < batch_seq {
+    for i < batch_seq {
         int offset = i * hidden
         float sum_sq = 0.0
         int h = 0
-        while h < hidden {
+        for h < hidden {
             float val = x[offset + h]
             sum_sq = sum_sq + val * val
             h = h + 1
         }
         float rms = sqrt_approx(sum_sq / (hidden as float) + 0.000001)
         h = 0
-        while h < hidden {
+        for h < hidden {
             output[offset + h] = (x[offset + h] / rms) * weight[h]
             h = h + 1
         }
@@ -108,12 +108,12 @@ func rms_norm([]float x, []float weight, int batch_seq, int hidden) []float {
 func embedding([]int token_ids, []float embed_weight, int batch_seq, int hidden, int vocab) []float {
     []float output = []float{cap: batch_seq * hidden}
     int i = 0
-    while i < batch_seq {
+    for i < batch_seq {
         int token_id = token_ids[i]
         if token_id < 0 { token_id = 0 }
         if token_id >= vocab { token_id = vocab - 1 }
         int h = 0
-        while h < hidden {
+        for h < hidden {
             output[i * hidden + h] = embed_weight[token_id * hidden + h]
             h = h + 1
         }
@@ -126,7 +126,7 @@ func add_arrays([]float a, []float b) []float {
     int size = len(a)
     []float output = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         output[i] = a[i] + b[i]
         i = i + 1
     }
@@ -153,14 +153,14 @@ func simple_transformer_layer(
 func cross_entropy_loss([]float logits, []int labels, int batch_seq, int vocab) float {
     float total_loss = 0.0
     int i = 0
-    while i < batch_seq {
+    for i < batch_seq {
         int label = labels[i]
         if label < 0 { label = 0 }
         if label >= vocab { label = vocab - 1 }
         int logits_offset = i * vocab
         float max_logit = logits[logits_offset]
         int j = 1
-        while j < vocab {
+        for j < vocab {
             if logits[logits_offset + j] > max_logit {
                 max_logit = logits[logits_offset + j]
             }
@@ -168,7 +168,7 @@ func cross_entropy_loss([]float logits, []int labels, int batch_seq, int vocab) 
         }
         float sum_exp = 0.0
         j = 0
-        while j < vocab {
+        for j < vocab {
             sum_exp = sum_exp + exp_approx(logits[logits_offset + j] - max_logit)
             j = j + 1
         }
@@ -187,7 +187,7 @@ func log_approx(float x) float {
     float result = y
     float term = y
     int i = 1
-    while i < 10 {
+    for i < 10 {
         term = term * y2
         result = result + term / ((2 * i + 1) as float)
         i = i + 1
@@ -222,7 +222,7 @@ func main() {
     []int input_ids = []int{cap: batch_seq}
     []int labels = []int{cap: batch_seq}
     int i = 0
-    while i < batch_seq {
+    for i < batch_seq {
         input_ids[i] = (i * 7 + 3) - (((i * 7 + 3) / vocab) * vocab)
         labels[i] = (i * 11 + 5) - (((i * 11 + 5) / vocab) * vocab)
         i = i + 1
@@ -231,10 +231,10 @@ func main() {
     eprintln("")
     eprintln("[Step 3/4] Training...")
     int epoch = 0
-    while epoch < config.num_epochs {
+    for epoch < config.num_epochs {
         eprintln("  Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(config.num_epochs))
         int step = 0
-        while step < config.steps_per_epoch {
+        for step < config.steps_per_epoch {
             []float hidden_states = embedding(input_ids, embed_weight, batch_seq, hidden, vocab)
             hidden_states = simple_transformer_layer(hidden_states, ln_weight, q_proj, v_proj, o_proj, batch_seq, hidden)
             []float logits = matmul(hidden_states, embed_weight, batch_seq, hidden, vocab)
@@ -264,7 +264,7 @@ func int_to_str(int x) string {
     if x < 0 { return "-" + int_to_str(0 - x) }
     string result = ""
     int num = x
-    while num > 0 {
+    for num > 0 {
         int digit = num - ((num / 10) * 10)
         if digit == 0 { result = "0" + result }
         if digit == 1 { result = "1" + result }
@@ -287,7 +287,7 @@ func float_to_str(float x, int precision) string {
     if decimal_part < 0.0 { decimal_part = 0.0 - decimal_part }
     string result = int_to_str(integer_part) + "."
     int i = 0
-    while i < precision {
+    for i < precision {
         decimal_part = decimal_part * 10.0
         int digit = decimal_part as int
         result = result + int_to_str(digit)

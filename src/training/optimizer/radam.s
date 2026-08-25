@@ -46,7 +46,7 @@ func radam_step(radam_optimizer optimizer, tensor params, tensor grads) radam_op
     }
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float grad = grads.data[i]
         if optimizer.weight_decay != 0.0 {
             grad = grad + optimizer.weight_decay * params.data[i]
@@ -76,7 +76,7 @@ struct radam_optimizer_step_output {
 func ensure_radam_state([]float values, int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         if i < len(values) {
             out[i] = values[i]
         } else {
@@ -96,7 +96,7 @@ func radam_sqrt(float x) float {
         y = x
     }
     int i = 0
-    while i < 32 {
+    for i < 32 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -106,7 +106,7 @@ func radam_sqrt(float x) float {
 func radam_pow(float base, int exponent) float {
     float result = 1.0
     int i = 0
-    while i < exponent {
+    for i < exponent {
         result = result * base
         i = i + 1
     }

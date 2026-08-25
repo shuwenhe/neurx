@@ -43,7 +43,7 @@ struct session_kv_result {
 func session_kv_int_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -61,7 +61,7 @@ func session_kv_page_offset(session_kv_binding_state state, int slot, int page_i
 
 func session_kv_find(session_kv_binding_state state, int session_id) int {
     int i = 0
-    while i < state.config.capacity {
+    for i < state.config.capacity {
         if state.active[i] == 1 && state.session_ids[i] == session_id { return i }
         i = i + 1
     }
@@ -80,7 +80,7 @@ func session_kv_save(session_kv_binding_state state, int session_id, int request
     int slot = session_kv_find(state, session_id)
     if slot < 0 {
         int i = 0
-        while i < state.config.capacity {
+        for i < state.config.capacity {
             if slot < 0 && state.active[i] == 0 { slot = i }
             i = i + 1
         }
@@ -96,7 +96,7 @@ func session_kv_save(session_kv_binding_state state, int session_id, int request
     state.page_counts[slot] = pages
     state.first_page_ids[slot] = first_page_id
     int page_index = 0
-    while page_index < state.config.maximum_pages_per_session {
+    for page_index < state.config.maximum_pages_per_session {
         int offset = session_kv_page_offset(state, slot, page_index)
         state.page_ids[offset] = 0
         if page_index < pages && first_page_id > 0 { state.page_ids[offset] = first_page_id + page_index }
@@ -117,7 +117,7 @@ func session_kv_restore(session_kv_binding_state state, int session_id, int requ
     int kept_pages = (prefix + state.config.page_size - 1) / state.config.page_size
     if kept_pages < old_pages { state.freed_tail_pages = state.freed_tail_pages + old_pages - kept_pages }
     int page_index = kept_pages
-    while page_index < old_pages {
+    for page_index < old_pages {
         state.page_ids[session_kv_page_offset(state, slot, page_index)] = 0
         page_index = page_index + 1
     }
@@ -159,7 +159,7 @@ func session_kv_release(session_kv_binding_state state, int session_id) session_
     if slot < 0 { return state }
     state.released_pages = state.released_pages + state.page_counts[slot]
     int page_index = 0
-    while page_index < state.page_counts[slot] {
+    for page_index < state.page_counts[slot] {
         state.page_ids[session_kv_page_offset(state, slot, page_index)] = 0
         page_index = page_index + 1
     }

@@ -57,17 +57,17 @@ func adafactor_step_2d(
     []float row_sums = []float{cap: num_rows}
     []float col_sums = []float{cap: num_cols}
     int r = 0
-    while r < num_rows {
+    for r < num_rows {
         row_sums[r] = 0.0
         r = r + 1
     }
     int c = 0
-    while c < num_cols {
+    for c < num_cols {
         col_sums[c] = 0.0
         c = c + 1
     }
     int idx = 0
-    while idx < num_rows * num_cols {
+    for idx < num_rows * num_cols {
         int row = idx / num_cols
         int col = idx - row * num_cols
         float grad = grads.data[idx]
@@ -77,27 +77,27 @@ func adafactor_step_2d(
         idx = idx + 1
     }
     r = 0
-    while r < num_rows {
+    for r < num_rows {
         float row_mean = row_sums[r] / float(num_cols)
         optimizer.row_var[r] = optimizer.row_var[r] * (1.0 - beta2_t) + row_mean * beta2_t
         r = r + 1
     }
     c = 0
-    while c < num_cols {
+    for c < num_cols {
         float col_mean = col_sums[c] / float(num_rows)
         optimizer.col_var[c] = optimizer.col_var[c] * (1.0 - beta2_t) + col_mean * beta2_t
         c = c + 1
     }
     float total_row_var = 0.0
     r = 0
-    while r < num_rows {
+    for r < num_rows {
         total_row_var = total_row_var + optimizer.row_var[r]
         r = r + 1
     }
     int n = num_rows * num_cols
     []float update = []float{cap: n}
     idx = 0
-    while idx < n {
+    for idx < n {
         int row = idx / num_cols
         int col = idx - row * num_cols
         float denom = adafactor_sqrt(optimizer.row_var[row] * optimizer.col_var[col] / total_row_var)
@@ -108,7 +108,7 @@ func adafactor_step_2d(
     float clip_denom = adafactor_max(1.0, rms / optimizer.clip_threshold)
     []float out = []float{cap: n}
     idx = 0
-    while idx < n {
+    for idx < n {
         float scaled = update[idx] / clip_denom
         float new_param = params.data[idx]
         if optimizer.weight_decay != 0.0 {
@@ -131,7 +131,7 @@ struct adafactor_optimizer_step_output {
 func ensure_adafactor_state([]float values, int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         if i < len(values) {
             out[i] = values[i]
         } else {
@@ -148,7 +148,7 @@ func adafactor_rms([]float values, int n) float {
     }
     float sum_sq = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         sum_sq = sum_sq + values[i] * values[i]
         i = i + 1
     }
@@ -171,7 +171,7 @@ func adafactor_sqrt(float x) float {
         y = x
     }
     int i = 0
-    while i < 32 {
+    for i < 32 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -189,7 +189,7 @@ func adafactor_exp(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i < 25 {
+    for i < 25 {
         term = term * x / float(i)
         result = result + term
         i = i + 1
@@ -206,7 +206,7 @@ func adafactor_ln(float x) float {
     float result = 0.0
     float term = y
     int i = 0
-    while i < 20 {
+    for i < 20 {
         result = result + term / float(2 * i + 1)
         term = term * y_sq
         i = i + 1

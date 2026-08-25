@@ -43,7 +43,7 @@ func new_tool_parser_registry() tool_parser_registry {
 
 func tool_register(tool_parser_registry registry, tool_definition definition) tool_parser_registry {
     int i = 0
-    while i < len(registry.tools) {
+    for i < len(registry.tools) {
         if registry.tools[i].name == definition.name {
             registry.tools[i] = definition
             return registry
@@ -59,10 +59,10 @@ func tool_find_substring(string text, string pattern, int start) int {
         return start
     }
     int i = start
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
         bool matches = true
-        while j < len(pattern) {
+        for j < len(pattern) {
             if text[i + j] != pattern[j] {
                 matches = false
                 break
@@ -83,7 +83,7 @@ func tool_is_space(int ch) bool {
 
 func tool_skip_space(string text, int start) int {
     int i = start
-    while i < len(text) && tool_is_space(int(text[i])) {
+    for i < len(text) && tool_is_space(int(text[i])) {
         i = i + 1
     }
     i
@@ -92,7 +92,7 @@ func tool_skip_space(string text, int start) int {
 func tool_substring(string text, int start, int end) string {
     string result = ""
     int i = start
-    while i < end && i < len(text) {
+    for i < end && i < len(text) {
         result = result + string(text[i])
         i = i + 1
     }
@@ -116,7 +116,7 @@ func tool_json_string_field(string text, string field_name) string {
     string value = ""
     bool escaped = false
     int i = start + 1
-    while i < len(text) {
+    for i < len(text) {
         int ch = int(text[i])
         if escaped {
             value = value + string(text[i])
@@ -148,7 +148,7 @@ func tool_balanced_json_value(string text, int start) string {
     bool in_string = false
     bool escaped = false
     int i = value_start
-    while i < len(text) {
+    for i < len(text) {
         int ch = int(text[i])
         if in_string {
             if escaped {
@@ -205,7 +205,7 @@ func tool_extract_tag(string text, string open_tag, string close_tag) string {
 
 func tool_exists(tool_parser_registry registry, string name) bool {
     int i = 0
-    while i < len(registry.tools) {
+    for i < len(registry.tools) {
         if registry.tools[i].name == name {
             return true
         }
@@ -224,7 +224,7 @@ func tool_definition_at(tool_parser_registry registry, int index) tool_definitio
 
 func tool_arguments_have_required(string arguments_json, tool_definition definition) bool {
     int i = 0
-    while i < len(definition.required_arguments) {
+    for i < len(definition.required_arguments) {
         string argument_name = tool_required_argument(definition, i)
         string key = "\"" + argument_name + "\""
         if tool_find_substring(arguments_json, key, 0) < 0 {
@@ -265,7 +265,7 @@ func tool_validate(tool_parser_registry registry, tool_choice choice, parsed_too
         return call
     }
     int i = 0
-    while i < len(registry.tools) {
+    for i < len(registry.tools) {
         tool_definition definition = tool_definition_at(registry, i)
         if definition.name == call.name && !tool_arguments_have_required(call.arguments_json, definition) {
             call.valid = false

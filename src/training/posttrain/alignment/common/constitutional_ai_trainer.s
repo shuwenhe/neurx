@@ -271,7 +271,7 @@ func generate_cai_preference_pairs(
     float total_critique_strength = 0.0
     float total_revision_quality = 0.0
     int i = 0
-    while i < len(prompts) {
+    for i < len(prompts) {
         int principle_idx = i % constitution_obj.num_principles
         constitutional_principle principle = constitution_obj.principles[principle_idx]
         critique_revision_result result = perform_critique_revision(
@@ -364,7 +364,7 @@ func start_cai_training(
     if batch.num_pairs > 0 {
         float total_tokens = 0.0
         int i = 0
-        while i < len(batch.pairs) {
+        for i < len(batch.pairs) {
             total_tokens = total_tokens +
                           float(batch.pairs[i].num_tokens_prompt) +
                           float(batch.pairs[i].num_tokens_chosen) +

@@ -43,7 +43,7 @@ func embedding_forward([]float weight, int token_id, int hidden_size) []float {
     []float result
     int start = token_id * hidden_size
     int i = 0
-    while i < hidden_size {
+    for i < hidden_size {
         if start + i < len(weight) {
         }
         i = i + 1
@@ -93,7 +93,7 @@ func rms_norm_forward([]float x, []float weight, float epsilon) []float {
     []float result
     float rms = 0.0
     int i = 0
-    while i < len(x) {
+    for i < len(x) {
         rms = rms + x[i] * x[i]
         i = i + 1
     }
@@ -150,7 +150,7 @@ func model_forward(
     []float hidden = embedding_forward(embedding_weight, token_id, config.hidden_size)
     trace.embedding = hidden
     int layer = 0
-    while layer < config.num_layers {
+    for layer < config.num_layers {
         []float layer_out = hidden
         hidden = layer_out
         decoder_layer_trace layer_trace

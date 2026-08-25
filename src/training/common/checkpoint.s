@@ -55,7 +55,7 @@ func checkpoint_is_better(checkpoint_state ckpt, float current_metric, bool high
 func clone_weights([][]float weights) [][]float {
     [][]float cloned = make([][]float, 0)
     int i = 0
-    while i < len(weights) {
+    for i < len(weights) {
         cloned = append(cloned, clone_float_array(weights[i]))
         i = i + 1
     }
@@ -65,7 +65,7 @@ func clone_weights([][]float weights) [][]float {
 func clone_float_array([]float arr) []float {
     []float cloned = []float{cap: len(arr)}
     int i = 0
-    while i < len(arr) {
+    for i < len(arr) {
         cloned[i] = arr[i]
         i = i + 1
     }

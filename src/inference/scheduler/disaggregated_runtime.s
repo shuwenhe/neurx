@@ -148,7 +148,7 @@ func disaggregated_transfer_at(disaggregated_runtime_state state, int index) kv_
 
 func disaggregated_find_worker(disaggregated_runtime_state state, string worker_id) int {
     int i = 0
-    while i < len(state.workers) {
+    for i < len(state.workers) {
         inference_worker worker = disaggregated_worker_at(state, i)
         if worker.worker_id == worker_id {
             return i
@@ -160,7 +160,7 @@ func disaggregated_find_worker(disaggregated_runtime_state state, string worker_
 
 func disaggregated_find_request(disaggregated_runtime_state state, string request_id) int {
     int i = 0
-    while i < len(state.requests) {
+    for i < len(state.requests) {
         disaggregated_request request = disaggregated_request_at(state, i)
         if request.request_id == request_id {
             return i
@@ -172,7 +172,7 @@ func disaggregated_find_request(disaggregated_runtime_state state, string reques
 
 func disaggregated_find_transfer(disaggregated_runtime_state state, string request_id) int {
     int i = 0
-    while i < len(state.transfers) {
+    for i < len(state.transfers) {
         kv_transfer_ticket transfer = disaggregated_transfer_at(state, i)
         if transfer.request_id == request_id {
             return i
@@ -186,7 +186,7 @@ func disaggregated_select_worker(disaggregated_runtime_state state, string role)
     int selected = -1
     int selected_load = 2147483647
     int i = 0
-    while i < len(state.workers) {
+    for i < len(state.workers) {
         inference_worker worker = disaggregated_worker_at(state, i)
         if worker.healthy && worker.role == role && worker.active_requests < worker.capacity && worker.active_requests < selected_load {
             selected = i

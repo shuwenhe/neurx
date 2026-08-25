@@ -57,7 +57,7 @@ func prefill_with_medusa(
     hidden_states := [][]float{}
     attention_cache := [][]float{}
     i := 0
-    while i < batch.num_sequences {
+    for i < batch.num_sequences {
         input_seq := batch.input_ids[i]
         output_hidden := forward_model(engine.base_model, input_seq)
         hidden_states = append(hidden_states, output_hidden)
@@ -67,7 +67,7 @@ func prefill_with_medusa(
     }
     if engine.enable_medusa {
         i = 0
-        while i < hidden_states.len {
+        for i < hidden_states.len {
             updated_engine.medusa_pipeline = initialize_medusa_for_sequence(
                 updated_engine.medusa_pipeline,
                 hidden_states[i]
@@ -104,11 +104,11 @@ func decode_step_with_medusa(
     )
     candidate_sequences := [][]int{}
     i := 0
-    while i < draft_sequences.len {
+    for i < draft_sequences.len {
         draft_seq := draft_sequences[i]
         candidates := []int{}
         j := 0
-        while j < draft_seq.len {
+        for j < draft_seq.len {
             candidates = append(candidates, draft_seq[j])
             j = j + 1
         }
@@ -117,7 +117,7 @@ func decode_step_with_medusa(
     }
     verifier_logits := [][]float{}
     i = 0
-    while i < candidate_sequences.len {
+    for i < candidate_sequences.len {
         candidate := candidate_sequences[i]
         logits := compute_verifier_logits(engine.base_model, candidate, kv_cache)
         verifier_logits = append(verifier_logits, logits)
@@ -132,10 +132,10 @@ func decode_step_with_medusa(
     num_accepted := 0
     num_total := 0
     i = 0
-    while i < verified_results.len {
+    for i < verified_results.len {
         result_seq := verified_results[i]
         j := 0
-        while j < result_seq.len {
+        for j < result_seq.len {
             if result_seq[j] {
                 output_tokens = append(output_tokens, candidate_sequences[i][j])
                 num_accepted = num_accepted + 1
@@ -189,7 +189,7 @@ func generate_with_medusa(
     current_hidden := prefill_hidden[0]
     tokens_generated := 0
     medusa_tokens := 0
-    while tokens_generated < max_new_tokens {
+    for tokens_generated < max_new_tokens {
         (updated_engine, output_tokens) := decode_step_with_medusa(
             updated_engine,
             current_hidden,
@@ -199,7 +199,7 @@ func generate_with_medusa(
             updated_engine.sampling_config
         )
         i := 0
-        while i < output_tokens.len {
+        for i < output_tokens.len {
             output.sequence_ids = append(output.sequence_ids, output_tokens)
             medusa_tokens = medusa_tokens + output_tokens.len
             i = i + 1
@@ -274,7 +274,7 @@ func disable_medusa_and_retry(
 func forward_model(inference_model_handle model, []int input_ids) []float {
     output := []float{}
     i := 0
-    while i < 4096 {
+    for i < 4096 {
         output = append(output, 0.0)
         i = i + 1
     }
@@ -284,7 +284,7 @@ func forward_model(inference_model_handle model, []int input_ids) []float {
 func create_kv_cache_entry([]float hidden, int seq_len) []float {
     cache := []float{}
     i := 0
-    while i < hidden.len * 2 {
+    for i < hidden.len * 2 {
         cache = append(cache, 0.0)
         i = i + 1
     }
@@ -298,7 +298,7 @@ func compute_verifier_logits(
 ) []float {
     logits := []float{}
     i := 0
-    while i < 32000 {
+    for i < 32000 {
         logits = append(logits, 0.0)
         i = i + 1
     }
@@ -310,7 +310,7 @@ func sample_from_verifier([]float logits, sampling_config config) int {
     max_idx := 0
     max_prob := probs[0]
     i := 1
-    while i < probs.len {
+    for i < probs.len {
         if probs[i] > max_prob {
             max_prob = probs[i]
             max_idx = i

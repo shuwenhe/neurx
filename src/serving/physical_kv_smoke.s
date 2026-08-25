@@ -6,7 +6,7 @@ func fail(string message) int { println("physical-kv FAIL " + message); 1 }
 func main() {
     physical_kv_state state = new_physical_kv_state(4, 4)
     int i = 0
-    while i < 4 {
+    for i < 4 {
         state = physical_kv_bind_block(state, i, int64(4096 + i * 1024))
         i = i + 1
     }

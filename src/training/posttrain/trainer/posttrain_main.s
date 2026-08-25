@@ -138,7 +138,7 @@ func runtime_split_lines(string text) []string {
     []string lines = []
     string current = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = char_at(text, i)
         if ch == "\n" || ch == "\r" {
             if trim(current) != "" {
@@ -169,13 +169,13 @@ func text_window_to_vector(string text, int start, int count, int dim) []float {
         return vec
     }
     int i = 0
-    while i < limit {
+    for i < limit {
         if i >= len(text) {
             return vec
         }
         string ch = char_at(text, start + i)
         int slot_raw = i
-        while slot_raw >= dim {
+        for slot_raw >= dim {
             slot_raw = slot_raw - dim
         }
         float char_component = 0.001
@@ -192,7 +192,7 @@ func text_window_to_vector(string text, int start, int count, int dim) []float {
             char_component = 0.002
         }
         int pos_mod = i
-        while pos_mod >= 11 {
+        for pos_mod >= 11 {
             pos_mod = pos_mod - 11
         }
         float position_component = (pos_mod as float - 5.0) * 0.0002
@@ -201,7 +201,7 @@ func text_window_to_vector(string text, int start, int count, int dim) []float {
     }
     float normalization = 1.0 / (limit as float + 1.0)
     i = 0
-    while i < len(vec) {
+    for i < len(vec) {
         vec[i] = vec[i] * normalization
         i = i + 1
     }
@@ -280,7 +280,7 @@ func run_posttrain_lora_sft() int {
     []named_lora_module modules = []named_lora_module{cap: num_layers * 2}
     int layer_idx = 0
     int module_idx = 0
-    while layer_idx < num_layers {
+    for layer_idx < num_layers {
         eprintln("[Progress] building LoRA modules: layer " + int_to_str(layer_idx + 1) + "/" + int_to_str(num_layers))
         string q_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.q_proj"
         string v_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.v_proj"
@@ -355,7 +355,7 @@ func run_posttrain_lora_sft() int {
     int response_loss_count = 54
     []int shifted_labels = []int{cap: 94}
     int i = 0
-    while i < 94 {
+    for i < 94 {
         shifted_labels[i] = 0
         i = i + 1
     }
@@ -379,12 +379,12 @@ func run_posttrain_lora_sft() int {
     []float target_q = fill_lora(hidden_size, 0.0)
     []float target_v = fill_lora(v_out, 0.0)
     int epoch = 0
-    while epoch < epochs {
+    for epoch < epochs {
         eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " started")
         float epoch_loss = 0.0
         int epoch_items = 0
         int sample_idx = 0
-        while sample_idx < total_steps {
+        for sample_idx < total_steps {
             eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " sample " + int_to_str(sample_idx + 1) + "/" + int_to_str(total_steps) + " start")
             int module_cursor = 0
             float sample_loss_sum = 0.0
@@ -392,7 +392,7 @@ func run_posttrain_lora_sft() int {
             []float output_reuse = fill_lora(896, 0.0)
             []float hidden_reuse = fill_lora(8, 0.0)
             int max_modules = len(modules)
-            while module_cursor < max_modules {
+            for module_cursor < max_modules {
                 named_lora_module module = modules[module_cursor]
                 int out_dim = module.out_dim
                 int in_dim = module.in_dim
@@ -406,19 +406,19 @@ func run_posttrain_lora_sft() int {
                     target = target_v
                 }
                 int zero_idx = 0
-                while zero_idx < 896 {
+                for zero_idx < 896 {
                     output_reuse[zero_idx] = 0.0
                     zero_idx = zero_idx + 1
                 }
                 zero_idx = 0
-                while zero_idx < 8 {
+                for zero_idx < 8 {
                     hidden_reuse[zero_idx] = 0.0
                     zero_idx = zero_idx + 1
                 }
                 int r = 0
-                while r < rank_val {
+                for r < rank_val {
                     int in_idx = 0
-                    while in_idx < in_dim && in_idx < len(prompt_vec) {
+                    for in_idx < in_dim && in_idx < len(prompt_vec) {
                         int a_idx = r * in_dim + in_idx
                         if a_idx < len(lora_a) {
                             hidden_reuse[r] = hidden_reuse[r] + lora_a[a_idx] * prompt_vec[in_idx]
@@ -428,10 +428,10 @@ func run_posttrain_lora_sft() int {
                     r = r + 1
                 }
                 int out_idx = 0
-                while out_idx < out_dim {
+                for out_idx < out_dim {
                     float sum = 0.0
                     int rank_idx = 0
-                    while rank_idx < rank_val {
+                    for rank_idx < rank_val {
                         int b_idx = out_idx * rank_val + rank_idx
                         if b_idx < len(lora_b) {
                             sum = sum + scaling_val * lora_b[b_idx] * hidden_reuse[rank_idx]
@@ -513,7 +513,7 @@ func run_posttrain_lora_sft() int {
 func fill_lora(int n, float val) []float {
     []float result = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         result[i] = val
         i = i + 1
     }
@@ -523,7 +523,7 @@ func fill_lora(int n, float val) []float {
 func init_gaussian(int n, float std) []float {
     []float result = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float val = ((i + 1) as float) * std * 0.001
         if i - (i / 2) * 2 == 1 {
             val = 0.0 - val
@@ -540,7 +540,7 @@ func sqrt_lora(float x) float {
     }
     float guess = 1.0
     int iter = 0
-    while iter < 5 {
+    for iter < 5 {
         guess = 0.5 * (guess + x / guess)
         iter = iter + 1
     }
@@ -713,7 +713,7 @@ func compute_stats_from_layer([]named_lora_module modules) adapter_stats {
     int hidden_size_const = 896
     int v_out_const = 896
     int module_idx = 0
-    while module_idx < len(modules) {
+    for module_idx < len(modules) {
         named_lora_module module = modules[module_idx]
         int rank = rank_const
         int in_dim = hidden_size_const
@@ -726,7 +726,7 @@ func compute_stats_from_layer([]named_lora_module modules) adapter_stats {
         []float lora_b_copy = copy_float_array(module.lora_b)
         int i = 0
         int a_len = rank * in_dim
-        while i < a_len {
+        for i < a_len {
             if i < len(lora_a_copy) {
                 float value = lora_a_copy[i]
                 float abs_value = abs_float(value)
@@ -744,7 +744,7 @@ func compute_stats_from_layer([]named_lora_module modules) adapter_stats {
         }
         i = 0
         int b_len = out_dim * rank
-        while i < b_len {
+        for i < b_len {
             if i < len(lora_b_copy) {
                 float value = lora_b_copy[i]
                 float abs_value = abs_float(value)
@@ -780,7 +780,7 @@ func compute_delta_stats_from_layer([]named_lora_module modules) delta_stats {
     int hidden_size_const = 896
     int v_out_const = 896
     int module_idx = 0
-    while module_idx < len(modules) {
+    for module_idx < len(modules) {
         named_lora_module module = modules[module_idx]
         int rank = rank_const
         int in_dim = hidden_size_const
@@ -795,7 +795,7 @@ func compute_delta_stats_from_layer([]named_lora_module modules) delta_stats {
         []float init_b_copy = copy_float_array(module.initial_b)
         int i = 0
         int a_len = rank * in_dim
-        while i < a_len {
+        for i < a_len {
             if i < len(lora_a_copy) && i < len(init_a_copy) {
                 float delta = lora_a_copy[i] - init_a_copy[i]
                 float abs_delta = abs_float(delta)
@@ -812,7 +812,7 @@ func compute_delta_stats_from_layer([]named_lora_module modules) delta_stats {
         }
         i = 0
         int b_len = out_dim * rank
-        while i < b_len {
+        for i < b_len {
             if i < len(lora_b_copy) && i < len(init_b_copy) {
                 float delta = lora_b_copy[i] - init_b_copy[i]
                 float abs_delta = abs_float(delta)
@@ -848,7 +848,7 @@ func save_lora_weights_json(
     string weights_json = "{\n"
     weights_json = weights_json + "  \"modules\": [\n"
     int m_idx = 0
-    while m_idx < len(modules) {
+    for m_idx < len(modules) {
         named_lora_module curr = modules[m_idx]
         weights_json = weights_json + "    {\n"
         weights_json = weights_json + "      \"name\": " + json_escape(curr.name) + ",\n"
@@ -862,7 +862,7 @@ func save_lora_weights_json(
             a_sample_count = len(curr.lora_a)
         }
         int a_idx = 0
-        while a_idx < a_sample_count {
+        for a_idx < a_sample_count {
             if a_idx > 0 {
                 weights_json = weights_json + ", "
             }
@@ -879,7 +879,7 @@ func save_lora_weights_json(
             b_sample_count = len(curr.lora_b)
         }
         int b_idx = 0
-        while b_idx < b_sample_count {
+        for b_idx < b_sample_count {
             if b_idx > 0 {
                 weights_json = weights_json + ", "
             }
@@ -989,7 +989,7 @@ func save_adapter_weights_safetensors(
     string adapter_path = output_dir + "/adapter_model.safetensors"
     safetensors_writer writer = safetensors_writer_new(adapter_path)
     int m_idx = 0
-    while m_idx < len(modules) && m_idx < 4 {
+    for m_idx < len(modules) && m_idx < 4 {
         named_lora_module curr_module = modules[m_idx]
         []int a_shape = []int{cap: 2}
         a_shape[0] = rank
@@ -1075,7 +1075,7 @@ func build_training_state_json(
     json = json + "  \"best_loss\": " + float_to_str(loss_history[len(loss_history) - 1], 12) + ",\n"
     json = json + "  \"loss_history\": [\n"
     int i = 0
-    while i < len(loss_history) {
+    for i < len(loss_history) {
         json = json + "    " + float_to_str(loss_history[i], 12)
         if i + 1 < len(loss_history) {
             json = json + ",\n"
@@ -1107,7 +1107,7 @@ func text_to_vector(string text, int dim) []float {
         return vec
     }
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = char_at(text, i)
         int slot = i - (i / dim) * dim
         float char_component = 0.0009
@@ -1128,7 +1128,7 @@ func text_to_vector(string text, int dim) []float {
     }
     float normalization = 1.0 / ((len(text) + 1) as float)
     i = 0
-    while i < len(vec) {
+    for i < len(vec) {
         vec[i] = vec[i] * normalization
         i = i + 1
     }
@@ -1142,7 +1142,7 @@ func mse_loss([]float predictions, []float targets) float {
     if len(targets) < limit {
         limit = len(targets)
     }
-    while i < limit {
+    for i < limit {
         float diff = predictions[i] - targets[i]
         loss = loss + diff * diff
         i = i + 1
@@ -1160,7 +1160,7 @@ func mse_gradient([]float predictions, []float targets) []float {
     }
     []float grad = fill_lora(len(predictions), 0.0)
     int i = 0
-    while i < limit {
+    for i < limit {
         grad[i] = 2.0 * (predictions[i] - targets[i]) / (limit as float)
         i = i + 1
     }
@@ -1177,7 +1177,7 @@ func abs_float(float value) float {
 func copy_float_array([]float source) []float {
     []float result = []float{cap: len(source)}
     int i = 0
-    while i < len(source) {
+    for i < len(source) {
         result[i] = source[i]
         i = i + 1
     }
@@ -1188,7 +1188,7 @@ func first_non_empty_line(string path) string {
     string content = runtime_read_text_file(path)
     string current = ""
     int i = 0
-    while i <= len(content) {
+    for i <= len(content) {
         bool at_end = i == len(content)
         int ch_code = 0
         if !at_end {
@@ -1216,7 +1216,7 @@ func extract_json_string_field(string json_text, string field_name) string {
         return ""
     }
     int i = pos + len(needle)
-    while i < len(json_text) {
+    for i < len(json_text) {
         string ch = char_at(json_text, i)
         if ch == ":" {
             i = i + 1
@@ -1224,7 +1224,7 @@ func extract_json_string_field(string json_text, string field_name) string {
         }
         i = i + 1
     }
-    while i < len(json_text) {
+    for i < len(json_text) {
         string ch = char_at(json_text, i)
         if ch != " " && ch != "\t" {
             break
@@ -1239,7 +1239,7 @@ func extract_json_string_field(string json_text, string field_name) string {
     }
     i = i + 1
     string out = ""
-    while i < len(json_text) {
+    for i < len(json_text) {
         string ch = char_at(json_text, i)
         if ch == "\"" {
             return out
@@ -1280,7 +1280,7 @@ func extract_json_int_field(string json_text, string field_name, int fallback) i
         return fallback
     }
     int i = pos + len(needle)
-    while i < len(json_text) {
+    for i < len(json_text) {
         string ch = char_at(json_text, i)
         if ch != " " && ch != "\t" && ch != "\n" && ch != "\r" && ch != ":" {
             break
@@ -1289,7 +1289,7 @@ func extract_json_int_field(string json_text, string field_name, int fallback) i
     }
     string token = ""
     bool started = false
-    while i < len(json_text) {
+    for i < len(json_text) {
         string ch = char_at(json_text, i)
         if ch == "-" || ch == "0" || ch == "1" || ch == "2" || ch == "3" || ch == "4" || ch == "5" || ch == "6" || ch == "7" || ch == "8" || ch == "9" {
             token = concat2(token, ch)
@@ -1310,9 +1310,9 @@ func find_substring(string text, string pattern) int {
         return 0
     }
     int i = 0
-    while i + len(pattern) <= len(text) {
+    for i + len(pattern) <= len(text) {
         int j = 0
-        while j < len(pattern) {
+        for j < len(pattern) {
             if char_at(text, i + j) != char_at(pattern, j) {
                 break
             }
@@ -1348,7 +1348,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -1375,7 +1375,7 @@ func float_to_str(float value, int decimals) string {
         current = 0.0 - current
     }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -1385,10 +1385,10 @@ func float_to_str(float value, int decimals) string {
     }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }
@@ -1410,7 +1410,7 @@ func float_to_str(float value, int decimals) string {
 func json_escape(string s) string {
     string out = "\""
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         int ch = s[i]
         if ch == 34 {
             out = out + "\\\""

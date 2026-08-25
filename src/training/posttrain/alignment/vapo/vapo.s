@@ -57,7 +57,7 @@ func vapo_compute_value_augmented_advantages(
 ) []tensor {
     []tensor augmented = []tensor{cap: advantages.len}
     int i = 0
-    while i < advantages.len {
+    for i < advantages.len {
         tensor adv = advantages[i]
         tensor value_component = tensor_ops.sub(
             rewards[i],
@@ -85,7 +85,7 @@ func vapo_compute_advantages_with_gae(
     []tensor returns = []tensor{cap: T}
     tensor gae = tensor_ops.zeros_like(values[T - 1])
     int t = T - 1
-    while t >= 0 {
+    for t >= 0 {
         tensor reward = rewards[t]
         tensor value = values[t]
         bool done = dones[t]
@@ -147,7 +147,7 @@ func vapo_step(
     float mean_adv = tensor_ops.mean_scalar(adv_cat)
     float std_adv = tensor_ops.std_scalar(adv_cat)
     int i = 0
-    while i < advantages.len {
+    for i < advantages.len {
         advantages[i] = tensor_ops.div_scalar(
             tensor_ops.sub_scalar(advantages[i], mean_adv),
             std_adv + 1e-8

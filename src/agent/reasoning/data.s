@@ -32,7 +32,7 @@ func get_reasoning_trace_sample(reasoning_trace_dataset_state state, int index) 
 func copy_reasoning_trace_samples([]reasoning_trace_sample_state samples) []reasoning_trace_sample_state {
     []reasoning_trace_sample_state out = []reasoning_trace_sample_state{cap: len(samples)}
     int i = 0
-    while i < len(samples) {
+    for i < len(samples) {
         out[i] = reasoning_trace_sample_state {
             step: samples[i].step,
             goal: samples[i].goal,
@@ -85,7 +85,7 @@ func reasoning_trace_dataset_add_sample(reasoning_trace_dataset_state state, rea
     int size = len(state.samples)
     []reasoning_trace_sample_state samples = []reasoning_trace_sample_state{cap: size + 1}
     int i = 0
-    while i < size {
+    for i < size {
         samples[i] = state.samples[i]
         i = i + 1
     }
@@ -159,7 +159,7 @@ func reasoning_trace_dataset_next(reasoning_trace_dataset_state state) reasoning
 func reasoning_trace_dataset_render(reasoning_trace_dataset_state state) string {
     string out = ""
     int i = 0
-    while i < len(state.samples) {
+    for i < len(state.samples) {
         string rendered = reasoning_trace_sample_render(get_reasoning_trace_sample(state, i))
         if rendered != "" {
             if out != "" {
@@ -176,7 +176,7 @@ func reasoning_trace_from_agent(agent_runtime_state state, string source) reason
     reasoning_trace_dataset_state ds = new_reasoning_trace_dataset_state(source)
     int total = len(state.trace.steps)
     int i = 0
-    while i < total {
+    for i < total {
         ds = reasoning_trace_dataset_add_sample(
             ds,
             reasoning_trace_sample_state {

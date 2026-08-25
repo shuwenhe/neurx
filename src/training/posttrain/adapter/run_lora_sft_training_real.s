@@ -34,7 +34,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         out = digit_to_char(digit) + out
         value = value / 10
@@ -65,7 +65,7 @@ func format_float(float value, int decimals) string {
         current = 0.0 - current
     }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -75,10 +75,10 @@ func format_float(float value, int decimals) string {
     }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }
@@ -110,7 +110,7 @@ func trim_json_string(string s) string {
 func simple_hash(string text) int {
     int hash = 5381
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         hash = hash * 33 + 97
         i = i + 1
     }
@@ -201,16 +201,16 @@ func main() {
     adam_optimizer optimizer = create_adam_optimizer(learning_rate)
     training_state state = create_training_state(num_examples)
     int epoch = 0
-    while epoch < epochs {
+    for epoch < epochs {
         println("Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs))
         float epoch_loss = 0.0
         int epoch_steps = 0
         int sample_idx = 0
-        while sample_idx < num_examples {
+        for sample_idx < num_examples {
             vector input_vec = create_vector(hidden_dim)
             vector target_vec = create_vector(hidden_dim)
             int i = 0
-            while i < hidden_dim {
+            for i < hidden_dim {
                 float hash_val = (simple_hash(examples[sample_idx].output) + i) as float
                 input_vec.data[i] = (hash_val / 10000.0) * 0.1
                 target_vec.data[i] = (hash_val / 10000.0) * 0.05

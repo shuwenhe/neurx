@@ -150,7 +150,7 @@ func agent_protocol_message_add_block(agent_protocol_message msg, agent_content_
     int n = msg.content_count
     []agent_content_block next = []agent_content_block{cap: n + 1}
     int i = 0
-    while i < n {
+    for i < n {
         next[i] = msg.content[i]
         i = i + 1
     }
@@ -224,7 +224,7 @@ func agent_protocol_error(string session_id, string task_id, string category, st
 
 func agent_protocol_message_has_tool_use(agent_protocol_message msg) bool {
     int i = 0
-    while i < msg.content_count {
+    for i < msg.content_count {
         if msg.content[i].block_type == "tool_use" {
             return true
         }
@@ -236,7 +236,7 @@ func agent_protocol_message_has_tool_use(agent_protocol_message msg) bool {
 func agent_protocol_message_text(agent_protocol_message msg) string {
     string out = ""
     int i = 0
-    while i < msg.content_count {
+    for i < msg.content_count {
         if msg.content[i].block_type == "text" {
             if out == "" {
                 out = msg.content[i].text
@@ -251,7 +251,7 @@ func agent_protocol_message_text(agent_protocol_message msg) string {
 
 func agent_protocol_first_tool_use(agent_protocol_message msg) agent_content_block {
     int i = 0
-    while i < msg.content_count {
+    for i < msg.content_count {
         if msg.content[i].block_type == "tool_use" {
             return msg.content[i]
         }

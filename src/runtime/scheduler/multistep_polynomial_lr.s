@@ -21,7 +21,7 @@ func new_multistep_lr(float base_lr, float gamma, []int milestones) multistep_lr
 func multistep_lr_compute(float base_lr, float gamma, []int milestones, int step) float {
     int num_passed = 0
     int i = 0
-    while i < len(milestones) {
+    for i < len(milestones) {
         if step >= milestones[i] {
             num_passed = num_passed + 1
         }
@@ -100,7 +100,7 @@ func exponential_lr_step(exponential_lr_state sched, int step) exponential_lr_st
 func sched_pow_int(float base, int exponent) float {
     float result = 1.0
     int i = 0
-    while i < exponent {
+    for i < exponent {
         result = result * base
         i = i + 1
     }
@@ -118,7 +118,7 @@ func sched_exp(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i < 25 {
+    for i < 25 {
         term = term * x / float(i)
         result = result + term
         i = i + 1
@@ -135,7 +135,7 @@ func sched_ln(float x) float {
     float result = 0.0
     float term = y
     int i = 0
-    while i < 20 {
+    for i < 20 {
         result = result + term / float(2 * i + 1)
         term = term * y_sq
         i = i + 1

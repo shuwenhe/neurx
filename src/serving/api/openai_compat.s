@@ -100,7 +100,7 @@ func validate_chat_completion_request(chat_completion_request req) api_error {
         return err
     }
     int i = 0
-    while i < req.messages_count {
+    for i < req.messages_count {
         chat_message msg = req.messages[i]
         if strlen(msg.role) == 0 {
             err.error_code = 400
@@ -180,7 +180,7 @@ func handle_chat_completion(chat_completion_request req, api_config config) chat
 func build_chat_prompt(chat_message* messages, int count) string {
     string prompt = ""
     int i = 0
-    while i < count {
+    for i < count {
         chat_message msg = messages[i]
         prompt = prompt + "<" + msg.role + ">: " + msg.content + "\n"
         i = i + 1
@@ -197,7 +197,7 @@ func count_tokens(string text) int {
     int count = 1
     int i = 0
     int len = strlen(text)
-    while i < len {
+    for i < len {
         if text[i] == 32 {
             count = count + 1
         }
@@ -242,7 +242,7 @@ func handle_embeddings(embedding_request req, api_config config) embedding_respo
 func generate_embedding(string text) float* {
     float* embedding = alloc(float, 768)
     int i = 0
-    while i < 768 {
+    for i < 768 {
         embedding[i] = 0.5
         i = i + 1
     }
@@ -255,7 +255,7 @@ func stream_chat_completion(chat_completion_request req, api_config config) void
     }
     string full_prompt = build_chat_prompt(req.messages, req.messages_count)
     int tokens_generated = 0
-    while tokens_generated < req.max_tokens {
+    for tokens_generated < req.max_tokens {
         string next_token = generate_next_token(full_prompt, tokens_generated)
         tokens_generated = tokens_generated + 1
         if is_stop_token(next_token, req.stop, req.stop_count) {
@@ -270,7 +270,7 @@ func generate_next_token(string prompt, int position) string {
 
 func is_stop_token(string token, string* stop_tokens, int stop_count) bool {
     int i = 0
-    while i < stop_count {
+    for i < stop_count {
         if str_equals(token, stop_tokens[i]) {
             return true
         }
@@ -292,7 +292,7 @@ func str_equals(string s1, string s2) bool {
         return false
     }
     int i = 0
-    while i < strlen(s1) {
+    for i < strlen(s1) {
         if s1[i] != s2[i] {
             return false
         }
@@ -304,7 +304,7 @@ func str_equals(string s1, string s2) bool {
 func strlen(string s) int {
     int count = 0
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         count = count + 1
         i = i + 1
     }
@@ -321,7 +321,7 @@ func int_to_string(int n) string {
     if is_neg {
         num = -num
     }
-    while num > 0 {
+    for num > 0 {
         int digit = num % 10
         result = char_to_string(digit + 48) + result
         num = num / 10

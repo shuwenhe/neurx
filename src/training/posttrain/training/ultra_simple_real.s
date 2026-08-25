@@ -10,7 +10,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
         else if digit == 1 { out = "1" + out }
@@ -33,7 +33,7 @@ func float_to_str(float value, int decimals) string {
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -41,10 +41,10 @@ func float_to_str(float value, int decimals) string {
     if negative { out = "-" }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }
@@ -93,12 +93,12 @@ func main() {
     int total_steps = 0
     float current_loss = 0.0
     int epoch = 0
-    while epoch < epochs {
+    for epoch < epochs {
         println("====================================================")
         println("[Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + "]")
         println("====================================================")
         int step = 0
-        while step < steps_per_epoch {
+        for step < steps_per_epoch {
             total_steps = total_steps + 1
             float input1 = 1.0
             float input2 = 0.5
@@ -150,7 +150,7 @@ func main() {
     weights_text = weights_text + "best_loss=" + float_to_str(best_loss, 6) + "\n"
     int len_text = 0
     int i = 0
-    while i < 1000 {
+    for i < 1000 {
         if i < len(weights_text) {
             len_text = i + 1
         }

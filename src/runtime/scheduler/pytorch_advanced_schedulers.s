@@ -154,7 +154,7 @@ func new_sequential_lr([]float base_lrs, []int milestones) sequential_lr_state {
 func sequential_lr_step(sequential_lr_state sched, int step) sequential_lr_state {
     int idx = 0
     int i = 0
-    while i < len(sched.milestones) {
+    for i < len(sched.milestones) {
         if step >= sched.milestones[i] {
             idx = i + 1
         }
@@ -202,7 +202,7 @@ func chained_scheduler_step(chained_scheduler_state sched, int step) chained_sch
     sched.current_step = step
     float lr = sched.base_lr
     int i = 0
-    while i < len(sched.multipliers) {
+    for i < len(sched.multipliers) {
         lr = lr * sched.multipliers[i]
         i = i + 1
     }
@@ -308,7 +308,7 @@ func cos_approx(float x) float {
 func pow_int(float base, int exponent) float {
     float result = 1.0
     int i = 0
-    while i < exponent {
+    for i < exponent {
         result = result * base
         i = i + 1
     }
@@ -318,7 +318,7 @@ func pow_int(float base, int exponent) float {
 func clone_float_array([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = values[i]
         i = i + 1
     }

@@ -15,7 +15,7 @@ impl ToolExtractorUtils {
         results := Vec::new()
         search_pos := 0
 
-        while search_pos < strings::len(text) {
+        for search_pos < strings::len(text) {
             start_pos := strings::index_of_from(text, start_marker, search_pos)
             if start_pos < 0 {
                 break
@@ -56,7 +56,7 @@ impl ToolExtractorUtils {
         open_pattern := "<" + tag_prefix + " name=\""
         close_tag := "</" + tag_prefix + ">"
 
-        while search_pos < strings::len(text) {
+        for search_pos < strings::len(text) {
             open_pos := strings::index_of_from(text, open_pattern, search_pos)
             if open_pos < 0 {
                 break
@@ -101,7 +101,7 @@ impl ToolExtractorUtils {
         chars := strings::chars(text)
         i := start_index
 
-        while i < len(chars) {
+        for i < len(chars) {
             c := chars[i]
 
             if escaped {
@@ -125,7 +125,7 @@ impl ToolExtractorUtils {
                     if depth == 0 {
                         open_pos := i
                         j := i + 1
-                        while j < len(chars) {
+                        for j < len(chars) {
                             c2 := chars[j]
 
                             if c2 == '\\' && in_string {
@@ -192,7 +192,7 @@ impl ToolExtractorUtils {
         re := regex::compile(pattern)
         search_pos := 0
 
-        while search_pos < strings::len(text) {
+        for search_pos < strings::len(text) {
             match regex::find_at(re, text, search_pos) {
                 Some(m) => {
                     results.push(strings::substring(text, m.start, m.end))
@@ -216,7 +216,7 @@ impl ToolExtractorUtils {
         }
 
         content_end := tool_pos - 1
-        while content_end >= 0 && (text[content_end] == ' ' || text[content_end] == '\n' || text[content_end] == '\r') {
+        for content_end >= 0 && (text[content_end] == ' ' || text[content_end] == '\n' || text[content_end] == '\r') {
             content_end = content_end - 1
         }
 

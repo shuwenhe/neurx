@@ -45,7 +45,7 @@ func example_basic_value_training() {
     print("")
     []value_trajectory trajectories = []value_trajectory{cap: num_trajectories}
     int t = 0
-    while t < num_trajectories {
+    for t < num_trajectories {
         value_trajectory traj = value_trajectory {
             trajectory_id: t,
             steps: []value_trajectory_step{cap: steps_per_trajectory},
@@ -56,7 +56,7 @@ func example_basic_value_training() {
             min_advantage: 0.0,
         }
         int s = 0
-        while s < steps_per_trajectory {
+        for s < steps_per_trajectory {
             value_trajectory_step step = value_trajectory_step {
                 observation: []float{cap: cfg.seq_len},
                 reward: 0.5 + (s as float) / (steps_per_trajectory as float) * 0.5,
@@ -67,7 +67,7 @@ func example_basic_value_training() {
                 is_terminal: (s == steps_per_trajectory - 1),
             }
             int i = 0
-            while i < cfg.seq_len {
+            for i < cfg.seq_len {
                 step.observation = append_float_ex(step.observation, 0.1)
                 i = i + 1
             }
@@ -118,7 +118,7 @@ func example_gae_advantage_estimation() {
     float gamma = 0.99
     float lambda = 0.95
     int i = 0
-    while i < 5 {
+    for i < 5 {
         float r = rewards[i]
         float v = values[i]
         float v_next = if i < 4 { values[i + 1] } else { 0.0 }
@@ -163,7 +163,7 @@ func example_distributed_value_training() {
     print("")
     print("[GPU Progress]")
     int gpu = 0
-    while gpu < num_gpus {
+    for gpu < num_gpus {
         print("  GPU " + int_to_string_ex(gpu) + ": Processing batch " + int_to_string_ex(gpu * batch_per_gpu))
         gpu = gpu + 1
     }

@@ -301,7 +301,7 @@ func int_to_str(int n) string {
         n = -n
     }
     string s = ""
-    while n > 0 {
+    for n > 0 {
         s = string((n % 10) + 48) + s
         n = n / 10
     }

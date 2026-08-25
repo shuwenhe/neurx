@@ -231,7 +231,7 @@ func cos(float x) float {
     float result = 1.0
     float term = 1.0
     int n = 1
-    while n < 10 {
+    for n < 10 {
         term = term * (-x * x) / float(2 * n * (2 * n - 1))
         result = result + term
         n = n + 1
@@ -264,7 +264,7 @@ func exp(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i < 20 {
+    for i < 20 {
         term = term * x / float(i)
         result = result + term
         i = i + 1

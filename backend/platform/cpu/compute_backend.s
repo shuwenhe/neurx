@@ -103,11 +103,11 @@ func quantize_mantissa(float value, int mantissa_bits) float {
     bool neg = value < 0.0
     float mag = cb_abs(value)
     int exp = 0
-    while mag >= 2.0 {
+    for mag >= 2.0 {
         mag = mag * 0.5
         exp = exp + 1
     }
-    while mag < 1.0 {
+    for mag < 1.0 {
         mag = mag * 2.0
         exp = exp - 1
     }
@@ -130,7 +130,7 @@ func quantize_mantissa(float value, int mantissa_bits) float {
 func cb_pow2(int bits) float {
     float r = 1.0
     int i = 0
-    while i < bits {
+    for i < bits {
         r = r * 2.0
         i = i + 1
     }
@@ -141,9 +141,9 @@ func cb_pow2_signed(int exp) float {
     float r = 1.0
     int e = exp
     if e >= 0 {
-        while e > 0 { r = r * 2.0; e = e - 1 }
+        for e > 0 { r = r * 2.0; e = e - 1 }
     } else {
-        while e < 0 { r = r * 0.5; e = e + 1 }
+        for e < 0 { r = r * 0.5; e = e + 1 }
     }
     r
 }
@@ -154,7 +154,7 @@ func cb_round(float x) int {
     if neg { v = -v }
     float y = v + 0.5
     int n = 0
-    while y >= 1.0 { y = y - 1.0; n = n + 1 }
+    for y >= 1.0 { y = y - 1.0; n = n + 1 }
     if neg { return -n }
     n
 }
@@ -175,7 +175,7 @@ func array_to_bf16([]float arr) []float {
     int n = len(arr)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = to_bf16(arr[i])
         i = i + 1
     }
@@ -186,7 +186,7 @@ func array_to_fp16([]float arr) []float {
     int n = len(arr)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = to_fp16(arr[i])
         i = i + 1
     }
@@ -202,7 +202,7 @@ func backend_matmul(
         if ctx.device.backend == "cann" {
             []float out = []float{cap: m * n}
             int idx = 0
-            while idx < m * n { out[idx] = 0.0; idx = idx + 1 }
+            for idx < m * n { out[idx] = 0.0; idx = idx + 1 }
             __neurx_cann_matmul(a, b, out, m, k, n)
             return out
         }
@@ -215,14 +215,14 @@ extern "intrinsic" func __neurx_cann_matmul([]float a, []float b, []float out, i
 func cpu_matmul([]float a, []float b, int m, int k, int n) []float {
     []float result = []float{cap: m * n}
     int idx = 0
-    while idx < m * n { result[idx] = 0.0; idx = idx + 1 }
+    for idx < m * n { result[idx] = 0.0; idx = idx + 1 }
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = 0.0
             int l = 0
-            while l < k {
+            for l < k {
                 sum = sum + a[i * k + l] * b[l * n + j]
                 l = l + 1
             }
@@ -290,7 +290,7 @@ func backend_all_reduce_pair([]float a, []float b) []float {
     int n = len(a)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float bv = 0.0
         if i < len(b) { bv = b[i] }
         out[i] = a[i] + bv
@@ -341,7 +341,7 @@ func amp_unscale_grad(amp_state amp, []float grad) []float {
     int n = len(grad)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = grad[i] * inv
         i = i + 1
     }
@@ -350,7 +350,7 @@ func amp_unscale_grad(amp_state amp, []float grad) []float {
 
 func amp_check_overflow([]float grad) bool {
     int i = 0
-    while i < len(grad) {
+    for i < len(grad) {
         float g = grad[i]
         if g > 1e30 || g < -1e30 {
             return true
@@ -415,7 +415,7 @@ func estimate_training_memory(int params, string dtype, int batch_tokens, int hi
 func bf16_max_relative_error([]float arr) float {
     float max_err = 0.0
     int i = 0
-    while i < len(arr) {
+    for i < len(arr) {
         float orig = arr[i]
         float q = to_bf16(orig)
         float denom = cb_abs(orig)

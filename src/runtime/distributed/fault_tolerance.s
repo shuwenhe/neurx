@@ -149,7 +149,7 @@ func detect_failed_ranks_multi_node(
     []int failed = []int{cap: 10}
     int failed_count = 0
     int rank = 0
-    while rank < ft_mn.world_size {
+    for rank < ft_mn.world_size {
         heartbeat_entry hb = ft_mn.heartbeats[rank]
         int time_since_heartbeat = current_time_sec - hb.timestamp_sec
         if time_since_heartbeat > ft_mn.heartbeat_timeout_sec && hb.timestamp_sec > 0 {
@@ -177,7 +177,7 @@ func plan_multi_node_recovery(
         return false
     }
     int i = 0
-    while i < failed_count {
+    for i < failed_count {
         int rank = failed_ranks[i]
         multi_node_recovery_plan plan = multi_node_recovery_plan {
             failed_rank: rank,
@@ -234,7 +234,7 @@ func itoa_ext(int n) string {
         s = "-"
         num = -num
     }
-    while num > 0 {
+    for num > 0 {
         byte digit = byte('0' + (num % 10))
         s = string(digit) + s
         num = num / 10

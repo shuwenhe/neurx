@@ -2,7 +2,7 @@ package neurx.observability.logging
 
 func format_percent(float value, int width, int decimals) string {
     string formatted = format_float(value, width, decimals) + "%"
-    while len(formatted) < width {
+    for len(formatted) < width {
         formatted = " " + formatted
     }
     if len(formatted) > width + 1 {

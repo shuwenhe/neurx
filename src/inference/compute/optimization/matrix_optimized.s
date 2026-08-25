@@ -28,12 +28,12 @@ func matrix_mult_naive(matrix A, matrix B) matrix {
     matrix result = matrix_new(A.rows, B.cols)
 
     int i = 0
-    while i < A.rows {
+    for i < A.rows {
         int j = 0
-        while j < B.cols {
+        for j < B.cols {
             float sum = 0.0
             int k = 0
-            while k < A.cols {
+            for k < A.cols {
                 sum = sum + matrix_at(A, i, k) * matrix_at(B, k, j)
                 k = k + 1
             }
@@ -52,31 +52,31 @@ func matrix_mult_blocked(matrix A, matrix B) matrix {
     matrix result = matrix_new(A.rows, B.cols)
 
     int idx = 0
-    while idx < len(result.data) {
+    for idx < len(result.data) {
         result.data[idx] = 0.0
         idx = idx + 1
     }
 
     int i_block = 0
-    while i_block < A.rows {
+    for i_block < A.rows {
         int i_end = min_int(i_block + BLOCK_SIZE, A.rows)
 
         int k_block = 0
-        while k_block < A.cols {
+        for k_block < A.cols {
             int k_end = min_int(k_block + BLOCK_SIZE, A.cols)
 
             int j_block = 0
-            while j_block < B.cols {
+            for j_block < B.cols {
                 int j_end = min_int(j_block + BLOCK_SIZE, B.cols)
 
                 int i = i_block
-                while i < i_end {
+                for i < i_end {
                     int j = j_block
-                    while j < j_end {
+                    for j < j_end {
                         float sum = matrix_at(result, i, j)
 
                         int k = k_block
-                        while k < k_end {
+                        for k < k_end {
                             sum = sum + matrix_at(A, i, k) * matrix_at(B, k, j)
                             k = k + 1
                         }
@@ -103,10 +103,10 @@ func matvec_optimized([]float v, matrix W) []float {
     []float result = []float{cap: W.cols}
 
     int j = 0
-    while j < W.cols {
+    for j < W.cols {
         float sum = 0.0
         int i = 0
-        while i < len(v) {
+        for i < len(v) {
             sum = sum + v[i] * matrix_at(W, i, j)
             i = i + 1
         }
@@ -121,10 +121,10 @@ func matvec_row_major([]float v, []float W_data, int W_rows, int W_cols) []float
     []float result = []float{cap: W_cols}
 
     int i = 0
-    while i < W_rows {
+    for i < W_rows {
         float sum = 0.0
         int j = 0
-        while j < len(v) {
+        for j < len(v) {
             sum = sum + v[j] * W_data[i * W_cols + j]
             j = j + 1
         }
@@ -140,7 +140,7 @@ func matmul_with_activation(matrix A, matrix B, string activation) matrix {
     matrix result = matrix_mult_blocked(A, B)
 
     int i = 0
-    while i < len(result.data) {
+    for i < len(result.data) {
         float val = result.data[i]
 
         if activation == "relu" {
@@ -183,7 +183,7 @@ func exp_approx(float x) float {
     float term = 1.0
 
     int i = 1
-    while i < 10 {
+    for i < 10 {
         term = term * x / float(i)
         result = result + term
         i = i + 1

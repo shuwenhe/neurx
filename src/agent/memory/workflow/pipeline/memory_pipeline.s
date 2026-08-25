@@ -34,7 +34,7 @@ expected_keys[2] = "distributed_config"
 int hit_count = 0
 string key_report = ""
 int ki = 0
-while ki < len(expected_keys) {
+for ki < len(expected_keys) {
     bool found = agent_memory_has(phase2, expected_keys[ki])
     string hit_str = "miss"
     if found {

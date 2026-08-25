@@ -40,10 +40,10 @@ func agent_workspace_text_contains(string text, string pattern) bool {
         return false
     }
     int i = 0
-    while i <= hay_len - nee_len {
+    for i <= hay_len - nee_len {
         int j = 0
         bool match = true
-        while j < nee_len {
+        for j < nee_len {
             if haystack[i + j] != needle[j] {
                 match = false
                 break
@@ -65,7 +65,7 @@ func agent_workspace_starts_with(string text, string prefix) bool {
         return false
     }
     int i = 0
-    while i < pl {
+    for i < pl {
         if text[i] != prefix[i] {
             return false
         }
@@ -119,7 +119,7 @@ func agent_workspace_clip(string text, int max_chars) string {
     }
     string out = ""
     int i = 0
-    while i < max_chars {
+    for i < max_chars {
         out = out + string(text[i])
         i = i + 1
     }
@@ -141,7 +141,7 @@ func agent_workspace_count_lines(string text) int {
     }
     int count = 1
     int i = 0
-    while i < len(trimmed) {
+    for i < len(trimmed) {
         if string(trimmed[i]) == "\n" {
             count = count + 1
         }
@@ -251,7 +251,7 @@ func agent_workspace_read_file(string path, int start_line, int line_count, int 
     }
     string slice = ""
     int i = begin
-    while i < end {
+    for i < end {
         slice = slice + lines[i]
         if i + 1 < end {
             slice = slice + "\n"
@@ -275,7 +275,7 @@ func agent_workspace_write(string path, string content) agent_workspace_result {
     }
     int last_slash = -1
     int i = 0
-    while i < len(resolved) {
+    for i < len(resolved) {
         if string(resolved[i]) == "/" {
             last_slash = i
         }
@@ -284,7 +284,7 @@ func agent_workspace_write(string path, string content) agent_workspace_result {
     if last_slash > 0 {
         string parent = ""
         i = 0
-        while i < last_slash {
+        for i < last_slash {
             parent = parent + string(resolved[i])
             i = i + 1
         }
@@ -404,10 +404,10 @@ func agent_workspace_find(string text, string pattern, int start) int {
         return -1
     }
     int i = start
-    while i <= text_len - pat_len {
+    for i <= text_len - pat_len {
         int j = 0
         bool match = true
-        while j < pat_len {
+        for j < pat_len {
             if text[i + j] != pattern[j] {
                 match = false
                 break
@@ -430,9 +430,9 @@ func agent_workspace_replace_exact(string text, string old_text, string new_text
     int cursor = 0
     int replacements = 0
     int idx = agent_workspace_find(text, old_text, 0)
-    while idx >= 0 {
+    for idx >= 0 {
         int i = cursor
-        while i < idx {
+        for i < idx {
             out = out + string(text[i])
             i = i + 1
         }
@@ -448,7 +448,7 @@ func agent_workspace_replace_exact(string text, string old_text, string new_text
         return agent_workspace_patch_result_fail(agent_workspace_observation("patch", "no_progress", "reason=no_match"), "")
     }
     int tail = cursor
-    while tail < len(text) {
+    for tail < len(text) {
         out = out + string(text[tail])
         tail = tail + 1
     }
@@ -468,7 +468,7 @@ func agent_workspace_split_lines(string text) []string {
     []string result = []string{cap: count + 1}
     string line = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         string ch = string(text[i])
         if ch == "\n" {
             result.push(line)
@@ -485,7 +485,7 @@ func agent_workspace_split_lines(string text) []string {
 func agent_workspace_normalize_line(string line) string {
     string expanded = ""
     int i = 0
-    while i < len(line) {
+    for i < len(line) {
         string ch = string(line[i])
         if ch == "\t" {
             expanded = expanded + "    "
@@ -507,7 +507,7 @@ func agent_workspace_replace_fuzzy(string content, string old_text, string new_t
     }
     []string norm_ol = []string{cap: no + 1}
     int oi = 0
-    while oi < no {
+    for oi < no {
         norm_ol.push(agent_workspace_normalize_line(ol[oi]))
         oi = oi + 1
     }
@@ -515,11 +515,11 @@ func agent_workspace_replace_fuzzy(string content, string old_text, string new_t
     string out = ""
     int replacements = 0
     int ci = 0
-    while ci < nc {
+    for ci < nc {
         bool match = no > 0 && ci + no <= nc
         if match {
             int mi = 0
-            while mi < no {
+            for mi < no {
                 if agent_workspace_normalize_line(cl[ci + mi]) != norm_ol[mi] {
                     match = false
                     break
@@ -536,7 +536,7 @@ func agent_workspace_replace_fuzzy(string content, string old_text, string new_t
             ci = ci + no
             replacements = replacements + 1
             if !replace_all {
-                while ci < nc {
+                for ci < nc {
                     if ci < nc - 1 {
                         out = out + cl[ci] + "\n"
                     } else {

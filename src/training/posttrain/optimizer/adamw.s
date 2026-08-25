@@ -68,7 +68,7 @@ func create_adamw_optimizer(int num_params, optimizer_config config) adamw_optim
     optimizer.param_states_m = [][]float{}
     optimizer.param_states_v = [][]float{}
     int i = 0
-    while i < num_params {
+    for i < num_params {
         optimizer.param_states_m.push(fill_model_tensor(num_params, 0.0))
         optimizer.param_states_v.push(fill_model_tensor(num_params, 0.0))
         i = i + 1
@@ -79,7 +79,7 @@ func create_adamw_optimizer(int num_params, optimizer_config config) adamw_optim
 func clip_grad_norm([]float gradients, float max_norm) []float {
     float total_norm = 0.0
     int i = 0
-    while i < len(gradients) {
+    for i < len(gradients) {
         total_norm = total_norm + gradients[i] * gradients[i]
         i = i + 1
     }
@@ -88,13 +88,13 @@ func clip_grad_norm([]float gradients, float max_norm) []float {
     if total_norm > max_norm && total_norm > 0.0 {
         float scale = max_norm / total_norm
         i = 0
-        while i < len(gradients) {
+        for i < len(gradients) {
             clipped[i] = gradients[i] * scale
             i = i + 1
         }
     } else {
         i = 0
-        while i < len(gradients) {
+        for i < len(gradients) {
             clipped[i] = gradients[i]
             i = i + 1
         }
@@ -126,7 +126,7 @@ func adamw_step(adamw_optimizer opt, []float params, []float gradients, optimize
     }
     []float clipped_grads = clip_grad_norm(gradients, config.max_grad_norm)
     int i = 0
-    while i < len(params) && i < len(clipped_grads) {
+    for i < len(params) && i < len(clipped_grads) {
         float g = clipped_grads[i]
         float m_t = opt.beta1 * opt.param_states_m[0][i] + (1.0 - opt.beta1) * g
         float v_t = opt.beta2 * opt.param_states_v[0][i] + (1.0 - opt.beta2) * g * g
@@ -142,9 +142,9 @@ func adamw_step(adamw_optimizer opt, []float params, []float gradients, optimize
 
 func adamw_zero_grad(adamw_optimizer opt) adamw_optimizer {
     int i = 0
-    while i < len(opt.param_states_m) {
+    for i < len(opt.param_states_m) {
         int j = 0
-        while j < len(opt.param_states_m[i]) {
+        for j < len(opt.param_states_m[i]) {
             opt.param_states_m[i][j] = 0.0
             opt.param_states_v[i][j] = 0.0
             j = j + 1

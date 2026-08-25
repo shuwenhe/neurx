@@ -11,7 +11,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / i
         result = result + term
         i = i + 1
@@ -37,7 +37,7 @@ func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -48,7 +48,7 @@ func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -73,10 +73,10 @@ func shape3(int a, int b, int c) []int {
 func mat_vec([]float weight, int rows, int cols, []float vec) []float {
     []float out = []float{cap: rows}
     int r = 0
-    while r < rows {
+    for r < rows {
         float acc = 0.0
         int c = 0
-        while c < cols {
+        for c < cols {
             acc = acc + weight[r * cols + c] * vec[c]
             c = c + 1
         }
@@ -89,7 +89,7 @@ func mat_vec([]float weight, int rows, int cols, []float vec) []float {
 func vec_add([]float a, []float b, int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = a[i] + b[i]
         i = i + 1
     }
@@ -99,7 +99,7 @@ func vec_add([]float a, []float b, int n) []float {
 func vec_mul([]float a, []float b, int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = a[i] * b[i]
         i = i + 1
     }
@@ -109,7 +109,7 @@ func vec_mul([]float a, []float b, int n) []float {
 func zeros(int n) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = 0.0
         i = i + 1
     }
@@ -143,7 +143,7 @@ func rnn_cell_forward(rnn_cell_state cell, []float x, []float h_prev) []float {
     []float pre = vec_add(vec_add(gi, cell.bias_ih, hs), vec_add(gh, cell.bias_hh, hs), hs)
     []float out = []float{cap: hs}
     int i = 0
-    while i < hs {
+    for i < hs {
         out[i] = tanh_approx(pre[i])
         i = i + 1
     }
@@ -163,16 +163,16 @@ func rnn_forward(rnn_cell_state cell, []float input, int seq_len, []float h0) rn
     []float h = copy_float(h0)
     []float all_h = []float{cap: seq_len * hs}
     int t = 0
-    while t < seq_len {
+    for t < seq_len {
         []float x = []float{cap: is_}
         int j = 0
-        while j < is_ {
+        for j < is_ {
             x[j] = input[t * is_ + j]
             j = j + 1
         }
         h = rnn_cell_forward(cell, x, h)
         j = 0
-        while j < hs {
+        for j < hs {
             all_h[t * hs + j] = h[j]
             j = j + 1
         }
@@ -223,7 +223,7 @@ func lstm_cell_forward(lstm_cell_state cell, []float x, []float h_prev, []float 
     []float g_gate = []float{cap: hs}
     []float o_gate = []float{cap: hs}
     int j = 0
-    while j < hs {
+    for j < hs {
         i_gate[j] = sigmoid(pre[j])
         f_gate[j] = sigmoid(pre[hs + j])
         g_gate[j] = tanh_approx(pre[2 * hs + j])
@@ -233,7 +233,7 @@ func lstm_cell_forward(lstm_cell_state cell, []float x, []float h_prev, []float 
     []float c_next = []float{cap: hs}
     []float h_next = []float{cap: hs}
     j = 0
-    while j < hs {
+    for j < hs {
         c_next[j] = f_gate[j] * c_prev[j] + i_gate[j] * g_gate[j]
         h_next[j] = o_gate[j] * tanh_approx(c_next[j])
         j = j + 1
@@ -259,10 +259,10 @@ func lstm_forward(lstm_cell_state cell, []float input, int seq_len, []float h0, 
     []float c = copy_float(c0)
     []float all_h = []float{cap: seq_len * hs}
     int t = 0
-    while t < seq_len {
+    for t < seq_len {
         []float x = []float{cap: is_}
         int j = 0
-        while j < is_ {
+        for j < is_ {
             x[j] = input[t * is_ + j]
             j = j + 1
         }
@@ -270,7 +270,7 @@ func lstm_forward(lstm_cell_state cell, []float input, int seq_len, []float h0, 
         h = step.h_next
         c = step.c_next
         j = 0
-        while j < hs {
+        for j < hs {
             all_h[t * hs + j] = h[j]
             j = j + 1
         }
@@ -323,7 +323,7 @@ func gru_cell_forward(gru_cell_state cell, []float x, []float h_prev) []float {
     []float r = []float{cap: hs}
     []float z = []float{cap: hs}
     int j = 0
-    while j < hs {
+    for j < hs {
         r[j] = sigmoid(pre_rz[j])
         z[j] = sigmoid(pre_rz[hs + j])
         j = j + 1
@@ -332,14 +332,14 @@ func gru_cell_forward(gru_cell_state cell, []float x, []float h_prev) []float {
     []float gh_n = mat_vec(cell.weight_hh_n, hs, hs, h_prev)
     []float n = []float{cap: hs}
     j = 0
-    while j < hs {
+    for j < hs {
         float pre_n = gi_n[j] + cell.bias_ih_n[j] + r[j] * (gh_n[j] + cell.bias_hh_n[j])
         n[j] = tanh_approx(pre_n)
         j = j + 1
     }
     []float h_next = []float{cap: hs}
     j = 0
-    while j < hs {
+    for j < hs {
         h_next[j] = (1.0 - z[j]) * n[j] + z[j] * h_prev[j]
         j = j + 1
     }
@@ -359,16 +359,16 @@ func gru_forward(gru_cell_state cell, []float input, int seq_len, []float h0) gr
     []float h = copy_float(h0)
     []float all_h = []float{cap: seq_len * hs}
     int t = 0
-    while t < seq_len {
+    for t < seq_len {
         []float x = []float{cap: is_}
         int j = 0
-        while j < is_ {
+        for j < is_ {
             x[j] = input[t * is_ + j]
             j = j + 1
         }
         h = gru_cell_forward(cell, x, h)
         j = 0
-        while j < hs {
+        for j < hs {
             all_h[t * hs + j] = h[j]
             j = j + 1
         }

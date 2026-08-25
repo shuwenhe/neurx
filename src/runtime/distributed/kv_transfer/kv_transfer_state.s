@@ -45,7 +45,7 @@ struct kv_transfer_begin_result {
 func copy_kv_block_ids([]int block_ids) []int {
     []int copied = []int{cap: len(block_ids)}
     int i = 0
-    while i < len(block_ids) {
+    for i < len(block_ids) {
         copied[i] = block_ids[i]
         i = i + 1
     }

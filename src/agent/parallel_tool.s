@@ -47,7 +47,7 @@ func parallel_tool_batch_add(parallel_tool_batch batch, string tool_name, string
     int n = batch.count
     []parallel_tool_call next = []parallel_tool_call{cap: n + 1}
     int i = 0
-    while i < n {
+    for i < n {
         next[i] = batch.calls[i]
         i = i + 1
     }
@@ -122,7 +122,7 @@ func parallel_tool_dispatch(parallel_tool_batch batch, agent_tool_registry_state
     int ok_count = 0
     int fail_count = 0
     int i = 0
-    while i < n {
+    for i < n {
         parallel_tool_result r = parallel_tool_dispatch_one(batch.calls[i], tools)
         results[i] = r
         if r.ok {
@@ -143,7 +143,7 @@ func parallel_tool_dispatch(parallel_tool_batch batch, agent_tool_registry_state
 func parallel_tool_merge_observations(parallel_tool_batch_result batch_result) string {
     string merged = ""
     int i = 0
-    while i < batch_result.count {
+    for i < batch_result.count {
         parallel_tool_result r = batch_result.results[i]
         string status = "ok"
         if !r.ok {
@@ -163,7 +163,7 @@ func parallel_tool_merge_observations(parallel_tool_batch_result batch_result) s
 func parallel_tool_store_results(parallel_tool_batch_result batch_result, agent_memory_state memory) agent_memory_state {
     agent_memory_state m = memory
     int i = 0
-    while i < batch_result.count {
+    for i < batch_result.count {
         parallel_tool_result r = batch_result.results[i]
         m = agent_memory_write_short(m, "tool_result_" + r.id, r.observation)
         i = i + 1

@@ -22,7 +22,7 @@ func new_init_config(string method) init_config {
 
 func uniform_([]float tensor, float a, float b) []float {
     int i = 0
-    while i < len(tensor) {
+    for i < len(tensor) {
         float u = uniform_random()
         tensor[i] = a + u * (b - a)
         i = i + 1
@@ -32,7 +32,7 @@ func uniform_([]float tensor, float a, float b) []float {
 
 func normal_([]float tensor, float mean, float std) []float {
     int i = 0
-    while i < len(tensor) {
+    for i < len(tensor) {
         float z = box_muller_random()
         tensor[i] = mean + z * std
         i = i + 1
@@ -42,7 +42,7 @@ func normal_([]float tensor, float mean, float std) []float {
 
 func constant_([]float tensor, float val) []float {
     int i = 0
-    while i < len(tensor) {
+    for i < len(tensor) {
         tensor[i] = val
         i = i + 1
     }
@@ -59,9 +59,9 @@ func zeros_([]float tensor) []float {
 
 func eye_([]float tensor, int size) []float {
     int i = 0
-    while i < size {
+    for i < size {
         int j = 0
-        while j < size {
+        for j < size {
             tensor[i * size + j] = 0.0
             if i == j {
                 tensor[i * size + j] = 1.0
@@ -102,22 +102,22 @@ func orthogonal_([]float tensor, int rows, int cols, float gain) []float {
     }
     []float gaussian = []float{cap: rows * cols}
     int i = 0
-    while i < rows * cols {
+    for i < rows * cols {
         gaussian[i] = box_muller_random()
         i = i + 1
     }
     int k = 0
-    while k < cols {
+    for k < cols {
         float norm = 0.0
         int j = 0
-        while j < rows {
+        for j < rows {
             norm = norm + gaussian[j * cols + k] * gaussian[j * cols + k]
             j = j + 1
         }
         norm = sqrt_approx(norm)
         if norm > 0.0000001 {
             int j = 0
-            while j < rows {
+            for j < rows {
                 gaussian[j * cols + k] = gaussian[j * cols + k] / norm
                 j = j + 1
             }
@@ -125,7 +125,7 @@ func orthogonal_([]float tensor, int rows, int cols, float gain) []float {
         k = k + 1
     }
     i = 0
-    while i < len(tensor) {
+    for i < len(tensor) {
         if i < len(gaussian) {
             tensor[i] = gain * gaussian[i]
         }
@@ -136,13 +136,13 @@ func orthogonal_([]float tensor, int rows, int cols, float gain) []float {
 
 func dirac_([]float tensor, int size) []float {
     int i = 0
-    while i < len(tensor) {
+    for i < len(tensor) {
         tensor[i] = 0.0
         i = i + 1
     }
     int center = size / 2
     int k = 0
-    while k < size {
+    for k < size {
         tensor[center * size + k] = 1.0
         k = k + 1
     }
@@ -152,7 +152,7 @@ func dirac_([]float tensor, int size) []float {
 func sparse_([]float tensor, int size, float sparsity) []float {
     int count = 0
     int i = 0
-    while i < len(tensor) {
+    for i < len(tensor) {
         float u = uniform_random()
         if u < sparsity {
             tensor[i] = 0.0
@@ -165,7 +165,7 @@ func sparse_([]float tensor, int size, float sparsity) []float {
     if count > 0 {
         float std = sqrt_approx(1.0 / float(count))
         i = 0
-        while i < len(tensor) {
+        for i < len(tensor) {
             if tensor[i] != 0.0 {
                 tensor[i] = tensor[i] * std
             }
@@ -188,7 +188,7 @@ func sqrt_approx(float x) float {
         y = x
     }
     int i = 0
-    while i < 32 {
+    for i < 32 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -216,7 +216,7 @@ func log_approx(float x) float {
     float result = 0.0
     float term = y
     int i = 0
-    while i < 20 {
+    for i < 20 {
         result = result + term / float(2 * i + 1)
         term = term * y_sq
         i = i + 1

@@ -145,7 +145,7 @@ func start_neurx_training(
     print("  Total steps: " + string(tcfg.total_training_steps))
     print("  Target throughput: ~200K tokens/sec (estimated)")
     print("")
-    while orch.current_step < tcfg.total_training_steps {
+    for orch.current_step < tcfg.total_training_steps {
         training_batch batch = get_next_batch(loader)
         float step_loss = training_step(ref orch,  batch)
         float current_lr = current_learning_rate(orch)
@@ -239,7 +239,7 @@ func generate_progress_bar(int current, int total) string {
     if filled > width { filled = width }
     string bar = "["
     int i = 0
-    while i < width {
+    for i < width {
         if i < filled { bar = bar + "=" }
         else { bar = bar + "-" }
         i = i + 1
@@ -262,7 +262,7 @@ func print_training_summary(orchestrator_state orch, monitoring_manager mgr) {
 }
 
 func pad_right(string s, int total_width) string {
-    while len(s) < total_width { s = s + " " }
+    for len(s) < total_width { s = s + " " }
     return s
 }
 

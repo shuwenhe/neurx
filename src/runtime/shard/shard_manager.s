@@ -531,7 +531,7 @@ func save_manifest(dataset_manifest manifest, string path) void:
 func validate_all_shards(dataset_manifest manifest) void:
     int i = 0
     int validated = 0
-    while i < len(manifest.shards) {
+    for i < len(manifest.shards) {
         shard_info shard = manifest.shards[i]
         if !file_exists(shard.filename) {
             print("WARNING: missing shard file: ", shard.filename)
@@ -561,7 +561,7 @@ func get_file_size(string path) int64 {
     string size_text = trim(runtime_run_command_output("wc -c < " + runtime_shell_escape(path)))
     int64 size = 0
     int i = 0
-    while i < len(size_text) {
+    for i < len(size_text) {
         string ch = string(size_text[i])
         if ch >= "0" && ch <= "9" {
             size = size * 10 + int64(int(ch) - 48)
@@ -596,7 +596,7 @@ func read_file_range(string path, int64 offset, int64 length) []byte {
     []byte out = []byte{cap: end - start}
     int i = 0
     int pos = start
-    while pos < end {
+    for pos < end {
         out[i] = int(string(content[pos]))
         i = i + 1
         pos = pos + 1
@@ -607,7 +607,7 @@ func read_file_range(string path, int64 offset, int64 length) []byte {
 func write_all_bytes(string path, []byte data) bool {
     string content = ""
     int i = 0
-    while i < len(data) {
+    for i < len(data) {
         content = content + string(data[i])
         i = i + 1
     }
@@ -638,7 +638,7 @@ func compress_data([]byte data, int level) []return byte data
 func compute_sha256([]byte data) string {
     string payload = ""
     int i = 0
-    while i < len(data) {
+    for i < len(data) {
         payload = payload + string(data[i])
         i = i + 1
     }
@@ -652,7 +652,7 @@ func compute_sha256([]byte data) string {
 
 func format_int_with_leading_zeros(int val, int width) string {
     string s = string(val)
-    while len(s) < width {
+    for len(s) < width {
         s = "0" + s
     }
     s
@@ -662,7 +662,7 @@ func get_current_time_ms() int {
     string out = trim(runtime_run_command_output("date +%s%3N"))
     int current = 0
     int i = 0
-    while i < len(out) {
+    for i < len(out) {
         string ch = string(out[i])
         if ch >= "0" && ch <= "9" {
             current = current * 10 + (int(ch) - 48)
@@ -682,7 +682,7 @@ func bool_to_json(bool value) string {
 func json_escape(string value) string {
     string out = ""
     int i = 0
-    while i < len(value) {
+    for i < len(value) {
         string ch = string(value[i])
         if ch == "\\" {
             out = out + "\\\\"
@@ -722,7 +722,7 @@ func shard_info_to_json(shard_info shard) string {
     out = out + "\"avg_read_time_ms\":" + string(shard.avg_read_time_ms) + ","
     out = out + "\"assigned_ranks\":["
     int i = 0
-    while i < len(shard.assigned_ranks) {
+    for i < len(shard.assigned_ranks) {
         if i > 0 {
             out = out + ","
         }
@@ -771,7 +771,7 @@ func manifest_to_json(dataset_manifest manifest) string {
     out = out + "\"parent_dataset\":\"" + json_escape(manifest.parent_dataset) + "\","
     out = out + "\"shards\":["
     int i = 0
-    while i < len(manifest.shards) {
+    for i < len(manifest.shards) {
         if i > 0 {
             out = out + ","
         }

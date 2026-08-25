@@ -8,7 +8,7 @@ func relu(tensor x) tensor {
     int n = len(x.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float val = x.data[i]
         if val > 0.0 {
             out[i] = val
@@ -24,7 +24,7 @@ func relu_backward(tensor x, tensor grad_output) tensor {
     int n = len(x.data)
     []float grad_input = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         if x.data[i] > 0.0 {
             grad_input[i] = grad_output.data[i]
         } else {
@@ -40,7 +40,7 @@ func softmax_last_dim(tensor logits) tensor {
     []float out = []float{cap: n}
     float max_val = logits.data[0]
     int i = 0
-    while i < n {
+    for i < n {
         if logits.data[i] > max_val {
             max_val = logits.data[i]
         }
@@ -48,14 +48,14 @@ func softmax_last_dim(tensor logits) tensor {
     }
     float sum_exp = 0.0
     i = 0
-    while i < n {
+    for i < n {
         float exp_val = exp_approx(logits.data[i] - max_val)
         out[i] = exp_val
         sum_exp = sum_exp + exp_val
         i = i + 1
     }
     i = 0
-    while i < n {
+    for i < n {
         out[i] = out[i] / sum_exp
         i = i + 1
     }
@@ -67,7 +67,7 @@ func cross_entropy_loss(tensor logits, tensor targets) float {
     tensor probs = softmax_last_dim(logits)
     float loss = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float prob = probs.data[i]
         float target = targets.data[i]
         if prob < 0.0000001 {
@@ -86,12 +86,12 @@ func matmul(tensor A, tensor B) tensor {
     int n = B.shape[1]
     []float c_data = []float{cap: m * n}
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = 0.0
             int p = 0
-            while p < k {
+            for p < k {
                 int a_idx = i * k + p
                 int b_idx = p * n + j
                 sum = sum + A.data[a_idx] * B.data[b_idx]
@@ -116,9 +116,9 @@ func transpose(tensor A, int dim1, int dim2) tensor {
     int cols = A.shape[1]
     []float trans_data = []float{cap: rows * cols}
     int i = 0
-    while i < rows {
+    for i < rows {
         int j = 0
-        while j < cols {
+        for j < cols {
             trans_data[j * rows + i] = A.data[i * cols + j]
             j = j + 1
         }
@@ -135,10 +135,10 @@ func sum_first_dim(tensor x, bool keepdim) tensor {
     int cols = x.shape[1]
     []float out = []float{cap: cols}
     int j = 0
-    while j < cols {
+    for j < cols {
         float sum = 0.0
         int i = 0
-        while i < rows {
+        for i < rows {
             sum = sum + x.data[i * cols + j]
             i = i + 1
         }
@@ -172,7 +172,7 @@ func adamw_update(adamw_state state) tensor {
     int n = len(state.params.data)
     []float new_params = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float g = state.grad.data[i]
         float m = state.m.data[i] * beta1 + g * (1.0 - beta1)
         float v = state.v.data[i] * beta2 + g * g * (1.0 - beta2)
@@ -192,7 +192,7 @@ func grad_logits(tensor logits, tensor targets) tensor {
     int n = len(probs.data)
     []float grad = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         grad[i] = probs.data[i] - targets.data[i]
         i = i + 1
     }
@@ -209,7 +209,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / (i as float)
         result = result + term
         i = i + 1
@@ -226,7 +226,7 @@ func log_approx(float x) float {
     float xx2 = xx * xx
     float xx_power = xx
     int i = 0
-    while i < 10 {
+    for i < 10 {
         result = result + xx_power / ((2 * i + 1) as float)
         xx_power = xx_power * xx2
         i = i + 1
@@ -240,7 +240,7 @@ func sqrt_approx(float x) float {
     }
     float guess = x
     int i = 0
-    while i < 5 {
+    for i < 5 {
         guess = (guess + x / guess) * 0.5
         i = i + 1
     }
@@ -265,7 +265,7 @@ func int_to_str(int n, int fallback) string {
         result = "-"
         num = 0 - num
     }
-    while num > 0 {
+    for num > 0 {
         int digit = num % 10
         result = string_char(48 + digit) + result
         num = num / 10
@@ -286,7 +286,7 @@ func fmt_float(float f, int precision) string {
         frac = 0.0 - frac
     }
     int i = 0
-    while i < precision {
+    for i < precision {
         frac = frac * 10.0
         int digit = frac as int
         result = result + string_char(48 + digit)

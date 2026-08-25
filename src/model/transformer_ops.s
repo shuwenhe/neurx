@@ -11,12 +11,12 @@ func embedding_lookup(
 ) []float {
     []float output = []float{cap: batch_size * seq_len * hidden_size}
     int idx = 0
-    while idx < batch_size * seq_len {
+    for idx < batch_size * seq_len {
         int token_id = token_ids[idx]
         if token_id < 0 { token_id = 0 }
         if token_id >= vocab_size { token_id = vocab_size - 1 }
         int h = 0
-        while h < hidden_size {
+        for h < hidden_size {
             int embed_offset = token_id * hidden_size + h
             int out_offset = idx * hidden_size + h
             output[out_offset] = embed_weight[embed_offset]
@@ -37,20 +37,20 @@ func rms_norm(
 ) []float {
     []float output = []float{cap: batch_size * seq_len * hidden_size}
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int offset = (b * seq_len + s) * hidden_size
             float sum_sq = 0.0
             int h = 0
-            while h < hidden_size {
+            for h < hidden_size {
                 float val = x[offset + h]
                 sum_sq = sum_sq + val * val
                 h = h + 1
             }
             float rms = sqrt_approx(sum_sq / (hidden_size as float) + eps)
             h = 0
-            while h < hidden_size {
+            for h < hidden_size {
                 output[offset + h] = (x[offset + h] / rms) * weight[h]
                 h = h + 1
             }
@@ -65,7 +65,7 @@ func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float guess = x / 2.0
     int i = 0
-    while i < 5 {
+    for i < 5 {
         guess = (guess + x / guess) / 2.0
         i = i + 1
     }
@@ -81,12 +81,12 @@ func matmul(
 ) []float {
     []float C = []float{cap: M * N}
     int m = 0
-    while m < M {
+    for m < M {
         int n = 0
-        while n < N {
+        for n < N {
             float sum = 0.0
             int k = 0
-            while k < K {
+            for k < K {
                 sum = sum + A[m * K + k] * B[k * N + n]
                 k = k + 1
             }
@@ -106,11 +106,11 @@ func softmax(
     []float output = []float{cap: total_size}
     int num_softmax = total_size / last_dim
     int i = 0
-    while i < num_softmax {
+    for i < num_softmax {
         int offset = i * last_dim
         float max_val = x[offset]
         int j = 1
-        while j < last_dim {
+        for j < last_dim {
             if x[offset + j] > max_val {
                 max_val = x[offset + j]
             }
@@ -118,14 +118,14 @@ func softmax(
         }
         float sum = 0.0
         j = 0
-        while j < last_dim {
+        for j < last_dim {
             float exp_val = exp_approx(x[offset + j] - max_val)
             output[offset + j] = exp_val
             sum = sum + exp_val
             j = j + 1
         }
         j = 0
-        while j < last_dim {
+        for j < last_dim {
             output[offset + j] = output[offset + j] / sum
             j = j + 1
         }
@@ -140,7 +140,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / (i as float)
         result = result + term
         i = i + 1
@@ -151,7 +151,7 @@ func exp_approx(float x) float {
 func silu([]float x) []float {
     []float output = []float{cap: len(x)}
     int i = 0
-    while i < len(x) {
+    for i < len(x) {
         float val = x[i]
         output[i] = val / (1.0 + exp_approx(0.0 - val))
         i = i + 1
@@ -164,7 +164,7 @@ func add_arrays([]float a, []float b) []float {
     if len(b) < size { size = len(b) }
     []float output = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         output[i] = a[i] + b[i]
         i = i + 1
     }
@@ -176,7 +176,7 @@ func mul_arrays([]float a, []float b) []float {
     if len(b) < size { size = len(b) }
     []float output = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         output[i] = a[i] * b[i]
         i = i + 1
     }
@@ -202,12 +202,12 @@ func simplified_attention(
     float scale = 1.0 / sqrt_approx(head_dim as float)
     []float attn_scores = []float{cap: total_tokens * total_tokens}
     int i = 0
-    while i < total_tokens {
+    for i < total_tokens {
         int j = 0
-        while j < total_tokens {
+        for j < total_tokens {
             float score = 0.0
             int h = 0
-            while h < head_dim {
+            for h < head_dim {
                 score = score + q[i * hidden_size + h] * k[j * hidden_size + h]
                 h = h + 1
             }
@@ -219,12 +219,12 @@ func simplified_attention(
     []float attn_weights = softmax(attn_scores, total_tokens * total_tokens, total_tokens)
     []float context = []float{cap: total_tokens * hidden_size}
     i = 0
-    while i < total_tokens {
+    for i < total_tokens {
         int h = 0
-        while h < head_dim {
+        for h < head_dim {
             float sum = 0.0
             int j = 0
-            while j < total_tokens {
+            for j < total_tokens {
                 sum = sum + attn_weights[i * total_tokens + j] * v[j * hidden_size + h]
                 j = j + 1
             }

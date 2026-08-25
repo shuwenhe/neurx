@@ -73,9 +73,9 @@ func optimizer_set_lr(optimizer_base opt, int group_index, float lr) optimizer_b
 
 func optimizer_zero_grad(optimizer_base opt) optimizer_base {
     int i = 0
-    while i < len(opt.param_states) {
+    for i < len(opt.param_states) {
         int j = 0
-        while j < len(opt.param_states[i]) {
+        for j < len(opt.param_states[i]) {
             opt.param_states[i][j] = 0.0
             j = j + 1
         }

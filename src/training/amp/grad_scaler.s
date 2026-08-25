@@ -21,7 +21,7 @@ func new_grad_scaler(float init_scale, float growth_factor, float backoff_factor
 func grad_scaler_scale(grad_scaler_state scaler, []float grads) []float {
     []float scaled = []float{cap: len(grads)}
     int i = 0
-    while i < len(grads) {
+    for i < len(grads) {
         scaled[i] = grads[i] * scaler.scale
         i = i + 1
     }
@@ -31,7 +31,7 @@ func grad_scaler_scale(grad_scaler_state scaler, []float grads) []float {
 func grad_scaler_unscale(grad_scaler_state scaler, []float grads) []float {
     []float unscaled = []float{cap: len(grads)}
     int i = 0
-    while i < len(grads) {
+    for i < len(grads) {
         unscaled[i] = grads[i] / (scaler.scale + 1e-10)
         i = i + 1
     }
@@ -40,7 +40,7 @@ func grad_scaler_unscale(grad_scaler_state scaler, []float grads) []float {
 
 func grad_scaler_has_overflow([]float grads) bool {
     int i = 0
-    while i < len(grads) {
+    for i < len(grads) {
         if grads[i] != grads[i] {
             return true
         }

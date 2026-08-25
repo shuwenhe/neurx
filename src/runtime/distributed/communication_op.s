@@ -17,7 +17,7 @@ struct collective_result {
 func copy_tensor_floats([]float values) []float {
     []float copied = []float{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         copied[i] = values[i]
         i = i + 1
     }
@@ -27,7 +27,7 @@ func copy_tensor_floats([]float values) []float {
 func copy_tensor_shape([]int shape) []int {
     []int copied = []int{cap: len(shape)}
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         copied[i] = shape[i]
         i = i + 1
     }
@@ -40,7 +40,7 @@ func tensor_shape_numel([]int shape) int {
     }
     int count = 1
     int i = 0
-    while i < len(shape) {
+    for i < len(shape) {
         if shape[i] < 0 {
             return 0
         }
@@ -77,7 +77,7 @@ func normalize_tensor_dim(int dim, int dimensions) int {
 func tensor_outer_size([]int shape, int dim) int {
     int size = 1
     int i = 0
-    while i < dim {
+    for i < dim {
         size = size * shape[i]
         i = i + 1
     }
@@ -87,7 +87,7 @@ func tensor_outer_size([]int shape, int dim) int {
 func tensor_inner_size([]int shape, int dim) int {
     int size = 1
     int i = dim + 1
-    while i < len(shape) {
+    for i < len(shape) {
         size = size * shape[i]
         i = i + 1
     }
@@ -122,7 +122,7 @@ func tensor_model_parallel_all_reduce(group_coordinator group, distributed_tenso
     }
     []float output = copy_tensor_floats(input.data)
     int i = 0
-    while i < len(output) {
+    for i < len(output) {
         output[i] = output[i] * float(group.world_size)
         i = i + 1
     }
@@ -144,13 +144,13 @@ func tensor_model_parallel_all_gather(group_coordinator group, distributed_tenso
     output_shape[normalized_dim] = axis * group.world_size
     []float output = []float{cap: len(input.data) * group.world_size}
     int outer_index = 0
-    while outer_index < outer {
+    for outer_index < outer {
         int member = 0
-        while member < group.world_size {
+        for member < group.world_size {
             int axis_index = 0
-            while axis_index < axis {
+            for axis_index < axis {
                 int inner_index = 0
-                while inner_index < inner {
+                for inner_index < inner {
                     int input_index = (outer_index * axis + axis_index) * inner + inner_index
                     int output_axis = member * axis + axis_index
                     int output_index = (outer_index * axis * group.world_size + output_axis) * inner + inner_index
@@ -185,11 +185,11 @@ func tensor_model_parallel_reduce_scatter(group_coordinator group, distributed_t
     output_shape[normalized_dim] = local_axis
     []float output = []float{cap: len(input.data) / group.world_size}
     int outer_index = 0
-    while outer_index < outer {
+    for outer_index < outer {
         int local_axis_index = 0
-        while local_axis_index < local_axis {
+        for local_axis_index < local_axis {
             int inner_index = 0
-            while inner_index < inner {
+            for inner_index < inner {
                 int input_axis = group.rank_in_group * local_axis + local_axis_index
                 int input_index = (outer_index * axis + input_axis) * inner + inner_index
                 int output_index = (outer_index * local_axis + local_axis_index) * inner + inner_index
@@ -239,9 +239,9 @@ func all_to_all_single(group_coordinator group, distributed_tensor input) collec
     int chunk = len(input.data) / group.world_size
     []float output = []float{cap: len(input.data)}
     int source = 0
-    while source < group.world_size {
+    for source < group.world_size {
         int i = 0
-        while i < chunk {
+        for i < chunk {
             output[source * chunk + i] = input.data[group.rank_in_group * chunk + i]
             i = i + 1
         }

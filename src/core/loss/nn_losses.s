@@ -5,7 +5,7 @@ func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -22,7 +22,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / i
         result = result + term
         i = i + 1
@@ -50,7 +50,7 @@ func cross_entropy_loss(tensor logits, tensor target) tensor {
     int classes = logits.shape[len(logits.shape) - 1]
     float loss = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         int cls = target.data[i]
         if cls < 0 {
             cls = 0
@@ -83,7 +83,7 @@ func nll_loss(tensor log_probs, tensor target) tensor {
     int classes = log_probs.shape[len(log_probs.shape) - 1]
     float loss = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         int cls = target.data[i]
         if cls < 0 {
             cls = 0
@@ -103,7 +103,7 @@ func smooth_l1_loss(tensor input, tensor target, float beta) tensor {
     int n = len(abs_diff.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float d = abs_diff.data[i]
         if d < beta {
             out[i] = 0.5 * d * d / beta
@@ -138,7 +138,7 @@ func kl_div_loss(tensor input_log_probs, tensor target, bool log_target) tensor 
     }
     float loss = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float target_prob = target.data[i]
         float target_log = 0.0
         if log_target {
@@ -170,7 +170,7 @@ func margin_ranking_loss(tensor input1, tensor input2, tensor target, float marg
     }
     float loss = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         float v = 0.0 - target.data[i] * (input1.data[i] - input2.data[i]) + margin
         if v > 0.0 {
             loss = loss + v
@@ -201,7 +201,7 @@ func cosine_embedding_loss(tensor input1, tensor input2, tensor target, float ma
     }
     float loss = 0.0
     int i = 0
-    while i < n {
+    for i < n {
         if target.data[i] >= 0.0 {
             loss = loss + (1.0 - cos.data[i])
         } else {
@@ -236,7 +236,7 @@ func pairwise_distance(tensor x, tensor y, int p, float eps) tensor {
     }
     tensor powered = diff
     int i = 1
-    while i < p {
+    for i < p {
         powered = neurx.tensor.mul(powered, diff)
         i = i + 1
     }

@@ -10,7 +10,7 @@ func int_to_str(int n) string {
         value = 0 - value
     }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         string d = ""
         if digit == 0 { d = "0" }
@@ -35,7 +35,7 @@ func float_to_str(float value, int decimals) string {
     bool neg = current < 0.0
     if neg { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -43,10 +43,10 @@ func float_to_str(float value, int decimals) string {
     if neg { out = "-" }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }
@@ -97,7 +97,7 @@ func load_and_merge() merged_model {
     println("")
     []float base_weights
     int i1 = 0
-    while i1 < input_dim * output_dim {
+    for i1 < input_dim * output_dim {
         base_weights[i1] = 0.1
         i1 = i1 + 1
     }
@@ -108,12 +108,12 @@ func load_and_merge() merged_model {
     []float lora_a
     []float lora_b
     int i2 = 0
-    while i2 < input_dim * lora_rank {
+    for i2 < input_dim * lora_rank {
         lora_a[i2] = 0.01
         i2 = i2 + 1
     }
     int i3 = 0
-    while i3 < lora_rank * output_dim {
+    for i3 < lora_rank * output_dim {
         lora_b[i3] = 0.005
         i3 = i3 + 1
     }

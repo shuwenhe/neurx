@@ -57,7 +57,7 @@ func parse_int_string(string s) int {
         negative = true
         i = i + 1
     }
-    while i < len(s) {
+    for i < len(s) {
         int ch = __host_byte_at(s, i)
         if ch >= 48 && ch <= 57 {
             result = result * 10 + (ch - 48)
@@ -80,7 +80,7 @@ func parse_float_string(string s) float {
         negative = true
         i = i + 1
     }
-    while i < len(s) {
+    for i < len(s) {
         int ch = __host_byte_at(s, i)
         if ch == 46 {
             after_decimal = true
@@ -157,7 +157,7 @@ func int_to_str(int x) string {
     if x < 0 { return "-" + int_to_str(0 - x) }
     string result = ""
     int num = x
-    while num > 0 {
+    for num > 0 {
         int digit = num - ((num / 10) * 10)
         if digit == 0 { result = "0" + result }
         if digit == 1 { result = "1" + result }
@@ -181,7 +181,7 @@ func float_to_str(float x, int decimals) string {
         current = 0.0 - current
     }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -190,10 +190,10 @@ func float_to_str(float x, int decimals) string {
         result = result + "."
     }
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 && digit < 9 {
+        for current >= 1.0 && digit < 9 {
             current = current - 1.0
             digit = digit + 1
         }
@@ -210,7 +210,7 @@ func scaled_ratio_to_str(int scaled) string {
     int whole = scaled / 10000
     int fraction = scaled - whole * 10000
     string digits = int_to_str(fraction)
-    while len(digits) < 4 {
+    for len(digits) < 4 {
         digits = "0" + digits
     }
     int_to_str(whole) + "." + digits
@@ -224,10 +224,10 @@ func contains_text(string text, string needle) bool {
         return false
     }
     int i = 0
-    while i + len(needle) <= len(text) {
+    for i + len(needle) <= len(text) {
         int j = 0
         bool matches = true
-        while j < len(needle) {
+        for j < len(needle) {
             if __host_byte_at(text, i + j) != __host_byte_at(needle, j) {
                 matches = false
                 break
@@ -247,7 +247,7 @@ func safe_command_path(string value) bool {
         return false
     }
     int i = 0
-    while i < len(value) {
+    for i < len(value) {
         int ch = __host_byte_at(value, i)
         bool allowed = (ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 90) ||
             (ch >= 97 && ch <= 122) || ch == 47 || ch == 46 || ch == 95 || ch == 45
@@ -262,7 +262,7 @@ func safe_command_path(string value) bool {
 func escape_json_string(string s) string {
     string out = "\""
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         int ch = s[i]
         if ch == 34 {
             out = out + "\\\""
@@ -289,7 +289,7 @@ func int_to_hex(int x) string {
     string hex = "0123456789abcdef"
     string result = ""
     int current = x
-    while current > 0 {
+    for current > 0 {
         int digit = current - ((current / 16) * 16)
         result = string(hex[digit]) + result
         current = current / 16

@@ -210,7 +210,7 @@ func custom_model_config(int n_embd, int n_layer, int n_head, int block_size, st
 func alloc_tensor(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }
@@ -220,7 +220,7 @@ func alloc_tensor(int size, float init_val) []float {
 func copy_tensor([]float src) []float {
     []float out = gpt_alloc(len(src), 0.0)
     int i = 0
-    while i < len(src) {
+    for i < len(src) {
         out[i] = src[i]
         i = i + 1
     }
@@ -230,7 +230,7 @@ func copy_tensor([]float src) []float {
 func add_tensors([]float a, []float b) []float {
     []float out = gpt_copy(a)
     int i = 0
-    while i < len(out) {
+    for i < len(out) {
         out[i] = out[i] + b[i]
         i = i + 1
     }
@@ -240,12 +240,12 @@ func add_tensors([]float a, []float b) []float {
 func matmul_transpose[]float a, []float b, int m, int k, int n) []float {
     []float result = gpt_alloc(m * n, 0.0)
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = 0.0
             int l = 0
-            while l < k {
+            for l < k {
                 sum = sum + a[i * k + l] * b[j * k + l]
                 l = l + 1
             }
@@ -260,12 +260,12 @@ func matmul_transpose[]float a, []float b, int m, int k, int n) []float {
 func matmul[]float a, []float b, int m, int k, int n) []float {
     []float result = gpt_alloc(m * n, 0.0)
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = 0.0
             int l = 0
-            while l < k {
+            for l < k {
                 sum = sum + a[i * k + l] * b[l * n + j]
                 l = l + 1
             }
@@ -287,7 +287,7 @@ func tensor_expfloat x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 14 {
+    for i <= 14 {
         term = term * x / (i * 1.0)
         result = result + term
         i = i + 1
@@ -302,11 +302,11 @@ func tensor_logfloat x) float {
     float y = x
     float adj = 0.0
     float ln2 = 0.6931471805599453
-    while y >= 2.0 {
+    for y >= 2.0 {
         y = y * 0.5
         adj = adj + ln2
     }
-    while y < 1.0 {
+    for y < 1.0 {
         y = y * 2.0
         adj = adj - ln2
     }
@@ -314,7 +314,7 @@ func tensor_logfloat x) float {
     float s = z
     float term = z
     int i = 2
-    while i <= 20 {
+    for i <= 20 {
         term = term * (-z)
         s = s + term / (i * 1.0)
         i = i + 1
@@ -328,7 +328,7 @@ func tensor_sqrtfloat x) float {
     }
     float y = x
     int i = 0
-    while i < 15 {
+    for i < 15 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -339,17 +339,17 @@ func tensor_cosfloat x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
     float v = x
-    while v > pi {
+    for v > pi {
         v = v - two_pi
     }
-    while v < -pi {
+    for v < -pi {
         v = v + two_pi
     }
     float x2 = v * v
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = -term * x2 / ((2 * i - 1) * (2 * i) * 1.0)
         result = result + term
         i = i + 1
@@ -361,17 +361,17 @@ func tensor_sinfloat x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
     float v = x
-    while v > pi {
+    for v > pi {
         v = v - two_pi
     }
-    while v < -pi {
+    for v < -pi {
         v = v + two_pi
     }
     float x2 = v * v
     float term = v
     float result = v
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = -term * x2 / ((2 * i) * (2 * i + 1) * 1.0)
         result = result + term
         i = i + 1
@@ -397,7 +397,7 @@ func softmax_row[]float scores, int size) []float {
     []float out = gpt_alloc(size, 0.0)
     float max_val = scores[0]
     int i = 1
-    while i < size {
+    for i < size {
         if scores[i] > max_val {
             max_val = scores[i]
         }
@@ -405,7 +405,7 @@ func softmax_row[]float scores, int size) []float {
     }
     float sum_exp = 0.0
     i = 0
-    while i < size {
+    for i < size {
         float e = gpt_exp(scores[i] - max_val)
         out[i] = e
         sum_exp = sum_exp + e
@@ -413,7 +413,7 @@ func softmax_row[]float scores, int size) []float {
     }
     if sum_exp > 0.0 {
         i = 0
-        while i < size {
+        for i < size {
             out[i] = out[i] / sum_exp
             i = i + 1
         }
@@ -424,12 +424,12 @@ func softmax_row[]float scores, int size) []float {
 func matmul_kv[]float a, []float b, int m, int k, int n, int full_n) []float {
     []float result = gpt_alloc(m * n, 0.0)
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = 0.0
             int l = 0
-            while l < k {
+            for l < k {
                 sum = sum + a[i * k + l] * b[l * full_n + j]
                 l = l + 1
             }
@@ -444,7 +444,7 @@ func matmul_kv[]float a, []float b, int m, int k, int n, int full_n) []float {
 func init_weightsint size, float scale) []float {
     []float w = gpt_alloc(size, 0.0)
     int i = 0
-    while i < size {
+    for i < size {
         float t = (i * 1.0 + 1.0) / ((size + 1) * 1.0)
         float val = gpt_exp(-t) * scale * (1.0 - 2.0 * t)
         w[i] = val
@@ -493,7 +493,7 @@ func new_language_modelmodel_config cfg) language_model {
     []float wpe = gpt_init_weights(cfg.block_size * hidden_dim, wpe_scale)
     []transformer_layer layers = []transformer_layer{cap: cfg.n_layer}
     int i = 0
-    while i < cfg.n_layer {
+    for i < cfg.n_layer {
         layers[i] = new_transformer_layer(cfg)
         i = i + 1
     }
@@ -544,9 +544,9 @@ func embed_tokens(
     int total = batch_size * seq_len
     []float out = gpt_alloc(total * n_embd, 0.0)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int idx = b * seq_len + s
             int tok_id = token_ids[idx]
             if tok_id < 0 {
@@ -559,7 +559,7 @@ func embed_tokens(
             int src_pos = s * n_embd
             int dst = idx * n_embd
             int d = 0
-            while d < n_embd {
+            for d < n_embd {
                 float tok_emb = wte[src_tok + d]
                 float pos_emb = 0.0
                 if src_pos + d < len(wpe) {
@@ -590,22 +590,22 @@ func causal_sdpa
     float scale = 1.0 / gpt_sqrt(head_dim * 1.0)
     float NEG_INF = -1000000.0
     int h = 0
-    while h < num_heads {
+    for h < num_heads {
         int hk = h
         if num_kv_heads > 0 {
             hk = h - (h / num_kv_heads) * num_kv_heads
         }
         int i = 0
-        while i < total {
+        for i < total {
             []float scores = gpt_alloc(total, 0.0)
             int j = 0
-            while j < total {
+            for j < total {
                 if j > i {
                     scores[j] = NEG_INF
                 } else {
                     float score = 0.0
                     int d = 0
-                    while d < head_dim {
+                    for d < head_dim {
                         float q_val = query[i * (num_heads * head_dim) + h * head_dim + d]
                         float k_val = key[j * (num_kv_heads * head_dim) + hk * head_dim + d]
                         score = score + q_val * k_val
@@ -617,10 +617,10 @@ func causal_sdpa
             }
             []float weights = gpt_softmax_row(scores, total)
             int d = 0
-            while d < head_dim {
+            for d < head_dim {
                 float sum_val = 0.0
                 j = 0
-                while j <= i {
+                for j <= i {
                     float v_val = value[j * (num_kv_heads * head_dim) + hk * head_dim + d]
                     sum_val = sum_val + weights[j] * v_val
                     j = j + 1
@@ -638,7 +638,7 @@ func causal_sdpa
 func transformer_layer_at([]transformer_layer layers, int idx) transformer_layer {
     transformer_layer val = layers[0]
     int i = 0
-    while i < len(layers) {
+    for i < len(layers) {
         if i == idx {
             val = layers[i]
         }
@@ -666,14 +666,14 @@ func transformer_layer_forward(
     []float v_out = gpt_matmul_kv(normed1, layer.attn.value_weight, total_tokens, hidden_dim, kv_hidden, hidden_dim)
     if layer.attn.config.use_qkv_bias {
         int i = 0
-        while i < total_tokens {
+        for i < total_tokens {
             int d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 q_out[i * hidden_dim + d] = q_out[i * hidden_dim + d] + layer.attn.query_bias[d]
                 d = d + 1
             }
             d = 0
-            while d < kv_hidden {
+            for d < kv_hidden {
                 k_out[i * kv_hidden + d] = k_out[i * kv_hidden + d] + layer.attn.key_bias[d]
                 v_out[i * kv_hidden + d] = v_out[i * kv_hidden + d] + layer.attn.value_bias[d]
                 d = d + 1
@@ -684,15 +684,15 @@ func transformer_layer_forward(
     []float q_rope = gpt_copy(q_out)
     []float k_rope = gpt_copy(k_out)
     int b = 0
-    while b < batch_size {
+    for b < batch_size {
         int s = 0
-        while s < seq_len {
+        for s < seq_len {
             int tok_idx = b * seq_len + s
             int pair_dim = head_dim / 2
             int h = 0
-            while h < n_head {
+            for h < n_head {
                 int pair = 0
-                while pair < pair_dim {
+                for pair < pair_dim {
                     float freq = rope.frequencies[pair]
                     float angle = (s * 1.0) * freq
                     float cos_val = gpt_cos(angle)
@@ -707,9 +707,9 @@ func transformer_layer_forward(
                 h = h + 1
             }
             int hk = 0
-            while hk < n_kv_head {
+            for hk < n_kv_head {
                 int pair = 0
-                while pair < pair_dim {
+                for pair < pair_dim {
                     float freq = rope.frequencies[pair]
                     float angle = (s * 1.0) * freq
                     float cos_val = gpt_cos(angle)
@@ -729,7 +729,7 @@ func transformer_layer_forward(
     }
     []float attn_out = gpt_alloc(total_tokens * hidden_dim, 0.0)
     b = 0
-    while b < batch_size {
+    for b < batch_size {
         int batch_offset = b * seq_len
         int q_offset = batch_offset * hidden_dim
         int k_offset = batch_offset * kv_hidden
@@ -738,19 +738,19 @@ func transformer_layer_forward(
         []float k_batch = gpt_alloc(seq_len * kv_hidden, 0.0)
         []float v_batch = gpt_alloc(seq_len * kv_hidden, 0.0)
         int i = 0
-        while i < seq_len * hidden_dim {
+        for i < seq_len * hidden_dim {
             q_batch[i] = q_rope[q_offset + i]
             i = i + 1
         }
         i = 0
-        while i < seq_len * kv_hidden {
+        for i < seq_len * kv_hidden {
             k_batch[i] = k_rope[k_offset + i]
             v_batch[i] = v_out[v_offset + i]
             i = i + 1
         }
         []float sdpa_out = gpt_causal_sdpa(q_batch, k_batch, v_batch, seq_len, n_head, n_kv_head, head_dim)
         int o = 0
-        while o < seq_len * hidden_dim {
+        for o < seq_len * hidden_dim {
             attn_out[batch_offset * hidden_dim + o] = sdpa_out[o]
             o = o + 1
         }
@@ -759,9 +759,9 @@ func transformer_layer_forward(
     []float attn_proj = gpt_matmul(attn_out, layer.attn.output_weight, total_tokens, hidden_dim, hidden_dim)
     if layer.attn.config.use_qkv_bias {
         int i = 0
-        while i < total_tokens {
+        for i < total_tokens {
             int d = 0
-            while d < hidden_dim {
+            for d < hidden_dim {
                 attn_proj[i * hidden_dim + d] = attn_proj[i * hidden_dim + d] + layer.attn.output_bias[d]
                 d = d + 1
             }
@@ -790,7 +790,7 @@ func model_forward
     int total = batch_size * seq_len
     []float hidden = embed_tokens(model.wte, model.wpe, token_ids, batch_size, seq_len, n_embd)
     int l = 0
-    while l < model.n_layer {
+    for l < model.n_layer {
         transformer_layer layer = transformer_layer_at(model.layers, l)
         hidden = transformer_layer_forward(layer, hidden, batch_size, seq_len, model.rope)
         l = l + 1
@@ -818,7 +818,7 @@ func gpt_loss(
     float loss = 0.0
     int count = 0
     int i = 0
-    while i < total_tokens {
+    for i < total_tokens {
         int tgt = targets[i]
         if tgt < 0 {
             i = i + 1
@@ -830,7 +830,7 @@ func gpt_loss(
         int base = i * vocab_size
         float max_logit = logits[base]
         int j = 1
-        while j < vocab_size {
+        for j < vocab_size {
             if logits[base + j] > max_logit {
                 max_logit = logits[base + j]
             }
@@ -838,7 +838,7 @@ func gpt_loss(
         }
         float lse = 0.0
         j = 0
-        while j < vocab_size {
+        for j < vocab_size {
             lse = lse + gpt_exp(logits[base + j] - max_logit)
             j = j + 1
         }
@@ -863,12 +863,12 @@ func gpt_generate_greedy(
     int max_total = prompt_len + max_new_tokens
     []int context = gpt_alloc_int(max_total)
     int i = 0
-    while i < prompt_len {
+    for i < prompt_len {
         context[i] = prompt[i]
         i = i + 1
     }
     int cur_len = prompt_len
-    while cur_len < max_total {
+    for cur_len < max_total {
         int start = cur_len - model.block_size
         if start < 0 {
             start = 0
@@ -876,7 +876,7 @@ func gpt_generate_greedy(
         int input_len = cur_len - start
         []int input_ids = gpt_alloc_int(input_len)
         int s = 0
-        while s < input_len {
+        for s < input_len {
             input_ids[s] = context[start + s]
             s = s + 1
         }
@@ -885,7 +885,7 @@ func gpt_generate_greedy(
         int best_tok = 0
         float best_logit = out.logits[last_base]
         int v = 1
-        while v < model.vocab_size {
+        for v < model.vocab_size {
             if out.logits[last_base + v] > best_logit {
                 best_logit = out.logits[last_base + v]
                 best_tok = v
@@ -901,7 +901,7 @@ func gpt_generate_greedy(
     int new_len = cur_len - prompt_len
     []int result = gpt_alloc_int(new_len)
     i = 0
-    while i < new_len {
+    for i < new_len {
         result[i] = context[prompt_len + i]
         i = i + 1
     }
@@ -920,13 +920,13 @@ func gpt_generate_topk(
     int max_total = prompt_len + max_new_tokens
     []int context = gpt_alloc_int(max_total)
     int i = 0
-    while i < prompt_len {
+    for i < prompt_len {
         context[i] = prompt[i]
         i = i + 1
     }
     int cur_len = prompt_len
     int rng_state = seed + 42
-    while cur_len < max_total {
+    for cur_len < max_total {
         int start = cur_len - model.block_size
         if start < 0 {
             start = 0
@@ -934,7 +934,7 @@ func gpt_generate_topk(
         int input_len = cur_len - start
         []int input_ids = gpt_alloc_int(input_len)
         int s = 0
-        while s < input_len {
+        for s < input_len {
             input_ids[s] = context[start + s]
             s = s + 1
         }
@@ -943,13 +943,13 @@ func gpt_generate_topk(
         []float scaled = gpt_alloc(model.vocab_size, 0.0)
         if temperature > 0.0001 {
             int v = 0
-            while v < model.vocab_size {
+            for v < model.vocab_size {
                 scaled[v] = out.logits[last_base + v] / temperature
                 v = v + 1
             }
         } else {
             int v = 0
-            while v < model.vocab_size {
+            for v < model.vocab_size {
                 scaled[v] = out.logits[last_base + v]
                 v = v + 1
             }
@@ -961,10 +961,10 @@ func gpt_generate_topk(
         []int top_indices = gpt_alloc_int(actual_k)
         []float top_vals = gpt_alloc(actual_k, -1000000.0)
         int v = 0
-        while v < model.vocab_size {
+        for v < model.vocab_size {
             int min_pos = 0
             int k = 1
-            while k < actual_k {
+            for k < actual_k {
                 if top_vals[k] < top_vals[min_pos] {
                     min_pos = k
                 }
@@ -987,7 +987,7 @@ func gpt_generate_topk(
         float cumulative = 0.0
         int chosen = top_indices[0]
         int k = 0
-        while k < actual_k {
+        for k < actual_k {
             cumulative = cumulative + top_probs[k]
             if r <= cumulative {
                 chosen = top_indices[k]
@@ -1004,7 +1004,7 @@ func gpt_generate_topk(
     int new_len = cur_len - prompt_len
     []int result = gpt_alloc_int(new_len)
     i = 0
-    while i < new_len {
+    for i < new_len {
         result[i] = context[prompt_len + i]
         i = i + 1
     }
@@ -1023,13 +1023,13 @@ func gpt_generate_nucleus(
     int max_total = prompt_len + max_new_tokens
     []int context = gpt_alloc_int(max_total)
     int i = 0
-    while i < prompt_len {
+    for i < prompt_len {
         context[i] = prompt[i]
         i = i + 1
     }
     int cur_len = prompt_len
     int rng_state = seed + 137
-    while cur_len < max_total {
+    for cur_len < max_total {
         int start = cur_len - model.block_size
         if start < 0 {
             start = 0
@@ -1037,7 +1037,7 @@ func gpt_generate_nucleus(
         int input_len = cur_len - start
         []int input_ids = gpt_alloc_int(input_len)
         int s = 0
-        while s < input_len {
+        for s < input_len {
             input_ids[s] = context[start + s]
             s = s + 1
         }
@@ -1049,24 +1049,24 @@ func gpt_generate_nucleus(
             temp = 1.0
         }
         int v = 0
-        while v < model.vocab_size {
+        for v < model.vocab_size {
             scaled[v] = out.logits[last_base + v] / temp
             v = v + 1
         }
         []float probs = gpt_softmax_row(scaled, model.vocab_size)
         []int sorted_idx = gpt_alloc_int(model.vocab_size)
         v = 0
-        while v < model.vocab_size {
+        for v < model.vocab_size {
             sorted_idx[v] = v
             v = v + 1
         }
         int nucleus_size = 0
         float cumulative = 0.0
         v = 0
-        while v < model.vocab_size && cumulative < top_p {
+        for v < model.vocab_size && cumulative < top_p {
             int max_idx = v
             int w = v + 1
-            while w < model.vocab_size {
+            for w < model.vocab_size {
                 if probs[sorted_idx[w]] > probs[sorted_idx[max_idx]] {
                     max_idx = w
                 }
@@ -1092,7 +1092,7 @@ func gpt_generate_nucleus(
         float cum2 = 0.0
         int chosen = sorted_idx[0]
         v = 0
-        while v < nucleus_size {
+        for v < nucleus_size {
             cum2 = cum2 + probs[sorted_idx[v]]
             if r <= cum2 {
                 chosen = sorted_idx[v]
@@ -1109,7 +1109,7 @@ func gpt_generate_nucleus(
     int new_len = cur_len - prompt_len
     []int result = gpt_alloc_int(new_len)
     i = 0
-    while i < new_len {
+    for i < new_len {
         result[i] = context[prompt_len + i]
         i = i + 1
     }
@@ -1119,7 +1119,7 @@ func gpt_generate_nucleus(
 func gpt_alloc_int(int size) []int {
     []int v = []int{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = 0
         i = i + 1
     }
@@ -1180,7 +1180,7 @@ func int_to_str_simple(int n) string {
         value = -value
     }
     string s = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         s = string(digit + 48) + s
         value = value / 10

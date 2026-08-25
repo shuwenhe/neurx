@@ -49,10 +49,10 @@ func extract_json_value(string json, string key) string {
     int found_pos = -1
 
     int i = 0
-    while i < len(json) {
+    for i < len(json) {
         bool matches = true
         int j = 0
-        while j < len(search_key) && i + j < len(json) {
+        for j < len(search_key) && i + j < len(json) {
             if json[i + j] != search_key[j] {
                 matches = false
             }
@@ -75,7 +75,7 @@ func extract_json_value(string json, string key) string {
     bool in_string = false
     bool escaped = false
 
-    while j < len(json) {
+    for j < len(json) {
         string char = json[j]
 
         if escaped {
@@ -125,7 +125,7 @@ func extract_int_field(string body, string field_name) int {
 
     int result = 0
     int i = 0
-    while i < len(value_str) {
+    for i < len(value_str) {
         string c = value_str[i]
         if c >= "0" && c <= "9" {
             result = result * 10 + (c[0] - '0'[0])
@@ -146,7 +146,7 @@ func extract_float_field(string body, string field_name) float {
     bool has_dot = false
     float decimal_places = 1.0
 
-    while i < len(value_str) {
+    for i < len(value_str) {
         string c = value_str[i]
 
         if c == "." {
@@ -177,7 +177,7 @@ func estimate_token_count(string text) int {
 func format_json_string(string s) string {
     string result = ""
     int i = 0
-    while i < len(s) {
+    for i < len(s) {
         string c = s[i]
         if c == "\"" {
             result = result + "\\\""
@@ -209,7 +209,7 @@ func int_to_string(int n) string {
     }
 
     string result = ""
-    while n > 0 {
+    for n > 0 {
         int digit = n % 10
         string digit_char = ""
         if digit == 0 { digit_char = "0" }

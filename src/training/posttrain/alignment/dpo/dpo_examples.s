@@ -123,7 +123,7 @@ func example_dpo_with_different_betas() {
     tokenizer_state tokenizer = load_tokenizer()
     dpo_dataset dataset = create_dpo_example_dataset()
     int i = 0
-    while i < len(betas) {
+    for i < len(betas) {
         float beta = betas[i]
         print("")
         print("[Beta = " + string_float(beta) + "]")

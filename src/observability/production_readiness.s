@@ -355,7 +355,7 @@ func print_production_readiness_report(production_readiness_report report) {
     
     string current_category = ""
     int i = 0
-    while i < len(report.checks) {
+    for i < len(report.checks) {
         check := report.checks[i]
         
         if check.category != current_category {

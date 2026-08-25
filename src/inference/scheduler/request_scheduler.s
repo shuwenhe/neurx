@@ -75,7 +75,7 @@ func dequeue_batch(request_queue queue) request_batch {
         num_to_dequeue = len(queue.pending_requests)
     }
     int i = 0
-    while i < num_to_dequeue {
+    for i < num_to_dequeue {
         batch_item item
         if i < len(queue.pending_requests) {
             item.request = queue.pending_requests[i]
@@ -105,7 +105,7 @@ func process_batch(request_queue queue, request_batch batch) request_batch {
     batch.status = "processing"
     batch.start_time = get_current_time_ms()
     int i = 0
-    while i < len(batch.items) {
+    for i < len(batch.items) {
         batch.items[i].status = "processing"
         string req_id = batch.items[i].request.request_id
         int max_tokens = batch.items[i].request.max_tokens
@@ -132,7 +132,7 @@ func print_batch_results(request_batch batch) {
     print("  Processing time: " + int_to_string(batch.end_time - batch.start_time) + " ms\n")
     print("\n  Results:\n")
     int i = 0
-    while i < len(batch.items) {
+    for i < len(batch.items) {
         print("    [" + int_to_string(i+1) + "] " + batch.items[i].request.request_id + "\n")
         print("        Generated text: " + batch.items[i].generated_text + "\n")
         print("        Tokens: " + int_to_string(batch.items[i].tokens_generated) + "\n")
@@ -148,7 +148,7 @@ func simulate_inference_queue() {
     print("✓ Queue initialized (max_queue: 100, max_batch: 4)\n\n")
     print("📥 Adding requests to queue...\n")
     int req_id = 1
-    while req_id <= 10 {
+    for req_id <= 10 {
         inference_request req
         req.request_id = "req_" + int_to_string(req_id)
         req.model_type = "text"
@@ -162,7 +162,7 @@ func simulate_inference_queue() {
     print("\n" + get_queue_stats(queue) + "\n")
     print("\n🔄 Processing batches...\n")
     int batch_count = 0
-    while len(queue.pending_requests) > 0 {
+    for len(queue.pending_requests) > 0 {
         batch_count = batch_count + 1
         print("Batch " + int_to_string(batch_count) + ":\n")
         request_batch batch = dequeue_batch(queue)

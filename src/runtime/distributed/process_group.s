@@ -100,7 +100,7 @@ func (process_group* group) finalize() bool {
 
 func (process_group* group) contains_rank(int rank) bool {
     i := 0
-    while i < group.ranks.len() {
+    for i < group.ranks.len() {
         if group.ranks[i] == rank {
             true
         }
@@ -112,7 +112,7 @@ func (process_group* group) contains_rank(int rank) bool {
 
 func (process_group* group) get_rank_index(int rank) int {
     i := 0
-    while i < group.ranks.len() {
+    for i < group.ranks.len() {
         if group.ranks[i] == rank {
             i
         }

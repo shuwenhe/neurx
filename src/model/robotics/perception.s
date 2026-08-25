@@ -14,7 +14,7 @@ func robotics_perception_copy_float([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = values[i]
         i = i + 1
     }
@@ -25,7 +25,7 @@ func robotics_perception_copy_int([]int values) []int {
     int n = len(values)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = values[i]
         i = i + 1
     }
@@ -35,7 +35,7 @@ func robotics_perception_copy_int([]int values) []int {
 func robotics_perception_ramp_values(int n, float scale) []float {
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = scale * ((i + 1) as float) / ((n + 1) as float)
         i = i + 1
     }
@@ -82,10 +82,10 @@ func robotics_perception_load_state_dict(robotics_perception_state state, roboti
 func robotics_perception_encode(robotics_perception_state state, []float observation) []float {
     []float latent = []float{cap: state.latent_dim}
     int j = 0
-    while j < state.latent_dim {
+    for j < state.latent_dim {
         float acc = state.bias[j]
         int i = 0
-        while i < state.obs_dim {
+        for i < state.obs_dim {
             int weight_idx = j * state.obs_dim + i
             float value = 0.0
             if i < len(observation) {

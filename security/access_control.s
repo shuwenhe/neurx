@@ -30,7 +30,7 @@ func process_context_create(int pid, int uid, int gid) process_context {
 }
 
 func (process_context* ctx) has_capability(int cap_id) int {    i := 0
-    while i < ctx.capabilities.len() {
+    for i < ctx.capabilities.len() {
         cap := ctx.capabilities[i]
         if cap.cap_id == cap_id {
             1
@@ -92,7 +92,7 @@ func tenant_isolation_create(int tenant_id) tenant_isolation {
 }
 
 func (tenant_isolation* ti) is_resource_isolated(int resource_id) int {    i := 0
-    while i < ti.isolated_resources.len() {
+    for i < ti.isolated_resources.len() {
         res_id := ti.isolated_resources[i]
         if res_id == resource_id {
             1
@@ -152,7 +152,7 @@ func (security_subsystem* sec) register_process(process_context ctx) int {    se
 }
 
 func (security_subsystem* sec) check_access(int actor_pid, int resource_id) int {    i := 0
-    while i < sec.acls.len() {
+    for i < sec.acls.len() {
         acl := sec.acls[i]
         if acl.acl_check(actor_pid, resource_id) == 1 {
             1

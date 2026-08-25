@@ -36,10 +36,10 @@ func agent_observation_contains(string text, string pattern) bool {
         return false
     }
     int i = 0
-    while i <= hay_len - nee_len {
+    for i <= hay_len - nee_len {
         int j = 0
         bool match = true
-        while j < nee_len {
+        for j < nee_len {
             if haystack[i + j] != needle[j] {
                 match = false
                 break
@@ -61,7 +61,7 @@ func agent_observation_kind(string observation) string {
     }
     string kind = ""
     int i = 0
-    while i < len(raw) {
+    for i < len(raw) {
         string ch = string(raw[i])
         if ch == ":" || ch == ";" || ch == "\n" || ch == " " {
             break

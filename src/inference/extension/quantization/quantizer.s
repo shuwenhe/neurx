@@ -418,7 +418,7 @@ func quantization_config_from_text(string text, quantization_config fallback) qu
     quantization_config config = fallback
     []string lines = split_lines(text)
     int i = 0
-    while i < length(lines) {
+    for i < length(lines) {
         string line = lines[i]
         int idx = line_find(line, "=")
         if idx > 0 {
@@ -448,7 +448,7 @@ func quantization_config_from_text(string text, quantization_config fallback) qu
 func quantization_manifest_layer_count(string text) int {
     []string lines = split_lines(text)
     int i = 0
-    while i < length(lines) {
+    for i < length(lines) {
         string line = lines[i]
         int idx = line_find(line, "=")
         if idx > 0 {
@@ -535,7 +535,7 @@ func text_to_int(string text, int fallback) int {
         i = 1
     }
     int value = 0
-    while i < length(s) {
+    for i < length(s) {
         int digit = s[i] - 48
         if digit < 0 || digit > 9 {
             return fallback
@@ -558,7 +558,7 @@ func text_to_float(string text, float fallback) float {
         i = 1
     }
     float whole = 0.0
-    while i < length(s) && s[i] >= 48 && s[i] <= 57 {
+    for i < length(s) && s[i] >= 48 && s[i] <= 57 {
         whole = whole * 10.0 + float(s[i] - 48)
         i = i + 1
     }
@@ -566,7 +566,7 @@ func text_to_float(string text, float fallback) float {
     float div = 1.0
     if i < length(s) && s[i] == 46 {
         i = i + 1
-        while i < length(s) && s[i] >= 48 && s[i] <= 57 {
+        for i < length(s) && s[i] >= 48 && s[i] <= 57 {
             frac = frac * 10.0 + float(s[i] - 48)
             div = div * 10.0
             i = i + 1
@@ -587,7 +587,7 @@ func split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current = ""
     int i = 0
-    while i < length(text) {
+    for i < length(text) {
         int ch = text[i]
         if ch == 10 || ch == 13 {
             if trim(current) != "" {
@@ -610,9 +610,9 @@ func line_find(string line, string pattern) int {
         return 0
     }
     int i = 0
-    while i + length(pattern) <= length(line) {
+    for i + length(pattern) <= length(line) {
         int j = 0
-        while j < length(pattern) && line[i + j] == pattern[j] {
+        for j < length(pattern) && line[i + j] == pattern[j] {
             j = j + 1
         }
         if j == length(pattern) {

@@ -24,7 +24,7 @@ func CATEGORY_PATHOLOGY() int { return 9 }
 func to_lower(string text) string {
     string result = ""
     int i = 0
-    while i < len(text) {
+    for i < len(text) {
         int c = text[i]
         if c >= 65 && c <= 90 {
             c = c + 32
@@ -42,9 +42,9 @@ func contains_substr(string text, string substr) bool {
         return false
     }
     int i = 0
-    while i <= text_len - substr_len {
+    for i <= text_len - substr_len {
         int j = 0
-        while j < substr_len {
+        for j < substr_len {
             if text[i + j] != substr[j] {
                 break
             }

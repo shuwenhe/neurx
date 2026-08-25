@@ -26,28 +26,28 @@ func attention_fused([]float query, []float key, []float value, int seq_len, int
     []float output = []float{cap: seq_len * head_dim}
 
     int i = 0
-    while i < seq_len * head_dim {
+    for i < seq_len * head_dim {
         output[i] = 0.0
         i = i + 1
     }
 
     []float norm_factor = []float{cap: seq_len}
     i = 0
-    while i < seq_len {
+    for i < seq_len {
         norm_factor[i] = 0.0
         i = i + 1
     }
 
     int q_pos = 0
-    while q_pos < seq_len {
+    for q_pos < seq_len {
         []float exp_scores = []float{cap: seq_len}
         float max_score = -999999.0
 
         int k_pos = 0
-        while k_pos < seq_len {
+        for k_pos < seq_len {
             float score = 0.0
             int d = 0
-            while d < head_dim {
+            for d < head_dim {
                 score = score + query[q_pos * head_dim + d] * key[k_pos * head_dim + d]
                 d = d + 1
             }
@@ -63,7 +63,7 @@ func attention_fused([]float query, []float key, []float value, int seq_len, int
 
         float sum_exp = 0.0
         k_pos = 0
-        while k_pos < seq_len {
+        for k_pos < seq_len {
             exp_scores[k_pos] = exp_approx(exp_scores[k_pos] - max_score)
             sum_exp = sum_exp + exp_scores[k_pos]
             k_pos = k_pos + 1
@@ -72,11 +72,11 @@ func attention_fused([]float query, []float key, []float value, int seq_len, int
         norm_factor[q_pos] = sum_exp
 
         k_pos = 0
-        while k_pos < seq_len {
+        for k_pos < seq_len {
             float weight = exp_scores[k_pos] / sum_exp
 
             int d = 0
-            while d < head_dim {
+            for d < head_dim {
                 output[q_pos * head_dim + d] = output[q_pos * head_dim + d] + weight * value[k_pos * head_dim + d]
                 d = d + 1
             }
@@ -95,7 +95,7 @@ func attention_cached([]float query, []float kv_cache, int seq_len, int kv_cache
     []float output = []float{cap: head_dim}
 
     int i = 0
-    while i < head_dim {
+    for i < head_dim {
         output[i] = 0.0
         i = i + 1
     }
@@ -104,10 +104,10 @@ func attention_cached([]float query, []float kv_cache, int seq_len, int kv_cache
     []float exp_scores = []float{cap: kv_cache_len}
 
     int cache_pos = 0
-    while cache_pos < kv_cache_len {
+    for cache_pos < kv_cache_len {
         float score = 0.0
         int d = 0
-        while d < head_dim {
+        for d < head_dim {
 
             score = score + query[d] * kv_cache[cache_pos * 2 * head_dim + d]
             d = d + 1
@@ -124,18 +124,18 @@ func attention_cached([]float query, []float kv_cache, int seq_len, int kv_cache
 
     float sum_exp = 0.0
     cache_pos = 0
-    while cache_pos < kv_cache_len {
+    for cache_pos < kv_cache_len {
         exp_scores[cache_pos] = exp_approx(exp_scores[cache_pos] - max_score)
         sum_exp = sum_exp + exp_scores[cache_pos]
         cache_pos = cache_pos + 1
     }
 
     cache_pos = 0
-    while cache_pos < kv_cache_len {
+    for cache_pos < kv_cache_len {
         float weight = exp_scores[cache_pos] / sum_exp
 
         int d = 0
-        while d < head_dim {
+        for d < head_dim {
 
             output[d] = output[d] + weight * kv_cache[cache_pos * 2 * head_dim + head_dim + d]
             d = d + 1
@@ -151,13 +151,13 @@ func attention_gqa([]float query_heads, []float kv_cache, int num_query_heads, i
     []float output = []float{cap: num_query_heads * head_dim}
 
     int q_head = 0
-    while q_head < num_query_heads {
+    for q_head < num_query_heads {
 
         int kv_head = q_head / (num_query_heads / num_kv_heads)
 
         []float query_for_head = []float{cap: head_dim}
         int d = 0
-        while d < head_dim {
+        for d < head_dim {
             query_for_head[d] = query_heads[q_head * head_dim + d]
             d = d + 1
         }
@@ -165,7 +165,7 @@ func attention_gqa([]float query_heads, []float kv_cache, int num_query_heads, i
         []float head_output = attention_cached_gqa(query_for_head, kv_cache, kv_head, head_dim, kv_cache_len)
 
         d = 0
-        while d < head_dim {
+        for d < head_dim {
             output[q_head * head_dim + d] = head_output[d]
             d = d + 1
         }
@@ -180,7 +180,7 @@ func attention_cached_gqa([]float query, []float kv_cache, int kv_head, int head
     []float output = []float{cap: head_dim}
 
     int i = 0
-    while i < head_dim {
+    for i < head_dim {
         output[i] = 0.0
         i = i + 1
     }
@@ -189,10 +189,10 @@ func attention_cached_gqa([]float query, []float kv_cache, int kv_head, int head
     []float exp_scores = []float{cap: kv_cache_len}
 
     int cache_pos = 0
-    while cache_pos < kv_cache_len {
+    for cache_pos < kv_cache_len {
         float score = 0.0
         int d = 0
-        while d < head_dim {
+        for d < head_dim {
 
             score = score + query[d] * kv_cache[cache_pos * 2 * head_dim + kv_head * head_dim + d]
             d = d + 1
@@ -209,18 +209,18 @@ func attention_cached_gqa([]float query, []float kv_cache, int kv_head, int head
 
     float sum_exp = 0.0
     cache_pos = 0
-    while cache_pos < kv_cache_len {
+    for cache_pos < kv_cache_len {
         exp_scores[cache_pos] = exp_approx(exp_scores[cache_pos] - max_score)
         sum_exp = sum_exp + exp_scores[cache_pos]
         cache_pos = cache_pos + 1
     }
 
     cache_pos = 0
-    while cache_pos < kv_cache_len {
+    for cache_pos < kv_cache_len {
         float weight = exp_scores[cache_pos] / sum_exp
 
         int d = 0
-        while d < head_dim {
+        for d < head_dim {
 
             output[d] = output[d] + weight * kv_cache[cache_pos * 2 * head_dim + head_dim + kv_head * head_dim + d]
             d = d + 1
@@ -245,7 +245,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i < 8 {
+    for i < 8 {
         term = term * x / float(i)
         result = result + term
         i = i + 1
@@ -256,12 +256,12 @@ func exp_approx(float x) float {
 func matmul_seq([]float q, []float k, int seq_len, int head_dim) []float {
     []float scores = []float{cap: seq_len * seq_len}
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         int j = 0
-        while j < seq_len {
+        for j < seq_len {
             float sum = 0.0
             int d = 0
-            while d < head_dim {
+            for d < head_dim {
                 sum = sum + q[i * head_dim + d] * k[j * head_dim + d]
                 d = d + 1
             }
@@ -276,10 +276,10 @@ func matmul_seq([]float q, []float k, int seq_len, int head_dim) []float {
 func softmax_2d([]float scores, int seq_len) []float {
     []float result = []float{cap: seq_len * seq_len}
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         float max_val = -999999.0
         int j = 0
-        while j < seq_len {
+        for j < seq_len {
             if scores[i * seq_len + j] > max_val {
                 max_val = scores[i * seq_len + j]
             }
@@ -288,14 +288,14 @@ func softmax_2d([]float scores, int seq_len) []float {
 
         float sum_exp = 0.0
         j = 0
-        while j < seq_len {
+        for j < seq_len {
             result[i * seq_len + j] = exp_approx(scores[i * seq_len + j] - max_val)
             sum_exp = sum_exp + result[i * seq_len + j]
             j = j + 1
         }
 
         j = 0
-        while j < seq_len {
+        for j < seq_len {
             result[i * seq_len + j] = result[i * seq_len + j] / sum_exp
             j = j + 1
         }
@@ -307,12 +307,12 @@ func softmax_2d([]float scores, int seq_len) []float {
 func matmul_attn([]float attn, []float value, int seq_len, int head_dim) []float {
     []float output = []float{cap: seq_len * head_dim}
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         int d = 0
-        while d < head_dim {
+        for d < head_dim {
             float sum = 0.0
             int j = 0
-            while j < seq_len {
+            for j < seq_len {
                 sum = sum + attn[i * seq_len + j] * value[j * head_dim + d]
                 j = j + 1
             }

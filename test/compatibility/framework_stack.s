@@ -153,7 +153,7 @@ func int_to_string(int n) string {
     }
     string result = ""
     int remaining = n
-    while remaining >= 10 {
+    for remaining >= 10 {
         int digit = remaining - ((remaining / 10) * 10)
         remaining = remaining / 10
         if digit == 0 { result = "0" + result }

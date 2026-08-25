@@ -7,7 +7,7 @@ func int_to_str(int n) string {
     bool neg = false
     if value < 0 { neg = true; value = 0 - value }
     string out = ""
-    while value > 0 {
+    for value > 0 {
         int digit = value - (value / 10) * 10
         string d = ""
         if digit == 0 { d = "0" } else if digit == 1 { d = "1" } else if digit == 2 { d = "2" } else if digit == 3 { d = "3" } else if digit == 4 { d = "4" } else if digit == 5 { d = "5" } else if digit == 6 { d = "6" } else if digit == 7 { d = "7" } else if digit == 8 { d = "8" } else if digit == 9 { d = "9" }
@@ -23,7 +23,7 @@ func float_to_str(float value, int decimals) string {
     bool neg = current < 0.0
     if neg { current = 0.0 - current }
     int whole = 0
-    while current >= 1.0 {
+    for current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
@@ -31,10 +31,10 @@ func float_to_str(float value, int decimals) string {
     if neg { out = "-" }
     out = out + int_to_str(whole) + "."
     int i = 0
-    while i < decimals {
+    for i < decimals {
         current = current * 10.0
         int digit = 0
-        while current >= 1.0 {
+        for current >= 1.0 {
             current = current - 1.0
             digit = digit + 1
         }
@@ -79,7 +79,7 @@ func step1_train() int {
     println("⏳ Trainingenterlinein...")
     println("")
     int epoch = 0
-    while epoch < 3 {
+    for epoch < 3 {
         println("  Epoch " + int_to_str(epoch + 1) + "/3")
         float loss = 0.8 - ((epoch as float) * 0.15)
         println("    Loss: " + float_to_str(loss, 6))

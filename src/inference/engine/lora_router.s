@@ -56,7 +56,7 @@ func new_lora_router(int max_loaded_adapters, int max_lora_rank) lora_router_sta
 
 func lora_find_adapter(lora_router_state state, string adapter_id) int {
     int i = 0
-    while i < len(state.adapters) {
+    for i < len(state.adapters) {
         if state.adapters[i].adapter_id == adapter_id {
             return i
         }
@@ -72,7 +72,7 @@ func lora_adapter_at(lora_router_state state, int index) lora_adapter {
 func lora_loaded_count(lora_router_state state) int {
     int count = 0
     int i = 0
-    while i < len(state.adapters) {
+    for i < len(state.adapters) {
         if state.adapters[i].status == lora_ready_status() || state.adapters[i].status == lora_loading_status() {
             count = count + 1
         }
@@ -188,7 +188,7 @@ func lora_unload(lora_router_state state, string adapter_id) lora_route_result {
 func apply_lora_linear([]float input, []float base_output, []float lora_a, []float lora_b, int input_dim, int output_dim, int rank, float alpha) []float {
     []float output = []float{cap: output_dim}
     int i = 0
-    while i < output_dim {
+    for i < output_dim {
         if i < len(base_output) {
             output[i] = base_output[i]
         } else {
@@ -201,10 +201,10 @@ func apply_lora_linear([]float input, []float base_output, []float lora_a, []flo
     }
     []float low_rank = []float{cap: rank}
     int r = 0
-    while r < rank {
+    for r < rank {
         float sum = 0.0
         i = 0
-        while i < input_dim {
+        for i < input_dim {
             sum = sum + lora_a[r * input_dim + i] * input[i]
             i = i + 1
         }
@@ -213,10 +213,10 @@ func apply_lora_linear([]float input, []float base_output, []float lora_a, []flo
     }
     float scale = alpha / float(rank)
     int o = 0
-    while o < output_dim {
+    for o < output_dim {
         float delta = 0.0
         r = 0
-        while r < rank {
+        for r < rank {
             delta = delta + lora_b[o * rank + r] * low_rank[r]
             r = r + 1
         }

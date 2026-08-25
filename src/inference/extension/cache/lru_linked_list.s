@@ -31,7 +31,7 @@ func create_lru_cache(int capacity) lru_cache {
 
 func lru_cache_put(lru_cache lru, string key, int block_id) int {
     int idx = 0
-    while idx < lru.num_nodes {
+    for idx < lru.num_nodes {
         if lru.nodes[idx].key == key {
             lru.nodes[idx].access_count = lru.nodes[idx].access_count + 1
             lru.nodes[idx].timestamp = lru.current_time
@@ -78,7 +78,7 @@ func lru_cache_put(lru_cache lru, string key, int block_id) int {
 
 func lru_cache_get(lru_cache lru, string key) int {
     int idx = 0
-    while idx < lru.num_nodes {
+    for idx < lru.num_nodes {
         if lru.nodes[idx].key == key {
             lru.nodes[idx].access_count = lru.nodes[idx].access_count + 1
             lru.nodes[idx].timestamp = lru.current_time
@@ -99,7 +99,7 @@ func lru_cache_get(lru_cache lru, string key) int {
 
 func lru_cache_remove(lru_cache lru, string key) int {
     int idx = 0
-    while idx < lru.num_nodes {
+    for idx < lru.num_nodes {
         if lru.nodes[idx].key == key {
             lru_node node = lru.nodes[idx]
             
@@ -116,7 +116,7 @@ func lru_cache_remove(lru_cache lru, string key) int {
             }
             
             idx = idx + 1
-            while idx < lru.num_nodes {
+            for idx < lru.num_nodes {
                 lru.nodes[idx - 1] = lru.nodes[idx]
                 idx = idx + 1
             }
@@ -175,7 +175,7 @@ func lru_cache_evict_tail(lru_cache lru) string {
     }
     
     int idx = tail_idx
-    while idx < lru.num_nodes - 1 {
+    for idx < lru.num_nodes - 1 {
         lru.nodes[idx] = lru.nodes[idx + 1]
         idx = idx + 1
     }
@@ -202,7 +202,7 @@ func lru_cache_get_lru_key(lru_cache lru) string {
 func lru_cache_get_stats(lru_cache lru) string {
     int total_accesses = 0
     int idx = 0
-    while idx < lru.num_nodes {
+    for idx < lru.num_nodes {
         total_accesses = total_accesses + lru.nodes[idx].access_count
         idx = idx + 1
     }

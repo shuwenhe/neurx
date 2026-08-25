@@ -18,7 +18,7 @@ func test_forward_pass_basic() bool {
     model_state.weight_matrices = [][]float(100 * 768)
     var []int input_ids = []int(32 * 512)
     i := 0
-    while i < 16384 {
+    for i < 16384 {
         input_ids[i] = 1000 + i % 50000
         i = i + 1
     }
@@ -66,7 +66,7 @@ func test_forward_pass_different_batch_sizes() bool {
     batch_sizes[2] = 16
     batch_sizes[3] = 32
     b := 0
-    while b < 4 {
+    for b < 4 {
         batch_size := batch_sizes[b]
         var []int input_ids = []int(batch_size * 512)
         result := 
@@ -145,10 +145,10 @@ func test_gradient_clipping() bool {
 func test_gradient_scaling_basic() bool {
     gradients := [][]float(10 * 768)
     i := 0
-    while i < 10 {
+    for i < 10 {
         gradients[i] = []float(768)
         j := 0
-        while j < 768 {
+        for j < 768 {
             gradients[i][j] = 0.001
             j = j + 1
         }
@@ -206,7 +206,7 @@ func test_gradient_accumulation_basic() bool {
     accumulated.accumulated_loss = 0.0
     accumulated.is_ready = false
     step := 0
-    while step < 4 {
+    for step < 4 {
         accumulated.accumulated_loss = accumulated.accumulated_loss + 5.5
         accumulated.steps_accumulated = accumulated.steps_accumulated + 1
         step = step + 1
@@ -381,7 +381,7 @@ func test_gradient_accumulation_integration() bool {
     accumulated.accumulation_steps = 4
     accumulated.steps_accumulated = 0
     step := 0
-    while step < 4 {
+    for step < 4 {
         accumulated.accumulated_loss = accumulated.accumulated_loss + 5.5
         accumulated.steps_accumulated = accumulated.steps_accumulated + 1
         if accumulated.steps_accumulated >= accumulated.accumulation_steps {

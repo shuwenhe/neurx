@@ -15,7 +15,7 @@ func create_json_object([]json_field fields) string {
     result := "{"
 
     i := 0
-    while i < len(fields) {
+    for i < len(fields) {
         if i > 0 {
             result = result + ", "
         }
@@ -32,7 +32,7 @@ func create_json_array([]string items) string {
     result := "["
 
     i := 0
-    while i < len(items) {
+    for i < len(items) {
         if i > 0 {
             result = result + ", "
         }
@@ -63,14 +63,14 @@ func json_to_xml_inner(string json_str, int depth) string {
         key := ""
         value_start := 0
 
-        while i < len(json_str) && json_str[i] != '}' {
+        for i < len(json_str) && json_str[i] != '}' {
             if json_str[i] == '"' && (i == 0 || json_str[i - 1] != '\\') {
                 if in_key {
 
                     in_key = false
 
                     j := i + 1
-                    while j < len(json_str) && json_str[j] != ':' {
+                    for j < len(json_str) && json_str[j] != ':' {
                         j = j + 1
                     }
                     value_start = j + 1
@@ -79,7 +79,7 @@ func json_to_xml_inner(string json_str, int depth) string {
                     in_key = true
                     key = ""
                     j := i + 1
-                    while j < len(json_str) && json_str[j] != '"' {
+                    for j < len(json_str) && json_str[j] != '"' {
                         key = key + string_from_code(int(json_str[j]))
                         j = j + 1
                     }
@@ -178,7 +178,7 @@ func prettify_json_inner(string json_str, int depth) string {
     i := 0
     in_string := false
 
-    while i < len(json_str) {
+    for i < len(json_str) {
         c := json_str[i]
 
         if c == '"' && (i == 0 || json_str[i - 1] != '\\') {
@@ -213,7 +213,7 @@ func minify_json(string json_str) string {
     in_string := false
 
     i := 0
-    while i < len(json_str) {
+    for i < len(json_str) {
         c := json_str[i]
 
         if c == '"' && (i == 0 || json_str[i - 1] != '\\') {
@@ -239,7 +239,7 @@ struct json_field {
 func get_indent(int level) string {
     result := ""
     i := 0
-    while i < level * 2 {
+    for i < level * 2 {
         result = result + " "
         i = i + 1
     }
@@ -272,7 +272,7 @@ func extract_string_value(string s, int start) string {
     }
 
     result := ""
-    while i < len(s) && s[i] != '"' {
+    for i < len(s) && s[i] != '"' {
         result = result + string_from_code(int(s[i]))
         i = i + 1
     }

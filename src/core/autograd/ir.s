@@ -91,7 +91,7 @@ func copy_eqn(ir_eqn eqn) ir_eqn {
 func copy_eqns([]ir_eqn values) []ir_eqn {
     []ir_eqn out = []ir_eqn{cap: len(values)}
     int i = 0
-    while i < len(values) {
+    for i < len(values) {
         out[i] = copy_eqn(values[i])
         i = i + 1
     }
@@ -101,7 +101,7 @@ func copy_eqns([]ir_eqn values) []ir_eqn {
 func join_params([]string params) string {
     string out = ""
     int i = 0
-    while i < len(params) {
+    for i < len(params) {
         if i > 0 {
             out = out + ","
         }
@@ -151,7 +151,7 @@ func ir_output_count(ir_graph graph) int {
 
 func ir_has_primitive(ir_graph graph, string primitive) bool {
     int i = 0
-    while i < len(graph.primitives) {
+    for i < len(graph.primitives) {
         if get_primitive(graph, i) == primitive {
             return true
         }
@@ -311,7 +311,7 @@ func transform_chain_to_jaxpr(transform_chain chain, string name) ir_graph {
     if len(eqns) == 0 {
         eqns = []ir_eqn{cap: len(chain.steps)}
         int i = 0
-        while i < len(chain.steps) {
+        for i < len(chain.steps) {
             string step = get_chain_step(chain, i)
             eqns[i] = ir_eqn {
                 primitive: step,
@@ -361,7 +361,7 @@ func optimize_ir(ir_graph graph) ir_graph {
 func simple_fuse_add(ir_graph graph) ir_graph {
     []ir_eqn optimized_eqns = []ir_eqn{}
     int i = 0
-    while i < len(graph.eqns) {
+    for i < len(graph.eqns) {
         ir_eqn eqn = get_eqn(graph, i)
         if eqn.primitive == "add" && len(eqn.inputs) > 1 && get_eqn_input(eqn, 0) == get_eqn_input(eqn, 1) {
             []string params = []string{cap: 1}
@@ -398,7 +398,7 @@ func compile_jaxpr(ir_graph graph) string {
     }
     string compiled_code = ""
     int i = 0
-    while i < len(graph.eqns) {
+    for i < len(graph.eqns) {
         ir_eqn eqn = get_eqn(graph, i)
         compiled_code = compiled_code + eqn.primitive + "\n"
         i = i + 1
@@ -408,11 +408,11 @@ func compile_jaxpr(ir_graph graph) string {
 
 func synchronize_gradients([]ir_eqn eqns, int num_workers) []ir_eqn {
     int i = 0
-    while i < len(eqns) {
+    for i < len(eqns) {
         ir_eqn eqn = eqns[i]
         if eqn.primitive == "grad" {
             int j = 0
-            while j < len(eqn.params) {
+            for j < len(eqn.params) {
                 string param_val = get_eqn_param(eqn, j)
                 eqn.params[j] = param_val + "|sync"
                 j = j + 1

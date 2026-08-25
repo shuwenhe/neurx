@@ -30,7 +30,7 @@ func create_transformer_model(int num_layers, int hidden_size, int vocab_size, i
     model.embedding = create_embedding(vocab_size, hidden_size)
     model.layers = []transformer_block{}
     int i = 0
-    while i < num_layers {
+    for i < num_layers {
         transformer_block block = create_transformer_block(hidden_size, intermediate_size, num_heads)
         model.layers.push(block)
         i = i + 1
@@ -52,10 +52,10 @@ func transformer_model_forward(transformer_model model, []int token_ids) forward
     [][]float hidden_states = embeddings
     result.hidden_states.push(embeddings[0])
     int layer_idx = 0
-    while layer_idx < model.num_layers && layer_idx < len(model.layers) {
+    for layer_idx < model.num_layers && layer_idx < len(model.layers) {
         [][]float new_hidden_states = [][]float{}
         int seq_idx = 0
-        while seq_idx < len(hidden_states) {
+        for seq_idx < len(hidden_states) {
             []float block_output = transformer_block_forward(model.layers[layer_idx], hidden_states[seq_idx])
             new_hidden_states.push(block_output)
             seq_idx = seq_idx + 1
@@ -76,7 +76,7 @@ func transformer_model_forward(transformer_model model, []int token_ids) forward
 func transformer_model_forward_with_loss(transformer_model model, []int input_ids, []int target_ids) forward_pass_result {
     forward_pass_result result = transformer_model_forward(model, input_ids)
     int i = 0
-    while i < len(result.logits) && i < len(target_ids) {
+    for i < len(result.logits) && i < len(target_ids) {
         float log_prob = 0.0
         if target_ids[i] >= 0 && target_ids[i] < len(result.logits) {
             float prob = exp(result.logits[target_ids[i]])

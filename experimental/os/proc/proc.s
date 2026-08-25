@@ -49,7 +49,7 @@ func proc_spawn(pt proc_table, int ppid, string name, string goal, int sched_cla
 
 func proc_exit(pt proc_table, int pid, int exit_code, string reason) proc_table {
     int i = 0
-    while i < len(pt.procs) {
+    for i < len(pt.procs) {
         if pt.procs[i].pid == pid {
             pt.procs[i].state       = PROC_ZOMBIE
             pt.procs[i].exit_code   = exit_code
@@ -62,7 +62,7 @@ func proc_exit(pt proc_table, int pid, int exit_code, string reason) proc_table 
 
 func proc_wait(pt proc_table, int ppid) (proc_table, proc_descriptor, bool) {
     int i = 0
-    while i < len(pt.procs) {
+    for i < len(pt.procs) {
         if pt.procs[i].ppid == ppid && pt.procs[i].state == PROC_ZOMBIE {
             proc_descriptor result = pt.procs[i]
             pt.procs[i].state = PROC_REAPED

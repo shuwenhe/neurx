@@ -37,7 +37,7 @@ struct project_qkv_result {
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
-    while i < size {
+    for i < size {
         v[i] = init_val
         i = i + 1
     }
@@ -47,7 +47,7 @@ func allocate_vector(int size, float init_val) []float {
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
-    while i < len(src) {
+    for i < len(src) {
         out[i] = src[i]
         i = i + 1
     }
@@ -64,7 +64,7 @@ func exp_approx(float x) float {
     float term = 1.0
     float result = 1.0
     int i = 1
-    while i <= 12 {
+    for i <= 12 {
         term = term * x / (i * 1.0)
         result = result + term
         i = i + 1
@@ -78,7 +78,7 @@ func sqrt_approx(float x) float {
     }
     float y = x
     int i = 0
-    while i < 10 {
+    for i < 10 {
         y = 0.5 * (y + x / y)
         i = i + 1
     }
@@ -102,7 +102,7 @@ func new_attention_config(int hidden_dim, int num_heads, int num_key_value_heads
 func fill_ramp(int size, float scale) []float {
     []float values = allocate_vector(size, 0.0)
     int i = 0
-    while i < size {
+    for i < size {
         values[i] = scale * ((i + 1) * 1.0) / ((size + 1) * 1.0)
         i = i + 1
     }
@@ -131,12 +131,12 @@ func new_multi_head_attention(attention_config cfg) multi_head_attention {
 func matmul_flat([]float a, []float b, int m, int k, int n) []float {
     []float result = allocate_vector(m * n, 0.0)
     int i = 0
-    while i < m {
+    for i < m {
         int j = 0
-        while j < n {
+        for j < n {
             float sum = 0.0
             int l = 0
-            while l < k {
+            for l < k {
                 sum = sum + a[i * k + l] * b[l * n + j]
                 l = l + 1
             }
@@ -154,7 +154,7 @@ func apply_bias([]float values, []float bias) []float {
     }
     []float out = copy_vector(values)
     int i = 0
-    while i < len(out) {
+    for i < len(out) {
         out[i] = out[i] + bias[i % len(bias)]
         i = i + 1
     }
@@ -165,7 +165,7 @@ func softmax_row([]float row, int size) []float {
     []float out = allocate_vector(size, 0.0)
     float max_val = row[0]
     int i = 1
-    while i < size {
+    for i < size {
         if row[i] > max_val {
             max_val = row[i]
         }
@@ -173,7 +173,7 @@ func softmax_row([]float row, int size) []float {
     }
     float sum_exp = 0.0
     i = 0
-    while i < size {
+    for i < size {
         float e = exp_approx(row[i] - max_val)
         out[i] = e
         sum_exp = sum_exp + e
@@ -181,7 +181,7 @@ func softmax_row([]float row, int size) []float {
     }
     if sum_exp > 0.0 {
         i = 0
-        while i < size {
+        for i < size {
             out[i] = out[i] / sum_exp
             i = i + 1
         }
@@ -220,7 +220,7 @@ func attention_core(
     []float output = allocate_vector(seq_len * hidden_dim, 0.0)
     float scale = 1.0 / sqrt_approx(head_dim * 1.0)
     int h = 0
-    while h < num_heads {
+    for h < num_heads {
         int kv_head = h
         if num_kv_heads > 0 {
             kv_head = h % num_kv_heads
@@ -228,13 +228,13 @@ func attention_core(
         int q_offset = h * q_block
         int kv_offset = kv_head * q_block
         int i = 0
-        while i < seq_len {
+        for i < seq_len {
             []float scores = allocate_vector(seq_len, 0.0)
             int j = 0
-            while j < seq_len {
+            for j < seq_len {
                 float score = 0.0
                 int d = 0
-                while d < head_dim {
+                for d < head_dim {
                     score = score + query[q_offset + i * head_dim + d] * key[kv_offset + j * head_dim + d]
                     d = d + 1
                 }
@@ -246,10 +246,10 @@ func attention_core(
             }
             []float weights = softmax_row(scores, seq_len)
             int d = 0
-            while d < head_dim {
+            for d < head_dim {
                 float sum_val = 0.0
                 j = 0
-                while j < seq_len {
+                for j < seq_len {
                     sum_val = sum_val + weights[j] * value[kv_offset + j * head_dim + d]
                     j = j + 1
                 }
@@ -332,9 +332,9 @@ func forward_flash_attention(
     )
     []float causal_mask = allocate_vector(seq_len * seq_len, 1.0)
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         int j = i + 1
-        while j < seq_len {
+        for j < seq_len {
             causal_mask[i * seq_len + j] = 0.0
             j = j + 1
         }
@@ -356,11 +356,11 @@ func reshape_for_flash([]float input, int seq_len, int num_heads, int head_dim) 
     int hidden_dim = num_heads * head_dim
     []float output = allocate_vector(seq_len * num_heads * head_dim, 0.0)
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         int h = 0
-        while h < num_heads {
+        for h < num_heads {
             int d = 0
-            while d < head_dim {
+            for d < head_dim {
                 output[h * seq_len * head_dim + i * head_dim + d] = input[i * hidden_dim + h * head_dim + d]
                 d = d + 1
             }
@@ -375,11 +375,11 @@ func reshape_from_flash([]float input, int seq_len, int num_heads, int head_dim)
     int hidden_dim = num_heads * head_dim
     []float output = allocate_vector(seq_len * hidden_dim, 0.0)
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         int h = 0
-        while h < num_heads {
+        for h < num_heads {
             int d = 0
-            while d < head_dim {
+            for d < head_dim {
                 output[i * hidden_dim + h * head_dim + d] = input[h * seq_len * head_dim + i * head_dim + d]
                 d = d + 1
             }
@@ -406,9 +406,9 @@ func apply_causal_mask(
 ) []float {
     []float out = copy_vector(attention_scores)
     int i = 0
-    while i < seq_len {
+    for i < seq_len {
         int j = i + 1
-        while j < seq_len {
+        for j < seq_len {
             out[i * seq_len + j] = -10000.0
             j = j + 1
         }
@@ -428,7 +428,7 @@ func apply_attention_dropout(
     []float out = copy_vector(attention_weights)
     float keep_scale = 1.0 / (1.0 - dropout_rate)
     int i = 0
-    while i < len(out) {
+    for i < len(out) {
         int bucket = (seed + i * 1103515245) % 1000
         if bucket < (dropout_rate * 1000.0) {
             out[i] = 0.0

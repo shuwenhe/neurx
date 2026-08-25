@@ -11,7 +11,7 @@ func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0
     int i = 1
-    while i <= 10 {
+    for i <= 10 {
         term = term * x / i
         result = result + term
         i = i + 1
@@ -25,7 +25,7 @@ func sqrt_approx(float x) float {
     }
     float guess = x
     int i = 0
-    while i < 8 {
+    for i < 8 {
         guess = 0.5 * (guess + x / guess)
         i = i + 1
     }
@@ -46,7 +46,7 @@ func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -57,7 +57,7 @@ func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = data[i]
         i = i + 1
     }
@@ -72,7 +72,7 @@ func relu(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float v = input.data[i]
         if v > 0.0 {
             out[i] = v
@@ -88,7 +88,7 @@ func leaky_relu(tensor input, float negative_slope) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float v = input.data[i]
         if v > 0.0 {
             out[i] = v
@@ -104,7 +104,7 @@ func elu(tensor input, float alpha) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float v = input.data[i]
         if v > 0.0 {
             out[i] = v
@@ -120,7 +120,7 @@ func sigmoid(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = 1.0 / (1.0 + exp_approx(-input.data[i]))
         i = i + 1
     }
@@ -131,7 +131,7 @@ func tanh(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = tanh_approx(input.data[i])
         i = i + 1
     }
@@ -142,7 +142,7 @@ func gelu(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float x = input.data[i]
         float x3 = x * x * x
         float inner = 0.7978845608 * (x + 0.044715 * x3)
@@ -156,7 +156,7 @@ func silu(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float x = input.data[i]
         out[i] = x / (1.0 + exp_approx(-x))
         i = i + 1
@@ -168,7 +168,7 @@ func softplus(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float x = input.data[i]
         out[i] = log_approx(1.0 + exp_approx(x))
         i = i + 1
@@ -181,7 +181,7 @@ func mish(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = input.data[i] * tanh_approx(sp.data[i])
         i = i + 1
     }
@@ -210,7 +210,7 @@ func relu6(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = clamp_value(input.data[i], 0.0, 6.0)
         i = i + 1
     }
@@ -221,7 +221,7 @@ func hardtanh(tensor input, float min_value, float max_value) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = clamp_value(input.data[i], min_value, max_value)
         i = i + 1
     }
@@ -232,7 +232,7 @@ func hardsigmoid(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = clamp_value((input.data[i] + 3.0) / 6.0, 0.0, 1.0)
         i = i + 1
     }
@@ -243,7 +243,7 @@ func hardswish(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float gate = clamp_value((input.data[i] + 3.0) / 6.0, 0.0, 1.0)
         out[i] = input.data[i] * gate
         i = i + 1
@@ -255,7 +255,7 @@ func threshold(tensor input, float threshold_value, float value) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         if input.data[i] > threshold_value {
             out[i] = input.data[i]
         } else {
@@ -270,7 +270,7 @@ func softsign(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         out[i] = input.data[i] / (1.0 + abs_value(input.data[i]))
         i = i + 1
     }
@@ -282,7 +282,7 @@ func softmax_1d([]float values) []float {
     []float out = []float{cap: n}
     float max_v = values[0]
     int i = 1
-    while i < n {
+    for i < n {
         if values[i] > max_v {
             max_v = values[i]
         }
@@ -290,7 +290,7 @@ func softmax_1d([]float values) []float {
     }
     float denom = 0.0
     i = 0
-    while i < n {
+    for i < n {
         float v = exp_approx(values[i] - max_v)
         out[i] = v
         denom = denom + v
@@ -300,7 +300,7 @@ func softmax_1d([]float values) []float {
         denom = 1.0
     }
     i = 0
-    while i < n {
+    for i < n {
         out[i] = out[i] / denom
         i = i + 1
     }
@@ -312,11 +312,11 @@ func softmax(tensor input) tensor {
     int cols = input.shape[1]
     []float out = []float{cap: rows * cols}
     int r = 0
-    while r < rows {
+    for r < rows {
         int base = r * cols
         float max_v = get_tensor_data(input, base)
         int c = 1
-        while c < cols {
+        for c < cols {
             if get_tensor_data(input, base + c) > max_v {
                 max_v = get_tensor_data(input, base + c)
             }
@@ -324,7 +324,7 @@ func softmax(tensor input) tensor {
         }
         float denom = 0.0
         c = 0
-        while c < cols {
+        for c < cols {
             float v = exp_approx(get_tensor_data(input, base + c) - max_v)
             out[base + c] = v
             denom = denom + v
@@ -334,7 +334,7 @@ func softmax(tensor input) tensor {
             denom = 1.0
         }
         c = 0
-        while c < cols {
+        for c < cols {
             out[base + c] = out[base + c] / denom
             c = c + 1
         }
@@ -348,7 +348,7 @@ func log_softmax(tensor input) tensor {
     int n = len(sm.data)
     []float out = []float{cap: n}
     int i = 0
-    while i < n {
+    for i < n {
         float v = sm.data[i]
         if v < 0.000000000001 {
             v = 0.000000000001
@@ -368,7 +368,7 @@ func log_approx(float x) float {
     float result = z
     float term = z
     int k = 1
-    while k < 20 {
+    for k < 20 {
         term = term * z2
         result = result + term / (2 * k + 1)
         k = k + 1

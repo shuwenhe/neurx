@@ -40,12 +40,12 @@ func compute_router_logits(
 ) []float {
     []float logits = make([]float, num_tokens * num_experts)
     int t = 0
-    while t < num_tokens {
+    for t < num_tokens {
         int e = 0
-        while e < num_experts {
+        for e < num_experts {
             float logit = 0.0
             int h = 0
-            while h < hidden_dim {
+            for h < hidden_dim {
                 logit = logit + hidden_states[t * hidden_dim + h] *
                                router_weight[h * num_experts + e]
                 h = h + 1
@@ -67,21 +67,21 @@ func select_top_k_experts(
 ) []routing_decision {
     []routing_decision decisions = make([]routing_decision, num_tokens)
     int t = 0
-    while t < num_tokens {
+    for t < num_tokens {
         []int indices = make([]int, num_experts)
         []float values = make([]float, num_experts)
         int e = 0
-        while e < num_experts {
+        for e < num_experts {
             indices[e] = e
             values[e] = logits[t * num_experts + e]
             e = e + 1
         }
         int k = 0
-        while k < top_k && k < num_experts {
+        for k < top_k && k < num_experts {
             int best_idx = k
             float best_val = values[k]
             int i = k + 1
-            while i < num_experts {
+            for i < num_experts {
                 if values[i] > best_val {
                     best_val = values[i]
                     best_idx = i
@@ -101,7 +101,7 @@ func select_top_k_experts(
         float max_logit = values[0]
         float sum_exp = 0.0
         int j = 0
-        while j < top_k {
+        for j < top_k {
             selected_experts[j] = indices[j]
             float exp_logit = exp(values[j] - max_logit)
             weights[j] = exp_logit
@@ -109,7 +109,7 @@ func select_top_k_experts(
             j = j + 1
         }
         j = 0
-        while j < top_k {
+        for j < top_k {
             if sum_exp > 0.0 {
                 weights[j] = weights[j] / sum_exp
             }
@@ -133,15 +133,15 @@ func create_send_buffers(
 ) [][]float {
     [][]float send_buffers = make([][]float, ep_size)
     int i = 0
-    while i < ep_size {
+    for i < ep_size {
         send_buffers[i] = make([]float, 0)
         i = i + 1
     }
     int t = 0
-    while t < state.num_tokens {
+    for t < state.num_tokens {
         routing_decision decision = state.routing_decisions[t]
         int k = 0
-        while k < decision.num_experts_selected {
+        for k < decision.num_experts_selected {
             int expert_id = decision.expert_indices[k]
             float weight = decision.expert_weights[k]
             int target_ep_rank = expert_id / (state.num_experts / ep_size)
@@ -149,7 +149,7 @@ func create_send_buffers(
                 target_ep_rank = ep_size - 1
             }
             int h = 0
-            while h < state.hidden_dim {
+            for h < state.hidden_dim {
                 float weighted_val = hidden_states[t * state.hidden_dim + h] * weight
                 h = h + 1
             }
@@ -169,7 +169,7 @@ func moe_alltoall_exchange(
 ) [][]float {
     [][]float recv_buffers = make([][]float, ep_size)
     int i = 0
-    while i < ep_size {
+    for i < ep_size {
         recv_buffers[i] = make([]float, 0)
         i = i + 1
     }
@@ -195,17 +195,17 @@ func reconstruct_token_order(
 ) []float {
     []float output = make([]float, num_tokens * hidden_dim)
     int t = 0
-    while t < num_tokens {
+    for t < num_tokens {
         routing_decision decision = state.routing_decisions[t]
         []float combined_output = make([]float, hidden_dim)
         int k = 0
-        while k < decision.num_experts_selected {
+        for k < decision.num_experts_selected {
             int expert_id = decision.expert_indices[k]
             float weight = decision.expert_weights[k]
             k = k + 1
         }
         int h = 0
-        while h < hidden_dim {
+        for h < hidden_dim {
             output[t * hidden_dim + h] = combined_output[h]
             h = h + 1
         }
@@ -219,10 +219,10 @@ func compute_load_balancing_loss(
 ) float {
     []int expert_token_count = make([]int, state.num_experts)
     int t = 0
-    while t < state.num_tokens {
+    for t < state.num_tokens {
         routing_decision decision = state.routing_decisions[t]
         int k = 0
-        while k < decision.num_experts_selected {
+        for k < decision.num_experts_selected {
             int expert_id = decision.expert_indices[k]
             expert_token_count[expert_id] = expert_token_count[expert_id] + 1
             k = k + 1
@@ -232,7 +232,7 @@ func compute_load_balancing_loss(
     float mean_count = float(state.num_tokens * state.top_k) / float(state.num_experts)
     float max_count = 0.0
     int e = 0
-    while e < state.num_experts {
+    for e < state.num_experts {
         if float(expert_token_count[e]) > max_count {
             max_count = float(expert_token_count[e])
         }
@@ -252,7 +252,7 @@ func compute_expert_utilization(
 ) float {
     float total_expert_assignments = 0.0
     int t = 0
-    while t < state.num_tokens {
+    for t < state.num_tokens {
         total_expert_assignments = total_expert_assignments + float(state.top_k)
         t = t + 1
     }

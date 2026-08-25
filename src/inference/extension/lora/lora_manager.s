@@ -73,7 +73,7 @@ func apply_lora_transformation(
 
     scaled_output := vec[float]()
     i := 0
-    while i < output.len() {
+    for i < output.len() {
         scaled_val := output[i] * weights.scaling * scale
         scaled_output.push(scaled_val)
         i = i + 1
@@ -95,11 +95,11 @@ func matrix_multiply(
 
     result := vec[float]()
     i := 0
-    while i < b.len() {
+    for i < b.len() {
         row := b[i]
         sum := 0.0
         j := 0
-        while j < row.len() && j < a.len() {
+        for j < row.len() && j < a.len() {
             sum = sum + a[j] * row[j]
             j = j + 1
         }
@@ -150,7 +150,7 @@ func (mut lora_adapter_manager* manager) remove_adapter(string name) result[(), 
     manager.adapters.remove(name)
 
     idx := 0
-    while idx < manager.active_adapters.len() {
+    for idx < manager.active_adapters.len() {
         if manager.active_adapters[idx] == name {
             manager.active_adapters.remove(idx)
             break
@@ -187,7 +187,7 @@ func (mut lora_adapter_manager* manager) activate_adapter(string name) result[()
 
 func (mut lora_adapter_manager* manager) deactivate_adapter(string name) result[(), lora_adapter_error] {
     idx := 0
-    while idx < manager.active_adapters.len() {
+    for idx < manager.active_adapters.len() {
         if manager.active_adapters[idx] == name {
             manager.active_adapters.remove(idx)
             break
@@ -234,7 +234,7 @@ func (mut lora_adapter_manager* manager) set_global_scale(float scale) result[()
 
 func (mut lora_adapter_manager* manager) merge_adapters() result[(), lora_adapter_error] {
     i := 0
-    while i < manager.active_adapters.len() {
+    for i < manager.active_adapters.len() {
         adapter_name := manager.active_adapters[i]
 
         switch manager.adapters.get(adapter_name) {

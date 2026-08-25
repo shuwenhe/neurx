@@ -50,7 +50,7 @@ struct media_budget_result {
 func media_zero_array(int capacity) []int {
     []int values = []int{cap: capacity}
     int i = 0
-    while i < capacity { values[i] = 0; i = i + 1 }
+    for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
@@ -59,7 +59,7 @@ func media_hash_bytes([]int bytes, int modality, int metadata_hash) int {
     hash = hash * 167 + modality
     hash = hash * 167 + metadata_hash
     int i = 0
-    while i < len(bytes) {
+    for i < len(bytes) {
         hash = hash * 167 + bytes[i]
         hash = hash - (hash / 1000000007) * 1000000007
         i = i + 1
@@ -75,7 +75,7 @@ func init_media_cache(media_cache_config config) media_cache_state {
 
 func media_cache_find(media_cache_state state, int hash) int {
     int i = 0
-    while i < state.config.capacity_items {
+    for i < state.config.capacity_items {
         if state.hashes[i] == hash { return i }
         i = i + 1
     }
@@ -97,14 +97,14 @@ func media_cache_insert(media_cache_state state, int hash, int modality, int tok
     if existing >= 0 { return media_cache_result {state: state, slot: existing, hit: true, stored: false, evicted_hash: 0} }
     int slot = 0 - 1
     int i = 0
-    while i < state.config.capacity_items {
+    for i < state.config.capacity_items {
         if state.hashes[i] == 0 { slot = i; i = state.config.capacity_items }
         else { i = i + 1 }
     }
     if slot < 0 {
         slot = 0
         i = 1
-        while i < state.config.capacity_items {
+        for i < state.config.capacity_items {
             if state.last_access[i] < state.last_access[slot] { slot = i }
             i = i + 1
         }

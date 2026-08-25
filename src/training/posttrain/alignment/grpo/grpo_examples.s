@@ -93,7 +93,7 @@ func example_grpo_group_size_comparison() {
     tokenizer_state tokenizer = load_tokenizer_grpo()
     grpo_dataset dataset = create_grpo_example_dataset()
     int i = 0
-    while i < len(group_sizes) {
+    for i < len(group_sizes) {
         int G = group_sizes[i]
         print("")
         print("[Group Size = " + string(G) + "]")

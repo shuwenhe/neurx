@@ -106,8 +106,8 @@ struct orchestrator_state {
 func orch_mod(int v, int d) int {
     if d <= 0 { return 0 }
     int r = v
-    while r >= d { r = r - d }
-    while r < 0 { r = r + d }
+    for r >= d { r = r - d }
+    for r < 0 { r = r + d }
     return r
 }
 
@@ -225,7 +225,7 @@ func build_topology(int world_size, int tp, int pp, int dp) []gpu_topology_entry
     []gpu_topology_entry map = []gpu_topology_entry{cap: world_size}
     int gpus_per_node = 8
     int rank = 0
-    while rank < world_size {
+    for rank < world_size {
         int d = rank / (tp * pp)
         int remainder = orch_mod(rank, tp * pp)
         int p = remainder / tp
@@ -269,11 +269,11 @@ func run_training_loop(ref orchestrator_state state) {
     int save_interval = cfg.save_every_n_steps
     int log_interval = cfg.log_interval
     int step = 0
-    while step < total_steps {
+    for step < total_steps {
         double step_start = 0.0
         int accum_step = 0
         double step_loss = 0.0
-        while accum_step < cfg.gradient_accumulation_steps {
+        for accum_step < cfg.gradient_accumulation_steps {
             double mb_loss = 0.0
             step_loss = step_loss + mb_loss
             accum_step = accum_step + 1
@@ -329,7 +329,7 @@ func cos_double(double x) double {
     double term = 1.0
     double xx = x * x
     int n = 1
-    while n <= 12 {
+    for n <= 12 {
         term = -term * xx / double((2*n-2) * (2*n-1))
         result = result + term
         n = n + 1
@@ -349,7 +349,7 @@ func log_training_status(
 
 func pad_int(int value, int width) string {
     string s = str(value)
-    while len(s) < width {
+    for len(s) < width {
         s = "0" + s
     }
     return s
@@ -438,7 +438,7 @@ func estimate_memory_usage(training_orchestrator_config cfg) memory_estimate_res
 func pow_dbl_o(double base, double exp) double {
     double result = 1.0
     int e = 0
-    while e < int(exp) {
+    for e < int(exp) {
         result = result * base
         e = e + 1
     }

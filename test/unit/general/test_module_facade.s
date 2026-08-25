@@ -40,7 +40,7 @@ func test_module_facade_basic() bool {
     nn.module frozen = neurx.module.module_freeze(loaded)
     []tensor params = neurx.module.module_parameters(frozen)
     int i = 0
-    while i < len(params) {
+    for i < len(params) {
         if params[i].requires_grad {
             return false
         }
