@@ -30,24 +30,6 @@ func print_mutex_info(mutex m) {
     print("")
 }
 
-func mutex_trylock(mut m: &mutex, int pid) (mutex, bool) {
-    mut_local := m.*
-    success := false
-    
-    if mut_local.state == 0 {
-        mut_local.state = 1
-        mut_local.owner_pid = pid
-        success = true
-    }
-    
-    m.* = mut_local
-    (mut_local, success)
-}
-
-func is_mutex_locked(mutex m) bool {
-    m.state == 1
-}
-
 func get_mutex_owner(mutex m) int {
     m.owner_pid
 }
