@@ -186,7 +186,7 @@ func main() {
         _ = __sys_write_string(1, "❌ Listen failed\n")
         return
     }
-    _ = __sys_write_string(1, "✅ Web UI running at http:
+    _ = __sys_write_string(1, "✅ Web UI running at http://127.0.0.1:8081\n")
     _ = __sys_write_string(1, "📌 Make sure backend is running: make chat-cpu\n")
     while true {
         int client = __sys_accept(listener)

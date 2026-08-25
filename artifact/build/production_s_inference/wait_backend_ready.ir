@@ -152,7 +152,7 @@ RET|"150"|_|_
 JUMP|L42|_|_
 LABEL|L41|_|_
 LABEL|L42|_|_
-RET|"?"|_|_
+RET|""|_|_
 RET|""|_|_
 FUNC_END|format_int|_|_
 FUNC_BEGIN|main|_|_
