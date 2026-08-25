@@ -3343,4 +3343,23 @@ phase1-demo: build-s-ir-runner
 	@echo "   ✓ Process Manager: Unix-style process hierarchy"
 	@echo ""
 
+phase2-demo: build-s-ir-runner
+	@echo "🚀 Running NeurX Phase 2 - AI OS Storage & I/O Demo..."
+	@mkdir -p $(CURDIR_UNIX)/artifact/build/phase2
+	@$(S_SEED_COMPILER) kernel/phase2_integrated_demo.s $(CURDIR_UNIX)/artifact/build/phase2/phase2_demo.ir || { \
+		echo "❌ Phase 2 demo compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Phase 2 demo compiled"
+	@$(S_RUNNER_BIN) $(CURDIR_UNIX)/artifact/build/phase2/phase2_demo.ir 2>&1 | tee $(LOG_DIR)/phase2_demo_$(shell date +%Y%m%d_%H%M%S).log
+	@echo ""
+	@echo "✅ Phase 2 Demo Complete!"
+	@echo "   ✓ Block Device Manager: 512MB storage capacity"
+	@echo "   ✓ I/O Scheduler: Priority-based elevator algorithm"
+	@echo "   ✓ Block Cache: LRU eviction with 256MB cache"
+	@echo "   ✓ Async I/O Engine: io_uring backend support"
+	@echo "   ✓ Memory Manager: Buddy allocator with 512MB"
+	@echo "   ✓ Device Drivers: Modular driver framework"
+	@echo ""
+
 include build/mk/deploy.mk
