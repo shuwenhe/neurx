@@ -3362,4 +3362,26 @@ phase2-demo: build-s-ir-runner
 	@echo "   ✓ Device Drivers: Modular driver framework"
 	@echo ""
 
+phase3-demo: build-s-ir-runner
+	@echo "🔐 Running NeurX Phase 3 - AI OS Locking + VFS + Network Demo..."
+	@mkdir -p $(CURDIR_UNIX)/artifact/build/phase3
+	@$(S_SEED_COMPILER) kernel/phase3_integrated_demo.s $(CURDIR_UNIX)/artifact/build/phase3/phase3_demo.ir || { \
+		echo "❌ Phase 3 demo compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Phase 3 demo compiled"
+	@$(S_RUNNER_BIN) $(CURDIR_UNIX)/artifact/build/phase3/phase3_demo.ir 2>&1 | tee $(LOG_DIR)/phase3_demo_$(shell date +%Y%m%d_%H%M%S).log
+	@echo ""
+	@echo "✅ Phase 3 Demo Complete!"
+	@echo "   ✓ Mutex Lock: Mutual exclusion synchronization"
+	@echo "   ✓ Semaphore: Binary/counting signaling mechanism"
+	@echo "   ✓ Spinlock: CPU busy-wait locking"
+	@echo "   ✓ RW-Lock: Reader-writer lock for concurrent reads"
+	@echo "   ✓ Atomic: Lock-free atomic operations"
+	@echo "   ✓ VFS Layer: Virtual file system abstraction"
+	@echo "   ✓ Inode Cache: Inode metadata caching (10K inodes)"
+	@echo "   ✓ Dentry Cache: Directory entry path cache (5K entries)"
+	@echo "   ✓ Socket Layer: BSD socket interface"
+	@echo ""
+
 include build/mk/deploy.mk
