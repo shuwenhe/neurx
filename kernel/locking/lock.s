@@ -30,13 +30,3 @@ func print_lock_info(lock l) {
     print("✅ Lock operational!")
     print("")
 }
-
-func try_acquire_lock(lock* lock) bool {
-    if !lock.is_locked {
-        lock.is_locked = true
-        lock.owner_id = 0
-        true
-    } else {
-        false
-    }
-}
