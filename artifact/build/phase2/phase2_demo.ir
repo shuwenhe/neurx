@@ -1,0 +1,519 @@
+SSEED-TARGET-V1
+MOV|t0|"t0"|_
+MOV|t0.__type|"block_device_manager"|_
+MOV|t0.num_devices|"int"|_
+MOV|t0.total_devices_mounted|"int"|_
+MOV|t0.total_requests_processed|"int"|_
+MOV|t0.total_sectors_read|"int"|_
+MOV|t0.total_sectors_written|"int"|_
+MOV|t0.active_requests|"int"|_
+MOV|t0.max_device_id|"int"|_
+MOV|block_device_manager|t0|_
+MOV|t1|"t1"|_
+MOV|t1.__type|"io_scheduler"|_
+MOV|t1.total_io_requests|"int"|_
+MOV|t1.requests_in_flight|"int"|_
+MOV|t1.completed_requests|"int"|_
+MOV|t1.failed_requests|"int"|_
+MOV|t1.total_io_bytes|"int"|_
+MOV|t1.avg_latency_us|"int"|_
+MOV|io_scheduler|t1|_
+MOV|t2|"t2"|_
+MOV|t2.__type|"block_cache"|_
+MOV|t2.cache_size_mb|"int"|_
+MOV|t2.cache_entries|"int"|_
+MOV|t2.cache_hits|"int"|_
+MOV|t2.cache_misses|"int"|_
+MOV|t2.evictions|"int"|_
+MOV|t2.dirty_entries|"int"|_
+MOV|t2.hit_rate_percent|"int"|_
+MOV|block_cache|t2|_
+MOV|t3|"t3"|_
+MOV|t3.__type|"async_io_engine"|_
+MOV|t3.total_async_operations|"int"|_
+MOV|t3.pending_operations|"int"|_
+MOV|t3.completed_operations|"int"|_
+MOV|t3.failed_operations|"int"|_
+MOV|t3.total_bytes_transferred|"int"|_
+MOV|t3.throughput_mbps|"int"|_
+MOV|t3.average_completion_time_us|"int"|_
+MOV|async_io_engine|t3|_
+MOV|t4|"t4"|_
+MOV|t4.__type|"memory_manager"|_
+MOV|t4.total_memory_mb|"int"|_
+MOV|t4.available_memory_mb|"int"|_
+MOV|t4.used_memory_mb|"int"|_
+MOV|t4.reserved_memory_mb|"int"|_
+MOV|t4.total_page_faults|"int"|_
+MOV|t4.total_allocations|"int"|_
+MOV|t4.total_deallocations|"int"|_
+MOV|t4.fragmentation_percent|"int"|_
+MOV|memory_manager|t4|_
+MOV|t5|"t5"|_
+MOV|t5.__type|"driver_manager"|_
+MOV|t5.total_drivers|"int"|_
+MOV|t5.active_drivers|"int"|_
+MOV|t5.total_devices_managed|"int"|_
+MOV|t5.total_driver_operations|"int"|_
+MOV|t5.failed_operations|"int"|_
+MOV|t5.driver_load_count|"int"|_
+MOV|t5.driver_unload_count|"int"|_
+MOV|driver_manager|t5|_
+FUNC_BEGIN|create_block_device_manager|_|_
+MOV|t6|"t6"|_
+MOV|t6.__type|"block_device_manager"|_
+MOV|t6.num_devices|0|_
+MOV|t6.total_devices_mounted|0|_
+MOV|t6.total_requests_processed|0|_
+MOV|t6.total_sectors_read|0|_
+MOV|t6.total_sectors_written|0|_
+MOV|t6.active_requests|0|_
+MOV|t6.max_device_id|0|_
+MOV|mgr|t6|_
+RET|mgr|_|_
+RET|0|_|_
+FUNC_END|create_block_device_manager|_|_
+FUNC_BEGIN|register_block_device|_|_
+PARAM|mgr|_|_
+PARAM|name|_|_
+PARAM|capacity_mb|_|_
+ADD|t7|mgr.num_devices|1
+MOV|mgr.num_devices|t7|_
+ADD|t8|mgr.max_device_id|1
+MOV|mgr.max_device_id|t8|_
+RET|mgr|_|_
+RET|0|_|_
+FUNC_END|register_block_device|_|_
+FUNC_BEGIN|mount_block_device|_|_
+PARAM|mgr|_|_
+PARAM|device_id|_|_
+ADD|t9|mgr.total_devices_mounted|1
+MOV|mgr.total_devices_mounted|t9|_
+RET|mgr|_|_
+RET|0|_|_
+FUNC_END|mount_block_device|_|_
+FUNC_BEGIN|submit_read_request|_|_
+PARAM|mgr|_|_
+PARAM|device_id|_|_
+PARAM|sector_offset|_|_
+PARAM|sector_count|_|_
+ADD|t10|mgr.total_requests_processed|1
+MOV|mgr.total_requests_processed|t10|_
+ADD|t11|mgr.total_sectors_read|sector_count
+MOV|mgr.total_sectors_read|t11|_
+ADD|t12|mgr.active_requests|1
+MOV|mgr.active_requests|t12|_
+RET|mgr|_|_
+RET|0|_|_
+FUNC_END|submit_read_request|_|_
+FUNC_BEGIN|print_block_device_manager_info|_|_
+PARAM|mgr|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t13|print|1
+ARG|"║      NeurX Block Device Manager - Status Report            ║"|_|_
+CALL|t14|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t15|print|1
+ARG|""|_|_
+CALL|t16|print|1
+ARG|"📊 Block Device Configuration:"|_|_
+CALL|t17|print|1
+ARG|"   • Total Devices: "|_|_
+CALL|t18|print|1
+ARG|mgr.num_devices|_|_
+CALL|t19|print|1
+ARG|"   • Mounted Devices: "|_|_
+CALL|t20|print|1
+ARG|mgr.total_devices_mounted|_|_
+CALL|t21|print|1
+ARG|""|_|_
+CALL|t22|print|1
+ARG|"📈 Statistics:"|_|_
+CALL|t23|print|1
+ARG|"   • Total Requests: "|_|_
+CALL|t24|print|1
+ARG|mgr.total_requests_processed|_|_
+CALL|t25|print|1
+ARG|"   • Total Sectors Read: "|_|_
+CALL|t26|print|1
+ARG|mgr.total_sectors_read|_|_
+CALL|t27|print|1
+ARG|""|_|_
+CALL|t28|print|1
+ARG|"✅ Block device manager operational!"|_|_
+CALL|t29|print|1
+FUNC_END|print_block_device_manager_info|_|_
+FUNC_BEGIN|create_io_scheduler|_|_
+MOV|t30|"t30"|_
+MOV|t30.__type|"io_scheduler"|_
+MOV|t30.total_io_requests|0|_
+MOV|t30.requests_in_flight|0|_
+MOV|t30.completed_requests|0|_
+MOV|t30.failed_requests|0|_
+MOV|t30.total_io_bytes|0|_
+MOV|t30.avg_latency_us|0|_
+MOV|sched|t30|_
+RET|sched|_|_
+RET|0|_|_
+FUNC_END|create_io_scheduler|_|_
+FUNC_BEGIN|print_io_scheduler_info|_|_
+PARAM|sched|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t31|print|1
+ARG|"║        NeurX I/O Scheduler - Status Report                 ║"|_|_
+CALL|t32|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t33|print|1
+ARG|""|_|_
+CALL|t34|print|1
+ARG|"📊 I/O Scheduler Configuration:"|_|_
+CALL|t35|print|1
+ARG|"   • Scheduling Policy: Priority-based elevator algorithm"|_|_
+CALL|t36|print|1
+ARG|""|_|_
+CALL|t37|print|1
+ARG|"📈 Statistics:"|_|_
+CALL|t38|print|1
+ARG|"   • Total I/O Requests: "|_|_
+CALL|t39|print|1
+ARG|sched.total_io_requests|_|_
+CALL|t40|print|1
+ARG|"   • Completed Requests: "|_|_
+CALL|t41|print|1
+ARG|sched.completed_requests|_|_
+CALL|t42|print|1
+ARG|""|_|_
+CALL|t43|print|1
+ARG|"✅ I/O scheduler operational!"|_|_
+CALL|t44|print|1
+FUNC_END|print_io_scheduler_info|_|_
+FUNC_BEGIN|create_block_cache|_|_
+PARAM|size_mb|_|_
+MOV|t45|"t45"|_
+MOV|t45.__type|"block_cache"|_
+MOV|t45.cache_size_mb|size_mb|_
+MOV|t45.cache_entries|0|_
+MOV|t45.cache_hits|0|_
+MOV|t45.cache_misses|0|_
+MOV|t45.evictions|0|_
+MOV|t45.dirty_entries|0|_
+MOV|t45.hit_rate_percent|0|_
+MOV|cache|t45|_
+RET|cache|_|_
+RET|0|_|_
+FUNC_END|create_block_cache|_|_
+FUNC_BEGIN|print_block_cache_info|_|_
+PARAM|cache|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t46|print|1
+ARG|"║         NeurX Block Cache - Status Report                  ║"|_|_
+CALL|t47|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t48|print|1
+ARG|""|_|_
+CALL|t49|print|1
+ARG|"📊 Block Cache Configuration:"|_|_
+CALL|t50|print|1
+ARG|"   • Cache Size: "|_|_
+CALL|t51|print|1
+ARG|cache.cache_size_mb|_|_
+CALL|t52|print|1
+ARG|"MB"|_|_
+CALL|t53|print|1
+ARG|""|_|_
+CALL|t54|print|1
+ARG|"📈 Statistics:"|_|_
+CALL|t55|print|1
+ARG|"   • Cache Hits: "|_|_
+CALL|t56|print|1
+ARG|cache.cache_hits|_|_
+CALL|t57|print|1
+ARG|"   • Cache Misses: "|_|_
+CALL|t58|print|1
+ARG|cache.cache_misses|_|_
+CALL|t59|print|1
+ARG|""|_|_
+CALL|t60|print|1
+ARG|"✅ Block cache operational!"|_|_
+CALL|t61|print|1
+FUNC_END|print_block_cache_info|_|_
+FUNC_BEGIN|create_async_io_engine|_|_
+MOV|t62|"t62"|_
+MOV|t62.__type|"async_io_engine"|_
+MOV|t62.total_async_operations|0|_
+MOV|t62.pending_operations|0|_
+MOV|t62.completed_operations|0|_
+MOV|t62.failed_operations|0|_
+MOV|t62.total_bytes_transferred|0|_
+MOV|t62.throughput_mbps|0|_
+MOV|t62.average_completion_time_us|0|_
+MOV|engine|t62|_
+RET|engine|_|_
+RET|0|_|_
+FUNC_END|create_async_io_engine|_|_
+FUNC_BEGIN|print_async_io_engine_info|_|_
+PARAM|engine|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t63|print|1
+ARG|"║       NeurX Async I/O Engine - Status Report               ║"|_|_
+CALL|t64|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t65|print|1
+ARG|""|_|_
+CALL|t66|print|1
+ARG|"📊 Async I/O Engine Configuration:"|_|_
+CALL|t67|print|1
+ARG|"   • Backend: io_uring (Linux 5.1+)"|_|_
+CALL|t68|print|1
+ARG|""|_|_
+CALL|t69|print|1
+ARG|"📈 Statistics:"|_|_
+CALL|t70|print|1
+ARG|"   • Total Async Operations: "|_|_
+CALL|t71|print|1
+ARG|engine.total_async_operations|_|_
+CALL|t72|print|1
+ARG|"   • Completed Operations: "|_|_
+CALL|t73|print|1
+ARG|engine.completed_operations|_|_
+CALL|t74|print|1
+ARG|""|_|_
+CALL|t75|print|1
+ARG|"✅ Async I/O engine operational!"|_|_
+CALL|t76|print|1
+FUNC_END|print_async_io_engine_info|_|_
+FUNC_BEGIN|create_memory_manager|_|_
+PARAM|total_mem_mb|_|_
+MOV|t77|"t77"|_
+MOV|t77.__type|"memory_manager"|_
+MOV|t77.total_memory_mb|total_mem_mb|_
+MOV|t77.available_memory_mb|total_mem_mb|_
+MOV|t77.used_memory_mb|0|_
+MUL|t78|total_mem_mb|10
+DIV|t79|t78|100
+MOV|t77.reserved_memory_mb|t79|_
+MOV|t77.total_page_faults|0|_
+MOV|t77.total_allocations|0|_
+MOV|t77.total_deallocations|0|_
+MOV|t77.fragmentation_percent|0|_
+MOV|mgr|t77|_
+RET|mgr|_|_
+RET|0|_|_
+FUNC_END|create_memory_manager|_|_
+FUNC_BEGIN|print_memory_manager_info|_|_
+PARAM|mgr|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t80|print|1
+ARG|"║       NeurX Memory Manager - Status Report                 ║"|_|_
+CALL|t81|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t82|print|1
+ARG|""|_|_
+CALL|t83|print|1
+ARG|"📊 Memory Configuration:"|_|_
+CALL|t84|print|1
+ARG|"   • Total Memory: "|_|_
+CALL|t85|print|1
+ARG|mgr.total_memory_mb|_|_
+CALL|t86|print|1
+ARG|"MB"|_|_
+CALL|t87|print|1
+ARG|""|_|_
+CALL|t88|print|1
+ARG|"📈 Memory Statistics:"|_|_
+CALL|t89|print|1
+ARG|"   • Used Memory: "|_|_
+CALL|t90|print|1
+ARG|mgr.used_memory_mb|_|_
+CALL|t91|print|1
+ARG|"MB"|_|_
+CALL|t92|print|1
+ARG|"   • Available Memory: "|_|_
+CALL|t93|print|1
+ARG|mgr.available_memory_mb|_|_
+CALL|t94|print|1
+ARG|"MB"|_|_
+CALL|t95|print|1
+ARG|"   • Page Faults: "|_|_
+CALL|t96|print|1
+ARG|mgr.total_page_faults|_|_
+CALL|t97|print|1
+ARG|""|_|_
+CALL|t98|print|1
+ARG|"✅ Memory manager operational!"|_|_
+CALL|t99|print|1
+FUNC_END|print_memory_manager_info|_|_
+FUNC_BEGIN|create_driver_manager|_|_
+MOV|t100|"t100"|_
+MOV|t100.__type|"driver_manager"|_
+MOV|t100.total_drivers|0|_
+MOV|t100.active_drivers|0|_
+MOV|t100.total_devices_managed|0|_
+MOV|t100.total_driver_operations|0|_
+MOV|t100.failed_operations|0|_
+MOV|t100.driver_load_count|0|_
+MOV|t100.driver_unload_count|0|_
+MOV|mgr|t100|_
+RET|mgr|_|_
+RET|0|_|_
+FUNC_END|create_driver_manager|_|_
+FUNC_BEGIN|register_device_driver|_|_
+PARAM|mgr|_|_
+PARAM|driver_name|_|_
+PARAM|device_type|_|_
+ADD|t101|mgr.total_drivers|1
+MOV|mgr.total_drivers|t101|_
+ADD|t102|mgr.active_drivers|1
+MOV|mgr.active_drivers|t102|_
+ADD|t103|mgr.driver_load_count|1
+MOV|mgr.driver_load_count|t103|_
+RET|mgr|_|_
+RET|0|_|_
+FUNC_END|register_device_driver|_|_
+FUNC_BEGIN|print_driver_manager_info|_|_
+PARAM|mgr|_|_
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t104|print|1
+ARG|"║       NeurX Device Driver Manager - Status Report          ║"|_|_
+CALL|t105|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t106|print|1
+ARG|""|_|_
+CALL|t107|print|1
+ARG|"📊 Driver Manager Configuration:"|_|_
+CALL|t108|print|1
+ARG|"   • Driver Architecture: Modular character & block drivers"|_|_
+CALL|t109|print|1
+ARG|""|_|_
+CALL|t110|print|1
+ARG|"📈 Statistics:"|_|_
+CALL|t111|print|1
+ARG|"   • Total Drivers Registered: "|_|_
+CALL|t112|print|1
+ARG|mgr.total_drivers|_|_
+CALL|t113|print|1
+ARG|"   • Active Drivers: "|_|_
+CALL|t114|print|1
+ARG|mgr.active_drivers|_|_
+CALL|t115|print|1
+ARG|""|_|_
+CALL|t116|print|1
+ARG|"✅ Device driver manager operational!"|_|_
+CALL|t117|print|1
+FUNC_END|print_driver_manager_info|_|_
+FUNC_BEGIN|demonstrate_block_storage|_|_
+ARG|""|_|_
+CALL|t118|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t119|print|1
+ARG|"  💾 Demonstrating Block Storage Subsystem"|_|_
+CALL|t120|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t121|print|1
+CALL|t122|create_block_device_manager|0
+MOV|bd_mgr|t122|_
+ARG|bd_mgr|_|_
+CALL|t123|print_block_device_manager_info|1
+FUNC_END|demonstrate_block_storage|_|_
+FUNC_BEGIN|demonstrate_io_scheduler|_|_
+ARG|""|_|_
+CALL|t124|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t125|print|1
+ARG|"  ⚙️  Demonstrating I/O Scheduler"|_|_
+CALL|t126|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t127|print|1
+CALL|t128|create_io_scheduler|0
+MOV|io_sched|t128|_
+ARG|io_sched|_|_
+CALL|t129|print_io_scheduler_info|1
+FUNC_END|demonstrate_io_scheduler|_|_
+FUNC_BEGIN|demonstrate_block_cache|_|_
+ARG|""|_|_
+CALL|t130|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t131|print|1
+ARG|"  📦 Demonstrating Block Cache"|_|_
+CALL|t132|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t133|print|1
+ARG|256|_|_
+CALL|t134|create_block_cache|1
+MOV|cache|t134|_
+ARG|cache|_|_
+CALL|t135|print_block_cache_info|1
+FUNC_END|demonstrate_block_cache|_|_
+FUNC_BEGIN|demonstrate_async_io|_|_
+ARG|""|_|_
+CALL|t136|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t137|print|1
+ARG|"  🔄 Demonstrating Async I/O"|_|_
+CALL|t138|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t139|print|1
+CALL|t140|create_async_io_engine|0
+MOV|async_engine|t140|_
+ARG|async_engine|_|_
+CALL|t141|print_async_io_engine_info|1
+FUNC_END|demonstrate_async_io|_|_
+FUNC_BEGIN|demonstrate_memory_management|_|_
+ARG|""|_|_
+CALL|t142|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t143|print|1
+ARG|"  🧠 Demonstrating Memory Management"|_|_
+CALL|t144|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t145|print|1
+ARG|512|_|_
+CALL|t146|create_memory_manager|1
+MOV|mem_mgr|t146|_
+ARG|mem_mgr|_|_
+CALL|t147|print_memory_manager_info|1
+FUNC_END|demonstrate_memory_management|_|_
+FUNC_BEGIN|demonstrate_device_drivers|_|_
+ARG|""|_|_
+CALL|t148|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t149|print|1
+ARG|"  🔌 Demonstrating Device Drivers"|_|_
+CALL|t150|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t151|print|1
+CALL|t152|create_driver_manager|0
+MOV|drv_mgr|t152|_
+ARG|drv_mgr|_|_
+CALL|t153|print_driver_manager_info|1
+FUNC_END|demonstrate_device_drivers|_|_
+FUNC_BEGIN|main|_|_
+ARG|""|_|_
+CALL|t154|print|1
+ARG|"╔════════════════════════════════════════════════════════════╗"|_|_
+CALL|t155|print|1
+ARG|"║          NeurX Phase 2 - AI OS Storage & I/O Demo          ║"|_|_
+CALL|t156|print|1
+ARG|"║  Block Devices + I/O Scheduler + Async I/O + Memory Mgmt   ║"|_|_
+CALL|t157|print|1
+ARG|"╚════════════════════════════════════════════════════════════╝"|_|_
+CALL|t158|print|1
+CALL|t159|demonstrate_block_storage|0
+CALL|t160|demonstrate_io_scheduler|0
+CALL|t161|demonstrate_block_cache|0
+CALL|t162|demonstrate_async_io|0
+CALL|t163|demonstrate_memory_management|0
+CALL|t164|demonstrate_device_drivers|0
+ARG|""|_|_
+CALL|t165|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t166|print|1
+ARG|"✅ Phase 2 Demonstration Complete!"|_|_
+CALL|t167|print|1
+ARG|"All storage, I/O, and memory systems operational"|_|_
+CALL|t168|print|1
+ARG|"════════════════════════════════════════════════════════════"|_|_
+CALL|t169|print|1
+ARG|""|_|_
+CALL|t170|print|1
+FUNC_END|main|_|_
