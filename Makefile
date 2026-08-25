@@ -1027,9 +1027,9 @@ $(PRODUCTION_S_BACKEND): backend/cpu/inference_server.s src/inference/extension/
 	@echo "✓ LMCache Phase 2-4 modules included: hash_table (O(1) lookup), storage_backend (L1/L2/L3), lru_linked_list (O(1) evict), distributed_cache, performance_optimization, advanced_cache_engine"
 	@touch '$(PRODUCTION_S_BACKEND)'
 
-$(PRODUCTION_S_GPU_BACKEND): backend/cuda/inference_server.s src/model/formats/hf_config.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_GPU_BACKEND): backend/platform/cuda/inference_server.s src/model/formats/hf_config.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX GPU Backend (Pure S Language + GPU Acceleration)..."
-	@$(S_SEED_COMPILER) backend/cuda/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_entry.ir' && \
+	@$(S_SEED_COMPILER) backend/platform/cuda/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_entry.ir' && \
 		$(S_SEED_COMPILER) src/model/formats/hf_config.s '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' && \
 		$(S_SEED_COMPILER) --link-ir '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir' '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_entry.ir' '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' || { \
 		echo "❌ GPU Backend compilation failed!"; \
@@ -1042,9 +1042,9 @@ $(PRODUCTION_S_GPU_BACKEND): backend/cuda/inference_server.s src/model/formats/h
 	@echo "✓ GPU backend compiled: $(PRODUCTION_S_INFERENCE_DIR)/gpu_backend.ir"
 	@touch '$(PRODUCTION_S_GPU_BACKEND)'
 
-$(PRODUCTION_S_GPU_BACKEND_ENHANCED): backend/cuda/inference_server.s src/model/formats/hf_config.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_GPU_BACKEND_ENHANCED): backend/platform/cuda/inference_server.s src/model/formats/hf_config.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX GPU Backend Enhanced (Real Inference + Streaming MatMul)..."
-	@$(S_SEED_COMPILER) backend/cuda/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced_entry.ir' && \
+	@$(S_SEED_COMPILER) backend/platform/cuda/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced_entry.ir' && \
 		$(S_SEED_COMPILER) src/model/formats/hf_config.s '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' && \
 		$(S_SEED_COMPILER) --link-ir '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced.ir' '$(PRODUCTION_S_INFERENCE_DIR)/gpu_backend_enhanced_entry.ir' '$(PRODUCTION_S_INFERENCE_DIR)/hf_config.ir' || { \
 		echo "❌ GPU Backend Enhanced compilation failed!"; \
