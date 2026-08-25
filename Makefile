@@ -3171,19 +3171,10 @@ logs:
 	@echo "💡 Tip: Run 'make log-tail' to watch logs in real-time"
 
 log:
-	@mkdir -p $(LOG_DIR)
-	@if [ -f "$(LOG_DIR)/gpu_backend.log" ]; then \
-		echo "📋 GPU Backend Log (Ctrl+C to exit):"; \
-		echo ""; \
-		tail -f $(LOG_DIR)/gpu_backend.log; \
-	else \
-		echo "⚠️  GPU Backend log not found: $(LOG_DIR)/gpu_backend.log"; \
-		echo ""; \
-		echo "💡 Available logs:"; \
-		ls -lh $(LOG_DIR)/ 2>/dev/null || echo "  (no logs yet)"; \
-		echo ""; \
-		echo "💡 Start services with: make start-inference"; \
-	fi
+	@echo "📋 GPU Backend Log (Ctrl+C to exit):"; \
+	echo ""; \
+	tail -f /tmp/neurx_gpu_backend.log 2>/dev/null || echo "❌ Log file not found: /tmp/neurx_gpu_backend.log"; \
+	echo "💡 Start services with: make chat-gpu"
 
 log-gpu:
 	@tail -f $(LOG_DIR)/gpu_backend.log
