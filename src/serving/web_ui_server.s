@@ -11,7 +11,7 @@ extern "intrinsic" func __sys_setsockopt(int fd, int level, int option, int valu
 func get_html() string {
     string html = "<!DOCTYPE html>\n"
     html = html + "<html>\n"
-    html = html + "<head><title>NeurX AI Training & Inference</title>\n"
+    html = html + "<head><title>NeurX</title>\n"
     html = html + "<style>\n"
     html = html + "body{font-family:Arial,sans-serif;margin:0;padding:0;background:#f5f5f5;height:100vh;display:flex;justify-content:center;align-items:center}\n"
     html = html + ".container{background:white;display:flex;flex-direction:column;width:80%;height:90vh;box-shadow:0 2px 10px rgba(0,0,0,0.1);border-radius:8px;overflow:hidden}\n"
@@ -52,7 +52,7 @@ func get_html() string {
     html = html + "<div class=\"form-group\">\n"
     html = html + "<textarea id=\"prompt\" placeholder=\"Enter your prompt... (Enter to send, Shift+Enter for new line)\" style=\"min-height:60px;resize:vertical;font-family:inherit;font-size:inherit;padding:8px;border:1px solid #ddd;border-radius:4px;line-height:1.5\" wrap=\"soft\">What is artificial intelligence</textarea>\n"
     html = html + "</div>\n"
-    html = html + "<div class=\"form-group\">\n"
+    html = html + "<div class=\"form-group\" style=\"display:none\">\n"
     html = html + "<label for=\"maxTokens\">Max Tokens:</label>\n"
     html = html + "<input type=\"number\" id=\"maxTokens\" value=\"1024\" min=\"1\" max=\"4096\">\n"
     html = html + "</div>\n"

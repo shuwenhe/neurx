@@ -3,7 +3,7 @@ FUNC_BEGIN|get_html|_|_
 MOV|html|"<!DOCTYPE html>\\n"|_
 ADD|t0|html|"<html>\\n"
 MOV|html|t0|_
-ADD|t1|html|"<head><title>NeurX AI Training & Inference</title>\\n"
+ADD|t1|html|"<head><title>NeurX</title>\\n"
 MOV|html|t1|_
 ADD|t2|html|"<style>\\n"
 MOV|html|t2|_
@@ -85,7 +85,7 @@ ADD|t40|html|"<textarea id=\\"prompt\\" placeholder=\\"Enter your prompt... (Ent
 MOV|html|t40|_
 ADD|t41|html|"</div>\\n"
 MOV|html|t41|_
-ADD|t42|html|"<div class=\\"form-group\\">\\n"
+ADD|t42|html|"<div class=\\"form-group\\" style=\\"display:none\\">\\n"
 MOV|html|t42|_
 ADD|t43|html|"<label for=\\"maxTokens\\">Max Tokens:</label>\\n"
 MOV|html|t43|_
