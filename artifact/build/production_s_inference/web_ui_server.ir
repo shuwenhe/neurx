@@ -131,7 +131,7 @@ ADD|t63|html|"function renderMarkdown(text){window.__neurxCodes=[];let html='',p
 MOV|html|t63|_
 ADD|t64|html|"async function copyCode(id,btn){await navigator.clipboard.writeText(window.__neurxCodes[id]\|\|'');const old=btn.textContent;btn.textContent='✅ Copied';setTimeout(()=>btn.textContent=old,1200)}\\n"
 MOV|html|t64|_
-ADD|t65|html|"function streamRender(target,text){return new Promise(resolve=>{let shown=0;function frame(){shown=Math.min(text.length,shown+3);target.innerHTML=renderMarkdown(text.slice(0,shown))+(shown<text.length?'<span class=\\"stream-cursor\\"></span>':'');target.scrollIntoView({block:'nearest'});if(shown<text.length)requestAnimationFrame(frame);else resolve()}frame()})}\\n"
+ADD|t65|html|"function streamRender(target,text){return new Promise(resolve=>{let shown=0;function frame(){shown=Math.min(text.length,shown+3);target.innerHTML=renderMarkdown(text.slice(0,shown));target.scrollIntoView({block:'nearest'});if(shown<text.length)requestAnimationFrame(frame);else resolve()}frame()})}\\n"
 MOV|html|t65|_
 ADD|t66|html|"async function sendRequest(){\\n"
 MOV|html|t66|_
@@ -141,7 +141,7 @@ ADD|t68|html|"if(!promptEl\|\|!maxEl\|\|!resultEl){console.error('Required eleme
 MOV|html|t68|_
 ADD|t69|html|"const p=promptEl.value,m=parseInt(maxEl.value)\|\|1024,r=resultEl;\\n"
 MOV|html|t69|_
-ADD|t70|html|"let chatHtml=r.innerHTML+'<div class=\\"user-message\\"><div class=\\"user-message-bubble\\">'+escapeHtml(p)+'</div></div><div class=\\"ai-response\\"><div class=\\"ai-response-bubble\\"><div id=\\"responseBody\\" class=\\"response-body\\"><span class=\\"stream-cursor\\"></span></div></div></div>';\\n"
+ADD|t70|html|"let chatHtml=r.innerHTML+'<div class=\\"user-message\\"><div class=\\"user-message-bubble\\">'+escapeHtml(p)+'</div></div><div class=\\"ai-response\\"><div class=\\"ai-response-bubble\\"><div id=\\"responseBody\\" class=\\"response-body\\"></div></div></div>';\\n"
 MOV|html|t70|_
 ADD|t71|html|"r.innerHTML=chatHtml;\\n"
 MOV|html|t71|_
@@ -157,9 +157,9 @@ ADD|t76|html|"while(!finished){const part=await reader.read();finished=part.done
 MOV|html|t76|_
 ADD|t77|html|"const lines=pending.split(String.fromCharCode(10));pending=lines.pop()\|\|'';for(const line of lines){if(!line.trim())continue;const event=JSON.parse(line);\\n"
 MOV|html|t77|_
-ADD|t78|html|"if(event.error)throw new Error(event.error);if(event.delta){output+=event.delta;body.innerHTML=renderMarkdown(output)+'<span class=\\"stream-cursor\\"></span>';body.parentElement.scrollIntoView({block:'end'})}if(event.done)finished=true}}\\n"
+ADD|t78|html|"if(event.error)throw new Error(event.error);if(event.delta){output+=event.delta;body.innerHTML=renderMarkdown(output);body.parentElement.scrollIntoView({block:'end'})}if(event.done)finished=true}}\\n"
 MOV|html|t78|_
-ADD|t79|html|"if(pending.trim()){const event=JSON.parse(pending);if(event.delta){output+=event.delta;body.innerHTML=renderMarkdown(output)+'<span class=\\"stream-cursor\\"></span>';body.parentElement.scrollIntoView({block:'end'})}}\\n"
+ADD|t79|html|"if(pending.trim()){const event=JSON.parse(pending);if(event.delta){output+=event.delta;body.innerHTML=renderMarkdown(output);body.parentElement.scrollIntoView({block:'end'})}}\\n"
 MOV|html|t79|_
 ADD|t80|html|"const cursor=r.querySelector('.stream-cursor');if(cursor)cursor.remove();promptEl.value=''}catch(e){r.innerHTML+='<p class=\\"error\\">❌ Connection error: '+escapeHtml(e)+'</p>';r.scrollIntoView({block:'end'});promptEl.value=''}}\\n"
 MOV|html|t80|_
