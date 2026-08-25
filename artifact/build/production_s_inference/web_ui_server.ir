@@ -7,197 +7,203 @@ ADD|t1|html|"<head><title>NeurX AI Training & Inference</title>\\n"
 MOV|html|t1|_
 ADD|t2|html|"<style>\\n"
 MOV|html|t2|_
-ADD|t3|html|"body{font-family:Arial,sans-serif;max-width:900px;margin:50px auto;background:#f5f5f5}\\n"
+ADD|t3|html|"body{font-family:Arial,sans-serif;margin:0;padding:0;background:#f5f5f5;height:100vh;display:flex}\\n"
 MOV|html|t3|_
-ADD|t4|html|".container{background:white;padding:30px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}\\n"
+ADD|t4|html|".container{background:white;display:flex;flex-direction:column;width:100%;height:100vh;box-shadow:0 2px 10px rgba(0,0,0,0.1)}\\n"
 MOV|html|t4|_
-ADD|t5|html|"h1{color:#333;text-align:center}\\n"
+ADD|t5|html|"h1{color:#333;text-align:center;padding:15px;margin:0;border-bottom:1px solid #ddd;flex-shrink:0}\\n"
 MOV|html|t5|_
-ADD|t6|html|".form-group{margin:15px 0}\\n"
+ADD|t6|html|"#result{flex:1;background:#f9f9f9;border:none;padding:20px;border-radius:0;margin:0;line-height:1.6;color:#333;overflow-y:auto}\\n"
 MOV|html|t6|_
-ADD|t7|html|"label{display:block;font-weight:bold;margin-bottom:5px;color:#555}\\n"
+ADD|t7|html|".input-section{background:white;border-top:1px solid #ddd;padding:20px;flex-shrink:0;max-height:50vh;overflow-y:auto}\\n"
 MOV|html|t7|_
-ADD|t8|html|"textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;font-family:monospace;font-size:14px;resize:vertical}\\n"
+ADD|t8|html|".form-group{margin:15px 0}\\n"
 MOV|html|t8|_
-ADD|t9|html|"input[type=\\"number\\"]{width:100px;padding:8px;border:1px solid #ddd;border-radius:4px}\\n"
+ADD|t9|html|"label{display:block;font-weight:bold;margin-bottom:5px;color:#555}\\n"
 MOV|html|t9|_
-ADD|t10|html|".button-group{display:flex;gap:10px;margin-top:15px}\\n"
+ADD|t10|html|"textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;font-family:monospace;font-size:14px;resize:vertical}\\n"
 MOV|html|t10|_
-ADD|t11|html|"button{flex:1;background:#4CAF50;color:white;padding:12px;border:none;border-radius:4px;cursor:pointer;font-size:14px;font-weight:bold}\\n"
+ADD|t11|html|"input[type=\\"number\\"]{width:100px;padding:8px;border:1px solid #ddd;border-radius:4px}\\n"
 MOV|html|t11|_
-ADD|t12|html|"button:hover{background:#45a049}\\n"
+ADD|t12|html|".button-group{display:flex;gap:10px;margin-top:15px}\\n"
 MOV|html|t12|_
-ADD|t13|html|"button.clear{background:#ff9800}\\n"
+ADD|t13|html|"button{flex:1;background:#4CAF50;color:white;padding:12px;border:none;border-radius:4px;cursor:pointer;font-size:14px;font-weight:bold}\\n"
 MOV|html|t13|_
-ADD|t14|html|"button.clear:hover{background:#e68900}\\n"
+ADD|t14|html|"button:hover{background:#45a049}\\n"
 MOV|html|t14|_
-ADD|t15|html|"#result{background:#f9f9f9;border:1px solid #ddd;padding:15px;border-radius:4px;margin-top:20px;min-height:100px;line-height:1.6;color:#333}\\n"
+ADD|t15|html|"button.clear{background:#ff9800}\\n"
 MOV|html|t15|_
-ADD|t16|html|".loading{color:#999;font-style:italic}\\n"
+ADD|t16|html|"button.clear:hover{background:#e68900}\\n"
 MOV|html|t16|_
-ADD|t17|html|".error{color:#d32f2f}\\n"
+ADD|t17|html|".loading{color:#999;font-style:italic}\\n"
 MOV|html|t17|_
-ADD|t18|html|".success{color:#388e3c}\\n"
+ADD|t18|html|".error{color:#d32f2f}\\n"
 MOV|html|t18|_
-ADD|t19|html|".response-body{white-space:normal;overflow-wrap:anywhere}\\n"
+ADD|t19|html|".success{color:#388e3c}\\n"
 MOV|html|t19|_
-ADD|t20|html|".response-body p{margin:0.65em 0}\\n"
+ADD|t20|html|".response-body{white-space:normal;overflow-wrap:anywhere}\\n"
 MOV|html|t20|_
-ADD|t21|html|".code-block{margin:14px 0;border:1px solid #3d4652;border-radius:8px;overflow:hidden;background:#111827}\\n"
+ADD|t21|html|".response-body p{margin:0.65em 0}\\n"
 MOV|html|t21|_
-ADD|t22|html|".code-head{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;background:#1f2937;color:#cbd5e1;font:12px monospace}\\n"
+ADD|t22|html|".code-block{margin:14px 0;border:1px solid #3d4652;border-radius:8px;overflow:hidden;background:#111827}\\n"
 MOV|html|t22|_
-ADD|t23|html|".copy-code{flex:0;background:#374151;padding:4px 9px;font-size:12px}\\n"
+ADD|t23|html|".code-head{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;background:#1f2937;color:#cbd5e1;font:12px monospace}\\n"
 MOV|html|t23|_
-ADD|t24|html|".code-block pre{margin:0;padding:15px;overflow:auto;color:#e5e7eb;font:14px/1.55 Consolas,Monaco,monospace;white-space:pre}\\n"
+ADD|t24|html|".copy-code{flex:0;background:#374151;padding:4px 9px;font-size:12px}\\n"
 MOV|html|t24|_
-ADD|t25|html|".stream-cursor{display:inline-block;width:8px;height:1.05em;margin-left:3px;background:#4CAF50;vertical-align:-2px;animation:blink .8s steps(1) infinite}\\n"
+ADD|t25|html|".code-block pre{margin:0;padding:15px;overflow:auto;color:#e5e7eb;font:14px/1.55 Consolas,Monaco,monospace;white-space:pre}\\n"
 MOV|html|t25|_
-ADD|t26|html|"@keyframes blink{50%{opacity:0}}\\n"
+ADD|t26|html|".stream-cursor{display:inline-block;width:8px;height:1.05em;margin-left:3px;background:#4CAF50;vertical-align:-2px;animation:blink .8s steps(1) infinite}\\n"
 MOV|html|t26|_
-ADD|t27|html|"#backendStatus{margin-top:15px;padding:10px;border-radius:4px;font-size:12px}\\n"
+ADD|t27|html|"@keyframes blink{50%{opacity:0}}\\n"
 MOV|html|t27|_
-ADD|t28|html|".status-ok{background:#c8e6c9;color:#2e7d32}\\n"
+ADD|t28|html|"#backendStatus{margin-bottom:15px;padding:10px;border-radius:4px;font-size:12px}\\n"
 MOV|html|t28|_
-ADD|t29|html|".status-err{background:#ffcdd2;color:#c62828}\\n"
+ADD|t29|html|".status-ok{background:#c8e6c9;color:#2e7d32}\\n"
 MOV|html|t29|_
-ADD|t30|html|"</style>\\n"
+ADD|t30|html|".status-err{background:#ffcdd2;color:#c62828}\\n"
 MOV|html|t30|_
-ADD|t31|html|"</head>\\n"
+ADD|t31|html|"</style>\\n"
 MOV|html|t31|_
-ADD|t32|html|"<body>\\n"
+ADD|t32|html|"</head>\\n"
 MOV|html|t32|_
-ADD|t33|html|"<div class=\\"container\\">\\n"
+ADD|t33|html|"<body>\\n"
 MOV|html|t33|_
-ADD|t34|html|"<h1>🧠 NeurX AI Training & Inference Engine</h1>\\n"
+ADD|t34|html|"<div class=\\"container\\">\\n"
 MOV|html|t34|_
-ADD|t35|html|"<div class=\\"form-group\\">\\n"
+ADD|t35|html|"<h1>NeurX</h1>\\n"
 MOV|html|t35|_
-ADD|t36|html|"<label for=\\"prompt\\">Prompt:</label>\\n"
+ADD|t36|html|"<div id=\\"result\\"></div>\\n"
 MOV|html|t36|_
-ADD|t37|html|"<textarea id=\\"prompt\\" rows=\\"6\\" placeholder=\\"Enter your prompt here...\\">What is artificial intelligence</textarea>\\n"
+ADD|t37|html|"<div class=\\"input-section\\">\\n"
 MOV|html|t37|_
-ADD|t38|html|"</div>\\n"
+ADD|t38|html|"<div id=\\"backendStatus\\">Checking backend...</div>\\n"
 MOV|html|t38|_
 ADD|t39|html|"<div class=\\"form-group\\">\\n"
 MOV|html|t39|_
-ADD|t40|html|"<label for=\\"maxTokens\\">Max Tokens:</label>\\n"
+ADD|t40|html|"<label for=\\"prompt\\">Prompt:</label>\\n"
 MOV|html|t40|_
-ADD|t41|html|"<input type=\\"number\\" id=\\"maxTokens\\" value=\\"1024\\" min=\\"1\\" max=\\"4096\\">\\n"
+ADD|t41|html|"<textarea id=\\"prompt\\" rows=\\"6\\" placeholder=\\"Enter your prompt here...\\">What is artificial intelligence</textarea>\\n"
 MOV|html|t41|_
 ADD|t42|html|"</div>\\n"
 MOV|html|t42|_
-ADD|t43|html|"<div class=\\"button-group\\">\\n"
+ADD|t43|html|"<div class=\\"form-group\\">\\n"
 MOV|html|t43|_
-ADD|t44|html|"<button onclick=\\"sendRequest()\\">🚀 Generate</button>\\n"
+ADD|t44|html|"<label for=\\"maxTokens\\">Max Tokens:</label>\\n"
 MOV|html|t44|_
-ADD|t45|html|"<button class=\\"clear\\" onclick=\\"clearText()\\">🗑️ Clear</button>\\n"
+ADD|t45|html|"<input type=\\"number\\" id=\\"maxTokens\\" value=\\"1024\\" min=\\"1\\" max=\\"4096\\">\\n"
 MOV|html|t45|_
 ADD|t46|html|"</div>\\n"
 MOV|html|t46|_
-ADD|t47|html|"<div id=\\"backendStatus\\">Checking backend...</div>\\n"
+ADD|t47|html|"<div class=\\"button-group\\">\\n"
 MOV|html|t47|_
-ADD|t48|html|"<div id=\\"result\\"></div>\\n"
+ADD|t48|html|"<button onclick=\\"sendRequest()\\">🚀 Generate</button>\\n"
 MOV|html|t48|_
-ADD|t49|html|"</div>\\n"
+ADD|t49|html|"<button class=\\"clear\\" onclick=\\"clearText()\\">🗑️ Clear</button>\\n"
 MOV|html|t49|_
-ADD|t50|html|"<script>\\n"
+ADD|t50|html|"</div>\\n"
 MOV|html|t50|_
-ADD|t51|html|"async function checkBackend() {\\n"
+ADD|t51|html|"</div>\\n"
 MOV|html|t51|_
-ADD|t52|html|"try{\\n"
+ADD|t52|html|"</div>\\n"
 MOV|html|t52|_
-ADD|t53|html|"const resp=await fetch('/api/health');\\n"
+ADD|t53|html|"<script>\\n"
 MOV|html|t53|_
-ADD|t54|html|"const data=await resp.json();if(resp.ok&&data.status==='ok'){document.getElementById('backendStatus').className='status-ok';document.getElementById('backendStatus').textContent='✅ Backend: Ready ('+(data.model\|\|data.backend\|\|'NeurX')+')'}\\n"
+ADD|t54|html|"async function checkBackend() {\\n"
 MOV|html|t54|_
-ADD|t55|html|"else{document.getElementById('backendStatus').className='status-err';document.getElementById('backendStatus').innerHTML='⚠️ Backend: Unreachable'}\\n"
+ADD|t55|html|"try{\\n"
 MOV|html|t55|_
-ADD|t56|html|"}catch(e){document.getElementById('backendStatus').className='status-err';document.getElementById('backendStatus').innerHTML='❌ Backend: Offline (Start with: make backend)'}\\n"
+ADD|t56|html|"const resp=await fetch('/api/health');\\n"
 MOV|html|t56|_
-ADD|t57|html|"}\\n"
+ADD|t57|html|"const data=await resp.json();if(resp.ok&&data.status==='ok'){document.getElementById('backendStatus').className='status-ok';document.getElementById('backendStatus').textContent='✅ Backend: Ready ('+(data.model\|\|data.backend\|\|'NeurX')+')'}\\n"
 MOV|html|t57|_
-ADD|t58|html|"function escapeHtml(s){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('\\"','&quot;')}\\n"
+ADD|t58|html|"else{document.getElementById('backendStatus').className='status-err';document.getElementById('backendStatus').innerHTML='⚠️ Backend: Unreachable'}\\n"
 MOV|html|t58|_
-ADD|t59|html|"function formatCode(src,lang){const NL=String.fromCharCode(10);let s=String(src).replaceAll(String.fromCharCode(160),' ').trim();if(s.includes(NL))return s;let out='',indent=0,paren=0,line=true,quote='',escape=false;const pad=()=> '    '.repeat(Math.max(0,indent));for(let i=0;i<s.length;i++){const c=s[i];if(quote){out+=c;if(escape)escape=false;else if(c==='\\\\\\\\')escape=true;else if(c===quote)quote='';continue}if(c==='\\"'\|\|c===\\"'\\"){quote=c;out+=c;continue}if(c==='('){paren++;out+=c;continue}if(c===')'){paren=Math.max(0,paren-1);out+=c;continue}if(c==='{'){out=out.trimEnd()+' {'+NL;indent++;out+=pad();line=true;continue}if(c==='}'){out=out.trimEnd()+NL;indent=Math.max(0,indent-1);out+=pad()+'}';if(i+1<s.length&&s[i+1]!==';'&&s[i+1]!==',')out+=NL+pad();line=true;continue}if(c===';'&&paren===0){out+=';'+NL+pad();line=true;continue}if(c==='#'&&out.trim().length>0){out=out.trimEnd()+NL+'#';line=false;continue}if(c===' '&&line)continue;out+=c;line=false}return out.trim()}\\n"
+ADD|t59|html|"}catch(e){document.getElementById('backendStatus').className='status-err';document.getElementById('backendStatus').innerHTML='❌ Backend: Offline (Start with: make backend)'}\\n"
 MOV|html|t59|_
-ADD|t60|html|"function renderText(s){const NL=String.fromCharCode(10);return escapeHtml(s).split(NL+NL).map(x=>'<p>'+x.split(NL).join('<br>')+'</p>').join('')}\\n"
+ADD|t60|html|"}\\n"
 MOV|html|t60|_
-ADD|t61|html|"function renderMarkdown(text){window.__neurxCodes=[];let html='',pos=0;while(pos<text.length){const open=text.indexOf('```',pos);if(open<0){html+=renderText(text.slice(pos));break}html+=renderText(text.slice(pos,open));let q=open+3,lang='';while(q<text.length&&/[A-Za-z0-9_+.-]/.test(text[q])){lang+=text[q];q++}while(q<text.length&&(text[q]===' '\|\|text.charCodeAt(q)===10\|\|text.charCodeAt(q)===13))q++;const close=text.indexOf('```',q);const raw=close<0?text.slice(q):text.slice(q,close);const code=formatCode(raw,lang);const id=window.__neurxCodes.push(code)-1;html+='<div class=\\"code-block\\"><div class=\\"code-head\\"><span>'+(escapeHtml(lang)\|\|'code')+'</span><button class=\\"copy-code\\" onclick=\\"copyCode('+id+',this)\\">📋 Copy</button></div><pre><code>'+escapeHtml(code)+'</code></pre></div>';if(close<0)break;pos=close+3}return html}\\n"
+ADD|t61|html|"function escapeHtml(s){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('\\"','&quot;')}\\n"
 MOV|html|t61|_
-ADD|t62|html|"async function copyCode(id,btn){await navigator.clipboard.writeText(window.__neurxCodes[id]\|\|'');const old=btn.textContent;btn.textContent='✅ Copied';setTimeout(()=>btn.textContent=old,1200)}\\n"
+ADD|t62|html|"function formatCode(src,lang){const NL=String.fromCharCode(10);let s=String(src).replaceAll(String.fromCharCode(160),' ').trim();if(s.includes(NL))return s;let out='',indent=0,paren=0,line=true,quote='',escape=false;const pad=()=> '    '.repeat(Math.max(0,indent));for(let i=0;i<s.length;i++){const c=s[i];if(quote){out+=c;if(escape)escape=false;else if(c==='\\\\\\\\')escape=true;else if(c===quote)quote='';continue}if(c==='\\"'\|\|c===\\"'\\"){quote=c;out+=c;continue}if(c==='('){paren++;out+=c;continue}if(c===')'){paren=Math.max(0,paren-1);out+=c;continue}if(c==='{'){out=out.trimEnd()+' {'+NL;indent++;out+=pad();line=true;continue}if(c==='}'){out=out.trimEnd()+NL;indent=Math.max(0,indent-1);out+=pad()+'}';if(i+1<s.length&&s[i+1]!==';'&&s[i+1]!==',')out+=NL+pad();line=true;continue}if(c===';'&&paren===0){out+=';'+NL+pad();line=true;continue}if(c==='#'&&out.trim().length>0){out=out.trimEnd()+NL+'#';line=false;continue}if(c===' '&&line)continue;out+=c;line=false}return out.trim()}\\n"
 MOV|html|t62|_
-ADD|t63|html|"function streamRender(target,text){return new Promise(resolve=>{let shown=0;function frame(){shown=Math.min(text.length,shown+3);target.innerHTML=renderMarkdown(text.slice(0,shown))+(shown<text.length?'<span class=\\"stream-cursor\\"></span>':'');target.scrollIntoView({block:'nearest'});if(shown<text.length)requestAnimationFrame(frame);else resolve()}frame()})}\\n"
+ADD|t63|html|"function renderText(s){const NL=String.fromCharCode(10);return escapeHtml(s).split(NL+NL).map(x=>'<p>'+x.split(NL).join('<br>')+'</p>').join('')}\\n"
 MOV|html|t63|_
-ADD|t64|html|"async function sendRequest(){\\n"
+ADD|t64|html|"function renderMarkdown(text){window.__neurxCodes=[];let html='',pos=0;while(pos<text.length){const open=text.indexOf('```',pos);if(open<0){html+=renderText(text.slice(pos));break}html+=renderText(text.slice(pos,open));let q=open+3,lang='';while(q<text.length&&/[A-Za-z0-9_+.-]/.test(text[q])){lang+=text[q];q++}while(q<text.length&&(text[q]===' '\|\|text.charCodeAt(q)===10\|\|text.charCodeAt(q)===13))q++;const close=text.indexOf('```',q);const raw=close<0?text.slice(q):text.slice(q,close);const code=formatCode(raw,lang);const id=window.__neurxCodes.push(code)-1;html+='<div class=\\"code-block\\"><div class=\\"code-head\\"><span>'+(escapeHtml(lang)\|\|'code')+'</span><button class=\\"copy-code\\" onclick=\\"copyCode('+id+',this)\\">📋 Copy</button></div><pre><code>'+escapeHtml(code)+'</code></pre></div>';if(close<0)break;pos=close+3}return html}\\n"
 MOV|html|t64|_
-ADD|t65|html|"const p=document.getElementById('prompt').value,m=parseInt(document.getElementById('maxTokens').value),r=document.getElementById('result');\\n"
+ADD|t65|html|"async function copyCode(id,btn){await navigator.clipboard.writeText(window.__neurxCodes[id]\|\|'');const old=btn.textContent;btn.textContent='✅ Copied';setTimeout(()=>btn.textContent=old,1200)}\\n"
 MOV|html|t65|_
-ADD|t66|html|"r.innerHTML='<p class=\\"success\\"><strong>AI Response:</strong> <span class=\\"stream-cursor\\"></span></p><div id=\\"responseBody\\" class=\\"response-body\\"></div>';\\n"
+ADD|t66|html|"function streamRender(target,text){return new Promise(resolve=>{let shown=0;function frame(){shown=Math.min(text.length,shown+3);target.innerHTML=renderMarkdown(text.slice(0,shown))+(shown<text.length?'<span class=\\"stream-cursor\\"></span>':'');target.scrollIntoView({block:'nearest'});if(shown<text.length)requestAnimationFrame(frame);else resolve()}frame()})}\\n"
 MOV|html|t66|_
-ADD|t67|html|"const body=document.getElementById('responseBody');let output='',pending='';try{\\n"
+ADD|t67|html|"async function sendRequest(){\\n"
 MOV|html|t67|_
-ADD|t68|html|"const res=await fetch('/api/infer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p,max_tokens:m,max_new_tokens:m,stream:true})});\\n"
+ADD|t68|html|"const p=document.getElementById('prompt').value,m=parseInt(document.getElementById('maxTokens').value),r=document.getElementById('result');\\n"
 MOV|html|t68|_
-ADD|t69|html|"if(!res.ok\|\|!res.body)throw new Error('Streaming response unavailable');const reader=res.body.getReader(),decoder=new TextDecoder();let finished=false;\\n"
+ADD|t69|html|"r.innerHTML='<p class=\\"success\\"><strong>AI Response:</strong> <span class=\\"stream-cursor\\"></span></p><div id=\\"responseBody\\" class=\\"response-body\\"></div>';\\n"
 MOV|html|t69|_
-ADD|t70|html|"while(!finished){const part=await reader.read();finished=part.done;pending+=decoder.decode(part.value\|\|new Uint8Array(),{stream:!finished});\\n"
+ADD|t70|html|"const body=document.getElementById('responseBody');let output='',pending='';try{\\n"
 MOV|html|t70|_
-ADD|t71|html|"const lines=pending.split(String.fromCharCode(10));pending=lines.pop()\|\|'';for(const line of lines){if(!line.trim())continue;const event=JSON.parse(line);\\n"
+ADD|t71|html|"const res=await fetch('/api/infer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p,max_tokens:m,max_new_tokens:m,stream:true})});\\n"
 MOV|html|t71|_
-ADD|t72|html|"if(event.error)throw new Error(event.error);if(event.delta){output+=event.delta;body.innerHTML=renderMarkdown(output);body.scrollIntoView({block:'nearest'})}if(event.done)finished=true}}\\n"
+ADD|t72|html|"if(!res.ok\|\|!res.body)throw new Error('Streaming response unavailable');const reader=res.body.getReader(),decoder=new TextDecoder();let finished=false;\\n"
 MOV|html|t72|_
-ADD|t73|html|"if(pending.trim()){const event=JSON.parse(pending);if(event.delta){output+=event.delta;body.innerHTML=renderMarkdown(output)}}\\n"
+ADD|t73|html|"while(!finished){const part=await reader.read();finished=part.done;pending+=decoder.decode(part.value\|\|new Uint8Array(),{stream:!finished});\\n"
 MOV|html|t73|_
-ADD|t74|html|"const cursor=r.querySelector('.stream-cursor');if(cursor)cursor.remove()}catch(e){r.innerHTML+='<p class=\\"error\\">❌ Connection error: '+escapeHtml(e)+'</p>'}}\\n"
+ADD|t74|html|"const lines=pending.split(String.fromCharCode(10));pending=lines.pop()\|\|'';for(const line of lines){if(!line.trim())continue;const event=JSON.parse(line);\\n"
 MOV|html|t74|_
-ADD|t75|html|"function clearText(){document.getElementById('prompt').value='';document.getElementById('result').innerHTML=''}\\n"
+ADD|t75|html|"if(event.error)throw new Error(event.error);if(event.delta){output+=event.delta;body.innerHTML=renderMarkdown(output);body.scrollIntoView({block:'nearest'})}if(event.done)finished=true}}\\n"
 MOV|html|t75|_
-ADD|t76|html|"checkBackend();setInterval(checkBackend,5000);\\n"
+ADD|t76|html|"if(pending.trim()){const event=JSON.parse(pending);if(event.delta){output+=event.delta;body.innerHTML=renderMarkdown(output)}}\\n"
 MOV|html|t76|_
-ADD|t77|html|"</script>\\n"
+ADD|t77|html|"const cursor=r.querySelector('.stream-cursor');if(cursor)cursor.remove()}catch(e){r.innerHTML+='<p class=\\"error\\">❌ Connection error: '+escapeHtml(e)+'</p>'}}\\n"
 MOV|html|t77|_
-ADD|t78|html|"</body></html>\\n"
+ADD|t78|html|"function clearText(){document.getElementById('prompt').value='';document.getElementById('result').innerHTML=''}\\n"
 MOV|html|t78|_
+ADD|t79|html|"checkBackend();setInterval(checkBackend,5000);\\n"
+MOV|html|t79|_
+ADD|t80|html|"</script>\\n"
+MOV|html|t80|_
+ADD|t81|html|"</body></html>\\n"
+MOV|html|t81|_
 RET|html|_|_
 RET|""|_|_
 FUNC_END|get_html|_|_
 FUNC_BEGIN|int_to_string|_|_
 PARAM|value|_|_
-CMP_EQ|t79|value|0
-JUMP_IF_FALSE|L0|t79|_
+CMP_EQ|t82|value|0
+JUMP_IF_FALSE|L0|t82|_
 RET|"0"|_|_
 JUMP|L1|_|_
 LABEL|L0|_|_
 LABEL|L1|_|_
 MOV|result|""|_
 MOV|n|value|_
-CMP_LT|t80|n|0
-JUMP_IF_FALSE|L2|t80|_
-SUB|t81|0|n
-MOV|n|t81|_
+CMP_LT|t83|n|0
+JUMP_IF_FALSE|L2|t83|_
+SUB|t84|0|n
+MOV|n|t84|_
 JUMP|L3|_|_
 LABEL|L2|_|_
 LABEL|L3|_|_
 LABEL|L4|_|_
-CMP_GT|t82|n|0
-JUMP_IF_FALSE|L5|t82|_
-DIV|t83|n|10
-MUL|t84|t83|10
-SUB|t85|n|t84
-ADD|t86|48|t85
-ARG|t86|_|_
-CALL|t87|string|1
-ADD|t88|t87|result
-MOV|result|t88|_
-DIV|t89|n|10
-MOV|n|t89|_
+CMP_GT|t85|n|0
+JUMP_IF_FALSE|L5|t85|_
+DIV|t86|n|10
+MUL|t87|t86|10
+SUB|t88|n|t87
+ADD|t89|48|t88
+ARG|t89|_|_
+CALL|t90|string|1
+ADD|t91|t90|result
+MOV|result|t91|_
+DIV|t92|n|10
+MOV|n|t92|_
 JUMP|L4|_|_
 LABEL|L5|_|_
-CMP_LT|t90|value|0
-JUMP_IF_FALSE|L6|t90|_
-ADD|t91|"-"|result
-MOV|result|t91|_
+CMP_LT|t93|value|0
+JUMP_IF_FALSE|L6|t93|_
+ADD|t94|"-"|result
+MOV|result|t94|_
 JUMP|L7|_|_
 LABEL|L6|_|_
 LABEL|L7|_|_
@@ -211,10 +217,10 @@ PARAM|request_body|_|_
 ARG|2|_|_
 ARG|1|_|_
 ARG|6|_|_
-CALL|t92|__sys_socket|3
-MOV|backend_sock|t92|_
-CMP_LT|t93|backend_sock|0
-JUMP_IF_FALSE|L8|t93|_
+CALL|t95|__sys_socket|3
+MOV|backend_sock|t95|_
+CMP_LT|t96|backend_sock|0
+JUMP_IF_FALSE|L8|t96|_
 RET|"{\\"error\\": \\"Socket creation failed\\"}"|_|_
 JUMP|L9|_|_
 LABEL|L8|_|_
@@ -223,63 +229,63 @@ ARG|backend_sock|_|_
 ARG|"127.0.0.1"|_|_
 ARG|18084|_|_
 ARG|2|_|_
-CALL|t94|__sys_connect|4
-CMP_LT|t95|t94|0
-JUMP_IF_FALSE|L10|t95|_
+CALL|t97|__sys_connect|4
+CMP_LT|t98|t97|0
+JUMP_IF_FALSE|L10|t98|_
 ARG|backend_sock|_|_
-CALL|t96|__sys_close|1
-MOV|_|t96|_
+CALL|t99|__sys_close|1
+MOV|_|t99|_
 RET|"{\\"error\\": \\"Backend connection failed\\"}"|_|_
 JUMP|L11|_|_
 LABEL|L10|_|_
 LABEL|L11|_|_
-ADD|t97|method|" "
-ADD|t98|t97|path
-ADD|t99|t98|" HTTP/1.1\\r\\n"
-MOV|backend_request|t99|_
-ADD|t100|backend_request|"Host: 127.0.0.1:18084\\r\\n"
-MOV|backend_request|t100|_
-ADD|t101|backend_request|"Content-Type: application/json\\r\\n"
-MOV|backend_request|t101|_
-ADD|t102|backend_request|"Content-Length: "
+ADD|t100|method|" "
+ADD|t101|t100|path
+ADD|t102|t101|" HTTP/1.1\\r\\n"
+MOV|backend_request|t102|_
+ADD|t103|backend_request|"Host: 127.0.0.1:18084\\r\\n"
+MOV|backend_request|t103|_
+ADD|t104|backend_request|"Content-Type: application/json\\r\\n"
+MOV|backend_request|t104|_
+ADD|t105|backend_request|"Content-Length: "
 ARG|request_body|_|_
-CALL|t103|len|1
-ARG|t103|_|_
-CALL|t104|int_to_string|1
-ADD|t105|t102|t104
-ADD|t106|t105|"\\r\\n"
-MOV|backend_request|t106|_
-ADD|t107|backend_request|"Connection: close\\r\\n"
-MOV|backend_request|t107|_
-ADD|t108|backend_request|"\\r\\n"
-MOV|backend_request|t108|_
-ADD|t109|backend_request|request_body
+CALL|t106|len|1
+ARG|t106|_|_
+CALL|t107|int_to_string|1
+ADD|t108|t105|t107
+ADD|t109|t108|"\\r\\n"
 MOV|backend_request|t109|_
+ADD|t110|backend_request|"Connection: close\\r\\n"
+MOV|backend_request|t110|_
+ADD|t111|backend_request|"\\r\\n"
+MOV|backend_request|t111|_
+ADD|t112|backend_request|request_body
+MOV|backend_request|t112|_
 ARG|backend_sock|_|_
 ARG|backend_request|_|_
-CALL|t110|__sys_write_string|2
-MOV|_|t110|_
+CALL|t113|__sys_write_string|2
+MOV|_|t113|_
 MOV|response|""|_
 ARG|backend_sock|_|_
 ARG|4096|_|_
-CALL|t111|__sys_read_string|2
-MOV|chunk|t111|_
+CALL|t114|__sys_read_string|2
+MOV|chunk|t114|_
 LABEL|L12|_|_
 ARG|chunk|_|_
-CALL|t112|len|1
-CMP_GT|t113|t112|0
-JUMP_IF_FALSE|L13|t113|_
-ADD|t114|response|chunk
-MOV|response|t114|_
+CALL|t115|len|1
+CMP_GT|t116|t115|0
+JUMP_IF_FALSE|L13|t116|_
+ADD|t117|response|chunk
+MOV|response|t117|_
 ARG|backend_sock|_|_
 ARG|4096|_|_
-CALL|t115|__sys_read_string|2
-MOV|chunk|t115|_
+CALL|t118|__sys_read_string|2
+MOV|chunk|t118|_
 JUMP|L12|_|_
 LABEL|L13|_|_
 ARG|backend_sock|_|_
-CALL|t116|__sys_close|1
-MOV|_|t116|_
+CALL|t119|__sys_close|1
+MOV|_|t119|_
 RET|response|_|_
 RET|""|_|_
 FUNC_END|proxy_to_backend|_|_
@@ -289,14 +295,14 @@ PARAM|request_body|_|_
 ARG|2|_|_
 ARG|1|_|_
 ARG|6|_|_
-CALL|t117|__sys_socket|3
-MOV|backend_sock|t117|_
-CMP_LT|t118|backend_sock|0
-JUMP_IF_FALSE|L14|t118|_
+CALL|t120|__sys_socket|3
+MOV|backend_sock|t120|_
+CMP_LT|t121|backend_sock|0
+JUMP_IF_FALSE|L14|t121|_
 ARG|client_fd|_|_
 ARG|"HTTP/1.1 502 Bad Gateway\\r\\nConnection: close\\r\\n\\r\\n"|_|_
-CALL|t119|__sys_write_string|2
-MOV|_|t119|_
+CALL|t122|__sys_write_string|2
+MOV|_|t122|_
 RET|_|_|_
 JUMP|L15|_|_
 LABEL|L14|_|_
@@ -305,99 +311,99 @@ ARG|backend_sock|_|_
 ARG|"127.0.0.1"|_|_
 ARG|18084|_|_
 ARG|2|_|_
-CALL|t120|__sys_connect|4
-CMP_LT|t121|t120|0
-JUMP_IF_FALSE|L16|t121|_
+CALL|t123|__sys_connect|4
+CMP_LT|t124|t123|0
+JUMP_IF_FALSE|L16|t124|_
 ARG|backend_sock|_|_
-CALL|t122|__sys_close|1
-MOV|_|t122|_
+CALL|t125|__sys_close|1
+MOV|_|t125|_
 ARG|client_fd|_|_
 ARG|"HTTP/1.1 502 Bad Gateway\\r\\nConnection: close\\r\\n\\r\\n"|_|_
-CALL|t123|__sys_write_string|2
-MOV|_|t123|_
+CALL|t126|__sys_write_string|2
+MOV|_|t126|_
 RET|_|_|_
 JUMP|L17|_|_
 LABEL|L16|_|_
 LABEL|L17|_|_
 MOV|backend_request|"POST /v1/generate HTTP/1.1\\r\\n"|_
-ADD|t124|backend_request|"Host: 127.0.0.1:18084\\r\\n"
-MOV|backend_request|t124|_
-ADD|t125|backend_request|"Content-Type: application/json\\r\\n"
-MOV|backend_request|t125|_
-ADD|t126|backend_request|"Content-Length: "
+ADD|t127|backend_request|"Host: 127.0.0.1:18084\\r\\n"
+MOV|backend_request|t127|_
+ADD|t128|backend_request|"Content-Type: application/json\\r\\n"
+MOV|backend_request|t128|_
+ADD|t129|backend_request|"Content-Length: "
 ARG|request_body|_|_
-CALL|t127|len|1
-ARG|t127|_|_
-CALL|t128|int_to_string|1
-ADD|t129|t126|t128
-ADD|t130|t129|"\\r\\n"
-MOV|backend_request|t130|_
-ADD|t131|backend_request|"Connection: close\\r\\n\\r\\n"
-ADD|t132|t131|request_body
-MOV|backend_request|t132|_
+CALL|t130|len|1
+ARG|t130|_|_
+CALL|t131|int_to_string|1
+ADD|t132|t129|t131
+ADD|t133|t132|"\\r\\n"
+MOV|backend_request|t133|_
+ADD|t134|backend_request|"Connection: close\\r\\n\\r\\n"
+ADD|t135|t134|request_body
+MOV|backend_request|t135|_
 ARG|backend_sock|_|_
 ARG|backend_request|_|_
-CALL|t133|__sys_write_string|2
-MOV|_|t133|_
+CALL|t136|__sys_write_string|2
+MOV|_|t136|_
 ARG|backend_sock|_|_
 ARG|4096|_|_
-CALL|t134|__sys_read_string|2
-MOV|chunk|t134|_
+CALL|t137|__sys_read_string|2
+MOV|chunk|t137|_
 LABEL|L18|_|_
 ARG|chunk|_|_
-CALL|t135|len|1
-CMP_GT|t136|t135|0
-JUMP_IF_FALSE|L19|t136|_
+CALL|t138|len|1
+CMP_GT|t139|t138|0
+JUMP_IF_FALSE|L19|t139|_
 ARG|client_fd|_|_
 ARG|chunk|_|_
-CALL|t137|__sys_write_string|2
-MOV|_|t137|_
+CALL|t140|__sys_write_string|2
+MOV|_|t140|_
 ARG|backend_sock|_|_
 ARG|4096|_|_
-CALL|t138|__sys_read_string|2
-MOV|chunk|t138|_
+CALL|t141|__sys_read_string|2
+MOV|chunk|t141|_
 JUMP|L18|_|_
 LABEL|L19|_|_
 ARG|backend_sock|_|_
-CALL|t139|__sys_close|1
-MOV|_|t139|_
+CALL|t142|__sys_close|1
+MOV|_|t142|_
 FUNC_END|proxy_stream_to_backend|_|_
 FUNC_BEGIN|parse_json_response|_|_
 PARAM|http_response|_|_
 MOV|idx|0|_
 LABEL|L20|_|_
 ARG|http_response|_|_
-CALL|t140|len|1
-CMP_LT|t141|idx|t140
-JUMP_IF_FALSE|L21|t141|_
-ADD|t142|idx|3
-ARG|http_response|_|_
 CALL|t143|len|1
-CMP_LT|t144|t142|t143
-JUMP_IF_FALSE|L22|t144|_
+CMP_LT|t144|idx|t143
+JUMP_IF_FALSE|L21|t144|_
+ADD|t145|idx|3
+ARG|http_response|_|_
+CALL|t146|len|1
+CMP_LT|t147|t145|t146
+JUMP_IF_FALSE|L22|t147|_
 ARG|http_response|_|_
 ARG|idx|_|_
-ADD|t145|idx|4
-ARG|t145|_|_
-CALL|t146|__host_slice|3
-CMP_EQ|t147|t146|"\\r\\n\\r\\n"
-JUMP_IF_FALSE|L24|t147|_
-ARG|http_response|_|_
 ADD|t148|idx|4
 ARG|t148|_|_
+CALL|t149|__host_slice|3
+CMP_EQ|t150|t149|"\\r\\n\\r\\n"
+JUMP_IF_FALSE|L24|t150|_
 ARG|http_response|_|_
-CALL|t149|len|1
-ARG|t149|_|_
-CALL|t150|__host_slice|3
-RET|t150|_|_
+ADD|t151|idx|4
+ARG|t151|_|_
+ARG|http_response|_|_
+CALL|t152|len|1
+ARG|t152|_|_
+CALL|t153|__host_slice|3
+RET|t153|_|_
 JUMP|L25|_|_
 LABEL|L24|_|_
 LABEL|L25|_|_
 JUMP|L23|_|_
 LABEL|L22|_|_
 LABEL|L23|_|_
-ADD|t151|idx|1
-MOV|idx|t151|_
+ADD|t154|idx|1
+MOV|idx|t154|_
 JUMP|L20|_|_
 LABEL|L21|_|_
 RET|http_response|_|_
@@ -406,19 +412,19 @@ FUNC_END|parse_json_response|_|_
 FUNC_BEGIN|main|_|_
 ARG|1|_|_
 ARG|"🚀 NeurX Web UI Server starting on port 8081...\\n"|_|_
-CALL|t152|__sys_write_string|2
-MOV|_|t152|_
+CALL|t155|__sys_write_string|2
+MOV|_|t155|_
 ARG|2|_|_
 ARG|1|_|_
 ARG|6|_|_
-CALL|t153|__sys_socket|3
-MOV|listener|t153|_
-CMP_LT|t154|listener|0
-JUMP_IF_FALSE|L26|t154|_
+CALL|t156|__sys_socket|3
+MOV|listener|t156|_
+CMP_LT|t157|listener|0
+JUMP_IF_FALSE|L26|t157|_
 ARG|1|_|_
 ARG|"❌ Socket creation failed\\n"|_|_
-CALL|t155|__sys_write_string|2
-MOV|_|t155|_
+CALL|t158|__sys_write_string|2
+MOV|_|t158|_
 RET|_|_|_
 JUMP|L27|_|_
 LABEL|L26|_|_
@@ -427,150 +433,150 @@ ARG|listener|_|_
 ARG|1|_|_
 ARG|2|_|_
 ARG|1|_|_
-CALL|t156|__sys_setsockopt|4
-MOV|_|t156|_
+CALL|t159|__sys_setsockopt|4
+MOV|_|t159|_
 ARG|listener|_|_
 ARG|"127.0.0.1"|_|_
 ARG|8081|_|_
 ARG|2|_|_
-CALL|t157|__sys_bind|4
-CMP_LT|t158|t157|0
-JUMP_IF_FALSE|L28|t158|_
+CALL|t160|__sys_bind|4
+CMP_LT|t161|t160|0
+JUMP_IF_FALSE|L28|t161|_
 ARG|1|_|_
 ARG|"❌ Bind failed\\n"|_|_
-CALL|t159|__sys_write_string|2
-MOV|_|t159|_
+CALL|t162|__sys_write_string|2
+MOV|_|t162|_
 RET|_|_|_
 JUMP|L29|_|_
 LABEL|L28|_|_
 LABEL|L29|_|_
 ARG|listener|_|_
 ARG|128|_|_
-CALL|t160|__sys_listen|2
-CMP_LT|t161|t160|0
-JUMP_IF_FALSE|L30|t161|_
+CALL|t163|__sys_listen|2
+CMP_LT|t164|t163|0
+JUMP_IF_FALSE|L30|t164|_
 ARG|1|_|_
 ARG|"❌ Listen failed\\n"|_|_
-CALL|t162|__sys_write_string|2
-MOV|_|t162|_
+CALL|t165|__sys_write_string|2
+MOV|_|t165|_
 RET|_|_|_
 JUMP|L31|_|_
 LABEL|L30|_|_
 LABEL|L31|_|_
 ARG|1|_|_
 ARG|"✅ Web UI running at http://127.0.0.1:8081\\n"|_|_
-CALL|t163|__sys_write_string|2
-MOV|_|t163|_
+CALL|t166|__sys_write_string|2
+MOV|_|t166|_
 ARG|1|_|_
 ARG|"📌 Make sure backend is running: make chat-cpu\\n"|_|_
-CALL|t164|__sys_write_string|2
-MOV|_|t164|_
+CALL|t167|__sys_write_string|2
+MOV|_|t167|_
 LABEL|L32|_|_
 JUMP_IF_FALSE|L33|1|_
 ARG|listener|_|_
-CALL|t165|__sys_accept|1
-MOV|client|t165|_
-CMP_LT|t166|client|0
-JUMP_IF_FALSE|L34|t166|_
+CALL|t168|__sys_accept|1
+MOV|client|t168|_
+CMP_LT|t169|client|0
+JUMP_IF_FALSE|L34|t169|_
 JUMP|L32|_|_
 JUMP|L35|_|_
 LABEL|L34|_|_
 LABEL|L35|_|_
 ARG|client|_|_
 ARG|4096|_|_
-CALL|t167|__sys_read_string|2
-MOV|request|t167|_
+CALL|t170|__sys_read_string|2
+MOV|request|t170|_
 MOV|response|""|_
 ARG|request|_|_
 ARG|0|_|_
 ARG|16|_|_
-CALL|t168|__host_slice|3
-CMP_EQ|t169|t168|"GET /api/health "
-JUMP_IF_FALSE|L36|t169|_
+CALL|t171|__host_slice|3
+CMP_EQ|t172|t171|"GET /api/health "
+JUMP_IF_FALSE|L36|t172|_
 ARG|"GET"|_|_
 ARG|"/health"|_|_
 ARG|""|_|_
-CALL|t170|proxy_to_backend|3
-MOV|backend_response|t170|_
+CALL|t173|proxy_to_backend|3
+MOV|backend_response|t173|_
 ARG|backend_response|_|_
-CALL|t171|parse_json_response|1
-MOV|json_body|t171|_
+CALL|t174|parse_json_response|1
+MOV|json_body|t174|_
 ARG|json_body|_|_
-CALL|t172|len|1
-ARG|t172|_|_
-CALL|t173|int_to_string|1
-ADD|t174|"HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: "|t173
-ADD|t175|t174|"\\r\\n\\r\\n"
-ADD|t176|t175|json_body
-MOV|response|t176|_
+CALL|t175|len|1
+ARG|t175|_|_
+CALL|t176|int_to_string|1
+ADD|t177|"HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: "|t176
+ADD|t178|t177|"\\r\\n\\r\\n"
+ADD|t179|t178|json_body
+MOV|response|t179|_
 JUMP|L37|_|_
 LABEL|L36|_|_
 ARG|request|_|_
 ARG|0|_|_
 ARG|4|_|_
-CALL|t177|__host_slice|3
-CMP_EQ|t178|t177|"GET "
-JUMP_IF_FALSE|L38|t178|_
-CALL|t179|get_html|0
-MOV|html|t179|_
+CALL|t180|__host_slice|3
+CMP_EQ|t181|t180|"GET "
+JUMP_IF_FALSE|L38|t181|_
+CALL|t182|get_html|0
+MOV|html|t182|_
 ARG|html|_|_
-CALL|t180|len|1
-ARG|t180|_|_
-CALL|t181|int_to_string|1
-ADD|t182|"HTTP/1.1 200 OK\\r\\nContent-Type: text/html; charset=UTF-8\\r\\nContent-Length: "|t181
-ADD|t183|t182|"\\r\\n\\r\\n"
-ADD|t184|t183|html
-MOV|response|t184|_
+CALL|t183|len|1
+ARG|t183|_|_
+CALL|t184|int_to_string|1
+ADD|t185|"HTTP/1.1 200 OK\\r\\nContent-Type: text/html; charset=UTF-8\\r\\nContent-Length: "|t184
+ADD|t186|t185|"\\r\\n\\r\\n"
+ADD|t187|t186|html
+MOV|response|t187|_
 JUMP|L39|_|_
 LABEL|L38|_|_
 ARG|request|_|_
 ARG|0|_|_
 ARG|16|_|_
-CALL|t185|__host_slice|3
-CMP_EQ|t186|t185|"POST /api/infer "
-JUMP_IF_FALSE|L40|t186|_
+CALL|t188|__host_slice|3
+CMP_EQ|t189|t188|"POST /api/infer "
+JUMP_IF_FALSE|L40|t189|_
 MOV|body_start|0|_
 MOV|idx|0|_
 LABEL|L42|_|_
 ARG|request|_|_
-CALL|t187|len|1
-SUB|t188|t187|3
-CMP_LT|t189|idx|t188
-JUMP_IF_FALSE|L43|t189|_
+CALL|t190|len|1
+SUB|t191|t190|3
+CMP_LT|t192|idx|t191
+JUMP_IF_FALSE|L43|t192|_
 ARG|request|_|_
 ARG|idx|_|_
-ADD|t190|idx|4
-ARG|t190|_|_
-CALL|t191|__host_slice|3
-CMP_EQ|t192|t191|"\\r\\n\\r\\n"
-JUMP_IF_FALSE|L44|t192|_
 ADD|t193|idx|4
-MOV|body_start|t193|_
+ARG|t193|_|_
+CALL|t194|__host_slice|3
+CMP_EQ|t195|t194|"\\r\\n\\r\\n"
+JUMP_IF_FALSE|L44|t195|_
+ADD|t196|idx|4
+MOV|body_start|t196|_
 JUMP|L43|_|_
 JUMP|L45|_|_
 LABEL|L44|_|_
 LABEL|L45|_|_
-ADD|t194|idx|1
-MOV|idx|t194|_
+ADD|t197|idx|1
+MOV|idx|t197|_
 JUMP|L42|_|_
 LABEL|L43|_|_
 ARG|request|_|_
 ARG|body_start|_|_
 ARG|request|_|_
-CALL|t195|len|1
-ARG|t195|_|_
-CALL|t196|__host_slice|3
-MOV|body|t196|_
+CALL|t198|len|1
+ARG|t198|_|_
+CALL|t199|__host_slice|3
+MOV|body|t199|_
 ARG|body|_|_
-CALL|t197|len|1
-CMP_GT|t198|t197|0
-JUMP_IF_FALSE|L46|t198|_
+CALL|t200|len|1
+CMP_GT|t201|t200|0
+JUMP_IF_FALSE|L46|t201|_
 ARG|client|_|_
 ARG|body|_|_
-CALL|t199|proxy_stream_to_backend|2
+CALL|t202|proxy_stream_to_backend|2
 ARG|client|_|_
-CALL|t200|__sys_close|1
-MOV|_|t200|_
+CALL|t203|__sys_close|1
+MOV|_|t203|_
 JUMP|L32|_|_
 JUMP|L47|_|_
 LABEL|L46|_|_
@@ -584,11 +590,11 @@ LABEL|L39|_|_
 LABEL|L37|_|_
 ARG|client|_|_
 ARG|response|_|_
-CALL|t201|__sys_write_string|2
-MOV|_|t201|_
+CALL|t204|__sys_write_string|2
+MOV|_|t204|_
 ARG|client|_|_
-CALL|t202|__sys_close|1
-MOV|_|t202|_
+CALL|t205|__sys_close|1
+MOV|_|t205|_
 JUMP|L32|_|_
 LABEL|L33|_|_
 FUNC_END|main|_|_
