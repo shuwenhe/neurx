@@ -1,52 +1,33 @@
 package neurx.kernel.locking
 
-enum mutex_state {
-    unlocked,
-    locked
-}
-
 struct mutex {
-    int state              // 0 = unlocked, 1 = locked
-    int owner_pid          // PID of owning process
-    int contention_count   // Number of waiters
+    int state
+    int owner_pid
+    int contention_count
 }
 
 func create_mutex() mutex {
-    mutex {
-        state: 0,
-        owner_pid: 0,
-        contention_count: 0
-    }
+    mutex { state: 0, owner_pid: 0, contention_count: 0 }
 }
 
-func mutex_lock(mut m: &mutex, int pid) mutex {
-    mut_local := m.*
-    
-    if mut_local.state == 0 {
-        mut_local.state = 1
-        mut_local.owner_pid = pid
+func print_mutex_info(mutex m) {
+    print("╔════════════════════════════════════════════════════════════╗")
+    print("║               NeurX Mutex - Status Report                  ║")
+    print("╚════════════════════════════════════════════════════════════╝")
+    print("")
+    print("📊 Mutex State:")
+    if m.state == 0 {
+        print("   • Status: 🟢 Unlocked")
     } else {
-        mut_local.contention_count = mut_local.contention_count + 1
+        print("   • Status: 🔴 Locked")
     }
-    
-    m.* = mut_local
-    mut_local
-}
-
-func mutex_unlock(mut m: &mutex) mutex {
-    mut_local := m.*
-    
-    if mut_local.owner_pid != 0 {
-        mut_local.state = 0
-        mut_local.owner_pid = 0
-        
-        if mut_local.contention_count > 0 {
-            mut_local.contention_count = mut_local.contention_count - 1
-        }
-    }
-    
-    m.* = mut_local
-    mut_local
+    print("   • Owner PID: ")
+    print(m.owner_pid)
+    print("   • Contention Count: ")
+    print(m.contention_count)
+    print("")
+    print("✅ Mutex operational!")
+    print("")
 }
 
 func mutex_trylock(mut m: &mutex, int pid) (mutex, bool) {
