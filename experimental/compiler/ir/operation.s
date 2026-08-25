@@ -175,7 +175,7 @@ func new_operation(int id, op_type op_kind, string name, int[] input_ids, int[] 
     }
 }
 
-func (mut operation* op) add_attribute(string key, string value) {
+func (operation* op) add_attribute(string key, string value) {
     attr = attr_value {
         key: key,
         value_str: value,

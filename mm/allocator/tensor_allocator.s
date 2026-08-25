@@ -55,7 +55,7 @@ func create_memory_pool(int size_mb) (memory_pool, string) {
         allocated_size_mb: 0,
         free_size_mb: size_mb,
         base_addr: base_addr,
-        allocated_list: &mut allocated_list,
+        allocated_list: &allocated_list,
         free_list_head: &initial_free_block,
         fragmentation_ratio: 0
     }

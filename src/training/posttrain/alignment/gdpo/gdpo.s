@@ -139,7 +139,7 @@ func (gdpo_trainer* trainer) compute_gdpo_loss(
         rejected_log_ratio := rejected_log_probs - ref_rejected_log_probs
         reward_margin := chosen_reward - rejected_reward
         logits_diff := trainer.config.beta * (chosen_log_ratio - rejected_log_ratio)
-        let loss: tensor
+        loss: tensor
         if trainer.config.label_smoothing > 0.0 {
             smooth_loss := -log_sigmoid(logits_diff)
             uniform_loss := log(2.0)

@@ -88,7 +88,7 @@ func compute_lora_delta(
     (delta, "")
 }
 
-func (mut weight_fusion_engine* engine) fuse_weights(
+func (weight_fusion_engine* engine) fuse_weights(
     module_name: string,
     original_weights: *vec[vec[float]],
     lora_delta: *vec[vec[float]]
@@ -129,7 +129,7 @@ func (mut weight_fusion_engine* engine) fuse_weights(
     ((, ""))
 }
 
-func (mut weight_fusion_engine* engine) unfuse_weights(
+func (weight_fusion_engine* engine) unfuse_weights(
     module_name: string,
     fused_weights: *vec[vec[float]],
     lora_delta: *vec[vec[float]]
@@ -183,7 +183,7 @@ func (weight_fusion_engine* engine) get_fused_modules() &vec[string] {
     modules
 }
 
-func (mut weight_fusion_engine* engine) clear_fused_weights() {
+func (weight_fusion_engine* engine) clear_fused_weights() {
     engine.fused.clear()
 }
 

@@ -672,37 +672,37 @@ func list_all_model_names() []string {
 }
 
 func main() {
-    println("🚀 Model Zoo - 30+ 种模型配置库")
+    println("🚀 Model Zoo - 30+ typemodelconfiguration库")
     println("==================================")
 
     models := get_all_models()
-    println(f"✅ 总模型数: {models.len()}")
+    println(f"✅ Total Models: {models.len()}")
     println("")
 
-    println("📊 模型类型统计:")
+    println("📊 modelclass型统计:")
     llama_models := get_model_by_type("llama")
-    println(f"  LLaMA 系列: {llama_models.len()}")
+    println(f"  LLaMA series: {llama_models.len()}")
 
     qwen_models := get_model_by_type("qwen")
     qwen2_models := get_model_by_type("qwen2")
     qwen25_models := get_model_by_type("qwen2.5")
-    println(f"  Qwen 系列: {qwen_models.len() + qwen2_models.len() + qwen25_models.len()}")
+    println(f"  Qwen series: {qwen_models.len() + qwen2_models.len() + qwen25_models.len()}")
 
     mistral_models := get_model_by_type("mistral")
     mixtral_models := get_model_by_type("mixtral")
-    println(f"  Mistral 系列: {mistral_models.len() + mixtral_models.len()}")
+    println(f"  Mistral series: {mistral_models.len() + mixtral_models.len()}")
 
     println("")
-    println("📋 完整模型列表:")
+    println("📋 completemodel列table:")
     for i in 0..models.len() {
         model := models[i]
         println(f"  {i + 1:2}. {model.name:20} ({model.model_type})")
     }
 
     println("")
-    println("✅ 核心特性:")
-    println("  ✓ 30+ 种主流模型支持")
-    println("  ✓ 完整架构参数")
-    println("  ✓ 工厂模式快速创建")
-    println("  ✓ 易于扩展新模型")
+    println("✅ Core Features:")
+    println("  ✓ 30+ type主流modelsupport")
+    println("  ✓ complete架构Parameters")
+    println("  ✓ 工厂模式fast速创建")
+    println("  ✓ 易于扩展newmodel")
 }

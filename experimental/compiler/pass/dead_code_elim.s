@@ -76,7 +76,7 @@ func find_dead_operations(*computation_graph g) vec[int] {
     dead_ops
 }
 
-func remove_dead_code(*mut computation_graph g) dead_code_result {
+func remove_dead_code(*computation_graph g) dead_code_result {
     dead_ops = find_dead_operations(g)
 
     dead_code_result {

@@ -232,7 +232,7 @@ func enqueue_inference_request(batch_scheduler scheduler, inference_request req)
 
 func schedule_next_batch(batch_scheduler scheduler) int {
     int batch_count = 0
-    while batch_count < scheduler.max_batch_size &&
+    for batch_count < scheduler.max_batch_size &&
           scheduler.pending_count > 0 {
         scheduler.active_requests[batch_count] = scheduler.pending_requests[0]
         int i = 0

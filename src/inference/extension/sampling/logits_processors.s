@@ -282,7 +282,7 @@ func logits_processor_pipeline::new() logits_processor_pipeline {
     }
 }
 
-func (mut logits_processor_pipeline* pipeline) with_temperature(
+func (logits_processor_pipeline* pipeline) with_temperature(
     temperature: float
 ) result[(), processor_error] {
     if temperature <= 0.0 {
@@ -296,7 +296,7 @@ func (mut logits_processor_pipeline* pipeline) with_temperature(
     ((, ""))
 }
 
-func (mut logits_processor_pipeline* pipeline) with_top_k(
+func (logits_processor_pipeline* pipeline) with_top_k(
     k: int
 ) result[(), processor_error] {
     if k <= 0 {
@@ -310,7 +310,7 @@ func (mut logits_processor_pipeline* pipeline) with_top_k(
     ((, ""))
 }
 
-func (mut logits_processor_pipeline* pipeline) with_nucleus(
+func (logits_processor_pipeline* pipeline) with_nucleus(
     top_p: float
 ) result[(), processor_error] {
     if top_p <= 0.0 || top_p > 1.0 {

@@ -33,12 +33,12 @@ func int_to_string(int n) string {
 
 func print_test_header() {
     print("\n╔════════════════════════════════════════════════════════════════════╗\n")
-    print("║             🧪 NeurX REST API 测试客户端 (S 语言)              ║\n")
+    print("║             🧪 NeurX REST API testclient (S language)              ║\n")
     print("╚════════════════════════════════════════════════════════════════════╝\n\n")
-    print("📋 测试配置:\n")
+    print("📋 testconfiguration:\n")
     print("   服务地址: http:
-    print("   协议: OpenAI 兼容 REST API\n")
-    print("   语言: 纯 S 实现\n\n")
+    print("   协议: OpenAI Compatible REST API\n")
+    print("   language: pure S implementation\n\n")
 }
 
 func print_curl_command(api_test_case test) {
@@ -52,7 +52,7 @@ func print_curl_command(api_test_case test) {
 }
 
 func print_python_client(api_test_case test) {
-    print("🐍 Python 客户端:\n")
+    print("🐍 Python client:\n")
     print("   import requests\n")
     print("   \n")
     if test.method == "POST" {
@@ -70,7 +70,7 @@ func print_python_client(api_test_case test) {
 }
 
 func print_javascript_client(api_test_case test) {
-    print("📱 JavaScript 客户端:\n")
+    print("📱 JavaScript client:\n")
     print("   fetch('http:
     if test.method == "POST" {
         print("       method: 'POST',\n")
@@ -87,25 +87,25 @@ func print_javascript_client(api_test_case test) {
 func main() {
     print_test_header()
     print("=" * 70 + "\n\n")
-    print("🔵 测试 1: 聊天完成 (Chat Completions)\n")
+    print("🔵 test 1: 聊天complete (Chat Completions)\n")
     print("=" * 70 + "\n\n")
     api_test_case test1
     test1.name = "chat_completion"
     test1.endpoint = "/v1/chat/completions"
     test1.method = "POST"
-    test1.payload = "{\"model\":\"Qwen2.5-0.5B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"你好\"}],\"max_tokens\":256,\"temperature\":0.7}"
+    test1.payload = "{\"model\":\"Qwen2.5-0.5B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"hello\"}],\"max_tokens\":256,\"temperature\":0.7}"
     test1.expected_status = 200
-    print("📝 请求详情:\n")
-    print("   端点: " + test1.endpoint + "\n")
-    print("   方法: " + test1.method + "\n")
-    print("   模型: Qwen2.5-0.5B-Instruct\n")
-    print("   用户消息: 你好\n")
-    print("   最大tokens: 256\n")
+    print("📝 request details:\n")
+    print("   endpoint: " + test1.endpoint + "\n")
+    print("   method: " + test1.method + "\n")
+    print("   model: Qwen2.5-0.5B-Instruct\n")
+    print("   use户消息: hello\n")
+    print("   maximumtokens: 256\n")
     print("   温度: 0.7\n\n")
     print_curl_command(test1)
     print_python_client(test1)
     print_javascript_client(test1)
-    print("📤 预期响应:\n")
+    print("📤 预期response:\n")
     print("{\n")
     print("  \"id\": \"chatcmpl-...\",\n")
     print("  \"object\": \"chat.completion\",\n")
@@ -115,7 +115,7 @@ func main() {
     print("    \"index\": 0,\n")
     print("    \"message\": {\n")
     print("      \"role\": \"assistant\",\n")
-    print("      \"content\": \"模型生成的响应文本\"\n")
+    print("      \"content\": \"modelgenerateofresponse文本\"\n")
     print("    },\n")
     print("    \"finish_reason\": \"stop\"\n")
     print("  }],\n")
@@ -126,7 +126,7 @@ func main() {
     print("  }\n")
     print("}\n\n")
     print("─" * 70 + "\n\n")
-    print("🟢 测试 2: 健康检查 (Health Check)\n")
+    print("🟢 test 2: healthcheck (Health Check)\n")
     print("─" * 70 + "\n\n")
     api_test_case test2
     test2.name = "health_check"
@@ -134,13 +134,13 @@ func main() {
     test2.method = "GET"
     test2.payload = ""
     test2.expected_status = 200
-    print("📝 请求详情:\n")
-    print("   端点: " + test2.endpoint + "\n")
-    print("   方法: " + test2.method + "\n\n")
+    print("📝 request details:\n")
+    print("   endpoint: " + test2.endpoint + "\n")
+    print("   method: " + test2.method + "\n\n")
     print_curl_command(test2)
     print_python_client(test2)
     print_javascript_client(test2)
-    print("📤 预期响应:\n")
+    print("📤 预期response:\n")
     print("{\n")
     print("  \"status\": \"healthy\",\n")
     print("  \"service\": \"neurx-inference\",\n")
@@ -149,7 +149,7 @@ func main() {
     print("  \"timestamp\": 1692547200\n")
     print("}\n\n")
     print("─" * 70 + "\n\n")
-    print("🟡 测试 3: 列表模型 (List Models)\n")
+    print("🟡 test 3: 列tablemodel (List Models)\n")
     print("─" * 70 + "\n\n")
     api_test_case test3
     test3.name = "list_models"
@@ -157,13 +157,13 @@ func main() {
     test3.method = "GET"
     test3.payload = ""
     test3.expected_status = 200
-    print("📝 请求详情:\n")
-    print("   端点: " + test3.endpoint + "\n")
-    print("   方法: " + test3.method + "\n\n")
+    print("📝 request details:\n")
+    print("   endpoint: " + test3.endpoint + "\n")
+    print("   method: " + test3.method + "\n\n")
     print_curl_command(test3)
     print_python_client(test3)
     print_javascript_client(test3)
-    print("📤 预期响应:\n")
+    print("📤 预期response:\n")
     print("{\n")
     print("  \"object\": \"list\",\n")
     print("  \"data\": [\n")
@@ -176,19 +176,19 @@ func main() {
     print("  ]\n")
     print("}\n\n")
     print("=" * 70 + "\n\n")
-    print("🎯 测试总结\n")
+    print("🎯 testtotal结\n")
     print("=" * 70 + "\n\n")
-    print("✅ 已测试 3 个端点\n")
-    print("✅ 所有响应遵循 OpenAI 兼容格式\n")
-    print("✅ 错误处理完善\n\n")
-    print("🚀 下一步:\n")
-    print("   1. 启动 REST API 服务器\n")
-    print("   2. 使用上面的 cURL/Python/JS 命令进行请求\n")
-    print("   3. 验证响应格式\n")
-    print("   4. 监控性能指标\n\n")
-    print("📚 相关文件:\n")
-    print("   • S API 实现: /app/shuwen/neurx/src/serving/api/rest_api_pure_s.s\n")
-    print("   • 此测试客户端: /app/shuwen/neurx/src/serving/api/test_client.s\n")
-    print("   • 部署指南: /app/shuwen/NEURX_DEPLOYMENT_GUIDE_S.md\n\n")
+    print("✅ alreadytest 3 itemendpoint\n")
+    print("✅ allresponse遵循 OpenAI Compatible格式\n")
+    print("✅ wrong误processing完善\n\n")
+    print("🚀 downone步:\n")
+    print("   1. start REST API server\n")
+    print("   2. 使useup面of cURL/Python/JS 命令进do请求\n")
+    print("   3. validationresponse格式\n")
+    print("   4. 监控ity能指标\n\n")
+    print("📚 相关文piece:\n")
+    print("   • S API implementation: /app/shuwen/neurx/src/serving/api/rest_api_pure_s.s\n")
+    print("   • 此testclient: /app/shuwen/neurx/src/serving/api/test_client.s\n")
+    print("   • deployment指南: /app/shuwen/NEURX_DEPLOYMENT_GUIDE_S.md\n\n")
     print("=" * 70 + "\n\n")
 }

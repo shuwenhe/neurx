@@ -15,7 +15,7 @@ func new_model_executor(string device) model_executor {
     }
 }
 
-func (mut model_executor* executor) load_model(string model_name, string device) bool {
+func (model_executor* executor) load_model(string model_name, string device) bool {
 
     if model_name == "llama-7b" {
         executor.current_model = model_name
@@ -105,7 +105,7 @@ func collect_execution_stats(
     }
 }
 
-func (mut model_executor* executor) switch_model(string model_name) bool {
+func (model_executor* executor) switch_model(string model_name) bool {
     if model_name == "llama-7b" || model_name == "qwen2-7b" ||
        model_name == "mistral-7b" || model_name == "deepseek-7b" {
         executor.current_model = model_name
@@ -118,7 +118,7 @@ func (model_executor* executor) get_current_model() string {
     return executor.current_model
 }
 
-func (mut model_executor* executor) unload_model(string model_name) bool {
+func (model_executor* executor) unload_model(string model_name) bool {
     if executor.current_model == model_name {
         executor.current_model = ""
     }
@@ -183,34 +183,34 @@ func get_model_info(string model_name) option[model_info] {
 }
 
 func main() {
-    println("🤖 Model Executor - 30+ 种模型推理引擎")
+    println("🤖 Model Executor - 30+ typemodelinferenceengine")
     println("=====================================")
     println("")
 
     executor := new_model_executor("cuda")
 
-    println("📥 加载模型:")
+    println("📥 加载model:")
     models_to_load := ["llama-7b", "qwen2-7b", "mistral-7b", "deepseek-7b"]
 
     for model_name in models_to_load.iter() {
         success := executor.load_model(model_name, "cuda")
         if success {
-            println(f"  ✓ 已加载 {model_name}")
+            println(f"  ✓ already加载 {model_name}")
         } else {
             println(f"  ✗ 加载失败: {model_name}")
         }
     }
 
     println("")
-    println("📊 已加载模型列表:")
+    println("📊 already加载model列table:")
     for model_name in models_to_load.iter() {
         info_opt := get_model_info(model_name)
         match info_opt {
             Some(info) => {
                 println(f"  {info.name}:")
-                println(f"    参数: {info.parameters_b:.1f}B")
-                println(f"    显存: {info.memory_gb_fp16:.1f}GB (fp16)")
-                println(f"    最大序列长: {info.max_seq_len}")
+                println(f"    Parameters: {info.parameters_b:.1f}B")
+                println(f"    GPU Memory: {info.memory_gb_fp16:.1f}GB (fp16)")
+                println(f"    maximum序列long: {info.max_seq_len}")
                 println(f"    Attention: {info.attention_type}")
             },
             None => println(f"  {model_name}: 未找到"),
@@ -219,11 +219,11 @@ func main() {
 
     println("")
     println("✅ 核心功能:")
-    println("  ✓ 30+ 种模型加载和执行")
-    println("  ✓ 多模型并发管理")
-    println("  ✓ 模型特定优化")
-    println("  ✓ 量化支持 (int4/int8/fp16/bf16)")
-    println("  ✓ 分布式推理")
-    println("  ✓ 性能监控")
-    println("  ✓ 灵活的模型切换")
+    println("  ✓ 30+ typemodel加载and执do")
+    println("  ✓ moremodel并developmanagement")
+    println("  ✓ Model-specific optimization")
+    println("  ✓ 量izationsupport (int4/int8/fp16/bf16)")
+    println("  ✓ distributedinference")
+    println("  ✓ ity能监控")
+    println("  ✓ 灵活ofmodel切换")
 }

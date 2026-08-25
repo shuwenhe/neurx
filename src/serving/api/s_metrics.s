@@ -91,7 +91,7 @@ func json_error_summary() string {
 }
 
 func main() {
-    print("✅ 纯 S 性能监控系统已编译\n")
+    print("✅ pure S ity能监控系统already编译\n")
 
     string metrics = format_metrics_json(10000, 45, 200, 2)
     print("系统指标: ")
@@ -99,12 +99,12 @@ func main() {
     print("\n")
 
     string endpoint_stats = format_endpoint_stats("/v1/chat/completions", 5000, 4900, 100)
-    print("端点统计: ")
+    print("endpoint统计: ")
     print(endpoint_stats)
     print("\n")
 
     string latency = format_latency_histogram(20, 50, 100, 200)
-    print("延迟分布: ")
+    print("latency分布: ")
     print(latency)
     print("\n")
 }

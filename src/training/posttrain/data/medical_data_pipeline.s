@@ -25,13 +25,13 @@ func clean_medical_content(string raw_content) string {
     cleaned = remove_pattern(cleaned, "Section Editors:.*\\n")
     cleaned = remove_pattern(cleaned, "Deputy Editor:.*\\n")
     cleaned = remove_pattern(cleaned, "Translator:.*\\n")
-    cleaned = remove_pattern(cleaned, "all专题都会依据新发table of 证据.*[.\\n]")
+    cleaned = remove_pattern(cleaned, "all专题都will依据newdeveloptable of 证据.*[.\\n]")
     cleaned = remove_pattern(cleaned, "\\[\\d+(:[-,]\\d+)*\\]")
     cleaned = remove_pattern(cleaned, "(graph片\\d+)")
     cleaned = remove_pattern(cleaned, "(table\\d+)")
     cleaned = remove_pattern(cleaned, "\\(Figure \\d+\\)")
     cleaned = remove_pattern(cleaned, "\\(Table \\d+\\)")
-    cleaned = remove_pattern(cleaned, "(参见下文[''\"'].*[''\"'])")
+    cleaned = remove_pattern(cleaned, "(参见down文[''\"'].*[''\"'])")
     cleaned = remove_pattern(cleaned, "(参见\".*\")")
     cleaned = remove_pattern(cleaned, "引言—")
     cleaned = normalize_whitespace(cleaned)
@@ -50,10 +50,10 @@ func extract_disease_terms(string title, string subtitle) []string {
     []string disease_terms = []
     string combined = title + " " + subtitle
     []string non_disease_terms = [
-        "筛查", "diagnosis", "治疗", "Evaluation", "管理",
+        "筛查", "diagnosis", "Treatment", "Evaluation", "management",
         "随访", "guide", "standard", "策略", "概述",
-        "患病率", "发病率", "死亡率", "生store率",
-        "综述", "analysis", "研究", "调查", "chart",
+        "患diseaserate", "developdiseaserate", "死亡rate", "生storerate",
+        "综述", "analysis", "research", "调查", "chart",
         "screening", "diagnosis", "treatment", "management"
     ]
     []string candidates = split_string(combined, " ")
@@ -71,7 +71,7 @@ func extract_disease_terms(string title, string subtitle) []string {
         disease_terms = append_string(disease_terms, candidate)
     }
     if len(disease_terms) == 0 {
-        disease_terms = append_string(disease_terms, "健康question")
+        disease_terms = append_string(disease_terms, "healthquestion")
     }
     return disease_terms
 }
@@ -137,13 +137,13 @@ func generate_questions_from_template(string subject, []seed_template templates)
 
 func get_seed_templates() []seed_template {
     []seed_template templates = [
-        seed_template{ template: "什么是{subject}", intent_type: "definition" },
-        seed_template{ template: "{subject} of 通俗解释是什么", intent_type: "definition" },
-        seed_template{ template: "{subject}是怎么分型 of ", intent_type: "classification" },
-        seed_template{ template: "{subject}是怎么分期 of ", intent_type: "classification" },
-        seed_template{ template: "{subject} of diagnosis定义是什么", intent_type: "diagnosis" },
-        seed_template{ template: "{subject} of 发病机制是什么", intent_type: "mechanism" },
-        seed_template{ template: "{subject} of 病理生理过程是什么", intent_type: "pathophysiology" }
+        seed_template{ template: "什么is{subject}", intent_type: "definition" },
+        seed_template{ template: "{subject} of 通俗解释is什么", intent_type: "definition" },
+        seed_template{ template: "{subject}is怎么分型 of ", intent_type: "classification" },
+        seed_template{ template: "{subject}is怎么分期 of ", intent_type: "classification" },
+        seed_template{ template: "{subject} of diagnosisset义is什么", intent_type: "diagnosis" },
+        seed_template{ template: "{subject} of developdiseasemechanismis什么", intent_type: "mechanism" },
+        seed_template{ template: "{subject} of diseasemanage生manageprocessis什么", intent_type: "pathophysiology" }
     ]
     return templates
 }
@@ -154,7 +154,7 @@ func substitute_placeholder(string template, string subject) string {
 
 func simplify_question(string question) string {
     []string polite_phrases = [
-        "请问", "我想", "能为我", "希望了解", "麻烦你"
+        "请问", "我想", "能为我", "希望ed解", "麻烦你"
     ]
     string simplified = question
     for i = 0; i < len(polite_phrases); i = i + 1 {
@@ -186,7 +186,7 @@ func detect_intent(string question) question_intent {
         intent.type = "classification"
     } else if string_contains(question, "diagnosis") {
         intent.type = "diagnosis"
-    } else if string_contains(question, "机制") {
+    } else if string_contains(question, "mechanism") {
         intent.type = "mechanism"
     } else if string_contains(question, "通俗") {
         intent.type = "definition"
@@ -196,13 +196,13 @@ func detect_intent(string question) question_intent {
 
 func extract_relevant_content(string question, string full_content, question_intent intent) string {
     []string definition_patterns = [
-        "定义", "概念", "是指", "是一种"
+        "set义", "概念", "is指", "isonetype"
     ]
     []string diagnosis_patterns = [
-        "diagnosis", "确诊", "Check", "symptom"
+        "diagnosis", "sure诊", "Check", "symptom"
     ]
     []string mechanism_patterns = [
-        "机制", "原因", "导致", "病理"
+        "mechanism", "reason", "cause", "diseasemanage"
     ]
     []string patterns = []
     if intent.type == "definition" {

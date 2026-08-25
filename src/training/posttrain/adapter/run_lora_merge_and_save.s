@@ -220,7 +220,7 @@ func main() {
     println("     ├── generation_config.json")
     println("     └── README.md")
     println("")
-    println("🚀 afterTrainingcomplete!modelhaveReady好enterline:")
+    println("🚀 afterTrainingcomplete!modelhaveReadygoodenterline:")
     println("  • inference and Generate")
     println("  • Fine-tuning and Evaluation")
     println("  • deployment and service")

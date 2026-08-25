@@ -32,11 +32,11 @@ impl ToolParserManager {
         }
     }
 
-    func register_parser(mut self, str name, ToolParserFactory factory) {
+    func register_parser(self, str name, ToolParserFactory factory) {
         self.parsers.insert(name, factory)
     }
 
-    func register_lazy_parser(mut self, str name, str module, str class_name) {
+    func register_lazy_parser(self, str name, str module, str class_name) {
         self.lazy_parsers.insert(name, (module, class_name))
     }
 

@@ -436,11 +436,11 @@ func prompt_needs_reasoning(string text) bool {
         contains_text(lower, "analysis") ||
         contains_text(lower, "reason") ||
         contains_text(lower, "explain") ||
-        contains_text(lower, "推理") ||
-        contains_text(lower, "证明") ||
-        contains_text(lower, "推导") ||
-        contains_text(lower, "分析") ||
-        contains_text(lower, "一步一步") ||
+        contains_text(lower, "inference") ||
+        contains_text(lower, "证bright") ||
+        contains_text(lower, "derivation") ||
+        contains_text(lower, "Analysis") ||
+        contains_text(lower, "one步one步") ||
         contains_text(lower, "为什么")
 }
 
@@ -549,7 +549,7 @@ func score_candidate_text(string prompt, string response_text, int generated_tok
         score = score - 40
     }
     if prompt_needs_reasoning(prompt) {
-        if contains_text(lower_text, "therefore") || contains_text(lower_text, "because") || contains_text(lower_text, "so ") || contains_text(lower_text, "因此") || contains_text(lower_text, "所以") {
+        if contains_text(lower_text, "therefore") || contains_text(lower_text, "because") || contains_text(lower_text, "so ") || contains_text(lower_text, "because此") || contains_text(lower_text, "so") {
             score = score + 20
         }
         if len(response_text) > 32 {

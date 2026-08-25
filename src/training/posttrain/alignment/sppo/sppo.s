@@ -144,7 +144,7 @@ func (sppo_trainer* trainer) compute_sppo_loss(
         chosen_log_ratio := (chosen_log_probs - ref_chosen_log_probs).sum()
         rejected_log_ratio := (rejected_log_probs - ref_rejected_log_probs).sum()
         logits_diff := chosen_log_ratio - rejected_log_ratio
-        let loss: tensor
+        loss: tensor
         if trainer.config.use_margin {
             loss = -log_sigmoid(trainer.config.beta * logits_diff - trainer.config.margin)
         } else {

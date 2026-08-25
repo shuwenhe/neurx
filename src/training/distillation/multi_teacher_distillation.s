@@ -88,7 +88,7 @@ func (multi_teacher_distillation* distill) compute_distillation_loss(
         logits := teacher.model.forward(input)
         teacher_logits.push(logits)
     }
-    let distill_loss: tensor
+    distill_loss: tensor
     match distill.config.distill_mode {
         "average" => {
             distill_loss = distill.average_distillation(student_logits, teacher_logits)

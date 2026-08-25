@@ -89,7 +89,7 @@ func float_to_str(float value, int decimals) string {
 }
 
 func step_verify_environment() int {
-    println_subheader("Step 1: verify环境")
+    println_subheader("Step 1: verifyenvironment")
     println("")
     println("🔍 verifyprojectstructure and file...")
     println("")
@@ -108,7 +108,7 @@ func step_verify_environment() int {
     println("  ✓ S compiledevice")
     println("    /home/shuwen/shuwen/train/s/bin/s_seed")
     println("")
-    println("✅ 环境verifycomplete")
+    println("✅ environmentverifycomplete")
     0
 }
 
@@ -124,7 +124,7 @@ func step_show_configuration() int {
     println("")
     println("  Training超Parameter:")
     println("    • method        : SFT (Supervised Fine-Tuning)")
-    println("    • 轮number        : 3")
+    println("    • roundnumber        : 3")
     println("    • batchsize    : 32")
     println("    • learning_rate      : 0.000500")
     println("    • 调度device      : cosine")
@@ -151,7 +151,7 @@ func step_run_lora_training() int {
     println("    1️⃣  loadbasemodel: base-model")
     println("    2️⃣  initialize LoRA adapter (rank=8)")
     println("    3️⃣  loadTrainingData: train.jsonl")
-    println("    4️⃣  Execute 3  轮次 of Training")
+    println("    4️⃣  Execute 3  round次 of Training")
     println("    5️⃣  Usage余弦learning_rate调度device")
     println("    6️⃣  saveCheckpoint to : lora_sft Directory")
     println("")
@@ -225,7 +225,7 @@ func main() {
     println("  🎓 NeurX CompleteafterTrainingExecuteprocess")
     println("  afterTrainingmethod: LoRA SFT (Low-Rank Supervised Fine-Tuning)")
     println("  basemodel: base-model")
-    println("  Dataset: MedMCQA (medical多选题)")
+    println("  Dataset: MedMCQA (medicalmore选题)")
     println_separator()
     println("")
     step_verify_environment()

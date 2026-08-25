@@ -120,8 +120,8 @@ func (hf_transformers_rollout* rollout) generate(
         if finished.all() {
             break
         }
-        let current_input: tensor
-        let current_attention_mask: tensor
+        current_input: tensor
+        current_attention_mask: tensor
         if step == 0 {
             current_input = input_ids
             current_attention_mask = attention_mask

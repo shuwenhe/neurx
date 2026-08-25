@@ -56,7 +56,7 @@ func (graph_compiler* compiler) compile(*computation_graph g) compilation_unit {
     unit.stats.original_memory = g.total_memory_bytes()
 
     unit.pipeline = default_optimization_pipeline()
-    unit.pass_results = run_pass_pipeline(&mut unit.optimized_graph, &unit.pipeline)
+    unit.pass_results = run_pass_pipeline(&unit.optimized_graph, &unit.pipeline)
 
     unit.stats.optimized_op_count = unit.optimized_graph.operation_count()
     unit.stats.optimized_memory = unit.optimized_graph.total_memory_bytes()
@@ -70,7 +70,7 @@ func (graph_compiler* compiler) compile_with_pipeline(*computation_graph g, *pas
     unit.stats.original_op_count = g.operation_count()
     unit.stats.original_memory = g.total_memory_bytes()
 
-    unit.pass_results = run_pass_pipeline(&mut unit.optimized_graph, pipeline)
+    unit.pass_results = run_pass_pipeline(&unit.optimized_graph, pipeline)
 
     unit.stats.optimized_op_count = unit.optimized_graph.operation_count()
     unit.stats.optimized_memory = unit.optimized_graph.total_memory_bytes()
@@ -89,11 +89,11 @@ func (graph_compiler* compiler) compile_with_config(*computation_graph g, string
     if opt_level == "O0" {
         unit.pass_results = vec[pass_result]()
     } else if opt_level == "O1" {
-        unit.pass_results = run_pass_pipeline(&mut unit.optimized_graph, &minimal_optimization_pipeline())
+        unit.pass_results = run_pass_pipeline(&unit.optimized_graph, &minimal_optimization_pipeline())
     } else if opt_level == "O2" {
-        unit.pass_results = run_pass_pipeline(&mut unit.optimized_graph, &default_optimization_pipeline())
+        unit.pass_results = run_pass_pipeline(&unit.optimized_graph, &default_optimization_pipeline())
     } else if opt_level == "O3" {
-        unit.pass_results = run_pass_pipeline(&mut unit.optimized_graph, &aggressive_optimization_pipeline())
+        unit.pass_results = run_pass_pipeline(&unit.optimized_graph, &aggressive_optimization_pipeline())
     }
 
     if cfg.enable_validation {

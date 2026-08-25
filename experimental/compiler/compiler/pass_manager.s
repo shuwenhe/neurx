@@ -121,7 +121,7 @@ func minimal_optimization_pipeline() pass_pipeline {
     }
 }
 
-func apply_pass(*mut computation_graph g, pass_type pass_kind) pass_result {
+func apply_pass(*computation_graph g, pass_type pass_kind) pass_result {
     match pass_kind {
         pass_type::constant_folding: {
             result = apply_constant_folding(g)
@@ -158,7 +158,7 @@ func apply_pass(*mut computation_graph g, pass_type pass_kind) pass_result {
     }
 }
 
-func run_pass_pipeline(*mut computation_graph g, *pass_pipeline pipeline) vec[pass_result] {
+func run_pass_pipeline(*computation_graph g, *pass_pipeline pipeline) vec[pass_result] {
     results = vec[pass_result]()
 
     for pass_cfg in pipeline.passes {

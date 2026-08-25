@@ -50,7 +50,7 @@ func create_rpc_server(int port) (rpc_server, string) {
         port: port,
         active_connections: 0,
         is_running: false,
-        request_queue: &mut request_queue
+        request_queue: &request_queue
     }
     server, ""
 }

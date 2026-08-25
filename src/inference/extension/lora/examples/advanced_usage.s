@@ -11,7 +11,7 @@ use neurx.lora.weight_fusion::{weight_fusion_engine, compute_lora_delta}
 use neurx.lora.lora_state::{lora_state_manager}
 
 func example_weight_fusion() result[(), string] {
-    println("示例 1: 权重融合")
+    println("example 1: 权重融合")
 
     config := lora_config::default()
     config.lora_rank = 8
@@ -68,20 +68,20 @@ func example_weight_fusion() result[(), string] {
 
     adapter.fuse_weights(&original_weights)
 
-    println("  ✓ 权重已融合")
-    println("    融合状态: " + adapter.is_fused().to_string())
-    println("    适配器大小: " + adapter.get_size_mb().to_string() + " MB")
+    println("  ✓ 权重already融合")
+    println("    融合status: " + adapter.is_fused().to_string())
+    println("    适配器bigsmall: " + adapter.get_size_mb().to_string() + " MB")
 
     adapter.unfuse_weights(&original_weights)
 
-    println("  ✓ 权重已反融合")
-    println("    融合状态: " + adapter.is_fused().to_string())
+    println("  ✓ 权重already反融合")
+    println("    融合status: " + adapter.is_fused().to_string())
 
     ((, ""))
 }
 
 func example_lora_state_management() result[(), string] {
-    println("\n示例 2: 请求状态管理")
+    println("\nexample 2: 请求statusmanagement")
 
     state_manager := lora_state_manager::new(4)
 
@@ -100,17 +100,17 @@ func example_lora_state_management() result[(), string] {
         state_manager.create_request_state(req_id, adapter_names, scales)
     }
 
-    println("  ✓ 创建了 " + state_manager.get_request_count().to_string() + " 个请求")
+    println("  ✓ 创建ed " + state_manager.get_request_count().to_string() + " item请求")
 
     for req_id in req_ids.iter() {
         state_manager.activate_request(req_id)
     }
 
     active_count := state_manager.get_active_request_count()
-    println("  ✓ 激活了 " + active_count.to_string() + " 个请求")
+    println("  ✓ 激活ed " + active_count.to_string() + " item请求")
 
     state_manager.deactivate_request("req_002")
-    println("  ✓ 停用后活跃请求: " + state_manager.get_active_request_count().to_string())
+    println("  ✓ 停useback活跃请求: " + state_manager.get_active_request_count().to_string())
 
     active := state_manager.get_active_requests()
     println("    活跃请求: " + active.len().to_string())
@@ -119,7 +119,7 @@ func example_lora_state_management() result[(), string] {
 }
 
 func example_multi_adapter_caching() result[(), string] {
-    println("\n示例 3: 多适配器缓存管理")
+    println("\nexample 3: more适配器缓存management")
 
     state_manager := lora_state_manager::new(8)
 
@@ -148,23 +148,23 @@ func example_multi_adapter_caching() result[(), string] {
 
     state_manager.cache_fused_weights("multi_req_adapter_1", cached_weight)
 
-    println("  ✓ 已缓存融合权重")
+    println("  ✓ already缓存融合权重")
 
     (cache_entries, cache_size) := state_manager.get_cache_stats()
     println("    缓存条目: " + cache_entries.to_string())
-    println("    缓存大小: " + cache_size.to_string() + " MB")
+    println("    缓存bigsmall: " + cache_size.to_string() + " MB")
 
     state_manager.clear_request_cache("multi_req")
-    println("  ✓ 已清除请求缓存")
+    println("  ✓ alreadyclear除请求缓存")
 
     (cache_entries, _) := state_manager.get_cache_stats()
-    println("    清除后缓存条目: " + cache_entries.to_string())
+    println("    clear除back缓存条目: " + cache_entries.to_string())
 
     ((, ""))
 }
 
 func example_dynamic_adapter_switch() result[(), string] {
-    println("\n示例 4: 动态适配器切换")
+    println("\nexample 4: 动态适配器切换")
 
     state_manager := lora_state_manager::new(4)
 
@@ -196,9 +196,9 @@ func example_dynamic_adapter_switch() result[(), string] {
 
     switch state_manager.get_request_state("dynamic_req") {
         option::some(state) : {
-            println("  ✓ 已切换适配器")
-            println("    新适配器数: " + state.adapter_names.len().to_string())
-            println("    第一个适配器: " + state.adapter_names[0])
+            println("  ✓ already切换适配器")
+            println("    new适配器数: " + state.adapter_names.len().to_string())
+            println("    thoneitem适配器: " + state.adapter_names[0])
         },
         option::none : {},
     }
@@ -208,20 +208,20 @@ func example_dynamic_adapter_switch() result[(), string] {
     updated_scales.push(0.5)
 
     state_manager.update_adapter_scales("dynamic_req", updated_scales)
-    println("  ✓ 已更新缩放因子")
+    println("  ✓ already更new缩放because子")
 
     ((, ""))
 }
 
 func example_weight_computation_perf() result[(), string] {
-    println("\n示例 5: 权重计算性能")
+    println("\nexample 5: 权重计算ity能")
 
     engine := weight_fusion_engine::new(8, 16.0)
 
-    println("  ✓ 创建融合引擎")
-    println("    秩: 8")
+    println("  ✓ 创建融合engine")
+    println("    rank: 8")
     println("    alpha: 16.0")
-    println("    缩放因子: " + engine.scaling_factor.to_string())
+    println("    缩放because子: " + engine.scaling_factor.to_string())
 
     lora_a := vec[vec[float]]()
     i := 0
@@ -251,7 +251,7 @@ func example_weight_computation_perf() result[(), string] {
 
     delta := compute_lora_delta(lora_a, lora_b, engine.scaling_factor)
 
-    println("  ✓ 计算完成")
+    println("  ✓ 计算complete")
     println("    输入形状: (" + lora_a.len().to_string() + ", " + lora_a[0].len().to_string() + ")")
     println("    权重形状: (" + lora_b.len().to_string() + ", " + lora_b[0].len().to_string() + ")")
     println("    输出形状: (" + delta.len().to_string() + ", " + delta[0].len().to_string() + ")")
@@ -260,7 +260,7 @@ func example_weight_computation_perf() result[(), string] {
 }
 
 func main() {
-    println("=== LoRA 高级使用示例 ===\n")
+    println("=== LoRA high级使useexample ===\n")
 
     switch example_weight_fusion() {
         (_, "") : {},
@@ -287,5 +287,5 @@ func main() {
         (0, e) : println("Error: " + e),
     }
 
-    println("\n=== 所有示例完成 ===")
+    println("\n=== allexamplecomplete ===")
 }

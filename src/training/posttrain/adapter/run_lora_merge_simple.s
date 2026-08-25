@@ -44,10 +44,10 @@ func main() {
     println("     ├── generation_config.json")
     println("     └── README.md")
     println("")
-    println("🚀 现 in 可以:")
+    println("🚀 show in can:")
     println("  • Usagemodelenterlineinference")
-    println("  • enter一stepFine-tuning")
-    println("  • deployment to 生产环境")
+    println("  • enteronestepFine-tuning")
+    println("  • deployment to 生产environment")
     println("")
     0
 }

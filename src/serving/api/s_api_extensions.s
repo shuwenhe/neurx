@@ -39,7 +39,7 @@ func int_to_string(int n) string {
 }
 
 func json_completions() string {
-    return "{\"id\":\"cmpl-001\",\"object\":\"text_completion\",\"created\":1726509600,\"model\":\"Qwen2.5-0.5B-Instruct\",\"choices\":[{\"text\":\" 这是补全响应\",\"index\":0,\"finish_reason\":\"length\"}],\"usage\":{\"prompt_tokens\":10,\"completion_tokens\":15,\"total_tokens\":25}}"
+    return "{\"id\":\"cmpl-001\",\"object\":\"text_completion\",\"created\":1726509600,\"model\":\"Qwen2.5-0.5B-Instruct\",\"choices\":[{\"text\":\" thisis补全response\",\"index\":0,\"finish_reason\":\"length\"}],\"usage\":{\"prompt_tokens\":10,\"completion_tokens\":15,\"total_tokens\":25}}"
 }
 
 func json_embeddings() string {
@@ -51,7 +51,7 @@ func json_image_generation() string {
 }
 
 func json_audio_transcription() string {
-    return "{\"text\":\"这是音频转录的文本\",\"duration\":30.5,\"language\":\"zh\"}"
+    return "{\"text\":\"thisis音频转录of文本\",\"duration\":30.5,\"language\":\"zh\"}"
 }
 
 func json_fine_tune_list() string {
@@ -117,8 +117,8 @@ func handle_fine_tunes(string method) string {
 }
 
 func main() {
-    print("✅ 纯 S API 扩展端点已编译\n")
-    print("已实现端点:\n")
+    print("✅ pure S API 扩展endpointalready编译\n")
+    print("alreadyimplementationendpoint:\n")
     print("  - POST /v1/completions\n")
     print("  - POST /v1/embeddings\n")
     print("  - POST /v1/images/generations\n")

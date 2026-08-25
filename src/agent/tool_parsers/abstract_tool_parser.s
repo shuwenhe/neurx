@@ -96,22 +96,22 @@ impl BaseToolParser {
         }
     }
 
-    func set_tools(mut self, Vec<str> tools) . BaseToolParser {
+    func set_tools(self, Vec<str> tools) . BaseToolParser {
         self.tools = tools
         self
     }
 
-    func set_streaming(mut self, bool streaming) . BaseToolParser {
+    func set_streaming(self, bool streaming) . BaseToolParser {
         self.supports_streaming = streaming
         self
     }
 
-    func set_tool_choice_required(mut self, bool required) . BaseToolParser {
+    func set_tool_choice_required(self, bool required) . BaseToolParser {
         self.supports_required = required
         self
     }
 
-    func set_structural_tag(mut self, str tag) . BaseToolParser {
+    func set_structural_tag(self, str tag) . BaseToolParser {
         self.structural_tag_model = tag
         self
     }

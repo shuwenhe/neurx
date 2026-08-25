@@ -83,7 +83,7 @@ func main() {
     print("  • Vocabulary: 151,936\n\n")
     print("🔄 INFERENCE EXAMPLE\n")
     print("─────────────────────────────────────────────────────\n")
-    string user_input = "糖尿病的治疗"
+    string user_input = "diabetesdiseaseofTreatment"
     print("User input: \"" + user_input + "\"\n\n")
     int token_id = tokenize_input(user_input)
     string output = forward_through_transformer(token_id)

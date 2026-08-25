@@ -158,7 +158,7 @@ func show_network_configuration() {
     print("  curl -X POST http:
     print("    -H \"Content-Type: application/json\" \\\n")
     print("    -d '{\n")
-    print("      \"prompt\": \"糖尿病的治疗\",\n")
+    print("      \"prompt\": \"diabetesdiseaseofTreatment\",\n")
     print("      \"max_tokens\": 256,\n")
     print("      \"temperature\": 0.7\n")
     print("    }'\n\n")

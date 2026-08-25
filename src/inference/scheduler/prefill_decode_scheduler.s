@@ -65,7 +65,7 @@ func new_scheduler_state(scheduler_config config) scheduler_state {
     }
 }
 
-func (mut scheduler_state* sched) add_request(request_metrics metrics) {
+func (scheduler_state* sched) add_request(request_metrics metrics) {
     sched.pending_metrics.push(metrics)
 }
 
@@ -259,8 +259,8 @@ func balanced_schedule(*scheduler_state sched) scheduling_decision {
 }
 
 func check_and_apply_preemption(
-    sched: *mut scheduler_state,
-    decision: *mut scheduling_decision
+    sched: *scheduler_state,
+    decision: *scheduling_decision
 ) {
     if !sched.config.enable_preemption {
         return
@@ -275,12 +275,16 @@ func check_and_apply_preemption(
 
         for i in 0..decision.decode_request_ids.len() {
             req_id := decision.decode_request_ids[i]
-            if let Some(metrics) = sched.running_metrics.iter().find(|m| m.request_id == req_id) {
-                prio := priority_value(metrics.priority)
-                if prio < min_priority {
-                    min_priority = prio
-                    min_idx = i
+            metrics_opt := sched.running_metrics.iter().find(|m| m.request_id == req_id)
+            match metrics_opt {
+                Some(metrics) => {
+                    prio := priority_value(metrics.priority)
+                    if prio < min_priority {
+                        min_priority = prio
+                        min_idx = i
+                    }
                 }
+                None => {}
             }
         }
 
@@ -292,7 +296,7 @@ func check_and_apply_preemption(
     }
 }
 
-func (mut scheduler_state* sched) make_decision() scheduling_decision {
+func (scheduler_state* sched) make_decision() scheduling_decision {
     decision := match sched.config.strategy {
         scheduling_strategy.min_latency => min_latency_schedule(sched),
         scheduling_strategy.max_throughput => max_throughput_schedule(sched),
@@ -301,7 +305,7 @@ func (mut scheduler_state* sched) make_decision() scheduling_decision {
         _ => min_latency_schedule(sched),
     }
 
-    check_and_apply_preemption(sched, &mut decision)
+    check_and_apply_preemption(sched, &decision)
 
     sched.current_iteration += 1
     decision
@@ -338,7 +342,7 @@ func (scheduler_state* sched) get_stats() scheduler_stats {
 }
 
 func main() {
-    println("🎯 Prefill/Decode 高级调度策略")
+    println("🎯 Prefill/Decode high级调度策略")
     println("================================")
 
     config := scheduler_config {
@@ -376,5 +380,5 @@ func main() {
         println("")
     }
 
-    println("✅ 调度策略已就绪")
+    println("✅ 调度策略alreadythen绪")
 }

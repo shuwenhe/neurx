@@ -110,7 +110,7 @@ func (grpo_pass_k_trainer* trainer) compute_passk_advantages(
         group_evals := evaluations[b]
         group_rewards := rewards[b]
         passk := compute_passk(group_evals, k)
-        let baseline: f32
+        baseline: f32
         if trainer.config.use_majority_voting {
             sorted_rewards := sort(group_rewards)
             baseline = sorted_rewards[k / 2]

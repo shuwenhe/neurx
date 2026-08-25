@@ -195,7 +195,7 @@ func handle_http_request_full(string raw_http_request) string {
     string method = extract_method_from_request(raw_http_request)
     string path = extract_path_from_request(raw_http_request)
 
-    print("📨 处理请求: " + method + " " + path + "\n")
+    print("📨 processing请求: " + method + " " + path + "\n")
 
     string response_body = ""
     int status = 404
@@ -222,17 +222,17 @@ func handle_http_request_full(string raw_http_request) string {
 
 func print_network_startup() {
     print("\n╔═══════════════════════════════════════════════════════╗\n")
-    print("║  🌐 NeurX 纯 S 语言网络层 (Pure S Network Layer)  ║\n")
+    print("║  🌐 NeurX pure S language网络层 (Pure S Network Layer)  ║\n")
     print("╚═══════════════════════════════════════════════════════╝\n\n")
 }
 
 func print_network_capabilities() {
     print("✅ 网络功能:\n")
-    print("   • HTTP 请求解析 (HTTP Request Parsing)\n")
-    print("   • 路由处理 (Path Routing)\n")
-    print("   • JSON 响应生成 (JSON Response Generation)\n")
-    print("   • 完全纯 S 实现 (Pure S Implementation)\n")
-    print("   • 零外部依赖 (Zero External Dependencies)\n\n")
+    print("   • HTTP 请求parsing (HTTP Request Parsing)\n")
+    print("   • 路由processing (Path Routing)\n")
+    print("   • JSON responsegenerate (JSON Response Generation)\n")
+    print("   • fullypure S implementation (Pure S Implementation)\n")
+    print("   • 零outsidepart依赖 (Zero External Dependencies)\n\n")
 }
 
 func main() {
@@ -240,24 +240,24 @@ func main() {
     print_network_capabilities()
 
     string test_get = "GET /health HTTP/1.1\r\nHost: localhost:8888\r\n\r\n"
-    print("🧪 测试 1: GET /health\n")
+    print("🧪 test 1: GET /health\n")
     string resp_get = handle_http_request_full(test_get)
-    print("✅ 响应已生成\n\n")
+    print("✅ responsealreadygenerate\n\n")
 
     string test_models = "GET /v1/models HTTP/1.1\r\nHost: localhost:8888\r\n\r\n"
-    print("🧪 测试 2: GET /v1/models\n")
+    print("🧪 test 2: GET /v1/models\n")
     string resp_models = handle_http_request_full(test_models)
-    print("✅ 响应已生成\n\n")
+    print("✅ responsealreadygenerate\n\n")
 
     string test_chat = "POST /v1/chat/completions HTTP/1.1\r\nHost: localhost:8888\r\nContent-Type: application/json\r\n\r\n{\"model\":\"Qwen2.5-0.5B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}"
-    print("🧪 测试 3: POST /v1/chat/completions\n")
+    print("🧪 test 3: POST /v1/chat/completions\n")
     string resp_chat = handle_http_request_full(test_chat)
-    print("✅ 响应已生成\n\n")
+    print("✅ responsealreadygenerate\n\n")
 
     string test_404 = "GET /unknown HTTP/1.1\r\nHost: localhost:8888\r\n\r\n"
-    print("🧪 测试 4: GET /unknown (404)\n")
+    print("🧪 test 4: GET /unknown (404)\n")
     string resp_404 = handle_http_request_full(test_404)
-    print("✅ 404 响应已生成\n\n")
+    print("✅ 404 responsealreadygenerate\n\n")
 
-    print("🎉 纯 S 网络层已完全实现！\n")
+    print("🎉 pure S 网络层alreadyfullyimplementation！\n")
 }

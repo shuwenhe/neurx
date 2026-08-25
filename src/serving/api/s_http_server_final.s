@@ -200,30 +200,30 @@ func process_request(string raw_request) string {
 }
 
 func main() {
-    print("🚀 纯 S HTTP 服务器已启动\n")
-    print("等待来自 socat 的请求...\n")
+    print("🚀 pure S HTTP serveralreadystart\n")
+    print("等待来自 socat of请求...\n")
 
     string test_health = "GET /health HTTP/1.1\r\nHost: localhost:8888\r\n\r\n"
     string resp_health = process_request(test_health)
 
-    print("✅ 健康检查响应已生成\n")
+    print("✅ healthcheckresponsealreadygenerate\n")
     print_response(resp_health)
 
     string test_models = "GET /v1/models HTTP/1.1\r\nHost: localhost:8888\r\n\r\n"
     string resp_models = process_request(test_models)
 
-    print("✅ 模型列表响应已生成\n")
+    print("✅ model列tableresponsealreadygenerate\n")
     print_response(resp_models)
 
     string test_chat = "POST /v1/chat/completions HTTP/1.1\r\nHost: localhost:8888\r\n\r\n"
     string resp_chat = process_request(test_chat)
 
-    print("✅ 聊天响应已生成\n")
+    print("✅ 聊天responsealreadygenerate\n")
     print_response(resp_chat)
 }
 
 func print_response(string response) {
-    print("── 响应 ──\n")
+    print("── response ──\n")
     print(response)
     print("\n\n")
 }

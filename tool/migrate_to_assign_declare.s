@@ -34,7 +34,7 @@ func main() {
     
     println("")
     println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    println("✅ 迁移完成! 共替换 " + count_to_string(total_replaced) + " 处")
+    println("✅ 迁移complete! 共替换 " + count_to_string(total_replaced) + " 处")
 }
 
 func find_all_s_files(string dir, vec[string] files) {

@@ -76,7 +76,7 @@ func calculate_entry_size(*vec[float] k, *vec[float] v) int {
     (k.len() + v.len()) * 4
 }
 
-func (mut kv_cache_pool* pool) put_kv(
+func (kv_cache_pool* pool) put_kv(
     sequence_id: int,
     layer_id: int,
     token_position: int,
@@ -116,7 +116,7 @@ func (mut kv_cache_pool* pool) put_kv(
     ((, ""))
 }
 
-func (mut kv_cache_pool* pool) get_kv(
+func (kv_cache_pool* pool) get_kv(
     sequence_id: int,
     layer_id: int,
     token_position: int
@@ -148,7 +148,7 @@ func (mut kv_cache_pool* pool) get_kv(
     }
 }
 
-func (mut kv_cache_pool* pool) try_offload_to_cpu() result[(), error] {
+func (kv_cache_pool* pool) try_offload_to_cpu() result[(), error] {
     gpu_entries := pool.gpu_cache
 
     oldest_key := 0
@@ -188,7 +188,7 @@ func (mut kv_cache_pool* pool) try_offload_to_cpu() result[(), error] {
     }
 }
 
-func (mut kv_cache_pool* pool) restore_from_cpu(int cache_key) result[(), error] {
+func (kv_cache_pool* pool) restore_from_cpu(int cache_key) result[(), error] {
     switch pool.cpu_cache.get(cache_key) {
         option::some(entry) : {
             pool.gpu_cache.insert(cache_key, entry)
@@ -228,7 +228,7 @@ func (pool* pool) get_cache_hit_rate() float {
     (pool.stats.restore_count as float) / (total_accesses as float)
 }
 
-func (mut kv_cache_pool* pool) clear_sequence_cache(int sequence_id) result[(), error] {
+func (kv_cache_pool* pool) clear_sequence_cache(int sequence_id) result[(), error] {
     keys_to_remove := vec[int]()
 
     for key in pool.gpu_cache.keys() {
@@ -257,7 +257,7 @@ func (mut kv_cache_pool* pool) clear_sequence_cache(int sequence_id) result[(), 
     ((, ""))
 }
 
-func (mut kv_cache_pool* pool) clear_all() result[(), error] {
+func (kv_cache_pool* pool) clear_all() result[(), error] {
     pool.gpu_cache = map[int, kv_cache_entry]()
     pool.cpu_cache = map[int, kv_cache_entry]()
     pool.metadata_map = map[int, cache_metadata]()

@@ -411,10 +411,10 @@ func test_json_parser() {
     
     println("")
     println("迁移路径:")
-    println("  1. 完成 json_parser.s 的完整实现")
-    println("  2. 与 json.cpp 进行性能基准对比")
-    println("  3. 与 HF config.json 测试兼容性")
-    println("  4. 替换 json.cpp 的所有调用")
+    println("  1. complete json_parser.s ofcompleteimplementation")
+    println("  2. 与 json.cpp 进doity能基准pair比")
+    println("  3. 与 HF config.json testCompatibleity")
+    println("  4. 替换 json.cpp ofall调use")
     println("  5. 删除 json.cpp/json.h")
     println("")
 }

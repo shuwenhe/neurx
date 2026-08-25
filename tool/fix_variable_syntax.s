@@ -7,7 +7,7 @@ func main() {
     print("Converting: name: type → type name\n")
     print("========================================\n\n")
     fix_variable_declarations()
-    print("\n✓ 变量声明格式统一完成\n")
+    print("\n✓ 变量声bright格式统onecomplete\n")
 }
 
 func fix_variable_declarations() {
@@ -27,9 +27,9 @@ import re
 import sys
 def fix_file(filepath):
     """
-    修复单个文件中的变量声明格式
-    将 name: type 改为 type name
-    保留 struct 字段定义
+    修复单item文piecemiddleof变量声bright格式
+    will name: type 改为 type name
+    保留 struct 字段set义
     """
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
@@ -72,7 +72,7 @@ def main():
                 if fix_file(filepath):
                     fixed += 1
                     print(f'✓ {filepath}')
-    print(f'\n完成: {count} 个文件扫描, {fixed} 个文件修改')
+    print(f'\ncomplete: {count} item文piece扫描, {fixed} item文piece修改')
 if __name__ == '__main__':
     main()
 `
@@ -89,9 +89,9 @@ PYEOF
 func run_fixer() {
     cd_result := runtime_run_command("cd /home/shuwen/shuwen && python3 /tmp/fix_neurx_syntax.py")
     if !cd_result.ok {
-        print("error: 执行 Python 脚本失败\n")
-        print("提示：请手动运行：python3 /tmp/fix_neurx_syntax.py\n")
+        print("error: 执do Python 脚本失败\n")
+        print("prompt：请手动运do：python3 /tmp/fix_neurx_syntax.py\n")
         return
     }
-    print("\n执行完成\n")
+    print("\n执docomplete\n")
 }

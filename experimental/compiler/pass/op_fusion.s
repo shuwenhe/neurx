@@ -75,7 +75,7 @@ func find_fusion_candidates(*computation_graph g) vec[fusion_candidate] {
     candidates
 }
 
-func apply_op_fusion(*mut computation_graph g) fusion_result {
+func apply_op_fusion(*computation_graph g) fusion_result {
     candidates = find_fusion_candidates(g)
     removed = vec[int]()
 

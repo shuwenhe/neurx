@@ -116,7 +116,7 @@ func main() {
 
     print("──────────────────────────────────────────────────────────────────\n")
 
-    print("Requirement: \"用neurx的s实现不用python和pytorch\"\n")
+    print("Requirement: \"useneurxofsimplementation不usepythonandpytorch\"\n")
 
     print("            (Use NeurX S implementation, no Python/PyTorch)\n\n")
 

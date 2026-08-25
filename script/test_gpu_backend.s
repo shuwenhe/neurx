@@ -6,7 +6,7 @@ func main() {
 
     print("║  NeurX GPU Backend - 24 Layer Test (Pure S Language)           ║\n")
 
-    print("║  User Requirement: 用neurx的s实现不用python和pytorch             ║\n")
+    print("║  User Requirement: useneurxofsimplementation不usepythonandpytorch             ║\n")
 
     print("╚════════════════════════════════════════════════════════════════╝\n\n")
 

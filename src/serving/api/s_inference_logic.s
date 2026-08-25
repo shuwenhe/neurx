@@ -21,18 +21,18 @@ func estimate_tokens(string text) int {
 }
 
 func generate_response(string prompt, int max_tokens, float temperature) string {
-    print("🤖 生成推理响应\n")
-    print("   提示: " + prompt + "\n")
-    print("   最大tokens: " + int_to_string(max_tokens) + "\n\n")
+    print("🤖 generateinferenceresponse\n")
+    print("   prompt: " + prompt + "\n")
+    print("   maximumtokens: " + int_to_string(max_tokens) + "\n\n")
 
     string response = ""
 
     if len(prompt) < 10 {
-        response = "这是对简短提示的简洁回复。"
+        response = "thisispair简shortpromptof简洁回复。"
     } else if len(prompt) < 50 {
-        response = "这是对中等长度提示的详细响应。它包含相关信息和多个句子以演示推理能力。"
+        response = "thisispairmiddle等long度promptof详细response。它包含相关信息andmoreitem句子以演示inference能力。"
     } else {
-        response = "这是对较长提示的综合回复。提供了详细的分析，包含多个段落，涵盖了提示的各个方面。演示了复杂推理和信息组织能力。"
+        response = "thisispair较longpromptof综合回复。提供ed详细ofAnalysis，包含moreitem段落，涵盖edpromptof各item方面。演示ed复杂inferenceand信息组织能力。"
     }
 
     if len(response) > max_tokens {
@@ -95,5 +95,5 @@ func int_to_string(int n) string {
 }
 
 func main() {
-    print("✅ 推理引擎模块已加载\n")
+    print("✅ inferenceenginemodulealready加载\n")
 }

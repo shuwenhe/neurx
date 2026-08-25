@@ -69,31 +69,31 @@ func deployment_plan_1m_machines() distribution_strategy {
 }
 
 func phased_deployment_schedule() {
-    println("=== NeurX 1M 机器分阶段部署计划 ===")
+    println("=== NeurX 1M 机器分stagedeployment计划 ===")
     println("")
     
-    println("第1阶段 (第1个月): 集中式")
-    println("  部署: 1000 台高端GPU服务器")
-    println("  客户端: 999k 轻量级库 (5MB)")
-    println("  推理: 100% 走中央服务器")
+    println("th1stage (th1months): 集middle式")
+    println("  deployment: 1000 devicehigh端GPUserver")
+    println("  client: 999k lightweight库 (5MB)")
+    println("  inference: 100% 走centralserver")
     println("")
     
-    println("第2阶段 (第2个月): 边缘优先级 Tier 1")
-    println("  新增: 10k 边缘推理节点")
-    println("  客户端: 890k 轻量级库")
-    println("  推理: 20% 边缘 + 80% 中央")
+    println("th2stage (th2months): edge优先级 Tier 1")
+    println("  new增: 10k edgeinferencenode")
+    println("  client: 890k lightweight库")
+    println("  inference: 20% edge + 80% central")
     println("")
     
-    println("第3阶段 (第3个月): 边缘优先级 Tier 2")
-    println("  新增: 40k 边缘推理节点 (总计50k)")
-    println("  客户端: 850k 轻量级库")
-    println("  推理: 50% 边缘 + 50% 中央")
+    println("th3stage (th3months): edge优先级 Tier 2")
+    println("  new增: 40k edgeinferencenode (total50k)")
+    println("  client: 850k lightweight库")
+    println("  inference: 50% edge + 50% central")
     println("")
     
-    println("第4阶段 (第4个月): 完全边缘化")
-    println("  新增: 50k 边缘推理节点 (总计100k)")
-    println("  客户端: 800k 轻量级库")
-    println("  推理: 80% 边缘 + 20% 中央 (故障转移)")
+    println("th4stage (th4months): fullyedgeization")
+    println("  new增: 50k edgeinferencenode (total100k)")
+    println("  client: 800k lightweight库")
+    println("  inference: 80% edge + 20% central (failover)")
     println("")
 }
 
@@ -141,6 +141,6 @@ func estimate_network_traffic(
     central_bandwidth_gbps := (central_qps * 3) / 1000 / 1000
     edge_bandwidth_gbps := (edge_qps * 3) / 1000 / 1000
     
-    println("中央服务器总带宽: " + central_bandwidth_gbps as string + " Gbps")
-    println("边缘节点总带宽: " + edge_bandwidth_gbps as string + " Gbps")
+    println("centralservertotal带wide: " + central_bandwidth_gbps as string + " Gbps")
+    println("edgenodetotal带wide: " + edge_bandwidth_gbps as string + " Gbps")
 }

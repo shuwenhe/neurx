@@ -15,7 +15,7 @@ impl ToolParserRegistry {
         registry
     }
 
-    func register_default_parsers(mut self) {
+    func register_default_parsers(self) {
         self.register_parser("deepseek_v3", || DeepSeekV3Parser::new())
         self.register_parser("deepseek_v31", || DeepSeekV3Parser::new())
         self.register_parser("deepseek_v32", || DeepSeekV32Parser::new())
@@ -64,7 +64,7 @@ impl ToolParserRegistry {
         self.register_parser("python", || PythonicToolParser::new())
     }
 
-    func register_parser(mut self, str name, func( factory) . ToolParser) {
+    func register_parser(self, str name, func( factory) . ToolParser) {
         self.parsers.insert(name, factory)
     }
 
@@ -165,12 +165,12 @@ impl ToolParserConfig {
         }
     }
 
-    func set_strict_mode(mut self, bool strict) . ToolParserConfig {
+    func set_strict_mode(self, bool strict) . ToolParserConfig {
         self.strict_mode = strict
         self
     }
 
-    func set_streaming_enabled(mut self, bool enabled) . ToolParserConfig {
+    func set_streaming_enabled(self, bool enabled) . ToolParserConfig {
         self.enable_streaming = enabled
         self
     }

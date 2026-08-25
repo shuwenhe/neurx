@@ -71,14 +71,14 @@ func new_prefill_decode_engine(batch_config config) prefill_decode_engine {
     }
 }
 
-func (mut prefill_decode_engine* engine) enqueue_request(request_state req) {
+func (prefill_decode_engine* engine) enqueue_request(request_state req) {
     new_req := req
     new_req.status = request_status.pending
     new_req.arrival_time_ms = engine.total_time_ms
     engine.pending_requests.push(new_req)
 }
 
-func (mut prefill_decode_engine* engine) schedule_prefill() bool {
+func (prefill_decode_engine* engine) schedule_prefill() bool {
     if engine.pending_requests.is_empty() {
         return false
     }
@@ -115,7 +115,7 @@ func (mut prefill_decode_engine* engine) schedule_prefill() bool {
     return prefill_count > 0
 }
 
-func (mut prefill_decode_engine* engine) schedule_decode() bool {
+func (prefill_decode_engine* engine) schedule_decode() bool {
     if engine.prefilling_requests.is_empty() && engine.decoding_requests.is_empty() {
         return false
     }
@@ -173,7 +173,7 @@ func (mut prefill_decode_engine* engine) schedule_decode() bool {
     return decode_batch_size > 0
 }
 
-func (mut prefill_decode_engine* engine) iteration() {
+func (prefill_decode_engine* engine) iteration() {
     engine.current_iteration += 1
 
     prefill_scheduled := engine.schedule_prefill()
@@ -189,7 +189,7 @@ func (mut prefill_decode_engine* engine) iteration() {
     engine.total_time_ms += 10
 }
 
-func (mut prefill_decode_engine* engine) run_one_step() {
+func (prefill_decode_engine* engine) run_one_step() {
 
     engine.iteration()
 }
@@ -241,7 +241,7 @@ func rand_next_token() int {
 }
 
 func main() {
-    println("🚀 Prefill/Decode 分离架构 - 核心引擎")
+    println("🚀 Prefill/Decode 分离架构 - 核心engine")
     println("========================================")
 
     config := batch_config {
@@ -283,20 +283,20 @@ func main() {
     }
 
     stats := engine.get_stats()
-    println("📊 引擎统计:")
-    println(f"  总迭代数: {stats.total_iterations}")
+    println("📊 engine统计:")
+    println(f"  total迭代数: {stats.total_iterations}")
     println(f"  Prefill Token: {stats.total_prefilled_tokens}")
     println(f"  Decode Token: {stats.total_decoded_tokens}")
-    println(f"  完成请求数: {stats.total_requests_completed}")
-    println(f"  平均 Prefill 延迟: {stats.avg_prefill_latency_ms:.2f}ms")
-    println(f"  平均 Decode 延迟: {stats.avg_decode_latency_ms:.2f}ms")
-    println(f"  吞吐量: {stats.total_throughput_req_per_sec:.2f} req/s")
+    println(f"  complete请求数: {stats.total_requests_completed}")
+    println(f"  average Prefill latency: {stats.avg_prefill_latency_ms:.2f}ms")
+    println(f"  average Decode latency: {stats.avg_decode_latency_ms:.2f}ms")
+    println(f"  throughput: {stats.total_throughput_req_per_sec:.2f} req/s")
 
     println!("")
-    println!("✅ 关键特性:")
-    println!("  ✓ Prefill/Decode 批处理分离")
-    println!("  ✓ 迭代级调度 (交错执行)")
-    println!("  ✓ KV 缓存动态管理")
-    println!("  ✓ 性能目标: 5-10x 吞吐提升")
-    println!("  ✓ 100% Pure S 实现")
+    println!("✅ 关键特ity:")
+    println!("  ✓ Prefill/Decode 批processing分离")
+    println!("  ✓ 迭代级调度 (交wrong执do)")
+    println!("  ✓ KV 缓存动态management")
+    println!("  ✓ ity能target: 5-10x 吞吐提升")
+    println!("  ✓ 100% Pure S implementation")
 }

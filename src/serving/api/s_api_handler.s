@@ -205,7 +205,7 @@ func int_to_string(int n) string {
 }
 
 func handle_health_check() api_response {
-    print("\n💚 处理健康检查请求\n")
+    print("\n💚 processinghealthcheck请求\n")
 
     string body = "{"
     body = body + "\"status\":\"healthy\","
@@ -223,7 +223,7 @@ func handle_health_check() api_response {
 }
 
 func handle_list_models() api_response {
-    print("\n📋 处理模型列表请求\n")
+    print("\n📋 processingmodel列table请求\n")
 
     string body = "{"
     body = body + "\"object\":\"list\","
@@ -245,7 +245,7 @@ func handle_list_models() api_response {
 }
 
 func handle_chat_completion(api_request req) api_response {
-    print("\n🤖 处理聊天完成请求\n")
+    print("\n🤖 processing聊天complete请求\n")
 
     string model = extract_json_string(req.body, "model")
     if model == "" {
@@ -259,14 +259,14 @@ func handle_chat_completion(api_request req) api_response {
 
     string content = extract_json_string(req.body, "content")
     if content == "" {
-        content = "你好"
+        content = "hello"
     }
 
-    print("   模型: " + model + "\n")
+    print("   model: " + model + "\n")
     print("   消息: " + content + "\n")
-    print("   最大tokens: " + int_to_string(max_tokens) + "\n")
+    print("   maximumtokens: " + int_to_string(max_tokens) + "\n")
 
-    string response_text = "这是一个示例响应。在实际部署中，这里会调用真实的推理引擎。"
+    string response_text = "thisisoneitemexampleresponse。atactualdeploymentmiddle，thisinsidewill调usetrue实ofinferenceengine。"
 
     int prompt_tokens = len(content) / 4 + 1
     int completion_tokens = len(response_text) / 4 + 1
@@ -303,7 +303,7 @@ func handle_chat_completion(api_request req) api_response {
 }
 
 func handle_error(int status, string message) api_response {
-    print("\n❌ 错误响应: " + int_to_string(status) + " " + message + "\n")
+    print("\n❌ wrong误response: " + int_to_string(status) + " " + message + "\n")
 
     string body = "{"
     body = body + "\"error\":{"
@@ -324,7 +324,7 @@ func route_request(api_request req) api_response {
     print("\n" + "="*60 + "\n")
     print("📨 路由请求\n")
     print("="*60 + "\n")
-    print("方法: " + req.method + "\n")
+    print("method: " + req.method + "\n")
     print("路径: " + req.path + "\n")
 
     if req.path == "/v1/chat/completions" && req.method == "POST" {
@@ -334,15 +334,15 @@ func route_request(api_request req) api_response {
     } else if req.path == "/v1/models" && req.method == "GET" {
         return handle_list_models()
     } else {
-        return handle_error(404, "端点未找到")
+        return handle_error(404, "endpoint未找到")
     }
 }
 
 func print_response(api_response resp) {
     print("\n" + "─"*60 + "\n")
-    print("✅ API 响应\n")
+    print("✅ API response\n")
     print("─"*60 + "\n")
-    print("状态: " + int_to_string(resp.status_code) + " " + resp.status_message + "\n")
+    print("status: " + int_to_string(resp.status_code) + " " + resp.status_message + "\n")
     print("内容:\n")
     print(resp.response_body + "\n")
     print("="*60 + "\n")
@@ -350,10 +350,10 @@ func print_response(api_response resp) {
 
 func main() {
     print("\n╔════════════════════════════════════════════════════════════╗\n")
-    print("║           🌐 NeurX REST API 处理器 (纯 S)                ║\n")
+    print("║           🌐 NeurX REST API processing器 (pure S)                ║\n")
     print("╚════════════════════════════════════════════════════════════╝\n\n")
 
-    print("🧪 测试用例 1: 健康检查\n")
+    print("🧪 testuse例 1: healthcheck\n")
     api_request req1
     req1.method = "GET"
     req1.path = "/health"
@@ -362,7 +362,7 @@ func main() {
     api_response resp1 = route_request(req1)
     print_response(resp1)
 
-    print("🧪 测试用例 2: 列表模型\n")
+    print("🧪 testuse例 2: 列tablemodel\n")
     api_request req2
     req2.method = "GET"
     req2.path = "/v1/models"
@@ -371,14 +371,14 @@ func main() {
     api_response resp2 = route_request(req2)
     print_response(resp2)
 
-    print("🧪 测试用例 3: 聊天完成\n")
+    print("🧪 testuse例 3: 聊天complete\n")
     api_request req3
     req3.method = "POST"
     req3.path = "/v1/chat/completions"
-    req3.body = "{\"model\":\"Qwen2.5-0.5B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"你好\"}],\"max_tokens\":256}"
+    req3.body = "{\"model\":\"Qwen2.5-0.5B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"hello\"}],\"max_tokens\":256}"
 
     api_response resp3 = route_request(req3)
     print_response(resp3)
 
-    print("✅ 所有测试完成\n\n")
+    print("✅ alltestcomplete\n\n")
 }

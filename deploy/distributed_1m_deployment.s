@@ -74,7 +74,7 @@ struct regional_tier_architecture {
 
 func get_tier_0_central_server() regional_tier_architecture {
     return regional_tier_architecture {
-        tier_name: "Tier-0: 全球中央",
+        tier_name: "Tier-0: globalcentral",
         nodes: 1000,
         neurx_installed: true,
         gpu_required: true,
@@ -85,7 +85,7 @@ func get_tier_0_central_server() regional_tier_architecture {
 
 func get_tier_1_regional_gateway() regional_tier_architecture {
     return regional_tier_architecture {
-        tier_name: "Tier-1: 区域网关 (100 个)",
+        tier_name: "Tier-1: regional gateway (100 item)",
         nodes: 100,
         neurx_installed: true,
         gpu_required: true,
@@ -96,7 +96,7 @@ func get_tier_1_regional_gateway() regional_tier_architecture {
 
 func get_tier_2_edge_inference() regional_tier_architecture {
     return regional_tier_architecture {
-        tier_name: "Tier-2: 边缘推理 (100k 个)",
+        tier_name: "Tier-2: edgeinference (100k item)",
         nodes: 100000,
         neurx_installed: true,
         gpu_required: true,
@@ -107,7 +107,7 @@ func get_tier_2_edge_inference() regional_tier_architecture {
 
 func get_tier_3_lightweight_client() regional_tier_architecture {
     return regional_tier_architecture {
-        tier_name: "Tier-3: 轻量级客户端 (899k 个)",
+        tier_name: "Tier-3: lightweightclient (899k item)",
         nodes: 899000,
         neurx_installed: false,      
         gpu_required: false,
@@ -119,7 +119,7 @@ func get_tier_3_lightweight_client() regional_tier_architecture {
 func print_deployment_comparison() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")
-    println("║         100万台机器 - 分层部署架构 (推荐方案)               ║")
+    println("║         100ten_thousanddevice机器 - 分层deployment架构 (recommendationsolution)               ║")
     println("╚════════════════════════════════════════════════════════════════╝")
     println("")
     
@@ -128,51 +128,51 @@ func print_deployment_comparison() {
     tier2 := get_tier_2_edge_inference()
     tier3 := get_tier_3_lightweight_client()
     
-    println("┌─ Tier-0: 全球中央服务器")
-    println("│  ├─ 数量: 1,000 台")
-    println("│  ├─ 部署位置: 全球 10+ 数据中心")
-    println("│  ├─ 安装 NeurX: ✅ 完整部署")
-    println("│  ├─ GPU: NVIDIA A100/H100 (8 GPUs/台)")
-    println("│  ├─ 部署方式: Kubernetes")
-    println("│  ├─ 存储/台: 500GB (所有模型缓存)")
-    println("│  └─ 职责: 全局模型服务、故障恢复、模型版本管理")
+    println("┌─ Tier-0: globalcentralserver")
+    println("│  ├─ quantity: 1,000 device")
+    println("│  ├─ deploymentlocation: global 10+ 数据middle心")
+    println("│  ├─ installation NeurX: ✅ completedeployment")
+    println("│  ├─ GPU: NVIDIA A100/H100 (8 GPUs/device)")
+    println("│  ├─ deploymentmethod: Kubernetes")
+    println("│  ├─ storage/device: 500GB (allmodel缓存)")
+    println("│  └─ responsibility: 全局model服务、故障恢复、modelversionmanagement")
     println("")
     
-    println("┌─ Tier-1: 区域网关 (可选)")
-    println("│  ├─ 数量: 100 台 (每个区域 1-2 台)")
-    println("│  ├─ 部署位置: 主要区域中心")
-    println("│  ├─ 安装 NeurX: ✅ 完整部署")
-    println("│  ├─ GPU: 可选 (NVIDIA L40S/RTX 4090)")
-    println("│  ├─ 部署方式: Docker Compose")
-    println("│  ├─ 存储/台: 200GB (热模型缓存)")
-    println("│  └─ 职责: 区域流量汇聚、负载均衡、本地缓存")
+    println("┌─ Tier-1: regional gateway (optional)")
+    println("│  ├─ quantity: 100 device (每item区域 1-2 device)")
+    println("│  ├─ deploymentlocation: 主要区域middle心")
+    println("│  ├─ installation NeurX: ✅ completedeployment")
+    println("│  ├─ GPU: optional (NVIDIA L40S/RTX 4090)")
+    println("│  ├─ deploymentmethod: Docker Compose")
+    println("│  ├─ storage/device: 200GB (热model缓存)")
+    println("│  └─ responsibility: 区域流量汇聚、负载均衡、本地缓存")
     println("")
     
-    println("┌─ Tier-2: 边缘推理节点")
-    println("│  ├─ 数量: 100,000 台 (10% 总量)")
-    println("│  ├─ 部署位置: CDN、ISP、校园网等")
-    println("│  ├─ 安装 NeurX: ✅ 完整部署 (轻量版本)")
-    println("│  ├─ GPU: RTX 4070 / 4070 Ti (推荐)")
-    println("│  ├─ 部署方式: Docker 单机 / 轻型 K8s")
-    println("│  ├─ 存储/台: 50-100GB (业界热模型)")
-    println("│  └─ 职责: 边缘推理加速、本地请求处理、故障转移")
+    println("┌─ Tier-2: edgeinferencenode")
+    println("│  ├─ quantity: 100,000 device (10% total amount)")
+    println("│  ├─ deploymentlocation: CDN、ISP、校园网等")
+    println("│  ├─ installation NeurX: ✅ completedeployment (轻量version)")
+    println("│  ├─ GPU: RTX 4070 / 4070 Ti (recommendation)")
+    println("│  ├─ deploymentmethod: Docker 单机 / 轻型 K8s")
+    println("│  ├─ storage/device: 50-100GB (业界热model)")
+    println("│  └─ responsibility: edgeinference加速、本地请求processing、failover")
     println("")
     
-    println("┌─ Tier-3: 轻量级客户端")
-    println("│  ├─ 数量: 899,000 台 (89.9% 总量)")
-    println("│  ├─ 部署位置: 所有业务节点")
-    println("│  ├─ 安装 NeurX: ❌ 不需要 (只安装客户端库)")
-    println("│  ├─ GPU: 不需要")
-    println("│  ├─ 部署方式: 软件包 (5MB SDK)")
-    println("│  ├─ 存储/台: 0 (不存储模型)")
-    println("│  └─ 职责: API 调用、请求转发、本地缓存 (可选)")
+    println("┌─ Tier-3: lightweightclient")
+    println("│  ├─ quantity: 899,000 device (89.9% total amount)")
+    println("│  ├─ deploymentlocation: all业务node")
+    println("│  ├─ installation NeurX: ❌ no need (onlyinstallationclient库)")
+    println("│  ├─ GPU: no need")
+    println("│  ├─ deploymentmethod: 软piece包 (5MB SDK)")
+    println("│  ├─ storage/device: 0 (不storagemodel)")
+    println("│  └─ responsibility: API 调use、请求转develop、本地缓存 (optional)")
     println("")
     
     println("╔════════════════════════════════════════════════════════════════╗")
-    println("║ 总体安装 NeurX 的机器数:                                     ║")
+    println("║ total体installation NeurX of机器数:                                     ║")
     println("║   Tier-0 (1,000) + Tier-1 (100) + Tier-2 (100,000) =          ║")
-    println("║   ✅ 101,100 台 (10.11%) 需要安装完整 NeurX                  ║")
-    println("║   ❌ 898,900 台 (89.89%) 只需要 5MB 客户端库                 ║")
+    println("║   ✅ 101,100 device (10.11%) needinstallationcomplete NeurX                  ║")
+    println("║   ❌ 898,900 device (89.89%) onlyneed 5MB client库                 ║")
     println("╚════════════════════════════════════════════════════════════════╝")
     println("")
 }
@@ -180,40 +180,40 @@ func print_deployment_comparison() {
 func cost_estimation() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")
-    println("║                   部署成本估算 (第1年)                       ║")
+    println("║                   deploymentcost估算 (th1year)                       ║")
     println("╚════════════════════════════════════════════════════════════════╝")
     println("")
     
-    println("中央服务器 (Tier-0):")
-    println("  • 1,000 台 × $50k/台 (A100+8GPU 服务器) = $50M")
-    println("  • 运维成本 (年): $10M")
+    println("centralserver (Tier-0):")
+    println("  • 1,000 device × $50k/device (A100+8GPU server) = $50M")
+    println("  • operationscost (year): $10M")
     println("")
     
-    println("区域网关 (Tier-1) [可选]:")
-    println("  • 100 台 × $10k/台 (L40S 服务器) = $1M")
-    println("  • 运维成本 (年): $500k")
+    println("regional gateway (Tier-1) [optional]:")
+    println("  • 100 device × $10k/device (L40S server) = $1M")
+    println("  • operationscost (year): $500k")
     println("")
     
-    println("边缘节点 (Tier-2):")
-    println("  • 100k 台 × $2k/台 (RTX 4070 + CPU) = $200M")
-    println("  • 运维成本 (年): $50M")
+    println("edgenode (Tier-2):")
+    println("  • 100k device × $2k/device (RTX 4070 + CPU) = $200M")
+    println("  • operationscost (year): $50M")
     println("")
     
-    println("客户端部署 (Tier-3):")
-    println("  • 899k 台 × $0 (软件包) = $0")
-    println("  • 维护成本 (年): $1M")
+    println("clientdeployment (Tier-3):")
+    println("  • 899k device × $0 (软piece包) = $0")
+    println("  • 维护cost (year): $1M")
     println("")
     
-    println("模型存储 CDN:")
-    println("  • 总大小: 100TB × 3 副本 = 300TB")
-    println("  • 存储成本 (年): $1M")
+    println("modelstorage CDN:")
+    println("  • totalbigsmall: 100TB × 3 pair本 = 300TB")
+    println("  • storagecost (year): $1M")
     println("")
     
-    println("总计 (第1年):")
-    println("  • 硬件投资: $251M")
-    println("  • 运维成本: $61.5M")
-    println("  • 总计: $312.5M")
-    println("  • 平均成本/台: $312 (第1年)")
-    println("  • 年均成本/台: $61 (后续年份)")
+    println("total (th1year):")
+    println("  • 硬piece投资: $251M")
+    println("  • operationscost: $61.5M")
+    println("  • total: $312.5M")
+    println("  • averagecost/device: $312 (th1year)")
+    println("  • year均cost/device: $61 (back续year份)")
     println("")
 }

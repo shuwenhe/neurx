@@ -268,20 +268,20 @@ func check_model_compatibility(
 
     if est_memory_gb > available_memory_gb {
         is_compatible = false
-        msg := f"模型需要 ~{est_memory_gb}GB 显存，但仅有 {available_memory_gb}GB"
+        msg := f"modelneed ~{est_memory_gb}GB GPU Memory，but仅有 {available_memory_gb}GB"
         requirements.push(msg)
     }
 
     if adapter.optimization.use_flash_attn {
-        requirements.push("需要 Ampere+ GPU (RTX 30 系或更新)")
+        requirements.push("need Ampere+ GPU (RTX 30 系or更new)")
     }
 
     if adapter.distributed_strategy != "none" {
-        requirements.push("需要多 GPU 支持和 NCCL")
+        requirements.push("needmore GPU supportand NCCL")
     }
 
     if adapter.quantization_level < 16 {
-        warnings.push(f"量化到 {adapter.quantization_level}bit，可能影响精度")
+        warnings.push(f"量ization到 {adapter.quantization_level}bit，possible影响精度")
     }
 
     compatibility_report {
@@ -344,15 +344,15 @@ func format_activation(string act) string {
 }
 
 func main() {
-    println("🏢 Model Registry - 模型注册表和适配器系统")
+    println("🏢 Model Registry - Model Registryand适配器系统")
     println("==========================================")
     println("")
 
     all_models := get_all_models()
-    println(f"📦 总模型数: {all_models.len()}")
+    println(f"📦 Total Models: {all_models.len()}")
     println("")
 
-    println("🔧 模型适配器演示:")
+    println("🔧 Model Adapter Demo:")
 
     model_names := [
         "llama-7b",
@@ -362,30 +362,34 @@ func main() {
     ]
 
     for name in model_names.iter() {
-        if let Some(adapter) = create_adapter_for_model(name) {
-            diag := get_model_diagnostics(&adapter)
+        adapter_opt := create_adapter_for_model(name)
+        match adapter_opt {
+            Some(adapter) => {
+                diag := get_model_diagnostics(&adapter)
 
-            println(f"\n✅ {name}:")
-            println(f"   参数: {diag.parameter_count / 1e9:.1f}B")
-            println(f"   显存: ~{diag.estimated_memory_gb:.1f}GB (fp16)")
-            println(f"   Attention: {diag.attention_type}")
-            println(f"   激活函数: {diag.activation}")
-            println(f"   启用优化: {diag.optimizations_enabled} 项")
+                println(f"\n✅ {name}:")
+                println(f"   Parameters: {diag.parameter_count / 1e9:.1f}B")
+                println(f"   GPU Memory: ~{diag.estimated_memory_gb:.1f}GB (fp16)")
+                println(f"   Attention: {diag.attention_type}")
+                println(f"   Activation Function: {diag.activation}")
+                println(f"   Optimizations Enabled: {diag.optimizations_enabled} items")
 
-            report := check_model_compatibility(&adapter, "cuda", 80)
-            if report.is_compatible {
-                println("   ✓ 兼容 A100 (80GB)")
-            } else {
-                println("   ✗ 不兼容当前环境")
+                report := check_model_compatibility(&adapter, "cuda", 80)
+                if report.is_compatible {
+                    println("   ✓ Compatible A100 (80GB)")
+                } else {
+                    println("   ✗ 不Compatiblewhenfrontenvironment")
+                }
             }
+            None => {}
         }
     }
 
     println("")
-    println("✅ 核心特性:")
-    println("  ✓ 30+ 种模型完整支持")
-    println("  ✓ 模型特定优化")
-    println("  ✓ 灵活的适配器系统")
-    println("  ✓ 自动兼容性检查")
-    println("  ✓ 性能诊断工具")
+    println("✅ Core Features:")
+    println("  ✓ 30+ model complete support")
+    println("  ✓ Model-specific optimization")
+    println("  ✓ Flexible adapter system")
+    println("  ✓ 自动Compatibleitycheck")
+    println("  ✓ Performance diagnostic tools")
 }

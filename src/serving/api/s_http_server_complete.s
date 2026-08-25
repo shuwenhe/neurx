@@ -107,17 +107,17 @@ func route_request(string path) string {
 func print_header() {
     print("\n")
     print("╔════════════════════════════════════════════════════════════╗\n")
-    print("║   🚀 NeurX 纯 S 语言 HTTP 服务器实现                      ║\n")
+    print("║   🚀 NeurX pure S language HTTP serverimplementation                      ║\n")
     print("║      (100% Pure S - Zero External Dependencies)            ║\n")
     print("╚════════════════════════════════════════════════════════════╝\n")
     print("\n")
 }
 
 func print_server_info() {
-    print("🔧 服务器配置:\n")
+    print("🔧 serverconfiguration:\n")
     print("   主机: 0.0.0.0\n")
     print("   端口: 8888\n")
-    print("   状态: 已启动\n\n")
+    print("   status: alreadystart\n\n")
 }
 
 func print_api_endpoint(string method, string path, string response) {
@@ -126,12 +126,12 @@ func print_api_endpoint(string method, string path, string response) {
 }
 
 func print_footer() {
-    print("✅ 纯 S HTTP 服务器已准备好部署！\n")
-    print("📊 特性:\n")
-    print("   - 完全用 S 语言实现\n")
-    print("   - 支持三个 OpenAI 兼容端点\n")
-    print("   - JSON 序列化无依赖\n")
-    print("   - 生产就绪的架构\n\n")
+    print("✅ pure S HTTP serveralready准备gooddeployment！\n")
+    print("📊 特ity:\n")
+    print("   - fullyuse S languageimplementation\n")
+    print("   - support三item OpenAI Compatibleendpoint\n")
+    print("   - JSON 序列ization无依赖\n")
+    print("   - production readyof架构\n\n")
 }
 
 func main() {

@@ -24,7 +24,7 @@ func main() {
     print("✓ Pure S Language Implementation\n")
     print("✓ Real 6-Step Inference Pipeline\n\n")
     print("╔════════════════════════════════════════════════════════════════╗\n")
-    print("║         真实推理引擎 (Real Transformer Inference)             ║\n")
+    print("║         true实inferenceengine (Real Transformer Inference)             ║\n")
     print("║   Running all 6 steps natively in pure S language             ║\n")
     print("╚════════════════════════════════════════════════════════════════╝\n\n")
     print("✓ Model Configuration:\n")
@@ -75,7 +75,7 @@ func main() {
             return
         }
         if user_input == "exit" || user_input == "quit" {
-            print("Goodbye! 再见！\n")
+            print("Goodbye! goodbye！\n")
             return
         }
         print("\n[Executing Real Inference Pipeline]\n\n")

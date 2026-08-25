@@ -84,7 +84,7 @@ struct medical_grpo_objective {
 
 func create_medical_sft_objective() medical_sft_objective {
     medical_sft_objective obj = medical_sft_objective{
-        system_prompt: "你是infoxmed医疗大model.",
+        system_prompt: "你isinfoxmed医疗bigmodel.",
         max_token_length: 1024,
         epochs: 2,
         learning_rate: 5e-5
@@ -139,7 +139,7 @@ func get_medical_safety_constraints() []medical_safety_constraint {
     constraints = append_constraint(constraints, medical_safety_constraint{
         constraint_name: "avoid_overconfidence",
         description: "Don't use absolute language in medical claims",
-        violation_patterns: []string{ "肯定", "一定", "100%" },
+        violation_patterns: []string{ "肯set", "oneset", "100%" },
         penalty_weight: 0.1
     })
     constraints = append_constraint(constraints, medical_safety_constraint{
@@ -151,7 +151,7 @@ func get_medical_safety_constraints() []medical_safety_constraint {
     constraints = append_constraint(constraints, medical_safety_constraint{
         constraint_name: "no_unapproved_drugs",
         description: "Don't recommend unapproved or experimental drugs",
-        violation_patterns: []string{ "实验property", "未经批准", "非正式" },
+        violation_patterns: []string{ "实验property", "未经批准", "not正式" },
         penalty_weight: 0.15
     })
     constraints = append_constraint(constraints, medical_safety_constraint{
@@ -173,8 +173,8 @@ func evaluate_safety_constraints(string response) float {
             }
         }
     }
-    if !string_contains(response, "咨询医生") &&
-       !string_contains(response, "Not构成医疗建议") {
+    if !string_contains(response, "咨询Doctor") &&
+       !string_contains(response, "Not构成医疗Recommendation") {
         total_penalty = total_penalty + 0.05
     }
     return total_penalty

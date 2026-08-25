@@ -94,7 +94,7 @@ func (tir_optimal_token_baseline_trainer* trainer) compute_tir_token_baseline(
             reward := rewards[b][t].item()
             is_weight := is_weights[b][t].item()
             weighted_reward := reward * is_weight
-            let key: i64
+            key: i64
             if trainer.config.use_position_baseline {
                 key = position
             } else {

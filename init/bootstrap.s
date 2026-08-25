@@ -47,7 +47,7 @@ func kernel_main() (core_system) {
     }
     
     core := core_system {
-        state: &mut state,
+        state: &state,
         mem_pool: mem_pool,
         task_scheduler: task_scheduler,
         monitor_service: monitor_service,

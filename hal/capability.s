@@ -52,7 +52,7 @@ func detect_platform_capability() result[platform_capability, string] {
         cpu_count: cpu_count,
         total_memory_gb: total_memory,
         network_bandwidth_gbps: 10,
-        accelerators: &mut accelerators
+        accelerators: &accelerators
     }
     
     (platform, "")

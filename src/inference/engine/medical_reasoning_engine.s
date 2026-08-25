@@ -69,38 +69,38 @@ func detect_category(string text) int {
     string lower = to_lower(text)
     if contains_substr(lower, "treatment") || contains_substr(lower, "treat") ||
        contains_substr(lower, "therapy") || contains_substr(lower, "therapeutic") ||
-       contains_substr(lower, "治疗") || contains_substr(lower, "疗法") {
+       contains_substr(lower, "Treatment") || contains_substr(lower, "疗法") {
         return CATEGORY_TREATMENT()
     }
     if contains_substr(lower, "symptom") || contains_substr(lower, "pain") ||
        contains_substr(lower, "fever") || contains_substr(lower, "sign") ||
-       contains_substr(lower, "症状") || contains_substr(lower, "疼痛") ||
-       contains_substr(lower, "发热") || contains_substr(lower, "体征") {
+       contains_substr(lower, "Symptoms") || contains_substr(lower, "疼痛") ||
+       contains_substr(lower, "fever") || contains_substr(lower, "体征") {
         return CATEGORY_SYMPTOM()
     }
     if contains_substr(lower, "diagnos") || contains_substr(lower, "detect") ||
        contains_substr(lower, "identify") || contains_substr(lower, "test") ||
-       contains_substr(lower, "诊断") || contains_substr(lower, "检查") {
+       contains_substr(lower, "Diagnosis") || contains_substr(lower, "check") {
         return CATEGORY_DIAGNOSIS()
     }
     if contains_substr(lower, "disease") || contains_substr(lower, "disorder") ||
        contains_substr(lower, "condition") || contains_substr(lower, "illness") ||
-       contains_substr(lower, "疾病") || contains_substr(lower, "病") {
+       contains_substr(lower, "Disease") || contains_substr(lower, "disease") {
         return CATEGORY_DISEASE()
     }
     if contains_substr(lower, "medicine") || contains_substr(lower, "drug") ||
        contains_substr(lower, "medication") || contains_substr(lower, "pharma") ||
-       contains_substr(lower, "药") || contains_substr(lower, "药物") {
+       contains_substr(lower, "medicine") || contains_substr(lower, "medicine") {
         return CATEGORY_DRUG()
     }
     if contains_substr(lower, "infection") || contains_substr(lower, "infect") ||
        contains_substr(lower, "virus") || contains_substr(lower, "bacteria") ||
-       contains_substr(lower, "感染") || contains_substr(lower, "病原") {
+       contains_substr(lower, "infection") || contains_substr(lower, "disease原") {
         return CATEGORY_INFECTION()
     }
     if contains_substr(lower, "health") || contains_substr(lower, "wellness") ||
        contains_substr(lower, "preventive") || contains_substr(lower, "prevention") ||
-       contains_substr(lower, "健康") || contains_substr(lower, "保健") {
+       contains_substr(lower, "health") || contains_substr(lower, "保健") {
         return CATEGORY_HEALTH()
     }
     if contains_substr(lower, "anatomy") || contains_substr(lower, "organ") ||
@@ -110,7 +110,7 @@ func detect_category(string text) int {
     }
     if contains_substr(lower, "pathology") || contains_substr(lower, "patholog") ||
        contains_substr(lower, "lesion") || contains_substr(lower, "abnormal") ||
-       contains_substr(lower, "病理") || contains_substr(lower, "病变") {
+       contains_substr(lower, "diseasemanage") || contains_substr(lower, "disease变") {
         return CATEGORY_PATHOLOGY()
     }
     CATEGORY_UNKNOWN()
@@ -118,73 +118,73 @@ func detect_category(string text) int {
 
 func generate_treatment_response(string text) string {
     string lower = to_lower(text)
-    if contains_substr(lower, "diabetes") || contains_substr(lower, "diabetic") || contains_substr(lower, "糖尿病") {
-        return "糖尿病的治疗通常包括：\n1. 血糖控制（胰岛素或口服药物）\n2. 饮食管理和运动\n3. 定期监测血糖和血压\n4. 预防并发症（眼睛、肾脏、神经）\n建议在内分泌专家指导下进行治疗。"
+    if contains_substr(lower, "diabetes") || contains_substr(lower, "diabetic") || contains_substr(lower, "diabetesdisease") {
+        return "diabetesdiseaseofTreatment通常包括：\n1. 血糖控制（胰岛素or口服medicine）\n2. 饮食managementand运动\n3. set期监测血糖and血压\n4. Preventioncomplications（眼睛、肾脏、神经）\nRecommendationat内分泌专家指导down进doTreatment。"
     }
-    if contains_substr(lower, "hypertension") || contains_substr(lower, "blood pressure") || contains_substr(lower, "高血压") {
-        return "高血压的治疗方案：\n1. 生活方式调整（低钠饮食、运动、减肥）\n2. 抗高血压药物（ACE抑制剂、利尿剂等）\n3. 定期血压监测\n4. 心血管风险评估\n个性化治疗需咨询心内科医生。"
+    if contains_substr(lower, "hypertension") || contains_substr(lower, "blood pressure") || contains_substr(lower, "hypertension") {
+        return "hypertensionofTreatmentsolution：\n1. 生活method调整（low钠饮食、运动、减肥）\n2. antihypertensionmedicine（ACE抑制剂、利尿剂等）\n3. set期血压监测\n4. 心血管风险评估\nitemityizationTreatment需咨询心内科Doctor。"
     }
-    if contains_substr(lower, "cancer") || contains_substr(lower, "tumor") || contains_substr(lower, "肿瘤") || contains_substr(lower, "癌") {
-        return "肿瘤/癌症的治疗通常包括多学科方案：\n1. 手术切除（如适用）\n2. 化疗和靶向治疗\n3. 放射治疗\n4. 免疫治疗\n5. 支持性治疗和康复\n需在肿瘤中心进行综合评估。"
+    if contains_substr(lower, "cancer") || contains_substr(lower, "tumor") || contains_substr(lower, "tumor") || contains_substr(lower, "cancer") {
+        return "tumor/cancer症ofTreatment通常包括more学科solution：\n1. 手术切除（如适use）\n2. ization疗and靶towardsTreatment\n3. 放射Treatment\n4. 免疫Treatment\n5. supportityTreatmentand康复\n需attumormiddle心进do综合评估。"
     }
-    if contains_substr(lower, "infection") || contains_substr(lower, "infect") || contains_substr(lower, "感染") {
-        return "感染的治疗策略：\n1. 病原体鉴定（细菌、病毒、真菌等）\n2. 针对性抗感染治疗\n3. 支持性治疗（补液、营养支持）\n4. 监测治疗反应\n5. 并发症管理\n抗生素使用需按医嘱规范用药。"
+    if contains_substr(lower, "infection") || contains_substr(lower, "infect") || contains_substr(lower, "infection") {
+        return "infectionofTreatment策略：\n1. disease原体鉴set（细菌、diseasetoxic、true菌等）\n2. 针pairityantiinfectionTreatment\n3. supportityTreatment（补液、营养support）\n4. 监测Treatment反应\n5. complicationsmanagement\nanti生素使use需按医嘱规范usemedicine。"
     }
-    if contains_substr(lower, "asthma") || contains_substr(lower, "哮喘") {
-        return "哮喘的治疗包括：\n1. 长期控制性用药（吸入糖皮质激素）\n2. 急性发作缓解（支气管扩张剂）\n3. 触发因素识别和回避\n4. 肺功能监测\n5. 患者教育和自我管理\n规则用药可以有效控制症状。"
+    if contains_substr(lower, "asthma") || contains_substr(lower, "asthma") {
+        return "asthmaofTreatment包括：\n1. long期控制ityusemedicine（吸入糖皮质激素）\n2. 急itydevelop作缓解（支气管扩张剂）\n3. Trigger factors识categoryand回避\n4. Lung功能监测\n5. Patient教育and自我management\n规thenusemedicinecan有效控制Symptoms。"
     }
-    return "治疗方案的制定需要考虑多个因素：\n1. 明确诊断：准确识别疾病\n2. 病情评估：严重程度、并发症、患者情况\n3. 治疗选择：\n   - 保守治疗：药物、物理治疗、生活方式改变\n   - 手术治疗：适应症明确时\n   - 综合治疗：多学科协作\n4. 预后评估：预期效果和风险\n5. 随访监测：调整治疗方案\n\n最终的治疗决策应由医生根据患者具体情况制定。"
+    return "Treatmentsolutionof制setneed考虑moreitembecause素：\n1. brightsureDiagnosis：准sure识categoryDisease\n2. Condition评估：严重程度、complications、Patient情况\n3. Treatment选择：\n   - 保守Treatment：medicine、物manageTreatment、生活method改变\n   - 手术Treatment：适应症brightsure时\n   - 综合Treatment：more学科协作\n4. 预back评估：预期效果and风险\n5. 随访监测：调整Treatmentsolution\n\n最终ofTreatment决策应由Doctorbased onPatientspecific情况制set。"
 }
 
 func generate_symptom_response(string text) string {
     string lower = to_lower(text)
     if contains_substr(lower, "pain") || contains_substr(lower, "ache") || contains_substr(lower, "疼痛") {
-        return "疼痛是一个复杂的症状，可能由多种原因引起：\n\n常见原因：\n1. 肌肉骨骼问题：拉伤、扭伤、关节炎\n2. 神经压迫：坐骨神经痛、脊椎问题\n3. 炎症：感染、自免疾病\n4. 内脏疾病：心脏、消化系统、生殖系统问题\n5. 其他：肿瘤、代谢性疾病\n\n评估重点：\n- 疼痛位置、性质和放射情况\n- 发作频率和持续时间\n- 加重或缓解因素\n- 伴随症状\n\n建议：就医进行全面评估，必要时进行影像学检查。"
+        return "疼痛isoneitem复杂ofSymptoms，possible由moretypereason引起：\n\ncommonreason：\n1. 肌肉骨骼issue：拉伤、扭伤、关节inflammation\n2. 神经压迫：坐骨神经痛、脊椎issue\n3. inflammation症：infection、自免Disease\n4. 内脏Disease：Heart、Digestive system、Reproductive system issues\n5. other：tumor、代谢ityDisease\n\nAssessment focus：\n- Pain location、Nature and radiation\n- Frequency and duration of onset\n- Aggravating or relieving factors\n- 伴随Symptoms\n\nRecommendation：Medical consultation进doComprehensive assessment，Imaging examination when necessary。"
     }
-    if contains_substr(lower, "fever") || contains_substr(lower, "temperature") || contains_substr(lower, "发热") || contains_substr(lower, "发烧") {
-        return "发热症状处理指南：\n\n发热的常见原因：\n1. 感染性疾病：\n   - 细菌感染（肺炎、膀胱炎等）\n   - 病毒感染（流感、COVID-19等）\n   - 真菌或寄生虫感染\n2. 非感染原因：肿瘤、自免疾病、药物反应\n\n危险信号（需要立即就医）：\n- 高热（>39.5°C）持续不退\n- 伴有呼吸困难、胸痛\n- 意识改变或严重头痛\n- 皮肤出血点\n- 婴幼儿或老年人的发热\n\n一般处理：\n1. 物理降温：温水擦浴\n2. 充分补液\n3. 适当休息\n4. 监测体温变化\n\n发热>3天或症状加重应就医。"
+    if contains_substr(lower, "fever") || contains_substr(lower, "temperature") || contains_substr(lower, "fever") || contains_substr(lower, "Fever") {
+        return "feverSymptomsprocessing指南：\n\nCommon causes of fever：\n1. infectionityDisease：\n   - Bacterial infection（Pneumonia、Cystitis etc.）\n   - Viral infection（流感、COVID-19等）\n   - true菌orParasitic infection\n2. notinfectionreason：tumor、自免Disease、medicine反应\n\n危险信号（need立即Medical consultation）：\n- high热（>39.5°C）持续不退\n- 伴有dyspnea、胸痛\n- 意识改变or严重头痛\n- 皮肤出血点\n- 婴幼儿or老year人offever\n\none般processing：\n1. 物manage降温：温水擦浴\n2. 充分补液\n3. 适when休息\n4. 监测体温变ization\n\nfever>3天orSymptoms加重应Medical consultation。"
     }
-    if contains_substr(lower, "cough") || contains_substr(lower, "咳嗽") {
-        return "咳嗽症状分析：\n\n常见原因：\n1. 上呼吸道感染：感冒、喉炎\n2. 下呼吸道感染：支气管炎、肺炎\n3. 慢性疾病：哮喘、COPD、肺纤维化\n4. 其他：胃食管反流、心脏病、药物副作用\n\n咳嗽类型：\n- 干咳：无痰，常见于病毒感染初期\n- 湿咳：有痰，提示感染或水肿\n- 阵咳：集中发作\n\n警示信号：\n- 咳血\n- 呼吸困难\n- 胸痛\n- 持续>3周的咳嗽\n- 伴有高热、寒战\n\n建议：咳嗽持续>1周或恶化应就医检查。"
+    if contains_substr(lower, "cough") || contains_substr(lower, "cough") {
+        return "coughSymptomsAnalysis：\n\ncommonreason：\n1. up呼吸道infection：感冒、喉inflammation\n2. down呼吸道infection：支气管inflammation、Pneumonia\n3. slowityDisease：asthma、COPD、Lung纤维ization\n4. other：胃食管反流、Heartdisease、medicinepair作use\n\ncoughclass型：\n- 干咳：无痰，common于Viral infection初期\n- 湿咳：有痰，promptinfectionor水肿\n- 阵咳：集middledevelop作\n\n警示信号：\n- 咳血\n- dyspnea\n- 胸痛\n- 持续>3周ofcough\n- 伴有high热、寒战\n\nRecommendation：cough持续>1周or恶ization应Medical consultationcheck。"
     }
-    return "症状评估需要系统分析：\n\n重要信息：\n1. 症状特征：\n   - 发生时间和进展过程\n   - 症状性质和位置\n   - 严重程度和对生活的影响\n\n2. 伴随症状：全身症状、其他部位症状\n\n3. 加重或缓解因素：特定活动、饮食、位置变化\n\n4. 既往史：相关病史、手术、过敏\n\n5. 危险信号识别：\n   - 急性发作的严重症状\n   - 进行性恶化\n   - 生命危险症状\n\n专业评估包括：\n- 详细的病史采集\n- 体格检查\n- 必要的实验室和影像学检查\n\n建议：症状新发或加重时应及时就医评估。"
+    return "Symptoms评估need系统Analysis：\n\n重要信息：\n1. Symptoms特征：\n   - develop生时betweenand进展process\n   - Symptomsity质andlocation\n   - 严重程度andpair生活of影响\n\n2. 伴随Symptoms：systemicSymptoms、otherpartpositionSymptoms\n\n3. Aggravating or relieving factors：特set活动、饮食、location变ization\n\n4. 既往history：相关diseasehistory、手术、allergy\n\n5. 危险信号识category：\n   - 急itydevelop作of严重Symptoms\n   - 进doity恶ization\n   - 生命危险Symptoms\n\n专业评估包括：\n- 详细ofdiseasehistory采集\n- 体格check\n- 必要of实验室and影像学check\n\nRecommendation：Symptomsnewdevelopor加重时应及时Medical consultation评估。"
 }
 
 func generate_diagnosis_response(string text) string {
     string lower = to_lower(text)
-    return "诊断是医学实践中最重要的步骤：\n\n诊断过程通常包括：\n1. 病史采集（现病史、既往史、家族史、生活史）\n2. 体格检查（全面的临床检查）\n3. 实验室检查：\n   - 血液检查：血球计数、生化指标\n   - 尿液检查\n   - 特异性标志物检查\n4. 影像学检查：\n   - X线成像\n   - 超声检查\n   - CT/MRI检查\n   - 其他专项检查\n5. 特殊检查：\n   - 内镜检查\n   - 病理活检\n   - 功能学检查\n\n诊断思维：\n1. 根据症状和体征构建鉴别诊断清单\n2. 通过检查逐步排除或确认\n3. 综合分析所有信息做出最可能的诊断\n4. 必要时追加检查确诊\n\n重要提醒：\n- 准确诊断是有效治疗的基础\n- 不同疾病的诊断标准不同\n- 某些疾病需要专科医生诊断\n- 遵循循证医学原则\n\n建议：各类症状和体征应由有资质的医疗专业人员进行诊断。"
+    return "Diagnosisis医学实践middle最重要of步骤：\n\nDiagnosisprocess通常包括：\n1. diseasehistory采集（showdiseasehistory、既往history、家族history、生活history）\n2. 体格check（全面of临床check）\n3. 实验室check：\n   - Bloodcheck：血球计数、生ization指标\n   - 尿液check\n   - 特异ity标志物check\n4. 影像学check：\n   - X线成像\n   - 超声check\n   - CT/MRIcheck\n   - other专itemscheck\n5. specialcheck：\n   - 内镜check\n   - diseasemanage活检\n   - 功能学check\n\nDiagnosis思维：\n1. based onSymptomsand体征构建鉴categoryDiagnosisclear单\n2. 通passcheck逐步排除orsure认\n3. 综合Analysisall信息做出最possibleofDiagnosis\n4. 必要时追加checksure诊\n\n重要提醒：\n- 准sureDiagnosisis有效Treatmentoffoundation\n- 不同DiseaseofDiagnosis标准不同\n- 某someDiseaseneed专科DoctorDiagnosis\n- 遵循循证医学原then\n\nRecommendation：各classSymptomsand体征应由有资质of医疗专业人员进doDiagnosis。"
 }
 
 func generate_disease_response(string text) string {
     string lower = to_lower(text)
-    if contains_substr(lower, "heart") || contains_substr(lower, "cardiac") || contains_substr(lower, "心脏") {
-        return "心脏病的医学知识：\n\n心脏病类型：\n1. 冠心病：冠状动脉粥样硬化\n   - 表现：心绞痛、心肌梗死\n   - 危险因素：吸烟、高血压、高脂血症、糖尿病\n\n2. 心律不齐：心脏电传导异常\n   - 常见类型：房颤、室速、心动过缓\n   - 症状：心悸、晕厥、乏力\n\n3. 心力衰竭：心脏泵血功能减退\n   - 分类：收缩期/舒张期、急性/慢性\n   - 症状：呼吸困难、浮肿、乏力\n\n4. 瓣膜病：心脏瓣膜结构或功能异常\n\n危险信号：\n- 突然胸痛\n- 严重呼吸困难\n- 晕厥\n- 快速无规律心跳\n\n预防：控制危险因素、规律锻炼、健康饮食、定期体检。"
+    if contains_substr(lower, "heart") || contains_substr(lower, "cardiac") || contains_substr(lower, "Heart") {
+        return "Heartdiseaseof医学知识：\n\nHeartdiseaseclass型：\n1. 冠心disease：冠状动脉粥like硬ization\n   - tableshow：心绞痛、心肌梗死\n   - 危险because素：smoking、hypertension、high脂血症、diabetesdisease\n\n2. 心律不齐：Heart电传导异常\n   - commonclass型：房颤、室速、心动pass缓\n   - Symptoms：心悸、晕厥、乏力\n\n3. 心力衰竭：Heart泵血功能减退\n   - 分class：收缩期/舒张期、急ity/slowity\n   - Symptoms：dyspnea、浮肿、乏力\n\n4. 瓣膜disease：Heart瓣膜结构or功能异常\n\n危险信号：\n- 突然胸痛\n- 严重dyspnea\n- 晕厥\n- fast速无规律心跳\n\nPrevention：控制危险because素、Regular exercise、Healthy diet、Regular checkup。"
     }
-    if contains_substr(lower, "lung") || contains_substr(lower, "respiratory") || contains_substr(lower, "肺") {
-        return "肺部疾病概述：\n\n常见肺部疾病：\n1. 肺炎：肺部感染\n   - 症状：咳嗽、发热、呼吸困难\n   - 分类：细菌性、病毒性、真菌性、吸入性\n\n2. 慢性阻塞性肺病（COPD）：\n   - 主要病因：吸烟、职业暴露\n   - 症状：慢性咳嗽、气短、喘息\n\n3. 哮喘：气道炎症和可逆性梗阻\n   - 症状：喘息、胸闷、呼吸困难\n   - 触发因素：过敏原、冷空气、运动\n\n4. 肺纤维化：肺间质纤维化\n   - 症状：进行性呼吸困难、干咳\n\n5. 肺癌：肺部恶性肿瘤\n   - 危险因素：吸烟、职业暴露、遗传因素\n\n保护肺部：\n- 戒烟是最有效的预防措施\n- 避免空气污染\n- 定期体检和筛查\n- 防止呼吸道感染"
+    if contains_substr(lower, "lung") || contains_substr(lower, "respiratory") || contains_substr(lower, "Lung") {
+        return "LungpartDisease概述：\n\ncommonLungpartDisease：\n1. Pneumonia：Lungpartinfection\n   - Symptoms：cough、fever、dyspnea\n   - 分class：Bacterial、Viral、Fungal、Inhalational\n\n2. slowity阻塞ityLungdisease（COPD）：\n   - Main cause：smoking、Occupational exposure\n   - Symptoms：Chronic cough、Shortness of breath、Wheezing\n\n3. asthma：Airway inflammation and reversible obstruction\n   - Symptoms：Wheezing、Chest tightness、dyspnea\n   - Trigger factors：Allergens、Cold air、运动\n\n4. Lung纤维ization：Lungbetween质纤维ization\n   - Symptoms：Progressive dyspnea、干咳\n\n5. Lungcancer：LungpartMalignant neoplasm\n   - 危险because素：smoking、Occupational exposure、Genetic factors\n\n保护Lungpart：\n- 戒烟is最有效ofPrevention措施\n- Avoid air pollution\n- Regular checkupand筛查\n- Prevent respiratory infection"
     }
-    if contains_substr(lower, "liver") || contains_substr(lower, "hepatic") || contains_substr(lower, "肝") {
-        return "肝脏疾病知识：\n\n常见肝脏疾病：\n1. 病毒性肝炎：\n   - 甲型肝炎：粪口途径传播\n   - 乙型肝炎：血液/体液传播，可慢性化\n   - 丙型肝炎：主要通过血液传播\n\n2. 脂肪肝：肝细胞脂肪堆积\n   - 非酒精性脂肪肝：代谢相关\n   - 酒精性脂肪肝：饮酒引起\n\n3. 肝硬化：肝脏结构和功能的终末改变\n   - 常见病因：乙肝、酒精滥用\n   - 并发症：门脉高压、腹水、食管静脉曲张\n\n4. 肝癌：原发性肝细胞癌\n   - 高危人群：肝硬化患者、乙肝患者\n\n症状提示：\n- 黄疸（皮肤黄染）\n- 腹痛和腹胀\n- 乏力和厌食\n- 尿色深、大便浅色\n\n预防措施：\n- 乙肝疫苗接种\n- 戒酒\n- 健康饮食\n- 定期肝功能检查"
+    if contains_substr(lower, "liver") || contains_substr(lower, "hepatic") || contains_substr(lower, "Liver") {
+        return "Liver脏Disease知识：\n\ncommonLiver脏Disease：\n1. ViralLiverinflammation：\n   - 甲型Liverinflammation：Fecal-oral transmission\n   - b型Liverinflammation：Blood/Body fluid transmission，Can become chronic\n   - 丙型Liverinflammation：主要通passBlood传播\n\n2. 脂肪Liver：Liver细胞脂肪堆积\n   - not酒精ity脂肪Liver：Metabolism related\n   - 酒精ity脂肪Liver：Caused by alcohol consumption\n\n3. Liver硬ization：Liver脏结构and功能of终末改变\n   - Common causes：bLiver、Alcohol abuse\n   - complications：Portal hypertension、Ascites、Esophageal varices\n\n4. Livercancer：原developityLiver细胞cancer\n   - High-risk population：Liver硬izationPatient、bLiverPatient\n\nSymptomsprompt：\n- Jaundice（Skin yellowing）\n- 腹痛and腹胀\n- 乏力and厌食\n- 尿色deep、big便shallow色\n\nPrevention措施：\n- bLiver疫苗接type\n- 戒酒\n- Healthy diet\n- set期Liver功能check"
     }
-    return "疾病是人体在一定条件下因各种病因引起的生理功能和代谢异常，导致身体不适。\n\n疾病的基本要素：\n1. 病因：导致疾病的原因\n   - 传染性病因：病原微生物\n   - 非传染性病因：遗传、代谢、环境、生活方式\n\n2. 发病机制：疾病发展的过程\n   - 损伤程度\n   - 代偿机制\n   - 临床表现产生\n\n3. 临床表现：患者主观感受和客观体征\n   - 症状：患者感觉到的不适\n   - 体征：医生检查发现的异常\n\n4. 预后：疾病的发展结果和恢复情况\n\n疾病的预防：\n- 一级预防：预防疾病发生（健康教育、环境改善）\n- 二级预防：早期发现、早期治疗\n- 三级预防：防止并发症、康复治疗\n\n了解具体疾病需咨询医学专业人士。"
+    return "Diseaseis人体atoneset条piecedownbecause各typediseasebecause引起of生manage功能and代谢异常，cause身体不适。\n\nDiseaseof基本要素：\n1. diseasebecause：causeDiseaseofreason\n   - 传染itydiseasebecause：disease原微生物\n   - not传染itydiseasebecause：遗传、代谢、environment、生活method\n\n2. developdiseasemechanism：Diseasedevelop展ofprocess\n   - 损伤程度\n   - 代偿mechanism\n   - 临床tableshow产生\n\n3. 临床tableshow：Patient主观感受and客观体征\n   - Symptoms：Patient感觉到of不适\n   - 体征：Doctorcheckdevelopshowof异常\n\n4. 预back：Diseaseofdevelop展结果and恢复情况\n\nDiseaseofPrevention：\n- one级Prevention：PreventionDiseasedevelop生（health教育、environment改善）\n- 二级Prevention：early期developshow、early期Treatment\n- 三级Prevention：防止complications、康复Treatment\n\ned解specificDisease需咨询医学专业人士。"
 }
 
 func generate_drug_response(string text) string {
-    return "药物治疗的重要原则：\n\n1. 用药基础：\n   - 明确诊断后选择合适的药物\n   - 根据病情严重程度调整用药方案\n   - 考虑患者年龄、肝肾功能、其他疾病\n\n2. 常见药物类别：\n   - 抗感染药：抗生素、抗病毒、抗真菌\n   - 心血管药：降压药、降脂药、强心药\n   - 神经系统药：镇静剂、止痛剂、抗癫痫\n   - 消化系统药：制酸剂、促动力药\n   - 激素类：糖皮质激素、甲状腺激素\n\n3. 合理用药原则：\n   - 准确的用法用量：按医嘱服用\n   - 疗程：完成足够的治疗疗程\n   - 时间间隔：按规定时间服用\n   - 食物相互作用：某些药物需空腹或饭后服用\n\n4. 不良反应和禁忌：\n   - 了解常见的不良反应\n   - 避免禁忌药物组合\n   - 过敏患者需特别注意\n\n5. 特殊人群用药：\n   - 肝肾功能不全者：需要减量\n   - 孕妇和哺乳期妇女：药物安全性更严格\n   - 老年患者：易发生药物相互作用\n   - 儿童：剂量需根据体重调整\n\n重要提醒：\n- 所有药物都应在医生或药师指导下使用\n- 不要自行改变用药方案\n- 报告任何不寻常的症状\n- 保存好用药记录"
+    return "medicineTreatmentof重要原then：\n\n1. usemedicinefoundation：\n   - brightsureDiagnosisback选择合适ofmedicine\n   - based onCondition严重程度调整usemedicinesolution\n   - 考虑Patientyear龄、Liver肾功能、otherDisease\n\n2. commonmedicineclasscategory：\n   - antiinfectionmedicine：anti生素、antidiseasetoxic、antitrue菌\n   - 心血管medicine：降压medicine、降脂medicine、强心medicine\n   - 神经系统medicine：镇静剂、止痛剂、anti癫痫\n   - Digestive systemmedicine：制酸剂、促动力medicine\n   - 激素class：糖皮质激素、甲状腺激素\n\n3. 合manageusemedicine原then：\n   - 准sureofuse法use量：按医嘱服use\n   - 疗程：complete足够ofTreatment疗程\n   - 时betweenbetween隔：按规set时between服use\n   - 食物相互作use：某somemedicine需空腹or饭back服use\n\n4. 不良反应and禁忌：\n   - ed解commonof不良反应\n   - 避免禁忌medicine组合\n   - allergyPatient需特category注意\n\n5. special人groupusemedicine：\n   - Liver肾功能不全者：need减量\n   - 孕妇and哺乳期妇女：medicine安全ity更严格\n   - 老yearPatient：易develop生medicine相互作use\n   - 儿童：剂量需based on体重调整\n\n重要提醒：\n- allmedicine都应atDoctorormedicine师指导down使use\n- 不要自do改变usemedicinesolution\n- 报告任何不寻常ofSymptoms\n- 保存goodusemedicine记录"
 }
 
 func generate_infection_response(string text) string {
     string lower = to_lower(text)
-    return "感染性疾病的医学知识：\n\n感染的基本概念：\n病原体成功入侵机体，克服防御机制，在组织内繁殖引起的病理过程。\n\n主要病原体类型：\n1. 细菌感染：\n   - 常见细菌：金黄色葡萄球菌、链球菌、大肠杆菌\n   - 感染部位：皮肤、呼吸道、泌尿道、血液\n   - 治疗：抗生素\n\n2. 病毒感染：\n   - 常见病毒：流感、COVID-19、疱疹病毒\n   - 症状：通常为自限性\n   - 治疗：主要是支持性治疗\n\n3. 真菌感染：\n   - 常见真菌：念珠菌、曲霉菌\n   - 易发人群：免疫低下者\n   - 治疗：抗真菌药\n\n4. 寄生虫感染：\n   - 常见寄生虫：蠕虫、原虫\n   - 治疗：相应的抗寄生虫药\n\n感染的进展阶段：\n1. 局部感染：局限于特定部位\n2. 全身感染/败血症：病原体进入血液，引起全身性炎症反应\n\n感染的临床表现：\n- 局部：红肿热痛\n- 全身：发热、寒战、头痛、肌肉酸痛\n\n预防感染：\n- 个人卫生：洗手、清洁伤口\n- 疫苗接种\n- 避免与感染者接触\n- 食品卫生和安全\n- 安全医疗操作\n\n抗感染原则：\n- 早期诊断和治疗\n- 选择合适的抗感染药物\n- 完成完整疗程\n- 监测治疗效果"
+    return "infectionityDiseaseof医学知识：\n\ninfectionof基本概念：\ndisease原体成功入侵机体，克服防御mechanism，at组织内繁殖引起ofdiseasemanageprocess。\n\n主要disease原体class型：\n1. Bacterial infection：\n   - common细菌：金黄色葡萄球菌、链球菌、big肠杆菌\n   - infectionpartposition：皮肤、呼吸道、泌尿道、Blood\n   - Treatment：anti生素\n\n2. Viral infection：\n   - commondiseasetoxic：流感、COVID-19、疱疹diseasetoxic\n   - Symptoms：通常为自限ity\n   - Treatment：主要issupportityTreatment\n\n3. Fungal infection：\n   - commontrue菌：念珠菌、曲霉菌\n   - 易develop人group：免疫lowdown者\n   - Treatment：antitrue菌medicine\n\n4. Parasitic infection：\n   - common寄生虫：蠕虫、原虫\n   - Treatment：相应ofanti寄生虫medicine\n\ninfectionof进展stage：\n1. 局partinfection：局限于特setpartposition\n2. systemicinfection/败血症：disease原体进入Blood，引起systemicityinflammation症反应\n\ninfectionof临床tableshow：\n- 局part：红肿热痛\n- systemic：fever、寒战、头痛、肌肉酸痛\n\nPreventioninfection：\n- item人卫生：洗手、clear洁伤口\n- 疫苗接type\n- 避免与infection者接触\n- 食品卫生and安全\n- 安全医疗操作\n\nantiinfection原then：\n- early期DiagnosisandTreatment\n- 选择合适ofantiinfectionmedicine\n- completecomplete疗程\n- 监测Treatment效果"
 }
 
 func generate_health_response(string text) string {
-    return "健康维护的综合指南：\n\n健康是身体、心理和社会适应的完整状态，而不仅仅是没有疾病。\n\n健康的四大支柱：\n\n1. 营养饮食：\n   - 均衡饮食：蛋白质、碳水化合物、脂肪的合理比例\n   - 微量营养素：维生素和矿物质的充分摄入\n   - 食物多样性：不同颜色和来源的食物\n   - 限制有害物质：减少盐、糖、饱和脂肪摄入\n   - 水合状态：每日充分饮水\n\n2. 规律运动：\n   - 有氧运动：每周至少150分钟中等强度运动\n   - 力量训练：每周2-3次肌肉锻炼\n   - 柔韧性训练：改善活动范围\n   - 运动益处：\n     * 维持健康体重\n     * 改善心血管功能\n     * 增强肌肉和骨骼\n     * 改善心理健康\n     * 降低疾病风险\n\n3. 充足睡眠：\n   - 推荐睡眠：成人7-9小时\n   - 睡眠质量：规律作息时间\n   - 睡眠环境：舒适、黑暗、安静\n   - 睡眠卫生：避免咖啡因和屏幕刺激\n   - 睡眠的益处：\n     * 免疫功能恢复\n     * 认知功能改善\n     * 情绪调节\n     * 体重管理\n\n4. 心理健康：\n   - 压力管理：识别和处理压力源\n   - 社交联系：维持健康的人际关系\n   - 心理平衡：乐观心态、应对能力\n   - 寻求帮助：需要时接受心理咨询\n\n预防性检查：\n- 定期体检：根据年龄和风险因素制定计划\n- 疾病筛查：癌症、心脏病、糖尿病等\n- 生活方式评估：吸烟、饮酒等\n- 免疫接种：按推荐时间表接种\n\n特殊人群的健康维护：\n- 儿童：生长发育监测、营养需求\n- 孕妇：产前检查、营养、运动注意事项\n- 老年人：跌倒预防、慢病管理、认知健康\n- 慢性病患者：病情控制、并发症预防\n\n健康生活方式的长期效益：\n- 提高生活质量\n- 延长健康寿命\n- 减少医疗成本\n- 改善工作和学习表现\n\n记住：健康是一种生活方式的选择，而不是目标。需要持续的努力和承诺。"
+    return "health维护of综合指南：\n\nhealthis身体、心manageand社will适应ofcompletestatus，而不仅仅is没有Disease。\n\nhealthof四big支柱：\n\n1. 营养饮食：\n   - 均衡饮食：蛋white质、碳水ization合物、脂肪of合manageratio\n   - 微量营养素：维生素and矿物质of充分摄入\n   - 食物morelikeity：不同颜色and来源of食物\n   - 限制有害物质：减less盐、糖、饱and脂肪摄入\n   - 水合status：每日充分饮水\n\n2. 规律运动：\n   - 有氧运动：每周至less150分钟middle等强度运动\n   - 力量训练：每周2-3次肌肉锻炼\n   - 柔韧ity训练：改善活动范围\n   - 运动益处：\n     * 维持health体重\n     * 改善心血管功能\n     * 增强肌肉and骨骼\n     * 改善心managehealth\n     * 降lowDisease风险\n\n3. 充足睡眠：\n   - recommendation睡眠：成人7-9small时\n   - 睡眠质量：规律作息时between\n   - 睡眠environment：舒适、黑dark、安静\n   - 睡眠卫生：避免咖啡becauseand屏幕刺激\n   - 睡眠of益处：\n     * 免疫功能恢复\n     * 认知功能改善\n     * 情绪调节\n     * 体重management\n\n4. 心managehealth：\n   - 压力management：识categoryandprocessing压力源\n   - 社交联系：维持healthof人际关系\n   - 心manage平衡：乐观心态、应pair能力\n   - 寻求帮助：need时接受心manage咨询\n\nPreventionitycheck：\n- Regular checkup：based onyear龄and风险because素制set计划\n- Disease筛查：cancer症、Heartdisease、diabetesdisease等\n- 生活method评估：smoking、饮酒等\n- 免疫接type：按recommendation时betweentable接type\n\nspecial人groupofhealth维护：\n- 儿童：生longdevelop育监测、营养需求\n- 孕妇：产frontcheck、营养、运动注意事items\n- 老year人：跌倒Prevention、slowdiseasemanagement、认知health\n- slowitydiseasePatient：Condition控制、complicationsPrevention\n\nhealth生活methodoflong期效益：\n- 提high生活质量\n- 延longhealth寿命\n- 减less医疗cost\n- 改善工作and学习tableshow\n\n记住：healthisonetype生活methodof选择，而不istarget。need持续of努力and承诺。"
 }
 
 func reason_medical_response(string prompt) string {
     if len(prompt) == 0 {
-        return "请提供您的医学问题或症状。"
+        return "请提供您of医学issueorSymptoms。"
     }
     int category = detect_category(prompt)
     if category == CATEGORY_TREATMENT() {
@@ -202,18 +202,18 @@ func reason_medical_response(string prompt) string {
     } else if category == CATEGORY_HEALTH() {
         return generate_health_response(prompt)
     } else if category == CATEGORY_ANATOMY() {
-        return "解剖学知识是医学的基础。人体由多个系统组成，包括：\n1. 骨骼系统：支撑和保护\n2. 肌肉系统：运动和力量\n3. 神经系统：信息处理和控制\n4. 循环系统：血液运输\n5. 呼吸系统：氧气交换\n6. 消化系统：营养吸收\n7. 泌尿系统：代谢废物清除\n8. 内分泌系统：激素调节\n9. 免疫系统：防御和保护\n10. 生殖系统：繁殖功能\n\n每个器官和系统都有特定的结构和功能。具体的解剖知识需要医学教科书或专家指导。"
+        return "解剖学知识is医学offoundation。人体由moreitem系统组成，包括：\n1. 骨骼系统：支撑and保护\n2. 肌肉系统：运动and力量\n3. 神经系统：信息processingand控制\n4. 循环系统：Blood运输\n5. 呼吸系统：氧气交换\n6. Digestive system：营养吸收\n7. 泌尿系统：代谢废物clear除\n8. 内分泌系统：激素调节\n9. 免疫系统：防御and保护\n10. 生殖系统：繁殖功能\n\n每item器官and系统都有特setof结构and功能。specificof解剖知识need医学教科书or专家指导。"
     } else if category == CATEGORY_PATHOLOGY() {
-        return "病理学是研究疾病的本质、原因和机制的学科。\n\n病理改变的层次：\n1. 分子水平：基因突变、蛋白质异常\n2. 细胞水平：细胞病变、凋亡、坏死\n3. 组织水平：炎症、纤维化、肿瘤\n4. 器官水平：功能障碍、结构破坏\n5. 整体水平：系统性表现\n\n基本病理过程：\n- 炎症反应：红肿热痛和全身反应\n- 修复和再生：组织愈合过程\n- 肿瘤发生：异常细胞增殖\n- 适应过程：代偿性改变\n\n深入了解病理变化需要病理检查和医学专业知识。"
+        return "diseasemanage学isresearchDiseaseof本质、reasonandmechanismof学科。\n\ndiseasemanage改变of层次：\n1. 分子水平：基because突变、蛋white质异常\n2. 细胞水平：细胞disease变、凋亡、bad死\n3. 组织水平：inflammation症、纤维ization、tumor\n4. 器官水平：功能障碍、结构破bad\n5. 整体水平：系统itytableshow\n\n基本diseasemanageprocess：\n- inflammation症反应：红肿热痛andsystemic反应\n- 修复andagain生：组织愈合process\n- tumordevelop生：异常细胞增殖\n- 适应process：代偿ity改变\n\ndeep入ed解diseasemanage变izationneeddiseasemanagecheckand医学专业知识。"
     }
-    return "感谢您的问题。这是一个有趣的医学话题。基于医学原理，您似乎在询问关于生物学、生理学或临床医学的问题。\n\n为了给您更准确的回答，我需要：\n1. 更具体的症状或问题描述\n2. 相关的背景信息\n3. 您想了解的具体方面\n\n如果您能提供更多细节，我可以提供更有针对性的医学解释。同时，对于具体的诊疗建议，建议咨询专业医疗人员。"
+    return "thank youofissue。thisisoneitem有趣of医学话题。基于医学原manage，您似乎at询问关于生物学、生manage学or临床医学ofissue。\n\n为ed给您更准sureof回答，我need：\n1. 更specificofSymptomsorissue描述\n2. 相关of背景信息\n3. 您想ed解ofspecific方面\n\n如果您能提供更more细节，我can提供更有针pairityof医学解释。同时，pair于specificof诊疗Recommendation，Recommendation咨询专业医疗人员。"
 }
 
 func main() {
-    string test1 = "用c++写一个快速排序"
-    string test2 = "糖尿病的治疗方法是什么"
+    string test1 = "usec++写oneitemfast速排序"
+    string test2 = "diabetesdiseaseofTreatmentmethodis什么"
     string test3 = "我头痛怎么办"
-    string test4 = "心脏病有哪些症状"
+    string test4 = "Heartdisease有whichsomeSymptoms"
     print("Medical Reasoning Engine Test\n")
     print("═════════════════════════════════════════\n\n")
     print("Test 1: \"" + test1 + "\"\n")

@@ -307,5 +307,5 @@ func format_error_response(int status, string error_msg) string {
 }
 
 func main() {
-    print("✅ 纯 S 请求验证模块已编译\n")
+    print("✅ pure S 请求validationmodulealready编译\n")
 }

@@ -120,12 +120,12 @@ func trim_string(string s) string {
     start := 0
     end := len(s) - 1
 
-    while start <= end && (s[start] == ' ' || s[start] == '\t' ||
+    for start <= end && (s[start] == ' ' || s[start] == '\t' ||
                           s[start] == '\n' || s[start] == '\r') {
         start = start + 1
     }
 
-    while end >= start && (s[end] == ' ' || s[end] == '\t' ||
+    for end >= start && (s[end] == ' ' || s[end] == '\t' ||
                           s[end] == '\n' || s[end] == '\r') {
         end = end - 1
     }

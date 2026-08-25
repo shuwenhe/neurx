@@ -202,50 +202,50 @@ func get_available_presets() vec[string] {
 func get_preset_description(string name) string {
     switch name {
         "lightweight" :
-            "轻量级微调\n" +
-            "  秩: 4, Alpha: 8.0\n" +
-            "  场景: 最低显存占用，最快推理\n" +
-            "  模块: q_proj, v_proj",
+            "lightweight微调\n" +
+            "  rank: 4, Alpha: 8.0\n" +
+            "  scenario: 最lowGPU Memory占use，最fastinference\n" +
+            "  module: q_proj, v_proj",
         "balanced" :
-            "平衡配置\n" +
-            "  秩: 16, Alpha: 32.0\n" +
-            "  场景: 效果与速度的平衡\n" +
-            "  模块: q_proj, k_proj, v_proj, dense",
+            "平衡configuration\n" +
+            "  rank: 16, Alpha: 32.0\n" +
+            "  scenario: 效果与速度of平衡\n" +
+            "  module: q_proj, k_proj, v_proj, dense",
         "high_quality" :
-            "高质量微调\n" +
-            "  秩: 64, Alpha: 128.0\n" +
-            "  场景: 最优效果，较高推理开销\n" +
-            "  模块: q_proj, k_proj, v_proj, dense, out_proj",
+            "high质量微调\n" +
+            "  rank: 64, Alpha: 128.0\n" +
+            "  scenario: 最优效果，较highinference开销\n" +
+            "  module: q_proj, k_proj, v_proj, dense, out_proj",
         "text_classification" :
-            "文本分类\n" +
-            "  秩: 8, 任务类型: SEQUENCE_CLASSIFICATION\n" +
-            "  场景: 文本分类任务\n" +
-            "  模块: q_proj, v_proj",
+            "文本分class\n" +
+            "  rank: 8, task type: SEQUENCE_CLASSIFICATION\n" +
+            "  scenario: 文本分class任务\n" +
+            "  module: q_proj, v_proj",
         "question_answering" :
             "问答任务\n" +
-            "  秩: 16, 任务类型: QUESTION_ANSWERING\n" +
-            "  场景: 机器阅读理解\n" +
-            "  模块: q_proj, k_proj, v_proj, dense",
+            "  rank: 16, task type: QUESTION_ANSWERING\n" +
+            "  scenario: 机器阅读manage解\n" +
+            "  module: q_proj, k_proj, v_proj, dense",
         "machine_translation" :
             "机器翻译\n" +
-            "  秩: 32, Alpha: 64.0, 任务类型: TRANSLATION\n" +
-            "  场景: 多语言翻译\n" +
-            "  模块: q_proj, k_proj, v_proj, dense, attention",
+            "  rank: 32, Alpha: 64.0, task type: TRANSLATION\n" +
+            "  scenario: morelanguage翻译\n" +
+            "  module: q_proj, k_proj, v_proj, dense, attention",
         "code_generation" :
-            "代码生成\n" +
-            "  秩: 64, Alpha: 128.0, 任务类型: CAUSAL_LM\n" +
-            "  场景: 编程语言模型\n" +
-            "  模块: q_proj, v_proj, dense",
+            "代码generate\n" +
+            "  rank: 64, Alpha: 128.0, task type: CAUSAL_LM\n" +
+            "  scenario: 编程languagemodel\n" +
+            "  module: q_proj, v_proj, dense",
         "instruction_following" :
             "指令跟随\n" +
-            "  秩: 16, Alpha: 32.0, 任务类型: CAUSAL_LM\n" +
-            "  场景: 指令跟随和对齐\n" +
-            "  模块: q_proj, v_proj",
+            "  rank: 16, Alpha: 32.0, task type: CAUSAL_LM\n" +
+            "  scenario: 指令跟随andpair齐\n" +
+            "  module: q_proj, v_proj",
         "conversational" :
-            "对话模型\n" +
-            "  秩: 32, Alpha: 64.0, 任务类型: CAUSAL_LM\n" +
-            "  场景: 对话和聊天\n" +
-            "  模块: q_proj, k_proj, v_proj, dense",
+            "pair话model\n" +
+            "  rank: 32, Alpha: 64.0, task type: CAUSAL_LM\n" +
+            "  scenario: pair话and聊天\n" +
+            "  module: q_proj, k_proj, v_proj, dense",
         _ : "未知预设",
     }
 }
@@ -327,19 +327,19 @@ func get_performance_info(preset_type preset) preset_performance {
 }
 
 func demo_presets() {
-    println("=== LoRA 预设配置演示 ===\n")
+    println("=== LoRA 预设configuration演示 ===\n")
 
     presets := get_available_presets()
 
     for preset_name in presets.iter() {
-        println("配置名: " + preset_name)
+        println("configuration名: " + preset_name)
 
         switch load_preset_by_name(preset_name) {
             option::some(config) : {
-                println("  秩: " + config.lora_rank.to_string())
+                println("  rank: " + config.lora_rank.to_string())
                 println("  Alpha: " + config.lora_alpha.to_string())
-                println("  缩放因子: " + config.get_lora_scaling().to_string())
-                println("  模块数: " + config.target_modules.len().to_string())
+                println("  缩放because子: " + config.get_lora_scaling().to_string())
+                println("  module数: " + config.target_modules.len().to_string())
                 println("  描述: " + get_preset_description(preset_name))
             },
             option::none : {

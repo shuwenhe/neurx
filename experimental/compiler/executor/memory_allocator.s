@@ -39,7 +39,7 @@ func new_memory_arena(int total_size) memory_arena {
     }
 }
 
-func (mut memory_arena* arena) allocate(int size) allocation_result {
+func (memory_arena* arena) allocate(int size) allocation_result {
     for i, block in arena.blocks {
         if !block.allocated && block.size >= size {
             arena.blocks[i].allocated = true
@@ -72,7 +72,7 @@ func (mut memory_arena* arena) allocate(int size) allocation_result {
     }
 }
 
-func (mut memory_arena* arena) deallocate(int block_id) bool {
+func (memory_arena* arena) deallocate(int block_id) bool {
     for i, block in arena.blocks {
         if block.block_id == block_id && block.allocated {
             arena.blocks[i].allocated = false

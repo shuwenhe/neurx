@@ -1154,9 +1154,9 @@ func extract_last_user_message(string prompt) string {
 }
 
 func fallback_response(string prompt) string {
-    string greeting_responses = "我是一个基于Qwen2.5-0.5B的AI助手，专门设计用于理解和生成中文文本。我可以帮您解答问题、进行对话，或协助完成各种文本任务。有什么我能帮您的吗？"
+    string greeting_responses = "我isoneitem基于Qwen2.5-0.5BofAI助手，专门设计use于manage解andgeneratemiddle文文本。我can帮您解答issue、进dopair话，or协助complete各type文本任务。有什么我能帮您ofquestion？"
     
-    if contains_keyword(prompt, "你好") ||
+    if contains_keyword(prompt, "hello") ||
        contains_keyword(prompt, "hello") ||
        contains_keyword(prompt, "Hi") {
         return greeting_responses
@@ -1165,15 +1165,15 @@ func fallback_response(string prompt) string {
     if contains_keyword(prompt, "感谢") ||
        contains_keyword(prompt, "谢谢") ||
        contains_keyword(prompt, "thank") {
-        return "很高兴能帮助您！如果还有其他问题，请继续提问。"
+        return "veryhigh兴能帮助您！如果still有otherissue，请继续提问。"
     }
     
-    if contains_keyword(prompt, "再见") ||
+    if contains_keyword(prompt, "goodbye") ||
        contains_keyword(prompt, "bye") {
-        return "再见！欢迎下次使用。"
+        return "goodbye！欢迎down次使use。"
     }
     
-    return "感谢您的提问。我已接收您的消息，正在处理中。"
+    return "thank youof提问。我already接收您of消息，正atprocessingmiddle。"
 }
 
 func slice_bytes([]int bytes, int start, int count) []int {
@@ -2337,7 +2337,7 @@ func fast_token_generation(string prompt, int max_tokens) string {
         return output
     }
     
-    string common_words = "的是一个我们在这样有很是不是关于或者和其他系统功能设计"
+    string common_words = "ofisoneitem我们atthislike有veryis不is关于or者andother系统功能设计"
     int seed = 0
     int i = 0
     for i < len(prompt) && i < 20 {
@@ -2350,16 +2350,16 @@ func fast_token_generation(string prompt, int max_tokens) string {
         seed = (seed * 1103515245 + 12345) % 2147483648
         int word_idx = (seed / 65536) % 12
         
-        if word_idx == 0 { output = output + "这是" }
-        else if word_idx == 1 { output = output + "一个" }
-        else if word_idx == 2 { output = output + "很好" }
-        else if word_idx == 3 { output = output + "的想法" }
+        if word_idx == 0 { output = output + "thisis" }
+        else if word_idx == 1 { output = output + "oneitem" }
+        else if word_idx == 2 { output = output + "verygood" }
+        else if word_idx == 3 { output = output + "of想法" }
         else if word_idx == 4 { output = output + "系统" }
         else if word_idx == 5 { output = output + "功能" }
-        else if word_idx == 6 { output = output + "实现" }
-        else if word_idx == 7 { output = output + "可以" }
+        else if word_idx == 6 { output = output + "implementation" }
+        else if word_idx == 7 { output = output + "can" }
         else if word_idx == 8 { output = output + "有效" }
-        else if word_idx == 9 { output = output + "完成" }
+        else if word_idx == 9 { output = output + "complete" }
         else if word_idx == 10 { output = output + "任务" }
         else { output = output + "结果" }
         

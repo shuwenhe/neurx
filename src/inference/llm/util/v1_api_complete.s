@@ -74,7 +74,7 @@ func new_v1_engine(v1_engine_config config) v1_engine {
     }
 }
 
-func (mut v1_engine* engine) submit_request(
+func (v1_engine* engine) submit_request(
     prompt_tokens: []int,
     max_new_tokens: int
 ) int {
@@ -88,7 +88,7 @@ func (mut v1_engine* engine) submit_request(
     return request_id
 }
 
-func (mut v1_engine* engine) schedule_prefill_batch() bool {
+func (v1_engine* engine) schedule_prefill_batch() bool {
     engine.current_prefill_batch.request_ids.clear()
     engine.current_prefill_batch.total_tokens = 0
     engine.current_prefill_batch.batch_size = 0
@@ -123,7 +123,7 @@ func (mut v1_engine* engine) schedule_prefill_batch() bool {
     return prefill_count > 0
 }
 
-func (mut v1_engine* engine) execute_prefill() {
+func (v1_engine* engine) execute_prefill() {
     if engine.current_prefill_batch.batch_size == 0 {
         return
     }
@@ -140,7 +140,7 @@ func (mut v1_engine* engine) execute_prefill() {
     }
 }
 
-func (mut v1_engine* engine) schedule_decode_batch() bool {
+func (v1_engine* engine) schedule_decode_batch() bool {
     engine.current_decode_batch.request_ids.clear()
     engine.current_decode_batch.batch_size = 0
 
@@ -176,7 +176,7 @@ func (mut v1_engine* engine) schedule_decode_batch() bool {
     return decode_count > 0
 }
 
-func (mut v1_engine* engine) execute_decode() {
+func (v1_engine* engine) execute_decode() {
     if engine.current_decode_batch.batch_size == 0 {
         return
     }
@@ -192,7 +192,7 @@ func (mut v1_engine* engine) execute_decode() {
     }
 }
 
-func (mut v1_engine* engine) iteration() iteration_result {
+func (v1_engine* engine) iteration() iteration_result {
     engine.iteration_count += 1
 
     prefill_ok := engine.schedule_prefill_batch()
@@ -273,7 +273,7 @@ func (v1_engine* engine) get_stats() v1_engine_stats {
     }
 }
 
-func (mut v1_engine* engine) run_to_completion() {
+func (v1_engine* engine) run_to_completion() {
 
     for engine.total_requests_completed < engine.total_requests_received {
         result := engine.iteration()
@@ -286,7 +286,7 @@ func (mut v1_engine* engine) run_to_completion() {
 }
 
 func main() {
-    println("🚀 V1 API - Prefill/Decode 分离推理引擎")
+    println("🚀 V1 API - Prefill/Decode 分离inferenceengine")
     println("=========================================")
     println("")
 
@@ -313,7 +313,7 @@ func main() {
     }
     println("")
 
-    println("⚙️ 运行推理循环:")
+    println("⚙️ 运doinference循环:")
     for iter in 0..20 {
         result := engine.iteration()
 
@@ -332,28 +332,28 @@ func main() {
     }
 
     stats := engine.get_stats()
-    println("📊 性能统计:")
-    println(f"  总迭代数: {stats.total_iterations}")
-    println(f"  完成请求: {stats.total_requests_completed}")
-    println(f"  处理 Token: {stats.total_tokens_processed}")
-    println(f"  平均批大小: {stats.avg_batch_size:.2f}")
-    println(f"  平均迭代时间: {stats.avg_iteration_time_ms:.2f}ms")
+    println("📊 ity能统计:")
+    println(f"  total迭代数: {stats.total_iterations}")
+    println(f"  complete请求: {stats.total_requests_completed}")
+    println(f"  processing Token: {stats.total_tokens_processed}")
+    println(f"  average批bigsmall: {stats.avg_batch_size:.2f}")
+    println(f"  average迭代时between: {stats.avg_iteration_time_ms:.2f}ms")
     println(f"  请求吞吐: {stats.throughput_req_per_sec:.2f} req/s")
     println(f"  Token 吞吐: {stats.throughput_tok_per_sec:.2f} tok/s")
-    println(f"  GPU 利用率: {stats.gpu_utilization_percent:.1f}%")
+    println(f"  GPU 利userate: {stats.gpu_utilization_percent:.1f}%")
     println("")
 
-    println("✅ 核心特性:")
+    println("✅ Core Features:")
     println("  ✓ Prefill/Decode 分离管道")
     println("  ✓ 迭代级调度 (Iteration-level)")
-    println("  ✓ KV 缓存优化 (50-70% 内存节省)")
-    println("  ✓ 批处理优化 (高吞吐)")
-    println("  ✓ 低延迟保证 (快速 Decode)")
+    println("  ✓ KV 缓存optimization (50-70% 内存节省)")
+    println("  ✓ 批processingoptimization (high吞吐)")
+    println("  ✓ lowlatency保证 (fast速 Decode)")
     println("")
 
-    println("🎯 性能目标:")
-    println("  吞吐量: 6 req/s → 30-50 req/s (5-10x)")
-    println("  延迟: 5.7s → 1.0s (82% ↓)")
-    println("  GPU 利用率: 30-40% → 70-80%")
-    println("  显存占用: 使用 KV 缓存卸载减少 50-70%")
+    println("🎯 ity能target:")
+    println("  throughput: 6 req/s → 30-50 req/s (5-10x)")
+    println("  latency: 5.7s → 1.0s (82% ↓)")
+    println("  GPU 利userate: 30-40% → 70-80%")
+    println("  GPU Memory占use: 使use KV 缓存卸载减less 50-70%")
 }

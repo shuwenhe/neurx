@@ -230,31 +230,31 @@ func handle_http_request(string raw_request) string {
 
 func main() {
     print("\n╔════════════════════════════════════════════════════════╗\n")
-    print("║   🚀 NeurX 纯 S 语言 HTTP 核心实现                   ║\n")
+    print("║   🚀 NeurX pure S language HTTP 核心implementation                   ║\n")
     print("║      (100% Pure S - Core Request Processor)          ║\n")
     print("╚════════════════════════════════════════════════════════╝\n\n")
 
     string test1_request = "GET /health HTTP/1.1\r\nHost: localhost:8888\r\n\r\n"
-    print("📨 测试 1: GET /health\n")
+    print("📨 test 1: GET /health\n")
     string test1_response = handle_http_request(test1_request)
     print_http_response(test1_response)
 
     string test2_request = "GET /v1/models HTTP/1.1\r\nHost: localhost:8888\r\n\r\n"
-    print("📨 测试 2: GET /v1/models\n")
+    print("📨 test 2: GET /v1/models\n")
     string test2_response = handle_http_request(test2_request)
     print_http_response(test2_response)
 
     string test3_request = "POST /v1/chat/completions HTTP/1.1\r\nHost: localhost:8888\r\nContent-Type: application/json\r\n\r\n{\"model\":\"Qwen2.5-0.5B-Instruct\"}\n"
-    print("📨 测试 3: POST /v1/chat/completions\n")
+    print("📨 test 3: POST /v1/chat/completions\n")
     string test3_response = handle_http_request(test3_request)
     print_http_response(test3_response)
 
     string test4_request = "GET /unknown HTTP/1.1\r\nHost: localhost:8888\r\n\r\n"
-    print("📨 测试 4: GET /unknown (404)\n")
+    print("📨 test 4: GET /unknown (404)\n")
     string test4_response = handle_http_request(test4_request)
     print_http_response(test4_response)
 
-    print("\n✅ 纯 S HTTP 处理器已准备就绪\n\n")
+    print("\n✅ pure S HTTP processing器already准备then绪\n\n")
 }
 
 func print_http_response(string response) {

@@ -66,7 +66,7 @@ func format_metrics(int total_requests, int successful_requests, int failed_requ
 }
 
 func main() {
-    print("✅ 纯 S 日志系统已编译\n")
+    print("✅ pure S 日志系统already编译\n")
 
     string log1 = log_request("GET", "/health")
     print(log1)

@@ -56,9 +56,9 @@ func create_scheduler() (scheduler) {
     completed_tasks := vec[task]()
     
     sched := scheduler {
-        ready_queue: &mut ready_queue,
-        running_tasks: &mut running_tasks,
-        completed_tasks: &mut completed_tasks,
+        ready_queue: &ready_queue,
+        running_tasks: &running_tasks,
+        completed_tasks: &completed_tasks,
         current_task_id: 1,
         total_scheduled_count: 0,
         context_switch_count: 0,
@@ -182,7 +182,7 @@ func context_switch(scheduler* sched, int from_task_id, int to_task_id) (int, st
     from_idx := find_task_in_running(sched, from_task_id)
     
     if from_idx >= 0 {
-        mut from_task := sched.running_tasks.get(from_idx)
+        from_task := sched.running_tasks.get(from_idx)
         from_task.state = task_state::ready
         
         sched.running_tasks.remove(from_idx)
@@ -192,7 +192,7 @@ func context_switch(scheduler* sched, int from_task_id, int to_task_id) (int, st
     to_idx := find_task_in_queue(sched, to_task_id)
     
     if to_idx >= 0 {
-        mut to_task := sched.ready_queue.queue.get(to_idx)
+        to_task := sched.ready_queue.queue.get(to_idx)
         to_task.state = task_state::running
         to_task.start_time_ms = sched.current_time_ms
         
@@ -244,7 +244,7 @@ func advance_scheduler_clock(scheduler* sched) (int, string) {
     sched.current_time_ms = sched.current_time_ms + 1
     
     for i in 0..sched.running_tasks.len() {
-        mut t := sched.running_tasks.get(i)
+        t := sched.running_tasks.get(i)
         t.cpu_time_used_ms = t.cpu_time_used_ms + 1
     }
     
@@ -258,7 +258,7 @@ func complete_task(scheduler* sched, int task_id) (int, string) {
     idx := find_task_in_running(sched, task_id)
     
     if idx >= 0 {
-        mut t := sched.running_tasks.get(idx)
+        t := sched.running_tasks.get(idx)
         t.state = task_state::completed
         
         sched.running_tasks.remove(idx)
@@ -271,7 +271,7 @@ func fail_task(scheduler* sched, int task_id) (int, string) {
     idx := find_task_in_running(sched, task_id)
     
     if idx >= 0 {
-        mut t := sched.running_tasks.get(idx)
+        t := sched.running_tasks.get(idx)
         t.state = task_state::failed
         
         sched.running_tasks.remove(idx)

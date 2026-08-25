@@ -105,7 +105,7 @@ func index_of(string text, string needle) int {
     int index = 0
     for index <= len(text) - len(needle) {
         int inner = 0
-        while inner < len(needle) &&
+        for inner < len(needle) &&
               __host_slice(text, index + inner, index + inner + 1) ==
               __host_slice(needle, inner, inner + 1) {
             inner = inner + 1

@@ -21,23 +21,23 @@ struct fact_verification_result {
 func extract_medical_facts(string response) []medical_fact {
     []medical_fact facts = []
     []string dosage_patterns = [
-        "给药.*mg",
-        "剂量.*单位",
-        "用量.*",
+        "给medicine.*mg",
+        "剂量.*单position",
+        "use量.*",
         "dose.*mg",
         "每次.*毫克"
     ]
     []string contra_patterns = [
         "禁忌.*",
-        "禁用.*",
-        "Not能用于.*",
+        "禁use.*",
+        "Not能use于.*",
         "contraindicated",
         "avoid.*"
     ]
     []string mechanism_patterns = [
-        "Function机制",
-        "机制是",
-        "through.*导致",
+        "Functionmechanism",
+        "mechanismis",
+        "through.*cause",
         "mechanism.*",
         "cause.*"
     ]
@@ -126,12 +126,12 @@ struct clarification_analysis {
 
 func detect_underspecified_medical_question(string prompt) bool {
     []string missing_indicators = [
-        "患者",
-        "年龄",
-        "property别",
+        "Patient",
+        "year龄",
+        "propertycategory",
         "持续",
         "symptom",
-        "过敏",
+        "allergy",
         "既往",
         "concurrency症"
     ]
@@ -148,9 +148,9 @@ func count_clarification_questions(string response) int {
     int count = 0
     []string clarification_patterns = [
         "请问",
-        "能否",
+        "能no",
         "need知道",
-        "更多Information",
+        "更moreInformation",
         "Could you",
         "Can you provide",
         "I need to know"

@@ -81,12 +81,12 @@ func format_http_response(http_response resp) string {
 
 func print_config(server_config config) {
     print("╔════════════════════════════════════════════════════════════╗\n")
-    print("║         🚀 NeurX 纯 S 语言 REST API 服务器               ║\n")
+    print("║         🚀 NeurX pure S language REST API server               ║\n")
     print("╚════════════════════════════════════════════════════════════╝\n\n")
-    print("🔧 服务器配置:\n")
+    print("🔧 serverconfiguration:\n")
     print("   主机: " + config.host + "\n")
     print("   端口: " + int_to_string(config.port) + "\n")
-    print("   监听队列: " + int_to_string(config.backlog) + "\n")
+    print("   监听team列: " + int_to_string(config.backlog) + "\n")
     print("   超时: " + int_to_string(config.timeout_sec) + " 秒\n\n")
 }
 
@@ -99,5 +99,5 @@ func main() {
     config.debug_mode = true
 
     print_config(config)
-    print("✅ NeurX S 语言服务器已初始化\n")
+    print("✅ NeurX S languageserveralready初始ization\n")
 }

@@ -107,7 +107,7 @@ func load_samples_for_indices(dataset ds, []int indices) []sample {
 
 func fill_prefetch_buffer(dataloader dl) dataloader {
     int target_count = dl.config.prefetch_factor * 2
-    while len(dl.prefetch_buffer) < target_count
+    for len(dl.prefetch_buffer) < target_count
           dl.batches_served + len(dl.prefetch_buffer) < dl.total_batches {
         ([]int indices, bool has_data) = next_batch_sequential(dl.samp)
         if !has_data || len(indices) == 0 {

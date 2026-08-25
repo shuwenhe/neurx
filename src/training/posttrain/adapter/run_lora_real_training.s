@@ -182,7 +182,7 @@ func compute_lora_gradients(
 }
 
 func optimizer_step(
-    mut lora_weights weights,
+    lora_weights weights,
     lora_weights gradients,
     float learning_rate
 ) {
@@ -191,9 +191,9 @@ func optimizer_step(
 }
 
 func train_epoch(
-    mut base_model model,
+    base_model model,
     training_config config,
-    mut training_state state
+    training_state state
 ) float {
     println("\nEpoch " + int_to_string(state.current_epoch + 1) + "/" + int_to_string(config.num_epochs))
     float epoch_loss = 0.0
@@ -207,7 +207,7 @@ func train_epoch(
         for i in 0..config.num_layers {
             transformer_block block = model.blocks[i]
             lora_weights grads = compute_lora_gradients(logits, dummy_input, block.lora)
-            optimizer_step(mut block.lora, grads, config.learning_rate)
+            optimizer_step(block.lora, grads, config.learning_rate)
         }
         epoch_loss = epoch_loss + batch_loss
         state.total_steps = state.total_steps + 1
@@ -223,7 +223,7 @@ func train_epoch(
 }
 
 func train_model(
-    mut base_model model,
+    base_model model,
     training_config config
 ) training_state {
     training_state state
@@ -235,12 +235,12 @@ func train_model(
     println("\n" + "="*50)
     println("🚀 开始 LoRA SFT 训练")
     println("="*50)
-    println("配置: rank=" + int_to_string(config.lora_rank) +
+    println("configuration: rank=" + int_to_string(config.lora_rank) +
             ", epochs=" + int_to_string(config.num_epochs) +
             ", layers=" + int_to_string(config.num_layers))
     for epoch in 0..config.num_epochs {
         state.current_epoch = epoch
-        float epoch_loss = train_epoch(mut model, config, mut state)
+        float epoch_loss = train_epoch(model, config, state)
         println("✓ Epoch " + int_to_string(epoch + 1) + " complete")
         println("  Average loss: " + float_to_string(epoch_loss))
     }
@@ -261,7 +261,7 @@ func save_merged_model(
     training_config config,
     string output_path
 ) {
-    println("\n💾 保存合并后的模型...")
+    println("\n💾 保存合并backofmodel...")
     println("  输出目录: " + output_path)
     for i in 0..model.num_blocks {
         transformer_block block = model.blocks[i]
@@ -270,7 +270,7 @@ func save_merged_model(
         block.attn.value_proj = merge_lora_to_model(block.attn.value_proj, block.lora)
         block.attn.output_proj = merge_lora_to_model(block.attn.output_proj, block.lora)
     }
-    println("  ✓ model.safetensors (已修改)")
+    println("  ✓ model.safetensors (already修改)")
     println("  ✓ config.json")
     println("  ✓ tokenizer.json")
     println("  ✓ generation_config.json")
@@ -281,21 +281,21 @@ func verify_training_results(
     string output_path,
     training_state state
 ) {
-    println("\n✅ 验证训练结果...")
+    println("\n✅ validation训练结果...")
     println("\n📊 训练统计:")
-    println("  总步数: " + int_to_string(state.total_steps))
-    println("  总 epoch: " + int_to_string(state.loss_history.length))
+    println("  total步数: " + int_to_string(state.total_steps))
+    println("  total epoch: " + int_to_string(state.loss_history.length))
     println("  最佳损失: " + float_to_string(state.best_loss))
     println("  最终损失: " + float_to_string(state.total_loss))
-    println("\n🔍 权重变化验证:")
-    println("  原始模型: " + original_path)
-    println("  新模型:   " + output_path)
-    println("  ✓ SHA256 校验（权重已修改）")
-    println("  ✓ 权重差异: ~5-10% 的参数被修改")
-    println("\n🧪 推理对比:")
-    println("  原始模型推理示例: 'The capital of France is...'")
-    println("  微调后推理示例:   'The capital of France is...'")
-    println("  ✓ 推理结果一致（权重修改有效）")
+    println("\n🔍 权重变izationvalidation:")
+    println("  原始model: " + original_path)
+    println("  newmodel:   " + output_path)
+    println("  ✓ SHA256 校验（权重already修改）")
+    println("  ✓ 权重差异: ~5-10% ofParametersby修改")
+    println("\n🧪 inferencepair比:")
+    println("  原始modelinferenceexample: 'The capital of France is...'")
+    println("  微调backinferenceexample:   'The capital of France is...'")
+    println("  ✓ inference结果one致（权重修改有效）")
 }
 
 func int_to_string(int n) string {
@@ -342,26 +342,26 @@ func float(int n) float {
 
 func main() {
     println("\n" + "="*60)
-    println("🎯 NeurX 完整 LoRA SFT 训练实现")
-    println("目标: 真实权重修改、前向传播、损失计算、反向传播")
+    println("🎯 NeurX complete LoRA SFT 训练implementation")
+    println("target: true实权重修改、fronttowards传播、损失计算、反towards传播")
     println("="*60)
     string model_path = "/home/shuwen/shuwen/train/model/base-model"
     training_config config = load_model_config(model_path)
     if verify_model_files(model_path) == false {
-        print_error("❌ 模型文件验证失败")
+        print_error("❌ model文piecevalidation失败")
         return
     }
-    println("\n📦 初始化模型...")
+    println("\n📦 初始izationmodel...")
     base_model model = init_base_model(config)
-    println("  ✓ BaseModel.5-0.5B 模型已加载")
+    println("  ✓ BaseModel.5-0.5B modelalready加载")
     println("  隐藏维度: 896")
-    println("  词汇表大小: 151936")
-    println("  Block 数量: " + int_to_string(config.num_layers))
+    println("  词汇tablebigsmall: 151936")
+    println("  Block quantity: " + int_to_string(config.num_layers))
     println("  LoRA Rank: " + int_to_string(config.lora_rank))
-    training_state training_state = train_model(mut model, config)
+    training_state training_state = train_model(model, config)
     save_merged_model(model, config, config.output_dir)
     verify_training_results(model_path, config.output_dir, training_state)
     println("\n" + "="*60)
-    println("✨ LoRA SFT 训练完成！")
+    println("✨ LoRA SFT 训练complete！")
     println("="*60)
 }

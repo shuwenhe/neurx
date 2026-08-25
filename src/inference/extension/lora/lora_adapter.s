@@ -37,7 +37,7 @@ impl lora_adapter {
         }
     }
 
-    func(mut lora_adapter* adapter) add_module_weights(
+    func(lora_adapter* adapter) add_module_weights(
         module_name: string,
         lora_a: *vec[vec[float]],
         lora_b: *vec[vec[float]]
@@ -66,7 +66,7 @@ impl lora_adapter {
         adapter.weights.get(module_name)
     }
 
-    func(mut lora_adapter* adapter) remove_module_weights(
+    func(lora_adapter* adapter) remove_module_weights(
         module_name: string
     ) result[(), lora_adapter_error] {
         if !adapter.weights.contains(module_name) {
@@ -148,7 +148,7 @@ impl lora_adapter {
         (outputs, "")
     }
 
-    func(mut lora_adapter* adapter) fuse_weights(
+    func(lora_adapter* adapter) fuse_weights(
         original_weights: *map[string, &vec[vec[float]]]
     ) result[(), lora_adapter_error] {
         if adapter.fused {
@@ -191,7 +191,7 @@ impl lora_adapter {
         ((, ""))
     }
 
-    func(mut lora_adapter* adapter) unfuse_weights(
+    func(lora_adapter* adapter) unfuse_weights(
         original_weights: *map[string, &vec[vec[float]]]
     ) result[(), lora_adapter_error] {
         if !adapter.fused {
@@ -247,7 +247,7 @@ impl lora_adapter {
         names
     }
 
-    func(mut lora_adapter* adapter) set_metadata(string key, string value) {
+    func(lora_adapter* adapter) set_metadata(string key, string value) {
         adapter.metadata.insert(key, value)
     }
 

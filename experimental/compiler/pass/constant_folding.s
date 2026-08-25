@@ -56,7 +56,7 @@ func find_folding_candidates(*computation_graph g) vec[folding_candidate] {
     candidates
 }
 
-func apply_constant_folding(*mut computation_graph g) fold_result {
+func apply_constant_folding(*computation_graph g) fold_result {
     candidates = find_folding_candidates(g)
     int folded_count = 0
 

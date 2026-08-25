@@ -218,7 +218,7 @@ func example_batch_apply_lora() result[(), string] {
 }
 
 func main() {
-    println("=== LoRA 基础使用示例 ===\n")
+    println("=== LoRA foundation使useexample ===\n")
 
     switch example_create_basic_adapter() {
         (_, "") : {},
@@ -246,5 +246,5 @@ func main() {
         (0, e) : println("Error in example_batch_apply_lora: " + e),
     }
 
-    println("\n=== 所有示例完成 ===")
+    println("\n=== allexamplecomplete ===")
 }

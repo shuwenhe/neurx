@@ -124,7 +124,7 @@ func lora_adapter_manager::new() lora_adapter_manager {
     }
 }
 
-func (mut lora_adapter_manager* manager) add_adapter(
+func (lora_adapter_manager* manager) add_adapter(
     name: string,
     adapter: *lora_adapter
 ) result[(), lora_adapter_error] {
@@ -139,7 +139,7 @@ func (mut lora_adapter_manager* manager) add_adapter(
     ((, ""))
 }
 
-func (mut lora_adapter_manager* manager) remove_adapter(string name) result[(), lora_adapter_error] {
+func (lora_adapter_manager* manager) remove_adapter(string name) result[(), lora_adapter_error] {
     if !manager.adapters.contains(name) {
         return (lora_adapter_error {
             code: "ADAPTER_NOT_FOUND",
@@ -161,7 +161,7 @@ func (mut lora_adapter_manager* manager) remove_adapter(string name) result[(), 
     ((, ""))
 }
 
-func (mut lora_adapter_manager* manager) activate_adapter(string name) result[(), lora_adapter_error] {
+func (lora_adapter_manager* manager) activate_adapter(string name) result[(), lora_adapter_error] {
     if !manager.adapters.contains(name) {
         return (lora_adapter_error {
             code: "ADAPTER_NOT_FOUND",
@@ -185,7 +185,7 @@ func (mut lora_adapter_manager* manager) activate_adapter(string name) result[()
     }
 }
 
-func (mut lora_adapter_manager* manager) deactivate_adapter(string name) result[(), lora_adapter_error] {
+func (lora_adapter_manager* manager) deactivate_adapter(string name) result[(), lora_adapter_error] {
     idx := 0
     for idx < manager.active_adapters.len() {
         if manager.active_adapters[idx] == name {
@@ -220,7 +220,7 @@ func (manager* manager) get_adapter(string name) option[lora_adapter] {
     }
 }
 
-func (mut lora_adapter_manager* manager) set_global_scale(float scale) result[(), lora_adapter_error] {
+func (lora_adapter_manager* manager) set_global_scale(float scale) result[(), lora_adapter_error] {
     if scale < 0.0 {
         return (lora_adapter_error {
             code: "INVALID_SCALE",
@@ -232,7 +232,7 @@ func (mut lora_adapter_manager* manager) set_global_scale(float scale) result[()
     ((, ""))
 }
 
-func (mut lora_adapter_manager* manager) merge_adapters() result[(), lora_adapter_error] {
+func (lora_adapter_manager* manager) merge_adapters() result[(), lora_adapter_error] {
     i := 0
     for i < manager.active_adapters.len() {
         adapter_name := manager.active_adapters[i]
@@ -257,7 +257,7 @@ func (mut lora_adapter_manager* manager) merge_adapters() result[(), lora_adapte
     ((, ""))
 }
 
-func (mut lora_adapter_manager* manager) unmerge_adapters() result[(), lora_adapter_error] {
+func (lora_adapter_manager* manager) unmerge_adapters() result[(), lora_adapter_error] {
     ((, ""))
 }
 

@@ -254,19 +254,19 @@ func float_to_string(float f) string {
 }
 
 func run_inference(string prompt, int max_tokens, float temperature) string {
-    print("🤖 运行推理\n")
-    print("   提示: " + prompt + "\n")
-    print("   最大tokens: " + int_to_string(max_tokens) + "\n")
+    print("🤖 运doinference\n")
+    print("   prompt: " + prompt + "\n")
+    print("   maximumtokens: " + int_to_string(max_tokens) + "\n")
     print("   温度: " + float_to_string(temperature) + "\n")
 
     string response = ""
 
     if len(prompt) < 10 {
-        response = "这是一个简短提示的响应。"
+        response = "thisisoneitem简shortpromptofresponse。"
     } else if len(prompt) < 50 {
-        response = "这是一个中等长度提示的生成文本。它包含多个句子以演示令牌计数和响应格式化。"
+        response = "thisisoneitemmiddle等long度promptofgenerate文本。它包含moreitem句子以演示令牌计数andresponse格式ization。"
     } else {
-        response = "这是对长提示的详细回复。模型在这里生成更长的、更具信息性的响应。包括多个段落、解释和示例。这演示了完整推理流程。"
+        response = "thisispairlongpromptof详细回复。modelatthisinsidegenerate更longof、更具信息ityofresponse。包括moreitem段落、解释andexample。this演示edcompleteinference流程。"
     }
 
     if max_tokens < len(response) {
@@ -277,7 +277,7 @@ func run_inference(string prompt, int max_tokens, float temperature) string {
 }
 
 func handle_chat_completion(http_request req) http_response {
-    print("\n📨 处理聊天完成请求\n")
+    print("\n📨 processing聊天complete请求\n")
 
     string model = extract_string_field(req.body, "model")
     if model == "" {
@@ -296,11 +296,11 @@ func handle_chat_completion(http_request req) http_response {
 
     string prompt = extract_string_field(req.body, "content")
     if prompt == "" {
-        prompt = "你好"
+        prompt = "hello"
     }
 
-    print("   模型: " + model + "\n")
-    print("   提示内容: " + prompt + "\n")
+    print("   model: " + model + "\n")
+    print("   prompt内容: " + prompt + "\n")
 
     string response_text = run_inference(prompt, max_tokens, temperature)
 
@@ -339,7 +339,7 @@ func handle_chat_completion(http_request req) http_response {
 }
 
 func handle_health_check(http_request req) http_response {
-    print("\n💚 处理健康检查\n")
+    print("\n💚 processinghealthcheck\n")
 
     string body = "{"
     body = body + "\"status\":\"healthy\","
@@ -358,7 +358,7 @@ func handle_health_check(http_request req) http_response {
 }
 
 func handle_list_models(http_request req) http_response {
-    print("\n📋 列出可用模型\n")
+    print("\n📋 列出可usemodel\n")
 
     string body = "{"
     body = body + "\"object\":\"list\","
@@ -400,7 +400,7 @@ func route_request(http_request req) http_response {
     print("\n" + "="*70 + "\n")
     print("🌐 NeurX REST API - 路由请求\n")
     print("="*70 + "\n")
-    print("方法: " + req.method + "\n")
+    print("method: " + req.method + "\n")
     print("路径: " + req.path + "\n")
 
     if req.path == "/v1/chat/completions" && req.method == "POST" {
@@ -410,15 +410,15 @@ func route_request(http_request req) http_response {
     } else if req.path == "/v1/models" && req.method == "GET" {
         return handle_list_models(req)
     } else {
-        return handle_error(404, "端点未找到: " + req.path)
+        return handle_error(404, "endpoint未找到: " + req.path)
     }
 }
 
 func print_response(http_response resp) {
     print("\n" + "─"*70 + "\n")
-    print("✅ API 响应\n")
+    print("✅ API response\n")
     print("─"*70 + "\n")
-    print("状态: " + int_to_string(resp.status_code) + " " + resp.status_message + "\n")
+    print("status: " + int_to_string(resp.status_code) + " " + resp.status_message + "\n")
     print("内容:\n")
     print(resp.body + "\n")
     print("="*70 + "\n\n")
@@ -426,19 +426,19 @@ func print_response(http_response resp) {
 
 func main() {
     print("\n╔════════════════════════════════════════════════════════════════════╗\n")
-    print("║          🚀 NeurX REST API 服务器 (纯 S 语言实现)               ║\n")
+    print("║          🚀 NeurX REST API server (pure S languageimplementation)               ║\n")
     print("╚════════════════════════════════════════════════════════════════════╝\n\n")
 
-    print("📝 示例 1: 聊天完成请求\n")
+    print("📝 example 1: 聊天complete请求\n")
     http_request req1
     req1.method = "POST"
     req1.path = "/v1/chat/completions"
-    req1.body = "{\"model\":\"Qwen2.5-0.5B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"你好，请介绍一下你自己\"}],\"max_tokens\":256,\"temperature\":0.7}"
+    req1.body = "{\"model\":\"Qwen2.5-0.5B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"hello，请介绍onedown你自己\"}],\"max_tokens\":256,\"temperature\":0.7}"
 
     http_response resp1 = route_request(req1)
     print_response(resp1)
 
-    print("📝 示例 2: 健康检查\n")
+    print("📝 example 2: healthcheck\n")
     http_request req2
     req2.method = "GET"
     req2.path = "/health"
@@ -446,7 +446,7 @@ func main() {
     http_response resp2 = route_request(req2)
     print_response(resp2)
 
-    print("📝 示例 3: 列表模型\n")
+    print("📝 example 3: 列tablemodel\n")
     http_request req3
     req3.method = "GET"
     req3.path = "/v1/models"
@@ -454,7 +454,7 @@ func main() {
     http_response resp3 = route_request(req3)
     print_response(resp3)
 
-    print("📝 示例 4: 错误处理\n")
+    print("📝 example 4: wrong误processing\n")
     http_request req4
     req4.method = "GET"
     req4.path = "/unknown"
