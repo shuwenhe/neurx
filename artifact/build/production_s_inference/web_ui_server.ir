@@ -87,111 +87,119 @@ ADD|t41|html|"</div>\\n"
 MOV|html|t41|_
 ADD|t42|html|"<div class=\\"form-group\\">\\n"
 MOV|html|t42|_
-ADD|t43|html|"</div>\\n"
+ADD|t43|html|"<label for=\\"maxTokens\\">Max Tokens:</label>\\n"
 MOV|html|t43|_
-ADD|t44|html|"</div>\\n"
+ADD|t44|html|"<input type=\\"number\\" id=\\"maxTokens\\" value=\\"1024\\" min=\\"1\\" max=\\"4096\\">\\n"
 MOV|html|t44|_
 ADD|t45|html|"</div>\\n"
 MOV|html|t45|_
-ADD|t46|html|"<script>\\n"
+ADD|t46|html|"</div>\\n"
 MOV|html|t46|_
-ADD|t47|html|"async function checkBackend() {\\n"
+ADD|t47|html|"</div>\\n"
 MOV|html|t47|_
-ADD|t48|html|"try{\\n"
+ADD|t48|html|"<script>\\n"
 MOV|html|t48|_
-ADD|t49|html|"const resp=await fetch('/api/health');\\n"
+ADD|t49|html|"async function checkBackend() {\\n"
 MOV|html|t49|_
-ADD|t50|html|"const data=await resp.json();if(resp.ok&&data.status==='ok'){document.getElementById('backendStatus').className='status-ok';document.getElementById('backendStatus').textContent='✅ Backend: Ready ('+(data.model\|\|data.backend\|\|'NeurX')+')'}\\n"
+ADD|t50|html|"try{\\n"
 MOV|html|t50|_
-ADD|t51|html|"else{document.getElementById('backendStatus').className='status-err';document.getElementById('backendStatus').innerHTML='⚠️ Backend: Unreachable'}\\n"
+ADD|t51|html|"const resp=await fetch('/api/health');\\n"
 MOV|html|t51|_
-ADD|t52|html|"}catch(e){document.getElementById('backendStatus').className='status-err';document.getElementById('backendStatus').innerHTML='❌ Backend: Offline (Start with: make backend)'}\\n"
+ADD|t52|html|"const data=await resp.json();if(resp.ok&&data.status==='ok'){document.getElementById('backendStatus').className='status-ok';document.getElementById('backendStatus').textContent='✅ Backend: Ready ('+(data.model\|\|data.backend\|\|'NeurX')+')'}\\n"
 MOV|html|t52|_
-ADD|t53|html|"}\\n"
+ADD|t53|html|"else{document.getElementById('backendStatus').className='status-err';document.getElementById('backendStatus').innerHTML='⚠️ Backend: Unreachable'}\\n"
 MOV|html|t53|_
-ADD|t54|html|"function escapeHtml(s){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('\\"','&quot;')}\\n"
+ADD|t54|html|"}catch(e){document.getElementById('backendStatus').className='status-err';document.getElementById('backendStatus').innerHTML='❌ Backend: Offline (Start with: make backend)'}\\n"
 MOV|html|t54|_
-ADD|t55|html|"function formatCode(src,lang){const NL=String.fromCharCode(10);let s=String(src).replaceAll(String.fromCharCode(160),' ').trim();if(s.includes(NL))return s;let out='',indent=0,paren=0,line=true,quote='',escape=false;const pad=()=> '    '.repeat(Math.max(0,indent));for(let i=0;i<s.length;i++){const c=s[i];if(quote){out+=c;if(escape)escape=false;else if(c==='\\\\\\\\')escape=true;else if(c===quote)quote='';continue}if(c==='\\"'\|\|c===\\"'\\"){quote=c;out+=c;continue}if(c==='('){paren++;out+=c;continue}if(c===')'){paren=Math.max(0,paren-1);out+=c;continue}if(c==='{'){out=out.trimEnd()+' {'+NL;indent++;out+=pad();line=true;continue}if(c==='}'){out=out.trimEnd()+NL;indent=Math.max(0,indent-1);out+=pad()+'}';if(i+1<s.length&&s[i+1]!==';'&&s[i+1]!==',')out+=NL+pad();line=true;continue}if(c===';'&&paren===0){out+=';'+NL+pad();line=true;continue}if(c==='#'&&out.trim().length>0){out=out.trimEnd()+NL+'#';line=false;continue}if(c===' '&&line)continue;out+=c;line=false}return out.trim()}\\n"
+ADD|t55|html|"}\\n"
 MOV|html|t55|_
-ADD|t56|html|"function renderText(s){const NL=String.fromCharCode(10);return escapeHtml(s).split(NL+NL).map(x=>'<p>'+x.split(NL).join('<br>')+'</p>').join('')}\\n"
+ADD|t56|html|"function escapeHtml(s){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('\\"','&quot;')}\\n"
 MOV|html|t56|_
-ADD|t57|html|"function renderMarkdown(text){window.__neurxCodes=[];let html='',pos=0;while(pos<text.length){const open=text.indexOf('```',pos);if(open<0){html+=renderText(text.slice(pos));break}html+=renderText(text.slice(pos,open));let q=open+3,lang='';while(q<text.length&&/[A-Za-z0-9_+.-]/.test(text[q])){lang+=text[q];q++}while(q<text.length&&(text[q]===' '\|\|text.charCodeAt(q)===10\|\|text.charCodeAt(q)===13))q++;const close=text.indexOf('```',q);const raw=close<0?text.slice(q):text.slice(q,close);const code=formatCode(raw,lang);const id=window.__neurxCodes.push(code)-1;html+='<div class=\\"code-block\\"><div class=\\"code-head\\"><span>'+(escapeHtml(lang)\|\|'code')+'</span><button class=\\"copy-code\\" onclick=\\"copyCode('+id+',this)\\">📋 Copy</button></div><pre><code>'+escapeHtml(code)+'</code></pre></div>';if(close<0)break;pos=close+3}return html}\\n"
+ADD|t57|html|"function formatCode(src,lang){const NL=String.fromCharCode(10);let s=String(src).replaceAll(String.fromCharCode(160),' ').trim();if(s.includes(NL))return s;let out='',indent=0,paren=0,line=true,quote='',escape=false;const pad=()=> '    '.repeat(Math.max(0,indent));for(let i=0;i<s.length;i++){const c=s[i];if(quote){out+=c;if(escape)escape=false;else if(c==='\\\\\\\\')escape=true;else if(c===quote)quote='';continue}if(c==='\\"'\|\|c===\\"'\\"){quote=c;out+=c;continue}if(c==='('){paren++;out+=c;continue}if(c===')'){paren=Math.max(0,paren-1);out+=c;continue}if(c==='{'){out=out.trimEnd()+' {'+NL;indent++;out+=pad();line=true;continue}if(c==='}'){out=out.trimEnd()+NL;indent=Math.max(0,indent-1);out+=pad()+'}';if(i+1<s.length&&s[i+1]!==';'&&s[i+1]!==',')out+=NL+pad();line=true;continue}if(c===';'&&paren===0){out+=';'+NL+pad();line=true;continue}if(c==='#'&&out.trim().length>0){out=out.trimEnd()+NL+'#';line=false;continue}if(c===' '&&line)continue;out+=c;line=false}return out.trim()}\\n"
 MOV|html|t57|_
-ADD|t58|html|"async function copyCode(id,btn){await navigator.clipboard.writeText(window.__neurxCodes[id]\|\|'');const old=btn.textContent;btn.textContent='✅ Copied';setTimeout(()=>btn.textContent=old,1200)}\\n"
+ADD|t58|html|"function renderText(s){const NL=String.fromCharCode(10);return escapeHtml(s).split(NL+NL).map(x=>'<p>'+x.split(NL).join('<br>')+'</p>').join('')}\\n"
 MOV|html|t58|_
-ADD|t59|html|"function streamRender(target,text){return new Promise(resolve=>{let shown=0;function frame(){shown=Math.min(text.length,shown+3);target.innerHTML=renderMarkdown(text.slice(0,shown))+(shown<text.length?'<span class=\\"stream-cursor\\"></span>':'');target.scrollIntoView({block:'nearest'});if(shown<text.length)requestAnimationFrame(frame);else resolve()}frame()})}\\n"
+ADD|t59|html|"function renderMarkdown(text){window.__neurxCodes=[];let html='',pos=0;while(pos<text.length){const open=text.indexOf('```',pos);if(open<0){html+=renderText(text.slice(pos));break}html+=renderText(text.slice(pos,open));let q=open+3,lang='';while(q<text.length&&/[A-Za-z0-9_+.-]/.test(text[q])){lang+=text[q];q++}while(q<text.length&&(text[q]===' '\|\|text.charCodeAt(q)===10\|\|text.charCodeAt(q)===13))q++;const close=text.indexOf('```',q);const raw=close<0?text.slice(q):text.slice(q,close);const code=formatCode(raw,lang);const id=window.__neurxCodes.push(code)-1;html+='<div class=\\"code-block\\"><div class=\\"code-head\\"><span>'+(escapeHtml(lang)\|\|'code')+'</span><button class=\\"copy-code\\" onclick=\\"copyCode('+id+',this)\\">📋 Copy</button></div><pre><code>'+escapeHtml(code)+'</code></pre></div>';if(close<0)break;pos=close+3}return html}\\n"
 MOV|html|t59|_
-ADD|t60|html|"async function sendRequest(){\\n"
+ADD|t60|html|"async function copyCode(id,btn){await navigator.clipboard.writeText(window.__neurxCodes[id]\|\|'');const old=btn.textContent;btn.textContent='✅ Copied';setTimeout(()=>btn.textContent=old,1200)}\\n"
 MOV|html|t60|_
-ADD|t61|html|"const p=document.getElementById('prompt').value,m=parseInt(document.getElementById('maxTokens').value),r=document.getElementById('result');\\n"
+ADD|t61|html|"function streamRender(target,text){return new Promise(resolve=>{let shown=0;function frame(){shown=Math.min(text.length,shown+3);target.innerHTML=renderMarkdown(text.slice(0,shown))+(shown<text.length?'<span class=\\"stream-cursor\\"></span>':'');target.scrollIntoView({block:'nearest'});if(shown<text.length)requestAnimationFrame(frame);else resolve()}frame()})}\\n"
 MOV|html|t61|_
-ADD|t62|html|"r.innerHTML='<p class=\\"success\\"><strong>AI Response:</strong> <span class=\\"stream-cursor\\"></span></p><div id=\\"responseBody\\" class=\\"response-body\\"></div>';\\n"
+ADD|t62|html|"async function sendRequest(){\\n"
 MOV|html|t62|_
-ADD|t63|html|"const body=document.getElementById('responseBody');let output='',pending='';try{\\n"
+ADD|t63|html|"const promptEl=document.getElementById('prompt');const maxEl=document.getElementById('maxTokens');const resultEl=document.getElementById('result');\\n"
 MOV|html|t63|_
-ADD|t64|html|"const res=await fetch('/api/infer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p,max_tokens:m,max_new_tokens:m,stream:true})});\\n"
+ADD|t64|html|"if(!promptEl\|\|!maxEl\|\|!resultEl){console.error('Required elements not found');return}\\n"
 MOV|html|t64|_
-ADD|t65|html|"if(!res.ok\|\|!res.body)throw new Error('Streaming response unavailable');const reader=res.body.getReader(),decoder=new TextDecoder();let finished=false;\\n"
+ADD|t65|html|"const p=promptEl.value,m=parseInt(maxEl.value)\|\|1024,r=resultEl;\\n"
 MOV|html|t65|_
-ADD|t66|html|"while(!finished){const part=await reader.read();finished=part.done;pending+=decoder.decode(part.value\|\|new Uint8Array(),{stream:!finished});\\n"
+ADD|t66|html|"r.innerHTML='<p class=\\"success\\"><strong>AI Response:</strong> <span class=\\"stream-cursor\\"></span></p><div id=\\"responseBody\\" class=\\"response-body\\"></div>';\\n"
 MOV|html|t66|_
-ADD|t67|html|"const lines=pending.split(String.fromCharCode(10));pending=lines.pop()\|\|'';for(const line of lines){if(!line.trim())continue;const event=JSON.parse(line);\\n"
+ADD|t67|html|"const body=document.getElementById('responseBody');let output='',pending='';try{\\n"
 MOV|html|t67|_
-ADD|t68|html|"if(event.error)throw new Error(event.error);if(event.delta){output+=event.delta;body.innerHTML=renderMarkdown(output);body.scrollIntoView({block:'nearest'})}if(event.done)finished=true}}\\n"
+ADD|t68|html|"const res=await fetch('/api/infer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p,max_tokens:m,max_new_tokens:m,stream:true})});\\n"
 MOV|html|t68|_
-ADD|t69|html|"if(pending.trim()){const event=JSON.parse(pending);if(event.delta){output+=event.delta;body.innerHTML=renderMarkdown(output)}}\\n"
+ADD|t69|html|"if(!res.ok\|\|!res.body)throw new Error('Streaming response unavailable');const reader=res.body.getReader(),decoder=new TextDecoder();let finished=false;\\n"
 MOV|html|t69|_
-ADD|t70|html|"const cursor=r.querySelector('.stream-cursor');if(cursor)cursor.remove()}catch(e){r.innerHTML+='<p class=\\"error\\">❌ Connection error: '+escapeHtml(e)+'</p>'}}\\n"
+ADD|t70|html|"while(!finished){const part=await reader.read();finished=part.done;pending+=decoder.decode(part.value\|\|new Uint8Array(),{stream:!finished});\\n"
 MOV|html|t70|_
-ADD|t71|html|"function clearText(){document.getElementById('prompt').value='';document.getElementById('result').innerHTML=''}\\n"
+ADD|t71|html|"const lines=pending.split(String.fromCharCode(10));pending=lines.pop()\|\|'';for(const line of lines){if(!line.trim())continue;const event=JSON.parse(line);\\n"
 MOV|html|t71|_
-ADD|t72|html|"function autoResizeTextarea(ta){ta.style.height='auto';const newH=Math.min(ta.scrollHeight,200);ta.style.height=newH+'px'}\\n"
+ADD|t72|html|"if(event.error)throw new Error(event.error);if(event.delta){output+=event.delta;body.innerHTML=renderMarkdown(output);body.scrollIntoView({block:'nearest'})}if(event.done)finished=true}}\\n"
 MOV|html|t72|_
-ADD|t73|html|"document.addEventListener('DOMContentLoaded',function(){const promptEl=document.getElementById('prompt');if(promptEl){promptEl.addEventListener('input',function(){autoResizeTextarea(this)});promptEl.addEventListener('keydown',function(e){console.log('Key pressed:',e.key,e.keyCode);if(e.keyCode===13\|\|e.key==='Enter'){if(!e.shiftKey){e.preventDefault();console.log('Sending request...');sendRequest();return false}else{e.preventDefault();const start=this.selectionStart,end=this.selectionEnd;this.value=this.value.substring(0,start)+String.fromCharCode(10)+this.value.substring(end);this.selectionStart=this.selectionEnd=start+1;autoResizeTextarea(this);return false}}})}checkBackend();setInterval(checkBackend,5000)})\\n"
+ADD|t73|html|"if(pending.trim()){const event=JSON.parse(pending);if(event.delta){output+=event.delta;body.innerHTML=renderMarkdown(output)}}\\n"
 MOV|html|t73|_
-ADD|t74|html|"</script>\\n"
+ADD|t74|html|"const cursor=r.querySelector('.stream-cursor');if(cursor)cursor.remove()}catch(e){r.innerHTML+='<p class=\\"error\\">❌ Connection error: '+escapeHtml(e)+'</p>'}}\\n"
 MOV|html|t74|_
-ADD|t75|html|"</body></html>\\n"
+ADD|t75|html|"function clearText(){document.getElementById('prompt').value='';document.getElementById('result').innerHTML=''}\\n"
 MOV|html|t75|_
+ADD|t76|html|"function autoResizeTextarea(ta){ta.style.height='auto';const newH=Math.min(ta.scrollHeight,200);ta.style.height=newH+'px'}\\n"
+MOV|html|t76|_
+ADD|t77|html|"document.addEventListener('DOMContentLoaded',function(){const promptEl=document.getElementById('prompt');if(promptEl){promptEl.addEventListener('input',function(){autoResizeTextarea(this)});promptEl.addEventListener('keydown',function(e){console.log('Key pressed:',e.key,e.keyCode);if(e.keyCode===13\|\|e.key==='Enter'){if(!e.shiftKey){e.preventDefault();console.log('Sending request...');sendRequest();return false}else{e.preventDefault();const start=this.selectionStart,end=this.selectionEnd;this.value=this.value.substring(0,start)+String.fromCharCode(10)+this.value.substring(end);this.selectionStart=this.selectionEnd=start+1;autoResizeTextarea(this);return false}}})}checkBackend();setInterval(checkBackend,5000)})\\n"
+MOV|html|t77|_
+ADD|t78|html|"</script>\\n"
+MOV|html|t78|_
+ADD|t79|html|"</body></html>\\n"
+MOV|html|t79|_
 RET|html|_|_
 RET|""|_|_
 FUNC_END|get_html|_|_
 FUNC_BEGIN|int_to_string|_|_
 PARAM|value|_|_
-CMP_EQ|t76|value|0
-JUMP_IF_FALSE|L0|t76|_
+CMP_EQ|t80|value|0
+JUMP_IF_FALSE|L0|t80|_
 RET|"0"|_|_
 JUMP|L1|_|_
 LABEL|L0|_|_
 LABEL|L1|_|_
 MOV|result|""|_
 MOV|n|value|_
-CMP_LT|t77|n|0
-JUMP_IF_FALSE|L2|t77|_
-SUB|t78|0|n
-MOV|n|t78|_
+CMP_LT|t81|n|0
+JUMP_IF_FALSE|L2|t81|_
+SUB|t82|0|n
+MOV|n|t82|_
 JUMP|L3|_|_
 LABEL|L2|_|_
 LABEL|L3|_|_
 LABEL|L4|_|_
-CMP_GT|t79|n|0
-JUMP_IF_FALSE|L5|t79|_
-DIV|t80|n|10
-MUL|t81|t80|10
-SUB|t82|n|t81
-ADD|t83|48|t82
-ARG|t83|_|_
-CALL|t84|string|1
-ADD|t85|t84|result
-MOV|result|t85|_
-DIV|t86|n|10
-MOV|n|t86|_
+CMP_GT|t83|n|0
+JUMP_IF_FALSE|L5|t83|_
+DIV|t84|n|10
+MUL|t85|t84|10
+SUB|t86|n|t85
+ADD|t87|48|t86
+ARG|t87|_|_
+CALL|t88|string|1
+ADD|t89|t88|result
+MOV|result|t89|_
+DIV|t90|n|10
+MOV|n|t90|_
 JUMP|L4|_|_
 LABEL|L5|_|_
-CMP_LT|t87|value|0
-JUMP_IF_FALSE|L6|t87|_
-ADD|t88|"-"|result
-MOV|result|t88|_
+CMP_LT|t91|value|0
+JUMP_IF_FALSE|L6|t91|_
+ADD|t92|"-"|result
+MOV|result|t92|_
 JUMP|L7|_|_
 LABEL|L6|_|_
 LABEL|L7|_|_
@@ -205,10 +213,10 @@ PARAM|request_body|_|_
 ARG|2|_|_
 ARG|1|_|_
 ARG|6|_|_
-CALL|t89|__sys_socket|3
-MOV|backend_sock|t89|_
-CMP_LT|t90|backend_sock|0
-JUMP_IF_FALSE|L8|t90|_
+CALL|t93|__sys_socket|3
+MOV|backend_sock|t93|_
+CMP_LT|t94|backend_sock|0
+JUMP_IF_FALSE|L8|t94|_
 RET|"{\\"error\\": \\"Socket creation failed\\"}"|_|_
 JUMP|L9|_|_
 LABEL|L8|_|_
@@ -217,63 +225,63 @@ ARG|backend_sock|_|_
 ARG|"127.0.0.1"|_|_
 ARG|18084|_|_
 ARG|2|_|_
-CALL|t91|__sys_connect|4
-CMP_LT|t92|t91|0
-JUMP_IF_FALSE|L10|t92|_
+CALL|t95|__sys_connect|4
+CMP_LT|t96|t95|0
+JUMP_IF_FALSE|L10|t96|_
 ARG|backend_sock|_|_
-CALL|t93|__sys_close|1
-MOV|_|t93|_
+CALL|t97|__sys_close|1
+MOV|_|t97|_
 RET|"{\\"error\\": \\"Backend connection failed\\"}"|_|_
 JUMP|L11|_|_
 LABEL|L10|_|_
 LABEL|L11|_|_
-ADD|t94|method|" "
-ADD|t95|t94|path
-ADD|t96|t95|" HTTP/1.1\\r\\n"
-MOV|backend_request|t96|_
-ADD|t97|backend_request|"Host: 127.0.0.1:18084\\r\\n"
-MOV|backend_request|t97|_
-ADD|t98|backend_request|"Content-Type: application/json\\r\\n"
-MOV|backend_request|t98|_
-ADD|t99|backend_request|"Content-Length: "
+ADD|t98|method|" "
+ADD|t99|t98|path
+ADD|t100|t99|" HTTP/1.1\\r\\n"
+MOV|backend_request|t100|_
+ADD|t101|backend_request|"Host: 127.0.0.1:18084\\r\\n"
+MOV|backend_request|t101|_
+ADD|t102|backend_request|"Content-Type: application/json\\r\\n"
+MOV|backend_request|t102|_
+ADD|t103|backend_request|"Content-Length: "
 ARG|request_body|_|_
-CALL|t100|len|1
-ARG|t100|_|_
-CALL|t101|int_to_string|1
-ADD|t102|t99|t101
-ADD|t103|t102|"\\r\\n"
-MOV|backend_request|t103|_
-ADD|t104|backend_request|"Connection: close\\r\\n"
-MOV|backend_request|t104|_
-ADD|t105|backend_request|"\\r\\n"
-MOV|backend_request|t105|_
-ADD|t106|backend_request|request_body
-MOV|backend_request|t106|_
+CALL|t104|len|1
+ARG|t104|_|_
+CALL|t105|int_to_string|1
+ADD|t106|t103|t105
+ADD|t107|t106|"\\r\\n"
+MOV|backend_request|t107|_
+ADD|t108|backend_request|"Connection: close\\r\\n"
+MOV|backend_request|t108|_
+ADD|t109|backend_request|"\\r\\n"
+MOV|backend_request|t109|_
+ADD|t110|backend_request|request_body
+MOV|backend_request|t110|_
 ARG|backend_sock|_|_
 ARG|backend_request|_|_
-CALL|t107|__sys_write_string|2
-MOV|_|t107|_
+CALL|t111|__sys_write_string|2
+MOV|_|t111|_
 MOV|response|""|_
-ARG|backend_sock|_|_
-ARG|4096|_|_
-CALL|t108|__sys_read_string|2
-MOV|chunk|t108|_
-LABEL|L12|_|_
-ARG|chunk|_|_
-CALL|t109|len|1
-CMP_GT|t110|t109|0
-JUMP_IF_FALSE|L13|t110|_
-ADD|t111|response|chunk
-MOV|response|t111|_
 ARG|backend_sock|_|_
 ARG|4096|_|_
 CALL|t112|__sys_read_string|2
 MOV|chunk|t112|_
+LABEL|L12|_|_
+ARG|chunk|_|_
+CALL|t113|len|1
+CMP_GT|t114|t113|0
+JUMP_IF_FALSE|L13|t114|_
+ADD|t115|response|chunk
+MOV|response|t115|_
+ARG|backend_sock|_|_
+ARG|4096|_|_
+CALL|t116|__sys_read_string|2
+MOV|chunk|t116|_
 JUMP|L12|_|_
 LABEL|L13|_|_
 ARG|backend_sock|_|_
-CALL|t113|__sys_close|1
-MOV|_|t113|_
+CALL|t117|__sys_close|1
+MOV|_|t117|_
 RET|response|_|_
 RET|""|_|_
 FUNC_END|proxy_to_backend|_|_
@@ -283,14 +291,14 @@ PARAM|request_body|_|_
 ARG|2|_|_
 ARG|1|_|_
 ARG|6|_|_
-CALL|t114|__sys_socket|3
-MOV|backend_sock|t114|_
-CMP_LT|t115|backend_sock|0
-JUMP_IF_FALSE|L14|t115|_
+CALL|t118|__sys_socket|3
+MOV|backend_sock|t118|_
+CMP_LT|t119|backend_sock|0
+JUMP_IF_FALSE|L14|t119|_
 ARG|client_fd|_|_
 ARG|"HTTP/1.1 502 Bad Gateway\\r\\nConnection: close\\r\\n\\r\\n"|_|_
-CALL|t116|__sys_write_string|2
-MOV|_|t116|_
+CALL|t120|__sys_write_string|2
+MOV|_|t120|_
 RET|_|_|_
 JUMP|L15|_|_
 LABEL|L14|_|_
@@ -299,99 +307,99 @@ ARG|backend_sock|_|_
 ARG|"127.0.0.1"|_|_
 ARG|18084|_|_
 ARG|2|_|_
-CALL|t117|__sys_connect|4
-CMP_LT|t118|t117|0
-JUMP_IF_FALSE|L16|t118|_
+CALL|t121|__sys_connect|4
+CMP_LT|t122|t121|0
+JUMP_IF_FALSE|L16|t122|_
 ARG|backend_sock|_|_
-CALL|t119|__sys_close|1
-MOV|_|t119|_
+CALL|t123|__sys_close|1
+MOV|_|t123|_
 ARG|client_fd|_|_
 ARG|"HTTP/1.1 502 Bad Gateway\\r\\nConnection: close\\r\\n\\r\\n"|_|_
-CALL|t120|__sys_write_string|2
-MOV|_|t120|_
+CALL|t124|__sys_write_string|2
+MOV|_|t124|_
 RET|_|_|_
 JUMP|L17|_|_
 LABEL|L16|_|_
 LABEL|L17|_|_
 MOV|backend_request|"POST /v1/generate HTTP/1.1\\r\\n"|_
-ADD|t121|backend_request|"Host: 127.0.0.1:18084\\r\\n"
-MOV|backend_request|t121|_
-ADD|t122|backend_request|"Content-Type: application/json\\r\\n"
-MOV|backend_request|t122|_
-ADD|t123|backend_request|"Content-Length: "
+ADD|t125|backend_request|"Host: 127.0.0.1:18084\\r\\n"
+MOV|backend_request|t125|_
+ADD|t126|backend_request|"Content-Type: application/json\\r\\n"
+MOV|backend_request|t126|_
+ADD|t127|backend_request|"Content-Length: "
 ARG|request_body|_|_
-CALL|t124|len|1
-ARG|t124|_|_
-CALL|t125|int_to_string|1
-ADD|t126|t123|t125
-ADD|t127|t126|"\\r\\n"
-MOV|backend_request|t127|_
-ADD|t128|backend_request|"Connection: close\\r\\n\\r\\n"
-ADD|t129|t128|request_body
-MOV|backend_request|t129|_
+CALL|t128|len|1
+ARG|t128|_|_
+CALL|t129|int_to_string|1
+ADD|t130|t127|t129
+ADD|t131|t130|"\\r\\n"
+MOV|backend_request|t131|_
+ADD|t132|backend_request|"Connection: close\\r\\n\\r\\n"
+ADD|t133|t132|request_body
+MOV|backend_request|t133|_
 ARG|backend_sock|_|_
 ARG|backend_request|_|_
-CALL|t130|__sys_write_string|2
-MOV|_|t130|_
-ARG|backend_sock|_|_
-ARG|4096|_|_
-CALL|t131|__sys_read_string|2
-MOV|chunk|t131|_
-LABEL|L18|_|_
-ARG|chunk|_|_
-CALL|t132|len|1
-CMP_GT|t133|t132|0
-JUMP_IF_FALSE|L19|t133|_
-ARG|client_fd|_|_
-ARG|chunk|_|_
 CALL|t134|__sys_write_string|2
 MOV|_|t134|_
 ARG|backend_sock|_|_
 ARG|4096|_|_
 CALL|t135|__sys_read_string|2
 MOV|chunk|t135|_
+LABEL|L18|_|_
+ARG|chunk|_|_
+CALL|t136|len|1
+CMP_GT|t137|t136|0
+JUMP_IF_FALSE|L19|t137|_
+ARG|client_fd|_|_
+ARG|chunk|_|_
+CALL|t138|__sys_write_string|2
+MOV|_|t138|_
+ARG|backend_sock|_|_
+ARG|4096|_|_
+CALL|t139|__sys_read_string|2
+MOV|chunk|t139|_
 JUMP|L18|_|_
 LABEL|L19|_|_
 ARG|backend_sock|_|_
-CALL|t136|__sys_close|1
-MOV|_|t136|_
+CALL|t140|__sys_close|1
+MOV|_|t140|_
 FUNC_END|proxy_stream_to_backend|_|_
 FUNC_BEGIN|parse_json_response|_|_
 PARAM|http_response|_|_
 MOV|idx|0|_
 LABEL|L20|_|_
 ARG|http_response|_|_
-CALL|t137|len|1
-CMP_LT|t138|idx|t137
-JUMP_IF_FALSE|L21|t138|_
-ADD|t139|idx|3
+CALL|t141|len|1
+CMP_LT|t142|idx|t141
+JUMP_IF_FALSE|L21|t142|_
+ADD|t143|idx|3
 ARG|http_response|_|_
-CALL|t140|len|1
-CMP_LT|t141|t139|t140
-JUMP_IF_FALSE|L22|t141|_
+CALL|t144|len|1
+CMP_LT|t145|t143|t144
+JUMP_IF_FALSE|L22|t145|_
 ARG|http_response|_|_
 ARG|idx|_|_
-ADD|t142|idx|4
-ARG|t142|_|_
-CALL|t143|__host_slice|3
-CMP_EQ|t144|t143|"\\r\\n\\r\\n"
-JUMP_IF_FALSE|L24|t144|_
-ARG|http_response|_|_
-ADD|t145|idx|4
-ARG|t145|_|_
-ARG|http_response|_|_
-CALL|t146|len|1
+ADD|t146|idx|4
 ARG|t146|_|_
 CALL|t147|__host_slice|3
-RET|t147|_|_
+CMP_EQ|t148|t147|"\\r\\n\\r\\n"
+JUMP_IF_FALSE|L24|t148|_
+ARG|http_response|_|_
+ADD|t149|idx|4
+ARG|t149|_|_
+ARG|http_response|_|_
+CALL|t150|len|1
+ARG|t150|_|_
+CALL|t151|__host_slice|3
+RET|t151|_|_
 JUMP|L25|_|_
 LABEL|L24|_|_
 LABEL|L25|_|_
 JUMP|L23|_|_
 LABEL|L22|_|_
 LABEL|L23|_|_
-ADD|t148|idx|1
-MOV|idx|t148|_
+ADD|t152|idx|1
+MOV|idx|t152|_
 JUMP|L20|_|_
 LABEL|L21|_|_
 RET|http_response|_|_
@@ -400,19 +408,19 @@ FUNC_END|parse_json_response|_|_
 FUNC_BEGIN|main|_|_
 ARG|1|_|_
 ARG|"🚀 NeurX Web UI Server starting on port 8081...\\n"|_|_
-CALL|t149|__sys_write_string|2
-MOV|_|t149|_
+CALL|t153|__sys_write_string|2
+MOV|_|t153|_
 ARG|2|_|_
 ARG|1|_|_
 ARG|6|_|_
-CALL|t150|__sys_socket|3
-MOV|listener|t150|_
-CMP_LT|t151|listener|0
-JUMP_IF_FALSE|L26|t151|_
+CALL|t154|__sys_socket|3
+MOV|listener|t154|_
+CMP_LT|t155|listener|0
+JUMP_IF_FALSE|L26|t155|_
 ARG|1|_|_
 ARG|"❌ Socket creation failed\\n"|_|_
-CALL|t152|__sys_write_string|2
-MOV|_|t152|_
+CALL|t156|__sys_write_string|2
+MOV|_|t156|_
 RET|_|_|_
 JUMP|L27|_|_
 LABEL|L26|_|_
@@ -421,150 +429,150 @@ ARG|listener|_|_
 ARG|1|_|_
 ARG|2|_|_
 ARG|1|_|_
-CALL|t153|__sys_setsockopt|4
-MOV|_|t153|_
+CALL|t157|__sys_setsockopt|4
+MOV|_|t157|_
 ARG|listener|_|_
 ARG|"127.0.0.1"|_|_
 ARG|8081|_|_
 ARG|2|_|_
-CALL|t154|__sys_bind|4
-CMP_LT|t155|t154|0
-JUMP_IF_FALSE|L28|t155|_
+CALL|t158|__sys_bind|4
+CMP_LT|t159|t158|0
+JUMP_IF_FALSE|L28|t159|_
 ARG|1|_|_
 ARG|"❌ Bind failed\\n"|_|_
-CALL|t156|__sys_write_string|2
-MOV|_|t156|_
+CALL|t160|__sys_write_string|2
+MOV|_|t160|_
 RET|_|_|_
 JUMP|L29|_|_
 LABEL|L28|_|_
 LABEL|L29|_|_
 ARG|listener|_|_
 ARG|128|_|_
-CALL|t157|__sys_listen|2
-CMP_LT|t158|t157|0
-JUMP_IF_FALSE|L30|t158|_
+CALL|t161|__sys_listen|2
+CMP_LT|t162|t161|0
+JUMP_IF_FALSE|L30|t162|_
 ARG|1|_|_
 ARG|"❌ Listen failed\\n"|_|_
-CALL|t159|__sys_write_string|2
-MOV|_|t159|_
+CALL|t163|__sys_write_string|2
+MOV|_|t163|_
 RET|_|_|_
 JUMP|L31|_|_
 LABEL|L30|_|_
 LABEL|L31|_|_
 ARG|1|_|_
 ARG|"✅ Web UI running at http://127.0.0.1:8081\\n"|_|_
-CALL|t160|__sys_write_string|2
-MOV|_|t160|_
+CALL|t164|__sys_write_string|2
+MOV|_|t164|_
 ARG|1|_|_
 ARG|"📌 Make sure backend is running: make chat-cpu\\n"|_|_
-CALL|t161|__sys_write_string|2
-MOV|_|t161|_
+CALL|t165|__sys_write_string|2
+MOV|_|t165|_
 LABEL|L32|_|_
 JUMP_IF_FALSE|L33|1|_
 ARG|listener|_|_
-CALL|t162|__sys_accept|1
-MOV|client|t162|_
-CMP_LT|t163|client|0
-JUMP_IF_FALSE|L34|t163|_
+CALL|t166|__sys_accept|1
+MOV|client|t166|_
+CMP_LT|t167|client|0
+JUMP_IF_FALSE|L34|t167|_
 JUMP|L32|_|_
 JUMP|L35|_|_
 LABEL|L34|_|_
 LABEL|L35|_|_
 ARG|client|_|_
 ARG|4096|_|_
-CALL|t164|__sys_read_string|2
-MOV|request|t164|_
+CALL|t168|__sys_read_string|2
+MOV|request|t168|_
 MOV|response|""|_
 ARG|request|_|_
 ARG|0|_|_
 ARG|16|_|_
-CALL|t165|__host_slice|3
-CMP_EQ|t166|t165|"GET /api/health "
-JUMP_IF_FALSE|L36|t166|_
+CALL|t169|__host_slice|3
+CMP_EQ|t170|t169|"GET /api/health "
+JUMP_IF_FALSE|L36|t170|_
 ARG|"GET"|_|_
 ARG|"/health"|_|_
 ARG|""|_|_
-CALL|t167|proxy_to_backend|3
-MOV|backend_response|t167|_
+CALL|t171|proxy_to_backend|3
+MOV|backend_response|t171|_
 ARG|backend_response|_|_
-CALL|t168|parse_json_response|1
-MOV|json_body|t168|_
+CALL|t172|parse_json_response|1
+MOV|json_body|t172|_
 ARG|json_body|_|_
-CALL|t169|len|1
-ARG|t169|_|_
-CALL|t170|int_to_string|1
-ADD|t171|"HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: "|t170
-ADD|t172|t171|"\\r\\n\\r\\n"
-ADD|t173|t172|json_body
-MOV|response|t173|_
+CALL|t173|len|1
+ARG|t173|_|_
+CALL|t174|int_to_string|1
+ADD|t175|"HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\nContent-Length: "|t174
+ADD|t176|t175|"\\r\\n\\r\\n"
+ADD|t177|t176|json_body
+MOV|response|t177|_
 JUMP|L37|_|_
 LABEL|L36|_|_
 ARG|request|_|_
 ARG|0|_|_
 ARG|4|_|_
-CALL|t174|__host_slice|3
-CMP_EQ|t175|t174|"GET "
-JUMP_IF_FALSE|L38|t175|_
-CALL|t176|get_html|0
-MOV|html|t176|_
+CALL|t178|__host_slice|3
+CMP_EQ|t179|t178|"GET "
+JUMP_IF_FALSE|L38|t179|_
+CALL|t180|get_html|0
+MOV|html|t180|_
 ARG|html|_|_
-CALL|t177|len|1
-ARG|t177|_|_
-CALL|t178|int_to_string|1
-ADD|t179|"HTTP/1.1 200 OK\\r\\nContent-Type: text/html; charset=UTF-8\\r\\nContent-Length: "|t178
-ADD|t180|t179|"\\r\\n\\r\\n"
-ADD|t181|t180|html
-MOV|response|t181|_
+CALL|t181|len|1
+ARG|t181|_|_
+CALL|t182|int_to_string|1
+ADD|t183|"HTTP/1.1 200 OK\\r\\nContent-Type: text/html; charset=UTF-8\\r\\nContent-Length: "|t182
+ADD|t184|t183|"\\r\\n\\r\\n"
+ADD|t185|t184|html
+MOV|response|t185|_
 JUMP|L39|_|_
 LABEL|L38|_|_
 ARG|request|_|_
 ARG|0|_|_
 ARG|16|_|_
-CALL|t182|__host_slice|3
-CMP_EQ|t183|t182|"POST /api/infer "
-JUMP_IF_FALSE|L40|t183|_
+CALL|t186|__host_slice|3
+CMP_EQ|t187|t186|"POST /api/infer "
+JUMP_IF_FALSE|L40|t187|_
 MOV|body_start|0|_
 MOV|idx|0|_
 LABEL|L42|_|_
 ARG|request|_|_
-CALL|t184|len|1
-SUB|t185|t184|3
-CMP_LT|t186|idx|t185
-JUMP_IF_FALSE|L43|t186|_
+CALL|t188|len|1
+SUB|t189|t188|3
+CMP_LT|t190|idx|t189
+JUMP_IF_FALSE|L43|t190|_
 ARG|request|_|_
 ARG|idx|_|_
-ADD|t187|idx|4
-ARG|t187|_|_
-CALL|t188|__host_slice|3
-CMP_EQ|t189|t188|"\\r\\n\\r\\n"
-JUMP_IF_FALSE|L44|t189|_
-ADD|t190|idx|4
-MOV|body_start|t190|_
+ADD|t191|idx|4
+ARG|t191|_|_
+CALL|t192|__host_slice|3
+CMP_EQ|t193|t192|"\\r\\n\\r\\n"
+JUMP_IF_FALSE|L44|t193|_
+ADD|t194|idx|4
+MOV|body_start|t194|_
 JUMP|L43|_|_
 JUMP|L45|_|_
 LABEL|L44|_|_
 LABEL|L45|_|_
-ADD|t191|idx|1
-MOV|idx|t191|_
+ADD|t195|idx|1
+MOV|idx|t195|_
 JUMP|L42|_|_
 LABEL|L43|_|_
 ARG|request|_|_
 ARG|body_start|_|_
 ARG|request|_|_
-CALL|t192|len|1
-ARG|t192|_|_
-CALL|t193|__host_slice|3
-MOV|body|t193|_
+CALL|t196|len|1
+ARG|t196|_|_
+CALL|t197|__host_slice|3
+MOV|body|t197|_
 ARG|body|_|_
-CALL|t194|len|1
-CMP_GT|t195|t194|0
-JUMP_IF_FALSE|L46|t195|_
+CALL|t198|len|1
+CMP_GT|t199|t198|0
+JUMP_IF_FALSE|L46|t199|_
 ARG|client|_|_
 ARG|body|_|_
-CALL|t196|proxy_stream_to_backend|2
+CALL|t200|proxy_stream_to_backend|2
 ARG|client|_|_
-CALL|t197|__sys_close|1
-MOV|_|t197|_
+CALL|t201|__sys_close|1
+MOV|_|t201|_
 JUMP|L32|_|_
 JUMP|L47|_|_
 LABEL|L46|_|_
@@ -578,11 +586,11 @@ LABEL|L39|_|_
 LABEL|L37|_|_
 ARG|client|_|_
 ARG|response|_|_
-CALL|t198|__sys_write_string|2
-MOV|_|t198|_
+CALL|t202|__sys_write_string|2
+MOV|_|t202|_
 ARG|client|_|_
-CALL|t199|__sys_close|1
-MOV|_|t199|_
+CALL|t203|__sys_close|1
+MOV|_|t203|_
 JUMP|L32|_|_
 LABEL|L33|_|_
 FUNC_END|main|_|_
