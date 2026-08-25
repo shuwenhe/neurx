@@ -37,7 +37,7 @@ struct allocation_result {
     int pool_id
 }
 
-func create_memory_pool(size_mb: int) result[memory_pool, string] {
+func create_memory_pool(int size_mb) (memory_pool, string) {
     let total_bytes = size_mb * 1024 * 1024
     let base_addr = 1000000
     
@@ -71,7 +71,7 @@ func create_tensor_allocator(memory_pool* pool) tensor_allocator {
     }
 }
 
-func allocate_tensor(tensor_allocator* allocator, memory_pool* pool, size_mb: int) result[allocation_result, string] {
+func allocate_tensor(tensor_allocator* allocator, memory_pool* pool, int size_mb) (allocation_result, string) {
     let size_bytes = size_mb * 1024 * 1024
     let aligned_size = align_size(size_bytes, allocator->alignment_bytes)
     
@@ -108,7 +108,7 @@ func allocate_tensor(tensor_allocator* allocator, memory_pool* pool, size_mb: in
     })
 }
 
-func deallocate_tensor(tensor_allocator* allocator, memory_pool* pool, ptr: int) result[int, string] {
+func deallocate_tensor(tensor_allocator* allocator, memory_pool* pool, int ptr) (int, string) {
     let found_idx = -1
     let found_size = 0
     
@@ -144,7 +144,7 @@ func get_pool_stats(memory_pool* pool) memory_pool {
     pool*
 }
 
-func find_free_block(memory_pool* pool, size_needed: int) result[allocation_result, string] {
+func find_free_block(memory_pool* pool, int size_needed) (allocation_result, string) {
     let current_block = pool->free_list_head
     
     while current_block != 0 as free_block* {
@@ -170,7 +170,7 @@ func find_free_block(memory_pool* pool, size_needed: int) result[allocation_resu
     })
 }
 
-func add_free_block(memory_pool* pool, block_ptr: int, size_bytes: int) result[int, string] {
+func add_free_block(memory_pool* pool, int block_ptr, int size_bytes) (int, string) {
     let new_block = free_block {
         block_ptr: block_ptr,
         size_bytes: size_bytes,
@@ -182,7 +182,7 @@ func add_free_block(memory_pool* pool, block_ptr: int, size_bytes: int) result[i
     result::ok(0)
 }
 
-func coalesce_free_blocks(memory_pool* pool) result[int, string] {
+func coalesce_free_blocks(memory_pool* pool) (int, string) {
     let current = pool->free_list_head
     let coalesced = 0
     
@@ -207,7 +207,7 @@ func coalesce_free_blocks(memory_pool* pool) result[int, string] {
     result::ok(coalesced)
 }
 
-func garbage_collection(memory_pool* pool) result[int, string] {
+func garbage_collection(memory_pool* pool) (int, string) {
     let freed = 0
     
     let candidates = vec[allocated_block]()
@@ -234,7 +234,7 @@ func garbage_collection(memory_pool* pool) result[int, string] {
     result::ok(freed)
 }
 
-func deallocate_tensor_internal(memory_pool* pool, ptr: int) result[int, string] {
+func deallocate_tensor_internal(memory_pool* pool, int ptr) (int, string) {
     let found_idx = -1
     let found_size = 0
     
@@ -254,7 +254,7 @@ func deallocate_tensor_internal(memory_pool* pool, ptr: int) result[int, string]
     result::ok(found_size)
 }
 
-func align_size(size: int, alignment: int) int {
+func align_size(int size, int alignment) int {
     if size % alignment == 0 {
         size
     } else {
@@ -272,7 +272,7 @@ func get_current_time_us() int {
     0
 }
 
-func cleanup_memory_pool(memory_pool* pool) result[int, string] {
+func cleanup_memory_pool(memory_pool* pool) (int, string) {
     pool->allocated_size_mb = 0
     pool->free_size_mb = pool->total_size_mb
     result::ok(0)

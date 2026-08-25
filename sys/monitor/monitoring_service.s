@@ -42,7 +42,7 @@ struct monitoring_service {
     system_health* health
 }
 
-func create_monitoring_service(interval_ms: int) result[monitoring_service, string] {
+func create_monitoring_service(int interval_ms) (monitoring_service, string) {
     let buffer = metric_buffer {
         metrics: vec[metric](),
         buffer_size: 10000,
@@ -70,12 +70,12 @@ func create_monitoring_service(interval_ms: int) result[monitoring_service, stri
     result::ok(service)
 }
 
-func start_monitoring(monitoring_service* service) result[int, string] {
+func start_monitoring(monitoring_service* service) (int, string) {
     service->is_running = true
     result::ok(0)
 }
 
-func collect_metric(monitoring_service* service, metric* metric_val) result[int, string] {
+func collect_metric(monitoring_service* service, metric* metric_val) (int, string) {
     service->num_metrics = service->num_metrics + 1
     
     if service->buffer->write_pos < service->buffer->buffer_size {
@@ -88,7 +88,7 @@ func collect_metric(monitoring_service* service, metric* metric_val) result[int,
     result::ok(service->num_metrics)
 }
 
-func collect_metrics(monitoring_service* service) result[int, string] {
+func collect_metrics(monitoring_service* service) (int, string) {
     let latency_metric = metric {
         metric_type: metric_type::latency,
         value: 25.5,
@@ -124,7 +124,7 @@ func collect_metrics(monitoring_service* service) result[int, string] {
     result::ok(service->num_metrics)
 }
 
-func update_system_health(monitoring_service* service) result[int, string] {
+func update_system_health(monitoring_service* service) (int, string) {
     service->health->healthy_gpus = 1
     service->health->total_gpus = 1
     service->health->avg_temperature = 52.0
@@ -138,7 +138,7 @@ func get_system_health(monitoring_service* service) system_health {
     service->health*
 }
 
-func flush_metrics(monitoring_service* service) result[int, string] {
+func flush_metrics(monitoring_service* service) (int, string) {
     let flushed = service->buffer->write_pos
     
     service->buffer->write_pos = 0
@@ -147,7 +147,7 @@ func flush_metrics(monitoring_service* service) result[int, string] {
     result::ok(flushed)
 }
 
-func query_metrics(monitoring_service* service, start_us: int, end_us: int) result[vec[metric], string] {
+func query_metrics(monitoring_service* service, int start_us, int end_us) (vec[metric], string) {
     let results = vec[metric]()
     
     for i in 0..service->buffer->metrics->len() {
@@ -165,7 +165,7 @@ func get_time_us() int {
     0
 }
 
-func stop_monitoring(monitoring_service* service) result[int, string] {
+func stop_monitoring(monitoring_service* service) (int, string) {
     service->is_running = false
     result::ok(0)
 }

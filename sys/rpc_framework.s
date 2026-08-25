@@ -38,7 +38,7 @@ struct rpc_client {
     bool is_connected
 }
 
-func create_rpc_server(port: int) result[rpc_server, string] {
+func create_rpc_server(int port) (rpc_server, string) {
     let request_queue = rpc_request_queue {
         queue: vec[rpc_message](),
         queue_size: 1000,
@@ -56,19 +56,19 @@ func create_rpc_server(port: int) result[rpc_server, string] {
     result::ok(server)
 }
 
-func start_rpc_server(rpc_server* server) result[int, string] {
+func start_rpc_server(rpc_server* server) (int, string) {
     server->is_running = true
     server->active_connections = 1
     result::ok(server->port)
 }
 
-func stop_rpc_server(rpc_server* server) result[int, string] {
+func stop_rpc_server(rpc_server* server) (int, string) {
     server->is_running = false
     server->active_connections = 0
     result::ok(0)
 }
 
-func create_rpc_client(string* address, port: int) result[rpc_client, string] {
+func create_rpc_client(string* address, int port) (rpc_client, string) {
     let client = rpc_client {
         client_id: 0,
         server_address: address,
@@ -80,7 +80,7 @@ func create_rpc_client(string* address, port: int) result[rpc_client, string] {
     result::ok(client)
 }
 
-func send_rpc_call(rpc_client* client, string* method, int* payload, payload_size: int) result[rpc_message, string] {
+func send_rpc_call(rpc_client* client, string* method, int* payload, int payload_size) (rpc_message, string) {
     if !client->is_connected {
         return result::err("Client not connected")
     }
@@ -96,7 +96,7 @@ func send_rpc_call(rpc_client* client, string* method, int* payload, payload_siz
     result::ok(message)
 }
 
-func receive_rpc_response(rpc_client* client) result[rpc_message, string] {
+func receive_rpc_response(rpc_client* client) (rpc_message, string) {
     let response = rpc_message {
         message_id: 0,
         call_type: rpc_call_type::response,
@@ -108,7 +108,7 @@ func receive_rpc_response(rpc_client* client) result[rpc_message, string] {
     result::ok(response)
 }
 
-func process_rpc_requests(rpc_server* server) result[int, string] {
+func process_rpc_requests(rpc_server* server) (int, string) {
     let processed = 0
     
     while server->request_queue->write_pos > 0 && processed < 100 {
@@ -126,7 +126,7 @@ func process_rpc_requests(rpc_server* server) result[int, string] {
     result::ok(processed)
 }
 
-func handle_rpc_request(rpc_server* server, rpc_message* message) result[int, string] {
+func handle_rpc_request(rpc_server* server, rpc_message* message) (int, string) {
     if message->method_name == "infer" {
         return result::ok(1)
     }
@@ -142,7 +142,7 @@ func handle_rpc_request(rpc_server* server, rpc_message* message) result[int, st
     result::ok(0)
 }
 
-func enqueue_rpc_request(rpc_server* server, rpc_message* message) result[int, string] {
+func enqueue_rpc_request(rpc_server* server, rpc_message* message) (int, string) {
     if server->request_queue->write_pos >= server->request_queue->queue_size {
         return result::err("Request queue full")
     }

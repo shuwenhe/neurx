@@ -24,7 +24,7 @@ struct sensor_driver {
     bool is_streaming
 }
 
-func init_sensor(sensor_type: sensor_type, sampling_rate_hz: int) result[sensor_driver, string] {
+func init_sensor(sensor_type sensor_type, int sampling_rate_hz) (sensor_driver, string) {
     result::ok(sensor_driver {
         sensor_type: sensor_type,
         driver_id: 0,
@@ -33,7 +33,7 @@ func init_sensor(sensor_type: sensor_type, sampling_rate_hz: int) result[sensor_
     })
 }
 
-func read_sensor(sensor_driver* driver) result[sensor_data, string] {
+func read_sensor(sensor_driver* driver) (sensor_data, string) {
     result::ok(sensor_data {
         sensor_type: driver->sensor_type,
         timestamp_us: 0,
@@ -42,12 +42,12 @@ func read_sensor(sensor_driver* driver) result[sensor_data, string] {
     })
 }
 
-func start_streaming(sensor_driver* driver) result[int, string] {
+func start_streaming(sensor_driver* driver) (int, string) {
     driver->is_streaming = true
     result::ok(0)
 }
 
-func stop_streaming(sensor_driver* driver) result[int, string] {
+func stop_streaming(sensor_driver* driver) (int, string) {
     driver->is_streaming = false
     result::ok(0)
 }

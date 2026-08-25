@@ -28,7 +28,7 @@ struct rpc_client {
     int connection_timeout_ms
 }
 
-func create_rpc_server(port: int) rpc_server {
+func create_rpc_server(int port) rpc_server {
     rpc_server {
         server_id: 0,
         port: port,
@@ -37,12 +37,12 @@ func create_rpc_server(port: int) rpc_server {
     }
 }
 
-func start_rpc_server(rpc_server* server) result[int, string] {
+func start_rpc_server(rpc_server* server) (int, string) {
     server->is_running = true
     result::ok(0)
 }
 
-func create_rpc_client(string* address, port: int) rpc_client {
+func create_rpc_client(string* address, int port) rpc_client {
     rpc_client {
         client_id: 0,
         server_address: address,
@@ -51,7 +51,7 @@ func create_rpc_client(string* address, port: int) rpc_client {
     }
 }
 
-func send_rpc_call(rpc_client* client, string* method, int* payload, payload_size: int) result[rpc_message, string] {
+func send_rpc_call(rpc_client* client, string* method, int* payload, int payload_size) (rpc_message, string) {
     result::ok(rpc_message {
         message_id: 0,
         call_type: rpc_call_type::request,

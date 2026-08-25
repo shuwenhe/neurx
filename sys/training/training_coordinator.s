@@ -40,15 +40,15 @@ func create_training_coordinator(training_config* config) training_coordinator {
     }
 }
 
-func start_training(training_coordinator* coordinator) result[int, string] {
+func start_training(training_coordinator* coordinator) (int, string) {
     result::ok(0)
 }
 
-func save_checkpoint(training_coordinator* coordinator, string* checkpoint_path) result[int, string] {
+func save_checkpoint(training_coordinator* coordinator, string* checkpoint_path) (int, string) {
     result::ok(0)
 }
 
-func resume_from_checkpoint(training_coordinator* coordinator, string* checkpoint_path) result[int, string] {
+func resume_from_checkpoint(training_coordinator* coordinator, string* checkpoint_path) (int, string) {
     result::ok(0)
 }
 

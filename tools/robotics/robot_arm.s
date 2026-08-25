@@ -36,7 +36,7 @@ struct arm_feedback {
     int timestamp_us
 }
 
-func create_robot_arm(string* name, num_joints: int, frequency_hz: int) robot_arm {
+func create_robot_arm(string* name, int num_joints, int frequency_hz) robot_arm {
     robot_arm {
         robot_name: name,
         joints: 0 as joint_config*,
@@ -45,15 +45,15 @@ func create_robot_arm(string* name, num_joints: int, frequency_hz: int) robot_ar
     }
 }
 
-func add_joint(robot_arm* arm, joint_config* joint) result[int, string] {
+func add_joint(robot_arm* arm, joint_config* joint) (int, string) {
     result::ok(0)
 }
 
-func send_arm_command(robot_arm* arm, arm_command* cmd) result[int, string] {
+func send_arm_command(robot_arm* arm, arm_command* cmd) (int, string) {
     result::ok(0)
 }
 
-func get_arm_feedback(robot_arm* arm) result[arm_feedback, string] {
+func get_arm_feedback(robot_arm* arm) (arm_feedback, string) {
     result::ok(arm_feedback {
         current_positions: 0 as float*,
         position_count: 0,
@@ -63,6 +63,6 @@ func get_arm_feedback(robot_arm* arm) result[arm_feedback, string] {
     })
 }
 
-func inverse_kinematics(robot_arm* arm, float* target_position, float* target_orientation) result[float*, string] {
+func inverse_kinematics(robot_arm* arm, float* target_position, float* target_orientation) (float*, string) {
     result::ok(0 as float*)
 }

@@ -39,6 +39,6 @@ func evaluate_workload(workload* workload, resource_request* resource) schedule_
     }
 }
 
-func allocate_resources(string* workload_id, gpu_count: int, memory_gb: int) result[int, string] {
+func allocate_resources(string* workload_id, int gpu_count, int memory_gb) (int, string) {
     result::ok(0)
 }

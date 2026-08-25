@@ -26,7 +26,7 @@ struct core_system {
     rpc_server* rpc_srv
 }
 
-func kernel_main() result[core_system, string] {
+func kernel_main() (core_system, string) {
     let hal_cap = hal::detect_platform_capability()?
     
     let mem_pool = allocator::create_memory_pool(16384)?
@@ -59,7 +59,7 @@ func kernel_main() result[core_system, string] {
     result::ok(core)
 }
 
-func run_main_event_loop(core_system* core) result[int, string] {
+func run_main_event_loop(core_system* core) (int, string) {
     while core->state->is_running {
         let scheduled_task = sched::schedule_next_task(core->task_scheduler)?
         
@@ -77,7 +77,7 @@ func run_main_event_loop(core_system* core) result[int, string] {
     result::ok(0)
 }
 
-func init_platform_backends(core_system* core) result[int, string] {
+func init_platform_backends(core_system* core) (int, string) {
     let hal_cap = hal::detect_platform_capability()?
     
     if hal_cap.gpu_count > 0 {
@@ -91,7 +91,7 @@ func init_platform_backends(core_system* core) result[int, string] {
     result::ok(0)
 }
 
-func add_system_task(core_system* core, int task_type_id, int priority) result[int, string] {
+func add_system_task(core_system* core, int task_type_id, int priority) (int, string) {
     let task_id = sched::schedule_task(core->task_scheduler, task_type_id, priority)?
     
     core->state->active_task_count = core->state->active_task_count + 1
@@ -99,7 +99,7 @@ func add_system_task(core_system* core, int task_type_id, int priority) result[i
     result::ok(task_id)
 }
 
-func shutdown_system(core_system* core) result[int, string] {
+func shutdown_system(core_system* core) (int, string) {
     core->state->is_running = false
     
     monitor::flush_metrics(core->monitor_service)?

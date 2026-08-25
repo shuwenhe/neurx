@@ -20,7 +20,7 @@ struct rwlock {
     bool writer_active
 }
 
-func create_lock(lock_type: lock_type) lock {
+func create_lock(lock_type lock_type) lock {
     lock {
         lock_type: lock_type,
         owner_id: -1,
@@ -29,7 +29,7 @@ func create_lock(lock_type: lock_type) lock {
     }
 }
 
-func acquire_lock(lock* lock) result[int, string] {
+func acquire_lock(lock* lock) (int, string) {
     if lock->is_locked {
         lock->wait_queue_size = lock->wait_queue_size + 1
         result::err("Lock not acquired")
@@ -40,7 +40,7 @@ func acquire_lock(lock* lock) result[int, string] {
     }
 }
 
-func release_lock(lock* lock) result[int, string] {
+func release_lock(lock* lock) (int, string) {
     lock->is_locked = false
     lock->owner_id = -1
     if lock->wait_queue_size > 0 {

@@ -28,7 +28,7 @@ struct control_output {
     bool valid
 }
 
-func create_vehicle_controller(latency_ms: int) vehicle_controller {
+func create_vehicle_controller(int latency_ms) vehicle_controller {
     vehicle_controller {
         control_mode: vehicle_control_mode::manual,
         latency_constraint_ms: latency_ms,
@@ -36,7 +36,7 @@ func create_vehicle_controller(latency_ms: int) vehicle_controller {
     }
 }
 
-func process_sensor_fusion(vehicle_state* vehicle_state) result[control_output, string] {
+func process_sensor_fusion(vehicle_state* vehicle_state) (control_output, string) {
     result::ok(control_output {
         steering_command: 0.0,
         brake_command: 0.0,
@@ -49,7 +49,7 @@ func verify_safety(control_output* output) bool {
     output->valid
 }
 
-func execute_control(control_output* output) result[int, string] {
+func execute_control(control_output* output) (int, string) {
     if !output->valid {
         result::err("Control output invalid")
     } else {

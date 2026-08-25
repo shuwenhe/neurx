@@ -45,5 +45,5 @@ func is_secure_boot_enabled() bool {
     false
 }
 
-func init_early_subsystems(ctx: boot_context) {
+func init_early_subsystems(boot_context ctx) {
 }
