@@ -241,10 +241,10 @@ func compute_gradients(
     forward_result fwd_res
 ) backward_result_info {
     float start_time = current_time_ms()
-    if !model->graph.is_recording {
-        model->graph = start_recording(model->graph)
+    if !model.graph.is_recording {
+        model.graph = start_recording(model.graph)
     }
-    []tensor grads = backward(model->graph, fwd_res.loss)
+    []tensor grads = backward(model.graph, fwd_res.loss)
     float grad_norm = compute_global_gradient_norm(grads)
     float end_time = current_time_ms()
     backward_result_info {

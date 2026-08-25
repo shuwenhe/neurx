@@ -39,7 +39,7 @@ func new_multi_teacher_distillation(
     multi_teacher_config config,
     *model student,
     []*model teacher_models
-) -> multi_teacher_distillation {
+) . multi_teacher_distillation {
     optimizer := adamw_optimizer(student.parameters(), config.learning_rate)
     teachers := []
     for i, model in teacher_models {
@@ -81,7 +81,7 @@ func new_multi_teacher_distillation(
 func (multi_teacher_distillation* distill) compute_distillation_loss(
     tensor input,
     tensor targets
-) -> tensor {
+) . tensor {
     student_logits := distill.student.forward(input)
     teacher_logits := []
     for teacher in distill.teachers {
@@ -119,7 +119,7 @@ func (multi_teacher_distillation* distill) compute_distillation_loss(
 func (multi_teacher_distillation* distill) average_distillation(
     tensor student_logits,
     []tensor teacher_logits
-) -> tensor {
+) . tensor {
     avg_teacher_logits := tensor_zeros_like(teacher_logits[0])
     for logits in teacher_logits {
         avg_teacher_logits = avg_teacher_logits + logits
@@ -135,7 +135,7 @@ func (multi_teacher_distillation* distill) average_distillation(
 func (multi_teacher_distillation* distill) weighted_distillation(
     tensor student_logits,
     []tensor teacher_logits
-) -> tensor {
+) . tensor {
     total_loss := tensor_zeros([1])
     for i, logits in teacher_logits {
         weight := distill.teachers[i].weight
@@ -153,7 +153,7 @@ func (multi_teacher_distillation* distill) weighted_distillation(
 func (multi_teacher_distillation* distill) ensemble_distillation(
     tensor student_logits,
     []tensor teacher_logits
-) -> tensor {
+) . tensor {
     teacher_probs := []
     for logits in teacher_logits {
         probs := softmax(logits / distill.config.temperature, dim: -1)
@@ -172,7 +172,7 @@ func (multi_teacher_distillation* distill) ensemble_distillation(
 func (multi_teacher_distillation* distill) dynamic_distillation(
     tensor student_logits,
     []tensor teacher_logits
-) -> tensor {
+) . tensor {
     total_loss := tensor_zeros([1])
     if distill.config.use_dynamic_weights {
         distill.update_teacher_weights()
@@ -209,7 +209,7 @@ func (multi_teacher_distillation* distill) update_teacher_weights() {
 
 func (multi_teacher_distillation* distill) compute_layer_distillation_loss(
     tensor input
-) -> tensor {
+) . tensor {
     student_activations := distill.student.forward_with_activations(input)
     num_layers := student_activations.len()
     avg_teacher_activations := []
@@ -230,7 +230,7 @@ func (multi_teacher_distillation* distill) compute_layer_distillation_loss(
     return total_layer_loss / f32(num_layers)
 }
 
-func (multi_teacher_distillation* distill) train_step(Batch batch) -> f32 {
+func (multi_teacher_distillation* distill) train_step(Batch batch) . f32 {
     input := batch.input
     targets := batch.targets
     loss := distill.compute_distillation_loss(input, targets)
@@ -241,7 +241,7 @@ func (multi_teacher_distillation* distill) train_step(Batch batch) -> f32 {
     return loss.item()
 }
 
-func (multi_teacher_distillation* distill) train(DataLoader train_data) -> []f32 {
+func (multi_teacher_distillation* distill) train(DataLoader train_data) . []f32 {
     losses := []
     step := 0
     for epoch in 0..distill.config.num_epochs {
@@ -274,7 +274,7 @@ func (multi_teacher_distillation* distill) print_teacher_contributions() {
     }
 }
 
-func kl_divergence_loss(tensor student_logits, tensor teacher_logits, f32 temperature) -> tensor {
+func kl_divergence_loss(tensor student_logits, tensor teacher_logits, f32 temperature) . tensor {
     student_log_probs := log_softmax(student_logits / temperature, dim: -1)
     teacher_probs := softmax(teacher_logits / temperature, dim: -1)
     kl := -(teacher_probs * student_log_probs).sum(dim: -1).mean()

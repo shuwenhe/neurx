@@ -43,7 +43,7 @@ func compile_one(string compiler, string script_dir, string build_dir, string sh
     string cmd = compiler + " ir " + shell_escape(input_path) + " -o " + shell_escape(output_path)
     (_, code) := command(cmd)
     if code == 0 {
-        println("✓ " + shard_file + " -> " + output_path)
+        println("✓ " + shard_file + " . " + output_path)
         return true
     }
     println("✗ Failed: " + shard_file)

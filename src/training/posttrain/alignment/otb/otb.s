@@ -36,7 +36,7 @@ func new_otb_trainer(
     otb_config config,
     *model policy,
     *model baseline
-) -> OTBTrainer {
+) . OTBTrainer {
     optimizer := adamw_optimizer(policy.parameters(), config.learning_rate)
     baseline_optimizer := nil
     if config.use_learned_baseline {
@@ -61,7 +61,7 @@ func new_otb_trainer(
 func (otb_trainer* trainer) compute_token_baseline(
     Tensor tokens,
     Tensor rewards
-) -> Tensor {
+) . Tensor {
     seq_len := tokens.shape[0]
     baselines := tensor_zeros([seq_len])
     match trainer.config.baseline_type {
@@ -118,7 +118,7 @@ func (otb_trainer* trainer) compute_token_baseline(
 func (otb_trainer* trainer) compute_advantages(
     Tensor tokens,
     Tensor rewards
-) -> Tensor {
+) . Tensor {
     baselines := trainer.compute_token_baseline(tokens, rewards)
     raw_advantages := rewards.clone()
     if trainer.config.compute_variance {
@@ -140,7 +140,7 @@ func (otb_trainer* trainer) train_step(
     []tensor prompts,
     []tensor responses,
     []tensor rewards
-) -> (f32, f32, f32) {
+) . (f32, f32, f32) {
     batch_size := prompts.len()
     inputs := []
     for i in 0..batch_size {
@@ -198,7 +198,7 @@ func (otb_trainer* trainer) train_step(
     )
 }
 
-func (otb_trainer* trainer) train(DataLoader train_data) -> []f32 {
+func (otb_trainer* trainer) train(DataLoader train_data) . []f32 {
     policy_losses := []
     for batch in train_data {
         policy_loss, baseline_loss, entropy  := trainer.train_step(
@@ -228,7 +228,7 @@ func (otb_trainer* trainer) train(DataLoader train_data) -> []f32 {
     return policy_losses
 }
 
-func (otb_trainer* trainer) get_variance_reduction() -> f32 {
+func (otb_trainer* trainer) get_variance_reduction() . f32 {
     if trainer.advantage_variance_before < 1e-8 {
         return 0.0
     }
@@ -236,13 +236,13 @@ func (otb_trainer* trainer) get_variance_reduction() -> f32 {
            trainer.advantage_variance_before
 }
 
-func compute_variance_tensor(Tensor x) -> f32 {
+func compute_variance_tensor(Tensor x) . f32 {
     mean := x.mean()
     variance := (x - mean).pow(2).mean()
     return variance.item()
 }
 
-func compute_mean([]f32 values) -> f32 {
+func compute_mean([]f32 values) . f32 {
     if values.len() == 0 {
         return 0.0
     }
@@ -253,7 +253,7 @@ func compute_mean([]f32 values) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_variance([]f32 values, f32 mean) -> f32 {
+func compute_variance([]f32 values, f32 mean) . f32 {
     if values.len() == 0 {
         return 0.0
     }

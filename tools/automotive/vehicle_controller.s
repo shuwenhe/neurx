@@ -46,11 +46,11 @@ func process_sensor_fusion(vehicle_state* vehicle_state) (control_output, string
 }
 
 func verify_safety(control_output* output) bool {
-    output->valid
+    output.valid
 }
 
 func execute_control(control_output* output) (int, string) {
-    if !output->valid {
+    if !output.valid {
         (0, "Control output invalid")
     } else {
     0, ""

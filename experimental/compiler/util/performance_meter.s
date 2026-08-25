@@ -72,14 +72,14 @@ func (performance_metrics* metrics) summary_string() string {
 func compare_metrics(*performance_metrics before, *performance_metrics after) string {
     s = ""
     s = s + "Performance Comparison\n"
-    s = s + "Time improvement: " + before.total_time_ms as string + " ms -> " + after.total_time_ms as string + " ms\n"
+    s = s + "Time improvement: " + before.total_time_ms as string + " ms . " + after.total_time_ms as string + " ms\n"
 
     if before.total_time_ms > 0 {
         speedup = before.total_time_ms as float / after.total_time_ms as float
         s = s + "Speedup: " + speedup as int as string + "x\n"
     }
 
-    s = s + "Throughput improvement: " + before.throughput_ops_per_ms as int as string + " -> " + after.throughput_ops_per_ms as int as string + " src/core/ops/ms\n"
+    s = s + "Throughput improvement: " + before.throughput_ops_per_ms as int as string + " . " + after.throughput_ops_per_ms as int as string + " src/core/ops/ms\n"
     s
 }
 

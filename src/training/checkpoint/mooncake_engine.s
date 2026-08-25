@@ -27,7 +27,7 @@ struct mooncake_engine {
     total_transfer_time: f64
 }
 
-func new_mooncake_engine(mooncake_config config) -> mooncake_engine {
+func new_mooncake_engine(mooncake_config config) . mooncake_engine {
     prev_rank := (config.rank - 1 + config.world_size) % config.world_size
     next_rank := (config.rank + 1) % config.world_size
     send_streams := []
@@ -172,7 +172,7 @@ func (mooncake_engine* engine) p2p_recv(tensor params, i32 source_rank) {
     cuda_stream_synchronize(stream)
 }
 
-func (mooncake_engine* engine) flatten_state(map state[string]tensor) -> tensor {
+func (mooncake_engine* engine) flatten_state(map state[string]tensor) . tensor {
     total_size := 0
     param_list := []
     for name, param in state {
@@ -192,7 +192,7 @@ func (mooncake_engine* engine) unflatten_state(tensor flat, map state[string]ten
     }
 }
 
-func (mooncake_engine* engine) compute_state_size(map state[string]tensor) -> i64 {
+func (mooncake_engine* engine) compute_state_size(map state[string]tensor) . i64 {
     total := 0
     for name, param in state {
         total += param.numel()
@@ -200,7 +200,7 @@ func (mooncake_engine* engine) compute_state_size(map state[string]tensor) -> i6
     return total
 }
 
-func (mooncake_engine* engine) is_same_node([]i32 ranks) -> bool {
+func (mooncake_engine* engine) is_same_node([]i32 ranks) . bool {
     for rank in ranks {
         if abs(rank - engine.config.rank) > 8 {
             return false
@@ -209,7 +209,7 @@ func (mooncake_engine* engine) is_same_node([]i32 ranks) -> bool {
     return true
 }
 
-func (mooncake_engine* engine) compress(tensor data) -> tensor {
+func (mooncake_engine* engine) compress(tensor data) . tensor {
     match engine.config.compression_method {
         "lz4" => return lz4_compress(data),
         "zstd" => return zstd_compress(data),
@@ -217,7 +217,7 @@ func (mooncake_engine* engine) compress(tensor data) -> tensor {
     }
 }
 
-func (mooncake_engine* engine) decompress(tensor data) -> tensor {
+func (mooncake_engine* engine) decompress(tensor data) . tensor {
     match engine.config.compression_method {
         "lz4" => return lz4_decompress(data),
         "zstd" => return zstd_decompress(data),
@@ -225,7 +225,7 @@ func (mooncake_engine* engine) decompress(tensor data) -> tensor {
     }
 }
 
-func (mooncake_engine* engine) get_statistics() -> (i64, f64, f64) {
+func (mooncake_engine* engine) get_statistics() . (i64, f64, f64) {
     avg_bandwidth := 0.0
     if engine.total_transfer_time > 0.0 {
         avg_bandwidth = f64(engine.bytes_transferred) / engine.total_transfer_time / 1e9
@@ -255,18 +255,18 @@ func (mooncake_engine* engine) destroy() {
     }
 }
 
-func lz4_compress(tensor data) -> tensor {
+func lz4_compress(tensor data) . tensor {
     return data
 }
 
-func lz4_decompress(tensor data) -> tensor {
+func lz4_decompress(tensor data) . tensor {
     return data
 }
 
-func zstd_compress(tensor data) -> tensor {
+func zstd_compress(tensor data) . tensor {
     return data
 }
 
-func zstd_decompress(tensor data) -> tensor {
+func zstd_decompress(tensor data) . tensor {
     return data
 }

@@ -25,7 +25,7 @@ struct gspo_trainer {
     load_balance_losses: []f32
 }
 
-func new_gspo_trainer(gspo_config config, *model model, *model ref_model) -> gspo_trainer {
+func new_gspo_trainer(gspo_config config, *model model, *model ref_model) . gspo_trainer {
     optimizer := adamw_optimizer(model.parameters(), config.learning_rate)
     return gspo_trainer{
         config: config,
@@ -37,7 +37,7 @@ func new_gspo_trainer(gspo_config config, *model model, *model ref_model) -> gsp
     }
 }
 
-func (gspo_trainer* trainer) group_sequences([]tensor sequences) -> [][]tensor {
+func (gspo_trainer* trainer) group_sequences([]tensor sequences) . [][]tensor {
     match trainer.config.sequence_group_method {
         "length" => return trainer.group_by_length(sequences),
         "similarity" => return trainer.group_by_similarity(sequences),
@@ -46,7 +46,7 @@ func (gspo_trainer* trainer) group_sequences([]tensor sequences) -> [][]tensor {
     }
 }
 
-func (gspo_trainer* trainer) group_by_length([]tensor sequences) -> [][]tensor {
+func (gspo_trainer* trainer) group_by_length([]tensor sequences) . [][]tensor {
     sorted_seqs := sequences.clone()
     sorted_seqs.sort(|a, b| a.shape[0] - b.shape[0])
     groups := []
@@ -64,7 +64,7 @@ func (gspo_trainer* trainer) group_by_length([]tensor sequences) -> [][]tensor {
     return groups
 }
 
-func (gspo_trainer* trainer) group_by_similarity([]tensor sequences) -> [][]tensor {
+func (gspo_trainer* trainer) group_by_similarity([]tensor sequences) . [][]tensor {
     embeddings := []
     for seq in sequences {
         emb := trainer.policy_model.encode(seq)
@@ -82,7 +82,7 @@ func (gspo_trainer* trainer) group_by_similarity([]tensor sequences) -> [][]tens
     return groups
 }
 
-func (gspo_trainer* trainer) group_randomly([]tensor sequences) -> [][]tensor {
+func (gspo_trainer* trainer) group_randomly([]tensor sequences) . [][]tensor {
     shuffled := sequences.clone()
     shuffled.shuffle()
     groups := []
@@ -103,7 +103,7 @@ func (gspo_trainer* trainer) group_randomly([]tensor sequences) -> [][]tensor {
 func (gspo_trainer* trainer) compute_sequence_advantages(
     []tensor group,
     []f32 rewards
-) -> []f32 {
+) . []f32 {
     mean_reward := 0.0
     for r in rewards {
         mean_reward += r
@@ -122,7 +122,7 @@ func (gspo_trainer* trainer) compute_sequence_advantages(
     return advantages
 }
 
-func (gspo_trainer* trainer) compute_load_balance_loss(tensor router_logits) -> tensor {
+func (gspo_trainer* trainer) compute_load_balance_loss(tensor router_logits) . tensor {
     batch_size := router_logits.shape[0]
     seq_len := router_logits.shape[1]
     num_experts := router_logits.shape[2]
@@ -133,7 +133,7 @@ func (gspo_trainer* trainer) compute_load_balance_loss(tensor router_logits) -> 
     return lb_loss * trainer.config.moe_load_balance_coeff
 }
 
-func (gspo_trainer* trainer) train_step(Batch batch) -> (f32, f32) {
+func (gspo_trainer* trainer) train_step(Batch batch) . (f32, f32) {
     prompts := batch.prompts
     rewards := batch.rewards
     groups := trainer.group_sequences(prompts)
@@ -185,7 +185,7 @@ func (gspo_trainer* trainer) train_step(Batch batch) -> (f32, f32) {
     return total_policy_loss, total_lb_loss
 }
 
-func (gspo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
+func (gspo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     policy_losses := []
     lb_losses := []
     for epoch in 0..trainer.config.num_epochs {
@@ -202,7 +202,7 @@ func (gspo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     return policy_losses, lb_losses
 }
 
-func kmeans_clustering([]tensor embeddings, i32 k) -> []i32 {
+func kmeans_clustering([]tensor embeddings, i32 k) . []i32 {
     n := embeddings.len()
     dim := embeddings[0].shape[0]
     centroids := []
@@ -239,6 +239,6 @@ func kmeans_clustering([]tensor embeddings, i32 k) -> []i32 {
     return assignments
 }
 
-func compute_reward(tensor prompt, tensor response) -> f32 {
+func compute_reward(tensor prompt, tensor response) . f32 {
     return random_uniform(-1.0, 1.0)
 }

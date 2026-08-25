@@ -49,7 +49,7 @@ func new_tir_otb_trainer(
     *model policy,
     *model value,
     *model reference
-) -> TIROptimalTokenBaselineTrainer {
+) . TIROptimalTokenBaselineTrainer {
     optimizer := adamw_optimizer(policy.parameters(), config.learning_rate)
     value_optimizer := nil
     if config.use_learned_baseline {
@@ -83,7 +83,7 @@ func (tir_optimal_token_baseline_trainer* trainer) compute_tir_token_baseline(
     Tensor rewards,
     Tensor is_weights,
     Tensor positions
-) -> Tensor {
+) . Tensor {
     batch_size := tokens.shape[0]
     seq_len := tokens.shape[1]
     baselines := tensor_zeros([batch_size, seq_len])
@@ -120,7 +120,7 @@ func (tir_optimal_token_baseline_trainer* trainer) compute_tir_advantages(
     Tensor rewards,
     Tensor is_weights,
     Tensor positions
-) -> Tensor {
+) . Tensor {
     baselines := Tensor()
     if trainer.config.use_learned_baseline {
         baselines = trainer.value_model.forward(tokens)
@@ -150,7 +150,7 @@ func (tir_optimal_token_baseline_trainer* trainer) train_step(
     []tensor responses,
     []tensor rollout_log_probs,
     []tensor rewards
-) -> (f32, f32, f32, f32) {
+) . (f32, f32, f32, f32) {
     batch_size := prompts.len()
     inputs := []
     all_tokens := []
@@ -250,24 +250,24 @@ func (tir_optimal_token_baseline_trainer* trainer) update_is_weight_stats(Tensor
     trainer.is_weight_stats.clip_fraction = clipped.mean().item()
 }
 
-func (tir_optimal_token_baseline_trainer* trainer) get_variance_reduction() -> f32 {
+func (tir_optimal_token_baseline_trainer* trainer) get_variance_reduction() . f32 {
     return trainer.variance_reduction_ratio
 }
 
-func compute_variance_tensor(Tensor x) -> f32 {
+func compute_variance_tensor(Tensor x) . f32 {
     mean := x.mean()
     variance := (x - mean).pow(2).mean()
     return variance.item()
 }
 
-func clamp(Tensor x, f32 min_val, f32 max_val) -> Tensor {
+func clamp(Tensor x, f32 min_val, f32 max_val) . Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
 
-func minimum(Tensor x, Tensor y) -> Tensor {
+func minimum(Tensor x, Tensor y) . Tensor {
     return where((x < y), x, y)
 }
 
-func where(Tensor condition, Tensor x, Tensor y) -> Tensor {
+func where(Tensor condition, Tensor x, Tensor y) . Tensor {
     return condition.to_float() * x + (1.0 - condition.to_float()) * y
 }

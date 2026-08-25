@@ -41,7 +41,7 @@ func new_gmpo_trainer(
     *model policy,
     *model value,
     *model reference
-) -> GMPOTrainer {
+) . GMPOTrainer {
     optimizer := adamw_optimizer(
         policy.parameters() + value.parameters(),
         config.learning_rate
@@ -67,7 +67,7 @@ func new_gmpo_trainer(
     }
 }
 
-func (gmpo_trainer* trainer) compute_geometric_mean([]f32 rewards) -> f32 {
+func (gmpo_trainer* trainer) compute_geometric_mean([]f32 rewards) . f32 {
     if rewards.len() == 0 {
         return 0.0
     }
@@ -84,7 +84,7 @@ func (gmpo_trainer* trainer) compute_geometric_mean([]f32 rewards) -> f32 {
     return geometric_mean - trainer.config.epsilon
 }
 
-func compute_arithmetic_mean([]f32 rewards) -> f32 {
+func compute_arithmetic_mean([]f32 rewards) . f32 {
     if rewards.len() == 0 {
         return 0.0
     }
@@ -132,7 +132,7 @@ func (gmpo_trainer* trainer) update_reward_statistics(
 
 func (gmpo_trainer* trainer) normalize_rewards(
     [][]f32 multi_rewards
-) -> [][]f32 {
+) . [][]f32 {
     if !trainer.config.reward_normalization {
         return multi_rewards
     }
@@ -151,7 +151,7 @@ func (gmpo_trainer* trainer) normalize_rewards(
     return normalized
 }
 
-func (gmpo_trainer* trainer) combine_rewards([]f32 multi_rewards) -> f32 {
+func (gmpo_trainer* trainer) combine_rewards([]f32 multi_rewards) . f32 {
     if trainer.config.use_geometric_mean {
         return trainer.compute_geometric_mean(multi_rewards)
     } else {
@@ -163,7 +163,7 @@ func (gmpo_trainer* trainer) compute_gae(
     []tensor rewards,
     []tensor values,
     []tensor dones
-) -> ([]tensor, []tensor) {
+) . ([]tensor, []tensor) {
     batch_size := rewards.len()
     advantages := []
     returns := []
@@ -202,7 +202,7 @@ func (gmpo_trainer* trainer) train_step(
     []tensor prompts,
     []tensor responses,
     [][]f32 multi_rewards
-) -> (f32, f32, f32) {
+) . (f32, f32, f32) {
     batch_size := prompts.len()
     trainer.update_reward_statistics(multi_rewards)
     normalized_rewards := trainer.normalize_rewards(multi_rewards)
@@ -295,7 +295,7 @@ func (gmpo_trainer* trainer) train_step(
     )
 }
 
-func (gmpo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
+func (gmpo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     policy_losses := []
     value_losses := []
     for batch in train_data {
@@ -328,7 +328,7 @@ func (gmpo_trainer* trainer) print_reward_statistics() {
     }
 }
 
-func compute_mean([]f32 values) -> f32 {
+func compute_mean([]f32 values) . f32 {
     if values.len() == 0 {
         return 0.0
     }
@@ -339,7 +339,7 @@ func compute_mean([]f32 values) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_std([]f32 values, f32 mean) -> f32 {
+func compute_std([]f32 values, f32 mean) . f32 {
     if values.len() == 0 {
         return 1.0
     }

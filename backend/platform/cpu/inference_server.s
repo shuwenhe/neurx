@@ -589,7 +589,7 @@ func tokenize_qwen(string text) []int {
     }
     tokens[count] = 151645
     count = count + 1
-    print("[tokenize_qwen] Tokenized \"" + text + "\" -> " + int_to_string(count) + " tokens\n")
+    print("[tokenize_qwen] Tokenized \"" + text + "\" . " + int_to_string(count) + " tokens\n")
     return tokens
 }
 
@@ -1327,7 +1327,7 @@ func load_model_metadata_sharded(string model_dir) []int {
     }
     int header_len = u64_le_bytes(size_bytes, 0)
     if header_len <= 0 || header_len > 20000000 {
-        print("[ShardedModel] Invalid header length for target shard -> " + int_to_string(header_len) + "\n")
+        print("[ShardedModel] Invalid header length for target shard . " + int_to_string(header_len) + "\n")
         return []int{cap: 0}
     }
     []int header_bytes = __host_read_binary_file_range(shard_path, 8, header_len)
@@ -2259,7 +2259,7 @@ func sample_token([]int logits) int {
 
 func tokenize_text(string text) []int {
     []int tokens = tokenize_qwen(text)
-    print("[Tokenizer] Encoded \"" + text + "\" -> " + int_to_string(len(tokens)) + " tokens\n")
+    print("[Tokenizer] Encoded \"" + text + "\" . " + int_to_string(len(tokens)) + " tokens\n")
     return tokens
 }
 

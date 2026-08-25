@@ -107,9 +107,9 @@ func main() {
     println("transformer_2 model End-to-End Tests")
     println("========================================")
     if test_ffn_layer() {
-        println("✓ FFN layer hidden -> 4xhidden -> hidden")
+        println("✓ FFN layer hidden . 4xhidden . hidden")
     } else {
-        println("✗ FFN layer hidden -> 4xhidden -> hidden")
+        println("✗ FFN layer hidden . 4xhidden . hidden")
     }
     if test_transformer_block_with_rope() {
         println("✓ transformer_2 block with RoPE")

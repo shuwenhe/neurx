@@ -102,13 +102,13 @@ static py_object* tensor_cuda_add_bias_3d_device(py_object* , py_object* args) {
     if (!a || !b) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)bsz * (size_t)t * (size_t)c != a->size || (size_t)c != b->size) {
+    if ((size_t)bsz * (size_t)t * (size_t)c != a.size || (size_t)c != b.size) {
         return _raise(py_exc_value_error, "add_bias_3d_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, (size_t)bsz * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
-        cuda_add_bias_3d_device_float((const float*)a->ptr, (const float*)b->ptr, (float*)d_out, bsz, t, c);
+        cuda_add_bias_3d_device_float((const float*)a.ptr, (const float*)b.ptr, (float*)d_out, bsz, t, c);
         _cuda_check(cuda_get_last_error(), "cuda_add_bias_3d_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -134,13 +134,13 @@ static py_object* tensor_cuda_matmul_device(py_object* , py_object* args) {
     if (!a || !b) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)m * (size_t)k != a->size || (size_t)k * (size_t)n != b->size) {
+    if ((size_t)m * (size_t)k != a.size || (size_t)k * (size_t)n != b.size) {
         return _raise(py_exc_value_error, "matmul_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
-        cuda_matmul_device_float((const float*)a->ptr, (const float*)b->ptr, (float*)d_out, m, k, n);
+        cuda_matmul_device_float((const float*)a.ptr, (const float*)b.ptr, (float*)d_out, m, k, n);
         _cuda_check(cuda_get_last_error(), "cuda_matmul_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -169,13 +169,13 @@ static py_object* tensor_cuda_layernorm_device(py_object* , py_object* args) {
     if (!a || !g || !b) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)m * (size_t)n != a->size || (size_t)n != g->size || (size_t)n != b->size) {
+    if ((size_t)m * (size_t)n != a.size || (size_t)n != g.size || (size_t)n != b.size) {
         return _raise(py_exc_value_error, "layernorm_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
-        cuda_layernorm_device_float((const float*)a->ptr, (const float*)g->ptr, (const float*)b->ptr, (float*)d_out, m, n, eps);
+        cuda_layernorm_device_float((const float*)a.ptr, (const float*)g.ptr, (const float*)b.ptr, (float*)d_out, m, n, eps);
         _cuda_check(cuda_get_last_error(), "cuda_layernorm_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -199,13 +199,13 @@ static py_object* tensor_cuda_softmax_device(py_object* , py_object* args) {
     if (!a) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)m * (size_t)n != a->size) {
+    if ((size_t)m * (size_t)n != a.size) {
         return _raise(py_exc_value_error, "softmax_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
-        cuda_softmax_device_float((const float*)a->ptr, (float*)d_out, m, n);
+        cuda_softmax_device_float((const float*)a.ptr, (float*)d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_softmax_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -229,13 +229,13 @@ static py_object* tensor_cuda_reduce_sum_device(py_object* , py_object* args) {
     if (!a) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)size != a->size) {
+    if ((size_t)size != a.size) {
         return _raise(py_exc_value_error, "reduce_sum_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, sizeof(float)), "cudaMalloc");
-        cuda_reduce_sum_device_float((const float*)a->ptr, (float*)d_out, (size_t)size);
+        cuda_reduce_sum_device_float((const float*)a.ptr, (float*)d_out, (size_t)size);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_sum_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -259,13 +259,13 @@ static py_object* tensor_cuda_reduce_mean_device(py_object* , py_object* args) {
     if (!a) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)size != a->size) {
+    if ((size_t)size != a.size) {
         return _raise(py_exc_value_error, "reduce_mean_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, sizeof(float)), "cudaMalloc");
-        cuda_reduce_mean_device_float((const float*)a->ptr, (float*)d_out, (size_t)size);
+        cuda_reduce_mean_device_float((const float*)a.ptr, (float*)d_out, (size_t)size);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_mean_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -289,13 +289,13 @@ static py_object* tensor_cuda_reduce_max_device(py_object* , py_object* args) {
     if (!a) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)size != a->size) {
+    if ((size_t)size != a.size) {
         return _raise(py_exc_value_error, "reduce_max_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, sizeof(float)), "cudaMalloc");
-        cuda_reduce_max_device_float((const float*)a->ptr, (float*)d_out, (size_t)size);
+        cuda_reduce_max_device_float((const float*)a.ptr, (float*)d_out, (size_t)size);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_max_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -319,13 +319,13 @@ static py_object* tensor_cuda_reduce_min_device(py_object* , py_object* args) {
     if (!a) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)size != a->size) {
+    if ((size_t)size != a.size) {
         return _raise(py_exc_value_error, "reduce_min_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, sizeof(float)), "cudaMalloc");
-        cuda_reduce_min_device_float((const float*)a->ptr, (float*)d_out, (size_t)size);
+        cuda_reduce_min_device_float((const float*)a.ptr, (float*)d_out, (size_t)size);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_min_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -349,13 +349,13 @@ static py_object* tensor_cuda_reduce_sum_lastdim_device(py_object* , py_object* 
     if (!a) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)m * (size_t)n != a->size) {
+    if ((size_t)m * (size_t)n != a.size) {
         return _raise(py_exc_value_error, "reduce_sum_lastdim_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
-        cuda_reduce_sum_lastdim_device_float((const float*)a->ptr, (float*)d_out, m, n);
+        cuda_reduce_sum_lastdim_device_float((const float*)a.ptr, (float*)d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_sum_lastdim_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -379,13 +379,13 @@ static py_object* tensor_cuda_reduce_mean_lastdim_device(py_object* , py_object*
     if (!a) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)m * (size_t)n != a->size) {
+    if ((size_t)m * (size_t)n != a.size) {
         return _raise(py_exc_value_error, "reduce_mean_lastdim_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
-        cuda_reduce_mean_lastdim_device_float((const float*)a->ptr, (float*)d_out, m, n);
+        cuda_reduce_mean_lastdim_device_float((const float*)a.ptr, (float*)d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_mean_lastdim_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -409,13 +409,13 @@ static py_object* tensor_cuda_reduce_max_lastdim_device(py_object* , py_object* 
     if (!a) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)m * (size_t)n != a->size) {
+    if ((size_t)m * (size_t)n != a.size) {
         return _raise(py_exc_value_error, "reduce_max_lastdim_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
-        cuda_reduce_max_lastdim_device_float((const float*)a->ptr, (float*)d_out, m, n);
+        cuda_reduce_max_lastdim_device_float((const float*)a.ptr, (float*)d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_max_lastdim_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -439,13 +439,13 @@ static py_object* tensor_cuda_reduce_min_lastdim_device(py_object* , py_object* 
     if (!a) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)m * (size_t)n != a->size) {
+    if ((size_t)m * (size_t)n != a.size) {
         return _raise(py_exc_value_error, "reduce_min_lastdim_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
-        cuda_reduce_min_lastdim_device_float((const float*)a->ptr, (float*)d_out, m, n);
+        cuda_reduce_min_lastdim_device_float((const float*)a.ptr, (float*)d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_reduce_min_lastdim_device");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -469,13 +469,13 @@ static py_object* tensor_cuda_argmax_lastdim(py_object* , py_object* args) {
     if (!a) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)m * (size_t)n != a->size) {
+    if ((size_t)m * (size_t)n != a.size) {
         return _raise(py_exc_value_error, "argmax_lastdim: size mismatch");
     }
     long long* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(long long)), "cudaMalloc");
-        cuda_argmax_lastdim_device_int64((const float*)a->ptr, d_out, m, n);
+        cuda_argmax_lastdim_device_int64((const float*)a.ptr, d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_argmax_lastdim");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -499,13 +499,13 @@ static py_object* tensor_cuda_argmin_lastdim(py_object* , py_object* args) {
     if (!a) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)m * (size_t)n != a->size) {
+    if ((size_t)m * (size_t)n != a.size) {
         return _raise(py_exc_value_error, "argmin_lastdim: size mismatch");
     }
     long long* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(long long)), "cudaMalloc");
-        cuda_argmin_lastdim_device_int64((const float*)a->ptr, d_out, m, n);
+        cuda_argmin_lastdim_device_int64((const float*)a.ptr, d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_argmin_lastdim");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -529,13 +529,13 @@ static py_object* tensor_cuda_transpose_2d(py_object* , py_object* args) {
     if (!a) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)m * (size_t)n != a->size) {
+    if ((size_t)m * (size_t)n != a.size) {
         return _raise(py_exc_value_error, "transpose_2d: size mismatch");
     }
     void* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
-        cuda_transpose_2d_device_float((const float*)a->ptr, (float*)d_out, m, n);
+        cuda_transpose_2d_device_float((const float*)a.ptr, (float*)d_out, m, n);
         _cuda_check(cuda_get_last_error(), "cuda_transpose_2d");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -559,13 +559,13 @@ static py_object* tensor_cuda_permute_3d_0_2_1(py_object* , py_object* args) {
     if (!a) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)b * (size_t)t * (size_t)c != a->size) {
+    if ((size_t)b * (size_t)t * (size_t)c != a.size) {
         return _raise(py_exc_value_error, "permute_3d_0_2_1: size mismatch");
     }
     void* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, (size_t)b * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
-        cuda_permute_3d_0_2_1_device_float((const float*)a->ptr, (float*)d_out, b, t, c);
+        cuda_permute_3d_0_2_1_device_float((const float*)a.ptr, (float*)d_out, b, t, c);
         _cuda_check(cuda_get_last_error(), "cuda_permute_3d_0_2_1");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
@@ -589,13 +589,13 @@ static py_object* tensor_cuda_permute_3d_1_2_0(py_object* , py_object* args) {
     if (!a) {
         return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
-    if ((size_t)b * (size_t)t * (size_t)c != a->size) {
+    if ((size_t)b * (size_t)t * (size_t)c != a.size) {
         return _raise(py_exc_value_error, "permute_3d_1_2_0: size mismatch");
     }
     void* d_out = nullptr;
     try {
         _cuda_check(cuda_malloc(&d_out, (size_t)b * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
-        cuda_permute_3d_1_2_0_device_float((const float*)a->ptr, (float*)d_out, b, t, c);
+        cuda_permute_3d_1_2_0_device_float((const float*)a.ptr, (float*)d_out, b, t, c);
         _cuda_check(cuda_get_last_error(), "cuda_permute_3d_1_2_0");
         _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {

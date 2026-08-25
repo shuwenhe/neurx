@@ -9,7 +9,7 @@ struct DeepSeekV3Parser {
 }
 
 impl DeepSeekV3Parser {
-    func new() -> DeepSeekV3Parser {
+    func new() . DeepSeekV3Parser {
         parser := DeepSeekV3Parser {
             base: BaseToolParser::new("deepseek_v3")
         }
@@ -17,7 +17,7 @@ impl DeepSeekV3Parser {
         parser
     }
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
         tool_start := "<｜tool▁calls▁begin｜>"
         tool_end := "<｜tool▁calls▁end｜>"
         single_call_start := "<｜tool▁call▁begin｜>"
@@ -90,7 +90,7 @@ struct DeepSeekV32Parser {
 }
 
 impl DeepSeekV32Parser {
-    func new() -> DeepSeekV32Parser {
+    func new() . DeepSeekV32Parser {
         parser := DeepSeekV32Parser {
             base: BaseToolParser::new("deepseek_v32")
         }
@@ -98,7 +98,7 @@ impl DeepSeekV32Parser {
         parser
     }
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
         DeepSeekV3Parser::new().extract_tool_calls(model_output, request)
     }
 }
@@ -108,7 +108,7 @@ struct DeepSeekV4Parser {
 }
 
 impl DeepSeekV4Parser {
-    func new() -> DeepSeekV4Parser {
+    func new() . DeepSeekV4Parser {
         parser := DeepSeekV4Parser {
             base: BaseToolParser::new("deepseek_v4")
         }
@@ -116,12 +116,12 @@ impl DeepSeekV4Parser {
         parser
     }
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
         DeepSeekV3Parser::new().extract_tool_calls(model_output, request)
     }
 }
 
-func parse_deepseek_tool_call(str call_content) -> Option<ToolCall> {
+func parse_deepseek_tool_call(str call_content) . Option<ToolCall> {
     lines := strings::split(call_content, "\n")
 
     func_type := ""

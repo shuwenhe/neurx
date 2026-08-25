@@ -274,7 +274,7 @@ func extended_thinking_export(extended_thinking_state state) string {
     int i = 0
     while i < state.thought_count {
         out = out + "[" + string(i) + "] " + state.thoughts[i].thought + "\n"
-        out = out + "  -> " + state.thoughts[i].conclusion + "\n"
+        out = out + "  . " + state.thoughts[i].conclusion + "\n"
         i = i + 1
     }
     out + "final: " + extended_thinking_conclusion(state)

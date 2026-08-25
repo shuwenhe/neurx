@@ -8,7 +8,7 @@ func main() {
     println("NeurX Training Pipeline (S Lang)")
     println("")
     println("Project root: " + project_root)
-    println("Pipeline mode: train -> checkpoint -> infer")
+    println("Pipeline mode: train . checkpoint . infer")
     println("")
     println("  training runner : " + check_path("script/legacy/run_llm_training.s"))
     println("  inference entry : " + check_path("script/legacy/run_inference_llm.s"))

@@ -156,7 +156,7 @@ func test_tokenization_correctness() test_result {
     while i < len(test_inputs) {
         tokens := tokenize_prompt(test_inputs[i])
         if len(tokens) > 0 {
-            print("✓ Input: \"" + test_inputs[i] + "\" -> " + string(len(tokens)) + " tokens\n")
+            print("✓ Input: \"" + test_inputs[i] + "\" . " + string(len(tokens)) + " tokens\n")
         } else {
             print("✗ Failed to tokenize: \"" + test_inputs[i] + "\"\n")
             return result

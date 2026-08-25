@@ -121,7 +121,7 @@ func print_graph_dot_format(*computation_graph g) string {
         for input_id in op.input_ids {
             producers = g.find_producers(input_id)
             for producer in producers {
-                s = s + "  node_" + producer.id as string + " -> node_" + op.id as string + ";\n"
+                s = s + "  node_" + producer.id as string + " . node_" + op.id as string + ";\n"
             }
         }
     }

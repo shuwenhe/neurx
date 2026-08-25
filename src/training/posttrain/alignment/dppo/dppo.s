@@ -36,7 +36,7 @@ func new_dppo_trainer(
     *model policy,
     *model value,
     *model reference
-) -> DPPOTrainer {
+) . DPPOTrainer {
     params := policy.parameters()
     if config.use_value_loss {
         params = params + value.parameters()
@@ -58,7 +58,7 @@ func (dppo_trainer* trainer) compute_binary_kl_constraint(
     Tensor new_probs,
     Tensor old_probs,
     Tensor advantage
-) -> Tensor {
+) . Tensor {
     epsilon := 1e-8
     p_new := clamp(new_probs, epsilon, 1.0 - epsilon)
     p_old := clamp(old_probs, epsilon, 1.0 - epsilon)
@@ -75,7 +75,7 @@ func (dppo_trainer* trainer) compute_binary_tv_constraint(
     Tensor new_probs,
     Tensor old_probs,
     Tensor advantage
-) -> Tensor {
+) . Tensor {
     tv := abs(new_probs - old_probs)
     tv_violation := (tv > trainer.current_epsilon).to_float()
     ratio := new_probs / (old_probs + 1e-8)
@@ -88,7 +88,7 @@ func (dppo_trainer* trainer) compute_constrained_objective(
     Tensor new_log_probs,
     Tensor old_log_probs,
     Tensor advantage
-) -> Tensor {
+) . Tensor {
     new_probs := exp(new_log_probs)
     old_probs := exp(old_log_probs)
     constrained_obj := Tensor()
@@ -144,7 +144,7 @@ func (dppo_trainer* trainer) compute_gae(
     []tensor rewards,
     []tensor values,
     []tensor dones
-) -> ([]tensor, []tensor) {
+) . ([]tensor, []tensor) {
     batch_size := rewards.len()
     advantages := []
     returns := []
@@ -174,7 +174,7 @@ func (dppo_trainer* trainer) train_step(
     []tensor prompts,
     []tensor responses,
     []tensor rewards
-) -> (f32, f32, f32) {
+) . (f32, f32, f32) {
     batch_size := prompts.len()
     inputs := []
     for i in 0..batch_size {
@@ -272,7 +272,7 @@ func (dppo_trainer* trainer) train_step(
     )
 }
 
-func (dppo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
+func (dppo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     policy_losses := []
     value_losses := []
     for batch in train_data {
@@ -294,7 +294,7 @@ func (dppo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     return policy_losses, value_losses
 }
 
-func compute_mean([]f32 values) -> f32 {
+func compute_mean([]f32 values) . f32 {
     if values.len() == 0 {
         return 0.0
     }
@@ -305,7 +305,7 @@ func compute_mean([]f32 values) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_std([]f32 values, f32 mean) -> f32 {
+func compute_std([]f32 values, f32 mean) . f32 {
     if values.len() == 0 {
         return 1.0
     }
@@ -316,6 +316,6 @@ func compute_std([]f32 values, f32 mean) -> f32 {
     return sqrt(sum_sq / f32(values.len()))
 }
 
-func clamp(Tensor x, f32 min_val, f32 max_val) -> Tensor {
+func clamp(Tensor x, f32 min_val, f32 max_val) . Tensor {
     return maximum(minimum(x, max_val), min_val)
 }

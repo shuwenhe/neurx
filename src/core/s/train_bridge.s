@@ -32,7 +32,7 @@ func log_step(int step, float loss, float best_loss) () {
 }
 
 func log_save(string path) () {
-    println("  -> Saved: " + path)
+    println("  . Saved: " + path)
 }
 
 func log_header(string title, string subtitle) () {

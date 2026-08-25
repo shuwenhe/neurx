@@ -237,8 +237,8 @@ func demonstrate_grpo() {
         i = i + 1
     }
     println("")
-    println("  advantage > 0 -> better than group avg -> reinforced")
-    println("  advantage < 0 -> worse than group avg -> suppressed")
+    println("  advantage > 0 . better than group avg . reinforced")
+    println("  advantage < 0 . worse than group avg . suppressed")
     println("  No critic/value model needed!")
 }
 

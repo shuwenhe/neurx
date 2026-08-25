@@ -39,7 +39,7 @@ func new_sapo_trainer(
     *model policy,
     *model value,
     *model reference
-) -> SAPOTrainer {
+) . SAPOTrainer {
     params := policy.parameters()
     if config.use_value_loss {
         params = params + value.parameters()
@@ -61,7 +61,7 @@ func new_sapo_trainer(
     }
 }
 
-func (sapo_trainer* trainer) smooth_clip(Tensor x, f32 lower, f32 upper) -> Tensor {
+func (sapo_trainer* trainer) smooth_clip(Tensor x, f32 lower, f32 upper) . Tensor {
     tau := trainer.config.tau
     lower_weight := sigmoid((x - lower) / tau)
     upper_weight := sigmoid((upper - x) / tau)
@@ -74,7 +74,7 @@ func (sapo_trainer* trainer) smooth_clip(Tensor x, f32 lower, f32 upper) -> Tens
 func (sapo_trainer* trainer) compute_smooth_surrogate(
     Tensor ratio,
     Tensor advantage
-) -> Tensor {
+) . Tensor {
     if trainer.config.use_smooth_clipping {
         clipped_ratio := trainer.smooth_clip(ratio, 0.8, 1.2)
         return clipped_ratio * advantage
@@ -92,7 +92,7 @@ func (sapo_trainer* trainer) compute_gae(
     []tensor rewards,
     []tensor values,
     []tensor dones
-) -> ([]tensor, []tensor) {
+) . ([]tensor, []tensor) {
     batch_size := rewards.len()
     advantages := []
     returns := []
@@ -118,7 +118,7 @@ func (sapo_trainer* trainer) compute_gae(
     return advantages, returns
 }
 
-func (sapo_trainer* trainer) normalize_advantages([]tensor advantages) -> []tensor {
+func (sapo_trainer* trainer) normalize_advantages([]tensor advantages) . []tensor {
     if !trainer.config.normalize_advantages {
         return advantages
     }
@@ -150,7 +150,7 @@ func (sapo_trainer* trainer) train_step(
     []tensor prompts,
     []tensor responses,
     []tensor rewards
-) -> (f32, f32, f32) {
+) . (f32, f32, f32) {
     batch_size := prompts.len()
     inputs := []
     for i in 0..batch_size {
@@ -228,7 +228,7 @@ func (sapo_trainer* trainer) train_step(
     )
 }
 
-func (sapo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
+func (sapo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     policy_losses := []
     value_losses := []
     for batch in train_data {
@@ -252,11 +252,11 @@ func (sapo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     return policy_losses, value_losses
 }
 
-func sigmoid(Tensor x) -> Tensor {
+func sigmoid(Tensor x) . Tensor {
     return 1.0 / (1.0 + exp(-x))
 }
 
-func compute_mean([]f32 values) -> f32 {
+func compute_mean([]f32 values) . f32 {
     if values.len() == 0 {
         return 0.0
     }
@@ -267,7 +267,7 @@ func compute_mean([]f32 values) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_std([]f32 values, f32 mean) -> f32 {
+func compute_std([]f32 values, f32 mean) . f32 {
     if values.len() == 0 {
         return 1.0
     }

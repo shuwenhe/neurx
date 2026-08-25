@@ -241,7 +241,7 @@ func (plugin_lifecycle_manager* m) record_transition(transition lifecycle_transi
 
 	duration_ms := (transition.transition_end_time - transition.transition_start_time) / 1000000
 
-	event_data := "transition:" + string(transition.from_state) + "->" + string(transition.to_state)
+	event_data := "transition:" + string(transition.from_state) + "." + string(transition.to_state)
 
 	event := lifecycle_event{
 		event_type:        EVENT_STARTED,

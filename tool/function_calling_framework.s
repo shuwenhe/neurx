@@ -569,9 +569,9 @@ struct call_tracker {
         elif call.status in [call_status.FAILED, call_status.TIMEOUT]:
             this.failed_calls += 1
     }
-    get success_rate -> float {
+    get success_rate . float {
         return this.successful_calls / max(this.total_calls, 1)
-    get unique_tools_used -> set<string> {
+    get unique_tools_used . set<string> {
         return this.tools_used.copy()
     reset() {
         this.history.clear()

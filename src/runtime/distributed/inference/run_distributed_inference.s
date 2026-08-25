@@ -60,7 +60,7 @@ func process_batch(
             req,
             pipeline.node_states,
             pipeline.config.scheduling_policy)
-        printf("  Request %s -> Rank %d\n", req.request_id, target_rank)
+        printf("  Request %s . Rank %d\n", req.request_id, target_rank)
         inference_response resp = forward_inference(pipeline.engine, req)
         responses = append(responses, resp)
         pipeline.node_states[target_rank].num_pending_requests =

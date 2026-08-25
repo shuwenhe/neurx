@@ -234,7 +234,7 @@ func (multimodal_inference_engine* mie) reason_cross_modalities(modality_feature
 	for modality_i, attention_scores := range attention_matrix {
 		for modality_j, score := range attention_scores {
 			if score > 0.5 {
-				cross_modal_text += modality_i + " -> " + modality_j + " (score: "
+				cross_modal_text += modality_i + " . " + modality_j + " (score: "
 			}
 		}
 	}

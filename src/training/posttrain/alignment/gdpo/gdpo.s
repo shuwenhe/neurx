@@ -29,7 +29,7 @@ struct gdpo_trainer {
     reward_histories: [][]f32
 }
 
-func new_gdpo_trainer(gdpo_config config, *model model, *model ref_model) -> gdpo_trainer {
+func new_gdpo_trainer(gdpo_config config, *model model, *model ref_model) . gdpo_trainer {
     optimizer := adamw_optimizer(model.parameters(), config.learning_rate)
     reward_scales := []
     reward_histories := []
@@ -47,7 +47,7 @@ func new_gdpo_trainer(gdpo_config config, *model model, *model ref_model) -> gdp
     }
 }
 
-func (gdpo_trainer* trainer) aggregate_rewards(rubric rubric) -> f32 {
+func (gdpo_trainer* trainer) aggregate_rewards(rubric rubric) . f32 {
     aggregated := 0.0
     match trainer.config.aggregation_method {
         "sum" => {
@@ -90,7 +90,7 @@ func (gdpo_trainer* trainer) aggregate_rewards(rubric rubric) -> f32 {
     return aggregated
 }
 
-func (gdpo_trainer* trainer) normalize_rubric(rubric rubric) -> rubric {
+func (gdpo_trainer* trainer) normalize_rubric(rubric rubric) . rubric {
     normalized := rubric{
         reward_names: rubric.reward_names.clone(),
         reward_values: [],
@@ -117,7 +117,7 @@ func (gdpo_trainer* trainer) compute_gdpo_loss(
     []tensor rejected_responses,
     []rubric chosen_rubrics,
     []rubric rejected_rubrics
-) -> tensor {
+) . tensor {
     batch_size := chosen_prompts.len()
     total_loss := tensor_zeros([1])
     for i in 0..batch_size {
@@ -161,7 +161,7 @@ func (gdpo_trainer* trainer) train_step(
     []tensor rejected_responses,
     []rubric chosen_rubrics,
     []rubric rejected_rubrics
-) -> f32 {
+) . f32 {
     loss := trainer.compute_gdpo_loss(
         chosen_prompts,
         chosen_responses,
@@ -177,7 +177,7 @@ func (gdpo_trainer* trainer) train_step(
     return loss.item()
 }
 
-func (gdpo_trainer* trainer) train(DataLoader train_data) -> []f32 {
+func (gdpo_trainer* trainer) train(DataLoader train_data) . []f32 {
     losses := []
     for epoch in 0..trainer.config.num_epochs {
         println(f"GDPO Epoch {epoch + 1}/{trainer.config.num_epochs}")
@@ -211,7 +211,7 @@ func (gdpo_trainer* trainer) print_reward_statistics() {
     }
 }
 
-func compute_mean([]f32 values) -> f32 {
+func compute_mean([]f32 values) . f32 {
     if values.len() == 0 {
         return 0.0
     }
@@ -222,7 +222,7 @@ func compute_mean([]f32 values) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_std([]f32 values, f32 mean) -> f32 {
+func compute_std([]f32 values, f32 mean) . f32 {
     if values.len() == 0 {
         return 1.0
     }
@@ -233,10 +233,10 @@ func compute_std([]f32 values, f32 mean) -> f32 {
     return sqrt(sum_sq / f32(values.len()))
 }
 
-func log_sigmoid(tensor x) -> tensor {
+func log_sigmoid(tensor x) . tensor {
     return -softplus(-x)
 }
 
-func softplus(tensor x) -> tensor {
+func softplus(tensor x) . tensor {
     return log(1.0 + exp(x))
 }

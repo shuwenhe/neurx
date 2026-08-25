@@ -279,7 +279,7 @@ func (timeline_analyzer* ta) IdentifyBottleneck(request_id string) string {
         gap := events[i+1].timestamp_ns - events[i].timestamp_ns
         if gap > max_gap {
             max_gap = gap
-            bottleneck = events[i].name + " -> " + events[i+1].name
+            bottleneck = events[i].name + " . " + events[i+1].name
         }
     }
     return bottleneck + " (" + core.ToString(max_gap/1e6) + "ms)"

@@ -44,7 +44,7 @@ struct rollout_correction_config {
     loss_type: LossType
 }
 
-func new_rollout_correction_config() -> RolloutCorrectionConfig {
+func new_rollout_correction_config() . RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.NONE,
         is_threshold: ISThreshold{
@@ -60,7 +60,7 @@ func new_rollout_correction_config() -> RolloutCorrectionConfig {
     }
 }
 
-func parse_threshold(string threshold_str) -> (f32, f32) {
+func parse_threshold(string threshold_str) . (f32, f32) {
     if threshold_str.contains("_") {
         parts := threshold_str.split("_")
         if parts.len() != 2 {
@@ -76,7 +76,7 @@ func parse_threshold(string threshold_str) -> (f32, f32) {
     }
 }
 
-func decoupled_token_is(f32 threshold) -> RolloutCorrectionConfig {
+func decoupled_token_is(f32 threshold) . RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.TOKEN,
         is_threshold: ISThreshold{
@@ -92,7 +92,7 @@ func decoupled_token_is(f32 threshold) -> RolloutCorrectionConfig {
     }
 }
 
-func decoupled_seq_is(f32 threshold) -> RolloutCorrectionConfig {
+func decoupled_seq_is(f32 threshold) . RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.SEQUENCE,
         is_threshold: ISThreshold{
@@ -108,7 +108,7 @@ func decoupled_seq_is(f32 threshold) -> RolloutCorrectionConfig {
     }
 }
 
-func decoupled_token_icepop(f32 threshold_lower, f32 threshold_upper) -> RolloutCorrectionConfig {
+func decoupled_token_icepop(f32 threshold_lower, f32 threshold_upper) . RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.TOKEN,
         is_threshold: ISThreshold{
@@ -124,7 +124,7 @@ func decoupled_token_icepop(f32 threshold_lower, f32 threshold_upper) -> Rollout
     }
 }
 
-func decoupled_seq_is_rs(f32 is_threshold, f32 rs_lower, f32 rs_upper) -> RolloutCorrectionConfig {
+func decoupled_seq_is_rs(f32 is_threshold, f32 rs_lower, f32 rs_upper) . RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.SEQUENCE,
         is_threshold: ISThreshold{
@@ -140,7 +140,7 @@ func decoupled_seq_is_rs(f32 is_threshold, f32 rs_lower, f32 rs_upper) -> Rollou
     }
 }
 
-func decoupled_geo_rs(f32 rs_lower, f32 rs_upper) -> RolloutCorrectionConfig {
+func decoupled_geo_rs(f32 rs_lower, f32 rs_upper) . RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.NONE,
         is_threshold: ISThreshold{lower: 0.0, upper: 1e10, is_icepop: false},
@@ -152,7 +152,7 @@ func decoupled_geo_rs(f32 rs_lower, f32 rs_upper) -> RolloutCorrectionConfig {
     }
 }
 
-func decoupled_k3_rs(f32 rs_upper) -> RolloutCorrectionConfig {
+func decoupled_k3_rs(f32 rs_upper) . RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.NONE,
         is_threshold: ISThreshold{lower: 0.0, upper: 1e10, is_icepop: false},
@@ -164,7 +164,7 @@ func decoupled_k3_rs(f32 rs_upper) -> RolloutCorrectionConfig {
     }
 }
 
-func decoupled_k3_rs_seq_tis(f32 rs_upper, f32 is_threshold) -> RolloutCorrectionConfig {
+func decoupled_k3_rs_seq_tis(f32 rs_upper, f32 is_threshold) . RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.SEQUENCE,
         is_threshold: ISThreshold{
@@ -180,7 +180,7 @@ func decoupled_k3_rs_seq_tis(f32 rs_upper, f32 is_threshold) -> RolloutCorrectio
     }
 }
 
-func bypass_ppo_clip() -> RolloutCorrectionConfig {
+func bypass_ppo_clip() . RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.NONE,
         is_threshold: ISThreshold{lower: 0.0, upper: 1e10, is_icepop: false},
@@ -192,7 +192,7 @@ func bypass_ppo_clip() -> RolloutCorrectionConfig {
     }
 }
 
-func bypass_ppo_clip_geo_rs(f32 rs_lower, f32 rs_upper) -> RolloutCorrectionConfig {
+func bypass_ppo_clip_geo_rs(f32 rs_lower, f32 rs_upper) . RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.NONE,
         is_threshold: ISThreshold{lower: 0.0, upper: 1e10, is_icepop: false},
@@ -204,7 +204,7 @@ func bypass_ppo_clip_geo_rs(f32 rs_lower, f32 rs_upper) -> RolloutCorrectionConf
     }
 }
 
-func bypass_ppo_clip_k3_rs(f32 rs_upper) -> RolloutCorrectionConfig {
+func bypass_ppo_clip_k3_rs(f32 rs_upper) . RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.NONE,
         is_threshold: ISThreshold{lower: 0.0, upper: 1e10, is_icepop: false},
@@ -216,7 +216,7 @@ func bypass_ppo_clip_k3_rs(f32 rs_upper) -> RolloutCorrectionConfig {
     }
 }
 
-func bypass_pg_is(f32 is_threshold) -> RolloutCorrectionConfig {
+func bypass_pg_is(f32 is_threshold) . RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.SEQUENCE,
         is_threshold: ISThreshold{
@@ -232,7 +232,7 @@ func bypass_pg_is(f32 is_threshold) -> RolloutCorrectionConfig {
     }
 }
 
-func bypass_pg_geo_rs(f32 rs_lower, f32 rs_upper) -> RolloutCorrectionConfig {
+func bypass_pg_geo_rs(f32 rs_lower, f32 rs_upper) . RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.NONE,
         is_threshold: ISThreshold{lower: 0.0, upper: 1e10, is_icepop: false},
@@ -248,7 +248,7 @@ func bypass_pg_geo_rs_seq_tis(
     f32 rs_lower,
     f32 rs_upper,
     f32 is_threshold
-) -> RolloutCorrectionConfig {
+) . RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.SEQUENCE,
         is_threshold: ISThreshold{
@@ -268,7 +268,7 @@ func bypass_pg_geo_rs_token_tis(
     f32 rs_lower,
     f32 rs_upper,
     f32 is_threshold
-) -> RolloutCorrectionConfig {
+) . RolloutCorrectionConfig {
     return rollout_correction_config{
         is_level: ISAggregationLevel.TOKEN,
         is_threshold: ISThreshold{
@@ -284,6 +284,6 @@ func bypass_pg_geo_rs_token_tis(
     }
 }
 
-func parse_f32(string s) -> f32 {
+func parse_f32(string s) . f32 {
     return 1.0
 }

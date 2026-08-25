@@ -126,7 +126,7 @@ func evaluate_depth(string response) depth_analysis {
         "首先",
         "其次",
         "最after",
-        "->",
+        ".",
         "推导",
         "1.", "2.", "3.",
     ]

@@ -9,7 +9,7 @@ struct GlmParser {
 }
 
 impl GlmParser {
-    func new() -> GlmParser {
+    func new() . GlmParser {
         parser := GlmParser {
             base: BaseToolParser::new("glm")
         }
@@ -17,7 +17,7 @@ impl GlmParser {
         parser
     }
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
         extract_xml_tools(model_output, "tool_call")
     }
 }
@@ -27,7 +27,7 @@ struct Glm47MoeParser {
 }
 
 impl Glm47MoeParser {
-    func new() -> Glm47MoeParser {
+    func new() . Glm47MoeParser {
         parser := Glm47MoeParser {
             base: BaseToolParser::new("glm47")
         }
@@ -35,7 +35,7 @@ impl Glm47MoeParser {
         parser
     }
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
         extract_xml_tools(model_output, "tool_call")
     }
 }
@@ -45,7 +45,7 @@ struct KimiK3Parser {
 }
 
 impl KimiK3Parser {
-    func new() -> KimiK3Parser {
+    func new() . KimiK3Parser {
         parser := KimiK3Parser {
             base: BaseToolParser::new("kimi_k3")
         }
@@ -53,7 +53,7 @@ impl KimiK3Parser {
         parser
     }
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
         extract_xml_tools(model_output, "function")
     }
 }
@@ -63,14 +63,14 @@ struct InternlmParser {
 }
 
 impl InternlmParser {
-    func new() -> InternlmParser {
+    func new() . InternlmParser {
         parser := InternlmParser {
             base: BaseToolParser::new("internlm")
         }
         parser
     }
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
         extract_qwen_json_tools(model_output)
     }
 }
@@ -80,14 +80,14 @@ struct MinimaxM3Parser {
 }
 
 impl MinimaxM3Parser {
-    func new() -> MinimaxM3Parser {
+    func new() . MinimaxM3Parser {
         parser := MinimaxM3Parser {
             base: BaseToolParser::new("minimax_m3")
         }
         parser
     }
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
         extract_qwen_json_tools(model_output)
     }
 }
@@ -97,14 +97,14 @@ struct MiniCpm5Parser {
 }
 
 impl MiniCpm5Parser {
-    func new() -> MiniCpm5Parser {
+    func new() . MiniCpm5Parser {
         parser := MiniCpm5Parser {
             base: BaseToolParser::new("minicpm5")
         }
         parser
     }
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
         extract_xml_function_tools(model_output)
     }
 }
@@ -114,14 +114,14 @@ struct CohereCommand3Parser {
 }
 
 impl CohereCommand3Parser {
-    func new() -> CohereCommand3Parser {
+    func new() . CohereCommand3Parser {
         parser := CohereCommand3Parser {
             base: BaseToolParser::new("cohere_command3")
         }
         parser
     }
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
         extract_json_tool_array(model_output)
     }
 }
@@ -131,14 +131,14 @@ struct CohereCommand4Parser {
 }
 
 impl CohereCommand4Parser {
-    func new() -> CohereCommand4Parser {
+    func new() . CohereCommand4Parser {
         parser := CohereCommand4Parser {
             base: BaseToolParser::new("cohere_command4")
         }
         parser
     }
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
         extract_json_tool_array(model_output)
     }
 }
@@ -148,14 +148,14 @@ struct GraniteParser {
 }
 
 impl GraniteParser {
-    func new() -> GraniteParser {
+    func new() . GraniteParser {
         parser := GraniteParser {
             base: BaseToolParser::new("granite")
         }
         parser
     }
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
         extract_qwen_xml_tools(model_output)
     }
 }
@@ -165,19 +165,19 @@ struct PythonicToolParser {
 }
 
 impl PythonicToolParser {
-    func new() -> PythonicToolParser {
+    func new() . PythonicToolParser {
         parser := PythonicToolParser {
             base: BaseToolParser::new("pythonic")
         }
         parser
     }
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
         extract_python_tool_calls(model_output)
     }
 }
 
-func extract_xml_tools(str model_output, str tag) -> ExtractedToolCallInformation {
+func extract_xml_tools(str model_output, str tag) . ExtractedToolCallInformation {
     start_tag := "<" + tag + ">"
     end_tag := "</" + tag + ">"
 
@@ -231,7 +231,7 @@ func extract_xml_tools(str model_output, str tag) -> ExtractedToolCallInformatio
     }
 }
 
-func extract_xml_function_tools(str model_output) -> ExtractedToolCallInformation {
+func extract_xml_function_tools(str model_output) . ExtractedToolCallInformation {
     start_tag := "<function name=\""
     end_tag := "</function>"
 
@@ -298,7 +298,7 @@ func extract_xml_function_tools(str model_output) -> ExtractedToolCallInformatio
     }
 }
 
-func extract_json_tool_array(str model_output) -> ExtractedToolCallInformation {
+func extract_json_tool_array(str model_output) . ExtractedToolCallInformation {
     pattern := "\\[\\s*\\{[^\\]]*\\}\\s*\\]"
     re := regex::compile(pattern)
 
@@ -344,7 +344,7 @@ func extract_json_tool_array(str model_output) -> ExtractedToolCallInformation {
     }
 }
 
-func extract_python_tool_calls(str model_output) -> ExtractedToolCallInformation {
+func extract_python_tool_calls(str model_output) . ExtractedToolCallInformation {
     pattern := "\\[([a-zA-Z_][a-zA-Z0-9_]*\\([^)]*\\)[,\\s]*)+\\]"
     re := regex::compile(pattern)
 
@@ -396,16 +396,16 @@ func extract_python_tool_calls(str model_output) -> ExtractedToolCallInformation
     }
 }
 
-func extract_param_values(str content) -> str {
+func extract_param_values(str content) . str {
     pattern := "<param name=\"([^\"]+)\">([^<]*)</param>"
     ""
 }
 
-func extract_group(RegexMatch m, i32 group) -> str {
+func extract_group(RegexMatch m, i32 group) . str {
     ""
 }
 
-func parse_qwen_json_tool(str json_str) -> Option<ToolCall> {
+func parse_qwen_json_tool(str json_str) . Option<ToolCall> {
     func_name := extract_json_field(json_str, "name")
     arguments := extract_json_field(json_str, "arguments")
 
@@ -423,7 +423,7 @@ func parse_qwen_json_tool(str json_str) -> Option<ToolCall> {
     }
 }
 
-func extract_json_field(str json_str, str field_name) -> str {
+func extract_json_field(str json_str, str field_name) . str {
     pattern := "\"" + field_name + "\"\\s*:\\s*\"([^\"]*)\""
     re := regex::compile(pattern)
     match regex::find_string(re, json_str) {

@@ -59,18 +59,18 @@ func kernel_main() (core_system) {
 }
 
 func run_main_event_loop(core_system* core) (int, string) {
-    while core->state->is_running {
-        scheduled_task := sched::schedule_next_task(core->task_scheduler)
+    while core.state.is_running {
+        scheduled_task := sched::schedule_next_task(core.task_scheduler)
         
         if scheduled_task > 0 {
-            core->state->active_task_count = core->state->active_task_count + 1
+            core.state.active_task_count = core.state.active_task_count + 1
         }
         
-        monitor::collect_metrics(core->monitor_service)
+        monitor::collect_metrics(core.monitor_service)
         
-        rpc_framework::process_rpc_requests(core->rpc_srv)
+        rpc_framework::process_rpc_requests(core.rpc_srv)
         
-        sched::advance_scheduler_clock(core->task_scheduler)
+        sched::advance_scheduler_clock(core.task_scheduler)
     }
     0, ""
 }
@@ -89,30 +89,30 @@ func init_platform_backends(core_system* core) (int, string) {
 }
 
 func add_system_task(core_system* core, int task_type_id, int priority) (int, string) {
-    task_id := sched::schedule_task(core->task_scheduler, task_type_id, priority)
+    task_id := sched::schedule_task(core.task_scheduler, task_type_id, priority)
     
-    core->state->active_task_count = core->state->active_task_count + 1
+    core.state.active_task_count = core.state.active_task_count + 1
     task_id, ""
 }
 
 func shutdown_system(core_system* core) (int, string) {
-    core->state->is_running = false
+    core.state.is_running = false
     
-    monitor::flush_metrics(core->monitor_service)
+    monitor::flush_metrics(core.monitor_service)
     
-    rpc_framework::stop_rpc_server(core->rpc_srv)
+    rpc_framework::stop_rpc_server(core.rpc_srv)
     
-    sched::shutdown_scheduler(core->task_scheduler)
+    sched::shutdown_scheduler(core.task_scheduler)
     
-    allocator::cleanup_memory_pool(core->mem_pool)
+    allocator::cleanup_memory_pool(core.mem_pool)
     0, ""
 }
 
 func get_system_status(core_system* core) system_state {
-    core->state*
+    core.state*
 }
 
 func update_system_metrics(core_system* core, int inference_count, int training_count) {
-    core->state->inference_request_count = inference_count
-    core->state->training_task_count = training_count
+    core.state.inference_request_count = inference_count
+    core.state.training_task_count = training_count
 }

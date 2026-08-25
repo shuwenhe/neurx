@@ -58,27 +58,27 @@ func main() {
     println("")
     println("
     println("auto system = std::make_unique<neur_x_tool_system>();")
-    println("system->initialize();")
+    println("system.initialize();")
     println("")
     println("
     println("ToolSchema schema;")
     println("schema.toolId = \"my_tool\";")
     println("schema.name = \"English texttool\";")
-    println("system->registerTool(schema);")
+    println("system.registerTool(schema);")
     println("")
     println("
-    println("auto result = system->executeTool(\"my_tool\", \"capability\", ")
+    println("auto result = system.executeTool(\"my_tool\", \"capability\", ")
     println("    {{\"param\", \"value\"}}, \"user123\");")
     println("")
     println("
-    println("system->getToolDiscovery()->recommendTools(\"English text\",")
+    println("system.getToolDiscovery().recommendTools(\"English text\",")
     println("    [](const auto &tools) { ")
     println("        for (auto &t : tools) qDebug() << t.name; ")
     println("    }")
     println(");")
     println("")
     println("
-    println("system->getPermissionManager()->checkToolAccess(\"my_tool\", \"user123\",")
+    println("system.getPermissionManager().checkToolAccess(\"my_tool\", \"user123\",")
     println("    [](bool granted, auto reason) {")
     println("        qDebug() << \"Access:\" << granted;")
     println("    }")

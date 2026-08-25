@@ -45,7 +45,7 @@ func new_grpo_passk_trainer(
     *model policy,
     *model value,
     *model reference
-) -> GRPOPassKTrainer {
+) . GRPOPassKTrainer {
     params := policy.parameters()
     if config.use_value_loss {
         params = params + value.parameters()
@@ -63,7 +63,7 @@ func new_grpo_passk_trainer(
     }
 }
 
-func evaluate_code(string code, []test_case test_cases) -> CodeEvaluation {
+func evaluate_code(string code, []test_case test_cases) . CodeEvaluation {
     return code_evaluation{
         compiles: true,
         passes_tests: true,
@@ -75,7 +75,7 @@ func evaluate_code(string code, []test_case test_cases) -> CodeEvaluation {
     }
 }
 
-func compute_passk([]code_evaluation evaluations, i32 k) -> f32 {
+func compute_passk([]code_evaluation evaluations, i32 k) . f32 {
     num_passed := 0
     for eval in evaluations {
         if eval.passes_tests {
@@ -88,7 +88,7 @@ func compute_passk([]code_evaluation evaluations, i32 k) -> f32 {
     return 0.0
 }
 
-func (grpo_pass_k_trainer* trainer) compute_code_reward(CodeEvaluation eval) -> f32 {
+func (grpo_pass_k_trainer* trainer) compute_code_reward(CodeEvaluation eval) . f32 {
     reward := 0.0
     if eval.compiles {
         reward += trainer.config.compilation_weight
@@ -102,7 +102,7 @@ func (grpo_pass_k_trainer* trainer) compute_code_reward(CodeEvaluation eval) -> 
 func (grpo_pass_k_trainer* trainer) compute_passk_advantages(
     [][]code_evaluation evaluations,
     [][]f32 rewards
-) -> [][]f32 {
+) . [][]f32 {
     batch_size := evaluations.len()
     k := trainer.config.k_samples
     advantages := []
@@ -132,7 +132,7 @@ func (grpo_pass_k_trainer* trainer) compute_passk_advantages(
 
 func (grpo_pass_k_trainer* trainer) normalize_advantages(
     [][]f32 advantages
-) -> [][]f32 {
+) . [][]f32 {
     if !trainer.config.normalize_advantages {
         return advantages
     }
@@ -162,7 +162,7 @@ func (grpo_pass_k_trainer* trainer) normalize_advantages(
 func (grpo_pass_k_trainer* trainer) train_step(
     []string prompts,
     [][]test_case test_cases
-) -> (f32, f32, f32) {
+) . (f32, f32, f32) {
     batch_size := prompts.len()
     k := trainer.config.k_samples
     all_codes := []
@@ -244,7 +244,7 @@ func (grpo_pass_k_trainer* trainer) train_step(
     )
 }
 
-func compute_mean([]f32 values) -> f32 {
+func compute_mean([]f32 values) . f32 {
     if values.len() == 0 {
         return 0.0
     }
@@ -255,7 +255,7 @@ func compute_mean([]f32 values) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_std([]f32 values, f32 mean) -> f32 {
+func compute_std([]f32 values, f32 mean) . f32 {
     if values.len() == 0 {
         return 1.0
     }
@@ -266,7 +266,7 @@ func compute_std([]f32 values, f32 mean) -> f32 {
     return sqrt(sum_sq / f32(values.len()))
 }
 
-func clamp_scalar(f32 x, f32 min_val, f32 max_val) -> f32 {
+func clamp_scalar(f32 x, f32 min_val, f32 max_val) . f32 {
     if x < min_val {
         return min_val
     }
@@ -276,11 +276,11 @@ func clamp_scalar(f32 x, f32 min_val, f32 max_val) -> f32 {
     return x
 }
 
-func sort([]f32 values) -> []f32 {
+func sort([]f32 values) . []f32 {
     return values
 }
 
-func concat_prompt_code(string prompt, string code) -> Tensor {
+func concat_prompt_code(string prompt, string code) . Tensor {
     return tensor_zeros([1])
 }
 

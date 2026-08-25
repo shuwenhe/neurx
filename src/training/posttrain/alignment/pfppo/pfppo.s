@@ -39,7 +39,7 @@ struct replay_buffer {
     insertion_index: i32
 }
 
-func new_replay_buffer(i32 capacity) -> replay_buffer {
+func new_replay_buffer(i32 capacity) . replay_buffer {
     return replay_buffer{
         capacity: capacity,
         experiences: [],
@@ -61,7 +61,7 @@ func (replay_buffer* buffer) add(experience exp, f32 reward) {
     buffer.insertion_index = (buffer.insertion_index + 1) % buffer.capacity
 }
 
-func (replay_buffer* buffer) sample(i32 n) -> []experience {
+func (replay_buffer* buffer) sample(i32 n) . []experience {
     if buffer.current_size == 0 {
         return []
     }
@@ -99,7 +99,7 @@ func (replay_buffer* buffer) filter_by_reward(f32 threshold, f32 percentile) {
     buffer.insertion_index = 0
 }
 
-func (replay_buffer* buffer) get_statistics() -> (f32, f32, f32) {
+func (replay_buffer* buffer) get_statistics() . (f32, f32, f32) {
     if buffer.current_size == 0 {
         return 0.0, 0.0, 0.0
     }
@@ -131,7 +131,7 @@ func new_pfppo_trainer(
     *model policy,
     *model value,
     *model reference
-) -> pfppo_trainer {
+) . pfppo_trainer {
     optimizer := adamw_optimizer(
         policy.parameters() + value.parameters(),
         config.learning_rate
@@ -150,7 +150,7 @@ func new_pfppo_trainer(
     }
 }
 
-func (pfppo_trainer* trainer) collect_experiences([]tensor prompts) -> []experience {
+func (pfppo_trainer* trainer) collect_experiences([]tensor prompts) . []experience {
     experiences := []
     for prompt in prompts {
         response, log_probs  := trainer.policy_model.generate(
@@ -208,7 +208,7 @@ func (pfppo_trainer* trainer) compute_gae([]experience experiences) {
     }
 }
 
-func (pfppo_trainer* trainer) train_step([]tensor new_prompts) -> (f32, f32, f32) {
+func (pfppo_trainer* trainer) train_step([]tensor new_prompts) . (f32, f32, f32) {
     new_experiences := trainer.collect_experiences(new_prompts)
     buffer_sample_size := i32(
         f32(new_experiences.len()) * trainer.config.buffer_sample_ratio
@@ -272,7 +272,7 @@ func (pfppo_trainer* trainer) train_step([]tensor new_prompts) -> (f32, f32, f32
     )
 }
 
-func (pfppo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
+func (pfppo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     policy_losses := []
     value_losses := []
     for batch in train_data {
@@ -295,6 +295,6 @@ func (pfppo_trainer* trainer) train(DataLoader train_data) -> ([]f32, []f32) {
     return policy_losses, value_losses
 }
 
-func compute_reward(tensor prompt, tensor response) -> f32 {
+func compute_reward(tensor prompt, tensor response) . f32 {
     return random_uniform(-1.0, 1.0)
 }

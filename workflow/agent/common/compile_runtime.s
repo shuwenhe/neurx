@@ -165,7 +165,7 @@ func compile_one(string s_bin, bool legacy_mode, string src) bool {
     string target_dir = dirname_of(module)
     string target = "build/ir/" + module + ".ir"
     _ = runtime_run_command("mkdir -p build/ir/" + runtime_shell_escape(target_dir))
-    println("Compiling " + src + " -> " + target)
+    println("Compiling " + src + " . " + target)
     if legacy_mode {
         return runtime_run_command(runtime_shell_escape(s_bin) + " " + runtime_shell_escape(src) + " " + runtime_shell_escape(target)).ok
     }

@@ -32,8 +32,8 @@ func create_model_registry() model_registry {
 }
 
 func register_model(model_registry* registry, model_metadata* metadata) (string, string) {
-    registry->model_count = registry->model_count + 1
-    metadata->model_id, ""
+    registry.model_count = registry.model_count + 1
+    metadata.model_id, ""
 }
 
 func locate_model(model_registry* registry, string* model_id) (model_location, string) {
@@ -47,10 +47,10 @@ func locate_model(model_registry* registry, string* model_id) (model_location, s
 }
 
 func list_models(model_registry* registry) (model_metadata*, string) {
-    registry->models, ""
+    registry.models, ""
 }
 
 func delete_model(model_registry* registry, string* model_id) (int, string) {
-    registry->model_count = registry->model_count - 1
+    registry.model_count = registry.model_count - 1
     0, ""
 }

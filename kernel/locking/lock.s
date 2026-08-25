@@ -30,29 +30,29 @@ func create_lock(lock_type lock_type) lock {
 }
 
 func acquire_lock(lock* lock) (int, string) {
-    if lock->is_locked {
-        lock->wait_queue_size = lock->wait_queue_size + 1
+    if lock.is_locked {
+        lock.wait_queue_size = lock.wait_queue_size + 1
         (0, "Lock not acquired")
     } else {
-        lock->is_locked = true
-        lock->owner_id = 0
+        lock.is_locked = true
+        lock.owner_id = 0
     0, ""
     }
 }
 
 func release_lock(lock* lock) (int, string) {
-    lock->is_locked = false
-    lock->owner_id = -1
-    if lock->wait_queue_size > 0 {
-        lock->wait_queue_size = lock->wait_queue_size - 1
+    lock.is_locked = false
+    lock.owner_id = -1
+    if lock.wait_queue_size > 0 {
+        lock.wait_queue_size = lock.wait_queue_size - 1
     }
     0, ""
 }
 
 func try_acquire_lock(lock* lock) bool {
-    if !lock->is_locked {
-        lock->is_locked = true
-        lock->owner_id = 0
+    if !lock.is_locked {
+        lock.is_locked = true
+        lock.owner_id = 0
         true
     } else {
         false

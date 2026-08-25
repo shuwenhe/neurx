@@ -47,30 +47,30 @@ struct ParserResponse {
 }
 
 trait ToolParser {
-    fn extract_tool_calls(model_output: str, request: ParserRequest) -> ExtractedToolCallInformation
+    fn extract_tool_calls(model_output: str, request: ParserRequest) . ExtractedToolCallInformation
 
     fn extract_tool_calls_streaming(
         previous_text: str,
         current_text: str,
         delta_text: str,
         request: ParserRequest
-    ) -> DeltaToolCall
+    ) . DeltaToolCall
 
-    fn adjust_request(request: ParserRequest) -> ParserRequest {
+    fn adjust_request(request: ParserRequest) . ParserRequest {
         request
     }
 
-    fn get_parser_name() -> str
+    fn get_parser_name() . str
 
-    fn supports_streaming() -> bool {
+    fn supports_streaming() . bool {
         true
     }
 
-    fn supports_tool_choice_required() -> bool {
+    fn supports_tool_choice_required() . bool {
         true
     }
 
-    fn get_structural_tag_model() -> str {
+    fn get_structural_tag_model() . str {
         ""
     }
 }
@@ -85,7 +85,7 @@ struct BaseToolParser {
 }
 
 impl BaseToolParser {
-    func new(str name) -> BaseToolParser {
+    func new(str name) . BaseToolParser {
         BaseToolParser {
             parser_name: name,
             supports_streaming: true,
@@ -96,22 +96,22 @@ impl BaseToolParser {
         }
     }
 
-    func set_tools(mut self, Vec<str> tools) -> BaseToolParser {
+    func set_tools(mut self, Vec<str> tools) . BaseToolParser {
         self.tools = tools
         self
     }
 
-    func set_streaming(mut self, bool streaming) -> BaseToolParser {
+    func set_streaming(mut self, bool streaming) . BaseToolParser {
         self.supports_streaming = streaming
         self
     }
 
-    func set_tool_choice_required(mut self, bool required) -> BaseToolParser {
+    func set_tool_choice_required(mut self, bool required) . BaseToolParser {
         self.supports_required = required
         self
     }
 
-    func set_structural_tag(mut self, str tag) -> BaseToolParser {
+    func set_structural_tag(mut self, str tag) . BaseToolParser {
         self.structural_tag_model = tag
         self
     }
@@ -126,7 +126,7 @@ struct ToolExtractionContext {
     tool_call_count: i32
 }
 
-func create_extraction_context() -> ToolExtractionContext {
+func create_extraction_context() . ToolExtractionContext {
     ToolExtractionContext {
         current_pos: 0,
         bracket_depth: 0,
@@ -137,7 +137,7 @@ func create_extraction_context() -> ToolExtractionContext {
     }
 }
 
-func find_json_boundaries(str text, i32 start) -> (i32, i32) {
+func find_json_boundaries(str text, i32 start) . (i32, i32) {
     brace_depth := 0
     in_string := false
     escaped := false
@@ -186,7 +186,7 @@ func find_json_boundaries(str text, i32 start) -> (i32, i32) {
     (start_pos, end_pos)
 }
 
-func extract_json_field(str json_str, str field_name) -> str {
+func extract_json_field(str json_str, str field_name) . str {
     pattern := "\"" + field_name + "\"\\s*:\\s*\"([^\"]*)\""
     re := regex::compile(pattern)
     match re::find_string(re, json_str) {
@@ -195,7 +195,7 @@ func extract_json_field(str json_str, str field_name) -> str {
     }
 }
 
-func validate_tool_call(ToolCall tool_call, Vec<str> available_tools) -> bool {
+func validate_tool_call(ToolCall tool_call, Vec<str> available_tools) . bool {
     found := false
     for tool_name in available_tools {
         if tool_name == tool_call.function.name {

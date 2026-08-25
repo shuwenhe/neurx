@@ -75,7 +75,7 @@ func verify_inference_pipeline_checks(production_readiness_report* report) {
     
     add_check(report, production_check {
         category: "Inference Pipeline",
-        item: "Tokenization (prompt -> token IDs)",
+        item: "Tokenization (prompt . token IDs)",
         status: true,
         details: "✓ Qwen tokenizer integrated",
     })
@@ -96,7 +96,7 @@ func verify_inference_pipeline_checks(production_readiness_report* report) {
     
     add_check(report, production_check {
         category: "Inference Pipeline",
-        item: "Detokenization (token IDs -> text)",
+        item: "Detokenization (token IDs . text)",
         status: true,
         details: "✓ UTF-8 output encoding supported",
     })

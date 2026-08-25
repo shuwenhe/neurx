@@ -8,11 +8,11 @@ struct JsonToolParser {
     base: BaseToolParser
     tool_call_start_marker: str
     tool_call_end_marker: str
-    extract_function_body: func(str) -> str
+    extract_function_body: func(str) . str
 }
 
 impl JsonToolParser {
-    func new(str name) -> JsonToolParser {
+    func new(str name) . JsonToolParser {
         JsonToolParser {
             base: BaseToolParser::new(name),
             tool_call_start_marker: "{",
@@ -21,7 +21,7 @@ impl JsonToolParser {
         }
     }
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
         tool_calls := Vec::new()
         content_end := 0
 
@@ -77,7 +77,7 @@ impl JsonToolParser {
         current_text: str,
         delta_text: str,
         request: ParserRequest
-    ) -> DeltaToolCall {
+    ) . DeltaToolCall {
         tool_index := 0
         pattern := "\\{[^}]*\\}"
         re := regex::compile(pattern)
@@ -125,7 +125,7 @@ impl JsonToolParser {
     }
 }
 
-func parse_json_tool_call(str json_str) -> Option<ToolCall> {
+func parse_json_tool_call(str json_str) . Option<ToolCall> {
     func_name := extract_json_string(json_str, "function")
     if len(func_name) == 0 {
         func_name := extract_json_string(json_str, "name")
@@ -146,7 +146,7 @@ func parse_json_tool_call(str json_str) -> Option<ToolCall> {
     })
 }
 
-func extract_json_string(str json_str, str field_name) -> str {
+func extract_json_string(str json_str, str field_name) . str {
     pattern := "\"" + field_name + "\"\\s*:\\s*\"([^\"]*)\""
     re := regex::compile(pattern)
     match regex::find_string(re, json_str) {
@@ -162,11 +162,11 @@ func extract_json_string(str json_str, str field_name) -> str {
     }
 }
 
-func extract_group(RegexMatch m, i32 group) -> str {
+func extract_group(RegexMatch m, i32 group) . str {
     ""
 }
 
-func extract_arguments_from_json(str json_str) -> str {
+func extract_arguments_from_json(str json_str) . str {
     pattern := "\"arguments\"\\s*:\\s*(\\{[^}]*\\})"
     re := regex::compile(pattern)
     match regex::find_string(re, json_str) {
@@ -175,7 +175,7 @@ func extract_arguments_from_json(str json_str) -> str {
     }
 }
 
-func extract_function_name_from_json(str json_str) -> str {
+func extract_function_name_from_json(str json_str) . str {
     pattern := "\"name\"\\s*:\\s*\"([^\"]*)\""
     re := regex::compile(pattern)
     match regex::find_string(re, json_str) {
@@ -184,6 +184,6 @@ func extract_function_name_from_json(str json_str) -> str {
     }
 }
 
-func default_extract_function_body(str s) -> str {
+func default_extract_function_body(str s) . str {
     s
 }

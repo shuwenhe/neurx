@@ -33,7 +33,7 @@ func main() {
         }
         string name = normalize_name(key)
         string dest = root + "/" + name
-        println("Cloning " + key + " -> " + dest)
+        println("Cloning " + key + " . " + dest)
         if force {
             _ = runtime_run_command("rm -rf " + runtime_shell_escape(dest))
         }

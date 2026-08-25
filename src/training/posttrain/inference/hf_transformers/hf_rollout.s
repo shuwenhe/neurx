@@ -52,7 +52,7 @@ struct hf_tokenizer {
     special_tokens: map[string]i32
 }
 
-func new_hf_transformers_rollout(hf_transformers_config config) -> hf_transformers_rollout {
+func new_hf_transformers_rollout(hf_transformers_config config) . hf_transformers_rollout {
     model := load_hf_model(
         config.model_name_or_path,
         config.device,
@@ -79,7 +79,7 @@ func new_hf_transformers_rollout(hf_transformers_config config) -> hf_transforme
 
 func (hf_transformers_rollout* rollout) generate_batch(
     []string prompts
-) -> ([]string, [][]f32) {
+) . ([]string, [][]f32) {
     start_time := get_time_ms()
     rollout.total_prompts += i64(prompts.len())
     input_ids, attention_mask  := rollout.tokenize_batch(prompts)
@@ -104,7 +104,7 @@ func (hf_transformers_rollout* rollout) generate(
     tensor input_ids,
     tensor attention_mask,
     i32 max_new_tokens
-) -> (tensor, [][]f32) {
+) . (tensor, [][]f32) {
     batch_size := input_ids.shape[0]
     input_length := input_ids.shape[1]
     max_length := input_length + max_new_tokens
@@ -163,7 +163,7 @@ func (hf_transformers_rollout* rollout) generate(
 func (hf_transformers_rollout* rollout) sample_next_tokens(
     tensor logits,
     tensor finished
-) -> (tensor, []f32) {
+) . (tensor, []f32) {
     batch_size := logits.shape[0]
     if !rollout.config.do_sample {
         next_tokens := logits.argmax(dim: -1)
@@ -203,7 +203,7 @@ func (hf_transformers_rollout* rollout) sample_next_tokens(
 
 func (hf_transformers_rollout* rollout) tokenize_batch(
     []string prompts
-) -> (tensor, tensor) {
+) . (tensor, tensor) {
     all_input_ids := []
     max_length := 0
     for prompt in prompts {
@@ -238,7 +238,7 @@ func (hf_transformers_rollout* rollout) tokenize_batch(
     return input_ids_tensor, attention_mask
 }
 
-func (hf_transformers_rollout* rollout) get_statistics() -> (i64, i64, f32, f32) {
+func (hf_transformers_rollout* rollout) get_statistics() . (i64, i64, f32, f32) {
     avg_tokens_per_prompt := 0.0
     if rollout.total_prompts > 0 {
         avg_tokens_per_prompt = f32(rollout.total_tokens_generated) / f32(rollout.total_prompts)
@@ -271,7 +271,7 @@ func load_hf_model(
     string dtype,
     bool trust_remote_code,
     bool low_cpu_mem_usage
-) -> *hf_model {
+) . *hf_model {
     println(f"Loading HF model: {model_name}")
     println(f"  Device: {device}")
     println(f"  Dtype: {dtype}")
@@ -282,13 +282,13 @@ func load_hf_tokenizer(
     string model_name,
     string padding_side,
     bool trust_remote_code
-) -> *hf_tokenizer {
+) . *hf_tokenizer {
     println(f"Loading HF tokenizer: {model_name}")
     println(f"  Padding side: {padding_side}")
     return null
 }
 
-func parse_device(string device_str) -> device {
+func parse_device(string device_str) . device {
     return device{}
 }
 
@@ -321,6 +321,6 @@ struct mlp {}
 
 struct layer_norm {}
 
-func get_time_ms() -> i64 {
+func get_time_ms() . i64 {
     return 0
 }

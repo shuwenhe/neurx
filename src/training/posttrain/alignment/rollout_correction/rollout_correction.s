@@ -20,7 +20,7 @@ func apply_rollout_correction_to_advantages(
     Tensor old_log_probs,
     Tensor response_mask,
     RolloutCorrectionConfig config
-) -> RolloutCorrectionResult {
+) . RolloutCorrectionResult {
     is_weights := compute_is_weights(
         new_log_probs,
         rollout_log_probs,
@@ -63,7 +63,7 @@ func apply_rollout_correction_to_loss(
     Tensor old_log_probs,
     Tensor response_mask,
     RolloutCorrectionConfig config
-) -> RolloutCorrectionResult {
+) . RolloutCorrectionResult {
     is_weights := compute_is_weights(
         new_log_probs,
         rollout_log_probs,
@@ -106,7 +106,7 @@ func compute_policy_loss_bypass_mode(
     Tensor response_mask,
     RolloutCorrectionConfig config,
     f32 clip_epsilon
-) -> (tensor, rollout_correction_result) {
+) . (tensor, rollout_correction_result) {
     ratio := exp(new_log_probs - rollout_log_probs)
     policy_loss := Tensor()
     match config.loss_type {
@@ -139,7 +139,7 @@ func compute_policy_loss_decoupled_mode(
     Tensor response_mask,
     RolloutCorrectionConfig config,
     f32 clip_epsilon
-) -> (tensor, rollout_correction_result) {
+) . (tensor, rollout_correction_result) {
     ratio := exp(new_log_probs - old_log_probs)
     surr1 := ratio * advantages
     surr2 := clamp(ratio, 1.0 - clip_epsilon, 1.0 + clip_epsilon) * advantages
@@ -160,7 +160,7 @@ func collect_statistics(
     []rs_result rs_results,
     Tensor corrected_mask,
     Tensor original_mask
-) -> map[string]f32 {
+) . map[string]f32 {
     stats := map[string]f32{}
     is_stats := compute_is_statistics(is_weights)
     for key, value in is_stats {
@@ -179,18 +179,18 @@ func collect_statistics(
     return stats
 }
 
-func is_rollout_correction_enabled(RolloutCorrectionConfig config) -> bool {
+func is_rollout_correction_enabled(RolloutCorrectionConfig config) . bool {
     return config.is_level != is_aggregation_level.NONE || config.rs_modes.len() > 0
 }
 
-func clamp(Tensor x, f32 min_val, f32 max_val) -> Tensor {
+func clamp(Tensor x, f32 min_val, f32 max_val) . Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
 
-func minimum(Tensor x, Tensor y) -> Tensor {
+func minimum(Tensor x, Tensor y) . Tensor {
     return where((x < y), x, y)
 }
 
-func where(Tensor condition, Tensor x, Tensor y) -> Tensor {
+func where(Tensor condition, Tensor x, Tensor y) . Tensor {
     return condition.to_float() * x + (1.0 - condition.to_float()) * y
 }

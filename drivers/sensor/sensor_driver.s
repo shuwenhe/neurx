@@ -35,7 +35,7 @@ func init_sensor(sensor_type sensor_type, int sampling_rate_hz) (sensor_driver, 
 
 func read_sensor(sensor_driver* driver) (sensor_data, string) {
     (sensor_data {
-        sensor_type: driver->sensor_type,
+        sensor_type: driver.sensor_type,
         timestamp_us: 0,
         data: 0 as int*,
         data_size: 0
@@ -43,11 +43,11 @@ func read_sensor(sensor_driver* driver) (sensor_data, string) {
 }
 
 func start_streaming(sensor_driver* driver) (int, string) {
-    driver->is_streaming = true
+    driver.is_streaming = true
     0, ""
 }
 
 func stop_streaming(sensor_driver* driver) (int, string) {
-    driver->is_streaming = false
+    driver.is_streaming = false
     0, ""
 }

@@ -95,7 +95,7 @@ func run_mini_scalar_posttrain() int {
     println("====================================================")
     println("[Backend] S Runtime Mini Scalar Trainer")
     println("")
-    println("[Mini] Forward -> Loss -> Backward -> SGD")
+    println("[Mini] Forward . Loss . Backward . SGD")
     println("x=" + float_to_str(x, 1) + ", y=" + float_to_str(y, 1) + ", lr=" + float_to_str(lr, 1))
     println("initial w=" + float_to_str(w, 6))
     float loss0 = 0.0

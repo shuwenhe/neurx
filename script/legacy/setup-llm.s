@@ -45,11 +45,11 @@ func main() {
     println("")
     println("
     println("    auto provider = new RemoteProvider();")
-    println("    provider->setApiKey(getenv(\"NEURX_API_KEY\"));")
-    println("    analyzer->setLLMProvider(provider);")
+    println("    provider.setApiKey(getenv(\"NEURX_API_KEY\"));")
+    println("    analyzer.setLLMProvider(provider);")
     println("")
     println("
-    println("    auto result = analyzer->analyzeCode(\"def hello(): print('world')\",")
+    println("    auto result = analyzer.analyzeCode(\"def hello(): print('world')\",")
     println("                                        ProgrammingLanguage::Python);")
     println("")
     println("    qDebug() << \"Quality:\" << result.quality;")

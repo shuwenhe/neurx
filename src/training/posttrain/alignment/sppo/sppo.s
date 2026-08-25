@@ -32,7 +32,7 @@ struct trajectory {
     win_rate: f32
 }
 
-func new_sppo_trainer(sppo_config config, *model model, *model ref_model) -> sppo_trainer {
+func new_sppo_trainer(sppo_config config, *model model, *model ref_model) . sppo_trainer {
     optimizer := adamw_optimizer(model.parameters(), config.learning_rate)
     return sppo_trainer{
         config: config,
@@ -45,7 +45,7 @@ func new_sppo_trainer(sppo_config config, *model model, *model ref_model) -> spp
     }
 }
 
-func (sppo_trainer* trainer) self_play_rollout(tensor prompts, i32 num_samples) -> []trajectory {
+func (sppo_trainer* trainer) self_play_rollout(tensor prompts, i32 num_samples) . []trajectory {
     trajectories := []
     for i in 0..prompts.shape[0] {
         prompt := prompts[i]
@@ -70,14 +70,14 @@ func (sppo_trainer* trainer) self_play_rollout(tensor prompts, i32 num_samples) 
     return trajectories
 }
 
-func (sppo_trainer* trainer) compute_self_play_reward(tensor prompt, tensor response) -> f32 {
+func (sppo_trainer* trainer) compute_self_play_reward(tensor prompt, tensor response) . f32 {
     logits := trainer.policy_model.forward(concat(prompt, response))
     ref_logits := trainer.reference_model.forward(concat(prompt, response))
     kl_div := compute_kl_divergence(logits, ref_logits)
     return -kl_div
 }
 
-func (sppo_trainer* trainer) compute_win_rates([]trajectory trajectories) -> []trajectory {
+func (sppo_trainer* trainer) compute_win_rates([]trajectory trajectories) . []trajectory {
     n := trajectories.len()
     for i in 0..n {
         wins := 0
@@ -100,7 +100,7 @@ func (sppo_trainer* trainer) compute_win_rates([]trajectory trajectories) -> []t
     return trajectories
 }
 
-func (sppo_trainer* trainer) create_preference_pairs([]trajectory trajectories) -> ([]trajectory, []trajectory) {
+func (sppo_trainer* trainer) create_preference_pairs([]trajectory trajectories) . ([]trajectory, []trajectory) {
     chosen := []
     rejected := []
     prompt_groups := {}
@@ -125,7 +125,7 @@ func (sppo_trainer* trainer) create_preference_pairs([]trajectory trajectories) 
 func (sppo_trainer* trainer) compute_sppo_loss(
     []trajectory chosen,
     []trajectory rejected
-) -> tensor {
+) . tensor {
     batch_size := chosen.len()
     total_loss := tensor_zeros([1])
     for i in 0..batch_size {
@@ -155,7 +155,7 @@ func (sppo_trainer* trainer) compute_sppo_loss(
     return total_loss / f32(batch_size)
 }
 
-func (sppo_trainer* trainer) train_step(tensor prompts) -> f32 {
+func (sppo_trainer* trainer) train_step(tensor prompts) . f32 {
     trajectories := trainer.self_play_rollout(prompts, num_samples: 4)
     trajectories = trainer.compute_win_rates(trajectories)
     chosen, rejected  := trainer.create_preference_pairs(trajectories)
@@ -179,7 +179,7 @@ func (sppo_trainer* trainer) train_step(tensor prompts) -> f32 {
     return loss.item()
 }
 
-func (sppo_trainer* trainer) train(DataLoader train_data) -> []f32 {
+func (sppo_trainer* trainer) train(DataLoader train_data) . []f32 {
     losses := []
     for batch in train_data {
         prompts := batch.prompts
@@ -192,7 +192,7 @@ func (sppo_trainer* trainer) train(DataLoader train_data) -> []f32 {
     return losses
 }
 
-func compute_kl_divergence(tensor p_logits, tensor q_logits) -> f32 {
+func compute_kl_divergence(tensor p_logits, tensor q_logits) . f32 {
     p := softmax(p_logits, dim: -1)
     log_p := log_softmax(p_logits, dim: -1)
     log_q := log_softmax(q_logits, dim: -1)
@@ -200,10 +200,10 @@ func compute_kl_divergence(tensor p_logits, tensor q_logits) -> f32 {
     return kl.item()
 }
 
-func log_sigmoid(tensor x) -> tensor {
+func log_sigmoid(tensor x) . tensor {
     return -softplus(-x)
 }
 
-func softplus(tensor x) -> tensor {
+func softplus(tensor x) . tensor {
     return log(1.0 + exp(x))
 }

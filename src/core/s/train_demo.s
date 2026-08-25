@@ -127,7 +127,7 @@ func save_checkpoint_to_file(int step, float loss, float best_loss, int best_ste
     if r1.is_ok() {
         r2 := fs_write(manifest_path, file_path + "\n")
         if r2.is_ok() {
-            println("  -> Saved: ", file_path)
+            println("  . Saved: ", file_path)
             return file_path
         }
     }

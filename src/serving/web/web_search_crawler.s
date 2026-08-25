@@ -116,7 +116,7 @@ struct google_search_engine implements search_engine_interface {
         this.api_key = api_key
         this.cx_id = cx_id
     }
-    get name -> string {
+    get name . string {
         return this.name
     }
     search(string query, config: web_search_config) {
@@ -207,7 +207,7 @@ struct bing_search_engine implements search_engine_interface {
     init(api_key: string) {
         this.api_key = api_key
     }
-    get name -> string {
+    get name . string {
         return this.name
     }
     search(string query, config: web_search_config) {

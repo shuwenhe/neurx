@@ -1606,7 +1606,7 @@ func gpt_large_pretrain_advance_epoch_shard(gpt_large_pretrain_state state) gpt_
     }
     int next_shard_index = gpt_large_pretrain_int_at(next_order, next_order_index)
     string next_shard_path = gpt_large_pretrain_string_at(state.train_shard_refs, next_shard_index)
-    println("[Shard] next -> " + gpt_large_pretrain_shard_summary_text(next_shard_index + 1, len(state.train_shard_refs), next_shard_path) + " (epoch=" + int_to_str(next_shard_epoch, 0) + ", order=" + int_to_str(next_order_index, 0) + ")")
+    println("[Shard] next . " + gpt_large_pretrain_shard_summary_text(next_shard_index + 1, len(state.train_shard_refs), next_shard_path) + " (epoch=" + int_to_str(next_shard_epoch, 0) + ", order=" + int_to_str(next_order_index, 0) + ")")
     gpt_large_pretrain_state stepped = gpt_large_pretrain_apply_shard(state, next_shard_index)
     stepped.shard_order = next_order
     stepped.shard_order_index = next_order_index

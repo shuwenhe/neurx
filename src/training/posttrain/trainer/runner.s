@@ -954,7 +954,7 @@ func run_runtime_training(trainer_config config) int {
     }
     println("  Non-zero weights:  " + int_to_str(adapter.nonzero_weights) + "/" + int_to_str(adapter.total_weights) + " (" + float_to_str(nonzero_pct, 1) + "%)")
     println("")
-    println("[Weight Delta (Init -> Final)]")
+    println("[Weight Delta (Init . Final)]")
     println("  L1 delta:          " + float_to_str(delta.l1_delta, 6))
     println("  L2 delta:          " + float_to_str(delta.l2_delta, 6))
     println("  Max delta:         " + float_to_str(delta.max_delta, 6))

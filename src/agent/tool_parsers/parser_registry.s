@@ -3,11 +3,11 @@ package neurx.tool_parsers
 use neurx.tool_parsers.parsers
 
 struct ToolParserRegistry {
-    parsers: Map<str, func() -> ToolParser>
+    parsers: Map<str, func() . ToolParser>
 }
 
 impl ToolParserRegistry {
-    func new() -> ToolParserRegistry {
+    func new() . ToolParserRegistry {
         registry := ToolParserRegistry {
             parsers: map::new()
         }
@@ -64,23 +64,23 @@ impl ToolParserRegistry {
         self.register_parser("python", || PythonicToolParser::new())
     }
 
-    func register_parser(mut self, str name, func( factory) -> ToolParser) {
+    func register_parser(mut self, str name, func( factory) . ToolParser) {
         self.parsers.insert(name, factory)
     }
 
-    func get_parser(self, str name) -> Option<ToolParser> {
+    func get_parser(self, str name) . Option<ToolParser> {
         match self.parsers.get(name) {
             Some(factory) => Some(factory()),
             None => None
         }
     }
 
-    func get_parser_for_model(self, str model_name) -> Option<ToolParser> {
+    func get_parser_for_model(self, str model_name) . Option<ToolParser> {
         parser_name := infer_parser_from_model_name(model_name)
         self.get_parser(parser_name)
     }
 
-    func list_available_parsers(self) -> Vec<str> {
+    func list_available_parsers(self) . Vec<str> {
         names := Vec::new()
         for (name, _) in self.parsers.iter() {
             names.push(name.clone())
@@ -91,7 +91,7 @@ impl ToolParserRegistry {
 
 _GLOBAL_PARSER_REGISTRY := None
 
-func get_global_registry() -> ToolParserRegistry {
+func get_global_registry() . ToolParserRegistry {
     match _GLOBAL_PARSER_REGISTRY {
         Some(r) => r,
         None => {
@@ -101,12 +101,12 @@ func get_global_registry() -> ToolParserRegistry {
     }
 }
 
-func get_parser_for_model(str model_name) -> Option<ToolParser> {
+func get_parser_for_model(str model_name) . Option<ToolParser> {
     registry := get_global_registry()
     registry.get_parser_for_model(model_name)
 }
 
-func list_available_parsers() -> Vec<str> {
+func list_available_parsers() . Vec<str> {
     registry := get_global_registry()
     registry.list_available_parsers()
 }
@@ -115,7 +115,7 @@ func extract_tool_calls(
     model_name: str,
     model_output: str,
     tools: Vec<str>
-) -> ExtractedToolCallInformation {
+) . ExtractedToolCallInformation {
     match get_parser_for_model(model_name) {
         Some(parser) => {
             request := ParserRequest {
@@ -139,7 +139,7 @@ func extract_tool_calls(
 func validate_tool_calls(
     tool_calls: Vec<ToolCall>,
     available_tools: Vec<str>
-) -> Vec<ToolCall> {
+) . Vec<ToolCall> {
     validator := ToolCallValidator::new(available_tools, true)
     validator.validate_tool_calls(tool_calls)
 }
@@ -153,7 +153,7 @@ struct ToolParserConfig {
 }
 
 impl ToolParserConfig {
-    func default() -> ToolParserConfig {
+    func default() . ToolParserConfig {
         ToolParserConfig {
             strict_mode: false,
             enable_streaming: true,
@@ -165,12 +165,12 @@ impl ToolParserConfig {
         }
     }
 
-    func set_strict_mode(mut self, bool strict) -> ToolParserConfig {
+    func set_strict_mode(mut self, bool strict) . ToolParserConfig {
         self.strict_mode = strict
         self
     }
 
-    func set_streaming_enabled(mut self, bool enabled) -> ToolParserConfig {
+    func set_streaming_enabled(mut self, bool enabled) . ToolParserConfig {
         self.enable_streaming = enabled
         self
     }

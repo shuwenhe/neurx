@@ -56,14 +56,14 @@ func create_rpc_server(int port) (rpc_server, string) {
 }
 
 func start_rpc_server(rpc_server* server) (int, string) {
-    server->is_running = true
-    server->active_connections = 1
-    server->port, ""
+    server.is_running = true
+    server.active_connections = 1
+    server.port, ""
 }
 
 func stop_rpc_server(rpc_server* server) (int, string) {
-    server->is_running = false
-    server->active_connections = 0
+    server.is_running = false
+    server.active_connections = 0
     0, ""
 }
 
@@ -79,7 +79,7 @@ func create_rpc_client(string* address, int port) (rpc_client, string) {
 }
 
 func send_rpc_call(rpc_client* client, string* method, int* payload, int payload_size) (rpc_message, string) {
-    if !client->is_connected {
+    if !client.is_connected {
         return 0, "Client not connected"
     }
     
@@ -107,43 +107,43 @@ func receive_rpc_response(rpc_client* client) (rpc_message, string) {
 func process_rpc_requests(rpc_server* server) (int, string) {
     processed := 0
     
-    while server->request_queue->write_pos > 0 && processed < 100 {
-        if server->request_queue->queue->len() > 0 {
-            msg := server->request_queue->queue->get(0)
-            server->request_queue->queue->remove(0)
+    while server.request_queue.write_pos > 0 && processed < 100 {
+        if server.request_queue.queue.len() > 0 {
+            msg := server.request_queue.queue.get(0)
+            server.request_queue.queue.remove(0)
             
             handle_rpc_request(server, &msg)
             
             processed = processed + 1
-            server->request_queue->write_pos = server->request_queue->write_pos - 1
+            server.request_queue.write_pos = server.request_queue.write_pos - 1
         }
     }
     processed, ""
 }
 
 func handle_rpc_request(rpc_server* server, rpc_message* message) (int, string) {
-    if message->method_name == "infer" {
+    if message.method_name == "infer" {
         return 1, ""
     }
     
-    if message->method_name == "train" {
+    if message.method_name == "train" {
         return 2, ""
     }
     
-    if message->method_name == "status" {
+    if message.method_name == "status" {
         return 3, ""
     }
     0, ""
 }
 
 func enqueue_rpc_request(rpc_server* server, rpc_message* message) (int, string) {
-    if server->request_queue->write_pos >= server->request_queue->queue_size {
+    if server.request_queue.write_pos >= server.request_queue.queue_size {
         return 0, "Request queue full"
     }
     
-    server->request_queue->queue->push(message*)
-    server->request_queue->write_pos = server->request_queue->write_pos + 1
-    server->request_queue->write_pos, ""
+    server.request_queue.queue.push(message*)
+    server.request_queue.write_pos = server.request_queue.write_pos + 1
+    server.request_queue.write_pos, ""
 }
 
 func get_rpc_server_status(rpc_server* server) rpc_server {

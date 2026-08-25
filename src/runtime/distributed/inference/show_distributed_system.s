@@ -37,9 +37,9 @@ func print_resource_requirements() {
 func process_requests() {
     printf("\nProcessing Inference Requests:\n")
     printf("=============================\n")
-    printf("Request 1: req-001 -> Rank 0 (queue=12, util=45.1%%)\n")
-    printf("Request 2: req-002 -> Rank 1 (queue=10, util=42.3%%)\n")
-    printf("Request 3: req-003 -> Rank 2 (queue=11, util=43.8%%)\n")
+    printf("Request 1: req-001 . Rank 0 (queue=12, util=45.1%%)\n")
+    printf("Request 2: req-002 . Rank 1 (queue=10, util=42.3%%)\n")
+    printf("Request 3: req-003 . Rank 2 (queue=11, util=43.8%%)\n")
     printf("✓ Processed 3 requests\n")
 }
 

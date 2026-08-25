@@ -48,7 +48,7 @@ func delete_file(string filepath) bool {
 }
 
 func rename_file(string old_path, string new_path) bool {
-    println("[FileIO] Renaming: " + old_path + " -> " + new_path)
+    println("[FileIO] Renaming: " + old_path + " . " + new_path)
     return true
 }
 

@@ -64,7 +64,7 @@ func main() {
     println("  4. Will connect to real base-model embedding")
     println("")
     println("Components to implement:")
-    println("  - Embedding lookup (vocab_id -> 128-dim)")
+    println("  - Embedding lookup (vocab_id . 128-dim)")
     println("  - Single attention head (Q,K,V projections)")
     println("  - LoRA A,B matrices for Q,K,V")
     println("  - Loss computation (CE loss with target tokens)")

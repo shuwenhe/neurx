@@ -385,7 +385,7 @@ func tokenize_text(string text) []int {
         }
         i = i + 1
     }
-    print("[Tokenize] Input: '" + text + "' -> " + int_to_string(token_count) + " tokens\n")
+    print("[Tokenize] Input: '" + text + "' . " + int_to_string(token_count) + " tokens\n")
     return tokens
 }
 

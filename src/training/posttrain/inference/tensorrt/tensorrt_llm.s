@@ -52,7 +52,7 @@ struct tensorrt_decoder {
     bad_words: []string
 }
 
-func new_tensorrt_engine(tensorrt_config config) -> tensorrt_engine {
+func new_tensorrt_engine(tensorrt_config config) . tensorrt_engine {
     runtime := tensorrt_runtime{
         world_size: get_world_size(),
         rank: get_rank(),
@@ -98,7 +98,7 @@ func (tensorrt_engine* engine) generate(
     tensor input_ids,
     i32 max_new_tokens,
     SamplingConfig sampling_config
-) -> (tensor, []f32) {
+) . (tensor, []f32) {
     engine.total_requests += 1
     batch_size := input_ids.shape[0]
     input_len := input_ids.shape[1]
@@ -122,7 +122,7 @@ func (tensorrt_engine* engine) generate(
 
 func (tensorrt_engine* engine) run_generation(
     tensorrt_decoder_input input
-) -> (tensor, []f32) {
+) . (tensor, []f32) {
     batch_size := input.input_ids.shape[0]
     max_input_len := input.input_ids.shape[1]
     max_seq_len := max_input_len + input.max_new_tokens
@@ -164,7 +164,7 @@ func (tensorrt_engine* engine) sample(
     tensor logits,
     SamplingConfig config,
     tensor finished
-) -> (tensor, []f32) {
+) . (tensor, []f32) {
     batch_size := logits.shape[0]
     scaled_logits := logits / config.temperature
     if config.top_k > 0 {
@@ -208,7 +208,7 @@ func (tensorrt_engine* engine) apply_lora_adapters() {
 
 func (tensorrt_engine* engine) generate_batch(
     []generation_request requests
-) -> []generation_response {
+) . []generation_response {
     batch_size := requests.len()
     input_ids_list := []
     max_input_len := 0
@@ -238,7 +238,7 @@ func (tensorrt_engine* engine) generate_batch(
     return responses
 }
 
-func (tensorrt_engine* engine) get_statistics() -> (i64, i64, f32) {
+func (tensorrt_engine* engine) get_statistics() . (i64, i64, f32) {
     avg_tokens_per_request := 0.0
     if engine.total_requests > 0 {
         avg_tokens_per_request = f32(engine.total_tokens_generated) / f32(engine.total_requests)
@@ -272,18 +272,18 @@ struct generation_response {
     log_probs: []f32
 }
 
-func load_tensorrt_engine(string model_dir, string engine_name) -> *tensorrt_model_engine {
+func load_tensorrt_engine(string model_dir, string engine_name) . *tensorrt_model_engine {
     return null
 }
 
-func get_end_token_id() -> i32 {
+func get_end_token_id() . i32 {
     return 2
 }
 
-func get_pad_token_id() -> i32 {
+func get_pad_token_id() . i32 {
     return 0
 }
 
-func pad_sequences([]tensor sequences, i32 max_len) -> tensor {
+func pad_sequences([]tensor sequences, i32 max_len) . tensor {
     return sequences[0]
 }

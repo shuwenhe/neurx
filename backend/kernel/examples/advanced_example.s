@@ -140,14 +140,14 @@ func DataTypeConversionExample() {
 
     result := conversion.Float32ToFloat16(input_f32, &output_f16)
     if result.success {
-        println("✅ Float32->Float16 succeeded")
+        println("✅ Float32.Float16 succeeded")
     }
 
     println("Converting Float16 back to Float32...")
     output_f32 := make([]f32, 1024)
     result = conversion.Float16ToFloat32(output_f16, &output_f32)
     if result.success {
-        println("✅ Float16->Float32 succeeded")
+        println("✅ Float16.Float32 succeeded")
     }
 
     println("Quantizing to Int8...")

@@ -28,7 +28,7 @@ struct batch_reward_manager {
     avg_batch_size: f32
 }
 
-func new_batch_reward_manager(batch_reward_manager_config config, *model model) -> batch_reward_manager {
+func new_batch_reward_manager(batch_reward_manager_config config, *model model) . batch_reward_manager {
     workers := []
     for i in 0..config.num_workers {
         workers.push(new_worker(i))
@@ -124,7 +124,7 @@ struct delayed_request {
 func new_rate_limited_reward_manager(
     rate_limited_reward_manager_config config,
     *model model
-) -> rate_limited_reward_manager {
+) . rate_limited_reward_manager {
     return rate_limited_reward_manager{
         config: config,
         reward_model: model,
@@ -139,7 +139,7 @@ func new_rate_limited_reward_manager(
 func (rate_limited_reward_manager* manager) compute_reward(
     tensor prompt,
     tensor response
-) -> f32 {
+) . f32 {
     manager.total_requests += 1
     manager.refill_tokens()
     if manager.tokens >= 1.0 {
@@ -169,7 +169,7 @@ func (rate_limited_reward_manager* manager) refill_tokens() {
 func (rate_limited_reward_manager* manager) compute_reward_internal(
     tensor prompt,
     tensor response
-) -> f32 {
+) . f32 {
     input := concat(prompt, response)
     reward := manager.reward_model.forward(input)
     return reward.item()
@@ -190,7 +190,7 @@ struct dapo_reward_manager {
     reasoning_scorer: *reasoning_scorer
 }
 
-func new_dapo_reward_manager(dapo_reward_manager_config config) -> dapo_reward_manager {
+func new_dapo_reward_manager(dapo_reward_manager_config config) . dapo_reward_manager {
     return dapo_reward_manager{
         config: config,
         format_checker: new_format_checker(),
@@ -203,7 +203,7 @@ func (dapo_reward_manager* manager) compute_reward(
     tensor prompt,
     tensor response,
     string ground_truth
-) -> (f32, map[string]f32) {
+) . (f32, map[string]f32) {
     response_text := decode_tokens(response)
     format_score := manager.format_checker.check(response_text)
     accuracy_score := manager.accuracy_verifier.verify(response_text, ground_truth)
@@ -243,7 +243,7 @@ func new_prime_reward_manager(
     prime_reward_manager_config config,
     *model step_model,
     *model final_model
-) -> prime_reward_manager {
+) . prime_reward_manager {
     return prime_reward_manager{
         config: config,
         step_reward_model: step_model,
@@ -255,7 +255,7 @@ func (prime_reward_manager* manager) compute_reward(
     tensor prompt,
     tensor response,
     []string steps
-) -> (f32, []f32) {
+) . (f32, []f32) {
     step_rewards := []
     for step_text in steps {
         step_tokens := encode_text(step_text)
@@ -273,7 +273,7 @@ func (prime_reward_manager* manager) compute_reward(
     return total_reward, step_rewards
 }
 
-func stack_and_pad([]tensor tensors) -> tensor {
+func stack_and_pad([]tensor tensors) . tensor {
     max_len := 0
     for t in tensors {
         if t.shape[0] > max_len {
@@ -292,18 +292,18 @@ func stack_and_pad([]tensor tensors) -> tensor {
     return stack(padded)
 }
 
-func generate_uuid() -> string {
+func generate_uuid() . string {
     return f"{random_int(0, 999999)}-{get_time_ms()}"
 }
 
-func get_time_ms() -> i64 {
+func get_time_ms() . i64 {
     return 0
 }
 
 func sleep_ms(i64 duration) {
 }
 
-func compute_mean([]f32 values) -> f32 {
+func compute_mean([]f32 values) . f32 {
     if values.len() == 0 {
         return 0.0
     }
@@ -324,20 +324,20 @@ struct worker { id: i32 }
 
 struct mutex {}
 
-func new_format_checker() -> *format_checker { return null }
+func new_format_checker() . *format_checker { return null }
 
-func new_answer_verifier(string method) -> *answer_verifier { return null }
+func new_answer_verifier(string method) . *answer_verifier { return null }
 
-func new_reasoning_scorer() -> *reasoning_scorer { return null }
+func new_reasoning_scorer() . *reasoning_scorer { return null }
 
-func new_worker(i32 id) -> worker { return worker{ id id } }
+func new_worker(i32 id) . worker { return worker{ id id } }
 
-func mutex_new() -> mutex { return mutex{} }
+func mutex_new() . mutex { return mutex{} }
 
 func (mutex* m) lock() {}
 
 func (mutex* m) unlock() {}
 
-func decode_tokens(tensor t) -> string { return "" }
+func decode_tokens(tensor t) . string { return "" }
 
-func encode_text(string s) -> tensor { return tensor_zeros([1]) }
+func encode_text(string s) . tensor { return tensor_zeros([1]) }

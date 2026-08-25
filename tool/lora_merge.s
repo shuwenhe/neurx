@@ -90,7 +90,7 @@ func file_exists(string path) bool {
 }
 
 func copy_directory(string src, string dst) bool {
-    println("Copying directory: " + src + " -> " + dst)
+    println("Copying directory: " + src + " . " + dst)
     true
 }
 

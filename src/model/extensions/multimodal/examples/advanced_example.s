@@ -55,7 +55,7 @@ func main() {
         if can_process {
             info := res_proc.GetInfo(h, w)
             println(fmt(
-                "  [%dx%d] -> Target: %dx%d, Patches: %d, Scale: %.2f",
+                "  [%dx%d] . Target: %dx%d, Patches: %d, Scale: %.2f",
                 info.original_height,
                 info.original_width,
                 info.target_height,

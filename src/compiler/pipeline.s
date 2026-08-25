@@ -37,12 +37,12 @@ func pipeline_capture_module(compile_pipeline_state pipeline) compile_pipeline_s
     graph = ir_add_node(graph, make_ir_node_state(pipeline.state.name + "_entry", "module_entry", ["input"], ["hidden"]))
     graph = ir_add_node(graph, make_ir_node_state(pipeline.state.name + "_exit", "module_exit", ["hidden"], ["output"]))
     graph = ir_add_output(graph, "output")
-    graph = ir_add_edge(graph, pipeline.state.name + "_entry->" + pipeline.state.name + "_exit")
+    graph = ir_add_edge(graph, pipeline.state.name + "_entry." + pipeline.state.name + "_exit")
     compile_state next = pipeline.state
     next = compile_set_captured(next, true)
     next = compile_add_node_with_io(next, pipeline.state.name + "_entry", "module_entry", [], ["input"], ["hidden"])
     next = compile_add_node_with_io(next, pipeline.state.name + "_exit", "module_exit", [], ["hidden"], ["output"])
-    next = compile_add_edge(next, pipeline.state.name + "_entry->" + pipeline.state.name + "_exit")
+    next = compile_add_edge(next, pipeline.state.name + "_entry." + pipeline.state.name + "_exit")
     compile_pipeline_state {
         state: next,
         graph: graph,

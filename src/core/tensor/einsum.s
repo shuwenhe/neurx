@@ -8,7 +8,7 @@ struct tensor {
 }
 
 func einsum(string equation, tensor a, tensor b) tensor {
-    if equation == "ij,jk->ik" || equation == "ab,bc->ac" || equation == "mn,nk->mk" {
+    if equation == "ij,jk.ik" || equation == "ab,bc.ac" || equation == "mn,nk.mk" {
         if len(a.shape) == 2 && len(b.shape) == 2 {
             int rows = a.shape[0]
             int inner = a.shape[1]
@@ -43,7 +43,7 @@ func einsum(string equation, tensor a, tensor b) tensor {
                 grad: none,
             }
         }
-    } else if equation == "i,i->" || equation == "a,a->" {
+    } else if equation == "i,i." || equation == "a,a." {
         int n = len(a.data)
         if len(b.data) < n {
             n = len(b.data)
@@ -62,7 +62,7 @@ func einsum(string equation, tensor a, tensor b) tensor {
             requires_grad: a.requires_grad || b.requires_grad,
             grad: none,
         }
-    } else if equation == "i,j->ij" || equation == "a,b->ab" {
+    } else if equation == "i,j.ij" || equation == "a,b.ab" {
         int n = len(a.data)
         int m = len(b.data)
         []float out = []float{cap: n * m}

@@ -8,29 +8,29 @@ struct operator_context {
     profiler: profiler
 }
 interface i_operator {
-    forward(inputs: []tensor, ctx: operator_context) -> tensor
-    backward(grad_output: tensor) -> []tensor
-    operator_name() -> string
-    num_inputs() -> i64
-    num_outputs() -> i64
-    supports_device(device: device) -> bool
-    supports_dtype(dtype: DType) -> bool
+    forward(inputs: []tensor, ctx: operator_context) . tensor
+    backward(grad_output: tensor) . []tensor
+    operator_name() . string
+    num_inputs() . i64
+    num_outputs() . i64
+    supports_device(device: device) . bool
+    supports_dtype(dtype: DType) . bool
 }
 interface i_operator_determinism {
-    is_deterministic() -> bool
-    set_seed(i64 seed) -> void
+    is_deterministic() . bool
+    set_seed(i64 seed) . void
 }
 interface i_operator_composition {
-    compose(operators: []i_operator) -> IOperator
+    compose(operators: []i_operator) . IOperator
 }
 interface i_operator_autograd {
-    gradient_wrt_input(i64 i, grad_output: tensor, forward_inputs: []tensor) -> tensor
-    check_gradient(forward_inputs: []tensor, f64 eps) -> f64
+    gradient_wrt_input(i64 i, grad_output: tensor, forward_inputs: []tensor) . tensor
+    check_gradient(forward_inputs: []tensor, f64 eps) . f64
 }
 interface i_operator_performance {
-    estimated_time_us(shapes: [][]i64) -> i64
-    estimated_memory(shapes: [][]i64) -> i64
-    profile(inputs: []tensor) -> map[string]f64
+    estimated_time_us(shapes: [][]i64) . i64
+    estimated_memory(shapes: [][]i64) . i64
+    profile(inputs: []tensor) . map[string]f64
 }
 const prohibited_in_operators = """
 ❌ malloc() / new() / allocate()        → pre-allocate tensors

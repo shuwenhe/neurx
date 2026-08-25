@@ -131,7 +131,7 @@ func train_forward_pass() float {
         step = step + 1
     }
     println("")
-    println("Loss change: " + float_to_str(first_loss) + " -> " + float_to_str(last_loss))
+    println("Loss change: " + float_to_str(first_loss) + " . " + float_to_str(last_loss))
     if last_loss < first_loss {
         println("✓ PASS: Loss decreased")
         return 1.0
@@ -185,7 +185,7 @@ func train_target_zero() float {
         step = step + 1
     }
     println("")
-    println("Loss change: " + float_to_str(first_loss) + " -> " + float_to_str(last_loss))
+    println("Loss change: " + float_to_str(first_loss) + " . " + float_to_str(last_loss))
     if last_loss < first_loss {
         println("✓ PASS: Loss decreased")
         return 1.0

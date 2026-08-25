@@ -37,43 +37,43 @@ struct profiler_summary {
     device: device
 }
 interface i_profiler {
-    enable() -> void
-    disable() -> void
-    is_enabled() -> bool
-    set_mode(mode: ProfilingMode) -> void
-    get_mode() -> ProfilingMode
-    reset() -> void
-    get_profile() -> profiler_summary
+    enable() . void
+    disable() . void
+    is_enabled() . bool
+    set_mode(mode: ProfilingMode) . void
+    get_mode() . ProfilingMode
+    reset() . void
+    get_profile() . profiler_summary
 }
 interface i_kernel_profiler {
-    record_kernel(string kernel_name, device: device, i64 time_us) -> void
-    record_memory(string kernel_name, i64 allocated, i64 freed) -> void
-    get_kernel_stats(string kernel_name) -> kernel_profile
-    list_kernels() -> []string
+    record_kernel(string kernel_name, device: device, i64 time_us) . void
+    record_memory(string kernel_name, i64 allocated, i64 freed) . void
+    get_kernel_stats(string kernel_name) . kernel_profile
+    list_kernels() . []string
 }
 interface i_operator_profiler {
-    record_operator(string op_name, i64 time_us, input_shapes: [][]i64, output_shapes: [][]i64) -> void
-    get_operator_stats(string op_name) -> operator_profile
-    list_operators() -> []string
+    record_operator(string op_name, i64 time_us, input_shapes: [][]i64, output_shapes: [][]i64) . void
+    get_operator_stats(string op_name) . operator_profile
+    list_operators() . []string
 }
 interface i_memory_profiler {
-    track_allocation(ptr: memory_ptr, i64 size) -> void
-    track_deallocation(ptr: memory_ptr) -> void
-    get_memory_peak() -> i64
-    get_current_memory() -> i64
-    get_memory_timeline() -> []i64
+    track_allocation(ptr: memory_ptr, i64 size) . void
+    track_deallocation(ptr: memory_ptr) . void
+    get_memory_peak() . i64
+    get_current_memory() . i64
+    get_memory_timeline() . []i64
 }
 interface i_profiler_export {
-    export_chrome_trace(string path) -> void
-    export_tensorboard(string path) -> void
-    export_perfetto(string path) -> void
-    export_json(string path) -> void
+    export_chrome_trace(string path) . void
+    export_tensorboard(string path) . void
+    export_perfetto(string path) . void
+    export_json(string path) . void
 }
 interface i_profiler_context {
-    push_scope(string name) -> void
-    pop_scope() -> void
-    record_event(string name, i64 time_us) -> void
-    add_metadata(string key, string value) -> void
+    push_scope(string name) . void
+    pop_scope() . void
+    record_event(string name, i64 time_us) . void
+    add_metadata(string key, string value) . void
 }
 interface i_profiling_guard {
 }

@@ -70,20 +70,20 @@ func create_monitoring_service(int interval_ms) (monitoring_service, string) {
 }
 
 func start_monitoring(monitoring_service* service) (int, string) {
-    service->is_running = true
+    service.is_running = true
     0, ""
 }
 
 func collect_metric(monitoring_service* service, metric* metric_val) (int, string) {
-    service->num_metrics = service->num_metrics + 1
+    service.num_metrics = service.num_metrics + 1
     
-    if service->buffer->write_pos < service->buffer->buffer_size {
-        service->buffer->metrics->push(metric_val*)
-        service->buffer->write_pos = service->buffer->write_pos + 1
+    if service.buffer.write_pos < service.buffer.buffer_size {
+        service.buffer.metrics.push(metric_val*)
+        service.buffer.write_pos = service.buffer.write_pos + 1
     } else {
-        service->buffer->is_full = true
+        service.buffer.is_full = true
     }
-    service->num_metrics, ""
+    service.num_metrics, ""
 }
 
 func collect_metrics(monitoring_service* service) (int, string) {
@@ -94,8 +94,8 @@ func collect_metrics(monitoring_service* service) (int, string) {
         timestamp_us: get_time_us()
     }
     
-    service->buffer->metrics->push(latency_metric)
-    service->num_metrics = service->num_metrics + 1
+    service.buffer.metrics.push(latency_metric)
+    service.num_metrics = service.num_metrics + 1
     
         gpu_metric := metric {
         metric_type: metric_type::gpu_utilization,
@@ -104,8 +104,8 @@ func collect_metrics(monitoring_service* service) (int, string) {
         timestamp_us: get_time_us()
     }
     
-    service->buffer->metrics->push(gpu_metric)
-    service->num_metrics = service->num_metrics + 1
+    service.buffer.metrics.push(gpu_metric)
+    service.num_metrics = service.num_metrics + 1
     
         mem_metric := metric {
         metric_type: metric_type::memory_usage,
@@ -114,39 +114,39 @@ func collect_metrics(monitoring_service* service) (int, string) {
         timestamp_us: get_time_us()
     }
     
-    service->buffer->metrics->push(mem_metric)
-    service->num_metrics = service->num_metrics + 1
+    service.buffer.metrics.push(mem_metric)
+    service.num_metrics = service.num_metrics + 1
     
     update_system_health(service)
-    service->num_metrics, ""
+    service.num_metrics, ""
 }
 
 func update_system_health(monitoring_service* service) (int, string) {
-    service->health->healthy_gpus = 1
-    service->health->total_gpus = 1
-    service->health->avg_temperature = 52.0
-    service->health->memory_utilization = 51.2
-    service->health->network_utilization = 23.5
+    service.health.healthy_gpus = 1
+    service.health.total_gpus = 1
+    service.health.avg_temperature = 52.0
+    service.health.memory_utilization = 51.2
+    service.health.network_utilization = 23.5
     0, ""
 }
 
 func get_system_health(monitoring_service* service) system_health {
-    service->health*
+    service.health*
 }
 
 func flush_metrics(monitoring_service* service) (int, string) {
-    flushed := service->buffer->write_pos
+    flushed := service.buffer.write_pos
     
-    service->buffer->write_pos = 0
-    service->buffer->is_full = false
+    service.buffer.write_pos = 0
+    service.buffer.is_full = false
     flushed, ""
 }
 
 func query_metrics(monitoring_service* service, int start_us, int end_us) (vec[metric], string) {
     results := vec[metric]()
     
-    for i in 0..service->buffer->metrics->len() {
-        m := service->buffer->metrics->get(i)
+    for i in 0..service.buffer.metrics.len() {
+        m := service.buffer.metrics.get(i)
         
         if m.timestamp_us >= start_us && m.timestamp_us <= end_us {
             results.push(m)
@@ -160,6 +160,6 @@ func get_time_us() int {
 }
 
 func stop_monitoring(monitoring_service* service) (int, string) {
-    service->is_running = false
+    service.is_running = false
     0, ""
 }

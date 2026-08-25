@@ -101,5 +101,5 @@ func main() {
     eprintln("  - Transformer decoder (decoder_cpu.s)")
     eprintln("  - BPE tokenizer (bpe_tokenizer.s)")
     eprintln("")
-    eprintln("Usage: load_model(directory) -> runtime_model")
+    eprintln("Usage: load_model(directory) . runtime_model")
 }

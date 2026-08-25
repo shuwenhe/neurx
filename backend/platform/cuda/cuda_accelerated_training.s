@@ -165,7 +165,7 @@ func launch_kernel(kernel_launch_config config, int data_size) {
 func cuda_gemm(int64 a_ptr, int64 b_ptr, int64 c_ptr,
                int m, int n, int k,
                cuda_context ctx) {
-    fmt.printfln("   CUDA GEMM: [%d x %d] @ [%d x %d] -> [%d x %d]",
+    fmt.printfln("   CUDA GEMM: [%d x %d] @ [%d x %d] . [%d x %d]",
                  m, k, k, n, m, n)
     flops := int64(2 * m * n * k)
     tensor_cores := flops / 128

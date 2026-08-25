@@ -136,7 +136,7 @@ func process_batch(batch []inference_request, nodes []inference_node_state, engi
     for i = 0; i < len(batch); i = i + 1 {
         inference_request req = batch[i]
         int target_rank = schedule_request(req, nodes)
-        printf("  Request %s -> Rank %d\n", req.request_id, target_rank)
+        printf("  Request %s . Rank %d\n", req.request_id, target_rank)
         inference_response resp = forward_inference(engine, req)
         nodes[target_rank].num_pending_requests = nodes[target_rank].num_pending_requests + 1
         total_processed = total_processed + 1
