@@ -31,7 +31,7 @@ struct feedback {
 }
 
 func init_actuator(actuator_type actuator_type) (actuator_driver, string) {
-    result::ok(actuator_driver {
+    (actuator_driver {
         actuator_type: actuator_type,
         driver_id: 0,
         max_speed: 100.0,
@@ -42,15 +42,15 @@ func init_actuator(actuator_type actuator_type) (actuator_driver, string) {
 
 func home_actuator(actuator_driver* driver) (int, string) {
     driver->is_homed = true
-    result::ok(0)
+    (0, "")
 }
 
 func send_command(actuator_driver* driver, actuator_command* cmd) (int, string) {
-    result::ok(0)
+    (0, "")
 }
 
 func read_feedback(actuator_driver* driver) (feedback, string) {
-    result::ok(feedback {
+    (feedback {
         current_position: 0.0,
         current_velocity: 0.0,
         current_force: 0.0,

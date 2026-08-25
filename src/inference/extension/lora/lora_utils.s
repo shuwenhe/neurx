@@ -16,14 +16,14 @@ func init_lora_weights_kaiming(
     rank: int
 ) result[(vec[vec[float]], vec[vec[float]]), lora_utils_error] {
     if in_features <= 0 || out_features <= 0 || rank <= 0 {
-        return result::err(lora_utils_error {
+        return (lora_utils_error {
             code: "INVALID_DIMS",
             message: "Dimensions must be positive",
         })
     }
 
     if rank > in_features || rank > out_features {
-        return result::err(lora_utils_error {
+        return (lora_utils_error {
             code: "INVALID_RANK",
             message: "Rank cannot exceed input or output features",
         })
@@ -61,7 +61,7 @@ func init_lora_weights_kaiming(
         i = i + 1
     }
 
-    result::ok((lora_a, lora_b))
+    ((lora_a, lora_b, ""))
 }
 
 func gaussian_random(std: float) float {
@@ -89,7 +89,7 @@ func load_lora_weights_from_dict(
         }
     }
 
-    result::ok(result_weights)
+    (result_weights, "")
 }
 
 func save_lora_weights_to_file(
@@ -97,20 +97,20 @@ func save_lora_weights_to_file(
     weights: *map[string, (vec[vec[float]], vec[vec[float]])]
 ) result[(), lora_utils_error] {
     if output_path.len() == 0 {
-        return result::err(lora_utils_error {
+        return (lora_utils_error {
             code: "INVALID_PATH",
             message: "Output path cannot be empty",
         })
     }
 
-    result::ok(())
+    ((, ""))
 }
 
 func load_lora_weights_from_file(
     file_path: string
 ) result[&map[string, (vec[vec[float]], vec[vec[float]])], lora_utils_error] {
     if file_path.len() == 0 {
-        return result::err(lora_utils_error {
+        return (lora_utils_error {
             code: "INVALID_PATH",
             message: "File path cannot be empty",
         })
@@ -118,7 +118,7 @@ func load_lora_weights_from_file(
 
     let mut weights = map[string, (vec[vec[float]], vec[vec[float]])]()
 
-    result::ok(weights)
+    (weights, "")
 }
 
 func estimate_lora_rank(
@@ -126,14 +126,14 @@ func estimate_lora_rank(
     threshold: float
 ) result[int, lora_utils_error] {
     if delta_weights.len() == 0 {
-        return result::err(lora_utils_error {
+        return (lora_utils_error {
             code: "EMPTY_WEIGHTS",
             message: "Delta weights cannot be empty",
         })
     }
 
     if threshold < 0.0 || threshold > 1.0 {
-        return result::err(lora_utils_error {
+        return (lora_utils_error {
             code: "INVALID_THRESHOLD",
             message: "Threshold must be in [0.0, 1.0]",
         })
@@ -155,9 +155,9 @@ func estimate_lora_rank(
     let estimated_rank = (frobenius_norm * (1.0 - threshold)).ceil() as int
 
     if estimated_rank < 1 {
-        result::ok(1)
+        (1, "")
     } else {
-        result::ok(estimated_rank)
+        (estimated_rank, "")
     }
 }
 
@@ -165,7 +165,7 @@ func merge_lora_configs(
     configs: *vec[&map[string, string]]
 ) result[&map[string, string], lora_utils_error] {
     if configs.len() == 0 {
-        return result::err(lora_utils_error {
+        return (lora_utils_error {
             code: "EMPTY_CONFIGS",
             message: "Configurations cannot be empty",
         })
@@ -183,7 +183,7 @@ func merge_lora_configs(
         }
     }
 
-    result::ok(merged)
+    (merged, "")
 }
 
 func validate_lora_weight_shapes(
@@ -195,7 +195,7 @@ func validate_lora_weight_shapes(
 ) result[(), lora_utils_error] {
 
     if lora_a.len() != expected_in_features {
-        return result::err(lora_utils_error {
+        return (lora_utils_error {
             code: "SHAPE_MISMATCH",
             message: "LoRA A rows mismatch: expected " + expected_in_features.to_string() +
                      ", got " + lora_a.len().to_string(),
@@ -203,7 +203,7 @@ func validate_lora_weight_shapes(
     }
 
     if lora_a.len() > 0 && lora_a[0].len() != expected_rank {
-        return result::err(lora_utils_error {
+        return (lora_utils_error {
             code: "SHAPE_MISMATCH",
             message: "LoRA A columns mismatch: expected " + expected_rank.to_string() +
                      ", got " + lora_a[0].len().to_string(),
@@ -211,7 +211,7 @@ func validate_lora_weight_shapes(
     }
 
     if lora_b.len() != expected_rank {
-        return result::err(lora_utils_error {
+        return (lora_utils_error {
             code: "SHAPE_MISMATCH",
             message: "LoRA B rows mismatch: expected " + expected_rank.to_string() +
                      ", got " + lora_b.len().to_string(),
@@ -219,14 +219,14 @@ func validate_lora_weight_shapes(
     }
 
     if lora_b.len() > 0 && lora_b[0].len() != expected_out_features {
-        return result::err(lora_utils_error {
+        return (lora_utils_error {
             code: "SHAPE_MISMATCH",
             message: "LoRA B columns mismatch: expected " + expected_out_features.to_string() +
                      ", got " + lora_b[0].len().to_string(),
         })
     }
 
-    result::ok(())
+    ((, ""))
 }
 
 func calculate_lora_memory_mb(
@@ -244,7 +244,7 @@ func normalize_lora_weights(
     lora_b: *vec[vec[float]]
 ) result[(vec[vec[float]], vec[vec[float]]), lora_utils_error] {
     if lora_a.len() == 0 || lora_b.len() == 0 {
-        return result::err(lora_utils_error {
+        return (lora_utils_error {
             code: "EMPTY_WEIGHTS",
             message: "Weights cannot be empty",
         })
@@ -318,7 +318,7 @@ func normalize_lora_weights(
         i = i + 1
     }
 
-    result::ok((normalized_a, normalized_b))
+    ((normalized_a, normalized_b, ""))
 }
 
 func check_lora_weights_validity(
@@ -331,7 +331,7 @@ func check_lora_weights_validity(
         while j < lora_a[0].len() {
             let val = lora_a[i][j]
             if val != val {
-                return result::err(lora_utils_error {
+                return (lora_utils_error {
                     code: "INVALID_VALUE",
                     message: "LoRA A contains NaN at position (" + i.to_string() + ", " + j.to_string() + ")",
                 })
@@ -347,7 +347,7 @@ func check_lora_weights_validity(
         while j < lora_b[0].len() {
             let val = lora_b[i][j]
             if val != val {
-                return result::err(lora_utils_error {
+                return (lora_utils_error {
                     code: "INVALID_VALUE",
                     message: "LoRA B contains NaN at position (" + i.to_string() + ", " + j.to_string() + ")",
                 })
@@ -357,5 +357,5 @@ func check_lora_weights_validity(
         i = i + 1
     }
 
-    result::ok(())
+    ((, ""))
 }

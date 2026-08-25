@@ -38,14 +38,14 @@ func compute_lora_delta(
     scaling: float
 ) result[&vec[vec[float]], fusion_error] {
     if lora_a.len() == 0 || lora_b.len() == 0 {
-        return result::err(fusion_error {
+        return (fusion_error {
             code: "INVALID_MATRIX",
             message: "LoRA matrices cannot be empty",
         })
     }
 
     if lora_a[0].len() == 0 || lora_b[0].len() == 0 {
-        return result::err(fusion_error {
+        return (fusion_error {
             code: "INVALID_MATRIX",
             message: "LoRA matrix dimensions are invalid",
         })
@@ -53,7 +53,7 @@ func compute_lora_delta(
 
     let rank = lora_a[0].len()
     if lora_b.len() != rank {
-        return result::err(fusion_error {
+        return (fusion_error {
             code: "DIMENSION_MISMATCH",
             message: "LoRA A and B dimension mismatch: " +
                      rank.to_string() + " vs " + lora_b.len().to_string(),
@@ -85,7 +85,7 @@ func compute_lora_delta(
         i = i + 1
     }
 
-    result::ok(delta)
+    (delta, "")
 }
 
 func (mut weight_fusion_engine* engine) fuse_weights(
@@ -94,14 +94,14 @@ func (mut weight_fusion_engine* engine) fuse_weights(
     lora_delta: *vec[vec[float]]
 ) result[(), fusion_error] {
     if original_weights.len() != lora_delta.len() {
-        return result::err(fusion_error {
+        return (fusion_error {
             code: "SHAPE_MISMATCH",
             message: "Original and LoRA delta shape mismatch",
         })
     }
 
     if original_weights[0].len() != lora_delta[0].len() {
-        return result::err(fusion_error {
+        return (fusion_error {
             code: "SHAPE_MISMATCH",
             message: "Original and LoRA delta width mismatch",
         })
@@ -126,7 +126,7 @@ func (mut weight_fusion_engine* engine) fuse_weights(
     }
 
     engine.fused.insert(module_name, fused)
-    result::ok(())
+    ((, ""))
 }
 
 func (mut weight_fusion_engine* engine) unfuse_weights(
@@ -135,7 +135,7 @@ func (mut weight_fusion_engine* engine) unfuse_weights(
     lora_delta: *vec[vec[float]]
 ) result[&vec[vec[float]], fusion_error] {
     if fused_weights.len() != lora_delta.len() {
-        return result::err(fusion_error {
+        return (fusion_error {
             code: "SHAPE_MISMATCH",
             message: "Fused and LoRA delta shape mismatch",
         })
@@ -160,7 +160,7 @@ func (mut weight_fusion_engine* engine) unfuse_weights(
     }
 
     engine.fused.remove(module_name)
-    result::ok(original)
+    (original, "")
 }
 
 func (weight_fusion_engine* engine) get_fused_weights(
@@ -211,7 +211,7 @@ func fuse_multiple_adapters(
     adapter_scales: *vec[float]
 ) result[&map[string, &vec[vec[float]]], fusion_error] {
     if lora_deltas.len() != adapter_scales.len() {
-        return result::err(fusion_error {
+        return (fusion_error {
             code: "LENGTH_MISMATCH",
             message: "LoRA deltas and scales length mismatch",
         })
@@ -278,5 +278,5 @@ func fuse_multiple_adapters(
         }
     }
 
-    result::ok(result_weights)
+    (result_weights, "")
 }

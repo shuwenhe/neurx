@@ -56,7 +56,7 @@ func kernel_main() (core_system, string) {
     
     rpc_framework::start_rpc_server(&core.rpc_srv)?
     
-    result::ok(core)
+    (core, "")
 }
 
 func run_main_event_loop(core_system* core) (int, string) {
@@ -74,7 +74,7 @@ func run_main_event_loop(core_system* core) (int, string) {
         sched::advance_scheduler_clock(core->task_scheduler)?
     }
     
-    result::ok(0)
+    (0, "")
 }
 
 func init_platform_backends(core_system* core) (int, string) {
@@ -88,7 +88,7 @@ func init_platform_backends(core_system* core) (int, string) {
         backend_selector::init_cpu_backend(&hal_cap)?
     }
     
-    result::ok(0)
+    (0, "")
 }
 
 func add_system_task(core_system* core, int task_type_id, int priority) (int, string) {
@@ -96,7 +96,7 @@ func add_system_task(core_system* core, int task_type_id, int priority) (int, st
     
     core->state->active_task_count = core->state->active_task_count + 1
     
-    result::ok(task_id)
+    (task_id, "")
 }
 
 func shutdown_system(core_system* core) (int, string) {
@@ -110,7 +110,7 @@ func shutdown_system(core_system* core) (int, string) {
     
     allocator::cleanup_memory_pool(core->mem_pool)?
     
-    result::ok(0)
+    (0, "")
 }
 
 func get_system_status(core_system* core) system_state {

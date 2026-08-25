@@ -270,22 +270,22 @@ func create_solar_config() model_config {
 
 func create_model_config(model_name: string) result[model_config, model_loader_error] {
     switch model_name {
-        "llama" : result::ok(create_llama_config()),
-        "llama2" : result::ok(create_llama2_config()),
-        "qwen" : result::ok(create_qwen_config()),
-        "qwen2" : result::ok(create_qwen2_config()),
-        "deepseek" : result::ok(create_deepseek_config()),
-        "mistral" : result::ok(create_mistral_config()),
-        "phi" : result::ok(create_phi_config()),
-        "baichuan" : result::ok(create_baichuan_config()),
-        "internlm" : result::ok(create_internlm_config()),
-        "glm" : result::ok(create_glm_config()),
-        "mixtral" : result::ok(create_mixtral_config()),
-        "yi" : result::ok(create_yi_config()),
-        "openchat" : result::ok(create_openchat_config()),
-        "neural_chat" : result::ok(create_neural_chat_config()),
-        "solar" : result::ok(create_solar_config()),
-        _ : result::err(model_loader_error {
+        "llama" : (create_llama_config(, "")),
+        "llama2" : (create_llama2_config(, "")),
+        "qwen" : (create_qwen_config(, "")),
+        "qwen2" : (create_qwen2_config(, "")),
+        "deepseek" : (create_deepseek_config(, "")),
+        "mistral" : (create_mistral_config(, "")),
+        "phi" : (create_phi_config(, "")),
+        "baichuan" : (create_baichuan_config(, "")),
+        "internlm" : (create_internlm_config(, "")),
+        "glm" : (create_glm_config(, "")),
+        "mixtral" : (create_mixtral_config(, "")),
+        "yi" : (create_yi_config(, "")),
+        "openchat" : (create_openchat_config(, "")),
+        "neural_chat" : (create_neural_chat_config(, "")),
+        "solar" : (create_solar_config(, "")),
+        _ : (model_loader_error {
             code: "UNKNOWN_MODEL",
             message: "Unknown model type: " + model_name,
         }),
@@ -314,48 +314,48 @@ func (model_config* config) get_intermediate_size() int {
 
 func (model_config* config) is_valid() result[(), model_loader_error] {
     if config.hidden_size <= 0 {
-        return result::err(model_loader_error {
+        return (model_loader_error {
             code: "INVALID_CONFIG",
             message: "Hidden size must be positive",
         })
     }
 
     if config.num_hidden_layers <= 0 {
-        return result::err(model_loader_error {
+        return (model_loader_error {
             code: "INVALID_CONFIG",
             message: "Number of layers must be positive",
         })
     }
 
     if config.vocab_size <= 0 {
-        return result::err(model_loader_error {
+        return (model_loader_error {
             code: "INVALID_CONFIG",
             message: "Vocab size must be positive",
         })
     }
 
     if config.num_attention_heads <= 0 {
-        return result::err(model_loader_error {
+        return (model_loader_error {
             code: "INVALID_CONFIG",
             message: "Number of attention heads must be positive",
         })
     }
 
     if config.hidden_size % config.num_attention_heads != 0 {
-        return result::err(model_loader_error {
+        return (model_loader_error {
             code: "INVALID_CONFIG",
             message: "Hidden size must be divisible by number of attention heads",
         })
     }
 
-    result::ok(())
+    ((, ""))
 }
 
 func load_model_architecture(model_name: string) result[model_architecture, model_loader_error] {
     let config = create_model_config(model_name)?
     config.is_valid()?
 
-    result::ok(model_architecture {
+    (model_architecture {
         model_type: model_name,
         config: config,
         weight_map: map[string, string](),
@@ -374,10 +374,10 @@ func main() {
     while i < model_names.len() {
         let name = model_names[i]
         switch load_model_architecture(name) {
-            result::ok(arch) : {
+            (arch, "") : {
                 ""
             },
-            result::err(err) : {
+            (0, err) : {
                 ""
             },
         }

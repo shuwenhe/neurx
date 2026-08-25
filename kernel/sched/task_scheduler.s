@@ -66,7 +66,7 @@ func create_scheduler() (scheduler, string) {
         current_time_ms: 0
     }
     
-    result::ok(sched)
+    (sched, "")
 }
 
 func schedule_training_task(scheduler* sched, int priority) (int, string) {
@@ -88,7 +88,7 @@ func schedule_training_task(scheduler* sched, int priority) (int, string) {
     sched->ready_queue->queue->push(new_task)
     sched->total_scheduled_count = sched->total_scheduled_count + 1
     
-    result::ok(task_id)
+    (task_id, "")
 }
 
 func schedule_inference_task(scheduler* sched, int priority) (int, string) {
@@ -110,7 +110,7 @@ func schedule_inference_task(scheduler* sched, int priority) (int, string) {
     sched->ready_queue->queue->push(new_task)
     sched->total_scheduled_count = sched->total_scheduled_count + 1
     
-    result::ok(task_id)
+    (task_id, "")
 }
 
 func schedule_system_task(scheduler* sched, int priority) (int, string) {
@@ -132,7 +132,7 @@ func schedule_system_task(scheduler* sched, int priority) (int, string) {
     sched->ready_queue->queue->push(new_task)
     sched->total_scheduled_count = sched->total_scheduled_count + 1
     
-    result::ok(task_id)
+    (task_id, "")
 }
 
 func schedule_task(scheduler* sched, int task_type_id, int priority) (int, string) {
@@ -147,13 +147,13 @@ func schedule_task(scheduler* sched, int task_type_id, int priority) (int, strin
 
 func schedule_next_task(scheduler* sched) (int, string) {
     if sched->ready_queue->queue->len() == 0 {
-        return result::ok(0)
+        return (0, "")
     }
     
     let selected_idx = find_highest_priority_task(sched)?
     
     if selected_idx < 0 {
-        return result::ok(0)
+        return (0, "")
     }
     
     let next_task = sched->ready_queue->queue->get(selected_idx)
@@ -164,7 +164,7 @@ func schedule_next_task(scheduler* sched) (int, string) {
     
     sched->context_switch_count = sched->context_switch_count + 1
     
-    result::ok(next_task_id)
+    (next_task_id, "")
 }
 
 func find_highest_priority_task(scheduler* sched) (int, string) {
@@ -180,7 +180,7 @@ func find_highest_priority_task(scheduler* sched) (int, string) {
         }
     }
     
-    result::ok(highest_idx)
+    (highest_idx, "")
 }
 
 func context_switch(scheduler* sched, int from_task_id, int to_task_id) (int, string) {
@@ -205,27 +205,27 @@ func context_switch(scheduler* sched, int from_task_id, int to_task_id) (int, st
         sched->running_tasks->push(to_task)
     }
     
-    result::ok(0)
+    (0, "")
 }
 
 func find_task_in_running(scheduler* sched, int task_id) (int, string) {
     for i in 0..sched->running_tasks->len() {
         let t = sched->running_tasks->get(i)
         if t.task_id == task_id {
-            return result::ok(i)
+            return (i, "")
         }
     }
-    result::ok(-1)
+    (-1, "")
 }
 
 func find_task_in_queue(scheduler* sched, int task_id) (int, string) {
     for i in 0..sched->ready_queue->queue->len() {
         let t = sched->ready_queue->queue->get(i)
         if t.task_id == task_id {
-            return result::ok(i)
+            return (i, "")
         }
     }
-    result::ok(-1)
+    (-1, "")
 }
 
 func check_deadline_violations(scheduler* sched) (int, string) {
@@ -244,7 +244,7 @@ func check_deadline_violations(scheduler* sched) (int, string) {
         }
     }
     
-    result::ok(violation_count)
+    (violation_count, "")
 }
 
 func advance_scheduler_clock(scheduler* sched) (int, string) {
@@ -259,7 +259,7 @@ func advance_scheduler_clock(scheduler* sched) (int, string) {
         check_deadline_violations(sched)?
     }
     
-    result::ok(sched->current_time_ms)
+    (sched->current_time_ms, "")
 }
 
 func complete_task(scheduler* sched, int task_id) (int, string) {
@@ -273,7 +273,7 @@ func complete_task(scheduler* sched, int task_id) (int, string) {
         sched->completed_tasks->push(t)
     }
     
-    result::ok(0)
+    (0, "")
 }
 
 func fail_task(scheduler* sched, int task_id) (int, string) {
@@ -287,7 +287,7 @@ func fail_task(scheduler* sched, int task_id) (int, string) {
         sched->completed_tasks->push(t)
     }
     
-    result::ok(0)
+    (0, "")
 }
 
 func get_scheduler_stats(scheduler* sched) scheduler {
@@ -300,5 +300,5 @@ func shutdown_scheduler(scheduler* sched) (int, string) {
         complete_task(sched, t.task_id)?
     }
     
-    result::ok(sched->total_scheduled_count)
+    (sched->total_scheduled_count, "")
 }

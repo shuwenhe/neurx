@@ -33,11 +33,11 @@ func create_model_registry() model_registry {
 
 func register_model(model_registry* registry, model_metadata* metadata) (string, string) {
     registry->model_count = registry->model_count + 1
-    result::ok(metadata->model_id)
+    (metadata->model_id, "")
 }
 
 func locate_model(model_registry* registry, string* model_id) (model_location, string) {
-    result::ok(model_location {
+    (model_location {
         model_id: model_id,
         storage_path: "",
         storage_type: "distributed",
@@ -47,10 +47,10 @@ func locate_model(model_registry* registry, string* model_id) (model_location, s
 }
 
 func list_models(model_registry* registry) (model_metadata*, string) {
-    result::ok(registry->models)
+    (registry->models, "")
 }
 
 func delete_model(model_registry* registry, string* model_id) (int, string) {
     registry->model_count = registry->model_count - 1
-    result::ok(0)
+    (0, "")
 }

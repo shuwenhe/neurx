@@ -77,7 +77,7 @@ func example_weight_fusion() result[(), string] {
     println("  ✓ 权重已反融合")
     println("    融合状态: " + adapter.is_fused().to_string())
 
-    result::ok(())
+    ((, ""))
 }
 
 func example_lora_state_management() result[(), string] {
@@ -115,7 +115,7 @@ func example_lora_state_management() result[(), string] {
     let active = state_manager.get_active_requests()
     println("    活跃请求: " + active.len().to_string())
 
-    result::ok(())
+    ((, ""))
 }
 
 func example_multi_adapter_caching() result[(), string] {
@@ -160,7 +160,7 @@ func example_multi_adapter_caching() result[(), string] {
     let (cache_entries, _) = state_manager.get_cache_stats()
     println("    清除后缓存条目: " + cache_entries.to_string())
 
-    result::ok(())
+    ((, ""))
 }
 
 func example_dynamic_adapter_switch() result[(), string] {
@@ -210,7 +210,7 @@ func example_dynamic_adapter_switch() result[(), string] {
     state_manager.update_adapter_scales("dynamic_req", updated_scales)?
     println("  ✓ 已更新缩放因子")
 
-    result::ok(())
+    ((, ""))
 }
 
 func example_weight_computation_perf() result[(), string] {
@@ -256,35 +256,35 @@ func example_weight_computation_perf() result[(), string] {
     println("    权重形状: (" + lora_b.len().to_string() + ", " + lora_b[0].len().to_string() + ")")
     println("    输出形状: (" + delta.len().to_string() + ", " + delta[0].len().to_string() + ")")
 
-    result::ok(())
+    ((, ""))
 }
 
 func main() {
     println("=== LoRA 高级使用示例 ===\n")
 
     switch example_weight_fusion() {
-        result::ok(_) : {},
-        result::err(e) : println("Error: " + e),
+        (_, "") : {},
+        (0, e) : println("Error: " + e),
     }
 
     switch example_lora_state_management() {
-        result::ok(_) : {},
-        result::err(e) : println("Error: " + e),
+        (_, "") : {},
+        (0, e) : println("Error: " + e),
     }
 
     switch example_multi_adapter_caching() {
-        result::ok(_) : {},
-        result::err(e) : println("Error: " + e),
+        (_, "") : {},
+        (0, e) : println("Error: " + e),
     }
 
     switch example_dynamic_adapter_switch() {
-        result::ok(_) : {},
-        result::err(e) : println("Error: " + e),
+        (_, "") : {},
+        (0, e) : println("Error: " + e),
     }
 
     switch example_weight_computation_perf() {
-        result::ok(_) : {},
-        result::err(e) : println("Error: " + e),
+        (_, "") : {},
+        (0, e) : println("Error: " + e),
     }
 
     println("\n=== 所有示例完成 ===")

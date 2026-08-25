@@ -59,7 +59,7 @@ func example_create_basic_adapter() result[(), string] {
     println("  Size: " + adapter.get_size_mb().to_string() + " MB")
     println("  Modules: " + adapter.get_module_names().len().to_string())
 
-    result::ok(())
+    ((, ""))
 }
 
 func example_apply_lora() result[(), string] {
@@ -115,7 +115,7 @@ func example_apply_lora() result[(), string] {
     println("  Input size: " + input.len().to_string())
     println("  Output size: " + output.len().to_string())
 
-    result::ok(())
+    ((, ""))
 }
 
 func example_adapter_manager() result[(), string] {
@@ -152,7 +152,7 @@ func example_adapter_manager() result[(), string] {
     manager.deactivate_adapter("adapter_2")?
     println("  Active after deactivation: " + manager.get_active_adapters().len().to_string())
 
-    result::ok(())
+    ((, ""))
 }
 
 func example_batch_apply_lora() result[(), string] {
@@ -214,36 +214,36 @@ func example_batch_apply_lora() result[(), string] {
     println("  Batch size: " + batch_size.to_string())
     println("  Output count: " + outputs.len().to_string())
 
-    result::ok(())
+    ((, ""))
 }
 
 func main() {
     println("=== LoRA 基础使用示例 ===\n")
 
     switch example_create_basic_adapter() {
-        result::ok(_) : {},
-        result::err(e) : println("Error in example_create_basic_adapter: " + e),
+        (_, "") : {},
+        (0, e) : println("Error in example_create_basic_adapter: " + e),
     }
 
     println()
 
     switch example_apply_lora() {
-        result::ok(_) : {},
-        result::err(e) : println("Error in example_apply_lora: " + e),
+        (_, "") : {},
+        (0, e) : println("Error in example_apply_lora: " + e),
     }
 
     println()
 
     switch example_adapter_manager() {
-        result::ok(_) : {},
-        result::err(e) : println("Error in example_adapter_manager: " + e),
+        (_, "") : {},
+        (0, e) : println("Error in example_adapter_manager: " + e),
     }
 
     println()
 
     switch example_batch_apply_lora() {
-        result::ok(_) : {},
-        result::err(e) : println("Error in example_batch_apply_lora: " + e),
+        (_, "") : {},
+        (0, e) : println("Error in example_batch_apply_lora: " + e),
     }
 
     println("\n=== 所有示例完成 ===")

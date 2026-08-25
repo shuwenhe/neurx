@@ -16,7 +16,7 @@ struct temperature_processor {
 
 func (temperature_processor* tp) apply(logits: *vec[float]) result[vec[float], processor_error] {
     if tp.temperature <= 0.0 {
-        return result::err(processor_error {
+        return (processor_error {
             code: "INVALID_TEMPERATURE",
             message: "Temperature must be positive",
         })
@@ -30,7 +30,7 @@ func (temperature_processor* tp) apply(logits: *vec[float]) result[vec[float], p
         i = i + 1
     }
 
-    result::ok(result_logits)
+    (result_logits, "")
 }
 
 struct top_k_processor {
@@ -56,14 +56,14 @@ func find_kth_largest(logits: *vec[float], k: int) float {
 
 func (top_k_processor* tp) apply(logits: *vec[float]) result[vec[float], processor_error] {
     if tp.k <= 0 {
-        return result::err(processor_error {
+        return (processor_error {
             code: "INVALID_K",
             message: "K must be positive",
         })
     }
 
     if tp.k >= logits.len() {
-        return result::ok(logits)
+        return (logits, "")
     }
 
     let threshold = find_kth_largest(logits, tp.k)
@@ -79,7 +79,7 @@ func (top_k_processor* tp) apply(logits: *vec[float]) result[vec[float], process
         i = i + 1
     }
 
-    result::ok(result_logits)
+    (result_logits, "")
 }
 
 struct nucleus_processor {
@@ -119,7 +119,7 @@ func softmax(logits: *vec[float]) vec[float] {
 
 func (nucleus_processor* np) apply(logits: *vec[float]) result[vec[float], processor_error] {
     if np.top_p <= 0.0 || np.top_p > 1.0 {
-        return result::err(processor_error {
+        return (processor_error {
             code: "INVALID_TOP_P",
             message: "top_p must be in (0, 1]",
         })
@@ -157,7 +157,7 @@ func (nucleus_processor* np) apply(logits: *vec[float]) result[vec[float], proce
         i = i + 1
     }
 
-    result::ok(result_logits)
+    (result_logits, "")
 }
 
 struct frequency_penalty_processor {
@@ -167,7 +167,7 @@ struct frequency_penalty_processor {
 
 func (frequency_penalty_processor* fp) apply(logits: *vec[float]) result[vec[float], processor_error] {
     if fp.penalty < 0.0 {
-        return result::err(processor_error {
+        return (processor_error {
             code: "INVALID_PENALTY",
             message: "Penalty must be non-negative",
         })
@@ -186,7 +186,7 @@ func (frequency_penalty_processor* fp) apply(logits: *vec[float]) result[vec[flo
         i = i + 1
     }
 
-    result::ok(result_logits)
+    (result_logits, "")
 }
 
 struct length_penalty_processor {
@@ -195,7 +195,7 @@ struct length_penalty_processor {
 
 func (length_penalty_processor* lp) apply(logits: *vec[float]) result[vec[float], processor_error] {
     if lp.penalty < 0.0 {
-        return result::err(processor_error {
+        return (processor_error {
             code: "INVALID_PENALTY",
             message: "Penalty must be non-negative",
         })
@@ -209,7 +209,7 @@ func (length_penalty_processor* lp) apply(logits: *vec[float]) result[vec[float]
         i = i + 1
     }
 
-    result::ok(result_logits)
+    (result_logits, "")
 }
 
 struct repetition_penalty_processor {
@@ -219,7 +219,7 @@ struct repetition_penalty_processor {
 
 func (repetition_penalty_processor* rp) apply(logits: *vec[float]) result[vec[float], processor_error] {
     if rp.penalty < 1.0 {
-        return result::err(processor_error {
+        return (processor_error {
             code: "INVALID_PENALTY",
             message: "Penalty must be >= 1.0",
         })
@@ -250,7 +250,7 @@ func (repetition_penalty_processor* rp) apply(logits: *vec[float]) result[vec[fl
         i = i + 1
     }
 
-    result::ok(result_logits)
+    (result_logits, "")
 }
 
 struct sampling_params {
@@ -286,42 +286,42 @@ func (mut logits_processor_pipeline* pipeline) with_temperature(
     temperature: float
 ) result[(), processor_error] {
     if temperature <= 0.0 {
-        return result::err(processor_error {
+        return (processor_error {
             code: "INVALID_TEMPERATURE",
             message: "Temperature must be positive",
         })
     }
 
     pipeline.temperature_proc = option::some(temperature_processor { temperature: temperature })
-    result::ok(())
+    ((, ""))
 }
 
 func (mut logits_processor_pipeline* pipeline) with_top_k(
     k: int
 ) result[(), processor_error] {
     if k <= 0 {
-        return result::err(processor_error {
+        return (processor_error {
             code: "INVALID_K",
             message: "K must be positive",
         })
     }
 
     pipeline.top_k_proc = option::some(top_k_processor { k: k })
-    result::ok(())
+    ((, ""))
 }
 
 func (mut logits_processor_pipeline* pipeline) with_nucleus(
     top_p: float
 ) result[(), processor_error] {
     if top_p <= 0.0 || top_p > 1.0 {
-        return result::err(processor_error {
+        return (processor_error {
             code: "INVALID_TOP_P",
             message: "top_p must be in (0, 1]",
         })
     }
 
     pipeline.nucleus_proc = option::some(nucleus_processor { top_p: top_p })
-    result::ok(())
+    ((, ""))
 }
 
 func (logits_processor_pipeline* pipeline) process(
@@ -350,7 +350,7 @@ func (logits_processor_pipeline* pipeline) process(
         option::none : {},
     }
 
-    result::ok(result_logits)
+    (result_logits, "")
 }
 
 func main() {
@@ -367,10 +367,10 @@ func main() {
     pipeline.with_nucleus(0.9)?
 
     switch pipeline.process(logits) {
-        result::ok(processed) : {
+        (processed, "") : {
             ""
         },
-        result::err(err) : {
+        (0, err) : {
             ""
         },
     }

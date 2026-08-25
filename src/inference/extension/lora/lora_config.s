@@ -37,21 +37,21 @@ func lora_config::default() lora_config {
 func (lora_config* config) validate() result[(), lora_config_error] {
 
     if config.lora_rank <= 0 || config.lora_rank > 1024 {
-        return result::err(lora_config_error {
+        return (lora_config_error {
             code: "INVALID_RANK",
             message: "lora_rank must be in range (0, 1024], got: " + config.lora_rank.to_string(),
         })
     }
 
     if config.lora_alpha <= 0.0 {
-        return result::err(lora_config_error {
+        return (lora_config_error {
             code: "INVALID_ALPHA",
             message: "lora_alpha must be positive, got: " + config.lora_alpha.to_string(),
         })
     }
 
     if config.lora_dropout < 0.0 || config.lora_dropout > 1.0 {
-        return result::err(lora_config_error {
+        return (lora_config_error {
             code: "INVALID_DROPOUT",
             message: "lora_dropout must be in range [0.0, 1.0], got: " + config.lora_dropout.to_string(),
         })
@@ -61,20 +61,20 @@ func (lora_config* config) validate() result[(), lora_config_error] {
                      config.bias == "lora_only" ||
                      config.bias == "all"
     if !valid_bias {
-        return result::err(lora_config_error {
+        return (lora_config_error {
             code: "INVALID_BIAS",
             message: "bias must be 'none', 'lora_only' or 'all', got: " + config.bias,
         })
     }
 
     if config.task_type.len() == 0 {
-        return result::err(lora_config_error {
+        return (lora_config_error {
             code: "INVALID_TASK_TYPE",
             message: "task_type cannot be empty",
         })
     }
 
-    result::ok(())
+    ((, ""))
 }
 
 func lora_config::from_dict(
@@ -89,7 +89,7 @@ func lora_config::from_dict(
                     config.lora_rank = rank
                 },
                 option::none : {
-                    return result::err(lora_config_error {
+                    return (lora_config_error {
                         code: "PARSE_ERROR",
                         message: "Failed to parse lora_rank: " + val,
                     })
@@ -106,7 +106,7 @@ func lora_config::from_dict(
                     config.lora_alpha = alpha
                 },
                 option::none : {
-                    return result::err(lora_config_error {
+                    return (lora_config_error {
                         code: "PARSE_ERROR",
                         message: "Failed to parse lora_alpha: " + val,
                     })
@@ -123,7 +123,7 @@ func lora_config::from_dict(
                     config.lora_dropout = dropout
                 },
                 option::none : {
-                    return result::err(lora_config_error {
+                    return (lora_config_error {
                         code: "PARSE_ERROR",
                         message: "Failed to parse lora_dropout: " + val,
                     })
@@ -149,7 +149,7 @@ func lora_config::from_dict(
 
     config.validate()?
 
-    result::ok(config)
+    (config, "")
 }
 
 func (lora_config* config) get_lora_scaling() float {

@@ -55,7 +55,7 @@ func detect_platform_capability() result[platform_capability, string] {
         accelerators: &mut accelerators
     }
     
-    result::ok(platform)
+    (platform, "")
 }
 
 func detect_cpu_count() result[int, string] {
@@ -65,7 +65,7 @@ func detect_cpu_count() result[int, string] {
         cpu_count = 8
     }
     
-    result::ok(cpu_count)
+    (cpu_count, "")
 }
 
 func detect_gpu_count() result[int, string] {
@@ -79,7 +79,7 @@ func detect_gpu_count() result[int, string] {
         gpu_count = query_intel_gpu_count()
     }
     
-    result::ok(gpu_count)
+    (gpu_count, "")
 }
 
 func detect_total_memory() result[int, string] {
@@ -89,12 +89,12 @@ func detect_total_memory() result[int, string] {
         memory_gb = 16
     }
     
-    result::ok(memory_gb)
+    (memory_gb, "")
 }
 
 func detect_compute_device(index: int) result[device_capability, string] {
     if index == 0 {
-        return result::ok(device_capability {
+        return (device_capability {
             compute_type: compute_capability::gpu_nvidia,
             compute_cores: 8192,
             memory_gb: 80,
@@ -105,7 +105,7 @@ func detect_compute_device(index: int) result[device_capability, string] {
         })
     }
     
-    result::ok(device_capability {
+    (device_capability {
         compute_type: compute_capability::cpu_only,
         compute_cores: 8,
         memory_gb: 16,
@@ -142,12 +142,12 @@ func get_device_capability(device_id: int) result[device_capability, string] {
 
 func is_gpu_available() result[bool, string] {
     let gpu_count = detect_gpu_count()?
-    result::ok(gpu_count > 0)
+    (gpu_count > 0, "")
 }
 
 func is_nvidia_gpu_available() result[bool, string] {
     let count = query_nvidia_gpu_count()
-    result::ok(count > 0)
+    (count > 0, "")
 }
 
 func get_total_compute_capability() result[int, string] {
@@ -155,5 +155,5 @@ func get_total_compute_capability() result[int, string] {
     
     let total_tflops = platform.accelerators*.len() * 89100
     
-    result::ok(total_tflops)
+    (total_tflops, "")
 }

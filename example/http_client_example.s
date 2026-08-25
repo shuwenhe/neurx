@@ -77,41 +77,41 @@ func string_from_char(int code) string {
 
 func http_request_to_server(string host, int port, string path) result[http_response, string] {
     switch socket(2, 1, 0) {
-        result::ok(fd) : {
+        (fd, "") : {
             switch socket_connect(fd, host, port) {
-                result::ok(_) : {
+                (_, "") : {
                     let request = create_http_get_request(host, port, path)
                     switch socket_send(fd, request) {
-                        result::ok(_) : {
+                        (_, "") : {
                             switch socket_recv(fd, 4096) {
-                                result::ok(response_data) : {
+                                (response_data, "") : {
                                     socket_close(fd)
-                                    result::ok(http_response{
+                                    (http_response{
                                         status_code: 200,
                                         headers: "",
                                         body: response_data
                                     })
                                 },
-                                result::err(recv_error) : {
+                                (0, recv_error) : {
                                     socket_close(fd)
-                                    result::err("Failed to receive response: " + recv_error)
+                                    (0, "Failed to receive response: " + recv_error)
                                 }
                             }
                         },
-                        result::err(send_error) : {
+                        (0, send_error) : {
                             socket_close(fd)
-                            result::err("Failed to send request: " + send_error)
+                            (0, "Failed to send request: " + send_error)
                         }
                     }
                 },
-                result::err(connect_error) : {
+                (0, connect_error) : {
                     socket_close(fd)
-                    result::err("Failed to connect: " + connect_error)
+                    (0, "Failed to connect: " + connect_error)
                 }
             }
         },
-        result::err(socket_error) : {
-            result::err("Failed to create socket: " + socket_error)
+        (0, socket_error) : {
+            (0, "Failed to create socket: " + socket_error)
         }
     }
 }
@@ -121,12 +121,12 @@ func main() {
     println("Connecting to 127.0.0.1:18083...")
 
     switch http_request_to_server("127.0.0.1", 18083, "/api/chat") {
-        result::ok(response) : {
+        (response, "") : {
             println("[HTTP] Response received")
             println("Status: " + int_to_string(response.status_code))
             println("Body: " + response.body)
         },
-        result::err(error) : {
+        (0, error) : {
             println("[HTTP] Error: " + error)
         }
     }

@@ -39,16 +39,16 @@ func (lora_adapter* adapter) apply_lora(
     output: *vec[vec[float]]
 ) result[vec[float], lora_adapter_error] {
     if !adapter.enabled {
-        return result::ok(output)
+        return (output, "")
     }
 
     switch adapter.weights.get(module_name) {
         option::some(weights) : {
             let lora_result = apply_lora_transformation(input, weights, adapter.scale)?
-            result::ok(lora_result)
+            (lora_result, "")
         },
         option::none : {
-            result::err(lora_adapter_error {
+            (lora_adapter_error {
                 code: "MODULE_NOT_FOUND",
                 message: "LoRA weights not found for module: " + module_name,
             })
@@ -62,7 +62,7 @@ func apply_lora_transformation(
     scale: float
 ) result[vec[float], lora_adapter_error] {
     if weights.lora_a.len() == 0 || weights.lora_b.len() == 0 {
-        return result::err(lora_adapter_error {
+        return (lora_adapter_error {
             code: "INVALID_WEIGHTS",
             message: "LoRA weights are empty",
         })
@@ -79,7 +79,7 @@ func apply_lora_transformation(
         i = i + 1
     }
 
-    result::ok(scaled_output)
+    (scaled_output, "")
 }
 
 func matrix_multiply(
@@ -87,7 +87,7 @@ func matrix_multiply(
     b: *vec[vec[float]]
 ) result[vec[float], lora_adapter_error] {
     if b.len() == 0 {
-        return result::err(lora_adapter_error {
+        return (lora_adapter_error {
             code: "INVALID_MATRIX",
             message: "Matrix B is empty",
         })
@@ -107,7 +107,7 @@ func matrix_multiply(
         i = i + 1
     }
 
-    result::ok(result)
+    (result, "")
 }
 
 struct lora_adapter_manager {
@@ -129,19 +129,19 @@ func (mut lora_adapter_manager* manager) add_adapter(
     adapter: *lora_adapter
 ) result[(), lora_adapter_error] {
     if name.len() == 0 {
-        return result::err(lora_adapter_error {
+        return (lora_adapter_error {
             code: "INVALID_NAME",
             message: "Adapter name cannot be empty",
         })
     }
 
     manager.adapters.insert(name, adapter)
-    result::ok(())
+    ((, ""))
 }
 
 func (mut lora_adapter_manager* manager) remove_adapter(name: string) result[(), lora_adapter_error] {
     if !manager.adapters.contains(name) {
-        return result::err(lora_adapter_error {
+        return (lora_adapter_error {
             code: "ADAPTER_NOT_FOUND",
             message: "Adapter not found: " + name,
         })
@@ -158,12 +158,12 @@ func (mut lora_adapter_manager* manager) remove_adapter(name: string) result[(),
         idx = idx + 1
     }
 
-    result::ok(())
+    ((, ""))
 }
 
 func (mut lora_adapter_manager* manager) activate_adapter(name: string) result[(), lora_adapter_error] {
     if !manager.adapters.contains(name) {
-        return result::err(lora_adapter_error {
+        return (lora_adapter_error {
             code: "ADAPTER_NOT_FOUND",
             message: "Adapter not found: " + name,
         })
@@ -174,10 +174,10 @@ func (mut lora_adapter_manager* manager) activate_adapter(name: string) result[(
     switch manager.adapters.get(name) {
         option::some(adapter) : {
             adapter.enabled = true
-            result::ok(())
+            ((, ""))
         },
         option::none : {
-            result::err(lora_adapter_error {
+            (lora_adapter_error {
                 code: "ACTIVATION_FAILED",
                 message: "Failed to activate adapter",
             })
@@ -198,10 +198,10 @@ func (mut lora_adapter_manager* manager) deactivate_adapter(name: string) result
     switch manager.adapters.get(name) {
         option::some(adapter) : {
             adapter.enabled = false
-            result::ok(())
+            ((, ""))
         },
         option::none : {
-            result::err(lora_adapter_error {
+            (lora_adapter_error {
                 code: "DEACTIVATION_FAILED",
                 message: "Failed to deactivate adapter",
             })
@@ -222,14 +222,14 @@ func (manager* manager) get_adapter(name: string) option[lora_adapter] {
 
 func (mut lora_adapter_manager* manager) set_global_scale(scale: float) result[(), lora_adapter_error] {
     if scale < 0.0 {
-        return result::err(lora_adapter_error {
+        return (lora_adapter_error {
             code: "INVALID_SCALE",
             message: "Scale must be non-negative",
         })
     }
 
     manager.global_scale = scale
-    result::ok(())
+    ((, ""))
 }
 
 func (mut lora_adapter_manager* manager) merge_adapters() result[(), lora_adapter_error] {
@@ -254,11 +254,11 @@ func (mut lora_adapter_manager* manager) merge_adapters() result[(), lora_adapte
         i = i + 1
     }
 
-    result::ok(())
+    ((, ""))
 }
 
 func (mut lora_adapter_manager* manager) unmerge_adapters() result[(), lora_adapter_error] {
-    result::ok(())
+    ((, ""))
 }
 
 func (manager* manager) get_memory_usage_mb() int {
@@ -324,10 +324,10 @@ func main() {
     }
 
     switch manager.add_adapter("adapter1", adapter) {
-        result::ok(()) : {
+        ((, "")) : {
             ""
         },
-        result::err(err) : {
+        (0, err) : {
             ""
         },
     }

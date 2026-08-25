@@ -28,7 +28,7 @@ struct collective_group {
 }
 
 func create_collective_group(participant_ids: int*, count: int) result[collective_group, string] {
-    result::ok(collective_group {
+    (collective_group {
         group_id: 0,
         participant_ids: participant_ids,
         participant_count: count
@@ -36,7 +36,7 @@ func create_collective_group(participant_ids: int*, count: int) result[collectiv
 }
 
 func execute_allreduce(group: collective_group*, data_ptr: int, data_size: int) result[collective_result, string] {
-    result::ok(collective_result {
+    (collective_result {
         success: true,
         result_data: 0 as int*,
         result_size: data_size,
@@ -45,7 +45,7 @@ func execute_allreduce(group: collective_group*, data_ptr: int, data_size: int) 
 }
 
 func execute_allgather(group: collective_group*, local_data: int*, local_size: int) result[collective_result, string] {
-    result::ok(collective_result {
+    (collective_result {
         success: true,
         result_data: 0 as int*,
         result_size: local_size * group*.participant_count,
@@ -54,7 +54,7 @@ func execute_allgather(group: collective_group*, local_data: int*, local_size: i
 }
 
 func execute_broadcast(group: collective_group*, root_id: int, data_ptr: int, data_size: int) result[collective_result, string] {
-    result::ok(collective_result {
+    (collective_result {
         success: true,
         result_data: 0 as int*,
         result_size: data_size,

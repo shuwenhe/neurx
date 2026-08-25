@@ -42,21 +42,21 @@ func (mut lora_state_manager* manager) create_request_state(
 ) result[(), lora_state_error] {
 
     if request_id.len() == 0 {
-        return result::err(lora_state_error {
+        return (lora_state_error {
             code: "INVALID_REQUEST_ID",
             message: "Request ID cannot be empty",
         })
     }
 
     if adapter_names.len() != adapter_scales.len() {
-        return result::err(lora_state_error {
+        return (lora_state_error {
             code: "LENGTH_MISMATCH",
             message: "Adapter names and scales length mismatch",
         })
     }
 
     if adapter_names.len() > manager.max_adapters_per_request {
-        return result::err(lora_state_error {
+        return (lora_state_error {
             code: "TOO_MANY_ADAPTERS",
             message: "Number of adapters exceeds limit: " +
                      adapter_names.len().to_string() + " > " +
@@ -67,7 +67,7 @@ func (mut lora_state_manager* manager) create_request_state(
     let i = 0
     while i < adapter_scales.len() {
         if adapter_scales[i] < 0.0 {
-            return result::err(lora_state_error {
+            return (lora_state_error {
                 code: "INVALID_SCALE",
                 message: "Adapter scale cannot be negative",
             })
@@ -76,7 +76,7 @@ func (mut lora_state_manager* manager) create_request_state(
     }
 
     if manager.request_states.contains(request_id) {
-        return result::err(lora_state_error {
+        return (lora_state_error {
             code: "DUPLICATE_REQUEST",
             message: "Request state already exists for ID: " + request_id,
         })
@@ -94,7 +94,7 @@ func (mut lora_state_manager* manager) create_request_state(
     }
 
     manager.request_states.insert(request_id, state)
-    result::ok(())
+    ((, ""))
 }
 
 func (lora_state_manager* manager) get_request_state(
@@ -110,7 +110,7 @@ func (mut lora_state_manager* manager) update_adapter_scales(
     switch manager.request_states.get(request_id) {
         option::some(mut state) : {
             if new_scales.len() != state.adapter_names.len() {
-                return result::err(lora_state_error {
+                return (lora_state_error {
                     code: "LENGTH_MISMATCH",
                     message: "New scales length does not match adapters",
                 })
@@ -120,10 +120,10 @@ func (mut lora_state_manager* manager) update_adapter_scales(
             state.updated_at = 0
 
             manager.request_states.insert(request_id, state)
-            result::ok(())
+            ((, ""))
         },
         option::none : {
-            result::err(lora_state_error {
+            (lora_state_error {
                 code: "REQUEST_NOT_FOUND",
                 message: "Request state not found for ID: " + request_id,
             })
@@ -137,14 +137,14 @@ func (mut lora_state_manager* manager) switch_adapters(
     new_scales: *vec[float]
 ) result[(), lora_state_error] {
     if new_adapter_names.len() != new_scales.len() {
-        return result::err(lora_state_error {
+        return (lora_state_error {
             code: "LENGTH_MISMATCH",
             message: "Adapter names and scales length mismatch",
         })
     }
 
     if new_adapter_names.len() > manager.max_adapters_per_request {
-        return result::err(lora_state_error {
+        return (lora_state_error {
             code: "TOO_MANY_ADAPTERS",
             message: "Number of adapters exceeds limit",
         })
@@ -160,10 +160,10 @@ func (mut lora_state_manager* manager) switch_adapters(
 
             manager.clear_request_cache(request_id)?
 
-            result::ok(())
+            ((, ""))
         },
         option::none : {
-            result::err(lora_state_error {
+            (lora_state_error {
                 code: "REQUEST_NOT_FOUND",
                 message: "Request state not found for ID: " + request_id,
             })
@@ -175,7 +175,7 @@ func (mut lora_state_manager* manager) remove_request_state(
     request_id: string
 ) result[(), lora_state_error] {
     if !manager.request_states.contains(request_id) {
-        return result::err(lora_state_error {
+        return (lora_state_error {
             code: "REQUEST_NOT_FOUND",
             message: "Request state not found for ID: " + request_id,
         })
@@ -184,7 +184,7 @@ func (mut lora_state_manager* manager) remove_request_state(
     manager.request_states.remove(request_id)
     manager.clear_request_cache(request_id)?
 
-    result::ok(())
+    ((, ""))
 }
 
 func (mut lora_state_manager* manager) activate_request(
@@ -195,10 +195,10 @@ func (mut lora_state_manager* manager) activate_request(
             state.is_active = true
             state.updated_at = 0
             manager.request_states.insert(request_id, state)
-            result::ok(())
+            ((, ""))
         },
         option::none : {
-            result::err(lora_state_error {
+            (lora_state_error {
                 code: "REQUEST_NOT_FOUND",
                 message: "Request state not found for ID: " + request_id,
             })
@@ -214,10 +214,10 @@ func (mut lora_state_manager* manager) deactivate_request(
             state.is_active = false
             state.updated_at = 0
             manager.request_states.insert(request_id, state)
-            result::ok(())
+            ((, ""))
         },
         option::none : {
-            result::err(lora_state_error {
+            (lora_state_error {
                 code: "REQUEST_NOT_FOUND",
                 message: "Request state not found for ID: " + request_id,
             })
@@ -254,18 +254,18 @@ func (mut lora_state_manager* manager) cache_fused_weights(
     weights: *vec[vec[float]]
 ) result[(), lora_state_error] {
     if !manager.enable_cache {
-        return result::ok(())
+        return ((, ""))
     }
 
     if cache_key.len() == 0 {
-        return result::err(lora_state_error {
+        return (lora_state_error {
             code: "INVALID_CACHE_KEY",
             message: "Cache key cannot be empty",
         })
     }
 
     manager.adapter_cache.insert(cache_key, weights)
-    result::ok(())
+    ((, ""))
 }
 
 func (lora_state_manager* manager) get_cached_weights(
@@ -291,7 +291,7 @@ func (mut lora_state_manager* manager) clear_request_cache(
         i = i + 1
     }
 
-    result::ok(())
+    ((, ""))
 }
 
 func (mut lora_state_manager* manager) clear_all_cache() {

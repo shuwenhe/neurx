@@ -43,21 +43,21 @@ impl lora_adapter {
         lora_b: *vec[vec[float]]
     ) result[(), lora_adapter_error] {
         if !adapter.config.is_target_module(module_name) {
-            return result::err(lora_adapter_error {
+            return (lora_adapter_error {
                 code: "NOT_TARGET_MODULE",
                 message: "Module " + module_name + " is not a target module for this adapter",
             })
         }
 
         if lora_a.len() == 0 || lora_b.len() == 0 {
-            return result::err(lora_adapter_error {
+            return (lora_adapter_error {
                 code: "INVALID_WEIGHTS",
                 message: "LoRA weights cannot be empty",
             })
         }
 
         adapter.weights.insert(module_name, (lora_a, lora_b))
-        result::ok(())
+        ((, ""))
     }
 
     func (lora_adapter* adapter) get_module_weights(
@@ -70,14 +70,14 @@ impl lora_adapter {
         module_name: string
     ) result[(), lora_adapter_error] {
         if !adapter.weights.contains(module_name) {
-            return result::err(lora_adapter_error {
+            return (lora_adapter_error {
                 code: "MODULE_NOT_FOUND",
                 message: "Weights not found for module: " + module_name,
             })
         }
 
         adapter.weights.remove(module_name)
-        result::ok(())
+        ((, ""))
     }
 
     func (lora_adapter* adapter) apply_lora(
@@ -120,10 +120,10 @@ impl lora_adapter {
                     }
                 }
 
-                result::ok(output)
+                (output, "")
             },
             option::none : {
-                result::err(lora_adapter_error {
+                (lora_adapter_error {
                     code: "MODULE_NOT_FOUND",
                     message: "LoRA weights not found for module: " + module_name,
                 })
@@ -145,14 +145,14 @@ impl lora_adapter {
             i = i + 1
         }
 
-        result::ok(outputs)
+        (outputs, "")
     }
 
     func (mut lora_adapter* adapter) fuse_weights(
         original_weights: *map[string, &vec[vec[float]]]
     ) result[(), lora_adapter_error] {
         if adapter.fused {
-            return result::err(lora_adapter_error {
+            return (lora_adapter_error {
                 code: "ALREADY_FUSED",
                 message: "Adapter weights are already fused",
             })
@@ -175,7 +175,7 @@ impl lora_adapter {
                             engine.fuse_weights(module_name, orig, delta)?
                         },
                         option::none : {
-                            return result::err(lora_adapter_error {
+                            return (lora_adapter_error {
                                 code: "MISSING_WEIGHTS",
                                 message: "Original weights not found for module: " + module_name,
                             })
@@ -188,14 +188,14 @@ impl lora_adapter {
 
         adapter.fusion_engine = option::some(&engine)
         adapter.fused = true
-        result::ok(())
+        ((, ""))
     }
 
     func (mut lora_adapter* adapter) unfuse_weights(
         original_weights: *map[string, &vec[vec[float]]]
     ) result[(), lora_adapter_error] {
         if !adapter.fused {
-            return result::err(lora_adapter_error {
+            return (lora_adapter_error {
                 code: "NOT_FUSED",
                 message: "Adapter weights are not fused",
             })
@@ -204,7 +204,7 @@ impl lora_adapter {
         adapter.fused = false
         adapter.fusion_engine = option::none
 
-        result::ok(())
+        ((, ""))
     }
 
     func (lora_adapter* adapter) is_fused() bool {
@@ -257,7 +257,7 @@ impl lora_adapter {
 
     func (lora_adapter* adapter) validate() result[(), lora_adapter_error] {
         if adapter.name.len() == 0 {
-            return result::err(lora_adapter_error {
+            return (lora_adapter_error {
                 code: "INVALID_NAME",
                 message: "Adapter name cannot be empty",
             })
@@ -267,14 +267,14 @@ impl lora_adapter {
             switch adapter.weights.get(module_name) {
                 option::some((lora_a, lora_b)) : {
                     if lora_a.len() == 0 || lora_b.len() == 0 {
-                        return result::err(lora_adapter_error {
+                        return (lora_adapter_error {
                             code: "INVALID_WEIGHTS",
                             message: "Empty weights for module: " + module_name,
                         })
                     }
 
                     if lora_a[0].len() != lora_b.len() {
-                        return result::err(lora_adapter_error {
+                        return (lora_adapter_error {
                             code: "SHAPE_MISMATCH",
                             message: "LoRA A and B shape mismatch for module: " + module_name,
                         })
@@ -284,6 +284,6 @@ impl lora_adapter {
             }
         }
 
-        result::ok(())
+        ((, ""))
     }
 }

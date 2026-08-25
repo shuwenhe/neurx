@@ -67,12 +67,12 @@ func create_monitoring_service(int interval_ms) (monitoring_service, string) {
         health: &mut health
     }
     
-    result::ok(service)
+    (service, "")
 }
 
 func start_monitoring(monitoring_service* service) (int, string) {
     service->is_running = true
-    result::ok(0)
+    (0, "")
 }
 
 func collect_metric(monitoring_service* service, metric* metric_val) (int, string) {
@@ -85,7 +85,7 @@ func collect_metric(monitoring_service* service, metric* metric_val) (int, strin
         service->buffer->is_full = true
     }
     
-    result::ok(service->num_metrics)
+    (service->num_metrics, "")
 }
 
 func collect_metrics(monitoring_service* service) (int, string) {
@@ -121,7 +121,7 @@ func collect_metrics(monitoring_service* service) (int, string) {
     
     update_system_health(service)?
     
-    result::ok(service->num_metrics)
+    (service->num_metrics, "")
 }
 
 func update_system_health(monitoring_service* service) (int, string) {
@@ -131,7 +131,7 @@ func update_system_health(monitoring_service* service) (int, string) {
     service->health->memory_utilization = 51.2
     service->health->network_utilization = 23.5
     
-    result::ok(0)
+    (0, "")
 }
 
 func get_system_health(monitoring_service* service) system_health {
@@ -144,7 +144,7 @@ func flush_metrics(monitoring_service* service) (int, string) {
     service->buffer->write_pos = 0
     service->buffer->is_full = false
     
-    result::ok(flushed)
+    (flushed, "")
 }
 
 func query_metrics(monitoring_service* service, int start_us, int end_us) (vec[metric], string) {
@@ -158,7 +158,7 @@ func query_metrics(monitoring_service* service, int start_us, int end_us) (vec[m
         }
     }
     
-    result::ok(results)
+    (results, "")
 }
 
 func get_time_us() int {
@@ -167,5 +167,5 @@ func get_time_us() int {
 
 func stop_monitoring(monitoring_service* service) (int, string) {
     service->is_running = false
-    result::ok(0)
+    (0, "")
 }

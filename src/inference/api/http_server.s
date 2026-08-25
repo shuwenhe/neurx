@@ -33,24 +33,24 @@ func conn_from_fd(int client_fd) tcp_conn {
 func write_client_data(int client_fd, string data) int {
     tcp_conn conn = conn_from_fd(client_fd)
     switch conn.write(data) {
-        result::ok(n) : n,
-        result::err(_) : -1,
+        (n, "") : n,
+        (0, _) : -1,
     }
 }
 
 func close_client_connection(int client_fd) int {
     tcp_conn conn = conn_from_fd(client_fd)
     switch conn.close() {
-        result::ok(_) : 0,
-        result::err(_) : -1,
+        (_, "") : 0,
+        (0, _) : -1,
     }
 }
 
 func create_http_server(string host, int port) http_server {
     let listener_res = listen_tcp(host, port)
     let listener = switch listener_res {
-        result::ok(value) : value,
-        result::err(err) : {
+        (value, "") : value,
+        (0, err) : {
             print("error: failed to listen: " + err.message + "\n")
             return http_server{listen_fd: -1, port: port, host: host, running: false}
         },
@@ -67,8 +67,8 @@ func create_http_server(string host, int port) http_server {
 func handle_connection(int client_fd, func(http_request) http_response handler) {
     tcp_conn conn = conn_from_fd(client_fd)
     string request_data = switch conn.read(4096) {
-        result::ok(data) : data,
-        result::err(err) : {
+        (data, "") : data,
+        (0, err) : {
             print("error: failed to read request: " + err.message + "\n")
             conn.close()
             return
@@ -82,8 +82,8 @@ func handle_connection(int client_fd, func(http_request) http_response handler) 
     response := handler(request)
     response_data := format_http_response(response)
     switch conn.write(response_data) {
-        result::ok(_) : (),
-        result::err(err) : {
+        (_, "") : (),
+        (0, err) : {
             print("error: failed to write response: " + err.message + "\n")
         },
     }
@@ -95,10 +95,10 @@ func server_accept_loop(http_server server, func(http_request) http_response han
     while server.running {
         let conn_res = listener.accept()
         switch conn_res {
-            result::ok(conn) : {
+            (conn, "") : {
                 handle_connection(conn.fd, handler)
             },
-            result::err(err) : {
+            (0, err) : {
                 print("error: accept failed: " + err.message + "\n")
             },
         }

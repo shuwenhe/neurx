@@ -113,7 +113,7 @@ func (mut kv_cache_pool* pool) put_kv(
     pool.metadata_map.insert(cache_key, metadata)
     pool.stats.gpu_used_mb = pool.stats.gpu_used_mb + (entry_size / 1024 / 1024)
 
-    result::ok(())
+    ((, ""))
 }
 
 func (mut kv_cache_pool* pool) get_kv(
@@ -126,10 +126,10 @@ func (mut kv_cache_pool* pool) get_kv(
     if pool.gpu_cache.contains(cache_key) {
         switch pool.gpu_cache.get(cache_key) {
             option::some(entry) : {
-                result::ok(entry)
+                (entry, "")
             },
             option::none : {
-                result::err(error { code: "CACHE_MISS", message: "Entry not found in GPU cache" })
+                (0, error { code: "CACHE_MISS", message: "Entry not found in GPU cache" })
             },
         }
     } else if pool.cpu_cache.contains(cache_key) {
@@ -137,14 +137,14 @@ func (mut kv_cache_pool* pool) get_kv(
 
         switch pool.gpu_cache.get(cache_key) {
             option::some(entry) : {
-                result::ok(entry)
+                (entry, "")
             },
             option::none : {
-                result::err(error { code: "RESTORE_FAILED", message: "Failed to restore from CPU" })
+                (0, error { code: "RESTORE_FAILED", message: "Failed to restore from CPU" })
             },
         }
     } else {
-        result::err(error { code: "CACHE_MISS", message: "Entry not found" })
+        (0, error { code: "CACHE_MISS", message: "Entry not found" })
     }
 }
 
@@ -177,14 +177,14 @@ func (mut kv_cache_pool* pool) try_offload_to_cpu() result[(), error] {
                 pool.stats.cpu_used_mb = pool.stats.cpu_used_mb + (entry_size / 1024 / 1024)
                 pool.stats.offload_count = pool.stats.offload_count + 1
 
-                result::ok(())
+                ((, ""))
             },
             option::none : {
-                result::err(error { code: "OFFLOAD_FAILED", message: "Failed to offload entry" })
+                (0, error { code: "OFFLOAD_FAILED", message: "Failed to offload entry" })
             },
         }
     } else {
-        result::err(error { code: "NO_ENTRY_TO_OFFLOAD", message: "No entry to offload" })
+        (0, error { code: "NO_ENTRY_TO_OFFLOAD", message: "No entry to offload" })
     }
 }
 
@@ -199,10 +199,10 @@ func (mut kv_cache_pool* pool) restore_from_cpu(cache_key: int) result[(), error
             pool.stats.gpu_used_mb = pool.stats.gpu_used_mb + (entry_size / 1024 / 1024)
             pool.stats.restore_count = pool.stats.restore_count + 1
 
-            result::ok(())
+            ((, ""))
         },
         option::none : {
-            result::err(error { code: "RESTORE_FAILED", message: "Entry not found in CPU cache" })
+            (0, error { code: "RESTORE_FAILED", message: "Entry not found in CPU cache" })
         },
     }
 }
@@ -254,7 +254,7 @@ func (mut kv_cache_pool* pool) clear_sequence_cache(sequence_id: int) result[(),
         i = i + 1
     }
 
-    result::ok(())
+    ((, ""))
 }
 
 func (mut kv_cache_pool* pool) clear_all() result[(), error] {
@@ -265,7 +265,7 @@ func (mut kv_cache_pool* pool) clear_all() result[(), error] {
     pool.stats.gpu_used_mb = 0
     pool.stats.cpu_used_mb = 0
 
-    result::ok(())
+    ((, ""))
 }
 
 struct error {
@@ -295,10 +295,10 @@ func main() {
     }
 
     switch pool.put_kv(0, 0, 0, key, value) {
-        result::ok(()) : {
+        ((, "")) : {
             ""
         },
-        result::err(err) : {
+        (0, err) : {
             ""
         },
     }

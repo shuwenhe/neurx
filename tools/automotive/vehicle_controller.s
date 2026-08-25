@@ -37,7 +37,7 @@ func create_vehicle_controller(int latency_ms) vehicle_controller {
 }
 
 func process_sensor_fusion(vehicle_state* vehicle_state) (control_output, string) {
-    result::ok(control_output {
+    (control_output {
         steering_command: 0.0,
         brake_command: 0.0,
         throttle_command: 0.0,
@@ -51,8 +51,8 @@ func verify_safety(control_output* output) bool {
 
 func execute_control(control_output* output) (int, string) {
     if !output->valid {
-        result::err("Control output invalid")
+        (0, "Control output invalid")
     } else {
-        result::ok(0)
+        (0, "")
     }
 }
