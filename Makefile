@@ -1010,11 +1010,11 @@ build-real-chat-s:
 $(PRODUCTION_S_INFERENCE_DIR):
 	@mkdir -p '$(PRODUCTION_S_INFERENCE_DIR)'
 
-$(PRODUCTION_S_BACKEND): backend/cpu/inference_server.s src/inference/extension/cache/kv_cache_block.s src/inference/extension/cache/cache_index.s src/inference/extension/cache/kv_cache_engine.s src/inference/extension/cache/kv_cache_integration.s src/inference/extension/cache/hash_table.s src/inference/extension/cache/storage_backend.s src/inference/extension/cache/lru_linked_list.s src/inference/extension/cache/distributed_cache.s src/inference/extension/cache/performance_optimization.s src/inference/extension/cache/advanced_cache_engine.s src/inference/extension/cache/advanced_cache_integration.s | $(PRODUCTION_S_INFERENCE_DIR)
+$(PRODUCTION_S_BACKEND): backend/platform/cpu/inference_server.s src/inference/extension/cache/kv_cache_block.s src/inference/extension/cache/cache_index.s src/inference/extension/cache/kv_cache_engine.s src/inference/extension/cache/kv_cache_integration.s src/inference/extension/cache/hash_table.s src/inference/extension/cache/storage_backend.s src/inference/extension/cache/lru_linked_list.s src/inference/extension/cache/distributed_cache.s src/inference/extension/cache/performance_optimization.s src/inference/extension/cache/advanced_cache_engine.s src/inference/extension/cache/advanced_cache_integration.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "🔧 Building NeurX CPU Backend (Pure S Language)..."
 	@echo "  Phase 1 (Legacy): kv_cache_block.s, cache_index.s, kv_cache_engine.s, kv_cache_integration.s"
 	@echo "  Phase 2-4 (Advanced): hash_table.s, storage_backend.s, lru_linked_list.s, distributed_cache.s, performance_optimization.s, advanced_cache_engine.s, advanced_cache_integration.s"
-	@$(S_SEED_COMPILER) backend/cpu/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' || { \
+	@$(S_SEED_COMPILER) backend/platform/cpu/inference_server.s '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' || { \
 		echo "❌ Backend compilation failed!"; \
 		exit 1; \
 	}
