@@ -29,9 +29,9 @@ func init_gpu_driver(gpu_driver_type driver_type) (gpu_driver*, string) {
 }
 
 func allocate_gpu_memory(int device_id, int size_mb) (int, string) {
-    (0, "")
+    0, ""
 }
 
 func launch_gpu_kernel(int device_id, int kernel_ptr) (int, string) {
-    (0, "")
+    0, ""
 }

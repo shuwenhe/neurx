@@ -31,13 +31,13 @@ func init_network_driver(network_protocol protocol, int device_count) (network_d
 }
 
 func send_packet(network_device* device, int data_ptr, int data_size) (int, string) {
-    (data_size, "")
+    data_size, ""
 }
 
 func receive_packet(network_device* device) (int, string) {
-    (0, "")
+    0, ""
 }
 
 func enable_rdma(network_device* device) (int, string) {
-    (0, "")
+    0, ""
 }

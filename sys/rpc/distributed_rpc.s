@@ -39,7 +39,7 @@ func create_rpc_server(int port) rpc_server {
 
 func start_rpc_server(rpc_server* server) (int, string) {
     server->is_running = true
-    (0, "")
+    0, ""
 }
 
 func create_rpc_client(string* address, int port) rpc_client {

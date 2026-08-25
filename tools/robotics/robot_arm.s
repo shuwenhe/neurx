@@ -46,11 +46,11 @@ func create_robot_arm(string* name, int num_joints, int frequency_hz) robot_arm 
 }
 
 func add_joint(robot_arm* arm, joint_config* joint) (int, string) {
-    (0, "")
+    0, ""
 }
 
 func send_arm_command(robot_arm* arm, arm_command* cmd) (int, string) {
-    (0, "")
+    0, ""
 }
 
 func get_arm_feedback(robot_arm* arm) (arm_feedback, string) {
@@ -64,5 +64,5 @@ func get_arm_feedback(robot_arm* arm) (arm_feedback, string) {
 }
 
 func inverse_kinematics(robot_arm* arm, float* target_position, float* target_orientation) (float*, string) {
-    (0 as float*, "")
+    0 as float*, ""
 }

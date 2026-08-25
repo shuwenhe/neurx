@@ -53,6 +53,6 @@ func execute_control(control_output* output) (int, string) {
     if !output->valid {
         (0, "Control output invalid")
     } else {
-        (0, "")
+    0, ""
     }
 }

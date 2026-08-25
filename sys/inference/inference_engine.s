@@ -41,7 +41,7 @@ func create_inference_engine() inference_engine {
 
 func load_model(inference_engine* engine, string* model_id, model_precision precision) (int, string) {
     engine->model_count = engine->model_count + 1
-    (engine->model_count, "")
+    engine->model_count, ""
 }
 
 func infer(inference_engine* engine, inference_request* request) (inference_response, string) {
@@ -55,5 +55,5 @@ func infer(inference_engine* engine, inference_request* request) (inference_resp
 
 func unload_model(inference_engine* engine, string* model_id) (int, string) {
     engine->model_count = engine->model_count - 1
-    (0, "")
+    0, ""
 }

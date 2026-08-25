@@ -41,15 +41,15 @@ func create_training_coordinator(training_config* config) training_coordinator {
 }
 
 func start_training(training_coordinator* coordinator) (int, string) {
-    (0, "")
+    0, ""
 }
 
 func save_checkpoint(training_coordinator* coordinator, string* checkpoint_path) (int, string) {
-    (0, "")
+    0, ""
 }
 
 func resume_from_checkpoint(training_coordinator* coordinator, string* checkpoint_path) (int, string) {
-    (0, "")
+    0, ""
 }
 
 func get_training_metrics(training_coordinator* coordinator) training_state {

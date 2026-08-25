@@ -44,10 +44,10 @@ func read_sensor(sensor_driver* driver) (sensor_data, string) {
 
 func start_streaming(sensor_driver* driver) (int, string) {
     driver->is_streaming = true
-    (0, "")
+    0, ""
 }
 
 func stop_streaming(sensor_driver* driver) (int, string) {
     driver->is_streaming = false
-    (0, "")
+    0, ""
 }

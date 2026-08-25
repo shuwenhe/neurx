@@ -42,11 +42,11 @@ func init_actuator(actuator_type actuator_type) (actuator_driver, string) {
 
 func home_actuator(actuator_driver* driver) (int, string) {
     driver->is_homed = true
-    (0, "")
+    0, ""
 }
 
 func send_command(actuator_driver* driver, actuator_command* cmd) (int, string) {
-    (0, "")
+    0, ""
 }
 
 func read_feedback(actuator_driver* driver) (feedback, string) {

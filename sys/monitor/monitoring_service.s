@@ -66,13 +66,12 @@ func create_monitoring_service(int interval_ms) (monitoring_service, string) {
         buffer: &mut buffer,
         health: &mut health
     }
-    
-    (service, "")
+    service, ""
 }
 
 func start_monitoring(monitoring_service* service) (int, string) {
     service->is_running = true
-    (0, "")
+    0, ""
 }
 
 func collect_metric(monitoring_service* service, metric* metric_val) (int, string) {
@@ -84,8 +83,7 @@ func collect_metric(monitoring_service* service, metric* metric_val) (int, strin
     } else {
         service->buffer->is_full = true
     }
-    
-    (service->num_metrics, "")
+    service->num_metrics, ""
 }
 
 func collect_metrics(monitoring_service* service) (int, string) {
@@ -120,8 +118,7 @@ func collect_metrics(monitoring_service* service) (int, string) {
     service->num_metrics = service->num_metrics + 1
     
     update_system_health(service)?
-    
-    (service->num_metrics, "")
+    service->num_metrics, ""
 }
 
 func update_system_health(monitoring_service* service) (int, string) {
@@ -130,8 +127,7 @@ func update_system_health(monitoring_service* service) (int, string) {
     service->health->avg_temperature = 52.0
     service->health->memory_utilization = 51.2
     service->health->network_utilization = 23.5
-    
-    (0, "")
+    0, ""
 }
 
 func get_system_health(monitoring_service* service) system_health {
@@ -143,8 +139,7 @@ func flush_metrics(monitoring_service* service) (int, string) {
     
     service->buffer->write_pos = 0
     service->buffer->is_full = false
-    
-    (flushed, "")
+    flushed, ""
 }
 
 func query_metrics(monitoring_service* service, int start_us, int end_us) (vec[metric], string) {
@@ -157,8 +152,7 @@ func query_metrics(monitoring_service* service, int start_us, int end_us) (vec[m
             results.push(m)
         }
     }
-    
-    (results, "")
+    results, ""
 }
 
 func get_time_us() int {
@@ -167,5 +161,5 @@ func get_time_us() int {
 
 func stop_monitoring(monitoring_service* service) (int, string) {
     service->is_running = false
-    (0, "")
+    0, ""
 }
