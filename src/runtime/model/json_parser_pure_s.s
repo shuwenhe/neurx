@@ -53,7 +53,7 @@ func is_digit(char c) bool {
     c >= '0' && c <= '9'
 }
 
-func skip_whitespace(state: mut json_parser_state*) {
+func skip_whitespace(json_parser_state* state) {
     while state.pos < state.input.len() {
         let c = state.input[state.pos] as char
         if !is_whitespace(c) {
@@ -69,7 +69,7 @@ func skip_whitespace(state: mut json_parser_state*) {
     }
 }
 
-func peek_char(state: json_parser_state*) option[char] {
+func peek_char(json_parser_state* state) option[char] {
     if state.pos < state.input.len() {
         option::some(state.input[state.pos] as char)
     } else {
@@ -77,7 +77,7 @@ func peek_char(state: json_parser_state*) option[char] {
     }
 }
 
-func consume_char(state: mut json_parser_state*) option[char] {
+func consume_char(json_parser_state* state) option[char] {
     skip_whitespace(state)
     if state.pos < state.input.len() {
         let c = state.input[state.pos] as char
@@ -93,7 +93,7 @@ func consume_char(state: mut json_parser_state*) option[char] {
 // 值解析
 // ============================================================================
 
-func parse_null(state: mut json_parser_state*) option[json_value] {
+func parse_null(json_parser_state* state) option[json_value] {
     if state.pos + 4 <= state.input.len() {
         let substring = state.input  // TODO: 实现 substring
         if substring == "null" {
@@ -111,7 +111,7 @@ func parse_null(state: mut json_parser_state*) option[json_value] {
     option::none[json_value]()
 }
 
-func parse_bool(state: mut json_parser_state*) option[json_value] {
+func parse_bool(json_parser_state* state) option[json_value] {
     if state.pos + 4 <= state.input.len() {
         // 检查 "true"
         let is_true = true  // TODO: 实现字符串比较
@@ -147,7 +147,7 @@ func parse_bool(state: mut json_parser_state*) option[json_value] {
     option::none[json_value]()
 }
 
-func parse_number(state: mut json_parser_state*) option[json_value] {
+func parse_number(json_parser_state* state) option[json_value] {
     let start = state.pos
     
     // 可选负号
@@ -209,7 +209,7 @@ func parse_number(state: mut json_parser_state*) option[json_value] {
     })
 }
 
-func parse_string(state: mut json_parser_state*) option[string] {
+func parse_string(json_parser_state* state) option[string] {
     if state.pos >= state.input.len() || state.input[state.pos] as char != '"' {
         return option::none[string]()
     }
@@ -234,7 +234,7 @@ func parse_string(state: mut json_parser_state*) option[string] {
     option::none[string]()
 }
 
-func parse_array(state: mut json_parser_state*) option[json_value] {
+func parse_array(json_parser_state* state) option[json_value] {
     if state.pos >= state.input.len() || state.input[state.pos] as char != '[' {
         return option::none[json_value]()
     }
@@ -292,7 +292,7 @@ func parse_array(state: mut json_parser_state*) option[json_value] {
     })
 }
 
-func parse_object(state: mut json_parser_state*) option[json_value] {
+func parse_object(json_parser_state* state) option[json_value] {
     if state.pos >= state.input.len() || state.input[state.pos] as char != '{' {
         return option::none[json_value]()
     }
