@@ -83,8 +83,7 @@ func get_html() string {
     html = html + "const cursor=r.querySelector('.stream-cursor');if(cursor)cursor.remove()}catch(e){r.innerHTML+='<p class=\"error\">❌ Connection error: '+escapeHtml(e)+'</p>'}}\n"
     html = html + "function clearText(){document.getElementById('prompt').value='';document.getElementById('result').innerHTML=''}\n"
     html = html + "function autoResizeTextarea(ta){ta.style.height='auto';const newH=Math.min(ta.scrollHeight,200);ta.style.height=newH+'px'}\n"
-    html = html + "const promptEl=document.getElementById('prompt');promptEl.addEventListener('input',function(){autoResizeTextarea(this)});promptEl.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendRequest()}else if(e.key==='Enter'&&e.shiftKey){e.preventDefault();const start=this.selectionStart,end=this.selectionEnd;this.value=this.value.substring(0,start)+String.fromCharCode(10)+this.value.substring(end);this.selectionStart=this.selectionEnd=start+1;autoResizeTextarea(this)}})\n"
-    html = html + "checkBackend();setInterval(checkBackend,5000);\n"
+    html = html + "window.addEventListener('load',function(){const promptEl=document.getElementById('prompt');if(promptEl){promptEl.addEventListener('input',function(){autoResizeTextarea(this)});promptEl.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendRequest()}else if(e.key==='Enter'&&e.shiftKey){e.preventDefault();const start=this.selectionStart,end=this.selectionEnd;this.value=this.value.substring(0,start)+String.fromCharCode(10)+this.value.substring(end);this.selectionStart=this.selectionEnd=start+1;autoResizeTextarea(this)}})}checkBackend();setInterval(checkBackend,5000)})\n"
     html = html + "</script>\n"
     html = html + "</body></html>\n"
     return html
