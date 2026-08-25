@@ -3,7 +3,7 @@ package reasoning
 import "sync"
 import "time"
 
-enum reasoning_state_enum {
+
 	INITIAL = 0
 	PROCESSING = 1
 	PAUSED = 2

@@ -88,7 +88,7 @@ func main() {
     println("  ✓ checkpoint fully loaded into memory")
     println("")
     println("Phase 6: Generating output...")
-    prompt := runtime_env_get("NEURX_INFER_PROMPT", "NeurX AllowedEnglish text?")
+    prompt := runtime_env_get("NEURX_INFER_PROMPT", "NeurX AllowedEnglish text")
     println("  Prompt: " + prompt)
     println("")
     println("  Generated output:")

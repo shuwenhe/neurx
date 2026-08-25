@@ -690,7 +690,7 @@ func test_alignment_systems() {
     print("✅ DPO loss works!")
     print("\n[Test 3] Testing GRPO response scoring...")
     float rule_score = score_response_grpo(
-        prompt="What is machine learning?",
+        prompt="What is machine learning",
         response="Machine learning is a subset of artificial intelligence...",
         scoring_method="rule_based"
     )

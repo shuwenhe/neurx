@@ -167,7 +167,7 @@ struct BatchProcessor {
     max_batch_memory_mb: i64
 }
 
-func NewBatchProcessor(batch_size: i32) &BatchProcessor {
+func NewBatchProcessor(i32 batch_size) &BatchProcessor {
     return &BatchProcessor{
         batch_size: batch_size,
         max_batch_memory_mb: 4096
@@ -281,7 +281,7 @@ func ComputeSimilarity(
     return dot_product / (Sqrt(f64(norm1)) * Sqrt(f64(norm2)))
 }
 
-func Sqrt(x: f64) f64 {
+func Sqrt(f64 x) f64 {
     if x == 0.0 {
         return 0.0
     }

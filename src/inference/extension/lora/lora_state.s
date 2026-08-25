@@ -26,7 +26,7 @@ struct lora_state_manager {
     enable_cache: bool
 }
 
-func lora_state_manager::new(max_adapters: int) lora_state_manager {
+func lora_state_manager::new(int max_adapters) lora_state_manager {
     lora_state_manager {
         request_states: map[string, lora_request_state](),
         adapter_cache: map[string, &vec[vec[float]]](),
@@ -158,7 +158,7 @@ func (mut lora_state_manager* manager) switch_adapters(
 
             manager.request_states.insert(request_id, state)
 
-            manager.clear_request_cache(request_id)?
+            manager.clear_request_cache(request_id)
 
             ((, ""))
         },
@@ -182,7 +182,7 @@ func (mut lora_state_manager* manager) remove_request_state(
     }
 
     manager.request_states.remove(request_id)
-    manager.clear_request_cache(request_id)?
+    manager.clear_request_cache(request_id)
 
     ((, ""))
 }
@@ -225,7 +225,7 @@ func (mut lora_state_manager* manager) deactivate_request(
     }
 }
 
-func (lora_state_manager* manager) is_request_active(request_id: string) bool {
+func (lora_state_manager* manager) is_request_active(string request_id) bool {
     switch manager.request_states.get(request_id) {
         option::some(state) : state.is_active,
         option::none : false,
@@ -298,7 +298,7 @@ func (mut lora_state_manager* manager) clear_all_cache() {
     manager.adapter_cache.clear()
 }
 
-func (mut lora_state_manager* manager) set_cache_enabled(enabled: bool) {
+func (mut lora_state_manager* manager) set_cache_enabled(bool enabled) {
     manager.enable_cache = enabled
 }
 

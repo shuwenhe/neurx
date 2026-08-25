@@ -155,7 +155,7 @@ func validate_mainchain_step_1(s_mainchain_validator validator) {
     print("🧪 VALIDATION STEP 1 Tokenization\n")
     print("═══════════════════════════════════════════════════════════\n")
     
-    string prompt = "What is AI?"
+    string prompt = "What is AI"
     []int tokens = tokenize_input(prompt)
     
     if len(tokens) > 0 {

@@ -479,7 +479,7 @@ func string_float(float f) string {
 
 func create_dummy_grpo_group() grpo_generation_group {
     grpo_generation_group {
-        prompt: "What is 2+2?",
+        prompt: "What is 2+2",
         reference_answer: "4",
         outputs: []generation_output{},
         advantages: []float{},

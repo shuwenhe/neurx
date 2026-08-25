@@ -127,7 +127,7 @@ func handle_vqa_endpoint(string request_body) api_response {
     print("  Endpoint: /v1/vision/vqa\n")
     print("  Method: POST\n")
     string response_body = "{"
-    response_body = response_body + "\"question\":\"What is in the image?\","
+    response_body = response_body + "\"question\":\"What is in the image\","
     response_body = response_body + "\"answer\":\"The image contains...\","
     response_body = response_body + "\"confidence\":0.92"
     response_body = response_body + "}"

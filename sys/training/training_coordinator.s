@@ -1,6 +1,6 @@
 package neurx.sys.training
 
-enum optimizer_type {
+
     sgd,
     adam,
     adamw,

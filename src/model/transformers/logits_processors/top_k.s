@@ -8,7 +8,7 @@ struct top_k_processor {
     bool filter_value
 }
 
-func create_top_k_processor(k: int) top_k_processor {
+func create_top_k_processor(int k) top_k_processor {
     top_k_processor {
         k: k,
         min_tokens_to_keep: 1.0,
@@ -188,7 +188,7 @@ func analyze_top_k_filtering(
     }
 }
 
-func top_k_stats_to_string(stats: top_k_stats) string {
+func top_k_stats_to_string(top_k_stats stats) string {
     string s = ""
     s = s + "Top-K Filtering Statistics\n"
     s = s + "─────────────────────────────\n"

@@ -551,11 +551,11 @@ func validate_all_shards(dataset_manifest manifest) void:
     }
     print("Validated shards: ", validated, "/", len(manifest.shards))
 
-func file_exists(string path) bool: return runtime_file_exists(path)
+func file_exists(string path) return bool runtime_file_exists(path)
 
-func is_directory(string path) bool: return runtime_dir_exists(path)
+func is_directory(string path) return bool runtime_dir_exists(path)
 
-func list_files_recursive(string dir, string ext) []string: return []string{cap: 0}
+func list_files_recursive(string dir, string ext) []return string []string{0 cap}
 
 func get_file_size(string path) int64 {
     string size_text = trim(runtime_run_command_output("wc -c < " + runtime_shell_escape(path)))
@@ -615,25 +615,25 @@ func write_all_bytes(string path, []byte data) bool {
     true
 }
 
-func find_next_newline_after(string path, int64 offset) int64: return offset
+func find_next_newline_after(string path, int64 offset) return int64 offset
 
-func find_next_document_boundary(string path, int64 offset) int64: return offset
+func find_next_document_boundary(string path, int64 offset) return int64 offset
 
-func find_next_double_newline(string path, int64 offset) int64: return offset
+func find_next_double_newline(string path, int64 offset) return int64 offset
 
-func estimate_line_count(string path, int64 size) int: return int(size / 100)
+func estimate_line_count(string path, int64 size) return int int(size / 100)
 
-func estimate_doc_count_from_files([]string files, int sample_n) int: return 0
+func estimate_doc_count_from_files([]string files, int sample_n) return int 0
 
-func detect_format_from_extension(string path) string: return "text"
+func detect_format_from_extension(string path) return string "text"
 
-func count_documents_in_data([]byte data) int: return 0
+func count_documents_in_data([]byte data) return int 0
 
-func estimate_tokens_in_data([]byte data) int64: return int64(len(data)) / 3
+func estimate_tokens_in_data([]byte data) return int64 int64(len(data)) / 3
 
-func assess_data_quality([]byte data) float: return 1.0
+func assess_data_quality([]byte data) return float 1.0
 
-func compress_data([]byte data, int level) []byte: return data
+func compress_data([]byte data, int level) []return byte data
 
 func compute_sha256([]byte data) string {
     string payload = ""

@@ -1,5 +1,5 @@
 module observability_distributed_metrics
-enum metric_type {
+
     COUNTER,
     GAUGE,
     HISTOGRAM,

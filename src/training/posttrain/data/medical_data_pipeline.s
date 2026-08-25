@@ -26,8 +26,8 @@ func clean_medical_content(string raw_content) string {
     cleaned = remove_pattern(cleaned, "Deputy Editor:.*\\n")
     cleaned = remove_pattern(cleaned, "Translator:.*\\n")
     cleaned = remove_pattern(cleaned, "all专题都会依据新发table of 证据.*[.\\n]")
-    cleaned = remove_pattern(cleaned, "\\[\\d+(?:[-,]\\d+)*\\]")
-    cleaned = remove_pattern(cleaned, "(graph片?\\d+)")
+    cleaned = remove_pattern(cleaned, "\\[\\d+(:[-,]\\d+)*\\]")
+    cleaned = remove_pattern(cleaned, "(graph片\\d+)")
     cleaned = remove_pattern(cleaned, "(table\\d+)")
     cleaned = remove_pattern(cleaned, "\\(Figure \\d+\\)")
     cleaned = remove_pattern(cleaned, "\\(Table \\d+\\)")
@@ -137,13 +137,13 @@ func generate_questions_from_template(string subject, []seed_template templates)
 
 func get_seed_templates() []seed_template {
     []seed_template templates = [
-        seed_template{ template: "什么是{subject}?", intent_type: "definition" },
-        seed_template{ template: "{subject} of 通俗解释是什么?", intent_type: "definition" },
-        seed_template{ template: "{subject}是怎么分型 of ?", intent_type: "classification" },
-        seed_template{ template: "{subject}是怎么分期 of ?", intent_type: "classification" },
-        seed_template{ template: "{subject} of diagnosis定义是什么?", intent_type: "diagnosis" },
-        seed_template{ template: "{subject} of 发病机制是什么?", intent_type: "mechanism" },
-        seed_template{ template: "{subject} of 病理生理过程是什么?", intent_type: "pathophysiology" }
+        seed_template{ template: "什么是{subject}", intent_type: "definition" },
+        seed_template{ template: "{subject} of 通俗解释是什么", intent_type: "definition" },
+        seed_template{ template: "{subject}是怎么分型 of ", intent_type: "classification" },
+        seed_template{ template: "{subject}是怎么分期 of ", intent_type: "classification" },
+        seed_template{ template: "{subject} of diagnosis定义是什么", intent_type: "diagnosis" },
+        seed_template{ template: "{subject} of 发病机制是什么", intent_type: "mechanism" },
+        seed_template{ template: "{subject} of 病理生理过程是什么", intent_type: "pathophysiology" }
     ]
     return templates
 }

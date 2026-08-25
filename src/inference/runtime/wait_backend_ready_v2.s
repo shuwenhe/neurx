@@ -84,6 +84,6 @@ func print_number(int n) {
         print_number(n / 100)
         print_number(n % 100)
     } else {
-        print("?")
+        print("")
     }
 }

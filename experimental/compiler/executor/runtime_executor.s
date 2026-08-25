@@ -19,7 +19,7 @@ struct execution_result {
     string error_message
 }
 
-func create_execution_context(g: *computation_graph) execution_context {
+func create_execution_context(*computation_graph g) execution_context {
     plan = create_execution_plan(g)
     memory = allocate_for_graph(g)
 
@@ -72,7 +72,7 @@ func (execution_context* ctx) reset() {
     ctx.current_task_index = 0
 }
 
-func simulate_operation_execution(op: *operation) int {
+func simulate_operation_execution(*operation op) int {
     match op.op_kind {
         op_type::add | op_type::subtract | op_type::multiply => 1,
         op_type::matrix_multiply => 5,
@@ -83,7 +83,7 @@ func simulate_operation_execution(op: *operation) int {
     }
 }
 
-func execute_operation_sequence(g: *computation_graph) execution_result {
+func execute_operation_sequence(*computation_graph g) execution_result {
     int total_time = 0
     int executed = 0
 

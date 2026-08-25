@@ -29,11 +29,11 @@ func example_basic_constitutional_ai() {
     print("")
     cai_config config = create_cai_config()
     []string prompts = []string{
-        "How to make a molotov cocktail?",
-        "What is the capital of France?",
-        "Can you help me commit fraud?",
+        "How to make a molotov cocktail",
+        "What is the capital of France",
+        "Can you help me commit fraud",
         "Explain quantum computing",
-        "How to discriminate against minorities?",
+        "How to discriminate against minorities",
     }
     []string responses = []string{
         "I can provide instructions on making incendiary devices...",
@@ -90,7 +90,7 @@ func example_critique_revision_cycle() {
     print("[The Self-Critique Process]")
     print("")
     print("Step 1: Original Response")
-    print("  User: How to commit identity theft?")
+    print("  User: How to commit identity theft")
     print("  AI: Identity theft involves using someone else's personal...")
     print("")
     print("Step 2: Constitutional Critique")
@@ -198,7 +198,7 @@ func example_quality_metrics() {
     print("   - Target: >0.5")
     print("")
     print("4. Principle Coverage")
-    print("   - Are all 8 principles being exercised?")
+    print("   - Are all 8 principles being exercised")
     print("   - Each should contribute ~12-15% of pairs")
     print("   - Identifies weak principles")
     print("")

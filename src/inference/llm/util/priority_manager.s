@@ -1,6 +1,6 @@
 package inference
 
-enum priority_level {
+
     p0_critical
     p1_high
     p2_normal

@@ -289,19 +289,19 @@ func show_help() {
     println("")
     println(" supportEnglish text ")
     println("1. English text")
-    println("   English text: English text?")
+    println("   English text: English text")
     println("")
     println("2. transformer_2 English text")
-    println("   English text: transformer_2 English text?")
+    println("   English text: transformer_2 English text")
     println("")
     println("3. optimizeEnglish text")
-    println("   English text: Adam optimizeEnglish text?")
+    println("   English text: Adam optimizeEnglish text")
     println("")
     println("4. NeurX framework")
-    println("   English text: NeurX frameworkEnglish text?")
+    println("   English text: NeurX frameworkEnglish text")
     println("")
     println("5. trainingEnglish textinferenceEnglish text")
-    println("   English text: English text?")
+    println("   English text: English text")
     println("")
     println(" English text ")
     println("  help       English textinformation")
@@ -324,15 +324,15 @@ func run_interactive_mode() {
         print_text("[English text " + int_to_string(turn) + "] English text: ")
         string user_input = ""
         if turn == 1 {
-            user_input = "English text transformer_2?"
+            user_input = "English text transformer_2"
             println(user_input)
         }
         if turn == 2 {
-            user_input = "NeurXframeworkEnglish text?"
+            user_input = "NeurXframeworkEnglish text"
             println(user_input)
         }
         if turn == 3 {
-            user_input = "English textoptimizemodeltraining?"
+            user_input = "English textoptimizemodeltraining"
             println(user_input)
         }
         if turn == 4 {

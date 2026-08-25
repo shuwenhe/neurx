@@ -38,7 +38,7 @@ struct parsed_document {
     links: list<extracted_link>
     code_blocks: list<code_block>
     statistics: document_statistics
-    raw_structure: any?
+    raw_structure: any
 }
 
 struct document_metadata {
@@ -47,14 +47,14 @@ struct document_metadata {
     file_format: string
     file_size_bytes: int
     mime_type: string
-    title: string?
-    author: string?
-    created_date: string?
-    modified_date: string?
-    page_count: int?
-    word_count: int?
-    language: string?
-    encoding: string?
+    title: string
+    author: string
+    created_date: string
+    modified_date: string
+    page_count: int
+    word_count: int
+    language: string
+    encoding: string
 }
 
 struct document_section {
@@ -64,8 +64,8 @@ struct document_section {
     content: string
     start_position: int
     end_position: int
-    page_number?: int
-    subsections: list<document_section>?
+    page_number: int
+    subsections: list<document_section>
 }
 
 struct extracted_table {
@@ -73,24 +73,24 @@ struct extracted_table {
     headers: list<string>
     rows: list<list<string>>
     markdown_representation: string
-    html_representation: string?
-    caption: string?
+    html_representation: string
+    caption: string
     row_count: int
     column_count: int
-    source_page?: int
+    source_page: int
     confidence: float
-    bbox?: tuple<float, float, float, float>?
+    bbox: tuple<float, float, float, float>
 }
 
 struct extracted_image {
     id: string
     data: bytes
     format: string
-    alt_text: string?
+    alt_text: string
     width: int
     height: int
-    caption: string?
-    position: tuple<int, int>?
+    caption: string
+    position: tuple<int, int>
 }
 
 struct extracted_link {
@@ -119,12 +119,12 @@ struct document_statistics {
 }
 struct document_parser {
     config: document_parser_config
-    pdf_parser: PDFParser?
-    html_parser: HTMLParser?
-    markdown_parser: MarkdownParser?
-    office_parser: OfficeDocumentParser?
-    init(config?: document_parser_config) {
-        this.config = config ?? new document_parser_config()
+    pdf_parser: PDFParser
+    html_parser: HTMLParser
+    markdown_parser: MarkdownParser
+    office_parser: OfficeDocumentParser
+    init(config: document_parser_config) {
+        this.config = config  new document_parser_config()
         if "pdf" in this.config.enabled_formats {
             this.pdf_parser = new pdf_parser(config=this.config)
         }
@@ -243,7 +243,7 @@ struct document_parser {
         content = read_text_file(file_path)
         return this._parse_plain_text_string(content, source_path=file_path)
     }
-    _parse_plain_text_string(string content, source_path?: string) {
+    _parse_plain_text_string(string content, source_path: string) {
         stats = compute_statistics(content)
         raw_sections = content.split("\n\n")
         sections: list<document_section> = []
@@ -263,8 +263,8 @@ struct document_parser {
         return parsed_document{
             content=content,
             metadata=document_metadata{
-                filename=source_path ? get_filename(source_path!) : "unknown.txt",
-                file_path=source_path ?? "",
+                filename=source_path  get_filename(source_path!) : "unknown.txt",
+                file_path=source_path  "",
                 file_format="txt",
                 file_size_bytes=content.encode('utf-8').length,
                 mime_type="text/plain",
@@ -377,7 +377,7 @@ struct html_parser {
     init(config: document_parser_config) {
         this.config = config
     }
-    parse_string(string html_content, source_url?: string) {
+    parse_string(string html_content, source_url: string) {
         soup = parse_html(html_content)
         if this.config.html_clean_html {
             for selector in this.config.html_remove_elements {
@@ -387,7 +387,7 @@ struct html_parser {
         if this.config.html_extract_main_content:
             main_content = this._extract_main_content(soup)
         } else:
-            main_content = soup.body ?? soup
+            main_content = soup.body  soup
         result = this._convert_element(main_content, source_url)
         stats = compute_statistics(result.content)
         return parsed_document{
@@ -402,18 +402,18 @@ struct html_parser {
             raw_structure=soup
         }
     }
-    _extract_metadata(soup: any, source_url?: string) {
-        title = soup.title?.get_text().trim() ?? ""
-        og_title = soup.find("meta", property="og:title")?.get("content")
-        description = soup.find("meta", attrs={"name": "description"})?.get("content")
-        author_meta = soup.find("meta", attrs={"name": "author"})?.get("content")
+    _extract_metadata(soup: any, source_url: string) {
+        title = soup.title.get_text().trim()  ""
+        og_title = soup.find("meta", property="og:title").get("content")
+        description = soup.find("meta", attrs={"name": "description"}).get("content")
+        author_meta = soup.find("meta", attrs={"name": "author"}).get("content")
         return document_metadata{
-            filename=source_url ? extract_filename_from_url(source_url!) : "",
-            file_path=source_url ?? "",
+            filename=source_url  extract_filename_from_url(source_url!) : "",
+            file_path=source_url  "",
             file_format="html",
-            file_size_bytes=len(source_url?.encode() ?? b""),
+            file_size_bytes=len(source_url.encode()  b""),
             mime_type="text/html",
-            title=og_title ?? title,
+            title=og_title  title,
             author=author_meta,
             word_count=null
         }
@@ -428,7 +428,7 @@ struct html_parser {
             tag_name = elem.name
             if tag_name in ["article", "main"]:
                 score += 25
-            class_id_str = (elem.get("class", []) ?? []).join("") + (elem.get("id", "") ?? "")
+            class_id_str = (elem.get("class", [])  []).join("") + (elem.get("id", "")  "")
             positive_terms = ["post", "article", "content", "entry", "body", "text", "story", "main"]
             for term in positive_terms:
                 if term in class_id_str.to_lower():
@@ -448,9 +448,9 @@ struct html_parser {
         if candidates.length > 0:
             candidates.sort_by_descending(c => c.score)
             return candidates[0].element
-        return soup.body ?? soup
+        return soup.body  soup
     }
-    _convert_element(element: any, base_url?: string) {
+    _convert_element(element: any, base_url: string) {
         sections: list<document_section> = []
         tables: list<extracted_table> = []
         images: list<extracted_image> = []
@@ -486,12 +486,12 @@ struct html_parser {
                 content_parts.append(table_result.markdown + "\n\n")
                 pos += len(table_result.markdown) + 2
             elif node.name == "img":
-                src = node.get("src") ?? ""
-                alt = node.get("alt") ?? ""
+                src = node.get("src")  ""
+                alt = node.get("alt")  ""
                 if src.starts_with("
                     src = "https:" + src
                 elif not (src.starts_with("http:
-                    src = resolve_relative_url(base_url ?? "", src)
+                    src = resolve_relative_url(base_url  "", src)
                 images.append(extracted_image{
                     id=f"img_{images.length}",
                     data=b"",
@@ -570,7 +570,7 @@ struct html_parser {
                     avg_length = sum(cell_lengths) / cell_lengths.length
                     if avg_length < 30:
                         headers = [td.get_text().strip() for td in td_cells]
-        tbody = table_elem.find("tbody") ?? table_elem
+        tbody = table_elem.find("tbody")  table_elem
         for tr in tbody.find_all("tr")[1 if (headers.length > 0 and !thead) else 0:]:
             cells: list<string> = []
             for td in tr.find_all(["td", "th"]):
@@ -610,7 +610,7 @@ struct markdown_parser {
     init(config: document_parser_config) {
         this.config = config
     }
-    parse_string(string markdown_content, source_path?: string) {
+    parse_string(string markdown_content, source_path: string) {
         lines = markdown_content.split("\n")
         sections: list<document_section> = []
         tables: list<extracted_table> = []
@@ -618,7 +618,7 @@ struct markdown_parser {
         images: list<extracted_image> = []
         links: list<extracted_link> = []
         content_parts: list<string> = []
-        current_section: document_section? = null
+        current_section: document_section = null
         in_code_block = false
         code_lang = ""
         code_lines: list<string> = []
@@ -738,8 +738,8 @@ struct markdown_parser {
         return parsed_document{
             content=full_content,
             metadata=document_metadata{
-                filename=source_path ? get_filename(source_path!) : "document.md",
-                file_path=source_path ?? "", file_format="markdown",
+                filename=source_path  get_filename(source_path!) : "document.md",
+                file_path=source_path  "", file_format="markdown",
                 file_size_bytes=len(full_content.encode('utf-8')),
                 mime_type="text/markdown", word_count=stats.total_words
             },
@@ -847,7 +847,7 @@ struct office_document_parser {
         content_parts: list<string> = []
         pos = 0
         for slide_idx, slide in enumerate(pptx.slides):
-            slide_title = slide.shapes.title?.text.trim() ?? f"Slide {slide_idx + 1}"
+            slide_title = slide.shapes.title.text.trim()  f"Slide {slide_idx + 1}"
             shape_texts: list<string> = []
             for shape in slide.shapes:
                 if hasattr(shape, "text") and shape.text.trim() != "":
@@ -886,8 +886,8 @@ struct office_document_parser {
             sheet_data = sheet.values
             rows_list = list(sheet_data)
             if rows_list.length == 0 { continue }
-            headers = [str(c) ?? "" for c in rows_list[0]]
-            data_rows = [[str(c) ?? "" for c in row] for row in rows_list[1:]]
+            headers = [str(c)  "" for c in rows_list[0]]
+            data_rows = [[str(c)  "" for c in row] for row in rows_list[1:]]
             md_table = format_table_as_markdown(headers, data_rows)
             all_tables.append(extracted_table{
                 id=f"sheet_{all_tables.length}",
@@ -980,7 +980,7 @@ function generate_uuid() {
 def generate_short_uuid() {
     import uuid, shortuuid
     return shortuuid.uuid()[:8]
-function create_document_parser(config?: document_parser_config) {
+function create_document_parser(config: document_parser_config) {
     return new document_parser(config=config)
 }
 function test_document_parser() {

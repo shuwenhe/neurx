@@ -108,7 +108,7 @@ func main() {
     println("    - Max weight delta: 0.0087")
     println("")
     println("  Test Inference:")
-    println("    Prompt: 'What is the cause of pneumonia?'")
+    println("    Prompt: 'What is the cause of pneumonia'")
     println("    Base: 'Pneumonia is a respiratory infection...'")
     println("    Fine-tuned: 'Pneumonia is caused by bacterial, viral, or fungal'")
     println("    ✓ Medical terminology improved")

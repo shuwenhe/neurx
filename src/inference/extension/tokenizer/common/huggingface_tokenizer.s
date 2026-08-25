@@ -15,7 +15,7 @@ struct HFTokenizer {
     merges_file: string,
 }
 
-func NewHFTokenizer(config: types.TokenizerConfig, model_path: string) &HFTokenizer {
+func NewHFTokenizer(types.TokenizerConfig config, string model_path) &HFTokenizer {
     hf := new(HFTokenizer)
     hf.base = tokenizer.NewBaseTokenizer(config)
     hf.model_path = model_path
@@ -27,7 +27,7 @@ func NewHFTokenizer(config: types.TokenizerConfig, model_path: string) &HFTokeni
     return hf
 }
 
-func (HFTokenizer* h) LoadVocabulary(vocab_file: string) types.TokenizerResult {
+func (HFTokenizer* h) LoadVocabulary(string vocab_file) types.TokenizerResult {
     h.vocab_file = vocab_file
 
     if contains_string(vocab_file, "llama") || contains_string(vocab_file, "Llama") {
@@ -47,7 +47,7 @@ func (HFTokenizer* h) LoadVocabulary(vocab_file: string) types.TokenizerResult {
     }
 }
 
-func (HFTokenizer* h) LoadMerges(merges_file: string) types.TokenizerResult {
+func (HFTokenizer* h) LoadMerges(string merges_file) types.TokenizerResult {
     h.merges_file = merges_file
 
     return types.TokenizerResult{
@@ -57,7 +57,7 @@ func (HFTokenizer* h) LoadMerges(merges_file: string) types.TokenizerResult {
     }
 }
 
-func (HFTokenizer* h) Encode(text: string) types.TokenizerResult {
+func (HFTokenizer* h) Encode(string text) types.TokenizerResult {
     return h.EncodeWithOptions(text, types.EncodingOptions{
         add_special_tokens: true,
         truncation: false,
@@ -66,7 +66,7 @@ func (HFTokenizer* h) Encode(text: string) types.TokenizerResult {
     })
 }
 
-func (HFTokenizer* h) EncodeWithOptions(text: string, opts: types.EncodingOptions) types.TokenizerResult {
+func (HFTokenizer* h) EncodeWithOptions(string text, types.EncodingOptions opts) types.TokenizerResult {
 
     if h.lowercase {
         text = lowercase_string(text)
@@ -120,7 +120,7 @@ func (HFTokenizer* h) EncodeWithOptions(text: string, opts: types.EncodingOption
     }
 }
 
-func (HFTokenizer* h) EncodeMultiSentences(text_a: string, text_b: string) types.TokenizerResult {
+func (HFTokenizer* h) EncodeMultiSentences(string text_a, string text_b) types.TokenizerResult {
 
     tokens_a := h.tokenize_internal(text_a)
 
@@ -141,7 +141,7 @@ func (HFTokenizer* h) EncodeMultiSentences(text_a: string, text_b: string) types
     }
 }
 
-func (HFTokenizer* h) Decode(token_ids: vec[i32]) string {
+func (HFTokenizer* h) Decode(vec[i32] token_ids) string {
     result := h.base.DecodeWithOptions(token_ids, types.DecodingOptions{
         skip_special_tokens: true,
         clean_up_tokenization_spaces: true,
@@ -149,7 +149,7 @@ func (HFTokenizer* h) Decode(token_ids: vec[i32]) string {
     return result.text
 }
 
-func (HFTokenizer* h) basic_tokenize(text: string) vec[string] {
+func (HFTokenizer* h) basic_tokenize(string text) vec[string] {
     tokens := make(vec[string], 0)
     current := ""
 
@@ -179,7 +179,7 @@ func (HFTokenizer* h) basic_tokenize(text: string) vec[string] {
     return tokens
 }
 
-func (HFTokenizer* h) wordpiece_tokenize(tokens: vec[string]) vec[string] {
+func (HFTokenizer* h) wordpiece_tokenize(vec[string] tokens) vec[string] {
     output := make(vec[string], 0)
 
     for i := 0; i < len(tokens); i += 1 {
@@ -199,7 +199,7 @@ func (HFTokenizer* h) wordpiece_tokenize(tokens: vec[string]) vec[string] {
     return output
 }
 
-func (HFTokenizer* h) split_subwords(word: string) vec[string] {
+func (HFTokenizer* h) split_subwords(string word) vec[string] {
     subwords := make(vec[string], 0)
     start := 0
 
@@ -236,7 +236,7 @@ func (HFTokenizer* h) split_subwords(word: string) vec[string] {
     return subwords
 }
 
-func (HFTokenizer* h) add_special_tokens_hf(tokens: vec[i32]) vec[i32] {
+func (HFTokenizer* h) add_special_tokens_hf(vec[i32] tokens) vec[i32] {
     result := make(vec[i32], 0)
 
     result = append(result, h.base.GetSpecialToken("cls"))
@@ -248,7 +248,7 @@ func (HFTokenizer* h) add_special_tokens_hf(tokens: vec[i32]) vec[i32] {
     return result
 }
 
-func (HFTokenizer* h) truncate_tokens(tokens: vec[i32], max_length: i32, side: string) vec[i32] {
+func (HFTokenizer* h) truncate_tokens(vec[i32] tokens, i32 max_length, string side) vec[i32] {
     if i32(len(tokens)) <= max_length {
         return tokens
     }
@@ -261,7 +261,7 @@ func (HFTokenizer* h) truncate_tokens(tokens: vec[i32], max_length: i32, side: s
     return tokens[0:max_length]
 }
 
-func (HFTokenizer* h) add_spaces_around_chinese(text: string) string {
+func (HFTokenizer* h) add_spaces_around_chinese(string text) string {
     result := ""
     for i := 0; i < len(text); i += 1 {
         char := text[i]
@@ -271,12 +271,12 @@ func (HFTokenizer* h) add_spaces_around_chinese(text: string) string {
     return result
 }
 
-func (HFTokenizer* h) remove_accents(text: string) string {
+func (HFTokenizer* h) remove_accents(string text) string {
 
     return text
 }
 
-func (HFTokenizer* h) tokenize_internal(text: string) vec[i32] {
+func (HFTokenizer* h) tokenize_internal(string text) vec[i32] {
     basic_tokens := h.basic_tokenize(text)
     wordpiece_tokens := h.wordpiece_tokenize(basic_tokens)
 
@@ -313,7 +313,7 @@ func (HFTokenizer* h) load_generic_vocab() {
     h.tokenizer_type = "bpe"
 }
 
-func lowercase_string(s: string) string {
+func lowercase_string(string s) string {
     result := ""
     for i := 0; i < len(s); i += 1 {
         char := s[i]
@@ -326,16 +326,16 @@ func lowercase_string(s: string) string {
     return result
 }
 
-func is_whitespace(char: string) bool {
+func is_whitespace(string char) bool {
     return char == " " || char == "\t" || char == "\n" || char == "\r"
 }
 
-func is_punctuation(char: string) bool {
-    return char == "." || char == "," || char == "!" || char == "?" ||
+func is_punctuation(string char) bool {
+    return char == "." || char == "," || char == "!" || char == "" ||
            char == ";" || char == ":" || char == "-" || char == "(" || char == ")"
 }
 
-func contains_string(s: string, substring: string) bool {
+func contains_string(string s, string substring) bool {
     for i := 0; i <= len(s) - len(substring); i += 1 {
         match := true
         for j := 0; j < len(substring); j += 1 {
@@ -351,7 +351,7 @@ func contains_string(s: string, substring: string) bool {
     return false
 }
 
-func append_slice_i32(a: vec[i32], b: vec[i32]) vec[i32] {
+func append_slice_i32(vec[i32] a, vec[i32] b) vec[i32] {
     for i := 0; i < len(b); i += 1 {
         a = append(a, b[i])
     }

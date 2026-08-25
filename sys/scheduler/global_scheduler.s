@@ -1,6 +1,6 @@
 package neurx.sys.scheduler
 
-enum deployment_target {
+
     datacenter,
     autonomous_vehicle,
     robotics,

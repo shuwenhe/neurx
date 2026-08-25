@@ -17,7 +17,7 @@ struct KernelLauncher {
     kernel_stats: map[string, types.KernelStats]
 }
 
-func NewKernelLauncher(device_id: i32) &KernelLauncher {
+func NewKernelLauncher(i32 device_id) &KernelLauncher {
     device_mgr := cuda_primitives.NewCUDADeviceManager()
     device_mgr.InitDevice(device_id)
 
@@ -222,7 +222,7 @@ func (KernelLauncher* l) Synchronize() types.KernelResult {
     }
 }
 
-func (KernelLauncher* l) GetKernelStats(kernel_name: string) types.KernelStats {
+func (KernelLauncher* l) GetKernelStats(string kernel_name) types.KernelStats {
     if stats, exists := l.kernel_stats[kernel_name]; exists {
         return stats
     }
@@ -238,7 +238,7 @@ func (KernelLauncher* l) GetKernelStats(kernel_name: string) types.KernelStats {
     }
 }
 
-func (KernelLauncher* l) RecordStats(stats: types.KernelStats) {
+func (KernelLauncher* l) RecordStats(types.KernelStats stats) {
     if existing, exists := l.kernel_stats[stats.name]; exists {
 
         existing.execution_time_ms += stats.execution_time_ms

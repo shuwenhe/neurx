@@ -8,14 +8,14 @@ struct model_executor {
     device: string
 }
 
-func new_model_executor(device: string) model_executor {
+func new_model_executor(string device) model_executor {
     model_executor {
         current_model: "",
         device: device,
     }
 }
 
-func (mut model_executor* executor) load_model(model_name: string, device: string) bool {
+func (mut model_executor* executor) load_model(string model_name, string device) bool {
 
     if model_name == "llama-7b" {
         executor.current_model = model_name
@@ -105,7 +105,7 @@ func collect_execution_stats(
     }
 }
 
-func (mut model_executor* executor) switch_model(model_name: string) bool {
+func (mut model_executor* executor) switch_model(string model_name) bool {
     if model_name == "llama-7b" || model_name == "qwen2-7b" ||
        model_name == "mistral-7b" || model_name == "deepseek-7b" {
         executor.current_model = model_name
@@ -118,7 +118,7 @@ func (model_executor* executor) get_current_model() string {
     return executor.current_model
 }
 
-func (mut model_executor* executor) unload_model(model_name: string) bool {
+func (mut model_executor* executor) unload_model(string model_name) bool {
     if executor.current_model == model_name {
         executor.current_model = ""
     }
@@ -134,7 +134,7 @@ struct model_info {
     attention_type: string
 }
 
-func get_model_info(model_name: string) option[model_info] {
+func get_model_info(string model_name) option[model_info] {
     if model_name == "llama-7b" {
         return Some(model_info {
             name: "llama-7b",

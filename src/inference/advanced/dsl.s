@@ -258,9 +258,9 @@ func parse_int(string s) int {
 
 func main() {
     prog := new_dsl_program("prog-1", "Medical Assistant")
-    prog.set_variable("user_input", "What is diabetes?", "string")
+    prog.set_variable("user_input", "What is diabetes", "string")
     llm_call := create_llm_call_statement(
-        "What is diabetes?",
+        "What is diabetes",
         "qwen",
         200,
     )

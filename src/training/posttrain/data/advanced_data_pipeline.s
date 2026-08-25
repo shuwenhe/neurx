@@ -1,6 +1,6 @@
 package neurx.posttrain.data.advanced_data_pipeline
 use std.io.eprintln
-enum prefetch_strategy {
+
     NONE,
     SIMPLE,
     ADVANCED,

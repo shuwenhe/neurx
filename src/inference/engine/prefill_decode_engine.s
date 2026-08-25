@@ -2,12 +2,12 @@ package neurx.inference.engine.prefill_decode_engine
 
 use std.vec
 
-enum phase_type {
+
     prefill,
     decode
 }
 
-enum request_status {
+
     pending,
     prefilling,
     decoding,
@@ -71,7 +71,7 @@ func new_prefill_decode_engine(batch_config config) prefill_decode_engine {
     }
 }
 
-func (mut prefill_decode_engine* engine) enqueue_request(req: request_state) {
+func (mut prefill_decode_engine* engine) enqueue_request(request_state req) {
     new_req := req
     new_req.status = request_status.pending
     new_req.arrival_time_ms = engine.total_time_ms

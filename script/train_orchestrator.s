@@ -6,7 +6,7 @@ import (
     "strconv"
     "strings"
 )
-enum training_scale {
+
     mini,
     small,
     medium,

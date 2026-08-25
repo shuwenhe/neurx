@@ -20,7 +20,7 @@ impl Qwen3Parser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         if self.use_xml {
             extract_qwen_xml_tools(model_output)
         } else {
@@ -42,7 +42,7 @@ impl Qwen3CoderParser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         extract_qwen_json_tools(model_output)
     }
 }
@@ -60,7 +60,7 @@ impl Gemma4Parser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         extract_gemma_json_tools(model_output)
     }
 }
@@ -78,7 +78,7 @@ impl MistralParser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         extract_mistral_tools(model_output)
     }
 }
@@ -96,7 +96,7 @@ impl Llama3JsonParser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         extract_llama_json_tools(model_output)
     }
 }
@@ -114,12 +114,12 @@ impl HermesParser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         extract_hermes_xml_tools(model_output)
     }
 }
 
-func extract_qwen_json_tools(model_output: str) -> ExtractedToolCallInformation {
+func extract_qwen_json_tools(str model_output) -> ExtractedToolCallInformation {
     pattern := "\\{[^}]*\\\"function\\\"[^}]*\\}"
     re := regex::compile(pattern)
 
@@ -160,7 +160,7 @@ func extract_qwen_json_tools(model_output: str) -> ExtractedToolCallInformation 
     }
 }
 
-func extract_qwen_xml_tools(model_output: str) -> ExtractedToolCallInformation {
+func extract_qwen_xml_tools(str model_output) -> ExtractedToolCallInformation {
     start_tag := "<tool_call>"
     end_tag := "</tool_call>"
 
@@ -214,15 +214,15 @@ func extract_qwen_xml_tools(model_output: str) -> ExtractedToolCallInformation {
     }
 }
 
-func extract_gemma_json_tools(model_output: str) -> ExtractedToolCallInformation {
+func extract_gemma_json_tools(str model_output) -> ExtractedToolCallInformation {
     extract_qwen_json_tools(model_output)
 }
 
-func extract_llama_json_tools(model_output: str) -> ExtractedToolCallInformation {
+func extract_llama_json_tools(str model_output) -> ExtractedToolCallInformation {
     extract_qwen_json_tools(model_output)
 }
 
-func extract_mistral_tools(model_output: str) -> ExtractedToolCallInformation {
+func extract_mistral_tools(str model_output) -> ExtractedToolCallInformation {
     tool_start := "[TOOL_CALLS]"
     tool_end := "[/TOOL_CALLS]"
 
@@ -270,11 +270,11 @@ func extract_mistral_tools(model_output: str) -> ExtractedToolCallInformation {
     }
 }
 
-func extract_hermes_xml_tools(model_output: str) -> ExtractedToolCallInformation {
+func extract_hermes_xml_tools(str model_output) -> ExtractedToolCallInformation {
     extract_qwen_xml_tools(model_output)
 }
 
-func parse_qwen_json_tool(json_str: str) -> Option<ToolCall> {
+func parse_qwen_json_tool(str json_str) -> Option<ToolCall> {
     func_name := extract_json_field(json_str, "name")
     arguments := extract_json_field(json_str, "arguments")
 
@@ -292,7 +292,7 @@ func parse_qwen_json_tool(json_str: str) -> Option<ToolCall> {
     }
 }
 
-func parse_mistral_tool_call(call_str: str) -> Option<ToolCall> {
+func parse_mistral_tool_call(str call_str) -> Option<ToolCall> {
     pattern := "([a-zA-Z_][a-zA-Z0-9_]*)\\((.*)\\)"
     re := regex::compile(pattern)
 
@@ -314,7 +314,7 @@ func parse_mistral_tool_call(call_str: str) -> Option<ToolCall> {
     }
 }
 
-func extract_json_field(json_str: str, field_name: str) -> str {
+func extract_json_field(str json_str, str field_name) -> str {
     pattern := "\"" + field_name + "\"\\s*:\\s*\"([^\"]*)\""
     re := regex::compile(pattern)
     match regex::find_string(re, json_str) {
@@ -323,6 +323,6 @@ func extract_json_field(json_str: str, field_name: str) -> str {
     }
 }
 
-func extract_group(m: RegexMatch, group: i32) -> str {
+func extract_group(RegexMatch m, i32 group) -> str {
     ""
 }

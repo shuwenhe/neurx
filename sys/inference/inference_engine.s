@@ -1,6 +1,6 @@
 package neurx.sys.inference
 
-enum model_precision {
+
     fp32,
     fp16,
     int8,

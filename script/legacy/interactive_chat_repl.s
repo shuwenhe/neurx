@@ -138,7 +138,7 @@ func generate_response(string user_input, inference_context ctx) string {
     if ctx.model_loaded {
     }
     if contains_string(user_input, "English text") || contains_string(user_input, "hello") || contains_string(user_input, "hi") || contains_string(user_input, "hey") {
-        return "English text!English text NeurX-1.3.English text.English textAllowedEnglish text?"
+        return "English text!English text NeurX-1.3.English text.English textAllowedEnglish text"
     }
     if contains_string(user_input, "English text") || contains_string(user_input, "who are you") || contains_string(user_input, "who") {
         return "English text NeurX-1.3, English text1.3BparameterEnglish textTransformermodel.English textlanguageEnglish textgenerate."
@@ -162,16 +162,16 @@ func generate_response(string user_input, inference_context ctx) string {
         return "1+1 = 2.English textmainEnglish textlanguageEnglish text, English textAllowedEnglish textcompute."
     }
     if contains_string(user_input, "English text") || contains_string(user_input, "why") {
-        return "English text!English text, RequiredEnglish text.English textAllowedEnglish text?"
+        return "English text!English text, RequiredEnglish text.English textAllowedEnglish text"
     }
     if contains_string(user_input, "English text") || contains_string(user_input, "what") {
-        return "English text?English text.English textAllowedEnglish text NeurX, transformer_2, trainingEnglish textinferenceEnglish text."
+        return "English textEnglish text.English textAllowedEnglish text NeurX, transformer_2, trainingEnglish textinferenceEnglish text."
     }
     if contains_string(user_input, "English text") || contains_string(user_input, "how") {
         return "English text.English text, English textAllowedEnglish text."
     }
     if contains_string(user_input, "English text") || contains_string(user_input, "English text") || contains_string(user_input, "thank") {
-        return "English text!English text.English text?"
+        return "English text!English text.English text"
     }
     "English text!English textAllowedEnglish text.English texttraining, English text: NeurXframework, Transformermodel, trainingEnglish text, English textgenerateEnglish textinferenceEnglish text.English textexplanationEnglish text, English text."
 }

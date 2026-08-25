@@ -18,7 +18,7 @@ func create_stream_state() IncrementalParseState {
     }
 }
 
-func process_stream_chunk(state: *IncrementalParseState, chunk: string) StreamChunk {
+func process_stream_chunk(*IncrementalParseState state, string chunk) StreamChunk {
 
     state.buffer = state.buffer + chunk
 
@@ -41,7 +41,7 @@ func process_stream_chunk(state: *IncrementalParseState, chunk: string) StreamCh
     return chunk_result
 }
 
-func incremental_parse(state: *IncrementalParseState) ParseResult {
+func incremental_parse(*IncrementalParseState state) ParseResult {
     result := create_parse_result()
     result.format = state.format_detected
     result.raw_output = state.buffer
@@ -63,7 +63,7 @@ func incremental_parse(state: *IncrementalParseState) ParseResult {
     return result
 }
 
-func parse_json_incremental(state: *IncrementalParseState) {
+func parse_json_incremental(*IncrementalParseState state) {
     buffer := state.buffer
     pos := state.position
 
@@ -90,7 +90,7 @@ func parse_json_incremental(state: *IncrementalParseState) {
     state.position = pos
 }
 
-func parse_xml_incremental(state: *IncrementalParseState) {
+func parse_xml_incremental(*IncrementalParseState state) {
     buffer := state.buffer
     pos := state.position
     in_tag := false
@@ -121,7 +121,7 @@ func parse_xml_incremental(state: *IncrementalParseState) {
     state.is_complete = tag_depth == 0 && !in_tag
 }
 
-func parse_markdown_incremental(state: *IncrementalParseState) {
+func parse_markdown_incremental(*IncrementalParseState state) {
     buffer := state.buffer
     pos := state.position
 
@@ -131,14 +131,14 @@ func parse_markdown_incremental(state: *IncrementalParseState) {
     state.position = len(buffer)
 }
 
-func parse_text_incremental(state: *IncrementalParseState) {
+func parse_text_incremental(*IncrementalParseState state) {
 
     state.position = len(state.buffer)
 
     state.is_complete = len(state.buffer) > 100
 }
 
-func count_character(text: string, ch: byte) int {
+func count_character(string text, byte ch) int {
     count := 0
     i := 0
 
@@ -152,25 +152,25 @@ func count_character(text: string, ch: byte) int {
     return count
 }
 
-func get_partial_output(state: IncrementalParseState) string {
+func get_partial_output(IncrementalParseState state) string {
     if state.position > len(state.buffer) {
         state.position = len(state.buffer)
     }
     return state.buffer[0:state.position]
 }
 
-func get_remaining_output(state: IncrementalParseState) string {
+func get_remaining_output(IncrementalParseState state) string {
     if state.position > len(state.buffer) {
         state.position = len(state.buffer)
     }
     return state.buffer[state.position:]
 }
 
-func is_parse_complete(state: IncrementalParseState) bool {
+func is_parse_complete(IncrementalParseState state) bool {
     return state.is_complete
 }
 
-func reset_stream_state(state: *IncrementalParseState) {
+func reset_stream_state(*IncrementalParseState state) {
     state.buffer = ""
     state.position = 0
     state.format_detected = 0
@@ -182,7 +182,7 @@ func reset_stream_state(state: *IncrementalParseState) {
     state.last_token = ""
 }
 
-func finalize_stream(state: IncrementalParseState) ParseResult {
+func finalize_stream(IncrementalParseState state) ParseResult {
     result := create_parse_result()
     result.format = state.format_detected
     result.raw_output = state.buffer
@@ -204,7 +204,7 @@ func finalize_stream(state: IncrementalParseState) ParseResult {
     return result
 }
 
-func extract_lines_from_stream(state: IncrementalParseState, max_lines: int) []string {
+func extract_lines_from_stream(IncrementalParseState state, int max_lines) []string {
     partial := get_partial_output(state)
     lines := split_lines(partial)
 
@@ -222,7 +222,7 @@ func extract_lines_from_stream(state: IncrementalParseState, max_lines: int) []s
     return result
 }
 
-func estimate_progress(state: IncrementalParseState) float {
+func estimate_progress(IncrementalParseState state) float {
     if len(state.buffer) == 0 {
         return 0.0
     }
@@ -250,29 +250,29 @@ func create_stream_builder() StreamBuilder {
     }
 }
 
-func (StreamBuilder* sb) add_chunk(chunk: string) {
+func (StreamBuilder* sb) add_chunk(string chunk) {
     stream_chunk := process_stream_chunk(&sb.current_state, chunk)
     sb.chunks = append(sb.chunks, stream_chunk)
     sb.full_output = sb.full_output + chunk
 }
 
-func (sb: StreamBuilder) get_current_output() string {
+func (StreamBuilder sb) get_current_output() string {
     return get_partial_output(sb.current_state)
 }
 
-func (sb: StreamBuilder) get_chunks() []StreamChunk {
+func (StreamBuilder sb) get_chunks() []StreamChunk {
     return sb.chunks
 }
 
-func (sb: StreamBuilder) is_complete() bool {
+func (StreamBuilder sb) is_complete() bool {
     return is_parse_complete(sb.current_state)
 }
 
-func (sb: StreamBuilder) get_final_result() ParseResult {
+func (StreamBuilder sb) get_final_result() ParseResult {
     return finalize_stream(sb.current_state)
 }
 
-func (sb: StreamBuilder) get_progress() float {
+func (StreamBuilder sb) get_progress() float {
     return estimate_progress(sb.current_state)
 }
 

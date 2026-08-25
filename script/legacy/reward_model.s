@@ -78,7 +78,7 @@ func (reward_model_trainer* trainer) load_preference_data(data_path string) {
     fmt.Printf("[Reward model] Loading preference data from %s\n", data_path)
     for i := 0; i < 1000; i++ {
         example := preference_data{
-            prompt: fmt.Sprintf("Prompt %d: What is %d + %d?", i, i%100, (i+1)%100),
+            prompt: fmt.Sprintf("Prompt %d: What is %d + %d", i, i%100, (i+1)%100),
             response_a: fmt.Sprintf("The answer is %d", (i%100 + (i+1)%100)),
             response_b: fmt.Sprintf("Calculating: %d + %d = %d", i%100, (i+1)%100, (i%100 + (i+1)%100)),
             preferred: i % 2,

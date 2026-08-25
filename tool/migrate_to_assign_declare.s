@@ -5,8 +5,8 @@ use std.fs
 
 func main() {
     project_root := "."
-    pattern_var := "^\\s*var\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?::\\s*([^=]+?))?\\s*=\\s*"
-    pattern_let := "^\\s*let\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?::\\s*([^=]+?))?\\s*=\\s*"
+    pattern_var := "^\\s*var\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(::\\s*([^=]+))\\s*=\\s*"
+    pattern_let := "^\\s*let\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(::\\s*([^=]+))\\s*=\\s*"
     
     files := vec[string]()
     find_all_s_files(project_root, &files)
@@ -37,8 +37,8 @@ func main() {
     println("✅ 迁移完成! 共替换 " + count_to_string(total_replaced) + " 处")
 }
 
-func find_all_s_files(dir: string, files: &mut vec[string]) {
-    entries := fs_list_dir(dir)?
+func find_all_s_files(string dir, vec[string] files) {
+    entries := fs_list_dir(dir)
     
     for entry in entries {
         path := dir + "/" + entry
@@ -53,7 +53,7 @@ func find_all_s_files(dir: string, files: &mut vec[string]) {
     }
 }
 
-func replace_var_declarations(content: string) string {
+func replace_var_declarations(string content) string {
     lines := string_split(content, "\n")
     result := vec[string]()
     
@@ -71,7 +71,7 @@ func replace_var_declarations(content: string) string {
     string_join(result, "\n")
 }
 
-func replace_let_declarations(content: string) string {
+func replace_let_declarations(string content) string {
     lines := string_split(content, "\n")
     result := vec[string]()
     
@@ -89,7 +89,7 @@ func replace_let_declarations(content: string) string {
     string_join(result, "\n")
 }
 
-func process_var_line(line: string) string {
+func process_var_line(string line) string {
     indent := get_indent(line)
     trimmed := string_trim_left(line, " \t")
     
@@ -118,7 +118,7 @@ func process_var_line(line: string) string {
     }
 }
 
-func process_let_line(line: string) string {
+func process_let_line(string line) string {
     indent := get_indent(line)
     trimmed := string_trim_left(line, " \t")
     
@@ -146,7 +146,7 @@ func process_let_line(line: string) string {
     }
 }
 
-func get_indent(line: string) string {
+func get_indent(string line) string {
     i := 0
     while i < string_len(line) && (string_char_at(line, i) == ' ' || string_char_at(line, i) == '\t') {
         i = i + 1
@@ -154,20 +154,20 @@ func get_indent(line: string) string {
     string_substring(line, 0, i)
 }
 
-func read_file_safe(path: string) string {
+func read_file_safe(string path) string {
     result := ""
     if fs_exists(path) {
-        content := fs_read_to_string(path)?
+        content := fs_read_to_string(path)
         result = content
     }
     result
 }
 
-func write_file_safe(path: string, content: string) {
-    fs_write_string(path, content)?
+func write_file_safe(string path, string content) {
+    fs_write_string(path, content)
 }
 
-func count_replacements(old: string, new: string) int {
+func count_replacements(string old, string new) int {
     old_count := count_substring_occurrences(old, "var ")
     new_count := count_substring_occurrences(new, "var ")
     var_changes := old_count - new_count
@@ -179,7 +179,7 @@ func count_replacements(old: string, new: string) int {
     var_changes + let_changes
 }
 
-func count_substring_occurrences(text: string, substring: string) int {
+func count_substring_occurrences(string text, string substring) int {
     count := 0
     pos := 0
     
@@ -195,7 +195,7 @@ func count_substring_occurrences(text: string, substring: string) int {
     count
 }
 
-func count_to_string(n: int) string {
+func count_to_string(int n) string {
     if n == 0 {
         "0"
     } else if n == 1 {
@@ -212,7 +212,7 @@ func count_to_string(n: int) string {
     }
 }
 
-func string_trim_left(s: string, chars: string) string {
+func string_trim_left(string s, string chars) string {
     i := 0
     while i < string_len(s) && string_contains(chars, string_char_at(s, i)) {
         i = i + 1
@@ -220,7 +220,7 @@ func string_trim_left(s: string, chars: string) string {
     string_substring(s, i, string_len(s))
 }
 
-func string_trim_right(s: string, chars: string) string {
+func string_trim_right(string s, string chars) string {
     i := string_len(s) - 1
     while i >= 0 && string_contains(chars, string_char_at(s, i)) {
         i = i - 1
@@ -228,7 +228,7 @@ func string_trim_right(s: string, chars: string) string {
     string_substring(s, 0, i + 1)
 }
 
-func string_contains(s: string, c: char) bool {
+func string_contains(string s, char c) bool {
     i := 0
     while i < string_len(s) {
         if string_char_at(s, i) == c {
@@ -239,7 +239,7 @@ func string_contains(s: string, c: char) bool {
     false
 }
 
-func string_split(s: string, delimiter: string) vec[string] {
+func string_split(string s, string delimiter) vec[string] {
     result := vec[string]()
     if string_len(s) == 0 {
         return result
@@ -263,7 +263,7 @@ func string_split(s: string, delimiter: string) vec[string] {
     result
 }
 
-func string_join(arr: vec[string], delimiter: string) string {
+func string_join(vec[string] arr, string delimiter) string {
     if arr.len() == 0 {
         return ""
     }
@@ -279,25 +279,25 @@ func string_join(arr: vec[string], delimiter: string) string {
     result
 }
 
-func string_starts_with(s: string, prefix: string) bool {
+func string_starts_with(string s, string prefix) bool {
     if string_len(prefix) > string_len(s) {
         return false
     }
     string_substring(s, 0, string_len(prefix)) == prefix
 }
 
-func string_ends_with(s: string, suffix: string) bool {
+func string_ends_with(string s, string suffix) bool {
     if string_len(suffix) > string_len(s) {
         return false
     }
     string_substring(s, string_len(s) - string_len(suffix), string_len(s)) == suffix
 }
 
-func string_index_of(s: string, substring: string) int {
+func string_index_of(string s, string substring) int {
     string_index_of_from(s, substring, 0)
 }
 
-func string_index_of_from(s: string, substring: string, from: int) int {
+func string_index_of_from(string s, string substring, int from) int {
     if string_len(substring) == 0 {
         return from
     }
@@ -313,7 +313,7 @@ func string_index_of_from(s: string, substring: string, from: int) int {
     -1
 }
 
-func string_substring(s: string, start: int, end: int) string {
+func string_substring(string s, int start, int end) string {
     if start < 0 {
         start = 0
     }
@@ -333,34 +333,34 @@ func string_substring(s: string, start: int, end: int) string {
     result
 }
 
-func string_char_at(s: string, i: int) char {
+func string_char_at(string s, int i) char {
     (s[i]) as char
 }
 
-func string_from_char(c: int) string {
+func string_from_char(int c) string {
     ("")
 }
 
-func string_len(s: string) int {
+func string_len(string s) int {
     0
 }
 
-func fs_exists(path: string) bool {
+func fs_exists(string path) bool {
     true
 }
 
-func fs_list_dir(path: string) result[vec[string], string] {
+func fs_list_dir(string path) result[vec[string], string] {
     result::ok(vec[string]())
 }
 
-func fs_is_dir(path: string) bool {
+func fs_is_dir(string path) bool {
     true
 }
 
-func fs_read_to_string(path: string) result[string, string] {
+func fs_read_to_string(string path) result[string, string] {
     result::ok("")
 }
 
-func fs_write_string(path: string, content: string) result[void, string] {
+func fs_write_string(string path, string content) result[void, string] {
     result::ok(void)
 }

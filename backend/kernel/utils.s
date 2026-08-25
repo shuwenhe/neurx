@@ -14,7 +14,7 @@ func NewKernelUtils() &KernelUtils {
     }
 }
 
-func (KernelUtils* u) ValidateTensorShape(shape: []i32) bool {
+func (KernelUtils* u) ValidateTensorShape([]i32 shape) bool {
     if len(shape) == 0 {
         return false
     }
@@ -28,7 +28,7 @@ func (KernelUtils* u) ValidateTensorShape(shape: []i32) bool {
     return true
 }
 
-func (KernelUtils* u) ComputeTensorSize(shape: []i32) i64 {
+func (KernelUtils* u) ComputeTensorSize([]i32 shape) i64 {
     if !u.ValidateTensorShape(shape) {
         return 0
     }
@@ -41,7 +41,7 @@ func (KernelUtils* u) ComputeTensorSize(shape: []i32) i64 {
     return size
 }
 
-func (KernelUtils* u) GetDataTypeSize(dtype: types.DataType) i32 {
+func (KernelUtils* u) GetDataTypeSize(types.DataType dtype) i32 {
     switch dtype {
     case types.DataType.float32:
         return 4
@@ -174,7 +174,7 @@ func (KernelUtils* u) AreShapesCompatible(
     return true
 }
 
-func (KernelUtils* u) TransposeShape(shape: []i32) []i32 {
+func (KernelUtils* u) TransposeShape([]i32 shape) []i32 {
     result := make([]i32, len(shape))
 
     for i := 0; i < len(shape); i += 1 {
@@ -220,7 +220,7 @@ func (KernelUtils* u) ChunkShape(
     return chunks
 }
 
-func (KernelUtils* u) ComputeStrides(shape: []i32) []i64 {
+func (KernelUtils* u) ComputeStrides([]i32 shape) []i64 {
     strides := make([]i64, len(shape))
 
     stride := i64(1)
@@ -277,7 +277,7 @@ func (KernelUtils* u) FormatTensorInfo(
     return result
 }
 
-func (KernelUtils* u) HasNanOrInf(data: []f32) bool {
+func (KernelUtils* u) HasNanOrInf([]f32 data) bool {
     for i := 0; i < len(data); i += 1 {
         x := data[i]
 
@@ -288,7 +288,7 @@ func (KernelUtils* u) HasNanOrInf(data: []f32) bool {
     return false
 }
 
-func (KernelUtils* u) ComputeStats(data: []f32) (f32, f32, f32, f32) {
+func (KernelUtils* u) ComputeStats([]f32 data) (f32, f32, f32, f32) {
     if len(data) == 0 {
         return 0.0, 0.0, 0.0, 0.0
     }

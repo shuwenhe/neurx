@@ -17,7 +17,7 @@ func main() {
         return 1
     }
     string summary = runtime_run_command_output(phase5_summary_command(prompt_path))
-    if summary != "prompts=5 default=What is the treatment for chronic urinary tract infection? tokens=10\n" {
+    if summary != "prompts=5 default=What is the treatment for chronic urinary tract infection tokens=10\n" {
         println("phase5-golden-prompt FAIL summary_unavailable")
         return 1
     }

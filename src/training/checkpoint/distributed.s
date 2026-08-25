@@ -1,11 +1,11 @@
 package neurx.checkpoint.distributed
-enum compression_type {
+
     COMPRESSION_NONE,
     COMPRESSION_LZ4,
     COMPRESSION_ZSTD,
 }
 
-enum checkpoint_format {
+
     FORMAT_PT,
     FORMAT_SAFE_TENSORS,
     FORMAT_HF_DS,
@@ -111,7 +111,7 @@ struct data_iterator_state {
     string dataset_version
 }
 
-enum checkpoint_status {
+
     CKPT_IDLE,
     CKPT_PREPARING,
     CKPT_SAVING,

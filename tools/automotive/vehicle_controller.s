@@ -1,6 +1,6 @@
 package neurx.tools.automotive
 
-enum vehicle_control_mode {
+
     manual,
     assisted,
     autonomous,

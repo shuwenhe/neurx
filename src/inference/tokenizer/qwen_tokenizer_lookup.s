@@ -32,7 +32,7 @@ func qwen_token_to_text(int token_id) string {
         case 27: "<"
         case 28: "="
         case 29: ">"
-        case 30: "?"
+        case 30: ""
         case 31: "@"
         case 32: "A"
         case 33: "B"
@@ -939,7 +939,7 @@ func qwen_token_to_text(int token_id) string {
         case 934: "AR"
         case 935: "];Ċ"
         case 936: "]."
-        case 937: "Ġ?"
+        case 937: "Ġ"
         case 938: "ical"
         case 939: "Ġdes"
         case 940: "uth"
@@ -1059,762 +1059,762 @@ func qwen_token_to_text(int token_id) string {
         case 1054: "du"
         case 1055: "of"
         case 1056: "line"
-        case 1057: "/*"
-        case 1058: "duct"
-        case 1059: "Ġher"
-        case 1060: "ĠĠĠĠĠĠĠĠĠĠĠĠĠ"
-        case 1061: "Res"
-        case 1062: "Ġco"
-        case 1063: "Ġcomm"
-        case 1064: "ise"
-        case 1065: "min"
-        case 1066: "ĠĠĠĠĊ"
-        case 1067: "#include"
-        case 1068: "ethod"
-        case 1069: ".P"
-        case 1070: "ute"
-        case 1071: "Ġass"
-        case 1072: "Int"
-        case 1073: "ask"
-        case 1074: "loc"
-        case 1075: "Ġlike"
-        case 1076: "ody"
-        case 1077: "Ġlet"
-        case 1078: "load"
-        case 1079: "Ġam"
-        case 1080: "rol"
-        case 1081: "Ġgr"
-        case 1082: "yp"
-        case 1083: "Ġalso"
-        case 1084: "ĠIt"
-        case 1085: "url"
-        case 1086: "ific"
-        case 1087: "ors"
-        case 1088: "_P"
-        case 1089: "_n"
-        case 1090: "igh"
-        case 1091: "Ġthan"
-        case 1092: "Com"
-        case 1093: "AN"
-        case 1094: "UL"
-        case 1095: "ating"
-        case 1096: "ĠThis"
-        case 1097: "ref"
-        case 1098: "_S"
-        case 1099: "Ġstatic"
-        case 1100: "roll"
-        case 1101: "Ġjust"
-        case 1102: "Ġresult"
-        case 1103: "ian"
-        case 1104: "idth"
-        case 1105: "Ġthem"
-        case 1106: "));Ċ"
-        case 1107: "der"
-        case 1108: "reak"
-        case 1109: "Con"
-        case 1110: ":
-        case 1111: "ule"
-        case 1112: "..."
-        case 1113: "arch"
-        case 1114: "ement"
-        case 1115: "Ġ<<"
-        case 1116: "ush"
-        case 1117: "ense"
-        case 1118: "arr"
-        case 1119: "Ġinto"
-        case 1120: "cess"
-        case 1121: "amp"
-        case 1122: "ied"
-        case 1123: "ument"
-        case 1124: "Ġ\\"
-        case 1125: "],"
-        case 1126: "wo"
-        case 1127: "als"
-        case 1128: "Ġwhat"
-        case 1129: "anc"
-        case 1130: "Value"
-        case 1131: "='"
-        case 1132: "olum"
-        case 1133: "Ġpos"
-        case 1134: "ages"
-        case 1135: "ayer"
-        case 1136: "Ġsc"
-        case 1137: "ues"
-        case 1138: "\")Ċ"
-        case 1139: "_T"
-        case 1140: "Ġlist"
-        case 1141: "(s"
-        case 1142: "Ġcase"
-        case 1143: "Ch"
-        case 1144: "ĉĉĉĉĉ"
-        case 1145: "
-        case 1146: "ponent"
-        case 1147: "Ġz"
-        case 1148: "Ġkn"
-        case 1149: "let"
-        case 1150: "DE"
-        case 1151: "red"
-        case 1152: "Ġfe"
-        case 1153: "Ġ},Ċ"
-        case 1154: "Ġ,"
-        case 1155: "(t"
-        case 1156: "Ġfirst"
-        case 1157: "');Ċ"
-        case 1158: "word"
-        case 1159: "Ġimport"
-        case 1160: "Ġact"
-        case 1161: "Ġchar"
-        case 1162: "CT"
-        case 1163: "ĠTr"
-        case 1164: "ople"
-        case 1165: "={"
-        case 1166: "ĉf"
-        case 1167: "ient"
-        case 1168: "cent"
-        case 1169: ".j"
-        case 1170: "lection"
-        case 1171: "))Ċ"
-        case 1172: "Ġonly"
-        case 1173: "Ġprint"
-        case 1174: "mer"
-        case 1175: ".W"
-        case 1176: "ock"
-        case 1177: "Ġ--"
-        case 1178: "Text"
-        case 1179: "Ġop"
-        case 1180: "ank"
-        case 1181: "Ġits"
-        case 1182: "Ġback"
-        case 1183: "[\""
-        case 1184: "Ġneed"
-        case 1185: "Ġcl"
-        case 1186: "Ġsub"
-        case 1187: "Ġla"
-        case 1188: "(("
-        case 1189: ".\""
-        case 1190: "Object"
-        case 1191: "Ġstart"
-        case 1192: "file"
-        case 1193: "(self"
-        case 1194: "ner"
-        case 1195: "ey"
-        case 1196: "Ġuser"
-        case 1197: "Ġent"
-        case 1198: "ĠCom"
-        case 1199: "its"
-        case 1200: "ĠCon"
-        case 1201: "ouble"
-        case 1202: "ower"
-        case 1203: "item"
-        case 1204: "very"
-        case 1205: "ĠWe"
-        case 1206: "lick"
-        case 1207: "ĠQ"
-        case 1208: "php"
-        case 1209: "ttp"
-        case 1210: "':"
-        case 1211: "ics"
-        case 1212: "Ġunder"
-        case 1213: "Ġ*Ċ"
-        case 1214: ".L"
-        case 1215: ");"
-        case 1216: "ices"
-        case 1217: "Ġreg"
-        case 1218: ")čĊ"
-        case 1219: "ĉpublic"
-        case 1220: "SS"
-        case 1221: "Ġthen"
-        case 1222: "reat"
-        case 1223: "ious"
-        case 1224: ".G"
-        case 1225: "ek"
-        case 1226: "irect"
-        case 1227: "heck"
-        case 1228: "cript"
-        case 1229: "ning"
-        case 1230: "ĠUn"
-        case 1231: "Ġmay"
-        case 1232: "ĠWh"
-        case 1233: "Bo"
-        case 1234: "Item"
-        case 1235: "struct"
-        case 1236: ".st"
-        case 1237: "ream"
-        case 1238: "ible"
-        case 1239: "loat"
-        case 1240: "Ġorg"
-        case 1241: "und"
-        case 1242: "sum"
-        case 1243: "_in"
-        case 1244: "../"
-        case 1245: "_M"
-        case 1246: "Ġhow"
-        case 1247: "rite"
-        case 1248: "'Ċ"
-        case 1249: "To"
-        case 1250: "ww"
-        case 1251: "Ġpeople"
-        case 1252: "index"
-        case 1253: ".n"
-        case 1254: "http"
-        case 1255: "(m"
-        case 1256: "ector"
-        case 1257: "Ġind"
-        case 1258: "Ġjav"
-        case 1259: "],Ċ"
-        case 1260: "ĠHe"
-        case 1261: "_st"
-        case 1262: "ful"
-        case 1263: "ole"
-        case 1264: "){Ċ"
-        case 1265: "Ġshould"
-        case 1266: "opy"
-        case 1267: "elp"
-        case 1268: "ier"
-        case 1269: "_name"
-        case 1270: "erson"
-        case 1271: "ION"
-        case 1272: "ote"
-        case 1273: "Ġtest"
-        case 1274: "Ġbet"
-        case 1275: "rror"
-        case 1276: "ular"
-        case 1277: "ãĢ"
-        case 1278: "ĠÐ"
-        case 1279: "bs"
-        case 1280: "ting"
-        case 1281: "Ġmake"
-        case 1282: "Tr"
-        case 1283: "Ġafter"
-        case 1284: "arget"
-        case 1285: "RO"
-        case 1286: "olumn"
-        case 1287: "rc"
-        case 1288: "_re"
-        case 1289: "define"
-        case 1290: "Ġright"
-        case 1291: "right"
-        case 1292: "day"
-        case 1293: "Ġlong"
-        case 1294: "[]"
-        case 1295: "(p"
-        case 1296: "td"
-        case 1297: "cond"
-        case 1298: "ĠPro"
-        case 1299: "Ġrem"
-        case 1300: "ptions"
-        case 1301: "vid"
-        case 1302: ".g"
-        case 1303: "Ġext"
-        case 1304: "Ġ__"
-        case 1305: "')Ċ"
-        case 1306: "pace"
-        case 1307: "mp"
-        case 1308: "Ġmin"
-        case 1309: "stance"
-        case 1310: "air"
-        case 1311: "action"
-        case 1312: "wh"
-        case 1313: "type"
-        case 1314: "util"
-        case 1315: "ait"
-        case 1316: "<?"
-        case 1317: "IC"
-        case 1318: "text"
-        case 1319: "Ġph"
-        case 1320: "Ġfl"
-        case 1321: ".M"
-        case 1322: "ccess"
-        case 1323: "br"
-        case 1324: "fore"
-        case 1325: "ersion"
-        case 1326: "),Ċ"
-        case 1327: ".re"
-        case 1328: "ateg"
-        case 1329: "Ġloc"
-        case 1330: "ins"
-        case 1331: "-s"
-        case 1332: "trib"
-        case 1333: "ĠInt"
-        case 1334: "Ġarray"
-        case 1335: ",\""
-        case 1336: "Pro"
-        case 1337: "(c"
-        case 1338: "ession"
-        case 1339: ">ĊĊ"
-        case 1340: "Ġshe"
-        case 1341: "\"]"
-        case 1342: "aph"
-        case 1343: "Ġexp"
-        case 1344: "erty"
-        case 1345: "ĠSe"
-        case 1346: "Ġpar"
-        case 1347: "unc"
-        case 1348: "ET"
-        case 1349: "Ġread"
-        case 1350: "print"
-        case 1351: "Ġrel"
-        case 1352: "Ġform"
-        case 1353: "Ġdr"
-        case 1354: "Exception"
-        case 1355: "input"
-        case 1356: "Ġtrans"
-        case 1357: "########"
-        case 1358: "order"
-        case 1359: "By"
-        case 1360: "Ġaw"
-        case 1361: "ities"
-        case 1362: "uff"
-        case 1363: "play"
-        case 1364: ".add"
-        case 1365: "ĠâĢĵ"
-        case 1366: "Ġwant"
-        case 1367: "Ġcomp"
-        case 1368: "ments"
-        case 1369: "Ġ||"
-        case 1370: "az"
-        case 1371: "be"
-        case 1372: "Ġnumber"
-        case 1373: "Ġrequire"
-        case 1374: "ĠEx"
-        case 1375: "Ġcol"
-        case 1376: "Ġkey"
-        case 1377: "ember"
-        case 1378: "Ġtwo"
-        case 1379: "Ġsize"
-        case 1380: "Ġwhere"
-        case 1381: "UT"
-        case 1382: "result"
-        case 1383: "ĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠ"
-        case 1384: "ough"
-        case 1385: "orld"
-        case 1386: "ood"
-        case 1387: "uch"
-        case 1388: "ative"
-        case 1389: "ger"
-        case 1390: "arent"
-        case 1391: "Ġ/*"
-        case 1392: "Ġarg"
-        case 1393: "Ġwhile"
-        case 1394: "(this"
-        case 1395: "Ġrec"
-        case 1396: "Ġdif"
-        case 1397: "State"
-        case 1398: "Ġspec"
-        case 1399: "ride"
-        case 1400: "_F"
-        case 1401: "Ġlook"
-        case 1402: "AM"
-        case 1403: "ility"
-        case 1404: "eter"
-        case 1405: "âĢĻt"
-        case 1406: "ĊĊĊ"
-        case 1407: "ayout"
-        case 1408: "--------------------------------"
-        case 1409: "ager"
-        case 1410: "Ġcould"
-        case 1411: "Ġbr"
-        case 1412: "ends"
-        case 1413: "ures"
-        case 1414: "Ġknow"
-        case 1415: "ets"
-        case 1416: "ĠIf"
-        case 1417: "ĠSh"
-        case 1418: ".w"
-        case 1419: "back"
-        case 1420: "Ġser"
-        case 1421: "Ġ+="
-        case 1422: "Ġfr"
-        case 1423: "());Ċ"
-        case 1424: "Ġhand"
-        case 1425: "Ind"
-        case 1426: "ULL"
-        case 1427: "Im"
-        case 1428: "();ĊĊ"
-        case 1429: "Ġmost"
-        case 1430: "Ġtry"
-        case 1431: "Ġnow"
-        case 1432: "rough"
-        case 1433: ">čĊ"
-        case 1434: "ackage"
-        case 1435: "Ġhim"
-        case 1436: "._"
-        case 1437: "ify"
-        case 1438: "Ġbreak"
-        case 1439: "Ġ);Ċ"
-        case 1440: "ren"
-        case 1441: "#define"
-        case 1442: "itt"
-        case 1443: "Ġap"
-        case 1444: "ĉc"
-        case 1445: "(n"
-        case 1446: "ĠYou"
-        case 1447: ":ĊĊ"
-        case 1448: "-m"
-        case 1449: "Ġevery"
-        case 1450: "ustom"
-        case 1451: "lient"
-        case 1452: "ocument"
-        case 1453: "cription"
-        case 1454: "Error"
-        case 1455: "-b"
-        case 1456: "Ð¾"
-        case 1457: "]["
-        case 1458: "trans"
-        case 1459: "Ġpoint"
-        case 1460: "Ġstd"
-        case 1461: "Ġfil"
-        case 1462: "Time"
-        case 1463: "Ġmod"
-        case 1464: "Ġ->"
-        case 1465: "Ġerror"
-        case 1466: "ah"
-        case 1467: "Ġtext"
-        case 1468: "roller"
-        case 1469: "lose"
-        case 1470: "ql"
-        case 1471: "Ġpol"
-        case 1472: "></"
-        case 1473: "Ġshow"
-        case 1474: "User"
-        case 1475: "ased"
-        case 1476: "Ġ{ĊĊ"
-        case 1477: "Ġfind"
-        case 1478: "Ð°"
-        case 1479: "ED"
-        case 1480: "span"
-        case 1481: "enu"
-        case 1482: "Ġcurrent"
-        case 1483: "Ġused"
-        case 1484: "cept"
-        case 1485: "clud"
-        case 1486: "Ġplay"
-        case 1487: "Ġlog"
-        case 1488: "ution"
-        case 1489: "fl"
-        case 1490: "Ġsee"
-        case 1491: "indows"
-        case 1492: "Ġhelp"
-        case 1493: "Ġthese"
-        case 1494: "Ġpass"
-        case 1495: "Ġdown"
-        case 1496: "Ġeven"
-        case 1497: "ason"
-        case 1498: "uild"
-        case 1499: "from"
-        case 1500: "(d"
-        case 1501: "Ġbl"
-        case 1502: "label"
-        case 1503: "else"
-        case 1504: "Ðµ"
-        case 1505: "Ġ(!"
-        case 1506: "ized"
-        case 1507: "(),"
-        case 1508: "Ġob"
-        case 1509: "Ġitem"
-        case 1510: "ump"
-        case 1511: "UR"
-        case 1512: "orn"
-        case 1513: "Ġdon"
-        case 1514: "Se"
-        case 1515: "man"
-        case 1516: "ample"
-        case 1517: "tn"
-        case 1518: "================"
-        case 1519: "He"
-        case 1520: "gram"
-        case 1521: "Ġdid"
-        case 1522: "wn"
-        case 1523: "_h"
-        case 1524: "iver"
-        case 1525: "Ġsm"
-        case 1526: "Ġthrough"
-        case 1527: "ĠAn"
-        case 1528: "che"
-        case 1529: "Ġinv"
-        case 1530: "ouse"
-        case 1531: "Ġes"
-        case 1532: "ĠNew"
-        case 1533: "export"
-        case 1534: "mary"
-        case 1535: "uto"
-        case 1536: "ler"
-        case 1537: "Ġlast"
-        case 1538: "Ġevent"
-        case 1539: "try"
-        case 1540: "ï¼"
-        case 1541: "ily"
-        case 1542: "igned"
-        case 1543: "ines"
-        case 1544: "ollow"
-        case 1545: "icense"
-        case 1546: "sole"
-        case 1547: "lear"
-        case 1548: "(int"
-        case 1549: "Ġagain"
-        case 1550: "Ġhigh"
-        case 1551: "html"
-        case 1552: "Index"
-        case 1553: "uthor"
-        case 1554: "Ġ/**Ċ"
-        case 1555: "Ġline"
-        case 1556: "Event"
-        case 1557: "_D"
-        case 1558: "Ġdoes"
-        case 1559: "itial"
-        case 1560: "Ġcr"
-        case 1561: "ars"
-        case 1562: "Ġtem"
-        case 1563: "cause"
-        case 1564: "face"
-        case 1565: "Ġ`"
-        case 1566: "_A"
-        case 1567: "Button"
-        case 1568: "ature"
-        case 1569: "ected"
-        case 1570: "ES"
-        case 1571: "ister"
-        case 1572: "ĉĊ"
-        case 1573: "Ġbefore"
-        case 1574: "ale"
-        case 1575: "other"
-        case 1576: "Ġbecause"
-        case 1577: "roid"
-        case 1578: "Ġed"
-        case 1579: "ik"
-        case 1580: "reg"
-        case 1581: "ĠDe"
-        case 1582: "Ġdist"
-        case 1583: "},Ċ"
-        case 1584: "Ġstate"
-        case 1585: "Ġcons"
-        case 1586: "rint"
-        case 1587: "att"
-        case 1588: "Ġhere"
-        case 1589: "ined"
-        case 1590: "Ġfinal"
-        case 1591: "Ġ\"\""
-        case 1592: "Key"
-        case 1593: "LO"
-        case 1594: "Ġdel"
-        case 1595: "pty"
-        case 1596: "thing"
-        case 1597: "ĠAnd"
-        case 1598: "Ġrun"
-        case 1599: "ĠX"
-        case 1600: "ym"
-        case 1601: ".app"
-        case 1602: "Ġvery"
-        case 1603: "ces"
-        case 1604: "_N"
-        case 1605: "ared"
-        case 1606: "ward"
-        case 1607: "list"
-        case 1608: "ited"
-        case 1609: "olog"
-        case 1610: "itch"
-        case 1611: "Box"
-        case 1612: "ife"
-        case 1613: "Ġac"
-        case 1614: "Ġmodel"
-        case 1615: "Ġmon"
-        case 1616: "Ġway"
-        case 1617: "lete"
-        case 1618: "Ġcall"
-        case 1619: "Ġatt"
-        case 1620: "Ġcal"
-        case 1621: "vert"
-        case 1622: "Ġdec"
-        case 1623: "lease"
-        case 1624: "oun"
-        case 1625: "Ġ});Ċ"
-        case 1626: "fr"
-        case 1627: "formation"
-        case 1628: "etail"
-        case 1629: "Ġnum"
-        case 1630: "aj"
-        case 1631: "query"
-        case 1632: "Ġwell"
-        case 1633: "Ġobject"
-        case 1634: "ĠAs"
-        case 1635: "Ġyears"
-        case 1636: "Color"
-        case 1637: "IS"
-        case 1638: "Ġdefault"
-        case 1639: "Wh"
-        case 1640: "Ġins"
-        case 1641: "aint"
-        case 1642: "Ġjava"
-        case 1643: "Ġsim"
-        case 1644: "ĠAr"
-        case 1645: "mon"
-        case 1646: "til"
-        case 1647: "();čĊ"
-        case 1648: "):"
-        case 1649: "Set"
-        case 1650: "atter"
-        case 1651: "Ġview"
-        case 1652: "Ġpres"
-        case 1653: "array"
-        case 1654: "We"
-        case 1655: "At"
-        case 1656: "Ġbel"
-        case 1657: "Ġmany"
-        case 1658: "Man"
-        case 1659: "ender"
-        case 1660: "Ġbeing"
-        case 1661: "Ġgood"
-        case 1662: "ĉĉĉĉĉĉ"
-        case 1663: "ational"
-        case 1664: "ware"
-        case 1665: ".log"
-        case 1666: "{čĊ"
-        case 1667: "Ġusing"
-        case 1668: "_B"
-        case 1669: "Ġ:="
-        case 1670: "_w"
-        case 1671: "ists"
-        case 1672: "lish"
-        case 1673: "Ġstud"
-        case 1674: "ĠAl"
-        case 1675: "Ġgu"
-        case 1676: "config"
-        case 1677: "uring"
-        case 1678: "time"
-        case 1679: "oken"
-        case 1680: "amespace"
-        case 1681: "Ġrequest"
-        case 1682: "Ġchild"
-        case 1683: "ĠÃ"
-        case 1684: "lob"
-        case 1685: "Ġparam"
-        case 1686: "Ġ}čĊ"
-        case 1687: "Ġecho"
-        case 1688: "function"
-        case 1689: "********************************"
-        case 1690: "ps"
-        case 1691: "Element"
-        case 1692: "alk"
-        case 1693: "lication"
-        case 1694: "by"
-        case 1695: "Size"
-        case 1696: "rawing"
-        case 1697: "Ġperson"
-        case 1698: "ĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠĠ"
-        case 1699: "\\n"
-        case 1700: "object"
-        case 1701: "ince"
-        case 1702: "En"
-        case 1703: "File"
-        case 1704: "uf"
-        case 1705: "ffect"
-        case 1706: "AC"
-        case 1707: "Ġstyle"
-        case 1708: "summary"
-        case 1709: "Ġque"
-        case 1710: "_r"
-        case 1711: "Ġ($"
-        case 1712: "Model"
-        case 1713: "ident"
-        case 1714: "Ġmethod"
-        case 1715: "IL"
-        case 1716: "ott"
-        case 1717: "less"
-        case 1718: "ING"
-        case 1719: "Ġ()"
-        case 1720: "Ġexpect"
-        case 1721: "ync"
-        case 1722: "package"
-        case 1723: "urs"
-        case 1724: "Ġprot"
-        case 1725: "./"
-        case 1726: "pre"
-        case 1727: "Ġ)Ċ"
-        case 1728: "ma"
-        case 1729: "Ġsur"
-        case 1730: "Ġfound"
-        case 1731: "Info"
-        case 1732: "par"
-        case 1733: "imes"
-        case 1734: ".e"
-        case 1735: "ains"
-        case 1736: "Ġpost"
-        case 1737: "-d"
-        case 1738: "olean"
-        case 1739: "Ġsl"
-        case 1740: "PE"
-        case 1741: "Ġsuch"
-        case 1742: "select"
-        case 1743: "ainer"
-        case 1744: "Ġthink"
-        case 1745: "Ġdiffer"
-        case 1746: ".r"
-        case 1747: "/**Ċ"
-        case 1748: "FF"
-        case 1749: "ool"
-        case 1750: "plate"
-        case 1751: "qual"
-        case 1752: "ĠFor"
-        case 1753: "Ġmuch"
-        case 1754: "uc"
-        case 1755: "(new"
-        case 1756: "odule"
-        case 1757: "Ġsom"
-        case 1758: "Ġhttp"
-        case 1759: "ĠList"
-        case 1760: "Ġcount"
-        case 1761: "Ġinst"
-        case 1762: "char"
-        case 1763: "mit"
-        case 1764: ".id"
-        case 1765: "aking"
-        case 1766: "Ġgener"
-        case 1767: "px"
-        case 1768: "vice"
-        case 1769: "_data"
-        case 1770: "ĠNULL"
-        case 1771: "}čĊ"
-        case 1772: "idd"
-        case 1773: "ãĢĤ"
-        case 1774: "Ġmed"
-        case 1775: "org"
-        case 1776: "ider"
-        case 1777: "ache"
-        case 1778: "work"
-        case 1779: "Ġcheck"
-        case 1780: "ween"
-        case 1781: "Ġ(("
-        case 1782: "the"
-        case 1783: "ants"
-        case 1784: "><"
-        case 1785: ".B"
-        case 1786: "-c"
-        case 1787: "Ġopen"
-        case 1788: "Ġest"
-        case 1789: "ĠĠĠĠĠĠĠĠĊ"
-        case 1790: "Ġnext"
-        case 1791: "IM"
-        case 1792: "ÑĤ"
-        case 1793: "OT"
-        case 1794: "Ã³"
-        case 1795: "Ġfollow"
-        case 1796: "content"
-        case 1797: "ĠĠĠĠĠĠĠĠĠĠĠĠ"
-        case 1798: "Ġinclud"
-        case 1799: "HE"
-        case 1800: "ĠRes"
-        case 1801: "Ġhref"
-        case 1802: "Ð¸"
-        case 1803: "Ġcar"
-        case 1804: "ypes"
-        case 1805: "image"
-        case 1806: "Un"
-        case 1807: "Ġbool"
-        case 1808: "AD"
-        case 1809: "Ġgame"
-        case 1810: ".Form"
-        case 1811: "rows"
-        case 1812: "*/"
+        case 1057: "
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"
         case 1813: "velop"
         case 1814: ".Drawing"
         case 1815: "Ġpath"
@@ -1941,7 +1941,7 @@ func qwen_token_to_text(int token_id) string {
         case 1936: "Ġbuild"
         case 1937: "leg"
         case 1938: "assword"
-        case 1939: "?ĊĊ"
+        case 1939: "ĊĊ"
         case 1940: "âĢ¦"
         case 1941: "ook"
         case 1942: "uck"
@@ -3171,7 +3171,7 @@ func qwen_token_to_text(int token_id) string {
         case 3166: "Ġthing"
         case 3167: "Trans"
         case 3168: "ĠTHE"
-        case 3169: "Ġ<?"
+        case 3169: "Ġ<"
         case 3170: "Ġwhy"
         case 3171: "Ġdoesn"
         case 3172: "ij"
@@ -3372,7 +3372,7 @@ func qwen_token_to_text(int token_id) string {
         case 3367: "Ġmeet"
         case 3368: "Ġmom"
         case 3369: "ĠâĢĺ"
-        case 3370: "Ġ?>"
+        case 3370: "Ġ>"
         case 3371: "Ġden"
         case 3372: "obile"
         case 3373: "change"
@@ -3872,7 +3872,7 @@ func qwen_token_to_text(int token_id) string {
         case 3867: "Ġtook"
         case 3868: "Ġgames"
         case 3869: "Ġ}}"
-        case 3870: "Ġ?>Ċ"
+        case 3870: "Ġ>Ċ"
         case 3871: "Ġproducts"
         case 3872: "Is"
         case 3873: "Ġbad"
@@ -4254,7 +4254,7 @@ func qwen_token_to_text(int token_id) string {
         case 4249: "âĢĻm"
         case 4250: "just"
         case 4251: "holder"
-        case 4252: "=\"<?"
+        case 4252: "=\"<"
         case 4253: "ĠGNU"
         case 4254: "ĠCol"
         case 4255: "imest"
@@ -4609,7 +4609,7 @@ func qwen_token_to_text(int token_id) string {
         case 4604: "asks"
         case 4605: "''"
         case 4606: "_LO"
-        case 4607: "?."
+        case 4607: "."
         case 4608: "account"
         case 4609: "Ġ(*"
         case 4610: "')ĊĊ"
@@ -4784,7 +4784,7 @@ func qwen_token_to_text(int token_id) string {
         case 4779: ",$"
         case 4780: "Ġfriends"
         case 4781: "Email"
-        case 4782: "?>"
+        case 4782: ">"
         case 4783: "Resource"
         case 4784: "KEY"
         case 4785: "osp"
@@ -4822,7 +4822,7 @@ func qwen_token_to_text(int token_id) string {
         case 4817: "fg"
         case 4818: "ĠSk"
         case 4819: ".jpg"
-        case 4820: "?:"
+        case 4820: ":"
         case 4821: "];ĊĊ"
         case 4822: "Ġcallback"
         case 4823: "ĠHttp"

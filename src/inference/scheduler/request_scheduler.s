@@ -152,7 +152,7 @@ func simulate_inference_queue() {
         inference_request req
         req.request_id = "req_" + int_to_string(req_id)
         req.model_type = "text"
-        req.prompt = "What is AI?"
+        req.prompt = "What is AI"
         req.max_tokens = 100
         req.temperature = 0.7
         req.top_p = 0.9

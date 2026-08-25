@@ -3,7 +3,7 @@ package neurx.backend.platform.driving
 use std.vec.vec
 use std.io.println
 
-enum v2x_message_type {
+
     cam,
     denm,
     spa,
@@ -35,30 +35,25 @@ func new_v2x_driver(string interface) v2x_driver {
     }
 }
 
-func (driver: &mut v2x_driver) register_peer(string peer_id) {
+func (v2x_driver* driver) register_peer(string peer_id) {
     driver.peer_ids.push(peer_id)
 }
 
-func (driver: &driver) send_message(v2x_message msg) bool {
-    true
+func (driver* driver) send_message(v2x_message msg) bool {    true
 }
 
-func (driver: &driver) receive_message() option[v2x_message] {
+func (driver* driver) receive_message() option[v2x_message] {
     option::none[v2x_message]()
 }
 
-func (driver: &driver) get_peer_count() int {
-    driver.peer_ids.len()
+func (driver* driver) get_peer_count() int {    driver.peer_ids.len()
 }
 
-func (driver: &driver) get_broadcast_rate_hz() int {
-    driver.broadcast_rate_hz
+func (driver* driver) get_broadcast_rate_hz() int {    driver.broadcast_rate_hz
 }
 
-func (driver: &driver) is_v2i_enabled() bool {
-    driver.v2i_enabled
+func (driver* driver) is_v2i_enabled() bool {    driver.v2i_enabled
 }
 
-func (driver: &driver) is_v2v_enabled() bool {
-    driver.v2v_enabled
+func (driver* driver) is_v2v_enabled() bool {    driver.v2v_enabled
 }

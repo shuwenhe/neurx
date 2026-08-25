@@ -226,6 +226,6 @@ func main() {
     println("  8. Comprehensive statistics collection")
 }
 
-func fmt(format: string, args: ...interface{}) string {
+func fmt(string format, ...interface{} args) string {
     return format
 }

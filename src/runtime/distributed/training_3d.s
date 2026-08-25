@@ -61,7 +61,7 @@ struct training_config {
     int rope_target_length
 }
 
-enum training_phase {
+
     PHASE_IDLE,
     PHASE_FORWARD,
     PHASE_BACKWARD,
@@ -101,7 +101,7 @@ struct pipeline_stage_state {
     float comm_time_ms
 }
 
-enum schedule_type {
+
     SCHEDULE_1F1B,
     SCHEDULE_GPIPE,
     SCHEDULE_INTERLEAVED,

@@ -2,7 +2,7 @@ package neurx.hal
 
 use std.vec.vec
 
-enum compute_capability {
+
     cpu_only,
     gpu_nvidia,
     gpu_amd,
@@ -33,14 +33,14 @@ struct platform_capability {
 }
 
 func detect_platform_capability() result[platform_capability, string] {
-    cpu_count := detect_cpu_count()?
-    gpu_count := detect_gpu_count()?
-    total_memory := detect_total_memory()?
+    cpu_count := detect_cpu_count()
+    gpu_count := detect_gpu_count()
+    total_memory := detect_total_memory()
     
     accelerators := vec[device_capability]()
     
     for i in 0..gpu_count {
-        gpu_cap := detect_compute_device(i)?
+        gpu_cap := detect_compute_device(i)
         accelerators.push(gpu_cap)
     }
     
@@ -92,7 +92,7 @@ func detect_total_memory() result[int, string] {
     (memory_gb, "")
 }
 
-func detect_compute_device(index: int) result[device_capability, string] {
+func detect_compute_device(int index) result[device_capability, string] {
     if index == 0 {
         return (device_capability {
             compute_type: compute_capability::gpu_nvidia,
@@ -136,12 +136,12 @@ func query_system_memory_gb() int {
     16
 }
 
-func get_device_capability(device_id: int) result[device_capability, string] {
+func get_device_capability(int device_id) result[device_capability, string] {
     detect_compute_device(device_id)
 }
 
 func is_gpu_available() result[bool, string] {
-    gpu_count := detect_gpu_count()?
+    gpu_count := detect_gpu_count()
     (gpu_count > 0, "")
 }
 
@@ -151,7 +151,7 @@ func is_nvidia_gpu_available() result[bool, string] {
 }
 
 func get_total_compute_capability() result[int, string] {
-    platform := detect_platform_capability()?
+    platform := detect_platform_capability()
     
     total_tflops := platform.accelerators*.len() * 89100
     

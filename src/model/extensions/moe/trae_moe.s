@@ -1,6 +1,6 @@
 package neurx.moe.trae
 import "neurx.util.math"
-enum trae_moe_status {
+
     ROUTING = 0
     FORWARD = 1
     BACKWARD = 2

@@ -49,7 +49,7 @@ func (graph_compiler* compiler) get_optimization_level() int {
     }
 }
 
-func (graph_compiler* compiler) compile(g: *computation_graph) compilation_unit {
+func (graph_compiler* compiler) compile(*computation_graph g) compilation_unit {
     unit = new_compilation_unit("compiled_graph", g)
 
     unit.stats.original_op_count = g.operation_count()
@@ -64,7 +64,7 @@ func (graph_compiler* compiler) compile(g: *computation_graph) compilation_unit 
     unit
 }
 
-func (graph_compiler* compiler) compile_with_pipeline(g: *computation_graph, pipeline: *pass_pipeline) compilation_unit {
+func (graph_compiler* compiler) compile_with_pipeline(*computation_graph g, *pass_pipeline pipeline) compilation_unit {
     unit = new_compilation_unit("compiled_graph", g)
 
     unit.stats.original_op_count = g.operation_count()
@@ -78,7 +78,7 @@ func (graph_compiler* compiler) compile_with_pipeline(g: *computation_graph, pip
     unit
 }
 
-func (graph_compiler* compiler) compile_with_config(g: *computation_graph, unit_name: string, cfg: *compilation_config) compilation_unit {
+func (graph_compiler* compiler) compile_with_config(*computation_graph g, string unit_name, *compilation_config cfg) compilation_unit {
     unit = new_compilation_unit(unit_name, g)
 
     unit.stats.original_op_count = g.operation_count()
@@ -108,7 +108,7 @@ func (graph_compiler* compiler) compile_with_config(g: *computation_graph, unit_
     unit
 }
 
-func (graph_compiler* compiler) dump_compilation_stats(unit: *compilation_unit) string {
+func (graph_compiler* compiler) dump_compilation_stats(*compilation_unit unit) string {
     s = ""
     s = s + "=== Compilation Statistics ===\n"
     s = s + "Unit: " + unit.unit_name + "\n"

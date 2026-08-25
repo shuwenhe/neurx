@@ -1,6 +1,6 @@
 package neurx.posttrain.multiturn.multiturn_manager
 use std.io.eprintln
-enum message_role {
+
     SYSTEM,
     USER,
     ASSISTANT,

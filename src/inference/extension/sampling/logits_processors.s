@@ -14,7 +14,7 @@ struct temperature_processor {
     temperature: float
 }
 
-func (temperature_processor* tp) apply(logits: *vec[float]) result[vec[float], processor_error] {
+func (temperature_processor* tp) apply(*vec[float] logits) result[vec[float], processor_error] {
     if tp.temperature <= 0.0 {
         return (processor_error {
             code: "INVALID_TEMPERATURE",
@@ -37,7 +37,7 @@ struct top_k_processor {
     k: int
 }
 
-func find_kth_largest(logits: *vec[float], k: int) float {
+func find_kth_largest(*vec[float] logits, int k) float {
     if k >= logits.len() {
         return logits[0]
     }
@@ -54,7 +54,7 @@ func find_kth_largest(logits: *vec[float], k: int) float {
     max_val
 }
 
-func (top_k_processor* tp) apply(logits: *vec[float]) result[vec[float], processor_error] {
+func (top_k_processor* tp) apply(*vec[float] logits) result[vec[float], processor_error] {
     if tp.k <= 0 {
         return (processor_error {
             code: "INVALID_K",
@@ -86,7 +86,7 @@ struct nucleus_processor {
     top_p: float
 }
 
-func softmax(logits: *vec[float]) vec[float] {
+func softmax(*vec[float] logits) vec[float] {
     max_logit := logits[0]
     i := 1
     while i < logits.len() {
@@ -117,7 +117,7 @@ func softmax(logits: *vec[float]) vec[float] {
     probs
 }
 
-func (nucleus_processor* np) apply(logits: *vec[float]) result[vec[float], processor_error] {
+func (nucleus_processor* np) apply(*vec[float] logits) result[vec[float], processor_error] {
     if np.top_p <= 0.0 || np.top_p > 1.0 {
         return (processor_error {
             code: "INVALID_TOP_P",
@@ -165,7 +165,7 @@ struct frequency_penalty_processor {
     token_counts: *map[int, int]
 }
 
-func (frequency_penalty_processor* fp) apply(logits: *vec[float]) result[vec[float], processor_error] {
+func (frequency_penalty_processor* fp) apply(*vec[float] logits) result[vec[float], processor_error] {
     if fp.penalty < 0.0 {
         return (processor_error {
             code: "INVALID_PENALTY",
@@ -193,7 +193,7 @@ struct length_penalty_processor {
     penalty: float
 }
 
-func (length_penalty_processor* lp) apply(logits: *vec[float]) result[vec[float], processor_error] {
+func (length_penalty_processor* lp) apply(*vec[float] logits) result[vec[float], processor_error] {
     if lp.penalty < 0.0 {
         return (processor_error {
             code: "INVALID_PENALTY",
@@ -217,7 +217,7 @@ struct repetition_penalty_processor {
     previous_tokens: *vec[int]
 }
 
-func (repetition_penalty_processor* rp) apply(logits: *vec[float]) result[vec[float], processor_error] {
+func (repetition_penalty_processor* rp) apply(*vec[float] logits) result[vec[float], processor_error] {
     if rp.penalty < 1.0 {
         return (processor_error {
             code: "INVALID_PENALTY",
@@ -331,21 +331,21 @@ func (logits_processor_pipeline* pipeline) process(
 
     switch pipeline.temperature_proc {
         option::some(tp) : {
-            result_logits = tp.apply(result_logits)?
+            result_logits = tp.apply(result_logits)
         },
         option::none : {},
     }
 
     switch pipeline.top_k_proc {
         option::some(tp) : {
-            result_logits = tp.apply(result_logits)?
+            result_logits = tp.apply(result_logits)
         },
         option::none : {},
     }
 
     switch pipeline.nucleus_proc {
         option::some(np) : {
-            result_logits = np.apply(result_logits)?
+            result_logits = np.apply(result_logits)
         },
         option::none : {},
     }
@@ -362,9 +362,9 @@ func main() {
     logits.push(5.0)
 
     pipeline := logits_processor_pipeline::new()
-    pipeline.with_temperature(0.7)?
-    pipeline.with_top_k(3)?
-    pipeline.with_nucleus(0.9)?
+    pipeline.with_temperature(0.7)
+    pipeline.with_top_k(3)
+    pipeline.with_nucleus(0.9)
 
     switch pipeline.process(logits) {
         (processed, "") : {

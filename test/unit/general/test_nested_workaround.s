@@ -10,7 +10,7 @@ struct outer {
 }
 
 func main() {
-    println("=== Test: Can we even SET nested fields? ===")
+    println("=== Test: Can we even SET nested fields ===")
     outer obj
     obj.name = "test"
     println("Step 1: Set top-level field OK")

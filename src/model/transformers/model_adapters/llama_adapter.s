@@ -68,7 +68,7 @@ func get_llama_3_8b_config() llama_model_config {
     }
 }
 
-func get_llama_config_by_version(version: string) llama_model_config {
+func get_llama_config_by_version(string version) llama_model_config {
     if version == "llama-7b" || version == "meta-llama/Llama-2-7b" {
         return get_llama_7b_config()
     }
@@ -84,7 +84,7 @@ func get_llama_config_by_version(version: string) llama_model_config {
     get_llama_7b_config()
 }
 
-func get_llama_attention_type(num_kv_heads: int) string {
+func get_llama_attention_type(int num_kv_heads) string {
     if num_kv_heads == 1 {
         return "mqa"
     }
@@ -134,7 +134,7 @@ struct llama_quantization_config {
     int quant_type
 }
 
-func get_llama_quantization_config(method: string) llama_quantization_config {
+func get_llama_quantization_config(string method) llama_quantization_config {
     if method == "4bit" {
         return llama_quantization_config {
             quant_method: "int4",
@@ -215,7 +215,7 @@ func get_llama_inference_optimization() llama_inference_optimization {
     }
 }
 
-func print_llama_config(config: llama_model_config) {
+func print_llama_config(llama_model_config config) {
     print("\n╔════════════════════════════════════════════════╗\n")
     print("║  🦙 LLaMA Model Configuration                ║\n")
     print("╚════════════════════════════════════════════════╝\n\n")

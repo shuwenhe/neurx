@@ -272,7 +272,7 @@ func detect_toxicity(string text) (bool, float):
 func detect_pii(string text) bool:
     if contains_regex(text, r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"):
         return true
-    if contains_regex(text, r"\d{3}[-.]?\d{3}[-.]?\d{4}"):
+    if contains_regex(text, r"\d{3}[-.]\d{3}[-.]\d{4}"):
         return true
     if contains_regex(text, r"\d{3}-\d{2}-\d{4}"):
         return true

@@ -5,7 +5,7 @@ use std.option.option
 use std.result.result
 use std.map.map
 
-enum device_type {
+
     gpu,
     cpu,
     disk,
@@ -54,7 +54,7 @@ struct kv_cache_pool {
     stats: kv_cache_stats
 }
 
-func kv_cache_pool::new(config: cache_config) kv_cache_pool {
+func kv_cache_pool::new(cache_config config) kv_cache_pool {
     kv_cache_pool {
         gpu_cache: map[int, kv_cache_entry](),
         cpu_cache: map[int, kv_cache_entry](),
@@ -72,7 +72,7 @@ func kv_cache_pool::new(config: cache_config) kv_cache_pool {
     }
 }
 
-func calculate_entry_size(k: *vec[float], v: *vec[float]) int {
+func calculate_entry_size(*vec[float] k, *vec[float] v) int {
     (k.len() + v.len()) * 4
 }
 
@@ -100,7 +100,7 @@ func (mut kv_cache_pool* pool) put_kv(
     gpu_budget_exceeded := pool.stats.gpu_used_mb + (entry_size / 1024 / 1024) > pool.config.max_gpu_memory_mb
 
     if gpu_budget_exceeded {
-        pool.try_offload_to_cpu()?
+        pool.try_offload_to_cpu()
     }
 
     entry := kv_cache_entry {
@@ -133,7 +133,7 @@ func (mut kv_cache_pool* pool) get_kv(
             },
         }
     } else if pool.cpu_cache.contains(cache_key) {
-        pool.restore_from_cpu(cache_key)?
+        pool.restore_from_cpu(cache_key)
 
         switch pool.gpu_cache.get(cache_key) {
             option::some(entry) : {
@@ -188,7 +188,7 @@ func (mut kv_cache_pool* pool) try_offload_to_cpu() result[(), error] {
     }
 }
 
-func (mut kv_cache_pool* pool) restore_from_cpu(cache_key: int) result[(), error] {
+func (mut kv_cache_pool* pool) restore_from_cpu(int cache_key) result[(), error] {
     switch pool.cpu_cache.get(cache_key) {
         option::some(entry) : {
             pool.gpu_cache.insert(cache_key, entry)
@@ -228,7 +228,7 @@ func (pool* pool) get_cache_hit_rate() float {
     (pool.stats.restore_count as float) / (total_accesses as float)
 }
 
-func (mut kv_cache_pool* pool) clear_sequence_cache(sequence_id: int) result[(), error] {
+func (mut kv_cache_pool* pool) clear_sequence_cache(int sequence_id) result[(), error] {
     keys_to_remove := vec[int]()
 
     for key in pool.gpu_cache.keys() {

@@ -27,7 +27,7 @@ struct PerfLogger {
     bytes_processed: int
 }
 
-func create_perf_logger(op: string) PerfLogger {
+func create_perf_logger(string op) PerfLogger {
     return PerfLogger{
         operation: op,
         start_time: 0,
@@ -36,7 +36,7 @@ func create_perf_logger(op: string) PerfLogger {
     }
 }
 
-func (pl: PerfLogger) log_result(result: ParseResult) string {
+func (PerfLogger pl) log_result(ParseResult result) string {
     log_str := ""
     log_str = log_str + "[" + pl.operation + "] "
     log_str = log_str + "status=" + status_to_string(result.status)
@@ -51,7 +51,7 @@ func (pl: PerfLogger) log_result(result: ParseResult) string {
     return log_str
 }
 
-func status_to_string(status: int) string {
+func status_to_string(int status) string {
     match status {
         0 => return "SUCCESS"
         1 => return "PARTIAL"
@@ -62,7 +62,7 @@ func status_to_string(status: int) string {
     }
 }
 
-func format_to_string(format: int) string {
+func format_to_string(int format) string {
     match format {
         0 => return "TEXT"
         1 => return "JSON"
@@ -76,7 +76,7 @@ func format_to_string(format: int) string {
     }
 }
 
-func escape_json_string(s: string) string {
+func escape_json_string(string s) string {
     result := "\""
     i := 0
 
@@ -108,7 +108,7 @@ func escape_json_string(s: string) string {
     return result
 }
 
-func escape_xml_string(s: string) string {
+func escape_xml_string(string s) string {
     result := ""
     i := 0
 
@@ -135,7 +135,7 @@ func escape_xml_string(s: string) string {
     return result
 }
 
-func unescape_json_string(s: string) string {
+func unescape_json_string(string s) string {
     result := ""
     i := 1
 
@@ -182,7 +182,7 @@ func unescape_json_string(s: string) string {
     return result
 }
 
-func prettify_json_value(value: ParsedValue, depth: int) string {
+func prettify_json_value(ParsedValue value, int depth) string {
     indent := ""
     i := 0
     while i < depth * 2 {
@@ -246,7 +246,7 @@ func prettify_json_value(value: ParsedValue, depth: int) string {
     return "null"
 }
 
-func minify_json_value(value: ParsedValue) string {
+func minify_json_value(ParsedValue value) string {
     if value.is_null() {
         return "null"
     } else if value.is_bool() {
@@ -289,7 +289,7 @@ func minify_json_value(value: ParsedValue) string {
     return "null"
 }
 
-func estimate_quality_score(result: ParseResult) float {
+func estimate_quality_score(ParseResult result) float {
     score := 0.0
 
     score = score + match result.status {
@@ -317,7 +317,7 @@ func estimate_quality_score(result: ParseResult) float {
     return score
 }
 
-func create_parse_summary(result: ParseResult) string {
+func create_parse_summary(ParseResult result) string {
     summary := ""
 
     summary = summary + "Status: " + status_to_string(result.status) + "\n"

@@ -184,7 +184,7 @@ func _standard_attention_forward(
     if is_training && dropout_p > 0:
         attn_probs = dropout(attn_probs, p=dropout_p)
     tensor context = matmul(attn_probs, value_states)
-    option[tensor] weights = return_attn_weights ? some(attn_probs) : none
+    option[tensor] weights = return_attn_weights  some(attn_probs) : none
     return (context, weights)
 func _flash_attention_forward(
     tensor query_states,

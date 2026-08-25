@@ -3,7 +3,7 @@ package neurx.backend.platform.driving
 use std.vec.vec
 use std.io.println
 
-enum safety_level {
+
     qm,
     asil_a,
     asil_b,
@@ -11,7 +11,7 @@ enum safety_level {
     asil_d,
 }
 
-enum failure_mode {
+
     sensor_fault,
     compute_fault,
     communication_fault,
@@ -37,7 +37,7 @@ func new_functional_safety_monitor(safety_level level) functional_safety_monitor
     }
 }
 
-func (monitor: &mut functional_safety_monitor) report_fault(failure_mode mode) {
+func (functional_safety_monitor* monitor) report_fault(failure_mode mode) {
     mode_id := 0
     switch mode {
         failure_mode::sensor_fault: mode_id = 1,
@@ -53,18 +53,14 @@ func (monitor: &mut functional_safety_monitor) report_fault(failure_mode mode) {
     }
 }
 
-func (monitor: &monitor) get_fmea_coverage() int {
-    monitor.fmea_coverage_percent
+func (monitor* monitor) get_fmea_coverage() int {    monitor.fmea_coverage_percent
 }
 
-func (monitor: &monitor) get_target_level() safety_level {
-    monitor.target_level
+func (monitor* monitor) get_target_level() safety_level {    monitor.target_level
 }
 
-func (monitor: &monitor) get_fault_count() int {
-    monitor.fault_history.len()
+func (monitor* monitor) get_fault_count() int {    monitor.fault_history.len()
 }
 
-func (monitor: &monitor) is_diagnostics_enabled() bool {
-    monitor.diagnostics_enabled
+func (monitor* monitor) is_diagnostics_enabled() bool {    monitor.diagnostics_enabled
 }

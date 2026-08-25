@@ -30,31 +30,31 @@ struct document_chunk {
     id: string
     content: string
     metadata: document_metadata
-    embedding: tensor?
+    embedding: tensor
     chunk_index: int
     token_count: int
 }
 
 struct document_metadata {
     source_id: string
-    source_path: string?
+    source_path: string
     title: string
-    author: string?
-    created_at: float?
+    author: string
+    created_at: float
     document_type: string
     language: string = "zh"
     tags: list<string>
-    url?: string
-    page_number?: int
-    section?: string
-    relevance_score?: float
+    url: string
+    page_number: int
+    section: string
+    relevance_score: float
 }
 
 struct search_result {
     chunks: list<document_chunk>
     scores: list<float>
     query: string
-    expanded_query: string?
+    expanded_query: string
     retrieval_metadata: retrieval_metadata
 }
 
@@ -317,7 +317,7 @@ struct faiss_vector_db implements vector_db_interface {
         this.next_id = 0
     }
     get_status() {
-        mem_bytes = faiss.index_memory_size(this.index) ?? 0
+        mem_bytes = faiss.index_memory_size(this.index)  0
         return dbstatus{
             total_documents=this.count(),
             index_type=f"FAISS ({this.config.index_type})",
@@ -509,7 +509,7 @@ struct recursive_character_text_splitter {
         chunks: list<string> = []
         current_chunk = ""
         for part in parts {
-            new_text = current_chunk + (current_chunk.empty() ? "" : separator) + part
+            new_text = current_chunk + (current_chunk.empty()  "" : separator) + part
             if new_text.length > this.chunk_size {
                 if !current_chunk.empty() {
                     chunks.append(current_chunk)
@@ -835,12 +835,12 @@ struct retrieval_engine {
     vector_db: VectorDBInterface
     embedding_service: EmbeddingService
     document_processor: DocumentProcessor
-    query_expander: QueryExpander?
-    bm25_retriever: BM25Retriever?
-    reranker: CrossEncoderReranker?
+    query_expander: QueryExpander
+    bm25_retriever: BM25Retriever
+    reranker: CrossEncoderReranker
     fusion_engine: HybridFusionEngine
     documents_store: map<string, document_chunk>
-    init(config: retrieval_system_config, llm_client?: any) {
+    init(config: retrieval_system_config, llm_client: any) {
         this.config = config
         this.documents_store = map<string, document_chunk>{}
         this.document_processor = new document_processor(config=config)
@@ -899,8 +899,8 @@ struct retrieval_engine {
             db_status=this.vector_db.get_status()
         }
     }
-    retrieve(string query, top_k?: int) {
-        effective_top_k = top_k ?? this.config.top_k
+    retrieve(string query, top_k: int) {
+        effective_top_k = top_k  this.config.top_k
         start_total = current_time_millis()
         expanded_query = query
         if this.query_expander != null && this.config.enable_query_expansion {
@@ -973,15 +973,15 @@ struct retrieval_engine {
             }
         }
     }
-    generate_context_for_llm(search_result: search_result, max_tokens?: int) {
-        effective_max_tokens = max_tokens ?? this.config.max_context_tokens
+    generate_context_for_llm(search_result: search_result, max_tokens: int) {
+        effective_max_tokens = max_tokens  this.config.max_context_tokens
         context_parts: list<string> = []
         total_tokens = 0
         for i, chunk in enumerate(search_result.chunks) {
             if total_tokens + chunk.token_count > effective_max_tokens {
                 break
             }
-            source_info = chunk.metadata.source_path ?? chunk.metadata.source_id
+            source_info = chunk.metadata.source_path  chunk.metadata.source_id
             formatted = f"[{this.config.citation.format(index=i)}] {source_info}\n{chunk.content}\n"
             context_parts.append(formatted)
             total_tokens += chunk.token_count
@@ -1037,8 +1037,8 @@ struct rag_statistics {
     reranker_ready: bool
     query_expansion_enabled: bool
 }
-function create_retrieval_system(config?: retrieval_system_config, llm_client?: any) {
-    return new retrieval_engine(config=config ?? new retrieval_system_config(), llm_client=llm_client)
+function create_retrieval_system(config: retrieval_system_config, llm_client: any) {
+    return new retrieval_engine(config=config  new retrieval_system_config(), llm_client=llm_client)
 }
 function test_retrieval_system() {
     print("🧪 Testing NEURX RAG System...")

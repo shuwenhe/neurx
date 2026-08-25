@@ -53,7 +53,7 @@ func (SpecialTokenManager* m) register_standard_tokens() {
     m.register_special_token("[VIDEO]", 20, "Video Token")
 }
 
-func (SpecialTokenManager* m) RegisterSpecialToken(token_str: string, token_id: i32, description: string) bool {
+func (SpecialTokenManager* m) RegisterSpecialToken(string token_str, i32 token_id, string description) bool {
     if _, exists := m.tokens[token_str]; exists {
         return false
     }
@@ -63,38 +63,38 @@ func (SpecialTokenManager* m) RegisterSpecialToken(token_str: string, token_id: 
     return true
 }
 
-func (SpecialTokenManager* m) register_special_token(token_str: string, token_id: i32, description: string) {
+func (SpecialTokenManager* m) register_special_token(string token_str, i32 token_id, string description) {
     m.tokens[token_str] = token_id
     m.token_to_name[token_id] = token_str
     m.special_tokens_list = append(m.special_tokens_list, token_str)
     m.reserved_tokens = append(m.reserved_tokens, token_id)
 }
 
-func (SpecialTokenManager* m) GetTokenId(token_str: string) i32 {
+func (SpecialTokenManager* m) GetTokenId(string token_str) i32 {
     if id, ok := m.tokens[token_str]; ok {
         return id
     }
     return -1
 }
 
-func (SpecialTokenManager* m) GetTokenName(token_id: i32) string {
+func (SpecialTokenManager* m) GetTokenName(i32 token_id) string {
     if name, ok := m.token_to_name[token_id]; ok {
         return name
     }
     return "[UNKNOWN]"
 }
 
-func (SpecialTokenManager* m) IsSpecialToken(token_id: i32) bool {
+func (SpecialTokenManager* m) IsSpecialToken(i32 token_id) bool {
     _, exists := m.token_to_name[token_id]
     return exists
 }
 
-func (SpecialTokenManager* m) IsSpecialTokenStr(token_str: string) bool {
+func (SpecialTokenManager* m) IsSpecialTokenStr(string token_str) bool {
     _, exists := m.tokens[token_str]
     return exists
 }
 
-func (SpecialTokenManager* m) GetTokenType(token_id: i32) string {
+func (SpecialTokenManager* m) GetTokenType(i32 token_id) string {
     name := m.GetTokenName(token_id)
 
     if contains_string(name, "BOS") || contains_string(name, "EOS") || contains_string(name, "CLS") {
@@ -120,7 +120,7 @@ func (SpecialTokenManager* m) GetTokenType(token_id: i32) string {
     return "unknown"
 }
 
-func (SpecialTokenManager* m) RemoveSpecialTokens(tokens: vec[i32]) vec[i32] {
+func (SpecialTokenManager* m) RemoveSpecialTokens(vec[i32] tokens) vec[i32] {
     result := make(vec[i32], 0)
     for i := 0; i < len(tokens); i += 1 {
         if !m.IsSpecialToken(tokens[i]) {
@@ -130,7 +130,7 @@ func (SpecialTokenManager* m) RemoveSpecialTokens(tokens: vec[i32]) vec[i32] {
     return result
 }
 
-func (SpecialTokenManager* m) KeepOnlySpecialTokens(tokens: vec[i32]) vec[i32] {
+func (SpecialTokenManager* m) KeepOnlySpecialTokens(vec[i32] tokens) vec[i32] {
     result := make(vec[i32], 0)
     for i := 0; i < len(tokens); i += 1 {
         if m.IsSpecialToken(tokens[i]) {
@@ -140,7 +140,7 @@ func (SpecialTokenManager* m) KeepOnlySpecialTokens(tokens: vec[i32]) vec[i32] {
     return result
 }
 
-func (SpecialTokenManager* m) GetSpecialTokenPositions(tokens: vec[i32]) vec[i32] {
+func (SpecialTokenManager* m) GetSpecialTokenPositions(vec[i32] tokens) vec[i32] {
     positions := make(vec[i32], 0)
     for i := 0; i < len(tokens); i += 1 {
         if m.IsSpecialToken(tokens[i]) {
@@ -150,7 +150,7 @@ func (SpecialTokenManager* m) GetSpecialTokenPositions(tokens: vec[i32]) vec[i32
     return positions
 }
 
-func (SpecialTokenManager* m) CreateSpecialTokenMask(tokens: vec[i32]) vec[i32] {
+func (SpecialTokenManager* m) CreateSpecialTokenMask(vec[i32] tokens) vec[i32] {
     mask := make(vec[i32], len(tokens))
     for i := 0; i < len(tokens); i += 1 {
         if m.IsSpecialToken(tokens[i]) {
@@ -162,7 +162,7 @@ func (SpecialTokenManager* m) CreateSpecialTokenMask(tokens: vec[i32]) vec[i32] 
     return mask
 }
 
-func (SpecialTokenManager* m) ReplaceSpecialTokens(tokens: vec[i32], substitute_id: i32) vec[i32] {
+func (SpecialTokenManager* m) ReplaceSpecialTokens(vec[i32] tokens, i32 substitute_id) vec[i32] {
     result := make(vec[i32], len(tokens))
     for i := 0; i < len(tokens); i += 1 {
         if m.IsSpecialToken(tokens[i]) {
@@ -174,7 +174,7 @@ func (SpecialTokenManager* m) ReplaceSpecialTokens(tokens: vec[i32], substitute_
     return result
 }
 
-func (SpecialTokenManager* m) ReplaceSpecialTokensByType(tokens: vec[i32], token_type: string, substitute_id: i32) vec[i32] {
+func (SpecialTokenManager* m) ReplaceSpecialTokensByType(vec[i32] tokens, string token_type, i32 substitute_id) vec[i32] {
     result := make(vec[i32], len(tokens))
     for i := 0; i < len(tokens); i += 1 {
         if m.IsSpecialToken(tokens[i]) && m.GetTokenType(tokens[i]) == token_type {
@@ -186,7 +186,7 @@ func (SpecialTokenManager* m) ReplaceSpecialTokensByType(tokens: vec[i32], token
     return result
 }
 
-func (SpecialTokenManager* m) InsertSpecialToken(tokens: vec[i32], token_id: i32, position: i32) vec[i32] {
+func (SpecialTokenManager* m) InsertSpecialToken(vec[i32] tokens, i32 token_id, i32 position) vec[i32] {
     if position < 0 || position > i32(len(tokens)) {
         return tokens
     }
@@ -207,7 +207,7 @@ func (SpecialTokenManager* m) InsertSpecialToken(tokens: vec[i32], token_id: i32
     return result
 }
 
-func (SpecialTokenManager* m) AddBeginSpecialToken(tokens: vec[i32], token_id: i32) vec[i32] {
+func (SpecialTokenManager* m) AddBeginSpecialToken(vec[i32] tokens, i32 token_id) vec[i32] {
     result := make(vec[i32], 1 + len(tokens))
     result[0] = token_id
     for i := 0; i < len(tokens); i += 1 {
@@ -216,7 +216,7 @@ func (SpecialTokenManager* m) AddBeginSpecialToken(tokens: vec[i32], token_id: i
     return result
 }
 
-func (SpecialTokenManager* m) AddEndSpecialToken(tokens: vec[i32], token_id: i32) vec[i32] {
+func (SpecialTokenManager* m) AddEndSpecialToken(vec[i32] tokens, i32 token_id) vec[i32] {
     result := append(tokens, token_id)
     return result
 }
@@ -233,7 +233,7 @@ func (SpecialTokenManager* m) GetSpecialTokenCount() i32 {
     return i32(len(m.special_tokens_list))
 }
 
-func (SpecialTokenManager* m) CountSpecialTokensInSequence(tokens: vec[i32]) i32 {
+func (SpecialTokenManager* m) CountSpecialTokensInSequence(vec[i32] tokens) i32 {
     count := 0
     for i := 0; i < len(tokens); i += 1 {
         if m.IsSpecialToken(tokens[i]) {
@@ -243,7 +243,7 @@ func (SpecialTokenManager* m) CountSpecialTokensInSequence(tokens: vec[i32]) i32
     return i32(count)
 }
 
-func (SpecialTokenManager* m) CountSpecialTokensByType(tokens: vec[i32], token_type: string) i32 {
+func (SpecialTokenManager* m) CountSpecialTokensByType(vec[i32] tokens, string token_type) i32 {
     count := 0
     for i := 0; i < len(tokens); i += 1 {
         if m.IsSpecialToken(tokens[i]) && m.GetTokenType(tokens[i]) == token_type {
@@ -253,7 +253,7 @@ func (SpecialTokenManager* m) CountSpecialTokensByType(tokens: vec[i32], token_t
     return i32(count)
 }
 
-func (SpecialTokenManager* m) ValidateSpecialTokens(tokens: vec[i32]) bool {
+func (SpecialTokenManager* m) ValidateSpecialTokens(vec[i32] tokens) bool {
     for i := 0; i < len(tokens); i += 1 {
         if m.IsSpecialToken(tokens[i]) {
 
@@ -263,11 +263,11 @@ func (SpecialTokenManager* m) ValidateSpecialTokens(tokens: vec[i32]) bool {
     return true
 }
 
-func (SpecialTokenManager* m) IsValidTokenId(token_id: i32) bool {
+func (SpecialTokenManager* m) IsValidTokenId(i32 token_id) bool {
     return m.IsSpecialToken(token_id)
 }
 
-func contains_string(s: string, substring: string) bool {
+func contains_string(string s, string substring) bool {
     for i := 0; i <= len(s) - len(substring); i += 1 {
         match := true
         for j := 0; j < len(substring); j += 1 {

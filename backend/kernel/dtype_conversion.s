@@ -8,7 +8,7 @@ struct DTypeConversionKernels {
     config: types.KernelConfig
 }
 
-func NewDTypeConversionKernels(config: types.KernelConfig) &DTypeConversionKernels {
+func NewDTypeConversionKernels(types.KernelConfig config) &DTypeConversionKernels {
     return &DTypeConversionKernels{
         config: config
     }

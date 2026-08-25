@@ -127,7 +127,7 @@ func main() {
     println("    ✓ Tokenizer ready")
     println("")
     println("  Test inference on MedMCQA samples:")
-    println("    Sample 1: 'What is the primary cause of...?'")
+    println("    Sample 1: 'What is the primary cause of...'")
     println("      Response: 'Inflammation caused by...'")
     println("      Confidence: 0.92 (improved from 0.87)")
     println("")

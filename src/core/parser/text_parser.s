@@ -3,7 +3,7 @@ package neurx.parser.text_parser
 use neurx.parser.types
 use std.vec
 
-func tokenize(input: string) []string {
+func tokenize(string input) []string {
     tokens := []string{}
     current_token := ""
     i := 0
@@ -19,7 +19,7 @@ func tokenize(input: string) []string {
             i = i + 1
         }
 
-        else if ch == '.' || ch == ',' || ch == '!' || ch == '?' ||
+        else if ch == '.' || ch == ',' || ch == '!' || ch == '' ||
                 ch == ';' || ch == ':' || ch == '"' || ch == '\'' {
             if len(current_token) > 0 {
                 tokens = append(tokens, current_token)
@@ -52,7 +52,7 @@ func tokenize(input: string) []string {
     return tokens
 }
 
-func split_lines(text: string) []string {
+func split_lines(string text) []string {
     lines := []string{}
     current_line := ""
     i := 0
@@ -85,7 +85,7 @@ func split_lines(text: string) []string {
     return lines
 }
 
-func split_paragraphs(text: string) []string {
+func split_paragraphs(string text) []string {
     lines := split_lines(text)
     paragraphs := []string{}
     current_para := ""
@@ -116,7 +116,7 @@ func split_paragraphs(text: string) []string {
     return paragraphs
 }
 
-func trim_string(s: string) string {
+func trim_string(string s) string {
     start := 0
     end := len(s) - 1
 
@@ -137,7 +137,7 @@ func trim_string(s: string) string {
     return s[start:end + 1]
 }
 
-func extract_between(text: string, open_delim: string, close_delim: string) string {
+func extract_between(string text, string open_delim, string close_delim) string {
     open_pos := find_substring(text, open_delim, 0)
     if open_pos < 0 {
         return ""
@@ -153,7 +153,7 @@ func extract_between(text: string, open_delim: string, close_delim: string) stri
     return text[open_pos:close_pos]
 }
 
-func find_all_substring(text: string, pattern: string) []int {
+func find_all_substring(string text, string pattern) []int {
     positions := []int{}
     pos := 0
 
@@ -169,7 +169,7 @@ func find_all_substring(text: string, pattern: string) []int {
     return positions
 }
 
-func find_substring(text: string, substring: string, start_pos: int) int {
+func find_substring(string text, string substring, int start_pos) int {
     if len(substring) == 0 || len(text) == 0 {
         return -1
     }
@@ -191,7 +191,7 @@ func find_substring(text: string, substring: string, start_pos: int) int {
     return -1
 }
 
-func replace_all(text: string, pattern: string, replacement: string) string {
+func replace_all(string text, string pattern, string replacement) string {
     positions := find_all_substring(text, pattern)
     result := ""
     last_pos := 0
@@ -208,21 +208,21 @@ func replace_all(text: string, pattern: string, replacement: string) string {
     return result
 }
 
-func starts_with(text: string, prefix: string) bool {
+func starts_with(string text, string prefix) bool {
     if len(prefix) > len(text) {
         return false
     }
     return text[0:len(prefix)] == prefix
 }
 
-func ends_with(text: string, suffix: string) bool {
+func ends_with(string text, string suffix) bool {
     if len(suffix) > len(text) {
         return false
     }
     return text[len(text) - len(suffix):] == suffix
 }
 
-func normalize_whitespace(text: string) string {
+func normalize_whitespace(string text) string {
     text = trim_string(text)
     result := ""
     last_was_space := false
@@ -247,7 +247,7 @@ func normalize_whitespace(text: string) string {
     return result
 }
 
-func to_lowercase(text: string) string {
+func to_lowercase(string text) string {
     result := ""
     i := 0
 
@@ -266,7 +266,7 @@ func to_lowercase(text: string) string {
     return result
 }
 
-func to_uppercase(text: string) string {
+func to_uppercase(string text) string {
     result := ""
     i := 0
 
@@ -285,7 +285,7 @@ func to_uppercase(text: string) string {
     return result
 }
 
-func is_alphanumeric(ch: string) bool {
+func is_alphanumeric(string ch) bool {
     if len(ch) != 1 {
         return false
     }
@@ -294,7 +294,7 @@ func is_alphanumeric(ch: string) bool {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
 }
 
-func is_digit(ch: string) bool {
+func is_digit(string ch) bool {
     if len(ch) != 1 {
         return false
     }
@@ -303,7 +303,7 @@ func is_digit(ch: string) bool {
     return c >= '0' && c <= '9'
 }
 
-func is_whitespace(ch: string) bool {
+func is_whitespace(string ch) bool {
     if len(ch) != 1 {
         return false
     }
@@ -312,7 +312,7 @@ func is_whitespace(ch: string) bool {
     return c == ' ' || c == '\t' || c == '\n' || c == '\r'
 }
 
-func extract_words(text: string) []string {
+func extract_words(string text) []string {
     words := []string{}
     current_word := ""
     i := 0
@@ -339,12 +339,12 @@ func extract_words(text: string) []string {
     return words
 }
 
-func count_occurrences(text: string, substring: string) int {
+func count_occurrences(string text, string substring) int {
     positions := find_all_substring(text, substring)
     return len(positions)
 }
 
-func substring(text: string, start: int, length: int) string {
+func substring(string text, int start, int length) string {
     if start < 0 || start >= len(text) || length <= 0 {
         return ""
     }
@@ -357,7 +357,7 @@ func substring(text: string, start: int, length: int) string {
     return text[start:end]
 }
 
-func split_string(text: string, delimiter: string) []string {
+func split_string(string text, string delimiter) []string {
     if len(delimiter) == 0 {
         chars := []string{}
         i := 0
@@ -387,7 +387,7 @@ func split_string(text: string, delimiter: string) []string {
     return parts
 }
 
-func join_strings(strings: []string, separator: string) string {
+func join_strings([]string strings, string separator) string {
     result := ""
     i := 0
 

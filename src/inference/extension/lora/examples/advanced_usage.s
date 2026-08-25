@@ -49,7 +49,7 @@ func example_weight_fusion() result[(), string] {
         i = i + 1
     }
 
-    adapter.add_module_weights("attention", lora_a, lora_b)?
+    adapter.add_module_weights("attention", lora_a, lora_b)
 
     original_weights := map[string, &vec[vec[float]]]()
     orig_weight := vec[vec[float]]()
@@ -66,13 +66,13 @@ func example_weight_fusion() result[(), string] {
     }
     original_weights.insert("attention", orig_weight)
 
-    adapter.fuse_weights(&original_weights)?
+    adapter.fuse_weights(&original_weights)
 
     println("  ✓ 权重已融合")
     println("    融合状态: " + adapter.is_fused().to_string())
     println("    适配器大小: " + adapter.get_size_mb().to_string() + " MB")
 
-    adapter.unfuse_weights(&original_weights)?
+    adapter.unfuse_weights(&original_weights)
 
     println("  ✓ 权重已反融合")
     println("    融合状态: " + adapter.is_fused().to_string())
@@ -97,19 +97,19 @@ func example_lora_state_management() result[(), string] {
         scales := vec[float]()
         scales.push(1.0)
 
-        state_manager.create_request_state(req_id, adapter_names, scales)?
+        state_manager.create_request_state(req_id, adapter_names, scales)
     }
 
     println("  ✓ 创建了 " + state_manager.get_request_count().to_string() + " 个请求")
 
     for req_id in req_ids.iter() {
-        state_manager.activate_request(req_id)?
+        state_manager.activate_request(req_id)
     }
 
     active_count := state_manager.get_active_request_count()
     println("  ✓ 激活了 " + active_count.to_string() + " 个请求")
 
-    state_manager.deactivate_request("req_002")?
+    state_manager.deactivate_request("req_002")
     println("  ✓ 停用后活跃请求: " + state_manager.get_active_request_count().to_string())
 
     active := state_manager.get_active_requests()
@@ -131,7 +131,7 @@ func example_multi_adapter_caching() result[(), string] {
     scales.push(1.0)
     scales.push(0.5)
 
-    state_manager.create_request_state("multi_req", adapter_names, scales)?
+    state_manager.create_request_state("multi_req", adapter_names, scales)
 
     cached_weight := vec[vec[float]]()
     i := 0
@@ -146,7 +146,7 @@ func example_multi_adapter_caching() result[(), string] {
         i = i + 1
     }
 
-    state_manager.cache_fused_weights("multi_req_adapter_1", cached_weight)?
+    state_manager.cache_fused_weights("multi_req_adapter_1", cached_weight)
 
     println("  ✓ 已缓存融合权重")
 
@@ -154,7 +154,7 @@ func example_multi_adapter_caching() result[(), string] {
     println("    缓存条目: " + cache_entries.to_string())
     println("    缓存大小: " + cache_size.to_string() + " MB")
 
-    state_manager.clear_request_cache("multi_req")?
+    state_manager.clear_request_cache("multi_req")
     println("  ✓ 已清除请求缓存")
 
     (cache_entries, _) := state_manager.get_cache_stats()
@@ -174,7 +174,7 @@ func example_dynamic_adapter_switch() result[(), string] {
     init_scales := vec[float]()
     init_scales.push(1.0)
 
-    state_manager.create_request_state("dynamic_req", init_adapters, init_scales)?
+    state_manager.create_request_state("dynamic_req", init_adapters, init_scales)
 
     switch state_manager.get_request_state("dynamic_req") {
         option::some(state) : {
@@ -192,7 +192,7 @@ func example_dynamic_adapter_switch() result[(), string] {
     new_scales.push(0.8)
     new_scales.push(0.2)
 
-    state_manager.switch_adapters("dynamic_req", new_adapters, new_scales)?
+    state_manager.switch_adapters("dynamic_req", new_adapters, new_scales)
 
     switch state_manager.get_request_state("dynamic_req") {
         option::some(state) : {
@@ -207,7 +207,7 @@ func example_dynamic_adapter_switch() result[(), string] {
     updated_scales.push(0.5)
     updated_scales.push(0.5)
 
-    state_manager.update_adapter_scales("dynamic_req", updated_scales)?
+    state_manager.update_adapter_scales("dynamic_req", updated_scales)
     println("  ✓ 已更新缩放因子")
 
     ((, ""))
@@ -249,7 +249,7 @@ func example_weight_computation_perf() result[(), string] {
         i = i + 1
     }
 
-    delta := compute_lora_delta(lora_a, lora_b, engine.scaling_factor)?
+    delta := compute_lora_delta(lora_a, lora_b, engine.scaling_factor)
 
     println("  ✓ 计算完成")
     println("    输入形状: (" + lora_a.len().to_string() + ", " + lora_a[0].len().to_string() + ")")

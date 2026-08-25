@@ -4,7 +4,7 @@ struct long_writer_config {
     max_total_tokens: int = 32000
     max_section_tokens: int = 4096
     min_section_length: int = 200
-    target_word_count?: int
+    target_word_count: int
     writing_mode: string = "outline_driven"
     outline_detail_level: string = "detailed"
     quality_check_enabled: bool = true
@@ -19,33 +19,33 @@ struct long_writer_config {
     revision_threshold: float = 0.7
     auto_expand_sections: bool = true
     auto_merge_short_sections: bool = true
-    domain?: string
-    style_guide_path?: string
+    domain: string
+    style_guide_path: string
     tone: string = "professional"
     language: string = "zh-CN"
     enable_citations: bool = false
     enable_footnotes: bool = false
     enable_cross_references: bool = false
-    template_id?: string
+    template_id: string
 }
 
 struct outline_node {
     id: string
     title: string
     level: int
-    description?: string
-    estimated_words?: int
-    keywords?: list<string>
-    must_include?: list<string>
+    description: string
+    estimated_words: int
+    keywords: list<string>
+    must_include: list<string>
     children: list<outline_node>
-    content?: string
-    word_count?: int
-    quality_score?: float
+    content: string
+    word_count: int
+    quality_score: float
     status: SectionStatus = section_status.PENDING
     revisions: int = 0
 }
 
-enum section_status {
+
     PENDING
     GENERATING
     COMPLETED
@@ -60,7 +60,7 @@ struct writing_plan {
     sections_count: int
     max_depth: int
     metadata: plan_metadata
-    constraints: writing_constraints?
+    constraints: writing_constraints
 }
 
 struct plan_metadata {
@@ -71,11 +71,11 @@ struct plan_metadata {
 }
 
 struct writing_constraints {
-    min_total_words: int?
-    max_total_words: int?
-    forbidden_topics: list<string>?
-    required_sections: list<string>?
-    style_requirements: list<string>?
+    min_total_words: int
+    max_total_words: int
+    forbidden_topics: list<string>
+    required_sections: list<string>
+    style_requirements: list<string>
     audience_level: string = "general"
 }
 
@@ -84,7 +84,7 @@ struct long_document {
     plan: writing_plan
     sections: list<outline_node>
     full_text: string
-    toc: table_of_contents?
+    toc: table_of_contents
     statistics: document_statistics
     generation_metadata: generation_metadata
 }
@@ -98,8 +98,8 @@ struct toc_entry {
     level: int
     number: string
     title: string
-    page_ref?: string
-    word_count?: int
+    page_ref: string
+    word_count: int
 }
 
 struct document_statistics {
@@ -133,7 +133,7 @@ struct outline_planner {
         this.config = config
         this.llm_client = llm_client
     }
-    async create_plan(string topic, requirements?: string, existing_outline?: outline_node) {
+    async create_plan(string topic, requirements: string, existing_outline: outline_node) {
         start_time = current_time_millis()
         print(f"📋 Creating outline for: {topic}")
         prompt = this._build_planning_prompt(topic, requirements, existing_outline)
@@ -161,7 +161,7 @@ struct outline_planner {
         print(f"   ✓ Outline created: {len(flat_sections)} sections, ~{total_words} words estimated")
         return plan
     }
-    _build_planning_prompt(string topic, requirements?: string, existing_outline?: outline_node) {
+    _build_planning_prompt(string topic, requirements: string, existing_outline: outline_node) {
         detail_instructions = match this.config.outline_detail_level {
             "brief" => """
 Provide a high-level outline with main sections only (2-3 levels deep).
@@ -235,7 +235,7 @@ IMPORTANT:
 - Balance depth and breadth appropriately
 - Make sure the outline covers the topic comprehensively
 - Include both introduction and conclusion sections
-- Consider the reader's knowledge level: {this.config.constraints?.audience_level ?? "general"}
+- Consider the reader's knowledge level: {this.config.constraints.audience_level  "general"}
 Now create the outline:"""
     }
     _parse_outline(string llm_response_text, string topic) {
@@ -260,7 +260,7 @@ Now create the outline:"""
         for line in lines:
             stripped = line.strip()
             heading_match = regex.match(r'^(#{1,6})\s+(.+)$', stripped)
-            num_match = regex.match(r'^(\d+(?:\.\d+)*)\.\s*(.+)$', stripped)
+            num_match = regex.match(r'^(\d+(:\.\d+)*)\.\s*(.+)$', stripped)
             current_depth = len(node_stack) - 1
             if heading_match != None:
                 level = len(heading_match.group(1))
@@ -288,7 +288,7 @@ Now create the outline:"""
 struct content_generator {
     config: long_writer_config
     llm_client: any
-    quality_checker: QualityChecker?
+    quality_checker: QualityChecker
     init(config: long_writer_config, llm_client: any) {
         this.config = config
         this.llm_client = llm_client
@@ -326,7 +326,7 @@ struct content_generator {
             if quality_result.needs_revision && section.revisions < this.config.max_revision_rounds:
                 generated.revision_suggested = True
                 section.status = section_status.REVISION_NEEDED
-        print(f"   ✓ {section.id}: {section.word_count} words ({elapsed:.0f}ms, score: {generated.quality_score ?? 'N/A'})")
+        print(f"   ✓ {section.id}: {section.word_count} words ({elapsed:.0f}ms, score: {generated.quality_score  'N/A'})")
         return generated
     }
     _build_generation_prompt(section: outline_node, context: generation_context) {
@@ -422,8 +422,8 @@ struct generated_section {
     formatting_changes: list<string>
     generation_time_ms: float
     tokens_used: int
-    quality_score?: float
-    quality_feedback?: string
+    quality_score: float
+    quality_feedback: string
     revision_suggested: bool = false
 }
 
@@ -444,28 +444,28 @@ struct quality_checker {
 **Content**:
 {generated.processed_text[:3000]}
 1. **Completeness** (weight 25%):
-   - Does it cover all expected topics for this section?
-   - Is there sufficient detail and depth?
-   - Are important aspects missing?
+   - Does it cover all expected topics for this section
+   - Is there sufficient detail and depth
+   - Are important aspects missing
 2. **Clarity & Readability** (weight 20%):
-   - Is the writing clear and easy to understand?
-   - Are sentences well-structured?
-   - Is jargon used appropriately (defined if needed)?
+   - Is the writing clear and easy to understand
+   - Are sentences well-structured
+   - Is jargon used appropriately (defined if needed)
 3. **Coherence** (weight 20%):
-   - Does it flow logically within itself?
-   - Are ideas well-connected?
-   - Is there a clear progression of thought?
+   - Does it flow logically within itself
+   - Are ideas well-connected
+   - Is there a clear progression of thought
 4. **Relevance & Focus** (weighted 15%):
-   - Does it stay on-topic?
-   - Is all content relevant to the section's purpose?
-   - Is there unnecessary repetition or digression?
+   - Does it stay on-topic
+   - Is all content relevant to the section's purpose
+   - Is there unnecessary repetition or digression
 5. **Style Consistency** (weighted 10%):
-   - Does it match the expected tone ({this.config.tone})?
-   - Is language consistent throughout?
-   - Are formatting conventions followed correctly?
+   - Does it match the expected tone ({this.config.tone})
+   - Is language consistent throughout
+   - Are formatting conventions followed correctly
 6. **Length Appropriateness** (weighted 10%):
-   - Is the length suitable for the section's importance?
-   - Neither too short (superficial) nor too long (verbose)?
+   - Is the length suitable for the section's importance
+   - Neither too short (superficial) nor too long (verbose)
 {{
   "scores": {{
     "completeness": <float 0-1>,
@@ -490,21 +490,21 @@ struct quality_checker {
         result = parse_quality_response(response.text)
         return result
     }
-    async check_coherence_between_sections(prev: generated_section?, curr: generated_section, next_preview?: string) {
+    async check_coherence_between_sections(prev: generated_section, curr: generated_section, next_preview: string) {
         prev_summary = summarize_section(prev.processed_text, max_words=50) if prev != None else "[START OF DOCUMENT]"
         curr_intro = extract_first_paragraph(curr.processed_text)
-        next_expectation = next_preview ?: "[END]"
+        next_expectation = next_preview : "[END]"
         prompt = f"""Evaluate the transition quality between these two consecutive document sections:
-**Previous Section** ({prev?.section.title ?? 'Introduction'}):
+**Previous Section** ({prev.section.title  'Introduction'}):
 Summary: {prev_summary}
 **Current Section** ({curr.section.title}):
 First ~100 words: {curr_intro}
 **Next Section Preview**: {next_expectation}
 Evaluate:
-1. Does the current section begin smoothly after the previous one? (yes/partially/no)
-2. Is there a clear transitional phrase or concept linking them?
-3. Does the ending of the current section set up what comes next?
-4. Any suggestions for improving the flow?
+1. Does the current section begin smoothly after the previous one (yes/partially/no)
+2. Is there a clear transitional phrase or concept linking them
+3. Does the ending of the current section set up what comes next
+4. Any suggestions for improving the flow
 Respond briefly in 3-4 sentences."""
         response = await this.llm_client.generate(prompt, temperature=0.3, max_tokens=200)
         return coherence_check_result{
@@ -542,7 +542,7 @@ struct long_writer_engine {
         this.generator = new content_generator(config=config, llm_client=llm_client)
         this.documents_history = []
     }
-    async write_document(string topic, requirements?: string) {
+    async write_document(string topic, requirements: string) {
         total_start = current_time_millis()
         api_calls = 0
         errors = []
@@ -632,7 +632,7 @@ struct long_writer_engine {
         print_generation_summary(doc)
         return doc
     }
-    async revise_section(document: long_document, string section_id, feedback?: string) {
+    async revise_section(document: long_document, string section_id, feedback: string) {
         """Revise a specific section of an existing document."""
         section_to_revise = find_section_by_id(document.plan.outline, section_id)
         if section_to_revise == None:
@@ -648,8 +648,8 @@ struct long_writer_engine {
         document.generation_metadata.sections_revised += 1
         return document
     }
-    export(document: long_document, output_format?: string, file_path?: string) {
-        fmt = output_format ?? this.config.output_format
+    export(document: long_document, output_format: string, file_path: string) {
+        fmt = output_format  this.config.output_format
         match fmt {
             "markdown" => { return document.full_text }
             "html" => { return convert_markdown_to_html(document.full_text) }
@@ -716,8 +716,8 @@ function print_generation_summary(doc: long_document) {
     print(f"Revisions: {m.sections_revised}")
     print(f"Quality Checks: ✅{m.quality_checks_passed} ❌{m.quality_checks_failed}")
     print(f"{'='*60}\n")
-function create_long_writer(config?: long_writer_config, llm_client: any) {
-    return new long_writer_engine(config=config ?? new long_writer_config(), llm_client=llm_client)
+function create_long_writer(config: long_writer_config, llm_client: any) {
+    return new long_writer_engine(config=config  new long_writer_config(), llm_client=llm_client)
 }
 async function test_long_writer() {
     print("🧪 Testing NEURX LONGWRITER Engine...")
@@ -770,9 +770,9 @@ async function test_long_writer() {
     return true
 }
 struct mock_llm_client {
-    async generate(string prompt, temperature?: float, max_tokens?: int,
-                   response_format?: string, stop_sequences?: list<string>) {
-        content_length = min(max_tokens ?? 256, 300)
+    async generate(string prompt, temperature: float, max_tokens: int,
+                   response_format: string, stop_sequences: list<string>) {
+        content_length = min(max_tokens  256, 300)
         if "outline" in prompt.to_lower():
             return llm_response(text=json.dumps({
                 "title": "AI in Healthcare Overview",

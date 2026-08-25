@@ -1,13 +1,13 @@
 package distributed
 
-enum comm_backend {
+
     nccl
     ucc
     gloo
     cpu_only
 }
 
-enum comm_op_type {
+
     all_reduce
     all_gather
     reduce_scatter

@@ -13,7 +13,7 @@ struct ParserInstance {
     last_error: string
 }
 
-func create_parser(config: ParserConfig) ParserInstance {
+func create_parser(ParserConfig config) ParserInstance {
     return ParserInstance{
         config: config,
         stats: create_parser_stats(),
@@ -26,7 +26,7 @@ func create_default_parser() ParserInstance {
     return create_parser(create_default_config())
 }
 
-func (ParserInstance* p) parse(text: string) ParseResult {
+func (ParserInstance* p) parse(string text) ParseResult {
     start_time := 0
 
     if p.config.cache_intermediate {
@@ -88,7 +88,7 @@ func (ParserInstance* p) parse(text: string) ParseResult {
     return result
 }
 
-func parse_with_format(text: string, format: int) ParseResult {
+func parse_with_format(string text, int format) ParseResult {
     match format {
         0 => return parse_text_format(text)
         1 => return parse_json_output(text)
@@ -102,7 +102,7 @@ func parse_with_format(text: string, format: int) ParseResult {
     }
 }
 
-func parse_text_format(text: string) ParseResult {
+func parse_text_format(string text) ParseResult {
     result := create_parse_result()
     result.format = 0
     result.raw_output = text
@@ -114,7 +114,7 @@ func parse_text_format(text: string) ParseResult {
     return result
 }
 
-func parse_yaml_format(text: string) ParseResult {
+func parse_yaml_format(string text) ParseResult {
     result := create_parse_result()
     result.format = 4
     result.raw_output = text
@@ -132,7 +132,7 @@ func parse_yaml_format(text: string) ParseResult {
     return result
 }
 
-func parse_html_format(text: string) ParseResult {
+func parse_html_format(string text) ParseResult {
     result := create_parse_result()
     result.format = 6
     result.raw_output = text
@@ -150,12 +150,12 @@ func parse_html_format(text: string) ParseResult {
     return result
 }
 
-func parse_auto_format(text: string) ParseResult {
+func parse_auto_format(string text) ParseResult {
     detection := detect_format(text)
     return parse_with_format(text, detection.detected_format)
 }
 
-func (ParserInstance* p) parse_stream(chunks: []string) []ParseResult {
+func (ParserInstance* p) parse_stream([]string chunks) []ParseResult {
     results := []ParseResult{}
     builder := create_stream_builder()
 
@@ -178,7 +178,7 @@ func (ParserInstance* p) parse_stream(chunks: []string) []ParseResult {
     return results
 }
 
-func (p: ParserInstance) get_stats() ParserStats {
+func (ParserInstance p) get_stats() ParserStats {
     return p.stats
 }
 
@@ -190,16 +190,16 @@ func (ParserInstance* p) clear_cache() {
     p.cache = map[string]ParseResult{}
 }
 
-func (p: ParserInstance) get_last_error() string {
+func (ParserInstance p) get_last_error() string {
     return p.last_error
 }
 
-func (ParserInstance* p) set_config(config: ParserConfig) {
+func (ParserInstance* p) set_config(ParserConfig config) {
     p.config = config
     p.clear_cache()
 }
 
-func format_to_string(format: int) string {
+func format_to_string(int format) string {
     match format {
         0 => return "text"
         1 => return "json"
@@ -213,7 +213,7 @@ func format_to_string(format: int) string {
     }
 }
 
-func strategy_to_string(strategy: int) string {
+func strategy_to_string(int strategy) string {
     match strategy {
         0 => return "none"
         1 => return "skip_invalid"
@@ -224,7 +224,7 @@ func strategy_to_string(strategy: int) string {
     }
 }
 
-func (r: ParseResult) to_string() string {
+func (ParseResult r) to_string() string {
     status_str := match r.status {
         0 => "SUCCESS"
         1 => "PARTIAL"
@@ -253,7 +253,7 @@ func (r: ParseResult) to_string() string {
     return result
 }
 
-func (ParserInstance* p) parse_and_get(text: string, key: string) string {
+func (ParserInstance* p) parse_and_get(string text, string key) string {
     result := p.parse(text)
 
     if result.status != 0 && result.status != 4 {
@@ -273,7 +273,7 @@ func (ParserInstance* p) parse_and_get(text: string, key: string) string {
     return ""
 }
 
-func (ParserInstance* p) parse_batch(texts: []string) []ParseResult {
+func (ParserInstance* p) parse_batch([]string texts) []ParseResult {
     results := []ParseResult{}
 
     for text in texts {

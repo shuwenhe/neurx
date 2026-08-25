@@ -1,6 +1,6 @@
 package neurx.amp.training
 import "neurx.autograd"
-enum amp_dtype {
+
     FP32 = 0
     FP16 = 1
     BF16 = 2

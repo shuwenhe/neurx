@@ -1,6 +1,6 @@
 package attention
 
-enum attention_backend_type {
+
     standard
     flash_attention
     dsa

@@ -87,7 +87,7 @@ func test_basic_tokenization() {
         record_test_result(test_name, false, "model not loaded, skipping test")
         return
     }
-    string test_text = "What is the treatment for chronic urinary tract infection?"
+    string test_text = "What is the treatment for chronic urinary tract infection"
     tokenization_result_2 result = tokenize(state, test_text)
     bool passed = true
     string message = ""
@@ -112,7 +112,7 @@ func test_determinism() {
         record_test_result(test_name, false, "model not loaded, skipping test")
         return
     }
-    string test_text = "What is the treatment for chronic urinary tract infection?"
+    string test_text = "What is the treatment for chronic urinary tract infection"
     tokenization_result_2 result = tokenize_deterministic(state, test_text, 10)
     bool passed = result.success
     string message = ""

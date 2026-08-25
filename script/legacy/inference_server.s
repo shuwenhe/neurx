@@ -229,7 +229,7 @@ func handle_inference_request(json_data []byte) ([]byte, error) {
 	return resp_data, nil
 }
 
-func handle_metrics_request() ([]byte, error) {
+func handle_metrics_request() ([]byte) {
 	g_metrics.UptimeSeconds = int64(time.Since(g_server_start_time).Seconds())
 	data, err := json.MarshalIndent(g_metrics, "", "  ")
 	if err != nil {
@@ -238,7 +238,7 @@ func handle_metrics_request() ([]byte, error) {
 	return data, nil
 }
 
-func handle_health_check() ([]byte, error) {
+func handle_health_check() ([]byte) {
 	health := map[string]interface{}{
 		"status": "healthy",
 	"model": filepath.Base(g_config.model_path),
@@ -283,9 +283,9 @@ func run_interactive_mode() {
 	log_info("entering interactive mode (simulation)...")
 	log_info("type 'quit' to exit")
 	requests := []string{
-		`{"prompt":"what is artificial intelligence?","max_tokens":100}`,
+		`{"prompt":"what is artificial intelligence","max_tokens":100}`,
 		`{"prompt":"explain machine learning in one sentence","max_tokens":50}`,
-		`{"prompt":"how does neural networks work?","max_tokens":150}`,
+		`{"prompt":"how does neural networks work","max_tokens":150}`,
 	}
 	for i, reqStr := range requests {
 		fmt.Printf("\n[request %d]\n", i+1)

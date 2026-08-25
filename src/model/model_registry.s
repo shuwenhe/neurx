@@ -42,7 +42,7 @@ struct model_registry {
     models: []model_adapter
 }
 
-func create_llama_adapter(spec: model_spec) model_adapter {
+func create_llama_adapter(model_spec spec) model_adapter {
     model_adapter {
         model_spec: spec,
         optimization: model_optimization {
@@ -63,7 +63,7 @@ func create_llama_adapter(spec: model_spec) model_adapter {
     }
 }
 
-func create_qwen_adapter(spec: model_spec) model_adapter {
+func create_qwen_adapter(model_spec spec) model_adapter {
     model_adapter {
         model_spec: spec,
         optimization: model_optimization {
@@ -84,7 +84,7 @@ func create_qwen_adapter(spec: model_spec) model_adapter {
     }
 }
 
-func create_deepseek_adapter(spec: model_spec) model_adapter {
+func create_deepseek_adapter(model_spec spec) model_adapter {
     model_adapter {
         model_spec: spec,
         optimization: model_optimization {
@@ -105,7 +105,7 @@ func create_deepseek_adapter(spec: model_spec) model_adapter {
     }
 }
 
-func create_mistral_adapter(spec: model_spec) model_adapter {
+func create_mistral_adapter(model_spec spec) model_adapter {
     model_adapter {
         model_spec: spec,
         optimization: model_optimization {
@@ -126,7 +126,7 @@ func create_mistral_adapter(spec: model_spec) model_adapter {
     }
 }
 
-func create_default_adapter(spec: model_spec) model_adapter {
+func create_default_adapter(model_spec spec) model_adapter {
     model_adapter {
         model_spec: spec,
         optimization: model_optimization {
@@ -147,7 +147,7 @@ func create_default_adapter(spec: model_spec) model_adapter {
     }
 }
 
-func create_adapter_for_model(model_name: string) option[model_adapter] {
+func create_adapter_for_model(string model_name) option[model_adapter] {
     spec_opt := get_model_by_name(model_name)
     if spec_opt == none {
         return none
@@ -180,7 +180,7 @@ struct rope_scaling_params {
     short_mlen: int
 }
 
-func get_rope_params_for_model(model_type: string, seq_len: int) rope_scaling_params {
+func get_rope_params_for_model(string model_type, int seq_len) rope_scaling_params {
     if model_type == "llama" || model_type == "mistral" {
         return rope_scaling_params {
             rope_type: "default",
@@ -301,7 +301,7 @@ struct model_diagnostics {
     performance_profile: string
 }
 
-func get_model_diagnostics(adapter: *model_adapter) model_diagnostics {
+func get_model_diagnostics(*model_adapter adapter) model_diagnostics {
     param_count := adapter.model_spec.hidden_size *
                      adapter.model_spec.num_hidden_layers *
                      adapter.model_spec.vocab_size
@@ -325,7 +325,7 @@ func get_model_diagnostics(adapter: *model_adapter) model_diagnostics {
     }
 }
 
-func format_attention_type(attn: string) string {
+func format_attention_type(string attn) string {
     if attn == ATTENTION_STANDARD { return "Standard Attention" }
     if attn == ATTENTION_FLASH { return "Flash Attention" }
     if attn == ATTENTION_GQA { return "Grouped Query Attention" }
@@ -334,7 +334,7 @@ func format_attention_type(attn: string) string {
     return "Unknown"
 }
 
-func format_activation(act: string) string {
+func format_activation(string act) string {
     if act == ACTIVATION_RELU { return "ReLU" }
     if act == ACTIVATION_GELU { return "GELU" }
     if act == ACTIVATION_GELU_APPROX { return "GELU (approx)" }

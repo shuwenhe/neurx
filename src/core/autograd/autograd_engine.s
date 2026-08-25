@@ -1,6 +1,6 @@
 package neurx.autograd
 use neurx.tensor.tensor
-enum node_type {
+
     INPUT,
     ADD,
     MUL,

@@ -5,7 +5,7 @@ import (
     "path/filepath"
     "strings"
 )
-enum data_format {
+
     JSONL,
     parquet,
     HDF5,

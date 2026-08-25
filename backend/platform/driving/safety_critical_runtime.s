@@ -21,26 +21,21 @@ func new_safety_critical_runtime(string os) safety_critical_runtime {
     }
 }
 
-func (runtime: &mut safety_critical_runtime) register_critical_function(string func_name) {
+func (safety_critical_runtime* runtime) register_critical_function(string func_name) {
     runtime.critical_functions.push(func_name)
 }
 
-func (runtime: &runtime) get_watchdog_period_ms() int {
-    runtime.watchdog_period_ms
+func (runtime* runtime) get_watchdog_period_ms() int {    runtime.watchdog_period_ms
 }
 
-func (runtime: &runtime) is_redundancy_enabled() bool {
-    runtime.redundancy_enabled
+func (runtime* runtime) is_redundancy_enabled() bool {    runtime.redundancy_enabled
 }
 
-func (runtime: &runtime) get_critical_function_count() int {
-    runtime.critical_functions.len()
+func (runtime* runtime) get_critical_function_count() int {    runtime.critical_functions.len()
 }
 
-func (runtime: &runtime) get_os_name() string {
-    runtime.os_name
+func (runtime* runtime) get_os_name() string {    runtime.os_name
 }
 
-func (runtime: &runtime) get_safety_level() int {
-    runtime.safety_certification_level
+func (runtime* runtime) get_safety_level() int {    runtime.safety_certification_level
 }

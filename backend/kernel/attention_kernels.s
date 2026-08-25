@@ -10,7 +10,7 @@ struct AttentionKernels {
     matrix_kernels: *matrix_kernels.MatrixKernels
 }
 
-func NewAttentionKernels(config: types.KernelConfig) &AttentionKernels {
+func NewAttentionKernels(types.KernelConfig config) &AttentionKernels {
     return &AttentionKernels{
         config: config,
         matrix_kernels: matrix_kernels.NewMatrixKernels(config)

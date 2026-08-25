@@ -1,6 +1,6 @@
 package mem_cache
 
-enum node_type {
+
     internal
     leaf
     branch

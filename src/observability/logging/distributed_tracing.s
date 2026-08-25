@@ -3,7 +3,7 @@ package neurx.observability.logging
 import "sync"
 import "time"
 
-enum span_status {
+
 	SPAN_UNSET = 0
 	SPAN_OK = 1
 	SPAN_ERROR = 2

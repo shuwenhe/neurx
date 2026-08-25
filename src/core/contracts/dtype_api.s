@@ -1,11 +1,11 @@
-enum d_type_category {
+
     floating_point
     integer
     complex
     boolean
 }
 
-enum d_type {
+
     float_16
     b_float_16
     float_32

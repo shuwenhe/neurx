@@ -3,7 +3,7 @@ package plugins
 import "sync"
 import "time"
 
-enum message_type {
+
 	MSG_REQUEST = 0
 	MSG_RESPONSE = 1
 	MSG_EVENT = 2
@@ -12,7 +12,7 @@ enum message_type {
 	MSG_PONG = 5
 }
 
-enum message_priority {
+
 	PRIORITY_LOW = 0
 	PRIORITY_NORMAL = 1
 	PRIORITY_HIGH = 2

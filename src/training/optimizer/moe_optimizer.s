@@ -27,13 +27,13 @@ struct moe_config {
 
 struct moe_forward_output {
     output: tensor
-    aux_loss: tensor?
-    load_balance_loss: tensor?
+    aux_loss: tensor
+    load_balance_loss: tensor
     router_logits: tensor
     expert_mask: tensor
     expert_weights: tensor
     dispatch_pattern: dispatch_pattern
-    perexpert_output?: list<tensor>
+    perexpert_output: list<tensor>
 }
 
 struct dispatch_pattern {
@@ -51,7 +51,7 @@ struct moe_expert {
     id: int
     up_proj: linear
     down_proj: linear
-    gate: Activation?
+    gate: Activation
     specialization_score: float = 0.0
     importance_weight: float = 1.0
     is_active: bool = true
@@ -59,8 +59,8 @@ struct moe_expert {
 
 struct moe_router {
     gate_layer: linear
-    bias: Parameter?
-    noise: Normal?
+    bias: Parameter
+    noise: Normal
     router_type: string
     top_k: int
     init(hidden_dim: int, num_experts: int, config: moe_config) {
@@ -131,7 +131,7 @@ struct mo_effn_layer {
         )
         if config.router_bias_init != 0.0:
             nn_init.constant_(this.router.gate_layer.bias, config.router_bias_init)
-    forward(hidden_states: tensor, attention_mask: tensor?) {
+    forward(hidden_states: tensor, attention_mask: tensor) {
         batch_size, seq_len, hidden_dim = hidden_states.shape
         router_input = hidden_states
         if this.training && this.config.jitter_noise > 0 && this.router.noise != null {
@@ -155,8 +155,8 @@ struct mo_effn_layer {
             pass
         else:
             expert_outputs = expert_outputs + hidden_states
-        aux_loss: tensor? = null
-        lb_loss: tensor? = null
+        aux_loss: tensor = null
+        lb_loss: tensor = null
         if this.training {
             lb_loss_val, aux_loss_val = this.loss_computer.compute(router_logits, expert_mask)
             if this.config.z_loss_coef > 0:
@@ -314,7 +314,7 @@ struct mo_effn_layer {
 }
 struct expert_specializer {
     config: moe_config
-    moe_layer: MoEFFNLayer?
+    moe_layer: MoEFFNLayer
     init(config: moe_config) {
         this.config = config
     }
@@ -441,8 +441,8 @@ struct expert_manager {
             this.specializer.bind(layer)
         }
     }
-    prune_low_importance_experts(threshold?: float) {
-        effective_threshold = threshold ?? this.config.expert_pruning_threshold
+    prune_low_importance_experts(threshold: float) {
+        effective_threshold = threshold  this.config.expert_pruning_threshold
         pruned_count = 0
         pruned_ids: set<int> = set{}
         for layer in this.moe_layers:
@@ -541,8 +541,8 @@ struct moe_efficiency_report {
     parameter_sparsity: float
     theoretical_flops_reduction: string
 }
-function create_moe_ffn_layer(config?: moe_config) {
-    return new mo_effn_layer(config=config ?? new moe_config())
+function create_moe_ffn_layer(config: moe_config) {
+    return new mo_effn_layer(config=config  new moe_config())
 }
 function test_moe_system() {
     print("🧪 Testing NEURX MOE Optimization System...")

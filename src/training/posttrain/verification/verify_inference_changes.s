@@ -18,11 +18,11 @@ struct response_metrics {
 func create_test_queries() []test_query {
     []test_query queries = make([]test_query, 5)
     queries[0] = test_query{
-        question: "What are the symptoms of diabetes?",
+        question: "What are the symptoms of diabetes",
         expected_topic: "diabetes symptoms"
     }
     queries[1] = test_query{
-        question: "How is hypertension treated?",
+        question: "How is hypertension treated",
         expected_topic: "hypertension treatment"
     }
     queries[2] = test_query{
@@ -30,7 +30,7 @@ func create_test_queries() []test_query {
         expected_topic: "cancer stages"
     }
     queries[3] = test_query{
-        question: "What causes migraine headaches?",
+        question: "What causes migraine headaches",
         expected_topic: "migraine causes"
     }
     queries[4] = test_query{

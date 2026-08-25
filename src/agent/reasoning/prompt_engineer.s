@@ -87,7 +87,7 @@ func (prompt_engineer* pe) get_verification_prompt(string previous_reasoning, st
     string prompt = "Now let's verify this reasoning:\n"
     prompt = prompt + "Previous step: " + previous_reasoning + "\n"
     prompt = prompt + "Result obtained: " + result + "\n"
-    prompt = prompt + "Is this correct and consistent with what we know? "
+    prompt = prompt + "Is this correct and consistent with what we know "
     prompt
 }
 
@@ -101,7 +101,7 @@ func (prompt_engineer* pe) get_checkpoint_prompt([]string previous_steps, string
     }
 
     prompt = prompt + "Current conclusion: " + current_result + "\n"
-    prompt = prompt + "Should we continue or revise our approach? "
+    prompt = prompt + "Should we continue or revise our approach "
     prompt
 }
 

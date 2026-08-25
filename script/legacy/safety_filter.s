@@ -73,7 +73,7 @@ func (safety_filter* filter) calculate_toxicity_score(text string) float64 {
     if uppercase_ratio > 0.5 {
         score += uppercase_ratio * 0.2
     }
-    punct_count := strings.Count(text, "!") + strings.Count(text, "?")*2
+    punct_count := strings.Count(text, "!") + strings.Count(text, "")*2
     punct_score := math.Min(float64(punct_count)/float64(len(text)+1), 1.0)
     score += punct_score * 0.15
     harmful := filter.detect_harmful_keywords(text)
@@ -286,8 +286,8 @@ func (safety_filter* filter) demonstrate() {
     test_texts := []string{
         "I love this product! Highly recommend.",
         "This is VERY BAD and DANGEROUS!!!",
-        "How to help someone in need?",
-        "How to cause harm?",
+        "How to help someone in need",
+        "How to cause harm",
         "Tell me about Python programming",
     }
     fmt.Println("Testing Safety Checks:")

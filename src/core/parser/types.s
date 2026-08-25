@@ -1,6 +1,6 @@
 package neurx.parser.types
 
-enum ParseResultType {
+
     SUCCESS = 0
     PARTIAL = 1
     INCOMPLETE = 2
@@ -8,7 +8,7 @@ enum ParseResultType {
     RECOVERED = 4
 }
 
-enum OutputFormat {
+
     TEXT = 0
     JSON = 1
     XML = 2
@@ -19,14 +19,14 @@ enum OutputFormat {
     MIXED = 7
 }
 
-enum ParseMode {
+
     STRICT = 0
     LENIENT = 1
     STREAMING = 2
     CACHED = 3
 }
 
-enum ErrorRecoveryStrategy {
+
     NONE = 0
     SKIP_INVALID = 1
     ATTEMPT_FIX = 2
@@ -171,7 +171,7 @@ func create_null_value() ParsedValue {
     }
 }
 
-func create_string_value(s: string) ParsedValue {
+func create_string_value(string s) ParsedValue {
     return ParsedValue{
         type: 3,
         string_value: s,
@@ -184,7 +184,7 @@ func create_string_value(s: string) ParsedValue {
     }
 }
 
-func create_number_value(n: float) ParsedValue {
+func create_number_value(float n) ParsedValue {
     str_val := ""
     int_n := int(n)
     if float(int_n) == n {
@@ -204,7 +204,7 @@ func create_number_value(n: float) ParsedValue {
     }
 }
 
-func create_bool_value(b: bool) ParsedValue {
+func create_bool_value(bool b) ParsedValue {
     str_val := if b { "true" } else { "false" }
     return ParsedValue{
         type: 1,
@@ -218,7 +218,7 @@ func create_bool_value(b: bool) ParsedValue {
     }
 }
 
-func create_array_value(items: []ParsedValue) ParsedValue {
+func create_array_value([]ParsedValue items) ParsedValue {
     return ParsedValue{
         type: 4,
         string_value: "",
@@ -231,7 +231,7 @@ func create_array_value(items: []ParsedValue) ParsedValue {
     }
 }
 
-func create_object_value(keys: []string, values: []ParsedValue) ParsedValue {
+func create_object_value([]string keys, []ParsedValue values) ParsedValue {
     return ParsedValue{
         type: 5,
         string_value: "",
@@ -263,7 +263,7 @@ func create_default_config() ParserConfig {
     }
 }
 
-func create_parser_context(input: string, config: ParseConfig) ParseContext {
+func create_parser_context(string input, ParseConfig config) ParseContext {
     return ParseContext{
         input: input,
         position: 0,
@@ -295,27 +295,27 @@ func create_parser_context(input: string, config: ParseConfig) ParseContext {
     }
 }
 
-func (v: ParsedValue) is_null() bool {
+func (ParsedValue v) is_null() bool {
     return v.type == 0
 }
 
-func (v: ParsedValue) is_bool() bool {
+func (ParsedValue v) is_bool() bool {
     return v.type == 1
 }
 
-func (v: ParsedValue) is_number() bool {
+func (ParsedValue v) is_number() bool {
     return v.type == 2
 }
 
-func (v: ParsedValue) is_string() bool {
+func (ParsedValue v) is_string() bool {
     return v.type == 3
 }
 
-func (v: ParsedValue) is_array() bool {
+func (ParsedValue v) is_array() bool {
     return v.type == 4
 }
 
-func (v: ParsedValue) is_object() bool {
+func (ParsedValue v) is_object() bool {
     return v.type == 5
 }
 

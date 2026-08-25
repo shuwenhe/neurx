@@ -318,7 +318,7 @@ func digit_to_char(int d) string {
     if d == 7 { return "7" }
     if d == 8 { return "8" }
     if d == 9 { return "9" }
-    "?"
+    ""
 }
 
 func float_to_string(float x) string {

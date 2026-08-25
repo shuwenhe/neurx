@@ -12,7 +12,7 @@ struct TestResult {
     execution_time_ms: f32,
 }
 
-func LogTest(name: string, passed: bool, message: string, time_ms: f32) TestResult {
+func LogTest(string name, bool passed, string message, f32 time_ms) TestResult {
     status := "✓"
     if !passed {
         status = "✗"
@@ -28,7 +28,7 @@ func LogTest(name: string, passed: bool, message: string, time_ms: f32) TestResu
     }
 }
 
-func PrintTestReport(results: vec[TestResult]) {
+func PrintTestReport(vec[TestResult] results) {
     passed := 0
     failed := 0
     total_time := f32(0.0)
@@ -337,7 +337,7 @@ func main() {
     PrintTestReport(results)
 }
 
-func string_from_i32(n: i32) string {
+func string_from_i32(i32 n) string {
     if n == 0 {
         return "0"
     }

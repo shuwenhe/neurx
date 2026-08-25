@@ -2,7 +2,7 @@ package neurx.inference.v1_api_integration
 
 use std.vec
 
-enum request_phase {
+
     waiting_prefill,
     in_prefill,
     waiting_decode,
@@ -52,7 +52,7 @@ struct v1_engine {
     int total_compute_time_ms
 }
 
-func new_v1_engine(config: v1_engine_config) v1_engine {
+func new_v1_engine(v1_engine_config config) v1_engine {
     v1_engine {
         config: config,
         request_phases: vec[request_phase](cap: 1024),

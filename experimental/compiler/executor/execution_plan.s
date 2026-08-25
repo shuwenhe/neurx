@@ -23,7 +23,7 @@ struct execution_stage {
     int parallel_degree
 }
 
-func create_execution_plan(g: *computation_graph) execution_plan {
+func create_execution_plan(*computation_graph g) execution_plan {
     tasks = vec[execution_task]()
 
     sorted_ops = g.topological_sort()
@@ -53,7 +53,7 @@ func (execution_plan* plan) task_count() int {
     plan.tasks.len()
 }
 
-func (execution_plan* plan) can_parallelize(task_a_idx: int, task_b_idx: int) bool {
+func (execution_plan* plan) can_parallelize(int task_a_idx, int task_b_idx) bool {
     if task_a_idx == task_b_idx {
         return false
     }
@@ -84,7 +84,7 @@ func (execution_plan* plan) estimate_execution_time_ms() int {
     time
 }
 
-func create_staged_execution_plan(g: *computation_graph, num_stages: int) execution_plan {
+func create_staged_execution_plan(*computation_graph g, int num_stages) execution_plan {
     basic_plan = create_execution_plan(g)
 
     if num_stages <= 1 {

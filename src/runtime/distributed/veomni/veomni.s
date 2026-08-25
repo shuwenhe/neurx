@@ -1,6 +1,6 @@
 package neurx.distributed.veomni
 import "neurx.util.math"
-enum parallel_mode {
+
     DATA_PARALLEL = 0
     MODEL_PARALLEL = 1
     EXPERT_PARALLEL = 2

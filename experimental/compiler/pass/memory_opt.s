@@ -14,7 +14,7 @@ struct memory_opt_result {
     bool success
 }
 
-func compute_memory_usage(g: *computation_graph) memory_usage {
+func compute_memory_usage(*computation_graph g) memory_usage {
     memory_per_value = new int[g.values.len()]
     int total = 0
     int peak = 0
@@ -36,7 +36,7 @@ func compute_memory_usage(g: *computation_graph) memory_usage {
     }
 }
 
-func find_reusable_values(g: *computation_graph, lifetime: *vec[int]) vec[int] {
+func find_reusable_values(*computation_graph g, *vec[int] lifetime) vec[int] {
     reusable = vec[int]()
 
     for i in range(g.values.len()) {
@@ -55,7 +55,7 @@ func find_reusable_values(g: *computation_graph, lifetime: *vec[int]) vec[int] {
     reusable
 }
 
-func compute_value_lifetime(g: *computation_graph) vec[int] {
+func compute_value_lifetime(*computation_graph g) vec[int] {
     lifetime = new int[g.values.len()]
     for i in range(g.values.len()) {
         lifetime[i] = 0
@@ -80,7 +80,7 @@ func compute_value_lifetime(g: *computation_graph) vec[int] {
     lifetime
 }
 
-func apply_memory_optimization(g: *computation_graph) memory_opt_result {
+func apply_memory_optimization(*computation_graph g) memory_opt_result {
     usage_before = compute_memory_usage(g)
     lifetime = compute_value_lifetime(g)
     reusable = find_reusable_values(g, &lifetime)
@@ -97,12 +97,12 @@ func apply_memory_optimization(g: *computation_graph) memory_opt_result {
     }
 }
 
-func is_value_needed_later(g: *computation_graph, value_id: int, current_step: int) bool {
+func is_value_needed_later(*computation_graph g, int value_id, int current_step) bool {
     consumers = g.find_consumers(value_id)
     consumers.len() > 0
 }
 
-func can_reuse_buffer(g: *computation_graph, source_id: int, target_id: int) bool {
+func can_reuse_buffer(*computation_graph g, int source_id, int target_id) bool {
     if source_id == target_id {
         return false
     }

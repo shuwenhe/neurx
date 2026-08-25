@@ -21,7 +21,7 @@ func example_create_basic_adapter() result[(), string] {
     target_modules.push("v_proj")
     config.target_modules = target_modules
 
-    config.validate().map_err(|e| e.message)?
+    config.validate().map_err(|e| e.message)
 
     adapter := lora_adapter::new("lora_basic", &config)
 
@@ -51,9 +51,9 @@ func example_create_basic_adapter() result[(), string] {
         i = i + 1
     }
 
-    adapter.add_module_weights("q_proj", lora_a, lora_b)?
+    adapter.add_module_weights("q_proj", lora_a, lora_b)
 
-    adapter.validate()?
+    adapter.validate()
 
     println("✓ Created LoRA adapter: " + adapter.name)
     println("  Size: " + adapter.get_size_mb().to_string() + " MB")
@@ -100,7 +100,7 @@ func example_apply_lora() result[(), string] {
         i = i + 1
     }
 
-    adapter.add_module_weights("dense", lora_a, lora_b)?
+    adapter.add_module_weights("dense", lora_a, lora_b)
 
     input := vec[float]()
     i := 0
@@ -109,7 +109,7 @@ func example_apply_lora() result[(), string] {
         i = i + 1
     }
 
-    output := adapter.apply_lora("dense", input, 1.0)?
+    output := adapter.apply_lora("dense", input, 1.0)
 
     println("✓ Applied LoRA")
     println("  Input size: " + input.len().to_string())
@@ -128,7 +128,7 @@ func example_adapter_manager() result[(), string] {
     config1.target_modules = targets1
 
     adapter1 := lora_adapter::new("adapter_1", &config1)
-    manager.add_adapter("adapter_1", &adapter1)?
+    manager.add_adapter("adapter_1", &adapter1)
 
     config2 := lora_config::default()
     config2.lora_rank = 16
@@ -137,19 +137,19 @@ func example_adapter_manager() result[(), string] {
     config2.target_modules = targets2
 
     adapter2 := lora_adapter::new("adapter_2", &config2)
-    manager.add_adapter("adapter_2", &adapter2)?
+    manager.add_adapter("adapter_2", &adapter2)
 
-    manager.activate_adapter("adapter_1")?
-    manager.activate_adapter("adapter_2")?
+    manager.activate_adapter("adapter_1")
+    manager.activate_adapter("adapter_2")
 
     active := manager.get_active_adapters()
     println("✓ Created adapter manager")
     println("  Total adapters: " + manager.list_adapters().len().to_string())
     println("  Active adapters: " + active.len().to_string())
 
-    manager.set_global_scale(0.5)?
+    manager.set_global_scale(0.5)
 
-    manager.deactivate_adapter("adapter_2")?
+    manager.deactivate_adapter("adapter_2")
     println("  Active after deactivation: " + manager.get_active_adapters().len().to_string())
 
     ((, ""))
@@ -190,7 +190,7 @@ func example_batch_apply_lora() result[(), string] {
         i = i + 1
     }
 
-    adapter.add_module_weights("linear", lora_a, lora_b)?
+    adapter.add_module_weights("linear", lora_a, lora_b)
 
     inputs := vec[&vec[float]]()
     batch_size := 4
@@ -208,7 +208,7 @@ func example_batch_apply_lora() result[(), string] {
         b = b + 1
     }
 
-    outputs := adapter.apply_lora_batch("linear", inputs, 1.0)?
+    outputs := adapter.apply_lora_batch("linear", inputs, 1.0)
 
     println("✓ Batch applied LoRA")
     println("  Batch size: " + batch_size.to_string())

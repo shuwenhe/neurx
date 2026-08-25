@@ -3,7 +3,7 @@ package neurx.backend.platform.driving
 use std.vec.vec
 use std.io.println
 
-enum sensor_type {
+
     camera,
     lidar,
     radar,
@@ -40,12 +40,11 @@ func new_sensor_fusion_engine(int hz) sensor_fusion_engine {
     }
 }
 
-func (engine: &mut sensor_fusion_engine) register_sensor(sensor_type stype) {
+func (sensor_fusion_engine* engine) register_sensor(sensor_type stype) {
     engine.active_sensors.push(stype)
 }
 
-func (engine: &sensor_fusion_engine) fuse_readings([]sensor_reading readings) sensor_fusion_result {
-    fused_state := vec[float]()
+func (sensor_fusion_engine* engine) fuse_readings([]sensor_reading readings) sensor_fusion_result {    fused_state := vec[float]()
     uncertainty := vec[float]()
     
     for i in 0..readings.len() {
@@ -63,14 +62,11 @@ func (engine: &sensor_fusion_engine) fuse_readings([]sensor_reading readings) se
     }
 }
 
-func (engine: &sensor_fusion_engine) get_active_sensor_count() int {
-    engine.active_sensors.len()
+func (sensor_fusion_engine* engine) get_active_sensor_count() int {    engine.active_sensors.len()
 }
 
-func (engine: &sensor_fusion_engine) get_fusion_rate_hz() int {
-    engine.fusion_rate_hz
+func (sensor_fusion_engine* engine) get_fusion_rate_hz() int {    engine.fusion_rate_hz
 }
 
-func (engine: &sensor_fusion_engine) get_max_sensor_latency_us() int {
-    engine.max_sensor_latency_us
+func (sensor_fusion_engine* engine) get_max_sensor_latency_us() int {    engine.max_sensor_latency_us
 }

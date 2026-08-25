@@ -447,7 +447,7 @@ func main() {
     config.ppo_steps = 5
     config.ppo_batch_size = 16
     println("Starting PPO training...")
-    ppo_train_state state = ppo_train_step("What is machine learning?", config, 0.8)
+    ppo_train_state state = ppo_train_step("What is machine learning", config, 0.8)
     println("Policy Loss: " + float_to_string(state.policy_loss))
     println("Value Loss: " + float_to_string(state.value_loss))
     println("Reward: " + float_to_string(state.reward))

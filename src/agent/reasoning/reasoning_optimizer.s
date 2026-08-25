@@ -3,7 +3,7 @@ package reasoning
 import "sync"
 import "time"
 
-enum optimization_strategy {
+
 	GREEDY = 0
 	BEAM_SEARCH = 1
 	BRANCH_AND_BOUND = 2
@@ -11,7 +11,7 @@ enum optimization_strategy {
 	ADAPTIVE = 4
 }
 
-enum pruning_strategy {
+
 	SCORE_BASED = 0
 	DEPTH_BASED = 1
 	AGE_BASED = 2

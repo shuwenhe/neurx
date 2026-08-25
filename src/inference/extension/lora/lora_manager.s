@@ -44,7 +44,7 @@ func (lora_adapter* adapter) apply_lora(
 
     switch adapter.weights.get(module_name) {
         option::some(weights) : {
-            lora_result := apply_lora_transformation(input, weights, adapter.scale)?
+            lora_result := apply_lora_transformation(input, weights, adapter.scale)
             (lora_result, "")
         },
         option::none : {
@@ -68,8 +68,8 @@ func apply_lora_transformation(
         })
     }
 
-    intermediate := matrix_multiply(input, weights.lora_a)?
-    output := matrix_multiply(intermediate, weights.lora_b)?
+    intermediate := matrix_multiply(input, weights.lora_a)
+    output := matrix_multiply(intermediate, weights.lora_b)
 
     scaled_output := vec[float]()
     i := 0
@@ -139,7 +139,7 @@ func (mut lora_adapter_manager* manager) add_adapter(
     ((, ""))
 }
 
-func (mut lora_adapter_manager* manager) remove_adapter(name: string) result[(), lora_adapter_error] {
+func (mut lora_adapter_manager* manager) remove_adapter(string name) result[(), lora_adapter_error] {
     if !manager.adapters.contains(name) {
         return (lora_adapter_error {
             code: "ADAPTER_NOT_FOUND",
@@ -161,7 +161,7 @@ func (mut lora_adapter_manager* manager) remove_adapter(name: string) result[(),
     ((, ""))
 }
 
-func (mut lora_adapter_manager* manager) activate_adapter(name: string) result[(), lora_adapter_error] {
+func (mut lora_adapter_manager* manager) activate_adapter(string name) result[(), lora_adapter_error] {
     if !manager.adapters.contains(name) {
         return (lora_adapter_error {
             code: "ADAPTER_NOT_FOUND",
@@ -185,7 +185,7 @@ func (mut lora_adapter_manager* manager) activate_adapter(name: string) result[(
     }
 }
 
-func (mut lora_adapter_manager* manager) deactivate_adapter(name: string) result[(), lora_adapter_error] {
+func (mut lora_adapter_manager* manager) deactivate_adapter(string name) result[(), lora_adapter_error] {
     idx := 0
     while idx < manager.active_adapters.len() {
         if manager.active_adapters[idx] == name {
@@ -213,14 +213,14 @@ func (manager* manager) get_active_adapters() &vec[string] {
     manager.active_adapters
 }
 
-func (manager* manager) get_adapter(name: string) option[lora_adapter] {
+func (manager* manager) get_adapter(string name) option[lora_adapter] {
     switch manager.adapters.get(name) {
         option::some(adapter) : option::some(adapter),
         option::none : option::none,
     }
 }
 
-func (mut lora_adapter_manager* manager) set_global_scale(scale: float) result[(), lora_adapter_error] {
+func (mut lora_adapter_manager* manager) set_global_scale(float scale) result[(), lora_adapter_error] {
     if scale < 0.0 {
         return (lora_adapter_error {
             code: "INVALID_SCALE",

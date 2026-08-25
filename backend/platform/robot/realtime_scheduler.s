@@ -30,7 +30,7 @@ func new_realtime_scheduler(int hz) realtime_scheduler {
     }
 }
 
-func (scheduler: &mut realtime_scheduler) register_task(string name, func() int callback, int period_us, int priority) {
+func (realtime_scheduler* scheduler) register_task(string name, func() int callback, int period_us, int priority) {
     task := realtime_task{
         name: name,
         callback: callback,
@@ -41,7 +41,7 @@ func (scheduler: &mut realtime_scheduler) register_task(string name, func() int 
     scheduler.tasks.push(task)
 }
 
-func (scheduler: &mut realtime_scheduler) enable_task(string name) {
+func (realtime_scheduler* scheduler) enable_task(string name) {
     for i in 0..scheduler.tasks.len() {
         if scheduler.tasks[i].name == name {
             scheduler.tasks[i].enabled = true
@@ -50,7 +50,7 @@ func (scheduler: &mut realtime_scheduler) enable_task(string name) {
     }
 }
 
-func (scheduler: &mut realtime_scheduler) disable_task(string name) {
+func (realtime_scheduler* scheduler) disable_task(string name) {
     for i in 0..scheduler.tasks.len() {
         if scheduler.tasks[i].name == name {
             scheduler.tasks[i].enabled = false
@@ -59,22 +59,17 @@ func (scheduler: &mut realtime_scheduler) disable_task(string name) {
     }
 }
 
-func (scheduler: &realtime_scheduler) get_task_count() int {
-    scheduler.tasks.len()
+func (realtime_scheduler* scheduler) get_task_count() int {    scheduler.tasks.len()
 }
 
-func (scheduler: &realtime_scheduler) get_cycle_period_us() int {
-    scheduler.cycle_period_us
+func (realtime_scheduler* scheduler) get_cycle_period_us() int {    scheduler.cycle_period_us
 }
 
-func (scheduler: &realtime_scheduler) get_max_latency_us() int {
-    scheduler.max_latency_us
+func (realtime_scheduler* scheduler) get_max_latency_us() int {    scheduler.max_latency_us
 }
 
-func (scheduler: &realtime_scheduler) get_current_cycle() int {
-    scheduler.current_cycle
+func (realtime_scheduler* scheduler) get_current_cycle() int {    scheduler.current_cycle
 }
 
-func (scheduler: &realtime_scheduler) is_running() bool {
-    scheduler.running
+func (realtime_scheduler* scheduler) is_running() bool {    scheduler.running
 }

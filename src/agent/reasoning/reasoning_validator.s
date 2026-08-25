@@ -265,6 +265,6 @@ func (reasoning_validator* validator) auto_fix_issues(reasoning_chain chain) rea
     chain
 }
 
-func (state: chain_state) to_string() string {
+func (chain_state state) to_string() string {
     "unknown"
 }

@@ -1,6 +1,6 @@
 package neurx.net.collective
 
-enum collective_operation {
+
     allreduce,
     allgather,
     broadcast,
@@ -27,7 +27,7 @@ struct collective_group {
     int participant_count
 }
 
-func create_collective_group(participant_ids: int*, count: int) result[collective_group, string] {
+func create_collective_group(int* participant_ids, int count) result[collective_group, string] {
     (collective_group {
         group_id: 0,
         participant_ids: participant_ids,
@@ -35,7 +35,7 @@ func create_collective_group(participant_ids: int*, count: int) result[collectiv
     })
 }
 
-func execute_allreduce(group: collective_group*, data_ptr: int, data_size: int) result[collective_result, string] {
+func execute_allreduce(collective_group* group, int data_ptr, int data_size) result[collective_result, string] {
     (collective_result {
         success: true,
         result_data: 0 as int*,
@@ -44,7 +44,7 @@ func execute_allreduce(group: collective_group*, data_ptr: int, data_size: int) 
     })
 }
 
-func execute_allgather(group: collective_group*, local_data: int*, local_size: int) result[collective_result, string] {
+func execute_allgather(collective_group* group, int* local_data, int local_size) result[collective_result, string] {
     (collective_result {
         success: true,
         result_data: 0 as int*,
@@ -53,7 +53,7 @@ func execute_allgather(group: collective_group*, local_data: int*, local_size: i
     })
 }
 
-func execute_broadcast(group: collective_group*, root_id: int, data_ptr: int, data_size: int) result[collective_result, string] {
+func execute_broadcast(collective_group* group, int root_id, int data_ptr, int data_size) result[collective_result, string] {
     (collective_result {
         success: true,
         result_data: 0 as int*,

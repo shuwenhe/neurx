@@ -229,15 +229,15 @@ func test_complete_pipeline() {
     print("   ✓ Tensor Parallelism: 2 GPUs\n")
     print("   ✓ API: OpenAI Compatible on :8000\n")
     print("2. Single Request (Quantized)...\n")
-    string result = inference_system.inference_quantized(sys, "What is AI?", 50)
-    print("   ✓ Prompt: 'What is AI?'\n")
+    string result = inference_system.inference_quantized(sys, "What is AI", 50)
+    print("   ✓ Prompt: 'What is AI'\n")
     print("   ✓ Max tokens: 50\n")
     print("   ✓ Latency: ~120ms (with quantization)\n")
     print("   ✓ Status: GENERATED\n")
     print("3. Batch Inference...\n")
     []string prompts = []string{
         "Explain machine learning",
-        "What is deep learning?",
+        "What is deep learning",
         "Define neural networks",
     }
     []string outputs = inference_system.inference_batch(sys, prompts, 50)

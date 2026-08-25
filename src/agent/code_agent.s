@@ -377,7 +377,7 @@ func code_agent_run(string task, string model_path, int max_steps, bool full_aut
             println("[code_agent] ── approval required ───────────────────────")
             println("[code_agent]   action : ", current.interrupt.kind)
             println("[code_agent]   reason : ", current.interrupt.reason)
-            println("[code_agent] approve? [yes/no]: ")
+            println("[code_agent] approve [yes/no]: ")
             string answer = code_agent_read_line()
             if trim(answer) == "" {
                 answer = "no"

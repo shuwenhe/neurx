@@ -42,8 +42,7 @@ func new_rt_inference_engine(string device, int latency_budget_us) rt_inference_
     }
 }
 
-func (engine: &mut rt_inference_engine) load_model(string model_name) bool {
-    for i in 0..engine.loaded_models.len() {
+func (rt_inference_engine* engine) load_model(string model_name) bool {    for i in 0..engine.loaded_models.len() {
         if engine.loaded_models[i] == model_name {
             return true
         }
@@ -54,14 +53,13 @@ func (engine: &mut rt_inference_engine) load_model(string model_name) bool {
     true
 }
 
-func (engine: &mut rt_inference_engine) preload_all_models([]string model_names) {
+func (rt_inference_engine* engine) preload_all_models([]string model_names) {
     for i in 0..model_names.len() {
         _ := engine.load_model(model_names[i])
     }
 }
 
-func (engine: &mut rt_inference_engine) run_inference(rt_inference_request request) rt_inference_result {
-    engine.total_inferences = engine.total_inferences + 1
+func (rt_inference_engine* engine) run_inference(rt_inference_request request) rt_inference_result {    engine.total_inferences = engine.total_inferences + 1
     
     actions := vec[float]()
     result := rt_inference_result{
@@ -87,14 +85,12 @@ func (engine: &mut rt_inference_engine) run_inference(rt_inference_request reque
     result
 }
 
-func (engine: &rt_inference_engine) get_stats() (int, int, int) {
+func (rt_inference_engine* engine) get_stats() (int, int, int) {
     (engine.total_inferences, engine.successful_inferences, engine.missed_deadlines)
 }
 
-func (engine: &rt_inference_engine) get_loaded_model_count() int {
-    engine.loaded_models.len()
+func (rt_inference_engine* engine) get_loaded_model_count() int {    engine.loaded_models.len()
 }
 
-func (engine: &rt_inference_engine) get_latency_budget_us() int {
-    engine.inference_latency_budget_us
+func (rt_inference_engine* engine) get_latency_budget_us() int {    engine.inference_latency_budget_us
 }

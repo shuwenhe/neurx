@@ -64,7 +64,7 @@ func init_lora_weights_kaiming(
     ((lora_a, lora_b, ""))
 }
 
-func gaussian_random(std: float) float {
+func gaussian_random(float std) float {
 
     u1 := 0.5
     u2 := 0.5

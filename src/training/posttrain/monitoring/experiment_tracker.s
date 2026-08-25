@@ -1,6 +1,6 @@
 package neurx.posttrain.monitoring.experiment_tracker
 use std.io.eprintln
-enum tracker_backend {
+
     WANDB,
     MLFLOW,
     TENSORBOARD,

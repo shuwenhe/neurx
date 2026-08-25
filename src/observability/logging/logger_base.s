@@ -1,12 +1,12 @@
 package neurx.observability.logging
-enum log_level {
+
     DEBUG,
     INFO,
     WARNING,
     ERROR,
 }
 
-enum metric_type {
+
     SCALAR,
     HISTOGRAM,
     IMAGE,

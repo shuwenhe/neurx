@@ -6,7 +6,7 @@ use neurx.experimental.compiler.passes.op_fusion.{apply_op_fusion, fusion_result
 use neurx.experimental.compiler.passes.dead_code_elim.{remove_dead_code, dead_code_result}
 use neurx.experimental.compiler.passes.memory_opt.{apply_memory_optimization, memory_opt_result}
 
-enum pass_type {
+
     constant_folding,
     op_fusion,
     dead_code_elim,
@@ -121,7 +121,7 @@ func minimal_optimization_pipeline() pass_pipeline {
     }
 }
 
-func apply_pass(g: *mut computation_graph, pass_kind: pass_type) pass_result {
+func apply_pass(*mut computation_graph g, pass_type pass_kind) pass_result {
     match pass_kind {
         pass_type::constant_folding: {
             result = apply_constant_folding(g)
@@ -158,7 +158,7 @@ func apply_pass(g: *mut computation_graph, pass_kind: pass_type) pass_result {
     }
 }
 
-func run_pass_pipeline(g: *mut computation_graph, pipeline: *pass_pipeline) vec[pass_result] {
+func run_pass_pipeline(*mut computation_graph g, *pass_pipeline pipeline) vec[pass_result] {
     results = vec[pass_result]()
 
     for pass_cfg in pipeline.passes {

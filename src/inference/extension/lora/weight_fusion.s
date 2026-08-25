@@ -23,7 +23,7 @@ struct weight_fusion_engine {
     fused: map[string, &vec[vec[float]]]
 }
 
-func weight_fusion_engine::new(lora_rank: int, lora_alpha: float) weight_fusion_engine {
+func weight_fusion_engine::new(int lora_rank, float lora_alpha) weight_fusion_engine {
     weight_fusion_engine {
         lora_rank: lora_rank,
         lora_alpha: lora_alpha,
@@ -169,7 +169,7 @@ func (weight_fusion_engine* engine) get_fused_weights(
     engine.fused.get(module_name)
 }
 
-func (weight_fusion_engine* engine) is_fused(module_name: string) bool {
+func (weight_fusion_engine* engine) is_fused(string module_name) bool {
     engine.fused.contains(module_name)
 }
 

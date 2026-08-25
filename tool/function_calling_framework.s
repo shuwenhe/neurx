@@ -22,38 +22,38 @@ struct tool_definition {
     name: string
     description: string
     parameters: parameter_schema
-    category?: string
-    tags?: list<string>
+    category: string
+    tags: list<string>
     requires_permission: bool = false
     is_dangerous: bool = false
-    rate_limit?: rate_limit
+    rate_limit: rate_limit
     timeout_seconds: float = 30.0
-    metadata?: map<string, any>
+    metadata: map<string, any>
 }
 
 struct parameter_schema {
     type: string
-    properties?: map<string, property_definition>
-    required?: list<string>
-    items?: parameter_schema
-    enum?: list<any>
-    format?: string
-    description?: string
-    default?: any
-    additional_properties?: bool | parameter_schema
+    properties: map<string, property_definition>
+    required: list<string>
+    items: parameter_schema
+    enum: list<any>
+    format: string
+    description: string
+    default: any
+    additional_properties: bool | parameter_schema
 }
 
 struct property_definition {
     type: string
     description: string
-    enum?: list<any>
-    default?: any
-    format?: string
-    min?: int | float
-    max?: int | float
-    items?: parameter_schema
-    properties?: map<string, property_definition>
-    required?: list<string>
+    enum: list<any>
+    default: any
+    format: string
+    min: int | float
+    max: int | float
+    items: parameter_schema
+    properties: map<string, property_definition>
+    required: list<string>
 }
 
 struct rate_limit {
@@ -67,19 +67,19 @@ struct tool_call {
     id: string
     name: string
     arguments: string
-    parsed_arguments: map<string, any>?
+    parsed_arguments: map<string, any>
     status: call_status = call_status.PENDING
-    result?: tool_call_result
-    error?: tool_call_error
-    start_time: float?
-    end_time: float?
-    duration_ms?: float
-    parent_id?: string
+    result: tool_call_result
+    error: tool_call_error
+    start_time: float
+    end_time: float
+    duration_ms: float
+    parent_id: string
     children_ids: list<string> = []
     retry_count: int = 0
 }
 
-enum call_status {
+
     PENDING
     RUNNING
     COMPLETED
@@ -94,44 +94,44 @@ struct tool_call_result {
     content: any
     content_type: string = "text"
     truncated: bool = false
-    raw_output?: string
-    metadata?: map<string, any>
+    raw_output: string
+    metadata: map<string, any>
 }
 
 struct tool_call_error {
     code: string
     message: string
-    details?: map<string, any>
+    details: map<string, any>
     recoverable: bool = false
-    suggestion?: string
+    suggestion: string
 }
 
 struct function_calling_response {
     tool_calls: list<tool_call>
-    final_text_response: string?
+    final_text_response: string
     finished_reason: string
-    total_tokens_used: int?
+    total_tokens_used: int
     intermediate_messages: list<assistant_message>
-    execution_summary: execution_summary?
+    execution_summary: execution_summary
 }
 
 struct assistant_message {
     role: string = "assistant"
-    content: string? | list<content_block>
-    tool_calls?: list<tool_call>
-    reasoning_content?: string
+    content: string | list<content_block>
+    tool_calls: list<tool_call>
+    reasoning_content: string
 }
 
 struct content_block {
     type: string
-    text?: string
-    id?: string
-    name?: string
-    input?: map<string, any>
+    text: string
+    id: string
+    name: string
+    input: map<string, any>
 struct user_message {
     role: string = "user"
     content: string | list<content_block>
-    tool_results?: list<tool_call_result_block>
+    tool_results: list<tool_call_result_block>
 }
 struct tool_call_result_block {
     tool_call_id: string
@@ -153,8 +153,8 @@ struct tool_registry {
     executors: map<string, tool_executor>
     categories: map<string, list<string>>
     config: function_calling_config
-    init(config?: function_calling_config) {
-        this.config = config ?? new function_calling_config()
+    init(config: function_calling_config) {
+        this.config = config  new function_calling_config()
         this.tools = map<string, tool_definition>{}
         this.executors = map<string, tool_executor>{}
         this.categories = map<string, list<string>>{}
@@ -163,7 +163,7 @@ struct tool_registry {
             throw error(f"Tool '{definition.name}' already registered. Use update() to modify.")
         this.tools[definition.name] = definition
         this.executors[definition.name] = executor
-        cat = definition.category ?? "uncategorized"
+        cat = definition.category  "uncategorized"
         if cat not in this.categories:
             this.categories[cat] = []
         this.categories[cat].append(definition.name)
@@ -172,7 +172,7 @@ struct tool_registry {
     unregister(string tool_name) {
         if tool_name in this.tools:
             defn := this.tools[tool_name]
-            cat = defn.category ?? "uncategorized"
+            cat = defn.category  "uncategorized"
             if cat in this.categories:
                 this.categories[cat] = [t for t in this.categories[cat] if t != tool_name]
             this.tools.remove(tool_name)
@@ -184,7 +184,7 @@ struct tool_registry {
     get_executor(string tool_name) {
         return this.executors.get(tool_name)
     }
-    list_tools(category?: string, tag?: string) {
+    list_tools(category: string, tag: string) {
         results: list<tool_definition> = []
         for name, defn in this.tools {
             if category != None && defn.category != category:
@@ -261,21 +261,21 @@ struct function_calling_engine {
     config: function_calling_config
     conversation_history: list<user_message | assistant_message>
     call_tracker: call_tracker
-    init(llm_client: any, config?: function_calling_config, registry?: tool_registry) {
+    init(llm_client: any, config: function_calling_config, registry: tool_registry) {
         this.llm_client = llm_client
-        this.config = config ?? new function_calling_config()
-        this.registry = registry ?? new tool_registry(this.config)
+        this.config = config  new function_calling_config()
+        this.registry = registry  new tool_registry(this.config)
         this.conversation_history = []
         this.call_tracker = new call_tracker()
     }
-    async process_user_request(string user_message, available_tools?: list<tool_definition>) {
+    async process_user_request(string user_message, available_tools: list<tool_definition>) {
         total_start = current_time_millis()
         if this.config.verbose_logging:
             print(f"\n{'='*60}")
             print(f"🔧 Function Calling Engine - Processing request")
             print(f"User: {user_message[:100]}...")
             print(f"Mode: {this.config.execution_mode}")
-            print(f"Available Tools: {available_tools?.length ?? this.registry.get_statistics().total_tools}\n")
+            print(f"Available Tools: {available_tools.length  this.registry.get_statistics().total_tools}\n")
         user_msg = user_message{content=user_message}
         this.conversation_history.append(user_msg)
         match this.config.execution_mode {
@@ -302,16 +302,16 @@ struct function_calling_engine {
             parallel_batches=this.call_tracker.parallel_batch_count,
             total_execution_time_ms=total_time,
             tools_used=set(tc.name for tc in response.tool_calls),
-            avg_duration_per_call_ms=mean([tc.duration_ms ?? 0 for tc in completed_calls]) if !completed_calls.empty() else 0,
+            avg_duration_per_call_ms=mean([tc.duration_ms  0 for tc in completed_calls]) if !completed_calls.empty() else 0,
             retry_count=sum(tc.retry_count for tc in response.tool_calls)
         }
         if this.config.verbose_logging:
             print_execution_log(response)
         return response
     }
-    async _single_step_execution(user_msg: user_message, tools?: list<tool_definition>) {
+    async _single_step_execution(user_msg: user_message, tools: list<tool_definition>) {
         """Execute at most one round of tool calls, then generate final response."""
-        tool_defs = tools ?? this.registry.list_tools()
+        tool_defs = tools  this.registry.list_tools()
         llm_response = await this._call_llm_with_tools(
             messages=[*this.conversation_history],
             tools=tool_defs
@@ -337,14 +337,14 @@ struct function_calling_engine {
         this.conversation_history.append(final_msg)
         return function_calling_response{
             tool_calls=executed_calls,
-            finished_reason=final_llm_resp.finished_reason ?? "stop",
+            finished_reason=final_llm_resp.finished_reason  "stop",
             final_text_response=get_text_from_message(final_msg),
             intermediate_messages=[assistant_msg, final_msg]
         }
     }
-    async _multi_step_execution(user_msg: user_message, tools?: list<tool_definition>, int max_rounds = 10) {
+    async _multi_step_execution(user_msg: user_message, tools: list<tool_definition>, int max_rounds = 10) {
         """Allow multiple rounds of tool calls until task completion."""
-        tool_defs = tools ?? this.registry.list_tools()
+        tool_defs = tools  this.registry.list_tools()
         all_executed_calls: list<tool_call> = []
         rounds = 0
         while rounds < max_rounds:
@@ -367,7 +367,7 @@ struct function_calling_engine {
             executed = await this._execute_tool_calls(assistant_msg.tool_calls!)
             all_executed_calls.extend(executed)
             has_unrecoverable_errors = any(
-                tc.error?.recoverable == false
+                tc.error.recoverable == false
                 for tc in executed
                 if tc.status != call_status.COMPLETED
             )
@@ -386,10 +386,10 @@ struct function_calling_engine {
             intermediate_messages=[]
         }
     }
-    async _agent_loop_execution(user_msg: user_message, tools?: list<tool_definition>) {
+    async _agent_loop_execution(user_msg: user_message, tools: list<tool_definition>) {
         """Full agent loop with planning, reflection, and self-correction capabilities."""
         return await this._multi_step_execution(user_msg, tools)
-    async _auto_execution(user_msg: user_message, tools?: list<tool_definition>) {
+    async _auto_execution(user_msg: user_message, tools: list<tool_definition>) {
         query_complexity = estimate_query_complexity(user_msg.content as string)
         if query_complexity < 3:
             return await this._single_step_execution(user_msg, tools)
@@ -400,7 +400,7 @@ struct function_calling_engine {
         """Make LLM API call with tool definitions."""
         tool_schemas = [serialize_for_llm(t) for t in tools]
         response = await this.llm_client.chat.completions.create(
-            model=this.config.model ?? "neurx-4-plus",
+            model=this.config.model  "neurx-4-plus",
             messages=messages,
             tools=tool_schemas,
             tool_choice="auto",
@@ -433,7 +433,7 @@ struct function_calling_engine {
                         message=f"Invalid arguments: {', '.join(validation.missing_params + [p for p in validation.invalid_params])}",
                         details={"missing": validation.missing_params, "invalid": validation.invalid_params},
                         recoverable=true,
-                        suggestion=validation.warnings.length > 0 ? "; ".join(validation.warnings) : null
+                        suggestion=validation.warnings.length > 0  "; ".join(validation.warnings) : null
                     }
                     validated_calls.append(call)
                     continue
@@ -497,10 +497,10 @@ struct function_calling_engine {
             if !result.success:
                 call.error = tool_call_error{
                     code="EXECUTION_ERROR",
-                    message=result.content?.toString() ?? "Tool execution failed",
+                    message=result.content.toString()  "Tool execution failed",
                     recoverable=true
                 }
-            if call.status == call_status.FAILED and call.error?.recoverable and call.retry_count < this.config.max_retries:
+            if call.status == call_status.FAILED and call.error.recoverable and call.retry_count < this.config.max_retries:
                 call.retry_count += 1
                 if this.config.verbose_logging:
                     print(f"   🔄 Retrying {call.name} (attempt {call.retry_count}/{this.config.max_retries})")
@@ -744,7 +744,7 @@ struct file_operations_executor implements tool_executor {
         }
     }
 }
-function create_function_calling_engine(llm_client: any, config?: function_calling_config) {
+function create_function_calling_engine(llm_client: any, config: function_calling_config) {
     engine = new function_calling_engine(llm_client=llm_client, config=config)
     search_def, search_exec = create_builtin_web_search_tool()
     engine.registry.register(search_def, search_exec)
@@ -836,7 +836,7 @@ struct mock_llm_client_for_fc {
     }
 }
 struct llm_raw_response {
-    finished_reason?: string
+    finished_reason: string
     choices: list<map<string, any>>
 }
 export {

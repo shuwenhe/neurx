@@ -5,7 +5,7 @@ import (
     "neurx.multimodal.types"
 )
 
-enum FusionStrategy {
+
     concatenation,
     addition,
     attention,
@@ -283,7 +283,7 @@ func (FeatureFusion* f) Fuse(
     }
 }
 
-func Sqrt(x: f64) f64 {
+func Sqrt(f64 x) f64 {
     if x == 0.0 {
         return 0.0
     }

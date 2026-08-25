@@ -3,7 +3,7 @@ package plugins
 import "sync"
 import "time"
 
-enum lifecycle_event_type {
+
 	EVENT_LOADING = 0
 	EVENT_LOADED = 1
 	EVENT_INITIALIZING = 2

@@ -1,5 +1,5 @@
 import "serialization_api"
-enum optimizer_type {
+
     SGD
     adam
     adam_w

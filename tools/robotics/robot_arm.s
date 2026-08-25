@@ -1,6 +1,6 @@
 package neurx.tools.robotics
 
-enum joint_type {
+
     revolute,
     prismatic,
     continuous

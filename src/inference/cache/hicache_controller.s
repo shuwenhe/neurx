@@ -120,7 +120,7 @@ func hicache_set_lock_refs(hicache_state state, int key_hash, int pool_id, int l
     state
 }
 
-func hicache_no_action(hicache_state state, int index) hicache_action_result { hicache_action_result {state: state, page_index: index, action: hicache_action_none(), scheduled: false} }
+func hicache_no_action(hicache_state state, int index) hicache_action_result { hicache_action_result {state state, index page_index, hicache_action_none action(), false scheduled} }
 
 func hicache_prepare_backup(hicache_state state, int key_hash, int pool_id) hicache_action_result {
     int index = hicache_find_page(state, key_hash, pool_id)

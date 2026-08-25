@@ -85,10 +85,10 @@ func (data_synthesis_engine* engine) generate_synthetic_examples() {
 func (data_synthesis_engine* engine) generate_prompt(task string, int index) string {
     prompts := map[string][]string{
         "qa": {
-            "What is the capital of France?",
+            "What is the capital of France",
             "Explain quantum computing in simple terms",
-            "How does photosynthesis work?",
-            "What are the main causes of climate change?",
+            "How does photosynthesis work",
+            "What are the main causes of climate change",
             "Describe the process of cell division",
         },
         "writing": {
@@ -109,18 +109,18 @@ func (data_synthesis_engine* engine) generate_prompt(task string, int index) str
             "Solve: 2x + 5 = 13",
             "Calculate the area of a circle with radius 5",
             "Find the derivative of x^3 + 2x^2",
-            "What is 15% of 200?",
+            "What is 15% of 200",
             "Solve the system: x+y=5, x-y=1",
         },
         "reasoning": {
-            "If all cats are animals and Fluffy is a cat, what can we conclude?",
-            "What's the logical flaw in this argument?",
+            "If all cats are animals and Fluffy is a cat, what can we conclude",
+            "What's the logical flaw in this argument",
             "Complete this sequence: 2, 4, 6, 8, ...",
             "Solve this riddle about a man and his son",
             "Analyze the cause and effect relationship",
         },
         "translation": {
-            "Translate 'Hello, how are you?' to Spanish",
+            "Translate 'Hello, how are you' to Spanish",
             "Convert this sentence to French",
             "Translate the concept of 'wanderlust' to German",
             "Translate a technical term to Japanese",

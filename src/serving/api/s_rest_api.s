@@ -101,7 +101,7 @@ func main() {
     print_endpoint("GET /v1/models", models_resp)
 
     print("🧪 Test 3: Chat Completion\n")
-    string chat_resp = chat("Qwen2.5-0.5B-Instruct", "Hello, how are you?")
+    string chat_resp = chat("Qwen2.5-0.5B-Instruct", "Hello, how are you")
     print_endpoint("POST /v1/chat/completions", chat_resp)
 
     print("✅ All pure S API tests completed successfully!\n\n")

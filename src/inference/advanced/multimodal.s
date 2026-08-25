@@ -1,18 +1,18 @@
 package neurx.inference.advanced.multimodal
-enum modality_type {
+
     TEXT
     IMAGE
     VIDEO
     AUDIO
 }
 
-enum image_format {
+
     PNG
     JPEG
     WEBP
 }
 
-enum audio_format {
+
     WAV
     MP3
     FLAC

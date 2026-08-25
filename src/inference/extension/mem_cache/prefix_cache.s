@@ -1,6 +1,6 @@
 package mem_cache
 
-enum eviction_policy {
+
     lru
     lfu
     lru_with_time_decay

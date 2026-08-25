@@ -1,13 +1,13 @@
 package neurx.trainer.rl_training
 import "neurx.util.math"
-enum rl_algorithm {
+
     PPO = 0
     VAPO = 1
     DAPO = 2
     RLAIF = 3
 }
 
-enum rl_stage {
+
     COLLECTING = 0
     TRAINING = 1
     EVALUATING = 2

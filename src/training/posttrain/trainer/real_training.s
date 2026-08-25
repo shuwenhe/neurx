@@ -79,7 +79,7 @@ func run_real_training() int {
     eprintln("")
     eprintln("[Step 3/6] Creating tokenizer and preparing data")
     simple_tokenizer tokenizer = create_simple_tokenizer()
-    string sample_text = "What are the symptoms of diabetes? The symptoms include increased thirst."
+    string sample_text = "What are the symptoms of diabetes The symptoms include increased thirst."
     []int input_ids = tokenize(tokenizer, sample_text, config.seq_len)
     []int labels = create_labels(input_ids, config.seq_len)
     eprintln("[Step 3/6] ✓ Tokenizer ready (vocab_size=" + int_to_str(tokenizer.vocab_size) + ")")

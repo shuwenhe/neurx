@@ -1,6 +1,6 @@
 package neurx.kernel.locking
 
-enum lock_type {
+
     mutex,
     rwlock,
     spinlock,

@@ -194,7 +194,7 @@ func builtin_sft_samples() []string {
     samples[0] = format_sft_text("Explain gradient descent", "", "Gradient descent updates parameters by following the negative loss gradient.")
     samples[1] = format_sft_text("Write a short apology", "late delivery", "Sorry for the late delivery. I will fix it immediately.")
     samples[2] = format_sft_text("Summarize the task", "train a model", "The task is to train a model on the given data.")
-    samples[3] = format_sft_text("Answer politely", "Can you help me?", "Yes, I can help you with that.")
+    samples[3] = format_sft_text("Answer politely", "Can you help me", "Yes, I can help you with that.")
     samples
 }
 

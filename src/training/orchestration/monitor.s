@@ -1,6 +1,6 @@
 package neurx.trainer.monitor
 import "neurx.arch.mps"
-enum log_level {
+
     DEBUG = 0
     INFO = 1
     WARN = 2

@@ -111,7 +111,7 @@ func (memory_arena* arena) get_fragmentation_ratio() float {
     1.0 - (largest_free as float / arena.get_free_memory() as float)
 }
 
-func allocate_for_graph(g: *computation_graph) memory_arena {
+func allocate_for_graph(*computation_graph g) memory_arena {
     total_memory = g.total_memory_bytes()
     arena = new_memory_arena(total_memory)
 

@@ -114,7 +114,7 @@ struct token_ids {
     []int token_type_ids
 }
 
-func tokenize_text(text: string, tokenizer: hf_tokenizer) []string {
+func tokenize_text(string text, hf_tokenizer tokenizer) []string {
 
     []string tokens
     string current_token = ""
@@ -125,7 +125,7 @@ func tokenize_text(text: string, tokenizer: hf_tokenizer) []string {
                 tokens.append(current_token)
                 current_token = ""
             }
-        } else if char == '.' || char == ',' || char == '!' || char == '?' {
+        } else if char == '.' || char == ',' || char == '!' || char == '' {
             if current_token != "" {
                 tokens.append(current_token)
                 current_token = ""
@@ -162,7 +162,7 @@ func apply_chat_template(
     formatted
 }
 
-func get_token_from_tokenizer(tokenizer_class: string, model_id: string) hf_tokenizer {
+func get_token_from_tokenizer(string tokenizer_class, string model_id) hf_tokenizer {
     if tokenizer_class == "LlamaTokenizer" {
         return create_llama_tokenizer()
     }

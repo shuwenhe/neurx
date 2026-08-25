@@ -9,7 +9,7 @@ use neurx.reasoning.reasoning_validator.new_reasoning_validator
 func example_adaptive_reasoning_length() {
     config := new_default_cot_config()
 
-    simple_prompt := "What is 5 + 3?"
+    simple_prompt := "What is 5 + 3"
     config_simple := config.clone()
     config_simple = config_simple.set_max_steps(3)
 
@@ -38,7 +38,7 @@ func example_multi_path_reasoning() {
     config := new_hierarchical_cot_config()
     config.max_branches = 3
 
-    prompt := "What is the best approach to climate change?"
+    prompt := "What is the best approach to climate change"
     chain := new_reasoning_chain("climate_analysis", prompt, config)
     chain = chain.start()
 
@@ -141,9 +141,9 @@ func example_cross_chain_coordination() {
     manager := new_reasoning_manager(config)
 
     related_prompts := []string{
-        "What is photosynthesis?",
-        "What is the role of chlorophyll?",
-        "How do light reactions work?",
+        "What is photosynthesis",
+        "What is the role of chlorophyll",
+        "How do light reactions work",
     }
 
     chains := manager.batch_start_reasoning(related_prompts, config)

@@ -46,7 +46,7 @@ def fix_file(filepath):
             indent = len(line) - len(line.lstrip())
             if indent > 0 and ': ' in line:
                 continue
-        pattern = r'\b([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*((?:int|string|bool|float|i32|i64|f32|f64|vector|map|option)\b|\[\](?:int|string|float|bool))'
+        pattern = r'\b([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*((:int|string|bool|float|i32|i64|f32|f64|vector|map|option)\b|\[\](:int|string|float|bool))'
         replacement = r'\2 \1'
         if 'func' in line or '(' in line:
             new_line = re.sub(pattern, replacement, line)

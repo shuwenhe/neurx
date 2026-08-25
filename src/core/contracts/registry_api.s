@@ -1,4 +1,4 @@
-enum component_type {
+
     kernel
     operator
     device

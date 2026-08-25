@@ -1,5 +1,5 @@
 package neurx.observability.training.training_observability
-enum log_backend {
+
     LOG_TENSORBOARD,
     LOG_WANDB,
    _LOG_MLFLOW,
@@ -8,7 +8,7 @@ enum log_backend {
     LOG_ALL
 }
 
-enum alert_channel {
+
     ALERT_WEBHOOK,
     ALERT_EMAIL,
     ALERT_CONSOLE,
@@ -153,7 +153,7 @@ struct alert_info {
     string suggested_action
 }
 
-enum severity_level {
+
     SEVERITY_INFO,
     SEVERITY_WARNING,
     SEVERITY_CRITICAL,
@@ -181,9 +181,9 @@ struct recommendation {
     complexity complexity
 }
 
-enum priority { PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW }
 
-enum complexity { COMPLEXITY_EASY, COMPLEXITY_MEDIUM, COMPLEXITY_HARD }
+
+
 
 struct monitoring_manager {
     monitoring_config config

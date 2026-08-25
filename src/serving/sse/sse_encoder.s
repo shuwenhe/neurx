@@ -29,7 +29,7 @@ struct encoded_event {
 	int64                   encoded_time
 }
 
-enum encoding_format {
+
 	FORMAT_TEXT = 0
 	FORMAT_JSON = 1
 	FORMAT_PROTOBUF = 2

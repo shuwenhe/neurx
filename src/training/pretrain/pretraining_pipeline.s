@@ -3,7 +3,7 @@ import neurx.model.llm.neurx.*
 import neurx.tokenizer.neurx.*
 import neurx.distributed.*
 import neurx.amp.scaler.*
-enum pretrain_task_type {
+
     CLM
     MLM
     PREFIX_LM
@@ -140,7 +140,7 @@ func create_test_pretrain_config() pretrain_config {
         enable_gradient_checkpointing: false,
     }
 }
-enum training_phase {
+
     WARMUP
     STABLE_TRAINING
     LONG_CONTEXT_PHASE

@@ -8,7 +8,7 @@ struct NormKernels {
     config: types.KernelConfig
 }
 
-func NewNormKernels(config: types.KernelConfig) &NormKernels {
+func NewNormKernels(types.KernelConfig config) &NormKernels {
     return &NormKernels{
         config: config
     }

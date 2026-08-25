@@ -1,6 +1,6 @@
 package distributed
 
-enum tensor_layout {
+
     dense
     sparse
     blocked

@@ -1,6 +1,6 @@
 package config
 
-enum device_type {
+
     cuda
     rocm
     cpu
@@ -9,7 +9,7 @@ enum device_type {
     unknown
 }
 
-enum cpu_arch {
+
     x86
     arm
     powerpc

@@ -353,7 +353,7 @@ func main() {
     chat_req.messages[0].role = "system"
     chat_req.messages[0].content = "You are a helpful assistant."
     chat_req.messages[1].role = "user"
-    chat_req.messages[1].content = "What is machine learning?"
+    chat_req.messages[1].content = "What is machine learning"
     chat_req.messages_count = 2
     chat_req.temperature = 0.7
     chat_req.max_tokens = 256

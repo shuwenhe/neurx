@@ -1,6 +1,6 @@
 package inference
 
-enum request_lifecycle_event {
+
     submitted
     queued
     acquiring_resources

@@ -1,12 +1,12 @@
 import "device_api"
 import "event_api"
-enum stream_priority {
+
     high
     normal
     low
 }
 
-enum stream_type {
+
     compute
     transfer
     communication

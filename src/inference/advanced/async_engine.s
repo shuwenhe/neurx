@@ -1,6 +1,6 @@
 package neurx.inference.advanced.async_engine
 import "time"
-enum request_status {
+
     PENDING
     SCHEDULING
     RUNNING
@@ -286,7 +286,7 @@ func main() {
     )
     req := inference_request {
         request_id: "req-001",
-        prompt: "What is machine learning?",
+        prompt: "What is machine learning",
         sampling_params: sampling_params {
             max_tokens: 100,
             temperature: 0.7,

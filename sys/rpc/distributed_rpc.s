@@ -1,6 +1,6 @@
 package neurx.sys.rpc
 
-enum rpc_call_type {
+
     request,
     response,
     error

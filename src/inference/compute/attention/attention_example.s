@@ -43,7 +43,7 @@ func example_basic_inference() {
     )
     println("✓ Pipeline created\n")
     println("--- Prefill Phase ---")
-    println("Processing prompt: 'What is machine learning?'")
+    println("Processing prompt: 'What is machine learning'")
     prompt_len = 5
     prompt_emb = make_dummy_embeddings(prompt_len * config.num_heads * config.head_size)
     prompt_ids = make_dummy_tokens(prompt_len)

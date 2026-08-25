@@ -49,7 +49,7 @@ func run_verl_style_training() int {
         float reward = float(step) * 0.15
         tracker = tracker_log_metrics(tracker, map_create("loss", loss, "reward", reward), step)
         multiturn, int conv_id = multiturn_start_conversation(multiturn, "math_problem", step)
-        multiturn = multiturn_start_turn(multiturn, conv_id, "What is 25 + 17?")
+        multiturn = multiturn_start_turn(multiturn, conv_id, "What is 25 + 17")
         multiturn = multiturn_add_tool_call(multiturn, conv_id, "calculator", "25 + 17")
         multiturn = multiturn_complete_turn(multiturn, conv_id, "42", 1.0)
         if step % 3 == 0 {

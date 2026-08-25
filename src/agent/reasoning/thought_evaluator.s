@@ -3,7 +3,7 @@ package reasoning
 import "sync"
 import "time"
 
-enum evaluation_criteria {
+
 	RELEVANCE = 0
 	COMPLETENESS = 1
 	LOGICAL_CONSISTENCY = 2

@@ -93,7 +93,7 @@ impl ToolExtractorUtils {
         results
     }
 
-    func find_bracket_pair(text: str, start_index: i32) -> (i32, i32) {
+    func find_bracket_pair(str text, i32 start_index) -> (i32, i32) {
         depth := 0
         in_string := false
         escaped := false
@@ -160,7 +160,7 @@ impl ToolExtractorUtils {
         (-1, -1)
     }
 
-    func parse_json_safely(json_str: str) -> Option<Map<str, Any>> {
+    func parse_json_safely(str json_str) -> Option<Map<str, Any>> {
         if len(json_str) == 0 {
             return None
         }
@@ -174,7 +174,7 @@ impl ToolExtractorUtils {
         None
     }
 
-    func extract_regex_group(text: str, pattern: str, group_index: i32) -> str {
+    func extract_regex_group(str text, str pattern, i32 group_index) -> str {
         re := regex::compile(pattern)
         match regex::find_string(re, text) {
             Some(m) => {
@@ -187,7 +187,7 @@ impl ToolExtractorUtils {
         }
     }
 
-    func find_all_regex_matches(text: str, pattern: str) -> Vec<str> {
+    func find_all_regex_matches(str text, str pattern) -> Vec<str> {
         results := Vec::new()
         re := regex::compile(pattern)
         search_pos := 0
@@ -227,7 +227,7 @@ impl ToolExtractorUtils {
         }
     }
 
-    func validate_json_structure(json_str: str) -> bool {
+    func validate_json_structure(str json_str) -> bool {
         brace_depth := 0
         bracket_depth := 0
         in_string := false
@@ -274,7 +274,7 @@ impl ToolExtractorUtils {
         brace_depth == 0 && bracket_depth == 0 && !in_string
     }
 
-    func normalize_json_string(json_str: str) -> str {
+    func normalize_json_string(str json_str) -> str {
         json_str = strings::trim(json_str)
 
         if strings::starts_with(json_str, "```json") {
@@ -296,14 +296,14 @@ struct ToolCallValidator {
 }
 
 impl ToolCallValidator {
-    func new(tools: Vec<str>, strict: bool) -> ToolCallValidator {
+    func new(Vec<str> tools, bool strict) -> ToolCallValidator {
         ToolCallValidator {
             available_tools: tools,
             strict_mode: strict
         }
     }
 
-    func validate_tool_call(self, tool_call: ToolCall) -> bool {
+    func validate_tool_call(self, ToolCall tool_call) -> bool {
         if len(self.available_tools) == 0 {
             return true
         }
@@ -332,7 +332,7 @@ impl ToolCallValidator {
         true
     }
 
-    func validate_tool_calls(self, tool_calls: Vec<ToolCall>) -> Vec<ToolCall> {
+    func validate_tool_calls(self, Vec<ToolCall> tool_calls) -> Vec<ToolCall> {
         valid_calls := Vec::new()
 
         for tc in tool_calls {

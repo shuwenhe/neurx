@@ -1,6 +1,6 @@
 package neurx.model.multimodal.vision_encoder
 import "neurx.util.math"
-enum vision_encoder_type {
+
     TRANSFORMER = 0
     RESNET = 1
     HYBRID = 2

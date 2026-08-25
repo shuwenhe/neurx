@@ -1,6 +1,6 @@
 package neurx.distributed.fsdp
 import "neurx.distributed.nccl_backend"
-enum fsdp_sharding_strategy {
+
     FULL_SHARD = 0
     SHARD_GRAD_OP = 1
     NO_SHARD = 2

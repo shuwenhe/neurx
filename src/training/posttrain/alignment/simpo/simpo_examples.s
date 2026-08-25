@@ -104,7 +104,7 @@ func example_margin_based_learning() {
     print("║  Example 3: Margin-Based Learning                         ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
-    print("[What is Margin?]")
+    print("[What is Margin]")
     print("  Margin = log P(chosen) - log P(rejected)")
     print("  Goal: Maximize margin → maximize preference")
     print("")

@@ -225,10 +225,10 @@ func test_custom_extraction() {
     print("\n\n")
 }
 
-func bool_to_string(b: bool) -> str {
+func bool_to_string(bool b) -> str {
     if b { "true" } else { "false" }
 }
 
-func int_to_string(i: i32) -> str {
+func int_to_string(i32 i) -> str {
     i.to_string()
 }

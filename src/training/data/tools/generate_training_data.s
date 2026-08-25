@@ -69,7 +69,7 @@ func main() {
         text: "English textlanguageEnglish text: English text.English text.English text, English text.English text.mainEnglish textmainEnglish text.Word embeddingsEnglish textWord2VecEnglish text.",
     })
     training_data = append(training_data, training_data{
-        text: "English textrequest: \"English textoptimizeEnglish textPythonEnglish text?\".English text: 1)useEnglish texttoolEnglish textcProfileEnglish text.2)usenumpy/pandasEnglish textPythonEnglish textdataEnglish text.3)usecacheEnglish textcompute.4)useEnglish textstepEnglish text.5)useCextensionEnglish textCythonEnglish text.6)dataEnglish textqueryoptimizeuseEnglish text.7)English textusePyPyEnglish textimplementation.",
+        text: "English textrequest: \"English textoptimizeEnglish textPythonEnglish text\".English text: 1)useEnglish texttoolEnglish textcProfileEnglish text.2)usenumpy/pandasEnglish textPythonEnglish textdataEnglish text.3)usecacheEnglish textcompute.4)useEnglish textstepEnglish text.5)useCextensionEnglish textCythonEnglish text.6)dataEnglish textqueryoptimizeuseEnglish text.7)English textusePyPyEnglish textimplementation.",
     })
     training_data = append(training_data, training_data{
         text: "English textrequest: \"English textSOLIDprinciple.\".SOLIDEnglish text5English textprincipleEnglish text: S(English textprinciple)English text.O(English textprinciple)English textextensionEnglish text.L(English textprinciple)English text.I(English textprinciple)English text.D(English textprinciple)English textimplementation.English textprincipleAllowedEnglish text.",
@@ -78,10 +78,10 @@ func main() {
         text: "English textrequest: \"recommendedEnglish textlanguageEnglish text.\".English text: PythonEnglish text, English text: 1)English text, English text.2)English textsystemEnglish text.3)English text.4)English textsupportEnglish text.5)English text(Web, dataEnglish text, English text).English textJavaScript(WebEnglish text)English textRust(systemEnglish text).",
     })
     training_data = append(training_data, training_data{
-        text: "English textrequest: \"English textuseNoSQLdataEnglish textdataEnglish text?\".useNoSQLEnglish text: 1)English textdata.2)RequiredEnglish textextensionEnglish text.3)dataEnglish text.4)RequiredEnglish text.English textdataEnglish text: 1)dataEnglish text.2)RequiredEnglish textACIDEnglish text.3)dataEnglish text.4)RequiredEnglish textqueryEnglish text.",
+        text: "English textrequest: \"English textuseNoSQLdataEnglish textdataEnglish text\".useNoSQLEnglish text: 1)English textdata.2)RequiredEnglish textextensionEnglish text.3)dataEnglish text.4)RequiredEnglish text.English textdataEnglish text: 1)dataEnglish text.2)RequiredEnglish textACIDEnglish text.3)dataEnglish text.4)RequiredEnglish textqueryEnglish text.",
     })
     training_data = append(training_data, training_data{
-        text: "English textrequest: \"English textsystem?\".English text: 1)dataEnglish text.2)English text.3)English text.4)English textquickrecover.5)monitoringEnglish text.6)English text.7)English text�recoverEnglish text.8)stateEnglish textquickrecover.systemEnglish text, English text99.99%English text52English texttime.",
+        text: "English textrequest: \"English textsystem\".English text: 1)dataEnglish text.2)English text.3)English text.4)English textquickrecover.5)monitoringEnglish text.6)English text.7)English text�recoverEnglish text.8)stateEnglish textquickrecover.systemEnglish text, English text99.99%English text52English texttime.",
     })
     training_data = append(training_data, training_data{
         text: "English text: English textcachesystem.English text: 1)useEnglish text.2)implementationEnglish text.3)useLRUEnglish textLFUEnglish text.4)supportTTLEnglish text.5)English textcacheEnglish text.6)monitoringcacheEnglish text.7)implementationEnglish text.8)supportEnglish textrecover.English text(>80%English text), English text(<5msEnglish text), English textuseEnglish text.",
@@ -90,7 +90,7 @@ func main() {
         text: "English text: English textSELECTqueryEnglish text.stepEnglish text: 1)useEXPLAINEnglish text.2)English textactualRequiredEnglish text.3)English textuse.4)English textJOINEnglish text.5)English textstatisticsinformationEnglish text.6)English textqueryEnglish text.7)evaluationEnglish text.8)testEnglish text.English textoptimizeEnglish text, English textquery, English textstatistics.",
     })
     training_data = append(training_data, training_data{
-        text: "English text: English text1000English textdataEnglish texttop-100English text?English text: 1)useEnglish text.2)English text100.3)English textdataEnglish text, English text.4)English text, useEnglish text.5)AlloweduseEnglish textdataEnglish textCount-Min SketchEnglish text.6)timeEnglish textO(n log k), English textO(k).7)English text, English textcomputeEnglish texttop-100English text.",
+        text: "English text: English text1000English textdataEnglish texttop-100English textEnglish text: 1)useEnglish text.2)English text100.3)English textdataEnglish text, English text.4)English text, useEnglish text.5)AlloweduseEnglish textdataEnglish textCount-Min SketchEnglish text.6)timeEnglish textO(n log k), English textO(k).7)English text, English textcomputeEnglish texttop-100English text.",
     })
     training_data = append(training_data, training_data{
         text: "English text: English textsystemEnglish textQPS.English text: 1)English textgenerateEnglish text, English text.2)useRedisEnglish textsafety.3)English textVIPEnglish text.4)useEnglish text.5)English textdataEnglish textcache.6)English textstepEnglish text.7)useEnglish text.8)English text.9)English textcache.10)English text.",

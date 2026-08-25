@@ -19,13 +19,13 @@ struct TestResult {
 
 test_results := make([]TestResult, 0)
 
-func assert(condition: bool, message: string) {
+func assert(bool condition, string message) {
     if !condition {
         println(fmt("❌ ASSERTION FAILED: %s", message))
     }
 }
 
-func assertEqual(expected: i32, actual: i32, message: string) {
+func assertEqual(i32 expected, i32 actual, string message) {
     if expected != actual {
         println(fmt("❌ ASSERTION FAILED: %s (expected %d, got %d)", message, expected, actual))
     }
@@ -268,6 +268,6 @@ func main() {
     RunAllTests()
 }
 
-func fmt(format: string, args: ...interface{}) string {
+func fmt(string format, ...interface{} args) string {
     return format
 }

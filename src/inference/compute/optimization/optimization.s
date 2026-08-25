@@ -343,7 +343,7 @@ func main() {
     init_flash_attention(attention_config)
     batch_scheduler scheduler = init_batch_scheduler(32, 100)
     inference_request req1
-    req1.prompt = "What is artificial intelligence?"
+    req1.prompt = "What is artificial intelligence"
     req1.max_tokens = 256
     req1.temperature = 0.7
     req1.top_p = 0.9

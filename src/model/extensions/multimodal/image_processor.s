@@ -219,7 +219,7 @@ func resizeImage(
     return result
 }
 
-func GetImageStats(img: *types.ImageData) (f32, f32, f32) {
+func GetImageStats(*types.ImageData img) (f32, f32, f32) {
     if len(img.raw_data) == 0 {
         return 0.0, 0.0, 0.0
     }

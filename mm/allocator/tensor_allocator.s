@@ -74,14 +74,14 @@ func allocate_tensor(tensor_allocator* allocator, memory_pool* pool, int size_mb
     size_bytes := size_mb * 1024 * 1024
     aligned_size := align_size(size_bytes, allocator->alignment_bytes)
     
-    result := find_free_block(pool, aligned_size)?
+    result := find_free_block(pool, aligned_size)
     
     if result.block_ptr == 0 {
-        freed := garbage_collection(pool)?
+        freed := garbage_collection(pool)
         if freed < aligned_size {
             return 0, "Insufficient memory after GC"
         }
-        result2 := find_free_block(pool, aligned_size)?
+        result2 := find_free_block(pool, aligned_size)
         if result2.block_ptr == 0 {
             return 0, "Memory allocation failed"
         }
@@ -125,10 +125,10 @@ func deallocate_tensor(tensor_allocator* allocator, memory_pool* pool, int ptr) 
     
     pool->allocated_list->remove(found_idx)
     
-    add_free_block(pool, ptr, found_size)?
+    add_free_block(pool, ptr, found_size)
     
     if allocator->enable_coalescing {
-        coalesce_free_blocks(pool)?
+        coalesce_free_blocks(pool)
     }
     
     pool->allocated_size_mb = pool->allocated_size_mb - (found_size / (1024 * 1024))
@@ -220,11 +220,11 @@ func garbage_collection(memory_pool* pool) (int, string) {
     
     for i in 0..candidates.len() {
         block := candidates.get(i)
-        deallocate_tensor_internal(pool, block.block_ptr)?
+        deallocate_tensor_internal(pool, block.block_ptr)
     }
     
     if pool->enable_coalescing {
-        coalesce_free_blocks(pool)?
+        coalesce_free_blocks(pool)
     }
     freed, ""
 }
@@ -243,7 +243,7 @@ func deallocate_tensor_internal(memory_pool* pool, int ptr) (int, string) {
     
     if found_idx >= 0 {
         pool->allocated_list->remove(found_idx)
-        add_free_block(pool, ptr, found_size)?
+        add_free_block(pool, ptr, found_size)
     }
     found_size, ""
 }

@@ -108,7 +108,7 @@ func cuda_synchronize() int {
     0
 }
 
-func get_memory_info() (string, string) {
+func get_memory_info() (string) {
     ("0", "0")
 }
 

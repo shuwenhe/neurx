@@ -171,5 +171,5 @@ func digit(int d) string {
     if d == 9 {
         return "9"
     }
-    return "?"
+    return ""
 }

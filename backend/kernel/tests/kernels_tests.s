@@ -17,7 +17,7 @@ struct TestResult {
 
 test_results := make([]TestResult, 0)
 
-func LogTest(name: string, passed: bool, message: string, time: f32) {
+func LogTest(string name, bool passed, string message, f32 time) {
     result := TestResult{
         name: name,
         passed: passed,

@@ -1,6 +1,6 @@
 package neurx.model.reasoning.chain_of_thought
 import "neurx.util.math"
-enum reasoning_strategy {
+
     STEP_BY_STEP = 0
     SELF_CONSISTENCY = 1
     TREE_SEARCH = 2

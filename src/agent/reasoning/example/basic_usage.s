@@ -10,7 +10,7 @@ func example_math_reasoning() {
 
     config := new_default_cot_config()
 
-    user_prompt := "If a rectangle has a width of 5 and length of 10, what is its area?"
+    user_prompt := "If a rectangle has a width of 5 and length of 10, what is its area"
     chain := new_reasoning_chain("math_chain_1", user_prompt, config)
     chain = chain.start()
 
@@ -50,7 +50,7 @@ func example_math_reasoning() {
 func example_logical_reasoning() {
     config := new_default_cot_config()
 
-    user_prompt := "All humans are mortal. Socrates is a human. Is Socrates mortal?"
+    user_prompt := "All humans are mortal. Socrates is a human. Is Socrates mortal"
     chain := new_reasoning_chain("logic_chain_1", user_prompt, config)
     chain = chain.start()
 
@@ -74,9 +74,9 @@ func example_with_manager() {
     manager := new_reasoning_manager(config)
 
     prompts := []string{
-        "What is 2 + 2?",
-        "What is the capital of France?",
-        "How do photosynthesis work?",
+        "What is 2 + 2",
+        "What is the capital of France",
+        "How do photosynthesis work",
     }
 
     chains := manager.batch_start_reasoning(prompts, config)

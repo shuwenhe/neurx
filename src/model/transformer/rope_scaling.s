@@ -1,5 +1,5 @@
 package neurx.model.transformer.rope_scaling
-enum rope_scaling_type {
+
     ROPE_SCALING_LINEAR
     ROPE_SCALING_NTK
     ROPE_SCALING_YARN

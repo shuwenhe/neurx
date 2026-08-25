@@ -133,7 +133,7 @@ func create_deepseek_config() hf_model_config {
     }
 }
 
-func get_hf_config_by_model_id(model_id: string) hf_model_config {
+func get_hf_config_by_model_id(string model_id) hf_model_config {
     if model_id == "meta-llama/Llama-2-7b" || model_id == "meta-llama/Llama-3-8b" {
         return create_llama_config()
     }
@@ -149,7 +149,7 @@ func get_hf_config_by_model_id(model_id: string) hf_model_config {
     create_llama_config()
 }
 
-func get_hf_config_by_type(model_type: string) hf_model_config {
+func get_hf_config_by_type(string model_type) hf_model_config {
     if model_type == "llama" {
         return create_llama_config()
     }

@@ -14,7 +14,7 @@ struct validation_report {
     vec[string] warnings
 }
 
-func validate_graph(g: *computation_graph) validation_report {
+func validate_graph(*computation_graph g) validation_report {
     errors = vec[validation_error]()
     warnings = vec[string]()
 
@@ -61,7 +61,7 @@ func validate_graph(g: *computation_graph) validation_report {
     }
 }
 
-func check_graph_connectivity(g: *computation_graph) bool {
+func check_graph_connectivity(*computation_graph g) bool {
     visited = new bool[g.operations.len()]
     for i in range(g.operations.len()) {
         visited[i] = false
@@ -108,7 +108,7 @@ func check_graph_connectivity(g: *computation_graph) bool {
     true
 }
 
-func check_shape_compatibility(g: *computation_graph) validation_report {
+func check_shape_compatibility(*computation_graph g) validation_report {
     errors = vec[validation_error]()
     warnings = vec[string]()
 

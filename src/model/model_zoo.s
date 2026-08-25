@@ -641,7 +641,7 @@ func get_all_models() []model_spec {
     ]
 }
 
-func get_model_by_name(name: string) option[model_spec] {
+func get_model_by_name(string name) option[model_spec] {
     models := get_all_models()
     for model in models.iter() {
         if model.name == name {
@@ -651,7 +651,7 @@ func get_model_by_name(name: string) option[model_spec] {
     none
 }
 
-func get_model_by_type(model_type: string) []model_spec {
+func get_model_by_type(string model_type) []model_spec {
     models := get_all_models()
     result := vec[]()
     for model in models.iter() {

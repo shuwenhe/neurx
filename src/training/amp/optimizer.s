@@ -1,5 +1,5 @@
 package neurx.amp.optimizer
-enum precision_type {
+
     FP32,
     BF16,
     FP16,

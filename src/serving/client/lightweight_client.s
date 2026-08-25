@@ -3,7 +3,7 @@ package neurx.serving.client
 use std.vec.vec
 use std.io.println
 
-enum deployment_mode {
+
     centralized,
     edge_compute,
     hybrid,
@@ -48,8 +48,7 @@ func new_lightweight_client(lightweight_client_config cfg) lightweight_client_co
     cfg
 }
 
-func (cfg: &lightweight_client_config) infer(inference_request req) inference_response {
-    response := inference_response {
+func (lightweight_client_config* cfg) infer(inference_request req) inference_response {    response := inference_response {
         result: "",
         tokens_generated: 0,
         latency_ms: 0,

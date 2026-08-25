@@ -47,7 +47,7 @@ func default_hf_load_options() hf_load_options {
     }
 }
 
-func create_hf_model_loader(model_id: string) hf_model_loader {
+func create_hf_model_loader(string model_id) hf_model_loader {
     hf_model_loader {
         model_id: model_id,
         cache_dir: "~/.src/inference/extension/cache/huggingface/hub",
@@ -195,7 +195,7 @@ func generate_text(
     generated
 }
 
-func print_hf_model_summary(model: loaded_hf_model) {
+func print_hf_model_summary(loaded_hf_model model) {
     print("\n╔════════════════════════════════════════════════╗\n")
     print("║  📊 HuggingFace Model Summary                ║\n")
     print("╚════════════════════════════════════════════════╝\n\n")

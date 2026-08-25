@@ -57,7 +57,7 @@ func cuda_set_device(int device_id) {
 func cuda_device_synchronize() {
 }
 
-func cuda_get_device_memory_info() (int, int) {
+func cuda_get_device_memory_info() (int) {
     (12884901888, 25769803776)
 }
 

@@ -2,7 +2,7 @@ package neurx.sys.rpc_framework
 
 use std.vec.vec
 
-enum rpc_call_type {
+
     request,
     response,
     error
@@ -112,7 +112,7 @@ func process_rpc_requests(rpc_server* server) (int, string) {
             msg := server->request_queue->queue->get(0)
             server->request_queue->queue->remove(0)
             
-            handle_rpc_request(server, &msg)?
+            handle_rpc_request(server, &msg)
             
             processed = processed + 1
             server->request_queue->write_pos = server->request_queue->write_pos - 1

@@ -147,7 +147,7 @@ func lora_config::from_dict(
         option::none : {},
     }
 
-    config.validate()?
+    config.validate()
 
     (config, "")
 }
@@ -156,7 +156,7 @@ func (lora_config* config) get_lora_scaling() float {
     config.lora_alpha / config.lora_rank as float
 }
 
-func (lora_config* config) is_target_module(module_name: string) bool {
+func (lora_config* config) is_target_module(string module_name) bool {
     for target in config.target_modules.iter() {
         if target == module_name {
             return true
@@ -165,7 +165,7 @@ func (lora_config* config) is_target_module(module_name: string) bool {
     false
 }
 
-func (lora_config* config) should_save_full_weights(module_name: string) bool {
+func (lora_config* config) should_save_full_weights(string module_name) bool {
     switch config.modules_to_save {
         option::some(modules) : {
             for module in modules.iter() {

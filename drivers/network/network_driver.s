@@ -1,6 +1,6 @@
 package neurx.drivers.network
 
-enum network_protocol {
+
     ethernet_10g,
     ethernet_100g,
     infiniband_hdr,

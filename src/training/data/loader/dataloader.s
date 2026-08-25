@@ -1,5 +1,5 @@
 package neurx.data.loader.dataloader
-enum data_format {
+
     FORMAT_JSONL,
     FORMAT_PARQUET,
     FORMAT_TFRECORD,
@@ -8,7 +8,7 @@ enum data_format {
     FORMAT_CUSTOM,
 }
 
-enum packing_strategy {
+
     PACKING_NONE,
     PACKING_FIXED_LENGTH,
     PACKING_BINNING,
@@ -106,7 +106,7 @@ struct training_batch {
     float64 total_prepare_time_ms
 }
 
-enum loader_status {
+
     LOADER_IDLE,
     LOADER_LOADING,
     LOADER_READY,

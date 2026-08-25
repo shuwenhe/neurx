@@ -1,6 +1,6 @@
 package attention
 
-enum attention_layer_mode {
+
     training
     inference
 }

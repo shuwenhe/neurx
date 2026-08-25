@@ -1,6 +1,6 @@
 package neurx.inference.speculative_decoding
 import "neurx.util.math"
-enum speculative_mode {
+
     DRAFT_VERIFIER = 0
     TREE_SEARCH = 1
     ADAPTIVE = 2

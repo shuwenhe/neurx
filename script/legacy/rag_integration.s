@@ -294,9 +294,9 @@ func (ragintegration* rag) run_complete_rag_cycle() {
     fmt.Println("│  Processing Queries                    │")
     fmt.Println("└────────────────────────────────────────┘")
     queries := []string{
-        "What is machine learning?",
-        "How to train LLMs?",
-        "What is RAG?",
+        "What is machine learning",
+        "How to train LLMs",
+        "What is RAG",
     }
     for _, query := range queries {
         query_embedding := make([]float64, 768)

@@ -40,7 +40,7 @@ func format_int(int value) string {
     if value == 50 { return "50" }
     if value == 100 { return "100" }
     if value == 150 { return "150" }
-    return "?"
+    return ""
 }
 
 func main() {

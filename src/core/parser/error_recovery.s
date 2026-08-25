@@ -3,7 +3,7 @@ package neurx.parser.error_recovery
 use neurx.parser.types
 use neurx.parser.text_parser
 
-func attempt_recovery(error_msg: string, text: string, strategy: int) ParseResult {
+func attempt_recovery(string error_msg, string text, int strategy) ParseResult {
     result := create_parse_result()
     result.raw_output = text
     result.error_msg = error_msg
@@ -18,7 +18,7 @@ func attempt_recovery(error_msg: string, text: string, strategy: int) ParseResul
     }
 }
 
-func skip_invalid(text: string) ParseResult {
+func skip_invalid(string text) ParseResult {
     result := create_parse_result()
     result.raw_output = text
     result.recovery_applied = true
@@ -53,7 +53,7 @@ func skip_invalid(text: string) ParseResult {
     return result
 }
 
-func attempt_fix(text: string) ParseResult {
+func attempt_fix(string text) ParseResult {
     result := create_parse_result()
     result.raw_output = text
     result.recovery_applied = true
@@ -71,7 +71,7 @@ func attempt_fix(text: string) ParseResult {
     return fix_common_issues(text)
 }
 
-func fix_json(text: string) ParseResult {
+func fix_json(string text) ParseResult {
     result := create_parse_result()
     result.recovery_method = "fix_json"
     result.raw_output = text
@@ -117,7 +117,7 @@ func fix_json(text: string) ParseResult {
     return result
 }
 
-func contains_json_content(text: string) bool {
+func contains_json_content(string text) bool {
     has_colon := find_substring(text, ":", 0) >= 0
     has_comma := find_substring(text, ",", 0) >= 0
     has_quotes := find_substring(text, "\"", 0) >= 0
@@ -125,7 +125,7 @@ func contains_json_content(text: string) bool {
     return has_colon || (has_comma && has_quotes)
 }
 
-func fix_xml(text: string) ParseResult {
+func fix_xml(string text) ParseResult {
     result := create_parse_result()
     result.recovery_method = "fix_xml"
     result.raw_output = text
@@ -162,7 +162,7 @@ func fix_xml(text: string) ParseResult {
     return result
 }
 
-func fix_common_issues(text: string) ParseResult {
+func fix_common_issues(string text) ParseResult {
     result := create_parse_result()
     result.recovery_method = "fix_common_issues"
     result.raw_output = text
@@ -187,7 +187,7 @@ func fix_common_issues(text: string) ParseResult {
     return result
 }
 
-func truncate_at_error(text: string, error_msg: string) ParseResult {
+func truncate_at_error(string text, string error_msg) ParseResult {
     result := create_parse_result()
     result.recovery_method = "truncate"
     result.raw_output = text
@@ -232,7 +232,7 @@ func truncate_at_error(text: string, error_msg: string) ParseResult {
     return result
 }
 
-func truncate_at_last_token(text: string) string {
+func truncate_at_last_token(string text) string {
 
     last_space := -1
     last_newline := -1
@@ -256,7 +256,7 @@ func truncate_at_last_token(text: string) string {
     return text
 }
 
-func fallback_to_text(text: string) ParseResult {
+func fallback_to_text(string text) ParseResult {
     result := create_parse_result()
     result.recovery_method = "fallback_to_text"
     result.raw_output = text
@@ -271,7 +271,7 @@ func fallback_to_text(text: string) ParseResult {
     return result
 }
 
-func extract_last_tag(xml: string) string {
+func extract_last_tag(string xml) string {
     last_tag_start := -1
     last_tag_end := -1
     i := 0
@@ -299,7 +299,7 @@ func extract_last_tag(xml: string) string {
     return ""
 }
 
-func parse_int(s: string) int {
+func parse_int(string s) int {
     result := 0
     i := 0
 
@@ -311,7 +311,7 @@ func parse_int(s: string) int {
     return result
 }
 
-func suggest_recovery_strategy(error_msg: string, text: string) int {
+func suggest_recovery_strategy(string error_msg, string text) int {
     if find_substring(error_msg, "brace", 0) >= 0 ||
        find_substring(error_msg, "bracket", 0) >= 0 {
         return 2
@@ -333,7 +333,7 @@ func suggest_recovery_strategy(error_msg: string, text: string) int {
     return 4
 }
 
-func validate_recovery(original: string, recovered: string) bool {
+func validate_recovery(string original, string recovered) bool {
 
     if len(recovered) < len(original) / 2 {
         return false

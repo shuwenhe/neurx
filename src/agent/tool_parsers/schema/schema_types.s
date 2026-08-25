@@ -92,7 +92,7 @@ struct sampler_state {
     warnings: []string
 }
 
-func is_valid_json_type(type_name: string) bool {
+func is_valid_json_type(string type_name) bool {
     if type_name == TYPE_STRING {
         return true
     } else if type_name == TYPE_NUMBER {
@@ -164,7 +164,7 @@ func create_empty_constraint() token_constraint {
     return constraint
 }
 
-func create_sampler_state(mode: string, schema: *json_schema) sampler_state {
+func create_sampler_state(string mode, *json_schema schema) sampler_state {
     state := sampler_state{
         mode: mode,
         schema: schema,

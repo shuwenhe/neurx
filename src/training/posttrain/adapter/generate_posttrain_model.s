@@ -174,7 +174,7 @@ func main() {
     println("    - Backward compatibility: YES")
     println("")
     println("🧪 Test Inference:")
-    println("  Prompt: 'What causes fever?'")
+    println("  Prompt: 'What causes fever'")
     println("  Base model output: 'Fever is caused by...'")
     println("  Fine-tuned model output: 'Fever is typically caused by infection...'")
     println("  ✓ Output improved (medical terminology better)")

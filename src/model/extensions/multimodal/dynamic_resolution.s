@@ -262,7 +262,7 @@ resolution_stats := ResolutionStats{
     min_patches_used: 999999
 }
 
-func RecordResolution(num_patches: i32) {
+func RecordResolution(i32 num_patches) {
     resolution_stats.processed_images += 1
     resolution_stats.avg_patches = (resolution_stats.avg_patches * f32(resolution_stats.processed_images - 1) + f32(num_patches)) / f32(resolution_stats.processed_images)
 

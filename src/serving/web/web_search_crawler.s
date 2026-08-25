@@ -4,9 +4,9 @@ struct web_search_config {
     search_engines: list<string> = ["google", "bing"]
     max_results_per_engine: int = 10
     total_max_results: int = 20
-    google_api_key?: string
-    google_cx_id?: string
-    bing_api_key?: string
+    google_api_key: string
+    google_cx_id: string
+    bing_api_key: string
     language: string = "zh-CN"
     region: string = "CN"
     safe_search: string = "moderate"
@@ -36,11 +36,11 @@ struct search_result_item {
     snippet: string
     source_engine: string
     rank_in_engine: int
-    relevance_score?: float
-    published_date?: string
-    crawled_content?: crawled_content?
-    crawl_status?: string
-    crawl_error?: string
+    relevance_score: float
+    published_date: string
+    crawled_content: crawled_content
+    crawl_status: string
+    crawl_error: string
 }
 
 struct crawled_content {
@@ -48,41 +48,41 @@ struct crawled_content {
     text_content: string
     cleaned_text: string
     metadata: page_metadata
-    sections: list<page_section>?
+    sections: list<page_section>
     extraction_timestamp: float
     word_count: int
 }
 
 struct page_metadata {
     title: string
-    description: string?
-    author: string?
-    publish_date: string?
-    last_modified: string?
+    description: string
+    author: string
+    publish_date: string
+    last_modified: string
     site_name: string
     domain: string
-    language: string?
-    content_type: string?
-    canonical_url: string?
-    keywords: list<string>?
-    og_data: map<string, string>?
+    language: string
+    content_type: string
+    canonical_url: string
+    keywords: list<string>
+    og_data: map<string, string>
 }
 
 struct page_section {
-    heading: string?
+    heading: string
     level: int
     content: string
 }
 
 struct search_response {
     query: string
-    corrected_query?: string
+    corrected_query: string
     total_results_found: int
     results: list<search_result_item>
     aggregated_from_engines: list<string>
     search_time_ms: float
-    summary?: string
-    key_findings: list<string>?
+    summary: string
+    key_findings: list<string>
     stats: search_statistics
 }
 
@@ -103,16 +103,16 @@ interface search_engine_interface {
 struct engine_search_result {
     items: list<search_result_item>
     total_estimated: int
-    corrected_query?: string
+    corrected_query: string
     query_time_ms: float
     has_more: bool
-    error?: string
+    error: string
 }
 struct google_search_engine implements search_engine_interface {
     name = "google"
-    api_key: string?
-    cx_id: string?
-    init(api_key?: string, cx_id?: string) {
+    api_key: string
+    cx_id: string
+    init(api_key: string, cx_id: string) {
         this.api_key = api_key
         this.cx_id = cx_id
     }
@@ -203,8 +203,8 @@ struct google_search_engine implements search_engine_interface {
 }
 struct bing_search_engine implements search_engine_interface {
     name = "bing"
-    api_key: string?
-    init(api_key?: string) {
+    api_key: string
+    init(api_key: string) {
         this.api_key = api_key
     }
     get name -> string {
@@ -324,7 +324,7 @@ struct web_crawler {
             return (null, str(e))
     }
     batch_crawl(urls: list<string>, int max_concurrent = 3) {
-        results: dict<string, tuple<crawled_content?, string?>> = {}
+        results: dict<string, tuple<crawled_content, string>> = {}
         semaphore = semaphore(max_concurrent)
         async def crawl_single(string url) {
             async with semaphore:
@@ -351,7 +351,7 @@ struct main_content_extractor {
         if main_element != None:
             text_content, sections = this._extract_structured(main_element)
         else:
-            body = soup.find("body") ?? soup
+            body = soup.find("body")  soup
             text_content, sections = this._extract_structured(body)
         return extraction_result{
             text_content=text_content,
@@ -425,7 +425,7 @@ struct main_content_extractor {
                 score += 25
             if tag == "main":
                 score += 20
-            class_id_str = (elem.get("class", []) ?? []).join("") + (elem.get("id", "") ?? "")
+            class_id_str = (elem.get("class", [])  []).join("") + (elem.get("id", "")  "")
             positive_keywords = ["post", "article", "content", "entry", "body", "text", "story",
                                   "main-content", "content-area", "article-body"]
             for kw in positive_keywords:
@@ -500,8 +500,8 @@ struct html_cleaner {
     clean(string raw_text) {
         text = raw_text
         if this.config.remove_scripts_styles:
-            text = regex.sub(r'<script[^>]*>.*?</script>', '', text, flags=regex.DOTALL)
-            text = regex.sub(r'<style[^>]*>.*?</style>', '', text, flags=regex.DOTALL)
+            text = regex.sub(r'<script[^>]*>.*</script>', '', text, flags=regex.DOTALL)
+            text = regex.sub(r'<style[^>]*>.*</style>', '', text, flags=regex.DOTALL)
         text = regex.sub(r'<[^>]+>', ' ', text)
         if this.config.normalize_whitespace:
             text = regex.sub(r'[ \t]+', ' ', text)
@@ -517,9 +517,9 @@ struct web_search_system {
     engines: map<string, search_engine_interface>
     crawler: WebCrawler
     result_aggregator: ResultAggregator
-    llm_client: any?
-    init(config?: web_search_config, llm_client?: any) {
-        this.config = config ?? new web_search_config()
+    llm_client: any
+    init(config: web_search_config, llm_client: any) {
+        this.config = config  new web_search_config()
         this.engines = map<string, search_engine_interface>{}
         this.llm_client = llm_client
         if "google" in this.config.search_engines:
@@ -531,8 +531,8 @@ struct web_search_system {
         this.crawler = new web_crawler(config=this.config)
         this.result_aggregator = new result_aggregator(config=config)
     }
-    async search(string query, options?: search_options) {
-        opts = options ?? new search_options()
+    async search(string query, options: search_options) {
+        opts = options  new search_options()
         start_total = current_time_millis()
         print(f"🔍 Searching: {query}")
         all_items: list<search_result_item> = []
@@ -587,7 +587,7 @@ struct web_search_system {
                     item.rank_in_engine = i + 1
                     crawl_times.append(crawl_total_time / max(len(urls_to_crawl), 1))
         summary = None
-        key_findings: list<string>? = None
+        key_findings: list<string> = None
         if this.llm_client != None and (opts.generate_summary or this.config.rerank_with_llm):
             if opts.verbose:
                 print(f"   🤖 Generating AI summary...")
@@ -655,16 +655,16 @@ Respond in this format:
 Also provide a comma-separated ranking of the most relevant result indices (0-based): [indices]
 """
         response = this.llm_client!.generate(prompt, temperature=0.3, max_tokens=600)
-        summary_match = regex.search(r'## Summary\n(.*?)(?=##|\Z)', response.text, regex.DOTALL)
-        findings_match = regex.search(r'## Key Findings\n(.*?)(=\Z)', response.text, regex.DOTALL)
-        indices_match = regex.search(r'indices:\s*\[(.*?)\]', response.text)
+        summary_match = regex.search(r'## Summary\n(.*)(=##|\Z)', response.text, regex.DOTALL)
+        findings_match = regex.search(r'## Key Findings\n(.*)(=\Z)', response.text, regex.DOTALL)
+        indices_match = regex.search(r'indices:\s*\[(.*)\]', response.text)
         summary = summary_match.group(1).trim() if summary_match else ""
         key_findings: list<string> = []
         if findings_match != None:
             findings_text = findings_match.group(1)
             key_findings = [line.strip().lstrip("- ") for line in findings_text.split("\n")
                            if line.trim().starts_with("-")]
-        reranked_indices: list<int>? = None
+        reranked_indices: list<int> = None
         if indices_match != None:
             indices_str = indices_match.group(1)
             try:
@@ -678,10 +678,10 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
     }
     struct llm_summary_result {
         summary: string
-        key_findings: list<string>?
-        reranked_indices: list<int>?
+        key_findings: list<string>
+        reranked_indices: list<int>
     }
-    export_results(response: search_response, string format = "markdown", output_path?: string) {
+    export_results(response: search_response, string format = "markdown", output_path: string) {
         output: list<string> = []
         output.append(f"# Search Results: {response.query}\n")
         output.append(f"**Total Results**: {response.total_results_found}\n")
@@ -726,7 +726,7 @@ struct search_options {
     crawl_results: bool = true
     generate_summary: bool = true
     verbose: bool = true
-    corrected_query?: string
+    corrected_query: string
 }
 struct result_aggregator {
     config: web_search_config
@@ -751,7 +751,7 @@ struct result_aggregator {
             title_lower = item.title.to_lower()
             title_matches = sum(1 for term in query_terms if term in title_lower)
             score += title_matches * 15.0
-            snippet_lower = (item.snippet ?? "").to_lower()
+            snippet_lower = (item.snippet  "").to_lower()
             snippet_matches = sum(1 for term in query_terms if term in snippet_lower)
             score += snippet_matches * 8.0
             score += (20.0 / (item.rank_in_engine + 1))
@@ -777,7 +777,7 @@ struct result_aggregator {
         normalized = f"{parsed.scheme}:
         if parsed.query:
             params = sorted(parsed.query.split("&"))
-            normalized += "?" + "&".join(params)
+            normalized += "" + "&".join(params)
         return normalized.to_lower()
     }
     _is_high_quality_domain(string domain) {
@@ -790,7 +790,7 @@ struct result_aggregator {
         return any(indicator in domain for indicator in quality_indicators)
     }
 }
-function create_web_search_system(config?: web_search_config, llm_client?: any) {
+function create_web_search_system(config: web_search_config, llm_client: any) {
     return new WebSearchSystem(config=config, llm_client=llm_client)
 }
 async function test_web_search_system() {

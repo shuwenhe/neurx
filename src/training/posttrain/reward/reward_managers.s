@@ -330,7 +330,7 @@ func new_answer_verifier(string method) -> *answer_verifier { return null }
 
 func new_reasoning_scorer() -> *reasoning_scorer { return null }
 
-func new_worker(i32 id) -> worker { return worker{ id: id } }
+func new_worker(i32 id) -> worker { return worker{ id id } }
 
 func mutex_new() -> mutex { return mutex{} }
 

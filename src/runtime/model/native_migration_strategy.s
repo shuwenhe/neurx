@@ -46,21 +46,20 @@ func new_tokenizer(string vocab_file) native_tokenizer_handle {
     }
 }
 
-func (t: &native_tokenizer_handle) encode(string text) int[] {
+func (native_tokenizer_handle* t) encode(string text) int[] {
     if !t.initialized {
         return vec[int]()
     }
     __tokenizer_encode(t.handle_id, text)
 }
 
-func (t: &native_tokenizer_handle) decode(int[] tokens) string {
-    if !t.initialized {
+func (native_tokenizer_handle* t) decode(int[] tokens) string {    if !t.initialized {
         return ""
     }
     __tokenizer_decode(t.handle_id, tokens)
 }
 
-func (t: &mut native_tokenizer_handle) cleanup() {
+func (native_tokenizer_handle* t) cleanup() {
     if t.initialized {
         __tokenizer_free(t.handle_id)
         t.initialized = false

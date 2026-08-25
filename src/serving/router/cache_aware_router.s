@@ -131,7 +131,7 @@ func cache_router_upsert_affinity(cache_aware_router_state state, int pool_id, i
     state
 }
 
-func cache_router_empty_result(cache_aware_router_state state) cache_route_result { cache_route_result {state: state, worker_id: 0, matched_prefix_tokens: 0, strategy: cache_route_none(), routed: false} }
+func cache_router_empty_result(cache_aware_router_state state) cache_route_result { cache_route_result {state state, 0 worker_id, 0 matched_prefix_tokens, cache_route_none strategy(), false routed} }
 
 func cache_router_route(cache_aware_router_state state, int pool_id, int model_id, int prefix_hash, int prefix_tokens, int prompt_tokens) cache_route_result {
     int selected = 0 - 1

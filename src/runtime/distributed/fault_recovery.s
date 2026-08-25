@@ -1,12 +1,12 @@
 module distributed_fault_recovery
-enum checkpoint_type {
+
     FULL,
     INCREMENTAL,
     PARTIAL,
     CKPT_ASYNC,
 }
 
-enum recovery_strategy {
+
     IMMEDIATE,
     ROLLBACK,
     PARTIAL_ROLLBACK,

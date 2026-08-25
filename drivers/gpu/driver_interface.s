@@ -1,6 +1,6 @@
 package neurx.drivers.gpu
 
-enum gpu_driver_type {
+
     nvidia_cuda,
     amd_rocm,
     intel_oneapi,

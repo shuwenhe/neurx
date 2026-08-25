@@ -45,7 +45,7 @@ func test_basic_inference() test_result {
     )
     
     request := inference_request {
-        prompt: "What is machine learning?",
+        prompt: "What is machine learning",
         max_tokens: 100,
         temperature: 0.7,
         top_p: 0.9,
@@ -85,7 +85,7 @@ func test_batch_inference() test_result {
     
     []inference_request requests = [
         inference_request {
-            prompt: "What is AI?",
+            prompt: "What is AI",
             max_tokens: 50,
             temperature: 0.7,
             top_p: 0.9,
@@ -101,7 +101,7 @@ func test_batch_inference() test_result {
             request_id: 2,
         },
         inference_request {
-            prompt: "What is neural networks?",
+            prompt: "What is neural networks",
             max_tokens: 75,
             temperature: 0.8,
             top_p: 0.85,

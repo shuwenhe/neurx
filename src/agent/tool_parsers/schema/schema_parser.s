@@ -4,13 +4,13 @@ use neurx.tool_parsers.schema.schema_types
 use std.conv.string_to_int
 use std.vec
 
-func parse_schema_from_json(json_str: string) json_schema {
+func parse_schema_from_json(string json_str) json_schema {
     schema := schema_types.create_empty_schema()
     schema = parse_schema_object(json_str, 0, &schema)
     return schema
 }
 
-func parse_schema_object(json_str: string, start_pos: int, schema: *json_schema) json_schema {
+func parse_schema_object(string json_str, int start_pos, *json_schema schema) json_schema {
     result := *schema
 
     title_end := find_json_string_value(json_str, "\"title\"", start_pos)
@@ -61,7 +61,7 @@ func parse_schema_object(json_str: string, start_pos: int, schema: *json_schema)
     return result
 }
 
-func find_json_string_value(json_str: string, key: string, start_pos: int) int {
+func find_json_string_value(string json_str, string key, int start_pos) int {
     i := start_pos
     while i < len(json_str) {
         if i + len(key) <= len(json_str) {
@@ -81,7 +81,7 @@ func find_json_string_value(json_str: string, key: string, start_pos: int) int {
     return -1
 }
 
-func extract_string_value(json_str: string, pos: int) string {
+func extract_string_value(string json_str, int pos) string {
     i := pos
 
     if i < len(json_str) && json_str[i] == '"' {
@@ -96,11 +96,11 @@ func extract_string_value(json_str: string, pos: int) string {
     return result
 }
 
-func extract_type_value(json_str: string, pos: int) string {
+func extract_type_value(string json_str, int pos) string {
     return extract_string_value(json_str, pos)
 }
 
-func extract_int_value(json_str: string, pos: int) int {
+func extract_int_value(string json_str, int pos) int {
     i := pos
     result := ""
     while i < len(json_str) && json_str[i] >= '0' && json_str[i] <= '9' {
@@ -110,7 +110,7 @@ func extract_int_value(json_str: string, pos: int) int {
     return string_to_int(result)
 }
 
-func extract_string_array(json_str: string, pos: int) []string {
+func extract_string_array(string json_str, int pos) []string {
     result := vec_new()
     i := pos
 
@@ -144,7 +144,7 @@ func extract_string_array(json_str: string, pos: int) []string {
     return result
 }
 
-func extract_properties(json_str: string, pos: int, required: *[]string) []json_property {
+func extract_properties(string json_str, int pos, *[]string required) []json_property {
     result := vec_new()
     i := pos
 
@@ -194,7 +194,7 @@ func extract_properties(json_str: string, pos: int, required: *[]string) []json_
     return result
 }
 
-func is_property_required(name: string, required: *[]string) bool {
+func is_property_required(string name, *[]string required) bool {
     i := 0
     while i < len(*required) {
         if (*required)[i] == name {
@@ -205,7 +205,7 @@ func is_property_required(name: string, required: *[]string) bool {
     return false
 }
 
-func substring(s: string, start: int, end: int) string {
+func substring(string s, int start, int end) string {
     if start < 0 || end > len(s) || start > end {
         return ""
     }
@@ -218,7 +218,7 @@ func substring(s: string, start: int, end: int) string {
     return result
 }
 
-func string_from_char(c: int) string {
+func string_from_char(int c) string {
 
     result := ""
     if c == 32 { result = " " }
@@ -240,7 +240,7 @@ func string_from_char(c: int) string {
     return result
 }
 
-func create_string_schema(min_len: int, max_len: int, pattern: string) json_schema {
+func create_string_schema(int min_len, int max_len, string pattern) json_schema {
     schema := schema_types.create_empty_schema()
     schema.type_name = schema_types.TYPE_STRING
     schema.min_length = min_len
@@ -249,7 +249,7 @@ func create_string_schema(min_len: int, max_len: int, pattern: string) json_sche
     return schema
 }
 
-func create_object_schema(properties: []json_property, required: []string) json_schema {
+func create_object_schema([]json_property properties, []string required) json_schema {
     schema := schema_types.create_empty_schema()
     schema.type_name = schema_types.TYPE_OBJECT
     schema.properties = properties
@@ -257,7 +257,7 @@ func create_object_schema(properties: []json_property, required: []string) json_
     return schema
 }
 
-func create_array_schema(item_schema: *json_schema, min_items: int, max_items: int) json_schema {
+func create_array_schema(*json_schema item_schema, int min_items, int max_items) json_schema {
     schema := schema_types.create_empty_schema()
     schema.type_name = schema_types.TYPE_ARRAY
     schema.items = item_schema
@@ -266,7 +266,7 @@ func create_array_schema(item_schema: *json_schema, min_items: int, max_items: i
     return schema
 }
 
-func create_enum_schema(values: []string) json_schema {
+func create_enum_schema([]string values) json_schema {
     schema := schema_types.create_empty_schema()
     schema.type_name = schema_types.TYPE_STRING
     schema.enum_values = values

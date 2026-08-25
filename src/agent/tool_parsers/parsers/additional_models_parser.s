@@ -17,7 +17,7 @@ impl GlmParser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         extract_xml_tools(model_output, "tool_call")
     }
 }
@@ -35,7 +35,7 @@ impl Glm47MoeParser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         extract_xml_tools(model_output, "tool_call")
     }
 }
@@ -53,7 +53,7 @@ impl KimiK3Parser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         extract_xml_tools(model_output, "function")
     }
 }
@@ -70,7 +70,7 @@ impl InternlmParser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         extract_qwen_json_tools(model_output)
     }
 }
@@ -87,7 +87,7 @@ impl MinimaxM3Parser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         extract_qwen_json_tools(model_output)
     }
 }
@@ -104,7 +104,7 @@ impl MiniCpm5Parser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         extract_xml_function_tools(model_output)
     }
 }
@@ -121,7 +121,7 @@ impl CohereCommand3Parser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         extract_json_tool_array(model_output)
     }
 }
@@ -138,7 +138,7 @@ impl CohereCommand4Parser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         extract_json_tool_array(model_output)
     }
 }
@@ -155,7 +155,7 @@ impl GraniteParser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         extract_qwen_xml_tools(model_output)
     }
 }
@@ -172,12 +172,12 @@ impl PythonicToolParser {
         parser
     }
 
-    func extract_tool_calls(self, model_output: str, request: ParserRequest) -> ExtractedToolCallInformation {
+    func extract_tool_calls(self, str model_output, ParserRequest request) -> ExtractedToolCallInformation {
         extract_python_tool_calls(model_output)
     }
 }
 
-func extract_xml_tools(model_output: str, tag: str) -> ExtractedToolCallInformation {
+func extract_xml_tools(str model_output, str tag) -> ExtractedToolCallInformation {
     start_tag := "<" + tag + ">"
     end_tag := "</" + tag + ">"
 
@@ -231,7 +231,7 @@ func extract_xml_tools(model_output: str, tag: str) -> ExtractedToolCallInformat
     }
 }
 
-func extract_xml_function_tools(model_output: str) -> ExtractedToolCallInformation {
+func extract_xml_function_tools(str model_output) -> ExtractedToolCallInformation {
     start_tag := "<function name=\""
     end_tag := "</function>"
 
@@ -298,7 +298,7 @@ func extract_xml_function_tools(model_output: str) -> ExtractedToolCallInformati
     }
 }
 
-func extract_json_tool_array(model_output: str) -> ExtractedToolCallInformation {
+func extract_json_tool_array(str model_output) -> ExtractedToolCallInformation {
     pattern := "\\[\\s*\\{[^\\]]*\\}\\s*\\]"
     re := regex::compile(pattern)
 
@@ -344,7 +344,7 @@ func extract_json_tool_array(model_output: str) -> ExtractedToolCallInformation 
     }
 }
 
-func extract_python_tool_calls(model_output: str) -> ExtractedToolCallInformation {
+func extract_python_tool_calls(str model_output) -> ExtractedToolCallInformation {
     pattern := "\\[([a-zA-Z_][a-zA-Z0-9_]*\\([^)]*\\)[,\\s]*)+\\]"
     re := regex::compile(pattern)
 
@@ -396,16 +396,16 @@ func extract_python_tool_calls(model_output: str) -> ExtractedToolCallInformatio
     }
 }
 
-func extract_param_values(content: str) -> str {
+func extract_param_values(str content) -> str {
     pattern := "<param name=\"([^\"]+)\">([^<]*)</param>"
     ""
 }
 
-func extract_group(m: RegexMatch, group: i32) -> str {
+func extract_group(RegexMatch m, i32 group) -> str {
     ""
 }
 
-func parse_qwen_json_tool(json_str: str) -> Option<ToolCall> {
+func parse_qwen_json_tool(str json_str) -> Option<ToolCall> {
     func_name := extract_json_field(json_str, "name")
     arguments := extract_json_field(json_str, "arguments")
 
@@ -423,7 +423,7 @@ func parse_qwen_json_tool(json_str: str) -> Option<ToolCall> {
     }
 }
 
-func extract_json_field(json_str: str, field_name: str) -> str {
+func extract_json_field(str json_str, str field_name) -> str {
     pattern := "\"" + field_name + "\"\\s*:\\s*\"([^\"]*)\""
     re := regex::compile(pattern)
     match regex::find_string(re, json_str) {

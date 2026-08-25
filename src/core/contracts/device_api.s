@@ -1,4 +1,4 @@
-enum device_type {
+
     CPU
     CUDA
     CANN

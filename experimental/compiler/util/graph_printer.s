@@ -3,7 +3,7 @@ package neurx.experimental.compiler.utils.graph_printer
 use neurx.experimental.compiler.ir.graph.computation_graph
 use neurx.experimental.compiler.ir.operation.op_type
 
-func print_graph_info(g: *computation_graph) string {
+func print_graph_info(*computation_graph g) string {
     s = ""
     s = s + "========== Computation Graph Info ==========\n"
     s = s + "Graph name: " + g.graph_name + "\n"
@@ -16,7 +16,7 @@ func print_graph_info(g: *computation_graph) string {
     s
 }
 
-func print_graph_operations(g: *computation_graph) string {
+func print_graph_operations(*computation_graph g) string {
     s = ""
     s = s + "========== Operations ==========\n"
 
@@ -54,7 +54,7 @@ func print_graph_operations(g: *computation_graph) string {
     s
 }
 
-func print_graph_values(g: *computation_graph) string {
+func print_graph_values(*computation_graph g) string {
     s = ""
     s = s + "========== Values ==========\n"
 
@@ -69,14 +69,14 @@ func print_graph_values(g: *computation_graph) string {
     s
 }
 
-func print_graph_structure(g: *computation_graph) string {
+func print_graph_structure(*computation_graph g) string {
     s = print_graph_info(g)
     s = s + print_graph_operations(g)
     s = s + print_graph_values(g)
     s
 }
 
-func print_graph_dataflow(g: *computation_graph) string {
+func print_graph_dataflow(*computation_graph g) string {
     s = ""
     s = s + "========== Data Flow ==========\n"
 
@@ -104,7 +104,7 @@ func print_graph_dataflow(g: *computation_graph) string {
     s
 }
 
-func print_graph_dot_format(g: *computation_graph) string {
+func print_graph_dot_format(*computation_graph g) string {
     s = ""
     s = s + "digraph computation_graph {\n"
     s = s + "  rankdir=LR;\n"

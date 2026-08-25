@@ -80,7 +80,7 @@ struct embedding_request {
 	int64           created_at
 }
 
-enum validation_error {
+
 	ERR_MISSING_MODEL         = 0
 	ERR_MISSING_MESSAGES      = 1
 	ERR_INVALID_TEMPERATURE   = 2

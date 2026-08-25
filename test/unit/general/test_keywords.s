@@ -85,7 +85,7 @@ func main() {
         print("✗ FAIL\n")
     }
     print("\n")
-    string test5 = "What is diagnosis?"
+    string test5 = "What is diagnosis"
     string result5 = generate_response(test5)
     print("Input: '" + test5 + "'\n")
     print("Output: '" + result5 + "'\n")

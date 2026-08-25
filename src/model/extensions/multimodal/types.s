@@ -2,7 +2,7 @@ package neurx.multimodal.types
 
 import "neurx.tensor.types"
 
-enum Modality {
+
     image,
     text,
     audio,
@@ -11,7 +11,7 @@ enum Modality {
     unknown
 }
 
-enum ImageFormat {
+
     rgb,
     rgba,
     bgr,
@@ -19,14 +19,14 @@ enum ImageFormat {
     yuv
 }
 
-enum AudioFormat {
+
     pcm16,
     pcm32,
     float32,
     mu_law
 }
 
-enum ResolutionStrategy {
+
     pad,
     resize,
     dynamic,
@@ -74,7 +74,7 @@ struct MultimodalInput {
     images: []ImageData,
     audios: []AudioData,
     videos: []VideoData,
-    depth: ?DepthData,
+    depth: DepthData,
     timestamp: i64,
     sequence_order: []i32
 }

@@ -330,7 +330,7 @@ func (apiserver* server) handle_incoming_requests() {
             method:     "POST",
             headers:    map[string]string{"Content-Type": "application/json"},
             body: map[string]string{
-                "messages": "What is AI?",
+                "messages": "What is AI",
             },
             timestamp:  1719842403,
         },

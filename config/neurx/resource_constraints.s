@@ -1,6 +1,6 @@
 package config
 
-enum constraint_type {
+
     memory_constraint
     compute_constraint
     bandwidth_constraint
@@ -9,7 +9,7 @@ enum constraint_type {
     device_constraint
 }
 
-enum constraint_status {
+
     satisfied
     warning
     violated

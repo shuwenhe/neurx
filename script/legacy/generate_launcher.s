@@ -209,7 +209,7 @@ func generate_launcher_script(training_config cfg, []string hosts) string {
     script = script + "\n"
     script = script + "# Wait for all processes\n"
     script = script + "status=0\n"
-    script = script + "for pid in \"${PIDS[@]}\"; do wait \"$pid\" || status=$?; done\n"
+    script = script + "for pid in \"${PIDS[@]}\"; do wait \"$pid\" || status=$; done\n"
     script = script + "exit \"$status\"\n"
     return script
 }

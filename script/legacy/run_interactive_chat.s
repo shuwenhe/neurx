@@ -42,7 +42,7 @@ func main() {
     println("║              Interactive Chat Ready                ║")
     println("╚════════════════════════════════════════════════════╝")
     println("")
-    println("User: NeurX AllowedEnglish text?")
+    println("User: NeurX AllowedEnglish text")
     println("")
     println("model: NeurX English textlanguageEnglish textsystem, English text: ")
     println("  • English textlanguageEnglish textgenerate")

@@ -171,7 +171,7 @@ func test_bpe_tokenizer() bool {
 }
 
 func test_integrated_pipeline() bool {
-    []int input_tokens = tokenize_text("What is machine learning?", 256)
+    []int input_tokens = tokenize_text("What is machine learning", 256)
     if len(input_tokens) == 0 {
         return false
     }

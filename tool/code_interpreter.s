@@ -30,13 +30,13 @@ struct code_interpreter_config {
 struct execution_result {
     success: bool
     output: string
-    error: string?
-    error_type: string?
-    traceback: list<string>?
+    error: string
+    error_type: string
+    traceback: list<string>
     return_value: any
-    variables: map<string, any>?
-    generated_files: list<file_info>?
-    plots: list<image_data>?
+    variables: map<string, any>
+    generated_files: list<file_info>
+    plots: list<image_data>
     execution_time_ms: float
     memory_used_mb: float
     line_count: int
@@ -46,7 +46,7 @@ struct file_info {
     path: string
     size_bytes: int
     content_type: string
-    preview: string?
+    preview: string
     is_image: bool
 }
 
@@ -55,23 +55,23 @@ struct image_data {
     format: string
     width: int
     height: int
-    alt_text: string?
+    alt_text: string
 }
 
 struct code_block {
     language: string
     code: string
-    filename: string?
+    filename: string
 }
 struct sandbox_environment {
     config: code_interpreter_config
     session_id: string
     working_dir: string
     state: SessionState
-    python_runtime: PythonRuntime?
-    javascript_runtime: JavaScriptRuntime?
-    s_runtime: ShellRuntime?
-    sql_runtime: SQLRuntime?
+    python_runtime: PythonRuntime
+    javascript_runtime: JavaScriptRuntime
+    s_runtime: ShellRuntime
+    sql_runtime: SQLRuntime
     init(config: code_interpreter_config) {
         this.config = config
         this.session_id = generate_uuid()
@@ -302,7 +302,7 @@ struct python_runtime {
     sandbox_dir: string
     memory_limit: int
     timeout: int
-    process?: ProcessHandle
+    process: ProcessHandle
     interpreter_path: string = "python"
     init(string sandbox_dir, int memory_limit, int timeout) {
         this.sandbox_dir = sandbox_dir
@@ -312,8 +312,8 @@ struct python_runtime {
             throw error(f"Python interpreter not found: {this.interpreter_path}")
         }
     }
-    execute(string code, string filename?) {
-        script_path := this.sandbox_dir + (filename ?? "execution_" + generate_short_uuid() + ".py")
+    execute(string code, string filename) {
+        script_path := this.sandbox_dir + (filename  "execution_" + generate_short_uuid() + ".py")
         write_file(script_path, code)
         try {
             cmd := [
@@ -403,8 +403,8 @@ struct python_runtime {
             }
         }
         return error_info{
-            error_type=error_type ?: "UnknownError",
-            message=message ?: stderr_output,
+            error_type=error_type : "UnknownError",
+            message=message : stderr_output,
             traceback=traceback
         }
     }
@@ -443,7 +443,7 @@ struct java_script_runtime {
                     console.log = (...args) => { __output.push(args.join(' ')); };
                     try {
                         ${code}
-                        const __result = typeof __last_expression !== 'undefined' ? __last_expression : undefined;
+                        const __result = typeof __last_expression !== 'undefined'  __last_expression : undefined;
                         console.log = originalLog;
                         return { output: __output.join('\\n'), returnValue: __result };
                     } catch(e) {
@@ -467,7 +467,7 @@ struct java_script_runtime {
                 success=false,
                 output="",
                 error=str(e),
-                error_type=e.name ?? "JavaScriptError",
+                error_type=e.name  "JavaScriptError",
                 line_count=count_lines(code),
                 memory_used_mb=0
             }
@@ -539,7 +539,7 @@ struct shell_runtime {
 }
 struct sql_runtime {
     db_path: string
-    connection: DatabaseConnection?
+    connection: DatabaseConnection
     init(string db_path) {
         this.db_path = db_path
         this.connection = connect_to_sqlite(db_path)
@@ -595,14 +595,14 @@ struct sql_runtime {
                 success=false,
                 output="",
                 error=e.message,
-                error_type=e.error_type ?? "SQLError",
+                error_type=e.error_type  "SQLError",
                 line_count=count_lines(query),
                 memory_used_mb=0
             }
         }
     }
     close() {
-        this.connection?.close()
+        this.connection.close()
     }
 }
 
@@ -618,8 +618,8 @@ struct result_formatter {
     }
     format_for_llm(result: execution_result) {
         sections: list<string> = []
-        status_icon = result.success ? "✅" : "❌"
-        status_text = result.success ? "Success" : f"Error ({result.error_type})"
+        status_icon = result.success  "✅" : "❌"
+        status_text = result.success  "Success" : f"Error ({result.error_type})"
         sections.append(f"{status_icon} **status**: {status_text}")
         if result.output.length > 0 {
             truncated_output = this._truncate(result.output, max_chars=5000)
@@ -664,8 +664,8 @@ struct result_formatter {
         return formatted_output{
             raw=result,
             formatted_text="\n\n".join(sections),
-            has_visualizations=(result.plots?.length ?? 0) > 0,
-            has_files=(result.generated_files?.length ?? 0) > 0
+            has_visualizations=(result.plots.length  0) > 0,
+            has_files=(result.generated_files.length  0) > 0
         }
     }
     _truncate(string text, int max_chars) {
@@ -729,8 +729,8 @@ print(f"total: {{mem.sum() / 1024 / 1024:.2f}} MB")
         result := this.sandbox.execute(code_block)
         return result
     }
-    visualize_data(string csv_path, string chart_type, string x_col, string y_col?,
-                   group_by: string?) {
+    visualize_data(string csv_path, string chart_type, string x_col, string y_col,
+                   group_by: string) {
         viz_templates: map<string, string> = {
             "bar": f"""
 import pandas as pd
@@ -738,7 +738,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 df = pd.read_csv("{csv_path}")
 plt.figure(figsize=(12, 6))
-sns.barplot(data=df, x="{x_col}", y="{y_col ?? 'value'}")
+sns.barplot(data=df, x="{x_col}", y="{y_col  'value'}")
 plt.xticks(rotation=45)
 plt.title('Bar Chart')
 plt.tight_layout()
@@ -751,7 +751,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 df = pd.read_csv("{csv_path}")
 plt.figure(figsize=(12, 6))
-sns.lineplot(data=df, x="{x_col}", y="{y_col ?? 'value'}")
+sns.lineplot(data=df, x="{x_col}", y="{y_col  'value'}")
 plt.title('Line Chart')
 plt.tight_layout()
 plt.savefig('chart_line.png', dpi=150, bbox_inches='tight')
@@ -763,7 +763,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 df = pd.read_csv("{csv_path}")
 plt.figure(figsize=(10, 8))
-sns.scatterplot(data=df, x="{x_col}", y="{y_col ?? 'value'}", alpha=0.7)
+sns.scatterplot(data=df, x="{x_col}", y="{y_col  'value'}", alpha=0.7)
 plt.title('Scatter Plot')
 plt.tight_layout()
 plt.savefig('chart_scatter.png', dpi=150, bbox_inches='tight')
@@ -808,7 +808,7 @@ print("Chart saved as chart_correlation.png")
         code_block := code_block{language="python", code=code}
         return this.sandbox.execute(code_block)
     }
-    run_statistical_test(string csv_path, string test_type, string col1, string col2?) {
+    run_statistical_test(string csv_path, string test_type, string col1, string col2) {
         code = f"""
 import pandas as pd
 import numpy as np
@@ -845,13 +845,13 @@ else:
 }
 struct code_interpreter {
     config: code_interpreter_config
-    sandbox: sandbox_environment?
-    data_helper: data_analysis_helper?
+    sandbox: sandbox_environment
+    data_helper: data_analysis_helper
     formatter: result_formatter
     active_sessions: map<string, sandbox_environment>
-    default_session: sandbox_environment?
-    init(config?: code_interpreter_config) {
-        this.config = config ?? new code_interpreter_config()
+    default_session: sandbox_environment
+    init(config: code_interpreter_config) {
+        this.config = config  new code_interpreter_config()
         this.formatter = new result_formatter(this.config)
         this.active_sessions = map<string, sandbox_environment>{}
         this.default_session = this.create_session("default")
@@ -862,10 +862,10 @@ struct code_interpreter {
         this.active_sessions[session_name] = session
         return session
     }
-    execute_code(string code, language?: string, session?: string) {
-        target_session := this.active_sessions[session ?? "default"] ?? this.default_session!
+    execute_code(string code, language: string, session: string) {
+        target_session := this.active_sessions[session  "default"]  this.default_session!
         code_block := code_block{
-            language=language ?? this.config.default_language,
+            language=language  this.config.default_language,
             code=code
         }
         result := target_session.execute(code_block)
@@ -887,12 +887,12 @@ struct code_interpreter {
         result := this.data_helper!.explore_dataset(csv_path)
         return this.formatter.format_for_llm(result)
     }
-    plot_chart(string csv_path, string chart_type, string x, y?: string,
-               group_by?: string) {
+    plot_chart(string csv_path, string chart_type, string x, y: string,
+               group_by: string) {
         result := this.data_helper!.visualize_data(csv_path, chart_type, x, y, group_by)
         return this.formatter.format_for_llm(result)
     }
-    statistical_test(string csv_path, string test, string col1, col2?: string) {
+    statistical_test(string csv_path, string test, string col1, col2: string) {
         result := this.data_helper!.run_statistical_test(csv_path, test, col1, col2)
         return this.formatter.format_for_llm(result)
     }
@@ -900,7 +900,7 @@ struct code_interpreter {
         return list(this.active_sessions.keys())
     }
     get_session_summary(string session_name) {
-        session := this.active_sessions[session_name] ?? this.default_session!
+        session := this.active_sessions[session_name]  this.default_session!
         return session.get_session_state().get_summary()
     }
     reset_session(string session_name) {
@@ -912,11 +912,11 @@ struct code_interpreter {
         for session in this.active_sessions.values() {
             session.cleanup()
         }
-        this.default_session?.cleanup()
+        this.default_session.cleanup()
         this.active_sessions.clear()
     }
 }
-function create_code_interpreter(config?: code_interpreter_config) {
+function create_code_interpreter(config: code_interpreter_config) {
     return new code_interpreter(config=config)
 }
 function test_code_interpreter() {

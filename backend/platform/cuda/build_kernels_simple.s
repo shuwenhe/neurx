@@ -39,7 +39,7 @@ func main() {
     if link_ok && runtime_file_exists(build_dir + "/libcuda_kernels.so") {
         println("")
         println("[SUCCESS] libcuda_kernels.so created successfully")
-        string size_out = runtime_run_command_output("ls -lh " + build_dir + "/libcuda_kernels.so 2>/dev/null | awk '{print $5}' || echo '?'")
+        string size_out = runtime_run_command_output("ls -lh " + build_dir + "/libcuda_kernels.so 2>/dev/null | awk '{print $5}' || echo ''")
         println("  Size: " + trim(size_out))
         create_env_metadata(build_dir, cuda_lib)
         println("[INFO] Environment metadata: " + build_dir + "/env.txt")

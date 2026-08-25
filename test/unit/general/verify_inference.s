@@ -71,14 +71,14 @@ func create_test_cases() []inference_test_case {
 
     tests[0] = inference_test_case{
         name: "Basic Greeting",
-        prompt: "Hello, how are you?",
+        prompt: "Hello, how are you",
         expected_min_tokens: 5,
         expected_max_tokens: 50
     }
 
     tests[1] = inference_test_case{
         name: "Math Question",
-        prompt: "What is 2+2?",
+        prompt: "What is 2+2",
         expected_min_tokens: 3,
         expected_max_tokens: 20
     }

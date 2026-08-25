@@ -204,7 +204,7 @@ func industrial_chr(int code) string {
     if code == 120 { return "x" }
     if code == 121 { return "y" }
     if code == 122 { return "z" }
-    "?"
+    ""
 }
 
 func industrial_int_to_string(int n) string {

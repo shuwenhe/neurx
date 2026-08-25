@@ -1,7 +1,7 @@
 import "std/string"
 import "std/vector"
 
-enum TokenizerType {
+
     HUGGINGFACE,
     SENTENCEPIECE,
     TIKTOKEN,
@@ -9,7 +9,7 @@ enum TokenizerType {
     CUSTOM,
 }
 
-enum TokenClass {
+
     NORMAL,
     SPECIAL,
     PADDING,

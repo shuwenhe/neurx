@@ -1,10 +1,10 @@
 import "tensor/tensor.s"
-enum is_aggregation_level {
+
     NONE,
     TOKEN,
     SEQUENCE
 }
-enum rejection_mode {
+
     NONE,
     TOKEN_K1,
     TOKEN_K2,
@@ -18,7 +18,7 @@ enum rejection_mode {
     SEQ_MAX_K2,
     SEQ_MAX_K3
 }
-enum loss_type {
+
     PPO_CLIP,
     REINFORCE
 }

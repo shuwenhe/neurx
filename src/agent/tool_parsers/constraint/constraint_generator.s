@@ -3,7 +3,7 @@ package neurx.tool_parsers.constraint.constraint_generator
 use neurx.tool_parsers.schema.schema_types
 use std.vec
 
-func generate_initial_constraint(schema: *json_schema) token_constraint {
+func generate_initial_constraint(*json_schema schema) token_constraint {
     constraint := schema_types.create_empty_constraint()
     constraint.context = "root"
     constraint.state = 0
@@ -35,7 +35,7 @@ func generate_initial_constraint(schema: *json_schema) token_constraint {
     return constraint
 }
 
-func get_next_constraint(current_output: string, schema: *json_schema, context: *schema_types.parse_context) token_constraint {
+func get_next_constraint(string current_output, *json_schema schema, *schema_types.parse_context context) token_constraint {
     constraint := schema_types.create_empty_constraint()
 
     update_parse_context(current_output, context)
@@ -54,7 +54,7 @@ func get_next_constraint(current_output: string, schema: *json_schema, context: 
     return constraint
 }
 
-func get_object_constraint(current_output: string, schema: *json_schema, context: *schema_types.parse_context) token_constraint {
+func get_object_constraint(string current_output, *json_schema schema, *schema_types.parse_context context) token_constraint {
     constraint := schema_types.create_empty_constraint()
     constraint.context = "object"
 
@@ -77,7 +77,7 @@ func get_object_constraint(current_output: string, schema: *json_schema, context
     return constraint
 }
 
-func get_array_constraint(current_output: string, schema: *json_schema, context: *schema_types.parse_context) token_constraint {
+func get_array_constraint(string current_output, *json_schema schema, *schema_types.parse_context context) token_constraint {
     constraint := schema_types.create_empty_constraint()
     constraint.context = "array"
 
@@ -94,7 +94,7 @@ func get_array_constraint(current_output: string, schema: *json_schema, context:
     return constraint
 }
 
-func get_string_constraint(current_output: string, schema: *json_schema, context: *schema_types.parse_context) token_constraint {
+func get_string_constraint(string current_output, *json_schema schema, *schema_types.parse_context context) token_constraint {
     constraint := schema_types.create_empty_constraint()
     constraint.context = "string"
 
@@ -115,7 +115,7 @@ func get_string_constraint(current_output: string, schema: *json_schema, context
     return constraint
 }
 
-func get_number_constraint(current_output: string, schema: *json_schema, context: *schema_types.parse_context) token_constraint {
+func get_number_constraint(string current_output, *json_schema schema, *schema_types.parse_context context) token_constraint {
     constraint := schema_types.create_empty_constraint()
     constraint.context = "number"
 
@@ -138,7 +138,7 @@ func get_number_constraint(current_output: string, schema: *json_schema, context
     return constraint
 }
 
-func add_digit_tokens(tokens: *[]int) {
+func add_digit_tokens(*[]int tokens) {
     i := 48
     while i <= 57 {
         tokens.append(i)
@@ -146,7 +146,7 @@ func add_digit_tokens(tokens: *[]int) {
     }
 }
 
-func add_letter_tokens(tokens: *[]int) {
+func add_letter_tokens(*[]int tokens) {
 
     i := 97
     while i <= 122 {
@@ -161,7 +161,7 @@ func add_letter_tokens(tokens: *[]int) {
     }
 }
 
-func add_value_start_tokens(tokens: *[]int) {
+func add_value_start_tokens(*[]int tokens) {
     tokens.append(34)
     tokens.append(45)
     tokens.append(123)
@@ -172,7 +172,7 @@ func add_value_start_tokens(tokens: *[]int) {
     add_digit_tokens(tokens)
 }
 
-func ends_with(s: string, suffix: string) bool {
+func ends_with(string s, string suffix) bool {
     if len(suffix) > len(s) {
         return false
     }
@@ -187,7 +187,7 @@ func ends_with(s: string, suffix: string) bool {
     return true
 }
 
-func contains_char(s: string, c: int) bool {
+func contains_char(string s, int c) bool {
     i := 0
     while i < len(s) {
         if int(s[i]) == c {
@@ -198,7 +198,7 @@ func contains_char(s: string, c: int) bool {
     return false
 }
 
-func count_unclosed_braces(s: string) int {
+func count_unclosed_braces(string s) int {
     count := 0
     i := 0
     while i < len(s) {
@@ -212,7 +212,7 @@ func count_unclosed_braces(s: string) int {
     return count
 }
 
-func is_valid_number(s: string) bool {
+func is_valid_number(string s) bool {
     if len(s) == 0 {
         return false
     }
@@ -234,12 +234,12 @@ func is_valid_number(s: string) bool {
     return true
 }
 
-func apply_pattern_constraint(constraint: token_constraint, pattern: string, context: *schema_types.parse_context) token_constraint {
+func apply_pattern_constraint(token_constraint constraint, string pattern, *schema_types.parse_context context) token_constraint {
 
     return constraint
 }
 
-func update_parse_context(output: string, context: *schema_types.parse_context) {
+func update_parse_context(string output, *schema_types.parse_context context) {
     context.depth = count_unclosed_braces(output)
 
     i := 0
@@ -254,7 +254,7 @@ func update_parse_context(output: string, context: *schema_types.parse_context) 
     context.current_value = output
 }
 
-func apply_constraint_to_logits(logits: []float, constraint: *token_constraint) []float {
+func apply_constraint_to_logits([]float logits, *token_constraint constraint) []float {
     result := logits
 
     i := 0
@@ -269,7 +269,7 @@ func apply_constraint_to_logits(logits: []float, constraint: *token_constraint) 
     return result
 }
 
-func is_token_allowed(token_id: int, allowed_tokens: *[]int) bool {
+func is_token_allowed(int token_id, *[]int allowed_tokens) bool {
     i := 0
     while i < len(*allowed_tokens) {
         if (*allowed_tokens)[i] == token_id {

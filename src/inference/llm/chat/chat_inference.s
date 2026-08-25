@@ -245,6 +245,6 @@ func main() {
         io.println("   Latency: " + strings.from_f64(response.latency_ms) + "ms")
     } else {
         io.println("Usage: chat_inference '<user_input>'")
-        io.println("Example: chat_inference 'Hello, how are you?'")
+        io.println("Example: chat_inference 'Hello, how are you'")
     }
 }

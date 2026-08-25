@@ -85,7 +85,7 @@ struct BaseToolParser {
 }
 
 impl BaseToolParser {
-    func new(name: str) -> BaseToolParser {
+    func new(str name) -> BaseToolParser {
         BaseToolParser {
             parser_name: name,
             supports_streaming: true,
@@ -96,22 +96,22 @@ impl BaseToolParser {
         }
     }
 
-    func set_tools(mut self, tools: Vec<str>) -> BaseToolParser {
+    func set_tools(mut self, Vec<str> tools) -> BaseToolParser {
         self.tools = tools
         self
     }
 
-    func set_streaming(mut self, streaming: bool) -> BaseToolParser {
+    func set_streaming(mut self, bool streaming) -> BaseToolParser {
         self.supports_streaming = streaming
         self
     }
 
-    func set_tool_choice_required(mut self, required: bool) -> BaseToolParser {
+    func set_tool_choice_required(mut self, bool required) -> BaseToolParser {
         self.supports_required = required
         self
     }
 
-    func set_structural_tag(mut self, tag: str) -> BaseToolParser {
+    func set_structural_tag(mut self, str tag) -> BaseToolParser {
         self.structural_tag_model = tag
         self
     }
@@ -137,7 +137,7 @@ func create_extraction_context() -> ToolExtractionContext {
     }
 }
 
-func find_json_boundaries(text: str, start: i32) -> (i32, i32) {
+func find_json_boundaries(str text, i32 start) -> (i32, i32) {
     brace_depth := 0
     in_string := false
     escaped := false
@@ -186,7 +186,7 @@ func find_json_boundaries(text: str, start: i32) -> (i32, i32) {
     (start_pos, end_pos)
 }
 
-func extract_json_field(json_str: str, field_name: str) -> str {
+func extract_json_field(str json_str, str field_name) -> str {
     pattern := "\"" + field_name + "\"\\s*:\\s*\"([^\"]*)\""
     re := regex::compile(pattern)
     match re::find_string(re, json_str) {
@@ -195,7 +195,7 @@ func extract_json_field(json_str: str, field_name: str) -> str {
     }
 }
 
-func validate_tool_call(tool_call: ToolCall, available_tools: Vec<str>) -> bool {
+func validate_tool_call(ToolCall tool_call, Vec<str> available_tools) -> bool {
     found := false
     for tool_name in available_tools {
         if tool_name == tool_call.function.name {

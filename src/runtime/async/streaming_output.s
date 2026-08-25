@@ -3,7 +3,7 @@ package async
 import "time"
 import "encoding/json"
 
-enum stream_event_type {
+
 	EVENT_TOKEN_DELTA   = 0
 	EVENT_CHUNK         = 1
 	EVENT_ERROR         = 2

@@ -166,31 +166,31 @@ func main() {
     training_example[] examples
     int num_examples = 0
     training_example ex1
-    ex1.instruction = "What is the capital of France?"
+    ex1.instruction = "What is the capital of France"
     ex1.input = ""
     ex1.output = "Paris"
     examples[0] = ex1
     num_examples = 1
     training_example ex2
-    ex2.instruction = "What is the capital of Germany?"
+    ex2.instruction = "What is the capital of Germany"
     ex2.input = ""
     ex2.output = "Berlin"
     examples[1] = ex2
     num_examples = 2
     training_example ex3
-    ex3.instruction = "What is the capital of Spain?"
+    ex3.instruction = "What is the capital of Spain"
     ex3.input = ""
     ex3.output = "Madrid"
     examples[2] = ex3
     num_examples = 3
     training_example ex4
-    ex4.instruction = "What is the capital of Italy?"
+    ex4.instruction = "What is the capital of Italy"
     ex4.input = ""
     ex4.output = "Rome"
     examples[3] = ex4
     num_examples = 4
     training_example ex5
-    ex5.instruction = "What is the capital of Greece?"
+    ex5.instruction = "What is the capital of Greece"
     ex5.input = ""
     ex5.output = "Athens"
     examples[4] = ex5

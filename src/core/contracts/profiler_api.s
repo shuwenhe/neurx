@@ -1,6 +1,6 @@
 import "device_api"
 import "memory_api"
-enum profiling_mode {
+
     disabled
     enabled
     memory_only

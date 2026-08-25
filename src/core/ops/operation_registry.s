@@ -1,6 +1,6 @@
 package ops
 
-enum operation_type {
+
     element_wise
     reduction
     matmul
@@ -12,7 +12,7 @@ enum operation_type {
     custom
 }
 
-enum compute_capability {
+
     sm_70
     sm_75
     sm_80

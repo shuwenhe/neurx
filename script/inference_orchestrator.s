@@ -5,7 +5,7 @@ import (
     "path/filepath"
     "strings"
 )
-enum inference_backend {
+
     ONNX,
     tensor_rt,
     production,

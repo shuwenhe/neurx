@@ -1,6 +1,6 @@
 package inference
 
-enum draft_model_type {
+
     smaller_model
     pruned_model
     distilled_model

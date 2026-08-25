@@ -2,7 +2,7 @@ package neurx.sys.monitor
 
 use std.vec.vec
 
-enum metric_type {
+
     latency,
     throughput,
     gpu_utilization,
@@ -117,7 +117,7 @@ func collect_metrics(monitoring_service* service) (int, string) {
     service->buffer->metrics->push(mem_metric)
     service->num_metrics = service->num_metrics + 1
     
-    update_system_health(service)?
+    update_system_health(service)
     service->num_metrics, ""
 }
 

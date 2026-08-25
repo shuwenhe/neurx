@@ -1,6 +1,6 @@
 package neurx.model.transformer.long_context
 import "neurx.util.math"
-enum context_type {
+
     SLIDING_WINDOW = 0
     PAGED_KV = 1
     FULL_ATTENTION = 2

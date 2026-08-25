@@ -4,14 +4,14 @@ import (
     "neurx.tensor.types" as ttypes
 )
 
-enum DeviceType {
+
     cpu,
     cuda,
     rocm,
     npu
 }
 
-enum DataType {
+
     float32,
     float16,
     bfloat16,
@@ -75,7 +75,7 @@ struct NormParams {
     track_running_stats: bool
 }
 
-enum ActivationType {
+
     relu,
     gelu,
     silu,
@@ -108,7 +108,7 @@ struct DTypeConversionParams {
     zero_point: i32
 }
 
-enum MemoryLayout {
+
     nchw,
     nhwc,
     ncwh,

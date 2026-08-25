@@ -268,7 +268,7 @@ func create_solar_config() model_config {
     }
 }
 
-func create_model_config(model_name: string) result[model_config, model_loader_error] {
+func create_model_config(string model_name) result[model_config, model_loader_error] {
     switch model_name {
         "llama" : (create_llama_config(, "")),
         "llama2" : (create_llama2_config(, "")),
@@ -351,9 +351,9 @@ func (model_config* config) is_valid() result[(), model_loader_error] {
     ((, ""))
 }
 
-func load_model_architecture(model_name: string) result[model_architecture, model_loader_error] {
-    config := create_model_config(model_name)?
-    config.is_valid()?
+func load_model_architecture(string model_name) result[model_architecture, model_loader_error] {
+    config := create_model_config(model_name)
+    config.is_valid()
 
     (model_architecture {
         model_type: model_name,

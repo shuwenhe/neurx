@@ -286,7 +286,7 @@ func main() {
     print("╚════════════════════════════════════════════════════════════════╝\n\n")
 }
 
-func int_to_string(n: int) string {
+func int_to_string(int n) string {
     if n == 0 {
         return "0"
     }

@@ -64,18 +64,18 @@ impl ToolParserRegistry {
         self.register_parser("python", || PythonicToolParser::new())
     }
 
-    func register_parser(mut self, name: str, factory: func() -> ToolParser) {
+    func register_parser(mut self, str name, func( factory) -> ToolParser) {
         self.parsers.insert(name, factory)
     }
 
-    func get_parser(self, name: str) -> Option<ToolParser> {
+    func get_parser(self, str name) -> Option<ToolParser> {
         match self.parsers.get(name) {
             Some(factory) => Some(factory()),
             None => None
         }
     }
 
-    func get_parser_for_model(self, model_name: str) -> Option<ToolParser> {
+    func get_parser_for_model(self, str model_name) -> Option<ToolParser> {
         parser_name := infer_parser_from_model_name(model_name)
         self.get_parser(parser_name)
     }
@@ -101,7 +101,7 @@ func get_global_registry() -> ToolParserRegistry {
     }
 }
 
-func get_parser_for_model(model_name: str) -> Option<ToolParser> {
+func get_parser_for_model(str model_name) -> Option<ToolParser> {
     registry := get_global_registry()
     registry.get_parser_for_model(model_name)
 }
@@ -165,12 +165,12 @@ impl ToolParserConfig {
         }
     }
 
-    func set_strict_mode(mut self, strict: bool) -> ToolParserConfig {
+    func set_strict_mode(mut self, bool strict) -> ToolParserConfig {
         self.strict_mode = strict
         self
     }
 
-    func set_streaming_enabled(mut self, enabled: bool) -> ToolParserConfig {
+    func set_streaming_enabled(mut self, bool enabled) -> ToolParserConfig {
         self.enable_streaming = enabled
         self
     }

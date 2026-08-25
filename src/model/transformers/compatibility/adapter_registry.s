@@ -92,7 +92,7 @@ func get_model_registry() []model_adapter_entry {
     registry
 }
 
-func get_adapter_by_model_id(model_id: string) model_adapter_entry {
+func get_adapter_by_model_id(string model_id) model_adapter_entry {
     []model_adapter_entry registry = get_model_registry()
 
     for entry in registry {
@@ -112,7 +112,7 @@ func get_adapter_by_model_id(model_id: string) model_adapter_entry {
     }
 }
 
-func get_adapter_by_model_type(model_type: string) model_adapter_entry {
+func get_adapter_by_model_type(string model_type) model_adapter_entry {
     []model_adapter_entry registry = get_model_registry()
 
     for entry in registry {
@@ -153,7 +153,7 @@ func list_all_supported_models() string {
     output
 }
 
-func is_model_supported(model_id: string) bool {
+func is_model_supported(string model_id) bool {
     []model_adapter_entry registry = get_model_registry()
 
     for entry in registry {

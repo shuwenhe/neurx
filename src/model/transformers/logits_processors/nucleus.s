@@ -8,7 +8,7 @@ struct nucleus_processor {
     float epsilon
 }
 
-func create_nucleus_processor(p: float) nucleus_processor {
+func create_nucleus_processor(float p) nucleus_processor {
     nucleus_processor {
         p: p,
         min_tokens_to_keep: 1,
@@ -253,7 +253,7 @@ func analyze_nucleus_filtering(
     }
 }
 
-func nucleus_stats_to_string(stats: nucleus_stats) string {
+func nucleus_stats_to_string(nucleus_stats stats) string {
     string s = ""
     s = s + "Nucleus (Top-P) Filtering Statistics\n"
     s = s + "────────────────────────────────────\n"

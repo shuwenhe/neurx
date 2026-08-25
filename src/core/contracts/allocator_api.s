@@ -1,5 +1,5 @@
 import "device_api"
-enum allocator_strategy {
+
     simple_alloc
     pool_alloc
     caching_alloc

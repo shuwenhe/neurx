@@ -1,4 +1,4 @@
-enum layout_type {
+
     dense
     channels_last
     channels_first

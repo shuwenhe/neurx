@@ -1,6 +1,6 @@
 package inference
 
-enum request_state {
+
     submitted
     queued
     acquiring_resources
@@ -11,7 +11,7 @@ enum request_state {
     timeout
 }
 
-enum request_priority {
+
     critical
     high
     normal

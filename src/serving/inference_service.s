@@ -187,7 +187,7 @@ func print_deployment_guide() {
     print("   Response: {\"description\":\"...\",\"objects\":[...]}\n\n")
     print("3. Visual Question Answering\n")
     print("   POST /v1/vision/vqa\n")
-    print("   Request: {\"image_path\":\"...\",\"question\":\"What is...?\"}\n")
+    print("   Request: {\"image_path\":\"...\",\"question\":\"What is...\"}\n")
     print("   Response: {\"question\":\"...\",\"answer\":\"...\",\"confidence\":0.95}\n\n")
     print("4. Health Check\n")
     print("   GET /health\n")

@@ -22,7 +22,7 @@ func main() {
         return 1
     }
     string prompt_summary = runtime_run_command_output(phase5_summary_command(prompt_path))
-    if prompt_summary != "default_prompt=What is the treatment for chronic urinary tract infection? tokens=10 prompts=5\n" {
+    if prompt_summary != "default_prompt=What is the treatment for chronic urinary tract infection tokens=10 prompts=5\n" {
         println("phase5-hf-runtime FAIL prompt_summary")
         return 1
     }

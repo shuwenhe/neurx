@@ -109,7 +109,7 @@ func print_header(string title) void {
 }
 
 func print_result(string category, string name, string status, string message) void {
-    string symbol = "?"
+    string symbol = ""
     if status == "passed" { symbol = "✓" }
     else if status == "failed" { symbol = "✗" }
     else if status == "skipped" { symbol = "⊘" }

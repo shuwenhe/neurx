@@ -1,7 +1,7 @@
 package neurx.checkpoint.checkpoint_training
 import "neurx.autograd"
 import "neurx.optimizer"
-enum checkpoint_type {
+
     FULL = 0
     MODEL_ONLY = 1
     OPTIMIZER_ONLY = 2

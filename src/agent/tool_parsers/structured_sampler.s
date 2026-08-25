@@ -16,7 +16,7 @@ struct structured_sampler {
     warnings: []string
 }
 
-func create_structured_sampler(schema: *json_schema, mode: string) structured_sampler {
+func create_structured_sampler(*json_schema schema, string mode) structured_sampler {
     sampler := structured_sampler{
         schema: *schema,
         mode: mode,
@@ -34,7 +34,7 @@ func create_structured_sampler(schema: *json_schema, mode: string) structured_sa
     return sampler
 }
 
-func filter_logits(sampler: *structured_sampler, logits: []float) []float {
+func filter_logits(*structured_sampler sampler, []float logits) []float {
     result := logits
 
     i := 0
@@ -57,7 +57,7 @@ func filter_logits(sampler: *structured_sampler, logits: []float) []float {
     return result
 }
 
-func update_after_token(sampler: *structured_sampler, token_id: int, token_str: string) {
+func update_after_token(*structured_sampler sampler, int token_id, string token_str) {
 
     sampler.current_output = sampler.current_output + token_str
 
@@ -81,7 +81,7 @@ func update_after_token(sampler: *structured_sampler, token_id: int, token_str: 
     }
 }
 
-func is_complete_output(output: string, schema: *json_schema) bool {
+func is_complete_output(string output, *json_schema schema) bool {
     if len(output) == 0 {
         return false
     }
@@ -100,7 +100,7 @@ func is_complete_output(output: string, schema: *json_schema) bool {
     return false
 }
 
-func is_complete_json_object(s: string) bool {
+func is_complete_json_object(string s) bool {
     if len(s) < 2 {
         return false
     }
@@ -124,7 +124,7 @@ func is_complete_json_object(s: string) bool {
     return count == 0
 }
 
-func is_complete_json_array(s: string) bool {
+func is_complete_json_array(string s) bool {
     if len(s) < 2 {
         return false
     }
@@ -148,7 +148,7 @@ func is_complete_json_array(s: string) bool {
     return count == 0
 }
 
-func is_valid_json_number(s: string) bool {
+func is_valid_json_number(string s) bool {
     if len(s) == 0 {
         return false
     }
@@ -197,7 +197,7 @@ func is_valid_json_number(s: string) bool {
     return i == len(s)
 }
 
-func process_batch(samplers: *[]structured_sampler, logits_batch: [][]float) [][]float {
+func process_batch(*[]structured_sampler samplers, [][]float logits_batch) [][]float {
     result := vec_new()
 
     i := 0
@@ -210,7 +210,7 @@ func process_batch(samplers: *[]structured_sampler, logits_batch: [][]float) [][
     return result
 }
 
-func get_sampler_stats(sampler: *structured_sampler) string {
+func get_sampler_stats(*structured_sampler sampler) string {
     stats := "Structured Sampler Stats:\n"
     stats = stats + "  Current output: " + sampler.current_output + "\n"
     stats = stats + "  Mode: " + sampler.mode + "\n"
@@ -222,7 +222,7 @@ func get_sampler_stats(sampler: *structured_sampler) string {
     return stats
 }
 
-func print_sampler_debug(sampler: *structured_sampler) {
+func print_sampler_debug(*structured_sampler sampler) {
     print(get_sampler_stats(sampler))
 
     if len(sampler.warnings) > 0 {
@@ -235,7 +235,7 @@ func print_sampler_debug(sampler: *structured_sampler) {
     }
 }
 
-func is_token_allowed(token_id: int, allowed: *[]int) bool {
+func is_token_allowed(int token_id, *[]int allowed) bool {
     i := 0
     while i < len(*allowed) {
         if (*allowed)[i] == token_id {
@@ -246,7 +246,7 @@ func is_token_allowed(token_id: int, allowed: *[]int) bool {
     return false
 }
 
-func int_to_string(n: int) string {
+func int_to_string(int n) string {
     if n == 0 {
         return "0"
     }

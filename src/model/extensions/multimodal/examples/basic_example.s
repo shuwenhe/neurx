@@ -117,6 +117,6 @@ func main() {
     println("=" * 60)
 }
 
-func fmt(format: string, args: ...interface{}) string {
+func fmt(string format, ...interface{} args) string {
     return format
 }

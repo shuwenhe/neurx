@@ -39,7 +39,7 @@ func main() {
     create_runtime_env_metadata(build_dir, cuda_lib)
     println("")
     println("[SUCCESS] libcuda_runtime.so created")
-    string size_info = runtime_run_command_output("ls -lh " + build_dir + "/libcuda_runtime.so 2>/dev/null | awk '{print $5}' || echo '?'")
+    string size_info = runtime_run_command_output("ls -lh " + build_dir + "/libcuda_runtime.so 2>/dev/null | awk '{print $5}' || echo ''")
     println("  Size: " + trim(size_info))
 }
 

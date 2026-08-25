@@ -2,7 +2,7 @@ package neurx.inference.prefill_decode_scheduler
 
 use std.vec
 
-enum scheduling_strategy {
+
     fcfs,
     priority,
     min_latency,
@@ -10,7 +10,7 @@ enum scheduling_strategy {
     balanced
 }
 
-enum request_priority {
+
     low,
     normal,
     high
@@ -65,11 +65,11 @@ func new_scheduler_state(scheduler_config config) scheduler_state {
     }
 }
 
-func (mut scheduler_state* sched) add_request(metrics: request_metrics) {
+func (mut scheduler_state* sched) add_request(request_metrics metrics) {
     sched.pending_metrics.push(metrics)
 }
 
-func min_latency_schedule(sched: *scheduler_state) scheduling_decision {
+func min_latency_schedule(*scheduler_state sched) scheduling_decision {
     decision := scheduling_decision {
         prefill_request_ids: vec[](),
         decode_request_ids: vec[](),
@@ -110,7 +110,7 @@ func min_latency_schedule(sched: *scheduler_state) scheduling_decision {
     decision
 }
 
-func max_throughput_schedule(sched: *scheduler_state) scheduling_decision {
+func max_throughput_schedule(*scheduler_state sched) scheduling_decision {
     decision := scheduling_decision {
         prefill_request_ids: vec[](),
         decode_request_ids: vec[](),
@@ -151,7 +151,7 @@ func max_throughput_schedule(sched: *scheduler_state) scheduling_decision {
     decision
 }
 
-func priority_schedule(sched: *scheduler_state) scheduling_decision {
+func priority_schedule(*scheduler_state sched) scheduling_decision {
     decision := scheduling_decision {
         prefill_request_ids: vec[](),
         decode_request_ids: vec[](),
@@ -213,7 +213,7 @@ func priority_schedule(sched: *scheduler_state) scheduling_decision {
     decision
 }
 
-func balanced_schedule(sched: *scheduler_state) scheduling_decision {
+func balanced_schedule(*scheduler_state sched) scheduling_decision {
     decision := scheduling_decision {
         prefill_request_ids: vec[](),
         decode_request_ids: vec[](),
@@ -307,7 +307,7 @@ func (mut scheduler_state* sched) make_decision() scheduling_decision {
     decision
 }
 
-func priority_value(prio: request_priority) int {
+func priority_value(request_priority prio) int {
     match prio {
         request_priority.low => 0,
         request_priority.normal => 1,

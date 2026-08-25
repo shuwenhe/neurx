@@ -32,7 +32,7 @@ func NewCUDADeviceManager() &CUDADeviceManager {
     }
 }
 
-func (CUDADeviceManager* m) InitDevice(device_id: i32) bool {
+func (CUDADeviceManager* m) InitDevice(i32 device_id) bool {
     props := CUDADeviceProperties{
         device_id: device_id,
         name: "NVIDIA GPU " + string(device_id),
@@ -49,7 +49,7 @@ func (CUDADeviceManager* m) InitDevice(device_id: i32) bool {
     return true
 }
 
-func (CUDADeviceManager* m) SetDevice(device_id: i32) bool {
+func (CUDADeviceManager* m) SetDevice(i32 device_id) bool {
     if _, exists := m.device_properties[device_id]; exists {
         m.active_device = types.DeviceType.cuda
         return true
@@ -57,14 +57,14 @@ func (CUDADeviceManager* m) SetDevice(device_id: i32) bool {
     return false
 }
 
-func (CUDADeviceManager* m) GetDeviceProperties(device_id: i32) CUDADeviceProperties {
+func (CUDADeviceManager* m) GetDeviceProperties(i32 device_id) CUDADeviceProperties {
     if props, exists := m.device_properties[device_id]; exists {
         return props
     }
     return CUDADeviceProperties{}
 }
 
-func (CUDADeviceManager* m) CreateStream(priority: i32) &types.CUDAStream {
+func (CUDADeviceManager* m) CreateStream(i32 priority) &types.CUDAStream {
     stream_id := i32(len(m.streams))
     stream := &types.CUDAStream{
         stream_id: stream_id,
@@ -77,7 +77,7 @@ func (CUDADeviceManager* m) CreateStream(priority: i32) &types.CUDAStream {
     return stream
 }
 
-func (CUDADeviceManager* m) DestroyStream(stream_id: i32) bool {
+func (CUDADeviceManager* m) DestroyStream(i32 stream_id) bool {
     if _, exists := m.streams[stream_id]; exists {
         delete(m.streams, stream_id)
         return true
@@ -85,7 +85,7 @@ func (CUDADeviceManager* m) DestroyStream(stream_id: i32) bool {
     return false
 }
 
-func (CUDADeviceManager* m) SynchronizeStream(stream_id: i32) bool {
+func (CUDADeviceManager* m) SynchronizeStream(i32 stream_id) bool {
     if stream, exists := m.streams[stream_id]; exists {
         stream.is_active = false
 
@@ -100,7 +100,7 @@ struct CUDAEventManager {
     device_manager: *CUDADeviceManager
 }
 
-func NewCUDAEventManager(device_manager: *CUDADeviceManager) &CUDAEventManager {
+func NewCUDAEventManager(*CUDADeviceManager device_manager) &CUDAEventManager {
     return &CUDAEventManager{
         events: make(map[i32, &types.CUDAEvent]),
         device_manager: device_manager
@@ -120,7 +120,7 @@ func (CUDAEventManager* m) CreateEvent() &types.CUDAEvent {
     return event
 }
 
-func (CUDAEventManager* m) RecordEvent(event_id: i32, stream_id: i32) bool {
+func (CUDAEventManager* m) RecordEvent(i32 event_id, i32 stream_id) bool {
     if event, exists := m.events[event_id]; exists {
         event.is_recorded = true
         event.timestamp = i64(0)
@@ -129,7 +129,7 @@ func (CUDAEventManager* m) RecordEvent(event_id: i32, stream_id: i32) bool {
     return false
 }
 
-func (CUDAEventManager* m) SynchronizeEvent(event_id: i32) bool {
+func (CUDAEventManager* m) SynchronizeEvent(i32 event_id) bool {
     if event, exists := m.events[event_id]; exists {
         if event.is_recorded {
 
@@ -139,7 +139,7 @@ func (CUDAEventManager* m) SynchronizeEvent(event_id: i32) bool {
     return false
 }
 
-func (CUDAEventManager* m) ElapsedTime(start_event_id: i32, end_event_id: i32) f32 {
+func (CUDAEventManager* m) ElapsedTime(i32 start_event_id, i32 end_event_id) f32 {
     if start, ok1 := m.events[start_event_id]; ok1 {
         if end, ok2 := m.events[end_event_id]; ok2 {
             if start.is_recorded && end.is_recorded {
@@ -150,7 +150,7 @@ func (CUDAEventManager* m) ElapsedTime(start_event_id: i32, end_event_id: i32) f
     return 0.0
 }
 
-func (CUDAEventManager* m) DestroyEvent(event_id: i32) bool {
+func (CUDAEventManager* m) DestroyEvent(i32 event_id) bool {
     if _, exists := m.events[event_id]; exists {
         delete(m.events, event_id)
         return true
@@ -164,7 +164,7 @@ struct CUDAPrimitives {
     memory_manager: *memory_manager.MemoryManager
 }
 
-func NewCUDAPrimitives(device_id: i32) &CUDAPrimitives {
+func NewCUDAPrimitives(i32 device_id) &CUDAPrimitives {
     device_mgr := NewCUDADeviceManager()
     device_mgr.InitDevice(device_id)
 
@@ -213,14 +213,14 @@ func (CUDAPrimitives* p) MemcpyDeviceToDevice(
     return true
 }
 
-func (CUDAPrimitives* p) Memset(address: i64, value: i32, size: i64) bool {
+func (CUDAPrimitives* p) Memset(i64 address, i32 value, i64 size) bool {
     if address < 0 || size <= 0 {
         return false
     }
     return true
 }
 
-func (CUDAPrimitives* p) Prefetch(address: i64, size: i64) bool {
+func (CUDAPrimitives* p) Prefetch(i64 address, i64 size) bool {
     if address < 0 || size <= 0 {
         return false
     }

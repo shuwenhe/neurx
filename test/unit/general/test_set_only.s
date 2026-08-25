@@ -5,7 +5,7 @@ struct data {
 }
 
 func main() {
-    println("=== Test: Can we SET fields? ===")
+    println("=== Test: Can we SET fields ===")
     data obj
     obj.value = 42
     println("Set obj.value = 42")

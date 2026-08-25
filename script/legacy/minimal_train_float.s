@@ -143,7 +143,7 @@ func fmt_int(int n) string {
         int ones = value - tens * 10
         return fmt_digit(tens) + fmt_digit(ones)
     }
-    return "?"
+    return ""
 }
 
 func fmt_digit(int d) string {
@@ -177,5 +177,5 @@ func fmt_digit(int d) string {
     if d == 9 {
         return "9"
     }
-    return "?"
+    return ""
 }

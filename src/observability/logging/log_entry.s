@@ -2,7 +2,7 @@ package neurx.observability.logging
 
 import "time"
 
-enum log_level {
+
 	TRACE = 0
 	DEBUG = 1
 	INFO = 2
@@ -11,7 +11,7 @@ enum log_level {
 	FATAL = 5
 }
 
-enum event_type {
+
 	REQUEST_RECEIVED = 0
 	PROCESSING_START = 1
 	PROCESSING_END = 2

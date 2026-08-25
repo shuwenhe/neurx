@@ -1,12 +1,12 @@
 package config
 
-enum validation_level {
+
     strict
     normal
     lenient
 }
 
-enum validation_rule_type {
+
     range_check
     enum_check
     dependency_check

@@ -165,7 +165,7 @@ func demo_batch_parsing() {
     print("  Total Bytes: " + string(stats.total_bytes_parsed) + "\n\n")
 }
 
-func status_to_string(status: int) string {
+func status_to_string(int status) string {
     match status {
         0 => return "SUCCESS"
         1 => return "PARTIAL"
@@ -176,7 +176,7 @@ func status_to_string(status: int) string {
     }
 }
 
-func format_to_string(format: int) string {
+func format_to_string(int format) string {
     match format {
         0 => return "TEXT"
         1 => return "JSON"

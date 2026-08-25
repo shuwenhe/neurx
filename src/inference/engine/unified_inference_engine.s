@@ -228,7 +228,7 @@ func main() {
     engine := NewUnifiedInferenceEngine(config)
     engine.Initialize("./models/llama2-7b")
     req := generate_request{
-        prompt_text: "What is machine learning?",
+        prompt_text: "What is machine learning",
         max_tokens:  100,
         temperature: 0.7,
         priority:    0,

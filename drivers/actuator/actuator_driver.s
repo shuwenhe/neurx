@@ -1,6 +1,6 @@
 package neurx.drivers.actuator
 
-enum actuator_type {
+
     motor_brushless,
     servo_precision,
     linear_actuator,

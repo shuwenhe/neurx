@@ -1,6 +1,6 @@
 package model
 
-enum parameter_dtype {
+
     float32
     float16
     bfloat16
@@ -9,7 +9,7 @@ enum parameter_dtype {
     nf4
 }
 
-enum quantization_method {
+
     none
     symmetric
     asymmetric

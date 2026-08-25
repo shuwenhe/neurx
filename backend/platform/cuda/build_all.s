@@ -195,7 +195,7 @@ func compile_kernels_ptx(build_config cfg, string build_dir) build_result {
         "-std=c++11 -O3 2>&1"
     string output = runtime_run_command_output(cmd)
     bool success = str_len(trim(output)) > 0 && !contains_string(output, "error:")
-    build_result{success: success, output: output, exit_code: success ? 0 : 1}
+    build_result{success: success, output: output, exit_code: success  0 : 1}
 }
 
 func compile_cuda_wrapper(build_config cfg, string build_dir) build_result {
@@ -236,7 +236,7 @@ func create_directory(string path) {
 
 func check_file_exists(string path) {
     if runtime_file_exists(path) {
-        string size = runtime_run_command_output("ls -lh " + path + " | awk '{print $5}' || echo '?'")
+        string size = runtime_run_command_output("ls -lh " + path + " | awk '{print $5}' || echo ''")
         println("  Path: " + path)
         println("  Size: " + trim(size))
     } else {

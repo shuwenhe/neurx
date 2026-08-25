@@ -3,7 +3,7 @@ package reasoning
 import "sync"
 import "time"
 
-enum node_status {
+
 	UNEXPLORED = 0
 	EXPLORING = 1
 	EVALUATED = 2
@@ -11,7 +11,7 @@ enum node_status {
 	SELECTED = 4
 }
 
-enum traversal_type {
+
 	BREADTH_FIRST = 0
 	DEPTH_FIRST = 1
 	BEST_FIRST = 2

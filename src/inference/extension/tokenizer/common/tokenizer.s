@@ -14,7 +14,7 @@ struct BaseTokenizer {
     cache_size_bytes: i32,
 }
 
-func NewBaseTokenizer(config: types.TokenizerConfig) &BaseTokenizer {
+func NewBaseTokenizer(types.TokenizerConfig config) &BaseTokenizer {
     tokenizer := new(BaseTokenizer)
     tokenizer.config = config
     tokenizer.cache_size_bytes = 0
@@ -36,7 +36,7 @@ func NewBaseTokenizer(config: types.TokenizerConfig) &BaseTokenizer {
     return tokenizer
 }
 
-func (BaseTokenizer* t) Encode(text: string) types.TokenizerResult {
+func (BaseTokenizer* t) Encode(string text) types.TokenizerResult {
     return t.EncodeWithOptions(text, types.EncodingOptions{
         add_special_tokens: true,
         truncation: false,
@@ -44,7 +44,7 @@ func (BaseTokenizer* t) Encode(text: string) types.TokenizerResult {
     })
 }
 
-func (BaseTokenizer* t) EncodeWithOptions(text: string, opts: types.EncodingOptions) types.TokenizerResult {
+func (BaseTokenizer* t) EncodeWithOptions(string text, types.EncodingOptions opts) types.TokenizerResult {
     t.stats.total_encodings += 1
 
     if t.config.cache_enabled {
@@ -112,7 +112,7 @@ func (BaseTokenizer* t) EncodeWithOptions(text: string, opts: types.EncodingOpti
     }
 }
 
-func (BaseTokenizer* t) EncodeBatch(texts: vec[string]) vec[types.TokenizerResult] {
+func (BaseTokenizer* t) EncodeBatch(vec[string] texts) vec[types.TokenizerResult] {
     results := make(vec[types.TokenizerResult], len(texts))
     for i := 0; i < len(texts); i += 1 {
         results[i] = t.Encode(texts[i])
@@ -120,14 +120,14 @@ func (BaseTokenizer* t) EncodeBatch(texts: vec[string]) vec[types.TokenizerResul
     return results
 }
 
-func (BaseTokenizer* t) Decode(token_ids: vec[i32]) types.TokenizerResult {
+func (BaseTokenizer* t) Decode(vec[i32] token_ids) types.TokenizerResult {
     return t.DecodeWithOptions(token_ids, types.DecodingOptions{
         skip_special_tokens: false,
         clean_up_tokenization_spaces: true,
     })
 }
 
-func (BaseTokenizer* t) DecodeWithOptions(token_ids: vec[i32], opts: types.DecodingOptions) types.TokenizerResult {
+func (BaseTokenizer* t) DecodeWithOptions(vec[i32] token_ids, types.DecodingOptions opts) types.TokenizerResult {
     t.stats.total_decodings += 1
 
     text_parts := make(vec[string], len(token_ids))
@@ -156,7 +156,7 @@ func (BaseTokenizer* t) DecodeWithOptions(token_ids: vec[i32], opts: types.Decod
     }
 }
 
-func (BaseTokenizer* t) DecodeBatch(token_sequences: vec[vec[i32]]) vec[types.TokenizerResult] {
+func (BaseTokenizer* t) DecodeBatch(vec[vec[i32]] token_sequences) vec[types.TokenizerResult] {
     results := make(vec[types.TokenizerResult], len(token_sequences))
     for i := 0; i < len(token_sequences); i += 1 {
         results[i] = t.Decode(token_sequences[i])
@@ -164,12 +164,12 @@ func (BaseTokenizer* t) DecodeBatch(token_sequences: vec[vec[i32]]) vec[types.To
     return results
 }
 
-func (BaseTokenizer* t) SetSpecialTokens(special: types.SpecialTokens) {
+func (BaseTokenizer* t) SetSpecialTokens(types.SpecialTokens special) {
     t.special_tokens = special
     t.vocab.num_special_tokens = 7
 }
 
-func (BaseTokenizer* t) GetSpecialToken(name: string) i32 {
+func (BaseTokenizer* t) GetSpecialToken(string name) i32 {
     switch name {
     case "bos":
         return t.special_tokens.bos_token_id
@@ -184,7 +184,7 @@ func (BaseTokenizer* t) GetSpecialToken(name: string) i32 {
     }
 }
 
-func (BaseTokenizer* t) IsSpecialToken(token_id: i32) bool {
+func (BaseTokenizer* t) IsSpecialToken(i32 token_id) bool {
     return t.is_special_token(token_id)
 }
 
@@ -192,21 +192,21 @@ func (BaseTokenizer* t) GetVocabularySize() i32 {
     return t.vocab.size
 }
 
-func (BaseTokenizer* t) GetTokenText(token_id: i32) string {
+func (BaseTokenizer* t) GetTokenText(i32 token_id) string {
     if token_text, ok := t.vocab_id_to_text[token_id]; ok {
         return token_text
     }
     return "<unk>"
 }
 
-func (BaseTokenizer* t) GetTokenId(text: string) i32 {
+func (BaseTokenizer* t) GetTokenId(string text) i32 {
     if token_id, ok := t.vocab_text_to_id[text]; ok {
         return token_id
     }
     return t.special_tokens.unk_token_id
 }
 
-func (BaseTokenizer* t) tokenize_internal(text: string) vec[i32] {
+func (BaseTokenizer* t) tokenize_internal(string text) vec[i32] {
     tokens := make(vec[i32], 0)
 
     words := split_string(text, " ")
@@ -231,7 +231,7 @@ func (BaseTokenizer* t) tokenize_internal(text: string) vec[i32] {
     return tokens
 }
 
-func (BaseTokenizer* t) add_special_tokens_internal(tokens: vec[i32]) vec[i32] {
+func (BaseTokenizer* t) add_special_tokens_internal(vec[i32] tokens) vec[i32] {
     result := make(vec[i32], 0)
 
     if t.config.add_bos {
@@ -247,7 +247,7 @@ func (BaseTokenizer* t) add_special_tokens_internal(tokens: vec[i32]) vec[i32] {
     return result
 }
 
-func (BaseTokenizer* t) is_special_token(token_id: i32) bool {
+func (BaseTokenizer* t) is_special_token(i32 token_id) bool {
     return token_id == t.special_tokens.bos_token_id ||
            token_id == t.special_tokens.eos_token_id ||
            token_id == t.special_tokens.pad_token_id ||
@@ -257,7 +257,7 @@ func (BaseTokenizer* t) is_special_token(token_id: i32) bool {
            token_id == t.special_tokens.mask_token_id
 }
 
-func (BaseTokenizer* t) join_tokens(tokens: vec[string], clean_spaces: bool) string {
+func (BaseTokenizer* t) join_tokens(vec[string] tokens, bool clean_spaces) string {
     if len(tokens) == 0 {
         return ""
     }
@@ -306,7 +306,7 @@ func (BaseTokenizer* t) GetCacheStatistics() map[string]i64 {
     return stats
 }
 
-func simple_hash(s: string) u64 {
+func simple_hash(string s) u64 {
     hash := u64(5381)
     for i := 0; i < len(s); i += 1 {
         hash = ((hash << 5) + hash) + u64(s[i])
@@ -319,7 +319,7 @@ func current_time_ms() i64 {
     return i64(0)
 }
 
-func split_string(s: string, sep: string) vec[string] {
+func split_string(string s, string sep) vec[string] {
     parts := make(vec[string], 0)
     current := ""
 
@@ -341,7 +341,7 @@ func split_string(s: string, sep: string) vec[string] {
     return parts
 }
 
-func append_slice(a: vec[i32], b: vec[i32]) vec[i32] {
+func append_slice(vec[i32] a, vec[i32] b) vec[i32] {
     for i := 0; i < len(b); i += 1 {
         a = append(a, b[i])
     }

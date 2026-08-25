@@ -2,7 +2,7 @@ import "./types"
 import "std/string"
 import "std/vector"
 
-func NormalizeText(text: string) string {
+func NormalizeText(string text) string {
 
     text = trim_whitespace(text)
 
@@ -11,7 +11,7 @@ func NormalizeText(text: string) string {
     return text
 }
 
-func TokensToString(tokens: vec[i32], vocab: map[i32]string) string {
+func TokensToString(vec[i32] tokens, map[i32]string vocab) string {
     result := ""
 
     for i := 0; i < len(tokens); i += 1 {
@@ -29,7 +29,7 @@ func TokensToString(tokens: vec[i32], vocab: map[i32]string) string {
     return result
 }
 
-func StringToTokens(text: string, vocab: map[string]i32) vec[i32] {
+func StringToTokens(string text, map[string]i32 vocab) vec[i32] {
     tokens := make(vec[i32], 0)
 
     parts := split_by_space(text)
@@ -49,11 +49,11 @@ func StringToTokens(text: string, vocab: map[string]i32) vec[i32] {
     return tokens
 }
 
-func GetSequenceLength(tokens: vec[i32]) i32 {
+func GetSequenceLength(vec[i32] tokens) i32 {
     return i32(len(tokens))
 }
 
-func GetTokenFrequency(tokens: vec[i32]) map[i32]i32 {
+func GetTokenFrequency(vec[i32] tokens) map[i32]i32 {
     freq := make(map[i32]i32)
 
     for i := 0; i < len(tokens); i += 1 {
@@ -63,7 +63,7 @@ func GetTokenFrequency(tokens: vec[i32]) map[i32]i32 {
     return freq
 }
 
-func GetMostFrequentTokens(tokens: vec[i32], top_n: i32) vec[i32] {
+func GetMostFrequentTokens(vec[i32] tokens, i32 top_n) vec[i32] {
     freq := GetTokenFrequency(tokens)
 
     token_ids := make(vec[i32], 0)
@@ -88,7 +88,7 @@ func GetMostFrequentTokens(tokens: vec[i32], top_n: i32) vec[i32] {
     return token_ids
 }
 
-func GetTokenEntropy(tokens: vec[i32]) f32 {
+func GetTokenEntropy(vec[i32] tokens) f32 {
     if len(tokens) == 0 {
         return 0.0
     }
@@ -107,7 +107,7 @@ func GetTokenEntropy(tokens: vec[i32]) f32 {
     return entropy
 }
 
-func GetUniqueTokenCount(tokens: vec[i32]) i32 {
+func GetUniqueTokenCount(vec[i32] tokens) i32 {
     unique := make(map[i32]bool)
 
     for i := 0; i < len(tokens); i += 1 {
@@ -117,7 +117,7 @@ func GetUniqueTokenCount(tokens: vec[i32]) i32 {
     return i32(len(unique))
 }
 
-func PadSequence(tokens: vec[i32], target_length: i32, pad_token_id: i32) vec[i32] {
+func PadSequence(vec[i32] tokens, i32 target_length, i32 pad_token_id) vec[i32] {
     current_len := i32(len(tokens))
 
     if current_len >= target_length {
@@ -137,7 +137,7 @@ func PadSequence(tokens: vec[i32], target_length: i32, pad_token_id: i32) vec[i3
     return result
 }
 
-func TruncateSequence(tokens: vec[i32], max_length: i32) vec[i32] {
+func TruncateSequence(vec[i32] tokens, i32 max_length) vec[i32] {
     if i32(len(tokens)) <= max_length {
         return tokens
     }
@@ -145,7 +145,7 @@ func TruncateSequence(tokens: vec[i32], max_length: i32) vec[i32] {
     return tokens[0:max_length]
 }
 
-func TruncateSequenceFromLeft(tokens: vec[i32], max_length: i32) vec[i32] {
+func TruncateSequenceFromLeft(vec[i32] tokens, i32 max_length) vec[i32] {
     if i32(len(tokens)) <= max_length {
         return tokens
     }
@@ -154,7 +154,7 @@ func TruncateSequenceFromLeft(tokens: vec[i32], max_length: i32) vec[i32] {
     return tokens[start:]
 }
 
-func AreTokensEqual(seq1: vec[i32], seq2: vec[i32]) bool {
+func AreTokensEqual(vec[i32] seq1, vec[i32] seq2) bool {
     if len(seq1) != len(seq2) {
         return false
     }
@@ -168,7 +168,7 @@ func AreTokensEqual(seq1: vec[i32], seq2: vec[i32]) bool {
     return true
 }
 
-func FindSubsequence(haystack: vec[i32], needle: vec[i32]) i32 {
+func FindSubsequence(vec[i32] haystack, vec[i32] needle) i32 {
     if len(needle) == 0 || len(needle) > len(haystack) {
         return -1
     }
@@ -189,7 +189,7 @@ func FindSubsequence(haystack: vec[i32], needle: vec[i32]) i32 {
     return -1
 }
 
-func CountOccurrences(haystack: vec[i32], needle: vec[i32]) i32 {
+func CountOccurrences(vec[i32] haystack, vec[i32] needle) i32 {
     count := i32(0)
     pos := i32(0)
 
@@ -206,7 +206,7 @@ func CountOccurrences(haystack: vec[i32], needle: vec[i32]) i32 {
     return count
 }
 
-func GetSequenceStats(tokens: vec[i32]) map[string]f32 {
+func GetSequenceStats(vec[i32] tokens) map[string]f32 {
     stats := make(map[string]f32)
 
     if len(tokens) == 0 {
@@ -240,7 +240,7 @@ func GetSequenceStats(tokens: vec[i32]) map[string]f32 {
     return stats
 }
 
-func PadBatch(sequences: vec[vec[i32]], pad_token_id: i32) vec[vec[i32]] {
+func PadBatch(vec[vec[i32]] sequences, i32 pad_token_id) vec[vec[i32]] {
 
     max_len := i32(0)
     for i := 0; i < len(sequences); i += 1 {
@@ -257,7 +257,7 @@ func PadBatch(sequences: vec[vec[i32]], pad_token_id: i32) vec[vec[i32]] {
     return result
 }
 
-func GetBatchLengths(sequences: vec[vec[i32]]) vec[i32] {
+func GetBatchLengths(vec[vec[i32]] sequences) vec[i32] {
     lengths := make(vec[i32], len(sequences))
     for i := 0; i < len(sequences); i += 1 {
         lengths[i] = i32(len(sequences[i]))
@@ -265,7 +265,7 @@ func GetBatchLengths(sequences: vec[vec[i32]]) vec[i32] {
     return lengths
 }
 
-func trim_whitespace(s: string) string {
+func trim_whitespace(string s) string {
     start := 0
     end := len(s)
 
@@ -280,12 +280,12 @@ func trim_whitespace(s: string) string {
     return s[start:end]
 }
 
-func normalize_unicode(s: string) string {
+func normalize_unicode(string s) string {
 
     return s
 }
 
-func split_by_space(s: string) vec[string] {
+func split_by_space(string s) vec[string] {
     parts := make(vec[string], 0)
     current := ""
 
@@ -307,11 +307,11 @@ func split_by_space(s: string) vec[string] {
     return parts
 }
 
-func is_whitespace(char: string) bool {
+func is_whitespace(string char) bool {
     return char == " " || char == "\t" || char == "\n" || char == "\r"
 }
 
-func string_from_i32(n: i32) string {
+func string_from_i32(i32 n) string {
     if n == 0 {
         return "0"
     }
@@ -334,7 +334,7 @@ func string_from_i32(n: i32) string {
     return result + digits
 }
 
-func log2(x: f32) f32 {
+func log2(f32 x) f32 {
 
     if x <= 0.0 {
         return 0.0

@@ -31,7 +31,7 @@ struct MemoryPool {
     min_block_size: i64
 }
 
-func NewMemoryManager(device: types.DeviceType, total_mem: i64) &MemoryManager {
+func NewMemoryManager(types.DeviceType device, i64 total_mem) &MemoryManager {
     return &MemoryManager{
         device: device,
         total_memory: total_mem,
@@ -43,7 +43,7 @@ func NewMemoryManager(device: types.DeviceType, total_mem: i64) &MemoryManager {
     }
 }
 
-func (MemoryManager* m) Allocate(size: i64) i64 {
+func (MemoryManager* m) Allocate(i64 size) i64 {
     if size <= 0 {
         return -1
     }
@@ -63,7 +63,7 @@ func (MemoryManager* m) Allocate(size: i64) i64 {
     return address
 }
 
-func (MemoryManager* m) Free(address: i64) bool {
+func (MemoryManager* m) Free(i64 address) bool {
     if _, exists := m.allocated_blocks[address]; exists {
         delete(m.allocated_blocks, address)
         m.free_blocks = append(m.free_blocks, address)
@@ -153,7 +153,7 @@ func (MemoryManager* m) GetStats() string {
     return result
 }
 
-func NewMemoryPool(device: types.DeviceType, pool_size: i64) &MemoryPool {
+func NewMemoryPool(types.DeviceType device, i64 pool_size) &MemoryPool {
     return &MemoryPool{
         device: device,
         pool_size: pool_size,
@@ -164,7 +164,7 @@ func NewMemoryPool(device: types.DeviceType, pool_size: i64) &MemoryPool {
     }
 }
 
-func (MemoryPool* p) AllocateFromPool(size: i64) i64 {
+func (MemoryPool* p) AllocateFromPool(i64 size) i64 {
     if size > p.available || size < p.min_block_size {
         return -1
     }
@@ -184,7 +184,7 @@ func (MemoryPool* p) AllocateFromPool(size: i64) i64 {
     return address
 }
 
-func (MemoryPool* p) FreeToPool(address: i64, size: i64) bool {
+func (MemoryPool* p) FreeToPool(i64 address, i64 size) bool {
     for i := 0; i < len(p.blocks); i += 1 {
         if p.blocks[i].address == address {
             p.blocks[i].is_free = true

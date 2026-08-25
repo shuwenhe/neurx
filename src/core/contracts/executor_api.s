@@ -1,6 +1,6 @@
 import "execution_plan_api"
 import "profiler_api"
-enum execution_mode {
+
     eager
     compiled
     JIT

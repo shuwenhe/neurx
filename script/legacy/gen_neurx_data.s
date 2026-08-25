@@ -41,7 +41,7 @@ func generate_llm_training_data(): training_data {
 }
 
 func generate_qa_data(): training_data {
-    text := "# English text: English textusePythonimplementationquickrankingEnglish text?"
+    text := "# English text: English textusePythonimplementationquickrankingEnglish text"
     return training_data{
         text: text,
         category: CATEGORY_QA,

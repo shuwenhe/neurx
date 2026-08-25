@@ -3,7 +3,7 @@ package neurx.backend.platform.robot
 use std.vec.vec
 use std.io.println
 
-enum safety_state {
+
     safe,
     warning,
     critical,
@@ -32,8 +32,7 @@ func new_safety_monitor(int hz) safety_monitor {
     }
 }
 
-func (monitor: &mut safety_monitor) check_joint_limits([]float positions, []float limits_min, []float limits_max) bool {
-    if positions.len() != limits_min.len() || positions.len() != limits_max.len() {
+func (safety_monitor* monitor) check_joint_limits([]float positions, []float limits_min, []float limits_max) bool {    if positions.len() != limits_min.len() || positions.len() != limits_max.len() {
         return false
     }
     
@@ -48,8 +47,7 @@ func (monitor: &mut safety_monitor) check_joint_limits([]float positions, []floa
     true
 }
 
-func (monitor: &mut safety_monitor) check_joint_velocities([]float velocities, float max_velocity) bool {
-    for i in 0..velocities.len() {
+func (safety_monitor* monitor) check_joint_velocities([]float velocities, float max_velocity) bool {    for i in 0..velocities.len() {
         if velocities[i] > max_velocity {
             monitor.state = safety_state::critical
             return false
@@ -58,24 +56,21 @@ func (monitor: &mut safety_monitor) check_joint_velocities([]float velocities, f
     true
 }
 
-func (monitor: &mut safety_monitor) trigger_emergency_stop() {
+func (safety_monitor* monitor) trigger_emergency_stop() {
     monitor.emergency_stop_triggered = true
     monitor.state = safety_state::emergency_stop
 }
 
-func (monitor: &mut safety_monitor) reset_emergency_stop() {
+func (safety_monitor* monitor) reset_emergency_stop() {
     monitor.emergency_stop_triggered = false
     monitor.state = safety_state::safe
 }
 
-func (monitor: &monitor) get_state() safety_state {
-    monitor.state
+func (monitor* monitor) get_state() safety_state {    monitor.state
 }
 
-func (monitor: &monitor) is_emergency_stop_active() bool {
-    monitor.emergency_stop_triggered
+func (monitor* monitor) is_emergency_stop_active() bool {    monitor.emergency_stop_triggered
 }
 
-func (monitor: &monitor) get_monitoring_hz() int {
-    monitor.monitoring_hz
+func (monitor* monitor) get_monitoring_hz() int {    monitor.monitoring_hz
 }

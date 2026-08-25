@@ -1,6 +1,6 @@
 package mem_cache
 
-enum memory_layout {
+
     contiguous
     fragmented
     hybrid

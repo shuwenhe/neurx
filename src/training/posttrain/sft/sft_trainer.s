@@ -189,7 +189,7 @@ func builtin_sft_examples() []sft_example {
     }
     examples[3] = sft_example {
         instruction: "Answer politely",
-        input_context: "Can you help me?",
+        input_context: "Can you help me",
         output: "Yes, I can help you with that.",
         category: "chat",
         quality_score: 0.94,

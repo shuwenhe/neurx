@@ -29,7 +29,7 @@ struct weight_dict {
     int total_size_bytes
 }
 
-func parse_safetensors_header(header_json: string) safetensors_header {
+func parse_safetensors_header(string header_json) safetensors_header {
 
     safetensors_header {
         tensor_names: [],
@@ -40,7 +40,7 @@ func parse_safetensors_header(header_json: string) safetensors_header {
     }
 }
 
-func get_tensor_info(name: string) tensor_info {
+func get_tensor_info(string name) tensor_info {
     tensor_info {
         dtype: "F32",
         shape: [],
@@ -49,7 +49,7 @@ func get_tensor_info(name: string) tensor_info {
     }
 }
 
-func map_layer_name_to_neurx(hf_name: string) string {
+func map_layer_name_to_neurx(string hf_name) string {
 
     if hf_name == "model.embed_tokens.weight" {
         return "embedding.token_embed"
@@ -90,7 +90,7 @@ func convert_weight_names_huggingface_to_neurx(
     neurx_names
 }
 
-func dtype_size_bytes(dtype: string) int {
+func dtype_size_bytes(string dtype) int {
     if dtype == "F32" || dtype == "I32" {
         return 4
     }
@@ -106,7 +106,7 @@ func dtype_size_bytes(dtype: string) int {
     4
 }
 
-func calculate_tensor_size(shape: []int, dtype: string) int {
+func calculate_tensor_size([]int shape, string dtype) int {
     int size = 1
     for dim in shape {
         size = size * dim
@@ -114,7 +114,7 @@ func calculate_tensor_size(shape: []int, dtype: string) int {
     size * dtype_size_bytes(dtype)
 }
 
-func load_safetensors_metadata(file_path: string) weight_dict {
+func load_safetensors_metadata(string file_path) weight_dict {
 
     weight_dict {
         tensors: [],

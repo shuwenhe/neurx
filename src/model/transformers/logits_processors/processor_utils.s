@@ -13,7 +13,7 @@ struct processor_result {
     []float top_token_probs
 }
 
-func softmax(logits: []float) []float {
+func softmax([]float logits) []float {
 
     float max_logit = logits[0]
     for i = 1; i < logits.len(); i = i + 1 {
@@ -39,7 +39,7 @@ func softmax(logits: []float) []float {
     probs
 }
 
-func log_softmax(logits: []float) []float {
+func log_softmax([]float logits) []float {
     float max_logit = logits[0]
     for i = 1; i < logits.len(); i = i + 1 {
         if logits[i] > max_logit {
@@ -119,14 +119,14 @@ func apply_token_mask(
     masked_logits
 }
 
-func find_token_index(token_id: int, vocab_size: int) int {
+func find_token_index(int token_id, int vocab_size) int {
     if token_id < 0 || token_id >= vocab_size {
         return -1
     }
     token_id
 }
 
-func cumulative_softmax(probs: []float) []float {
+func cumulative_softmax([]float probs) []float {
     []float cum_probs
     float cumsum = 0.0
 
@@ -144,7 +144,7 @@ struct batch_processor_state {
     []processor_result results
 }
 
-func create_batch_processor(batch_size: int, vocab_size: int) batch_processor_state {
+func create_batch_processor(int batch_size, int vocab_size) batch_processor_state {
     batch_processor_state {
         batch_size: batch_size,
         batch_logits: [],
@@ -152,7 +152,7 @@ func create_batch_processor(batch_size: int, vocab_size: int) batch_processor_st
     }
 }
 
-func logits_processor_to_string(processor: logits_processor) string {
+func logits_processor_to_string(logits_processor processor) string {
     string s = ""
     s = s + "Processor: " + processor.processor_type + "\n"
     s = s + "Vocab size: " + int_to_string(processor.vocab_size) + "\n"

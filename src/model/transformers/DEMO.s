@@ -141,7 +141,7 @@ func main() {
     string test_model = "meta-llama/Llama-2-7b"
     bool supported = adapter_registry.is_model_supported(test_model)
 
-    print("Is '" + test_model + "' supported? ")
+    print("Is '" + test_model + "' supported ")
     if supported {
         print("✓ YES\n\n")
     } else {

@@ -2,7 +2,7 @@ package plugins
 
 import "time"
 
-enum plugin_state {
+
 	PLUGIN_UNINITIALIZED = 0
 	PLUGIN_LOADED = 1
 	PLUGIN_INITIALIZED = 2
@@ -14,7 +14,7 @@ enum plugin_state {
 	PLUGIN_UNLOADING = 8
 }
 
-enum plugin_type {
+
 	TYPE_SAMPLER = 0
 	TYPE_ENCODER = 1
 	TYPE_REASONER = 2
@@ -24,7 +24,7 @@ enum plugin_type {
 	TYPE_CUSTOM = 6
 }
 
-enum plugin_hook_type {
+
 	HOOK_ON_LOAD = 0
 	HOOK_ON_INIT = 1
 	HOOK_BEFORE_PROCESS = 2

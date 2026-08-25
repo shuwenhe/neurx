@@ -23,25 +23,25 @@ struct vision_config {
 
 struct image_input {
     pixel_values: tensor
-    image_path: string?
-    image_url: string?
-    metadata: map<string, any>?
+    image_path: string
+    image_url: string
+    metadata: map<string, any>
 }
 
 struct video_input {
     frames: list<tensor>
-    video_path: string?
+    video_path: string
     fps: float
     duration_seconds: float
-    audio_track: tensor?
+    audio_track: tensor
 }
 
 struct vision_output {
     image_features: tensor
     pooled_features: tensor
-    attention_maps: list<tensor>?,
-    spatial_features: tensor?,
-    multimodal_embedding: tensor?,
+    attention_maps: list<tensor>,
+    spatial_features: tensor,
+    multimodal_embedding: tensor,
     metadata: vision_metadata
 }
 
@@ -171,7 +171,7 @@ struct vi_t_encoder_blocks {
             ))
         }
     }
-    forward(hidden_states: tensor, attention_mask: tensor?) {
+    forward(hidden_states: tensor, attention_mask: tensor) {
         all attentions: list<tensor> = []
         for layer in this.layers {
             if this.gradient_checkpointing {
@@ -186,14 +186,14 @@ struct vi_t_encoder_blocks {
         }
         return encoder_output {
             last_hidden_state=hidden_states,
-            attentions=attentions.length > 0 ? attentions : null
+            attentions=attentions.length > 0  attentions : null
         }
     }
 }
 
 struct encoder_output {
     last_hidden_state: tensor
-    attentions: list<tensor>?
+    attentions: list<tensor>
 }
 struct vi_t_layer {
     attention: ViTAttention
@@ -208,7 +208,7 @@ struct vi_t_layer {
         this.layernorm_before = new layer_norm(hidden_size, eps=1e-6)
         this.layernorm_after = new layer_norm(hidden_size, eps=1e-6)
     }
-    forward(hidden_states: tensor, attention_mask: tensor?) {
+    forward(hidden_states: tensor, attention_mask: tensor) {
         normalized := this.layernorm_before.forward(hidden_states)
         attention_output := this.attention.forward(normalized, attention_mask)
         residual := hidden_states + attention_output.hidden_states
@@ -224,7 +224,7 @@ struct vi_t_layer {
 
 struct layer_output {
     hidden_states: tensor
-    attention_weights: tensor?
+    attention_weights: tensor
 }
 struct vi_t_attention {
     query: linear
@@ -243,7 +243,7 @@ struct vi_t_attention {
         this.value = new linear(in_features=hidden_size, out_features=hidden_size, bias=true)
         this.output_proj = new linear(in_features=hidden_size, out_features=hidden_size, bias=true)
     }
-    forward(hidden_states: tensor, attention_mask: tensor?) {
+    forward(hidden_states: tensor, attention_mask: tensor) {
         batch_size, seq_len, _ = hidden_states.shape
         q := this.query.forward(hidden_states)
         k := this.key.forward(hidden_states)
@@ -269,7 +269,7 @@ struct vi_t_attention {
 
 struct attention_output {
     hidden_states: tensor
-    attention_weights: tensor?
+    attention_weights: tensor
 }
 struct intermediate {
     dense: linear
@@ -296,7 +296,7 @@ struct output {
         return x + residual
     }
 }
-enum pool_type {
+
     CLS_TOKEN
     MEAN_POOLING
     MAX_POOLING
@@ -304,7 +304,7 @@ enum pool_type {
 }
 struct vision_pooler {
     pool_type: PoolType
-    attention_pool?: LearnableAttentionPool
+    attention_pool: LearnableAttentionPool
     init(string pool_type) {
         match pool_type {
             "cls_token" => this.pool_type = pool_type.CLS_TOKEN
@@ -634,7 +634,7 @@ struct multi_image_processor {
     config: vision_config
     vit_encoder: ViTEncoder
     visual_adapter: VisualAdapter
-    cross_image_attention: CrossImageAttention?
+    cross_image_attention: CrossImageAttention
     init(config: vision_config) {
         this.config = config
         this.vit_encoder = new vi_t_encoder(config=config)
@@ -686,9 +686,9 @@ struct multi_image_processor {
 
 struct multimodal_embedding_result {
     per_image_features: list<tensor>
-    fused_multimodal_embedding: tensor?
+    fused_multimodal_embedding: tensor
     num_images: int
-    metadata: vision_metadata?
+    metadata: vision_metadata
 }
 struct cross_image_attention {
     query: linear
@@ -765,8 +765,8 @@ struct multimodal_vision_model {
     vision_encoder: ViTEncoder
     visual_adapter: VisualAdapter
     language_model: any
-    multi_image_processor: MultiImageProcessor?
-    video_processor: VideoProcessor?
+    multi_image_processor: MultiImageProcessor
+    video_processor: VideoProcessor
     image_preprocessor: ImagePreprocessor
     init(config: vision_config, lm_model: any) {
         this.config = config
@@ -794,7 +794,7 @@ struct multimodal_vision_model {
         return vision_language_output {
             answer=response.text,
             visual_tokens=visual_tokens,
-            attention_map=vision_out.attention_maps?[0],
+            attention_map=vision_out.attention_maps[0],
             confidence=response.confidence_score
         }
     }
@@ -860,7 +860,7 @@ struct multimodal_vision_model {
 struct vision_language_output {
     answer: string
     visual_tokens: tensor
-    attention_map: tensor?
+    attention_map: tensor
     confidence: float
 }
 function create_multimodal_vision(string model_variant = "neurx-4v-plus") {

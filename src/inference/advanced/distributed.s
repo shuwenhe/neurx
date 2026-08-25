@@ -1,19 +1,19 @@
 package neurx.inference.advanced.distributed
 import "time"
-enum device_type {
+
     CPU
     CUDA_GPU
     ROCm_GPU
 }
 
-enum parallel_mode {
+
     DATA_PARALLEL
     TENSOR_PARALLEL
     PIPELINE_PARALLEL
     HYBRID_PARALLEL
 }
 
-enum comm_backend {
+
     NCCL
     GLOO
     MPI
@@ -50,7 +50,7 @@ struct tensor_shard {
     shard_index int
 }
 
-enum communication_op {
+
     ALL_REDUCE
     ALL_GATHER
     REDUCE_SCATTER

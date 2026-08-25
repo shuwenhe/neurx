@@ -29,7 +29,7 @@ struct CacheStats {
     bytes_evicted: i64,
 }
 
-func NewTokenCache(max_size_bytes: i32, eviction_policy: string) &TokenCache {
+func NewTokenCache(i32 max_size_bytes, string eviction_policy) &TokenCache {
     cache := new(TokenCache)
     cache.entries = make(map[string]CacheEntry)
     cache.max_size_bytes = max_size_bytes
@@ -40,7 +40,7 @@ func NewTokenCache(max_size_bytes: i32, eviction_policy: string) &TokenCache {
     return cache
 }
 
-func (TokenCache* c) Get(key: string) (vec[i32], bool) {
+func (TokenCache* c) Get(string key) (vec[i32], bool) {
     if entry, ok := c.entries[key]; ok {
         c.stats.total_hits += 1
 
@@ -54,11 +54,11 @@ func (TokenCache* c) Get(key: string) (vec[i32], bool) {
     return make(vec[i32], 0), false
 }
 
-func (TokenCache* c) Put(key: string, tokens: vec[i32]) bool {
+func (TokenCache* c) Put(string key, vec[i32] tokens) bool {
     return c.PutWithHash(key, tokens, hash_string(key))
 }
 
-func (TokenCache* c) PutWithHash(key: string, tokens: vec[i32], hash: u64) bool {
+func (TokenCache* c) PutWithHash(string key, vec[i32] tokens, u64 hash) bool {
 
     if _, exists := c.entries[key]; exists {
         return false
@@ -91,7 +91,7 @@ func (TokenCache* c) PutWithHash(key: string, tokens: vec[i32], hash: u64) bool 
     return true
 }
 
-func (TokenCache* c) Remove(key: string) bool {
+func (TokenCache* c) Remove(string key) bool {
     if entry, ok := c.entries[key]; ok {
         delete(c.entries, key)
         c.current_size_bytes -= entry.size_bytes
@@ -100,7 +100,7 @@ func (TokenCache* c) Remove(key: string) bool {
     return false
 }
 
-func (TokenCache* c) Contains(key: string) bool {
+func (TokenCache* c) Contains(string key) bool {
     _, exists := c.entries[key]
     return exists
 }
@@ -155,7 +155,7 @@ func (TokenCache* c) evict_one() {
     }
 }
 
-func (TokenCache* c) GetBatch(keys: vec[string]) map[string]vec[i32] {
+func (TokenCache* c) GetBatch(vec[string] keys) map[string]vec[i32] {
     results := make(map[string]vec[i32])
 
     for i := 0; i < len(keys); i += 1 {
@@ -167,7 +167,7 @@ func (TokenCache* c) GetBatch(keys: vec[string]) map[string]vec[i32] {
     return results
 }
 
-func (TokenCache* c) PutBatch(entries: map[string]vec[i32]) i32 {
+func (TokenCache* c) PutBatch(map[string]vec[i32] entries) i32 {
     count := i32(0)
 
     for key, tokens := range entries {
@@ -186,7 +186,7 @@ func (TokenCache* c) Clear() {
     c.current_size_bytes = 0
 }
 
-func (TokenCache* c) Compact(min_hit_count: i32) i32 {
+func (TokenCache* c) Compact(i32 min_hit_count) i32 {
     removed := i32(0)
     keys_to_remove := make(vec[string], 0)
 
@@ -205,7 +205,7 @@ func (TokenCache* c) Compact(min_hit_count: i32) i32 {
     return removed
 }
 
-func (TokenCache* c) PurgeOld(max_age_ms: i64) i32 {
+func (TokenCache* c) PurgeOld(i64 max_age_ms) i32 {
     removed := i32(0)
     current_time := current_time_ms()
     keys_to_remove := make(vec[string], 0)
@@ -265,7 +265,7 @@ func (TokenCache* c) PrintStatistics() {
     println("  Bytes Evicted:", c.stats.bytes_evicted)
 }
 
-func (TokenCache* c) GetLargestEntries(count: i32) vec[CacheEntry] {
+func (TokenCache* c) GetLargestEntries(i32 count) vec[CacheEntry] {
     entries := make(vec[CacheEntry], 0)
 
     for _, entry := range c.entries {
@@ -288,7 +288,7 @@ func (TokenCache* c) GetLargestEntries(count: i32) vec[CacheEntry] {
     return entries
 }
 
-func (TokenCache* c) GetHotEntries(count: i32) vec[CacheEntry] {
+func (TokenCache* c) GetHotEntries(i32 count) vec[CacheEntry] {
     entries := make(vec[CacheEntry], 0)
 
     for _, entry := range c.entries {
@@ -311,7 +311,7 @@ func (TokenCache* c) GetHotEntries(count: i32) vec[CacheEntry] {
     return entries
 }
 
-func hash_string(s: string) u64 {
+func hash_string(string s) u64 {
     hash := u64(5381)
     for i := 0; i < len(s); i += 1 {
         hash = ((hash << 5) + hash) + u64(s[i])

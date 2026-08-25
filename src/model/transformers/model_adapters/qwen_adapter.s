@@ -83,7 +83,7 @@ func get_qwen2_5_7b_config() qwen_model_config {
     }
 }
 
-func get_qwen_config_by_version(version: string) qwen_model_config {
+func get_qwen_config_by_version(string version) qwen_model_config {
     if version == "qwen-7b" {
         return get_qwen_7b_config()
     }
@@ -110,7 +110,7 @@ func get_qwen_chat_template() string {
     template
 }
 
-func get_qwen_attention_type(num_kv_heads: int) string {
+func get_qwen_attention_type(int num_kv_heads) string {
     if num_kv_heads == 1 {
         return "mqa"
     }
@@ -162,7 +162,7 @@ struct qwen_quantization_config {
     int quant_type
 }
 
-func get_qwen_quantization_config(method: string) qwen_quantization_config {
+func get_qwen_quantization_config(string method) qwen_quantization_config {
     if method == "4bit" {
         return qwen_quantization_config {
             quant_method: "int4",
@@ -266,7 +266,7 @@ func get_qwen_special_tokens() qwen_special_tokens {
     }
 }
 
-func print_qwen_config(config: qwen_model_config) {
+func print_qwen_config(qwen_model_config config) {
     print("\n╔════════════════════════════════════════════════╗\n")
     print("║  🏮 Qwen Model Configuration                 ║\n")
     print("╚════════════════════════════════════════════════╝\n\n")
@@ -287,7 +287,7 @@ func print_qwen_config(config: qwen_model_config) {
     print("RoPE theta: " + float_to_string(config.rope_theta) + "\n")
     print("RoPE scaling: " + config.rope_scaling_type + "\n")
     print("Sliding window: " + int_to_string(config.sliding_window) + "\n")
-    print("Long context attn: " + (config.use_long_context_attn ? "Yes" : "No") + "\n\n")
+    print("Long context attn: " + (config.use_long_context_attn  "Yes" : "No") + "\n\n")
 
     print("Normalization\n")
     print("─────────────────────────────────────────────\n")

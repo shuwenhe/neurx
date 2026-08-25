@@ -3,7 +3,7 @@ package reasoning
 import "sync"
 import "time"
 
-enum thought_type {
+
 	INITIAL_ANALYSIS = 0
 	INTERMEDIATE_STEP = 1
 	VERIFICATION = 2

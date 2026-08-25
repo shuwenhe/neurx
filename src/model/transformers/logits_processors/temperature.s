@@ -7,7 +7,7 @@ struct temperature_processor {
     bool preserve_extremes
 }
 
-func create_temperature_processor(temperature: float) temperature_processor {
+func create_temperature_processor(float temperature) temperature_processor {
     temp := temperature
 
     if temp < 0.01 {
@@ -270,7 +270,7 @@ func analyze_temperature_effect(
     }
 }
 
-func temperature_stats_to_string(stats: temperature_stats) string {
+func temperature_stats_to_string(temperature_stats stats) string {
     string s = ""
     s = s + "Temperature Effect Analysis\n"
     s = s + "───────────────────────────────\n"

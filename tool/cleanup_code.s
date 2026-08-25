@@ -74,7 +74,7 @@ func ensure_spacing(string content) string {
 			is_func := strings.has_prefix(trimmed, "func ") && strings.has_suffix(trimmed, "{")
 			is_struct := strings.has_prefix(trimmed, "struct ") && strings.has_suffix(trimmed, "{")
 			next_is_decl := (strings.has_prefix(next_trimmed, "func ") || strings.has_prefix(next_trimmed, "struct ")) && next_trimmed != ""
-			if (is_func || is_struct) && next_is_decl {
+			if(is_func || is_struct) && next_is_decl {
 				if i + 2 < len(lines) && strings.trim(lines[i + 1]) != "" {
 					result = result + [""]
 				}

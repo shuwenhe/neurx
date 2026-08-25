@@ -1,6 +1,6 @@
 package neurx.posttrain.reward.verifiable_reward_manager
 use std.io.eprintln
-enum reward_type {
+
     MODEL_BASED,
     FUNCTION_BASED,
     HUMAN_FEEDBACK,

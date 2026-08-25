@@ -1,0 +1,127 @@
+SSEED-TARGET-V1
+FUNC_BEGIN|main|_|_
+ARG|"\\n🚀 启动 NeurX 推理系统（带日志记录）\\n"|_|_
+CALL|t0|print|1
+ARG|"════════════════════════════════════════════\\n"|_|_
+CALL|t1|print|1
+ARG|"\\n"|_|_
+CALL|t2|print|1
+MOV|neurx_dir|"/home/shuwen/shuwen/neurx"|_
+ADD|t3|neurx_dir|"/artifact/logs"
+MOV|log_dir|t3|_
+ADD|t4|neurx_dir|"/artifact/build/production_s_inference/gpu_backend_enhanced.ir"
+MOV|gpu_backend_ir|t4|_
+ADD|t5|neurx_dir|"/artifact/build/production_s_inference/web_ui_server.ir"
+MOV|web_ui_ir|t5|_
+ADD|t6|neurx_dir|"/artifact/build/s_runner/s_ir_runner"
+MOV|s_runner|t6|_
+ADD|t7|log_dir|"/gpu_backend.log"
+MOV|gpu_log|t7|_
+ADD|t8|log_dir|"/web_ui.log"
+MOV|web_log|t8|_
+ARG|"⏹️  停止旧进程...\\n"|_|_
+CALL|t9|print|1
+ARG|"pkill -f 's_ir_runner.*gpu_backend' 2>/dev/null \|\| true"|_|_
+CALL|t10|system|1
+ARG|"pkill -f 's_ir_runner.*web_ui' 2>/dev/null \|\| true"|_|_
+CALL|t11|system|1
+ARG|"sleep 1"|_|_
+CALL|t12|system|1
+ARG|"📁 创建日志目录...\\n"|_|_
+CALL|t13|print|1
+ADD|t14|"mkdir -p "|log_dir
+ARG|t14|_|_
+CALL|t15|system|1
+ARG|"\\n"|_|_
+CALL|t16|print|1
+ARG|"🎯 启动 GPU 推理后端...\\n"|_|_
+CALL|t17|print|1
+ADD|t18|"   启动进程: "|s_runner
+ADD|t19|t18|"\\n"
+ARG|t19|_|_
+CALL|t20|print|1
+ADD|t21|"   IR 文件: "|gpu_backend_ir
+ADD|t22|t21|"\\n"
+ARG|t22|_|_
+CALL|t23|print|1
+ADD|t24|"   输出日志: "|gpu_log
+ADD|t25|t24|"\\n"
+ARG|t25|_|_
+CALL|t26|print|1
+ADD|t27|"nohup '"|s_runner
+ADD|t28|t27|"' '"
+ADD|t29|t28|gpu_backend_ir
+ADD|t30|t29|"' >> '"
+ADD|t31|t30|gpu_log
+ADD|t32|t31|"' 2>&1 &"
+MOV|gpu_cmd|t32|_
+ARG|gpu_cmd|_|_
+CALL|t33|system|1
+ARG|"sleep 2"|_|_
+CALL|t34|system|1
+ARG|"   ✓ GPU 后端启动\\n"|_|_
+CALL|t35|print|1
+ARG|"   📍 地址: http://127.0.0.1:18084\\n"|_|_
+CALL|t36|print|1
+ARG|"\\n"|_|_
+CALL|t37|print|1
+ARG|"🎯 启动 Web UI 服务器...\\n"|_|_
+CALL|t38|print|1
+ADD|t39|"   启动进程: "|s_runner
+ADD|t40|t39|"\\n"
+ARG|t40|_|_
+CALL|t41|print|1
+ADD|t42|"   IR 文件: "|web_ui_ir
+ADD|t43|t42|"\\n"
+ARG|t43|_|_
+CALL|t44|print|1
+ADD|t45|"   输出日志: "|web_log
+ADD|t46|t45|"\\n"
+ARG|t46|_|_
+CALL|t47|print|1
+ADD|t48|"nohup '"|s_runner
+ADD|t49|t48|"' '"
+ADD|t50|t49|web_ui_ir
+ADD|t51|t50|"' >> '"
+ADD|t52|t51|web_log
+ADD|t53|t52|"' 2>&1 &"
+MOV|web_cmd|t53|_
+ARG|web_cmd|_|_
+CALL|t54|system|1
+ARG|"sleep 2"|_|_
+CALL|t55|system|1
+ARG|"   ✓ Web UI 启动\\n"|_|_
+CALL|t56|print|1
+ARG|"   📍 地址: http://127.0.0.1:8081\\n"|_|_
+CALL|t57|print|1
+ARG|"\\n"|_|_
+CALL|t58|print|1
+ARG|"════════════════════════════════════════════\\n"|_|_
+CALL|t59|print|1
+ARG|"✅ 服务启动完成！\\n"|_|_
+CALL|t60|print|1
+ARG|"\\n"|_|_
+CALL|t61|print|1
+ARG|"📋 查看日志:\\n"|_|_
+CALL|t62|print|1
+ARG|"   make log          # 查看 GPU 后端日志（最后 50 行）\\n"|_|_
+CALL|t63|print|1
+ARG|"   make log-gpu      # 实时查看 GPU 后端\\n"|_|_
+CALL|t64|print|1
+ARG|"   make log-web      # 实时查看 Web UI\\n"|_|_
+CALL|t65|print|1
+ARG|"   make log-tail     # 并排显示所有日志\\n"|_|_
+CALL|t66|print|1
+ARG|"   make logs         # 列出所有日志文件\\n"|_|_
+CALL|t67|print|1
+ARG|"\\n"|_|_
+CALL|t68|print|1
+ARG|"🔗 访问服务:\\n"|_|_
+CALL|t69|print|1
+ARG|"   - GPU 推理: http://127.0.0.1:18084/v1/generate\\n"|_|_
+CALL|t70|print|1
+ARG|"   - Web UI:   http://127.0.0.1:8081\\n"|_|_
+CALL|t71|print|1
+ARG|"\\n"|_|_
+CALL|t72|print|1
+FUNC_END|main|_|_

@@ -1,6 +1,6 @@
 package neurx.drivers.sensor
 
-enum sensor_type {
+
     lidar_3d,
     camera_rgb,
     camera_thermal,

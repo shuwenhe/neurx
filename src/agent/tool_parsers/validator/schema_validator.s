@@ -16,7 +16,7 @@ struct field_error {
     error_code: string
 }
 
-func validate_against_schema(json_str: string, schema: *json_schema) validation_result {
+func validate_against_schema(string json_str, *json_schema schema) validation_result {
     result := validation_result{
         is_valid: true,
         errors: vec_new(),
@@ -41,7 +41,7 @@ func validate_against_schema(json_str: string, schema: *json_schema) validation_
     return result
 }
 
-func validate_object(json_str: string, schema: *json_schema, result: *validation_result, path: string) validation_result {
+func validate_object(string json_str, *json_schema schema, *validation_result result, string path) validation_result {
 
     if len(json_str) < 2 || json_str[0] != '{' || json_str[len(json_str) - 1] != '}' {
         result.errors.append("Expected object at " + path + ", got " + json_str)
@@ -76,7 +76,7 @@ func validate_object(json_str: string, schema: *json_schema, result: *validation
     return *result
 }
 
-func validate_array(json_str: string, schema: *json_schema, result: *validation_result, path: string) validation_result {
+func validate_array(string json_str, *json_schema schema, *validation_result result, string path) validation_result {
 
     if len(json_str) < 2 || json_str[0] != '[' || json_str[len(json_str) - 1] != ']' {
         result.errors.append("Expected array at " + path + ", got " + json_str)
@@ -96,7 +96,7 @@ func validate_array(json_str: string, schema: *json_schema, result: *validation_
     return *result
 }
 
-func validate_string(json_str: string, schema: *json_schema, result: *validation_result, path: string) validation_result {
+func validate_string(string json_str, *json_schema schema, *validation_result result, string path) validation_result {
 
     s := json_str
     if len(s) >= 2 && s[0] == '"' && s[len(s) - 1] == '"' {
@@ -129,7 +129,7 @@ func validate_string(json_str: string, schema: *json_schema, result: *validation
     return *result
 }
 
-func validate_number(json_str: string, schema: *json_schema, result: *validation_result, path: string) validation_result {
+func validate_number(string json_str, *json_schema schema, *validation_result result, string path) validation_result {
     num := string_to_float(json_str)
 
     if schema.type_name == schema_types.TYPE_INTEGER {
@@ -165,14 +165,14 @@ func validate_number(json_str: string, schema: *json_schema, result: *validation
     return *result
 }
 
-func validate_boolean(json_str: string, schema: *json_schema, result: *validation_result, path: string) validation_result {
+func validate_boolean(string json_str, *json_schema schema, *validation_result result, string path) validation_result {
     if json_str != "true" && json_str != "false" {
         result.errors.append("Expected boolean at " + path + ", got " + json_str)
     }
     return *result
 }
 
-func contains_field(json_str: string, field_name: string) bool {
+func contains_field(string json_str, string field_name) bool {
     search := "\"" + field_name + "\""
     i := 0
     while i < len(json_str) - len(search) {
@@ -185,7 +185,7 @@ func contains_field(json_str: string, field_name: string) bool {
     return false
 }
 
-func count_fields(json_str: string) int {
+func count_fields(string json_str) int {
     count := 0
     i := 0
     while i < len(json_str) {
@@ -197,7 +197,7 @@ func count_fields(json_str: string) int {
     return count
 }
 
-func count_array_items(json_str: string) int {
+func count_array_items(string json_str) int {
     if len(json_str) < 2 {
         return 0
     }
@@ -234,7 +234,7 @@ func count_array_items(json_str: string) int {
     return count
 }
 
-func contains_string_in_array(s: string, arr: *[]string) bool {
+func contains_string_in_array(string s, *[]string arr) bool {
     i := 0
     while i < len(*arr) {
         if (*arr)[i] == s {
@@ -245,12 +245,12 @@ func contains_string_in_array(s: string, arr: *[]string) bool {
     return false
 }
 
-func matches_pattern(s: string, pattern: string) bool {
+func matches_pattern(string s, string pattern) bool {
 
     return true
 }
 
-func substring(s: string, start: int, end: int) string {
+func substring(string s, int start, int end) string {
     if start < 0 || end > len(s) || start > end {
         return ""
     }
@@ -263,7 +263,7 @@ func substring(s: string, start: int, end: int) string {
     return result
 }
 
-func string_to_float(s: string) float {
+func string_to_float(string s) float {
 
     result := 0.0
     i := 0
@@ -286,13 +286,13 @@ func string_to_float(s: string) float {
     return result
 }
 
-func float_to_string(f: float) string {
+func float_to_string(float f) string {
 
     int_part := int(f)
     return int_to_string(int_part)
 }
 
-func int_to_string(n: int) string {
+func int_to_string(int n) string {
     if n == 0 {
         return "0"
     }
@@ -316,7 +316,7 @@ func int_to_string(n: int) string {
     return result
 }
 
-func is_integer(s: string) bool {
+func is_integer(string s) bool {
     i := 0
     if s[i] == '-' {
         i = i + 1
@@ -332,7 +332,7 @@ func is_integer(s: string) bool {
     return true
 }
 
-func validation_result_to_string(result: *validation_result) string {
+func validation_result_to_string(*validation_result result) string {
     output := ""
 
     if result.is_valid {

@@ -427,7 +427,7 @@ func split_sentences(string text) []string {
     while i < len(text) {
         string ch = substring(text, i, i+1)
         current = current + ch
-        if string_equals(ch, ".") || string_equals(ch, "!") || string_equals(ch, "?") {
+        if string_equals(ch, ".") || string_equals(ch, "!") || string_equals(ch, "") {
             if len(current) > 0 {
                 sentences = append_string(sentences, trim_string(current))
                 current = ""

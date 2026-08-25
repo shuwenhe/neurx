@@ -3,7 +3,7 @@ import neurx.model.transformer.*
 import neurx.model.transformer.rope_scaling.*
 import neurx.tensor.*
 import neurx.nn.*
-enum neurx_version {
+
     NEURX_130B
     NEURX_4_9B
     NEURX_4_34B
@@ -189,13 +189,13 @@ func create_custom_neurx_config(
         num_key_value_heads: max(num_heads / 4, 1),
         intermediate_size: hidden_size * 8 / 3,
         use_moe: enable_moe,
-        moe_num_experts: enable_moe ? 64 : 0,
-        moe_top_k: enable_moe ? 4 : 0,
+        moe_num_experts: enable_moe  64 : 0,
+        moe_top_k: enable_moe  4 : 0,
         max_seq_len: max_seq_len,
         max_position_embeddings: max_seq_len,
         position_encoding_type: "rope",
         rope_theta: 500000.0,
-        rope_scaling_type: use_rope_yarn ? 3 : 0,
+        rope_scaling_type: use_rope_yarn  3 : 0,
         float rope_factor(max_seq_len / 4096),
         pad_token_id: 0,
         bos_token_id: 1,
@@ -282,7 +282,7 @@ func apply_position_encoding_2d(
     abs_emb_k = abs_emb.unsqueeze(0).unsqueeze(0)
     return rel_emb
 }
-enum mask_type {
+
     CAUSAL
     BIDIRECTIONAL
     PREFIX_LM
@@ -304,8 +304,8 @@ func build_prefix_mask(
     }
     tensor final_mask = zeros(batch_size, 1, seq_len, seq_len)
     for b in range(batch_size) {
-        int sop_pos = sop_position != none ? sop_position[b].item() : 0
-        int eop_pos = eop_position != none ? eop_position[b].item() : seq_len
+        int sop_pos = sop_position != none  sop_position[b].item() : 0
+        int eop_pos = eop_position != none  eop_position[b].item() : seq_len
         if eop_pos > 0 {
             final_mask[b, 0, :eop_pos, :eop_pos] = 0.0
             final_mask[b, 0, eop_pos:, :eop_pos] = 0.0
@@ -642,11 +642,11 @@ func neurx_forward(
     tensor logits = matmul(hidden_states, model.lm_head.T)
     dict[string, any] result = {}
     result["logits"] = logits
-    result["hidden_states"] = output_hidden_states ? some(all_hidden_states) : none
-    result["attentions"] = output_attentions ? some(all_attentions) : none
+    result["hidden_states"] = output_hidden_states  some(all_hidden_states) : none
+    result["attentions"] = output_attentions  some(all_attentions) : none
     return result
 }
-enum neurx_loss_type {
+
     CLM
     MLM
     PREFIX_LM

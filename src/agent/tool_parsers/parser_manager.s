@@ -32,15 +32,15 @@ impl ToolParserManager {
         }
     }
 
-    func register_parser(mut self, name: str, factory: ToolParserFactory) {
+    func register_parser(mut self, str name, ToolParserFactory factory) {
         self.parsers.insert(name, factory)
     }
 
-    func register_lazy_parser(mut self, name: str, module: str, class_name: str) {
+    func register_lazy_parser(mut self, str name, str module, str class_name) {
         self.lazy_parsers.insert(name, (module, class_name))
     }
 
-    func get_parser(self, name: str) -> Option<ToolParser> {
+    func get_parser(self, str name) -> Option<ToolParser> {
         match self.parsers.get(name) {
             Some(factory) => Some(factory()),
             None => {
@@ -65,7 +65,7 @@ impl ToolParserManager {
         names
     }
 
-    func get_parser_for_model(self, model_name: str) -> Option<ToolParser> {
+    func get_parser_for_model(self, str model_name) -> Option<ToolParser> {
         parser_name := infer_parser_from_model_name(model_name)
         self.get_parser(parser_name)
     }
@@ -75,19 +75,19 @@ func get_manager() -> ToolParserManager {
     _TOOL_PARSER_MANAGER.instance.clone()
 }
 
-func register_global_parser(name: str, factory: ToolParserFactory) {
+func register_global_parser(str name, ToolParserFactory factory) {
     _TOOL_PARSER_MANAGER.instance.register_parser(name, factory)
 }
 
-func register_global_lazy_parser(name: str, module: str, class_name: str) {
+func register_global_lazy_parser(str name, str module, str class_name) {
     _TOOL_PARSER_MANAGER.instance.register_lazy_parser(name, module, class_name)
 }
 
-func load_parser_module(module: str, class_name: str, parser_name: str) -> Option<ToolParser> {
+func load_parser_module(str module, str class_name, str parser_name) -> Option<ToolParser> {
     None
 }
 
-func infer_parser_from_model_name(model_name: str) -> str {
+func infer_parser_from_model_name(str model_name) -> str {
     match model_name {
         s if strings::contains_str(s, "deepseek-v3") => "deepseek_v3",
         s if strings::contains_str(s, "deepseek-v31") => "deepseek_v31",

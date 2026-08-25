@@ -1,5 +1,5 @@
 import "tensor_api"
-enum serialization_format {
+
     py_torch_pickle
     safe_tensor
     ONNX

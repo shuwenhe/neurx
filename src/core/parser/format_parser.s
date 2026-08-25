@@ -3,7 +3,7 @@ package neurx.parser.format_parser
 use neurx.parser.types
 use neurx.parser.text_parser
 
-func detect_format(text: string) FormatDetectionResult {
+func detect_format(string text) FormatDetectionResult {
     trimmed := trim_string(text)
 
     if len(trimmed) == 0 {
@@ -84,7 +84,7 @@ func detect_format(text: string) FormatDetectionResult {
     }
 }
 
-func is_valid_json_structure(text: string) bool {
+func is_valid_json_structure(string text) bool {
     trimmed := trim_string(text)
     if len(trimmed) < 2 {
         return false
@@ -126,7 +126,7 @@ func is_valid_json_structure(text: string) bool {
     return false
 }
 
-func is_valid_xml_structure(text: string) bool {
+func is_valid_xml_structure(string text) bool {
     trimmed := trim_string(text)
 
     if len(trimmed) < 3 || trimmed[0] != '<' {
@@ -152,7 +152,7 @@ func is_valid_xml_structure(text: string) bool {
     return false
 }
 
-func has_markdown_markers(text: string) bool {
+func has_markdown_markers(string text) bool {
 
     if starts_with(trim_string(text), "#") {
         return true
@@ -180,7 +180,7 @@ func has_markdown_markers(text: string) bool {
     return false
 }
 
-func is_yaml_like(text: string) bool {
+func is_yaml_like(string text) bool {
     lines := split_lines(text)
 
     if len(lines) == 0 {
@@ -210,7 +210,7 @@ func is_yaml_like(text: string) bool {
     return yaml_count >= 2
 }
 
-func is_csv_like(text: string) bool {
+func is_csv_like(string text) bool {
     lines := split_lines(text)
 
     if len(lines) < 2 {
@@ -236,7 +236,7 @@ func is_csv_like(text: string) bool {
     return false
 }
 
-func has_html_tags(text: string) bool {
+func has_html_tags(string text) bool {
 
     html_tags := []string{"<html", "<div", "<span", "<p>", "<h1", "<h2", "<table", "<body"}
     i := 0
@@ -255,7 +255,7 @@ func has_html_tags(text: string) bool {
     return false
 }
 
-func parse_json_output(text: string) ParseResult {
+func parse_json_output(string text) ParseResult {
     result := create_parse_result()
     result.format = 1
     result.raw_output = text
@@ -286,7 +286,7 @@ func parse_json_output(text: string) ParseResult {
     return result
 }
 
-func parse_xml_output(text: string) ParseResult {
+func parse_xml_output(string text) ParseResult {
     result := create_parse_result()
     result.format = 2
     result.raw_output = text
@@ -307,7 +307,7 @@ func parse_xml_output(text: string) ParseResult {
     return result
 }
 
-func parse_markdown_output(text: string) ParseResult {
+func parse_markdown_output(string text) ParseResult {
     result := create_parse_result()
     result.format = 3
     result.raw_output = text
@@ -322,7 +322,7 @@ func parse_markdown_output(text: string) ParseResult {
     return result
 }
 
-func parse_csv_output(text: string) ParseResult {
+func parse_csv_output(string text) ParseResult {
     result := create_parse_result()
     result.format = 5
     result.raw_output = text
@@ -341,7 +341,7 @@ func parse_csv_output(text: string) ParseResult {
     return result
 }
 
-func extract_tag_name(xml: string) string {
+func extract_tag_name(string xml) string {
     if len(xml) < 2 || xml[0] != '<' {
         return ""
     }
@@ -357,7 +357,7 @@ func extract_tag_name(xml: string) string {
     return tag_name
 }
 
-func extract_string_value(quoted: string) string {
+func extract_string_value(string quoted) string {
     if len(quoted) < 2 {
         return ""
     }
@@ -397,7 +397,7 @@ func extract_string_value(quoted: string) string {
     return result
 }
 
-func normalize_format(text: string, format: int) string {
+func normalize_format(string text, int format) string {
     match format {
         0 => return normalize_text(text)
         1 => return normalize_json(text)
@@ -410,35 +410,35 @@ func normalize_format(text: string, format: int) string {
     }
 }
 
-func normalize_text(text: string) string {
+func normalize_text(string text) string {
     return normalize_whitespace(text)
 }
 
-func normalize_json(text: string) string {
+func normalize_json(string text) string {
     return normalize_whitespace(text)
 }
 
-func normalize_xml(text: string) string {
+func normalize_xml(string text) string {
     return normalize_whitespace(text)
 }
 
-func normalize_markdown(text: string) string {
+func normalize_markdown(string text) string {
     return normalize_whitespace(text)
 }
 
-func normalize_yaml(text: string) string {
+func normalize_yaml(string text) string {
     return normalize_whitespace(text)
 }
 
-func normalize_csv(text: string) string {
+func normalize_csv(string text) string {
     return text
 }
 
-func normalize_html(text: string) string {
+func normalize_html(string text) string {
     return normalize_whitespace(text)
 }
 
-func convert_format(text: string, from_format: int, to_format: int) string {
+func convert_format(string text, int from_format, int to_format) string {
     if from_format == to_format {
         return text
     }
@@ -446,7 +446,7 @@ func convert_format(text: string, from_format: int, to_format: int) string {
     return normalize_format(text, to_format)
 }
 
-func validate_format(text: string, format: int) bool {
+func validate_format(string text, int format) bool {
     match format {
         0 => return true
         1 => return is_valid_json_structure(text)

@@ -5,7 +5,7 @@ import (
     "path/filepath"
     "runtime"
 )
-enum build_target {
+
     CPU,
     CUDA,
     HIP,
@@ -14,7 +14,7 @@ enum build_target {
     CANN,
 }
 
-enum build_arch {
+
     X86_64,
     ARM64,
 }
@@ -38,7 +38,7 @@ struct build_orchestrator {
     build_dir    string
 }
 
-func new_build_orchestrator() (*build_orchestrator, error) {
+func new_build_orchestrator() (*build_orchestrator) {
     logger := new_logger("build_orchestrator")
     neurx_root := get_env("NEURX_ROOT", "")
     if neurx_root == "" {

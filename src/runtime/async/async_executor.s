@@ -3,7 +3,7 @@ package async
 import "sync"
 import "time"
 
-enum task_state {
+
 	TASK_PENDING       = 0
 	TASK_RUNNING       = 1
 	TASK_PAUSED        = 2

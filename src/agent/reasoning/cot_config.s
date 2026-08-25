@@ -1,13 +1,13 @@
 package neurx.reasoning.cot_config
 
-enum reasoning_style {
+
     step_by_step
     detailed
     summarized
     hierarchical
 }
 
-enum validation_strategy {
+
     none
     consistency
     logical

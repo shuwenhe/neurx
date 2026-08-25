@@ -78,7 +78,7 @@ interface trainer {
 
     func initialize(trainer_config config) trainer_state
 }
-enum trainer_type {
+
     REFERENCE
     RUNTIME
 }

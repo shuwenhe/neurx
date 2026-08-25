@@ -8,7 +8,7 @@ struct ActivationKernels {
     config: types.KernelConfig
 }
 
-func NewActivationKernels(config: types.KernelConfig) &ActivationKernels {
+func NewActivationKernels(types.KernelConfig config) &ActivationKernels {
     return &ActivationKernels{
         config: config
     }

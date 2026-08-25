@@ -6,7 +6,7 @@ import "neurx.distributed.zero"
 import "neurx.amp.training"
 import "neurx.checkpoint.gradient"
 import "neurx.checkpoint.checkpoint_training"
-enum training_mode {
+
     TRAIN = 0
     VALIDATE = 1
     TEST = 2

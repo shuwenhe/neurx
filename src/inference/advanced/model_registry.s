@@ -1,5 +1,5 @@
 package neurx.inference.advanced.model_registry
-enum model_type {
+
     QWEN
     LLAMA
     MIXTRAL

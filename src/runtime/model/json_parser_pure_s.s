@@ -3,7 +3,7 @@ package neurx.runtime.model.json_parser
 use std.vec.vec
 use std.io.println
 
-enum json_type {
+
     null_type,
     bool_type,
     number_type,
@@ -343,7 +343,7 @@ func parse_object(json_parser_state* state) option[json_value] {
     })
 }
 
-func parse_json(input: string) option[json_value] {
+func parse_json(string input) option[json_value] {
     state := json_parser_state {
         input: input,
         pos: 0,
@@ -373,7 +373,7 @@ func test_json_parser() {
     test1 := "null"
     result1 := parse_json(test1)
     println("Test 1 - Null: " + match result1 {
-        option::some(v) => v.value_type == json_type::null_type ? "✅ PASS" : "❌ FAIL",
+        option::some(v) => v.value_type == json_type::null_type  "✅ PASS" : "❌ FAIL",
         option::none => "❌ FAIL",
     })
     
@@ -381,7 +381,7 @@ func test_json_parser() {
     test2 := "true"
     result2 := parse_json(test2)
     println("Test 2 - Boolean: " + match result2 {
-        option::some(v) => v.value_type == json_type::bool_type ? "✅ PASS" : "❌ FAIL",
+        option::some(v) => v.value_type == json_type::bool_type  "✅ PASS" : "❌ FAIL",
         option::none => "❌ FAIL",
     })
     
@@ -389,7 +389,7 @@ func test_json_parser() {
     test3 := "42.5"
     result3 := parse_json(test3)
     println("Test 3 - Number: " + match result3 {
-        option::some(v) => v.value_type == json_type::number_type ? "✅ PASS" : "❌ FAIL",
+        option::some(v) => v.value_type == json_type::number_type  "✅ PASS" : "❌ FAIL",
         option::none => "❌ FAIL",
     })
     
@@ -397,7 +397,7 @@ func test_json_parser() {
     test4 := "[1, 2, 3]"
     result4 := parse_json(test4)
     println("Test 4 - Array: " + match result4 {
-        option::some(v) => v.value_type == json_type::array_type ? "✅ PASS" : "❌ FAIL",
+        option::some(v) => v.value_type == json_type::array_type  "✅ PASS" : "❌ FAIL",
         option::none => "❌ FAIL",
     })
     
@@ -405,7 +405,7 @@ func test_json_parser() {
     test5 := "{\"hidden_size\": 896, \"num_hidden_layers\": 24}"
     result5 := parse_json(test5)
     println("Test 5 - Object: " + match result5 {
-        option::some(v) => v.value_type == json_type::object_type ? "✅ PASS" : "❌ FAIL",
+        option::some(v) => v.value_type == json_type::object_type  "✅ PASS" : "❌ FAIL",
         option::none => "❌ FAIL",
     })
     

@@ -144,7 +144,7 @@ func preset_conversational() lora_config {
     config
 }
 
-enum preset_type {
+
     lightweight,
     balanced,
     high_quality,
@@ -156,7 +156,7 @@ enum preset_type {
     conversational,
 }
 
-func load_preset(preset: preset_type) lora_config {
+func load_preset(preset_type preset) lora_config {
     switch preset {
         preset_type::lightweight : preset_lightweight(),
         preset_type::balanced : preset_balanced(),
@@ -170,7 +170,7 @@ func load_preset(preset: preset_type) lora_config {
     }
 }
 
-func load_preset_by_name(name: string) option[lora_config] {
+func load_preset_by_name(string name) option[lora_config] {
     switch name {
         "lightweight" : option::some(preset_lightweight()),
         "balanced" : option::some(preset_balanced()),
@@ -199,7 +199,7 @@ func get_available_presets() vec[string] {
     presets
 }
 
-func get_preset_description(name: string) string {
+func get_preset_description(string name) string {
     switch name {
         "lightweight" :
             "轻量级微调\n" +
@@ -258,7 +258,7 @@ struct preset_performance {
     recommended_batch_size: int
 }
 
-func get_performance_info(preset: preset_type) preset_performance {
+func get_performance_info(preset_type preset) preset_performance {
     switch preset {
         preset_type::lightweight : preset_performance {
             name: "lightweight",

@@ -2,7 +2,7 @@ package sse
 
 import "time"
 
-enum event_field_type {
+
 	FIELD_EVENT = 0
 	FIELD_DATA = 1
 	FIELD_ID = 2
@@ -10,7 +10,7 @@ enum event_field_type {
 	FIELD_COMMENT = 4
 }
 
-enum compression_type {
+
 	COMPRESSION_NONE = 0
 	COMPRESSION_GZIP = 1
 	COMPRESSION_DEFLATE = 2

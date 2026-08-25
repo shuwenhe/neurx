@@ -1,6 +1,6 @@
 package neurx.reasoning.reasoning_step
 
-enum step_state {
+
     pending
     processing
     completed
@@ -8,7 +8,7 @@ enum step_state {
     backtracked
 }
 
-enum step_type {
+
     analysis
     deduction
     verification

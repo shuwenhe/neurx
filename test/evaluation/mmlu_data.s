@@ -95,7 +95,7 @@ func new_mmlu_dataset_state(string data_root) mmlu_dataset_state {
 func parse_mmlu_csv_line(string line, string task_name, int qid) mmlu_question {
     mmlu_question {
         task_name: task_name,
-        question: "Sample question about " + task_name + "?",
+        question: "Sample question about " + task_name + "",
         choice_a: "Option A",
         choice_b: "Option B",
         choice_c: "Option C",
@@ -111,7 +111,7 @@ func load_mmlu_dev_examples(string data_root, string task_name, int num_examples
     while i < num_examples {
         dev = append(dev, mmlu_question{
             task_name: task_name,
-            question: "Example " + int_to_str(i+1) + ": " + task_name + " question?",
+            question: "Example " + int_to_str(i+1) + ": " + task_name + " question",
             choice_a: "Option A",
             choice_b: "Option B",
             choice_c: "Option C",
@@ -130,7 +130,7 @@ func load_mmlu_test_questions(string data_root, string task_name) []mmlu_questio
     while i < 10 {
         test = append(test, mmlu_question{
             task_name: task_name,
-            question: task_name + " question " + int_to_str(i+1) + "?",
+            question: task_name + " question " + int_to_str(i+1) + "",
             choice_a: "Option A",
             choice_b: "Option B",
             choice_c: "Option C",

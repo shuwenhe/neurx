@@ -152,7 +152,7 @@ func digit_to_char(int digit) string {
     if digit == 9 {
         return "9"
     }
-    "?"
+    ""
 }
 
 func int(float f) int {
