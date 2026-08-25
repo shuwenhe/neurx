@@ -3,14 +3,6 @@ package neurx.runtime.model.json_parser
 use std.vec.vec
 use std.io.println
 
-
-
-
-
-
-
-
-
 enum json_type {
     null_type,
     bool_type,
@@ -40,10 +32,6 @@ struct json_parser_state {
     int line
     int column
 }
-
-
-
-
 
 func is_whitespace(char c) bool {
     c == ' ' || c == '\t' || c == '\n' || c == '\r'
@@ -88,10 +76,6 @@ func consume_char(json_parser_state* state) option[char] {
         option::none[char]()
     }
 }
-
-
-
-
 
 func parse_null(json_parser_state* state) option[json_value] {
     if state.pos + 4 <= state.input.len() {
@@ -359,10 +343,6 @@ func parse_object(json_parser_state* state) option[json_value] {
     })
 }
 
-
-
-
-
 func parse_json(input: string) option[json_value] {
     let state = json_parser_state {
         input: input,
@@ -382,10 +362,6 @@ func parse_json(input: string) option[json_value] {
     
     option::none[json_value]()
 }
-
-
-
-
 
 func test_json_parser() {
     println("╔════════════════════════════════════════════════════════════════╗")

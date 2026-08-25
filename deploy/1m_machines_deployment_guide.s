@@ -2,8 +2,6 @@ package neurx.deployment.1m_deployment_guide
 
 use std.io.println
 
-
-
 func print_deployment_guide() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")
@@ -240,7 +238,6 @@ func print_validation_checklist() {
     println("  □ 模型更新不中断服务")
     println("")
 }
-
 
 func main() {
     print_deployment_guide()

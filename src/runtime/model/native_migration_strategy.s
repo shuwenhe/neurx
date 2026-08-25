@@ -3,15 +3,6 @@ package neurx.runtime.model.native_migration
 use std.vec.vec
 use std.io.println
 
-
-
-
-
-
-
-
-
-
 struct json_value {
     string type_name    
     string string_value
@@ -19,7 +10,6 @@ struct json_value {
     bool bool_value
     []json_value array_value
 }
-
 
 func parse_json(string input) option[json_value] {
     
@@ -38,18 +28,10 @@ func parse_json(string input) option[json_value] {
     })
 }
 
-
-
-
-
-
-
-
 struct native_tokenizer_handle {
     int handle_id
     bool initialized
 }
-
 
 external func __tokenizer_init(string vocab_file) int
 external func __tokenizer_encode(int handle, string text) int[]
@@ -85,12 +67,6 @@ func (t: &mut native_tokenizer_handle) cleanup() {
     }
 }
 
-
-
-
-
-
-
 struct compilation_strategy {
     string name
     []string pure_s_modules     
@@ -122,10 +98,6 @@ func get_current_compilation_strategy() compilation_strategy {
     }
 }
 
-
-
-
-
 struct code_quality_metrics {
     int total_s_lines
     int total_native_lines
@@ -145,10 +117,6 @@ func get_quality_targets() code_quality_metrics {
         maintainability_index: "Good",
     }
 }
-
-
-
-
 
 struct evolution_roadmap {
     string phase_name

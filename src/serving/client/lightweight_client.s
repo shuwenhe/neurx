@@ -44,11 +44,9 @@ struct distribution_strategy {
     float edge_traffic_percent
 }
 
-
 func new_lightweight_client(lightweight_client_config cfg) lightweight_client_config {
     cfg
 }
-
 
 func (cfg: &lightweight_client_config) infer(inference_request req) inference_response {
     let response = inference_response {
@@ -61,7 +59,6 @@ func (cfg: &lightweight_client_config) infer(inference_request req) inference_re
     response
 }
 
-
 func deployment_plan_1m_machines() distribution_strategy {
     distribution_strategy {
         mode: deployment_mode::hybrid,
@@ -71,7 +68,6 @@ func deployment_plan_1m_machines() distribution_strategy {
         edge_traffic_percent: 0.7,    
     }
 }
-
 
 func phased_deployment_schedule() {
     println("=== NeurX 1M 机器分阶段部署计划 ===")
@@ -102,7 +98,6 @@ func phased_deployment_schedule() {
     println("")
 }
 
-
 struct shared_model_cache {
     string cache_dir
     []string cached_models
@@ -119,7 +114,6 @@ func new_shared_model_cache(string cache_dir, int replicas) shared_model_cache {
     }
 }
 
-
 func calculate_storage_requirement(
     int central_nodes,
     int edge_nodes,
@@ -134,7 +128,6 @@ func calculate_storage_requirement(
     
     central_storage + edge_storage
 }
-
 
 func estimate_network_traffic(
     int total_qps,

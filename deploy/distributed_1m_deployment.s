@@ -63,7 +63,6 @@ func get_1m_global_deployment_plan() global_deployment_plan {
     }
 }
 
-
 struct regional_tier_architecture {
     string tier_name
     int nodes
@@ -116,7 +115,6 @@ func get_tier_3_lightweight_client() regional_tier_architecture {
         avg_latency_ms: 15.0,
     }
 }
-
 
 func print_deployment_comparison() {
     println("")
@@ -178,7 +176,6 @@ func print_deployment_comparison() {
     println("╚════════════════════════════════════════════════════════════════╝")
     println("")
 }
-
 
 func cost_estimation() {
     println("")
