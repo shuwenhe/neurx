@@ -81,7 +81,7 @@ func get_html() string {
     html = html + "const promptEl=document.getElementById('prompt');const maxEl=document.getElementById('maxTokens');const resultEl=document.getElementById('result');\n"
     html = html + "if(!promptEl||!maxEl||!resultEl){console.error('Required elements not found');return}\n"
     html = html + "const p=promptEl.value,m=parseInt(maxEl.value)||1024,r=resultEl;\n"
-    html = html + "let chatHtml=r.innerHTML+'<div class=\"user-message\"><div style=\"display:flex;gap:8px;align-items:flex-end\"><div class=\"user-message-bubble\">'+escapeHtml(p)+'</div><button onclick=\"deleteMessagePair(this)\" style=\"background:none;border:none;color:#999;cursor:pointer;padding:0;font-size:16px\">✕</button></div></div><div class=\"ai-response\"><div class=\"ai-response-bubble\"><div id=\"responseBody\" class=\"response-body\"></div></div></div>';\n"
+    html = html + "let chatHtml=r.innerHTML+'<div class=\"ai-response\"><div class=\"ai-response-bubble\"><div id=\"responseBody\" class=\"response-body\"></div></div></div>';\n"
     html = html + "r.innerHTML=chatHtml;\n"
     html = html + "r.scrollIntoView({block:'end',behavior:'smooth'});\n"
     html = html + "const body=document.getElementById('responseBody');let output='',pending='';try{\n"

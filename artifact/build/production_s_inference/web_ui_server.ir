@@ -143,7 +143,7 @@ ADD|t69|html|"if(!promptEl\|\|!maxEl\|\|!resultEl){console.error('Required eleme
 MOV|html|t69|_
 ADD|t70|html|"const p=promptEl.value,m=parseInt(maxEl.value)\|\|1024,r=resultEl;\\n"
 MOV|html|t70|_
-ADD|t71|html|"let chatHtml=r.innerHTML+'<div class=\\"user-message\\"><div style=\\"display:flex;gap:8px;align-items:flex-end\\"><div class=\\"user-message-bubble\\">'+escapeHtml(p)+'</div><button onclick=\\"deleteMessagePair(this)\\" style=\\"background:none;border:none;color:#999;cursor:pointer;padding:0;font-size:16px\\">✕</button></div></div><div class=\\"ai-response\\"><div class=\\"ai-response-bubble\\"><div id=\\"responseBody\\" class=\\"response-body\\"></div></div></div>';\\n"
+ADD|t71|html|"let chatHtml=r.innerHTML+'<div class=\\"ai-response\\"><div class=\\"ai-response-bubble\\"><div id=\\"responseBody\\" class=\\"response-body\\"></div></div></div>';\\n"
 MOV|html|t71|_
 ADD|t72|html|"r.innerHTML=chatHtml;\\n"
 MOV|html|t72|_
