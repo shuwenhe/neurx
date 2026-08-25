@@ -1,4 +1,4 @@
-package neurx.backend.platform.autonomous_driving
+package neurx.backend.platform.driving
 
 use std.vec.vec
 use std.io.println
