@@ -131,7 +131,7 @@ func divide_into_chunks(streaming_reader_state reader) streaming_reader_state {
     reader.chunks = []data_chunk{cap: num_chunks}
     int64 current_offset = 0
     int c = 0
-    while c < num_chunks:
+    for c < num_chunks {
         data_chunk chunk
         chunk.chunk_id = c
         chunk.start_byte_offset = current_offset
@@ -264,7 +264,7 @@ func read_batch_of_lines(
     []string batch_lines = []string{cap: batch_size}
     int count = 0
     bool eof = false
-    while count < batch_size and !eof:
+    for count < batch_size and !eof {
         line_read_result result = read_next_line(reader)
         reader = result.updated_reader
         if result.success:
@@ -297,7 +297,7 @@ func seek_to_approximate_line(
     return reader
 func reset_reader(streaming_reader_state reader) streaming_reader_state {
     int i = 0
-    while i < len(reader.loaded_chunk_indices):
+    for i < len(reader.loaded_chunk_indices) {
         reader = unload_chunk(reader, reader.loaded_chunk_indices[i])
         i = i + 1
     reader.current_chunk_idx = 0

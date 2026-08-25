@@ -165,7 +165,7 @@ func finalize_current_bin(bin_packer_state packer) packed_batch:
         return empty_packed_batch()
     int max_len = 0
     int i = 0
-    while i < num_seqs:
+    for i < num_seqs {
         if len(packer.current_bin_contents[i].token_ids) > max_len:
             max_len = len(packer.current_bin_contents[i].token_ids)
         i = i + 1
@@ -186,11 +186,11 @@ func finalize_current_bin(bin_packer_state packer) packed_batch:
     float total_quality = 0.0
     int real_token_count = 0
     i = 0
-    while i < num_seqs:
+    for i < num_seqs {
         sequence_buffer seq = packer.current_bin_contents[i]
         int seq_len = len(seq.token_ids)
         int t = 0
-        while t < max_len:
+        for t < max_len {
             int global_idx = i * max_len + t
             if t < seq_len:
                 input_ids[global_idx] = seq.token_ids[t]
@@ -247,7 +247,7 @@ func calculate_current_utilization(bin_packer_state packer) float:
         return 0.0
     int max_len_in_bin = 0
     int i = 0
-    while i < len(packer.current_bin_contents):
+    for i < len(packer.current_bin_contents) {
         if len(packer.current_bin_contents[i].token_ids) > max_len_in_bin:
             max_len_in_bin = len(packer.current_bin_contents[i].token_ids)
         i = i + 1
@@ -287,7 +287,7 @@ func pack_samples_crosswise(
     result.num_original_samples = 0
     result.sample_boundaries[0] = 0
     int s = 0
-    while s < len(sequences) and current_pos < max_combined_length:
+    for s < len(sequences) and current_pos < max_combined_length {
         sequence_buffer seq = sequences[s]
         int seq_len = len(seq.token_ids)
         int remaining_space = max_combined_length - current_pos
@@ -296,7 +296,7 @@ func pack_samples_crosswise(
         if seq_len <= 0:
             break
         int t = 0
-        while t < seq_len:
+        for t < seq_len {
             result.input_ids[current_pos + t] = seq.token_ids[t]
             result.attention_masks[current_pos + t] = 1
             result.segment_ids[current_pos + t] = sample_idx
@@ -312,7 +312,7 @@ func pack_samples_crosswise(
         result.num_original_samples = result.num_original_samples + 1
         sample_idx = sample_idx + 1
         s = s + 1
-    while current_pos < max_combined_length:
+    for current_pos < max_combined_length {
         result.input_ids[current_pos] = config.pad_token_id
         result.attention_masks[current_pos] = 0
         result.segment_ids[current_pos] = 0
@@ -395,7 +395,7 @@ func next_power_of_two(int n) int:
     if n <= 1:
         return 1
     int p = 1
-    while p < n:
+    for p < n {
         p = p * 2
     return p
 

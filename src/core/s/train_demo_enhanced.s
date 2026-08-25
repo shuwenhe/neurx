@@ -498,19 +498,19 @@ func format_step_line(int step, float loss, float best_loss,
                        float grad_norm, float lr, int time_ms) string {
     string line = ""
     string step_str = string(step)
-    while len(step_str) < 4: step_str = " " + step_str
+    for len(step_str) < 4 { step_str = " " + step_str
     line = line + step_str + " | "
     string loss_str = format_float(loss, 6)
-    while len(loss_str) < 8: loss_str = " " + loss_str
+    for len(loss_str) < 8 { loss_str = " " + loss_str
     line = line + loss_str + " | "
     string best_str = format_float(best_loss, 6)
-    while len(best_str) < 7: best_str = " " + best_str
+    for len(best_str) < 7 { best_str = " " + best_str
     line = line + best_str + " | "
     string grad_str = format_float(grad_norm, 4)
-    while len(grad_str) < 8: grad_str = " " + grad_str
+    for len(grad_str) < 8 { grad_str = " " + grad_str
     line = line + grad_str + " | "
     string lr_str = format_float(lr, 6)
-    while len(lr_str) < 8: lr_str = " " + lr_str
+    for len(lr_str) < 8 { lr_str = " " + lr_str
     line = line + lr_str + " | "
     line = line + string(time_ms) + " ms"
     line

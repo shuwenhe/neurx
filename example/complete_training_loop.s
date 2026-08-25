@@ -506,7 +506,7 @@ func run_validation(
     int total_batches = 0
     int total_samples = 0
     (batch b, bool done) = next_batch(val_loader)
-    while !done:
+    for !done {
         forward_result fwd = model_forward(model, b, record_for_backward=false)
         float loss = extract_scalar_value(fwd.loss)
         total_loss = total_loss + loss * b.batch_size

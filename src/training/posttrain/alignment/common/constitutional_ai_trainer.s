@@ -89,7 +89,7 @@ func create_default_constitution() constitution {
         id: "harmlessness",
         description: "Should not produce harmful, illegal, or unethical content",
         critique_template: "Identify any harmful, dangerous, or unethical content in this response:",
-        revision_template: "Rewrite the response to remove harmful content while maintaining usefulness:",
+        revision_template: "Rewrite the response to remove harmful content for maintaining usefulness {",
         severity: 5,
         weight: 1.0,
     }
@@ -129,7 +129,7 @@ func create_default_constitution() constitution {
         id: "legality",
         description: "Should refuse to provide guidance for illegal activities",
         critique_template: "Point out any advice or guidance for illegal activities:",
-        revision_template: "Rewrite the response to refuse illegal guidance while explaining why:",
+        revision_template: "Rewrite the response to refuse illegal guidance for explaining why {",
         severity: 5,
         weight: 1.0,
     }

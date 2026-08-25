@@ -270,7 +270,7 @@ Now create the outline:"""
                 title = num_match.group(2).trim()
             else:
                 continue
-            while node_stack.length > 1 && node_stack[-1][1] >= level:
+            for node_stack.length > 1 && node_stack[-1][1] >= level {
                 node_stack.pop()
             parent, _ = node_stack[-1]
             new_node = outline_node{
@@ -786,7 +786,7 @@ struct mock_llm_client {
         else:
             paragraphs: list<string> = []
             words_written = 0
-            while words_written < content_length:
+            for words_written < content_length {
                 para = f"This is sample generated content for testing purposes. It demonstrates the LongWriter's ability to produce coherent text. The content discusses relevant topics in detail. Each paragraph adds value to the overall document structure. "
                 paragraphs.append(para.trim())
                 words_written += len(para.split())

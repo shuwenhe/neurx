@@ -629,7 +629,7 @@ struct markdown_parser {
         table_start_idx = 0
         pos = 0
         i = 0
-        while i < lines.length:
+        for i < lines.length {
             line = lines[i]
             if line.startswith("```") {
                 if !in_code_block:

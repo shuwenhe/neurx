@@ -142,12 +142,12 @@ func start_workers(async_prefetch_manager mgr) async_prefetch_manager:
     mgr.workers_running = true
     mgr.start_time_ns = get_time_nanoseconds()
     int i = 0
-    while i < mgr.config.num_io_threads:
+    for i < mgr.config.num_io_threads {
         thread_handle t = spawn_thread(io_worker_function, mgr)
         mgr.io_workers.push(t)
         i = i + 1
     i = 0
-    while i < mgr.config.num_tokenizer_threads:
+    for i < mgr.config.num_tokenizer_threads {
         thread_handle t = spawn_thread(tokenizer_worker_function, mgr)
         mgr.tokenizer_workers.push(t)
         i = i + 1
@@ -157,11 +157,11 @@ func stop_workers(async_prefetch_manager mgr) async_prefetch_manager:
         return mgr
     mgr.workers_training = false
     int i = 0
-    while i < len(mgr.io_workers):
+    for i < len(mgr.io_workers) {
         join_thread(mgr.io_workers[i])
         i = i + 1
     i = 0
-    while i < len(mgr.tokenizer_workers):
+    for i < len(mgr.tokenizer_workers) {
         join_thread(mgr.tokenizer_workers[i])
         i = i + 1
     return mgr
@@ -193,7 +193,7 @@ func fetch_next_batch(async_prefetch_manager mgr) batch_fetch_result:
             wait_time_ms: wait_time
         }
 func io_worker_function(async_prefetch_manager mgr) void:
-    while mgr.workers_running:
+    for mgr.workers_running {
         if is_full(mgr.queue):
             sleep_ms(1)
             continue
@@ -215,7 +215,7 @@ func io_worker_function(async_prefetch_manager mgr) void:
             if !enqueued:
                 mgr.backpressure_events_count = mgr.backpressure_events_count + 1
 func tokenizer_worker_function(async_prefetch_manager mgr) void:
-    while mgr.workers_running:
+    for mgr.workers_running {
         []string raw_lines
         bool has_data = get_raw_data_from_io_queue(mgr, raw_lines)
         if !has_data:
@@ -244,7 +244,7 @@ func tokenize_batch(
     int valid_samples = 0
     int global_token_idx = 0
     int line_idx = 0
-    while line_idx < line_count:
+    for line_idx < line_count {
         string line = raw_lines[line_idx]
         if len(line) < 10:
             line_idx = line_idx + 1
@@ -254,7 +254,7 @@ func tokenize_batch(
             line_idx = line_idx + 1
             continue
         int t = 0
-        while t < tokens_per_line:
+        for t < tokens_per_line {
             int pos = valid_samples * tokens_per_line + t
             if t < len(token_ids):
                 input_ids[pos] = token_ids[t]
@@ -346,7 +346,7 @@ func tokenize_single_line(async_prefetch_manager mgr, string line, int max_token
     if len(token_ids) > max_tokens:
         []int truncated = []int{cap: max_tokens}
         int i = 0
-        while i < max_tokens:
+        for i < max_tokens {
             truncated[i] = token_ids[i]
             i = i + 1
         return truncated
@@ -354,7 +354,7 @@ func tokenize_single_line(async_prefetch_manager mgr, string line, int max_token
 func estimate_bytes_from_lines([]string lines, int count) int64:
     int64 total = 0
     int i = 0
-    while i < count and i < len(lines):
+    for i < count and i < len(lines) {
         total = total + int64(len(lines[i]))
         i = i + 1
     return total

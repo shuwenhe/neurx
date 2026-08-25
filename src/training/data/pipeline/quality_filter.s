@@ -76,7 +76,7 @@ func new_bloom_filter(int64 size_bits, int num_hashes) bloom_filter:
     int64 array_size = (size_bits + 7) / 8
     []byte bit_array = []byte{cap: array_size}
     int i = 0
-    while i < array_size:
+    for i < array_size {
         bit_array.push(0)
         i = i + 1
     bloom_filter bf
@@ -89,7 +89,7 @@ func new_bloom_filter(int64 size_bits, int num_hashes) bloom_filter:
 
 func bloom_insert(bloom_filter bf, string item) void:
     int h = 0
-    while h < bf.num_hash_functions:
+    for h < bf.num_hash_functions {
         int64 hash_val = compute_hash_with_seed(item, h)
         int64 bit_pos = h(hash_val - (hash_val / bf.size_bits) * bf.size_bits)
         int64 byte_idx = bit_pos / 8
@@ -101,7 +101,7 @@ func bloom_insert(bloom_filter bf, string item) void:
 
 func bloom_contains(bloom_filter bf, string item) bool:
     int h = 0
-    while h < bf.num_hash_functions:
+    for h < bf.num_hash_functions {
         int64 hash_val = compute_hash_with_seed(item, h)
         int64 bit_pos = h(hash_val - (hash_val / bf.size_bits) * bf.size_bits)
         int64 byte_idx = bit_pos / 8
@@ -227,7 +227,7 @@ func compute_content_quality(string text, []int token_ids, quality_metrics metri
     map<int, int> token_freq
     int unique_tokens = 0
     int i = 0
-    while i < len(token_ids):
+    for i < len(token_ids) {
         if !token_freq.contains(token_ids[i]):
             token_freq[token_ids[i]] = 1
             unique_tokens = unique_tokens + 1
@@ -260,7 +260,7 @@ func detect_toxicity(string text) (bool, float):
     int toxic_count = 0
     string lower_text = to_lower_case(text)
     int i = 0
-    while i < len(toxic_words):
+    for i < len(toxic_words) {
         if contains(lower_text, toxic_words[i]):
             toxic_count = toxic_count + 1
             score = score + 0.2
@@ -291,7 +291,7 @@ func detect_code_content(string text) float:
     code_keywords = ["function", "def ", "class ", "import ", "return ", "if ", "else", "for ", "while "]
     int keyword_hits = 0
     int i = 0
-    while i < len(code_keywords):
+    for i < len(code_keywords) {
         if contains(text, code_keywords[i]):
             keyword_hits = keyword_hits + 1
         i = i + 1
@@ -436,7 +436,7 @@ func detect_language(string text) (string, float):
 
 func contains_range(string s, int start, int end) bool:
     int i = 0
-    while i < len(s):
+    for i < len(s) {
         int cp = get_codepoint(s, i)
         if cp >= start and cp <= end:
             return true
@@ -449,7 +449,7 @@ func get_codepoint(string s, int pos) int:
 func compute_hash_with_seed(string item, int seed) int64:
     int64 hash = int64(seed) * 2654435761
     int i = 0
-    while i < len(item):
+    for i < len(item) {
         hash = hash + int64(item[i])
         hash = hash * 16777619
         i = i + 1
@@ -472,7 +472,7 @@ func trim(string s) string:
 func count_char(string s, char c) int:
     int count = 0
     int i = 0
-    while i < len(s):
+    for i < len(s) {
         if s[i] == c:
             count = count + 1
         i = i + 1
@@ -481,7 +481,7 @@ func count_char(string s, char c) int:
 func count_occurrences(string s, string sub) int:
     int count = 0
     int pos = 0
-    while pos < len(s):
+    for pos < len(s) {
         int found = find_substring_from(s, sub, pos)
         if found >= 0:
             count = count + 1

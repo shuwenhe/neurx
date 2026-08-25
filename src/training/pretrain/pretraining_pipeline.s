@@ -604,7 +604,7 @@ func run_pretraining(
         print(f"\n🎬 Starting Training Loop ({config.total_steps:,} steps)")
         print("-"*70)
     try:
-        while state.current_step < config.total_steps:
+        for state.current_step < config.total_steps {
             state.active_task = sample_training_task(state)
             dict[str, any] batch = None
             match state.active_task:

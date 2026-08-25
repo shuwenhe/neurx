@@ -209,7 +209,7 @@ func partition_dataset(
     print("Writing shards...")
     []shard_info all_shards = []shard_info{cap: len(boundaries)}
     int s = 0
-    while s < len(boundaries):
+    for s < len(boundaries) {
         shard_boundary bnd = boundaries[s]
         mgr.current_shard_being_processed = s
         mgr.operation_progress = float(s) / float(len(boundaries))
@@ -244,7 +244,7 @@ func partition_dataset(
     manifest.created_by = "neurx_shard_manager_v1.0"
     int64 comp_total = 0
     s = 0
-    while s < len(all_shards):
+    for s < len(all_shards) {
         comp_total = comp_total + all_shards[s].file_size_bytes
         s = s + 1
     manifest.total_compressed_bytes = comp_total
@@ -294,7 +294,7 @@ func analyze_input_dataset(string path, shard_manager_config cfg) dataset_analys
             analysis.error_reason = "No data files found in directory"
             return analysis
         int i = 0
-        while i < len(analysis.source_files):
+        for i < len(analysis.source_files) {
             analysis.total_size_bytes = analysis.total_size_bytes +
                                         get_file_size(analysis.source_files[i])
             i = i + 1
@@ -357,7 +357,7 @@ func find_split_points_single_file(
     []shard_boundary boundaries = []shard_boundary{cap: 100}
     int64 current_start = 0
     int shard_id = 0
-    while current_start < total_size:
+    for current_start < total_size {
         int64 proposed_end = current_start + target_size
         if proposed_end >= total_size:
             boundaries.push(shard_boundary{
@@ -454,10 +454,10 @@ func assign_shard_to_ranks(int shard_id, int num_ranks) []int:
 func get_shards_for_rank(dataset_manifest manifest, int rank_id) []shard_info:
     []shard_info my_shards = []shard_info{cap: 100}
     int s = 0
-    while s < len(manifest.shards):
+    for s < len(manifest.shards) {
         shard_info shard = manifest.shards[s]
         int r = 0
-        while r < len(shard.assigned_ranks):
+        for r < len(shard.assigned_ranks) {
             if shard.assigned_ranks[r] == rank_id:
                 my_shards.push(shard)
                 break
@@ -498,7 +498,7 @@ func add_incremental_data(
 func sum_document_counts([]shard_info shards) int:
     int total = 0
     int i = 0
-    while i < len(shards):
+    for i < len(shards) {
         total = total + shards[i].document_count
         i = i + 1
     return total
@@ -506,7 +506,7 @@ func sum_document_counts([]shard_info shards) int:
 func sum_token_counts([]shard_info shards) int64:
     int64 total = 0
     int i = 0
-    while i < len(shards):
+    for i < len(shards) {
         total = total + shards[i].token_count
         i = i + 1
     return total

@@ -347,7 +347,7 @@ struct function_calling_engine {
         tool_defs = tools  this.registry.list_tools()
         all_executed_calls: list<tool_call> = []
         rounds = 0
-        while rounds < max_rounds:
+        for rounds < max_rounds {
             rounds += 1
             if this.config.verbose_logging:
                 print(f"\n--- Round {rounds} ---")

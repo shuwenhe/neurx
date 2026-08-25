@@ -480,7 +480,7 @@ struct clip_text_encoder {
     _tokenize(string text) {
         tokens = [49406]
         tokens.append(49407)
-        while tokens.length < 77:
+        for tokens.length < 77 {
             tokens.append(0)
         return tensor(tokens[:77])
     }
