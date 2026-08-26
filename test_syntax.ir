@@ -1,0 +1,17 @@
+SSEED-TARGET-V1
+MOV|t0|"t0"|_
+MOV|t0.__type|"test_struct"|_
+MOV|t0.value|"int"|_
+MOV|t0.name|"string"|_
+MOV|test_struct|t0|_
+FUNC_BEGIN|new_test|_|_
+MOV|t1|"t1"|_
+MOV|t1.__type|"test_struct"|_
+MOV|t1.value|42|_
+MOV|t1.name|"test"|_
+RET|t1|_|_
+FUNC_END|new_test|_|_
+FUNC_BEGIN|test_struct.get_value|_|_
+PARAM|t|_|_
+RET|t.value|_|_
+FUNC_END|test_struct.get_value|_|_

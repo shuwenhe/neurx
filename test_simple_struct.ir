@@ -1,0 +1,11 @@
+SSEED-TARGET-V1
+MOV|t0|"t0"|_
+MOV|t0.__type|"config"|_
+MOV|t0.value|"int"|_
+MOV|config|t0|_
+FUNC_BEGIN|new_config|_|_
+MOV|t1|"t1"|_
+MOV|t1.__type|"config"|_
+MOV|t1.value|42|_
+RET|t1|_|_
+FUNC_END|new_config|_|_

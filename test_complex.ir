@@ -1,0 +1,12 @@
+SSEED-TARGET-V1
+MOV|t0|"t0"|_
+MOV|t0.__type|"item"|_
+MOV|t0.pid|"int"|_
+MOV|t0.name|"string"|_
+MOV|item|t0|_
+MOV|t1|"t1"|_
+MOV|t1.__type|"complex_struct"|_
+MOV|t1.ptr|"item*"|_
+MOV|t1.array|"int[]"|_
+MOV|t1.items|"item[]"|_
+MOV|complex_struct|t1|_
