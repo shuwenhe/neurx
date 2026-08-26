@@ -3288,6 +3288,40 @@ ai-os-boot-test: build-s-ir-runner
 		$(AI_OS_BUILD_DIR)/boot_state.ir $(AI_OS_BUILD_DIR)/boot_test_main.ir
 	@$(S_RUNNER_BIN) $(AI_OS_BUILD_DIR)/ai_os_boot_test.ir
 
+BAREMETAL_BUILD_DIR := $(CURDIR_UNIX)/artifact/build/baremetal_x86_64
+BAREMETAL_KERNEL := $(BAREMETAL_BUILD_DIR)/neurx-kernel.elf
+BAREMETAL_ISO := $(BAREMETAL_BUILD_DIR)/neurx-ai-os.iso
+
+.PHONY: baremetal-x86_64 baremetal-iso baremetal-check baremetal-run
+baremetal-x86_64:
+	@mkdir -p $(BAREMETAL_BUILD_DIR)
+	@$(S_SEED_COMPILER) arch/x86_64/baremetal/kernel.s $(BAREMETAL_BUILD_DIR)/kernel.ir
+	@S_SOURCE_ROOT='$(S_REPO_ROOT)' $(S_SEED_COMPILER) --emit-standalone-amd64-obj \
+		$(BAREMETAL_BUILD_DIR)/kernel.ir $(BAREMETAL_BUILD_DIR)/kernel.s.o
+	@$(CC) -c -m64 -ffreestanding -fno-pie arch/x86_64/baremetal/boot.S \
+		-o $(BAREMETAL_BUILD_DIR)/boot.o
+	@$(LD) -nostdlib -z max-page-size=0x1000 -T arch/x86_64/baremetal/linker.ld \
+		-o $(BAREMETAL_KERNEL) $(BAREMETAL_BUILD_DIR)/boot.o $(BAREMETAL_BUILD_DIR)/kernel.s.o
+	@echo "Built bare-metal S kernel: $(BAREMETAL_KERNEL)"
+
+baremetal-check: baremetal-x86_64
+	@grub-file --is-x86-multiboot2 $(BAREMETAL_KERNEL)
+	@readelf -h $(BAREMETAL_KERNEL) | grep -q 'Class:.*ELF64'
+	@readelf -h $(BAREMETAL_KERNEL) | grep -q 'Entry point address:.*0x100018'
+	@echo "Verified Multiboot2 x86_64 kernel image"
+
+baremetal-iso: baremetal-check
+	@command -v xorriso >/dev/null || { echo "xorriso is required for baremetal-iso" >&2; exit 1; }
+	@mkdir -p $(BAREMETAL_BUILD_DIR)/iso/boot/grub
+	@cp $(BAREMETAL_KERNEL) $(BAREMETAL_BUILD_DIR)/iso/boot/neurx-kernel.elf
+	@cp arch/x86_64/baremetal/grub.cfg $(BAREMETAL_BUILD_DIR)/iso/boot/grub/grub.cfg
+	@grub-mkrescue -o $(BAREMETAL_ISO) $(BAREMETAL_BUILD_DIR)/iso >/dev/null 2>&1
+	@echo "Built bootable image: $(BAREMETAL_ISO)"
+
+baremetal-run: baremetal-check
+	@command -v qemu-system-x86_64 >/dev/null || { echo "qemu-system-x86_64 is required for baremetal-run" >&2; exit 1; }
+	@qemu-system-x86_64 -kernel $(BAREMETAL_KERNEL) -serial stdio -display none -no-reboot
+
 ai-os-manager: build-s-ir-runner
 	@echo "🔧 Starting AI OS System Manager..."
 	@mkdir -p $(CURDIR_UNIX)/artifact/build/ai_os
