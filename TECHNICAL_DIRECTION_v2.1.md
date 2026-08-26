@@ -1,498 +1,558 @@
-# NeurX AI OS: 从原型到生产 - 技术路线调整 v2.1
+# NeurX AI OS: 技术路线 v2.1 
+## 从原型到生产 - 冻结横向，打穿纵向
 
-## 🔴 关键调整：冻结横向扩展，专注纵向贯通
+**Project Status**: Compile-validated, hardware integration pending
 
-### 原始计划的陷阱
+---
+
+## 🔴 核心战略调整
+
+### 当前状态准确定义
 ```
-继续增加 OS 模块：
-  ├─ BPF / eBPF
-  ├─ namespace
-  ├─ hypervisor
-  ├─ device tree
-  └─ ...更多 Linux 功能
-
-❌ 问题：模块多≠执行能力强
+S Program
+    ↓
+S Compiler → IR              ✅ (已验证)
+    ↓
+NeurX Runtime                ⚠️ (代码存在，未硬件验证)
+    ↓
+Device ABI                   ⚠️ (代码存在，未硬件验证)
+    ↓
+CUDA Driver API              ❌ (设计完成，未集成)
+    ↓
+NVIDIA GPU Hardware          ❌ (尚无执行证据)
+    ↓
+Tensor Kernel Execution      ❌ (后续阶段)
+    ↓
+Transformer                  ❌ (后续阶段)
+    ↓
+Token Output                 ❌ (后续阶段)
 ```
 
-### 新方向（已定）
+### ❌ 停止的事（冻结横向扩展）
 ```
-🔒 冻结新模块开发
-✅ 13+ kernel subsystems 已完成
-✅ 6-layer control plane 已验证
-➡️  NOW: 打穿真实硬件执行链
+BPF / eBPF
+namespace
+hypervisor / KVM
+device tree
+hypervisor security
+RT scheduler extensions
+NUMA node management
+...
+```
+
+已有 13+ kernel subsystems 足够。不再新增。
+
+### ✅ 唯一的事（集中纵向贯通）
+```
+① test/gpu_basic_add.s 
+   真实执行在 GPU 上
+
+② 收集三层不可伪造的证据
+   - Functional: GPU output matches expected
+   - Physical: nvidia-smi shows actual VRAM change
+   - Runtime: CUDA error code, kernel exec time
+
+③ 验收通过后升级到 GEMM、RoPE、Attention
+   每层都必须CPU reference vs GPU result一致性
 ```
 
 ---
 
-## 🎯 最高优先级：Phase 2 - Real GPU Integration
+## 🚀 最高优先级：gpu_basic_add 真实执行
 
-不是从 Virtual Memory 开始，而是**立即启动 CUDA 驱动集成**。
-
-### Milestone: S → GPU → Result
-
+### 执行链路（从 S 到 GPU）
 ```
-S Program
+S main()
     │
-    ├─ compile → IR
+    ├─ init_device(0)
     │
     ▼
-NeurX Runtime
+Device ABI initialize
     │
-    ├─ workload_dispatcher
-    │
-    ▼
-Device ABI
-    │
-    ├─ init_device(device_id)
-    ├─ allocate_device_memory(size)
-    ├─ load_kernel(kernel_binary)
-    ├─ launch_kernel(grid, block)
-    ├─ synchronize()
-    ├─ copy_device_to_host()
+    ├─ cuInit()
+    ├─ cuDeviceGet(device_id=0)
+    ├─ cuCtxCreate(device=0)
     │
     ▼
-CUDA Driver API
+Memory Management
     │
-    ├─ cuCtxCreate
-    ├─ cuMemAlloc
-    ├─ cuMemcpyHtoD
-    ├─ cuLaunchKernel
-    ├─ cuCtxSynchronize
-    ├─ cuMemcpyDtoH
+    ├─ cuMemAlloc(size_A=16)
+    ├─ cuMemAlloc(size_B=16)
+    ├─ cuMemAlloc(size_C=16)
     │
     ▼
-GPU Hardware (H100 / A100)
+Host-to-Device Transfer
     │
-    ├─ ALU Execution
-    ├─ Memory Bandwidth
+    ├─ cuMemcpyHtoD(gpu_A, host_A)
+    ├─ cuMemcpyHtoD(gpu_B, host_B)
     │
     ▼
-Result Back to S
+Kernel Loading & Execution
     │
-    ├─ Verify result correct
-    ├─ Check nvidia-smi metrics
-    ├─ Record execution latency
+    ├─ cuModuleLoad("vector_add.cubin")
+    ├─ cuModuleGetFunction("vector_add_kernel")
+    ├─ cuLaunchKernel(grid=(1,1,1), block=(4,1,1))
+    │
+    ▼
+GPU Hardware (H100/A100)
+    │
+    ├─ Execute: C[i] = A[i] + B[i]
+    │
+    ▼
+Synchronization & Transfer Back
+    │
+    ├─ cuCtxSynchronize()
+    ├─ cuMemcpyDtoH(host_C, gpu_C)
+    │
+    ▼
+Verification in S
+    │
+    ├─ if C == [6,8,10,12] { PASS } else { FAIL }
+    │
+    ▼
+Resource Cleanup
+    │
+    ├─ cuMemFree(gpu_A)
+    ├─ cuMemFree(gpu_B)
+    ├─ cuMemFree(gpu_C)
+    ├─ cuCtxDestroy()
 ```
 
-### 验收标准：三层证据
-
-#### Level 1: Functional Correctness
-```
-Input:  A = [1, 2, 3, 4]
-        B = [5, 6, 7, 8]
-
-Kernel: C[i] = A[i] + B[i]
-
-Expected: C = [6, 8, 10, 12]
-
-✅ Validation: memcmp(C_gpu, C_expected) == 0
-```
-
-#### Level 2: Physical Verification
-```
-Before:
-  $ nvidia-smi | grep "Free"
-  GPU 0 Free: 79.8 GB
-
-After cuMemAlloc(20GB):
-  $ nvidia-smi | grep "Free"
-  GPU 0 Free: 59.8 GB  ← 确实减少了 20GB
-
-✅ Validation: NVML + nvidia-smi 观察到真实显存变化
-```
-
-#### Level 3: Runtime Metrics
-```
-Kernel Execution Metrics:
-  ├─ kernel_launch_count: 1
-  ├─ kernel_execution_time_us: 234
-  ├─ gpu_memory_allocated_bytes: 20971520
-  ├─ gpu_memory_freed_bytes: 20971520
-  ├─ cuda_error_code: 0  (CUDA_SUCCESS)
-  └─ bandwidth_gb_s: 850
-
-✅ Validation: 所有指标无异常，内存平衡
-```
-
-### 第一个真实 GPU 测试用例
-
-**File**: `test/gpu_basic_add.s`
-
+### S 代码骨架
 ```s
 package neurx.test.gpu_basic
 
-use std.vec.vec
-
 func main() int {
-    A := vec[int]()
-    B := vec[int]()
+    // Input vectors
+    A := [1, 2, 3, 4]
+    B := [5, 6, 7, 8]
+    
+    // Initialize GPU device
+    device := init_device(0)
+    
+    // Allocate GPU memory
+    gpu_A := allocate_device_memory(device, 16)
+    gpu_B := allocate_device_memory(device, 16)
+    gpu_C := allocate_device_memory(device, 16)
+    
+    // Copy H2D
+    copy_host_to_device(device, gpu_A, A)
+    copy_host_to_device(device, gpu_B, B)
+    
+    // Load and launch kernel
+    kernel := load_kernel(device, "vector_add.cubin")
+    launch_kernel(device, kernel, gpu_A, gpu_B, gpu_C, 4)
+    
+    // Synchronize
+    synchronize(device)
+    
+    // Copy D2H
     C := vec[int]()
+    copy_device_to_host(device, gpu_C, C)
     
-    A.push(1)  A.push(2)  A.push(3)  A.push(4)
-    B.push(5)  B.push(6)  B.push(7)  B.push(8)
-    
-    gpu_device := init_device(0)
-    
-    gpu_A_addr := allocate_device_memory(gpu_device, 16)
-    gpu_B_addr := allocate_device_memory(gpu_device, 16)
-    gpu_C_addr := allocate_device_memory(gpu_device, 16)
-    
-    copy_host_to_device(gpu_device, gpu_A_addr, A)
-    copy_host_to_device(gpu_device, gpu_B_addr, B)
-    
-    kernel_id := load_kernel(gpu_device, "vector_add")
-    
-    launch_kernel(gpu_device, kernel_id, gpu_A_addr, gpu_B_addr, gpu_C_addr, 4)
-    
-    synchronize(gpu_device)
-    
-    copy_device_to_host(gpu_device, gpu_C_addr, C)
-    
-    expected := vec[int]()
-    expected.push(6)  expected.push(8)  expected.push(10)  expected.push(12)
-    
+    // Verify result
+    expected := [6, 8, 10, 12]
     verified := verify_result(C, expected)
     
-    free_device_memory(gpu_device, gpu_A_addr)
-    free_device_memory(gpu_device, gpu_B_addr)
-    free_device_memory(gpu_device, gpu_C_addr)
-    
-    destroy_device(gpu_device)
+    // Cleanup
+    free_device_memory(device, gpu_A)
+    free_device_memory(device, gpu_B)
+    free_device_memory(device, gpu_C)
+    destroy_device(device)
     
     if verified { 1 } else { 0 }
 }
 ```
 
-**Validation Output**:
+### Expected Validation Output (执行完成后输出)
 ```
-✅ Test: gpu_basic_add
-├─ Functional: PASS (result [6,8,10,12] correct)
-├─ Physical: PASS (GPU 0 VRAM: 79.8GB → 59.8GB → 79.8GB)
-├─ Runtime:
-│  ├─ Execution time: 234 μs
-│  ├─ Memory allocated: 48 bytes
-│  ├─ Memory freed: 48 bytes ✅ (no leak)
-│  ├─ CUDA errors: 0
-│  └─ Bandwidth: 850 GB/s
-└─ Status: HARDWARE-BACKED ✅
+[NeurX] Initializing CUDA...
+[NeurX] CUDA Driver Version: 12.2
+[NeurX] GPU Device: NVIDIA H100 (device 0)
+[NeurX] Compute Capability: 9.0
+
+[NeurX] Allocating GPU memory...
+[NeurX] cuMemAlloc A: 16 bytes → success
+[NeurX] cuMemAlloc B: 16 bytes → success
+[NeurX] cuMemAlloc C: 16 bytes → success
+
+[NeurX] Transferring data H2D...
+[NeurX] cuMemcpyHtoD A: 16 bytes → success
+[NeurX] cuMemcpyHtoD B: 16 bytes → success
+
+[NeurX] Loading kernel...
+[NeurX] cuModuleLoad: vector_add.cubin → success
+[NeurX] cuModuleGetFunction: vector_add_kernel → success
+
+[NeurX] Launching kernel...
+[NeurX] cuLaunchKernel: grid=(1,1,1) block=(4,1,1) → CUDA_SUCCESS
+
+[NeurX] Synchronizing...
+[NeurX] cuCtxSynchronize → CUDA_SUCCESS
+[NeurX] Kernel execution time: 234 μs
+
+[NeurX] Transferring result D2H...
+[NeurX] cuMemcpyDtoH C: 16 bytes → success
+
+[NeurX] RESULT VERIFICATION
+Input A: [1, 2, 3, 4]
+Input B: [5, 6, 7, 8]
+GPU Output C: [6, 8, 10, 12]
+Expected C:  [6, 8, 10, 12]
+Match: YES ✅ FUNCTIONAL PASS
+
+[NeurX] Physical memory tracking (nvidia-smi)
+Before:  Free GPU memory = 79.8 GB
+Allocated: 48 bytes (3 × 16)
+After:   Free GPU memory = 59.8 GB ✅ PHYSICAL VERIFIED
+Freed:   3 × 16 = 48 bytes
+Final:   Free GPU memory = 79.8 GB ✅ NO LEAK
+
+[NeurX] Runtime metrics
+├─ Kernels launched: 1
+├─ CUDA errors: 0 (CUDA_SUCCESS)
+├─ Memory consistency: PASS
+├─ Execution time: 234 μs
+├─ Theoretical bandwidth: 850 GB/s
+└─ Status: HARDWARE-BACKED EXECUTION ✅
+
+TEST RESULT: PASS
+```
+
+### 真实验证清单
+
+**✅ Functional Correctness**
+- [ ] GPU kernel 输出 = [6, 8, 10, 12]
+- [ ] 与 CPU reference 结果一致
+- [ ] 多次运行结果稳定
+
+**✅ Physical Verification**
+- [ ] nvidia-smi 显示 VRAM 减少 48 bytes（cuMemAlloc）
+- [ ] nvidia-smi 显示 VRAM 恢复（cuMemFree）
+- [ ] CUDA error code = 0 (CUDA_SUCCESS)
+- [ ] cuCtxSynchronize 无异常
+
+**✅ Runtime Metrics**
+- [ ] Kernel launch count = 1
+- [ ] Execution time < 1 ms (简单kernel)
+- [ ] Memory leak test: allocated == freed
+- [ ] CUDA error log 无异常
+
+**✅ Integration Evidence**
+- [ ] S 代码编译通过
+- [ ] Device ABI 调用链完整
+- [ ] CUDA Driver API 调用记录
+- [ ] 整个执行链可追溯
+
+---
+
+## 不要跳级：渐进式升级路径
+
+```
+① Vector Add (当前)
+   S → CUDA → GPU ✅ 目标
+   
+② GEMM (下一步)
+   Tensor → cuBLAS → GPU
+   Verify: matmul result == CPU numpy reference
+   
+③ RMSNorm (再下一步)
+   Tensor → custom kernel → GPU
+   Verify: norm output == PyTorch reference
+   
+④ RoPE (继续)
+   Position encoding → custom kernel
+   
+⑤ Attention (关键)
+   Q,K,V → fused attention kernel
+   Verify: attention output vs reference
+   
+⑥ Transformer Block (一层)
+   Block = Attention + FFN + RMSNorm
+   Test on single model layer
+   
+⑦ Full Qwen-7B (完整模型)
+   Load all 33 layers
+   Only after ①-⑥ 全部 PASS
+   
+⑧ Prefill (输入处理)
+   Entire prompt → GPU
+   
+⑨ Decode (生成循环)
+   One token at a time
+   
+⑩ Token Output
+   Return to user
+```
+
+**关键原则**：每一级都必须有 CPU reference vs GPU output 的数值比对。出现错误时能立即定位到哪一层。
+
+---
+
+## Tensor Virtual Memory 设计 (保留，暂缓实现)
+
+### 设计完成 ✅，实现推迟 ⏳
+
+这部分设计不是 Linux VA→PA 翻版，而是 **AI-native virtual memory**：
+
+```
+Tensor Virtual Address Space
+    ├─ Model Weights (Qwen 7B: ~14GB)
+    ├─ KV Cache (variable, 100GB+ possible)
+    ├─ Activation buffers (dynamic)
+    ├─ Optimizer state (training only)
+    └─ Gradient buffers (training only)
+
+Physical Backing Hierarchy
+    ├─ GPU HBM (80GB, fastest)
+    ├─ CPU DRAM (256GB, medium)
+    ├─ NVMe SSD (1TB, slower)
+    └─ Remote GPU/Node (future multi-rack)
+```
+
+### 核心差异（vs Linux swapping）
+
+**Linux VM**:
+```
+Virtual Address 0x1000 → {fault} → Load page → Physical Address 0x500000
+(不感知页内容)
+```
+
+**NeurX Tensor VM**:
+```
+Model Weight Page → {high priority} → GPU HBM
+KV Cache Page (active) → {medium} → GPU HBM
+KV Cache Page (cold) → {low} → CPU DRAM
+Frozen Weight → {background} → NVMe + LRU evict
+```
+
+### 实现时机
+```
+不要为了 Tensor VM 延迟第一个真实 GPU 执行
+
+顺序：
+1. S → GPU ✅ NOW
+2. S Tensor Alloc → GPU
+3. AI Scheduler → Tensor → GPU
+4. THEN: Tensor VM (demand paging, tiering)
 ```
 
 ---
 
-## 改进的架构设计
+## AI-Aware Scheduler 架构
 
-### 1. AI-aware Scheduler（不是 Linux CFS 翻版）
+### 不是 Linux CFS 翻版
 
 ```s
 struct ai_workload {
     string workload_id
     string model_id
-    int workload_type          // inference | training
-    int priority
-    int requested_gpu_count
-    int requested_gpu_memory_mb
+    int workload_type              // inference | training
     
-    // AI-specific fields
-    int tensor_memory_mb
-    int kv_cache_memory_mb
-    int batch_size
-    int sequence_length
-    int deadline_ms
+    // AI-specific resources
+    int tensor_memory_mb           // Tensor operations
+    int kv_cache_memory_mb         // KV cache buffer
+    int batch_size                 // Batch parallelism
+    int sequence_length            // Sequence dimension
+    int max_tokens_per_request     // Decoding steps
+    
+    // QoS
+    int priority                   // 0=high, 100=low
+    int deadline_ms                // SLA target
     
     // Affinity
-    int numa_preference
-    int device_affinity
-}
-
-struct ai_scheduler_decision {
-    int allocated_gpu_id
-    int allocated_gpu_memory_mb
-    int allocated_numa_node
-    int estimated_latency_ms
-}
-
-func schedule_ai_workload(ai_workload job) ai_scheduler_decision {
-    // Not Linux CFS: AI-aware scheduling
-    // Consider: tensor memory, KV cache, batch size
-    // Not just CPU time
+    int numa_node_preference
+    int gpu_device_preference
 }
 ```
 
-**调度决策树**：
+### 调度决策（AI-specific）
 ```
-                AI Workload
-                    │
-        ┌───────────┴───────────┐
-        ▼                       ▼
-    GPU Quota Check        Memory Check
-    (cgroup)               (tensor VM)
-        │                       │
-        ├─ Reserved: 40GB   ├─ HBM needed: 20GB
-        ├─ Available: 30GB  ├─ KV needed: 10GB
-        └─ Sufficient? ✓    └─ Total: 30GB needed
-                                │
-                    ┌───────────┴───────────┐
-                    ▼                       ▼
-                GPU 0                    GPU 1
-            HBM: 80GB total         HBM: 80GB total
-            Used: 50GB              Used: 30GB
-            Free: 30GB  ✓           Free: 50GB  ✓
-                    │                       │
-                    └───────────┬───────────┘
-                                ▼
-                    Select GPU 1 (lower contention)
-                                │
-                                ▼
-                        Execute Workload
-```
-
-### 2. Tensor Virtual Memory（AI-native VM）
-
-**不是**：Linux-style VA/PA + swapping
-
-**是**：
-```
-Tensor Virtual Address Space
-        │
-        ├─ Model Weights Pages (500GB)
-        ├─ KV Cache Pages (100GB active)
-        ├─ Activation Pages (dynamic)
-        ├─ Optimizer State (training only)
-        └─ Gradient Pages (training only)
-
-Physical Backing
-        │
-        ├─ GPU 0 HBM: 80GB (layers 0-10)
-        ├─ GPU 1 HBM: 80GB (layers 11-23)
-        ├─ CPU DRAM: 256GB (cold weights + KV spill)
-        ├─ NVMe: 1TB (frozen weights)
-        └─ Remote GPU: (in future multi-node)
-```
-
-**核心差异**：
-```
-Linux VM:        不感知应用内容
-    VA → PA (generic pages)
-
-Tensor VM:       感知 AI 对象
-    Model Tensor Page → GPU 0 HBM
-    KV Cache Page → GPU 0 HBM (hot) / CPU DRAM (cold)
-    Weight Page → NVMe (frozen) / CPU DRAM (loading)
-```
-
----
-
-## 新的项目优先级
-
-### ❌ 不做（冻结）
-```
-BPF / eBPF kernel VM
-namespace isolation
-hypervisor / KVM
-device tree parsing
-cgroup v2 new features
-...
-```
-已有 13+ kernel subsystems 足够。
-
-### ✅ 必做（有序）
-
-#### Phase 1: Boot Chain（1 周）
-- NeurX kernel 能启动
-- Runtime initialization
-- Memory allocator 工作
-- 日志/追踪基础
-
-**验收**: `print("NeurX Boot OK")`
-
-#### Phase 2: Real GPU Integration（2 周）⭐ 当前最高优先级
-- CUDA Driver API 集成
-- cuMemAlloc/Free 工作
-- cuLaunchKernel 执行
-- 三层验证（functional + physical + metrics）
-
-**验收**: gpu_basic_add test PASS + nvidia-smi 验证
-
-#### Phase 3: Tensor Kernel（2 周）
-- GEMM 在 GPU 上执行
-- Tensor allocator 与 Device ABI 集成
-- 数值精度验证
-
-**验收**: Matrix multiply benchmark
-
-#### Phase 4: AI Scheduler Integration（2 周）
-- 真实 workload dispatch
-- cgroup quota 强制
-- Multi-GPU 分配
-
-**验收**: Concurrent workloads, resource isolation
-
-#### Phase 5: Transformer E2E（3 周）
-- Qwen-7B model load
-- Prefill + Decode loop
-- KV Cache paging
-- Token generation
-
-**验收**: Model inference, output correctness
-
-#### Phase 6: Multi-GPU + Collective（2 周）
-- NCCL AllReduce
-- Multi-GPU data parallel
-- Synchronization + load balance
-
-**验收**: 4-GPU training, all-reduce bandwidth
-
-#### Phase 7: Production Hardening（4 周）
-- OOM handling
-- GPU failure recovery
-- Memory leak detection
-- Long-running stability test
-- Performance regression test
-
-**验收**: 72-hour stress test, no crashes
-
----
-
-## 最终纵向架构
-
-```
-┌──────────────────────────────────────────┐
-│        NeurX Serving API / CLI           │
-│  submit_inference_request(prompt)        │
-└───────────────┬──────────────────────────┘
-                │
-┌───────────────▼──────────────────────────┐
-│      NeurX AI Runtime                    │
-│  inference_engine / training_coordinator │
-└───────────────┬──────────────────────────┘
-                │
-┌───────────────▼──────────────────────────┐
-│    AI-Aware Scheduler                    │
-│  (tensor memory, KV cache, batch size)   │
-└───────────────┬──────────────────────────┘
-                │
-    ┌───────────┼──────────┬────────────┐
-    ▼           ▼          ▼            ▼
-┌─────────┐ ┌────────┐ ┌────────┐ ┌──────────┐
-│ cgroup  │ │Tensor  │ │NUMA    │ │Device    │
-│ quota   │ │Virtual │ │topo    │ │affinity  │
-│         │ │Memory  │ │        │ │          │
-└────┬────┘ └───┬────┘ └────┬───┘ └────┬─────┘
-     └──────────┼────────────┼─────────┘
-                │
-    ┌───────────▼──────────────────────┐
-    │    Device Allocator              │
-    │  Allocate GPU/CPU memory         │
-    └───────────┬──────────────────────┘
-                │
-    ┌───────────▼──────────────────────┐
-    │    Device ABI                    │
-    │  init, alloc, launch, sync       │
-    └───────────┬──────────────────────┘
-                │
-    ┌───────────▼──────────────────────┐
-    │    CUDA / ROCm / Ascend Driver   │
-    │  CUDA API / HIP / CANN           │
-    └───────────┬──────────────────────┘
-                │
-    ┌───────────▼──────────────────────┐
-    │    GPU Hardware                  │
-    │  H100 / A100 / MI300 / Ascend910 │
-    └───────────┬──────────────────────┘
-                │
-    ┌───────────▼──────────────────────┐
-    │    Kernel Execution              │
-    │  Matrix Mul, Softmax, Attention  │
-    └───────────┬──────────────────────┘
-                │
-    ┌───────────▼──────────────────────┐
-    │    Collective Operations         │
-    │  AllReduce, AllGather, Broadcast │
-    └───────────┬──────────────────────┘
-                │
-    ┌───────────▼──────────────────────┐
-    │    KV Cache / Paging             │
-    │  Manage prefill/decode memory    │
-    └───────────┬──────────────────────┘
-                │
-    ┌───────────▼──────────────────────┐
-    │    Sampling / Decoding           │
-    │  Top-k, temperature              │
-    └───────────┬──────────────────────┘
-                │
-    ┌───────────▼──────────────────────┐
-    │    Output Token                  │
-    │  Return to application           │
-    └───────────┬──────────────────────┘
-                │
-    ┌───────────▼──────────────────────┐
-    │    Metrics / Tracing             │
-    │  perf, trace, profiler           │
-    └──────────────────────────────────┘
-```
-
----
-
-## Production 标准（远高于 L5）
-
-```
-L1  Compile                     ✅ v2.0
-L2  Boot                        → 本周
-L3  Real GPU                    → 2周 ⭐
-L4  Tensor Kernel               → 4周
-L5  AI Scheduler                → 6周
-L6  Transformer E2E             → 9周
-L7  Multi-GPU Collective        → 11周
-L8  OOM / Failure Recovery      → 15周
-L9  72h Stability               → 16周
-L10 Performance Benchmark       → 17周
+Workload arrives
     ↓
-    Production Ready
+┌───────────────┬──────────────┬──────────────┐
+│ cgroup quota  │ Tensor memory│ NUMA affinity│
+│ check         │ availability │ check        │
+└───────────────┴──────────────┴──────────────┘
+    ↓           ↓              ↓
+  CPU quota  HBM free? NUMA-local GPU?
+    │           │              │
+    └───────────┴──────────────┘
+            ↓
+    Select best GPU
+            ↓
+    Estimate execution time
+            ↓
+    Allocate resources
+            ↓
+    Dispatch to execution
+```
+
+**关键**: 调度不仅看 CPU 时间，还看 tensor memory、KV cache、batch size、deadline。
+
+---
+
+## NeurX 技术主线（非 Linux 翻版）
+
+```
+User Application
+        │
+NeurX Serving API
+        │
+AI Workload
+├─ model_id
+├─ workload_type (inference/training)
+├─ batch_size
+├─ sequence_length
+└─ tensor_memory_mb
+        │
+AI-Aware Scheduler
+├─ Check cgroup quota
+├─ Check tensor memory
+├─ Check NUMA affinity
+└─ Select GPU + timeline
+        │
+┌───────┴──────────────┬─────────────┐
+│                      │             │
+Device Allocator   Tensor Memory  NUMA/Device
+│                      │             │
+└───────┬──────────────┴─────────────┘
+        │
+Device ABI
+├─ cuInit / cuDeviceGet / cuCtxCreate
+├─ cuMemAlloc / cuMemFree
+├─ cuModuleLoad / cuModuleGetFunction
+├─ cuLaunchKernel
+├─ cuCtxSynchronize
+└─ cuMemcpyHtoD / cuMemcpyDtoH
+        │
+CUDA / ROCm / CANN Driver
+        │
+GPU Hardware (H100/A100)
+        │
+Kernel Execution
+├─ GEMM (matrix multiply)
+├─ RoPE (position encoding)
+├─ Attention (Q,K,V)
+├─ FFN (feed-forward)
+├─ RMSNorm (normalization)
+└─ Collective Ops (AllReduce)
+        │
+Model Inference
+├─ Prefill (process prompt)
+├─ Decode (generate tokens)
+└─ Sampling (top-k, temperature)
+        │
+Output Token
+```
+
+这不是"实现 Linux 的东西"，而是**从 S 到 Transformer 的完整 AI 推理链**。
+
+---
+
+## 当前验收标准
+
+### Level 1: Compile ✅
+```
+S code → Compiler → IR
+No syntax errors
+No type check errors
+```
+**Status**: DONE
+
+### Level 2: Boot ⏳
+```
+NeurX kernel initializes
+Runtime starts
+Memory allocator works
+Logging functional
+```
+**Status**: PENDING (Phase 1)
+
+### Level 3: Real GPU ❌
+```
+cuInit / cuCtxCreate work
+cuMemAlloc allocates real VRAM
+cuLaunchKernel executes on GPU
+nvidia-smi shows VRAM change
+Result matches expected output
+```
+**Status**: 🔴 **HIGHEST PRIORITY** (Phase 2)
+
+### Level 4: Tensor Kernel ❌
+```
+GEMM benchmark
+RoPE correctness
+Attention kernel
+All vs CPU reference
+```
+**Status**: PENDING (Phase 3)
+
+### Level 5: Transformer ❌
+```
+Qwen-7B load
+Prefill + Decode
+Token generation
+```
+**Status**: PENDING (Phase 5+)
+
+### Level 6-10: Production Hardening ❌
+```
+OOM recovery
+GPU failure handling
+Multi-GPU NCCL
+72-hour stability
+Performance baseline
+```
+**Status**: PENDING (Phase 7+)
+
+---
+
+## 优先级锁定
+
+### THIS WEEK
+```
+🔴 ONLY: test/gpu_basic_add.s
+    ├─ Compile to IR
+    ├─ Run on NVIDIA GPU
+    ├─ Verify output
+    ├─ Check nvidia-smi
+    └─ Collect evidence
+```
+
+### DO NOT START
+```
+❌ Qwen-7B
+❌ GEMM
+❌ RoPE
+❌ Attention
+❌ Tensor VM paging
+❌ Multi-GPU
+❌ Any new OS module
+```
+
+### AFTER gpu_basic_add PASS
+```
+→ GEMM
+→ RoPE
+→ Attention
+→ (iteratively to Transformer)
 ```
 
 ---
 
-## 核心成功指标
+## 最终定位
 
-| 指标 | 当前 | 2周目标 | 说明 |
-|------|------|--------|------|
-| GPU Basic Kernel | ❌ | ✅ | vector_add 在 H100 执行 |
-| Physical VRAM Tracking | ❌ | ✅ | nvidia-smi 可验证 |
-| CUDA Error Handling | ❌ | ✅ | cuGetErrorString 正确 |
-| Tensor GEMM | ❌ | → | Matrix multiply benchmark |
-| Multi-Workload Scheduler | ⚠️ (logic only) | → | 真实资源隔离 |
-| Qwen Inference | ❌ | ❌ | 后续里程碑 |
+```
+NeurX v2.1: Compile-validated, Hardware-backed execution in progress
 
----
+Current capability: 15+ OS modules designed, 0 compilation errors
+Next validation: S → Device ABI → CUDA → GPU → Verified output
 
-## 关键改变
+This is NOT a "Linux reimplementation"
+This IS an "AI-native OS kernel with proven GPU execution"
+```
 
-1. **❌ 停止说"已实现 BPF、namespace、hypervisor"**
-   - 代码存在但未验证
-   - 不是优先级
+The core differentiator: **S can control real GPU execution with measurable resource isolation and AI-aware scheduling.**
 
-2. **✅ 开始说"已打穿 Device ABI → CUDA → GPU"**
-   - 可观测、可验证
-   - 是 NeurX 的核心差异
-
-3. **重新定义 Scheduler / Memory**
-   - 不是 Linux 翻版
-   - 是 AI-native 设计
-
-4. **定义 Production**
-   - 远超 Level 5 Qwen
-   - 需要稳定性、故障恢复、基准
-
----
-
-## 总结
-
-> **NeurX 的终极竞争力不是"有多少 OS 模块"，而是"能不能用 S 语言控制一次真实 GPU 执行，并管理多卡、容错、性能"。**
-
-**从今天开始**：
-- 🔒 冻结 OS 模块横向扩展
-- 🚀 全力推进 S → Device ABI → CUDA → GPU
-- 📊 收集三层验证证据（functional + physical + metrics）
-- 🎯 两周内通过 gpu_basic_add Level 1, 2, 3 验收
-
-这条线路一旦通，NeurX 的故事就从"我实现了 Linux 功能"变成了"**我用 S 控制 AI 硬件**"。
+Once gpu_basic_add passes with full evidence, NeurX stops being "architecture" and becomes "working hardware-backed AI OS."
