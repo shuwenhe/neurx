@@ -1,4 +1,4 @@
-package neurx.tools.lora_safetensors_merge_s
+package neurx.tool.lora_safetensors_merge
 use std.io.println
 use neurx.runtime.io.{runtime_env_get}
 

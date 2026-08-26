@@ -1,4 +1,4 @@
-package neurx.tools.automotive
+package neurx.tool.automotive
 
 
     manual,

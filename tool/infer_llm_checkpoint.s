@@ -1,4 +1,4 @@
-package neurx.tools.infer
+package neurx.tool.infer
 use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_file_exists, runtime_run_command_output}
 
 func trim(string s) string {

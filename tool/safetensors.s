@@ -1,4 +1,4 @@
-package neurx.tools.safetensors
+package neurx.tool.safetensors
 
 struct tensor_metadata {
     string name

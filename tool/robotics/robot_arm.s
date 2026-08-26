@@ -1,4 +1,4 @@
-package neurx.tools.robotics
+package neurx.tool.robotics
 
 
     revolute,

@@ -1,4 +1,4 @@
-package neurx.tools.json_parser
+package neurx.tool.json_parser
 
 use std.conv.int_to_string
 

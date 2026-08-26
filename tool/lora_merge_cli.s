@@ -1,4 +1,4 @@
-package neurx.tools.lora_merge_cli
+package neurx.tool.lora_merge_cli
 use neurx.runtime.io.{runtime_env_get}
 use std.io.println
 
