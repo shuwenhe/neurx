@@ -9,14 +9,6 @@ struct memory_region {
     int device_id
 }
 
-struct tensor_metadata {
-    int addr
-    int size
-    int dtype
-    int shape_rank
-    int device_id
-}
-
 struct tensor_pool {
     int base_addr
     int total_size
@@ -40,84 +32,23 @@ func create_tensor_pool(int base_addr, int total_size) tensor_pool {
     pool
 }
 
-func allocate_tensor(&mut tensor_pool pool, int size, int device_id) int {
-    i := 0
-    for i < pool.regions.len() {
-        region := pool.regions[i]
-        if region.is_free && region.size >= size {
-            mark_region_used(pool, region.base_addr, size, device_id)
-            pool.allocated_size = pool.allocated_size + size
-            return region.base_addr
-        }
-        i = i + 1
-    }
-    
-    new_addr := pool.base_addr + pool.allocated_size
-    if pool.allocated_size + size <= pool.total_size {
-        mark_region_used(pool, new_addr, size, device_id)
-        pool.allocated_size = pool.allocated_size + size
-        return new_addr
-    }
-    
-    -1
+func get_allocated_size(tensor_pool pool) int {
+    pool.allocated_size
 }
 
-func free_tensor(&mut tensor_pool pool, int addr) bool {
-    i := 0
-    for i < pool.regions.len() {
-        region := pool.regions[i]
-        if region.base_addr == addr {
-            pool.allocated_size = pool.allocated_size - region.size
-            return true
-        }
-        i = i + 1
-    }
-    false
+func get_total_size(tensor_pool pool) int {
+    pool.total_size
 }
 
-func find_free_region(&mut tensor_pool pool, int size) int {
-    i := 0
-    for i < pool.regions.len() {
-        region := pool.regions[i]
-        if region.is_free && region.size >= size {
-            return region.base_addr
-        }
-        i = i + 1
-    }
-    -1
+func get_free_size(tensor_pool pool) int {
+    pool.total_size - pool.allocated_size
 }
 
-func mark_region_used(&mut tensor_pool pool, int addr, int size, int device_id) {
-    new_region := memory_region {
-        base_addr: addr,
-        size: size,
-        is_free: false,
-        device_id: device_id
-    }
-    pool.regions.push(new_region)
-}
-
-func get_pool_stats(&tensor_pool pool) pool_stats {
+func get_pool_stats(tensor_pool pool) pool_stats {
     stats := pool_stats {
         allocated: pool.allocated_size,
         free: pool.total_size - pool.allocated_size,
         total: pool.total_size
     }
     stats
-}
-
-func defragment_pool(&mut tensor_pool pool) {
-    compacted := vec[memory_region]()
-    i := 0
-    for i < pool.regions.len() {
-        region := pool.regions[i]
-        if !region.is_free {
-            compacted.push(region)
-        }
-        i = i + 1
-    }
-    pool.regions = compacted
-}
-
-func coalesce_free_blocks(&mut tensor_pool pool) {
 }
