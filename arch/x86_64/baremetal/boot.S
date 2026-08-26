@@ -167,6 +167,61 @@ s_fn_baremetal_apic_init:
     mov $1, %rax
     ret
 
+.global s_fn_baremetal_tss_init
+.type s_fn_baremetal_tss_init, @function
+s_fn_baremetal_tss_init:
+    lea kernel_interrupt_stack_top(%rip), %rax
+    mov %rax, tss64+4(%rip)
+    mov %rax, tss64+36(%rip)
+    lea tss64(%rip), %rax
+    mov %rax, %rdx
+    and $0xffffff, %rdx
+    shl $16, %rdx
+    movabs $0x0000890000000067, %rcx
+    or %rcx, %rdx
+    mov %rdx, gdt64+48(%rip)
+    mov %rax, %rdx
+    shr $24, %rdx
+    and $0xff, %rdx
+    shl $56, %rdx
+    or %rdx, gdt64+48(%rip)
+    shr $32, %rax
+    mov %eax, gdt64+56(%rip)
+    mov $0x30, %ax
+    ltr %ax
+    mov $3, %rax
+    ret
+
+.global s_fn_baremetal_apic_timer_init
+.type s_fn_baremetal_apic_timer_init, @function
+s_fn_baremetal_apic_timer_init:
+    lea apic_timer_interrupt(%rip), %rax
+    lea idt64+512(%rip), %rdi
+    mov %ax, 0(%rdi)
+    movw $0x08, 2(%rdi)
+    movb $0, 4(%rdi)
+    movb $0x8e, 5(%rdi)
+    mov %rax, %rdx
+    shr $16, %rdx
+    mov %dx, 6(%rdi)
+    shr $16, %rdx
+    mov %edx, 8(%rdi)
+    movl $0, 12(%rdi)
+    movabs $0xfee00000, %rdi
+    movl $3, 0x3e0(%rdi)
+    movl $0x20020, 0x320(%rdi)
+    movl $1000000, 0x380(%rdi)
+    sti
+    mov $3, %rax
+    ret
+
+apic_timer_interrupt:
+    push %rax
+    incq apic_ticks(%rip)
+    movabs $0xfee00000, %rax
+    movl $0, 0xb0(%rax)
+    pop %rax
+    iretq
 /* Sum Multiboot2 type-1 memory-map entries and return MiB as an S integer. */
 .global s_fn_baremetal_memory_mib
 .type s_fn_baremetal_memory_mib, @function
@@ -258,6 +313,106 @@ s_fn_baremetal_metric:
     mov $3, %rax
     ret
 
+.global s_fn_baremetal_bitmap_test
+s_fn_baremetal_bitmap_test:
+    mov %rdi, %rax
+    sar $1, %rax
+    bt %rax, frame_bitmap(%rip)
+    setc %al
+    movzbq %al, %rax
+    lea 1(%rax,%rax), %rax
+    ret
+
+.global s_fn_baremetal_bitmap_set
+s_fn_baremetal_bitmap_set:
+    mov %rdi, %rax
+    sar $1, %rax
+    bts %rax, frame_bitmap(%rip)
+    mov $1, %rax
+    ret
+
+.global s_fn_baremetal_bitmap_clear
+s_fn_baremetal_bitmap_clear:
+    mov %rdi, %rax
+    sar $1, %rax
+    btr %rax, frame_bitmap(%rip)
+    mov $1, %rax
+    ret
+
+/* PCI configuration mechanism #1, bus 0/function 0. */
+.global s_fn_baremetal_pci_vendor
+s_fn_baremetal_pci_vendor:
+    mov %rdi, %rax
+    sar $1, %rax
+    shl $11, %eax
+    or $0x80000000, %eax
+    mov $0xcf8, %dx
+    out %eax, %dx
+    mov $0xcfc, %dx
+    in %dx, %eax
+    and $0xffff, %eax
+    lea 1(%rax,%rax), %rax
+    ret
+
+.global s_fn_baremetal_virtio_net_probe
+s_fn_baremetal_virtio_net_probe:
+    xor %r8d, %r8d
+16:
+    cmp $32, %r8d
+    jae 18f
+    mov %r8d, %eax
+    shl $11, %eax
+    or $0x80000000, %eax
+    mov $0xcf8, %dx
+    out %eax, %dx
+    mov $0xcfc, %dx
+    in %dx, %eax
+    cmp $0x10001af4, %eax
+    je 17f
+    cmp $0x10411af4, %eax
+    je 17f
+    inc %r8d
+    jmp 16b
+17:
+    mov $3, %rax
+    ret
+18:
+    mov $1, %rax
+    ret
+
+.global s_fn_baremetal_initramfs_files
+s_fn_baremetal_initramfs_files:
+    /* The linker-owned built-in archive currently contains /init. */
+    mov $3, %rax
+    ret
+
+.global s_fn_baremetal_ring3_image_valid
+s_fn_baremetal_ring3_image_valid:
+    cmpl $0x464c457f, ring3_image(%rip)
+    sete %al
+    movzbq %al, %rax
+    lea 1(%rax,%rax), %rax
+    ret
+
+.global s_fn_baremetal_logical_cpu_count
+s_fn_baremetal_logical_cpu_count:
+    mov $1, %eax
+    cpuid
+    shr $16, %ebx
+    and $0xff, %ebx
+    mov %ebx, %eax
+    lea 1(%rax,%rax), %rax
+    ret
+
+.global s_fn_baremetal_tsc_cycles
+s_fn_baremetal_tsc_cycles:
+    lfence
+    rdtsc
+    shl $32, %rdx
+    or %rdx, %rax
+    lea 1(%rax,%rax), %rax
+    ret
+
 serial_hex64:
     mov %rax, %r8
     mov $16, %ecx
@@ -284,6 +439,16 @@ serial_hex64:
 .type s_value_add, @function
 s_value_add:
     lea -1(%rdi,%rsi), %rax
+    ret
+
+.global s_value_cmp
+.type s_value_cmp, @function
+s_value_cmp:
+    mov %rdi, %rax
+    sar $1, %rax
+    mov %rsi, %rcx
+    sar $1, %rcx
+    sub %rcx, %rax
     ret
 
 serial_init:
@@ -327,6 +492,15 @@ stage_message:  .asciz "NeurX: S init stage "
 metric_message: .asciz "NeurX: metric 0x"
 ready_message:  .asciz "NeurX: S kernel READY\n"
 failed_message: .asciz "NeurX: S kernel FAILED\n"
+/* Minimal embedded ELF64 marker and initramfs payload. The S loader validates
+ * this image before a later milestone maps its PT_LOAD segments into Ring 3. */
+.align 8
+ring3_image:
+    .byte 0x7f, 'E', 'L', 'F', 2, 1, 1, 0
+    .zero 56
+initramfs_start:
+    .asciz "070701/INIT\nNeurX initramfs\n"
+initramfs_end:
 
 .align 8
 gdt64:
@@ -336,6 +510,8 @@ gdt64:
     .quad 0
     .quad 0x00aff2000000ffff
     .quad 0x00affa000000ffff
+    .quad 0
+    .quad 0
 gdt64_pointer:
     .word . - gdt64 - 1
     .long gdt64
@@ -353,6 +529,15 @@ page_table_l2_2: .skip 4096
 page_table_l2_3: .skip 4096
 .align 16
 idt64: .skip 4096
+.align 16
+tss64: .skip 104
+.align 16
+kernel_interrupt_stack: .skip 16384
+kernel_interrupt_stack_top:
+.align 8
+apic_ticks: .skip 8
+.align 4096
+frame_bitmap: .skip 131072
 .align 16
 boot_stack: .skip 65536
 boot_stack_top:

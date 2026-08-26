@@ -594,7 +594,6 @@
               type="text"
               id="messageInput"
               placeholder="输入消息或按 Shift + Enter 换行..."
-              onkeydown="if(event.key==='Enter' && !event.shiftKey) { event.preventDefault(); app.sendMessage(); }"
             />
             <div class="input-actions">
               <button class="icon-btn" title="附件" onclick="alert('功能开发中')">📎</button>
@@ -672,7 +671,16 @@
         this.checkBackendStatus();
         setInterval(() => this.checkBackendStatus(), 5000);
         this.render();
-        document.getElementById('messageInput').focus();
+        const input = document.getElementById('messageInput');
+        if (input) {
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              this.sendMessage();
+            }
+          });
+          input.focus();
+        }
       },
 
       async checkBackendStatus() {

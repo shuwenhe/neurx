@@ -3288,6 +3288,24 @@ ai-os-boot-test: build-s-ir-runner
 		$(AI_OS_BUILD_DIR)/boot_state.ir $(AI_OS_BUILD_DIR)/boot_test_main.ir
 	@$(S_RUNNER_BIN) $(AI_OS_BUILD_DIR)/ai_os_boot_test.ir
 
+.PHONY: deployment-profile-test
+deployment-profile-test: build-s-ir-runner
+	@mkdir -p $(AI_OS_BUILD_DIR)/platform
+	@$(S_SEED_COMPILER) kernel/platform/deployment_profile.s $(AI_OS_BUILD_DIR)/platform/profile.ir
+	@$(S_SEED_COMPILER) test/platform/deployment_profile_test.s $(AI_OS_BUILD_DIR)/platform/profile_test.ir
+	@$(S_SEED_COMPILER) --link-ir $(AI_OS_BUILD_DIR)/platform/profile_test_linked.ir \
+		$(AI_OS_BUILD_DIR)/platform/profile.ir $(AI_OS_BUILD_DIR)/platform/profile_test.ir
+	@$(S_RUNNER_BIN) $(AI_OS_BUILD_DIR)/platform/profile_test_linked.ir
+
+.PHONY: execution-core-test
+execution-core-test: build-s-ir-runner
+	@mkdir -p $(AI_OS_BUILD_DIR)/execution_core
+	@$(S_SEED_COMPILER) kernel/core/execution_core.s $(AI_OS_BUILD_DIR)/execution_core/core.ir
+	@$(S_SEED_COMPILER) test/kernel/execution_core_test.s $(AI_OS_BUILD_DIR)/execution_core/test.ir
+	@$(S_SEED_COMPILER) --link-ir $(AI_OS_BUILD_DIR)/execution_core/linked.ir \
+		$(AI_OS_BUILD_DIR)/execution_core/core.ir $(AI_OS_BUILD_DIR)/execution_core/test.ir
+	@$(S_RUNNER_BIN) $(AI_OS_BUILD_DIR)/execution_core/linked.ir
+
 BAREMETAL_BUILD_DIR := $(CURDIR_UNIX)/artifact/build/baremetal_x86_64
 BAREMETAL_KERNEL := $(BAREMETAL_BUILD_DIR)/neurx-kernel.elf
 BAREMETAL_ISO := $(BAREMETAL_BUILD_DIR)/neurx-ai-os.iso
