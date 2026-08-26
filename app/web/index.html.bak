@@ -35,6 +35,7 @@
       height: 100%;
     }
 
+    /* 侧边栏 */
     .sidebar {
       width: 260px;
       background: var(--bg-secondary);
@@ -87,6 +88,19 @@
       overflow-y: auto;
     }
 
+    .chat-history::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .chat-history::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .chat-history::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
     .chat-item {
       padding: 12px;
       border-radius: 8px;
@@ -115,6 +129,7 @@
     .sidebar-footer {
       border-top: 1px solid var(--border-color);
       padding-top: 16px;
+      padding-bottom: 0;
     }
 
     .sidebar-footer-item {
@@ -127,7 +142,6 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 8px;
     }
 
     .sidebar-footer-item:hover {
@@ -135,48 +149,51 @@
       background: var(--bg-tertiary);
     }
 
+    /* 主聊天区域 */
     .main-content {
       flex: 1;
       display: flex;
       flex-direction: column;
-      position: relative;
+      background: var(--bg-primary);
     }
 
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px;
-      background: var(--bg-secondary);
+    .chat-header {
       border-bottom: 1px solid var(--border-color);
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    .status-indicator {
+    .chat-header-title {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .header-info {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: var(--bg-tertiary);
+      gap: 12px;
+      padding: 4px 12px;
+      background: var(--bg-secondary);
       border-radius: 6px;
       font-size: 12px;
     }
 
-    .status-dot {
+    .status-indicator {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #22c55e;
-      animation: pulse 2s infinite;
+      background: var(--primary);
     }
 
-    .status-dot.offline {
+    .status-indicator.offline {
       background: #ef4444;
-      animation: none;
     }
 
-    .status-dot.loading {
+    .status-indicator.loading {
       background: #f59e0b;
-      animation: pulse 1s infinite;
+      animation: pulse 2s infinite;
     }
 
     @keyframes pulse {
@@ -184,73 +201,105 @@
       50% { opacity: 0.5; }
     }
 
+    /* 聊天消息区域 */
     .messages-container {
       flex: 1;
       overflow-y: auto;
-      padding: 16px;
+      padding: 24px 32px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
+    }
+
+    .messages-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .messages-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .messages-container::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
     }
 
     .empty-state {
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100%;
+      gap: 16px;
       color: var(--text-secondary);
     }
 
     .empty-state-icon {
       font-size: 48px;
-      margin-bottom: 16px;
+      opacity: 0.3;
     }
 
     .empty-state-title {
-      font-size: 20px;
+      font-size: 24px;
       font-weight: 600;
-      margin-bottom: 8px;
+      color: var(--text-primary);
     }
 
     .empty-state-subtitle {
       font-size: 14px;
-      color: var(--text-secondary);
+      opacity: 0.7;
     }
 
+    /* 消息样式 */
     .message {
       display: flex;
       gap: 12px;
-      animation: slideIn 0.3s ease;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      background: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
     }
 
     .message.user {
       justify-content: flex-end;
     }
 
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .message-avatar {
-      font-size: 24px;
-      flex-shrink: 0;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
     .message.user .message-avatar {
+      background: var(--primary);
       order: 2;
+    }
+
+    .message.user .message-content {
+      order: 1;
     }
 
     .message-content {
       max-width: 70%;
-      padding: 12px;
-      border-radius: 8px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 12px 16px;
+      line-height: 1.5;
+      font-size: 15px;
       word-wrap: break-word;
     }
 
@@ -259,20 +308,18 @@
       color: white;
     }
 
-    .message.assistant .message-content {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-    }
-
     .message.error .message-content {
       background: #7f1d1d;
-      color: #fecaca;
+      border-left: 3px solid #ef4444;
+      padding-left: 13px;
     }
 
-    .typing-indicator {
+    .message.loading .message-content {
+      background: transparent;
+      padding: 0;
       display: flex;
       gap: 4px;
-      padding: 4px 8px;
+      align-items: center;
     }
 
     .typing-indicator span {
@@ -280,41 +327,41 @@
       height: 8px;
       border-radius: 50%;
       background: var(--text-secondary);
-      animation: typing 1.4s infinite;
+      animation: bounce 1.4s infinite;
     }
 
-    .typing-indicator span:nth-child(2) {
-      animation-delay: 0.2s;
+    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
     }
 
-    .typing-indicator span:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-
-    @keyframes typing {
-      0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-      30% { opacity: 1; transform: translateY(-10px); }
-    }
-
+    /* 输入区域 */
     .input-area {
-      padding: 16px;
-      background: var(--bg-secondary);
       border-top: 1px solid var(--border-color);
+      padding: 24px 32px;
+      background: var(--bg-primary);
     }
 
     .input-wrapper {
       display: flex;
-      gap: 8px;
+      gap: 12px;
+      align-items: flex-end;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
     }
 
     .input-field-container {
       flex: 1;
       display: flex;
-      align-items: center;
-      background: var(--bg-tertiary);
+      gap: 8px;
+      background: var(--bg-secondary);
       border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 8px 12px;
+      border-radius: 24px;
+      padding: 12px 16px;
       transition: border-color 0.2s;
     }
 
@@ -327,8 +374,11 @@
       background: transparent;
       border: none;
       color: var(--text-primary);
+      font-size: 15px;
       outline: none;
-      font-size: 14px;
+      resize: none;
+      max-height: 100px;
+      font-family: inherit;
     }
 
     #messageInput::placeholder {
@@ -341,32 +391,43 @@
     }
 
     .icon-btn {
-      background: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: transparent;
       border: none;
       color: var(--text-secondary);
       cursor: pointer;
-      font-size: 16px;
-      transition: color 0.2s;
-      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.2s;
     }
 
     .icon-btn:hover {
+      background: var(--bg-tertiary);
       color: var(--text-primary);
     }
 
     .send-btn {
-      padding: 8px 16px;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
       background: var(--primary);
-      color: white;
       border: none;
-      border-radius: 6px;
+      color: white;
       cursor: pointer;
-      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
       transition: all 0.2s;
     }
 
     .send-btn:hover:not(:disabled) {
       background: var(--primary-dark);
+      transform: scale(1.05);
     }
 
     .send-btn:disabled {
@@ -374,19 +435,20 @@
       cursor: not-allowed;
     }
 
+    /* 参数面板 */
     .params-panel {
-      position: absolute;
+      position: fixed;
       right: 0;
       top: 0;
       width: 300px;
       height: 100%;
       background: var(--bg-secondary);
       border-left: 1px solid var(--border-color);
-      padding: 16px;
+      padding: 20px;
       overflow-y: auto;
       transform: translateX(100%);
-      transition: transform 0.3s ease;
-      z-index: 100;
+      transition: transform 0.3s;
+      z-index: 1000;
     }
 
     .params-panel.open {
@@ -394,19 +456,16 @@
     }
 
     .params-close {
-      position: absolute;
-      top: 16px;
-      right: 16px;
       background: none;
       border: none;
       color: var(--text-primary);
       cursor: pointer;
-      font-size: 20px;
+      font-size: 24px;
+      margin-bottom: 16px;
     }
 
     .param-group {
-      margin-top: 40px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .param-label {
@@ -414,63 +473,108 @@
       color: var(--text-secondary);
       margin-bottom: 8px;
       text-transform: uppercase;
-      font-weight: 600;
-    }
-
-    .param-group input,
-    .param-group select {
-      width: 100%;
-      padding: 8px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      color: var(--text-primary);
-      font-size: 14px;
-    }
-
-    .param-group input:focus,
-    .param-group select:focus {
-      outline: none;
-      border-color: var(--primary);
+      letter-spacing: 0.5px;
     }
 
     .param-value {
-      font-size: 14px;
-      margin-top: 4px;
+      font-size: 13px;
       color: var(--text-primary);
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--bg-tertiary);
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      border: none;
+    }
+
+    select {
+      width: 100%;
       padding: 8px;
       background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
       border-radius: 6px;
+      margin-bottom: 12px;
+    }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+
+      .message-content {
+        max-width: 90%;
+      }
+
+      .messages-container {
+        padding: 16px;
+      }
+
+      .input-area {
+        padding: 16px;
+      }
+
+      .params-panel {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <div class="app-container">
+    <!-- 侧边栏 -->
     <div class="sidebar">
-      <div class="sidebar-header" onclick="app.newChat()" title="新对话">
-        <span>💬</span>
-        <span>NeurX Chat</span>
-      </div>
-
-      <button class="new-chat-btn" onclick="app.newChat()">+ 新对话</button>
+      <button class="new-chat-btn" onclick="app.newChat()">
+        <span>➕</span>
+        <span>新对话</span>
+      </button>
 
       <div class="chat-history" id="chatHistory"></div>
 
       <div class="sidebar-footer">
-        <div class="sidebar-footer-item" onclick="app.toggleParams()" title="参数设置">
-          ⚙️ 参数设置
+        <div class="sidebar-footer-item" onclick="app.toggleParams()">
+          <span>⚙️</span>
+          <span>参数设置</span>
         </div>
-        <div class="sidebar-footer-item" onclick="app.clearChat()" title="清空聊天">
-          🗑️ 清空聊天
+        <div class="sidebar-footer-item" onclick="app.clearChat()">
+          <span>🗑️</span>
+          <span>清空聊天</span>
         </div>
       </div>
     </div>
 
+    <!-- 主聊天区域 -->
     <div class="main-content">
-      <div class="header">
-        <h1 style="font-size: 18px;">NeurX AI 推理引擎</h1>
-        <div class="status-indicator">
-          <div class="status-dot" id="statusIndicator"></div>
+      <div class="chat-header">
+        <div class="chat-header-title">NeurX AI推理引擎</div>
+        <div class="header-info">
+          <div class="status-indicator" id="statusIndicator"></div>
           <span id="statusText">检查连接...</span>
         </div>
       </div>
@@ -500,6 +604,7 @@
       </div>
     </div>
 
+    <!-- 参数面板 -->
     <div class="params-panel" id="paramsPanel">
       <button class="params-close" onclick="app.toggleParams()">✕</button>
 
@@ -514,31 +619,41 @@
 
       <div class="param-group">
         <div class="param-label">温度 (Temperature)</div>
-        <input type="range" min="0" max="2" step="0.1" value="0.7" id="tempSlider" onchange="app.state.temperature = parseFloat(this.value); document.getElementById('tempValue').textContent = this.value">
         <div class="param-value" id="tempValue">0.7</div>
+        <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7"
+          oninput="document.getElementById('tempValue').textContent = this.value; app.state.temperature = parseFloat(this.value);"
+        />
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">控制回应的创意程度</div>
       </div>
 
       <div class="param-group">
-        <div class="param-label">最大令牌数</div>
-        <input type="number" min="1" max="4096" value="256" id="maxTokensInput" onchange="app.state.maxTokens = parseInt(this.value)">
+        <div class="param-label">最大长度 (Max Tokens)</div>
+        <div class="param-value" id="maxTokensValue">256</div>
+        <input type="range" id="maxTokens" min="50" max="2048" step="50" value="256"
+          oninput="document.getElementById('maxTokensValue').textContent = this.value; app.state.maxTokens = parseInt(this.value);"
+        />
       </div>
 
       <div class="param-group">
         <div class="param-label">Top P</div>
-        <input type="range" min="0" max="1" step="0.05" value="0.9" id="topPSlider" onchange="app.state.topP = parseFloat(this.value); document.getElementById('topPValue').textContent = this.value">
         <div class="param-value" id="topPValue">0.9</div>
+        <input type="range" id="topP" min="0" max="1" step="0.05" value="0.9"
+          oninput="document.getElementById('topPValue').textContent = this.value; app.state.topP = parseFloat(this.value);"
+        />
       </div>
 
       <div class="param-group">
         <div class="param-label">Top K</div>
-        <input type="number" min="0" max="100" value="40" id="topKInput" onchange="app.state.topK = parseInt(this.value)">
+        <div class="param-value" id="topKValue">40</div>
+        <input type="range" id="topK" min="0" max="100" step="5" value="40"
+          oninput="document.getElementById('topKValue').textContent = this.value; app.state.topK = parseInt(this.value);"
+        />
       </div>
     </div>
   </div>
 
   <script>
-    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8000' : `http://${window.location.hostname}:8000`;
-    console.log('API_BASE configured to:', API_BASE);
+    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8000' : '';
 
     window.app = {
       state: {
@@ -553,25 +668,18 @@
       },
 
       async init() {
-        console.log('Initializing app...');
         this.checkBackendStatus();
         setInterval(() => this.checkBackendStatus(), 5000);
         this.render();
         const input = document.getElementById('messageInput');
         if (input) {
-          const self = this;
-          input.addEventListener('keydown', function(e) {
-            console.log('Key pressed:', e.key, 'shiftKey:', e.shiftKey);
+          input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
-              console.log('Sending message...');
-              self.sendMessage();
+              this.sendMessage();
             }
           });
           input.focus();
-          console.log('Message input initialized');
-        } else {
-          console.error('Message input element not found!');
         }
       },
 
@@ -597,29 +705,23 @@
         const text = document.getElementById('statusText');
         const status = this.state.backendStatus;
 
-        indicator.classList.remove('offline', 'loading');
+        indicator?.classList.remove('offline', 'loading');
         if (status === 'online') {
           text.textContent = '后端在线';
         } else if (status === 'offline') {
-          indicator.classList.add('offline');
+          indicator?.classList.add('offline');
           text.textContent = '后端离线';
         } else {
-          indicator.classList.add('loading');
+          indicator?.classList.add('loading');
           text.textContent = '检查连接...';
         }
       },
 
       async sendMessage() {
-        console.log('[sendMessage] Starting...');
         const input = document.getElementById('messageInput');
         const message = input.value.trim();
-        console.log('[sendMessage] Message:', message);
-        console.log('[sendMessage] isLoading:', this.state.isLoading);
 
-        if (!message || this.state.isLoading) {
-          console.log('[sendMessage] Blocked: empty message or already loading');
-          return;
-        }
+        if (!message || this.state.isLoading) return;
 
         input.value = '';
         input.focus();
@@ -639,30 +741,21 @@
         this.render();
 
         try {
-          const url = `${API_BASE}/v1/chat/completions`;
-          const payload = {
-            model: this.state.model,
-            messages: this.state.messages.filter(m => m.role !== 'error' && !m.loading),
-            max_tokens: this.state.maxTokens,
-            temperature: this.state.temperature,
-            top_p: this.state.topP,
-            top_k: this.state.topK
-          };
-          console.log('[sendMessage] POST to:', url);
-          console.log('[sendMessage] Payload:', payload);
-
-          const response = await fetch(url, {
+          const response = await fetch(`${API_BASE}/v1/chat/completions`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({
+              model: this.state.model,
+              messages: this.state.messages.filter(m => m.role !== 'error' && !m.loading),
+              max_tokens: this.state.maxTokens,
+              temperature: this.state.temperature,
+              top_p: this.state.topP,
+              top_k: this.state.topK
+            })
           });
 
-          console.log('[sendMessage] Response status:', response.status);
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const data = await response.json();
-          console.log('[sendMessage] Response data:', data);
           const assistantMessage = data.choices?.[0]?.message?.content || '抱歉，未能获得回复';
 
           this.state.messages[this.state.messages.length - 1] = {
@@ -670,7 +763,6 @@
             content: assistantMessage
           };
         } catch (error) {
-          console.error('[sendMessage] Error:', error);
           this.state.messages[this.state.messages.length - 1] = {
             role: 'error',
             content: `❌ ${error.message || '发送失败，请检查后端连接'}`
@@ -697,7 +789,7 @@
 
       toggleParams() {
         const panel = document.getElementById('paramsPanel');
-        panel.classList.toggle('open');
+        panel?.classList.toggle('open');
       },
 
       render() {
@@ -720,9 +812,7 @@
                   <div class="message-avatar">🤖</div>
                   <div class="message-content">
                     <div class="typing-indicator">
-                      <span></span>
-                      <span></span>
-                      <span></span>
+                      <span></span><span></span><span></span>
                     </div>
                   </div>
                 </div>

@@ -3306,6 +3306,58 @@ execution-core-test: build-s-ir-runner
 		$(AI_OS_BUILD_DIR)/execution_core/core.ir $(AI_OS_BUILD_DIR)/execution_core/test.ir
 	@$(S_RUNNER_BIN) $(AI_OS_BUILD_DIR)/execution_core/linked.ir
 
+.PHONY: smp-runtime-test
+smp-runtime-test: build-s-ir-runner
+	@mkdir -p $(AI_OS_BUILD_DIR)/smp_runtime
+	@$(S_SEED_COMPILER) kernel/smp/smp_runtime.s $(AI_OS_BUILD_DIR)/smp_runtime/runtime.ir
+	@$(S_SEED_COMPILER) test/kernel/smp_runtime_test.s $(AI_OS_BUILD_DIR)/smp_runtime/test.ir
+	@$(S_SEED_COMPILER) --link-ir $(AI_OS_BUILD_DIR)/smp_runtime/linked.ir \
+		$(AI_OS_BUILD_DIR)/smp_runtime/runtime.ir $(AI_OS_BUILD_DIR)/smp_runtime/test.ir
+	@$(S_RUNNER_BIN) $(AI_OS_BUILD_DIR)/smp_runtime/linked.ir
+
+.PHONY: resource-domain-test
+resource-domain-test: build-s-ir-runner
+	@mkdir -p $(AI_OS_BUILD_DIR)/resource_domain
+	@$(S_SEED_COMPILER) kernel/resource/resource_domain.s $(AI_OS_BUILD_DIR)/resource_domain/domain.ir
+	@$(S_SEED_COMPILER) test/kernel/resource_domain_test.s $(AI_OS_BUILD_DIR)/resource_domain/test.ir
+	@$(S_SEED_COMPILER) --link-ir $(AI_OS_BUILD_DIR)/resource_domain/linked.ir \
+		$(AI_OS_BUILD_DIR)/resource_domain/domain.ir $(AI_OS_BUILD_DIR)/resource_domain/test.ir
+	@$(S_RUNNER_BIN) $(AI_OS_BUILD_DIR)/resource_domain/linked.ir
+
+.PHONY: process-isolation-test
+process-isolation-test: build-s-ir-runner
+	@mkdir -p $(AI_OS_BUILD_DIR)/process_isolation
+	@$(S_SEED_COMPILER) kernel/process/process_isolation.s $(AI_OS_BUILD_DIR)/process_isolation/isolation.ir
+	@$(S_SEED_COMPILER) test/kernel/process_isolation_test.s $(AI_OS_BUILD_DIR)/process_isolation/test.ir
+	@$(S_SEED_COMPILER) --link-ir $(AI_OS_BUILD_DIR)/process_isolation/linked.ir \
+		$(AI_OS_BUILD_DIR)/process_isolation/isolation.ir $(AI_OS_BUILD_DIR)/process_isolation/test.ir
+	@$(S_RUNNER_BIN) $(AI_OS_BUILD_DIR)/process_isolation/linked.ir
+
+.PHONY: process-spawn-transaction-test
+process-spawn-transaction-test: build-s-ir-runner
+	@mkdir -p $(AI_OS_BUILD_DIR)/spawn_transaction
+	@$(S_SEED_COMPILER) kernel/core/execution_core.s $(AI_OS_BUILD_DIR)/spawn_transaction/core.ir
+	@$(S_SEED_COMPILER) kernel/resource/resource_domain.s $(AI_OS_BUILD_DIR)/spawn_transaction/resource.ir
+	@$(S_SEED_COMPILER) kernel/process/process_isolation.s $(AI_OS_BUILD_DIR)/spawn_transaction/isolation.ir
+	@$(S_SEED_COMPILER) kernel/process/spawn_transaction.s $(AI_OS_BUILD_DIR)/spawn_transaction/transaction.ir
+	@$(S_SEED_COMPILER) test/kernel/spawn_transaction_test.s $(AI_OS_BUILD_DIR)/spawn_transaction/test.ir
+	@$(S_SEED_COMPILER) --link-ir $(AI_OS_BUILD_DIR)/spawn_transaction/linked.ir \
+		$(AI_OS_BUILD_DIR)/spawn_transaction/core.ir \
+		$(AI_OS_BUILD_DIR)/spawn_transaction/resource.ir \
+		$(AI_OS_BUILD_DIR)/spawn_transaction/isolation.ir \
+		$(AI_OS_BUILD_DIR)/spawn_transaction/transaction.ir \
+		$(AI_OS_BUILD_DIR)/spawn_transaction/test.ir
+	@$(S_RUNNER_BIN) $(AI_OS_BUILD_DIR)/spawn_transaction/linked.ir
+
+.PHONY: page-fault-test
+page-fault-test: build-s-ir-runner
+	@mkdir -p $(AI_OS_BUILD_DIR)/page_fault
+	@$(S_SEED_COMPILER) mm/page_fault.s $(AI_OS_BUILD_DIR)/page_fault/vm.ir
+	@$(S_SEED_COMPILER) test/kernel/page_fault_test.s $(AI_OS_BUILD_DIR)/page_fault/test.ir
+	@$(S_SEED_COMPILER) --link-ir $(AI_OS_BUILD_DIR)/page_fault/linked.ir \
+		$(AI_OS_BUILD_DIR)/page_fault/vm.ir $(AI_OS_BUILD_DIR)/page_fault/test.ir
+	@$(S_RUNNER_BIN) $(AI_OS_BUILD_DIR)/page_fault/linked.ir
+
 BAREMETAL_BUILD_DIR := $(CURDIR_UNIX)/artifact/build/baremetal_x86_64
 BAREMETAL_KERNEL := $(BAREMETAL_BUILD_DIR)/neurx-kernel.elf
 BAREMETAL_ISO := $(BAREMETAL_BUILD_DIR)/neurx-ai-os.iso
