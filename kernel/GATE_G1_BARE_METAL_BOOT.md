@@ -1,62 +1,251 @@
-# Gate G1: Bare-Metal Boot Verification
-## NeurX Kernel First Boot on x86_64
+# Gate G1: Minimal Bare-Metal Boot
+## UEFI → NeurX Kernel → Serial Output → Halt
 
-**Objective**: Prove NeurX Kernel can boot from bare metal (UEFI/BIOS) without Linux.
+**Objective**: First undeniable proof of bare-metal control.
 
-**Timeline**: 2-3 weeks
+**Timeline**: 1-2 weeks (after P0 verification)
 
----
-
-## Acceptance Criteria
-
-### ✅ Requirements
-
-```
-1. CPU Control
-   ✓ Kernel takes control from UEFI
-   ✓ x86_64 long mode active
-   ✓ Stack initialized
-   ✓ No Linux kernel involved
-
-2. Early Console
-   ✓ Serial output (COM1 at 0x3F8)
-   ✓ Boot messages printed
-   ✓ Debugging visible
-
-3. Memory Initialization
-   ✓ Physical memory detected (from firmware)
-   ✓ Page allocator functional
-   ✓ Basic malloc/free works
-
-4. Kernel Readiness
-   ✓ Paging initialized
-   ✓ IDT setup
-   ✓ Timer/APIC initialized
-   ✓ Kernel enters main loop
-```
+**Critical**: G1 is ONLY the boot path. Memory/IRQ/scheduler moved to G2/G3.
 
 ---
 
-## Expected Serial Output
+## Acceptance Criteria - Extreme Minimalism
+
+### ✅ Requirements (G1 Only)
 
 ```
-[BOOT] NeurX Kernel v0.1
-[BOOT] Booting on x86_64...
-[CPU ] CPU x86_64 initialized
-[CPU ] Interrupts disabled during init
-[MM  ] Physical memory initialized
-[MM ] Total memory: 65536 MB
-[MM  ] Physical page allocator ready
-[VM  ] Virtual memory initialized
-[VM  ] Page tables setup
-[IRQ ] IDT initialized
-[IRQ ] Exception handlers registered
-[TMR ] APIC timer initialized
-[HEAP] Kernel heap initialized
-[KERNEL] Entering main loop
+1. UEFI Handoff
+   ✓ UEFI firmware loads NeurX EFI application
+   ✓ _efi_main() is invoked
+   ✓ ExitBootServices() called
+   ✓ Boot Services no longer available
 
-NeurX Kernel Ready.
+2. Kernel Takeover
+   ✓ Control transfers to _neurx_kernel_entry
+   ✓ x86_64 long mode confirmed active
+   ✓ Interrupts disabled (RFLAGS.IF = 0)
+   ✓ Linux is no longer running
+
+3. Serial Console Control
+   ✓ NeurX owns COM1 (0x3F8)
+   ✓ Direct UART output (no OS intermediary)
+   ✓ "NeurX Kernel Ready" printed
+
+4. Execution Halt
+   ✓ CPU enters hlt loop
+   ✓ No crash, no hang, clean exit
 ```
+
+---
+
+## Expected Serial Output (ONLY)
+
+```
+NeurX Kernel Ready
+```
+
+**That's it.** No memory stats, no IRQ info, no timer output.
+
+Just one line proving:
+- UEFI loaded your code
+- Your code printed to serial
+- Your code halted cleanly
+
+---
+
+## What G1 DOES NOT Include
+
+```
+❌ Memory initialization (G2)
+❌ Page tables / paging (G2)
+❌ Interrupt descriptor table (G3)
+❌ CPU scheduling (G3)
+❌ Timer/APIC (G3)
+❌ Device enumeration (G4)
+```
+
+These move to their proper gates.
+
+---
+
+## Delivery
+
+### File Structure
+
+```
+kernel/
+├── boot/
+│   └── uefi/
+│       ├── entry.s          ← UEFI main entry
+│       ├── memory_map.s     ← Get UEFI memmap (for G2)
+│       └── exit_boot.s      ← ExitBootServices()
+│
+└── arch/
+    └── x86_64/
+        ├── cpu.s           ← CPU detection, mode check
+        ├── serial.s        ← COM1 UART output
+        └── entry.s         ← kernel_entry after ExitBootServices
+```
+
+### Minimal boot.s Entry Point
+
+```s
+package neurx.kernel.boot.uefi
+
+func _efi_main(handle: int, system_table: int) int {
+    // Get UEFI memory map (save for G2)
+    get_uefi_memory_map()
+    
+    // Exit boot services
+    exit_boot_services(handle, system_table)
+    
+    // Transfer control to x86_64 kernel entry
+    kernel_entry()
+    
+    0
+}
+
+func kernel_entry() {
+    // We are now bare-metal
+    // No UEFI boot services available
+    
+    // Detect x86_64 mode
+    verify_x86_64_mode()
+    
+    // Initialize serial console (direct UART)
+    init_serial_uart()
+    
+    // Print startup message
+    print("NeurX Kernel Ready\n")
+    
+    // Halt CPU
+    halt_cpu()
+}
+
+func halt_cpu() {
+    loop {
+        // hlt instruction (via intrinsic or inline asm)
+    }
+}
+```
+
+---
+
+## Verification Checklist
+
+- [ ] S compiler can compile to x86_64 EFI binary
+- [ ] QEMU accepts binary as UEFI application
+- [ ] QEMU boots and serial output appears
+- [ ] "NeurX Kernel Ready" visible in console
+- [ ] CPU halts (no exception, no reboot)
+- [ ] Verify Linux is not involved:
+  - [ ] No /proc/cpuinfo
+  - [ ] No dmesg
+  - [ ] No systemd services running
+  - [ ] Only QEMU's UEFI + NeurX
+
+---
+
+## Success Markers
+
+```
+❌ Failure:
+   - EFI binary doesn't load
+   - Triple fault or general protection fault
+   - No serial output
+   - "ExitBootServices() failed" message
+   - Code continues to Linux kernel
+
+✅ Success:
+   - QEMU boots NeurX EFI app
+   - Serial: "NeurX Kernel Ready"
+   - CPU halts cleanly
+   - Nothing runs after that
+```
+
+---
+
+## Why This Gate Is So Small
+
+```
+Reason 1: Signal Clarity
+  One line of output = one undeniable proof
+  No "memory initialization partially works"
+  No "timer might be running"
+  Pure binary result: prints or doesn't
+
+Reason 2: Fastest Time to Truth
+  2 weeks to beat Linux kernel is huge
+  1 week proves concept is valid
+  Earlier validation = faster iterations
+
+Reason 3: Pure Architecture
+  G1 proves: bare-metal boot chain works
+  G2 proves: kernel manages memory
+  G3 proves: kernel manages execution
+  Clean separation
+
+Reason 4: Risk Isolation
+  If UEFI handoff fails → S compiler issue
+  If serial doesn't work → x86_64 code issue
+  If CPU halts wrong → instruction encoding
+  Single-layer failure modes
+```
+
+---
+
+## Dependency on S Compiler
+
+**Must have (from P0 verification)**:
+- S generates freestanding x86_64 code
+- No Linux symbol injection
+- Can link with custom linker script
+- Can produce EFI binary format
+
+---
+
+## Next After G1 Success
+
+Once "NeurX Kernel Ready" prints:
+
+```
+G1 Complete: UEFI → Serial → Halt
+    ↓
+G2 Start: Physical Memory
+    ├─ Read UEFI memory map (already collected)
+    ├─ Implement physical page allocator
+    ├─ Implement malloc/free
+    └─ Print: "Physical memory: X MB"
+
+Then:
+G3 (IDT + APIC + scheduler)
+G4 (PCIe + device enumeration)
+...
+```
+
+---
+
+## Key Difference from Original G1
+
+**Original G1 included**:
+- Physical memory initialization
+- Paging + virtual addressing
+- Interrupt descriptor table
+- APIC timer setup
+- Kernel heap
+
+**That was 3 weeks of work mixed in.**
+
+**New G1 is**:
+- Boot from UEFI
+- Take bare-metal control
+- Print one line
+- Halt
+
+**This is 1 week of work, crystal clear validation.**
+
+The rest goes to G2, G3, G4 where it belongs.
+
 
 ---
 
