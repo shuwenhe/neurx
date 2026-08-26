@@ -6,77 +6,7 @@
 
 
 
-## 9. 控制流
 
-### if/else
-```s
-if condition {
-    // 代码块
-} else {
-    // 代码块
-}
-
-if x > 0 {
-    y = x + 1
-} else if x == 0 {
-    y = 0
-} else {
-    y = x - 1
-}
-```
-
-### while 循环
-```s
-let mut i = 0
-while i < 10 {
-    // 循环体
-    i = i + 1
-}
-```
-
-### for 循环
-```s
-for i in 0..10 {
-    // i 从 0 到 9
-}
-
-for item in array {
-    // 遍历数组
-}
-```
-
-### switch 表达式
-```s
-switch value {
-    case1 : { block1 },
-    case2 : { block2 },
-    _ : { default_block }
-}
-
-// 示例
-switch color {
-    "red" : { print_red() },
-    "blue" : { print_blue() },
-    _ : { print_unknown() }
-}
-```
-
-## 10. 变量声明
-
-### 变量定义
-```s
-let x = 5                   // 不可变
-let mut y = 10              // 可变
-let z int = 15              // 显式类型
-let mut w int = 20          // 显式类型，可变
-```
-
-### 赋值
-```s
-x = x + 1                   // 表达式赋值
-arr[0] = 42                 // 数组赋值
-struct_val.field = 100      // 结构体字段赋值
-```
 
 ## 11. 包和导入
 
