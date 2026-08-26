@@ -1,4 +1,4 @@
-package neurx.drivers
+package neurx.driver
 
 struct device_driver {
     int driver_id

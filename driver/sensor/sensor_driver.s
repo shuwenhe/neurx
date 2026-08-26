@@ -1,4 +1,4 @@
-package neurx.drivers.sensor
+package neurx.driver.sensor
 
 
     lidar_3d,

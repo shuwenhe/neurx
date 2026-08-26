@@ -121,7 +121,7 @@ kernel/sched/         kernel/sched/         ✅ Task scheduling
 fs/                   fs/model_storage.s    ✅ Model filesystem
 net/                  net/collective_ops.s  ✅ Distributed training
 sys/                  sys/ai_os_runtime.s   ✅ AI workload orchestration
-drivers/              drivers/              ✅ GPU/CPU/TPU drivers
+driver/              driver/               ✅ GPU/CPU/TPU drivers
 ```
 
 ## Compilation Status

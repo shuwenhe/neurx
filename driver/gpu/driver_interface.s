@@ -1,4 +1,4 @@
-package neurx.drivers.gpu
+package neurx.driver.gpu
 
 
     nvidia_cuda,

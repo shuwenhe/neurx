@@ -1,4 +1,4 @@
-package neurx.drivers.actuator
+package neurx.driver.actuator
 
 
     motor_brushless,

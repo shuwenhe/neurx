@@ -1,4 +1,4 @@
-package neurx.drivers.network
+package neurx.driver.network
 
 
     ethernet_10g,
