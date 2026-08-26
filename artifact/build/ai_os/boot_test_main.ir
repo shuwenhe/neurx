@@ -1,0 +1,74 @@
+SSEED-TARGET-V1
+FUNC_BEGIN|assert_test|_|_
+PARAM|condition|_|_
+PARAM|name|_|_
+JUMP_IF_FALSE|L0|condition|_
+ARG|"✅ "|_|_
+CALL|t0|print|1
+ARG|name|_|_
+CALL|t1|print|1
+RET|0|_|_
+JUMP|L1|_|_
+LABEL|L0|_|_
+LABEL|L1|_|_
+ARG|"❌ "|_|_
+CALL|t2|print|1
+ARG|name|_|_
+CALL|t3|print|1
+RET|1|_|_
+RET|0|_|_
+FUNC_END|assert_test|_|_
+FUNC_BEGIN|main|_|_
+MOV|failures|0|_
+CALL|t4|boot_state_create|0
+ARG|t4|_|_
+CALL|t5|init_scheduler|1
+MOV|invalid|t5|_
+CMP_EQ|t6|invalid.failed_stage|2
+ARG|t6|_|_
+ARG|"reject scheduler before memory"|_|_
+CALL|t7|assert_test|2
+ADD|t8|failures|t7
+MOV|failures|t8|_
+CALL|t9|boot_state_create|0
+ARG|t9|_|_
+CALL|t10|init_model_runtime|1
+MOV|invalid_model|t10|_
+CMP_EQ|t11|invalid_model.failed_stage|6
+ARG|t11|_|_
+ARG|"reject model runtime before accelerator and VFS"|_|_
+CALL|t12|assert_test|2
+ADD|t13|failures|t12
+MOV|failures|t13|_
+CALL|t14|boot_state_create|0
+ARG|t14|_|_
+CALL|t15|run_boot_sequence|1
+MOV|state|t15|_
+ARG|state|_|_
+CALL|t16|boot_is_ready|1
+ARG|t16|_|_
+ARG|"complete ordered boot"|_|_
+CALL|t17|assert_test|2
+ADD|t18|failures|t17
+MOV|failures|t18|_
+CMP_EQ|t19|state.completed_stages|7
+ARG|t19|_|_
+ARG|"initialize every stage exactly once"|_|_
+CALL|t20|assert_test|2
+ADD|t21|failures|t20
+MOV|failures|t21|_
+CMP_EQ|t22|failures|0
+JUMP_IF_FALSE|L2|t22|_
+ARG|"AI OS boot tests passed"|_|_
+CALL|t23|print|1
+JUMP|L3|_|_
+LABEL|L2|_|_
+LABEL|L3|_|_
+RET|failures|_|_
+RET|0|_|_
+FUNC_END|main|_|_
+FUNC_BEGIN|_start|_|_
+CALL|t24|main|0
+RET|t24|_|_
+RET|0|_|_
+FUNC_END|_start|_|_

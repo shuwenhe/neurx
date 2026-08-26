@@ -3263,16 +3263,30 @@ compile-multimodal-all: compile-multimodal-audio compile-multimodal-video compil
 	@echo "🎯 Next steps:"
 	@echo "   make test-multimodal      # Run comprehensive tests"
 
+AI_OS_BUILD_DIR := $(CURDIR_UNIX)/artifact/build/ai_os
+
+.PHONY: ai-os-boot ai-os-boot-test
 ai-os-boot: build-s-ir-runner
 	@echo "🚀 Booting NeurX AI Operating System..."
-	@mkdir -p $(CURDIR_UNIX)/artifact/build/ai_os
-	@$(S_SEED_COMPILER) init/ai_os_boot.s $(CURDIR_UNIX)/artifact/build/ai_os/ai_os_boot.ir || { \
+	@mkdir -p $(AI_OS_BUILD_DIR) $(LOG_DIR)
+	@$(S_SEED_COMPILER) init/boot_state.s $(AI_OS_BUILD_DIR)/boot_state.ir
+	@$(S_SEED_COMPILER) init/ai_os_boot.s $(AI_OS_BUILD_DIR)/ai_os_boot_main.ir
+	@$(S_SEED_COMPILER) --link-ir $(AI_OS_BUILD_DIR)/ai_os_boot.ir \
+		$(AI_OS_BUILD_DIR)/boot_state.ir $(AI_OS_BUILD_DIR)/ai_os_boot_main.ir || { \
 		echo "❌ AI OS boot failed!"; \
 		exit 1; \
 	}
 	@echo "✓ AI OS boot module compiled"
-	@$(S_RUNNER_BIN) $(CURDIR_UNIX)/artifact/build/ai_os/ai_os_boot.ir 2>&1 | tee $(LOG_DIR)/ai_os_boot_$(shell date +%Y%m%d_%H%M%S).log
+	@$(S_RUNNER_BIN) $(AI_OS_BUILD_DIR)/ai_os_boot.ir 2>&1 | tee $(LOG_DIR)/ai_os_boot_$(shell date +%Y%m%d_%H%M%S).log
 	@echo "✅ AI OS booted successfully!"
+
+ai-os-boot-test: build-s-ir-runner
+	@mkdir -p $(AI_OS_BUILD_DIR)
+	@$(S_SEED_COMPILER) init/boot_state.s $(AI_OS_BUILD_DIR)/boot_state.ir
+	@$(S_SEED_COMPILER) test/ai_os_boot_test.s $(AI_OS_BUILD_DIR)/boot_test_main.ir
+	@$(S_SEED_COMPILER) --link-ir $(AI_OS_BUILD_DIR)/ai_os_boot_test.ir \
+		$(AI_OS_BUILD_DIR)/boot_state.ir $(AI_OS_BUILD_DIR)/boot_test_main.ir
+	@$(S_RUNNER_BIN) $(AI_OS_BUILD_DIR)/ai_os_boot_test.ir
 
 ai-os-manager: build-s-ir-runner
 	@echo "🔧 Starting AI OS System Manager..."

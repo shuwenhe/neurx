@@ -1,5 +1,9 @@
 package neurx.os.core
 
+use neurx.os.boot.boot_state_create
+use neurx.os.boot.run_boot_sequence
+use neurx.os.boot.boot_is_ready
+
 func print_banner() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║       NeurX AI Operating System - Bootstrap Sequence       ║")
@@ -9,19 +13,25 @@ func print_banner() {
 
 func main() {
     print_banner()
-    
-    print("✓ Layer 0:  Boot & Initialization")
-    print("✓ Layer 1:  Architecture-Specific")
-    print("✓ Layer 2:  Hardware Abstraction")
-    print("✓ Layer 3:  Device Drivers")
-    print("✓ Layer 4:  Kernel Core")
-    print("✓ Layer 5:  Memory Management")
-    print("✓ Layer 6:  File System")
-    print("✓ Layer 7:  Network Stack")
-    print("✓ Layer 8:  System Services")
-    print("✓ Layer 9:  Applications")
+
+    state := run_boot_sequence(boot_state_create())
+
+    if !boot_is_ready(state) {
+        print("❌ AI OS boot failed at stage ")
+        print(state.failed_stage)
+        print(state.error)
+        return
+    }
+
+    print("✓ Stage 1: early memory and page allocator")
+    print("✓ Stage 2: task scheduler")
+    print("✓ Stage 3: virtual file system")
+    print("✓ Stage 4: network stack")
+    print("✓ Stage 5: AI accelerator abstraction")
+    print("✓ Stage 6: model runtime")
+    print("✓ Stage 7: initial userspace services")
     print("")
-    print("✅ AI OS booted successfully!")
-    print("📊 System running at full capacity")
-    print("🎯 All 10 layers initialized")
+    print("✅ NeurX AI OS reached READY state")
+    print("Initialized stages: ")
+    print(state.completed_stages)
 }
