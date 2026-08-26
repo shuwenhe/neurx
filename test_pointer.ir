@@ -1,9 +1,0 @@
-SSEED-TARGET-V1
-MOV|t0|"t0"|_
-MOV|t0.__type|"inner"|_
-MOV|t0.value|"int"|_
-MOV|inner|t0|_
-MOV|t1|"t1"|_
-MOV|t1.__type|"outer"|_
-MOV|t1.ptr|"inner*"|_
-MOV|outer|t1|_
