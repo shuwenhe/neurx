@@ -42,7 +42,7 @@ func create_tensor_pool(int base_addr, int total_size) tensor_pool {
 
 func allocate_tensor(&mut tensor_pool pool, int size, int device_id) int {
     i := 0
-    while i < pool.regions.len() {
+    for i < pool.regions.len() {
         region := pool.regions[i]
         if region.is_free && region.size >= size {
             mark_region_used(pool, region.base_addr, size, device_id)
@@ -64,7 +64,7 @@ func allocate_tensor(&mut tensor_pool pool, int size, int device_id) int {
 
 func free_tensor(&mut tensor_pool pool, int addr) bool {
     i := 0
-    while i < pool.regions.len() {
+    for i < pool.regions.len() {
         region := pool.regions[i]
         if region.base_addr == addr {
             pool.allocated_size = pool.allocated_size - region.size
@@ -77,7 +77,7 @@ func free_tensor(&mut tensor_pool pool, int addr) bool {
 
 func find_free_region(&mut tensor_pool pool, int size) int {
     i := 0
-    while i < pool.regions.len() {
+    for i < pool.regions.len() {
         region := pool.regions[i]
         if region.is_free && region.size >= size {
             return region.base_addr
@@ -109,7 +109,7 @@ func get_pool_stats(&tensor_pool pool) pool_stats {
 func defragment_pool(&mut tensor_pool pool) {
     compacted := vec[memory_region]()
     i := 0
-    while i < pool.regions.len() {
+    for i < pool.regions.len() {
         region := pool.regions[i]
         if !region.is_free {
             compacted.push(region)
