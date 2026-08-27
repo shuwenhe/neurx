@@ -1,22 +1,22 @@
 struct speculative_decode_runtime {
-    draft_executor: draft_model_executor
-    verifier_executor: verifier_executor
-    decode_config: speculative_decode_config
-    batch_size: int
-    max_batch_tokens: int
-    statistics: speculative_statistics
+    draft_model_executor draft_executor
+    verifier_executor verifier_executor
+    speculative_decode_config decode_config
+    int batch_size
+    int max_batch_tokens
+    speculative_statistics statistics
     request_queue: []int
 }
 
 struct speculative_generation_request {
-    request_id: int
+    int request_id
     input_ids: []int
-    max_tokens: int
-    temperature: float
-    top_k: int
-    top_p: float
+    int max_tokens
+    float temperature
+    int top_k
+    float top_p
     output_tokens: []int
-    is_complete: bool
+    bool is_complete
 }
 
 struct speculative_generation_batch {
@@ -24,16 +24,16 @@ struct speculative_generation_batch {
     draft_predictions: [][]draft_token
     verification_results: [][]verification_result
     final_outputs: [][]int
-    batch_generation_time_ms: float
+    float batch_generation_time_ms
 }
 
 struct speculative_decode_context {
-    sequence_length: int
+    int sequence_length
     cached_hidden_states: [][]float
     kv_cache: [][]float
-    is_prefill_stage: bool
-    speculative_tokens_accepted: int
-    speculative_tokens_rejected: int
+    bool is_prefill_stage
+    int speculative_tokens_accepted
+    int speculative_tokens_rejected
 }
 
 func new_speculative_decode_runtime(draft_model_executor draft_exec, verifier_executor verifier_exec, speculative_decode_config config) speculative_decode_runtime {

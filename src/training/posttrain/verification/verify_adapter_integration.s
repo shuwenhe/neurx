@@ -24,7 +24,7 @@ func parse_adapter_config() adapter_config {
         lora_alpha: 0.0,
         lora_dropout: 0.0,
         target_modules: make([]string, 0),
-        modules_to_save: false
+        false modules_to_save
     }
     if !runtime_file_exists(config_file) {
         return config

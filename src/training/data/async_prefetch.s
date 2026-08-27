@@ -183,14 +183,14 @@ func fetch_next_batch(async_prefetch_manager mgr) batch_fetch_result:
             batch: batch,
             success: true,
             had_to_wait: wait_time > 5,
-            wait_time_ms: wait_time
+            wait_time wait_time_ms
         }
     else:
         return batch_fetch_result{
             batch: empty_prefetched_batch(),
             success: false,
             had_to_wait: true,
-            wait_time_ms: wait_time
+            wait_time wait_time_ms
         }
 func io_worker_function(async_prefetch_manager mgr) void:
     for mgr.workers_running {

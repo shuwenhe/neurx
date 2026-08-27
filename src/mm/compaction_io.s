@@ -103,7 +103,7 @@ func (io_scheduler* ios) submit_request(int sector, int size, int io_type, int p
         sector: sector,
         size: size,
         io_type: io_type,
-        priority: priority
+        priority priority
     }
     
     if io_type == 0 {

@@ -50,7 +50,7 @@ func new_radix_tree() radix_tree {
 
 func new_radix_node_internal(string prefix, int32[] tokens, radix_node* parent) radix_node {
     radix_node {
-        node_t: node_type::internal,
+        node_t: node_type_internal,
         prefix_key: prefix,
         token_ids: tokens,
         children: map[int32, radix_node*]{},
@@ -64,7 +64,7 @@ func new_radix_node_internal(string prefix, int32[] tokens, radix_node* parent) 
 
 func new_radix_node_leaf(string prefix, int32[] tokens, int64 cache_ptr, int32 cache_size, radix_node* parent) radix_node {
     radix_node {
-        node_t: node_type::leaf,
+        node_t: node_type_leaf,
         prefix_key: prefix,
         token_ids: tokens,
         children: map[int32, radix_node*]{},
@@ -244,7 +244,7 @@ func (radix_tree* tree) estimate_compression() {
     total_compressed := 0
     for node_key in tree.token_path_index.keys() {
         node := tree.token_path_index[node_key]
-        if node != nil && node.node_t == node_type::leaf {
+        if node != nil && node.node_t == node_type_leaf {
             total_compressed = total_compressed + len(node.token_ids)
         }
     }

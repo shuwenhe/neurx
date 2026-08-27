@@ -48,7 +48,7 @@ func (vm_manager* vmm) allocate_area(int size) (vm_area, string) {
         vm_end: vmm.total_pages - vmm.free_pages + size,
         vm_flags: 3,
         page_size: 4096,
-        page_table: new page_table_entry[pages]
+        new page_table_entry[pages] page_table
     }
     
     i := 0

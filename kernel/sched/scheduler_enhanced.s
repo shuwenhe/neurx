@@ -117,11 +117,11 @@ func cpu_rq_create(int cpu_id) cpu_rq {
 func (cpu_rq* rq) enqueue_task(task_struct task) {
     rq.nr_running = rq.nr_running + 1
     
-    if task.policy == sched_class::sched_normal || task.policy == sched_class::sched_batch {
+    if task.policy == sched_class_sched_normal || task.policy == sched_class_sched_batch {
         rq.cfs.nr_running = rq.cfs.nr_running + 1
-    } else if task.policy == sched_class::sched_fifo || task.policy == sched_class::sched_rr {
+    } else if task.policy == sched_class_sched_fifo || task.policy == sched_class_sched_rr {
         rq.rt.nr_running = rq.rt.nr_running + 1
-    } else if task.policy == sched_class::sched_deadline {
+    } else if task.policy == sched_class_sched_deadline {
         rq.deadline.nr_running = rq.deadline.nr_running + 1
     }
 }
@@ -134,14 +134,14 @@ func (cpu_rq* rq) dequeue_task(task_struct task) {
 
 func (cpu_rq* rq) pick_next_task() option[task_struct] {
     if rq.nr_running == 0 {
-        return option::none
+        return nil
     }
     
     if rq.rt.nr_running > 0 {
         task := task_struct {
             pid: 0,
             comm: "rt_task",
-            policy: sched_class::sched_fifo,
+            policy: sched_class_sched_fifo,
             prio: 100,
             nice: -20,
             se: se_stats {
@@ -154,14 +154,14 @@ func (cpu_rq* rq) pick_next_task() option[task_struct] {
             state: 0,
             flags: 0
         }
-        return option::some(task)
+        return some(task)
     }
     
     if rq.cfs.nr_running > 0 {
         task := task_struct {
             pid: 0,
             comm: "cfs_task",
-            policy: sched_class::sched_normal,
+            policy: sched_class_sched_normal,
             prio: 120,
             nice: 0,
             se: se_stats {
@@ -174,10 +174,10 @@ func (cpu_rq* rq) pick_next_task() option[task_struct] {
             state: 0,
             flags: 0
         }
-        return option::some(task)
+        return some(task)
     }
     
-    return option::none
+    return nil
 }
 
 func (cpu_rq* rq) update_load_avg(int delta_exec) {
@@ -239,7 +239,7 @@ func (scheduler* sched) dequeue_task(int cpu_id, task_struct task) (bool, string
 
 func (scheduler* sched) pick_next_task(int cpu_id) option[task_struct] {
     if cpu_id < 0 || cpu_id >= sched.nr_cpus {
-        return option::none
+        return nil
     }
     
     return sched.cpus[cpu_id].pick_next_task()

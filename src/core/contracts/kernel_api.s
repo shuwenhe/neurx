@@ -1,12 +1,12 @@
 struct kernel_metadata {
-    kernel_name: string
-    operation_name: string
-    device: device
-    supports_fp16: bool
-    supports_bfloat16: bool
-    supports_fp8: bool
-    compute_complexity_str: string
-    memory_complexity_str: string
+    string kernel_name
+    string operation_name
+    device device
+    bool supports_fp16
+    bool supports_bfloat16
+    bool supports_fp8
+    string compute_complexity_str
+    string memory_complexity_str
 }
 interface i_forward_kernel {
     metadata() . kernel_metadata

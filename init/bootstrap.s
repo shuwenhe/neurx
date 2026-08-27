@@ -27,15 +27,15 @@ struct core_system {
 }
 
 func kernel_main() (core_system) {
-    hal_cap := hal::detect_platform_capability()
+    hal_cap := hal_detect_platform_capability()
     
-    mem_pool := allocator::create_memory_pool(16384)
+    mem_pool := allocator_create_memory_pool(16384)
     
-    task_scheduler := sched::create_scheduler()
+    task_scheduler := sched_create_scheduler()
     
-    monitor_service := monitor::create_monitoring_service(1000)
+    monitor_service := monitor_create_monitoring_service(1000)
     
-    rpc_srv := rpc_framework::create_rpc_server(8080)
+    rpc_srv := rpc_framework_create_rpc_server(8080)
     
     state := system_state {
         is_running: true,
@@ -51,45 +51,45 @@ func kernel_main() (core_system) {
         mem_pool: mem_pool,
         task_scheduler: task_scheduler,
         monitor_service: monitor_service,
-        rpc_srv: rpc_srv
+        rpc_srv rpc_srv
     }
     
-    rpc_framework::start_rpc_server(*core.rpc_srv)
+    rpc_framework_start_rpc_server(*core.rpc_srv)
     core, ""
 }
 
 func run_main_event_loop(core_system* core) (int, string) {
     for core.state.is_running {
-        scheduled_task := sched::schedule_next_task(core.task_scheduler)
+        scheduled_task := sched_schedule_next_task(core.task_scheduler)
         
         if scheduled_task > 0 {
             core.state.active_task_count = core.state.active_task_count + 1
         }
         
-        monitor::collect_metrics(core.monitor_service)
+        monitor_collect_metrics(core.monitor_service)
         
-        rpc_framework::process_rpc_requests(core.rpc_srv)
+        rpc_framework_process_rpc_requests(core.rpc_srv)
         
-        sched::advance_scheduler_clock(core.task_scheduler)
+        sched_advance_scheduler_clock(core.task_scheduler)
     }
     0, ""
 }
 
 func init_platform_backends(core_system* core) (int, string) {
-    hal_cap := hal::detect_platform_capability()
+    hal_cap := hal_detect_platform_capability()
     
     if hal_cap.gpu_count > 0 {
-        backend_selector::select_and_init_gpu_backend(*hal_cap)
+        backend_selector_select_and_init_gpu_backend(*hal_cap)
     }
     
     if hal_cap.cpu_count > 0 {
-        backend_selector::init_cpu_backend(*hal_cap)
+        backend_selector_init_cpu_backend(*hal_cap)
     }
     0, ""
 }
 
 func add_system_task(core_system* core, int task_type_id, int priority) (int, string) {
-    task_id := sched::schedule_task(core.task_scheduler, task_type_id, priority)
+    task_id := sched_schedule_task(core.task_scheduler, task_type_id, priority)
     
     core.state.active_task_count = core.state.active_task_count + 1
     task_id, ""
@@ -98,13 +98,13 @@ func add_system_task(core_system* core, int task_type_id, int priority) (int, st
 func shutdown_system(core_system* core) (int, string) {
     core.state.is_running = false
     
-    monitor::flush_metrics(core.monitor_service)
+    monitor_flush_metrics(core.monitor_service)
     
-    rpc_framework::stop_rpc_server(core.rpc_srv)
+    rpc_framework_stop_rpc_server(core.rpc_srv)
     
-    sched::shutdown_scheduler(core.task_scheduler)
+    sched_shutdown_scheduler(core.task_scheduler)
     
-    allocator::cleanup_memory_pool(core.mem_pool)
+    allocator_cleanup_memory_pool(core.mem_pool)
     0, ""
 }
 

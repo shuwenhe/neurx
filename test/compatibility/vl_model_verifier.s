@@ -1,20 +1,20 @@
 package main
 
 struct model_file {
-    name: string
-    size_mb: int
-    required: bool
-    found: bool
+    string name
+    int size_mb
+    bool required
+    bool found
 }
 
 struct vl_deployment_info {
-    model_dir: string
-    model_name: string
-    total_files: int
-    total_size_gb: float
-    is_complete: bool
-    vision_encoder_ready: bool
-    language_model_ready: bool
+    string model_dir
+    string model_name
+    int total_files
+    float total_size_gb
+    bool is_complete
+    bool vision_encoder_ready
+    bool language_model_ready
 }
 
 func verify_vl_model_files(string model_dir) bool {

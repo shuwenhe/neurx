@@ -5,36 +5,36 @@ use std.time
 use std.strings
 
 struct model_config {
-    vocab_size: i32
-    hidden_dim: i32
-    num_layers: i32
-    num_heads: i32
-    ffn_dim: i32
-    seq_len: i32
-    batch_size: i32
+    i32 vocab_size
+    i32 hidden_dim
+    i32 num_layers
+    i32 num_heads
+    i32 ffn_dim
+    i32 seq_len
+    i32 batch_size
 }
 
 struct training_config {
-    num_epochs: i32
-    steps_per_epoch: i32
-    learning_rate: f64
-    warmup_steps: i32
-    max_grad_norm: f64
+    i32 num_epochs
+    i32 steps_per_epoch
+    f64 learning_rate
+    i32 warmup_steps
+    f64 max_grad_norm
 }
 
 struct training_metrics {
-    step: i32
-    loss: f64
-    avg_loss: f64
-    learning_rate: f64
-    throughput: f64
+    i32 step
+    f64 loss
+    f64 avg_loss
+    f64 learning_rate
+    f64 throughput
 }
 
 struct inference_result {
-    prompt: string
-    generated: string
-    num_tokens: i32
-    latency_ms: f64
+    string prompt
+    string generated
+    i32 num_tokens
+    f64 latency_ms
 }
 
 func println(string s) {
@@ -58,7 +58,7 @@ func format_large_number(i64 n) string {
 }
 
 struct transformer_model {
-    config: model_config
+    model_config config
     embedding_table: [][]f64
     attention_weights: [][]f64
     ffn_weights: [][]f64
@@ -88,8 +88,8 @@ func create_model(model_config config) transformer_model {
 struct data_batch {
     input_ids: []i32
     labels: []i32
-    batch_size: i32
-    seq_len: i32
+    i32 batch_size
+    i32 seq_len
 }
 
 func create_dummy_batch(model_config config) data_batch {
@@ -159,7 +159,7 @@ func train_epoch(transformer_model model, training_config config, i32 epoch) (tr
                 loss: loss,
                 avg_loss: avg_loss,
                 learning_rate: lr,
-                throughput: throughput
+                throughput throughput
             }
             print_training_progress(metrics)
         }

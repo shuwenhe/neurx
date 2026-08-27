@@ -77,7 +77,7 @@ func cpufreq_policy_create(int cpu_id) cpufreq_policy {
         min_freq_mhz: 400,
         max_freq_mhz: 3600,
         cur_freq_mhz: 1800,
-        governor: cpu_freq_governor::schedutil,
+        governor: cpu_freq_governor_schedutil,
         transition_latency_us: 0,
         transition_samples: 0,
         up_threshold_pct: 80,
@@ -199,7 +199,7 @@ func power_domain_create(string name, int power_id) power_domain {
     domain := power_domain {
         name: name,
         power_id: power_id,
-        state: power_state::power_on,
+        state: power_state_power_on,
         ref_count: 0,
         voltage_mv: 1200,
         frequency_mhz: 2000
@@ -208,7 +208,7 @@ func power_domain_create(string name, int power_id) power_domain {
 }
 
 func (power_domain* domain) power_on() (bool, string) {
-    domain.state = power_state::power_on
+    domain.state = power_state_power_on
     domain.ref_count = domain.ref_count + 1
     return true, ""
 }
@@ -218,7 +218,7 @@ func (power_domain* domain) power_off() (bool, string) {
         domain.ref_count = domain.ref_count - 1
     }
     if domain.ref_count == 0 {
-        domain.state = power_state::power_s5
+        domain.state = power_state_power_s5
     }
     return true, ""
 }
@@ -229,7 +229,7 @@ func power_manager_create(int nr_cpus) power_manager {
         cpuidle_devices: cpuidle_device[]{},
         power_domains: power_domain[]{},
         nr_cpus: nr_cpus,
-        system_state: power_state::power_on,
+        system_state: power_state_power_on,
         total_transitions: 0,
         total_power_save_time_us: 0
     }

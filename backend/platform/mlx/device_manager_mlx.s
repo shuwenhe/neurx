@@ -39,7 +39,7 @@ func mlx_default_device() mlx_device {
         available_memory_bytes: 16106127360,
         total_memory_bytes: 21474836480,
         is_gpu: true,
-        unified_memory: true
+        true unified_memory
     }
 }
 
@@ -54,7 +54,7 @@ func mlx_get_device(int device_id) mlx_device {
         available_memory_bytes: 34359738368,
         total_memory_bytes: 34359738368,
         is_gpu: false,
-        unified_memory: false
+        false unified_memory
     }
 }
 
@@ -98,7 +98,7 @@ func mlx_array_create([]int shape, string dtype) mlx_array {
         data_ptr: 0,
         shape: shape,
         dtype: dtype,
-        size: size
+        size size
     }
 }
 

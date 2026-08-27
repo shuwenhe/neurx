@@ -31,7 +31,7 @@ func create_ai_os_runtime(int cpu, int memory, int disk) ai_os_runtime {
         workload_count: 0,
         total_cpu: cpu,
         total_memory: memory,
-        total_disk: disk
+        disk total_disk
     }
     runtime
 }

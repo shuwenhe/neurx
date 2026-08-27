@@ -3,15 +3,15 @@ import "dtype_api"
 import "layout_api"
 
 struct storage {
-    id: i64
-    ptr: i64
-    size_bytes: i64
-    dtype: DType
-    layout: Layout
-    device: device
-    offset: i64
-    version: i64
-    shared: bool
+    i64 id
+    i64 ptr
+    i64 size_bytes
+    DType dtype
+    Layout layout
+    device device
+    i64 offset
+    i64 version
+    bool shared
 }
 interface i_storage {
     data_ptr() . i64

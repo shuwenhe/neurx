@@ -5,13 +5,13 @@ use std.option.option
 use std.result.result
 use std.map.map
 
-use neurx.lora.lora_config::{lora_config}
-use neurx.lora.lora_adapter::{lora_adapter}
-use neurx.lora.lora_manager::{lora_adapter_manager}
+use neurx.lora.lora_config
+use neurx.lora.lora_adapter
+use neurx.lora.lora_manager
 
 func example_create_basic_adapter() ((), string) {
 
-    config := lora_config::default()
+    config := default()
     config.lora_rank = 8
     config.lora_alpha = 16.0
     config.lora_dropout = 0.05
@@ -23,7 +23,7 @@ func example_create_basic_adapter() ((), string) {
 
     config.validate().map_err(|e| e.message)
 
-    adapter := lora_adapter::new("lora_basic", *config)
+    adapter := new("lora_basic", *config)
 
     lora_a := float[][]]()
     i := 0
@@ -64,7 +64,7 @@ func example_create_basic_adapter() ((), string) {
 
 func example_apply_lora() ((), string) {
 
-    config := lora_config::default()
+    config := default()
     config.lora_rank = 4
     config.lora_alpha = 8.0
 
@@ -72,7 +72,7 @@ func example_apply_lora() ((), string) {
     targets = append(targets, "dense")
     config.target_modules = targets
 
-    adapter := lora_adapter::new("lora_apply", *config)
+    adapter := new("lora_apply", *config)
 
     lora_a := float[][]]()
     i := 0
@@ -119,24 +119,24 @@ func example_apply_lora() ((), string) {
 }
 
 func example_adapter_manager() ((), string) {
-    manager := lora_adapter_manager::new()
+    manager := new()
 
-    config1 := lora_config::default()
+    config1 := default()
     config1.lora_rank = 8
     targets1 := string[]()
     targets1 = append(targets1, "q_proj")
     config1.target_modules = targets1
 
-    adapter1 := lora_adapter::new("adapter_1", *config1)
+    adapter1 := new("adapter_1", *config1)
     manager.add_adapter("adapter_1", *adapter1)
 
-    config2 := lora_config::default()
+    config2 := default()
     config2.lora_rank = 16
     targets2 := string[]()
     targets2 = append(targets2, "v_proj")
     config2.target_modules = targets2
 
-    adapter2 := lora_adapter::new("adapter_2", *config2)
+    adapter2 := new("adapter_2", *config2)
     manager.add_adapter("adapter_2", *adapter2)
 
     manager.activate_adapter("adapter_1")
@@ -156,13 +156,13 @@ func example_adapter_manager() ((), string) {
 }
 
 func example_batch_apply_lora() ((), string) {
-    config := lora_config::default()
+    config := default()
     config.lora_rank = 4
     targets := string[]()
     targets = append(targets, "linear")
     config.target_modules = targets
 
-    adapter := lora_adapter::new("lora_batch", *config)
+    adapter := new("lora_batch", *config)
 
     lora_a := float[][]]()
     i := 0

@@ -3,51 +3,51 @@ import "src/inference/inference_engine.s"
 import "src/inference/extension/attention/attention.s"
 
 struct tensorrt_config {
-    model_dir: string
-    engine_name: string
-    max_batch_size: i32
-    max_input_len: i32
-    max_output_len: i32
-    max_beam_width: i32
-    use_gpt_attention_plugin: bool
-    use_gemm_plugin: bool
-    use_layernorm_plugin: bool
-    enable_context_fmha: bool
-    kv_cache_free_gpu_memory_fraction: f32
-    use_paged_kv_cache: bool
-    lora_dir: string
+    string model_dir
+    string engine_name
+    i32 max_batch_size
+    i32 max_input_len
+    i32 max_output_len
+    i32 max_beam_width
+    bool use_gpt_attention_plugin
+    bool use_gemm_plugin
+    bool use_layernorm_plugin
+    bool enable_context_fmha
+    f32 kv_cache_free_gpu_memory_fraction
+    bool use_paged_kv_cache
+    string lora_dir
     lora_target_modules: []string
 }
 
 struct tensorrt_engine {
-    config: tensorrt_config
-    runtime: *tensorrt_runtime
-    engine: *tensorrt_model_engine
-    decoder: *tensorrt_decoder
-    kv_cache_manager: *kv_cache_manager
-    lora_manager: *lo_ra_manager
+    tensorrt_config config
+    *tensorrt_runtime runtime
+    *tensorrt_model_engine engine
+    *tensorrt_decoder decoder
+    *kv_cache_manager kv_cache_manager
+    *lo_ra_manager lora_manager
     active_adapters: map[string]*lo_ra_adapter
-    total_requests: i64
-    total_tokens_generated: i64
+    i64 total_requests
+    i64 total_tokens_generated
 }
 
 struct tensorrt_runtime {
-    world_size: i32
-    rank: i32
-    device_id: i32
-    stream: CudaStream
+    i32 world_size
+    i32 rank
+    i32 device_id
+    CudaStream stream
 }
 
 struct tensorrt_model_engine {
-    engine_path: string
-    context: *tensor_rt_context
-    max_batch_size: i32
-    max_seq_len: i32
+    string engine_path
+    *tensor_rt_context context
+    i32 max_batch_size
+    i32 max_seq_len
 }
 
 struct tensorrt_decoder {
-    config: tensorrt_config
-    sampling_config: SamplingConfig
+    tensorrt_config config
+    SamplingConfig sampling_config
     stop_words: []string
     bad_words: []string
 }
@@ -251,24 +251,24 @@ func (tensorrt_engine* engine) get_statistics() . (i64, i64, f32) {
 }
 
 struct tensorrt_decoder_input {
-    input_ids: tensor
-    max_new_tokens: i32
-    end_id: i32
-    pad_id: i32
+    tensor input_ids
+    i32 max_new_tokens
+    i32 end_id
+    i32 pad_id
     cache_blocks: []kv_cache_block
-    sampling_config: SamplingConfig
+    SamplingConfig sampling_config
 }
 
 struct generation_request {
-    request_id: string
-    input_ids: tensor
-    max_new_tokens: i32
-    sampling_config: SamplingConfig
+    string request_id
+    tensor input_ids
+    i32 max_new_tokens
+    SamplingConfig sampling_config
 }
 
 struct generation_response {
-    request_id: string
-    output_ids: tensor
+    string request_id
+    tensor output_ids
     log_probs: []f32
 }
 

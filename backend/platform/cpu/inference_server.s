@@ -359,7 +359,7 @@ func get_cache_stats() weight_cache {
         capacity: 2000,
         hit_count: 0,
         miss_count: 0,
-        enabled: true
+        true enabled
     }
 }
 

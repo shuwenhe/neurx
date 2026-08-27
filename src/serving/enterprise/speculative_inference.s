@@ -6,13 +6,13 @@ use neurx.inference.speculative.speculative_verifier
 use neurx.inference.speculative.speculative_runtime
 
 struct speculative_inference_config {
-    enable_speculative_decode: bool
-    num_draft_tokens: int
-    draft_model_scale: float
-    draft_model_path: string
-    acceptance_threshold: float
-    adaptive_num_tokens: bool
-    max_speculative_length: int
+    bool enable_speculative_decode
+    int num_draft_tokens
+    float draft_model_scale
+    string draft_model_path
+    float acceptance_threshold
+    bool adaptive_num_tokens
+    int max_speculative_length
 }
 
 struct speculative_inference_system {
@@ -20,9 +20,9 @@ struct speculative_inference_system {
     verifier_executor: speculative_verifier.verifier_executor
     decode_config: speculative_decode_core.speculative_decode_config
     runtime: speculative_runtime.speculative_decode_runtime
-    system_config: speculative_inference_config
+    speculative_inference_config system_config
     statistics: speculative_decode_core.speculative_statistics
-    is_initialized: bool
+    bool is_initialized
 }
 
 func new_speculative_inference_config() speculative_inference_config {

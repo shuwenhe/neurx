@@ -5,12 +5,12 @@ use std.regex
 use neurx.tool_parsers
 
 struct DeepSeekV3Parser {
-    base: BaseToolParser
+    BaseToolParser base
 }
 
 func new() . DeepSeekV3Parser {
     parser := DeepSeekV3Parser {
-        base: BaseToolParser::new("deepseek_v3")
+        base: BaseToolParser_new("deepseek_v3")
     }
     parser.base = parser.base.set_structural_tag("deepseek_r1")
     parser
@@ -22,48 +22,48 @@ func extract_tool_calls(self, str model_output, ParserRequest request) . Extract
     single_call_start := "<｜tool▁call▁begin｜>"
     single_call_end := "<｜tool▁call▁end｜>"
 
-    if !strings::contains_str(model_output, tool_start) {
+    if !strings_contains_str(model_output, tool_start) {
         return ExtractedToolCallInformation {
             tools_called: false,
-            tool_calls: Vec::new(),
-            content: model_output
+            tool_calls: Vec_new(),
+            model_output content
         }
     }
 
-    content_end := strings::index_of(model_output, tool_start)
+    content_end := strings_index_of(model_output, tool_start)
     content := if content_end > 0 {
-        strings::substring(model_output, 0, content_end)
+        strings_substring(model_output, 0, content_end)
     } else {
         ""
     }
 
     tool_section_start := content_end
-    tool_section_end := strings::index_of_from(model_output, tool_end, tool_section_start)
+    tool_section_end := strings_index_of_from(model_output, tool_end, tool_section_start)
 
-    tool_calls := Vec::new()
+    tool_calls := Vec_new()
 
     if tool_section_end > tool_section_start {
-        tool_section := strings::substring(
+        tool_section := strings_substring(
             model_output,
-            tool_section_start + strings::len(tool_start),
+            tool_section_start + strings_len(tool_start),
             tool_section_end
         )
 
         search_pos := 0
-        for search_pos < strings::len(tool_section) {
-            call_start_pos := strings::index_of_from(tool_section, single_call_start, search_pos)
+        for search_pos < strings_len(tool_section) {
+            call_start_pos := strings_index_of_from(tool_section, single_call_start, search_pos)
             if call_start_pos < 0 {
                 break
             }
 
-            call_end_pos := strings::index_of_from(tool_section, single_call_end, call_start_pos)
+            call_end_pos := strings_index_of_from(tool_section, single_call_end, call_start_pos)
             if call_end_pos < 0 {
                 break
             }
 
-            call_content := strings::substring(
+            call_content := strings_substring(
                 tool_section,
-                call_start_pos + strings::len(single_call_start),
+                call_start_pos + strings_len(single_call_start),
                 call_end_pos
             )
 
@@ -72,63 +72,63 @@ func extract_tool_calls(self, str model_output, ParserRequest request) . Extract
                 None => {}
             }
 
-            search_pos = call_end_pos + strings::len(single_call_end)
+            search_pos = call_end_pos + strings_len(single_call_end)
         }
     }
 
     ExtractedToolCallInformation {
         tools_called: len(tool_calls) > 0,
         tool_calls: tool_calls,
-        content: content
+        content content
     }
 }
 
 struct DeepSeekV32Parser {
-    base: BaseToolParser
+    BaseToolParser base
 }
 
 func new() . DeepSeekV32Parser {
     parser := DeepSeekV32Parser {
-        base: BaseToolParser::new("deepseek_v32")
+        base: BaseToolParser_new("deepseek_v32")
     }
     parser.base = parser.base.set_structural_tag("deepseek_r1")
     parser
 }
 
 func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
-    DeepSeekV3Parser::new().extract_tool_calls(model_output, request)
+    DeepSeekV3Parser_new().extract_tool_calls(model_output, request)
 }
 
 struct DeepSeekV4Parser {
-    base: BaseToolParser
+    BaseToolParser base
 }
 
 func new() . DeepSeekV4Parser {
     parser := DeepSeekV4Parser {
-        base: BaseToolParser::new("deepseek_v4")
+        base: BaseToolParser_new("deepseek_v4")
     }
     parser.base = parser.base.set_structural_tag("deepseek_v3_1")
     parser
 }
 
 func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
-    DeepSeekV3Parser::new().extract_tool_calls(model_output, request)
+    DeepSeekV3Parser_new().extract_tool_calls(model_output, request)
 }
 
 func parse_deepseek_tool_call(str call_content) . Option<ToolCall> {
-    lines := strings::split(call_content, "\n")
+    lines := strings_split(call_content, "\n")
 
     func_type := ""
     func_name := ""
     func_args := ""
 
     for line in lines {
-        trimmed := strings::trim(line)
+        trimmed := strings_trim(line)
 
-        if strings::starts_with(trimmed, "<") && strings::ends_with(trimmed, ">") {
+        if strings_starts_with(trimmed, "<") && strings_ends_with(trimmed, ">") {
             func_type = trimmed
-        } else if strings::starts_with(trimmed, "```json") {
-            func_args = strings::substring(trimmed, 7, strings::len(trimmed))
+        } else if strings_starts_with(trimmed, "```json") {
+            func_args = strings_substring(trimmed, 7, strings_len(trimmed))
         }
     }
 
@@ -138,7 +138,7 @@ func parse_deepseek_tool_call(str call_content) . Option<ToolCall> {
             id: "",
             function: FunctionCall {
                 name: func_name,
-                arguments: func_args
+                func_args arguments
             }
         })
     } else {

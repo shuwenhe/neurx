@@ -9,12 +9,12 @@ import "serialization_api"
 }
 
 struct optimizer_state {
-    step: i64
-    learning_rate: f64
-    weight_decay: f64
-    momentum: map[string]tensor
-    m: map[string]tensor
-    v: map[string]tensor
+    i64 step
+    f64 learning_rate
+    f64 weight_decay
+    map[string]tensor momentum
+    map[string]tensor m
+    map[string]tensor v
 }
 interface i_optimizer {
     get_learning_rate() . f64

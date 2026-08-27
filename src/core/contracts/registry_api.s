@@ -10,12 +10,12 @@
 }
 
 struct registry_entry {
-    component_type: ComponentType
-    name: string
-    namespace: string
-    version: string
-    impl_ptr: i64
-    metadata: map[string]string
+    ComponentType component_type
+    string name
+    string namespace
+    string version
+    i64 impl_ptr
+    map[string]string metadata
 }
 interface i_registry {
     register(entry: registry_entry) . void

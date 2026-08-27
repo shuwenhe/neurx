@@ -27,7 +27,7 @@ interface operator_impl {
 }
 
 struct dispatch_context {
-    preferred_device: device
-    enable_autograd: bool
-    enable_profiling: bool
+    device preferred_device
+    bool enable_autograd
+    bool enable_profiling
 }

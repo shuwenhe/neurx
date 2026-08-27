@@ -4,7 +4,7 @@ import "device_api"
 import "dtype_api"
 
 struct tensor {
-    impl: tensor_impl
+    tensor_impl impl
 }
 interface i_tensor {
     shape() . []i64

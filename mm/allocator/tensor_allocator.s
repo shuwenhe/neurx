@@ -27,7 +27,7 @@ func create_tensor_pool(int base_addr, int total_size) tensor_pool {
         base_addr: base_addr,
         total_size: total_size,
         allocated_size: 0,
-        regions: memory_region[]
+        memory_region[] regions
     }
     pool
 }

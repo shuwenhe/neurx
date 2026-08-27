@@ -6,12 +6,12 @@ use std.math.exp
 use std.math.log
 
 struct processor_error {
-    code: string
-    message: string
+    string code
+    string message
 }
 
 struct temperature_processor {
-    temperature: float
+    float temperature
 }
 
 func (temperature_processor* tp) apply(*float[] logits) (float), processor_error[] {
@@ -34,7 +34,7 @@ return     (result_logits, "")
 }
 
 struct top_k_processor {
-    k: int
+    int k
 }
 
 func find_kth_largest(*float[] logits, int k) float {
@@ -83,7 +83,7 @@ return     (result_logits, "")
 }
 
 struct nucleus_processor {
-    top_p: float
+    float top_p
 }
 
 func softmax(*float[] logits) float[] {
@@ -161,7 +161,7 @@ return     (result_logits, "")
 }
 
 struct frequency_penalty_processor {
-    penalty: float
+    float penalty
     token_counts: *map[int, int]
 }
 
@@ -190,7 +190,7 @@ return     (result_logits, "")
 }
 
 struct length_penalty_processor {
-    penalty: float
+    float penalty
 }
 
 func (length_penalty_processor* lp) apply(*float[] logits) (float), processor_error[] {
@@ -213,8 +213,8 @@ return     (result_logits, "")
 }
 
 struct repetition_penalty_processor {
-    penalty: float
-    previous_tokens: *int[]
+    float penalty
+    *int[] previous_tokens
 }
 
 func (repetition_penalty_processor* rp) apply(*float[] logits) (float), processor_error[] {
@@ -254,36 +254,36 @@ return     (result_logits, "")
 }
 
 struct sampling_params {
-    temperature: float
-    top_k: int
-    top_p: float
-    frequency_penalty: float
-    length_penalty: float
-    repetition_penalty: float
+    float temperature
+    int top_k
+    float top_p
+    float frequency_penalty
+    float length_penalty
+    float repetition_penalty
 }
 
 struct logits_processor_pipeline {
-    temperature_proc: option[temperature_processor]
-    top_k_proc: option[top_k_processor]
-    nucleus_proc: option[nucleus_processor]
-    frequency_proc: option[frequency_penalty_processor]
-    length_proc: option[length_penalty_processor]
-    repetition_proc: option[repetition_penalty_processor]
+    option[temperature_processor] temperature_proc
+    option[top_k_processor] top_k_proc
+    option[nucleus_processor] nucleus_proc
+    option[frequency_penalty_processor] frequency_proc
+    option[length_penalty_processor] length_proc
+    option[repetition_penalty_processor] repetition_proc
 }
 
-func logits_processor_pipeline::new() logits_processor_pipeline {
+func logits_processor_pipeline_new() logits_processor_pipeline {
     logits_processor_pipeline {
-        temperature_proc: option::none,
-        top_k_proc: option::none,
-        nucleus_proc: option::none,
-        frequency_proc: option::none,
-        length_proc: option::none,
-        repetition_proc: option::none,
+        temperature_proc: nil,
+        top_k_proc: nil,
+        nucleus_proc: nil,
+        frequency_proc: nil,
+        length_proc: nil,
+        repetition_proc: nil,
     }
 }
 
 func (logits_processor_pipeline* pipeline) with_temperature(
-    temperature: float
+    float temperature
 ) ((), processor_error) {
     if temperature <= 0.0 {
         return (processor_error {
@@ -292,12 +292,12 @@ func (logits_processor_pipeline* pipeline) with_temperature(
         })
     }
 
-    pipeline.temperature_proc = option::some(temperature_processor { temperature: temperature })
+    pipeline.temperature_proc = some(temperature_processor { temperature: temperature })
     return (), ""
 }
 
 func (logits_processor_pipeline* pipeline) with_top_k(
-    k: int
+    int k
 ) ((), processor_error) {
     if k <= 0 {
         return (processor_error {
@@ -306,12 +306,12 @@ func (logits_processor_pipeline* pipeline) with_top_k(
         })
     }
 
-    pipeline.top_k_proc = option::some(top_k_processor { k: k })
+    pipeline.top_k_proc = some(top_k_processor { k: k })
     return (), ""
 }
 
 func (logits_processor_pipeline* pipeline) with_nucleus(
-    top_p: float
+    float top_p
 ) ((), processor_error) {
     if top_p <= 0.0 || top_p > 1.0 {
         return (processor_error {
@@ -320,34 +320,34 @@ func (logits_processor_pipeline* pipeline) with_nucleus(
         })
     }
 
-    pipeline.nucleus_proc = option::some(nucleus_processor { top_p: top_p })
+    pipeline.nucleus_proc = some(nucleus_processor { top_p: top_p })
     return (), ""
 }
 
 func (logits_processor_pipeline* pipeline) process(
-    logits: *float[]
+    *float[] logits
 ) (float), processor_error[] {
     result_logits := logits
 
     switch pipeline.temperature_proc {
-        option::some(tp) : {
+        some(tp) : {
             result_logits = tp.apply(result_logits)
         },
-        option::none : {},
+        nil : {},
     }
 
     switch pipeline.top_k_proc {
-        option::some(tp) : {
+        some(tp) : {
             result_logits = tp.apply(result_logits)
         },
-        option::none : {},
+        nil : {},
     }
 
     switch pipeline.nucleus_proc {
-        option::some(np) : {
+        some(np) : {
             result_logits = np.apply(result_logits)
         },
-        option::none : {},
+        nil : {},
     }
 
 return     (result_logits, "")
@@ -361,7 +361,7 @@ func main() {
     logits = append(logits, 4.0)
     logits = append(logits, 5.0)
 
-    pipeline := logits_processor_pipeline::new()
+    pipeline := logits_processor_pipeline_new()
     pipeline.with_temperature(0.7)
     pipeline.with_top_k(3)
     pipeline.with_nucleus(0.9)

@@ -80,10 +80,10 @@ func new_tensor_handle(int64 device_id, string device_type, int64 ptr, int64 siz
 func new_communicator(comm_backend backend, int rank, int world_size, int local_rank) communicator {
     backend_name := ""
     switch backend {
-        comm_backend::nccl : backend_name = "nccl",
-        comm_backend::ucc : backend_name = "ucc",
-        comm_backend::gloo : backend_name = "gloo",
-        comm_backend::cpu_only : backend_name = "cpu_only",
+        comm_backend_nccl : backend_name = "nccl",
+        comm_backend_ucc : backend_name = "ucc",
+        comm_backend_gloo : backend_name = "gloo",
+        comm_backend_cpu_only : backend_name = "cpu_only",
     }
 
     config := communicator_config {

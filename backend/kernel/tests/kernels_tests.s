@@ -12,7 +12,7 @@ struct TestResult {
     name: string,
     passed: bool,
     message: string,
-    execution_time: f32
+    f32 execution_time
 }
 
 test_results := make([]TestResult, 0)
@@ -22,7 +22,7 @@ func LogTest(string name, bool passed, string message, f32 time) {
         name: name,
         passed: passed,
         message: message,
-        execution_time: time
+        time execution_time
     }
     test_results = append(test_results, result)
 
@@ -236,7 +236,7 @@ func TestLayerNorm() {
         epsilon: 1e-5,
         momentum: 0.1,
         affine: true,
-        track_running_stats: false
+        false track_running_stats
     }
 
     result := kernel.LayerNorm(m, n, input, gamma, beta, params, *output)

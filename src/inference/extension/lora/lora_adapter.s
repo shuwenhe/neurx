@@ -5,40 +5,41 @@ use std.option.option
 use std.result.result
 use std.map.map
 
-use neurx.lora.lora_config::{lora_config, lora_config_error}
-use neurx.lora.weight_fusion::{compute_lora_delta, weight_fusion_engine}
+use neurx.lora.lora_config
+use neurx.lora.weight_fusion
 
 struct lora_adapter_error {
-    code: string
-    message: string
+    string code
+    string message
 }
 
 struct lora_adapter {
-    name: string
-    config: *lora_config
-    weights: map[string, (float[][], float[][])]
-    is_loaded: bool
-    fused: bool
-    fusion_engine: option[*weight_fusion_engine]
-    metadata: map[string, string]
+    string name
+    *lora_config config
+    map[string, (float[][], float[][])] weights
+    bool is_loaded
+    bool fused
+    option[*weight_fusion_engine] fusion_engine
+    map[string, string] metadata
 }
 
 func new(string name, *lora_config config) *lora_adapter {
-    lora_adapter {
+    adapter := lora_adapter(
         name: name,
         config: config,
-        weights: map[string, (float[][], float[][])]()
+        weights: make(map[string, (float[][], float[][])])
         is_loaded: false,
         fused: false,
-        fusion_engine: option::none,
-        metadata: map[string, string]()
-    }
+        fusion_engine: none,
+        metadata: make(map[string, string])
+    )
+    adapter
 }
 
 func (lora_adapter* adapter) add_module_weights(
-    module_name: string,
-    lora_a: *float[][],
-    lora_b: *float[][]
+    string module_name,
+    *float[][] lora_a,
+    *float[][] lora_b
 ) ((), string) {
     if !adapter.config.is_target_module(module_name) {
         return (), "NOT_TARGET_MODULE: Module " + module_name + " is not a target module for this adapter"
@@ -52,15 +53,11 @@ func (lora_adapter* adapter) add_module_weights(
     return (), ""
 }
 
-func (lora_adapter* adapter) get_module_weights(
-    module_name: string
-) option[(float[][], float[][])] {
+func (lora_adapter* adapter) get_module_weights(string module_name) option[(float[][], float[][])] {
     adapter.weights.get(module_name)
 }
 
-func (lora_adapter* adapter) remove_module_weights(
-    module_name: string
-) ((), string) {
+func (lora_adapter* adapter) remove_module_weights(string module_name) ((), string) {
     if !adapter.weights.contains(module_name) {
         return (), "MODULE_NOT_FOUND: Weights not found for module: " + module_name
     }
@@ -69,13 +66,9 @@ func (lora_adapter* adapter) remove_module_weights(
     return (), ""
 }
 
-func (lora_adapter* adapter) apply_lora(
-    module_name: string,
-    input: *float[],
-    scale: float
-) (*float[], string) {
+func (lora_adapter* adapter) apply_lora(string module_name, *float[] input, float scale) (*float[], string) {
     switch adapter.weights.get(module_name) {
-        option::some((lora_a, lora_b)) : {
+        case ((lora_a, lora_b)) : {
             scaling := adapter.config.get_lora_scaling() * scale
 
             intermediate := float[]()
@@ -110,16 +103,16 @@ func (lora_adapter* adapter) apply_lora(
 
             return output, ""
         },
-        option::none: {
+        case nil : {
             return nil, "MODULE_NOT_FOUND: LoRA weights not found for module: " + module_name
         },
     }
 }
 
 func (lora_adapter* adapter) apply_lora_batch(
-    module_name: string,
-    inputs: **float[][],
-    scale: float
+    string module_name,
+    **float[][] inputs,
+    float scale
 ) (**float[][], string) {
     outputs := *float[[]]()
 
@@ -137,50 +130,47 @@ func (lora_adapter* adapter) apply_lora_batch(
 }
 
 func (lora_adapter* adapter) fuse_weights(
-    original_weights: *map[string, *float[][]]
+    *map[string, *float[][]] original_weights
 ) ((), string) {
     if adapter.fused {
         return (), "ALREADY_FUSED: Adapter weights are already fused"
     }
 
-    engine := weight_fusion_engine::new(
+    engine := weight_fusion_engine_new(
         adapter.config.lora_rank,
         adapter.config.lora_alpha as float
     )
 
     for module_name in adapter.weights.keys() {
-        switch adapter.weights.get(module_name) {
-            option::some((lora_a, lora_b)) : {
-                scaling := adapter.config.get_lora_scaling()
-                delta := compute_lora_delta(lora_a, lora_b, scaling)
+        weights := adapter.weights.get(module_name)
+        if weights != nil {
+            lora_a, lora_b := weights
+            scaling := adapter.config.get_lora_scaling()
+            delta := compute_lora_delta(lora_a, lora_b, scaling)
 
-                switch original_weights.get(module_name) {
-                    option::some(orig) : {
-                        engine.fuse_weights(module_name, orig, delta)
-                    },
-                    option::none : {
-                        return (), "MISSING_WEIGHTS: Original weights not found for module: " + module_name
-                    },
-                }
-            },
-            option::none : {},
+            orig := original_weights.get(module_name)
+            if orig != nil {
+                engine.fuse_weights(module_name, orig, delta)
+            } else {
+                return (), "MISSING_WEIGHTS: Original weights not found for module: " + module_name
+            }
         }
     }
 
-    adapter.fusion_engine = option::some(*engine)
+    adapter.fusion_engine = some(*engine)
     adapter.fused = true
     return (), ""
 }
 
 func (lora_adapter* adapter) unfuse_weights(
-    original_weights: *map[string, *float[][]]
+    *map[string, *float[][]] original_weights
 ) ((), string) {
     if !adapter.fused {
         return (), "NOT_FUSED: Adapter weights are not fused"
     }
 
     adapter.fused = false
-    adapter.fusion_engine = option::none
+    adapter.fusion_engine = none
 
     return (), ""
 }
@@ -202,15 +192,14 @@ func (lora_adapter* adapter) get_size_mb() int {
     total := 0
 
     for module_name in adapter.weights.keys() {
-        switch adapter.weights.get(module_name) {
-            option::some((lora_a, lora_b)) : {
-                a_size := len(lora_a) *
-                    (if len(lora_a) > 0 { lora_a[0].len() } else { 0 }) * 4
-                b_size := len(lora_b) *
-                    (if len(lora_b) > 0 { lora_b[0].len() } else { 0 }) * 4
-                total = total + a_size + b_size
-            },
-            option::none : {},
+        weights := adapter.weights.get(module_name)
+        if weights != nil {
+            lora_a, lora_b := weights
+            a_size := len(lora_a) *
+                (if len(lora_a) > 0 { lora_a[0].len() } else { 0 }) * 4
+            b_size := len(lora_b) *
+                (if len(lora_b) > 0 { lora_b[0].len() } else { 0 }) * 4
+            total = total + a_size + b_size
         }
     }
 
@@ -239,17 +228,16 @@ func (lora_adapter* adapter) validate() ((), string) {
     }
 
     for module_name in adapter.weights.keys() {
-        switch adapter.weights.get(module_name) {
-            option::some((lora_a, lora_b)) : {
-                if len(lora_a) == 0 || len(lora_b) == 0 {
-                    return (), "INVALID_WEIGHTS: Empty weights for module: " + module_name
-                }
+        weights := adapter.weights.get(module_name)
+        if weights != nil {
+            lora_a, lora_b := weights
+            if len(lora_a) == 0 || len(lora_b) == 0 {
+                return (), "INVALID_WEIGHTS: Empty weights for module: " + module_name
+            }
 
-                if lora_a[0].len() != len(lora_b) {
-                    return (), "SHAPE_MISMATCH: LoRA A and B shape mismatch for module: " + module_name
-                }
-            },
-            option::none : {},
+            if lora_a[0].len() != len(lora_b) {
+                return (), "SHAPE_MISMATCH: LoRA A and B shape mismatch for module: " + module_name
+            }
         }
     }
 

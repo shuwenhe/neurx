@@ -1,37 +1,37 @@
 struct verifier_config {
-    model_type: string
-    vocab_size: int
-    acceptance_threshold: float
-    verify_all: bool
-    confidence_based_verification: bool
-    max_verification_depth: int
+    string model_type
+    int vocab_size
+    float acceptance_threshold
+    bool verify_all
+    bool confidence_based_verification
+    int max_verification_depth
 }
 
 struct verification_context {
-    draft_token_id: int
+    int draft_token_id
     draft_logits: []float
-    verified_token_id: int
+    int verified_token_id
     verified_logits: []float
-    match_found: bool
-    verification_depth: int
+    bool match_found
+    int verification_depth
 }
 
 struct verifier_executor {
-    config: verifier_config
+    verifier_config config
     model_embeddings: [][]float
     model_weights: [][]float
-    verification_count: int64
-    acceptance_count: int64
-    rejection_count: int64
-    total_verify_time_ms: float64
+    int64 verification_count
+    int64 acceptance_count
+    int64 rejection_count
+    float64 total_verify_time_ms
 }
 
 struct verification_batch {
-    batch_id: int
+    int batch_id
     draft_predictions: [][]draft_token
     verification_results: [][]verification_result
-    batch_accept_rate: float
-    batch_verify_time_ms: float
+    float batch_accept_rate
+    float batch_verify_time_ms
 }
 
 func new_verifier_config(int vocab, float threshold) verifier_config {

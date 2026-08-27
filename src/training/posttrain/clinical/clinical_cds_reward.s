@@ -219,7 +219,7 @@ func compute_cds_reward(
         length_penalty: r_length,
         clarification_bonus: r_clarify,
         external_model: r_external,
-        total_reward: total
+        total total_reward
     }
     return breakdown
 }

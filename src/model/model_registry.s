@@ -18,24 +18,24 @@ const ACTIVATION_SILU = "silu"
 const ACTIVATION_SWIGLU = "swiglu"
 
 struct model_optimization {
-    attention_type: string
-    activation: string
-    use_flash_attn: bool
-    use_paged_attn: bool
-    use_kv_cache_quantization: bool
-    kv_cache_quantization_bits: int
-    enable_rope_scaling: bool
-    rope_scaling_factor: f32
+    string attention_type
+    string activation
+    bool use_flash_attn
+    bool use_paged_attn
+    bool use_kv_cache_quantization
+    int kv_cache_quantization_bits
+    bool enable_rope_scaling
+    f32 rope_scaling_factor
 }
 
 struct model_adapter {
-    model_spec: model_spec
-    optimization: model_optimization
-    weight_format: string
-    quantization_level: int
-    distributed_strategy: string
-    distributed_world_size: int
-    distributed_rank: int
+    model_spec model_spec
+    model_optimization optimization
+    string weight_format
+    int quantization_level
+    string distributed_strategy
+    int distributed_world_size
+    int distributed_rank
 }
 
 struct model_registry {
@@ -175,9 +175,9 @@ func create_adapter_for_model(string model_name) option[model_adapter] {
 }
 
 struct rope_scaling_params {
-    rope_type: string
-    factor: f32
-    short_mlen: int
+    string rope_type
+    f32 factor
+    int short_mlen
 }
 
 func get_rope_params_for_model(string model_type, int seq_len) rope_scaling_params {
@@ -223,19 +223,19 @@ func get_rope_params_for_model(string model_type, int seq_len) rope_scaling_para
 }
 
 struct weight_loading_config {
-    load_strategy: string
-    precision: string
-    enable_tensor_parallel: bool
-    enable_pipeline_parallel: bool
-    tp_degree: int
-    pp_degree: int
-    enable_zero_optimization: bool
+    string load_strategy
+    string precision
+    bool enable_tensor_parallel
+    bool enable_pipeline_parallel
+    int tp_degree
+    int pp_degree
+    bool enable_zero_optimization
 }
 
 func get_weight_loading_config_for_model(
     model_name: string,
     world_size: int,
-    rank: int
+    int rank
 ) weight_loading_config {
     weight_loading_config {
         load_strategy: "eager",
@@ -249,7 +249,7 @@ func get_weight_loading_config_for_model(
 }
 
 struct compatibility_report {
-    is_compatible: bool
+    bool is_compatible
     warnings: []string
     requirements: []string
 }
@@ -257,7 +257,7 @@ struct compatibility_report {
 func check_model_compatibility(
     adapter: *model_adapter,
     target_device: string,
-    available_memory_gb: int
+    int available_memory_gb
 ) compatibility_report {
     warnings := []()
     requirements := []()
@@ -292,13 +292,13 @@ func check_model_compatibility(
 }
 
 struct model_diagnostics {
-    model_name: string
-    parameter_count: long
-    estimated_memory_gb: f32
-    attention_type: string
-    activation: string
-    optimizations_enabled: int
-    performance_profile: string
+    string model_name
+    long parameter_count
+    f32 estimated_memory_gb
+    string attention_type
+    string activation
+    int optimizations_enabled
+    string performance_profile
 }
 
 func get_model_diagnostics(*model_adapter adapter) model_diagnostics {

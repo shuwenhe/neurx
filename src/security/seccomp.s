@@ -73,7 +73,7 @@ func (filter* seccomp_filter) add_condition(arg_index int, comparator int, value
     condition := seccomp_condition{
         arg_index: arg_index,
         comparator: comparator,
-        value: value
+        value value
     }
     
     filter.conditions = append(filter.conditions, condition)

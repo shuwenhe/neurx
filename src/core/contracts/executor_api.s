@@ -8,12 +8,12 @@ import "profiler_api"
 }
 
 struct execution_profile {
-    total_time_us: i64
-    kernel_profiles: map[string]kernel_profile
-    memory_peak: i64
-    memory_allocated: i64
-    memory_freed: i64
-    kernel_call_count: i64
+    i64 total_time_us
+    map[string]kernel_profile kernel_profiles
+    i64 memory_peak
+    i64 memory_allocated
+    i64 memory_freed
+    i64 kernel_call_count
 }
 interface i_executor {
     set_mode(mode: ExecutionMode) . void

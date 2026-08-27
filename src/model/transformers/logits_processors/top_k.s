@@ -18,7 +18,7 @@ func create_top_k_processor(int k) top_k_processor {
 
 func apply_top_k(
     logits: []float,
-    processor: top_k_processor
+    top_k_processor processor
 ) []float {
     int vocab_size = len(logits)
     int k_actual = processor.k
@@ -45,7 +45,7 @@ func apply_top_k(
 
 func apply_top_k_batch(
     logits_batch: [][]float,
-    processor: top_k_processor
+    top_k_processor processor
 ) [][]float {
     [][]float filtered_batch
 
@@ -60,7 +60,7 @@ func apply_top_k_batch(
 func apply_adaptive_top_k(
     logits: []float,
     base_k: int,
-    entropy_threshold: float
+    float entropy_threshold
 ) []float {
 
     []float probs = processor_utils.softmax(logits)
@@ -84,7 +84,7 @@ func apply_adaptive_top_k(
 func apply_top_k_with_threshold(
     logits: []float,
     k: int,
-    min_prob: float
+    float min_prob
 ) []float {
     int vocab_size = len(logits)
 
@@ -128,7 +128,7 @@ func apply_top_k_with_threshold(
 func sample_from_top_k(
     logits: []float,
     processor: top_k_processor,
-    temperature: float
+    float temperature
 ) int {
 
     []float scaled_logits
@@ -163,7 +163,7 @@ struct top_k_stats {
 
 func analyze_top_k_filtering(
     logits: []float,
-    k: int
+    int k
 ) top_k_stats {
     []float probs = processor_utils.softmax(logits)
 

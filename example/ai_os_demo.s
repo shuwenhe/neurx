@@ -17,7 +17,7 @@ use neurx.kernel.time_management
 func main() (void, string) {
     print_banner()?
     
-    mgr := os_features_integration::new_os_features_manager()?
+    mgr := os_features_integration_new_os_features_manager()?
     
     print_section("1. Virtual Memory Subsystem")?
     demo_virtual_memory()?
@@ -94,15 +94,15 @@ func print_status(string* feature, enabled: bool) (void, string) {
 }
 
 func demo_virtual_memory() (void, string) {
-    pt := page_table::new_page_table()?
-    vas := virtual_memory::new_virtual_address_space(pt)?
+    pt := page_table_new_page_table()?
+    vas := virtual_memory_new_virtual_address_space(pt)?
     
-    vas.map_vma(0x1000, 0x1000, 0x1, option::none)?
+    vas.map_vma(0x1000, 0x1000, 0x1, nil)?
     
     vma_opt := vas.find_vma(0x1500)
     switch vma_opt {
-        option::some(_): {},
-        option::none: {},
+        some(_): {},
+        nil: {},
     }
     
     vas.handle_page_fault(0x1500, false)?
@@ -111,8 +111,8 @@ func demo_virtual_memory() (void, string) {
 }
 
 func demo_huge_pages() (void, string) {
-    pool := huge_pages::new_huge_page_pool()?
-    thp := huge_pages::new_thp_manager(pool)?
+    pool := huge_pages_new_huge_page_pool()?
+    thp := huge_pages_new_thp_manager(pool)?
     
     pool.allocate_2m_page()?
     pool.allocate_1g_page()?
@@ -125,13 +125,13 @@ func demo_huge_pages() (void, string) {
 }
 
 func demo_filesystem() (void, string) {
-    fs := ext4::new_ext4_filesystem(4096)?
+    fs := ext4_new_ext4_filesystem(4096)?
     
     fs.format()?
     
     inode_num := fs.create_inode(0o100644)?
     
-    fs.open_file(inode_num, ext4::file_mode::read_write)?
+    fs.open_file(inode_num, ext4_file_mode::read_write)?
     
     fs.close_file(inode_num)?
     
@@ -141,15 +141,15 @@ func demo_filesystem() (void, string) {
 }
 
 func demo_netfilter() (void, string) {
-    engine := netfilter::new_netfilter_engine()?
+    engine := netfilter_new_netfilter_engine()?
     
     engine.add_rule(
-        option::some(0xc0a80001),
-        option::some(0xc0a80002),
-        option::none,
-        option::none,
-        option::some(6),
-        netfilter::packet_verdict::nf_accept,
+        some(0xc0a80001),
+        some(0xc0a80002),
+        nil,
+        nil,
+        some(6),
+        netfilter_packet_verdict::nf_accept,
         100
     )?
     
@@ -159,10 +159,10 @@ func demo_netfilter() (void, string) {
 }
 
 func demo_qos() (void, string) {
-    qos_engine := qos::new_qos_engine(qos::qos_policy::token_bucket)?
+    qos_engine := qos_new_qos_engine(qos_qos_policy::token_bucket)?
     
     qos_engine.create_qos_class(
-        qos::traffic_class::tc_interactive,
+        qos_traffic_class::tc_interactive,
         10,
         1000000
     )?
@@ -175,9 +175,9 @@ func demo_qos() (void, string) {
 }
 
 func demo_cpufreq() (void, string) {
-    cpufreq_engine := cpufreq::new_cpufreq_engine(16, 1000000, 4000000)?
+    cpufreq_engine := cpufreq_new_cpufreq_engine(16, 1000000, 4000000)?
     
-    cpufreq_engine.set_governor(cpufreq::frequency_scaling_governor::gov_ondemand)?
+    cpufreq_engine.set_governor(cpufreq_frequency_scaling_governor::gov_ondemand)?
     
     cpufreq_engine.set_cpu_frequency(0, 2000000)?
     
@@ -189,10 +189,10 @@ func demo_cpufreq() (void, string) {
 }
 
 func demo_cpuidle() (void, string) {
-    cpuidle_engine := cpuidle::new_cpuidle_engine(16)?
+    cpuidle_engine := cpuidle_new_cpuidle_engine(16)?
     
-    c1_state := cpuidle::c_state{
-        state_type: cpuidle::c_state_type::c1,
+    c1_state := cpuidle_c_state{
+        state_type: cpuidle_c_state_type::c1,
         exit_latency_us: 2,
         power_usage_mw: 100,
         target_residency_us: 10,
@@ -202,9 +202,9 @@ func demo_cpuidle() (void, string) {
     
     cpuidle_engine.register_c_state(0, *c1_state)?
     
-    cpuidle_engine.enable_c_state(0, cpuidle::c_state_type::c1)?
+    cpuidle_engine.enable_c_state(0, cpuidle_c_state_type::c1)?
     
-    cpuidle_engine.enter_idle_state(0, cpuidle::c_state_type::c1)?
+    cpuidle_engine.enter_idle_state(0, cpuidle_c_state_type::c1)?
     cpuidle_engine.exit_idle_state(0)?
     
     stats := cpuidle_engine.get_statistics()?
@@ -213,18 +213,18 @@ func demo_cpuidle() (void, string) {
 }
 
 func demo_time_management() (void, string) {
-    time_engine := time_management::new_time_management_engine()?
+    time_engine := time_management_new_time_management_engine()?
     
-    ts := time_management::timespec{ tv_sec: 1724000000, tv_nsec: 0 }
-    time_engine.set_time(time_management::clock_type::clock_realtime, *ts)?
+    ts := time_management_timespec{ tv_sec: 1724000000, tv_nsec: 0 }
+    time_engine.set_time(time_management_clock_type::clock_realtime, *ts)?
     
-    current_time := time_engine.get_time(time_management::clock_type::clock_realtime)?
+    current_time := time_engine.get_time(time_management_clock_type::clock_realtime)?
     
     timer_id := time_engine.create_timer(
-        time_management::clock_type::clock_monotonic,
+        time_management_clock_type::clock_monotonic,
         *ts,
-        option::some(*time_management::timespec{ tv_sec: 1, tv_nsec: 0 }),
-        option::none
+        some(*time_management_timespec{ tv_sec: 1, tv_nsec: 0 }),
+        nil
     )?
     
     time_engine.check_timers_and_fire()?
@@ -236,10 +236,10 @@ func demo_time_management() (void, string) {
     return (), ""
 }
 
-func print_capabilities(os_features_integration* cap::system_capability) (void, string) {
+func print_capabilities(os_features_integration* cap_system_capability) (void, string) {
     return (), ""
 }
 
-func print_feature_report(os_features_integration* report::feature_report) (void, string) {
+func print_feature_report(os_features_integration* report_feature_report) (void, string) {
     return (), ""
 }

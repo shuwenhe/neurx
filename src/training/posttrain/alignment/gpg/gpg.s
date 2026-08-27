@@ -2,25 +2,25 @@ import "tensor/tensor.s"
 import "src/training/optimizer/optimizer.s"
 
 struct gpg_config {
-    learning_rate: f32
-    num_epochs: i32
-    max_grad_norm: f32
-    group_size: i32
-    use_baseline: bool
-    baseline_type: string
-    ema_alpha: f32
-    advantage_normalization: bool
-    reward_scaling: f32
-    entropy_coeff: f32
-    l2_reg_coeff: f32
+    f32 learning_rate
+    i32 num_epochs
+    f32 max_grad_norm
+    i32 group_size
+    bool use_baseline
+    string baseline_type
+    f32 ema_alpha
+    bool advantage_normalization
+    f32 reward_scaling
+    f32 entropy_coeff
+    f32 l2_reg_coeff
 }
 
 struct gpg_trainer {
-    config: gpg_config
-    policy_model: *model
-    optimizer: *optimizer
-    ema_baseline: f32
-    step_count: i64
+    gpg_config config
+    *model policy_model
+    *optimizer optimizer
+    f32 ema_baseline
+    i64 step_count
     reward_history: []f32
 }
 
@@ -43,7 +43,7 @@ func (gpg_trainer* trainer) generate_group(Tensor prompt) . ([]tensor, []tensor)
         response, log_probs  := trainer.policy_model.generate(
             prompt,
             temperature: 1.0,
-            return_log_probs: true
+            true return_log_probs
         )
         responses = append(responses, response)
         log_probs_list = append(log_probs_list, log_probs)

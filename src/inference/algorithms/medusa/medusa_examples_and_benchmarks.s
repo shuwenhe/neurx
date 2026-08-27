@@ -249,14 +249,14 @@ func example_quality_vs_speed_tradeoff() string {
 }
 
 struct medusa_benchmark_result {
-    test_name: string
-    avg_latency_ms: float
-    p50_latency_ms: float
-    p95_latency_ms: float
-    p99_latency_ms: float
-    throughput_tokens_per_sec: float
-    acceptance_rate: float
-    speedup_factor: float
+    string test_name
+    float avg_latency_ms
+    float p50_latency_ms
+    float p95_latency_ms
+    float p99_latency_ms
+    float throughput_tokens_per_sec
+    float acceptance_rate
+    float speedup_factor
 }
 
 func benchmark_medusa_vs_standard(

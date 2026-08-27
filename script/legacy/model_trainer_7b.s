@@ -6,27 +6,27 @@ import (
 )
 
 struct large_model_config {
-    model_name: string
-    num_params: int
-    hidden_dim: int
-    num_layers: int
-    num_heads: int
-    vocab_size: int
-    max_seq_len: int
-    gradient_accumulation_steps: int
-    activation_checkpointing: bool
-    use_flash_attention: bool
-    use_fused_ops: bool
-    use_mixed_precision: bool
-    zero_stage: int
+    string model_name
+    int num_params
+    int hidden_dim
+    int num_layers
+    int num_heads
+    int vocab_size
+    int max_seq_len
+    int gradient_accumulation_steps
+    bool activation_checkpointing
+    bool use_flash_attention
+    bool use_fused_ops
+    bool use_mixed_precision
+    int zero_stage
 }
 
 struct memory_estimate {
-    model_weights_gb: float
-    gradients_gb: float
-    optimizer_states_gb: float
-    activation_gb: float
-    total_gb: float
+    float model_weights_gb
+    float gradients_gb
+    float optimizer_states_gb
+    float activation_gb
+    float total_gb
 }
 
 func create_7b_config(): large_model_config {

@@ -3,32 +3,32 @@ import "src/training/optimizer/optimizer.s"
 import "src/training/posttrain/alignment/ppo/ppo.s"
 
 struct dppo_config {
-    learning_rate: f32
-    num_epochs: i32
-    max_grad_norm: f32
-    gamma: f32
-    gae_lambda: f32
-    divergence_type: string
-    epsilon: f32
-    use_adaptive_epsilon: bool
-    target_kl: f32
-    epsilon_decay: f32
-    epsilon_min: f32
-    epsilon_max: f32
-    use_value_loss: bool
-    value_loss_coeff: f32
-    value_clip_epsilon: f32
+    f32 learning_rate
+    i32 num_epochs
+    f32 max_grad_norm
+    f32 gamma
+    f32 gae_lambda
+    string divergence_type
+    f32 epsilon
+    bool use_adaptive_epsilon
+    f32 target_kl
+    f32 epsilon_decay
+    f32 epsilon_min
+    f32 epsilon_max
+    bool use_value_loss
+    f32 value_loss_coeff
+    f32 value_clip_epsilon
 }
 
 struct dppo_trainer {
-    config: dppo_config
-    policy_model: *model
-    value_model: *model
-    reference_model: *model
-    optimizer: *optimizer
-    current_epsilon: f32
+    dppo_config config
+    *model policy_model
+    *model value_model
+    *model reference_model
+    *optimizer optimizer
+    f32 current_epsilon
     kl_history: []f32
-    step_count: i64
+    i64 step_count
 }
 
 func new_dppo_trainer(

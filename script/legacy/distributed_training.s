@@ -7,27 +7,27 @@ import (
 )
 
 struct distributed_config {
-    backend: string
-    rank: int
-    world_size: int
-    master_addr: string
-    master_port: string
-    data_parallel: bool
-    model_parallel: bool
-    gradient_as_bucket_view: bool
-    bucket_cap_mb: int
-    find_unused_parameters: bool
-    sync_gradients: bool
-    static_graph: bool
+    string backend
+    int rank
+    int world_size
+    string master_addr
+    string master_port
+    bool data_parallel
+    bool model_parallel
+    bool gradient_as_bucket_view
+    int bucket_cap_mb
+    bool find_unused_parameters
+    bool sync_gradients
+    bool static_graph
 }
 
 struct distributed_process {
-    config: distributed_config
-    is_master: bool
-    initialized: bool
-    device_id: int
+    distributed_config config
+    bool is_master
+    bool initialized
+    int device_id
     grad_buckets: [][]float
-    bucket_size: int
+    int bucket_size
 }
 
 func (distributed_process* dp) init_from_env(string backend) error {
@@ -113,10 +113,10 @@ func (distributed_process* dp) reduce_bucket(int bucket_idx) {
 }
 
 struct data_partitioner {
-    world_size: int
-    rank: int
-    total_samples: int
-    local_batch_size: int
+    int world_size
+    int rank
+    int total_samples
+    int local_batch_size
 }
 
 func (data_partitioner* dp) get_local_indices(): []int {
@@ -145,12 +145,12 @@ func (data_partitioner* dp) get_local_batch_size(): int {
 }
 
 struct distributed_sampler {
-    num_samples: int
-    world_size: int
-    rank: int
-    shuffle: bool
-    seed: int
-    epoch: int
+    int num_samples
+    int world_size
+    int rank
+    bool shuffle
+    int seed
+    int epoch
 }
 
 func (distributed_sampler* ds) get_indices(): []int {
@@ -170,11 +170,11 @@ func (distributed_sampler* ds) set_epoch(int epoch) {
 }
 
 struct communication_metrics {
-    allreduce_count: int
-    broadcast_count: int
-    total_bytes_communicated: int
-    communication_time_ms: float
-    computation_time_ms: float
+    int allreduce_count
+    int broadcast_count
+    int total_bytes_communicated
+    float communication_time_ms
+    float computation_time_ms
 }
 
 func (communication_metrics* cm) get_efficiency(): float {
@@ -186,11 +186,11 @@ func (communication_metrics* cm) get_efficiency(): float {
 }
 
 struct multi_node_config {
-    num_nodes: int
-    processes_per_node: int
-    node_rank: int
-    nccl_debug: string
-    timeout_minutes: int
+    int num_nodes
+    int processes_per_node
+    int node_rank
+    string nccl_debug
+    int timeout_minutes
 }
 
 func (distributed_process* dp) get_stats(): map[string]interface{} {
@@ -220,8 +220,8 @@ func (distributed_process* dp) destroy_process_group() {
 }
 
 struct distributed_context {
-    process: *distributed_process
-    comm_metrics: communication_metrics
+    *distributed_process process
+    communication_metrics comm_metrics
 }
 
 func (distributed_context* dc) enter(): error {
@@ -236,12 +236,12 @@ func (distributed_context* dc) exit() {
 }
 
 struct launch_config {
-    num_processes: int
-    num_nodes: int
-    node_rank: int
-    master_addr: string
-    master_port: string
-    backend: string
+    int num_processes
+    int num_nodes
+    int node_rank
+    string master_addr
+    string master_port
+    string backend
 }
 
 func create_launch_config_from_env(): launch_config {

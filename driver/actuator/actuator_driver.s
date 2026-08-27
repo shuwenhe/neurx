@@ -36,7 +36,7 @@ func init_actuator(actuator_type actuator_type) (actuator_driver, string) {
         driver_id: 0,
         max_speed: 100.0,
         max_force: 100.0,
-        is_homed: false
+        false is_homed
     })
 }
 

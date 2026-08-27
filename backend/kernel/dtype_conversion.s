@@ -10,7 +10,7 @@ struct DTypeConversionKernels {
 
 func NewDTypeConversionKernels(types.KernelConfig config) *DTypeConversionKernels {
     return *DTypeConversionKernels{
-        config: config
+        config config
     }
 }
 

@@ -3,7 +3,7 @@ use std.io
 use std.strings
 
 struct training_data {
-    text: string
+    string text
 }
 
 func main() {

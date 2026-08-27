@@ -3,50 +3,50 @@ package neurx.inference.medusa
 use std.conv.int64_to_string
 
 struct medusa_head {
-    head_id: int
-    layer_depth: int
-    hidden_dim: int
-    vocab_size: int
+    int head_id
+    int layer_depth
+    int hidden_dim
+    int vocab_size
     weights: [][]float
     bias: []float
 }
 
 struct medusa_heads_config {
-    num_heads: int
-    base_hidden_dim: int
-    vocab_size: int
+    int num_heads
+    int base_hidden_dim
+    int vocab_size
     attach_layers: []int
-    temperature: float
-    top_k: int
-    top_p: float
+    float temperature
+    int top_k
+    float top_p
 }
 
 struct medusa_candidate_tree {
     tree_tokens: [][][]int
     tree_probs: [][][]float
-    node_count: int64
-    tree_depth: int
-    branching_factor: int
+    int64 node_count
+    int tree_depth
+    int branching_factor
 }
 
 struct medusa_verification_batch {
     input_ids: [][]int
     candidate_trees: []medusa_candidate_tree
-    batch_size: int
-    max_tree_depth: int
+    int batch_size
+    int max_tree_depth
 }
 
 struct medusa_runtime_stats {
-    total_prefill_tokens: int64
-    total_decode_tokens: int64
-    total_draft_tokens: int64
-    total_verified_tokens: int64
-    total_accepted_tokens: int64
-    total_rejected_tokens: int64
-    draft_latency_ms: float64
-    verify_latency_ms: float64
-    acceptance_rate: float
-    speedup_factor: float
+    int64 total_prefill_tokens
+    int64 total_decode_tokens
+    int64 total_draft_tokens
+    int64 total_verified_tokens
+    int64 total_accepted_tokens
+    int64 total_rejected_tokens
+    float64 draft_latency_ms
+    float64 verify_latency_ms
+    float acceptance_rate
+    float speedup_factor
 }
 
 func new_medusa_head(int head_id, int layer_depth, int hidden_dim, int vocab_size) medusa_head {
@@ -310,8 +310,8 @@ func rejection_sample_medusa_tokens(
 
 struct medusa_generation_pipeline {
     heads: []medusa_head
-    config: medusa_heads_config
-    stats: medusa_runtime_stats
+    medusa_heads_config config
+    medusa_runtime_stats stats
     acceptance_rates: []float
 }
 

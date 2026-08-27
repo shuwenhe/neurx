@@ -79,7 +79,7 @@ func create_device(name string, device_type int, major int, minor int) (device, 
         driver_id: -1,
         state: 0,  // unused
         major_num: major,
-        minor_num: minor
+        minor minor_num
     }
     
     return dev, ""

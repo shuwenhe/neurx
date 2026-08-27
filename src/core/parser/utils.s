@@ -3,8 +3,8 @@ package neurx.parser.utils
 use neurx.parser.types
 
 struct Timer {
-    start_time: int
-    end_time: int
+    int start_time
+    int end_time
 }
 
 func start_timer() Timer {
@@ -21,10 +21,10 @@ func (Timer* t) stop() int {
 }
 
 struct PerfLogger {
-    operation: string
-    start_time: int
-    parse_time_ms: int
-    bytes_processed: int
+    string operation
+    int start_time
+    int parse_time_ms
+    int bytes_processed
 }
 
 func create_perf_logger(string op) PerfLogger {

@@ -151,7 +151,7 @@ struct weight_validation_result {
 func validate_weight_compatibility(
     hf_config_dict: string,
     weight_dict: weight_dict,
-    target_model_type: string
+    string target_model_type
 ) weight_validation_result {
     []string errors
     []string warnings
@@ -181,7 +181,7 @@ func validate_weight_compatibility(
 
 func summarize_weight_loading(
     weight_dict: weight_dict,
-    num_layers: int
+    int num_layers
 ) string {
     string summary = ""
     summary = summary + "=== Safetensors Weight Loading Summary ===\n"

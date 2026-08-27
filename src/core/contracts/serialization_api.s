@@ -10,17 +10,17 @@ import "tensor_api"
 }
 
 struct serialization_config {
-    format: SerializationFormat
-    version: string
-    metadata: map[string]string
-    compression: bool
-    compression_level: i64
+    SerializationFormat format
+    string version
+    map[string]string metadata
+    bool compression
+    i64 compression_level
 }
 
 struct state_dict {
-    tensors: map[string]tensor
-    hyperparams: map[string]string
-    metadata: map[string]string
+    map[string]tensor tensors
+    map[string]string hyperparams
+    map[string]string metadata
 }
 interface i_checkpoint {
     save(string path, state_dict: state_dict, config: serialization_config) . void

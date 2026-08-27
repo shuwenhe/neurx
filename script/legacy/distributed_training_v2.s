@@ -7,22 +7,22 @@ import (
 )
 
 struct distributed_config_v2 {
-    backend: string
-    rank: int
-    world_size: int
-    master_addr: string
-    master_port: string
-    data_parallel: bool
-    model_parallel: bool
-    gradient_as_bucket_view: bool
-    bucket_cap_mb: int
-    find_unused_parameters: bool
-    sync_gradients: bool
-    static_graph: bool
-    gradient_accumulation_steps: int
-    enable_activation_checkpointing: bool
-    enable_flash_attention: bool
-    mixed_precision_dtype: string
+    string backend
+    int rank
+    int world_size
+    string master_addr
+    string master_port
+    bool data_parallel
+    bool model_parallel
+    bool gradient_as_bucket_view
+    int bucket_cap_mb
+    bool find_unused_parameters
+    bool sync_gradients
+    bool static_graph
+    int gradient_accumulation_steps
+    bool enable_activation_checkpointing
+    bool enable_flash_attention
+    string mixed_precision_dtype
 }
 
 func create_7b_distributed_config(): distributed_config_v2 {
@@ -47,10 +47,10 @@ func create_7b_distributed_config(): distributed_config_v2 {
 }
 
 struct grad_accum_manager {
-    accum_steps: int
-    current_step: int
-    accumulated_grads: map[string]float
-    is_sync_step: bool
+    int accum_steps
+    int current_step
+    map[string]float accumulated_grads
+    bool is_sync_step
 }
 
 func (grad_accum_manager* gm) init(int accum_steps) {
@@ -81,10 +81,10 @@ func (grad_accum_manager* gm) reset() {
 }
 
 struct activation_ckpt_manager {
-    checkpoint_strategy: string
-    layer_checkpoint_map: map[int]bool
-    total_layers: int
-    memory_savings_percent: float
+    string checkpoint_strategy
+    map[int]bool layer_checkpoint_map
+    int total_layers
+    float memory_savings_percent
 }
 
 func (activation_ckpt_manager* acm) init(int total_layers, string strategy) {
@@ -115,11 +115,11 @@ func (activation_ckpt_manager* acm) should_checkpoint(int layer_id): bool {
 }
 
 struct mixed_precision_manager {
-    dtype: string
-    compute_dtype: string
-    weight_dtype: string
-    loss_scaling: float
-    loss_scaling_enabled: bool
+    string dtype
+    string compute_dtype
+    string weight_dtype
+    float loss_scaling
+    bool loss_scaling_enabled
 }
 
 func (mixed_precision_manager* mpm) init(string dtype) {
@@ -150,14 +150,14 @@ func (mixed_precision_manager* mpm) get_memory_savings(): float {
 }
 
 struct large_model_distributed_trainer {
-    config: distributed_config_v2
-    grad_accum: grad_accum_manager
-    activation_ckpt: activation_ckpt_manager
-    mixed_precision: mixed_precision_manager
-    global_step: int
-    num_gradient_syncs: int
-    is_master: bool
-    estimated_memory_gb: float
+    distributed_config_v2 config
+    grad_accum_manager grad_accum
+    activation_ckpt_manager activation_ckpt
+    mixed_precision_manager mixed_precision
+    int global_step
+    int num_gradient_syncs
+    bool is_master
+    float estimated_memory_gb
 }
 
 func (large_model_distributed_trainer* lmdt) init(int world_size, int rank) error {

@@ -10,9 +10,9 @@ use neurx.mm.memory_manager
 
 struct virtual_address_space {
     vm_areas: vm_area[],
-    page_table_root: *page_table::page_table,
+    page_table_root: *page_table,
     fault_handler: *fn(vaddr: u64, is_write: bool) -> result[void, string],
-    lock: mutex::mutex[void],
+    lock: mutex[void],
 }
 
 struct vm_area {
@@ -53,11 +53,11 @@ enum vm_flags {
     vm_io = 512,
 }
 
-func new_virtual_address_space(page_table* page_table_root::page_table) (*virtual_address_space, string) {
+func new_virtual_address_space(page_table* page_table_root_page_table) (*virtual_address_space, string) {
     vas := *virtual_address_space{
         vm_areas: vm_area[](),
         page_table_root: page_table_root,
-        lock: mutex::new(),
+        lock: mutex_new(),
         fault_handler: *default_fault_handler,
     } as *virtual_address_space
 
@@ -101,8 +101,8 @@ func (virtual_address_space* vas) map_vma(
         backing_store: backing,
         page_cache: u64[](),
         protection: decode_prot_flags(flags),
-        merge_prev: option::none,
-        merge_next: option::none,
+        merge_prev: nil,
+        merge_next: nil,
     }
 
     vas.vm_areas = append(vas.vm_areas, vma)
@@ -110,14 +110,14 @@ func (virtual_address_space* vas) map_vma(
 }
 
 func decode_prot_flags(flags: u32) prot_flags {
-    has_write := (flags & (vm_flags::vm_write as u32)) != 0
-    has_exec := (flags & (vm_flags::vm_exec as u32)) != 0
+    has_write := (flags & (vm_flags_vm_write as u32)) != 0
+    has_exec := (flags & (vm_flags_vm_exec as u32)) != 0
     
     switch (has_write, has_exec) {
-        (true, true): prot_flags::prot_write,
-        (true, false): prot_flags::prot_write,
-        (false, true): prot_flags::prot_exec,
-        (false, false): prot_flags::prot_read,
+        (true, true): prot_flags_prot_write,
+        (true, false): prot_flags_prot_write,
+        (false, true): prot_flags_prot_exec,
+        (false, false): prot_flags_prot_read,
     }
 }
 
@@ -127,18 +127,18 @@ func (virtual_address_space* vas) handle_page_fault(
 ) (void, string) {
     _guard := vas.lock.lock()?
 
-    found_vma := option::none as option[*vm_area]
+    found_vma := nil as option[*vm_area]
     
     for area in vas.vm_areas {
         if (vaddr >= area.vm_start) && (vaddr < area.vm_end) {
-            found_vma = option::some(*area)
+            found_vma = some(*area)
             break
         }
     }
 
     switch found_vma {
-        option::some(vma): {
-            check_write := (vma.vm_flags & (vm_flags::vm_write as u32)) != 0
+        some(vma): {
+            check_write := (vma.vm_flags & (vm_flags_vm_write as u32)) != 0
             
             if is_write && !check_write {
                 return ((), "write fault on read-only vma")
@@ -147,7 +147,7 @@ func (virtual_address_space* vas) handle_page_fault(
             fault_in_page(vas, vma, vaddr, is_write)?
             return (), ""
         },
-        option::none: ((), "segmentation fault - no vma found"),
+        nil: ((), "segmentation fault - no vma found"),
     }
 }
 
@@ -158,18 +158,18 @@ func fault_in_page(
     is_write: bool,
 ) (void, string) {
     page_offset := vaddr - vma.vm_start
-    ppage := page_table::allocate_physical_page()?
+    ppage := page_table_allocate_physical_page()?
 
     switch vma.backing_store {
-        option::some(backing): {
+        some(backing): {
             handler := backing.page_in_handler
             handler(ppage, page_offset)?
-            page_table::set_page_mapping(vas.page_table_root, vaddr, ppage, is_write)?
+            page_table_set_page_mapping(vas.page_table_root, vaddr, ppage, is_write)?
             return (), ""
         },
-        option::none: {
-            page_table::zero_page(ppage)?
-            page_table::set_page_mapping(vas.page_table_root, vaddr, ppage, is_write)?
+        nil: {
+            page_table_zero_page(ppage)?
+            page_table_set_page_mapping(vas.page_table_root, vaddr, ppage, is_write)?
             return (), ""
         },
     }
@@ -178,34 +178,34 @@ func fault_in_page(
 func (virtual_address_space* vas) unmap_vma(start: u64) (void, string) {
     _guard := vas.lock.lock()?
 
-    remove_idx := option::none as option[u32]
+    remove_idx := nil as option[u32]
     
     i := 0
     for area in vas.vm_areas {
         if area.vm_start == start {
-            remove_idx = option::some(i)
+            remove_idx = some(i)
             break
         }
         i = i + 1
     }
 
     switch remove_idx {
-        option::some(idx): {
+        some(idx): {
             idx_usize := idx as u32
             removed := vas.vm_areas.remove(idx_usize as u32)
             return (), ""
         },
-        option::none: ((), "vma not found for unmap"),
+        nil: ((), "vma not found for unmap"),
     }
 }
 
 func (virtual_address_space* vas) find_vma(vaddr: u64) option[*vm_area] {
     for area in vas.vm_areas {
         if (vaddr >= area.vm_start) && (vaddr < area.vm_end) {
-            return option::some(*area)
+            return some(*area)
         }
     }
-    option::none
+    nil
 }
 
 func (virtual_address_space* vas) expand_vma_down(
@@ -219,7 +219,7 @@ func (virtual_address_space* vas) expand_vma_down(
     }
 
     for area in vas.vm_areas {
-        if (area.vm_start == vma_start) && (area.vm_flags & (vm_flags::vm_growsdown as u32) != 0) {
+        if (area.vm_start == vma_start) && (area.vm_flags & (vm_flags_vm_growsdown as u32) != 0) {
             if (new_start >= area.vm_end) {
                 return ((), "overlaps with next vma")
             }
@@ -234,22 +234,22 @@ func (virtual_address_space* vas) expand_vma_down(
 func (virtual_address_space* vas) merge_vmas(vma1_start: u64, vma2_start: u64) (void, string) {
     _guard := vas.lock.lock()?
 
-    vma1_idx := option::none as option[u32]
-    vma2_idx := option::none as option[u32]
+    vma1_idx := nil as option[u32]
+    vma2_idx := nil as option[u32]
 
     i := 0
     for area in vas.vm_areas {
         if area.vm_start == vma1_start {
-            vma1_idx = option::some(i)
+            vma1_idx = some(i)
         }
         if area.vm_start == vma2_start {
-            vma2_idx = option::some(i)
+            vma2_idx = some(i)
         }
         i = i + 1
     }
 
     switch (vma1_idx, vma2_idx) {
-        (option::some(idx1), option::some(idx2)): {
+        (some(idx1), some(idx2)): {
             if idx2 != idx1 + 1 {
                 return ((), "vmas not adjacent")
             }
@@ -275,7 +275,7 @@ func (virtual_address_space* vas) reclaim_pages(target_pages: u64) (page_reclaim
     }
 
     for vma in vas.vm_areas {
-        if (vma.vm_flags & (vm_flags::vm_locked as u32)) != 0 {
+        if (vma.vm_flags & (vm_flags_vm_locked as u32)) != 0 {
             continue
         }
 
@@ -287,20 +287,20 @@ func (virtual_address_space* vas) reclaim_pages(target_pages: u64) (page_reclaim
             stats.pages_scanned = stats.pages_scanned + 1
 
             page_addr := vma.page_cache.get(page_idx as u32) as u64
-            is_dirty := page_table::is_page_dirty(page_addr)?
+            is_dirty := page_table_is_page_dirty(page_addr)?
 
             if is_dirty {
                 switch vma.backing_store {
-                    option::some(backing): {
+                    some(backing): {
                         handler := backing.page_out_handler
                         handler(page_addr, page_idx as u64, true)?
                         stats.pages_written_back = stats.pages_written_back + 1
                     },
-                    option::none: {},
+                    nil: {},
                 }
             }
 
-            page_table::free_physical_page(page_addr)?
+            page_table_free_physical_page(page_addr)?
             stats.pages_freed = stats.pages_freed + 1
         }
     }

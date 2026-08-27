@@ -6,19 +6,19 @@ import (
 )
 
 struct evaluation_metrics {
-    step: int
-    loss: float
-    perplexity: float
-    val_loss: float
-    val_perplexity: float
-    accuracy: float
-    speed: float
-    timestamp: string
+    int step
+    float loss
+    float perplexity
+    float val_loss
+    float val_perplexity
+    float accuracy
+    float speed
+    string timestamp
 }
 
 struct evaluator {
-    batch_size: int
-    accumulation_steps: int
+    int batch_size
+    int accumulation_steps
     history: []evaluation_metrics
 }
 

@@ -25,7 +25,7 @@ func create_temperature_processor(float temperature) temperature_processor {
 
 func apply_temperature(
     logits: []float,
-    processor: temperature_processor
+    temperature_processor processor
 ) []float {
     []float scaled_logits
 
@@ -39,7 +39,7 @@ func apply_temperature(
 
 func apply_temperature_minmax(
     logits: []float,
-    temperature: float
+    float temperature
 ) []float {
 
     float min_logit = logits[0]
@@ -78,7 +78,7 @@ func apply_temperature_minmax(
 
 func apply_temperature_batch(
     logits_batch: [][]float,
-    processor: temperature_processor
+    temperature_processor processor
 ) [][]float {
     [][]float scaled_batch
 
@@ -92,7 +92,7 @@ func apply_temperature_batch(
 
 func sample_with_temperature(
     logits: []float,
-    processor: temperature_processor
+    temperature_processor processor
 ) int {
 
     []float scaled = apply_temperature(logits, processor)
@@ -115,7 +115,7 @@ func sample_with_temperature(
 func adaptive_temperature_by_entropy(
     logits: []float,
     base_temperature: float,
-    target_entropy: float
+    float target_entropy
 ) float {
     []float probs = processor_utils.softmax(logits)
 
@@ -151,7 +151,7 @@ func adaptive_temperature_by_entropy(
 
 func measure_distribution_diversity(
     logits: []float,
-    temperature: float
+    float temperature
 ) float {
 
     []float scaled_logits
@@ -175,7 +175,7 @@ func measure_distribution_diversity(
 func apply_temperature_top_k(
     logits: []float,
     temperature: float,
-    k: int
+    int k
 ) []float {
     int vocab_size = len(logits)
 
@@ -227,7 +227,7 @@ struct temperature_stats {
 
 func analyze_temperature_effect(
     logits: []float,
-    temperature: float
+    float temperature
 ) temperature_stats {
 
     []float original_probs = processor_utils.softmax(logits)

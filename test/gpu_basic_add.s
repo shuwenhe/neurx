@@ -27,7 +27,7 @@ struct gpu_execution_result {
 func init_device(int device_id) cuda_device {
     device := cuda_device {
         device_id: device_id,
-        initialized: true
+        true initialized
     }
     device
 }

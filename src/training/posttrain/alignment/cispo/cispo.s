@@ -3,40 +3,40 @@ import "src/training/optimizer/optimizer.s"
 import "src/training/posttrain/alignment/ppo/ppo.s"
 
 struct cispo_config {
-    learning_rate: f32
-    num_epochs: i32
-    max_grad_norm: f32
-    gamma: f32
-    gae_lambda: f32
-    clip_epsilon_positive: f32
-    clip_epsilon_negative: f32
-    is_clip_lower: f32
-    is_clip_upper: f32
-    use_is_weights: bool
-    is_epsilon: f32
-    use_value_loss: bool
-    value_loss_coeff: f32
-    value_clip_epsilon: f32
-    kl_coeff: f32
+    f32 learning_rate
+    i32 num_epochs
+    f32 max_grad_norm
+    f32 gamma
+    f32 gae_lambda
+    f32 clip_epsilon_positive
+    f32 clip_epsilon_negative
+    f32 is_clip_lower
+    f32 is_clip_upper
+    bool use_is_weights
+    f32 is_epsilon
+    bool use_value_loss
+    f32 value_loss_coeff
+    f32 value_clip_epsilon
+    f32 kl_coeff
 }
 
 struct cispo_trainer {
-    config: cispo_config
-    policy_model: *model
-    value_model: *model
-    reference_model: *model
-    optimizer: *optimizer
+    cispo_config config
+    *model policy_model
+    *model value_model
+    *model reference_model
+    *optimizer optimizer
     behavior_log_probs: []tensor
-    step_count: i64
-    is_weight_stats: ISWeightStats
+    i64 step_count
+    ISWeightStats is_weight_stats
 }
 
 struct is_weight_stats {
-    mean: f32
-    std: f32
-    min: f32
-    max: f32
-    clipped_ratio: f32
+    f32 mean
+    f32 std
+    f32 min
+    f32 max
+    f32 clipped_ratio
 }
 
 func new_cispo_trainer(

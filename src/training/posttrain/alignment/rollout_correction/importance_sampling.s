@@ -2,13 +2,13 @@ import "tensor/tensor.s"
 import "src/training/posttrain/alignment/rollout_correction/config.s"
 
 struct is_weights {
-    weights: Tensor
-    level: ISAggregationLevel
-    is_clipped: Tensor
-    clip_fraction: f32
-    mean_weight: f32
-    max_weight: f32
-    min_weight: f32
+    Tensor weights
+    ISAggregationLevel level
+    Tensor is_clipped
+    f32 clip_fraction
+    f32 mean_weight
+    f32 max_weight
+    f32 min_weight
 }
 
 func compute_token_is_weights(

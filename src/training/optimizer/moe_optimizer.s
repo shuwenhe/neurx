@@ -26,43 +26,43 @@ struct moe_config {
 }
 
 struct moe_forward_output {
-    output: tensor
-    aux_loss: tensor
-    load_balance_loss: tensor
-    router_logits: tensor
-    expert_mask: tensor
-    expert_weights: tensor
-    dispatch_pattern: dispatch_pattern
-    perexpert_output: list<tensor>
+    tensor output
+    tensor aux_loss
+    tensor load_balance_loss
+    tensor router_logits
+    tensor expert_mask
+    tensor expert_weights
+    dispatch_pattern dispatch_pattern
+    list<tensor> perexpert_output
 }
 
 struct dispatch_pattern {
-    total_tokens: int
-    tokens_per_expert: list<int>
-    expert_utilization: list<float>
-    load_variance: float
-    avg_load: float
-    max_load_imbalance_ratio: float
-    entropy: float
-    dropped_tokens: int
+    int total_tokens
+    list<int> tokens_per_expert
+    list<float> expert_utilization
+    float load_variance
+    float avg_load
+    float max_load_imbalance_ratio
+    float entropy
+    int dropped_tokens
 }
 
 struct moe_expert {
-    id: int
-    up_proj: linear
-    down_proj: linear
-    gate: Activation
+    int id
+    linear up_proj
+    linear down_proj
+    Activation gate
     specialization_score: float = 0.0
     importance_weight: float = 1.0
     is_active: bool = true
 }
 
 struct moe_router {
-    gate_layer: linear
-    bias: Parameter
-    noise: Normal
-    router_type: string
-    top_k: int
+    linear gate_layer
+    Parameter bias
+    Normal noise
+    string router_type
+    int top_k
     init(hidden_dim: int, num_experts: int, config: moe_config) {
         this.gate_layer = new linear(in_features=hidden_dim, out_features=num_experts, bias=true)
         this.router_type = config.router_type
@@ -72,7 +72,7 @@ struct moe_router {
     }
 }
 struct load_balance_loss_computer {
-    config: moe_config
+    moe_config config
     init(config: moe_config) {
         this.config = config
     }
@@ -92,11 +92,11 @@ struct load_balance_loss_computer {
     }
 }
 struct mo_effn_layer {
-    config: moe_config
-    experts: list<moe_expert>
-    shared_experts: list<moe_expert>
-    router: moe_router
-    loss_computer: LoadBalanceLossComputer
+    moe_config config
+    list<moe_expert> experts
+    list<moe_expert> shared_experts
+    moe_router router
+    LoadBalanceLossComputer loss_computer
     training: bool = true
     init(config: moe_config) {
         this.config = config
@@ -224,7 +224,7 @@ struct mo_effn_layer {
         hidden_states: tensor,
         selected_experts: tensor,
         routing_weights: tensor,
-        capacity: int
+        int capacity
     ) {
         B, T, H = hidden_states.shape
         _, _, K = selected_experts.shape
@@ -313,8 +313,8 @@ struct mo_effn_layer {
     }
 }
 struct expert_specializer {
-    config: moe_config
-    moe_layer: MoEFFNLayer
+    moe_config config
+    MoEFFNLayer moe_layer
     init(config: moe_config) {
         this.config = config
     }
@@ -412,27 +412,27 @@ struct expert_specializer {
     }
 }
 struct expert_analysis_report {
-    num_total_experts: int
-    num_active_experts: int
-    expert_reports: list<individual_expert_report>
-    average_specialization_score: float
+    int num_total_experts
+    int num_active_experts
+    list<individual_expert_report> expert_reports
+    float average_specialization_score
     importance_range: tuple<float, float>
-    redundancy_detected: bool
+    bool redundancy_detected
 }
 
 struct individual_expert_report {
-    expert_id: int
-    is_active: bool
-    up_projection_l2_norm: float
-    down_projection_l2_norm: float
-    weight_magnitude: float
-    specialization_score: float
-    importance_weight: float
+    int expert_id
+    bool is_active
+    float up_projection_l2_norm
+    float down_projection_l2_norm
+    float weight_magnitude
+    float specialization_score
+    float importance_weight
 }
 struct expert_manager {
-    moe_layers: list<mo_effn_layer>
-    specializer: ExpertSpecializer
-    config: moe_config
+    list<mo_effn_layer> moe_layers
+    ExpertSpecializer specializer
+    moe_config config
     init(moe_layers: list<mo_effn_layer>, config: moe_config) {
         this.moe_layers = moe_layers
         this.config = config
@@ -514,32 +514,32 @@ struct expert_manager {
     }
 }
 struct pruning_report {
-    experts_pruned: int
-    pruned_expert_ids: list<int>
-    threshold_used: float
-    remaining_active: int
+    int experts_pruned
+    list<int> pruned_expert_ids
+    float threshold_used
+    int remaining_active
 }
 
 struct merging_report {
-    merges_performed: int
-    operations: list<merge_operation>
-    estimated_memory_savings_pct: float
+    int merges_performed
+    list<merge_operation> operations
+    float estimated_memory_savings_pct
 }
 
 struct merge_operation {
-    layer_index: int
-    expert_a_id: int
-    expert_b_id: int
-    similarity: float
-    action: string
+    int layer_index
+    int expert_a_id
+    int expert_b_id
+    float similarity
+    string action
 }
 
 struct moe_efficiency_report {
-    total_experts_per_layer: int
-    total_moe_layers: int
-    active_experts_per_layer: list<int>
-    parameter_sparsity: float
-    theoretical_flops_reduction: string
+    int total_experts_per_layer
+    int total_moe_layers
+    list<int> active_experts_per_layer
+    float parameter_sparsity
+    string theoretical_flops_reduction
 }
 function create_moe_ffn_layer(config: moe_config) {
     return new mo_effn_layer(config=config  new moe_config())

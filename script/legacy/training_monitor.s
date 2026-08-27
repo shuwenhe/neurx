@@ -7,22 +7,22 @@ import (
 )
 
 struct training_metrics {
-    step: int
-    epoch: int
-    loss: float
-    learning_rate: float
-    throughput: float
-    time_elapsed: float
-    eta: float
-    memory_used: float
+    int step
+    int epoch
+    float loss
+    float learning_rate
+    float throughput
+    float time_elapsed
+    float eta
+    float memory_used
 }
 
 struct training_monitor {
     start_time: time.Time
     steps: []training_metrics
-    total_steps: int
-    log_file: string
-    update_interval: int
+    int total_steps
+    string log_file
+    int update_interval
 }
 
 func (training_monitor* tm) init(

@@ -27,46 +27,46 @@ struct retrieval_system_config {
 }
 
 struct document_chunk {
-    id: string
-    content: string
-    metadata: document_metadata
-    embedding: tensor
-    chunk_index: int
-    token_count: int
+    string id
+    string content
+    document_metadata metadata
+    tensor embedding
+    int chunk_index
+    int token_count
 }
 
 struct document_metadata {
-    source_id: string
-    source_path: string
-    title: string
-    author: string
-    created_at: float
-    document_type: string
+    string source_id
+    string source_path
+    string title
+    string author
+    float created_at
+    string document_type
     language: string = "zh"
-    tags: list<string>
-    url: string
-    page_number: int
-    section: string
-    relevance_score: float
+    list<string> tags
+    string url
+    int page_number
+    string section
+    float relevance_score
 }
 
 struct search_result {
-    chunks: list<document_chunk>
-    scores: list<float>
-    query: string
-    expanded_query: string
-    retrieval_metadata: retrieval_metadata
+    list<document_chunk> chunks
+    list<float> scores
+    string query
+    string expanded_query
+    retrieval_metadata retrieval_metadata
 }
 
 struct retrieval_metadata {
-    total_scanned: int
-    total_returned: int
-    vector_search_time_ms: float
-    keyword_search_time_ms: float
-    rerank_time_ms: float
-    fusion_time_ms: float
-    used_hybrid_search: bool
-    used_query_expansion: bool
+    int total_scanned
+    int total_returned
+    float vector_search_time_ms
+    float keyword_search_time_ms
+    float rerank_time_ms
+    float fusion_time_ms
+    bool used_hybrid_search
+    bool used_query_expansion
 }
 interface vector_db_interface {
     init(config: retrieval_system_config)
@@ -81,25 +81,25 @@ interface vector_db_interface {
 }
 
 struct search_result_item {
-    chunk_id: string
-    score: float
-    metadata: document_metadata
+    string chunk_id
+    float score
+    document_metadata metadata
 }
 
 struct dbstatus {
-    total_documents: int
-    index_type: string
-    memory_usage_mb: float
-    is_initialized: bool
-    last_updated: float
+    int total_documents
+    string index_type
+    float memory_usage_mb
+    bool is_initialized
+    float last_updated
 }
 struct in_memory_vector_db implements vector_db_interface {
-    config: retrieval_system_config
+    retrieval_system_config config
     embeddings: map<str, tensor>
     documents: map<str, document_chunk>
     index_built: bool = false
-    created_at: float
-    last_updated: float
+    float created_at
+    float last_updated
     init(config: retrieval_system_config) {
         this.config = config
         this.embeddings = map<str, tensor>{}
@@ -184,8 +184,8 @@ struct in_memory_vector_db implements vector_db_interface {
     }
 }
 struct faiss_vector_db implements vector_db_interface {
-    config: retrieval_system_config
-    index: any
+    retrieval_system_config config
+    any index
     id_to_chunk: map<int, document_chunk>
     next_id: int = 0
     is_trained: bool = false
@@ -328,10 +328,10 @@ struct faiss_vector_db implements vector_db_interface {
     }
 }
 struct embedding_service {
-    model_name: string
-    model: any
-    tokenizer: any
-    config: retrieval_system_config
+    string model_name
+    any model
+    any tokenizer
+    retrieval_system_config config
     cache: LRUCache<string, tensor>
     init(string model_name, config: retrieval_system_config) {
         this.model_name = model_name
@@ -427,7 +427,7 @@ struct embedding_service {
     }
 }
 struct lru_cache<K, V> {
-    capacity: int
+    int capacity
     cache: OrderedDict<K, V>
     init(int capacity) {
         this.capacity = capacity
@@ -452,8 +452,8 @@ struct lru_cache<K, V> {
     }
 }
 struct document_processor {
-    config: retrieval_system_config
-    splitter: TextSplitter
+    retrieval_system_config config
+    TextSplitter splitter
     init(config: retrieval_system_config) {
         this.config = config
         this.splitter = new recursive_character_text_splitter(
@@ -485,9 +485,9 @@ struct document_processor {
     }
 }
 struct recursive_character_text_splitter {
-    chunk_size: int
-    chunk_overlap: int
-    separators: list<string>
+    int chunk_size
+    int chunk_overlap
+    list<string> separators
     init(int chunk_size, int chunk_overlap) {
         this.chunk_size = chunk_size
         this.chunk_overlap = chunk_overlap
@@ -543,8 +543,8 @@ struct recursive_character_text_splitter {
     }
 }
 struct query_expander {
-    llm_client: any
-    enabled: bool
+    any llm_client
+    bool enabled
     init(llm_client: any, bool enabled = true) {
         this.llm_client = llm_client
         this.enabled = enabled
@@ -607,15 +607,15 @@ Expanded queries:
     }
 }
 struct query_expansion_result {
-    original: string
-    expanded: list<string>
+    string original
+    list<string> expanded
 }
 struct b_m_25_retriever {
-    corpus: list<string>
-    doc_ids: list<string>
+    list<string> corpus
+    list<string> doc_ids
     df: map<string, int>
     tf: list<map<string, int>>
-    avg_doc_len: float
+    float avg_doc_len
     k1: float = 1.5
     b: float = 0.75
     init() {
@@ -686,14 +686,14 @@ struct b_m_25_retriever {
     }
 }
 struct bm25_result {
-    chunk_id: string
-    score: float
+    string chunk_id
+    float score
 }
 struct cross_encoder_reranker {
-    model: any
-    tokenizer: any
-    model_name: string
-    device: string
+    any model
+    any tokenizer
+    string model_name
+    string device
     init(string model_name) {
         this.model_name = model_name
         this.device = "cuda" if has_gpu() else "cpu"
@@ -734,12 +734,12 @@ struct cross_encoder_reranker {
     }
 }
 struct reranked_result {
-    chunk: document_chunk
-    rerank_score: float
+    document_chunk chunk
+    float rerank_score
 }
 struct hybrid_fusion_engine {
-    vector_weight: float
-    keyword_weight: float
+    float vector_weight
+    float keyword_weight
     normalization_method: string = "rrf"
     init(float vector_w = 0.7, float keyword_w = 0.3, string method = "rrf") {
         assert abs(vector_w + keyword_w - 1.0) < 0.001, "Weights must sum to 1.0"
@@ -827,18 +827,18 @@ struct hybrid_fusion_engine {
     }
 }
 struct fused_result {
-    chunk_id: string
-    fused_score: float
+    string chunk_id
+    float fused_score
 }
 struct retrieval_engine {
-    config: retrieval_system_config
-    vector_db: VectorDBInterface
-    embedding_service: EmbeddingService
-    document_processor: DocumentProcessor
-    query_expander: QueryExpander
-    bm25_retriever: BM25Retriever
-    reranker: CrossEncoderReranker
-    fusion_engine: HybridFusionEngine
+    retrieval_system_config config
+    VectorDBInterface vector_db
+    EmbeddingService embedding_service
+    DocumentProcessor document_processor
+    QueryExpander query_expander
+    BM25Retriever bm25_retriever
+    CrossEncoderReranker reranker
+    HybridFusionEngine fusion_engine
     documents_store: map<string, document_chunk>
     init(config: retrieval_system_config, llm_client: any) {
         this.config = config
@@ -1022,20 +1022,20 @@ struct retrieval_engine {
     }
 }
 struct ingestion_report {
-    documents_ingested: int
-    chunks_created: int
-    has_embeddings: bool
-    processing_time_ms: float
-    db_status: dbstatus
+    int documents_ingested
+    int chunks_created
+    bool has_embeddings
+    float processing_time_ms
+    dbstatus db_status
 }
 
 struct rag_statistics {
-    total_documents: int
-    db_status: dbstatus
-    embedding_cache_size: int
-    bm25_ready: bool
-    reranker_ready: bool
-    query_expansion_enabled: bool
+    int total_documents
+    dbstatus db_status
+    int embedding_cache_size
+    bool bm25_ready
+    bool reranker_ready
+    bool query_expansion_enabled
 }
 function create_retrieval_system(config: retrieval_system_config, llm_client: any) {
     return new retrieval_engine(config=config  new retrieval_system_config(), llm_client=llm_client)

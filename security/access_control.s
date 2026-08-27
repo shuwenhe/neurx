@@ -3,18 +3,18 @@ package neurx.security
 use std.slices
 
 struct capability {
-    cap_id: int
-    name: string
-    required_level: int
+    int cap_id
+    string name
+    int required_level
 }
 
 struct process_context {
-    pid: int
-    uid: int
-    gid: int
-    capabilities: capability[]
-    tenant_id: int
-    security_level: int
+    int pid
+    int uid
+    int gid
+    capability[] capabilities
+    int tenant_id
+    int security_level
 }
 
 func process_context_create(int pid, int uid, int gid) process_context {
@@ -47,16 +47,16 @@ func (process_context* ctx) grant_capability(capability cap) int {    ctx.capabi
 }
 
 struct access_control_list {
-    acl_id: int
-    owner_pid: int
-    permissions: int[]
+    int acl_id
+    int owner_pid
+    int[] permissions
 }
 
 func acl_create(int id, int owner) access_control_list {
     acl := access_control_list {
         acl_id: id,
         owner_pid: owner,
-        permissions: int[]
+        int[] permissions
     }
     acl
 }
@@ -74,11 +74,11 @@ func (access_control_list* acl) acl_grant(int pid, int perm) int {    acl.permis
 }
 
 struct tenant_isolation {
-    tenant_id: int
-    isolated_resources: int[]
-    quota_memory: int
-    quota_cpu: int
-    quota_gpu: int
+    int tenant_id
+    int[] isolated_resources
+    int quota_memory
+    int quota_cpu
+    int quota_gpu
 }
 
 func tenant_isolation_create(int tenant_id) tenant_isolation {
@@ -109,13 +109,13 @@ func (tenant_isolation* ti) add_isolated_resource(int resource_id) int {    ti.i
 }
 
 struct audit_log {
-    log_id: int
-    timestamp: int
-    event_type: int
-    actor_pid: int
-    resource_id: int
-    action: string
-    result: int
+    int log_id
+    int timestamp
+    int event_type
+    int actor_pid
+    int resource_id
+    string action
+    int result
 }
 
 func audit_log_create(int log_id, int event, int actor) audit_log {
@@ -132,10 +132,10 @@ func audit_log_create(int log_id, int event, int actor) audit_log {
 }
 
 struct security_subsystem {
-    processes: process_context[]
-    acls: access_control_list[]
-    tenant_isolations: tenant_isolation[]
-    audit_logs: audit_log[]
+    process_context[] processes
+    access_control_list[] acls
+    tenant_isolation[] tenant_isolations
+    audit_log[] audit_logs
 }
 
 func security_subsystem_init() security_subsystem {

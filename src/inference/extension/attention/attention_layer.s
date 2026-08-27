@@ -59,7 +59,7 @@ func new_attention_layer(string layer_id, int layer_index, int num_heads, int he
         layer_index: layer_index,
         backend_manager: backend_mgr,
         active_backend: "flash_attention",
-        mode: attention_layer_mode::inference,
+        mode: attention_layer_mode_inference,
         kv_cache: kv_cache,
         use_kv_cache: true,
         layer_creation_time: 0,

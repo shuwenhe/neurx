@@ -1,20 +1,20 @@
 package neurx.io.async
 
 struct io_request {
-    request_id: int
-    operation: int
-    user_addr: int
-    kernel_addr: int
-    length: int
-    result: int
-    status: int
+    int request_id
+    int operation
+    int user_addr
+    int kernel_addr
+    int length
+    int result
+    int status
 }
 
 struct io_ring {
-    ring_size: int
-    head: int
-    tail: int
-    completed: int
+    int ring_size
+    int head
+    int tail
+    int completed
 }
 
 func io_ring_init(int size) io_ring {

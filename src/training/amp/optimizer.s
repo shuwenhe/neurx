@@ -6,32 +6,32 @@ package neurx.amp.optimizer
     INT8,
 }
 structure loss_scale_config {
-    initial_scale: float
-    max_scale: float
-    min_scale: float
-    scale_growth_factor: float
-    scale_backoff_factor: float
-    update_interval: int
-    consecutive_overflows: int
+    float initial_scale
+    float max_scale
+    float min_scale
+    float scale_growth_factor
+    float scale_backoff_factor
+    int update_interval
+    int consecutive_overflows
 }
 structure mixed_precision_state {
-    compute_precision: precision_type
-    accumulator_precision: precision_type
-    weight_precision: precision_type
-    loss_scale: float
-    current_loss_scale: float
-    overflow_counter: int
-    scale_update_step: int
-    total_steps: int
-    num_overflow_steps: int
-    num_total_steps: int
-    average_loss_scale: float
+    precision_type compute_precision
+    precision_type accumulator_precision
+    precision_type weight_precision
+    float loss_scale
+    float current_loss_scale
+    int overflow_counter
+    int scale_update_step
+    int total_steps
+    int num_overflow_steps
+    int num_total_steps
+    float average_loss_scale
 }
 structure gradient_overflow_info {
-    has_overflow: bool
-    overflow_rank: int
-    overflow_value: float
-    num_overflowing_params: int
+    bool has_overflow
+    int overflow_rank
+    float overflow_value
+    int num_overflowing_params
 }
 
 func new_mixed_precision_state(loss_scale_config config): mixed_precision_state {

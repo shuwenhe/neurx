@@ -54,7 +54,7 @@ func (process_group_manager* mgr) get_group(int group_id) process_group {
         ranks: int[]{},
         world_size: 0,
         name: "",
-        backend: comm_backend::cpu_only,
+        backend: comm_backend_cpu_only,
         initialized: false,
     }
 }

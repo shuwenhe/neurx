@@ -30,99 +30,99 @@ struct document_parser_config {
 }
 
 struct parsed_document {
-    content: string
-    metadata: document_metadata
-    sections: list<document_section>
-    tables: list<extracted_table>
-    images: list<extracted_image>
-    links: list<extracted_link>
-    code_blocks: list<code_block>
-    statistics: document_statistics
-    raw_structure: any
+    string content
+    document_metadata metadata
+    list<document_section> sections
+    list<extracted_table> tables
+    list<extracted_image> images
+    list<extracted_link> links
+    list<code_block> code_blocks
+    document_statistics statistics
+    any raw_structure
 }
 
 struct document_metadata {
-    filename: string
-    file_path: string
-    file_format: string
-    file_size_bytes: int
-    mime_type: string
-    title: string
-    author: string
-    created_date: string
-    modified_date: string
-    page_count: int
-    word_count: int
-    language: string
-    encoding: string
+    string filename
+    string file_path
+    string file_format
+    int file_size_bytes
+    string mime_type
+    string title
+    string author
+    string created_date
+    string modified_date
+    int page_count
+    int word_count
+    string language
+    string encoding
 }
 
 struct document_section {
-    id: string
-    title: string
-    level: int
-    content: string
-    start_position: int
-    end_position: int
-    page_number: int
-    subsections: list<document_section>
+    string id
+    string title
+    int level
+    string content
+    int start_position
+    int end_position
+    int page_number
+    list<document_section> subsections
 }
 
 struct extracted_table {
-    id: string
-    headers: list<string>
-    rows: list<list<string>>
-    markdown_representation: string
-    html_representation: string
-    caption: string
-    row_count: int
-    column_count: int
-    source_page: int
-    confidence: float
+    string id
+    list<string> headers
+    list<list<string>> rows
+    string markdown_representation
+    string html_representation
+    string caption
+    int row_count
+    int column_count
+    int source_page
+    float confidence
     bbox: tuple<float, float, float, float>
 }
 
 struct extracted_image {
-    id: string
-    data: bytes
-    format: string
-    alt_text: string
-    width: int
-    height: int
-    caption: string
+    string id
+    bytes data
+    string format
+    string alt_text
+    int width
+    int height
+    string caption
     position: tuple<int, int>
 }
 
 struct extracted_link {
-    url: string
-    text: string
-    link_type: string
+    string url
+    string text
+    string link_type
 }
 
 struct code_block {
-    language: string
-    code: string
-    start_line: int
-    end_line: int
+    string language
+    string code
+    int start_line
+    int end_line
 }
 
 struct document_statistics {
-    total_characters: int
-    total_words: int
-    total_lines: int
-    section_count: int
-    table_count: int
-    image_count: int
-    code_block_count: int
-    link_count: int
-    estimated_reading_time_minutes: float
+    int total_characters
+    int total_words
+    int total_lines
+    int section_count
+    int table_count
+    int image_count
+    int code_block_count
+    int link_count
+    float estimated_reading_time_minutes
 }
 struct document_parser {
-    config: document_parser_config
-    pdf_parser: PDFParser
-    html_parser: HTMLParser
-    markdown_parser: MarkdownParser
-    office_parser: OfficeDocumentParser
+    document_parser_config config
+    PDFParser pdf_parser
+    HTMLParser html_parser
+    MarkdownParser markdown_parser
+    OfficeDocumentParser office_parser
     init(config: document_parser_config) {
         this.config = config  new document_parser_config()
         if "pdf" in this.config.enabled_formats {
@@ -280,7 +280,7 @@ struct document_parser {
     }
 }
 struct pdf_parser {
-    config: document_parser_config
+    document_parser_config config
     init(config: document_parser_config) {
         this.config = config
     }
@@ -373,7 +373,7 @@ struct pdf_parser {
     }
 }
 struct html_parser {
-    config: document_parser_config
+    document_parser_config config
     init(config: document_parser_config) {
         this.config = config
     }
@@ -593,20 +593,20 @@ struct html_parser {
     }
 }
 struct conversion_result {
-    content: string
-    sections: list<document_section>
-    tables: list<extracted_table>
-    images: list<extracted_image>
-    links: list<extracted_link>
-    code_blocks: list<code_block>
+    string content
+    list<document_section> sections
+    list<extracted_table> tables
+    list<extracted_image> images
+    list<extracted_link> links
+    list<code_block> code_blocks
 }
 
 struct table_conversion_result {
-    table: extracted_table
-    markdown: string
+    extracted_table table
+    string markdown
 }
 struct markdown_parser {
-    config: document_parser_config
+    document_parser_config config
     init(config: document_parser_config) {
         this.config = config
     }
@@ -757,7 +757,7 @@ struct markdown_parser {
     }
 }
 struct office_document_parser {
-    config: document_parser_config
+    document_parser_config config
     init(config: document_parser_config) {
         this.config = config
     }

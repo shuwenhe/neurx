@@ -3,9 +3,9 @@ use std.io.println
 use neurx.inference.tokenizer_loader
 
 struct test_result_2 {
-    test_name: string
-    passed: bool
-    message: string
+    string test_name
+    bool passed
+    string message
 }
 []test_result_2 test_results = make([]test_result_2, 0)
 

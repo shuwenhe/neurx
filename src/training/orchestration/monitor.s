@@ -9,48 +9,48 @@ import "neurx.arch.mps"
 }
 
 struct log_entry {
-    timestamp: string
-    level: log_level
-    message: string
-    step: int
-    epoch: int
-    loss: float
-    metric: float
+    string timestamp
+    log_level level
+    string message
+    int step
+    int epoch
+    float loss
+    float metric
 }
 
 struct training_metrics {
-    loss: float
-    ppl: float
-    accuracy: float
-    lr: float
-    throughput_samples: float
-    throughput_tokens: float
-    memory_usage: float
-    grad_norm: float
-    loss_scale: float
+    float loss
+    float ppl
+    float accuracy
+    float lr
+    float throughput_samples
+    float throughput_tokens
+    float memory_usage
+    float grad_norm
+    float loss_scale
 }
 
 struct monitor_config {
-    log_level: log_level
-    log_file: string
-    log_interval: int
-    metrics_file: string
-    metrics_interval: int
-    enable_wandb: bool
-    wandb_project: string
-    wandb_entity: string
-    enable_tensorboard: bool
-    tensorboard_dir: string
-    enable_progress_bar: bool
+    log_level log_level
+    string log_file
+    int log_interval
+    string metrics_file
+    int metrics_interval
+    bool enable_wandb
+    string wandb_project
+    string wandb_entity
+    bool enable_tensorboard
+    string tensorboard_dir
+    bool enable_progress_bar
 }
 
 struct training_monitor {
-    config: monitor_config
+    monitor_config config
     logs: []log_entry
     metrics_history: [][]training_metrics
-    current_metrics: training_metrics
-    total_steps: int
-    start_time: float
+    training_metrics current_metrics
+    int total_steps
+    float start_time
     step_times: []float
 }
 

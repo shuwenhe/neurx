@@ -43,7 +43,7 @@ func (driver* driver) send_message(v2x_message msg) bool {    true
 }
 
 func (driver* driver) receive_message() option[v2x_message] {
-    option::none[v2x_message]()
+    nil[v2x_message]()
 }
 
 func (driver* driver) get_peer_count() int {    len(driver.peer_ids)

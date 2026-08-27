@@ -33,14 +33,14 @@ func main() {
     weight1_shape[1] = 512
     weight1_id = g.add_value(value_type_float32(weight1_shape))
 
-    matmul1_id = g.add_operation(op_type::matrix_multiply, "matmul1", new int[]{input_value_id, weight1_id}, new int[]{hidden1_id})
+    matmul1_id = g.add_operation(op_type_matrix_multiply, "matmul1", new int[]{input_value_id, weight1_id}, new int[]{hidden1_id})
 
     hidden1_relu_shape = new int[2]
     hidden1_relu_shape[0] = 32
     hidden1_relu_shape[1] = 512
     hidden1_relu_id = g.add_value(value_type_float32(hidden1_relu_shape))
 
-    relu1_id = g.add_operation(op_type::relu, "relu1", new int[]{hidden1_id}, new int[]{hidden1_relu_id})
+    relu1_id = g.add_operation(op_type_relu, "relu1", new int[]{hidden1_id}, new int[]{hidden1_relu_id})
 
     output_shape = new int[2]
     output_shape[0] = 32
@@ -52,7 +52,7 @@ func main() {
     weight2_shape[1] = 10
     weight2_id = g.add_value(value_type_float32(weight2_shape))
 
-    matmul2_id = g.add_operation(op_type::matrix_multiply, "matmul2", new int[]{hidden1_relu_id, weight2_id}, new int[]{output_id})
+    matmul2_id = g.add_operation(op_type_matrix_multiply, "matmul2", new int[]{hidden1_relu_id, weight2_id}, new int[]{output_id})
 
     g.add_output(output_id)
 

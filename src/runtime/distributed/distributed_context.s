@@ -14,10 +14,10 @@ struct distributed_context {
 func new_distributed_context(int rank, int world_size, int local_rank, int num_gpus, comm_backend backend) distributed_context {
     backend_name := ""
     switch backend {
-        comm_backend::nccl : backend_name = "nccl",
-        comm_backend::ucc : backend_name = "ucc",
-        comm_backend::gloo : backend_name = "gloo",
-        comm_backend::cpu_only : backend_name = "cpu_only",
+        comm_backend_nccl : backend_name = "nccl",
+        comm_backend_ucc : backend_name = "ucc",
+        comm_backend_gloo : backend_name = "gloo",
+        comm_backend_cpu_only : backend_name = "cpu_only",
     }
 
     comm := new_communicator(backend, rank, world_size, local_rank)
@@ -88,12 +88,12 @@ func (distributed_context* ctx) is_master() bool {
 }
 
 func (distributed_context* ctx) create_subgroup(int[] ranks, string name) int {
-    backend := comm_backend::nccl
+    backend := comm_backend_nccl
     switch ctx.backend_name {
-        "nccl" : backend = comm_backend::nccl,
-        "ucc" : backend = comm_backend::ucc,
-        "gloo" : backend = comm_backend::gloo,
-        "cpu_only" : backend = comm_backend::cpu_only,
+        "nccl" : backend = comm_backend_nccl,
+        "ucc" : backend = comm_backend_ucc,
+        "gloo" : backend = comm_backend_gloo,
+        "cpu_only" : backend = comm_backend_cpu_only,
     }
 
     ctx.group_manager.create_group(ranks, name, backend)

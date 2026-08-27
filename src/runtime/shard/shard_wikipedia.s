@@ -203,7 +203,7 @@ func process_wikipedia(string input_bz2_file, string output_dir, string manifest
         return 1
     }
     string perl_script = ""
-    perl_script = perl_script + "use strict; use warnings; use POSIX qw(strftime); use JSON::PP qw(encode_json);\n"
+    perl_script = perl_script + "use strict; use warnings; use POSIX qw(strftime); use JSON_PP qw(encode_json);\n"
     perl_script = perl_script + "my ($input, $out_dir, $manifest, $docs_per_shard, $max_pages) = @ARGV;\n"
     perl_script = perl_script + "open my $fh, '<', $input or die $!;\n"
     perl_script = perl_script + "local $/ = undef;\n"

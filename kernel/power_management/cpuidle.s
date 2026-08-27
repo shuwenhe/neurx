@@ -46,7 +46,7 @@ struct cpuidle_engine {
     cpus: cpu_idle_state[],
     governors: idle_governor[],
     active_governor: option[*string],
-    lock: spinlock::spinlock[void],
+    lock: spinlock[void],
     total_idle_time: u64,
 }
 
@@ -57,7 +57,7 @@ func new_cpuidle_engine(num_cpus: u32) (*cpuidle_engine, string) {
     while i < num_cpus {
         idle_state := cpu_idle_state{
             cpu_id: i,
-            current_c_state: c_state_type::c0,
+            current_c_state: c_state_type_c0,
             available_states: c_state[](),
             residency_time: 0,
             wake_time: 0,
@@ -71,8 +71,8 @@ func new_cpuidle_engine(num_cpus: u32) (*cpuidle_engine, string) {
     engine := *cpuidle_engine{
         cpus: cpus,
         governors: idle_governor[](),
-        active_governor: option::none,
-        lock: spinlock::new(),
+        active_governor: nil,
+        lock: spinlock_new(),
         total_idle_time: 0,
     } as *cpuidle_engine
 
@@ -178,7 +178,7 @@ func (cpuidle_engine* engine) exit_idle_state(cpu_id: u32) (void, string) {
 
     cpu_state := *engine.cpus.get(cpu_id) as *cpu_idle_state
 
-    cpu_state.current_c_state = c_state_type::c0
+    cpu_state.current_c_state = c_state_type_c0
     cpu_state.wake_time = 0
 
     return (), ""
@@ -195,7 +195,7 @@ func (cpuidle_engine* engine) predict_next_c_state(
 
     cpu_state := *engine.cpus.get(cpu_id) as *cpu_idle_state
 
-    deepest_state := c_state_type::c0
+    deepest_state := c_state_type_c0
 
     for state in cpu_state.available_states {
         if state.enabled {
@@ -220,7 +220,7 @@ func (cpuidle_engine* engine) set_governor(string* name) (void, string) {
 
     for governor in engine.governors {
         if governor.name == name {
-            engine.active_governor = option::some(*governor.name)
+            engine.active_governor = some(*governor.name)
             return return (), ""
         }
     }
@@ -245,7 +245,7 @@ func (cpuidle_engine* engine) get_statistics() (idle_statistics, string) {
     total_residency := 0
 
     for cpu_state in engine.cpus {
-        if cpu_state.current_c_state != c_state_type::c0 {
+        if cpu_state.current_c_state != c_state_type_c0 {
             idle_count = idle_count + 1
         }
         total_transitions = total_transitions + cpu_state.state_transitions
@@ -258,7 +258,7 @@ func (cpuidle_engine* engine) get_statistics() (idle_statistics, string) {
         total_idle_time: engine.total_idle_time,
         average_idle_depth: 0.0,
         state_transitions_total: total_transitions,
-        deepest_state_reached: c_state_type::c10,
+        deepest_state_reached: c_state_type_c10,
     }
 
 return     (stats, "")

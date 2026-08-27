@@ -71,7 +71,7 @@ func (MultimodalManager* m) ProcessMultimodalInput(
         start_time: GetCurrentTime(),
         processing_times: make(map[string, f32),
         error_messages: make([]string, 0),
-        is_cached: false
+        false is_cached
     }
 
     embeddings := make(map[types.Modality, *types.Tensor])
@@ -186,7 +186,7 @@ func (MultimodalManager* m) ProcessAudio(
 }
 
 func (MultimodalManager* m) ProcessText(
-    text: string
+    string text
 ) *types.Tensor {
 
     text_len := i32(len(text))
@@ -222,7 +222,7 @@ func (MultimodalManager* m) ProcessBatch(
 }
 
 func (MultimodalManager* m) GetProcessingState(
-    input_id: string
+    string input_id
 ) types.ProcessingState {
     if state, exists := m.processing_cache[input_id]; exists {
         return state
@@ -234,7 +234,7 @@ func (MultimodalManager* m) GetProcessingState(
         start_time: 0,
         processing_times: make(map[string, f32),
         error_messages: make([]string, 0),
-        is_cached: false
+        false is_cached
     }
 }
 

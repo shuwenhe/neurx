@@ -126,7 +126,7 @@ func medmcqa_to_sft(string line) sft_example {
     sft_example{
         instruction: instruction,
         input_text: input,
-        output_text: output
+        output output_text
     }
 }
 

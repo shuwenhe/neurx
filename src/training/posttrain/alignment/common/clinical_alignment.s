@@ -115,7 +115,7 @@ func create_medical_grpo_objective() medical_grpo_objective {
         num_generations: 8,
         learning_rate: 2e-6,
         beta: 0.01,
-        use_inference_engine: true
+        true use_inference_engine
     }
     obj.reward_functions = [
         "cds_fact_consistency_reward",
@@ -303,7 +303,7 @@ func validate_before_training(
         constraints_configured: false,
         objectives_set: false,
         test_set_locked: false,
-        ready_to_train: false
+        false ready_to_train
     }
     contamination_check_result contamination = check_training_data_contamination(
         training_sample_ids,

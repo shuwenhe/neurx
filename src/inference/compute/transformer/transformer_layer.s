@@ -16,14 +16,14 @@ struct tensor_two_d {
 
 func create_tensor_one_d(int size) tensor_one_d {
     return tensor_one_d{
-        size: size
+        size size
     }
 }
 
 func create_tensor_two_d(int rows, int cols) tensor_two_d {
     return tensor_two_d{
         rows: rows,
-        cols: cols
+        cols cols
     }
 }
 

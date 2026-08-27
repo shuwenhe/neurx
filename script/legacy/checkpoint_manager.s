@@ -9,20 +9,20 @@ import (
 )
 
 struct checkpoint_metadata {
-    step: int
-    epoch: int
-    timestamp: string
-    loss: float
-    perplexity: float
-    learning_rate: float
+    int step
+    int epoch
+    string timestamp
+    float loss
+    float perplexity
+    float learning_rate
     optimizer_state: map[string]interface{}
-    model_hash: string
-    config_hash: string
+    string model_hash
+    string config_hash
 }
 
 struct checkpoint_manager {
-    checkpoint_dir: string
-    max_checkpoints: int
+    string checkpoint_dir
+    int max_checkpoints
     checkpoints: []checkpoint_metadata
 }
 

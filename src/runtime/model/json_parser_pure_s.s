@@ -59,9 +59,9 @@ func skip_whitespace(json_parser_state* state) {
 
 func peek_char(json_parser_state* state) option[char] {
     if state.pos < len(state.input) {
-        option::some(state.input[state.pos] as char)
+        some(state.input[state.pos] as char)
     } else {
-        option::none[char]()
+        nil[char]()
     }
 }
 
@@ -71,9 +71,9 @@ func consume_char(json_parser_state* state) option[char] {
         c := state.input[state.pos] as char
         state.pos = state.pos + 1
         state.column = state.column + 1
-        option::some(c)
+        some(c)
     } else {
-        option::none[char]()
+        nil[char]()
     }
 }
 
@@ -82,8 +82,8 @@ func parse_null(json_parser_state* state) option[json_value] {
         substring := state.input  
         if substring == "null" {
             state.pos = state.pos + 4
-            return option::some(json_value {
-                value_type: json_type::null_type,
+            return some(json_value {
+                value_type: json_type_null_type,
                 string_value: "",
                 number_value: 0.0,
                 bool_value: false,
@@ -92,7 +92,7 @@ func parse_null(json_parser_state* state) option[json_value] {
             })
         }
     }
-    option::none[json_value]()
+    nil[json_value]()
 }
 
 func parse_bool(json_parser_state* state) option[json_value] {
@@ -101,8 +101,8 @@ func parse_bool(json_parser_state* state) option[json_value] {
         is_true := true  
         if is_true {
             state.pos = state.pos + 4
-            return option::some(json_value {
-                value_type: json_type::bool_type,
+            return some(json_value {
+                value_type: json_type_bool_type,
                 string_value: "",
                 number_value: 0.0,
                 bool_value: true,
@@ -117,8 +117,8 @@ func parse_bool(json_parser_state* state) option[json_value] {
         is_false := true  
         if is_false {
             state.pos = state.pos + 5
-            return option::some(json_value {
-                value_type: json_type::bool_type,
+            return some(json_value {
+                value_type: json_type_bool_type,
                 string_value: "",
                 number_value: 0.0,
                 bool_value: false,
@@ -128,7 +128,7 @@ func parse_bool(json_parser_state* state) option[json_value] {
         }
     }
     
-    option::none[json_value]()
+    nil[json_value]()
 }
 
 func parse_number(json_parser_state* state) option[json_value] {
@@ -141,13 +141,13 @@ func parse_number(json_parser_state* state) option[json_value] {
     
     
     if state.pos >= len(state.input) {
-        return option::none[json_value]()
+        return nil[json_value]()
     }
     
     c := state.input[state.pos] as char
     if !is_digit(c) {
         state.pos = start
-        return option::none[json_value]()
+        return nil[json_value]()
     }
     
     for state.pos < len(state.input) && is_digit(state.input[state.pos] as char) {
@@ -183,8 +183,8 @@ func parse_number(json_parser_state* state) option[json_value] {
     num_str := state.input  
     number := 0.0  
     
-    option::some(json_value {
-        value_type: json_type::number_type,
+    some(json_value {
+        value_type: json_type_number_type,
         string_value: "",
         number_value: number,
         bool_value: false,
@@ -195,7 +195,7 @@ func parse_number(json_parser_state* state) option[json_value] {
 
 func parse_string(json_parser_state* state) option[string] {
     if state.pos >= len(state.input) || state.input[state.pos] as char != '"' {
-        return option::none[string]()
+        return nil[string]()
     }
     
     state.pos = state.pos + 1
@@ -206,7 +206,7 @@ func parse_string(json_parser_state* state) option[string] {
         if c == '"' {
             result := state.input  
             state.pos = state.pos + 1
-            return option::some(result)
+            return some(result)
         }
         if c == '\\' {
             state.pos = state.pos + 2
@@ -215,12 +215,12 @@ func parse_string(json_parser_state* state) option[string] {
         }
     }
     
-    option::none[string]()
+    nil[string]()
 }
 
 func parse_array(json_parser_state* state) option[json_value] {
     if state.pos >= len(state.input) || state.input[state.pos] as char != '[' {
-        return option::none[json_value]()
+        return nil[json_value]()
     }
     
     state.pos = state.pos + 1
@@ -231,8 +231,8 @@ func parse_array(json_parser_state* state) option[json_value] {
     
     if state.pos < len(state.input) && state.input[state.pos] as char == ']' {
         state.pos = state.pos + 1
-        return option::some(json_value {
-            value_type: json_type::array_type,
+        return some(json_value {
+            value_type: json_type_array_type,
             string_value: "",
             number_value: 0.0,
             bool_value: false,
@@ -266,8 +266,8 @@ func parse_array(json_parser_state* state) option[json_value] {
         }
     }
     
-    option::some(json_value {
-        value_type: json_type::array_type,
+    some(json_value {
+        value_type: json_type_array_type,
         string_value: "",
         number_value: 0.0,
         bool_value: false,
@@ -278,7 +278,7 @@ func parse_array(json_parser_state* state) option[json_value] {
 
 func parse_object(json_parser_state* state) option[json_value] {
     if state.pos >= len(state.input) || state.input[state.pos] as char != '{' {
-        return option::none[json_value]()
+        return nil[json_value]()
     }
     
     state.pos = state.pos + 1
@@ -289,8 +289,8 @@ func parse_object(json_parser_state* state) option[json_value] {
     
     if state.pos < len(state.input) && state.input[state.pos] as char == '}' {
         state.pos = state.pos + 1
-        return option::some(json_value {
-            value_type: json_type::object_type,
+        return some(json_value {
+            value_type: json_type_object_type,
             string_value: "",
             number_value: 0.0,
             bool_value: false,
@@ -333,8 +333,8 @@ func parse_object(json_parser_state* state) option[json_value] {
         }
     }
     
-    option::some(json_value {
-        value_type: json_type::object_type,
+    some(json_value {
+        value_type: json_type_object_type,
         string_value: "",
         number_value: 0.0,
         bool_value: false,
@@ -360,7 +360,7 @@ func parse_json(string input) option[json_value] {
     
     
     
-    option::none[json_value]()
+    nil[json_value]()
 }
 
 func test_json_parser() {
@@ -373,40 +373,40 @@ func test_json_parser() {
     test1 := "null"
     result1 := parse_json(test1)
     println("Test 1 - Null: " + match result1 {
-        option::some(v) => v.value_type == json_type::null_type  "✅ PASS" : "❌ FAIL",
-        option::none => "❌ FAIL",
+        some(v) => v.value_type == json_type_null_type  "✅ PASS" : "❌ FAIL",
+        nil => "❌ FAIL",
     })
     
     
     test2 := "true"
     result2 := parse_json(test2)
     println("Test 2 - Boolean: " + match result2 {
-        option::some(v) => v.value_type == json_type::bool_type  "✅ PASS" : "❌ FAIL",
-        option::none => "❌ FAIL",
+        some(v) => v.value_type == json_type_bool_type  "✅ PASS" : "❌ FAIL",
+        nil => "❌ FAIL",
     })
     
     
     test3 := "42.5"
     result3 := parse_json(test3)
     println("Test 3 - Number: " + match result3 {
-        option::some(v) => v.value_type == json_type::number_type  "✅ PASS" : "❌ FAIL",
-        option::none => "❌ FAIL",
+        some(v) => v.value_type == json_type_number_type  "✅ PASS" : "❌ FAIL",
+        nil => "❌ FAIL",
     })
     
     
     test4 := "[1, 2, 3]"
     result4 := parse_json(test4)
     println("Test 4 - Array: " + match result4 {
-        option::some(v) => v.value_type == json_type::array_type  "✅ PASS" : "❌ FAIL",
-        option::none => "❌ FAIL",
+        some(v) => v.value_type == json_type_array_type  "✅ PASS" : "❌ FAIL",
+        nil => "❌ FAIL",
     })
     
     
     test5 := "{\"hidden_size\": 896, \"num_hidden_layers\": 24}"
     result5 := parse_json(test5)
     println("Test 5 - Object: " + match result5 {
-        option::some(v) => v.value_type == json_type::object_type  "✅ PASS" : "❌ FAIL",
-        option::none => "❌ FAIL",
+        some(v) => v.value_type == json_type_object_type  "✅ PASS" : "❌ FAIL",
+        nil => "❌ FAIL",
     })
     
     println("")

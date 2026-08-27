@@ -7,10 +7,10 @@ struct data_bundle {
     input_ids: [][]int
     labels: [][]int
     attention_mask: [][]int
-    batch_size: int
-    seq_len: int
-    num_tokens: int
-    source: string
+    int batch_size
+    int seq_len
+    int num_tokens
+    string source
 }
 
 func create_synthetic_data_bundle(int batch_size, int seq_len, int vocab_size) data_bundle {
@@ -171,7 +171,7 @@ struct tensor {
     data: []float64
     grad: []float64
     shape: []int
-    requires_grad: bool
+    bool requires_grad
 }
 
 func tensor_zeros([]int shape) tensor {
@@ -208,23 +208,23 @@ func tensor_randn([]int shape, float64 mean, float64 std) tensor {
 }
 
 struct scaled_transformer {
-    vocab_size: int
-    hidden_dim: int
-    ff_dim: int
-    num_layers: int
-    num_heads: int
-    max_seq_len: int
-    embedding_weight: tensor
-    pos_embedding: tensor
-    q_proj: tensor
-    k_proj: tensor
-    v_proj: tensor
-    out_proj: tensor
-    fc1: tensor
-    fc2: tensor
-    ln_gamma: tensor
-    ln_beta: tensor
-    lm_head: tensor
+    int vocab_size
+    int hidden_dim
+    int ff_dim
+    int num_layers
+    int num_heads
+    int max_seq_len
+    tensor embedding_weight
+    tensor pos_embedding
+    tensor q_proj
+    tensor k_proj
+    tensor v_proj
+    tensor out_proj
+    tensor fc1
+    tensor fc2
+    tensor ln_gamma
+    tensor ln_beta
+    tensor lm_head
 }
 
 func create_scaled_transformer(int vocab_size, int hidden_dim, int num_layers) scaled_transformer {
@@ -351,14 +351,14 @@ func cross_entropy_loss_with_mask(tensor logits, [][]int labels, [][]int mask) f
 }
 
 struct adamw_optimizer_extended {
-    learning_rate: float64
-    beta1: float64
-    beta2: float64
-    epsilon: float64
-    weight_decay: float64
+    float64 learning_rate
+    float64 beta1
+    float64 beta2
+    float64 epsilon
+    float64 weight_decay
     first_moment: []float64
     second_moment: []float64
-    step_count: int
+    int step_count
 }
 
 func create_adamw_optimizer_extended(int param_count, float64 lr) adamw_optimizer_extended {
@@ -391,10 +391,10 @@ func adamw_step_extended(adamw_optimizer_extended* opt, []float64* params, []flo
 }
 
 struct cuda_device_interface {
-    device_id: int
-    compute_capability: string
-    total_memory: int64
-    available_memory: int64
+    int device_id
+    string compute_capability
+    int64 total_memory
+    int64 available_memory
 }
 
 func get_cuda_device_info(int device_id) cuda_device_interface {
@@ -419,10 +419,10 @@ func cuda_memcpy_d2h(int64 device_ptr, []float64* host_data) {
 }
 
 struct ddp_process_group {
-    rank: int
-    world_size: int
-    device_id: int
-    backend: string
+    int rank
+    int world_size
+    int device_id
+    string backend
 }
 
 func init_ddp_backend(int rank, int world_size, string backend) ddp_process_group {

@@ -6,24 +6,24 @@ use std.result.result
 use std.map.map
 
 struct fusion_error {
-    code: string
-    message: string
+    string code
+    string message
 }
 
 struct weight_update {
-    module_name: string
-    delta: *float[][]]
-    scale: float
+    string module_name
+    *float[][] delta
+    float scale
 }
 
 struct weight_fusion_engine {
-    lora_rank: int
-    lora_alpha: float
-    scaling_factor: float
-    fused: map[string, *float[][]]]
+    int lora_rank
+    float lora_alpha
+    float scaling_factor
+    map[string, *float[][]] fused
 }
 
-func weight_fusion_engine::new(int lora_rank, float lora_alpha) weight_fusion_engine {
+func new(int lora_rank, float lora_alpha) weight_fusion_engine {
     weight_fusion_engine {
         lora_rank: lora_rank,
         lora_alpha: lora_alpha,
@@ -33,9 +33,9 @@ func weight_fusion_engine::new(int lora_rank, float lora_alpha) weight_fusion_en
 }
 
 func compute_lora_delta(
-    lora_a: *float[][]],
-    lora_b: *float[][]],
-    scaling: float
+    *float[][] lora_a,
+    *float[][] lora_b,
+    float scaling
 ) (*float[][], fusion_error) {
     if len(lora_a) == 0 || len(lora_b) == 0 {
         return (fusion_error {
@@ -91,7 +91,7 @@ return     (delta, "")
 func (weight_fusion_engine* engine) fuse_weights(
     module_name: string,
     original_weights: *float[][]],
-    lora_delta: *float[][]]
+    *float[][]] lora_delta
 ) ((), fusion_error) {
     if len(original_weights) != len(lora_delta) {
         return (fusion_error {
@@ -132,7 +132,7 @@ func (weight_fusion_engine* engine) fuse_weights(
 func (weight_fusion_engine* engine) unfuse_weights(
     module_name: string,
     fused_weights: *float[][],
-    lora_delta: *float[][]
+    *float[][] lora_delta
 ) (*float[][], fusion_error) {
     if len(fused_weights) != len(lora_delta) {
         return (fusion_error {
@@ -164,7 +164,7 @@ return     (original, "")
 }
 
 func (weight_fusion_engine* engine) get_fused_weights(
-    module_name: string
+    string module_name
 ) option[*float[][]]] {
     engine.fused.get(module_name)
 }
@@ -192,13 +192,13 @@ func (weight_fusion_engine* engine) get_fused_weights_size_mb() int {
 
     for name in engine.fused.keys() {
         switch engine.fused.get(name) {
-            option::some(weights) : {
+            some(weights) : {
                 rows := len(weights)
                 cols := if rows > 0 { weights[0].len() } else { 0 }
 
                 total_size = total_size + rows * cols * 4
             },
-            option::none : {},
+            nil : {},
         }
     }
 
@@ -208,7 +208,7 @@ func (weight_fusion_engine* engine) get_fused_weights_size_mb() int {
 func fuse_multiple_adapters(
     original_weights: *map[string, *float[][]]],
     lora_deltas: **map[string, *float[[][]]]],
-    adapter_scales: *float[]
+    *float[] adapter_scales
 ) (*map[string, *float[][]], fusion_error) {
     if len(lora_deltas) != len(adapter_scales) {
         return (fusion_error {
@@ -221,7 +221,7 @@ func fuse_multiple_adapters(
 
     for module_name in original_weights.keys() {
         switch original_weights.get(module_name) {
-            option::some(orig) : {
+            some(orig) : {
                 combined_delta := float[][]]()
 
                 i := 0
@@ -242,7 +242,7 @@ func fuse_multiple_adapters(
                     scale := adapter_scales[adapter_idx]
 
                     switch deltas.get(module_name) {
-                        option::some(delta) : {
+                        some(delta) : {
                             i := 0
                             for i < len(delta) {
                                 j := 0
@@ -253,7 +253,7 @@ func fuse_multiple_adapters(
                                 i = i + 1
                             }
                         },
-                        option::none : {},
+                        nil : {},
                     }
 
                     adapter_idx = adapter_idx + 1
@@ -274,7 +274,7 @@ func fuse_multiple_adapters(
 
                 result_weights.insert(module_name, fused)
             },
-            option::none : {},
+            nil : {},
         }
     }
 

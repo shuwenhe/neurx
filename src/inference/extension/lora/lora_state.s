@@ -6,27 +6,27 @@ use std.result.result
 use std.map.map
 
 struct lora_request_state {
-    request_id: string
-    adapter_names: *string[]
-    adapter_scales: *float[]
-    is_active: bool
-    created_at: int
-    updated_at: int
+    string request_id
+    *string[] adapter_names
+    *float[] adapter_scales
+    bool is_active
+    int created_at
+    int updated_at
 }
 
 struct lora_state_error {
-    code: string
-    message: string
+    string code
+    string message
 }
 
 struct lora_state_manager {
     request_states: map[string, lora_request_state]
     adapter_cache: map[string, *float[][]]]
-    max_adapters_per_request: int
-    enable_cache: bool
+    int max_adapters_per_request
+    bool enable_cache
 }
 
-func lora_state_manager::new(int max_adapters) lora_state_manager {
+func new(int max_adapters) lora_state_manager {
     lora_state_manager {
         request_states: map[string, lora_request_state](),
         adapter_cache: map[string, *float[][]]](),
@@ -38,7 +38,7 @@ func lora_state_manager::new(int max_adapters) lora_state_manager {
 func (lora_state_manager* manager) create_request_state(
     request_id: string,
     adapter_names: *string[],
-    adapter_scales: *float[]
+    *float[] adapter_scales
 ) ((), lora_state_error) {
 
     if len(request_id) == 0 {
@@ -98,17 +98,17 @@ func (lora_state_manager* manager) create_request_state(
 }
 
 func (lora_state_manager* manager) get_request_state(
-    request_id: string
+    string request_id
 ) option[lora_request_state] {
     manager.request_states.get(request_id)
 }
 
 func (lora_state_manager* manager) update_adapter_scales(
     request_id: string,
-    new_scales: *float[]
+    *float[] new_scales
 ) ((), lora_state_error) {
     switch manager.request_states.get(request_id) {
-        option::some(state) : {
+        some(state) : {
             if len(new_scales) != len(state.adapter_names) {
                 return (lora_state_error {
                     code: "LENGTH_MISMATCH",
@@ -122,7 +122,7 @@ func (lora_state_manager* manager) update_adapter_scales(
             manager.request_states.insert(request_id, state)
             return (), ""
         },
-        option::none : {
+        nil : {
             (lora_state_error {
                 code: "REQUEST_NOT_FOUND",
                 message: "Request state not found for ID: " + request_id,
@@ -134,7 +134,7 @@ func (lora_state_manager* manager) update_adapter_scales(
 func (lora_state_manager* manager) switch_adapters(
     request_id: string,
     new_adapter_names: *string[],
-    new_scales: *float[]
+    *float[] new_scales
 ) ((), lora_state_error) {
     if len(new_adapter_names) != len(new_scales) {
         return (lora_state_error {
@@ -151,7 +151,7 @@ func (lora_state_manager* manager) switch_adapters(
     }
 
     switch manager.request_states.get(request_id) {
-        option::some(state) : {
+        some(state) : {
             state.adapter_names = new_adapter_names
             state.adapter_scales = new_scales
             state.updated_at = 0
@@ -162,7 +162,7 @@ func (lora_state_manager* manager) switch_adapters(
 
             return (), ""
         },
-        option::none : {
+        nil : {
             (lora_state_error {
                 code: "REQUEST_NOT_FOUND",
                 message: "Request state not found for ID: " + request_id,
@@ -172,7 +172,7 @@ func (lora_state_manager* manager) switch_adapters(
 }
 
 func (lora_state_manager* manager) remove_request_state(
-    request_id: string
+    string request_id
 ) ((), lora_state_error) {
     if !manager.request_states.contains(request_id) {
         return (lora_state_error {
@@ -188,16 +188,16 @@ func (lora_state_manager* manager) remove_request_state(
 }
 
 func (lora_state_manager* manager) activate_request(
-    request_id: string
+    string request_id
 ) ((), lora_state_error) {
     switch manager.request_states.get(request_id) {
-        option::some(state) : {
+        some(state) : {
             state.is_active = true
             state.updated_at = 0
             manager.request_states.insert(request_id, state)
             return (), ""
         },
-        option::none : {
+        nil : {
             (lora_state_error {
                 code: "REQUEST_NOT_FOUND",
                 message: "Request state not found for ID: " + request_id,
@@ -207,16 +207,16 @@ func (lora_state_manager* manager) activate_request(
 }
 
 func (lora_state_manager* manager) deactivate_request(
-    request_id: string
+    string request_id
 ) ((), lora_state_error) {
     switch manager.request_states.get(request_id) {
-        option::some(state) : {
+        some(state) : {
             state.is_active = false
             state.updated_at = 0
             manager.request_states.insert(request_id, state)
             return (), ""
         },
-        option::none : {
+        nil : {
             (lora_state_error {
                 code: "REQUEST_NOT_FOUND",
                 message: "Request state not found for ID: " + request_id,
@@ -227,8 +227,8 @@ func (lora_state_manager* manager) deactivate_request(
 
 func (lora_state_manager* manager) is_request_active(string request_id) bool {
     switch manager.request_states.get(request_id) {
-        option::some(state) : state.is_active,
-        option::none : false,
+        some(state) : state.is_active,
+        nil : false,
     }
 }
 
@@ -237,12 +237,12 @@ func (lora_state_manager* manager) get_active_requests() *string[] {
 
     for req_id in manager.request_states.keys() {
         switch manager.request_states.get(req_id) {
-            option::some(state) : {
+            some(state) : {
                 if state.is_active {
                     active = append(active, req_id)
                 }
             },
-            option::none : {},
+            nil : {},
         }
     }
 
@@ -251,7 +251,7 @@ func (lora_state_manager* manager) get_active_requests() *string[] {
 
 func (lora_state_manager* manager) cache_fused_weights(
     cache_key: string,
-    weights: *float[][]]
+    *float[][]] weights
 ) ((), lora_state_error) {
     if !manager.enable_cache {
         return return (), ""
@@ -269,13 +269,13 @@ func (lora_state_manager* manager) cache_fused_weights(
 }
 
 func (lora_state_manager* manager) get_cached_weights(
-    cache_key: string
+    string cache_key
 ) option[*float[][]]] {
     manager.adapter_cache.get(cache_key)
 }
 
 func (lora_state_manager* manager) clear_request_cache(
-    request_id: string
+    string request_id
 ) ((), lora_state_error) {
     keys_to_remove := string[]()
 
@@ -307,12 +307,12 @@ func (lora_state_manager* manager) get_cache_stats() (int, int) {
 
     for key in manager.adapter_cache.keys() {
         switch manager.adapter_cache.get(key) {
-            option::some(weights) : {
+            some(weights) : {
                 rows := len(weights)
                 cols := if rows > 0 { weights[0].len() } else { 0 }
                 total_size_mb = total_size_mb + rows * cols * 4
             },
-            option::none : {},
+            nil : {},
         }
     }
 

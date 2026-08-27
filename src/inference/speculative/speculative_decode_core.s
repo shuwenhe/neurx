@@ -1,45 +1,45 @@
 struct draft_token {
-    token_id: int
+    int token_id
     logits: []float
-    confidence: float
+    float confidence
 }
 
 struct verification_result {
-    accepted: bool
-    num_accepted_tokens: int
-    fallback_token_id: int
+    bool accepted
+    int num_accepted_tokens
+    int fallback_token_id
     verification_logits: []float
 }
 
 struct speculative_batch {
-    batch_id: int
+    int batch_id
     sequence_ids: []int
     draft_predictions: [][]draft_token
     verification_results: []verification_result
-    acceptance_rate: float
-    draft_time_ms: float
-    verify_time_ms: float
+    float acceptance_rate
+    float draft_time_ms
+    float verify_time_ms
 }
 
 struct speculative_decode_config {
-    num_draft_tokens: int
-    draft_model_scale: float
-    temperature: float
-    top_k: int
-    top_p: float
-    use_temperature_scaling: bool
-    max_speculative_length: int
+    int num_draft_tokens
+    float draft_model_scale
+    float temperature
+    int top_k
+    float top_p
+    bool use_temperature_scaling
+    int max_speculative_length
 }
 
 struct speculative_statistics {
-    total_tokens_generated: int64
-    total_draft_tokens: int64
-    total_verified_tokens: int64
-    total_accepted_tokens: int64
-    total_rejected_tokens: int64
-    average_acceptance_rate: float
-    cumulative_time_saved_ms: float64
-    verification_accuracy: float
+    int64 total_tokens_generated
+    int64 total_draft_tokens
+    int64 total_verified_tokens
+    int64 total_accepted_tokens
+    int64 total_rejected_tokens
+    float average_acceptance_rate
+    float64 cumulative_time_saved_ms
+    float verification_accuracy
 }
 
 func new_speculative_config(int num_draft, float draft_scale, float temp) speculative_decode_config {

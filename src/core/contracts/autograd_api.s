@@ -1,30 +1,30 @@
 struct graph_node {
-    id: i64
-    operation_name: string
+    i64 id
+    string operation_name
     forward_inputs: []tensor
-    forward_output: tensor
+    tensor forward_output
     backward_fn: func(tensor grad) . []tensor
 }
 
 struct graph_edge {
-    from_node_id: i64
-    to_node_id: i64
-    tensor_index: i64
+    i64 from_node_id
+    i64 to_node_id
+    i64 tensor_index
     prev_func: func(tensor grad) . tensor
 }
 
 struct computation_graph {
-    nodes: map[i64]graph_node
+    map[i64]graph_node nodes
     edges: []graph_edge
     leaf_tensors: []tensor
-    output_tensor: tensor
+    tensor output_tensor
 }
 
 struct graph_task {
-    id: i64
-    node_id: i64
-    grad_tensor: tensor
-    dependencies_remaining: i64
+    i64 id
+    i64 node_id
+    tensor grad_tensor
+    i64 dependencies_remaining
 }
 
 struct ready_queue {
@@ -32,9 +32,9 @@ struct ready_queue {
 }
 
 struct autograd_engine {
-    graph: computation_graph
-    ready_queue: ready_queue
-    node_results: map[i64][]tensor
+    computation_graph graph
+    ready_queue ready_queue
+    map[i64][]tensor node_results
 }
 interface i_graph_builder {
     build_graph(output: tensor) . computation_graph
@@ -95,7 +95,7 @@ interface i_gradient_validator {
         forward_fn: func([]tensor) . tensor,
         backward_fn: func(tensor) . []tensor,
         inputs: []tensor,
-        eps: f64
+        f64 eps
     ) . f64
     check_backward_graph(output: tensor, f64 eps) . f64
 }

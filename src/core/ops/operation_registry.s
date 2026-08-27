@@ -176,7 +176,7 @@ func (operation_registry* reg) get_operation(string op_id) custom_operation {
         reg.operations[op_id]
     }
 
-    new_custom_operation("", "", operation_type::custom)
+    new_custom_operation("", "", operation_type_custom)
 }
 
 func (operation_registry* reg) register_fused_operation(string fused_id, string[] component_ops, string fusion_name) bool {

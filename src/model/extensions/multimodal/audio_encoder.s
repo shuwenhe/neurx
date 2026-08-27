@@ -14,13 +14,13 @@ struct AudioProcessor {
     num_mels: i32,
     n_fft: i32,
     f_min: f32,
-    f_max: f32
+    f32 f_max
 }
 
 func NewAudioProcessor(
     sample_rate: i32,
     frame_length: i32,
-    num_mels: i32
+    i32 num_mels
 ) *AudioProcessor {
     return *AudioProcessor{
         sample_rate: sample_rate,
@@ -205,7 +205,7 @@ func (AudioProcessor* p) GetNumFrames(
 
 func (AudioProcessor* p) ApplyWindow(
     frame: *types.Tensor,
-    window_type: string
+    string window_type
 ) *types.Tensor {
     windowed := make([]f32, len(frame.data))
     n := len(frame.data)

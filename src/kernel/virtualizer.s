@@ -180,7 +180,7 @@ func (virt* virtualizer) add_memory_region(vm_id int, guest_addr int, host_addr 
         guest_phys_addr: guest_addr,
         host_phys_addr: host_addr,
         size: size,
-        access_flags: flags
+        flags access_flags
     }
     
     vm.memory_regions = append(vm.memory_regions, region)

@@ -5,9 +5,9 @@ use std.math
 struct data_bundle {
     input_ids: [][]int
     labels: [][]int
-    batch_size: int
-    seq_len: int
-    num_tokens: int
+    int batch_size
+    int seq_len
+    int num_tokens
 }
 
 func create_dummy_data_bundle(int batch_size, int seq_len, int vocab_size) data_bundle {
@@ -34,9 +34,9 @@ func create_dummy_data_bundle(int batch_size, int seq_len, int vocab_size) data_
 struct tensor {
     data: []float64
     shape: []int
-    size: int
+    int size
     grad: []float64
-    requires_grad: bool
+    bool requires_grad
 }
 
 func create_tensor([]int shape) tensor {
@@ -82,18 +82,18 @@ func zero_grad(tensor t) {
 }
 
 struct mini_transformer {
-    embedding_weight: tensor
-    q_proj: tensor
-    k_proj: tensor
-    v_proj: tensor
-    out_proj: tensor
-    fc1: tensor
-    fc2: tensor
-    lm_head: tensor
-    vocab_size: int
-    hidden_dim: int
-    ff_dim: int
-    num_heads: int
+    tensor embedding_weight
+    tensor q_proj
+    tensor k_proj
+    tensor v_proj
+    tensor out_proj
+    tensor fc1
+    tensor fc2
+    tensor lm_head
+    int vocab_size
+    int hidden_dim
+    int ff_dim
+    int num_heads
 }
 
 func create_mini_transformer(int vocab_size, int hidden_dim, int ff_dim, int num_heads) mini_transformer {
@@ -318,14 +318,14 @@ func cross_entropy_loss(tensor logits, [][]int labels) float64 {
 }
 
 struct adamw_optimizer {
-    learning_rate: float64
-    beta1: float64
-    beta2: float64
-    epsilon: float64
-    weight_decay: float64
-    first_moment: map[string]tensor
-    second_moment: map[string]tensor
-    t: int
+    float64 learning_rate
+    float64 beta1
+    float64 beta2
+    float64 epsilon
+    float64 weight_decay
+    map[string]tensor first_moment
+    map[string]tensor second_moment
+    int t
 }
 
 func create_adamw_optimizer(float64 lr) adamw_optimizer {

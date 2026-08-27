@@ -54,7 +54,7 @@ func bpf_program_add_insn(bpf_program prog, int opcode, int src, int dst, int of
         src: src,
         dst: dst,
         offset: offset,
-        imm: imm
+        imm imm
     }
     prog.instructions = append(prog.instructions, insn)
     prog
@@ -66,7 +66,7 @@ func create_bpf_map(string name, int key_sz, int value_sz, int max_ent) bpf_map 
         map_name: name,
         key_size: key_sz,
         value_size: value_sz,
-        max_entries: max_ent
+        max_ent max_entries
     }
     map
 }

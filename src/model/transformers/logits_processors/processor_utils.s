@@ -65,7 +65,7 @@ func log_softmax([]float logits) []float {
 
 func get_top_k_tokens(
     logits: []float,
-    k: int
+    int k
 ) ([]int, []float) {
 
     []int indices

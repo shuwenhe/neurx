@@ -70,12 +70,12 @@ func forward(
     """
     English text
     Args:
-        hidden_states: inputEnglish textstate
+        inputEnglish textstate hidden_states
         attention_mask: English text (None=English text)
         position_ids: English text ID (English text RoPE)
         layer_past_kv: English text K/V cache (English textgenerate)
-        use_cache: English text KV cache
-        output_attentions: English textweight
+        English text KV cache use_cache
+        English textweight output_attentions
     Returns:
         tuple: (
             attention_output: [batch, seq_len, hidden],
@@ -250,9 +250,9 @@ struct mask_builder {
         """
         English text NEURX Prefix-LM attention Mask
         Args:
-            batch_size: batchEnglish text
+            batchEnglish text batch_size
             total_seq_len: English text (query English text)
-            prefix_lengths: English text sample English text prefix English text
+            English text sample English text prefix English text prefix_lengths
             kv_seq_len: KV English text (-1 English text total_seq_len)
         Returns:
             mask tensor: [batch_size, 1, total_seq_len, kv_seq_len]
@@ -315,10 +315,10 @@ func compute_rope_embeddings(
     """
     compute RoPE English text cos/sin English text
     Args:
-        position_ids: English text ID
-        head_dim: English text
+        English text ID position_ids
+        English text head_dim
         base: English text (English text 10000 English text 500000)
-        scaling_type: English text
+        English text scaling_type
         factor: English text (English text 4K→128K English text factor=32)
     Returns:
         (cos_vals, sin_vals): [1, seq_len, 1, head_dim/2]
@@ -345,10 +345,10 @@ func apply_rotary_emb(
     English text
     x = x_even * cos + x_odd * sin  (rotate)
     x_odd = x_odd * cos - x_even * sin
-    English text x_even = x[..., ::2], x_odd = x[..., 1::2]
+    English text x_even = x[..., ::2], x_odd = x[..., 1_2]
     """
     tensor x_even = x[..., ::2]
-    tensor x_odd = x[..., 1::2]
+    tensor x_odd = x[..., 1_2]
     tensor rotated_even = x_even * cos_vals - x_odd * sin_vals
     tensor rotated_odd = x_even * sin_vals + x_odd * cos_vals
     tensor result = stack([rotated_even, rotated_odd], dim=-1)

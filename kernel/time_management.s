@@ -202,7 +202,7 @@ func (engine* time_management_engine) get_timer_statistics() (timer_statistics, 
         active_timers: len(engine.timers),
         periodic_timers: periodic_count,
         oneshot_timers: oneshot_count,
-        total_timer_fires: total_fires
+        total_fires total_timer_fires
     }
 
     return stats, ""

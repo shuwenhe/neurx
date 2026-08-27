@@ -4,12 +4,12 @@ import "layout_api"
 import "device_api"
 
 struct version_counter {
-    version: i64
+    i64 version
 }
 
 struct autograd_meta {
-    requires_grad: bool
-    is_leaf: bool
+    bool requires_grad
+    bool is_leaf
     grad_fn: func(tensor grad_output) . []tensor
     saved_tensors: []tensor
 }
@@ -17,19 +17,19 @@ struct autograd_meta {
 struct tensor_metadata {
     shape: []i64
     stride: []i64
-    offset: i64
-    dtype: DType
-    layout: Layout
-    device: device
-    version_counter: version_counter
+    i64 offset
+    DType dtype
+    Layout layout
+    device device
+    version_counter version_counter
 }
 
 struct tensor_impl {
-    id: i64
-    storage: storage
-    metadata: tensor_metadata
-    autograd_meta: autograd_meta
-    ref_count: i64
+    i64 id
+    storage storage
+    tensor_metadata metadata
+    autograd_meta autograd_meta
+    i64 ref_count
 }
 interface i_tensor_impl {
     shape() . []i64

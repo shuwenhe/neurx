@@ -6,29 +6,29 @@ use std.result.result
 use std.map.map
 
 struct model_config {
-    name: string
-    hidden_size: int
-    num_hidden_layers: int
-    vocab_size: int
-    num_attention_heads: int
-    num_key_value_heads: int
-    intermediate_size: int
-    max_position_embeddings: int
-    rms_norm_eps: float
-    rope_theta: float
-    attention_bias: bool
-    use_cache: bool
+    string name
+    int hidden_size
+    int num_hidden_layers
+    int vocab_size
+    int num_attention_heads
+    int num_key_value_heads
+    int intermediate_size
+    int max_position_embeddings
+    float rms_norm_eps
+    float rope_theta
+    bool attention_bias
+    bool use_cache
 }
 
 struct model_architecture {
-    model_type: string
-    config: model_config
+    string model_type
+    model_config config
     weight_map: map[string, string]
 }
 
 struct model_loader_error {
-    code: string
-    message: string
+    string code
+    string message
 }
 
 func create_llama_config() model_config {

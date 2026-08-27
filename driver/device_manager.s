@@ -89,7 +89,7 @@ func device_create(string device_id, string device_name, device_type dev_type) d
         device_id: device_id,
         device_name: device_name,
         dev_type: dev_type,
-        dev_state: device_state::device_unknown,
+        dev_state: device_state_device_unknown,
         driver_name: "",
         vendor_id: 0,
         device_id_hw: 0,
@@ -122,7 +122,7 @@ func (device* dev) bind_driver(string driver_name, int irq, int dma) (bool, stri
     dev.driver_name = driver_name
     dev.irq_number = irq
     dev.dma_channel = dma
-    dev.dev_state = device_state::device_bound
+    dev.dev_state = device_state_device_bound
     return true, ""
 }
 

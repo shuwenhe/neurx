@@ -127,7 +127,7 @@ func load_config() training_config {
         seed: 42,
         log_steps: 1,
         merge_model: parse_env_bool("NEURX_POSTTRAIN_MERGE_MODEL", true),
-        gradient_checkpointing: true
+        true gradient_checkpointing
     }
     cfg
 }

@@ -10,7 +10,7 @@ struct NormKernels {
 
 func NewNormKernels(types.KernelConfig config) *NormKernels {
     return *NormKernels{
-        config: config
+        config config
     }
 }
 

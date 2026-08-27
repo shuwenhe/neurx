@@ -102,6 +102,6 @@ func evaluate_platform(int profile, platform_capabilities caps) readiness_report
         profile_ready: common == 0 && profile_missing == 0,
         missing_common: common,
         missing_profile: profile_missing,
-        safety_level: safety_level
+        safety_level safety_level
     }
 }

@@ -6,21 +6,21 @@ import (
 )
 
 struct mixed_precision_config {
-    enabled: bool
-    loss_scale: float
-    loss_scale_growth_factor: float
-    loss_scale_backoff_factor: float
-    max_loss_scale: float
-    min_loss_scale: float
-    dynamics_loss_scale: bool
-    overflow_patience: int
+    bool enabled
+    float loss_scale
+    float loss_scale_growth_factor
+    float loss_scale_backoff_factor
+    float max_loss_scale
+    float min_loss_scale
+    bool dynamics_loss_scale
+    int overflow_patience
 }
 
 struct mixed_precision_trainer {
-    config: mixed_precision_config
-    current_loss_scale: float
-    overflow_counter: int
-    steps_since_overflow: int
+    mixed_precision_config config
+    float current_loss_scale
+    int overflow_counter
+    int steps_since_overflow
 }
 
 func (mixed_precision_trainer* mpt) init(mixed_precision_config config) {
@@ -110,10 +110,10 @@ func cast_to_fp32(float value): float {
 }
 
 struct amp_step_result {
-    scaled_loss: float
-    overflow: bool
-    loss_scale: float
-    skipped: bool
+    float scaled_loss
+    bool overflow
+    float loss_scale
+    bool skipped
 }
 
 func (mixed_precision_trainer* mpt) amp_step(
@@ -163,15 +163,15 @@ const (
 )
 
 struct learning_rate_scheduler {
-    schedule_type: LRScheduleType
-    base_lr: float
-    current_lr: float
-    total_steps: int
-    warmup_steps: int
-    min_lr_ratio: float
-    step_size: int
-    gamma: float
-    power: float
+    LRScheduleType schedule_type
+    float base_lr
+    float current_lr
+    int total_steps
+    int warmup_steps
+    float min_lr_ratio
+    int step_size
+    float gamma
+    float power
 }
 
 func (learning_rate_scheduler* lrs) cosine_annealing_warmup(int step): float {
@@ -238,8 +238,8 @@ func (learning_rate_scheduler* lrs) get_lr(int step): float {
 }
 
 struct gradient_clipper {
-    max_grad_norm: float
-    clip_type: string
+    float max_grad_norm
+    string clip_type
 }
 
 func (gradient_clipper* gc) clip_by_norm(float grad_norm): float {
@@ -260,16 +260,16 @@ func (gradient_clipper* gc) clip_by_value(float gradient): float {
 }
 
 struct training_optimization_config {
-    use_amp: bool
-    amp_config: mixed_precision_config
-    use_lr_schedule: bool
-    lr_schedule_type: LRScheduleType
-    base_lr: float
-    warmup_steps: int
-    total_steps: int
-    min_lr_ratio: float
-    use_grad_clip: bool
-    max_grad_norm: float
+    bool use_amp
+    mixed_precision_config amp_config
+    bool use_lr_schedule
+    LRScheduleType lr_schedule_type
+    float base_lr
+    int warmup_steps
+    int total_steps
+    float min_lr_ratio
+    bool use_grad_clip
+    float max_grad_norm
 }
 
 func create_default_optimization_config(): training_optimization_config {

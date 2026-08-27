@@ -127,7 +127,7 @@ func load_layer_weights(string model_path, int layer_idx, int hidden_size, int i
         o_proj_weight: o,
         mlp_up_weight: up,
         mlp_down_weight: down,
-        norm_weight: norm
+        norm norm_weight
     }
 }
 

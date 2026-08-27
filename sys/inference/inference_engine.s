@@ -3,32 +3,32 @@ package neurx.sys.inference
 use std.slices
 
 struct model_config {
-    model_id: string
-    version: int
-    batch_size: int
-    input_shapes: int[]
-    output_shapes: int[]
+    string model_id
+    int version
+    int batch_size
+    int[] input_shapes
+    int[] output_shapes
 }
 
 struct inference_request {
-    request_id: int64
-    model_id: string
-    batch_size: int
-    priority: int
-    timeout_ms: int
+    int64 request_id
+    string model_id
+    int batch_size
+    int priority
+    int timeout_ms
 }
 
 struct inference_result {
-    request_id: int64
-    status: int
-    latency_ms: int
+    int64 request_id
+    int status
+    int latency_ms
 }
 
 struct inference_engine {
-    model_registry: model_config[]
-    active_requests: inference_request[]
-    result_queue: inference_result[]
-    next_request_id: int64
+    model_config[] model_registry
+    inference_request[] active_requests
+    inference_result[] result_queue
+    int64 next_request_id
 }
 
 func create_inference_engine() inference_engine {
@@ -89,11 +89,11 @@ func get_inference_result(inference_engine* engine, request_id: int64) option[in
     for i < len(engine.result_queue) {
         if engine.result_queue[i].request_id == request_id {
             result := engine.result_queue[i]
-            return option::some(result)
+            return some(result)
         }
         i = i + 1
     }
-    option::none
+    nil
 }
 
 func process_inference_batch(inference_engine* engine) int {

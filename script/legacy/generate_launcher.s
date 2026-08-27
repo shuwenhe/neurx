@@ -30,30 +30,30 @@ struct training_config {
 
 func load_config_from_env() training_config {
     training_config cfg
-    string root = os::getenv("NEURX_ROOT")
+    string root = os_getenv("NEURX_ROOT")
     if root == "" {
-        root = os::working_dir()
+        root = os_working_dir()
     }
     cfg.root_dir = root
-    cfg.hostfile = os::getenv("NEURX_HOSTFILE")
+    cfg.hostfile = os_getenv("NEURX_HOSTFILE")
     if cfg.hostfile == "" {
         cfg.hostfile = root + "/config/pretrain.hosts"
     }
-    cfg.output_dir = os::getenv("NEURX_PRETRAIN_OUTPUT_DIR")
+    cfg.output_dir = os_getenv("NEURX_PRETRAIN_OUTPUT_DIR")
     if cfg.output_dir == "" {
         cfg.output_dir = root + "/checkpoint/NeurX-1.3"
     }
-    cfg.nccl_id_file = os::getenv("NEURX_SHARED_NCCL_ID_FILE")
+    cfg.nccl_id_file = os_getenv("NEURX_SHARED_NCCL_ID_FILE")
     if cfg.nccl_id_file == "" {
         cfg.nccl_id_file = root + "/artifact/nccl/unique_id"
     }
-    cfg.master_addr = os::getenv("MASTER_ADDR")
+    cfg.master_addr = os_getenv("MASTER_ADDR")
     if cfg.master_addr == "" {
         cfg.master_addr = "localhost"
     }
-    string port_str = os::getenv("MASTER_PORT")
+    string port_str = os_getenv("MASTER_PORT")
     if port_str != "" {
-        cfg.master_port = strings::parse_int(port_str)
+        cfg.master_port = strings_parse_int(port_str)
     } else {
         cfg.master_port = 29500
     }
@@ -68,15 +68,15 @@ func load_config_from_env() training_config {
     cfg.transformer_ffn = parse_env_int("NEURX_TRANSFORMER_FFN", 4096)
     cfg.transformer_layers = parse_env_int("NEURX_TRANSFORMER_NUM_LAYERS", 24)
     cfg.gradient_accumulation_steps = parse_env_int("NEURX_GRADIENT_ACCUMULATION_STEPS", 8)
-    cfg.tokenizer_vocab = os::getenv("NEURX_TOKENIZER_VOCAB")
+    cfg.tokenizer_vocab = os_getenv("NEURX_TOKENIZER_VOCAB")
     if cfg.tokenizer_vocab == "" {
         cfg.tokenizer_vocab = root + "/data/corpus/vocab.json"
     }
-    cfg.tokenizer_merges = os::getenv("NEURX_TOKENIZER_MERGES")
+    cfg.tokenizer_merges = os_getenv("NEURX_TOKENIZER_MERGES")
     if cfg.tokenizer_merges == "" {
         cfg.tokenizer_merges = root + "/data/corpus/merges.txt"
     }
-    cfg.shard_list_file = os::getenv("NEURX_PRETRAIN_SHARD_LIST_FILE")
+    cfg.shard_list_file = os_getenv("NEURX_PRETRAIN_SHARD_LIST_FILE")
     if cfg.shard_list_file == "" {
         cfg.shard_list_file = root + "/artifact/build/run_large_pretrain/shard_list.txt"
     }
@@ -84,35 +84,35 @@ func load_config_from_env() training_config {
 }
 
 func parse_env_int(string key, int default_val) int {
-    string val = os::getenv(key)
+    string val = os_getenv(key)
     if val == "" {
         return default_val
     }
-    return strings::parse_int(val)
+    return strings_parse_int(val)
 }
 
 func parse_env_float(string key, float default_val) float {
-    string val = os::getenv(key)
+    string val = os_getenv(key)
     if val == "" {
         return default_val
     }
-    return strings::parse_float(val)
+    return strings_parse_float(val)
 }
 
 func parse_hostfile(string hostfile_path) []string {
     []string hosts = []string{}
-    if !fs::exists(hostfile_path) {
-        io::eprintln("hostfile not found: " + hostfile_path)
+    if !fs_exists(hostfile_path) {
+        io_eprintln("hostfile not found: " + hostfile_path)
         return hosts
     }
-    string content = fs::read_file(hostfile_path)
-    []string lines = strings::split(content, "\n")
+    string content = fs_read_file(hostfile_path)
+    []string lines = strings_split(content, "\n")
     for i := 0; i < len(lines); i++ {
-        string line = strings::trim(lines[i])
-        if line == "" || strings::has_prefix(line, "#") {
+        string line = strings_trim(lines[i])
+        if line == "" || strings_has_prefix(line, "#") {
             continue
         }
-        []string parts = strings::split(line, " ")
+        []string parts = strings_split(line, " ")
         if len(parts) >= 1 {
             hosts = append(hosts, line)
         }
@@ -134,7 +134,7 @@ func generate_launcher_script(training_config cfg, []string hosts) string {
     script = script + "OUT=\"" + cfg.output_dir + "\"\n"
     script = script + "SHARED_ID=\"" + cfg.nccl_id_file + "\"\n"
     script = script + "MASTER_ADDR=\"" + cfg.master_addr + "\"\n"
-    script = script + "MASTER_PORT=" + strings::from_int(cfg.master_port) + "\n"
+    script = script + "MASTER_PORT=" + strings_from_int(cfg.master_port) + "\n"
     script = script + "\n"
     script = script + "# Base environment variables\n"
     script = script + "declare -a base_env=(\n"
@@ -142,22 +142,22 @@ func generate_launcher_script(training_config cfg, []string hosts) string {
     script = script + "  \"NEURX_PRETRAIN_OUTPUT_DIR=$OUT\"\n"
     script = script + "  \"NEURX_NCCL_ID_FILE=$SHARED_ID\"\n"
     script = script + "  \"NEURX_PRETRAIN_SHARD_LIST_FILE=" + cfg.shard_list_file + "\"\n"
-    script = script + "  \"NEURX_PRETRAIN_STEPS=" + strings::from_int(cfg.pretrain_steps) + "\"\n"
-    script = script + "  \"NEURX_PRETRAIN_MICRO_BATCH=" + strings::from_int(cfg.micro_batch) + "\"\n"
-    script = script + "  \"NEURX_PRETRAIN_SEQ_LEN=" + strings::from_int(cfg.seq_len) + "\"\n"
-    script = script + "  \"NEURX_PRETRAIN_LR=" + strings::from_float(cfg.learning_rate) + "\"\n"
-    script = script + "  \"NEURX_PRETRAIN_LOG_INTERVAL=" + strings::from_int(cfg.log_interval) + "\"\n"
-    script = script + "  \"NEURX_PRETRAIN_SAVE_INTERVAL=" + strings::from_int(cfg.save_interval) + "\"\n"
-    script = script + "  \"NEURX_TRANSFORMER_DIM=" + strings::from_int(cfg.transformer_dim) + "\"\n"
-    script = script + "  \"NEURX_TRANSFORMER_HEADS=" + strings::from_int(cfg.transformer_heads) + "\"\n"
-    script = script + "  \"NEURX_TRANSFORMER_FFN=" + strings::from_int(cfg.transformer_ffn) + "\"\n"
-    script = script + "  \"NEURX_TRANSFORMER_NUM_LAYERS=" + strings::from_int(cfg.transformer_layers) + "\"\n"
-    script = script + "  \"NEURX_GRADIENT_ACCUMULATION_STEPS=" + strings::from_int(cfg.gradient_accumulation_steps) + "\"\n"
+    script = script + "  \"NEURX_PRETRAIN_STEPS=" + strings_from_int(cfg.pretrain_steps) + "\"\n"
+    script = script + "  \"NEURX_PRETRAIN_MICRO_BATCH=" + strings_from_int(cfg.micro_batch) + "\"\n"
+    script = script + "  \"NEURX_PRETRAIN_SEQ_LEN=" + strings_from_int(cfg.seq_len) + "\"\n"
+    script = script + "  \"NEURX_PRETRAIN_LR=" + strings_from_float(cfg.learning_rate) + "\"\n"
+    script = script + "  \"NEURX_PRETRAIN_LOG_INTERVAL=" + strings_from_int(cfg.log_interval) + "\"\n"
+    script = script + "  \"NEURX_PRETRAIN_SAVE_INTERVAL=" + strings_from_int(cfg.save_interval) + "\"\n"
+    script = script + "  \"NEURX_TRANSFORMER_DIM=" + strings_from_int(cfg.transformer_dim) + "\"\n"
+    script = script + "  \"NEURX_TRANSFORMER_HEADS=" + strings_from_int(cfg.transformer_heads) + "\"\n"
+    script = script + "  \"NEURX_TRANSFORMER_FFN=" + strings_from_int(cfg.transformer_ffn) + "\"\n"
+    script = script + "  \"NEURX_TRANSFORMER_NUM_LAYERS=" + strings_from_int(cfg.transformer_layers) + "\"\n"
+    script = script + "  \"NEURX_GRADIENT_ACCUMULATION_STEPS=" + strings_from_int(cfg.gradient_accumulation_steps) + "\"\n"
     script = script + "  \"NEURX_TOKENIZER_VOCAB=" + cfg.tokenizer_vocab + "\"\n"
     script = script + "  \"NEURX_TOKENIZER_MERGES=" + cfg.tokenizer_merges + "\"\n"
     script = script + "  \"MASTER_ADDR=$MASTER_ADDR\"\n"
     script = script + "  \"MASTER_PORT=$MASTER_PORT\"\n"
-    script = script + "  \"WORLD_SIZE=" + strings::from_int(cfg.world_size) + "\"\n"
+    script = script + "  \"WORLD_SIZE=" + strings_from_int(cfg.world_size) + "\"\n"
     script = script + ")\n"
     script = script + "\n"
     script = script + "# Cleanup function\n"
@@ -172,8 +172,8 @@ func generate_launcher_script(training_config cfg, []string hosts) string {
     script = script + "mkdir -p \"$(dirname \"$SHARED_ID\")\" \"$OUT\"\n"
     script = script + "rm -f \"$SHARED_ID\" \"$SHARED_ID.tmp\"\n"
     script = script + "\n"
-    script = script + "echo \"[multinode] nodes=" + strings::from_int(len(hosts)) +
-                      " world_size=" + strings::from_int(cfg.world_size) +
+    script = script + "echo \"[multinode] nodes=" + strings_from_int(len(hosts)) +
+                      " world_size=" + strings_from_int(cfg.world_size) +
                       " master=${MASTER_ADDR}:${MASTER_PORT}\"\n"
     script = script + "echo \"[multinode] shared NCCL id: $SHARED_ID\"\n"
     script = script + "\n"
@@ -229,8 +229,8 @@ func main() {
     training_config cfg = load_config_from_env()
     []string hosts = parse_hostfile(cfg.hostfile)
     if len(hosts) == 0 {
-        io::eprintln("ERROR: no valid hosts in hostfile")
-        os::exit(2)
+        io_eprintln("ERROR: no valid hosts in hostfile")
+        os_exit(2)
     }
     cfg.num_nodes = len(hosts)
     cfg.world_size = 0
@@ -239,11 +239,11 @@ func main() {
     }
     string script = generate_launcher_script(cfg, hosts)
     string output_script = cfg.root_dir + "/script/legacy/launch_multinode_pretrain_generated.sh"
-    if !fs::write_file(output_script, script) {
-        io::eprintln("ERROR: cannot write script to " + output_script)
-        os::exit(1)
+    if !fs_write_file(output_script, script) {
+        io_eprintln("ERROR: cannot write script to " + output_script)
+        os_exit(1)
     }
-    io::println("✓ Generated launcher script: " + output_script)
-    os::chmod(output_script, 0755)
-    io::println("✓ Ready to launch: bash " + output_script)
+    io_println("✓ Generated launcher script: " + output_script)
+    os_chmod(output_script, 0755)
+    io_println("✓ Ready to launch: bash " + output_script)
 }

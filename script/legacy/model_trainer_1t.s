@@ -7,51 +7,51 @@ import (
 )
 
 struct model_config1_t {
-    model_name: string
-    num_params: int
-    hidden_dim: int
-    num_layers: int
-    num_heads: int
-    head_dim: int
-    vocab_size: int
-    max_seq_len: int
-    ffn_multiplier: int
-    gradient_accumulation_steps: int
-    activation_checkpointing: bool
-    use_flash_attention: bool
-    use_fused_ops: bool
-    use_mixed_precision: bool
-    use_bfloat16: bool
+    string model_name
+    int num_params
+    int hidden_dim
+    int num_layers
+    int num_heads
+    int head_dim
+    int vocab_size
+    int max_seq_len
+    int ffn_multiplier
+    int gradient_accumulation_steps
+    bool activation_checkpointing
+    bool use_flash_attention
+    bool use_fused_ops
+    bool use_mixed_precision
+    bool use_bfloat16
 }
 
 struct distributed_config1_t {
-    tensor_parallel_size: int
-    pipeline_parallel_stages: int
-    data_parallel_size: int
-    sequence_parallel: bool
-    zero_stage: int
-    total_gpus: int
+    int tensor_parallel_size
+    int pipeline_parallel_stages
+    int data_parallel_size
+    bool sequence_parallel
+    int zero_stage
+    int total_gpus
 }
 
 struct memory_analysis1_t {
-    model_weights_tb: float
-    gradients_tb: float
-    optimizer_states_tb: float
-    activation_memory_tb: float
-    total_per_gpu_gb: float
-    total_system_tb: float
+    float model_weights_tb
+    float gradients_tb
+    float optimizer_states_tb
+    float activation_memory_tb
+    float total_per_gpu_gb
+    float total_system_tb
 }
 
 struct training_optimization1_t {
-    learning_rate: float
-    warmup_steps: int
-    total_steps: int
-    batch_size_global: int
-    micro_batch_size: int
-    gradient_accumulation_steps: int
-    save_checkpoint_steps: int
-    eval_steps: int
-    max_grad_norm: float
+    float learning_rate
+    int warmup_steps
+    int total_steps
+    int batch_size_global
+    int micro_batch_size
+    int gradient_accumulation_steps
+    int save_checkpoint_steps
+    int eval_steps
+    float max_grad_norm
 }
 
 func create_1t_config(): model_config1_t {
@@ -145,12 +145,12 @@ func create_training_config_1t(): training_optimization1_t {
 }
 
 struct hardware_requirements {
-    num_h100_gpus: int
-    total_memory_tb: float
-    interconnect: string
-    network_bandwidth_gbps: int
-    estimated_training_days: int
-    estimated_cost_usd: int
+    int num_h100_gpus
+    float total_memory_tb
+    string interconnect
+    int network_bandwidth_gbps
+    int estimated_training_days
+    int estimated_cost_usd
 }
 
 func calculate_hardware_requirements(): hardware_requirements {
@@ -172,10 +172,10 @@ func calculate_hardware_requirements(): hardware_requirements {
 }
 
 struct training_pipeline1_t {
-    config: model_config1_t
-    dist_config: distributed_config1_t
-    train_config: training_optimization1_t
-    memory_analysis: memory_analysis1_t
+    model_config1_t config
+    distributed_config1_t dist_config
+    training_optimization1_t train_config
+    memory_analysis1_t memory_analysis
 }
 
 func create_training_pipeline_1t(): training_pipeline1_t {

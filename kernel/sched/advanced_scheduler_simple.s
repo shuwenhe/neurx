@@ -17,7 +17,7 @@ struct scheduler {
 func create_task(int task_id, int priority) task {
     t := task {
         task_id: task_id,
-        priority: priority
+        priority priority
     }
     return t
 }

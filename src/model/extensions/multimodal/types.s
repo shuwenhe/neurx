@@ -49,7 +49,7 @@ struct AudioData {
     sample_rate: i32,
     num_channels: i32,
     duration_ms: i32,
-    format: AudioFormat
+    AudioFormat format
 }
 
 struct VideoData {
@@ -57,7 +57,7 @@ struct VideoData {
     frames: []ImageData,
     fps: f32,
     duration_ms: i32,
-    total_frames: i32
+    i32 total_frames
 }
 
 struct DepthData {
@@ -65,7 +65,7 @@ struct DepthData {
     depth_map: *types.Tensor,
     intrinsics: [9]f32,
     min_depth: f32,
-    max_depth: f32
+    f32 max_depth
 }
 
 struct MultimodalInput {
@@ -84,7 +84,7 @@ struct ImageFeatures {
     embeddings: *types.Tensor,
     patch_info: PatchInfo,
     spatial_resolution: (i32, i32),
-    temporal_index: i32
+    i32 temporal_index
 }
 
 struct PatchInfo {
@@ -101,7 +101,7 @@ struct AudioFeatures {
     embeddings: *types.Tensor,
     frame_rate: i32,
     num_frames: i32,
-    segment_length: i32
+    i32 segment_length
 }
 
 struct VideoFeatures {
@@ -116,7 +116,7 @@ struct FusedFeatures {
     fused_embedding: *types.Tensor,
     modality_embeddings: map[Modality, *types.Tensor],
     attention_weights: map[Modality, *types.Tensor],
-    fusion_type: string
+    string fusion_type
 }
 
 struct MultimodalConfig {
@@ -135,7 +135,7 @@ struct MultimodalConfig {
     resolution_strategy: ResolutionStrategy,
     use_dynamic_resolution: bool,
     cache_encoded_features: bool,
-    device: string
+    string device
 }
 
 struct ProcessingState {
@@ -144,5 +144,5 @@ struct ProcessingState {
     start_time: i64,
     processing_times: map[string, f32],
     error_messages: []string,
-    is_cached: bool
+    bool is_cached
 }

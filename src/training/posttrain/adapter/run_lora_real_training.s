@@ -1,8 +1,8 @@
-use std::io::{println, print_error}
-use std::fs::{file, read_file}
+use std::io
+use std::fs
 use std::json
-use neurx::lib::tensor::{tensor, create_vector, create_matrix, zeros}
-use neurx::lib::safetensors::{safe_tensors_reader, load_safetensors_metadata, verify_safetensors_file}
+use neurx::lib::tensor
+use neurx::lib::safetensors
 
 struct tensor_2 {
     []float data

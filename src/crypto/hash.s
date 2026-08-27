@@ -196,7 +196,7 @@ func hmac_init(algo_type int, key vec, key_len int) (hmac_context, string) {
     ctx := hmac_context{
         algo_type: algo_type,
         key: key,
-        key_len: key_len
+        key_len key_len
     }
     
     if algo_type == 0 {

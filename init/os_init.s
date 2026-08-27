@@ -30,7 +30,7 @@ func neurx_os_create(int cpu_cnt, int mem_mb) neurx_os {
         boot_time: 0,
         initialized: false,
         cpu_count: cpu_cnt,
-        total_memory_mb: mem_mb
+        mem_mb total_memory_mb
     }
     return os_info
 }

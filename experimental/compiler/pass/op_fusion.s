@@ -25,23 +25,23 @@ struct fusion_result {
 
 func can_fuse_ops(op_type first_op, op_type second_op) bool {
     match (first_op, second_op) {
-        (op_type::convolution, op_type::batch_norm): true,
-        (op_type::convolution, op_type::relu): true,
-        (op_type::matrix_multiply, op_type::relu): true,
-        (op_type::batch_norm, op_type::relu): true,
-        (op_type::matrix_multiply, op_type::gelu): true,
+        (op_type_convolution, op_type_batch_norm): true,
+        (op_type_convolution, op_type_relu): true,
+        (op_type_matrix_multiply, op_type_relu): true,
+        (op_type_batch_norm, op_type_relu): true,
+        (op_type_matrix_multiply, op_type_gelu): true,
         default: false,
     }
 }
 
 func get_fusion_pattern(op_type first_op, op_type second_op) option[fusion_pattern] {
     match (first_op, second_op) {
-        (op_type::convolution, op_type::batch_norm): option::some(fusion_pattern::conv_bn),
-        (op_type::convolution, op_type::relu): option::some(fusion_pattern::conv_relu),
-        (op_type::matrix_multiply, op_type::relu): option::some(fusion_pattern::linear_relu),
-        (op_type::batch_norm, op_type::relu): option::some(fusion_pattern::bn_relu),
-        (op_type::matrix_multiply, op_type::gelu): option::some(fusion_pattern::fc_gelu),
-        default: option::none,
+        (op_type_convolution, op_type_batch_norm): some(fusion_pattern_conv_bn),
+        (op_type_convolution, op_type_relu): some(fusion_pattern_conv_relu),
+        (op_type_matrix_multiply, op_type_relu): some(fusion_pattern_linear_relu),
+        (op_type_batch_norm, op_type_relu): some(fusion_pattern_bn_relu),
+        (op_type_matrix_multiply, op_type_gelu): some(fusion_pattern_fc_gelu),
+        default: nil,
     }
 }
 
@@ -59,7 +59,7 @@ func find_fusion_candidates(*computation_graph g) fusion_candidate[] {
 
                 for consumer in consumers {
                     if consumer.id == second_op.id {
-                        if get_fusion_pattern(first_op.op_kind, second_op.op_kind) is option::some(pattern) {
+                        if get_fusion_pattern(first_op.op_kind, second_op.op_kind) is some(pattern) {
                             candidates.push(fusion_candidate {
                                 first_op_id: first_op.id,
                                 second_op_id: second_op.id,
@@ -92,25 +92,25 @@ func apply_op_fusion(*computation_graph g) fusion_result {
 
 func should_fuse_before_activation(op_type op_kind) bool {
     match op_kind {
-        op_type::relu | op_type::gelu => true,
+        op_type_relu | op_type_gelu => true,
         default => false,
     }
 }
 
 func is_memory_efficient_to_fuse(*computation_graph g, int first_id, int second_id) bool {
     switch g.get_operation(first_id) {
-        option::some(first_op): {
+        some(first_op): {
             switch g.get_operation(second_id) {
-                option::some(second_op): {
+                some(second_op): {
                     if len(first_op.output_ids) == 1 && len(second_op.input_ids) == 1 {
                         output_id = first_op.output_ids[0]
                         return g.find_consumers(output_id).len() == 1
                     }
                     false
                 },
-                option::none: false,
+                nil: false,
             }
         },
-        option::none: false,
+        nil: false,
     }
 }

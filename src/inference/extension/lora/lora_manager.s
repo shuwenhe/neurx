@@ -6,48 +6,48 @@ use std.result.result
 use std.map.map
 
 struct lora_config {
-    lora_rank: int
-    lora_alpha: float
-    lora_dropout: float
-    target_modules: *string[]
-    bias: string
-    task_type: string
+    int lora_rank
+    float lora_alpha
+    float lora_dropout
+    *string[] target_modules
+    string bias
+    string task_type
 }
 
 struct lora_weights {
-    lora_a: float[][]]
-    lora_b: float[][]]
-    scaling: float
+    float[][]] lora_a
+    float[][]] lora_b
+    float scaling
 }
 
 struct lora_adapter {
-    name: string
-    config: lora_config
+    string name
+    lora_config config
     weights: map[string, lora_weights]
-    enabled: bool
-    scale: float
+    bool enabled
+    float scale
 }
 
 struct lora_adapter_error {
-    code: string
-    message: string
+    string code
+    string message
 }
 
 func (lora_adapter* adapter) apply_lora(
     module_name: string,
     input: *float[],
-    output: *float[][]]
+    *float[][]] output
 ) (float), lora_adapter_error[] {
     if !adapter.enabled {
         return output, ""
     }
 
     switch adapter.weights.get(module_name) {
-        option::some(weights) : {
+        some(weights) : {
             lora_result := apply_lora_transformation(input, weights, adapter.scale)
 return             (lora_result, "")
         },
-        option::none : {
+        nil : {
             (lora_adapter_error {
                 code: "MODULE_NOT_FOUND",
                 message: "LoRA weights not found for module: " + module_name,
@@ -59,7 +59,7 @@ return             (lora_result, "")
 func apply_lora_transformation(
     input: *float[],
     weights: *lora_weights,
-    scale: float
+    float scale
 ) (float), lora_adapter_error[] {
     if len(weights.lora_a) == 0 || len(weights.lora_b) == 0 {
         return (lora_adapter_error {
@@ -84,7 +84,7 @@ return     (scaled_output, "")
 
 func matrix_multiply(
     a: *float[],
-    b: *float[][]]
+    *float[][]] b
 ) (float), lora_adapter_error[] {
     if len(b) == 0 {
         return (lora_adapter_error {
@@ -112,11 +112,11 @@ return     (result, "")
 
 struct lora_adapter_manager {
     adapters: map[string, lora_adapter]
-    active_adapters: *string[]
-    global_scale: float
+    *string[] active_adapters
+    float global_scale
 }
 
-func lora_adapter_manager::new() lora_adapter_manager {
+func new() lora_adapter_manager {
     lora_adapter_manager {
         adapters: map[string, lora_adapter](),
         active_adapters: string[](),
@@ -126,7 +126,7 @@ func lora_adapter_manager::new() lora_adapter_manager {
 
 func (lora_adapter_manager* manager) add_adapter(
     name: string,
-    adapter: *lora_adapter
+    *lora_adapter adapter
 ) ((), lora_adapter_error) {
     if len(name) == 0 {
         return (lora_adapter_error {
@@ -172,11 +172,11 @@ func (lora_adapter_manager* manager) activate_adapter(string name) ((), lora_ada
     manager.active_adapters = append(manager.active_adapters, name)
 
     switch manager.adapters.get(name) {
-        option::some(adapter) : {
+        some(adapter) : {
             adapter.enabled = true
             return (), ""
         },
-        option::none : {
+        nil : {
             (lora_adapter_error {
                 code: "ACTIVATION_FAILED",
                 message: "Failed to activate adapter",
@@ -196,11 +196,11 @@ func (lora_adapter_manager* manager) deactivate_adapter(string name) ((), lora_a
     }
 
     switch manager.adapters.get(name) {
-        option::some(adapter) : {
+        some(adapter) : {
             adapter.enabled = false
             return (), ""
         },
-        option::none : {
+        nil : {
             (lora_adapter_error {
                 code: "DEACTIVATION_FAILED",
                 message: "Failed to deactivate adapter",
@@ -215,8 +215,8 @@ func (manager* manager) get_active_adapters() *string[] {
 
 func (manager* manager) get_adapter(string name) option[lora_adapter] {
     switch manager.adapters.get(name) {
-        option::some(adapter) : option::some(adapter),
-        option::none : option::none,
+        some(adapter) : some(adapter),
+        nil : nil,
     }
 }
 
@@ -238,17 +238,17 @@ func (lora_adapter_manager* manager) merge_adapters() ((), lora_adapter_error) {
         adapter_name := manager.active_adapters[i]
 
         switch manager.adapters.get(adapter_name) {
-            option::some(adapter) : {
+            some(adapter) : {
                 for module_name in adapter.weights.keys() {
                     switch adapter.weights.get(module_name) {
-                        option::some(weights) : {
+                        some(weights) : {
                             ""
                         },
-                        option::none : {},
+                        nil : {},
                     }
                 }
             },
-            option::none : {},
+            nil : {},
         }
 
         i = i + 1
@@ -266,23 +266,23 @@ func (manager* manager) get_memory_usage_mb() int {
 
     for name in manager.adapters.keys() {
         switch manager.adapters.get(name) {
-            option::some(adapter) : {
+            some(adapter) : {
                 adapter_size := 0
 
                 for module_name in adapter.weights.keys() {
                     switch adapter.weights.get(module_name) {
-                        option::some(weights) : {
+                        some(weights) : {
                             a_size := len(weights.lora_a) * weights.lora_a[0].len() * 4
                             b_size := len(weights.lora_b) * weights.lora_b[0].len() * 4
                             adapter_size = adapter_size + a_size + b_size
                         },
-                        option::none : {},
+                        nil : {},
                     }
                 }
 
                 total = total + adapter_size
             },
-            option::none : {},
+            nil : {},
         }
     }
 
@@ -313,7 +313,7 @@ func create_default_lora_config() lora_config {
 func main() {
     config := create_default_lora_config()
 
-    manager := lora_adapter_manager::new()
+    manager := new()
 
     adapter := lora_adapter {
         name: "finetuned_lora",

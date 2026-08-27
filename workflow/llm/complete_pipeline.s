@@ -6,16 +6,16 @@ use std.strings
 println := io.println
 
 struct compile_config {
-    source_file: string
-    output_binary: string
-    optimization_level: i32
-    debug_mode: bool
+    string source_file
+    string output_binary
+    i32 optimization_level
+    bool debug_mode
 }
 
 struct ir_module {
-    name: string
-    version: string
-    optimization_level: i32
+    string name
+    string version
+    i32 optimization_level
     instructions: []string
     data_section: []string
 }
@@ -77,15 +77,15 @@ func compile_neurx_code(compile_config config) (bool, ir_module) {
 struct tensor_2 {
     data: []f64
     shape: []i32
-    dtype: string
-    device: string
+    string dtype
+    string device
 }
 
 struct data_bundle {
-    batch_id: i32
-    input_tensor: tensor_2
-    target_tensor: tensor_2
-    metadata: map[string]string
+    i32 batch_id
+    tensor_2 input_tensor
+    tensor_2 target_tensor
+    map[string]string metadata
 }
 
 func bundle_training_data(i32 batch_size, i32 seq_len, i32 vocab_size) data_bundle {
@@ -131,25 +131,25 @@ func bundle_training_data(i32 batch_size, i32 seq_len, i32 vocab_size) data_bund
 }
 
 struct model_config {
-    hidden_dim: i32
-    num_layers: i32
-    num_heads: i32
-    ffn_dim: i32
-    vocab_size: i32
+    i32 hidden_dim
+    i32 num_layers
+    i32 num_heads
+    i32 ffn_dim
+    i32 vocab_size
 }
 
 struct training_state {
-    step: i32
-    model_params: tensor_2
-    optimizer_state: map[string]tensor_2
-    learning_rate: f64
-    warmup_steps: i32
+    i32 step
+    tensor_2 model_params
+    map[string]tensor_2 optimizer_state
+    f64 learning_rate
+    i32 warmup_steps
 }
 
 struct runner {
-    config: model_config
-    state: training_state
-    batch: data_bundle
+    model_config config
+    training_state state
+    data_bundle batch
 }
 
 func init_runner(model_config config, data_bundle batch, f64 learning_rate) runner {
@@ -210,9 +210,9 @@ func init_runner(model_config config, data_bundle batch, f64 learning_rate) runn
 }
 
 struct forward_output {
-    logits: tensor_2
+    tensor_2 logits
     hidden_states: []tensor_2
-    cache: map[string]tensor_2
+    map[string]tensor_2 cache
 }
 
 func forward_pass(runner runner) (forward_output, f64) {
@@ -266,10 +266,10 @@ func forward_pass(runner runner) (forward_output, f64) {
 }
 
 struct loss_metrics {
-    total_loss: f64
-    avg_logit: f64
-    max_logit: f64
-    min_logit: f64
+    f64 total_loss
+    f64 avg_logit
+    f64 max_logit
+    f64 min_logit
 }
 
 func compute_loss(forward_output output, tensor_2 targets) (loss_metrics, f64) {
@@ -307,11 +307,11 @@ func compute_loss(forward_output output, tensor_2 targets) (loss_metrics, f64) {
 }
 
 struct gradient_info {
-    num_gradients: i32
-    total_norm: f64
-    max_grad: f64
-    min_grad: f64
-    grad_overflow: bool
+    i32 num_gradients
+    f64 total_norm
+    f64 max_grad
+    f64 min_grad
+    bool grad_overflow
 }
 
 func backward_pass(runner runner, forward_output output, f64 loss) (gradient_info, f64) {
@@ -365,10 +365,10 @@ func backward_pass(runner runner, forward_output output, f64 loss) (gradient_inf
 }
 
 struct optimizer_update {
-    step_count: i32
-    learning_rate_adjusted: f64
-    param_update_norm: f64
-    weight_decay_applied: bool
+    i32 step_count
+    f64 learning_rate_adjusted
+    f64 param_update_norm
+    bool weight_decay_applied
 }
 
 func adamw_optimizer_step(runner runner, gradient_info grad_info, i32 step) (optimizer_update, f64) {
@@ -442,15 +442,15 @@ func adamw_optimizer_step(runner runner, gradient_info grad_info, i32 step) (opt
 }
 
 struct training_step {
-    step_id: i32
-    total_time: f64
-    compile_time: f64
-    forward_time: f64
-    loss_time: f64
-    backward_time: f64
-    optimizer_time: f64
-    loss_value: f64
-    learning_rate: f64
+    i32 step_id
+    f64 total_time
+    f64 compile_time
+    f64 forward_time
+    f64 loss_time
+    f64 backward_time
+    f64 optimizer_time
+    f64 loss_value
+    f64 learning_rate
 }
 
 func exit_and_summarize(

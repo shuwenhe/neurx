@@ -5,20 +5,20 @@ use std.path
 use std.env
 
 struct component_status {
-    name: string
-    file_path: string
-    size_bytes: i64
-    lines: i32
-    status: string
-    description: string
+    string name
+    string file_path
+    i64 size_bytes
+    i32 lines
+    string status
+    string description
 }
 
 struct system_health_check {
-    timestamp: string
-    total_components: i32
-    ready_components: i32
-    health_score: f64
-    components: component_status[]
+    string timestamp
+    i32 total_components
+    i32 ready_components
+    f64 health_score
+    component_status[] components
     recommendations: []string
 }
 
@@ -146,7 +146,7 @@ func perform_system_check() system_health_check {
         ready_components: ready,
         health_score: health_score,
         components: components,
-        recommendations: recommendations
+        recommendations recommendations
     }
     return check
 }

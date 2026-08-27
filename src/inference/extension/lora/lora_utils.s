@@ -6,14 +6,14 @@ use std.result.result
 use std.map.map
 
 struct lora_utils_error {
-    code: string
-    message: string
+    string code
+    string message
 }
 
 func init_lora_weights_kaiming(
-    in_features: int,
-    out_features: int,
-    rank: int
+    int in_features,
+    int out_features,
+    int rank
 ) ((float[][], float[][]]), lora_utils_error) {
     if in_features <= 0 || out_features <= 0 || rank <= 0 {
         return (lora_utils_error {
@@ -75,17 +75,17 @@ func gaussian_random(float std) float {
 }
 
 func load_lora_weights_from_dict(
-    weights_dict: *map[string, *float[][]]]
+    *map[string, *float[][]] weights_dict
 ) (*map[string, (float[][], float[][])]], lora_utils_error) {
     result_weights := map[string, (float[][]], float[][]])]()
 
     for name in weights_dict.keys() {
         switch weights_dict.get(name) {
-            option::some(weight) : {
+            some(weight) : {
 
                 result_weights.insert(name, (weight, weight))
             },
-            option::none : {},
+            nil : {},
         }
     }
 
@@ -93,8 +93,8 @@ return     (result_weights, "")
 }
 
 func save_lora_weights_to_file(
-    output_path: string,
-    weights: *map[string, (float[][]], float[][]])]
+    string output_path,
+    *map[string, (float[][], float[][])] weights
 ) ((), lora_utils_error) {
     if len(output_path) == 0 {
         return (lora_utils_error {
@@ -107,7 +107,7 @@ func save_lora_weights_to_file(
 }
 
 func load_lora_weights_from_file(
-    file_path: string
+    string file_path
 ) (*map[string, (float[][], float[][])], lora_utils_error) {
     if len(file_path) == 0 {
         return (lora_utils_error {
@@ -123,7 +123,7 @@ return     (weights, "")
 
 func estimate_lora_rank(
     delta_weights: *float[][]],
-    threshold: float
+    float threshold
 ) (int, lora_utils_error) {
     if len(delta_weights) == 0 {
         return (lora_utils_error {
@@ -176,10 +176,10 @@ func merge_lora_configs(
     first_config := configs[0]
     for key in first_config.keys() {
         switch first_config.get(key) {
-            option::some(val) : {
+            some(val) : {
                 merged.insert(key, val)
             },
-            option::none : {},
+            nil : {},
         }
     }
 
@@ -191,7 +191,7 @@ func validate_lora_weight_shapes(
     lora_b: *float[][]],
     expected_in_features: int,
     expected_out_features: int,
-    expected_rank: int
+    int expected_rank
 ) ((), lora_utils_error) {
 
     if len(lora_a) != expected_in_features {
@@ -231,7 +231,7 @@ func validate_lora_weight_shapes(
 
 func calculate_lora_memory_mb(
     lora_a: *float[][]],
-    lora_b: *float[][]]
+    *float[][]] lora_b
 ) int {
     a_size := len(lora_a) * (if len(lora_a) > 0 { lora_a[0].len() } else { 0 })
     b_size := len(lora_b) * (if len(lora_b) > 0 { lora_b[0].len() } else { 0 })
@@ -241,7 +241,7 @@ func calculate_lora_memory_mb(
 
 func normalize_lora_weights(
     lora_a: *float[][],
-    lora_b: *float[][]
+    *float[][] lora_b
 ) ((float[][], float[][])), lora_utils_error) {
     if len(lora_a) == 0 || len(lora_b) == 0 {
         return (lora_utils_error {
@@ -323,7 +323,7 @@ func normalize_lora_weights(
 
 func check_lora_weights_validity(
     lora_a: *float[][]],
-    lora_b: *float[][]]
+    *float[][]] lora_b
 ) ((), lora_utils_error) {
     i := 0
     for i < len(lora_a) {

@@ -2,8 +2,8 @@ import "device_api"
 import "stream_api"
 
 struct memory_ptr {
-    addr: i64
-    device: device
+    i64 addr
+    device device
 }
 interface i_memory {
     allocate(device: device, i64 size, i64 alignment) . memory_ptr

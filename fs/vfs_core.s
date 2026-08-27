@@ -79,11 +79,11 @@ func lookup_inode(*inode_table table, int inode_num) option[*inode] {
     i := 0
     while i < table.allocated_inodes {
         if table.inodes.get(i).inode_num == inode_num {
-            return option::some(table.inodes.get(i))
+            return some(table.inodes.get(i))
         }
         i = i + 1
     }
-    option::none
+    nil
 }
 
 func add_inode_to_directory(*inode parent, string name, *inode child) int {
@@ -131,16 +131,16 @@ func dentry_lookup_child(*dentry parent, string name) option[*dentry] {
     i := 0
     while i < len(parent.children) {
         if parent.children.get(i).name == name {
-            return option::some(parent.children.get(i))
+            return some(parent.children.get(i))
         }
         i = i + 1
     }
-    option::none
+    nil
 }
 
 func path_lookup(*dentry root, string path) option[*dentry] {
     if path == "/" {
-        return option::some(root)
+        return some(root)
     }
     
     current := root
@@ -158,17 +158,17 @@ func path_lookup(*dentry root, string path) option[*dentry] {
             component := substr(path, pos, next_slash)
             
             switch dentry_lookup_child(current, component) {
-                option::some(next_dir) : {
+                some(next_dir) : {
                     current = next_dir
                     pos = next_slash + 1
                 },
-                option::none : {
-                    return option::none
+                nil : {
+                    return nil
                 }
             }
         }
     }
-    option::some(current)
+    some(current)
 }
 
 func find_next_slash(string path, int start) int {
@@ -200,9 +200,9 @@ func open_file(*dentry dentry_ptr, int flags) option[*file] {
         f.flags = flags
         f.mode = dentry_ptr.inode_ptr.mode
         dentry_ptr.inode_ptr.reference_count = dentry_ptr.inode_ptr.reference_count + 1
-        return option::some(f)
+        return some(f)
     }
-    option::none
+    nil
 }
 
 func close_file(*file file_ptr) int {
@@ -260,23 +260,23 @@ func vfs_mkdir(*dentry parent, string name, int mode) option[*dentry] {
     new_inode := create_inode(parent.inode_ptr.reference_count + 1, mode)
     new_dentry := create_dentry(name, new_inode)
     dentry_add_child(parent, new_dentry)
-    option::some(new_dentry)
+    some(new_dentry)
 }
 
 func vfs_create_file(*dentry parent, string name, int mode) option[*dentry] {
     new_inode := create_inode(parent.inode_ptr.reference_count + 100, mode)
     new_dentry := create_dentry(name, new_inode)
     dentry_add_child(parent, new_dentry)
-    option::some(new_dentry)
+    some(new_dentry)
 }
 
 func vfs_unlink(*dentry parent, string name) int {
     switch dentry_lookup_child(parent, name) {
-        option::some(child) : {
+        some(child) : {
             child.inode_ptr.reference_count = child.inode_ptr.reference_count - 1
             return 0
         },
-        option::none : {
+        nil : {
             return 1
         }
     }
@@ -284,14 +284,14 @@ func vfs_unlink(*dentry parent, string name) int {
 
 func vfs_rmdir(*dentry parent, string name) int {
     switch dentry_lookup_child(parent, name) {
-        option::some(child) : {
+        some(child) : {
             if len(child.children) == 0 {
                 child.inode_ptr.reference_count = child.inode_ptr.reference_count - 1
                 return 0
             }
             return 1
         },
-        option::none : {
+        nil : {
             return 1
         }
     }

@@ -6,13 +6,13 @@ use neurx.tool_parsers.constraint.constraint_generator
 use std.slices
 
 struct structured_sampler {
-    schema: json_schema
-    mode: string
+    json_schema schema
+    string mode
     allowed_next: []int
-    current_output: string
+    string current_output
     parse_context: schema_types.parse_context
-    state: int
-    violations: int
+    int state
+    int violations
     warnings: []string
 }
 

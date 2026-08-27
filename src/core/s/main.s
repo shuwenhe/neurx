@@ -68,7 +68,7 @@ func new_config(int epochs, int batch_size, float learning_rate, float grad_clip
         epochs: epochs,
         batch_size: batch_size,
         learning_rate: learning_rate,
-        grad_clip: grad_clip
+        grad_clip grad_clip
     }
 }
 
@@ -317,7 +317,7 @@ func apply_sgd(trainer_state state, tensor params, tensor grads) trainer_step_ou
     tensor updated_params = step_tensor(state.optimizer, params, grads)
     trainer_step_output {
         state: state,
-        params: updated_params
+        updated_params params
     }
 }
 

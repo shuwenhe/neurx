@@ -115,7 +115,7 @@ func (mm module_manager*) load_module(string name, string version) (int, string)
         code_size: 0,
         has_init: true,
         has_exit: true,
-        has_modinfo: true
+        true has_modinfo
     }
     
     mm.loaded_modules = append(mm.loaded_modules, module)
@@ -179,9 +179,9 @@ func (mm module_manager) find_module(string name) option[int] {
     i := 0
     while i < len(mm.loaded_modules) {
         if mm.loaded_modules[i].name == name {
-            return option::some(i)
+            return some(i)
         }
         i = i + 1
     }
-    return option::none()
+    return nil()
 }

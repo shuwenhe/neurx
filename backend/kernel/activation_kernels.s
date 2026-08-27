@@ -10,7 +10,7 @@ struct ActivationKernels {
 
 func NewActivationKernels(types.KernelConfig config) *ActivationKernels {
     return *ActivationKernels{
-        config: config
+        config config
     }
 }
 

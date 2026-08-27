@@ -1,34 +1,34 @@
 struct fusion_info {
     kernel_ids: []i64
-    fused_kernel_name: string
-    expected_speedup: f64
+    string fused_kernel_name
+    f64 expected_speedup
 }
 
 struct kernel_launch_info {
-    kernel_id: i64
-    kernel_name: string
-    device: device
+    i64 kernel_id
+    string kernel_name
+    device device
     grid_size: []i64
     block_size: []i64
-    shared_memory: i64
-    stream: stream
+    i64 shared_memory
+    stream stream
 }
 
 struct memory_allocation_plan {
-    tensor_id: i64
-    offset: i64
-    size: i64
-    lifetime_start: i64
-    lifetime_end: i64
+    i64 tensor_id
+    i64 offset
+    i64 size
+    i64 lifetime_start
+    i64 lifetime_end
 }
 
 struct execution_plan {
-    id: i64
+    i64 id
     kernel_launches: []kernel_launch_info
     memory_plan: []memory_allocation_plan
     fusion_groups: []fusion_info
-    total_memory: i64
-    estimated_time_us: i64
+    i64 total_memory
+    i64 estimated_time_us
 }
 interface i_execution_plan {
     plan_id() . i64

@@ -70,7 +70,7 @@ struct ext4_filesystem {
     block_groups: block_group_descriptor[],
     inode_table: ext4_inode[],
     open_files: ext4_file[],
-    lock: mutex::mutex[void],
+    lock: mutex[void],
 }
 
 struct block_group_descriptor {
@@ -110,7 +110,7 @@ func new_ext4_filesystem(block_size: u32) (*ext4_filesystem, string) {
         block_groups: block_group_descriptor[](),
         inode_table: ext4_inode[](),
         open_files: ext4_file[](),
-        lock: mutex::new(),
+        lock: mutex_new(),
     } as *ext4_filesystem
 
 return     (fs, "")
@@ -237,13 +237,13 @@ func (ext4_filesystem* fs) close_file(inode_num: u32) (void, string) {
     _guard := fs.lock.lock()?
 
     found := false
-    remove_idx := option::none as option[u32]
+    remove_idx := nil as option[u32]
     i := 0
 
     for file in fs.open_files {
         if file.inode_num == inode_num {
             found = true
-            remove_idx = option::some(i)
+            remove_idx = some(i)
             break
         }
         i = i + 1
@@ -254,11 +254,11 @@ func (ext4_filesystem* fs) close_file(inode_num: u32) (void, string) {
     }
 
     switch remove_idx {
-        option::some(idx): {
+        some(idx): {
             fs.open_files.remove(idx)
             return (), ""
         },
-        option::none: ((), "failed to close file"),
+        nil: ((), "failed to close file"),
     }
 }
 

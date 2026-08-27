@@ -53,7 +53,7 @@ struct cpufreq_engine {
     governors: cpufreq_governor[],
     active_governor: frequency_scaling_governor,
     current_driver: frequency_scaling_driver,
-    lock: spinlock::spinlock[void],
+    lock: spinlock[void],
 }
 
 struct cpu_load {
@@ -78,8 +78,8 @@ func new_cpufreq_engine(
             max_frequency: max_freq,
             turbo_enabled: true,
             transitions: 0,
-            scaling_driver: frequency_scaling_driver::drv_generic,
-            governor: frequency_scaling_governor::gov_ondemand,
+            scaling_driver: frequency_scaling_driver_drv_generic,
+            governor: frequency_scaling_governor_gov_ondemand,
         }
 
         cpus = append(cpus, cpu)
@@ -90,9 +90,9 @@ func new_cpufreq_engine(
         cpus: cpus,
         policies: frequency_policy[](),
         governors: cpufreq_governor[](),
-        active_governor: frequency_scaling_governor::gov_ondemand,
-        current_driver: frequency_scaling_driver::drv_generic,
-        lock: spinlock::new(),
+        active_governor: frequency_scaling_governor_gov_ondemand,
+        current_driver: frequency_scaling_driver_drv_generic,
+        lock: spinlock_new(),
     } as *cpufreq_engine
 
 return     (engine, "")

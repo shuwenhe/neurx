@@ -14,7 +14,7 @@ struct TestResult {
     name: string,
     passed: bool,
     message: string,
-    duration_ms: f32
+    f32 duration_ms
 }
 
 test_results := make([]TestResult, 0)

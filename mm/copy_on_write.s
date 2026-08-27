@@ -16,7 +16,7 @@ struct cow_page {
 
 struct cow_manager {
     pages: cow_page[],
-    lock: mutex::mutex[void],
+    lock: mutex[void],
 }
 
 const cow_max_references = 1000
@@ -24,7 +24,7 @@ const cow_max_references = 1000
 func new_cow_manager() (*cow_manager, string) {
     mgr := *cow_manager{
         pages: cow_page[]{},
-        lock: mutex::new(),
+        lock: mutex_new(),
     } as *cow_manager
 
 return     (mgr, "")
@@ -107,7 +107,7 @@ func (cow_manager* mgr) get_reference_count(ppage: u64) (u32, string) {
 func (cow_manager* mgr) handle_cow_fault(
     vaddr: u64,
     ppage: u64,
-    pt: *page_table::page_table,
+    pt: *page_table,
 ) (u64, string) {
     _guard := mgr.lock.lock()?
 
@@ -119,7 +119,7 @@ func (cow_manager* mgr) handle_cow_fault(
         return ppage, ""
     }
 
-    new_ppage := page_table::allocate_physical_page()?
+    new_ppage := page_table_allocate_physical_page()?
     copy_page_memory(ppage, new_ppage)?
 
     mgr.decrement_reference(ppage)?
@@ -138,36 +138,36 @@ func copy_page_memory(src: u64, dst: u64) (void, string) {
 func (cow_manager* mgr) unmap_cow_page(ppage: u64) (void, string) {
     _guard := mgr.lock.lock()?
 
-    remove_idx := option::none as option[u32]
+    remove_idx := nil as option[u32]
     i := 0
 
     for page in mgr.pages {
         if page.physical_address == ppage {
-            remove_idx = option::some(i)
+            remove_idx = some(i)
             break
         }
         i = i + 1
     }
 
     switch remove_idx {
-        option::some(idx): {
+        some(idx): {
             mgr.pages.remove(idx)
-            page_table::free_physical_page(ppage)?
+            page_table_free_physical_page(ppage)?
             return (), ""
         },
-        option::none: ((), "cow page not found"),
+        nil: ((), "cow page not found"),
     }
 }
 
 struct fork_context {
-    parent_page_table: *page_table::page_table,
-    child_page_table: *page_table::page_table,
+    parent_page_table: *page_table,
+    child_page_table: *page_table,
     cow_mgr: *cow_manager,
 }
 
 func (cow_manager* mgr) fork_address_space(
-    parent_pt: *page_table::page_table,
-    child_pt: *page_table::page_table,
+    parent_pt: *page_table,
+    child_pt: *page_table,
 ) (void, string) {
     _guard := mgr.lock.lock()?
 

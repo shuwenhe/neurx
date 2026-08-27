@@ -70,11 +70,11 @@ func new_attention_config(int num_heads, int head_dim) attention_config {
 func new_attention_backend(attention_backend_type backend_type, attention_config config) attention_backend {
     backend_name := ""
     switch backend_type {
-        attention_backend_type::standard : backend_name = "standard",
-        attention_backend_type::flash_attention : backend_name = "flash_attention",
-        attention_backend_type::dsa : backend_name = "dsa",
-        attention_backend_type::paged_attention : backend_name = "paged_attention",
-        attention_backend_type::sparse_attention : backend_name = "sparse_attention",
+        attention_backend_type_standard : backend_name = "standard",
+        attention_backend_type_flash_attention : backend_name = "flash_attention",
+        attention_backend_type_dsa : backend_name = "dsa",
+        attention_backend_type_paged_attention : backend_name = "paged_attention",
+        attention_backend_type_sparse_attention : backend_name = "sparse_attention",
     }
 
     attention_backend {

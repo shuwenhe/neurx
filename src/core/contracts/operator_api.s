@@ -2,10 +2,10 @@ import "dispatcher_api"
 import "autograd_api"
 
 struct operator_context {
-    requires_grad: bool
-    dispatcher: Dispatcher
-    device: device
-    profiler: profiler
+    bool requires_grad
+    Dispatcher dispatcher
+    device device
+    profiler profiler
 }
 interface i_operator {
     forward(inputs: []tensor, ctx: operator_context) . tensor

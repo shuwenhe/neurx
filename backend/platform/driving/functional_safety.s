@@ -40,11 +40,11 @@ func new_functional_safety_monitor(safety_level level) functional_safety_monitor
 func (functional_safety_monitor* monitor) report_fault(failure_mode mode) {
     mode_id := 0
     switch mode {
-        failure_mode::sensor_fault: mode_id = 1,
-        failure_mode::compute_fault: mode_id = 2,
-        failure_mode::communication_fault: mode_id = 3,
-        failure_mode::power_fault: mode_id = 4,
-        failure_mode::unknown: mode_id = 5,
+        failure_mode_sensor_fault: mode_id = 1,
+        failure_mode_compute_fault: mode_id = 2,
+        failure_mode_communication_fault: mode_id = 3,
+        failure_mode_power_fault: mode_id = 4,
+        failure_mode_unknown: mode_id = 5,
     }
     
     monitor.fault_history = append(monitor.fault_history, mode_id)

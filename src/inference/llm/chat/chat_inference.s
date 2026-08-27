@@ -5,34 +5,34 @@ use std.time
 use std.strings
 
 struct chat_config {
-    vocab_size: i32
-    hidden_dim: i32
-    num_layers: i32
-    num_heads: i32
-    ffn_dim: i32
-    max_seq_length: i32
-    max_new_tokens: i32
-    temperature: f64
+    i32 vocab_size
+    i32 hidden_dim
+    i32 num_layers
+    i32 num_heads
+    i32 ffn_dim
+    i32 max_seq_length
+    i32 max_new_tokens
+    f64 temperature
 }
 
 struct chat_request {
-    user_input: string
+    string user_input
     conversation_history: []string
-    max_tokens: i32
-    temperature: f64
+    i32 max_tokens
+    f64 temperature
 }
 
 struct chat_response {
-    assistant_reply: string
-    tokens_generated: i32
-    latency_ms: f64
+    string assistant_reply
+    i32 tokens_generated
+    f64 latency_ms
 }
 
 struct simple_transformer {
-    config: chat_config
-    embedding_dim: i32
-    head_dim: i32
-    total_params: i64
+    chat_config config
+    i32 embedding_dim
+    i32 head_dim
+    i64 total_params
 }
 
 func create_chat_config() chat_config {

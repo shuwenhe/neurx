@@ -125,13 +125,13 @@ func backward_embedding(node n, tensor grad_output) backward_result {
         data: grad_weight_data,
         grad: [],
         shape: embedding_weight.shape,
-        requires_grad: true
+        true requires_grad
     }
     tensor grad_ids_zeros {
         data: zeros_like_array(len(token_ids.data)),
         grad: [],
         shape: token_ids.shape,
-        requires_grad: false
+        false requires_grad
     }
     backward_result { input_grads: [grad_weight, grad_ids_zeros], success: true }
 }

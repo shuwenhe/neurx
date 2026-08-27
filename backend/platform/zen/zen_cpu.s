@@ -31,7 +31,7 @@ func detect_zen_cpu() zen_cpu_info {
         boost_frequency_ghz: 5.6,
         supports_avx512: false,
         supports_avx2: true,
-        supports_smm: true
+        true supports_smm
     }
 }
 
@@ -43,7 +43,7 @@ func create_zen_platform_config() zen_platform_config {
         num_numa_nodes: 2,
         cores_per_node: [8, 8],
         frequency_mode: "performance",
-        power_management_enabled: false
+        false power_management_enabled
     }
 }
 

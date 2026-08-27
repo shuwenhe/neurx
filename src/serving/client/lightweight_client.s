@@ -60,7 +60,7 @@ func (lightweight_client_config* cfg) infer(inference_request req) inference_res
 
 func deployment_plan_1m_machines() distribution_strategy {
     distribution_strategy {
-        mode: deployment_mode::hybrid,
+        mode: deployment_mode_hybrid,
         central_nodes: 1000,          
         edge_nodes: 100000,            
         client_nodes: 899000,          

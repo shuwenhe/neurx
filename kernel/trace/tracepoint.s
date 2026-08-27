@@ -60,7 +60,7 @@ func trace_event_record(trace_buffer buffer, string event_type, int pid, string 
         timestamp: 0,
         process_id: pid,
         cpu_id: 0,
-        event_data: data
+        data event_data
     }
     buffer.events = append(buffer.events, event)
     buffer.write_pos = buffer.write_pos + 1

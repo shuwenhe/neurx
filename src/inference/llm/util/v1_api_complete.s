@@ -76,7 +76,7 @@ func new_v1_engine(v1_engine_config config) v1_engine {
 
 func (v1_engine* engine) submit_request(
     prompt_tokens: []int,
-    max_new_tokens: int
+    int max_new_tokens
 ) int {
     request_id := engine.total_requests_received
     engine.total_requests_received += 1

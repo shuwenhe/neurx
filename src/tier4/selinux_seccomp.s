@@ -80,7 +80,7 @@ func (policy* selinux_policy) add_te_rule(source_type int, target_type int, perm
         source_type: source_type,
         target_type: target_type,
         permission: permissions,
-        effect: effect
+        effect effect
     }
     
     policy.te_rules = append(policy.te_rules, rule)
@@ -203,7 +203,7 @@ func (filter* seccomp_filter) add_arg_rule(syscall_nr int, action int, arg_value
         syscall_nr: syscall_nr,
         action: action,
         arg1_value: arg_value,
-        arg1_mask: arg_mask
+        arg_mask arg1_mask
     }
     
     filter.rules = append(filter.rules, rule)

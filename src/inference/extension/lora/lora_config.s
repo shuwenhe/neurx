@@ -6,22 +6,22 @@ use std.result.result
 use std.map.map
 
 struct lora_config {
-    lora_rank: int
-    lora_alpha: float
-    lora_dropout: float
-    target_modules: *string[]
-    bias: string
-    task_type: string
-    modules_to_save: option[*string[]]
-    init_lora_weights: bool
+    int lora_rank
+    float lora_alpha
+    float lora_dropout
+    *string[] target_modules
+    string bias
+    string task_type
+    option[*string[]] modules_to_save
+    bool init_lora_weights
 }
 
 struct lora_config_error {
-    code: string
-    message: string
+    string code
+    string message
 }
 
-func lora_config::default() lora_config {
+func default() lora_config {
     lora_config {
         lora_rank: 8,
         lora_alpha: 16.0,
@@ -29,7 +29,7 @@ func lora_config::default() lora_config {
         target_modules: string[](),
         bias: "none",
         task_type: "CAUSAL_LM",
-        modules_to_save: option::none,
+        modules_to_save: nil,
         init_lora_weights: true,
     }
 }
@@ -77,18 +77,16 @@ func (lora_config* config) validate() ((), lora_config_error) {
     return (), ""
 }
 
-func lora_config::from_dict(
-    config_dict: *map[string, string]
-) (lora_config, lora_config_error) {
-    config := lora_config::default()
+func from_dict(*map[string, string] config_dict) (lora_config, lora_config_error) {
+    config := default()
 
     switch config_dict.get("lora_rank") {
-        option::some(val) : {
+        some(val) : {
             switch val.parse::<int>() {
-                option::some(rank) : {
+                some(rank) : {
                     config.lora_rank = rank
                 },
-                option::none : {
+                nil : {
                     return (lora_config_error {
                         code: "PARSE_ERROR",
                         message: "Failed to parse lora_rank: " + val,
@@ -96,16 +94,16 @@ func lora_config::from_dict(
                 },
             }
         },
-        option::none : {},
+        nil : {},
     }
 
     switch config_dict.get("lora_alpha") {
-        option::some(val) : {
+        some(val) : {
             switch val.parse::<float>() {
-                option::some(alpha) : {
+                some(alpha) : {
                     config.lora_alpha = alpha
                 },
-                option::none : {
+                nil : {
                     return (lora_config_error {
                         code: "PARSE_ERROR",
                         message: "Failed to parse lora_alpha: " + val,
@@ -113,16 +111,16 @@ func lora_config::from_dict(
                 },
             }
         },
-        option::none : {},
+        nil : {},
     }
 
     switch config_dict.get("lora_dropout") {
-        option::some(val) : {
+        some(val) : {
             switch val.parse::<float>() {
-                option::some(dropout) : {
+                some(dropout) : {
                     config.lora_dropout = dropout
                 },
-                option::none : {
+                nil : {
                     return (lora_config_error {
                         code: "PARSE_ERROR",
                         message: "Failed to parse lora_dropout: " + val,
@@ -130,21 +128,21 @@ func lora_config::from_dict(
                 },
             }
         },
-        option::none : {},
+        nil : {},
     }
 
     switch config_dict.get("bias") {
-        option::some(val) : {
+        some(val) : {
             config.bias = val
         },
-        option::none : {},
+        nil : {},
     }
 
     switch config_dict.get("task_type") {
-        option::some(val) : {
+        some(val) : {
             config.task_type = val
         },
-        option::none : {},
+        nil : {},
     }
 
     config.validate()
@@ -167,7 +165,7 @@ func (lora_config* config) is_target_module(string module_name) bool {
 
 func (lora_config* config) should_save_full_weights(string module_name) bool {
     switch config.modules_to_save {
-        option::some(modules) : {
+        some(modules) : {
             for module in modules.iter() {
                 if module == module_name {
                     return true
@@ -175,7 +173,7 @@ func (lora_config* config) should_save_full_weights(string module_name) bool {
             }
             false
         },
-        option::none : false,
+        nil : false,
     }
 }
 

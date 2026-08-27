@@ -225,7 +225,7 @@ func question_to_sft(question_data q) sft_record {
     sft_record{
         instruction: instruction,
         input: input,
-        output: output
+        output output
     }
 }
 

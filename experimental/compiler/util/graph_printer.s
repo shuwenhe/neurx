@@ -23,16 +23,16 @@ func print_graph_operations(*computation_graph g) string {
     for i, op in g.operations {
         s = s + op.id as string + ": " + op.name + " ("
         match op.op_kind {
-            op_type::add: s = s + "add",
-            op_type::subtract: s = s + "subtract",
-            op_type::multiply: s = s + "multiply",
-            op_type::matrix_multiply: s = s + "matmul",
-            op_type::relu: s = s + "relu",
-            op_type::gelu: s = s + "gelu",
-            op_type::softmax: s = s + "softmax",
-            op_type::layer_norm: s = s + "layer_norm",
-            op_type::reshape: s = s + "reshape",
-            op_type::transpose: s = s + "transpose",
+            op_type_add: s = s + "add",
+            op_type_subtract: s = s + "subtract",
+            op_type_multiply: s = s + "multiply",
+            op_type_matrix_multiply: s = s + "matmul",
+            op_type_relu: s = s + "relu",
+            op_type_gelu: s = s + "gelu",
+            op_type_softmax: s = s + "softmax",
+            op_type_layer_norm: s = s + "layer_norm",
+            op_type_reshape: s = s + "reshape",
+            op_type_transpose: s = s + "transpose",
             default: s = s + "unknown",
         }
         s = s + ")\n"

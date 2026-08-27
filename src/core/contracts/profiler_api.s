@@ -8,33 +8,33 @@ import "memory_api"
 }
 
 struct kernel_profile {
-    kernel_name: string
-    device: device
-    call_count: i64
-    total_time_us: i64
-    avg_time_us: i64
-    min_time_us: i64
-    max_time_us: i64
-    memory_allocated: i64
-    memory_freed: i64
+    string kernel_name
+    device device
+    i64 call_count
+    i64 total_time_us
+    i64 avg_time_us
+    i64 min_time_us
+    i64 max_time_us
+    i64 memory_allocated
+    i64 memory_freed
 }
 
 struct operator_profile {
-    op_name: string
-    call_count: i64
-    total_time_us: i64
-    avg_time_us: i64
+    string op_name
+    i64 call_count
+    i64 total_time_us
+    i64 avg_time_us
     input_shapes: [][]i64
     output_shapes: [][]i64
-    memory_peak: i64
+    i64 memory_peak
 }
 
 struct profiler_summary {
-    total_time_us: i64
-    kernel_profiles: map[string]kernel_profile
-    operator_profiles: map[string]operator_profile
+    i64 total_time_us
+    map[string]kernel_profile kernel_profiles
+    map[string]operator_profile operator_profiles
     memory_timeline: []i64
-    device: device
+    device device
 }
 interface i_profiler {
     enable() . void

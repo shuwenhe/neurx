@@ -2,11 +2,11 @@ import "tensor/tensor.s"
 import "src/training/posttrain/alignment/rollout_correction/config.s"
 
 struct rs_result {
-    rejection_mask: Tensor
-    rejection_scores: Tensor
-    rejection_rate: f32
-    mean_score: f32
-    max_score: f32
+    Tensor rejection_mask
+    Tensor rejection_scores
+    f32 rejection_rate
+    f32 mean_score
+    f32 max_score
 }
 
 func compute_k1_divergence(

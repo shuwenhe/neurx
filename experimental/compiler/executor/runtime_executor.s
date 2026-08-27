@@ -74,11 +74,11 @@ func (execution_context* ctx) reset() {
 
 func simulate_operation_execution(*operation op) int {
     match op.op_kind {
-        op_type::add | op_type::subtract | op_type::multiply => 1,
-        op_type::matrix_multiply => 5,
-        op_type::relu | op_type::gelu => 2,
-        op_type::softmax => 3,
-        op_type::layer_norm => 4,
+        op_type_add | op_type_subtract | op_type_multiply => 1,
+        op_type_matrix_multiply => 5,
+        op_type_relu | op_type_gelu => 2,
+        op_type_softmax => 3,
+        op_type_layer_norm => 4,
         default => 1,
     }
 }

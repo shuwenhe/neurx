@@ -3,40 +3,40 @@ import "src/training/optimizer/optimizer.s"
 import "src/training/posttrain/alignment/ppo/ppo.s"
 
 struct pfppo_config {
-    clip_epsilon: f32
-    value_clip_epsilon: f32
-    learning_rate: f32
-    num_epochs: i32
-    max_grad_norm: f32
-    kl_coeff: f32
-    gamma: f32
-    gae_lambda: f32
-    replay_buffer_size: i32
-    reward_threshold: f32
-    reward_percentile: f32
-    use_reward_filtering: bool
-    reuse_count: i32
-    buffer_sample_ratio: f32
+    f32 clip_epsilon
+    f32 value_clip_epsilon
+    f32 learning_rate
+    i32 num_epochs
+    f32 max_grad_norm
+    f32 kl_coeff
+    f32 gamma
+    f32 gae_lambda
+    i32 replay_buffer_size
+    f32 reward_threshold
+    f32 reward_percentile
+    bool use_reward_filtering
+    i32 reuse_count
+    f32 buffer_sample_ratio
 }
 
 struct experience {
-    prompt: tensor
-    response: tensor
-    log_probs: tensor
-    values: tensor
-    rewards: tensor
-    advantages: tensor
-    returns: tensor
-    done: bool
-    timestep: i32
+    tensor prompt
+    tensor response
+    tensor log_probs
+    tensor values
+    tensor rewards
+    tensor advantages
+    tensor returns
+    bool done
+    i32 timestep
 }
 
 struct replay_buffer {
-    capacity: i32
+    i32 capacity
     experiences: []experience
     rewards: []f32
-    current_size: i32
-    insertion_index: i32
+    i32 current_size
+    i32 insertion_index
 }
 
 func new_replay_buffer(i32 capacity) . replay_buffer {
@@ -115,15 +115,15 @@ func (replay_buffer* buffer) get_statistics() . (f32, f32, f32) {
 }
 
 struct pfppo_trainer {
-    config: pfppo_config
-    policy_model: *model
-    value_model: *model
-    reference_model: *model
-    optimizer: *optimizer
-    replay_buffer: replay_buffer
-    reuse_counts: map[i32]i32
-    filtered_count: i32
-    total_count: i32
+    pfppo_config config
+    *model policy_model
+    *model value_model
+    *model reference_model
+    *optimizer optimizer
+    replay_buffer replay_buffer
+    map[i32]i32 reuse_counts
+    i32 filtered_count
+    i32 total_count
 }
 
 func new_pfppo_trainer(
@@ -156,7 +156,7 @@ func (pfppo_trainer* trainer) collect_experiences([]tensor prompts) . []experien
         response, log_probs  := trainer.policy_model.generate(
             prompt,
             temperature: 1.0,
-            return_log_probs: true
+            true return_log_probs
         )
         input := concat(prompt, response)
         values := trainer.value_model.forward(input)

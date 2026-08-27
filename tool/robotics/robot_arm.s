@@ -41,7 +41,7 @@ func create_robot_arm(string* name, int num_joints, int frequency_hz) robot_arm 
         robot_name: name,
         joints: 0 as joint_config*,
         joint_count: num_joints,
-        control_frequency_hz: frequency_hz
+        frequency_hz control_frequency_hz
     }
 }
 

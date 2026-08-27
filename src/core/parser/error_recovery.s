@@ -347,10 +347,10 @@ func validate_recovery(string original, string recovered) bool {
 }
 
 struct RepairStrategy {
-    strategy_type: int
-    max_attempts: int
-    preserve_ratio: float
-    strict: bool
+    int strategy_type
+    int max_attempts
+    float preserve_ratio
+    bool strict
 }
 
 func create_default_repair_strategy() RepairStrategy {

@@ -146,7 +146,7 @@ func tokenize_text(string text, hf_tokenizer tokenizer) []string {
 func apply_chat_template(
     messages: []string,
     tokenizer: hf_tokenizer,
-    add_generation_prompt: bool
+    bool add_generation_prompt
 ) string {
 
     string formatted = ""

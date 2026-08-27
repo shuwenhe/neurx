@@ -38,7 +38,7 @@ func add_freq_state(int freq, int voltage, int power) cpu_freq_state {
     return cpu_freq_state{
         frequency: freq,
         voltage: voltage,
-        power: power
+        power power
     }
 }
 
@@ -50,7 +50,7 @@ func (cpufreq_driver* driver) create_ondemand_governor(int min_freq, int max_fre
         current_freq: max_freq,
         min_freq: min_freq,
         max_freq: max_freq,
-        available_states: new cpu_freq_state[5]
+        new cpu_freq_state[5] available_states
     }
     
     // 预设频率状态 (示例)
@@ -72,7 +72,7 @@ func (cpufreq_driver* driver) create_powersave_governor(int min_freq, int max_fr
         current_freq: min_freq,
         min_freq: min_freq,
         max_freq: max_freq,
-        available_states: new cpu_freq_state[5]
+        new cpu_freq_state[5] available_states
     }
     
     governor.available_states[0] = add_freq_state(800, 800, 500)
@@ -93,7 +93,7 @@ func (cpufreq_driver* driver) create_performance_governor(int min_freq, int max_
         current_freq: max_freq,
         min_freq: min_freq,
         max_freq: max_freq,
-        available_states: new cpu_freq_state[5]
+        new cpu_freq_state[5] available_states
     }
     
     governor.available_states[0] = add_freq_state(800, 800, 500)

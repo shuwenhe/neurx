@@ -7,15 +7,15 @@ import (
 )
 
 struct quality_metrics {
-    total_lines: i64
-    valid_docs: i64
-    invalid_docs: i64
-    total_chars: i64
-    total_tokens: i64
-    avg_doc_length: f64
-    avg_line_length: f64
-    quality_score: f64
-    dedup_hash_count: i64
+    i64 total_lines
+    i64 valid_docs
+    i64 invalid_docs
+    i64 total_chars
+    i64 total_tokens
+    f64 avg_doc_length
+    f64 avg_line_length
+    f64 quality_score
+    i64 dedup_hash_count
     language_detected: map<string, i64>
     length_distribution: map<string, i64>
     quality_distribution: map<string, i64>
@@ -23,9 +23,9 @@ struct quality_metrics {
 }
 
 struct quality_assessor {
-    sample_size: i64
-    metrics: quality_metrics
-    seen_hashes: set<string>
+    i64 sample_size
+    quality_metrics metrics
+    set<string> seen_hashes
 }
 
 func new_quality_assessor(i64 sample_size) quality_assessor {

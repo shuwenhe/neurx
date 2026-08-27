@@ -8,7 +8,7 @@ use neurx.kernel.locking.spinlock
 struct page_table {
     level4_table: *page_directory_entry,
     entry_count: u32,
-    lock: spinlock::spinlock[void],
+    lock: spinlock[void],
 }
 
 struct page_directory_entry {
@@ -58,7 +58,7 @@ func new_page_table() (*page_table, string) {
     pt := *page_table{
         level4_table: level4,
         entry_count: 0,
-        lock: spinlock::new(),
+        lock: spinlock_new(),
     } as *page_table
 
 return     (pt, "")

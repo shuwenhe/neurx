@@ -55,7 +55,7 @@ struct qos_engine {
     classes: qos_class[],
     queues: qos_queue[],
     active_policy: qos_policy,
-    lock: spinlock::spinlock[void],
+    lock: spinlock[void],
     tick_interval: u32,
 }
 
@@ -64,7 +64,7 @@ func new_qos_engine(policy: qos_policy) (*qos_engine, string) {
         classes: qos_class[](),
         queues: qos_queue[](),
         active_policy: policy,
-        lock: spinlock::new(),
+        lock: spinlock_new(),
         tick_interval: 1000,
     } as *qos_engine
 
@@ -147,17 +147,17 @@ func (qos_engine* engine) dequeue_packet(class_id: u32) (option[packet_info), st
     queue := *engine.queues.get(class_id) as *qos_queue
 
     if len(queue.packets) == 0 {
-        return option::none, ""
+        return nil, ""
     }
 
     match engine.active_policy {
-        qos_policy::fifo: {
+        qos_policy_fifo: {
             packet := queue.packets.get(0)
             queue.packets.remove(0)
             queue.bytes_total = queue.bytes_total - (len(packet.data) as u64)
-            (option::some(packet, ""))
+            (some(packet, ""))
         },
-        qos_policy::priority_queue: {
+        qos_policy_priority_queue: {
             max_priority := 0
             max_idx := 0
             i := 0
@@ -173,9 +173,9 @@ func (qos_engine* engine) dequeue_packet(class_id: u32) (option[packet_info), st
             packet := queue.packets.get(max_idx)
             queue.packets.remove(max_idx)
             queue.bytes_total = queue.bytes_total - (len(packet.data) as u64)
-            (option::some(packet, ""))
+            (some(packet, ""))
         },
-        _: (option::none, ""),
+        _: (nil, ""),
     }
 }
 

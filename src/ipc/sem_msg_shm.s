@@ -163,7 +163,7 @@ func (message_queue_manager* mqm) send_message(int queue_id, int sender_pid, str
         sender_pid: sender_pid,
         content: content,
         timestamp: 0,
-        priority: priority
+        priority priority
     }
     
     mq.messages = append(mq.messages, msg)

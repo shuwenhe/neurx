@@ -210,7 +210,7 @@ func (stack* tcp_ip_stack) udp_send(src_port int, dst_ip int, dst_port int, data
         dst_port: dst_port,
         length: len(data) + 8,
         checksum: 0,
-        data: data
+        data data
     }
     
     // 简单校验和（仅用于演示）

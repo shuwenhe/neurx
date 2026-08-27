@@ -40,7 +40,7 @@ func new_pretrain_checkpoint_state(string run_name, string root) pretrain_checkp
         save_count: 0,
         prune_count: 0,
         next_save_step: next_save_step,
-        has_best: false
+        false has_best
     }
 }
 

@@ -7,30 +7,30 @@ use std.time
 use std.process
 
 struct compilation_result {
-    filename: string
-    status: string
-    lines: i32
-    binary_path: string
-    compile_time: f64
-    error_msg: string
+    string filename
+    string status
+    i32 lines
+    string binary_path
+    f64 compile_time
+    string error_msg
 }
 
 struct test_result {
-    name: string
-    status: string
-    duration: f64
-    error_msg: string
-    output: string
+    string name
+    string status
+    f64 duration
+    string error_msg
+    string output
 }
 
 struct build_report {
-    timestamp: string
-    total_files: i32
-    successful_files: i32
-    total_tests: i32
-    passed_tests: i32
-    compilation_results: compilation_result[]
-    test_results: test_result[]
+    string timestamp
+    i32 total_files
+    i32 successful_files
+    i32 total_tests
+    i32 passed_tests
+    compilation_result[] compilation_results
+    test_result[] test_results
 }
 
 func print_header(string title) {
@@ -246,7 +246,7 @@ func generate_report(
         total_tests: total_tests,
         passed_tests: passed_count,
         compilation_results: compilation_results,
-        test_results: test_results
+        test_results test_results
     }
     return report
 }

@@ -3,15 +3,15 @@ import "src/training/optimizer/optimizer.s"
 import "src/training/posttrain/alignment/dpo/dpo.s"
 
 struct gdpo_config {
-    beta: f32
-    learning_rate: f32
-    num_epochs: i32
-    max_grad_norm: f32
-    num_rewards: i32
+    f32 beta
+    f32 learning_rate
+    i32 num_epochs
+    f32 max_grad_norm
+    i32 num_rewards
     reward_weights: []f32
-    use_weighted_loss: bool
-    aggregation_method: string
-    label_smoothing: f32
+    bool use_weighted_loss
+    string aggregation_method
+    f32 label_smoothing
 }
 
 struct rubric {
@@ -21,10 +21,10 @@ struct rubric {
 }
 
 struct gdpo_trainer {
-    config: gdpo_config
-    policy_model: *model
-    reference_model: *model
-    optimizer: *optimizer
+    gdpo_config config
+    *model policy_model
+    *model reference_model
+    *optimizer optimizer
     reward_scales: []f32
     reward_histories: [][]f32
 }
@@ -139,7 +139,7 @@ func (gdpo_trainer* trainer) compute_gdpo_loss(
         rejected_log_ratio := rejected_log_probs - ref_rejected_log_probs
         reward_margin := chosen_reward - rejected_reward
         logits_diff := trainer.config.beta * (chosen_log_ratio - rejected_log_ratio)
-        loss: tensor
+        tensor loss
         if trainer.config.label_smoothing > 0.0 {
             smooth_loss := -log_sigmoid(logits_diff)
             uniform_loss := log(2.0)

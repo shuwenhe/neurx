@@ -4,23 +4,23 @@ import "src/training/posttrain/alignment/grpo/grpo.s"
 import "src/runtime/distributed/moe_all_to_all.s"
 
 struct gspo_config {
-    group_size: i32
-    learning_rate: f32
-    num_epochs: i32
-    max_grad_norm: f32
-    kl_coeff: f32
-    sequence_level_aggregation: bool
-    moe_load_balance_coeff: f32
-    expert_capacity_factor: f32
-    use_aux_loss: bool
-    sequence_group_method: string
+    i32 group_size
+    f32 learning_rate
+    i32 num_epochs
+    f32 max_grad_norm
+    f32 kl_coeff
+    bool sequence_level_aggregation
+    f32 moe_load_balance_coeff
+    f32 expert_capacity_factor
+    bool use_aux_loss
+    string sequence_group_method
 }
 
 struct gspo_trainer {
-    config: gspo_config
-    policy_model: *model
-    reference_model: *model
-    optimizer: *optimizer
+    gspo_config config
+    *model policy_model
+    *model reference_model
+    *optimizer optimizer
     expert_routing_counts: []i32
     load_balance_losses: []f32
 }
@@ -149,7 +149,7 @@ func (gspo_trainer* trainer) train_step(Batch batch) . (f32, f32) {
                 prompt,
                 temperature: 1.0,
                 return_log_probs: true,
-                return_router_logits: true
+                true return_router_logits
             )
             responses = append(responses, resp)
             log_probs_list = append(log_probs_list, log_probs)

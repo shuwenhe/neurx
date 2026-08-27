@@ -3,34 +3,34 @@ import "src/training/optimizer/optimizer.s"
 import "src/training/posttrain/alignment/ppo/ppo.s"
 
 struct opo_config {
-    learning_rate: f32
-    num_epochs: i32
-    max_grad_norm: f32
-    gamma: f32
-    gae_lambda: f32
-    target_kl: f32
-    kl_tolerance: f32
-    use_adaptive_lr: bool
-    lr_decay_factor: f32
-    lr_growth_factor: f32
-    advantage_weighting: string
-    temperature: f32
-    clip_weight_range: f32
-    use_value_loss: bool
-    value_loss_coeff: f32
-    value_clip_epsilon: f32
-    entropy_coeff: f32
+    f32 learning_rate
+    i32 num_epochs
+    f32 max_grad_norm
+    f32 gamma
+    f32 gae_lambda
+    f32 target_kl
+    f32 kl_tolerance
+    bool use_adaptive_lr
+    f32 lr_decay_factor
+    f32 lr_growth_factor
+    string advantage_weighting
+    f32 temperature
+    f32 clip_weight_range
+    bool use_value_loss
+    f32 value_loss_coeff
+    f32 value_clip_epsilon
+    f32 entropy_coeff
 }
 
 struct opo_trainer {
-    config: opo_config
-    policy_model: *model
-    value_model: *model
-    reference_model: *model
-    optimizer: *optimizer
-    current_lr: f32
+    opo_config config
+    *model policy_model
+    *model value_model
+    *model reference_model
+    *optimizer optimizer
+    f32 current_lr
     kl_history: []f32
-    step_count: i64
+    i64 step_count
 }
 
 func new_opo_trainer(

@@ -7,29 +7,29 @@ import "neurx.autograd"
 }
 
 struct amp_config {
-    dtype: amp_dtype
-    enable_grad_scaling: bool
-    initial_scale: float
-    scale_factor: float
-    scale_window: int
-    min_scale: float
-    max_scale: float
-    growth_interval: int
+    amp_dtype dtype
+    bool enable_grad_scaling
+    float initial_scale
+    float scale_factor
+    int scale_window
+    float min_scale
+    float max_scale
+    int growth_interval
 }
 
 struct amp_state {
-    scale: float
-    growth_step: int
-    last_overflow: bool
+    float scale
+    int growth_step
+    bool last_overflow
     fp16_params: []autograd.tensor
     fp16_grads: []autograd.tensor
     fp32_params: []autograd.tensor
 }
 
 struct mixed_precision_model {
-    model: pointer
-    amp_config: amp_config
-    amp_state: amp_state
+    pointer model
+    amp_config amp_config
+    amp_state amp_state
     param_groups: [][]autograd.tensor
 }
 

@@ -13,38 +13,38 @@ import "neurx.checkpoint.checkpoint_training"
 }
 
 struct training_config {
-    epochs: int
-    batch_size: int
-    learning_rate: float
-    weight_decay: float
-    warmup_steps: int
-    total_steps: int
-    gradient_accumulation_steps: int
-    max_grad_norm: float
-    logging_interval: int
-    eval_interval: int
-    save_interval: int
-    device: string
+    int epochs
+    int batch_size
+    float learning_rate
+    float weight_decay
+    int warmup_steps
+    int total_steps
+    int gradient_accumulation_steps
+    float max_grad_norm
+    int logging_interval
+    int eval_interval
+    int save_interval
+    string device
     dtype: training.amp_dtype
-    enable_amp: bool
-    enable_checkpointing: bool
-    enable_zero: bool
-    zero_stage: int
-    seed: int
+    bool enable_amp
+    bool enable_checkpointing
+    bool enable_zero
+    int zero_stage
+    int seed
 }
 
 struct training_state {
-    epoch: int
-    step: int
-    global_step: int
-    loss: float
-    avg_loss: float
-    lr: float
-    train_time: float
-    samples_processed: int
-    tokens_processed: int
-    best_val_loss: float
-    is_training: bool
+    int epoch
+    int step
+    int global_step
+    float loss
+    float avg_loss
+    float lr
+    float train_time
+    int samples_processed
+    int tokens_processed
+    float best_val_loss
+    bool is_training
 }
 
 struct training_stats {
@@ -57,11 +57,11 @@ struct training_stats {
 }
 
 struct training_loop {
-    model: pointer
+    pointer model
     optimizer: opt.adamw_optimizer
-    config: training_config
-    state: training_state
-    stats: training_stats
+    training_config config
+    training_state state
+    training_stats stats
     amp: training.mixed_precision_model
     checkpoint_manager: checkpoint_training.checkpoint_manager
     zero_state: zero.zero_state

@@ -3,53 +3,53 @@ import "src/inference/extension/tokenizer/tokenizer.s"
 import "src/inference/sampling_strategies.s"
 
 struct hf_transformers_config {
-    model_name_or_path: string
-    device: string
-    dtype: string
-    max_new_tokens: i32
-    temperature: f32
-    top_k: i32
-    top_p: f32
-    repetition_penalty: f32
-    do_sample: bool
-    num_beams: i32
-    use_cache: bool
-    low_cpu_mem_usage: bool
-    torch_dtype: string
-    batch_size: i32
-    padding_side: string
-    trust_remote_code: bool
-    revision: string
+    string model_name_or_path
+    string device
+    string dtype
+    i32 max_new_tokens
+    f32 temperature
+    i32 top_k
+    f32 top_p
+    f32 repetition_penalty
+    bool do_sample
+    i32 num_beams
+    bool use_cache
+    bool low_cpu_mem_usage
+    string torch_dtype
+    i32 batch_size
+    string padding_side
+    bool trust_remote_code
+    string revision
 }
 
 struct hf_transformers_rollout {
-    config: hf_transformers_config
-    model: *hf_model
-    tokenizer: *hf_tokenizer
-    device: device
-    total_prompts: i64
-    total_tokens_generated: i64
-    total_time_ms: i64
+    hf_transformers_config config
+    *hf_model model
+    *hf_tokenizer tokenizer
+    device device
+    i64 total_prompts
+    i64 total_tokens_generated
+    i64 total_time_ms
 }
 
 struct hf_model {
-    model_type: string
-    config: model_config
+    string model_type
+    model_config config
     layers: []transformer_layer
-    lm_head: *linear
-    token_embeddings: *embedding
-    position_embeddings: *embedding
+    *linear lm_head
+    *embedding token_embeddings
+    *embedding position_embeddings
     past_key_values: [][]tensor
 }
 
 struct hf_tokenizer {
-    vocab_size: i32
-    pad_token_id: i32
-    eos_token_id: i32
-    bos_token_id: i32
-    vocab: map[string]i32
-    inverse_vocab: map[i32]string
-    special_tokens: map[string]i32
+    i32 vocab_size
+    i32 pad_token_id
+    i32 eos_token_id
+    i32 bos_token_id
+    map[string]i32 vocab
+    map[i32]string inverse_vocab
+    map[string]i32 special_tokens
 }
 
 func new_hf_transformers_rollout(hf_transformers_config config) . hf_transformers_rollout {
@@ -120,8 +120,8 @@ func (hf_transformers_rollout* rollout) generate(
         if finished.all() {
             break
         }
-        current_input: tensor
-        current_attention_mask: tensor
+        tensor current_input
+        tensor current_attention_mask
         if step == 0 {
             current_input = input_ids
             current_attention_mask = attention_mask
@@ -217,7 +217,7 @@ func (hf_transformers_rollout* rollout) tokenize_batch(
     input_ids_tensor := tensor_full(
         [batch_size, max_length],
         rollout.tokenizer.pad_token_id,
-        dtype: i64
+        i64 dtype
     )
     attention_mask := tensor_zeros([batch_size, max_length])
     for i, ids in all_input_ids {
@@ -293,22 +293,22 @@ func parse_device(string device_str) . device {
 }
 
 struct device {
-    device_type: string
-    device_id: i32
+    string device_type
+    i32 device_id
 }
 
 struct model_config {
-    hidden_size: i32
-    num_layers: i32
-    num_heads: i32
-    vocab_size: i32
+    i32 hidden_size
+    i32 num_layers
+    i32 num_heads
+    i32 vocab_size
 }
 
 struct transformer_layer {
-    self_attention: *attention
-    mlp: *mlp
-    layer_norm1: *layer_norm
-    layer_norm2: *layer_norm
+    *attention self_attention
+    *mlp mlp
+    *layer_norm layer_norm1
+    *layer_norm layer_norm2
 }
 
 struct embedding {}

@@ -86,7 +86,7 @@ func load_model_weights_mock(string model_dir, int hidden_size, int num_layers) 
         embed_tokens: init_gaussian(vocab_size * hidden_size, 0.02),
         layers: layers,
         norm_weight: ones_array(hidden_size),
-        weights_loaded: true
+        true weights_loaded
     }
 }
 
@@ -125,7 +125,7 @@ func load_model_weights_real(string model_dir) model_weights {
         embed_tokens: embed_tokens,
         layers: layers,
         norm_weight: norm_weight,
-        weights_loaded: true
+        true weights_loaded
     }
 }
 

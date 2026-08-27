@@ -166,7 +166,7 @@ func read_next_line(streaming_reader_state reader) line_read_result {
             success: false,
             end_of_chunk: false,
             end_of_file: true,
-            updated_reader: reader
+            reader updated_reader
         }
     reader = ensure_chunk_loaded(reader, reader.current_chunk_idx)
     if reader.error_state:
@@ -175,7 +175,7 @@ func read_next_line(streaming_reader_state reader) line_read_result {
             success: false,
             end_of_chunk: false,
             end_of_file: true,
-            updated_reader: reader
+            reader updated_reader
         }
     data_chunk current_chunk = reader.chunks[reader.current_chunk_idx]
     string line
@@ -192,7 +192,7 @@ func read_next_line(streaming_reader_state reader) line_read_result {
                 success: false,
                 end_of_chunk: true,
                 end_of_file: true,
-                updated_reader: reader
+                reader updated_reader
             }
         else:
             reader.current_chunk_idx = reader.current_chunk_idx + 1
@@ -209,7 +209,7 @@ func read_next_line(streaming_reader_state reader) line_read_result {
         success: true,
         end_of_chunk: chunk_exhausted,
         end_of_file: false,
-        updated_reader: reader
+        reader updated_reader
     }
 func ensure_chunk_loaded(streaming_reader_state reader, int chunk_idx) streaming_reader_state {
     if chunk_idx < 0 or chunk_idx >= reader.num_chunks:
@@ -278,7 +278,7 @@ func read_batch_of_lines(
         lines: batch_lines,
         count: count,
         end_of_file: eof,
-        updated_reader: reader
+        reader updated_reader
     }
 func seek_to_approximate_line(
     streaming_reader_state reader,

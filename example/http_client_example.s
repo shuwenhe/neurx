@@ -89,7 +89,7 @@ func http_request_to_server(string host, int port, string path) (http_response, 
                                     (http_response{
                                         status_code: 200,
                                         headers: "",
-                                        body: response_data
+                                        response_data body
                                     })
                                 },
                                 (0, recv_error) : {

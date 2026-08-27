@@ -93,7 +93,7 @@ func tokenize_deterministic(tokenizer_state_2 state, string text, int runs) toke
 }
 
 func new_tokenization_result() tokenization_result_2 {
-    result: tokenization_result_2
+    tokenization_result_2 result
     result.success = false
     result.error = ""
     result

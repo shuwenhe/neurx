@@ -35,28 +35,28 @@ func default_optimization_pipeline() pass_pipeline {
     passes = pass_config[]()
 
     passes.push(pass_config {
-        pass_kind: pass_type::constant_folding,
+        pass_kind: pass_type_constant_folding,
         enabled: true,
         priority: 1,
         description: "fold constant expressions",
     })
 
     passes.push(pass_config {
-        pass_kind: pass_type::op_fusion,
+        pass_kind: pass_type_op_fusion,
         enabled: true,
         priority: 2,
         description: "fuse compatible operations",
     })
 
     passes.push(pass_config {
-        pass_kind: pass_type::dead_code_elim,
+        pass_kind: pass_type_dead_code_elim,
         enabled: true,
         priority: 3,
         description: "eliminate dead code",
     })
 
     passes.push(pass_config {
-        pass_kind: pass_type::memory_opt,
+        pass_kind: pass_type_memory_opt,
         enabled: true,
         priority: 4,
         description: "optimize memory usage",
@@ -72,28 +72,28 @@ func aggressive_optimization_pipeline() pass_pipeline {
     passes = pass_config[]()
 
     passes.push(pass_config {
-        pass_kind: pass_type::constant_folding,
+        pass_kind: pass_type_constant_folding,
         enabled: true,
         priority: 1,
         description: "fold constant expressions",
     })
 
     passes.push(pass_config {
-        pass_kind: pass_type::op_fusion,
+        pass_kind: pass_type_op_fusion,
         enabled: true,
         priority: 2,
         description: "fuse compatible operations",
     })
 
     passes.push(pass_config {
-        pass_kind: pass_type::memory_opt,
+        pass_kind: pass_type_memory_opt,
         enabled: true,
         priority: 3,
         description: "optimize memory usage",
     })
 
     passes.push(pass_config {
-        pass_kind: pass_type::dead_code_elim,
+        pass_kind: pass_type_dead_code_elim,
         enabled: true,
         priority: 4,
         description: "eliminate dead code",
@@ -109,7 +109,7 @@ func minimal_optimization_pipeline() pass_pipeline {
     passes = pass_config[]()
 
     passes.push(pass_config {
-        pass_kind: pass_type::constant_folding,
+        pass_kind: pass_type_constant_folding,
         enabled: true,
         priority: 1,
         description: "fold constant expressions",
@@ -123,7 +123,7 @@ func minimal_optimization_pipeline() pass_pipeline {
 
 func apply_pass(*computation_graph g, pass_type pass_kind) pass_result {
     match pass_kind {
-        pass_type::constant_folding: {
+        pass_type_constant_folding: {
             result = apply_constant_folding(g)
             pass_result {
                 pass_kind: pass_kind,
@@ -131,7 +131,7 @@ func apply_pass(*computation_graph g, pass_type pass_kind) pass_result {
                 message: "folded " + result.folded_ops as string + " operations",
             }
         },
-        pass_type::op_fusion: {
+        pass_type_op_fusion: {
             result = apply_op_fusion(g)
             pass_result {
                 pass_kind: pass_kind,
@@ -139,7 +139,7 @@ func apply_pass(*computation_graph g, pass_type pass_kind) pass_result {
                 message: "fused " + result.fused_ops as string + " operations",
             }
         },
-        pass_type::dead_code_elim: {
+        pass_type_dead_code_elim: {
             result = remove_dead_code(g)
             pass_result {
                 pass_kind: pass_kind,
@@ -147,7 +147,7 @@ func apply_pass(*computation_graph g, pass_type pass_kind) pass_result {
                 message: "removed " + result.removed_ops as string + " dead operations",
             }
         },
-        pass_type::memory_opt: {
+        pass_type_memory_opt: {
             result = apply_memory_optimization(g)
             pass_result {
                 pass_kind: pass_kind,

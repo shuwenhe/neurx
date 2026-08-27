@@ -60,7 +60,7 @@ func new_cache_pool_v2(int64 pool_size, int32 initial_blocks, eviction_policy po
         allocation_map: map[string, int64]{},
         pool_size: pool_size,
         allocated_size: 0,
-        layout_strategy: memory_layout::hybrid,
+        layout_strategy: memory_layout_hybrid,
         fragmentation_threshold: 40,
         enable_compaction: true,
     }
@@ -272,9 +272,9 @@ func (cache_pool_v2* pool) reset_pool() {
 
 func (cache_pool_v2* pool) get_memory_layout() string {
     switch pool.layout_strategy {
-        memory_layout::contiguous : "contiguous",
-        memory_layout::fragmented : "fragmented",
-        memory_layout::hybrid : "hybrid",
+        memory_layout_contiguous : "contiguous",
+        memory_layout_fragmented : "fragmented",
+        memory_layout_hybrid : "hybrid",
     }
 }
 

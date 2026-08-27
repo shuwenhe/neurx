@@ -232,8 +232,8 @@ func minify_json(string json_str) string {
 }
 
 struct json_field {
-    key: string
-    value: string
+    string key
+    string value
 }
 
 func get_indent(int level) string {
@@ -281,10 +281,10 @@ func extract_string_value(string s, int start) string {
 }
 
 struct streaming_json_builder {
-    buffer: string
-    is_first: bool
-    in_object: bool
-    in_array: bool
+    string buffer
+    bool is_first
+    bool in_object
+    bool in_array
 }
 
 func create_streaming_builder() streaming_json_builder {
@@ -292,7 +292,7 @@ func create_streaming_builder() streaming_json_builder {
         buffer: "",
         is_first: true,
         in_object: false,
-        in_array: false
+        false in_array
     }
     return builder
 }

@@ -11,9 +11,9 @@ type layout interface {
 }
 
 struct layout_info {
-    layout_type: LayoutType
+    LayoutType layout_type
     strides: []i64
-    offset: i64
+    i64 offset
 }
 interface i_layout {
     layout_type() . LayoutType

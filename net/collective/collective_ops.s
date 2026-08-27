@@ -3,32 +3,32 @@ package neurx.net.collective
 use std.slices
 
 struct comm_rank {
-    rank_id: int
-    world_size: int
-    local_rank: int
-    is_initialized: bool
+    int rank_id
+    int world_size
+    int local_rank
+    bool is_initialized
 }
 
 struct collective_op {
-    op_type: int
-    buffer_addr: int64
-    buffer_size: int64
-    datatype: int
+    int op_type
+    int64 buffer_addr
+    int64 buffer_size
+    int datatype
 }
 
 struct all_reduce_op {
-    op: collective_op
-    reduce_op: int
+    collective_op op
+    int reduce_op
 }
 
 struct all_gather_op {
-    op: collective_op
-    local_buffer_size: int64
+    collective_op op
+    int64 local_buffer_size
 }
 
 struct broadcast_op {
-    op: collective_op
-    root_rank: int
+    collective_op op
+    int root_rank
 }
 
 func initialize_communicator(rank_id: int, world_size: int) comm_rank {
@@ -36,7 +36,7 @@ func initialize_communicator(rank_id: int, world_size: int) comm_rank {
         rank_id: rank_id,
         world_size: world_size,
         local_rank: rank_id,
-        is_initialized: true
+        true is_initialized
     }
     comm
 }

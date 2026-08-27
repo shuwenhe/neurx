@@ -29,7 +29,7 @@ struct huge_page {
 struct huge_page_pool {
     pages_2m: huge_page[],
     pages_1g: huge_page[],
-    lock: spinlock::spinlock[void],
+    lock: spinlock[void],
     total_allocated: u64,
 }
 
@@ -37,7 +37,7 @@ func new_huge_page_pool() (*huge_page_pool, string) {
     pool := *huge_page_pool{
         pages_2m: huge_page[]{},
         pages_1g: huge_page[]{},
-        lock: spinlock::new(),
+        lock: spinlock_new(),
         total_allocated: 0,
     } as *huge_page_pool
 
@@ -52,7 +52,7 @@ func (huge_page_pool* pool) allocate_2m_page() (u64, string) {
     hp := huge_page{
         physical_address: physical_addr,
         virtual_address: 0,
-        size: huge_page_size::page_2m,
+        size: huge_page_size_page_2m,
         page_count: 512,
         ref_count: 1,
         flags: 0,
@@ -73,7 +73,7 @@ func (huge_page_pool* pool) allocate_1g_page() (u64, string) {
     hp := huge_page{
         physical_address: physical_addr,
         virtual_address: 0,
-        size: huge_page_size::page_1g,
+        size: huge_page_size_page_1g,
         page_count: 262144,
         ref_count: 1,
         flags: 0,
@@ -94,13 +94,13 @@ func (huge_page_pool* pool) free_2m_page(physical_addr: u64) (void, string) {
     _guard := pool.lock.lock()?
 
     found := false
-    remove_idx := option::none as option[u32]
+    remove_idx := nil as option[u32]
     i := 0
 
     for page in pool.pages_2m {
         if page.physical_address == physical_addr {
             found = true
-            remove_idx = option::some(i)
+            remove_idx = some(i)
             break
         }
         i = i + 1
@@ -111,12 +111,12 @@ func (huge_page_pool* pool) free_2m_page(physical_addr: u64) (void, string) {
     }
 
     switch remove_idx {
-        option::some(idx): {
+        some(idx): {
             pool.pages_2m, _ := remove(pool.pages_2m, idx)
             pool.total_allocated = pool.total_allocated - huge_page_2m_size
             return (), ""
         },
-        option::none: ((), "failed to remove page"),
+        nil: ((), "failed to remove page"),
     }
 }
 
@@ -124,13 +124,13 @@ func (huge_page_pool* pool) free_1g_page(physical_addr: u64) (void, string) {
     _guard := pool.lock.lock()?
 
     found := false
-    remove_idx := option::none as option[u32]
+    remove_idx := nil as option[u32]
     i := 0
 
     for page in pool.pages_1g {
         if page.physical_address == physical_addr {
             found = true
-            remove_idx = option::some(i)
+            remove_idx = some(i)
             break
         }
         i = i + 1
@@ -141,12 +141,12 @@ func (huge_page_pool* pool) free_1g_page(physical_addr: u64) (void, string) {
     }
 
     switch remove_idx {
-        option::some(idx): {
+        some(idx): {
             pool.pages_1g.remove(idx)
             pool.total_allocated = pool.total_allocated - huge_page_1g_size
             return (), ""
         },
-        option::none: ((), "failed to remove page"),
+        nil: ((), "failed to remove page"),
     }
 }
 
@@ -158,8 +158,8 @@ func (huge_page_pool* pool) map_huge_page(
     _guard := pool.lock.lock()?
 
     pt_flags := match size {
-        huge_page_size::page_2m: 0x080,
-        huge_page_size::page_1g: 0x080,
+        huge_page_size_page_2m: 0x080,
+        huge_page_size_page_1g: 0x080,
     }
 
     return (), ""
@@ -185,7 +185,7 @@ struct transparent_huge_pages {
 struct thp_manager {
     config: transparent_huge_pages,
     huge_pool: *huge_page_pool,
-    lock: spinlock::spinlock[void],
+    lock: spinlock[void],
 }
 
 func new_thp_manager(huge_page_pool* pool) (*thp_manager, string) {
@@ -199,7 +199,7 @@ func new_thp_manager(huge_page_pool* pool) (*thp_manager, string) {
     mgr := *thp_manager{
         config: config,
         huge_pool: pool,
-        lock: spinlock::new(),
+        lock: spinlock_new(),
     } as *thp_manager
 
 return     (mgr, "")
@@ -230,7 +230,7 @@ func (thp_manager* mgr) split_huge_page(ppage: u64) (u64), string[] {
 
     i := 0
     while i < 512 {
-        page := page_table::allocate_physical_page()?
+        page := page_table_allocate_physical_page()?
         regular_pages = append(regular_pages, page)
         i = i + 1
     }

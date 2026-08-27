@@ -3,21 +3,21 @@ package neurx.model.model_zoo
 use std.map
 
 struct model_spec {
-    name: string
-    model_type: string
-    hidden_size: int
-    num_hidden_layers: int
-    vocab_size: int
-    num_attention_heads: int
-    num_key_value_heads: int
-    intermediate_size: int
-    max_position_embeddings: int
-    rms_norm_eps: f32
-    rope_theta: f32
-    attention_bias: bool
-    use_cache: bool
-    tie_word_embeddings: bool
-    initializer_range: f32
+    string name
+    string model_type
+    int hidden_size
+    int num_hidden_layers
+    int vocab_size
+    int num_attention_heads
+    int num_key_value_heads
+    int intermediate_size
+    int max_position_embeddings
+    f32 rms_norm_eps
+    f32 rope_theta
+    bool attention_bias
+    bool use_cache
+    bool tie_word_embeddings
+    f32 initializer_range
     architectures: []string
 }
 

@@ -56,7 +56,7 @@ struct netfilter_engine {
     hooks: netfilter_hook[],
     rules: firewall_rule[],
     conntrack_table: connection_table,
-    lock: spinlock::spinlock[void],
+    lock: spinlock[void],
 }
 
 struct connection_table {
@@ -99,7 +99,7 @@ func new_netfilter_engine() (*netfilter_engine, string) {
         conntrack_table: connection_table{
             entries: connection_entry[](),
         },
-        lock: spinlock::new(),
+        lock: spinlock_new(),
     } as *netfilter_engine
 
     return engine, ""
@@ -185,13 +185,13 @@ func (netfilter_engine* engine) delete_rule(rule_id: u32) (void, string) {
     _guard := engine.lock.lock()?
 
     found := false
-    remove_idx := option::none as option[u32]
+    remove_idx := nil as option[u32]
     i := 0
 
     for rule in engine.rules {
         if rule.id == rule_id {
             found = true
-            remove_idx = option::some(i)
+            remove_idx = some(i)
             break
         }
         i = i + 1
@@ -202,11 +202,11 @@ func (netfilter_engine* engine) delete_rule(rule_id: u32) (void, string) {
     }
 
     switch remove_idx {
-        option::some(idx): {
+        some(idx): {
             engine.rules.remove(idx)
             return , ""
         },
-        option::none: return , "failed to delete rule",
+        nil: return , "failed to delete rule",
     }
 }
 
@@ -220,9 +220,9 @@ func (netfilter_engine* engine) process_packet(
         if hook.enabled {
             verdict := (hook.hook_fn)(skb, hook_type)
             switch verdict {
-                packet_verdict::nf_drop: return packet_verdict::nf_drop, "",
-                packet_verdict::nf_accept: continue,
-                packet_verdict::nf_queue: return packet_verdict::nf_queue, "",
+                packet_verdict_nf_drop: return packet_verdict_nf_drop, "",
+                packet_verdict_nf_accept: continue,
+                packet_verdict_nf_queue: return packet_verdict_nf_queue, "",
                 _: continue,
             }
         }
@@ -239,35 +239,35 @@ func (netfilter_engine* engine) process_packet(
         }
     }
 
-    return packet_verdict::nf_accept, ""
+    return packet_verdict_nf_accept, ""
 }
 
 func match_rule(packet_buffer* skb, firewall_rule* rule) bool {
     switch rule.src_ip {
-        option::some(ip): {
+        some(ip): {
             if skb.src_ip != ip {
                 return false
             }
         },
-        option::none: {},
+        nil: {},
     }
 
     switch rule.dst_ip {
-        option::some(ip): {
+        some(ip): {
             if skb.dst_ip != ip {
                 return false
             }
         },
-        option::none: {},
+        nil: {},
     }
 
     switch rule.protocol {
-        option::some(proto): {
+        some(proto): {
             if skb.protocol != proto {
                 return false
             }
         },
-        option::none: {},
+        nil: {},
     }
 
     true
@@ -291,7 +291,7 @@ func (netfilter_engine* engine) track_connection(
         src_port: src_port,
         dst_port: dst_port,
         protocol: protocol,
-        state: connection_state::tcp_established,
+        state: connection_state_tcp_established,
         packets_in: 0,
         packets_out: 0,
         bytes_in: 0,

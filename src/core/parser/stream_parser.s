@@ -238,8 +238,8 @@ func estimate_progress(IncrementalParseState state) float {
 
 struct StreamBuilder {
     chunks: []StreamChunk
-    full_output: string
-    current_state: IncrementalParseState
+    string full_output
+    IncrementalParseState current_state
 }
 
 func create_stream_builder() StreamBuilder {

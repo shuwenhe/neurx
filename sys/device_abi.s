@@ -81,7 +81,7 @@ func submit_to_cuda_runtime(device_abi_context ctx) device_abi_context {
         api_id: ctx.api_counter,
         api_name: "cuLaunchKernel",
         device_id: 0,
-        success: true
+        true success
     }
     ctx.api_history = append(ctx.api_history, api_call)
     ctx.api_counter = ctx.api_counter + 1
@@ -93,7 +93,7 @@ func submit_to_nccl_allreduce(device_abi_context ctx) device_abi_context {
         api_id: ctx.api_counter,
         api_name: "ncclAllReduce",
         device_id: 0,
-        success: true
+        true success
     }
     ctx.api_history = append(ctx.api_history, api_call)
     ctx.api_counter = ctx.api_counter + 1

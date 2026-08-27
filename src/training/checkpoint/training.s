@@ -9,43 +9,43 @@ import "neurx.optimizer"
 }
 
 struct checkpoint_config {
-    save_dir: string
-    save_interval: int
-    max_checkpoints: int
-    checkpoint_type: checkpoint_type
-    save_best: bool
-    best_metric: string
-    best_mode: string
-    enable_compression: bool
-    compression_level: int
+    string save_dir
+    int save_interval
+    int max_checkpoints
+    checkpoint_type checkpoint_type
+    bool save_best
+    string best_metric
+    string best_mode
+    bool enable_compression
+    int compression_level
 }
 
 struct checkpoint_info {
-    step: int
-    epoch: int
-    loss: float
-    metric: float
-    timestamp: string
-    size_bytes: int
-    path: string
+    int step
+    int epoch
+    float loss
+    float metric
+    string timestamp
+    int size_bytes
+    string path
 }
 
 struct checkpoint_manager {
-    config: checkpoint_config
+    checkpoint_config config
     checkpoints: []checkpoint_info
-    best_metric_value: float
-    current_step: int
-    current_epoch: int
+    float best_metric_value
+    int current_step
+    int current_epoch
 }
 
 struct checkpoint_data {
     model_params: []autograd.tensor
-    optimizer_state: pointer
-    scheduler_state: pointer
-    step: int
-    epoch: int
-    loss: float
-    amp_state: pointer
+    pointer optimizer_state
+    pointer scheduler_state
+    int step
+    int epoch
+    float loss
+    pointer amp_state
 }
 
 func new_checkpoint_config(string save_dir) checkpoint_config {

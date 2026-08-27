@@ -29,7 +29,7 @@ func init_sensor(sensor_type sensor_type, int sampling_rate_hz) (sensor_driver, 
         sensor_type: sensor_type,
         driver_id: 0,
         sampling_rate_hz: sampling_rate_hz,
-        is_streaming: false
+        false is_streaming
     })
 }
 

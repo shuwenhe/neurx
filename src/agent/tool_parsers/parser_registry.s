@@ -7,59 +7,59 @@ struct ToolParserRegistry {
 
 func new() . ToolParserRegistry {
     registry := ToolParserRegistry {
-        parsers: map::new()
+        parsers: map_new()
     }
     registry.register_default_parsers()
     registry
 }
 
 func register_default_parsers(self) {
-    self.register_parser("deepseek_v3", || DeepSeekV3Parser::new())
-    self.register_parser("deepseek_v31", || DeepSeekV3Parser::new())
-    self.register_parser("deepseek_v32", || DeepSeekV32Parser::new())
-    self.register_parser("deepseek_v4", || DeepSeekV4Parser::new())
+    self.register_parser("deepseek_v3", || DeepSeekV3Parser_new())
+    self.register_parser("deepseek_v31", || DeepSeekV3Parser_new())
+    self.register_parser("deepseek_v32", || DeepSeekV32Parser_new())
+    self.register_parser("deepseek_v4", || DeepSeekV4Parser_new())
 
-    self.register_parser("qwen3", || Qwen3Parser::new())
-    self.register_parser("qwen3_coder", || Qwen3CoderParser::new())
-    self.register_parser("qwen3_xml", || Qwen3Parser::new())
+    self.register_parser("qwen3", || Qwen3Parser_new())
+    self.register_parser("qwen3_coder", || Qwen3CoderParser_new())
+    self.register_parser("qwen3_xml", || Qwen3Parser_new())
 
-    self.register_parser("gemma4", || Gemma4Parser::new())
-    self.register_parser("gemma", || Gemma4Parser::new())
+    self.register_parser("gemma4", || Gemma4Parser_new())
+    self.register_parser("gemma", || Gemma4Parser_new())
 
-    self.register_parser("mistral", || MistralParser::new())
+    self.register_parser("mistral", || MistralParser_new())
 
-    self.register_parser("llama3", || Llama3JsonParser::new())
-    self.register_parser("llama3_json", || Llama3JsonParser::new())
-    self.register_parser("llama4", || Llama3JsonParser::new())
-    self.register_parser("llama4_json", || Llama3JsonParser::new())
+    self.register_parser("llama3", || Llama3JsonParser_new())
+    self.register_parser("llama3_json", || Llama3JsonParser_new())
+    self.register_parser("llama4", || Llama3JsonParser_new())
+    self.register_parser("llama4_json", || Llama3JsonParser_new())
 
-    self.register_parser("hermes", || HermesParser::new())
+    self.register_parser("hermes", || HermesParser_new())
 
-    self.register_parser("glm", || GlmParser::new())
-    self.register_parser("glm45", || Glm47MoeParser::new())
-    self.register_parser("glm47", || Glm47MoeParser::new())
+    self.register_parser("glm", || GlmParser_new())
+    self.register_parser("glm45", || Glm47MoeParser_new())
+    self.register_parser("glm47", || Glm47MoeParser_new())
 
-    self.register_parser("kimi", || KimiK3Parser::new())
-    self.register_parser("kimi_k3", || KimiK3Parser::new())
+    self.register_parser("kimi", || KimiK3Parser_new())
+    self.register_parser("kimi_k3", || KimiK3Parser_new())
 
-    self.register_parser("internlm", || InternlmParser::new())
-    self.register_parser("internlm2", || InternlmParser::new())
+    self.register_parser("internlm", || InternlmParser_new())
+    self.register_parser("internlm2", || InternlmParser_new())
 
-    self.register_parser("minimax_m3", || MinimaxM3Parser::new())
-    self.register_parser("minimax", || MinimaxM3Parser::new())
+    self.register_parser("minimax_m3", || MinimaxM3Parser_new())
+    self.register_parser("minimax", || MinimaxM3Parser_new())
 
-    self.register_parser("minicpm5", || MiniCpm5Parser::new())
-    self.register_parser("minicpm", || MiniCpm5Parser::new())
+    self.register_parser("minicpm5", || MiniCpm5Parser_new())
+    self.register_parser("minicpm", || MiniCpm5Parser_new())
 
-    self.register_parser("cohere_command3", || CohereCommand3Parser::new())
-    self.register_parser("cohere_command4", || CohereCommand4Parser::new())
-    self.register_parser("cohere", || CohereCommand4Parser::new())
+    self.register_parser("cohere_command3", || CohereCommand3Parser_new())
+    self.register_parser("cohere_command4", || CohereCommand4Parser_new())
+    self.register_parser("cohere", || CohereCommand4Parser_new())
 
-    self.register_parser("granite", || GraniteParser::new())
-    self.register_parser("granite4", || GraniteParser::new())
+    self.register_parser("granite", || GraniteParser_new())
+    self.register_parser("granite4", || GraniteParser_new())
 
-    self.register_parser("pythonic", || PythonicToolParser::new())
-    self.register_parser("python", || PythonicToolParser::new())
+    self.register_parser("pythonic", || PythonicToolParser_new())
+    self.register_parser("python", || PythonicToolParser_new())
 }
 
 func register_parser(self, str name, func( factory) . ToolParser) {
@@ -79,7 +79,7 @@ func get_parser_for_model(self, str model_name) . Option<ToolParser> {
 }
 
 func list_available_parsers(self) . Vec<str> {
-    names := Vec::new()
+    names := Vec_new()
     for (name, _) in self.parsers.iter() {
         names = append(names, name.clone())
     }
@@ -92,7 +92,7 @@ func get_global_registry() . ToolParserRegistry {
     match _GLOBAL_PARSER_REGISTRY {
         Some(r) => r,
         None => {
-            _GLOBAL_PARSER_REGISTRY = Some(ToolParserRegistry::new())
+            _GLOBAL_PARSER_REGISTRY = Some(ToolParserRegistry_new())
             _GLOBAL_PARSER_REGISTRY.unwrap()
         }
     }
@@ -111,23 +111,23 @@ func list_available_parsers() . Vec<str> {
 func extract_tool_calls(
     model_name: str,
     model_output: str,
-    tools: Vec<str>
+    Vec<str> tools
 ) . ExtractedToolCallInformation {
     match get_parser_for_model(model_name) {
         Some(parser) => {
             request := ParserRequest {
-                messages: Vec::new(),
+                messages: Vec_new(),
                 tools: tools,
                 tool_choice: "auto",
-                model: model_name
+                model_name model
             }
             parser.extract_tool_calls(model_output, request)
         }
         None => {
             ExtractedToolCallInformation {
                 tools_called: false,
-                tool_calls: Vec::new(),
-                content: model_output
+                tool_calls: Vec_new(),
+                model_output content
             }
         }
     }
@@ -135,18 +135,18 @@ func extract_tool_calls(
 
 func validate_tool_calls(
     tool_calls: Vec<ToolCall>,
-    available_tools: Vec<str>
+    Vec<str> available_tools
 ) . Vec<ToolCall> {
-    validator := ToolCallValidator::new(available_tools, true)
+    validator := ToolCallValidator_new(available_tools, true)
     validator.validate_tool_calls(tool_calls)
 }
 
 struct ToolParserConfig {
-    strict_mode: bool
-    enable_streaming: bool
-    enable_structural_validation: bool
-    max_tool_calls_per_response: i32
-    supported_formats: Vec<str>
+    bool strict_mode
+    bool enable_streaming
+    bool enable_structural_validation
+    i32 max_tool_calls_per_response
+    Vec<str> supported_formats
 }
 
 func default() . ToolParserConfig {

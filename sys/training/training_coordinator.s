@@ -58,6 +58,6 @@ func get_training_metrics(training_coordinator* coordinator) training_state {
         global_step: 0,
         current_loss: 0.0,
         num_params: 0,
-        is_distributed: false
+        false is_distributed
     }
 }

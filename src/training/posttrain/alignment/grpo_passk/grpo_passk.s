@@ -2,42 +2,42 @@ import "tensor/tensor.s"
 import "src/training/optimizer/optimizer.s"
 
 struct grpo_pass_k_config {
-    learning_rate: f32
-    num_epochs: i32
-    max_grad_norm: f32
-    gamma: f32
-    k_samples: i32
-    use_passk_advantage: bool
-    passk_temperature: f32
+    f32 learning_rate
+    i32 num_epochs
+    f32 max_grad_norm
+    f32 gamma
+    i32 k_samples
+    bool use_passk_advantage
+    f32 passk_temperature
     test_case_weight: f32
-    compilation_weight: f32
-    style_weight: f32
-    use_majority_voting: bool
-    normalize_advantages: bool
-    advantage_clip: f32
-    use_value_loss: bool
-    value_loss_coeff: f32
+    f32 compilation_weight
+    f32 style_weight
+    bool use_majority_voting
+    bool normalize_advantages
+    f32 advantage_clip
+    bool use_value_loss
+    f32 value_loss_coeff
 }
 
 struct code_evaluation {
-    compiles: bool
-    passes_tests: bool
-    num_tests_passed: i32
-    num_tests_total: i32
-    style_score: f32
-    execution_time: f32
-    correctness_score: f32
+    bool compiles
+    bool passes_tests
+    i32 num_tests_passed
+    i32 num_tests_total
+    f32 style_score
+    f32 execution_time
+    f32 correctness_score
 }
 
 struct grpo_pass_k_trainer {
-    config: GRPOPassKConfig
-    policy_model: *model
-    value_model: *model
-    reference_model: *model
-    optimizer: *optimizer
+    GRPOPassKConfig config
+    *model policy_model
+    *model value_model
+    *model reference_model
+    *optimizer optimizer
     passk_history: []f32
-    success_rate: f32
-    step_count: i64
+    f32 success_rate
+    i64 step_count
 }
 
 func new_grpo_passk_trainer(
@@ -110,7 +110,7 @@ func (grpo_pass_k_trainer* trainer) compute_passk_advantages(
         group_evals := evaluations[b]
         group_rewards := rewards[b]
         passk := compute_passk(group_evals, k)
-        baseline: f32
+        f32 baseline
         if trainer.config.use_majority_voting {
             sorted_rewards := sort(group_rewards)
             baseline = sorted_rewards[k / 2]
@@ -174,7 +174,7 @@ func (grpo_pass_k_trainer* trainer) train_step(
             code, log_prob  := trainer.policy_model.generate(
                 prompt,
                 temperature: trainer.config.passk_temperature,
-                return_log_probs: true
+                true return_log_probs
             )
             codes = append(codes, code)
             log_probs = append(log_probs, log_prob)
@@ -285,7 +285,7 @@ func concat_prompt_code(string prompt, string code) . Tensor {
 }
 
 struct test_case {
-    input: string
-    expected_output: string
-    timeout_ms: i32
+    string input
+    string expected_output
+    i32 timeout_ms
 }

@@ -4,7 +4,7 @@ struct long_writer_config {
     max_total_tokens: int = 32000
     max_section_tokens: int = 4096
     min_section_length: int = 200
-    target_word_count: int
+    int target_word_count
     writing_mode: string = "outline_driven"
     outline_detail_level: string = "detailed"
     quality_check_enabled: bool = true
@@ -19,28 +19,28 @@ struct long_writer_config {
     revision_threshold: float = 0.7
     auto_expand_sections: bool = true
     auto_merge_short_sections: bool = true
-    domain: string
-    style_guide_path: string
+    string domain
+    string style_guide_path
     tone: string = "professional"
     language: string = "zh-CN"
     enable_citations: bool = false
     enable_footnotes: bool = false
     enable_cross_references: bool = false
-    template_id: string
+    string template_id
 }
 
 struct outline_node {
-    id: string
-    title: string
-    level: int
-    description: string
-    estimated_words: int
-    keywords: list<string>
-    must_include: list<string>
-    children: list<outline_node>
-    content: string
-    word_count: int
-    quality_score: float
+    string id
+    string title
+    int level
+    string description
+    int estimated_words
+    list<string> keywords
+    list<string> must_include
+    list<outline_node> children
+    string content
+    int word_count
+    float quality_score
     status: SectionStatus = section_status.PENDING
     revisions: int = 0
 }
@@ -54,81 +54,81 @@ struct outline_node {
 }
 
 struct writing_plan {
-    topic: string
-    outline: outline_node
-    total_estimated_words: int
-    sections_count: int
-    max_depth: int
-    metadata: plan_metadata
-    constraints: writing_constraints
+    string topic
+    outline_node outline
+    int total_estimated_words
+    int sections_count
+    int max_depth
+    plan_metadata metadata
+    writing_constraints constraints
 }
 
 struct plan_metadata {
-    created_at: float
-    model_used: string
-    planning_time_ms: float
+    float created_at
+    string model_used
+    float planning_time_ms
     version: int = 1
 }
 
 struct writing_constraints {
-    min_total_words: int
-    max_total_words: int
-    forbidden_topics: list<string>
-    required_sections: list<string>
-    style_requirements: list<string>
+    int min_total_words
+    int max_total_words
+    list<string> forbidden_topics
+    list<string> required_sections
+    list<string> style_requirements
     audience_level: string = "general"
 }
 
 struct long_document {
-    title: string
-    plan: writing_plan
-    sections: list<outline_node>
-    full_text: string
-    toc: table_of_contents
-    statistics: document_statistics
-    generation_metadata: generation_metadata
+    string title
+    writing_plan plan
+    list<outline_node> sections
+    string full_text
+    table_of_contents toc
+    document_statistics statistics
+    generation_metadata generation_metadata
 }
 
 struct table_of_contents {
-    entries: list<toc_entry>
-    format: string
+    list<toc_entry> entries
+    string format
 }
 
 struct toc_entry {
-    level: int
-    number: string
-    title: string
-    page_ref: string
-    word_count: int
+    int level
+    string number
+    string title
+    string page_ref
+    int word_count
 }
 
 struct document_statistics {
-    total_words: int
-    total_characters: int
-    total_sections: int
-    avg_section_words: float
-    min_section_words: int
-    max_section_words: int
-    reading_time_minutes: float
-    generation_time_seconds: float
-    revision_count: int
+    int total_words
+    int total_characters
+    int total_sections
+    float avg_section_words
+    int min_section_words
+    int max_section_words
+    float reading_time_minutes
+    float generation_time_seconds
+    int revision_count
     quality_scores: map<string, float>
 }
 
 struct generation_metadata {
-    model_name: string
-    total_tokens_generated: int
-    total_prompt_tokens: int
-    generation_time_seconds: float
-    sections_revised: int
-    quality_checks_passed: int
-    quality_checks_failed: int
-    api_calls_made: int
-    errors_encountered: int
+    string model_name
+    int total_tokens_generated
+    int total_prompt_tokens
+    float generation_time_seconds
+    int sections_revised
+    int quality_checks_passed
+    int quality_checks_failed
+    int api_calls_made
+    int errors_encountered
 }
 struct outline_planner {
-    config: long_writer_config
-    llm_client: any
+    long_writer_config config
+    any llm_client
     init(config: long_writer_config, llm_client: any) {
         this.config = config
         this.llm_client = llm_client
@@ -286,9 +286,9 @@ Now create the outline:"""
     }
 }
 struct content_generator {
-    config: long_writer_config
-    llm_client: any
-    quality_checker: QualityChecker
+    long_writer_config config
+    any llm_client
+    QualityChecker quality_checker
     init(config: long_writer_config, llm_client: any) {
         this.config = config
         this.llm_client = llm_client
@@ -407,33 +407,33 @@ Now write the content for "{section.title}":
     }
 }
 struct generation_context {
-    document_topic: string
-    full_outline: outline_node
-    total_sections: int
-    tokens_used_so_far: int
-    completed_sections: list<string>
+    string document_topic
+    outline_node full_outline
+    int total_sections
+    int tokens_used_so_far
+    list<string> completed_sections
     global_constraints: map<string, string>
 }
 
 struct generated_section {
-    section: outline_node
-    raw_text: string
-    processed_text: string
-    formatting_changes: list<string>
-    generation_time_ms: float
-    tokens_used: int
-    quality_score: float
-    quality_feedback: string
+    outline_node section
+    string raw_text
+    string processed_text
+    list<string> formatting_changes
+    float generation_time_ms
+    int tokens_used
+    float quality_score
+    string quality_feedback
     revision_suggested: bool = false
 }
 
 struct post_process_result {
-    text: string
-    formatting_changes: list<string>
+    string text
+    list<string> formatting_changes
 }
 struct quality_checker {
-    config: long_writer_config
-    llm_client: any
+    long_writer_config config
+    any llm_client
     init(config: long_writer_config, llm_client: any) {
         this.config = config
         this.llm_client = llm_client
@@ -516,25 +516,25 @@ Respond briefly in 3-4 sentences."""
 }
 struct quality_check_result {
     scores: map<string, float>
-    overall_score: float
-    needs_revision: bool
-    strengths: list<string>
-    weaknesses: list<string>
-    specific_improvements: list<string>
-    feedback: string
+    float overall_score
+    bool needs_revision
+    list<string> strengths
+    list<string> weaknesses
+    list<string> specific_improvements
+    string feedback
 }
 
 struct coherence_check_result {
-    feedback: string
-    smooth_transition: bool
-    has_bridge_phrase: bool
+    string feedback
+    bool smooth_transition
+    bool has_bridge_phrase
 }
 struct long_writer_engine {
-    config: long_writer_config
-    llm_client: any
-    planner: OutlinePlanner
-    generator: ContentGenerator
-    documents_history: list<long_document>
+    long_writer_config config
+    any llm_client
+    OutlinePlanner planner
+    ContentGenerator generator
+    list<long_document> documents_history
     init(config: long_writer_config, llm_client: any) {
         this.config = config
         this.llm_client = llm_client
@@ -797,13 +797,13 @@ struct mock_llm_client {
     }
 }
 struct usage_info {
-    prompt_tokens: int
-    completion_tokens: int
+    int prompt_tokens
+    int completion_tokens
 }
 
 struct llm_response {
-    text: string
-    usage: usage_info
+    string text
+    usage_info usage
 }
 export {
     long_writer_config, outline_node, section_status, writing_plan, plan_metadata,

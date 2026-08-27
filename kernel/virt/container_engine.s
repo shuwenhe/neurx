@@ -76,28 +76,28 @@ func namespace_create(namespace_type ns_type, int ns_id, string name) namespace 
 
 func nsproxy_create() nsproxy {
     proxy := nsproxy {
-        ipc_ns: namespace_create(namespace_type::ipc_namespace, 1, "ipc_ns"),
-        net_ns: namespace_create(namespace_type::network_namespace, 2, "net_ns"),
-        mnt_ns: namespace_create(namespace_type::mount_namespace, 3, "mnt_ns"),
-        pid_ns: namespace_create(namespace_type::pid_namespace, 4, "pid_ns"),
-        user_ns: namespace_create(namespace_type::user_namespace, 5, "user_ns"),
-        uts_ns: namespace_create(namespace_type::uts_namespace, 6, "uts_ns"),
-        cgroup_ns: namespace_create(namespace_type::cgroup_namespace, 7, "cgroup_ns")
+        ipc_ns: namespace_create(namespace_type_ipc_namespace, 1, "ipc_ns"),
+        net_ns: namespace_create(namespace_type_network_namespace, 2, "net_ns"),
+        mnt_ns: namespace_create(namespace_type_mount_namespace, 3, "mnt_ns"),
+        pid_ns: namespace_create(namespace_type_pid_namespace, 4, "pid_ns"),
+        user_ns: namespace_create(namespace_type_user_namespace, 5, "user_ns"),
+        uts_ns: namespace_create(namespace_type_uts_namespace, 6, "uts_ns"),
+        cgroup_ns: namespace_create(namespace_type_cgroup_namespace, 7, "cgroup_ns")
     }
     return proxy
 }
 
 func (nsproxy* proxy) get_namespace(namespace_type ns_type) option[namespace] {
-    if ns_type == namespace_type::ipc_namespace {
-        return option::some(proxy.ipc_ns)
+    if ns_type == namespace_type_ipc_namespace {
+        return some(proxy.ipc_ns)
     }
-    if ns_type == namespace_type::network_namespace {
-        return option::some(proxy.net_ns)
+    if ns_type == namespace_type_network_namespace {
+        return some(proxy.net_ns)
     }
-    if ns_type == namespace_type::pid_namespace {
-        return option::some(proxy.pid_ns)
+    if ns_type == namespace_type_pid_namespace {
+        return some(proxy.pid_ns)
     }
-    return option::none
+    return nil
 }
 
 func container_config_create(string container_id, string image_name) container_config {

@@ -25,7 +25,7 @@ struct KernelConfig {
     grid_size: i32,
     shared_memory: i32,
     stream_id: i32,
-    device: DeviceType
+    DeviceType device
 }
 
 struct MemoryInfo {
@@ -33,7 +33,7 @@ struct MemoryInfo {
     reserved: i64,
     free: i64,
     used: i64,
-    total: i64
+    i64 total
 }
 
 struct KernelStats {
@@ -43,14 +43,14 @@ struct KernelStats {
     bytes_read: i64,
     bytes_written: i64,
     gpu_time_ms: f32,
-    launch_count: i32
+    i32 launch_count
 }
 
 struct CUDAStream {
     stream_id: i32,
     device: DeviceType,
     priority: i32,
-    is_active: bool
+    bool is_active
 }
 
 struct TensorOpParams {
@@ -65,14 +65,14 @@ struct TensorOpParams {
     k: i32,
     lda: i32,
     ldb: i32,
-    ldc: i32
+    i32 ldc
 }
 
 struct NormParams {
     epsilon: f32,
     momentum: f32,
     affine: bool,
-    track_running_stats: bool
+    bool track_running_stats
 }
 
 
@@ -88,7 +88,7 @@ struct NormParams {
 struct ActivationParams {
     activation_type: ActivationType,
     inplace: bool,
-    dim: i32
+    i32 dim
 }
 
 struct AttentionParams {
@@ -98,14 +98,14 @@ struct AttentionParams {
     head_dim: i32,
     is_causal: bool,
     dropout_p: f32,
-    scale: f32
+    f32 scale
 }
 
 struct DTypeConversionParams {
     src_dtype: DataType,
     dst_dtype: DataType,
     scale_factor: f32,
-    zero_point: i32
+    i32 zero_point
 }
 
 
@@ -119,7 +119,7 @@ struct KernelCacheConfig {
     enable_cache: bool,
     max_cache_entries: i32,
     cache_eviction_policy: string,
-    cache_hit_threshold: i32
+    i32 cache_hit_threshold
 }
 
 struct KernelCompileOptions {
@@ -127,7 +127,7 @@ struct KernelCompileOptions {
     enable_ptx_cache: bool,
     enable_graph_capture: bool,
     max_registers: i32,
-    use_fast_math: bool
+    bool use_fast_math
 }
 
 struct KernelResult {
@@ -135,21 +135,21 @@ struct KernelResult {
     error_code: i32,
     error_message: string,
     execution_time_ms: f32,
-    stats: KernelStats
+    KernelStats stats
 }
 
 struct CUDAEvent {
     event_id: i32,
     device: DeviceType,
     is_recorded: bool,
-    timestamp: i64
+    i64 timestamp
 }
 
 struct LaunchConfig {
     block_dim: [3]i32,
     grid_dim: [3]i32,
     shared_memory_bytes: i32,
-    stream: *CUDAStream
+    *CUDAStream stream
 }
 
 func main() {

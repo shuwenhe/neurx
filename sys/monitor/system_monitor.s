@@ -3,25 +3,25 @@ package neurx.sys.monitor
 use std.slices
 
 struct system_metrics {
-    cpu_usage: int
-    memory_usage: int64
-    gpu_usage: int
-    network_bandwidth: int64
-    inference_latency_ms: int
-    throughput_ops_per_sec: int
+    int cpu_usage
+    int64 memory_usage
+    int gpu_usage
+    int64 network_bandwidth
+    int inference_latency_ms
+    int throughput_ops_per_sec
 }
 
 struct resource_limit {
-    max_cpu_usage: int
-    max_memory_usage: int64
-    max_gpu_usage: int
-    max_latency_ms: int
+    int max_cpu_usage
+    int64 max_memory_usage
+    int max_gpu_usage
+    int max_latency_ms
 }
 
 struct monitor_state {
-    metrics: system_metrics
-    limits: resource_limit
-    threshold_violations: int
+    system_metrics metrics
+    resource_limit limits
+    int threshold_violations
 }
 
 func create_monitor() monitor_state {

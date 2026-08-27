@@ -9,16 +9,16 @@ import "device_api"
 }
 
 struct allocation_info {
-    device: device
-    size: i64
-    alignment: i64
-    strategy: AllocatorStrategy
+    device device
+    i64 size
+    i64 alignment
+    AllocatorStrategy strategy
 }
 
 struct allocation_result {
-    ptr: i64
-    allocated_size: i64
-    actual_device: device
+    i64 ptr
+    i64 allocated_size
+    device actual_device
 }
 interface i_allocator {
     allocate(info: allocation_info) . allocation_result

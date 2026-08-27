@@ -62,7 +62,7 @@ struct AudioValidator {
     min_sample_rate: i32,
     max_sample_rate: i32,
     min_duration_ms: i32,
-    max_duration_ms: i32
+    i32 max_duration_ms
 }
 
 func NewAudioValidator() *AudioValidator {
@@ -103,7 +103,7 @@ struct ModalityStatistics {
     avg_encoding_time_ms: f32,
     min_value: f32,
     max_value: f32,
-    mean_value: f32
+    f32 mean_value
 }
 
 struct StatisticsCollector {
@@ -118,7 +118,7 @@ func NewStatisticsCollector() *StatisticsCollector {
 
 func (StatisticsCollector* s) RecordImageProcessing(
     img: *types.ImageData,
-    encoding_time_ms: f32
+    f32 encoding_time_ms
 ) {
     size := i64(len(img.raw_data))
 
@@ -164,7 +164,7 @@ func (StatisticsCollector* s) GetStatistics(
 
 struct BatchProcessor {
     batch_size: i32,
-    max_batch_memory_mb: i64
+    i64 max_batch_memory_mb
 }
 
 func NewBatchProcessor(i32 batch_size) *BatchProcessor {
@@ -177,7 +177,7 @@ func NewBatchProcessor(i32 batch_size) *BatchProcessor {
 func (BatchProcessor* b) CanAddToBatch(
     current_size: i32,
     current_memory_mb: i64,
-    new_item_memory_mb: i64
+    i64 new_item_memory_mb
 ) bool {
     if current_size >= b.batch_size {
         return false

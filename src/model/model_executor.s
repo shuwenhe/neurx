@@ -4,8 +4,8 @@ use std.slices
 use std.option
 
 struct model_executor {
-    current_model: string
-    device: string
+    string current_model
+    string device
 }
 
 func new_model_executor(string device) model_executor {
@@ -38,8 +38,8 @@ func (model_executor* executor) load_model(string model_name, string device) boo
 
 struct forward_output {
     logits: []f32
-    kv_cache_updated: bool
-    compute_time_ms: int
+    bool kv_cache_updated
+    int compute_time_ms
 }
 
 func (model_executor* executor) forward_pass(
@@ -66,15 +66,15 @@ const QUANT_INT8 = "int8"
 const QUANT_INT4 = "int4"
 
 struct distributed_config {
-    world_size: int
-    rank: int
-    backend: string
+    int world_size
+    int rank
+    string backend
 }
 
 func prepare_distributed_model(
     executor: *model_executor,
     model_name: string,
-    config: *distributed_config
+    *distributed_config config
 ) bool {
     if config.world_size == 1 {
         return true
@@ -83,17 +83,17 @@ func prepare_distributed_model(
 }
 
 struct execution_stats {
-    model_name: string
-    total_tokens: int
-    total_time_ms: int
-    tokens_per_sec: f32
-    peak_memory_mb: int
-    avg_batch_size: f32
+    string model_name
+    int total_tokens
+    int total_time_ms
+    f32 tokens_per_sec
+    int peak_memory_mb
+    f32 avg_batch_size
 }
 
 func collect_execution_stats(
     executor: *model_executor,
-    model_name: string
+    string model_name
 ) execution_stats {
     execution_stats {
         model_name: model_name,
@@ -126,12 +126,12 @@ func (model_executor* executor) unload_model(string model_name) bool {
 }
 
 struct model_info {
-    name: string
-    model_type: string
-    parameters_b: f32
-    memory_gb_fp16: f32
-    max_seq_len: int
-    attention_type: string
+    string name
+    string model_type
+    f32 parameters_b
+    f32 memory_gb_fp16
+    int max_seq_len
+    string attention_type
 }
 
 func get_model_info(string model_name) option[model_info] {

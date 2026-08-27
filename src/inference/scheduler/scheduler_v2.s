@@ -80,7 +80,7 @@ func new_batch_request(string request_id, int32[] input_tokens, int32 max_tokens
         input_tokens: input_tokens,
         generated_tokens: int32[]{},
         max_tokens: max_tokens,
-        state: request_state::submitted,
+        state: request_state_submitted,
         priority: priority,
         submission_time: 0,
         start_time: 0,
@@ -96,19 +96,19 @@ func new_batch_request(string request_id, int32[] input_tokens, int32 max_tokens
 func (batch_request* req) transition_state(request_state new_state) bool {
     valid_transitions := map[request_state, bool]{}
 
-    if req.state == request_state::submitted {
-        valid_transitions[request_state::queued] = true
-        valid_transitions[request_state::cancelled] = true
-    } else if req.state == request_state::queued {
-        valid_transitions[request_state::acquiring_resources] = true
-        valid_transitions[request_state::cancelled] = true
-    } else if req.state == request_state::acquiring_resources {
-        valid_transitions[request_state::executing] = true
-        valid_transitions[request_state::cancelled] = true
-    } else if req.state == request_state::executing {
-        valid_transitions[request_state::completed] = true
-        valid_transitions[request_state::failed] = true
-        valid_transitions[request_state::timeout] = true
+    if req.state == request_state_submitted {
+        valid_transitions[request_state_queued] = true
+        valid_transitions[request_state_cancelled] = true
+    } else if req.state == request_state_queued {
+        valid_transitions[request_state_acquiring_resources] = true
+        valid_transitions[request_state_cancelled] = true
+    } else if req.state == request_state_acquiring_resources {
+        valid_transitions[request_state_executing] = true
+        valid_transitions[request_state_cancelled] = true
+    } else if req.state == request_state_executing {
+        valid_transitions[request_state_completed] = true
+        valid_transitions[request_state_failed] = true
+        valid_transitions[request_state_timeout] = true
     }
 
     if new_state in valid_transitions && valid_transitions[new_state] {
@@ -120,7 +120,7 @@ func (batch_request* req) transition_state(request_state new_state) bool {
 }
 
 func (batch_request* req) is_in_final_state() bool {
-    req.state == request_state::completed || req.state == request_state::cancelled || req.state == request_state::failed || req.state == request_state::timeout
+    req.state == request_state_completed || req.state == request_state_cancelled || req.state == request_state_failed || req.state == request_state_timeout
 }
 
 func (batch_request* req) update_generated_tokens(int32[] new_tokens) {
@@ -140,13 +140,13 @@ func (batch_request* req) is_complete() bool {
 func (batch_request* req) get_priority_score() float {
     base_score := 0.0
 
-    if req.priority == request_priority::critical {
+    if req.priority == request_priority_critical {
         base_score = 100.0
-    } else if req.priority == request_priority::high {
+    } else if req.priority == request_priority_high {
         base_score = 75.0
-    } else if req.priority == request_priority::normal {
+    } else if req.priority == request_priority_normal {
         base_score = 50.0
-    } else if req.priority == request_priority::low {
+    } else if req.priority == request_priority_low {
         base_score = 25.0
     } else {
         base_score = 10.0

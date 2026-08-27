@@ -38,7 +38,7 @@ func grant_capability(process_capabilities pc, int cap_id, string cap_name) proc
     cap := capability {
         cap_id: cap_id,
         cap_name: cap_name,
-        granted: true
+        true granted
     }
     pc.caps = append(pc.caps, cap)
     pc
@@ -62,7 +62,7 @@ func audit_log_event(audit_log log, string event_type, int pid, string details) 
         event_type: event_type,
         process_id: pid,
         timestamp: 0,
-        details: details
+        details details
     }
     log.events = append(log.events, event)
     log.event_count = log.event_count + 1

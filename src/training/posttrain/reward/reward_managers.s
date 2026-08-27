@@ -2,30 +2,30 @@ import "tensor/tensor.s"
 import "src/training/posttrain/reward/reward_model.s"
 
 struct batch_reward_manager_config {
-    batch_size: i32
-    max_queue_size: i32
-    timeout_ms: i64
-    num_workers: i32
-    use_gpu: bool
-    gpu_device: i32
+    i32 batch_size
+    i32 max_queue_size
+    i64 timeout_ms
+    i32 num_workers
+    bool use_gpu
+    i32 gpu_device
 }
 
 struct reward_request {
-    request_id: string
-    prompt: tensor
-    response: tensor
+    string request_id
+    tensor prompt
+    tensor response
     callback: fn(f32)
 }
 
 struct batch_reward_manager {
-    config: batch_reward_manager_config
-    reward_model: *model
+    batch_reward_manager_config config
+    *model reward_model
     request_queue: []reward_request
-    queue_mutex: mutex
+    mutex queue_mutex
     workers: []worker
-    total_requests: i64
-    total_batches: i64
-    avg_batch_size: f32
+    i64 total_requests
+    i64 total_batches
+    f32 avg_batch_size
 }
 
 func new_batch_reward_manager(batch_reward_manager_config config, *model model) . batch_reward_manager {
@@ -101,24 +101,24 @@ func (batch_reward_manager* manager) flush() {
 }
 
 struct rate_limited_reward_manager_config {
-    max_requests_per_second: f32
-    burst_size: i32
-    use_token_bucket: bool
+    f32 max_requests_per_second
+    i32 burst_size
+    bool use_token_bucket
 }
 
 struct rate_limited_reward_manager {
-    config: rate_limited_reward_manager_config
-    reward_model: *model
-    tokens: f32
-    last_refill_time: i64
+    rate_limited_reward_manager_config config
+    *model reward_model
+    f32 tokens
+    i64 last_refill_time
     delayed_queue: []delayed_request
-    total_requests: i64
-    rate_limited_count: i64
+    i64 total_requests
+    i64 rate_limited_count
 }
 
 struct delayed_request {
-    request: reward_request
-    scheduled_time: i64
+    reward_request request
+    i64 scheduled_time
 }
 
 func new_rate_limited_reward_manager(
@@ -176,18 +176,18 @@ func (rate_limited_reward_manager* manager) compute_reward_internal(
 }
 
 struct dapo_reward_manager_config {
-    format_weight: f32
-    accuracy_weight: f32
-    reasoning_weight: f32
-    use_process_reward: bool
-    verification_method: string
+    f32 format_weight
+    f32 accuracy_weight
+    f32 reasoning_weight
+    bool use_process_reward
+    string verification_method
 }
 
 struct dapo_reward_manager {
-    config: dapo_reward_manager_config
-    format_checker: *format_checker
-    accuracy_verifier: *answer_verifier
-    reasoning_scorer: *reasoning_scorer
+    dapo_reward_manager_config config
+    *format_checker format_checker
+    *answer_verifier accuracy_verifier
+    *reasoning_scorer reasoning_scorer
 }
 
 func new_dapo_reward_manager(dapo_reward_manager_config config) . dapo_reward_manager {
@@ -227,16 +227,16 @@ func (dapo_reward_manager* manager) compute_reward(
 }
 
 struct prime_reward_manager_config {
-    num_steps: i32
-    step_reward_weight: f32
-    final_reward_weight: f32
-    use_step_verification: bool
+    i32 num_steps
+    f32 step_reward_weight
+    f32 final_reward_weight
+    bool use_step_verification
 }
 
 struct prime_reward_manager {
-    config: prime_reward_manager_config
-    step_reward_model: *model
-    final_reward_model: *model
+    prime_reward_manager_config config
+    *model step_reward_model
+    *model final_reward_model
 }
 
 func new_prime_reward_manager(

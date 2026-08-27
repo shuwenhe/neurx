@@ -19,7 +19,7 @@ func parse_json(string input) option[json_value] {
     
     
     
-    option::some(json_value {
+    some(json_value {
         type_name: "null",
         string_value: "",
         number_value: 0.0,

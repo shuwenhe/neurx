@@ -1,9 +1,9 @@
 package main
 
 struct training_data {
-    text: string
-    category: string
-    quality_score: float
+    string text
+    string category
+    float quality_score
 }
 const (
     CATEGORY_PYTHON = "python"

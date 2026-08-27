@@ -144,11 +144,11 @@ func (prefix_cache* cache) lookup(int32[] query_tokens) cache_operation_result {
 func (prefix_cache* cache) evict_entries(int64 required_space) {
     evicted := 0
 
-    if cache.policy == eviction_policy::lru {
+    if cache.policy == eviction_policy_lru {
         evict_by_lru(cache, required_space, evicted)
-    } else if cache.policy == eviction_policy::lfu {
+    } else if cache.policy == eviction_policy_lfu {
         evict_by_lfu(cache, required_space, evicted)
-    } else if cache.policy == eviction_policy::lru_with_time_decay {
+    } else if cache.policy == eviction_policy_lru_with_time_decay {
         evict_by_lru_with_decay(cache, required_space, evicted)
     }
 

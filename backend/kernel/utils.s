@@ -5,12 +5,12 @@ import (
 )
 
 struct KernelUtils {
-    verbose: bool
+    bool verbose
 }
 
 func NewKernelUtils() *KernelUtils {
     return *KernelUtils{
-        verbose: false
+        false verbose
     }
 }
 
@@ -96,7 +96,7 @@ func (KernelUtils* u) GetLinearIndex(
 
 func (KernelUtils* u) GetMultiDimensionalIndex(
     shape: []i32,
-    linear_index: i64
+    i64 linear_index
 ) []i32 {
 
     indices := make([]i32, len(shape))
@@ -187,7 +187,7 @@ func (KernelUtils* u) TransposeShape([]i32 shape) []i32 {
 func (KernelUtils* u) ChunkShape(
     shape: []i32,
     chunk_size: i32,
-    dim: i32
+    i32 dim
 ) [][]i32 {
 
     if dim < 0 || dim >= i32(len(shape)) {

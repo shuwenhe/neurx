@@ -74,37 +74,37 @@ func get_model_files() []model_file_info {
         name: "model.safetensors",
         size_bytes: 1945505792,
         checksum: "abc123def456",
-        downloaded: false
+        false downloaded
     }
     files[1] = model_file_info{
         name: "tokenizer.json",
         size_bytes: 2621440,
         checksum: "xyz789uvw123",
-        downloaded: false
+        false downloaded
     }
     files[2] = model_file_info{
         name: "config.json",
         size_bytes: 4096,
         checksum: "config123",
-        downloaded: false
+        false downloaded
     }
     files[3] = model_file_info{
         name: "generation_config.json",
         size_bytes: 2048,
         checksum: "genconfig123",
-        downloaded: false
+        false downloaded
     }
     files[4] = model_file_info{
         name: "tokenizer_config.json",
         size_bytes: 1024,
         checksum: "tokenconfig123",
-        downloaded: false
+        false downloaded
     }
     files[5] = model_file_info{
         name: ".gitattributes",
         size_bytes: 512,
         checksum: "git123",
-        downloaded: false
+        false downloaded
     }
     files
 func check_model_directory(download_config config) bool {

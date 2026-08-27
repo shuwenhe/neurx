@@ -4,134 +4,134 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_fi
 struct industrial_batch {
     tokens: []int
     labels: []int
-    batch_size: int
-    seq_len: int
+    int batch_size
+    int seq_len
 }
 
 struct industrial_dataset_state {
-    manifest_path: string
+    string manifest_path
     shard_paths: []string
-    shard_index: int
-    line_index: int
-    vocab_size: int
-    batch_size: int
-    seq_len: int
+    int shard_index
+    int line_index
+    int vocab_size
+    int batch_size
+    int seq_len
 }
 
 struct industrial_dist_state {
-    rank: int
-    world_size: int
-    tp_size: int
-    pp_size: int
-    dp_size: int
-    ep_size: int
+    int rank
+    int world_size
+    int tp_size
+    int pp_size
+    int dp_size
+    int ep_size
 }
 
 struct industrial_mp_state {
-    use_bf16: int
-    loss_scale: float
-    min_loss_scale: float
-    max_loss_scale: float
-    overflow_steps: int
-    growth_interval: int
+    int use_bf16
+    float loss_scale
+    float min_loss_scale
+    float max_loss_scale
+    int overflow_steps
+    int growth_interval
 }
 
 struct industrial_optimizer_state {
-    step: int
-    param_count: int
-    learning_rate: float
-    weight_decay: float
-    beta1: float
-    beta2: float
-    epsilon: float
+    int step
+    int param_count
+    float learning_rate
+    float weight_decay
+    float beta1
+    float beta2
+    float epsilon
     m: []float
     v: []float
-    scalar_momentum: float
-    scalar_variance: float
+    float scalar_momentum
+    float scalar_variance
 }
 
 struct industrial_checkpoint_state {
-    base_dir: string
-    latest_step: int
-    best_loss: float
-    latest_path: string
+    string base_dir
+    int latest_step
+    float best_loss
+    string latest_path
 }
 
 struct industrial_trainer {
-    dataset: industrial_dataset_state
-    dist: industrial_dist_state
-    mp: industrial_mp_state
-    opt: industrial_optimizer_state
-    base_learning_rate: float
-    warmup_steps: int
-    ckpt: industrial_checkpoint_state
+    industrial_dataset_state dataset
+    industrial_dist_state dist
+    industrial_mp_state mp
+    industrial_optimizer_state opt
+    float base_learning_rate
+    int warmup_steps
+    industrial_checkpoint_state ckpt
     params: []float
-    param_count: int
-    last_loss: float
-    global_step: int
-    tokens_seen: int
+    int param_count
+    float last_loss
+    int global_step
+    int tokens_seen
 }
 
 struct industrial_batch_result {
-    dataset: industrial_dataset_state
-    batch: industrial_batch
+    industrial_dataset_state dataset
+    industrial_batch batch
 }
 
 struct industrial_adamw_result {
     params: []float
-    opt: industrial_optimizer_state
+    industrial_optimizer_state opt
 }
 
 struct industrial_mp_step_result {
     params: []float
-    mp: industrial_mp_state
-    opt: industrial_optimizer_state
-    loss: float
-    overflow: int
+    industrial_mp_state mp
+    industrial_optimizer_state opt
+    float loss
+    int overflow
 }
 
 struct industrial_scalar_adamw_result {
-    param: float
-    opt_step: int
-    scalar_momentum: float
-    scalar_variance: float
+    float param
+    int opt_step
+    float scalar_momentum
+    float scalar_variance
 }
 
 struct industrial_scalar_mp_step_result {
-    param: float
-    mp: industrial_mp_state
-    loss: float
-    overflow: int
-    opt_step: int
-    scalar_momentum: float
-    scalar_variance: float
+    float param
+    industrial_mp_state mp
+    float loss
+    int overflow
+    int opt_step
+    float scalar_momentum
+    float scalar_variance
 }
 
 struct industrial_train_step_result {
     params: []float
-    mp: industrial_mp_state
-    opt: industrial_optimizer_state
-    loss: float
-    global_step: int
-    tokens_seen: int
+    industrial_mp_state mp
+    industrial_optimizer_state opt
+    float loss
+    int global_step
+    int tokens_seen
 }
 
 struct industrial_checkpoint_load_result {
-    ckpt: industrial_checkpoint_state
+    industrial_checkpoint_state ckpt
     params: []float
-    opt: industrial_optimizer_state
-    step: int
-    tokens_seen: int
-    param_count: int
-    loss: float
-    loss_scale: float
-    best_loss: float
-    has_base_learning_rate: int
-    has_warmup_steps: int
-    base_learning_rate: float
-    warmup_steps: int
-    data_shard_index: int
-    data_line_index: int
+    industrial_optimizer_state opt
+    int step
+    int tokens_seen
+    int param_count
+    float loss
+    float loss_scale
+    float best_loss
+    int has_base_learning_rate
+    int has_warmup_steps
+    float base_learning_rate
+    int warmup_steps
+    int data_shard_index
+    int data_line_index
 }
 
 func industrial_chr(int code) string {

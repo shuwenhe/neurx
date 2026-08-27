@@ -52,7 +52,7 @@ func detect_platform_capability() (platform_capability, string) {
         cpu_count: cpu_count,
         total_memory_gb: total_memory,
         network_bandwidth_gbps: 10,
-        accelerators: *accelerators
+        *accelerators accelerators
     }
     
 return     (platform, "")
@@ -95,7 +95,7 @@ return     (memory_gb, "")
 func detect_compute_device(int index) (device_capability, string) {
     if index == 0 {
         return (device_capability {
-            compute_type: compute_capability::gpu_nvidia,
+            compute_type: compute_capability_gpu_nvidia,
             compute_cores: 8192,
             memory_gb: 80,
             memory_bandwidth_gbps: 864,
@@ -106,7 +106,7 @@ func detect_compute_device(int index) (device_capability, string) {
     }
     
     (device_capability {
-        compute_type: compute_capability::cpu_only,
+        compute_type: compute_capability_cpu_only,
         compute_cores: 8,
         memory_gb: 16,
         memory_bandwidth_gbps: 50,

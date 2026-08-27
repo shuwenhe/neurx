@@ -6,13 +6,13 @@ use neurx.security.access_control as sec_sys
 use neurx.crypto.cipher as crypto_sys
 
 struct enhanced_kernel_state {
-    version: int
+    int version
     io_ring: async_io.io_ring
     ipc_subsystem: ipc_sys.ipc_subsystem
     security_subsystem: sec_sys.security_subsystem
     crypto_subsystem: crypto_sys.crypto_subsystem
-    active_tasks: int
-    gpu_utilization: int
+    int active_tasks
+    int gpu_utilization
 }
 
 func init_io_subsystem() async_io.io_ring {

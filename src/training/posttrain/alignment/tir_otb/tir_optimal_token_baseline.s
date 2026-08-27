@@ -4,44 +4,44 @@ import "src/training/posttrain/alignment/rollout_correction/config.s"
 import "src/training/posttrain/alignment/rollout_correction/importance_sampling.s"
 
 struct tir_optimal_token_baseline_config {
-    learning_rate: f32
-    num_epochs: i32
-    max_grad_norm: f32
-    gamma: f32
-    is_threshold: f32
-    use_is_batch_normalize: bool
-    baseline_ema_alpha: f32
-    use_position_baseline: bool
-    use_learned_baseline: bool
-    use_whitening: bool
-    compute_variance_reduction: bool
-    use_clipping: bool
-    clip_epsilon: f32
-    entropy_coeff: f32
+    f32 learning_rate
+    i32 num_epochs
+    f32 max_grad_norm
+    f32 gamma
+    f32 is_threshold
+    bool use_is_batch_normalize
+    f32 baseline_ema_alpha
+    bool use_position_baseline
+    bool use_learned_baseline
+    bool use_whitening
+    bool compute_variance_reduction
+    bool use_clipping
+    f32 clip_epsilon
+    f32 entropy_coeff
 }
 
 struct tir_optimal_token_baseline_trainer {
-    config: TIROptimalTokenBaselineConfig
-    policy_model: *model
-    value_model: *model
-    reference_model: *model
-    optimizer: *optimizer
-    value_optimizer: *optimizer
-    token_baselines: map[i64]f32
-    position_baselines: map[i64]f32
-    variance_before: f32
-    variance_after: f32
-    variance_reduction_ratio: f32
-    is_weight_stats: ISWeightStats
-    step_count: i64
+    TIROptimalTokenBaselineConfig config
+    *model policy_model
+    *model value_model
+    *model reference_model
+    *optimizer optimizer
+    *optimizer value_optimizer
+    map[i64]f32 token_baselines
+    map[i64]f32 position_baselines
+    f32 variance_before
+    f32 variance_after
+    f32 variance_reduction_ratio
+    ISWeightStats is_weight_stats
+    i64 step_count
 }
 
 struct is_weight_stats {
-    mean: f32
-    std: f32
-    min: f32
-    max: f32
-    clip_fraction: f32
+    f32 mean
+    f32 std
+    f32 min
+    f32 max
+    f32 clip_fraction
 }
 
 func new_tir_otb_trainer(
@@ -94,7 +94,7 @@ func (tir_optimal_token_baseline_trainer* trainer) compute_tir_token_baseline(
             reward := rewards[b][t].item()
             is_weight := is_weights[b][t].item()
             weighted_reward := reward * is_weight
-            key: i64
+            i64 key
             if trainer.config.use_position_baseline {
                 key = position
             } else {

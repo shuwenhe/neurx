@@ -8,39 +8,39 @@ import (
 )
 
 struct perplexity_metrics {
-    step: int
-    loss: float
-    perplexity: float
-    val_loss: float
-    val_perplexity: float
-    improvement: float
+    int step
+    float loss
+    float perplexity
+    float val_loss
+    float val_perplexity
+    float improvement
 }
 
 struct training_metrics {
-    step: int
-    epoch: int
-    batch_idx: int
-    loss: float
-    learning_rate: float
-    throughput: float
-    time_elapsed: float
-    eta: float
-    memory_used: float
-    grad_norm: float
-    perplexity: perplexity_metrics
+    int step
+    int epoch
+    int batch_idx
+    float loss
+    float learning_rate
+    float throughput
+    float time_elapsed
+    float eta
+    float memory_used
+    float grad_norm
+    perplexity_metrics perplexity
 }
 
 struct advanced_training_monitor {
     start_time: time.Time
     steps: []training_metrics
-    total_steps: int
-    log_file: string
-    update_interval: int
+    int total_steps
+    string log_file
+    int update_interval
     ppl_history: []perplexity_metrics
-    best_val_ppl: float
-    best_step: int
-    convergence_window: int
-    convergence_threshold: float
+    float best_val_ppl
+    int best_step
+    int convergence_window
+    float convergence_threshold
 }
 
 func (advanced_training_monitor* atm) init(

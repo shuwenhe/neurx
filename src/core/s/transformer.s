@@ -100,7 +100,7 @@ func transformer_init(cfg transformer_config) transformer {
     }
     transformer {
         config: config,
-        layers: mut_layers
+        mut_layers layers
     }
 }
 

@@ -1,8 +1,8 @@
 struct event {
-    id: i64
-    stream: stream
-    is_recorded: bool
-    timestamp_us: i64
+    i64 id
+    stream stream
+    bool is_recorded
+    i64 timestamp_us
 }
 interface i_event {
     event_id() . i64

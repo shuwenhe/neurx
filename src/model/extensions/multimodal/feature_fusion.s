@@ -19,12 +19,12 @@ struct FeatureFusion {
     num_heads: i32,
     dropout_rate: f32,
     use_residual: bool,
-    normalization: string
+    string normalization
 }
 
 func NewFeatureFusion(
     hidden_dim: i32,
-    fusion_strategy: FusionStrategy
+    FusionStrategy fusion_strategy
 ) *FeatureFusion {
     return *FeatureFusion{
         fusion_strategy: fusion_strategy,
@@ -216,7 +216,7 @@ func (FeatureFusion* f) FuseGating(
 
 func (FeatureFusion* f) ApplyLayerNorm(
     tensor: *types.Tensor,
-    eps: f32
+    f32 eps
 ) *types.Tensor {
     seq_len := tensor.shape[0]
     feature_dim := tensor.shape[1]

@@ -104,7 +104,7 @@ func new_distributed_tensor_manager(distributed_context ctx) distributed_tensor_
 }
 
 func (distributed_tensor_manager* mgr) register_tensor(string tensor_id, int64[] shape, string dtype) string {
-    dtensor := new_distributed_tensor(tensor_id, shape, dtype, tensor_layout::dense)
+    dtensor := new_distributed_tensor(tensor_id, shape, dtype, tensor_layout_dense)
     mgr.tensors[tensor_id] = dtensor
     tensor_id
 }
@@ -114,7 +114,7 @@ func (distributed_tensor_manager* mgr) get_tensor(string tensor_id) distributed_
         mgr.tensors[tensor_id]
     }
 
-    new_distributed_tensor("", int64[]{}, "float32", tensor_layout::dense)
+    new_distributed_tensor("", int64[]{}, "float32", tensor_layout_dense)
 }
 
 func (distributed_tensor_manager* mgr) has_tensor(string tensor_id) bool {

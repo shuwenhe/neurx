@@ -5,31 +5,31 @@ import "src/core/nn/linear.s"
 import "src/training/posttrain/alignment/base_algorithm.s"
 
 struct sppo_config {
-    beta: f32
-    learning_rate: f32
-    num_iterations: i32
-    win_rate_threshold: f32
-    max_grad_norm: f32
-    use_margin: bool
-    margin: f32
+    f32 beta
+    f32 learning_rate
+    i32 num_iterations
+    f32 win_rate_threshold
+    f32 max_grad_norm
+    bool use_margin
+    f32 margin
 }
 
 struct sppo_trainer {
-    config: sppo_config
-    policy_model: *model
-    reference_model: *model
-    optimizer: *optimizer
-    iteration: i32
+    sppo_config config
+    *model policy_model
+    *model reference_model
+    *optimizer optimizer
+    i32 iteration
     win_rates: []f32
     trajectory_buffer: []trajectory
 }
 
 struct trajectory {
-    prompt: tensor
-    response: tensor
-    log_probs: tensor
-    reward: f32
-    win_rate: f32
+    tensor prompt
+    tensor response
+    tensor log_probs
+    f32 reward
+    f32 win_rate
 }
 
 func new_sppo_trainer(sppo_config config, *model model, *model ref_model) . sppo_trainer {
@@ -54,7 +54,7 @@ func (sppo_trainer* trainer) self_play_rollout(tensor prompts, i32 num_samples) 
                 prompt,
                 temperature: 1.0,
                 top_p: 0.95,
-                return_log_probs: true
+                true return_log_probs
             )
             reward := trainer.compute_self_play_reward(prompt, response)
             traj := trajectory{
@@ -144,7 +144,7 @@ func (sppo_trainer* trainer) compute_sppo_loss(
         chosen_log_ratio := (chosen_log_probs - ref_chosen_log_probs).sum()
         rejected_log_ratio := (rejected_log_probs - ref_rejected_log_probs).sum()
         logits_diff := chosen_log_ratio - rejected_log_ratio
-        loss: tensor
+        tensor loss
         if trainer.config.use_margin {
             loss = -log_sigmoid(trainer.config.beta * logits_diff - trainer.config.margin)
         } else {

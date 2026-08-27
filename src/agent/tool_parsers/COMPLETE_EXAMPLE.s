@@ -198,7 +198,7 @@ func test_custom_extraction() {
     println("─────────────────────────────────────────────────────────────")
 
     test_xml := "<tool_call>{\"name\": \"func1\"}</tool_call><tool_call>{\"name\": \"func2\"}</tool_call>"
-    extracted := ToolExtractorUtils::extract_xml_elements(test_xml, "tool_call")
+    extracted := ToolExtractorUtils_extract_xml_elements(test_xml, "tool_call")
 
     println("XML extraction test:")
     println("  Input: " + test_xml)
@@ -212,13 +212,13 @@ func test_custom_extraction() {
     println("─────────────────────────────────────────────────────────────")
 
     test_json := "{\"valid\": true, \"nested\": {\"data\": [1, 2, 3]}}"
-    is_valid := ToolExtractorUtils::validate_json_structure(test_json)
+    is_valid := ToolExtractorUtils_validate_json_structure(test_json)
     println("JSON structure validation:")
     println("  Input: " + test_json)
     println("  Valid: " + bool_to_string(is_valid))
 
     invalid_json := "{\"missing\": closing brace"
-    is_invalid := ToolExtractorUtils::validate_json_structure(invalid_json)
+    is_invalid := ToolExtractorUtils_validate_json_structure(invalid_json)
     println("\n  Input: " + invalid_json)
     println("  Valid: " + bool_to_string(is_invalid))
 

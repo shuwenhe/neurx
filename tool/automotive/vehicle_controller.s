@@ -30,9 +30,9 @@ struct control_output {
 
 func create_vehicle_controller(int latency_ms) vehicle_controller {
     vehicle_controller {
-        control_mode: vehicle_control_mode::manual,
+        control_mode: vehicle_control_mode_manual,
         latency_constraint_ms: latency_ms,
-        safety_check_enabled: true
+        true safety_check_enabled
     }
 }
 
@@ -41,7 +41,7 @@ func process_sensor_fusion(vehicle_state* vehicle_state) (control_output, string
         steering_command: 0.0,
         brake_command: 0.0,
         throttle_command: 0.0,
-        valid: false
+        false valid
     })
 }
 

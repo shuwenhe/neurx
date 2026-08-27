@@ -134,7 +134,7 @@ func NormalizationExample() {
         epsilon: 1e-5,
         momentum: 0.1,
         affine: true,
-        track_running_stats: true
+        true track_running_stats
     }
 
     result := norm_kernel.LayerNorm(m, n, input, gamma, beta, norm_params, *output)

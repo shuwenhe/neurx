@@ -11,7 +11,7 @@ struct MemoryManager {
     free_blocks: []i64,
     fragmentation_ratio: f32,
     enable_memory_pool: bool,
-    pool_size: i64
+    i64 pool_size
 }
 
 struct MemoryBlock {
@@ -19,7 +19,7 @@ struct MemoryBlock {
     size: i64,
     is_free: bool,
     allocated_time: i64,
-    allocated_by: string
+    string allocated_by
 }
 
 struct MemoryPool {
@@ -28,7 +28,7 @@ struct MemoryPool {
     available: i64,
     blocks: []MemoryBlock,
     max_block_size: i64,
-    min_block_size: i64
+    i64 min_block_size
 }
 
 func NewMemoryManager(types.DeviceType device, i64 total_mem) *MemoryManager {

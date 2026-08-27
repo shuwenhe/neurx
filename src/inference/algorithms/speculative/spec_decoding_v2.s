@@ -51,11 +51,11 @@ struct draft_model_manager {
 func new_draft_model_manager(draft_model_type model_type, string model_name) draft_model_manager {
     speed_mult := 1.0
     switch model_type {
-        draft_model_type::smaller_model : speed_mult = 4.0,
-        draft_model_type::pruned_model : speed_mult = 2.5,
-        draft_model_type::distilled_model : speed_mult = 3.5,
-        draft_model_type::medusa_heads : speed_mult = 1.5,
-        draft_model_type::eagle_heads : speed_mult = 2.0,
+        draft_model_type_smaller_model : speed_mult = 4.0,
+        draft_model_type_pruned_model : speed_mult = 2.5,
+        draft_model_type_distilled_model : speed_mult = 3.5,
+        draft_model_type_medusa_heads : speed_mult = 1.5,
+        draft_model_type_eagle_heads : speed_mult = 2.0,
     }
 
     draft_model_manager {

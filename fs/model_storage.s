@@ -28,7 +28,7 @@ func create_model_storage(string root_path, int capacity_gb) model_storage {
         storage_root: root_path,
         files: model_file[](),
         total_size: 0,
-        available_space: capacity_gb
+        capacity_gb available_space
     }
     storage
 }
@@ -63,7 +63,7 @@ func create_storage_policy(int replication, bool compression, bool tiering, int 
         replication_factor: replication,
         enable_compression: compression,
         enable_tiering: tiering,
-        retention_days: retention
+        retention retention_days
     }
     policy
 }

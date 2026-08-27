@@ -3,32 +3,32 @@ package neurx.sys.scheduler
 use std.slices
 
 struct inference_task {
-    task_id: int64
-    model_id: string
-    batch_size: int
-    priority: int
-    device_id: int
-    status: int
+    int64 task_id
+    string model_id
+    int batch_size
+    int priority
+    int device_id
+    int status
 }
 
 struct task_queue {
-    tasks: inference_task[]
-    next_task_id: int64
-    max_tasks: int
+    inference_task[] tasks
+    int64 next_task_id
+    int max_tasks
 }
 
 struct scheduler_stats {
-    total_tasks: int
-    pending_tasks: int
-    running_tasks: int
-    completed_tasks: int
+    int total_tasks
+    int pending_tasks
+    int running_tasks
+    int completed_tasks
 }
 
 func create_task_queue(max_tasks: int) task_queue {
     queue := task_queue {
         tasks: inference_task[](),
         next_task_id: 1,
-        max_tasks: max_tasks
+        max_tasks max_tasks
     }
     queue
 }
@@ -55,7 +55,7 @@ func enqueue_task(task_queue* queue, model_id: string, batch_size: int, priority
 
 func dequeue_task(task_queue* queue) option[inference_task] {
     if len(queue.tasks) == 0 {
-        return option::none
+        return nil
     }
     
     max_priority_idx := 0
@@ -78,7 +78,7 @@ func dequeue_task(task_queue* queue) option[inference_task] {
         j = j + 1
     }
     
-    option::some(task)
+    some(task)
 }
 
 func get_queue_size(task_queue* queue) int {

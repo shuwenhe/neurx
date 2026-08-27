@@ -260,7 +260,7 @@ func balanced_schedule(*scheduler_state sched) scheduling_decision {
 
 func check_and_apply_preemption(
     sched: *scheduler_state,
-    decision: *scheduling_decision
+    *scheduling_decision decision
 ) {
     if !sched.config.enable_preemption {
         return

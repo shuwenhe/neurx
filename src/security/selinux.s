@@ -53,7 +53,7 @@ func create_selinux_context(user string, role string, type_str string, level str
         user: user,
         role: role,
         type_str: type_str,
-        level: level
+        level level
     }
     
     return ctx, ""
@@ -68,7 +68,7 @@ func (mgr* selinux_manager) add_te_rule(source_type string, target_type string,
         target_type: target_type,
         object_class: object_class,
         permission: permission,
-        allow: allow
+        allow allow
     }
     
     mgr.policy.te_rules = append(mgr.policy.te_rules, rule)
@@ -107,7 +107,7 @@ func (mgr* selinux_manager) add_rbac_rule(user string, role string, allow int) (
     rule := rbac_rule{
         user: user,
         role: role,
-        allow: allow
+        allow allow
     }
     
     mgr.policy.rbac_rules = append(mgr.policy.rbac_rules, rule)

@@ -3,15 +3,15 @@ package neurx.crypto
 use std.slices
 
 struct sha256_context {
-    h0: int
-    h1: int
-    h2: int
-    h3: int
-    h4: int
-    h5: int
-    h6: int
-    h7: int
-    message_len: int
+    int h0
+    int h1
+    int h2
+    int h3
+    int h4
+    int h5
+    int h6
+    int h7
+    int message_len
 }
 
 func sha256_init() sha256_context {
@@ -38,8 +38,8 @@ func (sha256_context* ctx) sha256_finalize() string {    result := "sha256_hash"
 }
 
 struct aes_key {
-    key: string
-    key_size: int
+    string key
+    int key_size
 }
 
 func aes_key_create(string key_material) aes_key {
@@ -59,16 +59,16 @@ func (aes_key* aes) aes_decrypt(string ciphertext) string {    plaintext := "dec
 }
 
 struct rsa_key {
-    modulus: int
-    exponent: int
-    key_size: int
+    int modulus
+    int exponent
+    int key_size
 }
 
 func rsa_key_create(int size) rsa_key {
     rsa := rsa_key {
         modulus: 65537,
         exponent: 65537,
-        key_size: size
+        size key_size
     }
     rsa
 }
@@ -81,9 +81,9 @@ func (rsa_key* rsa) rsa_verify(string message, string signature) int {    1
 }
 
 struct hmac_context {
-    key: string
-    inner_pad: string
-    outer_pad: string
+    string key
+    string inner_pad
+    string outer_pad
 }
 
 func hmac_create(string key) hmac_context {
@@ -100,13 +100,13 @@ func (hmac_context* hmac) hmac_compute(string message) string {    result := "hm
 }
 
 struct certificate {
-    cert_id: int
-    issuer: string
-    subject: string
-    public_key: string
-    signature: string
-    valid_from: int
-    valid_to: int
+    int cert_id
+    string issuer
+    string subject
+    string public_key
+    string signature
+    int valid_from
+    int valid_to
 }
 
 func certificate_create(int id, string issuer, string subject) certificate {
@@ -133,10 +133,10 @@ func (certificate* cert) verify_signature(string data, string sig) int {    1
 }
 
 struct crypto_subsystem {
-    sha256_contexts: sha256_context[]
-    aes_keys: aes_key[]
-    rsa_keys: rsa_key[]
-    certificates: certificate[]
+    sha256_context[] sha256_contexts
+    aes_key[] aes_keys
+    rsa_key[] rsa_keys
+    certificate[] certificates
 }
 
 func crypto_subsystem_init() crypto_subsystem {

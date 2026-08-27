@@ -5,45 +5,45 @@ use std.regex
 use std.strings
 
 struct ToolCall {
-    type: str
-    id: str
-    function: FunctionCall
+    str type
+    str id
+    FunctionCall function
 }
 
 struct FunctionCall {
-    name: str
-    arguments: str
+    str name
+    str arguments
 }
 
 struct ExtractedToolCallInformation {
-    tools_called: bool
-    tool_calls: Vec<ToolCall>
-    content: str
+    bool tools_called
+    Vec<ToolCall> tool_calls
+    str content
 }
 
 struct DeltaToolCall {
-    index: i32
-    type: str
-    function: DeltaFunctionCall
+    i32 index
+    str type
+    DeltaFunctionCall function
 }
 
 struct DeltaFunctionCall {
-    name: str
-    arguments: str
+    str name
+    str arguments
 }
 
 struct ParserRequest {
-    messages: Vec<str>
-    tools: Vec<str>
-    tool_choice: str
-    model: str
+    Vec<str> messages
+    Vec<str> tools
+    str tool_choice
+    str model
 }
 
 struct ParserResponse {
-    tools_called: bool
-    tool_calls: Vec<ToolCall>
-    content: str
-    is_streaming: bool
+    bool tools_called
+    Vec<ToolCall> tool_calls
+    str content
+    bool is_streaming
 }
 
 trait ToolParser {
@@ -53,7 +53,7 @@ trait ToolParser {
         previous_text: str,
         current_text: str,
         delta_text: str,
-        request: ParserRequest
+        ParserRequest request
     ) . DeltaToolCall
 
     fn adjust_request(request: ParserRequest) . ParserRequest {
@@ -76,12 +76,12 @@ trait ToolParser {
 }
 
 struct BaseToolParser {
-    parser_name: str
-    supports_streaming: bool
-    supports_required: bool
-    structural_tag_model: str
-    tokenizer: str
-    tools: Vec<str>
+    str parser_name
+    bool supports_streaming
+    bool supports_required
+    str structural_tag_model
+    str tokenizer
+    Vec<str> tools
 }
 
 func new(str name) . BaseToolParser {
@@ -91,7 +91,7 @@ func new(str name) . BaseToolParser {
         supports_required: true,
         structural_tag_model: "",
         tokenizer: "default",
-        tools: Vec::new()
+        tools: Vec_new()
     }
 }
 
@@ -116,12 +116,12 @@ func set_structural_tag(self, str tag) . BaseToolParser {
 }
 
 struct ToolExtractionContext {
-    current_pos: i32
-    bracket_depth: i32
-    in_string: bool
-    escaped: bool
-    last_newline_pos: i32
-    tool_call_count: i32
+    i32 current_pos
+    i32 bracket_depth
+    bool in_string
+    bool escaped
+    i32 last_newline_pos
+    i32 tool_call_count
 }
 
 func create_extraction_context() . ToolExtractionContext {
@@ -142,7 +142,7 @@ func find_json_boundaries(str text, i32 start) . (i32, i32) {
     start_pos := -1
     end_pos := -1
 
-    chars := strings::chars(text)
+    chars := strings_chars(text)
     i := start
     for i < len(chars) {
         c := chars[i]
@@ -186,8 +186,8 @@ func find_json_boundaries(str text, i32 start) . (i32, i32) {
 
 func extract_json_field(str json_str, str field_name) . str {
     pattern := "\"" + field_name + "\"\\s*:\\s*\"([^\"]*)\""
-    re := regex::compile(pattern)
-    match re::find_string(re, json_str) {
+    re := regex_compile(pattern)
+    match re_find_string(re, json_str) {
         Some(m) => m.group(1).to_string(),
         None => ""
     }

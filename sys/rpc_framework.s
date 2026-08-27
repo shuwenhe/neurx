@@ -50,7 +50,7 @@ func create_rpc_server(int port) (rpc_server, string) {
         port: port,
         active_connections: 0,
         is_running: false,
-        request_queue: *request_queue
+        *request_queue request_queue
     }
     server, ""
 }
@@ -73,7 +73,7 @@ func create_rpc_client(string* address, int port) (rpc_client, string) {
         server_address: address,
         server_port: port,
         connection_timeout_ms: 5000,
-        is_connected: false
+        false is_connected
     }
     client, ""
 }
@@ -85,10 +85,10 @@ func send_rpc_call(rpc_client* client, string* method, int* payload, int payload
     
     message := rpc_message {
         message_id: get_next_message_id(),
-        call_type: rpc_call_type::request,
+        call_type: rpc_call_type_request,
         method_name: method,
         payload: payload,
-        payload_size: payload_size
+        payload_size payload_size
     }
     message, ""
 }
@@ -96,7 +96,7 @@ func send_rpc_call(rpc_client* client, string* method, int* payload, int payload
 func receive_rpc_response(rpc_client* client) (rpc_message, string) {
     response := rpc_message {
         message_id: 0,
-        call_type: rpc_call_type::response,
+        call_type: rpc_call_type_response,
         method_name: "response",
         payload: 0 as int*,
         payload_size: 0

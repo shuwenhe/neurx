@@ -17,7 +17,7 @@ struct DynamicResolutionProcessor {
 func NewDynamicResolutionProcessor(
     base_resolution: i32,
     patch_size: i32,
-    max_patches: i32
+    i32 max_patches
 ) *DynamicResolutionProcessor {
     return *DynamicResolutionProcessor{
         base_resolution: base_resolution,
@@ -31,7 +31,7 @@ func NewDynamicResolutionProcessor(
 
 func (DynamicResolutionProcessor* p) CalculateTargetResolution(
     height: i32,
-    width: i32
+    i32 width
 ) (i32, i32) {
 
     aspect_ratio := f32(width) / f32(height)
@@ -70,7 +70,7 @@ func (DynamicResolutionProcessor* p) CalculateTargetResolution(
 
 func (DynamicResolutionProcessor* p) GetPatchCount(
     height: i32,
-    width: i32
+    i32 width
 ) i32 {
     patch_h := height / p.patch_size
     patch_w := width / p.patch_size
@@ -134,12 +134,12 @@ struct ResolutionPatch {
     data: []f32,
     position: (i32, i32),
     resolution: (i32, i32),
-    scale_factor: f32
+    f32 scale_factor
 }
 
 func (DynamicResolutionProcessor* p) MultiCropProcess(
     image_tensor: *types.Tensor,
-    num_crops: i32
+    i32 num_crops
 ) []*types.Tensor {
     h := image_tensor.shape[0]
     w := image_tensor.shape[1]
@@ -217,12 +217,12 @@ struct ResolutionInfo {
     target_height: i32,
     target_width: i32,
     num_patches: i32,
-    scale_factor: f32
+    f32 scale_factor
 }
 
 func (DynamicResolutionProcessor* p) GetInfo(
     height: i32,
-    width: i32
+    i32 width
 ) ResolutionInfo {
     target_h, target_w := p.CalculateTargetResolution(height, width)
     num_patches := p.GetPatchCount(target_h, target_w)
@@ -234,13 +234,13 @@ func (DynamicResolutionProcessor* p) GetInfo(
         target_height: target_h,
         target_width: target_w,
         num_patches: num_patches,
-        scale_factor: scale
+        scale scale_factor
     }
 }
 
 func (DynamicResolutionProcessor* p) CanProcessImage(
     height: i32,
-    width: i32
+    i32 width
 ) bool {
     target_h, target_w := p.CalculateTargetResolution(height, width)
     num_patches := p.GetPatchCount(target_h, target_w)
@@ -252,7 +252,7 @@ struct ResolutionStats {
     processed_images: i32,
     avg_patches: f32,
     max_patches_used: i32,
-    min_patches_used: i32
+    i32 min_patches_used
 }
 
 resolution_stats := ResolutionStats{

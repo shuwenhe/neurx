@@ -20,7 +20,7 @@ func NewVisionEncoder(
     model_name: string,
     hidden_size: i32,
     patch_size: i32,
-    device: string
+    string device
 ) *VisionEncoder {
     encoder := *VisionEncoder{
         model_name: model_name,

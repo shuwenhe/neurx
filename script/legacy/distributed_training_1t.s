@@ -6,30 +6,30 @@ import (
 )
 
 struct distributed_trainer1_t {
-    world_size: int
-    rank: int
-    local_rank: int
-    device_id: int
-    tp_group: int
-    pp_group: int
-    dp_group: int
+    int world_size
+    int rank
+    int local_rank
+    int device_id
+    int tp_group
+    int pp_group
+    int dp_group
 }
 
 struct training_state {
-    step: int
-    epoch: int
-    tokens_processed: int64
-    total_loss: float
-    avg_loss: float
-    tokens_per_second: float
-    learning_rate: float
+    int step
+    int epoch
+    int64 tokens_processed
+    float total_loss
+    float avg_loss
+    float tokens_per_second
+    float learning_rate
 }
 
 struct checkpoint_manager {
-    checkpoint_dir: string
-    save_interval: int
-    keep_last_n: int
-    saved_checkpoints: int
+    string checkpoint_dir
+    int save_interval
+    int keep_last_n
+    int saved_checkpoints
 }
 
 func initialize_distributed_1t(int world_size, int rank,
@@ -47,8 +47,8 @@ func initialize_distributed_1t(int world_size, int rank,
 }
 
 struct tensor_parallel_operator {
-    tp_rank: int
-    tp_size: int
+    int tp_rank
+    int tp_size
     tp_group_members: [string]
 }
 
@@ -65,15 +65,15 @@ func (tensor_parallel_operator* op) all_reduce_loss(float local_loss): float {
 }
 
 struct pipeline_stage {
-    stage_id: int
-    layers_in_stage: int
+    int stage_id
+    int layers_in_stage
     input_activation_shape: [4]int
     output_activation_shape: [4]int
 }
 
 struct pipeline_scheduler {
-    num_stages: int
-    micro_batch_size: int
+    int num_stages
+    int micro_batch_size
     pipeline_stages: []*pipeline_stage
 }
 
@@ -92,10 +92,10 @@ func (pipeline_scheduler* ps) create_pipeline_stages(int num_stages,
 }
 
 struct zero_optimizer {
-    stage: int
-    partition_optimizer_states: bool
-    partition_gradients: bool
-    partition_parameters: bool
+    int stage
+    bool partition_optimizer_states
+    bool partition_gradients
+    bool partition_parameters
 }
 
 func create_zero_optimizer_1t(): zero_optimizer {
@@ -118,10 +118,10 @@ func (zero_optimizer* z) estimate_memory_reduction(int64 original_bytes): int64 
 }
 
 struct gradient_manager {
-    accumulation_steps: int
-    accumulated_step: int
-    accumulated_loss: float
-    ready_to_update: bool
+    int accumulation_steps
+    int accumulated_step
+    float accumulated_loss
+    bool ready_to_update
 }
 
 func (gradient_manager* gm) accumulate_gradient(float loss): bool {
@@ -148,8 +148,8 @@ func (gradient_manager* gm) reset() {
 }
 
 struct activation_checkpointer {
-    checkpoint_segments: int
-    enabled: bool
+    int checkpoint_segments
+    bool enabled
 }
 
 func (activation_checkpointer* ac) compute_memory_savings(): float {
@@ -162,12 +162,12 @@ func (activation_checkpointer* ac) configure_for_1t_model() {
 }
 
 struct training_loop1_t {
-    trainer: distributed_trainer1_t
-    grad_manager: gradient_manager
-    zero_optimizer: zero_optimizer
-    activation_checkpointer: activation_checkpointer
-    checkpoint_mgr: checkpoint_manager
-    state: training_state
+    distributed_trainer1_t trainer
+    gradient_manager grad_manager
+    zero_optimizer zero_optimizer
+    activation_checkpointer activation_checkpointer
+    checkpoint_manager checkpoint_mgr
+    training_state state
 }
 
 func create_training_loop_1t(int rank, int world_size): training_loop1_t {
@@ -234,9 +234,9 @@ func (training_loop1_t* loop) save_checkpoint() {
 }
 
 struct communication_optimizer {
-    use_async_communication: bool
-    use_gradient_compression: bool
-    overlap_communication: bool
+    bool use_async_communication
+    bool use_gradient_compression
+    bool overlap_communication
 }
 
 func (communication_optimizer* co) all_reduce_grads_async(int64 grad_size): {
@@ -248,11 +248,11 @@ func (communication_optimizer* co) broadcast_weights_async(int64 weight_size): {
 }
 
 struct performance_monitor {
-    tokens_per_second: float
-    flops_per_second: float
-    gpu_utilization_percent: float
-    interconnect_utilization: float
-    memory_usage_percent: float
+    float tokens_per_second
+    float flops_per_second
+    float gpu_utilization_percent
+    float interconnect_utilization
+    float memory_usage_percent
 }
 
 func (performance_monitor* pm) compute_throughput(int batch_size, int seq_len,

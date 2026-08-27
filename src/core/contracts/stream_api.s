@@ -14,11 +14,11 @@ import "event_api"
 }
 
 struct stream {
-    id: i64
-    device: device
-    stream_type: StreamType
-    priority: StreamPriority
-    is_blocking: bool
+    i64 id
+    device device
+    StreamType stream_type
+    StreamPriority priority
+    bool is_blocking
 }
 interface i_stream {
     stream_id() . i64

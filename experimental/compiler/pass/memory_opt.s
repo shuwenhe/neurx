@@ -108,14 +108,14 @@ func can_reuse_buffer(*computation_graph g, int source_id, int target_id) bool {
     }
 
     switch g.get_value(source_id) {
-        option::some(src_vt): {
+        some(src_vt): {
             switch g.get_value(target_id) {
-                option::some(tgt_vt): {
+                some(tgt_vt): {
                     src_vt.dtype == tgt_vt.dtype && src_vt.total_elements() == tgt_vt.total_elements()
                 },
-                option::none: false,
+                nil: false,
             }
         },
-        option::none: false,
+        nil: false,
     }
 }

@@ -5,22 +5,22 @@ use std.path
 use std.env
 
 struct deployment_config {
-    cluster_name: string
-    num_nodes: i32
-    gpus_per_node: i32
-    batch_size_per_gpu: i32
-    sequence_length: i32
-    num_epochs: i32
-    learning_rate: f64
-    warmup_steps: i32
+    string cluster_name
+    i32 num_nodes
+    i32 gpus_per_node
+    i32 batch_size_per_gpu
+    i32 sequence_length
+    i32 num_epochs
+    f64 learning_rate
+    i32 warmup_steps
 }
 
 struct gpu_config {
-    device_id: i32
-    device_name: string
-    compute_capability: string
-    total_memory: i64
-    available_memory: i64
+    i32 device_id
+    string device_name
+    string compute_capability
+    i64 total_memory
+    i64 available_memory
 }
 
 func generate_slurm_script(deployment_config config, string output_path) bool {
@@ -97,7 +97,7 @@ services:
     devices:
       - /dev/nvidia-uvm
       - /dev/nvidia-uvm-tools
-    runtime: nvidia
+    nvidia runtime
     networks:
       - neurx_network
     command: >
@@ -111,7 +111,7 @@ services:
     docker_compose = docker_compose + `
 networks:
   neurx_network:
-    driver: bridge
+    bridge driver
 `
     println("Generated Docker Compose: " + output_path)
     return true
@@ -122,10 +122,10 @@ func generate_kubernetes_deployment(deployment_config config, string output_path
     gpus_per_node := config.gpus_per_node
     total_replicas := num_nodes
     k8s_yaml := `api_version: batch/v1
-kind: Job
+Job kind
 metadata:
   name: neurx-training
-  namespace: default
+  default namespace
 spec:
   parallelism: ` + strings.from_i32(total_replicas) + `
   completions: ` + strings.from_i32(total_replicas) + `
@@ -141,7 +141,7 @@ spec:
       containers:
       - name: neurx-trainer
         image: neurx:v1.0
-        image_pull_policy: Always
+        Always image_pull_policy
         env:
         - name: MASTER_ADDR
           value: neurx-training-0
@@ -200,18 +200,18 @@ spec:
               labelSelector:
                 matchExpressions:
                 - key: app
-                  operator: In
+                  In operator
                   values:
                   - neurx-training
               topology_key: kubernetes.io/hostname
 ---
-api_version: v1
-kind: ServiceAccount
+v1 api_version
+ServiceAccount kind
 metadata:
   name: neurx-trainer
 ---
-api_version: v1
-kind: PersistentVolumeClaim
+v1 api_version
+PersistentVolumeClaim kind
 metadata:
   name: neurx-data-pvc
 spec:
@@ -222,8 +222,8 @@ spec:
     requests:
       storage: 1ti
 ---
-api_version: v1
-kind: PersistentVolumeClaim
+v1 api_version
+PersistentVolumeClaim kind
 metadata:
   name: neurx-checkpoints-pvc
 spec:
@@ -234,14 +234,14 @@ spec:
     requests:
       storage: 100gi
 ---
-api_version: v1
-kind: PersistentVolumeClaim
+v1 api_version
+PersistentVolumeClaim kind
 metadata:
   name: neurx-logs-pvc
 spec:
   accessModes:
     - read_write_many
-  storage_class_name: standard
+  standard storage_class_name
   resources:
     requests:
       storage: 50gi

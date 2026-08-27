@@ -9,35 +9,35 @@ import time
 import io
 
 struct training_config {
-    vocab_size: int
-    embedding_dim: int
-    hidden_dim: int
-    num_layers: int
-    num_heads: int
-    seq_length: int
-    batch_size: int
-    num_epochs: int
-    num_steps: int
-    learning_rate: float
-    weight_decay: float
-    warmup_steps: int
-    log_interval: int
-    checkpoint_interval: int
-    output_dir: string
+    int vocab_size
+    int embedding_dim
+    int hidden_dim
+    int num_layers
+    int num_heads
+    int seq_length
+    int batch_size
+    int num_epochs
+    int num_steps
+    float learning_rate
+    float weight_decay
+    int warmup_steps
+    int log_interval
+    int checkpoint_interval
+    string output_dir
 }
 
 struct mini_language_model {
-    vocab_size: int
-    embedding_dim: int
-    hidden_dim: int
-    num_layers: int
-    seq_length: int
+    int vocab_size
+    int embedding_dim
+    int hidden_dim
+    int num_layers
+    int seq_length
     token_embedding: bundle.tensor_2
     position_embedding: bundle.tensor_2
     transformer_layers: []transformer_layer
     output_projection: bundle.tensor_2
-    last_loss: float
-    gradients_computed: bool
+    float last_loss
+    bool gradients_computed
 }
 
 struct transformer_layer {
@@ -411,8 +411,8 @@ func generate_loss_curve([]float losses, string output_dir) {
 }
 
 struct logger {
-    log_file: string
-    loss_file: string
+    string log_file
+    string loss_file
     log_handle: io.Writer
     loss_handle: io.Writer
 }

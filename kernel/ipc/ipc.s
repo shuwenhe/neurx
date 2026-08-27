@@ -3,18 +3,18 @@ package neurx.kernel.ipc
 use std.slices as std_vec
 
 struct message {
-    msg_type: int
-    sender_pid: int
-    data_len: int
-    payload: string
+    int msg_type
+    int sender_pid
+    int data_len
+    string payload
 }
 
 struct msg_queue {
-    queue_id: int
-    messages: message[]
-    max_size: int
-    creator_pid: int
-    created_at: int
+    int queue_id
+    message[] messages
+    int max_size
+    int creator_pid
+    int created_at
 }
 
 func msg_queue_create(int id, int max_msgs) msg_queue {
@@ -58,9 +58,9 @@ func (msg_queue* mq) msg_receive(int msg_type) message {    i := 0
 }
 
 struct semaphore {
-    sem_id: int
-    value: int
-    owner_pid: int
+    int sem_id
+    int value
+    int owner_pid
 }
 
 func semaphore_create(int id, int initial_value) semaphore {
@@ -88,11 +88,11 @@ func (semaphore* sem) sem_getvalue() int {    sem.value
 }
 
 struct shared_memory {
-    shm_id: int
-    size: int
-    address: int
-    owner_pid: int
-    attach_count: int
+    int shm_id
+    int size
+    int address
+    int owner_pid
+    int attach_count
 }
 
 func shm_create(int id, int size) shared_memory {
@@ -122,9 +122,9 @@ func (shared_memory* shm) shm_get_size() int {    shm.size
 }
 
 struct ipc_subsystem {
-    msg_queues: msg_queue[]
-    semaphores: semaphore[]
-    shared_mems: shared_memory[]
+    msg_queue[] msg_queues
+    semaphore[] semaphores
+    shared_memory[] shared_mems
 }
 
 func ipc_subsystem_init() ipc_subsystem {

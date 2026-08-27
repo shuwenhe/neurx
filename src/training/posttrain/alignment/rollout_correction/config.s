@@ -24,24 +24,24 @@ import "tensor/tensor.s"
 }
 
 struct is_threshold {
-    lower: f32
-    upper: f32
-    is_icepop: bool
+    f32 lower
+    f32 upper
+    bool is_icepop
 }
 
 struct rs_threshold {
-    lower: f32
-    upper: f32
+    f32 lower
+    f32 upper
 }
 
 struct rollout_correction_config {
-    is_level: ISAggregationLevel
-    is_threshold: ISThreshold
-    is_batch_normalize: bool
+    ISAggregationLevel is_level
+    ISThreshold is_threshold
+    bool is_batch_normalize
     rs_modes: []rejection_mode
     rs_thresholds: []rs_threshold
-    bypass_mode: bool
-    loss_type: LossType
+    bool bypass_mode
+    LossType loss_type
 }
 
 func new_rollout_correction_config() . RolloutCorrectionConfig {

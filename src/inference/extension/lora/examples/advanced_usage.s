@@ -5,15 +5,15 @@ use std.option.option
 use std.result.result
 use std.map.map
 
-use neurx.lora.lora_config::{lora_config}
-use neurx.lora.lora_adapter::{lora_adapter}
-use neurx.lora.weight_fusion::{weight_fusion_engine, compute_lora_delta}
-use neurx.lora.lora_state::{lora_state_manager}
+use neurx.lora.lora_config
+use neurx.lora.lora_adapter
+use neurx.lora.weight_fusion
+use neurx.lora.lora_state
 
 func example_weight_fusion() ((), string) {
     println("example 1: 权重融合")
 
-    config := lora_config::default()
+    config := default()
     config.lora_rank = 8
     config.lora_alpha = 16.0
 
@@ -21,7 +21,7 @@ func example_weight_fusion() ((), string) {
     targets = append(targets, "attention")
     config.target_modules = targets
 
-    adapter := lora_adapter::new("fusion_adapter", *config)
+    adapter := new("fusion_adapter", *config)
 
     lora_a := float[][]]()
     i := 0
@@ -83,7 +83,7 @@ func example_weight_fusion() ((), string) {
 func example_lora_state_management() ((), string) {
     println("\nexample 2: 请求statusmanagement")
 
-    state_manager := lora_state_manager::new(4)
+    state_manager := new(4)
 
     req_ids := string[]()
     req_ids = append(req_ids, "req_001")
@@ -121,7 +121,7 @@ func example_lora_state_management() ((), string) {
 func example_multi_adapter_caching() ((), string) {
     println("\nexample 3: more适配器缓存management")
 
-    state_manager := lora_state_manager::new(8)
+    state_manager := new(8)
 
     adapter_names := string[]()
     adapter_names = append(adapter_names, "adapter_1")
@@ -166,7 +166,7 @@ func example_multi_adapter_caching() ((), string) {
 func example_dynamic_adapter_switch() ((), string) {
     println("\nexample 4: 动态适配器切换")
 
-    state_manager := lora_state_manager::new(4)
+    state_manager := new(4)
 
     init_adapters := string[]()
     init_adapters = append(init_adapters, "task_a")
@@ -177,11 +177,11 @@ func example_dynamic_adapter_switch() ((), string) {
     state_manager.create_request_state("dynamic_req", init_adapters, init_scales)
 
     switch state_manager.get_request_state("dynamic_req") {
-        option::some(state) : {
+        some(state) : {
             println("  ✓ 初始适配器: " + state.adapter_names[0])
             println("    初始缩放: " + state.adapter_scales[0].to_string())
         },
-        option::none : {},
+        nil : {},
     }
 
     new_adapters := string[]()
@@ -195,12 +195,12 @@ func example_dynamic_adapter_switch() ((), string) {
     state_manager.switch_adapters("dynamic_req", new_adapters, new_scales)
 
     switch state_manager.get_request_state("dynamic_req") {
-        option::some(state) : {
+        some(state) : {
             println("  ✓ already切换适配器")
             println("    new适配器数: " + len(state.adapter_names).to_string())
             println("    thoneitem适配器: " + state.adapter_names[0])
         },
-        option::none : {},
+        nil : {},
     }
 
     updated_scales := float[]()
@@ -216,7 +216,7 @@ func example_dynamic_adapter_switch() ((), string) {
 func example_weight_computation_perf() ((), string) {
     println("\nexample 5: 权重计算ity能")
 
-    engine := weight_fusion_engine::new(8, 16.0)
+    engine := new(8, 16.0)
 
     println("  ✓ 创建融合engine")
     println("    rank: 8")

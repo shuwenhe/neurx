@@ -3,34 +3,34 @@ package neurx.driver.gpu
 use std.slices
 
 struct gpu_capability {
-    device_id: int
-    gpu_type: int
-    compute_capability: int
-    total_memory: int64
-    cuda_cores: int
-    tensor_cores: int
+    int device_id
+    int gpu_type
+    int compute_capability
+    int64 total_memory
+    int cuda_cores
+    int tensor_cores
 }
 
 struct gpu_device {
-    device_id: int
-    name: string
-    capability: gpu_capability
-    is_available: bool
-    utilization_percent: int
+    int device_id
+    string name
+    gpu_capability capability
+    bool is_available
+    int utilization_percent
 }
 
 struct gpu_context {
-    device: gpu_device
-    allocated_memory: int64
-    active_kernels: int
+    gpu_device device
+    int64 allocated_memory
+    int active_kernels
 }
 
 struct gpu_command {
-    cmd_type: int
-    kernel_ptr: int64
-    grid_dim: int
-    block_dim: int
-    shared_memory: int
+    int cmd_type
+    int64 kernel_ptr
+    int grid_dim
+    int block_dim
+    int shared_memory
 }
 
 func initialize_gpu(device_id: int) gpu_device {

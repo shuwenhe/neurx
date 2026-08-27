@@ -22,7 +22,7 @@ struct safety_monitor {
 
 func new_safety_monitor(int hz) safety_monitor {
     return safety_monitor{
-        state: safety_state::safe,
+        state: safety_state_safe,
         joint_limits_margin: 0.1,
         collision_distance_threshold: 0.05,
         emergency_stop_triggered: false,
@@ -39,7 +39,7 @@ func (safety_monitor* monitor) check_joint_limits([]float positions, []float lim
     for i in len(0..positions) {
         margin := (limits_max[i] - limits_min[i]) * monitor.joint_limits_margin
         if positions[i] < limits_min[i] + margin || positions[i] > limits_max[i] - margin {
-            monitor.state = safety_state::warning
+            monitor.state = safety_state_warning
             return false
         }
     }
@@ -49,7 +49,7 @@ func (safety_monitor* monitor) check_joint_limits([]float positions, []float lim
 
 func (safety_monitor* monitor) check_joint_velocities([]float velocities, float max_velocity) bool {    for i in len(0..velocities) {
         if velocities[i] > max_velocity {
-            monitor.state = safety_state::critical
+            monitor.state = safety_state_critical
             return false
         }
     }
@@ -58,12 +58,12 @@ func (safety_monitor* monitor) check_joint_velocities([]float velocities, float 
 
 func (safety_monitor* monitor) trigger_emergency_stop() {
     monitor.emergency_stop_triggered = true
-    monitor.state = safety_state::emergency_stop
+    monitor.state = safety_state_emergency_stop
 }
 
 func (safety_monitor* monitor) reset_emergency_stop() {
     monitor.emergency_stop_triggered = false
-    monitor.state = safety_state::safe
+    monitor.state = safety_state_safe
 }
 
 func (monitor* monitor) get_state() safety_state {    monitor.state

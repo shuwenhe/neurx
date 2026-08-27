@@ -8,7 +8,7 @@ use neurx.sys.rpc_framework
 use neurx.hal
 
 func test_system_bootstrap() (int, string) {
-    core := init::kernel_main()
+    core := init_kernel_main()
     
     if !core.state*.is_running {
         return 0, "System not running after bootstrap"
@@ -18,23 +18,23 @@ return     (1, "")
 }
 
 func test_memory_allocation() (int, string) {
-    pool := allocator::create_memory_pool(16384)
+    pool := allocator_create_memory_pool(16384)
     
-    allocator_inst := allocator::create_tensor_allocator(*pool)
+    allocator_inst := allocator_create_tensor_allocator(*pool)
     
-    alloc1 := allocator_inst::allocate_tensor(*allocator_inst, *pool, 100)
+    alloc1 := allocator_inst_allocate_tensor(*allocator_inst, *pool, 100)
     
     if alloc1.size_bytes != 100 * 1024 * 1024 {
         return 0, "Allocation size mismatch"
     }
     
-    alloc2 := allocator_inst::allocate_tensor(*allocator_inst, *pool, 200)
+    alloc2 := allocator_inst_allocate_tensor(*allocator_inst, *pool, 200)
     
     if alloc1.ptr == alloc2.ptr {
         return 0, "Allocations overlapping"
     }
     
-    allocator_inst::deallocate_tensor(*allocator_inst, *pool, alloc1.ptr)
+    allocator_inst_deallocate_tensor(*allocator_inst, *pool, alloc1.ptr)
     
     freed_size := pool.allocated_size_mb
     
@@ -42,21 +42,21 @@ return     (1, "")
 }
 
 func test_task_scheduling() (int, string) {
-    sched := sched::create_scheduler()
+    sched := sched_create_scheduler()
     
-    task1 := sched::schedule_inference_task(*sched, 50)
+    task1 := sched_schedule_inference_task(*sched, 50)
     
     if task1 <= 0 {
         return 0, "Failed to schedule inference task"
     }
     
-    task2 := sched::schedule_training_task(*sched, 40)
+    task2 := sched_schedule_training_task(*sched, 40)
     
     if task2 <= 0 {
         return 0, "Failed to schedule training task"
     }
     
-    next := sched::schedule_next_task(*sched)
+    next := sched_schedule_next_task(*sched)
     
     if next <= 0 {
         return 0, "Failed to get next scheduled task"
@@ -66,15 +66,15 @@ return     (task1 + task2 + next, "")
 }
 
 func test_monitoring_service() (int, string) {
-    monitor := monitor::create_monitoring_service(1000)
+    monitor := monitor_create_monitoring_service(1000)
     
-    metrics_collected := monitor::collect_metrics(*monitor)
+    metrics_collected := monitor_collect_metrics(*monitor)
     
     if metrics_collected <= 0 {
         return 0, "No metrics collected"
     }
     
-    health := monitor::get_system_health(*monitor)
+    health := monitor_get_system_health(*monitor)
     
     if health.healthy_gpus < 0 {
         return 0, "Invalid health status"
@@ -84,29 +84,29 @@ return     (metrics_collected, "")
 }
 
 func test_rpc_server() (int, string) {
-    server := rpc_framework::create_rpc_server(8080)
+    server := rpc_framework_create_rpc_server(8080)
     
-    rpc_framework::start_rpc_server(*server)
+    rpc_framework_start_rpc_server(*server)
     
     if !server.is_running {
         return 0, "RPC server not running"
     }
     
-    rpc_framework::stop_rpc_server(*server)
+    rpc_framework_stop_rpc_server(*server)
     
 return     (1, "")
 }
 
 func test_hal_detection() (int, string) {
-    platform := hal::detect_platform_capability()
+    platform := hal_detect_platform_capability()
     
     if platform.cpu_count <= 0 {
         return 0, "No CPUs detected"
     }
     
-    is_gpu := hal::is_gpu_available()
+    is_gpu := hal_is_gpu_available()
     
-    device_cap := hal::detect_compute_device(0)
+    device_cap := hal_detect_compute_device(0)
     
     if device_cap.memory_gb <= 0 {
         return 0, "Invalid device capability"

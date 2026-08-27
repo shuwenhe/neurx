@@ -3,36 +3,36 @@ import "src/training/optimizer/optimizer.s"
 import "src/training/posttrain/alignment/ppo/ppo.s"
 
 struct gmpo_config {
-    clip_epsilon: f32
-    value_clip_epsilon: f32
-    learning_rate: f32
-    num_epochs: i32
-    max_grad_norm: f32
-    kl_coeff: f32
-    gamma: f32
-    gae_lambda: f32
-    num_rewards: i32
-    use_geometric_mean: bool
-    epsilon: f32
-    reward_normalization: bool
-    min_reward_value: f32
+    f32 clip_epsilon
+    f32 value_clip_epsilon
+    f32 learning_rate
+    i32 num_epochs
+    f32 max_grad_norm
+    f32 kl_coeff
+    f32 gamma
+    f32 gae_lambda
+    i32 num_rewards
+    bool use_geometric_mean
+    f32 epsilon
+    bool reward_normalization
+    f32 min_reward_value
 }
 
 struct gmpo_trainer {
-    config: gmpo_config
-    policy_model: *model
-    value_model: *model
-    reference_model: *model
-    optimizer: *optimizer
+    gmpo_config config
+    *model policy_model
+    *model value_model
+    *model reference_model
+    *optimizer optimizer
     reward_statistics: []reward_stats
-    step_count: i64
+    i64 step_count
 }
 
 struct reward_stats {
-    mean: f32
-    std: f32
-    min: f32
-    max: f32
+    f32 mean
+    f32 std
+    f32 min
+    f32 max
     history: []f32
 }
 

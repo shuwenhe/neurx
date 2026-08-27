@@ -22,45 +22,45 @@ struct vision_config {
 }
 
 struct image_input {
-    pixel_values: tensor
-    image_path: string
-    image_url: string
+    tensor pixel_values
+    string image_path
+    string image_url
     metadata: map<string, any>
 }
 
 struct video_input {
-    frames: list<tensor>
-    video_path: string
-    fps: float
-    duration_seconds: float
-    audio_track: tensor
+    list<tensor> frames
+    string video_path
+    float fps
+    float duration_seconds
+    tensor audio_track
 }
 
 struct vision_output {
-    image_features: tensor
-    pooled_features: tensor
+    tensor image_features
+    tensor pooled_features
     attention_maps: list<tensor>,
     spatial_features: tensor,
     multimodal_embedding: tensor,
-    metadata: vision_metadata
+    vision_metadata metadata
 }
 
 struct vision_metadata {
-    num_patches_h: int
-    num_patches_w: int
-    total_patches: int
+    int num_patches_h
+    int num_patches_w
+    int total_patches
     original_size: tuple<int, int>
     processed_size: tuple<int, int>
-    is_video: bool
-    frame_count: int
+    bool is_video
+    int frame_count
 }
 struct vi_t_encoder {
-    config: vision_config
-    embeddings: ViTPatchEmbeddings
-    encoder: ViTEncoderBlocks
-    pooler: VisionPooler
-    layernorm: layer_norm
-    dropout: Dropout
+    vision_config config
+    ViTPatchEmbeddings embeddings
+    ViTEncoderBlocks encoder
+    VisionPooler pooler
+    layer_norm layernorm
+    Dropout dropout
     init(config: vision_config) {
         this.config = config
         this.embeddings = new vi_t_patch_embeddings(
@@ -113,13 +113,13 @@ struct vi_t_encoder {
     }
 }
 struct vi_t_patch_embeddings {
-    projection: Conv2D
-    cls_token: Parameter
-    position_embeddings: Parameter
-    img_size: int
-    patch_size: int
-    num_patches: int
-    embed_dim: int
+    Conv2D projection
+    Parameter cls_token
+    Parameter position_embeddings
+    int img_size
+    int patch_size
+    int num_patches
+    int embed_dim
     init(int img_size, int patch_size, int in_channels, int embed_dim) {
         this.img_size = img_size
         this.patch_size = patch_size
@@ -153,12 +153,12 @@ struct vi_t_patch_embeddings {
 }
 
 struct embeddings_output {
-    hidden_states: tensor
-    attention_mask: tensor
+    tensor hidden_states
+    tensor attention_mask
 }
 struct vi_t_encoder_blocks {
-    layers: list<vi_t_layer>
-    gradient_checkpointing: bool
+    list<vi_t_layer> layers
+    bool gradient_checkpointing
     init(int hidden_size, int num_layers, int num_heads, int intermediate_size) {
         this.gradient_checkpointing = false
         this.layers = []
@@ -192,15 +192,15 @@ struct vi_t_encoder_blocks {
 }
 
 struct encoder_output {
-    last_hidden_state: tensor
-    attentions: list<tensor>
+    tensor last_hidden_state
+    list<tensor> attentions
 }
 struct vi_t_layer {
-    attention: ViTAttention
-    intermediate: Intermediate
-    output: Output
-    layernorm_before: layer_norm
-    layernorm_after: layer_norm
+    ViTAttention attention
+    Intermediate intermediate
+    Output output
+    layer_norm layernorm_before
+    layer_norm layernorm_after
     init(int hidden_size, int num_attention_heads, int intermediate_size, int layer_idx) {
         this.attention = new vi_t_attention(hidden_size=hidden_size, num_heads=num_attention_heads)
         this.intermediate = intermediate(hidden_size=hidden_size, intermediate_size=intermediate_size)
@@ -223,17 +223,17 @@ struct vi_t_layer {
 }
 
 struct layer_output {
-    hidden_states: tensor
-    attention_weights: tensor
+    tensor hidden_states
+    tensor attention_weights
 }
 struct vi_t_attention {
-    query: linear
-    key: linear
-    value: linear
-    output_proj: linear
-    num_heads: int
-    head_dim: int
-    scale: float
+    linear query
+    linear key
+    linear value
+    linear output_proj
+    int num_heads
+    int head_dim
+    float scale
     init(int hidden_size, int num_heads) {
         this.num_heads = num_heads
         this.head_dim = hidden_size / num_heads
@@ -268,12 +268,12 @@ struct vi_t_attention {
 }
 
 struct attention_output {
-    hidden_states: tensor
-    attention_weights: tensor
+    tensor hidden_states
+    tensor attention_weights
 }
 struct intermediate {
-    dense: linear
-    activation: GELU
+    linear dense
+    GELU activation
     init(int hidden_size, int intermediate_size) {
         this.dense = new linear(in_features=hidden_size, out_features=intermediate_size, bias=true)
         this.activation = new GELU(approximate='none')
@@ -284,8 +284,8 @@ struct intermediate {
     }
 }
 struct output {
-    dense: linear
-    dropout: Dropout
+    linear dense
+    Dropout dropout
     init(int intermediate_size, int hidden_size) {
         this.dense = new linear(in_features=intermediate_size, out_features=hidden_size, bias=true)
         this.dropout = new dropout(p=0.0)
@@ -303,8 +303,8 @@ struct output {
     ATTENTION_POOL
 }
 struct vision_pooler {
-    pool_type: PoolType
-    attention_pool: LearnableAttentionPool
+    PoolType pool_type
+    LearnableAttentionPool attention_pool
     init(string pool_type) {
         match pool_type {
             "cls_token" => this.pool_type = pool_type.CLS_TOKEN
@@ -334,8 +334,8 @@ struct vision_pooler {
     }
 }
 struct learnable_attention_pool {
-    query: Parameter
-    attention: ViTAttention
+    Parameter query
+    ViTAttention attention
     init(int embed_dim = 1024, int num_heads = 16) {
         this.query = parameter(shape=(1, 1, embed_dim))
         this.attention = new vi_t_attention(
@@ -351,12 +351,12 @@ struct learnable_attention_pool {
     }
 }
 struct visual_adapter {
-    input_dim: int
-    output_dim: int
-    hidden_dim: int
-    layers: Sequential
-    activation: GELU
-    layer_norm: layer_norm
+    int input_dim
+    int output_dim
+    int hidden_dim
+    Sequential layers
+    GELU activation
+    layer_norm layer_norm
     init(int input_dim, int hidden_dim, int output_dim) {
         this.input_dim = input_dim
         this.output_dim = output_dim
@@ -375,11 +375,11 @@ struct visual_adapter {
     }
 }
 struct clip_contrastive_model {
-    vision_encoder: ViTEncoder
-    text_encoder: CLIPTextEncoder
-    vision_projection: linear
-    text_projection: linear
-    logit_scale: Parameter
+    ViTEncoder vision_encoder
+    CLIPTextEncoder text_encoder
+    linear vision_projection
+    linear text_projection
+    Parameter logit_scale
     temperature: float = 0.07
     init(vision_config: vision_config) {
         this.vision_encoder = new vi_t_encoder(config=vision_config)
@@ -432,21 +432,21 @@ struct clip_contrastive_model {
 }
 
 struct clipoutput {
-    image_features: tensor
-    text_features: tensor
-    logits_per_image: tensor
-    logits_per_text: tensor
-    contrastive_loss: tensor
-    similarity_score: tensor
+    tensor image_features
+    tensor text_features
+    tensor logits_per_image
+    tensor logits_per_text
+    tensor contrastive_loss
+    tensor similarity_score
 }
 struct clip_text_encoder {
-    token_embedding: embedding
-    positional_embedding: Parameter
-    transformer_blocks: list<clip_transformer_block>
-    final_layer_norm: layer_norm
-    text_projection: linear
-    vocab_size: int
-    embed_dim: int
+    embedding token_embedding
+    Parameter positional_embedding
+    list<clip_transformer_block> transformer_blocks
+    layer_norm final_layer_norm
+    linear text_projection
+    int vocab_size
+    int embed_dim
     max_position_embeddings: int = 77
     context_length: int = 77
     init(int vocab_size, int embed_dim, int transformer_width,
@@ -493,10 +493,10 @@ struct clip_text_encoder {
     }
 }
 struct clip_transformer_block {
-    self_attn: multi_head_attention
-    mlp: mlp
-    layer_norm1: layer_norm
-    layer_norm2: layer_norm
+    multi_head_attention self_attn
+    mlp mlp
+    layer_norm layer_norm1
+    layer_norm layer_norm2
     init(int embed_dim, int num_heads, int intermediate_size) {
         this.self_attn = new multi_head_attention(embed_dim=embed_dim, num_heads=num_heads)
         this.mlp = mlp(embed_dim=embed_dim, intermediate_size=intermediate_size)
@@ -513,9 +513,9 @@ struct clip_transformer_block {
     }
 }
 struct video_processor {
-    config: vision_config
-    frame_sampler: FrameSampler
-    temporal_encoder: TemporalEncoder
+    vision_config config
+    FrameSampler frame_sampler
+    TemporalEncoder temporal_encoder
     init(config: vision_config) {
         this.config = config
         this.frame_sampler = new frame_sampler(
@@ -550,15 +550,15 @@ struct video_processor {
 }
 
 struct video_vision_output {
-    per_frame_features: tensor
-    temporal_encoded: tensor
-    pooled_video_feature: tensor
-    num_frames: int
-    frame_timestamps: list<float>
+    tensor per_frame_features
+    tensor temporal_encoded
+    tensor pooled_video_feature
+    int num_frames
+    list<float> frame_timestamps
 }
 struct frame_sampler {
-    max_frames: int
-    fps_sample: float
+    int max_frames
+    float fps_sample
     init(int max_frames, float fps_sample) {
         this.max_frames = max_frames
         this.fps_sample = fps_sample
@@ -586,9 +586,9 @@ struct frame_sampler {
     }
 }
 struct temporal_encoder {
-    position_embedding: Parameter
-    transformer_layers: list<temporal_transformer_block>
-    layer_norm: layer_norm
+    Parameter position_embedding
+    list<temporal_transformer_block> transformer_layers
+    layer_norm layer_norm
     init(int input_dim, int num_temporal_layers, int num_heads) {
         this.position_embedding = parameter(shape=(256, input_dim))
         this.transformer_layers = []
@@ -611,10 +611,10 @@ struct temporal_encoder {
     }
 }
 struct temporal_transformer_block {
-    self_attn: multi_head_attention
-    mlp: mlp
-    norm1: layer_norm
-    norm2: layer_norm
+    multi_head_attention self_attn
+    mlp mlp
+    layer_norm norm1
+    layer_norm norm2
     init(int embed_dim, int num_heads, int intermediate_size) {
         this.self_attn = new multi_head_attention(embed_dim=embed_dim, num_heads=num_heads)
         this.mlp = mlp(embed_dim=embed_dim, intermediate_size=intermediate_size)
@@ -631,10 +631,10 @@ struct temporal_transformer_block {
     }
 }
 struct multi_image_processor {
-    config: vision_config
-    vit_encoder: ViTEncoder
-    visual_adapter: VisualAdapter
-    cross_image_attention: CrossImageAttention
+    vision_config config
+    ViTEncoder vit_encoder
+    VisualAdapter visual_adapter
+    CrossImageAttention cross_image_attention
     init(config: vision_config) {
         this.config = config
         this.vit_encoder = new vi_t_encoder(config=config)
@@ -685,19 +685,19 @@ struct multi_image_processor {
 }
 
 struct multimodal_embedding_result {
-    per_image_features: list<tensor>
-    fused_multimodal_embedding: tensor
-    num_images: int
-    metadata: vision_metadata
+    list<tensor> per_image_features
+    tensor fused_multimodal_embedding
+    int num_images
+    vision_metadata metadata
 }
 struct cross_image_attention {
-    query: linear
-    key: linear
-    value: linear
-    output_proj: linear
-    num_heads: int
-    head_dim: int
-    scale: float
+    linear query
+    linear key
+    linear value
+    linear output_proj
+    int num_heads
+    int head_dim
+    float scale
     init(int embed_dim, int num_heads) {
         this.num_heads = num_heads
         this.head_dim = embed_dim / num_heads
@@ -721,8 +721,8 @@ struct cross_image_attention {
     }
 }
 struct image_preprocessor {
-    config: vision_config
-    transforms: list<image_transform>
+    vision_config config
+    list<image_transform> transforms
     init(config: vision_config) {
         this.config = config
         this.transforms = [
@@ -761,13 +761,13 @@ struct image_preprocessor {
     }
 }
 struct multimodal_vision_model {
-    config: vision_config
-    vision_encoder: ViTEncoder
-    visual_adapter: VisualAdapter
-    language_model: any
-    multi_image_processor: MultiImageProcessor
-    video_processor: VideoProcessor
-    image_preprocessor: ImagePreprocessor
+    vision_config config
+    ViTEncoder vision_encoder
+    VisualAdapter visual_adapter
+    any language_model
+    MultiImageProcessor multi_image_processor
+    VideoProcessor video_processor
+    ImagePreprocessor image_preprocessor
     init(config: vision_config, lm_model: any) {
         this.config = config
         this.language_model = lm_model
@@ -858,10 +858,10 @@ struct multimodal_vision_model {
 }
 
 struct vision_language_output {
-    answer: string
-    visual_tokens: tensor
-    attention_map: tensor
-    confidence: float
+    string answer
+    tensor visual_tokens
+    tensor attention_map
+    float confidence
 }
 function create_multimodal_vision(string model_variant = "neurx-4v-plus") {
     match model_variant.lower() {

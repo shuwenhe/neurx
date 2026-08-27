@@ -47,7 +47,7 @@ func create_monitoring_service(int interval_ms) (monitoring_service, string) {
         metrics: metric[](),
         buffer_size: 10000,
         write_pos: 0,
-        is_full: false
+        false is_full
     }
     
     health := system_health {
@@ -64,7 +64,7 @@ func create_monitoring_service(int interval_ms) (monitoring_service, string) {
         sampling_interval_ms: interval_ms,
         is_running: false,
         buffer: *buffer,
-        health: *health
+        *health health
     }
     service, ""
 }
@@ -88,7 +88,7 @@ func collect_metric(monitoring_service* service, metric* metric_val) (int, strin
 
 func collect_metrics(monitoring_service* service) (int, string) {
         latency_metric := metric {
-        metric_type: metric_type::latency,
+        metric_type: metric_type_latency,
         value: 25.5,
         unit: "ms",
         timestamp_us: get_time_us()
@@ -98,7 +98,7 @@ func collect_metrics(monitoring_service* service) (int, string) {
     service.num_metrics = service.num_metrics + 1
     
         gpu_metric := metric {
-        metric_type: metric_type::gpu_utilization,
+        metric_type: metric_type_gpu_utilization,
         value: 72.3,
         unit: "percent",
         timestamp_us: get_time_us()
@@ -108,7 +108,7 @@ func collect_metrics(monitoring_service* service) (int, string) {
     service.num_metrics = service.num_metrics + 1
     
         mem_metric := metric {
-        metric_type: metric_type::memory_usage,
+        metric_type: metric_type_memory_usage,
         value: 8192.0,
         unit: "mb",
         timestamp_us: get_time_us()

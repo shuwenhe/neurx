@@ -115,7 +115,7 @@ func vma_create(int64 start, int64 end, int prot, int flags) vma {
         flags: flags,
         file_offset: 0,
         owner_pid: 0,
-        is_shared: false
+        false is_shared
     }
     return vm
 }
@@ -177,7 +177,7 @@ func tlb_insert(tlb* t, int64 vaddr, int64 paddr) {
         virtual_addr: vaddr,
         physical_addr: paddr,
         pid: 0,
-        valid: true
+        true valid
     }
     t.entries[t.entry_count] = entry
     t.entry_count = t.entry_count + 1

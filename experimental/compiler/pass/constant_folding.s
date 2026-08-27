@@ -18,8 +18,8 @@ struct fold_result {
 
 func can_fold_operation(*operation op) bool {
     match op.op_kind {
-        op_type::add | op_type::subtract | op_type::multiply | op_type::divide => true,
-        op_type::reduce_sum | op_type::reduce_mean => true,
+        op_type_add | op_type_subtract | op_type_multiply | op_type_divide => true,
+        op_type_reduce_sum | op_type_reduce_mean => true,
         default => false,
     }
 }
@@ -32,12 +32,12 @@ func find_folding_candidates(*computation_graph g) folding_candidate[] {
             all_inputs_constant = true
             for input_id in op.input_ids {
                 switch g.get_value(input_id) {
-                    option::some(vt): {
+                    some(vt): {
                         if vt.kind != "constant" {
                             all_inputs_constant = false
                         }
                     },
-                    option::none: {
+                    nil: {
                         all_inputs_constant = false
                     },
                 }
@@ -82,7 +82,7 @@ func should_fold(*operation op, *computation_graph g) bool {
         for input_op in g.operations {
             for output_id in input_op.output_ids {
                 if output_id == input_id {
-                    if input_op.op_kind != op_type::constant {
+                    if input_op.op_kind != op_type_constant {
                         return false
                     }
                 }

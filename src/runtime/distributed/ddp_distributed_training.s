@@ -3,19 +3,19 @@ use std.io
 use std.math
 
 struct process_group {
-    rank: int
-    world_size: int
-    device_id: int
-    backend: string
-    pg_id: int
-    is_initialized: bool
+    int rank
+    int world_size
+    int device_id
+    string backend
+    int pg_id
+    bool is_initialized
 }
 
 struct rank_info {
-    rank: int
-    device_id: int
-    hostname: string
-    ip_address: string
+    int rank
+    int device_id
+    string hostname
+    string ip_address
 }
 
 func init_process_group(int rank, int world_size, string backend) process_group {
@@ -41,10 +41,10 @@ func get_world_size() int {
 }
 
 struct nccl_communicator {
-    rank: int
-    world_size: int
-    nccl_id: int64
-    nccl_comm: int64
+    int rank
+    int world_size
+    int64 nccl_id
+    int64 nccl_comm
 }
 
 func init_nccl_communicator(int rank, int world_size, int device_id) nccl_communicator {
@@ -93,11 +93,11 @@ func barrier(nccl_communicator comm) {
 }
 
 struct gradient_synchronizer {
-    world_size: int
-    rank: int
+    int world_size
+    int rank
     accumulated_grads: []float64
-    sync_frequency: int
-    sync_count: int
+    int sync_frequency
+    int sync_count
 }
 
 func create_gradient_synchronizer(int rank, int world_size, int param_count, int sync_freq) gradient_synchronizer {
@@ -121,16 +121,16 @@ func should_sync(gradient_synchronizer sync) bool {
 }
 
 struct ddp_trainer {
-    rank: int
-    world_size: int
-    device_id: int
-    process_group: process_group
-    nccl_comm: nccl_communicator
-    gradient_sync: gradient_synchronizer
-    batch_size_per_gpu: int
-    total_batch_size: int
-    num_batches_synced: int
-    total_training_time: float64
+    int rank
+    int world_size
+    int device_id
+    process_group process_group
+    nccl_communicator nccl_comm
+    gradient_synchronizer gradient_sync
+    int batch_size_per_gpu
+    int total_batch_size
+    int num_batches_synced
+    float64 total_training_time
 }
 
 func create_ddp_trainer(int rank, int world_size, int batch_size, int param_count) ddp_trainer {
@@ -182,13 +182,13 @@ func compute_distributed_loss([]float64 local_losses, ddp_trainer trainer) float
 }
 
 struct distributed_batch_sampler {
-    dataset_size: int
-    batch_size: int
-    rank: int
-    world_size: int
-    shuffle: bool
-    num_batches: int
-    current_batch: int
+    int dataset_size
+    int batch_size
+    int rank
+    int world_size
+    bool shuffle
+    int num_batches
+    int current_batch
 }
 
 func create_distributed_sampler(int dataset_size, int batch_size, int rank, int world_size) distributed_batch_sampler {

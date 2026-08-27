@@ -28,50 +28,50 @@ struct code_interpreter_config {
 }
 
 struct execution_result {
-    success: bool
-    output: string
-    error: string
-    error_type: string
-    traceback: list<string>
-    return_value: any
+    bool success
+    string output
+    string error
+    string error_type
+    list<string> traceback
+    any return_value
     variables: map<string, any>
-    generated_files: list<file_info>
-    plots: list<image_data>
-    execution_time_ms: float
-    memory_used_mb: float
-    line_count: int
+    list<file_info> generated_files
+    list<image_data> plots
+    float execution_time_ms
+    float memory_used_mb
+    int line_count
 }
 
 struct file_info {
-    path: string
-    size_bytes: int
-    content_type: string
-    preview: string
-    is_image: bool
+    string path
+    int size_bytes
+    string content_type
+    string preview
+    bool is_image
 }
 
 struct image_data {
-    data: bytes
-    format: string
-    width: int
-    height: int
-    alt_text: string
+    bytes data
+    string format
+    int width
+    int height
+    string alt_text
 }
 
 struct code_block {
-    language: string
-    code: string
-    filename: string
+    string language
+    string code
+    string filename
 }
 struct sandbox_environment {
-    config: code_interpreter_config
-    session_id: string
-    working_dir: string
-    state: SessionState
-    python_runtime: PythonRuntime
-    javascript_runtime: JavaScriptRuntime
-    s_runtime: ShellRuntime
-    sql_runtime: SQLRuntime
+    code_interpreter_config config
+    string session_id
+    string working_dir
+    SessionState state
+    PythonRuntime python_runtime
+    JavaScriptRuntime javascript_runtime
+    ShellRuntime s_runtime
+    SQLRuntime sql_runtime
     init(config: code_interpreter_config) {
         this.config = config
         this.session_id = generate_uuid()
@@ -115,7 +115,7 @@ struct sandbox_environment {
                 memory_used_mb=0
             }
         }
-        result: execution_result
+        execution_result result
         match code_block.language.lower() {
             "python" | "py" => {
                 assert this.python_runtime != null, "Python runtime not initialized"
@@ -238,16 +238,16 @@ return             ("mkfs", "Filesystem formatting command")
 }
 
 struct security_check_result {
-    allowed: bool
-    reason: string
+    bool allowed
+    string reason
 }
 struct session_state {
-    session_id: string
-    created_at: float
+    string session_id
+    float created_at
     last_execution_time: float = 0
     variables: map<string, any>
-    files_created: list<string>
-    execution_history: list<execution_record>
+    list<string> files_created
+    list<execution_record> execution_history
     total_execution_time_ms: float = 0
     init(string session_id, float created_at, map variables<string, any>,
          files_created: list<string>, execution_history: list<execution_record>) {
@@ -283,26 +283,26 @@ struct session_state {
 }
 
 struct execution_record {
-    code: string
-    language: string
-    result: execution_result
-    timestamp: float
+    string code
+    string language
+    execution_result result
+    float timestamp
 }
 
 struct session_summary {
-    session_id: string
-    duration_seconds: float
-    num_executions: int
-    total_execution_time_sec: float
-    files_created_count: int
-    variable_names: list<string>
-    success_rate: float
+    string session_id
+    float duration_seconds
+    int num_executions
+    float total_execution_time_sec
+    int files_created_count
+    list<string> variable_names
+    float success_rate
 }
 struct python_runtime {
-    sandbox_dir: string
-    memory_limit: int
-    timeout: int
-    process: ProcessHandle
+    string sandbox_dir
+    int memory_limit
+    int timeout
+    ProcessHandle process
     interpreter_path: string = "python"
     init(string sandbox_dir, int memory_limit, int timeout) {
         this.sandbox_dir = sandbox_dir
@@ -425,12 +425,12 @@ struct python_runtime {
 }
 
 struct error_info {
-    error_type: string
-    message: string
-    traceback: list<string>
+    string error_type
+    string message
+    list<string> traceback
 }
 struct java_script_runtime {
-    vm_context: any
+    any vm_context
     init() {
         this.vm_context = create_javascript_vm()
     }
@@ -475,8 +475,8 @@ struct java_script_runtime {
     }
 }
 struct shell_runtime {
-    allow_network: bool
-    allowed_commands: set<string>
+    bool allow_network
+    set<string> allowed_commands
     init(bool allow_network) {
         this.allow_network = allow_network
         this.allowed_commands = set<string>{
@@ -538,8 +538,8 @@ struct shell_runtime {
     }
 }
 struct sql_runtime {
-    db_path: string
-    connection: DatabaseConnection
+    string db_path
+    DatabaseConnection connection
     init(string db_path) {
         this.db_path = db_path
         this.connection = connect_to_sqlite(db_path)
@@ -607,12 +607,12 @@ struct sql_runtime {
 }
 
 struct sql_query_result {
-    columns: list<string>
-    rows: list<list<any>>
-    row_count: int
+    list<string> columns
+    list<list<any>> rows
+    int row_count
 }
 struct result_formatter {
-    config: code_interpreter_config
+    code_interpreter_config config
     init(config: code_interpreter_config) {
         this.config = config
     }
@@ -680,14 +680,14 @@ struct result_formatter {
 }
 
 struct formatted_output {
-    raw: execution_result
-    formatted_text: string
-    has_visualizations: bool
-    has_files: bool
+    execution_result raw
+    string formatted_text
+    bool has_visualizations
+    bool has_files
 }
 struct data_analysis_helper {
-    sandbox: sandbox_environment
-    formatter: result_formatter
+    sandbox_environment sandbox
+    result_formatter formatter
     init(sandbox: sandbox_environment) {
         this.sandbox = sandbox
         this.formatter = new result_formatter(sandbox.config)
@@ -844,12 +844,12 @@ else:
     }
 }
 struct code_interpreter {
-    config: code_interpreter_config
-    sandbox: sandbox_environment
-    data_helper: data_analysis_helper
-    formatter: result_formatter
+    code_interpreter_config config
+    sandbox_environment sandbox
+    data_analysis_helper data_helper
+    result_formatter formatter
     active_sessions: map<string, sandbox_environment>
-    default_session: sandbox_environment
+    sandbox_environment default_session
     init(config: code_interpreter_config) {
         this.config = config  new code_interpreter_config()
         this.formatter = new result_formatter(this.config)

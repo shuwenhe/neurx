@@ -8,30 +8,30 @@ import (
 )
 
 struct large_model_config {
-    model_name: string
-    num_params: int
-    hidden_dim: int
-    num_layers: int
-    num_heads: int
-    vocab_size: int
-    max_seq_len: int
-    gradient_accumulation_steps: int
-    activation_checkpointing: bool
-    use_flash_attention: bool
-    use_fused_ops: bool
-    use_mixed_precision: bool
-    use_bfloat16: bool
-    tensor_parallel_size: int
-    pipeline_parallel_stages: int
-    zero_stage: int
+    string model_name
+    int num_params
+    int hidden_dim
+    int num_layers
+    int num_heads
+    int vocab_size
+    int max_seq_len
+    int gradient_accumulation_steps
+    bool activation_checkpointing
+    bool use_flash_attention
+    bool use_fused_ops
+    bool use_mixed_precision
+    bool use_bfloat16
+    int tensor_parallel_size
+    int pipeline_parallel_stages
+    int zero_stage
 }
 
 struct memory_estimate {
-    model_weights_gb: float
-    gradients_gb: float
-    optimizer_states_gb: float
-    activation_gb: float
-    total_gb: float
+    float model_weights_gb
+    float gradients_gb
+    float optimizer_states_gb
+    float activation_gb
+    float total_gb
 }
 
 func create_7b_config(): large_model_config {
@@ -132,11 +132,11 @@ func (large_model_config* config) estimate_memory(int batch_size): memory_estima
 }
 
 struct gradient_accumulator {
-    accumulation_steps: int
-    current_step: int
-    accumulated_grads: map[string][]float
-    should_sync: bool
-    step_counter: int
+    int accumulation_steps
+    int current_step
+    map[string][]float accumulated_grads
+    bool should_sync
+    int step_counter
 }
 
 func (gradient_accumulator* ga) init(int accumulation_steps) {
@@ -186,8 +186,8 @@ func (gradient_accumulator* ga) reset() {
 }
 
 struct activation_checkpointer {
-    checkpoint_segments: int
-    checkpointed_layers: map[int]bool
+    int checkpoint_segments
+    map[int]bool checkpointed_layers
 }
 
 func (activation_checkpointer* ac) init(int num_layers) {
@@ -228,16 +228,16 @@ func (activation_checkpointer* ac) estimate_memory_savings(): float {
 }
 
 struct large_model_trainer {
-    config: large_model_config
-    memory_est: memory_estimate
-    grad_accumulator: gradient_accumulator
-    activation_ckpt: activation_checkpointer
-    global_step: int
-    epoch: int
-    training: bool
-    world_size: int
-    rank: int
-    is_master: bool
+    large_model_config config
+    memory_estimate memory_est
+    gradient_accumulator grad_accumulator
+    activation_checkpointer activation_ckpt
+    int global_step
+    int epoch
+    bool training
+    int world_size
+    int rank
+    bool is_master
 }
 
 func (large_model_trainer* lmt) init(string config_name, int world_size, int rank) error {

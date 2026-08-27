@@ -36,9 +36,9 @@ interface id_type {
 }
 
 struct dtype_promotion_rule {
-    from_dtype: DType
-    to_dtype: DType
-    cost: i64
+    DType from_dtype
+    DType to_dtype
+    i64 cost
 }
 interface id_type_promotion {
     promote(dtype1: DType, dtype2: DType) . DType

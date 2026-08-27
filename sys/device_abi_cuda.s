@@ -138,7 +138,7 @@ func alloc_device_memory(device_abi_context ctx, int size_bytes) device_abi_cont
             device_id: ctx.device_id,
             device_address: 1024 + ctx.memory_stats.allocated_bytes,
             size_bytes: size_bytes,
-            is_allocated: true
+            true is_allocated
         }
         ctx.allocations = append(ctx.allocations, alloc)
         

@@ -5,34 +5,34 @@ use std.math
 use std.time
 
 struct model_config {
-    name: string
-    vocab_size: i32
-    hidden_dim: i32
-    num_layers: i32
-    num_heads: i32
-    ff_dim: i32
-    batch_size: i32
-    seq_length: i32
-    num_params: i64
+    string name
+    i32 vocab_size
+    i32 hidden_dim
+    i32 num_layers
+    i32 num_heads
+    i32 ff_dim
+    i32 batch_size
+    i32 seq_length
+    i64 num_params
 }
 
 struct gpu_benchmark {
-    gpu_count: i32
-    batch_size: i32
-    tokens_per_sec: f64
-    throughput: f64
-    memory_usage: f64
-    efficiency: f64
-    communication_overhead: f64
+    i32 gpu_count
+    i32 batch_size
+    f64 tokens_per_sec
+    f64 throughput
+    f64 memory_usage
+    f64 efficiency
+    f64 communication_overhead
 }
 
 struct performance_report {
-    timestamp: string
-    model: model_config
-    benchmarks: gpu_benchmark[]
-    total_params: i64
-    peak_throughput: f64
-    scaling_efficiency: f64
+    string timestamp
+    model_config model
+    gpu_benchmark[] benchmarks
+    i64 total_params
+    f64 peak_throughput
+    f64 scaling_efficiency
 }
 
 func get_scaled_model() model_config {
@@ -107,7 +107,7 @@ func benchmark_multi_gpu(model_config model, i32 gpu_count) gpu_benchmark {
         throughput: (model.batch_size * model.seq_length * math.from_i32(gpu_count) * 1000.0) / step_time,
         memory_usage: memory_usage,
         efficiency: adjusted_efficiency,
-        communication_overhead: comm_overhead
+        comm_overhead communication_overhead
     }
     return benchmark
 }
@@ -153,7 +153,7 @@ func benchmark_model(model_config model) performance_report {
         benchmarks: benchmarks,
         total_params: model.num_params,
         peak_throughput: peak_throughput,
-        scaling_efficiency: avg_efficiency
+        avg_efficiency scaling_efficiency
     }
     return report
 }

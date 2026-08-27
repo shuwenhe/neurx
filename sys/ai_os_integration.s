@@ -33,7 +33,7 @@ func create_execution_context(int total_gpu, int total_mem, int total_cpu) execu
         active_allocations: resource_allocation[](),
         total_gpu_available: total_gpu,
         total_memory_available: total_mem,
-        total_cpu_available: total_cpu
+        total_cpu total_cpu_available
     }
     ctx
 }
@@ -61,7 +61,7 @@ func schedule_workload(execution_context ctx, int workload_id, int cgroup_id) ex
                 allocated_cpu: 2,
                 allocated_memory: req.required_memory,
                 cgroup_id: cgroup_id,
-                allocation_success: true
+                true allocation_success
             }
             ctx.active_allocations = append(ctx.active_allocations, alloc)
             ctx.total_gpu_available = ctx.total_gpu_available - req.required_gpu

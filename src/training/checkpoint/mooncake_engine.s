@@ -3,28 +3,28 @@ import "src/runtime/distributed/nccl_collectives.s"
 import "src/training/checkpoint/checkpoint.s"
 
 struct mooncake_config {
-    world_size: i32
-    rank: i32
-    use_nccl: bool
-    use_p2p: bool
-    ring_topology: bool
-    chunk_size: i64
-    num_streams: i32
-    enable_compression: bool
-    compression_method: string
+    i32 world_size
+    i32 rank
+    bool use_nccl
+    bool use_p2p
+    bool ring_topology
+    i64 chunk_size
+    i32 num_streams
+    bool enable_compression
+    string compression_method
 }
 
 struct mooncake_engine {
-    config: mooncake_config
-    prev_rank: i32
-    next_rank: i32
+    mooncake_config config
+    i32 prev_rank
+    i32 next_rank
     send_streams: []cuda_stream
     recv_streams: []cuda_stream
     send_buffers: []tensor
     recv_buffers: []tensor
-    bytes_transferred: i64
-    transfer_count: i64
-    total_transfer_time: f64
+    i64 bytes_transferred
+    i64 transfer_count
+    f64 total_transfer_time
 }
 
 func new_mooncake_engine(mooncake_config config) . mooncake_engine {
@@ -121,7 +121,7 @@ func (mooncake_engine* engine) ring_send(tensor params, []i32 target_ranks) {
         cuda_memcpy_async(
             chunk,
             dest_rank: engine.next_rank,
-            stream: stream
+            stream stream
         )
         offset += chunk_size
     }
@@ -143,7 +143,7 @@ func (mooncake_engine* engine) ring_recv(tensor params, []i32 source_ranks) {
         cuda_memcpy_async(
             chunk,
             source_rank: engine.prev_rank,
-            stream: stream
+            stream stream
         )
         offset += chunk_size
     }
@@ -157,7 +157,7 @@ func (mooncake_engine* engine) p2p_send(tensor params, i32 target_rank) {
     cuda_memcpy_async(
         params,
         dest_rank: target_rank,
-        stream: stream
+        stream stream
     )
     cuda_stream_synchronize(stream)
 }
@@ -167,7 +167,7 @@ func (mooncake_engine* engine) p2p_recv(tensor params, i32 source_rank) {
     cuda_memcpy_async(
         params,
         source_rank: source_rank,
-        stream: stream
+        stream stream
     )
     cuda_stream_synchronize(stream)
 }

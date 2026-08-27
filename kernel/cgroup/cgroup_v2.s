@@ -222,9 +222,9 @@ func (cgroup_hierarchy_v2* hier) add_cgroup(string cg_name, int parent_id) (int,
 
 func (cgroup_hierarchy_v2* hier) get_cgroup(int cg_id) option[cgroup_v2] {
     if cg_id < 0 || cg_id >= hier.total_cgroups {
-        return option::none
+        return nil
     }
-    return option::some(hier.cgroups[cg_id])
+    return some(hier.cgroups[cg_id])
 }
 
 func (cgroup_hierarchy_v2* hier) total_cpu_usage() int {

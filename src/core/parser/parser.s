@@ -7,10 +7,10 @@ use neurx.parser.stream_parser
 use neurx.parser.error_recovery
 
 struct ParserInstance {
-    config: ParserConfig
-    stats: ParserStats
-    cache: map[string]ParseResult
-    last_error: string
+    ParserConfig config
+    ParserStats stats
+    map[string]ParseResult cache
+    string last_error
 }
 
 func create_parser(ParserConfig config) ParserInstance {

@@ -19,41 +19,41 @@ struct function_calling_config {
 }
 
 struct tool_definition {
-    name: string
-    description: string
-    parameters: parameter_schema
-    category: string
-    tags: list<string>
+    string name
+    string description
+    parameter_schema parameters
+    string category
+    list<string> tags
     requires_permission: bool = false
     is_dangerous: bool = false
-    rate_limit: rate_limit
+    rate_limit rate_limit
     timeout_seconds: float = 30.0
     metadata: map<string, any>
 }
 
 struct parameter_schema {
-    type: string
+    string type
     properties: map<string, property_definition>
-    required: list<string>
-    items: parameter_schema
-    enum: list<any>
-    format: string
-    description: string
-    default: any
+    list<string> required
+    parameter_schema items
+    list<any> enum
+    string format
+    string description
+    any default
     additional_properties: bool | parameter_schema
 }
 
 struct property_definition {
-    type: string
-    description: string
-    enum: list<any>
-    default: any
-    format: string
+    string type
+    string description
+    list<any> enum
+    any default
+    string format
     min: int | float
     max: int | float
-    items: parameter_schema
+    parameter_schema items
     properties: map<string, property_definition>
-    required: list<string>
+    list<string> required
 }
 
 struct rate_limit {
@@ -64,17 +64,17 @@ struct rate_limit {
 }
 
 struct tool_call {
-    id: string
-    name: string
-    arguments: string
+    string id
+    string name
+    string arguments
     parsed_arguments: map<string, any>
     status: call_status = call_status.PENDING
-    result: tool_call_result
-    error: tool_call_error
-    start_time: float
-    end_time: float
-    duration_ms: float
-    parent_id: string
+    tool_call_result result
+    tool_call_error error
+    float start_time
+    float end_time
+    float duration_ms
+    string parent_id
     children_ids: list<string> = []
     retry_count: int = 0
 }
@@ -90,69 +90,69 @@ struct tool_call {
 }
 
 struct tool_call_result {
-    success: bool
-    content: any
+    bool success
+    any content
     content_type: string = "text"
     truncated: bool = false
-    raw_output: string
+    string raw_output
     metadata: map<string, any>
 }
 
 struct tool_call_error {
-    code: string
-    message: string
+    string code
+    string message
     details: map<string, any>
     recoverable: bool = false
-    suggestion: string
+    string suggestion
 }
 
 struct function_calling_response {
-    tool_calls: list<tool_call>
-    final_text_response: string
-    finished_reason: string
-    total_tokens_used: int
-    intermediate_messages: list<assistant_message>
-    execution_summary: execution_summary
+    list<tool_call> tool_calls
+    string final_text_response
+    string finished_reason
+    int total_tokens_used
+    list<assistant_message> intermediate_messages
+    execution_summary execution_summary
 }
 
 struct assistant_message {
     role: string = "assistant"
     content: string | list<content_block>
-    tool_calls: list<tool_call>
-    reasoning_content: string
+    list<tool_call> tool_calls
+    string reasoning_content
 }
 
 struct content_block {
-    type: string
-    text: string
-    id: string
-    name: string
+    string type
+    string text
+    string id
+    string name
     input: map<string, any>
 struct user_message {
     role: string = "user"
     content: string | list<content_block>
-    tool_results: list<tool_call_result_block>
+    list<tool_call_result_block> tool_results
 }
 struct tool_call_result_block {
-    tool_call_id: string
-    content: any
+    string tool_call_id
+    any content
     is_error: bool = false
 }
 struct execution_summary {
-    total_tool_calls_initiated: int
-    total_tool_calls_completed: int
-    total_tool_calls_failed: int
-    parallel_batches: int
-    total_execution_time_ms: float
-    tools_used: set<string>
-    avg_duration_per_call_ms: float
-    retry_count: int
+    int total_tool_calls_initiated
+    int total_tool_calls_completed
+    int total_tool_calls_failed
+    int parallel_batches
+    float total_execution_time_ms
+    set<string> tools_used
+    float avg_duration_per_call_ms
+    int retry_count
 }
 struct tool_registry {
     tools: map<string, tool_definition>
     executors: map<string, tool_executor>
     categories: map<string, list<string>>
-    config: function_calling_config
+    function_calling_config config
     init(config: function_calling_config) {
         this.config = config  new function_calling_config()
         this.tools = map<string, tool_definition>{}
@@ -239,10 +239,10 @@ struct tool_registry {
     }
 }
 struct registry_statistics {
-    total_tools: int
+    int total_tools
     categories: map<string, int>
-    dangerous_tools: int
-    permission_required_tools: int
+    int dangerous_tools
+    int permission_required_tools
 }
 interface tool_executor {
     execute(map arguments<string, any>)
@@ -250,17 +250,17 @@ interface tool_executor {
     validate_arguments(map args<string, any>, schema: parameter_schema)
 }
 struct validation_report {
-    is_valid: bool
-    missing_params: list<string>
+    bool is_valid
+    list<string> missing_params
     invalid_params: list<map<string, string>>
-    warnings: list<string>
+    list<string> warnings
 }
 struct function_calling_engine {
-    registry: tool_registry
-    llm_client: any
-    config: function_calling_config
+    tool_registry registry
+    any llm_client
+    function_calling_config config
     conversation_history: list<user_message | assistant_message>
-    call_tracker: call_tracker
+    call_tracker call_tracker
     init(llm_client: any, config: function_calling_config, registry: tool_registry) {
         this.llm_client = llm_client
         this.config = config  new function_calling_config()
@@ -544,15 +544,15 @@ struct function_calling_engine {
     }
 }
 struct conversation_summary {
-    total_messages: int
-    user_messages: int
-    assistant_messages: int
-    tool_calls_made: int
-    unique_tools_used: set<string>
-    success_rate: float
+    int total_messages
+    int user_messages
+    int assistant_messages
+    int tool_calls_made
+    set<string> unique_tools_used
+    float success_rate
 }
 struct call_tracker {
-    history: list<tool_call>
+    list<tool_call> history
     total_calls: int = 0
     successful_calls: int = 0
     failed_calls: int = 0
@@ -836,7 +836,7 @@ struct mock_llm_client_for_fc {
     }
 }
 struct llm_raw_response {
-    finished_reason: string
+    string finished_reason
     choices: list<map<string, any>>
 }
 export {

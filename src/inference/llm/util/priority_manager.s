@@ -48,7 +48,7 @@ func new_priority_manager(int32 max_queue_size) priority_manager {
     configs := sla_config[]{}
 
     p0_config := sla_config {
-        priority: priority_level::p0_critical,
+        priority: priority_level_p0_critical,
         max_latency_ms: 100,
         throughput_threshold: 100,
         priority_boost: 10.0,
@@ -56,7 +56,7 @@ func new_priority_manager(int32 max_queue_size) priority_manager {
     configs = append(configs, p0_config)
 
     p1_config := sla_config {
-        priority: priority_level::p1_high,
+        priority: priority_level_p1_high,
         max_latency_ms: 500,
         throughput_threshold: 50,
         priority_boost: 5.0,
@@ -64,7 +64,7 @@ func new_priority_manager(int32 max_queue_size) priority_manager {
     configs = append(configs, p1_config)
 
     p2_config := sla_config {
-        priority: priority_level::p2_normal,
+        priority: priority_level_p2_normal,
         max_latency_ms: 2000,
         throughput_threshold: 20,
         priority_boost: 1.0,
@@ -72,7 +72,7 @@ func new_priority_manager(int32 max_queue_size) priority_manager {
     configs = append(configs, p2_config)
 
     p3_config := sla_config {
-        priority: priority_level::p3_low,
+        priority: priority_level_p3_low,
         max_latency_ms: 5000,
         throughput_threshold: 10,
         priority_boost: 0.5,
@@ -80,7 +80,7 @@ func new_priority_manager(int32 max_queue_size) priority_manager {
     configs = append(configs, p3_config)
 
     p4_config := sla_config {
-        priority: priority_level::p4_background,
+        priority: priority_level_p4_background,
         max_latency_ms: 10000,
         throughput_threshold: 5,
         priority_boost: 0.1,
@@ -124,13 +124,13 @@ func (priority_manager* pm) add_request(string request_id, priority_level level,
 func calculate_priority_score(priority_level level, int64 wait_time, int64 deadline) int64 {
     base_score := 0
 
-    if level == priority_level::p0_critical {
+    if level == priority_level_p0_critical {
         base_score = 1000
-    } else if level == priority_level::p1_high {
+    } else if level == priority_level_p1_high {
         base_score = 800
-    } else if level == priority_level::p2_normal {
+    } else if level == priority_level_p2_normal {
         base_score = 500
-    } else if level == priority_level::p3_low {
+    } else if level == priority_level_p3_low {
         base_score = 300
     } else {
         base_score = 100
@@ -168,7 +168,7 @@ func (priority_manager* pm) get_next_request() priority_entry {
 
     priority_entry {
         request_id: "",
-        level: priority_level::p4_background,
+        level: priority_level_p4_background,
         priority_score: 0,
         submission_time: 0,
         deadline: 0,
@@ -234,13 +234,13 @@ func (priority_manager* pm) get_queue_stats() priority_queue_stats {
     total_priority := 0
 
     for entry in pm.queue {
-        if entry.level == priority_level::p0_critical {
+        if entry.level == priority_level_p0_critical {
             critical_cnt = critical_cnt + 1
-        } else if entry.level == priority_level::p1_high {
+        } else if entry.level == priority_level_p1_high {
             high_cnt = high_cnt + 1
-        } else if entry.level == priority_level::p2_normal {
+        } else if entry.level == priority_level_p2_normal {
             normal_cnt = normal_cnt + 1
-        } else if entry.level == priority_level::p3_low {
+        } else if entry.level == priority_level_p3_low {
             low_cnt = low_cnt + 1
         } else {
             bg_cnt = bg_cnt + 1
@@ -294,14 +294,14 @@ func (priority_manager* pm) boost_aging_requests() {
         if wait_time > 1000 {
             old_priority := pm.queue[i].level
 
-            if old_priority != priority_level::p0_critical {
+            if old_priority != priority_level_p0_critical {
                 new_level := old_priority
-                if old_priority == priority_level::p4_background {
-                    new_level = priority_level::p3_low
-                } else if old_priority == priority_level::p3_low {
-                    new_level = priority_level::p2_normal
-                } else if old_priority == priority_level::p2_normal {
-                    new_level = priority_level::p1_high
+                if old_priority == priority_level_p4_background {
+                    new_level = priority_level_p3_low
+                } else if old_priority == priority_level_p3_low {
+                    new_level = priority_level_p2_normal
+                } else if old_priority == priority_level_p2_normal {
+                    new_level = priority_level_p1_high
                 }
 
                 pm.queue[i].level = new_level

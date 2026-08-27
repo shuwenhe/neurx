@@ -49,106 +49,106 @@ struct operation_def {
 
 func get_op_definition(op_type op_kind) operation_def {
     match op_kind {
-        op_type::add: operation_def {
-            op_kind: op_type::add,
+        op_type_add: operation_def {
+            op_kind: op_type_add,
             op_name: "add",
             num_inputs: 2,
             num_outputs: 1,
             description: "element-wise addition",
         },
-        op_type::subtract: operation_def {
-            op_kind: op_type::subtract,
+        op_type_subtract: operation_def {
+            op_kind: op_type_subtract,
             op_name: "subtract",
             num_inputs: 2,
             num_outputs: 1,
             description: "element-wise subtraction",
         },
-        op_type::multiply: operation_def {
-            op_kind: op_type::multiply,
+        op_type_multiply: operation_def {
+            op_kind: op_type_multiply,
             op_name: "multiply",
             num_inputs: 2,
             num_outputs: 1,
             description: "element-wise multiplication",
         },
-        op_type::matrix_multiply: operation_def {
-            op_kind: op_type::matrix_multiply,
+        op_type_matrix_multiply: operation_def {
+            op_kind: op_type_matrix_multiply,
             op_name: "matmul",
             num_inputs: 2,
             num_outputs: 1,
             description: "matrix multiplication",
         },
-        op_type::relu: operation_def {
-            op_kind: op_type::relu,
+        op_type_relu: operation_def {
+            op_kind: op_type_relu,
             op_name: "relu",
             num_inputs: 1,
             num_outputs: 1,
             description: "rectified linear unit activation",
         },
-        op_type::gelu: operation_def {
-            op_kind: op_type::gelu,
+        op_type_gelu: operation_def {
+            op_kind: op_type_gelu,
             op_name: "gelu",
             num_inputs: 1,
             num_outputs: 1,
             description: "gaussian error linear unit activation",
         },
-        op_type::softmax: operation_def {
-            op_kind: op_type::softmax,
+        op_type_softmax: operation_def {
+            op_kind: op_type_softmax,
             op_name: "softmax",
             num_inputs: 1,
             num_outputs: 1,
             description: "softmax activation",
         },
-        op_type::layer_norm: operation_def {
-            op_kind: op_type::layer_norm,
+        op_type_layer_norm: operation_def {
+            op_kind: op_type_layer_norm,
             op_name: "layer_norm",
             num_inputs: 1,
             num_outputs: 1,
             description: "layer normalization",
         },
-        op_type::reshape: operation_def {
-            op_kind: op_type::reshape,
+        op_type_reshape: operation_def {
+            op_kind: op_type_reshape,
             op_name: "reshape",
             num_inputs: 2,
             num_outputs: 1,
             description: "reshape tensor",
         },
-        op_type::transpose: operation_def {
-            op_kind: op_type::transpose,
+        op_type_transpose: operation_def {
+            op_kind: op_type_transpose,
             op_name: "transpose",
             num_inputs: 1,
             num_outputs: 1,
             description: "transpose tensor",
         },
-        op_type::reduce_sum: operation_def {
-            op_kind: op_type::reduce_sum,
+        op_type_reduce_sum: operation_def {
+            op_kind: op_type_reduce_sum,
             op_name: "reduce_sum",
             num_inputs: 1,
             num_outputs: 1,
             description: "reduce sum over dimensions",
         },
-        op_type::reduce_mean: operation_def {
-            op_kind: op_type::reduce_mean,
+        op_type_reduce_mean: operation_def {
+            op_kind: op_type_reduce_mean,
             op_name: "reduce_mean",
             num_inputs: 1,
             num_outputs: 1,
             description: "reduce mean over dimensions",
         },
-        op_type::constant: operation_def {
-            op_kind: op_type::constant,
+        op_type_constant: operation_def {
+            op_kind: op_type_constant,
             op_name: "constant",
             num_inputs: 0,
             num_outputs: 1,
             description: "constant value",
         },
-        op_type::input: operation_def {
-            op_kind: op_type::input,
+        op_type_input: operation_def {
+            op_kind: op_type_input,
             op_name: "input",
             num_inputs: 0,
             num_outputs: 1,
             description: "graph input",
         },
-        op_type::output: operation_def {
-            op_kind: op_type::output,
+        op_type_output: operation_def {
+            op_kind: op_type_output,
             op_name: "output",
             num_inputs: 1,
             num_outputs: 0,
@@ -186,10 +186,10 @@ func (operation* op) add_attribute(string key, string value) {
 func (operation* op) get_attribute(string key) option[string] {
     for attr in op.attributes {
         if attr.key == key {
-            return option::some(attr.value_str)
+            return some(attr.value_str)
         }
     }
-    option::none
+    nil
 }
 
 func (operation* op) num_inputs() int {

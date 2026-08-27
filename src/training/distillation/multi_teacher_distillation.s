@@ -4,33 +4,33 @@ import "src/core/loss/kl_divergence.s"
 import "src/training/distillation/knowledge_distillation.s"
 
 struct multi_teacher_config {
-    num_teachers: i32
+    i32 num_teachers
     teacher_weights: []f32
-    temperature: f32
-    learning_rate: f32
-    num_epochs: i32
-    max_grad_norm: f32
-    distill_mode: string
-    kl_loss_weight: f32
-    ce_loss_weight: f32
-    use_dynamic_weights: bool
-    weight_update_freq: i32
-    use_layer_distill: bool
-    layer_loss_weight: f32
+    f32 temperature
+    f32 learning_rate
+    i32 num_epochs
+    f32 max_grad_norm
+    string distill_mode
+    f32 kl_loss_weight
+    f32 ce_loss_weight
+    bool use_dynamic_weights
+    i32 weight_update_freq
+    bool use_layer_distill
+    f32 layer_loss_weight
 }
 
 struct teacher {
-    model: *model
-    weight: f32
-    name: string
-    performance_score: f32
+    *model model
+    f32 weight
+    string name
+    f32 performance_score
 }
 
 struct multi_teacher_distillation {
-    config: multi_teacher_config
-    student: *model
+    multi_teacher_config config
+    *model student
     teachers: []teacher
-    optimizer: *optimizer
+    *optimizer optimizer
     teacher_losses: [][]f32
     teacher_contributions: []f32
 }
@@ -88,7 +88,7 @@ func (multi_teacher_distillation* distill) compute_distillation_loss(
         logits := teacher.model.forward(input)
         teacher_logits = append(teacher_logits, logits)
     }
-    distill_loss: tensor
+    tensor distill_loss
     match distill.config.distill_mode {
         "average" => {
             distill_loss = distill.average_distillation(student_logits, teacher_logits)

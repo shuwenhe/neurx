@@ -18,7 +18,7 @@ func create_nucleus_processor(float p) nucleus_processor {
 
 func apply_nucleus(
     logits: []float,
-    processor: nucleus_processor
+    nucleus_processor processor
 ) []float {
     int vocab_size = len(logits)
 
@@ -74,7 +74,7 @@ func apply_nucleus(
 func apply_adaptive_nucleus(
     logits: []float,
     base_p: float,
-    temperature: float
+    float temperature
 ) []float {
 
     float adaptive_p = base_p
@@ -98,7 +98,7 @@ func apply_adaptive_nucleus(
 
 func apply_nucleus_batch(
     logits_batch: [][]float,
-    processor: nucleus_processor
+    nucleus_processor processor
 ) [][]float {
     [][]float filtered_batch
 
@@ -113,7 +113,7 @@ func apply_nucleus_batch(
 func sample_from_nucleus(
     logits: []float,
     processor: nucleus_processor,
-    temperature: float
+    float temperature
 ) int {
 
     []float scaled_logits
@@ -141,7 +141,7 @@ func sample_from_nucleus(
 func apply_top_k_nucleus(
     logits: []float,
     k: int,
-    p: float
+    float p
 ) []float {
     int vocab_size = len(logits)
 
@@ -208,7 +208,7 @@ struct nucleus_stats {
 
 func analyze_nucleus_filtering(
     logits: []float,
-    p: float
+    float p
 ) nucleus_stats {
     []float probs = processor_utils.softmax(logits)
     int vocab_size = len(logits)

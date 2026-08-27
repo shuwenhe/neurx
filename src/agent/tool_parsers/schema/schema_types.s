@@ -11,72 +11,72 @@ const TYPE_ARRAY = "array"
 const TYPE_NULL = "null"
 
 struct json_schema {
-    title: string
-    description: string
-    type_name: string
+    string title
+    string description
+    string type_name
 
     properties: []json_property
     required: []string
-    additional_properties: bool
-    min_properties: int
-    max_properties: int
+    bool additional_properties
+    int min_properties
+    int max_properties
 
-    items: *json_schema
-    min_items: int
-    max_items: int
-    unique_items: bool
+    *json_schema items
+    int min_items
+    int max_items
+    bool unique_items
 
-    pattern: string
-    min_length: int
-    max_length: int
+    string pattern
+    int min_length
+    int max_length
     enum_values: []string
 
-    minimum: float
-    maximum: float
-    exclusive_minimum: bool
-    exclusive_maximum: bool
-    multiple_of: float
+    float minimum
+    float maximum
+    bool exclusive_minimum
+    bool exclusive_maximum
+    float multiple_of
 
-    default_value: string
+    string default_value
     examples: []string
 }
 
 struct json_property {
-    name: string
-    schema: json_schema
-    required: bool
-    description: string
+    string name
+    json_schema schema
+    bool required
+    string description
 }
 
 struct token_constraint {
     allowed_tokens: []int
     forbidden_tokens: []int
-    state: int
-    context: string
-    is_terminal: bool
+    int state
+    string context
+    bool is_terminal
 }
 
 struct dfa_state {
-    state_id: int
+    int state_id
     transitions: []dfa_transition
-    is_accepting: bool
+    bool is_accepting
     token_set: []int
 }
 
 struct dfa_transition {
-    token_id: int
-    next_state: int
-    condition: string
+    int token_id
+    int next_state
+    string condition
 }
 
 struct parse_context {
     current_path: []string
-    current_value: string
-    depth: int
-    in_string: bool
-    in_array: bool
-    escape_next: bool
-    buffer: string
+    string current_value
+    int depth
+    bool in_string
+    bool in_array
+    bool escape_next
+    string buffer
 }
 
 const CONSTRAINT_STRICT = "strict"
@@ -84,11 +84,11 @@ const CONSTRAINT_PERMISSIVE = "permissive"
 const CONSTRAINT_WARNING = "warning"
 
 struct sampler_state {
-    mode: string
-    schema: *json_schema
-    context: parse_context
+    string mode
+    *json_schema schema
+    parse_context context
     allowed_next: []int
-    rejected_count: int
+    int rejected_count
     warnings: []string
 }
 
@@ -159,7 +159,7 @@ func create_empty_constraint() token_constraint {
         forbidden_tokens: vec_new(),
         state: 0,
         context: "root",
-        is_terminal: false
+        false is_terminal
     }
     return constraint
 }

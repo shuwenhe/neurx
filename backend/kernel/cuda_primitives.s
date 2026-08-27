@@ -20,7 +20,7 @@ struct CUDADeviceProperties {
     max_blocks_per_grid: i32,
     compute_capability_major: i32,
     compute_capability_minor: i32,
-    num_multiprocessors: i32
+    i32 num_multiprocessors
 }
 
 func NewCUDADeviceManager() *CUDADeviceManager {
@@ -70,7 +70,7 @@ func (CUDADeviceManager* m) CreateStream(i32 priority) *types.CUDAStream {
         stream_id: stream_id,
         device: m.active_device,
         priority: priority,
-        is_active: true
+        true is_active
     }
 
     m.streams[stream_id] = stream
@@ -97,13 +97,13 @@ func (CUDADeviceManager* m) SynchronizeStream(i32 stream_id) bool {
 
 struct CUDAEventManager {
     events: map[i32, *types.CUDAEvent],
-    device_manager: *CUDADeviceManager
+    *CUDADeviceManager device_manager
 }
 
 func NewCUDAEventManager(*CUDADeviceManager device_manager) *CUDAEventManager {
     return *CUDAEventManager{
         events: make(map[i32, *types.CUDAEvent]),
-        device_manager: device_manager
+        device_manager device_manager
     }
 }
 
@@ -178,13 +178,13 @@ func NewCUDAPrimitives(i32 device_id) *CUDAPrimitives {
     return *CUDAPrimitives{
         device_manager: device_mgr,
         event_manager: event_mgr,
-        memory_manager: mem_mgr
+        mem_mgr memory_manager
     }
 }
 
 func (CUDAPrimitives* p) MemcpyHostToDevice(
     dst: i64,
-    src_size: i64
+    i64 src_size
 ) bool {
     if dst < 0 {
         return false
@@ -194,7 +194,7 @@ func (CUDAPrimitives* p) MemcpyHostToDevice(
 
 func (CUDAPrimitives* p) MemcpyDeviceToHost(
     src: i64,
-    size: i64
+    i64 size
 ) bool {
     if src < 0 {
         return false
@@ -205,7 +205,7 @@ func (CUDAPrimitives* p) MemcpyDeviceToHost(
 func (CUDAPrimitives* p) MemcpyDeviceToDevice(
     dst: i64,
     src: i64,
-    size: i64
+    i64 size
 ) bool {
     if dst < 0 || src < 0 {
         return false

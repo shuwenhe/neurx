@@ -9,7 +9,7 @@ struct dead_code_result {
 }
 
 func is_output_op(*operation op) bool {
-    op.op_kind == op_type::output
+    op.op_kind == op_type_output
 }
 
 func mark_used_values(*computation_graph g) bool[] {
@@ -88,8 +88,8 @@ func remove_dead_code(*computation_graph g) dead_code_result {
 
 func has_side_effects(*operation op) bool {
     match op.op_kind {
-        op_type::output => true,
-        op_type::input => true,
+        op_type_output => true,
+        op_type_input => true,
         default => false,
     }
 }

@@ -20,36 +20,36 @@ use neurx.common.parse.{parse_int, parse_float}
 use neurx.common.string.{trim, substring, str_len, int_to_str, float_to_str}
 
 struct gpu_training_config {
-    max_steps: int
-    batch_size: int
-    seq_len: int
-    learning_rate: float
-    warmup_steps: int
-    log_interval: int
-    save_interval: int
-    device_id: int
-    gradient_accumulation_steps: int
-    weight_decay: float
+    int max_steps
+    int batch_size
+    int seq_len
+    float learning_rate
+    int warmup_steps
+    int log_interval
+    int save_interval
+    int device_id
+    int gradient_accumulation_steps
+    float weight_decay
 }
 
 struct gpu_model {
-    embedding_size: int
-    hidden_size: int
-    num_layers: int
-    num_heads: int
-    embedding_weight_gpu: int64
-    embeddings_layernorm_gpu: int64
-    transformer_weights_gpu: int64
-    transformer_bias_gpu: int64
-    m_gpu: int64
-    v_gpu: int64
+    int embedding_size
+    int hidden_size
+    int num_layers
+    int num_heads
+    int64 embedding_weight_gpu
+    int64 embeddings_layernorm_gpu
+    int64 transformer_weights_gpu
+    int64 transformer_bias_gpu
+    int64 m_gpu
+    int64 v_gpu
 }
 
 struct training_state {
-    step: int
-    total_loss: float
-    samples_seen: int
-    batches_completed: int
+    int step
+    float total_loss
+    int samples_seen
+    int batches_completed
 }
 
 func main() {

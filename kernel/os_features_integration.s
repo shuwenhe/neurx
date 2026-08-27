@@ -22,7 +22,7 @@ struct os_features_manager {
     cpufreq_enabled: bool,
     cpuidle_enabled: bool,
     time_management_enabled: bool,
-    lock: mutex::mutex[void],
+    lock: mutex[void],
 }
 
 struct feature_status {
@@ -42,7 +42,7 @@ func new_os_features_manager() (*os_features_manager, string) {
         cpufreq_enabled: false,
         cpuidle_enabled: false,
         time_management_enabled: false,
-        lock: mutex::new(),
+        lock: mutex_new(),
     } as *os_features_manager
 
 return     (mgr, "")

@@ -18,7 +18,7 @@ func rocm_create_rccl_comm(int rank, int world_size) rccl_comm {
         world_size: world_size,
         comm_handle: 0,
         backend_type: "rccl",
-        is_initialized: true
+        true is_initialized
     }
 }
 

@@ -4,13 +4,13 @@ use std.strings
 use std.math
 
 struct tokenizer {
-    vocab_size: int
+    int vocab_size
     vocab: []string
-    token_to_id: map[string]int
-    bos_token_id: int
-    eos_token_id: int
-    unk_token_id: int
-    pad_token_id: int
+    map[string]int token_to_id
+    int bos_token_id
+    int eos_token_id
+    int unk_token_id
+    int pad_token_id
 }
 
 func create_tokenizer(int vocab_size) tokenizer {
@@ -52,12 +52,12 @@ func encode(tokenizer tok, string text) []int {
 }
 
 struct wikitext_dataset {
-    file_path: string
-    split: string
-    max_seq_len: int
-    tokenizer: tokenizer
+    string file_path
+    string split
+    int max_seq_len
+    tokenizer tokenizer
     samples: [][]int
-    num_samples: int
+    int num_samples
 }
 
 func load_wikitext_dataset(string file_path, string split, int max_seq_len, tokenizer tok) wikitext_dataset {
@@ -99,12 +99,12 @@ func get_wikitext_batch(wikitext_dataset dataset, int batch_start, int batch_siz
 }
 
 struct c4_dataset {
-    file_path: string
-    split: string
-    max_seq_len: int
-    tokenizer: tokenizer
+    string file_path
+    string split
+    int max_seq_len
+    tokenizer tokenizer
     samples: [][]int
-    num_samples: int
+    int num_samples
 }
 
 func load_c4_dataset(string file_path, string split, int max_seq_len, tokenizer tok) c4_dataset {
@@ -146,13 +146,13 @@ func get_c4_batch(c4_dataset dataset, int batch_start, int batch_size, int seq_l
 }
 
 struct data_loader {
-    dataset_type: string
-    batch_size: int
-    seq_len: int
-    tokenizer: tokenizer
-    num_batches: int
-    wikitext: wikitext_dataset
-    c4: c4_dataset
+    string dataset_type
+    int batch_size
+    int seq_len
+    tokenizer tokenizer
+    int num_batches
+    wikitext_dataset wikitext
+    c4_dataset c4
 }
 
 func create_wikitext_loader(int batch_size, int seq_len, int vocab_size, string split) data_loader {
@@ -200,13 +200,13 @@ func next_batch(data_loader* loader, int batch_idx) [][]int {
 }
 
 struct dataset_statistics {
-    name: string
-    num_samples: int
-    total_tokens: int64
-    vocab_size: int
-    avg_sample_length: int
-    min_token_id: int
-    max_token_id: int
+    string name
+    int num_samples
+    int64 total_tokens
+    int vocab_size
+    int avg_sample_length
+    int min_token_id
+    int max_token_id
 }
 
 func compute_dataset_stats(string dataset_name, string split) dataset_statistics {

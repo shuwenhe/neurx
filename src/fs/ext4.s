@@ -65,7 +65,7 @@ func (ext4_fs* fs) create_file(string filename, int mode) (inode, string) {
         mtime: 0,
         ctime: 0,
         block_count: 0,
-        block_pointers: new int[12]
+        new int[12] block_pointers
     }
     
     fs.inode_table[inode_num] = new_inode
@@ -102,7 +102,7 @@ func (ext4_fs* fs) create_directory(string dirname) (inode, string) {
         mtime: 0,
         ctime: 0,
         block_count: 0,
-        block_pointers: new int[12]
+        new int[12] block_pointers
     }
     
     fs.inode_table[inode_num] = new_inode

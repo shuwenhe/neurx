@@ -1,30 +1,30 @@
 struct draft_model_config {
-    model_size: string
-    num_layers: int
-    hidden_dim: int
-    vocab_size: int
-    num_heads: int
-    compression_ratio: float
-    shared_embeddings: bool
+    string model_size
+    int num_layers
+    int hidden_dim
+    int vocab_size
+    int num_heads
+    float compression_ratio
+    bool shared_embeddings
 }
 
 struct draft_model_executor {
-    config: draft_model_config
+    draft_model_config config
     embeddings: [][]float
     layer_weights: [][]float
     output_projection: [][]float
     layer_cache: [][]float
-    inference_count: int64
-    total_time_ms: float64
+    int64 inference_count
+    float64 total_time_ms
 }
 
 struct draft_prediction_batch {
-    batch_id: int
+    int batch_id
     input_ids: [][]int
     attention_mask: [][]bool
     batch_predictions: [][]draft_token
     batch_embeddings: [][]float
-    batch_time_ms: float
+    float batch_time_ms
 }
 
 func new_draft_model_config(string size, int num_layers, int hidden, int vocab) draft_model_config {

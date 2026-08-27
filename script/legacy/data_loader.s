@@ -3,14 +3,14 @@ use std.io
 use std.strings
 
 struct data_loader_config {
-    shard_dir: string
-    max_samples_per_shard: i64
-    max_shards: i64
+    string shard_dir
+    i64 max_samples_per_shard
+    i64 max_shards
 }
 
 struct sample {
-    text: string
-    index: i64
+    string text
+    i64 index
 }
 
 func main() {

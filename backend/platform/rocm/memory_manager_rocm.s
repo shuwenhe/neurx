@@ -26,7 +26,7 @@ func create_memory_allocator(int device_id, int64 total_memory) memory_allocator
         total_memory: total_memory,
         allocated_memory: 0,
         allocations: [],
-        enable_caching: true
+        true enable_caching
     }
 }
 

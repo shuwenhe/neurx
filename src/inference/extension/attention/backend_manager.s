@@ -30,55 +30,55 @@ struct attention_backend_manager {
 }
 
 func detect_hardware() hardware_type {
-    hardware_type::unknown
+    hardware_type_unknown
 }
 
 func get_backend_capability(attention_backend_type backend_type) backend_capability {
     switch backend_type {
-        attention_backend_type::standard : backend_capability {
+        attention_backend_type_standard : backend_capability {
             backend_name: "standard",
             supported_dtypes: string[]{"float32", "float16", "bfloat16"},
-            supported_hardware: hardware_type[]{hardware_type::cpu, hardware_type::unknown},
+            supported_hardware: hardware_type[]{hardware_type_cpu, hardware_type_unknown},
             min_batch_size: 1,
             max_seq_length: 8192,
             estimated_flops_per_token: 0,
             supports_paged_cache: false,
             supports_sparse: false,
         },
-        attention_backend_type::flash_attention : backend_capability {
+        attention_backend_type_flash_attention : backend_capability {
             backend_name: "flash_attention",
             supported_dtypes: string[]{"float16", "bfloat16"},
-            supported_hardware: hardware_type[]{hardware_type::cuda_sm_70, hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
+            supported_hardware: hardware_type[]{hardware_type_cuda_sm_70, hardware_type_cuda_sm_80, hardware_type_cuda_sm_90},
             min_batch_size: 1,
             max_seq_length: 16384,
             estimated_flops_per_token: 1000000,
             supports_paged_cache: true,
             supports_sparse: false,
         },
-        attention_backend_type::dsa : backend_capability {
+        attention_backend_type_dsa : backend_capability {
             backend_name: "dsa",
             supported_dtypes: string[]{"float16", "bfloat16"},
-            supported_hardware: hardware_type[]{hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
+            supported_hardware: hardware_type[]{hardware_type_cuda_sm_80, hardware_type_cuda_sm_90},
             min_batch_size: 1,
             max_seq_length: 32768,
             estimated_flops_per_token: 1200000,
             supports_paged_cache: true,
             supports_sparse: true,
         },
-        attention_backend_type::paged_attention : backend_capability {
+        attention_backend_type_paged_attention : backend_capability {
             backend_name: "paged_attention",
             supported_dtypes: string[]{"float16", "bfloat16", "int8"},
-            supported_hardware: hardware_type[]{hardware_type::cuda_sm_70, hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
+            supported_hardware: hardware_type[]{hardware_type_cuda_sm_70, hardware_type_cuda_sm_80, hardware_type_cuda_sm_90},
             min_batch_size: 1,
             max_seq_length: 32768,
             estimated_flops_per_token: 900000,
             supports_paged_cache: true,
             supports_sparse: false,
         },
-        attention_backend_type::sparse_attention : backend_capability {
+        attention_backend_type_sparse_attention : backend_capability {
             backend_name: "sparse_attention",
             supported_dtypes: string[]{"float16", "bfloat16"},
-            supported_hardware: hardware_type[]{hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
+            supported_hardware: hardware_type[]{hardware_type_cuda_sm_80, hardware_type_cuda_sm_90},
             min_batch_size: 1,
             max_seq_length: 1000000,
             estimated_flops_per_token: 300000,
@@ -115,7 +115,7 @@ func (attention_backend_manager* mgr) get_backend(string backend_name) attention
     }
 
     config := new_attention_config(8, 64)
-    new_attention_backend(attention_backend_type::standard, config)
+    new_attention_backend(attention_backend_type_standard, config)
 }
 
 func (attention_backend_manager* mgr) set_current_backend(string backend_name) bool {
@@ -132,13 +132,13 @@ func (attention_backend_manager* mgr) get_current_backend() attention_backend {
 }
 
 func (attention_backend_manager* mgr) auto_select_backend(int seq_length, string precision) string {
-    if mgr.detected_hardware == hardware_type::cuda_sm_90 {
+    if mgr.detected_hardware == hardware_type_cuda_sm_90 {
         if seq_length > 16384 && precision == "float16" {
             "dsa"
         } else {
             "flash_attention"
         }
-    } else if mgr.detected_hardware == hardware_type::cuda_sm_80 {
+    } else if mgr.detected_hardware == hardware_type_cuda_sm_80 {
         "flash_attention"
     } else {
         "standard"
@@ -177,12 +177,12 @@ func (attention_backend_manager* mgr) list_backends() string[] {
 
 func (attention_backend_manager* mgr) get_detected_hardware() string {
     switch mgr.detected_hardware {
-        hardware_type::cuda_sm_70 : "cuda_sm_70",
-        hardware_type::cuda_sm_80 : "cuda_sm_80",
-        hardware_type::cuda_sm_90 : "cuda_sm_90",
-        hardware_type::rocm_mi100 : "rocm_mi100",
-        hardware_type::rocm_mi200 : "rocm_mi200",
-        hardware_type::cpu : "cpu",
-        hardware_type::unknown : "unknown",
+        hardware_type_cuda_sm_70 : "cuda_sm_70",
+        hardware_type_cuda_sm_80 : "cuda_sm_80",
+        hardware_type_cuda_sm_90 : "cuda_sm_90",
+        hardware_type_rocm_mi100 : "rocm_mi100",
+        hardware_type_rocm_mi200 : "rocm_mi200",
+        hardware_type_cpu : "cpu",
+        hardware_type_unknown : "unknown",
     }
 }

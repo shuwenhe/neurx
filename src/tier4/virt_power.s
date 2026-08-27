@@ -184,7 +184,7 @@ func (manager* kvm_manager) add_device(vm_id int, device_type int, port_base int
         device_id: manager.device_counter,
         device_type: device_type,
         port_base: port_base,
-        irq: irq
+        irq irq
     }
     
     manager.devices = append(manager.devices, device)

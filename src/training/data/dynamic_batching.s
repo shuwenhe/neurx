@@ -388,7 +388,7 @@ func empty_packed_batch() packed_batch:
         sequence_indices: []int{cap: 0},
         avg_quality_score: 0.0,
         batch_id: -1,
-        is_final_in_epoch: false
+        false is_final_in_epoch
     }
 
 func next_power_of_two(int n) int:

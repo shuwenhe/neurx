@@ -11,7 +11,7 @@ struct ImageProcessor {
     mean: [3]f32,
     std: [3]f32,
     interpolation: string,
-    normalize: bool
+    bool normalize
 }
 
 func NewImageProcessor(
@@ -25,7 +25,7 @@ func NewImageProcessor(
         mean: mean,
         std: std,
         interpolation: "bilinear",
-        normalize: true
+        true normalize
     }
 }
 
@@ -192,7 +192,7 @@ func resizeImage(
     src_w: i32,
     src_h: i32,
     dst_w: i32,
-    dst_h: i32
+    i32 dst_h
 ) []i8 {
 
     result := make([]i8, dst_w * dst_h * 3)

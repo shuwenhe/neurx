@@ -44,10 +44,10 @@ func detect_fusion_opportunities(operation_registry reg, string[] operation_sequ
             op2 := reg.get_operation(op_id2)
 
             can_fuse := false
-            if op1.op_type == operation_type::element_wise && op2.op_type == operation_type::element_wise {
+            if op1.op_type == operation_type_element_wise && op2.op_type == operation_type_element_wise {
                 can_fuse = true
             }
-            if op1.op_type == operation_type::normalization && op2.op_type == operation_type::activation {
+            if op1.op_type == operation_type_normalization && op2.op_type == operation_type_activation {
                 can_fuse = true
             }
 

@@ -74,8 +74,8 @@ func schedule_training_task(scheduler* sched, int priority) (int, string) {
     
     new_task := task {
         task_id: task_id,
-        task_type: task_type::training_task,
-        state: task_state::ready,
+        task_type: task_type_training_task,
+        state: task_state_ready,
         priority: priority,
         cpu_affinity: -1,
         gpu_affinity: -1,
@@ -95,8 +95,8 @@ func schedule_inference_task(scheduler* sched, int priority) (int, string) {
     
     new_task := task {
         task_id: task_id,
-        task_type: task_type::inference_task,
-        state: task_state::ready,
+        task_type: task_type_inference_task,
+        state: task_state_ready,
         priority: priority,
         cpu_affinity: -1,
         gpu_affinity: -1,
@@ -116,8 +116,8 @@ func schedule_system_task(scheduler* sched, int priority) (int, string) {
     
     new_task := task {
         task_id: task_id,
-        task_type: task_type::system_task,
-        state: task_state::ready,
+        task_type: task_type_system_task,
+        state: task_state_ready,
         priority: priority,
         cpu_affinity: 0,
         gpu_affinity: -1,
@@ -183,7 +183,7 @@ func context_switch(scheduler* sched, int from_task_id, int to_task_id) (int, st
     
     if from_idx >= 0 {
         from_task := sched.running_tasks.get(from_idx)
-        from_task.state = task_state::ready
+        from_task.state = task_state_ready
         
         sched.running_tasks.remove(from_idx)
         sched.ready_queue.queue = append(sched.ready_queue.queue, from_task)
@@ -193,7 +193,7 @@ func context_switch(scheduler* sched, int from_task_id, int to_task_id) (int, st
     
     if to_idx >= 0 {
         to_task := sched.ready_queue.queue.get(to_idx)
-        to_task.state = task_state::running
+        to_task.state = task_state_running
         to_task.start_time_ms = sched.current_time_ms
         
         sched.ready_queue.queue.remove(to_idx)
@@ -259,7 +259,7 @@ func complete_task(scheduler* sched, int task_id) (int, string) {
     
     if idx >= 0 {
         t := sched.running_tasks.get(idx)
-        t.state = task_state::completed
+        t.state = task_state_completed
         
         sched.running_tasks.remove(idx)
         sched.completed_tasks = append(sched.completed_tasks, t)
@@ -272,7 +272,7 @@ func fail_task(scheduler* sched, int task_id) (int, string) {
     
     if idx >= 0 {
         t := sched.running_tasks.get(idx)
-        t.state = task_state::failed
+        t.state = task_state_failed
         
         sched.running_tasks.remove(idx)
         sched.completed_tasks = append(sched.completed_tasks, t)

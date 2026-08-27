@@ -44,7 +44,7 @@ func backward_concat(node n, tensor grad_output) backward_result {
             data: grad_slice,
             grad: [],
             shape: inp.shape,
-            requires_grad: true
+            true requires_grad
         }
         grads = append(grads, grad_t)
         offset = offset + size

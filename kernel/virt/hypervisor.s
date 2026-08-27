@@ -82,7 +82,7 @@ func create_vm_io_device(string name, int dev_type, int irq) vm_io_device {
         device_id: 0,
         device_name: name,
         device_type: dev_type,
-        irq_number: irq
+        irq irq_number
     }
     dev
 }

@@ -54,7 +54,7 @@ struct timeout_config {
 func new_request_lifecycle(string request_id) request_lifecycle {
     request_lifecycle {
         request_id: request_id,
-        current_state: request_state::submitted,
+        current_state: request_state_submitted,
         transitions: state_transition[]{},
         created_at: 0,
         started_at: 0,
@@ -110,11 +110,11 @@ func (state_machine* sm) transition(string request_id, request_state new_state, 
     lifecycle.transitions = append(lifecycle.transitions, transition_rec)
     sm.all_transitions = append(sm.all_transitions, transition_rec)
 
-    if new_state == request_state::executing && old_state != request_state::executing {
+    if new_state == request_state_executing && old_state != request_state_executing {
         lifecycle.started_at = 0
     }
 
-    if new_state == request_state::completed {
+    if new_state == request_state_completed {
         lifecycle.completed_at = 0
         lifecycle.total_execution_time_ms = 0
     }
@@ -124,14 +124,14 @@ func (state_machine* sm) transition(string request_id, request_state new_state, 
 }
 
 func is_valid_transition(request_state from_state, request_state to_state, request_lifecycle_event event) bool {
-    if from_state == request_state::submitted {
-        to_state == request_state::queued || to_state == request_state::cancelled
-    } else if from_state == request_state::queued {
-        to_state == request_state::acquiring_resources || to_state == request_state::cancelled
-    } else if from_state == request_state::acquiring_resources {
-        to_state == request_state::executing || to_state == request_state::failed
-    } else if from_state == request_state::executing {
-        to_state == request_state::completed || to_state == request_state::failed || to_state == request_state::timeout || to_state == request_state::cancelled
+    if from_state == request_state_submitted {
+        to_state == request_state_queued || to_state == request_state_cancelled
+    } else if from_state == request_state_queued {
+        to_state == request_state_acquiring_resources || to_state == request_state_cancelled
+    } else if from_state == request_state_acquiring_resources {
+        to_state == request_state_executing || to_state == request_state_failed
+    } else if from_state == request_state_executing {
+        to_state == request_state_completed || to_state == request_state_failed || to_state == request_state_timeout || to_state == request_state_cancelled
     } else {
         false
     }
@@ -144,13 +144,13 @@ func (state_machine* sm) handle_token_generated(string request_id, int32 token_i
 
     lifecycle := sm.active_requests[request_id]
 
-    if lifecycle.current_state == request_state::executing {
+    if lifecycle.current_state == request_state_executing {
         lifecycle.total_tokens_generated = lifecycle.total_tokens_generated + 1
 
         transition_rec := state_transition {
-            from_state: request_state::executing,
-            to_state: request_state::executing,
-            trigger_event: request_lifecycle_event::token_generated,
+            from_state: request_state_executing,
+            to_state: request_state_executing,
+            trigger_event: request_lifecycle_event_token_generated,
             transition_time: 0,
         }
 
@@ -172,7 +172,7 @@ func (state_machine* sm) handle_stream_token(string request_id, int32 token_id) 
     transition_rec := state_transition {
         from_state: lifecycle.current_state,
         to_state: lifecycle.current_state,
-        trigger_event: request_lifecycle_event::streaming_token,
+        trigger_event: request_lifecycle_event_streaming_token,
         transition_time: 0,
     }
 
@@ -189,19 +189,19 @@ func (state_machine* sm) cancel_request(string request_id, bool by_user) bool {
 
     lifecycle := sm.active_requests[request_id]
 
-    if lifecycle.current_state == request_state::completed || lifecycle.current_state == request_state::cancelled || lifecycle.current_state == request_state::failed {
+    if lifecycle.current_state == request_state_completed || lifecycle.current_state == request_state_cancelled || lifecycle.current_state == request_state_failed {
         false
     }
 
-    event := request_lifecycle_event::cancelled_by_user
+    event := request_lifecycle_event_cancelled_by_user
     if !by_user {
-        event = request_lifecycle_event::cancelled_by_system
+        event = request_lifecycle_event_cancelled_by_system
     }
 
-    lifecycle.current_state = request_state::cancelled
+    lifecycle.current_state = request_state_cancelled
     transition_rec := state_transition {
         from_state: lifecycle.current_state,
-        to_state: request_state::cancelled,
+        to_state: request_state_cancelled,
         trigger_event: event,
         transition_time: 0,
     }
@@ -219,14 +219,14 @@ func (state_machine* sm) mark_failed(string request_id, string error_msg) bool {
     }
 
     lifecycle := sm.active_requests[request_id]
-    lifecycle.current_state = request_state::failed
+    lifecycle.current_state = request_state_failed
     lifecycle.error_message = error_msg
     lifecycle.completed_at = 0
 
     transition_rec := state_transition {
         from_state: lifecycle.current_state,
-        to_state: request_state::failed,
-        trigger_event: request_lifecycle_event::failed_error,
+        to_state: request_state_failed,
+        trigger_event: request_lifecycle_event_failed_error,
         transition_time: 0,
     }
 
@@ -241,14 +241,14 @@ func (state_machine* sm) mark_timeout(string request_id) bool {
     }
 
     lifecycle := sm.active_requests[request_id]
-    lifecycle.current_state = request_state::timeout
+    lifecycle.current_state = request_state_timeout
     lifecycle.error_message = "request timeout"
     lifecycle.completed_at = 0
 
     transition_rec := state_transition {
         from_state: lifecycle.current_state,
-        to_state: request_state::timeout,
-        trigger_event: request_lifecycle_event::timeout_reached,
+        to_state: request_state_timeout,
+        trigger_event: request_lifecycle_event_timeout_reached,
         transition_time: 0,
     }
 
@@ -270,7 +270,7 @@ func (state_machine* sm) get_request_state(string request_id) request_state {
         sm.active_requests[request_id].current_state
     }
 
-    request_state::submitted
+    request_state_submitted
 }
 
 func (state_machine* sm) get_transition_history(string request_id) state_transition[] {
@@ -285,7 +285,7 @@ func (state_machine* sm) get_active_count() int32 {
     active := 0
     for req_id in sm.active_requests.keys() {
         lifecycle := sm.active_requests[req_id]
-        if !lifecycle.current_state == request_state::completed && !lifecycle.current_state == request_state::cancelled && !lifecycle.current_state == request_state::failed && !lifecycle.current_state == request_state::timeout {
+        if !lifecycle.current_state == request_state_completed && !lifecycle.current_state == request_state_cancelled && !lifecycle.current_state == request_state_failed && !lifecycle.current_state == request_state_timeout {
             active = active + 1
         }
     }
@@ -296,7 +296,7 @@ func (state_machine* sm) get_active_count() int32 {
 func (state_machine* sm) cleanup_completed_request(string request_id) bool {
     if request_id in sm.active_requests {
         lifecycle := sm.active_requests[request_id]
-        if lifecycle.current_state == request_state::completed || lifecycle.current_state == request_state::cancelled || lifecycle.current_state == request_state::failed {
+        if lifecycle.current_state == request_state_completed || lifecycle.current_state == request_state_cancelled || lifecycle.current_state == request_state_failed {
             delete(sm.active_requests, request_id)
             true
         }

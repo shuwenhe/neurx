@@ -1,14 +1,14 @@
-package neurx::inference::cpu
+package neurx_inference::cpu
 
 struct model_info {
-  step: uint64
-  vocabulary: uint32
-  context_length: uint32
-  hidden_size: uint32
-  heads: uint32
-  ffn_size: uint32
-  layers: uint32
-  bpe_tokenizer: bool
+  uint64 step
+  uint32 vocabulary
+  uint32 context_length
+  uint32 hidden_size
+  uint32 heads
+  uint32 ffn_size
+  uint32 layers
+  bool bpe_tokenizer
 }
 
 struct generation_config {
@@ -21,7 +21,7 @@ struct generation_config {
 }
 
 struct transformer_2 {
-  model_info: model_info
+  model_info model_info
   impl: interface{}
 }
 

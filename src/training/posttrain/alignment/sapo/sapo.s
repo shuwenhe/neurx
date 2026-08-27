@@ -3,34 +3,34 @@ import "src/training/optimizer/optimizer.s"
 import "src/training/posttrain/alignment/ppo/ppo.s"
 
 struct sapo_config {
-    learning_rate: f32
-    num_epochs: i32
-    max_grad_norm: f32
-    kl_coeff: f32
-    gamma: f32
-    gae_lambda: f32
-    tau: f32
-    use_smooth_clipping: bool
-    advantage_epsilon: f32
-    normalize_advantages: bool
-    use_value_loss: bool
-    value_loss_coeff: f32
+    f32 learning_rate
+    i32 num_epochs
+    f32 max_grad_norm
+    f32 kl_coeff
+    f32 gamma
+    f32 gae_lambda
+    f32 tau
+    bool use_smooth_clipping
+    f32 advantage_epsilon
+    bool normalize_advantages
+    bool use_value_loss
+    f32 value_loss_coeff
 }
 
 struct sapo_trainer {
-    config: sapo_config
-    policy_model: *model
-    value_model: *model
-    reference_model: *model
-    optimizer: *optimizer
-    step_count: i64
-    advantage_stats: AdvantageStats
+    sapo_config config
+    *model policy_model
+    *model value_model
+    *model reference_model
+    *optimizer optimizer
+    i64 step_count
+    AdvantageStats advantage_stats
 }
 
 struct advantage_stats {
-    mean: f32
-    std: f32
-    max_abs: f32
+    f32 mean
+    f32 std
+    f32 max_abs
     history: []f32
 }
 

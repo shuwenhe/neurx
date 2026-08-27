@@ -330,7 +330,7 @@ func create_tcp_ip_stack() (tcp_ip_stack, string) {
         tcp_mgr: tcp_mgr,
         udp_mgr: udp_mgr,
         route_mgr: route_mgr,
-        ip_stat: ip_stat
+        ip_stat ip_stat
     }
     
     return stack, ""

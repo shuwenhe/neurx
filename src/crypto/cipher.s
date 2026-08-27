@@ -136,7 +136,7 @@ func cbc_init(key vec, key_len int, iv vec, iv_len int) (cbc_context, string) {
     ctx := cbc_context{
         aes_ctx: aes_ctx,
         iv: iv,
-        mode: MODE_CBC
+        MODE_CBC mode
     }
     
     return ctx, ""
@@ -206,7 +206,7 @@ func ctr_init(key vec, key_len int, nonce vec, nonce_len int) (ctr_context, stri
         aes_ctx: aes_ctx,
         nonce: nonce,
         counter: 0,
-        mode: MODE_CTR
+        MODE_CTR mode
     }
     
     return ctx, ""
@@ -246,7 +246,7 @@ func ecb_init(key vec, key_len int) (ecb_context, string) {
     
     ctx := ecb_context{
         aes_ctx: aes_ctx,
-        mode: MODE_ECB
+        MODE_ECB mode
     }
     
     return ctx, ""
@@ -309,7 +309,7 @@ func pbkdf2(password vec, password_len int, salt vec, salt_len int,
     ctx := pbkdf2_context{
         derived_key: {},
         iterations: iterations,
-        output_len: output_len
+        output_len output_len
     }
     
     i := 0

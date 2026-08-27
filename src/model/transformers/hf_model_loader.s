@@ -60,7 +60,7 @@ func create_hf_model_loader(string model_id) hf_model_loader {
 
 func load_hf_model(
     model_id: string,
-    options: hf_load_options
+    hf_load_options options
 ) loaded_hf_model {
     print("╔════════════════════════════════════════════════╗\n")
     print("║  🤗 HuggingFace Model Loader (Pure S)         ║\n")
@@ -161,7 +161,7 @@ func default_inference_config() hf_inference_config {
 func generate_text(
     model: loaded_hf_model,
     prompt: string,
-    config: hf_inference_config
+    hf_inference_config config
 ) string {
     print("\n📝 Generating Text\n")
     print("─────────────────────────────────────────────\n")

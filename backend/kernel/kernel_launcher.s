@@ -32,7 +32,7 @@ func NewKernelLauncher(i32 device_id) *KernelLauncher {
 
 func (KernelLauncher* l) ComputeOptimalBlockSize(
     problem_size: i32,
-    threads_per_element: i32
+    i32 threads_per_element
 ) i32 {
 
     optimal_block_sizes := [6]i32{32, 64, 128, 256, 512, 1024}
@@ -51,7 +51,7 @@ func (KernelLauncher* l) ComputeOptimalBlockSize(
 
 func (KernelLauncher* l) ComputeGridSize(
     problem_size: i32,
-    block_size: i32
+    i32 block_size
 ) i32 {
 
     grid_size := (problem_size + block_size - 1) / block_size
@@ -66,7 +66,7 @@ func (KernelLauncher* l) ComputeGridSize(
 func (KernelLauncher* l) CreateLaunchConfig(
     problem_size: i32,
     threads_per_element: i32,
-    stream_id: i32
+    i32 stream_id
 ) types.LaunchConfig {
 
     block_size := l.ComputeOptimalBlockSize(problem_size, threads_per_element)
@@ -78,7 +78,7 @@ func (KernelLauncher* l) CreateLaunchConfig(
         block_dim: [3]i32{block_size, 1, 1},
         grid_dim: [3]i32{grid_size, 1, 1},
         shared_memory_bytes: 0,
-        stream: stream
+        stream stream
     }
 }
 
@@ -87,7 +87,7 @@ func (KernelLauncher* l) LaunchMatrixKernel(
     config: types.KernelConfig,
     m: i32,
     n: i32,
-    k: i32
+    i32 k
 ) types.KernelResult {
 
     launch_config := l.CreateLaunchConfig(m * n, 1, config.stream_id)
@@ -183,7 +183,7 @@ func (KernelLauncher* l) LaunchBatch(
 func (KernelLauncher* l) LaunchAsync(
     kernel_name: string,
     config: types.KernelConfig,
-    callback_id: i32
+    i32 callback_id
 ) bool {
 
     l.execution_queue = append(l.execution_queue, kernel_name)

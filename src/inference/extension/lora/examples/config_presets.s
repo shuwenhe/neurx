@@ -2,10 +2,10 @@ package neurx.lora.examples.config_presets
 
 use std.slices
 use std.map.map
-use neurx.lora.lora_config::{lora_config}
+use neurx.lora.lora_config
 
 func preset_lightweight() lora_config {
-    config := lora_config::default()
+    config := default()
     config.lora_rank = 4
     config.lora_alpha = 8.0
     config.lora_dropout = 0.01
@@ -20,7 +20,7 @@ func preset_lightweight() lora_config {
 }
 
 func preset_balanced() lora_config {
-    config := lora_config::default()
+    config := default()
     config.lora_rank = 16
     config.lora_alpha = 32.0
     config.lora_dropout = 0.05
@@ -37,7 +37,7 @@ func preset_balanced() lora_config {
 }
 
 func preset_high_quality() lora_config {
-    config := lora_config::default()
+    config := default()
     config.lora_rank = 64
     config.lora_alpha = 128.0
     config.lora_dropout = 0.1
@@ -158,30 +158,30 @@ func preset_conversational() lora_config {
 
 func load_preset(preset_type preset) lora_config {
     switch preset {
-        preset_type::lightweight : preset_lightweight(),
-        preset_type::balanced : preset_balanced(),
-        preset_type::high_quality : preset_high_quality(),
-        preset_type::text_classification : preset_text_classification(),
-        preset_type::question_answering : preset_question_answering(),
-        preset_type::machine_translation : preset_machine_translation(),
-        preset_type::code_generation : preset_code_generation(),
-        preset_type::instruction_following : preset_instruction_following(),
-        preset_type::conversational : preset_conversational(),
+        preset_type_lightweight : preset_lightweight(),
+        preset_type_balanced : preset_balanced(),
+        preset_type_high_quality : preset_high_quality(),
+        preset_type_text_classification : preset_text_classification(),
+        preset_type_question_answering : preset_question_answering(),
+        preset_type_machine_translation : preset_machine_translation(),
+        preset_type_code_generation : preset_code_generation(),
+        preset_type_instruction_following : preset_instruction_following(),
+        preset_type_conversational : preset_conversational(),
     }
 }
 
 func load_preset_by_name(string name) option[lora_config] {
     switch name {
-        "lightweight" : option::some(preset_lightweight()),
-        "balanced" : option::some(preset_balanced()),
-        "high_quality" : option::some(preset_high_quality()),
-        "text_classification" : option::some(preset_text_classification()),
-        "question_answering" : option::some(preset_question_answering()),
-        "machine_translation" : option::some(preset_machine_translation()),
-        "code_generation" : option::some(preset_code_generation()),
-        "instruction_following" : option::some(preset_instruction_following()),
-        "conversational" : option::some(preset_conversational()),
-        _ : option::none,
+        "lightweight" : some(preset_lightweight()),
+        "balanced" : some(preset_balanced()),
+        "high_quality" : some(preset_high_quality()),
+        "text_classification" : some(preset_text_classification()),
+        "question_answering" : some(preset_question_answering()),
+        "machine_translation" : some(preset_machine_translation()),
+        "code_generation" : some(preset_code_generation()),
+        "instruction_following" : some(preset_instruction_following()),
+        "conversational" : some(preset_conversational()),
+        _ : nil,
     }
 }
 
@@ -251,72 +251,72 @@ func get_preset_description(string name) string {
 }
 
 struct preset_performance {
-    name: string
-    rank: int
-    estimated_memory_mb: int
-    estimated_inference_overhead_percent: int
-    recommended_batch_size: int
+    string name
+    int rank
+    int estimated_memory_mb
+    int estimated_inference_overhead_percent
+    int recommended_batch_size
 }
 
 func get_performance_info(preset_type preset) preset_performance {
     switch preset {
-        preset_type::lightweight : preset_performance {
+        preset_type_lightweight : preset_performance {
             name: "lightweight",
             rank: 4,
             estimated_memory_mb: 16,
             estimated_inference_overhead_percent: 1,
             recommended_batch_size: 128,
         },
-        preset_type::balanced : preset_performance {
+        preset_type_balanced : preset_performance {
             name: "balanced",
             rank: 16,
             estimated_memory_mb: 64,
             estimated_inference_overhead_percent: 3,
             recommended_batch_size: 64,
         },
-        preset_type::high_quality : preset_performance {
+        preset_type_high_quality : preset_performance {
             name: "high_quality",
             rank: 64,
             estimated_memory_mb: 256,
             estimated_inference_overhead_percent: 12,
             recommended_batch_size: 32,
         },
-        preset_type::text_classification : preset_performance {
+        preset_type_text_classification : preset_performance {
             name: "text_classification",
             rank: 8,
             estimated_memory_mb: 32,
             estimated_inference_overhead_percent: 1,
             recommended_batch_size: 128,
         },
-        preset_type::question_answering : preset_performance {
+        preset_type_question_answering : preset_performance {
             name: "question_answering",
             rank: 16,
             estimated_memory_mb: 64,
             estimated_inference_overhead_percent: 3,
             recommended_batch_size: 64,
         },
-        preset_type::machine_translation : preset_performance {
+        preset_type_machine_translation : preset_performance {
             name: "machine_translation",
             rank: 32,
             estimated_memory_mb: 128,
             estimated_inference_overhead_percent: 6,
             recommended_batch_size: 32,
         },
-        preset_type::code_generation : preset_performance {
+        preset_type_code_generation : preset_performance {
             name: "code_generation",
             rank: 64,
             estimated_memory_mb: 256,
             estimated_inference_overhead_percent: 12,
             recommended_batch_size: 16,
         },
-        preset_type::instruction_following : preset_performance {
+        preset_type_instruction_following : preset_performance {
             name: "instruction_following",
             rank: 16,
             estimated_memory_mb: 64,
             estimated_inference_overhead_percent: 3,
             recommended_batch_size: 64,
         },
-        preset_type::conversational : preset_performance {
+        preset_type_conversational : preset_performance {
             name: "conversational",
             rank: 32,
             estimated_memory_mb: 128,
@@ -335,14 +335,14 @@ func demo_presets() {
         println("configuration名: " + preset_name)
 
         switch load_preset_by_name(preset_name) {
-            option::some(config) : {
+            some(config) : {
                 println("  rank: " + config.lora_rank.to_string())
                 println("  Alpha: " + config.lora_alpha.to_string())
                 println("  缩放because子: " + config.get_lora_scaling().to_string())
                 println("  module数: " + len(config.target_modules).to_string())
                 println("  描述: " + get_preset_description(preset_name))
             },
-            option::none : {
+            nil : {
                 println("  (无法加载)")
             },
         }

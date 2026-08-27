@@ -30,7 +30,7 @@ func (huge_pages_pool* hpool) init(int pages_2mb_count, int pages_1gb_count) (in
             base_address: 0x200000 + i * 2097152,
             size: 2097152,
             free: true,
-            pool_index: i
+            i pool_index
         }
         hpool.pages_2mb = append(hpool.pages_2mb, page)
         i = i + 1
@@ -42,7 +42,7 @@ func (huge_pages_pool* hpool) init(int pages_2mb_count, int pages_1gb_count) (in
             base_address: 0x40000000 + j * 1073741824,
             size: 1073741824,
             free: true,
-            pool_index: j
+            j pool_index
         }
         hpool.pages_1gb = append(hpool.pages_1gb, page)
         j = j + 1

@@ -18,7 +18,7 @@ func syscall_dispatcher_create() syscall_dispatcher {
     dispatcher := syscall_dispatcher {
         handlers: syscall_handler_entry[](),
         stats: syscall_stats_create() as syscall_stats*,
-        initialized: false
+        false initialized
     }
     return dispatcher
 }
@@ -30,7 +30,7 @@ func register_syscall_handler(syscall_dispatcher* dispatcher,
     entry := syscall_handler_entry {
         syscall_number: number,
         name: name,
-        arg_count: arg_count
+        arg_count arg_count
     }
 }
 

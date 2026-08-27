@@ -4,16 +4,16 @@ import os
 import neurx.model
 
 struct train_config {
-    vocab_size: int
-    embed_dim: int
-    hidden_dim: int
-    num_layers: int
-    seq_len: int
-    num_heads: int
-    learning_rate: float
-    batch_size: int
-    num_epochs: int
-    log_interval: int
+    int vocab_size
+    int embed_dim
+    int hidden_dim
+    int num_layers
+    int seq_len
+    int num_heads
+    float learning_rate
+    int batch_size
+    int num_epochs
+    int log_interval
 }
 
 func get_default_config() train_config {

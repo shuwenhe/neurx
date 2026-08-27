@@ -4,16 +4,16 @@ use neurx.tool_parsers.schema.schema_types
 use std.slices
 
 struct validation_result {
-    is_valid: bool
+    bool is_valid
     errors: []string
     warnings: []string
     field_errors: []field_error
 }
 
 struct field_error {
-    field_path: string
-    error_message: string
-    error_code: string
+    string field_path
+    string error_message
+    string error_code
 }
 
 func validate_against_schema(string json_str, *json_schema schema) validation_result {

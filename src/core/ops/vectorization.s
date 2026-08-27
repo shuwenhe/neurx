@@ -5,10 +5,10 @@ import (
 )
 
 struct matmul_config {
-    batch_size: int
-    use_blocked: bool
-    block_size: int
-    parallel_threads: int
+    int batch_size
+    bool use_blocked
+    int block_size
+    int parallel_threads
 }
 
 struct batch_matmul_result {
@@ -17,10 +17,10 @@ struct batch_matmul_result {
 }
 
 struct vectorization_stats {
-    ops_count: int
-    throughput: float
-    memory_bandwidth: float
-    compute_efficiency: float
+    int ops_count
+    float throughput
+    float memory_bandwidth
+    float compute_efficiency
 }
 
 func batch_matmul([][]float A, [][]float B, int batch_size, int M, int K, int N) batch_matmul_result {

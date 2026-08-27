@@ -43,7 +43,7 @@ func create_gpu_cluster(int num_gpus) gpu_cluster {
             available_memory: 40,
             core_count: 432,
             compute_capability: 90,
-            online: true
+            true online
         }
         cluster.devices = append(cluster.devices, device)
         cluster.total_available_memory = cluster.total_available_memory + device.total_memory
@@ -64,7 +64,7 @@ func allocate_gpu_memory(gpu_cluster cluster, int workload_id, int size_gb) gpu_
                 base_addr: 0,
                 size: size_gb,
                 workload_id: workload_id,
-                allocated: true
+                true allocated
             }
             cluster.memory_blocks = append(cluster.memory_blocks, block)
             cluster.total_available_memory = cluster.total_available_memory - size_gb

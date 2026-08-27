@@ -3,18 +3,18 @@ use std.io
 use std.math
 
 struct cuda_device {
-    device_id: int
-    device_name: string
-    compute_capability: string
-    total_memory: int64
-    available_memory: int64
-    stream_id: int64
+    int device_id
+    string device_name
+    string compute_capability
+    int64 total_memory
+    int64 available_memory
+    int64 stream_id
 }
 
 struct cuda_context {
-    device: cuda_device
-    is_initialized: bool
-    current_stream: int64
+    cuda_device device
+    bool is_initialized
+    int64 current_stream
 }
 
 func get_device_count() int {
@@ -56,10 +56,10 @@ func destroy_cuda_context(cuda_context* ctx) {
 }
 
 struct gpu_memory_allocator {
-    device_id: int
-    total_allocated: int64
-    max_allocated: int64
-    allocations: map[int64]int64
+    int device_id
+    int64 total_allocated
+    int64 max_allocated
+    map[int64]int64 allocations
 }
 
 func create_memory_allocator(int device_id, int64 max_memory) gpu_memory_allocator {
@@ -105,9 +105,9 @@ func gpu_memory_info(gpu_memory_allocator alloc) {
 }
 
 struct transfer_stats {
-    bytes_transferred: int64
-    num_transfers: int
-    avg_bandwidth_gbps: float64
+    int64 bytes_transferred
+    int num_transfers
+    float64 avg_bandwidth_gbps
 }
 
 func cuda_memcpy_h2d([]float64 host_data, int64 device_ptr, cuda_context ctx) transfer_stats {
@@ -148,10 +148,10 @@ func cuda_memcpy_d2d(int64 src_ptr, int64 dst_ptr, int bytes, cuda_context ctx) 
 }
 
 struct kernel_launch_config {
-    grid_dim: int
-    block_dim: int
-    shared_memory: int
-    stream_id: int64
+    int grid_dim
+    int block_dim
+    int shared_memory
+    int64 stream_id
 }
 
 func launch_kernel(kernel_launch_config config, int data_size) {
@@ -176,10 +176,10 @@ func cuda_gemm(int64 a_ptr, int64 b_ptr, int64 c_ptr,
 }
 
 struct cuda_stream {
-    stream_id: int64
-    device_id: int
-    tasks: int
-    is_complete: bool
+    int64 stream_id
+    int device_id
+    int tasks
+    bool is_complete
 }
 
 func create_stream(cuda_context ctx) cuda_stream {
@@ -203,7 +203,7 @@ func cuda_synchronize(cuda_context ctx) {
 }
 
 struct multi_gpu_context {
-    num_devices: int
+    int num_devices
     devices: []cuda_device
     contexts: []cuda_context
     streams: []cuda_stream
@@ -235,9 +235,9 @@ func init_multi_gpu_context(int num_gpus) multi_gpu_context {
 struct cuda_profiler {
     kernel_times: []float64
     transfer_times: []float64
-    total_compute_time: float64
-    total_transfer_time: float64
-    kernel_count: int
+    float64 total_compute_time
+    float64 total_transfer_time
+    int kernel_count
 }
 
 func create_profiler() cuda_profiler {

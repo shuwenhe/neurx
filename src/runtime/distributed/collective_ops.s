@@ -85,7 +85,7 @@ func (communicator* comm) all_reduce_async(tensor_handle tensor, reduce_op op) s
     request_id := "allreduce_" + string(comm.config.rank) + "_" + string(tensor.device_id)
 
     op_info := comm_operation {
-        op_type: comm_op_type::all_reduce,
+        op_type: comm_op_type_all_reduce,
         name: request_id,
         created_at: 0,
     }
@@ -125,7 +125,7 @@ func (communicator* comm) all_gather_async(tensor_handle send_tensor, tensor_han
     request_id := "allgather_" + string(comm.config.rank) + "_" + string(send_tensor.device_id)
 
     op_info := comm_operation {
-        op_type: comm_op_type::all_gather,
+        op_type: comm_op_type_all_gather,
         name: request_id,
         created_at: 0,
     }

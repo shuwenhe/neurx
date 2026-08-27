@@ -74,13 +74,13 @@ func (cfq_scheduler* sched) cfq_add_request(io_queue_entry req) {
 
 func (cfq_scheduler* sched) cfq_dispatch_request() option[io_queue_entry] {
     if len(sched.queue) == 0 {
-        return option::none
+        return nil
     }
     entry := len(sched.queue) - 1
     req := sched.queue[entry]
     sched.queue.pop()
     sched.stats.total_dispatches = sched.stats.total_dispatches + 1
-    return option::some(req)
+    return some(req)
 }
 
 func (cfq_scheduler* sched) cfq_request_complete(io_queue_entry req) {
@@ -126,15 +126,15 @@ func (deadline_scheduler* sched) deadline_dispatch() option[io_queue_entry] {
         req := sched.read_queue[0]
         sched.read_queue.pop()
         sched.stats.total_dispatches = sched.stats.total_dispatches + 1
-        return option::some(req)
+        return some(req)
     }
     if len(sched.write_queue) > 0 {
         req := sched.write_queue[0]
         sched.write_queue.pop()
         sched.stats.total_dispatches = sched.stats.total_dispatches + 1
-        return option::some(req)
+        return some(req)
     }
-    return option::none
+    return nil
 }
 
 func (deadline_scheduler* sched) deadline_complete(io_queue_entry req) {
@@ -172,12 +172,12 @@ func (bfq_scheduler* sched) bfq_add_request(io_queue_entry req) {
 
 func (bfq_scheduler* sched) bfq_dispatch() option[io_queue_entry] {
     if len(sched.queue) == 0 {
-        return option::none
+        return nil
     }
     req := sched.queue[0]
     sched.queue.pop()
     sched.stats.total_dispatches = sched.stats.total_dispatches + 1
-    return option::some(req)
+    return some(req)
 }
 
 func (bfq_scheduler* sched) bfq_complete(io_queue_entry req) {

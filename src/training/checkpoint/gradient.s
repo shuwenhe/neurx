@@ -2,23 +2,23 @@ package neurx.checkpoint.gradient
 import "neurx.autograd"
 
 struct checkpoint_config {
-    enabled: bool
-    checkpoints_per_layer: int
-    preserve_inputs: bool
-    recomputation_strategy: int
+    bool enabled
+    int checkpoints_per_layer
+    bool preserve_inputs
+    int recomputation_strategy
 }
 
 struct checkpoint_state {
     saved_tensors: [][]autograd.tensor
-    recomputation_count: int
-    memory_saved: float
+    int recomputation_count
+    float memory_saved
 }
 
 struct checkpoint_layer {
     layer_fn: func([][]autograd.tensor) [][]autograd.tensor
     inputs: [][]autograd.tensor
     outputs: [][]autograd.tensor
-    needs_recompute: bool
+    bool needs_recompute
 }
 
 func new_checkpoint_config(bool enabled) checkpoint_config {

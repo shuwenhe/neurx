@@ -5,7 +5,7 @@ import math
 struct tensor_2 {
     shape: []int
     data: []float
-    requires_grad: bool
+    bool requires_grad
 }
 
 func tensor_new([]int shape) tensor_2 {
@@ -33,30 +33,30 @@ func tensor_shape_string(tensor_2 t) string {
 }
 
 struct mini_transformer {
-    vocab_size: int
-    embed_dim: int
-    hidden_dim: int
-    num_layers: int
-    seq_len: int
-    num_heads: int
-    token_embed: tensor_2
-    pos_embed: tensor_2
+    int vocab_size
+    int embed_dim
+    int hidden_dim
+    int num_layers
+    int seq_len
+    int num_heads
+    tensor_2 token_embed
+    tensor_2 pos_embed
     layers: []transformer_layer
-    output_proj: tensor_2
-    param_count: int
+    tensor_2 output_proj
+    int param_count
 }
 
 struct transformer_layer {
-    q_proj: tensor_2
-    k_proj: tensor_2
-    v_proj: tensor_2
-    out_proj: tensor_2
-    fc1: tensor_2
-    fc2: tensor_2
-    norm1_gamma: tensor_2
-    norm1_beta: tensor_2
-    norm2_gamma: tensor_2
-    norm2_beta: tensor_2
+    tensor_2 q_proj
+    tensor_2 k_proj
+    tensor_2 v_proj
+    tensor_2 out_proj
+    tensor_2 fc1
+    tensor_2 fc2
+    tensor_2 norm1_gamma
+    tensor_2 norm1_beta
+    tensor_2 norm2_gamma
+    tensor_2 norm2_beta
 }
 
 func create_mini_transformer(
@@ -425,9 +425,9 @@ func compute_gradients(
 }
 
 struct adam_w_state {
-    m_states: map[string]tensor_2
-    v_states: map[string]tensor_2
-    t: int
+    map[string]tensor_2 m_states
+    map[string]tensor_2 v_states
+    int t
 }
 
 func adamw_update(

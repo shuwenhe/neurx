@@ -13,43 +13,43 @@ module distributed_fault_recovery
     SKIP_STEP,
 }
 structure checkpoint_metadata {
-    checkpoint_id: int
-    global_step: int
-    epoch: int
-    timestamp: float
-    loss: float
-    learning_rate: float
-    num_ranks: int
-    tensor_parallel_size: int
-    pipeline_parallel_size: int
-    data_parallel_size: int
-    checksum: int
-    hash_value: vector
-    recovery_step: int
-    last_successful_step: int
-    num_restarts: int
+    int checkpoint_id
+    int global_step
+    int epoch
+    float timestamp
+    float loss
+    float learning_rate
+    int num_ranks
+    int tensor_parallel_size
+    int pipeline_parallel_size
+    int data_parallel_size
+    int checksum
+    vector hash_value
+    int recovery_step
+    int last_successful_step
+    int num_restarts
 }
 structure checkpoint_manager {
-    base_path: string
-    save_interval: int
-    max_checkpoints_to_keep: int
-    use_async_save: bool
-    save_queue: vector
-    use_compression: bool
-    compression_level: int
-    replicate_checkpoint: bool
-    replication_factor: int
-    checkpoint_db: vector
+    string base_path
+    int save_interval
+    int max_checkpoints_to_keep
+    bool use_async_save
+    vector save_queue
+    bool use_compression
+    int compression_level
+    bool replicate_checkpoint
+    int replication_factor
+    vector checkpoint_db
 }
 structure recovery_state {
-    is_recovering: bool
-    recovery_step: int
-    last_checkpoint_id: int
-    num_rank_mismatches: int
-    num_data_inconsistencies: int
-    recovery_start_time: float
-    recovery_end_time: float
-    recovery_duration: float
+    bool is_recovering
+    int recovery_step
+    int last_checkpoint_id
+    int num_rank_mismatches
+    int num_data_inconsistencies
+    float recovery_start_time
+    float recovery_end_time
+    float recovery_duration
 }
 
 func new_checkpoint_manager(

@@ -35,7 +35,7 @@ func (MatrixKernels* k) GEMM(
     ldb: i32,
     beta: f32,
     C: *[]f32,
-    ldc: i32
+    i32 ldc
 ) types.KernelResult {
 
     if m <= 0 || n <= 0 || kk <= 0 {

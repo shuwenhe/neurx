@@ -33,7 +33,7 @@ func create_rpc_server(int port) rpc_server {
         server_id: 0,
         port: port,
         active_connections: 0,
-        is_running: false
+        false is_running
     }
 }
 
@@ -54,9 +54,9 @@ func create_rpc_client(string* address, int port) rpc_client {
 func send_rpc_call(rpc_client* client, string* method, int* payload, int payload_size) (rpc_message, string) {
     (rpc_message {
         message_id: 0,
-        call_type: rpc_call_type::request,
+        call_type: rpc_call_type_request,
         method_name: method,
         payload: payload,
-        payload_size: payload_size
+        payload_size payload_size
     })
 }

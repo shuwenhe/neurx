@@ -386,7 +386,7 @@ func find_split_points_single_file(
             start_byte: current_start,
             end_byte: actual_end,
             estimated_documents: 0,
-            split_reason: alignment
+            alignment split_reason
         })
         current_start = actual_end
         shard_id = shard_id + 1

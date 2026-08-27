@@ -4,9 +4,9 @@ struct web_search_config {
     search_engines: list<string> = ["google", "bing"]
     max_results_per_engine: int = 10
     total_max_results: int = 20
-    google_api_key: string
-    google_cx_id: string
-    bing_api_key: string
+    string google_api_key
+    string google_cx_id
+    string bing_api_key
     language: string = "zh-CN"
     region: string = "CN"
     safe_search: string = "moderate"
@@ -31,69 +31,69 @@ struct web_search_config {
 }
 
 struct search_result_item {
-    url: string
-    title: string
-    snippet: string
-    source_engine: string
-    rank_in_engine: int
-    relevance_score: float
-    published_date: string
-    crawled_content: crawled_content
-    crawl_status: string
-    crawl_error: string
+    string url
+    string title
+    string snippet
+    string source_engine
+    int rank_in_engine
+    float relevance_score
+    string published_date
+    crawled_content crawled_content
+    string crawl_status
+    string crawl_error
 }
 
 struct crawled_content {
-    raw_html_size: int
-    text_content: string
-    cleaned_text: string
-    metadata: page_metadata
-    sections: list<page_section>
-    extraction_timestamp: float
-    word_count: int
+    int raw_html_size
+    string text_content
+    string cleaned_text
+    page_metadata metadata
+    list<page_section> sections
+    float extraction_timestamp
+    int word_count
 }
 
 struct page_metadata {
-    title: string
-    description: string
-    author: string
-    publish_date: string
-    last_modified: string
-    site_name: string
-    domain: string
-    language: string
-    content_type: string
-    canonical_url: string
-    keywords: list<string>
+    string title
+    string description
+    string author
+    string publish_date
+    string last_modified
+    string site_name
+    string domain
+    string language
+    string content_type
+    string canonical_url
+    list<string> keywords
     og_data: map<string, string>
 }
 
 struct page_section {
-    heading: string
-    level: int
-    content: string
+    string heading
+    int level
+    string content
 }
 
 struct search_response {
-    query: string
-    corrected_query: string
-    total_results_found: int
-    results: list<search_result_item>
-    aggregated_from_engines: list<string>
-    search_time_ms: float
-    summary: string
-    key_findings: list<string>
-    stats: search_statistics
+    string query
+    string corrected_query
+    int total_results_found
+    list<search_result_item> results
+    list<string> aggregated_from_engines
+    float search_time_ms
+    string summary
+    list<string> key_findings
+    search_statistics stats
 }
 
 struct search_statistics {
     engine_query_times_ms: map<string, float>
-    crawl_times_ms: list<float>
-    total_crawl_time_ms: float
-    pages_crawled: int
-    pages_failed: int
-    duplicates_removed: int
-    cache_hit_count: int
+    list<float> crawl_times_ms
+    float total_crawl_time_ms
+    int pages_crawled
+    int pages_failed
+    int duplicates_removed
+    int cache_hit_count
 }
 interface search_engine_interface {
     name: string { get }
@@ -101,17 +101,17 @@ interface search_engine_interface {
 }
 
 struct engine_search_result {
-    items: list<search_result_item>
-    total_estimated: int
-    corrected_query: string
-    query_time_ms: float
-    has_more: bool
-    error: string
+    list<search_result_item> items
+    int total_estimated
+    string corrected_query
+    float query_time_ms
+    bool has_more
+    string error
 }
 struct google_search_engine implements search_engine_interface {
     name = "google"
-    api_key: string
-    cx_id: string
+    string api_key
+    string cx_id
     init(api_key: string, cx_id: string) {
         this.api_key = api_key
         this.cx_id = cx_id
@@ -203,7 +203,7 @@ struct google_search_engine implements search_engine_interface {
 }
 struct bing_search_engine implements search_engine_interface {
     name = "bing"
-    api_key: string
+    string api_key
     init(api_key: string) {
         this.api_key = api_key
     }
@@ -269,11 +269,11 @@ struct bing_search_engine implements search_engine_interface {
     }
 }
 struct web_crawler {
-    config: web_search_config
-    session: HTTPSession
+    web_search_config config
+    HTTPSession session
     cache: LRUCache<string, crawled_content>
-    content_extractor: MainContentExtractor
-    html_cleaner: HTMLCleaner
+    MainContentExtractor content_extractor
+    HTMLCleaner html_cleaner
     init(config: web_search_config) {
         this.config = config
         this.session = new http_session(
@@ -339,7 +339,7 @@ struct web_crawler {
     }
 }
 struct main_content_extractor {
-    config: web_search_config
+    web_search_config config
     init(config: web_search_config) {
         this.config = config
     }
@@ -487,13 +487,13 @@ struct main_content_extractor {
         return full_text, sections
     }
     struct extraction_result {
-        text_content: string
-        metadata: page_metadata
-        sections: list<page_section>
+        string text_content
+        page_metadata metadata
+        list<page_section> sections
     }
 }
 struct html_cleaner {
-    config: web_search_config
+    web_search_config config
     init(config: web_search_config) {
         this.config = config
     }
@@ -513,11 +513,11 @@ struct html_cleaner {
     }
 }
 struct web_search_system {
-    config: web_search_config
+    web_search_config config
     engines: map<string, search_engine_interface>
-    crawler: WebCrawler
-    result_aggregator: ResultAggregator
-    llm_client: any
+    WebCrawler crawler
+    ResultAggregator result_aggregator
+    any llm_client
     init(config: web_search_config, llm_client: any) {
         this.config = config  new web_search_config()
         this.engines = map<string, search_engine_interface>{}
@@ -677,9 +677,9 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
         }
     }
     struct llm_summary_result {
-        summary: string
-        key_findings: list<string>
-        reranked_indices: list<int>
+        string summary
+        list<string> key_findings
+        list<int> reranked_indices
     }
     export_results(response: search_response, string format = "markdown", output_path: string) {
         output: list<string> = []
@@ -726,10 +726,10 @@ struct search_options {
     crawl_results: bool = true
     generate_summary: bool = true
     verbose: bool = true
-    corrected_query: string
+    string corrected_query
 }
 struct result_aggregator {
-    config: web_search_config
+    web_search_config config
     init(config: web_search_config) {
         this.config = config
     }

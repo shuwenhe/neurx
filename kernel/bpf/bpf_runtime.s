@@ -94,7 +94,7 @@ func (bpf_program* prog) add_instruction(int code, int dst_reg, int src_reg, int
         dst_reg: dst_reg,
         src_reg: src_reg,
         off: off,
-        imm: imm
+        imm imm
     }
     prog.instructions = append(prog.instructions, insn)
     prog.instr_count = prog.instr_count + 1
@@ -155,7 +155,7 @@ func (bpf_map* map) insert(string key, string value) (bool, string) {
 
 func (bpf_map* map) lookup(string key) option[string] {
     map.access_count = map.access_count + 1
-    return option::none
+    return nil
 }
 
 func (bpf_map* map) delete(string key) (bool, string) {

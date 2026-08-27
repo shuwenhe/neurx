@@ -4,28 +4,28 @@ import "Metal"
 import "MetalPerformanceShaders"
 
 struct mps_device {
-    id: int
-    name: string
-    max_memory: int
-    shared_memory: bool
+    int id
+    string name
+    int max_memory
+    bool shared_memory
 }
 
 struct mps_tensor {
     data: []float
     shape: []int
-    device: mps_device
-    gpu_buffer: pointer
+    mps_device device
+    pointer gpu_buffer
 }
 
 struct mps_context {
     devices: []mps_device
-    current_device: int
-    command_queue: pointer
+    int current_device
+    pointer command_queue
 }
 
 struct mps_kernel {
-    name: string
-    shader: pointer
+    string name
+    pointer shader
 }
 
 func mps_available() bool {

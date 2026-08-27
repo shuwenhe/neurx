@@ -84,12 +84,12 @@ func new_parameter_metadata(string name, int64[] shape, parameter_dtype dtype) p
 
     size_bytes := total_elements * 4
     switch dtype {
-        parameter_dtype::float32 : size_bytes = total_elements * 4,
-        parameter_dtype::float16 : size_bytes = total_elements * 2,
-        parameter_dtype::bfloat16 : size_bytes = total_elements * 2,
-        parameter_dtype::int8 : size_bytes = total_elements,
-        parameter_dtype::int4 : size_bytes = total_elements / 2,
-        parameter_dtype::nf4 : size_bytes = total_elements / 2,
+        parameter_dtype_float32 : size_bytes = total_elements * 4,
+        parameter_dtype_float16 : size_bytes = total_elements * 2,
+        parameter_dtype_bfloat16 : size_bytes = total_elements * 2,
+        parameter_dtype_int8 : size_bytes = total_elements,
+        parameter_dtype_int4 : size_bytes = total_elements / 2,
+        parameter_dtype_nf4 : size_bytes = total_elements / 2,
     }
 
     parameter_metadata {
@@ -98,7 +98,7 @@ func new_parameter_metadata(string name, int64[] shape, parameter_dtype dtype) p
         dtype: dtype,
         total_elements: total_elements,
         size_bytes: size_bytes,
-        quant_method: quantization_method::none,
+        quant_method: quantization_method_none,
         is_quantized: false,
         device_type: "cuda",
     }
@@ -124,7 +124,7 @@ func new_quantized_weight(string weight_id, parameter_dtype original_dtype, para
         zero_ptr: 0,
         weight_ptr: 0,
         config: quantization_config {
-            method: quantization_method::symmetric,
+            method: quantization_method_symmetric,
             target_dtype: target_dtype,
             per_channel: true,
             scale_factor: 1.0,
@@ -149,12 +149,12 @@ func new_packed_weight(string weight_id, string original_weight_id, string algor
 
 func (model_weight* weight) get_dtype_string() string {
     switch weight.metadata.dtype {
-        parameter_dtype::float32 : "float32",
-        parameter_dtype::float16 : "float16",
-        parameter_dtype::bfloat16 : "bfloat16",
-        parameter_dtype::int8 : "int8",
-        parameter_dtype::int4 : "int4",
-        parameter_dtype::nf4 : "nf4",
+        parameter_dtype_float32 : "float32",
+        parameter_dtype_float16 : "float16",
+        parameter_dtype_bfloat16 : "bfloat16",
+        parameter_dtype_int8 : "int8",
+        parameter_dtype_int4 : "int4",
+        parameter_dtype_nf4 : "nf4",
     }
 }
 
@@ -181,12 +181,12 @@ func (quantized_weight* qweight) set_scales(float scale, float zero_pt) () {
 
 func (quantized_weight* qweight) get_compression_ratio() float {
     switch qweight.quantized_dtype {
-        parameter_dtype::int8 : 4.0,
-        parameter_dtype::int4 : 8.0,
-        parameter_dtype::nf4 : 8.0,
-        parameter_dtype::float16 : 2.0,
-        parameter_dtype::float32 : 1.0,
-        parameter_dtype::bfloat16 : 2.0,
+        parameter_dtype_int8 : 4.0,
+        parameter_dtype_int4 : 8.0,
+        parameter_dtype_nf4 : 8.0,
+        parameter_dtype_float16 : 2.0,
+        parameter_dtype_float32 : 1.0,
+        parameter_dtype_bfloat16 : 2.0,
     }
 }
 
@@ -234,11 +234,11 @@ func (layer_weights* layer) get_weight(string weight_id) weight_parameter {
         layer.weights[weight_id]
     }
 
-    metadata := new_parameter_metadata("", int64[]{}, parameter_dtype::float32)
+    metadata := new_parameter_metadata("", int64[]{}, parameter_dtype_float32)
     weight := new_model_weight("", metadata)
     weight_parameter {
         weight: weight,
-        quant_data: new_quantized_weight("", parameter_dtype::float32, parameter_dtype::float32),
+        quant_data: new_quantized_weight("", parameter_dtype_float32, parameter_dtype_float32),
         uses_quantization: false,
         uses_packing: false,
     }

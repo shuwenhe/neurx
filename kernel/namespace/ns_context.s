@@ -53,7 +53,7 @@ func create_pid_namespace(int parent_id, int level) pid_namespace {
         ns_id: 0,
         parent_id: parent_id,
         highest_pid: 0,
-        level: level
+        level level
     }
     ns
 }
@@ -90,7 +90,7 @@ func create_uts_namespace(string hostname) uts_namespace {
     ns := uts_namespace {
         ns_id: 0,
         hostname: hostname,
-        domainname: hostname
+        hostname domainname
     }
     ns
 }

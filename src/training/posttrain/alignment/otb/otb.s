@@ -3,33 +3,33 @@ import "src/training/optimizer/optimizer.s"
 import "src/training/posttrain/alignment/ppo/ppo.s"
 
 struct otb_config {
-    learning_rate: f32
-    num_epochs: i32
-    max_grad_norm: f32
-    gamma: f32
-    baseline_type: string
-    use_token_wise_baseline: bool
-    ema_alpha: f32
-    use_learned_baseline: bool
-    baseline_lr: f32
-    baseline_loss_coeff: f32
-    compute_variance: bool
-    use_whitening: bool
-    use_clipping: bool
-    clip_epsilon: f32
-    entropy_coeff: f32
+    f32 learning_rate
+    i32 num_epochs
+    f32 max_grad_norm
+    f32 gamma
+    string baseline_type
+    bool use_token_wise_baseline
+    f32 ema_alpha
+    bool use_learned_baseline
+    f32 baseline_lr
+    f32 baseline_loss_coeff
+    bool compute_variance
+    bool use_whitening
+    bool use_clipping
+    f32 clip_epsilon
+    f32 entropy_coeff
 }
 
 struct otb_trainer {
-    config: otb_config
-    policy_model: *model
-    baseline_model: *model
-    optimizer: *optimizer
-    baseline_optimizer: *optimizer
-    token_ema_baselines: map[i64]f32
-    advantage_variance_before: f32
-    advantage_variance_after: f32
-    step_count: i64
+    otb_config config
+    *model policy_model
+    *model baseline_model
+    *optimizer optimizer
+    *optimizer baseline_optimizer
+    map[i64]f32 token_ema_baselines
+    f32 advantage_variance_before
+    f32 advantage_variance_after
+    i64 step_count
 }
 
 func new_otb_trainer(

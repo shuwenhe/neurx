@@ -249,7 +249,7 @@ func (file_permission_manager* fpm) add_acl_entry(int file_id, int subject_id, i
         entry_id: fpm.next_acl_id,
         subject_id: subject_id,
         subject_type: subject_type,
-        permission: permission
+        permission permission
     }
     
     fpm.acl_entries = append(fpm.acl_entries, entry)

@@ -35,59 +35,59 @@ package neurx.parser.types
 }
 
 struct ParsedValue {
-    type: int
-    string_value: string
-    number_value: float
-    bool_value: bool
+    int type
+    string string_value
+    float number_value
+    bool bool_value
     array_values: []ParsedValue
     object_keys: []string
     object_values: []ParsedValue
-    raw_text: string
+    string raw_text
 }
 
 struct ParseResult {
-    status: int
-    value: ParsedValue
-    format: int
-    raw_output: string
-    parsed_output: string
-    error_msg: string
-    error_pos: int
-    recovery_applied: bool
-    recovery_method: string
-    parse_time_ms: int
-    confidence: float
+    int status
+    ParsedValue value
+    int format
+    string raw_output
+    string parsed_output
+    string error_msg
+    int error_pos
+    bool recovery_applied
+    string recovery_method
+    int parse_time_ms
+    float confidence
     warnings: []string
-    metadata: map[string]string
+    map[string]string metadata
 }
 
 struct IncrementalParseState {
-    buffer: string
-    position: int
-    format_detected: int
-    depth: int
-    in_string: bool
-    escape_char: string
-    partial_value: ParsedValue
-    is_complete: bool
-    last_token: string
+    string buffer
+    int position
+    int format_detected
+    int depth
+    bool in_string
+    string escape_char
+    ParsedValue partial_value
+    bool is_complete
+    string last_token
 }
 
 struct ParserConfig {
-    mode: int
-    format: int
-    max_depth: int
-    strict_mode: bool
-    auto_format_detect: bool
-    stream_mode: bool
-    error_recovery: int
-    max_error_recovery_attempts: int
-    timeout_ms: int
-    max_size_bytes: int
-    preserve_whitespace: bool
+    int mode
+    int format
+    int max_depth
+    bool strict_mode
+    bool auto_format_detect
+    bool stream_mode
+    int error_recovery
+    int max_error_recovery_attempts
+    int timeout_ms
+    int max_size_bytes
+    bool preserve_whitespace
     case_sensitive: bool
-    normalize_output: bool
-    cache_intermediate: bool
+    bool normalize_output
+    bool cache_intermediate
 }
 
 struct TokenBuffer {
@@ -95,17 +95,17 @@ struct TokenBuffer {
     positions: []int
     types: []int
     confidence: []float
-    buffer_size: int
+    int buffer_size
 }
 
 struct ParseContext {
-    input: string
-    position: int
-    line: int
-    column: int
-    config: ParseConfig
-    state: IncrementalParseState
-    token_buffer: TokenBuffer
+    string input
+    int position
+    int line
+    int column
+    ParseConfig config
+    IncrementalParseState state
+    TokenBuffer token_buffer
     scope_stack: []string
     format_hints: []string
     errors: []string
@@ -113,31 +113,31 @@ struct ParseContext {
 }
 
 struct FormatDetectionResult {
-    detected_format: int
-    confidence: float
+    int detected_format
+    float confidence
     indicators: []string
-    metadata: map[string]string
+    map[string]string metadata
 }
 
 struct StreamChunk {
-    data: string
-    position: int
-    is_complete: bool
-    format_hint: int
-    partial_parse: ParsedValue
-    error: string
+    string data
+    int position
+    bool is_complete
+    int format_hint
+    ParsedValue partial_parse
+    string error
 }
 
 struct ParserStats {
-    total_parses: int
-    successful_parses: int
-    failed_parses: int
-    recovered_parses: int
-    avg_parse_time_ms: float
-    total_bytes_parsed: int
-    cache_hits: int
-    cache_misses: int
-    formats_detected: map[string]int
+    int total_parses
+    int successful_parses
+    int failed_parses
+    int recovered_parses
+    float avg_parse_time_ms
+    int total_bytes_parsed
+    int cache_hits
+    int cache_misses
+    map[string]int formats_detected
 }
 
 func create_parse_result() ParseResult {

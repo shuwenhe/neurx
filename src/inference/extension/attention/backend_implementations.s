@@ -31,7 +31,7 @@ func new_flash_attention_backend(attention_config base_config) attention_backend
     config.use_flash_attention = true
     config.enable_cache = true
 
-    backend := new_attention_backend(attention_backend_type::flash_attention, config)
+    backend := new_attention_backend(attention_backend_type_flash_attention, config)
     backend.set_metadata("algorithm", "fast_flash_v2")
     backend.set_metadata("memory_efficient", "true")
     backend
@@ -43,7 +43,7 @@ func new_dsa_backend(attention_config base_config) attention_backend {
     config.use_sparse_patterns = true
     config.enable_cache = true
 
-    backend := new_attention_backend(attention_backend_type::dsa, config)
+    backend := new_attention_backend(attention_backend_type_dsa, config)
     backend.set_metadata("algorithm", "dynamic_sparse_attention")
     backend.set_metadata("max_sparse_ratio", "0.9")
     backend
@@ -54,7 +54,7 @@ func new_paged_attention_backend(attention_config base_config) attention_backend
     config.use_paged_kv_cache = true
     config.enable_cache = true
 
-    backend := new_attention_backend(attention_backend_type::paged_attention, config)
+    backend := new_attention_backend(attention_backend_type_paged_attention, config)
     backend.set_metadata("algorithm", "paged_attention_v2")
     backend.set_metadata("page_based", "true")
     backend
@@ -65,7 +65,7 @@ func new_standard_attention_backend(attention_config base_config) attention_back
     config.use_flash_attention = false
     config.enable_cache = true
 
-    backend := new_attention_backend(attention_backend_type::standard, config)
+    backend := new_attention_backend(attention_backend_type_standard, config)
     backend.set_metadata("algorithm", "standard_scaled_dot_product")
     backend
 }

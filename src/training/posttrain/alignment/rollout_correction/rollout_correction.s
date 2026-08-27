@@ -5,12 +5,12 @@ import "src/training/posttrain/alignment/rollout_correction/importance_sampling.
 import "src/training/posttrain/alignment/rollout_correction/rejection_sampling.s"
 
 struct rollout_correction_result {
-    is_weights: ISWeights
+    ISWeights is_weights
     rs_results: []rs_result
-    corrected_mask: Tensor
-    corrected_advantages: Tensor
-    corrected_loss: Tensor
-    statistics: map[string]f32
+    Tensor corrected_mask
+    Tensor corrected_advantages
+    Tensor corrected_loss
+    map[string]f32 statistics
 }
 
 func apply_rollout_correction_to_advantages(

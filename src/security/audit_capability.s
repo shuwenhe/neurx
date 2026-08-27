@@ -109,7 +109,7 @@ func (audit_manager* am) log_event(int pid, int uid, int event_type, string even
         event_type: event_type,
         event_name: event_name,
         details: details,
-        result: result
+        result result
     }
     
     // 检查审计规则

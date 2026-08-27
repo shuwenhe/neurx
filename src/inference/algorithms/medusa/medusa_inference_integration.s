@@ -3,22 +3,22 @@ use neurx.inference.medusa.*
 use neurx.inference.sampling.*
 
 struct inference_engine_with_medusa {
-    base_model: inference_model_handle
-    medusa_pipeline: medusa_generation_pipeline
-    kv_cache: kv_cache_manager
-    sampling_config: sampling_config
-    enable_medusa: bool
-    medusa_threshold: float
+    inference_model_handle base_model
+    medusa_generation_pipeline medusa_pipeline
+    kv_cache_manager kv_cache
+    sampling_config sampling_config
+    bool enable_medusa
+    float medusa_threshold
 }
 
 struct inference_batch_with_medusa {
-    batch_id: int
+    int batch_id
     input_ids: [][]int
     attention_mask: [][]bool
     position_ids: [][]int
-    use_medusa: bool
-    max_draft_tokens: int
-    num_sequences: int
+    bool use_medusa
+    int max_draft_tokens
+    int num_sequences
 }
 
 struct inference_output_with_medusa {
@@ -329,20 +329,20 @@ func format_float(float val) string {
 }
 
 struct inference_model_handle {
-    model_id: int
-    is_loaded: bool
+    int model_id
+    bool is_loaded
 }
 
 struct kv_cache_manager {
-    max_cache_size: int64
-    current_size: int64
+    int64 max_cache_size
+    int64 current_size
 }
 
 struct sampling_config {
-    temperature: float
-    top_k: int
-    top_p: float
-    repetition_penalty: float
-    min_length: int
-    max_length: int
+    float temperature
+    int top_k
+    float top_p
+    float repetition_penalty
+    int min_length
+    int max_length
 }

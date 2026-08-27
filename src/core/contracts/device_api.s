@@ -7,26 +7,26 @@
 }
 
 struct cpu_device {
-    id: i64
+    i64 id
 }
 
 struct cuda_device {
-    id: i64
-    compute_capability: string
+    i64 id
+    string compute_capability
 }
 
 struct cann_device {
-    id: i64
-    compute_capability: string
+    i64 id
+    string compute_capability
 }
 
 struct metal_device {
-    id: i64
+    i64 id
 }
 
 struct device {
-    device_type: DeviceType
-    id: i64
+    DeviceType device_type
+    i64 id
 }
 interface i_device {
     device_type() . DeviceType
