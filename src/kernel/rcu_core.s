@@ -18,12 +18,12 @@ struct rcu_state {
     int gp_start_time
 }
 
-var g_rcu_state rcu_state
+rcu_state g_rcu_state
 
 func init_rcu() int {
     g_rcu_state = rcu_state {
         gp_seq: 0,
-        rcu_data_array: new int[256],
+        rcu_data_array: vec[int](),
         gp_in_progress: false,
         gp_start_time: 0,
     }
@@ -46,9 +46,9 @@ func synchronize_rcu() int {
     g_rcu_state.gp_in_progress = true
     g_rcu_state.gp_seq = g_rcu_state.gp_seq + 1
     
-    var gp_seq_waited = g_rcu_state.gp_seq
+    int gp_seq_waited = g_rcu_state.gp_seq
     
-    var retry_count = 0
+    int retry_count = 0
     for retry_count < 1000 {
         if all_cpus_qs_passed(gp_seq_waited) {
             g_rcu_state.gp_in_progress = false
@@ -62,7 +62,7 @@ func synchronize_rcu() int {
 }
 
 func all_cpus_qs_passed(int gp_seq) bool {
-    var i = 0
+    int i = 0
     for i < 256 {
         if g_rcu_state.rcu_data_array[i] > 0 {
             return false
