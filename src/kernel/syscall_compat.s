@@ -15,7 +15,7 @@ syscall_entry[] syscall_table
 map[int]int[] fd_table
 int next_fd
 
-const ENOSYS = -38
+const enosys = -38
 
 func init_syscall_table() int {
     syscall_table = syscall_entry[]{}
@@ -122,7 +122,7 @@ func syscall_dispatch(int num, int[] args) int {
             }
             return sys_open(path_str, args[1])
         }
-        return ENOSYS
+        return enosys
     } else if num == 3 {
         if len(args) >= 1 {
             return sys_close(args[0])
@@ -132,12 +132,12 @@ func syscall_dispatch(int num, int[] args) int {
         if len(args) >= 2 {
             return sys_fstat(args[0], args[1])
         }
-        return ENOSYS
+        return enosys
     } else if num == 9 {
         if len(args) >= 6 {
             return sys_mmap(args[0], args[1], args[2], args[3], args[4], args[5])
         }
-        return ENOSYS
+        return enosys
     } else if num == 12 {
         if len(args) >= 1 {
             return sys_brk(args[0])
