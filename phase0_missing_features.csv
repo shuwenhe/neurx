@@ -1,0 +1,13 @@
+component,present_in_linux,present_in_neurx,priority,notes
+syscall_compat,yes,no,high,POSIX/syscall compatibility layer required for userland portability
+scheduler,yes,partial,high,Preemptive scheduler with GPU/CPU hints and realtime policy
+virtual_memory,yes,partial,high,Paging, mmap, page cache, swap and memory reclamation
+device_model,yes,partial,high,PCI/PCIe/USB driver model and accelerator abstraction (DMA/firmware)
+network_stack,yes,partial,high,TCP/IP stack, sockets, RDMA support for distributed inference
+filesystem,yes,partial,medium,ext-family or object-store adapter and proc/sys interfaces
+io_zero_copy,yes,no,high,Zero-copy model loading and tensor I/O paths
+security_namespaces,yes,no,medium,Namespaces, cgroups, SELinux/AppArmor-like policies
+observability,yes,partial,medium,Tracing, perf counters, metrics, remote debug hooks
+power_management,yes,no,low,ACPI/firmware hooks for edge devices
+virtualization,yes,no,low,Container/VM/KVM interfaces for multi-tenancy
+userspace_tooling,yes,partial,high,S compiler & model toolchain integration, build/test automation
