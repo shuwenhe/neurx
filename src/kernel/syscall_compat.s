@@ -2,6 +2,7 @@ package kernel.syscall
 
 use std.strings.int_to_string
 use std.io.eprintln
+use mm.vm
 
 struct syscall_entry {
     int number
@@ -13,6 +14,8 @@ syscall_entry[] syscall_table
 
 map[int]string fd_table
 int next_fd
+
+const ENOSYS = -38
 
 func init_syscall_table() int {
     syscall_table = syscall_entry[]{}
@@ -64,10 +67,30 @@ func sys_open(string path, int flags) int {
 
 func sys_close(int fd) int {
     if has(fd_table, fd) {
-        
         fd_table[fd] = ""
     }
     0
+}
+
+func sys_fstat(int fd, int stat_buf_addr) int {
+    eprintln("sys_fstat fd=" + int_to_string(fd))
+    0
+}
+
+func sys_mmap(int addr, int length, int prot, int flags, int fd, int offset) int {
+    // Map a region via vm module (simple abstraction)
+    mmap_region(0x100000, length, prot)
+    0x100000
+}
+
+func sys_brk(int brk_addr) int {
+    eprintln("sys_brk called: " + int_to_string(brk_addr))
+    0x200000
+}
+
+func sys_exit(int code) int {
+    eprintln("sys_exit called: code=" + int_to_string(code))
+    code
 }
 
 func syscall_dispatch(int num, int[] args) int {
@@ -84,7 +107,6 @@ func syscall_dispatch(int num, int[] args) int {
         }
         return -1
     } else if num == 2 {
-        
         if len(args) >= 2 {
             path_str := "unknown"
             if args[0] == 1 {
@@ -92,13 +114,33 @@ func syscall_dispatch(int num, int[] args) int {
             }
             return sys_open(path_str, args[1])
         }
-        return -1
+        return ENOSYS
     } else if num == 3 {
         if len(args) >= 1 {
             return sys_close(args[0])
         }
         return -1
+    } else if num == 5 {
+        if len(args) >= 2 {
+            return sys_fstat(args[0], args[1])
+        }
+        return ENOSYS
+    } else if num == 9 {
+        if len(args) >= 6 {
+            return sys_mmap(args[0], args[1], args[2], args[3], args[4], args[5])
+        }
+        return ENOSYS
+    } else if num == 12 {
+        if len(args) >= 1 {
+            return sys_brk(args[0])
+        }
+        return ENOSYS
+    } else if num == 60 {
+        if len(args) >= 1 {
+            return sys_exit(args[0])
+        }
+        return sys_exit(0)
     }
-    
+
     -1
 }
