@@ -10,35 +10,63 @@ struct syscall_entry {
 
 syscall_entry[] syscall_table
 
+// in-memory file table: fd -> content
+map[int]string fd_table
+int next_fd
+
 func init_syscall_table() int {
     syscall_table = syscall_entry[]{}
     syscall_table = append(syscall_table, syscall_entry{number:0, name:"read"})
     syscall_table = append(syscall_table, syscall_entry{number:1, name:"write"})
     syscall_table = append(syscall_table, syscall_entry{number:2, name:"open"})
     syscall_table = append(syscall_table, syscall_entry{number:3, name:"close"})
+    fd_table = map[int]string{}
+    next_fd = 3
     0
 }
 
 func sys_read(int fd, int buf_addr, int count) int {
-    // stub: pretend we read 'count' bytes
-    eprintln("sys_read called fd=" + int_to_string(fd) + " count=" + int_to_string(count))
-    count
+    // read from in-memory fd content
+    content := ""
+    if has(fd_table, fd) {
+        content = fd_table[fd]
+    }
+    // return min(count, len(content)) as bytes read
+    if count < len(content) {
+        return count
+    }
+    len(content)
 }
 
 func sys_write(int fd, int buf_addr, int count) int {
-    // stub: pretend we wrote 'count' bytes
-    eprintln("sys_write called fd=" + int_to_string(fd) + " count=" + int_to_string(count))
+    // append placeholder bytes to in-memory fd
+    existing := ""
+    if has(fd_table, fd) {
+        existing = fd_table[fd]
+    }
+    // append 'count' dots to simulate data
+    i := 0
+    for i < count {
+        existing = existing + "."
+        i = i + 1
+    }
+    fd_table[fd] = existing
     count
 }
 
 func sys_open(string path, int flags) int {
     eprintln("sys_open called path=" + path)
-    // return fake fd
-    3
+    fd := next_fd
+    next_fd = next_fd + 1
+    fd_table[fd] = ""
+    fd
 }
 
 func sys_close(int fd) int {
-    eprintln("sys_close called fd=" + int_to_string(fd))
+    if has(fd_table, fd) {
+        // remove entry
+        fd_table[fd] = ""
+    }
     0
 }
 
@@ -56,10 +84,8 @@ func syscall_dispatch(int num, int[] args) int {
         }
         return -1
     } else if num == 2 {
-        // open: args[0]=path_addr (not supported), args[1]=flags
-        // we accept a synthetic path index as int for smoke tests
+        // open: args[0]=path_index (synthetic), args[1]=flags
         if len(args) >= 2 {
-            // if path represented as an int index, map to string
             path_str := "unknown"
             if args[0] == 1 {
                 path_str = "/tmp/test"
