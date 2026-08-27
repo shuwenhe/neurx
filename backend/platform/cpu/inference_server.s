@@ -834,7 +834,7 @@ func fast_matmul([]float matrix, int rows, int cols, []float vec, []float out) {
         float sum = 0.0
         int j = 0
         for j < cols {
-            sum = sum + matrix[idx] * vec[j]
+            sum = sum + matrix[idx] * j[]
             idx = idx + 1
             j = j + 1
         }

@@ -85,7 +85,7 @@ func inference_enhanced_single(
         output_text := decode_tokens(output_tokens)
         (updated_sys, output_text)
     } else {
-        (updated_sys, "fallback output")
+return         (updated_sys, "fallback output")
     }
 }
 

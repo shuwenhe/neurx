@@ -10,22 +10,20 @@ struct Qwen3Parser {
     use_xml: bool
 }
 
-impl Qwen3Parser {
-    func new() . Qwen3Parser {
-        parser := Qwen3Parser {
-            base: BaseToolParser::new("qwen3"),
-            use_xml: false
-        }
-        parser.base = parser.base.set_structural_tag("qwen_3")
-        parser
+func new() . Qwen3Parser {
+    parser := Qwen3Parser {
+        base: BaseToolParser::new("qwen3"),
+        use_xml: false
     }
+    parser.base = parser.base.set_structural_tag("qwen_3")
+    parser
+}
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
-        if self.use_xml {
-            extract_qwen_xml_tools(model_output)
-        } else {
-            extract_qwen_json_tools(model_output)
-        }
+func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
+    if self.use_xml {
+        extract_qwen_xml_tools(model_output)
+    } else {
+        extract_qwen_json_tools(model_output)
     }
 }
 
@@ -33,90 +31,80 @@ struct Qwen3CoderParser {
     base: BaseToolParser
 }
 
-impl Qwen3CoderParser {
-    func new() . Qwen3CoderParser {
-        parser := Qwen3CoderParser {
-            base: BaseToolParser::new("qwen3_coder")
-        }
-        parser.base = parser.base.set_structural_tag("qwen_3_coder")
-        parser
+func new() . Qwen3CoderParser {
+    parser := Qwen3CoderParser {
+        base: BaseToolParser::new("qwen3_coder")
     }
+    parser.base = parser.base.set_structural_tag("qwen_3_coder")
+    parser
+}
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
-        extract_qwen_json_tools(model_output)
-    }
+func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
+    extract_qwen_json_tools(model_output)
 }
 
 struct Gemma4Parser {
     base: BaseToolParser
 }
 
-impl Gemma4Parser {
-    func new() . Gemma4Parser {
-        parser := Gemma4Parser {
-            base: BaseToolParser::new("gemma4")
-        }
-        parser.base = parser.base.set_structural_tag("gemma4")
-        parser
+func new() . Gemma4Parser {
+    parser := Gemma4Parser {
+        base: BaseToolParser::new("gemma4")
     }
+    parser.base = parser.base.set_structural_tag("gemma4")
+    parser
+}
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
-        extract_gemma_json_tools(model_output)
-    }
+func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
+    extract_gemma_json_tools(model_output)
 }
 
 struct MistralParser {
     base: BaseToolParser
 }
 
-impl MistralParser {
-    func new() . MistralParser {
-        parser := MistralParser {
-            base: BaseToolParser::new("mistral")
-        }
-        parser.base = parser.base.set_tool_choice_required(false)
-        parser
+func new() . MistralParser {
+    parser := MistralParser {
+        base: BaseToolParser::new("mistral")
     }
+    parser.base = parser.base.set_tool_choice_required(false)
+    parser
+}
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
-        extract_mistral_tools(model_output)
-    }
+func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
+    extract_mistral_tools(model_output)
 }
 
 struct Llama3JsonParser {
     base: BaseToolParser
 }
 
-impl Llama3JsonParser {
-    func new() . Llama3JsonParser {
-        parser := Llama3JsonParser {
-            base: BaseToolParser::new("llama3_json")
-        }
-        parser.base = parser.base.set_structural_tag("llama")
-        parser
+func new() . Llama3JsonParser {
+    parser := Llama3JsonParser {
+        base: BaseToolParser::new("llama3_json")
     }
+    parser.base = parser.base.set_structural_tag("llama")
+    parser
+}
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
-        extract_llama_json_tools(model_output)
-    }
+func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
+    extract_llama_json_tools(model_output)
 }
 
 struct HermesParser {
     base: BaseToolParser
 }
 
-impl HermesParser {
-    func new() . HermesParser {
-        parser := HermesParser {
-            base: BaseToolParser::new("hermes")
-        }
-        parser.base = parser.base.set_structural_tag("hermes")
-        parser
+func new() . HermesParser {
+    parser := HermesParser {
+        base: BaseToolParser::new("hermes")
     }
+    parser.base = parser.base.set_structural_tag("hermes")
+    parser
+}
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
-        extract_hermes_xml_tools(model_output)
-    }
+func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
+    extract_hermes_xml_tools(model_output)
 }
 
 func extract_qwen_json_tools(str model_output) . ExtractedToolCallInformation {
@@ -132,7 +120,7 @@ func extract_qwen_json_tools(str model_output) . ExtractedToolCallInformation {
             Some(m) => {
                 json_str := strings::substring(model_output, m.start, m.end)
                 match parse_qwen_json_tool(json_str) {
-                    Some(tc) => tool_calls.push(tc),
+                    Some(tc) => tool_calls = append(tool_calls, tc),
                     None => {}
                 }
                 search_pos = m.end
@@ -200,7 +188,7 @@ func extract_qwen_xml_tools(str model_output) . ExtractedToolCallInformation {
         )
 
         match parse_qwen_json_tool(call_content) {
-            Some(tc) => tool_calls.push(tc),
+            Some(tc) => tool_calls = append(tool_calls, tc),
             None => {}
         }
 
@@ -255,7 +243,7 @@ func extract_mistral_tools(str model_output) . ExtractedToolCallInformation {
             Some(m) => {
                 call_str := extract_group(m, 1)
                 match parse_mistral_tool_call(call_str) {
-                    Some(tc) => tool_calls.push(tc),
+                    Some(tc) => tool_calls = append(tool_calls, tc),
                     None => {}
                 }
             }

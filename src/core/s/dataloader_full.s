@@ -97,7 +97,7 @@ func load_samples_for_indices(dataset ds, []int indices) []sample {
     for idx in indices {
         (sample s, error err) = get_sample(ds, idx)
         if err == nil {
-            samples.push(s)
+            samples = append(samples, s)
         } else {
             sample { token_ids: [], text: "", label: -1, weight: 1.0, metadata: {} }
         }
@@ -115,7 +115,7 @@ func fill_prefetch_buffer(dataloader dl) dataloader {
         }
         []sample samples = load_samples_for_indices(dl.ds, indices)
         batch b = collate_fn(samples, dl.config.collator)
-        dl.prefetch_buffer.push(b)
+        dl.prefetch_buffer = append(dl.prefetch_buffer, b)
     }
     dl
 }
@@ -169,7 +169,7 @@ func assign_to_bucket(int seq_len, bucket_config bcfg) int {
 func generate_bucket_order(map[int][]int buckets) []int {
     []int order = []
     for key in buckets {
-        order.push(key)
+        order = append(order, key)
     }
     for i in 0..len(order)-1 {
         for j in 0..len(order)-i-1 {

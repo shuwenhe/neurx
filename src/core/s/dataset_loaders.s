@@ -32,7 +32,7 @@ func load_text_dataset(dataset ds) (dataset, error) {
             weight: 1.0,
             metadata: {},
         }
-        ds.samples.push(s)
+        ds.samples = append(ds.samples, s)
         total_tokens = total_tokens + len(tokens)
         if len(tokens) < min_len { min_len = len(tokens) }
         if len(tokens) > max_len { max_len = len(tokens) }

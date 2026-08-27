@@ -17,16 +17,16 @@ struct io_uring_cqe {
 }
 
 struct io_uring {
-    vec[io_uring_sqe] sq
-    vec[io_uring_cqe] cq
+    io_uring_sqe[] sq
+    io_uring_cqe[] cq
     int sq_tail
     int cq_head
 }
 
 func create_io_uring(int queue_depth) io_uring {
     uring := io_uring {
-        sq: vec[io_uring_sqe](),
-        cq: vec[io_uring_cqe](),
+        sq: io_uring_sqe[](),
+        cq: io_uring_cqe[](),
         sq_tail: 0,
         cq_head: 0
     }
@@ -41,7 +41,7 @@ func io_uring_prep_read(io_uring uring, int fd, int offset, int len) io_uring {
         length: len,
         flags: 0
     }
-    uring.sq.push(sqe)
+    uring.sq = append(uring.sq, sqe)
     uring.sq_tail = uring.sq_tail + 1
     uring
 }
@@ -54,7 +54,7 @@ func io_uring_prep_write(io_uring uring, int fd, int offset, int len) io_uring {
         length: len,
         flags: 0
     }
-    uring.sq.push(sqe)
+    uring.sq = append(uring.sq, sqe)
     uring.sq_tail = uring.sq_tail + 1
     uring
 }

@@ -22,7 +22,7 @@ struct realtime_scheduler {
 func new_realtime_scheduler(int hz) realtime_scheduler {
     int period_us = 1000000 / hz
     return realtime_scheduler{
-        tasks: vec[realtime_task](),
+        tasks: realtime_task[](),
         cycle_period_us: period_us,
         max_latency_us: period_us / 2,
         current_cycle: 0,
@@ -38,11 +38,11 @@ func (realtime_scheduler* scheduler) register_task(string name, func() int callb
         priority: priority,
         enabled: true,
     }
-    scheduler.tasks.push(task)
+    scheduler.tasks = append(scheduler.tasks, task)
 }
 
 func (realtime_scheduler* scheduler) enable_task(string name) {
-    for i in 0..scheduler.tasks.len() {
+    for i in len(0..scheduler.tasks) {
         if scheduler.tasks[i].name == name {
             scheduler.tasks[i].enabled = true
             return
@@ -51,7 +51,7 @@ func (realtime_scheduler* scheduler) enable_task(string name) {
 }
 
 func (realtime_scheduler* scheduler) disable_task(string name) {
-    for i in 0..scheduler.tasks.len() {
+    for i in len(0..scheduler.tasks) {
         if scheduler.tasks[i].name == name {
             scheduler.tasks[i].enabled = false
             return
@@ -59,7 +59,7 @@ func (realtime_scheduler* scheduler) disable_task(string name) {
     }
 }
 
-func (realtime_scheduler* scheduler) get_task_count() int {    scheduler.tasks.len()
+func (realtime_scheduler* scheduler) get_task_count() int {    len(scheduler.tasks)
 }
 
 func (realtime_scheduler* scheduler) get_cycle_period_us() int {    scheduler.cycle_period_us

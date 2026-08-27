@@ -12,7 +12,7 @@ type layer_stats struct {
 	layer_name string
 	cpu_time_us float64
 	gpu_time_us float64
-	children vec[layer_stats*]
+	children layer_stats*[]
 	percentage_gpu float64
 	pct_total float64
 }
@@ -31,7 +31,7 @@ type profiler_stats struct {
 	total_gpu_time_us float64
 	total_memory_mb float64
 	operations map[string]operation_stats*
-	layers vec[layer_stats*]
+	layers layer_stats*[]
 	memory map[string]memory_stats*
 	metadata map[string]interface{}
 	stat_count int64
@@ -52,7 +52,7 @@ func create_layer_stats(layer_name string) layer_stats* {
 		layer_name: layer_name,
 		cpu_time_us: 0,
 		gpu_time_us: 0,
-		children: make(vec[layer_stats*]),
+		children: make(layer_stats*[]),
 		percentage_gpu: 0,
 		pct_total: 0,
 	}
@@ -75,7 +75,7 @@ func create_profiler_stats() profiler_stats* {
 		total_gpu_time_us: 0,
 		total_memory_mb: 0,
 		operations: make(map[string]operation_stats*),
-		layers: make(vec[layer_stats*]),
+		layers: make(layer_stats*[]),
 		memory: make(map[string]memory_stats*),
 		metadata: make(map[string]interface{}),
 		stat_count: 0,
@@ -139,8 +139,8 @@ func (s* profiler_stats) compute_percentages() {
 	}
 }
 
-func (s* profiler_stats) get_top_operations(limit int64) vec[operation_stats*] {
-	result := make(vec[operation_stats*])
+func (s* profiler_stats) get_top_operations(limit int64) operation_stats*[] {
+	result := make(operation_stats*[])
 	if limit <= 0 {
 		limit = 10
 	}

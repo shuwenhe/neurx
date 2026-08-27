@@ -30,7 +30,7 @@ func create_empty_report() production_readiness_report {
 }
 
 func add_check(production_readiness_report* report, production_check check) {
-    report.checks.push(check)
+    report.checks = append(report.checks, check)
     report.total_checks = report.total_checks + 1
     if check.status {
         report.passed_checks = report.passed_checks + 1

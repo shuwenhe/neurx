@@ -21,7 +21,7 @@ struct stream_event {
 
 	token_id        int32
 	token_text      string
-	logits          vec[float32]
+	logits          float32[]
 	log_prob        float32
 
 	chunk_text      string
@@ -41,8 +41,8 @@ struct stream_output {
 	session_id              string
 
 	generated_text          string
-	generated_tokens        vec[int32]
-	token_texts             vec[string]
+	generated_tokens        int32[]
+	token_texts             string[]
 
 	total_tokens_generated  int32
 	completion_tokens_total int32
@@ -87,9 +87,9 @@ struct sse_config {
 }
 
 struct stream_buffer {
-	events          vec[stream_event]
+	events          stream_event[]
 	text_buffer     string
-	token_buffer    vec[int32]
+	token_buffer    int32[]
 
 	buffer_size     int32
 	max_buffer_size int32
@@ -119,14 +119,14 @@ func create_stream_state(request_id string, mode int32) stream_state {
 			request_id:          request_id,
 			output_mode:         mode,
 			created_timestamp:   time.Now().UnixNano(),
-			generated_tokens:    make(vec[int32], 0, 1024),
-			token_texts:         make(vec[string], 0, 1024),
+			generated_tokens:    make(int32[], 0, 1024),
+			token_texts:         make(string[], 0, 1024),
 			metadata:            make(map[string]string),
 		},
 		buffer: stream_buffer{
-			events:          make(vec[stream_event], 0, BUFFER_SIZE),
+			events:          make(stream_event[], 0, BUFFER_SIZE),
 			text_buffer:     "",
-			token_buffer:    make(vec[int32], 0, CHUNK_SIZE),
+			token_buffer:    make(int32[], 0, CHUNK_SIZE),
 			max_buffer_size: BUFFER_SIZE,
 		},
 		config: create_default_sse_config(),
@@ -178,7 +178,7 @@ func (s stream_state*) add_token(token_id int32, token_text string) bool {
 	return true
 }
 
-func (s stream_state*) add_tokens_batch(token_ids vec[int32], token_texts vec[string]) bool {
+func (s stream_state*) add_tokens_batch(token_ids int32[], token_texts string[]) bool {
 	for i := int32(0); i < int32(len(token_ids)); i++ {
 		s.add_token(token_ids[i], token_texts[i])
 	}
@@ -211,7 +211,7 @@ func (s stream_state*) flush_chunk() bool {
 	}
 
 	s.buffer.text_buffer = ""
-	s.buffer.token_buffer = make(vec[int32], 0, s.config.chunk_size)
+	s.buffer.token_buffer = make(int32[], 0, s.config.chunk_size)
 
 	return true
 }
@@ -271,16 +271,16 @@ func (s stream_state*) create_heartbeat_event() stream_event {
 	}
 }
 
-func (s stream_state*) get_pending_events() vec[stream_event] {
+func (s stream_state*) get_pending_events() stream_event[] {
 	s.buffer.mu.Lock()
 	defer s.buffer.mu.Unlock()
 
-	events := make(vec[stream_event], 0, len(s.buffer.events))
+	events := make(stream_event[], 0, len(s.buffer.events))
 	for event := range s.buffer.events {
 		events = append(events, event)
 	}
 
-	s.buffer.events = make(vec[stream_event], 0, s.buffer.max_buffer_size)
+	s.buffer.events = make(stream_event[], 0, s.buffer.max_buffer_size)
 	s.sent_events_count += int64(len(events))
 
 	return events

@@ -26,25 +26,25 @@ func (semaphore_set* ss) init(int max_sems) (int, string) {
 
 // 创建信号量
 func (semaphore_set* ss) create_semaphore(int initial_value) (semaphore, string) {
-    if ss.semaphores.len() >= ss.total_sems {
+    if len(ss.semaphores) >= ss.total_sems {
         return semaphore{}, "Semaphore set full"
     }
     
     sem := semaphore{
-        sem_id: ss.semaphores.len(),
+        sem_id: len(ss.semaphores),
         value: initial_value,
         owner_pid: 0,
         wait_count: 0,
         waiters: int[]{}
     }
     
-    ss.semaphores.push(sem)
+    ss.semaphores = append(ss.semaphores, sem)
     return sem, ""
 }
 
 // P 操作 (等待/减少)
 func (semaphore_set* ss) wait_semaphore(int sem_id, int pid) (int, string) {
-    if sem_id >= ss.semaphores.len() {
+    if sem_id >= len(ss.semaphores) {
         return -1, "Invalid semaphore"
     }
     
@@ -58,14 +58,14 @@ func (semaphore_set* ss) wait_semaphore(int sem_id, int pid) (int, string) {
     
     // 进程需要阻塞，加入等待队列
     sem.wait_count = sem.wait_count + 1
-    sem.waiters.push(pid)
+    sem.waiters = append(sem.waiters, pid)
     ss.semaphores[sem_id] = sem
     return 1, "BLOCKED"  // 返回 1 表示进程应该被阻塞
 }
 
 // V 操作 (释放/增加)
 func (semaphore_set* ss) signal_semaphore(int sem_id) (int, string) {
-    if sem_id >= ss.semaphores.len() {
+    if sem_id >= len(ss.semaphores) {
         return -1, "Invalid semaphore"
     }
     
@@ -73,12 +73,12 @@ func (semaphore_set* ss) signal_semaphore(int sem_id) (int, string) {
     sem.value = sem.value + 1
     
     // 唤醒一个等待的进程
-    if sem.wait_count > 0 && sem.waiters.len() > 0 {
+    if sem.wait_count > 0 && len(sem.waiters) > 0 {
         woken_pid := sem.waiters[0]
         
         // 移除第一个元素
         i := 1
-        for i < sem.waiters.len() {
+        for i < len(sem.waiters) {
             sem.waiters[i - 1] = sem.waiters[i]
             i = i + 1
         }
@@ -92,7 +92,7 @@ func (semaphore_set* ss) signal_semaphore(int sem_id) (int, string) {
 
 // 获取信号量值
 func (semaphore_set ss) get_semaphore_value(int sem_id) (int, string) {
-    if sem_id >= ss.semaphores.len() {
+    if sem_id >= len(ss.semaphores) {
         return 0, "Invalid semaphore"
     }
     
@@ -141,45 +141,45 @@ func (message_queue_manager* mqm) create_queue(int max_msgs) (message_queue, str
         sender_pid: 0
     }
     
-    mqm.queues.push(mq)
+    mqm.queues = append(mqm.queues, mq)
     mqm.next_queue_id = mqm.next_queue_id + 1
     return mq, ""
 }
 
 // 发送消息
 func (message_queue_manager* mqm) send_message(int queue_id, int sender_pid, string content, int priority) (int, string) {
-    if queue_id >= mqm.queues.len() {
+    if queue_id >= len(mqm.queues) {
         return -1, "Invalid queue"
     }
     
     mq := mqm.queues[queue_id]
     
-    if mq.messages.len() >= mq.max_messages {
+    if len(mq.messages) >= mq.max_messages {
         return -1, "Queue full"
     }
     
     msg := message{
-        msg_id: mq.messages.len(),
+        msg_id: len(mq.messages),
         sender_pid: sender_pid,
         content: content,
         timestamp: 0,
         priority: priority
     }
     
-    mq.messages.push(msg)
+    mq.messages = append(mq.messages, msg)
     mqm.queues[queue_id] = mq
     return msg.msg_id, ""
 }
 
 // 接收消息
 func (message_queue_manager* mqm) receive_message(int queue_id) (message, string) {
-    if queue_id >= mqm.queues.len() {
+    if queue_id >= len(mqm.queues) {
         return message{}, "Invalid queue"
     }
     
     mq := mqm.queues[queue_id]
     
-    if mq.messages.len() == 0 {
+    if len(mq.messages) == 0 {
         return message{}, "Queue empty"
     }
     
@@ -187,7 +187,7 @@ func (message_queue_manager* mqm) receive_message(int queue_id) (message, string
     
     // 移除第一个消息
     i := 1
-    for i < mq.messages.len() {
+    for i < len(mq.messages) {
         mq.messages[i - 1] = mq.messages[i]
         i = i + 1
     }
@@ -230,14 +230,14 @@ func (shared_memory_manager* smm) create_shared_memory(int size) (shared_memory_
         permissions: 3
     }
     
-    smm.segments.push(shm)
+    smm.segments = append(smm.segments, shm)
     smm.next_shmid = smm.next_shmid + 1
     return shm, ""
 }
 
 // 挂载共享内存
 func (shared_memory_manager* smm) attach_shared_memory(int shmid) (int, string) {
-    if shmid >= smm.segments.len() {
+    if shmid >= len(smm.segments) {
         return -1, "Invalid shared memory"
     }
     
@@ -250,7 +250,7 @@ func (shared_memory_manager* smm) attach_shared_memory(int shmid) (int, string) 
 
 // 卸载共享内存
 func (shared_memory_manager* smm) detach_shared_memory(int shmid) (int, string) {
-    if shmid >= smm.segments.len() {
+    if shmid >= len(smm.segments) {
         return -1, "Invalid shared memory"
     }
     
@@ -265,7 +265,7 @@ func (shared_memory_manager* smm) detach_shared_memory(int shmid) (int, string) 
 
 // 删除共享内存
 func (shared_memory_manager* smm) remove_shared_memory(int shmid) (int, string) {
-    if shmid >= smm.segments.len() {
+    if shmid >= len(smm.segments) {
         return -1, "Invalid shared memory"
     }
     
@@ -285,7 +285,7 @@ func (shared_memory_manager smm) get_shm_stats() (int, int) {
     total_size := 0
     
     i := 0
-    for i < smm.segments.len() {
+    for i < len(smm.segments) {
         seg := smm.segments[i]
         if seg.shmid >= 0 {
             total_attached = total_attached + seg.attach_count

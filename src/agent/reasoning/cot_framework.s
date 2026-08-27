@@ -18,7 +18,7 @@ struct thought {
 	string          content
 	float32         confidence
 	int32           step_number
-	vec[string]     dependencies
+	string[]     dependencies
 	int64           created_at
 	int32           parent_step
 }
@@ -28,14 +28,14 @@ struct cot_reasoning_step {
 	string          reasoning_text
 	string          intermediate_result
 	float32         confidence_score
-	vec[string]     sub_thoughts
+	string[]     sub_thoughts
 	bool            is_valid
 	int64           timestamp
 }
 
 struct cot_framework {
-	vec[cot_reasoning_step]     steps
-	vec[thought]                thoughts
+	cot_reasoning_step[]     steps
+	thought[]                thoughts
 	string                      problem_statement
 	int32                       max_steps
 	float32                     confidence_threshold
@@ -49,8 +49,8 @@ func create_cot_framework(
 	max_steps int32,
 ) cot_framework {
 	return cot_framework{
-		steps:                   make(vec[cot_reasoning_step], 0, max_steps),
-		thoughts:                make(vec[thought], 0, max_steps*3),
+		steps:                   make(cot_reasoning_step[], 0, max_steps),
+		thoughts:                make(thought[], 0, max_steps*3),
 		problem_statement:       problem,
 		max_steps:               max_steps,
 		confidence_threshold:    0.5,
@@ -76,7 +76,7 @@ func (cot_framework* f) add_reasoning_step(
 		step_id:            step_id,
 		reasoning_text:     reasoning_text,
 		confidence_score:   confidence,
-		sub_thoughts:       make(vec[string], 0, 3),
+		sub_thoughts:       make(string[], 0, 3),
 		is_valid:           confidence >= f.confidence_threshold,
 		timestamp:          time.Now().UnixNano(),
 	}
@@ -104,7 +104,7 @@ func (cot_framework* f) add_thought(
 		content:         thought_content,
 		confidence:      confidence,
 		step_number:     step_number,
-		dependencies:    make(vec[string], 0, 5),
+		dependencies:    make(string[], 0, 5),
 		created_at:      time.Now().UnixNano(),
 		parent_step:     step_number,
 	}
@@ -134,11 +134,11 @@ func (cot_framework* f) add_thought_dependency(
 	return false
 }
 
-func (cot_framework* f) get_reasoning_chain() vec[string] {
+func (cot_framework* f) get_reasoning_chain() string[] {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
-	chain := make(vec[string], 0, len(f.steps))
+	chain := make(string[], 0, len(f.steps))
 	for step := range f.steps {
 		chain = append(chain, step.reasoning_text)
 	}
@@ -195,13 +195,13 @@ func (cot_framework* f) update_step_result(
 	return found
 }
 
-func (cot_framework* f) get_step_dependencies(thought_id string) vec[string] {
+func (cot_framework* f) get_step_dependencies(thought_id string) string[] {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
 	for thought := range f.thoughts {
 		if thought.id == thought_id {
-			deps := make(vec[string], 0, len(thought.dependencies))
+			deps := make(string[], 0, len(thought.dependencies))
 			for dep := range thought.dependencies {
 				deps = append(deps, dep)
 			}
@@ -209,16 +209,16 @@ func (cot_framework* f) get_step_dependencies(thought_id string) vec[string] {
 		}
 	}
 
-	return make(vec[string], 0)
+	return make(string[], 0)
 }
 
 func (cot_framework* f) get_thoughts_by_type(
 	thought_type thought_type,
-) vec[thought] {
+) thought[] {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
-	filtered := make(vec[thought], 0, len(f.thoughts)/5)
+	filtered := make(thought[], 0, len(f.thoughts)/5)
 	for t := range f.thoughts {
 		if t.type_enum == thought_type {
 			filtered = append(filtered, t)
@@ -296,8 +296,8 @@ func (cot_framework* f) clear_reasoning() {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
-	f.steps = make(vec[cot_reasoning_step], 0, f.max_steps)
-	f.thoughts = make(vec[thought], 0, f.max_steps*3)
+	f.steps = make(cot_reasoning_step[], 0, f.max_steps)
+	f.thoughts = make(thought[], 0, f.max_steps*3)
 	f.step_results = make(map[int32]string)
 	f.reasoning_complete = false
 }

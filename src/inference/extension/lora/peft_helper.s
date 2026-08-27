@@ -70,7 +70,7 @@ func (peft_model_wrapper* wrapper) get_lora_model() lora_model* {
     return wrapper.base_lora
 }
 
-func (peft_model_wrapper* wrapper) prepare_inputs_for_generation(vec[int32] input_ids, int32 max_length) map[string]interface{} {
+func (peft_model_wrapper* wrapper) prepare_inputs_for_generation(int32[] input_ids, int32 max_length) map[string]interface{} {
     inputs := make(map[string]interface{})
 
     inputs["input_ids"] = input_ids
@@ -84,8 +84,8 @@ func (peft_model_wrapper* wrapper) prepare_inputs_for_generation(vec[int32] inpu
     return inputs
 }
 
-func (peft_model_wrapper* wrapper) forward_pass(vec[float32] hidden_states) vec[float32] {
-    output := make(vec[float32])
+func (peft_model_wrapper* wrapper) forward_pass(float32[] hidden_states) float32[] {
+    output := make(float32[])
 
     for i := 0; i < len(hidden_states); i = i + 1 {
         output = append(output, hidden_states[i])
@@ -102,7 +102,7 @@ func (peft_model_wrapper* wrapper) forward_pass(vec[float32] hidden_states) vec[
     return output
 }
 
-func (peft_model_wrapper* wrapper) inference(vec[float32] input_data) vec[float32] {
+func (peft_model_wrapper* wrapper) inference(float32[] input_data) float32[] {
     if !wrapper.is_compiled {
         wrapper.compile_model()
     }
@@ -114,7 +114,7 @@ func (peft_model_wrapper* wrapper) inference(vec[float32] input_data) vec[float3
     return output
 }
 
-func (peft_model_wrapper* wrapper) training_step(vec[float32] input_data, vec[float32] target_data, float32 learning_rate) float32 {
+func (peft_model_wrapper* wrapper) training_step(float32[] input_data, float32[] target_data, float32 learning_rate) float32 {
     if wrapper.base_lora == nil {
         return 0.0
     }

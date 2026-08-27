@@ -2,7 +2,7 @@ package neurx.platform.cuda
 
 func cuda_malloc(int size_bytes, string label) (uint64, error) {
     if size_bytes <= 0 {
-        return (0, error{message: "Invalid allocation size"})
+        return 0, error{message: "Invalid allocation size"}
     }
     uint64 ptr = generate_fake_ptr(size_bytes)
     memory_allocation alloc {
@@ -11,7 +11,7 @@ func cuda_malloc(int size_bytes, string label) (uint64, error) {
         label: label,
         is_pinned: false,
     }
-    current_context().allocations.push(alloc)
+    current_context().allocations = append(.allocations, alloc)
     current_context().allocated_memory_bytes =
         current_context().allocated_memory_bytes + size_bytes
     (ptr, nil)

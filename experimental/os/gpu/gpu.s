@@ -88,7 +88,7 @@ func gpu_register(gs gpu_state, gpu_type int, name string, total_mem_mb int,
         driver_version: driver_version,
     }
     gs.devices = append(gs.devices, d)
-    return (gs, id)
+    return gs, id
 }
 
 func gpu_stream_create(gs gpu_state, int gpu_id, int priority) (gpu_state, int) {
@@ -103,7 +103,7 @@ func gpu_stream_create(gs gpu_state, int gpu_id, int priority) (gpu_state, int) 
     }
     gs.streams = append(gs.streams, s)
     gs.next_stream_id = gs.next_stream_id + 1
-    return (gs, sid)
+    return gs, sid
 }
 
 func gpu_submit_job(gs gpu_state, stream_id int, kernel_name string,
@@ -131,7 +131,7 @@ func gpu_submit_job(gs gpu_state, stream_id int, kernel_name string,
         }
         i = i + 1
     }
-    return (gs, jid)
+    return gs, jid
 }
 
 func gpu_record_fence(gs gpu_state, int stream_id) (gpu_state, int) {
@@ -139,7 +139,7 @@ func gpu_record_fence(gs gpu_state, int stream_id) (gpu_state, int) {
     gpu_fence f = gpu_fence{fence_id: fid, stream_id: stream_id, signaled: false}
     gs.fences = append(gs.fences, f)
     gs.next_fence_id = gs.next_fence_id + 1
-    return (gs, fid)
+    return gs, fid
 }
 
 func gpu_complete_job(gs gpu_state, int job_id) gpu_state {

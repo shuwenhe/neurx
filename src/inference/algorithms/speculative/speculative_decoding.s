@@ -308,7 +308,7 @@ func build_tree(tree_node node, draft_model model, []int input_tokens, int seq_l
             children: []tree_node{cap: width},
             depth: node.depth + 1,
         }
-        node.children.push(child)
+        node.children = append(node.children, child)
         build_tree(child, model, extended_tokens, seq_len, width, depth, temperature)
         i = i + 1
     }
@@ -329,7 +329,7 @@ func select_best_path(tree_node root) []int {
             i = i + 1
         }
         if best_idx >= 0 {
-            path.push(curr.children[best_idx].token)
+            path = append(path, curr.children[best_idx].token)
             curr = curr.children[best_idx]
         } else {
             break
@@ -344,7 +344,7 @@ func batch_verify(verifier_model model, [][]int input_batches, [][]int draft_bat
     int batch_idx = 0
     for batch_idx < batch_size {
         []float scores = verifier_model_verify(model, input_batches[batch_idx], draft_batches[batch_idx], seq_len, draft_len)
-        all_scores.push(scores)
+        all_scores = append(all_scores, scores)
         batch_idx = batch_idx + 1
     }
     all_scores
@@ -360,9 +360,9 @@ func speculative_decode_step(speculative_state state, []int input_tokens, int se
     for step < speculation_steps {
         ([]int next_token, []float next_prob) = draft_model_predict(state.draft, current_input, len(current_input))
         if len(next_token) > 0 && len(next_prob) > 0 {
-            draft_tokens.push(next_token[0])
+            draft_tokens = append(draft_tokens, next_token[0])
             draft_probs[step] = next_prob[0]
-            current_input.push(next_token[0])
+            current_input = append(current_input, next_token[0])
         }
         step = step + 1
     }
@@ -377,10 +377,10 @@ func speculative_decode_step(speculative_state state, []int input_tokens, int se
     step = 0
     for step < speculation_steps {
         if verification_scores[step] >= config.verification_threshold {
-            accepted_tokens.push(draft_tokens[step])
+            accepted_tokens = append(accepted_tokens, draft_tokens[step])
             accepted_count = accepted_count + 1
         } else {
-            rejected_tokens.push(draft_tokens[step])
+            rejected_tokens = append(rejected_tokens, draft_tokens[step])
             rejected_count = rejected_count + 1
         }
         step = step + 1
@@ -396,12 +396,12 @@ func speculative_decode_step(speculative_state state, []int input_tokens, int se
         []int fallback_input = math.copy_int(input_tokens)
         int i = 0
         for i < len(accepted_tokens) {
-            fallback_input.push(accepted_tokens[i])
+            fallback_input = append(fallback_input, accepted_tokens[i])
             i = i + 1
         }
         ([]int correct_token, []float correct_prob) = draft_model_predict(state.verifier, fallback_input, len(fallback_input))
         if len(correct_token) > 0 {
-            final_tokens.push(correct_token[0])
+            final_tokens = append(final_tokens, correct_token[0])
         }
     }
     state.draft_tokens = draft_tokens
@@ -423,7 +423,7 @@ func speculative_decode_full(speculative_state state, []int input_tokens, int se
         speculative_result result = speculative_decode_step(state, output, len(output))
         int i = 0
         for i < len(result.tokens) && pos < max_len {
-            output.push(result.tokens[i])
+            output = append(output, result.tokens[i])
             pos = pos + 1
             i = i + 1
         }

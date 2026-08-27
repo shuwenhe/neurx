@@ -55,7 +55,7 @@ func (distributed_context* ctx) finalize() bool {
 
     groups := ctx.group_manager.list_groups()
     i := 0
-    for i < groups.len() {
+    for i < len(groups) {
         g := ctx.group_manager.get_group(groups[i])
         g.finalize()
         ctx.group_manager.delete_group(groups[i])
@@ -87,7 +87,7 @@ func (distributed_context* ctx) is_master() bool {
     ctx.rank == 0
 }
 
-func (distributed_context* ctx) create_subgroup(vec[int] ranks, string name) int {
+func (distributed_context* ctx) create_subgroup(int[] ranks, string name) int {
     backend := comm_backend::nccl
     switch ctx.backend_name {
         "nccl" : backend = comm_backend::nccl,

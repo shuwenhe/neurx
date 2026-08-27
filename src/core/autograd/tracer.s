@@ -187,7 +187,7 @@ func tracer_has_tag(tracer_state state, string tag) bool {
 
 func tracer_add_op(tracer_state state, string op) tracer_state {
     []string ops = copy_strings(state.ops)
-    ops.push(op)
+    ops = append(ops, op)
     tracer_state {
         name: state.name,
         active: true,
@@ -205,8 +205,8 @@ func tracer_add_op(tracer_state state, string op) tracer_state {
 func tracer_add_op_with_param(tracer_state state, string op, string param) tracer_state {
     []string ops = copy_strings(state.ops)
     []string params = copy_strings(state.params)
-    ops.push(op)
-    params.push(param)
+    ops = append(ops, op)
+    params = append(params, param)
     tracer_state {
         name: state.name,
         active: true,
@@ -223,7 +223,7 @@ func tracer_add_op_with_param(tracer_state state, string op, string param) trace
 
 func tracer_add_input(tracer_state state, string input) tracer_state {
     []string inputs = copy_strings(state.inputs)
-    inputs.push(input)
+    inputs = append(inputs, input)
     tracer_state {
         name: state.name,
         active: true,
@@ -240,7 +240,7 @@ func tracer_add_input(tracer_state state, string input) tracer_state {
 
 func tracer_add_output(tracer_state state, string output) tracer_state {
     []string outputs = copy_strings(state.outputs)
-    outputs.push(output)
+    outputs = append(outputs, output)
     tracer_state {
         name: state.name,
         active: true,
@@ -269,16 +269,16 @@ func tracer_add_eqn_with_io(tracer_state state, string primitive, []string param
     []string input_list = copy_strings(state.inputs)
     []string output_list = copy_strings(state.outputs)
     []ir_eqn eqns = copy_eqns(state.eqns)
-    ops.push(primitive)
-    param_list.push(join_params(params))
+    ops = append(ops, primitive)
+    param_list = append(param_list, join_params(params))
     int i = 0
     for i < len(inputs) {
-        input_list.push(inputs[i])
+        input_list = append(input_list, inputs[i])
         i = i + 1
     }
     i = 0
     for i < len(outputs) {
-        output_list.push(outputs[i])
+        output_list = append(output_list, outputs[i])
         i = i + 1
     }
     eqns.push(

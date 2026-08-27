@@ -45,8 +45,8 @@ func (gpg_trainer* trainer) generate_group(Tensor prompt) . ([]tensor, []tensor)
             temperature: 1.0,
             return_log_probs: true
         )
-        responses.push(response)
-        log_probs_list.push(log_probs)
+        responses = append(responses, response)
+        log_probs_list = append(log_probs_list, log_probs)
     }
     return responses, log_probs_list
 }
@@ -72,18 +72,18 @@ func (gpg_trainer* trainer) compute_advantages([]f32 rewards) . []f32 {
     baseline := trainer.compute_baseline(rewards)
     scaled_rewards := []
     for r in rewards {
-        scaled_rewards.push(r * trainer.config.reward_scaling)
+        scaled_rewards = append(scaled_rewards, r * trainer.config.reward_scaling)
     }
     advantages := []
     for r in scaled_rewards {
-        advantages.push(r - baseline)
+        advantages = append(advantages, r - baseline)
     }
     if trainer.config.advantage_normalization {
         adv_mean := compute_mean(advantages)
         adv_std := compute_std(advantages, adv_mean)
         normalized := []
         for adv in advantages {
-            normalized.push((adv - adv_mean) / (adv_std + 1e-8))
+            normalized = append(normalized, (adv - adv_mean) / (adv_std + 1e-8))
         }
         return normalized
     }
@@ -107,7 +107,7 @@ func (gpg_trainer* trainer) train_step_group(
     total_entropy := 0.0
     num_updates := 0
     for epoch in 0..trainer.config.num_epochs {
-        for i in 0..responses.len() {
+        for i in len(0..responses) {
             input := concat(prompt, responses[i])
             logits := trainer.policy_model.forward(input)
             log_probs := log_softmax(logits, dim: -1)
@@ -141,21 +141,21 @@ func (gpg_trainer* trainer) train_step_group(
 func (gpg_trainer* trainer) train(DataLoader train_data) . []f32 {
     policy_losses := []
     for batch in train_data {
-        for i in 0..batch.prompts.len() {
+        for i in len(0..batch.prompts) {
             prompt := batch.prompts[i]
             responses, _  := trainer.generate_group(prompt)
             rewards := []
             for response in responses {
                 reward := compute_reward(prompt, response)
-                rewards.push(reward)
-                trainer.reward_history.push(reward)
+                rewards = append(rewards, reward)
+                trainer.reward_history = append(trainer.reward_history, reward)
             }
             policy_loss, entropy  := trainer.train_step_group(
                 prompt,
                 responses,
                 rewards
             )
-            policy_losses.push(policy_loss)
+            policy_losses = append(policy_losses, policy_loss)
             trainer.step_count += 1
             if trainer.step_count % 10 == 0 {
                 avg_reward := compute_mean(rewards)
@@ -173,11 +173,11 @@ func (gpg_trainer* trainer) train(DataLoader train_data) . []f32 {
 }
 
 func (gpg_trainer* trainer) get_statistics() . (f32, f32, f32) {
-    if trainer.reward_history.len() == 0 {
+    if len(trainer.reward_history) == 0 {
         return 0.0, 0.0, 0.0
     }
-    if trainer.reward_history.len() > 1000 {
-        trainer.reward_history = trainer.reward_history[trainer.reward_history.len() - 1000..]
+    if len(trainer.reward_history) > 1000 {
+        trainer.reward_history = trainer.reward_history[len(trainer.reward_history) - 1000..]
     }
     mean_reward := compute_mean(trainer.reward_history)
     std_reward := compute_std(trainer.reward_history, mean_reward)
@@ -195,25 +195,25 @@ func compute_reward(Tensor prompt, Tensor response) . f32 {
 }
 
 func compute_mean([]f32 values) . f32 {
-    if values.len() == 0 {
+    if len(values) == 0 {
         return 0.0
     }
     sum := 0.0
     for v in values {
         sum += v
     }
-    return sum / f32(values.len())
+    return sum / f32(len(values))
 }
 
 func compute_std([]f32 values, f32 mean) . f32 {
-    if values.len() == 0 {
+    if len(values) == 0 {
         return 1.0
     }
     sum_sq := 0.0
     for v in values {
         sum_sq += (v - mean) * (v - mean)
     }
-    return sqrt(sum_sq / f32(values.len()))
+    return sqrt(sum_sq / f32(len(values)))
 }
 
 func random_uniform(f32 min_val, f32 max_val) . f32 {

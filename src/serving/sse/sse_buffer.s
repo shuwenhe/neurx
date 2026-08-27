@@ -11,7 +11,7 @@ import "time"
 }
 
 struct sse_buffer {
-	vec[sse_event]          events
+	sse_event[]          events
 	int32                   write_index
 	int32                   read_index
 	int32                   capacity
@@ -47,7 +47,7 @@ struct buffer_stats {
 }
 
 struct sse_queue {
-	vec[sse_buffer]         buffers
+	sse_buffer[]         buffers
 	int32                   buffer_count
 	int32                   active_buffer_index
 
@@ -62,7 +62,7 @@ struct sse_queue {
 
 func create_sse_buffer(config buffer_config) sse_buffer {
 	return sse_buffer{
-		events:               make(vec[sse_event], 0, config.capacity),
+		events:               make(sse_event[], 0, config.capacity),
 		write_index:          0,
 		read_index:           0,
 		capacity:             config.capacity,
@@ -79,7 +79,7 @@ func create_sse_buffer(config buffer_config) sse_buffer {
 
 func create_sse_queue(max_buffers int32, buffer_capacity int32) sse_queue {
 	return sse_queue{
-		buffers:              make(vec[sse_buffer], 0, max_buffers),
+		buffers:              make(sse_buffer[], 0, max_buffers),
 		buffer_count:         0,
 		active_buffer_index:  -1,
 		total_enqueued:       0,
@@ -153,11 +153,11 @@ func (sse_buffer* b) peek_event() (sse_event, bool) {
 	return event, true
 }
 
-func (sse_buffer* b) get_pending_events() vec[sse_event] {
+func (sse_buffer* b) get_pending_events() sse_event[] {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	result := make(vec[sse_event], 0)
+	result := make(sse_event[], 0)
 
 	for i := b.read_index; i < int32(len(b.events)); i++ {
 		result = append(result, b.events[i])
@@ -170,7 +170,7 @@ func (sse_buffer* b) flush() {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	b.events = make(vec[sse_event], 0, b.capacity)
+	b.events = make(sse_event[], 0, b.capacity)
 	b.write_index = 0
 	b.read_index = 0
 	b.current_size_bytes = 0
@@ -264,11 +264,11 @@ func (sse_queue* q) dequeue_event() (sse_event, bool) {
 	return sse_event{}, false
 }
 
-func (sse_queue* q) get_pending_events() vec[sse_event] {
+func (sse_queue* q) get_pending_events() sse_event[] {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	result := make(vec[sse_event], 0)
+	result := make(sse_event[], 0)
 
 	for i := int32(0); i < q.buffer_count; i++ {
 		pending := q.buffers[i].get_pending_events()
@@ -288,7 +288,7 @@ func (sse_queue* q) flush_all() {
 		q.buffers[i].flush()
 	}
 
-	q.buffers = make(vec[sse_buffer], 0, q.max_buffers)
+	q.buffers = make(sse_buffer[], 0, q.max_buffers)
 	q.buffer_count = 0
 	q.active_buffer_index = -1
 }

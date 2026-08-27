@@ -4,7 +4,7 @@ import "sync"
 import "time"
 
 struct log_collector {
-	vec[structured_logger*] loggers
+	structured_logger*[] loggers
 	int32                   logger_count
 
 	map[string]int32        component_entry_counts
@@ -13,7 +13,7 @@ struct log_collector {
 	int64                   collection_start_time
 	int32                   total_collected_entries
 
-	vec[log_entry_batch]    collected_batches
+	log_entry_batch[]    collected_batches
 	int32                   batch_collection_count
 
 	sync.Mutex              mu
@@ -37,20 +37,20 @@ struct log_aggregation {
 
 	int32                   count
 	int32                   error_count
-	vec[string]             message_samples
+	string[]             message_samples
 
 	map[string]int32        component_counts
 }
 
 func create_log_collector() log_collector {
 	return log_collector{
-		loggers:                   make(vec[structured_logger*], 0, 10),
+		loggers:                   make(structured_logger*[], 0, 10),
 		logger_count:              0,
 		component_entry_counts:    make(map[string]int32),
 		component_error_counts:    make(map[string]int32),
 		collection_start_time:     time.Now().UnixNano(),
 		total_collected_entries:   0,
-		collected_batches:         make(vec[log_entry_batch], 0, 100),
+		collected_batches:         make(log_entry_batch[], 0, 100),
 		batch_collection_count:    0,
 		mu:                        sync.Mutex{},
 	}
@@ -102,11 +102,11 @@ func (log_collector* c) collect_all() {
 	}
 }
 
-func (log_collector* c) get_collected_entries() vec[log_entry] {
+func (log_collector* c) get_collected_entries() log_entry[] {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	result := make(vec[log_entry], 0)
+	result := make(log_entry[], 0)
 
 	for batch := range c.collected_batches {
 		for entry := range batch.entries {
@@ -169,7 +169,7 @@ func (log_collector* c) aggregate_by_level() map[log_level]log_aggregation {
 					level:            entry.level,
 					count:            1,
 					error_count:      0,
-					message_samples:  make(vec[string], 0, 5),
+					message_samples:  make(string[], 0, 5),
 					component_counts: make(map[string]int32),
 				}
 				if entry.level == ERROR || entry.level == FATAL {
@@ -201,7 +201,7 @@ func (log_collector* c) aggregate_by_component() map[string]log_aggregation {
 				agg := log_aggregation{
 					count:            1,
 					error_count:      0,
-					message_samples:  make(vec[string], 0, 5),
+					message_samples:  make(string[], 0, 5),
 					component_counts: make(map[string]int32),
 				}
 				if entry.level == ERROR || entry.level == FATAL {
@@ -219,7 +219,7 @@ func (log_collector* c) clear() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.collected_batches = make(vec[log_entry_batch], 0, 100)
+	c.collected_batches = make(log_entry_batch[], 0, 100)
 	c.component_entry_counts = make(map[string]int32)
 	c.component_error_counts = make(map[string]int32)
 	c.total_collected_entries = 0

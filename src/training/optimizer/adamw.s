@@ -42,7 +42,7 @@ func adamw_register_param(
     state.momentum = allocate_float_vector(param_size, 0.0)
     state.variance = allocate_float_vector(param_size, 0.0)
     state.step = 0
-    opt.param_states.push(state)
+    opt.param_states = append(opt.param_states, state)
     return opt
 }
 
@@ -160,7 +160,7 @@ func allocate_float_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     i := 0
     for i < size {
-        v.push(init_val)
+        v = append(v, init_val)
         i = i + 1
     }
     return v

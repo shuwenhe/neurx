@@ -84,37 +84,35 @@ struct BaseToolParser {
     tools: Vec<str>
 }
 
-impl BaseToolParser {
-    func new(str name) . BaseToolParser {
-        BaseToolParser {
-            parser_name: name,
-            supports_streaming: true,
-            supports_required: true,
-            structural_tag_model: "",
-            tokenizer: "default",
-            tools: Vec::new()
-        }
+func new(str name) . BaseToolParser {
+    BaseToolParser {
+        parser_name: name,
+        supports_streaming: true,
+        supports_required: true,
+        structural_tag_model: "",
+        tokenizer: "default",
+        tools: Vec::new()
     }
+}
 
-    func set_tools(self, Vec<str> tools) . BaseToolParser {
-        self.tools = tools
-        self
-    }
+func set_tools(self, Vec<str> tools) . BaseToolParser {
+    self.tools = tools
+    self
+}
 
-    func set_streaming(self, bool streaming) . BaseToolParser {
-        self.supports_streaming = streaming
-        self
-    }
+func set_streaming(self, bool streaming) . BaseToolParser {
+    self.supports_streaming = streaming
+    self
+}
 
-    func set_tool_choice_required(self, bool required) . BaseToolParser {
-        self.supports_required = required
-        self
-    }
+func set_tool_choice_required(self, bool required) . BaseToolParser {
+    self.supports_required = required
+    self
+}
 
-    func set_structural_tag(self, str tag) . BaseToolParser {
-        self.structural_tag_model = tag
-        self
-    }
+func set_structural_tag(self, str tag) . BaseToolParser {
+    self.structural_tag_model = tag
+    self
 }
 
 struct ToolExtractionContext {

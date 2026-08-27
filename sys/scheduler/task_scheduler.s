@@ -12,7 +12,7 @@ struct inference_task {
 }
 
 struct task_queue {
-    tasks: vec[inference_task]
+    tasks: inference_task[]
     next_task_id: int64
     max_tasks: int
 }
@@ -26,15 +26,15 @@ struct scheduler_stats {
 
 func create_task_queue(max_tasks: int) task_queue {
     queue := task_queue {
-        tasks: vec[inference_task](),
+        tasks: inference_task[](),
         next_task_id: 1,
         max_tasks: max_tasks
     }
     queue
 }
 
-func enqueue_task(queue: *task_queue, model_id: string, batch_size: int, priority: int, device_id: int) int64 {
-    if queue.tasks.len() >= queue.max_tasks {
+func enqueue_task(task_queue* queue, model_id: string, batch_size: int, priority: int, device_id: int) int64 {
+    if len(queue.tasks) >= queue.max_tasks {
         return 0
     }
     
@@ -49,12 +49,12 @@ func enqueue_task(queue: *task_queue, model_id: string, batch_size: int, priorit
         device_id: device_id,
         status: 0
     }
-    queue.tasks.push(task)
+    queue.tasks = append(queue.tasks, task)
     task_id
 }
 
-func dequeue_task(queue: *task_queue) option[inference_task] {
-    if queue.tasks.len() == 0 {
+func dequeue_task(task_queue* queue) option[inference_task] {
+    if len(queue.tasks) == 0 {
         return option::none
     }
     
@@ -62,7 +62,7 @@ func dequeue_task(queue: *task_queue) option[inference_task] {
     max_priority := queue.tasks.data[0].priority
     
     i := 1
-    for i < queue.tasks.len() {
+    for i < len(queue.tasks) {
         if queue.tasks.data[i].priority > max_priority {
             max_priority_idx = i
             max_priority = queue.tasks.data[i].priority
@@ -73,7 +73,7 @@ func dequeue_task(queue: *task_queue) option[inference_task] {
     task := queue.tasks.data[max_priority_idx]
     
     j := max_priority_idx
-    for j < queue.tasks.len() - 1 {
+    for j < len(queue.tasks) - 1 {
         queue.tasks.data[j] = queue.tasks.data[j + 1]
         j = j + 1
     }
@@ -81,13 +81,13 @@ func dequeue_task(queue: *task_queue) option[inference_task] {
     option::some(task)
 }
 
-func get_queue_size(queue: *task_queue) int {
-    queue.tasks.len()
+func get_queue_size(task_queue* queue) int {
+    len(queue.tasks)
 }
 
-func update_task_status(queue: *task_queue, task_id: int64, status: int) bool {
+func update_task_status(task_queue* queue, task_id: int64, status: int) bool {
     i := 0
-    for i < queue.tasks.len() {
+    for i < len(queue.tasks) {
         if queue.tasks.data[i].task_id == task_id {
             queue.tasks.data[i].status = status
             return true
@@ -97,9 +97,9 @@ func update_task_status(queue: *task_queue, task_id: int64, status: int) bool {
     false
 }
 
-func get_task_status(queue: *task_queue, task_id: int64) int {
+func get_task_status(task_queue* queue, task_id: int64) int {
     i := 0
-    for i < queue.tasks.len() {
+    for i < len(queue.tasks) {
         if queue.tasks.data[i].task_id == task_id {
             return queue.tasks.data[i].status
         }
@@ -108,16 +108,16 @@ func get_task_status(queue: *task_queue, task_id: int64) int {
     -1
 }
 
-func clear_queue(queue: *task_queue) {
-    queue.tasks = vec[inference_task]()
+func clear_queue(task_queue* queue) {
+    queue.tasks = inference_task[]()
 }
 
-func get_scheduler_stats(queue: *task_queue) scheduler_stats {
+func get_scheduler_stats(task_queue* queue) scheduler_stats {
     pending := 0
     running := 0
     
     i := 0
-    for i < queue.tasks.len() {
+    for i < len(queue.tasks) {
         if queue.tasks.data[i].status == 0 {
             pending = pending + 1
         } else if queue.tasks.data[i].status == 1 {
@@ -127,7 +127,7 @@ func get_scheduler_stats(queue: *task_queue) scheduler_stats {
     }
     
     stats := scheduler_stats {
-        total_tasks: queue.tasks.len(),
+        total_tasks: len(queue.tasks),
         pending_tasks: pending,
         running_tasks: running,
         completed_tasks: 0
@@ -135,11 +135,11 @@ func get_scheduler_stats(queue: *task_queue) scheduler_stats {
     stats
 }
 
-func reorder_by_priority(queue: *task_queue) {
+func reorder_by_priority(task_queue* queue) {
     i := 0
-    for i < queue.tasks.len() - 1 {
+    for i < len(queue.tasks) - 1 {
         j := 0
-        for j < queue.tasks.len() - 1 - i {
+        for j < len(queue.tasks) - 1 - i {
             if queue.tasks.data[j].priority < queue.tasks.data[j + 1].priority {
                 temp := queue.tasks.data[j]
                 queue.tasks.data[j] = queue.tasks.data[j + 1]

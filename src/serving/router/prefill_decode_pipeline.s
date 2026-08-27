@@ -19,14 +19,14 @@ struct pipeline_config {
 }
 
 struct prefill_batch {
-    vec[active_request*] requests
+    active_request*[] requests
     int32 batch_id
     int32 total_tokens
     int64 created_at
 }
 
 struct decode_batch {
-    vec[active_request*] requests
+    active_request*[] requests
     int32 batch_id
     int32 num_decode_steps
     int64 created_at
@@ -43,9 +43,9 @@ struct prefill_decode_pipeline {
     int32 total_decode_batches_executed
     int32 total_tokens_processed
 
-    vec[active_request*] pending_prefill
-    vec[active_request*] in_flight_decode
-    vec[active_request*] completed_requests
+    active_request*[] pending_prefill
+    active_request*[] in_flight_decode
+    active_request*[] completed_requests
 }
 
 func create_pipeline(pipeline_config cfg) prefill_decode_pipeline* {
@@ -57,9 +57,9 @@ func create_pipeline(pipeline_config cfg) prefill_decode_pipeline* {
         total_prefill_batches_executed: 0,
         total_decode_batches_executed: 0,
         total_tokens_processed: 0,
-        pending_prefill: make(vec[active_request*]),
-        in_flight_decode: make(vec[active_request*]),
-        completed_requests: make(vec[active_request*]),
+        pending_prefill: make(active_request*[]),
+        in_flight_decode: make(active_request*[]),
+        completed_requests: make(active_request*[]),
     }
 }
 
@@ -80,7 +80,7 @@ func (prefill_decode_pipeline* pd) prepare_prefill_batch() prefill_batch* {
     }
 
     total_tokens := 0
-    batch := make(vec[active_request*])
+    batch := make(active_request*[])
 
     for i := 0; i < batch_size; i = i + 1 {
         req := pd.pending_prefill[i]
@@ -89,7 +89,7 @@ func (prefill_decode_pipeline* pd) prepare_prefill_batch() prefill_batch* {
     }
 
     if total_tokens > pd.config.max_batch_tokens {
-        batch = make(vec[active_request*])
+        batch = make(active_request*[])
         total_tokens = 0
 
         for i := 0; i < len(pd.pending_prefill); i = i + 1 {
@@ -154,7 +154,7 @@ func (prefill_decode_pipeline* pd) prepare_decode_batch() decode_batch* {
         batch_size = len(pd.in_flight_decode)
     }
 
-    batch := make(vec[active_request*])
+    batch := make(active_request*[])
     for i := 0; i < batch_size; i = i + 1 {
         req := pd.in_flight_decode[i]
         if !req.is_decode_complete() {
@@ -213,7 +213,7 @@ func (prefill_decode_pipeline* pd) execute_decode() bool {
 }
 
 func (prefill_decode_pipeline* pd) cleanup_completed_from_in_flight() {
-    new_in_flight := make(vec[active_request*])
+    new_in_flight := make(active_request*[])
 
     for i := 0; i < len(pd.in_flight_decode); i = i + 1 {
         req := pd.in_flight_decode[i]

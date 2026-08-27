@@ -37,7 +37,7 @@ func list_ir_files() []string {
             if has_dot_ir {
                 s = trim_simple(s)
                 if !neurx.strings.strings_eq(s, "") {
-                    res.push(s)
+                    res = append(res, s)
                 }
             }
             current_line = ""

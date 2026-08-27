@@ -151,23 +151,23 @@ func (tir_optimal_token_baseline_trainer* trainer) train_step(
     []tensor rollout_log_probs,
     []tensor rewards
 ) . (f32, f32, f32, f32) {
-    batch_size := prompts.len()
+    batch_size := len(prompts)
     inputs := []
     all_tokens := []
     positions := []
     for i in 0..batch_size {
         input := concat(prompts[i], responses[i])
-        inputs.push(input)
-        all_tokens.push(responses[i])
+        inputs = append(inputs, input)
+        all_tokens = append(all_tokens, responses[i])
         seq_len := responses[i].shape[0]
         pos := tensor_arange(seq_len)
-        positions.push(pos)
+        positions = append(positions, pos)
     }
     ref_log_probs := []
     for input in inputs {
         logits := trainer.reference_model.forward(input)
         log_probs := log_softmax(logits, dim: -1)
-        ref_log_probs.push(log_probs)
+        ref_log_probs = append(ref_log_probs, log_probs)
     }
     total_policy_loss := 0.0
     total_value_loss := 0.0

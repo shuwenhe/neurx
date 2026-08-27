@@ -34,22 +34,22 @@ struct huge_page_pool {
 }
 
 func new_huge_page_pool() (*huge_page_pool, string) {
-    let pool := *huge_page_pool{
+    pool := *huge_page_pool{
         pages_2m: huge_page[]{},
         pages_1g: huge_page[]{},
         lock: spinlock::new(),
         total_allocated: 0,
     } as *huge_page_pool
 
-    result::ok(pool)
+return     (pool, "")
 }
 
-func (pool: *huge_page_pool) allocate_2m_page() (u64, string) {
-    let _guard := pool.lock.lock()?
+func (huge_page_pool* pool) allocate_2m_page() (u64, string) {
+    _guard := pool.lock.lock()?
 
-    let physical_addr := allocate_physical_huge_page(huge_page_2m_size)?
+    physical_addr := allocate_physical_huge_page(huge_page_2m_size)?
 
-    let hp := huge_page{
+    hp := huge_page{
         physical_address: physical_addr,
         virtual_address: 0,
         size: huge_page_size::page_2m,
@@ -62,15 +62,15 @@ func (pool: *huge_page_pool) allocate_2m_page() (u64, string) {
     pool.pages_2m = append(pool.pages_2m, hp)
     pool.total_allocated = pool.total_allocated + huge_page_2m_size
 
-    result::ok(physical_addr)
+return     (physical_addr, "")
 }
 
-func (pool: *huge_page_pool) allocate_1g_page() (u64, string) {
-    let _guard := pool.lock.lock()?
+func (huge_page_pool* pool) allocate_1g_page() (u64, string) {
+    _guard := pool.lock.lock()?
 
-    let physical_addr := allocate_physical_huge_page(huge_page_1g_size)?
+    physical_addr := allocate_physical_huge_page(huge_page_1g_size)?
 
-    let hp := huge_page{
+    hp := huge_page{
         physical_address: physical_addr,
         virtual_address: 0,
         size: huge_page_size::page_1g,
@@ -83,19 +83,19 @@ func (pool: *huge_page_pool) allocate_1g_page() (u64, string) {
     pool.pages_1g = append(pool.pages_1g, hp)
     pool.total_allocated = pool.total_allocated + huge_page_1g_size
 
-    result::ok(physical_addr)
+return     (physical_addr, "")
 }
 
 func allocate_physical_huge_page(size: u64) (u64, string) {
-    result::ok(0x200000)
+return     (0x200000, "")
 }
 
-func (pool: *huge_page_pool) free_2m_page(physical_addr: u64) (void, string) {
-    let _guard := pool.lock.lock()?
+func (huge_page_pool* pool) free_2m_page(physical_addr: u64) (void, string) {
+    _guard := pool.lock.lock()?
 
-    let mut found := false
-    let mut remove_idx := option::none as option[u32]
-    let mut i := 0
+    found := false
+    remove_idx := option::none as option[u32]
+    i := 0
 
     for page in pool.pages_2m {
         if page.physical_address == physical_addr {
@@ -107,25 +107,25 @@ func (pool: *huge_page_pool) free_2m_page(physical_addr: u64) (void, string) {
     }
 
     if !found {
-        return result::err("2M huge page not found")
+        return ((), "2M huge page not found")
     }
 
     switch remove_idx {
         option::some(idx): {
             pool.pages_2m, _ := remove(pool.pages_2m, idx)
             pool.total_allocated = pool.total_allocated - huge_page_2m_size
-            result::ok(())
+            return (), ""
         },
-        option::none: result::err("failed to remove page"),
+        option::none: ((), "failed to remove page"),
     }
 }
 
-func (pool: *huge_page_pool) free_1g_page(physical_addr: u64) (void, string) {
-    let _guard := pool.lock.lock()?
+func (huge_page_pool* pool) free_1g_page(physical_addr: u64) (void, string) {
+    _guard := pool.lock.lock()?
 
-    let mut found := false
-    let mut remove_idx := option::none as option[u32]
-    let mut i := 0
+    found := false
+    remove_idx := option::none as option[u32]
+    i := 0
 
     for page in pool.pages_1g {
         if page.physical_address == physical_addr {
@@ -137,42 +137,42 @@ func (pool: *huge_page_pool) free_1g_page(physical_addr: u64) (void, string) {
     }
 
     if !found {
-        return result::err("1G huge page not found")
+        return ((), "1G huge page not found")
     }
 
     switch remove_idx {
         option::some(idx): {
             pool.pages_1g.remove(idx)
             pool.total_allocated = pool.total_allocated - huge_page_1g_size
-            result::ok(())
+            return (), ""
         },
-        option::none: result::err("failed to remove page"),
+        option::none: ((), "failed to remove page"),
     }
 }
 
-func (pool: *huge_page_pool) map_huge_page(
+func (huge_page_pool* pool) map_huge_page(
     vaddr: u64,
     ppage: u64,
     size: huge_page_size,
 ) (void, string) {
-    let _guard := pool.lock.lock()?
+    _guard := pool.lock.lock()?
 
-    let pt_flags := match size {
+    pt_flags := match size {
         huge_page_size::page_2m: 0x080,
         huge_page_size::page_1g: 0x080,
     }
 
-    result::ok(())
+    return (), ""
 }
 
-func (pool: *huge_page_pool) unmap_huge_page(vaddr: u64) (void, string) {
-    let _guard := pool.lock.lock()?
-    result::ok(())
+func (huge_page_pool* pool) unmap_huge_page(vaddr: u64) (void, string) {
+    _guard := pool.lock.lock()?
+    return (), ""
 }
 
-func (pool: *huge_page_pool) is_huge_page(vaddr: u64) (bool, string) {
-    let _guard := pool.lock.lock()?
-    result::ok(false)
+func (huge_page_pool* pool) is_huge_page(vaddr: u64) (bool, string) {
+    _guard := pool.lock.lock()?
+return     (false, "")
 }
 
 struct transparent_huge_pages {
@@ -188,68 +188,68 @@ struct thp_manager {
     lock: spinlock::spinlock[void],
 }
 
-func new_thp_manager(pool: *huge_page_pool) (*thp_manager, string) {
-    let config := transparent_huge_pages{
+func new_thp_manager(huge_page_pool* pool) (*thp_manager, string) {
+    config := transparent_huge_pages{
         enabled: true,
         always_collapse: false,
         khugepaged_enabled: true,
         collapse_trigger_threshold: 100,
     }
 
-    let mgr := *thp_manager{
+    mgr := *thp_manager{
         config: config,
         huge_pool: pool,
         lock: spinlock::new(),
     } as *thp_manager
 
-    result::ok(mgr)
+return     (mgr, "")
 }
 
-func (mgr: *thp_manager) try_collapse_pages(
+func (thp_manager* mgr) try_collapse_pages(
     vaddr: u64,
     page_count: u32,
 ) (u64, string) {
-    let _guard := mgr.lock.lock()?
+    _guard := mgr.lock.lock()?
 
     if !mgr.config.enabled {
-        return result::err("transparent huge pages disabled")
+        return ((), "transparent huge pages disabled")
     }
 
     if page_count < mgr.config.collapse_trigger_threshold {
-        return result::err("insufficient pages for collapse")
+        return ((), "insufficient pages for collapse")
     }
 
-    let huge_ppage := mgr.huge_pool.allocate_2m_page()?
-    result::ok(huge_ppage)
+    huge_ppage := mgr.huge_pool.allocate_2m_page()?
+return     (huge_ppage, "")
 }
 
-func (mgr: *thp_manager) split_huge_page(ppage: u64) (vec[u64), string] {
-    let _guard := mgr.lock.lock()?
+func (thp_manager* mgr) split_huge_page(ppage: u64) (u64), string[] {
+    _guard := mgr.lock.lock()?
 
-    let mut regular_pages := vec[u64]()
+    regular_pages := u64[]()
 
-    let mut i := 0
+    i := 0
     while i < 512 {
-        let page := page_table::allocate_physical_page()?
-        regular_pages.push(page)
+        page := page_table::allocate_physical_page()?
+        regular_pages = append(regular_pages, page)
         i = i + 1
     }
 
     mgr.huge_pool.free_2m_page(ppage)?
-    result::ok(regular_pages)
+return     (regular_pages, "")
 }
 
-func (mgr: *thp_manager) enable_thp() (void, string) {
+func (thp_manager* mgr) enable_thp() (void, string) {
     mgr.config.enabled = true
-    result::ok(())
+    return (), ""
 }
 
-func (mgr: *thp_manager) disable_thp() (void, string) {
+func (thp_manager* mgr) disable_thp() (void, string) {
     mgr.config.enabled = false
-    result::ok(())
+    return (), ""
 }
 
-func (mgr: *thp_manager) is_thp_enabled() bool {
+func (thp_manager* mgr) is_thp_enabled() bool {
     mgr.config.enabled
 }
 
@@ -262,42 +262,42 @@ struct huge_page_statistics {
     thp_splits: u64,
 }
 
-func (mgr: *thp_manager) get_statistics() (huge_page_statistics, string) {
-    let _guard := mgr.lock.lock()?
+func (thp_manager* mgr) get_statistics() (huge_page_statistics, string) {
+    _guard := mgr.lock.lock()?
 
-    let stats := huge_page_statistics{
-        total_huge_pages_2m: mgr.huge_pool.pages_2m.len() as u32,
-        total_huge_pages_1g: mgr.huge_pool.pages_1g.len() as u32,
+    stats := huge_page_statistics{
+        total_huge_pages_2m: len(mgr.huge_pool.pages_2m) as u32,
+        total_huge_pages_1g: len(mgr.huge_pool.pages_1g) as u32,
         total_memory_used: mgr.huge_pool.total_allocated,
         average_compression_ratio: 1.0,
         thp_collapses: 0,
         thp_splits: 0,
     }
 
-    result::ok(stats)
+return     (stats, "")
 }
 
-func (mgr: *thp_manager) madvise_hugepage(
+func (thp_manager* mgr) madvise_hugepage(
     vaddr: u64,
     size: u64,
     advice: u32,
 ) (void, string) {
-    let _guard := mgr.lock.lock()?
+    _guard := mgr.lock.lock()?
 
-    result::ok(())
+    return (), ""
 }
 
 const madv_hugepage = 14
 const madv_nohugepage = 15
 
-func (mgr: *thp_manager) khugepaged_scan_and_collapse() (u32, string) {
-    let _guard := mgr.lock.lock()?
+func (thp_manager* mgr) khugepaged_scan_and_collapse() (u32, string) {
+    _guard := mgr.lock.lock()?
 
-    let mut collapsed := 0
+    collapsed := 0
 
     if !mgr.config.khugepaged_enabled {
-        return result::ok(0)
+        return 0, ""
     }
 
-    result::ok(collapsed)
+return     (collapsed, "")
 }

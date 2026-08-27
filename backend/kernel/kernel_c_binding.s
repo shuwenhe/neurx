@@ -84,8 +84,8 @@ func (c_binding_manager* mgr) load_kernel(string kernel_name) bool {
     return false
 }
 
-func (c_binding_manager* mgr) call_kernel_matmul(string kernel_name, vec[vec[float32]] a, vec[vec[float32]] b) vec[vec[float32]] {
-    result := make(vec[vec[float32]])
+func (c_binding_manager* mgr) call_kernel_matmul(string kernel_name, float32[[]] a, float32[[]] b) float32[[]] {
+    result := make(float32[[]])
 
     if wrapper, exists := mgr.kernel_wrappers[kernel_name]; exists {
         if wrapper.backend == backend_triton {
@@ -103,8 +103,8 @@ func (c_binding_manager* mgr) call_kernel_matmul(string kernel_name, vec[vec[flo
     return result
 }
 
-func (c_binding_manager* mgr) call_kernel_attention(string kernel_name, vec[float32] query, vec[float32] key, vec[float32] value) vec[float32] {
-    result := make(vec[float32])
+func (c_binding_manager* mgr) call_kernel_attention(string kernel_name, float32[] query, float32[] key, float32[] value) float32[] {
+    result := make(float32[])
 
     if wrapper, exists := mgr.kernel_wrappers[kernel_name]; exists {
         if wrapper.backend == backend_triton {
@@ -120,8 +120,8 @@ func (c_binding_manager* mgr) call_kernel_attention(string kernel_name, vec[floa
     return result
 }
 
-func (c_binding_manager* mgr) call_kernel_rope(string kernel_name, vec[float32] input, int32 seq_len) vec[float32] {
-    result := make(vec[float32])
+func (c_binding_manager* mgr) call_kernel_rope(string kernel_name, float32[] input, int32 seq_len) float32[] {
+    result := make(float32[])
 
     if wrapper, exists := mgr.kernel_wrappers[kernel_name]; exists {
         if wrapper.backend == backend_triton {
@@ -135,8 +135,8 @@ func (c_binding_manager* mgr) call_kernel_rope(string kernel_name, vec[float32] 
     return result
 }
 
-func (c_binding_manager* mgr) call_kernel_softmax(string kernel_name, vec[float32] logits) vec[float32] {
-    result := make(vec[float32])
+func (c_binding_manager* mgr) call_kernel_softmax(string kernel_name, float32[] logits) float32[] {
+    result := make(float32[])
 
     if wrapper, exists := mgr.kernel_wrappers[kernel_name]; exists {
         if wrapper.backend == backend_triton {
@@ -150,8 +150,8 @@ func (c_binding_manager* mgr) call_kernel_softmax(string kernel_name, vec[float3
     return result
 }
 
-func (c_binding_manager* mgr) call_kernel_norm(string kernel_name, vec[float32] input, float32 epsilon) vec[float32] {
-    result := make(vec[float32])
+func (c_binding_manager* mgr) call_kernel_norm(string kernel_name, float32[] input, float32 epsilon) float32[] {
+    result := make(float32[])
 
     if wrapper, exists := mgr.kernel_wrappers[kernel_name]; exists {
         if wrapper.backend == backend_triton {
@@ -165,8 +165,8 @@ func (c_binding_manager* mgr) call_kernel_norm(string kernel_name, vec[float32] 
     return result
 }
 
-func (c_binding_manager* mgr) call_kernel_activation(string kernel_name, vec[float32] input, string activation_type) vec[float32] {
-    result := make(vec[float32])
+func (c_binding_manager* mgr) call_kernel_activation(string kernel_name, float32[] input, string activation_type) float32[] {
+    result := make(float32[])
 
     if wrapper, exists := mgr.kernel_wrappers[kernel_name]; exists {
         if activation_type == "relu" {
@@ -207,8 +207,8 @@ func (c_binding_manager* mgr) get_kernel_wrapper_info(string kernel_name) map[st
     return info
 }
 
-func (c_binding_manager* mgr) list_available_kernels() vec[string] {
-    kernels := make(vec[string])
+func (c_binding_manager* mgr) list_available_kernels() string[] {
+    kernels := make(string[])
 
     for name := range mgr.kernel_wrappers {
         kernels = append(kernels, name)

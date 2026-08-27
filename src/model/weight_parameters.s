@@ -19,7 +19,7 @@ package model
 
 struct parameter_metadata {
     string param_name
-    vec[int64] shape
+    int64[] shape
     parameter_dtype dtype
     int64 total_elements
     int64 size_bytes
@@ -74,10 +74,10 @@ struct weight_parameter {
     bool uses_packing
 }
 
-func new_parameter_metadata(string name, vec[int64] shape, parameter_dtype dtype) parameter_metadata {
+func new_parameter_metadata(string name, int64[] shape, parameter_dtype dtype) parameter_metadata {
     total_elements := 1
     i := 0
-    for i < shape.len() {
+    for i < len(shape) {
         total_elements = total_elements * shape[i]
         i = i + 1
     }
@@ -234,7 +234,7 @@ func (layer_weights* layer) get_weight(string weight_id) weight_parameter {
         layer.weights[weight_id]
     }
 
-    metadata := new_parameter_metadata("", vec[int64]{}, parameter_dtype::float32)
+    metadata := new_parameter_metadata("", int64[]{}, parameter_dtype::float32)
     weight := new_model_weight("", metadata)
     weight_parameter {
         weight: weight,

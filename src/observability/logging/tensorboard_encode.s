@@ -42,7 +42,7 @@ func int_to_string(int x) string {
     }
     []byte digits = []
     for x > 0 {
-        digits.push('0' + byte(x % 10))
+        digits = append(digits, '0' + byte(x % 10))
         x = x / 10
     }
     string result = ""

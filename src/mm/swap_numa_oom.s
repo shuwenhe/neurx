@@ -43,14 +43,14 @@ func (swap_manager* swm) create_swap_device(int size_mb) (swap_device, string) {
     }
     
     device := swap_device{
-        device_id: swm.swap_devices.len(),
+        device_id: len(swm.swap_devices),
         size: size_mb,
         used_space: 0,
         free_space: size_mb,
         swap_pages: swap_page[]{}
     }
     
-    swm.swap_devices.push(device)
+    swm.swap_devices = append(swm.swap_devices, device)
     swm.used_swap_space = swm.used_swap_space + size_mb
     
     return device, ""
@@ -58,7 +58,7 @@ func (swap_manager* swm) create_swap_device(int size_mb) (swap_device, string) {
 
 // 将页面 Swap Out 到 Swap 设备
 func (swap_manager* swm) swap_out_page(int page_id, int device_id) (int, string) {
-    if device_id >= swm.swap_devices.len() {
+    if device_id >= len(swm.swap_devices) {
         return -1, "Invalid device"
     }
     
@@ -75,7 +75,7 @@ func (swap_manager* swm) swap_out_page(int page_id, int device_id) (int, string)
         flags: 1  // in_swap
     }
     
-    device.swap_pages.push(swap_pg)
+    device.swap_pages = append(device.swap_pages, swap_pg)
     device.used_space = device.used_space + 1
     device.free_space = device.free_space - 1
     
@@ -87,14 +87,14 @@ func (swap_manager* swm) swap_out_page(int page_id, int device_id) (int, string)
 
 // 从 Swap 设备 Swap In 页面
 func (swap_manager* swm) swap_in_page(int page_id, int device_id) (int, string) {
-    if device_id >= swm.swap_devices.len() {
+    if device_id >= len(swm.swap_devices) {
         return -1, "Invalid device"
     }
     
     device := swm.swap_devices[device_id]
     
     i := 0
-    for i < device.swap_pages.len() {
+    for i < len(device.swap_pages) {
         pg := device.swap_pages[i]
         if pg.page_id == page_id {
             pg.flags = 0  // in_memory
@@ -103,7 +103,7 @@ func (swap_manager* swm) swap_in_page(int page_id, int device_id) (int, string) 
             
             // 移除页面
             j := i
-            for j < device.swap_pages.len() - 1 {
+            for j < len(device.swap_pages) - 1 {
                 device.swap_pages[j] = device.swap_pages[j + 1]
                 j = j + 1
             }
@@ -153,7 +153,7 @@ func (numa_manager* nm) init(int num_nodes) (int, string) {
             cpu_count: 4,
             distance_to_other_nodes: 10
         }
-        nm.nodes.push(node)
+        nm.nodes = append(nm.nodes, node)
         i = i + 1
     }
     
@@ -242,14 +242,14 @@ func (oom_manager* om) register_process(int pid, int memory_usage) (int, string)
         oom_score: 0
     }
     
-    om.processes.push(victim)
+    om.processes = append(om.processes, victim)
     return 0, ""
 }
 
 // 计算 OOM 得分 (分数越高越可能被杀死)
 func (oom_manager* om) calculate_oom_score(int pid) (int, string) {
     i := 0
-    for i < om.processes.len() {
+    for i < len(om.processes) {
         proc := om.processes[i]
         if proc.pid == pid {
             score := proc.memory_usage * 100 / om.memory_threshold
@@ -274,7 +274,7 @@ func (oom_manager* om) check_and_kill_victim(int total_memory_used) (int, string
     max_score := 0
     
     i := 0
-    for i < om.processes.len() {
+    for i < len(om.processes) {
         proc := om.processes[i]
         if proc.oom_score > max_score {
             max_score = proc.oom_score
@@ -289,7 +289,7 @@ func (oom_manager* om) check_and_kill_victim(int total_memory_used) (int, string
         
         // 移除进程
         i := max_victim
-        for i < om.processes.len() - 1 {
+        for i < len(om.processes) - 1 {
             om.processes[i] = om.processes[i + 1]
             i = i + 1
         }
@@ -302,5 +302,5 @@ func (oom_manager* om) check_and_kill_victim(int total_memory_used) (int, string
 
 // 获取 OOM 统计
 func (oom_manager om) get_oom_stats() (int, int) {
-    return om.processes.len(), om.killed_processes
+    return len(om.processes), om.killed_processes
 }

@@ -56,25 +56,25 @@ func pick_next_task(rq run_queue) (run_queue, task_struct, bool) {
         task_struct t = rq.rt_queue[0]
         rq.rt_queue = rq.rt_queue[1:]
         rq.current_pid = t.pid
-        return (rq, t, true)
+        return rq, t, true
     }
     if len(rq.normal_queue) > 0 {
         task_struct t = rq.normal_queue[0]
         rq.normal_queue = rq.normal_queue[1:]
         rq.current_pid = t.pid
-        return (rq, t, true)
+        return rq, t, true
     }
     if len(rq.batch_queue) > 0 {
         task_struct t = rq.batch_queue[0]
         rq.batch_queue = rq.batch_queue[1:]
         rq.current_pid = t.pid
-        return (rq, t, true)
+        return rq, t, true
     }
     if len(rq.idle_queue) > 0 {
         task_struct t = rq.idle_queue[0]
         rq.idle_queue = rq.idle_queue[1:]
         rq.current_pid = t.pid
-        return (rq, t, true)
+        return rq, t, true
     }
-    return (rq, task_struct{}, false)
+    return rq, task_struct{}, false
 }

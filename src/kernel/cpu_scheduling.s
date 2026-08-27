@@ -30,8 +30,8 @@ struct cpu_scheduler {
 
 // 初始化 CPU 调度器
 func (cpu_scheduler* sched) init(int num_cpus) (int, string) {
-    sched.run_queue = vec()
-    sched.blocked_queue = vec()
+    sched.run_queue = {}
+    sched.blocked_queue = {}
     sched.num_cpus = num_cpus
     sched.current_task_id = 0
     return 0, ""
@@ -50,7 +50,7 @@ func (cpu_scheduler* sched) create_task(string name, int priority) (task, string
     }
     
     sched.current_task_id = sched.current_task_id + 1
-    sched.run_queue.push(new_task)
+    sched.run_queue = append(sched.run_queue, new_task)
     
     return new_task, ""
 }
@@ -58,7 +58,7 @@ func (cpu_scheduler* sched) create_task(string name, int priority) (task, string
 // 设置 CPU 亲和性
 func (cpu_scheduler* sched) set_affinity(int task_id, int cpu_mask) (int, string) {
     i := 0
-    for i < sched.run_queue.len() {
+    for i < len(sched.run_queue) {
         t := sched.run_queue[i]
         if t.task_id == task_id {
             t.cpu_affinity_mask = cpu_mask
@@ -73,7 +73,7 @@ func (cpu_scheduler* sched) set_affinity(int task_id, int cpu_mask) (int, string
 // 选择最合适的 CPU
 func (cpu_scheduler* sched) select_cpu_for_task(int task_id) (int, string) {
     i := 0
-    for i < sched.run_queue.len() {
+    for i < len(sched.run_queue) {
         t := sched.run_queue[i]
         if t.task_id == task_id {
             cpu_mask := t.cpu_affinity_mask
@@ -99,7 +99,7 @@ func (cpu_scheduler* sched) select_cpu_for_task(int task_id) (int, string) {
 
 // 调度 (CFS - Completely Fair Scheduler)
 func (cpu_scheduler* sched) schedule() (task, string) {
-    if sched.run_queue.len() == 0 {
+    if len(sched.run_queue) == 0 {
         return task{}, "No runnable tasks"
     }
     
@@ -112,11 +112,11 @@ func (cpu_scheduler* sched) schedule() (task, string) {
     
     // 将任务移到队列末尾
     i := 1
-    for i < sched.run_queue.len() {
+    for i < len(sched.run_queue) {
         sched.run_queue[i - 1] = sched.run_queue[i]
         i = i + 1
     }
-    sched.run_queue[sched.run_queue.len() - 1] = next_task
+    sched.run_queue[len(sched.run_queue) - 1] = next_task
     
     return next_task, ""
 }
@@ -124,15 +124,15 @@ func (cpu_scheduler* sched) schedule() (task, string) {
 // 阻塞任务
 func (cpu_scheduler* sched) block_task(int task_id) (int, string) {
     i := 0
-    for i < sched.run_queue.len() {
+    for i < len(sched.run_queue) {
         t := sched.run_queue[i]
         if t.task_id == task_id {
             t.state = 2  // blocked
-            sched.blocked_queue.push(t)
+            sched.blocked_queue = append(sched.blocked_queue, t)
             
             // 从运行队列移除
             j := i
-            for j < sched.run_queue.len() - 1 {
+            for j < len(sched.run_queue) - 1 {
                 sched.run_queue[j] = sched.run_queue[j + 1]
                 j = j + 1
             }
@@ -146,15 +146,15 @@ func (cpu_scheduler* sched) block_task(int task_id) (int, string) {
 // 唤醒任务
 func (cpu_scheduler* sched) wake_task(int task_id) (int, string) {
     i := 0
-    for i < sched.blocked_queue.len() {
+    for i < len(sched.blocked_queue) {
         t := sched.blocked_queue[i]
         if t.task_id == task_id {
             t.state = 0  // runnable
-            sched.run_queue.push(t)
+            sched.run_queue = append(sched.run_queue, t)
             
             // 从阻塞队列移除
             j := i
-            for j < sched.blocked_queue.len() - 1 {
+            for j < len(sched.blocked_queue) - 1 {
                 sched.blocked_queue[j] = sched.blocked_queue[j + 1]
                 j = j + 1
             }
@@ -167,13 +167,13 @@ func (cpu_scheduler* sched) wake_task(int task_id) (int, string) {
 
 // 获取调度统计
 func (cpu_scheduler sched) get_stats() (int, int) {
-    return sched.run_queue.len(), sched.blocked_queue.len()
+    return len(sched.run_queue), len(sched.blocked_queue)
 }
 
 // 获取任务优先级和亲和性
 func (cpu_scheduler sched) get_task_info(int task_id) (int, int, int, string) {
     i := 0
-    for i < sched.run_queue.len() {
+    for i < len(sched.run_queue) {
         t := sched.run_queue[i]
         if t.task_id == task_id {
             return t.priority, t.assigned_cpu, t.runtime, t.name

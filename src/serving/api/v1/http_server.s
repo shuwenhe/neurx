@@ -16,7 +16,7 @@ struct http_response_chunk {
 
 struct http_generate_response {
     string request_id
-    vec[int32] tokens
+    int32[] tokens
     string text
     int32 total_tokens
     int64 elapsed_ms
@@ -90,7 +90,7 @@ func (http_server* server) handle_generate_request(http_request_body req_body) (
         return request_id, 200
     }
 
-    tokens := make(vec[int32])
+    tokens := make(int32[])
     for i := 0; i < int(max_new_tokens); i = i + 1 {
         token, has_more := stream.next_token()
         if token < 0 || !has_more {
@@ -167,8 +167,8 @@ func generate_request_id(int32 counter) string {
     return "req_" + int32_to_string(counter)
 }
 
-func tokenize_prompt(string prompt) vec[int32] {
-    tokens := make(vec[int32])
+func tokenize_prompt(string prompt) int32[] {
+    tokens := make(int32[])
 
     for i := 0; i < len(prompt); i = i + 1 {
         tokens = append(tokens, int32(prompt[i]))
@@ -177,7 +177,7 @@ func tokenize_prompt(string prompt) vec[int32] {
     return tokens
 }
 
-func format_generate_response(string request_id, vec[int32] tokens) string {
+func format_generate_response(string request_id, int32[] tokens) string {
     result := "{\n"
     result = result + "  \"request_id\": \"" + request_id + "\",\n"
     result = result + "  \"tokens\": " + int32_array_to_json(tokens) + ",\n"
@@ -207,7 +207,7 @@ func token_to_string(int32 token) string {
     return "token"
 }
 
-func int32_array_to_json(vec[int32] arr) string {
+func int32_array_to_json(int32[] arr) string {
     result := "["
     for i := 0; i < len(arr); i = i + 1 {
         if i > 0 {

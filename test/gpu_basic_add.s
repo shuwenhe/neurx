@@ -10,7 +10,7 @@ struct cuda_device {
 
 // Vector container for test data
 struct vector_data {
-    vec[int] values
+    int[] values
     int size
 }
 
@@ -94,32 +94,32 @@ func verify_result(vector_data actual, vector_data expected) bool {
 func main() int {
     // Input vectors (host)
     A := vector_data {
-        values: vec[int](),
+        values: int[](),
         size: 4
     }
-    A.values.push(1)
-    A.values.push(2)
-    A.values.push(3)
-    A.values.push(4)
+    A.values = append(A.values, 1)
+    A.values = append(A.values, 2)
+    A.values = append(A.values, 3)
+    A.values = append(A.values, 4)
     
     B := vector_data {
-        values: vec[int](),
+        values: int[](),
         size: 4
     }
-    B.values.push(5)
-    B.values.push(6)
-    B.values.push(7)
-    B.values.push(8)
+    B.values = append(B.values, 5)
+    B.values = append(B.values, 6)
+    B.values = append(B.values, 7)
+    B.values = append(B.values, 8)
     
     // Expected result
     expected := vector_data {
-        values: vec[int](),
+        values: int[](),
         size: 4
     }
-    expected.values.push(6)
-    expected.values.push(8)
-    expected.values.push(10)
-    expected.values.push(12)
+    expected.values = append(expected.values, 6)
+    expected.values = append(expected.values, 8)
+    expected.values = append(expected.values, 10)
+    expected.values = append(expected.values, 12)
     
     // Initialize GPU
     device := init_device(0)
@@ -144,7 +144,7 @@ func main() int {
     
     // Copy result back D2H
     C := vector_data {
-        values: vec[int](),
+        values: int[](),
         size: 4
     }
     C = copy_device_to_host(device, gpu_C_addr, C)

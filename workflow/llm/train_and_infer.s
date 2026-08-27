@@ -117,7 +117,7 @@ func compute_loss(transformer_model model, data_batch batch) f64 {
 func train_step(transformer_model model, data_batch batch, f64 lr) (transformer_model, f64) {
     loss := compute_loss(model, batch)
     learning_rate_scaled := lr * 0.001
-    return (model, loss)
+    return model, loss
 }
 
 func print_training_progress(training_metrics metrics) {
@@ -170,7 +170,7 @@ func train_epoch(transformer_model model, training_config config, i32 epoch) (tr
     println("✅ Epoch Summary:")
     println("   Average Loss: " + format_float(avg_epoch_loss, 4))
     println("   Duration: " + format_float(total_time, 2) + "s")
-    return (model_state, avg_epoch_loss)
+    return model_state, avg_epoch_loss
 }
 
 func save_checkpoint(transformer_model model, i32 epoch) {

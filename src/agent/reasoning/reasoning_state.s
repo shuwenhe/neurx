@@ -41,9 +41,9 @@ struct reasoning_history_entry {
 
 struct reasoning_state_manager {
 	reasoning_state_enum current_state
-	vec[state_transition] transitions
-	vec[state_checkpoint] checkpoints
-	vec[reasoning_history_entry] history
+	state_transition[] transitions
+	state_checkpoint[] checkpoints
+	reasoning_history_entry[] history
 
 	int32           total_steps
 	int64           start_time
@@ -53,7 +53,7 @@ struct reasoning_state_manager {
 	string          current_context
 
 	map[string]interface{} state_variables
-	vec[string]     error_messages
+	string[]     error_messages
 
 	int32           max_history_size
 	int32           checkpoint_interval
@@ -66,16 +66,16 @@ struct reasoning_state_manager {
 func create_reasoning_state_manager() reasoning_state_manager {
 	return reasoning_state_manager{
 		current_state:       INITIAL,
-		transitions:         make(vec[state_transition], 0, 100),
-		checkpoints:         make(vec[state_checkpoint], 0, 50),
-		history:             make(vec[reasoning_history_entry], 0, 1000),
+		transitions:         make(state_transition[], 0, 100),
+		checkpoints:         make(state_checkpoint[], 0, 50),
+		history:             make(reasoning_history_entry[], 0, 1000),
 		total_steps:         0,
 		start_time:          0,
 		end_time:            0,
 		current_problem:     "",
 		current_context:     "",
 		state_variables:     make(map[string]interface{}),
-		error_messages:      make(vec[string], 0, 50),
+		error_messages:      make(string[], 0, 50),
 		max_history_size:    1000,
 		checkpoint_interval: 5,
 		pause_on_error:      true,
@@ -231,11 +231,11 @@ func (reasoning_state_manager* m) add_error(error_msg string) {
 	}
 }
 
-func (reasoning_state_manager* m) get_errors() vec[string] {
+func (reasoning_state_manager* m) get_errors() string[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	errors := make(vec[string], 0, len(m.error_messages))
+	errors := make(string[], 0, len(m.error_messages))
 	for err := range m.error_messages {
 		errors = append(errors, err)
 	}
@@ -247,14 +247,14 @@ func (reasoning_state_manager* m) clear_errors() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	m.error_messages = make(vec[string], 0, 50)
+	m.error_messages = make(string[], 0, 50)
 }
 
-func (reasoning_state_manager* m) get_history() vec[reasoning_history_entry] {
+func (reasoning_state_manager* m) get_history() reasoning_history_entry[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	history := make(vec[reasoning_history_entry], 0, len(m.history))
+	history := make(reasoning_history_entry[], 0, len(m.history))
 	for entry := range m.history {
 		history = append(history, entry)
 	}
@@ -262,11 +262,11 @@ func (reasoning_state_manager* m) get_history() vec[reasoning_history_entry] {
 	return history
 }
 
-func (reasoning_state_manager* m) get_history_by_type(action_type string) vec[reasoning_history_entry] {
+func (reasoning_state_manager* m) get_history_by_type(action_type string) reasoning_history_entry[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	filtered := make(vec[reasoning_history_entry], 0, len(m.history)/5)
+	filtered := make(reasoning_history_entry[], 0, len(m.history)/5)
 	for entry := range m.history {
 		if entry.action_type == action_type {
 			filtered = append(filtered, entry)
@@ -296,11 +296,11 @@ func (reasoning_state_manager* m) get_state_summary() map[string]interface{} {
 	return summary
 }
 
-func (reasoning_state_manager* m) get_transition_history() vec[state_transition] {
+func (reasoning_state_manager* m) get_transition_history() state_transition[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	transitions := make(vec[state_transition], 0, len(m.transitions))
+	transitions := make(state_transition[], 0, len(m.transitions))
 	for trans := range m.transitions {
 		transitions = append(transitions, trans)
 	}
@@ -388,16 +388,16 @@ func (reasoning_state_manager* m) reset() {
 	defer m.mu.Unlock()
 
 	m.current_state = INITIAL
-	m.transitions = make(vec[state_transition], 0, 100)
-	m.checkpoints = make(vec[state_checkpoint], 0, 50)
-	m.history = make(vec[reasoning_history_entry], 0, 1000)
+	m.transitions = make(state_transition[], 0, 100)
+	m.checkpoints = make(state_checkpoint[], 0, 50)
+	m.history = make(reasoning_history_entry[], 0, 1000)
 	m.total_steps = 0
 	m.start_time = 0
 	m.end_time = 0
 	m.current_problem = ""
 	m.current_context = ""
 	m.state_variables = make(map[string]interface{})
-	m.error_messages = make(vec[string], 0, 50)
+	m.error_messages = make(string[], 0, 50)
 }
 
 func (reasoning_state_manager* m) is_active() bool {

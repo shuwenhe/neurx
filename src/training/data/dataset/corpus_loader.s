@@ -520,7 +520,7 @@ func corpus_collect_token_ids(corpus_state state, int max_tokens) corpus_token_s
         []int batch_tokens = batch_result.batch.input_ids
         int i = 0
         for i < len(batch_tokens) && tokens_collected < target_tokens {
-            collected.push(batch_tokens[i])
+            collected = append(collected, batch_tokens[i])
             tokens_collected = tokens_collected + 1
             i = i + 1
         }

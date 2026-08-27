@@ -36,7 +36,7 @@ struct plugin_execution_context {
 
 	map[string]interface{}  execution_data
 
-	vec[string]             execution_logs
+	string[]             execution_logs
 	int32                   log_count
 }
 
@@ -289,7 +289,7 @@ func create_plugin_execution_context(exec_id string, plugin_id string) plugin_ex
 		execution_status_code:  0,
 		execution_result:       "",
 		execution_data:         make(map[string]interface{}),
-		execution_logs:         make(vec[string], 0),
+		execution_logs:         make(string[], 0),
 		log_count:              0,
 	}
 }

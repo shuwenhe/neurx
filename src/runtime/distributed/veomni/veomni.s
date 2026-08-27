@@ -135,7 +135,7 @@ func new_veomni_state(veomni_config config) veomni_state {
         if i == config.num_pipeline_stages - 1 {
             end_layer = total_layers - 1
         }
-        state.stages.push(new_pipeline_stage(i, start_layer, end_layer, 8192))
+        state.stages = append(state.stages, new_pipeline_stage(i, start_layer, end_layer, 8192))
         if i == config.num_pipeline_stages - 1 {
             state.stages[i].is_last_stage = true
         }

@@ -89,8 +89,8 @@ func (punica_wrapper* wrapper) compile_kernel(string kernel_name) bool {
     return false
 }
 
-func (punica_wrapper* wrapper) add_lora(vec[float32] input, vec[vec[float32]] lora_a, vec[vec[float32]] lora_b, float32 scaling) vec[float32] {
-    output := make(vec[float32])
+func (punica_wrapper* wrapper) add_lora(float32[] input, float32[][]] lora_a, float32[][]] lora_b, float32 scaling) float32[] {
+    output := make(float32[])
 
     for i := 0; i < len(input); i = i + 1 {
         output = append(output, input[i])
@@ -100,7 +100,7 @@ func (punica_wrapper* wrapper) add_lora(vec[float32] input, vec[vec[float32]] lo
         return output
     }
 
-    intermediate := make(vec[float32])
+    intermediate := make(float32[])
 
     for i := 0; i < len(lora_a); i = i + 1 {
         accum := 0.0
@@ -123,8 +123,8 @@ func (punica_wrapper* wrapper) add_lora(vec[float32] input, vec[vec[float32]] lo
     return output
 }
 
-func (punica_wrapper* wrapper) mul_lora(vec[float32] input, vec[vec[float32]] lora_a, vec[vec[float32]] lora_b, float32 scaling) vec[float32] {
-    output := make(vec[float32])
+func (punica_wrapper* wrapper) mul_lora(float32[] input, float32[][]] lora_a, float32[][]] lora_b, float32 scaling) float32[] {
+    output := make(float32[])
 
     for i := 0; i < len(input); i = i + 1 {
         output = append(output, input[i])
@@ -134,7 +134,7 @@ func (punica_wrapper* wrapper) mul_lora(vec[float32] input, vec[vec[float32]] lo
         return output
     }
 
-    intermediate := make(vec[float32])
+    intermediate := make(float32[])
 
     for i := 0; i < len(lora_a); i = i + 1 {
         accum := 0.0
@@ -157,12 +157,12 @@ func (punica_wrapper* wrapper) mul_lora(vec[float32] input, vec[vec[float32]] lo
     return output
 }
 
-func (punica_wrapper* wrapper) fused_lora_add(vec[float32] input, vec[vec[float32]] lora_a, vec[vec[float32]] lora_b, float32 scaling) vec[float32] {
+func (punica_wrapper* wrapper) fused_lora_add(float32[] input, float32[][]] lora_a, float32[][]] lora_b, float32 scaling) float32[] {
     return wrapper.add_lora(input, lora_a, lora_b, scaling)
 }
 
-func (punica_wrapper* wrapper) batch_lora_add(vec[vec[float32]] inputs, vec[vec[float32]] lora_a, vec[vec[float32]] lora_b, float32 scaling) vec[vec[float32]] {
-    outputs := make(vec[vec[float32]])
+func (punica_wrapper* wrapper) batch_lora_add(float32[][]] inputs, float32[][]] lora_a, float32[][]] lora_b, float32 scaling) float32[][]] {
+    outputs := make(float32[][]])
 
     for i := 0; i < len(inputs); i = i + 1 {
         output := wrapper.add_lora(inputs[i], lora_a, lora_b, scaling)

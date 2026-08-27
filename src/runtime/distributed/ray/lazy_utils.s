@@ -38,12 +38,12 @@ type lazy_resource struct {
     factory_fn interface{}
     is_initialized bool
     resource_obj interface{}
-    dependencies vec[string]
+    dependencies string[]
     creation_time_ms uint64
 }
 
 type dependency_graph struct {
-    nodes map[string]vec[string]
+    nodes map[string]string[]
     visited map[string]bool
     in_progress map[string]bool
 }
@@ -90,14 +90,14 @@ func create_lazy_resource(name string) lazy_resource* {
     resource.factory_fn = nil
     resource.is_initialized = false
     resource.resource_obj = nil
-    resource.dependencies = make(vec[string], 0)
+    resource.dependencies = make(string[], 0)
     resource.creation_time_ms = 0
     return resource
 }
 
 func create_dependency_graph() dependency_graph* {
     graph := new(dependency_graph)
-    graph.nodes = make(map[string]vec[string])
+    graph.nodes = make(map[string]string[])
     graph.visited = make(map[string]bool)
     graph.in_progress = make(map[string]bool)
     return graph
@@ -194,7 +194,7 @@ func (loader lazy_loader*) unload_module(module_name string) bool {
 
 func (loader lazy_loader*) register_resource(
     name string,
-    dependencies vec[string],
+    dependencies string[],
 ) bool {
     resource := create_lazy_resource(name)
     resource.dependencies = dependencies
@@ -351,7 +351,7 @@ func (loader lazy_loader*) clear_cache() {
     loader.cache = clear_map
 }
 
-func (loader lazy_loader*) preload_modules(module_names vec[string]) uint32 {
+func (loader lazy_loader*) preload_modules(module_names string[]) uint32 {
     count := uint32(0)
     for i := 0; i < len(module_names); i = i + 1 {
         if loader.load_module(module_names[i]) {

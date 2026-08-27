@@ -471,14 +471,14 @@ func agent_workspace_split_lines(string text) []string {
     for i < len(text) {
         string ch = string(text[i])
         if ch == "\n" {
-            result.push(line)
+            result = append(result, line)
             line = ""
         } else if ch != "\r" {
             line = line + ch
         }
         i = i + 1
     }
-    result.push(line)
+    result = append(result, line)
     result
 }
 
@@ -508,7 +508,7 @@ func agent_workspace_replace_fuzzy(string content, string old_text, string new_t
     []string norm_ol = []string{cap: no + 1}
     int oi = 0
     for oi < no {
-        norm_ol.push(agent_workspace_normalize_line(ol[oi]))
+        norm_ol = append(norm_ol, agent_workspace_normalize_line(ol[oi]))
         oi = oi + 1
     }
     bool content_ends_newline = nc > 0 && len(content) > 0 && string(content[len(content) - 1]) == "\n"

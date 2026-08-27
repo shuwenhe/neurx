@@ -133,7 +133,7 @@ func run_posttrain_lora_sft() int {
         if input_idx - (input_idx / 2) * 2 == 1 {
             value = 0.0 - value
         }
-        input_vec[input_idx] = value + 0.0001
+        input_input_idx[] = value + 0.0001
         input_idx = input_idx + 1
     }
     println("Vectorizing target q")
@@ -340,7 +340,7 @@ func run_posttrain_lora_sft() int {
         if input_idx - (input_idx / 2) * 2 == 1 {
             value = 0.0 - value
         }
-        input_vec[input_idx] = value + 0.0001
+        input_input_idx[] = value + 0.0001
         input_idx = input_idx + 1
     }
     println("Vectorizing target q")
@@ -441,7 +441,7 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
         for in_idx < module.layer.in_dim && in_idx < len(input_vec) {
             int w_idx = out_idx * module.layer.in_dim + in_idx
             if w_idx < base_len {
-                sum = sum + input_vec[in_idx] * module.layer.base_weight[w_idx]
+                sum = sum + input_in_idx[] * module.layer.base_weight[w_idx]
             }
             in_idx = in_idx + 1
         }
@@ -461,7 +461,7 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
     float error_scale = 0.0
     int i = 0
     for i < len(output) && i < len(target_vec) {
-        float diff = output[i] - target_vec[i]
+        float diff = output[i] - target_i[]
         if diff < 0.0 {
             diff = 0.0 - diff
         }
@@ -991,7 +991,7 @@ func text_to_vector(string text, int dim) []float {
         if i - (i / 2) * 2 == 1 {
             value = 0.0 - value
         }
-        vec[i] = value + length_scale
+        i[] = value + length_scale
         i = i + 1
     }
     vec

@@ -7,8 +7,8 @@ use std.map.map
 
 struct lora_request_state {
     request_id: string
-    adapter_names: *vec[string]
-    adapter_scales: *vec[float]
+    adapter_names: *string[]
+    adapter_scales: *float[]
     is_active: bool
     created_at: int
     updated_at: int
@@ -21,7 +21,7 @@ struct lora_state_error {
 
 struct lora_state_manager {
     request_states: map[string, lora_request_state]
-    adapter_cache: map[string, *vec[vec[float]]]
+    adapter_cache: map[string, *float[][]]]
     max_adapters_per_request: int
     enable_cache: bool
 }
@@ -29,7 +29,7 @@ struct lora_state_manager {
 func lora_state_manager::new(int max_adapters) lora_state_manager {
     lora_state_manager {
         request_states: map[string, lora_request_state](),
-        adapter_cache: map[string, *vec[vec[float]]](),
+        adapter_cache: map[string, *float[][]]](),
         max_adapters_per_request: max_adapters,
         enable_cache: true,
     }
@@ -37,35 +37,35 @@ func lora_state_manager::new(int max_adapters) lora_state_manager {
 
 func (lora_state_manager* manager) create_request_state(
     request_id: string,
-    adapter_names: *vec[string],
-    adapter_scales: *vec[float]
+    adapter_names: *string[],
+    adapter_scales: *float[]
 ) ((), lora_state_error) {
 
-    if request_id.len() == 0 {
+    if len(request_id) == 0 {
         return (lora_state_error {
             code: "INVALID_REQUEST_ID",
             message: "Request ID cannot be empty",
         })
     }
 
-    if adapter_names.len() != adapter_scales.len() {
+    if len(adapter_names) != len(adapter_scales) {
         return (lora_state_error {
             code: "LENGTH_MISMATCH",
             message: "Adapter names and scales length mismatch",
         })
     }
 
-    if adapter_names.len() > manager.max_adapters_per_request {
+    if len(adapter_names) > manager.max_adapters_per_request {
         return (lora_state_error {
             code: "TOO_MANY_ADAPTERS",
             message: "Number of adapters exceeds limit: " +
-                     adapter_names.len().to_string() + " > " +
+                     len(adapter_names).to_string() + " > " +
                      manager.max_adapters_per_request.to_string(),
         })
     }
 
     i := 0
-    for i < adapter_scales.len() {
+    for i < len(adapter_scales) {
         if adapter_scales[i] < 0.0 {
             return (lora_state_error {
                 code: "INVALID_SCALE",
@@ -94,7 +94,7 @@ func (lora_state_manager* manager) create_request_state(
     }
 
     manager.request_states.insert(request_id, state)
-    ((, ""))
+    return (), ""
 }
 
 func (lora_state_manager* manager) get_request_state(
@@ -105,11 +105,11 @@ func (lora_state_manager* manager) get_request_state(
 
 func (lora_state_manager* manager) update_adapter_scales(
     request_id: string,
-    new_scales: *vec[float]
+    new_scales: *float[]
 ) ((), lora_state_error) {
     switch manager.request_states.get(request_id) {
         option::some(state) : {
-            if new_scales.len() != state.adapter_names.len() {
+            if len(new_scales) != len(state.adapter_names) {
                 return (lora_state_error {
                     code: "LENGTH_MISMATCH",
                     message: "New scales length does not match adapters",
@@ -120,7 +120,7 @@ func (lora_state_manager* manager) update_adapter_scales(
             state.updated_at = 0
 
             manager.request_states.insert(request_id, state)
-            ((, ""))
+            return (), ""
         },
         option::none : {
             (lora_state_error {
@@ -133,17 +133,17 @@ func (lora_state_manager* manager) update_adapter_scales(
 
 func (lora_state_manager* manager) switch_adapters(
     request_id: string,
-    new_adapter_names: *vec[string],
-    new_scales: *vec[float]
+    new_adapter_names: *string[],
+    new_scales: *float[]
 ) ((), lora_state_error) {
-    if new_adapter_names.len() != new_scales.len() {
+    if len(new_adapter_names) != len(new_scales) {
         return (lora_state_error {
             code: "LENGTH_MISMATCH",
             message: "Adapter names and scales length mismatch",
         })
     }
 
-    if new_adapter_names.len() > manager.max_adapters_per_request {
+    if len(new_adapter_names) > manager.max_adapters_per_request {
         return (lora_state_error {
             code: "TOO_MANY_ADAPTERS",
             message: "Number of adapters exceeds limit",
@@ -160,7 +160,7 @@ func (lora_state_manager* manager) switch_adapters(
 
             manager.clear_request_cache(request_id)
 
-            ((, ""))
+            return (), ""
         },
         option::none : {
             (lora_state_error {
@@ -184,7 +184,7 @@ func (lora_state_manager* manager) remove_request_state(
     manager.request_states.remove(request_id)
     manager.clear_request_cache(request_id)
 
-    ((, ""))
+    return (), ""
 }
 
 func (lora_state_manager* manager) activate_request(
@@ -195,7 +195,7 @@ func (lora_state_manager* manager) activate_request(
             state.is_active = true
             state.updated_at = 0
             manager.request_states.insert(request_id, state)
-            ((, ""))
+            return (), ""
         },
         option::none : {
             (lora_state_error {
@@ -214,7 +214,7 @@ func (lora_state_manager* manager) deactivate_request(
             state.is_active = false
             state.updated_at = 0
             manager.request_states.insert(request_id, state)
-            ((, ""))
+            return (), ""
         },
         option::none : {
             (lora_state_error {
@@ -232,14 +232,14 @@ func (lora_state_manager* manager) is_request_active(string request_id) bool {
     }
 }
 
-func (lora_state_manager* manager) get_active_requests() *vec[string] {
-    active := vec[string]()
+func (lora_state_manager* manager) get_active_requests() *string[] {
+    active := string[]()
 
     for req_id in manager.request_states.keys() {
         switch manager.request_states.get(req_id) {
             option::some(state) : {
                 if state.is_active {
-                    active.push(req_id)
+                    active = append(active, req_id)
                 }
             },
             option::none : {},
@@ -251,13 +251,13 @@ func (lora_state_manager* manager) get_active_requests() *vec[string] {
 
 func (lora_state_manager* manager) cache_fused_weights(
     cache_key: string,
-    weights: *vec[vec[float]]
+    weights: *float[][]]
 ) ((), lora_state_error) {
     if !manager.enable_cache {
-        return ((, ""))
+        return return (), ""
     }
 
-    if cache_key.len() == 0 {
+    if len(cache_key) == 0 {
         return (lora_state_error {
             code: "INVALID_CACHE_KEY",
             message: "Cache key cannot be empty",
@@ -265,33 +265,33 @@ func (lora_state_manager* manager) cache_fused_weights(
     }
 
     manager.adapter_cache.insert(cache_key, weights)
-    ((, ""))
+    return (), ""
 }
 
 func (lora_state_manager* manager) get_cached_weights(
     cache_key: string
-) option[*vec[vec[float]]] {
+) option[*float[][]]] {
     manager.adapter_cache.get(cache_key)
 }
 
 func (lora_state_manager* manager) clear_request_cache(
     request_id: string
 ) ((), lora_state_error) {
-    keys_to_remove := vec[string]()
+    keys_to_remove := string[]()
 
     for key in manager.adapter_cache.keys() {
         if key.starts_with(request_id + "_") {
-            keys_to_remove.push(key)
+            keys_to_remove = append(keys_to_remove, key)
         }
     }
 
     i := 0
-    for i < keys_to_remove.len() {
+    for i < len(keys_to_remove) {
         manager.adapter_cache.remove(keys_to_remove[i])
         i = i + 1
     }
 
-    ((, ""))
+    return (), ""
 }
 
 func (lora_state_manager* manager) clear_all_cache() {
@@ -308,7 +308,7 @@ func (lora_state_manager* manager) get_cache_stats() (int, int) {
     for key in manager.adapter_cache.keys() {
         switch manager.adapter_cache.get(key) {
             option::some(weights) : {
-                rows := weights.len()
+                rows := len(weights)
                 cols := if rows > 0 { weights[0].len() } else { 0 }
                 total_size_mb = total_size_mb + rows * cols * 4
             },
@@ -320,10 +320,10 @@ func (lora_state_manager* manager) get_cache_stats() (int, int) {
 }
 
 func (lora_state_manager* manager) get_request_count() int {
-    manager.request_states.len()
+    len(manager.request_states)
 }
 
 func (lora_state_manager* manager) get_active_request_count() int {
     count := manager.get_active_requests()
-    count.len()
+    len(count)
 }

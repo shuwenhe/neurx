@@ -190,7 +190,7 @@ func data_pipeline_split_lines(string text) []string {
     for i < len(text) {
         if text[i] == 10 || text[i] == 13 {
             if len(current) > 0 {
-                lines.push(current)
+                lines = append(lines, current)
                 current = ""
             }
         } else {
@@ -199,7 +199,7 @@ func data_pipeline_split_lines(string text) []string {
         i = i + 1
     }
     if len(current) > 0 {
-        lines.push(current)
+        lines = append(lines, current)
     }
     lines
 }
@@ -279,15 +279,15 @@ func data_pipeline_parse_manifest_file(string manifest_path) []string {
     }
     string train_path = data_pipeline_extract_json_manifest_value(text, "train", "")
     if data_pipeline_trim(train_path) != "" {
-        paths.push(train_path)
+        paths = append(paths, train_path)
     }
     string val_path = data_pipeline_extract_json_manifest_value(text, "val", "")
     if data_pipeline_trim(val_path) != "" {
-        paths.push(val_path)
+        paths = append(paths, val_path)
     }
     string test_path = data_pipeline_extract_json_manifest_value(text, "test", "")
     if data_pipeline_trim(test_path) != "" {
-        paths.push(test_path)
+        paths = append(paths, test_path)
     }
     paths
 }
@@ -319,7 +319,7 @@ func data_pipeline_extract_json_manifest_paths(string text, string key) []string
                     }
                     value = data_pipeline_trim(value)
                     if value != "" {
-                        paths.push(value)
+                        paths = append(paths, value)
                     }
                 }
             }
@@ -417,7 +417,7 @@ func data_pipeline_parse_directory_shards(string dir_path) []string {
     for i < len(raw) {
         if raw[i] == 10 || raw[i] == 13 {
             if len(current) > 0 {
-                paths.push(current)
+                paths = append(paths, current)
                 current = ""
             }
         } else {
@@ -426,7 +426,7 @@ func data_pipeline_parse_directory_shards(string dir_path) []string {
         i = i + 1
     }
     if len(current) > 0 {
-        paths.push(current)
+        paths = append(paths, current)
     }
     paths
 }
@@ -501,7 +501,7 @@ func data_pipeline_jsonl_to_documents(string text) []string {
         string doc = data_pipeline_extract_jsonl_text(lines[i])
         doc = data_pipeline_trim(doc)
         if doc != "" {
-            docs.push(doc)
+            docs = append(docs, doc)
         }
         i = i + 1
     }
@@ -516,10 +516,10 @@ func data_pipeline_documents_to_tokens([]string documents) []int {
         if doc != "" {
             int j = 0
             for j < len(doc) {
-                tokens.push(doc[j])
+                tokens = append(tokens, doc[j])
                 j = j + 1
             }
-            tokens.push(10)
+            tokens = append(tokens, 10)
         }
         i = i + 1
     }

@@ -233,7 +233,7 @@ func sample_from_probs([]float probs, int size, rng_state rng) (int, rng_state) 
     for i < size {
         cum = cum + probs[i]
         if r < cum {
-            return (i, r2)
+            return i, r2
         }
         i = i + 1
     }

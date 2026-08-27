@@ -7,8 +7,8 @@ struct token_frequency {
 	frequency int32
 }
 
-func apply_frequency_penalty(vec[float32] logits, map[int32]int32 token_freq, float32 penalty) vec[float32] {
-	adjusted := make(vec[float32])
+func apply_frequency_penalty(float32[] logits, map[int32]int32 token_freq, float32 penalty) float32[] {
+	adjusted := make(float32[])
 
 	for i := 0; i < len(logits); i = i + 1 {
 		token_id := int32(i)
@@ -28,8 +28,8 @@ func apply_frequency_penalty(vec[float32] logits, map[int32]int32 token_freq, fl
 	return adjusted
 }
 
-func apply_presence_penalty(vec[float32] logits, map[int32]int32 token_freq, float32 penalty) vec[float32] {
-	adjusted := make(vec[float32])
+func apply_presence_penalty(float32[] logits, map[int32]int32 token_freq, float32 penalty) float32[] {
+	adjusted := make(float32[])
 
 	for i := 0; i < len(logits); i = i + 1 {
 		token_id := int32(i)
@@ -53,8 +53,8 @@ func apply_presence_penalty(vec[float32] logits, map[int32]int32 token_freq, flo
 	return adjusted
 }
 
-func apply_repetition_penalty(vec[float32] logits, map[int32]int32 token_freq, float32 penalty) vec[float32] {
-	adjusted := make(vec[float32])
+func apply_repetition_penalty(float32[] logits, map[int32]int32 token_freq, float32 penalty) float32[] {
+	adjusted := make(float32[])
 
 	for i := 0; i < len(logits); i = i + 1 {
 		token_id := int32(i)
@@ -84,8 +84,8 @@ func apply_repetition_penalty(vec[float32] logits, map[int32]int32 token_freq, f
 	return adjusted
 }
 
-func apply_length_penalty(vec[float32] logits, int32 generated_length, float32 penalty) vec[float32] {
-	adjusted := make(vec[float32])
+func apply_length_penalty(float32[] logits, int32 generated_length, float32 penalty) float32[] {
+	adjusted := make(float32[])
 
 	if penalty <= 0.0 {
 		return logits
@@ -104,12 +104,12 @@ func apply_length_penalty(vec[float32] logits, int32 generated_length, float32 p
 	return adjusted
 }
 
-func apply_ngram_penalty(vec[float32] logits, vec[int32] generated_tokens, int32 ngram_size, float32 penalty) vec[float32] {
+func apply_ngram_penalty(float32[] logits, int32[] generated_tokens, int32 ngram_size, float32 penalty) float32[] {
 	if ngram_size <= 0 || penalty <= 0.0 {
 		return logits
 	}
 
-	adjusted := make(vec[float32])
+	adjusted := make(float32[])
 
 	for i := 0; i < len(logits); i = i + 1 {
 		token_id := int32(i)
@@ -146,12 +146,12 @@ func apply_ngram_penalty(vec[float32] logits, vec[int32] generated_tokens, int32
 	return adjusted
 }
 
-func apply_bad_token_mask(vec[float32] logits, vec[int32] bad_token_ids) vec[float32] {
+func apply_bad_token_mask(float32[] logits, int32[] bad_token_ids) float32[] {
 	if len(bad_token_ids) == 0 {
 		return logits
 	}
 
-	adjusted := make(vec[float32])
+	adjusted := make(float32[])
 
 	for i := 0; i < len(logits); i = i + 1 {
 		token_id := int32(i)
@@ -175,12 +175,12 @@ func apply_bad_token_mask(vec[float32] logits, vec[int32] bad_token_ids) vec[flo
 	return adjusted
 }
 
-func apply_forced_token_boost(vec[float32] logits, vec[int32] forced_token_ids, float32 boost) vec[float32] {
+func apply_forced_token_boost(float32[] logits, int32[] forced_token_ids, float32 boost) float32[] {
 	if len(forced_token_ids) == 0 {
 		return logits
 	}
 
-	adjusted := make(vec[float32])
+	adjusted := make(float32[])
 
 	for i := 0; i < len(logits); i = i + 1 {
 		token_id := int32(i)
@@ -204,7 +204,7 @@ func apply_forced_token_boost(vec[float32] logits, vec[int32] forced_token_ids, 
 	return adjusted
 }
 
-func compute_token_frequency(vec[int32] tokens) map[int32]int32 {
+func compute_token_frequency(int32[] tokens) map[int32]int32 {
 	freq_map := make(map[int32]int32)
 
 	for i := 0; i < len(tokens); i = i + 1 {
@@ -221,7 +221,7 @@ func compute_token_frequency(vec[int32] tokens) map[int32]int32 {
 	return freq_map
 }
 
-func apply_all_penalties(vec[float32] logits, vec[int32] generated_tokens, penalty_config* penalty_params) vec[float32] {
+func apply_all_penalties(float32[] logits, int32[] generated_tokens, penalty_config* penalty_params) float32[] {
 	adjusted := logits
 
 	if penalty_config == nil {
@@ -268,8 +268,8 @@ struct penalty_params {
 	length_penalty float32
 	ngram_size int32
 	ngram_penalty float32
-	bad_tokens vec[int32]
-	forced_tokens vec[int32]
+	bad_tokens int32[]
+	forced_tokens int32[]
 	forced_boost float32
 }
 
@@ -281,8 +281,8 @@ func create_penalty_params() penalty_params* {
 		length_penalty: 1.0,
 		ngram_size: 0,
 		ngram_penalty: 0.0,
-		bad_tokens: make(vec[int32]),
-		forced_tokens: make(vec[int32]),
+		bad_tokens: make(int32[]),
+		forced_tokens: make(int32[]),
 		forced_boost: 10.0,
 	}
 }

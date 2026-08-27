@@ -16,7 +16,7 @@ struct compilation_unit {
     computation_graph original_graph
     computation_graph optimized_graph
     pass_pipeline pipeline
-    vec[pass_result] pass_results
+    pass_result[] pass_results
     compilation_stats stats
 }
 
@@ -41,8 +41,8 @@ func new_compilation_unit(string name, computation_graph g) compilation_unit {
         unit_name: name,
         original_graph: g,
         optimized_graph: g,
-        pipeline: vec[pass_result](),
-        pass_results: vec[pass_result](),
+        pipeline: pass_result[](),
+        pass_results: pass_result[](),
         stats: compilation_stats {
             original_op_count: 0,
             optimized_op_count: 0,

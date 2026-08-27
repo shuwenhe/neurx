@@ -3,7 +3,7 @@ package neurx.tool_parsers.structured_sampler
 use neurx.tool_parsers.schema.schema_types
 use neurx.tool_parsers.schema.schema_parser
 use neurx.tool_parsers.constraint.constraint_generator
-use std.vec
+use std.slices
 
 struct structured_sampler {
     schema: json_schema

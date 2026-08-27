@@ -28,7 +28,7 @@ func LogTest(string name, bool passed, string message, f32 time_ms) TestResult {
     }
 }
 
-func PrintTestReport(vec[TestResult] results) {
+func PrintTestReport(TestResult[] results) {
     passed := 0
     failed := 0
     total_time := f32(0.0)
@@ -130,7 +130,7 @@ func TestSpecialTokens() TestResult {
 func TestTokenCache() TestResult {
     cache_inst := cache.NewTokenCache(100000, "lru")
 
-    tokens := make(vec[i32], 0)
+    tokens := make(i32[], 0)
     tokens = append(tokens, 1)
     tokens = append(tokens, 2)
 
@@ -149,7 +149,7 @@ func TestCacheEviction() TestResult {
     cache_inst := cache.NewTokenCache(100, "lru")
 
     for i := 0; i < 5; i += 1 {
-        tokens := make(vec[i32], 0)
+        tokens := make(i32[], 0)
         tokens = append(tokens, i32(i))
         key := "text_" + string_from_i32(i32(i))
         cache_inst.Put(key, tokens)
@@ -164,7 +164,7 @@ func TestCacheEviction() TestResult {
 }
 
 func TestPadding() TestResult {
-    tokens := make(vec[i32], 0)
+    tokens := make(i32[], 0)
     tokens = append(tokens, 1)
     tokens = append(tokens, 2)
 
@@ -179,7 +179,7 @@ func TestPadding() TestResult {
 }
 
 func TestTruncation() TestResult {
-    tokens := make(vec[i32], 0)
+    tokens := make(i32[], 0)
     for i := 0; i < 10; i += 1 {
         tokens = append(tokens, i32(i))
     }
@@ -195,7 +195,7 @@ func TestTruncation() TestResult {
 }
 
 func TestTokenFrequency() TestResult {
-    tokens := make(vec[i32], 0)
+    tokens := make(i32[], 0)
     tokens = append(tokens, 1)
     tokens = append(tokens, 2)
     tokens = append(tokens, 1)
@@ -212,7 +212,7 @@ func TestTokenFrequency() TestResult {
 }
 
 func TestUniqueTokenCount() TestResult {
-    tokens := make(vec[i32], 0)
+    tokens := make(i32[], 0)
     tokens = append(tokens, 1)
     tokens = append(tokens, 2)
     tokens = append(tokens, 1)
@@ -229,17 +229,17 @@ func TestUniqueTokenCount() TestResult {
 }
 
 func TestBatchPadding() TestResult {
-    seq1 := make(vec[i32], 0)
+    seq1 := make(i32[], 0)
     seq1 = append(seq1, 1)
     seq1 = append(seq1, 2)
 
-    seq2 := make(vec[i32], 0)
+    seq2 := make(i32[], 0)
     seq2 = append(seq2, 1)
     seq2 = append(seq2, 2)
     seq2 = append(seq2, 3)
     seq2 = append(seq2, 4)
 
-    sequences := make(vec[vec[i32]], 0)
+    sequences := make(i32[][]], 0)
     sequences = append(sequences, seq1)
     sequences = append(sequences, seq2)
 
@@ -256,7 +256,7 @@ func TestBatchPadding() TestResult {
 func TestSpecialTokenMask() TestResult {
     mgr := special_tokens.NewSpecialTokenManager()
 
-    tokens := make(vec[i32], 0)
+    tokens := make(i32[], 0)
     tokens = append(tokens, 0)
     tokens = append(tokens, 100)
     tokens = append(tokens, 1)
@@ -274,7 +274,7 @@ func TestSpecialTokenMask() TestResult {
 func TestTokenCacheHitRate() TestResult {
     cache_inst := cache.NewTokenCache(100000, "lru")
 
-    tokens := make(vec[i32], 0)
+    tokens := make(i32[], 0)
     tokens = append(tokens, 1)
 
     cache_inst.Put("key1", tokens)
@@ -317,7 +317,7 @@ func main() {
     println("║       NeurX Tokenizers - Test Suite                   ║")
     println("╚════════════════════════════════════════════════════════╝\n")
 
-    results := make(vec[TestResult], 0)
+    results := make(TestResult[], 0)
 
     results = append(results, TestTokenizerInitialization())
     results = append(results, TestBasicEncoding())

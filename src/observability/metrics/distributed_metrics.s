@@ -231,7 +231,7 @@ func detect_anomalies(
     if is_anomaly {
         detector.anomaly_count = detector.anomaly_count + 1
     }
-    return (is_anomaly, description)
+    return is_anomaly, description
 }
 
 func compute_timing_breakdown(
@@ -240,14 +240,14 @@ func compute_timing_breakdown(
     total_time := metrics.forward_time + metrics.backward_time + metrics.optimizer_time +
                             metrics.communication_time + metrics.data_loading_time
     if total_time <= 0.0 {
-        return (0.0, 0.0, 0.0, 0.0, 0.0)
+        return 0.0, 0.0, 0.0, 0.0, 0.0
     }
     pct_forward := (metrics.forward_time / total_time) * 100.0
     pct_backward := (metrics.backward_time / total_time) * 100.0
     pct_optimizer := (metrics.optimizer_time / total_time) * 100.0
     pct_communication := (metrics.communication_time / total_time) * 100.0
     pct_data_load := (metrics.data_loading_time / total_time) * 100.0
-    return (pct_forward, pct_backward, pct_optimizer, pct_communication, pct_data_load)
+    return pct_forward, pct_backward, pct_optimizer, pct_communication, pct_data_load
 }
 
 func identify_communication_bottlenecks(

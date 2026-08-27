@@ -46,11 +46,11 @@ func lsm_find_context(ls lsm_state, int agent_pid) (security_context, bool) {
     int i = 0
     for i < len(ls.contexts) {
         if ls.contexts[i].agent_pid == agent_pid {
-            return (ls.contexts[i], true)
+            return ls.contexts[i], true
         }
         i = i + 1
     }
-    return (security_context{}, false)
+    return security_context{}, false
 }
 
 func lsm_check_tool_call(ls lsm_state, int agent_pid, string tool_name) (lsm_state, int) {
@@ -59,12 +59,12 @@ func lsm_check_tool_call(ls lsm_state, int agent_pid, string tool_name) (lsm_sta
     (ctx, found) = lsm_find_context(ls, agent_pid)
     if !found {
         ls.audit_log = append(ls.audit_log, "DENY tool=" + tool_name + " pid=" + string(agent_pid) + " (no context)")
-        if ls.enforcing { return (ls, LSM_DENY) }
-        return (ls, LSM_ALLOW)
+        if ls.enforcing { return ls, LSM_DENY }
+        return ls, LSM_ALLOW
     }
     if (ctx.capabilities & CAP_TOOL_EXEC) == 0 {
         ls.audit_log = append(ls.audit_log, "DENY tool=" + tool_name + " label=" + ctx.agent_label)
-        if ls.enforcing { return (ls, LSM_DENY) }
+        if ls.enforcing { return ls, LSM_DENY }
     }
     if len(ctx.allowed_tools) > 0 {
         bool ok = false
@@ -77,10 +77,10 @@ func lsm_check_tool_call(ls lsm_state, int agent_pid, string tool_name) (lsm_sta
         }
         if !ok {
             ls.audit_log = append(ls.audit_log, "DENY tool=" + tool_name + " not_in_allowlist")
-            if ls.enforcing { return (ls, LSM_DENY) }
+            if ls.enforcing { return ls, LSM_DENY }
         }
     }
-    return (ls, LSM_ALLOW)
+    return ls, LSM_ALLOW
 }
 
 func lsm_check_spawn(ls lsm_state, int agent_pid, string child_goal) (lsm_state, int) {
@@ -89,9 +89,9 @@ func lsm_check_spawn(ls lsm_state, int agent_pid, string child_goal) (lsm_state,
     (ctx, found) = lsm_find_context(ls, agent_pid)
     if !found || (ctx.capabilities & CAP_SPAWN_AGENT) == 0 {
         ls.audit_log = append(ls.audit_log, "DENY spawn goal=" + child_goal + " pid=" + string(agent_pid))
-        if ls.enforcing { return (ls, LSM_DENY) }
+        if ls.enforcing { return ls, LSM_DENY }
     }
-    return (ls, LSM_ALLOW)
+    return ls, LSM_ALLOW
 }
 
 func lsm_check_network(ls lsm_state, int agent_pid, string url) (lsm_state, int) {
@@ -100,7 +100,7 @@ func lsm_check_network(ls lsm_state, int agent_pid, string url) (lsm_state, int)
     (ctx, found) = lsm_find_context(ls, agent_pid)
     if !found || !ctx.network_allowed {
         ls.audit_log = append(ls.audit_log, "DENY net url=" + url + " pid=" + string(agent_pid))
-        if ls.enforcing { return (ls, LSM_DENY) }
+        if ls.enforcing { return ls, LSM_DENY }
     }
-    return (ls, LSM_ALLOW)
+    return ls, LSM_ALLOW
 }

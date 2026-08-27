@@ -32,7 +32,7 @@ struct vm_manager {
 func (vm_manager* vmm) init(int total_memory) (int, string) {
     vmm.total_pages = total_memory / 4096
     vmm.free_pages = vmm.total_pages
-    vmm.vm_areas = vec()
+    vmm.vm_areas = {}
     return 0, ""
 }
 

@@ -10,7 +10,7 @@ struct capability {
 
 struct process_capabilities {
     int process_id
-    vec[capability] caps
+    capability[] caps
 }
 
 struct audit_event {
@@ -22,14 +22,14 @@ struct audit_event {
 }
 
 struct audit_log {
-    vec[audit_event] events
+    audit_event[] events
     int event_count
 }
 
 func create_process_capabilities(int pid) process_capabilities {
     pc := process_capabilities {
         process_id: pid,
-        caps: vec[capability]()
+        caps: capability[]()
     }
     pc
 }
@@ -40,7 +40,7 @@ func grant_capability(process_capabilities pc, int cap_id, string cap_name) proc
         cap_name: cap_name,
         granted: true
     }
-    pc.caps.push(cap)
+    pc.caps = append(pc.caps, cap)
     pc
 }
 
@@ -50,7 +50,7 @@ func revoke_capability(process_capabilities pc, int cap_id) process_capabilities
 
 func create_audit_log() audit_log {
     log := audit_log {
-        events: vec[audit_event](),
+        events: audit_event[](),
         event_count: 0
     }
     log
@@ -64,7 +64,7 @@ func audit_log_event(audit_log log, string event_type, int pid, string details) 
         timestamp: 0,
         details: details
     }
-    log.events.push(event)
+    log.events = append(log.events, event)
     log.event_count = log.event_count + 1
     log
 }

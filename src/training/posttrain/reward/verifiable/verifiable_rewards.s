@@ -171,7 +171,7 @@ func run_code_sandbox(
     string language,
     string test_cases
 ) (bool, string, string) {
-    (true, "", "")
+return     (true, "", "")
 }
 
 func compute_output_similarity(string output, string expected) float {

@@ -12,8 +12,8 @@ package attention
 
 struct backend_capability {
     string backend_name
-    vec[string] supported_dtypes
-    vec[hardware_type] supported_hardware
+    string[] supported_dtypes
+    hardware_type[] supported_hardware
     int min_batch_size
     int max_seq_length
     int estimated_flops_per_token
@@ -37,8 +37,8 @@ func get_backend_capability(attention_backend_type backend_type) backend_capabil
     switch backend_type {
         attention_backend_type::standard : backend_capability {
             backend_name: "standard",
-            supported_dtypes: vec[string]{"float32", "float16", "bfloat16"},
-            supported_hardware: vec[hardware_type]{hardware_type::cpu, hardware_type::unknown},
+            supported_dtypes: string[]{"float32", "float16", "bfloat16"},
+            supported_hardware: hardware_type[]{hardware_type::cpu, hardware_type::unknown},
             min_batch_size: 1,
             max_seq_length: 8192,
             estimated_flops_per_token: 0,
@@ -47,8 +47,8 @@ func get_backend_capability(attention_backend_type backend_type) backend_capabil
         },
         attention_backend_type::flash_attention : backend_capability {
             backend_name: "flash_attention",
-            supported_dtypes: vec[string]{"float16", "bfloat16"},
-            supported_hardware: vec[hardware_type]{hardware_type::cuda_sm_70, hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
+            supported_dtypes: string[]{"float16", "bfloat16"},
+            supported_hardware: hardware_type[]{hardware_type::cuda_sm_70, hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
             min_batch_size: 1,
             max_seq_length: 16384,
             estimated_flops_per_token: 1000000,
@@ -57,8 +57,8 @@ func get_backend_capability(attention_backend_type backend_type) backend_capabil
         },
         attention_backend_type::dsa : backend_capability {
             backend_name: "dsa",
-            supported_dtypes: vec[string]{"float16", "bfloat16"},
-            supported_hardware: vec[hardware_type]{hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
+            supported_dtypes: string[]{"float16", "bfloat16"},
+            supported_hardware: hardware_type[]{hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
             min_batch_size: 1,
             max_seq_length: 32768,
             estimated_flops_per_token: 1200000,
@@ -67,8 +67,8 @@ func get_backend_capability(attention_backend_type backend_type) backend_capabil
         },
         attention_backend_type::paged_attention : backend_capability {
             backend_name: "paged_attention",
-            supported_dtypes: vec[string]{"float16", "bfloat16", "int8"},
-            supported_hardware: vec[hardware_type]{hardware_type::cuda_sm_70, hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
+            supported_dtypes: string[]{"float16", "bfloat16", "int8"},
+            supported_hardware: hardware_type[]{hardware_type::cuda_sm_70, hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
             min_batch_size: 1,
             max_seq_length: 32768,
             estimated_flops_per_token: 900000,
@@ -77,8 +77,8 @@ func get_backend_capability(attention_backend_type backend_type) backend_capabil
         },
         attention_backend_type::sparse_attention : backend_capability {
             backend_name: "sparse_attention",
-            supported_dtypes: vec[string]{"float16", "bfloat16"},
-            supported_hardware: vec[hardware_type]{hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
+            supported_dtypes: string[]{"float16", "bfloat16"},
+            supported_hardware: hardware_type[]{hardware_type::cuda_sm_80, hardware_type::cuda_sm_90},
             min_batch_size: 1,
             max_seq_length: 1000000,
             estimated_flops_per_token: 300000,
@@ -167,10 +167,10 @@ func (attention_backend_manager* mgr) finalize_all() bool {
     true
 }
 
-func (attention_backend_manager* mgr) list_backends() vec[string] {
-    result := vec[string]{}
+func (attention_backend_manager* mgr) list_backends() string[] {
+    result := string[]{}
     for name in mgr.backends.keys() {
-        result.push(name)
+        result = append(result, name)
     }
     result
 }

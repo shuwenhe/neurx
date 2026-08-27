@@ -51,8 +51,8 @@ func new_replay_buffer(i32 capacity) . replay_buffer {
 
 func (replay_buffer* buffer) add(experience exp, f32 reward) {
     if buffer.current_size < buffer.capacity {
-        buffer.experiences.push(exp)
-        buffer.rewards.push(reward)
+        buffer.experiences = append(buffer.experiences, exp)
+        buffer.rewards = append(buffer.rewards, reward)
         buffer.current_size += 1
     } else {
         buffer.experiences[buffer.insertion_index] = exp
@@ -69,7 +69,7 @@ func (replay_buffer* buffer) sample(i32 n) . []experience {
     sampled := []
     for i in 0..sample_size {
         idx := random_int(0, buffer.current_size)
-        sampled.push(buffer.experiences[idx])
+        sampled = append(sampled, buffer.experiences[idx])
     }
     return sampled
 }
@@ -82,20 +82,20 @@ func (replay_buffer* buffer) filter_by_reward(f32 threshold, f32 percentile) {
     if percentile > 0.0 {
         sorted_rewards := buffer.rewards[..buffer.current_size].clone()
         sorted_rewards.sort()
-        percentile_idx := i32((100.0 - percentile) / 100.0 * f32(sorted_rewards.len()))
+        percentile_idx := i32((100.0 - percentile) / 100.0 * f32(len(sorted_rewards)))
         actual_threshold = sorted_rewards[percentile_idx]
     }
     filtered_exps := []
     filtered_rewards := []
     for i in 0..buffer.current_size {
         if buffer.rewards[i] >= actual_threshold {
-            filtered_exps.push(buffer.experiences[i])
-            filtered_rewards.push(buffer.rewards[i])
+            filtered_exps = append(filtered_exps, buffer.experiences[i])
+            filtered_rewards = append(filtered_rewards, buffer.rewards[i])
         }
     }
     buffer.experiences = filtered_exps
     buffer.rewards = filtered_rewards
-    buffer.current_size = filtered_exps.len()
+    buffer.current_size = len(filtered_exps)
     buffer.insertion_index = 0
 }
 
@@ -172,7 +172,7 @@ func (pfppo_trainer* trainer) collect_experiences([]tensor prompts) . []experien
             done: true,
             timestep: trainer.total_count,
         }
-        experiences.push(exp)
+        experiences = append(experiences, exp)
         trainer.total_count += 1
         if trainer.config.use_reward_filtering {
             if reward >= trainer.config.reward_threshold {
@@ -211,7 +211,7 @@ func (pfppo_trainer* trainer) compute_gae([]experience experiences) {
 func (pfppo_trainer* trainer) train_step([]tensor new_prompts) . (f32, f32, f32) {
     new_experiences := trainer.collect_experiences(new_prompts)
     buffer_sample_size := i32(
-        f32(new_experiences.len()) * trainer.config.buffer_sample_ratio
+        f32(len(new_experiences)) * trainer.config.buffer_sample_ratio
     )
     buffer_experiences := trainer.replay_buffer.sample(buffer_sample_size)
     all_experiences := new_experiences + buffer_experiences
@@ -264,7 +264,7 @@ func (pfppo_trainer* trainer) train_step([]tensor new_prompts) . (f32, f32, f32)
             trainer.config.reward_percentile
         )
     }
-    num_updates := all_experiences.len() * trainer.config.num_epochs
+    num_updates := len(all_experiences) * trainer.config.num_epochs
     return (
         total_policy_loss / f32(num_updates),
         total_value_loss / f32(num_updates),
@@ -277,11 +277,11 @@ func (pfppo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
     value_losses := []
     for batch in train_data {
         policy_loss, value_loss, kl  := trainer.train_step(batch.prompts)
-        policy_losses.push(policy_loss)
-        value_losses.push(value_loss)
-        if policy_losses.len() % 10 == 0 {
+        policy_losses = append(policy_losses, policy_loss)
+        value_losses = append(value_losses, value_loss)
+        if len(policy_losses) % 10 == 0 {
             buf_mean, buf_std, buf_max  := trainer.replay_buffer.get_statistics()
-            println(f"Step {policy_losses.len()}: " +
+            println(f"Step {len(policy_losses)}: " +
                    f"Policy Loss = {policy_loss:.4f}, " +
                    f"Value Loss = {value_loss:.4f}, " +
                    f"KL = {kl:.4f}")

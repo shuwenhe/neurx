@@ -8,7 +8,7 @@ func main() {
     pattern_var := "^\\s*var\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(::\\s*([^=]+))\\s*=\\s*"
     pattern_let := "^\\s*let\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(::\\s*([^=]+))\\s*=\\s*"
     
-    files := vec[string]()
+    files := string[]()
     find_all_s_files(project_root, *files)
     
     total_replaced := 0
@@ -37,7 +37,7 @@ func main() {
     println("✅ 迁移complete! 共替换 " + count_to_string(total_replaced) + " 处")
 }
 
-func find_all_s_files(string dir, vec[string] files) {
+func find_all_s_files(string dir, string[] files) {
     entries := fs_list_dir(dir)
     
     for entry in entries {
@@ -48,14 +48,14 @@ func find_all_s_files(string dir, vec[string] files) {
                 find_all_s_files(path, files)
             }
         } else if string_ends_with(entry, ".s") {
-            files.push(path)
+            files = append(files, path)
         }
     }
 }
 
 func replace_var_declarations(string content) string {
     lines := string_split(content, "\n")
-    result := vec[string]()
+    result := string[]()
     
     for line in lines {
         new_line := line
@@ -65,7 +65,7 @@ func replace_var_declarations(string content) string {
             new_line = process_var_line(line)
         }
         
-        result.push(new_line)
+        result = append(result, new_line)
     }
     
     string_join(result, "\n")
@@ -73,7 +73,7 @@ func replace_var_declarations(string content) string {
 
 func replace_let_declarations(string content) string {
     lines := string_split(content, "\n")
-    result := vec[string]()
+    result := string[]()
     
     for line in lines {
         new_line := line
@@ -83,7 +83,7 @@ func replace_let_declarations(string content) string {
             new_line = process_let_line(line)
         }
         
-        result.push(new_line)
+        result = append(result, new_line)
     }
     
     string_join(result, "\n")
@@ -239,8 +239,8 @@ func string_contains(string s, char c) bool {
     false
 }
 
-func string_split(string s, string delimiter) vec[string] {
-    result := vec[string]()
+func string_split(string s, string delimiter) string[] {
+    result := string[]()
     if string_len(s) == 0 {
         return result
     }
@@ -250,7 +250,7 @@ func string_split(string s, string delimiter) vec[string] {
     
     for i < string_len(s) {
         if i + string_len(delimiter) <= string_len(s) && string_substring(s, i, i + string_len(delimiter)) == delimiter {
-            result.push(current)
+            result = append(result, current)
             current = ""
             i = i + string_len(delimiter)
         } else {
@@ -259,19 +259,19 @@ func string_split(string s, string delimiter) vec[string] {
         }
     }
     
-    result.push(current)
+    result = append(result, current)
     result
 }
 
-func string_join(vec[string] arr, string delimiter) string {
-    if arr.len() == 0 {
+func string_join(string[] arr, string delimiter) string {
+    if len(arr) == 0 {
         return ""
     }
     
     result := arr[0]
     i := 1
     
-    for i < arr.len() {
+    for i < len(arr) {
         result = result + delimiter + arr[i]
         i = i + 1
     }
@@ -349,8 +349,8 @@ func fs_exists(string path) bool {
     true
 }
 
-func fs_list_dir(string path) (vec[string), string] {
-    result::ok(vec[string]())
+func fs_list_dir(string path) (string), string[] {
+    (string[](, ""))
 }
 
 func fs_is_dir(string path) bool {
@@ -358,9 +358,9 @@ func fs_is_dir(string path) bool {
 }
 
 func fs_read_to_string(string path) (string, string) {
-    result::ok("")
+return     ("", "")
 }
 
 func fs_write_string(string path, string content) (void, string) {
-    result::ok(void)
+return     (void, "")
 }

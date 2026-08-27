@@ -41,8 +41,8 @@ struct cache_metadata {
 }
 
 struct kv_cache_entry {
-    key: vec[float]
-    value: vec[float]
+    key: float[]
+    value: float[]
     metadata: cache_metadata
 }
 
@@ -72,16 +72,16 @@ func kv_cache_pool::new(cache_config config) kv_cache_pool {
     }
 }
 
-func calculate_entry_size(*vec[float] k, *vec[float] v) int {
-    (k.len() + v.len()) * 4
+func calculate_entry_size(*float[] k, *float[] v) int {
+    (len(k) + len(v)) * 4
 }
 
 func (kv_cache_pool* pool) put_kv(
     sequence_id: int,
     layer_id: int,
     token_position: int,
-    key: *vec[float],
-    value: *vec[float]
+    key: *float[],
+    value: *float[]
 ) ((), error) {
     cache_key := sequence_id * 1000000 + layer_id * 1000 + token_position
     entry_size := calculate_entry_size(key, value)
@@ -113,7 +113,7 @@ func (kv_cache_pool* pool) put_kv(
     pool.metadata_map.insert(cache_key, metadata)
     pool.stats.gpu_used_mb = pool.stats.gpu_used_mb + (entry_size / 1024 / 1024)
 
-    ((, ""))
+    return (), ""
 }
 
 func (kv_cache_pool* pool) get_kv(
@@ -126,7 +126,7 @@ func (kv_cache_pool* pool) get_kv(
     if pool.gpu_cache.contains(cache_key) {
         switch pool.gpu_cache.get(cache_key) {
             option::some(entry) : {
-                (entry, "")
+return                 (entry, "")
             },
             option::none : {
                 (0, error { code: "CACHE_MISS", message: "Entry not found in GPU cache" })
@@ -137,7 +137,7 @@ func (kv_cache_pool* pool) get_kv(
 
         switch pool.gpu_cache.get(cache_key) {
             option::some(entry) : {
-                (entry, "")
+return                 (entry, "")
             },
             option::none : {
                 (0, error { code: "RESTORE_FAILED", message: "Failed to restore from CPU" })
@@ -177,7 +177,7 @@ func (kv_cache_pool* pool) try_offload_to_cpu() ((), error) {
                 pool.stats.cpu_used_mb = pool.stats.cpu_used_mb + (entry_size / 1024 / 1024)
                 pool.stats.offload_count = pool.stats.offload_count + 1
 
-                ((, ""))
+                return (), ""
             },
             option::none : {
                 (0, error { code: "OFFLOAD_FAILED", message: "Failed to offload entry" })
@@ -199,7 +199,7 @@ func (kv_cache_pool* pool) restore_from_cpu(int cache_key) ((), error) {
             pool.stats.gpu_used_mb = pool.stats.gpu_used_mb + (entry_size / 1024 / 1024)
             pool.stats.restore_count = pool.stats.restore_count + 1
 
-            ((, ""))
+            return (), ""
         },
         option::none : {
             (0, error { code: "RESTORE_FAILED", message: "Entry not found in CPU cache" })
@@ -229,17 +229,17 @@ func (pool* pool) get_cache_hit_rate() float {
 }
 
 func (kv_cache_pool* pool) clear_sequence_cache(int sequence_id) ((), error) {
-    keys_to_remove := vec[int]()
+    keys_to_remove := int[]()
 
     for key in pool.gpu_cache.keys() {
         key_seq_id := key / 1000000
         if key_seq_id == sequence_id {
-            keys_to_remove.push(key)
+            keys_to_remove = append(keys_to_remove, key)
         }
     }
 
     i := 0
-    for i < keys_to_remove.len() {
+    for i < len(keys_to_remove) {
         key := keys_to_remove[i]
 
         switch pool.gpu_cache.get(key) {
@@ -254,7 +254,7 @@ func (kv_cache_pool* pool) clear_sequence_cache(int sequence_id) ((), error) {
         i = i + 1
     }
 
-    ((, ""))
+    return (), ""
 }
 
 func (kv_cache_pool* pool) clear_all() ((), error) {
@@ -265,7 +265,7 @@ func (kv_cache_pool* pool) clear_all() ((), error) {
     pool.stats.gpu_used_mb = 0
     pool.stats.cpu_used_mb = 0
 
-    ((, ""))
+    return (), ""
 }
 
 struct error {
@@ -284,18 +284,18 @@ func main() {
 
     pool := kv_cache_pool::new(config)
 
-    key := vec[float]()
-    value := vec[float]()
+    key := float[]()
+    value := float[]()
 
     i := 0
     for i < 1024 {
-        key.push(0.1)
-        value.push(0.2)
+        key = append(key, 0.1)
+        value = append(value, 0.2)
         i = i + 1
     }
 
     switch pool.put_kv(0, 0, 0, key, value) {
-        ((, "")) : {
+        return (), "" : {
             ""
         },
         (0, err) : {

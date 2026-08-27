@@ -20,7 +20,7 @@ func copy_float([]float data) []float {
     []float out = []float{cap: len(data)}
     int i = 0
     for i < len(data) {
-        out.push(data[i])
+        out = append(out, data[i])
         i = i + 1
     }
     out
@@ -30,7 +30,7 @@ func copy_int([]int data) []int {
     []int out = []int{cap: len(data)}
     int i = 0
     for i < len(data) {
-        out.push(data[i])
+        out = append(out, data[i])
         i = i + 1
     }
     out
@@ -54,7 +54,7 @@ func copy_nodes([]grad_node nodes) []grad_node {
     []grad_node out = []grad_node{cap: len(nodes)}
     int i = 0
     for i < len(nodes) {
-        out.push(copy_node(nodes[i]))
+        out = append(out, copy_node(nodes[i]))
         i = i + 1
     }
     out
@@ -64,7 +64,7 @@ func zeros(int n) []float {
     []float out = []float{cap: n}
     int i = 0
     for i < n {
-        out.push(0.0)
+        out = append(out, 0.0)
         i = i + 1
     }
     out
@@ -74,7 +74,7 @@ func ones(int n) []float {
     []float out = []float{cap: n}
     int i = 0
     for i < n {
-        out.push(1.0)
+        out = append(out, 1.0)
         i = i + 1
     }
     out
@@ -98,7 +98,7 @@ func add_values([]float a, []float b) []float {
     []float out = []float{cap: len(a)}
     int i = 0
     for i < len(a) {
-        out.push(a[i] + b[i])
+        out = append(out, a[i] + b[i])
         i = i + 1
     }
     out
@@ -108,7 +108,7 @@ func sub_values([]float a, []float b) []float {
     []float out = []float{cap: len(a)}
     int i = 0
     for i < len(a) {
-        out.push(a[i] - b[i])
+        out = append(out, a[i] - b[i])
         i = i + 1
     }
     out
@@ -118,7 +118,7 @@ func mul_values([]float a, []float b) []float {
     []float out = []float{cap: len(a)}
     int i = 0
     for i < len(a) {
-        out.push(a[i] * b[i])
+        out = append(out, a[i] * b[i])
         i = i + 1
     }
     out
@@ -128,7 +128,7 @@ func div_values([]float a, []float b) []float {
     []float out = []float{cap: len(a)}
     int i = 0
     for i < len(a) {
-        out.push(a[i] / b[i])
+        out = append(out, a[i] / b[i])
         i = i + 1
     }
     out
@@ -138,7 +138,7 @@ func fill(int n, float value) []float {
     []float out = []float{cap: n}
     int i = 0
     for i < n {
-        out.push(value)
+        out = append(out, value)
         i = i + 1
     }
     out
@@ -148,7 +148,7 @@ func scale_values([]float values, float scale) []float {
     []float out = []float{cap: len(values)}
     int i = 0
     for i < len(values) {
-        out.push(values[i] * scale)
+        out = append(out, values[i] * scale)
         i = i + 1
     }
     out
@@ -458,7 +458,7 @@ func create_dynamic_graph() grad_graph {
 func add_node_dynamic(grad_graph graph, grad_node node) grad_graph {
     []grad_node nodes = copy_nodes(graph.nodes)
     node.id = len(nodes)
-    nodes.push(node)
+    nodes = append(nodes, node)
     grad_graph {
         nodes: nodes,
     }

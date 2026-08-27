@@ -42,7 +42,7 @@ func (timer_manager* tm) create_timer(int owner_pid, int expire_time, int interv
         fired_count: 0
     }
     
-    tm.timers.push(t)
+    tm.timers = append(tm.timers, t)
     tm.next_timer_id = tm.next_timer_id + 1
     
     return t, ""
@@ -51,7 +51,7 @@ func (timer_manager* tm) create_timer(int owner_pid, int expire_time, int interv
 // 删除定时器
 func (timer_manager* tm) delete_timer(int timer_id) (int, string) {
     i := 0
-    for i < tm.timers.len() {
+    for i < len(tm.timers) {
         t := tm.timers[i]
         if t.timer_id == timer_id {
             t.enabled = 0
@@ -67,15 +67,15 @@ func (timer_manager* tm) delete_timer(int timer_id) (int, string) {
 // 更新时间并检查过期的定时器
 func (timer_manager* tm) tick(int delta_time) (vec, string) {
     tm.current_time = tm.current_time + delta_time
-    expired_timers := vec()
+    expired_timers := {}
     
     i := 0
-    for i < tm.timers.len() {
+    for i < len(tm.timers) {
         t := tm.timers[i]
         
         if t.enabled == 1 && tm.current_time >= t.expire_time {
             t.fired_count = t.fired_count + 1
-            expired_timers.push(t)
+            expired_timers = append(expired_timers, t)
             
             // 如果是周期定时器，重新设置过期时间
             if t.interval > 0 {
@@ -98,7 +98,7 @@ func (timer_manager tm) get_timer_stats() (int, int) {
     total_fired := 0
     
     i := 0
-    for i < tm.timers.len() {
+    for i < len(tm.timers) {
         t := tm.timers[i]
         if t.enabled == 1 {
             active_timers = active_timers + 1
@@ -135,7 +135,7 @@ struct workqueue_manager {
 
 // 初始化工作队列管理器
 func (workqueue_manager* wqm) init() (int, string) {
-    wqm.workqueues = vec()
+    wqm.workqueues = {}
     wqm.next_queue_id = 0
     return 0, ""
 }
@@ -144,12 +144,12 @@ func (workqueue_manager* wqm) init() (int, string) {
 func (workqueue_manager* wqm) create_workqueue(int max_workers) (workqueue, string) {
     wq := workqueue{
         queue_id: wqm.next_queue_id,
-        work_items: vec(),
+        work_items: {},
         max_workers: max_workers,
         active_workers: 0
     }
     
-    wqm.workqueues.push(wq)
+    wqm.workqueues = append(wqm.workqueues, wq)
     wqm.next_queue_id = wqm.next_queue_id + 1
     
     return wq, ""
@@ -157,21 +157,21 @@ func (workqueue_manager* wqm) create_workqueue(int max_workers) (workqueue, stri
 
 // 队列工作项
 func (workqueue_manager* wqm) queue_work(int queue_id, int priority) (int, string) {
-    if queue_id >= wqm.workqueues.len() {
+    if queue_id >= len(wqm.workqueues) {
         return -1, "Invalid queue"
     }
     
     wq := wqm.workqueues[queue_id]
     
     work := work_item{
-        work_id: wq.work_items.len(),
+        work_id: len(wq.work_items),
         worker_pid: 0,
         queue_id: queue_id,
         priority: priority,
         status: 0  // pending
     }
     
-    wq.work_items.push(work)
+    wq.work_items = append(wq.work_items, work)
     wqm.workqueues[queue_id] = wq
     
     return work.work_id, ""
@@ -179,13 +179,13 @@ func (workqueue_manager* wqm) queue_work(int queue_id, int priority) (int, strin
 
 // 获取下一个工作项
 func (workqueue_manager* wqm) get_work(int queue_id) (work_item, string) {
-    if queue_id >= wqm.workqueues.len() {
+    if queue_id >= len(wqm.workqueues) {
         return work_item{}, "Invalid queue"
     }
     
     wq := wqm.workqueues[queue_id]
     
-    if wq.work_items.len() == 0 {
+    if len(wq.work_items) == 0 {
         return work_item{}, "No work items"
     }
     
@@ -194,7 +194,7 @@ func (workqueue_manager* wqm) get_work(int queue_id) (work_item, string) {
     
     // 移除第一个项目
     i := 1
-    for i < wq.work_items.len() {
+    for i < len(wq.work_items) {
         wq.work_items[i - 1] = wq.work_items[i]
         i = i + 1
     }
@@ -206,7 +206,7 @@ func (workqueue_manager* wqm) get_work(int queue_id) (work_item, string) {
 
 // 完成工作项
 func (workqueue_manager* wqm) complete_work(int queue_id, int work_id) (int, string) {
-    if queue_id >= wqm.workqueues.len() {
+    if queue_id >= len(wqm.workqueues) {
         return -1, "Invalid queue"
     }
     
@@ -216,10 +216,10 @@ func (workqueue_manager* wqm) complete_work(int queue_id, int work_id) (int, str
 
 // 获取工作队列统计
 func (workqueue_manager wqm) get_workqueue_stats(int queue_id) (int, int) {
-    if queue_id >= wqm.workqueues.len() {
+    if queue_id >= len(wqm.workqueues) {
         return 0, 0
     }
     
     wq := wqm.workqueues[queue_id]
-    return wq.work_items.len(), wq.active_workers
+    return len(wq.work_items), wq.active_workers
 }

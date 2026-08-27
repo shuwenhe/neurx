@@ -289,12 +289,12 @@ struct web_crawler {
         if this.config.cache_enabled && url in this.cache {
             cached = this.cache[url]
             if !this._is_cache_expired(cached):
-                return (cached, null)
+                return cached, null
         }
         try {
             response = await this.session.get(url)
             if response.status_code != 200:
-                return (null, f"HTTP {response.status_code}")
+                return null, f"HTTP {response.status_code}"
             html_content = response.text
             if len(html_content) > this.config.max_content_length * 5:
                 html_content = html_content[:this.config.max_content_length * 5]
@@ -311,17 +311,17 @@ struct web_crawler {
             }
             if this.config.cache_enabled:
                 this.cache[url] = crawled
-            return (crawled, null)
+            return crawled, null
         } except timeout_exception:
-            return (null, "Timeout")
+            return null, "Timeout"
         except ssl_error:
-            return (null, "SSL certificate error")
+            return null, "SSL certificate error"
         except dns_exception:
-            return (null, "DNS resolution failed")
+            return null, "DNS resolution failed"
         except too_many_redirects:
-            return (null, "Too many redirects")
+            return null, "Too many redirects"
         catch exception as e:
-            return (null, str(e))
+            return null, str(e)
     }
     batch_crawl(urls: list<string>, int max_concurrent = 3) {
         results: dict<string, tuple<crawled_content, string>> = {}
@@ -484,7 +484,7 @@ struct main_content_extractor {
                 process_node(child, depth + 1)
         process_node(element)
         full_text = "".join(content_parts).strip()
-        return (full_text, sections)
+        return full_text, sections
     }
     struct extraction_result {
         text_content: string

@@ -74,8 +74,8 @@ func (triton_engine* engine) compile_kernel(string kernel_name) bool {
     return false
 }
 
-func (triton_engine* engine) matmul_fp32(vec[vec[float32]] matrix_a, vec[vec[float32]] matrix_b) vec[vec[float32]] {
-    result := make(vec[vec[float32]])
+func (triton_engine* engine) matmul_fp32(float32[[]] matrix_a, float32[[]] matrix_b) float32[[]] {
+    result := make(float32[[]])
 
     if len(matrix_a) == 0 || len(matrix_b) == 0 {
         return result
@@ -86,7 +86,7 @@ func (triton_engine* engine) matmul_fp32(vec[vec[float32]] matrix_a, vec[vec[flo
     n := len(matrix_b[0])
 
     for i := 0; i < m; i = i + 1 {
-        row := make(vec[float32])
+        row := make(float32[])
         for j := 0; j < n; j = j + 1 {
             val := 0.0
             for p := 0; p < k; p = p + 1 {
@@ -100,12 +100,12 @@ func (triton_engine* engine) matmul_fp32(vec[vec[float32]] matrix_a, vec[vec[flo
     return result
 }
 
-func (triton_engine* engine) matmul_fp16(vec[vec[float32]] matrix_a, vec[vec[float32]] matrix_b) vec[vec[float32]] {
+func (triton_engine* engine) matmul_fp16(float32[[]] matrix_a, float32[[]] matrix_b) float32[[]] {
     return engine.matmul_fp32(matrix_a, matrix_b)
 }
 
-func (triton_engine* engine) rope_forward(vec[float32] q_input, int32 seq_len, float32 base) vec[float32] {
-    rope_output := make(vec[float32])
+func (triton_engine* engine) rope_forward(float32[] q_input, int32 seq_len, float32 base) float32[] {
+    rope_output := make(float32[])
 
     dim := len(q_input)
 
@@ -131,8 +131,8 @@ func (triton_engine* engine) rope_forward(vec[float32] q_input, int32 seq_len, f
     return rope_output
 }
 
-func (triton_engine* engine) softmax_forward(vec[float32] logits) vec[float32] {
-    output := make(vec[float32])
+func (triton_engine* engine) softmax_forward(float32[] logits) float32[] {
+    output := make(float32[])
 
     if len(logits) == 0 {
         return output
@@ -146,7 +146,7 @@ func (triton_engine* engine) softmax_forward(vec[float32] logits) vec[float32] {
     }
 
     sum_exp := 0.0
-    exp_vals := make(vec[float32])
+    exp_vals := make(float32[])
 
     for i := 0; i < len(logits); i = i + 1 {
         exp_val := 2.718 ^ (logits[i] - max_val)
@@ -165,8 +165,8 @@ func (triton_engine* engine) softmax_forward(vec[float32] logits) vec[float32] {
     return output
 }
 
-func (triton_engine* engine) gelu_forward(vec[float32] input) vec[float32] {
-    output := make(vec[float32])
+func (triton_engine* engine) gelu_forward(float32[] input) float32[] {
+    output := make(float32[])
 
     for i := 0; i < len(input); i = i + 1 {
         x := input[i]
@@ -177,15 +177,15 @@ func (triton_engine* engine) gelu_forward(vec[float32] input) vec[float32] {
     return output
 }
 
-func (triton_engine* engine) fused_attention(vec[float32] query, vec[float32] key, vec[float32] value) vec[float32] {
+func (triton_engine* engine) fused_attention(float32[] query, float32[] key, float32[] value) float32[] {
     q_len := len(query)
     k_len := len(key)
 
     if q_len == 0 || k_len == 0 {
-        return make(vec[float32])
+        return make(float32[])
     }
 
-    scores := make(vec[float32])
+    scores := make(float32[])
 
     for i := 0; i < q_len; i = i + 1 {
         score := query[i] * key[i]
@@ -194,7 +194,7 @@ func (triton_engine* engine) fused_attention(vec[float32] query, vec[float32] ke
 
     attention_weights := engine.softmax_forward(scores)
 
-    output := make(vec[float32])
+    output := make(float32[])
     for i := 0; i < len(attention_weights); i = i + 1 {
         if i < len(value) {
             output = append(output, attention_weights[i] * value[i])

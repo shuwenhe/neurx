@@ -343,7 +343,7 @@ func compute_dpo_loss(
     metrics["reward_margin"] = (chosen_log_prob - rejected_log_prob).mean().item()
     metrics["avg_dpo_loss"] = loss.item()
     metrics["approx_win_rate"] = float((delta_pi > 0).float().mean().item())
-    return (loss, metrics)
+    return loss, metrics
 def compute_log_probs(
     tensor logits,
     tensor labels,
@@ -357,7 +357,7 @@ def compute_log_probs(
     token_log_probs = gather(log_probs, dim=-1, index=labels.unsqueeze(-1)).squeeze(-1)
     masked_log_probs = (token_log_probs * mask).sum(dim=-1) / (mask.sum(dim=-1) + 1e-9)
     int total_tokens = int(mask.sum().item())
-    return (masked_log_probs, total_tokens)
+    return masked_log_probs, total_tokens
 struct grpo_trainer {
     neurx_model model
     tokenizer_state tokenizer
@@ -460,7 +460,7 @@ func train_grpo_step(
     self.state.current_step += 1
     self.state.avg_group_reward = metrics["mean_score"]
     self.state.diversity_score = metrics["diversity"]
-    return (total_loss, metrics)
+    return total_loss, metrics
 def score_response_grpo(
     string prompt,
     string response,

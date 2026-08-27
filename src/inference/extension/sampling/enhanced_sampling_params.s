@@ -42,9 +42,9 @@ struct sampling_params {
 	logprobs int32
 	prompt_logprobs int32
 	include_stop_sequences bool
-	stop_token_ids vec[int32]
-	bad_token_ids vec[int32]
-	forced_token_ids vec[int32]
+	stop_token_ids int32[]
+	bad_token_ids int32[]
+	forced_token_ids int32[]
 
 	beam_width int32
 	num_beam_groups int32
@@ -91,9 +91,9 @@ func create_sampling_params() sampling_params* {
 		logprobs: 0,
 		prompt_logprobs: 0,
 		include_stop_sequences: false,
-		stop_token_ids: make(vec[int32]),
-		bad_token_ids: make(vec[int32]),
-		forced_token_ids: make(vec[int32]),
+		stop_token_ids: make(int32[]),
+		bad_token_ids: make(int32[]),
+		forced_token_ids: make(int32[]),
 		beam_width: 1,
 		num_beam_groups: 1,
 		diversity_penalty_in_beam: 0.0,

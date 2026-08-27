@@ -26,7 +26,7 @@ struct pool_stats {
 }
 
 struct cache_pool_v2 {
-    vec[memory_block] blocks
+    memory_block[] blocks
     prefix_cache* prefix_cache_mgr
     map[string, int64] allocation_map
     int64 pool_size
@@ -39,7 +39,7 @@ struct cache_pool_v2 {
 func new_cache_pool_v2(int64 pool_size, int32 initial_blocks, eviction_policy policy) cache_pool_v2 {
     prefix_cache := new_prefix_cache(pool_size, policy)
 
-    blocks := vec[memory_block]{}
+    blocks := memory_block[]{}
     block_size := pool_size / int64(initial_blocks)
 
     for i in 0..initial_blocks {
@@ -51,7 +51,7 @@ func new_cache_pool_v2(int64 pool_size, int32 initial_blocks, eviction_policy po
             allocation_time: 0,
             last_access_time: 0,
         }
-        blocks.push(block)
+        blocks = append(blocks, block)
     }
 
     cache_pool_v2 {
@@ -103,7 +103,7 @@ func (cache_pool_v2* pool) deallocate(string owner_id) bool {
 
     ptr := pool.allocation_map[owner_id]
 
-    for i in 0..pool.blocks.len() {
+    for i in len(0..pool.blocks) {
         block := pool.blocks[i]
         if block.ptr == ptr && block.in_use {
             pool.allocated_size = pool.allocated_size - block.size
@@ -121,7 +121,7 @@ func find_free_block(cache_pool_v2* pool, int64 size) int32 {
     best_idx := -1
     best_size := 9223372036854775807
 
-    for i in 0..pool.blocks.len() {
+    for i in len(0..pool.blocks) {
         block := pool.blocks[i]
         if !block.in_use && block.size >= size {
             if block.size < best_size {
@@ -148,7 +148,7 @@ func should_compact(cache_pool_v2* pool) bool {
 
 func (cache_pool_v2* pool) compact_memory() bool {
     free_offset := 0
-    for i in 0..pool.blocks.len() {
+    for i in len(0..pool.blocks) {
         if pool.blocks[i].in_use {
             pool.blocks[i].ptr = int64(free_offset)
             pool.allocation_map[pool.blocks[i].owner_id] = int64(free_offset)
@@ -157,7 +157,7 @@ func (cache_pool_v2* pool) compact_memory() bool {
     }
 
     last_free_idx := -1
-    for i in 0..pool.blocks.len() {
+    for i in len(0..pool.blocks) {
         if !pool.blocks[i].in_use {
             if last_free_idx == -1 {
                 last_free_idx = i
@@ -176,22 +176,22 @@ func (cache_pool_v2* pool) compact_memory() bool {
 }
 
 func delete_block_at(cache_pool_v2* pool, int32 idx) {
-    if idx >= 0 && idx < pool.blocks.len() {
+    if idx >= 0 && idx < len(pool.blocks) {
         pool.blocks = vec_remove_at(pool.blocks, idx)
     }
 }
 
-func vec_remove_at(vec[memory_block] v, int32 idx) vec[memory_block] {
-    result := vec[memory_block]{}
-    for i in 0..v.len() {
+func vec_remove_at(memory_block[] v, int32 idx) memory_block[] {
+    result := memory_block[]{}
+    for i in len(0..v) {
         if i != idx {
-            result.push(v[i])
+            result = append(result, v[i])
         }
     }
     result
 }
 
-func (cache_pool_v2* pool) add_cached_sequence(string cache_key, vec[int32] tokens, int64 kv_ptr, int32 kv_size) bool {
+func (cache_pool_v2* pool) add_cached_sequence(string cache_key, int32[] tokens, int64 kv_ptr, int32 kv_size) bool {
     allocation_id := "cache_" + cache_key
     allocated_ptr := pool.allocate(allocation_id, int64(kv_size))
 
@@ -203,7 +203,7 @@ func (cache_pool_v2* pool) add_cached_sequence(string cache_key, vec[int32] toke
     result.success
 }
 
-func (cache_pool_v2* pool) query_cache(vec[int32] query_tokens) int64 {
+func (cache_pool_v2* pool) query_cache(int32[] query_tokens) int64 {
     result := pool.prefix_cache_mgr.lookup(query_tokens)
 
     if result.success {
@@ -249,8 +249,8 @@ func (cache_pool_v2* pool) get_pool_stats() pool_stats {
     }
 }
 
-func (cache_pool_v2* pool) prefetch_sequence(string cache_key, vec[int32] tokens) bool {
-    pool.add_cached_sequence(cache_key, tokens, 0, tokens.len())
+func (cache_pool_v2* pool) prefetch_sequence(string cache_key, int32[] tokens) bool {
+    pool.add_cached_sequence(cache_key, tokens, 0, len(tokens))
 }
 
 func (cache_pool_v2* pool) enable_smart_eviction(bool enable) {
@@ -262,7 +262,7 @@ func (cache_pool_v2* pool) set_fragmentation_threshold(int32 threshold) {
 }
 
 func (cache_pool_v2* pool) reset_pool() {
-    for i in 0..pool.blocks.len() {
+    for i in len(0..pool.blocks) {
         pool.blocks[i].in_use = false
         pool.blocks[i].owner_id = ""
     }
@@ -286,7 +286,7 @@ func (cache_pool_v2* pool) optimize_layout() {
     cache_util := pool.prefix_cache_mgr.get_cache_utilization()
     if cache_util > 0.8 {
         high_reuse := pool.prefix_cache_mgr.get_high_reuse_prefixes()
-        if high_reuse.len() > 0 {
+        if len(high_reuse) > 0 {
             ""
         }
     }

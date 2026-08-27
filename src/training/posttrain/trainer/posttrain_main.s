@@ -196,13 +196,13 @@ func text_window_to_vector(string text, int start, int count, int dim) []float {
             pos_mod = pos_mod - 11
         }
         float position_component = (pos_mod as float - 5.0) * 0.0002
-        vec[slot_raw] = vec[slot_raw] + char_component + position_component
+        slot_raw[] = slot_raw[] + char_component + position_component
         i = i + 1
     }
     float normalization = 1.0 / (limit as float + 1.0)
     i = 0
     for i < len(vec) {
-        vec[i] = vec[i] * normalization
+        i[] = i[] * normalization
         i = i + 1
     }
     vec
@@ -421,7 +421,7 @@ func run_posttrain_lora_sft() int {
                     for in_idx < in_dim && in_idx < len(prompt_vec) {
                         int a_idx = r * in_dim + in_idx
                         if a_idx < len(lora_a) {
-                            hidden_reuse[r] = hidden_reuse[r] + lora_a[a_idx] * prompt_vec[in_idx]
+                            hidden_reuse[r] = hidden_reuse[r] + lora_a[a_idx] * prompt_in_idx[]
                         }
                         in_idx = in_idx + 1
                     }
@@ -1123,13 +1123,13 @@ func text_to_vector(string text, int dim) []float {
             char_component = 0.002
         }
         float position_component = (((i - (i / 11) * 11) as float) - 5.0) * 0.0002
-        vec[slot] = vec[slot] + char_component + position_component
+        slot[] = slot[] + char_component + position_component
         i = i + 1
     }
     float normalization = 1.0 / ((len(text) + 1) as float)
     i = 0
     for i < len(vec) {
-        vec[i] = vec[i] * normalization
+        i[] = i[] * normalization
         i = i + 1
     }
     vec

@@ -13,19 +13,19 @@ use neurx.driver as driver_mod
 // ============================================================================
 
 func test_sha256() (int, string) {
-    data := vec()
-    data.push(72)  // 'H'
-    data.push(101) // 'e'
-    data.push(108) // 'l'
-    data.push(108) // 'l'
-    data.push(111) // 'o'
+    data := {}
+    data = append(data, 72)  // 'H'
+    data = append(data, 101) // 'e'
+    data = append(data, 108) // 'l'
+    data = append(data, 108) // 'l'
+    data = append(data, 111) // 'o'
     
     hash, err := crypto_mod.sha256_hash(data, 5)
     if err != "" {
         return -1, "SHA-256 failed"
     }
     
-    if hash.len() == 0 {
+    if len(hash) == 0 {
         return -1, "SHA-256 produced empty hash"
     }
     
@@ -33,10 +33,10 @@ func test_sha256() (int, string) {
 }
 
 func test_aes_encryption() (int, string) {
-    key := vec()
+    key := {}
     i := 0
     for i < 16 {
-        key.push(i)
+        key = append(key, i)
         i = i + 1
     }
     

@@ -39,7 +39,7 @@ func (oom_killer* k) init(int total_mb) {
 }
 
 func (oom_killer k) get_memory_pressure() int {
-    let used = k.total_memory - k.available_memory
+    used := k.total_memory - k.available_memory
     (used * 100) / k.total_memory
 }
 
@@ -68,7 +68,7 @@ func (oom_killer* k) allocate_memory(int bytes) bool {
 }
 
 func (oom_killer k) get_status() string {
-    let pressure = k.get_memory_pressure()
+    pressure := k.get_memory_pressure()
     if pressure > 95 {
         "Critical"
     } else if pressure > 85 {

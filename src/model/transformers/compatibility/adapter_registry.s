@@ -172,7 +172,7 @@ func count_supported_models() int {
     int total = 0
 
     for entry in registry {
-        total = total + entry.supported_model_ids.len()
+        total = total + len(entry.supported_model_ids)
     }
 
     total
@@ -185,7 +185,7 @@ func get_popular_models() []string {
     for entry in registry {
         if entry.popularity_rank <= 5 {
             for model_id in entry.supported_model_ids {
-                if popular.len() < 10 {
+                if len(popular) < 10 {
                     popular.append(model_id)
                 }
             }

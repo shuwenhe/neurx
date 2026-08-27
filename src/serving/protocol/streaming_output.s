@@ -9,7 +9,7 @@ struct backpressure_state {
 
 struct token_stream {
     string request_id
-    vec[int32] token_buffer
+    int32[] token_buffer
     int32 buffer_cursor
     bool completed
 
@@ -128,7 +128,7 @@ func (token_stream* ts) reset_backpressure() bool {
 }
 
 struct stream_batch {
-    vec[token_stream*] streams
+    token_stream*[] streams
     int32 batch_id
     int64 created_at
 }
@@ -195,7 +195,7 @@ func create_stream_buffer_manager(int32 max_buffer) stream_buffer_manager* {
 func (stream_buffer_manager* mgr) register_stream(string request_id) token_stream* {
     stream := token_stream{
         request_id: request_id,
-        token_buffer: make(vec[int32]),
+        token_buffer: make(int32[]),
         buffer_cursor: 0,
         completed: false,
         bp_state: backpressure_state{

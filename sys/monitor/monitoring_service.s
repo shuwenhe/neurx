@@ -19,7 +19,7 @@ struct metric {
 }
 
 struct metric_buffer {
-    vec[metric]* metrics
+    metric[]* metrics
     int buffer_size
     int write_pos
     bool is_full
@@ -44,7 +44,7 @@ struct monitoring_service {
 
 func create_monitoring_service(int interval_ms) (monitoring_service, string) {
     buffer := metric_buffer {
-        metrics: vec[metric](),
+        metrics: metric[](),
         buffer_size: 10000,
         write_pos: 0,
         is_full: false
@@ -78,7 +78,7 @@ func collect_metric(monitoring_service* service, metric* metric_val) (int, strin
     service.num_metrics = service.num_metrics + 1
     
     if service.buffer.write_pos < service.buffer.buffer_size {
-        service.buffer.metrics.push(metric_val*)
+        service.buffer.metrics = append(service.buffer.metrics, metric_val*)
         service.buffer.write_pos = service.buffer.write_pos + 1
     } else {
         service.buffer.is_full = true
@@ -94,7 +94,7 @@ func collect_metrics(monitoring_service* service) (int, string) {
         timestamp_us: get_time_us()
     }
     
-    service.buffer.metrics.push(latency_metric)
+    service.buffer.metrics = append(service.buffer.metrics, latency_metric)
     service.num_metrics = service.num_metrics + 1
     
         gpu_metric := metric {
@@ -104,7 +104,7 @@ func collect_metrics(monitoring_service* service) (int, string) {
         timestamp_us: get_time_us()
     }
     
-    service.buffer.metrics.push(gpu_metric)
+    service.buffer.metrics = append(service.buffer.metrics, gpu_metric)
     service.num_metrics = service.num_metrics + 1
     
         mem_metric := metric {
@@ -114,7 +114,7 @@ func collect_metrics(monitoring_service* service) (int, string) {
         timestamp_us: get_time_us()
     }
     
-    service.buffer.metrics.push(mem_metric)
+    service.buffer.metrics = append(service.buffer.metrics, mem_metric)
     service.num_metrics = service.num_metrics + 1
     
     update_system_health(service)
@@ -142,14 +142,14 @@ func flush_metrics(monitoring_service* service) (int, string) {
     flushed, ""
 }
 
-func query_metrics(monitoring_service* service, int start_us, int end_us) (vec[metric], string) {
-    results := vec[metric]()
+func query_metrics(monitoring_service* service, int start_us, int end_us) (metric[], string) {
+    results := metric[]()
     
-    for i in 0..service.buffer.metrics.len() {
+    for i in len(0..service.buffer.metrics) {
         m := service.buffer.metrics.get(i)
         
         if m.timestamp_us >= start_us && m.timestamp_us <= end_us {
-            results.push(m)
+            results = append(results, m)
         }
     }
     results, ""

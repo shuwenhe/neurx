@@ -11,7 +11,7 @@ struct memory_block {
 
 struct memory_arena {
     int total_size
-    vec[memory_block] blocks
+    memory_block[] blocks
     int next_block_id
 }
 
@@ -23,7 +23,7 @@ struct allocation_result {
 }
 
 func new_memory_arena(int total_size) memory_arena {
-    blocks = vec[memory_block]()
+    blocks = memory_block[]()
 
     blocks.push(memory_block {
         block_id: 0,
@@ -52,7 +52,7 @@ func (memory_arena* arena) allocate(int size) allocation_result {
                     allocated: false,
                 }
                 arena.next_block_id = arena.next_block_id + 1
-                arena.blocks.push(new_block)
+                arena.blocks = append(arena.blocks, new_block)
             }
 
             return allocation_result {
@@ -133,6 +133,6 @@ func (memory_arena* arena) summary_string() string {
     s = s + "Used memory: " + arena.get_used_memory() as string + " bytes\n"
     s = s + "Free memory: " + arena.get_free_memory() as string + " bytes\n"
     s = s + "Fragmentation ratio: " + (arena.get_fragmentation_ratio() * 100.0) as int as string + "%\n"
-    s = s + "Number of blocks: " + arena.blocks.len() as string + "\n"
+    s = s + "Number of blocks: " + len(arena.blocks) as string + "\n"
     s
 }

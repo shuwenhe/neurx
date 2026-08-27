@@ -28,7 +28,7 @@ struct fault_tolerance_config {
 struct v1_fault_tolerance {
     fault_tolerance_config config
 
-    vec[checkpoint*] checkpoints
+    checkpoint*[] checkpoints
     map[string]checkpoint* checkpoint_map
 
     int32 total_checkpoints_created
@@ -46,7 +46,7 @@ func create_v1_fault_tolerance() v1_fault_tolerance* {
             max_checkpoints: 5,
             checkpoint_dir: "/tmp/checkpoints",
         },
-        checkpoints: make(vec[checkpoint*]),
+        checkpoints: make(checkpoint*[]),
         checkpoint_map: make(map[string]checkpoint*),
         total_checkpoints_created: 0,
         total_checkpoints_restored: 0,
@@ -101,7 +101,7 @@ func (v1_fault_tolerance* ft) get_latest_checkpoint() option[checkpoint*] {
     return option[checkpoint*]{value: latest}
 }
 
-func (v1_fault_tolerance* ft) list_checkpoints() vec[checkpoint*] {
+func (v1_fault_tolerance* ft) list_checkpoints() checkpoint*[] {
     return ft.checkpoints
 }
 

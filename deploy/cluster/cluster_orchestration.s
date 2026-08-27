@@ -93,7 +93,7 @@ func new_cluster_orchestration_state(string cluster_name, string deployment_dir,
 
 func cluster_add_node(cluster_orchestration_state state, cluster_node_spec node) cluster_orchestration_state {
     cluster_orchestration_state next = state
-    next.nodes.push(node)
+    next.nodes = append(next.nodes, node)
     next.total_gpus = next.total_gpus + node.gpu_count
     if node.status == "healthy" {
         next.healthy_nodes = next.healthy_nodes + 1
@@ -129,7 +129,7 @@ func cluster_split_lines(string text) []string {
     for i < len(text) {
         if text[i] == 10 || text[i] == 13 {
             if len(current) > 0 {
-                lines.push(current)
+                lines = append(lines, current)
                 current = ""
             }
         } else {
@@ -138,7 +138,7 @@ func cluster_split_lines(string text) []string {
         i = i + 1
     }
     if len(current) > 0 {
-        lines.push(current)
+        lines = append(lines, current)
     }
     lines
 }
@@ -223,14 +223,14 @@ func cluster_parse_node_record(string line) cluster_node_spec {
     int i = 0
     for i < len(line) {
         if line[i] == 124 {
-            parts.push(cluster_trim(current))
+            parts = append(parts, cluster_trim(current))
             current = ""
         } else {
             current = current + chr(line[i])
         }
         i = i + 1
     }
-    parts.push(cluster_trim(current))
+    parts = append(parts, cluster_trim(current))
     string node_name = ""
     string ip_address = ""
     string gpu_type = "H100"
@@ -284,7 +284,7 @@ func cluster_discover_nodes_from_manifest() []cluster_node_spec {
         if line != "" {
             cluster_node_spec node = cluster_parse_node_record(line)
             node.node_id = i
-            nodes.push(node)
+            nodes = append(nodes, node)
         }
         i = i + 1
     }
@@ -293,7 +293,7 @@ func cluster_discover_nodes_from_manifest() []cluster_node_spec {
 
 func cluster_discover_local_fallback() []cluster_node_spec {
     []cluster_node_spec nodes = []cluster_node_spec{cap: 1}
-    nodes.push(new_cluster_node_spec(0, "localhost", "127.0.0.1", 1, "local", 8, 16, "healthy", 0.0))
+    nodes = append(nodes, new_cluster_node_spec(0, "localhost", "127.0.0.1", 1, "local", 8, 16, "healthy", 0.0))
     nodes
 }
 
@@ -432,18 +432,18 @@ func cluster_int_to_string(int value) string {
 
 func cluster_generate_env_lines(cluster_deployment_spec spec) []string {
     []string lines = []string{cap: 12}
-    lines.push("export CLUSTER_NAME=" + spec.cluster_name)
-    lines.push("export MASTER_ADDR=" + spec.master_addr)
-    lines.push("export MASTER_PORT=" + cluster_int_to_string(spec.master_port))
-    lines.push("export WORLD_SIZE=" + cluster_int_to_string(spec.world_size))
-    lines.push("export DATA_PARALLEL_SIZE=" + cluster_int_to_string(spec.data_parallel_size))
-    lines.push("export TENSOR_PARALLEL_SIZE=" + cluster_int_to_string(spec.tensor_parallel_size))
-    lines.push("export PIPELINE_PARALLEL_SIZE=" + cluster_int_to_string(spec.pipeline_parallel_size))
-    lines.push("export BACKEND=" + spec.backend)
-    lines.push("export CHECKPOINT_DIR=" + spec.checkpoint_dir)
-    lines.push("export DATA_DIR=" + spec.data_dir)
-    lines.push("export OUTPUT_DIR=" + spec.output_dir)
-    lines.push("export NEURX_IMAGE=" + spec.image_name)
+    lines = append(lines, "export CLUSTER_NAME=" + spec.cluster_name)
+    lines = append(lines, "export MASTER_ADDR=" + spec.master_addr)
+    lines = append(lines, "export MASTER_PORT=" + cluster_int_to_string(spec.master_port))
+    lines = append(lines, "export WORLD_SIZE=" + cluster_int_to_string(spec.world_size))
+    lines = append(lines, "export DATA_PARALLEL_SIZE=" + cluster_int_to_string(spec.data_parallel_size))
+    lines = append(lines, "export TENSOR_PARALLEL_SIZE=" + cluster_int_to_string(spec.tensor_parallel_size))
+    lines = append(lines, "export PIPELINE_PARALLEL_SIZE=" + cluster_int_to_string(spec.pipeline_parallel_size))
+    lines = append(lines, "export BACKEND=" + spec.backend)
+    lines = append(lines, "export CHECKPOINT_DIR=" + spec.checkpoint_dir)
+    lines = append(lines, "export DATA_DIR=" + spec.data_dir)
+    lines = append(lines, "export OUTPUT_DIR=" + spec.output_dir)
+    lines = append(lines, "export NEURX_IMAGE=" + spec.image_name)
     lines
 }
 
@@ -464,41 +464,41 @@ func cluster_generate_training_startup_lines(cluster_orchestration_state state, 
     string pretrain_output_dir = cluster_default_pretrain_output_dir(spec)
     string pretrain_manifest = cluster_default_pretrain_manifest_path(spec)
     string tokenizer_manifest = cluster_default_pretrain_tokenizer_manifest_path(spec)
-    lines.push("CLUSTER_NAME=" + spec.cluster_name)
-    lines.push("CLUSTER_BACKEND=" + spec.backend)
-    lines.push("WORLD_SIZE=" + cluster_int_to_string(spec.world_size))
-    lines.push("MASTER_ADDR=" + spec.master_addr)
-    lines.push("MASTER_PORT=" + cluster_int_to_string(spec.master_port))
-    lines.push("CHECKPOINT_DIR=" + spec.checkpoint_dir)
-    lines.push("DATA_DIR=" + spec.data_dir)
-    lines.push("OUTPUT_DIR=" + spec.output_dir)
-    lines.push("DEPLOYMENT_DIR=" + state.deployment_dir)
-    lines.push("NODE_MANIFEST=" + cluster_node_manifest_path())
-    lines.push("LAUNCH_PLAN=" + state.deployment_dir + "/launch_plan.s")
-    lines.push("SUMMARY_FILE=" + state.deployment_dir + "/cluster_summary.txt")
-    lines.push("NEURX_PRETRAIN_OUTPUT_DIR=" + pretrain_output_dir)
-    lines.push("NEURX_PRETRAIN_MANIFEST=" + pretrain_manifest)
-    lines.push("NEURX_PRETRAIN_TOKENIZER_MANIFEST=" + tokenizer_manifest)
-    lines.push("NEURX_PRETRAIN_PRECISION=bf16")
-    lines.push("NEURX_PRETRAIN_MICRO_BATCH=8")
-    lines.push("NEURX_PRETRAIN_SEQ_LEN=16")
-    lines.push("NEURX_PRETRAIN_STEPS=64")
-    lines.push("NEURX_PRETRAIN_LR=0.00015")
-    lines.push("NEURX_PRETRAIN_MIN_LR=0.00003")
-    lines.push("NEURX_PRETRAIN_WARMUP_STEPS=128")
-    lines.push("NEURX_PRETRAIN_WEIGHT_DECAY=0.1")
-    lines.push("NEURX_PRETRAIN_LOG_INTERVAL=8")
-    lines.push("NEURX_PRETRAIN_EVAL_INTERVAL=16")
-    lines.push("NEURX_PRETRAIN_SAVE_INTERVAL=32")
-    lines.push("NEURX_PRETRAIN_GRAD_ACCUMULATION=1")
-    lines.push("NEURX_PRETRAIN_RESUME=1")
-    lines.push("NEURX_PRETRAIN_WORLD_SIZE=" + cluster_int_to_string(spec.world_size))
-    lines.push("NEURX_PRETRAIN_BACKEND=" + spec.backend)
-    lines.push("NEURX_PRETRAIN_MASTER_ADDR=" + spec.master_addr)
-    lines.push("NEURX_PRETRAIN_MASTER_PORT=" + cluster_int_to_string(spec.master_port))
-    lines.push("NEURX_PRETRAIN_DATA_DIR=" + spec.data_dir)
-    lines.push("NEURX_PRETRAIN_CHECKPOINT_DIR=" + spec.checkpoint_dir)
-    lines.push("NEURX_PRETRAIN_USE_LAUNCH_PLAN=1")
+    lines = append(lines, "CLUSTER_NAME=" + spec.cluster_name)
+    lines = append(lines, "CLUSTER_BACKEND=" + spec.backend)
+    lines = append(lines, "WORLD_SIZE=" + cluster_int_to_string(spec.world_size))
+    lines = append(lines, "MASTER_ADDR=" + spec.master_addr)
+    lines = append(lines, "MASTER_PORT=" + cluster_int_to_string(spec.master_port))
+    lines = append(lines, "CHECKPOINT_DIR=" + spec.checkpoint_dir)
+    lines = append(lines, "DATA_DIR=" + spec.data_dir)
+    lines = append(lines, "OUTPUT_DIR=" + spec.output_dir)
+    lines = append(lines, "DEPLOYMENT_DIR=" + state.deployment_dir)
+    lines = append(lines, "NODE_MANIFEST=" + cluster_node_manifest_path())
+    lines = append(lines, "LAUNCH_PLAN=" + state.deployment_dir + "/launch_plan.s")
+    lines = append(lines, "SUMMARY_FILE=" + state.deployment_dir + "/cluster_summary.txt")
+    lines = append(lines, "NEURX_PRETRAIN_OUTPUT_DIR=" + pretrain_output_dir)
+    lines = append(lines, "NEURX_PRETRAIN_MANIFEST=" + pretrain_manifest)
+    lines = append(lines, "NEURX_PRETRAIN_TOKENIZER_MANIFEST=" + tokenizer_manifest)
+    lines = append(lines, "NEURX_PRETRAIN_PRECISION=bf16")
+    lines = append(lines, "NEURX_PRETRAIN_MICRO_BATCH=8")
+    lines = append(lines, "NEURX_PRETRAIN_SEQ_LEN=16")
+    lines = append(lines, "NEURX_PRETRAIN_STEPS=64")
+    lines = append(lines, "NEURX_PRETRAIN_LR=0.00015")
+    lines = append(lines, "NEURX_PRETRAIN_MIN_LR=0.00003")
+    lines = append(lines, "NEURX_PRETRAIN_WARMUP_STEPS=128")
+    lines = append(lines, "NEURX_PRETRAIN_WEIGHT_DECAY=0.1")
+    lines = append(lines, "NEURX_PRETRAIN_LOG_INTERVAL=8")
+    lines = append(lines, "NEURX_PRETRAIN_EVAL_INTERVAL=16")
+    lines = append(lines, "NEURX_PRETRAIN_SAVE_INTERVAL=32")
+    lines = append(lines, "NEURX_PRETRAIN_GRAD_ACCUMULATION=1")
+    lines = append(lines, "NEURX_PRETRAIN_RESUME=1")
+    lines = append(lines, "NEURX_PRETRAIN_WORLD_SIZE=" + cluster_int_to_string(spec.world_size))
+    lines = append(lines, "NEURX_PRETRAIN_BACKEND=" + spec.backend)
+    lines = append(lines, "NEURX_PRETRAIN_MASTER_ADDR=" + spec.master_addr)
+    lines = append(lines, "NEURX_PRETRAIN_MASTER_PORT=" + cluster_int_to_string(spec.master_port))
+    lines = append(lines, "NEURX_PRETRAIN_DATA_DIR=" + spec.data_dir)
+    lines = append(lines, "NEURX_PRETRAIN_CHECKPOINT_DIR=" + spec.checkpoint_dir)
+    lines = append(lines, "NEURX_PRETRAIN_USE_LAUNCH_PLAN=1")
     lines
 }
 
@@ -518,84 +518,84 @@ func cluster_generate_training_startup_env(cluster_orchestration_state state, cl
 
 func cluster_generate_slurm_script(cluster_deployment_spec spec) string {
     []string lines = []string{cap: 32}
-    lines.push("#!/bin/bash")
-    lines.push("")
-    lines.push("# NeurX cluster deployment script")
-    lines.push("# cluster: " + spec.cluster_name)
-    lines.push("# backend: " + spec.backend)
-    lines.push("")
-    lines.push("set -euo pipefail")
-    lines.push("")
-    lines.push("export MASTER_ADDR=" + spec.master_addr)
-    lines.push("export MASTER_PORT=" + cluster_int_to_string(spec.master_port))
-    lines.push("export WORLD_SIZE=" + cluster_int_to_string(spec.world_size))
-    lines.push("export RANK=${SLURM_PROCID:-0}")
-    lines.push("export LOCAL_RANK=${SLURM_LOCALID:-0}")
-    lines.push("export CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0,1,2,3}")
-    lines.push("")
-    lines.push("mkdir -p " + spec.output_dir)
-    lines.push("mkdir -p " + spec.checkpoint_dir)
-    lines.push("")
-    lines.push("echo '[NeurX] launching distributed training'")
-    lines.push("echo 'cluster=" + spec.cluster_name + "'")
-    lines.push("echo 'world_size=" + cluster_int_to_string(spec.world_size) + "'")
-    lines.push("echo 'backend=" + spec.backend + "'")
-    lines.push("")
-    lines.push("srun neurx run train/train_gpt_large.s \\")
-    lines.push("  --data_dir=" + spec.data_dir + " \\")
-    lines.push("  --checkpoint_dir=" + spec.checkpoint_dir + " \\")
-    lines.push("  --output_dir=" + spec.output_dir + " \\")
-    lines.push("  --backend=" + spec.backend + " \\")
-    lines.push("  --world_size=" + cluster_int_to_string(spec.world_size) + " \\")
-    lines.push("  --master_addr=" + spec.master_addr + " \\")
-    lines.push("  --master_port=" + cluster_int_to_string(spec.master_port))
+    lines = append(lines, "#!/bin/bash")
+    lines = append(lines, "")
+    lines = append(lines, "# NeurX cluster deployment script")
+    lines = append(lines, "# cluster: " + spec.cluster_name)
+    lines = append(lines, "# backend: " + spec.backend)
+    lines = append(lines, "")
+    lines = append(lines, "set -euo pipefail")
+    lines = append(lines, "")
+    lines = append(lines, "export MASTER_ADDR=" + spec.master_addr)
+    lines = append(lines, "export MASTER_PORT=" + cluster_int_to_string(spec.master_port))
+    lines = append(lines, "export WORLD_SIZE=" + cluster_int_to_string(spec.world_size))
+    lines = append(lines, "export RANK=${SLURM_PROCID:-0}")
+    lines = append(lines, "export LOCAL_RANK=${SLURM_LOCALID:-0}")
+    lines = append(lines, "export CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0,1,2,3}")
+    lines = append(lines, "")
+    lines = append(lines, "mkdir -p " + spec.output_dir)
+    lines = append(lines, "mkdir -p " + spec.checkpoint_dir)
+    lines = append(lines, "")
+    lines = append(lines, "echo '[NeurX] launching distributed training'")
+    lines = append(lines, "echo 'cluster=" + spec.cluster_name + "'")
+    lines = append(lines, "echo 'world_size=" + cluster_int_to_string(spec.world_size) + "'")
+    lines = append(lines, "echo 'backend=" + spec.backend + "'")
+    lines = append(lines, "")
+    lines = append(lines, "srun neurx run train/train_gpt_large.s \\")
+    lines = append(lines, "  --data_dir=" + spec.data_dir + " \\")
+    lines = append(lines, "  --checkpoint_dir=" + spec.checkpoint_dir + " \\")
+    lines = append(lines, "  --output_dir=" + spec.output_dir + " \\")
+    lines = append(lines, "  --backend=" + spec.backend + " \\")
+    lines = append(lines, "  --world_size=" + cluster_int_to_string(spec.world_size) + " \\")
+    lines = append(lines, "  --master_addr=" + spec.master_addr + " \\")
+    lines = append(lines, "  --master_port=" + cluster_int_to_string(spec.master_port))
     cluster_join_lines(lines)
 }
 
 func cluster_generate_kubernetes_yaml(cluster_deployment_spec spec) string {
     []string lines = []string{cap: 40}
-    lines.push("apiVersion: app/v1")
-    lines.push("kind: StatefulSet")
-    lines.push("metadata:")
-    lines.push("  name: " + spec.deployment_name)
-    lines.push("spec:")
-    lines.push("  replicas: " + cluster_int_to_string(spec.replica_count))
-    lines.push("  serviceName: " + spec.cluster_name)
-    lines.push("  selector:")
-    lines.push("    matchLabels:")
-    lines.push("      app: " + spec.deployment_name)
-    lines.push("  template:")
-    lines.push("    metadata:")
-    lines.push("      labels:")
-    lines.push("        app: " + spec.deployment_name)
-    lines.push("    spec:")
-    lines.push("      containers:")
-    lines.push("      - name: neurx-trainer")
-    lines.push("        image: " + spec.image_name)
-    lines.push("        env:")
-    lines.push("        - name: MASTER_ADDR")
-    lines.push("          value: \"" + spec.master_addr + "\"")
-    lines.push("        - name: MASTER_PORT")
-    lines.push("          value: \"" + cluster_int_to_string(spec.master_port) + "\"")
-    lines.push("        - name: WORLD_SIZE")
-    lines.push("          value: \"" + cluster_int_to_string(spec.world_size) + "\"")
-    lines.push("        - name: BACKEND")
-    lines.push("          value: \"" + spec.backend + "\"")
-    lines.push("        - name: CHECKPOINT_DIR")
-    lines.push("          value: \"" + spec.checkpoint_dir + "\"")
-    lines.push("        - name: DATA_DIR")
-    lines.push("          value: \"" + spec.data_dir + "\"")
-    lines.push("        - name: OUTPUT_DIR")
-    lines.push("          value: \"" + spec.output_dir + "\"")
-    lines.push("        resources:")
-    lines.push("          requests:")
-    lines.push("            nvidia.com/gpu: \"1\"")
-    lines.push("            cpu: \"16\"")
-    lines.push("            memory: \"64Gi\"")
-    lines.push("          limits:")
-    lines.push("            nvidia.com/gpu: \"1\"")
-    lines.push("            cpu: \"32\"")
-    lines.push("            memory: \"128Gi\"")
+    lines = append(lines, "apiVersion: app/v1")
+    lines = append(lines, "kind: StatefulSet")
+    lines = append(lines, "metadata:")
+    lines = append(lines, "  name: " + spec.deployment_name)
+    lines = append(lines, "spec:")
+    lines = append(lines, "  replicas: " + cluster_int_to_string(spec.replica_count))
+    lines = append(lines, "  serviceName: " + spec.cluster_name)
+    lines = append(lines, "  selector:")
+    lines = append(lines, "    matchLabels:")
+    lines = append(lines, "      app: " + spec.deployment_name)
+    lines = append(lines, "  template:")
+    lines = append(lines, "    metadata:")
+    lines = append(lines, "      labels:")
+    lines = append(lines, "        app: " + spec.deployment_name)
+    lines = append(lines, "    spec:")
+    lines = append(lines, "      containers:")
+    lines = append(lines, "      - name: neurx-trainer")
+    lines = append(lines, "        image: " + spec.image_name)
+    lines = append(lines, "        env:")
+    lines = append(lines, "        - name: MASTER_ADDR")
+    lines = append(lines, "          value: \"" + spec.master_addr + "\"")
+    lines = append(lines, "        - name: MASTER_PORT")
+    lines = append(lines, "          value: \"" + cluster_int_to_string(spec.master_port) + "\"")
+    lines = append(lines, "        - name: WORLD_SIZE")
+    lines = append(lines, "          value: \"" + cluster_int_to_string(spec.world_size) + "\"")
+    lines = append(lines, "        - name: BACKEND")
+    lines = append(lines, "          value: \"" + spec.backend + "\"")
+    lines = append(lines, "        - name: CHECKPOINT_DIR")
+    lines = append(lines, "          value: \"" + spec.checkpoint_dir + "\"")
+    lines = append(lines, "        - name: DATA_DIR")
+    lines = append(lines, "          value: \"" + spec.data_dir + "\"")
+    lines = append(lines, "        - name: OUTPUT_DIR")
+    lines = append(lines, "          value: \"" + spec.output_dir + "\"")
+    lines = append(lines, "        resources:")
+    lines = append(lines, "          requests:")
+    lines = append(lines, "            nvidia.com/gpu: \"1\"")
+    lines = append(lines, "            cpu: \"16\"")
+    lines = append(lines, "            memory: \"64Gi\"")
+    lines = append(lines, "          limits:")
+    lines = append(lines, "            nvidia.com/gpu: \"1\"")
+    lines = append(lines, "            cpu: \"32\"")
+    lines = append(lines, "            memory: \"128Gi\"")
     cluster_join_lines(lines)
 }
 

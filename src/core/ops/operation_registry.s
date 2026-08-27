@@ -25,10 +25,10 @@ package ops
 struct operation_metadata {
     string op_name
     operation_type op_type
-    vec[string] input_types
-    vec[string] output_types
+    string[] input_types
+    string[] output_types
     bool supports_fused_ops
-    vec[compute_capability] supported_hardware
+    compute_capability[] supported_hardware
     int estimated_flops
 }
 
@@ -44,7 +44,7 @@ struct operation_kernel {
 
 struct fused_operation {
     string fused_op_id
-    vec[string] component_ops
+    string[] component_ops
     string fusion_name
     int estimated_flops_saved
     int estimated_memory_saved
@@ -55,7 +55,7 @@ struct custom_operation {
     string op_name
     operation_type op_type
     operation_metadata metadata
-    vec[operation_kernel] kernels
+    operation_kernel[] kernels
     bool is_registered
     int64 registration_time
 }
@@ -72,10 +72,10 @@ func new_operation_metadata(string name, operation_type op_type) operation_metad
     operation_metadata {
         op_name: name,
         op_type: op_type,
-        input_types: vec[string]{},
-        output_types: vec[string]{},
+        input_types: string[]{},
+        output_types: string[]{},
         supports_fused_ops: false,
-        supported_hardware: vec[compute_capability]{},
+        supported_hardware: compute_capability[]{},
         estimated_flops: 0,
     }
 }
@@ -98,7 +98,7 @@ func new_custom_operation(string op_id, string op_name, operation_type op_type) 
         op_name: op_name,
         op_type: op_type,
         metadata: new_operation_metadata(op_name, op_type),
-        kernels: vec[operation_kernel]{},
+        kernels: operation_kernel[]{},
         is_registered: false,
         registration_time: 0,
     }
@@ -115,20 +115,20 @@ func new_operation_registry(string default_hw) operation_registry {
 }
 
 func (custom_operation* op) add_kernel(operation_kernel kernel) bool {
-    op.kernels.push(kernel)
+    op.kernels = append(op.kernels, kernel)
     true
 }
 
 func (custom_operation* op) add_input_type(string input_type) () {
-    op.metadata.input_types.push(input_type)
+    op.metadata.input_types = append(op.metadata.input_types, input_type)
 }
 
 func (custom_operation* op) add_output_type(string output_type) () {
-    op.metadata.output_types.push(output_type)
+    op.metadata.output_types = append(op.metadata.output_types, output_type)
 }
 
 func (custom_operation* op) add_supported_hardware(compute_capability hw) () {
-    op.metadata.supported_hardware.push(hw)
+    op.metadata.supported_hardware = append(op.metadata.supported_hardware, hw)
 }
 
 func (custom_operation* op) set_metadata(operation_metadata meta) () {
@@ -137,7 +137,7 @@ func (custom_operation* op) set_metadata(operation_metadata meta) () {
 
 func (custom_operation* op) get_kernel_for_hardware(compute_capability hw) operation_kernel {
     i := 0
-    for i < op.kernels.len() {
+    for i < len(op.kernels) {
         if op.kernels[i].target_hardware == hw {
             op.kernels[i]
         }
@@ -179,7 +179,7 @@ func (operation_registry* reg) get_operation(string op_id) custom_operation {
     new_custom_operation("", "", operation_type::custom)
 }
 
-func (operation_registry* reg) register_fused_operation(string fused_id, vec[string] component_ops, string fusion_name) bool {
+func (operation_registry* reg) register_fused_operation(string fused_id, string[] component_ops, string fusion_name) bool {
     if fused_id in reg.fused_ops {
         false
     }
@@ -208,48 +208,48 @@ func (operation_registry* reg) get_fused_operation(string fused_id) fused_operat
 
     fused_operation {
         fused_op_id: "",
-        component_ops: vec[string]{},
+        component_ops: string[]{},
         fusion_name: "",
         estimated_flops_saved: 0,
         estimated_memory_saved: 0,
     }
 }
 
-func (operation_registry* reg) list_operations() vec[string] {
-    result := vec[string]{}
+func (operation_registry* reg) list_operations() string[] {
+    result := string[]{}
     for op_id in reg.operations.keys() {
-        result.push(op_id)
+        result = append(result, op_id)
     }
     result
 }
 
-func (operation_registry* reg) list_fused_operations() vec[string] {
-    result := vec[string]{}
+func (operation_registry* reg) list_fused_operations() string[] {
+    result := string[]{}
     for fused_id in reg.fused_ops.keys() {
-        result.push(fused_id)
+        result = append(result, fused_id)
     }
     result
 }
 
-func (operation_registry* reg) find_operations_by_type(operation_type op_type) vec[string] {
-    result := vec[string]{}
+func (operation_registry* reg) find_operations_by_type(operation_type op_type) string[] {
+    result := string[]{}
     for op_id in reg.operations.keys() {
         op := reg.get_operation(op_id)
         if op.op_type == op_type {
-            result.push(op_id)
+            result = append(result, op_id)
         }
     }
     result
 }
 
-func (operation_registry* reg) find_operations_for_hardware(compute_capability hw) vec[string] {
-    result := vec[string]{}
+func (operation_registry* reg) find_operations_for_hardware(compute_capability hw) string[] {
+    result := string[]{}
     for op_id in reg.operations.keys() {
         op := reg.get_operation(op_id)
         i := 0
-        for i < op.metadata.supported_hardware.len() {
+        for i < len(op.metadata.supported_hardware) {
             if op.metadata.supported_hardware[i] == hw {
-                result.push(op_id)
+                result = append(result, op_id)
             }
             i = i + 1
         }

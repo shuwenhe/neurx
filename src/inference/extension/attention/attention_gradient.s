@@ -280,7 +280,7 @@ func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
     for i < size {
-        v.push(init_val)
+        v = append(v, init_val)
         i = i + 1
     }
     return v

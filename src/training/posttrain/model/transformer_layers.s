@@ -82,7 +82,7 @@ func embedding_forward(embedding_layer emb, []int token_ids) [][]float {
                 }
                 j = j + 1
             }
-            embeddings.push(embedding)
+            embeddings = append(embeddings, embedding)
         }
         i = i + 1
     }

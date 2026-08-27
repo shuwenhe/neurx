@@ -60,7 +60,7 @@ func cross_entropy_loss_batch([][]float logits_batch, []int target_ids) loss_bat
     int i = 0
     for i < len(logits_batch) && i < len(target_ids) {
         float token_loss = cross_entropy_loss_single(logits_batch[i], target_ids[i])
-        result.loss_per_token.push(token_loss)
+        result.loss_per_token = append(result.loss_per_token, token_loss)
         result.total_loss = result.total_loss + token_loss
         i = i + 1
     }
@@ -79,7 +79,7 @@ func cross_entropy_loss_with_ignore_index([][]float logits_batch, []int target_i
     for i < len(logits_batch) && i < len(target_ids) {
         if target_ids[i] != ignore_index {
             float token_loss = cross_entropy_loss_single(logits_batch[i], target_ids[i])
-            result.loss_per_token.push(token_loss)
+            result.loss_per_token = append(result.loss_per_token, token_loss)
             result.total_loss = result.total_loss + token_loss
             result.num_tokens = result.num_tokens + 1
         }
@@ -106,7 +106,7 @@ func label_smoothing_cross_entropy([][]float logits_batch, []int target_ids, flo
         if target_ids[i] >= 0 && target_ids[i] < len(probs) {
             loss = 0.0 - log(probs[target_ids[i]] * target_prob + smooth_prob)
         }
-        result.loss_per_token.push(loss)
+        result.loss_per_token = append(result.loss_per_token, loss)
         result.total_loss = result.total_loss + loss
         i = i + 1
     }

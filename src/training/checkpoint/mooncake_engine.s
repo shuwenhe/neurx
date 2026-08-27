@@ -33,8 +33,8 @@ func new_mooncake_engine(mooncake_config config) . mooncake_engine {
     send_streams := []
     recv_streams := []
     for i in 0..config.num_streams {
-        send_streams.push(cuda_stream_create())
-        recv_streams.push(cuda_stream_create())
+        send_streams = append(send_streams, cuda_stream_create())
+        recv_streams = append(recv_streams, cuda_stream_create())
     }
     return mooncake_engine{
         config: config,
@@ -177,7 +177,7 @@ func (mooncake_engine* engine) flatten_state(map state[string]tensor) . tensor {
     param_list := []
     for name, param in state {
         total_size += param.numel()
-        param_list.push(param.flatten())
+        param_list = append(param_list, param.flatten())
     }
     return tensor_cat(param_list)
 }

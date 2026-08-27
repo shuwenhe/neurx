@@ -52,7 +52,7 @@ func new_attention_layer(string layer_id, int layer_index, int num_heads, int he
     backend_mgr.register_backend("dsa", dsa)
     backend_mgr.register_backend("paged_attention", paged)
 
-    kv_cache := new_kv_cache(layer_id + "_cache", "float16", vec[int64]{}, false)
+    kv_cache := new_kv_cache(layer_id + "_cache", "float16", int64[]{}, false)
 
     attention_layer {
         layer_id: layer_id,
@@ -148,24 +148,24 @@ func (attention_layer* layer) enable_cache() bool {
     true
 }
 
-func (attention_layer* layer) list_available_backends() vec[string] {
+func (attention_layer* layer) list_available_backends() string[] {
     layer.backend_manager.list_backends()
 }
 
 struct attention_layer_stack {
-    vec[attention_layer] layers
+    attention_layer[] layers
     int num_layers
     int num_heads
     int head_dim
 }
 
 func new_attention_layer_stack(int num_layers, int num_heads, int head_dim) attention_layer_stack {
-    layers := vec[attention_layer]{}
+    layers := attention_layer[]{}
     i := 0
     for i < num_layers {
         layer_id := "attn_layer_" + string(i)
         layer := new_attention_layer(layer_id, i, num_heads, head_dim)
-        layers.push(layer)
+        layers = append(layers, layer)
         i = i + 1
     }
 
@@ -179,7 +179,7 @@ func new_attention_layer_stack(int num_layers, int num_heads, int head_dim) atte
 
 func (attention_layer_stack* stack) initialize_all() bool {
     i := 0
-    for i < stack.layers.len() {
+    for i < len(stack.layers) {
         if !stack.layers[i].initialize() {
             false
         }
@@ -191,7 +191,7 @@ func (attention_layer_stack* stack) initialize_all() bool {
 
 func (attention_layer_stack* stack) finalize_all() bool {
     i := 0
-    for i < stack.layers.len() {
+    for i < len(stack.layers) {
         if !stack.layers[i].finalize() {
             false
         }
@@ -203,7 +203,7 @@ func (attention_layer_stack* stack) finalize_all() bool {
 
 func (attention_layer_stack* stack) set_all_backend(string backend_name) bool {
     i := 0
-    for i < stack.layers.len() {
+    for i < len(stack.layers) {
         if !stack.layers[i].set_active_backend(backend_name) {
             false
         }
@@ -214,7 +214,7 @@ func (attention_layer_stack* stack) set_all_backend(string backend_name) bool {
 }
 
 func (attention_layer_stack* stack) get_layer(int index) attention_layer {
-    if index >= 0 && index < stack.layers.len() {
+    if index >= 0 && index < len(stack.layers) {
         stack.layers[index]
     }
 

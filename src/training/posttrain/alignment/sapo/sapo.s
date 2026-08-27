@@ -93,7 +93,7 @@ func (sapo_trainer* trainer) compute_gae(
     []tensor values,
     []tensor dones
 ) . ([]tensor, []tensor) {
-    batch_size := rewards.len()
+    batch_size := len(rewards)
     advantages := []
     returns := []
     for b in 0..batch_size {
@@ -112,8 +112,8 @@ func (sapo_trainer* trainer) compute_gae(
             seq_returns[t] = tensor_scalar(gae + value)
             next_value = value
         }
-        advantages.push(seq_advantages)
-        returns.push(seq_returns)
+        advantages = append(advantages, seq_advantages)
+        returns = append(returns, seq_returns)
     }
     return advantages, returns
 }
@@ -125,7 +125,7 @@ func (sapo_trainer* trainer) normalize_advantages([]tensor advantages) . []tenso
     all_advantages := []
     for adv in advantages {
         for i in 0..adv.numel() {
-            all_advantages.push(adv.flatten()[i].item())
+            all_advantages = append(all_advantages, adv.flatten()[i].item())
         }
     }
     trainer.advantage_stats.mean = compute_mean(all_advantages)
@@ -141,7 +141,7 @@ func (sapo_trainer* trainer) normalize_advantages([]tensor advantages) . []tenso
     for adv in advantages {
         norm_adv := (adv - trainer.advantage_stats.mean) /
                        (trainer.advantage_stats.std + trainer.config.advantage_epsilon)
-        normalized.push(norm_adv)
+        normalized = append(normalized, norm_adv)
     }
     return normalized
 }
@@ -151,22 +151,22 @@ func (sapo_trainer* trainer) train_step(
     []tensor responses,
     []tensor rewards
 ) . (f32, f32, f32) {
-    batch_size := prompts.len()
+    batch_size := len(prompts)
     inputs := []
     for i in 0..batch_size {
-        inputs.push(concat(prompts[i], responses[i]))
+        inputs = append(inputs, concat(prompts[i], responses[i]))
     }
     values := []
     for input in inputs {
         value := trainer.value_model.forward(input)
-        values.push(value)
+        values = append(values, value)
     }
     dones := []
     for resp in responses {
         seq_len := resp.shape[0]
         done := tensor_zeros([seq_len])
         done[-1] = tensor_scalar(1.0)
-        dones.push(done)
+        dones = append(dones, done)
     }
     advantages, returns  := trainer.compute_gae(rewards, values, dones)
     normalized_advantages := trainer.normalize_advantages(advantages)
@@ -174,13 +174,13 @@ func (sapo_trainer* trainer) train_step(
     for input in inputs {
         logits := trainer.policy_model.forward(input)
         log_probs := log_softmax(logits, dim: -1)
-        old_log_probs.push(log_probs)
+        old_log_probs = append(old_log_probs, log_probs)
     }
     ref_log_probs := []
     for input in inputs {
         logits := trainer.reference_model.forward(input)
         log_probs := log_softmax(logits, dim: -1)
-        ref_log_probs.push(log_probs)
+        ref_log_probs = append(ref_log_probs, log_probs)
     }
     total_policy_loss := 0.0
     total_value_loss := 0.0
@@ -237,8 +237,8 @@ func (sapo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
             batch.responses,
             batch.rewards
         )
-        policy_losses.push(policy_loss)
-        value_losses.push(value_loss)
+        policy_losses = append(policy_losses, policy_loss)
+        value_losses = append(value_losses, value_loss)
         if trainer.step_count % 10 == 0 {
             println(f"Step {trainer.step_count}: " +
                    f"Policy Loss = {policy_loss:.4f}, " +
@@ -257,23 +257,23 @@ func sigmoid(Tensor x) . Tensor {
 }
 
 func compute_mean([]f32 values) . f32 {
-    if values.len() == 0 {
+    if len(values) == 0 {
         return 0.0
     }
     sum := 0.0
     for v in values {
         sum += v
     }
-    return sum / f32(values.len())
+    return sum / f32(len(values))
 }
 
 func compute_std([]f32 values, f32 mean) . f32 {
-    if values.len() == 0 {
+    if len(values) == 0 {
         return 1.0
     }
     sum_sq := 0.0
     for v in values {
         sum_sq += (v - mean) * (v - mean)
     }
-    return sqrt(sum_sq / f32(values.len()))
+    return sqrt(sum_sq / f32(len(values)))
 }

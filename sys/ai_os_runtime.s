@@ -44,7 +44,7 @@ func submit_inference_workload(ai_os_runtime runtime, string model_id, resource_
         quota: quota,
         status: 0
     }
-    runtime.workloads.push(ctx)
+    runtime.workloads = append(runtime.workloads, ctx)
     runtime.workload_count = runtime.workload_count + 1
     runtime
 }
@@ -57,7 +57,7 @@ func submit_training_workload(ai_os_runtime runtime, string dataset_id, resource
         quota: quota,
         status: 0
     }
-    runtime.workloads.push(ctx)
+    runtime.workloads = append(runtime.workloads, ctx)
     runtime.workload_count = runtime.workload_count + 1
     runtime
 }

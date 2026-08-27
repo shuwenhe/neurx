@@ -109,17 +109,17 @@ func check_all_finished([][]int sequences, int eos_id) bool {
 }
 
 func append_sequence_score([]float scores, float score) []float {
-    scores.push(score)
+    scores = append(scores, score)
     scores
 }
 
 func append_token_logprob_sequence([][]float all_logprobs, []float seq_logprobs) [][]float {
-    all_logprobs.push(seq_logprobs)
+    all_logprobs = append(all_logprobs, seq_logprobs)
     all_logprobs
 }
 
 func append_top_logprob_sequence([][][]top_logprob_candidate all_top_logprobs, [][]top_logprob_candidate seq_top_logprobs) [][][]top_logprob_candidate {
-    all_top_logprobs.push(seq_top_logprobs)
+    all_top_logprobs = append(all_top_logprobs, seq_top_logprobs)
     all_top_logprobs
 }
 
@@ -207,7 +207,7 @@ func take_generation_output([]int prompt_ids, []int generated_ids, bool return_f
         []int full = copy_ids(prompt_ids)
         int i = 0
         for i < len(generated_ids) {
-            full.push(generated_ids[i])
+            full = append(full, generated_ids[i])
             i = i + 1
         }
         return full
@@ -281,7 +281,7 @@ func generate_one_sequence(
         [][]float all_logits = [][]float{cap: max_steps}
         int step = 0
         for step < max_steps {
-            all_logits.push(stub_next_logits(current_ids, cfg, step, max_steps, vocab_size))
+            all_logits = append(all_logits, stub_next_logits(current_ids, cfg, step, max_steps, vocab_size))
             step = step + 1
         }
         []int beam_tokens = neurx.inference.sampling_strategies.beam_search_decode(
@@ -291,7 +291,7 @@ func generate_one_sequence(
         )
         int i = 0
         for i < len(beam_tokens) {
-            current_ids.push(beam_tokens[i])
+            current_ids = append(current_ids, beam_tokens[i])
             if beam_tokens[i] == cfg.eos_token_id && i + 1 >= cfg.min_new_tokens {
                 finished = true
                 break
@@ -300,7 +300,7 @@ func generate_one_sequence(
         }
         generated = len(current_ids) - len(prompt_ids)
         if cfg.force_eos && !finished && generated >= max_steps {
-            current_ids.push(cfg.eos_token_id)
+            current_ids = append(current_ids, cfg.eos_token_id)
             finished = true
         }
         return (
@@ -333,10 +333,10 @@ func generate_one_sequence(
         }
         if next_token < len(processed) {
             sequence_score = sequence_score + processed[next_token]
-            step_logprobs.push(log_probs[next_token])
+            step_logprobs = append(step_logprobs, log_probs[next_token])
         }
-        step_top_logprobs.push(top_logprobs)
-        current_ids.push(next_token)
+        step_top_logprobs = append(step_top_logprobs, top_logprobs)
+        current_ids = append(current_ids, next_token)
         generated = generated + 1
         if next_token == cfg.eos_token_id && generated >= cfg.min_new_tokens {
             finished = true
@@ -345,7 +345,7 @@ func generate_one_sequence(
         step = step + 1
     }
     if cfg.force_eos && !finished && generated >= max_steps {
-        current_ids.push(cfg.eos_token_id)
+        current_ids = append(current_ids, cfg.eos_token_id)
         finished = true
     }
     (
@@ -375,8 +375,8 @@ func generate_one_sequence_with_forward(
         int step = 0
         for step < max_steps {
             []float step_logits = forward_fn(current_ids)
-            all_logits.push(step_logits)
-            current_ids.push(0)
+            all_logits = append(all_logits, step_logits)
+            current_ids = append(current_ids, 0)
             step = step + 1
         }
         current_ids = copy_ids(prompt_ids)
@@ -387,7 +387,7 @@ func generate_one_sequence_with_forward(
         )
         int i = 0
         for i < len(beam_tokens) {
-            current_ids.push(beam_tokens[i])
+            current_ids = append(current_ids, beam_tokens[i])
             if beam_tokens[i] == cfg.eos_token_id && i + 1 >= cfg.min_new_tokens {
                 finished = true
                 break
@@ -396,7 +396,7 @@ func generate_one_sequence_with_forward(
         }
         generated = len(current_ids) - len(prompt_ids)
         if cfg.force_eos && !finished && generated >= max_steps {
-            current_ids.push(cfg.eos_token_id)
+            current_ids = append(current_ids, cfg.eos_token_id)
             finished = true
         }
         return (
@@ -429,10 +429,10 @@ func generate_one_sequence_with_forward(
         }
         if next_token < len(processed) {
             sequence_score = sequence_score + processed[next_token]
-            step_logprobs.push(log_probs[next_token])
+            step_logprobs = append(step_logprobs, log_probs[next_token])
         }
-        step_top_logprobs.push(top_logprobs)
-        current_ids.push(next_token)
+        step_top_logprobs = append(step_top_logprobs, top_logprobs)
+        current_ids = append(current_ids, next_token)
         generated = generated + 1
         if next_token == cfg.eos_token_id && generated >= cfg.min_new_tokens {
             finished = true
@@ -441,7 +441,7 @@ func generate_one_sequence_with_forward(
         step = step + 1
     }
     if cfg.force_eos && !finished && generated >= max_steps {
-        current_ids.push(cfg.eos_token_id)
+        current_ids = append(current_ids, cfg.eos_token_id)
         finished = true
     }
     (
@@ -468,7 +468,7 @@ func generate(
     int i = 0
     for i < count {
         ([]int seq, float score, []float token_logprobs, [][]top_logprob_candidate top_logprobs, bool finished, uint64 next_rng) = generate_one_sequence(prompt_ids, cfg, rng)
-        all_sequences.push(seq)
+        all_sequences = append(all_sequences, seq)
         if cfg.return_scores {
             all_scores = append_sequence_score(all_scores, score)
         }
@@ -516,7 +516,7 @@ func generate_with_forward(
             cfg,
             rng
         )
-        all_sequences.push(seq)
+        all_sequences = append(all_sequences, seq)
         if cfg.return_scores {
             all_scores = append_sequence_score(all_scores, score)
         }

@@ -48,7 +48,7 @@ struct message_handler {
 	string                  handler_id
 	string                  handler_name
 
-	vec[message_type]       handled_message_types
+	message_type[]       handled_message_types
 	int32                   handler_type_count
 
 	int32                   messages_processed
@@ -58,9 +58,9 @@ struct message_handler {
 }
 
 struct plugin_communication_channel {
-	map[string]vec[plugin_message]]  message_queue
+	map[string]plugin_message[]]  message_queue
 
-	vec[message_handler]            handlers
+	message_handler[]            handlers
 	int32                           handler_count
 
 	int32                           total_messages_sent
@@ -76,7 +76,7 @@ struct message_router {
 	plugin_communication_channel    channel
 
 	map[string]string]              plugin_address_map
-	map[string]vec[string]]         plugin_subscription_map
+	map[string]string[]]         plugin_subscription_map
 
 	int32                           total_routes
 	int32                           total_subscriptions
@@ -118,8 +118,8 @@ func create_plugin_message(msg_id string, msg_type message_type, sender string, 
 
 func create_plugin_communication_channel() plugin_communication_channel {
 	return plugin_communication_channel{
-		message_queue:           make(map[string]vec[plugin_message]),
-		handlers:                make(vec[message_handler], 0),
+		message_queue:           make(map[string]plugin_message[]),
+		handlers:                make(message_handler[], 0),
 		handler_count:           0,
 		total_messages_sent:     0,
 		total_messages_received: 0,
@@ -133,7 +133,7 @@ func create_message_handler(handler_id string, name string) message_handler {
 	return message_handler{
 		handler_id:              handler_id,
 		handler_name:            name,
-		handled_message_types:   make(vec[message_type], 0),
+		handled_message_types:   make(message_type[], 0),
 		handler_type_count:      0,
 		messages_processed:      0,
 		messages_failed:         0,
@@ -145,7 +145,7 @@ func create_message_router() message_router {
 	return message_router{
 		channel:                 create_plugin_communication_channel(),
 		plugin_address_map:      make(map[string]string),
-		plugin_subscription_map: make(map[string]vec[string]),
+		plugin_subscription_map: make(map[string]string[]),
 		total_routes:            0,
 		total_subscriptions:     0,
 		mu:                      sync.Mutex{},
@@ -160,7 +160,7 @@ func (plugin_communication_channel* c) send_message(message plugin_message) bool
 
 	queue, exists := c.message_queue[receiver_id]
 	if !exists {
-		queue = make(vec[plugin_message], 0)
+		queue = make(plugin_message[], 0)
 	}
 
 	if int32(len(queue)) >= c.max_queue_size {
@@ -186,7 +186,7 @@ func (plugin_communication_channel* c) receive_message(plugin_id string) (plugin
 	message := queue[0]
 	message.received_time = time.Now().UnixNano()
 
-	new_queue := make(vec[plugin_message], 0)
+	new_queue := make(plugin_message[], 0)
 	for i := int32(1); i < int32(len(queue)); i++ {
 		new_queue = append(new_queue, queue[i])
 	}
@@ -279,7 +279,7 @@ func (message_router* r) subscribe_to_event(plugin_id string, event_topic string
 
 	subscribers, exists := r.plugin_subscription_map[event_topic]
 	if !exists {
-		subscribers = make(vec[string], 0)
+		subscribers = make(string[], 0)
 	}
 
 	for sub := range subscribers {

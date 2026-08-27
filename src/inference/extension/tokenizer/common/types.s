@@ -53,7 +53,7 @@ struct TokenizerResult {
     success: bool,
     error_code: i32,
     error_message: string,
-    tokens: vec[i32],
+    tokens: i32[],
     text: string,
     stats: TokenizerStats,
     timestamp_ms: i64,
@@ -96,17 +96,17 @@ struct DecodingOptions {
 }
 
 struct TokenSequence {
-    tokens: vec[i32],
-    text_tokens: vec[string],
-    attention_mask: vec[i32],
-    token_type_ids: vec[i32],
-    special_tokens_mask: vec[i32],
+    tokens: i32[],
+    text_tokens: string[],
+    attention_mask: i32[],
+    token_type_ids: i32[],
+    special_tokens_mask: i32[],
     length: i32,
 }
 
 struct TokenCache {
     text: string,
-    tokens: vec[i32],
+    tokens: i32[],
     hash: u64,
     timestamp: i64,
     hit_count: i32,

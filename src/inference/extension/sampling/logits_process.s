@@ -30,7 +30,7 @@ struct processor_config {
 }
 
 struct logits_processor {
-    vec[processor_config] processors
+    processor_config[] processors
     map[string]interface{} processor_params
     processor_status status
     int32 total_calls
@@ -39,7 +39,7 @@ struct logits_processor {
 
 func create_logits_processor() logits_processor* {
     processor := logits_processor{
-        processors: make(vec[processor_config]),
+        processors: make(processor_config[]),
         processor_params: make(map[string]interface{}),
         status: status_ready,
         total_calls: 0,
@@ -59,12 +59,12 @@ func (logits_processor* processor) add_processor(processor_type type, float32 th
     processor.processors = append(processor.processors, config)
 }
 
-func (logits_processor* processor) apply_temperature(vec[float32] logits, float32 temperature) vec[float32] {
+func (logits_processor* processor) apply_temperature(float32[] logits, float32 temperature) float32[] {
     if temperature <= 0.0 {
         temperature = 1.0
     }
 
-    scaled := make(vec[float32])
+    scaled := make(float32[])
 
     for i := 0; i < len(logits); i = i + 1 {
         scaled_val := logits[i] / temperature
@@ -74,17 +74,17 @@ func (logits_processor* processor) apply_temperature(vec[float32] logits, float3
     return scaled
 }
 
-func (logits_processor* processor) apply_top_k(vec[float32] logits, int32 k) vec[float32] {
+func (logits_processor* processor) apply_top_k(float32[] logits, int32 k) float32[] {
     if k <= 0 || int32(k) >= int32(len(logits)) {
         return logits
     }
 
-    sorted_indices := make(vec[int32])
+    sorted_indices := make(int32[])
     for i := 0; i < len(logits); i = i + 1 {
         sorted_indices = append(sorted_indices, int32(i))
     }
 
-    result := make(vec[float32])
+    result := make(float32[])
     for i := 0; i < len(logits); i = i + 1 {
         include := false
         for j := 0; int32(j) < k; j = j + 1 {
@@ -104,13 +104,13 @@ func (logits_processor* processor) apply_top_k(vec[float32] logits, int32 k) vec
     return result
 }
 
-func (logits_processor* processor) apply_top_p(vec[float32] logits, float32 top_p) vec[float32] {
+func (logits_processor* processor) apply_top_p(float32[] logits, float32 top_p) float32[] {
     if top_p >= 1.0 {
         return logits
     }
 
     if top_p <= 0.0 {
-        result := make(vec[float32])
+        result := make(float32[])
         for i := 0; i < len(logits); i = i + 1 {
             result = append(result, -10000.0)
         }
@@ -135,7 +135,7 @@ func (logits_processor* processor) apply_top_p(vec[float32] logits, float32 top_
     }
 
     cumsum := 0.0
-    result := make(vec[float32])
+    result := make(float32[])
 
     for i := 0; i < len(logits); i = i + 1 {
         exp_val := 2.718 ^ (logits[i] - max_logit)
@@ -152,13 +152,13 @@ func (logits_processor* processor) apply_top_p(vec[float32] logits, float32 top_
     return result
 }
 
-func (logits_processor* processor) apply_top_a(vec[float32] logits, float32 top_a) vec[float32] {
+func (logits_processor* processor) apply_top_a(float32[] logits, float32 top_a) float32[] {
     if top_a <= 0.0 {
         return logits
     }
 
     if top_a >= 1.0 {
-        result := make(vec[float32])
+        result := make(float32[])
         for i := 0; i < len(logits); i = i + 1 {
             result = append(result, -10000.0)
         }
@@ -176,7 +176,7 @@ func (logits_processor* processor) apply_top_a(vec[float32] logits, float32 top_
 
     threshold := top_a * max_prob
 
-    result := make(vec[float32])
+    result := make(float32[])
 
     for i := 0; i < len(logits); i = i + 1 {
         prob := 2.718 ^ (logits[i] - max_logit)
@@ -191,13 +191,13 @@ func (logits_processor* processor) apply_top_a(vec[float32] logits, float32 top_
     return result
 }
 
-func (logits_processor* processor) apply_min_p(vec[float32] logits, float32 min_p) vec[float32] {
+func (logits_processor* processor) apply_min_p(float32[] logits, float32 min_p) float32[] {
     if min_p <= 0.0 {
         return logits
     }
 
     if min_p >= 1.0 {
-        result := make(vec[float32])
+        result := make(float32[])
         for i := 0; i < len(logits); i = i + 1 {
             result = append(result, -10000.0)
         }
@@ -214,7 +214,7 @@ func (logits_processor* processor) apply_min_p(vec[float32] logits, float32 min_
     max_prob := 1.0
     threshold := min_p * max_prob
 
-    result := make(vec[float32])
+    result := make(float32[])
 
     for i := 0; i < len(logits); i = i + 1 {
         exp_val := 2.718 ^ (logits[i] - max_logit)
@@ -230,8 +230,8 @@ func (logits_processor* processor) apply_min_p(vec[float32] logits, float32 min_
     return result
 }
 
-func (logits_processor* processor) apply_frequency_penalty(vec[float32] logits, map[int32]int32 token_counts, float32 penalty) vec[float32] {
-    result := make(vec[float32])
+func (logits_processor* processor) apply_frequency_penalty(float32[] logits, map[int32]int32 token_counts, float32 penalty) float32[] {
+    result := make(float32[])
 
     for i := 0; i < len(logits); i = i + 1 {
         if count, exists := token_counts[int32(i)]; exists {
@@ -248,8 +248,8 @@ func (logits_processor* processor) apply_frequency_penalty(vec[float32] logits, 
     return result
 }
 
-func (logits_processor* processor) apply_presence_penalty(vec[float32] logits, map[int32]int32 token_counts, float32 penalty) vec[float32] {
-    result := make(vec[float32])
+func (logits_processor* processor) apply_presence_penalty(float32[] logits, map[int32]int32 token_counts, float32 penalty) float32[] {
+    result := make(float32[])
 
     for i := 0; i < len(logits); i = i + 1 {
         if _, exists := token_counts[int32(i)]; exists {
@@ -266,8 +266,8 @@ func (logits_processor* processor) apply_presence_penalty(vec[float32] logits, m
     return result
 }
 
-func (logits_processor* processor) apply_logit_bias(vec[float32] logits, map[int32]float32 bias_map) vec[float32] {
-    result := make(vec[float32])
+func (logits_processor* processor) apply_logit_bias(float32[] logits, map[int32]float32 bias_map) float32[] {
+    result := make(float32[])
 
     for i := 0; i < len(logits); i = i + 1 {
         if bias, exists := bias_map[int32(i)]; exists {
@@ -280,7 +280,7 @@ func (logits_processor* processor) apply_logit_bias(vec[float32] logits, map[int
     return result
 }
 
-func (logits_processor* processor) apply_all_processors(vec[float32] logits, sampling_params* params) vec[float32] {
+func (logits_processor* processor) apply_all_processors(float32[] logits, sampling_params* params) float32[] {
     processor.status = status_processing
 
     result := logits
@@ -333,7 +333,7 @@ func (logits_processor* processor) get_processor_stats() map[string]interface{} 
     stats["total_time_us"] = processor.total_process_time_us
     stats["num_processors"] = len(processor.processors)
 
-    processor_types := make(vec[string])
+    processor_types := make(string[])
     for i := 0; i < len(processor.processors); i = i + 1 {
         if processor.processors[i].enabled {
             processor_types = append(processor_types, string(processor.processors[i].type))

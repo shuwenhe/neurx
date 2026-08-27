@@ -58,7 +58,7 @@ func create_tcp_stack() tcp_stack {
     }
 }
 
-func tcp_connect(stack: *tcp_stack, sock: *tcp_sock) (tcp_stack, tcp_sock) {
+func tcp_connect(tcp_stack* stack, tc* sockp_sock) (tcp_stack, tcp_sock) {
     stack_local := stack.*
     sock_local := sock.*
     
@@ -74,7 +74,7 @@ func tcp_connect(stack: *tcp_stack, sock: *tcp_sock) (tcp_stack, tcp_sock) {
     (stack_local, sock_local)
 }
 
-func tcp_send(stack: *tcp_stack, sock: *tcp_sock, int data_len) (tcp_stack, tcp_sock, int) {
+func tcp_send(tcp_stack* stack, tc* sockp_sock, int data_len) (tcp_stack, tcp_sock, int) {
     stack_local := stack.*
     sock_local := sock.*
     
@@ -90,7 +90,7 @@ func tcp_send(stack: *tcp_stack, sock: *tcp_sock, int data_len) (tcp_stack, tcp_
     (stack_local, sock_local, bytes_sent)
 }
 
-func tcp_receive(stack: *tcp_stack, sock: *tcp_sock, int data_len) (tcp_stack, tcp_sock, int) {
+func tcp_receive(tcp_stack* stack, tc* sockp_sock, int data_len) (tcp_stack, tcp_sock, int) {
     stack_local := stack.*
     sock_local := sock.*
     
@@ -105,7 +105,7 @@ func tcp_receive(stack: *tcp_stack, sock: *tcp_sock, int data_len) (tcp_stack, t
     (stack_local, sock_local, bytes_recv)
 }
 
-func tcp_close(stack: *tcp_stack, sock: *tcp_sock) (tcp_stack, tcp_sock) {
+func tcp_close(tcp_stack* stack, tc* sockp_sock) (tcp_stack, tcp_sock) {
     stack_local := stack.*
     sock_local := sock.*
     
@@ -119,7 +119,7 @@ func tcp_close(stack: *tcp_stack, sock: *tcp_sock) (tcp_stack, tcp_sock) {
     (stack_local, sock_local)
 }
 
-func tcp_handle_retransmit(stack: *tcp_stack) tcp_stack {
+func tcp_handle_retransmit(tcp_stack* stack) tcp_stack {
     stack_local := stack.*
     stack_local.retransmissions = stack_local.retransmissions + 1
     

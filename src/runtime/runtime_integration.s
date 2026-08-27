@@ -178,7 +178,7 @@ func main_test_flow() bool {
         return false
     }
 
-    req_1_prompt_tokens := make(vec[int32])
+    req_1_prompt_tokens := make(int32[])
     req_1_prompt_tokens = append(req_1_prompt_tokens, 1)
     req_1_prompt_tokens = append(req_1_prompt_tokens, 2)
     req_1_prompt_tokens = append(req_1_prompt_tokens, 3)

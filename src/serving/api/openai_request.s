@@ -12,7 +12,7 @@ struct chat_message {
 
 struct chat_completion_request {
 	string              model
-	vec[chat_message]   messages
+	chat_message[]   messages
 	float32             temperature
 	float32             top_p
 	int32               top_k
@@ -23,14 +23,14 @@ struct chat_completion_request {
 	float32             frequency_penalty
 	float32             repetition_penalty
 
-	vec[string]         stop
+	string[]         stop
 	bool                stream
 	interface{}         stream_options
 
 	int32               seed
 	interface{}         response_format
 
-	vec[interface{}]    tools
+	interface{}[]    tools
 	string              tool_choice
 
 	int64               timeout_ms
@@ -53,7 +53,7 @@ struct completion_request {
 	float32         frequency_penalty
 	float32         presence_penalty
 
-	vec[string]     stop
+	string[]     stop
 	bool            stream
 
 	int32           seed
@@ -70,7 +70,7 @@ struct completion_request {
 
 struct embedding_request {
 	string          model
-	vec[string]     input
+	string[]     input
 	string          encoding_format
 
 	int64           timeout_ms
@@ -98,7 +98,7 @@ struct request_validator {
 	int32           max_tokens_limit
 	int32           min_tokens_limit
 
-	vec[string]     supported_models
+	string[]     supported_models
 }
 
 func create_default_validator() request_validator {
@@ -107,7 +107,7 @@ func create_default_validator() request_validator {
 		max_temperature:  2.0,
 		max_tokens_limit: 8192,
 		min_tokens_limit: 1,
-		supported_models: make(vec[string], 0),
+		supported_models: make(string[], 0),
 	}
 }
 

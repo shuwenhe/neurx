@@ -36,7 +36,7 @@ struct qos_class {
 
 struct qos_queue {
     queue_id: u32,
-    packets: vec[packet_info],
+    packets: packet_info[],
     max_packets: u32,
     bytes_total: u64,
     max_bytes: u64,
@@ -44,7 +44,7 @@ struct qos_queue {
 }
 
 struct packet_info {
-    data: vec[u8],
+    data: u8[],
     priority: u8,
     timestamp: u64,
     src_ip: u32,
@@ -52,35 +52,35 @@ struct packet_info {
 }
 
 struct qos_engine {
-    classes: vec[qos_class],
-    queues: vec[qos_queue],
+    classes: qos_class[],
+    queues: qos_queue[],
     active_policy: qos_policy,
     lock: spinlock::spinlock[void],
     tick_interval: u32,
 }
 
 func new_qos_engine(policy: qos_policy) (*qos_engine, string) {
-    let engine := *qos_engine{
-        classes: vec[qos_class](),
-        queues: vec[qos_queue](),
+    engine := *qos_engine{
+        classes: qos_class[](),
+        queues: qos_queue[](),
         active_policy: policy,
         lock: spinlock::new(),
         tick_interval: 1000,
     } as *qos_engine
 
-    result::ok(engine)
+return     (engine, "")
 }
 
-func (engine: *qos_engine) create_qos_class(
+func (qos_engine* engine) create_qos_class(
     traffic_class: traffic_class,
     priority: u8,
     bandwidth_limit: u64,
 ) (u32, string) {
-    let _guard := engine.lock.lock()?
+    _guard := engine.lock.lock()?
 
-    let class_id := engine.classes.len() as u32
+    class_id := len(engine.classes) as u32
 
-    let qos_class := qos_class{
+    qos_class := qos_class{
         class_id: class_id,
         traffic_class: traffic_class,
         priority: priority,
@@ -92,75 +92,75 @@ func (engine: *qos_engine) create_qos_class(
         policy: engine.active_policy,
     }
 
-    engine.classes.push(qos_class)
+    engine.classes = append(engine.classes, qos_class)
 
-    let queue := qos_queue{
+    queue := qos_queue{
         queue_id: class_id,
-        packets: vec[packet_info](),
+        packets: packet_info[](),
         max_packets: 1000,
         bytes_total: 0,
         max_bytes: 10000000,
         drop_count: 0,
     }
 
-    engine.queues.push(queue)
+    engine.queues = append(engine.queues, queue)
 
-    result::ok(class_id)
+return     (class_id, "")
 }
 
-func (engine: *qos_engine) enqueue_packet(
+func (qos_engine* engine) enqueue_packet(
     class_id: u32,
     packet: *packet_info,
 ) (void, string) {
-    let _guard := engine.lock.lock()?
+    _guard := engine.lock.lock()?
 
-    if (class_id as u32) >= engine.queues.len() as u32 {
-        return result::err("invalid class id")
+    if (class_id as u32) >= len(engine.queues) as u32 {
+        return ((), "invalid class id")
     }
 
-    let queue := *engine.queues.get(class_id) as *qos_queue
+    queue := *engine.queues.get(class_id) as *qos_queue
 
-    if queue.packets.len() as u32 >= queue.max_packets {
+    if len(queue.packets) as u32 >= queue.max_packets {
         queue.drop_count = queue.drop_count + 1
-        return result::err("queue full - packet dropped")
+        return ((), "queue full - packet dropped")
     }
 
-    let packet_size := packet.data.len() as u64
+    packet_size := len(packet.data) as u64
     if queue.bytes_total + packet_size > queue.max_bytes {
         queue.drop_count = queue.drop_count + 1
-        return result::err("queue memory full - packet dropped")
+        return ((), "queue memory full - packet dropped")
     }
 
-    queue.packets.push(packet)
+    queue.packets = append(queue.packets, packet)
     queue.bytes_total = queue.bytes_total + packet_size
 
-    result::ok(())
+    return (), ""
 }
 
-func (engine: *qos_engine) dequeue_packet(class_id: u32) (option[packet_info), string] {
-    let _guard := engine.lock.lock()?
+func (qos_engine* engine) dequeue_packet(class_id: u32) (option[packet_info), string] {
+    _guard := engine.lock.lock()?
 
-    if (class_id as u32) >= engine.queues.len() as u32 {
-        return result::err("invalid class id")
+    if (class_id as u32) >= len(engine.queues) as u32 {
+        return ((), "invalid class id")
     }
 
-    let queue := *engine.queues.get(class_id) as *qos_queue
+    queue := *engine.queues.get(class_id) as *qos_queue
 
-    if queue.packets.len() == 0 {
-        return result::ok(option::none)
+    if len(queue.packets) == 0 {
+        return option::none, ""
     }
 
     match engine.active_policy {
         qos_policy::fifo: {
-            let packet := queue.packets.get(0)
+            packet := queue.packets.get(0)
             queue.packets.remove(0)
-            queue.bytes_total = queue.bytes_total - (packet.data.len() as u64)
-            result::ok(option::some(packet))
+            queue.bytes_total = queue.bytes_total - (len(packet.data) as u64)
+            (option::some(packet, ""))
         },
         qos_policy::priority_queue: {
-            let mut max_priority := 0
-            let mut max_idx := 0
-            let mut i := 0
+            max_priority := 0
+            max_idx := 0
+            i := 0
 
             for pkt in queue.packets {
                 if pkt.priority > max_priority {
@@ -170,38 +170,38 @@ func (engine: *qos_engine) dequeue_packet(class_id: u32) (option[packet_info), s
                 i = i + 1
             }
 
-            let packet := queue.packets.get(max_idx)
+            packet := queue.packets.get(max_idx)
             queue.packets.remove(max_idx)
-            queue.bytes_total = queue.bytes_total - (packet.data.len() as u64)
-            result::ok(option::some(packet))
+            queue.bytes_total = queue.bytes_total - (len(packet.data) as u64)
+            (option::some(packet, ""))
         },
-        _: result::ok(option::none),
+        _: (option::none, ""),
     }
 }
 
-func (engine: *qos_engine) update_bandwidth_limit(
+func (qos_engine* engine) update_bandwidth_limit(
     class_id: u32,
     new_limit: u64,
 ) (void, string) {
-    let _guard := engine.lock.lock()?
+    _guard := engine.lock.lock()?
 
-    if (class_id as u32) >= engine.classes.len() as u32 {
-        return result::err("invalid class id")
+    if (class_id as u32) >= len(engine.classes) as u32 {
+        return ((), "invalid class id")
     }
 
-    let qos_class := *engine.classes.get(class_id) as *qos_class
+    qos_class := *engine.classes.get(class_id) as *qos_class
     qos_class.bandwidth_limit = new_limit
     qos_class.burst_size = new_limit * 2
 
-    result::ok(())
+    return (), ""
 }
 
-func (engine: *qos_engine) token_bucket_refill() (void, string) {
-    let _guard := engine.lock.lock()?
+func (qos_engine* engine) token_bucket_refill() (void, string) {
+    _guard := engine.lock.lock()?
 
     for class in engine.classes {
-        let tokens_to_add := class.bandwidth_limit / 1000
-        let new_tokens := class.current_tokens + tokens_to_add
+        tokens_to_add := class.bandwidth_limit / 1000
+        new_tokens := class.current_tokens + tokens_to_add
 
         if new_tokens > class.burst_size {
             class.current_tokens = class.burst_size
@@ -210,43 +210,43 @@ func (engine: *qos_engine) token_bucket_refill() (void, string) {
         }
     }
 
-    result::ok(())
+    return (), ""
 }
 
-func (engine: *qos_engine) check_bandwidth_available(
+func (qos_engine* engine) check_bandwidth_available(
     class_id: u32,
     bytes_needed: u64,
 ) (bool, string) {
-    let _guard := engine.lock.lock()?
+    _guard := engine.lock.lock()?
 
-    if (class_id as u32) >= engine.classes.len() as u32 {
-        return result::err("invalid class id")
+    if (class_id as u32) >= len(engine.classes) as u32 {
+        return ((), "invalid class id")
     }
 
-    let qos_class := *engine.classes.get(class_id) as *qos_class
+    qos_class := *engine.classes.get(class_id) as *qos_class
 
-    result::ok(qos_class.current_tokens >= bytes_needed)
+return     (qos_class.current_tokens >= bytes_needed, "")
 }
 
-func (engine: *qos_engine) consume_tokens(
+func (qos_engine* engine) consume_tokens(
     class_id: u32,
     bytes_used: u64,
 ) (void, string) {
-    let _guard := engine.lock.lock()?
+    _guard := engine.lock.lock()?
 
-    if (class_id as u32) >= engine.classes.len() as u32 {
-        return result::err("invalid class id")
+    if (class_id as u32) >= len(engine.classes) as u32 {
+        return ((), "invalid class id")
     }
 
-    let qos_class := *engine.classes.get(class_id) as *qos_class
+    qos_class := *engine.classes.get(class_id) as *qos_class
 
     if qos_class.current_tokens < bytes_used {
-        return result::err("insufficient tokens")
+        return ((), "insufficient tokens")
     }
 
     qos_class.current_tokens = qos_class.current_tokens - bytes_used
 
-    result::ok(())
+    return (), ""
 }
 
 struct qos_statistics {
@@ -255,7 +255,7 @@ struct qos_statistics {
     total_packets_dropped: u64,
     total_bytes_queued: u64,
     avg_queue_depth: f32,
-    class_utilization: vec[class_stats],
+    class_utilization: class_stats[],
 }
 
 struct class_stats {
@@ -265,37 +265,37 @@ struct class_stats {
     drop_rate: f32,
 }
 
-func (engine: *qos_engine) get_statistics() (qos_statistics, string) {
-    let _guard := engine.lock.lock()?
+func (qos_engine* engine) get_statistics() (qos_statistics, string) {
+    _guard := engine.lock.lock()?
 
-    let mut total_packets := 0
-    let mut total_dropped := 0
-    let mut total_bytes := 0
-    let mut class_stats_vec := vec[class_stats]()
+    total_packets := 0
+    total_dropped := 0
+    total_bytes := 0
+    class_stats_vec := class_stats[]()
 
     for queue in engine.queues {
-        total_packets = total_packets + (queue.packets.len() as u64)
+        total_packets = total_packets + (len(queue.packets) as u64)
         total_dropped = total_dropped + queue.drop_count
         total_bytes = total_bytes + queue.bytes_total
 
-        let stats := class_stats{
+        stats := class_stats{
             class_id: queue.queue_id,
-            packets_queued: queue.packets.len() as u32,
+            packets_queued: len(queue.packets) as u32,
             bytes_queued: queue.bytes_total,
             drop_rate: 0.0,
         }
 
-        class_stats_vec.push(stats)
+        class_stats_vec = append(class_stats_vec, stats)
     }
 
-    let avg_depth := if engine.queues.len() > 0 {
-        (total_packets as f32) / (engine.queues.len() as f32)
+    avg_depth := if len(engine.queues) > 0 {
+        (total_packets as f32) / (len(engine.queues) as f32)
     } else {
         0.0
     }
 
-    let qos_stats := qos_statistics{
-        total_classes: engine.classes.len() as u32,
+    qos_stats := qos_statistics{
+        total_classes: len(engine.classes) as u32,
         total_packets_queued: total_packets,
         total_packets_dropped: total_dropped,
         total_bytes_queued: total_bytes,
@@ -303,11 +303,11 @@ func (engine: *qos_engine) get_statistics() (qos_statistics, string) {
         class_utilization: class_stats_vec,
     }
 
-    result::ok(qos_stats)
+return     (qos_stats, "")
 }
 
-func (engine: *qos_engine) set_policy(policy: qos_policy) (void, string) {
-    let _guard := engine.lock.lock()?
+func (qos_engine* engine) set_policy(policy: qos_policy) (void, string) {
+    _guard := engine.lock.lock()?
 
     engine.active_policy = policy
 
@@ -315,21 +315,21 @@ func (engine: *qos_engine) set_policy(policy: qos_policy) (void, string) {
         class.policy = policy
     }
 
-    result::ok(())
+    return (), ""
 }
 
-func (engine: *qos_engine) prioritize_class(
+func (qos_engine* engine) prioritize_class(
     class_id: u32,
     new_priority: u8,
 ) (void, string) {
-    let _guard := engine.lock.lock()?
+    _guard := engine.lock.lock()?
 
-    if (class_id as u32) >= engine.classes.len() as u32 {
-        return result::err("invalid class id")
+    if (class_id as u32) >= len(engine.classes) as u32 {
+        return ((), "invalid class id")
     }
 
-    let qos_class := *engine.classes.get(class_id) as *qos_class
+    qos_class := *engine.classes.get(class_id) as *qos_class
     qos_class.priority = new_priority
 
-    result::ok(())
+    return (), ""
 }

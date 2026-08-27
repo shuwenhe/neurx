@@ -27,13 +27,13 @@ struct video_metadata {
 
 struct video_frame {
     int32 frame_id
-    vec[uint8] frame_data
+    uint8[] frame_data
     frame_info* info
     int32 size_bytes
 }
 
 struct video_data {
-    vec[video_frame*] frames
+    video_frame*[] frames
     video_metadata* metadata
     int32 total_frames
     string source_url
@@ -63,8 +63,8 @@ func create_video_processor() video_processor* {
     }
 }
 
-func (video_processor* proc) extract_frames_uniform(video_data* vid, int32 num_frames) vec[video_frame*] {
-    result := make(vec[video_frame*])
+func (video_processor* proc) extract_frames_uniform(video_data* vid, int32 num_frames) video_frame*[] {
+    result := make(video_frame*[])
 
     if vid == nil || vid.metadata == nil || vid.total_frames == 0 {
         return result
@@ -89,8 +89,8 @@ func (video_processor* proc) extract_frames_uniform(video_data* vid, int32 num_f
     return result
 }
 
-func (video_processor* proc) extract_frames_keyframe(video_data* vid, int32 num_frames) vec[video_frame*] {
-    result := make(vec[video_frame*])
+func (video_processor* proc) extract_frames_keyframe(video_data* vid, int32 num_frames) video_frame*[] {
+    result := make(video_frame*[])
 
     if vid == nil || vid.metadata == nil {
         return result
@@ -122,8 +122,8 @@ func (video_processor* proc) extract_frames_keyframe(video_data* vid, int32 num_
     return result
 }
 
-func (video_processor* proc) extract_frames_adaptive(video_data* vid, int32 num_frames) vec[video_frame*] {
-    result := make(vec[video_frame*])
+func (video_processor* proc) extract_frames_adaptive(video_data* vid, int32 num_frames) video_frame*[] {
+    result := make(video_frame*[])
 
     if vid == nil || vid.metadata == nil {
         return result
@@ -151,7 +151,7 @@ func (video_processor* proc) extract_frames_adaptive(video_data* vid, int32 num_
     return result
 }
 
-func (video_processor* proc) extract_frames(video_data* vid, int32 num_frames) vec[video_frame*] {
+func (video_processor* proc) extract_frames(video_data* vid, int32 num_frames) video_frame*[] {
     if proc.strategy == strategy_uniform {
         return proc.extract_frames_uniform(vid, num_frames)
     }
@@ -165,8 +165,8 @@ func (video_processor* proc) extract_frames(video_data* vid, int32 num_frames) v
     return proc.extract_frames_uniform(vid, num_frames)
 }
 
-func (video_processor* proc) detect_scene_changes(video_data* vid) vec[int32] {
-    scene_changes := make(vec[int32])
+func (video_processor* proc) detect_scene_changes(video_data* vid) int32[] {
+    scene_changes := make(int32[])
 
     if vid == nil || len(vid.frames) < 2 {
         return scene_changes

@@ -34,8 +34,8 @@ func new_gdpo_trainer(gdpo_config config, *model model, *model ref_model) . gdpo
     reward_scales := []
     reward_histories := []
     for i in 0..config.num_rewards {
-        reward_scales.push(1.0)
-        reward_histories.push([])
+        reward_scales = append(reward_scales, 1.0)
+        reward_histories = append(reward_histories, [])
     }
     return gdpo_trainer{
         config: config,
@@ -72,8 +72,8 @@ func (gdpo_trainer* trainer) aggregate_rewards(rubric rubric) . f32 {
             }
         },
         "weighted_sum" => {
-            for i in 0..rubric.reward_values.len() {
-                weight := if i < trainer.config.reward_weights.len() {
+            for i in len(0..rubric.reward_values) {
+                weight := if i < len(trainer.config.reward_weights) {
                     trainer.config.reward_weights[i]
                 } else {
                     1.0
@@ -96,7 +96,7 @@ func (gdpo_trainer* trainer) normalize_rubric(rubric rubric) . rubric {
         reward_values: [],
         weights: rubric.weights.clone(),
     }
-    for i in 0..rubric.reward_values.len() {
+    for i in len(0..rubric.reward_values) {
         trainer.reward_histories[i].push(rubric.reward_values[i])
         if trainer.reward_histories[i].len() > 1000 {
             trainer.reward_histories[i] = trainer.reward_histories[i][1..]
@@ -104,7 +104,7 @@ func (gdpo_trainer* trainer) normalize_rubric(rubric rubric) . rubric {
         mean := compute_mean(trainer.reward_histories[i])
         std := compute_std(trainer.reward_histories[i], mean)
         normalized_value := (rubric.reward_values[i] - mean) / (std + 1e-8)
-        normalized.reward_values.push(normalized_value)
+        normalized.reward_values = append(normalized.reward_values, normalized_value)
         trainer.reward_scales[i] = std
     }
     return normalized
@@ -118,7 +118,7 @@ func (gdpo_trainer* trainer) compute_gdpo_loss(
     []rubric chosen_rubrics,
     []rubric rejected_rubrics
 ) . tensor {
-    batch_size := chosen_prompts.len()
+    batch_size := len(chosen_prompts)
     total_loss := tensor_zeros([1])
     for i in 0..batch_size {
         norm_chosen_rubric := trainer.normalize_rubric(chosen_rubrics[i])
@@ -190,9 +190,9 @@ func (gdpo_trainer* trainer) train(DataLoader train_data) . []f32 {
                 batch.chosen_rubrics,
                 batch.rejected_rubrics
             )
-            losses.push(loss)
-            if losses.len() % 100 == 0 {
-                println(f"Step {losses.len()}: Loss = {loss}")
+            losses = append(losses, loss)
+            if len(losses) % 100 == 0 {
+                println(f"Step {len(losses)}: Loss = {loss}")
                 trainer.print_reward_statistics()
             }
         }
@@ -212,25 +212,25 @@ func (gdpo_trainer* trainer) print_reward_statistics() {
 }
 
 func compute_mean([]f32 values) . f32 {
-    if values.len() == 0 {
+    if len(values) == 0 {
         return 0.0
     }
     sum := 0.0
     for v in values {
         sum += v
     }
-    return sum / f32(values.len())
+    return sum / f32(len(values))
 }
 
 func compute_std([]f32 values, f32 mean) . f32 {
-    if values.len() == 0 {
+    if len(values) == 0 {
         return 1.0
     }
     sum_sq := 0.0
     for v in values {
         sum_sq += (v - mean) * (v - mean)
     }
-    return sqrt(sum_sq / f32(values.len()))
+    return sqrt(sum_sq / f32(len(values)))
 }
 
 func log_sigmoid(tensor x) . tensor {

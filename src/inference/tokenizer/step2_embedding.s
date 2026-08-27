@@ -37,7 +37,7 @@ func embed_tokens([]int token_ids) [][]float {
     [][]float result = [][]float{cap: len(token_ids)}
     int i = 0
     for i < len(token_ids) {
-        result.push(lookup_embedding(token_ids[i]))
+        result = append(result, lookup_embedding(token_ids[i]))
         i = i + 1
     }
     result

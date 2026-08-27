@@ -47,7 +47,7 @@ struct attention_forward_result {
 struct key_value_cache {
     string cache_id
     string dtype
-    vec[int64] shape
+    int64[] shape
     bool is_paged
     int num_pages
     int page_size
@@ -158,7 +158,7 @@ func (attention_backend* backend) get_metadata(string key) string {
     ""
 }
 
-func new_kv_cache(string cache_id, string dtype, vec[int64] shape, bool is_paged) key_value_cache {
+func new_kv_cache(string cache_id, string dtype, int64[] shape, bool is_paged) key_value_cache {
     cache := key_value_cache {
         cache_id: cache_id,
         dtype: dtype,
@@ -173,7 +173,7 @@ func new_kv_cache(string cache_id, string dtype, vec[int64] shape, bool is_paged
         cache.page_size = 4096
         total_elements := 1
         i := 0
-        for i < shape.len() {
+        for i < len(shape) {
             total_elements = total_elements * shape[i]
             i = i + 1
         }

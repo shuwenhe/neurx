@@ -186,7 +186,7 @@ func runtime_forward_named_module(named_lora_module module, []float input_vec) [
         for in_idx < module.in_dim && in_idx < len(input_vec) {
             int a_idx = r * module.in_dim + in_idx
             if a_idx < len(module.lora_A) {
-                hidden[r] = hidden[r] + module.lora_A[a_idx] * input_vec[in_idx]
+                hidden[r] = hidden[r] + module.lora_A[a_idx] * input_in_idx[]
             }
             in_idx = in_idx + 1
         }
@@ -199,7 +199,7 @@ func runtime_forward_named_module(named_lora_module module, []float input_vec) [
         for in_idx < module.in_dim && in_idx < len(input_vec) {
             int w_idx = out_idx * module.in_dim + in_idx
             if w_idx < len(module.base_weight) {
-                sum = sum + input_vec[in_idx] * module.base_weight[w_idx]
+                sum = sum + input_in_idx[] * module.base_weight[w_idx]
             }
             in_idx = in_idx + 1
         }
@@ -225,7 +225,7 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
         for in_idx < module.in_dim && in_idx < len(input_vec) {
             int a_idx = r * module.in_dim + in_idx
             if a_idx < len(module.lora_A) {
-                hidden[r] = hidden[r] + module.lora_A[a_idx] * input_vec[in_idx]
+                hidden[r] = hidden[r] + module.lora_A[a_idx] * input_in_idx[]
             }
             in_idx = in_idx + 1
         }
@@ -263,7 +263,7 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
             }
             int a_idx = r * module.in_dim + in_idx
             if a_idx < len(module.lora_A) {
-                module.lora_A[a_idx] = module.lora_A[a_idx] - step_scale * grad_a * input_vec[in_idx]
+                module.lora_A[a_idx] = module.lora_A[a_idx] - step_scale * grad_a * input_in_idx[]
             }
             in_idx = in_idx + 1
         }

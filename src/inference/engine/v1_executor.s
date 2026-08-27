@@ -24,7 +24,7 @@ struct v1_executor {
     int32 total_executed
     int32 total_batches
 
-    vec[v1_request*] current_batch
+    v1_request*[] current_batch
 }
 
 func create_v1_executor(v1_core* core_instance) v1_executor* {
@@ -40,16 +40,16 @@ func create_v1_executor(v1_core* core_instance) v1_executor* {
         core: core_instance,
         total_executed: 0,
         total_batches: 0,
-        current_batch: make(vec[v1_request*]),
+        current_batch: make(v1_request*[]),
     }
 }
 
-func (v1_executor* exec) prepare_batch(vec[v1_request*] requests) bool {
+func (v1_executor* exec) prepare_batch(v1_request*[] requests) bool {
     if len(requests) == 0 {
         return false
     }
 
-    exec.current_batch = make(vec[v1_request*])
+    exec.current_batch = make(v1_request*[])
 
     batch_size := exec.config.batch_size
     if len(requests) < batch_size {
@@ -68,14 +68,14 @@ func (v1_executor* exec) execute_prefill() bool {
         return false
     }
 
-    batch_input_ids := make(vec[vec[int32]])
-    batch_logits := make(vec[vec[float32]])
+    batch_input_ids := make(int32[][]])
+    batch_logits := make(float32[][]])
 
     for i := 0; i < len(exec.current_batch); i = i + 1 {
         req := exec.current_batch[i]
         batch_input_ids = append(batch_input_ids, req.prompt_token_ids)
 
-        logits := make(vec[float32])
+        logits := make(float32[])
         for j := 0; j < 100; j = j + 1 {
             logits = append(logits, 0.5)
         }
@@ -91,10 +91,10 @@ func (v1_executor* exec) execute_decode() bool {
         return false
     }
 
-    batch_logits := make(vec[vec[float32]])
+    batch_logits := make(float32[][]])
 
     for i := 0; i < len(exec.current_batch); i = i + 1 {
-        logits := make(vec[float32])
+        logits := make(float32[])
         for j := 0; j < 100; j = j + 1 {
             logits = append(logits, 0.5)
         }

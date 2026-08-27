@@ -38,21 +38,21 @@ struct md5_context {
 
 // 初始化 SHA-256 上下文
 func sha256_init() (sha256_context, string) {
-    state := vec()
-    state.push(0x6a09e667)
-    state.push(0xbb67ae85)
-    state.push(0x3c6ef372)
-    state.push(0xa54ff53a)
-    state.push(0x510e527f)
-    state.push(0x9b05688c)
-    state.push(0x1f83d9ab)
-    state.push(0x5be0cd19)
+    state := {}
+    state = append(state, 0x6a09e667)
+    state = append(state, 0xbb67ae85)
+    state = append(state, 0x3c6ef372)
+    state = append(state, 0xa54ff53a)
+    state = append(state, 0x510e527f)
+    state = append(state, 0x9b05688c)
+    state = append(state, 0x1f83d9ab)
+    state = append(state, 0x5be0cd19)
 
     ctx := sha256_context{
         state: state,
         msg_len_bits_lo: 0,
         msg_len_bits_hi: 0,
-        buffer: vec(),
+        buffer: {},
         buffer_len: 0
     }
 
@@ -63,7 +63,7 @@ func sha256_init() (sha256_context, string) {
 func (ctx* sha256_context) update(data vec, len int) (int, string) {
     i := 0
     for i < len {
-        ctx.buffer.push(data[i])
+        ctx.buffer = append(ctx.buffer, data[i])
         ctx.buffer_len = ctx.buffer_len + 1
         
         if ctx.buffer_len == 64 {
@@ -79,11 +79,11 @@ func (ctx* sha256_context) update(data vec, len int) (int, string) {
 
 // SHA-256 最终化
 func (ctx* sha256_context) finalize() (vec, string) {
-    digest := vec()
+    digest := {}
     
     i := 0
-    for i < ctx.state.len() {
-        digest.push(ctx.state[i])
+    for i < len(ctx.state) {
+        digest = append(digest, ctx.state[i])
         i = i + 1
     }
     
@@ -92,18 +92,18 @@ func (ctx* sha256_context) finalize() (vec, string) {
 
 // 初始化 SHA-1 上下文
 func sha1_init() (sha1_context, string) {
-    state := vec()
-    state.push(0x67452301)
-    state.push(0xefcdab89)
-    state.push(0x98badcfe)
-    state.push(0x10325476)
-    state.push(0xc3d2e1f0)
+    state := {}
+    state = append(state, 0x67452301)
+    state = append(state, 0xefcdab89)
+    state = append(state, 0x98badcfe)
+    state = append(state, 0x10325476)
+    state = append(state, 0xc3d2e1f0)
 
     ctx := sha1_context{
         state: state,
         msg_len_bits_lo: 0,
         msg_len_bits_hi: 0,
-        buffer: vec(),
+        buffer: {},
         buffer_len: 0
     }
 
@@ -114,7 +114,7 @@ func sha1_init() (sha1_context, string) {
 func (ctx* sha1_context) update(data vec, len int) (int, string) {
     i := 0
     for i < len {
-        ctx.buffer.push(data[i])
+        ctx.buffer = append(ctx.buffer, data[i])
         ctx.buffer_len = ctx.buffer_len + 1
         
         if ctx.buffer_len == 64 {
@@ -130,11 +130,11 @@ func (ctx* sha1_context) update(data vec, len int) (int, string) {
 
 // SHA-1 最终化
 func (ctx* sha1_context) finalize() (vec, string) {
-    digest := vec()
+    digest := {}
     
     i := 0
-    for i < ctx.state.len() {
-        digest.push(ctx.state[i])
+    for i < len(ctx.state) {
+        digest = append(digest, ctx.state[i])
         i = i + 1
     }
     
@@ -143,17 +143,17 @@ func (ctx* sha1_context) finalize() (vec, string) {
 
 // 初始化 MD5 上下文
 func md5_init() (md5_context, string) {
-    state := vec()
-    state.push(0x67452301)
-    state.push(0xefcdab89)
-    state.push(0x98badcfe)
-    state.push(0x10325476)
+    state := {}
+    state = append(state, 0x67452301)
+    state = append(state, 0xefcdab89)
+    state = append(state, 0x98badcfe)
+    state = append(state, 0x10325476)
 
     ctx := md5_context{
         state: state,
         msg_len_bits_lo: 0,
         msg_len_bits_hi: 0,
-        buffer: vec(),
+        buffer: {},
         buffer_len: 0
     }
 
@@ -164,7 +164,7 @@ func md5_init() (md5_context, string) {
 func (ctx* md5_context) update(data vec, len int) (int, string) {
     i := 0
     for i < len {
-        ctx.buffer.push(data[i])
+        ctx.buffer = append(ctx.buffer, data[i])
         ctx.buffer_len = ctx.buffer_len + 1
         
         if ctx.buffer_len == 64 {
@@ -180,11 +180,11 @@ func (ctx* md5_context) update(data vec, len int) (int, string) {
 
 // MD5 最终化
 func (ctx* md5_context) finalize() (vec, string) {
-    digest := vec()
+    digest := {}
     
     i := 0
-    for i < ctx.state.len() {
-        digest.push(ctx.state[i])
+    for i < len(ctx.state) {
+        digest = append(digest, ctx.state[i])
         i = i + 1
     }
     
@@ -229,14 +229,14 @@ func (ctx* hmac_context) finalize() (vec, string) {
         return ctx.sha1_ctx.finalize()
     }
     
-    return vec(), "unknown algorithm"
+    return {}, "unknown algorithm"
 }
 
 // 便利函数：计算 SHA-256
 func sha256_hash(data vec, len int) (vec, string) {
     ctx, err := sha256_init()
     if err != "" {
-        return vec(), err
+        return {}, err
     }
     
     ctx.update(data, len)
@@ -247,7 +247,7 @@ func sha256_hash(data vec, len int) (vec, string) {
 func sha1_hash(data vec, len int) (vec, string) {
     ctx, err := sha1_init()
     if err != "" {
-        return vec(), err
+        return {}, err
     }
     
     ctx.update(data, len)
@@ -258,7 +258,7 @@ func sha1_hash(data vec, len int) (vec, string) {
 func md5_hash(data vec, len int) (vec, string) {
     ctx, err := md5_init()
     if err != "" {
-        return vec(), err
+        return {}, err
     }
     
     ctx.update(data, len)
@@ -269,7 +269,7 @@ func md5_hash(data vec, len int) (vec, string) {
 func hmac_sha256(key vec, key_len int, data vec, data_len int) (vec, string) {
     ctx, err := hmac_init(0, key, key_len)
     if err != "" {
-        return vec(), err
+        return {}, err
     }
     
     ctx.update(data, data_len)
@@ -280,7 +280,7 @@ func hmac_sha256(key vec, key_len int, data vec, data_len int) (vec, string) {
 func hmac_sha1(key vec, key_len int, data vec, data_len int) (vec, string) {
     ctx, err := hmac_init(1, key, key_len)
     if err != "" {
-        return vec(), err
+        return {}, err
     }
     
     ctx.update(data, data_len)

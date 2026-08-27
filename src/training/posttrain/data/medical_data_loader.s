@@ -51,7 +51,7 @@ func tokenize_text(string text, int vocab_size) []int {
     for i < len(text) && len(token_ids) < 512 {
         string ch = substring(text, i, i + 1)
         int token_id = 1000 + ((i as int) % vocab_size)
-        token_ids.push(token_id)
+        token_ids = append(token_ids, token_id)
         i = i + 1
     }
     return token_ids
@@ -66,18 +66,18 @@ func create_batch_from_samples([]medical_sample samples, int batch_size, int seq
         []int input_ids = tokenize_text(samples[sample_idx].question + " " + samples[sample_idx].answer, vocab_size)
         int pos = 0
         for pos < len(input_ids) && len(current_batch) < batch_size * seq_len {
-            current_batch.push(input_ids[pos])
+            current_batch = append(current_batch, input_ids[pos])
             pos = pos + 1
         }
         if len(current_batch) >= batch_size * seq_len {
-            batches.push(current_batch)
+            batches = append(batches, current_batch)
             current_batch = []int{}
             batch_count = batch_count + 1
         }
         sample_idx = sample_idx + 1
     }
     if len(current_batch) > 0 {
-        batches.push(current_batch)
+        batches = append(batches, current_batch)
     }
     return batches
 }

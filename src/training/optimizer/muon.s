@@ -43,7 +43,7 @@ func muon_register_param(
     state.whitened_grad = allocate_float_vector(param_size, 0.0)
     state.grad_cov = allocate_2d_float_vector(param_size, param_size, 0.0)
     state.step = 0
-    opt.param_states.push(state)
+    opt.param_states = append(opt.param_states, state)
     return opt
 }
 

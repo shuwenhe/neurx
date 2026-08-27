@@ -113,7 +113,7 @@ func tokenize_prompt(string prompt) []int {
     []int token_ids = []
     int i = 0
     for i < len(prompt) {
-        token_ids.push(97 + (i % 26))
+        token_ids = append(token_ids, 97 + (i % 26))
         i = i + 1
     }
     
@@ -166,7 +166,7 @@ func generate_tokens(int num_tokens, float temperature) []int {
     int i = 0
     for i < num_tokens {
         int token = 65 + (i % 26)
-        generated.push(token)
+        generated = append(generated, token)
         
         if (i + 1) % 10 == 0 {
             print("Progress: " + int_to_string(i + 1) + "/" + int_to_string(num_tokens) + " tokens generated\n")

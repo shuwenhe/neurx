@@ -23,7 +23,7 @@ struct hash_matcher {
     int32 hash_cache_size
 
     map[string]content_hash* hash_cache
-    map[string]vec[string]*] similar_content
+    map[string]string[]*] similar_content
 }
 
 struct multimodal_hasher {
@@ -43,7 +43,7 @@ func create_multimodal_hasher() multimodal_hasher* {
             similarity_threshold: 0.95,
             hash_cache_size: 10000,
             hash_cache: make(map[string]content_hash*),
-            similar_content: make(map[string]vec[string]*]),
+            similar_content: make(map[string]string[]*]),
         },
         total_hashes_computed: 0,
         duplicates_found: 0,
@@ -51,7 +51,7 @@ func create_multimodal_hasher() multimodal_hasher* {
     }
 }
 
-func (multimodal_hasher* hasher) compute_hash(vec[uint8] data, modality_type modality) string {
+func (multimodal_hasher* hasher) compute_hash(uint8[] data, modality_type modality) string {
     if len(data) == 0 {
         return ""
     }
@@ -82,7 +82,7 @@ func (multimodal_hasher* hasher) compute_hash(vec[uint8] data, modality_type mod
     return hash_value
 }
 
-func (multimodal_hasher* hasher) add_content(string content_id, vec[uint8] data, modality_type modality) string {
+func (multimodal_hasher* hasher) add_content(string content_id, uint8[] data, modality_type modality) string {
     hash_value := hasher.compute_hash(data, modality)
 
     hash_obj := *content_hash{
@@ -106,8 +106,8 @@ func (multimodal_hasher* hasher) add_content(string content_id, vec[uint8] data,
     return hash_value
 }
 
-func (multimodal_hasher* hasher) find_duplicates(string content_id) vec[string] {
-    duplicates := make(vec[string])
+func (multimodal_hasher* hasher) find_duplicates(string content_id) string[] {
+    duplicates := make(string[])
 
     if hash_obj, exists := hasher.matcher.hash_cache[content_id]; exists {
         for other_id, other_hash := range hasher.matcher.hash_cache {
@@ -145,8 +145,8 @@ func (multimodal_hasher* hasher) compute_similarity(string hash1, string hash2) 
     return float32(common_chars) / float32(max_len)
 }
 
-func (multimodal_hasher* hasher) find_similar(string content_id) vec[string] {
-    similar := make(vec[string])
+func (multimodal_hasher* hasher) find_similar(string content_id) string[] {
+    similar := make(string[])
 
     if hash_obj, exists := hasher.matcher.hash_cache[content_id]; exists {
         for other_id, other_hash := range hasher.matcher.hash_cache {

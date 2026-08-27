@@ -132,28 +132,28 @@ func audit_log_create(int log_id, int event, int actor) audit_log {
 }
 
 struct security_subsystem {
-    processes: vec[process_context]
-    acls: vec[access_control_list]
-    tenant_isolations: vec[tenant_isolation]
-    audit_logs: vec[audit_log]
+    processes: process_context[]
+    acls: access_control_list[]
+    tenant_isolations: tenant_isolation[]
+    audit_logs: audit_log[]
 }
 
 func security_subsystem_init() security_subsystem {
     sec := security_subsystem {
-        processes: std_vec[process_context](),
-        acls: std_vec[access_control_list](),
-        tenant_isolations: std_vec[tenant_isolation](),
-        audit_logs: std_vec[audit_log]()
+        processes: std_process_context[](),
+        acls: std_access_control_list[](),
+        tenant_isolations: std_tenant_isolation[](),
+        audit_logs: std_audit_log[]()
     }
     sec
 }
 
-func (security_subsystem* sec) register_process(process_context ctx) int {    sec.processes.push(ctx)
-    sec.processes.len() - 1
+func (security_subsystem* sec) register_process(process_context ctx) int {    sec.processes = append(sec.processes, ctx)
+    len(sec.processes) - 1
 }
 
 func (security_subsystem* sec) check_access(int actor_pid, int resource_id) int {    i := 0
-    for i < sec.acls.len() {
+    for i < len(sec.acls) {
         acl := sec.acls[i]
         if acl.acl_check(actor_pid, resource_id) == 1 {
             1
@@ -164,9 +164,9 @@ func (security_subsystem* sec) check_access(int actor_pid, int resource_id) int 
     0
 }
 
-func (security_subsystem* sec) audit(audit_log log) int {    sec.audit_logs.push(log)
-    sec.audit_logs.len() - 1
+func (security_subsystem* sec) audit(audit_log log) int {    sec.audit_logs = append(sec.audit_logs, log)
+    len(sec.audit_logs) - 1
 }
 
-func (security_subsystem* sec) get_audit_count() int {    sec.audit_logs.len()
+func (security_subsystem* sec) get_audit_count() int {    len(sec.audit_logs)
 }

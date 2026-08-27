@@ -1,6 +1,6 @@
 package neurx.model.model_executor
 
-use std.vec
+use std.slices
 
 func main() {
     println("🤖 Model Executor - 30+ typemodelinferenceengine")

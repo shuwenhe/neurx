@@ -107,7 +107,7 @@ struct shared_model_cache {
 func new_shared_model_cache(string cache_dir, int replicas) shared_model_cache {
     shared_model_cache {
         cache_dir: cache_dir,
-        cached_models: vec[string](),
+        cached_models: string[](),
         total_size_gb: 0,
         shared_replicas: replicas,
     }

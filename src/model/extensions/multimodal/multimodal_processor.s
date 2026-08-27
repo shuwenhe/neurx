@@ -14,7 +14,7 @@ const (
 struct processing_result {
     string content_id
     modality_type modality
-    vec[uint8] processed_data
+    uint8[] processed_data
     int32 processing_time_ms
     bool is_cached
     int32 tokens_used
@@ -54,7 +54,7 @@ func (multimodal_processor* proc) process_image(string content_id, image_data* i
     result := processing_result{
         content_id: content_id,
         modality: modality_image,
-        processed_data: make(vec[uint8]),
+        processed_data: make(uint8[]),
         processing_time_ms: 0,
         is_cached: false,
         tokens_used: 0,
@@ -91,7 +91,7 @@ func (multimodal_processor* proc) process_video(string content_id, video_data* v
     result := processing_result{
         content_id: content_id,
         modality: modality_video,
-        processed_data: make(vec[uint8]),
+        processed_data: make(uint8[]),
         processing_time_ms: 0,
         is_cached: false,
         tokens_used: 0,
@@ -135,7 +135,7 @@ func (multimodal_processor* proc) process_audio(string content_id, audio_data* a
     result := processing_result{
         content_id: content_id,
         modality: modality_audio,
-        processed_data: make(vec[uint8]),
+        processed_data: make(uint8[]),
         processing_time_ms: 0,
         is_cached: false,
         tokens_used: 0,
@@ -168,8 +168,8 @@ func (multimodal_processor* proc) process_audio(string content_id, audio_data* a
     return result
 }
 
-func (multimodal_processor* proc) process_multimodal(string content_id, vec[interface{}] modalities) vec[processing_result] {
-    results := make(vec[processing_result])
+func (multimodal_processor* proc) process_multimodal(string content_id, interface{}[] modalities) processing_result[] {
+    results := make(processing_result[])
 
     proc.budget_mgr.allocate_budgets()
 
@@ -180,7 +180,7 @@ func (multimodal_processor* proc) process_multimodal(string content_id, vec[inte
     return results
 }
 
-func (multimodal_processor* proc) check_deduplication(string content_id, vec[uint8] data) bool {
+func (multimodal_processor* proc) check_deduplication(string content_id, uint8[] data) bool {
     hash_value := proc.hasher.add_content(content_id, data, modality_image)
 
     duplicates := proc.hasher.find_duplicates(content_id)

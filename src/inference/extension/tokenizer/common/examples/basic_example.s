@@ -76,7 +76,7 @@ func SpecialTokensExample() {
 
     mgr.RegisterSpecialToken("[CUSTOM]", 100, "Custom Token")
 
-    tokens := make(vec[i32], 0)
+    tokens := make(i32[], 0)
     tokens = append(tokens, 1)
     tokens = append(tokens, 7592)
     tokens = append(tokens, 2)
@@ -100,12 +100,12 @@ func TokenCachingExample() {
     cache_inst := cache.NewTokenCache(100000, "lru")
 
     text1 := "Hello world"
-    tokens1 := make(vec[i32], 0)
+    tokens1 := make(i32[], 0)
     tokens1 = append(tokens1, 1)
     tokens1 = append(tokens1, 2)
 
     text2 := "Hello there"
-    tokens2 := make(vec[i32], 0)
+    tokens2 := make(i32[], 0)
     tokens2 = append(tokens2, 1)
     tokens2 = append(tokens2, 3)
 
@@ -141,7 +141,7 @@ func BatchProcessingExample() {
 
     tokenizer_inst := tokenizer.NewBaseTokenizer(config)
 
-    texts := make(vec[string], 0)
+    texts := make(string[], 0)
     texts = append(texts, "first text")
     texts = append(texts, "second text")
     texts = append(texts, "third text")
@@ -160,7 +160,7 @@ func BatchProcessingExample() {
 func UtilityFunctionsExample() {
     println("\n=== Utility Functions Example ===\n")
 
-    tokens := make(vec[i32], 0)
+    tokens := make(i32[], 0)
     tokens = append(tokens, 1)
     tokens = append(tokens, 2)
     tokens = append(tokens, 2)

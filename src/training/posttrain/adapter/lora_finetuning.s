@@ -93,7 +93,7 @@ func (lora_adapter* adapter) matrix_vector_mult(vec []float64, matrix [][]float6
     for i := 0; i < len(matrix); i++ {
         sum := 0.0
         for j := 0; j < len(vec) && j < len(matrix[i]); j++ {
-            sum += vec[j] * matrix[i][j]
+            sum += j[] * matrix[i][j]
         }
         result[i] = sum
     }

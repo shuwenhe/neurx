@@ -12,9 +12,9 @@ func is_output_op(*operation op) bool {
     op.op_kind == op_type::output
 }
 
-func mark_used_values(*computation_graph g) vec[bool] {
-    used = new bool[g.values.len()]
-    for i in range(g.values.len()) {
+func mark_used_values(*computation_graph g) bool[] {
+    used = new bool[len(g.values)]
+    for i in range(len(g.values)) {
         used[i] = false
     }
 
@@ -33,15 +33,15 @@ func mark_used_values(*computation_graph g) vec[bool] {
     used
 }
 
-func mark_live_operations(*computation_graph g, *vec[bool] used) vec[bool] {
-    live = new bool[g.operations.len()]
-    for i in range(g.operations.len()) {
+func mark_live_operations(*computation_graph g, *bool[] used) bool[] {
+    live = new bool[len(g.operations)]
+    for i in range(len(g.operations)) {
         live[i] = false
     }
 
     for i, op in g.operations {
         for output_id in op.output_ids {
-            if output_id < used.len() && used[output_id] {
+            if output_id < len(used) && used[output_id] {
                 live[i] = true
                 break
             }
@@ -61,15 +61,15 @@ func mark_live_operations(*computation_graph g, *vec[bool] used) vec[bool] {
     live
 }
 
-func find_dead_operations(*computation_graph g) vec[int] {
-    dead_ops = vec[int]()
+func find_dead_operations(*computation_graph g) int[] {
+    dead_ops = int[]()
 
     used_values = mark_used_values(g)
     live_ops = mark_live_operations(g, *used_values)
 
-    for i in range(g.operations.len()) {
+    for i in range(len(g.operations)) {
         if !live_ops[i] {
-            dead_ops.push(i)
+            dead_ops = append(dead_ops, i)
         }
     }
 
@@ -80,7 +80,7 @@ func remove_dead_code(*computation_graph g) dead_code_result {
     dead_ops = find_dead_operations(g)
 
     dead_code_result {
-        removed_ops: dead_ops.len(),
+        removed_ops: len(dead_ops),
         removed_values: 0,
         success: true,
     }
@@ -101,7 +101,7 @@ func can_remove_operation(*operation op, *computation_graph g) bool {
 
     for output_id in op.output_ids {
         consumers = g.find_consumers(output_id)
-        if consumers.len() > 0 {
+        if len(consumers) > 0 {
             return false
         }
     }

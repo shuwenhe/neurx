@@ -32,7 +32,7 @@ func create_execution_context(*computation_graph g) execution_context {
 }
 
 func (execution_context* ctx) execute_next_task() bool {
-    if ctx.current_task_index >= ctx.plan.tasks.len() {
+    if ctx.current_task_index >= len(ctx.plan.tasks) {
         return false
     }
 
@@ -45,7 +45,7 @@ func (execution_context* ctx) execute_next_task() bool {
 func (execution_context* ctx) execute_all() execution_result {
     int executed = 0
 
-    for ctx.current_task_index < ctx.plan.tasks.len() {
+    for ctx.current_task_index < len(ctx.plan.tasks) {
         if ctx.execute_next_task() {
             executed = executed + 1
         } else {
@@ -62,10 +62,10 @@ func (execution_context* ctx) execute_all() execution_result {
 }
 
 func (execution_context* ctx) get_progress() float {
-    if ctx.plan.tasks.len() == 0 {
+    if len(ctx.plan.tasks) == 0 {
         return 1.0
     }
-    ctx.current_task_index as float / ctx.plan.tasks.len() as float
+    ctx.current_task_index as float / len(ctx.plan.tasks) as float
 }
 
 func (execution_context* ctx) reset() {

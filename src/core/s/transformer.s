@@ -43,7 +43,7 @@ func copy_layers([]transformer_layer layers) []transformer_layer {
     int n = len(layers)
     []transformer_layer out = []transformer_layer{cap: n}
     for i in 0..n {
-        out.push(copy_layer(layers[i]))
+        out = append(out, copy_layer(layers[i]))
     }
     out
 }

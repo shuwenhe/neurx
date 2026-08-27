@@ -16,7 +16,7 @@ struct processor_result {
 func softmax([]float logits) []float {
 
     float max_logit = logits[0]
-    for i = 1; i < logits.len(); i = i + 1 {
+    for i = 1; i < len(logits); i = i + 1 {
         if logits[i] > max_logit {
             max_logit = logits[i]
         }
@@ -25,14 +25,14 @@ func softmax([]float logits) []float {
     []float exp_logits
     float sum_exp = 0.0
 
-    for i = 0; i < logits.len(); i = i + 1 {
+    for i = 0; i < len(logits); i = i + 1 {
         float exp_val = exp(logits[i] - max_logit)
         exp_logits.append(exp_val)
         sum_exp = sum_exp + exp_val
     }
 
     []float probs
-    for i = 0; i < exp_logits.len(); i = i + 1 {
+    for i = 0; i < len(exp_logits); i = i + 1 {
         probs.append(exp_logits[i] / sum_exp)
     }
 
@@ -41,7 +41,7 @@ func softmax([]float logits) []float {
 
 func log_softmax([]float logits) []float {
     float max_logit = logits[0]
-    for i = 1; i < logits.len(); i = i + 1 {
+    for i = 1; i < len(logits); i = i + 1 {
         if logits[i] > max_logit {
             max_logit = logits[i]
         }
@@ -50,12 +50,12 @@ func log_softmax([]float logits) []float {
     []float log_probs
     float sum_exp = 0.0
 
-    for i = 0; i < logits.len(); i = i + 1 {
+    for i = 0; i < len(logits); i = i + 1 {
         float exp_val = exp(logits[i] - max_logit)
         sum_exp = sum_exp + exp_val
     }
 
-    for i = 0; i < logits.len(); i = i + 1 {
+    for i = 0; i < len(logits); i = i + 1 {
         float log_prob = logits[i] - max_logit - log(sum_exp)
         log_probs.append(log_prob)
     }
@@ -71,13 +71,13 @@ func get_top_k_tokens(
     []int indices
     []float scores
 
-    for i = 0; i < logits.len(); i = i + 1 {
+    for i = 0; i < len(logits); i = i + 1 {
         indices.append(i)
         scores.append(logits[i])
     }
 
-    for i = 0; i < k && i < scores.len(); i = i + 1 {
-        for j = i + 1; j < scores.len(); j = j + 1 {
+    for i = 0; i < k && i < len(scores); i = i + 1 {
+        for j = i + 1; j < len(scores); j = j + 1 {
             if scores[j] > scores[i] {
 
                 float temp_score = scores[i]
@@ -94,7 +94,7 @@ func get_top_k_tokens(
     []int top_indices
     []float top_scores
 
-    for i = 0; i < k && i < indices.len(); i = i + 1 {
+    for i = 0; i < k && i < len(indices); i = i + 1 {
         top_indices.append(indices[i])
         top_scores.append(scores[i])
     }
@@ -108,7 +108,7 @@ func apply_token_mask(
 ) []float {
     []float masked_logits
 
-    for i = 0; i < logits.len(); i = i + 1 {
+    for i = 0; i < len(logits); i = i + 1 {
         if mask[i] {
             masked_logits.append(logits[i])
         } else {
@@ -130,7 +130,7 @@ func cumulative_softmax([]float probs) []float {
     []float cum_probs
     float cumsum = 0.0
 
-    for i = 0; i < probs.len(); i = i + 1 {
+    for i = 0; i < len(probs); i = i + 1 {
         cumsum = cumsum + probs[i]
         cum_probs.append(cumsum)
     }
@@ -156,6 +156,6 @@ func logits_processor_to_string(logits_processor processor) string {
     string s = ""
     s = s + "Processor: " + processor.processor_type + "\n"
     s = s + "Vocab size: " + int_to_string(processor.vocab_size) + "\n"
-    s = s + "Logits size: " + int_to_string(processor.logits.len()) + "\n"
+    s = s + "Logits size: " + int_to_string(len(processor.logits)) + "\n"
     s
 }

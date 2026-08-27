@@ -1,7 +1,7 @@
 package neurx.tool_parsers.validator.schema_validator
 
 use neurx.tool_parsers.schema.schema_types
-use std.vec
+use std.slices
 
 struct validation_result {
     is_valid: bool

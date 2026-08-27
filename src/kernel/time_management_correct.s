@@ -41,8 +41,8 @@ struct time_management_engine {
 // 初始化时间管理引擎
 func new_time_management_engine() (time_management_engine, string) {
     engine := time_management_engine{
-        clocks: vec(),
-        timers: vec(),
+        clocks: {},
+        timers: {},
         timer_counter: 0,
         ntp_offset_ns: 0
     }
@@ -53,7 +53,7 @@ func new_time_management_engine() (time_management_engine, string) {
         current_time: timespec{ sec: 0, nsec: 0 },
         frequency: 1000000000
     }
-    engine.clocks.push(realtime_clock)
+    engine.clocks = append(engine.clocks, realtime_clock)
     
     // 创建 MONOTONIC 时钟
     monotonic_clock := posix_clock{
@@ -61,7 +61,7 @@ func new_time_management_engine() (time_management_engine, string) {
         current_time: timespec{ sec: 0, nsec: 0 },
         frequency: 1000000000
     }
-    engine.clocks.push(monotonic_clock)
+    engine.clocks = append(engine.clocks, monotonic_clock)
     
     return engine, ""
 }
@@ -69,7 +69,7 @@ func new_time_management_engine() (time_management_engine, string) {
 // 获取时间
 func (engine* time_management_engine) get_time(clock_type int) (timespec, string) {
     i := 0
-    for i < engine.clocks.len() {
+    for i < len(engine.clocks) {
         clock := engine.clocks[i]
         if clock.clock_type == clock_type {
             return clock.current_time, ""
@@ -83,7 +83,7 @@ func (engine* time_management_engine) get_time(clock_type int) (timespec, string
 // 设置时间
 func (engine* time_management_engine) set_time(clock_type int, new_time timespec) (int, string) {
     i := 0
-    for i < engine.clocks.len() {
+    for i < len(engine.clocks) {
         clock := engine.clocks[i]
         if clock.clock_type == clock_type {
             clock.current_time = new_time
@@ -110,14 +110,14 @@ func (engine* time_management_engine) create_timer(clock_type int, expire_time t
         fired_count: 0
     }
     
-    engine.timers.push(timer)
+    engine.timers = append(engine.timers, timer)
     return timer_id, ""
 }
 
 // 取消定时器
 func (engine* time_management_engine) cancel_timer(timer_id int) (int, string) {
     i := 0
-    for i < engine.timers.len() {
+    for i < len(engine.timers) {
         timer := engine.timers[i]
         if timer.timer_id == timer_id {
             timer.enabled = 0
@@ -139,7 +139,7 @@ func (engine* time_management_engine) nanosleep(clock_type int, duration timespe
 // 获取时钟分辨率
 func (engine* time_management_engine) clock_getres(clock_type int) (timespec, string) {
     i := 0
-    for i < engine.clocks.len() {
+    for i < len(engine.clocks) {
         clock := engine.clocks[i]
         if clock.clock_type == clock_type {
             res := timespec{ sec: 0, nsec: 1 }
@@ -154,7 +154,7 @@ func (engine* time_management_engine) clock_getres(clock_type int) (timespec, st
 // 设置时钟时间
 func (engine* time_management_engine) clock_settime(clock_type int, new_time timespec) (int, string) {
     i := 0
-    for i < engine.clocks.len() {
+    for i < len(engine.clocks) {
         clock := engine.clocks[i]
         if clock.clock_type == clock_type {
             clock.current_time = new_time
@@ -189,7 +189,7 @@ func (engine* time_management_engine) get_timer_statistics() (timer_statistics, 
     total_fires := 0
     
     i := 0
-    for i < engine.timers.len() {
+    for i < len(engine.timers) {
         timer := engine.timers[i]
         if timer.enabled == 1 {
             if timer.interval.sec > 0 || timer.interval.nsec > 0 {
@@ -204,7 +204,7 @@ func (engine* time_management_engine) get_timer_statistics() (timer_statistics, 
     
     stats := timer_statistics{
         total_timers_created: engine.timer_counter,
-        active_timers: engine.timers.len(),
+        active_timers: len(engine.timers),
         periodic_timers: periodic_count,
         oneshot_timers: oneshot_count,
         total_timer_fires: total_fires
@@ -216,7 +216,7 @@ func (engine* time_management_engine) get_timer_statistics() (timer_statistics, 
 // 调整时钟
 func (engine* time_management_engine) adjust_clock(clock_type int, offset_ns int) (int, string) {
     i := 0
-    for i < engine.clocks.len() {
+    for i < len(engine.clocks) {
         clock := engine.clocks[i]
         if clock.clock_type == clock_type {
             clock.current_time.nsec = clock.current_time.nsec + offset_ns
@@ -249,7 +249,7 @@ func (engine* time_management_engine) check_timers_and_fire() (int, string) {
     fired_count := 0
     
     i := 0
-    for i < engine.timers.len() {
+    for i < len(engine.timers) {
         timer := engine.timers[i]
         
         if timer.enabled == 0 {

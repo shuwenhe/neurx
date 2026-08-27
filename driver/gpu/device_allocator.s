@@ -21,16 +21,16 @@ struct gpu_memory_block {
 }
 
 struct gpu_cluster {
-    vec[gpu_device] devices
-    vec[gpu_memory_block] memory_blocks
+    gpu_device[] devices
+    gpu_memory_block[] memory_blocks
     int device_count
     int total_available_memory
 }
 
 func create_gpu_cluster(int num_gpus) gpu_cluster {
     cluster := gpu_cluster {
-        devices: vec[gpu_device](),
-        memory_blocks: vec[gpu_memory_block](),
+        devices: gpu_device[](),
+        memory_blocks: gpu_memory_block[](),
         device_count: 0,
         total_available_memory: 0
     }
@@ -45,7 +45,7 @@ func create_gpu_cluster(int num_gpus) gpu_cluster {
             compute_capability: 90,
             online: true
         }
-        cluster.devices.push(device)
+        cluster.devices = append(cluster.devices, device)
         cluster.total_available_memory = cluster.total_available_memory + device.total_memory
         cluster.device_count = cluster.device_count + 1
         i = i + 1
@@ -55,18 +55,18 @@ func create_gpu_cluster(int num_gpus) gpu_cluster {
 
 func allocate_gpu_memory(gpu_cluster cluster, int workload_id, int size_gb) gpu_cluster {
     i := 0
-    for i < cluster.devices.len() {
+    for i < len(cluster.devices) {
         device := cluster.devices[i]
         if device.available_memory >= size_gb && device.online {
             block := gpu_memory_block {
-                block_id: cluster.memory_blocks.len(),
+                block_id: len(cluster.memory_blocks),
                 device_id: device.device_id,
                 base_addr: 0,
                 size: size_gb,
                 workload_id: workload_id,
                 allocated: true
             }
-            cluster.memory_blocks.push(block)
+            cluster.memory_blocks = append(cluster.memory_blocks, block)
             cluster.total_available_memory = cluster.total_available_memory - size_gb
             return cluster
         }
@@ -77,7 +77,7 @@ func allocate_gpu_memory(gpu_cluster cluster, int workload_id, int size_gb) gpu_
 
 func free_gpu_memory(gpu_cluster cluster, int workload_id) gpu_cluster {
     i := 0
-    for i < cluster.memory_blocks.len() {
+    for i < len(cluster.memory_blocks) {
         block := cluster.memory_blocks[i]
         if block.workload_id == workload_id {
             cluster.total_available_memory = cluster.total_available_memory + block.size

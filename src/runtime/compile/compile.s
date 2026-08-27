@@ -214,7 +214,7 @@ func compile_is_activation_op(string op) bool {
 
 func compile_add_edge(compile_state state, string edge) compile_state {
     []string edges = copy_strings(state.edges)
-    edges.push(edge)
+    edges = append(edges, edge)
     compile_state {
         name: state.name,
         backend: state.backend,
@@ -247,17 +247,17 @@ func compile_add_node_with_io(compile_state state, string node, string op, []str
     []string param_list = copy_strings(state.params)
     []string input_list = copy_strings(state.inputs)
     []string output_list = copy_strings(state.outputs)
-    nodes.push(node)
-    ops.push(op)
-    param_list.push(join_strings(params))
+    nodes = append(nodes, node)
+    ops = append(ops, op)
+    param_list = append(param_list, join_strings(params))
     int i = 0
     for i < len(inputs) {
-        input_list.push(inputs[i])
+        input_list = append(input_list, inputs[i])
         i = i + 1
     }
     i = 0
     for i < len(outputs) {
-        output_list.push(outputs[i])
+        output_list = append(output_list, outputs[i])
         i = i + 1
     }
     compile_state {
@@ -292,7 +292,7 @@ func compile_add_node(compile_state state, string node, string op) compile_state
 
 func compile_add_input(compile_state state, string input) compile_state {
     []string inputs = copy_strings(state.inputs)
-    inputs.push(input)
+    inputs = append(inputs, input)
     compile_state {
         name: state.name,
         backend: state.backend,
@@ -321,7 +321,7 @@ func compile_add_input(compile_state state, string input) compile_state {
 
 func compile_add_output(compile_state state, string output) compile_state {
     []string outputs = copy_strings(state.outputs)
-    outputs.push(output)
+    outputs = append(outputs, output)
     compile_state {
         name: state.name,
         backend: state.backend,
@@ -350,7 +350,7 @@ func compile_add_output(compile_state state, string output) compile_state {
 
 func compile_add_pass(compile_state state, string pass) compile_state {
     []string passes = copy_strings(state.passes)
-    passes.push(pass)
+    passes = append(passes, pass)
     compile_state {
         name: state.name,
         backend: state.backend,
@@ -432,7 +432,7 @@ func compile_set_linearized(compile_state state, bool linearized) compile_state 
 
 func compile_add_param(compile_state state, string param) compile_state {
     []string params = copy_strings(state.params)
-    params.push(param)
+    params = append(params, param)
     compile_state {
         name: state.name,
         backend: state.backend,
@@ -461,7 +461,7 @@ func compile_add_param(compile_state state, string param) compile_state {
 
 func compile_add_cache_key(compile_state state, string key) compile_state {
     []string cache_keys = copy_strings(state.cache_keys)
-    cache_keys.push(key)
+    cache_keys = append(cache_keys, key)
     compile_state {
         name: state.name,
         backend: state.backend,
@@ -490,7 +490,7 @@ func compile_add_cache_key(compile_state state, string key) compile_state {
 
 func compile_add_tag(compile_state state, string tag) compile_state {
     []string tags = copy_strings(state.tags)
-    tags.push(tag)
+    tags = append(tags, tag)
     compile_state {
         name: state.name,
         backend: state.backend,

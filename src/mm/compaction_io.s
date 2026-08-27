@@ -84,8 +84,8 @@ struct io_scheduler {
 
 // 初始化 I/O 调度器
 func (io_scheduler* ios) init(int queue_depth) (int, string) {
-    ios.read_queue = vec()
-    ios.write_queue = vec()
+    ios.read_queue = {}
+    ios.write_queue = {}
     ios.queue_depth = queue_depth
     ios.requests_completed = 0
     return 0, ""
@@ -93,7 +93,7 @@ func (io_scheduler* ios) init(int queue_depth) (int, string) {
 
 // 提交 I/O 请求
 func (io_scheduler* ios) submit_request(int sector, int size, int io_type, int priority) (io_request, string) {
-    total_requests := ios.read_queue.len() + ios.write_queue.len()
+    total_requests := len(ios.read_queue) + len(ios.write_queue)
     if total_requests >= ios.queue_depth {
         return io_request{}, "Queue full"
     }
@@ -107,9 +107,9 @@ func (io_scheduler* ios) submit_request(int sector, int size, int io_type, int p
     }
     
     if io_type == 0 {
-        ios.read_queue.push(req)
+        ios.read_queue = append(ios.read_queue, req)
     } else {
-        ios.write_queue.push(req)
+        ios.write_queue = append(ios.write_queue, req)
     }
     
     return req, ""
@@ -118,12 +118,12 @@ func (io_scheduler* ios) submit_request(int sector, int size, int io_type, int p
 // 执行 I/O 请求 (从队列中取出)
 func (io_scheduler* ios) dispatch_request() (io_request, string) {
     // 优先分配读请求 (可配置)
-    if ios.read_queue.len() > 0 {
+    if len(ios.read_queue) > 0 {
         req := ios.read_queue[0]
         // 移除第一个元素 (简单模拟)
         ios.requests_completed = ios.requests_completed + 1
         return req, ""
-    } else if ios.write_queue.len() > 0 {
+    } else if len(ios.write_queue) > 0 {
         req := ios.write_queue[0]
         ios.requests_completed = ios.requests_completed + 1
         return req, ""
@@ -134,8 +134,8 @@ func (io_scheduler* ios) dispatch_request() (io_request, string) {
 
 // 获取队列深度
 func (io_scheduler ios) get_queue_stats() (int, int, int) {
-    read_count := ios.read_queue.len()
-    write_count := ios.write_queue.len()
+    read_count := len(ios.read_queue)
+    write_count := len(ios.write_queue)
     return read_count, write_count, ios.requests_completed
 }
 

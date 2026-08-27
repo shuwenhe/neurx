@@ -8,7 +8,7 @@ package mem_cache
 }
 
 struct cache_entry {
-    vec[int32] token_sequence
+    int32[] token_sequence
     int64 kv_cache_ptr
     int32 kv_cache_size
     int32 access_count
@@ -64,8 +64,8 @@ func new_prefix_cache(int64 max_size, eviction_policy policy) prefix_cache {
     }
 }
 
-func (prefix_cache* cache) insert(vec[int32] token_sequence, int64 kv_cache_ptr, int32 kv_cache_size) cache_operation_result {
-    if token_sequence.len() == 0 {
+func (prefix_cache* cache) insert(int32[] token_sequence, int64 kv_cache_ptr, int32 kv_cache_size) cache_operation_result {
+    if len(token_sequence) == 0 {
         cache_operation_result {
             success: false,
             cache_key: "",
@@ -104,8 +104,8 @@ func (prefix_cache* cache) insert(vec[int32] token_sequence, int64 kv_cache_ptr,
     }
 }
 
-func (prefix_cache* cache) lookup(vec[int32] query_tokens) cache_operation_result {
-    if query_tokens.len() == 0 {
+func (prefix_cache* cache) lookup(int32[] query_tokens) cache_operation_result {
+    if len(query_tokens) == 0 {
         cache_operation_result {
             success: false,
             cache_key: "",
@@ -250,7 +250,7 @@ func (prefix_cache* cache) get_stats() cache_stats {
         miss_count: cache.miss_count,
         eviction_count: cache.eviction_count,
         cache_size: cache.current_cache_size,
-        cache_entries: cache.entries.len(),
+        cache_entries: len(cache.entries),
         total_tokens_cached: tree_stats["total_cached_tokens"],
         hit_rate: hit_rate,
         compression_ratio: compression,
@@ -277,7 +277,7 @@ func (prefix_cache* cache) is_full() bool {
     cache.current_cache_size >= cache.max_cache_size
 }
 
-func (prefix_cache* cache) find_matching_prefix(vec[int32] query_tokens) cache_entry {
+func (prefix_cache* cache) find_matching_prefix(int32[] query_tokens) cache_entry {
     result := cache.lookup(query_tokens)
 
     if result.success && result.cache_key in cache.entries {
@@ -285,7 +285,7 @@ func (prefix_cache* cache) find_matching_prefix(vec[int32] query_tokens) cache_e
     }
 
     cache_entry {
-        token_sequence: vec[int32]{},
+        token_sequence: int32[]{},
         kv_cache_ptr: 0,
         kv_cache_size: 0,
         access_count: 0,
@@ -295,15 +295,15 @@ func (prefix_cache* cache) find_matching_prefix(vec[int32] query_tokens) cache_e
     }
 }
 
-func (prefix_cache* cache) get_high_reuse_prefixes() vec[cache_entry] {
-    results := vec[cache_entry]{}
+func (prefix_cache* cache) get_high_reuse_prefixes() cache_entry[] {
+    results := cache_entry[]{}
     high_reuse_nodes := cache.tree.find_high_reuse_nodes()
 
     for node in high_reuse_nodes {
         for key in cache.entries.keys() {
             entry := cache.entries[key]
             if entry.entry_id == node.prefix_key {
-                results.push(entry)
+                results = append(results, entry)
             }
         }
     }

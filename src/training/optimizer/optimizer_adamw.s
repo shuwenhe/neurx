@@ -31,8 +31,8 @@ func init_adam_state(
     []tensor v_states = []tensor{cap: len(parameters)}
     int i = 0
     for i < len(parameters) {
-        m_states.push(zeros(parameters[i].shape))
-        v_states.push(zeros(parameters[i].shape))
+        m_states = append(m_states, zeros(parameters[i].shape))
+        v_states = append(v_states, zeros(parameters[i].shape))
         i = i + 1
     }
     adam_state {

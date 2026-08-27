@@ -1,7 +1,7 @@
 package neurx.parser.text_parser
 
 use neurx.parser.types
-use std.vec
+use std.slices
 
 func tokenize(string input) []string {
     tokens := []string{}

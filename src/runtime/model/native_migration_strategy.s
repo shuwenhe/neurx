@@ -24,7 +24,7 @@ func parse_json(string input) option[json_value] {
         string_value: "",
         number_value: 0.0,
         bool_value: false,
-        array_value: vec[json_value](),
+        array_value: json_value[](),
     })
 }
 
@@ -48,7 +48,7 @@ func new_tokenizer(string vocab_file) native_tokenizer_handle {
 
 func (native_tokenizer_handle* t) encode(string text) int[] {
     if !t.initialized {
-        return vec[int]()
+        return int[]()
     }
     __tokenizer_encode(t.handle_id, text)
 }
@@ -77,19 +77,19 @@ struct compilation_strategy {
 func get_current_compilation_strategy() compilation_strategy {
     return compilation_strategy {
         name: "hybrid_modular",
-        pure_s_modules: vec[string]{
+        pure_s_modules: string[]{
             "inference/api",           
             "inference/cache",         
             "inference/scheduler",     
             "serving/web_ui_server",   
             "inference/logits_processors",  
         },
-        native_modules: vec[string]{
+        native_modules: string[]{
             "backend/platform/cuda/kernels_gemm",      
             "backend/platform/cuda/device_manager",    
             "runtime/native/tensor_runtime",           
         },
-        external_modules: vec[string]{
+        external_modules: string[]{
             "runtime/model/bpe_tokenizer",    
             "runtime/model/hf_model",         
         },

@@ -53,10 +53,10 @@ func create_test_matrix(int rows, int cols, float scale) [][]float {
         int c = 0
         for c < cols {
             float val = scale * float(r * cols + c) / 1000.0
-            row.push(val)
+            row = append(row, val)
             c = c + 1
         }
-        mat.push(row)
+        mat = append(mat, row)
         r = r + 1
     }
     mat

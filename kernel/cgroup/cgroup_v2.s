@@ -50,7 +50,7 @@ struct cgroup_v2 {
     int id
     int parent_id
     int level
-    vec[resource_type] enabled_controllers
+    resource_type[] enabled_controllers
     cgroup_cpu_stats cpu_stats
     cgroup_memory_stats mem_stats
     cgroup_io_stats io_stats
@@ -62,7 +62,7 @@ struct cgroup_v2 {
 
 struct cgroup_hierarchy_v2 {
     string name
-    vec[cgroup_v2] cgroups
+    cgroup_v2[] cgroups
     int total_cgroups
     int max_cgroups
     int root_cgroup_id
@@ -75,7 +75,7 @@ func cgroup_v2_create(string name, int id) cgroup_v2 {
         id: id,
         parent_id: 0,
         level: 1,
-        enabled_controllers: vec[resource_type](),
+        enabled_controllers: resource_type[](),
         cpu_stats: cgroup_cpu_stats {
             total_cpu_time_us: 0,
             user_time_us: 0,
@@ -111,61 +111,61 @@ func cgroup_v2_create(string name, int id) cgroup_v2 {
     return cg
 }
 
-func (cg: *cgroup_v2) enable_controller(resource_type res_type) (bool, string) {
-    cg.enabled_controllers.push(res_type)
-    return result::ok(true)
+func (cgroup_v2* cg) enable_controller(resource_type res_type) (bool, string) {
+    cg.enabled_controllers = append(cg.enabled_controllers, res_type)
+    return true, ""
 }
 
-func (cg: *cgroup_v2) set_cpu_max(int quota_us, int period_us) (bool, string) {
+func (cgroup_v2* cg) set_cpu_max(int quota_us, int period_us) (bool, string) {
     if quota_us <= 0 || period_us <= 0 {
-        return result::err("Invalid CPU max parameters")
+        return ((), "Invalid CPU max parameters")
     }
     cg.cpu_stats.nr_periods = cg.cpu_stats.nr_periods + 1
-    return result::ok(true)
+    return true, ""
 }
 
-func (cg: *cgroup_v2) set_memory_max(int bytes) (bool, string) {
+func (cgroup_v2* cg) set_memory_max(int bytes) (bool, string) {
     if bytes <= 0 {
-        return result::err("Invalid memory max")
+        return ((), "Invalid memory max")
     }
     cg.mem_stats.max_memory_bytes = bytes
-    return result::ok(true)
+    return true, ""
 }
 
-func (cg: *cgroup_v2) set_memory_high(int bytes) (bool, string) {
+func (cgroup_v2* cg) set_memory_high(int bytes) (bool, string) {
     if bytes <= 0 {
-        return result::err("Invalid memory high")
+        return ((), "Invalid memory high")
     }
-    return result::ok(true)
+    return true, ""
 }
 
-func (cg: *cgroup_v2) set_memory_low(int bytes) (bool, string) {
+func (cgroup_v2* cg) set_memory_low(int bytes) (bool, string) {
     if bytes <= 0 {
-        return result::err("Invalid memory low")
+        return ((), "Invalid memory low")
     }
-    return result::ok(true)
+    return true, ""
 }
 
-func (cg: *cgroup_v2) set_io_max(string device, string limits) (bool, string) {
+func (cgroup_v2* cg) set_io_max(string device, string limits) (bool, string) {
     cg.io_stats.total_io_operations = cg.io_stats.total_io_operations + 1
-    return result::ok(true)
+    return true, ""
 }
 
-func (cg: *cgroup_v2) set_pids_max(int max) (bool, string) {
+func (cgroup_v2* cg) set_pids_max(int max) (bool, string) {
     if max <= 0 {
-        return result::err("Invalid pids max")
+        return ((), "Invalid pids max")
     }
     cg.pids_stats.max_pids = max
-    return result::ok(true)
+    return true, ""
 }
 
-func (cg: *cgroup_v2) update_cpu_stats(int delta_user_us, int delta_system_us) {
+func (cgroup_v2* cg) update_cpu_stats(int delta_user_us, int delta_system_us) {
     cg.cpu_stats.total_cpu_time_us = cg.cpu_stats.total_cpu_time_us + delta_user_us + delta_system_us
     cg.cpu_stats.user_time_us = cg.cpu_stats.user_time_us + delta_user_us
     cg.cpu_stats.system_time_us = cg.cpu_stats.system_time_us + delta_system_us
 }
 
-func (cg: *cgroup_v2) update_memory_stats(int delta_rss, int delta_cache) {
+func (cgroup_v2* cg) update_memory_stats(int delta_rss, int delta_cache) {
     cg.mem_stats.rss_bytes = cg.mem_stats.rss_bytes + delta_rss
     cg.mem_stats.page_cache_bytes = cg.mem_stats.page_cache_bytes + delta_cache
     cg.mem_stats.total_memory_bytes = cg.mem_stats.rss_bytes + cg.mem_stats.page_cache_bytes
@@ -175,28 +175,28 @@ func (cg: *cgroup_v2) update_memory_stats(int delta_rss, int delta_cache) {
     }
 }
 
-func (cg: *cgroup_v2) update_io_stats(int read_bytes, int write_bytes) {
+func (cgroup_v2* cg) update_io_stats(int read_bytes, int write_bytes) {
     cg.io_stats.total_io_read_bytes = cg.io_stats.total_io_read_bytes + read_bytes
     cg.io_stats.total_io_write_bytes = cg.io_stats.total_io_write_bytes + write_bytes
     cg.io_stats.total_io_operations = cg.io_stats.total_io_operations + 1
 }
 
-func (cg: *cgroup_v2) get_cpu_pressure() int {
+func (cgroup_v2* cg) get_cpu_pressure() int {
     return cg.pressure_cpu
 }
 
-func (cg: *cgroup_v2) get_memory_pressure() int {
+func (cgroup_v2* cg) get_memory_pressure() int {
     return cg.pressure_memory
 }
 
-func (cg: *cgroup_v2) get_io_pressure() int {
+func (cgroup_v2* cg) get_io_pressure() int {
     return cg.pressure_io
 }
 
 func cgroup_hierarchy_v2_create(string name) cgroup_hierarchy_v2 {
     hier := cgroup_hierarchy_v2 {
         name: name,
-        cgroups: vec[cgroup_v2](),
+        cgroups: cgroup_v2[](),
         total_cgroups: 0,
         max_cgroups: 4096,
         root_cgroup_id: 0
@@ -204,30 +204,30 @@ func cgroup_hierarchy_v2_create(string name) cgroup_hierarchy_v2 {
     return hier
 }
 
-func (hier: *cgroup_hierarchy_v2) add_cgroup(string cg_name, int parent_id) (int, string) {
+func (cgroup_hierarchy_v2* hier) add_cgroup(string cg_name, int parent_id) (int, string) {
     if hier.total_cgroups >= hier.max_cgroups {
-        return result::err("Cgroup hierarchy limit exceeded")
+        return ((), "Cgroup hierarchy limit exceeded")
     }
     
     new_cg := cgroup_v2_create(cg_name, hier.total_cgroups)
     new_cg.parent_id = parent_id
     new_cg.level = if parent_id == 0 { 0 } else { 1 }
     
-    hier.cgroups.push(new_cg)
+    hier.cgroups = append(hier.cgroups, new_cg)
     new_id := hier.total_cgroups
     hier.total_cgroups = hier.total_cgroups + 1
     
-    return result::ok(new_id)
+    return new_id, ""
 }
 
-func (hier: *cgroup_hierarchy_v2) get_cgroup(int cg_id) option[cgroup_v2] {
+func (cgroup_hierarchy_v2* hier) get_cgroup(int cg_id) option[cgroup_v2] {
     if cg_id < 0 || cg_id >= hier.total_cgroups {
         return option::none
     }
     return option::some(hier.cgroups[cg_id])
 }
 
-func (hier: *cgroup_hierarchy_v2) total_cpu_usage() int {
+func (cgroup_hierarchy_v2* hier) total_cpu_usage() int {
     total := 0
     i := 0
     while i < hier.total_cgroups {
@@ -237,7 +237,7 @@ func (hier: *cgroup_hierarchy_v2) total_cpu_usage() int {
     return total
 }
 
-func (hier: *cgroup_hierarchy_v2) total_memory_used() int {
+func (cgroup_hierarchy_v2* hier) total_memory_used() int {
     total := 0
     i := 0
     while i < hier.total_cgroups {

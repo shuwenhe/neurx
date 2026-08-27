@@ -17,7 +17,7 @@ use neurx.kernel.time_management
 func main() (void, string) {
     print_banner()?
     
-    let mut mgr := os_features_integration::new_os_features_manager()?
+    mgr := os_features_integration::new_os_features_manager()?
     
     print_section("1. Virtual Memory Subsystem")?
     demo_virtual_memory()?
@@ -60,46 +60,46 @@ func main() (void, string) {
     print_status("Time Management", true)?
     
     print_section("System Summary")?
-    let cap := mgr.get_system_capabilities()?
+    cap := mgr.get_system_capabilities()?
     print_capabilities(*cap)?
     
     print_section("Feature Report")?
-    let report := mgr.generate_feature_report()?
+    report := mgr.generate_feature_report()?
     print_feature_report(*report)?
     
     print_section("✓ AI Operating System Initialization Complete")?
     
-    result::ok(())
+    return (), ""
 }
 
 func print_banner() (void, string) {
     print_line()?
     print_line()?
     print_line()?
-    result::ok(())
+    return (), ""
 }
 
 func print_line() (void, string) {
-    result::ok(())
+    return (), ""
 }
 
-func print_section(title: *string) (void, string) {
+func print_section(string* title) (void, string) {
     print_line()?
     print_line()?
-    result::ok(())
+    return (), ""
 }
 
-func print_status(feature: *string, enabled: bool) (void, string) {
-    result::ok(())
+func print_status(string* feature, enabled: bool) (void, string) {
+    return (), ""
 }
 
 func demo_virtual_memory() (void, string) {
-    let pt := page_table::new_page_table()?
-    let vas := virtual_memory::new_virtual_address_space(pt)?
+    pt := page_table::new_page_table()?
+    vas := virtual_memory::new_virtual_address_space(pt)?
     
     vas.map_vma(0x1000, 0x1000, 0x1, option::none)?
     
-    let vma_opt := vas.find_vma(0x1500)
+    vma_opt := vas.find_vma(0x1500)
     switch vma_opt {
         option::some(_): {},
         option::none: {},
@@ -107,41 +107,41 @@ func demo_virtual_memory() (void, string) {
     
     vas.handle_page_fault(0x1500, false)?
     
-    result::ok(())
+    return (), ""
 }
 
 func demo_huge_pages() (void, string) {
-    let pool := huge_pages::new_huge_page_pool()?
-    let thp := huge_pages::new_thp_manager(pool)?
+    pool := huge_pages::new_huge_page_pool()?
+    thp := huge_pages::new_thp_manager(pool)?
     
     pool.allocate_2m_page()?
     pool.allocate_1g_page()?
     
     thp.enable_thp()?
     
-    let stats := thp.get_statistics()?
+    stats := thp.get_statistics()?
     
-    result::ok(())
+    return (), ""
 }
 
 func demo_filesystem() (void, string) {
-    let fs := ext4::new_ext4_filesystem(4096)?
+    fs := ext4::new_ext4_filesystem(4096)?
     
     fs.format()?
     
-    let inode_num := fs.create_inode(0o100644)?
+    inode_num := fs.create_inode(0o100644)?
     
     fs.open_file(inode_num, ext4::file_mode::read_write)?
     
     fs.close_file(inode_num)?
     
-    let stats := fs.get_statistics()?
+    stats := fs.get_statistics()?
     
-    result::ok(())
+    return (), ""
 }
 
 func demo_netfilter() (void, string) {
-    let engine := netfilter::new_netfilter_engine()?
+    engine := netfilter::new_netfilter_engine()?
     
     engine.add_rule(
         option::some(0xc0a80001),
@@ -153,13 +153,13 @@ func demo_netfilter() (void, string) {
         100
     )?
     
-    let stats := engine.get_statistics()?
+    stats := engine.get_statistics()?
     
-    result::ok(())
+    return (), ""
 }
 
 func demo_qos() (void, string) {
-    let qos_engine := qos::new_qos_engine(qos::qos_policy::token_bucket)?
+    qos_engine := qos::new_qos_engine(qos::qos_policy::token_bucket)?
     
     qos_engine.create_qos_class(
         qos::traffic_class::tc_interactive,
@@ -169,13 +169,13 @@ func demo_qos() (void, string) {
     
     qos_engine.token_bucket_refill()?
     
-    let stats := qos_engine.get_statistics()?
+    stats := qos_engine.get_statistics()?
     
-    result::ok(())
+    return (), ""
 }
 
 func demo_cpufreq() (void, string) {
-    let cpufreq_engine := cpufreq::new_cpufreq_engine(16, 1000000, 4000000)?
+    cpufreq_engine := cpufreq::new_cpufreq_engine(16, 1000000, 4000000)?
     
     cpufreq_engine.set_governor(cpufreq::frequency_scaling_governor::gov_ondemand)?
     
@@ -183,15 +183,15 @@ func demo_cpufreq() (void, string) {
     
     cpufreq_engine.enable_turbo(0)?
     
-    let stats := cpufreq_engine.get_statistics()?
+    stats := cpufreq_engine.get_statistics()?
     
-    result::ok(())
+    return (), ""
 }
 
 func demo_cpuidle() (void, string) {
-    let cpuidle_engine := cpuidle::new_cpuidle_engine(16)?
+    cpuidle_engine := cpuidle::new_cpuidle_engine(16)?
     
-    let c1_state := cpuidle::c_state{
+    c1_state := cpuidle::c_state{
         state_type: cpuidle::c_state_type::c1,
         exit_latency_us: 2,
         power_usage_mw: 100,
@@ -207,20 +207,20 @@ func demo_cpuidle() (void, string) {
     cpuidle_engine.enter_idle_state(0, cpuidle::c_state_type::c1)?
     cpuidle_engine.exit_idle_state(0)?
     
-    let stats := cpuidle_engine.get_statistics()?
+    stats := cpuidle_engine.get_statistics()?
     
-    result::ok(())
+    return (), ""
 }
 
 func demo_time_management() (void, string) {
-    let time_engine := time_management::new_time_management_engine()?
+    time_engine := time_management::new_time_management_engine()?
     
-    let ts := time_management::timespec{ tv_sec: 1724000000, tv_nsec: 0 }
+    ts := time_management::timespec{ tv_sec: 1724000000, tv_nsec: 0 }
     time_engine.set_time(time_management::clock_type::clock_realtime, *ts)?
     
-    let current_time := time_engine.get_time(time_management::clock_type::clock_realtime)?
+    current_time := time_engine.get_time(time_management::clock_type::clock_realtime)?
     
-    let timer_id := time_engine.create_timer(
+    timer_id := time_engine.create_timer(
         time_management::clock_type::clock_monotonic,
         *ts,
         option::some(*time_management::timespec{ tv_sec: 1, tv_nsec: 0 }),
@@ -231,15 +231,15 @@ func demo_time_management() (void, string) {
     
     time_engine.cancel_timer(timer_id)?
     
-    let timer_stats := time_engine.get_timer_statistics()?
+    timer_stats := time_engine.get_timer_statistics()?
     
-    result::ok(())
+    return (), ""
 }
 
-func print_capabilities(cap: *os_features_integration::system_capability) (void, string) {
-    result::ok(())
+func print_capabilities(os_features_integration* cap::system_capability) (void, string) {
+    return (), ""
 }
 
-func print_feature_report(report: *os_features_integration::feature_report) (void, string) {
-    result::ok(())
+func print_feature_report(os_features_integration* report::feature_report) (void, string) {
+    return (), ""
 }

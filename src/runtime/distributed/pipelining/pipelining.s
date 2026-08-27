@@ -151,7 +151,7 @@ func pipeline_stage_is_last(pipeline_stage stage) bool {
 
 func pipeline_stage_add_input(pipeline_stage stage, string value) pipeline_stage {
     []string inputs = copy_strings(stage.inputs)
-    inputs.push(value)
+    inputs = append(inputs, value)
     pipeline_stage {
         name: stage.name,
         stage_index: stage.stage_index,
@@ -168,7 +168,7 @@ func pipeline_stage_add_input(pipeline_stage stage, string value) pipeline_stage
 
 func pipeline_stage_add_output(pipeline_stage stage, string value) pipeline_stage {
     []string outputs = copy_strings(stage.outputs)
-    outputs.push(value)
+    outputs = append(outputs, value)
     pipeline_stage {
         name: stage.name,
         stage_index: stage.stage_index,
@@ -242,7 +242,7 @@ func pipeline_stage_count(pipeline_plan plan) int {
 
 func pipeline_add_split_point(pipeline_plan plan, string split_point) pipeline_plan {
     []string split_points = copy_strings(plan.split_points)
-    split_points.push(split_point)
+    split_points = append(split_points, split_point)
     pipeline_plan {
         name: plan.name,
         strategy: plan.strategy,
@@ -260,7 +260,7 @@ func build_stage(pipeline_plan plan, int stage_index, int rank, int world_size, 
 
 func pipeline_add_stage(pipeline_plan plan, pipeline_stage stage) pipeline_plan {
     []pipeline_stage stages = copy_stages(plan.stages)
-    stages.push(copy_stage(stage))
+    stages = append(stages, copy_stage(stage))
     pipeline_plan {
         name: plan.name,
         strategy: plan.strategy,

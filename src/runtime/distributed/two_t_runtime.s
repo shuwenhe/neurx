@@ -119,7 +119,7 @@ func two_t_copy_backbone_optimizers([]transformer_layer_optimizer_state states) 
 
 func two_t_single_tensor_params(tensor value) []tensor {
     []tensor params = []tensor{cap: 1}
-    params.push(value)
+    params = append(params, value)
     params
 }
 
@@ -936,21 +936,21 @@ func two_t_collect_tp_shard_params(two_t_runtime_state state) []tensor {
     []int vocab_range = two_t_tp_vocab_range(state)
     []int col_range = two_t_tp_col_range(state)
     []int row_range = two_t_tp_row_range(state)
-    params.push(tensor_2d_row_slice(state.token_embedding, vocab_range[0], vocab_range[1]))
-    params.push(tensor_2d_col_slice(state.lm_head_weight, col_range[0], col_range[1]))
-    params.push(tensor_from_flat_slice(state.lm_head_bias, vocab_range[0], vocab_range[1]))
+    params = append(params, tensor_2d_row_slice(state.token_embedding, vocab_range[0], vocab_range[1]))
+    params = append(params, tensor_2d_col_slice(state.lm_head_weight, col_range[0], col_range[1]))
+    params = append(params, tensor_from_flat_slice(state.lm_head_bias, vocab_range[0], vocab_range[1]))
     int i = 0
     for i < len(state.backbone.layers) {
-        params.push(tensor_2d_col_slice(state.backbone.layers[i].w_q, col_range[0], col_range[1]))
-        params.push(tensor_2d_col_slice(state.backbone.layers[i].w_k, col_range[0], col_range[1]))
-        params.push(tensor_2d_col_slice(state.backbone.layers[i].w_v, col_range[0], col_range[1]))
-        params.push(tensor_2d_row_slice(state.backbone.layers[i].w_o, row_range[0], row_range[1]))
-        params.push(tensor_2d_col_slice(state.backbone.layers[i].w_ff1, col_range[0], col_range[1]))
-        params.push(tensor_2d_row_slice(state.backbone.layers[i].w_ff2, row_range[0], row_range[1]))
-        params.push(copy_tensor(state.backbone.layers[i].b_ff1))
-        params.push(copy_tensor(state.backbone.layers[i].b_ff2))
-        params.push(tensor_2d_col_slice(state.backbone.layers[i].w_up, col_range[0], col_range[1]))
-        params.push(copy_tensor(state.backbone.layers[i].b_up))
+        params = append(params, tensor_2d_col_slice(state.backbone.layers[i].w_q, col_range[0], col_range[1]))
+        params = append(params, tensor_2d_col_slice(state.backbone.layers[i].w_k, col_range[0], col_range[1]))
+        params = append(params, tensor_2d_col_slice(state.backbone.layers[i].w_v, col_range[0], col_range[1]))
+        params = append(params, tensor_2d_row_slice(state.backbone.layers[i].w_o, row_range[0], row_range[1]))
+        params = append(params, tensor_2d_col_slice(state.backbone.layers[i].w_ff1, col_range[0], col_range[1]))
+        params = append(params, tensor_2d_row_slice(state.backbone.layers[i].w_ff2, row_range[0], row_range[1]))
+        params = append(params, copy_tensor(state.backbone.layers[i].b_ff1))
+        params = append(params, copy_tensor(state.backbone.layers[i].b_ff2))
+        params = append(params, tensor_2d_col_slice(state.backbone.layers[i].w_up, col_range[0], col_range[1]))
+        params = append(params, copy_tensor(state.backbone.layers[i].b_up))
         i = i + 1
     }
     params
@@ -1066,16 +1066,16 @@ func two_t_collect_backbone_layer_shard_params(two_t_runtime_state state, int la
     []int col_range = two_t_tp_col_range(state)
     []int row_range = two_t_tp_row_range(state)
     transformer_layer layer = transformer_layer_at(state.backbone.layers, layer_index)
-    params.push(tensor_2d_col_slice(layer.w_q, col_range[0], col_range[1]))
-    params.push(tensor_2d_col_slice(layer.w_k, col_range[0], col_range[1]))
-    params.push(tensor_2d_col_slice(layer.w_v, col_range[0], col_range[1]))
-    params.push(tensor_2d_row_slice(layer.w_o, row_range[0], row_range[1]))
-    params.push(tensor_2d_col_slice(layer.w_ff1, col_range[0], col_range[1]))
-    params.push(tensor_2d_row_slice(layer.w_ff2, row_range[0], row_range[1]))
-    params.push(copy_tensor(layer.b_ff1))
-    params.push(copy_tensor(layer.b_ff2))
-    params.push(tensor_2d_col_slice(layer.w_up, col_range[0], col_range[1]))
-    params.push(copy_tensor(layer.b_up))
+    params = append(params, tensor_2d_col_slice(layer.w_q, col_range[0], col_range[1]))
+    params = append(params, tensor_2d_col_slice(layer.w_k, col_range[0], col_range[1]))
+    params = append(params, tensor_2d_col_slice(layer.w_v, col_range[0], col_range[1]))
+    params = append(params, tensor_2d_row_slice(layer.w_o, row_range[0], row_range[1]))
+    params = append(params, tensor_2d_col_slice(layer.w_ff1, col_range[0], col_range[1]))
+    params = append(params, tensor_2d_row_slice(layer.w_ff2, row_range[0], row_range[1]))
+    params = append(params, copy_tensor(layer.b_ff1))
+    params = append(params, copy_tensor(layer.b_ff2))
+    params = append(params, tensor_2d_col_slice(layer.w_up, col_range[0], col_range[1]))
+    params = append(params, copy_tensor(layer.b_up))
     params
 }
 
@@ -1193,7 +1193,7 @@ func two_t_parse_int_list(string text) []int {
         int chi = int(string(ch))
         if chi == 44 {
             if current != "" {
-                out.push(int(current))
+                out = append(out, int(current))
             }
             current = ""
         } else {
@@ -1202,7 +1202,7 @@ func two_t_parse_int_list(string text) []int {
         i = i + 1
     }
     if current != "" {
-        out.push(int(current))
+        out = append(out, int(current))
     }
     out
 }
@@ -1216,7 +1216,7 @@ func two_t_parse_float_list(string text) []float {
         int chi = int(string(ch))
         if chi == 44 {
             if current != "" {
-                out.push(float(current))
+                out = append(out, float(current))
             }
             current = ""
         } else {
@@ -1225,7 +1225,7 @@ func two_t_parse_float_list(string text) []float {
         i = i + 1
     }
     if current != "" {
-        out.push(float(current))
+        out = append(out, float(current))
     }
     out
 }
@@ -1239,7 +1239,7 @@ func two_t_split_lines(string text) []string {
         int chi = int(string(ch))
         if chi == 10 {
             if current != "" {
-                lines.push(current)
+                lines = append(lines, current)
             }
             current = ""
         } else if chi != 13 {
@@ -1248,7 +1248,7 @@ func two_t_split_lines(string text) []string {
         i = i + 1
     }
     if current != "" {
-        lines.push(current)
+        lines = append(lines, current)
     }
     lines
 }
@@ -1357,16 +1357,16 @@ func two_t_checkpoint_head_bias_optimizer_path(two_t_runtime_state state) string
 
 func two_t_checkpoint_payload_paths(two_t_runtime_state state) []string {
     []string paths = []string{cap: 0}
-    paths.push(two_t_checkpoint_embedding_params_path(state))
-    paths.push(two_t_checkpoint_embedding_optimizer_path(state))
-    paths.push(two_t_checkpoint_head_weight_params_path(state))
-    paths.push(two_t_checkpoint_head_weight_optimizer_path(state))
-    paths.push(two_t_checkpoint_head_bias_params_path(state))
-    paths.push(two_t_checkpoint_head_bias_optimizer_path(state))
+    paths = append(paths, two_t_checkpoint_embedding_params_path(state))
+    paths = append(paths, two_t_checkpoint_embedding_optimizer_path(state))
+    paths = append(paths, two_t_checkpoint_head_weight_params_path(state))
+    paths = append(paths, two_t_checkpoint_head_weight_optimizer_path(state))
+    paths = append(paths, two_t_checkpoint_head_bias_params_path(state))
+    paths = append(paths, two_t_checkpoint_head_bias_optimizer_path(state))
     int layer_index = 0
     for layer_index < len(state.backbone.layers) {
-        paths.push(two_t_checkpoint_backbone_layer_params_path(state, layer_index))
-        paths.push(two_t_checkpoint_backbone_layer_optimizer_path(state, layer_index))
+        paths = append(paths, two_t_checkpoint_backbone_layer_params_path(state, layer_index))
+        paths = append(paths, two_t_checkpoint_backbone_layer_optimizer_path(state, layer_index))
         layer_index = layer_index + 1
     }
     paths
@@ -1379,7 +1379,7 @@ func two_t_checkpoint_missing_paths(two_t_runtime_state state) []string {
     for i < len(paths) {
         string path = paths[i]
         if path != ""  !runtime_file_exists(path) {
-            missing.push(path)
+            missing = append(missing, path)
         }
         i = i + 1
     }

@@ -31,10 +31,10 @@ struct compression_stats {
 struct compressed_chunk {
 	string                  chunk_id
 
-	vec[byte]               compressed_data
+	byte[]               compressed_data
 	int32                   compressed_size
 
-	vec[byte]               original_data
+	byte[]               original_data
 	int32                   original_size
 
 	compression_algorithm   algorithm_used
@@ -50,7 +50,7 @@ struct sse_compressor {
 	compression_config      config
 	compression_stats       stats
 
-	vec[compressed_chunk]   chunk_cache
+	compressed_chunk[]   chunk_cache
 	int32                   max_cached_chunks
 
 	int32                   total_chunks_created
@@ -70,7 +70,7 @@ func create_sse_compressor(config compression_config) sse_compressor {
 	return sse_compressor{
 		config:                 config,
 		stats:                  compression_stats{},
-		chunk_cache:            make(vec[compressed_chunk], 0),
+		chunk_cache:            make(compressed_chunk[], 0),
 		max_cached_chunks:      100,
 		total_chunks_created:   0,
 	}
@@ -205,9 +205,9 @@ func (sse_compressor* c) create_compressed_chunk(data string, algo compression_a
 
 	chunk := compressed_chunk{
 		chunk_id:              "",
-		compressed_data:       make(vec[byte], 0),
+		compressed_data:       make(byte[], 0),
 		compressed_size:       int32(len(compressed_data)),
-		original_data:         make(vec[byte], 0),
+		original_data:         make(byte[], 0),
 		original_size:         int32(len(data)),
 		algorithm_used:        algo,
 		compression_level:     c.config.compression_level,
@@ -268,7 +268,7 @@ func (sse_compressor* c) estimate_compression_size(data_size int32) int32 {
 }
 
 struct compression_pipeline {
-	vec[sse_compressor]    compressors
+	sse_compressor[]    compressors
 	int32                  compressor_count
 	int32                  active_compressor_index
 
@@ -278,7 +278,7 @@ struct compression_pipeline {
 
 func create_compression_pipeline() compression_pipeline {
 	return compression_pipeline{
-		compressors:              make(vec[sse_compressor], 0),
+		compressors:              make(sse_compressor[], 0),
 		compressor_count:         0,
 		active_compressor_index:  -1,
 		total_data_processed:     0,

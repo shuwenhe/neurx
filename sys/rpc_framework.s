@@ -17,7 +17,7 @@ struct rpc_message {
 }
 
 struct rpc_request_queue {
-    vec[rpc_message]* queue
+    rpc_message[]* queue
     int queue_size
     int write_pos
 }
@@ -40,7 +40,7 @@ struct rpc_client {
 
 func create_rpc_server(int port) (rpc_server, string) {
     request_queue := rpc_request_queue {
-        queue: vec[rpc_message](),
+        queue: rpc_message[](),
         queue_size: 1000,
         write_pos: 0
     }
@@ -108,7 +108,7 @@ func process_rpc_requests(rpc_server* server) (int, string) {
     processed := 0
     
     for server.request_queue.write_pos > 0 && processed < 100 {
-        if server.request_queue.queue.len() > 0 {
+        if len(server.request_queue.queue) > 0 {
             msg := server.request_queue.queue.get(0)
             server.request_queue.queue.remove(0)
             
@@ -141,7 +141,7 @@ func enqueue_rpc_request(rpc_server* server, rpc_message* message) (int, string)
         return 0, "Request queue full"
     }
     
-    server.request_queue.queue.push(message*)
+    server.request_queue.queue = append(server.request_queue.queue, message*)
     server.request_queue.write_pos = server.request_queue.write_pos + 1
     server.request_queue.write_pos, ""
 }

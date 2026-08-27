@@ -101,12 +101,12 @@ func new_moe_layer(moe_config cfg) moe_layer {
     layer.expert_counts = allocate_vector(num_experts, 0)
     int e = 0
     for e < num_experts {
-        layer.expert_w1.push(fill_ramp(hidden_dim * expert_dim, 0.02))
-        layer.expert_w2.push(fill_ramp(expert_dim * expert_dim, 0.02))
-        layer.expert_w3.push(fill_ramp(expert_dim * hidden_dim, 0.02))
-        layer.expert_b1.push(allocate_vector(expert_dim, 0.0))
-        layer.expert_b2.push(allocate_vector(expert_dim, 0.0))
-        layer.expert_b3.push(allocate_vector(hidden_dim, 0.0))
+        layer.expert_w1 = append(layer.expert_w1, fill_ramp(hidden_dim * expert_dim, 0.02))
+        layer.expert_w2 = append(layer.expert_w2, fill_ramp(expert_dim * expert_dim, 0.02))
+        layer.expert_w3 = append(layer.expert_w3, fill_ramp(expert_dim * hidden_dim, 0.02))
+        layer.expert_b1 = append(layer.expert_b1, allocate_vector(expert_dim, 0.0))
+        layer.expert_b2 = append(layer.expert_b2, allocate_vector(expert_dim, 0.0))
+        layer.expert_b3 = append(layer.expert_b3, allocate_vector(hidden_dim, 0.0))
         e = e + 1
     }
     layer
@@ -245,7 +245,7 @@ func route_tokens(moe_layer layer, []float hidden_states, int seq_len) moe_route
         []int top_indices = top_k_indices(probs, layer.config.num_experts_per_token)
         j = 0
         for j < layer.config.num_experts_per_token {
-            expert_indices.push(top_indices[j])
+            expert_indices = append(expert_indices, top_indices[j])
             j = j + 1
         }
         i = i + 1
@@ -344,7 +344,7 @@ func moe_forward(moe_layer layer, []float hidden_states, int seq_len) moe_forwar
             int idx = 0
             for idx < num_experts_per_token {
                 if expert_indices[offset + idx] == e {
-                    token_indices.push(t)
+                    token_indices = append(token_indices, t)
                     break
                 }
                 idx = idx + 1
@@ -416,7 +416,7 @@ func moe_backward(moe_layer layer, []float grad_output, int seq_len) []float {
             int idx = 0
             for idx < layer.config.num_experts_per_token {
                 if layer.expert_indices[offset + idx] == e {
-                    token_indices.push(t)
+                    token_indices = append(token_indices, t)
                     break
                 }
                 idx = idx + 1

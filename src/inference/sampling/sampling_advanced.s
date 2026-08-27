@@ -31,12 +31,12 @@ func top_p_sample(
     []float filtered_probs = []
     for i in 0..cutoff_idx + 1 {
         if i < len(sorted_indices) {
-            filtered_indices.push(sorted_indices[i])
-            filtered_probs.push(probs[sorted_indices[i]])
+            filtered_indices = append(filtered_indices, sorted_indices[i])
+            filtered_probs = append(filtered_probs, probs[sorted_indices[i]])
         }
     }
     if len(filtered_indices) == 0 {
-        return (sorted_indices[0], advance_rng(rng_state))
+        return sorted_indices[0], advance_rng(rng_state)
     }
     []float normalized = normalize(filtered_probs)
     int sampled_idx = sample_from_distribution(normalized, rng_state)
@@ -67,7 +67,7 @@ func beam_search_decode(
         for b in 0..len(beams) {
             beam beam = beams[b]
             if beam.is_finished {
-                finished_beams.push(beam)
+                finished_beams = append(finished_beams, beam)
                 continue
             }
             []float logits = all_logits[step]
@@ -79,7 +79,7 @@ func beam_search_decode(
             for t in 0..len(log_probs) {
                 float new_score = beam.score + log_probs[t] * length_penalty_factor
                 []int new_tokens = copy_int_array(beam.token_ids)
-                new_tokens.push(t)
+                new_tokens = append(new_tokens, t)
                 bool is_eos = (t == eos_token_id)
                              (len(new_tokens) >= config.min_length)
                 candidates.push(beam_state {
@@ -95,9 +95,9 @@ func beam_search_decode(
         beams = []
         for c in 0..len(candidates) {
             if candidates[c].is_finished {
-                finished_beams.push(candidates[c])
+                finished_beams = append(finished_beams, candidates[c])
             } else if len(beams) < num_beams {
-                beams.push(candidates[c])
+                beams = append(beams, candidates[c])
             }
         }
         if config.early_stopping  len(finished_beams) >= num_beams {
@@ -105,7 +105,7 @@ func beam_search_decode(
         }
     }
     for b in 0..len(beams) {
-        finished_beams.push(beams[b])
+        finished_beams = append(finished_beams, beams[b])
     }
     if len(finished_beams) > 0 {
         beam best = find_best_beam(finished_beams)

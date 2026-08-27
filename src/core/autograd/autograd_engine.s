@@ -108,7 +108,7 @@ func add_node(
         requires_grad: requires_grad || output.requires_grad,
         ctx: {},
     }
-    g.nodes.push(n)
+    g.nodes = append(g.nodes, n)
     g.next_node_id = g.next_node_id + 1
     (g, node_id)
 }
@@ -119,13 +119,13 @@ func add_edge(computation_graph g, int src_id, int dst_id, tensor t) computation
         target_node_id: dst_id,
         tensor_data: t,
     }
-    g.edges.push(e)
+    g.edges = append(g.edges, e)
     for i in 0..len(g.nodes) {
         if g.nodes[i].id == src_id {
-            g.nodes[i].children_ids.push(dst_id)
+            g.nodes[i].children_ids = append(.children_ids, dst_id)
         }
         if g.nodes[i].id == dst_id {
-            g.nodes[i].parent_ids.push(src_id)
+            g.nodes[i].parent_ids = append(.parent_ids, src_id)
         }
     }
     g
@@ -164,14 +164,14 @@ func compute_topological_order(computation_graph g) computation_graph {
     []int queue = []
     for i in 0..n {
         if in_degree[i] == 0 {
-            queue.push(i)
+            queue = append(queue, i)
         }
     }
     []int order = []
     int count = 0
     for len(queue) > 0 {
         int u = queue.pop_front()
-        order.push(u)
+        order = append(order, u)
         count = count + 1
         for child_id in g.nodes[u].children_ids {
             int child_idx = -1
@@ -184,7 +184,7 @@ func compute_topological_order(computation_graph g) computation_graph {
             if child_idx >= 0 {
                 in_degree[child_idx] = in_degree[child_idx] - 1
                 if in_degree[child_idx] == 0 {
-                    queue.push(child_idx)
+                    queue = append(queue, child_idx)
                 }
             }
         }
@@ -193,12 +193,12 @@ func compute_topological_order(computation_graph g) computation_graph {
         println("Warning: Cycle detected in computation graph!")
         order = []
         for i in n-1 .. 0 {
-            order.push(i)
+            order = append(order, i)
         }
     }
     []int reversed = []
     for i in len(order)-1 .. 0 {
-        reversed.push(order[i])
+        reversed = append(reversed, order[i])
     }
     g.topo_order = reversed
     g

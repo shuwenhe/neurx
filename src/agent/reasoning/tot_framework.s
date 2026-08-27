@@ -25,23 +25,23 @@ struct tree_node {
 	node_status     status
 	int32           depth
 	int32           parent_index
-	vec[int32]      children_indices
+	int32[]      children_indices
 	int64           created_at
 	int64           evaluated_at
-	vec[string]     metadata
+	string[]     metadata
 }
 
 struct tot_branch {
 	int32           branch_id
-	vec[tree_node]  nodes
+	tree_node[]  nodes
 	float32         best_score
 	int32           best_node_index
 	int64           branch_created
 }
 
 struct tot_framework {
-	vec[tree_node]          all_nodes
-	vec[tot_branch]         branches
+	tree_node[]          all_nodes
+	tot_branch[]         branches
 
 	string                  initial_problem
 	int32                   max_depth
@@ -67,8 +67,8 @@ func create_tot_framework(
 	branching_factor int32,
 ) tot_framework {
 	return tot_framework{
-		all_nodes:              make(vec[tree_node], 0, 1000),
-		branches:               make(vec[tot_branch], 0, 100),
+		all_nodes:              make(tree_node[], 0, 1000),
+		branches:               make(tot_branch[], 0, 100),
 		initial_problem:        problem,
 		max_depth:              max_depth,
 		branching_factor:       branching_factor,
@@ -97,9 +97,9 @@ func (tot_framework* t) add_root_node(content string) string {
 		status:          UNEXPLORED,
 		depth:           0,
 		parent_index:    -1,
-		children_indices: make(vec[int32], 0, t.branching_factor),
+		children_indices: make(int32[], 0, t.branching_factor),
 		created_at:      time.Now().UnixNano(),
-		metadata:        make(vec[string], 0),
+		metadata:        make(string[], 0),
 	}
 
 	t.all_nodes = append(t.all_nodes, node)
@@ -111,8 +111,8 @@ func (tot_framework* t) add_root_node(content string) string {
 
 func (tot_framework* t) expand_node(
 	parent_id string,
-	child_contents vec[string],
-) vec[string] {
+	child_contents string[],
+) string[] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -125,16 +125,16 @@ func (tot_framework* t) expand_node(
 	}
 
 	if parent_index < 0 {
-		return make(vec[string], 0)
+		return make(string[], 0)
 	}
 
 	parent := t.all_nodes[parent_index]
 
 	if parent.depth >= t.max_depth {
-		return make(vec[string], 0)
+		return make(string[], 0)
 	}
 
-	child_ids := make(vec[string], 0, len(child_contents))
+	child_ids := make(string[], 0, len(child_contents))
 
 	for content := range child_contents {
 		if int32(len(t.all_nodes)) >= 1000 {
@@ -150,9 +150,9 @@ func (tot_framework* t) expand_node(
 			status:           UNEXPLORED,
 			depth:            parent.depth + 1,
 			parent_index:     parent_index,
-			children_indices: make(vec[int32], 0, t.branching_factor),
+			children_indices: make(int32[], 0, t.branching_factor),
 			created_at:       time.Now().UnixNano(),
-			metadata:         make(vec[string], 0),
+			metadata:         make(string[], 0),
 		}
 
 		child_index := int32(len(t.all_nodes))
@@ -227,17 +227,17 @@ func (tot_framework* t) prune_descendants(parent_index int32) bool {
 	return true
 }
 
-func (tot_framework* t) breadth_first_traversal() vec[string] {
+func (tot_framework* t) breadth_first_traversal() string[] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	traversal := make(vec[string], 0, len(t.all_nodes))
+	traversal := make(string[], 0, len(t.all_nodes))
 
 	if int32(len(t.all_nodes)) == 0 {
 		return traversal
 	}
 
-	queue := make(vec[int32], 0, len(t.all_nodes))
+	queue := make(int32[], 0, len(t.all_nodes))
 	queue = append(queue, 0)
 
 	for int32(len(queue)) > 0 {
@@ -263,17 +263,17 @@ func (tot_framework* t) breadth_first_traversal() vec[string] {
 	return traversal
 }
 
-func (tot_framework* t) depth_first_traversal() vec[string] {
+func (tot_framework* t) depth_first_traversal() string[] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	traversal := make(vec[string], 0, len(t.all_nodes))
+	traversal := make(string[], 0, len(t.all_nodes))
 
 	if int32(len(t.all_nodes)) == 0 {
 		return traversal
 	}
 
-	stack := make(vec[int32], 0, len(t.all_nodes))
+	stack := make(int32[], 0, len(t.all_nodes))
 	stack = append(stack, 0)
 
 	for int32(len(stack)) > 0 {
@@ -300,17 +300,17 @@ func (tot_framework* t) depth_first_traversal() vec[string] {
 	return traversal
 }
 
-func (tot_framework* t) best_first_traversal() vec[string] {
+func (tot_framework* t) best_first_traversal() string[] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	traversal := make(vec[string], 0, len(t.all_nodes))
+	traversal := make(string[], 0, len(t.all_nodes))
 
 	if int32(len(t.all_nodes)) == 0 {
 		return traversal
 	}
 
-	sorted_nodes := make(vec[int32], 0, len(t.all_nodes))
+	sorted_nodes := make(int32[], 0, len(t.all_nodes))
 	for i := int32(0); i < int32(len(t.all_nodes)); i++ {
 		sorted_nodes = append(sorted_nodes, i)
 	}
@@ -337,17 +337,17 @@ func (tot_framework* t) best_first_traversal() vec[string] {
 	return traversal
 }
 
-func (tot_framework* t) beam_search_traversal(beam_width int32) vec[string] {
+func (tot_framework* t) beam_search_traversal(beam_width int32) string[] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	traversal := make(vec[string], 0, beam_width*t.max_depth)
+	traversal := make(string[], 0, beam_width*t.max_depth)
 
 	if int32(len(t.all_nodes)) == 0 {
 		return traversal
 	}
 
-	current_level := make(vec[int32], 0, beam_width)
+	current_level := make(int32[], 0, beam_width)
 	current_level = append(current_level, 0)
 
 	for depth := int32(0); depth < t.max_depth; depth++ {
@@ -355,7 +355,7 @@ func (tot_framework* t) beam_search_traversal(beam_width int32) vec[string] {
 			break
 		}
 
-		next_level := make(vec[int32], 0, beam_width)
+		next_level := make(int32[], 0, beam_width)
 
 		for node_idx := range current_level {
 			if node_idx >= int32(len(t.all_nodes)) {
@@ -383,8 +383,8 @@ func (tot_framework* t) beam_search_traversal(beam_width int32) vec[string] {
 	return traversal
 }
 
-func (tot_framework* t) sort_by_score(indices vec[int32]) vec[int32] {
-	sorted := make(vec[int32], 0, len(indices))
+func (tot_framework* t) sort_by_score(indices int32[]) int32[] {
+	sorted := make(int32[], 0, len(indices))
 	for idx := range indices {
 		sorted = append(sorted, idx)
 	}
@@ -403,11 +403,11 @@ func (tot_framework* t) sort_by_score(indices vec[int32]) vec[int32] {
 	return sorted
 }
 
-func (tot_framework* t) get_best_path() vec[string] {
+func (tot_framework* t) get_best_path() string[] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	path := make(vec[string], 0, t.max_depth)
+	path := make(string[], 0, t.max_depth)
 
 	if len(t.best_solution_id) == 0 {
 		return path
@@ -432,7 +432,7 @@ func (tot_framework* t) get_best_path() vec[string] {
 		current_index = t.all_nodes[current_index].parent_index
 	}
 
-	reversed := make(vec[string], 0, len(path))
+	reversed := make(string[], 0, len(path))
 	for i := int32(len(path)) - 1; i >= 0; i-- {
 		reversed = append(reversed, path[i])
 	}
@@ -453,11 +453,11 @@ func (tot_framework* t) get_node_by_id(node_id string) (tree_node, bool) {
 	return tree_node{}, false
 }
 
-func (tot_framework* t) get_children(parent_id string) vec[tree_node] {
+func (tot_framework* t) get_children(parent_id string) tree_node[] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	children := make(vec[tree_node], 0)
+	children := make(tree_node[], 0)
 
 	for node := range t.all_nodes {
 		if node.id == parent_id {
@@ -527,8 +527,8 @@ func (tot_framework* t) reset() {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	t.all_nodes = make(vec[tree_node], 0, 1000)
-	t.branches = make(vec[tot_branch], 0, 100)
+	t.all_nodes = make(tree_node[], 0, 1000)
+	t.branches = make(tot_branch[], 0, 100)
 	t.current_depth = 0
 	t.best_solution_score = 0.0
 	t.best_solution_id = ""

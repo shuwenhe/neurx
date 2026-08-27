@@ -83,7 +83,7 @@ func compare_metrics(*performance_metrics before, *performance_metrics after) st
     s
 }
 
-func rank_operation_by_time(*vec[performance_profile] profile) vec[performance_profile] {
+func rank_operation_by_time(*performance_profile[] profile) performance_profile[] {
     sorted_profiles = profile
 
     sorted_profiles

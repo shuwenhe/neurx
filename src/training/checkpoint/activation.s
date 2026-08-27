@@ -9,11 +9,11 @@ func save_checkpoint(
     []tensor cheap_intermediates
 ) (checkpoint_manager, bool) {
     if !mgr.config.enabled {
-        return (mgr, false)
+        return mgr, false
     }
     bool should_checkpoint = should_save_layer(mgr, layer_id)
     if !should_checkpoint {
-        return (mgr, false)
+        return mgr, false
     }
     layer_checkpoint ckpt {
         layer_id: layer_id,
@@ -28,7 +28,7 @@ func save_checkpoint(
         ckpt.is_on_cpu = true
     }
     int idx = len(mgr.checkpoints)
-    mgr.checkpoints.push(ckpt)
+    mgr.checkpoints = append(mgr.checkpoints, ckpt)
     mgr.layer_to_ckpt_idx[layer_id] = idx
     mgr.total_saved_activations = mgr.total_saved_activations + estimate_full_layer_memory(layer_id)
     mgr.estimated_memory_saved = mgr.estimated_memory_saved +

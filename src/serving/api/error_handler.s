@@ -96,7 +96,7 @@ func error_code_to_type(code string) int32 {
 }
 
 struct error_handler {
-	vec[api_error]              errors
+	api_error[]              errors
 	map[string]int32            error_counts
 
 	sync.Mutex                  mu
@@ -104,7 +104,7 @@ struct error_handler {
 
 func create_error_handler() error_handler {
 	return error_handler{
-		errors:       make(vec[api_error], 0, 1000),
+		errors:       make(api_error[], 0, 1000),
 		error_counts: make(map[string]int32),
 		mu:           sync.Mutex{},
 	}
@@ -154,7 +154,7 @@ func (h error_handler*) clear_error_history() {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
-	h.errors = make(vec[api_error], 0, 1000)
+	h.errors = make(api_error[], 0, 1000)
 	h.error_counts = make(map[string]int32)
 }
 
@@ -224,7 +224,7 @@ func (r error_recovery*) get_backoff_delay(attempt_number int32) int64 {
 
 struct content_filter {
 	bool                        enabled
-	vec[string]                 filter_rules
+	string[]                 filter_rules
 
 	int64                       blocked_count
 
@@ -234,7 +234,7 @@ struct content_filter {
 func create_content_filter() content_filter {
 	return content_filter{
 		enabled:       true,
-		filter_rules:  make(vec[string], 0),
+		filter_rules:  make(string[], 0),
 		blocked_count: 0,
 		mu:            sync.Mutex{},
 	}
@@ -276,7 +276,7 @@ struct error_logging {
 	bool                        enable_logging
 	string                      log_level
 
-	vec[string]                 error_logs
+	string[]                 error_logs
 	int32                       max_log_size
 
 	sync.Mutex                  mu
@@ -286,7 +286,7 @@ func create_error_logging() error_logging {
 	return error_logging{
 		enable_logging: true,
 		log_level:      "error",
-		error_logs:     make(vec[string], 0, 10000),
+		error_logs:     make(string[], 0, 10000),
 		max_log_size:   10000,
 		mu:             sync.Mutex{},
 	}
@@ -308,11 +308,11 @@ func (l error_logging*) log_error(error_msg string) {
 	l.error_logs = append(l.error_logs, error_msg)
 }
 
-func (l error_logging*) get_error_logs() vec[string] {
+func (l error_logging*) get_error_logs() string[] {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	logs := make(vec[string], 0, len(l.error_logs))
+	logs := make(string[], 0, len(l.error_logs))
 	for log := range l.error_logs {
 		logs = append(logs, log)
 	}
@@ -324,7 +324,7 @@ func (l error_logging*) clear_logs() {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	l.error_logs = make(vec[string], 0, 10000)
+	l.error_logs = make(string[], 0, 10000)
 }
 
 func contains(text string, substring string) bool {

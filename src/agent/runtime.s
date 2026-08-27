@@ -650,7 +650,7 @@ func agent_runtime_append_task([]string queue, string task) []string {
     if trim(task) == "" {
         return queue
     }
-    queue.push(task)
+    queue = append(queue, task)
     queue
 }
 

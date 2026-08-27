@@ -26,7 +26,7 @@ struct frame_importance {
 
 struct video_pruner {
     pruning_config config
-    vec[frame_importance*] frame_scores
+    frame_importance*[] frame_scores
     int32 total_frames_pruned
     int32 total_frames_kept
 }
@@ -40,14 +40,14 @@ func create_video_pruner() video_pruner* {
             motion_threshold: 0.3,
             enable_adaptive_pruning: true,
         },
-        frame_scores: make(vec[frame_importance*]),
+        frame_scores: make(frame_importance*[]),
         total_frames_pruned: 0,
         total_frames_kept: 0,
     }
 }
 
-func (video_pruner* pruner) compute_frame_importance(video_data* vid) vec[frame_importance*] {
-    scores := make(vec[frame_importance*])
+func (video_pruner* pruner) compute_frame_importance(video_data* vid) frame_importance*[] {
+    scores := make(frame_importance*[])
 
     if vid == nil || len(vid.frames) == 0 {
         return scores
@@ -84,8 +84,8 @@ func (video_pruner* pruner) compute_frame_importance(video_data* vid) vec[frame_
     return scores
 }
 
-func (video_pruner* pruner) prune_quality(video_data* vid) vec[video_frame*] {
-    result := make(vec[video_frame*])
+func (video_pruner* pruner) prune_quality(video_data* vid) video_frame*[] {
+    result := make(video_frame*[])
 
     scores := pruner.compute_frame_importance(vid)
 
@@ -110,12 +110,12 @@ func (video_pruner* pruner) prune_quality(video_data* vid) vec[video_frame*] {
     return result
 }
 
-func (video_pruner* pruner) prune_motion(video_data* vid) vec[video_frame*] {
-    result := make(vec[video_frame*])
+func (video_pruner* pruner) prune_motion(video_data* vid) video_frame*[] {
+    result := make(video_frame*[])
 
     scores := pruner.compute_frame_importance(vid)
 
-    selected_indices := make(vec[int32])
+    selected_indices := make(int32[])
     selected_count := 0
 
     for i := 0; i < len(scores); i = i + 1 {
@@ -149,8 +149,8 @@ func (video_pruner* pruner) prune_motion(video_data* vid) vec[video_frame*] {
     return result
 }
 
-func (video_pruner* pruner) prune_temporal(video_data* vid) vec[video_frame*] {
-    result := make(vec[video_frame*])
+func (video_pruner* pruner) prune_temporal(video_data* vid) video_frame*[] {
+    result := make(video_frame*[])
 
     if len(vid.frames) == 0 {
         return result
@@ -177,7 +177,7 @@ func (video_pruner* pruner) prune_temporal(video_data* vid) vec[video_frame*] {
     return result
 }
 
-func (video_pruner* pruner) prune_video(video_data* vid) vec[video_frame*] {
+func (video_pruner* pruner) prune_video(video_data* vid) video_frame*[] {
     if pruner.config.strategy == prune_quality {
         return pruner.prune_quality(vid)
     }

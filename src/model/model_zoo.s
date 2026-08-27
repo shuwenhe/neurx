@@ -653,10 +653,10 @@ func get_model_by_name(string name) option[model_spec] {
 
 func get_model_by_type(string model_type) []model_spec {
     models := get_all_models()
-    result := vec[]()
+    result := []()
     for model in models.iter() {
         if model.model_type == model_type {
-            result.push(model)
+            result = append(result, model)
         }
     }
     result
@@ -664,9 +664,9 @@ func get_model_by_type(string model_type) []model_spec {
 
 func list_all_model_names() []string {
     models := get_all_models()
-    names := vec[]()
+    names := []()
     for model in models.iter() {
-        names.push(model.name)
+        names = append(names, model.name)
     }
     names
 }
@@ -676,25 +676,25 @@ func main() {
     println("==================================")
 
     models := get_all_models()
-    println(f"✅ Total Models: {models.len()}")
+    println(f"✅ Total Models: {len(models)}")
     println("")
 
     println("📊 modelclass型统计:")
     llama_models := get_model_by_type("llama")
-    println(f"  LLaMA series: {llama_models.len()}")
+    println(f"  LLaMA series: {len(llama_models)}")
 
     qwen_models := get_model_by_type("qwen")
     qwen2_models := get_model_by_type("qwen2")
     qwen25_models := get_model_by_type("qwen2.5")
-    println(f"  Qwen series: {qwen_models.len() + qwen2_models.len() + qwen25_models.len()}")
+    println(f"  Qwen series: {len(qwen_models) + len(qwen2_models) + len(qwen25_models)}")
 
     mistral_models := get_model_by_type("mistral")
     mixtral_models := get_model_by_type("mixtral")
-    println(f"  Mistral series: {mistral_models.len() + mixtral_models.len()}")
+    println(f"  Mistral series: {len(mistral_models) + len(mixtral_models)}")
 
     println("")
     println("📋 completemodel列table:")
-    for i in 0..models.len() {
+    for i in len(0..models) {
         model := models[i]
         println(f"  {i + 1:2}. {model.name:20} ({model.model_type})")
     }

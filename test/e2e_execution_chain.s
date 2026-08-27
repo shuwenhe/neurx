@@ -10,7 +10,7 @@ struct test_result {
 }
 
 struct execution_chain_test {
-    vec[test_result] results
+    test_result[] results
     int total_tests
     int passed_tests
     int failed_tests
@@ -18,7 +18,7 @@ struct execution_chain_test {
 
 func create_test_suite() execution_chain_test {
     suite := execution_chain_test {
-        results: vec[test_result](),
+        results: test_result[](),
         total_tests: 0,
         passed_tests: 0,
         failed_tests: 0
@@ -33,7 +33,7 @@ func test_workload_submission_and_scheduling(execution_chain_test suite) executi
         error_msg: "",
         duration_ms: 10
     }
-    suite.results.push(result)
+    suite.results = append(suite.results, result)
     suite.total_tests = suite.total_tests + 1
     suite.passed_tests = suite.passed_tests + 1
     suite
@@ -46,7 +46,7 @@ func test_resource_allocation_accuracy(execution_chain_test suite) execution_cha
         error_msg: "",
         duration_ms: 15
     }
-    suite.results.push(result)
+    suite.results = append(suite.results, result)
     suite.total_tests = suite.total_tests + 1
     suite.passed_tests = suite.passed_tests + 1
     suite
@@ -59,7 +59,7 @@ func test_gpu_memory_isolation(execution_chain_test suite) execution_chain_test 
         error_msg: "",
         duration_ms: 20
     }
-    suite.results.push(result)
+    suite.results = append(suite.results, result)
     suite.total_tests = suite.total_tests + 1
     suite.passed_tests = suite.passed_tests + 1
     suite
@@ -72,7 +72,7 @@ func test_concurrent_workload_execution(execution_chain_test suite) execution_ch
         error_msg: "",
         duration_ms: 30
     }
-    suite.results.push(result)
+    suite.results = append(suite.results, result)
     suite.total_tests = suite.total_tests + 1
     suite.passed_tests = suite.passed_tests + 1
     suite
@@ -85,7 +85,7 @@ func test_resource_reclamation(execution_chain_test suite) execution_chain_test 
         error_msg: "",
         duration_ms: 25
     }
-    suite.results.push(result)
+    suite.results = append(suite.results, result)
     suite.total_tests = suite.total_tests + 1
     suite.passed_tests = suite.passed_tests + 1
     suite
@@ -98,7 +98,7 @@ func test_collective_operation_across_gpus(execution_chain_test suite) execution
         error_msg: "",
         duration_ms: 50
     }
-    suite.results.push(result)
+    suite.results = append(suite.results, result)
     suite.total_tests = suite.total_tests + 1
     suite.passed_tests = suite.passed_tests + 1
     suite
@@ -111,7 +111,7 @@ func test_priority_based_scheduling(execution_chain_test suite) execution_chain_
         error_msg: "",
         duration_ms: 20
     }
-    suite.results.push(result)
+    suite.results = append(suite.results, result)
     suite.total_tests = suite.total_tests + 1
     suite.passed_tests = suite.passed_tests + 1
     suite

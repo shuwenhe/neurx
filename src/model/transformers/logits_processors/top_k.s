@@ -20,7 +20,7 @@ func apply_top_k(
     logits: []float,
     processor: top_k_processor
 ) []float {
-    int vocab_size = logits.len()
+    int vocab_size = len(logits)
     int k_actual = processor.k
 
     if k_actual > vocab_size {
@@ -86,7 +86,7 @@ func apply_top_k_with_threshold(
     k: int,
     min_prob: float
 ) []float {
-    int vocab_size = logits.len()
+    int vocab_size = len(logits)
 
     []float probs = processor_utils.softmax(logits)
 
@@ -97,8 +97,8 @@ func apply_top_k_with_threshold(
         sorted_indices.append(i)
     }
 
-    for i = 0; i < k && i < sorted_indices.len(); i = i + 1 {
-        for j = i + 1; j < sorted_indices.len(); j = j + 1 {
+    for i = 0; i < k && i < len(sorted_indices); i = i + 1 {
+        for j = i + 1; j < len(sorted_indices); j = j + 1 {
             idx_i := sorted_indices[i]
             idx_j := sorted_indices[j]
 
@@ -111,7 +111,7 @@ func apply_top_k_with_threshold(
 
     for i = 0; i < vocab_size; i = i + 1 {
         bool in_top_k = false
-        for j = 0; j < k && j < sorted_indices.len(); j = j + 1 {
+        for j = 0; j < k && j < len(sorted_indices); j = j + 1 {
             if sorted_indices[j] == i {
                 in_top_k = true
                 break
@@ -143,7 +143,7 @@ func sample_from_top_k(
     int best_token = 0
     float best_prob = probs[0]
 
-    for i = 1; i < probs.len(); i = i + 1 {
+    for i = 1; i < len(probs); i = i + 1 {
         if probs[i] > best_prob {
             best_prob = probs[i]
             best_token = i
@@ -173,16 +173,16 @@ func analyze_top_k_filtering(
     []float top_k_probs
 
     for idx in top_indices {
-        if idx >= 0 && idx < probs.len() {
+        if idx >= 0 && idx < len(probs) {
             top_k_probs.append(probs[idx])
             cum_prob = cum_prob + probs[idx]
         }
     }
 
     top_k_stats {
-        vocab_size: logits.len(),
+        vocab_size: len(logits),
         k: k,
-        fraction_kept: float(k) / float(logits.len()),
+        fraction_kept: float(k) / float(len(logits)),
         top_k_probs: top_k_probs,
         cumulative_prob: cum_prob,
     }

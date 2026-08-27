@@ -77,7 +77,7 @@ func test_streaming_dataloader() {
         []int tokens = []int{cap: 512}
         int i = 0
         for i < 512 {
-            tokens.push(i % 1000)
+            tokens = append(tokens, i % 1000)
             i = i + 1
         }
         tokens
@@ -120,7 +120,7 @@ func test_bpe_tokenizer() {
     tokenizer.id_to_token[4] = "HelloWorld"
     tokenizer.vocab_size = 5
     tokenizer.merges = []bpe_tokenizer.pair[string, string]{}
-    tokenizer.merges.push(bpe_tokenizer.pair[string, string]{first: "Hello", second: "World"})
+    tokenizer.merges = append(tokenizer.merges, bpe_tokenizer.pair[string, string]{first: "Hello", second: "World"})
     bpe_tokenizer.tokenization_result result = bpe_tokenizer.encode(tokenizer, "Hello World")
     if result.num_tokens > 0 && result.ids[0] == tokenizer.bos_id {
         print("PASS: BPE tokenizer\n")

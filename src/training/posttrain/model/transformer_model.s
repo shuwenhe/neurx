@@ -32,7 +32,7 @@ func create_transformer_model(int num_layers, int hidden_size, int vocab_size, i
     int i = 0
     for i < num_layers {
         transformer_block block = create_transformer_block(hidden_size, intermediate_size, num_heads)
-        model.layers.push(block)
+        model.layers = append(model.layers, block)
         i = i + 1
     }
     model.final_norm = create_rms_norm(hidden_size)
@@ -50,19 +50,19 @@ func transformer_model_forward(transformer_model model, []int token_ids) forward
         return result
     }
     [][]float hidden_states = embeddings
-    result.hidden_states.push(embeddings[0])
+    result.hidden_states = append(result.hidden_states, embeddings[0])
     int layer_idx = 0
     for layer_idx < model.num_layers && layer_idx < len(model.layers) {
         [][]float new_hidden_states = [][]float{}
         int seq_idx = 0
         for seq_idx < len(hidden_states) {
             []float block_output = transformer_block_forward(model.layers[layer_idx], hidden_states[seq_idx])
-            new_hidden_states.push(block_output)
+            new_hidden_states = append(new_hidden_states, block_output)
             seq_idx = seq_idx + 1
         }
         hidden_states = new_hidden_states
         if len(new_hidden_states) > 0 {
-            result.hidden_states.push(new_hidden_states[0])
+            result.hidden_states = append(result.hidden_states, new_hidden_states[0])
         }
         layer_idx = layer_idx + 1
     }

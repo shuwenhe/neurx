@@ -33,7 +33,7 @@ struct sensor_fusion_engine {
 
 func new_sensor_fusion_engine(int hz) sensor_fusion_engine {
     return sensor_fusion_engine{
-        active_sensors: vec[sensor_type](),
+        active_sensors: sensor_type[](),
         fusion_rate_hz: hz,
         max_sensor_latency_us: 50000,
         outlier_rejection_enabled: true,
@@ -41,16 +41,16 @@ func new_sensor_fusion_engine(int hz) sensor_fusion_engine {
 }
 
 func (sensor_fusion_engine* engine) register_sensor(sensor_type stype) {
-    engine.active_sensors.push(stype)
+    engine.active_sensors = append(engine.active_sensors, stype)
 }
 
-func (sensor_fusion_engine* engine) fuse_readings([]sensor_reading readings) sensor_fusion_result {    fused_state := vec[float]()
-    uncertainty := vec[float]()
+func (sensor_fusion_engine* engine) fuse_readings([]sensor_reading readings) sensor_fusion_result {    fused_state := float[]()
+    uncertainty := float[]()
     
-    for i in 0..readings.len() {
+    for i in len(0..readings) {
         if readings[i].valid {
-            for j in 0..readings[i].data.len() {
-                fused_state.push(readings[i].data[j])
+            for j in 0..readings[i]len(.data) {
+                fused_state = append(fused_state, readings[i].data[j])
             }
         }
     }
@@ -62,7 +62,7 @@ func (sensor_fusion_engine* engine) fuse_readings([]sensor_reading readings) sen
     }
 }
 
-func (sensor_fusion_engine* engine) get_active_sensor_count() int {    engine.active_sensors.len()
+func (sensor_fusion_engine* engine) get_active_sensor_count() int {    len(engine.active_sensors)
 }
 
 func (sensor_fusion_engine* engine) get_fusion_rate_hz() int {    engine.fusion_rate_hz

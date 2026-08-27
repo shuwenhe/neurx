@@ -87,7 +87,7 @@ func (graph_compiler* compiler) compile_with_config(*computation_graph g, string
     opt_level = cfg.opt_level
 
     if opt_level == "O0" {
-        unit.pass_results = vec[pass_result]()
+        unit.pass_results = pass_result[]()
     } else if opt_level == "O1" {
         unit.pass_results = run_pass_pipeline(*unit.optimized_graph, *minimal_optimization_pipeline())
     } else if opt_level == "O2" {

@@ -432,8 +432,8 @@ func module_register_parameter(module m, string name, parameter p) module {
         i = i + 1
     }
     if !replaced {
-        next.parameter_names.push(name)
-        next.parameters.push(copy_parameter(p))
+        next.parameter_names = append(next.parameter_names, name)
+        next.parameters = append(next.parameters, copy_parameter(p))
     }
     return next
 }
@@ -450,8 +450,8 @@ func module_register_buffer(module m, string name, tensor value) module {
         i = i + 1
     }
     if !replaced {
-        next.buffer_names.push(name)
-        next.buffers.push(neurx.tensor.clone(value))
+        next.buffer_names = append(next.buffer_names, name)
+        next.buffers = append(next.buffers, neurx.tensor.clone(value))
     }
     return next
 }
@@ -468,8 +468,8 @@ func module_register_child(module m, string name, module child) module {
         i = i + 1
     }
     if !replaced {
-        next.child_names.push(name)
-        next.children.push(module_state_dict(child))
+        next.child_names = append(next.child_names, name)
+        next.children = append(next.children, module_state_dict(child))
     }
     return next
 }
@@ -478,7 +478,7 @@ func module_parameters(module m) []tensor {
     []tensor out = []tensor{cap: 0}
     int i = 0
     for i < len(m.parameters) {
-        out.push(parameter_tensor(m.parameters[i]))
+        out = append(out, parameter_tensor(m.parameters[i]))
         i = i + 1
     }
     int j = 0
@@ -486,7 +486,7 @@ func module_parameters(module m) []tensor {
         []tensor child_params = module_parameters(m.children[j])
         int k = 0
         for k < len(child_params) {
-            out.push(child_params[k])
+            out = append(out, child_params[k])
             k = k + 1
         }
         j = j + 1
@@ -592,7 +592,7 @@ func module_named_parameters(module m) []string {
         []string child_names = module_named_parameters(m.children[i])
         int j = 0
         for j < len(child_names) {
-            names.push(m.child_names[i] + "." + child_names[j])
+            names = append(names, m.child_names[i] + "." + child_names[j])
             j = j + 1
         }
         i = i + 1
@@ -607,7 +607,7 @@ func module_named_buffers(module m) []string {
         []string child_names = module_named_buffers(m.children[i])
         int j = 0
         for j < len(child_names) {
-            names.push(m.child_names[i] + "." + child_names[j])
+            names = append(names, m.child_names[i] + "." + child_names[j])
             j = j + 1
         }
         i = i + 1
@@ -730,7 +730,7 @@ func new_parameter_list() parameter_list {
 
 func parameter_list_append(parameter_list plist, parameter p) parameter_list {
     parameter_list next = parameter_list_state_dict(plist)
-    next.items.push(copy_parameter(p))
+    next.items = append(next.items, copy_parameter(p))
     return next
 }
 
@@ -774,7 +774,7 @@ func new_module_list() module_list {
 
 func module_list_append(module_list list, module child) module_list {
     module_list next = module_list_state_dict(list)
-    next.items.push(module_state_dict(child))
+    next.items = append(next.items, module_state_dict(child))
     return next
 }
 
@@ -1491,8 +1491,8 @@ func parameter_dict_set(parameter_dict dict, string key, tensor value) parameter
         next.values[index] = p
         return next
     }
-    next.keys.push(key)
-    next.values.push(p)
+    next.keys = append(next.keys, key)
+    next.values = append(next.values, p)
     return next
 }
 
@@ -1565,8 +1565,8 @@ func module_dict_set(module_dict dict, string key, module value) module_dict {
         next.values[index] = m
         return next
     }
-    next.keys.push(key)
-    next.values.push(m)
+    next.keys = append(next.keys, key)
+    next.values = append(next.values, m)
     return next
 }
 

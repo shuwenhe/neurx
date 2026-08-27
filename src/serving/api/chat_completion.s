@@ -9,7 +9,7 @@ struct chat_completion_handler {
 	interface{}                     async_engine
 	interface{}                     sampler
 
-	vec[chat_completion_request]    request_queue
+	chat_completion_request[]    request_queue
 	map[string]chat_completion_response response_cache
 
 	sync.Mutex                      mu
@@ -25,7 +25,7 @@ func create_chat_completion_handler(
 		v1_engine:      v1_engine,
 		async_engine:   async_engine,
 		sampler:        sampler,
-		request_queue:  make(vec[chat_completion_request], 0, 100),
+		request_queue:  make(chat_completion_request[], 0, 100),
 		response_cache: make(map[string]chat_completion_response),
 		mu:             sync.Mutex{},
 		processing:     false,
@@ -59,7 +59,7 @@ func (h chat_completion_handler*) handle_non_streaming_chat(
 
 	prompt := h.build_prompt_from_messages(req.messages)
 	generated_text := ""
-	generated_tokens := make(vec[int32], 0, req.max_tokens)
+	generated_tokens := make(int32[], 0, req.max_tokens)
 
 	for step := int32(0); step < req.max_tokens; step++ {
 		token_id := int32(0)
@@ -89,7 +89,7 @@ func (h chat_completion_handler*) handle_non_streaming_chat(
 	response := create_chat_completion_response(
 		req.request_id,
 		req.model,
-		make(vec[choice], 1),
+		make(choice[], 1),
 		usage_data,
 	)
 	response.response_ms = response_time
@@ -111,7 +111,7 @@ func (h chat_completion_handler*) handle_streaming_chat(
 		object:  "chat.completion",
 		created: time.Now().Unix(),
 		model:   req.model,
-		choices: make(vec[choice], 0),
+		choices: make(choice[], 0),
 		usage:   usage{},
 	}
 
@@ -148,7 +148,7 @@ func (h chat_completion_handler*) handle_streaming_chat(
 }
 
 func (h chat_completion_handler*) build_prompt_from_messages(
-	messages vec[chat_message],
+	messages chat_message[],
 ) string {
 	prompt := ""
 
@@ -187,7 +187,7 @@ func (h chat_completion_handler*) handle_message_with_tools(
 	return response, err
 }
 
-func (h chat_completion_handler*) build_tool_section(tools vec[interface{}]) string {
+func (h chat_completion_handler*) build_tool_section(tools interface{}[]) string {
 	section := "\n[AVAILABLE_TOOLS]\n"
 
 	for i := int32(0); i < int32(len(tools)); i++ {
@@ -199,8 +199,8 @@ func (h chat_completion_handler*) build_tool_section(tools vec[interface{}]) str
 	return section
 }
 
-func (h chat_completion_handler*) extract_tool_calls(response_text string) vec[interface{}] {
-	tool_calls := make(vec[interface{}], 0)
+func (h chat_completion_handler*) extract_tool_calls(response_text string) interface{}[] {
+	tool_calls := make(interface{}[], 0)
 
 	return tool_calls
 }
@@ -209,7 +209,7 @@ struct chat_completion_stream {
 	request_id       string
 	model            string
 
-	stream_buffer    vec[chat_completion_response]
+	stream_buffer    chat_completion_response[]
 	events_sent      int64
 
 	is_finished      bool
@@ -225,7 +225,7 @@ func create_chat_completion_stream(request_id string, model string) chat_complet
 	return chat_completion_stream{
 		request_id:    request_id,
 		model:         model,
-		stream_buffer: make(vec[chat_completion_response], 0, 1024),
+		stream_buffer: make(chat_completion_response[], 0, 1024),
 		events_sent:   0,
 		is_finished:   false,
 		start_time:    time.Now().UnixNano(),
@@ -245,7 +245,7 @@ func (s chat_completion_stream*) add_token_to_stream(token_text string) bool {
 		object:  "chat.completion.chunk",
 		created: time.Now().Unix(),
 		model:   s.model,
-		choices: make(vec[choice], 1),
+		choices: make(choice[], 1),
 	}
 
 	chunk.choices[0] = choice{
@@ -275,7 +275,7 @@ func (s chat_completion_stream*) finish_stream(finish_reason string) bool {
 		object:  "chat.completion.chunk",
 		created: time.Now().Unix(),
 		model:   s.model,
-		choices: make(vec[choice], 1),
+		choices: make(choice[], 1),
 	}
 
 	final_chunk.choices[0] = choice{
@@ -288,15 +288,15 @@ func (s chat_completion_stream*) finish_stream(finish_reason string) bool {
 	return true
 }
 
-func (s chat_completion_stream*) get_pending_chunks() vec[chat_completion_response] {
+func (s chat_completion_stream*) get_pending_chunks() chat_completion_response[] {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if s.current_position >= int32(len(s.stream_buffer)) {
-		return make(vec[chat_completion_response], 0)
+		return make(chat_completion_response[], 0)
 	}
 
-	chunks := make(vec[chat_completion_response], 0)
+	chunks := make(chat_completion_response[], 0)
 	for i := s.current_position; i < int32(len(s.stream_buffer)); i++ {
 		chunks = append(chunks, s.stream_buffer[i])
 	}
@@ -321,7 +321,7 @@ struct chat_completion_batch_processor {
 	handler       chat_completion_handler*
 	validator     request_validator*
 
-	pending_reqs  vec[chat_completion_request]
+	pending_reqs  chat_completion_request[]
 	results       map[string]chat_completion_response
 
 	mu            sync.Mutex
@@ -334,7 +334,7 @@ func create_batch_processor(
 	return chat_completion_batch_processor{
 		handler:      handler,
 		validator:    validator,
-		pending_reqs: make(vec[chat_completion_request], 0, 32),
+		pending_reqs: make(chat_completion_request[], 0, 32),
 		results:      make(map[string]chat_completion_response),
 		mu:           sync.Mutex{},
 	}
@@ -355,11 +355,11 @@ func (bp chat_completion_batch_processor*) add_request(req chat_completion_reque
 
 func (bp chat_completion_batch_processor*) process_batch() int32 {
 	bp.mu.Lock()
-	reqs := make(vec[chat_completion_request], 0, len(bp.pending_reqs))
+	reqs := make(chat_completion_request[], 0, len(bp.pending_reqs))
 	for req := range bp.pending_reqs {
 		reqs = append(reqs, req)
 	}
-	bp.pending_reqs = make(vec[chat_completion_request], 0, 32)
+	bp.pending_reqs = make(chat_completion_request[], 0, 32)
 	bp.mu.Unlock()
 
 	processed := int32(0)
@@ -377,11 +377,11 @@ func (bp chat_completion_batch_processor*) process_batch() int32 {
 	return processed
 }
 
-func (bp chat_completion_batch_processor*) get_results() vec[chat_completion_response] {
+func (bp chat_completion_batch_processor*) get_results() chat_completion_response[] {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()
 
-	results := make(vec[chat_completion_response], 0, len(bp.results))
+	results := make(chat_completion_response[], 0, len(bp.results))
 	for _, resp := range bp.results {
 		results = append(results, resp)
 	}

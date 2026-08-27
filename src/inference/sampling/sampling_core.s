@@ -16,7 +16,7 @@ func greedy_decode(
         if best_token == eos_token_id  len(generated) >= config.min_length {
             break
         }
-        generated.push(best_token)
+        generated = append(generated, best_token)
     }
     generated
 }
@@ -71,8 +71,8 @@ func top_k_sample(
         []float filtered_probs = []
         for k in 0..config.top_k {
             if k < len(sorted_indices) {
-                filtered_indices.push(sorted_indices[k])
-                filtered_probs.push(probs[sorted_indices[k]])
+                filtered_indices = append(filtered_indices, sorted_indices[k])
+                filtered_probs = append(filtered_probs, probs[sorted_indices[k]])
             }
         }
         []float normalized = normalize(filtered_probs)

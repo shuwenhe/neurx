@@ -44,7 +44,7 @@ func mps_get_devices() []mps_device {
             int max_memory(device.maximumTextureWidth),
             shared_memory: device.hasUnifiedMemory,
         }
-        result.push(mps_dev)
+        result = append(result, mps_dev)
     }
     result
 }

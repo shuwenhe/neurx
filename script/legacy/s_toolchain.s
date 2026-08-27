@@ -28,7 +28,7 @@ func toolchain_command([]string args) string {
     if env_cmd != "" {
         return env_cmd
     }
-    if args.len() >= 2 {
+    if len(args) >= 2 {
         return args[1]
     }
     "status"

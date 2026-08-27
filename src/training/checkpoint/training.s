@@ -117,7 +117,7 @@ func checkpoint_save(checkpoint_manager manager, pointer model, opt.adamw_optimi
         size = size + checkpoint_save_optimizer(optimizer, info.path)
     }
     info.size_bytes = size
-    manager.checkpoints.push(info)
+    manager.checkpoints = append(manager.checkpoints, info)
     if manager.config.save_best {
         bool is_best = false
         if manager.config.best_mode == "min" {
@@ -211,7 +211,7 @@ func checkpoint_save_final(checkpoint_manager manager, pointer model, opt.adamw_
         size = size + checkpoint_save_optimizer(optimizer, final_path)
     }
     info.size_bytes = size
-    manager.checkpoints.push(info)
+    manager.checkpoints = append(manager.checkpoints, info)
     manager
 }
 

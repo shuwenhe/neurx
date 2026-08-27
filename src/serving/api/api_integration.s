@@ -313,7 +313,7 @@ func create_openai_api_client(base_url string, api_key string) openai_api_client
 
 func (c openai_api_client*) chat_complete(
 	model string,
-	messages vec[chat_message],
+	messages chat_message[],
 	temperature float32,
 ) (chat_completion_response, error) {
 	req := chat_completion_request{
@@ -345,7 +345,7 @@ func (c openai_api_client*) text_complete(
 
 func (c openai_api_client*) embed_text(
 	model string,
-	input vec[string],
+	input string[],
 ) (embedding_response, error) {
 	req := embedding_request{
 		model: model,

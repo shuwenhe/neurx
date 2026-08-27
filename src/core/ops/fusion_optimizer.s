@@ -2,7 +2,7 @@ package ops
 
 struct kernel_fusion_opportunity {
     string opportunity_id
-    vec[string] fusible_ops
+    string[] fusible_ops
     int potential_memory_reduction
     int potential_flops_reduction
     float fusion_benefit_ratio
@@ -15,15 +15,15 @@ struct operation_dependency {
 }
 
 struct operation_fusion_graph {
-    vec[string] nodes
-    vec[operation_dependency] edges
+    string[] nodes
+    operation_dependency[] edges
     int num_nodes
     int num_edges
 }
 
 struct fused_kernel_config {
     string fused_op_name
-    vec[string] component_ops
+    string[] component_ops
     int total_flops
     int total_memory_access
     int estimated_latency_us
@@ -31,11 +31,11 @@ struct fused_kernel_config {
     float compute_bound_ratio
 }
 
-func detect_fusion_opportunities(operation_registry reg, vec[string] operation_sequence) vec[kernel_fusion_opportunity] {
-    opportunities := vec[kernel_fusion_opportunity]{}
+func detect_fusion_opportunities(operation_registry reg, string[] operation_sequence) kernel_fusion_opportunity[] {
+    opportunities := kernel_fusion_opportunity[]{}
 
     i := 0
-    for i < operation_sequence.len() - 1 {
+    for i < len(operation_sequence) - 1 {
         op_id1 := operation_sequence[i]
         op_id2 := operation_sequence[i + 1]
 
@@ -52,7 +52,7 @@ func detect_fusion_opportunities(operation_registry reg, vec[string] operation_s
             }
 
             if can_fuse {
-                component_ops := vec[string]{op_id1, op_id2}
+                component_ops := string[]{op_id1, op_id2}
                 opp := kernel_fusion_opportunity {
                     opportunity_id: op_id1 + "_" + op_id2,
                     fusible_ops: component_ops,
@@ -60,7 +60,7 @@ func detect_fusion_opportunities(operation_registry reg, vec[string] operation_s
                     potential_flops_reduction: 100,
                     fusion_benefit_ratio: 1.2,
                 }
-                opportunities.push(opp)
+                opportunities = append(opportunities, opp)
             }
         }
 
@@ -72,7 +72,7 @@ func detect_fusion_opportunities(operation_registry reg, vec[string] operation_s
 
 struct operation_scheduler {
     operation_registry registry
-    vec[string] operation_queue
+    string[] operation_queue
     operation_fusion_graph fusion_graph
     int num_scheduled_ops
     bool optimization_enabled
@@ -81,10 +81,10 @@ struct operation_scheduler {
 func new_operation_scheduler(operation_registry reg) operation_scheduler {
     operation_scheduler {
         registry: reg,
-        operation_queue: vec[string]{},
+        operation_queue: string[]{},
         fusion_graph: operation_fusion_graph {
-            nodes: vec[string]{},
-            edges: vec[operation_dependency]{},
+            nodes: string[]{},
+            edges: operation_dependency[]{},
             num_nodes: 0,
             num_edges: 0,
         },
@@ -95,8 +95,8 @@ func new_operation_scheduler(operation_registry reg) operation_scheduler {
 
 func (operation_scheduler* sched) add_operation(string op_id) bool {
     if sched.registry.has_operation(op_id) {
-        sched.operation_queue.push(op_id)
-        sched.fusion_graph.nodes.push(op_id)
+        sched.operation_queue = append(sched.operation_queue, op_id)
+        sched.fusion_graph.nodes = append(sched.fusion_graph.nodes, op_id)
         sched.fusion_graph.num_nodes = sched.fusion_graph.num_nodes + 1
         true
     }
@@ -111,22 +111,22 @@ func (operation_scheduler* sched) add_dependency(string producer_op, string cons
         output_size: output_size,
     }
 
-    sched.fusion_graph.edges.push(dep)
+    sched.fusion_graph.edges = append(sched.fusion_graph.edges, dep)
     sched.fusion_graph.num_edges = sched.fusion_graph.num_edges + 1
     true
 }
 
-func (operation_scheduler* sched) optimize_schedule() vec[string] {
+func (operation_scheduler* sched) optimize_schedule() string[] {
     if !sched.optimization_enabled {
         sched.operation_queue
     }
 
-    optimized_schedule := vec[string]{}
+    optimized_schedule := string[]{}
 
     opportunities := detect_fusion_opportunities(sched.registry, sched.operation_queue)
 
     i := 0
-    for i < opportunities.len() {
+    for i < len(opportunities) {
         fused_idx := ""
         for op_id in opportunities[i].fusible_ops {
             if fused_idx == "" {
@@ -135,13 +135,13 @@ func (operation_scheduler* sched) optimize_schedule() vec[string] {
         }
 
         if fused_idx != "" {
-            optimized_schedule.push(fused_idx)
+            optimized_schedule = append(optimized_schedule, fused_idx)
         }
 
         i = i + 1
     }
 
-    if optimized_schedule.len() == 0 {
+    if len(optimized_schedule) == 0 {
         sched.operation_queue
     }
 
@@ -152,7 +152,7 @@ func (operation_scheduler* sched) execute_schedule(compute_capability hw) bool {
     schedule := sched.optimize_schedule()
 
     i := 0
-    for i < schedule.len() {
+    for i < len(schedule) {
         op_id := schedule[i]
         op := sched.registry.get_operation(op_id)
 
@@ -170,7 +170,7 @@ func (operation_scheduler* sched) execute_schedule(compute_capability hw) bool {
 
 func (operation_scheduler* sched) get_schedule_stats() string {
     stats := "Scheduled Operations: " + string(sched.num_scheduled_ops) + "\n"
-    stats = stats + "Total Operations: " + string(sched.operation_queue.len()) + "\n"
+    stats = stats + "Total Operations: " + string(len(sched.operation_queue)) + "\n"
     stats = stats + "Dependencies: " + string(sched.fusion_graph.num_edges)
     stats
 }

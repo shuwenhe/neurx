@@ -88,7 +88,7 @@ func load_model_from_safetensors(string model_path, int num_layers, int hidden_s
     int layer_idx = 0
     for layer_idx < num_layers {
         layer_weights layer_w = load_layer_weights_from_safetensors(model_path, layer_idx, hidden_size, intermediate_size)
-        weights.layer_weights.push(serialize_layer_weights(layer_w))
+        weights.layer_weights = append(weights.layer_weights, serialize_layer_weights(layer_w))
         layer_idx = layer_idx + 1
     }
     return weights
@@ -98,7 +98,7 @@ func fill_model_tensor(int size, float init_val) []float {
     []float tensor = []float{cap: size}
     int i = 0
     for i < size {
-        tensor.push(init_val)
+        tensor = append(tensor, init_val)
         i = i + 1
     }
     return tensor
@@ -116,22 +116,22 @@ func serialize_layer_weights(layer_weights w) []float {
     []float serialized = []float{}
     int i = 0
     for i < len(w.q_weight) {
-        serialized.push(w.q_weight[i])
+        serialized = append(serialized, w.q_weight[i])
         i = i + 1
     }
     i = 0
     for i < len(w.k_weight) {
-        serialized.push(w.k_weight[i])
+        serialized = append(serialized, w.k_weight[i])
         i = i + 1
     }
     i = 0
     for i < len(w.v_weight) {
-        serialized.push(w.v_weight[i])
+        serialized = append(serialized, w.v_weight[i])
         i = i + 1
     }
     i = 0
     for i < len(w.o_weight) {
-        serialized.push(w.o_weight[i])
+        serialized = append(serialized, w.o_weight[i])
         i = i + 1
     }
     return serialized

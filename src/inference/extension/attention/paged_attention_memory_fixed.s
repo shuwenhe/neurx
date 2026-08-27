@@ -101,7 +101,7 @@ func allocate_blocks(
     if len(allocated_block_ids) < blocks_needed {
         mgr.evictions = mgr.evictions + (blocks_needed - len(allocated_block_ids))
     }
-    return (mgr, allocated_block_ids)
+    return mgr, allocated_block_ids
 }
 
 func free_sequence_blocks(

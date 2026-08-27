@@ -44,8 +44,8 @@ struct plugin_metadata {
 
 	plugin_type             plugin_category
 
-	vec[string]             dependencies
-	vec[string]             capabilities
+	string[]             dependencies
+	string[]             capabilities
 
 	int32                   priority
 	bool                    required
@@ -68,7 +68,7 @@ struct plugin_interface {
 
 	map[string]interface{}  context_data
 
-	vec[plugin_hook]        hooks
+	plugin_hook[]        hooks
 	int32                   hook_count
 }
 
@@ -100,8 +100,8 @@ struct plugin_capability {
 	string                  capability_name
 	string                  capability_version
 
-	vec[string]             provided_methods
-	vec[string]             required_interfaces
+	string[]             provided_methods
+	string[]             required_interfaces
 
 	map[string]interface{}  capability_config
 }
@@ -123,8 +123,8 @@ func create_plugin_metadata(id string, name string, category plugin_type) plugin
 		author:          "",
 		description:     "",
 		plugin_category: category,
-		dependencies:    make(vec[string], 0),
-		capabilities:    make(vec[string], 0),
+		dependencies:    make(string[], 0),
+		capabilities:    make(string[], 0),
 		priority:        100,
 		required:        false,
 		config_schema:   "",
@@ -142,7 +142,7 @@ func create_plugin_interface(id string, metadata plugin_metadata) plugin_interfa
 		last_error_message:    "",
 		error_count:           0,
 		context_data:          make(map[string]interface{}),
-		hooks:                 make(vec[plugin_hook], 0),
+		hooks:                 make(plugin_hook[], 0),
 		hook_count:            0,
 	}
 }
@@ -195,8 +195,8 @@ func (plugin_interface* p) clear_context() {
 	p.context_data = make(map[string]interface{})
 }
 
-func (plugin_interface* p) get_hooks_by_type(event plugin_hook_type) vec[plugin_hook] {
-	result := make(vec[plugin_hook], 0)
+func (plugin_interface* p) get_hooks_by_type(event plugin_hook_type) plugin_hook[] {
+	result := make(plugin_hook[], 0)
 
 	for hook := range p.hooks {
 		if hook.hook_event == event {
@@ -220,7 +220,7 @@ func (plugin_interface* p) add_dependency(dep_id string) {
 	p.metadata.dependencies = append(p.metadata.dependencies, dep_id)
 }
 
-func (plugin_interface* p) get_dependencies() vec[string] {
+func (plugin_interface* p) get_dependencies() string[] {
 	return p.metadata.dependencies
 }
 

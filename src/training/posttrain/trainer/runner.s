@@ -403,7 +403,7 @@ func runtime_text_vector(string text, int size, float scale, int salt) []float {
         int ch = text[i]
         int bucket = cursor
         float magnitude = ((ch - (ch / 17) * 17) + 1) as float
-        vec[bucket] = vec[bucket] + magnitude * scale
+        bucket[] = bucket[] + magnitude * scale
         cursor = cursor + ch + 7 + i
         for cursor >= size {
             cursor = cursor - size
@@ -419,7 +419,7 @@ func runtime_text_vector(string text, int size, float scale, int salt) []float {
     }
     i = 0
     for i < size {
-        vec[i] = vec[i] / denom
+        i[] = i[] / denom
         i = i + 1
     }
     vec
@@ -484,7 +484,7 @@ func runtime_lora_step(runtime_lora_module module, []float input_vec, []float ta
         float sum = 0.0
         int i = 0
         for i < in_dim && i < len(input_vec) {
-            sum = sum + module.lora_A[r * in_dim + i] * input_vec[i]
+            sum = sum + module.lora_A[r * in_dim + i] * input_i[]
             i = i + 1
         }
         ax[r] = sum
@@ -507,7 +507,7 @@ func runtime_lora_step(runtime_lora_module module, []float input_vec, []float ta
     float out_scale = 2.0 / (out_dim as float)
     o = 0
     for o < out_dim {
-        grad_output[o] = out_scale * (output[o] - target_vec[o])
+        grad_output[o] = out_scale * (output[o] - target_o[])
         o = o + 1
     }
     []float grad_a = runtime_fill_f32(rank * in_dim, 0.0)
@@ -541,7 +541,7 @@ func runtime_lora_step(runtime_lora_module module, []float input_vec, []float ta
     for r < rank {
         int i = 0
         for i < in_dim {
-            float g = grad_hidden[r] * input_vec[i]
+            float g = grad_hidden[r] * input_i[]
             grad_a[r * in_dim + i] = g
             grad_norm_sq = grad_norm_sq + g * g
             i = i + 1

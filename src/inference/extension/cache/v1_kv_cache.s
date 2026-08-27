@@ -19,8 +19,8 @@ struct kv_cache_metadata {
 struct kv_block {
     int32 block_id
     int32 seq_id
-    vec[float32] key_data
-    vec[float32] value_data
+    float32[] key_data
+    float32[] value_data
     int32 token_count
     bool is_full
     int32 allocated_size
@@ -73,8 +73,8 @@ func (kv_cache_interface* cache) allocate_block(int32 seq_id) int32 {
     block := *kv_block{
         block_id: block_id,
         seq_id: seq_id,
-        key_data: make(vec[float32]),
-        value_data: make(vec[float32]),
+        key_data: make(float32[]),
+        value_data: make(float32[]),
         token_count: 0,
         is_full: false,
         allocated_size: cache.block_size,
@@ -92,7 +92,7 @@ func (kv_cache_interface* cache) allocate_block(int32 seq_id) int32 {
     return block_id
 }
 
-func (kv_cache_interface* cache) put_kv(int32 seq_id, vec[float32] keys, vec[float32] values) bool {
+func (kv_cache_interface* cache) put_kv(int32 seq_id, float32[] keys, float32[] values) bool {
     if len(cache.blocks) == 0 {
         cache.allocate_block(seq_id)
     }
@@ -116,13 +116,13 @@ func (kv_cache_interface* cache) put_kv(int32 seq_id, vec[float32] keys, vec[flo
     return false
 }
 
-func (kv_cache_interface* cache) get_kv(int32 seq_id) option[vec[float32]] {
+func (kv_cache_interface* cache) get_kv(int32 seq_id) option[float32[]] {
     for _, block := range cache.blocks {
         if block.seq_id == seq_id {
-            return option[vec[float32]]{value: block.key_data}
+            return option[float32[]]{value: block.key_data}
         }
     }
-    return option[vec[float32]]{}
+    return option[float32[]]{}
 }
 
 func (kv_cache_interface* cache) free_block(int32 block_id) bool {

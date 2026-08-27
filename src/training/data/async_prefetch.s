@@ -144,12 +144,12 @@ func start_workers(async_prefetch_manager mgr) async_prefetch_manager:
     int i = 0
     for i < mgr.config.num_io_threads {
         thread_handle t = spawn_thread(io_worker_function, mgr)
-        mgr.io_workers.push(t)
+        mgr.io_workers = append(mgr.io_workers, t)
         i = i + 1
     i = 0
     for i < mgr.config.num_tokenizer_threads {
         thread_handle t = spawn_thread(tokenizer_worker_function, mgr)
-        mgr.tokenizer_workers.push(t)
+        mgr.tokenizer_workers = append(mgr.tokenizer_workers, t)
         i = i + 1
     return mgr
 func stop_workers(async_prefetch_manager mgr) async_prefetch_manager:

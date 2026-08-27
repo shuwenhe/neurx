@@ -31,18 +31,18 @@ struct qos_manager {
 
 // 初始化 QoS 管理器
 func (qos_manager* qm) init(int max_classes) (int, string) {
-    qm.qos_classes = vec()
+    qm.qos_classes = {}
     qm.max_classes = max_classes
     return 0, ""
 }
 
 // 创建 QoS 类
 func (qos_manager* qm) create_class(int bandwidth_limit, int priority) (qos_class, string) {
-    if qm.qos_classes.len() >= qm.max_classes {
+    if len(qm.qos_classes) >= qm.max_classes {
         return qos_class{}, "Max classes reached"
     }
     
-    class_id := qm.qos_classes.len()
+    class_id := len(qm.qos_classes)
     qc := qos_class{
         class_id: class_id,
         bandwidth_limit: bandwidth_limit,
@@ -51,13 +51,13 @@ func (qos_manager* qm) create_class(int bandwidth_limit, int priority) (qos_clas
         bytes_sent: 0
     }
     
-    qm.qos_classes.push(qc)
+    qm.qos_classes = append(qm.qos_classes, qc)
     return qc, ""
 }
 
 // 发送数据包 (应用 QoS)
 func (qos_manager* qm) send_packet(int class_id, int size) (int, string) {
-    if class_id >= qm.qos_classes.len() {
+    if class_id >= len(qm.qos_classes) {
         return -1, "Invalid class"
     }
     
@@ -77,7 +77,7 @@ func (qos_manager* qm) send_packet(int class_id, int size) (int, string) {
 
 // 获取 QoS 类统计
 func (qos_manager qm) get_class_stats(int class_id) (int, int, int) {
-    if class_id >= qm.qos_classes.len() {
+    if class_id >= len(qm.qos_classes) {
         return 0, 0, 0
     }
     
@@ -93,7 +93,7 @@ struct netfilter {
 
 // 初始化 Netfilter
 func (netfilter* nf) init() (int, string) {
-    nf.rules = vec()
+    nf.rules = {}
     nf.rule_counter = 0
     return 0, ""
 }
@@ -111,7 +111,7 @@ func (netfilter* nf) add_rule(string src_ip, string dst_ip, int protocol, int sr
         counter: 0
     }
     
-    nf.rules.push(rule)
+    nf.rules = append(nf.rules, rule)
     nf.rule_counter = nf.rule_counter + 1
     return rule, ""
 }
@@ -119,7 +119,7 @@ func (netfilter* nf) add_rule(string src_ip, string dst_ip, int protocol, int sr
 // 检查数据包
 func (netfilter* nf) check_packet(string src_ip, string dst_ip, int protocol, int src_port, int dst_port) (int, string) {
     i := 0
-    for i < nf.rules.len() {
+    for i < len(nf.rules) {
         rule := nf.rules[i]
         
         if rule.source_ip == src_ip && rule.dest_ip == dst_ip && rule.protocol == protocol && rule.source_port == src_port && rule.dest_port == dst_port {
@@ -143,7 +143,7 @@ func (netfilter* nf) check_packet(string src_ip, string dst_ip, int protocol, in
 // 获取规则统计
 func (netfilter nf) get_rule_stats(int rule_id) (int, string) {
     i := 0
-    for i < nf.rules.len() {
+    for i < len(nf.rules) {
         rule := nf.rules[i]
         if rule.rule_id == rule_id {
             return rule.counter, ""
@@ -156,7 +156,7 @@ func (netfilter nf) get_rule_stats(int rule_id) (int, string) {
 // 删除规则
 func (netfilter* nf) delete_rule(int rule_id) (int, string) {
     i := 0
-    for i < nf.rules.len() {
+    for i < len(nf.rules) {
         rule := nf.rules[i]
         if rule.rule_id == rule_id {
             // 标记为删除 (简单实现)

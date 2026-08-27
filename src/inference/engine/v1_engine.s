@@ -118,14 +118,14 @@ func (llm_engine_v1* engine) complete(string prompt, int32 max_tokens) string {
     return ""
 }
 
-func (llm_engine_v1* engine) complete_stream(string prompt, int32 max_tokens) vec[string] {
+func (llm_engine_v1* engine) complete_stream(string prompt, int32 max_tokens) string[] {
     req := create_v1_request("req_stream", prompt)
     req.max_tokens = max_tokens
     req.stream = true
 
     engine.add_request(req)
 
-    outputs := make(vec[string])
+    outputs := make(string[])
 
     for !req.is_finished() && engine.step() {
         if len(req.output_texts) > 0 {

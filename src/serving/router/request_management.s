@@ -5,8 +5,8 @@ struct request_lifecycle {
     request_state current_state
     int64 state_change_time
 
-    vec[request_state] state_history
-    vec[int64] state_timestamps
+    request_state[] state_history
+    int64[] state_timestamps
 }
 
 struct request_priority {
@@ -30,8 +30,8 @@ func (active_request* req) transition_state(request_state new_state) bool {
     return false
 }
 
-func get_valid_transitions(request_state from_state) vec[request_state] {
-    transitions := make(vec[request_state])
+func get_valid_transitions(request_state from_state) request_state[] {
+    transitions := make(request_state[])
 
     if from_state == req_state_submitted {
         transitions = append(transitions, req_state_waiting)
@@ -108,13 +108,13 @@ func (active_request* req) get_total_tokens() int32 {
 
 func create_active_request(
     string request_id,
-    vec[int32] prompt_tokens,
+    int32[] prompt_tokens,
     int32 max_new_tokens
 ) active_request {
     return active_request{
         request_id: request_id,
         prompt_tokens: prompt_tokens,
-        generated_tokens: make(vec[int32]),
+        generated_tokens: make(int32[]),
         num_prefill_tokens: 0,
         num_decode_steps: 0,
         max_new_tokens: max_new_tokens,
@@ -189,7 +189,7 @@ func create_request_priority(string request_id, int32 priority_level) request_pr
 }
 
 struct request_batch {
-    vec[active_request*] requests
+    active_request*[] requests
     int32 batch_id
     int64 created_at
     int32 total_tokens
@@ -221,18 +221,18 @@ func (request_batch* batch) is_empty() bool {
 
 struct request_pool {
     map[string, active_request] all_requests
-    vec[string] pending_ids
-    vec[string] running_ids
-    vec[string] completed_ids
+    string[] pending_ids
+    string[] running_ids
+    string[] completed_ids
     int32 max_pool_size
 }
 
 func create_request_pool(int32 max_size) request_pool* {
     return *request_pool{
         all_requests: make(map[string, active_request]),
-        pending_ids: make(vec[string]),
-        running_ids: make(vec[string]),
-        completed_ids: make(vec[string]),
+        pending_ids: make(string[]),
+        running_ids: make(string[]),
+        completed_ids: make(string[]),
         max_pool_size: max_size,
     }
 }

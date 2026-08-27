@@ -1,7 +1,7 @@
 package neurx.tool_parsers.constraint.constraint_generator
 
 use neurx.tool_parsers.schema.schema_types
-use std.vec
+use std.slices
 
 func generate_initial_constraint(*json_schema schema) token_constraint {
     constraint := schema_types.create_empty_constraint()
@@ -59,7 +59,7 @@ func get_object_constraint(string current_output, *json_schema schema, *schema_t
     constraint.context = "object"
 
     if ends_with(current_output, "{") {
-        if schema.properties.len() > 0 {
+        if len(schema.properties) > 0 {
             constraint.allowed_tokens.append(34)
         }
         constraint.allowed_tokens.append(125)

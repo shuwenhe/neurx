@@ -24,7 +24,7 @@ struct weight_config {
 }
 
 struct weight_buffer {
-    vec[float32] data
+    float32[] data
     int32 size
     weight_dtype dtype
     string buffer_id
@@ -56,7 +56,7 @@ func (lora_weights* weights) allocate_buffer(string buffer_id, int32 size, weigh
     }
 
     buffer := *weight_buffer{
-        data: make(vec[float32]),
+        data: make(float32[]),
         size: size,
         dtype: dtype,
         buffer_id: buffer_id,
@@ -100,7 +100,7 @@ func (lora_weights* weights) free_buffer(string buffer_id) bool {
     return false
 }
 
-func (lora_weights* weights) load_weights(string buffer_id, vec[float32] data) bool {
+func (lora_weights* weights) load_weights(string buffer_id, float32[] data) bool {
     if buffer, exists := weights.buffers[buffer_id]; exists {
         if len(data) != buffer.size {
             return false
@@ -125,7 +125,7 @@ func (lora_weights* weights) quantize_weights(string buffer_id, int32 bits) bool
     if buffer, exists := weights.buffers[buffer_id]; exists {
         scale := float32((1 << uint32(bits - 1)) - 1)
 
-        quantized := make(vec[float32])
+        quantized := make(float32[])
         for i := 0; i < len(buffer.data); i = i + 1 {
             quantized_val := float32(int32(buffer.data[i] * scale)) / scale
             quantized = append(quantized, quantized_val)

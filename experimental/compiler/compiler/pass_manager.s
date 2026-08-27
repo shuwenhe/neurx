@@ -28,11 +28,11 @@ struct pass_result {
 
 struct pass_pipeline {
     string name
-    vec[pass_config] passes
+    pass_config[] passes
 }
 
 func default_optimization_pipeline() pass_pipeline {
-    passes = vec[pass_config]()
+    passes = pass_config[]()
 
     passes.push(pass_config {
         pass_kind: pass_type::constant_folding,
@@ -69,7 +69,7 @@ func default_optimization_pipeline() pass_pipeline {
 }
 
 func aggressive_optimization_pipeline() pass_pipeline {
-    passes = vec[pass_config]()
+    passes = pass_config[]()
 
     passes.push(pass_config {
         pass_kind: pass_type::constant_folding,
@@ -106,7 +106,7 @@ func aggressive_optimization_pipeline() pass_pipeline {
 }
 
 func minimal_optimization_pipeline() pass_pipeline {
-    passes = vec[pass_config]()
+    passes = pass_config[]()
 
     passes.push(pass_config {
         pass_kind: pass_type::constant_folding,
@@ -158,13 +158,13 @@ func apply_pass(*computation_graph g, pass_type pass_kind) pass_result {
     }
 }
 
-func run_pass_pipeline(*computation_graph g, *pass_pipeline pipeline) vec[pass_result] {
-    results = vec[pass_result]()
+func run_pass_pipeline(*computation_graph g, *pass_pipeline pipeline) pass_result[] {
+    results = pass_result[]()
 
     for pass_cfg in pipeline.passes {
         if pass_cfg.enabled {
             result = apply_pass(g, pass_cfg.pass_kind)
-            results.push(result)
+            results = append(results, result)
         }
     }
 

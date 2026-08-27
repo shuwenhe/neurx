@@ -28,7 +28,7 @@ struct state_transition {
 struct request_lifecycle {
     string request_id
     request_state current_state
-    vec[state_transition] transitions
+    state_transition[] transitions
     int64 created_at
     int64 started_at
     int64 completed_at
@@ -39,7 +39,7 @@ struct request_lifecycle {
 
 struct state_machine {
     map[string, request_lifecycle] active_requests
-    vec[state_transition] all_transitions
+    state_transition[] all_transitions
     int32 max_concurrent_requests
     bool track_detailed_timeline
 }
@@ -55,7 +55,7 @@ func new_request_lifecycle(string request_id) request_lifecycle {
     request_lifecycle {
         request_id: request_id,
         current_state: request_state::submitted,
-        transitions: vec[state_transition]{},
+        transitions: state_transition[]{},
         created_at: 0,
         started_at: 0,
         completed_at: 0,
@@ -68,7 +68,7 @@ func new_request_lifecycle(string request_id) request_lifecycle {
 func new_state_machine(int32 max_requests) state_machine {
     state_machine {
         active_requests: map[string, request_lifecycle]{},
-        all_transitions: vec[state_transition]{},
+        all_transitions: state_transition[]{},
         max_concurrent_requests: max_requests,
         track_detailed_timeline: true,
     }
@@ -107,8 +107,8 @@ func (state_machine* sm) transition(string request_id, request_state new_state, 
         transition_time: 0,
     }
 
-    lifecycle.transitions.push(transition_rec)
-    sm.all_transitions.push(transition_rec)
+    lifecycle.transitions = append(lifecycle.transitions, transition_rec)
+    sm.all_transitions = append(sm.all_transitions, transition_rec)
 
     if new_state == request_state::executing && old_state != request_state::executing {
         lifecycle.started_at = 0
@@ -154,7 +154,7 @@ func (state_machine* sm) handle_token_generated(string request_id, int32 token_i
             transition_time: 0,
         }
 
-        lifecycle.transitions.push(transition_rec)
+        lifecycle.transitions = append(lifecycle.transitions, transition_rec)
         sm.active_requests[request_id] = lifecycle
         true
     } else {
@@ -176,7 +176,7 @@ func (state_machine* sm) handle_stream_token(string request_id, int32 token_id) 
         transition_time: 0,
     }
 
-    lifecycle.transitions.push(transition_rec)
+    lifecycle.transitions = append(lifecycle.transitions, transition_rec)
     lifecycle.total_tokens_generated = lifecycle.total_tokens_generated + 1
     sm.active_requests[request_id] = lifecycle
     true
@@ -206,7 +206,7 @@ func (state_machine* sm) cancel_request(string request_id, bool by_user) bool {
         transition_time: 0,
     }
 
-    lifecycle.transitions.push(transition_rec)
+    lifecycle.transitions = append(lifecycle.transitions, transition_rec)
     lifecycle.completed_at = 0
 
     sm.active_requests[request_id] = lifecycle
@@ -230,7 +230,7 @@ func (state_machine* sm) mark_failed(string request_id, string error_msg) bool {
         transition_time: 0,
     }
 
-    lifecycle.transitions.push(transition_rec)
+    lifecycle.transitions = append(lifecycle.transitions, transition_rec)
     sm.active_requests[request_id] = lifecycle
     true
 }
@@ -252,7 +252,7 @@ func (state_machine* sm) mark_timeout(string request_id) bool {
         transition_time: 0,
     }
 
-    lifecycle.transitions.push(transition_rec)
+    lifecycle.transitions = append(lifecycle.transitions, transition_rec)
     sm.active_requests[request_id] = lifecycle
     true
 }
@@ -273,12 +273,12 @@ func (state_machine* sm) get_request_state(string request_id) request_state {
     request_state::submitted
 }
 
-func (state_machine* sm) get_transition_history(string request_id) vec[state_transition] {
+func (state_machine* sm) get_transition_history(string request_id) state_transition[] {
     if request_id in sm.active_requests {
         sm.active_requests[request_id].transitions
     }
 
-    vec[state_transition]{}
+    state_transition[]{}
 }
 
 func (state_machine* sm) get_active_count() int32 {
@@ -306,7 +306,7 @@ func (state_machine* sm) cleanup_completed_request(string request_id) bool {
 }
 
 func (state_machine* sm) get_average_lifetime_ms() int64 {
-    if sm.all_transitions.len() == 0 {
+    if len(sm.all_transitions) == 0 {
         0
     }
 
@@ -340,8 +340,8 @@ func (state_machine* sm) verify_state_consistency() bool {
             false
         }
 
-        if lifecycle.transitions.len() > 0 {
-            last_transition := lifecycle.transitions[lifecycle.transitions.len() - 1]
+        if len(lifecycle.transitions) > 0 {
+            last_transition := lifecycle.transitions[len(lifecycle.transitions) - 1]
             if last_transition.to_state != lifecycle.current_state {
                 false
             }

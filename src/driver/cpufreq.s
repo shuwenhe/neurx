@@ -28,7 +28,7 @@ struct cpufreq_driver {
 // 初始化 CPU 频率驱动
 func (cpufreq_driver* driver) init(int cpu_id) (int, string) {
     driver.cpu_id = cpu_id
-    driver.governors = vec()
+    driver.governors = {}
     driver.active_governor = -1
     return 0, ""
 }
@@ -45,7 +45,7 @@ func add_freq_state(int freq, int voltage, int power) cpu_freq_state {
 // 创建 Ondemand 调度器
 func (cpufreq_driver* driver) create_ondemand_governor(int min_freq, int max_freq) (cpufreq_governor, string) {
     governor := cpufreq_governor{
-        governor_id: driver.governors.len(),
+        governor_id: len(driver.governors),
         name: "ondemand",
         current_freq: max_freq,
         min_freq: min_freq,
@@ -60,14 +60,14 @@ func (cpufreq_driver* driver) create_ondemand_governor(int min_freq, int max_fre
     governor.available_states[3] = add_freq_state(2000, 1100, 1600)
     governor.available_states[4] = add_freq_state(2400, 1200, 2000)
     
-    driver.governors.push(governor)
+    driver.governors = append(driver.governors, governor)
     return governor, ""
 }
 
 // 创建 PowerSave 调度器
 func (cpufreq_driver* driver) create_powersave_governor(int min_freq, int max_freq) (cpufreq_governor, string) {
     governor := cpufreq_governor{
-        governor_id: driver.governors.len(),
+        governor_id: len(driver.governors),
         name: "powersave",
         current_freq: min_freq,
         min_freq: min_freq,
@@ -81,14 +81,14 @@ func (cpufreq_driver* driver) create_powersave_governor(int min_freq, int max_fr
     governor.available_states[3] = add_freq_state(2000, 1100, 1600)
     governor.available_states[4] = add_freq_state(2400, 1200, 2000)
     
-    driver.governors.push(governor)
+    driver.governors = append(driver.governors, governor)
     return governor, ""
 }
 
 // 创建 Performance 调度器
 func (cpufreq_driver* driver) create_performance_governor(int min_freq, int max_freq) (cpufreq_governor, string) {
     governor := cpufreq_governor{
-        governor_id: driver.governors.len(),
+        governor_id: len(driver.governors),
         name: "performance",
         current_freq: max_freq,
         min_freq: min_freq,
@@ -102,13 +102,13 @@ func (cpufreq_driver* driver) create_performance_governor(int min_freq, int max_
     governor.available_states[3] = add_freq_state(2000, 1100, 1600)
     governor.available_states[4] = add_freq_state(2400, 1200, 2000)
     
-    driver.governors.push(governor)
+    driver.governors = append(driver.governors, governor)
     return governor, ""
 }
 
 // 设置活跃调度器
 func (cpufreq_driver* driver) set_governor(int governor_id) (int, string) {
-    if governor_id >= driver.governors.len() {
+    if governor_id >= len(driver.governors) {
         return -1, "Invalid governor"
     }
     

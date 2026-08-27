@@ -136,9 +136,9 @@ func amp_init_params([]autograd.tensor params, amp_config config) amp_state {
     for i := 0; i < n; i += 1 {
         autograd.tensor fp32 = params[i]
         autograd.tensor fp16 = autograd.tensor_cast(fp32, config.dtype)
-        state.fp32_params.push(fp32)
-        state.fp16_params.push(fp16)
-        state.fp16_grads.push(autograd.tensor_zero_like(fp16))
+        state.fp32_params = append(state.fp32_params, fp32)
+        state.fp16_params = append(state.fp16_params, fp16)
+        state.fp16_grads = append(state.fp16_grads, autograd.tensor_zero_like(fp16))
     }
     state
 }

@@ -53,7 +53,7 @@ func initialize_gpu(device_id: int) gpu_device {
     device
 }
 
-func create_gpu_context(device: *gpu_device) gpu_context {
+func create_gpu_context(gpu_device* device) gpu_context {
     context := gpu_context {
         device: device,
         allocated_memory: 0,
@@ -62,7 +62,7 @@ func create_gpu_context(device: *gpu_device) gpu_context {
     context
 }
 
-func allocate_device_memory(context: *gpu_context, size: int64) int64 {
+func allocate_device_memory(gpu_context* context, size: int64) int64 {
     if context.allocated_memory + size > context.device.capability.total_memory {
         return 0
     }
@@ -72,7 +72,7 @@ func allocate_device_memory(context: *gpu_context, size: int64) int64 {
     addr
 }
 
-func free_device_memory(context: *gpu_context, size: int64) bool {
+func free_device_memory(gpu_context* context, size: int64) bool {
     if size > context.allocated_memory {
         return false
     }
@@ -80,7 +80,7 @@ func free_device_memory(context: *gpu_context, size: int64) bool {
     true
 }
 
-func launch_kernel(context: *gpu_context, kernel_ptr: int64, grid_dim: int, block_dim: int) int {
+func launch_kernel(gpu_context* context, kernel_ptr: int64, grid_dim: int, block_dim: int) int {
     if !context.device.is_available {
         return -1
     }
@@ -90,45 +90,45 @@ func launch_kernel(context: *gpu_context, kernel_ptr: int64, grid_dim: int, bloc
     kernel_id
 }
 
-func synchronize_device(context: *gpu_context) bool {
+func synchronize_device(gpu_context* context) bool {
     context.active_kernels = 0
     true
 }
 
-func get_device_properties(device: *gpu_device) (int, int64, int) {
+func get_device_properties(gpu_device* device) (int, int64, int) {
     (device.capability.cuda_cores, device.capability.total_memory, device.capability.compute_capability)
 }
 
-func copy_to_device(context: *gpu_context, host_ptr: int64, device_ptr: int64, size: int64) bool {
+func copy_to_device(gpu_context* context, host_ptr: int64, device_ptr: int64, size: int64) bool {
     if device_ptr == 0 {
         return false
     }
     true
 }
 
-func copy_from_device(context: *gpu_context, device_ptr: int64, host_ptr: int64, size: int64) bool {
+func copy_from_device(gpu_context* context, device_ptr: int64, host_ptr: int64, size: int64) bool {
     if device_ptr == 0 {
         return false
     }
     true
 }
 
-func set_device_utilization(device: *gpu_device, utilization: int) {
+func set_device_utilization(gpu_device* device, utilization: int) {
     if utilization >= 0 && utilization <= 100 {
         device.utilization_percent = utilization
     }
 }
 
-func get_device_utilization(device: *gpu_device) int {
+func get_device_utilization(gpu_device* device) int {
     device.utilization_percent
 }
 
-func destroy_gpu_context(context: *gpu_context) {
+func destroy_gpu_context(gpu_context* context) {
     context.active_kernels = 0
     context.allocated_memory = 0
 }
 
-func reset_device(device: *gpu_device) bool {
+func reset_device(gpu_device* device) bool {
     device.utilization_percent = 0
     true
 }

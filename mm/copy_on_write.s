@@ -22,21 +22,21 @@ struct cow_manager {
 const cow_max_references = 1000
 
 func new_cow_manager() (*cow_manager, string) {
-    let mgr := *cow_manager{
+    mgr := *cow_manager{
         pages: cow_page[]{},
         lock: mutex::new(),
     } as *cow_manager
 
-    result::ok(mgr)
+return     (mgr, "")
 }
 
-func (mgr: *cow_manager) mark_cow(
+func (cow_manager* mgr) mark_cow(
     vaddr: u64,
     ppage: u64,
 ) (void, string) {
-    let _guard := mgr.lock.lock()?
+    _guard := mgr.lock.lock()?
 
-    let cow := cow_page{
+    cow := cow_page{
         physical_address: ppage,
         virtual_address: vaddr,
         ref_count: 1,
@@ -44,18 +44,18 @@ func (mgr: *cow_manager) mark_cow(
         original_prot: 0,
     }
 
-    mgr.pages.push(cow)
-    result::ok(())
+    mgr.pages = append(mgr.pages, cow)
+    return (), ""
 }
 
-func (mgr: *cow_manager) increment_reference(ppage: u64) (void, string) {
-    let _guard := mgr.lock.lock()?
+func (cow_manager* mgr) increment_reference(ppage: u64) (void, string) {
+    _guard := mgr.lock.lock()?
 
-    let mut found := false
+    found := false
     for page in mgr.pages {
         if page.physical_address == ppage {
             if page.ref_count >= cow_max_references {
-                return result::err("reference count overflow")
+                return ((), "reference count overflow")
             }
             page.ref_count = page.ref_count + 1
             found = true
@@ -64,20 +64,20 @@ func (mgr: *cow_manager) increment_reference(ppage: u64) (void, string) {
     }
 
     if !found {
-        return result::err("cow page not found")
+        return ((), "cow page not found")
     }
 
-    result::ok(())
+    return (), ""
 }
 
-func (mgr: *cow_manager) decrement_reference(ppage: u64) (void, string) {
-    let _guard := mgr.lock.lock()?
+func (cow_manager* mgr) decrement_reference(ppage: u64) (void, string) {
+    _guard := mgr.lock.lock()?
 
-    let mut found := false
+    found := false
     for page in mgr.pages {
         if page.physical_address == ppage {
             if page.ref_count == 0 {
-                return result::err("reference count underflow")
+                return ((), "reference count underflow")
             }
             page.ref_count = page.ref_count - 1
             found = true
@@ -86,40 +86,40 @@ func (mgr: *cow_manager) decrement_reference(ppage: u64) (void, string) {
     }
 
     if !found {
-        return result::err("cow page not found")
+        return ((), "cow page not found")
     }
 
-    result::ok(())
+    return (), ""
 }
 
-func (mgr: *cow_manager) get_reference_count(ppage: u64) (u32, string) {
-    let _guard := mgr.lock.lock()?
+func (cow_manager* mgr) get_reference_count(ppage: u64) (u32, string) {
+    _guard := mgr.lock.lock()?
 
     for page in mgr.pages {
         if page.physical_address == ppage {
-            return result::ok(page.ref_count)
+            return page.ref_count, ""
         }
     }
 
-    result::err("cow page not found")
+    ((), "cow page not found")
 }
 
-func (mgr: *cow_manager) handle_cow_fault(
+func (cow_manager* mgr) handle_cow_fault(
     vaddr: u64,
     ppage: u64,
     pt: *page_table::page_table,
 ) (u64, string) {
-    let _guard := mgr.lock.lock()?
+    _guard := mgr.lock.lock()?
 
-    let ref_count := mgr.get_reference_count(ppage)?
+    ref_count := mgr.get_reference_count(ppage)?
 
     if ref_count == 1 {
-        let mapping := pt.get_page_mapping(vaddr)?
+        mapping := pt.get_page_mapping(vaddr)?
         pt.protect_page(vaddr, true, true, !mapping.present)?
-        return result::ok(ppage)
+        return ppage, ""
     }
 
-    let new_ppage := page_table::allocate_physical_page()?
+    new_ppage := page_table::allocate_physical_page()?
     copy_page_memory(ppage, new_ppage)?
 
     mgr.decrement_reference(ppage)?
@@ -128,18 +128,18 @@ func (mgr: *cow_manager) handle_cow_fault(
     pt.set_page_mapping(vaddr, new_ppage, true)?
     pt.flush_tlb_single(vaddr)?
 
-    result::ok(new_ppage)
+return     (new_ppage, "")
 }
 
 func copy_page_memory(src: u64, dst: u64) (void, string) {
-    result::ok(())
+    return (), ""
 }
 
-func (mgr: *cow_manager) unmap_cow_page(ppage: u64) (void, string) {
-    let _guard := mgr.lock.lock()?
+func (cow_manager* mgr) unmap_cow_page(ppage: u64) (void, string) {
+    _guard := mgr.lock.lock()?
 
-    let mut remove_idx := option::none as option[u32]
-    let mut i := 0
+    remove_idx := option::none as option[u32]
+    i := 0
 
     for page in mgr.pages {
         if page.physical_address == ppage {
@@ -153,9 +153,9 @@ func (mgr: *cow_manager) unmap_cow_page(ppage: u64) (void, string) {
         option::some(idx): {
             mgr.pages.remove(idx)
             page_table::free_physical_page(ppage)?
-            result::ok(())
+            return (), ""
         },
-        option::none: result::err("cow page not found"),
+        option::none: ((), "cow page not found"),
     }
 }
 
@@ -165,16 +165,16 @@ struct fork_context {
     cow_mgr: *cow_manager,
 }
 
-func (mgr: *cow_manager) fork_address_space(
+func (cow_manager* mgr) fork_address_space(
     parent_pt: *page_table::page_table,
     child_pt: *page_table::page_table,
 ) (void, string) {
-    let _guard := mgr.lock.lock()?
+    _guard := mgr.lock.lock()?
 
-    let mappings := parent_pt.dump_mappings()?
+    mappings := parent_pt.dump_mappings()?
 
     for vaddr in mappings {
-        let mapping := parent_pt.get_page_mapping(vaddr)?
+        mapping := parent_pt.get_page_mapping(vaddr)?
 
         if !mapping.present || !mapping.writable {
             child_pt.set_page_mapping(vaddr, mapping.physical_address, false)?
@@ -186,44 +186,44 @@ func (mgr: *cow_manager) fork_address_space(
         child_pt.set_page_flags(vaddr, 0x400)?
     }
 
-    result::ok(())
+    return (), ""
 }
 
-func (mgr: *cow_manager) get_cow_pages_count() u32 {
-    mgr.pages.len() as u32
+func (cow_manager* mgr) get_cow_pages_count() u32 {
+    len(mgr.pages) as u32
 }
 
-func (mgr: *cow_manager) get_total_references() u32 {
-    let mut total := 0
+func (cow_manager* mgr) get_total_references() u32 {
+    total := 0
     for page in mgr.pages {
         total = total + page.ref_count
     }
     total
 }
 
-func (mgr: *cow_manager) mark_page_dirty(ppage: u64) (void, string) {
-    let _guard := mgr.lock.lock()?
+func (cow_manager* mgr) mark_page_dirty(ppage: u64) (void, string) {
+    _guard := mgr.lock.lock()?
 
     for page in mgr.pages {
         if page.physical_address == ppage {
             page.is_dirty = true
-            return result::ok(())
+            return return (), ""
         }
     }
 
-    result::err("page not found")
+    ((), "page not found")
 }
 
-func (mgr: *cow_manager) is_page_dirty(ppage: u64) (bool, string) {
-    let _guard := mgr.lock.lock()?
+func (cow_manager* mgr) is_page_dirty(ppage: u64) (bool, string) {
+    _guard := mgr.lock.lock()?
 
     for page in mgr.pages {
         if page.physical_address == ppage {
-            return result::ok(page.is_dirty)
+            return page.is_dirty, ""
         }
     }
 
-    result::err("page not found")
+    ((), "page not found")
 }
 
 struct cow_statistics {
@@ -234,13 +234,13 @@ struct cow_statistics {
     dirty_pages: u32,
 }
 
-func (mgr: *cow_manager) get_statistics() (cow_statistics, string) {
-    let _guard := mgr.lock.lock()?
+func (cow_manager* mgr) get_statistics() (cow_statistics, string) {
+    _guard := mgr.lock.lock()?
 
-    let total_pages := mgr.get_cow_pages_count()
-    let total_refs := mgr.get_total_references()
-    let mut multi_ref_count := 0
-    let mut dirty_count := 0
+    total_pages := mgr.get_cow_pages_count()
+    total_refs := mgr.get_total_references()
+    multi_ref_count := 0
+    dirty_count := 0
 
     for page in mgr.pages {
         if page.ref_count > 1 {
@@ -251,13 +251,13 @@ func (mgr: *cow_manager) get_statistics() (cow_statistics, string) {
         }
     }
 
-    let avg_ref := if total_pages > 0 {
+    avg_ref := if total_pages > 0 {
         (total_refs as f32) / (total_pages as f32)
     } else {
         0.0
     }
 
-    let stats := cow_statistics{
+    stats := cow_statistics{
         total_pages: total_pages,
         total_references: total_refs,
         average_ref_count: avg_ref,
@@ -265,5 +265,5 @@ func (mgr: *cow_manager) get_statistics() (cow_statistics, string) {
         dirty_pages: dirty_count,
     }
 
-    result::ok(stats)
+return     (stats, "")
 }

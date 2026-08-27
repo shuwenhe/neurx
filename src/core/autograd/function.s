@@ -237,7 +237,7 @@ func transform_chain_is_linearized(transform_chain chain) bool {
 
 func transform_chain_add_step(transform_chain chain, string step) transform_chain {
     []string steps = copy_transform_steps(chain.steps)
-    steps.push(step)
+    steps = append(steps, step)
     transform_chain {
         steps: steps,
         params: copy_transform_steps(chain.params),
@@ -252,8 +252,8 @@ func transform_chain_add_step(transform_chain chain, string step) transform_chai
 func transform_chain_add_step_with_param(transform_chain chain, string step, string param) transform_chain {
     []string steps = copy_transform_steps(chain.steps)
     []string params = copy_transform_steps(chain.params)
-    steps.push(step)
-    params.push(param)
+    steps = append(steps, step)
+    params = append(params, param)
     transform_chain {
         steps: steps,
         params: params,
@@ -403,7 +403,7 @@ func function_has_param(function_record f, string param) bool {
 
 func add_function_tag(function_record f, string tag) function_record {
     []string tags = copy_strings(f.tags)
-    tags.push(tag)
+    tags = append(tags, tag)
     function_record {
         name: f.name,
         forward_enabled: f.forward_enabled,
@@ -418,7 +418,7 @@ func add_function_tag(function_record f, string tag) function_record {
 
 func add_function_param(function_record f, string param) function_record {
     []string params = copy_strings(f.params)
-    params.push(param)
+    params = append(params, param)
     function_record {
         name: f.name,
         forward_enabled: f.forward_enabled,

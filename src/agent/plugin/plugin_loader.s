@@ -12,7 +12,7 @@ import "sync"
 
 struct plugin_loader {
 	string                  plugin_search_path
-	vec[string]             loaded_plugin_paths
+	string[]             loaded_plugin_paths
 
 	int32                   max_plugins
 	int32                   current_plugins_loaded
@@ -38,7 +38,7 @@ struct plugin_package {
 	string                  checksum
 
 	plugin_metadata         metadata
-	vec[string]             files
+	string[]             files
 	int32                   file_count
 
 	map[string]string]      file_content_map
@@ -55,8 +55,8 @@ struct plugin_descriptor {
 	string                  plugin_main_file
 	string                  plugin_version
 
-	vec[string]             required_modules
-	vec[string]             exported_functions
+	string[]             required_modules
+	string[]             exported_functions
 
 	bool                    requires_config
 	bool                    requires_init
@@ -68,7 +68,7 @@ struct plugin_descriptor {
 
 struct load_validation_result {
 	bool                    is_valid
-	vec[string]             validation_errors
+	string[]             validation_errors
 	int32                   error_count
 
 	string                  validation_message
@@ -78,7 +78,7 @@ struct load_validation_result {
 func create_plugin_loader(search_path string, max_plugins int32) plugin_loader {
 	return plugin_loader{
 		plugin_search_path:    search_path,
-		loaded_plugin_paths:   make(vec[string], 0),
+		loaded_plugin_paths:   make(string[], 0),
 		max_plugins:           max_plugins,
 		current_plugins_loaded: 0,
 		status:                LOADER_READY,
@@ -98,7 +98,7 @@ func create_plugin_package(id string, name string, path string) plugin_package {
 		package_path:        path,
 		checksum:            "",
 		metadata:            plugin_metadata{},
-		files:               make(vec[string], 0),
+		files:               make(string[], 0),
 		file_count:          0,
 		file_content_map:    make(map[string]string),
 		package_created_at:  time.Now().UnixNano(),
@@ -113,8 +113,8 @@ func create_plugin_descriptor(plugin_id string, name string) plugin_descriptor {
 		plugin_name:           name,
 		plugin_main_file:      "",
 		plugin_version:        "1.0.0",
-		required_modules:      make(vec[string], 0),
-		exported_functions:    make(vec[string], 0),
+		required_modules:      make(string[], 0),
+		exported_functions:    make(string[], 0),
 		requires_config:       false,
 		requires_init:         true,
 		auto_start:            false,
@@ -162,7 +162,7 @@ func (plugin_loader* l) unload_plugin(plugin_id string) bool {
 	delete(l.plugin_path_map, plugin_id)
 	l.current_plugins_loaded--
 
-	result_list := make(vec[string], 0)
+	result_list := make(string[], 0)
 	for p := range l.loaded_plugin_paths {
 		if p != path {
 			result_list = append(result_list, p)
@@ -176,7 +176,7 @@ func (plugin_loader* l) unload_plugin(plugin_id string) bool {
 func (plugin_loader* l) validate_plugin_package(pkg plugin_package) load_validation_result {
 	result := load_validation_result{
 		is_valid:            true,
-		validation_errors:   make(vec[string], 0),
+		validation_errors:   make(string[], 0),
 		error_count:         0,
 		validation_message:  "",
 		validation_time:     time.Now().UnixNano(),
@@ -209,11 +209,11 @@ func (plugin_loader* l) validate_plugin_package(pkg plugin_package) load_validat
 	return result
 }
 
-func (plugin_loader* l) get_loaded_plugins() vec[string] {
+func (plugin_loader* l) get_loaded_plugins() string[] {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	result := make(vec[string], 0)
+	result := make(string[], 0)
 	for plugin_id, _ := range l.plugin_path_map {
 		result = append(result, plugin_id)
 	}
@@ -324,10 +324,10 @@ func (plugin_descriptor* d) add_exported_function(function_name string) {
 	d.exported_functions = append(d.exported_functions, function_name)
 }
 
-func (plugin_descriptor* d) get_required_modules() vec[string] {
+func (plugin_descriptor* d) get_required_modules() string[] {
 	return d.required_modules
 }
 
-func (plugin_descriptor* d) get_exported_functions() vec[string] {
+func (plugin_descriptor* d) get_exported_functions() string[] {
 	return d.exported_functions
 }

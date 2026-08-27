@@ -319,13 +319,13 @@ func run_all_production_tests() {
     
     []test_result results = []
     
-    results.push(test_basic_inference())
-    results.push(test_batch_inference())
-    results.push(test_tokenization_correctness())
-    results.push(test_kv_cache_prefill())
-    results.push(test_generation_quality())
-    results.push(test_detokenization())
-    results.push(test_error_handling())
+    results = append(results, test_basic_inference())
+    results = append(results, test_batch_inference())
+    results = append(results, test_tokenization_correctness())
+    results = append(results, test_kv_cache_prefill())
+    results = append(results, test_generation_quality())
+    results = append(results, test_detokenization())
+    results = append(results, test_error_handling())
     
     print("\n")
     print("╔═══════════════════════════════════════════════════════════╗\n")

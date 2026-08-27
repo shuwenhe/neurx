@@ -52,14 +52,14 @@ func (gspo_trainer* trainer) group_by_length([]tensor sequences) . [][]tensor {
     groups := []
     current_group := []
     for i, seq in sorted_seqs {
-        current_group.push(seq)
-        if current_group.len() >= trainer.config.group_size {
-            groups.push(current_group)
+        current_group = append(current_group, seq)
+        if len(current_group) >= trainer.config.group_size {
+            groups = append(groups, current_group)
             current_group = []
         }
     }
-    if current_group.len() > 0 {
-        groups.push(current_group)
+    if len(current_group) > 0 {
+        groups = append(groups, current_group)
     }
     return groups
 }
@@ -68,13 +68,13 @@ func (gspo_trainer* trainer) group_by_similarity([]tensor sequences) . [][]tenso
     embeddings := []
     for seq in sequences {
         emb := trainer.policy_model.encode(seq)
-        embeddings.push(emb.mean(dim: 0))
+        embeddings = append(embeddings, emb.mean(dim: 0))
     }
-    num_groups := sequences.len() / trainer.config.group_size
+    num_groups := len(sequences) / trainer.config.group_size
     cluster_assignments := kmeans_clustering(embeddings, num_groups)
     groups := []
     for i in 0..num_groups {
-        groups.push([])
+        groups = append(groups, [])
     }
     for i, assignment in cluster_assignments {
         groups[assignment].push(sequences[i])
@@ -88,14 +88,14 @@ func (gspo_trainer* trainer) group_randomly([]tensor sequences) . [][]tensor {
     groups := []
     current_group := []
     for seq in shuffled {
-        current_group.push(seq)
-        if current_group.len() >= trainer.config.group_size {
-            groups.push(current_group)
+        current_group = append(current_group, seq)
+        if len(current_group) >= trainer.config.group_size {
+            groups = append(groups, current_group)
             current_group = []
         }
     }
-    if current_group.len() > 0 {
-        groups.push(current_group)
+    if len(current_group) > 0 {
+        groups = append(groups, current_group)
     }
     return groups
 }
@@ -108,16 +108,16 @@ func (gspo_trainer* trainer) compute_sequence_advantages(
     for r in rewards {
         mean_reward += r
     }
-    mean_reward /= f32(rewards.len())
+    mean_reward /= f32(len(rewards))
     std_reward := 0.0
     for r in rewards {
         std_reward += (r - mean_reward) * (r - mean_reward)
     }
-    std_reward = sqrt(std_reward / f32(rewards.len()))
+    std_reward = sqrt(std_reward / f32(len(rewards)))
     advantages := []
     for r in rewards {
         adv := (r - mean_reward) / (std_reward + 1e-8)
-        advantages.push(adv)
+        advantages = append(advantages, adv)
     }
     return advantages
 }
@@ -139,7 +139,7 @@ func (gspo_trainer* trainer) train_step(Batch batch) . (f32, f32) {
     groups := trainer.group_sequences(prompts)
     total_policy_loss := 0.0
     total_lb_loss := 0.0
-    num_groups := groups.len()
+    num_groups := len(groups)
     for group in groups {
         responses := []
         log_probs_list := []
@@ -151,18 +151,18 @@ func (gspo_trainer* trainer) train_step(Batch batch) . (f32, f32) {
                 return_log_probs: true,
                 return_router_logits: true
             )
-            responses.push(resp)
-            log_probs_list.push(log_probs)
-            router_logits_list.push(router_logits)
+            responses = append(responses, resp)
+            log_probs_list = append(log_probs_list, log_probs)
+            router_logits_list = append(router_logits_list, router_logits)
         }
         group_rewards := []
         for i, resp in responses {
             r := compute_reward(group[i], resp)
-            group_rewards.push(r)
+            group_rewards = append(group_rewards, r)
         }
         advantages := trainer.compute_sequence_advantages(group, group_rewards)
         group_policy_loss := tensor_zeros([1])
-        for i in 0..group.len() {
+        for i in len(0..group) {
             log_probs := log_probs_list[i]
             advantage := advantages[i]
             seq_loss := -log_probs.sum() * advantage
@@ -173,7 +173,7 @@ func (gspo_trainer* trainer) train_step(Batch batch) . (f32, f32) {
                 total_lb_loss += lb_loss.item()
             }
         }
-        group_policy_loss = group_policy_loss / f32(group.len())
+        group_policy_loss = group_policy_loss / f32(len(group))
         total_policy_loss += group_policy_loss.item()
         group_policy_loss.backward()
     }
@@ -192,10 +192,10 @@ func (gspo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
         println(f"GSPO Epoch {epoch + 1}/{trainer.config.num_epochs}")
         for batch in train_data {
             policy_loss, lb_loss  := trainer.train_step(batch)
-            policy_losses.push(policy_loss)
-            lb_losses.push(lb_loss)
-            if policy_losses.len() % 100 == 0 {
-                println(f"Step {policy_losses.len()}: Policy Loss = {policy_loss}, LB Loss = {lb_loss}")
+            policy_losses = append(policy_losses, policy_loss)
+            lb_losses = append(lb_losses, lb_loss)
+            if len(policy_losses) % 100 == 0 {
+                println(f"Step {len(policy_losses)}: Policy Loss = {policy_loss}, LB Loss = {lb_loss}")
             }
         }
     }
@@ -203,12 +203,12 @@ func (gspo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
 }
 
 func kmeans_clustering([]tensor embeddings, i32 k) . []i32 {
-    n := embeddings.len()
+    n := len(embeddings)
     dim := embeddings[0].shape[0]
     centroids := []
     indices := random_permutation(n)
     for i in 0..k {
-        centroids.push(embeddings[indices[i]])
+        centroids = append(centroids, embeddings[indices[i]])
     }
     assignments := array_filled(n, 0)
     for iter in 0..10 {
@@ -228,10 +228,10 @@ func kmeans_clustering([]tensor embeddings, i32 k) . []i32 {
             cluster_points := []
             for i in 0..n {
                 if assignments[i] == j {
-                    cluster_points.push(embeddings[i])
+                    cluster_points = append(cluster_points, embeddings[i])
                 }
             }
-            if cluster_points.len() > 0 {
+            if len(cluster_points) > 0 {
                 centroids[j] = stack(cluster_points).mean(dim: 0)
             }
         }

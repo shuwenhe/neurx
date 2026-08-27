@@ -24,7 +24,7 @@ struct token_logprob {
 }
 
 struct logprob_output {
-    vec[token_logprob] top_tokens
+    token_logprob[] top_tokens
     float32 selected_token_logprob
     int32 selected_token_id
     float32 most_likely_logprob
@@ -42,7 +42,7 @@ struct logprobs_config {
 
 struct logprobs_manager {
     logprobs_config config
-    vec[logprob_output] token_outputs
+    logprob_output[] token_outputs
     map[int32]float32 token_to_logprob_cache
     int32 total_tokens_processed
     int32 cache_hits
@@ -63,7 +63,7 @@ func create_logprobs_config(logprob_method method, int32 top_k) logprobs_config 
 func create_logprobs_manager(logprobs_config config) logprobs_manager* {
     mgr := logprobs_manager{
         config: config,
-        token_outputs: make(vec[logprob_output]),
+        token_outputs: make(logprob_output[]),
         token_to_logprob_cache: make(map[int32]float32),
         total_tokens_processed: 0,
         cache_hits: 0,
@@ -73,8 +73,8 @@ func create_logprobs_manager(logprobs_config config) logprobs_manager* {
     return *mgr
 }
 
-func (logprobs_manager* mgr) compute_logprobs(vec[float32] logits, vec[int32] selected_token_ids) vec[logprob_output] {
-    outputs := make(vec[logprob_output])
+func (logprobs_manager* mgr) compute_logprobs(float32[] logits, int32[] selected_token_ids) logprob_output[] {
+    outputs := make(logprob_output[])
 
     max_logit := logits[0]
     for i := 1; i < len(logits); i = i + 1 {
@@ -93,7 +93,7 @@ func (logprobs_manager* mgr) compute_logprobs(vec[float32] logits, vec[int32] se
         sum_exp = 1.0
     }
 
-    probabilities := make(vec[float32])
+    probabilities := make(float32[])
     for i := 0; i < len(logits); i = i + 1 {
         exp_val := 2.718 ^ (logits[i] - max_logit)
         prob := exp_val / sum_exp
@@ -103,7 +103,7 @@ func (logprobs_manager* mgr) compute_logprobs(vec[float32] logits, vec[int32] se
     for s := 0; s < len(selected_token_ids); s = s + 1 {
         token_id := selected_token_ids[s]
 
-        top_tokens := make(vec[token_logprob])
+        top_tokens := make(token_logprob[])
 
         if mgr.config.top_k_logprobs > 0 {
             for i := 0; i < len(logits) && i < mgr.config.top_k_logprobs; i = i + 1 {
@@ -184,8 +184,8 @@ func (logprobs_manager* mgr) add_token_output(logprob_output output) {
     mgr.token_outputs = append(mgr.token_outputs, output)
 }
 
-func (logprobs_manager* mgr) get_token_outputs(int32 start, int32 end) vec[logprob_output] {
-    result := make(vec[logprob_output])
+func (logprobs_manager* mgr) get_token_outputs(int32 start, int32 end) logprob_output[] {
+    result := make(logprob_output[])
 
     for i := start; i < end && int32(i) < int32(len(mgr.token_outputs)); i = i + 1 {
         result = append(result, mgr.token_outputs[i])
@@ -200,7 +200,7 @@ func (logprobs_manager* mgr) get_last_token_logprobs() logprob_output {
     }
 
     return logprob_output{
-        top_tokens: make(vec[token_logprob]),
+        top_tokens: make(token_logprob[]),
         selected_token_logprob: 0.0,
         selected_token_id: -1,
         most_likely_logprob: 0.0,
@@ -213,7 +213,7 @@ func (logprobs_manager* mgr) filter_top_k_logprobs(logprob_output* output, int32
         return
     }
 
-    filtered := make(vec[token_logprob])
+    filtered := make(token_logprob[])
     for i := 0; int32(i) < k && i < len(output.top_tokens); i = i + 1 {
         filtered = append(filtered, output.top_tokens[i])
     }
@@ -271,7 +271,7 @@ func (logprobs_manager* mgr) get_logprobs_stats() map[string]interface{} {
 func (logprobs_manager* mgr) export_to_json_format() map[string]interface{} {
     export_data := make(map[string]interface{})
 
-    token_sequences := make(vec[interface{}])
+    token_sequences := make(interface{}[])
 
     for i := 0; i < len(mgr.token_outputs); i = i + 1 {
         output := mgr.token_outputs[i]
@@ -280,7 +280,7 @@ func (logprobs_manager* mgr) export_to_json_format() map[string]interface{} {
         token_data["token_id"] = output.selected_token_id
         token_data["logprob"] = output.selected_token_logprob
 
-        top_tokens_data := make(vec[interface{}])
+        top_tokens_data := make(interface{}[])
         for j := 0; j < len(output.top_tokens); j = j + 1 {
             top_data := make(map[string]interface{})
             top_data["token_id"] = output.top_tokens[j].token_id

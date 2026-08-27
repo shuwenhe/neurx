@@ -79,7 +79,7 @@ func net_socket(ns net_state, int proto, int owner_pid) (net_state, int) {
     }
     ns.sockets    = append(ns.sockets, s)
     ns.next_sock_id = ns.next_sock_id + 1
-    return (ns, sid)
+    return ns, sid
 }
 
 func net_connect(ns net_state, int sock_id, remote net_addr) net_state {
@@ -127,7 +127,7 @@ func net_send(ns net_state, int sock_id, string payload, int pkt_type) (net_stat
     }
     ns.send_queue   = append(ns.send_queue, pkt)
     ns.next_pkt_id  = ns.next_pkt_id + 1
-    return (ns, pkt_id)
+    return ns, pkt_id
 }
 
 func net_recv(ns net_state, int sock_id) (net_state, sk_buff, bool) {
@@ -144,11 +144,11 @@ func net_recv(ns net_state, int sock_id) (net_state, sk_buff, bool) {
                 j = j + 1
             }
             ns.recv_queue = remaining
-            return (ns, pkt, true)
+            return ns, pkt, true
         }
         i = i + 1
     }
-    return (ns, sk_buff{}, false)
+    return ns, sk_buff{}, false
 }
 
 func net_deliver(ns net_state, pkt sk_buff) net_state {

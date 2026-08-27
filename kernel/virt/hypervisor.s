@@ -33,10 +33,10 @@ struct vm_io_device {
 }
 
 struct hypervisor {
-    vec[virtual_machine] vms
-    vec[vcpu] vcpus
-    vec[vm_memory] memory_mappings
-    vec[vm_io_device] io_devices
+    virtual_machine[] vms
+    vcpu[] vcpus
+    vm_memory[] memory_mappings
+    vm_io_device[] io_devices
     int hypervisor_id
 }
 
@@ -89,49 +89,49 @@ func create_vm_io_device(string name, int dev_type, int irq) vm_io_device {
 
 func create_hypervisor() hypervisor {
     hv := hypervisor {
-        vms: vec[virtual_machine](),
-        vcpus: vec[vcpu](),
-        memory_mappings: vec[vm_memory](),
-        io_devices: vec[vm_io_device](),
+        vms: virtual_machine[](),
+        vcpus: vcpu[](),
+        memory_mappings: vm_memory[](),
+        io_devices: vm_io_device[](),
         hypervisor_id: 0
     }
     hv
 }
 
 func hypervisor_create_vm(hypervisor hv, virtual_machine vm) hypervisor {
-    hv.vms.push(vm)
-    vm_id := hv.vms.len() - 1
+    hv.vms = append(hv.vms, vm)
+    vm_id := len(hv.vms) - 1
     i := 0
     for i < vm.vcpu_count {
         cpu := create_vcpu(vm_id, i)
-        hv.vcpus.push(cpu)
+        hv.vcpus = append(hv.vcpus, cpu)
         i = i + 1
     }
     hv
 }
 
 func hypervisor_add_memory_mapping(hypervisor hv, vm_memory mapping) hypervisor {
-    hv.memory_mappings.push(mapping)
+    hv.memory_mappings = append(hv.memory_mappings, mapping)
     hv
 }
 
 func hypervisor_add_io_device(hypervisor hv, vm_io_device device) hypervisor {
-    hv.io_devices.push(device)
+    hv.io_devices = append(hv.io_devices, device)
     hv
 }
 
 func hypervisor_start_vm(hypervisor hv, int vm_id) hypervisor {
     i := 0
-    for i < hv.vms.len() {
+    for i < len(hv.vms) {
         i = i + 1
     }
     hv
 }
 
 func hypervisor_get_vm_count(hypervisor hv) int {
-    hv.vms.len()
+    len(hv.vms)
 }
 
 func hypervisor_get_vcpu_count(hypervisor hv) int {
-    hv.vcpus.len()
+    len(hv.vcpus)
 }

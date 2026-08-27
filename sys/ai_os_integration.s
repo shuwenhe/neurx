@@ -20,8 +20,8 @@ struct resource_allocation {
 }
 
 struct execution_context {
-    vec[workload_request] pending_workloads
-    vec[resource_allocation] active_allocations
+    workload_request[] pending_workloads
+    resource_allocation[] active_allocations
     int total_gpu_available
     int total_memory_available
     int total_cpu_available
@@ -29,8 +29,8 @@ struct execution_context {
 
 func create_execution_context(int total_gpu, int total_mem, int total_cpu) execution_context {
     ctx := execution_context {
-        pending_workloads: vec[workload_request](),
-        active_allocations: vec[resource_allocation](),
+        pending_workloads: workload_request[](),
+        active_allocations: resource_allocation[](),
         total_gpu_available: total_gpu,
         total_memory_available: total_mem,
         total_cpu_available: total_cpu
@@ -40,19 +40,19 @@ func create_execution_context(int total_gpu, int total_mem, int total_cpu) execu
 
 func submit_workload(execution_context ctx, string workload_type, int req_gpu, int req_mem) execution_context {
     req := workload_request {
-        workload_id: ctx.pending_workloads.len() + 1,
+        workload_id: len(ctx.pending_workloads) + 1,
         workload_type: workload_type,
         required_gpu: req_gpu,
         required_memory: req_mem,
         priority: 0
     }
-    ctx.pending_workloads.push(req)
+    ctx.pending_workloads = append(ctx.pending_workloads, req)
     ctx
 }
 
 func schedule_workload(execution_context ctx, int workload_id, int cgroup_id) execution_context {
     i := 0
-    for i < ctx.pending_workloads.len() {
+    for i < len(ctx.pending_workloads) {
         req := ctx.pending_workloads[i]
         if req.workload_id == workload_id {
             alloc := resource_allocation {
@@ -63,7 +63,7 @@ func schedule_workload(execution_context ctx, int workload_id, int cgroup_id) ex
                 cgroup_id: cgroup_id,
                 allocation_success: true
             }
-            ctx.active_allocations.push(alloc)
+            ctx.active_allocations = append(ctx.active_allocations, alloc)
             ctx.total_gpu_available = ctx.total_gpu_available - req.required_gpu
             ctx.total_memory_available = ctx.total_memory_available - req.required_memory
             return ctx
@@ -75,7 +75,7 @@ func schedule_workload(execution_context ctx, int workload_id, int cgroup_id) ex
 
 func reclaim_resources(execution_context ctx, int workload_id) execution_context {
     i := 0
-    for i < ctx.active_allocations.len() {
+    for i < len(ctx.active_allocations) {
         alloc := ctx.active_allocations[i]
         if alloc.workload_id == workload_id {
             ctx.total_gpu_available = ctx.total_gpu_available + alloc.allocated_gpu

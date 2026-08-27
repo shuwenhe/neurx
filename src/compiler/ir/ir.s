@@ -55,7 +55,7 @@ func make_ir_node_state(string name, string op, []string inputs, []string output
 
 func ir_add_node(ir_graph_state graph, ir_node_state node) ir_graph_state {
     []ir_node_state nodes = copy_nodes(graph.nodes)
-    nodes.push(node)
+    nodes = append(nodes, node)
     ir_graph_state {
         name: graph.name,
         nodes: nodes,
@@ -68,7 +68,7 @@ func ir_add_node(ir_graph_state graph, ir_node_state node) ir_graph_state {
 
 func ir_add_edge(ir_graph_state graph, string edge) ir_graph_state {
     []string edges = copy_strings(graph.edges)
-    edges.push(edge)
+    edges = append(edges, edge)
     ir_graph_state {
         name: graph.name,
         nodes: copy_nodes(graph.nodes),
@@ -81,7 +81,7 @@ func ir_add_edge(ir_graph_state graph, string edge) ir_graph_state {
 
 func ir_add_input(ir_graph_state graph, string input_name) ir_graph_state {
     []string inputs = copy_strings(graph.inputs)
-    inputs.push(input_name)
+    inputs = append(inputs, input_name)
     ir_graph_state {
         name: graph.name,
         nodes: copy_nodes(graph.nodes),
@@ -94,7 +94,7 @@ func ir_add_input(ir_graph_state graph, string input_name) ir_graph_state {
 
 func ir_add_output(ir_graph_state graph, string output_name) ir_graph_state {
     []string outputs = copy_strings(graph.outputs)
-    outputs.push(output_name)
+    outputs = append(outputs, output_name)
     ir_graph_state {
         name: graph.name,
         nodes: copy_nodes(graph.nodes),

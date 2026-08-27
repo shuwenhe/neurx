@@ -73,19 +73,19 @@ struct device_abi_context {
     bool initialized
     
     // Memory tracking
-    vec[device_memory_allocation] allocations
+    device_memory_allocation[] allocations
     device_memory_stats memory_stats
     
     // Kernel execution
-    vec[kernel_launch_request] pending_kernels
+    kernel_launch_request[] pending_kernels
     int kernel_launch_count
     int total_kernel_time_us
     
     // Collective ops
-    vec[collective_launch_request] pending_collectives
+    collective_launch_request[] pending_collectives
     
     // API call history
-    vec[cuda_api_call] api_calls
+    cuda_api_call[] api_calls
     int api_call_count
     
     // Error tracking
@@ -108,13 +108,13 @@ func create_device_abi(int device_id) device_abi_context {
     ctx := device_abi_context {
         device_id: device_id,
         initialized: true,
-        allocations: vec[device_memory_allocation](),
+        allocations: device_memory_allocation[](),
         memory_stats: stats,
-        pending_kernels: vec[kernel_launch_request](),
+        pending_kernels: kernel_launch_request[](),
         kernel_launch_count: 0,
         total_kernel_time_us: 0,
-        pending_collectives: vec[collective_launch_request](),
-        api_calls: vec[cuda_api_call](),
+        pending_collectives: collective_launch_request[](),
+        api_calls: cuda_api_call[](),
         api_call_count: 0,
         last_cuda_error_code: 0,
         last_error_message: "CUDA_SUCCESS"
@@ -140,7 +140,7 @@ func alloc_device_memory(device_abi_context ctx, int size_bytes) device_abi_cont
             size_bytes: size_bytes,
             is_allocated: true
         }
-        ctx.allocations.push(alloc)
+        ctx.allocations = append(ctx.allocations, alloc)
         
         ctx.memory_stats.allocated_bytes = ctx.memory_stats.allocated_bytes + size_bytes
         ctx.memory_stats.free_bytes = ctx.memory_stats.free_bytes - size_bytes
@@ -158,7 +158,7 @@ func alloc_device_memory(device_abi_context ctx, int size_bytes) device_abi_cont
             error_code: 0,
             timestamp_us: 0
         }
-        ctx.api_calls.push(api_call)
+        ctx.api_calls = append(ctx.api_calls, api_call)
         ctx.api_call_count = ctx.api_call_count + 1
         ctx.last_cuda_error_code = 0
         ctx.last_error_message = "CUDA_SUCCESS"
@@ -181,7 +181,7 @@ func free_device_memory(device_abi_context ctx, int device_address, int size_byt
         error_code: 0,
         timestamp_us: 0
     }
-    ctx.api_calls.push(api_call)
+    ctx.api_calls = append(ctx.api_calls, api_call)
     ctx.api_call_count = ctx.api_call_count + 1
     ctx.last_cuda_error_code = 0
     ctx.last_error_message = "CUDA_SUCCESS"
@@ -202,7 +202,7 @@ func launch_kernel(device_abi_context ctx, int kernel_id, int grid_x, int grid_y
         block_z: block_z,
         shared_memory_bytes: 0
     }
-    ctx.pending_kernels.push(req)
+    ctx.pending_kernels = append(ctx.pending_kernels, req)
     ctx.kernel_launch_count = ctx.kernel_launch_count + 1
     ctx.total_kernel_time_us = ctx.total_kernel_time_us + 234  // Simulated kernel time
     
@@ -214,7 +214,7 @@ func launch_kernel(device_abi_context ctx, int kernel_id, int grid_x, int grid_y
         error_code: 0,
         timestamp_us: 0
     }
-    ctx.api_calls.push(api_call)
+    ctx.api_calls = append(ctx.api_calls, api_call)
     ctx.api_call_count = ctx.api_call_count + 1
     ctx.last_cuda_error_code = 0
     ctx.last_error_message = "CUDA_SUCCESS"
@@ -232,7 +232,7 @@ func synchronize_device(device_abi_context ctx) device_abi_context {
         error_code: 0,
         timestamp_us: ctx.total_kernel_time_us
     }
-    ctx.api_calls.push(api_call)
+    ctx.api_calls = append(ctx.api_calls, api_call)
     ctx.api_call_count = ctx.api_call_count + 1
     ctx.last_cuda_error_code = 0
     ctx.last_error_message = "CUDA_SUCCESS"
@@ -249,7 +249,7 @@ func queue_collective_operation(device_abi_context ctx, string op_type, int rank
         world_size: world_size,
         tensor_size: 1024
     }
-    ctx.pending_collectives.push(req)
+    ctx.pending_collectives = append(ctx.pending_collectives, req)
     ctx.api_call_count = ctx.api_call_count + 1
     
     ctx

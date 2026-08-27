@@ -104,8 +104,8 @@ func new_trae_moe_layer(trae_moe_config config) trae_moe_layer {
     }
     int i = 0
     for i < config.num_experts {
-        layer.expert_weights.push(math.allocate_float(config.expert_dim * config.hidden_dim, 0.0))
-        layer.expert_biases.push(math.allocate_float(config.expert_dim, 0.0))
+        layer.expert_weights = append(layer.expert_weights, math.allocate_float(config.expert_dim * config.hidden_dim, 0.0))
+        layer.expert_biases = append(layer.expert_biases, math.allocate_float(config.expert_dim, 0.0))
         i = i + 1
     }
     layer

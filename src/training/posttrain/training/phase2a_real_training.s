@@ -285,7 +285,7 @@ func compute_lora_gradients(
         grad_b = append(grad_b, random_float(seed) * 0.01)
         i = i + 1
     }
-    return (grad_a, grad_b)
+    return grad_a, grad_b
 }
 
 func init_optimizer(int size_a, int size_b) optimizer_state {
@@ -341,7 +341,7 @@ func optimizer_step(
         lora.lora_B[i] = lora.lora_B[i] - lr_corrected * m_hat / (sqrt_approx(v_hat) + opt.epsilon)
         i = i + 1
     }
-    return (lora, opt)
+    return lora, opt
 }
 
 func pow_approx(float base, float exp) float {

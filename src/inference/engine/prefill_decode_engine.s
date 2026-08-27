@@ -1,6 +1,6 @@
 package neurx.inference.engine.prefill_decode_engine
 
-use std.vec
+use std.slices
 
 
     prefill,
@@ -60,10 +60,10 @@ struct prefill_decode_engine {
 func new_prefill_decode_engine(batch_config config) prefill_decode_engine {
     prefill_decode_engine {
         config: config,
-        pending_requests: vec[request_state](cap: 1024),
-        prefilling_requests: vec[request_state](cap: config.max_prefill_batch_size),
-        decoding_requests: vec[request_state](cap: config.max_batch_size),
-        finished_requests: vec[request_state](cap: 256),
+        pending_requests: request_state[](cap: 1024),
+        prefilling_requests: request_state[](cap: config.max_prefill_batch_size),
+        decoding_requests: request_state[](cap: config.max_batch_size),
+        finished_requests: request_state[](cap: 256),
         current_iteration: 0,
         total_prefilled_tokens: 0,
         total_decoded_tokens: 0,
@@ -75,7 +75,7 @@ func (prefill_decode_engine* engine) enqueue_request(request_state req) {
     new_req := req
     new_req.status = request_status.pending
     new_req.arrival_time_ms = engine.total_time_ms
-    engine.pending_requests.push(new_req)
+    engine.pending_requests = append(engine.pending_requests, new_req)
 }
 
 func (prefill_decode_engine* engine) schedule_prefill() bool {
@@ -86,13 +86,13 @@ func (prefill_decode_engine* engine) schedule_prefill() bool {
     prefill_count := 0
     total_prompt_tokens := 0
 
-    for i in 0..engine.pending_requests.len() {
+    for i in len(0..engine.pending_requests) {
         if prefill_count >= engine.config.max_prefill_batch_size {
             break
         }
 
         req := engine.pending_requests[i]
-        prompt_len := req.prompt_tokens.len()
+        prompt_len := len(req.prompt_tokens)
 
         if total_prompt_tokens + prompt_len > engine.config.prefill_token_budget {
             break
@@ -103,7 +103,7 @@ func (prefill_decode_engine* engine) schedule_prefill() bool {
         prefill_req := req
         prefill_req.status = request_status.prefilling
         prefill_req.start_time_ms = engine.total_time_ms
-        engine.prefilling_requests.push(prefill_req)
+        engine.prefilling_requests = append(engine.prefilling_requests, prefill_req)
 
         prefill_count += 1
     }
@@ -121,13 +121,13 @@ func (prefill_decode_engine* engine) schedule_decode() bool {
     }
 
     for req in engine.prefilling_requests.iter_mut() {
-        if req.generated_tokens.len() < req.max_new_tokens {
+        if len(req.generated_tokens) < req.max_new_tokens {
             req.status = request_status.decoding
-            req.current_position = req.prompt_tokens.len()
-            engine.decoding_requests.push(req.clone())
+            req.current_position = len(req.prompt_tokens)
+            engine.decoding_requests = append(engine.decoding_requests, req.clone())
         } else {
             req.status = request_status.finished
-            engine.finished_requests.push(req.clone())
+            engine.finished_requests = append(engine.finished_requests, req.clone())
         }
     }
 
@@ -136,18 +136,18 @@ func (prefill_decode_engine* engine) schedule_decode() bool {
     decoded_token_count := 0
     max_decode_batch := engine.config.max_batch_size
 
-    decode_batch_size := if engine.decoding_requests.len() > max_decode_batch {
+    decode_batch_size := if len(engine.decoding_requests) > max_decode_batch {
         max_decode_batch
     } else {
-        engine.decoding_requests.len()
+        len(engine.decoding_requests)
     }
 
     for i in 0..decode_batch_size {
         req := engine.decoding_requests[i]
 
-        if req.generated_tokens.len() < req.max_new_tokens {
+        if len(req.generated_tokens) < req.max_new_tokens {
 
-            engine.decoding_requests[i].generated_tokens.push(rand_next_token())
+            engine.decoding_requests[i].generated_tokens = append(.generated_tokens, rand_next_token())
             engine.decoding_requests[i].current_position += 1
             decoded_token_count += 1
         }
@@ -155,14 +155,14 @@ func (prefill_decode_engine* engine) schedule_decode() bool {
 
     engine.total_decoded_tokens += decoded_token_count
 
-    finished_indices := vec[]()
-    for i in 0..engine.decoding_requests.len() {
+    finished_indices := []()
+    for i in len(0..engine.decoding_requests) {
         req := engine.decoding_requests[i]
-        if req.generated_tokens.len() >= req.max_new_tokens {
+        if len(req.generated_tokens) >= req.max_new_tokens {
             finished_req := req
             finished_req.status = request_status.finished
-            engine.finished_requests.push(finished_req)
-            finished_indices.push(i)
+            engine.finished_requests = append(engine.finished_requests, finished_req)
+            finished_indices = append(finished_indices, i)
         }
     }
 
@@ -180,9 +180,9 @@ func (prefill_decode_engine* engine) iteration() {
 
     decode_scheduled := engine.schedule_decode()
 
-    prefill_tokens := engine.prefilling_requests.len() *
-        (if engine.prefilling_requests.len() > 0 {
-            engine.prefilling_requests[0].prompt_tokens.len()
+    prefill_tokens := len(engine.prefilling_requests) *
+        (if len(engine.prefilling_requests) > 0 {
+            engine.prefilling_requests[0]len(.prompt_tokens)
          } else { 0 })
 
     engine.total_prefilled_tokens += prefill_tokens
@@ -206,20 +206,20 @@ struct engine_stats {
 
 func (prefill_decode_engine* engine) get_stats() engine_stats {
     total_tokens := engine.total_prefilled_tokens + engine.total_decoded_tokens
-    avg_prefill_latency := if engine.prefilling_requests.len() > 0 {
+    avg_prefill_latency := if len(engine.prefilling_requests) > 0 {
         (engine.total_time_ms as f32) / (engine.current_iteration as f32)
     } else {
         0.0
     }
 
-    avg_decode_latency := if engine.decoding_requests.len() > 0 {
+    avg_decode_latency := if len(engine.decoding_requests) > 0 {
         (engine.total_time_ms as f32) / (engine.current_iteration as f32)
     } else {
         0.0
     }
 
     throughput := if engine.total_time_ms > 0 {
-        (engine.finished_requests.len() as f32) / ((engine.total_time_ms as f32) / 1000.0)
+        (len(engine.finished_requests) as f32) / ((engine.total_time_ms as f32) / 1000.0)
     } else {
         0.0
     }
@@ -228,7 +228,7 @@ func (prefill_decode_engine* engine) get_stats() engine_stats {
         total_iterations: engine.current_iteration,
         total_prefilled_tokens: engine.total_prefilled_tokens,
         total_decoded_tokens: engine.total_decoded_tokens,
-        total_requests_completed: engine.finished_requests.len(),
+        total_requests_completed: len(engine.finished_requests),
         avg_prefill_latency_ms: avg_prefill_latency,
         avg_decode_latency_ms: avg_decode_latency,
         total_throughput_req_per_sec: throughput,
@@ -258,8 +258,8 @@ func main() {
     for i in 0..4 {
         req := request_state {
             request_id: i,
-            prompt_tokens: vec[1, 2, 3, 4, 5],
-            generated_tokens: vec[](),
+            prompt_tokens: 1, 2, 3, 4, 5[],
+            generated_tokens: [](),
             max_new_tokens: 32,
             kv_cache_block_id: i,
             current_position: 0,
@@ -276,9 +276,9 @@ func main() {
     for iter in 0..10 {
         engine.run_one_step()
         println(f"Iteration {iter + 1}:")
-        println(f"  Prefilling: {engine.prefilling_requests.len()}")
-        println(f"  Decoding: {engine.decoding_requests.len()}")
-        println(f"  Finished: {engine.finished_requests.len()}")
+        println(f"  Prefilling: {len(engine.prefilling_requests)}")
+        println(f"  Decoding: {len(engine.decoding_requests)}")
+        println(f"  Finished: {len(engine.finished_requests)}")
         println("")
     }
 

@@ -12,7 +12,7 @@ struct rt_task {
 }
 
 struct rt_scheduler {
-    vec[rt_task] ready_queue
+    rt_task[] ready_queue
     int current_task_id
     int preemption_enabled
     int scheduling_point
@@ -27,7 +27,7 @@ struct deadline_tracker {
 
 struct priority_level {
     int level
-    vec[rt_task] tasks
+    rt_task[] tasks
     int quantum
 }
 
@@ -45,7 +45,7 @@ func create_rt_task(int pid, int priority, int deadline, int period) rt_task {
 
 func create_rt_scheduler() rt_scheduler {
     scheduler := rt_scheduler {
-        ready_queue: vec[rt_task](),
+        ready_queue: rt_task[](),
         current_task_id: 0,
         preemption_enabled: 1,
         scheduling_point: 0
@@ -54,7 +54,7 @@ func create_rt_scheduler() rt_scheduler {
 }
 
 func rt_scheduler_add_task(rt_scheduler sched, rt_task task) rt_scheduler {
-    sched.ready_queue.push(task)
+    sched.ready_queue = append(sched.ready_queue, task)
     sched
 }
 
@@ -95,14 +95,14 @@ func deadline_tracker_check(deadline_tracker tracker) int {
 func create_priority_level(int level) priority_level {
     pl := priority_level {
         level: level,
-        tasks: vec[rt_task](),
+        tasks: rt_task[](),
         quantum: 0
     }
     pl
 }
 
 func rt_get_queue_length(rt_scheduler sched) int {
-    sched.ready_queue.len()
+    len(sched.ready_queue)
 }
 
 func rt_get_current_task(rt_scheduler sched) int {

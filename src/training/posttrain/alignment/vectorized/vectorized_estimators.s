@@ -100,10 +100,10 @@ func compute_grpo_loss_vectorized(
 }
 
 func stack_sequences([]tensor sequences) . Tensor {
-    if sequences.len() == 0 {
+    if len(sequences) == 0 {
         return tensor_zeros([0, 0])
     }
-    batch_size := sequences.len()
+    batch_size := len(sequences)
     seq_len := sequences[0].shape[0]
     stacked := tensor_zeros([batch_size, seq_len])
     for i in 0..batch_size {
@@ -113,10 +113,10 @@ func stack_sequences([]tensor sequences) . Tensor {
 }
 
 func stack_grouped_sequences([][]tensor grouped_sequences) . Tensor {
-    if grouped_sequences.len() == 0 {
+    if len(grouped_sequences) == 0 {
         return tensor_zeros([0, 0, 0])
     }
-    batch_size := grouped_sequences.len()
+    batch_size := len(grouped_sequences)
     group_size := grouped_sequences[0].len()
     seq_len := grouped_sequences[0][0].shape[0]
     stacked := tensor_zeros([batch_size, group_size, seq_len])
@@ -132,7 +132,7 @@ func unstack_tensor(Tensor stacked) . []tensor {
     batch_size := stacked.shape[0]
     sequences := []
     for i in 0..batch_size {
-        sequences.push(stacked[i])
+        sequences = append(sequences, stacked[i])
     }
     return sequences
 }

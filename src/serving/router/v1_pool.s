@@ -11,9 +11,9 @@ const (
 struct request_pool {
     pool_strategy strategy
 
-    vec[v1_request*] pending_requests
-    vec[v1_request*] running_requests
-    vec[v1_request*] completed_requests
+    v1_request*[] pending_requests
+    v1_request*[] running_requests
+    v1_request*[] completed_requests
 
     int32 max_pool_size
     int32 max_running_requests
@@ -27,9 +27,9 @@ struct request_pool {
 func create_request_pool(int32 max_size, int32 max_running) request_pool* {
     return *request_pool{
         strategy: strategy_fcfs,
-        pending_requests: make(vec[v1_request*]),
-        running_requests: make(vec[v1_request*]),
-        completed_requests: make(vec[v1_request*]),
+        pending_requests: make(v1_request*[]),
+        running_requests: make(v1_request*[]),
+        completed_requests: make(v1_request*[]),
         max_pool_size: max_size,
         max_running_requests: max_running,
         total_requests_processed: 0,
@@ -58,8 +58,8 @@ func (request_pool* pool) get_next_request() option[v1_request*] {
     return option[v1_request*]{value: req}
 }
 
-func (request_pool* pool) schedule_batch(int32 batch_size) vec[v1_request*] {
-    batch := make(vec[v1_request*])
+func (request_pool* pool) schedule_batch(int32 batch_size) v1_request*[] {
+    batch := make(v1_request*[])
 
     if pool.strategy == strategy_fcfs {
         for i := 0; i < batch_size && len(pool.pending_requests) > 0; i = i + 1 {
@@ -113,7 +113,7 @@ func (request_pool* pool) get_pool_stats() map[string]interface{} {
 }
 
 func (request_pool* pool) clear_completed() {
-    pool.completed_requests = make(vec[v1_request*])
+    pool.completed_requests = make(v1_request*[])
 }
 
 func (request_pool* pool) abort_request(string request_id) bool {

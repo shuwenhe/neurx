@@ -42,7 +42,7 @@ struct sse_field {
 }
 
 struct sse_frame {
-	vec[sse_field]          fields
+	sse_field[]          fields
 	int32                   field_count
 
 	string                  raw_data
@@ -53,7 +53,7 @@ struct sse_frame {
 }
 
 struct sse_stream {
-	vec[sse_event]          events
+	sse_event[]          events
 	int32                   event_count
 	int32                   max_events_buffered
 
@@ -98,7 +98,7 @@ func create_sse_field(ftype event_field_type, name string, value string) sse_fie
 
 func create_sse_frame() sse_frame {
 	return sse_frame{
-		fields:       make(vec[sse_field], 0, 10),
+		fields:       make(sse_field[], 0, 10),
 		field_count:  0,
 		raw_data:     "",
 		raw_size_bytes: 0,
@@ -109,7 +109,7 @@ func create_sse_frame() sse_frame {
 
 func create_sse_stream(stream_id string, client_id string) sse_stream {
 	return sse_stream{
-		events:                  make(vec[sse_event], 0, 1000),
+		events:                  make(sse_event[], 0, 1000),
 		event_count:             0,
 		max_events_buffered:     1000,
 		stream_id:               stream_id,
@@ -213,12 +213,12 @@ func (sse_stream* s) add_event(event sse_event) bool {
 	return true
 }
 
-func (sse_stream* s) get_events() vec[sse_event] {
+func (sse_stream* s) get_events() sse_event[] {
 	return s.events
 }
 
 func (sse_stream* s) clear_events() {
-	s.events = make(vec[sse_event], 0, 1000)
+	s.events = make(sse_event[], 0, 1000)
 	s.event_count = 0
 }
 
@@ -258,6 +258,6 @@ func (sse_stream* s) get_stream_uptime_ms() int64 {
 
 func (sse_stream* s) close_stream() {
 	s.is_active = false
-	s.events = make(vec[sse_event], 0, 1000)
+	s.events = make(sse_event[], 0, 1000)
 	s.event_count = 0
 }

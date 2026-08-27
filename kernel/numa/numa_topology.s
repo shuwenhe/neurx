@@ -12,7 +12,7 @@ struct numa_node {
 }
 
 struct numa_topology {
-    vec[numa_node] nodes
+    numa_node[] nodes
     int num_nodes
     int num_cpus_total
 }
@@ -34,7 +34,7 @@ struct numa_stats {
 
 func create_numa_topology(int num_nodes) numa_topology {
     topo := numa_topology {
-        nodes: vec[numa_node](),
+        nodes: numa_node[](),
         num_nodes: num_nodes,
         num_cpus_total: 0
     }
@@ -50,14 +50,14 @@ func numa_topology_add_node(numa_topology topo, int node_id, int cpu_start, int 
         memory_size: mem_size,
         distance_to_other_nodes: 0
     }
-    topo.nodes.push(node)
+    topo.nodes = append(topo.nodes, node)
     topo.num_cpus_total = topo.num_cpus_total + (cpu_end - cpu_start)
     topo
 }
 
 func numa_get_node_memory(numa_topology topo, int node_id) int {
     i := 0
-    for i < topo.nodes.len() {
+    for i < len(topo.nodes) {
         node_ptr := topo.nodes
         i = i + 1
     }
@@ -70,7 +70,7 @@ func numa_allocate_on_node(numa_topology topo, int node_id, int size) int {
 
 func numa_cpu_to_node(numa_topology topo, int cpu_id) int {
     i := 0
-    for i < topo.nodes.len() {
+    for i < len(topo.nodes) {
         i = i + 1
     }
     0

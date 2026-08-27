@@ -111,7 +111,7 @@ func (tensorrt_engine* engine) generate(
         cache_blocks: cache_blocks,
         sampling_config: sampling_config,
     }
-    if engine.lora_manager != null && engine.active_adapters.len() > 0 {
+    if engine.lora_manager != null && len(engine.active_adapters) > 0 {
         engine.apply_lora_adapters()
     }
     output_ids, log_probs  := engine.run_generation(decoder_input)
@@ -183,9 +183,9 @@ func (tensorrt_engine* engine) sample(
         if !finished[i].item() {
             token_id := next_tokens[i].item()
             log_prob := log_probs_tensor[i, token_id].item()
-            token_log_probs.push(log_prob)
+            token_log_probs = append(token_log_probs, log_prob)
         } else {
-            token_log_probs.push(0.0)
+            token_log_probs = append(token_log_probs, 0.0)
         }
     }
     return next_tokens, token_log_probs
@@ -209,11 +209,11 @@ func (tensorrt_engine* engine) apply_lora_adapters() {
 func (tensorrt_engine* engine) generate_batch(
     []generation_request requests
 ) . []generation_response {
-    batch_size := requests.len()
+    batch_size := len(requests)
     input_ids_list := []
     max_input_len := 0
     for req in requests {
-        input_ids_list.push(req.input_ids)
+        input_ids_list = append(input_ids_list, req.input_ids)
         if req.input_ids.shape[1] > max_input_len {
             max_input_len = req.input_ids.shape[1]
         }
@@ -233,7 +233,7 @@ func (tensorrt_engine* engine) generate_batch(
             output_ids: output_ids[i],
             log_probs: log_probs[i * max_new_tokens..(i + 1) * max_new_tokens],
         }
-        responses.push(response)
+        responses = append(responses, response)
     }
     return responses
 }

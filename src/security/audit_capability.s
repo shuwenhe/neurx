@@ -52,12 +52,12 @@ func (audit_manager* am) init(int max_log_size) (int, string) {
 
 // 添加审计规则
 func (audit_manager* am) add_rule(int event_type, string target, int action) (audit_rule, string) {
-    if am.ruleset.rules.len() >= am.ruleset.max_rules {
+    if len(am.ruleset.rules) >= am.ruleset.max_rules {
         return audit_rule{}, "Rule limit exceeded"
     }
     
     rule := audit_rule{
-        rule_id: am.ruleset.rules.len(),
+        rule_id: len(am.ruleset.rules),
         enabled: 1,
         event_type: event_type,
         target: target,
@@ -65,13 +65,13 @@ func (audit_manager* am) add_rule(int event_type, string target, int action) (au
         priority: 0
     }
     
-    am.ruleset.rules.push(rule)
+    am.ruleset.rules = append(am.ruleset.rules, rule)
     return rule, ""
 }
 
 // 删除审计规则
 func (audit_manager* am) delete_rule(int rule_id) (int, string) {
-    if rule_id >= am.ruleset.rules.len() {
+    if rule_id >= len(am.ruleset.rules) {
         return -1, "Rule not found"
     }
     
@@ -84,7 +84,7 @@ func (audit_manager* am) delete_rule(int rule_id) (int, string) {
 
 // 启用/禁用规则
 func (audit_manager* am) toggle_rule(int rule_id, int enabled) (int, string) {
-    if rule_id >= am.ruleset.rules.len() {
+    if rule_id >= len(am.ruleset.rules) {
         return -1, "Rule not found"
     }
     
@@ -114,7 +114,7 @@ func (audit_manager* am) log_event(int pid, int uid, int event_type, string even
     
     // 检查审计规则
     i := 0
-    for i < am.ruleset.rules.len() {
+    for i < len(am.ruleset.rules) {
         rule := am.ruleset.rules[i]
         if rule.enabled == 1 && rule.event_type == event_type {
             if rule.action == 1 {
@@ -127,7 +127,7 @@ func (audit_manager* am) log_event(int pid, int uid, int event_type, string even
         i = i + 1
     }
     
-    am.log_entries.push(entry)
+    am.log_entries = append(am.log_entries, entry)
     am.log_count = am.log_count + 1
     am.next_entry_id = am.next_entry_id + 1
     
@@ -140,10 +140,10 @@ func (audit_manager am) query_logs(int event_type) (audit_log_entry[], string) {
 
     
     i := 0
-    for i < am.log_entries.len() {
+    for i < len(am.log_entries) {
         entry := am.log_entries[i]
         if entry.event_type == event_type {
-            matching_logs.push(entry)
+            matching_logs = append(matching_logs, entry)
         }
         i = i + 1
     }
@@ -157,7 +157,7 @@ func (audit_manager am) get_audit_stats() (int, int, int) {
     failure_count := 0
     
     i := 0
-    for i < am.log_entries.len() {
+    for i < len(am.log_entries) {
         entry := am.log_entries[i]
         if entry.result == 0 {
             success_count = success_count + 1
@@ -167,7 +167,7 @@ func (audit_manager am) get_audit_stats() (int, int, int) {
         i = i + 1
     }
     
-    return am.log_entries.len(), success_count, failure_count
+    return len(am.log_entries), success_count, failure_count
 }
 
 // 权限能力结构
@@ -201,7 +201,7 @@ func (capability_manager* capm) init() (int, string) {
 // 为进程添加能力
 func (capability_manager* capm) add_capability_to_process(int pid, int cap_id) (int, string) {
     i := 0
-    for i < capm.process_caps.len() {
+    for i < len(capm.process_caps) {
         proc_cap := capm.process_caps[i]
         if proc_cap.pid == pid {
             cap := capability{
@@ -209,7 +209,7 @@ func (capability_manager* capm) add_capability_to_process(int pid, int cap_id) (
                 cap_name: "",
                 enabled: 1
             }
-            proc_cap.effective_caps.push(cap)
+            proc_cap.effective_caps = append(proc_cap.effective_caps, cap)
             capm.process_caps[i] = proc_cap
             return 0, ""
         }
@@ -230,8 +230,8 @@ func (capability_manager* capm) add_capability_to_process(int pid, int cap_id) (
         enabled: 1
     }
     
-    new_proc_cap.effective_caps.push(cap)
-    capm.process_caps.push(new_proc_cap)
+    new_proc_cap.effective_caps = append(new_proc_cap.effective_caps, cap)
+    capm.process_caps = append(capm.process_caps, new_proc_cap)
     
     return 0, ""
 }
@@ -239,11 +239,11 @@ func (capability_manager* capm) add_capability_to_process(int pid, int cap_id) (
 // 移除进程的能力
 func (capability_manager* capm) remove_capability_from_process(int pid, int cap_id) (int, string) {
     i := 0
-    for i < capm.process_caps.len() {
+    for i < len(capm.process_caps) {
         proc_cap := capm.process_caps[i]
         if proc_cap.pid == pid {
             j := 0
-            for j < proc_cap.effective_caps.len() {
+            for j < len(proc_cap.effective_caps) {
                 cap := proc_cap.effective_caps[j]
                 if cap.cap_id == cap_id {
                     cap.enabled = 0
@@ -264,11 +264,11 @@ func (capability_manager* capm) remove_capability_from_process(int pid, int cap_
 // 检查进程是否具有能力
 func (capability_manager capm) has_capability(int pid, int cap_id) (int, string) {
     i := 0
-    for i < capm.process_caps.len() {
+    for i < len(capm.process_caps) {
         proc_cap := capm.process_caps[i]
         if proc_cap.pid == pid {
             j := 0
-            for j < proc_cap.effective_caps.len() {
+            for j < len(proc_cap.effective_caps) {
                 cap := proc_cap.effective_caps[j]
                 if cap.cap_id == cap_id && cap.enabled == 1 {
                     return 1, "Has capability"
@@ -286,10 +286,10 @@ func (capability_manager capm) has_capability(int pid, int cap_id) (int, string)
 // 获取进程能力统计
 func (capability_manager capm) get_capabilities(int pid) (int, string) {
     i := 0
-    for i < capm.process_caps.len() {
+    for i < len(capm.process_caps) {
         proc_cap := capm.process_caps[i]
         if proc_cap.pid == pid {
-            return proc_cap.effective_caps.len(), ""
+            return len(proc_cap.effective_caps), ""
         }
         i = i + 1
     }

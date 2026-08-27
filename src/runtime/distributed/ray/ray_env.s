@@ -54,7 +54,7 @@ type placement_group struct {
     id string
     name string
     strategy string
-    bundles vec[placement_group_bundle]
+    bundles placement_group_bundle[]
     is_prepared bool
     state string
 }
@@ -76,7 +76,7 @@ type ray_env struct {
     init_kwargs map[string]interface{}
     placement_groups map[string]placement_group*
     actors map[string]interface{}
-    task_refs vec[interface{}]
+    task_refs interface{}[]
     statistics map[string]interface{}
     shutdown_flag bool
 }
@@ -104,7 +104,7 @@ func create_ray_env() ray_env* {
     env.init_kwargs = make(map[string]interface{})
     env.placement_groups = make(map[string]placement_group*)
     env.actors = make(map[string]interface{})
-    env.task_refs = make(vec[interface{}], 0)
+    env.task_refs = make(interface{}[], 0)
     env.statistics = make(map[string]interface{})
     env.statistics["init_count"] = uint64(0)
     env.statistics["shutdown_count"] = uint64(0)
@@ -147,13 +147,13 @@ func (env ray_env*) initialize_ray(config ray_config*) bool {
 func (env ray_env*) create_placement_group(
     name string,
     strategy string,
-    bundles vec[map[string]float64],
+    bundles map[string[]float64],
 ) placement_group* {
     pg := new(placement_group)
     pg.id = name
     pg.name = name
     pg.strategy = strategy
-    pg.bundles = make(vec[placement_group_bundle], len(bundles))
+    pg.bundles = make(placement_group_bundle[], len(bundles))
     pg.is_prepared = false
     pg.state = "pending"
 
@@ -208,8 +208,8 @@ func (env ray_env*) get_actor(name string) interface{} {
     return actor
 }
 
-func (env ray_env*) list_actors() vec[string] {
-    names := make(vec[string], 0)
+func (env ray_env*) list_actors() string[] {
+    names := make(string[], 0)
     for name := range env.actors {
         names = append(names, name)
     }
@@ -234,8 +234,8 @@ func (env ray_env*) get_placement_group(name string) placement_group* {
     return pg
 }
 
-func (env ray_env*) list_placement_groups() vec[string] {
-    names := make(vec[string], 0)
+func (env ray_env*) list_placement_groups() string[] {
+    names := make(string[], 0)
     for name := range env.placement_groups {
         names = append(names, name)
     }
@@ -277,7 +277,7 @@ func (env ray_env*) shutdown() bool {
     clear_actors := make(map[string]interface{})
     env.actors = clear_actors
 
-    clear_tasks := make(vec[interface{}], 0)
+    clear_tasks := make(interface{}[], 0)
     env.task_refs = clear_tasks
 
     count := env.statistics["shutdown_count"].(uint64)

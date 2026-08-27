@@ -172,8 +172,8 @@ func ir_add_eqn_with_io(ir_graph graph, string primitive, []string params, []str
     []string primitives = copy_strings(graph.primitives)
     []string param_list = copy_strings(graph.params)
     []ir_eqn eqns = copy_eqns(graph.eqns)
-    primitives.push(primitive)
-    param_list.push(join_params(params))
+    primitives = append(primitives, primitive)
+    param_list = append(param_list, join_params(params))
     eqns.push(
         ir_eqn {
             primitive: primitive,
@@ -205,7 +205,7 @@ func ir_add_eqn(ir_graph graph, string primitive) ir_graph {
 
 func ir_add_input(ir_graph graph, string input) ir_graph {
     []string inputs = copy_strings(graph.inputs)
-    inputs.push(input)
+    inputs = append(inputs, input)
     ir_graph {
         name: graph.name,
         eqn_count: graph.eqn_count,
@@ -221,7 +221,7 @@ func ir_add_input(ir_graph graph, string input) ir_graph {
 
 func ir_add_output(ir_graph graph, string output) ir_graph {
     []string outputs = copy_strings(graph.outputs)
-    outputs.push(output)
+    outputs = append(outputs, output)
     ir_graph {
         name: graph.name,
         eqn_count: graph.eqn_count,
@@ -375,7 +375,7 @@ func simple_fuse_add(ir_graph graph) ir_graph {
                 outputs: copy_strings(eqn.outputs),
             })
         } else {
-            optimized_eqns.push(eqn)
+            optimized_eqns = append(optimized_eqns, eqn)
         }
         i = i + 1
     }

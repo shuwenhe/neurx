@@ -26,7 +26,7 @@ func read_jsonl_file(string filepath) []jsonl_document {
             jsonl_document doc = parse_json_document(line)
             doc.source = filepath
             doc.document_id = doc_id
-            docs.push(doc)
+            docs = append(docs, doc)
             doc_id = doc_id + 1
         }
         i = i + 1
@@ -248,10 +248,10 @@ func append_int([]int arr, int val) []int {
     []int out = []int{cap: len(arr) + 1}
     int i = 0
     for i < len(arr) {
-        out.push(arr[i])
+        out = append(out, arr[i])
         i = i + 1
     }
-    out.push(val)
+    out = append(out, val)
     out
 }
 
@@ -259,10 +259,10 @@ func append_string([]string arr, string val) []string {
     []string out = []string{cap: len(arr) + 1}
     int i = 0
     for i < len(arr) {
-        out.push(arr[i])
+        out = append(out, arr[i])
         i = i + 1
     }
-    out.push(val)
+    out = append(out, val)
     out
 }
 
@@ -301,7 +301,7 @@ func split_lines(string text) []string {
         string ch = neurx.strings.substring(text, i, i + 1)
         if ch == "\n" || ch == "\r" {
             if len(current) > 0 {
-                lines.push(current)
+                lines = append(lines, current)
                 current = ""
             }
         } else {
@@ -310,7 +310,7 @@ func split_lines(string text) []string {
         i = i + 1
     }
     if len(current) > 0 {
-        lines.push(current)
+        lines = append(lines, current)
     }
     lines
 }
@@ -425,16 +425,16 @@ func find_substring(string text, string pattern) int {
 
 func build_default_vocab() []string {
     []string vocab = []string{cap: 0}
-    vocab.push("<pad>")
-    vocab.push("<bos>")
-    vocab.push("<eos>")
-    vocab.push("<unk>")
+    vocab = append(vocab, "<pad>")
+    vocab = append(vocab, "<bos>")
+    vocab = append(vocab, "<eos>")
+    vocab = append(vocab, "<unk>")
     int c = 32
     for c <= 126 {
-        vocab.push(string(c))
+        vocab = append(vocab, string(c))
         c = c + 1
     }
-    vocab.push("\n")
-    vocab.push("\t")
+    vocab = append(vocab, "\n")
+    vocab = append(vocab, "\t")
     vocab
 }

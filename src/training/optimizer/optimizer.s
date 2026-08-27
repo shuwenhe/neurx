@@ -138,7 +138,7 @@ func optimizer_make_group([]tensor params, float lr, float weight_decay, float b
 
 func optimizer_with_group(optimizer opt, optimizer_param_group group) optimizer {
     optimizer next = optimizer_state_dict(opt)
-    next.param_groups.push(group)
+    next.param_groups = append(next.param_groups, group)
     if next.kind == "none" {
         next.kind = group.kind
     }

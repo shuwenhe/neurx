@@ -941,7 +941,7 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, []flo
     []float norm_weight = load_vector(state.model, input_norm, hidden_size)
     []float normalized = rms_norm(hidden, norm_weight)
     if len(normalized) != hidden_size {
-        return (hidden, cache)
+        return hidden, cache
     }
     string q_name = layer_name(layer, "self_attn.q_proj.weight")
     string k_name = layer_name(layer, "self_attn.k_proj.weight")
@@ -951,7 +951,7 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, []flo
     []float k = matvec_named(state.model, k_name, hidden_size, hidden_size, normalized)
     []float v = matvec_named(state.model, v_name, hidden_size, hidden_size, normalized)
     if len(q) != hidden_size || len(k) != hidden_size || len(v) != hidden_size {
-        return (hidden, cache)
+        return hidden, cache
     }
     if cache.total_tokens < position + 1 {
         cache = reserve_tokens(cache, position + 1 - cache.total_tokens)
@@ -961,11 +961,11 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, []flo
     float scale = 1.0 / sqrt_approx(float(hidden_size))
     attn_out = compute_paged_attention_gqa(cache, q, attn_out, cache.token_to_slot, 1, 1, hidden_size, scale)
     if len(attn_out) != hidden_size {
-        return (hidden, cache)
+        return hidden, cache
     }
     []float attention = matvec_named(state.model, o_name, hidden_size, hidden_size, attn_out)
     if len(attention) != hidden_size {
-        return (hidden, cache)
+        return hidden, cache
     }
     int index = 0
     for index < hidden_size {
@@ -976,7 +976,7 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, []flo
     []float ffn_norm_weight = load_vector(state.model, ffn_norm_name, hidden_size)
     []float ffn_hidden = rms_norm(hidden, ffn_norm_weight)
     if len(ffn_hidden) != hidden_size {
-        return (hidden, cache)
+        return hidden, cache
     }
     string gate_name = layer_name(layer, "mlp.gate_proj.weight")
     string up_name = layer_name(layer, "mlp.up_proj.weight")
@@ -984,7 +984,7 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, []flo
     []float gate = matvec_named(state.model, gate_name, intermediate_size, hidden_size, ffn_hidden)
     []float up = matvec_named(state.model, up_name, intermediate_size, hidden_size, ffn_hidden)
     if len(gate) != intermediate_size || len(up) != intermediate_size {
-        return (hidden, cache)
+        return hidden, cache
     }
     []float activated = []float{cap: intermediate_size}
     index = 0
@@ -994,7 +994,7 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, []flo
     }
     []float down = matvec_named(state.model, down_name, hidden_size, intermediate_size, activated)
     if len(down) != hidden_size {
-        return (hidden, cache)
+        return hidden, cache
     }
     index = 0
     for index < hidden_size {
@@ -1017,7 +1017,7 @@ func run_transformer_stack_cached(real_text_engine_state state, []float hidden, 
     []float final_norm = load_vector(state.model, norm_name, safe_hidden_size(state))
     []float output = rms_norm(hidden, final_norm)
     if len(output) == len(hidden) {
-        return (output, caches)
+        return output, caches
     }
     (hidden, caches)
 }
@@ -1027,7 +1027,7 @@ func advance_hidden_state_cached(real_text_engine_state state, []float hidden, i
     int vocab_size = safe_vocab_size(state)
     []float row = load_embedding_row(state.model, "model.embed_tokens.weight", token_id, hidden_size, vocab_size)
     if len(row) != hidden_size {
-        return (hidden, caches)
+        return hidden, caches
     }
     []float blended = blend_vectors(hidden, row, 0.78, 0.22)
     run_transformer_stack_cached(state, blended, caches, position)

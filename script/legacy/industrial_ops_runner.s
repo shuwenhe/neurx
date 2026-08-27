@@ -43,7 +43,7 @@ func ops_split_lines(string text) []string {
     for i < len(text) {
         int ch := text[i]
         if ch == 10 {
-            lines.push(current)
+            lines = append(lines, current)
             current = ""
         } else if ch != 13 {
             current = current + chr(ch)
@@ -51,7 +51,7 @@ func ops_split_lines(string text) []string {
         i = i + 1
     }
     if current != "" || len(text) == 0 {
-        lines.push(current)
+        lines = append(lines, current)
     }
     lines
 }

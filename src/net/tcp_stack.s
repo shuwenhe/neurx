@@ -103,7 +103,7 @@ func (mgr* tcp_manager) create_connection(local_port int, remote_port int, remot
         cwnd: 1460
     }
     
-    mgr.connections.push(conn)
+    mgr.connections = append(mgr.connections, conn)
     conn_id := mgr.conn_counter
     mgr.conn_counter = mgr.conn_counter + 1
     mgr.total_connections = mgr.total_connections + 1
@@ -113,7 +113,7 @@ func (mgr* tcp_manager) create_connection(local_port int, remote_port int, remot
 
 // 连接状态转变
 func (mgr* tcp_manager) change_state(conn_id int, new_state int) (int, string) {
-    if conn_id >= mgr.connections.len() {
+    if conn_id >= len(mgr.connections) {
         return -1, "connection not found"
     }
     
@@ -133,7 +133,7 @@ func (mgr* tcp_manager) change_state(conn_id int, new_state int) (int, string) {
 
 // 发送 TCP 数据
 func (mgr* tcp_manager) send_data(conn_id int, data byte[], len int) (int, string) {
-    if conn_id >= mgr.connections.len() {
+    if conn_id >= len(mgr.connections) {
         return -1, "connection not found"
     }
     
@@ -159,7 +159,7 @@ func (mgr* tcp_manager) send_data(conn_id int, data byte[], len int) (int, strin
 
 // 接收 TCP 数据
 func (mgr* tcp_manager) recv_data(conn_id int) (byte[], string) {
-    if conn_id >= mgr.connections.len() {
+    if conn_id >= len(mgr.connections) {
         return byte[]{}, "connection not found"
     }
     
@@ -171,7 +171,7 @@ func (mgr* tcp_manager) recv_data(conn_id int) (byte[], string) {
     
     // 返回空数据（模拟）
     data := byte[]{}
-    mgr.total_bytes_recv = mgr.total_bytes_recv + data.len()
+    mgr.total_bytes_recv = mgr.total_bytes_recv + len(data)
     
     return data, ""
 }
@@ -201,7 +201,7 @@ func (mgr* udp_manager) create_endpoint(local_port int, remote_port int, remote_
         packets_recv: 0
     }
     
-    mgr.endpoints.push(endpoint)
+    mgr.endpoints = append(mgr.endpoints, endpoint)
     endpoint_id := mgr.endpoint_counter
     mgr.endpoint_counter = mgr.endpoint_counter + 1
     
@@ -210,7 +210,7 @@ func (mgr* udp_manager) create_endpoint(local_port int, remote_port int, remote_
 
 // 发送 UDP 数据报
 func (mgr* udp_manager) send_datagram(endpoint_id int, data byte[], len int) (int, string) {
-    if endpoint_id >= mgr.endpoints.len() {
+    if endpoint_id >= len(mgr.endpoints) {
         return -1, "endpoint not found"
     }
     
@@ -226,7 +226,7 @@ func (mgr* udp_manager) send_datagram(endpoint_id int, data byte[], len int) (in
 
 // 接收 UDP 数据报
 func (mgr* udp_manager) recv_datagram(endpoint_id int) (byte[], string) {
-    if endpoint_id >= mgr.endpoints.len() {
+    if endpoint_id >= len(mgr.endpoints) {
         return byte[]{}, "endpoint not found"
     }
     
@@ -266,7 +266,7 @@ func (mgr* route_manager) add_route(dest_ip int, dest_mask int, next_hop_ip int,
         interface_id: 0
     }
     
-    mgr.routes.push(route)
+    mgr.routes = append(mgr.routes, route)
     route_id := mgr.route_counter
     mgr.route_counter = mgr.route_counter + 1
     
@@ -278,7 +278,7 @@ func (mgr* route_manager) lookup_route(dest_ip int) (route_entry, string) {
     mgr.total_lookups = mgr.total_lookups + 1
     
     i := 0
-    for i < mgr.routes.len() {
+    for i < len(mgr.routes) {
         route := mgr.routes[i]
         if route.dest_ip == dest_ip {
             mgr.cache_hits = mgr.cache_hits + 1

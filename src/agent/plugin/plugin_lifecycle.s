@@ -42,7 +42,7 @@ struct lifecycle_listener {
 	string                  listener_id
 	string                  listener_name
 
-	vec[lifecycle_event_type] subscribed_events
+	lifecycle_event_type[] subscribed_events
 	int32                   subscription_count
 
 	int32                   events_received
@@ -54,7 +54,7 @@ struct plugin_lifecycle_manager {
 	map[string]lifecycle_listener]  listeners
 	int32                           listener_count
 
-	vec[lifecycle_event]            event_history
+	lifecycle_event[]            event_history
 	int32                           max_history_size
 	int32                           event_history_count
 
@@ -102,7 +102,7 @@ func create_plugin_lifecycle_manager(max_history int32) plugin_lifecycle_manager
 	return plugin_lifecycle_manager{
 		listeners:                make(map[string]lifecycle_listener),
 		listener_count:           0,
-		event_history:            make(vec[lifecycle_event], 0, max_history),
+		event_history:            make(lifecycle_event[], 0, max_history),
 		max_history_size:         max_history,
 		event_history_count:      0,
 		total_lifecycle_events:   0,
@@ -197,11 +197,11 @@ func (plugin_lifecycle_manager* m) emit_lifecycle_event(event lifecycle_event) {
 	}
 }
 
-func (plugin_lifecycle_manager* m) get_event_history(plugin_id string) vec[lifecycle_event] {
+func (plugin_lifecycle_manager* m) get_event_history(plugin_id string) lifecycle_event[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	result := make(vec[lifecycle_event], 0)
+	result := make(lifecycle_event[], 0)
 
 	for event := range m.event_history {
 		if event.plugin_id == plugin_id {
@@ -212,11 +212,11 @@ func (plugin_lifecycle_manager* m) get_event_history(plugin_id string) vec[lifec
 	return result
 }
 
-func (plugin_lifecycle_manager* m) get_all_events() vec[lifecycle_event] {
+func (plugin_lifecycle_manager* m) get_all_events() lifecycle_event[] {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	result := make(vec[lifecycle_event], 0)
+	result := make(lifecycle_event[], 0)
 	for event := range m.event_history {
 		result = append(result, event)
 	}
@@ -309,7 +309,7 @@ func (plugin_lifecycle_manager* m) clear_event_history() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	m.event_history = make(vec[lifecycle_event], 0, m.max_history_size)
+	m.event_history = make(lifecycle_event[], 0, m.max_history_size)
 	m.event_history_count = 0
 }
 
@@ -328,7 +328,7 @@ func create_lifecycle_listener(listener_id string, name string) lifecycle_listen
 	return lifecycle_listener{
 		listener_id:         listener_id,
 		listener_name:       name,
-		subscribed_events:   make(vec[lifecycle_event_type], 0),
+		subscribed_events:   make(lifecycle_event_type[], 0),
 		subscription_count:  0,
 		events_received:     0,
 		created_at:          time.Now().UnixNano(),

@@ -41,19 +41,19 @@ func agent_search_count_lines(string text) int {
 
 func agent_search_candidate_paths(string route) []string {
     []string paths = []string{cap: 12}
-    paths.push("src/agent/runtime.s")
-    paths.push("src/runtime/executor/executor.s")
-    paths.push("src/runtime/task/planner.s")
-    paths.push("src/core/memory/memory.s")
-    paths.push("tool/workspace_tools.s")
-    paths.push("src/agent/action/action_schema.s")
-    paths.push("README.md")
+    paths = append(paths, "src/agent/runtime.s")
+    paths = append(paths, "src/runtime/executor/executor.s")
+    paths = append(paths, "src/runtime/task/planner.s")
+    paths = append(paths, "src/core/memory/memory.s")
+    paths = append(paths, "tool/workspace_tools.s")
+    paths = append(paths, "src/agent/action/action_schema.s")
+    paths = append(paths, "README.md")
     if route == "sql" {
-        paths.push("src/core/sql/neurx_init.s")
+        paths = append(paths, "src/core/sql/neurx_init.s")
     }
     if route == "repo" || route == "code" {
-        paths.push("app/README.md")
-        paths.push("doc/AGENT_CAPABILITY_GAP.md")
+        paths = append(paths, "app/README.md")
+        paths = append(paths, "doc/AGENT_CAPABILITY_GAP.md")
     }
     paths
 }

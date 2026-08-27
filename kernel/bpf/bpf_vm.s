@@ -11,7 +11,7 @@ struct bpf_insn {
 }
 
 struct bpf_program {
-    vec[bpf_insn] instructions
+    bpf_insn[] instructions
     string program_name
     int program_id
     int entry_point
@@ -32,15 +32,15 @@ struct bpf_map {
 }
 
 struct bpf_vm {
-    vec[bpf_program] programs
-    vec[bpf_map] maps
+    bpf_program[] programs
+    bpf_map[] maps
     int vm_id
     int running
 }
 
 func create_bpf_program(string name) bpf_program {
     prog := bpf_program {
-        instructions: vec[bpf_insn](),
+        instructions: bpf_insn[](),
         program_name: name,
         program_id: 0,
         entry_point: 0
@@ -56,7 +56,7 @@ func bpf_program_add_insn(bpf_program prog, int opcode, int src, int dst, int of
         offset: offset,
         imm: imm
     }
-    prog.instructions.push(insn)
+    prog.instructions = append(prog.instructions, insn)
     prog
 }
 
@@ -73,8 +73,8 @@ func create_bpf_map(string name, int key_sz, int value_sz, int max_ent) bpf_map 
 
 func create_bpf_vm() bpf_vm {
     vm := bpf_vm {
-        programs: vec[bpf_program](),
-        maps: vec[bpf_map](),
+        programs: bpf_program[](),
+        maps: bpf_map[](),
         vm_id: 0,
         running: 0
     }
@@ -82,12 +82,12 @@ func create_bpf_vm() bpf_vm {
 }
 
 func bpf_vm_load_program(bpf_vm vm, bpf_program prog) bpf_vm {
-    vm.programs.push(prog)
+    vm.programs = append(vm.programs, prog)
     vm
 }
 
 func bpf_vm_add_map(bpf_vm vm, bpf_map map) bpf_vm {
-    vm.maps.push(map)
+    vm.maps = append(vm.maps, map)
     vm
 }
 
@@ -102,9 +102,9 @@ func bpf_vm_stop(bpf_vm vm) bpf_vm {
 }
 
 func bpf_get_program_count(bpf_vm vm) int {
-    vm.programs.len()
+    len(vm.programs)
 }
 
 func bpf_get_map_count(bpf_vm vm) int {
-    vm.maps.len()
+    len(vm.maps)
 }

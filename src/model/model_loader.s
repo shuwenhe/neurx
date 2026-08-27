@@ -348,7 +348,7 @@ func (model_config* config) is_valid() ((), model_loader_error) {
         })
     }
 
-    ((, ""))
+    return (), ""
 }
 
 func load_model_architecture(string model_name) (model_architecture, model_loader_error) {
@@ -363,15 +363,15 @@ func load_model_architecture(string model_name) (model_architecture, model_loade
 }
 
 func main() {
-    model_names := vec[string]()
-    model_names.push("llama")
-    model_names.push("qwen")
-    model_names.push("deepseek")
-    model_names.push("mistral")
-    model_names.push("phi")
+    model_names := string[]()
+    model_names = append(model_names, "llama")
+    model_names = append(model_names, "qwen")
+    model_names = append(model_names, "deepseek")
+    model_names = append(model_names, "mistral")
+    model_names = append(model_names, "phi")
 
     i := 0
-    for i < model_names.len() {
+    for i < len(model_names) {
         name := model_names[i]
         switch load_model_architecture(name) {
             (arch, "") : {

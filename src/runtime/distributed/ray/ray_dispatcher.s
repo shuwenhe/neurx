@@ -21,7 +21,7 @@ type ray_task struct {
     task_id string
     actor_name string
     method_name string
-    args vec[interface{}]
+    args interface{}[]
     kwargs map[string]interface{}
     status task_status
     result interface{}
@@ -43,7 +43,7 @@ type actor_load struct {
 }
 
 type task_queue struct {
-    queue vec[ray_task*]
+    queue ray_task*[]
     size_limit uint32
     current_size uint32
 }
@@ -68,7 +68,7 @@ func create_ray_task(
     task.task_id = task_id
     task.actor_name = actor_name
     task.method_name = method_name
-    task.args = make(vec[interface{}], 0)
+    task.args = make(interface{}[], 0)
     task.kwargs = make(map[string]interface{})
     task.status = task_status_pending
     task.result = nil
@@ -94,7 +94,7 @@ func create_actor_load(actor_name string) actor_load* {
 
 func create_task_queue(size_limit uint32) task_queue* {
     queue := new(task_queue)
-    queue.queue = make(vec[ray_task*], 0)
+    queue.queue = make(ray_task*[], 0)
     queue.size_limit = size_limit
     queue.current_size = 0
     return queue
@@ -329,8 +329,8 @@ func (dispatcher ray_dispatcher*) get_actor_load(actor_name string) actor_load* 
     return load
 }
 
-func (dispatcher ray_dispatcher*) list_actors() vec[string] {
-    actors := make(vec[string], 0)
+func (dispatcher ray_dispatcher*) list_actors() string[] {
+    actors := make(string[], 0)
     for name := range dispatcher.actor_loads {
         actors = append(actors, name)
     }
@@ -351,7 +351,7 @@ func (dispatcher ray_dispatcher*) get_queue_size() uint32 {
 }
 
 func (dispatcher ray_dispatcher*) clear_queue() {
-    clear_queue := make(vec[ray_task*], 0)
+    clear_queue := make(ray_task*[], 0)
     dispatcher.task_queue.queue = clear_queue
     dispatcher.task_queue.current_size = 0
 }
@@ -436,7 +436,7 @@ func (dispatcher ray_dispatcher*) cleanup() {
     clear_loads := make(map[string]actor_load*)
     dispatcher.actor_loads = clear_loads
 
-    clear_queue := make(vec[ray_task*], 0)
+    clear_queue := make(ray_task*[], 0)
     dispatcher.task_queue.queue = clear_queue
     dispatcher.task_queue.current_size = 0
 }

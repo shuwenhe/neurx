@@ -180,7 +180,7 @@ func (operation* op) add_attribute(string key, string value) {
         key: key,
         value_str: value,
     }
-    op.attributes.push(attr)
+    op.attributes = append(op.attributes, attr)
 }
 
 func (operation* op) get_attribute(string key) option[string] {
@@ -193,9 +193,9 @@ func (operation* op) get_attribute(string key) option[string] {
 }
 
 func (operation* op) num_inputs() int {
-    op.input_ids.len()
+    len(op.input_ids)
 }
 
 func (operation* op) num_outputs() int {
-    op.output_ids.len()
+    len(op.output_ids)
 }

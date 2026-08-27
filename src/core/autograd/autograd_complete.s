@@ -25,7 +25,7 @@ func create_tape() gradient_tape {
 
 func add_node(gradient_tape tape, tensor value, string op, []int inputs) (gradient_tape, int) {
     if !tape.recording {
-        return (tape, -1)
+        return tape, -1
     }
     gradient_node node = gradient_node {
         id: tape.node_counter,
@@ -34,7 +34,7 @@ func add_node(gradient_tape tape, tensor value, string op, []int inputs) (gradie
         inputs: inputs,
         grad: zeros(value.shape),
     }
-    tape.nodes.push(node)
+    tape.nodes = append(tape.nodes, node)
     int node_id = tape.node_counter
     tape.node_counter = tape.node_counter + 1
     (tape, node_id)
@@ -270,7 +270,7 @@ func backward_tape(
     []tensor gradients = []tensor{cap: num_nodes}
     int i = 0
     for i < num_nodes {
-        gradients.push(zeros(tape.nodes[i].value.shape))
+        gradients = append(gradients, zeros(tape.nodes[i].value.shape))
         i = i + 1
     }
     i = num_nodes - 1

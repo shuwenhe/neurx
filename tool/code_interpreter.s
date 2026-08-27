@@ -171,7 +171,7 @@ struct sandbox_environment {
             ("rm -rf", "Destructive file operation"),
             ("> /dev/", "Writing to device files"),
             ("chmod 777", "Permission modification"),
-            ("mkfs", "Filesystem formatting command")
+return             ("mkfs", "Filesystem formatting command")
         ]
         for pattern, message in dangerous_patterns {
             if pattern.to_lower() in code.to_lower() {
@@ -440,7 +440,7 @@ struct java_script_runtime {
                 (function() {
                     __output := [];
                     const originalLog = console.log;
-                    console.log = (...args) => { __output.push(args.join(' ')); };
+                    console.log = (...args) => { __output = append(__output, args.join(' ')); };
                     try {
                         ${code}
                         const __result = typeof __last_expression !== 'undefined'  __last_expression : undefined;

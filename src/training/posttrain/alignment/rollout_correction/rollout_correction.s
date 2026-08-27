@@ -36,7 +36,7 @@ func apply_rollout_correction_to_advantages(
         response_mask
     )
     corrected_mask := response_mask
-    if rs_results.len() > 0 {
+    if len(rs_results) > 0 {
         combined_rs := combine_rejection_results(rs_results)
         corrected_mask = apply_rejection_to_mask(response_mask, combined_rs)
     }
@@ -79,7 +79,7 @@ func apply_rollout_correction_to_loss(
         response_mask
     )
     corrected_mask := response_mask
-    if rs_results.len() > 0 {
+    if len(rs_results) > 0 {
         combined_rs := combine_rejection_results(rs_results)
         corrected_mask = apply_rejection_to_mask(response_mask, combined_rs)
     }
@@ -180,7 +180,7 @@ func collect_statistics(
 }
 
 func is_rollout_correction_enabled(RolloutCorrectionConfig config) . bool {
-    return config.is_level != is_aggregation_level.NONE || config.rs_modes.len() > 0
+    return config.is_level != is_aggregation_level.NONE || len(config.rs_modes) > 0
 }
 
 func clamp(Tensor x, f32 min_val, f32 max_val) . Tensor {

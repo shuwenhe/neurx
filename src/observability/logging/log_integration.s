@@ -10,7 +10,7 @@ struct logging_system {
 
 	metrics_registry*  metrics
 
-	vec[distributed_trace] traces
+	distributed_trace[] traces
 	int32              trace_count
 	int32              max_traces
 
@@ -50,7 +50,7 @@ func create_logging_system(config logging_config) logging_system {
 		logger:                      *logger,
 		collector:                   *collector,
 		metrics:                     *metrics,
-		traces:                      make(vec[distributed_trace], 0, config.max_traces_retained),
+		traces:                      make(distributed_trace[], 0, config.max_traces_retained),
 		trace_count:                 0,
 		max_traces:                  config.max_traces_retained,
 		component_mapping:           make(map[string]string),
@@ -227,7 +227,7 @@ func (logging_system* sys) export_as_json() string {
 func (logging_system* sys) clear_all_logs() {
 	sys.logger.clear_all()
 	sys.collector.clear()
-	sys.traces = make(vec[distributed_trace], 0, sys.max_traces)
+	sys.traces = make(distributed_trace[], 0, sys.max_traces)
 	sys.trace_count = 0
 }
 

@@ -23,7 +23,7 @@ struct log_entry {
 }
 
 struct printk_log_buffer {
-    vec[log_entry] entries
+    log_entry[] entries
     int total_entries
     int max_entries
     int overflow_count
@@ -40,7 +40,7 @@ struct printk_log_buffer {
 
 func log_buffer_create(int max_size) printk_log_buffer {
     buffer := printk_log_buffer {
-        entries: vec[log_entry](),
+        entries: log_entry[](),
         total_entries: 0,
         max_entries: max_size,
         overflow_count: 0,
@@ -57,10 +57,10 @@ func log_buffer_create(int max_size) printk_log_buffer {
     return buffer
 }
 
-func (buf: *printk_log_buffer) printk(log_level level, string facility, string message) (int, string) {
+func (printk_log_buffer* buf) printk(log_level level, string facility, string message) (int, string) {
     if buf.total_entries >= buf.max_entries {
         buf.overflow_count = buf.overflow_count + 1
-        return result::err("Log buffer full")
+        return ((), "Log buffer full")
     }
     
     entry := log_entry {
@@ -69,10 +69,10 @@ func (buf: *printk_log_buffer) printk(log_level level, string facility, string m
         level: level,
         facility: facility,
         message: message,
-        length: message.len()
+        length: len(message)
     }
     
-    buf.entries.push(entry)
+    buf.entries = append(buf.entries, entry)
     buf.total_entries = buf.total_entries + 1
     buf.next_sequence = buf.next_sequence + 1
     
@@ -94,32 +94,32 @@ func (buf: *printk_log_buffer) printk(log_level level, string facility, string m
         buf.debug_count = buf.debug_count + 1
     }
     
-    return result::ok(buf.next_sequence - 1)
+    return buf.next_sequence - 1, ""
 }
 
-func (buf: *printk_log_buffer) set_loglevel(int min_level) (bool, string) {
+func (printk_log_buffer* buf) set_loglevel(int min_level) (bool, string) {
     if min_level < 0 || min_level > 7 {
-        return result::err("Invalid log level")
+        return ((), "Invalid log level")
     }
-    return result::ok(true)
+    return true, ""
 }
 
-func (buf: *printk_log_buffer) clear_buffer() (bool, string) {
-    buf.entries = vec[log_entry]()
+func (printk_log_buffer* buf) clear_buffer() (bool, string) {
+    buf.entries = log_entry[]()
     buf.total_entries = 0
-    return result::ok(true)
+    return true, ""
 }
 
-func (buf: *cprintk_log_buffer) get_stats() string {
+func (cprintk_log_buffer* buf) get_stats() string {
     total := buf.total_entries
     overflow := buf.overflow_count
     return "Log entries: " + total as string + ", Overflow: " + overflow as string
 }
 
-func (buf: *cprintk_log_buffer) count_by_level(log_level level) int {
+func (cprintk_log_buffer* buf) count_by_level(log_level level) int {
     count := 0
     i := 0
-    while i < buf.entries.len() {
+    while i < len(buf.entries) {
         if buf.entries[i].level.value == level.value {
             count = count + 1
         }

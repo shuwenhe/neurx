@@ -9,10 +9,10 @@ struct lora_config {
     lora_rank: int
     lora_alpha: float
     lora_dropout: float
-    target_modules: *vec[string]
+    target_modules: *string[]
     bias: string
     task_type: string
-    modules_to_save: option[*vec[string]]
+    modules_to_save: option[*string[]]
     init_lora_weights: bool
 }
 
@@ -26,7 +26,7 @@ func lora_config::default() lora_config {
         lora_rank: 8,
         lora_alpha: 16.0,
         lora_dropout: 0.05,
-        target_modules: vec[string](),
+        target_modules: string[](),
         bias: "none",
         task_type: "CAUSAL_LM",
         modules_to_save: option::none,
@@ -67,14 +67,14 @@ func (lora_config* config) validate() ((), lora_config_error) {
         })
     }
 
-    if config.task_type.len() == 0 {
+    if len(config.task_type) == 0 {
         return (lora_config_error {
             code: "INVALID_TASK_TYPE",
             message: "task_type cannot be empty",
         })
     }
 
-    ((, ""))
+    return (), ""
 }
 
 func lora_config::from_dict(
@@ -149,7 +149,7 @@ func lora_config::from_dict(
 
     config.validate()
 
-    (config, "")
+return     (config, "")
 }
 
 func (lora_config* config) get_lora_scaling() float {

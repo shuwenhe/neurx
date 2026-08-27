@@ -11,20 +11,20 @@ struct pass_plan_state {
 
 func default_passes(string mode, bool dynamic, bool fullgraph) []string {
     []string passes = []
-    passes.push("normalize")
-    passes.push("shape_infer")
-    passes.push("const_fold")
-    passes.push("dead_code_elim")
+    passes = append(passes, "normalize")
+    passes = append(passes, "shape_infer")
+    passes = append(passes, "const_fold")
+    passes = append(passes, "dead_code_elim")
     if mode == "reduce-overhead" || mode == "max-autotune" {
-        passes.push("fuse_linear_activation")
+        passes = append(passes, "fuse_linear_activation")
     }
     if fullgraph {
-        passes.push("fullgraph_partition")
+        passes = append(passes, "fullgraph_partition")
     }
     if dynamic {
-        passes.push("dynamic_shape_specialize")
+        passes = append(passes, "dynamic_shape_specialize")
     }
-    passes.push("lower_graph")
+    passes = append(passes, "lower_graph")
     passes
 }
 

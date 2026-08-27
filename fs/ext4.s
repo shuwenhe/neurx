@@ -67,9 +67,9 @@ enum file_mode {
 
 struct ext4_filesystem {
     superblock: *ext4_superblock,
-    block_groups: vec[block_group_descriptor],
-    inode_table: vec[ext4_inode],
-    open_files: vec[ext4_file],
+    block_groups: block_group_descriptor[],
+    inode_table: ext4_inode[],
+    open_files: ext4_file[],
     lock: mutex::mutex[void],
 }
 
@@ -83,7 +83,7 @@ struct block_group_descriptor {
 }
 
 func create_superblock(block_size: u32, total_blocks: u32) (*ext4_superblock, string) {
-    let sb := *ext4_superblock{
+    sb := *ext4_superblock{
         total_inodes: 65536,
         block_size: block_size,
         fragment_size: block_size,
@@ -99,32 +99,32 @@ func create_superblock(block_size: u32, total_blocks: u32) (*ext4_superblock, st
         revision_level: 1,
     } as *ext4_superblock
 
-    result::ok(sb)
+return     (sb, "")
 }
 
 func new_ext4_filesystem(block_size: u32) (*ext4_filesystem, string) {
-    let sb := create_superblock(block_size, 1000000)?
+    sb := create_superblock(block_size, 1000000)?
 
-    let fs := *ext4_filesystem{
+    fs := *ext4_filesystem{
         superblock: sb,
-        block_groups: vec[block_group_descriptor](),
-        inode_table: vec[ext4_inode](),
-        open_files: vec[ext4_file](),
+        block_groups: block_group_descriptor[](),
+        inode_table: ext4_inode[](),
+        open_files: ext4_file[](),
         lock: mutex::new(),
     } as *ext4_filesystem
 
-    result::ok(fs)
+return     (fs, "")
 }
 
-func (fs: *ext4_filesystem) format() (void, string) {
-    let _guard := fs.lock.lock()?
+func (ext4_filesystem* fs) format() (void, string) {
+    _guard := fs.lock.lock()?
 
-    let blocks_per_group := fs.superblock.blocks_per_group
-    let num_groups := (1000000 + blocks_per_group - 1) / blocks_per_group
+    blocks_per_group := fs.superblock.blocks_per_group
+    num_groups := (1000000 + blocks_per_group - 1) / blocks_per_group
 
-    let mut group_idx := 0
+    group_idx := 0
     while group_idx < num_groups {
-        let bgd := block_group_descriptor{
+        bgd := block_group_descriptor{
             block_bitmap: 0,
             inode_bitmap: 0,
             inode_table: 0,
@@ -133,11 +133,11 @@ func (fs: *ext4_filesystem) format() (void, string) {
             used_dirs_count: 0,
         }
 
-        fs.block_groups.push(bgd)
+        fs.block_groups = append(fs.block_groups, bgd)
         group_idx = group_idx + 1
     }
 
-    let root_inode := ext4_inode{
+    root_inode := ext4_inode{
         mode: 0o40755,
         uid: 0,
         size: 0,
@@ -159,21 +159,21 @@ func (fs: *ext4_filesystem) format() (void, string) {
         obso_fragment_addr: 0,
     }
 
-    fs.inode_table.push(root_inode)
-    result::ok(())
+    fs.inode_table = append(fs.inode_table, root_inode)
+    return (), ""
 }
 
 func initialize_blocks() u32[12] {
-    let blocks := &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    blocks := &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     blocks
 }
 
-func (fs: *ext4_filesystem) create_inode(mode: u16) (u32, string) {
-    let _guard := fs.lock.lock()?
+func (ext4_filesystem* fs) create_inode(mode: u16) (u32, string) {
+    _guard := fs.lock.lock()?
 
-    let inode_num := fs.inode_table.len() as u32
+    inode_num := len(fs.inode_table) as u32
 
-    let new_inode := ext4_inode{
+    new_inode := ext4_inode{
         mode: mode,
         uid: 0,
         size: 0,
@@ -195,33 +195,33 @@ func (fs: *ext4_filesystem) create_inode(mode: u16) (u32, string) {
         obso_fragment_addr: 0,
     }
 
-    fs.inode_table.push(new_inode)
-    result::ok(inode_num)
+    fs.inode_table = append(fs.inode_table, new_inode)
+return     (inode_num, "")
 }
 
-func (fs: *ext4_filesystem) delete_inode(inode_num: u32) (void, string) {
-    let _guard := fs.lock.lock()?
+func (ext4_filesystem* fs) delete_inode(inode_num: u32) (void, string) {
+    _guard := fs.lock.lock()?
 
-    if (inode_num as u32) >= fs.inode_table.len() as u32 {
-        return result::err("inode number out of range")
+    if (inode_num as u32) >= len(fs.inode_table) as u32 {
+        return ((), "inode number out of range")
     }
 
-    result::ok(())
+    return (), ""
 }
 
-func (fs: *ext4_filesystem) open_file(
+func (ext4_filesystem* fs) open_file(
     inode_num: u32,
     mode: file_mode,
 ) (*ext4_file, string) {
-    let _guard := fs.lock.lock()?
+    _guard := fs.lock.lock()?
 
-    if (inode_num as u32) >= fs.inode_table.len() as u32 {
-        return result::err("inode not found")
+    if (inode_num as u32) >= len(fs.inode_table) as u32 {
+        return ((), "inode not found")
     }
 
-    let inode_ref := *fs.inode_table.get(inode_num) as *ext4_inode
+    inode_ref := *fs.inode_table.get(inode_num) as *ext4_inode
 
-    let file := *ext4_file{
+    file := *ext4_file{
         inode_num: inode_num,
         inode: inode_ref,
         block_offset: 0,
@@ -229,16 +229,16 @@ func (fs: *ext4_filesystem) open_file(
         ref_count: 1,
     } as *ext4_file
 
-    fs.open_files.push(file)
-    result::ok(file)
+    fs.open_files = append(fs.open_files, file)
+return     (file, "")
 }
 
-func (fs: *ext4_filesystem) close_file(inode_num: u32) (void, string) {
-    let _guard := fs.lock.lock()?
+func (ext4_filesystem* fs) close_file(inode_num: u32) (void, string) {
+    _guard := fs.lock.lock()?
 
-    let mut found := false
-    let mut remove_idx := option::none as option[u32]
-    let mut i := 0
+    found := false
+    remove_idx := option::none as option[u32]
+    i := 0
 
     for file in fs.open_files {
         if file.inode_num == inode_num {
@@ -250,63 +250,63 @@ func (fs: *ext4_filesystem) close_file(inode_num: u32) (void, string) {
     }
 
     if !found {
-        return result::err("file not open")
+        return ((), "file not open")
     }
 
     switch remove_idx {
         option::some(idx): {
             fs.open_files.remove(idx)
-            result::ok(())
+            return (), ""
         },
-        option::none: result::err("failed to close file"),
+        option::none: ((), "failed to close file"),
     }
 }
 
-func (fs: *ext4_filesystem) allocate_block() (u32, string) {
-    let _guard := fs.lock.lock()?
+func (ext4_filesystem* fs) allocate_block() (u32, string) {
+    _guard := fs.lock.lock()?
 
     for group in fs.block_groups {
         if group.free_blocks_count > 0 {
             group.free_blocks_count = group.free_blocks_count - 1
-            return result::ok(group.block_bitmap)
+            return group.block_bitmap, ""
         }
     }
 
-    result::err("no free blocks available")
+    ((), "no free blocks available")
 }
 
-func (fs: *ext4_filesystem) free_block(block_num: u32) (void, string) {
-    let _guard := fs.lock.lock()?
+func (ext4_filesystem* fs) free_block(block_num: u32) (void, string) {
+    _guard := fs.lock.lock()?
 
     for group in fs.block_groups {
         if group.block_bitmap == block_num {
             group.free_blocks_count = group.free_blocks_count + 1
-            return result::ok(())
+            return return (), ""
         }
     }
 
-    result::err("block not found")
+    ((), "block not found")
 }
 
-func (fs: *ext4_filesystem) write_inode(inode_num: u32, data: *u8[], offset: u32) (u32, string) {
-    let _guard := fs.lock.lock()?
+func (ext4_filesystem* fs) write_inode(inode_num: u32, u8* data[], offset: u32) (u32, string) {
+    _guard := fs.lock.lock()?
 
-    if (inode_num as u32) >= fs.inode_table.len() as u32 {
-        return result::err("inode not found")
+    if (inode_num as u32) >= len(fs.inode_table) as u32 {
+        return ((), "inode not found")
     }
 
-    let inode := *fs.inode_table.get(inode_num) as *ext4_inode
-    inode.size = inode.size + (data.len() as u32)
+    inode := *fs.inode_table.get(inode_num) as *ext4_inode
+    inode.size = inode.size + (len(data) as u32)
     inode.mtime = 0
 
-    result::ok(data.len() as u32)
+    (data.len(, "") as u32)
 }
 
-func (fs: *ext4_filesystem) read_inode(inode_num: u32, offset: u32, size: u32) (vec[u8), string] {
-    let _guard := fs.lock.lock()?
+func (ext4_filesystem* fs) read_inode(inode_num: u32, offset: u32, size: u32) (u8), string[] {
+    _guard := fs.lock.lock()?
 
-    let buffer := vec[u8]()
-    result::ok(buffer)
+    buffer := u8[]()
+return     (buffer, "")
 }
 
 struct ext4_statistics {
@@ -319,34 +319,34 @@ struct ext4_statistics {
     block_size: u32,
 }
 
-func (fs: *ext4_filesystem) get_statistics() (ext4_statistics, string) {
-    let _guard := fs.lock.lock()?
+func (ext4_filesystem* fs) get_statistics() (ext4_statistics, string) {
+    _guard := fs.lock.lock()?
 
-    let mut total_blocks := 0
-    let mut free_blocks := 0
+    total_blocks := 0
+    free_blocks := 0
 
     for group in fs.block_groups {
         total_blocks = total_blocks + fs.superblock.blocks_per_group
         free_blocks = free_blocks + (group.free_blocks_count as u32)
     }
 
-    let stats := ext4_statistics{
+    stats := ext4_statistics{
         total_inodes: fs.superblock.total_inodes,
-        used_inodes: fs.inode_table.len() as u32,
-        free_inodes: fs.superblock.total_inodes - (fs.inode_table.len() as u32),
+        used_inodes: len(fs.inode_table) as u32,
+        free_inodes: fs.superblock.total_inodes - (len(fs.inode_table) as u32),
         total_blocks: total_blocks,
         free_blocks: free_blocks,
-        open_files: fs.open_files.len() as u32,
+        open_files: len(fs.open_files) as u32,
         block_size: fs.superblock.block_size,
     }
 
-    result::ok(stats)
+return     (stats, "")
 }
 
-func (fs: *ext4_filesystem) journal_add_transaction(inode_num: u32) (void, string) {
-    result::ok(())
+func (ext4_filesystem* fs) journal_add_transaction(inode_num: u32) (void, string) {
+    return (), ""
 }
 
-func (fs: *ext4_filesystem) journal_commit() (void, string) {
-    result::ok(())
+func (ext4_filesystem* fs) journal_commit() (void, string) {
+    return (), ""
 }

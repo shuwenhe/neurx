@@ -225,7 +225,7 @@ func zero_stage_3_all_gather_params(
         for row < len(local_params) {
             int i = 0
             for i < len(local_params[row]) {
-                full_params.push(local_params[row][i])
+                full_params = append(full_params, local_params[row][i])
                 i = i + 1
             }
             row = row + 1

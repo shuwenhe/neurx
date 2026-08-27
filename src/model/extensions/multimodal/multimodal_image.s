@@ -29,7 +29,7 @@ struct image_metadata {
 }
 
 struct image_data {
-    vec[uint8] raw_data
+    uint8[] raw_data
     image_metadata* metadata
     int32 size_bytes
     bool is_compressed
@@ -66,7 +66,7 @@ func (image_processor* proc) resize_image(image_data* img, int32 new_width, int3
     }
 
     new_img := *image_data{
-        raw_data: make(vec[uint8]),
+        raw_data: make(uint8[]),
         metadata: *image_metadata{
             width: new_width,
             height: new_height,
@@ -145,7 +145,7 @@ func (image_processor* proc) compress_image(image_data* img, int32 quality) imag
     compressed_size := img.size_bytes * quality / 100
 
     new_img := *image_data{
-        raw_data: make(vec[uint8]),
+        raw_data: make(uint8[]),
         metadata: img.metadata,
         size_bytes: compressed_size,
         is_compressed: true,

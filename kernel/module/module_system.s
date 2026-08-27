@@ -20,7 +20,7 @@ struct kernel_module {
     string description
     int refcount
     module_state state
-    vec[module_dependency] dependencies
+    module_dependency[] dependencies
     int init_offset
     int exit_offset
     int data_size
@@ -31,7 +31,7 @@ struct kernel_module {
 }
 
 struct module_manager {
-    vec[kernel_module] loaded_modules
+    kernel_module[] loaded_modules
     int total_loaded
     int total_unloaded
     int total_failed
@@ -42,7 +42,7 @@ struct module_manager {
 
 func module_manager_create() module_manager {
     return module_manager {
-        loaded_modules: vec[kernel_module](),
+        loaded_modules: kernel_module[](),
         total_loaded: 0,
         total_unloaded: 0,
         total_failed: 0,
@@ -95,7 +95,7 @@ func (m kernel_module*) remove_reference() (int, string) {
 
 func (mm module_manager*) load_module(string name, string version) (int, string) {
     i := 0
-    while i < mm.loaded_modules.len() {
+    while i < len(mm.loaded_modules) {
         if mm.loaded_modules[i].name == name {
             return 0, "Module already loaded"
         }
@@ -108,7 +108,7 @@ func (mm module_manager*) load_module(string name, string version) (int, string)
         description: "",
         refcount: 0,
         state: module_state_coming(),
-        dependencies: vec[module_dependency](),
+        dependencies: module_dependency[](),
         init_offset: 0,
         exit_offset: 0,
         data_size: 0,
@@ -118,14 +118,14 @@ func (mm module_manager*) load_module(string name, string version) (int, string)
         has_modinfo: true
     }
     
-    mm.loaded_modules.push(module)
+    mm.loaded_modules = append(mm.loaded_modules, module)
     mm.total_loaded = mm.total_loaded + 1
     return mm.total_loaded, ""
 }
 
 func (mm module_manager*) unload_module(string name) (bool, string) {
     i := 0
-    while i < mm.loaded_modules.len() {
+    while i < len(mm.loaded_modules) {
         if mm.loaded_modules[i].name == name {
             if mm.loaded_modules[i].refcount > 0 {
                 return false, "Module has active references"
@@ -140,14 +140,14 @@ func (mm module_manager*) unload_module(string name) (bool, string) {
 
 func (mm module_manager*) resolve_dependencies(string module_name) (bool, string) {
     i := 0
-    while i < mm.loaded_modules.len() {
+    while i < len(mm.loaded_modules) {
         if mm.loaded_modules[i].name == module_name {
             j := 0
-            while j < mm.loaded_modules[i].dependencies.len() {
+            while j < mm.loaded_modules[i]len(.dependencies) {
                 dep := mm.loaded_modules[i].dependencies[j]
                 k := 0
                 found := false
-                while k < mm.loaded_modules.len() {
+                while k < len(mm.loaded_modules) {
                     if mm.loaded_modules[k].name == dep.module_name {
                         found = true
                         break
@@ -177,7 +177,7 @@ func (mm module_manager) get_module_stats() string {
 
 func (mm module_manager) find_module(string name) option[int] {
     i := 0
-    while i < mm.loaded_modules.len() {
+    while i < len(mm.loaded_modules) {
         if mm.loaded_modules[i].name == name {
             return option::some(i)
         }

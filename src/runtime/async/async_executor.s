@@ -76,9 +76,9 @@ struct executor_stats {
 }
 
 struct async_executor {
-	task_queue          vec[async_task*]
+	task_queue          async_task*[]
 	running_tasks       map[string]async_task*
-	completed_tasks     vec[task_result]
+	completed_tasks     task_result[]
 
 	mu                  sync.Mutex
 	max_concurrent      int32
@@ -95,9 +95,9 @@ struct async_executor {
 
 func create_executor(max_concurrent int32, worker_pool_size int32) async_executor {
 	return async_executor{
-		task_queue:      make(vec[async_task*], 0, 1024),
+		task_queue:      make(async_task*[], 0, 1024),
 		running_tasks:   make(map[string]async_task*),
-		completed_tasks: make(vec[task_result], 0, 1024),
+		completed_tasks: make(task_result[], 0, 1024),
 		max_concurrent:  max_concurrent,
 		worker_pool_size: worker_pool_size,
 		active_workers:  0,
@@ -390,21 +390,21 @@ func (e async_executor*) shutdown(timeout_ms int64) {
 	e.wait_for_completion(timeout_ms)
 }
 
-func (e async_executor*) get_pending_results() vec[task_result] {
+func (e async_executor*) get_pending_results() task_result[] {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 
-	results := make(vec[task_result], 0, len(e.completed_tasks))
+	results := make(task_result[], 0, len(e.completed_tasks))
 	for result := range e.completed_tasks {
 		results = append(results, result)
 	}
 
-	e.completed_tasks = make(vec[task_result], 0, 1024)
+	e.completed_tasks = make(task_result[], 0, 1024)
 
 	return results
 }
 
-func sort_tasks_by_priority(tasks vec[async_task*]) {
+func sort_tasks_by_priority(tasks async_task*[]) {
 	for i := int32(0); i < int32(len(tasks)); i++ {
 		for j := i + 1; j < int32(len(tasks)); j++ {
 			if tasks[j].priority > tasks[i].priority {

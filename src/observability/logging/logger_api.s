@@ -27,7 +27,7 @@ func log_scalar(
         tags: tags,
         wall_time: current_time_seconds(),
     }
-    lg.metric_buffer.push(entry)
+    lg.metric_buffer = append(lg.metric_buffer, entry)
     if lg.config.log_to_console && should_log(lg) {
         print_scalar_to_console(lg.config, name, value, step, tags)
     }
@@ -52,7 +52,7 @@ func log_histogram(
         tags: tags,
         wall_time: current_time_seconds(),
     }
-    lg.metric_buffer.push(entry)
+    lg.metric_buffer = append(lg.metric_buffer, entry)
 }
 
 func log_text(
@@ -73,7 +73,7 @@ func log_text(
         wall_time: current_time_seconds(),
     }
     entry.metadata["text"] = text
-    lg.metric_buffer.push(entry)
+    lg.metric_buffer = append(lg.metric_buffer, entry)
 }
 
 func log_message(
@@ -87,7 +87,7 @@ func log_message(
         message: message,
         metadata: {},
     }
-    lg.message_buffer.push(entry)
+    lg.message_buffer = append(lg.message_buffer, entry)
     if lg.config.log_to_console && level >= lg.config.console_level {
         print_message_to_console(lg.config, entry)
     }

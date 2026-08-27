@@ -2,7 +2,7 @@ package distributed
 
 struct process_group {
     int group_id
-    vec[int] ranks
+    int[] ranks
     int world_size
     string name
     comm_backend backend
@@ -15,11 +15,11 @@ struct process_group_manager {
     string default_backend
 }
 
-func new_process_group(int group_id, vec[int] ranks, string name, comm_backend backend) process_group {
+func new_process_group(int group_id, int[] ranks, string name, comm_backend backend) process_group {
     process_group {
         group_id: group_id,
         ranks: ranks,
-        world_size: ranks.len(),
+        world_size: len(ranks),
         name: name,
         backend: backend,
         initialized: false,
@@ -34,7 +34,7 @@ func new_process_group_manager(string default_backend) process_group_manager {
     }
 }
 
-func (process_group_manager* mgr) create_group(vec[int] ranks, string name, comm_backend backend) int {
+func (process_group_manager* mgr) create_group(int[] ranks, string name, comm_backend backend) int {
     group_id := mgr.next_group_id
     mgr.next_group_id = mgr.next_group_id + 1
 
@@ -51,7 +51,7 @@ func (process_group_manager* mgr) get_group(int group_id) process_group {
 
     process_group {
         group_id: -1,
-        ranks: vec[int]{},
+        ranks: int[]{},
         world_size: 0,
         name: "",
         backend: comm_backend::cpu_only,
@@ -72,10 +72,10 @@ func (process_group_manager* mgr) delete_group(int group_id) bool {
     false
 }
 
-func (process_group_manager* mgr) list_groups() vec[int] {
-    result := vec[int]{}
+func (process_group_manager* mgr) list_groups() int[] {
+    result := int[]{}
     for gid in mgr.groups.keys() {
-        result.push(gid)
+        result = append(result, gid)
     }
     result
 }
@@ -100,7 +100,7 @@ func (process_group* group) finalize() bool {
 
 func (process_group* group) contains_rank(int rank) bool {
     i := 0
-    for i < group.ranks.len() {
+    for i < len(group.ranks) {
         if group.ranks[i] == rank {
             true
         }
@@ -112,7 +112,7 @@ func (process_group* group) contains_rank(int rank) bool {
 
 func (process_group* group) get_rank_index(int rank) int {
     i := 0
-    for i < group.ranks.len() {
+    for i < len(group.ranks) {
         if group.ranks[i] == rank {
             i
         }
@@ -122,7 +122,7 @@ func (process_group* group) get_rank_index(int rank) int {
     -1
 }
 
-func (process_group* group) get_ranks() vec[int] {
+func (process_group* group) get_ranks() int[] {
     group.ranks
 }
 

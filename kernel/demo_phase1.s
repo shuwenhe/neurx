@@ -158,7 +158,7 @@ func demonstrate_process_manager() {
     
     children, _ := get_child_processes(*pm, 1)
     print("✓ Found ")
-    print(children.len() as string)
+    print(len(children) as string)
     print(" child processes of init")
     print("")
     

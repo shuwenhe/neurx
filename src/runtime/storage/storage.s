@@ -79,7 +79,7 @@ func io_submit(ss storage_state, op int, path string, offset int,
     }
     ss.ring.submission_queue = append(ss.ring.submission_queue, req)
     ss.ring.next_req_id      = ss.ring.next_req_id + 1
-    return (ss, rid)
+    return ss, rid
 }
 
 func io_complete(ss storage_state, int req_id, string err) storage_state {
@@ -123,7 +123,7 @@ func io_poll(ss storage_state, int owner_pid) (storage_state, []io_request) {
         i = i + 1
     }
     ss.ring.completion_queue = remaining
-    return (ss, done)
+    return ss, done
 }
 
 func storage_readahead(ss storage_state, path string, offset int,

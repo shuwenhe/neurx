@@ -86,7 +86,7 @@ func (e* enhanced_sampler) prepare_for_method(sampling_type method) bool {
 	}
 }
 
-func (e* enhanced_sampler) sample(vec[float32] logits) int32 {
+func (e* enhanced_sampler) sample(float32[] logits) int32 {
 	if len(logits) == 0 {
 		return 0
 	}
@@ -94,7 +94,7 @@ func (e* enhanced_sampler) sample(vec[float32] logits) int32 {
 	adjusted_logits := logits
 
 	if e.params.use_logits_processor && e.penalty_config != nil {
-		adjusted_logits = apply_all_penalties(adjusted_logits, make(vec[int32]), e.penalty_config)
+		adjusted_logits = apply_all_penalties(adjusted_logits, make(int32[]), e.penalty_config)
 	}
 
 	bad_mask_logits := adjusted_logits
@@ -129,7 +129,7 @@ func (e* enhanced_sampler) sample(vec[float32] logits) int32 {
 
 	case sampling_contrastive:
 		if e.contrastive_state != nil {
-			embeddings := make(vec[vec[float32]])
+			embeddings := make(float32[][]])
 			return e.contrastive_state.select_token(final_logits, embeddings, embeddings)
 		}
 		return 0
@@ -147,8 +147,8 @@ func (e* enhanced_sampler) sample(vec[float32] logits) int32 {
 	}
 }
 
-func (e* enhanced_sampler) batch_sample(vec[vec[float32]] batch_logits) vec[int32] {
-	results := make(vec[int32])
+func (e* enhanced_sampler) batch_sample(float32[][]] batch_logits) int32[] {
+	results := make(int32[])
 
 	for i := 0; i < len(batch_logits); i = i + 1 {
 		token := e.sample(batch_logits[i])
@@ -158,7 +158,7 @@ func (e* enhanced_sampler) batch_sample(vec[vec[float32]] batch_logits) vec[int3
 	return results
 }
 
-func (e* enhanced_sampler) sample_with_penalties(vec[float32] logits, vec[int32] generated_tokens) int32 {
+func (e* enhanced_sampler) sample_with_penalties(float32[] logits, int32[] generated_tokens) int32 {
 	if e.penalty_config == nil {
 		return e.sample(logits)
 	}

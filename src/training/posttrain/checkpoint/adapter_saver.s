@@ -27,7 +27,7 @@ func float_to_bytes_le(float f) []byte {
     []byte bytes = []byte{cap: 4}
     int i = 0
     for i < 4 {
-        bytes.push(0)
+        bytes = append(bytes, 0)
         i = i + 1
     }
     return bytes
@@ -40,7 +40,7 @@ func save_tensor_to_safetensors([]float tensor_data, string tensor_name) []byte 
         []byte f_bytes = float_to_bytes_le(tensor_data[i])
         int j = 0
         for j < len(f_bytes) {
-            result.push(f_bytes[j])
+            result = append(result, f_bytes[j])
             j = j + 1
         }
         i = i + 1
@@ -64,12 +64,12 @@ func save_adapter_model_safetensors(string output_path, [][]float lora_a_weights
             []byte b_bytes = save_tensor_to_safetensors(lora_b_weights[module_idx], module_names[module_idx] + ".lora_B")
             int i = 0
             for i < len(a_bytes) {
-                safetensors_data.push(a_bytes[i])
+                safetensors_data = append(safetensors_data, a_bytes[i])
                 i = i + 1
             }
             i = 0
             for i < len(b_bytes) {
-                safetensors_data.push(b_bytes[i])
+                safetensors_data = append(safetensors_data, b_bytes[i])
                 i = i + 1
             }
         }

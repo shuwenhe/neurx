@@ -9,14 +9,14 @@ struct syscall_handler_entry {
 }
 
 struct syscall_dispatcher {
-    vec[syscall_handler_entry]* handlers
+    syscall_handler_entry[]* handlers
     syscall_stats* stats
     bool initialized
 }
 
 func syscall_dispatcher_create() syscall_dispatcher {
     dispatcher := syscall_dispatcher {
-        handlers: vec[syscall_handler_entry](),
+        handlers: syscall_handler_entry[](),
         stats: syscall_stats_create() as syscall_stats*,
         initialized: false
     }

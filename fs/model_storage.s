@@ -11,7 +11,7 @@ struct model_file {
 
 struct model_storage {
     string storage_root
-    vec[model_file] files
+    model_file[] files
     int total_size
     int available_space
 }
@@ -26,7 +26,7 @@ struct storage_policy {
 func create_model_storage(string root_path, int capacity_gb) model_storage {
     storage := model_storage {
         storage_root: root_path,
-        files: vec[model_file](),
+        files: model_file[](),
         total_size: 0,
         available_space: capacity_gb
     }
@@ -40,7 +40,7 @@ func store_model_file(model_storage storage, string path, int size) model_storag
         checksum: 0,
         version: "1.0"
     }
-    storage.files.push(file)
+    storage.files = append(storage.files, file)
     storage.total_size = storage.total_size + size
     storage.available_space = storage.available_space - size
     storage

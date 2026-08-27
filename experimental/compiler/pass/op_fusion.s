@@ -19,7 +19,7 @@ struct fusion_candidate {
 
 struct fusion_result {
     int fused_ops
-    vec[int] removed_ops
+    int[] removed_ops
     bool success
 }
 
@@ -45,13 +45,13 @@ func get_fusion_pattern(op_type first_op, op_type second_op) option[fusion_patte
     }
 }
 
-func find_fusion_candidates(*computation_graph g) vec[fusion_candidate] {
-    candidates = vec[fusion_candidate]()
+func find_fusion_candidates(*computation_graph g) fusion_candidate[] {
+    candidates = fusion_candidate[]()
 
-    for i in range(g.operations.len() - 1) {
+    for i in range(len(g.operations) - 1) {
         first_op = g.operations[i]
 
-        for j in range(i + 1, g.operations.len()) {
+        for j in range(i + 1, len(g.operations)) {
             second_op = g.operations[j]
 
             if can_fuse_ops(first_op.op_kind, second_op.op_kind) {
@@ -77,14 +77,14 @@ func find_fusion_candidates(*computation_graph g) vec[fusion_candidate] {
 
 func apply_op_fusion(*computation_graph g) fusion_result {
     candidates = find_fusion_candidates(g)
-    removed = vec[int]()
+    removed = int[]()
 
     for candidate in candidates {
-        removed.push(candidate.second_op_id)
+        removed = append(removed, candidate.second_op_id)
     }
 
     fusion_result {
-        fused_ops: candidates.len(),
+        fused_ops: len(candidates),
         removed_ops: removed,
         success: true,
     }
@@ -102,7 +102,7 @@ func is_memory_efficient_to_fuse(*computation_graph g, int first_id, int second_
         option::some(first_op): {
             switch g.get_operation(second_id) {
                 option::some(second_op): {
-                    if first_op.output_ids.len() == 1 && second_op.input_ids.len() == 1 {
+                    if len(first_op.output_ids) == 1 && len(second_op.input_ids) == 1 {
                         output_id = first_op.output_ids[0]
                         return g.find_consumers(output_id).len() == 1
                     }

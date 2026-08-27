@@ -70,14 +70,14 @@ func calculate_bloom_params(
         k = 1
     if k > 20:
         k = 20
-    return (m, k)
+    return m, k
 
 func new_bloom_filter(int64 size_bits, int num_hashes) bloom_filter:
     int64 array_size = (size_bits + 7) / 8
     []byte bit_array = []byte{cap: array_size}
     int i = 0
     for i < array_size {
-        bit_array.push(0)
+        bit_array = append(bit_array, 0)
         i = i + 1
     bloom_filter bf
     bf.bit_array = bit_array
@@ -238,7 +238,7 @@ func compute_content_quality(string text, []int token_ids, quality_metrics metri
     float repetition_penalty = measure_repetition(token_freq, len(token_ids))
     float diversity_component = metrics.unique_token_ratio
     float repetition_component = 1.0 - repetition_penalty
-    return (diversity_component * 0.6 + repetition_component * 0.4)
+    return diversity_component * 0.6 + repetition_component * 0.4
 
 func compute_language_score(string detected_lang, float confidence, quality_filter_config cfg) float:
     if cfg.target_language == "auto":
@@ -267,7 +267,7 @@ func detect_toxicity(string text) (bool, float):
         i = i + 1
     if score > 1.0:
         score = 1.0
-    return (toxic_count > 2, score)
+    return toxic_count > 2, score
 
 func detect_pii(string text) bool:
     if contains_regex(text, r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"):
@@ -413,7 +413,7 @@ func record_rejection_reason(quality_scorer_state scorer, quality_metrics m) voi
     else:
         reason = "other"
     if len(scorer.rejection_reasons) < 10000:
-        scorer.rejection_reasons.push(reason)
+        scorer.rejection_reasons = append(scorer.rejection_reasons, reason)
 
 func measure_repetition(map<int, int> freq, int total) float:
     if total == 0:
@@ -426,13 +426,13 @@ func measure_repetition(map<int, int> freq, int total) float:
 
 func detect_language(string text) (string, float):
     if contains_range(text, 0x_4_e_00, 0x_9_fff):
-        return ("zh", 0.9)
+        return "zh", 0.9
     elif contains_range(text, 0x0400, 0x_04_ff):
-        return ("ru", 0.8)
+        return "ru", 0.8
     elif contains_range(text, 0x0600, 0x_06_ff):
-        return ("ar", 0.8)
+        return "ar", 0.8
     else:
-        return ("en", 0.7)
+        return "en", 0.7
 
 func contains_range(string s, int start, int end) bool:
     int i = 0

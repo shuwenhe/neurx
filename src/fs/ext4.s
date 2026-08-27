@@ -39,7 +39,7 @@ func (ext4_fs* fs) init(int total_size) (int, string) {
     fs.total_blocks = total_size / fs.block_size
     fs.free_blocks = fs.total_blocks
     fs.inode_table = new inode[fs.total_blocks / 8]
-    fs.dentries = vec()
+    fs.dentries = {}
     return 0, ""
 }
 
@@ -75,7 +75,7 @@ func (ext4_fs* fs) create_file(string filename, int mode) (inode, string) {
         inode_num: inode_num,
         type: 1
     }
-    fs.dentries.push(dentry)
+    fs.dentries = append(fs.dentries, dentry)
     
     return new_inode, ""
 }
@@ -112,7 +112,7 @@ func (ext4_fs* fs) create_directory(string dirname) (inode, string) {
         inode_num: inode_num,
         type: 2
     }
-    fs.dentries.push(dentry)
+    fs.dentries = append(fs.dentries, dentry)
     
     return new_inode, ""
 }

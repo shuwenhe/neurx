@@ -51,11 +51,11 @@ func aes128_init(key vec, key_len int) (aes_context, string) {
         return aes_context{}, "Invalid key length for AES-128, must be 16 bytes"
     }
     
-    round_keys := vec()
+    round_keys := {}
     
     i := 0
     for i < key_len {
-        round_keys.push(key[i])
+        round_keys = append(round_keys, key[i])
         i = i + 1
     }
     
@@ -74,11 +74,11 @@ func aes256_init(key vec, key_len int) (aes_context, string) {
         return aes_context{}, "Invalid key length for AES-256, must be 32 bytes"
     }
     
-    round_keys := vec()
+    round_keys := {}
     
     i := 0
     for i < key_len {
-        round_keys.push(key[i])
+        round_keys = append(round_keys, key[i])
         i = i + 1
     }
     
@@ -93,7 +93,7 @@ func aes256_init(key vec, key_len int) (aes_context, string) {
 
 // AES 加密单个块
 func (ctx* aes_context) encrypt_block(plaintext vec, ciphertext* vec) (int, string) {
-    if plaintext.len() != 16 {
+    if len(plaintext) != 16 {
         return -1, "Plaintext block must be 16 bytes"
     }
     
@@ -109,7 +109,7 @@ func (ctx* aes_context) encrypt_block(plaintext vec, ciphertext* vec) (int, stri
 
 // AES 解密单个块
 func (ctx* aes_context) decrypt_block(ciphertext vec, plaintext* vec) (int, string) {
-    if ciphertext.len() != 16 {
+    if len(ciphertext) != 16 {
         return -1, "Ciphertext block must be 16 bytes"
     }
     
@@ -152,10 +152,10 @@ func (ctx* cbc_context) encrypt(plaintext vec, plaintext_len int, ciphertext* ve
     i := 0
     
     for i < plaintext_len {
-        block := vec()
+        block := {}
         j := 0
         for j < 16 {
-            block.push(plaintext[i + j])
+            block = append(block, plaintext[i + j])
             j = j + 1
         }
         
@@ -177,10 +177,10 @@ func (ctx* cbc_context) decrypt(ciphertext vec, ciphertext_len int, plaintext* v
     i := 0
     
     for i < ciphertext_len {
-        block := vec()
+        block := {}
         j := 0
         for j < 16 {
-            block.push(ciphertext[i + j])
+            block = append(block, ciphertext[i + j])
             j = j + 1
         }
         
@@ -218,17 +218,17 @@ func (ctx* ctr_context) encrypt(plaintext vec, plaintext_len int, ciphertext* ve
     i := 0
     
     for i < plaintext_len {
-        block := vec()
+        block := {}
         j := 0
         for j < 16 && i + j < plaintext_len {
-            block.push(0)
+            block = append(block, 0)
             j = j + 1
         }
         
         ctx.aes_ctx.encrypt_block(block, ciphertext)
-        encrypted_len = encrypted_len + block.len()
+        encrypted_len = encrypted_len + len(block)
         ctx.counter = ctx.counter + 1
-        i = i + block.len()
+        i = i + len(block)
     }
     
     return encrypted_len, ""
@@ -262,10 +262,10 @@ func (ctx* ecb_context) encrypt(plaintext vec, plaintext_len int, ciphertext* ve
     i := 0
     
     for i < plaintext_len {
-        block := vec()
+        block := {}
         j := 0
         for j < 16 {
-            block.push(plaintext[i + j])
+            block = append(block, plaintext[i + j])
             j = j + 1
         }
         
@@ -287,10 +287,10 @@ func (ctx* ecb_context) decrypt(ciphertext vec, ciphertext_len int, plaintext* v
     i := 0
     
     for i < ciphertext_len {
-        block := vec()
+        block := {}
         j := 0
         for j < 16 {
-            block.push(ciphertext[i + j])
+            block = append(block, ciphertext[i + j])
             j = j + 1
         }
         
@@ -307,14 +307,14 @@ func pbkdf2(password vec, password_len int, salt vec, salt_len int,
             iterations int, output_len int) (pbkdf2_context, string) {
     
     ctx := pbkdf2_context{
-        derived_key: vec(),
+        derived_key: {},
         iterations: iterations,
         output_len: output_len
     }
     
     i := 0
     for i < output_len {
-        ctx.derived_key.push(0)
+        ctx.derived_key = append(ctx.derived_key, 0)
         i = i + 1
     }
     

@@ -27,7 +27,7 @@ struct lora_config {
 }
 
 struct lora_matrix {
-    vec[vec[float32]] weights
+    float32[][]] weights
     int32 rows
     int32 cols
     lora_dtype dtype
@@ -67,13 +67,13 @@ func create_lora_model(string adapter_name, lora_config config) lora_model* {
 func (lora_model* model) add_lora_layer(string layer_name, int32 in_features, int32 out_features) {
     layer := *lora_layer{
         lora_a: *lora_matrix{
-            weights: make(vec[vec[float32]]),
+            weights: make(float32[][]]),
             rows: model.config.rank,
             cols: in_features,
             dtype: lora_dtype_fp32,
         },
         lora_b: *lora_matrix{
-            weights: make(vec[vec[float32]]),
+            weights: make(float32[][]]),
             rows: out_features,
             cols: model.config.rank,
             dtype: lora_dtype_fp32,
@@ -125,18 +125,18 @@ func (lora_model* model) initialize_weights() {
     for name := range model.layers {
         layer := model.layers[name]
 
-        layer.lora_a.weights = make(vec[vec[float32]])
+        layer.lora_a.weights = make(float32[][]])
         for i := 0; i < layer.lora_a.rows; i = i + 1 {
-            row := make(vec[float32])
+            row := make(float32[])
             for j := 0; j < layer.lora_a.cols; j = j + 1 {
                 row = append(row, 0.1)
             }
             layer.lora_a.weights = append(layer.lora_a.weights, row)
         }
 
-        layer.lora_b.weights = make(vec[vec[float32]])
+        layer.lora_b.weights = make(float32[][]])
         for i := 0; i < layer.lora_b.rows; i = i + 1 {
-            row := make(vec[float32])
+            row := make(float32[])
             for j := 0; j < layer.lora_b.cols; j = j + 1 {
                 row = append(row, 0.0)
             }

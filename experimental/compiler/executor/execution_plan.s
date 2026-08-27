@@ -12,19 +12,19 @@ struct execution_task {
 }
 
 struct execution_plan {
-    vec[execution_task] tasks
+    execution_task[] tasks
     int total_memory_requirement
     int num_stages
 }
 
 struct execution_stage {
     int stage_number
-    vec[execution_task] tasks
+    execution_task[] tasks
     int parallel_degree
 }
 
 func create_execution_plan(*computation_graph g) execution_plan {
-    tasks = vec[execution_task]()
+    tasks = execution_task[]()
 
     sorted_ops = g.topological_sort()
 
@@ -34,12 +34,12 @@ func create_execution_plan(*computation_graph g) execution_plan {
         task = execution_task {
             op_id: op.id,
             op: op,
-            input_memory_offsets: new int[op.input_ids.len()],
-            output_memory_offsets: new int[op.output_ids.len()],
+            input_memory_offsets: new int[len(op.input_ids)],
+            output_memory_offsets: new int[len(op.output_ids)],
             execution_device: "CPU",
         }
 
-        tasks.push(task)
+        tasks = append(tasks, task)
     }
 
     execution_plan {
@@ -50,7 +50,7 @@ func create_execution_plan(*computation_graph g) execution_plan {
 }
 
 func (execution_plan* plan) task_count() int {
-    plan.tasks.len()
+    len(plan.tasks)
 }
 
 func (execution_plan* plan) can_parallelize(int task_a_idx, int task_b_idx) bool {
@@ -58,7 +58,7 @@ func (execution_plan* plan) can_parallelize(int task_a_idx, int task_b_idx) bool
         return false
     }
 
-    if task_a_idx < plan.tasks.len() && task_b_idx < plan.tasks.len() {
+    if task_a_idx < len(plan.tasks) && task_b_idx < len(plan.tasks) {
         task_a = plan.tasks[task_a_idx]
         task_b = plan.tasks[task_b_idx]
 
@@ -91,7 +91,7 @@ func create_staged_execution_plan(*computation_graph g, int num_stages) executio
         return basic_plan
     }
 
-    tasks_per_stage = (basic_plan.tasks.len() + num_stages - 1) / num_stages
+    tasks_per_stage = (len(basic_plan.tasks) + num_stages - 1) / num_stages
 
     basic_plan.num_stages = num_stages
     basic_plan

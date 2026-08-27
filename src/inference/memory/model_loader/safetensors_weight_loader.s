@@ -121,7 +121,7 @@ func parse_json_string(string json, int start) (string, int) {
         pos = pos + 1
     }
     if pos >= len(json) {
-        return ("", pos)
+        return "", pos
     }
     pos = pos + 1
     string result = ""
@@ -196,7 +196,7 @@ func parse_int_array(string json, int start) ([]int, int) {
         pos = pos + 1
     }
     if pos >= len(json) {
-        return (result, pos)
+        return result, pos
     }
     pos = pos + 1
     for pos < len(json) && int(json[pos]) != 93 {

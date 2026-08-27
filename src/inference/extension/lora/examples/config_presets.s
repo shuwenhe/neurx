@@ -11,9 +11,9 @@ func preset_lightweight() lora_config {
     config.lora_dropout = 0.01
     config.bias = "none"
 
-    targets := vec[string]()
-    targets.push("q_proj")
-    targets.push("v_proj")
+    targets := string[]()
+    targets = append(targets, "q_proj")
+    targets = append(targets, "v_proj")
     config.target_modules = targets
 
     config
@@ -26,11 +26,11 @@ func preset_balanced() lora_config {
     config.lora_dropout = 0.05
     config.bias = "lora_only"
 
-    targets := vec[string]()
-    targets.push("q_proj")
-    targets.push("k_proj")
-    targets.push("v_proj")
-    targets.push("dense")
+    targets := string[]()
+    targets = append(targets, "q_proj")
+    targets = append(targets, "k_proj")
+    targets = append(targets, "v_proj")
+    targets = append(targets, "dense")
     config.target_modules = targets
 
     config
@@ -43,12 +43,12 @@ func preset_high_quality() lora_config {
     config.lora_dropout = 0.1
     config.bias = "all"
 
-    targets := vec[string]()
-    targets.push("q_proj")
-    targets.push("k_proj")
-    targets.push("v_proj")
-    targets.push("dense")
-    targets.push("out_proj")
+    targets := string[]()
+    targets = append(targets, "q_proj")
+    targets = append(targets, "k_proj")
+    targets = append(targets, "v_proj")
+    targets = append(targets, "dense")
+    targets = append(targets, "out_proj")
     config.target_modules = targets
 
     config
@@ -59,9 +59,9 @@ func preset_text_classification() lora_config {
     config.task_type = "SEQUENCE_CLASSIFICATION"
     config.lora_rank = 8
 
-    targets := vec[string]()
-    targets.push("q_proj")
-    targets.push("v_proj")
+    targets := string[]()
+    targets = append(targets, "q_proj")
+    targets = append(targets, "v_proj")
     config.target_modules = targets
 
     config
@@ -72,11 +72,11 @@ func preset_question_answering() lora_config {
     config.task_type = "QUESTION_ANSWERING"
     config.lora_rank = 16
 
-    targets := vec[string]()
-    targets.push("q_proj")
-    targets.push("k_proj")
-    targets.push("v_proj")
-    targets.push("dense")
+    targets := string[]()
+    targets = append(targets, "q_proj")
+    targets = append(targets, "k_proj")
+    targets = append(targets, "v_proj")
+    targets = append(targets, "dense")
     config.target_modules = targets
 
     config
@@ -88,12 +88,12 @@ func preset_machine_translation() lora_config {
     config.lora_rank = 32
     config.lora_alpha = 64.0
 
-    targets := vec[string]()
-    targets.push("q_proj")
-    targets.push("k_proj")
-    targets.push("v_proj")
-    targets.push("dense")
-    targets.push("attention")
+    targets := string[]()
+    targets = append(targets, "q_proj")
+    targets = append(targets, "k_proj")
+    targets = append(targets, "v_proj")
+    targets = append(targets, "dense")
+    targets = append(targets, "attention")
     config.target_modules = targets
 
     config
@@ -105,10 +105,10 @@ func preset_code_generation() lora_config {
     config.lora_rank = 64
     config.lora_alpha = 128.0
 
-    targets := vec[string]()
-    targets.push("q_proj")
-    targets.push("v_proj")
-    targets.push("dense")
+    targets := string[]()
+    targets = append(targets, "q_proj")
+    targets = append(targets, "v_proj")
+    targets = append(targets, "dense")
     config.target_modules = targets
 
     config
@@ -120,9 +120,9 @@ func preset_instruction_following() lora_config {
     config.lora_rank = 16
     config.lora_alpha = 32.0
 
-    targets := vec[string]()
-    targets.push("q_proj")
-    targets.push("v_proj")
+    targets := string[]()
+    targets = append(targets, "q_proj")
+    targets = append(targets, "v_proj")
     config.target_modules = targets
 
     config
@@ -134,11 +134,11 @@ func preset_conversational() lora_config {
     config.lora_rank = 32
     config.lora_alpha = 64.0
 
-    targets := vec[string]()
-    targets.push("q_proj")
-    targets.push("k_proj")
-    targets.push("v_proj")
-    targets.push("dense")
+    targets := string[]()
+    targets = append(targets, "q_proj")
+    targets = append(targets, "k_proj")
+    targets = append(targets, "v_proj")
+    targets = append(targets, "dense")
     config.target_modules = targets
 
     config
@@ -185,17 +185,17 @@ func load_preset_by_name(string name) option[lora_config] {
     }
 }
 
-func get_available_presets() vec[string] {
-    presets := vec[string]()
-    presets.push("lightweight")
-    presets.push("balanced")
-    presets.push("high_quality")
-    presets.push("text_classification")
-    presets.push("question_answering")
-    presets.push("machine_translation")
-    presets.push("code_generation")
-    presets.push("instruction_following")
-    presets.push("conversational")
+func get_available_presets() string[] {
+    presets := string[]()
+    presets = append(presets, "lightweight")
+    presets = append(presets, "balanced")
+    presets = append(presets, "high_quality")
+    presets = append(presets, "text_classification")
+    presets = append(presets, "question_answering")
+    presets = append(presets, "machine_translation")
+    presets = append(presets, "code_generation")
+    presets = append(presets, "instruction_following")
+    presets = append(presets, "conversational")
     presets
 }
 
@@ -339,7 +339,7 @@ func demo_presets() {
                 println("  rank: " + config.lora_rank.to_string())
                 println("  Alpha: " + config.lora_alpha.to_string())
                 println("  缩放because子: " + config.get_lora_scaling().to_string())
-                println("  module数: " + config.target_modules.len().to_string())
+                println("  module数: " + len(config.target_modules).to_string())
                 println("  描述: " + get_preset_description(preset_name))
             },
             option::none : {

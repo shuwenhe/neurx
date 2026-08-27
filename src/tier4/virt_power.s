@@ -57,8 +57,8 @@ struct kvm_manager {
 func kvm_init() (kvm_manager, string) {
     manager := kvm_manager{
         kvm_fd: 3,          // /dev/kvm
-        vms: vec(),
-        devices: vec(),
+        vms: {},
+        devices: {},
         vm_counter: 0,
         device_counter: 0
     }
@@ -73,7 +73,7 @@ func (manager* kvm_manager) create_vm(vcpu_count int, memory_mb int) (int, strin
         kvm_fd: manager.kvm_fd,
         vm_fd: 10 + manager.vm_counter,  // 模拟 fd
         vcpu_count: vcpu_count,
-        vcpus: vec(),
+        vcpus: {},
         guest_memory_mb: memory_mb,
         is_running: 0,
         exit_count: 0
@@ -90,14 +90,14 @@ func (manager* kvm_manager) create_vm(vcpu_count int, memory_mb int) (int, strin
             guest_rip: 0,
             guest_rsp: 0,
             guest_rax: 0,
-            vm_memory: vec(),
+            vm_memory: {},
             exit_reason: 0
         }
-        vm.vcpus.push(vcpu)
+        vm.vcpus = append(vm.vcpus, vcpu)
         i = i + 1
     }
     
-    manager.vms.push(vm)
+    manager.vms = append(manager.vms, vm)
     manager.vm_counter = manager.vm_counter + 1
     
     return vm.vm_id, ""
@@ -105,7 +105,7 @@ func (manager* kvm_manager) create_vm(vcpu_count int, memory_mb int) (int, strin
 
 // 启动虚拟机
 func (manager* kvm_manager) vm_run(vm_id int) (int, string) {
-    if vm_id >= manager.vms.len() {
+    if vm_id >= len(manager.vms) {
         return -1, "vm not found"
     }
     
@@ -118,7 +118,7 @@ func (manager* kvm_manager) vm_run(vm_id int) (int, string) {
 
 // 停止虚拟机
 func (manager* kvm_manager) vm_stop(vm_id int) (int, string) {
-    if vm_id >= manager.vms.len() {
+    if vm_id >= len(manager.vms) {
         return -1, "vm not found"
     }
     
@@ -131,12 +131,12 @@ func (manager* kvm_manager) vm_stop(vm_id int) (int, string) {
 
 // VCPU 执行
 func (manager* kvm_manager) vcpu_run(vm_id int, vcpu_id int) (int, string) {
-    if vm_id >= manager.vms.len() {
+    if vm_id >= len(manager.vms) {
         return -1, "vm not found"
     }
     
     vm := manager.vms[vm_id]
-    if vcpu_id >= vm.vcpus.len() {
+    if vcpu_id >= len(vm.vcpus) {
         return -1, "vcpu not found"
     }
     
@@ -150,7 +150,7 @@ func (manager* kvm_manager) vcpu_run(vm_id int, vcpu_id int) (int, string) {
 
 // 设置 VCPU 寄存器
 func (manager* kvm_manager) set_vcpu_registers(vm_id int, vcpu_id int, rip int, rsp int) (int, string) {
-    if vm_id >= manager.vms.len() {
+    if vm_id >= len(manager.vms) {
         return -1, "vm not found"
     }
     
@@ -168,7 +168,7 @@ func (manager* kvm_manager) set_vcpu_registers(vm_id int, vcpu_id int, rip int, 
 
 // 获取 VCPU 寄存器
 func (manager* kvm_manager) get_vcpu_registers(vm_id int, vcpu_id int) (int, int, string) {
-    if vm_id >= manager.vms.len() {
+    if vm_id >= len(manager.vms) {
         return 0, 0, "vm not found"
     }
     
@@ -187,7 +187,7 @@ func (manager* kvm_manager) add_device(vm_id int, device_type int, port_base int
         irq: irq
     }
     
-    manager.devices.push(device)
+    manager.devices = append(manager.devices, device)
     manager.device_counter = manager.device_counter + 1
     
     return device.device_id, ""
@@ -203,7 +203,7 @@ struct vm_info {
 }
 
 func (manager* kvm_manager) get_vm_info(vm_id int) (vm_info, string) {
-    if vm_id >= manager.vms.len() {
+    if vm_id >= len(manager.vms) {
         return vm_info{}, "vm not found"
     }
     
@@ -221,7 +221,7 @@ func (manager* kvm_manager) get_vm_info(vm_id int) (vm_info, string) {
 
 // 处理 VM exit
 func (manager* kvm_manager) handle_vm_exit(vm_id int, vcpu_id int, exit_reason int) (int, string) {
-    if vm_id >= manager.vms.len() {
+    if vm_id >= len(manager.vms) {
         return -1, "vm not found"
     }
     
@@ -274,8 +274,8 @@ struct power_manager {
 // 初始化电源管理
 func power_init() (power_manager, string) {
     pm := power_manager{
-        cpu_cstates: vec(),
-        cpu_pstates: vec(),
+        cpu_cstates: {},
+        cpu_pstates: {},
         current_pstate: 0,
         current_cstate: 0,
         acpi_enabled: 1,
@@ -283,22 +283,22 @@ func power_init() (power_manager, string) {
     }
     
     // 添加 C-states
-    pm.cpu_cstates.push(cpu_cstate{state_id: 0, latency_us: 1, power_mw: 1000})
-    pm.cpu_cstates.push(cpu_cstate{state_id: 1, latency_us: 10, power_mw: 500})
-    pm.cpu_cstates.push(cpu_cstate{state_id: 2, latency_us: 50, power_mw: 100})
-    pm.cpu_cstates.push(cpu_cstate{state_id: 3, latency_us: 1000, power_mw: 10})
+    pm.cpu_cstates = append(pm.cpu_cstates, cpu_cstate{state_id: 0, latency_us: 1, power_mw: 1000})
+    pm.cpu_cstates = append(pm.cpu_cstates, cpu_cstate{state_id: 1, latency_us: 10, power_mw: 500})
+    pm.cpu_cstates = append(pm.cpu_cstates, cpu_cstate{state_id: 2, latency_us: 50, power_mw: 100})
+    pm.cpu_cstates = append(pm.cpu_cstates, cpu_cstate{state_id: 3, latency_us: 1000, power_mw: 10})
     
     // 添加 P-states
-    pm.cpu_pstates.push(cpu_pstate{freq_mhz: 800, voltage_mv: 900, power_mw: 100})
-    pm.cpu_pstates.push(cpu_pstate{freq_mhz: 1600, voltage_mv: 1000, power_mw: 200})
-    pm.cpu_pstates.push(cpu_pstate{freq_mhz: 2400, voltage_mv: 1200, power_mw: 500})
+    pm.cpu_pstates = append(pm.cpu_pstates, cpu_pstate{freq_mhz: 800, voltage_mv: 900, power_mw: 100})
+    pm.cpu_pstates = append(pm.cpu_pstates, cpu_pstate{freq_mhz: 1600, voltage_mv: 1000, power_mw: 200})
+    pm.cpu_pstates = append(pm.cpu_pstates, cpu_pstate{freq_mhz: 2400, voltage_mv: 1200, power_mw: 500})
     
     return pm, ""
 }
 
 // 设置 P-state (频率缩放)
 func (pm* power_manager) set_pstate(pstate_id int) (int, string) {
-    if pstate_id >= pm.cpu_pstates.len() {
+    if pstate_id >= len(pm.cpu_pstates) {
         return -1, "invalid pstate"
     }
     
@@ -310,7 +310,7 @@ func (pm* power_manager) set_pstate(pstate_id int) (int, string) {
 
 // 设置 C-state (CPU 睡眠)
 func (pm* power_manager) set_cstate(cstate_id int) (int, string) {
-    if cstate_id >= pm.cpu_cstates.len() {
+    if cstate_id >= len(pm.cpu_cstates) {
         return -1, "invalid cstate"
     }
     

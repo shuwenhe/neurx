@@ -76,7 +76,7 @@ func backward_add(node n, tensor grad_output) backward_result {
     } else {
         grads = []
         for i in 0..len(n.inputs) {
-            grads.push(copy_tensor_with_grad(grad_output))
+            grads = append(grads, copy_tensor_with_grad(grad_output))
         }
     }
     backward_result { input_grads: grads, success: true }

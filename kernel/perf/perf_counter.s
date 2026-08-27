@@ -11,7 +11,7 @@ struct perf_event {
 }
 
 struct perf_counter {
-    vec[perf_event] events
+    perf_event[] events
     int enabled
     int timestamp
 }
@@ -26,7 +26,7 @@ struct perf_stat {
 
 func create_perf_counter() perf_counter {
     counter := perf_counter {
-        events: vec[perf_event](),
+        events: perf_event[](),
         enabled: 0,
         timestamp: 0
     }
@@ -41,7 +41,7 @@ func perf_add_event(perf_counter counter, string event_name, int cpu_id) perf_co
         count: 0,
         sample_period: 0
     }
-    counter.events.push(event)
+    counter.events = append(counter.events, event)
     counter
 }
 

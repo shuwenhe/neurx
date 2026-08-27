@@ -27,7 +27,7 @@ struct trace_span {
 	int64               end_time
 	int32               duration_ms
 
-	vec[span_event]     events
+	span_event[]     events
 	map[string]string   attributes
 
 	int32               baggage_items
@@ -37,7 +37,7 @@ struct distributed_trace {
 	string              trace_id
 	string              root_span_id
 
-	vec[trace_span]     spans
+	trace_span[]     spans
 	int32               span_count
 
 	int64               trace_start_time
@@ -69,7 +69,7 @@ func create_trace_span(operation_name string) trace_span {
 		start_time:      time.Now().UnixNano(),
 		end_time:        0,
 		duration_ms:     0,
-		events:          make(vec[span_event], 0, 10),
+		events:          make(span_event[], 0, 10),
 		attributes:      make(map[string]string),
 		baggage_items:   0,
 	}
@@ -82,7 +82,7 @@ func create_distributed_trace() distributed_trace {
 	return distributed_trace{
 		trace_id:         trace_id,
 		root_span_id:     root_span_id,
-		spans:            make(vec[trace_span], 0, 20),
+		spans:            make(trace_span[], 0, 20),
 		span_count:       0,
 		trace_start_time: time.Now().UnixNano(),
 		trace_end_time:   0,
@@ -192,8 +192,8 @@ func (distributed_trace* t) get_trace_summary() map[string]interface{} {
 	return summary
 }
 
-func (distributed_trace* t) get_critical_path() vec[trace_span] {
-	result := make(vec[trace_span], 0)
+func (distributed_trace* t) get_critical_path() trace_span[] {
+	result := make(trace_span[], 0)
 
 	for span := range t.spans {
 		if span.parent_span_id == "" || span.parent_span_id == t.root_span_id {

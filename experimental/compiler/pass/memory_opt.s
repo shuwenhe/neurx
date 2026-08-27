@@ -5,7 +5,7 @@ use neurx.experimental.compiler.ir.graph.computation_graph
 struct memory_usage {
     int peak_memory
     int total_memory
-    vec[int] memory_per_value
+    int[] memory_per_value
 }
 
 struct memory_opt_result {
@@ -15,11 +15,11 @@ struct memory_opt_result {
 }
 
 func compute_memory_usage(*computation_graph g) memory_usage {
-    memory_per_value = new int[g.values.len()]
+    memory_per_value = new int[len(g.values)]
     int total = 0
     int peak = 0
 
-    for i in range(g.values.len()) {
+    for i in range(len(g.values)) {
         vt = g.values[i]
         mem = vt.memory_bytes()
         memory_per_value[i] = mem
@@ -36,17 +36,17 @@ func compute_memory_usage(*computation_graph g) memory_usage {
     }
 }
 
-func find_reusable_values(*computation_graph g, *vec[int] lifetime) vec[int] {
-    reusable = vec[int]()
+func find_reusable_values(*computation_graph g, *int[] lifetime) int[] {
+    reusable = int[]()
 
-    for i in range(g.values.len()) {
-        for j in range(i + 1, g.values.len()) {
+    for i in range(len(g.values)) {
+        for j in range(i + 1, len(g.values)) {
             vt1 = g.values[i]
             vt2 = g.values[j]
 
             if vt1.dtype == vt2.dtype && vt1.total_elements() == vt2.total_elements() {
                 if lifetime[i] > 0 && lifetime[j] > lifetime[i] {
-                    reusable.push(j)
+                    reusable = append(reusable, j)
                 }
             }
         }
@@ -55,9 +55,9 @@ func find_reusable_values(*computation_graph g, *vec[int] lifetime) vec[int] {
     reusable
 }
 
-func compute_value_lifetime(*computation_graph g) vec[int] {
-    lifetime = new int[g.values.len()]
-    for i in range(g.values.len()) {
+func compute_value_lifetime(*computation_graph g) int[] {
+    lifetime = new int[len(g.values)]
+    for i in range(len(g.values)) {
         lifetime[i] = 0
     }
 
@@ -92,14 +92,14 @@ func apply_memory_optimization(*computation_graph g) memory_opt_result {
 
     memory_opt_result {
         memory_saved: saved,
-        reuse_candidates: reusable.len(),
+        reuse_candidates: len(reusable),
         success: true,
     }
 }
 
 func is_value_needed_later(*computation_graph g, int value_id, int current_step) bool {
     consumers = g.find_consumers(value_id)
-    consumers.len() > 0
+    len(consumers) > 0
 }
 
 func can_reuse_buffer(*computation_graph g, int source_id, int target_id) bool {

@@ -48,7 +48,7 @@ func unravel_index(int flat_index, []int shape) []int {
     []int coords = []int{cap: ndim}
     int i = 0
     for i < ndim {
-        coords.push(0)
+        coords = append(coords, 0)
         i = i + 1
     }
     int remaining = flat_index

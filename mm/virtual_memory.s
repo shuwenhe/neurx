@@ -53,35 +53,35 @@ enum vm_flags {
     vm_io = 512,
 }
 
-func new_virtual_address_space(page_table_root: *page_table::page_table) (*virtual_address_space, string) {
-    let vas := *virtual_address_space{
-        vm_areas: vec[vm_area](),
+func new_virtual_address_space(page_table* page_table_root::page_table) (*virtual_address_space, string) {
+    vas := *virtual_address_space{
+        vm_areas: vm_area[](),
         page_table_root: page_table_root,
         lock: mutex::new(),
         fault_handler: *default_fault_handler,
     } as *virtual_address_space
 
-    result::ok(vas)
+return     (vas, "")
 }
 
 func default_fault_handler(vaddr: u64, is_write: bool) (void, string) {
-    result::err("default handler - not implemented")
+    ((), "default handler - not implemented")
 }
 
-func (vas: *virtual_address_space) map_vma(
+func (virtual_address_space* vas) map_vma(
     start: u64,
     size: u64,
     flags: u32,
     backing: option[backing_file],
 ) (void, string) {
-    let _guard := vas.lock.lock()?
+    _guard := vas.lock.lock()?
 
     if size == 0 {
-        return result::err("vma size cannot be zero")
+        return ((), "vma size cannot be zero")
     }
 
-    let end := start + size
-    let mut overlap_check := false
+    end := start + size
+    overlap_check := false
     
     for area in vas.vm_areas {
         if (start < area.vm_end) && (end > area.vm_start) {
@@ -91,27 +91,27 @@ func (vas: *virtual_address_space) map_vma(
     }
 
     if overlap_check {
-        return result::err("vma overlaps with existing area")
+        return ((), "vma overlaps with existing area")
     }
 
-    let vma := vm_area{
+    vma := vm_area{
         vm_start: start,
         vm_end: end,
         vm_flags: flags,
         backing_store: backing,
-        page_cache: vec[u64](),
+        page_cache: u64[](),
         protection: decode_prot_flags(flags),
         merge_prev: option::none,
         merge_next: option::none,
     }
 
-    vas.vm_areas.push(vma)
-    result::ok(())
+    vas.vm_areas = append(vas.vm_areas, vma)
+    return (), ""
 }
 
 func decode_prot_flags(flags: u32) prot_flags {
-    let has_write := (flags & (vm_flags::vm_write as u32)) != 0
-    let has_exec := (flags & (vm_flags::vm_exec as u32)) != 0
+    has_write := (flags & (vm_flags::vm_write as u32)) != 0
+    has_exec := (flags & (vm_flags::vm_exec as u32)) != 0
     
     switch (has_write, has_exec) {
         (true, true): prot_flags::prot_write,
@@ -121,13 +121,13 @@ func decode_prot_flags(flags: u32) prot_flags {
     }
 }
 
-func (vas: *virtual_address_space) handle_page_fault(
+func (virtual_address_space* vas) handle_page_fault(
     vaddr: u64,
     is_write: bool,
 ) (void, string) {
-    let _guard := vas.lock.lock()?
+    _guard := vas.lock.lock()?
 
-    let mut found_vma := option::none as option[*vm_area]
+    found_vma := option::none as option[*vm_area]
     
     for area in vas.vm_areas {
         if (vaddr >= area.vm_start) && (vaddr < area.vm_end) {
@@ -138,16 +138,16 @@ func (vas: *virtual_address_space) handle_page_fault(
 
     switch found_vma {
         option::some(vma): {
-            let check_write := (vma.vm_flags & (vm_flags::vm_write as u32)) != 0
+            check_write := (vma.vm_flags & (vm_flags::vm_write as u32)) != 0
             
             if is_write && !check_write {
-                return result::err("write fault on read-only vma")
+                return ((), "write fault on read-only vma")
             }
 
             fault_in_page(vas, vma, vaddr, is_write)?
-            result::ok(())
+            return (), ""
         },
-        option::none: result::err("segmentation fault - no vma found"),
+        option::none: ((), "segmentation fault - no vma found"),
     }
 }
 
@@ -157,30 +157,30 @@ func fault_in_page(
     vaddr: u64,
     is_write: bool,
 ) (void, string) {
-    let page_offset := vaddr - vma.vm_start
-    let ppage := page_table::allocate_physical_page()?
+    page_offset := vaddr - vma.vm_start
+    ppage := page_table::allocate_physical_page()?
 
     switch vma.backing_store {
         option::some(backing): {
-            let handler := backing.page_in_handler
+            handler := backing.page_in_handler
             handler(ppage, page_offset)?
             page_table::set_page_mapping(vas.page_table_root, vaddr, ppage, is_write)?
-            result::ok(())
+            return (), ""
         },
         option::none: {
             page_table::zero_page(ppage)?
             page_table::set_page_mapping(vas.page_table_root, vaddr, ppage, is_write)?
-            result::ok(())
+            return (), ""
         },
     }
 }
 
-func (vas: *virtual_address_space) unmap_vma(start: u64) (void, string) {
-    let _guard := vas.lock.lock()?
+func (virtual_address_space* vas) unmap_vma(start: u64) (void, string) {
+    _guard := vas.lock.lock()?
 
-    let mut remove_idx := option::none as option[u32]
+    remove_idx := option::none as option[u32]
     
-    let mut i := 0
+    i := 0
     for area in vas.vm_areas {
         if area.vm_start == start {
             remove_idx = option::some(i)
@@ -191,15 +191,15 @@ func (vas: *virtual_address_space) unmap_vma(start: u64) (void, string) {
 
     switch remove_idx {
         option::some(idx): {
-            let idx_usize := idx as u32
-            let removed := vas.vm_areas.remove(idx_usize as u32)
-            result::ok(())
+            idx_usize := idx as u32
+            removed := vas.vm_areas.remove(idx_usize as u32)
+            return (), ""
         },
-        option::none: result::err("vma not found for unmap"),
+        option::none: ((), "vma not found for unmap"),
     }
 }
 
-func (vas: *virtual_address_space) find_vma(vaddr: u64) option[*vm_area] {
+func (virtual_address_space* vas) find_vma(vaddr: u64) option[*vm_area] {
     for area in vas.vm_areas {
         if (vaddr >= area.vm_start) && (vaddr < area.vm_end) {
             return option::some(*area)
@@ -208,36 +208,36 @@ func (vas: *virtual_address_space) find_vma(vaddr: u64) option[*vm_area] {
     option::none
 }
 
-func (vas: *virtual_address_space) expand_vma_down(
+func (virtual_address_space* vas) expand_vma_down(
     vma_start: u64,
     new_start: u64,
 ) (void, string) {
-    let _guard := vas.lock.lock()?
+    _guard := vas.lock.lock()?
 
     if new_start >= vma_start {
-        return result::err("cannot expand down - invalid range")
+        return ((), "cannot expand down - invalid range")
     }
 
     for area in vas.vm_areas {
         if (area.vm_start == vma_start) && (area.vm_flags & (vm_flags::vm_growsdown as u32) != 0) {
             if (new_start >= area.vm_end) {
-                return result::err("overlaps with next vma")
+                return ((), "overlaps with next vma")
             }
             area.vm_start = new_start
-            return result::ok(())
+            return return (), ""
         }
     }
 
-    result::err("vma not found or cannot grow")
+    ((), "vma not found or cannot grow")
 }
 
-func (vas: *virtual_address_space) merge_vmas(vma1_start: u64, vma2_start: u64) (void, string) {
-    let _guard := vas.lock.lock()?
+func (virtual_address_space* vas) merge_vmas(vma1_start: u64, vma2_start: u64) (void, string) {
+    _guard := vas.lock.lock()?
 
-    let mut vma1_idx := option::none as option[u32]
-    let mut vma2_idx := option::none as option[u32]
+    vma1_idx := option::none as option[u32]
+    vma2_idx := option::none as option[u32]
 
-    let mut i := 0
+    i := 0
     for area in vas.vm_areas {
         if area.vm_start == vma1_start {
             vma1_idx = option::some(i)
@@ -251,11 +251,11 @@ func (vas: *virtual_address_space) merge_vmas(vma1_start: u64, vma2_start: u64) 
     switch (vma1_idx, vma2_idx) {
         (option::some(idx1), option::some(idx2)): {
             if idx2 != idx1 + 1 {
-                return result::err("vmas not adjacent")
+                return ((), "vmas not adjacent")
             }
-            result::ok(())
+            return (), ""
         },
-        _: result::err("one or both vmas not found"),
+        _: ((), "one or both vmas not found"),
     }
 }
 
@@ -265,10 +265,10 @@ struct page_reclaim_stats {
     pages_written_back: u64,
 }
 
-func (vas: *virtual_address_space) reclaim_pages(target_pages: u64) (page_reclaim_stats, string) {
-    let _guard := vas.lock.lock()?
+func (virtual_address_space* vas) reclaim_pages(target_pages: u64) (page_reclaim_stats, string) {
+    _guard := vas.lock.lock()?
 
-    let mut stats := page_reclaim_stats{
+    stats := page_reclaim_stats{
         pages_scanned: 0,
         pages_freed: 0,
         pages_written_back: 0,
@@ -279,20 +279,20 @@ func (vas: *virtual_address_space) reclaim_pages(target_pages: u64) (page_reclai
             continue
         }
 
-        for page_idx in range(0, vma.page_cache.len()) {
+        for page_idx in range(0, len(vma.page_cache)) {
             if stats.pages_freed >= target_pages {
                 break
             }
 
             stats.pages_scanned = stats.pages_scanned + 1
 
-            let page_addr := vma.page_cache.get(page_idx as u32) as u64
-            let is_dirty := page_table::is_page_dirty(page_addr)?
+            page_addr := vma.page_cache.get(page_idx as u32) as u64
+            is_dirty := page_table::is_page_dirty(page_addr)?
 
             if is_dirty {
                 switch vma.backing_store {
                     option::some(backing): {
-                        let handler := backing.page_out_handler
+                        handler := backing.page_out_handler
                         handler(page_addr, page_idx as u64, true)?
                         stats.pages_written_back = stats.pages_written_back + 1
                     },
@@ -305,14 +305,14 @@ func (vas: *virtual_address_space) reclaim_pages(target_pages: u64) (page_reclai
         }
     }
 
-    result::ok(stats)
+return     (stats, "")
 }
 
-func range(start: u32, end: u32) vec[u32] {
-    let mut result := vec[u32]()
-    let mut i := start
+func range(start: u32, end: u32) u32[] {
+    result := u32[]()
+    i := start
     while i < end {
-        result.push(i)
+        result = append(result, i)
         i = i + 1
     }
     result

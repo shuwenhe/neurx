@@ -128,13 +128,13 @@ func create_lora_adapter(int num_layers, int hidden_size, int intermediate_size,
     adapter.down_proj_lora = []lora_linear{}
     int i = 0
     for i < num_layers {
-        adapter.q_proj_lora.push(create_lora_linear(hidden_size, hidden_size, rank, alpha, dropout_rate))
-        adapter.k_proj_lora.push(create_lora_linear(hidden_size, hidden_size, rank, alpha, dropout_rate))
-        adapter.v_proj_lora.push(create_lora_linear(hidden_size, hidden_size, rank, alpha, dropout_rate))
-        adapter.o_proj_lora.push(create_lora_linear(hidden_size, hidden_size, rank, alpha, dropout_rate))
-        adapter.gate_proj_lora.push(create_lora_linear(hidden_size, intermediate_size, rank, alpha, dropout_rate))
-        adapter.up_proj_lora.push(create_lora_linear(hidden_size, intermediate_size, rank, alpha, dropout_rate))
-        adapter.down_proj_lora.push(create_lora_linear(intermediate_size, hidden_size, rank, alpha, dropout_rate))
+        adapter.q_proj_lora = append(adapter.q_proj_lora, create_lora_linear(hidden_size, hidden_size, rank, alpha, dropout_rate))
+        adapter.k_proj_lora = append(adapter.k_proj_lora, create_lora_linear(hidden_size, hidden_size, rank, alpha, dropout_rate))
+        adapter.v_proj_lora = append(adapter.v_proj_lora, create_lora_linear(hidden_size, hidden_size, rank, alpha, dropout_rate))
+        adapter.o_proj_lora = append(adapter.o_proj_lora, create_lora_linear(hidden_size, hidden_size, rank, alpha, dropout_rate))
+        adapter.gate_proj_lora = append(adapter.gate_proj_lora, create_lora_linear(hidden_size, intermediate_size, rank, alpha, dropout_rate))
+        adapter.up_proj_lora = append(adapter.up_proj_lora, create_lora_linear(hidden_size, intermediate_size, rank, alpha, dropout_rate))
+        adapter.down_proj_lora = append(adapter.down_proj_lora, create_lora_linear(intermediate_size, hidden_size, rank, alpha, dropout_rate))
         i = i + 1
     }
     return adapter

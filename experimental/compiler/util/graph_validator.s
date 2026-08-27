@@ -10,13 +10,13 @@ struct validation_error {
 
 struct validation_report {
     bool is_valid
-    vec[validation_error] errors
-    vec[string] warnings
+    validation_error[] errors
+    string[] warnings
 }
 
 func validate_graph(*computation_graph g) validation_report {
-    errors = vec[validation_error]()
-    warnings = vec[string]()
+    errors = validation_error[]()
+    warnings = string[]()
 
     if !g.is_valid() {
         errors.push(validation_error {
@@ -28,7 +28,7 @@ func validate_graph(*computation_graph g) validation_report {
 
     for op in g.operations {
         for input_id in op.input_ids {
-            if input_id < 0 || input_id >= g.values.len() {
+            if input_id < 0 || input_id >= len(g.values) {
                 errors.push(validation_error {
                     error_type: "invalid_input_reference",
                     message: "operation " + op.id as string + " has invalid input reference " + input_id as string,
@@ -38,7 +38,7 @@ func validate_graph(*computation_graph g) validation_report {
         }
 
         for output_id in op.output_ids {
-            if output_id < 0 || output_id >= g.values.len() {
+            if output_id < 0 || output_id >= len(g.values) {
                 errors.push(validation_error {
                     error_type: "invalid_output_reference",
                     message: "operation " + op.id as string + " has invalid output reference " + output_id as string,
@@ -49,28 +49,28 @@ func validate_graph(*computation_graph g) validation_report {
     }
 
     for op in g.operations {
-        if op.input_ids.len() > 10 {
-            warnings.push("operation " + op.id as string + " has many inputs (" + op.input_ids.len() as string + ")")
+        if len(op.input_ids) > 10 {
+            warnings = append(warnings, "operation " + op.id as string + " has many inputs (" + len(op.input_ids) as string + ")")
         }
     }
 
     validation_report {
-        is_valid: errors.len() == 0,
+        is_valid: len(errors) == 0,
         errors: errors,
         warnings: warnings,
     }
 }
 
 func check_graph_connectivity(*computation_graph g) bool {
-    visited = new bool[g.operations.len()]
-    for i in range(g.operations.len()) {
+    visited = new bool[len(g.operations)]
+    for i in range(len(g.operations)) {
         visited[i] = false
     }
 
     for input_id in g.input_ids {
         producers = g.find_producers(input_id)
         for producer in producers {
-            for i in range(g.operations.len()) {
+            for i in range(len(g.operations)) {
                 if g.operations[i].id == producer.id {
                     visited[i] = true
                 }
@@ -81,12 +81,12 @@ func check_graph_connectivity(*computation_graph g) bool {
     changed = true
     for changed {
         changed = false
-        for i in range(g.operations.len()) {
+        for i in range(len(g.operations)) {
             if visited[i] {
                 for output_id in g.operations[i].output_ids {
                     consumers = g.find_consumers(output_id)
                     for consumer in consumers {
-                        for j in range(g.operations.len()) {
+                        for j in range(len(g.operations)) {
                             if g.operations[j].id == consumer.id && !visited[j] {
                                 visited[j] = true
                                 changed = true
@@ -100,7 +100,7 @@ func check_graph_connectivity(*computation_graph g) bool {
 
     for output_id in g.output_ids {
         producers = g.find_producers(output_id)
-        if producers.len() == 0 {
+        if len(producers) == 0 {
             return false
         }
     }
@@ -109,11 +109,11 @@ func check_graph_connectivity(*computation_graph g) bool {
 }
 
 func check_shape_compatibility(*computation_graph g) validation_report {
-    errors = vec[validation_error]()
-    warnings = vec[string]()
+    errors = validation_error[]()
+    warnings = string[]()
 
     validation_report {
-        is_valid: errors.len() == 0,
+        is_valid: len(errors) == 0,
         errors: errors,
         warnings: warnings,
     }
@@ -123,13 +123,13 @@ func (validation_report* report) summary_string() string {
     s = ""
     s = s + "Validation Report\n"
     s = s + "Valid: " + report.is_valid as string + "\n"
-    s = s + "Errors: " + report.errors.len() as string + "\n"
+    s = s + "Errors: " + len(report.errors) as string + "\n"
 
     for err in report.errors {
         s = s + "  [" + err.error_type + "] " + err.message + "\n"
     }
 
-    s = s + "Warnings: " + report.warnings.len() as string + "\n"
+    s = s + "Warnings: " + len(report.warnings) as string + "\n"
 
     for warn in report.warnings {
         s = s + "  [WARN] " + warn + "\n"

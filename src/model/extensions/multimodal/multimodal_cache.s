@@ -11,7 +11,7 @@ const (
 
 struct cache_entry {
     string cache_key
-    vec[uint8] cached_data
+    uint8[] cached_data
     int32 access_count
     int64 last_access_time
     int32 size_bytes
@@ -24,7 +24,7 @@ struct multimodal_cache {
     int32 current_cache_size
 
     map[string]cache_entry* cache_data
-    vec[string] access_order
+    string[] access_order
 
     int32 hit_count
     int32 miss_count
@@ -38,14 +38,14 @@ func create_multimodal_cache(int32 max_size) multimodal_cache* {
         max_cache_size: max_size,
         current_cache_size: 0,
         cache_data: make(map[string]cache_entry*),
-        access_order: make(vec[string]),
+        access_order: make(string[]),
         hit_count: 0,
         miss_count: 0,
         enable_compression: true,
     }
 }
 
-func (multimodal_cache* cache) put(string key, vec[uint8] data, modality_type modality) bool {
+func (multimodal_cache* cache) put(string key, uint8[] data, modality_type modality) bool {
     if len(key) == 0 {
         return false
     }
@@ -91,16 +91,16 @@ func (multimodal_cache* cache) put(string key, vec[uint8] data, modality_type mo
     return true
 }
 
-func (multimodal_cache* cache) get(string key) option[vec[uint8]] {
+func (multimodal_cache* cache) get(string key) option[uint8[]] {
     if entry, exists := cache.cache_data[key]; exists {
         entry.access_count = entry.access_count + 1
         entry.last_access_time = 0
         cache.hit_count = cache.hit_count + 1
-        return option[vec[uint8]]{value: entry.cached_data}
+        return option[uint8[]]{value: entry.cached_data}
     }
 
     cache.miss_count = cache.miss_count + 1
-    return option[vec[uint8]]{}
+    return option[uint8[]]{}
 }
 
 func (multimodal_cache* cache) evict_one() string {
@@ -173,7 +173,7 @@ func (multimodal_cache* cache) delete(string key) bool {
 
 func (multimodal_cache* cache) clear() {
     cache.cache_data = make(map[string]cache_entry*)
-    cache.access_order = make(vec[string])
+    cache.access_order = make(string[])
     cache.current_cache_size = 0
 }
 

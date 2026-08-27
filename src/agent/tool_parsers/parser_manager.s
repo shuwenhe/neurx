@@ -1,7 +1,7 @@
 package neurx.tool_parsers
 
 use std.map
-use std.vec
+use std.slices
 
 type ToolParserFactory = func() . ToolParser
 
@@ -23,52 +23,50 @@ _TOOL_PARSER_MANAGER := ToolParserManagerInstance {
     }
 }
 
-impl ToolParserManager {
-    func new() . ToolParserManager {
-        ToolParserManager {
-            parsers: map::new(),
-            lazy_parsers: map::new(),
-            loaded_modules: map::new()
-        }
+func new() . ToolParserManager {
+    ToolParserManager {
+        parsers: map::new(),
+        lazy_parsers: map::new(),
+        loaded_modules: map::new()
     }
+}
 
-    func register_parser(self, str name, ToolParserFactory factory) {
-        self.parsers.insert(name, factory)
-    }
+func register_parser(self, str name, ToolParserFactory factory) {
+    self.parsers.insert(name, factory)
+}
 
-    func register_lazy_parser(self, str name, str module, str class_name) {
-        self.lazy_parsers.insert(name, (module, class_name))
-    }
+func register_lazy_parser(self, str name, str module, str class_name) {
+    self.lazy_parsers.insert(name, (module, class_name))
+}
 
-    func get_parser(self, str name) . Option<ToolParser> {
-        match self.parsers.get(name) {
-            Some(factory) => Some(factory()),
-            None => {
-                match self.lazy_parsers.get(name) {
-                    Some((module, class)) => {
-                        load_parser_module(module, class, name)
-                    }
-                    None => None
+func get_parser(self, str name) . Option<ToolParser> {
+    match self.parsers.get(name) {
+        Some(factory) => Some(factory()),
+        None => {
+            match self.lazy_parsers.get(name) {
+                Some((module, class)) => {
+                    load_parser_module(module, class, name)
                 }
+                None => None
             }
         }
     }
+}
 
-    func list_parsers(self) . Vec<str> {
-        names := Vec::new()
-        for (name, _) in self.parsers.iter() {
-            names.push(name.clone())
-        }
-        for (name, _) in self.lazy_parsers.iter() {
-            names.push(name.clone())
-        }
-        names
+func list_parsers(self) . Vec<str> {
+    names := Vec::new()
+    for (name, _) in self.parsers.iter() {
+        names = append(names, name.clone())
     }
+    for (name, _) in self.lazy_parsers.iter() {
+        names = append(names, name.clone())
+    }
+    names
+}
 
-    func get_parser_for_model(self, str model_name) . Option<ToolParser> {
-        parser_name := infer_parser_from_model_name(model_name)
-        self.get_parser(parser_name)
-    }
+func get_parser_for_model(self, str model_name) . Option<ToolParser> {
+    parser_name := infer_parser_from_model_name(model_name)
+    self.get_parser(parser_name)
 }
 
 func get_manager() . ToolParserManager {

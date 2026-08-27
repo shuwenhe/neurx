@@ -20,7 +20,7 @@ func create_dentry_cache(int max_size) dentry_cache {
     }
 }
 
-func dentry_cache_lookup(cache: *dentry_cache) (dentry_cache, bool) {
+func dentry_cache_lookup(dentry_cache* cache) (dentry_cache, bool) {
     cache_local := cache.*
     
     cache_local.total_path_lookups = cache_local.total_path_lookups + 1
@@ -37,7 +37,7 @@ func dentry_cache_lookup(cache: *dentry_cache) (dentry_cache, bool) {
     (cache_local, found)
 }
 
-func dentry_cache_add(cache: *dentry_cache) dentry_cache {
+func dentry_cache_add(dentry_cache* cache) dentry_cache {
     cache_local := cache.*
     
     if cache_local.cached_entries < cache_local.max_cached_entries {
@@ -50,7 +50,7 @@ func dentry_cache_add(cache: *dentry_cache) dentry_cache {
     cache_local
 }
 
-func dentry_cache_remove(cache: *dentry_cache) dentry_cache {
+func dentry_cache_remove(dentry_cache* cache) dentry_cache {
     cache_local := cache.*
     
     if cache_local.cached_entries > 0 {
@@ -61,7 +61,7 @@ func dentry_cache_remove(cache: *dentry_cache) dentry_cache {
     cache_local
 }
 
-func dentry_cache_clear(cache: *dentry_cache) dentry_cache {
+func dentry_cache_clear(dentry_cache* cache) dentry_cache {
     cache_local := cache.*
     cache_local.cached_entries = 0
     

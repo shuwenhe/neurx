@@ -64,7 +64,7 @@ struct heartbeat_config {
 
 struct connection_pool {
 	active_connections  map[string]connection_info
-	idle_connections    vec[connection_info]
+	idle_connections    connection_info[]
 
 	mu                  sync.Mutex
 	pool_size           int32
@@ -81,7 +81,7 @@ struct connection_pool {
 func create_connection_pool(max_size int32) connection_pool {
 	return connection_pool{
 		active_connections: make(map[string]connection_info),
-		idle_connections:   make(vec[connection_info], 0, max_size),
+		idle_connections:   make(connection_info[], 0, max_size),
 		max_pool_size:      max_size,
 		idle_timeout:       300000000000,
 		pool_size:          0,
@@ -220,11 +220,11 @@ func (cp connection_pool*) get_active_connections_count() int32 {
 	return cp.metrics.active_connections
 }
 
-func (cp connection_pool*) get_idle_connections() vec[connection_info] {
+func (cp connection_pool*) get_idle_connections() connection_info[] {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
 
-	idle_conns := make(vec[connection_info], 0, len(cp.idle_connections))
+	idle_conns := make(connection_info[], 0, len(cp.idle_connections))
 	for conn := range cp.idle_connections {
 		idle_conns = append(idle_conns, conn)
 	}
@@ -239,7 +239,7 @@ func (cp connection_pool*) cleanup_idle_connections() int32 {
 	now := time.Now().UnixNano()
 	count := int32(0)
 
-	cleaned := make(vec[connection_info], 0, len(cp.idle_connections))
+	cleaned := make(connection_info[], 0, len(cp.idle_connections))
 	for conn := range cp.idle_connections {
 		if now - conn.last_activity > cp.idle_timeout {
 			cp.pool_size--
@@ -338,7 +338,7 @@ func (cm connection_monitor*) check_idle_connections() int32 {
 
 func (cm connection_monitor*) check_heartbeats() {
 	cm.pool.mu.Lock()
-	conns := make(vec[connection_info], 0, len(cm.pool.active_connections))
+	conns := make(connection_info[], 0, len(cm.pool.active_connections))
 	for _, conn := range cm.pool.active_connections {
 		conns = append(conns, conn)
 	}

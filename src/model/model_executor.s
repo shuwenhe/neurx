@@ -1,6 +1,6 @@
 package neurx.model.model_executor
 
-use std.vec
+use std.slices
 use std.option
 
 struct model_executor {
@@ -48,7 +48,7 @@ func (model_executor* executor) forward_pass(
     attention_mask: option[&[]int]
 ) forward_output {
     batch_size := 1
-    seq_len := input_ids.len()
+    seq_len := len(input_ids)
 
     output := forward_output {
         logits: []f32,

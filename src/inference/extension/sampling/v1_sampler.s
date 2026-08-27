@@ -42,7 +42,7 @@ func create_sampler(int32 seed) sampler* {
 	}
 }
 
-func (sampler* s) greedy_sample(vec[float32] logits) int32 {
+func (sampler* s) greedy_sample(float32[] logits) int32 {
 	if len(logits) == 0 {
 		return 0
 	}
@@ -60,7 +60,7 @@ func (sampler* s) greedy_sample(vec[float32] logits) int32 {
 	return int32(max_idx)
 }
 
-func (sampler* s) top_k_sample(vec[float32] logits, int32 k) int32 {
+func (sampler* s) top_k_sample(float32[] logits, int32 k) int32 {
 	if k <= 0 || len(logits) == 0 {
 		return s.greedy_sample(logits)
 	}
@@ -69,8 +69,8 @@ func (sampler* s) top_k_sample(vec[float32] logits, int32 k) int32 {
 		k = int32(len(logits))
 	}
 
-	top_indices := make(vec[int32])
-	top_values := make(vec[float32])
+	top_indices := make(int32[])
+	top_values := make(float32[])
 
 	for i := 0; i < len(logits); i = i + 1 {
 		val := logits[i]
@@ -78,11 +78,11 @@ func (sampler* s) top_k_sample(vec[float32] logits, int32 k) int32 {
 		inserted := false
 		for j := 0; j < len(top_values); j = j + 1 {
 			if val > top_values[j] {
-				top_values = append(make(vec[float32]), top_values[:j]...)
+				top_values = append(make(float32[]), top_values[:j]...)
 				top_values = append(top_values, val)
 				top_values = append(top_values, top_values[j+1:]...)
 
-				top_indices = append(make(vec[int32]), top_indices[:j]...)
+				top_indices = append(make(int32[]), top_indices[:j]...)
 				top_indices = append(top_indices, int32(i))
 				top_indices = append(top_indices, top_indices[j+1:]...)
 
@@ -109,7 +109,7 @@ func (sampler* s) top_k_sample(vec[float32] logits, int32 k) int32 {
 	return 0
 }
 
-func (sampler* s) top_p_sample(vec[float32] logits, float32 p_val) int32 {
+func (sampler* s) top_p_sample(float32[] logits, float32 p_val) int32 {
 	if p_val <= 0.0 || len(logits) == 0 {
 		return s.greedy_sample(logits)
 	}
@@ -118,8 +118,8 @@ func (sampler* s) top_p_sample(vec[float32] logits, float32 p_val) int32 {
 		return s.greedy_sample(logits)
 	}
 
-	sorted_indices := make(vec[int32])
-	sorted_logits := make(vec[float32])
+	sorted_indices := make(int32[])
+	sorted_logits := make(float32[])
 
 	for i := 0; i < len(logits); i = i + 1 {
 		sorted_indices = append(sorted_indices, int32(i))
@@ -143,7 +143,7 @@ func (sampler* s) top_p_sample(vec[float32] logits, float32 p_val) int32 {
 		sorted_indices[max_idx] = temp_idx
 	}
 
-	probs := make(vec[float32])
+	probs := make(float32[])
 	sum := 0.0
 	for i := 0; i < len(sorted_logits); i = i + 1 {
 		probs = append(probs, sorted_logits[i])
@@ -171,12 +171,12 @@ func (sampler* s) top_p_sample(vec[float32] logits, float32 p_val) int32 {
 	return 0
 }
 
-func (sampler* s) temperature_sample(vec[float32] logits, float32 temperature) vec[float32] {
+func (sampler* s) temperature_sample(float32[] logits, float32 temperature) float32[] {
 	if temperature <= 0.0 {
 		return logits
 	}
 
-	adjusted := make(vec[float32])
+	adjusted := make(float32[])
 	for i := 0; i < len(logits); i = i + 1 {
 		adjusted = append(adjusted, logits[i] / temperature)
 	}
@@ -184,7 +184,7 @@ func (sampler* s) temperature_sample(vec[float32] logits, float32 temperature) v
 	return adjusted
 }
 
-func (sampler* s) sample_with_params(vec[float32] logits, sampling_params* params) int32 {
+func (sampler* s) sample_with_params(float32[] logits, sampling_params* params) int32 {
 	if params == nil {
 		return s.greedy_sample(logits)
 	}
@@ -211,7 +211,7 @@ func (sampler* s) sample_with_params(vec[float32] logits, sampling_params* param
 	}
 }
 
-func (sampler* s) sample_enhanced(vec[float32] logits, sampling.sampling_params* params) int32 {
+func (sampler* s) sample_enhanced(float32[] logits, sampling.sampling_params* params) int32 {
 	if s.enhanced_sampler == nil {
 		return s.greedy_sample(logits)
 	}
@@ -223,8 +223,8 @@ func (sampler* s) sample_enhanced(vec[float32] logits, sampling.sampling_params*
 	return s.enhanced_sampler.sample(logits)
 }
 
-func (sampler* s) batch_sample(vec[vec[float32]] batch_logits, sampling_params* params) vec[int32] {
-	results := make(vec[int32])
+func (sampler* s) batch_sample(float32[][]] batch_logits, sampling_params* params) int32[] {
+	results := make(int32[])
 
 	for i := 0; i < len(batch_logits); i = i + 1 {
 		token := s.sample_with_params(batch_logits[i], params)
@@ -234,7 +234,7 @@ func (sampler* s) batch_sample(vec[vec[float32]] batch_logits, sampling_params* 
 	return results
 }
 
-func (sampler* s) batch_sample_enhanced(vec[vec[float32]] batch_logits) vec[int32] {
+func (sampler* s) batch_sample_enhanced(float32[][]] batch_logits) int32[] {
 	if s.enhanced_sampler == nil {
 		return s.batch_sample(batch_logits, nil)
 	}
@@ -242,12 +242,12 @@ func (sampler* s) batch_sample_enhanced(vec[vec[float32]] batch_logits) vec[int3
 	return s.enhanced_sampler.batch_sample(batch_logits)
 }
 
-func (sampler* s) apply_frequency_penalty(vec[float32] logits, vec[int32] token_ids, float32 penalty) vec[float32] {
+func (sampler* s) apply_frequency_penalty(float32[] logits, int32[] token_ids, float32 penalty) float32[] {
 	if penalty == 0.0 {
 		return logits
 	}
 
-	adjusted := make(vec[float32])
+	adjusted := make(float32[])
 
 	for i := 0; i < len(logits); i = i + 1 {
 		count := 0
@@ -263,12 +263,12 @@ func (sampler* s) apply_frequency_penalty(vec[float32] logits, vec[int32] token_
 	return adjusted
 }
 
-func (sampler* s) apply_presence_penalty(vec[float32] logits, vec[int32] token_ids, float32 penalty) vec[float32] {
+func (sampler* s) apply_presence_penalty(float32[] logits, int32[] token_ids, float32 penalty) float32[] {
 	if penalty == 0.0 {
 		return logits
 	}
 
-	adjusted := make(vec[float32])
+	adjusted := make(float32[])
 
 	for i := 0; i < len(logits); i = i + 1 {
 		token_id := int32(i)

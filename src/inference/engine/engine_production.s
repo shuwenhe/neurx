@@ -31,8 +31,8 @@ struct inference_engine {
     kv_cache* cache_manager
     metrics_tracker* metrics
 
-    vec[active_request] pending_requests
-    vec[active_request] running_requests
+    active_request[] pending_requests
+    active_request[] running_requests
     map[string, active_request] all_requests
 
     int32 max_batch_size
@@ -45,8 +45,8 @@ struct inference_engine {
 
 struct active_request {
     string request_id
-    vec[int32] prompt_tokens
-    vec[int32] generated_tokens
+    int32[] prompt_tokens
+    int32[] generated_tokens
 
     int32 num_prefill_tokens
     int32 num_decode_steps
@@ -85,7 +85,7 @@ struct model_executor {
 struct scheduler {
     int32 batch_size
     int32 max_pending
-    vec[active_request*] pending
+    active_request*[] pending
     map[string, active_request*] tracking
 }
 
@@ -123,7 +123,7 @@ func create_inference_engine(model_config cfg) inference_engine* {
     sched := *scheduler{
         batch_size: 32,
         max_pending: 1000,
-        pending: make(vec[active_request*]),
+        pending: make(active_request*[]),
         tracking: make(map[string, active_request*]),
     }
 
@@ -151,8 +151,8 @@ func create_inference_engine(model_config cfg) inference_engine* {
         sched: sched,
         cache_manager: cache,
         metrics: metrics,
-        pending_requests: make(vec[active_request]),
-        running_requests: make(vec[active_request]),
+        pending_requests: make(active_request[]),
+        running_requests: make(active_request[]),
         all_requests: make(map[string, active_request]),
         max_batch_size: 32,
         prefill_batch_size: 16,
@@ -179,7 +179,7 @@ func (inference_engine* e) load_model(string model_path) bool {
 
 func (inference_engine* e) generate_streaming(
     string request_id,
-    vec[int32] prompt_tokens,
+    int32[] prompt_tokens,
     int32 max_new_tokens,
     generation_config config
 ) token_stream* {
@@ -190,7 +190,7 @@ func (inference_engine* e) generate_streaming(
     req := active_request{
         request_id: request_id,
         prompt_tokens: prompt_tokens,
-        generated_tokens: make(vec[int32]),
+        generated_tokens: make(int32[]),
         num_prefill_tokens: 0,
         num_decode_steps: 0,
         max_new_tokens: max_new_tokens,
@@ -199,7 +199,7 @@ func (inference_engine* e) generate_streaming(
         is_streaming: true,
         stream: *token_stream{
             request_id: request_id,
-            token_buffer: make(vec[int32]),
+            token_buffer: make(int32[]),
             buffer_cursor: 0,
             completed: false,
             bp_state: backpressure_state{
@@ -239,7 +239,7 @@ func (inference_engine* e) process_batch() int32 {
         return 0
     }
 
-    batch := make(vec[active_request], 0)
+    batch := make(active_request[], 0)
     for i := 0; i < batch_size; i = i + 1 {
         req := e.pending_requests[i]
         req.state = req_state_waiting
@@ -257,7 +257,7 @@ func (inference_engine* e) process_batch() int32 {
     return int32(len(batch))
 }
 
-func (inference_engine* e) execute_prefill_batch(vec[active_request] batch) bool {
+func (inference_engine* e) execute_prefill_batch(active_request[] batch) bool {
     if len(batch) == 0 {
         return false
     }

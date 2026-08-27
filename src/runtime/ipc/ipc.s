@@ -28,7 +28,7 @@ func msgget(is ipc_state, string name, int max_depth) (ipc_state, int) {
     int i = 0
     for i < len(is.queues) {
         if is.queues[i].name == name {
-            return (is, is.queues[i].qid)
+            return is, is.queues[i].qid
         }
         i = i + 1
     }
@@ -36,7 +36,7 @@ func msgget(is ipc_state, string name, int max_depth) (ipc_state, int) {
     is.queues = append(is.queues, q)
     int qid = is.next_qid
     is.next_qid = is.next_qid + 1
-    return (is, qid)
+    return is, qid
 }
 
 func msgsnd(is ipc_state, int qid, int from_pid, int to_pid, string msg_type, string payload) ipc_state {
@@ -76,14 +76,14 @@ func msgrcv(is ipc_state, int qid, int to_pid) (ipc_state, ipc_message, bool) {
                         k = k + 1
                     }
                     is.queues[qi].messages = remaining
-                    return (is, m, true)
+                    return is, m, true
                 }
                 mi = mi + 1
             }
         }
         qi = qi + 1
     }
-    return (is, ipc_message{}, false)
+    return is, ipc_message{}, false
 }
 
 struct semaphore {
@@ -107,7 +107,7 @@ func sem_create(ss sem_state, string name, int initial, int max_val) (sem_state,
     ss.sems = append(ss.sems, s)
     int id = ss.next_sem_id
     ss.next_sem_id = ss.next_sem_id + 1
-    return (ss, id)
+    return ss, id
 }
 
 func sem_down(ss sem_state, int sem_id) (sem_state, bool) {
@@ -116,13 +116,13 @@ func sem_down(ss sem_state, int sem_id) (sem_state, bool) {
         if ss.sems[i].sem_id == sem_id {
             if ss.sems[i].value > 0 {
                 ss.sems[i].value = ss.sems[i].value - 1
-                return (ss, true)
+                return ss, true
             }
-            return (ss, false)
+            return ss, false
         }
         i = i + 1
     }
-    return (ss, false)
+    return ss, false
 }
 
 func sem_up(ss sem_state, int sem_id) sem_state {

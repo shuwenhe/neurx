@@ -43,7 +43,7 @@ func register_region(ms mem_state, int domain, int device_id, int total_bytes, i
     ms.regions = append(ms.regions, r)
     int id = ms.next_region_id
     ms.next_region_id = ms.next_region_id + 1
-    return (ms, id)
+    return ms, id
 }
 
 func mem_alloc(ms mem_state, int region_id, int size_bytes) (mem_state, mem_alloc_result) {
@@ -53,7 +53,7 @@ func mem_alloc(ms mem_state, int region_id, int size_bytes) (mem_state, mem_allo
     for i < len(ms.regions) {
         if ms.regions[i].region_id == region_id {
             if ms.regions[i].used_bytes + aligned > ms.regions[i].total_bytes {
-                return (ms, mem_alloc_result{ok: false, err: "OOM"})
+                return ms, mem_alloc_result{ok: false, err: "OOM"}
             }
             int offset = ms.regions[i].used_bytes
             ms.regions[i].used_bytes = ms.regions[i].used_bytes + aligned
@@ -67,7 +67,7 @@ func mem_alloc(ms mem_state, int region_id, int size_bytes) (mem_state, mem_allo
         }
         i = i + 1
     }
-    return (ms, mem_alloc_result{ok: false, err: "region_not_found"})
+    return ms, mem_alloc_result{ok: false, err: "region_not_found"}
 }
 
 func mem_free(ms mem_state, int region_id, int size_bytes) mem_state {

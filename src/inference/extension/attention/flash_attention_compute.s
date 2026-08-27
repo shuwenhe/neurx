@@ -159,7 +159,7 @@ func flash_attention_backward(
             )
         }
     }
-    return (grad_q, grad_k, grad_v)
+    return grad_q, grad_k, grad_v
 }
 
 func flash_attention_gqa(
@@ -211,7 +211,7 @@ func compute_flash_attention_memory_savings(
     flash_memory := float(batch_size * seq_len * head_dim * num_heads) * 2.0 / (1024 * 1024 * 1024)
     memory_savings := (1.0 - flash_memory / standard_memory) * 100.0
     speedup := standard_memory / flash_memory
-    return (memory_savings, speedup)
+    return memory_savings, speedup
 }
 
 func load_block(vector data, int start_idx, int block_size, int num_heads, int head_dim): vector {
@@ -369,7 +369,7 @@ func get_cross_mask(int from_rank, int to_rank): vector {
 func scale_and_add(vector result, vector scale_vec, int q_size, int num_heads): void {
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
-            result[h * q_size + qi] = result[h * q_size + qi] * scale_vec[h * q_size + qi]
+            result[h * q_size + qi] = result[h * q_size + qi] * scale_h * q_size + qi[]
         }
     }
 }

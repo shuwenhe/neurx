@@ -18,7 +18,7 @@ struct all_reduce_result {
 struct all_gather_request {
     string name
     tensor_handle send_tensor
-    vec[tensor_handle] recv_tensors
+    tensor_handle[] recv_tensors
     int group_id
     int64 timestamp
 }
@@ -32,7 +32,7 @@ struct all_gather_result {
 
 struct reduce_scatter_request {
     string name
-    vec[tensor_handle] send_tensors
+    tensor_handle[] send_tensors
     tensor_handle recv_tensor
     reduce_op op
     int group_id
@@ -94,7 +94,7 @@ func (communicator* comm) all_reduce_async(tensor_handle tensor, reduce_op op) s
     request_id
 }
 
-func (communicator* comm) all_gather(tensor_handle send_tensor, vec[tensor_handle] recv_tensors) all_gather_result {
+func (communicator* comm) all_gather(tensor_handle send_tensor, tensor_handle[] recv_tensors) all_gather_result {
     if !comm.initialized {
         all_gather_result {
             success: false,
@@ -106,7 +106,7 @@ func (communicator* comm) all_gather(tensor_handle send_tensor, vec[tensor_handl
 
     total_bytes := 0
     i := 0
-    for i < recv_tensors.len() {
+    for i < len(recv_tensors) {
         total_bytes = total_bytes + recv_tensors[i].size
         i = i + 1
     }
@@ -121,7 +121,7 @@ func (communicator* comm) all_gather(tensor_handle send_tensor, vec[tensor_handl
     result
 }
 
-func (communicator* comm) all_gather_async(tensor_handle send_tensor, vec[tensor_handle] recv_tensors) string {
+func (communicator* comm) all_gather_async(tensor_handle send_tensor, tensor_handle[] recv_tensors) string {
     request_id := "allgather_" + string(comm.config.rank) + "_" + string(send_tensor.device_id)
 
     op_info := comm_operation {
@@ -134,7 +134,7 @@ func (communicator* comm) all_gather_async(tensor_handle send_tensor, vec[tensor
     request_id
 }
 
-func (communicator* comm) reduce_scatter(vec[tensor_handle] send_tensors, tensor_handle recv_tensor, reduce_op op) reduce_scatter_result {
+func (communicator* comm) reduce_scatter(tensor_handle[] send_tensors, tensor_handle recv_tensor, reduce_op op) reduce_scatter_result {
     if !comm.initialized {
         reduce_scatter_result {
             success: false,
@@ -146,7 +146,7 @@ func (communicator* comm) reduce_scatter(vec[tensor_handle] send_tensors, tensor
 
     total_bytes := 0
     i := 0
-    for i < send_tensors.len() {
+    for i < len(send_tensors) {
         total_bytes = total_bytes + send_tensors[i].size
         i = i + 1
     }

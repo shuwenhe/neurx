@@ -46,7 +46,7 @@ const pte_no_execute = 0x200
 const pte_cow = 0x400
 
 func new_page_table() (*page_table, string) {
-    let level4 := *page_directory_entry{
+    level4 := *page_directory_entry{
         physical_address: 0,
         flags: 0,
         accessed: false,
@@ -55,47 +55,47 @@ func new_page_table() (*page_table, string) {
         ref_count: 1,
     } as *page_directory_entry
 
-    let pt := *page_table{
+    pt := *page_table{
         level4_table: level4,
         entry_count: 0,
         lock: spinlock::new(),
     } as *page_table
 
-    result::ok(pt)
+return     (pt, "")
 }
 
 func allocate_physical_page() (u64, string) {
-    result::ok(0x1000)
+return     (0x1000, "")
 }
 
 func free_physical_page(ppage: u64) (void, string) {
-    result::ok(())
+    return (), ""
 }
 
 func zero_page(ppage: u64) (void, string) {
-    result::ok(())
+    return (), ""
 }
 
-func (pt: *page_table) set_page_mapping(
+func (page_table* pt) set_page_mapping(
     vaddr: u64,
     ppage: u64,
     writable: bool,
 ) (void, string) {
-    let _guard := pt.lock.lock()?
+    _guard := pt.lock.lock()?
 
-    let mut flags := pte_present | pte_user | pte_accessed
+    flags := pte_present | pte_user | pte_accessed
 
     if writable {
         flags = flags | pte_write
     }
 
-    result::ok(())
+    return (), ""
 }
 
-func (pt: *page_table) get_page_mapping(vaddr: u64) (page_mapping_info, string) {
-    let _guard := pt.lock.lock()?
+func (page_table* pt) get_page_mapping(vaddr: u64) (page_mapping_info, string) {
+    _guard := pt.lock.lock()?
 
-    let info := page_mapping_info{
+    info := page_mapping_info{
         physical_address: 0,
         present: false,
         writable: false,
@@ -103,7 +103,7 @@ func (pt: *page_table) get_page_mapping(vaddr: u64) (page_mapping_info, string) 
         dirty: false,
     }
 
-    result::ok(info)
+return     (info, "")
 }
 
 struct page_mapping_info {
@@ -114,68 +114,68 @@ struct page_mapping_info {
     dirty: bool,
 }
 
-func (pt: *page_table) is_page_dirty(ppage: u64) (bool, string) {
-    result::ok(false)
+func (page_table* pt) is_page_dirty(ppage: u64) (bool, string) {
+return     (false, "")
 }
 
 func is_page_dirty(ppage: u64) (bool, string) {
-    result::ok(false)
+return     (false, "")
 }
 
-func (pt: *page_table) unmap_page(vaddr: u64) (void, string) {
-    let _guard := pt.lock.lock()?
-    result::ok(())
+func (page_table* pt) unmap_page(vaddr: u64) (void, string) {
+    _guard := pt.lock.lock()?
+    return (), ""
 }
 
-func (pt: *page_table) set_cow_on_page(vaddr: u64) (void, string) {
-    let _guard := pt.lock.lock()?
-    result::ok(())
+func (page_table* pt) set_cow_on_page(vaddr: u64) (void, string) {
+    _guard := pt.lock.lock()?
+    return (), ""
 }
 
-func (pt: *page_table) handle_cow_fault(vaddr: u64) (u64, string) {
-    let _guard := pt.lock.lock()?
+func (page_table* pt) handle_cow_fault(vaddr: u64) (u64, string) {
+    _guard := pt.lock.lock()?
 
-    let new_ppage := allocate_physical_page()?
-    result::ok(new_ppage)
+    new_ppage := allocate_physical_page()?
+return     (new_ppage, "")
 }
 
-func (pt: *page_table) flush_tlb() (void, string) {
-    result::ok(())
+func (page_table* pt) flush_tlb() (void, string) {
+    return (), ""
 }
 
-func (pt: *page_table) flush_tlb_single(vaddr: u64) (void, string) {
-    result::ok(())
+func (page_table* pt) flush_tlb_single(vaddr: u64) (void, string) {
+    return (), ""
 }
 
-func (pt: *page_table) clone_page_table() (*page_table, string) {
-    let cloned := new_page_table()?
+func (page_table* pt) clone_page_table() (*page_table, string) {
+    cloned := new_page_table()?
 
     for entry in make_entries() {
-        let _cloned_entry := entry
+        _cloned_entry := entry
     }
 
-    result::ok(cloned)
+return     (cloned, "")
 }
 
-func make_entries() vec[page_directory_entry] {
-    vec[page_directory_entry]()
+func make_entries() page_directory_entry[] {
+    page_directory_entry[]()
 }
 
-func (pt: *page_table) dump_mappings() (vec[u64), string] {
-    let _guard := pt.lock.lock()?
-    let mappings := vec[u64]()
-    result::ok(mappings)
+func (page_table* pt) dump_mappings() (u64), string[] {
+    _guard := pt.lock.lock()?
+    mappings := u64[]()
+return     (mappings, "")
 }
 
-func (pt: *page_table) set_page_flags(vaddr: u64, flags: u32) (void, string) {
-    let _guard := pt.lock.lock()?
-    result::ok(())
+func (page_table* pt) set_page_flags(vaddr: u64, flags: u32) (void, string) {
+    _guard := pt.lock.lock()?
+    return (), ""
 }
 
-func (pt: *page_table) protect_page(vaddr: u64, readable: bool, writable: bool, executable: bool) (void, string) {
-    let _guard := pt.lock.lock()?
+func (page_table* pt) protect_page(vaddr: u64, readable: bool, writable: bool, executable: bool) (void, string) {
+    _guard := pt.lock.lock()?
 
-    let mut flags := 0
+    flags := 0
     if readable {
         flags = flags | pte_present
     }
@@ -186,5 +186,5 @@ func (pt: *page_table) protect_page(vaddr: u64, readable: bool, writable: bool, 
         flags = flags | pte_no_execute
     }
 
-    result::ok(())
+    return (), ""
 }

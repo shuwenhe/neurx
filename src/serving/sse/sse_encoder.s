@@ -20,7 +20,7 @@ struct encoded_event {
 	string                  raw_text
 	int32                   size_bytes
 
-	vec[string]             lines
+	string[]             lines
 	int32                   line_count
 
 	bool                    compressed
@@ -52,7 +52,7 @@ func (sse_encoder* e) encode_event(event sse_event) encoded_event {
 	encoded := encoded_event{
 		raw_text:            "",
 		size_bytes:          0,
-		lines:               make(vec[string], 0),
+		lines:               make(string[], 0),
 		line_count:          0,
 		compressed:          false,
 		compression_method:  "none",
@@ -80,7 +80,7 @@ func (sse_encoder* e) encode_event(event sse_event) encoded_event {
 		data := event.event_data
 
 		if e.enable_multiline {
-			lines := make(vec[string], 0)
+			lines := make(string[], 0)
 			current_line := ""
 
 			for i := int32(0); i < int32(len(data)); i++ {
@@ -173,8 +173,8 @@ func (sse_encoder* e) escape_data(data string) string {
 	return escaped
 }
 
-func (sse_encoder* e) split_multiline(data string) vec[string] {
-	lines := make(vec[string], 0)
+func (sse_encoder* e) split_multiline(data string) string[] {
+	lines := make(string[], 0)
 	current_line := ""
 
 	for i := int32(0); i < int32(len(data)); i++ {
@@ -216,7 +216,7 @@ func (sse_encoder* e) reset_stats() {
 }
 
 struct sse_batch_encoder {
-	vec[encoded_event]      encoded_events
+	encoded_event[]      encoded_events
 	int32                   event_count
 
 	int32                   batch_size_bytes
@@ -227,7 +227,7 @@ struct sse_batch_encoder {
 
 func create_sse_batch_encoder(max_batch_size int32) sse_batch_encoder {
 	return sse_batch_encoder{
-		encoded_events:   make(vec[encoded_event], 0, 100),
+		encoded_events:   make(encoded_event[], 0, 100),
 		event_count:      0,
 		batch_size_bytes: 0,
 		max_batch_size:   max_batch_size,
@@ -263,7 +263,7 @@ func (sse_batch_encoder* b) get_batch_size_bytes() int32 {
 }
 
 func (sse_batch_encoder* b) clear_batch() {
-	b.encoded_events = make(vec[encoded_event], 0, 100)
+	b.encoded_events = make(encoded_event[], 0, 100)
 	b.event_count = 0
 	b.batch_size_bytes = 0
 	b.ready_to_send = false

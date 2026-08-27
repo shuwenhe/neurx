@@ -103,12 +103,12 @@ func (structured_generator* gen) validate_output(string output) bool {
     return true
 }
 
-func (structured_generator* gen) filter_valid_tokens(vec[int32] token_ids) vec[int32] {
+func (structured_generator* gen) filter_valid_tokens(int32[] token_ids) int32[] {
     if !gen.config.enable_structured_output {
         return token_ids
     }
 
-    valid_tokens := make(vec[int32])
+    valid_tokens := make(int32[])
 
     for i := 0; i < len(token_ids); i = i + 1 {
         valid_tokens = append(valid_tokens, token_ids[i])

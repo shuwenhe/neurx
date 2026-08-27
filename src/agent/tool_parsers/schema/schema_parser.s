@@ -2,7 +2,7 @@ package neurx.tool_parsers.schema.schema_parser
 
 use neurx.tool_parsers.schema.schema_types
 use std.conv.string_to_int
-use std.vec
+use std.slices
 
 func parse_schema_from_json(string json_str) json_schema {
     schema := schema_types.create_empty_schema()

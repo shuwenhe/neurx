@@ -18,10 +18,10 @@ func test_batch_preparation() {
         []int seq = []int{cap: 10}
         j := 0
         for j < 10 {
-            seq.push(j)
+            seq = append(seq, j)
             j = j + 1
         }
-        data.push(seq)
+        data = append(data, seq)
         i = i + 1
     }
     if len(data) == 5 {
@@ -55,17 +55,17 @@ func test_gradient_clipping() {
     println("Test 5: Gradient clipping")
     [][]float grads = [][]float{cap: 3}
     []float g1 = []float{cap: 2}
-    g1.push(0.5)
-    g1.push(0.5)
+    g1 = append(g1, 0.5)
+    g1 = append(g1, 0.5)
     []float g2 = []float{cap: 2}
-    g2.push(2.0)
-    g2.push(2.0)
+    g2 = append(g2, 2.0)
+    g2 = append(g2, 2.0)
     []float g3 = []float{cap: 2}
-    g3.push(1.0)
-    g3.push(1.0)
-    grads.push(g1)
-    grads.push(g2)
-    grads.push(g3)
+    g3 = append(g3, 1.0)
+    g3 = append(g3, 1.0)
+    grads = append(grads, g1)
+    grads = append(grads, g2)
+    grads = append(grads, g3)
     if len(grads) == 3 {
         println("  ✓ Gradient storage works")
     }
@@ -127,11 +127,11 @@ func test_monitor_init() {
 func test_loss_tracking() {
     println("Test 11: Loss tracking over steps")
     []float losses = []float{cap: 5}
-    losses.push(1.0)
-    losses.push(0.8)
-    losses.push(0.6)
-    losses.push(0.5)
-    losses.push(0.4)
+    losses = append(losses, 1.0)
+    losses = append(losses, 0.8)
+    losses = append(losses, 0.6)
+    losses = append(losses, 0.5)
+    losses = append(losses, 0.4)
     is_improving := true
     i := 1
     for i < len(losses) {
@@ -148,10 +148,10 @@ func test_loss_tracking() {
 func test_accuracy_tracking() {
     println("Test 12: Accuracy tracking over steps")
     []float accuracies = []float{cap: 4}
-    accuracies.push(0.5)
-    accuracies.push(0.6)
-    accuracies.push(0.7)
-    accuracies.push(0.75)
+    accuracies = append(accuracies, 0.5)
+    accuracies = append(accuracies, 0.6)
+    accuracies = append(accuracies, 0.7)
+    accuracies = append(accuracies, 0.75)
     early_acc := accuracies[0]
     recent_acc := accuracies[3]
     if recent_acc > early_acc {
@@ -174,15 +174,15 @@ func test_data_pipeline() {
     println("Test 14: Data pipeline components")
     [][]int tokenized = [][]int{cap: 2}
     []int seq1 = []int{cap: 5}
-    seq1.push(1)
-    seq1.push(2)
-    seq1.push(3)
+    seq1 = append(seq1, 1)
+    seq1 = append(seq1, 2)
+    seq1 = append(seq1, 3)
     []int seq2 = []int{cap: 5}
-    seq2.push(4)
-    seq2.push(5)
-    seq2.push(6)
-    tokenized.push(seq1)
-    tokenized.push(seq2)
+    seq2 = append(seq2, 4)
+    seq2 = append(seq2, 5)
+    seq2 = append(seq2, 6)
+    tokenized = append(tokenized, seq1)
+    tokenized = append(tokenized, seq2)
     if len(tokenized) == 2 && len(tokenized[0]) > 0 {
         println("  ✓ Data pipeline format compatible")
     }

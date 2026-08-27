@@ -156,7 +156,7 @@ func validate_weight_compatibility(
     []string errors
     []string warnings
 
-    if weight_dict.tensors.len() == 0 {
+    if len(weight_dict.tensors) == 0 {
         errors.append("No tensors found in weight file")
     }
 
@@ -173,7 +173,7 @@ func validate_weight_compatibility(
     }
 
     weight_validation_result {
-        is_valid: errors.len() == 0,
+        is_valid: len(errors) == 0,
         errors: errors,
         warnings: warnings,
     }
@@ -185,7 +185,7 @@ func summarize_weight_loading(
 ) string {
     string summary = ""
     summary = summary + "=== Safetensors Weight Loading Summary ===\n"
-    summary = summary + "Total tensors: " + int_to_string(weight_dict.tensors.len()) + "\n"
+    summary = summary + "Total tensors: " + int_to_string(len(weight_dict.tensors)) + "\n"
     summary = summary + "Total size (MB): " + int_to_string(weight_dict.total_size_bytes / (1024 * 1024)) + "\n"
     summary = summary + "Model layers: " + int_to_string(num_layers) + "\n"
 

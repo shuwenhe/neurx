@@ -96,7 +96,7 @@ func moe_1t_split_lines(string text) []string {
     for i < len(text) {
         int ch = text[i]
         if ch == 10 {
-            lines.push(current)
+            lines = append(lines, current)
             current = ""
             ends_with_newline = true
         } else if ch != 13 {
@@ -106,7 +106,7 @@ func moe_1t_split_lines(string text) []string {
         i = i + 1
     }
     if current != "" || len(text) == 0 || ends_with_newline {
-        lines.push(current)
+        lines = append(lines, current)
     }
     lines
 }
@@ -387,7 +387,7 @@ func moe_1t_get_next_batch(
     if len(next_orch.token_shards) == 0 {
         []int fallback = moe_1t_text_to_tokens(next_orch.data_manifest_path, batch_size_tokens, next_orch.world_rank + seq_len)
         next_orch.tokens_in_shard = len(fallback)
-        return (next_orch, fallback)
+        return next_orch, fallback
     }
     int shard_index = next_orch.current_shard_index
     if shard_index < 0 {
@@ -635,7 +635,7 @@ func moe_1t_load_checkpoint(
         }
     }
     if moe_1t_trim(target_path) == "" {
-        return (orch, 0)
+        return orch, 0
     }
     if orch.world_rank == 0 {
         io_println("Loading checkpoint from: " + target_path)
@@ -740,7 +740,7 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
             io_println("  Backward grad|mean abs=" + float_to_string(grad_norm))
         }
         moe_1t_log_step_metrics(state, step_state)
-        state.step_history.push(step_state)
+        state.step_history = append(state.step_history, step_state)
         if save_interval > 0 && current_step > 0 && current_step % save_interval == 0 {
             state = moe_1t_save_checkpoint(state, current_step, loss)
         }

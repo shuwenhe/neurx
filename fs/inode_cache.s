@@ -20,7 +20,7 @@ func create_inode_cache(int max_size) inode_cache {
     }
 }
 
-func inode_cache_lookup(cache: *inode_cache) (inode_cache, bool) {
+func inode_cache_lookup(inode_cache* cache) (inode_cache, bool) {
     cache_local := cache.*
     
     cache_local.total_lookups = cache_local.total_lookups + 1
@@ -37,7 +37,7 @@ func inode_cache_lookup(cache: *inode_cache) (inode_cache, bool) {
     (cache_local, found)
 }
 
-func inode_cache_insert(cache: *inode_cache) inode_cache {
+func inode_cache_insert(inode_cache* cache) inode_cache {
     cache_local := cache.*
     
     if cache_local.cached_inodes < cache_local.max_cached_inodes {
@@ -50,7 +50,7 @@ func inode_cache_insert(cache: *inode_cache) inode_cache {
     cache_local
 }
 
-func inode_cache_remove(cache: *inode_cache) inode_cache {
+func inode_cache_remove(inode_cache* cache) inode_cache {
     cache_local := cache.*
     
     if cache_local.cached_inodes > 0 {
@@ -61,7 +61,7 @@ func inode_cache_remove(cache: *inode_cache) inode_cache {
     cache_local
 }
 
-func inode_cache_flush(cache: *inode_cache) inode_cache {
+func inode_cache_flush(inode_cache* cache) inode_cache {
     cache_local := cache.*
     cache_local.cached_inodes = 0
     

@@ -33,9 +33,9 @@ func new_zone_deployment(string zone_id, string zone_name, int total_nodes) zone
         zone_id: zone_id,
         zone_name: zone_name,
         node_count: total_nodes,
-        central_servers: vec[string](),
-        edge_nodes: vec[string](),
-        client_nodes: vec[string](),
+        central_servers: string[](),
+        edge_nodes: string[](),
+        client_nodes: string[](),
         model_cache_strategy: "lru_with_replica",
         network_latency_target_ms: 10,
     }
@@ -43,13 +43,13 @@ func new_zone_deployment(string zone_id, string zone_name, int total_nodes) zone
 
 func get_1m_global_deployment_plan() global_deployment_plan {
     
-    zones := vec[zone_deployment_config]()
+    zones := zone_deployment_config[]()
     
     for i in 0..100 {
         zone_id := "zone-" + (i + 1) as string
         zone_name := "Region-" + (i + 1) as string
         zone := new_zone_deployment(zone_id, zone_name, 10000)
-        zones.push(zone)
+        zones = append(zones, zone)
     }
     
     return global_deployment_plan {

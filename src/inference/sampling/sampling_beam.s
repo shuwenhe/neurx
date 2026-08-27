@@ -19,7 +19,7 @@ func select_top_k_beams([]beam_state candidates, int k) []beam_state {
     }
     []beam_state result = []
     for i in 0..k {
-        result.push(candidates[i])
+        result = append(result, candidates[i])
     }
     result
 }

@@ -109,7 +109,7 @@ func cuda_synchronize() int {
 }
 
 func get_memory_info() (string) {
-    ("0", "0")
+return     ("0", "0")
 }
 
 func int_to_str(int n) string {

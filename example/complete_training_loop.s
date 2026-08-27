@@ -213,7 +213,7 @@ func model_forward(
         tensor ffn_out = matmul(hidden, layer.w_down)
         x = add_tensors(ffn_out, residual)
         if !model.config.enable_gradient_checkpointing || (layer_idx % 2 == 0) {
-            all_activations.push(x)
+            all_activations = append(all_activations, x)
         }
     }
     x = layer_norm(x, model.final_norm)
@@ -603,7 +603,7 @@ func simple_tokenize(string text) []int:
     """Mock tokenization: convert characters to ASCII codes"""
     []int tokens = [1]
     for char in text:
-        tokens.push(int(char) % 50257)
+        tokens = append(tokens, int(char) % 50257)
     return tokens
 func simple_decode([]int token_ids) string:
     """Mock decode: convert token IDs to characters"""
@@ -1008,7 +1008,7 @@ func create_attention_mask(int length) []int:
     []int mask = []
     for i in 0..length {
         for j in 0..length {
-            mask.push(1 if j <= i else 0)
+            mask = append(mask, 1 if j <= i else 0)
         }
     }
     return mask
@@ -1052,7 +1052,7 @@ func flatten_gradients([]tensor grads) []float:
     for g in grads {
         int i = 0
         for i < len(g.data) {
-            flat.push(g.data[i])
+            flat = append(flat, g.data[i])
             i = i + 1
         }
     }

@@ -55,7 +55,7 @@ type worker_profiler struct {
 	active bool
 	active_iteration_count int64
 	profiling_for_iters int64
-	events vec[profiler_event*]
+	events profiler_event*[]
 	stats profiler_stats*
 	error_count int64
 	created_at_ms int64
@@ -115,7 +115,7 @@ func create_worker_profiler(config profiler_config*) worker_profiler* {
 		active: false,
 		active_iteration_count: 0,
 		profiling_for_iters: 0,
-		events: make(vec[profiler_event*]),
+		events: make(profiler_event*[]),
 		stats: create_profiler_stats(),
 		error_count: 0,
 		created_at_ms: 0,
@@ -248,7 +248,7 @@ func (p* worker_profiler) shutdown() bool {
 	}
 
 	p.status = profiler_status_stopped
-	p.events = make(vec[profiler_event*])
+	p.events = make(profiler_event*[])
 	return true
 }
 

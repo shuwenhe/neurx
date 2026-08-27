@@ -46,29 +46,29 @@ const int PERM_LINK = 32
 // 初始化 SELinux 策略
 func selinux_init() (selinux_policy, string) {
     policy := selinux_policy{
-        users: vec(),
-        roles: vec(),
-        types: vec(),
-        te_rules: vec(),
-        role_maps: vec(),
-        context_cache: vec(),
+        users: {},
+        roles: {},
+        types: {},
+        te_rules: {},
+        role_maps: {},
+        context_cache: {},
         policy_loaded: 0
     }
     
     // 添加默认用户
-    policy.users.push(0)  // system_u
-    policy.users.push(1)  // user_u
+    policy.users = append(policy.users, 0)  // system_u
+    policy.users = append(policy.users, 1)  // user_u
     
     // 添加默认角色
-    policy.roles.push(0)  // system_r
-    policy.roles.push(1)  // user_r
-    policy.roles.push(2)  // sysadm_r
+    policy.roles = append(policy.roles, 0)  // system_r
+    policy.roles = append(policy.roles, 1)  // user_r
+    policy.roles = append(policy.roles, 2)  // sysadm_r
     
     // 添加默认类型
-    policy.types.push(0)  // kernel_t
-    policy.types.push(1)  // init_t
-    policy.types.push(2)  // file_t
-    policy.types.push(3)  // user_t
+    policy.types = append(policy.types, 0)  // kernel_t
+    policy.types = append(policy.types, 1)  // init_t
+    policy.types = append(policy.types, 2)  // file_t
+    policy.types = append(policy.types, 3)  // user_t
     
     policy.policy_loaded = 1
     return policy, ""
@@ -83,14 +83,14 @@ func (policy* selinux_policy) add_te_rule(source_type int, target_type int, perm
         effect: effect
     }
     
-    policy.te_rules.push(rule)
-    return policy.te_rules.len() - 1, ""
+    policy.te_rules = append(policy.te_rules, rule)
+    return len(policy.te_rules) - 1, ""
 }
 
 // 检查权限
 func (policy* selinux_policy) check_permission(source_type int, target_type int, requested_perm int) (int, string) {
     i := 0
-    for i < policy.te_rules.len() {
+    for i < len(policy.te_rules) {
         rule := policy.te_rules[i]
         
         if rule.source_type == source_type && rule.target_type == target_type {
@@ -118,16 +118,16 @@ func (policy* selinux_policy) set_file_context(file_id int, user_id int, role_id
         level_id: 0
     }
     
-    policy.context_cache.push(context.user_id)
-    policy.context_cache.push(context.role_id)
-    policy.context_cache.push(context.type_id)
+    policy.context_cache = append(policy.context_cache, context.user_id)
+    policy.context_cache = append(policy.context_cache, context.role_id)
+    policy.context_cache = append(policy.context_cache, context.type_id)
     
     return file_id, ""
 }
 
 // 获取文件上下文
 func (policy* selinux_policy) get_file_context(file_id int) (se_context, string) {
-    if file_id * 3 >= policy.context_cache.len() {
+    if file_id * 3 >= len(policy.context_cache) {
         return se_context{}, "context not found"
     }
     
@@ -168,7 +168,7 @@ struct seccomp_filter {
 // 初始化 seccomp 过滤器
 func seccomp_init(default_action int) (seccomp_filter, string) {
     filter := seccomp_filter{
-        rules: vec(),
+        rules: {},
         default_action: default_action,
         locked: 0
     }
@@ -189,8 +189,8 @@ func (filter* seccomp_filter) add_rule(syscall_nr int, action int) (int, string)
         arg1_mask: 0
     }
     
-    filter.rules.push(rule)
-    return filter.rules.len() - 1, ""
+    filter.rules = append(filter.rules, rule)
+    return len(filter.rules) - 1, ""
 }
 
 // 添加条件规则（带参数过滤）
@@ -206,14 +206,14 @@ func (filter* seccomp_filter) add_arg_rule(syscall_nr int, action int, arg_value
         arg1_mask: arg_mask
     }
     
-    filter.rules.push(rule)
-    return filter.rules.len() - 1, ""
+    filter.rules = append(filter.rules, rule)
+    return len(filter.rules) - 1, ""
 }
 
 // 检查系统调用是否允许
 func (filter* seccomp_filter) check_syscall(syscall_nr int, arg_value int) (int, string) {
     i := 0
-    for i < filter.rules.len() {
+    for i < len(filter.rules) {
         rule := filter.rules[i]
         
         if rule.syscall_nr == syscall_nr {
@@ -242,7 +242,7 @@ struct seccomp_stats {
 
 func (filter* seccomp_filter) get_stats() (seccomp_stats, string) {
     stats := seccomp_stats{
-        rules_count: filter.rules.len(),
+        rules_count: len(filter.rules),
         default_action: filter.default_action,
         is_locked: filter.locked
     }

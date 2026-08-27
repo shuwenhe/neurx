@@ -291,7 +291,7 @@ func merge_multimodal_features(
 func scale_vector([]float vec, float scale) []float {
     result := make([]float, len(vec))
     for i := 0; i < len(vec); i++ {
-        result[i] = vec[i] * scale
+        result[i] = i[] * scale
     }
     return result
 }

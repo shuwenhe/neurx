@@ -71,7 +71,7 @@ func speculative_decode(
     []int current_context = []int{cap: len(prompt_tokens)}
     int i = 0
     for i < len(prompt_tokens) {
-        current_context.push(prompt_tokens[i])
+        current_context = append(current_context, prompt_tokens[i])
         i = i + 1
     }
     int generated_count = 0
@@ -97,8 +97,8 @@ func speculative_decode(
         state.total_accepted_tokens = state.total_accepted_tokens + len(result.accepted_tokens)
         int j = 0
         for j < len(result.accepted_tokens) && generated_count < max_new_tokens {
-            all_generated.push(result.accepted_tokens[j])
-            current_context.push(result.accepted_tokens[j])
+            all_generated = append(all_generated, result.accepted_tokens[j])
+            current_context = append(current_context, result.accepted_tokens[j])
             generated_count = generated_count + 1
             j = j + 1
         }
@@ -107,8 +107,8 @@ func speculative_decode(
                 state.target_model,
                 current_context
             )
-            all_generated.push(fallback_token)
-            current_context.push(fallback_token)
+            all_generated = append(all_generated, fallback_token)
+            current_context = append(current_context, fallback_token)
             generated_count = generated_count + 1
         }
         if state.config.enable_early_exit && len(result.accepted_tokens) < 2 {
@@ -129,15 +129,15 @@ func draft_model_generate(
     []int current_ctx = []int{cap: len(context)}
     int i = 0
     for i < len(context) {
-        current_ctx.push(context[i])
+        current_ctx = append(current_ctx, context[i])
         i = i + 1
     }
     int gen_count = 0
     for gen_count < num_tokens {
         []float logits = draft_model_forward(model, current_ctx)
         int next_token = sample_token(logits, 1.0, 0.9, 50)
-        draft_tokens.push(next_token)
-        current_ctx.push(next_token)
+        draft_tokens = append(draft_tokens, next_token)
+        current_ctx = append(current_ctx, next_token)
         gen_count = gen_count + 1
     }
     return draft_tokens
@@ -151,7 +151,7 @@ func verify_draft_tokens(
     []int extended_context = []int{cap: len(context) + len(draft_tokens)}
     int i = 0
     for i < len(context) {
-        extended_context.push(context[i])
+        extended_context = append(extended_context, context[i])
         i = i + 1
     }
     []float all_logits = target_model_forward_sequence(model, extended_context, draft_tokens)
@@ -163,9 +163,9 @@ func verify_draft_tokens(
         int logit_offset = draft_idx * model.vocab_size
         float draft_prob = softmax_prob(all_logits, logit_offset, draft_token, model.vocab_size)
         if draft_prob >= acceptance_threshold {
-            accepted.push(draft_token)
+            accepted = append(accepted, draft_token)
         } else {
-            rejected.push(draft_token)
+            rejected = append(rejected, draft_token)
             break
         }
         draft_idx = draft_idx + 1
@@ -190,7 +190,7 @@ func draft_model_forward(
     int i = 0
     for i < model.vocab_size {
         float logit_val = float(i) * 0.01
-        logits.push(logit_val)
+        logits = append(logits, logit_val)
         i = i + 1
     }
     return logits
@@ -207,7 +207,7 @@ func target_model_forward_sequence(
         int i = 0
         for i < model.vocab_size {
             float logit_val = float(i) * 0.01
-            all_logits.push(logit_val)
+            all_logits = append(all_logits, logit_val)
             i = i + 1
         }
         pos = pos + 1
@@ -221,7 +221,7 @@ func target_model_generate_single(
     []float logits = []float{cap: model.vocab_size}
     int i = 0
     for i < model.vocab_size {
-        logits.push(float(i) * 0.01)
+        logits = append(logits, float(i) * 0.01)
         i = i + 1
     }
     return sample_token(logits, 1.0, 0.9, 50)

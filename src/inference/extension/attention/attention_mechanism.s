@@ -166,7 +166,7 @@ func forward(
         present_kv = some((key_states, value_states))
     timer.stop("attention_forward")
     _update_stats(self, batch_size, seq_len, cfg, timer)
-    return (attn_output, present_kv, attn_weights)
+    return attn_output, present_kv, attn_weights
 func _standard_attention_forward(
     tensor query_states,
     tensor key_states,
@@ -185,7 +185,7 @@ func _standard_attention_forward(
         attn_probs = dropout(attn_probs, p=dropout_p)
     tensor context = matmul(attn_probs, value_states)
     option[tensor] weights = return_attn_weights  some(attn_probs) : none
-    return (context, weights)
+    return context, weights
 func _flash_attention_forward(
     tensor query_states,
     tensor key_states,
@@ -335,7 +335,7 @@ func compute_rope_embeddings(
     tensor sin_vals = sin(angles)
     cos_vals = cos_vals.unsqueeze(0).unsqueeze(2)
     sin_vals = sin_vals.unsqueeze(0).unsqueeze(2)
-    return (cos_vals, sin_vals)
+    return cos_vals, sin_vals
 func apply_rotary_emb(
     tensor x,
     tensor cos_vals,

@@ -30,7 +30,7 @@ struct irq_handler {
 struct irq_descriptor {
     int irq_num
     interrupt_type int_type
-    vec[irq_handler] handlers
+    irq_handler[] handlers
     int status
     int depth
     int disable_count
@@ -38,7 +38,7 @@ struct irq_descriptor {
 }
 
 struct interrupt_controller {
-    vec[irq_descriptor] descriptors
+    irq_descriptor[] descriptors
     int total_interrupts
     int total_handlers
     int spurious_count
@@ -62,7 +62,7 @@ struct exception_handler {
 }
 
 struct exception_manager {
-    vec[exception_handler] handlers
+    exception_handler[] handlers
     int total_exceptions
     int critical_count
     int panic_count
@@ -70,7 +70,7 @@ struct exception_manager {
 
 func interrupt_controller_create() interrupt_controller {
     ctrl := interrupt_controller {
-        descriptors: vec[irq_descriptor](),
+        descriptors: irq_descriptor[](),
         total_interrupts: 0,
         total_handlers: 0,
         spurious_count: 0,
@@ -79,9 +79,9 @@ func interrupt_controller_create() interrupt_controller {
     return ctrl
 }
 
-func (ctrl: *interrupt_controller) register_handler(int irq_num, string name, interrupt_type int_type, int priority) (int, string) {
+func (interrupt_controller* ctrl) register_handler(int irq_num, string name, interrupt_type int_type, int priority) (int, string) {
     if irq_num < 0 || irq_num > 255 {
-        return result::err("Invalid IRQ number")
+        return ((), "Invalid IRQ number")
     }
     
     handler := irq_handler {
@@ -96,47 +96,47 @@ func (ctrl: *interrupt_controller) register_handler(int irq_num, string name, in
     desc := irq_descriptor {
         irq_num: irq_num,
         int_type: int_type,
-        handlers: vec[irq_handler](),
+        handlers: irq_handler[](),
         status: 0,
         depth: 0,
         disable_count: 0,
         enable_count: 0
     }
     
-    desc.handlers.push(handler)
-    ctrl.descriptors.push(desc)
+    desc.handlers = append(desc.handlers, handler)
+    ctrl.descriptors = append(ctrl.descriptors, desc)
     ctrl.total_handlers = ctrl.total_handlers + 1
     
-    return result::ok(irq_num)
+    return irq_num, ""
 }
 
-func (ctrl: *interrupt_controller) handle_interrupt(int irq_num) (int, string) {
+func (interrupt_controller* ctrl) handle_interrupt(int irq_num) (int, string) {
     if irq_num < 0 || irq_num > 255 {
         ctrl.spurious_count = ctrl.spurious_count + 1
-        return result::err("Spurious interrupt")
+        return ((), "Spurious interrupt")
     }
     
     ctrl.total_interrupts = ctrl.total_interrupts + 1
-    return result::ok(irq_num)
+    return irq_num, ""
 }
 
-func (ctrl: *interrupt_controller) mask_irq(int irq_num) (bool, string) {
+func (interrupt_controller* ctrl) mask_irq(int irq_num) (bool, string) {
     if irq_num < 0 || irq_num > 255 {
-        return result::err("Invalid IRQ")
+        return ((), "Invalid IRQ")
     }
-    return result::ok(true)
+    return true, ""
 }
 
-func (ctrl: *interrupt_controller) unmask_irq(int irq_num) (bool, string) {
+func (interrupt_controller* ctrl) unmask_irq(int irq_num) (bool, string) {
     if irq_num < 0 || irq_num > 255 {
-        return result::err("Invalid IRQ")
+        return ((), "Invalid IRQ")
     }
-    return result::ok(true)
+    return true, ""
 }
 
 func exception_manager_create() exception_manager {
     mgr := exception_manager {
-        handlers: vec[exception_handler](),
+        handlers: exception_handler[](),
         total_exceptions: 0,
         critical_count: 0,
         panic_count: 0
@@ -144,9 +144,9 @@ func exception_manager_create() exception_manager {
     return mgr
 }
 
-func (mgr: *exception_manager) register_exception_handler(int exc_num, string name) (int, string) {
+func (exception_manager* mgr) register_exception_handler(int exc_num, string name) (int, string) {
     if exc_num < 0 || exc_num > 31 {
-        return result::err("Invalid exception number")
+        return ((), "Invalid exception number")
     }
     
     handler := exception_handler {
@@ -156,15 +156,15 @@ func (mgr: *exception_manager) register_exception_handler(int exc_num, string na
         total_errors: 0
     }
     
-    mgr.handlers.push(handler)
-    return result::ok(exc_num)
+    mgr.handlers = append(mgr.handlers, handler)
+    return exc_num, ""
 }
 
-func (mgr: *exception_manager) handle_exception(int exc_num, exception_frame frame) (bool, string) {
+func (exception_manager* mgr) handle_exception(int exc_num, exception_frame frame) (bool, string) {
     mgr.total_exceptions = mgr.total_exceptions + 1
     
     if exc_num == 0 {
-        return result::ok(true)
+        return true, ""
     }
     
     if exc_num >= 8 && exc_num <= 14 {
@@ -173,13 +173,13 @@ func (mgr: *exception_manager) handle_exception(int exc_num, exception_frame fra
     
     if exc_num == 31 {
         mgr.panic_count = mgr.panic_count + 1
-        return result::err("PANIC: Double fault detected")
+        return ((), "PANIC: Double fault detected")
     }
     
-    return result::ok(true)
+    return true, ""
 }
 
-func (mgr: *exception_manager) exception_stats() string {
+func (exception_manager* mgr) exception_stats() string {
     total := mgr.total_exceptions
     critical := mgr.critical_count
     panics := mgr.panic_count

@@ -58,7 +58,7 @@ func (user_manager* um) init() (int, string) {
         gid: 0,
         shell_id: 0
     }
-    um.users.push(root)
+    um.users = append(um.users, root)
     
     // 创建 root 用户组 (GID 0)
     root_group := user_group{
@@ -66,7 +66,7 @@ func (user_manager* um) init() (int, string) {
         group_name: "root",
         members: int[]{}"
     }
-    um.groups.push(root_group)
+    um.groups = append(um.groups, root_group)
     
     return 0, ""
 }
@@ -81,7 +81,7 @@ func (user_manager* um) create_user(string username, string home_dir, int gid) (
         shell_id: 0
     }
     
-    um.users.push(new_user)
+    um.users = append(um.users, new_user)
     um.next_uid = um.next_uid + 1
     
     return new_user, ""
@@ -94,12 +94,12 @@ func (user_manager* um) delete_user(int uid) (int, string) {
     }
     
     i := 0
-    for i < um.users.len() {
+    for i < len(um.users) {
         u := um.users[i]
         if u.uid == uid {
             // 从用户向量中移除
             j := i
-            for j < um.users.len() - 1 {
+            for j < len(um.users) - 1 {
                 um.users[j] = um.users[j + 1]
                 j = j + 1
             }
@@ -119,7 +119,7 @@ func (user_manager* um) create_group(string group_name) (user_group, string) {
         members: int[]{}"
     }
     
-    um.groups.push(new_group)
+    um.groups = append(um.groups, new_group)
     um.next_gid = um.next_gid + 1
     
     return new_group, ""
@@ -130,7 +130,7 @@ func (user_manager* um) add_user_to_group(int uid, int gid) (int, string) {
     // 检查用户是否存在
     user_exists := 0
     i := 0
-    for i < um.users.len() {
+    for i < len(um.users) {
         u := um.users[i]
         if u.uid == uid {
             user_exists = 1
@@ -145,10 +145,10 @@ func (user_manager* um) add_user_to_group(int uid, int gid) (int, string) {
     
     // 查找组并添加用户
     i = 0
-    for i < um.groups.len() {
+    for i < len(um.groups) {
         g := um.groups[i]
         if g.gid == gid {
-            g.members.push(uid)
+            g.members = append(g.members, uid)
             um.groups[i] = g
             return 0, ""
         }
@@ -161,16 +161,16 @@ func (user_manager* um) add_user_to_group(int uid, int gid) (int, string) {
 // 从组中移除用户
 func (user_manager* um) remove_user_from_group(int uid, int gid) (int, string) {
     i := 0
-    for i < um.groups.len() {
+    for i < len(um.groups) {
         g := um.groups[i]
         if g.gid == gid {
             j := 0
-            for j < g.members.len() {
+            for j < len(g.members) {
                 member_uid := g.members[j]
                 if member_uid == uid {
                     // 移除用户
                     k := j
-                    for k < g.members.len() - 1 {
+                    for k < len(g.members) - 1 {
                         g.members[k] = g.members[k + 1]
                         k = k + 1
                     }
@@ -189,7 +189,7 @@ func (user_manager* um) remove_user_from_group(int uid, int gid) (int, string) {
 // 获取用户信息
 func (user_manager um) get_user(int uid) (user, string) {
     i := 0
-    for i < um.users.len() {
+    for i < len(um.users) {
         u := um.users[i]
         if u.uid == uid {
             return u, ""
@@ -203,7 +203,7 @@ func (user_manager um) get_user(int uid) (user, string) {
 // 获取组信息
 func (user_manager um) get_group(int gid) (user_group, string) {
     i := 0
-    for i < um.groups.len() {
+    for i < len(um.groups) {
         g := um.groups[i]
         if g.gid == gid {
             return g, ""
@@ -239,7 +239,7 @@ func (file_permission_manager* fpm) set_file_permission(int file_id, int owner_u
         acl_enabled: 0
     }
     
-    fpm.permissions.push(perm)
+    fpm.permissions = append(fpm.permissions, perm)
     return perm, ""
 }
 
@@ -252,12 +252,12 @@ func (file_permission_manager* fpm) add_acl_entry(int file_id, int subject_id, i
         permission: permission
     }
     
-    fpm.acl_entries.push(entry)
+    fpm.acl_entries = append(fpm.acl_entries, entry)
     fpm.next_acl_id = fpm.next_acl_id + 1
     
     // 启用该文件的 ACL
     i := 0
-    for i < fpm.permissions.len() {
+    for i < len(fpm.permissions) {
         perm := fpm.permissions[i]
         if perm.file_id == file_id {
             perm.acl_enabled = 1
@@ -275,7 +275,7 @@ func (file_permission_manager fpm) check_permission(int file_id, int uid, int op
     // operation: 0=read, 1=write, 2=execute
     
     i := 0
-    for i < fpm.permissions.len() {
+    for i < len(fpm.permissions) {
         perm := fpm.permissions[i]
         if perm.file_id == file_id {
             // 如果是所有者
@@ -289,7 +289,7 @@ func (file_permission_manager fpm) check_permission(int file_id, int uid, int op
             // 检查 ACL
             if perm.acl_enabled == 1 {
                 j := 0
-                for j < fpm.acl_entries.len() {
+                for j < len(fpm.acl_entries) {
                     entry := fpm.acl_entries[j]
                     if entry.subject_id == uid && entry.subject_type == 0 {
                         if entry.permission & (1 << operation) != 0 {
@@ -310,5 +310,5 @@ func (file_permission_manager fpm) check_permission(int file_id, int uid, int op
 
 // 获取用户统计
 func (user_manager um) get_user_stats() (int, int) {
-    return um.users.len(), um.groups.len()
+    return len(um.users), len(um.groups)
 }

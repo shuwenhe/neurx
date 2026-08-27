@@ -191,7 +191,7 @@ func split_lines(string text) []string {
         if chi == 10 {
             string cleaned = trim(current)
             if cleaned != "" {
-                lines.push(cleaned)
+                lines = append(lines, cleaned)
             }
             current = ""
         } else if chi != 13 {
@@ -201,7 +201,7 @@ func split_lines(string text) []string {
     }
     string tail = trim(current)
     if tail != "" {
-        lines.push(tail)
+        lines = append(lines, tail)
     }
     lines
 }
@@ -215,7 +215,7 @@ func csv_tokens(string text) []string {
         string ch = text[i]
         int chi = int(string(ch))
         if chi == 44 {
-            tokens.push(trim(current))
+            tokens = append(tokens, trim(current))
             current = ""
         } else {
             current = neurx.strings.concat2(current, ch)
@@ -223,7 +223,7 @@ func csv_tokens(string text) []string {
         i = i + 1
     }
     if trim(current) != "" {
-        tokens.push(trim(current))
+        tokens = append(tokens, trim(current))
     }
     tokens
 }
@@ -261,7 +261,7 @@ func parse_int_list(string value) []int {
     for i < len(parts) {
         string token = trim(parts[i])
         if token != "" {
-            out.push(int(token))
+            out = append(out, int(token))
         }
         i = i + 1
     }
@@ -275,7 +275,7 @@ func parse_float_list(string value) []float {
     for i < len(parts) {
         string token = trim(parts[i])
         if token != "" {
-            out.push(float(token))
+            out = append(out, float(token))
         }
         i = i + 1
     }
@@ -297,9 +297,9 @@ func tensor_to_checkpoint_lines(int index, tensor value) []string {
     string line1 = neurx.strings.concat5("param", idx_str, ".requires_grad=", string(value.requires_grad), "")
     string line2 = neurx.strings.concat5("param", idx_str, ".shape=", join_ints(value.shape), "")
     string line3 = neurx.strings.concat5("param", idx_str, ".data=", join_floats(value.data), "")
-    lines.push(line1)
-    lines.push(line2)
-    lines.push(line3)
+    lines = append(lines, line1)
+    lines = append(lines, line2)
+    lines = append(lines, line3)
     lines
 }
 
@@ -409,7 +409,7 @@ func parse_checkpoint_lines([]string lines) checkpoint {
                         }
                         k = k + 1
                     }
-                    params.push(new(data, shape, requires_grad))
+                    params = append(params, new(data, shape, requires_grad))
                 }
             }
         }

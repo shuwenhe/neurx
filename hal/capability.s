@@ -41,7 +41,7 @@ func detect_platform_capability() (platform_capability, string) {
     
     for i in 0..gpu_count {
         gpu_cap := detect_compute_device(i)
-        accelerators.push(gpu_cap)
+        accelerators = append(accelerators, gpu_cap)
     }
     
     platform := platform_capability {
@@ -55,7 +55,7 @@ func detect_platform_capability() (platform_capability, string) {
         accelerators: *accelerators
     }
     
-    (platform, "")
+return     (platform, "")
 }
 
 func detect_cpu_count() (int, string) {
@@ -65,7 +65,7 @@ func detect_cpu_count() (int, string) {
         cpu_count = 8
     }
     
-    (cpu_count, "")
+return     (cpu_count, "")
 }
 
 func detect_gpu_count() (int, string) {
@@ -79,7 +79,7 @@ func detect_gpu_count() (int, string) {
         gpu_count = query_intel_gpu_count()
     }
     
-    (gpu_count, "")
+return     (gpu_count, "")
 }
 
 func detect_total_memory() (int, string) {
@@ -89,7 +89,7 @@ func detect_total_memory() (int, string) {
         memory_gb = 16
     }
     
-    (memory_gb, "")
+return     (memory_gb, "")
 }
 
 func detect_compute_device(int index) (device_capability, string) {
@@ -142,12 +142,12 @@ func get_device_capability(int device_id) (device_capability, string) {
 
 func is_gpu_available() (bool, string) {
     gpu_count := detect_gpu_count()
-    (gpu_count > 0, "")
+return     (gpu_count > 0, "")
 }
 
 func is_nvidia_gpu_available() (bool, string) {
     count := query_nvidia_gpu_count()
-    (count > 0, "")
+return     (count > 0, "")
 }
 
 func get_total_compute_capability() (int, string) {
@@ -155,5 +155,5 @@ func get_total_compute_capability() (int, string) {
     
     total_tflops := platform.accelerators*.len() * 89100
     
-    (total_tflops, "")
+return     (total_tflops, "")
 }

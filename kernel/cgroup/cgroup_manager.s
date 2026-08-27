@@ -14,17 +14,17 @@ struct cgroup {
     string path
     int parent_id
     cgroup_resources resources
-    vec[int] task_ids
+    int[] task_ids
 }
 
 struct cgroup_hierarchy {
-    vec[cgroup] groups
+    cgroup[] groups
     int next_id
 }
 
 func create_cgroup_hierarchy() cgroup_hierarchy {
     hierarchy := cgroup_hierarchy {
-        groups: vec[cgroup](),
+        groups: cgroup[](),
         next_id: 0
     }
     hierarchy
@@ -36,9 +36,9 @@ func cgroup_hierarchy_add(cgroup_hierarchy h, string name, string path, cgroup_r
         path: path,
         parent_id: -1,
         resources: res,
-        task_ids: vec[int]()
+        task_ids: int[]()
     }
-    h.groups.push(cg)
+    h.groups = append(h.groups, cg)
     h
 }
 

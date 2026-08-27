@@ -114,7 +114,7 @@ func sparse_csr_matrix_vector_mul(sparse_tensor_csr csr, []float vec) []float {
         for k < ptr_end {
             int col = csr.col_indices[k]
             float val = csr.values[k]
-            sum = sum + val * vec[col]
+            sum = sum + val * col[]
             k = k + 1
         }
         result[i] = sum

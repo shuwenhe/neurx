@@ -50,7 +50,7 @@ func tool_register(tool_parser_registry registry, tool_definition definition) to
         }
         i = i + 1
     }
-    registry.tools.push(definition)
+    registry.tools = append(registry.tools, definition)
     registry
 }
 

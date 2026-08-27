@@ -10,8 +10,8 @@ const (
 )
 
 struct speculative_tokens {
-    vec[int32] tokens
-    vec[float32] probabilities
+    int32[] tokens
+    float32[] probabilities
     int32 num_speculated
 }
 
@@ -42,17 +42,17 @@ func create_v1_spec_decode(int32 num_spec_tokens) v1_spec_decode* {
         rejected_tokens: 0,
         total_tokens_generated: 0,
         spec_tokens: *speculative_tokens{
-            tokens: make(vec[int32]),
-            probabilities: make(vec[float32]),
+            tokens: make(int32[]),
+            probabilities: make(float32[]),
             num_speculated: 0,
         },
     }
 }
 
-func (v1_spec_decode* spec) speculate(vec[float32] logits) speculative_tokens {
+func (v1_spec_decode* spec) speculate(float32[] logits) speculative_tokens {
     result := speculative_tokens{
-        tokens: make(vec[int32]),
-        probabilities: make(vec[float32]),
+        tokens: make(int32[]),
+        probabilities: make(float32[]),
         num_speculated: 0,
     }
 
@@ -77,7 +77,7 @@ func (v1_spec_decode* spec) speculate(vec[float32] logits) speculative_tokens {
     return result
 }
 
-func (v1_spec_decode* spec) verify_speculated_tokens(vec[int32] predicted_tokens, vec[int32] actual_tokens) int32 {
+func (v1_spec_decode* spec) verify_speculated_tokens(int32[] predicted_tokens, int32[] actual_tokens) int32 {
     accepted := 0
 
     for i := 0; i < len(predicted_tokens) && i < len(actual_tokens); i = i + 1 {
@@ -93,8 +93,8 @@ func (v1_spec_decode* spec) verify_speculated_tokens(vec[int32] predicted_tokens
     return int32(accepted)
 }
 
-func (v1_spec_decode* spec) batch_speculate(vec[vec[float32]] batch_logits) vec[speculative_tokens] {
-    results := make(vec[speculative_tokens])
+func (v1_spec_decode* spec) batch_speculate(float32[][]] batch_logits) speculative_tokens[] {
+    results := make(speculative_tokens[])
 
     for i := 0; i < len(batch_logits); i = i + 1 {
         spec_result := spec.speculate(batch_logits[i])

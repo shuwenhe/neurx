@@ -1,6 +1,6 @@
 package neurx.model.model_registry
 
-use std.vec
+use std.slices
 use std.map
 use std.option
 use neurx.model.model_zoo
@@ -259,8 +259,8 @@ func check_model_compatibility(
     target_device: string,
     available_memory_gb: int
 ) compatibility_report {
-    warnings := vec[]()
-    requirements := vec[]()
+    warnings := []()
+    requirements := []()
     is_compatible := true
 
     est_memory_gb := (adapter.model_spec.hidden_size *
@@ -269,19 +269,19 @@ func check_model_compatibility(
     if est_memory_gb > available_memory_gb {
         is_compatible = false
         msg := f"modelneed ~{est_memory_gb}GB GPU Memory，but仅有 {available_memory_gb}GB"
-        requirements.push(msg)
+        requirements = append(requirements, msg)
     }
 
     if adapter.optimization.use_flash_attn {
-        requirements.push("need Ampere+ GPU (RTX 30 系or更new)")
+        requirements = append(requirements, "need Ampere+ GPU (RTX 30 系or更new)")
     }
 
     if adapter.distributed_strategy != "none" {
-        requirements.push("needmore GPU supportand NCCL")
+        requirements = append(requirements, "needmore GPU supportand NCCL")
     }
 
     if adapter.quantization_level < 16 {
-        warnings.push(f"量ization到 {adapter.quantization_level}bit，possible影响精度")
+        warnings = append(warnings, f"量ization到 {adapter.quantization_level}bit，possible影响精度")
     }
 
     compatibility_report {
@@ -349,7 +349,7 @@ func main() {
     println("")
 
     all_models := get_all_models()
-    println(f"📦 Total Models: {all_models.len()}")
+    println(f"📦 Total Models: {len(all_models)}")
     println("")
 
     println("🔧 Model Adapter Demo:")

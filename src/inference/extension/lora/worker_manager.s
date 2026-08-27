@@ -24,7 +24,7 @@ struct worker_task {
     string task_id
     task_type type
     string adapter_name
-    vec[interface{}] task_data
+    interface{}[] task_data
     float32 priority
     int32 retry_count
     int32 max_retries
@@ -83,7 +83,7 @@ func (worker_manager* mgr) submit_task(string task_id, task_type type, string ad
         task_id: task_id,
         type: type,
         adapter_name: adapter_name,
-        task_data: make(vec[interface{}]),
+        task_data: make(interface{}[]),
         priority: priority,
         retry_count: 0,
         max_retries: 3,
@@ -166,8 +166,8 @@ func (worker_manager* mgr) get_worker_status(string worker_id) worker_status {
     return worker_terminated
 }
 
-func (worker_manager* mgr) get_pending_tasks() vec[string] {
-    tasks := make(vec[string])
+func (worker_manager* mgr) get_pending_tasks() string[] {
+    tasks := make(string[])
 
     for task_id := range mgr.task_queue {
         tasks = append(tasks, task_id)

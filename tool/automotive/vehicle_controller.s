@@ -51,7 +51,7 @@ func verify_safety(control_output* output) bool {
 
 func execute_control(control_output* output) (int, string) {
     if !output.valid {
-        (0, "Control output invalid")
+return         (0, "Control output invalid")
     } else {
     0, ""
     }

@@ -122,7 +122,7 @@ func add_log_entry(training_monitor monitor, log_level level, string message) tr
         loss: 0.0,
         metric: 0.0,
     }
-    monitor.logs.push(entry)
+    monitor.logs = append(monitor.logs, entry)
     print_log_entry(entry)
     if len(monitor.logs) > 10000 {
         monitor.logs = monitor.logs[1000..len(monitor.logs)]
@@ -151,7 +151,7 @@ func update_metrics(training_monitor monitor, training_metrics metrics) training
     monitor.current_metrics = metrics
     monitor.total_steps = monitor.total_steps + 1
     if monitor.total_steps % monitor.config.metrics_interval == 0 {
-        monitor.metrics_history.push([metrics])
+        monitor.metrics_history = append(monitor.metrics_history, [metrics])
         save_metrics(monitor)
     }
     if monitor.config.enable_wandb {
@@ -307,7 +307,7 @@ func current_timestamp() string {
 }
 
 func calculate_throughput(training_monitor monitor, int samples, float step_time) float {
-    monitor.step_times.push(step_time)
+    monitor.step_times = append(monitor.step_times, step_time)
     if len(monitor.step_times) > 100 {
         monitor.step_times = monitor.step_times[1..len(monitor.step_times)]
     }

@@ -14,16 +14,16 @@ func test_basic_attention_forward() {
     []float input = []float{}
     i := 0
     for i < seq_len * hidden_dim {
-        input.push(0.1)
+        input = append(input, 0.1)
         i = i + 1
     }
     []float wq = []float{}
     i = 0
     for i < hidden_dim * hidden_dim {
         if i % (hidden_dim + 1) == 0 {
-            wq.push(1.0)
+            wq = append(wq, 1.0)
         } else {
-            wq.push(0.0)
+            wq = append(wq, 0.0)
         }
         i = i + 1
     }
@@ -40,9 +40,9 @@ func test_attention_causal_mask() {
         j := 0
         for j < seq_len {
             if j <= i {
-                attn_weights.push(1.0 / float(i + 1))
+                attn_weights = append(attn_weights, 1.0 / float(i + 1))
             } else {
-                attn_weights.push(0.0)
+                attn_weights = append(attn_weights, 0.0)
             }
             j = j + 1
         }
@@ -69,7 +69,7 @@ func test_attention_output_shape() {
     []float input = []float{}
     i := 0
     for i < batch_size * seq_len * hidden_dim {
-        input.push(0.5)
+        input = append(input, 0.5)
         i = i + 1
     }
     expected_size := batch_size * seq_len * hidden_dim
@@ -107,7 +107,7 @@ func test_attention_gradient_shape() {
     []float d_output = []float{}
     i := 0
     for i < seq_len * hidden_dim {
-        d_output.push(0.01)
+        d_output = append(d_output, 0.01)
         i = i + 1
     }
     if len(d_output) == seq_len * hidden_dim {

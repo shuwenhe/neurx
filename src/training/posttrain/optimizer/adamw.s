@@ -69,8 +69,8 @@ func create_adamw_optimizer(int num_params, optimizer_config config) adamw_optim
     optimizer.param_states_v = [][]float{}
     int i = 0
     for i < num_params {
-        optimizer.param_states_m.push(fill_model_tensor(num_params, 0.0))
-        optimizer.param_states_v.push(fill_model_tensor(num_params, 0.0))
+        optimizer.param_states_m = append(optimizer.param_states_m, fill_model_tensor(num_params, 0.0))
+        optimizer.param_states_v = append(optimizer.param_states_v, fill_model_tensor(num_params, 0.0))
         i = i + 1
     }
     return optimizer

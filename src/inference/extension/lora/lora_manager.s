@@ -9,14 +9,14 @@ struct lora_config {
     lora_rank: int
     lora_alpha: float
     lora_dropout: float
-    target_modules: *vec[string]
+    target_modules: *string[]
     bias: string
     task_type: string
 }
 
 struct lora_weights {
-    lora_a: vec[vec[float]]
-    lora_b: vec[vec[float]]
+    lora_a: float[][]]
+    lora_b: float[][]]
     scaling: float
 }
 
@@ -35,17 +35,17 @@ struct lora_adapter_error {
 
 func (lora_adapter* adapter) apply_lora(
     module_name: string,
-    input: *vec[float],
-    output: *vec[vec[float]]
-) (vec[float), lora_adapter_error] {
+    input: *float[],
+    output: *float[][]]
+) (float), lora_adapter_error[] {
     if !adapter.enabled {
-        return (output, "")
+        return output, ""
     }
 
     switch adapter.weights.get(module_name) {
         option::some(weights) : {
             lora_result := apply_lora_transformation(input, weights, adapter.scale)
-            (lora_result, "")
+return             (lora_result, "")
         },
         option::none : {
             (lora_adapter_error {
@@ -57,11 +57,11 @@ func (lora_adapter* adapter) apply_lora(
 }
 
 func apply_lora_transformation(
-    input: *vec[float],
+    input: *float[],
     weights: *lora_weights,
     scale: float
-) (vec[float), lora_adapter_error] {
-    if weights.lora_a.len() == 0 || weights.lora_b.len() == 0 {
+) (float), lora_adapter_error[] {
+    if len(weights.lora_a) == 0 || len(weights.lora_b) == 0 {
         return (lora_adapter_error {
             code: "INVALID_WEIGHTS",
             message: "LoRA weights are empty",
@@ -71,55 +71,55 @@ func apply_lora_transformation(
     intermediate := matrix_multiply(input, weights.lora_a)
     output := matrix_multiply(intermediate, weights.lora_b)
 
-    scaled_output := vec[float]()
+    scaled_output := float[]()
     i := 0
-    for i < output.len() {
+    for i < len(output) {
         scaled_val := output[i] * weights.scaling * scale
-        scaled_output.push(scaled_val)
+        scaled_output = append(scaled_output, scaled_val)
         i = i + 1
     }
 
-    (scaled_output, "")
+return     (scaled_output, "")
 }
 
 func matrix_multiply(
-    a: *vec[float],
-    b: *vec[vec[float]]
-) (vec[float), lora_adapter_error] {
-    if b.len() == 0 {
+    a: *float[],
+    b: *float[][]]
+) (float), lora_adapter_error[] {
+    if len(b) == 0 {
         return (lora_adapter_error {
             code: "INVALID_MATRIX",
             message: "Matrix B is empty",
         })
     }
 
-    result := vec[float]()
+    result := float[]()
     i := 0
-    for i < b.len() {
+    for i < len(b) {
         row := b[i]
         sum := 0.0
         j := 0
-        for j < row.len() && j < a.len() {
+        for j < len(row) && j < len(a) {
             sum = sum + a[j] * row[j]
             j = j + 1
         }
-        result.push(sum)
+        result = append(result, sum)
         i = i + 1
     }
 
-    (result, "")
+return     (result, "")
 }
 
 struct lora_adapter_manager {
     adapters: map[string, lora_adapter]
-    active_adapters: *vec[string]
+    active_adapters: *string[]
     global_scale: float
 }
 
 func lora_adapter_manager::new() lora_adapter_manager {
     lora_adapter_manager {
         adapters: map[string, lora_adapter](),
-        active_adapters: vec[string](),
+        active_adapters: string[](),
         global_scale: 1.0,
     }
 }
@@ -128,7 +128,7 @@ func (lora_adapter_manager* manager) add_adapter(
     name: string,
     adapter: *lora_adapter
 ) ((), lora_adapter_error) {
-    if name.len() == 0 {
+    if len(name) == 0 {
         return (lora_adapter_error {
             code: "INVALID_NAME",
             message: "Adapter name cannot be empty",
@@ -136,7 +136,7 @@ func (lora_adapter_manager* manager) add_adapter(
     }
 
     manager.adapters.insert(name, adapter)
-    ((, ""))
+    return (), ""
 }
 
 func (lora_adapter_manager* manager) remove_adapter(string name) ((), lora_adapter_error) {
@@ -150,7 +150,7 @@ func (lora_adapter_manager* manager) remove_adapter(string name) ((), lora_adapt
     manager.adapters.remove(name)
 
     idx := 0
-    for idx < manager.active_adapters.len() {
+    for idx < len(manager.active_adapters) {
         if manager.active_adapters[idx] == name {
             manager.active_adapters.remove(idx)
             break
@@ -158,7 +158,7 @@ func (lora_adapter_manager* manager) remove_adapter(string name) ((), lora_adapt
         idx = idx + 1
     }
 
-    ((, ""))
+    return (), ""
 }
 
 func (lora_adapter_manager* manager) activate_adapter(string name) ((), lora_adapter_error) {
@@ -169,12 +169,12 @@ func (lora_adapter_manager* manager) activate_adapter(string name) ((), lora_ada
         })
     }
 
-    manager.active_adapters.push(name)
+    manager.active_adapters = append(manager.active_adapters, name)
 
     switch manager.adapters.get(name) {
         option::some(adapter) : {
             adapter.enabled = true
-            ((, ""))
+            return (), ""
         },
         option::none : {
             (lora_adapter_error {
@@ -187,7 +187,7 @@ func (lora_adapter_manager* manager) activate_adapter(string name) ((), lora_ada
 
 func (lora_adapter_manager* manager) deactivate_adapter(string name) ((), lora_adapter_error) {
     idx := 0
-    for idx < manager.active_adapters.len() {
+    for idx < len(manager.active_adapters) {
         if manager.active_adapters[idx] == name {
             manager.active_adapters.remove(idx)
             break
@@ -198,7 +198,7 @@ func (lora_adapter_manager* manager) deactivate_adapter(string name) ((), lora_a
     switch manager.adapters.get(name) {
         option::some(adapter) : {
             adapter.enabled = false
-            ((, ""))
+            return (), ""
         },
         option::none : {
             (lora_adapter_error {
@@ -209,7 +209,7 @@ func (lora_adapter_manager* manager) deactivate_adapter(string name) ((), lora_a
     }
 }
 
-func (manager* manager) get_active_adapters() *vec[string] {
+func (manager* manager) get_active_adapters() *string[] {
     manager.active_adapters
 }
 
@@ -229,12 +229,12 @@ func (lora_adapter_manager* manager) set_global_scale(float scale) ((), lora_ada
     }
 
     manager.global_scale = scale
-    ((, ""))
+    return (), ""
 }
 
 func (lora_adapter_manager* manager) merge_adapters() ((), lora_adapter_error) {
     i := 0
-    for i < manager.active_adapters.len() {
+    for i < len(manager.active_adapters) {
         adapter_name := manager.active_adapters[i]
 
         switch manager.adapters.get(adapter_name) {
@@ -254,11 +254,11 @@ func (lora_adapter_manager* manager) merge_adapters() ((), lora_adapter_error) {
         i = i + 1
     }
 
-    ((, ""))
+    return (), ""
 }
 
 func (lora_adapter_manager* manager) unmerge_adapters() ((), lora_adapter_error) {
-    ((, ""))
+    return (), ""
 }
 
 func (manager* manager) get_memory_usage_mb() int {
@@ -272,8 +272,8 @@ func (manager* manager) get_memory_usage_mb() int {
                 for module_name in adapter.weights.keys() {
                     switch adapter.weights.get(module_name) {
                         option::some(weights) : {
-                            a_size := weights.lora_a.len() * weights.lora_a[0].len() * 4
-                            b_size := weights.lora_b.len() * weights.lora_b[0].len() * 4
+                            a_size := len(weights.lora_a) * weights.lora_a[0].len() * 4
+                            b_size := len(weights.lora_b) * weights.lora_b[0].len() * 4
                             adapter_size = adapter_size + a_size + b_size
                         },
                         option::none : {},
@@ -289,11 +289,11 @@ func (manager* manager) get_memory_usage_mb() int {
     total / 1024 / 1024
 }
 
-func (manager* manager) list_adapters() *vec[string] {
-    names := vec[string]()
+func (manager* manager) list_adapters() *string[] {
+    names := string[]()
 
     for name in manager.adapters.keys() {
-        names.push(name)
+        names = append(names, name)
     }
 
     names
@@ -304,7 +304,7 @@ func create_default_lora_config() lora_config {
         lora_rank: 8,
         lora_alpha: 16.0,
         lora_dropout: 0.05,
-        target_modules: vec[string](),
+        target_modules: string[](),
         bias: "none",
         task_type: "CAUSAL_LM",
     }
@@ -324,7 +324,7 @@ func main() {
     }
 
     switch manager.add_adapter("adapter1", adapter) {
-        ((, "")) : {
+        return (), "" : {
             ""
         },
         (0, err) : {

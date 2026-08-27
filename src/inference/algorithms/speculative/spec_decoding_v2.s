@@ -16,7 +16,7 @@ struct draft_token {
 
 struct draft_sequence {
     string sequence_id
-    vec[draft_token] tokens
+    draft_token[] tokens
     int num_tokens
     int total_tokens_generated
     float avg_confidence
@@ -26,8 +26,8 @@ struct verification_result {
     bool tokens_accepted
     int num_accepted_tokens
     int num_rejected_tokens
-    vec[int] accepted_positions
-    vec[int] rejected_positions
+    int[] accepted_positions
+    int[] rejected_positions
     bool full_sequence_accepted
 }
 
@@ -112,7 +112,7 @@ func new_draft_generator(string generator_id, draft_model_manager model_manager)
 }
 
 func (draft_generator* gen) generate_draft_tokens(int num_tokens) draft_sequence {
-    tokens := vec[draft_token]{}
+    tokens := draft_token[]{}
 
     i := 0
     for i < num_tokens {
@@ -121,7 +121,7 @@ func (draft_generator* gen) generate_draft_tokens(int num_tokens) draft_sequence
             confidence: 0.8,
             generation_time_us: 1000,
         }
-        tokens.push(token)
+        tokens = append(tokens, token)
         i = i + 1
     }
 
@@ -152,26 +152,26 @@ func new_token_verifier(string verifier_id, float threshold) token_verifier {
     }
 }
 
-func (token_verifier* verifier) verify_tokens(draft_sequence draft_tokens, vec[float] target_logits) verification_result {
-    accepted_positions := vec[int]{}
-    rejected_positions := vec[int]{}
+func (token_verifier* verifier) verify_tokens(draft_sequence draft_tokens, float[] target_logits) verification_result {
+    accepted_positions := int[]{}
+    rejected_positions := int[]{}
 
     i := 0
     all_accepted := true
-    for i < draft_tokens.tokens.len() {
+    for i < len(draft_tokens.tokens) {
         draft := draft_tokens.tokens[i]
 
-        if draft.confidence > verifier.acceptance_threshold && i < target_logits.len() {
+        if draft.confidence > verifier.acceptance_threshold && i < len(target_logits) {
             if target_logits[i] > 0.5 {
-                accepted_positions.push(i)
+                accepted_positions = append(accepted_positions, i)
                 verifier.num_accepted_tokens = verifier.num_accepted_tokens + 1
             } else {
-                rejected_positions.push(i)
+                rejected_positions = append(rejected_positions, i)
                 verifier.num_rejected_tokens = verifier.num_rejected_tokens + 1
                 all_accepted = false
             }
         } else {
-            rejected_positions.push(i)
+            rejected_positions = append(rejected_positions, i)
             verifier.num_rejected_tokens = verifier.num_rejected_tokens + 1
             all_accepted = false
         }
@@ -181,9 +181,9 @@ func (token_verifier* verifier) verify_tokens(draft_sequence draft_tokens, vec[f
     }
 
     verification_result {
-        tokens_accepted: rejected_positions.len() == 0,
-        num_accepted_tokens: accepted_positions.len(),
-        num_rejected_tokens: rejected_positions.len(),
+        tokens_accepted: len(rejected_positions) == 0,
+        num_accepted_tokens: len(accepted_positions),
+        num_rejected_tokens: len(rejected_positions),
         accepted_positions: accepted_positions,
         rejected_positions: rejected_positions,
         full_sequence_accepted: all_accepted,
@@ -223,10 +223,10 @@ func new_speculative_decoder(string decoder_id, draft_generator gen, token_verif
 func (speculative_decoder* decoder) generate_and_verify(int sequence_length) bool {
     draft_seq := decoder.draft_gen.generate_draft_tokens(decoder.config.num_draft_tokens)
 
-    target_logits := vec[float]{}
+    target_logits := float[]{}
     i := 0
     for i < draft_seq.num_tokens {
-        target_logits.push(0.9)
+        target_logits = append(target_logits, 0.9)
         i = i + 1
     }
 

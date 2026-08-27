@@ -81,7 +81,7 @@ func (hf_transformers_rollout* rollout) generate_batch(
     []string prompts
 ) . ([]string, [][]f32) {
     start_time := get_time_ms()
-    rollout.total_prompts += i64(prompts.len())
+    rollout.total_prompts += i64(len(prompts))
     input_ids, attention_mask  := rollout.tokenize_batch(prompts)
     output_ids, log_probs  := rollout.generate(
         input_ids,
@@ -92,7 +92,7 @@ func (hf_transformers_rollout* rollout) generate_batch(
     for i in 0..output_ids.shape[0] {
         output_seq := output_ids[i]
         response := rollout.tokenizer.decode(output_seq)
-        responses.push(response)
+        responses = append(responses, response)
         rollout.total_tokens_generated += i64(output_seq.shape[0] - input_ids.shape[1])
     }
     elapsed := get_time_ms() - start_time
@@ -113,7 +113,7 @@ func (hf_transformers_rollout* rollout) generate(
     finished := tensor_zeros([batch_size], bool dtype)
     all_log_probs := []
     for i in 0..batch_size {
-        all_log_probs.push([])
+        all_log_probs = append(all_log_probs, [])
     }
     rollout.model.past_key_values = []
     for step in 0..max_new_tokens {
@@ -172,7 +172,7 @@ func (hf_transformers_rollout* rollout) sample_next_tokens(
         for i in 0..batch_size {
             token_id := next_tokens[i].item()
             log_prob := log_probs[i, token_id].item()
-            token_log_probs.push(log_prob)
+            token_log_probs = append(token_log_probs, log_prob)
         }
         return next_tokens, token_log_probs
     }
@@ -193,9 +193,9 @@ func (hf_transformers_rollout* rollout) sample_next_tokens(
         if !finished[i].item() {
             token_id := next_tokens[i].item()
             log_prob := log_probs[i, token_id].item()
-            token_log_probs.push(log_prob)
+            token_log_probs = append(token_log_probs, log_prob)
         } else {
-            token_log_probs.push(0.0)
+            token_log_probs = append(token_log_probs, 0.0)
         }
     }
     return next_tokens, token_log_probs
@@ -208,12 +208,12 @@ func (hf_transformers_rollout* rollout) tokenize_batch(
     max_length := 0
     for prompt in prompts {
         input_ids := rollout.tokenizer.encode(prompt)
-        all_input_ids.push(input_ids)
-        if input_ids.len() > max_length {
-            max_length = input_ids.len()
+        all_input_ids = append(all_input_ids, input_ids)
+        if len(input_ids) > max_length {
+            max_length = len(input_ids)
         }
     }
-    batch_size := prompts.len()
+    batch_size := len(prompts)
     input_ids_tensor := tensor_full(
         [batch_size, max_length],
         rollout.tokenizer.pad_token_id,
@@ -221,7 +221,7 @@ func (hf_transformers_rollout* rollout) tokenize_batch(
     )
     attention_mask := tensor_zeros([batch_size, max_length])
     for i, ids in all_input_ids {
-        length := ids.len()
+        length := len(ids)
         if rollout.config.padding_side == "left" {
             offset := max_length - length
             for j, id in ids {

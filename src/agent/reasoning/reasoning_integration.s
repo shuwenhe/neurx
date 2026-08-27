@@ -27,8 +27,8 @@ struct reasoning_response {
 	string              request_id
 	string              status
 	string              final_answer
-	vec[string]         reasoning_steps
-	vec[string]         intermediate_thoughts
+	string[]         reasoning_steps
+	string[]         intermediate_thoughts
 	float32             confidence_score
 	float32             quality_score
 	int32               total_steps
@@ -54,10 +54,10 @@ struct reasoning_engine {
 
 	reasoning_type      default_reasoning_type
 
-	vec[reasoning_request] active_requests
+	reasoning_request[] active_requests
 	map[string]reasoning_response] completed_responses
 
-	map[string]vec[reasoning_stream_chunk] stream_buffers
+	map[string]reasoning_stream_chunk[] stream_buffers
 
 	int32               max_concurrent_requests
 	int32               current_requests
@@ -76,9 +76,9 @@ func create_reasoning_engine() reasoning_engine {
 		evaluator:               *create_thought_evaluator(),
 		optimizer:               *create_reasoning_optimizer(),
 		default_reasoning_type:  CHAIN_OF_THOUGHT,
-		active_requests:         make(vec[reasoning_request], 0, 100),
+		active_requests:         make(reasoning_request[], 0, 100),
 		completed_responses:     make(map[string]reasoning_response),
-		stream_buffers:          make(map[string]vec[reasoning_stream_chunk]),
+		stream_buffers:          make(map[string]reasoning_stream_chunk[]),
 		max_concurrent_requests: 10,
 		current_requests:        0,
 		mu:                      sync.Mutex{},
@@ -142,8 +142,8 @@ func (reasoning_engine* e) process_cot_reasoning(
 	response := reasoning_response{
 		request_id:        req.request_id,
 		status:            "in_progress",
-		reasoning_steps:   make(vec[string], 0, req.max_steps),
-		intermediate_thoughts: make(vec[string], 0, req.max_steps*3),
+		reasoning_steps:   make(string[], 0, req.max_steps),
+		intermediate_thoughts: make(string[], 0, req.max_steps*3),
 		metadata:          make(map[string]interface{}),
 	}
 
@@ -226,15 +226,15 @@ func (reasoning_engine* e) process_tot_reasoning(
 	response := reasoning_response{
 		request_id:        req.request_id,
 		status:            "in_progress",
-		reasoning_steps:   make(vec[string], 0),
-		intermediate_thoughts: make(vec[string], 0),
+		reasoning_steps:   make(string[], 0),
+		intermediate_thoughts: make(string[], 0),
 		metadata:          make(map[string]interface{}),
 	}
 
 	root_id := e.tot_engine.add_root_node(req.problem_statement)
 	response.reasoning_steps = append(response.reasoning_steps, req.problem_statement)
 
-	current_level := make(vec[string], 0, 1)
+	current_level := make(string[], 0, 1)
 	current_level = append(current_level, root_id)
 
 	for depth := int32(0); depth < req.max_depth; depth++ {
@@ -246,10 +246,10 @@ func (reasoning_engine* e) process_tot_reasoning(
 			break
 		}
 
-		next_level := make(vec[string], 0)
+		next_level := make(string[], 0)
 
 		for node_id := range current_level {
-			child_contents := make(vec[string], 0, e.tot_engine.branching_factor)
+			child_contents := make(string[], 0, e.tot_engine.branching_factor)
 
 			for i := int32(0); i < e.tot_engine.branching_factor; i++ {
 				child_contents = append(
@@ -317,7 +317,7 @@ func (reasoning_engine* e) add_stream_chunk(
 	defer e.mu.Unlock()
 
 	if _, exists := e.stream_buffers[request_id]; !exists {
-		e.stream_buffers[request_id] = make(vec[reasoning_stream_chunk], 0)
+		e.stream_buffers[request_id] = make(reasoning_stream_chunk[], 0)
 	}
 
 	e.stream_buffers[request_id] = append(
@@ -328,16 +328,16 @@ func (reasoning_engine* e) add_stream_chunk(
 
 func (reasoning_engine* e) get_stream_chunks(
 	request_id string,
-) vec[reasoning_stream_chunk] {
+) reasoning_stream_chunk[] {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 
 	chunks, exists := e.stream_buffers[request_id]
 	if !exists {
-		return make(vec[reasoning_stream_chunk], 0)
+		return make(reasoning_stream_chunk[], 0)
 	}
 
-	result := make(vec[reasoning_stream_chunk], 0, len(chunks))
+	result := make(reasoning_stream_chunk[], 0, len(chunks))
 	for chunk := range chunks {
 		result = append(result, chunk)
 	}
@@ -390,9 +390,9 @@ func (reasoning_engine* e) reset_engine() {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 
-	e.active_requests = make(vec[reasoning_request], 0, 100)
+	e.active_requests = make(reasoning_request[], 0, 100)
 	e.completed_responses = make(map[string]reasoning_response)
-	e.stream_buffers = make(map[string]vec[reasoning_stream_chunk])
+	e.stream_buffers = make(map[string]reasoning_stream_chunk[])
 	e.current_requests = 0
 
 	e.state_manager.reset()

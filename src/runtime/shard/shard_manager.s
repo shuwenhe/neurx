@@ -104,7 +104,7 @@ func build_training_dataset_manifest(string dataset_path) dataset_manifest:
     shard.version = 1
     shard.access_count = 0
     shard.avg_read_time_ms = 0.0
-    manifest.shards.push(shard)
+    manifest.shards = append(manifest.shards, shard)
     manifest
 
 struct shard_info {
@@ -221,7 +221,7 @@ func partition_dataset(
             shard_base_path
         )
         if write_res.success:
-            all_shards.push(write_res.info)
+            all_shards = append(all_shards, write_res.info)
             if (((s + 1) - ((s + 1) / 10) * 10) == 0 or s == len(boundaries) - 1:
                 print("Completed shard ", s + 1, "/", len(boundaries),
                       " (", write_res.info.file_size_bytes / (1024*1024), " MB)")
@@ -303,7 +303,7 @@ func analyze_input_dataset(string path, shard_manager_config cfg) dataset_analys
             min(10, len(analysis.source_files))
         )
     else:
-        analysis.source_files.push(path)
+        analysis.source_files = append(analysis.source_files, path)
         analysis.is_single_file = true
         analysis.total_size_bytes = get_file_size(path)
         analysis.document_count = estimate_line_count(path, analysis.total_size_bytes)
@@ -448,7 +448,7 @@ func write_single_shard(
 func assign_shard_to_ranks(int shard_id, int num_ranks) []int:
     []int ranks = []int{cap: 2}
     int primary_rank = s(shard_id - (shard_id / num_ranks) * num_ranks)
-    ranks.push(primary_rank)
+    ranks = append(ranks, primary_rank)
     return ranks
 
 func get_shards_for_rank(dataset_manifest manifest, int rank_id) []shard_info:
@@ -459,7 +459,7 @@ func get_shards_for_rank(dataset_manifest manifest, int rank_id) []shard_info:
         int r = 0
         for r < len(shard.assigned_ranks) {
             if shard.assigned_ranks[r] == rank_id:
-                my_shards.push(shard)
+                my_shards = append(my_shards, shard)
                 break
             r = r + 1
         s = s + 1
@@ -515,11 +515,11 @@ func copy_config(shard_manager_config orig) shard_manager_config:
     return orig
 
 func log_error(shard_manager_state mgr, string msg) void:
-    mgr.error_log.push("[ERROR] " + msg)
+    mgr.error_log = append(mgr.error_log, "[ERROR] " + msg)
     mgr.error_count = mgr.error_count + 1
 
 func log_warning(shard_manager_state mgr, string msg) void:
-    mgr.error_log.push("[WARN] " + msg)
+    mgr.error_log = append(mgr.error_log, "[WARN] " + msg)
 
 func save_manifest(dataset_manifest manifest, string path) void:
     string dir = trim(runtime_run_command_output("dirname " + runtime_shell_escape(path)))

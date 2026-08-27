@@ -50,9 +50,9 @@ struct metrics_tracker {
     cache_metrics cache
     gpu_metrics gpu
 
-    vec[int32] latency_samples
-    vec[int32] batch_sizes
-    vec[int32] token_counts
+    int32[] latency_samples
+    int32[] batch_sizes
+    int32[] token_counts
 
     int64 start_time
     int64 last_update_time
@@ -98,9 +98,9 @@ func create_metrics_tracker() metrics_tracker* {
             kernel_launch_rate: 0,
             gpu_errors: 0,
         },
-        latency_samples: make(vec[int32]),
-        batch_sizes: make(vec[int32]),
-        token_counts: make(vec[int32]),
+        latency_samples: make(int32[]),
+        batch_sizes: make(int32[]),
+        token_counts: make(int32[]),
         start_time: current_time_ns(),
         last_update_time: current_time_ns(),
     }
@@ -263,18 +263,18 @@ func (metrics_tracker* mt) reset() {
         current_pending_requests: 0,
         system_uptime_sec: 0.0,
     }
-    mt.latency_samples = make(vec[int32])
-    mt.batch_sizes = make(vec[int32])
-    mt.token_counts = make(vec[int32])
+    mt.latency_samples = make(int32[])
+    mt.batch_sizes = make(int32[])
+    mt.token_counts = make(int32[])
     mt.start_time = current_time_ns()
 }
 
-func quick_sort_int32(vec[int32] arr) vec[int32] {
+func quick_sort_int32(int32[] arr) int32[] {
     if len(arr) <= 1 {
         return arr
     }
 
-    sorted := make(vec[int32])
+    sorted := make(int32[])
     for i := 0; i < len(arr); i = i + 1 {
         sorted = append(sorted, arr[i])
     }

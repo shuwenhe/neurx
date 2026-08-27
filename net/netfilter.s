@@ -30,7 +30,7 @@ struct netfilter_hook {
 }
 
 struct packet_buffer {
-    data: vec[u8],
+    data: u8[],
     src_ip: u32,
     dst_ip: u32,
     src_port: u16,
@@ -53,14 +53,14 @@ struct firewall_rule {
 }
 
 struct netfilter_engine {
-    hooks: vec[netfilter_hook],
-    rules: vec[firewall_rule],
+    hooks: netfilter_hook[],
+    rules: firewall_rule[],
     conntrack_table: connection_table,
     lock: spinlock::spinlock[void],
 }
 
 struct connection_table {
-    entries: vec[connection_entry],
+    entries: connection_entry[],
 }
 
 struct connection_entry {
@@ -93,27 +93,27 @@ enum connection_state {
 }
 
 func new_netfilter_engine() (*netfilter_engine, string) {
-    let engine := *netfilter_engine{
-        hooks: vec[netfilter_hook](),
-        rules: vec[firewall_rule](),
+    engine := *netfilter_engine{
+        hooks: netfilter_hook[](),
+        rules: firewall_rule[](),
         conntrack_table: connection_table{
-            entries: vec[connection_entry](),
+            entries: connection_entry[](),
         },
         lock: spinlock::new(),
     } as *netfilter_engine
 
-    result::ok(engine)
+    return engine, ""
 }
 
-func (engine: *netfilter_engine) register_hook(
+func (netfilter_engine* engine) register_hook(
     hook_type: netfilter_hook_type,
     priority: i32,
     hook_fn: *fn(skb: *packet_buffer, hook: netfilter_hook_type) -> packet_verdict,
     module: *string,
 ) (void, string) {
-    let _guard := engine.lock.lock()?
+    _guard := engine.lock.lock()?
 
-    let hook := netfilter_hook{
+    hook := netfilter_hook{
         hook_type: hook_type,
         priority: priority,
         hook_fn: hook_fn,
@@ -121,26 +121,26 @@ func (engine: *netfilter_engine) register_hook(
         enabled: true,
     }
 
-    engine.hooks.push(hook)
-    result::ok(())
+    engine.hooks = append(engine.hooks, hook)
+    return , ""
 }
 
-func (engine: *netfilter_engine) unregister_hook(module: *string) (void, string) {
-    let _guard := engine.lock.lock()?
+func (netfilter_engine* engine) unregister_hook(string* module) (void, string) {
+    _guard := engine.lock.lock()?
 
-    let mut remove_indices := vec[u32]()
-    let mut i := 0
+    remove_indices := u32[]()
+    i := 0
 
     for hook in engine.hooks {
         if hook.module == module {
-            remove_indices.push(i)
+            remove_indices = append(remove_indices, i)
         }
         i = i + 1
     }
 
-    i = (remove_indices.len() - 1) as u32
+    i = (len(remove_indices) - 1) as u32
     while i >= 0 {
-        let idx := remove_indices.get(i) as u32
+        idx := remove_indices.get(i) as u32
         engine.hooks.remove(idx)
         if i == 0 {
             break
@@ -148,10 +148,10 @@ func (engine: *netfilter_engine) unregister_hook(module: *string) (void, string)
         i = i - 1
     }
 
-    result::ok(())
+    ((), "")
 }
 
-func (engine: *netfilter_engine) add_rule(
+func (netfilter_engine* engine) add_rule(
     src_ip: option[u32],
     dst_ip: option[u32],
     src_port: option[u16],
@@ -160,11 +160,11 @@ func (engine: *netfilter_engine) add_rule(
     action: packet_verdict,
     priority: i32,
 ) (u32, string) {
-    let _guard := engine.lock.lock()?
+    _guard := engine.lock.lock()?
 
-    let rule_id := engine.rules.len() as u32
+    rule_id := len(engine.rules) as u32
 
-    let rule := firewall_rule{
+    rule := firewall_rule{
         id: rule_id,
         src_ip: src_ip,
         dst_ip: dst_ip,
@@ -177,16 +177,16 @@ func (engine: *netfilter_engine) add_rule(
         packet_count: 0,
     }
 
-    engine.rules.push(rule)
-    result::ok(rule_id)
+    engine.rules = append(engine.rules, rule)
+    return rule_id, ""
 }
 
-func (engine: *netfilter_engine) delete_rule(rule_id: u32) (void, string) {
-    let _guard := engine.lock.lock()?
+func (netfilter_engine* engine) delete_rule(rule_id: u32) (void, string) {
+    _guard := engine.lock.lock()?
 
-    let mut found := false
-    let mut remove_idx := option::none as option[u32]
-    let mut i := 0
+    found := false
+    remove_idx := option::none as option[u32]
+    i := 0
 
     for rule in engine.rules {
         if rule.id == rule_id {
@@ -198,31 +198,31 @@ func (engine: *netfilter_engine) delete_rule(rule_id: u32) (void, string) {
     }
 
     if !found {
-        return result::err("rule not found")
+        return ((), "rule not found")
     }
 
     switch remove_idx {
         option::some(idx): {
             engine.rules.remove(idx)
-            result::ok(())
+            return , ""
         },
-        option::none: result::err("failed to delete rule"),
+        option::none: return , "failed to delete rule",
     }
 }
 
-func (engine: *netfilter_engine) process_packet(
+func (netfilter_engine* engine) process_packet(
     skb: *packet_buffer,
     hook_type: netfilter_hook_type,
 ) (packet_verdict, string) {
-    let _guard := engine.lock.lock()?
+    _guard := engine.lock.lock()?
 
     for hook in engine.hooks {
         if hook.enabled {
-            let verdict := (hook.hook_fn)(skb, hook_type)
+            verdict := (hook.hook_fn)(skb, hook_type)
             switch verdict {
-                packet_verdict::nf_drop: return result::ok(packet_verdict::nf_drop),
+                packet_verdict::nf_drop: return packet_verdict::nf_drop, "",
                 packet_verdict::nf_accept: continue,
-                packet_verdict::nf_queue: return result::ok(packet_verdict::nf_queue),
+                packet_verdict::nf_queue: return packet_verdict::nf_queue, "",
                 _: continue,
             }
         }
@@ -235,14 +235,14 @@ func (engine: *netfilter_engine) process_packet(
 
         if match_rule(skb, *rule) {
             rule.packet_count = rule.packet_count + 1
-            return result::ok(rule.action)
+            return rule.action, ""
         }
     }
 
-    result::ok(packet_verdict::nf_accept)
+    return packet_verdict::nf_accept, ""
 }
 
-func match_rule(skb: *packet_buffer, rule: *firewall_rule) bool {
+func match_rule(packet_buffer* skb, firewall_rule* rule) bool {
     switch rule.src_ip {
         option::some(ip): {
             if skb.src_ip != ip {
@@ -273,18 +273,18 @@ func match_rule(skb: *packet_buffer, rule: *firewall_rule) bool {
     true
 }
 
-func (engine: *netfilter_engine) track_connection(
+func (netfilter_engine* engine) track_connection(
     src_ip: u32,
     dst_ip: u32,
     src_port: u16,
     dst_port: u16,
     protocol: u8,
 ) (u64, string) {
-    let _guard := engine.lock.lock()?
+    _guard := engine.lock.lock()?
 
-    let conn_id := (engine.conntrack_table.entries.len() as u64) + 1
+    conn_id := (len(engine.conntrack_table.entries) as u64) + 1
 
-    let entry := connection_entry{
+    entry := connection_entry{
         conn_id: conn_id,
         src_ip: src_ip,
         dst_ip: dst_ip,
@@ -299,32 +299,32 @@ func (engine: *netfilter_engine) track_connection(
         timeout: 3600,
     }
 
-    engine.conntrack_table.entries.push(entry)
-    result::ok(conn_id)
+    engine.conntrack_table.entries = append(engine.conntrack_table.entries, entry)
+    return conn_id, ""
 }
 
-func (engine: *netfilter_engine) update_connection_state(
+func (netfilter_engine* engine) update_connection_state(
     conn_id: u64,
     new_state: connection_state,
 ) (void, string) {
-    let _guard := engine.lock.lock()?
+    _guard := engine.lock.lock()?
 
     for entry in engine.conntrack_table.entries {
         if entry.conn_id == conn_id {
             entry.state = new_state
-            return result::ok(())
+            return , ""
         }
     }
 
-    result::err("connection not found")
+    return , "connection not found"
 }
 
-func (engine: *netfilter_engine) update_connection_stats(
+func (netfilter_engine* engine) update_connection_stats(
     conn_id: u64,
     bytes: u64,
     is_incoming: bool,
 ) (void, string) {
-    let _guard := engine.lock.lock()?
+    _guard := engine.lock.lock()?
 
     for entry in engine.conntrack_table.entries {
         if entry.conn_id == conn_id {
@@ -335,11 +335,11 @@ func (engine: *netfilter_engine) update_connection_stats(
                 entry.bytes_out = entry.bytes_out + bytes
                 entry.packets_out = entry.packets_out + 1
             }
-            return result::ok(())
+            return , ""
         }
     }
 
-    result::err("connection not found")
+    return , "connection not found"
 }
 
 struct netfilter_statistics {
@@ -351,12 +351,12 @@ struct netfilter_statistics {
     active_connections: u32,
 }
 
-func (engine: *netfilter_engine) get_statistics() (netfilter_statistics, string) {
-    let _guard := engine.lock.lock()?
+func (netfilter_engine* engine) get_statistics() (netfilter_statistics, string) {
+    _guard := engine.lock.lock()?
 
-    let mut enabled_count := 0
-    let mut accepted := 0
-    let mut dropped := 0
+    enabled_count := 0
+    accepted := 0
+    dropped := 0
 
     for rule in engine.rules {
         if rule.enabled {
@@ -364,14 +364,14 @@ func (engine: *netfilter_engine) get_statistics() (netfilter_statistics, string)
         }
     }
 
-    let stats := netfilter_statistics{
-        total_rules: engine.rules.len() as u32,
+    stats := netfilter_statistics{
+        total_rules: len(engine.rules) as u32,
         enabled_rules: enabled_count,
         total_packets_processed: 0,
         packets_accepted: accepted,
         packets_dropped: dropped,
-        active_connections: engine.conntrack_table.entries.len() as u32,
+        active_connections: len(engine.conntrack_table.entries) as u32,
     }
 
-    result::ok(stats)
+return     (stats, "")
 }

@@ -31,7 +31,7 @@ struct chat_completion_response {
 	string              object
 	int64               created
 	string              model
-	vec[choice]         choices
+	choice[]         choices
 	usage               usage
 	string              system_fingerprint
 
@@ -44,7 +44,7 @@ struct completion_response {
 	string              object
 	int64               created
 	string              model
-	vec[completion_choice] choices
+	completion_choice[] choices
 	usage               usage
 	string              system_fingerprint
 }
@@ -52,12 +52,12 @@ struct completion_response {
 struct embedding_data {
 	string          object
 	int32           index
-	vec[float32]    embedding
+	float32[]    embedding
 }
 
 struct embedding_response {
 	string          object
-	vec[embedding_data] data
+	embedding_data[] data
 	string          model
 	usage           usage
 
@@ -69,14 +69,14 @@ struct model_info {
 	string          object
 	int64           created
 	string          owned_by
-	vec[interface{}] permission
+	interface{}[] permission
 	string          root
 	string          parent
 }
 
 struct model_list_response {
 	string          object
-	vec[model_info] data
+	model_info[] data
 }
 
 struct error_detail {
@@ -100,7 +100,7 @@ struct error_response {
 func create_chat_completion_response(
 	request_id string,
 	model string,
-	choices vec[choice],
+	choices choice[],
 	usage_data usage,
 ) chat_completion_response {
 	return chat_completion_response{
@@ -117,7 +117,7 @@ func create_chat_completion_response(
 
 func create_completion_response(
 	model string,
-	choices vec[completion_choice],
+	choices completion_choice[],
 	usage_data usage,
 ) completion_response {
 	return completion_response{
@@ -133,10 +133,10 @@ func create_completion_response(
 
 func create_embedding_response(
 	model string,
-	embeddings vec[vec[float32]],
+	embeddings float32[][]],
 	usage_data usage,
 ) embedding_response {
-	data := make(vec[embedding_data], 0, len(embeddings))
+	data := make(embedding_data[], 0, len(embeddings))
 
 	for i := int32(0); i < int32(len(embeddings)); i++ {
 		data = append(data, embedding_data{
@@ -155,8 +155,8 @@ func create_embedding_response(
 	}
 }
 
-func create_model_list_response(models vec[string]) model_list_response {
-	data := make(vec[model_info], 0, len(models))
+func create_model_list_response(models string[]) model_list_response {
+	data := make(model_info[], 0, len(models))
 
 	for model := range models {
 		data = append(data, model_info{
@@ -271,7 +271,7 @@ func create_stream_event(
 		object:  "chat.completion.chunk",
 		created: time.Now().Unix(),
 		model:   model,
-		choices: make(vec[choice], 1),
+		choices: make(choice[], 1),
 		request_id: request_id,
 	}
 }

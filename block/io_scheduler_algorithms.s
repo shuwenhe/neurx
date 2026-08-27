@@ -22,7 +22,7 @@ struct io_queue_entry {
 }
 
 struct cfq_scheduler {
-    vec[io_queue_entry] queue
+    io_queue_entry[] queue
     int quantum_us
     int time_slice_us
     int idle_slice_us
@@ -31,8 +31,8 @@ struct cfq_scheduler {
 }
 
 struct deadline_scheduler {
-    vec[io_queue_entry] read_queue
-    vec[io_queue_entry] write_queue
+    io_queue_entry[] read_queue
+    io_queue_entry[] write_queue
     int read_expire_ms
     int write_expire_ms
     int writes_starved
@@ -40,7 +40,7 @@ struct deadline_scheduler {
 }
 
 struct bfq_scheduler {
-    vec[io_queue_entry] queue
+    io_queue_entry[] queue
     int quantum_us
     int burst_detection
     int low_latency_mode
@@ -49,7 +49,7 @@ struct bfq_scheduler {
 
 func cfq_create() cfq_scheduler {
     sched := cfq_scheduler {
-        queue: vec[io_queue_entry](),
+        queue: io_queue_entry[](),
         quantum_us: 10000,
         time_slice_us: 100000,
         idle_slice_us: 8000,
@@ -67,23 +67,23 @@ func cfq_create() cfq_scheduler {
     return sched
 }
 
-func (sched: *cfq_scheduler) cfq_add_request(io_queue_entry req) {
-    sched.queue.push(req)
+func (cfq_scheduler* sched) cfq_add_request(io_queue_entry req) {
+    sched.queue = append(sched.queue, req)
     sched.stats.total_requests = sched.stats.total_requests + 1
 }
 
-func (sched: *cfq_scheduler) cfq_dispatch_request() option[io_queue_entry] {
-    if sched.queue.len() == 0 {
+func (cfq_scheduler* sched) cfq_dispatch_request() option[io_queue_entry] {
+    if len(sched.queue) == 0 {
         return option::none
     }
-    entry := sched.queue.len() - 1
+    entry := len(sched.queue) - 1
     req := sched.queue[entry]
     sched.queue.pop()
     sched.stats.total_dispatches = sched.stats.total_dispatches + 1
     return option::some(req)
 }
 
-func (sched: *cfq_scheduler) cfq_request_complete(io_queue_entry req) {
+func (cfq_scheduler* sched) cfq_request_complete(io_queue_entry req) {
     if req.is_read {
         sched.stats.total_sectors_read = sched.stats.total_sectors_read + req.sector_count
     } else {
@@ -94,8 +94,8 @@ func (sched: *cfq_scheduler) cfq_request_complete(io_queue_entry req) {
 
 func deadline_create() deadline_scheduler {
     sched := deadline_scheduler {
-        read_queue: vec[io_queue_entry](),
-        write_queue: vec[io_queue_entry](),
+        read_queue: io_queue_entry[](),
+        write_queue: io_queue_entry[](),
         read_expire_ms: 500,
         write_expire_ms: 5000,
         writes_starved: 2,
@@ -112,23 +112,23 @@ func deadline_create() deadline_scheduler {
     return sched
 }
 
-func (sched: *deadline_scheduler) deadline_add_request(io_queue_entry req) {
+func (deadline_scheduler* sched) deadline_add_request(io_queue_entry req) {
     if req.is_read {
-        sched.read_queue.push(req)
+        sched.read_queue = append(sched.read_queue, req)
     } else {
-        sched.write_queue.push(req)
+        sched.write_queue = append(sched.write_queue, req)
     }
     sched.stats.total_requests = sched.stats.total_requests + 1
 }
 
-func (sched: *deadline_scheduler) deadline_dispatch() option[io_queue_entry] {
-    if sched.read_queue.len() > 0 {
+func (deadline_scheduler* sched) deadline_dispatch() option[io_queue_entry] {
+    if len(sched.read_queue) > 0 {
         req := sched.read_queue[0]
         sched.read_queue.pop()
         sched.stats.total_dispatches = sched.stats.total_dispatches + 1
         return option::some(req)
     }
-    if sched.write_queue.len() > 0 {
+    if len(sched.write_queue) > 0 {
         req := sched.write_queue[0]
         sched.write_queue.pop()
         sched.stats.total_dispatches = sched.stats.total_dispatches + 1
@@ -137,7 +137,7 @@ func (sched: *deadline_scheduler) deadline_dispatch() option[io_queue_entry] {
     return option::none
 }
 
-func (sched: *deadline_scheduler) deadline_complete(io_queue_entry req) {
+func (deadline_scheduler* sched) deadline_complete(io_queue_entry req) {
     if req.is_read {
         sched.stats.total_sectors_read = sched.stats.total_sectors_read + req.sector_count
     } else {
@@ -148,7 +148,7 @@ func (sched: *deadline_scheduler) deadline_complete(io_queue_entry req) {
 
 func bfq_create() bfq_scheduler {
     sched := bfq_scheduler {
-        queue: vec[io_queue_entry](),
+        queue: io_queue_entry[](),
         quantum_us: 8000,
         burst_detection: 0,
         low_latency_mode: 1,
@@ -165,13 +165,13 @@ func bfq_create() bfq_scheduler {
     return sched
 }
 
-func (sched: *bfq_scheduler) bfq_add_request(io_queue_entry req) {
-    sched.queue.push(req)
+func (bfq_scheduler* sched) bfq_add_request(io_queue_entry req) {
+    sched.queue = append(sched.queue, req)
     sched.stats.total_requests = sched.stats.total_requests + 1
 }
 
-func (sched: *bfq_scheduler) bfq_dispatch() option[io_queue_entry] {
-    if sched.queue.len() == 0 {
+func (bfq_scheduler* sched) bfq_dispatch() option[io_queue_entry] {
+    if len(sched.queue) == 0 {
         return option::none
     }
     req := sched.queue[0]
@@ -180,7 +180,7 @@ func (sched: *bfq_scheduler) bfq_dispatch() option[io_queue_entry] {
     return option::some(req)
 }
 
-func (sched: *bfq_scheduler) bfq_complete(io_queue_entry req) {
+func (bfq_scheduler* sched) bfq_complete(io_queue_entry req) {
     if req.is_read {
         sched.stats.total_sectors_read = sched.stats.total_sectors_read + req.sector_count
     } else {

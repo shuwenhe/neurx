@@ -81,7 +81,7 @@ func ensure_size([]float values, int n) []float {
     }
     []float out = []float{cap: n}
     for i in 0..n {
-        out.push(0.0)
+        out = append(out, 0.0)
     }
     out
 }
@@ -90,7 +90,7 @@ func step_tensor(sgd_optimizer optimizer, tensor params, tensor grads) tensor {
     int n = len(params.data)
     []float out = []float{cap: n}
     for i in 0..n {
-        out.push(params.data[i] - optimizer.lr * grads.data[i])
+        out = append(out, params.data[i] - optimizer.lr * grads.data[i])
     }
     new(out, params.shape, params.requires_grad)
 }
@@ -114,7 +114,7 @@ func adam_step(adam_optimizer optimizer, tensor params, tensor grads) adam_step_
         float m_hat = m[i] / safe_c1
         float v_hat = v[i] / safe_c2
         float denom = inv_sqrt(v_hat + optimizer.eps)
-        out.push(params.data[i] - optimizer.lr * m_hat * denom)
+        out = append(out, params.data[i] - optimizer.lr * m_hat * denom)
     }
     adam_optimizer next_optimizer = adam_optimizer {
         lr: optimizer.lr,
@@ -141,7 +141,7 @@ func rmsprop_step(rmsprop_optimizer optimizer, tensor params, tensor grads) rmsp
         float g = grads.data[i]
         avg[i] = optimizer.alpha * avg[i] + (1.0 - optimizer.alpha) * g * g
         float denom = inv_sqrt(avg[i] + optimizer.eps)
-        out.push(params.data[i] - optimizer.lr * g * denom)
+        out = append(out, params.data[i] - optimizer.lr * g * denom)
     }
     rmsprop_optimizer next_optimizer = rmsprop_optimizer {
         lr: optimizer.lr,

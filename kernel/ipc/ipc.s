@@ -11,7 +11,7 @@ struct message {
 
 struct msg_queue {
     queue_id: int
-    messages: vec[message]
+    messages: message[]
     max_size: int
     creator_pid: int
     created_at: int
@@ -20,7 +20,7 @@ struct msg_queue {
 func msg_queue_create(int id, int max_msgs) msg_queue {
     queue := msg_queue {
         queue_id: id,
-        messages: std_vec[message](),
+        messages: std_message[](),
         max_size: max_msgs,
         creator_pid: 1,
         created_at: 0
@@ -28,11 +28,11 @@ func msg_queue_create(int id, int max_msgs) msg_queue {
     queue
 }
 
-func (msg_queue* mq) msg_send(message msg) int {    if mq.messages.len() >= mq.max_size {
+func (msg_queue* mq) msg_send(message msg) int {    if len(mq.messages) >= mq.max_size {
         -1
     } else {
-        mq.messages.push(msg)
-        mq.messages.len() - 1
+        mq.messages = append(mq.messages, msg)
+        len(mq.messages) - 1
     }
 }
 
@@ -44,7 +44,7 @@ func (msg_queue* mq) msg_receive(int msg_type) message {    i := 0
         payload: ""
     }
     
-    for i < mq.messages.len() {
+    for i < len(mq.messages) {
         msg := mq.messages[i]
         if msg.msg_type == msg_type {
             mq.messages[i] = empty_msg
@@ -122,20 +122,20 @@ func (shared_memory* shm) shm_get_size() int {    shm.size
 }
 
 struct ipc_subsystem {
-    msg_queues: vec[msg_queue]
-    semaphores: vec[semaphore]
-    shared_mems: vec[shared_memory]
+    msg_queues: msg_queue[]
+    semaphores: semaphore[]
+    shared_mems: shared_memory[]
 }
 
 func ipc_subsystem_init() ipc_subsystem {
     ipc := ipc_subsystem {
-        msg_queues: std_vec[msg_queue](),
-        semaphores: std_vec[semaphore](),
-        shared_mems: std_vec[shared_memory]()
+        msg_queues: std_msg_queue[](),
+        semaphores: std_semaphore[](),
+        shared_mems: std_shared_memory[]()
     }
     ipc
 }
 
-func (ipc_subsystem* ipc) ipc_get_status() int {    status := ipc.msg_queues.len() + ipc.semaphores.len() + ipc.shared_mems.len()
+func (ipc_subsystem* ipc) ipc_get_status() int {    status := len(ipc.msg_queues) + len(ipc.semaphores) + len(ipc.shared_mems)
     status
 }

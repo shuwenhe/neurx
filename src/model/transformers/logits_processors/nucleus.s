@@ -20,7 +20,7 @@ func apply_nucleus(
     logits: []float,
     processor: nucleus_processor
 ) []float {
-    int vocab_size = logits.len()
+    int vocab_size = len(logits)
 
     []float probs = processor_utils.softmax(logits)
 
@@ -128,7 +128,7 @@ func sample_from_nucleus(
     int best_token = 0
     float best_prob = probs[0]
 
-    for i = 1; i < probs.len(); i = i + 1 {
+    for i = 1; i < len(probs); i = i + 1 {
         if probs[i] > best_prob {
             best_prob = probs[i]
             best_token = i
@@ -143,7 +143,7 @@ func apply_top_k_nucleus(
     k: int,
     p: float
 ) []float {
-    int vocab_size = logits.len()
+    int vocab_size = len(logits)
 
     []float probs = processor_utils.softmax(logits)
 
@@ -211,7 +211,7 @@ func analyze_nucleus_filtering(
     p: float
 ) nucleus_stats {
     []float probs = processor_utils.softmax(logits)
-    int vocab_size = logits.len()
+    int vocab_size = len(logits)
 
     []int sorted_indices
     for i = 0; i < vocab_size; i = i + 1 {

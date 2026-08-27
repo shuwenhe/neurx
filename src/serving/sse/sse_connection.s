@@ -55,8 +55,8 @@ struct sse_connection {
 	int32                   heartbeat_interval_ms
 	int32                   idle_timeout_ms
 
-	vec[resume_token]       resume_tokens
-	vec[connection_checkpoint] checkpoints
+	resume_token[]       resume_tokens
+	connection_checkpoint[] checkpoints
 
 	int32                   current_checkpoint_id
 
@@ -88,8 +88,8 @@ func create_sse_connection(connection_id string, client_id string, stream_id str
 		total_bytes_sent:       0,
 		heartbeat_interval_ms:  30000,
 		idle_timeout_ms:        300000,
-		resume_tokens:          make(vec[resume_token], 0),
-		checkpoints:            make(vec[connection_checkpoint], 0),
+		resume_tokens:          make(resume_token[], 0),
+		checkpoints:            make(connection_checkpoint[], 0),
 		current_checkpoint_id:  0,
 		metadata:               make(map[string]string),
 		mu:                     sync.Mutex{},
@@ -257,7 +257,7 @@ func (sse_connection* c) close() {
 	defer c.mu.Unlock()
 
 	c.current_state = CONN_CLOSED
-	c.resume_tokens = make(vec[resume_token], 0)
+	c.resume_tokens = make(resume_token[], 0)
 }
 
 func (sse_connection* c) mark_failed() {

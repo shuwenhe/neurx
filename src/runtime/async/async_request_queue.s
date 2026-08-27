@@ -12,7 +12,7 @@ const (
 struct async_request {
 	request_id string
 	prompt     string
-	tokens     vec[int32]
+	tokens     int32[]
 	params     interface{}
 	priority   int32
 	created_at int64
@@ -33,7 +33,7 @@ struct async_request {
 }
 
 struct request_batch {
-	requests    vec[async_request*]
+	requests    async_request*[]
 	batch_id    string
 	size        int32
 	created_at  int64
@@ -50,9 +50,9 @@ struct backpressure_config {
 }
 
 struct async_request_queue {
-	pending_requests vec[async_request*]
-	processing_batch vec[request_batch*]
-	completed        vec[async_request*]
+	pending_requests async_request*[]
+	processing_batch request_batch*[]
+	completed        async_request*[]
 
 	mu              sync.Mutex
 	capacity        int32
@@ -108,7 +108,7 @@ func (q async_request_queue*) create_request(
 	req := async_request{
 		request_id: request_id,
 		prompt:     prompt,
-		tokens:     make(vec[int32], 0, 1024),
+		tokens:     make(int32[], 0, 1024),
 		params:     params,
 		priority:   priority,
 		created_at: current_timestamp_ns(),
@@ -156,7 +156,7 @@ func (q async_request_queue*) dequeue_batch() request_batch {
 	batch := request_batch{
 		batch_id:   generate_batch_id(),
 		created_at: current_timestamp_ns(),
-		requests:   make(vec[async_request*], 0, q.batch_size),
+		requests:   make(async_request*[], 0, q.batch_size),
 	}
 
 	count := int32(0)
@@ -278,11 +278,11 @@ func (q async_request_queue*) update_latency(latency_ms int64) {
 	}
 }
 
-func (q async_request_queue*) drain_queue(timeout_ms int64) vec[async_request*] {
+func (q async_request_queue*) drain_queue(timeout_ms int64) async_request*[] {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	result := make(vec[async_request*], 0, len(q.pending_requests))
+	result := make(async_request*[], 0, len(q.pending_requests))
 	deadline := current_timestamp_ns() + timeout_ms*1000000
 
 	for len(q.pending_requests) > 0 && current_timestamp_ns() < deadline {
@@ -306,7 +306,7 @@ func (q async_request_queue*) flush_batch(batch request_batch) {
 	}
 }
 
-func sort_by_priority(requests vec[async_request*]) {
+func sort_by_priority(requests async_request*[]) {
 	for i := int32(0); i < int32(len(requests)); i++ {
 		for j := i + 1; j < int32(len(requests)); j++ {
 			if requests[j].priority > requests[i].priority {

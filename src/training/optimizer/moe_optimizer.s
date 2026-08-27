@@ -88,7 +88,7 @@ struct load_balance_loss_computer {
             mean_prob.unsqueeze(0).expand(batch_size * seq_len, -1),
             expert_mask.reshape(-1, num_experts).float()
         ).mean()
-        return (load_balance_loss * this.config.loss_coef, aux_loss * this.config.aux_loss_coef)
+        return load_balance_loss * this.config.loss_coef, aux_loss * this.config.aux_loss_coef
     }
 }
 struct mo_effn_layer {
@@ -192,7 +192,7 @@ struct mo_effn_layer {
         if this.config.normalize_router:
             topk_probs = softmax(topk_values, dim=-1)
             weights.scatter_(-1, topk_indices, topk_probs)
-        return (weights, topk_indices)
+        return weights, topk_indices
     }
     _soft_routing(router_logits: tensor) {
         probs = softmax(router_logits.float(), dim=-1)
@@ -201,7 +201,7 @@ struct mo_effn_layer {
         masked_probs = zeros_like(probs)
         masked_probs.scatter_(-1, topk_indices, probs.gather(-1, topk_indices))
         normalized = masked_probs / (masked_probs.sum(dim=-1, keepdim=true) + 1e-9)
-        return (normalized, topk_indices)
+        return normalized, topk_indices
     }
     _group_limited_routing(router_logits: tensor) {
         B, T, E = router_logits.shape
@@ -218,7 +218,7 @@ struct mo_effn_layer {
             weights.scatter_(-1, global_topk_idx, topk_probs.reshape_as(weights))
         else:
             weights.scatter_(-1, global_topk_idx, 1.0)
-        return (weights, global_topk_idx)
+        return weights, global_topk_idx
     }
     _dispatch_and_compute(
         hidden_states: tensor,

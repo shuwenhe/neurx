@@ -103,7 +103,7 @@ func load_hf_model(
     string weight_file = "model.safetensors"
     safetensors_loader.weight_dict weights = safetensors_loader.load_safetensors_metadata(weight_file)
 
-    print("✓ Weights loaded: " + int_to_string(weights.tensors.len()) + " tensors\n")
+    print("✓ Weights loaded: " + int_to_string(len(weights.tensors)) + " tensors\n")
     print("✓ Total size: " + int_to_string(weights.total_size_bytes / (1024 * 1024)) + " MB\n\n")
 
     print("🔐 Step 4: Validation\n")
@@ -173,7 +173,7 @@ func generate_text(
 
     []string tokens = hf_tokenizer.tokenize_text(prompt, model.tokenizer)
 
-    print("✓ Tokenized to " + int_to_string(tokens.len()) + " tokens\n")
+    print("✓ Tokenized to " + int_to_string(len(tokens)) + " tokens\n")
 
     string generated = prompt
 

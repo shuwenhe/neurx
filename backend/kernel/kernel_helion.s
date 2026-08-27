@@ -70,11 +70,11 @@ func (helion_accelerator* accel) register_accelerated_kernel(string kernel_name,
     accel.accelerated_kernels[kernel_name] = kernel
 }
 
-func (helion_accelerator* accel) accelerate_matmul(int32 m, int32 n, int32 k) vec[vec[float32]] {
-    result := make(vec[vec[float32]])
+func (helion_accelerator* accel) accelerate_matmul(int32 m, int32 n, int32 k) float32[[]] {
+    result := make(float32[[]])
 
     for i := 0; i < m; i = i + 1 {
-        row := make(vec[float32])
+        row := make(float32[])
         for j := 0; j < n; j = j + 1 {
             val := 0.0
             row = append(row, val)
@@ -87,11 +87,11 @@ func (helion_accelerator* accel) accelerate_matmul(int32 m, int32 n, int32 k) ve
     return result
 }
 
-func (helion_accelerator* accel) accelerate_attention(int32 batch_size, int32 seq_len, int32 head_dim) vec[vec[float32]] {
-    result := make(vec[vec[float32]])
+func (helion_accelerator* accel) accelerate_attention(int32 batch_size, int32 seq_len, int32 head_dim) float32[[]] {
+    result := make(float32[[]])
 
     for b := 0; b < batch_size; b = b + 1 {
-        seq := make(vec[float32])
+        seq := make(float32[])
         for s := 0; s < seq_len; s = s + 1 {
             seq = append(seq, 0.0)
         }
@@ -103,8 +103,8 @@ func (helion_accelerator* accel) accelerate_attention(int32 batch_size, int32 se
     return result
 }
 
-func (helion_accelerator* accel) accelerate_softmax(vec[float32] logits) vec[float32] {
-    output := make(vec[float32])
+func (helion_accelerator* accel) accelerate_softmax(float32[] logits) float32[] {
+    output := make(float32[])
 
     max_val := 0.0
     for i := 0; i < len(logits); i = i + 1 {
@@ -143,8 +143,8 @@ func (helion_accelerator* accel) set_optimization_level(int32 level) {
     }
 }
 
-func (helion_accelerator* accel) apply_quantization(vec[float32] data, int32 bits) vec[int32] {
-    quantized := make(vec[int32])
+func (helion_accelerator* accel) apply_quantization(float32[] data, int32 bits) int32[] {
+    quantized := make(int32[])
 
     scale := float32((1 << uint32(bits - 1)) - 1)
 
@@ -156,8 +156,8 @@ func (helion_accelerator* accel) apply_quantization(vec[float32] data, int32 bit
     return quantized
 }
 
-func (helion_accelerator* accel) dequantize(vec[int32] data, int32 bits) vec[float32] {
-    dequantized := make(vec[float32])
+func (helion_accelerator* accel) dequantize(int32[] data, int32 bits) float32[] {
+    dequantized := make(float32[])
 
     scale := float32((1 << uint32(bits - 1)) - 1)
 
@@ -169,7 +169,7 @@ func (helion_accelerator* accel) dequantize(vec[int32] data, int32 bits) vec[flo
     return dequantized
 }
 
-func (helion_accelerator* accel) fuse_kernels(vec[string] kernel_names) string {
+func (helion_accelerator* accel) fuse_kernels(string[] kernel_names) string {
     fused_name := "fused_"
     for i := 0; i < len(kernel_names); i = i + 1 {
         fused_name = fused_name + kernel_names[i] + "_"

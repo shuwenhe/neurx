@@ -12,7 +12,7 @@ func get_blocked_tokens(
     int start = len(generated_ids) - (no_repeat_ngram_size - 1)
     []int recent_prefix = []
     for i in start .. len(generated_ids) {
-        recent_prefix.push(generated_ids[i])
+        recent_prefix = append(recent_prefix, generated_ids[i])
     }
     for pos in 0..(len(generated_ids) - no_repeat_ngram_size + 1) {
         bool match = true
@@ -31,7 +31,7 @@ func get_blocked_tokens(
     []int blocked_tokens = []
     for id in blocked {
         if blocked[id] {
-            blocked_tokens.push(id)
+            blocked_tokens = append(blocked_tokens, id)
         }
     }
     blocked_tokens

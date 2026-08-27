@@ -65,7 +65,7 @@ struct log_context {
 }
 
 struct log_entry_batch {
-	vec[log_entry]          entries
+	log_entry[]          entries
 	int64                   batch_timestamp
 	int32                   batch_id
 
@@ -110,7 +110,7 @@ func create_log_context(request_id string, component string) log_context {
 
 func create_log_entry_batch() log_entry_batch {
 	return log_entry_batch{
-		entries:           make(vec[log_entry], 0, 100),
+		entries:           make(log_entry[], 0, 100),
 		batch_timestamp:   time.Now().UnixNano(),
 		batch_id:          0,
 		source_component:  "",
@@ -164,7 +164,7 @@ func (log_entry_batch* b) get_entry_count() int32 {
 }
 
 func (log_entry_batch* b) clear() {
-	b.entries = make(vec[log_entry], 0, 100)
+	b.entries = make(log_entry[], 0, 100)
 	b.total_entries = 0
 	b.total_size_bytes = 0
 }

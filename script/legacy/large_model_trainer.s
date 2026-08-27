@@ -391,10 +391,10 @@ func (large_model_trainer* lmt) get_config(): large_model_config {
     return lmt.config
 }
 
-func (large_model_trainer* lmt) get_gradient_accumulator(): *gradient_accumulator {
+func (large_model_trainer* lmt) get_gradient_accumulator(): (gradient_accumulator*) {
     return *lmt.grad_accumulator
 }
 
-func (large_model_trainer* lmt) get_activation_checkpointer(): *activation_checkpointer {
+func (large_model_trainer* lmt) get_activation_checkpointer(): (activation_checkpointer*) {
     return *lmt.activation_ckpt
 }

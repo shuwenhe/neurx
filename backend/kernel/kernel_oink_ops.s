@@ -44,8 +44,8 @@ func create_oink_ops() oink_ops* {
     }
 }
 
-func (oink_ops* ops) reduce_sum(vec[vec[float32]] input, int32 axis) vec[float32] {
-    result := make(vec[float32])
+func (oink_ops* ops) reduce_sum(float32[[]] input, int32 axis) float32[] {
+    result := make(float32[])
 
     if len(input) == 0 {
         return result
@@ -72,10 +72,10 @@ func (oink_ops* ops) reduce_sum(vec[vec[float32]] input, int32 axis) vec[float32
     return result
 }
 
-func (oink_ops* ops) reduce_mean(vec[vec[float32]] input, int32 axis) vec[float32] {
+func (oink_ops* ops) reduce_mean(float32[[]] input, int32 axis) float32[] {
     sum_result := ops.reduce_sum(input, axis)
 
-    result := make(vec[float32])
+    result := make(float32[])
 
     divisor := 1.0
     if axis == 0 && len(input) > 0 {
@@ -91,7 +91,7 @@ func (oink_ops* ops) reduce_mean(vec[vec[float32]] input, int32 axis) vec[float3
     return result
 }
 
-func (oink_ops* ops) reduce_max(vec[float32] input) float32 {
+func (oink_ops* ops) reduce_max(float32[] input) float32 {
     if len(input) == 0 {
         return 0.0
     }
@@ -106,7 +106,7 @@ func (oink_ops* ops) reduce_max(vec[float32] input) float32 {
     return max_val
 }
 
-func (oink_ops* ops) reduce_min(vec[float32] input) float32 {
+func (oink_ops* ops) reduce_min(float32[] input) float32 {
     if len(input) == 0 {
         return 0.0
     }
@@ -121,7 +121,7 @@ func (oink_ops* ops) reduce_min(vec[float32] input) float32 {
     return min_val
 }
 
-func (oink_ops* ops) layer_norm(vec[float32] input, float32 epsilon) vec[float32] {
+func (oink_ops* ops) layer_norm(float32[] input, float32 epsilon) float32[] {
     mean := 0.0
     for i := 0; i < len(input); i = i + 1 {
         mean = mean + input[i]
@@ -135,7 +135,7 @@ func (oink_ops* ops) layer_norm(vec[float32] input, float32 epsilon) vec[float32
     }
     variance = variance / float32(len(input))
 
-    normalized := make(vec[float32])
+    normalized := make(float32[])
     std := 0.0
     if variance > 0.0 {
         std = 1.0 / (variance + epsilon)
@@ -148,8 +148,8 @@ func (oink_ops* ops) layer_norm(vec[float32] input, float32 epsilon) vec[float32
     return normalized
 }
 
-func (oink_ops* ops) batch_norm(vec[vec[float32]] input, float32 epsilon) vec[vec[float32]] {
-    result := make(vec[vec[float32]])
+func (oink_ops* ops) batch_norm(float32[[]] input, float32 epsilon) float32[[]] {
+    result := make(float32[[]])
 
     for i := 0; i < len(input); i = i + 1 {
         normalized := ops.layer_norm(input[i], epsilon)
@@ -159,13 +159,13 @@ func (oink_ops* ops) batch_norm(vec[vec[float32]] input, float32 epsilon) vec[ve
     return result
 }
 
-func (oink_ops* ops) group_norm(vec[float32] input, int32 num_groups, float32 epsilon) vec[float32] {
+func (oink_ops* ops) group_norm(float32[] input, int32 num_groups, float32 epsilon) float32[] {
     group_size := len(input) / num_groups
     if group_size <= 0 {
         group_size = 1
     }
 
-    result := make(vec[float32])
+    result := make(float32[])
 
     for g := 0; g < num_groups; g = g + 1 {
         start := g * group_size
@@ -175,7 +175,7 @@ func (oink_ops* ops) group_norm(vec[float32] input, int32 num_groups, float32 ep
             end = len(input)
         }
 
-        group := make(vec[float32])
+        group := make(float32[])
         for i := start; i < end; i = i + 1 {
             group = append(group, input[i])
         }
@@ -190,8 +190,8 @@ func (oink_ops* ops) group_norm(vec[float32] input, int32 num_groups, float32 ep
     return result
 }
 
-func (oink_ops* ops) relu(vec[float32] input) vec[float32] {
-    output := make(vec[float32])
+func (oink_ops* ops) relu(float32[] input) float32[] {
+    output := make(float32[])
 
     for i := 0; i < len(input); i = i + 1 {
         if input[i] > 0.0 {
@@ -204,8 +204,8 @@ func (oink_ops* ops) relu(vec[float32] input) vec[float32] {
     return output
 }
 
-func (oink_ops* ops) swish(vec[float32] input) vec[float32] {
-    output := make(vec[float32])
+func (oink_ops* ops) swish(float32[] input) float32[] {
+    output := make(float32[])
 
     for i := 0; i < len(input); i = i + 1 {
         sigmoid := 1.0 / (1.0 + (2.718 ^ (-input[i])))
@@ -215,8 +215,8 @@ func (oink_ops* ops) swish(vec[float32] input) vec[float32] {
     return output
 }
 
-func (oink_ops* ops) fused_linear_activation(vec[vec[float32]] weight, vec[float32] bias, vec[float32] input, string activation) vec[float32] {
-    output := make(vec[float32])
+func (oink_ops* ops) fused_linear_activation(float32[[]] weight, float32[] bias, float32[] input, string activation) float32[] {
+    output := make(float32[])
 
     for i := 0; i < len(weight); i = i + 1 {
         result := 0.0
@@ -243,8 +243,8 @@ func (oink_ops* ops) fused_linear_activation(vec[vec[float32]] weight, vec[float
     return output
 }
 
-func (oink_ops* ops) fused_attention_qkv(vec[float32] query, vec[float32] key, vec[float32] value, float32 scale) vec[float32] {
-    scores := make(vec[float32])
+func (oink_ops* ops) fused_attention_qkv(float32[] query, float32[] key, float32[] value, float32 scale) float32[] {
+    scores := make(float32[])
 
     for i := 0; i < len(query) && i < len(key); i = i + 1 {
         score := (query[i] * key[i]) * scale
@@ -254,7 +254,7 @@ func (oink_ops* ops) fused_attention_qkv(vec[float32] query, vec[float32] key, v
     max_score := ops.reduce_max(scores)
 
     sum_exp := 0.0
-    exp_scores := make(vec[float32])
+    exp_scores := make(float32[])
 
     for i := 0; i < len(scores); i = i + 1 {
         exp_val := 2.718 ^ (scores[i] - max_score)
@@ -262,7 +262,7 @@ func (oink_ops* ops) fused_attention_qkv(vec[float32] query, vec[float32] key, v
         sum_exp = sum_exp + exp_val
     }
 
-    output := make(vec[float32])
+    output := make(float32[])
     for i := 0; i < len(exp_scores) && i < len(value); i = i + 1 {
         attn_weight := exp_scores[i] / sum_exp
         output = append(output, attn_weight * value[i])

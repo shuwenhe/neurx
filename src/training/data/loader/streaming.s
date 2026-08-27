@@ -118,7 +118,7 @@ func buffer_write(streaming_buffer buf, string line) streaming_buffer {
 
 func buffer_read(streaming_buffer buf) (string, streaming_buffer) {
     if buf.read_pos == buf.write_pos && !buf.full {
-        return ("", buf)
+        return "", buf
     }
     string line = buf.raw_lines[buf.read_pos]
     buf.read_pos = buf.read_pos + 1
@@ -135,7 +135,7 @@ func tokenize_line(string line, int seq_len) []int {
     []int tokens = []int{cap: seq_len}
     int i = 0
     for i < seq_len {
-        tokens.push(i % 10000)
+        tokens = append(tokens, i % 10000)
         i = i + 1
     }
     tokens
@@ -183,7 +183,7 @@ func create_batch_from_stream([]int stream, int batch_size, int seq_len) (batch_
     }
     int tokens_per_batch = batch_size * seq_len
     if len(stream) < tokens_per_batch {
-        return (batch, stream)
+        return batch, stream
     }
     int b = 0
     for b < batch_size {
@@ -193,19 +193,19 @@ func create_batch_from_stream([]int stream, int batch_size, int seq_len) (batch_
             int pad_len = seq_len - len(label)
             int i = 0
             for i < pad_len {
-                label.push(0)
+                label = append(label, 0)
                 i = i + 1
             }
         }
         []int mask = []int{cap: seq_len}
         int i = 0
         for i < seq_len {
-            mask.push(1)
+            mask = append(mask, 1)
             i = i + 1
         }
-        batch.input_ids.push(input)
-        batch.labels.push(label)
-        batch.attention_mask.push(mask)
+        batch.input_ids = append(batch.input_ids, input)
+        batch.labels = append(batch.labels, label)
+        batch.attention_mask = append(batch.attention_mask, mask)
         batch.num_tokens = batch.num_tokens + seq_len
         b = b + 1
     }
@@ -214,7 +214,7 @@ func create_batch_from_stream([]int stream, int batch_size, int seq_len) (batch_
 
 func dataloader_next_batch(streaming_dataloader loader, func tokenizer) (batch_data, bool) {
     if loader.processed_batches >= loader.total_batches {
-        return (batch_data{}, false)
+        return batch_data{}, false
     }
     if loader.queue_size == 0 {
         loader = prefetch_batches(loader, tokenizer)
@@ -307,7 +307,7 @@ func split_long_sequence([]int tokens, int max_len) [][]int {
     int i = 0
     for i < len(tokens) {
         int end = min(i + max_len, len(tokens))
-        chunks.push(tokens[i..end])
+        chunks = append(chunks, tokens[i..end])
         i = end
     }
     chunks
@@ -326,7 +326,7 @@ func pad_sequence([]int seq, int length) []int {
     }
     []int padded = copy_int(seq)
     for len(padded) < length {
-        padded.push(0)
+        padded = append(padded, 0)
     }
     padded
 }

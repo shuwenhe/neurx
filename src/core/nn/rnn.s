@@ -77,7 +77,7 @@ func mat_vec([]float weight, int rows, int cols, []float vec) []float {
         float acc = 0.0
         int c = 0
         for c < cols {
-            acc = acc + weight[r * cols + c] * vec[c]
+            acc = acc + weight[r * cols + c] * c[]
             c = c + 1
         }
         out[r] = acc

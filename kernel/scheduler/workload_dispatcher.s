@@ -18,8 +18,8 @@ struct dispatch_result {
 }
 
 struct scheduler_state {
-    vec[dispatch_request] queue
-    vec[dispatch_result] history
+    dispatch_request[] queue
+    dispatch_result[] history
     int request_counter
     int success_count
     int fail_count
@@ -27,8 +27,8 @@ struct scheduler_state {
 
 func create_scheduler_state() scheduler_state {
     state := scheduler_state {
-        queue: vec[dispatch_request](),
-        history: vec[dispatch_result](),
+        queue: dispatch_request[](),
+        history: dispatch_result[](),
         request_counter: 0,
         success_count: 0,
         fail_count: 0
@@ -44,7 +44,7 @@ func dispatch_training_job(scheduler_state state, int resources_needed) schedule
         priority: 1,
         timestamp: 0
     }
-    state.queue.push(req)
+    state.queue = append(state.queue, req)
     state.request_counter = state.request_counter + 1
     state
 }
@@ -57,14 +57,14 @@ func dispatch_inference_job(scheduler_state state, int resources_needed) schedul
         priority: 0,
         timestamp: 0
     }
-    state.queue.push(req)
+    state.queue = append(state.queue, req)
     state.request_counter = state.request_counter + 1
     state
 }
 
 func process_dispatch_queue(scheduler_state state) scheduler_state {
     i := 0
-    for i < state.queue.len() {
+    for i < len(state.queue) {
         req := state.queue[i]
         result := dispatch_result {
             request_id: req.request_id,
@@ -72,7 +72,7 @@ func process_dispatch_queue(scheduler_state state) scheduler_state {
             dispatch_success: true,
             error_message: ""
         }
-        state.history.push(result)
+        state.history = append(state.history, result)
         state.success_count = state.success_count + 1
         i = i + 1
     }
@@ -84,7 +84,7 @@ func get_dispatch_stats(scheduler_state state) int {
 }
 
 func has_pending_work(scheduler_state state) bool {
-    if state.queue.len() > 0 {
+    if len(state.queue) > 0 {
         return true
     }
     false

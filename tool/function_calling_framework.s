@@ -609,7 +609,7 @@ function create_builtin_web_search_tool() {
         tags=["internet", "information", "real-time"]
     }
     executor = web_search_executor()
-    return (defn, executor)
+    return defn, executor
 }
 function create_builtin_code_executor_tool() {
     defn = tool_definition{
@@ -637,7 +637,7 @@ function create_builtin_code_executor_tool() {
         requires_permission=True
     }
     executor = code_interpreter_executor()
-    return (defn, executor)
+    return defn, executor
 }
 function create_builtin_file_operations_tool() {
     defn = tool_definition{
@@ -671,7 +671,7 @@ function create_builtin_file_operations_tool() {
         tags=["file", "io", "storage"]
     }
     executor = file_operations_executor()
-    return (defn, executor)
+    return defn, executor
 }
 struct web_search_executor implements tool_executor {
     get_name() { return "web_search" }

@@ -103,33 +103,33 @@ func create_power_domain(name string) (power_domain, string) {
 
 // 初始化电源管理器
 func create_power_manager() (power_manager, string) {
-    idle_states := vec()
+    idle_states := {}
     
     // 创建 C 状态
     c0, _ := create_cpu_idle_state(0, 0, 1000, 0)
     c1, _ := create_cpu_idle_state(1, 1, 500, 1000)
     c6, _ := create_cpu_idle_state(6, 100, 50, 10000)
     
-    idle_states.push(c0)
-    idle_states.push(c1)
-    idle_states.push(c6)
+    idle_states = append(idle_states, c0)
+    idle_states = append(idle_states, c1)
+    idle_states = append(idle_states, c6)
     
-    freq_states := vec()
+    freq_states := {}
     
     // 创建 P 状态
     p0, _ := create_cpu_freq_state(0, 2400, 1000, 50)  // 最高频率
     p8, _ := create_cpu_freq_state(8, 1800, 900, 35)   // 中等频率
     p15, _ := create_cpu_freq_state(15, 800, 750, 10)  // 最低频率
     
-    freq_states.push(p0)
-    freq_states.push(p8)
-    freq_states.push(p15)
+    freq_states = append(freq_states, p0)
+    freq_states = append(freq_states, p8)
+    freq_states = append(freq_states, p15)
     
     mgr := power_manager{
         idle_states: idle_states,
         freq_states: freq_states,
-        power_domains: vec(),
-        acpi_policies: vec(),
+        power_domains: {},
+        acpi_policies: {},
         current_power_state: POWER_STATE_S0,
         current_idle_state: CPU_STATE_C0,
         current_freq_state: FREQ_STATE_P0,
@@ -143,7 +143,7 @@ func create_power_manager() (power_manager, string) {
 
 // 进入空闲状态
 func (mgr* power_manager) enter_idle_state(cpu_id int, cstate int) (int, string) {
-    if cstate >= mgr.idle_states.len() {
+    if cstate >= len(mgr.idle_states) {
         return -1, "Invalid C-state"
     }
     
@@ -167,7 +167,7 @@ func (mgr* power_manager) exit_idle_state() (int, string) {
 
 // 改变 CPU 频率
 func (mgr* power_manager) change_cpu_frequency(cpu_id int, pstate int) (int, string) {
-    if pstate >= mgr.freq_states.len() {
+    if pstate >= len(mgr.freq_states) {
         return -1, "Invalid P-state"
     }
     
@@ -200,15 +200,15 @@ func (mgr* power_manager) system_wakeup() (int, string) {
 // 添加电源域
 func (mgr* power_manager) add_power_domain(name string) (int, string) {
     domain, _ := create_power_domain(name)
-    domain.domain_id = mgr.power_domains.len()
+    domain.domain_id = len(mgr.power_domains)
     
-    mgr.power_domains.push(domain)
+    mgr.power_domains = append(mgr.power_domains, domain)
     return domain.domain_id, ""
 }
 
 // 启用电源域
 func (mgr* power_manager) power_on_domain(domain_id int) (int, string) {
-    if domain_id >= mgr.power_domains.len() {
+    if domain_id >= len(mgr.power_domains) {
         return -1, "Domain not found"
     }
     
@@ -222,7 +222,7 @@ func (mgr* power_manager) power_on_domain(domain_id int) (int, string) {
 
 // 禁用电源域
 func (mgr* power_manager) power_off_domain(domain_id int) (int, string) {
-    if domain_id >= mgr.power_domains.len() {
+    if domain_id >= len(mgr.power_domains) {
         return -1, "Domain not found"
     }
     
@@ -249,7 +249,7 @@ func (mgr* power_manager) calculate_power_consumption() (int, string) {
     total_power := 0
     
     i := 0
-    for i < mgr.power_domains.len() {
+    for i < len(mgr.power_domains) {
         domain := mgr.power_domains[i]
         total_power = total_power + domain.power_consumption_mw
         i = i + 1

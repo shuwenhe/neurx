@@ -33,7 +33,7 @@ struct distributed_dataloader {
 
 func new_training_data_shard(string dataset_path) data_shard {
     []string paths = []string{cap: 1}
-    paths.push(dataset_path)
+    paths = append(paths, dataset_path)
     data_shard {
         shard_id: dataset_path,
         shard_index: 0,
@@ -71,7 +71,7 @@ func new_distributed_dataloader([]data_shard shards, distributed_loader_config c
 func create_data_shards(string dataset_dir, int num_ranks, int rank_id) []data_shard {
     if !is_directory(dataset_dir) {
         []data_shard shards = []data_shard{cap: 1}
-        shards.push(new_training_data_shard(dataset_dir))
+        shards = append(shards, new_training_data_shard(dataset_dir))
         shards
     } else {
         []data_shard shards = []data_shard{cap: 100}
@@ -80,21 +80,21 @@ func create_data_shards(string dataset_dir, int num_ranks, int rank_id) []data_s
             data_shard shard = new_training_data_shard(dataset_dir + "/training_data.jsonl")
             shard.shard_index = 0
             shard.total_shards = 1
-            shards.push(shard)
+            shards = append(shards, shard)
             shards
         } else {
             int i = 0
             for i < len(shard_files) {
                 data_shard shard
                 []string paths = []string{cap: 1}
-                paths.push(shard_files[i])
+                paths = append(paths, shard_files[i])
                 shard.shard_id = shard_files[i]
                 shard.shard_index = i
                 shard.total_shards = len(shard_files)
                 shard.file_paths = paths
                 shard.num_samples = estimate_file_samples(shard_files[i])
                 shard.byte_size = estimate_file_size(shard_files[i])
-                shards.push(shard)
+                shards = append(shards, shard)
                 i = i + 1
             }
             shards
@@ -111,7 +111,7 @@ func list_data_shard_files(string dataset_dir) []string {
     for i < len(raw_gz) {
         if raw_gz[i] == 10 {
             if len(line) > 0 {
-                files.push(line)
+                files = append(files, line)
                 line = ""
             }
         } else {
@@ -120,7 +120,7 @@ func list_data_shard_files(string dataset_dir) []string {
         i = i + 1
     }
     if len(line) > 0 {
-        files.push(line)
+        files = append(files, line)
     }
     if len(files) > 0 {
         return files
@@ -132,7 +132,7 @@ func list_data_shard_files(string dataset_dir) []string {
     for i < len(raw_jsonl) {
         if raw_jsonl[i] == 10 {
             if len(line) > 0 {
-                files.push(line)
+                files = append(files, line)
                 line = ""
             }
         } else {
@@ -141,7 +141,7 @@ func list_data_shard_files(string dataset_dir) []string {
         i = i + 1
     }
     if len(line) > 0 {
-        files.push(line)
+        files = append(files, line)
     }
     files
 }

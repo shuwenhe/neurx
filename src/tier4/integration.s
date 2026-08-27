@@ -19,18 +19,18 @@ func new_os_tier4_integration() (os_tier4_integration, string) {
         tier2_initialized: 1,
         tier3_initialized: 1,
         tier4_status: 1,
-        tier4_features: vec()
+        tier4_features: {}
     }
     
     // 注册 8 个 Tier 4 功能
-    integration.tier4_features.push(0)  // TCP/IP 网络栈
-    integration.tier4_features.push(1)  // SELinux/seccomp 安全
-    integration.tier4_features.push(2)  // KVM 虚拟化
-    integration.tier4_features.push(3)  // ACPI 电源管理
-    integration.tier4_features.push(4)  // 块设备管理
-    integration.tier4_features.push(5)  // 驱动框架
-    integration.tier4_features.push(6)  // 证书管理
-    integration.tier4_features.push(7)  // 音频驱动
+    integration.tier4_features = append(integration.tier4_features, 0)  // TCP/IP 网络栈
+    integration.tier4_features = append(integration.tier4_features, 1)  // SELinux/seccomp 安全
+    integration.tier4_features = append(integration.tier4_features, 2)  // KVM 虚拟化
+    integration.tier4_features = append(integration.tier4_features, 3)  // ACPI 电源管理
+    integration.tier4_features = append(integration.tier4_features, 4)  // 块设备管理
+    integration.tier4_features = append(integration.tier4_features, 5)  // 驱动框架
+    integration.tier4_features = append(integration.tier4_features, 6)  // 证书管理
+    integration.tier4_features = append(integration.tier4_features, 7)  // 音频驱动
     
     return integration, ""
 }
@@ -57,7 +57,7 @@ struct tier4_stats {
 
 func (ti* os_tier4_integration) get_tier4_stats() (tier4_stats, string) {
     stats := tier4_stats{
-        total_features: ti.tier4_features.len(),
+        total_features: len(ti.tier4_features),
         tier1_ready: ti.tier1_initialized,
         tier2_ready: ti.tier2_initialized,
         tier3_ready: ti.tier3_initialized,

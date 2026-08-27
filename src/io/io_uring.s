@@ -72,7 +72,7 @@ func (uring* io_uring) prep_read(fd int, offset int, len int) (int, string) {
         user_data: uring.sq_tail
     }
     
-    uring.sq.push(sqe)
+    uring.sq = append(uring.sq, sqe)
     sqe_index := uring.sq_tail
     uring.sq_tail = uring.sq_tail + 1
     
@@ -91,7 +91,7 @@ func (uring* io_uring) prep_write(fd int, offset int, len int, data int[]) (int,
         user_data: uring.sq_tail
     }
     
-    uring.sq.push(sqe)
+    uring.sq = append(uring.sq, sqe)
     sqe_index := uring.sq_tail
     uring.sq_tail = uring.sq_tail + 1
     
@@ -110,7 +110,7 @@ func (uring* io_uring) prep_fsync(fd int) (int, string) {
         user_data: uring.sq_tail
     }
     
-    uring.sq.push(sqe)
+    uring.sq = append(uring.sq, sqe)
     sqe_index := uring.sq_tail
     uring.sq_tail = uring.sq_tail + 1
     
@@ -129,7 +129,7 @@ func (uring* io_uring) prep_poll(fd int, events int) (int, string) {
         user_data: uring.sq_tail
     }
     
-    uring.sq.push(sqe)
+    uring.sq = append(uring.sq, sqe)
     sqe_index := uring.sq_tail
     uring.sq_tail = uring.sq_tail + 1
     
@@ -138,13 +138,13 @@ func (uring* io_uring) prep_poll(fd int, events int) (int, string) {
 
 // 提交操作到内核
 func (uring* io_uring) submit(to_submit int) (int, string) {
-    if to_submit > uring.sq.len() {
+    if to_submit > len(uring.sq) {
         return -1, "submit count exceeds queue size"
     }
     
     i := 0
     for i < to_submit {
-        if i < uring.sq.len() {
+        if i < len(uring.sq) {
             sqe := uring.sq[i]
             
             // 模拟提交 - 添加到完成队列
@@ -153,7 +153,7 @@ func (uring* io_uring) submit(to_submit int) (int, string) {
                 flags: 0,
                 user_data: sqe.user_data
             }
-            uring.cq.push(cqe)
+            uring.cq = append(uring.cq, cqe)
             uring.cq_tail = uring.cq_tail + 1
             uring.total_completed = uring.total_completed + 1
         }
@@ -166,7 +166,7 @@ func (uring* io_uring) submit(to_submit int) (int, string) {
 
 // 等待完成队列条目
 func (uring* io_uring) wait_cqe(wait_nr int) (io_uring_cqe, string) {
-    if uring.cq_head >= uring.cq.len() {
+    if uring.cq_head >= len(uring.cq) {
         return io_uring_cqe{}, "no completion available"
     }
     
@@ -181,19 +181,19 @@ func (uring* io_uring) cqe_get_all() (io_uring_cqe[], string) {
     results := io_uring_cqe[]{}
     
     i := uring.cq_head
-    for i < uring.cq.len() {
-        results.push(uring.cq[i])
+    for i < len(uring.cq) {
+        results = append(results, uring.cq[i])
         i = i + 1
     }
     
-    uring.cq_head = uring.cq.len()
+    uring.cq_head = len(uring.cq)
     
     return results, ""
 }
 
 // 获取单个完成条目
 func (uring* io_uring) cqe_get(timeout_ms int) (io_uring_cqe, string) {
-    if uring.cq_head < uring.cq.len() {
+    if uring.cq_head < len(uring.cq) {
         cqe := uring.cq[uring.cq_head]
         uring.cq_head = uring.cq_head + 1
         return cqe, ""
@@ -258,7 +258,7 @@ func (mgr* uring_manager) create_ring(queue_depth int) (int, string) {
         return -1, err
     }
     
-    mgr.rings.push(ring)
+    mgr.rings = append(mgr.rings, ring)
     ring_id := mgr.num_rings
     mgr.num_rings = mgr.num_rings + 1
     

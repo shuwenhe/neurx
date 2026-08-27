@@ -184,7 +184,7 @@ func load_checkpoint_for_recovery(
     model_params := extract_model_params(rank_data)
     optimizer_state := extract_optimizer_state(rank_data)
     training_state := extract_training_state(rank_data)
-    return (model_params, optimizer_state, training_state, metadata)
+    return model_params, optimizer_state, training_state, metadata
 }
 
 func verify_checkpoint_integrity(
@@ -285,7 +285,7 @@ func execute_recovery(
     }
     metadata.num_restarts = metadata.num_restarts + 1
     metadata.recovery_step = last_checkpoint_id
-    return (model_params, optimizer_state, training_state, metadata)
+    return model_params, optimizer_state, training_state, metadata
 }
 
 func distributed_training_with_recovery(
@@ -346,7 +346,7 @@ func distributed_training_with_recovery(
         }
         global_step = global_step + 1
     }
-    return (current_params, current_optimizer_state)
+    return current_params, current_optimizer_state
 }
 
 func compute_checkpoint_checksum(vector model_params, vector optimizer_state): int {

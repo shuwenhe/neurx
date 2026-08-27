@@ -119,7 +119,7 @@ func add_sequence(
                 packer = update_statistics(packer, completed)
         packer.current_bin_contents = []sequence_buffer{cap: packer.config.max_sequences_per_batch}
         packer.current_bin_used_tokens = 0
-    packer.current_bin_contents.push(seq)
+    packer.current_bin_contents = append(packer.current_bin_contents, seq)
     packer.current_bin_used_tokens = packer.current_bin_used_tokens + seq_len
     packer.total_sequences_processed = packer.total_sequences_processed + 1
     packer.total_real_tokens = packer.total_real_tokens + seq_len

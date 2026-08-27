@@ -69,8 +69,8 @@ func cache_put(compile_cache_state cache, string key, string entry) compile_cach
             miss_count: cache.miss_count,
         }
     }
-    keys.push(key)
-    entries.push(entry)
+    keys = append(keys, key)
+    entries = append(entries, entry)
     compile_cache_state {
         keys: keys,
         entries: entries,

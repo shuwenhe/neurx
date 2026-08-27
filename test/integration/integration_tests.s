@@ -11,10 +11,10 @@ func test_system_bootstrap() (int, string) {
     core := init::kernel_main()
     
     if !core.state*.is_running {
-        return (0, "System not running after bootstrap")
+        return 0, "System not running after bootstrap"
     }
     
-    (1, "")
+return     (1, "")
 }
 
 func test_memory_allocation() (int, string) {
@@ -25,20 +25,20 @@ func test_memory_allocation() (int, string) {
     alloc1 := allocator_inst::allocate_tensor(*allocator_inst, *pool, 100)
     
     if alloc1.size_bytes != 100 * 1024 * 1024 {
-        return (0, "Allocation size mismatch")
+        return 0, "Allocation size mismatch"
     }
     
     alloc2 := allocator_inst::allocate_tensor(*allocator_inst, *pool, 200)
     
     if alloc1.ptr == alloc2.ptr {
-        return (0, "Allocations overlapping")
+        return 0, "Allocations overlapping"
     }
     
     allocator_inst::deallocate_tensor(*allocator_inst, *pool, alloc1.ptr)
     
     freed_size := pool.allocated_size_mb
     
-    (1, "")
+return     (1, "")
 }
 
 func test_task_scheduling() (int, string) {
@@ -47,22 +47,22 @@ func test_task_scheduling() (int, string) {
     task1 := sched::schedule_inference_task(*sched, 50)
     
     if task1 <= 0 {
-        return (0, "Failed to schedule inference task")
+        return 0, "Failed to schedule inference task"
     }
     
     task2 := sched::schedule_training_task(*sched, 40)
     
     if task2 <= 0 {
-        return (0, "Failed to schedule training task")
+        return 0, "Failed to schedule training task"
     }
     
     next := sched::schedule_next_task(*sched)
     
     if next <= 0 {
-        return (0, "Failed to get next scheduled task")
+        return 0, "Failed to get next scheduled task"
     }
     
-    (task1 + task2 + next, "")
+return     (task1 + task2 + next, "")
 }
 
 func test_monitoring_service() (int, string) {
@@ -71,16 +71,16 @@ func test_monitoring_service() (int, string) {
     metrics_collected := monitor::collect_metrics(*monitor)
     
     if metrics_collected <= 0 {
-        return (0, "No metrics collected")
+        return 0, "No metrics collected"
     }
     
     health := monitor::get_system_health(*monitor)
     
     if health.healthy_gpus < 0 {
-        return (0, "Invalid health status")
+        return 0, "Invalid health status"
     }
     
-    (metrics_collected, "")
+return     (metrics_collected, "")
 }
 
 func test_rpc_server() (int, string) {
@@ -89,19 +89,19 @@ func test_rpc_server() (int, string) {
     rpc_framework::start_rpc_server(*server)
     
     if !server.is_running {
-        return (0, "RPC server not running")
+        return 0, "RPC server not running"
     }
     
     rpc_framework::stop_rpc_server(*server)
     
-    (1, "")
+return     (1, "")
 }
 
 func test_hal_detection() (int, string) {
     platform := hal::detect_platform_capability()
     
     if platform.cpu_count <= 0 {
-        return (0, "No CPUs detected")
+        return 0, "No CPUs detected"
     }
     
     is_gpu := hal::is_gpu_available()
@@ -109,10 +109,10 @@ func test_hal_detection() (int, string) {
     device_cap := hal::detect_compute_device(0)
     
     if device_cap.memory_gb <= 0 {
-        return (0, "Invalid device capability")
+        return 0, "Invalid device capability"
     }
     
-    (1, "")
+return     (1, "")
 }
 
 func run_all_integration_tests() (int, string) {
@@ -174,8 +174,8 @@ func run_all_integration_tests() (int, string) {
     }
     
     if failed == 0 {
-        (passed, "")
+return         (passed, "")
     } else {
-        (0, "Integration tests failed")
+return         (0, "Integration tests failed")
     }
 }

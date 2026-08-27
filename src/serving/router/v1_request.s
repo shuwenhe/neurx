@@ -30,15 +30,15 @@ struct sampling_params {
     float32 repetition_penalty
     int32 max_tokens
     bool ignore_eos
-    vec[int32] stop_token_ids
+    int32[] stop_token_ids
     string stop_str
     bool skip_special_tokens
 }
 
 struct request_output {
     string request_id
-    vec[string] output_texts
-    vec[int32] output_token_ids
+    string[] output_texts
+    int32[] output_token_ids
     int32 finish_reason
     bool is_finished
     map[string]interface{} metadata
@@ -47,7 +47,7 @@ struct request_output {
 struct v1_request {
     string request_id
     string prompt
-    vec[int32] prompt_token_ids
+    int32[] prompt_token_ids
 
     int32 arrival_time
     int32 start_time
@@ -63,8 +63,8 @@ struct v1_request {
     bool stream
     bool echo_prompt
 
-    vec[string] output_texts
-    vec[int32] output_token_ids
+    string[] output_texts
+    int32[] output_token_ids
 
     int32 num_completed_tokens
     int32 num_total_tokens
@@ -76,7 +76,7 @@ func create_v1_request(string request_id, string prompt) v1_request* {
     req := *v1_request{
         request_id: request_id,
         prompt: prompt,
-        prompt_token_ids: make(vec[int32]),
+        prompt_token_ids: make(int32[]),
         arrival_time: 0,
         start_time: 0,
         finish_time: 0,
@@ -91,7 +91,7 @@ func create_v1_request(string request_id, string prompt) v1_request* {
             repetition_penalty: 1.0,
             max_tokens: 512,
             ignore_eos: false,
-            stop_token_ids: make(vec[int32]),
+            stop_token_ids: make(int32[]),
             stop_str: "",
             skip_special_tokens: false,
         },
@@ -99,8 +99,8 @@ func create_v1_request(string request_id, string prompt) v1_request* {
         timeout_seconds: 60.0,
         stream: false,
         echo_prompt: false,
-        output_texts: make(vec[string]),
-        output_token_ids: make(vec[int32]),
+        output_texts: make(string[]),
+        output_token_ids: make(int32[]),
         num_completed_tokens: 0,
         num_total_tokens: 0,
         extra_params: make(map[string]interface{}),

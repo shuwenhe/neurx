@@ -1,6 +1,6 @@
 package neurx.tool_parsers.formatter.output_formatter
 
-use std.vec
+use std.slices
 
 const FORMAT_JSON = "json"
 const FORMAT_XML = "xml"

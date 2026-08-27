@@ -31,7 +31,7 @@ struct batch_reward_manager {
 func new_batch_reward_manager(batch_reward_manager_config config, *model model) . batch_reward_manager {
     workers := []
     for i in 0..config.num_workers {
-        workers.push(new_worker(i))
+        workers = append(workers, new_worker(i))
     }
     return batch_reward_manager{
         config: config,
@@ -57,29 +57,29 @@ func (batch_reward_manager* manager) compute_reward_async(
         callback: callback,
     }
     manager.queue_mutex.lock()
-    manager.request_queue.push(request)
+    manager.request_queue = append(manager.request_queue, request)
     manager.total_requests += 1
     manager.queue_mutex.unlock()
-    if manager.request_queue.len() >= manager.config.batch_size {
+    if len(manager.request_queue) >= manager.config.batch_size {
         manager.process_batch()
     }
 }
 
 func (batch_reward_manager* manager) process_batch() {
     manager.queue_mutex.lock()
-    if manager.request_queue.len() == 0 {
+    if len(manager.request_queue) == 0 {
         manager.queue_mutex.unlock()
         return
     }
-    batch_size := min(manager.config.batch_size, manager.request_queue.len())
+    batch_size := min(manager.config.batch_size, len(manager.request_queue))
     batch_requests := manager.request_queue[..batch_size]
     manager.request_queue = manager.request_queue[batch_size..]
     manager.queue_mutex.unlock()
     prompts := []
     responses := []
     for req in batch_requests {
-        prompts.push(req.prompt)
-        responses.push(req.response)
+        prompts = append(prompts, req.prompt)
+        responses = append(responses, req.response)
     }
     batched_prompts := stack_and_pad(prompts)
     batched_responses := stack_and_pad(responses)
@@ -95,7 +95,7 @@ func (batch_reward_manager* manager) process_batch() {
 }
 
 func (batch_reward_manager* manager) flush() {
-    for manager.request_queue.len() > 0 {
+    for len(manager.request_queue) > 0 {
         manager.process_batch()
     }
 }
@@ -261,7 +261,7 @@ func (prime_reward_manager* manager) compute_reward(
         step_tokens := encode_text(step_text)
         step_input := concat(prompt, step_tokens)
         step_reward := manager.step_reward_model.forward(step_input).item()
-        step_rewards.push(step_reward)
+        step_rewards = append(step_rewards, step_reward)
     }
     final_input := concat(prompt, response)
     final_reward := manager.final_reward_model.forward(final_input).item()
@@ -284,9 +284,9 @@ func stack_and_pad([]tensor tensors) . tensor {
     for t in tensors {
         if t.shape[0] < max_len {
             padding := tensor_zeros([max_len - t.shape[0]])
-            padded.push(concat(t, padding))
+            padded = append(padded, concat(t, padding))
         } else {
-            padded.push(t)
+            padded = append(padded, t)
         }
     }
     return stack(padded)
@@ -304,14 +304,14 @@ func sleep_ms(i64 duration) {
 }
 
 func compute_mean([]f32 values) . f32 {
-    if values.len() == 0 {
+    if len(values) == 0 {
         return 0.0
     }
     sum := 0.0
     for v in values {
         sum += v
     }
-    return sum / f32(values.len())
+    return sum / f32(len(values))
 }
 
 struct format_checker {}

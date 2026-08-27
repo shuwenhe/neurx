@@ -4,7 +4,7 @@ import "std/vector"
 
 struct CacheEntry {
     key: string,
-    tokens: vec[i32],
+    tokens: i32[],
     hash: u64,
     timestamp: i64,
     hit_count: i32,
@@ -40,7 +40,7 @@ func NewTokenCache(i32 max_size_bytes, string eviction_policy) *TokenCache {
     return cache
 }
 
-func (TokenCache* c) Get(string key) (vec[i32], bool) {
+func (TokenCache* c) Get(string key) (i32[], bool) {
     if entry, ok := c.entries[key]; ok {
         c.stats.total_hits += 1
 
@@ -51,14 +51,14 @@ func (TokenCache* c) Get(string key) (vec[i32], bool) {
     }
 
     c.stats.total_misses += 1
-    return make(vec[i32], 0), false
+    return make(i32[], 0), false
 }
 
-func (TokenCache* c) Put(string key, vec[i32] tokens) bool {
+func (TokenCache* c) Put(string key, i32[] tokens) bool {
     return c.PutWithHash(key, tokens, hash_string(key))
 }
 
-func (TokenCache* c) PutWithHash(string key, vec[i32] tokens, u64 hash) bool {
+func (TokenCache* c) PutWithHash(string key, i32[] tokens, u64 hash) bool {
 
     if _, exists := c.entries[key]; exists {
         return false
@@ -155,8 +155,8 @@ func (TokenCache* c) evict_one() {
     }
 }
 
-func (TokenCache* c) GetBatch(vec[string] keys) map[string]vec[i32] {
-    results := make(map[string]vec[i32])
+func (TokenCache* c) GetBatch(string[] keys) map[string]i32[] {
+    results := make(map[string]i32[])
 
     for i := 0; i < len(keys); i += 1 {
         if tokens, ok := c.Get(keys[i]); ok {
@@ -167,7 +167,7 @@ func (TokenCache* c) GetBatch(vec[string] keys) map[string]vec[i32] {
     return results
 }
 
-func (TokenCache* c) PutBatch(map[string]vec[i32] entries) i32 {
+func (TokenCache* c) PutBatch(map[string]i32[] entries) i32 {
     count := i32(0)
 
     for key, tokens := range entries {
@@ -188,7 +188,7 @@ func (TokenCache* c) Clear() {
 
 func (TokenCache* c) Compact(i32 min_hit_count) i32 {
     removed := i32(0)
-    keys_to_remove := make(vec[string], 0)
+    keys_to_remove := make(string[], 0)
 
     for key, entry := range c.entries {
         if entry.hit_count < min_hit_count {
@@ -208,7 +208,7 @@ func (TokenCache* c) Compact(i32 min_hit_count) i32 {
 func (TokenCache* c) PurgeOld(i64 max_age_ms) i32 {
     removed := i32(0)
     current_time := current_time_ms()
-    keys_to_remove := make(vec[string], 0)
+    keys_to_remove := make(string[], 0)
 
     for key, entry := range c.entries {
         if current_time - entry.timestamp > max_age_ms {
@@ -265,8 +265,8 @@ func (TokenCache* c) PrintStatistics() {
     println("  Bytes Evicted:", c.stats.bytes_evicted)
 }
 
-func (TokenCache* c) GetLargestEntries(i32 count) vec[CacheEntry] {
-    entries := make(vec[CacheEntry], 0)
+func (TokenCache* c) GetLargestEntries(i32 count) CacheEntry[] {
+    entries := make(CacheEntry[], 0)
 
     for _, entry := range c.entries {
         entries = append(entries, entry)
@@ -288,8 +288,8 @@ func (TokenCache* c) GetLargestEntries(i32 count) vec[CacheEntry] {
     return entries
 }
 
-func (TokenCache* c) GetHotEntries(i32 count) vec[CacheEntry] {
-    entries := make(vec[CacheEntry], 0)
+func (TokenCache* c) GetHotEntries(i32 count) CacheEntry[] {
+    entries := make(CacheEntry[], 0)
 
     for _, entry := range c.entries {
         entries = append(entries, entry)

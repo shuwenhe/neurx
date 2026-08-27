@@ -46,7 +46,7 @@ func (signal_manager* sm) init() (int, string) {
             handler_type: 0,
             handler_addr: 0
         }
-        sm.signal_handlers.push(handler)
+        sm.signal_handlers = append(sm.signal_handlers, handler)
         i = i + 1
     }
     
@@ -61,7 +61,7 @@ func (signal_manager* sm) register_pid(int pid) (int, string) {
         pending_signals: signal[]{}"
     }
     
-    sm.signal_masks.push(mask)
+    sm.signal_masks = append(sm.signal_masks, mask)
     return 0, ""
 }
 
@@ -81,7 +81,7 @@ func (signal_manager* sm) set_signal_handler(int sig_num, int handler_type) (int
 // 屏蔽信号
 func (signal_manager* sm) mask_signal(int pid, int sig_num) (int, string) {
     i := 0
-    for i < sm.signal_masks.len() {
+    for i < len(sm.signal_masks) {
         mask := sm.signal_masks[i]
         if mask.pid == pid {
             mask.masked_signals = mask.masked_signals | (1 << (sig_num - 1))
@@ -97,7 +97,7 @@ func (signal_manager* sm) mask_signal(int pid, int sig_num) (int, string) {
 // 取消屏蔽信号
 func (signal_manager* sm) unmask_signal(int pid, int sig_num) (int, string) {
     i := 0
-    for i < sm.signal_masks.len() {
+    for i < len(sm.signal_masks) {
         mask := sm.signal_masks[i]
         if mask.pid == pid {
             mask.masked_signals = mask.masked_signals & ~(1 << (sig_num - 1))
@@ -117,7 +117,7 @@ func (signal_manager* sm) send_signal(int sender_pid, int receiver_pid, int sig_
     }
     
     i := 0
-    for i < sm.signal_masks.len() {
+    for i < len(sm.signal_masks) {
         mask := sm.signal_masks[i]
         if mask.pid == receiver_pid {
             // 检查信号是否被屏蔽
@@ -133,7 +133,7 @@ func (signal_manager* sm) send_signal(int sender_pid, int receiver_pid, int sig_
                 info: 0
             }
             
-            mask.pending_signals.push(sig)
+            mask.pending_signals = append(mask.pending_signals, sig)
             sm.signal_masks[i] = mask
             return 0, ""
         }
@@ -146,15 +146,15 @@ func (signal_manager* sm) send_signal(int sender_pid, int receiver_pid, int sig_
 // 获取待处理信号
 func (signal_manager* sm) get_pending_signal(int pid) (signal, string) {
     i := 0
-    for i < sm.signal_masks.len() {
+    for i < len(sm.signal_masks) {
         mask := sm.signal_masks[i]
         if mask.pid == pid {
-            if mask.pending_signals.len() > 0 {
+            if len(mask.pending_signals) > 0 {
                 sig := mask.pending_signals[0]
                 
                 // 移除第一个信号
                 j := 1
-                for j < mask.pending_signals.len() {
+                for j < len(mask.pending_signals) {
                     mask.pending_signals[j - 1] = mask.pending_signals[j]
                     j = j + 1
                 }
@@ -198,7 +198,7 @@ func (interrupt_manager* im) init(int num_irqs) (int, string) {
             enabled: 0,
             handled_count: 0
         }
-        im.interrupts.push(irq)
+        im.interrupts = append(im.interrupts, irq)
         i = i + 1
     }
     

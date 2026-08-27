@@ -45,7 +45,7 @@ func apply_temperature_minmax(
     float min_logit = logits[0]
     float max_logit = logits[0]
 
-    for i = 1; i < logits.len(); i = i + 1 {
+    for i = 1; i < len(logits); i = i + 1 {
         if logits[i] < min_logit {
             min_logit = logits[i]
         }
@@ -102,7 +102,7 @@ func sample_with_temperature(
     int best_token = 0
     float best_prob = probs[0]
 
-    for i = 1; i < probs.len(); i = i + 1 {
+    for i = 1; i < len(probs); i = i + 1 {
         if probs[i] > best_prob {
             best_prob = probs[i]
             best_token = i
@@ -126,7 +126,7 @@ func adaptive_temperature_by_entropy(
         }
     }
 
-    float max_entropy = log(float(logits.len()))
+    float max_entropy = log(float(len(logits)))
     float normalized_entropy = entropy / max_entropy
 
     float adaptive_temp = base_temperature
@@ -168,7 +168,7 @@ func measure_distribution_diversity(
         }
     }
 
-    float max_entropy = log(float(logits.len()))
+    float max_entropy = log(float(len(logits)))
     entropy / max_entropy
 }
 
@@ -177,7 +177,7 @@ func apply_temperature_top_k(
     temperature: float,
     k: int
 ) []float {
-    int vocab_size = logits.len()
+    int vocab_size = len(logits)
 
     []float scaled_logits
     for logit in logits {
@@ -205,7 +205,7 @@ func apply_temperature_top_k(
     for i = 0; i < vocab_size; i = i + 1 {
         bool in_top_k = false
 
-        for j = 0; j < k && j < sorted_indices.len(); j = j + 1 {
+        for j = 0; j < k && j < len(sorted_indices); j = j + 1 {
             if sorted_indices[j] == i {
                 in_top_k = true
                 break
@@ -252,7 +252,7 @@ func analyze_temperature_effect(
     }
 
     []float top_5_probs
-    for i = 0; i < 5 && i < scaled_probs.len(); i = i + 1 {
+    for i = 0; i < 5 && i < len(scaled_probs); i = i + 1 {
         float max_prob = 0.0
         for prob in scaled_probs {
             if prob > max_prob {

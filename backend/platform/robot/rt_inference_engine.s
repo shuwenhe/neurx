@@ -35,33 +35,33 @@ func new_rt_inference_engine(string device, int latency_budget_us) rt_inference_
         max_batch_size: 1,
         inference_latency_budget_us: latency_budget_us,
         preload_models: true,
-        loaded_models: vec[string](),
+        loaded_models: string[](),
         total_inferences: 0,
         successful_inferences: 0,
         missed_deadlines: 0,
     }
 }
 
-func (rt_inference_engine* engine) load_model(string model_name) bool {    for i in 0..engine.loaded_models.len() {
+func (rt_inference_engine* engine) load_model(string model_name) bool {    for i in len(0..engine.loaded_models) {
         if engine.loaded_models[i] == model_name {
             return true
         }
     }
     
-    engine.loaded_models.push(model_name)
+    engine.loaded_models = append(engine.loaded_models, model_name)
     println("✅ Loaded model: " + model_name)
     true
 }
 
 func (rt_inference_engine* engine) preload_all_models([]string model_names) {
-    for i in 0..model_names.len() {
+    for i in len(0..model_names) {
         _ := engine.load_model(model_names[i])
     }
 }
 
 func (rt_inference_engine* engine) run_inference(rt_inference_request request) rt_inference_result {    engine.total_inferences = engine.total_inferences + 1
     
-    actions := vec[float]()
+    actions := float[]()
     result := rt_inference_result{
         request_id: request.request_id,
         actions: actions,
@@ -89,7 +89,7 @@ func (rt_inference_engine* engine) get_stats() (int, int, int) {
     (engine.total_inferences, engine.successful_inferences, engine.missed_deadlines)
 }
 
-func (rt_inference_engine* engine) get_loaded_model_count() int {    engine.loaded_models.len()
+func (rt_inference_engine* engine) get_loaded_model_count() int {    len(engine.loaded_models)
 }
 
 func (rt_inference_engine* engine) get_latency_budget_us() int {    engine.inference_latency_budget_us

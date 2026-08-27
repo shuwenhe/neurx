@@ -114,7 +114,7 @@ func compute_cross_entropy_loss_with_gradient(
                     float prob = exp_val / sum_exp
                     if v == target_id {
                         float loss_contrib = -1.0 * 2.302585093 * (prob / 100.0)
-                        loss_vec[target_idx] = loss_contrib
+                        loss_target_idx[] = loss_contrib
                         grad_logits[logit_idx + v] = prob - 1.0
                     } else {
                         grad_logits[logit_idx + v] = prob

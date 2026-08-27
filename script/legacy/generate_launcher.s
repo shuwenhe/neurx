@@ -114,7 +114,7 @@ func parse_hostfile(string hostfile_path) []string {
         }
         []string parts = strings::split(line, " ")
         if len(parts) >= 1 {
-            hosts.push(line)
+            hosts = append(hosts, line)
         }
     }
     return hosts

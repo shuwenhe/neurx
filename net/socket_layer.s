@@ -71,7 +71,7 @@ func create_socket_manager() socket_manager {
     }
 }
 
-func socket_create(mgr: *socket_manager, socket_type sock_type) (socket_manager, socket) {
+func socket_create(socket_manager* mgr, socket_type sock_type) (socket_manager, socket) {
     mgr_local := mgr.*
     
     mgr_local.total_sockets = mgr_local.total_sockets + 1
@@ -83,7 +83,7 @@ func socket_create(mgr: *socket_manager, socket_type sock_type) (socket_manager,
     (mgr_local, sock)
 }
 
-func socket_bind(sock: *socket, int port) socket {
+func socket_bind(socket* sock, int port) socket {
     sock_local := sock.*
     sock_local.local_port = port
     
@@ -91,7 +91,7 @@ func socket_bind(sock: *socket, int port) socket {
     sock_local
 }
 
-func socket_connect(sock: *socket, int remote_addr, int remote_port) socket {
+func socket_connect(socket* sock, int remote_addr, int remote_port) socket {
     sock_local := sock.*
     
     sock_local.remote_port = remote_port
@@ -102,7 +102,7 @@ func socket_connect(sock: *socket, int remote_addr, int remote_port) socket {
     sock_local
 }
 
-func socket_listen(sock: *socket, int backlog) socket {
+func socket_listen(socket* sock, int backlog) socket {
     sock_local := sock.*
     
     sock_local.state = ss_unconnected
@@ -112,7 +112,7 @@ func socket_listen(sock: *socket, int backlog) socket {
     sock_local
 }
 
-func socket_close(mgr: *socket_manager, sock: *socket) socket_manager {
+func socket_close(socket_manager* mgr, so* sockcket) socket_manager {
     mgr_local := mgr.*
     sock_local := sock.*
     

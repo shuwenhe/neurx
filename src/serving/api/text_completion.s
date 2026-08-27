@@ -8,7 +8,7 @@ struct text_completion_handler {
 	interface{}                 async_engine
 	interface{}                 sampler
 
-	vec[completion_request]     request_queue
+	completion_request[]     request_queue
 	map[string]completion_response response_cache
 
 	sync.Mutex                  mu
@@ -24,7 +24,7 @@ func create_text_completion_handler(
 		v1_engine:      v1_engine,
 		async_engine:   async_engine,
 		sampler:        sampler,
-		request_queue:  make(vec[completion_request], 0, 100),
+		request_queue:  make(completion_request[], 0, 100),
 		response_cache: make(map[string]completion_response),
 		mu:             sync.Mutex{},
 		processing:     false,
@@ -62,7 +62,7 @@ func (h text_completion_handler*) handle_non_streaming_completion(
 	}
 
 	generated_text := ""
-	generated_tokens := make(vec[int32], 0, req.max_tokens)
+	generated_tokens := make(int32[], 0, req.max_tokens)
 
 	for step := int32(0); step < req.max_tokens; step++ {
 		token_id := int32(0)
@@ -90,7 +90,7 @@ func (h text_completion_handler*) handle_non_streaming_completion(
 
 	response := create_completion_response(
 		req.model,
-		make(vec[completion_choice], 1),
+		make(completion_choice[], 1),
 		usage_data,
 	)
 
@@ -114,7 +114,7 @@ func (h text_completion_handler*) handle_streaming_completion(
 		object:  "text_completion",
 		created: time.Now().Unix(),
 		model:   req.model,
-		choices: make(vec[completion_choice], 0),
+		choices: make(completion_choice[], 0),
 		usage:   usage{},
 	}
 
@@ -165,7 +165,7 @@ func (h text_completion_handler*) handle_echo_completion(
 
 	prompt := req.prompt
 	generated_text := ""
-	generated_tokens := make(vec[int32], 0, req.max_tokens)
+	generated_tokens := make(int32[], 0, req.max_tokens)
 
 	for step := int32(0); step < req.max_tokens; step++ {
 		token_id := int32(0)
@@ -194,7 +194,7 @@ func (h text_completion_handler*) handle_echo_completion(
 
 	response := create_completion_response(
 		req.model,
-		make(vec[completion_choice], 1),
+		make(completion_choice[], 1),
 		usage_data,
 	)
 
@@ -206,7 +206,7 @@ struct text_completion_stream {
 	model            string
 	prompt           string
 
-	stream_buffer    vec[completion_response]
+	stream_buffer    completion_response[]
 	events_sent      int64
 
 	is_finished      bool
@@ -223,7 +223,7 @@ func create_text_completion_stream(request_id string, model string, prompt strin
 		request_id:    request_id,
 		model:         model,
 		prompt:        prompt,
-		stream_buffer: make(vec[completion_response], 0, 1024),
+		stream_buffer: make(completion_response[], 0, 1024),
 		events_sent:   0,
 		is_finished:   false,
 		start_time:    time.Now().UnixNano(),
@@ -243,7 +243,7 @@ func (s text_completion_stream*) add_token_to_stream(token_text string) bool {
 		object:  "text_completion.chunk",
 		created: time.Now().Unix(),
 		model:   s.model,
-		choices: make(vec[completion_choice], 1),
+		choices: make(completion_choice[], 1),
 	}
 
 	chunk.choices[0] = completion_choice{
@@ -273,7 +273,7 @@ func (s text_completion_stream*) finish_stream(finish_reason string) bool {
 		object:  "text_completion.chunk",
 		created: time.Now().Unix(),
 		model:   s.model,
-		choices: make(vec[completion_choice], 1),
+		choices: make(completion_choice[], 1),
 	}
 
 	final_chunk.choices[0] = completion_choice{
@@ -286,15 +286,15 @@ func (s text_completion_stream*) finish_stream(finish_reason string) bool {
 	return true
 }
 
-func (s text_completion_stream*) get_pending_chunks() vec[completion_response] {
+func (s text_completion_stream*) get_pending_chunks() completion_response[] {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if s.current_position >= int32(len(s.stream_buffer)) {
-		return make(vec[completion_response], 0)
+		return make(completion_response[], 0)
 	}
 
-	chunks := make(vec[completion_response], 0)
+	chunks := make(completion_response[], 0)
 	for i := s.current_position; i < int32(len(s.stream_buffer)); i++ {
 		chunks = append(chunks, s.stream_buffer[i])
 	}
@@ -319,7 +319,7 @@ struct text_completion_batch_processor {
 	handler       text_completion_handler*
 	validator     request_validator*
 
-	pending_reqs  vec[completion_request]
+	pending_reqs  completion_request[]
 	results       map[string]completion_response
 
 	mu            sync.Mutex
@@ -332,7 +332,7 @@ func create_completion_batch_processor(
 	return text_completion_batch_processor{
 		handler:      handler,
 		validator:    validator,
-		pending_reqs: make(vec[completion_request], 0, 32),
+		pending_reqs: make(completion_request[], 0, 32),
 		results:      make(map[string]completion_response),
 		mu:           sync.Mutex{},
 	}
@@ -353,11 +353,11 @@ func (bp text_completion_batch_processor*) add_request(req completion_request) b
 
 func (bp text_completion_batch_processor*) process_batch() int32 {
 	bp.mu.Lock()
-	reqs := make(vec[completion_request], 0, len(bp.pending_reqs))
+	reqs := make(completion_request[], 0, len(bp.pending_reqs))
 	for req := range bp.pending_reqs {
 		reqs = append(reqs, req)
 	}
-	bp.pending_reqs = make(vec[completion_request], 0, 32)
+	bp.pending_reqs = make(completion_request[], 0, 32)
 	bp.mu.Unlock()
 
 	processed := int32(0)
@@ -375,11 +375,11 @@ func (bp text_completion_batch_processor*) process_batch() int32 {
 	return processed
 }
 
-func (bp text_completion_batch_processor*) get_results() vec[completion_response] {
+func (bp text_completion_batch_processor*) get_results() completion_response[] {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()
 
-	results := make(vec[completion_response], 0, len(bp.results))
+	results := make(completion_response[], 0, len(bp.results))
 	for _, resp := range bp.results {
 		results = append(results, resp)
 	}

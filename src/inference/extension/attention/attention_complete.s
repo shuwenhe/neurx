@@ -45,7 +45,7 @@ func xavier_init_attention(int in_dim, int out_dim) tensor {
     int i = 0
     for i < total {
         float val = limit * (2.0 * (float_from_int(i % 1000) / 1000.0) - 1.0)
-        data.push(val)
+        data = append(data, val)
         i = i + 1
     }
     tensor {

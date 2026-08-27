@@ -71,8 +71,8 @@ func (mgr* selinux_manager) add_te_rule(source_type string, target_type string,
         allow: allow
     }
     
-    mgr.policy.te_rules.push(rule)
-    return mgr.policy.te_rules.len() - 1, ""
+    mgr.policy.te_rules = append(mgr.policy.te_rules, rule)
+    return len(mgr.policy.te_rules) - 1, ""
 }
 
 // 检查 TE 权限
@@ -80,7 +80,7 @@ func (mgr* selinux_manager) check_te_permission(source_type string, target_type 
                                                 object_class string, permission string) (int, string) {
     
     i := 0
-    for i < mgr.policy.te_rules.len() {
+    for i < len(mgr.policy.te_rules) {
         rule := mgr.policy.te_rules[i]
         
         if rule.source_type == source_type && rule.target_type == target_type && 
@@ -110,14 +110,14 @@ func (mgr* selinux_manager) add_rbac_rule(user string, role string, allow int) (
         allow: allow
     }
     
-    mgr.policy.rbac_rules.push(rule)
-    return mgr.policy.rbac_rules.len() - 1, ""
+    mgr.policy.rbac_rules = append(mgr.policy.rbac_rules, rule)
+    return len(mgr.policy.rbac_rules) - 1, ""
 }
 
 // 检查角色权限
 func (mgr* selinux_manager) check_role_permission(user string, role string) (int, string) {
     i := 0
-    for i < mgr.policy.rbac_rules.len() {
+    for i < len(mgr.policy.rbac_rules) {
         rule := mgr.policy.rbac_rules[i]
         
         if rule.user == user && rule.role == role {
@@ -151,8 +151,8 @@ func (mgr* selinux_manager) reload_policy() (int, string) {
 // 创建 SELinux 管理器
 func create_selinux_manager() (selinux_manager, string) {
     policy := selinux_policy{
-        te_rules: vec(),
-        rbac_rules: vec(),
+        te_rules: {},
+        rbac_rules: {},
         policy_name: "default",
         policy_version: 1
     }
@@ -160,7 +160,7 @@ func create_selinux_manager() (selinux_manager, string) {
     mgr := selinux_manager{
         mode: SELINUX_MODE_DISABLED,
         policy: policy,
-        audit_logs: vec(),
+        audit_logs: {},
         audit_denials: 0,
         audit_allows: 0,
         policy_loads: 0,

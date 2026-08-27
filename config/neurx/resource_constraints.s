@@ -34,8 +34,8 @@ struct constraint_check {
 
 struct constraint_report {
     bool all_satisfied
-    vec[constraint_check] checks
-    vec[string] recommendations
+    constraint_check[] checks
+    string[] recommendations
     int64 check_time_ms
 }
 
@@ -70,11 +70,11 @@ struct thermal_constraints {
 interface resource_constraint_checker {
     func check_constraints(cfg device_config_full*, hw_info hardware_info*) (constraint_report*)
 
-    func check_memory_constraints(cfg device_config_full*, hw_info hardware_info*) (vec[constraint_check])
+    func check_memory_constraints(cfg device_config_full*, hw_info hardware_info*) (constraint_check[])
 
-    func check_compute_constraints(cfg device_config_full*, hw_info hardware_info*) (vec[constraint_check])
+    func check_compute_constraints(cfg device_config_full*, hw_info hardware_info*) (constraint_check[])
 
-    func check_bandwidth_constraints(cfg device_config_full*, hw_info hardware_info*) (vec[constraint_check])
+    func check_bandwidth_constraints(cfg device_config_full*, hw_info hardware_info*) (constraint_check[])
 
     func can_allocate_memory(size int64, hw_info hardware_info*) (bool)
 
@@ -145,8 +145,8 @@ func create_default_thermal_constraints() (thermal_constraints*) {
 func (resource_constraint_checker_impl* c) check_constraints(cfg device_config_full*, hw_info hardware_info*) (constraint_report*) {
     report := *constraint_report{
         all_satisfied: true,
-        checks: vec[constraint_check]{},
-        recommendations: vec[string]{},
+        checks: constraint_check[]{},
+        recommendations: string[]{},
         check_time_ms: 0,
     }
 
@@ -183,8 +183,8 @@ func (resource_constraint_checker_impl* c) check_constraints(cfg device_config_f
     return report
 }
 
-func (resource_constraint_checker_impl* c) check_memory_constraints(cfg device_config_full*, hw_info hardware_info*) (vec[constraint_check]) {
-    checks := vec[constraint_check]{}
+func (resource_constraint_checker_impl* c) check_memory_constraints(cfg device_config_full*, hw_info hardware_info*) (constraint_check[]) {
+    checks := constraint_check[]{}
 
     if cfg.mem_cfg == nil {
         return checks
@@ -226,8 +226,8 @@ func (resource_constraint_checker_impl* c) check_memory_constraints(cfg device_c
     return checks
 }
 
-func (resource_constraint_checker_impl* c) check_compute_constraints(cfg device_config_full*, hw_info hardware_info*) (vec[constraint_check]) {
-    checks := vec[constraint_check]{}
+func (resource_constraint_checker_impl* c) check_compute_constraints(cfg device_config_full*, hw_info hardware_info*) (constraint_check[]) {
+    checks := constraint_check[]{}
 
     if cfg.comp_cfg == nil {
         return checks
@@ -251,8 +251,8 @@ func (resource_constraint_checker_impl* c) check_compute_constraints(cfg device_
     return checks
 }
 
-func (resource_constraint_checker_impl* c) check_bandwidth_constraints(cfg device_config_full*, hw_info hardware_info*) (vec[constraint_check]) {
-    checks := vec[constraint_check]{}
+func (resource_constraint_checker_impl* c) check_bandwidth_constraints(cfg device_config_full*, hw_info hardware_info*) (constraint_check[]) {
+    checks := constraint_check[]{}
 
     check1 := constraint_check{
         constraint_name: "memory_bandwidth",
@@ -361,8 +361,8 @@ func (resource_constraint_checker_impl* c) apply_conservative_limits(cfg device_
     return conservative
 }
 
-func (resource_constraint_checker_impl* c) generate_recommendations(checks vec[constraint_check]) (vec[string]) {
-    recommendations := vec[string]{}
+func (resource_constraint_checker_impl* c) generate_recommendations(checks constraint_check[]) (string[]) {
+    recommendations := string[]{}
 
     for check in checks {
         if check.status == constraint_status.warning || check.status == constraint_status.violated {

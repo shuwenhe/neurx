@@ -90,7 +90,7 @@ func (framework* device_driver_framework) register_driver(driver device_driver) 
     driver.driver_id = framework.driver_counter
     driver.loaded = 1
     
-    framework.drivers.push(driver)
+    framework.drivers = append(framework.drivers, driver)
     driver_id := framework.driver_counter
     framework.driver_counter = framework.driver_counter + 1
     
@@ -99,7 +99,7 @@ func (framework* device_driver_framework) register_driver(driver device_driver) 
 
 // 注销驱动
 func (framework* device_driver_framework) unregister_driver(driver_id int) (int, string) {
-    if driver_id >= framework.drivers.len() {
+    if driver_id >= len(framework.drivers) {
         return -1, "Driver not found"
     }
     
@@ -115,7 +115,7 @@ func (framework* device_driver_framework) register_device(device device) (int, s
     device.device_id = framework.device_counter
     device.state = 1  // registered
     
-    framework.devices.push(device)
+    framework.devices = append(framework.devices, device)
     device_id := framework.device_counter
     framework.device_counter = framework.device_counter + 1
     
@@ -124,7 +124,7 @@ func (framework* device_driver_framework) register_device(device device) (int, s
 
 // 注销设备
 func (framework* device_driver_framework) unregister_device(device_id int) (int, string) {
-    if device_id >= framework.devices.len() {
+    if device_id >= len(framework.devices) {
         return -1, "Device not found"
     }
     
@@ -137,7 +137,7 @@ func (framework* device_driver_framework) unregister_device(device_id int) (int,
 
 // 探测设备
 func (framework* device_driver_framework) probe_device(device_id int, driver_id int) (int, string) {
-    if device_id >= framework.devices.len() || driver_id >= framework.drivers.len() {
+    if device_id >= len(framework.devices) || driver_id >= len(framework.drivers) {
         return -1, "Device or driver not found"
     }
     
@@ -157,13 +157,13 @@ func (framework* device_driver_framework) probe_device(device_id int, driver_id 
 
 // 移除设备
 func (framework* device_driver_framework) remove_device(device_id int) (int, string) {
-    if device_id >= framework.devices.len() {
+    if device_id >= len(framework.devices) {
         return -1, "Device not found"
     }
     
     device := framework.devices[device_id]
     
-    if device.driver_id >= 0 && device.driver_id < framework.drivers.len() {
+    if device.driver_id >= 0 && device.driver_id < len(framework.drivers) {
         driver := framework.drivers[device.driver_id]
         if driver.device_count > 0 {
             driver.device_count = driver.device_count - 1
@@ -181,24 +181,24 @@ func (framework* device_driver_framework) remove_device(device_id int) (int, str
 
 // 读设备
 func (framework* device_driver_framework) device_read(device_id int) (vec, string) {
-    if device_id >= framework.devices.len() {
-        return vec(), "Device not found"
+    if device_id >= len(framework.devices) {
+        return {}, "Device not found"
     }
     
     device := framework.devices[device_id]
     
     if device.state != 2 {
-        return vec(), "Device not active"
+        return {}, "Device not active"
     }
     
     framework.total_device_operations = framework.total_device_operations + 1
     
-    return vec(), ""
+    return {}, ""
 }
 
 // 写设备
 func (framework* device_driver_framework) device_write(device_id int, data vec) (int, string) {
-    if device_id >= framework.devices.len() {
+    if device_id >= len(framework.devices) {
         return -1, "Device not found"
     }
     
@@ -210,15 +210,15 @@ func (framework* device_driver_framework) device_write(device_id int, data vec) 
     
     framework.total_device_operations = framework.total_device_operations + 1
     
-    return data.len(), ""
+    return len(data), ""
 }
 
 // 创建设备驱动框架
 func create_device_driver_framework() (device_driver_framework, string) {
     framework := device_driver_framework{
-        drivers: vec(),
-        devices: vec(),
-        id_tables: vec(),
+        drivers: {},
+        devices: {},
+        id_tables: {},
         driver_counter: 0,
         device_counter: 0,
         table_counter: 0,

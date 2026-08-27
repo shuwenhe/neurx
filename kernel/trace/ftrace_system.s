@@ -53,7 +53,7 @@ struct kretprobe {
 }
 
 struct trace_buffer {
-    vec[trace_event] events
+    trace_event[] events
     int max_events
     int current_events
     int overflow_count
@@ -62,9 +62,9 @@ struct trace_buffer {
 }
 
 struct ftrace_controller {
-    vec[tracepoint] tracepoints
-    vec[kprobe] kprobes
-    vec[kretprobe] kretprobes
+    tracepoint[] tracepoints
+    kprobe[] kprobes
+    kretprobe[] kretprobes
     trace_buffer buffer
     int total_events
     int enabled
@@ -85,11 +85,11 @@ func trace_event_create(int event_id, trace_event_type ev_type, int pid, int cpu
     return event
 }
 
-func (event: *trace_event) set_data(string data) {
+func (trace_event* event) set_data(string data) {
     event.event_data = data
 }
 
-func (event: *trace_event) set_duration(int duration_us) {
+func (trace_event* event) set_duration(int duration_us) {
     event.duration_us = duration_us
 }
 
@@ -105,22 +105,22 @@ func tracepoint_create(int tp_id, string name, trace_event_type tp_type) tracepo
     return tp
 }
 
-func (tp: *tracepoint) enable() (bool, string) {
+func (tracepoint* tp) enable() (bool, string) {
     tp.enabled = 1
-    return result::ok(true)
+    return true, ""
 }
 
-func (tp: *tracepoint) disable() (bool, string) {
+func (tracepoint* tp) disable() (bool, string) {
     tp.enabled = 0
-    return result::ok(true)
+    return true, ""
 }
 
-func (tp: *tracepoint) trigger(trace_event event) (bool, string) {
+func (tracepoint* tp) trigger(trace_event event) (bool, string) {
     if tp.enabled == 0 {
-        return result::err("Tracepoint not enabled")
+        return ((), "Tracepoint not enabled")
     }
     tp.hit_count = tp.hit_count + 1
-    return result::ok(true)
+    return true, ""
 }
 
 func kprobe_create(int kprobe_id, string symbol, int address) kprobe {
@@ -136,23 +136,23 @@ func kprobe_create(int kprobe_id, string symbol, int address) kprobe {
     return kp
 }
 
-func (kp: *kprobe) enable() (bool, string) {
+func (kprobe* kp) enable() (bool, string) {
     kp.enabled = 1
-    return result::ok(true)
+    return true, ""
 }
 
-func (kp: *kprobe) disable() (bool, string) {
+func (kprobe* kp) disable() (bool, string) {
     kp.enabled = 0
-    return result::ok(true)
+    return true, ""
 }
 
-func (kp: *kprobe) trigger() (bool, string) {
+func (kprobe* kp) trigger() (bool, string) {
     if kp.enabled == 0 {
         kp.missed_count = kp.missed_count + 1
-        return result::err("Kprobe not enabled")
+        return ((), "Kprobe not enabled")
     }
     kp.hit_count = kp.hit_count + 1
-    return result::ok(true)
+    return true, ""
 }
 
 func kretprobe_create(int kretprobe_id, string symbol, int address) kretprobe {
@@ -167,22 +167,22 @@ func kretprobe_create(int kretprobe_id, string symbol, int address) kretprobe {
     return krp
 }
 
-func (krp: *kretprobe) entry_hit(int duration_us) (bool, string) {
+func (kretprobe* krp) entry_hit(int duration_us) (bool, string) {
     krp.entry_hit_count = krp.entry_hit_count + 1
-    return result::ok(true)
+    return true, ""
 }
 
-func (krp: *kretprobe) exit_hit(int duration_us) (bool, string) {
+func (kretprobe* krp) exit_hit(int duration_us) (bool, string) {
     krp.exit_hit_count = krp.exit_hit_count + 1
     if krp.entry_hit_count > 0 {
         krp.avg_duration_us = duration_us / krp.entry_hit_count
     }
-    return result::ok(true)
+    return true, ""
 }
 
 func trace_buffer_create(int max_events) trace_buffer {
     buffer := trace_buffer {
-        events: vec[trace_event](),
+        events: trace_event[](),
         max_events: max_events,
         current_events: 0,
         overflow_count: 0,
@@ -192,13 +192,13 @@ func trace_buffer_create(int max_events) trace_buffer {
     return buffer
 }
 
-func (buffer: *trace_buffer) add_event(trace_event event) (bool, string) {
+func (trace_buffer* buffer) add_event(trace_event event) (bool, string) {
     if buffer.current_events >= buffer.max_events {
         buffer.overflow_count = buffer.overflow_count + 1
-        return result::err("Trace buffer full")
+        return ((), "Trace buffer full")
     }
     
-    buffer.events.push(event)
+    buffer.events = append(buffer.events, event)
     buffer.current_events = buffer.current_events + 1
     buffer.newest_timestamp_ns = event.timestamp_ns
     
@@ -206,13 +206,13 @@ func (buffer: *trace_buffer) add_event(trace_event event) (bool, string) {
         buffer.oldest_timestamp_ns = event.timestamp_ns
     }
     
-    return result::ok(true)
+    return true, ""
 }
 
-func (buffer: *trace_buffer) get_events_by_type(trace_event_type ev_type) int {
+func (trace_buffer* buffer) get_events_by_type(trace_event_type ev_type) int {
     count := 0
     i := 0
-    while i < buffer.events.len() {
+    while i < len(buffer.events) {
         if buffer.events[i].event_type == ev_type {
             count = count + 1
         }
@@ -221,10 +221,10 @@ func (buffer: *trace_buffer) get_events_by_type(trace_event_type ev_type) int {
     return count
 }
 
-func (buffer: *trace_buffer) get_events_by_pid(int pid) int {
+func (trace_buffer* buffer) get_events_by_pid(int pid) int {
     count := 0
     i := 0
-    while i < buffer.events.len() {
+    while i < len(buffer.events) {
         if buffer.events[i].pid == pid {
             count = count + 1
         }
@@ -235,9 +235,9 @@ func (buffer: *trace_buffer) get_events_by_pid(int pid) int {
 
 func ftrace_controller_create() ftrace_controller {
     ctrl := ftrace_controller {
-        tracepoints: vec[tracepoint](),
-        kprobes: vec[kprobe](),
-        kretprobes: vec[kretprobe](),
+        tracepoints: tracepoint[](),
+        kprobes: kprobe[](),
+        kretprobes: kretprobe[](),
         buffer: trace_buffer_create(10000),
         total_events: 0,
         enabled: 1,
@@ -246,38 +246,38 @@ func ftrace_controller_create() ftrace_controller {
     return ctrl
 }
 
-func (ctrl: *ftrace_controller) register_tracepoint(string name, trace_event_type ev_type) (int, string) {
+func (ftrace_controller* ctrl) register_tracepoint(string name, trace_event_type ev_type) (int, string) {
     tp := tracepoint_create(ctrl.total_tracers, name, ev_type)
-    ctrl.tracepoints.push(tp)
+    ctrl.tracepoints = append(ctrl.tracepoints, tp)
     ctrl.total_tracers = ctrl.total_tracers + 1
-    return result::ok(tp.tp_id)
+    return tp.tp_id, ""
 }
 
-func (ctrl: *ftrace_controller) register_kprobe(string symbol, int address) (int, string) {
+func (ftrace_controller* ctrl) register_kprobe(string symbol, int address) (int, string) {
     kp := kprobe_create(ctrl.total_tracers, symbol, address)
-    ctrl.kprobes.push(kp)
+    ctrl.kprobes = append(ctrl.kprobes, kp)
     ctrl.total_tracers = ctrl.total_tracers + 1
-    return result::ok(kp.kprobe_id)
+    return kp.kprobe_id, ""
 }
 
-func (ctrl: *ftrace_controller) register_kretprobe(string symbol, int address) (int, string) {
+func (ftrace_controller* ctrl) register_kretprobe(string symbol, int address) (int, string) {
     krp := kretprobe_create(ctrl.total_tracers, symbol, address)
-    ctrl.kretprobes.push(krp)
+    ctrl.kretprobes = append(ctrl.kretprobes, krp)
     ctrl.total_tracers = ctrl.total_tracers + 1
-    return result::ok(krp.kretprobe_id)
+    return krp.kretprobe_id, ""
 }
 
-func (ctrl: *ftrace_controller) enable_tracing() (bool, string) {
+func (ftrace_controller* ctrl) enable_tracing() (bool, string) {
     ctrl.enabled = 1
-    return result::ok(true)
+    return true, ""
 }
 
-func (ctrl: *ftrace_controller) disable_tracing() (bool, string) {
+func (ftrace_controller* ctrl) disable_tracing() (bool, string) {
     ctrl.enabled = 0
-    return result::ok(true)
+    return true, ""
 }
 
-func (ctrl: *cftrace_controller) trace_stats() string {
+func (cftrace_controller* ctrl) trace_stats() string {
     events := ctrl.buffer.current_events
     tracers := ctrl.total_tracers
     overflow := ctrl.buffer.overflow_count

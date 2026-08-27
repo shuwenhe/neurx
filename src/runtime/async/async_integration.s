@@ -29,7 +29,7 @@ struct async_engine_config {
 struct async_generation_result {
 	request_id          string
 	generated_text      string
-	generated_tokens    vec[int32]
+	generated_tokens    int32[]
 	finish_reason       string
 
 	completion_tokens   int32
@@ -181,7 +181,7 @@ func (ae async_engine*) process_single_request(req async_request*) {
 
 	stream := ae.get_or_create_stream(req.request_id)
 
-	generated_tokens := make(vec[int32], 0, 256)
+	generated_tokens := make(int32[], 0, 256)
 	generated_text := ""
 
 	for step := int32(0); step < 256; step++ {
@@ -234,13 +234,13 @@ func (ae async_engine*) get_or_create_stream(request_id string) stream_state* {
 	return *stream
 }
 
-func (ae async_engine*) get_stream_events(request_id string) vec[stream_event] {
+func (ae async_engine*) get_stream_events(request_id string) stream_event[] {
 	ae.stream_mu.Lock()
 	defer ae.stream_mu.Unlock()
 
 	stream, exists := ae.stream_states[request_id]
 	if !exists {
-		return make(vec[stream_event], 0)
+		return make(stream_event[], 0)
 	}
 
 	return stream.get_pending_events()

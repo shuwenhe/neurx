@@ -123,9 +123,9 @@ func (dppo_trainer* trainer) update_adaptive_epsilon(f32 current_kl) {
     if !trainer.config.use_adaptive_epsilon {
         return
     }
-    trainer.kl_history.push(current_kl)
-    if trainer.kl_history.len() > 100 {
-        trainer.kl_history = trainer.kl_history[trainer.kl_history.len() - 100..]
+    trainer.kl_history = append(trainer.kl_history, current_kl)
+    if len(trainer.kl_history) > 100 {
+        trainer.kl_history = trainer.kl_history[len(trainer.kl_history) - 100..]
     }
     avg_kl := compute_mean(trainer.kl_history)
     if avg_kl > trainer.config.target_kl * 1.5 {
@@ -145,7 +145,7 @@ func (dppo_trainer* trainer) compute_gae(
     []tensor values,
     []tensor dones
 ) . ([]tensor, []tensor) {
-    batch_size := rewards.len()
+    batch_size := len(rewards)
     advantages := []
     returns := []
     for b in 0..batch_size {
@@ -164,8 +164,8 @@ func (dppo_trainer* trainer) compute_gae(
             seq_returns[t] = tensor_scalar(gae + value)
             next_value = value
         }
-        advantages.push(seq_advantages)
-        returns.push(seq_returns)
+        advantages = append(advantages, seq_advantages)
+        returns = append(returns, seq_returns)
     }
     return advantages, returns
 }
@@ -175,20 +175,20 @@ func (dppo_trainer* trainer) train_step(
     []tensor responses,
     []tensor rewards
 ) . (f32, f32, f32) {
-    batch_size := prompts.len()
+    batch_size := len(prompts)
     inputs := []
     for i in 0..batch_size {
-        inputs.push(concat(prompts[i], responses[i]))
+        inputs = append(inputs, concat(prompts[i], responses[i]))
     }
     values := []
     if trainer.config.use_value_loss {
         for input in inputs {
             value := trainer.value_model.forward(input)
-            values.push(value)
+            values = append(values, value)
         }
     } else {
         for i in 0..batch_size {
-            values.push(tensor_zeros([responses[i].shape[0]]))
+            values = append(values, tensor_zeros([responses[i].shape[0]]))
         }
     }
     dones := []
@@ -196,13 +196,13 @@ func (dppo_trainer* trainer) train_step(
         seq_len := resp.shape[0]
         done := tensor_zeros([seq_len])
         done[-1] = tensor_scalar(1.0)
-        dones.push(done)
+        dones = append(dones, done)
     }
     advantages, returns  := trainer.compute_gae(rewards, values, dones)
     all_advantages := []
     for adv in advantages {
         for i in 0..adv.numel() {
-            all_advantages.push(adv.flatten()[i].item())
+            all_advantages = append(all_advantages, adv.flatten()[i].item())
         }
     }
     adv_mean := compute_mean(all_advantages)
@@ -210,13 +210,13 @@ func (dppo_trainer* trainer) train_step(
     normalized_advantages := []
     for adv in advantages {
         norm_adv := (adv - adv_mean) / (adv_std + 1e-8)
-        normalized_advantages.push(norm_adv)
+        normalized_advantages = append(normalized_advantages, norm_adv)
     }
     old_log_probs := []
     for input in inputs {
         logits := trainer.policy_model.forward(input)
         log_probs := log_softmax(logits, dim: -1)
-        old_log_probs.push(log_probs)
+        old_log_probs = append(old_log_probs, log_probs)
     }
     total_policy_loss := 0.0
     total_value_loss := 0.0
@@ -281,8 +281,8 @@ func (dppo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
             batch.responses,
             batch.rewards
         )
-        policy_losses.push(policy_loss)
-        value_losses.push(value_loss)
+        policy_losses = append(policy_losses, policy_loss)
+        value_losses = append(value_losses, value_loss)
         if trainer.step_count % 10 == 0 {
             println(f"Step {trainer.step_count} ({trainer.config.divergence_type}):")
             println(f"  Policy Loss = {policy_loss:.4f}, " +
@@ -295,25 +295,25 @@ func (dppo_trainer* trainer) train(DataLoader train_data) . ([]f32, []f32) {
 }
 
 func compute_mean([]f32 values) . f32 {
-    if values.len() == 0 {
+    if len(values) == 0 {
         return 0.0
     }
     sum := 0.0
     for v in values {
         sum += v
     }
-    return sum / f32(values.len())
+    return sum / f32(len(values))
 }
 
 func compute_std([]f32 values, f32 mean) . f32 {
-    if values.len() == 0 {
+    if len(values) == 0 {
         return 1.0
     }
     sum_sq := 0.0
     for v in values {
         sum_sq += (v - mean) * (v - mean)
     }
-    return sqrt(sum_sq / f32(values.len()))
+    return sqrt(sum_sq / f32(len(values)))
 }
 
 func clamp(Tensor x, f32 min_val, f32 max_val) . Tensor {

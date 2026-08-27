@@ -91,7 +91,7 @@ func split_commas(string text) []string {
         string ch = char_at(text, i)
         if ch == "," {
             if current != "" {
-                out.push(current)
+                out = append(out, current)
             }
             current = ""
         } else {
@@ -100,7 +100,7 @@ func split_commas(string text) []string {
         i = i + 1
     }
     if current != "" {
-        out.push(current)
+        out = append(out, current)
     }
     out
 }
@@ -183,7 +183,7 @@ func split_lines(string text) []string {
         if ch == "\n" {
             string line = trim(current)
             if line != "" {
-                lines.push(line)
+                lines = append(lines, line)
             }
             current = ""
         } else if ch != "\r" {
@@ -193,7 +193,7 @@ func split_lines(string text) []string {
     }
     string tail = trim(current)
     if tail != "" {
-        lines.push(tail)
+        lines = append(lines, tail)
     }
     lines
 }

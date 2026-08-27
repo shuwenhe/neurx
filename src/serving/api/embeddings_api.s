@@ -6,7 +6,7 @@ import "time"
 struct embeddings_handler {
 	interface{}                     embedding_model
 
-	vec[embedding_request]          request_queue
+	embedding_request[]          request_queue
 	map[string]embedding_response   response_cache
 
 	sync.Mutex                      mu
@@ -16,7 +16,7 @@ struct embeddings_handler {
 func create_embeddings_handler(embedding_model interface{}) embeddings_handler {
 	return embeddings_handler{
 		embedding_model: embedding_model,
-		request_queue:   make(vec[embedding_request], 0, 100),
+		request_queue:   make(embedding_request[], 0, 100),
 		response_cache:  make(map[string]embedding_response),
 		mu:              sync.Mutex{},
 		processing:      false,
@@ -44,7 +44,7 @@ func (h embeddings_handler*) compute_embeddings(
 ) (embedding_response, error) {
 	start_time := time.Now().UnixNano()
 
-	embeddings := make(vec[vec[float32]], 0, len(req.input))
+	embeddings := make(float32[][]], 0, len(req.input))
 	total_tokens := int32(0)
 
 	for text := range req.input {
@@ -71,9 +71,9 @@ func (h embeddings_handler*) compute_embeddings(
 	return response, nil
 }
 
-func (h embeddings_handler*) compute_text_embedding(text string) vec[float32] {
+func (h embeddings_handler*) compute_text_embedding(text string) float32[] {
 	embedding_dim := 768
-	embedding := make(vec[float32], 0, embedding_dim)
+	embedding := make(float32[], 0, embedding_dim)
 
 	for i := int32(0); i < int32(embedding_dim); i++ {
 		embedding = append(embedding, 0.0)
@@ -87,9 +87,9 @@ func (h embeddings_handler*) count_tokens(text string) int32 {
 }
 
 func (h embeddings_handler*) batch_compute_embeddings(
-	texts vec[string],
-) vec[vec[float32]] {
-	embeddings := make(vec[vec[float32]], 0, len(texts))
+	texts string[],
+) float32[][]] {
+	embeddings := make(float32[][]], 0, len(texts))
 
 	for text := range texts {
 		embedding := h.compute_text_embedding(text)
@@ -100,8 +100,8 @@ func (h embeddings_handler*) batch_compute_embeddings(
 }
 
 func (h embeddings_handler*) compute_similarity(
-	embedding1 vec[float32],
-	embedding2 vec[float32],
+	embedding1 float32[],
+	embedding2 float32[],
 ) float32 {
 	if int32(len(embedding1)) != int32(len(embedding2)) {
 		return 0.0
@@ -127,9 +127,9 @@ func (h embeddings_handler*) compute_similarity(
 }
 
 struct embedding_cache {
-	map[string]vec[float32]     text_to_embedding
-	vec[vec[float32]]           embeddings
-	vec[string]                 texts
+	map[string]float32[]     text_to_embedding
+	float32[][]]           embeddings
+	string[]                 texts
 
 	int32                       max_cache_size
 	sync.Mutex                  mu
@@ -137,15 +137,15 @@ struct embedding_cache {
 
 func create_embedding_cache(max_size int32) embedding_cache {
 	return embedding_cache{
-		text_to_embedding: make(map[string]vec[float32]),
-		embeddings:        make(vec[vec[float32]], 0, max_size),
-		texts:             make(vec[string], 0, max_size),
+		text_to_embedding: make(map[string]float32[]),
+		embeddings:        make(float32[][]], 0, max_size),
+		texts:             make(string[], 0, max_size),
 		max_cache_size:    max_size,
 		mu:                sync.Mutex{},
 	}
 }
 
-func (c embedding_cache*) get_cached_embedding(text string) (vec[float32], bool) {
+func (c embedding_cache*) get_cached_embedding(text string) (float32[], bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -153,7 +153,7 @@ func (c embedding_cache*) get_cached_embedding(text string) (vec[float32], bool)
 	return embedding, exists
 }
 
-func (c embedding_cache*) cache_embedding(text string, embedding vec[float32]) bool {
+func (c embedding_cache*) cache_embedding(text string, embedding float32[]) bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -174,9 +174,9 @@ func (c embedding_cache*) clear_cache() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.text_to_embedding = make(map[string]vec[float32])
-	c.embeddings = make(vec[vec[float32]], 0, c.max_cache_size)
-	c.texts = make(vec[string], 0, c.max_cache_size)
+	c.text_to_embedding = make(map[string]float32[])
+	c.embeddings = make(float32[][]], 0, c.max_cache_size)
+	c.texts = make(string[], 0, c.max_cache_size)
 }
 
 func (c embedding_cache*) get_cache_size() int32 {
@@ -190,7 +190,7 @@ struct batch_embeddings_processor {
 	validator     request_validator*
 	cache         embedding_cache*
 
-	pending_reqs  vec[embedding_request]
+	pending_reqs  embedding_request[]
 	results       map[string]embedding_response
 
 	mu            sync.Mutex
@@ -205,7 +205,7 @@ func create_batch_embeddings_processor(
 		handler:      handler,
 		validator:    validator,
 		cache:        cache,
-		pending_reqs: make(vec[embedding_request], 0, 32),
+		pending_reqs: make(embedding_request[], 0, 32),
 		results:      make(map[string]embedding_response),
 		mu:           sync.Mutex{},
 	}
@@ -226,11 +226,11 @@ func (bp batch_embeddings_processor*) add_request(req embedding_request) bool {
 
 func (bp batch_embeddings_processor*) process_batch() int32 {
 	bp.mu.Lock()
-	reqs := make(vec[embedding_request], 0, len(bp.pending_reqs))
+	reqs := make(embedding_request[], 0, len(bp.pending_reqs))
 	for req := range bp.pending_reqs {
 		reqs = append(reqs, req)
 	}
-	bp.pending_reqs = make(vec[embedding_request], 0, 32)
+	bp.pending_reqs = make(embedding_request[], 0, 32)
 	bp.mu.Unlock()
 
 	processed := int32(0)
@@ -250,19 +250,19 @@ func (bp batch_embeddings_processor*) process_batch() int32 {
 
 func (bp batch_embeddings_processor*) process_batch_with_cache() int32 {
 	bp.mu.Lock()
-	reqs := make(vec[embedding_request], 0, len(bp.pending_reqs))
+	reqs := make(embedding_request[], 0, len(bp.pending_reqs))
 	for req := range bp.pending_reqs {
 		reqs = append(reqs, req)
 	}
-	bp.pending_reqs = make(vec[embedding_request], 0, 32)
+	bp.pending_reqs = make(embedding_request[], 0, 32)
 	bp.mu.Unlock()
 
 	processed := int32(0)
 
 	for req := range reqs {
-		cached_embeddings := make(vec[vec[float32]], 0, len(req.input))
-		uncached_texts := make(vec[string], 0)
-		text_indices := make(vec[int32], 0)
+		cached_embeddings := make(float32[][]], 0, len(req.input))
+		uncached_texts := make(string[], 0)
+		text_indices := make(int32[], 0)
 
 		for i := int32(0); i < int32(len(req.input)); i++ {
 			text := req.input[i]
@@ -287,11 +287,11 @@ func (bp batch_embeddings_processor*) process_batch_with_cache() int32 {
 	return processed
 }
 
-func (bp batch_embeddings_processor*) get_results() vec[embedding_response] {
+func (bp batch_embeddings_processor*) get_results() embedding_response[] {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()
 
-	results := make(vec[embedding_response], 0, len(bp.results))
+	results := make(embedding_response[], 0, len(bp.results))
 	for _, resp := range bp.results {
 		results = append(results, resp)
 	}

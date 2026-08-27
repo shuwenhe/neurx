@@ -76,21 +76,21 @@ func (cgroup_manager* cm) init() (int, string) {
         name: "cpu",
         enabled: 1
     }
-    cm.subsystems.push(cpu_sys)
+    cm.subsystems = append(cm.subsystems, cpu_sys)
     
     mem_sys := cgroup_subsystem{
         subsys_id: 1,
         name: "memory",
         enabled: 1
     }
-    cm.subsystems.push(mem_sys)
+    cm.subsystems = append(cm.subsystems, mem_sys)
     
     io_sys := cgroup_subsystem{
         subsys_id: 2,
         name: "io",
         enabled: 1
     }
-    cm.subsystems.push(io_sys)
+    cm.subsystems = append(cm.subsystems, io_sys)
     
     return 0, ""
 }
@@ -125,7 +125,7 @@ func (cgroup_manager* cm) create_cgroup(string group_name) (cgroup_group, string
         processes: int[]{}"
     }
     
-    cm.cgroup_groups.push(group)
+    cm.cgroup_groups = append(cm.cgroup_groups, group)
     cm.next_group_id = cm.next_group_id + 1
     
     return group, ""
@@ -133,7 +133,7 @@ func (cgroup_manager* cm) create_cgroup(string group_name) (cgroup_group, string
 
 // 添加进程到 cgroup
 func (cgroup_manager* cm) add_process_to_cgroup(int group_id, int pid) (int, string) {
-    if group_id >= cm.cgroup_groups.len() {
+    if group_id >= len(cm.cgroup_groups) {
         return -1, "Invalid cgroup"
     }
     
@@ -148,7 +148,7 @@ func (cgroup_manager* cm) add_process_to_cgroup(int group_id, int pid) (int, str
         io_write: 0
     }
     
-    group.processes.push(proc)
+    group.processes = append(group.processes, proc)
     cm.cgroup_groups[group_id] = group
     
     return pid, ""
@@ -156,7 +156,7 @@ func (cgroup_manager* cm) add_process_to_cgroup(int group_id, int pid) (int, str
 
 // 设置 CPU 限制
 func (cgroup_manager* cm) set_cpu_limit(int group_id, int quota, int period) (int, string) {
-    if group_id >= cm.cgroup_groups.len() {
+    if group_id >= len(cm.cgroup_groups) {
         return -1, "Invalid cgroup"
     }
     
@@ -170,7 +170,7 @@ func (cgroup_manager* cm) set_cpu_limit(int group_id, int quota, int period) (in
 
 // 设置内存限制
 func (cgroup_manager* cm) set_memory_limit(int group_id, int memory_limit_mb) (int, string) {
-    if group_id >= cm.cgroup_groups.len() {
+    if group_id >= len(cm.cgroup_groups) {
         return -1, "Invalid cgroup"
     }
     
@@ -183,7 +183,7 @@ func (cgroup_manager* cm) set_memory_limit(int group_id, int memory_limit_mb) (i
 
 // 设置 I/O 限制
 func (cgroup_manager* cm) set_io_limit(int group_id, int read_bps, int write_bps) (int, string) {
-    if group_id >= cm.cgroup_groups.len() {
+    if group_id >= len(cm.cgroup_groups) {
         return -1, "Invalid cgroup"
     }
     
@@ -197,7 +197,7 @@ func (cgroup_manager* cm) set_io_limit(int group_id, int read_bps, int write_bps
 
 // 检查进程是否违反 cgroup 限制
 func (cgroup_manager* cm) check_limits(int group_id) (int, string) {
-    if group_id >= cm.cgroup_groups.len() {
+    if group_id >= len(cm.cgroup_groups) {
         return -1, "Invalid cgroup"
     }
     
@@ -211,7 +211,7 @@ func (cgroup_manager* cm) check_limits(int group_id) (int, string) {
     // 检查 CPU 配额
     i := 0
     total_cpu_time := 0
-    for i < group.processes.len() {
+    for i < len(group.processes) {
         proc := group.processes[i]
         total_cpu_time = total_cpu_time + proc.cpu_usage
         i = i + 1
@@ -226,17 +226,17 @@ func (cgroup_manager* cm) check_limits(int group_id) (int, string) {
 
 // 获取 cgroup 统计
 func (cgroup_manager cm) get_cgroup_stats(int group_id) (int, int, int, int) {
-    if group_id >= cm.cgroup_groups.len() {
+    if group_id >= len(cm.cgroup_groups) {
         return 0, 0, 0, 0
     }
     
     group := cm.cgroup_groups[group_id]
     total_cpu_usage := 0
     total_memory_usage := 0
-    process_count := group.processes.len()
+    process_count := len(group.processes)
     
     i := 0
-    for i < group.processes.len() {
+    for i < len(group.processes) {
         proc := group.processes[i]
         total_cpu_usage = total_cpu_usage + proc.cpu_usage
         total_memory_usage = total_memory_usage + proc.memory_usage

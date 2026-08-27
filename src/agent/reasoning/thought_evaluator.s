@@ -32,7 +32,7 @@ struct thought_quality_metrics {
 struct thought_evaluation_result {
 	string                      thought_id
 	thought_quality_metrics     metrics
-	vec[evaluation_score]       detailed_scores
+	evaluation_score[]       detailed_scores
 	bool                        is_valid
 	bool                        should_prune
 	string                      recommendation
@@ -53,7 +53,7 @@ struct thought_evaluator {
 	float32                     pruning_threshold
 	float32                     valid_threshold
 
-	vec[string]                 evaluated_thoughts
+	string[]                 evaluated_thoughts
 
 	map[string]int32            evaluation_counts
 
@@ -72,7 +72,7 @@ func create_thought_evaluator() thought_evaluator {
 		novelty_weight:        0.05,
 		pruning_threshold:     0.3,
 		valid_threshold:       0.5,
-		evaluated_thoughts:    make(vec[string], 0, 1000),
+		evaluated_thoughts:    make(string[], 0, 1000),
 		evaluation_counts:     make(map[string]int32),
 		mu:                    sync.Mutex{},
 	}
@@ -82,7 +82,7 @@ func (thought_evaluator* e) evaluate_thought(
 	thought_id string,
 	thought_content string,
 	context_text string,
-	previous_thoughts vec[string],
+	previous_thoughts string[],
 ) thought_evaluation_result {
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -127,7 +127,7 @@ func (thought_evaluator* e) evaluate_thought(
 	result := thought_evaluation_result{
 		thought_id:      thought_id,
 		metrics:         metrics,
-		detailed_scores: make(vec[evaluation_score], 0, 6),
+		detailed_scores: make(evaluation_score[], 0, 6),
 		is_valid:        is_valid,
 		should_prune:    should_prune,
 		recommendation:  recommendation,
@@ -236,7 +236,7 @@ func (thought_evaluator* e) calculate_completeness(thought string) float32 {
 
 func (thought_evaluator* e) calculate_consistency(
 	thought string,
-	previous_thoughts vec[string],
+	previous_thoughts string[],
 ) float32 {
 	if int32(len(previous_thoughts)) == 0 {
 		return 0.8
@@ -331,7 +331,7 @@ func (thought_evaluator* e) calculate_confidence(thought string) float32 {
 
 func (thought_evaluator* e) calculate_novelty(
 	thought string,
-	previous_thoughts vec[string],
+	previous_thoughts string[],
 ) float32 {
 	if int32(len(previous_thoughts)) == 0 {
 		return 1.0
@@ -381,8 +381,8 @@ func (thought_evaluator* e) calculate_text_similarity(
 	return float32(common*2) / float32(total)
 }
 
-func (thought_evaluator* e) tokenize(text string) vec[string] {
-	tokens := make(vec[string], 0)
+func (thought_evaluator* e) tokenize(text string) string[] {
+	tokens := make(string[], 0)
 	current_token := ""
 
 	for i := int32(0); i < int32(len(text)); i++ {
@@ -528,6 +528,6 @@ func (thought_evaluator* e) clear_cache() {
 
 	e.metrics_cache = make(map[string]thought_quality_metrics)
 	e.results_cache = make(map[string]thought_evaluation_result)
-	e.evaluated_thoughts = make(vec[string], 0, 1000)
+	e.evaluated_thoughts = make(string[], 0, 1000)
 	e.evaluation_counts = make(map[string]int32)
 }

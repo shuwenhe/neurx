@@ -141,10 +141,10 @@ func (otb_trainer* trainer) train_step(
     []tensor responses,
     []tensor rewards
 ) . (f32, f32, f32) {
-    batch_size := prompts.len()
+    batch_size := len(prompts)
     inputs := []
     for i in 0..batch_size {
-        inputs.push(concat(prompts[i], responses[i]))
+        inputs = append(inputs, concat(prompts[i], responses[i]))
     }
     total_policy_loss := 0.0
     total_baseline_loss := 0.0
@@ -206,7 +206,7 @@ func (otb_trainer* trainer) train(DataLoader train_data) . []f32 {
             batch.responses,
             batch.rewards
         )
-        policy_losses.push(policy_loss)
+        policy_losses = append(policy_losses, policy_loss)
         if trainer.step_count % 10 == 0 {
             println(f"Step {trainer.step_count} (OTB {trainer.config.baseline_type}):")
             println(f"  Policy Loss = {policy_loss:.4f}, " +
@@ -222,7 +222,7 @@ func (otb_trainer* trainer) train(DataLoader train_data) . []f32 {
                 println(f"  Before = {trainer.advantage_variance_before:.4f}, " +
                        f"After = {trainer.advantage_variance_after:.4f}")
             }
-            println(f"  Token Baselines Tracked = {trainer.token_ema_baselines.len()}")
+            println(f"  Token Baselines Tracked = {len(trainer.token_ema_baselines)}")
         }
     }
     return policy_losses
@@ -243,23 +243,23 @@ func compute_variance_tensor(Tensor x) . f32 {
 }
 
 func compute_mean([]f32 values) . f32 {
-    if values.len() == 0 {
+    if len(values) == 0 {
         return 0.0
     }
     sum := 0.0
     for v in values {
         sum += v
     }
-    return sum / f32(values.len())
+    return sum / f32(len(values))
 }
 
 func compute_variance([]f32 values, f32 mean) . f32 {
-    if values.len() == 0 {
+    if len(values) == 0 {
         return 0.0
     }
     sum_sq := 0.0
     for v in values {
         sum_sq += (v - mean) * (v - mean)
     }
-    return sum_sq / f32(values.len())
+    return sum_sq / f32(len(values))
 }

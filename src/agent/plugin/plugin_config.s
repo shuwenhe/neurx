@@ -30,14 +30,14 @@ struct config_validation_rule {
 	interface{}             max_value
 
 	bool                    is_required
-	vec[interface{}]        allowed_values
+	interface{}[]        allowed_values
 
 	string                  error_message
 }
 
 struct config_schema {
 	string                  schema_id
-	vec[config_validation_rule]  rules
+	config_validation_rule[]  rules
 	int32                   rule_count
 
 	bool                    strict_mode
@@ -109,7 +109,7 @@ func create_config_manager() config_manager {
 func create_config_schema(schema_id string) config_schema {
 	return config_schema{
 		schema_id:        schema_id,
-		rules:            make(vec[config_validation_rule], 0),
+		rules:            make(config_validation_rule[], 0),
 		rule_count:       0,
 		strict_mode:      false,
 		schema_version:   1,
@@ -125,7 +125,7 @@ func create_validation_rule(rule_id string, field_name string, rule_type string)
 		min_value:        nil,
 		max_value:        nil,
 		is_required:      false,
-		allowed_values:   make(vec[interface{}], 0),
+		allowed_values:   make(interface{}[], 0),
 		error_message:    "",
 	}
 }
@@ -224,21 +224,21 @@ func (config_manager* m) register_schema(schema config_schema) bool {
 	return true
 }
 
-func (config_manager* m) validate_config(config_id string, schema_id string) (bool, vec[string]) {
+func (config_manager* m) validate_config(config_id string, schema_id string) (bool, string[]) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	config, config_exists := m.configs[config_id]
 	if !config_exists {
-		return false, make(vec[string], 0)
+		return false, make(string[], 0)
 	}
 
 	schema, schema_exists := m.schemas[schema_id]
 	if !schema_exists {
-		return false, make(vec[string], 0)
+		return false, make(string[], 0)
 	}
 
-	errors := make(vec[string], 0)
+	errors := make(string[], 0)
 
 	for rule := range schema.rules {
 		value, exists := config.config_data[rule.field_name]
@@ -326,7 +326,7 @@ func (config_schema* s) add_rule(rule config_validation_rule) {
 	s.rule_count++
 }
 
-func (config_schema* s) get_rules() vec[config_validation_rule] {
+func (config_schema* s) get_rules() config_validation_rule[] {
 	return s.rules
 }
 

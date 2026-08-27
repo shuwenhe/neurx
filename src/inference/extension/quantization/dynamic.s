@@ -381,9 +381,9 @@ func abs_f(float x) float {
 
 func round_f(float x) int {
     if x >= 0.0 {
-        return (x + 0.5)
+        return x + 0.5
     } else {
-        return (x - 0.5)
+        return x - 0.5
     }
 }
 

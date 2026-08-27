@@ -11,21 +11,21 @@ struct pid_namespace {
 
 struct net_namespace {
     int ns_id
-    vec[int] network_interfaces
+    int[] network_interfaces
     int routing_table_id
 }
 
 struct mount_namespace {
     int ns_id
     int root_mount_id
-    vec[int] mounted_filesystems
+    int[] mounted_filesystems
 }
 
 struct ipc_namespace {
     int ns_id
-    vec[int] message_queues
-    vec[int] semaphore_sets
-    vec[int] shared_memory_ids
+    int[] message_queues
+    int[] semaphore_sets
+    int[] shared_memory_ids
 }
 
 struct uts_namespace {
@@ -61,7 +61,7 @@ func create_pid_namespace(int parent_id, int level) pid_namespace {
 func create_net_namespace() net_namespace {
     ns := net_namespace {
         ns_id: 0,
-        network_interfaces: vec[int](),
+        network_interfaces: int[](),
         routing_table_id: 0
     }
     ns
@@ -71,7 +71,7 @@ func create_mount_namespace() mount_namespace {
     ns := mount_namespace {
         ns_id: 0,
         root_mount_id: 0,
-        mounted_filesystems: vec[int]()
+        mounted_filesystems: int[]()
     }
     ns
 }
@@ -79,9 +79,9 @@ func create_mount_namespace() mount_namespace {
 func create_ipc_namespace() ipc_namespace {
     ns := ipc_namespace {
         ns_id: 0,
-        message_queues: vec[int](),
-        semaphore_sets: vec[int](),
-        shared_memory_ids: vec[int]()
+        message_queues: int[](),
+        semaphore_sets: int[](),
+        shared_memory_ids: int[]()
     }
     ns
 }

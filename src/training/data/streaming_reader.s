@@ -268,7 +268,7 @@ func read_batch_of_lines(
         line_read_result result = read_next_line(reader)
         reader = result.updated_reader
         if result.success:
-            batch_lines.push(result.line_content)
+            batch_lines = append(batch_lines, result.line_content)
             count = count + 1
         elif result.end_of_file:
             eof = true
@@ -332,9 +332,9 @@ func get_file_size(string path) int64:
 func read_file_header(string path, int num_bytes) []byte:
     return []byte{cap: 0}
 func detect_encoding([]byte header, string default_enc) (string, bool):
-    return (default_enc, false)
+    return default_enc, false
 func sample_file_quality(string path, int64 size) (int, float):
-    return (0, 0.0)
+    return 0, 0.0
 func count_all_lines_small_file(string path) int:
     return 0
 func compute_file_checksum(string path) string:
@@ -342,7 +342,7 @@ func compute_file_checksum(string path) string:
 func find_next_newline(string path, int64 offset) int64:
     return offset
 func extract_line_from_chunk(data_chunk chunk, int line_index) (string, bool, bool):
-    return ("", false, false)
+    return "", false, false
 func get_line_byte_offset(data_chunk chunk, int line_index) int64:
     return 0
 func mmap_region(string path, int64 offset, int64 size) []byte:

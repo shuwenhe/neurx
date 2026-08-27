@@ -11,64 +11,62 @@ struct JsonToolParser {
     extract_function_body: func(str) . str
 }
 
-impl JsonToolParser {
-    func new(str name) . JsonToolParser {
-        JsonToolParser {
-            base: BaseToolParser::new(name),
-            tool_call_start_marker: "{",
-            tool_call_end_marker: "}",
-            extract_function_body: default_extract_function_body
+func new(str name) . JsonToolParser {
+    JsonToolParser {
+        base: BaseToolParser::new(name),
+        tool_call_start_marker: "{",
+        tool_call_end_marker: "}",
+        extract_function_body: default_extract_function_body
+    }
+}
+
+func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
+    tool_calls := Vec::new()
+    content_end := 0
+
+    if !strings::contains_str(model_output, self.tool_call_start_marker) {
+        return ExtractedToolCallInformation {
+            tools_called: false,
+            tool_calls: tool_calls,
+            content: model_output
         }
     }
 
-    func extract_tool_calls(self, str model_output, ParserRequest request) . ExtractedToolCallInformation {
-        tool_calls := Vec::new()
-        content_end := 0
+    start_pos := strings::index_of(model_output, self.tool_call_start_marker)
+    if start_pos >= 0 {
+        content_end = start_pos
+    }
 
-        if !strings::contains_str(model_output, self.tool_call_start_marker) {
-            return ExtractedToolCallInformation {
-                tools_called: false,
-                tool_calls: tool_calls,
-                content: model_output
-            }
-        }
+    pattern := "\\{[^}]*\\}"
+    re := regex::compile(pattern)
 
-        start_pos := strings::index_of(model_output, self.tool_call_start_marker)
-        if start_pos >= 0 {
-            content_end = start_pos
-        }
-
-        pattern := "\\{[^}]*\\}"
-        re := regex::compile(pattern)
-
-        search_start := start_pos
-        for search_start >= 0 && search_start < strings::len(model_output) {
-            match regex::find_at(re, model_output, search_start) {
-                Some(m) => {
-                    json_str := strings::substring(model_output, m.start, m.end)
-                    match parse_json_tool_call(json_str) {
-                        Some(tc) => {
-                            tool_calls.push(tc)
-                        }
-                        None => {}
+    search_start := start_pos
+    for search_start >= 0 && search_start < strings::len(model_output) {
+        match regex::find_at(re, model_output, search_start) {
+            Some(m) => {
+                json_str := strings::substring(model_output, m.start, m.end)
+                match parse_json_tool_call(json_str) {
+                    Some(tc) => {
+                        tool_calls = append(tool_calls, tc)
                     }
-                    search_start = m.end
+                    None => {}
                 }
-                None => break
+                search_start = m.end
             }
+            None => break
         }
+    }
 
-        content := if content_end > 0 {
-            strings::substring(model_output, 0, content_end)
-        } else {
-            ""
-        }
+    content := if content_end > 0 {
+        strings::substring(model_output, 0, content_end)
+    } else {
+        ""
+    }
 
-        ExtractedToolCallInformation {
-            tools_called: len(tool_calls) > 0,
-            tool_calls: tool_calls,
-            content: content
-        }
+    ExtractedToolCallInformation {
+        tools_called: len(tool_calls) > 0,
+        tool_calls: tool_calls,
+        content: content
     }
 
     func extract_tool_calls_streaming(

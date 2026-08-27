@@ -3,8 +3,8 @@ package sampling
 import "math"
 
 struct embedding_cache {
-	token_embeddings map[int32]vec[float32]
-	model_embeddings vec[vec[float32]]
+	token_embeddings map[int32]float32[]
+	model_embeddings float32[][]]
 }
 
 struct contrastive_search_state {
@@ -20,13 +20,13 @@ func create_contrastive_search_state(float32 alpha, int32 k, bool degenerate) co
 		k: k,
 		degenerate_to_greedy: degenerate,
 		embedding_cache: *embedding_cache{
-			token_embeddings: make(map[int32]vec[float32]),
-			model_embeddings: make(vec[vec[float32]]),
+			token_embeddings: make(map[int32]float32[]),
+			model_embeddings: make(float32[][]]),
 		},
 	}
 }
 
-func cosine_similarity(vec[float32] vec_a, vec[float32] vec_b) float32 {
+func cosine_similarity(float32[] vec_a, float32[] vec_b) float32 {
 	if len(vec_a) == 0 || len(vec_b) == 0 {
 		return 0.0
 	}
@@ -51,7 +51,7 @@ func cosine_similarity(vec[float32] vec_a, vec[float32] vec_b) float32 {
 	return dot_product / (norm_a * norm_b)
 }
 
-func (c* contrastive_search_state) compute_model_diversity(vec[float32] model_embedding, vec[vec[float32]] generated_embeddings) float32 {
+func (c* contrastive_search_state) compute_model_diversity(float32[] model_embedding, float32[][]] generated_embeddings) float32 {
 	if len(generated_embeddings) == 0 {
 		return 0.0
 	}
@@ -73,7 +73,7 @@ func (c* contrastive_search_state) compute_model_diversity(vec[float32] model_em
 	return 1.0 - max_similarity
 }
 
-func (c* contrastive_search_state) compute_model_confidence(vec[float32] logits, int32 candidate_token) float32 {
+func (c* contrastive_search_state) compute_model_confidence(float32[] logits, int32 candidate_token) float32 {
 	if candidate_token < 0 || candidate_token >= int32(len(logits)) {
 		return 0.0
 	}
@@ -85,7 +85,7 @@ func (c* contrastive_search_state) compute_model_confidence(vec[float32] logits,
 		}
 	}
 
-	exp_logits := make(vec[float32])
+	exp_logits := make(float32[])
 	sum := 0.0
 
 	for i := 0; i < len(logits); i = i + 1 {
@@ -101,7 +101,7 @@ func (c* contrastive_search_state) compute_model_confidence(vec[float32] logits,
 	return 0.0
 }
 
-func (c* contrastive_search_state) select_token(vec[float32] logits, vec[vec[float32]] generated_embeddings, vec[vec[float32]] model_embeddings) int32 {
+func (c* contrastive_search_state) select_token(float32[] logits, float32[][]] generated_embeddings, float32[][]] model_embeddings) int32 {
 	if len(model_embeddings) == 0 || len(logits) == 0 {
 		max_idx := 0
 		max_val := logits[0]
@@ -119,8 +119,8 @@ func (c* contrastive_search_state) select_token(vec[float32] logits, vec[vec[flo
 		k = int32(len(logits))
 	}
 
-	top_k_tokens := make(vec[int32])
-	top_k_scores := make(vec[float32])
+	top_k_tokens := make(int32[])
+	top_k_scores := make(float32[])
 
 	for i := 0; i < len(logits); i = i + 1 {
 		score := logits[i]
@@ -128,11 +128,11 @@ func (c* contrastive_search_state) select_token(vec[float32] logits, vec[vec[flo
 		inserted := false
 		for j := 0; j < len(top_k_scores); j = j + 1 {
 			if score > top_k_scores[j] {
-				top_k_tokens = append(make(vec[int32]), top_k_tokens[:j]...)
+				top_k_tokens = append(make(int32[]), top_k_tokens[:j]...)
 				top_k_tokens = append(top_k_tokens, int32(i))
 				top_k_tokens = append(top_k_tokens, top_k_tokens[j+1:]...)
 
-				top_k_scores = append(make(vec[float32]), top_k_scores[:j]...)
+				top_k_scores = append(make(float32[]), top_k_scores[:j]...)
 				top_k_scores = append(top_k_scores, score)
 				top_k_scores = append(top_k_scores, top_k_scores[j+1:]...)
 
@@ -176,13 +176,13 @@ func (c* contrastive_search_state) select_token(vec[float32] logits, vec[vec[flo
 	return best_token
 }
 
-func (c* contrastive_search_state) cache_embeddings(int32 token_id, vec[float32] embedding) {
+func (c* contrastive_search_state) cache_embeddings(int32 token_id, float32[] embedding) {
 	if c.embedding_cache != nil {
 		c.embedding_cache.token_embeddings[token_id] = embedding
 	}
 }
 
-func contrastive_decoding_step(vec[float32] logits, vec[vec[float32]] context_embeddings, float32 alpha, int32 k) int32 {
+func contrastive_decoding_step(float32[] logits, float32[][]] context_embeddings, float32 alpha, int32 k) int32 {
 	if alpha < 0.0 {
 		alpha = 0.0
 	}
@@ -202,8 +202,8 @@ func contrastive_decoding_step(vec[float32] logits, vec[vec[float32]] context_em
 		k = int32(len(logits))
 	}
 
-	top_k_indices := make(vec[int32])
-	top_k_vals := make(vec[float32])
+	top_k_indices := make(int32[])
+	top_k_vals := make(float32[])
 
 	for i := 0; i < len(logits); i = i + 1 {
 		val := logits[i]
@@ -211,11 +211,11 @@ func contrastive_decoding_step(vec[float32] logits, vec[vec[float32]] context_em
 		inserted := false
 		for j := 0; j < len(top_k_vals); j = j + 1 {
 			if val > top_k_vals[j] {
-				top_k_vals = append(make(vec[float32]), top_k_vals[:j]...)
+				top_k_vals = append(make(float32[]), top_k_vals[:j]...)
 				top_k_vals = append(top_k_vals, val)
 				top_k_vals = append(top_k_vals, top_k_vals[j+1:]...)
 
-				top_k_indices = append(make(vec[int32]), top_k_indices[:j]...)
+				top_k_indices = append(make(int32[]), top_k_indices[:j]...)
 				top_k_indices = append(top_k_indices, int32(i))
 				top_k_indices = append(top_k_indices, top_k_indices[j+1:]...)
 

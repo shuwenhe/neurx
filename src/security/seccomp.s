@@ -62,7 +62,7 @@ func create_seccomp_rule(syscall_nr int, syscall_name string, action int) (secco
 // 添加过滤规则到过滤程序
 func (filter* seccomp_filter) add_rule(rule seccomp_rule) (int, string) {
     rule.rule_id = filter.total_rules
-    filter.rules.push(rule)
+    filter.rules = append(filter.rules, rule)
     filter.total_rules = filter.total_rules + 1
     
     return rule.rule_id, ""
@@ -76,8 +76,8 @@ func (filter* seccomp_filter) add_condition(arg_index int, comparator int, value
         value: value
     }
     
-    filter.conditions.push(condition)
-    return filter.conditions.len() - 1, ""
+    filter.conditions = append(filter.conditions, condition)
+    return len(filter.conditions) - 1, ""
 }
 
 // 检查系统调用权限
@@ -90,7 +90,7 @@ func (mgr* seccomp_manager) check_syscall(syscall_nr int, arg0 int, arg1 int, ar
     
     // 查找规则
     i := 0
-    for i < mgr.current_filter.rules.len() {
+    for i < len(mgr.current_filter.rules) {
         rule := mgr.current_filter.rules[i]
         
         if rule.syscall_nr == syscall_nr {
@@ -122,8 +122,8 @@ func create_seccomp_filter(name string) (seccomp_filter, string) {
     filter := seccomp_filter{
         filter_id: 0,
         filter_name: name,
-        rules: vec(),
-        conditions: vec(),
+        rules: {},
+        conditions: {},
         total_rules: 0
     }
     
@@ -137,7 +137,7 @@ func create_seccomp_manager() (seccomp_manager, string) {
     mgr := seccomp_manager{
         mode: SECCOMP_MODE_DISABLED,
         current_filter: filter,
-        filters: vec(),
+        filters: {},
         filter_counter: 0,
         denied_syscalls: 0,
         allowed_syscalls: 0,
@@ -169,7 +169,7 @@ func (mgr* seccomp_manager) enable_blacklist() (int, string) {
 // 加载过滤程序
 func (mgr* seccomp_manager) load_filter(filter seccomp_filter) (int, string) {
     filter.filter_id = mgr.filter_counter
-    mgr.filters.push(filter)
+    mgr.filters = append(mgr.filters, filter)
     mgr.current_filter = filter
     mgr.filter_counter = mgr.filter_counter + 1
     

@@ -288,7 +288,7 @@ func create_custom_neurx_config(
     mcfg.max_seq_len = seq_len
     mcfg.dims = dims
     training_config tcfg = default_training_config()
-    return (mcfg, tcfg)
+    return mcfg, tcfg
 }
 
 func test_rope_scaling_module() {

@@ -329,7 +329,7 @@ func build_mlm_mask(
     tensor mask_positions = random_matrix < mask_prob
     tensor random_replace_prob = rand(batch_size, seq_len)
     tensor masked_labels = where(mask_positions, input_ids, full_like(input_ids, -100))
-    return (mask_positions, masked_labels)
+    return mask_positions, masked_labels
 }
 
 struct transformer_block_state {
@@ -398,7 +398,7 @@ func transformer_block_forward(
         ffn_output = linear(gate * up, block.down_proj_weight)
     }
     hidden_states = residual + ffn_output
-    return (hidden_states, maybe_attn_weights)
+    return hidden_states, maybe_attn_weights
 }
 
 struct neurx_model {
@@ -675,7 +675,7 @@ func compute_neurx_loss(
     int num_tokens = batch * seq_len
     if attention_mask != none:
         num_tokens = int((attention_mask! != 0).sum().item())
-    return (loss, num_tokens)
+    return loss, num_tokens
 }
 
 func test_neurx_architecture() {

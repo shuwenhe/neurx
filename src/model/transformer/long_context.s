@@ -122,7 +122,7 @@ func new_paged_kv_cache(long_context_config config) paged_kv_cache {
     }
     int i = 0
     for i < config.num_kv_blocks {
-        cache.blocks.push(new_kv_cache_block(config.kv_cache_block_size, num_heads, head_dim))
+        cache.blocks = append(cache.blocks, new_kv_cache_block(config.kv_cache_block_size, num_heads, head_dim))
         cache.blocks[i].block_id = i
         i = i + 1
     }
@@ -475,7 +475,7 @@ func long_context_update_state(long_context_state state, int new_position) long_
                 end_pos: (new_segment_idx + 1) * state.config.segment_size - 1,
                 segment_embedding: compute_segment_embedding(new_segment_idx, 8192),
             }
-            state.segments.push(seg_info)
+            state.segments = append(state.segments, seg_info)
         }
     }
     state

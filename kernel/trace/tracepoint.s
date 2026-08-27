@@ -12,7 +12,7 @@ struct trace_event {
 }
 
 struct trace_buffer {
-    vec[trace_event] events
+    trace_event[] events
     int buffer_size
     int write_pos
     int read_pos
@@ -26,7 +26,7 @@ struct tracepoint {
 }
 
 struct trace_session {
-    vec[tracepoint] tracepoints
+    tracepoint[] tracepoints
     trace_buffer buffer
     int session_id
     int recording
@@ -34,7 +34,7 @@ struct trace_session {
 
 func create_trace_buffer(int size) trace_buffer {
     buffer := trace_buffer {
-        events: vec[trace_event](),
+        events: trace_event[](),
         buffer_size: size,
         write_pos: 0,
         read_pos: 0
@@ -49,7 +49,7 @@ func register_tracepoint(trace_session session, string tp_name) trace_session {
         enabled: 1,
         call_count: 0
     }
-    session.tracepoints.push(tp)
+    session.tracepoints = append(session.tracepoints, tp)
     session
 }
 
@@ -62,7 +62,7 @@ func trace_event_record(trace_buffer buffer, string event_type, int pid, string 
         cpu_id: 0,
         event_data: data
     }
-    buffer.events.push(event)
+    buffer.events = append(buffer.events, event)
     buffer.write_pos = buffer.write_pos + 1
     buffer
 }

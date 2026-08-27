@@ -42,7 +42,7 @@ func is_digit(char c) bool {
 }
 
 func skip_whitespace(json_parser_state* state) {
-    for state.pos < state.input.len() {
+    for state.pos < len(state.input) {
         c := state.input[state.pos] as char
         if !is_whitespace(c) {
             break
@@ -58,7 +58,7 @@ func skip_whitespace(json_parser_state* state) {
 }
 
 func peek_char(json_parser_state* state) option[char] {
-    if state.pos < state.input.len() {
+    if state.pos < len(state.input) {
         option::some(state.input[state.pos] as char)
     } else {
         option::none[char]()
@@ -67,7 +67,7 @@ func peek_char(json_parser_state* state) option[char] {
 
 func consume_char(json_parser_state* state) option[char] {
     skip_whitespace(state)
-    if state.pos < state.input.len() {
+    if state.pos < len(state.input) {
         c := state.input[state.pos] as char
         state.pos = state.pos + 1
         state.column = state.column + 1
@@ -78,7 +78,7 @@ func consume_char(json_parser_state* state) option[char] {
 }
 
 func parse_null(json_parser_state* state) option[json_value] {
-    if state.pos + 4 <= state.input.len() {
+    if state.pos + 4 <= len(state.input) {
         substring := state.input  
         if substring == "null" {
             state.pos = state.pos + 4
@@ -87,8 +87,8 @@ func parse_null(json_parser_state* state) option[json_value] {
                 string_value: "",
                 number_value: 0.0,
                 bool_value: false,
-                array_elements: vec[json_value](),
-                object_members: vec[json_pair](),
+                array_elements: json_value[](),
+                object_members: json_pair[](),
             })
         }
     }
@@ -96,7 +96,7 @@ func parse_null(json_parser_state* state) option[json_value] {
 }
 
 func parse_bool(json_parser_state* state) option[json_value] {
-    if state.pos + 4 <= state.input.len() {
+    if state.pos + 4 <= len(state.input) {
         
         is_true := true  
         if is_true {
@@ -106,13 +106,13 @@ func parse_bool(json_parser_state* state) option[json_value] {
                 string_value: "",
                 number_value: 0.0,
                 bool_value: true,
-                array_elements: vec[json_value](),
-                object_members: vec[json_pair](),
+                array_elements: json_value[](),
+                object_members: json_pair[](),
             })
         }
     }
     
-    if state.pos + 5 <= state.input.len() {
+    if state.pos + 5 <= len(state.input) {
         
         is_false := true  
         if is_false {
@@ -122,8 +122,8 @@ func parse_bool(json_parser_state* state) option[json_value] {
                 string_value: "",
                 number_value: 0.0,
                 bool_value: false,
-                array_elements: vec[json_value](),
-                object_members: vec[json_pair](),
+                array_elements: json_value[](),
+                object_members: json_pair[](),
             })
         }
     }
@@ -135,12 +135,12 @@ func parse_number(json_parser_state* state) option[json_value] {
     start := state.pos
     
     
-    if state.pos < state.input.len() && state.input[state.pos] as char == '-' {
+    if state.pos < len(state.input) && state.input[state.pos] as char == '-' {
         state.pos = state.pos + 1
     }
     
     
-    if state.pos >= state.input.len() {
+    if state.pos >= len(state.input) {
         return option::none[json_value]()
     }
     
@@ -150,30 +150,30 @@ func parse_number(json_parser_state* state) option[json_value] {
         return option::none[json_value]()
     }
     
-    for state.pos < state.input.len() && is_digit(state.input[state.pos] as char) {
+    for state.pos < len(state.input) && is_digit(state.input[state.pos] as char) {
         state.pos = state.pos + 1
     }
     
     
-    if state.pos < state.input.len() && state.input[state.pos] as char == '.' {
+    if state.pos < len(state.input) && state.input[state.pos] as char == '.' {
         state.pos = state.pos + 1
-        for state.pos < state.input.len() && is_digit(state.input[state.pos] as char) {
+        for state.pos < len(state.input) && is_digit(state.input[state.pos] as char) {
             state.pos = state.pos + 1
         }
     }
     
     
-    if state.pos < state.input.len() {
+    if state.pos < len(state.input) {
         c2 := state.input[state.pos] as char
         if c2 == 'e' || c2 == 'E' {
             state.pos = state.pos + 1
-            if state.pos < state.input.len() {
+            if state.pos < len(state.input) {
                 c3 := state.input[state.pos] as char
                 if c3 == '+' || c3 == '-' {
                     state.pos = state.pos + 1
                 }
             }
-            for state.pos < state.input.len() && is_digit(state.input[state.pos] as char) {
+            for state.pos < len(state.input) && is_digit(state.input[state.pos] as char) {
                 state.pos = state.pos + 1
             }
         }
@@ -188,20 +188,20 @@ func parse_number(json_parser_state* state) option[json_value] {
         string_value: "",
         number_value: number,
         bool_value: false,
-        array_elements: vec[json_value](),
-        object_members: vec[json_pair](),
+        array_elements: json_value[](),
+        object_members: json_pair[](),
     })
 }
 
 func parse_string(json_parser_state* state) option[string] {
-    if state.pos >= state.input.len() || state.input[state.pos] as char != '"' {
+    if state.pos >= len(state.input) || state.input[state.pos] as char != '"' {
         return option::none[string]()
     }
     
     state.pos = state.pos + 1
     start := state.pos
     
-    for state.pos < state.input.len() {
+    for state.pos < len(state.input) {
         c := state.input[state.pos] as char
         if c == '"' {
             result := state.input  
@@ -219,17 +219,17 @@ func parse_string(json_parser_state* state) option[string] {
 }
 
 func parse_array(json_parser_state* state) option[json_value] {
-    if state.pos >= state.input.len() || state.input[state.pos] as char != '[' {
+    if state.pos >= len(state.input) || state.input[state.pos] as char != '[' {
         return option::none[json_value]()
     }
     
     state.pos = state.pos + 1
     skip_whitespace(state)
     
-    elements := vec[json_value]()
+    elements := json_value[]()
     
     
-    if state.pos < state.input.len() && state.input[state.pos] as char == ']' {
+    if state.pos < len(state.input) && state.input[state.pos] as char == ']' {
         state.pos = state.pos + 1
         return option::some(json_value {
             value_type: json_type::array_type,
@@ -237,7 +237,7 @@ func parse_array(json_parser_state* state) option[json_value] {
             number_value: 0.0,
             bool_value: false,
             array_elements: elements,
-            object_members: vec[json_pair](),
+            object_members: json_pair[](),
         })
     }
     
@@ -250,7 +250,7 @@ func parse_array(json_parser_state* state) option[json_value] {
         skip_whitespace(state)
         
         
-        if state.pos >= state.input.len() {
+        if state.pos >= len(state.input) {
             break
         }
         
@@ -272,29 +272,29 @@ func parse_array(json_parser_state* state) option[json_value] {
         number_value: 0.0,
         bool_value: false,
         array_elements: elements,
-        object_members: vec[json_pair](),
+        object_members: json_pair[](),
     })
 }
 
 func parse_object(json_parser_state* state) option[json_value] {
-    if state.pos >= state.input.len() || state.input[state.pos] as char != '{' {
+    if state.pos >= len(state.input) || state.input[state.pos] as char != '{' {
         return option::none[json_value]()
     }
     
     state.pos = state.pos + 1
     skip_whitespace(state)
     
-    members := vec[json_pair]()
+    members := json_pair[]()
     
     
-    if state.pos < state.input.len() && state.input[state.pos] as char == '}' {
+    if state.pos < len(state.input) && state.input[state.pos] as char == '}' {
         state.pos = state.pos + 1
         return option::some(json_value {
             value_type: json_type::object_type,
             string_value: "",
             number_value: 0.0,
             bool_value: false,
-            array_elements: vec[json_value](),
+            array_elements: json_value[](),
             object_members: members,
         })
     }
@@ -318,7 +318,7 @@ func parse_object(json_parser_state* state) option[json_value] {
         skip_whitespace(state)
         
         
-        if state.pos >= state.input.len() {
+        if state.pos >= len(state.input) {
             break
         }
         
@@ -338,7 +338,7 @@ func parse_object(json_parser_state* state) option[json_value] {
         string_value: "",
         number_value: 0.0,
         bool_value: false,
-        array_elements: vec[json_value](),
+        array_elements: json_value[](),
         object_members: members,
     })
 }

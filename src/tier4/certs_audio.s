@@ -61,10 +61,10 @@ struct cert_manager {
 // 初始化证书管理器
 func cert_manager_init() (cert_manager, string) {
     manager := cert_manager{
-        certificates: vec(),
-        ca_list: vec(),
-        revocation_list: vec(),
-        trusted_roots: vec(),
+        certificates: {},
+        ca_list: {},
+        revocation_list: {},
+        trusted_roots: {},
         cert_counter: 0,
         crl_updated: 0
     }
@@ -82,21 +82,21 @@ func (manager* cert_manager) issue_certificate(subject_id int, issuer_id int, pu
         not_after: validity_days * 86400,  // 转换为秒
         subject_id: subject_id,
         issuer_id: issuer_id,
-        subject_alt_names: vec(),
+        subject_alt_names: {},
         public_key: public_key,
         signature_algo: 0,  // sha256withrsa
-        signature: vec(),
+        signature: {},
         self_signed: 0
     }
     
     // 生成签名（简化实现）
     i := 0
     for i < 256 {
-        cert.signature.push((i * 7 + subject_id) & 0xff)
+        cert.signature = append(cert.signature, (i * 7 + subject_id) & 0xff)
         i = i + 1
     }
     
-    manager.certificates.push(cert)
+    manager.certificates = append(manager.certificates, cert)
     manager.cert_counter = manager.cert_counter + 1
     
     return cert.cert_id, ""
@@ -104,14 +104,14 @@ func (manager* cert_manager) issue_certificate(subject_id int, issuer_id int, pu
 
 // 验证证书签名
 func (manager* cert_manager) verify_signature(cert_id int, data vec) (int, string) {
-    if cert_id >= manager.certificates.len() {
+    if cert_id >= len(manager.certificates) {
         return 0, "certificate not found"
     }
     
     cert := manager.certificates[cert_id]
     
     // 简化验证：检查数据长度
-    if data.len() == cert.signature.len() {
+    if len(data) == len(cert.signature) {
         return 1, ""  // valid
     }
     
@@ -120,18 +120,18 @@ func (manager* cert_manager) verify_signature(cert_id int, data vec) (int, strin
 
 // 撤销证书
 func (manager* cert_manager) revoke_certificate(cert_id int) (int, string) {
-    if cert_id >= manager.certificates.len() {
+    if cert_id >= len(manager.certificates) {
         return -1, "certificate not found"
     }
     
-    manager.revocation_list.push(cert_id)
+    manager.revocation_list = append(manager.revocation_list, cert_id)
     return 0, ""
 }
 
 // 检查证书是否已撤销
 func (manager* cert_manager) is_revoked(cert_id int) int {
     i := 0
-    for i < manager.revocation_list.len() {
+    for i < len(manager.revocation_list) {
         revoked_id := manager.revocation_list[i]
         if revoked_id == cert_id {
             return 1  // revoked
@@ -144,7 +144,7 @@ func (manager* cert_manager) is_revoked(cert_id int) int {
 
 // 验证证书链
 func (manager* cert_manager) verify_chain(cert_id int) (int, string) {
-    if cert_id >= manager.certificates.len() {
+    if cert_id >= len(manager.certificates) {
         return 0, "certificate not found"
     }
     
@@ -182,7 +182,7 @@ struct cert_info {
 }
 
 func (manager* cert_manager) get_cert_info(cert_id int) (cert_info, string) {
-    if cert_id >= manager.certificates.len() {
+    if cert_id >= len(manager.certificates) {
         return cert_info{}, "certificate not found"
     }
     
@@ -249,8 +249,8 @@ struct audio_driver {
 // 初始化音频驱动
 func audio_driver_init() (audio_driver, string) {
     driver := audio_driver{
-        devices: vec(),
-        mixers: vec(),
+        devices: {},
+        mixers: {},
         device_counter: 0,
         volume_level: 80
     }
@@ -266,13 +266,13 @@ func (driver* audio_driver) register_device(device_type int, sample_rate int, ch
         sample_rate: sample_rate,
         channels: channels,
         bit_depth: 16,  // 默认 16-bit
-        playback_buffers: vec(),
-        capture_buffers: vec(),
+        playback_buffers: {},
+        capture_buffers: {},
         underrun_count: 0,
         overrun_count: 0
     }
     
-    driver.devices.push(device)
+    driver.devices = append(driver.devices, device)
     driver.device_counter = driver.device_counter + 1
     
     return device.device_id, ""
@@ -280,14 +280,14 @@ func (driver* audio_driver) register_device(device_type int, sample_rate int, ch
 
 // 播放音频
 func (driver* audio_driver) play_audio(device_id int, buffer audio_buffer) (int, string) {
-    if device_id >= driver.devices.len() {
+    if device_id >= len(driver.devices) {
         return -1, "device not found"
     }
     
     device := driver.devices[device_id]
     
     if device.device_type == 0 || device.device_type == 2 {  // playback or duplex
-        device.playback_buffers.push(buffer.buffer_id)
+        device.playback_buffers = append(device.playback_buffers, buffer.buffer_id)
         driver.devices[device_id] = device
         return buffer.sample_count, ""
     }
@@ -297,7 +297,7 @@ func (driver* audio_driver) play_audio(device_id int, buffer audio_buffer) (int,
 
 // 捕获音频
 func (driver* audio_driver) capture_audio(device_id int, sample_count int) (audio_buffer, string) {
-    if device_id >= driver.devices.len() {
+    if device_id >= len(driver.devices) {
         return audio_buffer{}, "device not found"
     }
     
@@ -306,7 +306,7 @@ func (driver* audio_driver) capture_audio(device_id int, sample_count int) (audi
     if device.device_type == 1 || device.device_type == 2 {  // capture or duplex
         buffer := audio_buffer{
             buffer_id: 0,
-            samples: vec(),
+            samples: {},
             sample_count: sample_count,
             sample_rate: device.sample_rate,
             format: AUDIO_FORMAT_PCM,
@@ -316,7 +316,7 @@ func (driver* audio_driver) capture_audio(device_id int, sample_count int) (audi
         // 生成音频样本
         i := 0
         for i < sample_count {
-            buffer.samples.push((i * 31) & 0xff)
+            buffer.samples = append(buffer.samples, (i * 31) & 0xff)
             i = i + 1
         }
         
@@ -353,7 +353,7 @@ struct audio_info {
 }
 
 func (driver* audio_driver) get_device_info(device_id int) (audio_info, string) {
-    if device_id >= driver.devices.len() {
+    if device_id >= len(driver.devices) {
         return audio_info{}, "device not found"
     }
     

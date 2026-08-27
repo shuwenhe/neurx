@@ -44,7 +44,7 @@ struct user_quota {
 }
 
 struct usage_tracker {
-	vec[request_usage_record]   records
+	request_usage_record[]   records
 	map[string]user_quota       user_quotas
 
 	int64                       total_tokens_used
@@ -58,7 +58,7 @@ struct usage_tracker {
 
 func create_usage_tracker() usage_tracker {
 	return usage_tracker{
-		records:           make(vec[request_usage_record], 0, 10000),
+		records:           make(request_usage_record[], 0, 10000),
 		user_quotas:       make(map[string]user_quota),
 		total_tokens_used: 0,
 		total_requests:    0,

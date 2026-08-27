@@ -173,8 +173,8 @@ func ddp_add_param(ddp_state state, string param_name, int size) ddp_state {
     }
     []string params = copy_strings(state.params)
     []int param_sizes = copy_ints(state.param_sizes)
-    params.push(param_name)
-    param_sizes.push(clamp_positive(size, 1))
+    params = append(params, param_name)
+    param_sizes = append(param_sizes, clamp_positive(size, 1))
     ddp_state {
         name: state.name,
         backend: state.backend,
@@ -201,7 +201,7 @@ func ddp_mark_grad_ready(ddp_state state, string param_name) ddp_state {
         return ddp_state_dict(state)
     }
     []string ready = copy_strings(state.ready_params)
-    ready.push(param_name)
+    ready = append(ready, param_name)
     ddp_state {
         name: state.name,
         backend: state.backend,

@@ -1,6 +1,6 @@
 package neurx.tool_parsers.schema.schema_types
 
-use std.vec
+use std.slices
 
 const TYPE_STRING = "string"
 const TYPE_NUMBER = "number"

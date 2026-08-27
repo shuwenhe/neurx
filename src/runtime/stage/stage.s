@@ -118,7 +118,7 @@ func stage_has_param(stage_state state, string value) bool {
 
 func stage_add_stage(stage_state state, string value) stage_state {
     []string stages = copy_strings(state.stages)
-    stages.push(value)
+    stages = append(stages, value)
     stage_state {
         name: state.name,
         backend: state.backend,
@@ -141,7 +141,7 @@ func stage_add_stage(stage_state state, string value) stage_state {
 
 func stage_add_param(stage_state state, string value) stage_state {
     []string params = copy_strings(state.params)
-    params.push(value)
+    params = append(params, value)
     stage_state {
         name: state.name,
         backend: state.backend,
@@ -340,7 +340,7 @@ func stage_has_control_param(stage_state state, string param) bool {
 
 func stage_add_control_branch(stage_state state, string branch) stage_state {
     []string branches = copy_strings(state.control_branches)
-    branches.push(branch)
+    branches = append(branches, branch)
     stage_state {
         name: state.name,
         backend: state.backend,
@@ -363,7 +363,7 @@ func stage_add_control_branch(stage_state state, string branch) stage_state {
 
 func stage_add_control_param(stage_state state, string param) stage_state {
     []string params = copy_strings(state.control_params)
-    params.push(param)
+    params = append(params, param)
     stage_state {
         name: state.name,
         backend: state.backend,
@@ -704,13 +704,13 @@ func transform_chain_to_stage(transform_chain chain, string name, string backend
                 if primitive == "control_param" {
                     control_enabled = true
                     if joined != "" {
-                        control_params.push(joined)
+                        control_params = append(control_params, joined)
                     }
                 } else {
                     control_enabled = true
-                    control_branches.push(primitive)
+                    control_branches = append(control_branches, primitive)
                     if joined != "" {
-                        control_params.push(joined)
+                        control_params = append(control_params, joined)
                     }
                     if primitive == "cond" {
                         control_cond_enabled = true

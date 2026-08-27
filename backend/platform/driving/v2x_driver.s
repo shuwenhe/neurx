@@ -31,12 +31,12 @@ func new_v2x_driver(string interface) v2x_driver {
         broadcast_rate_hz: 10,
         v2i_enabled: false,
         v2v_enabled: true,
-        peer_ids: vec[string](),
+        peer_ids: string[](),
     }
 }
 
 func (v2x_driver* driver) register_peer(string peer_id) {
-    driver.peer_ids.push(peer_id)
+    driver.peer_ids = append(driver.peer_ids, peer_id)
 }
 
 func (driver* driver) send_message(v2x_message msg) bool {    true
@@ -46,7 +46,7 @@ func (driver* driver) receive_message() option[v2x_message] {
     option::none[v2x_message]()
 }
 
-func (driver* driver) get_peer_count() int {    driver.peer_ids.len()
+func (driver* driver) get_peer_count() int {    len(driver.peer_ids)
 }
 
 func (driver* driver) get_broadcast_rate_hz() int {    driver.broadcast_rate_hz

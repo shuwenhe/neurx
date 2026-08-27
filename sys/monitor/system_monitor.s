@@ -49,58 +49,58 @@ func create_monitor() monitor_state {
     monitor
 }
 
-func update_cpu_usage(monitor: *monitor_state, cpu_usage: int) {
+func update_cpu_usage(monitor_state* monitor, cpu_usage: int) {
     monitor.metrics.cpu_usage = cpu_usage
     if cpu_usage > monitor.limits.max_cpu_usage {
         monitor.threshold_violations = monitor.threshold_violations + 1
     }
 }
 
-func update_memory_usage(monitor: *monitor_state, memory_usage: int64) {
+func update_memory_usage(monitor_state* monitor, memory_usage: int64) {
     monitor.metrics.memory_usage = memory_usage
     if memory_usage > monitor.limits.max_memory_usage {
         monitor.threshold_violations = monitor.threshold_violations + 1
     }
 }
 
-func update_gpu_usage(monitor: *monitor_state, gpu_usage: int) {
+func update_gpu_usage(monitor_state* monitor, gpu_usage: int) {
     monitor.metrics.gpu_usage = gpu_usage
     if gpu_usage > monitor.limits.max_gpu_usage {
         monitor.threshold_violations = monitor.threshold_violations + 1
     }
 }
 
-func update_inference_latency(monitor: *monitor_state, latency_ms: int) {
+func update_inference_latency(monitor_state* monitor, latency_ms: int) {
     monitor.metrics.inference_latency_ms = latency_ms
     if latency_ms > monitor.limits.max_latency_ms {
         monitor.threshold_violations = monitor.threshold_violations + 1
     }
 }
 
-func update_throughput(monitor: *monitor_state, throughput: int) {
+func update_throughput(monitor_state* monitor, throughput: int) {
     monitor.metrics.throughput_ops_per_sec = throughput
 }
 
-func get_metrics(monitor: *monitor_state) system_metrics {
+func get_metrics(monitor_state* monitor) system_metrics {
     monitor.metrics
 }
 
-func get_violations(monitor: *monitor_state) int {
+func get_violations(monitor_state* monitor) int {
     monitor.threshold_violations
 }
 
-func set_resource_limits(monitor: *monitor_state, max_cpu: int, max_memory: int64, max_gpu: int, max_latency: int) {
+func set_resource_limits(monitor_state* monitor, max_cpu: int, max_memory: int64, max_gpu: int, max_latency: int) {
     monitor.limits.max_cpu_usage = max_cpu
     monitor.limits.max_memory_usage = max_memory
     monitor.limits.max_gpu_usage = max_gpu
     monitor.limits.max_latency_ms = max_latency
 }
 
-func reset_violations(monitor: *monitor_state) {
+func reset_violations(monitor_state* monitor) {
     monitor.threshold_violations = 0
 }
 
-func is_healthy(monitor: *monitor_state) bool {
+func is_healthy(monitor_state* monitor) bool {
     cpu_ok := monitor.metrics.cpu_usage <= monitor.limits.max_cpu_usage
     mem_ok := monitor.metrics.memory_usage <= monitor.limits.max_memory_usage
     gpu_ok := monitor.metrics.gpu_usage <= monitor.limits.max_gpu_usage
@@ -109,7 +109,7 @@ func is_healthy(monitor: *monitor_state) bool {
     cpu_ok && mem_ok && gpu_ok && latency_ok
 }
 
-func get_health_score(monitor: *monitor_state) int {
+func get_health_score(monitor_state* monitor) int {
     cpu_score := 100 - monitor.metrics.cpu_usage
     gpu_score := 100 - monitor.metrics.gpu_usage
     
@@ -119,6 +119,6 @@ func get_health_score(monitor: *monitor_state) int {
     (cpu_score + gpu_score + latency_score) / 3
 }
 
-func report_metrics(monitor: *monitor_state) (int, int64, int, int) {
+func report_metrics(monitor_state* monitor) (int, int64, int, int) {
     (monitor.metrics.cpu_usage, monitor.metrics.memory_usage, monitor.metrics.gpu_usage, monitor.metrics.inference_latency_ms)
 }

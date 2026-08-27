@@ -67,8 +67,8 @@ func evaluate_code(string code, []test_case test_cases) . CodeEvaluation {
     return code_evaluation{
         compiles: true,
         passes_tests: true,
-        num_tests_passed: test_cases.len(),
-        num_tests_total: test_cases.len(),
+        num_tests_passed: len(test_cases),
+        num_tests_total: len(test_cases),
         style_score: 1.0,
         execution_time: 0.1,
         correctness_score: 1.0,
@@ -103,7 +103,7 @@ func (grpo_pass_k_trainer* trainer) compute_passk_advantages(
     [][]code_evaluation evaluations,
     [][]f32 rewards
 ) . [][]f32 {
-    batch_size := evaluations.len()
+    batch_size := len(evaluations)
     k := trainer.config.k_samples
     advantages := []
     for b in 0..batch_size {
@@ -123,9 +123,9 @@ func (grpo_pass_k_trainer* trainer) compute_passk_advantages(
             if trainer.config.use_passk_advantage && group_evals[i].passes_tests {
                 adv *= (1.0 + passk)
             }
-            group_advantages.push(adv)
+            group_advantages = append(group_advantages, adv)
         }
-        advantages.push(group_advantages)
+        advantages = append(advantages, group_advantages)
     }
     return advantages
 }
@@ -139,7 +139,7 @@ func (grpo_pass_k_trainer* trainer) normalize_advantages(
     all_advantages := []
     for group in advantages {
         for adv in group {
-            all_advantages.push(adv)
+            all_advantages = append(all_advantages, adv)
         }
     }
     mean := compute_mean(all_advantages)
@@ -152,9 +152,9 @@ func (grpo_pass_k_trainer* trainer) normalize_advantages(
             if trainer.config.advantage_clip > 0.0 {
                 norm_adv = clamp_scalar(norm_adv, -trainer.config.advantage_clip, trainer.config.advantage_clip)
             }
-            norm_group.push(norm_adv)
+            norm_group = append(norm_group, norm_adv)
         }
-        normalized.push(norm_group)
+        normalized = append(normalized, norm_group)
     }
     return normalized
 }
@@ -163,7 +163,7 @@ func (grpo_pass_k_trainer* trainer) train_step(
     []string prompts,
     [][]test_case test_cases
 ) . (f32, f32, f32) {
-    batch_size := prompts.len()
+    batch_size := len(prompts)
     k := trainer.config.k_samples
     all_codes := []
     all_log_probs := []
@@ -176,11 +176,11 @@ func (grpo_pass_k_trainer* trainer) train_step(
                 temperature: trainer.config.passk_temperature,
                 return_log_probs: true
             )
-            codes.push(code)
-            log_probs.push(log_prob)
+            codes = append(codes, code)
+            log_probs = append(log_probs, log_prob)
         }
-        all_codes.push(codes)
-        all_log_probs.push(log_probs)
+        all_codes = append(all_codes, codes)
+        all_log_probs = append(all_log_probs, log_probs)
     }
     all_evaluations := []
     all_rewards := []
@@ -190,11 +190,11 @@ func (grpo_pass_k_trainer* trainer) train_step(
         for i in 0..k {
             eval := evaluate_code(all_codes[b][i], test_cases[b])
             reward := trainer.compute_code_reward(eval)
-            evaluations.push(eval)
-            rewards.push(reward)
+            evaluations = append(evaluations, eval)
+            rewards = append(rewards, reward)
         }
-        all_evaluations.push(evaluations)
-        all_rewards.push(rewards)
+        all_evaluations = append(all_evaluations, evaluations)
+        all_rewards = append(all_rewards, rewards)
     }
     advantages := trainer.compute_passk_advantages(all_evaluations, all_rewards)
     normalized_advantages := trainer.normalize_advantages(advantages)
@@ -234,7 +234,7 @@ func (grpo_pass_k_trainer* trainer) train_step(
         trainer.optimizer.zero_grad()
     }
     avg_passk := total_passk / f32(batch_size)
-    trainer.passk_history.push(avg_passk)
+    trainer.passk_history = append(trainer.passk_history, avg_passk)
     trainer.success_rate = avg_passk
     trainer.step_count += 1
     return (
@@ -245,25 +245,25 @@ func (grpo_pass_k_trainer* trainer) train_step(
 }
 
 func compute_mean([]f32 values) . f32 {
-    if values.len() == 0 {
+    if len(values) == 0 {
         return 0.0
     }
     sum := 0.0
     for v in values {
         sum += v
     }
-    return sum / f32(values.len())
+    return sum / f32(len(values))
 }
 
 func compute_std([]f32 values, f32 mean) . f32 {
-    if values.len() == 0 {
+    if len(values) == 0 {
         return 1.0
     }
     sum_sq := 0.0
     for v in values {
         sum_sq += (v - mean) * (v - mean)
     }
-    return sqrt(sum_sq / f32(values.len()))
+    return sqrt(sum_sq / f32(len(values)))
 }
 
 func clamp_scalar(f32 x, f32 min_val, f32 max_val) . f32 {

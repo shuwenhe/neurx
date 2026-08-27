@@ -113,8 +113,8 @@ func test_moe_route_top_k() int {
     int num_experts = 4
     int top_k = 2
     []float hidden_vec = make([]float, hidden)
-    hidden_vec[0] = 1.0
-    hidden_vec[1] = 2.0
+    hidden_0[] = 1.0
+    hidden_1[] = 2.0
     []float gate_w = make([]float, num_experts * hidden)
     gate_w[1 * hidden + 0] = 1.0
     gate_w[1 * hidden + 1] = 1.0

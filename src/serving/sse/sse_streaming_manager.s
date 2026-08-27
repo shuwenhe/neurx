@@ -69,7 +69,7 @@ struct stream_event_log {
 struct streaming_pipeline {
 	streaming_handler              handler
 
-	vec[stream_event_log]         event_logs
+	stream_event_log[]         event_logs
 	int32                         event_log_capacity
 
 	int32                         total_stream_bytes_sent
@@ -267,7 +267,7 @@ func (streaming_handler* h) get_stream_stats() map[string]interface{} {
 func create_streaming_pipeline(max_concurrent int32, max_buffer int32) streaming_pipeline {
 	return streaming_pipeline{
 		handler:                  create_streaming_handler(max_concurrent, max_buffer),
-		event_logs:              make(vec[stream_event_log], 0, 1000),
+		event_logs:              make(stream_event_log[], 0, 1000),
 		event_log_capacity:      1000,
 		total_stream_bytes_sent: 0,
 		total_stream_chunks_sent: 0,
@@ -387,10 +387,10 @@ func (streaming_pipeline* p) get_pipeline_stats() map[string]interface{} {
 	return pipeline_stats
 }
 
-func (streaming_pipeline* p) get_event_logs() vec[stream_event_log] {
+func (streaming_pipeline* p) get_event_logs() stream_event_log[] {
 	return p.event_logs
 }
 
 func (streaming_pipeline* p) clear_event_logs() {
-	p.event_logs = make(vec[stream_event_log], 0, 1000)
+	p.event_logs = make(stream_event_log[], 0, 1000)
 }

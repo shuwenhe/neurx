@@ -452,7 +452,7 @@ func get_blocked_tokens([]int past_tokens, int ngram_size, int vocab_size) []int
     i = 0
     for i < vocab_size {
         if blocked[i] == 1 {
-            out.push(i)
+            out = append(out, i)
         }
         i = i + 1
     }
@@ -650,7 +650,7 @@ func process_logits([]float logits, []int past_tokens, sampling_config config) [
 func sample_from_distribution([]float probs, uint64 rng_state) (int, uint64) {
     int n = len(probs)
     if n == 0 {
-        return (-1, advance_rng(rng_state))
+        return -1, advance_rng(rng_state)
     }
     float r = random_float_01(rng_state)
     float cumsum = 0.0
@@ -658,7 +658,7 @@ func sample_from_distribution([]float probs, uint64 rng_state) (int, uint64) {
     for i < n {
         cumsum = cumsum + probs[i]
         if r < cumsum {
-            return (i, advance_rng(rng_state))
+            return i, advance_rng(rng_state)
         }
         i = i + 1
     }
@@ -770,7 +770,7 @@ func select_top_beams([]beam_state candidates, int k) []beam_state {
     []beam_state out = []beam_state{cap: k}
     i = 0
     for i < k {
-        out.push(candidates[i])
+        out = append(out, candidates[i])
         i = i + 1
     }
     out
@@ -817,7 +817,7 @@ func beam_search_decode(
             if token == eos_token_id && len(greedy) >= config.min_length {
                 break
             }
-            greedy.push(token)
+            greedy = append(greedy, token)
             step = step + 1
         }
         return greedy
@@ -843,7 +843,7 @@ func beam_search_decode(
         for b < len(beams) {
             beam_state beam = beams[b]
             if beam.is_finished {
-                candidates.push(beam)
+                candidates = append(candidates, beam)
             } else {
                 []float logits = copy_float(all_logits[step])
                 logits = process_logits(logits, beam.token_ids, config)
@@ -856,7 +856,7 @@ func beam_search_decode(
                 for i < expand {
                     int token = ranked[i]
                     []int new_tokens = copy_int(beam.token_ids)
-                    new_tokens.push(token)
+                    new_tokens = append(new_tokens, token)
                     bool is_finished = token == eos_token_id && len(new_tokens) >= config.min_length
                     candidates.push(beam_state {
                         token_ids: new_tokens,
@@ -876,9 +876,9 @@ func beam_search_decode(
         int i = 0
         for i < len(selected) {
             if selected[i].is_finished {
-                finished.push(selected[i])
+                finished = append(finished, selected[i])
             } else if len(beams) < num_beams {
-                beams.push(selected[i])
+                beams = append(beams, selected[i])
             }
             i = i + 1
         }
@@ -889,7 +889,7 @@ func beam_search_decode(
     }
     int i = 0
     for i < len(beams) {
-        finished.push(beams[i])
+        finished = append(finished, beams[i])
         i = i + 1
     }
     if len(finished) == 0 {
@@ -905,7 +905,7 @@ func beam_search_decode_two_steps(
     int eos_token_id
 ) []int {
     [][]float all_logits = [][]float{cap: 2}
-    all_logits.push(first_logits)
-    all_logits.push(second_logits)
+    all_logits = append(all_logits, first_logits)
+    all_logits = append(all_logits, second_logits)
     beam_search_decode(all_logits, config, eos_token_id)
 }

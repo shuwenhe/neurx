@@ -29,18 +29,18 @@ struct driver_api_call {
 }
 
 struct device_abi_context {
-    vec[kernel_launch_request] pending_kernels
-    vec[collective_launch_request] pending_collectives
-    vec[driver_api_call] api_history
+    kernel_launch_request[] pending_kernels
+    collective_launch_request[] pending_collectives
+    driver_api_call[] api_history
     int kernel_counter
     int api_counter
 }
 
 func create_device_abi() device_abi_context {
     ctx := device_abi_context {
-        pending_kernels: vec[kernel_launch_request](),
-        pending_collectives: vec[collective_launch_request](),
-        api_history: vec[driver_api_call](),
+        pending_kernels: kernel_launch_request[](),
+        pending_collectives: collective_launch_request[](),
+        api_history: driver_api_call[](),
         kernel_counter: 0,
         api_counter: 0
     }
@@ -58,7 +58,7 @@ func queue_kernel_launch(device_abi_context ctx, int device_id, int grid_x, int 
         block_y: 1,
         block_z: 1
     }
-    ctx.pending_kernels.push(req)
+    ctx.pending_kernels = append(ctx.pending_kernels, req)
     ctx.kernel_counter = ctx.kernel_counter + 1
     ctx
 }
@@ -71,7 +71,7 @@ func queue_collective_operation(device_abi_context ctx, string op_type, int rank
         world_size: world_size,
         tensor_size: 1024
     }
-    ctx.pending_collectives.push(req)
+    ctx.pending_collectives = append(ctx.pending_collectives, req)
     ctx.api_counter = ctx.api_counter + 1
     ctx
 }
@@ -83,7 +83,7 @@ func submit_to_cuda_runtime(device_abi_context ctx) device_abi_context {
         device_id: 0,
         success: true
     }
-    ctx.api_history.push(api_call)
+    ctx.api_history = append(ctx.api_history, api_call)
     ctx.api_counter = ctx.api_counter + 1
     ctx
 }
@@ -95,13 +95,13 @@ func submit_to_nccl_allreduce(device_abi_context ctx) device_abi_context {
         device_id: 0,
         success: true
     }
-    ctx.api_history.push(api_call)
+    ctx.api_history = append(ctx.api_history, api_call)
     ctx.api_counter = ctx.api_counter + 1
     ctx
 }
 
 func get_pending_kernel_count(device_abi_context ctx) int {
-    ctx.pending_kernels.len()
+    len(ctx.pending_kernels)
 }
 
 func get_api_call_count(device_abi_context ctx) int {

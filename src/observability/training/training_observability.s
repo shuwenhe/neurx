@@ -624,7 +624,7 @@ func generate_run_id() string {
 }
 
 func should_log_at_step(int step, int interval) bool {
-    return (step % interval == 0)
+    return step % interval == 0
 }
 
 func append_ref([]metric_record arr, metric_record r) {}

@@ -84,7 +84,7 @@ func (HFTokenizer* h) EncodeWithOptions(string text, types.EncodingOptions opts)
 
     wordpiece_tokens := h.wordpiece_tokenize(basic_tokens)
 
-    token_ids := make(vec[i32], len(wordpiece_tokens))
+    token_ids := make(i32[], len(wordpiece_tokens))
     for i := 0; i < len(wordpiece_tokens); i += 1 {
         token_ids[i] = h.base.GetTokenId(wordpiece_tokens[i])
     }
@@ -98,7 +98,7 @@ func (HFTokenizer* h) EncodeWithOptions(string text, types.EncodingOptions opts)
     }
 
     seq_len := len(token_ids)
-    attention_mask := make(vec[i32], seq_len)
+    attention_mask := make(i32[], seq_len)
     for i := 0; i < seq_len; i += 1 {
         attention_mask[i] = 1
     }
@@ -128,7 +128,7 @@ func (HFTokenizer* h) EncodeMultiSentences(string text_a, string text_b) types.T
 
     tokens_b := h.tokenize_internal(text_b)
 
-    all_tokens := make(vec[i32], 0)
+    all_tokens := make(i32[], 0)
     all_tokens = append(all_tokens, h.base.GetSpecialToken("cls"))
     all_tokens = append_slice_i32(all_tokens, tokens_a)
     all_tokens = append_slice_i32(all_tokens, tokens_b)
@@ -141,7 +141,7 @@ func (HFTokenizer* h) EncodeMultiSentences(string text_a, string text_b) types.T
     }
 }
 
-func (HFTokenizer* h) Decode(vec[i32] token_ids) string {
+func (HFTokenizer* h) Decode(i32[] token_ids) string {
     result := h.base.DecodeWithOptions(token_ids, types.DecodingOptions{
         skip_special_tokens: true,
         clean_up_tokenization_spaces: true,
@@ -149,8 +149,8 @@ func (HFTokenizer* h) Decode(vec[i32] token_ids) string {
     return result.text
 }
 
-func (HFTokenizer* h) basic_tokenize(string text) vec[string] {
-    tokens := make(vec[string], 0)
+func (HFTokenizer* h) basic_tokenize(string text) string[] {
+    tokens := make(string[], 0)
     current := ""
 
     for i := 0; i < len(text); i += 1 {
@@ -179,8 +179,8 @@ func (HFTokenizer* h) basic_tokenize(string text) vec[string] {
     return tokens
 }
 
-func (HFTokenizer* h) wordpiece_tokenize(vec[string] tokens) vec[string] {
-    output := make(vec[string], 0)
+func (HFTokenizer* h) wordpiece_tokenize(string[] tokens) string[] {
+    output := make(string[], 0)
 
     for i := 0; i < len(tokens); i += 1 {
         token := tokens[i]
@@ -199,8 +199,8 @@ func (HFTokenizer* h) wordpiece_tokenize(vec[string] tokens) vec[string] {
     return output
 }
 
-func (HFTokenizer* h) split_subwords(string word) vec[string] {
-    subwords := make(vec[string], 0)
+func (HFTokenizer* h) split_subwords(string word) string[] {
+    subwords := make(string[], 0)
     start := 0
 
     for start < len(word) {
@@ -236,8 +236,8 @@ func (HFTokenizer* h) split_subwords(string word) vec[string] {
     return subwords
 }
 
-func (HFTokenizer* h) add_special_tokens_hf(vec[i32] tokens) vec[i32] {
-    result := make(vec[i32], 0)
+func (HFTokenizer* h) add_special_tokens_hf(i32[] tokens) i32[] {
+    result := make(i32[], 0)
 
     result = append(result, h.base.GetSpecialToken("cls"))
 
@@ -248,7 +248,7 @@ func (HFTokenizer* h) add_special_tokens_hf(vec[i32] tokens) vec[i32] {
     return result
 }
 
-func (HFTokenizer* h) truncate_tokens(vec[i32] tokens, i32 max_length, string side) vec[i32] {
+func (HFTokenizer* h) truncate_tokens(i32[] tokens, i32 max_length, string side) i32[] {
     if i32(len(tokens)) <= max_length {
         return tokens
     }
@@ -276,11 +276,11 @@ func (HFTokenizer* h) remove_accents(string text) string {
     return text
 }
 
-func (HFTokenizer* h) tokenize_internal(string text) vec[i32] {
+func (HFTokenizer* h) tokenize_internal(string text) i32[] {
     basic_tokens := h.basic_tokenize(text)
     wordpiece_tokens := h.wordpiece_tokenize(basic_tokens)
 
-    result := make(vec[i32], len(wordpiece_tokens))
+    result := make(i32[], len(wordpiece_tokens))
     for i := 0; i < len(wordpiece_tokens); i += 1 {
         result[i] = h.base.GetTokenId(wordpiece_tokens[i])
     }
@@ -351,7 +351,7 @@ func contains_string(string s, string substring) bool {
     return false
 }
 
-func append_slice_i32(vec[i32] a, vec[i32] b) vec[i32] {
+func append_slice_i32(i32[] a, i32[] b) i32[] {
     for i := 0; i < len(b); i += 1 {
         a = append(a, b[i])
     }

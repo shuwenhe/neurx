@@ -3,7 +3,7 @@ package sampling
 import "math"
 
 struct beam_hypothesis {
-	sequences vec[int32]
+	sequences int32[]
 	score float32
 	length int32
 }
@@ -15,8 +15,8 @@ struct beam_search_state {
 	early_stopping bool
 	num_beams int32
 
-	current_beams vec[beam_hypothesis]
-	final_beams vec[beam_hypothesis]
+	current_beams beam_hypothesis[]
+	final_beams beam_hypothesis[]
 
 	batch_size int32
 	eos_token_id int32
@@ -32,8 +32,8 @@ func create_beam_search_state(int32 beam_width, int32 max_length, float32 length
 		length_penalty: length_penalty,
 		early_stopping: early_stopping,
 		num_beams: beam_width,
-		current_beams: make(vec[beam_hypothesis]),
-		final_beams: make(vec[beam_hypothesis]),
+		current_beams: make(beam_hypothesis[]),
+		final_beams: make(beam_hypothesis[]),
 		batch_size: 1,
 		eos_token_id: 2,
 		pad_token_id: 0,
@@ -41,12 +41,12 @@ func create_beam_search_state(int32 beam_width, int32 max_length, float32 length
 	}
 }
 
-func (b* beam_search_state) init_beams(vec[int32] initial_tokens) {
-	b.current_beams = make(vec[beam_hypothesis])
+func (b* beam_search_state) init_beams(int32[] initial_tokens) {
+	b.current_beams = make(beam_hypothesis[])
 
 	for i := 0; i < int32(b.beam_width); i = i + 1 {
 		beam := beam_hypothesis{
-			sequences: make(vec[int32]),
+			sequences: make(int32[]),
 			score: 0.0,
 			length: 1,
 		}
@@ -61,8 +61,8 @@ func (b* beam_search_state) init_beams(vec[int32] initial_tokens) {
 	b.step = 1
 }
 
-func (b* beam_search_state) expand_beams(vec[float32] logits) vec[beam_hypothesis] {
-	candidates := make(vec[beam_hypothesis])
+func (b* beam_search_state) expand_beams(float32[] logits) beam_hypothesis[] {
+	candidates := make(beam_hypothesis[])
 
 	for beam_idx := 0; beam_idx < len(b.current_beams); beam_idx = beam_idx + 1 {
 		beam := b.current_beams[beam_idx]
@@ -70,7 +70,7 @@ func (b* beam_search_state) expand_beams(vec[float32] logits) vec[beam_hypothesi
 		for token_idx := 0; token_idx < len(logits); token_idx = token_idx + 1 {
 			next_score := beam.score + logits[token_idx]
 
-			new_sequences := make(vec[int32])
+			new_sequences := make(int32[])
 			for j := 0; j < len(beam.sequences); j = j + 1 {
 				new_sequences = append(new_sequences, beam.sequences[j])
 			}
@@ -89,12 +89,12 @@ func (b* beam_search_state) expand_beams(vec[float32] logits) vec[beam_hypothesi
 	return candidates
 }
 
-func (b* beam_search_state) select_top_beams(vec[beam_hypothesis] candidates) vec[beam_hypothesis] {
+func (b* beam_search_state) select_top_beams(beam_hypothesis[] candidates) beam_hypothesis[] {
 	if len(candidates) <= 0 {
-		return make(vec[beam_hypothesis])
+		return make(beam_hypothesis[])
 	}
 
-	sorted := make(vec[beam_hypothesis])
+	sorted := make(beam_hypothesis[])
 	for i := 0; i < len(candidates); i = i + 1 {
 		sorted = append(sorted, candidates[i])
 	}
@@ -115,7 +115,7 @@ func (b* beam_search_state) select_top_beams(vec[beam_hypothesis] candidates) ve
 		sorted[max_idx] = temp
 	}
 
-	result := make(vec[beam_hypothesis])
+	result := make(beam_hypothesis[])
 	for i := 0; i < len(sorted) && i < int32(b.beam_width); i = i + 1 {
 		result = append(result, sorted[i])
 	}
@@ -123,7 +123,7 @@ func (b* beam_search_state) select_top_beams(vec[beam_hypothesis] candidates) ve
 	return result
 }
 
-func (b* beam_search_state) step_beam_search(vec[float32] logits) bool {
+func (b* beam_search_state) step_beam_search(float32[] logits) bool {
 	if b.step >= b.max_length {
 		return false
 	}
@@ -138,10 +138,10 @@ func (b* beam_search_state) step_beam_search(vec[float32] logits) bool {
 	return true
 }
 
-func (b* beam_search_state) finalize() vec[vec[int32]] {
-	result := make(vec[vec[int32]])
+func (b* beam_search_state) finalize() int32[][]] {
+	result := make(int32[][]])
 
-	sorted := make(vec[beam_hypothesis])
+	sorted := make(beam_hypothesis[])
 	for i := 0; i < len(b.current_beams); i = i + 1 {
 		sorted = append(sorted, b.current_beams[i])
 	}
@@ -195,7 +195,7 @@ struct diverse_beam_search_state {
 	base_state* beam_search_state
 	num_groups int32
 	diversity_penalty float32
-	group_beams vec[vec[beam_hypothesis]]
+	group_beams beam_hypothesis[[]]
 }
 
 func create_diverse_beam_search_state(int32 beam_width, int32 num_groups, float32 diversity_penalty) diverse_beam_search_state* {
@@ -209,13 +209,13 @@ func create_diverse_beam_search_state(int32 beam_width, int32 num_groups, float3
 		base_state: create_beam_search_state(group_width, 512, 1.0, false),
 		num_groups: num_groups,
 		diversity_penalty: diversity_penalty,
-		group_beams: make(vec[vec[beam_hypothesis]]),
+		group_beams: make(beam_hypothesis[[]]),
 	}
 }
 
-func (d* diverse_beam_search_state) step(vec[float32] logits) bool {
+func (d* diverse_beam_search_state) step(float32[] logits) bool {
 	for group_idx := 0; group_idx < int32(d.num_groups); group_idx = group_idx + 1 {
-		adjusted_logits := make(vec[float32])
+		adjusted_logits := make(float32[])
 
 		for token_idx := 0; token_idx < len(logits); token_idx = token_idx + 1 {
 			val := logits[token_idx]
@@ -242,7 +242,7 @@ func (d* diverse_beam_search_state) step(vec[float32] logits) bool {
 	return true
 }
 
-func calculate_beam_search_probs(vec[float32] logits) vec[float32] {
+func calculate_beam_search_probs(float32[] logits) float32[] {
 	max_logit := logits[0]
 	for i := 1; i < len(logits); i = i + 1 {
 		if logits[i] > max_logit {
@@ -250,7 +250,7 @@ func calculate_beam_search_probs(vec[float32] logits) vec[float32] {
 		}
 	}
 
-	probs := make(vec[float32])
+	probs := make(float32[])
 	sum := 0.0
 
 	for i := 0; i < len(logits); i = i + 1 {

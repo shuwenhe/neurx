@@ -315,10 +315,10 @@ func transformer_forward([][]float embeddings) [][]float {
         []float row = []float{cap: hidden}
         int c = 0
         for c < hidden {
-            row.push(A[r * hidden + c])
+            row = append(row, A[r * hidden + c])
             c = c + 1
         }
-        result.push(row)
+        result = append(result, row)
         r = r + 1
     }
     result

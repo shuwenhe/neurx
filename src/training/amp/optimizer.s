@@ -192,7 +192,7 @@ func mixed_precision_training_step(
             learning_rate, state, config
         )
     }
-    return (updated_params, loss, overflow_info.has_overflow)
+    return updated_params, loss, overflow_info.has_overflow
 }
 
 func distributed_gradient_sync(
@@ -262,7 +262,7 @@ func compute_mixed_precision_memory_savings(
     }
     memory_saved := fp32_total - mixed_total
     speedup := fp32_total / mixed_total
-    return (memory_saved, speedup)
+    return memory_saved, speedup
 }
 
 func estimate_throughput_improvement(

@@ -64,5 +64,5 @@ func raise_irq(is irq_state, int irq_num) irq_state {
 func drain_hardirq(is irq_state) (irq_state, []int) {
     []int fired = is.pending_hardirq
     is.pending_hardirq = []
-    return (is, fired)
+    return is, fired
 }

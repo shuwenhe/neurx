@@ -90,7 +90,7 @@ func control_has_param(control_state state, string param) bool {
 
 func control_add_branch(control_state state, string branch) control_state {
     []string branches = copy_strings(state.branches)
-    branches.push(branch)
+    branches = append(branches, branch)
     control_state {
         name: state.name,
         cond_enabled: true,
@@ -104,7 +104,7 @@ func control_add_branch(control_state state, string branch) control_state {
 
 func control_add_param(control_state state, string param) control_state {
     []string params = copy_strings(state.params)
-    params.push(param)
+    params = append(params, param)
     control_state {
         name: state.name,
         cond_enabled: state.cond_enabled,

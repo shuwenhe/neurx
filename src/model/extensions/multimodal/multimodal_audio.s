@@ -19,14 +19,14 @@ struct audio_metadata {
 }
 
 struct audio_data {
-    vec[float32] samples
+    float32[] samples
     audio_metadata* metadata
     int32 num_samples
     string source_url
 }
 
 struct spectrogram_data {
-    vec[vec[float32]] spectrogram
+    float32[][]] spectrogram
     int32 num_freq_bins
     int32 num_time_frames
     int32 hop_length
@@ -70,7 +70,7 @@ func (audio_processor* proc) resample_audio(audio_data* audio, int32 new_sample_
     new_num_samples := int32(float32(audio.num_samples) * ratio)
 
     resampled := *audio_data{
-        samples: make(vec[float32]),
+        samples: make(float32[]),
         metadata: *audio_metadata{
             sample_rate: new_sample_rate,
             num_channels: audio.metadata.num_channels,
@@ -103,7 +103,7 @@ func (audio_processor* proc) normalize_audio(audio_data* audio) audio_data* {
     }
 
     normalized := *audio_data{
-        samples: make(vec[float32]),
+        samples: make(float32[]),
         metadata: audio.metadata,
         num_samples: audio.num_samples,
         source_url: audio.source_url,
@@ -118,7 +118,7 @@ func (audio_processor* proc) normalize_audio(audio_data* audio) audio_data* {
 
 func (audio_processor* proc) compute_spectrogram(audio_data* audio) spectrogram_data {
     spec := spectrogram_data{
-        spectrogram: make(vec[vec[float32]]),
+        spectrogram: make(float32[][]]),
         num_freq_bins: proc.fft_size / 2,
         num_time_frames: (audio.num_samples - proc.fft_size) / proc.hop_length,
         hop_length: proc.hop_length,
@@ -126,7 +126,7 @@ func (audio_processor* proc) compute_spectrogram(audio_data* audio) spectrogram_
     }
 
     for frame := 0; frame < spec.num_time_frames; frame = frame + 1 {
-        frame_data := make(vec[float32])
+        frame_data := make(float32[])
         for i := 0; i < proc.fft_size / 2; i = i + 1 {
             frame_data = append(frame_data, 0.1)
         }
@@ -136,13 +136,13 @@ func (audio_processor* proc) compute_spectrogram(audio_data* audio) spectrogram_
     return spec
 }
 
-func (audio_processor* proc) compute_mfcc(audio_data* audio) vec[vec[float32]] {
-    mfcc_features := make(vec[vec[float32]])
+func (audio_processor* proc) compute_mfcc(audio_data* audio) float32[][]] {
+    mfcc_features := make(float32[][]])
 
     spec := proc.compute_spectrogram(audio)
 
     for frame_idx := 0; frame_idx < spec.num_time_frames; frame_idx = frame_idx + 1 {
-        mfcc_frame := make(vec[float32])
+        mfcc_frame := make(float32[])
         for mel_idx := 0; mel_idx < proc.num_mel_bins; mel_idx = mel_idx + 1 {
             mfcc_frame = append(mfcc_frame, 0.0)
         }
@@ -157,7 +157,7 @@ func (audio_processor* proc) remove_silence(audio_data* audio) audio_data* {
         return audio
     }
 
-    trimmed_samples := make(vec[float32])
+    trimmed_samples := make(float32[])
 
     for i := 0; i < len(audio.samples); i = i + 1 {
         if audio.samples[i] > proc.noise_threshold || audio.samples[i] < -proc.noise_threshold {

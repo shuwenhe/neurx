@@ -105,8 +105,8 @@ func agent_perception_parse_kv(string raw) agent_perception_result {
                     j = j + 1
                 }
                 if eq >= 0 {
-                    keys.push(trim(string(pair[0:eq])))
-                    values.push(trim(string(pair[eq + 1:len(pair)])))
+                    keys = append(keys, trim(string(pair[0:eq])))
+                    values = append(values, trim(string(pair[eq + 1:len(pair)])))
                 }
             }
             item = ""

@@ -47,11 +47,11 @@ func PaddingTruncationExample() {
 
     tokenizer_inst := tokenizer.NewBaseTokenizer(config)
 
-    short_seq := make(vec[i32], 0)
+    short_seq := make(i32[], 0)
     short_seq = append(short_seq, 1)
     short_seq = append(short_seq, 2)
 
-    long_seq := make(vec[i32], 0)
+    long_seq := make(i32[], 0)
     for i := 0; i < 20; i += 1 {
         long_seq = append(long_seq, i32(i+1))
     }
@@ -66,7 +66,7 @@ func PaddingTruncationExample() {
     println("  Original:", len(long_seq))
     println("  Truncated:", len(truncated))
 
-    sequences := make(vec[vec[i32]], 0)
+    sequences := make(i32[][]], 0)
     sequences = append(sequences, short_seq)
     sequences = append(sequences, long_seq)
 
@@ -83,7 +83,7 @@ func CachePerformanceExample() {
     cache_lru := cache.NewTokenCache(100000, "lru")
     cache_lfu := cache.NewTokenCache(100000, "lfu")
 
-    texts := make(vec[string], 0)
+    texts := make(string[], 0)
     texts = append(texts, "hello world")
     texts = append(texts, "hello there")
     texts = append(texts, "goodbye world")
@@ -91,7 +91,7 @@ func CachePerformanceExample() {
     texts = append(texts, "hello world")
 
     for i := 0; i < len(texts); i += 1 {
-        tokens := make(vec[i32], 0)
+        tokens := make(i32[], 0)
         for j := 0; j < 5; j += 1 {
             tokens = append(tokens, i32(j+1))
         }
@@ -118,7 +118,7 @@ func SpecialTokenProcessingExample() {
 
     mgr := special_tokens.NewSpecialTokenManager()
 
-    tokens := make(vec[i32], 0)
+    tokens := make(i32[], 0)
     tokens = append(tokens, 2)
     tokens = append(tokens, 7592)
     tokens = append(tokens, 2088)
@@ -149,7 +149,7 @@ func SpecialTokenProcessingExample() {
 func TokenSequenceAnalysisExample() {
     println("\n=== Token Sequence Analysis Example ===\n")
 
-    tokens := make(vec[i32], 0)
+    tokens := make(i32[], 0)
     tokens = append(tokens, 1)
     tokens = append(tokens, 2)
     tokens = append(tokens, 3)
@@ -229,7 +229,7 @@ func PerformanceBenchmarkingExample() {
 
     tokenizer_inst := tokenizer.NewBaseTokenizer(config)
 
-    texts := make(vec[string], 0)
+    texts := make(string[], 0)
     texts = append(texts, "Hello world")
     texts = append(texts, "How are you")
     texts = append(texts, "Hello world")

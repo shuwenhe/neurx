@@ -55,7 +55,7 @@ func (w v1_async_engine_wrapper*) get_async_result(request_id string) (stream_ou
 	return w.async_engine.get_generation_output(request_id)
 }
 
-func (w v1_async_engine_wrapper*) stream_async_output(request_id string) vec[stream_event] {
+func (w v1_async_engine_wrapper*) stream_async_output(request_id string) stream_event[] {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
@@ -185,7 +185,7 @@ func (w v1_async_engine_wrapper*) is_enabled() bool {
 struct async_stream_handler {
 	engine              v1_async_engine_wrapper*
 	request_id          string
-	event_buffer        vec[stream_event]
+	event_buffer        stream_event[]
 
 	mu                  sync.Mutex
 }
@@ -197,11 +197,11 @@ func create_stream_handler(
 	return async_stream_handler{
 		engine:       engine,
 		request_id:   request_id,
-		event_buffer: make(vec[stream_event], 0, 1024),
+		event_buffer: make(stream_event[], 0, 1024),
 	}
 }
 
-func (h async_stream_handler*) poll_events() vec[stream_event] {
+func (h async_stream_handler*) poll_events() stream_event[] {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
@@ -211,16 +211,16 @@ func (h async_stream_handler*) poll_events() vec[stream_event] {
 	return events
 }
 
-func (h async_stream_handler*) drain_events() vec[stream_event] {
+func (h async_stream_handler*) drain_events() stream_event[] {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
-	events := make(vec[stream_event], 0, len(h.event_buffer))
+	events := make(stream_event[], 0, len(h.event_buffer))
 	for event := range h.event_buffer {
 		events = append(events, event)
 	}
 
-	h.event_buffer = make(vec[stream_event], 0, 1024)
+	h.event_buffer = make(stream_event[], 0, 1024)
 
 	return events
 }
@@ -255,7 +255,7 @@ func (h async_stream_handler*) cancel() bool {
 
 struct async_batch_processor {
 	engine              v1_async_engine_wrapper*
-	request_ids         vec[string]
+	request_ids         string[]
 
 	mu                  sync.Mutex
 }
@@ -263,11 +263,11 @@ struct async_batch_processor {
 func create_batch_processor(engine v1_async_engine_wrapper*) async_batch_processor {
 	return async_batch_processor{
 		engine:      engine,
-		request_ids: make(vec[string], 0, 32),
+		request_ids: make(string[], 0, 32),
 	}
 }
 
-func (bp async_batch_processor*) submit_batch(request_ids vec[string], params interface{}, priority int32) (int32, error) {
+func (bp async_batch_processor*) submit_batch(request_ids string[], params interface{}, priority int32) (int32, error) {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()
 
@@ -284,11 +284,11 @@ func (bp async_batch_processor*) submit_batch(request_ids vec[string], params in
 	return submitted, nil
 }
 
-func (bp async_batch_processor*) get_batch_results() vec[stream_output] {
+func (bp async_batch_processor*) get_batch_results() stream_output[] {
 	bp.mu.Lock()
 	defer bp.mu.Unlock()
 
-	results := make(vec[stream_output], 0, len(bp.request_ids))
+	results := make(stream_output[], 0, len(bp.request_ids))
 
 	for request_id := range bp.request_ids {
 		output, exists := bp.engine.get_async_result(request_id)

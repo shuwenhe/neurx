@@ -1,6 +1,6 @@
 package neurx.inference.v1_api_integration
 
-use std.vec
+use std.slices
 
 
     waiting_prefill,
@@ -55,16 +55,16 @@ struct v1_engine {
 func new_v1_engine(v1_engine_config config) v1_engine {
     v1_engine {
         config: config,
-        request_phases: vec[request_phase](cap: 1024),
-        prompt_lengths: vec[int](cap: 1024),
-        generated_lengths: vec[int](cap: 1024),
+        request_phases: request_phase[](cap: 1024),
+        prompt_lengths: int[](cap: 1024),
+        generated_lengths: int[](cap: 1024),
         current_prefill_batch: prefill_batch {
-            request_ids: vec[](),
+            request_ids: [](),
             total_tokens: 0,
             batch_size: 0,
         },
         current_decode_batch: decode_batch {
-            request_ids: vec[](),
+            request_ids: [](),
             batch_size: 0,
         },
         total_requests_received: 0,
@@ -81,9 +81,9 @@ func (v1_engine* engine) submit_request(
     request_id := engine.total_requests_received
     engine.total_requests_received += 1
 
-    engine.request_phases.push(request_phase.waiting_prefill)
-    engine.prompt_lengths.push(prompt_tokens.len())
-    engine.generated_lengths.push(0)
+    engine.request_phases = append(engine.request_phases, request_phase.waiting_prefill)
+    engine.prompt_lengths = append(engine.prompt_lengths, len(prompt_tokens))
+    engine.generated_lengths = append(engine.generated_lengths, 0)
 
     return request_id
 }
@@ -96,7 +96,7 @@ func (v1_engine* engine) schedule_prefill_batch() bool {
     prefill_count := 0
     total_tokens := 0
 
-    for i in 0..engine.request_phases.len() {
+    for i in len(0..engine.request_phases) {
         if engine.request_phases[i] != request_phase.waiting_prefill {
             continue
         }
@@ -110,7 +110,7 @@ func (v1_engine* engine) schedule_prefill_batch() bool {
             break
         }
 
-        engine.current_prefill_batch.request_ids.push(i)
+        engine.current_prefill_batch.request_ids = append(engine.current_prefill_batch.request_ids, i)
         total_tokens += prompt_len
         prefill_count += 1
 
@@ -147,7 +147,7 @@ func (v1_engine* engine) schedule_decode_batch() bool {
     decode_count := 0
     tokens_budget := engine.config.decode_token_budget
 
-    for i in 0..engine.request_phases.len() {
+    for i in len(0..engine.request_phases) {
         if engine.request_phases[i] != request_phase.waiting_decode &&
            engine.request_phases[i] != request_phase.in_decode {
             continue
@@ -161,7 +161,7 @@ func (v1_engine* engine) schedule_decode_batch() bool {
 
         if decode_count < engine.config.max_decode_batch_size {
             if tokens_budget > 0 {
-                engine.current_decode_batch.request_ids.push(i)
+                engine.current_decode_batch.request_ids = append(engine.current_decode_batch.request_ids, i)
                 decode_count += 1
                 tokens_budget -= 1
 
@@ -226,7 +226,7 @@ struct v1_engine_stats {
 
 func (v1_engine* engine) get_stats() v1_engine_stats {
     total_tokens := 0
-    for i in 0..engine.generated_lengths.len() {
+    for i in len(0..engine.generated_lengths) {
         total_tokens += engine.generated_lengths[i]
     }
 
@@ -305,7 +305,7 @@ func main() {
 
     println("📥 提交请求:")
     for i in 0..12 {
-        prompt := vec[1, 2, 3, 4, 5]
+        prompt := 1, 2, 3, 4, 5[]
         req_id := engine.submit_request(prompt, 128)
         if i % 3 == 0 {
             println(f"  Request {req_id} submitted (5 tokens)")

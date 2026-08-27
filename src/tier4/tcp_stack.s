@@ -93,13 +93,13 @@ struct tcp_ip_stack {
 // 初始化 TCP/IP 栈
 func tcp_ip_init(local_ip int, netmask int) (tcp_ip_stack, string) {
     stack := tcp_ip_stack{
-        connections: vec(),
-        routes: vec(),
-        arp_cache: vec(),
+        connections: {},
+        routes: {},
+        arp_cache: {},
         local_ip: local_ip,
         netmask: netmask,
         gateway_ip: 0,
-        recv_packets: vec(),
+        recv_packets: {},
         pkt_count: 0
     }
     
@@ -117,21 +117,21 @@ func (stack* tcp_ip_stack) tcp_connect(src_port int, dst_ip int, dst_port int) (
         seq_num: 12345,
         ack_num: 0,
         window_size: 65535,
-        send_buffer: vec(),
-        recv_buffer: vec(),
+        send_buffer: {},
+        recv_buffer: {},
         retransmit_count: 0,
         timeout_ms: 3000
     }
     
     conn.state = TCP_SYN_SENT  // 发送 SYN
-    stack.connections.push(conn)
+    stack.connections = append(stack.connections, conn)
     
-    return stack.connections.len() - 1, ""
+    return len(stack.connections) - 1, ""
 }
 
 // TCP 接收 SYN+ACK，转换为 ESTABLISHED
 func (stack* tcp_ip_stack) tcp_established(conn_id int) (int, string) {
-    if conn_id < 0 || conn_id >= stack.connections.len() {
+    if conn_id < 0 || conn_id >= len(stack.connections) {
         return -1, "invalid connection id"
     }
     
@@ -144,7 +144,7 @@ func (stack* tcp_ip_stack) tcp_established(conn_id int) (int, string) {
 
 // 发送 TCP 数据
 func (stack* tcp_ip_stack) tcp_send(conn_id int, data vec, len int) (int, string) {
-    if conn_id < 0 || conn_id >= stack.connections.len() {
+    if conn_id < 0 || conn_id >= len(stack.connections) {
         return -1, "invalid connection id"
     }
     
@@ -156,7 +156,7 @@ func (stack* tcp_ip_stack) tcp_send(conn_id int, data vec, len int) (int, string
     
     i := 0
     for i < len {
-        conn.send_buffer.push(data[i])
+        conn.send_buffer = append(conn.send_buffer, data[i])
         i = i + 1
     }
     
@@ -168,13 +168,13 @@ func (stack* tcp_ip_stack) tcp_send(conn_id int, data vec, len int) (int, string
 
 // 接收 TCP 数据
 func (stack* tcp_ip_stack) tcp_recv(conn_id int) (vec, string) {
-    if conn_id < 0 || conn_id >= stack.connections.len() {
-        return vec(), "invalid connection id"
+    if conn_id < 0 || conn_id >= len(stack.connections) {
+        return {}, "invalid connection id"
     }
     
     conn := stack.connections[conn_id]
     data := conn.recv_buffer
-    conn.recv_buffer = vec()
+    conn.recv_buffer = {}
     stack.connections[conn_id] = conn
     
     return data, ""
@@ -182,7 +182,7 @@ func (stack* tcp_ip_stack) tcp_recv(conn_id int) (vec, string) {
 
 // 关闭 TCP 连接
 func (stack* tcp_ip_stack) tcp_close(conn_id int) (int, string) {
-    if conn_id < 0 || conn_id >= stack.connections.len() {
+    if conn_id < 0 || conn_id >= len(stack.connections) {
         return -1, "invalid connection id"
     }
     
@@ -195,7 +195,7 @@ func (stack* tcp_ip_stack) tcp_close(conn_id int) (int, string) {
 
 // 获取连接状态
 func (stack* tcp_ip_stack) tcp_get_state(conn_id int) (int, string) {
-    if conn_id < 0 || conn_id >= stack.connections.len() {
+    if conn_id < 0 || conn_id >= len(stack.connections) {
         return -1, "invalid connection id"
     }
     
@@ -208,7 +208,7 @@ func (stack* tcp_ip_stack) udp_send(src_port int, dst_ip int, dst_port int, data
     pkt := udp_packet{
         src_port: src_port,
         dst_port: dst_port,
-        length: data.len() + 8,
+        length: len(data) + 8,
         checksum: 0,
         data: data
     }
@@ -216,7 +216,7 @@ func (stack* tcp_ip_stack) udp_send(src_port int, dst_ip int, dst_port int, data
     // 简单校验和（仅用于演示）
     checksum := 0
     i := 0
-    for i < pkt.data.len() {
+    for i < len(pkt.data) {
         checksum = checksum + pkt.data[i]
         i = i + 1
     }
@@ -235,8 +235,8 @@ func (stack* tcp_ip_stack) add_route(dest_ip int, netmask int, gateway int, metr
         interface_id: 0
     }
     
-    stack.routes.push(route)
-    return stack.routes.len() - 1, ""
+    stack.routes = append(stack.routes, route)
+    return len(stack.routes) - 1, ""
 }
 
 // 查询路由
@@ -245,7 +245,7 @@ func (stack* tcp_ip_stack) lookup_route(dst_ip int) (route_entry, string) {
     best_metric := 999999
     
     i := 0
-    for i < stack.routes.len() {
+    for i < len(stack.routes) {
         route := stack.routes[i]
         
         if (dst_ip & route.netmask) == (route.dest_ip & route.netmask) {
@@ -285,8 +285,8 @@ func (stack* tcp_ip_stack) get_stats() (tcp_ip_stats, string) {
         local_ip: stack.local_ip,
         netmask: stack.netmask,
         gateway_ip: stack.gateway_ip,
-        tcp_connections: stack.connections.len(),
-        routes: stack.routes.len(),
+        tcp_connections: len(stack.connections),
+        routes: len(stack.routes),
         packets_received: stack.pkt_count
     }
     
@@ -296,7 +296,7 @@ func (stack* tcp_ip_stack) get_stats() (tcp_ip_stats, string) {
 // ARP 缓存查询
 func (stack* tcp_ip_stack) arp_lookup(ip int) (int, string) {
     i := 0
-    for i < stack.arp_cache.len() {
+    for i < len(stack.arp_cache) {
         // 简化：返回虚拟 MAC 地址
         return ip & 0xffffff, ""
     }
@@ -306,8 +306,8 @@ func (stack* tcp_ip_stack) arp_lookup(ip int) (int, string) {
 
 // ARP 缓存添加
 func (stack* tcp_ip_stack) arp_add(ip int, mac int) (int, string) {
-    stack.arp_cache.push(ip)
-    stack.arp_cache.push(mac)
+    stack.arp_cache = append(stack.arp_cache, ip)
+    stack.arp_cache = append(stack.arp_cache, mac)
     return 0, ""
 }
 

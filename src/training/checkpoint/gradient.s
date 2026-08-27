@@ -52,7 +52,7 @@ func checkpoint_wrapper(func layer_fn, []autograd.tensor inputs, checkpoint_conf
     }
     []autograd.tensor detached_outputs = []autograd.tensor{cap: len(outputs)}
     for i := 0; i < len(outputs); i += 1 {
-        detached_outputs.push(autograd.tensor_detach(outputs[i]))
+        detached_outputs = append(detached_outputs, autograd.tensor_detach(outputs[i]))
     }
     func backward_fn([]autograd.tensor grads) []autograd.tensor {
         autograd.enable_grad()
@@ -62,7 +62,7 @@ func checkpoint_wrapper(func layer_fn, []autograd.tensor inputs, checkpoint_conf
             autograd.backward_with_grad(recomputed_outputs[i], grads[i])
         }
         for i := 0; i < len(inputs); i += 1 {
-            result_grads.push(inputs[i].grad)
+            result_grads = append(result_grads, inputs[i].grad)
         }
         autograd.disable_grad()
         result_grads
@@ -85,7 +85,7 @@ func checkpoint_module(pointer module, []autograd.tensor inputs, checkpoint_conf
     }
     []autograd.tensor detached_outputs = []autograd.tensor{cap: len(outputs)}
     for i := 0; i < len(outputs); i += 1 {
-        detached_outputs.push(autograd.tensor_detach(outputs[i]))
+        detached_outputs = append(detached_outputs, autograd.tensor_detach(outputs[i]))
     }
     func recompute_fn() []autograd.tensor {
         autograd.enable_grad()
@@ -101,7 +101,7 @@ func checkpoint_module(pointer module, []autograd.tensor inputs, checkpoint_conf
                 autograd.backward_with_grad(recomputed[j], grads[j])
             }
             for j := 0; j < len(inputs); j += 1 {
-                input_grads.push(inputs[j].grad)
+                input_grads = append(input_grads, inputs[j].grad)
             }
             input_grads
         })
@@ -153,12 +153,12 @@ func estimate_memory_savings(checkpoint_config config, int num_layers, int layer
 }
 
 func checkpoint_save_tensor(autograd.tensor tensor, checkpoint_state state) checkpoint_state {
-    state.saved_tensors.push([tensor])
+    state.saved_tensors = append(state.saved_tensors, [tensor])
     state
 }
 
 func checkpoint_save_tensors([][]autograd.tensor tensors, checkpoint_state state) checkpoint_state {
-    state.saved_tensors.push(tensors)
+    state.saved_tensors = append(state.saved_tensors, tensors)
     state
 }
 
@@ -189,7 +189,7 @@ func checkpoint_layer_forward(checkpoint_layer layer, []autograd.tensor inputs) 
     layer.needs_recompute = true
     []autograd.tensor detached = []autograd.tensor{cap: len(layer.outputs[0])}
     for i := 0; i < len(layer.outputs[0]); i += 1 {
-        detached.push(autograd.tensor_detach(layer.outputs[0][i]))
+        detached = append(detached, autograd.tensor_detach(layer.outputs[0][i]))
     }
     detached
 }
@@ -205,7 +205,7 @@ func checkpoint_layer_backward(checkpoint_layer layer, []autograd.tensor grads) 
         autograd.backward_with_grad(recomputed[i], grads[i])
     }
     for i := 0; i < len(layer.inputs[0]); i += 1 {
-        input_grads.push(layer.inputs[0][i].grad)
+        input_grads = append(input_grads, layer.inputs[0][i].grad)
     }
     autograd.disable_grad()
     layer.needs_recompute = false

@@ -311,7 +311,7 @@ func backward_has_tag(backward_state state, string tag) bool {
 
 func backward_add_step(backward_state state, string step) backward_state {
     []string steps = copy_strings(state.steps)
-    steps.push(step)
+    steps = append(steps, step)
     backward_state {
         name: state.name,
         ready: true,
@@ -329,8 +329,8 @@ func backward_add_step(backward_state state, string step) backward_state {
 func backward_add_step_with_param(backward_state state, string step, string param) backward_state {
     []string steps = copy_strings(state.steps)
     []string params = copy_strings(state.params)
-    steps.push(step)
-    params.push(param)
+    steps = append(steps, step)
+    params = append(params, param)
     backward_state {
         name: state.name,
         ready: true,
@@ -347,7 +347,7 @@ func backward_add_step_with_param(backward_state state, string step, string para
 
 func backward_add_input(backward_state state, string input) backward_state {
     []string inputs = copy_strings(state.inputs)
-    inputs.push(input)
+    inputs = append(inputs, input)
     backward_state {
         name: state.name,
         ready: true,
@@ -364,7 +364,7 @@ func backward_add_input(backward_state state, string input) backward_state {
 
 func backward_add_output(backward_state state, string output) backward_state {
     []string outputs = copy_strings(state.outputs)
-    outputs.push(output)
+    outputs = append(outputs, output)
     backward_state {
         name: state.name,
         ready: true,
@@ -381,7 +381,7 @@ func backward_add_output(backward_state state, string output) backward_state {
 
 func backward_add_tag(backward_state state, string tag) backward_state {
     []string tags = copy_strings(state.tags)
-    tags.push(tag)
+    tags = append(tags, tag)
     backward_state {
         name: state.name,
         ready: true,

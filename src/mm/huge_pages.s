@@ -19,8 +19,8 @@ struct huge_pages_pool {
 
 // 初始化 Huge Pages 池
 func (huge_pages_pool* hpool) init(int pages_2mb_count, int pages_1gb_count) (int, string) {
-    hpool.pages_2mb = vec()
-    hpool.pages_1gb = vec()
+    hpool.pages_2mb = {}
+    hpool.pages_1gb = {}
     hpool.total_2mb = pages_2mb_count
     hpool.total_1gb = pages_1gb_count
     
@@ -32,7 +32,7 @@ func (huge_pages_pool* hpool) init(int pages_2mb_count, int pages_1gb_count) (in
             free: true,
             pool_index: i
         }
-        hpool.pages_2mb.push(page)
+        hpool.pages_2mb = append(hpool.pages_2mb, page)
         i = i + 1
     }
     
@@ -44,7 +44,7 @@ func (huge_pages_pool* hpool) init(int pages_2mb_count, int pages_1gb_count) (in
             free: true,
             pool_index: j
         }
-        hpool.pages_1gb.push(page)
+        hpool.pages_1gb = append(hpool.pages_1gb, page)
         j = j + 1
     }
     
@@ -54,7 +54,7 @@ func (huge_pages_pool* hpool) init(int pages_2mb_count, int pages_1gb_count) (in
 // 分配 2MB Huge Page
 func (huge_pages_pool* hpool) allocate_2mb() (huge_page, string) {
     i := 0
-    for i < hpool.pages_2mb.len() {
+    for i < len(hpool.pages_2mb) {
         page := hpool.pages_2mb[i]
         if page.free {
             page.free = false
@@ -69,7 +69,7 @@ func (huge_pages_pool* hpool) allocate_2mb() (huge_page, string) {
 // 分配 1GB Huge Page
 func (huge_pages_pool* hpool) allocate_1gb() (huge_page, string) {
     i := 0
-    for i < hpool.pages_1gb.len() {
+    for i < len(hpool.pages_1gb) {
         page := hpool.pages_1gb[i]
         if page.free {
             page.free = false
@@ -85,7 +85,7 @@ func (huge_pages_pool* hpool) allocate_1gb() (huge_page, string) {
 func (huge_pages_pool* hpool) free_page(huge_page hp) (int, string) {
     if hp.size == 2097152 {
         i := 0
-        for i < hpool.pages_2mb.len() {
+        for i < len(hpool.pages_2mb) {
             page := hpool.pages_2mb[i]
             if page.base_address == hp.base_address {
                 page.free = true
@@ -96,7 +96,7 @@ func (huge_pages_pool* hpool) free_page(huge_page hp) (int, string) {
         }
     } else if hp.size == 1073741824 {
         j := 0
-        for j < hpool.pages_1gb.len() {
+        for j < len(hpool.pages_1gb) {
             page := hpool.pages_1gb[j]
             if page.base_address == hp.base_address {
                 page.free = true
@@ -115,7 +115,7 @@ func (huge_pages_pool hpool) get_stats() (int, int, int, int) {
     free_1gb := 0
     
     i := 0
-    for i < hpool.pages_2mb.len() {
+    for i < len(hpool.pages_2mb) {
         if hpool.pages_2mb[i].free {
             free_2mb = free_2mb + 1
         }
@@ -123,7 +123,7 @@ func (huge_pages_pool hpool) get_stats() (int, int, int, int) {
     }
     
     j := 0
-    for j < hpool.pages_1gb.len() {
+    for j < len(hpool.pages_1gb) {
         if hpool.pages_1gb[j].free {
             free_1gb = free_1gb + 1
         }

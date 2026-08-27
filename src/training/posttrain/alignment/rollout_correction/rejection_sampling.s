@@ -156,7 +156,7 @@ func compute_rejection_sampling(
     Tensor response_mask
 ) . []rs_result {
     results := []
-    if config.rs_modes.len() == 0 {
+    if len(config.rs_modes) == 0 {
         return results
     }
     reference_log_probs := Tensor()
@@ -165,7 +165,7 @@ func compute_rejection_sampling(
     } else {
         reference_log_probs = old_log_probs
     }
-    for i in 0..config.rs_modes.len() {
+    for i in len(0..config.rs_modes) {
         mode := config.rs_modes[i]
         threshold := config.rs_thresholds[i]
         result := RSResult()
@@ -189,13 +189,13 @@ func compute_rejection_sampling(
                 )
             }
         }
-        results.push(result)
+        results = append(results, result)
     }
     return results
 }
 
 func combine_rejection_results([]rs_result results) . RSResult {
-    if results.len() == 0 {
+    if len(results) == 0 {
         return rs_result{
             rejection_mask: tensor_zeros([1, 1]).to_bool(),
             rejection_scores: tensor_zeros([1, 1]),
@@ -204,11 +204,11 @@ func combine_rejection_results([]rs_result results) . RSResult {
             max_score: 0.0,
         }
     }
-    if results.len() == 1 {
+    if len(results) == 1 {
         return results[0]
     }
     combined_mask := results[0].rejection_mask
-    for i in 1..results.len() {
+    for i in len(1..results) {
         combined_mask = combined_mask | results[i].rejection_mask
     }
     total_rejection_rate := 0.0
@@ -225,7 +225,7 @@ func combine_rejection_results([]rs_result results) . RSResult {
         rejection_mask: combined_mask,
         rejection_scores: results[0].rejection_scores,
         rejection_rate: combined_mask.to_float().mean().item(),
-        mean_score: total_mean_score / f32(results.len()),
+        mean_score: total_mean_score / f32(len(results)),
         max_score: max_score,
     }
 }
@@ -239,13 +239,13 @@ func apply_rejection_to_mask(
 
 func compute_rs_statistics([]rs_result results) . map[string]f32 {
     stats := map[string]f32{}
-    for i in 0..results.len() {
+    for i in len(0..results) {
         prefix := f"rs_mode_{i}"
         stats[prefix + "_rejection_rate"] = results[i].rejection_rate
         stats[prefix + "_mean_score"] = results[i].mean_score
         stats[prefix + "_max_score"] = results[i].max_score
     }
-    if results.len() > 0 {
+    if len(results) > 0 {
         combined := combine_rejection_results(results)
         stats["rs_combined_rejection_rate"] = combined.rejection_rate
     }

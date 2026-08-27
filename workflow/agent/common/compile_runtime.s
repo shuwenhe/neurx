@@ -17,30 +17,30 @@ func main() {
     string help_text = runtime_run_command_output(runtime_shell_escape(s_bin) + " --help 2>&1")
     bool legacy_mode = contains_text(help_text, "<input.s> <output.ir>")
     []string roots = []string{cap: 0}
-    roots.push("agent")
-    roots.push("s")
-    roots.push("ops")
-    roots.push("data")
-    roots.push("tensor")
-    roots.push("ad")
-    roots.push("engine")
-    roots.push("nn")
-    roots.push("opt")
-    roots.push("lf")
-    roots.push("train")
-    roots.push("pretrain")
-    roots.push("runtime")
-    roots.push("distributed")
-    roots.push("serving")
-    roots.push("infer")
-    roots.push("inference")
-    roots.push("model")
-    roots.push("platform")
-    roots.push("compile")
-    roots.push("reasoning")
-    roots.push("workflows")
-    roots.push("app")
-    roots.push("web")
+    roots = append(roots, "agent")
+    roots = append(roots, "s")
+    roots = append(roots, "ops")
+    roots = append(roots, "data")
+    roots = append(roots, "tensor")
+    roots = append(roots, "ad")
+    roots = append(roots, "engine")
+    roots = append(roots, "nn")
+    roots = append(roots, "opt")
+    roots = append(roots, "lf")
+    roots = append(roots, "train")
+    roots = append(roots, "pretrain")
+    roots = append(roots, "runtime")
+    roots = append(roots, "distributed")
+    roots = append(roots, "serving")
+    roots = append(roots, "infer")
+    roots = append(roots, "inference")
+    roots = append(roots, "model")
+    roots = append(roots, "platform")
+    roots = append(roots, "compile")
+    roots = append(roots, "reasoning")
+    roots = append(roots, "workflows")
+    roots = append(roots, "app")
+    roots = append(roots, "web")
     int r = 0
     for r < len(roots) {
         string root_name = roots[r]
@@ -181,7 +181,7 @@ func split_lines(string text) []string {
         if ch == "\n" {
             string line = trim(current)
             if line != "" {
-                lines.push(line)
+                lines = append(lines, line)
             }
             current = ""
         } else if ch != "\r" {
@@ -191,7 +191,7 @@ func split_lines(string text) []string {
     }
     string tail = trim(current)
     if tail != "" {
-        lines.push(tail)
+        lines = append(lines, tail)
     }
     lines
 }

@@ -250,9 +250,9 @@ func run_epoch(training_loop loop, func get_train_batch, func get_val_batch) tra
         }
     }
     loop.state.avg_loss = epoch_loss / num_batches
-    loop.stats.train_loss.push(loop.state.avg_loss)
-    loop.stats.train_ppl.push(exp(loop.state.avg_loss))
-    loop.stats.learning_rates.push(loop.state.lr)
+    loop.stats.train_loss = append(loop.stats.train_loss, loop.state.avg_loss)
+    loop.stats.train_ppl = append(loop.stats.train_ppl, exp(loop.state.avg_loss))
+    loop.stats.learning_rates = append(loop.stats.learning_rates, loop.state.lr)
     loop
 }
 
@@ -267,8 +267,8 @@ func validate(training_loop loop, func get_val_batch) training_loop {
     }
     val_loss = val_loss / num_batches
     float val_ppl = exp(val_loss)
-    loop.stats.val_loss.push(val_loss)
-    loop.stats.val_ppl.push(val_ppl)
+    loop.stats.val_loss = append(loop.stats.val_loss, val_loss)
+    loop.stats.val_ppl = append(loop.stats.val_ppl, val_ppl)
     if val_loss < loop.state.best_val_loss {
         loop.state.best_val_loss = val_loss
         loop.checkpoint_manager = checkpoint_training.checkpoint_save(

@@ -8,11 +8,11 @@ struct structured_logger {
 	string                  logger_name
 	log_level               min_level
 
-	vec[log_entry]          entries
+	log_entry[]          entries
 	int32                   max_entries
 	int32                   entry_count
 
-	vec[log_entry_batch]    batches
+	log_entry_batch[]    batches
 	int32                   batch_count
 
 	map[string]string       default_labels
@@ -38,10 +38,10 @@ func create_structured_logger(config logger_config) structured_logger {
 	return structured_logger{
 		logger_name:          config.name,
 		min_level:            config.min_level,
-		entries:              make(vec[log_entry], 0, 1000),
+		entries:              make(log_entry[], 0, 1000),
 		max_entries:          config.max_entries,
 		entry_count:          0,
-		batches:              make(vec[log_entry_batch], 0, 100),
+		batches:              make(log_entry_batch[], 0, 100),
 		batch_count:          0,
 		default_labels:       make(map[string]string),
 		default_fields:       make(map[string]interface{}),
@@ -154,11 +154,11 @@ func (structured_logger* s) set_min_level(level log_level) {
 	s.min_level = level
 }
 
-func (structured_logger* s) get_entries() vec[log_entry] {
+func (structured_logger* s) get_entries() log_entry[] {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	result := make(vec[log_entry], 0, len(s.entries))
+	result := make(log_entry[], 0, len(s.entries))
 	for entry := range s.entries {
 		result = append(result, entry)
 	}
@@ -180,7 +180,7 @@ func (structured_logger* s) flush_batch() {
 
 	s.batches = append(s.batches, batch)
 	s.batch_count++
-	s.entries = make(vec[log_entry], 0, 1000)
+	s.entries = make(log_entry[], 0, 1000)
 	s.entry_count = 0
 	s.last_flush_time = time.Now().UnixNano()
 }
@@ -221,7 +221,7 @@ func (structured_logger* s) clear_entries() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.entries = make(vec[log_entry], 0, 1000)
+	s.entries = make(log_entry[], 0, 1000)
 	s.entry_count = 0
 }
 
@@ -229,8 +229,8 @@ func (structured_logger* s) clear_all() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.entries = make(vec[log_entry], 0, 1000)
-	s.batches = make(vec[log_entry_batch], 0, 100)
+	s.entries = make(log_entry[], 0, 1000)
+	s.batches = make(log_entry_batch[], 0, 100)
 	s.entry_count = 0
 	s.batch_count = 0
 	s.total_entries_logged = 0

@@ -29,7 +29,7 @@ struct metric_series {
 	string              metric_name
 	metric_type         metric_category
 
-	vec[metric_point]   points
+	metric_point[]   points
 	int32               point_count
 
 	map[string]string   common_labels
@@ -42,7 +42,7 @@ struct metrics_registry {
 	map[string]metric_series] metrics
 	int32                   metric_count
 
-	vec[string]             component_metrics
+	string[]             component_metrics
 	map[string]int32        component_metric_counts
 
 	int64                   last_collection_time
@@ -55,7 +55,7 @@ func create_metric_series(name string, category metric_type) metric_series {
 	return metric_series{
 		metric_name:     name,
 		metric_category: category,
-		points:          make(vec[metric_point], 0, 1000),
+		points:          make(metric_point[], 0, 1000),
 		point_count:     0,
 		common_labels:   make(map[string]string),
 		retention_hours: 24,
@@ -67,7 +67,7 @@ func create_metrics_registry() metrics_registry {
 	return metrics_registry{
 		metrics:                   make(map[string]metric_series),
 		metric_count:              0,
-		component_metrics:         make(vec[string], 0, 50),
+		component_metrics:         make(string[], 0, 50),
 		component_metric_counts:   make(map[string]int32),
 		last_collection_time:      time.Now().UnixNano(),
 		collection_interval_ms:    5000,
@@ -153,11 +153,11 @@ func (metrics_registry* r) get_metric(metric_name string) (metric_series, bool) 
 	return series, exists
 }
 
-func (metrics_registry* r) get_all_metrics() vec[metric_series] {
+func (metrics_registry* r) get_all_metrics() metric_series[] {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	result := make(vec[metric_series], 0, len(r.metrics))
+	result := make(metric_series[], 0, len(r.metrics))
 
 	for _, series := range r.metrics {
 		result = append(result, series)
@@ -200,7 +200,7 @@ func (metrics_registry* r) clear_old_points(retention_hours int32) {
 	cutoff_time := time.Now().UnixNano() - int64(retention_hours)*3600*1000000000
 
 	for name, series := range r.metrics {
-		valid_points := make(vec[metric_point], 0)
+		valid_points := make(metric_point[], 0)
 
 		for point := range series.points {
 			if point.timestamp > cutoff_time {

@@ -161,8 +161,8 @@ func zero_add_param(zero_state state, string param_name, int size) zero_state {
     }
     []string params = copy_strings(state.params)
     []int param_sizes = copy_ints(state.param_sizes)
-    params.push(param_name)
-    param_sizes.push(clamp_positive(size, 1))
+    params = append(params, param_name)
+    param_sizes = append(param_sizes, clamp_positive(size, 1))
     zero_state {
         name: state.name,
         backend: state.backend,
@@ -189,7 +189,7 @@ func zero_mark_grad_ready(zero_state state, string param_name) zero_state {
         return zero_state_dict(state)
     }
     []string ready = copy_strings(state.ready_params)
-    ready.push(param_name)
+    ready = append(ready, param_name)
     zero_state {
         name: state.name,
         backend: state.backend,

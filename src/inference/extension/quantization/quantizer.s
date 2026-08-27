@@ -227,7 +227,7 @@ func compute_quantization_range(
     float margin = (max_val - min_val) * 0.01
     min_val = min_val - margin
     max_val = max_val + margin
-    return (min_val, max_val)
+    return min_val, max_val
 }
 
 func simulated_quantize(float value, quantization_config config) float {
@@ -257,7 +257,7 @@ func compute_quantization_memory_savings(
     }
     float compression_ratio = float(original_bits) / float(target_bits)
     float new_size_gb = original_size_gb / compression_ratio
-    return (new_size_gb, compression_ratio)
+    return new_size_gb, compression_ratio
 }
 
 func verify_quantization_accuracy(
@@ -316,7 +316,7 @@ func load_quantized_model(
             layers = allocate_vector(declared_layers, 0.0)
         }
     }
-    return (layers, config)
+    return layers, config
 }
 
 func allocate_quantized_tensor(vector tensor, quantization_config config) quantized_tensor {
@@ -591,7 +591,7 @@ func split_lines(string text) []string {
         int ch = text[i]
         if ch == 10 || ch == 13 {
             if trim(current) != "" {
-                lines.push(trim(current))
+                lines = append(lines, trim(current))
             }
             current = ""
         } else {
@@ -600,7 +600,7 @@ func split_lines(string text) []string {
         i = i + 1
     }
     if trim(current) != "" {
-        lines.push(trim(current))
+        lines = append(lines, trim(current))
     }
     lines
 }

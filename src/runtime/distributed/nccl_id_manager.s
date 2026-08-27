@@ -81,7 +81,7 @@ func load_nccl_id_from_shared_storage(
                     initialized: true,
                 }
                 print("[NCCL_MANAGER] Loaded NCCL ID from shared storage")
-                return (id, true)
+                return id, true
             }
         }
         print("[NCCL_MANAGER] Waiting for NCCL ID... (" + itoa(elapsed) + "/" + itoa(timeout_seconds) + "s)")
@@ -137,7 +137,7 @@ func load_nccl_id_from_distributed_store(
             master_node: store.store_address,
             initialized: true,
         }
-        return (id, true)
+        return id, true
     }
     if store.store_type == "etcd" {
         print("[NCCL_MANAGER] Loading NCCL ID from Etcd: " + store.store_address)
@@ -147,7 +147,7 @@ func load_nccl_id_from_distributed_store(
             master_node: store.store_address,
             initialized: true,
         }
-        return (id, true)
+        return id, true
     }
     print("[ERROR] Unknown store type: " + store.store_type)
     (nccl_unique_id{}, false)
