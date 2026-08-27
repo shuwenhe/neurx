@@ -1,0 +1,19 @@
+component,present_in_linux,present_in_neurx,notes,priority
+certs,yes,no,top-level dir present in linux but missing in neurx,medium
+COPYING,yes,no,top-level dir present in linux but missing in neurx,medium
+CREDITS,yes,no,top-level dir present in linux but missing in neurx,medium
+Documentation,yes,no,top-level dir present in linux but missing in neurx,medium
+include,yes,no,top-level dir present in linux but missing in neurx,medium
+io_uring,yes,no,top-level dir present in linux but missing in neurx,medium
+Kbuild,yes,no,top-level dir present in linux but missing in neurx,medium
+Kconfig,yes,no,top-level dir present in linux but missing in neurx,medium
+LICENSES,yes,no,top-level dir present in linux but missing in neurx,medium
+MAINTAINERS,yes,no,top-level dir present in linux but missing in neurx,medium
+Makefile,yes,no,top-level dir present in linux but missing in neurx,medium
+README,yes,no,top-level dir present in linux but missing in neurx,medium
+rust,yes,no,top-level dir present in linux but missing in neurx,medium
+samples,yes,no,top-level dir present in linux but missing in neurx,medium
+scripts,yes,no,top-level dir present in linux but missing in neurx,high
+sound,yes,no,top-level dir present in linux but missing in neurx,medium
+usr,yes,no,top-level dir present in linux but missing in neurx,medium
+virt,yes,no,top-level dir present in linux but missing in neurx,high
