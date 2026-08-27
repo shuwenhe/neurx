@@ -290,41 +290,20 @@ s_fn_baremetal_syscall_init:
     ret
 
 syscall_entry:
-    
-    cmp $0, %rax
-    je .Lsys_read
-    cmp $1, %rax
-    je .Lsys_write
-    cmp $2, %rax
-    je .Lsys_open
-    cmp $3, %rax
-    je .Lsys_close
-    cmp $39, %rax
-    jne .Lsys_enosys
-    mov $1, %rax
-    sysretq
-
-.Lsys_read:
-    
-    mov %rdx, %rax
-    sysretq
-
-.Lsys_write:
-    
-    mov %rdx, %rax
-    sysretq
-
-.Lsys_open:
-    
-    mov $3, %rax
-    sysretq
-
-.Lsys_close:
-    mov $0, %rax
-    sysretq
-
-.Lsys_enosys:
-    mov $-38, %rax
+    // Marshal syscall registers into SystemV call and invoke S shim
+    // Registers on entry: rax=num, rdi=a0, rsi=a1, rdx=a2, r10=a3, r8=a4, r9=a5
+    sub $8, %rsp
+    mov %r9, (%rsp)      // save a5 on stack
+    mov %r8, %r9         // r9 = a4 (temporary)
+    mov %rdx, %r12       // r12 = a2
+    mov %rdi, %r11       // r11 = a0
+    mov %rsi, %rdx       // rdx = a1
+    mov %r12, %rcx       // rcx = a2
+    mov %r10, %r8        // r8 = a3
+    mov %rax, %rdi       // rdi = num
+    mov %r11, %rsi       // rsi = a0
+    call s_fn_syscall_entry_from_asm
+    add $8, %rsp
     sysretq
 
 .global s_fn_baremetal_metric
