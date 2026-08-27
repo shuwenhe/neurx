@@ -1,12 +1,12 @@
 package neurx.fs.vfs
 
 struct inode_cache {
-    int max_cached_inodes  // Maximum inodes in cache
-    int cached_inodes      // Current inodes in cache
-    int cache_hits         // Cache hit count
-    int cache_misses       // Cache miss count
-    int evictions          // Number of evictions
-    int total_lookups      // Total lookup operations
+    int max_cached_inodes  
+    int cached_inodes      
+    int cache_hits         
+    int cache_misses       
+    int evictions          
+    int total_lookups      
 }
 
 func create_inode_cache(int max_size) inode_cache {

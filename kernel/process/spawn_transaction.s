@@ -32,8 +32,8 @@ func spawn_result(process_isolation isolation, resource_controller resources,
     }
 }
 
-// All arguments are value snapshots. Only the success path returns mutated
-// snapshots; every failure returns the original three subsystem states.
+
+
 func process_spawn_transaction(
     process_isolation isolation,
     resource_controller resources,

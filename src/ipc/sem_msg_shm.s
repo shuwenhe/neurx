@@ -2,29 +2,29 @@ package neurx.ipc
 
 use std.slices
 
-// 信号量结构
+
 struct semaphore {
     int sem_id
     int value
     int owner_pid
     int wait_count
-    int[] waiters  // 等待的进程 ID
+    int[] waiters  
 }
 
-// 信号量集合
+
 struct semaphore_set {
     semaphore[] semaphores
     int total_sems
 }
 
-// 初始化信号量集合
+
 func (semaphore_set* ss) init(int max_sems) (int, string) {
     ss.semaphores = semaphore[]{}
     ss.total_sems = max_sems
     return 0, ""
 }
 
-// 创建信号量
+
 func (semaphore_set* ss) create_semaphore(int initial_value) (semaphore, string) {
     if len(ss.semaphores) >= ss.total_sems {
         return semaphore{}, "Semaphore set full"
@@ -42,7 +42,7 @@ func (semaphore_set* ss) create_semaphore(int initial_value) (semaphore, string)
     return sem, ""
 }
 
-// P 操作 (等待/减少)
+
 func (semaphore_set* ss) wait_semaphore(int sem_id, int pid) (int, string) {
     if sem_id >= len(ss.semaphores) {
         return -1, "Invalid semaphore"
@@ -56,14 +56,14 @@ func (semaphore_set* ss) wait_semaphore(int sem_id, int pid) (int, string) {
         return 0, ""
     }
     
-    // 进程需要阻塞，加入等待队列
+    
     sem.wait_count = sem.wait_count + 1
     sem.waiters = append(sem.waiters, pid)
     ss.semaphores[sem_id] = sem
-    return 1, "BLOCKED"  // 返回 1 表示进程应该被阻塞
+    return 1, "BLOCKED"  
 }
 
-// V 操作 (释放/增加)
+
 func (semaphore_set* ss) signal_semaphore(int sem_id) (int, string) {
     if sem_id >= len(ss.semaphores) {
         return -1, "Invalid semaphore"
@@ -72,11 +72,11 @@ func (semaphore_set* ss) signal_semaphore(int sem_id) (int, string) {
     sem := ss.semaphores[sem_id]
     sem.value = sem.value + 1
     
-    // 唤醒一个等待的进程
+    
     if sem.wait_count > 0 && len(sem.waiters) > 0 {
         woken_pid := sem.waiters[0]
         
-        // 移除第一个元素
+        
         i := 1
         for i < len(sem.waiters) {
             sem.waiters[i - 1] = sem.waiters[i]
@@ -90,7 +90,7 @@ func (semaphore_set* ss) signal_semaphore(int sem_id) (int, string) {
     return 0, ""
 }
 
-// 获取信号量值
+
 func (semaphore_set ss) get_semaphore_value(int sem_id) (int, string) {
     if sem_id >= len(ss.semaphores) {
         return 0, "Invalid semaphore"
@@ -100,7 +100,7 @@ func (semaphore_set ss) get_semaphore_value(int sem_id) (int, string) {
     return sem.value, ""
 }
 
-// 消息队列结构
+
 struct message {
     int msg_id
     int sender_pid
@@ -109,7 +109,7 @@ struct message {
     int priority
 }
 
-// 消息队列
+
 struct message_queue {
     int queue_id
     message[] messages
@@ -118,20 +118,20 @@ struct message_queue {
     int sender_pid
 }
 
-// 消息队列管理器
+
 struct message_queue_manager {
     message_queue[] queues
     int next_queue_id
 }
 
-// 初始化消息队列管理器
+
 func (message_queue_manager* mqm) init() (int, string) {
     mqm.queues = message_queue[]{}
     mqm.next_queue_id = 0
     return 0, ""
 }
 
-// 创建消息队列
+
 func (message_queue_manager* mqm) create_queue(int max_msgs) (message_queue, string) {
     mq := message_queue{
         queue_id: mqm.next_queue_id,
@@ -146,7 +146,7 @@ func (message_queue_manager* mqm) create_queue(int max_msgs) (message_queue, str
     return mq, ""
 }
 
-// 发送消息
+
 func (message_queue_manager* mqm) send_message(int queue_id, int sender_pid, string content, int priority) (int, string) {
     if queue_id >= len(mqm.queues) {
         return -1, "Invalid queue"
@@ -171,7 +171,7 @@ func (message_queue_manager* mqm) send_message(int queue_id, int sender_pid, str
     return msg.msg_id, ""
 }
 
-// 接收消息
+
 func (message_queue_manager* mqm) receive_message(int queue_id) (message, string) {
     if queue_id >= len(mqm.queues) {
         return message{}, "Invalid queue"
@@ -185,7 +185,7 @@ func (message_queue_manager* mqm) receive_message(int queue_id) (message, string
     
     msg := mq.messages[0]
     
-    // 移除第一个消息
+    
     i := 1
     for i < len(mq.messages) {
         mq.messages[i - 1] = mq.messages[i]
@@ -196,30 +196,30 @@ func (message_queue_manager* mqm) receive_message(int queue_id) (message, string
     return msg, ""
 }
 
-// 共享内存段
+
 struct shared_memory_segment {
     int shmid
     int size
     int owner_pid
     int attach_count
     int* memory_ptr
-    int permissions  // 0=read, 1=write, 2=execute
+    int permissions  
 }
 
-// 共享内存管理器
+
 struct shared_memory_manager {
     shared_memory_segment[] segments
     int next_shmid
 }
 
-// 初始化共享内存管理器
+
 func (shared_memory_manager* smm) init() (int, string) {
     smm.segments = shared_memory_segment[]{}"
     smm.next_shmid = 0
     return 0, ""
 }
 
-// 创建共享内存
+
 func (shared_memory_manager* smm) create_shared_memory(int size) (shared_memory_segment, string) {
     shm := shared_memory_segment{
         shmid: smm.next_shmid,
@@ -235,7 +235,7 @@ func (shared_memory_manager* smm) create_shared_memory(int size) (shared_memory_
     return shm, ""
 }
 
-// 挂载共享内存
+
 func (shared_memory_manager* smm) attach_shared_memory(int shmid) (int, string) {
     if shmid >= len(smm.segments) {
         return -1, "Invalid shared memory"
@@ -248,7 +248,7 @@ func (shared_memory_manager* smm) attach_shared_memory(int shmid) (int, string) 
     return shmid, ""
 }
 
-// 卸载共享内存
+
 func (shared_memory_manager* smm) detach_shared_memory(int shmid) (int, string) {
     if shmid >= len(smm.segments) {
         return -1, "Invalid shared memory"
@@ -263,7 +263,7 @@ func (shared_memory_manager* smm) detach_shared_memory(int shmid) (int, string) 
     return 0, ""
 }
 
-// 删除共享内存
+
 func (shared_memory_manager* smm) remove_shared_memory(int shmid) (int, string) {
     if shmid >= len(smm.segments) {
         return -1, "Invalid shared memory"
@@ -274,12 +274,12 @@ func (shared_memory_manager* smm) remove_shared_memory(int shmid) (int, string) 
         return -1, "Shared memory still attached"
     }
     
-    seg.shmid = -1  // 标记为删除
+    seg.shmid = -1  
     smm.segments[shmid] = seg
     return 0, ""
 }
 
-// 获取共享内存统计
+
 func (shared_memory_manager smm) get_shm_stats() (int, int) {
     total_attached := 0
     total_size := 0

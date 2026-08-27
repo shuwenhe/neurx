@@ -2,40 +2,40 @@ package neurx.kernel
 
 use std.slices
 
-// Namespace 类型定义
+
 struct namespace {
     int ns_id
-    int ns_type  // 0=pid, 1=network, 2=mount, 3=user, 4=ipc, 5=uts
+    int ns_type  
     string name
     int ref_count
     int owner_pid
 }
 
-// PID Namespace - 进程隔离
+
 struct pid_namespace {
     int ns_id
     int parent_pid
-    int[] pids  // 该命名空间中的 PID
+    int[] pids  
     int max_pid
     int current_pid_counter
 }
 
-// Network Namespace - 网络隔离
+
 struct network_namespace {
     int ns_id
     int max_interfaces
-    int[] interfaces  // 网络接口
+    int[] interfaces  
     int loopback_address
 }
 
-// Mount Namespace - 文件系统隔离
+
 struct mount_namespace {
     int ns_id
     int root_mount_id
     int[] mount_points
 }
 
-// User Namespace - 用户隔离
+
 struct user_namespace {
     int ns_id
     int parent_ns_id
@@ -43,7 +43,7 @@ struct user_namespace {
     int gid_map_count
 }
 
-// Namespace 管理器
+
 struct namespace_manager {
     pid_namespace[] pid_namespaces
     network_namespace[] network_namespaces
@@ -52,7 +52,7 @@ struct namespace_manager {
     int next_ns_id
 }
 
-// 初始化 Namespace 管理器
+
 func (namespace_manager* nm) init() (int, string) {
     nm.pid_namespaces = pid_namespace[]{}
     nm.network_namespaces = network_namespace[]{}
@@ -62,7 +62,7 @@ func (namespace_manager* nm) init() (int, string) {
     return 0, ""
 }
 
-// 创建 PID Namespace
+
 func (namespace_manager* nm) create_pid_namespace(int parent_pid) (pid_namespace, string) {
     pidns := pid_namespace{
         ns_id: nm.next_ns_id,
@@ -78,7 +78,7 @@ func (namespace_manager* nm) create_pid_namespace(int parent_pid) (pid_namespace
     return pidns, ""
 }
 
-// 在 PID Namespace 中创建进程
+
 func (namespace_manager* nm) add_pid_to_namespace(int ns_id, int pid) (int, string) {
     if ns_id >= len(nm.pid_namespaces) {
         return -1, "Invalid namespace"
@@ -97,13 +97,13 @@ func (namespace_manager* nm) add_pid_to_namespace(int ns_id, int pid) (int, stri
     return pid, ""
 }
 
-// 创建 Network Namespace
+
 func (namespace_manager* nm) create_network_namespace() (network_namespace, string) {
     netns := network_namespace{
         ns_id: nm.next_ns_id,
         max_interfaces: 256,
         interfaces: int[]{},
-        loopback_address: 0x7F000001  // 127.0.0.1
+        loopback_address: 0x7F000001  
     }
     
     nm.network_namespaces = append(nm.network_namespaces, netns)
@@ -112,7 +112,7 @@ func (namespace_manager* nm) create_network_namespace() (network_namespace, stri
     return netns, ""
 }
 
-// 在 Network Namespace 中添加接口
+
 func (namespace_manager* nm) add_interface_to_namespace(int ns_id, string interface_name) (int, string) {
     if ns_id >= len(nm.network_namespaces) {
         return -1, "Invalid namespace"
@@ -130,7 +130,7 @@ func (namespace_manager* nm) add_interface_to_namespace(int ns_id, string interf
     return len(netns.interfaces) - 1, ""
 }
 
-// 创建 Mount Namespace
+
 func (namespace_manager* nm) create_mount_namespace() (mount_namespace, string) {
     mntns := mount_namespace{
         ns_id: nm.next_ns_id,
@@ -144,7 +144,7 @@ func (namespace_manager* nm) create_mount_namespace() (mount_namespace, string) 
     return mntns, ""
 }
 
-// 在 Mount Namespace 中添加挂载点
+
 func (namespace_manager* nm) add_mount_point(int ns_id, string mount_path) (int, string) {
     if ns_id >= len(nm.mount_namespaces) {
         return -1, "Invalid namespace"
@@ -157,7 +157,7 @@ func (namespace_manager* nm) add_mount_point(int ns_id, string mount_path) (int,
     return len(mntns.mount_points) - 1, ""
 }
 
-// 创建 User Namespace
+
 func (namespace_manager* nm) create_user_namespace(int parent_ns_id) (user_namespace, string) {
     userns := user_namespace{
         ns_id: nm.next_ns_id,
@@ -172,7 +172,7 @@ func (namespace_manager* nm) create_user_namespace(int parent_ns_id) (user_names
     return userns, ""
 }
 
-// 在 User Namespace 中添加 UID 映射
+
 func (namespace_manager* nm) add_uid_mapping(int ns_id) (int, string) {
     if ns_id >= len(nm.user_namespaces) {
         return -1, "Invalid namespace"
@@ -185,7 +185,7 @@ func (namespace_manager* nm) add_uid_mapping(int ns_id) (int, string) {
     return userns.uid_map_count, ""
 }
 
-// 获取 Namespace 统计
+
 func (namespace_manager nm) get_namespace_stats() (int, int, int, int) {
     return len(nm.pid_namespaces), len(nm.network_namespaces), 
            len(nm.mount_namespaces), len(nm.user_namespaces)

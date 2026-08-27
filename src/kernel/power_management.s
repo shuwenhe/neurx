@@ -1,18 +1,18 @@
 package neurx.kernel
 
-const POWER_STATE_S0 = 0   // 工作状态
-const POWER_STATE_S1 = 1   // 灯睡眠
-const POWER_STATE_S3 = 3   // 深度睡眠
-const POWER_STATE_S5 = 5   // 关机
+const POWER_STATE_S0 = 0   
+const POWER_STATE_S1 = 1   
+const POWER_STATE_S3 = 3   
+const POWER_STATE_S5 = 5   
 
-const CPU_STATE_C0 = 0     // 工作状态
-const CPU_STATE_C1 = 1     // 最浅睡眠
-const CPU_STATE_C6 = 6     // 最深睡眠
+const CPU_STATE_C0 = 0     
+const CPU_STATE_C1 = 1     
+const CPU_STATE_C6 = 6     
 
-const FREQ_STATE_P0 = 0    // 最高频率
-const FREQ_STATE_P15 = 15  // 最低频率
+const FREQ_STATE_P0 = 0    
+const FREQ_STATE_P15 = 15  
 
-// CPU 空闲状态
+
 struct cpu_idle_state {
     int cstate
     int latency_us
@@ -21,7 +21,7 @@ struct cpu_idle_state {
     int time_in_state_ms
 }
 
-// CPU 频率状态
+
 struct cpu_freq_state {
     int pstate
     int frequency_mhz
@@ -30,7 +30,7 @@ struct cpu_freq_state {
     int time_in_state_ms
 }
 
-// 电源域
+
 struct power_domain {
     int domain_id
     string domain_name
@@ -39,7 +39,7 @@ struct power_domain {
     int power_consumption_mw
 }
 
-// ACPI 策略
+
 struct acpi_policy {
     int policy_id
     string policy_name
@@ -48,7 +48,7 @@ struct acpi_policy {
     int thermal_limit
 }
 
-// 电源管理器
+
 struct power_manager {
     vec idle_states
     vec freq_states
@@ -62,7 +62,7 @@ struct power_manager {
     int system_idle_time_ms
 }
 
-// 创建 CPU 空闲状态
+
 func create_cpu_idle_state(cstate int, latency_us int, power_mw int, residency_us int) (cpu_idle_state, string) {
     state := cpu_idle_state{
         cstate: cstate,
@@ -75,7 +75,7 @@ func create_cpu_idle_state(cstate int, latency_us int, power_mw int, residency_u
     return state, ""
 }
 
-// 创建 CPU 频率状态
+
 func create_cpu_freq_state(pstate int, freq_mhz int, voltage_mv int, power_mw int) (cpu_freq_state, string) {
     state := cpu_freq_state{
         pstate: pstate,
@@ -88,7 +88,7 @@ func create_cpu_freq_state(pstate int, freq_mhz int, voltage_mv int, power_mw in
     return state, ""
 }
 
-// 创建电源域
+
 func create_power_domain(name string) (power_domain, string) {
     domain := power_domain{
         domain_id: 0,
@@ -101,11 +101,11 @@ func create_power_domain(name string) (power_domain, string) {
     return domain, ""
 }
 
-// 初始化电源管理器
+
 func create_power_manager() (power_manager, string) {
     idle_states := {}
     
-    // 创建 C 状态
+    
     c0, _ := create_cpu_idle_state(0, 0, 1000, 0)
     c1, _ := create_cpu_idle_state(1, 1, 500, 1000)
     c6, _ := create_cpu_idle_state(6, 100, 50, 10000)
@@ -116,10 +116,10 @@ func create_power_manager() (power_manager, string) {
     
     freq_states := {}
     
-    // 创建 P 状态
-    p0, _ := create_cpu_freq_state(0, 2400, 1000, 50)  // 最高频率
-    p8, _ := create_cpu_freq_state(8, 1800, 900, 35)   // 中等频率
-    p15, _ := create_cpu_freq_state(15, 800, 750, 10)  // 最低频率
+    
+    p0, _ := create_cpu_freq_state(0, 2400, 1000, 50)  
+    p8, _ := create_cpu_freq_state(8, 1800, 900, 35)   
+    p15, _ := create_cpu_freq_state(15, 800, 750, 10)  
     
     freq_states = append(freq_states, p0)
     freq_states = append(freq_states, p8)
@@ -141,7 +141,7 @@ func create_power_manager() (power_manager, string) {
     return mgr, ""
 }
 
-// 进入空闲状态
+
 func (mgr* power_manager) enter_idle_state(cpu_id int, cstate int) (int, string) {
     if cstate >= len(mgr.idle_states) {
         return -1, "Invalid C-state"
@@ -157,7 +157,7 @@ func (mgr* power_manager) enter_idle_state(cpu_id int, cstate int) (int, string)
     return cstate, ""
 }
 
-// 退出空闲状态
+
 func (mgr* power_manager) exit_idle_state() (int, string) {
     mgr.current_idle_state = CPU_STATE_C0
     mgr.total_power_transitions = mgr.total_power_transitions + 1
@@ -165,7 +165,7 @@ func (mgr* power_manager) exit_idle_state() (int, string) {
     return CPU_STATE_C0, ""
 }
 
-// 改变 CPU 频率
+
 func (mgr* power_manager) change_cpu_frequency(cpu_id int, pstate int) (int, string) {
     if pstate >= len(mgr.freq_states) {
         return -1, "Invalid P-state"
@@ -181,7 +181,7 @@ func (mgr* power_manager) change_cpu_frequency(cpu_id int, pstate int) (int, str
     return pstate, ""
 }
 
-// 系统睡眠
+
 func (mgr* power_manager) system_sleep(sleep_state int) (int, string) {
     mgr.current_power_state = sleep_state
     mgr.total_power_transitions = mgr.total_power_transitions + 1
@@ -189,7 +189,7 @@ func (mgr* power_manager) system_sleep(sleep_state int) (int, string) {
     return sleep_state, ""
 }
 
-// 系统唤醒
+
 func (mgr* power_manager) system_wakeup() (int, string) {
     mgr.current_power_state = POWER_STATE_S0
     mgr.total_power_transitions = mgr.total_power_transitions + 1
@@ -197,7 +197,7 @@ func (mgr* power_manager) system_wakeup() (int, string) {
     return POWER_STATE_S0, ""
 }
 
-// 添加电源域
+
 func (mgr* power_manager) add_power_domain(name string) (int, string) {
     domain, _ := create_power_domain(name)
     domain.domain_id = len(mgr.power_domains)
@@ -206,7 +206,7 @@ func (mgr* power_manager) add_power_domain(name string) (int, string) {
     return domain.domain_id, ""
 }
 
-// 启用电源域
+
 func (mgr* power_manager) power_on_domain(domain_id int) (int, string) {
     if domain_id >= len(mgr.power_domains) {
         return -1, "Domain not found"
@@ -220,7 +220,7 @@ func (mgr* power_manager) power_on_domain(domain_id int) (int, string) {
     return domain_id, ""
 }
 
-// 禁用电源域
+
 func (mgr* power_manager) power_off_domain(domain_id int) (int, string) {
     if domain_id >= len(mgr.power_domains) {
         return -1, "Domain not found"
@@ -239,12 +239,12 @@ func (mgr* power_manager) power_off_domain(domain_id int) (int, string) {
     return domain_id, ""
 }
 
-// 获取统计
+
 func (mgr* power_manager) get_stats() (power_manager, string) {
     return mgr, ""
 }
 
-// 计算能耗
+
 func (mgr* power_manager) calculate_power_consumption() (int, string) {
     total_power := 0
     

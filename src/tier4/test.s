@@ -1,6 +1,6 @@
 package neurx.tier4.test
 
-// Tier 4 企业级功能测试套件
+
 
 struct test_result {
     int test_id
@@ -9,7 +9,7 @@ struct test_result {
     int total_tests
 }
 
-// ========== TCP/IP 网络栈测试 ==========
+
 
 func test_tcp_ip_stack() (int, string) {
     passed := 0
@@ -34,7 +34,7 @@ func test_tcp_ip_stack() (int, string) {
     return passed, "TCP/IP 栈测试完成"
 }
 
-// ========== SELinux 安全策略测试 ==========
+
 
 func test_selinux_security() (int, string) {
     passed := 0
@@ -53,7 +53,7 @@ func test_selinux_security() (int, string) {
     return passed, "SELinux 安全测试完成"
 }
 
-// ========== 虚拟化测试 ==========
+
 
 func test_kvm_virtualization() (int, string) {
     passed := 0
@@ -72,7 +72,7 @@ func test_kvm_virtualization() (int, string) {
     return passed, "虚拟化测试完成"
 }
 
-// ========== 电源管理测试 ==========
+
 
 func test_power_management() (int, string) {
     passed := 0
@@ -96,7 +96,7 @@ func test_power_management() (int, string) {
     return passed, "电源管理测试完成"
 }
 
-// ========== 块设备测试 ==========
+
 
 func test_block_devices() (int, string) {
     passed := 0
@@ -116,7 +116,7 @@ func test_block_devices() (int, string) {
     return passed, "块设备测试完成"
 }
 
-// ========== 驱动框架测试 ==========
+
 
 func test_driver_framework() (int, string) {
     passed := 0
@@ -135,7 +135,7 @@ func test_driver_framework() (int, string) {
     return passed, "驱动框架测试完成"
 }
 
-// ========== 证书管理测试 ==========
+
 
 func test_certificate_management() (int, string) {
     passed := 0
@@ -154,7 +154,7 @@ func test_certificate_management() (int, string) {
     return passed, "证书管理测试完成"
 }
 
-// ========== 音频驱动测试 ==========
+
 
 func test_audio_driver() (int, string) {
     passed := 0
@@ -178,7 +178,7 @@ func test_audio_driver() (int, string) {
     return passed, "音频驱动测试完成"
 }
 
-// ========== 完整 Tier 4 测试运行器 ==========
+
 
 func run_all_tier4_tests() (test_result, string) {
     result := test_result{

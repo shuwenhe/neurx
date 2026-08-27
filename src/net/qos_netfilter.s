@@ -2,41 +2,41 @@ package neurx.net
 
 use std.slices
 
-// QoS 流量分类
+
 struct qos_class {
     int class_id
-    int bandwidth_limit  // kbps
+    int bandwidth_limit  
     int priority
     int packets_sent
     int bytes_sent
 }
 
-// Netfilter 规则
+
 struct netfilter_rule {
     int rule_id
     string source_ip
     string dest_ip
-    int protocol  // 0=TCP, 1=UDP, 2=ICMP
+    int protocol  
     int source_port
     int dest_port
-    int action  // 0=ACCEPT, 1=DROP, 2=REJECT
+    int action  
     int counter
 }
 
-// QoS 队列管理器
+
 struct qos_manager {
     qos_class[] qos_classes
     int max_classes
 }
 
-// 初始化 QoS 管理器
+
 func (qos_manager* qm) init(int max_classes) (int, string) {
     qm.qos_classes = {}
     qm.max_classes = max_classes
     return 0, ""
 }
 
-// 创建 QoS 类
+
 func (qos_manager* qm) create_class(int bandwidth_limit, int priority) (qos_class, string) {
     if len(qm.qos_classes) >= qm.max_classes {
         return qos_class{}, "Max classes reached"
@@ -55,7 +55,7 @@ func (qos_manager* qm) create_class(int bandwidth_limit, int priority) (qos_clas
     return qc, ""
 }
 
-// 发送数据包 (应用 QoS)
+
 func (qos_manager* qm) send_packet(int class_id, int size) (int, string) {
     if class_id >= len(qm.qos_classes) {
         return -1, "Invalid class"
@@ -63,8 +63,8 @@ func (qos_manager* qm) send_packet(int class_id, int size) (int, string) {
     
     qc := qm.qos_classes[class_id]
     
-    // 检查带宽限制
-    if qc.bytes_sent >= qc.bandwidth_limit * 125 {  // 125 = 1000/8, 转换为字节
+    
+    if qc.bytes_sent >= qc.bandwidth_limit * 125 {  
         return -1, "Bandwidth limit exceeded"
     }
     
@@ -75,7 +75,7 @@ func (qos_manager* qm) send_packet(int class_id, int size) (int, string) {
     return size, ""
 }
 
-// 获取 QoS 类统计
+
 func (qos_manager qm) get_class_stats(int class_id) (int, int, int) {
     if class_id >= len(qm.qos_classes) {
         return 0, 0, 0
@@ -85,20 +85,20 @@ func (qos_manager qm) get_class_stats(int class_id) (int, int, int) {
     return qc.packets_sent, qc.bytes_sent, qc.bandwidth_limit
 }
 
-// Netfilter 防火墙
+
 struct netfilter {
     netfilter_rule[] rules
     int rule_counter
 }
 
-// 初始化 Netfilter
+
 func (netfilter* nf) init() (int, string) {
     nf.rules = {}
     nf.rule_counter = 0
     return 0, ""
 }
 
-// 添加防火墙规则
+
 func (netfilter* nf) add_rule(string src_ip, string dst_ip, int protocol, int src_port, int dst_port, int action) (netfilter_rule, string) {
     rule := netfilter_rule{
         rule_id: nf.rule_counter,
@@ -116,7 +116,7 @@ func (netfilter* nf) add_rule(string src_ip, string dst_ip, int protocol, int sr
     return rule, ""
 }
 
-// 检查数据包
+
 func (netfilter* nf) check_packet(string src_ip, string dst_ip, int protocol, int src_port, int dst_port) (int, string) {
     i := 0
     for i < len(nf.rules) {
@@ -137,10 +137,10 @@ func (netfilter* nf) check_packet(string src_ip, string dst_ip, int protocol, in
         i = i + 1
     }
     
-    return 0, "ACCEPT"  // 默认接受
+    return 0, "ACCEPT"  
 }
 
-// 获取规则统计
+
 func (netfilter nf) get_rule_stats(int rule_id) (int, string) {
     i := 0
     for i < len(nf.rules) {
@@ -153,13 +153,13 @@ func (netfilter nf) get_rule_stats(int rule_id) (int, string) {
     return 0, "Rule not found"
 }
 
-// 删除规则
+
 func (netfilter* nf) delete_rule(int rule_id) (int, string) {
     i := 0
     for i < len(nf.rules) {
         rule := nf.rules[i]
         if rule.rule_id == rule_id {
-            // 标记为删除 (简单实现)
+            
             rule.action = -1
             nf.rules[i] = rule
             return 0, ""

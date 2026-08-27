@@ -1,40 +1,40 @@
 package neurx.fs.vfs
 
 struct inode {
-    int ino                // Inode number
-    int size               // File size in bytes
-    int mode               // File type and permissions
-    int nlink              // Hard link count
-    int uid                // User ID
-    int gid                // Group ID
-    int atime              // Access time
-    int mtime              // Modification time
-    int ctime              // Change time
+    int ino                
+    int size               
+    int mode               
+    int nlink              
+    int uid                
+    int gid                
+    int atime              
+    int mtime              
+    int ctime              
 }
 
 struct dentry {
-    string name            // Directory entry name
-    int inode_no           // Inode number
-    int parent_ino         // Parent inode number
-    int valid              // 1 if valid, 0 if invalid
+    string name            
+    int inode_no           
+    int parent_ino         
+    int valid              
 }
 
 struct file {
-    int f_inode            // Inode number
-    int f_flags            // File open flags
-    int f_offset           // Current file offset
-    int f_mode             // File mode
-    int f_refcount         // Reference count
+    int f_inode            
+    int f_flags            
+    int f_offset           
+    int f_mode             
+    int f_refcount         
 }
 
 struct super_block {
-    string fs_name         // Filesystem name (ext4, etc)
-    int block_size         // Block size in bytes
-    int total_blocks       // Total blocks in filesystem
-    int free_blocks        // Free blocks
-    int inode_count        // Total inode count
-    int free_inodes        // Free inode count
-    int mounted            // 1 if mounted, 0 otherwise
+    string fs_name         
+    int block_size         
+    int total_blocks       
+    int free_blocks        
+    int inode_count        
+    int free_inodes        
+    int mounted            
 }
 
 func create_inode(int ino, int size, int mode) inode {

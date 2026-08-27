@@ -1,12 +1,12 @@
 package neurx.fs.vfs
 
 struct dentry_cache {
-    int max_cached_entries // Maximum dentries in cache
-    int cached_entries     // Current dentries in cache
-    int dcache_hits        // Dentry cache hit count
-    int dcache_misses      // Dentry cache miss count
-    int total_path_lookups // Path lookup operations
-    int evictions          // Number of evictions
+    int max_cached_entries 
+    int cached_entries     
+    int dcache_hits        
+    int dcache_misses      
+    int total_path_lookups 
+    int evictions          
 }
 
 func create_dentry_cache(int max_size) dentry_cache {

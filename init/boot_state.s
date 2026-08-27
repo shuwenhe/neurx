@@ -1,7 +1,7 @@
 package neurx.os.boot
 
-// Linux-inspired boot ordering for the NeurX S runtime.  This is a hosted
-// kernel model: each stage records an invariant that later stages depend on.
+
+
 struct boot_state {
     bool early_memory_ready
     bool scheduler_ready

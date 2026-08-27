@@ -8,17 +8,17 @@ use neurx.net as net_mod
 use neurx.kernel as kernel_mod
 use neurx.driver as driver_mod
 
-// ============================================================================
-// Tier 4 Test Suite - Enterprise Features
-// ============================================================================
+
+
+
 
 func test_sha256() (int, string) {
     data := {}
-    data = append(data, 72)  // 'H'
-    data = append(data, 101) // 'e'
-    data = append(data, 108) // 'l'
-    data = append(data, 108) // 'l'
-    data = append(data, 111) // 'o'
+    data = append(data, 72)  
+    data = append(data, 101) 
+    data = append(data, 108) 
+    data = append(data, 108) 
+    data = append(data, 111) 
     
     hash, err := crypto_mod.sha256_hash(data, 5)
     if err != "" {
@@ -235,103 +235,103 @@ func test_route_table() (int, string) {
     return 1, ""
 }
 
-// 运行所有 Tier 4 测试
+
 func run_all_tier4_tests() (int, string) {
     total_tests := 0
     passed_tests := 0
     
-    // 测试 1: SHA-256
+    
     result, _ := test_sha256()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
     
-    // 测试 2: AES
+    
     result, _ = test_aes_encryption()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
     
-    // 测试 3: io_uring
+    
     result, _ = test_io_uring()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
     
-    // 测试 4: TCP
+    
     result, _ = test_tcp_stack()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
     
-    // 测试 5: UDP
+    
     result, _ = test_udp_stack()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
     
-    // 测试 6: SELinux
+    
     result, _ = test_selinux()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
     
-    // 测试 7: seccomp
+    
     result, _ = test_seccomp()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
     
-    // 测试 8: 虚拟化
+    
     result, _ = test_virtualizer()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
     
-    // 测试 9: 电源管理
+    
     result, _ = test_power_management()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
     
-    // 测试 10: 设备框架
+    
     result, _ = test_device_framework()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
     
-    // 测试 11: Tier 4 集成
+    
     result, _ = test_tier4_integration()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
     
-    // 测试 12: 加密管理器
+    
     result, _ = test_crypto_manager()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
     
-    // 测试 13: io_uring 管理器
+    
     result, _ = test_uring_manager()
     if result == 1 {
         passed_tests = passed_tests + 1
     }
     total_tests = total_tests + 1
     
-    // 测试 14: 路由表
+    
     result, _ = test_route_table()
     if result == 1 {
         passed_tests = passed_tests + 1
@@ -341,7 +341,7 @@ func run_all_tier4_tests() (int, string) {
     return passed_tests, ""
 }
 
-// 主测试函数
+
 func main() (int, string) {
     passed, _ := run_all_tier4_tests()
     return passed, ""

@@ -2,30 +2,30 @@ package neurx.driver
 
 use std.slices
 
-// CPU 频率缩放
+
 struct cpu_freq_state {
-    int frequency  // MHz
-    int voltage    // mV
-    int power      // mW
+    int frequency  
+    int voltage    
+    int power      
 }
 
 struct cpufreq_governor {
     int governor_id
-    string name  // ondemand, powersave, performance
+    string name  
     int current_freq
     int min_freq
     int max_freq
     cpu_freq_state[] available_states
 }
 
-// CPU 电源管理驱动
+
 struct cpufreq_driver {
     int cpu_id
     cpufreq_governor[] governors
     int active_governor
 }
 
-// 初始化 CPU 频率驱动
+
 func (cpufreq_driver* driver) init(int cpu_id) (int, string) {
     driver.cpu_id = cpu_id
     driver.governors = {}
@@ -33,7 +33,7 @@ func (cpufreq_driver* driver) init(int cpu_id) (int, string) {
     return 0, ""
 }
 
-// 添加频率状态
+
 func add_freq_state(int freq, int voltage, int power) cpu_freq_state {
     return cpu_freq_state{
         frequency: freq,
@@ -42,7 +42,7 @@ func add_freq_state(int freq, int voltage, int power) cpu_freq_state {
     }
 }
 
-// 创建 Ondemand 调度器
+
 func (cpufreq_driver* driver) create_ondemand_governor(int min_freq, int max_freq) (cpufreq_governor, string) {
     governor := cpufreq_governor{
         governor_id: len(driver.governors),
@@ -53,7 +53,7 @@ func (cpufreq_driver* driver) create_ondemand_governor(int min_freq, int max_fre
         new cpu_freq_state[5] available_states
     }
     
-    // 预设频率状态 (示例)
+    
     governor.available_states[0] = add_freq_state(800, 800, 500)
     governor.available_states[1] = add_freq_state(1200, 900, 800)
     governor.available_states[2] = add_freq_state(1600, 1000, 1200)
@@ -64,7 +64,7 @@ func (cpufreq_driver* driver) create_ondemand_governor(int min_freq, int max_fre
     return governor, ""
 }
 
-// 创建 PowerSave 调度器
+
 func (cpufreq_driver* driver) create_powersave_governor(int min_freq, int max_freq) (cpufreq_governor, string) {
     governor := cpufreq_governor{
         governor_id: len(driver.governors),
@@ -85,7 +85,7 @@ func (cpufreq_driver* driver) create_powersave_governor(int min_freq, int max_fr
     return governor, ""
 }
 
-// 创建 Performance 调度器
+
 func (cpufreq_driver* driver) create_performance_governor(int min_freq, int max_freq) (cpufreq_governor, string) {
     governor := cpufreq_governor{
         governor_id: len(driver.governors),
@@ -106,7 +106,7 @@ func (cpufreq_driver* driver) create_performance_governor(int min_freq, int max_
     return governor, ""
 }
 
-// 设置活跃调度器
+
 func (cpufreq_driver* driver) set_governor(int governor_id) (int, string) {
     if governor_id >= len(driver.governors) {
         return -1, "Invalid governor"
@@ -116,7 +116,7 @@ func (cpufreq_driver* driver) set_governor(int governor_id) (int, string) {
     return 0, ""
 }
 
-// 更新频率 (Ondemand 动态调节)
+
 func (cpufreq_driver* driver) update_frequency(int cpu_load) (int, string) {
     if driver.active_governor < 0 {
         return -1, "No active governor"
@@ -144,7 +144,7 @@ func (cpufreq_driver* driver) update_frequency(int cpu_load) (int, string) {
     return gov.current_freq, ""
 }
 
-// 获取当前频率
+
 func (cpufreq_driver driver) get_current_freq() int {
     if driver.active_governor < 0 {
         return 0
@@ -153,7 +153,7 @@ func (cpufreq_driver driver) get_current_freq() int {
     return gov.current_freq
 }
 
-// 获取功耗
+
 func (cpufreq_driver driver) get_power_consumption() (int, string) {
     if driver.active_governor < 0 {
         return 0, "No active governor"

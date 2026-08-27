@@ -14,29 +14,29 @@ enum socket_state {
 }
 
 struct socket {
-    int sock_fd            // Socket file descriptor
-    socket_type type       // Socket type (TCP/UDP/RAW)
-    socket_state state     // Connection state
-    int family             // Address family (AF_INET, etc)
-    int local_port         // Local port number
-    int remote_port        // Remote port number
-    int backlog            // Listen backlog
+    int sock_fd            
+    socket_type type       
+    socket_state state     
+    int family             
+    int local_port         
+    int remote_port        
+    int backlog            
 }
 
 struct inet_sock {
-    socket base_socket     // Base socket structure
-    int saddr              // Source IP address
-    int daddr              // Destination IP address
-    int sport              // Source port
-    int dport              // Destination port
+    socket base_socket     
+    int saddr              
+    int daddr              
+    int sport              
+    int dport              
 }
 
 struct socket_manager {
-    int total_sockets      // Total sockets created
-    int active_sockets     // Currently active sockets
-    int total_connects     // Total connection attempts
-    int total_disconnects  // Total disconnections
-    int socket_errors      // Error count
+    int total_sockets      
+    int active_sockets     
+    int total_connects     
+    int total_disconnects  
+    int socket_errors      
 }
 
 func create_socket(socket_type sock_type, int family) socket {

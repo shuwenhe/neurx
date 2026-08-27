@@ -13,24 +13,24 @@ enum tcp_state {
 }
 
 struct tcp_sock {
-    int sock_id            // Socket ID
-    tcp_state state        // TCP connection state
-    int snd_nxt            // Send next sequence number
-    int rcv_nxt            // Receive next sequence number
-    int snd_una            // Send unacknowledged
-    int cwnd               // Congestion window
-    int ssthresh           // Slow start threshold
-    int rtt                // Round-trip time
-    int rto                // Retransmission timeout
+    int sock_id            
+    tcp_state state        
+    int snd_nxt            
+    int rcv_nxt            
+    int snd_una            
+    int cwnd               
+    int ssthresh           
+    int rtt                
+    int rto                
 }
 
 struct tcp_stack {
-    int total_connections  // Total TCP connections
-    int active_connections // Active connections
-    int packets_sent       // Packets sent
-    int packets_received   // Packets received
-    int retransmissions    // Retransmission count
-    int connection_errors  // Connection errors
+    int total_connections  
+    int active_connections 
+    int packets_sent       
+    int packets_received   
+    int retransmissions    
+    int connection_errors  
 }
 
 func create_tcp_sock(int sock_id) tcp_sock {

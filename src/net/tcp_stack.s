@@ -13,7 +13,7 @@ const TCP_STATE_CLOSE_WAIT = 7
 const TCP_STATE_CLOSING = 8
 const TCP_STATE_TIME_WAIT = 9
 
-// TCP 连接
+
 struct tcp_connection {
     int conn_id
     int local_port
@@ -29,7 +29,7 @@ struct tcp_connection {
     int cwnd
 }
 
-// UDP 端点
+
 struct udp_endpoint {
     int endpoint_id
     int local_port
@@ -39,7 +39,7 @@ struct udp_endpoint {
     int packets_recv
 }
 
-// 路由表条目
+
 struct route_entry {
     int dest_ip
     int dest_mask
@@ -48,7 +48,7 @@ struct route_entry {
     int interface_id
 }
 
-// TCP 连接管理器
+
 struct tcp_manager {
     tcp_connection[] connections
     int conn_counter
@@ -58,7 +58,7 @@ struct tcp_manager {
     int total_bytes_recv
 }
 
-// UDP 管理器
+
 struct udp_manager {
     udp_endpoint[] endpoints
     int endpoint_counter
@@ -68,7 +68,7 @@ struct udp_manager {
     int total_bytes_recv
 }
 
-// 路由管理器
+
 struct route_manager {
     route_entry[] routes
     int route_counter
@@ -77,7 +77,7 @@ struct route_manager {
     int cache_misses
 }
 
-// IP 层统计
+
 struct ip_stats {
     int total_packets_sent
     int total_packets_recv
@@ -86,7 +86,7 @@ struct ip_stats {
     int forwarded_packets
 }
 
-// 创建 TCP 连接
+
 func (mgr* tcp_manager) create_connection(local_port int, remote_port int, remote_ip int) (int, string) {
     conn := tcp_connection{
         conn_id: mgr.conn_counter,
@@ -111,7 +111,7 @@ func (mgr* tcp_manager) create_connection(local_port int, remote_port int, remot
     return conn_id, ""
 }
 
-// 连接状态转变
+
 func (mgr* tcp_manager) change_state(conn_id int, new_state int) (int, string) {
     if conn_id >= len(mgr.connections) {
         return -1, "connection not found"
@@ -131,7 +131,7 @@ func (mgr* tcp_manager) change_state(conn_id int, new_state int) (int, string) {
     return conn_id, ""
 }
 
-// 发送 TCP 数据
+
 func (mgr* tcp_manager) send_data(conn_id int, data byte[], len int) (int, string) {
     if conn_id >= len(mgr.connections) {
         return -1, "connection not found"
@@ -145,7 +145,7 @@ func (mgr* tcp_manager) send_data(conn_id int, data byte[], len int) (int, strin
     
     mgr.total_bytes_sent = mgr.total_bytes_sent + len
     
-    // 更新拥塞窗口
+    
     if conn.cwnd < conn.ssthresh {
         conn.cwnd = conn.cwnd + conn.mss
     } else {
@@ -157,7 +157,7 @@ func (mgr* tcp_manager) send_data(conn_id int, data byte[], len int) (int, strin
     return len, ""
 }
 
-// 接收 TCP 数据
+
 func (mgr* tcp_manager) recv_data(conn_id int) (byte[], string) {
     if conn_id >= len(mgr.connections) {
         return byte[]{}, "connection not found"
@@ -169,14 +169,14 @@ func (mgr* tcp_manager) recv_data(conn_id int) (byte[], string) {
         return byte[]{}, "connection not established"
     }
     
-    // 返回空数据（模拟）
+    
     data := byte[]{}
     mgr.total_bytes_recv = mgr.total_bytes_recv + len(data)
     
     return data, ""
 }
 
-// 创建 TCP 管理器
+
 func create_tcp_manager() (tcp_manager, string) {
     mgr := tcp_manager{
         connections: tcp_connection[]{},
@@ -190,7 +190,7 @@ func create_tcp_manager() (tcp_manager, string) {
     return mgr, ""
 }
 
-// 创建 UDP 端点
+
 func (mgr* udp_manager) create_endpoint(local_port int, remote_port int, remote_ip int) (int, string) {
     endpoint := udp_endpoint{
         endpoint_id: mgr.endpoint_counter,
@@ -208,7 +208,7 @@ func (mgr* udp_manager) create_endpoint(local_port int, remote_port int, remote_
     return endpoint_id, ""
 }
 
-// 发送 UDP 数据报
+
 func (mgr* udp_manager) send_datagram(endpoint_id int, data byte[], len int) (int, string) {
     if endpoint_id >= len(mgr.endpoints) {
         return -1, "endpoint not found"
@@ -224,7 +224,7 @@ func (mgr* udp_manager) send_datagram(endpoint_id int, data byte[], len int) (in
     return len, ""
 }
 
-// 接收 UDP 数据报
+
 func (mgr* udp_manager) recv_datagram(endpoint_id int) (byte[], string) {
     if endpoint_id >= len(mgr.endpoints) {
         return byte[]{}, "endpoint not found"
@@ -236,13 +236,13 @@ func (mgr* udp_manager) recv_datagram(endpoint_id int) (byte[], string) {
     
     mgr.endpoints[endpoint_id] = endpoint
     
-    // 返回空数据（模拟）
+    
     data := byte[]{}
     
     return data, ""
 }
 
-// 创建 UDP 管理器
+
 func create_udp_manager() (udp_manager, string) {
     mgr := udp_manager{
         endpoints: udp_endpoint[]{},
@@ -256,7 +256,7 @@ func create_udp_manager() (udp_manager, string) {
     return mgr, ""
 }
 
-// 添加路由
+
 func (mgr* route_manager) add_route(dest_ip int, dest_mask int, next_hop_ip int, metric int) (int, string) {
     route := route_entry{
         dest_ip: dest_ip,
@@ -273,7 +273,7 @@ func (mgr* route_manager) add_route(dest_ip int, dest_mask int, next_hop_ip int,
     return route_id, ""
 }
 
-// 路由表查找
+
 func (mgr* route_manager) lookup_route(dest_ip int) (route_entry, string) {
     mgr.total_lookups = mgr.total_lookups + 1
     
@@ -291,7 +291,7 @@ func (mgr* route_manager) lookup_route(dest_ip int) (route_entry, string) {
     return route_entry{}, "route not found"
 }
 
-// 创建路由管理器
+
 func create_route_manager() (route_manager, string) {
     mgr := route_manager{
         routes: route_entry[]{},
@@ -304,7 +304,7 @@ func create_route_manager() (route_manager, string) {
     return mgr, ""
 }
 
-// TCP/IP 协议栈
+
 struct tcp_ip_stack {
     tcp_manager tcp_mgr
     udp_manager udp_mgr
@@ -312,7 +312,7 @@ struct tcp_ip_stack {
     ip_stats ip_stat
 }
 
-// 创建 TCP/IP 协议栈
+
 func create_tcp_ip_stack() (tcp_ip_stack, string) {
     tcp_mgr, _ := create_tcp_manager()
     udp_mgr, _ := create_udp_manager()
@@ -336,7 +336,7 @@ func create_tcp_ip_stack() (tcp_ip_stack, string) {
     return stack, ""
 }
 
-// 获取统计
+
 func (stack* tcp_ip_stack) get_stats() (tcp_ip_stack, string) {
     return stack, ""
 }

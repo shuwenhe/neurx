@@ -8,7 +8,7 @@ const URING_OPCODE_FSYNC = 2
 const URING_OPCODE_TIMEOUT = 3
 const URING_OPCODE_POLL = 4
 
-// io_uring 提交队列条目
+
 struct io_uring_sqe {
     int opcode
     int fd
@@ -19,17 +19,17 @@ struct io_uring_sqe {
     int user_data
 }
 
-// io_uring 完成队列条目
+
 struct io_uring_cqe {
     int result
     int flags
     int user_data
 }
 
-// io_uring 实例
+
 struct io_uring {
-    io_uring_sqe[] sq          // 提交队列
-    io_uring_cqe[] cq          // 完成队列
+    io_uring_sqe[] sq          
+    io_uring_cqe[] cq          
     int sq_head
     int sq_tail
     int cq_head
@@ -39,7 +39,7 @@ struct io_uring {
     int total_completed
 }
 
-// 创建 io_uring 实例
+
 func io_uring_setup(queue_depth int) (io_uring, string) {
     if queue_depth <= 0 {
         return io_uring{}, "queue_depth must be positive"
@@ -60,7 +60,7 @@ func io_uring_setup(queue_depth int) (io_uring, string) {
     return uring, ""
 }
 
-// 准备读操作
+
 func (uring* io_uring) prep_read(fd int, offset int, len int) (int, string) {
     sqe := io_uring_sqe{
         opcode: URING_OPCODE_READ,
@@ -79,7 +79,7 @@ func (uring* io_uring) prep_read(fd int, offset int, len int) (int, string) {
     return sqe_index, ""
 }
 
-// 准备写操作
+
 func (uring* io_uring) prep_write(fd int, offset int, len int, data int[]) (int, string) {
     sqe := io_uring_sqe{
         opcode: URING_OPCODE_WRITE,
@@ -98,7 +98,7 @@ func (uring* io_uring) prep_write(fd int, offset int, len int, data int[]) (int,
     return sqe_index, ""
 }
 
-// 准备 fsync 操作
+
 func (uring* io_uring) prep_fsync(fd int) (int, string) {
     sqe := io_uring_sqe{
         opcode: URING_OPCODE_FSYNC,
@@ -117,7 +117,7 @@ func (uring* io_uring) prep_fsync(fd int) (int, string) {
     return sqe_index, ""
 }
 
-// 准备轮询操作
+
 func (uring* io_uring) prep_poll(fd int, events int) (int, string) {
     sqe := io_uring_sqe{
         opcode: URING_OPCODE_POLL,
@@ -136,7 +136,7 @@ func (uring* io_uring) prep_poll(fd int, events int) (int, string) {
     return sqe_index, ""
 }
 
-// 提交操作到内核
+
 func (uring* io_uring) submit(to_submit int) (int, string) {
     if to_submit > len(uring.sq) {
         return -1, "submit count exceeds queue size"
@@ -147,7 +147,7 @@ func (uring* io_uring) submit(to_submit int) (int, string) {
         if i < len(uring.sq) {
             sqe := uring.sq[i]
             
-            // 模拟提交 - 添加到完成队列
+            
             cqe := io_uring_cqe{
                 result: sqe.length,
                 flags: 0,
@@ -164,7 +164,7 @@ func (uring* io_uring) submit(to_submit int) (int, string) {
     return to_submit, ""
 }
 
-// 等待完成队列条目
+
 func (uring* io_uring) wait_cqe(wait_nr int) (io_uring_cqe, string) {
     if uring.cq_head >= len(uring.cq) {
         return io_uring_cqe{}, "no completion available"
@@ -176,7 +176,7 @@ func (uring* io_uring) wait_cqe(wait_nr int) (io_uring_cqe, string) {
     return cqe, ""
 }
 
-// 轮询完成队列
+
 func (uring* io_uring) cqe_get_all() (io_uring_cqe[], string) {
     results := io_uring_cqe[]{}
     
@@ -191,7 +191,7 @@ func (uring* io_uring) cqe_get_all() (io_uring_cqe[], string) {
     return results, ""
 }
 
-// 获取单个完成条目
+
 func (uring* io_uring) cqe_get(timeout_ms int) (io_uring_cqe, string) {
     if uring.cq_head < len(uring.cq) {
         cqe := uring.cq[uring.cq_head]
@@ -202,24 +202,24 @@ func (uring* io_uring) cqe_get(timeout_ms int) (io_uring_cqe, string) {
     return io_uring_cqe{}, "timeout"
 }
 
-// 标记完成条目为已见
+
 func (uring* io_uring) cqe_seen() (int, string) {
     seen_count := uring.cq_head
     return seen_count, ""
 }
 
-// 清空提交队列
+
 func (uring* io_uring) sq_ready() (int, string) {
     ready_count := uring.sq_tail - uring.sq_head
     return ready_count, ""
 }
 
-// 获取统计信息
+
 func (uring* io_uring) get_stats() (io_uring, string) {
     return uring, ""
 }
 
-// 释放资源
+
 func (uring* io_uring) queue_exit() (int, string) {
     uring.sq_head = 0
     uring.sq_tail = 0
@@ -229,7 +229,7 @@ func (uring* io_uring) queue_exit() (int, string) {
     return 0, ""
 }
 
-// io_uring 管理器
+
 struct uring_manager {
     int num_rings
     io_uring[] rings
@@ -238,7 +238,7 @@ struct uring_manager {
     int total_operations
 }
 
-// 创建 io_uring 管理器
+
 func create_uring_manager(max_rings int) (uring_manager, string) {
     mgr := uring_manager{
         num_rings: 0,
@@ -251,7 +251,7 @@ func create_uring_manager(max_rings int) (uring_manager, string) {
     return mgr, ""
 }
 
-// 创建新 ring
+
 func (mgr* uring_manager) create_ring(queue_depth int) (int, string) {
     ring, err := io_uring_setup(queue_depth)
     if err != "" {
@@ -265,7 +265,7 @@ func (mgr* uring_manager) create_ring(queue_depth int) (int, string) {
     return ring_id, ""
 }
 
-// 获取统计
+
 func (mgr* uring_manager) get_stats() (uring_manager, string) {
     return mgr, ""
 }

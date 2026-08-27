@@ -25,7 +25,7 @@ _start:
     mov %eax, multiboot_magic
     mov %ebx, multiboot_info
 
-    /* Identity-map the first 4 GiB with 2 MiB pages, including local APIC. */
+    
     mov $page_table_l3, %eax
     or $3, %eax
     mov %eax, page_table_l4
@@ -94,7 +94,7 @@ halt:
     hlt
     jmp halt
 
-/* Called from generated S code; RDI contains a tagged integer (n * 2 + 1). */
+
 .global s_fn_baremetal_stage
 .type s_fn_baremetal_stage, @function
 s_fn_baremetal_stage:
@@ -112,8 +112,7 @@ s_fn_baremetal_stage:
     mov $1, %rax
     ret
 
-/* Build a conservative IDT. Interrupts are acknowledged and ignored until a
- * device registers a handler; fatal exceptions stop in a deterministic loop. */
+
 .global s_fn_baremetal_interrupt_init
 .type s_fn_baremetal_interrupt_init, @function
 s_fn_baremetal_interrupt_init:
@@ -135,7 +134,7 @@ s_fn_baremetal_interrupt_init:
     add $16, %rdi
     loop 4b
     lidt idt64_pointer(%rip)
-    /* Mask the legacy PIC; interrupt routing is owned by APIC. */
+    
     mov $0x21, %dx
     mov $0xff, %al
     out %al, %dx
@@ -147,7 +146,7 @@ s_fn_baremetal_interrupt_init:
 interrupt_ignore:
     iretq
 
-/* Enable the local APIC and install vector 0xf0 as the spurious vector. */
+
 .global s_fn_baremetal_apic_init
 .type s_fn_baremetal_apic_init, @function
 s_fn_baremetal_apic_init:
@@ -222,7 +221,7 @@ apic_timer_interrupt:
     movl $0, 0xb0(%rax)
     pop %rax
     iretq
-/* Sum Multiboot2 type-1 memory-map entries and return MiB as an S integer. */
+
 .global s_fn_baremetal_memory_mib
 .type s_fn_baremetal_memory_mib, @function
 s_fn_baremetal_memory_mib:
@@ -266,7 +265,7 @@ s_fn_baremetal_memory_mib:
     mov $1, %rax
     ret
 
-/* Establish the x86-64 syscall entry. Ring-3 launch is deliberately separate. */
+
 .global s_fn_baremetal_syscall_init
 .type s_fn_baremetal_syscall_init, @function
 s_fn_baremetal_syscall_init:
@@ -291,13 +290,7 @@ s_fn_baremetal_syscall_init:
     ret
 
 syscall_entry:
-    /* Handle a few basic syscalls inline for early boot/testing:
-     * 0 = read(fd, buf, count) -> return count in RAX
-     * 1 = write(fd, buf, count) -> return count in RAX
-     * 2 = open(path_index, flags) -> return fake fd 3
-     * 3 = close(fd) -> return 0
-     * Otherwise fall back to getpid (39) or ENOSYS (-38)
-     */
+    
     cmp $0, %rax
     je .Lsys_read
     cmp $1, %rax
@@ -312,17 +305,17 @@ syscall_entry:
     sysretq
 
 .Lsys_read:
-    /* read(fd, buf, count) - return count (in RDX) */
+    
     mov %rdx, %rax
     sysretq
 
 .Lsys_write:
-    /* write(fd, buf, count) - return count (in RDX) */
+    
     mov %rdx, %rax
     sysretq
 
 .Lsys_open:
-    /* open(path_index, flags) - return fake fd 3 */
+    
     mov $3, %rax
     sysretq
 
@@ -373,7 +366,7 @@ s_fn_baremetal_bitmap_clear:
     mov $1, %rax
     ret
 
-/* PCI configuration mechanism #1, bus 0/function 0. */
+
 .global s_fn_baremetal_pci_vendor
 s_fn_baremetal_pci_vendor:
     mov %rdi, %rax
@@ -416,7 +409,7 @@ s_fn_baremetal_virtio_net_probe:
 
 .global s_fn_baremetal_initramfs_files
 s_fn_baremetal_initramfs_files:
-    /* The linker-owned built-in archive currently contains /init. */
+    
     mov $3, %rax
     ret
 
@@ -468,7 +461,7 @@ serial_hex64:
     out %al, %dx
     ret
 
-/* The standalone S object uses this helper for tagged integer addition. */
+
 .global s_value_add
 .type s_value_add, @function
 s_value_add:
@@ -526,8 +519,7 @@ stage_message:  .asciz "NeurX: S init stage "
 metric_message: .asciz "NeurX: metric 0x"
 ready_message:  .asciz "NeurX: S kernel READY\n"
 failed_message: .asciz "NeurX: S kernel FAILED\n"
-/* Minimal embedded ELF64 marker and initramfs payload. The S loader validates
- * this image before a later milestone maps its PT_LOAD segments into Ring 3. */
+
 .align 8
 ring3_image:
     .byte 0x7f, 'E', 'L', 'F', 2, 1, 1, 0

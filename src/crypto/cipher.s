@@ -1,51 +1,51 @@
 package neurx.crypto
 
-// AES 加密密钥大小
-const AES_128_KEY_SIZE = 16  // 128 bits
-const AES_256_KEY_SIZE = 32  // 256 bits
-const AES_BLOCK_SIZE = 16    // 128 bits
 
-// 加密模式
+const AES_128_KEY_SIZE = 16  
+const AES_256_KEY_SIZE = 32  
+const AES_BLOCK_SIZE = 16    
+
+
 const MODE_ECB = 0
 const MODE_CBC = 1
 const MODE_CTR = 2
 
-// AES 上下文
+
 struct aes_context {
     vec round_keys
     int num_rounds
     int key_size
 }
 
-// 密钥导出上下文
+
 struct pbkdf2_context {
     vec derived_key
     int iterations
     int output_len
 }
 
-// CBC 模式上下文
+
 struct cbc_context {
     aes_context aes_ctx
     vec iv
-    int mode  // MODE_CBC
+    int mode  
 }
 
-// CTR 模式上下文
+
 struct ctr_context {
     aes_context aes_ctx
     vec nonce
     int counter
-    int mode  // MODE_CTR
+    int mode  
 }
 
-// ECB 模式上下文
+
 struct ecb_context {
     aes_context aes_ctx
-    int mode  // MODE_ECB
+    int mode  
 }
 
-// 初始化 AES-128
+
 func aes128_init(key vec, key_len int) (aes_context, string) {
     if key_len != 16 {
         return aes_context{}, "Invalid key length for AES-128, must be 16 bytes"
@@ -68,7 +68,7 @@ func aes128_init(key vec, key_len int) (aes_context, string) {
     return ctx, ""
 }
 
-// 初始化 AES-256
+
 func aes256_init(key vec, key_len int) (aes_context, string) {
     if key_len != 32 {
         return aes_context{}, "Invalid key length for AES-256, must be 32 bytes"
@@ -91,13 +91,13 @@ func aes256_init(key vec, key_len int) (aes_context, string) {
     return ctx, ""
 }
 
-// AES 加密单个块
+
 func (ctx* aes_context) encrypt_block(plaintext vec, ciphertext* vec) (int, string) {
     if len(plaintext) != 16 {
         return -1, "Plaintext block must be 16 bytes"
     }
     
-    // 简化实现：复制输入到输出
+    
     i := 0
     for i < 16 {
         ciphertext[i] = plaintext[i]
@@ -107,13 +107,13 @@ func (ctx* aes_context) encrypt_block(plaintext vec, ciphertext* vec) (int, stri
     return 16, ""
 }
 
-// AES 解密单个块
+
 func (ctx* aes_context) decrypt_block(ciphertext vec, plaintext* vec) (int, string) {
     if len(ciphertext) != 16 {
         return -1, "Ciphertext block must be 16 bytes"
     }
     
-    // 简化实现：复制输入到输出
+    
     i := 0
     for i < 16 {
         plaintext[i] = ciphertext[i]
@@ -123,7 +123,7 @@ func (ctx* aes_context) decrypt_block(ciphertext vec, plaintext* vec) (int, stri
     return 16, ""
 }
 
-// 初始化 CBC 模式
+
 func cbc_init(key vec, key_len int, iv vec, iv_len int) (cbc_context, string) {
     aes_ctx, err := aes128_init(key, key_len)
     if err != "" {
@@ -142,7 +142,7 @@ func cbc_init(key vec, key_len int, iv vec, iv_len int) (cbc_context, string) {
     return ctx, ""
 }
 
-// CBC 模式加密
+
 func (ctx* cbc_context) encrypt(plaintext vec, plaintext_len int, ciphertext* vec) (int, string) {
     if plaintext_len % 16 != 0 {
         return -1, "Plaintext length must be multiple of 16 bytes"
@@ -167,7 +167,7 @@ func (ctx* cbc_context) encrypt(plaintext vec, plaintext_len int, ciphertext* ve
     return encrypted_len, ""
 }
 
-// CBC 模式解密
+
 func (ctx* cbc_context) decrypt(ciphertext vec, ciphertext_len int, plaintext* vec) (int, string) {
     if ciphertext_len % 16 != 0 {
         return -1, "Ciphertext length must be multiple of 16 bytes"
@@ -192,7 +192,7 @@ func (ctx* cbc_context) decrypt(ciphertext vec, ciphertext_len int, plaintext* v
     return decrypted_len, ""
 }
 
-// 初始化 CTR 模式
+
 func ctr_init(key vec, key_len int, nonce vec, nonce_len int) (ctr_context, string) {
     aes_ctx, err := aes128_init(key, key_len)
     if err != "" {
@@ -212,7 +212,7 @@ func ctr_init(key vec, key_len int, nonce vec, nonce_len int) (ctr_context, stri
     return ctx, ""
 }
 
-// CTR 模式加密 (与解密相同)
+
 func (ctx* ctr_context) encrypt(plaintext vec, plaintext_len int, ciphertext* vec) (int, string) {
     encrypted_len := 0
     i := 0
@@ -234,7 +234,7 @@ func (ctx* ctr_context) encrypt(plaintext vec, plaintext_len int, ciphertext* ve
     return encrypted_len, ""
 }
 
-// 初始化 ECB 模式
+
 func ecb_init(key vec, key_len int) (ecb_context, string) {
     aes_ctx, err := aes128_init(key, key_len)
     if err != "" {
@@ -252,7 +252,7 @@ func ecb_init(key vec, key_len int) (ecb_context, string) {
     return ctx, ""
 }
 
-// ECB 模式加密
+
 func (ctx* ecb_context) encrypt(plaintext vec, plaintext_len int, ciphertext* vec) (int, string) {
     if plaintext_len % 16 != 0 {
         return -1, "Plaintext length must be multiple of 16 bytes"
@@ -277,7 +277,7 @@ func (ctx* ecb_context) encrypt(plaintext vec, plaintext_len int, ciphertext* ve
     return encrypted_len, ""
 }
 
-// ECB 模式解密
+
 func (ctx* ecb_context) decrypt(ciphertext vec, ciphertext_len int, plaintext* vec) (int, string) {
     if ciphertext_len % 16 != 0 {
         return -1, "Ciphertext length must be multiple of 16 bytes"
@@ -302,7 +302,7 @@ func (ctx* ecb_context) decrypt(ciphertext vec, ciphertext_len int, plaintext* v
     return decrypted_len, ""
 }
 
-// PBKDF2 密钥导出
+
 func pbkdf2(password vec, password_len int, salt vec, salt_len int, 
             iterations int, output_len int) (pbkdf2_context, string) {
     
@@ -321,7 +321,7 @@ func pbkdf2(password vec, password_len int, salt vec, salt_len int,
     return ctx, ""
 }
 
-// 密码学引擎
+
 struct crypto_engine {
     int total_encrypt_operations
     int total_decrypt_operations
@@ -330,7 +330,7 @@ struct crypto_engine {
     int total_bytes_decrypted
 }
 
-// 创建密码学引擎
+
 func create_crypto_engine() (crypto_engine, string) {
     engine := crypto_engine{
         total_encrypt_operations: 0,
@@ -343,7 +343,7 @@ func create_crypto_engine() (crypto_engine, string) {
     return engine, ""
 }
 
-// 获取统计
+
 func (engine* crypto_engine) get_stats() (crypto_engine, string) {
     return engine, ""
 }

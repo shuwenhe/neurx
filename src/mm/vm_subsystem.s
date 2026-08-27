@@ -3,16 +3,16 @@ package neurx.mm
 use std.slices
 use std.collections.hashmap
 
-// 页表项结构
+
 struct page_table_entry {
     int address
     bool present
     bool dirty
     bool accessed
-    int permissions  // 0=read, 1=write, 2=execute
+    int permissions  
 }
 
-// 虚拟内存区域
+
 struct vm_area {
     int vm_start
     int vm_end
@@ -21,14 +21,14 @@ struct vm_area {
     page_table_entry[] page_table
 }
 
-// 虚拟内存管理器
+
 struct vm_manager {
     vec vm_areas
     int total_pages
     int free_pages
 }
 
-// 初始化虚拟内存管理器
+
 func (vm_manager* vmm) init(int total_memory) (int, string) {
     vmm.total_pages = total_memory / 4096
     vmm.free_pages = vmm.total_pages
@@ -36,7 +36,7 @@ func (vm_manager* vmm) init(int total_memory) (int, string) {
     return 0, ""
 }
 
-// 分配虚拟内存区域
+
 func (vm_manager* vmm) allocate_area(int size) (vm_area, string) {
     if vmm.free_pages * 4096 < size {
         return vm_area{}, "Not enough free pages"
@@ -67,7 +67,7 @@ func (vm_manager* vmm) allocate_area(int size) (vm_area, string) {
     return area, ""
 }
 
-// 页面故障处理 (需求分页)
+
 func (vm_manager* vmm) handle_page_fault(int address) (int, string) {
     i := 0
     for i < len(vmm.vm_areas) {
@@ -89,7 +89,7 @@ func (vm_manager* vmm) handle_page_fault(int address) (int, string) {
     return -1, "Invalid page fault"
 }
 
-// 获取页表项
+
 func (vm_manager vmm) get_page_entry(int address) (page_table_entry, string) {
     i := 0
     for i < len(vmm.vm_areas) {
@@ -103,7 +103,7 @@ func (vm_manager vmm) get_page_entry(int address) (page_table_entry, string) {
     return page_table_entry{}, "Address not found"
 }
 
-// 设置页面权限
+
 func (vm_manager* vmm) set_page_permissions(int address, int perms) (int, string) {
     i := 0
     for i < len(vmm.vm_areas) {

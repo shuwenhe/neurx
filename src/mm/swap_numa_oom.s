@@ -2,24 +2,24 @@ package neurx.mm
 
 use std.slices
 
-// Swap 页面
+
 struct swap_page {
     int page_id
     int physical_address
     int swap_offset
-    int flags  // 0=in_memory, 1=in_swap
+    int flags  
 }
 
-// Swap 设备
+
 struct swap_device {
     int device_id
-    int size  // MB
-    int used_space  // MB
-    int free_space  // MB
+    int size  
+    int used_space  
+    int free_space  
     swap_page[] swap_pages
 }
 
-// Swap 管理器
+
 struct swap_manager {
     swap_device[] swap_devices
     int total_swap_space
@@ -27,7 +27,7 @@ struct swap_manager {
     int swap_operations
 }
 
-// 初始化 Swap 管理器
+
 func (swap_manager* swm) init(int total_swap_mb) (int, string) {
     swm.swap_devices = swap_device[]{}
     swm.total_swap_space = total_swap_mb
@@ -36,7 +36,7 @@ func (swap_manager* swm) init(int total_swap_mb) (int, string) {
     return 0, ""
 }
 
-// 创建 Swap 设备
+
 func (swap_manager* swm) create_swap_device(int size_mb) (swap_device, string) {
     if swm.used_swap_space + size_mb > swm.total_swap_space {
         return swap_device{}, "Not enough swap space"
@@ -56,7 +56,7 @@ func (swap_manager* swm) create_swap_device(int size_mb) (swap_device, string) {
     return device, ""
 }
 
-// 将页面 Swap Out 到 Swap 设备
+
 func (swap_manager* swm) swap_out_page(int page_id, int device_id) (int, string) {
     if device_id >= len(swm.swap_devices) {
         return -1, "Invalid device"
@@ -72,7 +72,7 @@ func (swap_manager* swm) swap_out_page(int page_id, int device_id) (int, string)
         page_id: page_id,
         physical_address: 0,
         swap_offset: device.used_space,
-        flags: 1  // in_swap
+        flags: 1  
     }
     
     device.swap_pages = append(device.swap_pages, swap_pg)
@@ -85,7 +85,7 @@ func (swap_manager* swm) swap_out_page(int page_id, int device_id) (int, string)
     return swap_pg.swap_offset, ""
 }
 
-// 从 Swap 设备 Swap In 页面
+
 func (swap_manager* swm) swap_in_page(int page_id, int device_id) (int, string) {
     if device_id >= len(swm.swap_devices) {
         return -1, "Invalid device"
@@ -97,11 +97,11 @@ func (swap_manager* swm) swap_in_page(int page_id, int device_id) (int, string) 
     for i < len(device.swap_pages) {
         pg := device.swap_pages[i]
         if pg.page_id == page_id {
-            pg.flags = 0  // in_memory
+            pg.flags = 0  
             device.used_space = device.used_space - 1
             device.free_space = device.free_space + 1
             
-            // 移除页面
+            
             j := i
             for j < len(device.swap_pages) - 1 {
                 device.swap_pages[j] = device.swap_pages[j + 1]
@@ -119,27 +119,27 @@ func (swap_manager* swm) swap_in_page(int page_id, int device_id) (int, string) 
     return -1, "Page not found in swap"
 }
 
-// 获取 Swap 统计
+
 func (swap_manager swm) get_swap_stats() (int, int, int) {
     return swm.total_swap_space, swm.used_swap_space, swm.swap_operations
 }
 
-// NUMA 节点
+
 struct numa_node {
     int node_id
-    int total_memory  // MB
-    int free_memory   // MB
+    int total_memory  
+    int free_memory   
     int cpu_count
-    int distance_to_other_nodes  // 访问延迟
+    int distance_to_other_nodes  
 }
 
-// NUMA 管理器
+
 struct numa_manager {
     vec nodes
     int num_nodes
 }
 
-// 初始化 NUMA 管理器
+
 func (numa_manager* nm) init(int num_nodes) (int, string) {
     nm.nodes = numa_node[]{}
     nm.num_nodes = num_nodes
@@ -148,7 +148,7 @@ func (numa_manager* nm) init(int num_nodes) (int, string) {
     for i < num_nodes {
         node := numa_node{
             node_id: i,
-            total_memory: 4096,  // 4GB per node
+            total_memory: 4096,  
             free_memory: 4096,
             cpu_count: 4,
             distance_to_other_nodes: 10
@@ -160,7 +160,7 @@ func (numa_manager* nm) init(int num_nodes) (int, string) {
     return 0, ""
 }
 
-// 在特定 NUMA 节点分配内存
+
 func (numa_manager* nm) allocate_local(int node_id, int size_mb) (int, string) {
     if node_id >= nm.num_nodes {
         return -1, "Invalid node"
@@ -178,7 +178,7 @@ func (numa_manager* nm) allocate_local(int node_id, int size_mb) (int, string) {
     return node_id, ""
 }
 
-// 迁移页面到远程 NUMA 节点
+
 func (numa_manager* nm) migrate_page(int from_node, int to_node) (int, string) {
     if from_node >= nm.num_nodes || to_node >= nm.num_nodes {
         return -1, "Invalid node"
@@ -200,7 +200,7 @@ func (numa_manager* nm) migrate_page(int from_node, int to_node) (int, string) {
     return 0, ""
 }
 
-// 获取 NUMA 节点统计
+
 func (numa_manager nm) get_node_stats(int node_id) (int, int, int) {
     if node_id >= nm.num_nodes {
         return 0, 0, 0
@@ -210,22 +210,22 @@ func (numa_manager nm) get_node_stats(int node_id) (int, int, int) {
     return node.total_memory, node.free_memory, node.cpu_count
 }
 
-// OOM 杀手信息
+
 struct oom_victim {
     int pid
-    int memory_usage  // MB
+    int memory_usage  
     int priority
     int oom_score
 }
 
-// OOM 管理器
+
 struct oom_manager {
     vec processes
-    int memory_threshold  // MB
+    int memory_threshold  
     int killed_processes
 }
 
-// 初始化 OOM 管理器
+
 func (oom_manager* om) init(int memory_threshold_mb) (int, string) {
     om.processes = process[]{}"
     om.memory_threshold = memory_threshold_mb
@@ -233,7 +233,7 @@ func (oom_manager* om) init(int memory_threshold_mb) (int, string) {
     return 0, ""
 }
 
-// 注册进程内存使用
+
 func (oom_manager* om) register_process(int pid, int memory_usage) (int, string) {
     victim := oom_victim{
         pid: pid,
@@ -246,7 +246,7 @@ func (oom_manager* om) register_process(int pid, int memory_usage) (int, string)
     return 0, ""
 }
 
-// 计算 OOM 得分 (分数越高越可能被杀死)
+
 func (oom_manager* om) calculate_oom_score(int pid) (int, string) {
     i := 0
     for i < len(om.processes) {
@@ -263,13 +263,13 @@ func (oom_manager* om) calculate_oom_score(int pid) (int, string) {
     return -1, "Process not found"
 }
 
-// 检查是否触发 OOM 并选择受害者
+
 func (oom_manager* om) check_and_kill_victim(int total_memory_used) (int, string) {
     if total_memory_used < om.memory_threshold {
         return -1, "No OOM"
     }
     
-    // 找到得分最高的进程
+    
     max_victim := -1
     max_score := 0
     
@@ -287,7 +287,7 @@ func (oom_manager* om) check_and_kill_victim(int total_memory_used) (int, string
         victim := om.processes[max_victim]
         om.killed_processes = om.killed_processes + 1
         
-        // 移除进程
+        
         i := max_victim
         for i < len(om.processes) - 1 {
             om.processes[i] = om.processes[i + 1]
@@ -300,7 +300,7 @@ func (oom_manager* om) check_and_kill_victim(int total_memory_used) (int, string
     return -1, "No victim found"
 }
 
-// 获取 OOM 统计
+
 func (oom_manager om) get_oom_stats() (int, int) {
     return len(om.processes), om.killed_processes
 }

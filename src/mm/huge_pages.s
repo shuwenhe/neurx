@@ -2,10 +2,10 @@ package neurx.mm
 
 use std.slices
 
-// Huge Pages 支持 (2MB 和 1GB 页面)
+
 struct huge_page {
     int base_address
-    int size  // 2097152 (2MB) or 1073741824 (1GB)
+    int size  
     bool free
     int pool_index
 }
@@ -17,7 +17,7 @@ struct huge_pages_pool {
     int total_1gb
 }
 
-// 初始化 Huge Pages 池
+
 func (huge_pages_pool* hpool) init(int pages_2mb_count, int pages_1gb_count) (int, string) {
     hpool.pages_2mb = {}
     hpool.pages_1gb = {}
@@ -51,7 +51,7 @@ func (huge_pages_pool* hpool) init(int pages_2mb_count, int pages_1gb_count) (in
     return 0, ""
 }
 
-// 分配 2MB Huge Page
+
 func (huge_pages_pool* hpool) allocate_2mb() (huge_page, string) {
     i := 0
     for i < len(hpool.pages_2mb) {
@@ -66,7 +66,7 @@ func (huge_pages_pool* hpool) allocate_2mb() (huge_page, string) {
     return huge_page{}, "No free 2MB huge pages"
 }
 
-// 分配 1GB Huge Page
+
 func (huge_pages_pool* hpool) allocate_1gb() (huge_page, string) {
     i := 0
     for i < len(hpool.pages_1gb) {
@@ -81,7 +81,7 @@ func (huge_pages_pool* hpool) allocate_1gb() (huge_page, string) {
     return huge_page{}, "No free 1GB huge pages"
 }
 
-// 释放 Huge Page
+
 func (huge_pages_pool* hpool) free_page(huge_page hp) (int, string) {
     if hp.size == 2097152 {
         i := 0
@@ -109,7 +109,7 @@ func (huge_pages_pool* hpool) free_page(huge_page hp) (int, string) {
     return -1, "Page not found"
 }
 
-// 获取 Huge Pages 统计
+
 func (huge_pages_pool hpool) get_stats() (int, int, int, int) {
     free_2mb := 0
     free_1gb := 0

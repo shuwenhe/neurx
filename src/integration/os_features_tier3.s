@@ -16,9 +16,9 @@ use neurx.driver.cpufreq
 use neurx.mm.compaction_io
 use neurx.kernel.cpu_scheduling
 
-// 完整的 Tier 3 操作系统功能集成 (容器和安全)
+
 struct os_features_tier3_integration {
-    // Tier 1 + Tier 2 所有组件
+    
     vm_manager vm_manager
     huge_pages_pool huge_pages_pool
     ext4_fs ext4_fs
@@ -40,7 +40,7 @@ struct os_features_tier3_integration {
     numa numa_manager
     oom oom_manager
     
-    // Tier 3 新增组件
+    
     namespaces namespace_manager
     cgroups cgroup_manager
     audit audit_manager
@@ -49,11 +49,11 @@ struct os_features_tier3_integration {
     file_perms file_permission_manager
 }
 
-// 初始化所有 Tier 3 功能 (Tier 1 + Tier 2 + Tier 3)
+
 func new_os_features_tier3_integration() os_features_tier3_integration {
     osfi3 := os_features_tier3_integration{}
     
-    // Tier 1 初始化
+    
     osfi3.vm_manager.init(4 * 1024 * 1024 * 1024)
     osfi3.huge_pages_pool.init(1000, 100)
     osfi3.ext4_fs.init(100 * 1024 * 1024 * 1024)
@@ -67,7 +67,7 @@ func new_os_features_tier3_integration() os_features_tier3_integration {
     osfi3.page_cache.init(1024 * 1024 * 1024)
     osfi3.cpu_scheduler.init(8)
     
-    // Tier 2 初始化
+    
     osfi3.semaphores.init(256)
     osfi3.msg_queues.init()
     osfi3.shared_memory.init()
@@ -79,7 +79,7 @@ func new_os_features_tier3_integration() os_features_tier3_integration {
     osfi3.numa.init(4)
     osfi3.oom.init(4 * 1024)
     
-    // Tier 3 初始化
+    
     osfi3.namespaces.init()
     osfi3.cgroups.init()
     osfi3.audit.init(10000)
@@ -90,7 +90,7 @@ func new_os_features_tier3_integration() os_features_tier3_integration {
     return osfi3
 }
 
-// ============ Namespace 操作 ============
+
 
 func (osfi3* os) create_pid_namespace(int parent_pid) (pid_namespace, string) {
     return osfi3.namespaces.create_pid_namespace(parent_pid)
@@ -108,7 +108,7 @@ func (osfi3* os) create_user_namespace(int parent_ns_id) (user_namespace, string
     return osfi3.namespaces.create_user_namespace(parent_ns_id)
 }
 
-// ============ cgroups 操作 ============
+
 
 func (osfi3* os) create_cgroup(string group_name) (cgroup_group, string) {
     return osfi3.cgroups.create_cgroup(group_name)
@@ -134,7 +134,7 @@ func (osfi3* os) check_cgroup_limits(int group_id) (int, string) {
     return osfi3.cgroups.check_limits(group_id)
 }
 
-// ============ 审计操作 ============
+
 
 func (osfi3* os) add_audit_rule(int event_type, string target, int action) (audit_rule, string) {
     return osfi3.audit.add_rule(event_type, target, action)
@@ -144,7 +144,7 @@ func (osfi3* os) log_audit_event(int pid, int uid, int event_type, string event_
     return osfi3.audit.log_event(pid, uid, event_type, event_name, details, result)
 }
 
-// ============ 权限能力操作 ============
+
 
 func (osfi3* os) add_capability(int pid, int cap_id) (int, string) {
     return osfi3.capabilities.add_capability_to_process(pid, cap_id)
@@ -158,7 +158,7 @@ func (osfi3* os) check_capability(int pid, int cap_id) (int, string) {
     return osfi3.capabilities.has_capability(pid, cap_id)
 }
 
-// ============ 用户和权限操作 ============
+
 
 func (osfi3* os) create_user(string username, string home_dir, int gid) (user, string) {
     return osfi3.users.create_user(username, home_dir, gid)
@@ -184,18 +184,18 @@ func (osfi3* os) check_file_permission(int file_id, int uid, int operation) (int
     return osfi3.file_perms.check_permission(file_id, uid, operation)
 }
 
-// ============ 系统统计 (Tier 3) ============
+
 
 func (osfi3 os) get_system_stats_tier3() (int, int, int, int, int, int, int) {
     vm_used := osfi3.vm_manager.total_pages - osfi3.vm_manager.free_pages
     fs_used, fs_free, _ := osfi3.ext4_fs.get_stats()
     run_tasks, _ := osfi3.cpu_scheduler.get_stats()
     
-    // 获取 Namespace 统计
+    
     pid_ns, net_ns, mnt_ns, user_ns := osfi3.namespaces.get_namespace_stats()
     total_namespaces := pid_ns + net_ns + mnt_ns + user_ns
     
-    // 获取 cgroup 统计
+    
     users_count, groups_count := osfi3.users.get_user_stats()
     
     log_count, _, _ := osfi3.audit.get_audit_stats()

@@ -1,9 +1,9 @@
 package neurx.kernel
 
-// ============= LOCKING MECHANISMS =============
+
 
 struct mutex {
-    int state              // 0 = unlocked, 1 = locked
+    int state              
     int owner_pid
     int contention_count
 }
@@ -17,7 +17,7 @@ struct semaphore {
 }
 
 struct spinlock {
-    int locked             // 0 = unlocked, 1 = locked
+    int locked             
     int spin_count
     int lock_acquisitions
     int owner_cpu
@@ -25,7 +25,7 @@ struct spinlock {
 
 struct rw_lock {
     int read_count
-    int write_locked       // 0 = unlocked, 1 = locked
+    int write_locked       
     int write_waiters
     int reader_acquisitions
     int writer_acquisitions
@@ -38,7 +38,7 @@ struct atomic_int {
     int compare_swap_count
 }
 
-// ============= VFS STRUCTURES =============
+
 
 struct inode {
     int ino
@@ -95,13 +95,13 @@ struct dentry_cache {
     int evictions
 }
 
-// ============= NETWORK STRUCTURES =============
+
 
 struct socket {
     int sock_fd
-    int type               // 0 = SOCK_STREAM, 1 = SOCK_DGRAM, 2 = SOCK_RAW
-    int state              // 0 = unconnected, 1 = connecting, 2 = connected, 3 = disconnecting
-    int family             // AF_INET = 2
+    int type               
+    int state              
+    int family             
     int local_port
     int remote_port
     int backlog
@@ -117,7 +117,7 @@ struct socket_manager {
 
 struct tcp_sock {
     int sock_id
-    int state              // 0=established, 1=syn_sent, 2=syn_recv, ... 8=closed
+    int state              
     int snd_nxt
     int rcv_nxt
     int snd_una
@@ -136,7 +136,7 @@ struct tcp_stack {
     int connection_errors
 }
 
-// ============= FACTORY FUNCTIONS =============
+
 
 func create_mutex() mutex {
     mutex { state: 0, owner_pid: 0, contention_count: 0 }
@@ -219,7 +219,7 @@ func create_tcp_stack() tcp_stack {
     }
 }
 
-// ============= PRINT FUNCTIONS =============
+
 
 func print_mutex_info(mutex m) {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -462,7 +462,7 @@ func print_tcp_stack_info(tcp_stack stack) {
     print("")
 }
 
-// ============= DEMONSTRATIONS =============
+
 
 func demonstrate_mutex() {
     print("")

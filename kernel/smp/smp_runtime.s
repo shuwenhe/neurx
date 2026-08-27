@@ -70,7 +70,7 @@ func smp_runtime_create() smp_runtime {
     return runtime
 }
 
-// MADT parsing supplies enabled Local APIC/x2APIC identifiers to this API.
+
 func register_madt_cpu(smp_runtime runtime, int apic) smp_runtime {
     if runtime.cpu_count >= 64 { return runtime }
     slot := runtime.cpu_count
@@ -154,8 +154,8 @@ func set_next_task(smp_runtime runtime, int cpu, int task_id,
     return runtime
 }
 
-// Timer IRQ policy. The architecture exit path performs the actual register
-// restore after this function commits the selected task/context.
+
+
 func apic_timer_tick(smp_runtime runtime, int cpu) smp_runtime {
     if cpu < 0 || cpu >= runtime.cpu_count || runtime.state[cpu] != CPU_ONLINE() {
         return runtime

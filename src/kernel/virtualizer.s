@@ -5,7 +5,7 @@ const VM_STATE_RUNNING = 1
 const VM_STATE_PAUSED = 2
 const VM_STATE_HALTED = 3
 
-// 虚拟机配置
+
 struct vm_config {
     int vm_id
     string vm_name
@@ -14,7 +14,7 @@ struct vm_config {
     int disk_size_gb
 }
 
-// 虚拟 CPU
+
 struct vcpu {
     int vcpu_id
     int vm_id
@@ -24,16 +24,16 @@ struct vcpu {
     int cpu_cycles
 }
 
-// 虚拟机内存映射
+
 struct vm_memory_region {
     int region_id
     int guest_phys_addr
     int host_phys_addr
     int size
-    int access_flags  // RWX
+    int access_flags  
 }
 
-// 虚拟设备
+
 struct vm_device {
     int device_id
     int device_type
@@ -42,7 +42,7 @@ struct vm_device {
     int device_state
 }
 
-// 虚拟机
+
 struct virtual_machine {
     int vm_id
     string vm_name
@@ -56,7 +56,7 @@ struct virtual_machine {
     int total_exec_time_ms
 }
 
-// 虚拟化管理器
+
 struct virtualizer {
     vec vms
     int vm_counter
@@ -67,7 +67,7 @@ struct virtualizer {
     int total_mmio_operations
 }
 
-// 创建虚拟机
+
 func (virt* virtualizer) create_vm(name string, vcpu_count int, memory_mb int, disk_size_gb int) (int, string) {
     vm := virtual_machine{
         vm_id: virt.vm_counter,
@@ -82,7 +82,7 @@ func (virt* virtualizer) create_vm(name string, vcpu_count int, memory_mb int, d
         total_exec_time_ms: 0
     }
     
-    // 创建 VCPU
+    
     i := 0
     for i < vcpu_count {
         vcpu := vcpu{
@@ -105,7 +105,7 @@ func (virt* virtualizer) create_vm(name string, vcpu_count int, memory_mb int, d
     return vm_id, ""
 }
 
-// 启动虚拟机
+
 func (virt* virtualizer) start_vm(vm_id int) (int, string) {
     if vm_id >= len(virt.vms) {
         return -1, "VM not found"
@@ -114,13 +114,13 @@ func (virt* virtualizer) start_vm(vm_id int) (int, string) {
     vm := virt.vms[vm_id]
     vm.state = VM_STATE_RUNNING
     virt.running_vms = virt.running_vms + 1
-    vm.boot_time_ms = 100  // 模拟启动时间
+    vm.boot_time_ms = 100  
     virt.vms[vm_id] = vm
     
     return vm_id, ""
 }
 
-// 停止虚拟机
+
 func (virt* virtualizer) stop_vm(vm_id int) (int, string) {
     if vm_id >= len(virt.vms) {
         return -1, "VM not found"
@@ -136,7 +136,7 @@ func (virt* virtualizer) stop_vm(vm_id int) (int, string) {
     return vm_id, ""
 }
 
-// 暂停虚拟机
+
 func (virt* virtualizer) pause_vm(vm_id int) (int, string) {
     if vm_id >= len(virt.vms) {
         return -1, "VM not found"
@@ -152,7 +152,7 @@ func (virt* virtualizer) pause_vm(vm_id int) (int, string) {
     return vm_id, ""
 }
 
-// 恢复虚拟机
+
 func (virt* virtualizer) resume_vm(vm_id int) (int, string) {
     if vm_id >= len(virt.vms) {
         return -1, "VM not found"
@@ -168,7 +168,7 @@ func (virt* virtualizer) resume_vm(vm_id int) (int, string) {
     return vm_id, ""
 }
 
-// 添加内存映射
+
 func (virt* virtualizer) add_memory_region(vm_id int, guest_addr int, host_addr int, size int, flags int) (int, string) {
     if vm_id >= len(virt.vms) {
         return -1, "VM not found"
@@ -189,7 +189,7 @@ func (virt* virtualizer) add_memory_region(vm_id int, guest_addr int, host_addr 
     return region.region_id, ""
 }
 
-// 添加虚拟设备
+
 func (virt* virtualizer) add_device(vm_id int, device_type int, irq_nr int) (int, string) {
     if vm_id >= len(virt.vms) {
         return -1, "VM not found"
@@ -210,13 +210,13 @@ func (virt* virtualizer) add_device(vm_id int, device_type int, irq_nr int) (int
     return device.device_id, ""
 }
 
-// 处理 VM Exit
+
 func (virt* virtualizer) handle_vm_exit(vm_id int, exit_reason int) (int, string) {
     virt.total_vm_exits = virt.total_vm_exits + 1
     return 0, ""
 }
 
-// 创建虚拟化管理器
+
 func create_virtualizer() (virtualizer, string) {
     virt := virtualizer{
         vms: {},
@@ -231,7 +231,7 @@ func create_virtualizer() (virtualizer, string) {
     return virt, ""
 }
 
-// 获取统计
+
 func (virt* virtualizer) get_stats() (virtualizer, string) {
     return virt, ""
 }

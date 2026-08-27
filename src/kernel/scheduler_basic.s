@@ -24,7 +24,7 @@ func schedule() int {
     if len(run_queue) == 0 {
         return 0
     }
-    // naive scheduler: pick highest priority
+    
     best := 0
     i := 0
     for i < len(run_queue) {

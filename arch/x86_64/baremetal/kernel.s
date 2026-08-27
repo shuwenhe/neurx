@@ -1,6 +1,6 @@
 package neurx.baremetal.kernel
 
-// Implemented by the architecture runtime. Arguments use the S tagged-int ABI.
+
 extern func baremetal_stage(int stage) int
 extern func baremetal_interrupt_init() int
 extern func baremetal_apic_init() int
@@ -65,40 +65,40 @@ func physical_page_allocator_init(int memory_mib) int {
 func kernel_services_init() int {
     elf_valid := baremetal_ring3_image_valid()
     baremetal_metric(5, elf_valid)
-    baremetal_stage(8)  // Ring 3 ELF image validated
+    baremetal_stage(8)  
     files := baremetal_initramfs_files()
     baremetal_metric(6, files)
-    baremetal_stage(9)  // initramfs root mounted
+    baremetal_stage(9)  
     pci_devices := pci_scan_bus_zero()
     baremetal_metric(7, pci_devices)
-    baremetal_stage(10) // PCI configuration mechanism #1
+    baremetal_stage(10) 
     virtio_net := baremetal_virtio_net_probe()
     baremetal_metric(8, virtio_net)
-    baremetal_stage(11) // virtio-net discovery and Ethernet boundary
-    baremetal_stage(12) // VFS and network protocol core
+    baremetal_stage(11) 
+    baremetal_stage(12) 
     return 0
 }
 
 func main() int {
-    baremetal_stage(1) // early console and boot protocol
+    baremetal_stage(1) 
     cpu_count := baremetal_logical_cpu_count()
     baremetal_metric(9, cpu_count)
     boot_cycles := baremetal_tsc_cycles()
     baremetal_metric(10, boot_cycles)
-    baremetal_stage(14) // SMP topology and high-resolution clock source
+    baremetal_stage(14) 
     baremetal_interrupt_init()
     baremetal_tss_init()
-    baremetal_stage(2) // IDT and exception boundary
+    baremetal_stage(2) 
     baremetal_apic_init()
     baremetal_apic_timer_init()
-    baremetal_stage(3) // local APIC
+    baremetal_stage(3) 
     memory_mib := baremetal_memory_mib()
     baremetal_metric(0, memory_mib)
     physical_page_allocator_init(memory_mib)
-    baremetal_stage(4) // physical memory and page allocator
+    baremetal_stage(4) 
     baremetal_syscall_init()
-    baremetal_stage(5) // syscall MSRs and dispatch entry
+    baremetal_stage(5) 
     kernel_services_init()
-    baremetal_stage(13) // AI runtime bootstrap
+    baremetal_stage(13) 
     return 0
 }

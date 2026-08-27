@@ -10,7 +10,7 @@ struct syscall_entry {
 
 syscall_entry[] syscall_table
 
-// in-memory file table: fd -> content
+
 map[int]string fd_table
 int next_fd
 
@@ -26,12 +26,12 @@ func init_syscall_table() int {
 }
 
 func sys_read(int fd, int buf_addr, int count) int {
-    // read from in-memory fd content
+    
     content := ""
     if has(fd_table, fd) {
         content = fd_table[fd]
     }
-    // return min(count, len(content)) as bytes read
+    
     if count < len(content) {
         return count
     }
@@ -39,12 +39,12 @@ func sys_read(int fd, int buf_addr, int count) int {
 }
 
 func sys_write(int fd, int buf_addr, int count) int {
-    // append placeholder bytes to in-memory fd
+    
     existing := ""
     if has(fd_table, fd) {
         existing = fd_table[fd]
     }
-    // append 'count' dots to simulate data
+    
     i := 0
     for i < count {
         existing = existing + "."
@@ -64,7 +64,7 @@ func sys_open(string path, int flags) int {
 
 func sys_close(int fd) int {
     if has(fd_table, fd) {
-        // remove entry
+        
         fd_table[fd] = ""
     }
     0
@@ -72,7 +72,7 @@ func sys_close(int fd) int {
 
 func syscall_dispatch(int num, int[] args) int {
     eprintln("syscall_dispatch: " + int_to_string(num))
-    // dispatch common syscalls by number
+    
     if num == 0 {
         if len(args) >= 3 {
             return sys_read(args[0], args[1], args[2])
@@ -84,7 +84,7 @@ func syscall_dispatch(int num, int[] args) int {
         }
         return -1
     } else if num == 2 {
-        // open: args[0]=path_index (synthetic), args[1]=flags
+        
         if len(args) >= 2 {
             path_str := "unknown"
             if args[0] == 1 {
@@ -99,6 +99,6 @@ func syscall_dispatch(int num, int[] args) int {
         }
         return -1
     }
-    // unknown syscall
+    
     -1
 }

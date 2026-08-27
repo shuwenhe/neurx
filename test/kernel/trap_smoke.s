@@ -3,7 +3,7 @@ package test.kernel
 use kernel.trap
 
 func main() int {
-    // simulate syscall trap for open/write/read/close
+    
     fd := syscall_trap(2, int[]{1, 0})
     if fd != 3 {
         return 2
