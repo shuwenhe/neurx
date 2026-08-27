@@ -291,12 +291,46 @@ s_fn_baremetal_syscall_init:
     ret
 
 syscall_entry:
-    /* Minimal getpid-compatible syscall. Unsupported calls return -ENOSYS. */
+    /* Handle a few basic syscalls inline for early boot/testing:
+     * 0 = read(fd, buf, count) -> return count in RAX
+     * 1 = write(fd, buf, count) -> return count in RAX
+     * 2 = open(path_index, flags) -> return fake fd 3
+     * 3 = close(fd) -> return 0
+     * Otherwise fall back to getpid (39) or ENOSYS (-38)
+     */
+    cmp $0, %rax
+    je .Lsys_read
+    cmp $1, %rax
+    je .Lsys_write
+    cmp $2, %rax
+    je .Lsys_open
+    cmp $3, %rax
+    je .Lsys_close
     cmp $39, %rax
-    jne 12f
+    jne .Lsys_enosys
     mov $1, %rax
     sysretq
-12:
+
+.Lsys_read:
+    /* read(fd, buf, count) - return count (in RDX) */
+    mov %rdx, %rax
+    sysretq
+
+.Lsys_write:
+    /* write(fd, buf, count) - return count (in RDX) */
+    mov %rdx, %rax
+    sysretq
+
+.Lsys_open:
+    /* open(path_index, flags) - return fake fd 3 */
+    mov $3, %rax
+    sysretq
+
+.Lsys_close:
+    mov $0, %rax
+    sysretq
+
+.Lsys_enosys:
     mov $-38, %rax
     sysretq
 
