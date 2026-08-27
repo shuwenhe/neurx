@@ -80,14 +80,14 @@ struct corpus_state {
     []streaming_reader_state readers
     int current_source
     int rng
-    []string shuffle_buffer
+    string[] shuffle_buffer
     int buf_head
     int buf_size
     int total_docs_seen
     int total_tokens_seen
     int docs_filtered
     int docs_deduped
-    []int dedup_hashes
+    int[] dedup_hashes
 }
 
 func new_corpus_state(corpus_config cfg) corpus_state {
@@ -102,8 +102,8 @@ func new_corpus_state(corpus_config cfg) corpus_state {
         }
         i = i + 1
     }
-    []string buf = []string{cap: cfg.shuffle_buffer}
-    []int hashes = []int{cap: 1000000}
+    string[] buf = string[]{cap: cfg.shuffle_buffer}
+    int[] hashes = int[]{cap: 1000000}
     corpus_state {
         config: cfg,
         tokenizer: tok,
@@ -131,7 +131,7 @@ func new_corpus_config_from_sources([]data_source sources, int batch_size, int s
     cfg
 }
 
-func new_corpus_state_from_paths([]string paths, int batch_size, int seq_len, bool enable_dedup) corpus_state {
+func new_corpus_state_from_paths(string[] paths, int batch_size, int seq_len, bool enable_dedup) corpus_state {
     if len(paths) == 0 {
         return new_corpus_state(default_pretraining_corpus())
     }
@@ -279,13 +279,13 @@ func corpus_is_duplicate(corpus_state state, int hash) bool {
 }
 
 struct packing_buffer {
-    []int tokens
+    int[] tokens
     int length
     int capacity
 }
 
 func new_packing_buffer(int capacity) packing_buffer {
-    []int buf = []int{cap: capacity}
+    int[] buf = int[]{cap: capacity}
     packing_buffer { tokens: buf, length: 0, capacity: capacity }
 }
 
@@ -301,8 +301,8 @@ func pb_is_full(packing_buffer buf) bool {
     buf.length >= buf.capacity
 }
 
-func pb_flush(packing_buffer buf) []int {
-    []int out = []int{cap: buf.capacity}
+func pb_flush(packing_buffer buf) int[] {
+    int[] out = int[]{cap: buf.capacity}
     int i = 0
     for i < buf.capacity {
         if i < buf.length {
@@ -344,12 +344,12 @@ func corpus_select_source(corpus_state state) corpus_source_selection {
 }
 
 struct corpus_batch {
-    []int input_ids
-    []int target_ids
+    int[] input_ids
+    int[] target_ids
     int batch_size
     int seq_len
     int total_tokens
-    []string source_names
+    string[] source_names
 }
 
 struct corpus_source_selection {
@@ -369,7 +369,7 @@ struct corpus_batch_result {
 }
 
 struct corpus_token_stream_result {
-    []int token_ids
+    int[] token_ids
     corpus_state state
     int batches_read
     int tokens_collected
@@ -438,9 +438,9 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
     int batch_size = state.config.batch_size
     int bos = state.config.bos_token_id
     int eos = state.config.eos_token_id
-    []int all_input = []int{cap: batch_size * seq_len}
-    []int all_target = []int{cap: batch_size * seq_len}
-    []string src_names = []string{cap: batch_size}
+    int[] all_input = int[]{cap: batch_size * seq_len}
+    int[] all_target = int[]{cap: batch_size * seq_len}
+    string[] src_names = string[]{cap: batch_size}
     packing_buffer buf = new_packing_buffer(seq_len)
     int seqs_ready = 0
     for seqs_ready < batch_size {
@@ -464,14 +464,14 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
             }
             break
         }
-        []int token_ids = encode(state.tokenizer, doc_text)
+        int[] token_ids = encode(state.tokenizer, doc_text)
         state.total_tokens_seen = state.total_tokens_seen + len(token_ids)
         buf = pb_append(buf, bos)
         int i = 0
         for i < len(token_ids) {
             buf = pb_append(buf, token_ids[i])
             if pb_is_full(buf) {
-                []int seq = pb_flush(buf)
+                int[] seq = pb_flush(buf)
                 int pos = seqs_ready * seq_len
                 int t = 0
                 for t < seq_len {
@@ -507,7 +507,7 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
 }
 
 func corpus_collect_token_ids(corpus_state state, int max_tokens) corpus_token_stream_result {
-    []int collected = []int{cap: max_tokens}
+    int[] collected = int[]{cap: max_tokens}
     int batches_read = 0
     int tokens_collected = 0
     int target_tokens = max_tokens
@@ -517,7 +517,7 @@ func corpus_collect_token_ids(corpus_state state, int max_tokens) corpus_token_s
     for tokens_collected < target_tokens {
         corpus_batch_result batch_result = corpus_next_batch(state)
         state = batch_result.state
-        []int batch_tokens = batch_result.batch.input_ids
+        int[] batch_tokens = batch_result.batch.input_ids
         int i = 0
         for i < len(batch_tokens) && tokens_collected < target_tokens {
             collected = append(collected, batch_tokens[i])

@@ -9,7 +9,7 @@ struct image_data {
 }
 
 struct image_tensor {
-    [][]float data
+    float[][] data
     int height
     int width
     int channels
@@ -17,14 +17,14 @@ struct image_tensor {
 }
 
 struct vit_patch {
-    []float patch_embedding
+    float[] patch_embedding
     int patch_idx
     int patch_size
 }
 
 struct vision_language_bridge_output {
-    []float image_features
-    [][]float patch_features
+    float[] image_features
+    float[][] patch_features
     int num_patches
     int feature_dim
 }
@@ -42,8 +42,8 @@ func new_image_preprocess_config() image_preprocess_config {
     image_preprocess_config cfg
     cfg.target_height = 224
     cfg.target_width = 224
-    cfg.mean_normalization = []float{0.485, 0.456, 0.406}
-    cfg.std_normalization = []float{0.229, 0.224, 0.225}
+    cfg.mean_normalization = float[]{0.485, 0.456, 0.406}
+    cfg.std_normalization = float[]{0.229, 0.224, 0.225}
     cfg.center_crop = true
     cfg.random_flip = false
     cfg
@@ -92,11 +92,11 @@ func normalize_image(
     normalized.width = tensor.width
     normalized.channels = tensor.channels
     normalized.color_space = tensor.color_space
-    normalized.data = [][]float{}
+    normalized.data = float[][]{}
 
     for c = 0; c < tensor.channels; c = c + 1 {
-        []float channel_data = tensor.data[c]
-        []float normalized_channel = []float{}
+        float[] channel_data = tensor.data[c]
+        float[] normalized_channel = float[]{}
 
         for i = 0; i < len(channel_data); i = i + 1 {
             float normalized_val = (channel_data[i] - mean[c]) / std[c]
@@ -142,9 +142,9 @@ struct vit_config {
 
 struct vit_encoder {
     vit_config config
-    [][]float patch_embedding_weights
-    [][]float position_embeddings
-    [][]float cls_token
+    float[][] patch_embedding_weights
+    float[][] position_embeddings
+    float[][] cls_token
 }
 
 func new_vit_encoder(vit_config cfg) vit_encoder {
@@ -153,9 +153,9 @@ func new_vit_encoder(vit_config cfg) vit_encoder {
 
     int num_patches = (cfg.image_size / cfg.patch_size) * (cfg.image_size / cfg.patch_size)
 
-    encoder.patch_embedding_weights = [][]float{}
-    encoder.position_embeddings = [][]float{}
-    encoder.cls_token = [][]float{}
+    encoder.patch_embedding_weights = float[][]{}
+    encoder.position_embeddings = float[][]{}
+    encoder.cls_token = float[][]{}
 
     encoder
 }
@@ -176,7 +176,7 @@ func extract_patches(
             vit_patch patch
             patch.patch_idx = ph * num_patches_w + pw
             patch.patch_size = patch_size
-            patch.patch_embedding = []float{}
+            patch.patch_embedding = float[]{}
             patches = append(patches, patch)
         }
     }
@@ -187,12 +187,12 @@ func extract_patches(
 func encode_patches_to_embedding(
     []vit_patch patches,
     vit_encoder encoder
-) [][]float {
+) float[][] {
 
-    [][]float embeddings = [][]float{}
+    float[][] embeddings = float[][]{}
 
     for i = 0; i < len(patches); i = i + 1 {
-        []float embedding = encoder.patch_embedding_weights[0]
+        float[] embedding = encoder.patch_embedding_weights[0]
         embeddings = append(embeddings, embedding)
     }
 
@@ -200,14 +200,14 @@ func encode_patches_to_embedding(
 }
 
 func apply_position_embedding(
-    [][]float patch_embeddings,
+    float[][] patch_embeddings,
     vit_encoder encoder
-) [][]float {
+) float[][] {
 
-    [][]float with_pos_emb = [][]float{}
+    float[][] with_pos_emb = float[][]{}
 
     for i = 0; i < len(patch_embeddings); i = i + 1 {
-        []float emb = patch_embeddings[i]
+        float[] emb = patch_embeddings[i]
         if i < len(encoder.position_embeddings) {
 
         }
@@ -218,11 +218,11 @@ func apply_position_embedding(
 }
 
 func vit_transformer_layers(
-    [][]float embeddings,
+    float[][] embeddings,
     vit_encoder encoder
-) [][]float {
+) float[][] {
 
-    [][]float output = embeddings
+    float[][] output = embeddings
 
     for layer = 0; layer < encoder.config.num_layers; layer = layer + 1 {
 
@@ -232,10 +232,10 @@ func vit_transformer_layers(
 }
 
 func vit_pooling(
-    [][]float embeddings
-) []float {
+    float[][] embeddings
+) float[] {
 
-    []float pooled = embeddings[0]
+    float[] pooled = embeddings[0]
     pooled
 }
 
@@ -243,7 +243,7 @@ func vit_inference_pipeline(
     image_data image,
     vit_encoder encoder,
     image_preprocess_config preprocess_cfg
-) []float {
+) float[] {
 
     image_data preprocessed = augment_image(image, preprocess_cfg)
     preprocessed = resize_image(preprocessed, preprocess_cfg.target_width, preprocess_cfg.target_height)
@@ -252,19 +252,19 @@ func vit_inference_pipeline(
 
     []vit_patch patches = extract_patches(tensor, encoder.config)
 
-    [][]float patch_embeds = encode_patches_to_embedding(patches, encoder)
+    float[][] patch_embeds = encode_patches_to_embedding(patches, encoder)
 
     patch_embeds = apply_position_embedding(patch_embeds, encoder)
 
-    [][]float transformer_out = vit_transformer_layers(patch_embeds, encoder)
+    float[][] transformer_out = vit_transformer_layers(patch_embeds, encoder)
 
-    []float image_features = vit_pooling(transformer_out)
+    float[] image_features = vit_pooling(transformer_out)
 
     image_features
 }
 
 struct vision_language_bridge {
-    [][]float image_projection_weights
+    float[][] image_projection_weights
     int image_hidden_dim
     int language_hidden_dim
 }
@@ -276,27 +276,27 @@ func new_vision_language_bridge(
     vision_language_bridge bridge
     bridge.image_hidden_dim = image_hidden_dim
     bridge.language_hidden_dim = language_hidden_dim
-    bridge.image_projection_weights = [][]float{}
+    bridge.image_projection_weights = float[][]{}
     bridge
 }
 
 func project_image_features(
-    []float image_features,
+    float[] image_features,
     vision_language_bridge bridge
-) []float {
+) float[] {
 
-    []float projected = image_features
+    float[] projected = image_features
 
     projected
 }
 
 func fuse_image_and_text_embeddings(
-    []float image_features,
-    []float text_embeddings,
+    float[] image_features,
+    float[] text_embeddings,
     float fusion_weight
-) []float {
+) float[] {
 
-    []float fused = []float{}
+    float[] fused = float[]{}
 
     for i = 0; i < len(text_embeddings); i = i + 1 {
         float fused_val = text_embeddings[i] + image_features[0] * fusion_weight
@@ -307,7 +307,7 @@ func fuse_image_and_text_embeddings(
 }
 
 struct multimodal_cache {
-    map<string, []float> image_embedding_cache
+    map<string, float[]> image_embedding_cache
     map<string, image_data> image_data_cache
     int max_cache_size
     int current_cache_size
@@ -317,7 +317,7 @@ func new_multimodal_cache(int max_size) multimodal_cache {
     multimodal_cache cache
     cache.max_cache_size = max_size
     cache.current_cache_size = 0
-    cache.image_embedding_cache = map<string, []float>{}
+    cache.image_embedding_cache = map<string, float[]>{}
     cache.image_data_cache = map<string, image_data>{}
     cache
 }
@@ -325,7 +325,7 @@ func new_multimodal_cache(int max_size) multimodal_cache {
 func cache_image_embedding(
     multimodal_cache cache,
     string image_id,
-    []float embedding
+    float[] embedding
 ) {
 
 }
@@ -333,9 +333,9 @@ func cache_image_embedding(
 func get_cached_image_embedding(
     multimodal_cache cache,
     string image_id
-) []float {
+) float[] {
 
-    []float embedding
+    float[] embedding
     embedding
 }
 
@@ -387,8 +387,8 @@ func detect_objects(
 }
 
 struct scene_understanding {
-    []string objects
-    []string attributes
+    string[] objects
+    string[] attributes
     string overall_scene
 }
 
@@ -398,17 +398,17 @@ func understand_scene(
 ) scene_understanding {
 
     scene_understanding understanding
-    understanding.objects = []string{}
-    understanding.attributes = []string{}
+    understanding.objects = string[]{}
+    understanding.attributes = string[]{}
     understanding.overall_scene = "Unknown scene"
     understanding
 }
 
 struct segmentation_mask {
-    [][]int mask
+    int[][] mask
     int height
     int width
-    []string class_names
+    string[] class_names
 }
 
 func segment_image(
@@ -417,10 +417,10 @@ func segment_image(
 ) segmentation_mask {
 
     segmentation_mask seg
-    seg.mask = [][]int{}
+    seg.mask = int[][]{}
     seg.height = image.height
     seg.width = image.width
-    seg.class_names = []string{}
+    seg.class_names = string[]{}
     seg
 }
 
@@ -438,9 +438,9 @@ func retrieve_images_similar(
 func guide_image_generation(
     string text_prompt,
     vit_encoder encoder
-) []float {
+) float[] {
 
-    []float guidance_features
+    float[] guidance_features
     guidance_features
 }
 
@@ -448,12 +448,12 @@ func process_image_batch(
     []image_data images,
     vit_encoder encoder,
     image_preprocess_config cfg
-) [][]float {
+) float[][] {
 
-    [][]float batch_features = [][]float{}
+    float[][] batch_features = float[][]{}
 
     for i = 0; i < len(images); i = i + 1 {
-        []float features = vit_inference_pipeline(images[i], encoder, cfg)
+        float[] features = vit_inference_pipeline(images[i], encoder, cfg)
         batch_features = append(batch_features, features)
     }
 

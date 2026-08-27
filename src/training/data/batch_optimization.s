@@ -81,8 +81,8 @@ func first_fit_decreasing_pack([]sequence_info sequences, int max_seq_len) optim
     }
 }
 
-func compute_loss_weights([]sequence_info sequences, int target_seq_len) []float {
-    []float weights = []float{cap: len(sequences)}
+func compute_loss_weights([]sequence_info sequences, int target_seq_len) float[] {
+    float[] weights = float[]{cap: len(sequences)}
     int i = 0
     for i < len(sequences) {
         float length_ratio = float(sequences[i].num_tokens) / float(target_seq_len)
@@ -106,7 +106,7 @@ func estimate_batch_memory(optimized_batch batch, int model_param_count) int {
     memory_bytes
 }
 
-func create_length_buckets([]sequence_info sequences, []int bucket_boundaries) [][]sequence_info {
+func create_length_buckets([]sequence_info sequences, int[] bucket_boundaries) [][]sequence_info {
     [][]sequence_info{cap: len(bucket_boundaries)}
 }
 

@@ -41,7 +41,7 @@ struct training_state {
     int current_epoch
     float best_loss
     float current_loss
-    []float losses
+    float[] losses
     nccl_communicator nccl_comm
     int world_rank
     int world_size
@@ -59,7 +59,7 @@ func create_training_orchestrator(training_config cfg) (training_state, error) {
         current_epoch: 0,
         float best_loss("inf"),
         current_loss: 0.0,
-        losses: make([]float, 0),
+        losses: make(float[], 0),
         steps_since_checkpoint: 0,
     }
     if cfg.distributed_backend != "none" {

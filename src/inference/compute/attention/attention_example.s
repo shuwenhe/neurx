@@ -15,8 +15,8 @@ struct example_config {
 
 struct example_input {
     string prompt
-    []int token_ids
-    []float embeddings
+    int[] token_ids
+    float[] embeddings
 }
 
 func example_basic_inference() {
@@ -187,8 +187,8 @@ func example_diagnostics() {
     println("Optimal: ~4-8 (mix of focused and broad)\n")
 }
 
-func make_dummy_embeddings(int size) []float {
-    emb = make([]float, size)
+func make_dummy_embeddings(int size) float[] {
+    emb = make(float[], size)
     i = 0
     for i < size {
         emb[i] = 0.1
@@ -197,8 +197,8 @@ func make_dummy_embeddings(int size) []float {
     return emb
 }
 
-func make_dummy_tokens(int count) []int {
-    tokens = make([]int, count)
+func make_dummy_tokens(int count) int[] {
+    tokens = make(int[], count)
     i = 0
     for i < count {
         tokens[i] = 100 + i

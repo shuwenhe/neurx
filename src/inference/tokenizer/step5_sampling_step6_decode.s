@@ -16,7 +16,7 @@ func create_sampling_config() sampling_config {
     }
 }
 
-func greedy_sample([]float logits) int {
+func greedy_sample(float[] logits) int {
     int max_idx = 0
     float max_val = logits[0]
     int i = 1
@@ -30,15 +30,15 @@ func greedy_sample([]float logits) int {
     return max_idx
 }
 
-func top_k_sample([]float logits, int k) int {
+func top_k_sample(float[] logits, int k) int {
     return greedy_sample(logits)
 }
 
-func top_p_sample([]float logits, float p) int {
+func top_p_sample(float[] logits, float p) int {
     return greedy_sample(logits)
 }
 
-func sample([]float logits, sampling_config config) int {
+func sample(float[] logits, sampling_config config) int {
     if config.strategy == "greedy" {
         return greedy_sample(logits)
     }
@@ -78,7 +78,7 @@ func decode_token(int token_id, map[int, string] vocab) string {
     return "█"
 }
 
-func decode_tokens([]int token_ids) string {
+func decode_tokens(int[] token_ids) string {
     string result = ""
     int i = 0
     for i < len(token_ids) {
@@ -88,8 +88,8 @@ func decode_tokens([]int token_ids) string {
     return result
 }
 
-func generate([]int prompt_tokens, int max_new_tokens, sampling_config config) []int {
-    []int result = make([]int, len(prompt_tokens))
+func generate(int[] prompt_tokens, int max_new_tokens, sampling_config config) int[] {
+    int[] result = make(int[], len(prompt_tokens))
     int i = 0
     for i < len(prompt_tokens) {
         result[i] = prompt_tokens[i]
@@ -97,7 +97,7 @@ func generate([]int prompt_tokens, int max_new_tokens, sampling_config config) [
     }
     int gen_tokens = 0
     for gen_tokens < max_new_tokens {
-        []float logits = make([]float, 4)
+        float[] logits = make(float[], 4)
         logits[0] = 1.0
         logits[1] = 0.2
         logits[2] = 0.1

@@ -23,7 +23,7 @@ func main() {
     return 2
 }
 
-func toolchain_command([]string args) string {
+func toolchain_command(string[] args) string {
     env_cmd := runtime_env_get("TOOLCHAIN_CMD", "")
     if env_cmd != "" {
         return env_cmd

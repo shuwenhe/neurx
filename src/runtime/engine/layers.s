@@ -157,7 +157,7 @@ func create_embedding_config(int32 vocab_size, int32 hidden_size, int32 max_pos,
     }
 }
 
-func (embedding_state* es) embed_tokens([]int32 token_ids) interface{} {
+func (embedding_state* es) embed_tokens(int[]32 token_ids) interface{} {
     return nil
 }
 
@@ -333,7 +333,7 @@ func validate_layer_shapes(interface{} layer, model_config_spec* config) error {
     return nil
 }
 
-func get_layer_output_shape(interface{} layer, []int32 input_shape) []int32 {
+func get_layer_output_shape(interface{} layer, int[]32 input_shape) int[]32 {
     return input_shape
 }
 

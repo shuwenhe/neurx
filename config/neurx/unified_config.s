@@ -67,7 +67,7 @@ struct scheduler_config {
     max_batch_size         int32
     max_num_seqs           int32
     max_num_tokens         int32
-    max_num_tokens_list     []int32
+    max_num_tokens_list     int[]32
     max_log_probs          int32
     prefill_batch_size     int32
     decode_batch_size      int32
@@ -106,20 +106,20 @@ struct multimodal_config {
     weights_budget        int32
     depth_budget          int32
     vit_patch_size         int32
-    image_norm_shape       []int32
+    image_norm_shape       int[]32
     enable_image_feed      bool
-    max_image_shape       []int32
-    max_video_shape       []int32
+    max_image_shape       int[]32
+    max_video_shape       int[]32
 }
 
 struct device_config {
     device_type           string
     device_id             int32
-    cuda_devices          []int32
+    cuda_devices          int[]32
     ray_worker_use_colocated_pg bool
     ray_extra_resources_per_worker map[string]float32
-    tensor_parallel_devices []int32
-    pipeline_parallel_devices [][]int32
+    tensor_parallel_devices int[]32
+    pipeline_parallel_devices int[][]32
 }
 
 struct speculative_config {
@@ -226,7 +226,7 @@ func new_scheduler_config() scheduler_config {
         max_batch_size:       256,
         max_num_seqs:         256,
         max_num_tokens:       8192,
-        max_num_tokens_list:   []int32{8192, 16384},
+        max_num_tokens_list:   int[]32{8192, 16384},
         max_log_probs:        0,
         prefill_batch_size:   64,
         decode_batch_size:    256,
@@ -271,10 +271,10 @@ func new_multimodal_config() multimodal_config {
         weights_budget:       20000,
         depth_budget:         2000,
         vit_patch_size:        14,
-        image_norm_shape:      []int32{3, 224, 224},
+        image_norm_shape:      int[]32{3, 224, 224},
         enable_image_feed:     false,
-        max_image_shape:       []int32{2048, 2048},
-        max_video_shape:       []int32{1080, 1920},
+        max_image_shape:       int[]32{2048, 2048},
+        max_video_shape:       int[]32{1080, 1920},
     }
 }
 
@@ -282,11 +282,11 @@ func new_device_config() device_config {
     return device_config{
         device_type:        "cuda",
         device_id:          0,
-        cuda_devices:       []int32{0},
+        cuda_devices:       int[]32{0},
         ray_worker_use_colocated_pg: true,
         ray_extra_resources_per_worker: make(map[string]float32),
-        tensor_parallel_devices: []int32{0},
-        pipeline_parallel_devices: [][]int32{{0}},
+        tensor_parallel_devices: int[]32{0},
+        pipeline_parallel_devices: int[][]32{{0}},
     }
 }
 

@@ -15,18 +15,18 @@ struct cache_aware_router_config {
 
 struct cache_aware_router_state {
     cache_aware_router_config config
-    []int worker_ids
-    []int worker_pool_ids
-    []int worker_model_ids
-    []int worker_loads
-    []int worker_healthy
+    int[] worker_ids
+    int[] worker_pool_ids
+    int[] worker_model_ids
+    int[] worker_loads
+    int[] worker_healthy
     int worker_count
-    []int affinity_pool_ids
-    []int affinity_model_ids
-    []int affinity_prefix_hashes
-    []int affinity_prefix_tokens
-    []int affinity_worker_ids
-    []int affinity_last_access
+    int[] affinity_pool_ids
+    int[] affinity_model_ids
+    int[] affinity_prefix_hashes
+    int[] affinity_prefix_tokens
+    int[] affinity_worker_ids
+    int[] affinity_last_access
     int affinity_count
     int logical_clock
     int affinity_routes
@@ -42,8 +42,8 @@ struct cache_route_result {
     bool routed
 }
 
-func cache_router_int_array(int capacity) []int {
-    []int values = []int{cap: capacity}
+func cache_router_int_array(int capacity) int[] {
+    int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

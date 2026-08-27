@@ -1,15 +1,15 @@
 package neurx.serving.security.request_governance
 
 struct governance_state {
-    []string tenant_ids
-    []string key_fingerprints
-    []string roles
-    []int requests_per_minute
-    []int tokens_per_minute
-    []int window_start_ms
-    []int window_requests
-    []int window_tokens
-    []bool enabled
+    string[] tenant_ids
+    string[] key_fingerprints
+    string[] roles
+    int[] requests_per_minute
+    int[] tokens_per_minute
+    int[] window_start_ms
+    int[] window_requests
+    int[] window_tokens
+    bool[] enabled
     int authorized
     int denied
     int quota_rejected

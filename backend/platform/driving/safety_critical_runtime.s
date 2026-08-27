@@ -8,7 +8,7 @@ struct safety_critical_runtime {
     int watchdog_period_ms
     bool redundancy_enabled
     int safety_certification_level
-    []string critical_functions
+    string[] critical_functions
 }
 
 func new_safety_critical_runtime(string os) safety_critical_runtime {

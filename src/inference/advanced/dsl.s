@@ -9,8 +9,8 @@ struct dsl_statement {
     int statement_type
     string name
     string operation
-    []string parameters
-    []string arguments
+    string[] parameters
+    string[] arguments
     map[string]string attributes
 }
 
@@ -26,15 +26,15 @@ struct dsl_execution_context {
     dsl_program program
     int current_statement_index
     map[string]any current_state
-    []string execution_trace
+    string[] execution_trace
     bool halted
     string halt_reason
 }
 
 struct dsl_function_def {
     string function_name
-    []string parameters
-    []string return_types
+    string[] parameters
+    string[] return_types
     string description
 }
 
@@ -80,8 +80,8 @@ func create_llm_call_statement(
         statement_type: STMT_TYPE_LLM_CALL,
         operation: "llm",
         name: "llm_response",
-        parameters: make([]string, 0),
-        arguments: make([]string, 0),
+        parameters: make(string[], 0),
+        arguments: make(string[], 0),
         attributes: make(map[string]string),
     }
     stmt.parameters = append(stmt.parameters, "prompt")
@@ -100,8 +100,8 @@ func create_assignment_statement(
         statement_type: STMT_TYPE_ASSIGNMENT,
         operation: "set",
         name: variable,
-        parameters: make([]string, 0),
-        arguments: []string{value},
+        parameters: make(string[], 0),
+        arguments: string[]{value},
         attributes: make(map[string]string),
     }
 }
@@ -115,8 +115,8 @@ func create_loop_statement(
         statement_type: STMT_TYPE_LOOP,
         operation: "for",
         name: loop_var,
-        parameters: make([]string, 0),
-        arguments: []string{collection},
+        parameters: make(string[], 0),
+        arguments: string[]{collection},
         attributes: make(map[string]string),
     }
     stmt.attributes["iterations"] = string_from_int(num_iterations)
@@ -125,13 +125,13 @@ func create_loop_statement(
 
 func create_function_call_statement(
     string function_name,
-    []string args,
+    string[] args,
 ) dsl_statement {
     return dsl_statement {
         statement_type: STMT_TYPE_FUNCTION_CALL,
         operation: "call",
         name: function_name,
-        parameters: make([]string, 0),
+        parameters: make(string[], 0),
         arguments: args,
         attributes: make(map[string]string),
     }
@@ -148,7 +148,7 @@ func new_dsl_interpreter(prog dsl_program) dsl_interpreter {
             program: prog,
             current_statement_index: 0,
             current_state: make(map[string]any),
-            execution_trace: make([]string, 0),
+            execution_trace: make(string[], 0),
             halted: false,
         },
         functions: make(map[string]dsl_function_def),
@@ -244,7 +244,7 @@ func (dsl_interpreter* interp) execute_program() (map[string]any, bool) {
     return interp.context.current_state, true
 }
 
-func (dsl_interpreter* interp) get_execution_trace() []string {
+func (dsl_interpreter* interp) get_execution_trace() string[] {
     return interp.context.execution_trace
 }
 

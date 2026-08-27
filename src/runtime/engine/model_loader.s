@@ -289,7 +289,7 @@ func (dynamic_model_loader* dml) load_weights_eager(model_executor* executor) er
             weight_name := "layers." + string(i) + ".weights." + string(j)
             spec := *model_weight_spec{
                 name: weight_name,
-                shape: []int32{config.hidden_size, config.hidden_size},
+                shape: int[]32{config.hidden_size, config.hidden_size},
                 dtype: executor.load_config.dtype,
                 offset: 0,
                 size_bytes: int64(config.hidden_size * config.hidden_size * 2),
@@ -393,8 +393,8 @@ func (dynamic_model_loader* dml) get_metrics() *model_loader_metrics {
     return *dml.metrics
 }
 
-func (dynamic_model_loader* dml) get_loaded_models() []string {
-    models := []string{}
+func (dynamic_model_loader* dml) get_loaded_models() string[] {
+    models := string[]{}
     for model_id := range dml.executors {
         models = append(models, model_id)
     }

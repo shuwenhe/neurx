@@ -116,7 +116,7 @@ struct llama_lora_config {
     int lora_rank
     int lora_alpha
     float lora_dropout
-    []string target_modules
+    string[] target_modules
 }
 
 func get_llama_lora_config() llama_lora_config {

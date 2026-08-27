@@ -1,12 +1,12 @@
 package neurx.serving.runtime.production_runtime
 
 struct production_queue {
-    []string request_ids
-    []string backends
-    []string dtypes
-    []int prompt_remaining
-    []int max_new_tokens
-    []int generated_tokens
+    string[] request_ids
+    string[] backends
+    string[] dtypes
+    int[] prompt_remaining
+    int[] max_new_tokens
+    int[] generated_tokens
 }
 
 func new_production_queue() production_queue {
@@ -48,12 +48,12 @@ func production_normalize_dtype(string backend, string dtype) string {
 
 func production_queue_push(production_queue queue, string request_id, string backend, string dtype, int prompt_remaining, int max_new_tokens, int generated_tokens) production_queue {
     int old_size = production_queue_size(queue)
-    []string ids = []string{cap: old_size + 1}
-    []string next_backends = []string{cap: old_size + 1}
-    []string next_dtypes = []string{cap: old_size + 1}
-    []int prompts = []int{cap: old_size + 1}
-    []int limits = []int{cap: old_size + 1}
-    []int generated = []int{cap: old_size + 1}
+    string[] ids = string[]{cap: old_size + 1}
+    string[] next_backends = string[]{cap: old_size + 1}
+    string[] next_dtypes = string[]{cap: old_size + 1}
+    int[] prompts = int[]{cap: old_size + 1}
+    int[] limits = int[]{cap: old_size + 1}
+    int[] generated = int[]{cap: old_size + 1}
     int i = 0
     for i < old_size {
         ids[i] = queue.request_ids[i]
@@ -118,7 +118,7 @@ struct production_runtime_state {
     int queued_tokens
     int kv_tokens
     int in_flight_requests
-    []string in_flight_ids
+    string[] in_flight_ids
     int admitted_requests
     int rejected_requests
     int completed_requests
@@ -151,7 +151,7 @@ func new_production_runtime_state(production_runtime_config config) production_r
     }
 }
 
-func production_string_contains([]string values, string value) bool {
+func production_string_contains(string[] values, string value) bool {
     int i = 0
     for i < len(values) {
         if values[i] == value { return true }
@@ -160,8 +160,8 @@ func production_string_contains([]string values, string value) bool {
     false
 }
 
-func production_string_push([]string values, string value) []string {
-    []string result = []string{cap: len(values) + 1}
+func production_string_push(string[] values, string value) string[] {
+    string[] result = string[]{cap: len(values) + 1}
     int i = 0
     for i < len(values) {
         result[i] = values[i]
@@ -171,14 +171,14 @@ func production_string_push([]string values, string value) []string {
     result
 }
 
-func production_remove_in_flight([]string values, []string completed) []string {
+func production_remove_in_flight(string[] values, string[] completed) string[] {
     int keep = 0
     int i = 0
     for i < len(values) {
         if !production_string_contains(completed, values[i]) { keep = keep + 1 }
         i = i + 1
     }
-    []string result = []string{cap: keep}
+    string[] result = string[]{cap: keep}
     i = 0
     int j = 0
     for i < len(values) {
@@ -230,11 +230,11 @@ struct production_batch {
     string phase
     string backend
     string dtype
-    []string request_ids
-    []int token_counts
-    []int prompt_remaining
-    []int max_new_tokens
-    []int generated_tokens
+    string[] request_ids
+    int[] token_counts
+    int[] prompt_remaining
+    int[] max_new_tokens
+    int[] generated_tokens
     int total_tokens
     bool ok
 }
@@ -259,7 +259,7 @@ func empty_production_batch() production_batch {
     }
 }
 
-func production_queue_without_selected(production_queue queue, []bool selected) production_queue {
+func production_queue_without_selected(production_queue queue, bool[] selected) production_queue {
     int i = 0
     production_queue result = new_production_queue()
     for i < production_queue_size(queue) {
@@ -277,12 +277,12 @@ func production_schedule_decode(production_runtime_state state) production_sched
     if size <= 0 { return production_schedule_result { state: state, batch: empty_production_batch() } }
     string backend = queue.backends[0]
     string dtype = queue.dtypes[0]
-    []bool selected = []bool{cap: size}
-    []string ids = []string{cap: state.config.max_decode_batch_size}
-    []int counts = []int{cap: state.config.max_decode_batch_size}
-    []int prompts = []int{cap: state.config.max_decode_batch_size}
-    []int limits = []int{cap: state.config.max_decode_batch_size}
-    []int generated = []int{cap: state.config.max_decode_batch_size}
+    bool[] selected = bool[]{cap: size}
+    string[] ids = string[]{cap: state.config.max_decode_batch_size}
+    int[] counts = int[]{cap: state.config.max_decode_batch_size}
+    int[] prompts = int[]{cap: state.config.max_decode_batch_size}
+    int[] limits = int[]{cap: state.config.max_decode_batch_size}
+    int[] generated = int[]{cap: state.config.max_decode_batch_size}
     int chosen = 0
     int i = 0
     for i < size && chosen < state.config.max_decode_batch_size {
@@ -300,11 +300,11 @@ func production_schedule_decode(production_runtime_state state) production_sched
     }
     state.decode_queue = production_queue_without_selected(queue, selected)
     state.in_flight_requests = state.in_flight_requests + chosen
-    []string compact_ids = []string{cap: chosen}
-    []int compact_counts = []int{cap: chosen}
-    []int compact_prompts = []int{cap: chosen}
-    []int compact_limits = []int{cap: chosen}
-    []int compact_generated = []int{cap: chosen}
+    string[] compact_ids = string[]{cap: chosen}
+    int[] compact_counts = int[]{cap: chosen}
+    int[] compact_prompts = int[]{cap: chosen}
+    int[] compact_limits = int[]{cap: chosen}
+    int[] compact_generated = int[]{cap: chosen}
     i = 0
     for i < chosen {
         compact_ids[i] = ids[i]
@@ -338,12 +338,12 @@ func production_schedule_prefill(production_runtime_state state) production_sche
     if size <= 0 { return production_schedule_result { state: state, batch: empty_production_batch() } }
     string backend = queue.backends[0]
     string dtype = queue.dtypes[0]
-    []bool selected = []bool{cap: size}
-    []string ids = []string{cap: state.config.max_prefill_requests}
-    []int counts = []int{cap: state.config.max_prefill_requests}
-    []int prompts = []int{cap: state.config.max_prefill_requests}
-    []int limits = []int{cap: state.config.max_prefill_requests}
-    []int generated = []int{cap: state.config.max_prefill_requests}
+    bool[] selected = bool[]{cap: size}
+    string[] ids = string[]{cap: state.config.max_prefill_requests}
+    int[] counts = int[]{cap: state.config.max_prefill_requests}
+    int[] prompts = int[]{cap: state.config.max_prefill_requests}
+    int[] limits = int[]{cap: state.config.max_prefill_requests}
+    int[] generated = int[]{cap: state.config.max_prefill_requests}
     int chosen = 0
     int total = 0
     int i = 0
@@ -368,11 +368,11 @@ func production_schedule_prefill(production_runtime_state state) production_sche
     }
     state.prefill_queue = production_queue_without_selected(queue, selected)
     state.in_flight_requests = state.in_flight_requests + chosen
-    []string compact_ids = []string{cap: chosen}
-    []int compact_counts = []int{cap: chosen}
-    []int compact_prompts = []int{cap: chosen}
-    []int compact_limits = []int{cap: chosen}
-    []int compact_generated = []int{cap: chosen}
+    string[] compact_ids = string[]{cap: chosen}
+    int[] compact_counts = int[]{cap: chosen}
+    int[] compact_prompts = int[]{cap: chosen}
+    int[] compact_limits = int[]{cap: chosen}
+    int[] compact_generated = int[]{cap: chosen}
     i = 0
     for i < chosen {
         compact_ids[i] = ids[i]
@@ -443,7 +443,7 @@ func production_complete_prefill(production_runtime_state state, production_batc
     state
 }
 
-func production_complete_decode(production_runtime_state state, production_batch batch, []bool eos, bool succeeded) production_runtime_state {
+func production_complete_decode(production_runtime_state state, production_batch batch, bool[] eos, bool succeeded) production_runtime_state {
     bool commit = succeeded && state.kv_tokens + len(batch.request_ids) <= state.config.max_kv_tokens
     int i = 0
     for i < len(batch.request_ids) {

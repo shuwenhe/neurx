@@ -28,18 +28,18 @@ struct speculative_config {
 }
 
 struct draft_model {
-    []float embeddings
-    [][]float weights
-    [][]float biases
+    float[] embeddings
+    float[][] weights
+    float[][] biases
     int vocab_size
     int hidden_dim
     int num_layers
 }
 
 struct verifier_model {
-    []float embeddings
-    [][]float weights
-    [][]float biases
+    float[] embeddings
+    float[][] weights
+    float[][] biases
     int vocab_size
     int hidden_dim
     int num_layers
@@ -49,10 +49,10 @@ struct speculative_state {
     speculative_config config
     draft_model draft
     verifier_model verifier
-    []int draft_tokens
-    []int verified_tokens
-    []float draft_probs
-    []float verification_scores
+    int[] draft_tokens
+    int[] verified_tokens
+    float[] draft_probs
+    float[] verification_scores
     int current_speculation_steps
     int total_speculation_steps
     int accepted_count
@@ -69,8 +69,8 @@ struct tree_node {
 }
 
 struct speculative_result {
-    []int tokens
-    []float probabilities
+    int[] tokens
+    float[] probabilities
     int accepted_count
     int rejected_count
     float accept_rate
@@ -102,8 +102,8 @@ func new_speculative_config() speculative_config {
 func new_draft_model(int vocab_size, int hidden_dim, int num_layers) draft_model {
     draft_model {
         embeddings: math.allocate_float(vocab_size * hidden_dim, 0.0),
-        weights: [][]float{cap: num_layers},
-        biases: [][]float{cap: num_layers},
+        weights: float[][]{cap: num_layers},
+        biases: float[][]{cap: num_layers},
         vocab_size: vocab_size,
         hidden_dim: hidden_dim,
         num_layers: num_layers,
@@ -113,8 +113,8 @@ func new_draft_model(int vocab_size, int hidden_dim, int num_layers) draft_model
 func new_verifier_model(int vocab_size, int hidden_dim, int num_layers) verifier_model {
     verifier_model {
         embeddings: math.allocate_float(vocab_size * hidden_dim, 0.0),
-        weights: [][]float{cap: num_layers},
-        biases: [][]float{cap: num_layers},
+        weights: float[][]{cap: num_layers},
+        biases: float[][]{cap: num_layers},
         vocab_size: vocab_size,
         hidden_dim: hidden_dim,
         num_layers: num_layers,
@@ -126,8 +126,8 @@ func new_speculative_state(speculative_config config) speculative_state {
         config: config,
         draft: new_draft_model(32000, 1024, 6),
         verifier: new_verifier_model(32000, 8192, 70),
-        draft_tokens: []int{cap: config.max_speculation_steps},
-        verified_tokens: []int{cap: 1024},
+        draft_tokens: int[]{cap: config.max_speculation_steps},
+        verified_tokens: int[]{cap: 1024},
         draft_probs: math.allocate_float(config.max_speculation_steps, 0.0),
         verification_scores: math.allocate_float(config.max_speculation_steps, 0.0),
         current_speculation_steps: 0,
@@ -138,10 +138,10 @@ func new_speculative_state(speculative_config config) speculative_state {
     }
 }
 
-func draft_model_predict(draft_model model, []int input_tokens, int seq_len) ([]int, []float) {
+func draft_model_predict(draft_model model, int[] input_tokens, int seq_len) (int[], float[]) {
     int vocab_size = model.vocab_size
     int hidden_dim = model.hidden_dim
-    []float hidden = math.allocate_float(hidden_dim, 0.0)
+    float[] hidden = math.allocate_float(hidden_dim, 0.0)
     int i = 0
     for i < seq_len {
         int token = input_tokens[i]
@@ -152,7 +152,7 @@ func draft_model_predict(draft_model model, []int input_tokens, int seq_len) ([]
         }
         int layer = 0
         for layer < model.num_layers {
-            []float layer_hidden = math.allocate_float(hidden_dim, 0.0)
+            float[] layer_hidden = math.allocate_float(hidden_dim, 0.0)
             j = 0
             for j < hidden_dim {
                 layer_hidden[j] = model.biases[layer][j]
@@ -169,7 +169,7 @@ func draft_model_predict(draft_model model, []int input_tokens, int seq_len) ([]
         }
         i = i + 1
     }
-    []float logits = math.allocate_float(vocab_size, 0.0)
+    float[] logits = math.allocate_float(vocab_size, 0.0)
     j = 0
     for j < vocab_size {
         logits[j] = model.biases[model.num_layers][j]
@@ -180,17 +180,17 @@ func draft_model_predict(draft_model model, []int input_tokens, int seq_len) ([]
         }
         j = j + 1
     }
-    []float probs = math.softmax_1d(logits)
-    ([]int top_indices, []float top_probs) = math.top_k_select(probs, vocab_size, 1)
+    float[] probs = math.softmax_1d(logits)
+    (int[] top_indices, float[] top_probs) = math.top_k_select(probs, vocab_size, 1)
     (top_indices, top_probs)
 }
 
-func verifier_model_verify(verifier_model model, []int input_tokens, []int draft_tokens,
-                           int seq_len, int draft_len) []float {
+func verifier_model_verify(verifier_model model, int[] input_tokens, int[] draft_tokens,
+                           int seq_len, int draft_len) float[] {
     int vocab_size = model.vocab_size
     int hidden_dim = model.hidden_dim
-    []float verification_scores = math.allocate_float(draft_len, 0.0)
-    []int combined_tokens = math.allocate_int(seq_len + draft_len, 0)
+    float[] verification_scores = math.allocate_float(draft_len, 0.0)
+    int[] combined_tokens = math.allocate_int(seq_len + draft_len, 0)
     int i = 0
     for i < seq_len {
         combined_tokens[i] = input_tokens[i]
@@ -201,7 +201,7 @@ func verifier_model_verify(verifier_model model, []int input_tokens, []int draft
         combined_tokens[seq_len + i] = draft_tokens[i]
         i = i + 1
     }
-    []float hidden = math.allocate_float(hidden_dim, 0.0)
+    float[] hidden = math.allocate_float(hidden_dim, 0.0)
     i = 0
     for i < seq_len + draft_len {
         int token = combined_tokens[i]
@@ -212,7 +212,7 @@ func verifier_model_verify(verifier_model model, []int input_tokens, []int draft
         }
         int layer = 0
         for layer < model.num_layers {
-            []float layer_hidden = math.allocate_float(hidden_dim, 0.0)
+            float[] layer_hidden = math.allocate_float(hidden_dim, 0.0)
             j = 0
             for j < hidden_dim {
                 layer_hidden[j] = model.biases[layer][j]
@@ -228,7 +228,7 @@ func verifier_model_verify(verifier_model model, []int input_tokens, []int draft
             layer = layer + 1
         }
         if i >= seq_len {
-            []float logits = math.allocate_float(vocab_size, 0.0)
+            float[] logits = math.allocate_float(vocab_size, 0.0)
             j = 0
             for j < vocab_size {
                 logits[j] = model.biases[model.num_layers][j]
@@ -239,7 +239,7 @@ func verifier_model_verify(verifier_model model, []int input_tokens, []int draft
                 }
                 j = j + 1
             }
-            []float probs = math.softmax_1d(logits)
+            float[] probs = math.softmax_1d(logits)
             verification_scores[i - seq_len] = probs[draft_tokens[i - seq_len]]
         }
         i = i + 1
@@ -261,7 +261,7 @@ func adaptive_speculation_steps(speculative_state state) int {
     steps
 }
 
-func tree_search_generate(draft_model model, []int input_tokens, int seq_len,
+func tree_search_generate(draft_model model, int[] input_tokens, int seq_len,
                           int width, int depth, float temperature) tree_node {
     tree_node root {
         token: -1,
@@ -274,12 +274,12 @@ func tree_search_generate(draft_model model, []int input_tokens, int seq_len,
     root
 }
 
-func build_tree(tree_node node, draft_model model, []int input_tokens, int seq_len,
+func build_tree(tree_node node, draft_model model, int[] input_tokens, int seq_len,
                 int width, int depth, float temperature) {
     if node.depth >= depth {
         return
     }
-    []int extended_tokens = math.allocate_int(seq_len + node.depth + 1, 0)
+    int[] extended_tokens = math.allocate_int(seq_len + node.depth + 1, 0)
     int i = 0
     for i < seq_len + node.depth {
         extended_tokens[i] = input_tokens[i]
@@ -293,7 +293,7 @@ func build_tree(tree_node node, draft_model model, []int input_tokens, int seq_l
         }
         i = i - 1
     }
-    ([]int next_tokens, []float next_probs) = draft_model_predict(model, extended_tokens, seq_len + node.depth)
+    (int[] next_tokens, float[] next_probs) = draft_model_predict(model, extended_tokens, seq_len + node.depth)
     int num_tokens = math.min_int(width, len(next_tokens))
     i = 0
     for i < num_tokens {
@@ -314,8 +314,8 @@ func build_tree(tree_node node, draft_model model, []int input_tokens, int seq_l
     }
 }
 
-func select_best_path(tree_node root) []int {
-    []int path = []int{cap: 10}
+func select_best_path(tree_node root) int[] {
+    int[] path = int[]{cap: 10}
     tree_node curr = root
     for len(curr.children) > 0 {
         float best_score = -1e10
@@ -338,27 +338,27 @@ func select_best_path(tree_node root) []int {
     path
 }
 
-func batch_verify(verifier_model model, [][]int input_batches, [][]int draft_batches,
-                  int seq_len, int draft_len, int batch_size) [][]float {
-    [][]float all_scores = [][]float{cap: batch_size}
+func batch_verify(verifier_model model, int[][] input_batches, int[][] draft_batches,
+                  int seq_len, int draft_len, int batch_size) float[][] {
+    float[][] all_scores = float[][]{cap: batch_size}
     int batch_idx = 0
     for batch_idx < batch_size {
-        []float scores = verifier_model_verify(model, input_batches[batch_idx], draft_batches[batch_idx], seq_len, draft_len)
+        float[] scores = verifier_model_verify(model, input_batches[batch_idx], draft_batches[batch_idx], seq_len, draft_len)
         all_scores = append(all_scores, scores)
         batch_idx = batch_idx + 1
     }
     all_scores
 }
 
-func speculative_decode_step(speculative_state state, []int input_tokens, int seq_len) speculative_result {
+func speculative_decode_step(speculative_state state, int[] input_tokens, int seq_len) speculative_result {
     speculative_config config = state.config
     int speculation_steps = adaptive_speculation_steps(state)
-    []int draft_tokens = []int{cap: speculation_steps}
-    []float draft_probs = math.allocate_float(speculation_steps, 0.0)
-    []int current_input = math.copy_int(input_tokens)
+    int[] draft_tokens = int[]{cap: speculation_steps}
+    float[] draft_probs = math.allocate_float(speculation_steps, 0.0)
+    int[] current_input = math.copy_int(input_tokens)
     int step = 0
     for step < speculation_steps {
-        ([]int next_token, []float next_prob) = draft_model_predict(state.draft, current_input, len(current_input))
+        (int[] next_token, float[] next_prob) = draft_model_predict(state.draft, current_input, len(current_input))
         if len(next_token) > 0 && len(next_prob) > 0 {
             draft_tokens = append(draft_tokens, next_token[0])
             draft_probs[step] = next_prob[0]
@@ -368,10 +368,10 @@ func speculative_decode_step(speculative_state state, []int input_tokens, int se
     }
     state.current_speculation_steps = speculation_steps
     state.total_speculation_steps = state.total_speculation_steps + speculation_steps
-    []float verification_scores = verifier_model_verify(state.verifier, input_tokens, draft_tokens, seq_len, speculation_steps)
+    float[] verification_scores = verifier_model_verify(state.verifier, input_tokens, draft_tokens, seq_len, speculation_steps)
     state.verification_scores = verification_scores
-    []int accepted_tokens = []int{cap: speculation_steps}
-    []int rejected_tokens = []int{cap: speculation_steps}
+    int[] accepted_tokens = int[]{cap: speculation_steps}
+    int[] rejected_tokens = int[]{cap: speculation_steps}
     int accepted_count = 0
     int rejected_count = 0
     step = 0
@@ -391,15 +391,15 @@ func speculative_decode_step(speculative_state state, []int input_tokens, int se
     if total > 0 {
         state.avg_accept_rate = float(state.accepted_count) / total
     }
-    []int final_tokens = accepted_tokens
+    int[] final_tokens = accepted_tokens
     if len(rejected_tokens) > 0 {
-        []int fallback_input = math.copy_int(input_tokens)
+        int[] fallback_input = math.copy_int(input_tokens)
         int i = 0
         for i < len(accepted_tokens) {
             fallback_input = append(fallback_input, accepted_tokens[i])
             i = i + 1
         }
-        ([]int correct_token, []float correct_prob) = draft_model_predict(state.verifier, fallback_input, len(fallback_input))
+        (int[] correct_token, float[] correct_prob) = draft_model_predict(state.verifier, fallback_input, len(fallback_input))
         if len(correct_token) > 0 {
             final_tokens = append(final_tokens, correct_token[0])
         }
@@ -416,8 +416,8 @@ func speculative_decode_step(speculative_state state, []int input_tokens, int se
     }
 }
 
-func speculative_decode_full(speculative_state state, []int input_tokens, int seq_len, int max_len) []int {
-    []int output = math.copy_int(input_tokens)
+func speculative_decode_full(speculative_state state, int[] input_tokens, int seq_len, int max_len) int[] {
+    int[] output = math.copy_int(input_tokens)
     int pos = seq_len
     for pos < max_len {
         speculative_result result = speculative_decode_step(state, output, len(output))
@@ -448,8 +448,8 @@ func speculative_get_metrics(speculative_state state) speculative_result {
 }
 
 func speculative_reset(speculative_state state) speculative_state {
-    state.draft_tokens = []int{cap: state.config.max_speculation_steps}
-    state.verified_tokens = []int{cap: 1024}
+    state.draft_tokens = int[]{cap: state.config.max_speculation_steps}
+    state.verified_tokens = int[]{cap: 1024}
     state.current_speculation_steps = 0
     state.total_speculation_steps = 0
     state.accepted_count = 0

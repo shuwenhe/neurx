@@ -52,7 +52,7 @@ struct multimodal_inference_response {
 	string request_id
 	string generated_text
 	map[string]interface{} cross_modal_reasoning
-	[]string modality_contributions
+	string[] modality_contributions
 	float32 confidence_score
 	int32 output_tokens
 	float64 inference_time_ms
@@ -63,7 +63,7 @@ struct multimodal_inference_response {
 struct cross_modal_reasoning_result {
 	string reasoning_text
 	map[string]string modality_reasoning
-	[]string reasoning_steps
+	string[] reasoning_steps
 	float32 reasoning_confidence
 	time.Time created_at
 }
@@ -222,7 +222,7 @@ func (multimodal_inference_engine* mie) reason_cross_modalities(modality_feature
 	}
 
 	modality_reasoning := make(map[string]string)
-	reasoning_steps := make([]string, 0)
+	reasoning_steps := make(string[], 0)
 
 	for modality_name, features := range modality_features {
 		reasoning := "Analysis of " + modality_name + " modality"

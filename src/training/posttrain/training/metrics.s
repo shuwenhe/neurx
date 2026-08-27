@@ -16,7 +16,7 @@ func record_learning_rate(float lr) float {
     return lr
 }
 
-func argmax([]float logits) int {
+func argmax(float[] logits) int {
     if len(logits) == 0 { return 0 }
     int max_idx = 0
     float max_val = logits[0]

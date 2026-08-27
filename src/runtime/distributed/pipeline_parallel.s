@@ -3,7 +3,7 @@ package neurx.distributed
 struct pipeline_parallel_config {
     int pp_degree
     int pp_rank
-    []int pp_group
+    int[] pp_group
     int num_layers
     string schedule
     bool use_activation_checkpointing
@@ -43,7 +43,7 @@ func pp_mod_nonneg(int value, int divisor) int {
 func new_pipeline_parallel_config(
     int pp_degree,
     int pp_rank,
-    []int pp_group,
+    int[] pp_group,
     int num_layers,
     string schedule) pipeline_parallel_config {
     pipeline_parallel_config cfg

@@ -16,8 +16,8 @@ use std.slices
 
 struct request_state {
     int request_id
-    []int prompt_tokens
-    []int generated_tokens
+    int[] prompt_tokens
+    int[] generated_tokens
     int max_new_tokens
     int kv_cache_block_id
     int current_position

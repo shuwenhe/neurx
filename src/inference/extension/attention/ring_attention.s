@@ -51,14 +51,14 @@ func default_ring_attn_config(
 
 struct ring_attn_state {
     ring_attn_config config
-    [][][]float local_q
-    [][][]float local_k
-    [][][]float local_v
-    [][]float remote_k_buffer
-    [][]float remote_v_buffer
-    [][][]float attn_output
-    [][][]float row_max_accum
-    [][][]float row_sum_accum
+    float[][][] local_q
+    float[][][] local_k
+    float[][][] local_v
+    float[][] remote_k_buffer
+    float[][] remote_v_buffer
+    float[][][] attn_output
+    float[][][] row_max_accum
+    float[][][] row_sum_accum
     int current_ring_step
     float total_time_ms
     float comm_time_ms
@@ -139,8 +139,8 @@ func exp_stable(float x) float {
     1.0 + x + x2/2.0 + x3/6.0 + x4/24.0 + x5/120.0 + x6/720.0
 }
 
-func zeros(int n) []float {
-    []float out = []float{cap: n}
+func zeros(int n) float[] {
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         out = append(out, 0.0)
@@ -149,8 +149,8 @@ func zeros(int n) []float {
     out
 }
 
-func fill(int n, float val) []float {
-    []float out = []float{cap: n}
+func fill(int n, float val) float[] {
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         out = append(out, val)
@@ -159,8 +159,8 @@ func fill(int n, float val) []float {
     out
 }
 
-func allocate_2d_tensor(int rows, int cols) [][]float {
-    [][]float t = [][]float{cap: rows}
+func allocate_2d_tensor(int rows, int cols) float[][] {
+    float[][] t = float[][]{cap: rows}
     int i = 0
     for i < rows {
         t[i] = fill(cols, 0.0)
@@ -169,8 +169,8 @@ func allocate_2d_tensor(int rows, int cols) [][]float {
     return t
 }
 
-func allocate_3d_tensor(int d1, int d2, int d3) [][][]float {
-    [][][]float t = [][][]float{cap: d1}
+func allocate_3d_tensor(int d1, int d2, int d3) float[][][] {
+    float[][][] t = float[][][]{cap: d1}
     int i = 0
     for i < d1 {
         t[i] = allocate_2d_tensor(d2, d3)
@@ -181,10 +181,10 @@ func allocate_3d_tensor(int d1, int d2, int d3) [][][]float {
 
 func ring_attention_forward(
     ref ring_attn_state state,
-    [][][]float q_input,
-    [][][]float k_input,
-    [][][]float v_input
-) [][][]float {
+    float[][][] q_input,
+    float[][][] k_input,
+    float[][][] v_input
+) float[][][] {
     int P = state.config.sp_degree
     int rank = state.config.sp_rank
     int L = state.config.local_seq_len
@@ -212,8 +212,8 @@ func ring_attention_forward(
     int step = 0
     for step < P {
         int source_rank = mod_ring(rank - step, P)
-        [][]float current_k
-        [][]float current_v
+        float[][] current_k
+        float[][] current_v
         if source_rank == rank {
             current_k = k_input[0]
             current_v = v_input[0]
@@ -227,9 +227,9 @@ func ring_attention_forward(
             if hkv > 0 && hkv < H {
                 kv_h = h / (H / Hkv)
             }
-            [][]float q_h = q_input[h]
-            [][]float k_h
-            [][]float v_h
+            float[][] q_h = q_input[h]
+            float[][] k_h
+            float[][] v_h
             if source_rank == rank {
                 k_h = k_input[kv_h]
                 v_h = v_input[kv_h]
@@ -273,9 +273,9 @@ func ring_attention_forward(
 
 func ring_attn_update_step(
     ref ring_attn_state state,
-    [][]float q_local,
-    [][]float kv_block,
-    [][]float v_block,
+    float[][] q_local,
+    float[][] kv_block,
+    float[][] v_block,
     int head_idx,
     int L,
     int D,
@@ -294,7 +294,7 @@ func ring_attn_update_step(
     for qi < L {
         float old_max = state.row_max_accum[head_idx][qi][0]
         float old_sum = state.row_max_accum[head_idx][qi][0]
-        []float scores = fill(kv_l, 0.0)
+        float[] scores = fill(kv_l, 0.0)
         int kj = 0
         for kj < kv_l && kj < L {
             float dot = 0.0
@@ -373,22 +373,22 @@ func prepare_next_ring_comm(ref ring_attn_state state, int current_source_rank) 
 }
 
 struct ring_attn_grad_result {
-    [][][]float dq
-    [][][]float dk
-    [][][]float dv
+    float[][][] dq
+    float[][][] dk
+    float[][][] dv
 }
 
 func ring_attention_backward(
     ring_attn_state fwd_state,
-    [][][]float dout
+    float[][][] dout
 ) ring_attn_grad_result {
     int L = fwd_state.config.local_seq_len
     int H = fwd_state.config.local_num_heads
     int D = fwd_state.config.head_dim
     int P = fwd_state.config.sp_degree
-    [][][]float dq = allocate_3d_tensor(H, L, D)
-    [][][]float dk = allocate_3d_tensor(H, L, D)
-    [][][]float dv = allocate_3d_tensor(H, L, D)
+    float[][][] dq = allocate_3d_tensor(H, L, D)
+    float[][][] dk = allocate_3d_tensor(H, L, D)
+    float[][][] dv = allocate_3d_tensor(H, L, D)
     ring_attn_grad_result {
         dq: dq,
         dk: dk,
@@ -406,25 +406,25 @@ struct sequence_parallel_config {
 
 func sp_layernorm_forward(
     sequence_parallel_config sp_cfg,
-    [][]float local_hidden
-) [][]float {
+    float[][] local_hidden
+) float[][] {
     int L = sp_cfg.seq_len / sp_cfg.sp_degree
     int H = sp_cfg.hidden_dim
     if !sp_cfg.use_ring_reduce {
-        [][]float gathered = simulate_allgather(sp_cfg, local_hidden, L, H)
+        float[][] gathered = simulate_allgather(sp_cfg, local_hidden, L, H)
         int total_l = len(gathered)
-        [][]float normalized = layernorm_full_sequence(gathered, total_l, H)
-        [][]float local_result = extract_local_portion(normalized, sp_cfg.sp_rank, L, H)
+        float[][] normalized = layernorm_full_sequence(gathered, total_l, H)
+        float[][] local_result = extract_local_portion(normalized, sp_cfg.sp_rank, L, H)
         return local_result
     } else {
         return sp_layernorm_ring_reduce(sp_cfg, local_hidden)
     }
 }
 
-func simulate_allgather(sequence_parallel_config sp_cfg, [][]float input, int L, int H) [][]float {
+func simulate_allgather(sequence_parallel_config sp_cfg, float[][] input, int L, int H) float[][] {
     int P = sp_cfg.sp_degree
     int total_l = L * P
-    [][]float gathered = allocate_2d_tensor(total_l, H)
+    float[][] gathered = allocate_2d_tensor(total_l, H)
     int rank = sp_cfg.sp_rank
     int r = 0
     for r < P {
@@ -447,9 +447,9 @@ func simulate_allgather(sequence_parallel_config sp_cfg, [][]float input, int L,
     return gathered
 }
 
-func layernorm_full_sequence([][]float x, int seq_len, int dim) [][]float {
+func layernorm_full_sequence(float[][] x, int seq_len, int dim) float[][] {
     float eps = 1e-6
-    [][]float out = allocate_2d_tensor(seq_len, dim)
+    float[][] out = allocate_2d_tensor(seq_len, dim)
     int s = 0
     for s < seq_len {
         float mean = 0.0
@@ -478,9 +478,9 @@ func layernorm_full_sequence([][]float x, int seq_len, int dim) [][]float {
     return out
 }
 
-func extract_local_portion([][]float full, int rank, int L, int H) [][]float {
+func extract_local_portion(float[][] full, int rank, int L, int H) float[][] {
     int offset = rank * L
-    [][]float local = allocate_2d_tensor(L, H)
+    float[][] local = allocate_2d_tensor(L, H)
     int s = 0
     for s < L {
         int d = 0
@@ -495,13 +495,13 @@ func extract_local_portion([][]float full, int rank, int L, int H) [][]float {
 
 func sp_layernorm_ring_reduce(
     sequence_parallel_config sp_cfg,
-    [][]float local_hidden
-) [][]float {
+    float[][] local_hidden
+) float[][] {
     int L = sp_cfg.seq_len / sp_cfg.sp_degree
     int H = sp_cfg.hidden_dim
     int P = sp_cfg.sp_degree
-    []float local_sum = fill(H, 0.0)
-    []float local_sq_sum = fill(H, 0.0)
+    float[] local_sum = fill(H, 0.0)
+    float[] local_sq_sum = fill(H, 0.0)
     int s = 0
     for s < L {
         int d = 0
@@ -512,10 +512,10 @@ func sp_layernorm_ring_reduce(
         }
         s = s + 1
     }
-    []float global_sum = ring_allreduce_sum(local_sum, sp_cfg)
-    []float global_sq_sum = ring_allreduce_sum(local_sq_sum, sp_cfg)
+    float[] global_sum = ring_allreduce_sum(local_sum, sp_cfg)
+    float[] global_sq_sum = ring_allreduce_sum(local_sq_sum, sp_cfg)
     int total_seq_len = L * P
-    [][]float out = allocate_2d_tensor(L, H)
+    float[][] out = allocate_2d_tensor(L, H)
     float eps = 1e-6
     int d = 0
     for d < H {
@@ -532,10 +532,10 @@ func sp_layernorm_ring_reduce(
     return out
 }
 
-func ring_allreduce_sum([]float input, sequence_parallel_config sp_cfg) []float {
+func ring_allreduce_sum(float[] input, sequence_parallel_config sp_cfg) float[] {
     int P = sp_cfg.sp_degree
     int N = len(input)
-    []float result = fill(N, 0.0)
+    float[] result = fill(N, 0.0)
     int i = 0
     for i < N {
         result[i] = input[i] * float_of_int(P)

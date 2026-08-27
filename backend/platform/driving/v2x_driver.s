@@ -13,7 +13,7 @@ use std.io.println
 struct v2x_message {
     v2x_message_type mtype
     string sender_id
-    []float data
+    float[] data
     int timestamp_us
 }
 
@@ -22,7 +22,7 @@ struct v2x_driver {
     int broadcast_rate_hz
     bool v2i_enabled
     bool v2v_enabled
-    []string peer_ids
+    string[] peer_ids
 }
 
 func new_v2x_driver(string interface) v2x_driver {

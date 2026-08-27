@@ -20,7 +20,7 @@ struct nccl_communicator {
     int bytes_sent
     int bytes_received
     int num_collective_ops
-    []float64 op_times
+    float[]64 op_times
 }
 
 func init_nccl(nccl_config cfg) (nccl_communicator, error) {
@@ -45,7 +45,7 @@ func init_nccl(nccl_config cfg) (nccl_communicator, error) {
         bytes_sent: 0,
         bytes_received: 0,
         num_collective_ops: 0,
-        op_times: make([]float64, 0),
+        op_times: make(float[]64, 0),
     }
 }
 
@@ -278,7 +278,7 @@ func get_timestamp() float64 {
 }
 
 func nccl_barrier(nccl_communicator comm) error {
-    dummy_buf := make([]float32, 1)
+    dummy_buf := make(float[]32, 1)
     result := nccl_runtime_call("ncclBarrier", [comm.comm_handle], 0)
     if result.error_code != 0 {
         return error{message: "ncclBarrier failed"}

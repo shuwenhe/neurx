@@ -8,18 +8,18 @@ struct integrated_attention_engine {
     prefix_cached_attention_runtime prefix_runtime
     attention_config attn_config
     string optimization_mode
-    []float layer_scales
+    float[] layer_scales
 }
 
 struct attention_input {
-    []float queries
-    []int token_ids
+    float[] queries
+    int[] token_ids
     string layer_name
     int layer_idx
 }
 
 struct attention_result {
-    []float output
+    float[] output
     float compute_time_ms
     bool used_prefix_cache
     int tokens_from_cache
@@ -61,7 +61,7 @@ func new_integrated_attention_engine(
         use_softmax_cap: false,
         softmax_cap: 20.0,
     }
-    layer_scales = make([]float, num_layers)
+    layer_scales = make(float[], num_layers)
     int i = 0
     for i < num_layers {
         layer_scales[i] = 1.0
@@ -109,7 +109,7 @@ func compute_layer_attention(
     bool used_cache = false
     int tokens_from_cache = 0
     float memory_saved = 0.0
-    []float output = input.queries
+    float[] output = input.queries
     if prefix_result.found && engine.prefix_runtime.use_prefix_cache {
         used_cache = true
         tokens_from_cache = prefix_result.matched_tokens
@@ -169,7 +169,7 @@ struct transformer_with_paged_attention {
     int num_layers
     int num_heads
     int head_size
-    [][]float layer_outputs
+    float[][] layer_outputs
     int total_prefill_tokens
     int total_decode_tokens
 }
@@ -197,7 +197,7 @@ func new_transformer_with_paged_attention(
         num_layers: num_layers,
         num_heads: num_heads,
         head_size: head_size,
-        layer_outputs: make([][]float, num_layers),
+        layer_outputs: make(float[][], num_layers),
         total_prefill_tokens: 0,
         total_decode_tokens: 0,
     }
@@ -205,11 +205,11 @@ func new_transformer_with_paged_attention(
 
 func forward_layer_stack(
     transformer transformer_with_paged_attention,
-    []float embeddings,
-    []int token_ids,
+    float[] embeddings,
+    int[] token_ids,
     string phase
 ) transformer_with_paged_attention {
-    []float layer_input = embeddings
+    float[] layer_input = embeddings
     int layer = 0
     for layer < transformer.num_layers {
         input = attention_input{
@@ -232,12 +232,12 @@ func forward_layer_stack(
 }
 
 func compute_multi_head_attention_optimized(
-    []float queries,
+    float[] queries,
     paged_kv_cache kv_cache,
     attention_config config
-) []float {
+) float[] {
     int chunk_size = 4
-    []float output = make([]float, len(queries))
+    float[] output = make(float[], len(queries))
     int chunk_start = 0
     for chunk_start < len(queries) / (config.num_heads * config.head_size) {
         int chunk_end = chunk_start + chunk_size
@@ -282,8 +282,8 @@ func new_attention_inference_pipeline(
 
 func run_prefill_phase(
     pipeline attention_inference_pipeline,
-    []float prompt_embeddings,
-    []int prompt_token_ids
+    float[] prompt_embeddings,
+    int[] prompt_token_ids
 ) attention_inference_pipeline {
     pipeline.transformer = forward_layer_stack(
         pipeline.transformer,
@@ -296,8 +296,8 @@ func run_prefill_phase(
 
 func run_decode_phase(
     pipeline attention_inference_pipeline,
-    []float token_embedding,
-    []int token_id_so_far
+    float[] token_embedding,
+    int[] token_id_so_far
 ) attention_inference_pipeline {
     pipeline.transformer = forward_layer_stack(
         pipeline.transformer,
@@ -357,7 +357,7 @@ func str_float(float x) string {
     return "0.0"
 }
 
-func compute_prefix_hash([]int token_ids) string {
+func compute_prefix_hash(int[] token_ids) string {
     if len(token_ids) == 0 {
         return ""
     }

@@ -1,7 +1,7 @@
 package neurx.inference.advanced.pooling
 
-func pooling_copy_row([]float hidden_states, int sequence_length, int hidden_size, int row) []float {
-    []float output = []float{cap: hidden_size}
+func pooling_copy_row(float[] hidden_states, int sequence_length, int hidden_size, int row) float[] {
+    float[] output = float[]{cap: hidden_size}
     if sequence_length <= 0 || hidden_size <= 0 || row < 0 || row >= sequence_length || len(hidden_states) < sequence_length * hidden_size {
         return output
     }
@@ -13,11 +13,11 @@ func pooling_copy_row([]float hidden_states, int sequence_length, int hidden_siz
     output
 }
 
-func pooling_cls([]float hidden_states, int sequence_length, int hidden_size) []float {
+func pooling_cls(float[] hidden_states, int sequence_length, int hidden_size) float[] {
     pooling_copy_row(hidden_states, sequence_length, hidden_size, 0)
 }
 
-func pooling_last([]float hidden_states, []int attention_mask, int sequence_length, int hidden_size) []float {
+func pooling_last(float[] hidden_states, int[] attention_mask, int sequence_length, int hidden_size) float[] {
     int row = sequence_length - 1
     if len(attention_mask) >= sequence_length {
         int i = sequence_length - 1
@@ -32,8 +32,8 @@ func pooling_last([]float hidden_states, []int attention_mask, int sequence_leng
     pooling_copy_row(hidden_states, sequence_length, hidden_size, row)
 }
 
-func pooling_mean([]float hidden_states, []int attention_mask, int sequence_length, int hidden_size) []float {
-    []float output = []float{cap: hidden_size}
+func pooling_mean(float[] hidden_states, int[] attention_mask, int sequence_length, int hidden_size) float[] {
+    float[] output = float[]{cap: hidden_size}
     if sequence_length <= 0 || hidden_size <= 0 || len(hidden_states) < sequence_length * hidden_size {
         return output
     }
@@ -64,8 +64,8 @@ func pooling_mean([]float hidden_states, []int attention_mask, int sequence_leng
     output
 }
 
-func pooling_l2_normalize([]float embedding) []float {
-    []float output = []float{cap: len(embedding)}
+func pooling_l2_normalize(float[] embedding) float[] {
+    float[] output = float[]{cap: len(embedding)}
     float squared_norm = 0.0
     int i = 0
     for i < len(embedding) {
@@ -84,7 +84,7 @@ func pooling_l2_normalize([]float embedding) []float {
     output
 }
 
-func pooling_cosine_similarity([]float left, []float right) float {
+func pooling_cosine_similarity(float[] left, float[] right) float {
     int length = len(left)
     if len(right) < length {
         length = len(right)
@@ -105,8 +105,8 @@ func pooling_cosine_similarity([]float left, []float right) float {
     dot / (sqrt(left_norm) * sqrt(right_norm))
 }
 
-func pooling_linear_head([]float embedding, []float weights, []float bias, int label_count) []float {
-    []float logits = []float{cap: label_count}
+func pooling_linear_head(float[] embedding, float[] weights, float[] bias, int label_count) float[] {
+    float[] logits = float[]{cap: label_count}
     if label_count <= 0 || len(embedding) <= 0 || len(weights) < label_count * len(embedding) {
         return logits
     }
@@ -127,8 +127,8 @@ func pooling_linear_head([]float embedding, []float weights, []float bias, int l
     logits
 }
 
-func pooling_rerank([]float query_embedding, []float document_embeddings, int document_count, int embedding_size) []float {
-    []float scores = []float{cap: document_count}
+func pooling_rerank(float[] query_embedding, float[] document_embeddings, int document_count, int embedding_size) float[] {
+    float[] scores = float[]{cap: document_count}
     if document_count <= 0 || embedding_size <= 0 || len(document_embeddings) < document_count * embedding_size {
         return scores
     }

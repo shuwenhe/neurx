@@ -12,16 +12,16 @@ struct zero_state {
     int bucket_cap
     string stage
     bool initialized
-    []string params
-    []int param_sizes
-    []string ready_params
+    string[] params
+    int[] param_sizes
+    string[] ready_params
     int reduced_bucket_count
     int gathered_bucket_count
     float last_sync_scale
 }
 
-func copy_ints([]int values) []int {
-    []int out = []int{cap: len(values)}
+func copy_ints(int[] values) int[] {
+    int[] out = int[]{cap: len(values)}
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -47,7 +47,7 @@ func clamp_rank(int rank, int world_size) int {
     rank
 }
 
-func has_string([]string values, string value) bool {
+func has_string(string[] values, string value) bool {
     int i = 0
     for i < len(values) {
         if values[i] == value {
@@ -159,8 +159,8 @@ func zero_add_param(zero_state state, string param_name, int size) zero_state {
     if has_string(state.params, param_name) {
         return zero_state_dict(state)
     }
-    []string params = copy_strings(state.params)
-    []int param_sizes = copy_ints(state.param_sizes)
+    string[] params = copy_strings(state.params)
+    int[] param_sizes = copy_ints(state.param_sizes)
     params = append(params, param_name)
     param_sizes = append(param_sizes, clamp_positive(size, 1))
     zero_state {
@@ -188,7 +188,7 @@ func zero_mark_grad_ready(zero_state state, string param_name) zero_state {
     if has_string(state.ready_params, param_name) {
         return zero_state_dict(state)
     }
-    []string ready = copy_strings(state.ready_params)
+    string[] ready = copy_strings(state.ready_params)
     ready = append(ready, param_name)
     zero_state {
         name: state.name,
@@ -208,14 +208,14 @@ func zero_mark_grad_ready(zero_state state, string param_name) zero_state {
     }
 }
 
-func zero_reduce_scatter_grads(zero_state state, []float grads) []float {
+func zero_reduce_scatter_grads(zero_state state, float[] grads) float[] {
     if !zero_optimizer_sharded(state) {
         return copy_float(grads)
     }
     reduce_scatter_sum(new_process_group(state.backend, state.rank, state.world_size), grads)
 }
 
-func zero_all_gather_params(zero_state state, []float shard_values) []float {
+func zero_all_gather_params(zero_state state, float[] shard_values) float[] {
     if !zero_optimizer_sharded(state) {
         return copy_float(shard_values)
     }

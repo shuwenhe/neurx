@@ -15,13 +15,13 @@ struct moe_config {
 }
 
 struct routing_decision {
-    []int expert_indices
-    []float routing_weights
+    int[] expert_indices
+    float[] routing_weights
 }
 
 struct expert_load_stats {
-    []int expert_token_counts
-    []float expert_load_factors
+    int[] expert_token_counts
+    float[] expert_load_factors
     float load_balance_loss
 }
 
@@ -70,19 +70,19 @@ func new_moe_layer(moe_config config, int hidden_dim) moe_layer {
 
 func route_token_top_k(
     moe_layer layer,
-    []float token_embedding,
+    float[] token_embedding,
 ) routing_decision {
     num_experts_per_token := layer.config.num_experts_per_token
     num_experts := layer.config.num_experts
-    routing_logits := []float{}
+    routing_logits := float[]{}
     i := 0
     for i < num_experts {
         logit := compute_routing_logit(token_embedding, i)
         routing_logits = append_float(routing_logits, logit)
         i = i + 1
     }
-    expert_indices := []int{}
-    weights := []float{}
+    expert_indices := int[]{}
+    weights := float[]{}
     j := 0
     for j < num_experts_per_token {
         max_idx := 0
@@ -109,12 +109,12 @@ func route_token_top_k(
 
 func route_token_random(
     moe_layer layer,
-    []float token_embedding,
+    float[] token_embedding,
 ) routing_decision {
     num_experts_per_token := layer.config.num_experts_per_token
     num_experts := layer.config.num_experts
-    expert_indices := []int{}
-    weights := []float{}
+    expert_indices := int[]{}
+    weights := float[]{}
     i := 0
     for i < num_experts_per_token {
         expert_id := i % num_experts
@@ -165,8 +165,8 @@ func compute_load_balance_loss(moe_layer layer) float {
     loss / float(total_tokens)
 }
 
-func check_expert_overload(moe_layer layer) []int {
-    overloaded := []int{}
+func check_expert_overload(moe_layer layer) int[] {
+    overloaded := int[]{}
     mean_load := 0.0
     i := 0
     for i < layer.load_stats.expert_token_counts.len {
@@ -197,8 +197,8 @@ func rebalance_expert_load(moe_layer layer) moe_layer {
     layer
 }
 
-func get_expert_throughput(moe_layer layer) []float {
-    throughputs := []float{}
+func get_expert_throughput(moe_layer layer) float[] {
+    throughputs := float[]{}
     max_load := 0.0
     i := 0
     for i < layer.load_stats.expert_token_counts.len {
@@ -219,7 +219,7 @@ func get_expert_throughput(moe_layer layer) []float {
     throughputs
 }
 
-func compute_routing_logit([]float embedding, int expert_id) float {
+func compute_routing_logit(float[] embedding, int expert_id) float {
     logit := 0.0
     i := 0
     for i < embedding.len {
@@ -229,7 +229,7 @@ func compute_routing_logit([]float embedding, int expert_id) float {
     logit
 }
 
-func normalize_routing_weights([]float weights) []float {
+func normalize_routing_weights(float[] weights) float[] {
     total := 0.0
     i := 0
     for i < weights.len {
@@ -257,8 +257,8 @@ func append_expert([]expert_layer slice, expert_layer elem) []expert_layer {
     new_slice
 }
 
-func append_float([]float slice, float elem) []float {
-    new_slice := []float{}
+func append_float(float[] slice, float elem) float[] {
+    new_slice := float[]{}
     i := 0
     for i < slice.len {
         new_slice = append_float(new_slice, slice[i])
@@ -268,8 +268,8 @@ func append_float([]float slice, float elem) []float {
     new_slice
 }
 
-func append_int([]int slice, int elem) []int {
-    new_slice := []int{}
+func append_int(int[] slice, int elem) int[] {
+    new_slice := int[]{}
     i := 0
     for i < slice.len {
         new_slice = append_int(new_slice, slice[i])
@@ -279,8 +279,8 @@ func append_int([]int slice, int elem) []int {
     new_slice
 }
 
-func make_int_array(int len) []int {
-    arr := []int{}
+func make_int_array(int len) int[] {
+    arr := int[]{}
     i := 0
     for i < len {
         arr = append_int(arr, 0)
@@ -289,8 +289,8 @@ func make_int_array(int len) []int {
     arr
 }
 
-func make_float_array(int len) []float {
-    arr := []float{}
+func make_float_array(int len) float[] {
+    arr := float[]{}
     i := 0
     for i < len {
         arr = append_float(arr, 0.0)

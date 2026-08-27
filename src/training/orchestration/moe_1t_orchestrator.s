@@ -12,8 +12,8 @@ use neurx.runtime.io.{io_println, io_get_env, io_mkdir_recursive, runtime_file_e
 
 struct moe_routing_stats {
     int total_tokens
-    []int expert_load
-    []float expert_load_ratio
+    int[] expert_load
+    float[] expert_load_ratio
     float load_imbalance
     float communication_cost_ms
     float compute_cost_ms
@@ -50,7 +50,7 @@ struct moe_1t_orchestrator {
     zero_optimizer_state optimizer_state
     collective_state comm
     string data_manifest_path
-    []string token_shards
+    string[] token_shards
     int current_shard_index
     int tokens_in_shard
     string checkpoint_dir
@@ -88,8 +88,8 @@ func moe_1t_trim(string s) string {
     out
 }
 
-func moe_1t_split_lines(string text) []string {
-    []string lines = []string{cap: 0}
+func moe_1t_split_lines(string text) string[] {
+    string[] lines = string[]{cap: 0}
     string current = ""
     bool ends_with_newline = false
     int i = 0
@@ -123,31 +123,31 @@ func moe_1t_positive_mod(int value, int modulus) int {
     result
 }
 
-func moe_1t_manifest_refs(string manifest_path) []string {
+func moe_1t_manifest_refs(string manifest_path) string[] {
     if moe_1t_trim(manifest_path) == "" {
-        []string refs = []string{cap: 1}
+        string[] refs = string[]{cap: 1}
         refs[0] = "dataset/pretrain/manifest.json"
         return refs
     }
     if !runtime_file_exists(manifest_path) {
-        []string refs = []string{cap: 1}
+        string[] refs = string[]{cap: 1}
         refs[0] = manifest_path
         return refs
     }
-    []string refs = gpt_large_pretrain_manifest_refs(manifest_path)
+    string[] refs = gpt_large_pretrain_manifest_refs(manifest_path)
     if len(refs) == 0 {
-        []string fallback = []string{cap: 1}
+        string[] fallback = string[]{cap: 1}
         fallback[0] = manifest_path
         return fallback
     }
     refs
 }
 
-func moe_1t_text_to_tokens(string text, int batch_size_tokens, int seed) []int {
+func moe_1t_text_to_tokens(string text, int batch_size_tokens, int seed) int[] {
     if batch_size_tokens <= 0 {
-        return []int{cap: 0}
+        return int[]{cap: 0}
     }
-    []int tokens = []int{cap: batch_size_tokens}
+    int[] tokens = int[]{cap: batch_size_tokens}
     int token_count = 0
     int rolling = seed + 17
     int i = 0
@@ -178,9 +178,9 @@ func moe_1t_text_to_tokens(string text, int batch_size_tokens, int seed) []int {
     tokens
 }
 
-func moe_1t_shard_tokens(string shard_path, int batch_size_tokens, int seed) []int {
+func moe_1t_shard_tokens(string shard_path, int batch_size_tokens, int seed) int[] {
     if batch_size_tokens <= 0 {
-        return []int{cap: 0}
+        return int[]{cap: 0}
     }
     string shard_text = ""
     if runtime_file_exists(shard_path) {
@@ -189,7 +189,7 @@ func moe_1t_shard_tokens(string shard_path, int batch_size_tokens, int seed) []i
     if moe_1t_trim(shard_text) == "" {
         shard_text = shard_path
     } else {
-        []string docs = gpt_large_pretrain_documents_for_ref_with_seed(shard_path, seed)
+        string[] docs = gpt_large_pretrain_documents_for_ref_with_seed(shard_path, seed)
         int i = 0
         for i < len(docs) {
             if moe_1t_trim(docs[i]) != "" {
@@ -204,9 +204,9 @@ func moe_1t_shard_tokens(string shard_path, int batch_size_tokens, int seed) []i
     moe_1t_text_to_tokens(shard_text, batch_size_tokens, seed)
 }
 
-func moe_1t_build_labels([]int batch_tokens, int vocab_size) []int {
+func moe_1t_build_labels(int[] batch_tokens, int vocab_size) int[] {
     int count = len(batch_tokens)
-    []int labels = []int{cap: count}
+    int[] labels = int[]{cap: count}
     if count == 0 {
         return labels
     }
@@ -224,15 +224,15 @@ func moe_1t_build_labels([]int batch_tokens, int vocab_size) []int {
 
 func moe_1t_build_top1_routing(
     moe_1t_orchestrator orch,
-    []int batch_tokens
-) ([]int, []float) {
+    int[] batch_tokens
+) (int[], float[]) {
     int count = len(batch_tokens)
     int num_experts = orch.model_config.moe.num_experts
     if num_experts <= 0 {
         num_experts = 1
     }
-    []int expert_indices = []int{cap: count}
-    []float expert_weights = []float{cap: count}
+    int[] expert_indices = int[]{cap: count}
+    float[] expert_weights = float[]{cap: count}
     int i = 0
     for i < count {
         expert_indices[i] = moe_1t_positive_mod(batch_tokens[i] + orch.world_rank + i, num_experts)
@@ -242,7 +242,7 @@ func moe_1t_build_top1_routing(
     (expert_indices, expert_weights)
 }
 
-func moe_1t_average_abs([]float values) float {
+func moe_1t_average_abs(float[] values) float {
     if len(values) == 0 {
         return 0.0
     }
@@ -327,7 +327,7 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
     }
     string checkpoint_dir = fw.training.checkpoint_dir
     io_mkdir_recursive(checkpoint_dir)
-    []string shard_refs = moe_1t_manifest_refs(fw.training.data_manifest_path)
+    string[] shard_refs = moe_1t_manifest_refs(fw.training.data_manifest_path)
     moe_1t_orchestrator orch = moe_1t_orchestrator {
         framework: fw,
         model_config: fw.model,
@@ -379,13 +379,13 @@ func moe_1t_get_next_batch(
     moe_1t_orchestrator orch,
     int batch_size_tokens,
     int seq_len
-) (moe_1t_orchestrator, []int) {
+) (moe_1t_orchestrator, int[]) {
     moe_1t_orchestrator next_orch = orch
     if len(next_orch.token_shards) == 0 {
         next_orch.token_shards = moe_1t_manifest_refs(next_orch.data_manifest_path)
     }
     if len(next_orch.token_shards) == 0 {
-        []int fallback = moe_1t_text_to_tokens(next_orch.data_manifest_path, batch_size_tokens, next_orch.world_rank + seq_len)
+        int[] fallback = moe_1t_text_to_tokens(next_orch.data_manifest_path, batch_size_tokens, next_orch.world_rank + seq_len)
         next_orch.tokens_in_shard = len(fallback)
         return next_orch, fallback
     }
@@ -398,7 +398,7 @@ func moe_1t_get_next_batch(
     }
     string shard_path = next_orch.token_shards[shard_index]
     int seed = gpt_large_pretrain_mix_seed(next_orch.world_rank + 1, next_orch.world_size + 1, shard_index + seq_len)
-    []int tokens = moe_1t_shard_tokens(shard_path, batch_size_tokens, seed)
+    int[] tokens = moe_1t_shard_tokens(shard_path, batch_size_tokens, seed)
     next_orch.current_shard_index = shard_index + 1
     if next_orch.current_shard_index >= len(next_orch.token_shards) {
         next_orch.current_shard_index = 0
@@ -409,9 +409,9 @@ func moe_1t_get_next_batch(
 
 func moe_1t_forward_pass(
     moe_1t_orchestrator orch,
-    []int batch_tokens,
+    int[] batch_tokens,
     int seq_len
-) ([]float, moe_routing_stats) {
+) (float[], moe_routing_stats) {
     int batch_size = len(batch_tokens)
     int tp_size = orch.tp_size
     if tp_size <= 0 {
@@ -424,7 +424,7 @@ func moe_1t_forward_pass(
     int global_hidden_dim = orch.model_config.base.n_embd
     int local_hidden_dim = moe_1t_tp_local_hidden_dim(orch)
     int hidden_offset = moe_1t_tp_global_offset(orch)
-    []float hidden = make([]float, batch_size * local_hidden_dim)
+    float[] hidden = make(float[], batch_size * local_hidden_dim)
     int layer = 0
     int num_layers = orch.model_config.base.n_layer
     for layer < num_layers {
@@ -442,9 +442,9 @@ func moe_1t_forward_pass(
         }
         layer = layer + 1
     }
-    []float logits = make([]float, batch_size * orch.model_config.base.vocab_size)
-    []int expert_load = make([]int, orch.model_config.moe.num_experts)
-    []int ep_load = make([]int, ep_size)
+    float[] logits = make(float[], batch_size * orch.model_config.base.vocab_size)
+    int[] expert_load = make(int[], orch.model_config.moe.num_experts)
+    int[] ep_load = make(int[], ep_size)
     int token_idx = 0
     for token_idx < batch_size {
         int expert_idx = moe_1t_positive_mod(batch_tokens[token_idx] + seq_len + orch.world_rank, orch.model_config.moe.num_experts)
@@ -471,7 +471,7 @@ func moe_1t_forward_pass(
             load_imbalance = float(max_load) / avg_load
         }
     }
-    []float expert_load_ratio = make([]float, orch.model_config.moe.num_experts)
+    float[] expert_load_ratio = make(float[], orch.model_config.moe.num_experts)
     float aux_loss = 0.0
     int ratio_idx = 0
     for ratio_idx < len(expert_load) {
@@ -526,7 +526,7 @@ func moe_1t_forward_pass(
 
 func moe_1t_allreduce_gradients(
     moe_1t_orchestrator orch,
-    []float gradients
+    float[] gradients
 ) int {
     if orch.world_size > 1 {
         int i = 0
@@ -689,7 +689,7 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
         int current_step = state.training_step
         int batch_tokens_per_gpu = 512
         int seq_len = 4096
-        []int batch = []int{cap: 0}
+        int[] batch = int[]{cap: 0}
         (state, batch) = moe_1t_get_next_batch(state, batch_tokens_per_gpu, seq_len)
         if len(batch) == 0 {
             if state.world_rank == 0 {
@@ -698,10 +698,10 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
             global_step = state.training_step
             continue
         }
-        ([]float logits, moe_routing_stats routing_stats) = moe_1t_forward_pass(state, batch, seq_len)
+        (float[] logits, moe_routing_stats routing_stats) = moe_1t_forward_pass(state, batch, seq_len)
         int vocab_size = state.model_config.base.vocab_size
-        []int labels = moe_1t_build_labels(batch, vocab_size)
-        ([]int expert_indices, []float expert_weights) = moe_1t_build_top1_routing(state, batch)
+        int[] labels = moe_1t_build_labels(batch, vocab_size)
+        (int[] expert_indices, float[] expert_weights) = moe_1t_build_top1_routing(state, batch)
         loss_state loss_ctx = loss_state_new(vocab_size, state.model_config.moe_aux_loss_weight)
         float loss = compute_total_loss(
             loss_ctx,
@@ -713,7 +713,7 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
             1,
             1
         )
-        []float gradients = compute_ce_gradient(
+        float[] gradients = compute_ce_gradient(
             logits,
             labels,
             len(batch),

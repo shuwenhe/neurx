@@ -35,17 +35,17 @@ struct gpu_tbo_config {
 
 struct gpu_tbo_executor_state {
     gpu_tbo_config config
-    []int operation_ids
-    []int operation_types
-    []int batch_ids
-    []int stage_indices
-    []int stream_ids
-    []int input_ptr_low
-    []int output_ptr_low
-    []int element_counts
-    []int dependency_ids
-    []int statuses
-    []int backend_codes
+    int[] operation_ids
+    int[] operation_types
+    int[] batch_ids
+    int[] stage_indices
+    int[] stream_ids
+    int[] input_ptr_low
+    int[] output_ptr_low
+    int[] element_counts
+    int[] dependency_ids
+    int[] statuses
+    int[] backend_codes
     int operation_count
     int completed_count
     int failed_count
@@ -62,8 +62,8 @@ struct gpu_tbo_execution_result {
     bool complete
 }
 
-func gpu_tbo_int_array(int capacity) []int {
-    []int values = []int{cap: capacity}
+func gpu_tbo_int_array(int capacity) int[] {
+    int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

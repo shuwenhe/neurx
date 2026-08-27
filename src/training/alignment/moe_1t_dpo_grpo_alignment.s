@@ -31,7 +31,7 @@ struct preference_pair {
     string chosen_response
     string rejected_response
     float preference_score
-    []float per_token_preference
+    float[] per_token_preference
     string annotator_id
     string domain
     int timestamp
@@ -49,8 +49,8 @@ struct dpo_training_state {
     float rejected_logprob_mean
     float margin
     float implicit_reward
-    []float loss_history
-    []float margin_history
+    float[] loss_history
+    float[] margin_history
 }
 
 func dpo_compute_loss(
@@ -93,8 +93,8 @@ func dpo_training_new(
         rejected_logprob_mean: 0.0,
         margin: 0.0,
         implicit_reward: 0.0,
-        loss_history: make([]float, 0),
-        margin_history: make([]float, 0),
+        loss_history: make(float[], 0),
+        margin_history: make(float[], 0),
     }
     state
 }
@@ -137,9 +137,9 @@ struct grpo_training_state {
     float clip_ratio
     int ppo_epochs_per_batch
     int mini_batch_size
-    []float policy_loss_history
-    []float value_loss_history
-    []float kl_divergence_history
+    float[] policy_loss_history
+    float[] value_loss_history
+    float[] kl_divergence_history
     float average_return
 }
 
@@ -163,9 +163,9 @@ func grpo_training_new(
         clip_ratio: 0.2,
         ppo_epochs_per_batch: 4,
         mini_batch_size: 32,
-        policy_loss_history: make([]float, 0),
-        value_loss_history: make([]float, 0),
-        kl_divergence_history: make([]float, 0),
+        policy_loss_history: make(float[], 0),
+        value_loss_history: make(float[], 0),
+        kl_divergence_history: make(float[], 0),
         average_return: 0.0,
     }
     state
@@ -205,8 +205,8 @@ struct constitutional_ai_state {
     []constitution_principle principles
     moe_1t_framework base_model
     int num_principles
-    []float principle_compliance_scores
-    []int principle_violation_counts
+    float[] principle_compliance_scores
+    int[] principle_violation_counts
     float overall_alignment_score
 }
 
@@ -258,8 +258,8 @@ func constitutional_ai_new() constitutional_ai_state {
         principles: principles,
         base_model: moe_1t_framework {},
         num_principles: 7,
-        principle_compliance_scores: make([]float, 7),
-        principle_violation_counts: make([]int, 7),
+        principle_compliance_scores: make(float[], 7),
+        principle_violation_counts: make(int[], 7),
         overall_alignment_score: 0.0,
     }
     int i = 0

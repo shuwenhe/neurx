@@ -45,7 +45,7 @@ func format_duration(float seconds) string {
     }
 }
 
-func compute_rolling_average([]float values) float {
+func compute_rolling_average(float[] values) float {
     if len(values) == 0 { return 0.0 }
     float ema = values[0]
     float alpha = 0.1

@@ -20,7 +20,7 @@ struct distributed_pretrain_launcher {
     process_group_state pg_state
     ddp_state ddp_state
     cuda_bridge cb
-    []string shard_paths
+    string[] shard_paths
     int micro_batch_size
     int gradient_accum_steps
 }
@@ -98,7 +98,7 @@ func new_distributed_pretrain_launcher(
         env.world_size,
         env.backend,
     )
-    []string shard_paths = generate_shard_distribution(
+    string[] shard_paths = generate_shard_distribution(
         config_path,
         env.rank,
         env.world_size,
@@ -118,9 +118,9 @@ func generate_shard_distribution(
     config_path string,
     rank int,
     world_size int,
-) []string {
-    []string all_shards = load_shard_list(config_path)
-    []string my_shards = []string{cap: (len(all_shards) / world_size) + 1}
+) string[] {
+    string[] all_shards = load_shard_list(config_path)
+    string[] my_shards = string[]{cap: (len(all_shards) / world_size) + 1}
     int shard_idx = 0
     int i = rank
     for i < len(all_shards) {
@@ -131,8 +131,8 @@ func generate_shard_distribution(
     my_shards
 }
 
-func load_shard_list(string config_path) []string {
-    []string shards = []string{cap: 5131}
+func load_shard_list(string config_path) string[] {
+    string[] shards = string[]{cap: 5131}
     int i = 0
     for i < 5131 {
         string shard_path = format_string(
@@ -150,15 +150,15 @@ func format_string(string template, int number) string {
 }
 
 func (distributed_pretrain_launcher* launcher) sync_gradients_nccl(
-    []float gradients,
-) []float {
-    []float reduced_grads = cuda_bridge_all_reduce_sum(
+    float[] gradients,
+) float[] {
+    float[] reduced_grads = cuda_bridge_all_reduce_sum(
         launcher.cb,
         gradients,
     )
     int world_size = launcher.env.world_size
     int i = 0
-    []float averaged_grads = []float{cap: len(reduced_grads)}
+    float[] averaged_grads = float[]{cap: len(reduced_grads)}
     for i < len(reduced_grads) {
         averaged_grads[i] = reduced_grads[i] / float(world_size)
         i = i + 1
@@ -169,7 +169,7 @@ func (distributed_pretrain_launcher* launcher) sync_gradients_nccl(
 func (distributed_pretrain_launcher* launcher) optimizer_step(
     int step,
     float learning_rate,
-    []float gradients,
+    float[] gradients,
 ) {
     if (step % launcher.gradient_accum_steps) == 0 {
         gradients = launcher.sync_gradients_nccl(gradients)

@@ -38,7 +38,7 @@ struct inference_request {
 	repeat_penalty   float64  `json:"repeat_penalty"`
 	frequency_penalty float64  `json:"frequency_penalty"`
 	presence_penalty float64  `json:"presence_penalty"`
-	stop_sequences   []string `json:"stop_sequences"`
+	stop_sequences   string[] `json:"stop_sequences"`
 	return_logprobs  bool     `json:"return_logprobs"`
 }
 
@@ -50,7 +50,7 @@ struct inference_response {
 	throughput_ms float64   `json:"throughput_ms"`
 	model_used    string    `json:"model_used"`
 	finish_reason string    `json:"finish_reason"`
-	logprobs     []float64 `json:"logprobs,omitempty"`
+	logprobs     float[]64 `json:"logprobs,omitempty"`
 	timestamp    string    `json:"timestamp"`
 }
 
@@ -282,7 +282,7 @@ func start_server() error {
 func run_interactive_mode() {
 	log_info("entering interactive mode (simulation)...")
 	log_info("type 'quit' to exit")
-	requests := []string{
+	requests := string[]{
 		`{"prompt":"what is artificial intelligence","max_tokens":100}`,
 		`{"prompt":"explain machine learning in one sentence","max_tokens":50}`,
 		`{"prompt":"how does neural networks work","max_tokens":150}`,

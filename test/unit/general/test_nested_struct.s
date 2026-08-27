@@ -3,7 +3,7 @@ package main
 struct inner_data {
     int value
     float score
-    []float weights
+    float[] weights
 }
 
 struct outer_data {
@@ -16,7 +16,7 @@ func test_direct_access() {
     obj.name = "test"
     obj.data.value = 42
     obj.data.score = 3.14
-    obj.data.weights = []float{cap: 3}
+    obj.data.weights = float[]{cap: 3}
     obj.data.weights[0] = 1.0
     obj.data.weights[1] = 2.0
     obj.data.weights[2] = 3.0
@@ -31,7 +31,7 @@ func test_array_element_access() {
     arr[0].name = "first"
     arr[0].data.value = 10
     arr[0].data.score = 1.5
-    arr[0].data.weights = []float{cap: 2}
+    arr[0].data.weights = float[]{cap: 2}
     arr[0].data.weights[0] = 0.5
     arr[1].name = "second"
     arr[1].data.value = 20

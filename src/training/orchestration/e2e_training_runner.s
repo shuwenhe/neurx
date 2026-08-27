@@ -54,10 +54,10 @@ func generate_synthetic_data(
     int seq_length,
     int vocab_size,
     int num_batches
-) [][]int {
-    data := make([][]int, num_batches)
+) int[][] {
+    data := make(int[][], num_batches)
     for i := 0; i < num_batches; i += 1 {
-        batch := make([]int, batch_size * seq_length)
+        batch := make(int[], batch_size * seq_length)
         for j := 0; j < batch_size * seq_length; j += 1 {
             batch[j] = (i * j + 7) % (vocab_size - 1) + 1
         }
@@ -122,13 +122,13 @@ func create_mini_gpt(config training_config) mini_language_model {
 
 func forward_pass(
     mini_language_model model,
-    []int input_ids,
+    int[] input_ids,
     int batch_size,
     int seq_length
 ) (bundle.tensor_2, bundle.tensor_2) {
     embeddings := bundle.tensor_2{
         shape: [batch_size, seq_length, model.embedding_dim],
-        data: make([]float, batch_size * seq_length * model.embedding_dim),
+        data: make(float[], batch_size * seq_length * model.embedding_dim),
     }
     for i := 0; i < batch_size; i += 1 {
         for j := 0; j < seq_length; j += 1 {
@@ -140,12 +140,12 @@ func forward_pass(
     }
     logits := bundle.tensor_2{
         shape: [batch_size, seq_length, model.vocab_size],
-        data: make([]float, batch_size * seq_length * model.vocab_size),
+        data: make(float[], batch_size * seq_length * model.vocab_size),
     }
     logits, hidden_states
 }
 
-func compute_loss(bundle.tensor_2 logits, []int targets) float {
+func compute_loss(bundle.tensor_2 logits, int[] targets) float {
     batch_size := logits.shape[0]
     seq_length := logits.shape[1]
     vocab_size := logits.shape[2]
@@ -213,7 +213,7 @@ func run_training(training_config config) {
     log_message(log, fmt.Sprintf("Generated %d training batches", len(data)))
     fmt.Printf("\n🚀 Starting training...\n")
     log_message(log, "=== TRAINING START ===")
-    losses := make([]float, 0)
+    losses := make(float[], 0)
     start_time := time.Now()
     for step := 0; step < config.num_steps; step += 1 {
         batch_input := data[step % len(data)]
@@ -288,23 +288,23 @@ func compute_learning_rate(
     }
 }
 
-func initialize_normal(int size, float mean, float std) []float {
-    data := make([]float, size)
+func initialize_normal(int size, float mean, float std) float[] {
+    data := make(float[], size)
     for i := 0; i < size; i += 1 {
         data[i] = mean + std * (float(i%1000) / 1000.0 - 0.5)
     }
     data
 }
 
-func initialize_ones(int size) []float {
-    data := make([]float, size)
+func initialize_ones(int size) float[] {
+    data := make(float[], size)
     for i := 0; i < size; i += 1 {
         data[i] = 1.0
     }
     data
 }
 
-func verify_training(mini_language_model model, []float losses, logger log) {
+func verify_training(mini_language_model model, float[] losses, logger log) {
     fmt.Printf("   Parameters: %d\n", count_parameters(model))
     fmt.Printf("   Initial loss: %.4f\n", losses[0])
     fmt.Printf("   Final loss: %.4f\n", losses[len(losses)-1])
@@ -331,7 +331,7 @@ func verify_training(mini_language_model model, []float losses, logger log) {
     }
 }
 
-func find_min_loss([]float losses) float {
+func find_min_loss(float[] losses) float {
     if len(losses) == 0 {
         return 0.0
     }
@@ -344,7 +344,7 @@ func find_min_loss([]float losses) float {
     min_loss
 }
 
-func find_max_loss([]float losses) float {
+func find_max_loss(float[] losses) float {
     if len(losses) == 0 {
         return 0.0
     }
@@ -357,7 +357,7 @@ func find_max_loss([]float losses) float {
     max_loss
 }
 
-func compute_avg_loss([]float losses) float {
+func compute_avg_loss(float[] losses) float {
     if len(losses) == 0 {
         return 0.0
     }
@@ -368,7 +368,7 @@ func compute_avg_loss([]float losses) float {
     sum / float(len(losses))
 }
 
-func generate_loss_curve([]float losses, string output_dir) {
+func generate_loss_curve(float[] losses, string output_dir) {
     output := "Loss Curve Visualization\n"
     output += "=======================\n\n"
     if len(losses) == 0 {

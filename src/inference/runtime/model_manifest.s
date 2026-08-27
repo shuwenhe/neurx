@@ -1,7 +1,7 @@
 package neurx.inference.runtime.model_manifest
 use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file, runtime_run_command_output, runtime_shell_escape}
 use std.encoding.bytes_to_string
-extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
+extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) int[]
 
 struct hf_model_config {
     string architecture
@@ -27,7 +27,7 @@ struct hf_model_config {
 struct safetensors_tensor_manifest {
     string name
     string dtype
-    []int shape
+    int[] shape
     int data_start
     int data_end
     int byte_count
@@ -325,7 +325,7 @@ func model_file_size(string path) int {
     model_parse_positive_int(output)
 }
 
-func model_u64_le([]int bytes, int offset) int {
+func model_u64_le(int[] bytes, int offset) int {
     if offset < 0 || offset + 8 > len(bytes) { return -1 }
     int value = 0
     int multiplier = 1
@@ -368,8 +368,8 @@ func model_matching_end(string text, int start, int open_char, int close_char) i
     -1
 }
 
-func model_json_int_array(string object_text, string key) []int {
-    []int values = []int{cap: 8}
+func model_json_int_array(string object_text, string key) int[] {
+    int[] values = int[]{cap: 8}
     int start = model_json_value_start(object_text, key)
     if start < 0 || start >= len(object_text) || object_text[start] != 91 { return [] }
     int end = model_matching_end(object_text, start, 91, 93)
@@ -393,7 +393,7 @@ func model_json_int_array(string object_text, string key) []int {
 }
 
 func model_parse_tensor(string name, string object_text, int data_start) safetensors_tensor_manifest {
-    []int offsets = model_json_int_array(object_text, "data_offsets")
+    int[] offsets = model_json_int_array(object_text, "data_offsets")
     safetensors_tensor_manifest tensor
     tensor.name = name
     tensor.dtype = model_json_string(object_text, "dtype")

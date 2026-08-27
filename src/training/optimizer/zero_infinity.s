@@ -12,10 +12,10 @@ struct zero_infinity_config {
 }
 
 struct cpu_offload_buffer {
-    []float data
+    float[] data
     int capacity
     int used
-    []bool is_valid
+    bool[] is_valid
 }
 
 struct nvme_offload_buffer {
@@ -23,7 +23,7 @@ struct nvme_offload_buffer {
     int file_handle
     int capacity_mb
     int used_mb
-    []int block_mapping
+    int[] block_mapping
 }
 
 struct offload_param_metadata {
@@ -55,15 +55,15 @@ func new_zero_infinity_state(
     int total_size_mb) zero_infinity_state {
     cpu_offload_buffer cpu_buf
     cpu_buf.capacity = config.cpu_buffer_size_mb * 1024 * 1024 / 4
-    cpu_buf.data = []float{cap: cpu_buf.capacity}
+    cpu_buf.data = float[]{cap: cpu_buf.capacity}
     cpu_buf.used = 0
-    cpu_buf.is_valid = []bool{cap: total_params}
+    cpu_buf.is_valid = bool[]{cap: total_params}
     nvme_offload_buffer nvme_buf
     if config.enable_nvme_offload {
         nvme_buf.file_path = config.nvme_swap_dir + "/zero_infinity_swap.bin"
         nvme_buf.capacity_mb = config.nvme_buffer_size_mb
         nvme_buf.used_mb = 0
-        nvme_buf.block_mapping = []int{cap: total_params}
+        nvme_buf.block_mapping = int[]{cap: total_params}
         int i = 0
         for i < total_params {
             nvme_buf.block_mapping[i] = -1
@@ -100,7 +100,7 @@ func new_zero_infinity_state(
 
 func zero_infinity_offload_param_to_cpu(
     zero_infinity_state state,
-    []float gpu_param,
+    float[] gpu_param,
     int param_idx) zero_infinity_state {
     if state.param_metadata[param_idx].on_cpu {
         return state
@@ -130,7 +130,7 @@ func zero_infinity_evict_cpu_to_nvme(
     if !state.config.enable_nvme_offload {
         return state
     }
-    int[] lru_candidates = []int{cap: state.total_params}
+    int[] lru_candidates = int[]{cap: state.total_params}
     int candidate_count = 0
     int param_idx = 0
     for param_idx < state.total_params {
@@ -174,19 +174,19 @@ func zero_infinity_write_to_nvme(
 
 struct prefetch_result {
     zero_infinity_state state
-    []float param_data
+    float[] param_data
 }
 
 func zero_infinity_prefetch_param(
     zero_infinity_state state,
     int param_idx) prefetch_result {
     offload_param_metadata meta = state.param_metadata[param_idx]
-    []float dummy = []float{cap: 0}
+    float[] dummy = float[]{cap: 0}
     if meta.on_gpu {
         return prefetch_result{state: state, param_data: dummy}
     }
     int param_size = meta.size_bytes / 4
-    []float param_data = []float{cap: param_size}
+    float[] param_data = float[]{cap: param_size}
     if meta.on_cpu {
         int cpu_offset = meta.cpu_offset
         int i = 0

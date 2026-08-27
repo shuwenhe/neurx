@@ -17,9 +17,9 @@ func create_top_k_processor(int k) top_k_processor {
 }
 
 func apply_top_k(
-    logits: []float,
+    logits: float[],
     top_k_processor processor
-) []float {
+) float[] {
     int vocab_size = len(logits)
     int k_actual = processor.k
 
@@ -29,7 +29,7 @@ func apply_top_k(
 
     (top_indices, top_scores) := processor_utils.get_top_k_tokens(logits, k_actual)
 
-    []bool mask
+    bool[] mask
     for i = 0; i < vocab_size; i = i + 1 {
         mask.append(false)
     }
@@ -44,10 +44,10 @@ func apply_top_k(
 }
 
 func apply_top_k_batch(
-    logits_batch: [][]float,
+    logits_batch: float[][],
     top_k_processor processor
-) [][]float {
-    [][]float filtered_batch
+) float[][] {
+    float[][] filtered_batch
 
     for batch_logits in logits_batch {
         filtered := apply_top_k(batch_logits, processor)
@@ -58,12 +58,12 @@ func apply_top_k_batch(
 }
 
 func apply_adaptive_top_k(
-    logits: []float,
+    logits: float[],
     base_k: int,
     float entropy_threshold
-) []float {
+) float[] {
 
-    []float probs = processor_utils.softmax(logits)
+    float[] probs = processor_utils.softmax(logits)
 
     float entropy = 0.0
     for prob in probs {
@@ -82,16 +82,16 @@ func apply_adaptive_top_k(
 }
 
 func apply_top_k_with_threshold(
-    logits: []float,
+    logits: float[],
     k: int,
     float min_prob
-) []float {
+) float[] {
     int vocab_size = len(logits)
 
-    []float probs = processor_utils.softmax(logits)
+    float[] probs = processor_utils.softmax(logits)
 
-    []bool mask
-    []int sorted_indices
+    bool[] mask
+    int[] sorted_indices
 
     for i = 0; i < vocab_size; i = i + 1 {
         sorted_indices.append(i)
@@ -126,19 +126,19 @@ func apply_top_k_with_threshold(
 }
 
 func sample_from_top_k(
-    logits: []float,
+    logits: float[],
     processor: top_k_processor,
     float temperature
 ) int {
 
-    []float scaled_logits
+    float[] scaled_logits
     for logit in logits {
         scaled_logits.append(logit / temperature)
     }
 
-    []float filtered = apply_top_k(scaled_logits, processor)
+    float[] filtered = apply_top_k(scaled_logits, processor)
 
-    []float probs = processor_utils.softmax(filtered)
+    float[] probs = processor_utils.softmax(filtered)
 
     int best_token = 0
     float best_prob = probs[0]
@@ -157,20 +157,20 @@ struct top_k_stats {
     int vocab_size
     int k
     float fraction_kept
-    []float top_k_probs
+    float[] top_k_probs
     float cumulative_prob
 }
 
 func analyze_top_k_filtering(
-    logits: []float,
+    logits: float[],
     int k
 ) top_k_stats {
-    []float probs = processor_utils.softmax(logits)
+    float[] probs = processor_utils.softmax(logits)
 
     (top_indices, top_scores) := processor_utils.get_top_k_tokens(logits, k)
 
     float cum_prob = 0.0
-    []float top_k_probs
+    float[] top_k_probs
 
     for idx in top_indices {
         if idx >= 0 && idx < len(probs) {

@@ -23,15 +23,15 @@ struct hicache_config {
 
 struct hicache_state {
     hicache_config config
-    []int key_hashes
-    []int pool_ids
-    []int device_present
-    []int host_present
-    []int storage_present
-    []int dirty
-    []int transfer_in_flight
-    []int lock_refs
-    []int last_access
+    int[] key_hashes
+    int[] pool_ids
+    int[] device_present
+    int[] host_present
+    int[] storage_present
+    int[] dirty
+    int[] transfer_in_flight
+    int[] lock_refs
+    int[] last_access
     int page_count
     int logical_clock
     int write_through_threshold
@@ -55,8 +55,8 @@ struct hicache_prefix_result {
     int usable_pages
 }
 
-func hicache_int_array(int capacity) []int {
-    []int values = []int{cap: capacity}
+func hicache_int_array(int capacity) int[] {
+    int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values
@@ -184,7 +184,7 @@ func hicache_page_available(hicache_state state, int key_hash, int pool_id) bool
     index >= 0 && (state.device_present[index] == 1 || state.host_present[index] == 1 || state.storage_present[index] == 1)
 }
 
-func hicache_match_prefix(hicache_state state, []int kv_keys, int kv_pool_id, []int auxiliary_keys, int auxiliary_pool_id) hicache_prefix_result {
+func hicache_match_prefix(hicache_state state, int[] kv_keys, int kv_pool_id, int[] auxiliary_keys, int auxiliary_pool_id) hicache_prefix_result {
     int kv_hit = 0
     for kv_hit < len(kv_keys) && hicache_page_available(state, kv_keys[kv_hit], kv_pool_id) { kv_hit = kv_hit + 1 }
     int auxiliary_hit = 0

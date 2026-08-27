@@ -7,30 +7,30 @@ struct medusa_head {
     int layer_depth
     int hidden_dim
     int vocab_size
-    weights: [][]float
-    bias: []float
+    weights: float[][]
+    bias: float[]
 }
 
 struct medusa_heads_config {
     int num_heads
     int base_hidden_dim
     int vocab_size
-    attach_layers: []int
+    attach_layers: int[]
     float temperature
     int top_k
     float top_p
 }
 
 struct medusa_candidate_tree {
-    tree_tokens: [][][]int
-    tree_probs: [][][]float
+    tree_tokens: int[][][]
+    tree_probs: float[][][]
     int64 node_count
     int tree_depth
     int branching_factor
 }
 
 struct medusa_verification_batch {
-    input_ids: [][]int
+    input_ids: int[][]
     candidate_trees: []medusa_candidate_tree
     int batch_size
     int max_tree_depth
@@ -55,8 +55,8 @@ func new_medusa_head(int head_id, int layer_depth, int hidden_dim, int vocab_siz
         layer_depth: layer_depth,
         hidden_dim: hidden_dim,
         vocab_size: vocab_size,
-        weights: [][]float{},
-        bias: []float{},
+        weights: float[][]{},
+        bias: float[]{},
     }
     head
 }
@@ -65,7 +65,7 @@ func initialize_medusa_head_weights(medusa_head head) medusa_head {
     updated := head
     i := 0
     for i < head.vocab_size {
-        row := []float{}
+        row := float[]{}
         j := 0
         for j < head.hidden_dim {
             val := (2.0 / float(head.hidden_dim)) ^ 0.5 * (2.0 * 0.5 - 1.0) * 0.1
@@ -97,11 +97,11 @@ func initialize_medusa_heads(medusa_heads_config config) []medusa_head {
 
 func medusa_head_forward(
     medusa_head head,
-    []float hidden_state,
+    float[] hidden_state,
     float temperature,
     int top_k
-) []int {
-    logits := []float{}
+) int[] {
+    logits := float[]{}
     i := 0
     for i < head.vocab_size {
         logit := head.bias[i]
@@ -126,10 +126,10 @@ func medusa_head_forward(
     top_k_tokens
 }
 
-func sample_top_k_from_logits([]float logits, int k) []int {
+func sample_top_k_from_logits(float[] logits, int k) int[] {
     probs := softmax_stable(logits)
-    top_k_indices := []int{}
-    top_k_probs := []float{}
+    top_k_indices := int[]{}
+    top_k_probs := float[]{}
     i := 0
     for i < logits.len {
         prob := probs[i]
@@ -157,7 +157,7 @@ func sample_top_k_from_logits([]float logits, int k) []int {
     top_k_indices
 }
 
-func softmax_stable([]float logits) []float {
+func softmax_stable(float[] logits) float[] {
     max_logit := -1000000.0
     i := 0
     for i < logits.len {
@@ -166,7 +166,7 @@ func softmax_stable([]float logits) []float {
         }
         i = i + 1
     }
-    exp_logits := []float{}
+    exp_logits := float[]{}
     sum_exp := 0.0
     i = 0
     for i < logits.len {
@@ -175,7 +175,7 @@ func softmax_stable([]float logits) []float {
         sum_exp = sum_exp + val
         i = i + 1
     }
-    probs := []float{}
+    probs := float[]{}
     i = 0
     for i < exp_logits.len {
         probs = append(probs, exp_logits[i] / sum_exp)
@@ -186,31 +186,31 @@ func softmax_stable([]float logits) []float {
 
 func generate_medusa_candidate_tree(
     []medusa_head heads,
-    []float hidden_states,
+    float[] hidden_states,
     medusa_heads_config config,
     int tree_depth
 ) medusa_candidate_tree {
     tree := medusa_candidate_tree{
-        tree_tokens: [][][]int{},
-        tree_probs: [][][]float{},
+        tree_tokens: int[][][]{},
+        tree_probs: float[][][]{},
         node_count: 0,
         tree_depth: tree_depth,
         branching_factor: config.top_k,
     }
     depth := 0
     for depth < tree_depth  depth < heads.len {
-        level_tokens := [][]int{}
-        level_probs := [][]float{}
+        level_tokens := int[][]{}
+        level_probs := float[][]{}
         head_idx := depth
         if head_idx >= heads.len {
             break
         }
         hidden_idx := depth
         if hidden_idx < hidden_states.len {
-            hidden := []float{}
+            hidden := float[]{}
             candidates := medusa_head_forward(heads[head_idx], hidden, config.temperature, config.top_k)
             level_tokens = append(level_tokens, candidates)
-            probs := []float{}
+            probs := float[]{}
             i := 0
             for i < candidates.len {
                 probs = append(probs, 1.0 / float(candidates.len))
@@ -226,16 +226,16 @@ func generate_medusa_candidate_tree(
 }
 
 func verify_medusa_candidates(
-    [][]int candidate_sequences,
-    [][]float verifier_logits,
+    int[][] candidate_sequences,
+    float[][] verifier_logits,
     float threshold
-) [][]bool {
-    results := [][]bool{}
+) bool[][] {
+    results := bool[][]{}
     i := 0
     for i < candidate_sequences.len {
         candidate_seq := candidate_sequences[i]
         verifier_logit := verifier_logits[i]
-        verified := []bool{}
+        verified := bool[]{}
         j := 0
         for j < candidate_seq.len {
             token_id := candidate_seq[j]
@@ -283,11 +283,11 @@ func exp_approx(float x) float {
 }
 
 func rejection_sample_medusa_tokens(
-    [][]float candidate_logits,
-    [][]float verifier_logits,
+    float[][] candidate_logits,
+    float[][] verifier_logits,
     float temperature
-) []int {
-    accepted_tokens := []int{}
+) int[] {
+    accepted_tokens := int[]{}
     i := 0
     for i < candidate_logits.len {
         candidate_logit := candidate_logits[i]
@@ -312,7 +312,7 @@ struct medusa_generation_pipeline {
     heads: []medusa_head
     medusa_heads_config config
     medusa_runtime_stats stats
-    acceptance_rates: []float
+    acceptance_rates: float[]
 }
 
 func new_medusa_pipeline(medusa_heads_config config) medusa_generation_pipeline {
@@ -333,19 +333,19 @@ func new_medusa_pipeline(medusa_heads_config config) medusa_generation_pipeline 
         heads: heads,
         config: config,
         stats: stats,
-        acceptance_rates: []float{},
+        acceptance_rates: float[]{},
     }
     pipeline
 }
 
 func medusa_prefill(
     medusa_generation_pipeline pipeline,
-    [][]float hidden_states,
-    []int input_ids
-) (medusa_generation_pipeline, []float) {
+    float[][] hidden_states,
+    int[] input_ids
+) (medusa_generation_pipeline, float[]) {
     updated := pipeline
     updated.stats.total_prefill_tokens = updated.stats.total_prefill_tokens + int64(input_ids.len)
-    last_hidden := []float{}
+    last_hidden := float[]{}
     if hidden_states.len > 0 {
         last_hidden = hidden_states[hidden_states.len - 1]
     }
@@ -354,11 +354,11 @@ func medusa_prefill(
 
 func medusa_decode_step(
     medusa_generation_pipeline pipeline,
-    []float current_hidden,
+    float[] current_hidden,
     int max_draft_tokens
-) (medusa_generation_pipeline, [][]int) {
+) (medusa_generation_pipeline, int[][]) {
     updated := pipeline
-    draft_sequences := [][]int{}
+    draft_sequences := int[][]{}
     i := 0
     for i < pipeline.heads.len  i < max_draft_tokens {
         head := pipeline.heads[i]
@@ -397,8 +397,8 @@ func medusa_adaptive_draft_length(
     current_draft
 }
 
-func insert_at([]int arr, int idx, int val) []int {
-    result := []int{}
+func insert_at(int[] arr, int idx, int val) int[] {
+    result := int[]{}
     i := 0
     for i < arr.len {
         if i == idx {
@@ -413,8 +413,8 @@ func insert_at([]int arr, int idx, int val) []int {
     result
 }
 
-func insert_at_float([]float arr, int idx, float val) []float {
-    result := []float{}
+func insert_at_float(float[] arr, int idx, float val) float[] {
+    result := float[]{}
     i := 0
     for i < arr.len {
         if i == idx {
@@ -429,8 +429,8 @@ func insert_at_float([]float arr, int idx, float val) []float {
     result
 }
 
-func slice_array_int([]int arr, int start, int end) []int {
-    result := []int{}
+func slice_array_int(int[] arr, int start, int end) int[] {
+    result := int[]{}
     i := start
     for i < end  i < arr.len {
         result = append(result, arr[i])
@@ -439,8 +439,8 @@ func slice_array_int([]int arr, int start, int end) []int {
     result
 }
 
-func slice_array_float([]float arr, int start, int end) []float {
-    result := []float{}
+func slice_array_float(float[] arr, int start, int end) float[] {
+    result := float[]{}
     i := start
     for i < end  i < arr.len {
         result = append(result, arr[i])

@@ -8,9 +8,9 @@ use neurx.autograd.function
 
 struct grad_record {
     int id
-    []int shape
+    int[] shape
     bool requires_grad
-    []float grad
+    float[] grad
 }
 
 struct autograd_state {
@@ -21,11 +21,11 @@ struct autograd_state {
 
 struct dual_record {
     int id
-    []int shape
+    int[] shape
     bool requires_grad
-    []float primal
-    []float tangent
-    []float cotangent
+    float[] primal
+    float[] tangent
+    float[] cotangent
 }
 
 struct linearize_state {
@@ -34,11 +34,11 @@ struct linearize_state {
     []dual_record records
 }
 
-func copy_float([]float data) []float {
+func copy_float(float[] data) float[] {
     neurx.autograd.engine.copy_float(data)
 }
 
-func copy_int([]int data) []int {
+func copy_int(int[] data) int[] {
     neurx.autograd.engine.copy_int(data)
 }
 
@@ -90,11 +90,11 @@ func set_detect_anomaly(autograd_state state, bool enabled) autograd_state {
     neurx.autograd.engine.set_detect_anomaly(state, enabled)
 }
 
-func zeros_like([]float data) []float {
+func zeros_like(float[] data) float[] {
     neurx.autograd.engine.zeros_like(data)
 }
 
-func ones_like([]float data) []float {
+func ones_like(float[] data) float[] {
     neurx.autograd.engine.ones_like(data)
 }
 
@@ -110,7 +110,7 @@ func has_record(autograd_state state, int id) bool {
     neurx.autograd.engine.has_record(state, id)
 }
 
-func set_grad(autograd_state state, int id, []float grad) autograd_state {
+func set_grad(autograd_state state, int id, float[] grad) autograd_state {
     neurx.autograd.engine.set_grad(state, id, grad)
 }
 
@@ -122,11 +122,11 @@ func zero_grad(autograd_state state) autograd_state {
     neurx.autograd.engine.zero_grad(state)
 }
 
-func accumulate_grad(autograd_state state, int id, []float grad) autograd_state {
+func accumulate_grad(autograd_state state, int id, float[] grad) autograd_state {
     neurx.autograd.engine.accumulate_grad(state, id, grad)
 }
 
-func grad_of(autograd_state state, int id) []float {
+func grad_of(autograd_state state, int id) float[] {
     neurx.autograd.engine.grad_of(state, id)
 }
 
@@ -264,7 +264,7 @@ func linearize_has_record(linearize_state state, int id) bool {
     false
 }
 
-func linearize_shape_of(linearize_state state, int id) []int {
+func linearize_shape_of(linearize_state state, int id) int[] {
     int i = 0
     for i < len(state.records) {
         if state.records[i].id == id {
@@ -286,7 +286,7 @@ func linearize_requires_grad(linearize_state state, int id) bool {
     false
 }
 
-func linearize_primal_of(linearize_state state, int id) []float {
+func linearize_primal_of(linearize_state state, int id) float[] {
     int i = 0
     for i < len(state.records) {
         if state.records[i].id == id {
@@ -297,7 +297,7 @@ func linearize_primal_of(linearize_state state, int id) []float {
     []
 }
 
-func linearize_tangent_of(linearize_state state, int id) []float {
+func linearize_tangent_of(linearize_state state, int id) float[] {
     int i = 0
     for i < len(state.records) {
         if state.records[i].id == id {
@@ -308,7 +308,7 @@ func linearize_tangent_of(linearize_state state, int id) []float {
     []
 }
 
-func linearize_cotangent_of(linearize_state state, int id) []float {
+func linearize_cotangent_of(linearize_state state, int id) float[] {
     int i = 0
     for i < len(state.records) {
         if state.records[i].id == id {
@@ -319,7 +319,7 @@ func linearize_cotangent_of(linearize_state state, int id) []float {
     []
 }
 
-func set_linearize_primal(linearize_state state, int id, []float primal) linearize_state {
+func set_linearize_primal(linearize_state state, int id, float[] primal) linearize_state {
     []dual_record records = state.records
     int i = 0
     for i < len(records) {
@@ -335,7 +335,7 @@ func set_linearize_primal(linearize_state state, int id, []float primal) lineari
     }
 }
 
-func set_linearize_tangent(linearize_state state, int id, []float tangent) linearize_state {
+func set_linearize_tangent(linearize_state state, int id, float[] tangent) linearize_state {
     []dual_record records = state.records
     int i = 0
     for i < len(records) {
@@ -351,7 +351,7 @@ func set_linearize_tangent(linearize_state state, int id, []float tangent) linea
     }
 }
 
-func set_linearize_cotangent(linearize_state state, int id, []float cotangent) linearize_state {
+func set_linearize_cotangent(linearize_state state, int id, float[] cotangent) linearize_state {
     []dual_record records = state.records
     int i = 0
     for i < len(records) {
@@ -367,7 +367,7 @@ func set_linearize_cotangent(linearize_state state, int id, []float cotangent) l
     }
 }
 
-func accumulate_linearize_tangent(linearize_state state, int id, []float tangent) linearize_state {
+func accumulate_linearize_tangent(linearize_state state, int id, float[] tangent) linearize_state {
     []dual_record records = state.records
     int i = 0
     for i < len(records) {
@@ -390,7 +390,7 @@ func accumulate_linearize_tangent(linearize_state state, int id, []float tangent
     }
 }
 
-func accumulate_linearize_cotangent(linearize_state state, int id, []float cotangent) linearize_state {
+func accumulate_linearize_cotangent(linearize_state state, int id, float[] cotangent) linearize_state {
     []dual_record records = state.records
     int i = 0
     for i < len(records) {
@@ -425,7 +425,7 @@ func linearize_load_state_dict(linearize_state state, linearize_state other) lin
     other
 }
 
-func jvp_seed_data(tensor value) []float {
+func jvp_seed_data(tensor value) float[] {
     if value.requires_grad {
         return ones_like(value.data)
     }
@@ -1034,7 +1034,7 @@ func tracer_add_eqn_with_param(tracer_state state, string primitive, string para
     neurx.autograd.tracer.tracer_add_eqn_with_param(state, primitive, param)
 }
 
-func tracer_add_eqn_with_io(tracer_state state, string primitive, []string params, []string inputs, []string outputs) tracer_state {
+func tracer_add_eqn_with_io(tracer_state state, string primitive, string[] params, string[] inputs, string[] outputs) tracer_state {
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, primitive, params, inputs, outputs)
 }
 
@@ -1090,7 +1090,7 @@ func tracer_capture_with_param(tracer_state state, string op, string param) trac
     neurx.autograd.tracer.tracer_capture_with_param(state, op, param)
 }
 
-func tracer_capture_with_io(tracer_state state, string op, []string params, []string inputs, []string outputs) tracer_state {
+func tracer_capture_with_io(tracer_state state, string op, string[] params, string[] inputs, string[] outputs) tracer_state {
     neurx.autograd.tracer.tracer_capture_with_io(state, op, params, inputs, outputs)
 }
 
@@ -1146,11 +1146,11 @@ func ir_add_eqn(ir_graph graph, string primitive) ir_graph {
     neurx.autograd.ir.ir_add_eqn(graph, primitive)
 }
 
-func ir_add_eqn_with_params(ir_graph graph, string primitive, []string params) ir_graph {
+func ir_add_eqn_with_params(ir_graph graph, string primitive, string[] params) ir_graph {
     neurx.autograd.ir.ir_add_eqn_with_params(graph, primitive, params)
 }
 
-func ir_add_eqn_with_io(ir_graph graph, string primitive, []string params, []string inputs, []string outputs) ir_graph {
+func ir_add_eqn_with_io(ir_graph graph, string primitive, string[] params, string[] inputs, string[] outputs) ir_graph {
     neurx.autograd.ir.ir_add_eqn_with_io(graph, primitive, params, inputs, outputs)
 }
 
@@ -1182,11 +1182,11 @@ func ir_capture(ir_graph graph, string primitive) ir_graph {
     neurx.autograd.ir.ir_capture(graph, primitive)
 }
 
-func ir_capture_with_params(ir_graph graph, string primitive, []string params) ir_graph {
+func ir_capture_with_params(ir_graph graph, string primitive, string[] params) ir_graph {
     neurx.autograd.ir.ir_capture_with_params(graph, primitive, params)
 }
 
-func ir_capture_with_io(ir_graph graph, string primitive, []string params, []string inputs, []string outputs) ir_graph {
+func ir_capture_with_io(ir_graph graph, string primitive, string[] params, string[] inputs, string[] outputs) ir_graph {
     neurx.autograd.ir.ir_capture_with_io(graph, primitive, params, inputs, outputs)
 }
 

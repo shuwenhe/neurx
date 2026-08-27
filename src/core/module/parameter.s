@@ -30,7 +30,7 @@ func parameter_list_tensors(nn.parameter_list list) []tensor {
     neurx.nn.parameter_list_tensors(list)
 }
 
-func parameter_list_names(nn.parameter_list list) []string {
+func parameter_list_names(nn.parameter_list list) string[] {
     neurx.nn.parameter_list_names(list)
 }
 

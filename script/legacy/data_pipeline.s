@@ -361,8 +361,8 @@ func write_shard_file(string path, string content) (int64, error) {
     return info.Size(), nil
 }
 
-func find_source_files(string dir) ([]string, error) {
-    var files []string
+func find_source_files(string dir) (string[], error) {
+    var files string[]
     entries, err := ioutil.ReadDir(dir)
     if err != nil {
         return files, err

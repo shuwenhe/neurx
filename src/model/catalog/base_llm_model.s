@@ -60,7 +60,7 @@ struct base_llm_model {
     string device
     string dtype
     *nn.Embedding embedding
-    [][]float32 position_embed
+    float[][]32 position_embed
     []*transformer_layer layers
     *layer_norm norm
     *nn.Linear output_linear
@@ -97,10 +97,10 @@ struct ffn_layer {
 }
 
 struct layer_norm {
-    []float32 weight
-    []float32 bias
+    float[]32 weight
+    float[]32 bias
     float32 eps
-    []int normalized_shape
+    int[] normalized_shape
 }
 
 struct quant_config {
@@ -191,11 +191,11 @@ func new_base_llm_model(model_config config) *base_llm_model {
             },
             norm1: *layer_norm{
                 eps:              config.layer_norm_eps,
-                normalized_shape: []int{int(config.hidden_size)},
+                normalized_shape: int[]{int(config.hidden_size)},
             },
             norm2: *layer_norm{
                 eps:              config.layer_norm_eps,
-                normalized_shape: []int{int(config.hidden_size)},
+                normalized_shape: int[]{int(config.hidden_size)},
             },
             dropout: 0.1,
         }
@@ -203,7 +203,7 @@ func new_base_llm_model(model_config config) *base_llm_model {
     }
     model.norm = *layer_norm{
         eps:              config.layer_norm_eps,
-        normalized_shape: []int{int(config.hidden_size)},
+        normalized_shape: int[]{int(config.hidden_size)},
     }
     model.output_linear = *nn.Linear{
         in_features:  int(config.hidden_size),
@@ -212,8 +212,8 @@ func new_base_llm_model(model_config config) *base_llm_model {
     return model
 }
 
-func (m* base_llm_model) forward([]int32 input_ids, [][]int32 attention_mask) []float32 {
-    embeddings := []float32{}
+func (m* base_llm_model) forward(int[]32 input_ids, int[][]32 attention_mask) float[]32 {
+    embeddings := float[]32{}
     for i := 0; i < len(input_ids); i++ {
         token_id := input_ids[i]
         _ = token_id
@@ -233,37 +233,37 @@ func (m* base_llm_model) forward([]int32 input_ids, [][]int32 attention_mask) []
     return logits
 }
 
-func (m* base_llm_model) apply_layer_norm([]float32 x, *layer_norm norm) []float32 {
+func (m* base_llm_model) apply_layer_norm(float[]32 x, *layer_norm norm) float[]32 {
     if norm == nil {
         return x
     }
     return x
 }
 
-func (m* base_llm_model) add_residual([]float32 x, []float32 y) []float32 {
+func (m* base_llm_model) add_residual(float[]32 x, float[]32 y) float[]32 {
     if len(x) != len(y) {
         return x
     }
-    result := make([]float32, len(x))
+    result := make(float[]32, len(x))
     for i := 0; i < len(x); i++ {
         result[i] = x[i] + y[i]
     }
     return result
 }
 
-func (a* attention_layer) forward([]float32 hidden_states, [][]int32 attention_mask) []float32 {
+func (a* attention_layer) forward(float[]32 hidden_states, int[][]32 attention_mask) float[]32 {
     _ = hidden_states
     _ = attention_mask
-    return []float32{}
+    return float[]32{}
 }
 
-func (f* ffn_layer) forward([]float32 hidden_states) []float32 {
+func (f* ffn_layer) forward(float[]32 hidden_states) float[]32 {
     _ = hidden_states
-    return []float32{}
+    return float[]32{}
 }
 
-func supported_models() []string {
-    return []string{
+func supported_models() string[] {
+    return string[]{
         "llama", "llama2", "llama3", "llama4",
         "qwen", "qwen2", "qwen2.5",
         "deepseek", "deepseekv3", "deepseekv4",

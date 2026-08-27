@@ -153,7 +153,7 @@ func save_config_to_file(string path) error {
 
 func initialize_training() error {
 	log_info("Initializing training...")
-	dirs := []string{
+	dirs := string[]{
 		g_config.output_dir,
 		g_config.checkpoint_dir,
 		g_config.log_dir,

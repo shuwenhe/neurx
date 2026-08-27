@@ -29,7 +29,7 @@ struct speech_to_text_state {
 
 struct speech_chunk {
     int sequence_id
-    []float samples
+    float[] samples
     int start_ms
     int end_ms
     bool final_chunk

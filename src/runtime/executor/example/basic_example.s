@@ -70,7 +70,7 @@ func PrefillExecutorExample() {
     prefill := NewPrefillExecutor(config, prefill_config)
     prefill.Initialize()
 
-    sequences := make([]string, 8)
+    sequences := make(string[], 8)
     prompt_tokens := make([]i32, 8)
 
     for i := 0; i < 8; i++ {
@@ -109,7 +109,7 @@ func DecodeExecutorExample() {
     decoder := NewDecodeExecutor(config, decode_config)
     decoder.Initialize()
 
-    sequences := make([]string, 32)
+    sequences := make(string[], 32)
     for i := 0; i < 32; i++ {
         sequences[i] = "generation_" + string(i)
         decoder.base.AddSequence(sequences[i], 0)
@@ -263,7 +263,7 @@ func DistributedExecutorExample() {
         dist_executor.base.AddSequence("seq_" + string(i), 0)
     }
 
-    sequences := make([]string, 16)
+    sequences := make(string[], 16)
     for i := 0; i < 16; i++ {
         sequences[i] = "seq_" + string(i)
     }

@@ -23,10 +23,10 @@ struct model_partition {
 }
 
 struct resharding_plan {
-    []int src_ranks
-    []int dst_ranks
-    []int param_indices
-    []int sizes
+    int[] src_ranks
+    int[] dst_ranks
+    int[] param_indices
+    int[] sizes
     bool use_alltoall
 }
 
@@ -59,10 +59,10 @@ func compute_resharding_plan(
 ) resharding_plan {
     int src_tp = config.tensor_parallel_size_train
     int dst_tp = config.tensor_parallel_size_gen
-    []int src_ranks = []int{}
-    []int dst_ranks = []int{}
-    []int param_indices = []int{}
-    []int sizes = []int{}
+    int[] src_ranks = int[]{}
+    int[] dst_ranks = int[]{}
+    int[] param_indices = int[]{}
+    int[] sizes = int[]{}
     int i = 0
     for i < src.params.len {
         tensor param = src.params[i]

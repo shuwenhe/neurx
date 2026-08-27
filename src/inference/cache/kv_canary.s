@@ -15,13 +15,13 @@ struct kv_canary_config {
 
 struct kv_canary_state {
     kv_canary_config config
-    []int page_ids
-    []int expected_checksums
-    []int observed_checksums
-    []int statuses
-    []int failure_counts
-    []int sample_counts
-    []int last_sample_steps
+    int[] page_ids
+    int[] expected_checksums
+    int[] observed_checksums
+    int[] statuses
+    int[] failure_counts
+    int[] sample_counts
+    int[] last_sample_steps
     int page_count
     int logical_step
     int checked_pages
@@ -37,8 +37,8 @@ struct kv_canary_result {
     bool checksum_match
 }
 
-func canary_int_array(int capacity) []int {
-    []int values = []int{cap: capacity}
+func canary_int_array(int capacity) int[] {
+    int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

@@ -62,12 +62,12 @@ struct chat_completion_response_pb {
 
 struct embedding_request_pb {
     string model_id
-    []string texts
+    string[] texts
 }
 
 struct embedding_pb {
     int32 index
-    []float32 values
+    float[]32 values
 }
 
 struct embedding_response_pb {
@@ -208,7 +208,7 @@ func (grpc_server* srv) embed(embedding_request_pb* req) (embedding_response_pb*
     for i, _ := range req.texts {
         emb := *embedding_pb{
             index: int32(i),
-            values: make([]float32, 0),
+            values: make(float[]32, 0),
         }
         embeddings = append(embeddings, emb)
     }

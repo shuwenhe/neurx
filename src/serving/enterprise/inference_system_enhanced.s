@@ -91,13 +91,13 @@ return         (updated_sys, "fallback output")
 
 func inference_enhanced_batch(
     inference_system_enhanced sys,
-    []string prompts,
+    string[] prompts,
     int max_new_tokens,
-) (inference_system_enhanced, []string) {
+) (inference_system_enhanced, string[]) {
     updated_sys := sys
-    outputs := []string{}
+    outputs := string[]{}
     if updated_sys.config.enable_speculative_decode {
-        batch_input_ids := [][]int{}
+        batch_input_ids := int[][]{}
         i := 0
         for i < prompts.len {
             tokens := tokenize_prompt(prompts[i])
@@ -185,8 +185,8 @@ func disable_speculative_mode(inference_system_enhanced sys) inference_system_en
     updated_sys
 }
 
-func tokenize_prompt(string prompt) []int {
-    tokens := []int{}
+func tokenize_prompt(string prompt) int[] {
+    tokens := int[]{}
     i := 0
     for i < prompt.len {
         tokens = append(tokens, i)
@@ -195,7 +195,7 @@ func tokenize_prompt(string prompt) []int {
     tokens
 }
 
-func decode_tokens([]int tokens) string {
+func decode_tokens(int[] tokens) string {
     result := ""
     i := 0
     for i < tokens.len {

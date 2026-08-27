@@ -8,7 +8,7 @@ struct regularization_config {
     float prob
 }
 
-func l1_regularization([]float params, float lambda) float {
+func l1_regularization(float[] params, float lambda) float {
     float penalty = 0.0
     int i = 0
     for i < len(params) {
@@ -22,7 +22,7 @@ func l1_regularization([]float params, float lambda) float {
     return lambda * penalty
 }
 
-func l2_regularization([]float params, float lambda) float {
+func l2_regularization(float[] params, float lambda) float {
     float penalty = 0.0
     int i = 0
     for i < len(params) {
@@ -33,13 +33,13 @@ func l2_regularization([]float params, float lambda) float {
     return lambda * penalty
 }
 
-func elastic_net_regularization([]float params, float l1_weight, float l2_weight) float {
+func elastic_net_regularization(float[] params, float l1_weight, float l2_weight) float {
     float l1 = l1_regularization(params, l1_weight)
     float l2 = l2_regularization(params, l2_weight)
     return l1 + l2
 }
 
-func cutout_mask([][]float data, int cut_size, float prob) [][]float {
+func cutout_mask(float[][] data, int cut_size, float prob) float[][] {
     int rows = len(data)
     if rows == 0 {
         return data
@@ -67,7 +67,7 @@ func cutout_mask([][]float data, int cut_size, float prob) [][]float {
     return data
 }
 
-func mixup_batch([][]float x_a, [][]float x_b, []float y_a, []float y_b, float alpha) []float {
+func mixup_batch(float[][] x_a, float[][] x_b, float[] y_a, float[] y_b, float alpha) float[] {
     float lam = beta_random(alpha, alpha)
     int i = 0
     for i < len(x_a) {
@@ -83,13 +83,13 @@ func mixup_batch([][]float x_a, [][]float x_b, []float y_a, []float y_b, float a
         y_a[i] = lam * y_a[i] + (1.0 - lam) * y_b[i]
         i = i + 1
     }
-    []float result = []float{cap: 1}
+    float[] result = float[]{cap: 1}
     result[0] = lam
     return result
 }
 
-func label_smoothing([]float labels, int num_classes, float smoothing) []float {
-    []float smoothed = []float{cap: len(labels)}
+func label_smoothing(float[] labels, int num_classes, float smoothing) float[] {
+    float[] smoothed = float[]{cap: len(labels)}
     int i = 0
     for i < len(labels) {
         int label_idx = int(labels[i])
@@ -103,11 +103,11 @@ func label_smoothing([]float labels, int num_classes, float smoothing) []float {
     return smoothed
 }
 
-func dropout_mask([]float data, float p, bool training) []float {
+func dropout_mask(float[] data, float p, bool training) float[] {
     if !training {
         return data
     }
-    []float masked = []float{cap: len(data)}
+    float[] masked = float[]{cap: len(data)}
     float keep_prob = 1.0 - p
     float scale = 1.0 / (keep_prob + 0.0000001)
     int i = 0

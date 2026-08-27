@@ -367,8 +367,8 @@ func token_to_word(int token) string {
     get_token_text(token)
 }
 
-func tokenize_prompt(string text) []int {
-    []int tokens = []int{cap: len(text) + 8}
+func tokenize_prompt(string text) int[] {
+    int[] tokens = int[]{cap: len(text) + 8}
     int count = 0
     tokens[count] = 151643
     count = count + 1
@@ -405,7 +405,7 @@ func tokenize_prompt(string text) []int {
     }
     tokens[count] = 151645
     count = count + 1
-    []int output = []int{cap: count}
+    int[] output = int[]{cap: count}
     index = 0
     for index < count {
         output[index] = tokens[index]
@@ -414,7 +414,7 @@ func tokenize_prompt(string text) []int {
     output
 }
 
-func prompt_signature([]int tokens) int {
+func prompt_signature(int[] tokens) int {
     int signature = 17
     int index = 0
     for index < len(tokens) {
@@ -459,7 +459,7 @@ func prompt_is_greeting(string text) bool {
         contains_text(lower, "hey")
 }
 
-func count_token_occurrences([]int tokens, int token_id) int {
+func count_token_occurrences(int[] tokens, int token_id) int {
     int count = 0
     int index = 0
     for index < len(tokens) {
@@ -500,7 +500,7 @@ func count_repeated_words(string text) int {
 }
 
 func count_distinct_words(string text) int {
-    []string words = []string{cap: 64}
+    string[] words = string[]{cap: 64}
     int count = 0
     string current = ""
     int index = 0
@@ -622,14 +622,14 @@ func generate_response_candidate(real_text_engine_state state, string prompt, in
     if max_new_tokens > 128 {
         max_new_tokens = 128
     }
-    []int prompt_tokens = tokenize_prompt(prompt)
+    int[] prompt_tokens = tokenize_prompt(prompt)
     result.prompt_tokens = len(prompt_tokens)
     int total_tokens = len(prompt_tokens) + max_new_tokens
     if total_tokens <= 0 {
         total_tokens = 1
     }
     []paged_kv_cache caches = make_layer_caches(state, total_tokens)
-    []float hidden = []float{}
+    float[] hidden = float[]{}
     int position = 0
     for position < len(prompt_tokens) {
         int current_token = prompt_tokens[position]
@@ -638,7 +638,7 @@ func generate_response_candidate(real_text_engine_state state, string prompt, in
         } else {
             hidden = blend_vectors(hidden, load_embedding_row(state.model, "model.embed_tokens.weight", current_token, safe_hidden_size(state), safe_vocab_size(state)), 0.78, 0.22)
         }
-        ([]float updated_hidden, []paged_kv_cache updated_caches) = run_transformer_stack_cached(state, hidden, caches, position)
+        (float[] updated_hidden, []paged_kv_cache updated_caches) = run_transformer_stack_cached(state, hidden, caches, position)
         hidden = updated_hidden
         caches = updated_caches
         position = position + 1
@@ -647,11 +647,11 @@ func generate_response_candidate(real_text_engine_state state, string prompt, in
         hidden = load_embedding_row(state.model, "model.embed_tokens.weight", safe_bos_token_id(state), safe_hidden_size(state), safe_vocab_size(state))
     }
     int generated_count = 0
-    []int generated_history = []int{cap: max_new_tokens}
+    int[] generated_history = int[]{cap: max_new_tokens}
     string response_text = ""
     int vocab_size = safe_vocab_size(state)
     for generated_count < max_new_tokens {
-        []float logits = project_logits(state, hidden)
+        float[] logits = project_logits(state, hidden)
         if len(logits) == 0 {
             break
         }
@@ -668,7 +668,7 @@ func generate_response_candidate(real_text_engine_state state, string prompt, in
             response_text = response_text + " "
         }
         response_text = response_text + word
-        ([]float updated_hidden, []paged_kv_cache updated_caches) = advance_hidden_state_cached(state, hidden, next_token, caches, position)
+        (float[] updated_hidden, []paged_kv_cache updated_caches) = advance_hidden_state_cached(state, hidden, next_token, caches, position)
         hidden = updated_hidden
         caches = updated_caches
         position = position + 1
@@ -692,7 +692,7 @@ func pseudo_random_int(int seed) int {
     value
 }
 
-func insert_top_candidate([]float scores, []int tokens, int count, float score, int token_id) int {
+func insert_top_candidate(float[] scores, int[] tokens, int count, float score, int token_id) int {
     int limit = len(scores)
     if limit <= 0 {
         return 0
@@ -720,7 +720,7 @@ func insert_top_candidate([]float scores, []int tokens, int count, float score, 
     count
 }
 
-func sample_token_from_logits([]float logits, []int history, int seed) int {
+func sample_token_from_logits(float[] logits, int[] history, int seed) int {
     if len(logits) == 0 {
         return -1
     }
@@ -728,8 +728,8 @@ func sample_token_from_logits([]float logits, []int history, int seed) int {
     if top_k <= 0 {
         top_k = 1
     }
-    []float top_scores = []float{cap: top_k}
-    []int top_tokens = []int{cap: top_k}
+    float[] top_scores = float[]{cap: top_k}
+    int[] top_tokens = int[]{cap: top_k}
     int count = 0
     int index = 0
     for index < len(logits) {
@@ -750,7 +750,7 @@ func sample_token_from_logits([]float logits, []int history, int seed) int {
         return top_tokens[0]
     }
     float min_score = top_scores[count - 1]
-    []int weights = []int{cap: count}
+    int[] weights = int[]{cap: count}
     int total_weight = 0
     index = 0
     for index < count {
@@ -782,10 +782,10 @@ func sample_token_from_logits([]float logits, []int history, int seed) int {
     top_tokens[0]
 }
 
-func load_embedding_row(safetensors_model model, string tensor_name, int token_id, int hidden_size, int vocab_size) []float {
+func load_embedding_row(safetensors_model model, string tensor_name, int token_id, int hidden_size, int vocab_size) float[] {
     int normalized_token = normalize_token_id(token_id, vocab_size)
-    []int raw = read_tensor_elements(model, tensor_name, normalized_token * hidden_size, hidden_size)
-    []float row = []float{cap: hidden_size}
+    int[] raw = read_tensor_elements(model, tensor_name, normalized_token * hidden_size, hidden_size)
+    float[] row = float[]{cap: hidden_size}
     int index = 0
     for index < hidden_size {
         row[index] = bf16_at(raw, index)
@@ -794,7 +794,7 @@ func load_embedding_row(safetensors_model model, string tensor_name, int token_i
     row
 }
 
-func add_in_place([]float target, []float source, float scale) {
+func add_in_place(float[] target, float[] source, float scale) {
     int index = 0
     for index < len(target) && index < len(source) {
         target[index] = target[index] + source[index] * scale
@@ -802,8 +802,8 @@ func add_in_place([]float target, []float source, float scale) {
     }
 }
 
-func copy_vector([]float source) []float {
-    []float output = []float{cap: len(source)}
+func copy_vector(float[] source) float[] {
+    float[] output = float[]{cap: len(source)}
     int index = 0
     for index < len(source) {
         output[index] = source[index]
@@ -847,9 +847,9 @@ func make_layer_caches(real_text_engine_state state, int total_tokens) []paged_k
     caches
 }
 
-func blend_vectors([]float left, []float right, float left_scale, float right_scale) []float {
+func blend_vectors(float[] left, float[] right, float left_scale, float right_scale) float[] {
     int size = min_int(len(left), len(right))
-    []float output = []float{cap: size}
+    float[] output = float[]{cap: size}
     int index = 0
     for index < size {
         output[index] = left[index] * left_scale + right[index] * right_scale
@@ -868,12 +868,12 @@ func approx_silu(float value) float {
     value / (1.0 + abs_float(value))
 }
 
-func run_transformer_layer(real_text_engine_state state, int layer, []float hidden) []float {
+func run_transformer_layer(real_text_engine_state state, int layer, float[] hidden) float[] {
     int hidden_size = safe_hidden_size(state)
     int intermediate_size = safe_intermediate_size(state)
     string input_norm = layer_name(layer, "input_layernorm.weight")
-    []float norm_weight = load_vector(state.model, input_norm, hidden_size)
-    []float normalized = rms_norm(hidden, norm_weight)
+    float[] norm_weight = load_vector(state.model, input_norm, hidden_size)
+    float[] normalized = rms_norm(hidden, norm_weight)
     if len(normalized) != hidden_size {
         return hidden
     }
@@ -881,19 +881,19 @@ func run_transformer_layer(real_text_engine_state state, int layer, []float hidd
     string k_name = layer_name(layer, "self_attn.k_proj.weight")
     string v_name = layer_name(layer, "self_attn.v_proj.weight")
     string o_name = layer_name(layer, "self_attn.o_proj.weight")
-    []float q = matvec_named(state.model, q_name, hidden_size, hidden_size, normalized)
-    []float k = matvec_named(state.model, k_name, hidden_size, hidden_size, normalized)
-    []float v = matvec_named(state.model, v_name, hidden_size, hidden_size, normalized)
+    float[] q = matvec_named(state.model, q_name, hidden_size, hidden_size, normalized)
+    float[] k = matvec_named(state.model, k_name, hidden_size, hidden_size, normalized)
+    float[] v = matvec_named(state.model, v_name, hidden_size, hidden_size, normalized)
     if len(q) != hidden_size || len(k) != hidden_size || len(v) != hidden_size {
         return hidden
     }
-    []float attn_mix = []float{cap: hidden_size}
+    float[] attn_mix = float[]{cap: hidden_size}
     int index = 0
     for index < hidden_size {
         attn_mix[index] = (q[index] + k[index] + v[index]) / 3.0
         index = index + 1
     }
-    []float attention = matvec_named(state.model, o_name, hidden_size, hidden_size, attn_mix)
+    float[] attention = matvec_named(state.model, o_name, hidden_size, hidden_size, attn_mix)
     if len(attention) != hidden_size {
         return hidden
     }
@@ -903,26 +903,26 @@ func run_transformer_layer(real_text_engine_state state, int layer, []float hidd
         index = index + 1
     }
     string ffn_norm_name = layer_name(layer, "post_attention_layernorm.weight")
-    []float ffn_norm_weight = load_vector(state.model, ffn_norm_name, hidden_size)
-    []float ffn_hidden = rms_norm(hidden, ffn_norm_weight)
+    float[] ffn_norm_weight = load_vector(state.model, ffn_norm_name, hidden_size)
+    float[] ffn_hidden = rms_norm(hidden, ffn_norm_weight)
     if len(ffn_hidden) != hidden_size {
         return hidden
     }
     string gate_name = layer_name(layer, "mlp.gate_proj.weight")
     string up_name = layer_name(layer, "mlp.up_proj.weight")
     string down_name = layer_name(layer, "mlp.down_proj.weight")
-    []float gate = matvec_named(state.model, gate_name, intermediate_size, hidden_size, ffn_hidden)
-    []float up = matvec_named(state.model, up_name, intermediate_size, hidden_size, ffn_hidden)
+    float[] gate = matvec_named(state.model, gate_name, intermediate_size, hidden_size, ffn_hidden)
+    float[] up = matvec_named(state.model, up_name, intermediate_size, hidden_size, ffn_hidden)
     if len(gate) != intermediate_size || len(up) != intermediate_size {
         return hidden
     }
-    []float activated = []float{cap: intermediate_size}
+    float[] activated = float[]{cap: intermediate_size}
     index = 0
     for index < intermediate_size {
         activated[index] = approx_silu(gate[index]) * up[index]
         index = index + 1
     }
-    []float down = matvec_named(state.model, down_name, hidden_size, intermediate_size, activated)
+    float[] down = matvec_named(state.model, down_name, hidden_size, intermediate_size, activated)
     if len(down) != hidden_size {
         return hidden
     }
@@ -934,12 +934,12 @@ func run_transformer_layer(real_text_engine_state state, int layer, []float hidd
     hidden
 }
 
-func run_transformer_layer_cached(real_text_engine_state state, int layer, []float hidden, paged_kv_cache cache, int position) ([]float, paged_kv_cache) {
+func run_transformer_layer_cached(real_text_engine_state state, int layer, float[] hidden, paged_kv_cache cache, int position) (float[], paged_kv_cache) {
     int hidden_size = safe_hidden_size(state)
     int intermediate_size = safe_intermediate_size(state)
     string input_norm = layer_name(layer, "input_layernorm.weight")
-    []float norm_weight = load_vector(state.model, input_norm, hidden_size)
-    []float normalized = rms_norm(hidden, norm_weight)
+    float[] norm_weight = load_vector(state.model, input_norm, hidden_size)
+    float[] normalized = rms_norm(hidden, norm_weight)
     if len(normalized) != hidden_size {
         return hidden, cache
     }
@@ -947,9 +947,9 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, []flo
     string k_name = layer_name(layer, "self_attn.k_proj.weight")
     string v_name = layer_name(layer, "self_attn.v_proj.weight")
     string o_name = layer_name(layer, "self_attn.o_proj.weight")
-    []float q = matvec_named(state.model, q_name, hidden_size, hidden_size, normalized)
-    []float k = matvec_named(state.model, k_name, hidden_size, hidden_size, normalized)
-    []float v = matvec_named(state.model, v_name, hidden_size, hidden_size, normalized)
+    float[] q = matvec_named(state.model, q_name, hidden_size, hidden_size, normalized)
+    float[] k = matvec_named(state.model, k_name, hidden_size, hidden_size, normalized)
+    float[] v = matvec_named(state.model, v_name, hidden_size, hidden_size, normalized)
     if len(q) != hidden_size || len(k) != hidden_size || len(v) != hidden_size {
         return hidden, cache
     }
@@ -957,13 +957,13 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, []flo
         cache = reserve_tokens(cache, position + 1 - cache.total_tokens)
     }
     cache = write_kv_to_cache(cache, k, v, position)
-    []float attn_out = []float{cap: hidden_size}
+    float[] attn_out = float[]{cap: hidden_size}
     float scale = 1.0 / sqrt_approx(float(hidden_size))
     attn_out = compute_paged_attention_gqa(cache, q, attn_out, cache.token_to_slot, 1, 1, hidden_size, scale)
     if len(attn_out) != hidden_size {
         return hidden, cache
     }
-    []float attention = matvec_named(state.model, o_name, hidden_size, hidden_size, attn_out)
+    float[] attention = matvec_named(state.model, o_name, hidden_size, hidden_size, attn_out)
     if len(attention) != hidden_size {
         return hidden, cache
     }
@@ -973,26 +973,26 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, []flo
         index = index + 1
     }
     string ffn_norm_name = layer_name(layer, "post_attention_layernorm.weight")
-    []float ffn_norm_weight = load_vector(state.model, ffn_norm_name, hidden_size)
-    []float ffn_hidden = rms_norm(hidden, ffn_norm_weight)
+    float[] ffn_norm_weight = load_vector(state.model, ffn_norm_name, hidden_size)
+    float[] ffn_hidden = rms_norm(hidden, ffn_norm_weight)
     if len(ffn_hidden) != hidden_size {
         return hidden, cache
     }
     string gate_name = layer_name(layer, "mlp.gate_proj.weight")
     string up_name = layer_name(layer, "mlp.up_proj.weight")
     string down_name = layer_name(layer, "mlp.down_proj.weight")
-    []float gate = matvec_named(state.model, gate_name, intermediate_size, hidden_size, ffn_hidden)
-    []float up = matvec_named(state.model, up_name, intermediate_size, hidden_size, ffn_hidden)
+    float[] gate = matvec_named(state.model, gate_name, intermediate_size, hidden_size, ffn_hidden)
+    float[] up = matvec_named(state.model, up_name, intermediate_size, hidden_size, ffn_hidden)
     if len(gate) != intermediate_size || len(up) != intermediate_size {
         return hidden, cache
     }
-    []float activated = []float{cap: intermediate_size}
+    float[] activated = float[]{cap: intermediate_size}
     index = 0
     for index < intermediate_size {
         activated[index] = approx_silu(gate[index]) * up[index]
         index = index + 1
     }
-    []float down = matvec_named(state.model, down_name, hidden_size, intermediate_size, activated)
+    float[] down = matvec_named(state.model, down_name, hidden_size, intermediate_size, activated)
     if len(down) != hidden_size {
         return hidden, cache
     }
@@ -1004,36 +1004,36 @@ func run_transformer_layer_cached(real_text_engine_state state, int layer, []flo
     (hidden, cache)
 }
 
-func run_transformer_stack_cached(real_text_engine_state state, []float hidden, []paged_kv_cache caches, int position) ([]float, []paged_kv_cache) {
+func run_transformer_stack_cached(real_text_engine_state state, float[] hidden, []paged_kv_cache caches, int position) (float[], []paged_kv_cache) {
     int layer_count = safe_num_layers(state)
     int layer = 0
     for layer < layer_count {
-        ([]float updated_hidden, paged_kv_cache updated_cache) = run_transformer_layer_cached(state, layer, hidden, caches[layer], position)
+        (float[] updated_hidden, paged_kv_cache updated_cache) = run_transformer_layer_cached(state, layer, hidden, caches[layer], position)
         hidden = updated_hidden
         caches[layer] = updated_cache
         layer = layer + 1
     }
     string norm_name = "model.norm.weight"
-    []float final_norm = load_vector(state.model, norm_name, safe_hidden_size(state))
-    []float output = rms_norm(hidden, final_norm)
+    float[] final_norm = load_vector(state.model, norm_name, safe_hidden_size(state))
+    float[] output = rms_norm(hidden, final_norm)
     if len(output) == len(hidden) {
         return output, caches
     }
     (hidden, caches)
 }
 
-func advance_hidden_state_cached(real_text_engine_state state, []float hidden, int token_id, []paged_kv_cache caches, int position) ([]float, []paged_kv_cache) {
+func advance_hidden_state_cached(real_text_engine_state state, float[] hidden, int token_id, []paged_kv_cache caches, int position) (float[], []paged_kv_cache) {
     int hidden_size = safe_hidden_size(state)
     int vocab_size = safe_vocab_size(state)
-    []float row = load_embedding_row(state.model, "model.embed_tokens.weight", token_id, hidden_size, vocab_size)
+    float[] row = load_embedding_row(state.model, "model.embed_tokens.weight", token_id, hidden_size, vocab_size)
     if len(row) != hidden_size {
         return hidden, caches
     }
-    []float blended = blend_vectors(hidden, row, 0.78, 0.22)
+    float[] blended = blend_vectors(hidden, row, 0.78, 0.22)
     run_transformer_stack_cached(state, blended, caches, position)
 }
 
-func run_transformer_stack(real_text_engine_state state, []float hidden) []float {
+func run_transformer_stack(real_text_engine_state state, float[] hidden) float[] {
     int layer_count = safe_num_layers(state)
     int layer = 0
     for layer < layer_count {
@@ -1041,31 +1041,31 @@ func run_transformer_stack(real_text_engine_state state, []float hidden) []float
         layer = layer + 1
     }
     string norm_name = "model.norm.weight"
-    []float final_norm = load_vector(state.model, norm_name, safe_hidden_size(state))
-    []float output = rms_norm(hidden, final_norm)
+    float[] final_norm = load_vector(state.model, norm_name, safe_hidden_size(state))
+    float[] output = rms_norm(hidden, final_norm)
     if len(output) == len(hidden) {
         return output
     }
     hidden
 }
 
-func project_logits(real_text_engine_state state, []float hidden) []float {
+func project_logits(real_text_engine_state state, float[] hidden) float[] {
     int hidden_size = safe_hidden_size(state)
     int vocab_size = safe_vocab_size(state)
     if state.manifest.config.tie_word_embeddings {
-        []float tied = matvec_named(state.model, "model.embed_tokens.weight", vocab_size, hidden_size, hidden)
+        float[] tied = matvec_named(state.model, "model.embed_tokens.weight", vocab_size, hidden_size, hidden)
         if len(tied) > 0 {
             return tied
         }
     }
-    []float logits = matvec_named(state.model, "lm_head.weight", vocab_size, hidden_size, hidden)
+    float[] logits = matvec_named(state.model, "lm_head.weight", vocab_size, hidden_size, hidden)
     if len(logits) > 0 {
         return logits
     }
     matvec_named(state.model, "model.embed_tokens.weight", vocab_size, hidden_size, hidden)
 }
 
-func argmax_float([]float values) int {
+func argmax_float(float[] values) int {
     if len(values) == 0 {
         return -1
     }
@@ -1153,7 +1153,7 @@ func load_real_text_engine(string configured_path) real_text_engine_state {
     state
 }
 
-func encode_prompt_state(real_text_engine_state state, []int prompt_tokens) []float {
+func encode_prompt_state(real_text_engine_state state, int[] prompt_tokens) float[] {
     int hidden_size = safe_hidden_size(state)
     int vocab_size = safe_vocab_size(state)
     int token_count = len(prompt_tokens)
@@ -1164,10 +1164,10 @@ func encode_prompt_state(real_text_engine_state state, []int prompt_tokens) []fl
     if len(prompt_tokens) > 0 {
         first_token = prompt_tokens[0]
     }
-    []float hidden = load_embedding_row(state.model, "model.embed_tokens.weight", first_token, hidden_size, vocab_size)
+    float[] hidden = load_embedding_row(state.model, "model.embed_tokens.weight", first_token, hidden_size, vocab_size)
     int index = 1
     for index < len(prompt_tokens) {
-        []float row = load_embedding_row(state.model, "model.embed_tokens.weight", prompt_tokens[index], hidden_size, vocab_size)
+        float[] row = load_embedding_row(state.model, "model.embed_tokens.weight", prompt_tokens[index], hidden_size, vocab_size)
         if len(row) == hidden_size {
             hidden = blend_vectors(hidden, row, 0.80, 0.20)
         }
@@ -1176,18 +1176,18 @@ func encode_prompt_state(real_text_engine_state state, []int prompt_tokens) []fl
     run_transformer_stack(state, hidden)
 }
 
-func advance_hidden_state(real_text_engine_state state, []float hidden, int token_id) []float {
+func advance_hidden_state(real_text_engine_state state, float[] hidden, int token_id) float[] {
     int hidden_size = safe_hidden_size(state)
     int vocab_size = safe_vocab_size(state)
-    []float row = load_embedding_row(state.model, "model.embed_tokens.weight", token_id, hidden_size, vocab_size)
+    float[] row = load_embedding_row(state.model, "model.embed_tokens.weight", token_id, hidden_size, vocab_size)
     if len(row) != hidden_size {
         return hidden
     }
-    []float blended = blend_vectors(hidden, row, 0.78, 0.22)
+    float[] blended = blend_vectors(hidden, row, 0.78, 0.22)
     run_transformer_stack(state, blended)
 }
 
-func decode_generated_tokens([]int tokens) string {
+func decode_generated_tokens(int[] tokens) string {
     string output = ""
     int index = 0
     for index < len(tokens) {

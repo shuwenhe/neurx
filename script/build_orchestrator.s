@@ -82,7 +82,7 @@ func (build_orchestrator* b) clean() error {
     if err := remove_dir(b.buildDir); err != nil {
         b.logger.warn("Failed to clean build directory: %v", err)
     }
-    components := []string{"core", "training", "inference", "distributed"}
+    components := string[]{"core", "training", "inference", "distributed"}
     for _, comp := range components {
         comp_dir := filepath.Join(b.neurxRoot, comp)
         if dir_exists(comp_dir) {
@@ -114,7 +114,7 @@ func (build_orchestrator* b) build_compiler() error {
 
 func (build_orchestrator* b) build_core() error {
     b.logger.log("Building core NeurX components...")
-    components := []string{
+    components := string[]{
         "core/tensor.s",
         "core/autograd.s",
         "src/inference/extension/tokenizer/model_bpe.s",
@@ -141,7 +141,7 @@ func (build_orchestrator* b) build_core() error {
 
 func (build_orchestrator* b) build_training() error {
     b.logger.log("Building training components...")
-    components := []string{
+    components := string[]{
         "src/training/common/train_loop.s",
         "src/training/common/checkpoint.s",
         "src/training/common/validator.s",
@@ -168,7 +168,7 @@ func (build_orchestrator* b) build_training() error {
 
 func (build_orchestrator* b) build_inference() error {
     b.logger.log("Building inference components...")
-    components := []string{
+    components := string[]{
         "infer/inference_server.s",
         "infer/kv_cache_manager.s",
         "src/serving/speculative_decoding.s",
@@ -312,8 +312,8 @@ func detect_build_arch() build_arch {
     }
 }
 
-func find_build_artifacts(string dir) ([]string, error) {
-    var artifacts []string
+func find_build_artifacts(string dir) (string[], error) {
+    var artifacts string[]
     files, _ := list_dir(dir)
     for _, file := range files {
         full_path := filepath.Join(dir, file)

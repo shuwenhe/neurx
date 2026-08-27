@@ -15,10 +15,10 @@ struct tensor_parallel_config {
 }
 
 struct distributed_tensor {
-    local_shape      []int32
-    global_shape     []int32
+    local_shape      int[]32
+    global_shape     int[]32
     shard_dim        int32
-    data             []float32
+    data             float[]32
     tp_rank          int32
 }
 
@@ -31,7 +31,7 @@ struct tensor_parallel_inference {
 struct communication_op {
     op_id            int64
     op_type          string
-    tensor_shape     []int32
+    tensor_shape     int[]32
     is_complete      bool
 }
 
@@ -54,16 +54,16 @@ func NewTensorParallelInference(config tensor_parallel_config) *tensor_parallel_
 }
 
 func (tensor_parallel_inference* tp) ShardQKV(
-    q_proj []float32,
-    k_proj []float32,
-    v_proj []float32,
+    q_proj float[]32,
+    k_proj float[]32,
+    v_proj float[]32,
     batch_size int32,
     seq_len int32,
-) ([]float32, []float32, []float32) {
+) (float[]32, float[]32, float[]32) {
     shard_size := tp.config.hidden_size / tp.config.tp_size
     start_idx := tp.config.rank * shard_size
     end_idx := start_idx + shard_size
-    q_sharded := []float32{}
+    q_sharded := float[]32{}
     for b := int32(0); b < batch_size; b++ {
         for s := int32(0); s < seq_len; s++ {
             offset := (b*seq_len + s) * tp.config.hidden_size + start_idx
@@ -76,13 +76,13 @@ func (tensor_parallel_inference* tp) ShardQKV(
 }
 
 func (tensor_parallel_inference* tp) AllReduceAttentionOutput(
-    local_output []float32,
+    local_output float[]32,
     output_size int32,
-) []float32 {
+) float[]32 {
     if tp.config.tp_size == 1 {
         return local_output
     }
-    result := make([]float32, len(local_output))
+    result := make(float[]32, len(local_output))
     for i := 0; i < len(local_output); i++ {
         result[i] = local_output[i]
     }
@@ -90,14 +90,14 @@ func (tensor_parallel_inference* tp) AllReduceAttentionOutput(
 }
 
 func (tensor_parallel_inference* tp) ShardFFNInput(
-    input []float32,
+    input float[]32,
     batch_size int32,
     seq_len int32,
     intermediate_size int32,
-) []float32 {
+) float[]32 {
     shard_size := intermediate_size / tp.config.tp_size
     start_idx := tp.config.rank * shard_size
-    output := make([]float32, int(batch_size*seq_len*shard_size))
+    output := make(float[]32, int(batch_size*seq_len*shard_size))
     for b := int32(0); b < batch_size; b++ {
         for s := int32(0); s < seq_len; s++ {
             input_offset := (b*seq_len + s) * intermediate_size
@@ -111,15 +111,15 @@ func (tensor_parallel_inference* tp) ShardFFNInput(
 }
 
 func (tensor_parallel_inference* tp) AllGatherFFNOutput(
-    local_output []float32,
+    local_output float[]32,
     batch_size int32,
     seq_len int32,
-) []float32 {
+) float[]32 {
     if tp.config.tp_size == 1 {
         return local_output
     }
     shard_size := tp.config.hidden_size / tp.config.tp_size
-    full_output := make([]float32, int(batch_size*seq_len*tp.config.hidden_size))
+    full_output := make(float[]32, int(batch_size*seq_len*tp.config.hidden_size))
     for b := int32(0); b < batch_size; b++ {
         for s := int32(0); s < seq_len; s++ {
             input_offset := (b*seq_len + s) * shard_size
@@ -134,14 +134,14 @@ func (tensor_parallel_inference* tp) AllGatherFFNOutput(
 }
 
 func (tensor_parallel_inference* tp) ReduceScatterGradient(
-    gradients []float32,
+    gradients float[]32,
     output_size int32,
-) []float32 {
+) float[]32 {
     if tp.config.tp_size == 1 {
         return gradients
     }
     shard_size := output_size / tp.config.tp_size
-    scattered := make([]float32, int(shard_size))
+    scattered := make(float[]32, int(shard_size))
     start_idx := tp.config.rank * shard_size
     for i := int32(0); i < shard_size; i++ {
         scattered[i] = gradients[start_idx+i]
@@ -150,16 +150,16 @@ func (tensor_parallel_inference* tp) ReduceScatterGradient(
 }
 
 func (tensor_parallel_inference* tp) ComputeLocalAttention(
-    q []float32,
-    k []float32,
-    v []float32,
+    q float[]32,
+    k float[]32,
+    v float[]32,
     batch_size int32,
     seq_len int32,
     local_num_heads int32,
     head_dim int32,
-) []float32 {
+) float[]32 {
     output_size := int(batch_size * seq_len * local_num_heads * head_dim)
-    output := make([]float32, output_size)
+    output := make(float[]32, output_size)
     scale := 1.0 / core.Sqrt(float32(head_dim))
     for b := int32(0); b < batch_size; b++ {
         for h := int32(0); h < local_num_heads; h++ {
@@ -194,8 +194,8 @@ func (tensor_parallel_inference* tp) GetComputationSaving() float32 {
     return float32(tp.config.tp_size) * (1.0 - communication_overhead)
 }
 
-func (tensor_parallel_inference* tp) OverlapComputation() []string {
-    schedule := []string{
+func (tensor_parallel_inference* tp) OverlapComputation() string[] {
+    schedule := string[]{
         "compute_q_proj(shard_0)",
         "compute_k_proj(shard_0)",
         "start_all_gather_q()",

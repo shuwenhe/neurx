@@ -1,14 +1,14 @@
 package neurx.inference.safetensors_weight_loader
 use std.encoding.bytes_to_string
 
-extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
-extern "intrinsic" func __host_read_binary_file(string path) []int
+extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) int[]
+extern "intrinsic" func __host_read_binary_file(string path) int[]
 extern "intrinsic" func __host_file_exists(string path) bool
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
 struct tensor_meta {
     string name
-    []int shape
+    int[] shape
     string dtype
     int data_offset
     int data_length
@@ -36,7 +36,7 @@ func load_safetensors_header(string path) safetensors_header {
     if !__host_file_exists(path) {
         return hdr
     }
-    []int prefix = __host_read_binary_file_range(path, 0, 8)
+    int[] prefix = __host_read_binary_file_range(path, 0, 8)
     if len(prefix) < 8 {
         return hdr
     }
@@ -46,7 +46,7 @@ func load_safetensors_header(string path) safetensors_header {
     header_len = header_len + prefix[3] * 16777216
     hdr.header_length = header_len
     hdr.data_start = 8 + header_len
-    []int header_bytes = __host_read_binary_file_range(path, 8, header_len)
+    int[] header_bytes = __host_read_binary_file_range(path, 8, header_len)
     string json = bytes_to_string(header_bytes)
     []tensor_meta tensors = parse_header_json(json)
     hdr.tensors = tensors
@@ -139,7 +139,7 @@ func parse_json_string(string json, int start) (string, int) {
 }
 
 func parse_tensor_object(string json, int start, string name) tensor_meta {
-    tensor_meta t = tensor_meta{name: name, shape: []int{}, dtype: "", data_offset: 0, data_length: 0, num_elements: 0}
+    tensor_meta t = tensor_meta{name: name, shape: int[]{}, dtype: "", data_offset: 0, data_length: 0, num_elements: 0}
     int pos = start + 1
     for pos < len(json) {
         pos = skip_ws(json, pos)
@@ -189,8 +189,8 @@ func parse_tensor_object(string json, int start, string name) tensor_meta {
     t
 }
 
-func parse_int_array(string json, int start) ([]int, int) {
-    int[] result = []int{}
+func parse_int_array(string json, int start) (int[], int) {
+    int[] result = int[]{}
     int pos = start
     for pos < len(json) && int(json[pos]) != 91 {
         pos = pos + 1
@@ -300,17 +300,17 @@ func find_tensor(safetensors_header hdr, string name) int {
     -1
 }
 
-func load_tensor_floats(safetensors_header hdr, string name) []float {
+func load_tensor_floats(safetensors_header hdr, string name) float[] {
     int idx = find_tensor(hdr, name)
     if idx < 0 {
-        return []float{}
+        return float[]{}
     }
     tensor_meta meta = hdr.tensors[idx]
     int byte_offset = hdr.data_start + meta.data_offset
     int byte_count = meta.data_length
     int int_count = byte_count
-    []int raw = __host_read_binary_file_range(hdr.path, byte_offset, int_count)
-    []float result = make([]float, meta.num_elements)
+    int[] raw = __host_read_binary_file_range(hdr.path, byte_offset, int_count)
+    float[] result = make(float[], meta.num_elements)
     int dtype_size = 4
     if meta.dtype == "F32" || meta.dtype == "BF16" || meta.dtype == "F16" {
         dtype_size = 4
@@ -373,8 +373,8 @@ func has_tensor(safetensors_header hdr, string name) bool {
     find_tensor(hdr, name) >= 0
 }
 
-func tensor_names(safetensors_header hdr) []string {
-    []string names = []string{}
+func tensor_names(safetensors_header hdr) string[] {
+    string[] names = string[]{}
     int i = 0
     for i < hdr.total_tensors {
         names = append(names, hdr.tensors[i].name)

@@ -1,14 +1,14 @@
 package neurx.inference.sampling
 
 func apply_repetition_penalty(
-    []float logits,
-    []int generated_ids,
+    float[] logits,
+    int[] generated_ids,
     float penalty
-) []float {
+) float[] {
     if penalty == 1.0 || len(generated_ids) == 0 {
         return logits
     }
-    []float penalized = copy_float_array(logits)
+    float[] penalized = copy_float_array(logits)
     map<int]bool seen = {}
     for id in generated_ids {
         seen[id] = true
@@ -25,8 +25,8 @@ func apply_repetition_penalty(
     penalized
 }
 
-func copy_float_array([]float arr) []float {
-    []float copy = []float{cap: len(arr)}
+func copy_float_array(float[] arr) float[] {
+    float[] copy = float[]{cap: len(arr)}
     for i in 0..len(arr) {
         copy[i] = arr[i]
     }

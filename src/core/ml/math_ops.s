@@ -7,7 +7,7 @@ func matmul_2d(tensor A, tensor B) tensor {
     int n = A.shape[1]
     int p = B.shape[1]
     compute_context ctx = resolve_compute_context("", "")
-    []float out_data = backend_matmul_dispatch(ctx, A.data, B.data, m, n, p)
+    float[] out_data = backend_matmul_dispatch(ctx, A.data, B.data, m, n, p)
     tensor {
         data: out_data,
         shape: [m, p],

@@ -7,9 +7,9 @@ struct zone_deployment_config {
     string zone_id
     string zone_name
     int node_count
-    []string central_servers
-    []string edge_nodes
-    []string client_nodes
+    string[] central_servers
+    string[] edge_nodes
+    string[] client_nodes
     string model_cache_strategy
     int network_latency_target_ms
 }

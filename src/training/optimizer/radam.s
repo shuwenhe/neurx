@@ -9,8 +9,8 @@ struct radam_optimizer {
     float eps
     float weight_decay
     int step
-    []float exp_avg
-    []float exp_avg_sq
+    float[] exp_avg
+    float[] exp_avg_sq
 }
 
 func new_radam(float lr, float beta1, float beta2, float eps, float weight_decay) radam_optimizer {
@@ -44,7 +44,7 @@ func radam_step(radam_optimizer optimizer, tensor params, tensor grads) radam_op
         float denominator = (rho_inf - 4.0) * (rho_inf - 2.0) * rho_t
         rect_term = radam_sqrt(numerator / denominator)
     }
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         float grad = grads.data[i]
@@ -73,8 +73,8 @@ struct radam_optimizer_step_output {
     tensor params
 }
 
-func ensure_radam_state([]float values, int n) []float {
-    []float out = []float{cap: n}
+func ensure_radam_state(float[] values, int n) float[] {
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         if i < len(values) {

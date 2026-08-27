@@ -6,7 +6,7 @@ use std.io.eprintln
 struct safe_tensor_info {
     string name
     string dtype
-    []int shape
+    int[] shape
     int byte_start
     int byte_end
 }
@@ -30,7 +30,7 @@ func dtype_size(string dtype) int {
     return 0
 }
 
-func shape_numel([]int shape) int {
+func shape_numel(int[] shape) int {
     int result = 1
     int i = 0
     for i < len(shape) {
@@ -133,7 +133,7 @@ func parse_tensor_info(string json, string tensor_name) safe_tensor_info {
     safe_tensor_info info
     info.name = tensor_name
     info.dtype = "F32"
-    info.shape = []int{}
+    info.shape = int[]{}
     info.byte_start = 0
     info.byte_end = 0
     string search = "\"" + tensor_name + "\""
@@ -210,8 +210,8 @@ func open_safetensors(string path) safe_tensor_file {
     return file
 }
 
-func load_tensor_float(safe_tensor_file file, safe_tensor_info info) []float {
-    []float result
+func load_tensor_float(safe_tensor_file file, safe_tensor_info info) float[] {
+    float[] result
     string data = string(file.data)
     if len(data) == 0 { return result }
     int num_elements = shape_numel(info.shape)

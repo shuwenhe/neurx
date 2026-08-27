@@ -13,11 +13,11 @@ struct serving_observability_state {
     int latency_samples
     int latency_sum_ms
     int latency_max_ms
-    []string trace_ids
-    []string span_names
-    []int span_start_ms
-    []int span_duration_ms
-    []string span_status
+    string[] trace_ids
+    string[] span_names
+    int[] span_start_ms
+    int[] span_duration_ms
+    string[] span_status
     bool queue_alert
     bool error_rate_alert
     bool kv_capacity_alert

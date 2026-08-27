@@ -1,8 +1,8 @@
 package neurx.attention.paged_attention_core
 
 struct paged_block {
-    []float key_data
-    []float value_data
+    float[] key_data
+    float[] value_data
     int block_id
     int num_filled
     bool is_full
@@ -75,8 +75,8 @@ func new_paged_kv_cache(config paged_attention_config) paged_kv_cache {
     }
 }
 
-func new_float_array(int size) []float {
-    []float arr = make([]float, size)
+func new_float_array(int size) float[] {
+    float[] arr = make(float[], size)
     return arr
 }
 
@@ -175,8 +175,8 @@ func reset_cache(cache paged_kv_cache) paged_kv_cache {
 
 func write_kv_to_cache(
     cache paged_kv_cache,
-    []float keys,
-    []float values,
+    float[] keys,
+    float[] values,
     int start_token_idx
 ) paged_kv_cache {
     if len(keys) == 0 || len(values) == 0 {
@@ -220,13 +220,13 @@ func write_kv_to_cache(
 
 func compute_paged_attention(
     cache paged_kv_cache,
-    []float queries,
-    []float output,
+    float[] queries,
+    float[] output,
     []slot_mapping slot_mappings,
     int num_heads,
     int head_size,
     float scale
-) []float {
+) float[] {
     if len(queries) == 0 {
         return output
     }
@@ -243,7 +243,7 @@ func compute_paged_attention(
                 kv_head = mod_int(kv_head, cache.num_kv_heads)
             }
             int q_head_base = q_idx * q_stride + h * head_size
-            float[] scores = make([]float, context_len)
+            float[] scores = make(float[], context_len)
             int k_pos = 0
             for k_pos < context_len {
                 if k_pos > q_idx {
@@ -312,10 +312,10 @@ func compute_paged_attention(
 }
 
 func apply_attention_mask(
-    []float attention_scores,
+    float[] attention_scores,
     string mask_type,
     int context_len
-) []float {
+) float[] {
     if mask_type != "causal" {
         return attention_scores
     }
@@ -326,7 +326,7 @@ func apply_attention_mask(
     return attention_scores
 }
 
-func compute_softmax([]float scores) []float {
+func compute_softmax(float[] scores) float[] {
     if len(scores) == 0 {
         return scores
     }
@@ -338,7 +338,7 @@ func compute_softmax([]float scores) []float {
         }
         i = i + 1
     }
-    []float exp_scores = []float{}
+    float[] exp_scores = float[]{}
     float sum_exp = 0.0
     i = 0
     for i < len(scores) {
@@ -347,7 +347,7 @@ func compute_softmax([]float scores) []float {
         sum_exp = sum_exp + exp_val
         i = i + 1
     }
-    []float softmax_scores = []float{}
+    float[] softmax_scores = float[]{}
     i = 0
     for i < len(exp_scores) {
         if sum_exp > 0.0 {
@@ -434,14 +434,14 @@ func debug_print_cache_state(cache paged_kv_cache) string {
 
 func compute_paged_attention_gqa(
     cache paged_kv_cache,
-    []float queries,
-    []float output,
+    float[] queries,
+    float[] output,
     []slot_mapping slot_mappings,
     int num_heads,
     int num_kv_heads,
     int head_size,
     float scale
-) []float {
+) float[] {
     if len(queries) == 0 {
         return output
     }
@@ -459,7 +459,7 @@ func compute_paged_attention_gqa(
         for h < num_heads {
             int kv_head = h / group_size
             int q_head_base = q_idx * q_stride + h * head_size
-            float[] scores = make([]float, context_len)
+            float[] scores = make(float[], context_len)
             int k_pos = 0
             for k_pos < context_len {
                 if k_pos > q_idx {

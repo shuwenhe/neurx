@@ -2,9 +2,9 @@ package neurx.agent.retrieval
 use neurx.agent.memory
 
 struct agent_retrieval_result {
-    []string keys
-    []string values
-    []int scores
+    string[] keys
+    string[] values
+    int[] scores
     int count
 }
 
@@ -61,7 +61,7 @@ func agent_retrieval_score(string query, string text) int {
 }
 
 func agent_retrieval_search(agent_memory_state memory, string query, int top_k) agent_retrieval_result {
-    []string long_keys = agent_memory_long_keys(memory)
+    string[] long_keys = agent_memory_long_keys(memory)
     int n = len(long_keys)
     int limit = top_k
     if limit <= 0 {
@@ -71,9 +71,9 @@ func agent_retrieval_search(agent_memory_state memory, string query, int top_k) 
     if cap > n {
         cap = n
     }
-    []string out_keys = []string{cap: cap}
-    []string out_values = []string{cap: cap}
-    []int out_scores = []int{cap: cap}
+    string[] out_keys = string[]{cap: cap}
+    string[] out_values = string[]{cap: cap}
+    int[] out_scores = int[]{cap: cap}
     int found = 0
     int i = 0
     for i < n {
@@ -98,7 +98,7 @@ func agent_retrieval_search(agent_memory_state memory, string query, int top_k) 
 }
 
 func agent_retrieval_search_short(agent_memory_state memory, string query, int top_k) agent_retrieval_result {
-    []string short_keys = agent_memory_short_keys(memory)
+    string[] short_keys = agent_memory_short_keys(memory)
     int n = len(short_keys)
     int limit = top_k
     if limit <= 0 {
@@ -108,9 +108,9 @@ func agent_retrieval_search_short(agent_memory_state memory, string query, int t
     if cap > n {
         cap = n
     }
-    []string out_keys = []string{cap: cap}
-    []string out_values = []string{cap: cap}
-    []int out_scores = []int{cap: cap}
+    string[] out_keys = string[]{cap: cap}
+    string[] out_values = string[]{cap: cap}
+    int[] out_scores = int[]{cap: cap}
     int found = 0
     int i = 0
     for i < n {

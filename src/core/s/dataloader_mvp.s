@@ -6,14 +6,14 @@ struct dataloader_config {
 }
 
 struct dataloader_state {
-    []int token_ids
+    int[] token_ids
     int cursor
     dataloader_config config
 }
 
 struct dataloader_batch {
-    []int input_ids
-    []int target_ids
+    int[] input_ids
+    int[] target_ids
     int valid_tokens
 }
 
@@ -29,7 +29,7 @@ func new_config(int batch_size, int seq_len) dataloader_config {
     }
 }
 
-func new_state([]int token_ids, int batch_size, int seq_len) dataloader_state {
+func new_state(int[] token_ids, int batch_size, int seq_len) dataloader_state {
     dataloader_state {
         token_ids: token_ids,
         cursor: 0,
@@ -89,7 +89,7 @@ func dataloader_state_cursor(dataloader_state state) int {
     state.cursor
 }
 
-func dataloader_state_tokens(dataloader_state state) []int {
+func dataloader_state_tokens(dataloader_state state) int[] {
     state.token_ids
 }
 
@@ -97,11 +97,11 @@ func dataloader_state_config(dataloader_state state) dataloader_config {
     state.config
 }
 
-func dataloader_batch_input_ids(dataloader_batch batch) []int {
+func dataloader_batch_input_ids(dataloader_batch batch) int[] {
     batch.input_ids
 }
 
-func dataloader_batch_target_ids(dataloader_batch batch) []int {
+func dataloader_batch_target_ids(dataloader_batch batch) int[] {
     batch.target_ids
 }
 

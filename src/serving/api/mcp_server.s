@@ -29,8 +29,8 @@ struct resource {
 struct prompt_definition {
     string name
     string description
-    []string arguments
-    []string instructions
+    string[] arguments
+    string[] instructions
 }
 
 struct mcp_request {

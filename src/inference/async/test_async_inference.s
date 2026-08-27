@@ -1,15 +1,15 @@
 package async_inference
 
 struct TestResult {
-    test_name       []string
+    test_name       string[]
     passed          bool
-    error_msg       []string
+    error_msg       string[]
     duration_ms     int64
 }
 
 func test_async_task_manager() TestResult {
     result := TestResult{
-        test_name: make([]string, 1),
+        test_name: make(string[], 1),
         passed:    true,
     }
     result.test_name[0] = "AsyncTaskManager"
@@ -18,7 +18,7 @@ func test_async_task_manager() TestResult {
 
     manager := new_async_task_manager(10)
 
-    input_ids := make([]int, 4)
+    input_ids := make(int[], 4)
     input_ids[0] = 101
     input_ids[1] = 102
     input_ids[2] = 103
@@ -28,7 +28,7 @@ func test_async_task_manager() TestResult {
 
     if len(task_id) == 0 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Failed to submit task"
         return result
     }
@@ -36,7 +36,7 @@ func test_async_task_manager() TestResult {
     status := manager.get_task_status(task_id)
     if status != TASK_PENDING {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Task status incorrect"
         return result
     }
@@ -45,19 +45,19 @@ func test_async_task_manager() TestResult {
     status = manager.get_task_status(task_id)
     if status != TASK_RUNNING {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Status update failed"
         return result
     }
 
-    output_ids := make([]int, 5)
+    output_ids := make(int[], 5)
     output_ids[0] = 200
     output_ids[1] = 201
     output_ids[2] = 202
     output_ids[3] = 203
     output_ids[4] = 204
 
-    output_text := make([]string, 1)
+    output_text := make(string[], 1)
     output_text[0] = "Generated text"
 
     manager.set_task_output(task_id, output_ids, output_text)
@@ -65,7 +65,7 @@ func test_async_task_manager() TestResult {
     result_task := manager.get_task_result(task_id)
     if len(result_task.output_ids) != len(output_ids) {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Output mismatch"
         return result
     }
@@ -73,7 +73,7 @@ func test_async_task_manager() TestResult {
     stats := manager.get_statistics()
     if stats["total_tasks"] != 1 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Statistics incorrect"
         return result
     }
@@ -84,7 +84,7 @@ func test_async_task_manager() TestResult {
 
 func test_async_request_queue() TestResult {
     result := TestResult{
-        test_name: make([]string, 1),
+        test_name: make(string[], 1),
         passed:    true,
     }
     result.test_name[0] = "AsyncRequestQueue"
@@ -93,7 +93,7 @@ func test_async_request_queue() TestResult {
 
     queue := new_async_request_queue(32)
 
-    input_ids := make([]int, 3)
+    input_ids := make(int[], 3)
     input_ids[0] = 100
     input_ids[1] = 101
     input_ids[2] = 102
@@ -102,7 +102,7 @@ func test_async_request_queue() TestResult {
 
     if len(req_id) == 0 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Failed to enqueue request"
         return result
     }
@@ -110,7 +110,7 @@ func test_async_request_queue() TestResult {
     depth := queue.get_queue_depth()
     if depth != 1 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Queue depth incorrect"
         return result
     }
@@ -119,7 +119,7 @@ func test_async_request_queue() TestResult {
 
     if batch.batch_size != 1 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Batch size incorrect"
         return result
     }
@@ -127,7 +127,7 @@ func test_async_request_queue() TestResult {
     depth = queue.get_queue_depth()
     if depth != 0 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Queue not cleared after batch"
         return result
     }
@@ -135,7 +135,7 @@ func test_async_request_queue() TestResult {
     stats := queue.get_queue_statistics()
     if stats["total_processed"] != 1 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Statistics incorrect"
         return result
     }
@@ -146,7 +146,7 @@ func test_async_request_queue() TestResult {
 
 func test_async_batch_executor() TestResult {
     result := TestResult{
-        test_name: make([]string, 1),
+        test_name: make(string[], 1),
         passed:    true,
     }
     result.test_name[0] = "AsyncBatchExecutor"
@@ -157,7 +157,7 @@ func test_async_batch_executor() TestResult {
     executor.set_streaming_enabled(true)
 
     batch := RequestBatch{
-        batch_id:    make([]string, 1),
+        batch_id:    make(string[], 1),
         requests:    make([]InferenceRequest, 0),
         batch_size:  2,
         created_at:  current_time_ms(),
@@ -165,13 +165,13 @@ func test_async_batch_executor() TestResult {
     batch.batch_id[0] = "test_batch"
 
     for i := 0; i < 2; i++ {
-        input := make([]int, 3)
+        input := make(int[], 3)
         input[0] = 100 + i
         input[1] = 101 + i
         input[2] = 102 + i
 
         req := InferenceRequest{
-            request_id:  make([]string, 1),
+            request_id:  make(string[], 1),
             input_ids:   input,
             max_tokens:  50,
             temperature: 0.7,
@@ -186,7 +186,7 @@ func test_async_batch_executor() TestResult {
     executor.load_batch(batch)
     if executor.batch_size != 2 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Batch not loaded correctly"
         return result
     }
@@ -194,7 +194,7 @@ func test_async_batch_executor() TestResult {
     exec_results := executor.execute_batch()
     if len(exec_results) != 2 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Result count mismatch"
         return result
     }
@@ -202,14 +202,14 @@ func test_async_batch_executor() TestResult {
     for i := 0; i < len(exec_results); i++ {
         if !exec_results[i].success {
             result.passed = false
-            result.error_msg = make([]string, 1)
+            result.error_msg = make(string[], 1)
             result.error_msg[0] = "Result execution failed"
             return result
         }
 
         if exec_results[i].tokens_per_sec < 0 {
             result.passed = false
-            result.error_msg = make([]string, 1)
+            result.error_msg = make(string[], 1)
             result.error_msg[0] = "Throughput invalid"
             return result
         }
@@ -218,7 +218,7 @@ func test_async_batch_executor() TestResult {
     stats := executor.get_executor_statistics()
     if stats["batches_executed"] != 1 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Executor stats incorrect"
         return result
     }
@@ -229,7 +229,7 @@ func test_async_batch_executor() TestResult {
 
 func test_async_streaming_response() TestResult {
     result := TestResult{
-        test_name: make([]string, 1),
+        test_name: make(string[], 1),
         passed:    true,
     }
     result.test_name[0] = "AsyncStreamingResponseManager"
@@ -238,28 +238,28 @@ func test_async_streaming_response() TestResult {
 
     manager := new_async_streaming_response_manager(32, 1000, 100)
 
-    request_id := make([]string, 1)
+    request_id := make(string[], 1)
     request_id[0] = "req_001"
 
-    response_id := make([]string, 1)
+    response_id := make(string[], 1)
     response_id[0] = "resp_001"
 
     started := manager.start_stream(request_id, response_id)
     if !started {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Failed to start stream"
         return result
     }
 
     for i := 0; i < 10; i++ {
-        text := make([]string, 1)
+        text := make(string[], 1)
         text[0] = "token"
 
         added := manager.add_token_to_stream(request_id, 1000+i, text)
         if !added {
             result.passed = false
-            result.error_msg = make([]string, 1)
+            result.error_msg = make(string[], 1)
             result.error_msg[0] = "Failed to add token"
             return result
         }
@@ -268,7 +268,7 @@ func test_async_streaming_response() TestResult {
     completed := manager.complete_stream(request_id)
     if !completed {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Failed to complete stream"
         return result
     }
@@ -276,7 +276,7 @@ func test_async_streaming_response() TestResult {
     status := manager.get_stream_status(request_id)
     if status["completed"] != true {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Stream not marked as completed"
         return result
     }
@@ -284,7 +284,7 @@ func test_async_streaming_response() TestResult {
     stats := manager.get_streaming_statistics()
     if stats["total_streams"] != 1 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Stream statistics incorrect"
         return result
     }
@@ -295,7 +295,7 @@ func test_async_streaming_response() TestResult {
 
 func test_async_event_loop() TestResult {
     result := TestResult{
-        test_name: make([]string, 1),
+        test_name: make(string[], 1),
         passed:    true,
     }
     result.test_name[0] = "AsyncEventLoop"
@@ -307,12 +307,12 @@ func test_async_event_loop() TestResult {
     loop.start()
     if !loop.running {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Loop not started"
         return result
     }
 
-    source := make([]string, 1)
+    source := make(string[], 1)
     source[0] = "test_source"
 
     data := make(map[string]string)
@@ -322,7 +322,7 @@ func test_async_event_loop() TestResult {
 
     if len(event_id) == 0 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Failed to submit event"
         return result
     }
@@ -330,7 +330,7 @@ func test_async_event_loop() TestResult {
     processed := loop.process_next_event()
     if !processed {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Failed to process event"
         return result
     }
@@ -338,7 +338,7 @@ func test_async_event_loop() TestResult {
     stats := loop.get_statistics()
     if stats["events_processed"] != 1 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Event count incorrect"
         return result
     }
@@ -346,7 +346,7 @@ func test_async_event_loop() TestResult {
     loop.stop()
     if loop.running {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Loop not stopped"
         return result
     }
@@ -357,7 +357,7 @@ func test_async_event_loop() TestResult {
 
 func test_async_inference_engine() TestResult {
     result := TestResult{
-        test_name: make([]string, 1),
+        test_name: make(string[], 1),
         passed:    true,
     }
     result.test_name[0] = "AsyncInferenceEngine"
@@ -370,12 +370,12 @@ func test_async_inference_engine() TestResult {
     engine.start()
     if !engine.running {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Engine not started"
         return result
     }
 
-    input_ids := make([]int, 4)
+    input_ids := make(int[], 4)
     input_ids[0] = 100
     input_ids[1] = 101
     input_ids[2] = 102
@@ -385,7 +385,7 @@ func test_async_inference_engine() TestResult {
 
     if len(req_id) == 0 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Failed to submit request"
         return result
     }
@@ -394,7 +394,7 @@ func test_async_inference_engine() TestResult {
 
     if len(stream_req_id) == 0 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Failed to submit streaming request"
         return result
     }
@@ -406,7 +406,7 @@ func test_async_inference_engine() TestResult {
     status := engine.get_status()
     if status["total_requests"] != 2 {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Request count mismatch"
         return result
     }
@@ -414,7 +414,7 @@ func test_async_inference_engine() TestResult {
     engine.stop()
     if engine.running {
         result.passed = false
-        result.error_msg = make([]string, 1)
+        result.error_msg = make(string[], 1)
         result.error_msg[0] = "Engine not stopped"
         return result
     }
@@ -436,8 +436,8 @@ func run_all_tests() []TestResult {
     return results
 }
 
-func string_of_int(n int) []string {
-    s := make([]string, 1)
+func string_of_int(n int) string[] {
+    s := make(string[], 1)
     s[0] = "value"
     return s
 }

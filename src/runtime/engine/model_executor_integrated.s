@@ -4,7 +4,7 @@ import "core"
 import "tensor"
 
 struct inference_request {
-    []int32 token_ids
+    int[]32 token_ids
     int32 batch_size
     int32 max_new_tokens
     float32 temperature
@@ -14,8 +14,8 @@ struct inference_request {
 }
 
 struct inference_response {
-    []int32 generated_tokens
-    []float32 logits
+    int[]32 generated_tokens
+    float[]32 logits
     float32 inference_time_ms
     map[string]interface{} metadata
 }
@@ -55,22 +55,22 @@ func (model_executor_integrated* mei) warmup_model(warmup_config* config) error 
     return nil
 }
 
-func (model_executor_integrated* mei) forward_pass([]int32 token_ids, interface{} past_key_values) (interface{}, error) {
+func (model_executor_integrated* mei) forward_pass(int[]32 token_ids, interface{} past_key_values) (interface{}, error) {
     return nil, nil
 }
 
 func (model_executor_integrated* mei) generate_tokens(inference_request* req) (inference_response*, error) {
     resp := *inference_response{
-        generated_tokens: make([]int32, 0),
-        logits: make([]float32, 0),
+        generated_tokens: make(int[]32, 0),
+        logits: make(float[]32, 0),
         inference_time_ms: 0.0,
         metadata: make(map[string]interface{}),
     }
     return resp, nil
 }
 
-func (model_executor_integrated* mei) inference_with_streaming(inference_request* req) ([]interface{}, error) {
-    return make([]interface{}, 0), nil
+func (model_executor_integrated* mei) inference_with_streaming(inference_request* req) (int[]erface{}, error) {
+    return make(int[]erface{}, 0), nil
 }
 
 func (model_executor_integrated* mei) optimize_for_latency() error {

@@ -17,9 +17,9 @@ struct dllm_config {
 
 struct dllm_state {
     dllm_config config
-    []int token_ids
-    []int masked
-    []int confidences
+    int[] token_ids
+    int[] masked
+    int[] confidences
     int masked_count
     int step
     int committed_tokens
@@ -28,26 +28,26 @@ struct dllm_state {
 
 struct dllm_step_result {
     dllm_state state
-    []int selected_positions
+    int[] selected_positions
     int selected_count
     bool complete
 }
 
-func dllm_int_array(int capacity) []int {
-    []int values = []int{cap: capacity}
+func dllm_int_array(int capacity) int[] {
+    int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values
 }
 
-func new_dllm_state(dllm_config config, []int prompt_tokens) dllm_state {
+func new_dllm_state(dllm_config config, int[] prompt_tokens) dllm_state {
     if config.sequence_length <= 0 { config.sequence_length = 1 }
     if config.maximum_steps <= 0 { config.maximum_steps = 1 }
     if config.tokens_per_step <= 0 { config.tokens_per_step = 1 }
     if config.block_size <= 0 { config.block_size = config.sequence_length }
-    []int tokens = dllm_int_array(config.sequence_length)
-    []int masks = dllm_int_array(config.sequence_length)
-    []int confidence = dllm_int_array(config.sequence_length)
+    int[] tokens = dllm_int_array(config.sequence_length)
+    int[] masks = dllm_int_array(config.sequence_length)
+    int[] confidence = dllm_int_array(config.sequence_length)
     int prompt = len(prompt_tokens)
     if prompt > config.sequence_length { prompt = config.sequence_length }
     int i = 0
@@ -73,7 +73,7 @@ func dllm_position_allowed(dllm_state state, int position) bool {
     position >= block_start && position < block_start + state.config.block_size
 }
 
-func dllm_selected_contains([]int selected, int selected_count, int position) bool {
+func dllm_selected_contains(int[] selected, int selected_count, int position) bool {
     int i = 0
     for i < selected_count {
         if selected[i] == position { return true }
@@ -83,7 +83,7 @@ func dllm_selected_contains([]int selected, int selected_count, int position) bo
 }
 
 func dllm_decode_step(dllm_state state) dllm_step_result {
-    []int selected = dllm_int_array(state.config.tokens_per_step)
+    int[] selected = dllm_int_array(state.config.tokens_per_step)
     int selected_count = 0
     int i = 0
     if state.config.remask_strategy == dllm_strategy_random() {

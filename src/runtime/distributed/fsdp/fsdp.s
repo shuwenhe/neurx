@@ -26,18 +26,18 @@ struct fsdp_state {
     int world_size
     int local_rank
     int num_shards
-    []int param_shards
-    []int grad_shards
-    []int optimizer_shards
+    int[] param_shards
+    int[] grad_shards
+    int[] optimizer_shards
     bool is_root
     nccl_backend.nccl_comm comm
     fsdp_config config
 }
 
 struct fsdp_param {
-    []float local_data
-    []float shard_data
-    []float grad
+    float[] local_data
+    float[] shard_data
+    float[] grad
     int global_offset
     int local_size
     int shard_size
@@ -47,8 +47,8 @@ struct fsdp_param {
 struct fsdp_module {
     fsdp_state state
     []fsdp_param params
-    []float flattened_params
-    []float flattened_grads
+    float[] flattened_params
+    float[] flattened_grads
     int total_params
     int local_params
 }
@@ -76,17 +76,17 @@ func new_fsdp_state(int rank, int world_size, nccl_backend.nccl_comm comm) fsdp_
         world_size: world_size,
         local_rank: rank % 8,
         num_shards: world_size,
-        param_shards: []int{},
-        grad_shards: []int{},
-        optimizer_shards: []int{},
+        param_shards: int[]{},
+        grad_shards: int[]{},
+        optimizer_shards: int[]{},
         is_root: rank == 0,
         comm: comm,
         config: new_fsdp_config(),
     }
 }
 
-func allocate_vector(int size, float init_val) []float {
-    []float v = []float{cap: size}
+func allocate_vector(int size, float init_val) float[] {
+    float[] v = float[]{cap: size}
     int i = 0
     for i < size {
         v[i] = init_val
@@ -96,7 +96,7 @@ func allocate_vector(int size, float init_val) []float {
 }
 
 func fsdp_init(pointer model, fsdp_state state) fsdp_module {
-    []float all_params = model.parameters()
+    float[] all_params = model.parameters()
     int total_params = len(all_params)
     int shard_size = total_params / state.world_size
     int remainder = total_params % state.world_size
@@ -125,7 +125,7 @@ func fsdp_all_gather_params(fsdp_module module) fsdp_module {
     if module.state.config.sharding_strategy == fsdp_sharding_strategy.NO_SHARD {
         return module
     }
-    []float full_params = allocate_vector(module.total_params, 0.0)
+    float[] full_params = allocate_vector(module.total_params, 0.0)
     nccl_backend.nccl_all_gather(
         module.flattened_params,
         full_params,
@@ -150,7 +150,7 @@ func fsdp_scatter_params(fsdp_module module) fsdp_module {
     if module.state.config.sharding_strategy == fsdp_sharding_strategy.NO_SHARD {
         return module
     }
-    []float full_params = allocate_vector(module.total_params, 0.0)
+    float[] full_params = allocate_vector(module.total_params, 0.0)
     int i = 0
     for i < len(module.params) {
         fsdp_param param = module.params[i]
@@ -175,7 +175,7 @@ func fsdp_reduce_scatter_grads(fsdp_module module) fsdp_module {
     if module.state.config.sharding_strategy == fsdp_sharding_strategy.NO_SHARD {
         return module
     }
-    []float full_grads = allocate_vector(module.total_params, 0.0)
+    float[] full_grads = allocate_vector(module.total_params, 0.0)
     int i = 0
     for i < len(module.params) {
         fsdp_param param = module.params[i]
@@ -301,7 +301,7 @@ func fsdp_save_checkpoint(fsdp_module module, string path) bool {
 
 func fsdp_load_checkpoint(fsdp_module module, string path) bool {
     if module.state.is_root {
-        []float full_params = allocate_vector(module.total_params, 0.0)
+        float[] full_params = allocate_vector(module.total_params, 0.0)
         int i = 0
         for i < module.total_params {
             full_params[i] = read_float_from_file(path, i)
@@ -338,11 +338,11 @@ func fsdp_compute_memory_savings(fsdp_module module) float {
     (1.0 - local_memory / total_memory) * 100.0
 }
 
-func fsdp_module_parameters(fsdp_module module) []float {
+func fsdp_module_parameters(fsdp_module module) float[] {
     module.flattened_params
 }
 
-func fsdp_module_gradients(fsdp_module module) []float {
+func fsdp_module_gradients(fsdp_module module) float[] {
     module.flattened_grads
 }
 
@@ -373,7 +373,7 @@ func min(int a, int b) int {
     b
 }
 
-func fsdp_set_gradients(fsdp_module module, []float grads) fsdp_module {
+func fsdp_set_gradients(fsdp_module module, float[] grads) fsdp_module {
     int i = 0
     for i < min(len(grads), module.local_params) {
         module.flattened_grads[i] = grads[i]
@@ -382,13 +382,13 @@ func fsdp_set_gradients(fsdp_module module, []float grads) fsdp_module {
     module
 }
 
-func fsdp_get_gradients(fsdp_module module) []float {
+func fsdp_get_gradients(fsdp_module module) float[] {
     copy_vector(module.flattened_grads)
 }
 
-func copy_vector([]float src) []float {
+func copy_vector(float[] src) float[] {
     int n = len(src)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     for i := 0; i < n; i += 1 {
         out[i] = src[i]
     }

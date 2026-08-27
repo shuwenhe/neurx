@@ -149,8 +149,8 @@ struct model_metadata {
 	[]model_precision_type supported_precisions
 	[]model_device_type supported_devices
 	[]model_capability capabilities
-	[]string dependencies
-	[]string tags
+	string[] dependencies
+	string[] tags
 	map[string]interface{} capabilities_map
 }
 
@@ -190,7 +190,7 @@ struct model_interface {
 struct model_input {
 	string input_type
 	string prompt
-	[]interface{} messages
+	int[]erface{} messages
 	[]byte image_data
 	[]byte audio_data
 	[]byte video_data
@@ -200,9 +200,9 @@ struct model_input {
 struct model_output {
 	string output_type
 	string text
-	[]int32 tokens
-	[]float32 logits
-	[]float32 embedding
+	int[]32 tokens
+	float[]32 logits
+	float[]32 embedding
 	map[string]interface{} metadata
 }
 

@@ -8,28 +8,28 @@ func runtime_write_text_file(string path, string content) () {
 }
 
 struct train_cache {
-    []float x
-    []float q
-    []float k
-    []float v
-    []float attention
-    []float context
-    []float probabilities
+    float[] x
+    float[] q
+    float[] k
+    float[] v
+    float[] attention
+    float[] context
+    float[] probabilities
     float loss
 }
 
 struct adamw_state {
-    []float params
-    []float first_moment
-    []float second_moment
+    float[] params
+    float[] first_moment
+    float[] second_moment
     int step
     float beta1_power
     float beta2_power
     float last_loss
 }
 
-func zeros(int n) []float {
-    []float out = []float{cap: n}
+func zeros(int n) float[] {
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         out[i] = 0.0
@@ -38,12 +38,12 @@ func zeros(int n) []float {
     out
 }
 
-func initial_parameters(int vocab_size, int hidden_size) []float {
+func initial_parameters(int vocab_size, int hidden_size) float[] {
     int embedding_count = vocab_size * hidden_size
     int matrix_count = hidden_size * hidden_size
     int lm_head_count = hidden_size * vocab_size
     int count = embedding_count + matrix_count * 3 + lm_head_count
-    []float out = zeros(count)
+    float[] out = zeros(count)
     int i = 0
     for i < count {
         int centered = (i * 37 + 17) - ((i * 37 + 17) / 23) * 23 - 11
@@ -141,20 +141,20 @@ func sqrt_approx(float x) float {
 }
 
 func forward(
-    []float params,
-    []int inputs,
-    []int targets,
+    float[] params,
+    int[] inputs,
+    int[] targets,
     int vocab_size,
     int hidden_size
 ) train_cache {
     int seq_len = len(inputs)
-    []float x = zeros(seq_len * hidden_size)
-    []float q = zeros(seq_len * hidden_size)
-    []float k = zeros(seq_len * hidden_size)
-    []float v = zeros(seq_len * hidden_size)
-    []float attention = zeros(seq_len * seq_len)
-    []float context = zeros(seq_len * hidden_size)
-    []float probabilities = zeros(seq_len * vocab_size)
+    float[] x = zeros(seq_len * hidden_size)
+    float[] q = zeros(seq_len * hidden_size)
+    float[] k = zeros(seq_len * hidden_size)
+    float[] v = zeros(seq_len * hidden_size)
+    float[] attention = zeros(seq_len * seq_len)
+    float[] context = zeros(seq_len * hidden_size)
+    float[] probabilities = zeros(seq_len * vocab_size)
     int t = 0
     for t < seq_len {
         int h = 0
@@ -189,7 +189,7 @@ func forward(
     float scale = 1.0 / sqrt_approx(hidden_size as float)
     t = 0
     for t < seq_len {
-        []float scores = zeros(seq_len)
+        float[] scores = zeros(seq_len)
         float max_score = -1000000.0
         int s = 0
         for s <= t {
@@ -228,7 +228,7 @@ func forward(
     float loss = 0.0
     t = 0
     for t < seq_len {
-        []float logits = zeros(vocab_size)
+        float[] logits = zeros(vocab_size)
         float max_logit = -1000000.0
         int token = 0
         for token < vocab_size {
@@ -272,20 +272,20 @@ func forward(
 }
 
 func backward(
-    []float params,
+    float[] params,
     train_cache cache,
-    []int inputs,
-    []int targets,
+    int[] inputs,
+    int[] targets,
     int vocab_size,
     int hidden_size
-) []float {
+) float[] {
     int seq_len = len(inputs)
-    []float grads = zeros(len(params))
-    []float d_context = zeros(seq_len * hidden_size)
-    []float d_q = zeros(seq_len * hidden_size)
-    []float d_k = zeros(seq_len * hidden_size)
-    []float d_v = zeros(seq_len * hidden_size)
-    []float d_x = zeros(seq_len * hidden_size)
+    float[] grads = zeros(len(params))
+    float[] d_context = zeros(seq_len * hidden_size)
+    float[] d_q = zeros(seq_len * hidden_size)
+    float[] d_k = zeros(seq_len * hidden_size)
+    float[] d_v = zeros(seq_len * hidden_size)
+    float[] d_x = zeros(seq_len * hidden_size)
     int t = 0
     for t < seq_len {
         int token = 0
@@ -309,7 +309,7 @@ func backward(
     float scale = 1.0 / sqrt_approx(hidden_size as float)
     t = 0
     for t < seq_len {
-        []float d_attention = zeros(seq_len)
+        float[] d_attention = zeros(seq_len)
         int s = 0
         for s <= t {
             int h = 0
@@ -371,14 +371,14 @@ func backward(
     grads
 }
 
-func adamw_update(adamw_state state, []float grads, float loss, float learning_rate, float weight_decay) adamw_state {
+func adamw_update(adamw_state state, float[] grads, float loss, float learning_rate, float weight_decay) adamw_state {
     float beta1 = 0.9
     float beta2 = 0.999
     float beta1_power = state.beta1_power * beta1
     float beta2_power = state.beta2_power * beta2
-    []float params = zeros(len(state.params))
-    []float first = zeros(len(state.params))
-    []float second = zeros(len(state.params))
+    float[] params = zeros(len(state.params))
+    float[] first = zeros(len(state.params))
+    float[] second = zeros(len(state.params))
     int i = 0
     for i < len(state.params) {
         first[i] = beta1 * state.first_moment[i] + (1.0 - beta1) * grads[i]
@@ -401,10 +401,10 @@ func adamw_update(adamw_state state, []float grads, float loss, float learning_r
 }
 
 func gradient_relative_error(
-    []float params,
-    []float analytic,
-    []int inputs,
-    []int targets,
+    float[] params,
+    float[] analytic,
+    int[] inputs,
+    int[] targets,
     int vocab_size,
     int hidden_size
 ) float {
@@ -412,8 +412,8 @@ func gradient_relative_error(
     float worst = 0.0
     int i = 0
     for i < len(params) {
-        []float plus = copy_floats(params)
-        []float minus = copy_floats(params)
+        float[] plus = copy_floats(params)
+        float[] minus = copy_floats(params)
         plus[i] = plus[i] + epsilon
         minus[i] = minus[i] - epsilon
         float plus_loss = forward(plus, inputs, targets, vocab_size, hidden_size).loss
@@ -441,7 +441,7 @@ func save_checkpoint(string path, adamw_state state, float loss) {
     runtime_write_text_file(path, text)
 }
 
-func load_checkpoint(string path, []float fallback_params) adamw_state {
+func load_checkpoint(string path, float[] fallback_params) adamw_state {
     if !runtime_file_exists(path) {
         return adamw_state {
             params: fallback_params,
@@ -454,9 +454,9 @@ func load_checkpoint(string path, []float fallback_params) adamw_state {
         }
     }
     string text = runtime_read_text_file(path)
-    []float params = parse_float_list(value_for_key(text, "params"), len(fallback_params))
-    []float first = parse_float_list(value_for_key(text, "first_moment"), len(fallback_params))
-    []float second = parse_float_list(value_for_key(text, "second_moment"), len(fallback_params))
+    float[] params = parse_float_list(value_for_key(text, "params"), len(fallback_params))
+    float[] first = parse_float_list(value_for_key(text, "first_moment"), len(fallback_params))
+    float[] second = parse_float_list(value_for_key(text, "second_moment"), len(fallback_params))
     if len(params) != len(fallback_params) || len(first) != len(fallback_params) || len(second) != len(fallback_params) {
         println("[tiny-s] checkpoint topology mismatch; starting fresh")
         return adamw_state {
@@ -483,8 +483,8 @@ func load_checkpoint(string path, []float fallback_params) adamw_state {
 func main() {
     int vocab_size = 4
     int hidden_size = 2
-    []int inputs = [0, 1, 2]
-    []int targets = [1, 2, 3]
+    int[] inputs = [0, 1, 2]
+    int[] targets = [1, 2, 3]
     int max_steps = parse_int(runtime_env_get("NEURX_TINY_STEPS", "120"), 120)
     float learning_rate = parse_float(runtime_env_get("NEURX_TINY_LR", "0.005"))
     float weight_decay = parse_float(runtime_env_get("NEURX_TINY_WEIGHT_DECAY", "0.001"))
@@ -492,7 +492,7 @@ func main() {
     string checkpoint_path = output_dir + "/checkpoint.sckpt"
     bool resume = parse_int(runtime_env_get("NEURX_TINY_RESUME", "1"), 1) > 0
     _ = runtime_run_command_output("mkdir -p " + shell_escape(output_dir))
-    []float initial = initial_parameters(vocab_size, hidden_size)
+    float[] initial = initial_parameters(vocab_size, hidden_size)
     adamw_state state = load_checkpoint(checkpoint_path, initial)
     if !resume {
         state = adamw_state {
@@ -506,7 +506,7 @@ func main() {
         }
     }
     train_cache initial_cache = forward(state.params, inputs, targets, vocab_size, hidden_size)
-    []float initial_grads = backward(state.params, initial_cache, inputs, targets, vocab_size, hidden_size)
+    float[] initial_grads = backward(state.params, initial_cache, inputs, targets, vocab_size, hidden_size)
     float gradient_error = gradient_relative_error(state.params, initial_grads, inputs, targets, vocab_size, hidden_size)
     println("[tiny-s] gradient_relative_error=" + float_to_string(gradient_error, 8))
     if gradient_error > 0.08 {
@@ -516,7 +516,7 @@ func main() {
     float start_loss = initial_cache.loss
     for state.step < max_steps {
         train_cache cache = forward(state.params, inputs, targets, vocab_size, hidden_size)
-        []float grads = backward(state.params, cache, inputs, targets, vocab_size, hidden_size)
+        float[] grads = backward(state.params, cache, inputs, targets, vocab_size, hidden_size)
         state = adamw_update(state, grads, cache.loss, learning_rate, weight_decay)
         if state.step == 1 || state.step == max_steps || state.step - (state.step / 20) * 20 == 0 {
             println("[tiny-s] step=" + int_to_string(state.step) + " loss=" + float_to_string(cache.loss, 8))
@@ -534,8 +534,8 @@ func main() {
     0
 }
 
-func copy_floats([]float values) []float {
-    []float out = zeros(len(values))
+func copy_floats(float[] values) float[] {
+    float[] out = zeros(len(values))
     int i = 0
     for i < len(values) {
         out[i] = values[i]
@@ -551,7 +551,7 @@ func abs_float(float value) float {
     value
 }
 
-func floats_to_string([]float values) string {
+func floats_to_string(float[] values) string {
     string out = ""
     int i = 0
     for i < len(values) {
@@ -564,8 +564,8 @@ func floats_to_string([]float values) string {
     out
 }
 
-func parse_float_list(string text, int expected) []float {
-    []float out = zeros(expected)
+func parse_float_list(string text, int expected) float[] {
+    float[] out = zeros(expected)
     int count = 0
     int start = 0
     int i = 0

@@ -186,7 +186,7 @@ func device_release_operation(device_operation operation) int {
 struct transformer_execution_plan {
     int context_handle
     int stream_handle
-    []int operation_handle
+    int[] operation_handle
     int operation_count
     string backend
     bool valid
@@ -204,7 +204,7 @@ func transformer_plan_invalid(string backend, string message) transformer_execut
     transformer_execution_plan {context_handle: 0, stream_handle: 0, operation_handle: [], operation_count: 0, backend: backend, valid: false, error_message: message}
 }
 
-func transformer_descriptor_plan_compile(device_context context, string backend, []string descriptor, int stream_priority) transformer_execution_plan {
+func transformer_descriptor_plan_compile(device_context context, string backend, string[] descriptor, int stream_priority) transformer_execution_plan {
     if !context.valid { return transformer_plan_invalid(backend, "invalid_device_context") }
     if len(descriptor) <= 0 { return transformer_plan_invalid(backend, "empty_descriptor_plan") }
     if context.backend != backend && !(context.backend == "cann" && backend == "ascend") {
@@ -213,7 +213,7 @@ func transformer_descriptor_plan_compile(device_context context, string backend,
     int stream_handle = device_stream_open_handle(context.handle, stream_priority)
     if stream_handle <= 0 { return transformer_plan_invalid(backend, "stream_create_failed") }
     int count = len(descriptor)
-    []int compiled = []int{cap: count}
+    int[] compiled = int[]{cap: count}
     int index = 0
     for index < count {
         if len(descriptor[index]) == 0 {
@@ -235,11 +235,11 @@ func transformer_descriptor_plan_compile(device_context context, string backend,
     transformer_execution_plan {context_handle: context.handle, stream_handle: stream_handle, operation_handle: compiled, operation_count: count, backend: backend, valid: true, error_message: ""}
 }
 
-func transformer_plan_binding_valid(transformer_execution_plan plan, []string binding) bool {
+func transformer_plan_binding_valid(transformer_execution_plan plan, string[] binding) bool {
     plan.valid && plan.operation_count > 0 && len(binding) == plan.operation_count
 }
 
-func transformer_plan_execute(transformer_execution_plan plan, []string binding, bool synchronize) transformer_execution_result {
+func transformer_plan_execute(transformer_execution_plan plan, string[] binding, bool synchronize) transformer_execution_result {
     if !plan.valid { return transformer_execution_result {success: false, completed_operations: 0, failed_operation: -1, error_message: plan.error_message} }
     if len(binding) != plan.operation_count {
         return transformer_execution_result {success: false, completed_operations: 0, failed_operation: -1, error_message: "binding_count_mismatch"}
@@ -304,15 +304,15 @@ struct production_batch_config {
 
 struct production_batch_runtime {
     production_batch_config config
-    []int session_id
-    []int request_id
-    []int status
-    []int prompt_tokens
-    []int maximum_new_tokens
-    []int generated_tokens
-    []int page_count
-    []int page_id
-    []int page_owner
+    int[] session_id
+    int[] request_id
+    int[] status
+    int[] prompt_tokens
+    int[] maximum_new_tokens
+    int[] generated_tokens
+    int[] page_count
+    int[] page_id
+    int[] page_owner
     int active_requests
     int queued_requests
     int allocated_pages
@@ -323,8 +323,8 @@ struct production_batch_runtime {
 
 struct production_batch_selection {
     production_batch_runtime runtime
-    []int prefill_slot
-    []int decode_slot
+    int[] prefill_slot
+    int[] decode_slot
     int prefill_count
     int decode_count
     int prefill_tokens
@@ -339,8 +339,8 @@ struct production_admission_result {
     string error_message
 }
 
-func production_int_array(int capacity) []int {
-    []int values = []int{cap: capacity}
+func production_int_array(int capacity) int[] {
+    int[] values = int[]{cap: capacity}
     int index = 0
     for index < capacity { values[index] = 0; index = index + 1 }
     values
@@ -425,8 +425,8 @@ func production_admit(production_batch_runtime runtime, int session_id, int requ
 }
 
 func production_schedule(production_batch_runtime runtime) production_batch_selection {
-    []int prefill = production_int_array(runtime.config.maximum_batch_sequences)
-    []int decode = production_int_array(runtime.config.maximum_batch_sequences)
+    int[] prefill = production_int_array(runtime.config.maximum_batch_sequences)
+    int[] decode = production_int_array(runtime.config.maximum_batch_sequences)
     int prefill_count = 0
     int decode_count = 0
     int token_budget = runtime.config.maximum_batch_tokens
@@ -458,7 +458,7 @@ func production_schedule(production_batch_runtime runtime) production_batch_sele
     production_batch_selection {runtime: runtime, prefill_slot: prefill, decode_slot: decode, prefill_count: prefill_count, decode_count: decode_count, prefill_tokens: prefill_token_count, decode_tokens: decode_count, selected: prefill_count + decode_count > 0}
 }
 
-func production_mark_prefill_complete(production_batch_runtime runtime, []int slots, int count) production_batch_runtime {
+func production_mark_prefill_complete(production_batch_runtime runtime, int[] slots, int count) production_batch_runtime {
     int index = 0
     for index < count {
         int slot = slots[index]
@@ -497,7 +497,7 @@ func production_cancel(production_batch_runtime runtime, int session_id) product
     next
 }
 
-func production_execute_selected(transformer_execution_plan plan, production_batch_selection selected, []string binding, bool synchronize) transformer_execution_result {
+func production_execute_selected(transformer_execution_plan plan, production_batch_selection selected, string[] binding, bool synchronize) transformer_execution_result {
     if !selected.selected { return transformer_execution_result {success: false, completed_operations: 0, failed_operation: -1, error_message: "empty_batch"} }
     transformer_plan_execute(plan, binding, synchronize)
 }

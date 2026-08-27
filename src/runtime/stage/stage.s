@@ -13,18 +13,18 @@ struct stage_state {
     bool lowered
     bool compiled
     bool executed
-    []string stages
-    []string params
+    string[] stages
+    string[] params
     bool control_enabled
     bool control_cond_enabled
     bool control_loop_enabled
     bool control_scan_enabled
     int control_iterations
-    []string control_branches
-    []string control_params
+    string[] control_branches
+    string[] control_params
 }
 
-func join_strings([]string values) string {
+func join_strings(string[] values) string {
     string out = ""
     int i = 0
     for i < len(values) {
@@ -117,7 +117,7 @@ func stage_has_param(stage_state state, string value) bool {
 }
 
 func stage_add_stage(stage_state state, string value) stage_state {
-    []string stages = copy_strings(state.stages)
+    string[] stages = copy_strings(state.stages)
     stages = append(stages, value)
     stage_state {
         name: state.name,
@@ -140,7 +140,7 @@ func stage_add_stage(stage_state state, string value) stage_state {
 }
 
 func stage_add_param(stage_state state, string value) stage_state {
-    []string params = copy_strings(state.params)
+    string[] params = copy_strings(state.params)
     params = append(params, value)
     stage_state {
         name: state.name,
@@ -339,7 +339,7 @@ func stage_has_control_param(stage_state state, string param) bool {
 }
 
 func stage_add_control_branch(stage_state state, string branch) stage_state {
-    []string branches = copy_strings(state.control_branches)
+    string[] branches = copy_strings(state.control_branches)
     branches = append(branches, branch)
     stage_state {
         name: state.name,
@@ -362,7 +362,7 @@ func stage_add_control_branch(stage_state state, string branch) stage_state {
 }
 
 func stage_add_control_param(stage_state state, string param) stage_state {
-    []string params = copy_strings(state.control_params)
+    string[] params = copy_strings(state.control_params)
     params = append(params, param)
     stage_state {
         name: state.name,
@@ -681,18 +681,18 @@ func stage_to_transform_chain(stage_state state) transform_chain {
 }
 
 func transform_chain_to_stage(transform_chain chain, string name, string backend, string mode) stage_state {
-    []string stages = copy_strings(chain.steps)
-    []string params = copy_strings(chain.params)
+    string[] stages = copy_strings(chain.steps)
+    string[] params = copy_strings(chain.params)
     bool control_enabled = false
     bool control_cond_enabled = false
     bool control_loop_enabled = false
     bool control_scan_enabled = false
     int control_iterations = 0
-    []string control_branches = []
-    []string control_params = []
+    string[] control_branches = []
+    string[] control_params = []
     if len(chain.eqns) > 0 {
-        stages = []string{cap: len(chain.eqns)}
-        params = []string{cap: len(chain.eqns)}
+        stages = string[]{cap: len(chain.eqns)}
+        params = string[]{cap: len(chain.eqns)}
         int i = 0
         for i < len(chain.eqns) {
             string primitive = chain.eqns[i].primitive

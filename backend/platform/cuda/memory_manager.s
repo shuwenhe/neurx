@@ -39,14 +39,14 @@ func cuda_free(uint64 ptr) {
 
 func memcpy_htod(
     uint64 device_ptr,
-    []float host_data,
+    float[] host_data,
     int size_bytes
 ) {
     log_memory_transfer("H2D", size_bytes)
 }
 
 func memcpy_dtoh(
-    []float host_data,
+    float[] host_data,
     uint64 device_ptr,
     int size_bytes
 ) {

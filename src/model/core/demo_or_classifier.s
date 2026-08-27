@@ -6,7 +6,7 @@ struct demo_or_classifier_state {
     string dataset
     int input_dim
     int output_dim
-    []float weight
+    float[] weight
     float bias
     int training_steps
     float train_loss
@@ -15,7 +15,7 @@ struct demo_or_classifier_state {
 }
 
 func new_demo_or_classifier_state() demo_or_classifier_state {
-    []float weight = []float{cap: 2}
+    float[] weight = float[]{cap: 2}
     weight[0] = 2.0
     weight[1] = 2.0
     demo_or_classifier_state {
@@ -33,7 +33,7 @@ func new_demo_or_classifier_state() demo_or_classifier_state {
     }
 }
 
-func demo_or_classifier_predict(demo_or_classifier_state state, []float input) int {
+func demo_or_classifier_predict(demo_or_classifier_state state, float[] input) int {
     float score = state.bias
     int i = 0
     int limit = len(input)

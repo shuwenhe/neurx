@@ -122,9 +122,9 @@ func vma_create(int64 start, int64 end, int prot, int flags) vma {
 
 func mm_struct_create(int pid) mm_struct {
     mm := mm_struct {
-        page_tables: [512]int64{},
-        vma_start: [128]int64{},
-        vma_end: [128]int64{},
+        page_tables: int[512]64{},
+        vma_start: int[128]64{},
+        vma_end: int[128]64{},
         vma_count: 0,
         heap_start: 0x10000000,
         heap_end: 0x10000000,

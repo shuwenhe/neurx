@@ -91,8 +91,8 @@ func main() {
     int lora_a_size = lora_rank * hidden_size
     int lora_b_size = hidden_size * lora_rank
     println("[Initializing LoRA Weights]")
-    []float lora_a = []float{cap: lora_a_size}
-    []float lora_b = []float{cap: lora_b_size}
+    float[] lora_a = float[]{cap: lora_a_size}
+    float[] lora_b = float[]{cap: lora_b_size}
     int seed = 42
     int i = 0
     for i < lora_a_size {

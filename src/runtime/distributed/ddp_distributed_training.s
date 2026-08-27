@@ -57,7 +57,7 @@ func init_nccl_communicator(int rank, int world_size, int device_id) nccl_commun
     }
 }
 
-func allreduce_gradients([]float64 gradients, nccl_communicator comm) {
+func allreduce_gradients(float[]64 gradients, nccl_communicator comm) {
     fmt.printfln("   AllReduce: syncing %d gradient elements across %d ranks",
                  len(gradients), comm.world_size)
     for i := 0; i < len(gradients); i += 1 {
@@ -66,11 +66,11 @@ func allreduce_gradients([]float64 gradients, nccl_communicator comm) {
     fmt.printfln("   ✓ Gradient synchronization complete")
 }
 
-func allgather_tensors([]float64 local_tensor, [][]float64 gathered_tensors, nccl_communicator comm) {
+func allgather_tensors(float[]64 local_tensor, float[][]64 gathered_tensors, nccl_communicator comm) {
     fmt.printfln("   AllGather: gathering %d elements from %d ranks",
                  len(local_tensor), comm.world_size)
     for rank := 0; rank < comm.world_size; rank += 1 {
-        gathered_tensors[rank] = make([]float64, len(local_tensor))
+        gathered_tensors[rank] = make(float[]64, len(local_tensor))
         for i := 0; i < len(local_tensor); i += 1 {
             gathered_tensors[rank][i] = local_tensor[i]
         }
@@ -78,12 +78,12 @@ func allgather_tensors([]float64 local_tensor, [][]float64 gathered_tensors, ncc
     fmt.printfln("   ✓ AllGather complete")
 }
 
-func reduce_scatter_gradients([][]float64 scattered_grads, nccl_communicator comm) {
+func reduce_scatter_gradients(float[][]64 scattered_grads, nccl_communicator comm) {
     fmt.printfln("   ReduceScatter: reducing and scattering across %d ranks", comm.world_size)
     fmt.printfln("   ✓ ReduceScatter complete")
 }
 
-func broadcast_parameters([]float64 params, int src_rank, nccl_communicator comm) {
+func broadcast_parameters(float[]64 params, int src_rank, nccl_communicator comm) {
     fmt.printfln("   Broadcast: syncing parameters from rank %d to all ranks", src_rank)
     fmt.printfln("   ✓ Broadcast complete")
 }
@@ -95,7 +95,7 @@ func barrier(nccl_communicator comm) {
 struct gradient_synchronizer {
     int world_size
     int rank
-    accumulated_grads: []float64
+    accumulated_grads: float[]64
     int sync_frequency
     int sync_count
 }
@@ -104,13 +104,13 @@ func create_gradient_synchronizer(int rank, int world_size, int param_count, int
     gradient_synchronizer{
         world_size: world_size,
         rank: rank,
-        accumulated_grads: make([]float64, param_count),
+        accumulated_grads: make(float[]64, param_count),
         sync_frequency: sync_freq,
         sync_count: 0,
     }
 }
 
-func accumulate_gradients(gradient_synchronizer* sync, []float64 grads) {
+func accumulate_gradients(gradient_synchronizer* sync, float[]64 grads) {
     for i := 0; i < len(grads); i += 1 {
         sync.accumulated_grads[i] += grads[i]
     }
@@ -152,7 +152,7 @@ func create_ddp_trainer(int rank, int world_size, int batch_size, int param_coun
     }
 }
 
-func ddp_sync_gradients(ddp_trainer* trainer, []float64 gradients) {
+func ddp_sync_gradients(ddp_trainer* trainer, float[]64 gradients) {
     fmt.printfln("[Rank %d] Synchronizing gradients...", trainer.rank)
     accumulate_gradients(*trainer.gradient_sync, gradients)
     if should_sync(trainer.gradient_sync) {
@@ -167,7 +167,7 @@ func ddp_barrier(ddp_trainer* trainer) {
     barrier(trainer.nccl_comm)
 }
 
-func compute_distributed_loss([]float64 local_losses, ddp_trainer trainer) float64 {
+func compute_distributed_loss(float[]64 local_losses, ddp_trainer trainer) float64 {
     local_loss := 0.0
     for i := 0; i < len(local_losses); i += 1 {
         local_loss += local_losses[i]
@@ -207,10 +207,10 @@ func create_distributed_sampler(int dataset_size, int batch_size, int rank, int 
     }
 }
 
-func next_batch_indices(distributed_batch_sampler* sampler) []int {
+func next_batch_indices(distributed_batch_sampler* sampler) int[] {
     start_idx := (sampler.rank * sampler.dataset_size / sampler.world_size) +
                  (sampler.current_batch * sampler.batch_size)
-    indices := make([]int, sampler.batch_size)
+    indices := make(int[], sampler.batch_size)
     for i := 0; i < sampler.batch_size; i += 1 {
         indices[i] = (start_idx + i) % sampler.dataset_size
     }
@@ -242,13 +242,13 @@ func run_distributed_training_example() {
     total_loss := 0.0
     for step := 0; step < num_batches; step += 1 {
         batch_indices := next_batch_indices(*sampler)
-        local_losses := make([]float64, len(batch_indices))
+        local_losses := make(float[]64, len(batch_indices))
         for i := 0; i < len(batch_indices); i += 1 {
             local_losses[i] = 4.5 - float64(step) * 0.01
         }
         global_loss := compute_distributed_loss(local_losses, trainer)
         total_loss += global_loss
-        gradients := make([]float64, param_count)
+        gradients := make(float[]64, param_count)
         for i := 0; i < len(gradients); i += 1 {
             gradients[i] = math.random() * 0.01
         }

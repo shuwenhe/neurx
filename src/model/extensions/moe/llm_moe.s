@@ -57,12 +57,12 @@ struct gpt_moe_block {
 
 struct gpt_moe_model {
     gpt_moe_config config
-    []float wte
-    []float wpe
+    float[] wte
+    float[] wpe
     []gpt_moe_block blocks
     rms_norm final_norm
-    []float lm_head
-    []float rope_freqs
+    float[] lm_head
+    float[] rope_freqs
     int n_layer
     int vocab_size
     int n_embd
@@ -71,8 +71,8 @@ struct gpt_moe_model {
 }
 
 struct gpt_moe_output {
-    []float logits
-    []float last_hidden
+    float[] logits
+    float[] last_hidden
     float lm_loss
     float aux_loss
     float total_loss
@@ -137,16 +137,16 @@ func gpt_moe_block_at([]gpt_moe_block blocks, int idx) gpt_moe_block {
 }
 
 struct gpt_moe_block_forward_ret {
-    []float output
+    float[] output
     float aux_loss
 }
 
 func gpt_moe_block_forward(
     gpt_moe_block block,
-    []float x,
+    float[] x,
     int batch_size,
     int seq_len,
-    []float rope_freqs
+    float[] rope_freqs
 ) gpt_moe_block_forward_ret {
     int total = batch_size * seq_len
     int H = block.dense_block.hidden_dim
@@ -154,13 +154,13 @@ func gpt_moe_block_forward(
     int nkv = block.dense_block.n_kv_head
     int hd = block.dense_block.head_dim
     int kv_d = nkv * hd
-    []float normed1 = rms_normalize(block.dense_block.norm1, x, batch_size, seq_len)
-    []float q = gpt_matmul(normed1, block.dense_block.attn.query_weight, total, H, H)
-    []float k = gpt_matmul_kv(normed1, block.dense_block.attn.key_weight,   total, H, kv_d, H)
-    []float v = gpt_matmul_kv(normed1, block.dense_block.attn.value_weight, total, H, kv_d, H)
+    float[] normed1 = rms_normalize(block.dense_block.norm1, x, batch_size, seq_len)
+    float[] q = gpt_matmul(normed1, block.dense_block.attn.query_weight, total, H, H)
+    float[] k = gpt_matmul_kv(normed1, block.dense_block.attn.key_weight,   total, H, kv_d, H)
+    float[] v = gpt_matmul_kv(normed1, block.dense_block.attn.value_weight, total, H, kv_d, H)
     int pair_dim = hd / 2
-    []float qr = gpt_copy(q)
-    []float kr = gpt_copy(k)
+    float[] qr = gpt_copy(q)
+    float[] kr = gpt_copy(k)
     int b = 0
     for b < batch_size {
         int s = 0
@@ -200,27 +200,27 @@ func gpt_moe_block_forward(
         }
         b = b + 1
     }
-    []float attn_out = gpt_alloc(total * H, 0.0)
+    float[] attn_out = gpt_alloc(total * H, 0.0)
     b = 0
     for b < batch_size {
         int off_q = b * seq_len * H
         int off_k = b * seq_len * kv_d
-        []float qb = gpt_alloc(seq_len * H, 0.0)
-        []float kb = gpt_alloc(seq_len * kv_d, 0.0)
-        []float vb = gpt_alloc(seq_len * kv_d, 0.0)
+        float[] qb = gpt_alloc(seq_len * H, 0.0)
+        float[] kb = gpt_alloc(seq_len * kv_d, 0.0)
+        float[] vb = gpt_alloc(seq_len * kv_d, 0.0)
         int i = 0
         for i < seq_len * H    { qb[i] = qr[off_q + i]; i = i+1 }
         i = 0
         for i < seq_len * kv_d { kb[i] = kr[off_k + i]; vb[i] = v[off_k + i]; i = i+1 }
-        []float sdpa = gpt_causal_sdpa(qb, kb, vb, seq_len, nh, nkv, hd)
+        float[] sdpa = gpt_causal_sdpa(qb, kb, vb, seq_len, nh, nkv, hd)
         i = 0
         for i < seq_len * H { attn_out[b*seq_len*H + i] = sdpa[i]; i = i+1 }
         b = b + 1
     }
-    []float attn_proj = gpt_matmul(attn_out, block.dense_block.attn.output_weight, total, H, H)
-    []float h_attn = gpt_add(x, attn_proj)
-    []float normed2 = rms_normalize(block.dense_block.norm2, h_attn, batch_size, seq_len)
-    []float ffn_out
+    float[] attn_proj = gpt_matmul(attn_out, block.dense_block.attn.output_weight, total, H, H)
+    float[] h_attn = gpt_add(x, attn_proj)
+    float[] normed2 = rms_normalize(block.dense_block.norm2, h_attn, batch_size, seq_len)
+    float[] ffn_out
     float aux_loss = 0.0
     if block.is_moe {
         moe_output mo = moe_forward(block.moe_ffn, normed2, total)
@@ -232,24 +232,24 @@ func gpt_moe_block_forward(
     gpt_moe_block_forward_ret { output: gpt_add(h_attn, ffn_out), aux_loss: aux_loss }
 }
 
-func gpt_dense_ffn_forward(transformer_layer layer, []float normed2, int total) []float {
+func gpt_dense_ffn_forward(transformer_layer layer, float[] normed2, int total) float[] {
     int H = layer.hidden_dim
     int ffn_d = len(layer.ffn.glu_ffn.gate_weight) / H
-    []float gate = gpt_matmul(normed2, layer.ffn.glu_ffn.gate_weight, total, H, ffn_d)
-    []float val  = gpt_matmul(normed2, layer.ffn.glu_ffn.value_weight, total, H, ffn_d)
+    float[] gate = gpt_matmul(normed2, layer.ffn.glu_ffn.gate_weight, total, H, ffn_d)
+    float[] val  = gpt_matmul(normed2, layer.ffn.glu_ffn.value_weight, total, H, ffn_d)
     int i = 0
     for i < total * ffn_d {
         gate[i] = gate[i] + layer.ffn.glu_ffn.gate_bias[i % ffn_d]
         val[i]  = val[i]  + layer.ffn.glu_ffn.value_bias[i % ffn_d]
         i = i + 1
     }
-    []float gv = gpt_alloc(total * ffn_d, 0.0)
+    float[] gv = gpt_alloc(total * ffn_d, 0.0)
     i = 0
     for i < total * ffn_d {
         gv[i] = gpt_swish(gate[i]) * val[i]
         i = i + 1
     }
-    []float down = gpt_matmul(gv, layer.ffn.glu_ffn.down_weight, total, ffn_d, H)
+    float[] down = gpt_matmul(gv, layer.ffn.glu_ffn.down_weight, total, ffn_d, H)
     i = 0
     for i < total * H {
         down[i] = down[i] + layer.ffn.glu_ffn.down_bias[i % H]
@@ -260,27 +260,27 @@ func gpt_dense_ffn_forward(transformer_layer layer, []float normed2, int total) 
 
 func gpt_moe_forward(
     gpt_moe_model model,
-    []int token_ids,
+    int[] token_ids,
     int batch_size,
     int seq_len
 ) gpt_moe_output {
     int H = model.n_embd
     int V = model.vocab_size
     int total = batch_size * seq_len
-    []float hidden = embed_tokens(model.wte, model.wpe, token_ids, batch_size, seq_len, H)
+    float[] hidden = embed_tokens(model.wte, model.wpe, token_ids, batch_size, seq_len, H)
     float total_aux = 0.0
     int l = 0
     for l < model.n_layer {
         gpt_moe_block block = gpt_moe_block_at(model.blocks, l)
         gpt_moe_block_forward_ret _ret = gpt_moe_block_forward(block, hidden, batch_size, seq_len, model.rope_freqs)
-        []float next_hidden = _ret.output
+        float[] next_hidden = _ret.output
         float aux = _ret.aux_loss
         hidden = next_hidden
         total_aux = total_aux + aux
         l = l + 1
     }
-    []float normed = rms_normalize(model.final_norm, hidden, batch_size, seq_len)
-    []float logits
+    float[] normed = rms_normalize(model.final_norm, hidden, batch_size, seq_len)
+    float[] logits
     if model.config.base.tie_embeddings {
         logits = gpt_matmul_t(normed, model.lm_head, total, H, V)
     } else {

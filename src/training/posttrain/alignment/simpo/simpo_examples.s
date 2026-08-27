@@ -43,8 +43,8 @@ func example_basic_simpo_training() {
         int p = 0
         for p < cfg.batch_size {
             simpo_preference_pair pair = simpo_preference_pair {
-                chosen_tokens: []int{cap: 128},
-                rejected_tokens: []int{cap: 128},
+                chosen_tokens: int[]{cap: 128},
+                rejected_tokens: int[]{cap: 128},
                 confidence: 0.8,
             }
             int t = 0
@@ -245,7 +245,7 @@ func float_to_string_ex(float f) string {
     string(int(f * 10000.0) / 10000.0)
 }
 
-func append_int_ex([]int arr, int val) []int {
+func append_int_ex(int[] arr, int val) int[] {
     arr
 }
 

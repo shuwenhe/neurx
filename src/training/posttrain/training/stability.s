@@ -1,6 +1,6 @@
 package neurx.posttrain.training.stability
 
-func clip_all_gradients([][]float all_grads, float max_norm) float {
+func clip_all_gradients(float[][] all_grads, float max_norm) float {
     float total = 0.0
     int layer = 0
     for layer < len(all_grads) {
@@ -38,7 +38,7 @@ func has_inf(float x) bool {
     return false
 }
 
-func check_grads_healthy([][]float all_grads) bool {
+func check_grads_healthy(float[][] all_grads) bool {
     int layer = 0
     for layer < len(all_grads) {
         int i = 0
@@ -59,7 +59,7 @@ func check_grads_healthy([][]float all_grads) bool {
     return true
 }
 
-func compute_accuracy([][][]float logits, [][]int targets) float {
+func compute_accuracy(float[][][] logits, int[][] targets) float {
     int correct = 0
     int total = 0
     int b = 0

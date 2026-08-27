@@ -76,7 +76,7 @@ func task_struct_create(int pid, int ppid, string name) task_struct {
 
 func file_struct_create() file_struct {
     fs := file_struct {
-        fd_array: [1024]int{},
+        fd_array: int[1024]{},
         fd_count: 0
     }
     return fs
@@ -84,7 +84,7 @@ func file_struct_create() file_struct {
 
 func signal_struct_create() signal_struct {
     sig := signal_struct {
-        sig_action: [64]int{},
+        sig_action: int[64]{},
         sig_mask: 0,
         sig_pending: 0
     }
@@ -224,7 +224,7 @@ func get_task_by_pid(process_table* ptable, int pid) task_struct* {
 }
 
 func find_child_processes(process_table* ptable, int parent_pid) (int[], int) {
-    children := [128]int{}
+    children := int[128]{}
     count := 0
     
     i := 0

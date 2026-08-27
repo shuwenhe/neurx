@@ -2,17 +2,17 @@ package neurx.observability.tracing.tracer
 import io
 
 struct span_kind {
-    value []string
+    value string[]
 }
 
 struct span {
-    trace_id      []string
-    span_id       []string
-    parent_span_id []string
-    name         []string
+    trace_id      string[]
+    span_id       string[]
+    parent_span_id string[]
+    name         string[]
     kind         span_kind
-    start_time    []int
-    end_time      []int
+    start_time    int[]
+    end_time      int[]
     attributes   []map[string]string
     events       []span_event
     status       span_status
@@ -20,67 +20,67 @@ struct span {
 }
 
 struct span_event {
-    name       []string
-    timestamp  []int
+    name       string[]
+    timestamp  int[]
     attributes []map[string]string
 }
 
 struct span_status {
-    code        []string
-    description []string
+    code        string[]
+    description string[]
 }
 
 struct span_link {
-    trace_id    []string
-    span_id     []string
+    trace_id    string[]
+    span_id     string[]
     attributes []map[string]string
 }
 
 struct tracer {
     spans       []span
     exporters   []span_exporter
-    max_spans    []int
+    max_spans    int[]
 }
 
 struct span_exporter {
-    export_func func([]span) []bool
+    export_func func([]span) bool[]
 }
 
 var (
-    span_kind_internal  = span_kind{value: append([]string{}, "INTERNAL")}
-    span_kind_server    = span_kind{value: append([]string{}, "SERVER")}
-    span_kind_client    = span_kind{value: append([]string{}, "CLIENT")}
-    span_kind_producer  = span_kind{value: append([]string{}, "PRODUCER")}
-    span_kind_consumer  = span_kind{value: append([]string{}, "CONSUMER")}
+    span_kind_internal  = span_kind{value: append(string[]{}, "INTERNAL")}
+    span_kind_server    = span_kind{value: append(string[]{}, "SERVER")}
+    span_kind_client    = span_kind{value: append(string[]{}, "CLIENT")}
+    span_kind_producer  = span_kind{value: append(string[]{}, "PRODUCER")}
+    span_kind_consumer  = span_kind{value: append(string[]{}, "CONSUMER")}
 )
 
 var (
-    status_ok    = span_status{code: append([]string{}, "OK"), description: []string{}}
-    status_error = span_status{code: append([]string{}, "ERROR"), description: []string{}}
-    status_unset = span_status{code: append([]string{}, "UNSET"), description: []string{}}
+    status_ok    = span_status{code: append(string[]{}, "OK"), description: string[]{}}
+    status_error = span_status{code: append(string[]{}, "ERROR"), description: string[]{}}
+    status_unset = span_status{code: append(string[]{}, "UNSET"), description: string[]{}}
 )
 
-func get_current_time_nanos() []int {
-    return append([]int{}, 1000000000)
+func get_current_time_nanos() int[] {
+    return append(int[]{}, 1000000000)
 }
 
 func new_tracer() tracer {
     t := tracer{}
     t.spans = make([]span, 0)
     t.exporters = make([]span_exporter, 0)
-    t.max_spans = append([]int{}, 1000)
+    t.max_spans = append(int[]{}, 1000)
     return t
 }
 
-func (tracer* t) start_span(trace_id []string, span_id []string, name []string) span {
+func (tracer* t) start_span(trace_id string[], span_id string[], name string[]) span {
     s := span{}
     s.trace_id = trace_id
     s.span_id = span_id
-    s.parent_span_id = []string{}
+    s.parent_span_id = string[]{}
     s.name = name
     s.kind = span_kind_internal
     s.start_time = get_current_time_nanos()
-    s.end_time = []int{}
+    s.end_time = int[]{}
     s.attributes = make([]map[string]string, 1)
     s.attributes[0] = make(map[string]string)
     s.events = make([]span_event, 0)
@@ -90,15 +90,15 @@ func (tracer* t) start_span(trace_id []string, span_id []string, name []string) 
     return s
 }
 
-func (tracer* t) start_child_span(parent_span *span, name []string) span {
+func (tracer* t) start_child_span(parent_span *span, name string[]) span {
     s := span{}
     s.trace_id = parent_span.trace_id
-    s.span_id = append([]string{}, "new-span-id")
+    s.span_id = append(string[]{}, "new-span-id")
     s.parent_span_id = parent_span.span_id
     s.name = name
     s.kind = span_kind_internal
     s.start_time = get_current_time_nanos()
-    s.end_time = []int{}
+    s.end_time = int[]{}
     s.attributes = make([]map[string]string, 1)
     s.attributes[0] = make(map[string]string)
     s.events = make([]span_event, 0)
@@ -123,13 +123,13 @@ func (tracer* t) end_span(span* s) {
     t.export()
 }
 
-func (span* s) add_attribute(key []string, value []string) {
+func (span* s) add_attribute(key string[], value string[]) {
     if len(key) > 0 && len(value) > 0 && len(s.attributes) > 0 {
         s.attributes[0][key[0]] = value[0]
     }
 }
 
-func (span* s) add_event(name []string, attributes []map[string]string) {
+func (span* s) add_event(name string[], attributes []map[string]string) {
     event := span_event{}
     event.name = name
     event.timestamp = get_current_time_nanos()
@@ -146,9 +146,9 @@ func (span* s) set_kind(kind span_kind) {
     s.kind = kind
 }
 
-func (span* s) set_error(error_msg []string) {
+func (span* s) set_error(error_msg string[]) {
     s.status = span_status{
-        code: append([]string{}, "ERROR"),
+        code: append(string[]{}, "ERROR"),
         description: error_msg,
     }
 
@@ -157,14 +157,14 @@ func (span* s) set_error(error_msg []string) {
     error_attrs[0]["exception.message"] = error_msg[0] if len(error_msg) > 0 else ""
     error_attrs[0]["exception.type"] = "exception"
 
-    s.add_event(append([]string{}, "exception"), error_attrs)
+    s.add_event(append(string[]{}, "exception"), error_attrs)
 }
 
-func (span* s) get_duration() []int {
+func (span* s) get_duration() int[] {
     if len(s.end_time) > 0 && len(s.start_time) > 0 {
-        return append([]int{}, s.end_time[0] - s.start_time[0])
+        return append(int[]{}, s.end_time[0] - s.start_time[0])
     }
-    return append([]int{}, 0)
+    return append(int[]{}, 0)
 }
 
 func (tracer* t) register_exporter(exporter span_exporter) {
@@ -183,7 +183,7 @@ func (tracer* t) get_spans() []span {
     return t.spans
 }
 
-func (span* s) string_rep() []string {
+func (span* s) string_rep() string[] {
     result := ""
 
     if len(s.trace_id) > 0 {
@@ -204,7 +204,7 @@ func (span* s) string_rep() []string {
         result = result + "Duration=" + io.ToString(duration[0]) + "ns"
     }
 
-    return append([]string{}, result)
+    return append(string[]{}, result)
 }
 
 func main() {
@@ -213,21 +213,21 @@ func main() {
     t := new_tracer()
 
     root_span := t.start_span(
-        append([]string{}, "00112233445566778899aabbccddeeff"),
-        append([]string{}, "0011223344556677"),
-        append([]string{}, "ProcessRequest"),
+        append(string[]{}, "00112233445566778899aabbccddeeff"),
+        append(string[]{}, "0011223344556677"),
+        append(string[]{}, "ProcessRequest"),
     )
 
-    root_span.add_attribute(append([]string{}, "user.id"), append([]string{}, "12345"))
-    root_span.add_attribute(append([]string{}, "http.method"), append([]string{}, "POST"))
+    root_span.add_attribute(append(string[]{}, "user.id"), append(string[]{}, "12345"))
+    root_span.add_attribute(append(string[]{}, "http.method"), append(string[]{}, "POST"))
 
     io.Println("Root Span: " + root_span.string_rep()[0])
 
-    child_span := t.start_child_span(*root_span, append([]string{}, "ModelInference"))
+    child_span := t.start_child_span(*root_span, append(string[]{}, "ModelInference"))
     child_span.set_kind(span_kind_internal)
-    child_span.add_attribute(append([]string{}, "model.name"), append([]string{}, "qwen2.5"))
+    child_span.add_attribute(append(string[]{}, "model.name"), append(string[]{}, "qwen2.5"))
 
-    child_span.add_event(append([]string{}, "TokensProcessed"), []map[string]string{})
+    child_span.add_event(append(string[]{}, "TokensProcessed"), []map[string]string{})
 
     io.Println("Child Span: " + child_span.string_rep()[0])
 

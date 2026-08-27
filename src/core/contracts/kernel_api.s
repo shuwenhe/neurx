@@ -37,7 +37,7 @@ interface i_kernel_registry {
     has_forward(string op_name, device: device) . bool
     has_backward(string op_name, device: device) . bool
     list_kernels(string op_name) . []device
-    list_operations(device: device) . []string
+    list_operations(device: device) . string[]
     unregister(string op_name, device: device) . void
 }
 interface i_kernel_performance {

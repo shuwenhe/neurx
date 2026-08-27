@@ -28,7 +28,7 @@ struct stateless_group_state {
 
 struct stateless_broadcast_result {
     stateless_group_state state
-    []int payload
+    int[] payload
     bool success
 }
 
@@ -44,14 +44,14 @@ func init_stateless_group(stateless_group_config config) stateless_group_state {
     stateless_group_state {config: config, rank_in_group: config.global_rank, device_port: config.base_port + port_offset, cpu_port: config.base_port + port_offset + 1, store_port: config.base_port + port_offset + 2, generation: 1, broadcast_count: 0, object_broadcast_count: 0, device_group_initialized: initialized && config.use_device_communicator, cpu_group_initialized: initialized, store_group_initialized: initialized, destroyed: false, error_message: error_message}
 }
 
-func stateless_copy_payload([]int payload) []int {
-    []int copied = []int{cap: len(payload)}
+func stateless_copy_payload(int[] payload) int[] {
+    int[] copied = int[]{cap: len(payload)}
     int i = 0
     for i < len(payload) { copied[i] = payload[i]; i = i + 1 }
     copied
 }
 
-func stateless_broadcast(stateless_group_state state, []int payload, int source_rank) stateless_broadcast_result {
+func stateless_broadcast(stateless_group_state state, int[] payload, int source_rank) stateless_broadcast_result {
     if state.destroyed || !state.store_group_initialized || source_rank < 0 || source_rank >= state.config.world_size { return stateless_broadcast_result {state: state, payload: [], success: false} }
     state.broadcast_count = state.broadcast_count + 1
     stateless_broadcast_result {state: state, payload: stateless_copy_payload(payload), success: true}

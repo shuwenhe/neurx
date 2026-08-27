@@ -4,7 +4,7 @@ use std.io.println
 struct safetensors_header {
     string name
     string dtype
-    []int shape
+    int[] shape
     int64 offset_start
     int64 offset_end
 }

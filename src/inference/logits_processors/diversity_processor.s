@@ -18,7 +18,7 @@ struct diversity_processor {
     diversity_control_config config
     int vocab_size
     map[int]int token_frequency
-    []int generation_history
+    int[] generation_history
     int max_history_length
 }
 
@@ -37,7 +37,7 @@ func new_diversity_processor(int vocab_size) diversity_processor {
         },
         vocab_size: vocab_size,
         token_frequency: map[int]int{},
-        generation_history: make([]int, 0),
+        generation_history: make(int[], 0),
         max_history_length: 1000,
     }
 }
@@ -80,10 +80,10 @@ func (diversity_processor* processor) enable_cooling(bool enable, float factor) 
 }
 
 func (diversity_processor* processor) process_logits(
-    []float logits
-) []float {
+    float[] logits
+) float[] {
 
-    []float result = make([]float, len(logits))
+    float[] result = make(float[], len(logits))
     int i = 0
     for i < len(logits) {
         result[i] = logits[i]
@@ -119,7 +119,7 @@ func (diversity_processor* processor) process_logits(
 }
 
 func apply_penalties(
-    []float logits,
+    float[] logits,
     map[int]int frequency,
     float freq_penalty,
     float presence_penalty
@@ -142,7 +142,7 @@ func apply_penalties(
     }
 }
 
-func apply_temperature([]float logits, float temperature) {
+func apply_temperature(float[] logits, float temperature) {
     int i = 0
     for i < len(logits) {
         logits[i] = logits[i] / temperature
@@ -150,13 +150,13 @@ func apply_temperature([]float logits, float temperature) {
     }
 }
 
-func apply_top_k_filter([]float logits, int k) {
+func apply_top_k_filter(float[] logits, int k) {
 
     if k >= len(logits) {
         return
     }
 
-    []float sorted = make([]float, len(logits))
+    float[] sorted = make(float[], len(logits))
     int i = 0
     for i < len(logits) {
         sorted[i] = logits[i]
@@ -175,14 +175,14 @@ func apply_top_k_filter([]float logits, int k) {
     }
 }
 
-func apply_top_p_filter([]float logits, float p) {
+func apply_top_p_filter(float[] logits, float p) {
 
-    []float probs = compute_softmax(logits)
+    float[] probs = compute_softmax(logits)
 
-    []int indices = get_sorted_indices(probs, true)
+    int[] indices = get_sorted_indices(probs, true)
 
     float cumsum = 0.0
-    []bool keep = make([]bool, len(logits))
+    bool[] keep = make(bool[], len(logits))
 
     int i = 0
     for i < len(logits) {
@@ -211,7 +211,7 @@ func apply_top_p_filter([]float logits, float p) {
     }
 }
 
-func apply_cooling([]float logits, float factor) {
+func apply_cooling(float[] logits, float factor) {
 
     float mean = 0.0
     int i = 0
@@ -230,22 +230,22 @@ func apply_cooling([]float logits, float factor) {
 }
 
 func (diversity_processor* processor) apply_contrastive_search(
-    []float logits,
-    [][]float embedding_history,
-    []float current_embedding,
+    float[] logits,
+    float[][] embedding_history,
+    float[] current_embedding,
     float alpha
-) []float {
+) float[] {
 
-    []float result = make([]float, len(logits))
+    float[] result = make(float[], len(logits))
     int i = 0
     for i < len(logits) {
         result[i] = logits[i]
         i = i + 1
     }
 
-    []float probs = compute_softmax(result)
+    float[] probs = compute_softmax(result)
 
-    []float similarity = compute_similarity_with_history(
+    float[] similarity = compute_similarity_with_history(
         current_embedding, embedding_history
     )
 
@@ -263,19 +263,19 @@ func (diversity_processor* processor) apply_contrastive_search(
 }
 
 func (diversity_processor* processor) apply_mutual_information(
-    []float logits,
-    [][]float past_embeddings,
+    float[] logits,
+    float[][] past_embeddings,
     float lambda
-) []float {
+) float[] {
 
-    []float result = make([]float, len(logits))
+    float[] result = make(float[], len(logits))
     int i = 0
     for i < len(logits) {
         result[i] = logits[i]
         i = i + 1
     }
 
-    []float probs = compute_softmax(result)
+    float[] probs = compute_softmax(result)
 
     int j = 0
     for j < len(logits) {
@@ -284,7 +284,7 @@ func (diversity_processor* processor) apply_mutual_information(
         int k = 0
         for k < len(past_embeddings) {
             distance_sum = distance_sum + compute_distance(
-                []float{float(j)},
+                float[]{float(j)},
                 past_embeddings[k]
             )
             k = k + 1
@@ -300,8 +300,8 @@ func (diversity_processor* processor) apply_mutual_information(
 }
 
 struct beam_search_state {
-    [][]float top_candidates
-    []float top_scores
+    float[][] top_candidates
+    float[] top_scores
     int beam_width
 }
 
@@ -310,8 +310,8 @@ func (diversity_processor* processor) create_beam_search(
 ) beam_search_state {
 
     return beam_search_state{
-        top_candidates: make([][]float, beam_width),
-        top_scores: make([]float, beam_width),
+        top_candidates: make(float[][], beam_width),
+        top_scores: make(float[], beam_width),
         beam_width: beam_width,
     }
 }
@@ -324,7 +324,7 @@ func (diversity_processor* processor) add_token_to_history(int token_id) {
 
     if len(processor.generation_history) > processor.max_history_length {
 
-        []int new_history = make([]int, processor.max_history_length)
+        int[] new_history = make(int[], processor.max_history_length)
         int i = 1
         for i < len(processor.generation_history) {
             if i - 1 < processor.max_history_length {
@@ -338,7 +338,7 @@ func (diversity_processor* processor) add_token_to_history(int token_id) {
 
 func (diversity_processor* processor) reset_history() {
     processor.token_frequency = map[int]int{}
-    processor.generation_history = make([]int, 0)
+    processor.generation_history = make(int[], 0)
 }
 
 func (diversity_processor* processor) get_unique_token_ratio() float {
@@ -382,8 +382,8 @@ func (diversity_processor* processor) get_entropy() float {
     return entropy
 }
 
-func append_int([]int arr, int val) []int {
-    []int new_arr = make([]int, len(arr) + 1)
+func append_int(int[] arr, int val) int[] {
+    int[] new_arr = make(int[], len(arr) + 1)
     int i = 0
     for i < len(arr) {
         new_arr[i] = arr[i]
@@ -393,7 +393,7 @@ func append_int([]int arr, int val) []int {
     return new_arr
 }
 
-func sort_array_descending([]float arr) {
+func sort_array_descending(float[] arr) {
     int n = len(arr)
     int i = 0
     for i < n {
@@ -410,7 +410,7 @@ func sort_array_descending([]float arr) {
     }
 }
 
-func compute_softmax([]float logits) []float {
+func compute_softmax(float[] logits) float[] {
     float max_logit = logits[0]
     int i = 1
     for i < len(logits) {
@@ -420,7 +420,7 @@ func compute_softmax([]float logits) []float {
         i = i + 1
     }
 
-    []float exp_logits = make([]float, len(logits))
+    float[] exp_logits = make(float[], len(logits))
     float sum_exp = 0.0
     i = 0
     for i < len(logits) {
@@ -429,7 +429,7 @@ func compute_softmax([]float logits) []float {
         i = i + 1
     }
 
-    []float probs = make([]float, len(logits))
+    float[] probs = make(float[], len(logits))
     i = 0
     for i < len(logits) {
         if sum_exp > 0.0 {
@@ -443,8 +443,8 @@ func compute_softmax([]float logits) []float {
     return probs
 }
 
-func get_sorted_indices([]float arr, bool descending) []int {
-    []int indices = make([]int, len(arr))
+func get_sorted_indices(float[] arr, bool descending) int[] {
+    int[] indices = make(int[], len(arr))
     int i = 0
     for i < len(arr) {
         indices[i] = i
@@ -477,15 +477,15 @@ func get_sorted_indices([]float arr, bool descending) []int {
 }
 
 func compute_similarity_with_history(
-    []float current,
-    [][]float history
-) []float {
+    float[] current,
+    float[][] history
+) float[] {
 
-    []float similarities = make([]float, len(current))
+    float[] similarities = make(float[], len(current))
     return similarities
 }
 
-func compute_distance([]float a, []float b) float {
+func compute_distance(float[] a, float[] b) float {
     float sum = 0.0
     int i = 0
     for i < len(a) && i < len(b) {

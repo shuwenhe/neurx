@@ -53,17 +53,17 @@ struct model_descriptor {
 	[]model_device_type supported_devices
 	[]model_precision_type supported_precisions
 	[]model_capability capabilities
-	[]string dependencies
+	string[] dependencies
 	int32 recommended_batch_size
 	float64 recommended_memory_gb
-	[]string tags
+	string[] tags
 	map[string]interface{} metadata
 }
 
 struct load_validation_result {
 	bool valid
-	[]string errors
-	[]string warnings
+	string[] errors
+	string[] warnings
 	int64 validation_time_ms
 }
 
@@ -72,7 +72,7 @@ struct model_loader {
 	status model_loader_status
 	map[string]*model_package loaded_packages
 	map[string]*model_package loading_packages
-	[]string model_paths
+	string[] model_paths
 	int64 total_load_attempts
 	int64 total_load_failures
 	int64 total_load_successes
@@ -90,7 +90,7 @@ struct model_load_result {
 	*model_interface model_interface
 	int64 load_time_ms
 	string error_message
-	[]string warnings
+	string[] warnings
 }
 
 func create_model_loader() *model_loader {
@@ -98,7 +98,7 @@ func create_model_loader() *model_loader {
 		status: LOADER_STATUS_IDLE,
 		loaded_packages: make(map[string]*model_package),
 		loading_packages: make(map[string]*model_package),
-		model_paths: []string{},
+		model_paths: string[]{},
 		max_concurrent_loads: 4,
 		cache_enabled: true,
 		cache_dir: "/tmp/model_cache",
@@ -222,8 +222,8 @@ func (model_loader* loader) find_package_by_id(package_id string) *model_package
 func (model_loader* loader) validate_model_package(model_package* pkg) *load_validation_result {
 	result := *load_validation_result{
 		valid: true,
-		errors: []string{},
-		warnings: []string{},
+		errors: string[]{},
+		warnings: string[]{},
 	}
 
 	start_time := time.Now()
@@ -292,11 +292,11 @@ func (model_loader* loader) reload_model(package_id string, device model_device_
 	return loader.load_model(package_id, TYPE_CUSTOM, device)
 }
 
-func (model_loader* loader) get_loaded_models() []string {
+func (model_loader* loader) get_loaded_models() string[] {
 	loader.mu.Lock()
 	defer loader.mu.Unlock()
 
-	models := make([]string, 0, len(loader.loaded_packages))
+	models := make(string[], 0, len(loader.loaded_packages))
 	for package_id := range loader.loaded_packages {
 		models = append(models, package_id)
 	}

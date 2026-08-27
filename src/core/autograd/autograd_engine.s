@@ -51,8 +51,8 @@ struct node {
     node_type op_type
     []tensor inputs
     tensor output
-    []int children_ids
-    []int parent_ids
+    int[] children_ids
+    int[] parent_ids
     bool requires_grad
     map[string]tensor ctx
 }
@@ -67,7 +67,7 @@ struct computation_graph {
     []edge edges
     int next_node_id
     bool is_recording
-    []int topo_order
+    int[] topo_order
 }
 
 func new_graph() computation_graph {
@@ -157,17 +157,17 @@ func compute_topological_order(computation_graph g) computation_graph {
     if n == 0 {
         return g
     }
-    []int in_degree = []int{cap: n}
+    int[] in_degree = int[]{cap: n}
     for i in 0..n {
         in_degree[i] = len(g.nodes[i].parent_ids)
     }
-    []int queue = []
+    int[] queue = []
     for i in 0..n {
         if in_degree[i] == 0 {
             queue = append(queue, i)
         }
     }
-    []int order = []
+    int[] order = []
     int count = 0
     for len(queue) > 0 {
         int u = queue.pop_front()
@@ -196,7 +196,7 @@ func compute_topological_order(computation_graph g) computation_graph {
             order = append(order, i)
         }
     }
-    []int reversed = []
+    int[] reversed = []
     for i in len(order)-1 .. 0 {
         reversed = append(reversed, order[i])
     }
@@ -204,7 +204,7 @@ func compute_topological_order(computation_graph g) computation_graph {
     g
 }
 
-func backward(computation_graph g, tensor loss_tensor, []float grad_output) computation_graph {
+func backward(computation_graph g, tensor loss_tensor, float[] grad_output) computation_graph {
     if !loss_tensor.requires_grad {
         println("Warning: backward() called on tensor that doesn't require grad")
         return g
@@ -258,8 +258,8 @@ func accumulate_to_node_output(node *n, tensor grad) {
     }
 }
 
-func copy_tensor([]float data) []float {
-    []float out = []float{cap: len(data)}
+func copy_tensor(float[] data) float[] {
+    float[] out = float[]{cap: len(data)}
     for i in 0..len(data) {
         out[i] = data[i]
     }

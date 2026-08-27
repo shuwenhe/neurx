@@ -44,7 +44,7 @@ struct dapo_rollout_result {
     []tensor rewards
     []tensor log_probs
     []tensor values
-    []bool dones
+    bool[] dones
     float avg_reward
     float max_reward
     int num_correct
@@ -75,7 +75,7 @@ func new_dapo_config() dapo_config {
 func dapo_compute_advantages(
     []tensor rewards,
     []tensor values,
-    []bool dones,
+    bool[] dones,
     float gamma,
     float gae_lambda
 ) ([]tensor, []tensor) {
@@ -124,7 +124,7 @@ func dapo_select_top_k_trajectories(
     if k >= n {
         return rollouts
     }
-    []int indices = []int{cap: n}
+    int[] indices = int[]{cap: n}
     int i = 0
     for i < n {
         indices[i] = i
@@ -152,7 +152,7 @@ func dapo_select_top_k_trajectories(
     []tensor top_rewards = []tensor{cap: k}
     []tensor top_log_probs = []tensor{cap: k}
     []tensor top_values = []tensor{cap: k}
-    []bool top_dones = []bool{cap: k}
+    bool[] top_dones = bool[]{cap: k}
     i = 0
     for i < k {
         int idx = indices[i]

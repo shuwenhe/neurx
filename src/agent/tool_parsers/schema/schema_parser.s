@@ -110,7 +110,7 @@ func extract_int_value(string json_str, int pos) int {
     return string_to_int(result)
 }
 
-func extract_string_array(string json_str, int pos) []string {
+func extract_string_array(string json_str, int pos) string[] {
     result := vec_new()
     i := pos
 
@@ -144,7 +144,7 @@ func extract_string_array(string json_str, int pos) []string {
     return result
 }
 
-func extract_properties(string json_str, int pos, *[]string required) []json_property {
+func extract_properties(string json_str, int pos, *string[] required) []json_property {
     result := vec_new()
     i := pos
 
@@ -194,7 +194,7 @@ func extract_properties(string json_str, int pos, *[]string required) []json_pro
     return result
 }
 
-func is_property_required(string name, *[]string required) bool {
+func is_property_required(string name, *string[] required) bool {
     i := 0
     for i < len(*required) {
         if (*required)[i] == name {
@@ -249,7 +249,7 @@ func create_string_schema(int min_len, int max_len, string pattern) json_schema 
     return schema
 }
 
-func create_object_schema([]json_property properties, []string required) json_schema {
+func create_object_schema([]json_property properties, string[] required) json_schema {
     schema := schema_types.create_empty_schema()
     schema.type_name = schema_types.TYPE_OBJECT
     schema.properties = properties
@@ -266,7 +266,7 @@ func create_array_schema(*json_schema item_schema, int min_items, int max_items)
     return schema
 }
 
-func create_enum_schema([]string values) json_schema {
+func create_enum_schema(string[] values) json_schema {
     schema := schema_types.create_empty_schema()
     schema.type_name = schema_types.TYPE_STRING
     schema.enum_values = values

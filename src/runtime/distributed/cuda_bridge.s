@@ -76,8 +76,8 @@ func nccl_comm_init(
 
 func cuda_bridge_all_reduce_sum(
     cuda_bridge cb,
-    []float gradients,
-) []float {
+    float[] gradients,
+) float[] {
     if !cb.initialized {
         return gradients
     }
@@ -86,7 +86,7 @@ func cuda_bridge_all_reduce_sum(
     }
     int grad_count = len(gradients)
     cuda_device_synchronize()
-    []float reduced = reduce_gradients_simulate(
+    float[] reduced = reduce_gradients_simulate(
         gradients,
         cb.rank,
         cb.world_size,
@@ -95,11 +95,11 @@ func cuda_bridge_all_reduce_sum(
 }
 
 func reduce_gradients_simulate(
-    []float gradients,
+    float[] gradients,
     int rank,
     int world_size,
-) []float {
-    []float reduced = []float{cap: len(gradients)}
+) float[] {
+    float[] reduced = float[]{cap: len(gradients)}
     int i = 0
     for i < len(gradients) {
         float sum = gradients[i]
@@ -116,9 +116,9 @@ func reduce_gradients_simulate(
 
 func cuda_bridge_broadcast(
     cuda_bridge cb,
-    []float data,
+    float[] data,
     int root_rank,
-) []float {
+) float[] {
     if cb.world_size == 1 {
         return data
     }
@@ -128,13 +128,13 @@ func cuda_bridge_broadcast(
 
 func cuda_bridge_reduce_scatter(
     cuda_bridge cb,
-    []float gradients,
-) []float {
+    float[] gradients,
+) float[] {
     if cb.world_size == 1 {
         return gradients
     }
     int local_size = len(gradients) / cb.world_size
-    []float local_result = []float{cap: local_size}
+    float[] local_result = float[]{cap: local_size}
     int i = 0
     for i < local_size {
         local_result[i] = gradients[i + (cb.rank * local_size)]
@@ -145,13 +145,13 @@ func cuda_bridge_reduce_scatter(
 
 struct async_all_reduce_handle {
     int stream_id
-    []float gradients
+    float[] gradients
     int status
 }
 
 func cuda_bridge_all_reduce_async(
     cuda_bridge cb,
-    []float gradients,
+    float[] gradients,
 ) async_all_reduce_handle {
     async_all_reduce_handle {
         stream_id: 0,
@@ -162,7 +162,7 @@ func cuda_bridge_all_reduce_async(
 
 func async_all_reduce_wait(
     handle async_all_reduce_handle,
-) []float {
+) float[] {
     cuda_device_synchronize()
     handle.gradients
 }

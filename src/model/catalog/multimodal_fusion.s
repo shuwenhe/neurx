@@ -37,7 +37,7 @@ struct attention_head {
 	int32 head_index
 	int32 key_dim
 	int32 value_dim
-	[][]float32 attention_weights
+	float[][]32 attention_weights
 	float32 attention_score
 }
 
@@ -50,10 +50,10 @@ struct cross_modal_attention {
 }
 
 struct fused_features {
-	[]float32 fused_vector
+	float[]32 fused_vector
 	int32 feature_dim
-	map[string][]float32 modality_weights
-	[]string participating_modalities
+	map[string]float[]32 modality_weights
+	string[] participating_modalities
 	float64 fusion_time_ms
 	fusion_strategy strategy_used
 	time.Time created_at
@@ -62,7 +62,7 @@ struct fused_features {
 struct early_fusion {
 	sync.Mutex mu
 	int32 output_dim
-	map[string][]float32 modality_projections
+	map[string]float[]32 modality_projections
 	time.Time created_at
 }
 
@@ -111,7 +111,7 @@ func create_multimodal_fusion_engine(strategy fusion_strategy, output_dim int32)
 		},
 		early_fuser:  *early_fusion{
 			output_dim:           output_dim,
-			modality_projections: make(map[string][]float32),
+			modality_projections: make(map[string]float[]32),
 			created_at:           time.Now(),
 		},
 		late_fuser: *late_fusion{
@@ -121,7 +121,7 @@ func create_multimodal_fusion_engine(strategy fusion_strategy, output_dim int32)
 			created_at:      time.Now(),
 		},
 		hybrid_fuser: *hybrid_fusion{
-			early_stage:      *early_fusion{output_dim: output_dim / 2, modality_projections: make(map[string][]float32), created_at: time.Now()},
+			early_stage:      *early_fusion{output_dim: output_dim / 2, modality_projections: make(map[string]float[]32), created_at: time.Now()},
 			late_stage:       *late_fusion{output_dim: output_dim / 2, modality_models: make(map[string]*model_interface), modality_weights: make(map[string]float32), created_at: time.Now()},
 			intermediate_dim: output_dim / 2,
 			early_weight:     0.5,
@@ -145,7 +145,7 @@ func create_multimodal_fusion_engine(strategy fusion_strategy, output_dim int32)
 			head_index:       int32(i),
 			key_dim:          64,
 			value_dim:        64,
-			attention_weights: make([][]float32, 0),
+			attention_weights: make(float[][]32, 0),
 			attention_score:  0,
 		}
 	}
@@ -166,11 +166,11 @@ func (multimodal_fusion_engine* mfe) fuse_early(modality_features map[string]*en
 		total_dim += features.feature_dim
 	}
 
-	fused_vector := make([]float32, total_dim)
+	fused_vector := make(float[]32, total_dim)
 	idx := int32(0)
 
-	modalities := make([]string, 0)
-	modality_weights := make(map[string][]float32)
+	modalities := make(string[], 0)
+	modality_weights := make(map[string]float[]32)
 
 	for modality_name, features := range modality_features {
 		for i := 0; i < len(features.feature_vector); i++ {
@@ -179,7 +179,7 @@ func (multimodal_fusion_engine* mfe) fuse_early(modality_features map[string]*en
 		}
 		modalities = append(modalities, modality_name)
 
-		weight := make([]float32, len(features.feature_vector))
+		weight := make(float[]32, len(features.feature_vector))
 		for i := 0; i < len(weight); i++ {
 			weight[i] = 1.0 / float32(len(modality_features))
 		}
@@ -216,9 +216,9 @@ func (multimodal_fusion_engine* mfe) fuse_late(modality_features map[string]*enc
 		}
 	}
 
-	fused_vector := make([]float32, output_dim)
-	modality_weights := make(map[string][]float32)
-	modalities := make([]string, 0)
+	fused_vector := make(float[]32, output_dim)
+	modality_weights := make(map[string]float[]32)
+	modalities := make(string[], 0)
 
 	weight_sum := float32(0)
 	for modality_name, features := range modality_features {
@@ -227,7 +227,7 @@ func (multimodal_fusion_engine* mfe) fuse_late(modality_features map[string]*enc
 			fused_vector[i] += features.feature_vector[i] * weight
 		}
 
-		mod_weight := make([]float32, len(features.feature_vector))
+		mod_weight := make(float[]32, len(features.feature_vector))
 		for i := 0; i < len(mod_weight); i++ {
 			mod_weight[i] = weight
 		}
@@ -273,7 +273,7 @@ func (multimodal_fusion_engine* mfe) fuse_hybrid(modality_features map[string]*e
 		hybrid_dim = late_fused.feature_dim
 	}
 
-	fused_vector := make([]float32, hybrid_dim)
+	fused_vector := make(float[]32, hybrid_dim)
 	early_weight := mfe.config.extra_params["early_weight"].(float32)
 	if early_weight == 0 {
 		early_weight = 0.5
@@ -284,9 +284,9 @@ func (multimodal_fusion_engine* mfe) fuse_hybrid(modality_features map[string]*e
 		fused_vector[i] = early_fused.fused_vector[i]*early_weight + late_fused.fused_vector[i]*late_weight
 	}
 
-	modality_weights := make(map[string][]float32)
+	modality_weights := make(map[string]float[]32)
 	for modality_name := range modality_features {
-		weight := make([]float32, hybrid_dim)
+		weight := make(float[]32, hybrid_dim)
 		for i := 0; i < len(weight); i++ {
 			weight[i] = 1.0 / float32(len(modality_features))
 		}
@@ -314,7 +314,7 @@ func (multimodal_fusion_engine* mfe) compute_cross_modal_attention(modality_feat
 
 	attention_matrix := make(map[string]map[string]float32)
 
-	modality_list := make([]string, 0, len(modality_features))
+	modality_list := make(string[], 0, len(modality_features))
 	for modality := range modality_features {
 		modality_list = append(modality_list, modality)
 		attention_matrix[modality] = make(map[string]float32)

@@ -2,9 +2,9 @@ package neurx.posttrain.optimizer.adamw
 use neurx.posttrain.model.model_loader.{fill_model_tensor}
 
 struct adamw_optimizer {
-    []float param_groups
-    [][]float param_states_m
-    [][]float param_states_v
+    float[] param_groups
+    float[][] param_states_m
+    float[][] param_states_v
     float learning_rate
     float beta1
     float beta2
@@ -15,7 +15,7 @@ struct adamw_optimizer {
 }
 
 struct gradient_state {
-    []float gradients
+    float[] gradients
     float total_grad_norm
     int grad_count
 }
@@ -65,8 +65,8 @@ func create_adamw_optimizer(int num_params, optimizer_config config) adamw_optim
     optimizer.step_count = 0
     optimizer.warmup_steps = config.warmup_steps
     optimizer.param_groups = fill_model_tensor(num_params, 0.0)
-    optimizer.param_states_m = [][]float{}
-    optimizer.param_states_v = [][]float{}
+    optimizer.param_states_m = float[][]{}
+    optimizer.param_states_v = float[][]{}
     int i = 0
     for i < num_params {
         optimizer.param_states_m = append(optimizer.param_states_m, fill_model_tensor(num_params, 0.0))
@@ -76,7 +76,7 @@ func create_adamw_optimizer(int num_params, optimizer_config config) adamw_optim
     return optimizer
 }
 
-func clip_grad_norm([]float gradients, float max_norm) []float {
+func clip_grad_norm(float[] gradients, float max_norm) float[] {
     float total_norm = 0.0
     int i = 0
     for i < len(gradients) {
@@ -84,7 +84,7 @@ func clip_grad_norm([]float gradients, float max_norm) []float {
         i = i + 1
     }
     total_norm = sqrt(total_norm)
-    []float clipped = fill_model_tensor(len(gradients), 0.0)
+    float[] clipped = fill_model_tensor(len(gradients), 0.0)
     if total_norm > max_norm && total_norm > 0.0 {
         float scale = max_norm / total_norm
         i = 0
@@ -118,13 +118,13 @@ func get_learning_rate_cosine_annealing(adamw_optimizer opt, optimizer_config co
     return config.learning_rate * cosine_decay
 }
 
-func adamw_step(adamw_optimizer opt, []float params, []float gradients, optimizer_config config) adamw_optimizer {
+func adamw_step(adamw_optimizer opt, float[] params, float[] gradients, optimizer_config config) adamw_optimizer {
     opt.step_count = opt.step_count + 1
     float lr = get_learning_rate_with_warmup(opt, config)
     if config.scheduler_type == "cosine" {
         lr = get_learning_rate_cosine_annealing(opt, config)
     }
-    []float clipped_grads = clip_grad_norm(gradients, config.max_grad_norm)
+    float[] clipped_grads = clip_grad_norm(gradients, config.max_grad_norm)
     int i = 0
     for i < len(params) && i < len(clipped_grads) {
         float g = clipped_grads[i]

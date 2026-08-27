@@ -3,9 +3,9 @@ use neurx.tensor.tensor
 
 struct grad_record {
     int id
-    []int shape
+    int[] shape
     bool requires_grad
-    []float grad
+    float[] grad
 }
 
 struct autograd_state {
@@ -14,9 +14,9 @@ struct autograd_state {
     []grad_record records
 }
 
-func copy_float([]float data) []float {
+func copy_float(float[] data) float[] {
     int n = len(data)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -25,9 +25,9 @@ func copy_float([]float data) []float {
     out
 }
 
-func copy_int([]int data) []int {
+func copy_int(int[] data) int[] {
     int n = len(data)
-    []int out = []int{cap: n}
+    int[] out = int[]{cap: n}
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -108,18 +108,18 @@ func set_detect_anomaly(autograd_state state, bool enabled) autograd_state {
     state
 }
 
-func zeros_like([]float data) []float {
+func zeros_like(float[] data) float[] {
     int n = len(data)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     for i in 0..n {
         out[i] = 0.0
     }
     out
 }
 
-func ones_like([]float data) []float {
+func ones_like(float[] data) float[] {
     int n = len(data)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     for i in 0..n {
         out[i] = 1.0
     }
@@ -158,7 +158,7 @@ func has_record(autograd_state state, int id) bool {
     false
 }
 
-func set_grad(autograd_state state, int id, []float grad) autograd_state {
+func set_grad(autograd_state state, int id, float[] grad) autograd_state {
     []grad_record records = state.records
     for i in 0..len(records) {
         if records[i].id == id {
@@ -203,7 +203,7 @@ func zero_grad(autograd_state state) autograd_state {
     }
 }
 
-func accumulate_grad(autograd_state state, int id, []float grad) autograd_state {
+func accumulate_grad(autograd_state state, int id, float[] grad) autograd_state {
     []grad_record records = state.records
     for i in 0..len(records) {
         if records[i].id == id {
@@ -222,7 +222,7 @@ func accumulate_grad(autograd_state state, int id, []float grad) autograd_state 
     }
 }
 
-func grad_of(autograd_state state, int id) []float {
+func grad_of(autograd_state state, int id) float[] {
     int n = len(state.records)
     for i in 0..n {
         if state.records[i].id == id {

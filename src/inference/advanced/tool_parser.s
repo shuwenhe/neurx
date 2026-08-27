@@ -11,7 +11,7 @@ func tool_choice_named() int { 4 }
 struct tool_definition {
     string name
     string description
-    []string required_arguments
+    string[] required_arguments
 }
 
 struct tool_choice {
@@ -30,7 +30,7 @@ struct parsed_tool_call {
 }
 
 struct tool_parser_registry {
-    []string parser_names
+    string[] parser_names
     []tool_definition tools
 }
 
@@ -309,7 +309,7 @@ func parse_tool_call(tool_parser_registry registry, string parser_name, string t
     tool_validate(registry, choice, call)
 }
 
-func split_reasoning_content(string text, string end_marker) []string {
+func split_reasoning_content(string text, string end_marker) string[] {
     int end = tool_find_substring(text, end_marker, 0)
     if end < 0 {
         return [text, ""]

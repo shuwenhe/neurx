@@ -11,8 +11,8 @@ struct mps_device {
 }
 
 struct mps_tensor {
-    data: []float
-    shape: []int
+    data: float[]
+    shape: int[]
     mps_device device
     pointer gpu_buffer
 }
@@ -68,13 +68,13 @@ func mps_select_device(mps_context ctx, int device_id) mps_context {
     ctx
 }
 
-func mps_allocate_tensor([]int shape, mps_device device) mps_tensor {
+func mps_allocate_tensor(int[] shape, mps_device device) mps_tensor {
     int size = 1
     for i := 0; i < len(shape); i += 1 {
         size = size * shape[i]
     }
     mps_tensor tensor {
-        data: []float{cap: size},
+        data: float[]{cap: size},
         shape: shape,
         device: device,
         gpu_buffer: nil,
@@ -82,7 +82,7 @@ func mps_allocate_tensor([]int shape, mps_device device) mps_tensor {
     tensor
 }
 
-func mps_copy_to_device(mps_tensor tensor, []float data) mps_tensor {
+func mps_copy_to_device(mps_tensor tensor, float[] data) mps_tensor {
     int n = len(data)
     if n > len(tensor.data) {
         n = len(tensor.data)
@@ -93,7 +93,7 @@ func mps_copy_to_device(mps_tensor tensor, []float data) mps_tensor {
     tensor
 }
 
-func mps_copy_from_device(mps_tensor tensor) []float {
+func mps_copy_from_device(mps_tensor tensor) float[] {
     copy_vector(tensor.data)
 }
 
@@ -231,7 +231,7 @@ func mps_tensor_transpose(mps_tensor input, int dim0, int dim1) mps_tensor {
     if len(input.shape) < 2 {
         return input
     }
-    []int new_shape = copy_int(input.shape)
+    int[] new_shape = copy_int(input.shape)
     new_shape[dim0] = input.shape[dim1]
     new_shape[dim1] = input.shape[dim0]
     mps_tensor result = mps_allocate_tensor(new_shape, input.device)
@@ -247,7 +247,7 @@ func mps_tensor_transpose(mps_tensor input, int dim0, int dim1) mps_tensor {
     result
 }
 
-func mps_tensor_reshape(mps_tensor input, []int new_shape) mps_tensor {
+func mps_tensor_reshape(mps_tensor input, int[] new_shape) mps_tensor {
     int old_size = 1
     for i := 0; i < len(input.shape); i += 1 {
         old_size = old_size * input.shape[i]
@@ -278,18 +278,18 @@ func mps_get_device_info(mps_device device) string {
     "Device " + string(device.id) + ": " + device.name + " (Max Mem: " + string(device.max_memory) + ")"
 }
 
-func copy_vector([]float src) []float {
+func copy_vector(float[] src) float[] {
     int n = len(src)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     for i := 0; i < n; i += 1 {
         out[i] = src[i]
     }
     out
 }
 
-func copy_int([]int src) []int {
+func copy_int(int[] src) int[] {
     int n = len(src)
-    []int out = []int{cap: n}
+    int[] out = int[]{cap: n}
     for i := 0; i < n; i += 1 {
         out[i] = src[i]
     }

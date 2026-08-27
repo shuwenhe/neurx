@@ -52,13 +52,13 @@ func pf_ppo_reweight(
     tensor token_level_scores,
     tensor response_mask,
     pf_ppo_config config
-) (tensor, []int) {
+) (tensor, int[]) {
     tensor scores = sum_dim(token_level_scores, 1)
     tensor weights = compute_pf_ppo_weights(scores, config.reweight_method, config.weight_pow)
     weights = add_scalar(weights, 1e-8)
     weights = clamp_lower(weights, 1e-8)
     int batch_size = shape_at(scores, 0)
-    []int sample_indices = multinomial_sample(weights, batch_size)
+    int[] sample_indices = multinomial_sample(weights, batch_size)
     return weights, sample_indices
 }
 
@@ -82,8 +82,8 @@ func clamp_lower(tensor x, float min_val) tensor {
     return x
 }
 
-func multinomial_sample(tensor weights, int num_samples) []int {
-    []int indices = make([]int, num_samples)
+func multinomial_sample(tensor weights, int num_samples) int[] {
+    int[] indices = make(int[], num_samples)
     for int i = 0; i < num_samples; i = i + 1 {
         indices[i] = i
     }

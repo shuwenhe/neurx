@@ -1,12 +1,12 @@
 package neurx.serving.lifecycle.request_lifecycle
 
 struct lifecycle_state {
-    []string request_ids
-    []string statuses
-    []int deadlines_ms
-    []int attempts
-    []int max_retries
-    []int next_retry_ms
+    string[] request_ids
+    string[] statuses
+    int[] deadlines_ms
+    int[] attempts
+    int[] max_retries
+    int[] next_retry_ms
     bool accepting_requests
     bool draining
     int active_requests

@@ -1,9 +1,9 @@
 package neurx.agent.event
 
 struct agent_event_state {
-    []string kinds
-    []string payloads
-    []int steps
+    string[] kinds
+    string[] payloads
+    int[] steps
     int count
 }
 
@@ -18,9 +18,9 @@ func new_agent_event_state() agent_event_state {
 
 func agent_event_record(agent_event_state state, string kind, string payload, int step) agent_event_state {
     int n = state.count
-    []string new_kinds = []string{cap: n + 1}
-    []string new_payloads = []string{cap: n + 1}
-    []int new_steps = []int{cap: n + 1}
+    string[] new_kinds = string[]{cap: n + 1}
+    string[] new_payloads = string[]{cap: n + 1}
+    int[] new_steps = int[]{cap: n + 1}
     int i = 0
     for i < n {
         new_kinds[i] = state.kinds[i]

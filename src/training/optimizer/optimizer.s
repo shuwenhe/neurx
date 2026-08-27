@@ -13,9 +13,9 @@ struct optimizer_param_group {
     string kind
     []tensor first_moments
     []tensor second_moments
-    []int param_steps
-    []float beta1_pows
-    []float beta2_pows
+    int[] param_steps
+    float[] beta1_pows
+    float[] beta2_pows
 }
 
 struct optimizer {
@@ -36,8 +36,8 @@ func copy_tensors([]tensor values) []tensor {
     return out
 }
 
-func copy_float([]float data) []float {
-    []float out = []float{cap: len(data)}
+func copy_float(float[] data) float[] {
+    float[] out = float[]{cap: len(data)}
     int i = 0
     for i < len(data) {
         out[i] = data[i]
@@ -46,8 +46,8 @@ func copy_float([]float data) []float {
     return out
 }
 
-func copy_int([]int data) []int {
-    []int out = []int{cap: len(data)}
+func copy_int(int[] data) int[] {
+    int[] out = int[]{cap: len(data)}
     int i = 0
     for i < len(data) {
         out[i] = data[i]
@@ -58,7 +58,7 @@ func copy_int([]int data) []int {
 
 func optimizer_zero_moment(tensor value) tensor {
     int n = len(value.data)
-    []float data = []float{cap: n}
+    float[] data = float[]{cap: n}
     int i = 0
     for i < n {
         data[i] = 0.0
@@ -108,9 +108,9 @@ func optimizer_make_group([]tensor params, float lr, float weight_decay, float b
     int n = len(params)
     []tensor first_moments = []tensor{cap: n}
     []tensor second_moments = []tensor{cap: n}
-    []int param_steps = []int{cap: n}
-    []float beta1_pows = []float{cap: n}
-    []float beta2_pows = []float{cap: n}
+    int[] param_steps = int[]{cap: n}
+    float[] beta1_pows = float[]{cap: n}
+    float[] beta2_pows = float[]{cap: n}
     int i = 0
     for i < n {
         first_moments[i] = optimizer_zero_moment(params[i])

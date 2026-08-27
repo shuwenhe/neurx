@@ -23,8 +23,8 @@ func ResultStatusValues() result_status {
 struct inference_result {
     request_id      string
     status          int32
-    output_tokens   []int32
-    output_logits   []float32
+    output_tokens   int[]32
+    output_logits   float[]32
     finish_reason   string
     error_message   string
     latency_ms      int64
@@ -127,7 +127,7 @@ func (request_result_handler* handler) WaitForResult(
 struct proxy_config {
     listen_address  string
     listen_port     int32
-    backend_servers []string
+    backend_servers string[]
     load_balancing  string
     health_check_interval_ms int64
     failover_enabled bool
@@ -206,7 +206,7 @@ func (proxy_server* proxy) SelectBackend() (backend_server, bool) {
 
 func (proxy_server* proxy) ForwardRequest(
     request_id string,
-    payload []float32,
+    payload float[]32,
 ) (inference_result, bool) {
     backend, success := proxy.SelectBackend()
     if !success {
@@ -300,7 +300,7 @@ func main() {
     result := inference_result{
         request_id:     "req_001",
         status:         ResultStatusValues().SUCCESS,
-        output_tokens:  []int32{1, 2, 3},
+        output_tokens:  int[]32{1, 2, 3},
         tokens_per_sec: 100.0,
         timestamp_ms:   core.Now().UnixMilli(),
     }
@@ -311,7 +311,7 @@ func main() {
     config := proxy_config{
         listen_address:  "0.0.0.0",
         listen_port:     8000,
-        backend_servers: []string{"worker1", "worker2", "worker3"},
+        backend_servers: string[]{"worker1", "worker2", "worker3"},
         load_balancing:  "round_robin",
         health_check_interval_ms: 5000,
         failover_enabled: true,

@@ -1,30 +1,30 @@
 package neurx.data.dataset.dataset
 
 struct dataset_state {
-    []float items
+    float[] items
 }
 
 struct iterable_dataset_state {
-    []float items
+    float[] items
 }
 
 struct tensor_dataset_state {
-    []float items
+    float[] items
 }
 
 struct subset_state {
     dataset_state dataset
-    []int indices
+    int[] indices
 }
 
 struct concat_dataset_state {
     []dataset_state datasets
-    []int cumulative_sizes
+    int[] cumulative_sizes
 }
 
-func copy_float([]float values) []float {
+func copy_float(float[] values) float[] {
     int n = len(values)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         out[i] = values[i]
@@ -33,9 +33,9 @@ func copy_float([]float values) []float {
     out
 }
 
-func copy_int([]int values) []int {
+func copy_int(int[] values) int[] {
     int n = len(values)
-    []int out = []int{cap: n}
+    int[] out = int[]{cap: n}
     int i = 0
     for i < n {
         out[i] = values[i]
@@ -102,7 +102,7 @@ func normalize_index(int index, int total) int {
     index
 }
 
-func new_dataset([]float items) dataset_state {
+func new_dataset(float[] items) dataset_state {
     dataset_state {
         items: copy_float(items),
     }
@@ -134,7 +134,7 @@ func dataset_slice(dataset_state state, int start, int stop) dataset_state {
     if stop > n {
         stop = n
     }
-    []float items = []float{cap: stop - start}
+    float[] items = float[]{cap: stop - start}
     int i = start
     int j = 0
     for i < stop {
@@ -145,8 +145,8 @@ func dataset_slice(dataset_state state, int start, int stop) dataset_state {
     new_dataset(items)
 }
 
-func dataset_take(dataset_state state, []int indices) dataset_state {
-    []float items = []float{cap: len(indices)}
+func dataset_take(dataset_state state, int[] indices) dataset_state {
+    float[] items = float[]{cap: len(indices)}
     int i = 0
     for i < len(indices) {
         int normalized = normalize_index(indices[i], len(state.items))
@@ -161,7 +161,7 @@ func dataset_take(dataset_state state, []int indices) dataset_state {
 }
 
 func dataset_extend(dataset_state state, dataset_state other) dataset_state {
-    []float items = []float{cap: len(state.items) + len(other.items)}
+    float[] items = float[]{cap: len(state.items) + len(other.items)}
     int i = 0
     for i < len(state.items) {
         items[i] = state.items[i]
@@ -184,7 +184,7 @@ func dataset_load_state_dict(dataset_state state, dataset_state other) dataset_s
     copy_dataset(other)
 }
 
-func new_iterable_dataset([]float items) iterable_dataset_state {
+func new_iterable_dataset(float[] items) iterable_dataset_state {
     iterable_dataset_state {
         items: copy_float(items),
     }
@@ -211,7 +211,7 @@ func iterable_dataset_load_state_dict(iterable_dataset_state state, iterable_dat
     copy_iterable_dataset(other)
 }
 
-func new_tensor_dataset([]float items) tensor_dataset_state {
+func new_tensor_dataset(float[] items) tensor_dataset_state {
     tensor_dataset_state {
         items: copy_float(items),
     }
@@ -238,7 +238,7 @@ func tensor_dataset_load_state_dict(tensor_dataset_state state, tensor_dataset_s
     copy_tensor_dataset(other)
 }
 
-func new_subset(dataset_state dataset, []int indices) subset_state {
+func new_subset(dataset_state dataset, int[] indices) subset_state {
     subset_state {
         dataset: copy_dataset(dataset),
         indices: copy_int(indices),
@@ -272,7 +272,7 @@ func subset_load_state_dict(subset_state state, subset_state other) subset_state
 
 func new_concat_dataset([]dataset_state datasets) concat_dataset_state {
     int total = 0
-    []int cumulative_sizes = []int{cap: len(datasets)}
+    int[] cumulative_sizes = int[]{cap: len(datasets)}
     []dataset_state copied = []dataset_state{cap: len(datasets)}
     int i = 0
     for i < len(datasets) {
@@ -322,7 +322,7 @@ func concat_dataset_load_state_dict(concat_dataset_state state, concat_dataset_s
     copy_concat(other)
 }
 
-func random_split(dataset_state dataset, []int lengths, int seed) []subset_state {
+func random_split(dataset_state dataset, int[] lengths, int seed) []subset_state {
     del seed
     int total = dataset_len(dataset)
     int sum = 0
@@ -339,7 +339,7 @@ func random_split(dataset_state dataset, []int lengths, int seed) []subset_state
     i = 0
     for i < len(lengths) {
         int length = lengths[i]
-        []int indices = []int{cap: length}
+        int[] indices = int[]{cap: length}
         int j = 0
         for j < length {
             indices[j] = offset + j
@@ -360,7 +360,7 @@ func random_split_equal(dataset_state dataset, int parts, int seed) []subset_sta
     int total = dataset_len(dataset)
     int base = total / parts
     int remainder = total - base * parts
-    []int lengths = []int{cap: parts}
+    int[] lengths = int[]{cap: parts}
     int i = 0
     for i < parts {
         int length = base

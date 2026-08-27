@@ -91,7 +91,7 @@ func (prompt_engineer* pe) get_verification_prompt(string previous_reasoning, st
     prompt
 }
 
-func (prompt_engineer* pe) get_checkpoint_prompt([]string previous_steps, string current_result) string {
+func (prompt_engineer* pe) get_checkpoint_prompt(string[] previous_steps, string current_result) string {
     string prompt = "Checkpoint - Current understanding:\n"
 
     i := 0
@@ -124,7 +124,7 @@ func (prompt_engineer* pe) get_final_answer_prompt(string reasoning_summary) str
     prompt
 }
 
-func (prompt_engineer* pe) get_summary_prompt([]string steps) string {
+func (prompt_engineer* pe) get_summary_prompt(string[] steps) string {
     string prompt = pe.templates["summary_prefix"]
 
     i := 0
@@ -176,7 +176,7 @@ func (prompt_engineer* pe) format_reasoning_step(string step_type, string conten
     result
 }
 
-func (prompt_engineer* pe) generate_full_reasoning_prompt(string user_prompt, []string previous_steps, bool include_checkpoints) string {
+func (prompt_engineer* pe) generate_full_reasoning_prompt(string user_prompt, string[] previous_steps, bool include_checkpoints) string {
     string prompt = pe.get_initial_prompt(user_prompt)
 
     i := 0
@@ -198,7 +198,7 @@ func (prompt_engineer* pe) extract_reasoning_from_response(string response) stri
     response
 }
 
-func (prompt_engineer* pe) validate_reasoning_consistency([]string steps) bool {
+func (prompt_engineer* pe) validate_reasoning_consistency(string[] steps) bool {
 
     if len(steps) == 0 {
         return false

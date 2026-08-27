@@ -2,8 +2,8 @@ package neurx.posttrain.optimization.prefix_grouping
 use neurx.tensor
 
 struct prefix_group {
-    []int token_ids
-    []int sample_indices
+    int[] token_ids
+    int[] sample_indices
     int prefix_len
 }
 
@@ -28,17 +28,17 @@ func default_prefix_grouping_config() prefix_grouping_config {
 }
 
 func group_by_prefix(
-    [][]int token_sequences,
+    int[][] token_sequences,
     prefix_grouping_config config
 ) []prefix_group {
     []prefix_group groups = make([]prefix_group, 0)
-    []bool assigned = make([]bool, len(token_sequences))
+    bool[] assigned = make(bool[], len(token_sequences))
     for int i = 0; i < len(token_sequences); i = i + 1 {
         if assigned[i] {
             continue
         }
-        []int prefix = extract_prefix(token_sequences[i], config)
-        []int group_indices = make([]int, 0)
+        int[] prefix = extract_prefix(token_sequences[i], config)
+        int[] group_indices = make(int[], 0)
         group_indices = append(group_indices, i)
         assigned[i] = true
         for int j = i + 1; j < len(token_sequences); j = j + 1 {
@@ -60,17 +60,17 @@ func group_by_prefix(
     return groups
 }
 
-func extract_prefix([]int tokens, prefix_grouping_config config) []int {
+func extract_prefix(int[] tokens, prefix_grouping_config config) int[] {
     int prefix_len = min_int(len(tokens), config.max_prefix_len)
     prefix_len = max_int(prefix_len, config.min_prefix_len)
-    []int prefix = make([]int, prefix_len)
+    int[] prefix = make(int[], prefix_len)
     for int i = 0; i < prefix_len; i = i + 1 {
         prefix[i] = tokens[i]
     }
     return prefix
 }
 
-func has_matching_prefix([]int tokens, []int prefix) bool {
+func has_matching_prefix(int[] tokens, int[] prefix) bool {
     if len(tokens) < len(prefix) {
         return false
     }
@@ -92,10 +92,10 @@ func compute_with_prefix_cache(
         total_samples = total_samples + len(groups[i].sample_indices)
     }
     int embed_dim = size(input_embeddings, 2)
-    tensor outputs = zeros([]int{total_samples, 512, embed_dim})
+    tensor outputs = zeros(int[]{total_samples, 512, embed_dim})
     for int g = 0; g < len(groups); g = g + 1 {
         prefix_group group = groups[g]
-        []int prefix_token_ids = group.token_ids
+        int[] prefix_token_ids = group.token_ids
         tensor prefix_input = gather_embeddings(input_embeddings, prefix_token_ids)
         tensor prefix_output = forward_prefix(prefix_input)
         for int i = 0; i < len(group.sample_indices); i = i + 1 {
@@ -110,7 +110,7 @@ func forward_prefix(tensor prefix_input) tensor {
     return prefix_input
 }
 
-func gather_embeddings(tensor embeddings, []int token_ids) tensor {
+func gather_embeddings(tensor embeddings, int[] token_ids) tensor {
     return embeddings
 }
 

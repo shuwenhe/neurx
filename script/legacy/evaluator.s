@@ -35,7 +35,7 @@ func calculate_perplexity(float loss): float {
     return math.Exp(loss)
 }
 
-func calculate_cross_entropy([]float logits, []int labels): float {
+func calculate_cross_entropy(float[] logits, int[] labels): float {
     total_loss := 0.0
     for i := 0; i < len(labels); i++ {
         if i >= len(logits) {
@@ -60,8 +60,8 @@ func calculate_cross_entropy([]float logits, []int labels): float {
 func (evaluator* e) evaluate(
     int step,
     float train_loss,
-    [][]float val_logits,
-    [][]int val_labels,
+    float[][] val_logits,
+    int[][] val_labels,
     float speed) evaluation_metrics {
     val_loss := 0.0
     for i := 0; i < len(val_labels); i++ {
@@ -190,15 +190,15 @@ func format_int(int i): string {
 func main() {
     evaluator := *evaluator{}
     evaluator.init(32, 4)
-    steps := []int{100, 500, 1000, 2000}
+    steps := int[]{100, 500, 1000, 2000}
     initial_ppl := 1000.0
     for i, step := range steps {
         train_loss := math.Log(initial_ppl - float(i*150))
-        val_logits := make([][]float, 10)
-        val_labels := make([][]int, 10)
+        val_logits := make(float[][], 10)
+        val_labels := make(int[][], 10)
         for j := 0; j < 10; j++ {
-            val_logits[j] = []float{0.8}
-            val_labels[j] = []int{1}
+            val_logits[j] = float[]{0.8}
+            val_labels[j] = int[]{1}
         }
         metrics := evaluator.evaluate(step, train_loss, val_logits, val_labels, 1000.0)
         json_data, _ := json.Marshal(metrics)

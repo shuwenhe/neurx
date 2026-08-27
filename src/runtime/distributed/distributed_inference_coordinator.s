@@ -24,8 +24,8 @@ struct node_info {
     ip_address          string
     port                int32
     num_gpus            int32
-    gpu_memory_gb       []float32
-    gpu_utilization     []float32
+    gpu_memory_gb       float[]32
+    gpu_utilization     float[]32
     is_alive            bool
     last_heartbeat      int64
 }
@@ -33,18 +33,18 @@ struct node_info {
 struct distributed_request {
     request_id          int64
     primary_node        int32
-    target_nodes        []int32
-    input_tokens        []int32
+    target_nodes        int[]32
+    input_tokens        int[]32
     max_output_tokens   int32
     current_stage       int32
     state               string
 }
 
 struct load_balance_state {
-    gpu_loads           []float32
-    node_loads          []float32
-    queue_lengths       []int32
-    network_congestion  []float32
+    gpu_loads           float[]32
+    node_loads          float[]32
+    queue_lengths       int[]32
+    network_congestion  float[]32
 }
 
 struct distributed_inference_coordinator {
@@ -71,10 +71,10 @@ func NewDistributedInferenceCoordinator(config coordinator_config) *distributed_
         active_requests:   make(map[int64]*distributed_request),
         completed_requests: []*distributed_request{},
         load_state: *load_balance_state{
-            gpu_loads:       make([]float32, config.total_gpus),
-            node_loads:      make([]float32, config.num_nodes),
-            queue_lengths:   make([]int32, config.num_nodes),
-            network_congestion: make([]float32, config.num_nodes),
+            gpu_loads:       make(float[]32, config.total_gpus),
+            node_loads:      make(float[]32, config.num_nodes),
+            queue_lengths:   make(int[]32, config.num_nodes),
+            network_congestion: make(float[]32, config.num_nodes),
         },
     }
     hybrid_config := hybrid_3_d_config{
@@ -95,7 +95,7 @@ func (distributed_inference_coordinator* d) RegisterNode(
     ip_address string,
     port int32,
     num_gpus int32,
-    gpu_memory_gb []float32,
+    gpu_memory_gb float[]32,
 ) bool {
     node := *node_info{
         node_id:         node_id,
@@ -103,7 +103,7 @@ func (distributed_inference_coordinator* d) RegisterNode(
         port:            port,
         num_gpus:        num_gpus,
         gpu_memory_gb:   gpu_memory_gb,
-        gpu_utilization: make([]float32, num_gpus),
+        gpu_utilization: make(float[]32, num_gpus),
         is_alive:        true,
         last_heartbeat:  core.Now(),
     }
@@ -112,7 +112,7 @@ func (distributed_inference_coordinator* d) RegisterNode(
 }
 
 func (distributed_inference_coordinator* d) SubmitRequest(
-    input_tokens []int32,
+    input_tokens int[]32,
     max_output_tokens int32,
 ) int64 {
     req := *distributed_request{
@@ -145,7 +145,7 @@ func (distributed_inference_coordinator* d) selectPrimaryNode() int32 {
 }
 
 func (distributed_inference_coordinator* d) ScheduleRequest(distributed_request* req) bool {
-    target_nodes := []int32{}
+    target_nodes := int[]32{}
     for i := int32(0); i < d.config.tp_size; i++ {
         node_id := i % d.config.num_nodes
         found := false
@@ -175,7 +175,7 @@ func (distributed_inference_coordinator* d) ProcessPrefillBatch() {
 }
 
 func (distributed_inference_coordinator* d) ProcessDecodeBatch() {
-    completed := []int64{}
+    completed := int[]64{}
     for req_id, req := range d.active_requests {
         if req.current_stage == 1 {
             _ = req
@@ -243,7 +243,7 @@ func (distributed_inference_coordinator* d) HandleNodeFailure(node_id int32) boo
     }
     node.is_alive = false
     core.Println("Node", node_id, "marked as failed")
-    affected_requests := []int64{}
+    affected_requests := int[]64{}
     for req_id, req := range d.active_requests {
         if req.primary_node == node_id {
             affected_requests = append(affected_requests, req_id)
@@ -322,7 +322,7 @@ func main() {
     }
     coordinator := NewDistributedInferenceCoordinator(config)
     for i := int32(0); i < config.num_nodes; i++ {
-        gpu_mem := make([]float32, config.gpus_per_node)
+        gpu_mem := make(float[]32, config.gpus_per_node)
         for j := int32(0); j < config.gpus_per_node; j++ {
             gpu_mem[j] = 80.0
         }

@@ -16,7 +16,7 @@ struct tokenizer_config {
     bool add_special_tokens
     string padding_side
     string truncation_side
-    []string special_tokens
+    string[] special_tokens
 }
 
 struct token {
@@ -27,23 +27,23 @@ struct token {
 }
 
 struct tokenizer_output {
-    []int input_ids
-    []int attention_mask
-    []int token_type_ids
+    int[] input_ids
+    int[] attention_mask
+    int[] token_type_ids
     []token tokens
 }
 
 struct tokenizer_decode_output {
     string text
-    []string token_texts
-    []float confidence_scores
+    string[] token_texts
+    float[] confidence_scores
 }
 
 struct base_tokenizer {
     tokenizer_config config
     map<string, int> vocab
     map<int, string> id_to_token
-    []string special_tokens
+    string[] special_tokens
 }
 
 func new_tokenizer(tokenizer_config cfg) base_tokenizer {
@@ -51,7 +51,7 @@ func new_tokenizer(tokenizer_config cfg) base_tokenizer {
     tok.config = cfg
     tok.vocab = map<string, int>{}
     tok.id_to_token = map<int, string>{}
-    tok.special_tokens = []string{}
+    tok.special_tokens = string[]{}
     tok
 }
 
@@ -77,9 +77,9 @@ func (tok word_piece_tokenizer) tokenize(string text) []token {
 
 func (tok word_piece_tokenizer) encode(string text) tokenizer_output {
     tokenizer_output output
-    output.input_ids = []int{}
-    output.attention_mask = []int{}
-    output.token_type_ids = []int{}
+    output.input_ids = int[]{}
+    output.attention_mask = int[]{}
+    output.token_type_ids = int[]{}
     output.tokens = []token{}
 
     []token tokens = tok.tokenize(text)
@@ -93,11 +93,11 @@ func (tok word_piece_tokenizer) encode(string text) tokenizer_output {
     output
 }
 
-func (tok word_piece_tokenizer) decode([]int input_ids) tokenizer_decode_output {
+func (tok word_piece_tokenizer) decode(int[] input_ids) tokenizer_decode_output {
     tokenizer_decode_output output
     output.text = ""
-    output.token_texts = []string{}
-    output.confidence_scores = []float{}
+    output.token_texts = string[]{}
+    output.confidence_scores = float[]{}
 
     for i = 0; i < len(input_ids); i = i + 1 {
         int token_id = input_ids[i]
@@ -116,29 +116,29 @@ func (tok word_piece_tokenizer) decode([]int input_ids) tokenizer_decode_output 
 
 struct bpe_tokenizer {
     base_tokenizer base
-    []string merges
+    string[] merges
     map<string, int> merge_rank
 }
 
 func new_bpe_tokenizer(tokenizer_config cfg) bpe_tokenizer {
     bpe_tokenizer tok
     tok.base = new_tokenizer(cfg)
-    tok.merges = []string{}
+    tok.merges = string[]{}
     tok.merge_rank = map<string, int>{}
     tok
 }
 
-func (tok bpe_tokenizer) apply_bpe(string text) []int {
+func (tok bpe_tokenizer) apply_bpe(string text) int[] {
 
-    []int token_ids
+    int[] token_ids
     token_ids
 }
 
 func (tok bpe_tokenizer) encode(string text) tokenizer_output {
     tokenizer_output output
     output.input_ids = tok.apply_bpe(text)
-    output.attention_mask = []int{}
-    output.token_type_ids = []int{}
+    output.attention_mask = int[]{}
+    output.token_type_ids = int[]{}
     output.tokens = []token{}
 
     for i = 0; i < len(output.input_ids); i = i + 1 {
@@ -148,13 +148,13 @@ func (tok bpe_tokenizer) encode(string text) tokenizer_output {
     output
 }
 
-func (tok bpe_tokenizer) decode([]int input_ids) tokenizer_decode_output {
+func (tok bpe_tokenizer) decode(int[] input_ids) tokenizer_decode_output {
     tokenizer_decode_output output
     output.text = ""
-    output.token_texts = []string{}
-    output.confidence_scores = []float{}
+    output.token_texts = string[]{}
+    output.confidence_scores = float[]{}
 
-    []string tokens
+    string[] tokens
     for i = 0; i < len(input_ids); i = i + 1 {
         string token = tok.base.id_to_token[input_ids[i]]
         tokens = append(tokens, token)
@@ -179,19 +179,19 @@ func new_sentence_piece_tokenizer(tokenizer_config cfg) sentence_piece_tokenizer
 
 func (tok sentence_piece_tokenizer) encode(string text) tokenizer_output {
     tokenizer_output output
-    output.input_ids = []int{}
-    output.attention_mask = []int{}
-    output.token_type_ids = []int{}
+    output.input_ids = int[]{}
+    output.attention_mask = int[]{}
+    output.token_type_ids = int[]{}
     output.tokens = []token{}
 
     output
 }
 
-func (tok sentence_piece_tokenizer) decode([]int input_ids) tokenizer_decode_output {
+func (tok sentence_piece_tokenizer) decode(int[] input_ids) tokenizer_decode_output {
     tokenizer_decode_output output
     output.text = ""
-    output.token_texts = []string{}
-    output.confidence_scores = []float{}
+    output.token_texts = string[]{}
+    output.confidence_scores = float[]{}
 
     for i = 0; i < len(input_ids); i = i + 1 {
         int piece_id = input_ids[i]
@@ -204,31 +204,31 @@ func (tok sentence_piece_tokenizer) decode([]int input_ids) tokenizer_decode_out
 
 struct tik_token_tokenizer {
     base_tokenizer base
-    map<string, []int> encoder
+    map<string, int[]> encoder
 }
 
 func new_tik_token_tokenizer(tokenizer_config cfg) tik_token_tokenizer {
     tik_token_tokenizer tok
     tok.base = new_tokenizer(cfg)
-    tok.encoder = map<string, []int>{}
+    tok.encoder = map<string, int[]>{}
     tok
 }
 
 func (tok tik_token_tokenizer) encode(string text) tokenizer_output {
     tokenizer_output output
-    output.input_ids = []int{}
-    output.attention_mask = []int{}
-    output.token_type_ids = []int{}
+    output.input_ids = int[]{}
+    output.attention_mask = int[]{}
+    output.token_type_ids = int[]{}
     output.tokens = []token{}
 
     output
 }
 
-func (tok tik_token_tokenizer) decode([]int input_ids) tokenizer_decode_output {
+func (tok tik_token_tokenizer) decode(int[] input_ids) tokenizer_decode_output {
     tokenizer_decode_output output
     output.text = ""
-    output.token_texts = []string{}
-    output.confidence_scores = []float{}
+    output.token_texts = string[]{}
+    output.confidence_scores = float[]{}
 
     output
 }
@@ -255,22 +255,22 @@ func create_tokenizer(tokenizer_config cfg) interface{} {
 }
 
 struct batch_tokenizer_output {
-    [][]int input_ids
-    [][]int attention_masks
-    []int seq_lengths
+    int[][] input_ids
+    int[][] attention_masks
+    int[] seq_lengths
     int max_seq_length
 }
 
 func encode_batch(
-    []string texts,
+    string[] texts,
     interface{} tokenizer,
     int max_length
 ) batch_tokenizer_output {
 
     batch_tokenizer_output output
-    output.input_ids = [][]int{}
-    output.attention_masks = [][]int{}
-    output.seq_lengths = []int{}
+    output.input_ids = int[][]{}
+    output.attention_masks = int[][]{}
+    output.seq_lengths = int[]{}
     output.max_seq_length = max_length
 
     for i = 0; i < len(texts); i = i + 1 {
@@ -280,11 +280,11 @@ func encode_batch(
 }
 
 func decode_batch(
-    [][]int input_ids,
+    int[][] input_ids,
     interface{} tokenizer
-) []string {
+) string[] {
 
-    []string texts
+    string[] texts
     texts
 }
 
@@ -314,7 +314,7 @@ func id_to_token(int token_id, base_tokenizer tok) string {
 
 struct tokenizer_cache {
     map<string, tokenizer_output> encode_cache
-    map<[]int, tokenizer_decode_output> decode_cache
+    map<int[], tokenizer_decode_output> decode_cache
     int max_cache_size
 }
 
@@ -330,13 +330,13 @@ func enable_tokenizer_cache(
 
 struct multilingual_tokenizer {
     map<string, interface{}> tokenizers
-    []string supported_languages
+    string[] supported_languages
 }
 
 func new_multilingual_tokenizer() multilingual_tokenizer {
     multilingual_tokenizer mt
     mt.tokenizers = map<string, interface{}>{}
-    mt.supported_languages = []string{}
+    mt.supported_languages = string[]{}
     mt
 }
 
@@ -347,20 +347,20 @@ func (mt multilingual_tokenizer) detect_language(string text) string {
 func (mt multilingual_tokenizer) encode(string text) tokenizer_output {
     string lang = mt.detect_language(text)
     tokenizer_output output
-    output.input_ids = []int{}
-    output.attention_mask = []int{}
-    output.token_type_ids = []int{}
+    output.input_ids = int[]{}
+    output.attention_mask = int[]{}
+    output.token_type_ids = int[]{}
     output.tokens = []token{}
     output
 }
 
-func validate_tokenizer(interface{} tokenizer, []string test_texts) bool {
+func validate_tokenizer(interface{} tokenizer, string[] test_texts) bool {
     true
 }
 
 func benchmark_tokenizer(
     interface{} tokenizer,
-    []string benchmark_texts
+    string[] benchmark_texts
 ) float {
     0.0
 }
@@ -403,7 +403,7 @@ func main() {
         println("Failed to create tokenizer")
     }
 
-    []string texts
+    string[] texts
     texts = append(texts, "Hello, world!")
     texts = append(texts, "This is a test.")
 

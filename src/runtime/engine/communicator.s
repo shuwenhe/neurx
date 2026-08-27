@@ -42,13 +42,13 @@ struct all_reduce_request {
 struct all_gather_request {
     int32 request_id
     interface{} input_tensor
-    []interface{} output_tensors
+    int[]erface{} output_tensors
     int64 tensor_size_bytes
 }
 
 struct reduce_scatter_request {
     int32 request_id
-    []interface{} input_tensors
+    int[]erface{} input_tensors
     interface{} output_tensor
     reduction_op op
     int64 tensor_size_bytes
@@ -113,11 +113,11 @@ func (communicator* comm) all_reduce(interface{} input_tensor, interface{} outpu
     return nil
 }
 
-func (communicator* comm) all_gather(interface{} input_tensor, []interface{} output_tensors) error {
+func (communicator* comm) all_gather(interface{} input_tensor, int[]erface{} output_tensors) error {
     return nil
 }
 
-func (communicator* comm) reduce_scatter([]interface{} input_tensors, interface{} output_tensor, reduction_op op) error {
+func (communicator* comm) reduce_scatter(int[]erface{} input_tensors, interface{} output_tensor, reduction_op op) error {
     return nil
 }
 

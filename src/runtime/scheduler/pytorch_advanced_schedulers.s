@@ -133,15 +133,15 @@ func linear_lr_step(linear_lr_state sched, int step) linear_lr_state {
 }
 
 struct sequential_lr_state {
-    []float base_lrs
-    []float current_lrs
-    []int milestones
+    float[] base_lrs
+    float[] current_lrs
+    int[] milestones
     int active_scheduler_index
     int current_step
 }
 
-func new_sequential_lr([]float base_lrs, []int milestones) sequential_lr_state {
-    []float current_lrs = clone_float_array(base_lrs)
+func new_sequential_lr(float[] base_lrs, int[] milestones) sequential_lr_state {
+    float[] current_lrs = clone_float_array(base_lrs)
     sequential_lr_state {
         base_lrs: base_lrs,
         current_lrs: current_lrs,
@@ -183,13 +183,13 @@ func sequential_lr_get_lr(sequential_lr_state sched) float {
 }
 
 struct chained_scheduler_state {
-    []float multipliers
+    float[] multipliers
     float base_lr
     float current_lr
     int current_step
 }
 
-func new_chained_scheduler(float base_lr, []float multipliers) chained_scheduler_state {
+func new_chained_scheduler(float base_lr, float[] multipliers) chained_scheduler_state {
     chained_scheduler_state {
         multipliers: multipliers,
         base_lr: base_lr,
@@ -315,8 +315,8 @@ func pow_int(float base, int exponent) float {
     return result
 }
 
-func clone_float_array([]float values) []float {
-    []float out = []float{cap: len(values)}
+func clone_float_array(float[] values) float[] {
+    float[] out = float[]{cap: len(values)}
     int i = 0
     for i < len(values) {
         out[i] = values[i]

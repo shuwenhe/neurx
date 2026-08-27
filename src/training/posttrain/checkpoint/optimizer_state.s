@@ -2,8 +2,8 @@ package neurx.posttrain.checkpoint.optimizer_state
 
 struct adamw_state {
     int step
-    [][]float momentum
-    [][]float variance
+    float[][] momentum
+    float[][] variance
 }
 
 func init_adamw_state(int num_layers, int params_per_layer) {

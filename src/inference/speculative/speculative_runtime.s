@@ -5,17 +5,17 @@ struct speculative_decode_runtime {
     int batch_size
     int max_batch_tokens
     speculative_statistics statistics
-    request_queue: []int
+    request_queue: int[]
 }
 
 struct speculative_generation_request {
     int request_id
-    input_ids: []int
+    input_ids: int[]
     int max_tokens
     float temperature
     int top_k
     float top_p
-    output_tokens: []int
+    output_tokens: int[]
     bool is_complete
 }
 
@@ -23,14 +23,14 @@ struct speculative_generation_batch {
     batch_requests: []speculative_generation_request
     draft_predictions: [][]draft_token
     verification_results: [][]verification_result
-    final_outputs: [][]int
+    final_outputs: int[][]
     float batch_generation_time_ms
 }
 
 struct speculative_decode_context {
     int sequence_length
-    cached_hidden_states: [][]float
-    kv_cache: [][]float
+    cached_hidden_states: float[][]
+    kv_cache: float[][]
     bool is_prefill_stage
     int speculative_tokens_accepted
     int speculative_tokens_rejected
@@ -44,12 +44,12 @@ func new_speculative_decode_runtime(draft_model_executor draft_exec, verifier_ex
         batch_size: 32,
         max_batch_tokens: 4096,
         statistics: new_speculative_statistics(),
-        request_queue: []int{},
+        request_queue: int[]{},
     }
     runtime
 }
 
-func new_generation_request(int req_id, []int input_ids, int max_tokens) speculative_generation_request {
+func new_generation_request(int req_id, int[] input_ids, int max_tokens) speculative_generation_request {
     req := speculative_generation_request{
         request_id: req_id,
         input_ids: input_ids,
@@ -57,7 +57,7 @@ func new_generation_request(int req_id, []int input_ids, int max_tokens) specula
         temperature: 0.7,
         top_k: 50,
         top_p: 0.95,
-        output_tokens: []int{},
+        output_tokens: int[]{},
         is_complete: false,
     }
     req
@@ -68,7 +68,7 @@ func new_generation_batch() speculative_generation_batch {
         batch_requests: []speculative_generation_request{},
         draft_predictions: [][]draft_token{},
         verification_results: [][]verification_result{},
-        final_outputs: [][]int{},
+        final_outputs: int[][]{},
         batch_generation_time_ms: 0.0,
     }
     batch
@@ -77,8 +77,8 @@ func new_generation_batch() speculative_generation_batch {
 func new_decode_context() speculative_decode_context {
     ctx := speculative_decode_context{
         sequence_length: 0,
-        cached_hidden_states: [][]float{},
-        kv_cache: [][]float{},
+        cached_hidden_states: float[][]{},
+        kv_cache: float[][]{},
         is_prefill_stage: true,
         speculative_tokens_accepted: 0,
         speculative_tokens_rejected: 0,
@@ -97,7 +97,7 @@ func dequeue_generation_request(speculative_decode_runtime runtime) (speculative
     req_id := -1
     if updated.request_queue.len > 0 {
         req_id = updated.request_queue[0]
-        new_queue := []int{}
+        new_queue := int[]{}
         i := 1
         for i < updated.request_queue.len {
             new_queue = append(new_queue, updated.request_queue[i])
@@ -114,10 +114,10 @@ func speculative_prefill_phase(speculative_decode_runtime runtime, speculative_g
     (draft_preds, verify_results)
 }
 
-func speculative_decode_phase(speculative_decode_runtime runtime, int current_token_id, speculative_decode_context context) ([]draft_token, []verification_result, []int) {
-    draft_preds := draft_predict_batch(runtime.draft_executor, []int{current_token_id}, runtime.decode_config)
+func speculative_decode_phase(speculative_decode_runtime runtime, int current_token_id, speculative_decode_context context) ([]draft_token, []verification_result, int[]) {
+    draft_preds := draft_predict_batch(runtime.draft_executor, int[]{current_token_id}, runtime.decode_config)
     verify_results := verify_draft_sequence(runtime.verifier_executor, draft_preds)
-    output_tokens := []int{}
+    output_tokens := int[]{}
     i := 0
     for i < verify_results.len {
         if verify_results[i].accepted {
@@ -149,7 +149,7 @@ func process_speculative_batch(speculative_decode_runtime runtime, speculative_g
             }
             j = j + 1
         }
-        output := []int{}
+        output := int[]{}
         j = 0
         for j < prefill_verifies.len {
             if prefill_verifies[j].accepted {
@@ -165,7 +165,7 @@ func process_speculative_batch(speculative_decode_runtime runtime, speculative_g
     (updated_runtime, updated_batch)
 }
 
-func generate_with_speculative_decoding(speculative_decode_runtime runtime, speculative_generation_request request) (speculative_decode_runtime, []int) {
+func generate_with_speculative_decoding(speculative_decode_runtime runtime, speculative_generation_request request) (speculative_decode_runtime, int[]) {
     updated_runtime := runtime
     output_tokens := request.input_ids
     token_count := 0
@@ -189,7 +189,7 @@ func generate_with_speculative_decoding(speculative_decode_runtime runtime, spec
         }
         verify_batch := speculative_batch{
             batch_id: 0,
-            sequence_ids: []int{request.request_id},
+            sequence_ids: int[]{request.request_id},
             draft_predictions: [][]draft_token{draft_preds},
             verification_results: verify_results,
             acceptance_rate: compute_acceptance_rate(verify_results),

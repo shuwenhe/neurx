@@ -138,7 +138,7 @@ func new_train_orchestrator(scale training_scale, int num_gpus) (*train_orchestr
 
 func (train_orchestrator* t) setup() error {
     t.logger.log("Setting up training environment...")
-    for _, dir := range []string{t.config.log_dir, t.config.checkpoint_dir, t.config.output_dir} {
+    for _, dir := range string[]{t.config.log_dir, t.config.checkpoint_dir, t.config.output_dir} {
         if err := mkdir(dir); err != nil {
             return err
         }

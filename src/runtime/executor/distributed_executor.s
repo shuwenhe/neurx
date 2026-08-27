@@ -152,14 +152,14 @@ func (DistributedExecutor* de) TensorParallelForward(input []f32) ExecutionResul
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (DistributedExecutor* de) PipelineParallelForward(layers []string) ExecutionResult {
+func (DistributedExecutor* de) PipelineParallelForward(layers string[]) ExecutionResult {
 
     return ExecutionResult{success: 1, error_code: ERROR_SUCCESS}
 }
 
-func (DistributedExecutor* de) LoadBalance(sequences []string) [][]string {
+func (DistributedExecutor* de) LoadBalance(sequences string[]) string[][] {
 
-    result := make([][]string, de.distributed_config.world_size)
+    result := make(string[][], de.distributed_config.world_size)
     for i := 0; i < len(sequences); i++ {
         rank := i % int(de.distributed_config.world_size)
         result[rank] = append(result[rank], sequences[i])

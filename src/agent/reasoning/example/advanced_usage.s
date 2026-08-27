@@ -140,7 +140,7 @@ func example_cross_chain_coordination() {
     config := new_default_cot_config()
     manager := new_reasoning_manager(config)
 
-    related_prompts := []string{
+    related_prompts := string[]{
         "What is photosynthesis",
         "What is the role of chlorophyll",
         "How do light reactions work",

@@ -91,7 +91,7 @@ func npu_get_memory_info(npu_device device) [int64, int64] {
     [free, total]
 }
 
-func npu_chip_types() []string {
+func npu_chip_types() string[] {
     ["910a", "910b", "910c", "da", "d910"]
 }
 

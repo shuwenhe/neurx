@@ -2,16 +2,16 @@ package neurx.agent.trace
 use neurx.agent.observation
 
 struct agent_trace_state {
-    []int steps
-    []string tasks
-    []string inputs
-    []string actions
-    []string observations
-    []string active_skills
-    []string tool_names
-    []int tool_timeout_ms
-    []int tool_retries
-    []bool ok_flags
+    int[] steps
+    string[] tasks
+    string[] inputs
+    string[] actions
+    string[] observations
+    string[] active_skills
+    string[] tool_names
+    int[] tool_timeout_ms
+    int[] tool_retries
+    bool[] ok_flags
     int count
 }
 
@@ -33,16 +33,16 @@ func new_agent_trace_state() agent_trace_state {
 
 func agent_trace_append(agent_trace_state state, int step, string task, string input, string action, string observation, string active_skill, string tool_name, int timeout_ms, int retries, bool ok) agent_trace_state {
     int size = len(state.steps)
-    []int steps = []int{cap: size + 1}
-    []string tasks = []string{cap: size + 1}
-    []string inputs = []string{cap: size + 1}
-    []string actions = []string{cap: size + 1}
-    []string observations = []string{cap: size + 1}
-    []string active_skills = []string{cap: size + 1}
-    []string tool_names = []string{cap: size + 1}
-    []int tool_timeout_ms = []int{cap: size + 1}
-    []int tool_retries = []int{cap: size + 1}
-    []bool ok_flags = []bool{cap: size + 1}
+    int[] steps = int[]{cap: size + 1}
+    string[] tasks = string[]{cap: size + 1}
+    string[] inputs = string[]{cap: size + 1}
+    string[] actions = string[]{cap: size + 1}
+    string[] observations = string[]{cap: size + 1}
+    string[] active_skills = string[]{cap: size + 1}
+    string[] tool_names = string[]{cap: size + 1}
+    int[] tool_timeout_ms = int[]{cap: size + 1}
+    int[] tool_retries = int[]{cap: size + 1}
+    bool[] ok_flags = bool[]{cap: size + 1}
     int i = 0
     for i < size {
         steps[i] = state.steps[i]
@@ -182,16 +182,16 @@ func agent_trace_window(agent_trace_state state, int max_entries) agent_trace_st
         return state
     }
     int start = size - keep
-    []int steps = []int{cap: keep}
-    []string tasks = []string{cap: keep}
-    []string inputs = []string{cap: keep}
-    []string actions = []string{cap: keep}
-    []string observations = []string{cap: keep}
-    []string active_skills = []string{cap: keep}
-    []string tool_names = []string{cap: keep}
-    []int tool_timeout_ms = []int{cap: keep}
-    []int tool_retries = []int{cap: keep}
-    []bool ok_flags = []bool{cap: keep}
+    int[] steps = int[]{cap: keep}
+    string[] tasks = string[]{cap: keep}
+    string[] inputs = string[]{cap: keep}
+    string[] actions = string[]{cap: keep}
+    string[] observations = string[]{cap: keep}
+    string[] active_skills = string[]{cap: keep}
+    string[] tool_names = string[]{cap: keep}
+    int[] tool_timeout_ms = int[]{cap: keep}
+    int[] tool_retries = int[]{cap: keep}
+    bool[] ok_flags = bool[]{cap: keep}
     int i = 0
     for i < keep {
         steps[i] = state.steps[start + i]
@@ -254,7 +254,7 @@ func agent_trace_ok_rate(agent_trace_state state) float {
     float(ok_count) / float(size)
 }
 
-func agent_trace_filter_task_obs(agent_trace_state state, string task) []string {
+func agent_trace_filter_task_obs(agent_trace_state state, string task) string[] {
     int count = 0
     int i = 0
     for i < len(state.tasks) {
@@ -263,7 +263,7 @@ func agent_trace_filter_task_obs(agent_trace_state state, string task) []string 
         }
         i = i + 1
     }
-    []string out = []string{cap: count}
+    string[] out = string[]{cap: count}
     int wi = 0
     i = 0
     for i < len(state.tasks) {

@@ -26,7 +26,7 @@ struct mlx_memory_allocation {
 
 struct mlx_array {
     int64 data_ptr
-    []int shape
+    int[] shape
     string dtype
     int64 size
 }
@@ -87,7 +87,7 @@ func mlx_get_memory_info(mlx_device device) [int64, int64] {
     [device.available_memory_bytes, device.total_memory_bytes]
 }
 
-func mlx_array_create([]int shape, string dtype) mlx_array {
+func mlx_array_create(int[] shape, string dtype) mlx_array {
     size = int64(1)
     i = 0
     for i < len(shape) {
@@ -102,11 +102,11 @@ func mlx_array_create([]int shape, string dtype) mlx_array {
     }
 }
 
-func mlx_array_zeros([]int shape, string dtype) mlx_array {
+func mlx_array_zeros(int[] shape, string dtype) mlx_array {
     mlx_array_create(shape, dtype)
 }
 
-func mlx_array_ones([]int shape, string dtype) mlx_array {
+func mlx_array_ones(int[] shape, string dtype) mlx_array {
     mlx_array_create(shape, dtype)
 }
 

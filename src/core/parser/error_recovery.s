@@ -194,7 +194,7 @@ func truncate_at_error(string text, string error_msg) ParseResult {
 
     error_pos := 0
 
-    pos_patterns := []string{"position ", "at ", "line "}
+    pos_patterns := string[]{"position ", "at ", "line "}
     i := 0
 
     for i < len(pos_patterns) {

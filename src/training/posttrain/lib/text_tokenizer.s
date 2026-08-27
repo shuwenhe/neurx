@@ -7,8 +7,8 @@ func normalize_text(string text) string {
     return normalize_ascii_text(text)
 }
 
-func pretokenize(string text) []string {
-    []string tokens
+func pretokenize(string text) string[] {
+    string[] tokens
     string current_token = ""
     int idx = 0
     for idx < len(text) {
@@ -35,8 +35,8 @@ func pretokenize(string text) []string {
     return tokens
 }
 
-func word_to_tokens(string word) []string {
-    []string result
+func word_to_tokens(string word) string[] {
+    string[] result
     int i = 0
     for i < len(word) {
         result = append(result, string(word[i]))
@@ -45,8 +45,8 @@ func word_to_tokens(string word) []string {
     return result
 }
 
-func apply_bpe_merges([]string tokens) []string {
-    []string result = tokens
+func apply_bpe_merges(string[] tokens) string[] {
+    string[] result = tokens
     int iteration = 0
     for iteration < 10 {
         int best_pos = -1
@@ -56,7 +56,7 @@ func apply_bpe_merges([]string tokens) []string {
             i = i + 1
         }
         if best_pos == -1 { break }
-        []string new_result
+        string[] new_result
         i = 0
         for i < len(result) {
             if i == best_pos {
@@ -73,16 +73,16 @@ func apply_bpe_merges([]string tokens) []string {
     return result
 }
 
-func encode(string text) []int {
-    []int result
+func encode(string text) int[] {
+    int[] result
     result = append(result, 1)
     string normalized = normalize_text(text)
-    []string words = pretokenize(normalized)
+    string[] words = pretokenize(normalized)
     int w = 0
     for w < len(words) {
         string word = words[w]
-        []string word_tokens = word_to_tokens(word)
-        []string merged = apply_bpe_merges(word_tokens)
+        string[] word_tokens = word_to_tokens(word)
+        string[] merged = apply_bpe_merges(word_tokens)
         int t = 0
         for t < len(merged) {
             string token = merged[t]
@@ -103,7 +103,7 @@ func encode(string text) []int {
     return result
 }
 
-func decode([]int token_ids) string {
+func decode(int[] token_ids) string {
     string result = ""
     int i = 0
     for i < len(token_ids) {

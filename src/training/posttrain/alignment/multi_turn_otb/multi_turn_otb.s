@@ -29,7 +29,7 @@ func default_multi_turn_otb_config() multi_turn_otb_config {
 func compute_multi_turn_otb_advantages(
     tensor token_level_rewards,
     tensor response_mask,
-    []int index,
+    int[] index,
     tensor old_log_probs,
     tensor sum_pi_squared,
     []turn_boundary turn_boundaries,
@@ -42,9 +42,9 @@ func compute_multi_turn_otb_advantages(
     tensor w_per_timestep = add_scalar(sub(from_float(1.0), mul_scalar(pi_t, 2.0)), sum_pi_squared)
     tensor w_cumulative = cumsum_dim(mul(w_per_timestep, response_mask), 1)
     tensor baselines = zeros_like(returns)
-    [][]int prompt_groups = group_by_index(index, batch_size)
+    int[][] prompt_groups = group_by_index(index, batch_size)
     for int g = 0; g < len(prompt_groups); g = g + 1 {
-        []int trajectory_indices = prompt_groups[g]
+        int[] trajectory_indices = prompt_groups[g]
         int num_trajectories = len(trajectory_indices)
         if num_trajectories == 1 {
             continue
@@ -86,13 +86,13 @@ func compute_returns(tensor rewards, tensor mask) tensor {
     return flip_dim(cumsum, 1)
 }
 
-func group_by_index([]int index, int batch_size) [][]int {
-    [][]int groups = make([][]int, 1024)
+func group_by_index(int[] index, int batch_size) int[][] {
+    int[][] groups = make(int[][], 1024)
     for int i = 0; i < batch_size; i = i + 1 {
         int idx = index[i]
         groups[idx] = append(groups[idx], i)
     }
-    [][]int result = make([][]int, 0)
+    int[][] result = make(int[][], 0)
     for int i = 0; i < 1024; i = i + 1 {
         if len(groups[i]) > 0 {
             result = append(result, groups[i])

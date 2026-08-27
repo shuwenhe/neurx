@@ -20,10 +20,10 @@ func new_cache_stats(int total) cache_stats {
     return stats
 }
 
-func allocate_kv_blocks_impl(int block_size, int num_tokens, int currently_allocated) []int {
+func allocate_kv_blocks_impl(int block_size, int num_tokens, int currently_allocated) int[] {
     int blocks_needed
     blocks_needed = (num_tokens + block_size - 1) / block_size
-    []int block_ids = []
+    int[] block_ids = []
     int i
     i = 0
     for i < blocks_needed {
@@ -48,7 +48,7 @@ func free_kv_blocks(int currently_allocated, int num_blocks) int {
     return result
 }
 
-func copy_kv_blocks([]int src_blocks, []int dst_blocks) int {
+func copy_kv_blocks(int[] src_blocks, int[] dst_blocks) int {
     int min_len
     min_len = len(src_blocks)
     if len(dst_blocks) < min_len {

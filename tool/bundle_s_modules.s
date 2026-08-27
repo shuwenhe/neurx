@@ -6,7 +6,7 @@ use std.strings
 
 func strip_package_and_imports(string content) string {
     lines := strings.Split(content, "\n")
-    result := []string{}
+    result := string[]{}
     for _, line := range lines {
         trimmed := strings.TrimSpace(line)
         if strings.HasPrefix(trimmed, "package ") {

@@ -9,7 +9,7 @@ import (
 
 func remove_comments(string content) string {
 	lines := strings.Split(content, "\n")
-	result := make([]string, 0, len(lines))
+	result := make(string[], 0, len(lines))
 	in_block_comment := false
 	for _, line := range lines {
 		current := line
@@ -52,8 +52,8 @@ func process_file(string file_path) error {
 	return ioutil.WriteFile(file_path, []byte(clean_content), 0644)
 }
 
-func get_files_with_comments(string root_dir) []string {
-	files := []string{}
+func get_files_with_comments(string root_dir) string[] {
+	files := string[]{}
 	_ = filepath.Walk(root_dir, func(current_path string, info os.FileInfo, walk_err error) error {
 		if walk_err != nil {
 			return walk_err

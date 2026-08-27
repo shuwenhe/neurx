@@ -18,10 +18,10 @@ func main() {
         tensor_release(output); tensor_release(right); tensor_release(left); device_close(context); return
     }
     lowered_op lowered = lower_device_op("cuda", true, op_residual_add("bf16", 1024))
-    []string descriptor = []string{cap: 1}
+    string[] descriptor = string[]{cap: 1}
     descriptor[0] = lowered.descriptor
     transformer_execution_plan plan = transformer_descriptor_plan_compile(context, "cuda", descriptor, 0)
-    []string binding = []string{cap: 1}
+    string[] binding = string[]{cap: 1}
     binding[0] = residual_add_binding(left.buffer, right.buffer, output.buffer, 1024)
     transformer_execution_result result = transformer_plan_execute(plan, binding, true)
     if result.success { print("PASS: S Transformer Executor launched CUDA BF16 Kernel\n") }

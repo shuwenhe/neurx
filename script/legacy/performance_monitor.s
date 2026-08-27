@@ -30,7 +30,7 @@ struct system_health_status {
     memory_status           string
     gpu_status              string
     network_status          string
-    alerts                  []string
+    alerts                  string[]
 }
 
 struct performance_monitor {
@@ -38,7 +38,7 @@ struct performance_monitor {
     metrics_history         []performance_metrics
     health_history          []system_health_status
     alerts                  []alert
-    recommendations         []string
+    recommendations         string[]
 }
 
 struct alert {
@@ -81,7 +81,7 @@ func (performance_monitor* monitor) assess_health() system_health_status {
         memory_status: "normal",
         gpu_status: "normal",
         network_status: "normal",
-        alerts: []string{},
+        alerts: string[]{},
     }
     if len(monitor.metrics_history) == 0 {
         return status
@@ -186,7 +186,7 @@ func (performance_monitor* monitor) check_alerts() []alert {
 }
 
 func (performance_monitor* monitor) generate_recommendations() {
-    monitor.recommendations = []string{}
+    monitor.recommendations = string[]{}
     if len(monitor.metrics_history) < 2 {
         return
     }
@@ -209,7 +209,7 @@ func (performance_monitor* monitor) generate_recommendations() {
             "GPU saturated - consider reducing batch size")
     }
     if len(monitor.metrics_history) > 10 {
-        recent_ppls := []float64{}
+        recent_ppls := float[]64{}
         for i := len(monitor.metrics_history)-10; i < len(monitor.metrics_history); i++ {
             recent_ppls = append(recent_ppls, monitor.metrics_history[i].perplexity)
         }
@@ -292,7 +292,7 @@ func new_performance_monitor() *performance_monitor {
         metrics_history: []performance_metrics{},
         health_history: []system_health_status{},
         alerts: []alert{},
-        recommendations: []string{},
+        recommendations: string[]{},
     }
 }
 

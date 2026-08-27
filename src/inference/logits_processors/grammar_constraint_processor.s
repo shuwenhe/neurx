@@ -4,8 +4,8 @@ use neurx.inference.logits_processors
 
 struct grammar_rule {
     string rule_name
-    []string allowed_tokens
-    []int allowed_token_ids
+    string[] allowed_tokens
+    int[] allowed_token_ids
     string pattern
     string rule_type
     bool is_active
@@ -20,7 +20,7 @@ struct grammar_constraint_set {
 
 struct grammar_constraint_processor {
     grammar_constraint_set constraints
-    map[string][]int rule_token_map
+    map[string]int[] rule_token_map
     bool strict_mode
     int vocab_size
 }
@@ -33,7 +33,7 @@ func new_grammar_constraint_processor(int vocab_size) grammar_constraint_process
             tokens_matched: 0,
             match_all_rules: false,
         },
-        rule_token_map: map[string][]int{},
+        rule_token_map: map[string]int[]{},
         strict_mode: false,
         vocab_size: vocab_size,
     }
@@ -41,14 +41,14 @@ func new_grammar_constraint_processor(int vocab_size) grammar_constraint_process
 
 func (grammar_constraint_processor* processor) add_grammar_rule(
     rule_name string,
-    allowed_tokens []string,
+    allowed_tokens string[],
     rule_type string
 ) bool {
 
     rule := grammar_rule{
         rule_name: rule_name,
         allowed_tokens: allowed_tokens,
-        allowed_token_ids: make([]int, 0),
+        allowed_token_ids: make(int[], 0),
         pattern: "",
         rule_type: rule_type,
         is_active: true,
@@ -66,8 +66,8 @@ func (grammar_constraint_processor* processor) add_pattern_rule(
 
     rule := grammar_rule{
         rule_name: rule_name,
-        allowed_tokens: make([]string, 0),
-        allowed_token_ids: make([]int, 0),
+        allowed_tokens: make(string[], 0),
+        allowed_token_ids: make(int[], 0),
         pattern: pattern,
         rule_type: "pattern",
         is_active: true,
@@ -79,14 +79,14 @@ func (grammar_constraint_processor* processor) add_pattern_rule(
 }
 
 func (grammar_constraint_processor* processor) process_logits(
-    []float logits
-) []float {
+    float[] logits
+) float[] {
 
     if len(processor.constraints.rules) == 0 {
         return logits
     }
 
-    []float result = make([]float, len(logits))
+    float[] result = make(float[], len(logits))
     int i = 0
     for i < len(logits) {
         result[i] = -10000.0
@@ -117,7 +117,7 @@ func (grammar_constraint_processor* processor) process_logits(
     return result
 }
 
-func apply_exact_rule([]float result, grammar_rule rule) {
+func apply_exact_rule(float[] result, grammar_rule rule) {
 
     int i = 0
     for i < len(rule.allowed_token_ids) {
@@ -129,7 +129,7 @@ func apply_exact_rule([]float result, grammar_rule rule) {
     }
 }
 
-func apply_pattern_rule([]float result, grammar_rule rule) {
+func apply_pattern_rule(float[] result, grammar_rule rule) {
 
     string pattern = rule.pattern
 
@@ -145,7 +145,7 @@ func apply_pattern_rule([]float result, grammar_rule rule) {
     }
 }
 
-func apply_list_rule([]float result, []float logits, grammar_rule rule) {
+func apply_list_rule(float[] result, float[] logits, grammar_rule rule) {
 
     int i = 0
     for i < len(rule.allowed_token_ids) {
@@ -157,7 +157,7 @@ func apply_list_rule([]float result, []float logits, grammar_rule rule) {
     }
 }
 
-func apply_digit_pattern([]float result) {
+func apply_digit_pattern(float[] result) {
 
     int i = 0
     for i < 10 {
@@ -168,7 +168,7 @@ func apply_digit_pattern([]float result) {
     }
 }
 
-func apply_letter_pattern([]float result) {
+func apply_letter_pattern(float[] result) {
 
     int i = 10
     for i < 62 {
@@ -179,7 +179,7 @@ func apply_letter_pattern([]float result) {
     }
 }
 
-func apply_alphanumeric_pattern([]float result) {
+func apply_alphanumeric_pattern(float[] result) {
 
     int i = 0
     for i < 63 {
@@ -226,7 +226,7 @@ func validate_token_against_rules(
     return false
 }
 
-func token_in_list(int token_id, []int list) bool {
+func token_in_list(int token_id, int[] list) bool {
     int i = 0
     for i < len(list) {
         if list[i] == token_id {
@@ -243,7 +243,7 @@ func create_json_grammar() grammar_constraint_set {
 
     rule_start := grammar_rule{
         rule_name: "json_start",
-        allowed_tokens: []string{"{", "["},
+        allowed_tokens: string[]{"{", "["},
         rule_type: "exact",
         is_active: true,
     }
@@ -264,7 +264,7 @@ func create_sql_grammar() grammar_constraint_set {
 
     rule_start := grammar_rule{
         rule_name: "sql_start",
-        allowed_tokens: []string{"SELECT", "INSERT", "UPDATE", "DELETE"},
+        allowed_tokens: string[]{"SELECT", "INSERT", "UPDATE", "DELETE"},
         rule_type: "exact",
         is_active: true,
     }

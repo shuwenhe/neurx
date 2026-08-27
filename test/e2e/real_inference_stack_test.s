@@ -51,15 +51,15 @@ func expect(bool cond, string name) int {
 
 func test_rms_norm_unit_vector() int {
     int n = 8
-    []float x = make([]float, n)
-    []float w = make([]float, n)
+    float[] x = make(float[], n)
+    float[] w = make(float[], n)
     int i = 0
     for i < n {
         x[i] = 1.0
         w[i] = 1.0
         i = i + 1
     }
-    []float out = rms_norm(x, w, n, 1.0e-6)
+    float[] out = rms_norm(x, w, n, 1.0e-6)
     int fail = 0
     fail = fail + expect(approx(out[0], 1.0, 1.0e-3), "rms_norm of ones vector is ~1")
     fail = fail + expect(approx(out[3], 1.0, 1.0e-3), "rms_norm element 3 ~1")
@@ -69,16 +69,16 @@ func test_rms_norm_unit_vector() int {
 func test_matmul_identity() int {
     int in_dim = 4
     int out_dim = 4
-    []float x = make([]float, in_dim)
+    float[] x = make(float[], in_dim)
     x[0] = 2.0
     x[1] = 3.0
-    []float w = make([]float, out_dim * in_dim)
+    float[] w = make(float[], out_dim * in_dim)
     int i = 0
     for i < out_dim && i < in_dim {
         w[i * in_dim + i] = 1.0
         i = i + 1
     }
-    []float out = matmul_vec(x, w, in_dim, out_dim)
+    float[] out = matmul_vec(x, w, in_dim, out_dim)
     int fail = 0
     fail = fail + expect(approx(out[0], 2.0, 1.0e-6), "matmul identity out[0]=2")
     fail = fail + expect(approx(out[1], 3.0, 1.0e-6), "matmul identity out[1]=3")
@@ -88,12 +88,12 @@ func test_matmul_identity() int {
 func test_rope_rotation() int {
     int num_heads = 1
     int head_size = 4
-    []float q = make([]float, num_heads * head_size)
+    float[] q = make(float[], num_heads * head_size)
     q[0] = 1.0
     q[1] = 0.0
     q[2] = 1.0
     q[3] = 0.0
-    []float out = apply_rope(q, num_heads, head_size, 1, 10000.0)
+    float[] out = apply_rope(q, num_heads, head_size, 1, 10000.0)
     int fail = 0
     fail = fail + expect(approx(out[0], 1.0, 0.1), "rope at position 1 keeps magnitude for dim 0")
     fail = fail + expect(len(out) == len(q), "rope output length matches input")
@@ -112,10 +112,10 @@ func test_moe_route_top_k() int {
     int hidden = 4
     int num_experts = 4
     int top_k = 2
-    []float hidden_vec = make([]float, hidden)
+    float[] hidden_vec = make(float[], hidden)
     hidden_0[] = 1.0
     hidden_1[] = 2.0
-    []float gate_w = make([]float, num_experts * hidden)
+    float[] gate_w = make(float[], num_experts * hidden)
     gate_w[1 * hidden + 0] = 1.0
     gate_w[1 * hidden + 1] = 1.0
     gate_w[3 * hidden + 0] = 0.5
@@ -134,9 +134,9 @@ func test_transformer_layer_forward_runs() int {
     paged_kv_cache cache = new_paged_kv_cache(paged_attention_config{block_size: cfg.block_size, num_kv_heads: cfg.num_kv_heads, head_size: cfg.head_size, max_blocks: cfg.max_blocks, scale: 1.0})
     cache = reserve_tokens(cache, 4)
     []slot_mapping slots = cache.token_to_slot
-    []float hidden = make([]float, cfg.hidden_size)
+    float[] hidden = make(float[], cfg.hidden_size)
     hidden[0] = 1.0
-    ([]float out, paged_kv_cache c) = transformer_layer_forward(hidden, w, cfg, cache, slots, 0)
+    (float[] out, paged_kv_cache c) = transformer_layer_forward(hidden, w, cfg, cache, slots, 0)
     int fail = 0
     fail = fail + expect(len(out) == cfg.hidden_size, "layer forward output length matches hidden_size")
     fail = fail + expect(approx(out[0], 1.0, 0.5), "layer forward output[0] near input due to identity weights + residual")
@@ -145,7 +145,7 @@ func test_transformer_layer_forward_runs() int {
 
 func test_tokenizer_encode_decode_roundtrip() int {
     real_bpe_tokenizer tok = new_real_bpe_tokenizer()
-    []int ids = encode(tok, "hello world")
+    int[] ids = encode(tok, "hello world")
     string decoded = decode(tok, ids)
     int fail = 0
     fail = fail + expect(len(ids) > 0, "encode returns non-empty ids")
@@ -157,7 +157,7 @@ func test_tokenizer_encode_decode_roundtrip() int {
 
 func test_tokenizer_byte_fallback() int {
     real_bpe_tokenizer tok = new_real_bpe_tokenizer()
-    []int ids = encode(tok, "#@")
+    int[] ids = encode(tok, "#@")
     string decoded = decode(tok, ids)
     int fail = 0
     fail = fail + expect(len(ids) > 0, "byte fallback encode returns ids")
@@ -173,7 +173,7 @@ func test_generation_engine_end_to_end() int {
     fail = fail + expect(result.num_generated > 0, "engine generates at least one token")
     fail = fail + expect(len(result.token_ids) == result.num_generated, "token_ids length matches num_generated")
     fail = fail + expect(len(result.token_strings) == result.num_generated, "token_strings length matches num_generated")
-    []int all_ids = encode(engine.tokenizer, "hello")
+    int[] all_ids = encode(engine.tokenizer, "hello")
     int i = 0
     for i < result.num_generated {
         all_ids = append(all_ids, result.token_ids[i])

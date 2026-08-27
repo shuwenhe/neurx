@@ -1,14 +1,14 @@
 package neurx.scheduler.swa_lr
 
 struct swa_lr_state {
-    []float current_lrs
-    []float swa_lrs
+    float[] current_lrs
+    float[] swa_lrs
     int anneal_epochs
     string anneal_strategy
     int step_count
 }
 
-func new_swa_lr([]float initial_lrs, []float swa_lrs, int anneal_epochs, string anneal_strategy) swa_lr_state {
+func new_swa_lr(float[] initial_lrs, float[] swa_lrs, int anneal_epochs, string anneal_strategy) swa_lr_state {
     swa_lr_state {
         current_lrs: clone_float_array(initial_lrs),
         swa_lrs: clone_float_array(swa_lrs),
@@ -86,8 +86,8 @@ func swa_lr_get_lr(swa_lr_state sched, int group_index) float {
     return sched.current_lrs[group_index]
 }
 
-func clone_float_array([]float values) []float {
-    []float out = []float{cap: len(values)}
+func clone_float_array(float[] values) float[] {
+    float[] out = float[]{cap: len(values)}
     int i = 0
     for i < len(values) {
         out[i] = values[i]

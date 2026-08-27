@@ -18,8 +18,8 @@ struct lora_integrated_model {
     lora_model_config config
     lora_adapter_manager adapter_manager
     lora_request_router request_router
-    []float base_weights
-    map[string][]float merged_weights_cache
+    float[] base_weights
+    map[string]float[] merged_weights_cache
     string current_adapter_id
     int layer_idx
 }
@@ -39,8 +39,8 @@ func new_lora_integrated_model(config lora_model_config) lora_integrated_model {
         config: config,
         adapter_manager: adapter_mgr,
         request_router: router,
-        base_weights: make([]float, config.hidden_dim * config.hidden_dim),
-        merged_weights_cache: map[string][]float{},
+        base_weights: make(float[], config.hidden_dim * config.hidden_dim),
+        merged_weights_cache: map[string]float[]{},
         current_adapter_id: "",
         layer_idx: 0,
     }
@@ -84,7 +84,7 @@ func (lora_integrated_model* model) switch_adapter(adapter_id string) bool {
 
     model.current_adapter_id = adapter_id
 
-    model.merged_weights_cache = map[string][]float{}
+    model.merged_weights_cache = map[string]float[]{}
 
     return true
 }
@@ -94,9 +94,9 @@ func (lora_integrated_model* model) get_current_adapter() string {
 }
 
 func (lora_integrated_model* model) forward_with_lora(
-    []float hidden_states,
+    float[] hidden_states,
     string adapter_id
-) []float {
+) float[] {
 
     if len(adapter_id) > 0 && adapter_id != model.current_adapter_id {
         model.switch_adapter(adapter_id)
@@ -120,7 +120,7 @@ func (lora_integrated_model* model) forward_with_lora(
         total_elements / model.config.hidden_dim
     )
 
-    result := make([]float, len(hidden_states))
+    result := make(float[], len(hidden_states))
     int i = 0
     for i < len(hidden_states) {
         if i < len(lora_output) {
@@ -135,7 +135,7 @@ func (lora_integrated_model* model) forward_with_lora(
 }
 
 struct batch_item {
-    []float hidden_states
+    float[] hidden_states
     string adapter_id
     int batch_idx
     string request_id
@@ -143,11 +143,11 @@ struct batch_item {
 
 func (lora_integrated_model* model) forward_batch_multi_adapter(
     []batch_item items
-) [][]float {
+) float[][] {
 
-    results := [][]float{}
+    results := float[][]{}
 
-    adapter_groups := map[string][][]float{}
+    adapter_groups := map[string]float[][]{}
 
     int i = 0
     for i < len(items) {
@@ -177,9 +177,9 @@ func (lora_integrated_model* model) forward_batch_multi_adapter(
 }
 
 func (lora_integrated_model* model) forward_with_merged_weights(
-    []float hidden_states,
+    float[] hidden_states,
     string adapter_id
-) []float {
+) float[] {
 
     if len(model.merged_weights_cache[adapter_id]) > 0 {
         merged := model.merged_weights_cache[adapter_id]
@@ -199,9 +199,9 @@ func (lora_integrated_model* model) forward_with_merged_weights(
 }
 
 func compute_with_merged_weights(
-    []float hidden_states,
-    []float merged_weights
-) []float {
+    float[] hidden_states,
+    float[] merged_weights
+) float[] {
 
     int input_dim = len(merged_weights) / len(merged_weights)
     if input_dim <= 0 {
@@ -221,16 +221,16 @@ func compute_with_merged_weights(
 }
 
 func (lora_integrated_model* model) forward_with_adapter_ensemble(
-    []float hidden_states,
-    []string adapter_ids,
-    []float ensemble_weights
-) []float {
+    float[] hidden_states,
+    string[] adapter_ids,
+    float[] ensemble_weights
+) float[] {
 
     if len(adapter_ids) == 0 {
         return hidden_states
     }
 
-    [][]float outputs = make([][]float, len(adapter_ids))
+    float[][] outputs = make(float[][], len(adapter_ids))
 
     int i = 0
     for i < len(adapter_ids) {
@@ -247,7 +247,7 @@ func (lora_integrated_model* model) forward_with_adapter_ensemble(
         i = i + 1
     }
 
-    result := make([]float, len(hidden_states))
+    result := make(float[], len(hidden_states))
 
     int j = 0
     for j < len(hidden_states) {
@@ -279,7 +279,7 @@ func (lora_integrated_model* model) forward_with_adapter_ensemble(
 func (lora_integrated_model* model) submit_inference_request(
     request_id string,
     adapter_id string,
-    hidden_states []float,
+    hidden_states float[],
     batch_size int,
     seq_len int
 ) bool {
@@ -302,8 +302,8 @@ func (lora_integrated_model* model) process_request_batch() []lora_inference_res
     return model.request_router.process_request_batch()
 }
 
-func (lora_integrated_model* model) list_loaded_adapters() []string {
-    adapters := []string{}
+func (lora_integrated_model* model) list_loaded_adapters() string[] {
+    adapters := string[]{}
 
     for adapter_id in model.adapter_manager.cache {
         if model.adapter_manager.cache[adapter_id].weights.rank > 0 {
@@ -326,11 +326,11 @@ func (lora_integrated_model* model) get_model_stats() map[string]float {
 
 struct lora_transformer_layer {
     model *lora_integrated_model
-    []float layer_norm_weight
-    []float layer_norm_bias
-    []float attention_out_proj
-    []float mlp_up
-    []float mlp_down
+    float[] layer_norm_weight
+    float[] layer_norm_bias
+    float[] attention_out_proj
+    float[] mlp_up
+    float[] mlp_down
 }
 
 func create_lora_transformer_layer(
@@ -339,18 +339,18 @@ func create_lora_transformer_layer(
 
     lora_transformer_layer{
         model: model,
-        layer_norm_weight: make([]float, model.config.hidden_dim),
-        layer_norm_bias: make([]float, model.config.hidden_dim),
-        attention_out_proj: make([]float, model.config.hidden_dim * model.config.hidden_dim),
-        mlp_up: make([]float, model.config.hidden_dim * (model.config.hidden_dim * 4)),
-        mlp_down: make([]float, (model.config.hidden_dim * 4) * model.config.hidden_dim),
+        layer_norm_weight: make(float[], model.config.hidden_dim),
+        layer_norm_bias: make(float[], model.config.hidden_dim),
+        attention_out_proj: make(float[], model.config.hidden_dim * model.config.hidden_dim),
+        mlp_up: make(float[], model.config.hidden_dim * (model.config.hidden_dim * 4)),
+        mlp_down: make(float[], (model.config.hidden_dim * 4) * model.config.hidden_dim),
     }
 }
 
 func (lora_transformer_layer* layer) forward(
-    []float hidden_states,
+    float[] hidden_states,
     string adapter_id
-) []float {
+) float[] {
 
     normalized := apply_layer_norm(
         hidden_states,
@@ -372,11 +372,11 @@ func (lora_transformer_layer* layer) forward(
 }
 
 func compute_lora_output(
-    []float input,
+    float[] input,
     lora_weights weights,
     int input_dim,
     int batch_seq_len
-) []float {
+) float[] {
 
     int rank = weights.rank
     int output_dim = len(weights.lora_b) / rank
@@ -384,8 +384,8 @@ func compute_lora_output(
         output_dim = input_dim
     }
 
-    []float intermediate = matrix_mult(input, weights.lora_a, batch_seq_len, input_dim, rank)
-    []float output = matrix_mult(intermediate, weights.lora_b, batch_seq_len, rank, output_dim)
+    float[] intermediate = matrix_mult(input, weights.lora_a, batch_seq_len, input_dim, rank)
+    float[] output = matrix_mult(intermediate, weights.lora_b, batch_seq_len, rank, output_dim)
 
     int i = 0
     for i < len(output) {
@@ -397,13 +397,13 @@ func compute_lora_output(
 }
 
 func matrix_mult(
-    []float a,
-    []float b,
+    float[] a,
+    float[] b,
     int m,
     int k,
     int n
-) []float {
-    []float result = make([]float, m * n)
+) float[] {
+    float[] result = make(float[], m * n)
 
     int i = 0
     for i < m {
@@ -425,16 +425,16 @@ func matrix_mult(
 }
 
 func apply_layer_norm(
-    []float x,
-    []float weight,
-    []float bias
-) []float {
+    float[] x,
+    float[] weight,
+    float[] bias
+) float[] {
 
     return x
 }
 
-func add_residual([]float x, []float y) []float {
-    []float result = make([]float, len(x))
+func add_residual(float[] x, float[] y) float[] {
+    float[] result = make(float[], len(x))
     int i = 0
     for i < len(x) {
         if i < len(y) {
@@ -447,12 +447,12 @@ func add_residual([]float x, []float y) []float {
     return result
 }
 
-func apply_feed_forward([]float x, int hidden_dim) []float {
+func apply_feed_forward(float[] x, int hidden_dim) float[] {
     return x
 }
 
-func append_hidden([][]float arr, []float val) [][]float {
-    [][]float new_arr = make([][]float, len(arr) + 1)
+func append_hidden(float[][] arr, float[] val) float[][] {
+    float[][] new_arr = make(float[][], len(arr) + 1)
     int i = 0
     for i < len(arr) {
         new_arr[i] = arr[i]
@@ -462,12 +462,12 @@ func append_hidden([][]float arr, []float val) [][]float {
     return new_arr
 }
 
-func append_float_array([][]float arr, []float val) [][]float {
+func append_float_array(float[][] arr, float[] val) float[][] {
     return append_hidden(arr, val)
 }
 
-func append_str([]string arr, string val) []string {
-    []string new_arr = make([]string, len(arr) + 1)
+func append_str(string[] arr, string val) string[] {
+    string[] new_arr = make(string[], len(arr) + 1)
     int i = 0
     for i < len(arr) {
         new_arr[i] = arr[i]

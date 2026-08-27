@@ -20,8 +20,8 @@ struct fact_pair {
 
 struct factual_content {
     []fact facts
-    []string key_entities
-    []string temporal_refs
+    string[] key_entities
+    string[] temporal_refs
     int total_facts
 }
 
@@ -32,9 +32,9 @@ struct consistency_report {
     float coverage_score
     float citation_coverage
     []fact_pair inconsistencies
-    []string hallucinated_facts
-    []string missing_facts
-    []string contradictions
+    string[] hallucinated_facts
+    string[] missing_facts
+    string[] contradictions
     int total_reference_facts
     int total_generated_facts
     int consistent_facts
@@ -60,10 +60,10 @@ struct factual_config {
 func extract_facts(string text, factual_config config) factual_content {
     factual_content content
     content.facts = []fact{}
-    content.key_entities = []string{}
-    content.temporal_refs = []string{}
+    content.key_entities = string[]{}
+    content.temporal_refs = string[]{}
     content.total_facts = 0
-    []string sentences = split_sentences(text)
+    string[] sentences = split_sentences(text)
     int i = 0
     for i < len(sentences) && content.total_facts < config.max_facts_per_doc {
         string sent = sentences[i]
@@ -110,7 +110,7 @@ func extract_fact_from_sentence(string sentence) fact {
         f.predicate = "is"
         return trim_fact(f)
     }
-    []string words = split_words(sentence)
+    string[] words = split_words(sentence)
     if len(words) >= 3 {
         f.subject = words[0]
         f.predicate = words[1]
@@ -172,9 +172,9 @@ func verify_factual_consistency(
 ) consistency_report {
     consistency_report report
     report.inconsistencies = []fact_pair{}
-    report.hallucinated_facts = []string{}
-    report.missing_facts = []string{}
-    report.contradictions = []string{}
+    report.hallucinated_facts = string[]{}
+    report.missing_facts = string[]{}
+    report.contradictions = string[]{}
     report.total_reference_facts = reference_content.total_facts
     report.total_generated_facts = generated_content.total_facts
     report.consistent_facts = 0
@@ -313,7 +313,7 @@ func is_likely_hallucination(fact f, factual_content reference, factual_config c
     false
 }
 
-func temporal_is_compatible(string fact_temporal, []string reference_temporals) bool {
+func temporal_is_compatible(string fact_temporal, string[] reference_temporals) bool {
     int i = 0
     for i < len(reference_temporals) {
         if contains_substring(fact_temporal, reference_temporals[i]) {
@@ -420,8 +420,8 @@ func generate_detailed_report(consistency_report report) string {
     output
 }
 
-func split_sentences(string text) []string {
-    []string sentences = []string{}
+func split_sentences(string text) string[] {
+    string[] sentences = string[]{}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -441,8 +441,8 @@ func split_sentences(string text) []string {
     sentences
 }
 
-func split_words(string text) []string {
-    []string words = []string{}
+func split_words(string text) string[] {
+    string[] words = string[]{}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -530,7 +530,7 @@ func string_equals(string s1, string s2) bool {
     true
 }
 
-func contains_string([]string arr, string s) bool {
+func contains_string(string[] arr, string s) bool {
     int i = 0
     for i < len(arr) {
         if string_equals(arr[i], s) {
@@ -541,7 +541,7 @@ func contains_string([]string arr, string s) bool {
     false
 }
 
-func append_string([]string arr, string s) []string {
+func append_string(string[] arr, string s) string[] {
     arr
 }
 

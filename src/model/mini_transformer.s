@@ -3,19 +3,19 @@ import fmt
 import math
 
 struct tensor_2 {
-    shape: []int
-    data: []float
+    shape: int[]
+    data: float[]
     bool requires_grad
 }
 
-func tensor_new([]int shape) tensor_2 {
+func tensor_new(int[] shape) tensor_2 {
     size := 1
     for i := 0; i < len(shape); i += 1 {
         size *= shape[i]
     }
     tensor_2{
         shape: shape,
-        data: make([]float, size),
+        data: make(float[], size),
         requires_grad: true,
     }
 }
@@ -67,11 +67,11 @@ func create_mini_transformer(
     int seq_len,
     int num_heads
 ) mini_transformer {
-    token_embed := tensor_new([]int{vocab_size, embed_dim})
+    token_embed := tensor_new(int[]{vocab_size, embed_dim})
     for i := 0; i < len(token_embed.data); i += 1 {
         token_embed.data[i] = (float(i%1000) / 1000.0) * math.Sqrt(2.0 / float(vocab_size + embed_dim))
     }
-    pos_embed := tensor_new([]int{seq_len, embed_dim})
+    pos_embed := tensor_new(int[]{seq_len, embed_dim})
     for i := 0; i < seq_len; i += 1 {
         for j := 0; j < embed_dim; j += 1 {
             div_term := math.Pow(10000.0, float(2*(j/2)) / float(embed_dim))
@@ -85,16 +85,16 @@ func create_mini_transformer(
     layers := make([]transformer_layer, num_layers)
     for l := 0; l < num_layers; l += 1 {
         layer := transformer_layer{
-            q_proj: tensor_new([]int{embed_dim, embed_dim}),
-            k_proj: tensor_new([]int{embed_dim, embed_dim}),
-            v_proj: tensor_new([]int{embed_dim, embed_dim}),
-            out_proj: tensor_new([]int{embed_dim, embed_dim}),
-            fc1: tensor_new([]int{embed_dim, 4 * embed_dim}),
-            fc2: tensor_new([]int{4 * embed_dim, embed_dim}),
-            norm1_gamma: tensor_new([]int{embed_dim}),
-            norm1_beta: tensor_new([]int{embed_dim}),
-            norm2_gamma: tensor_new([]int{embed_dim}),
-            norm2_beta: tensor_new([]int{embed_dim}),
+            q_proj: tensor_new(int[]{embed_dim, embed_dim}),
+            k_proj: tensor_new(int[]{embed_dim, embed_dim}),
+            v_proj: tensor_new(int[]{embed_dim, embed_dim}),
+            out_proj: tensor_new(int[]{embed_dim, embed_dim}),
+            fc1: tensor_new(int[]{embed_dim, 4 * embed_dim}),
+            fc2: tensor_new(int[]{4 * embed_dim, embed_dim}),
+            norm1_gamma: tensor_new(int[]{embed_dim}),
+            norm1_beta: tensor_new(int[]{embed_dim}),
+            norm2_gamma: tensor_new(int[]{embed_dim}),
+            norm2_beta: tensor_new(int[]{embed_dim}),
         }
         for i := 0; i < len(layer.q_proj.data); i += 1 {
             layer.q_proj.data[i] = (float(i%1000) / 1000.0 - 0.5) * 0.1
@@ -116,7 +116,7 @@ func create_mini_transformer(
         }
         layers[l] = layer
     }
-    output_proj := tensor_new([]int{embed_dim, vocab_size})
+    output_proj := tensor_new(int[]{embed_dim, vocab_size})
     for i := 0; i < len(output_proj.data); i += 1 {
         output_proj.data[i] = (float(i%1000) / 1000.0 - 0.5) * 0.1
     }
@@ -146,13 +146,13 @@ func create_mini_transformer(
 
 func forward(
     mini_transformer model,
-    []int input_ids,
+    int[] input_ids,
     int batch_size,
     int seq_length
 ) tensor_2 {
     embeddings := tensor_2{
-        shape: []int{batch_size, seq_length, model.embed_dim},
-        data: make([]float, batch_size * seq_length * model.embed_dim),
+        shape: int[]{batch_size, seq_length, model.embed_dim},
+        data: make(float[], batch_size * seq_length * model.embed_dim),
         requires_grad: true,
     }
     for b := 0; b < batch_size; b += 1 {
@@ -179,8 +179,8 @@ func forward(
         x = apply_ffn(x, layer, batch_size, seq_length, model.embed_dim)
     }
     logits := tensor_2{
-        shape: []int{batch_size, seq_length, model.vocab_size},
-        data: make([]float, batch_size * seq_length * model.vocab_size),
+        shape: int[]{batch_size, seq_length, model.vocab_size},
+        data: make(float[], batch_size * seq_length * model.vocab_size),
         requires_grad: true,
     }
     for b := 0; b < batch_size; b += 1 {
@@ -211,7 +211,7 @@ func apply_attention(
     head_dim := embed_dim / num_heads
     output := tensor_2{
         shape: x.shape,
-        data: make([]float, len(x.data)),
+        data: make(float[], len(x.data)),
         requires_grad: true,
     }
     for b := 0; b < batch_size; b += 1 {
@@ -240,8 +240,8 @@ func apply_ffn(
 ) tensor_2 {
     hidden_dim := 4 * embed_dim
     hidden := tensor_2{
-        shape: []int{batch_size, seq_length, hidden_dim},
-        data: make([]float, batch_size * seq_length * hidden_dim),
+        shape: int[]{batch_size, seq_length, hidden_dim},
+        data: make(float[], batch_size * seq_length * hidden_dim),
         requires_grad: true,
     }
     for b := 0; b < batch_size; b += 1 {
@@ -261,7 +261,7 @@ func apply_ffn(
     }
     output := tensor_2{
         shape: x.shape,
-        data: make([]float, len(x.data)),
+        data: make(float[], len(x.data)),
         requires_grad: true,
     }
     for b := 0; b < batch_size; b += 1 {
@@ -288,7 +288,7 @@ func gelu(float x) float {
 
 func compute_cross_entropy_loss(
     tensor_2 logits,
-    []int targets,
+    int[] targets,
     int batch_size,
     int seq_length,
     int vocab_size
@@ -327,7 +327,7 @@ func compute_cross_entropy_loss(
 func compute_gradients(
     mini_transformer model,
     tensor_2 logits,
-    []int targets,
+    int[] targets,
     int batch_size,
     int seq_length
 ) map[string]tensor_2 {
@@ -335,7 +335,7 @@ func compute_gradients(
     vocab_size := model.vocab_size
     logit_grads := tensor_2{
         shape: logits.shape,
-        data: make([]float, len(logits.data)),
+        data: make(float[], len(logits.data)),
         requires_grad: true,
     }
     for b := 0; b < batch_size; b += 1 {

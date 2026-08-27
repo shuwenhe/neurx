@@ -34,18 +34,18 @@ use neurx.strings
 
 struct ir_eqn {
     string primitive
-    []string params
-    []string inputs
-    []string outputs
+    string[] params
+    string[] inputs
+    string[] outputs
 }
 
 struct ir_graph {
     string name
     int eqn_count
-    []string primitives
-    []string params
-    []string inputs
-    []string outputs
+    string[] primitives
+    string[] params
+    string[] inputs
+    string[] outputs
     []ir_eqn eqns
     bool ready
     bool linearized
@@ -98,7 +98,7 @@ func copy_eqns([]ir_eqn values) []ir_eqn {
     out
 }
 
-func join_params([]string params) string {
+func join_params(string[] params) string {
     string out = ""
     int i = 0
     for i < len(params) {
@@ -168,9 +168,9 @@ func ir_is_linearized(ir_graph graph) bool {
     graph.linearized
 }
 
-func ir_add_eqn_with_io(ir_graph graph, string primitive, []string params, []string inputs, []string outputs) ir_graph {
-    []string primitives = copy_strings(graph.primitives)
-    []string param_list = copy_strings(graph.params)
+func ir_add_eqn_with_io(ir_graph graph, string primitive, string[] params, string[] inputs, string[] outputs) ir_graph {
+    string[] primitives = copy_strings(graph.primitives)
+    string[] param_list = copy_strings(graph.params)
     []ir_eqn eqns = copy_eqns(graph.eqns)
     primitives = append(primitives, primitive)
     param_list = append(param_list, join_params(params))
@@ -195,7 +195,7 @@ func ir_add_eqn_with_io(ir_graph graph, string primitive, []string params, []str
     }
 }
 
-func ir_add_eqn_with_params(ir_graph graph, string primitive, []string params) ir_graph {
+func ir_add_eqn_with_params(ir_graph graph, string primitive, string[] params) ir_graph {
     ir_add_eqn_with_io(graph, primitive, params, [], [])
 }
 
@@ -204,7 +204,7 @@ func ir_add_eqn(ir_graph graph, string primitive) ir_graph {
 }
 
 func ir_add_input(ir_graph graph, string input) ir_graph {
-    []string inputs = copy_strings(graph.inputs)
+    string[] inputs = copy_strings(graph.inputs)
     inputs = append(inputs, input)
     ir_graph {
         name: graph.name,
@@ -220,7 +220,7 @@ func ir_add_input(ir_graph graph, string input) ir_graph {
 }
 
 func ir_add_output(ir_graph graph, string output) ir_graph {
-    []string outputs = copy_strings(graph.outputs)
+    string[] outputs = copy_strings(graph.outputs)
     outputs = append(outputs, output)
     ir_graph {
         name: graph.name,
@@ -286,11 +286,11 @@ func ir_capture(ir_graph graph, string primitive) ir_graph {
     ir_add_eqn(graph, primitive)
 }
 
-func ir_capture_with_params(ir_graph graph, string primitive, []string params) ir_graph {
+func ir_capture_with_params(ir_graph graph, string primitive, string[] params) ir_graph {
     ir_add_eqn_with_params(graph, primitive, params)
 }
 
-func ir_capture_with_io(ir_graph graph, string primitive, []string params, []string inputs, []string outputs) ir_graph {
+func ir_capture_with_io(ir_graph graph, string primitive, string[] params, string[] inputs, string[] outputs) ir_graph {
     ir_add_eqn_with_io(graph, primitive, params, inputs, outputs)
 }
 
@@ -315,12 +315,12 @@ func transform_chain_to_jaxpr(transform_chain chain, string name) ir_graph {
             string step = get_chain_step(chain, i)
             eqns[i] = ir_eqn {
                 primitive: step,
-                params: []string{cap: 0},
+                params: string[]{cap: 0},
                 inputs: [],
                 outputs: [],
             }
             if i < len(chain.params) && get_chain_param(chain, i) != "" {
-                []string params = []string{cap: 1}
+                string[] params = string[]{cap: 1}
                 params[0] = get_chain_param(chain, i)
                 eqns[i].params = params
             }
@@ -364,9 +364,9 @@ func simple_fuse_add(ir_graph graph) ir_graph {
     for i < len(graph.eqns) {
         ir_eqn eqn = get_eqn(graph, i)
         if eqn.primitive == "add" && len(eqn.inputs) > 1 && get_eqn_input(eqn, 0) == get_eqn_input(eqn, 1) {
-            []string params = []string{cap: 1}
+            string[] params = string[]{cap: 1}
             params[0] = "2.0"
-            []string inputs = []string{cap: 1}
+            string[] inputs = string[]{cap: 1}
             inputs[0] = get_eqn_input(eqn, 0)
             optimized_eqns.push(ir_eqn {
                 primitive: "mul",

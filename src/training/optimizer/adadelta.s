@@ -8,8 +8,8 @@ struct adadelta_optimizer {
     float eps
     float weight_decay
     int step
-    []float square_avg
-    []float acc_delta
+    float[] square_avg
+    float[] acc_delta
 }
 
 func new_adadelta(float lr, float rho, float eps, float weight_decay) adadelta_optimizer {
@@ -29,7 +29,7 @@ func adadelta_step(adadelta_optimizer optimizer, tensor params, tensor grads) ad
     optimizer.step = optimizer.step + 1
     optimizer.square_avg = ensure_adadelta_state(optimizer.square_avg, n)
     optimizer.acc_delta = ensure_adadelta_state(optimizer.acc_delta, n)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         float grad = grads.data[i]
@@ -54,8 +54,8 @@ struct adadelta_optimizer_step_output {
     tensor params
 }
 
-func ensure_adadelta_state([]float values, int n) []float {
-    []float out = []float{cap: n}
+func ensure_adadelta_state(float[] values, int n) float[] {
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         if i < len(values) {

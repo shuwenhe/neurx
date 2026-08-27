@@ -13,14 +13,14 @@ use std.io.println
 
 struct sensor_reading {
     sensor_type stype
-    []float data
+    float[] data
     int timestamp_us
     bool valid
 }
 
 struct sensor_fusion_result {
-    []float fused_state
-    []float uncertainty
+    float[] fused_state
+    float[] uncertainty
     int fusion_latency_us
 }
 

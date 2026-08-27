@@ -20,7 +20,7 @@ struct distributed_inference_state {
 
 struct inference_request {
     string request_id
-    []int input_ids
+    int[] input_ids
     int seq_len
 }
 
@@ -175,7 +175,7 @@ func main() {
         inference_request req
         req.request_id = "req-" + string(i)
         req.seq_len = 256
-        req.input_ids = []int{1, 2, 3}
+        req.input_ids = int[]{1, 2, 3}
         batch = append(batch, req)
     }
     int processed = process_batch(batch, nodes, engine)

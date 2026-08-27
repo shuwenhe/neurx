@@ -1,6 +1,6 @@
 struct hash_entry {
     string key
-    []int block_ids
+    int[] block_ids
     int64 timestamp
     int access_count
     int next_idx
@@ -44,7 +44,7 @@ func create_hash_table(int bucket_count, int max_entries_val) hash_table {
     for i < bucket_count {
         hash_entry entry = hash_entry{}
         entry.key = ""
-        entry.block_ids = []int{cap: 32}
+        entry.block_ids = int[]{cap: 32}
         entry.next_idx = -1
         entry.timestamp = 0
         entry.access_count = 0
@@ -56,7 +56,7 @@ func create_hash_table(int bucket_count, int max_entries_val) hash_table {
     return ht
 }
 
-func hash_table_insert(hash_table ht, string key, []int block_ids) int {
+func hash_table_insert(hash_table ht, string key, int[] block_ids) int {
     if ht.num_entries >= ht.max_entries {
         print("[HashTable] Table full, cannot insert key " + key + "\n")
         return 0
@@ -115,7 +115,7 @@ func hash_table_insert(hash_table ht, string key, []int block_ids) int {
     return 1
 }
 
-func hash_table_lookup(hash_table ht, string key) []int {
+func hash_table_lookup(hash_table ht, string key) int[] {
     int index = hash_function(key, ht.num_buckets)
     
     int entry_idx = index
@@ -133,7 +133,7 @@ func hash_table_lookup(hash_table ht, string key) []int {
     }
     
     print("[HashTable] MISS for key " + key + "\n")
-    return []int{cap: 0}
+    return int[]{cap: 0}
 }
 
 func hash_table_remove(hash_table ht, string key) int {

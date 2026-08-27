@@ -95,7 +95,7 @@ func (distributed_inference_coordinator* dic) finalize() error {
     return nil
 }
 
-func (distributed_inference_coordinator* dic) forward_pass(interface{} input, []interface{} weights) (interface{}, error) {
+func (distributed_inference_coordinator* dic) forward_pass(interface{} input, int[]erface{} weights) (interface{}, error) {
     if dic.config.enable_tensor_parallel {
         err := dic.all_gather_activations(input)
         if err != nil {
@@ -152,14 +152,14 @@ func (distributed_inference_coordinator* dic) recv_activations_from_prev_stage()
     return nil, nil
 }
 
-func (distributed_inference_coordinator* dic) prefetch_weights([]string weight_ids) error {
+func (distributed_inference_coordinator* dic) prefetch_weights(string[] weight_ids) error {
     for _, weight_id := range weight_ids {
         dic.wm.prefetch_weight(weight_id)
     }
     return nil
 }
 
-func (distributed_inference_coordinator* dic) prefetch_kv_cache([]int32 block_ids) error {
+func (distributed_inference_coordinator* dic) prefetch_kv_cache(int[]32 block_ids) error {
     for _, block_id := range block_ids {
         dic.kcm.prefetch_block(block_id, kv_cache_location_gpu)
     }

@@ -50,8 +50,8 @@ func exp_approx(float x) float {
     result
 }
 
-func init_weights(int size, float std) []float {
-    []float arr = []float{cap: size}
+func init_weights(int size, float std) float[] {
+    float[] arr = float[]{cap: size}
     int i = 0
     for i < size {
         float val = ((i * 12345 + 67890) - ((i * 12345 + 67890) / 100000) * 100000) as float
@@ -62,8 +62,8 @@ func init_weights(int size, float std) []float {
     arr
 }
 
-func matmul([]float A, []float B, int M, int K, int N) []float {
-    []float C = []float{cap: M * N}
+func matmul(float[] A, float[] B, int M, int K, int N) float[] {
+    float[] C = float[]{cap: M * N}
     int m = 0
     for m < M {
         int n = 0
@@ -82,8 +82,8 @@ func matmul([]float A, []float B, int M, int K, int N) []float {
     C
 }
 
-func rms_norm([]float x, []float weight, int batch_seq, int hidden) []float {
-    []float output = []float{cap: batch_seq * hidden}
+func rms_norm(float[] x, float[] weight, int batch_seq, int hidden) float[] {
+    float[] output = float[]{cap: batch_seq * hidden}
     int i = 0
     for i < batch_seq {
         int offset = i * hidden
@@ -105,8 +105,8 @@ func rms_norm([]float x, []float weight, int batch_seq, int hidden) []float {
     output
 }
 
-func embedding([]int token_ids, []float embed_weight, int batch_seq, int hidden, int vocab) []float {
-    []float output = []float{cap: batch_seq * hidden}
+func embedding(int[] token_ids, float[] embed_weight, int batch_seq, int hidden, int vocab) float[] {
+    float[] output = float[]{cap: batch_seq * hidden}
     int i = 0
     for i < batch_seq {
         int token_id = token_ids[i]
@@ -122,9 +122,9 @@ func embedding([]int token_ids, []float embed_weight, int batch_seq, int hidden,
     output
 }
 
-func add_arrays([]float a, []float b) []float {
+func add_arrays(float[] a, float[] b) float[] {
     int size = len(a)
-    []float output = []float{cap: size}
+    float[] output = float[]{cap: size}
     int i = 0
     for i < size {
         output[i] = a[i] + b[i]
@@ -134,23 +134,23 @@ func add_arrays([]float a, []float b) []float {
 }
 
 func simple_transformer_layer(
-    []float hidden_states,
-    []float ln_weight,
-    []float q_proj,
-    []float v_proj,
-    []float o_proj,
+    float[] hidden_states,
+    float[] ln_weight,
+    float[] q_proj,
+    float[] v_proj,
+    float[] o_proj,
     int batch_seq,
     int hidden
-) []float {
-    []float normed = rms_norm(hidden_states, ln_weight, batch_seq, hidden)
-    []float q = matmul(normed, q_proj, batch_seq, hidden, hidden)
-    []float v = matmul(normed, v_proj, batch_seq, hidden, hidden)
-    []float attn_out = matmul(v, o_proj, batch_seq, hidden, hidden)
-    []float output = add_arrays(hidden_states, attn_out)
+) float[] {
+    float[] normed = rms_norm(hidden_states, ln_weight, batch_seq, hidden)
+    float[] q = matmul(normed, q_proj, batch_seq, hidden, hidden)
+    float[] v = matmul(normed, v_proj, batch_seq, hidden, hidden)
+    float[] attn_out = matmul(v, o_proj, batch_seq, hidden, hidden)
+    float[] output = add_arrays(hidden_states, attn_out)
     output
 }
 
-func cross_entropy_loss([]float logits, []int labels, int batch_seq, int vocab) float {
+func cross_entropy_loss(float[] logits, int[] labels, int batch_seq, int vocab) float {
     float total_loss = 0.0
     int i = 0
     for i < batch_seq {
@@ -211,16 +211,16 @@ func main() {
     int vocab = config.vocab_size
     int batch_seq = config.batch_size * config.seq_len
     eprintln("[Step 1/4] Initializing model weights...")
-    []float embed_weight = init_weights(vocab * hidden, 0.02)
-    []float ln_weight = init_weights(hidden, 1.0)
-    []float q_proj = init_weights(hidden * hidden, 0.02)
-    []float v_proj = init_weights(hidden * hidden, 0.02)
-    []float o_proj = init_weights(hidden * hidden, 0.02)
+    float[] embed_weight = init_weights(vocab * hidden, 0.02)
+    float[] ln_weight = init_weights(hidden, 1.0)
+    float[] q_proj = init_weights(hidden * hidden, 0.02)
+    float[] v_proj = init_weights(hidden * hidden, 0.02)
+    float[] o_proj = init_weights(hidden * hidden, 0.02)
     eprintln("[Step 1/4] Weights initialized")
     eprintln("")
     eprintln("[Step 2/4] Creating training data...")
-    []int input_ids = []int{cap: batch_seq}
-    []int labels = []int{cap: batch_seq}
+    int[] input_ids = int[]{cap: batch_seq}
+    int[] labels = int[]{cap: batch_seq}
     int i = 0
     for i < batch_seq {
         input_ids[i] = (i * 7 + 3) - (((i * 7 + 3) / vocab) * vocab)
@@ -235,9 +235,9 @@ func main() {
         eprintln("  Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(config.num_epochs))
         int step = 0
         for step < config.steps_per_epoch {
-            []float hidden_states = embedding(input_ids, embed_weight, batch_seq, hidden, vocab)
+            float[] hidden_states = embedding(input_ids, embed_weight, batch_seq, hidden, vocab)
             hidden_states = simple_transformer_layer(hidden_states, ln_weight, q_proj, v_proj, o_proj, batch_seq, hidden)
-            []float logits = matmul(hidden_states, embed_weight, batch_seq, hidden, vocab)
+            float[] logits = matmul(hidden_states, embed_weight, batch_seq, hidden, vocab)
             float loss = cross_entropy_loss(logits, labels, batch_seq, vocab)
             float ppl = exp_approx(loss)
             eprintln("    Step " + int_to_str(step + 1) + ": loss=" + float_to_str(loss, 4) + ", ppl=" + float_to_str(ppl, 2))

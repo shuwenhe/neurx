@@ -10,7 +10,7 @@ interface dispatcher {
 
     func has_implementation(string op_name, DeviceType device_type) . bool
 
-    func list_operations() . []string
+    func list_operations() . string[]
 
     func list_devices_for_op(string op_name) . []device_type
 

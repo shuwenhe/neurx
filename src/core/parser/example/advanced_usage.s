@@ -105,7 +105,7 @@ func demo_realtime_parsing() {
 
     print("Simulating LLM real-time response...\n\n")
 
-    chunks := []string{
+    chunks := string[]{
         "I think the answer is ",
         "{\"reasoning\": \"Let me work through this\", ",
         "\"steps\": [\"First\", \"Second\", \"Third\"], ",

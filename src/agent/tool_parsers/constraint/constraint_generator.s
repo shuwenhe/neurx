@@ -138,7 +138,7 @@ func get_number_constraint(string current_output, *json_schema schema, *schema_t
     return constraint
 }
 
-func add_digit_tokens(*[]int tokens) {
+func add_digit_tokens(*int[] tokens) {
     i := 48
     for i <= 57 {
         tokens.append(i)
@@ -146,7 +146,7 @@ func add_digit_tokens(*[]int tokens) {
     }
 }
 
-func add_letter_tokens(*[]int tokens) {
+func add_letter_tokens(*int[] tokens) {
 
     i := 97
     for i <= 122 {
@@ -161,7 +161,7 @@ func add_letter_tokens(*[]int tokens) {
     }
 }
 
-func add_value_start_tokens(*[]int tokens) {
+func add_value_start_tokens(*int[] tokens) {
     tokens.append(34)
     tokens.append(45)
     tokens.append(123)
@@ -254,7 +254,7 @@ func update_parse_context(string output, *schema_types.parse_context context) {
     context.current_value = output
 }
 
-func apply_constraint_to_logits([]float logits, *token_constraint constraint) []float {
+func apply_constraint_to_logits(float[] logits, *token_constraint constraint) float[] {
     result := logits
 
     i := 0
@@ -269,7 +269,7 @@ func apply_constraint_to_logits([]float logits, *token_constraint constraint) []
     return result
 }
 
-func is_token_allowed(int token_id, *[]int allowed_tokens) bool {
+func is_token_allowed(int token_id, *int[] allowed_tokens) bool {
     i := 0
     for i < len(*allowed_tokens) {
         if (*allowed_tokens)[i] == token_id {

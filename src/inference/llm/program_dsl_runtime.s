@@ -35,17 +35,17 @@ struct dsl_runtime_config {
 
 struct dsl_program_runtime {
     dsl_runtime_config config
-    []int operation_types
-    []int destination_variables
-    []int argument_a
-    []int argument_b
-    []int jump_targets
+    int[] operation_types
+    int[] destination_variables
+    int[] argument_a
+    int[] argument_b
+    int[] jump_targets
     int operation_count
-    []int variables
-    []int program_counters
-    []int thread_statuses
-    []int parent_threads
-    []int join_threads
+    int[] variables
+    int[] program_counters
+    int[] thread_statuses
+    int[] parent_threads
+    int[] join_threads
     int thread_count
     int step_count
     int generated_calls
@@ -63,8 +63,8 @@ struct dsl_step_result {
     bool needs_external_result
 }
 
-func dsl_int_array(int capacity) []int {
-    []int values = []int{cap: capacity}
+func dsl_int_array(int capacity) int[] {
+    int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

@@ -103,7 +103,7 @@ func syscall_stats_create() syscall_stats {
         total_syscalls: 0,
         total_time_ns: 0,
         errors: 0,
-        by_type: [256]int64{}
+        by_type: int[256]64{}
     }
     return stats
 }

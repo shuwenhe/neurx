@@ -189,8 +189,8 @@ struct device_tensor {
     int device_id
     string backend
     string dtype
-    []int shape
-    []int strides
+    int[] shape
+    int[] strides
     int offset_bytes
     int storage_bytes
     bool owns_storage
@@ -205,7 +205,7 @@ func tensor_dtype_bytes(string dtype) int {
     0
 }
 
-func tensor_numel([]int shape) int {
+func tensor_numel(int[] shape) int {
     if len(shape) == 0 { return 0 }
     int elements = 1
     int i = 0
@@ -217,8 +217,8 @@ func tensor_numel([]int shape) int {
     elements
 }
 
-func tensor_contiguous_strides([]int shape) []int {
-    []int strides = []int{cap: len(shape)}
+func tensor_contiguous_strides(int[] shape) int[] {
+    int[] strides = int[]{cap: len(shape)}
     int stride = 1
     int i = len(shape) - 1
     for i >= 0 {
@@ -233,7 +233,7 @@ func tensor_invalid(string backend, string dtype, string error_message) device_t
     device_tensor {buffer: 0, context: 0, device_id: 0, backend: backend, dtype: dtype, shape: [], strides: [], offset_bytes: 0, storage_bytes: 0, owns_storage: false, valid: false, error_message: error_message}
 }
 
-func tensor_empty(device_context context, []int shape, string dtype) device_tensor {
+func tensor_empty(device_context context, int[] shape, string dtype) device_tensor {
     if !context.valid { return tensor_invalid(context.backend, dtype, "invalid_context") }
     int element_bytes = tensor_dtype_bytes(dtype)
     int elements = tensor_numel(shape)
@@ -244,7 +244,7 @@ func tensor_empty(device_context context, []int shape, string dtype) device_tens
     device_tensor {buffer: buffer, context: context.handle, device_id: context.device_id, backend: context.backend, dtype: dtype, shape: shape, strides: tensor_contiguous_strides(shape), offset_bytes: 0, storage_bytes: bytes, owns_storage: true, valid: true, error_message: ""}
 }
 
-func tensor_view(device_tensor source, []int shape, int offset_elements) device_tensor {
+func tensor_view(device_tensor source, int[] shape, int offset_elements) device_tensor {
     int bytes = tensor_dtype_bytes(source.dtype)
     int view_bytes = tensor_numel(shape) * bytes
     int offset = source.offset_bytes + offset_elements * bytes
@@ -262,7 +262,7 @@ func tensor_release(device_tensor tensor) int {
 struct transformer_execution_plan {
     int context_handle
     int stream_handle
-    []int operation_handle
+    int[] operation_handle
     int operation_count
     string backend
     bool valid
@@ -280,7 +280,7 @@ func transformer_plan_invalid(string backend, string message) transformer_execut
     transformer_execution_plan {context_handle: 0, stream_handle: 0, operation_handle: [], operation_count: 0, backend: backend, valid: false, error_message: message}
 }
 
-func transformer_descriptor_plan_compile(device_context context, string backend, []string descriptor, int stream_priority) transformer_execution_plan {
+func transformer_descriptor_plan_compile(device_context context, string backend, string[] descriptor, int stream_priority) transformer_execution_plan {
     if !context.valid { return transformer_plan_invalid(backend, "invalid_device_context") }
     if len(descriptor) <= 0 { return transformer_plan_invalid(backend, "empty_descriptor_plan") }
     if context.backend != backend && !(context.backend == "cann" && backend == "ascend") {
@@ -289,7 +289,7 @@ func transformer_descriptor_plan_compile(device_context context, string backend,
     int stream_handle = device_stream_open_handle(context.handle, stream_priority)
     if stream_handle <= 0 { return transformer_plan_invalid(backend, "stream_create_failed") }
     int count = len(descriptor)
-    []int compiled = []int{cap: count}
+    int[] compiled = int[]{cap: count}
     int index = 0
     for index < count {
         if len(descriptor[index]) == 0 {
@@ -311,11 +311,11 @@ func transformer_descriptor_plan_compile(device_context context, string backend,
     transformer_execution_plan {context_handle: context.handle, stream_handle: stream_handle, operation_handle: compiled, operation_count: count, backend: backend, valid: true, error_message: ""}
 }
 
-func transformer_plan_binding_valid(transformer_execution_plan plan, []string binding) bool {
+func transformer_plan_binding_valid(transformer_execution_plan plan, string[] binding) bool {
     plan.valid && plan.operation_count > 0 && len(binding) == plan.operation_count
 }
 
-func transformer_plan_execute(transformer_execution_plan plan, []string binding, bool synchronize) transformer_execution_result {
+func transformer_plan_execute(transformer_execution_plan plan, string[] binding, bool synchronize) transformer_execution_result {
     if !plan.valid { return transformer_execution_result {success: false, completed_operations: 0, failed_operation: -1, error_message: plan.error_message} }
     if len(binding) != plan.operation_count {
         return transformer_execution_result {success: false, completed_operations: 0, failed_operation: -1, error_message: "binding_count_mismatch"}
@@ -380,15 +380,15 @@ struct production_batch_config {
 
 struct production_batch_runtime {
     production_batch_config config
-    []int session_id
-    []int request_id
-    []int status
-    []int prompt_tokens
-    []int maximum_new_tokens
-    []int generated_tokens
-    []int page_count
-    []int page_id
-    []int page_owner
+    int[] session_id
+    int[] request_id
+    int[] status
+    int[] prompt_tokens
+    int[] maximum_new_tokens
+    int[] generated_tokens
+    int[] page_count
+    int[] page_id
+    int[] page_owner
     int active_requests
     int queued_requests
     int allocated_pages
@@ -399,8 +399,8 @@ struct production_batch_runtime {
 
 struct production_batch_selection {
     production_batch_runtime runtime
-    []int prefill_slot
-    []int decode_slot
+    int[] prefill_slot
+    int[] decode_slot
     int prefill_count
     int decode_count
     int prefill_tokens
@@ -415,8 +415,8 @@ struct production_admission_result {
     string error_message
 }
 
-func production_int_array(int capacity) []int {
-    []int values = []int{cap: capacity}
+func production_int_array(int capacity) int[] {
+    int[] values = int[]{cap: capacity}
     int index = 0
     for index < capacity { values[index] = 0; index = index + 1 }
     values
@@ -501,8 +501,8 @@ func production_admit(production_batch_runtime runtime, int session_id, int requ
 }
 
 func production_schedule(production_batch_runtime runtime) production_batch_selection {
-    []int prefill = production_int_array(runtime.config.maximum_batch_sequences)
-    []int decode = production_int_array(runtime.config.maximum_batch_sequences)
+    int[] prefill = production_int_array(runtime.config.maximum_batch_sequences)
+    int[] decode = production_int_array(runtime.config.maximum_batch_sequences)
     int prefill_count = 0
     int decode_count = 0
     int token_budget = runtime.config.maximum_batch_tokens
@@ -534,7 +534,7 @@ func production_schedule(production_batch_runtime runtime) production_batch_sele
     production_batch_selection {runtime: runtime, prefill_slot: prefill, decode_slot: decode, prefill_count: prefill_count, decode_count: decode_count, prefill_tokens: prefill_token_count, decode_tokens: decode_count, selected: prefill_count + decode_count > 0}
 }
 
-func production_mark_prefill_complete(production_batch_runtime runtime, []int slots, int count) production_batch_runtime {
+func production_mark_prefill_complete(production_batch_runtime runtime, int[] slots, int count) production_batch_runtime {
     int index = 0
     for index < count {
         int slot = slots[index]
@@ -573,7 +573,7 @@ func production_cancel(production_batch_runtime runtime, int session_id) product
     next
 }
 
-func production_execute_selected(transformer_execution_plan plan, production_batch_selection selected, []string binding, bool synchronize) transformer_execution_result {
+func production_execute_selected(transformer_execution_plan plan, production_batch_selection selected, string[] binding, bool synchronize) transformer_execution_result {
     if !selected.selected { return transformer_execution_result {success: false, completed_operations: 0, failed_operation: -1, error_message: "empty_batch"} }
     transformer_plan_execute(plan, binding, synchronize)
 }
@@ -625,7 +625,7 @@ func physical_paged_kv_release(physical_paged_kv cache) int {
     status
 }
 
-func batch_write_i32(int context, int host, []int values) int {
+func batch_write_i32(int context, int host, int[] values) int {
     int index = 0
     for index < len(values) {
         if neurx_device_write_i32(context, host, index, values[index]) != 0 { return -1 }
@@ -634,12 +634,12 @@ func batch_write_i32(int context, int host, []int values) int {
     0
 }
 
-func batch_upload_i32(device_context context, []int values) device_tensor {
+func batch_upload_i32(device_context context, int[] values) device_tensor {
     if len(values) <= 0 { return tensor_invalid(context.backend, "int32", "empty_upload") }
     int bytes = len(values) * 4
     int host = device_buffer_alloc(context.handle, bytes, "host")
     if host <= 0 { return tensor_invalid(context.backend, "int32", "host_allocation_failed") }
-    []int upload_shape = []int{cap: 1}
+    int[] upload_shape = int[]{cap: 1}
     upload_shape[0] = len(values)
     device_tensor output = tensor_empty(context, upload_shape, "int32")
     if !output.valid || batch_write_i32(context.handle, host, values) != 0 || neurx_device_copy(context.handle, output.buffer, host, bytes, device_copy_host_to_device()) != 0 {
@@ -651,17 +651,17 @@ func batch_upload_i32(device_context context, []int values) device_tensor {
     output
 }
 
-func pack_batch_tensor(device_context context, production_batch_runtime runtime, []int selected_slot, int selected_count, []int token_id, []int token_start, []int token_count) packed_batch_tensor {
+func pack_batch_tensor(device_context context, production_batch_runtime runtime, int[] selected_slot, int selected_count, int[] token_id, int[] token_start, int[] token_count) packed_batch_tensor {
     if selected_count <= 0 || selected_count > len(selected_slot) || selected_count > len(token_start) || selected_count > len(token_count) {
         return packed_batch_tensor {token: tensor_invalid(context.backend, "int32", "invalid_batch"), position: tensor_invalid(context.backend, "int32", "invalid_batch"), slot_mapping: tensor_invalid(context.backend, "int32", "invalid_batch"), block_table: tensor_invalid(context.backend, "int32", "invalid_batch"), token_host: 0, position_host: 0, slot_host: 0, block_host: 0, token_count: 0, sequence_count: 0, maximum_pages: runtime.config.maximum_pages_per_request, valid: false, error_message: "invalid_batch"}
     }
     int total = 0
     int sequence = 0
     for sequence < selected_count { total = total + token_count[sequence]; sequence = sequence + 1 }
-    []int tokens = []int{cap: total}
-    []int positions = []int{cap: total}
-    []int slots = []int{cap: total}
-    []int table = []int{cap: selected_count * runtime.config.maximum_pages_per_request}
+    int[] tokens = int[]{cap: total}
+    int[] positions = int[]{cap: total}
+    int[] slots = int[]{cap: total}
+    int[] table = int[]{cap: selected_count * runtime.config.maximum_pages_per_request}
     int packed = 0
     sequence = 0
     for sequence < selected_count {
@@ -711,12 +711,12 @@ func main() {
     runtime = first.runtime
     production_admission_result second = production_admit(runtime, 2, 2, 2, 2)
     runtime = second.runtime
-    []int selected = []int{cap: 2}
+    int[] selected = int[]{cap: 2}
     selected[0] = first.slot
     selected[1] = second.slot
-    []int token = [11, 12, 13, 21, 22]
-    []int start = [0, 3]
-    []int count = [3, 2]
+    int[] token = [11, 12, 13, 21, 22]
+    int[] start = [0, 3]
+    int[] count = [3, 2]
     physical_paged_kv cache = physical_paged_kv_create(context, 2, 16, 4, 2, 8, "bf16")
     packed_batch_tensor batch = pack_batch_tensor(context, runtime, selected, 2, token, start, count)
     if cache.valid && batch.valid && batch.token_count == 5 && batch.sequence_count == 2 {

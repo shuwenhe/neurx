@@ -11,13 +11,13 @@ use std.slices
 }
 
 struct prefill_batch {
-    []int request_ids
+    int[] request_ids
     int total_tokens
     int batch_size
 }
 
 struct decode_batch {
-    []int request_ids
+    int[] request_ids
     int batch_size
 }
 
@@ -42,8 +42,8 @@ struct v1_engine_config {
 struct v1_engine {
     v1_engine_config config
     []request_phase request_phases
-    []int prompt_lengths
-    []int generated_lengths
+    int[] prompt_lengths
+    int[] generated_lengths
     prefill_batch current_prefill_batch
     decode_batch current_decode_batch
     int total_requests_received
@@ -75,7 +75,7 @@ func new_v1_engine(v1_engine_config config) v1_engine {
 }
 
 func (v1_engine* engine) submit_request(
-    prompt_tokens: []int,
+    prompt_tokens: int[],
     int max_new_tokens
 ) int {
     request_id := engine.total_requests_received

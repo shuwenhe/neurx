@@ -23,25 +23,25 @@ struct optimizer_state {
     beta2               float64
     epsilon             float64
     weight_decay        float64
-    momentum            []float64
-    velocity            []float64
-    m_t                 []float64
-    v_t                 []float64
+    momentum            float[]64
+    velocity            float[]64
+    m_t                 float[]64
+    v_t                 float[]64
 }
 
 struct training_state {
     current_step        int64
     current_epoch       int
-    train_loss_history  []float64
-    val_loss_history    []float64
-    learning_rates      []float64
+    train_loss_history  float[]64
+    val_loss_history    float[]64
+    learning_rates      float[]64
     batch_count         int64
     total_tokens        int64
 }
 
 struct checkpoint {
     metadata            checkpoint_metadata
-    model_weights       [][]float64
+    model_weights       float[][]64
     optimizer_state     optimizer_state
     training_state      training_state
     distributed_state   map[string]string
@@ -58,7 +58,7 @@ struct checkpoint_manager {
 struct recovery_manager {
     manager             *checkpoint_manager
     recovery_points     []checkpoint_metadata
-    backup_locations    []string
+    backup_locations    string[]
     verification_status map[string]bool
 }
 
@@ -86,7 +86,7 @@ func (checkpoint_manager* manager) save_checkpoint(
     epoch int,
     train_loss float64,
     val_loss float64,
-    model_weights [][]float64,
+    model_weights float[][]64,
     opt_state optimizer_state,
     train_state training_state) {
     checkpoint_id := fmt.Sprintf("ckpt-step-%d-epoch-%d", step, epoch)
@@ -284,9 +284,9 @@ func new_checkpoint_manager(string checkpoint_dir) *checkpoint_manager {
 
 func (checkpoint_manager* manager) run_full_checkpoint_cycle() {
     manager.initialize()
-    model_weights := make([][]float64, 100)
+    model_weights := make(float[][]64, 100)
     for i := 0; i < 100; i++ {
-        model_weights[i] = make([]float64, 100)
+        model_weights[i] = make(float[]64, 100)
         for j := 0; j < 100; j++ {
             model_weights[i][j] = math.Sin(float64(i+j) / 100.0)
         }
@@ -298,15 +298,15 @@ func (checkpoint_manager* manager) run_full_checkpoint_cycle() {
         beta2:          0.999,
         epsilon:        1e-8,
         weight_decay:   0.01,
-        momentum:       make([]float64, 100),
-        velocity:       make([]float64, 100),
+        momentum:       make(float[]64, 100),
+        velocity:       make(float[]64, 100),
     }
     train_state := training_state{
         current_step:       0,
         current_epoch:      0,
-        train_loss_history: []float64{},
-        val_loss_history:   []float64{},
-        learning_rates:     []float64{},
+        train_loss_history: float[]64{},
+        val_loss_history:   float[]64{},
+        learning_rates:     float[]64{},
     }
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Saving Training Checkpoints           │")
@@ -319,7 +319,7 @@ func (checkpoint_manager* manager) run_full_checkpoint_cycle() {
     recovery := *recovery_manager{
         manager:            manager,
         recovery_points:    []checkpoint_metadata{},
-        backup_locations:   []string{},
+        backup_locations:   string[]{},
         verification_status: make(map[string]bool),
     }
     recovery.handle_training_interruption()

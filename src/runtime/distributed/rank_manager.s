@@ -44,7 +44,7 @@ struct rank_coordinates {
 
 struct rank_group {
     int kind
-    []int ranks
+    int[] ranks
     int rank_in_group
     int64 communicator
     bool initialized

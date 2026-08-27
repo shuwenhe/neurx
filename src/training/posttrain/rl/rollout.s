@@ -12,9 +12,9 @@ struct rollout_config {
 struct rollout_sample {
     string prompt
     string response
-    []int token_ids
-    []float log_probs
-    []float values
+    int[] token_ids
+    float[] log_probs
+    float[] values
     float reward
     int length
 }
@@ -40,13 +40,13 @@ func new_rollout_generator(rollout_config config, int vocab_size) rollout_genera
 
 func (rollout_generator* rg) generate_single(
     string prompt,
-    []int prompt_token_ids
+    int[] prompt_token_ids
 ) rollout_sample {
     rollout_sample sample = rollout_sample{}
     sample.prompt = prompt
-    sample.token_ids = []int{}
-    sample.log_probs = []float{}
-    sample.values = []float{}
+    sample.token_ids = int[]{}
+    sample.log_probs = float[]{}
+    sample.values = float[]{}
     int i = 0
     for i < len(prompt_token_ids) {
         sample.token_ids = append(sample.token_ids, prompt_token_ids[i])
@@ -55,7 +55,7 @@ func (rollout_generator* rg) generate_single(
     int generated_tokens = 0
     bool finished = false
     for !finished && generated_tokens < rg.config.max_seq_len {
-        []float logits = get_model_logits_placeholder(sample.token_ids, rg.vocab_size)
+        float[] logits = get_model_logits_placeholder(sample.token_ids, rg.vocab_size)
         if rg.config.temperature != 1.0 {
             logits = apply_temperature(logits, rg.config.temperature)
         }
@@ -68,12 +68,12 @@ func (rollout_generator* rg) generate_single(
             if rg.config.top_p > 0.0 && rg.config.top_p < 1.0 {
                 logits = apply_top_p_filtering(logits, rg.config.top_p)
             }
-            []float probs = softmax(logits)
+            float[] probs = softmax(logits)
             next_token = sample_from_distribution(probs)
             log_prob = log(probs[next_token] + 1e-10)
         } else {
             next_token = argmax(logits)
-            []float probs = softmax(logits)
+            float[] probs = softmax(logits)
             log_prob = log(probs[next_token] + 1e-10)
         }
         if next_token == 2 {
@@ -91,8 +91,8 @@ func (rollout_generator* rg) generate_single(
 }
 
 func (rollout_generator* rg) generate_batch(
-    []string prompts,
-    [][]int prompt_token_ids_batch
+    string[] prompts,
+    int[][] prompt_token_ids_batch
 ) rollout_batch {
     rollout_batch batch = rollout_batch{}
     batch.samples = []rollout_sample{}
@@ -136,8 +136,8 @@ func (rollout_generator* rg) generate_batch(
     return batch
 }
 
-func apply_temperature([]float logits, float temperature) []float {
-    []float scaled = []float{}
+func apply_temperature(float[] logits, float temperature) float[] {
+    float[] scaled = float[]{}
     int i = 0
     for i < len(logits) {
         scaled = append(scaled, logits[i] / temperature)
@@ -146,13 +146,13 @@ func apply_temperature([]float logits, float temperature) []float {
     return scaled
 }
 
-func apply_top_k_filtering([]float logits, int k) []float {
+func apply_top_k_filtering(float[] logits, int k) float[] {
     int n = len(logits)
     if k >= n { return logits }
-    []float sorted_logits = copy_float_array(logits)
+    float[] sorted_logits = copy_float_array(logits)
     sort_float_array_desc(sorted_logits)
     float threshold = sorted_logits[k - 1]
-    []float filtered = []float{}
+    float[] filtered = float[]{}
     int i = 0
     for i < n {
         if logits[i] >= threshold {
@@ -165,11 +165,11 @@ func apply_top_k_filtering([]float logits, int k) []float {
     return filtered
 }
 
-func apply_top_p_filtering([]float logits, float top_p) []float {
-    []float probs = softmax(logits)
-    []int sorted_indices = argsort_desc(probs)
+func apply_top_p_filtering(float[] logits, float top_p) float[] {
+    float[] probs = softmax(logits)
+    int[] sorted_indices = argsort_desc(probs)
     float cumsum = 0.0
-    []bool keep_mask = make_bool_array(len(probs), false)
+    bool[] keep_mask = make_bool_array(len(probs), false)
     int i = 0
     for i < len(sorted_indices) {
         int idx = sorted_indices[i]
@@ -180,7 +180,7 @@ func apply_top_p_filtering([]float logits, float top_p) []float {
         }
         i = i + 1
     }
-    []float filtered = []float{}
+    float[] filtered = float[]{}
     int j = 0
     for j < len(logits) {
         if keep_mask[j] {
@@ -193,9 +193,9 @@ func apply_top_p_filtering([]float logits, float top_p) []float {
     return filtered
 }
 
-func softmax([]float logits) []float {
+func softmax(float[] logits) float[] {
     int n = len(logits)
-    if n == 0 { return []float{} }
+    if n == 0 { return float[]{} }
     float max_logit = logits[0]
     int i = 1
     for i < n {
@@ -204,7 +204,7 @@ func softmax([]float logits) []float {
         }
         i = i + 1
     }
-    []float exp_logits = []float{}
+    float[] exp_logits = float[]{}
     float sum_exp = 0.0
     i = 0
     for i < n {
@@ -213,7 +213,7 @@ func softmax([]float logits) []float {
         sum_exp = sum_exp + exp_val
         i = i + 1
     }
-    []float probs = []float{}
+    float[] probs = float[]{}
     i = 0
     for i < n {
         probs = append(probs, exp_logits[i] / sum_exp)
@@ -222,8 +222,8 @@ func softmax([]float logits) []float {
     return probs
 }
 
-func sample_from_distribution([]float probs) int {
-    []float cumsum = []float{}
+func sample_from_distribution(float[] probs) int {
+    float[] cumsum = float[]{}
     float sum = 0.0
     int i = 0
     for i < len(probs) {
@@ -242,7 +242,7 @@ func sample_from_distribution([]float probs) int {
     return len(probs) - 1
 }
 
-func argmax([]float arr) int {
+func argmax(float[] arr) int {
     if len(arr) == 0 { return -1 }
     int max_idx = 0
     float max_val = arr[0]
@@ -257,8 +257,8 @@ func argmax([]float arr) int {
     return max_idx
 }
 
-func get_model_logits_placeholder([]int token_ids, int vocab_size) []float {
-    []float logits = []float{}
+func get_model_logits_placeholder(int[] token_ids, int vocab_size) float[] {
+    float[] logits = float[]{}
     int i = 0
     for i < vocab_size {
         logits = append(logits, 0.0)
@@ -267,7 +267,7 @@ func get_model_logits_placeholder([]int token_ids, int vocab_size) []float {
     return logits
 }
 
-func decode_tokens_placeholder([]int token_ids, int prompt_len) string {
+func decode_tokens_placeholder(int[] token_ids, int prompt_len) string {
     return "Generated response placeholder"
 }
 
@@ -275,8 +275,8 @@ func get_random_float() float {
     return 0.5
 }
 
-func copy_float_array([]float arr) []float {
-    []float copy = []float{}
+func copy_float_array(float[] arr) float[] {
+    float[] copy = float[]{}
     int i = 0
     for i < len(arr) {
         copy = append(copy, arr[i])
@@ -285,7 +285,7 @@ func copy_float_array([]float arr) []float {
     return copy
 }
 
-func sort_float_array_desc([]float arr) {
+func sort_float_array_desc(float[] arr) {
     int n = len(arr)
     int i = 0
     for i < n - 1 {
@@ -302,9 +302,9 @@ func sort_float_array_desc([]float arr) {
     }
 }
 
-func argsort_desc([]float arr) []int {
+func argsort_desc(float[] arr) int[] {
     int n = len(arr)
-    []int indices = []int{}
+    int[] indices = int[]{}
     int i = 0
     for i < n {
         indices = append(indices, i)
@@ -326,8 +326,8 @@ func argsort_desc([]float arr) []int {
     return indices
 }
 
-func make_bool_array(int size, bool default_val) []bool {
-    []bool arr = []bool{}
+func make_bool_array(int size, bool default_val) bool[] {
+    bool[] arr = bool[]{}
     int i = 0
     for i < size {
         arr = append(arr, default_val)

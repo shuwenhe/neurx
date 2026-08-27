@@ -70,7 +70,7 @@ struct batch_inference_response {
 	string batch_id
 	string model_id
 	[]*model_output outputs
-	[]int64 latencies
+	int[]64 latencies
 	bool success
 	string error_message
 	int32 batch_size
@@ -133,7 +133,7 @@ func (inference_engine* engine) execute_inference(inference_request* request) *i
 	output := *model_output{
 		output_type: "text",
 		text: fmt.Sprintf("Generated output for: %s", request.input.prompt),
-		tokens: make([]int32, tokens_generated),
+		tokens: make(int[]32, tokens_generated),
 		metadata: make(map[string]interface{}),
 	}
 
@@ -180,7 +180,7 @@ func (inference_engine* engine) submit_batch_inference(batch_inference_request* 
 	engine.mu.Unlock()
 
 	outputs := make([]*model_output, len(batch_request.inputs))
-	latencies := make([]int64, len(batch_request.inputs))
+	latencies := make(int[]64, len(batch_request.inputs))
 
 	for i, input := range batch_request.inputs {
 		item_start := time.Now()

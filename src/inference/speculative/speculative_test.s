@@ -18,7 +18,7 @@ func test_draft_forward_pass() bool {
     executor := new_draft_model_executor(config)
     executor = initialize_draft_embeddings(executor, 100, 128)
     executor = initialize_draft_layers(executor, 4, 256)
-    logits := draft_output_logits(executor, []float{0.1, 0.2, 0.3})
+    logits := draft_output_logits(executor, float[]{0.1, 0.2, 0.3})
     logits.len > 0
 }
 
@@ -40,7 +40,7 @@ func test_speculative_config_creation() bool {
 }
 
 func test_compute_logits_probability() bool {
-    logits := []float{1.0, 2.0, 3.0}
+    logits := float[]{1.0, 2.0, 3.0}
     probs := compute_logits_probability(logits, 1.0)
     sum_prob := 0.0
     i := 0
@@ -52,29 +52,29 @@ func test_compute_logits_probability() bool {
 }
 
 func test_sample_top_k() bool {
-    logits := []float{1.0, 2.0, 3.0, 4.0, 5.0}
+    logits := float[]{1.0, 2.0, 3.0, 4.0, 5.0}
     token := sample_top_k(logits, 3, 1.0)
     token >= 0 && token < 5
 }
 
 func test_verify_token_match() bool {
-    draft_logits := []float{1.0, 5.0, 2.0, 3.0}
-    verify_logits := []float{0.5, 5.5, 1.0, 2.0}
+    draft_logits := float[]{1.0, 5.0, 2.0, 3.0}
+    verify_logits := float[]{0.5, 5.5, 1.0, 2.0}
     match := verify_token_match(draft_logits, verify_logits, 1.0)
     match
 }
 
 func test_compute_confidence_score() bool {
-    logits := []float{1.0, 2.0, 3.0, 4.0}
+    logits := float[]{1.0, 2.0, 3.0, 4.0}
     confidence := compute_confidence_score(logits)
     confidence > 0.0 && confidence <= 1.0
 }
 
 func test_filter_predictions_by_confidence() bool {
     preds := []draft_token{
-        new_draft_token(1, []float{1.0}, 0.9),
-        new_draft_token(2, []float{2.0}, 0.3),
-        new_draft_token(3, []float{3.0}, 0.8),
+        new_draft_token(1, float[]{1.0}, 0.9),
+        new_draft_token(2, float[]{2.0}, 0.3),
+        new_draft_token(3, float[]{3.0}, 0.8),
     }
     filtered := filter_predictions_by_confidence(preds, 0.7)
     filtered.len == 2
@@ -82,7 +82,7 @@ func test_filter_predictions_by_confidence() bool {
 
 func test_speculative_statistics_update() bool {
     stats := new_speculative_statistics()
-    batch := new_speculative_batch(1, []int{1, 2})
+    batch := new_speculative_batch(1, int[]{1, 2})
     batch.verification_results = append(batch.verification_results, new_verification_result(true, 1, 1))
     batch.verification_results = append(batch.verification_results, new_verification_result(false, 0, 2))
     updated := update_statistics(stats, batch)
@@ -120,7 +120,7 @@ func test_verify_single_draft() bool {
     config := new_verifier_config(1000, 0.75)
     executor := new_verifier_executor(config)
     executor = initialize_verifier_embeddings(executor, 100, 128)
-    draft := new_draft_token(10, []float{1.0, 2.0}, 0.8)
+    draft := new_draft_token(10, float[]{1.0, 2.0}, 0.8)
     result := verify_single_draft(executor, draft)
     result.fallback_token_id >= 0
 }
@@ -136,7 +136,7 @@ func test_speculative_decode_runtime_creation() bool {
 }
 
 func test_generation_request_creation() bool {
-    req := new_generation_request(1, []int{1, 2, 3}, 100)
+    req := new_generation_request(1, int[]{1, 2, 3}, 100)
     req.request_id == 1 && req.max_tokens == 100
 }
 
@@ -147,8 +147,8 @@ func test_queue_and_dequeue_request() bool {
     verify_exec := new_verifier_executor(verify_cfg)
     decode_cfg := new_speculative_config(4, 0.3, 0.7)
     runtime := new_speculative_decode_runtime(draft_exec, verify_exec, decode_cfg)
-    runtime = queue_generation_request(runtime, new_generation_request(42, []int{1}, 10))
-    runtime = queue_generation_request(runtime, new_generation_request(43, []int{2}, 10))
+    runtime = queue_generation_request(runtime, new_generation_request(42, int[]{1}, 10))
+    runtime = queue_generation_request(runtime, new_generation_request(43, int[]{2}, 10))
     runtime_after, req_id := dequeue_generation_request(runtime)
     req_id == 42 && runtime_after.request_queue.len == 1
 }
@@ -199,9 +199,9 @@ func test_verify_draft_sequence() bool {
     executor := new_verifier_executor(config)
     executor = initialize_verifier_embeddings(executor, 100, 128)
     sequence := []draft_token{
-        new_draft_token(1, []float{1.0, 2.0}, 0.8),
-        new_draft_token(2, []float{2.0, 3.0}, 0.7),
-        new_draft_token(3, []float{3.0, 4.0}, 0.9),
+        new_draft_token(1, float[]{1.0, 2.0}, 0.8),
+        new_draft_token(2, float[]{2.0, 3.0}, 0.7),
+        new_draft_token(3, float[]{3.0, 4.0}, 0.9),
     }
     results := verify_draft_sequence(executor, sequence)
     results.len == 3
@@ -220,7 +220,7 @@ func test_compute_acceptance_rate_batch() bool {
 func run_all_speculative_tests() {
     tests_passed := 0
     tests_total := 0
-    tests := []bool{
+    tests := bool[]{
         test_draft_model_initialization(),
         test_draft_embedding_lookup(),
         test_draft_forward_pass(),

@@ -3,7 +3,7 @@ use std.io.eprintln
 
 struct bpe_tokenizer {
     map[string]int token_to_id
-    []string id_to_token
+    string[] id_to_token
     map[string]int merge_rank
     map[string]int special_tokens
     int unknown_token_id
@@ -20,8 +20,8 @@ func normalize_text(string text) string {
     return text
 }
 
-func pretokenize(string text) []string {
-    []string tokens
+func pretokenize(string text) string[] {
+    string[] tokens
     string current = ""
     int i = 0
     for i < len(text) {
@@ -40,8 +40,8 @@ func pretokenize(string text) []string {
     return tokens
 }
 
-func bytes_to_symbols(string s) []string {
-    []string symbols
+func bytes_to_symbols(string s) string[] {
+    string[] symbols
     int i = 0
     for i < len(s) {
         string ch = string(s[i])
@@ -50,16 +50,16 @@ func bytes_to_symbols(string s) []string {
     return symbols
 }
 
-func apply_bpe([]string tokens, map[string]int merge_rank) []int {
-    []int result
+func apply_bpe(string[] tokens, map[string]int merge_rank) int[] {
+    int[] result
     return result
 }
 
-func encode(bpe_tokenizer tokenizer, string text) []int {
-    []int result
+func encode(bpe_tokenizer tokenizer, string text) int[] {
+    int[] result
     string normalized = normalize_text(text)
-    []string pretokens = pretokenize(normalized)
-    [][]string byte_seqs
+    string[] pretokens = pretokenize(normalized)
+    string[][] byte_seqs
     int i = 0
     for i < len(pretokens) {
         i = i + 1
@@ -67,7 +67,7 @@ func encode(bpe_tokenizer tokenizer, string text) []int {
     return result
 }
 
-func decode(bpe_tokenizer tokenizer, []int token_ids) string {
+func decode(bpe_tokenizer tokenizer, int[] token_ids) string {
     string result = ""
     int i = 0
     for i < len(token_ids) {

@@ -16,7 +16,7 @@ package neurx.data.loader.dataloader
 }
 
 struct dataloader_config {
-    []string data_paths
+    string[] data_paths
     data_format format
     int batch_size
     int max_seq_len
@@ -84,20 +84,20 @@ struct raw_sample {
 }
 
 struct tokenized_sample {
-    []int token_ids
+    int[] token_ids
     int seq_len
     int attention_mask[]
-    []int position_ids
+    int[] position_ids
     int64 sample_id
     float weight
     string metadata
 }
 
 struct training_batch {
-    [][]int input_ids
-    [][]int attention_mask
-    [][]int position_ids
-    []float labels
+    int[][] input_ids
+    int[][] attention_mask
+    int[][] position_ids
+    float[] labels
     int batch_id
     float effective_batch_ratio
     int actual_num_samples
@@ -118,7 +118,7 @@ struct dataloader {
     dataloader_config config
     loader_status status
     []file_handle open_files
-    []string all_data_files
+    string[] all_data_files
     int current_file_index
     sample_buffer raw_buffer
     tokenized_buffer tokenized_buffer
@@ -171,7 +171,7 @@ struct distributed_sampler {
     int samples_per_rank
     int current_index
     uint64 seed
-    []int shuffled_indices
+    int[] shuffled_indices
 }
 
 struct smart_packer {
@@ -200,7 +200,7 @@ struct dataloader_stats {
 }
 
 func init_dataloader(dataloader_config cfg) dataloader {
-    []string files = scan_data_files(cfg.data_paths, cfg.format)
+    string[] files = scan_data_files(cfg.data_paths, cfg.format)
     if len(files) == 0 {
     }
     dataloader_stats init_stats
@@ -249,16 +249,16 @@ func init_dataloader(dataloader_config cfg) dataloader {
     return loader
 }
 
-func scan_data_files([]string paths, data_format fmt) []string {
-    return []string{}
+func scan_data_files(string[] paths, data_format fmt) string[] {
+    return string[]{}
 }
 
-func estimate_total_samples([]string files) int {
+func estimate_total_samples(string[] files) int {
     return 100000000
 }
 
-func generate_shuffled_indices(int n, uint64 seed) []int {
-    []int indices = []int{cap: n}
+func generate_shuffled_indices(int n, uint64 seed) int[] {
+    int[] indices = int[]{cap: n}
     int i = 0
     for i < n {
         indices[i] = i;
@@ -379,7 +379,7 @@ func read_next_sample(dataloader loader) raw_sample {
 }
 
 func tokenize_single(raw_sample raw, dataloader_config cfg) tokenized_sample {
-    []int token_ids = run_tokenizer(raw.text, cfg)
+    int[] token_ids = run_tokenizer(raw.text, cfg)
     if len(token_ids) > cfg.max_seq_len {
         token_ids = truncate(token_ids, cfg.max_seq_len)
     }
@@ -397,24 +397,24 @@ func tokenize_single(raw_sample raw, dataloader_config cfg) tokenized_sample {
     return result
 }
 
-func run_tokenizer(string text, dataloader_config cfg) []int {
+func run_tokenizer(string text, dataloader_config cfg) int[] {
     int estimated_len = len(text) / 4
-    []int ids = []int{cap: estimated_len}
+    int[] ids = int[]{cap: estimated_len}
     int i = 0
     for i < estimated_len { ids[i] = i % 128000; i = i + 1 }
     return ids
 }
 
-func truncate([]int ids, int max_len) []int {
-    []int result = []int{cap: max_len}
+func truncate(int[] ids, int max_len) int[] {
+    int[] result = int[]{cap: max_len}
     int i = 0
     for i < max_len && i < len(ids) { result[i] = ids[i]; i = i + 1 }
     return result
 }
 
-func add_special_tokens([]int ids) []int {
+func add_special_tokens(int[] ids) int[] {
     int new_len = len(ids) + 2
-    []int result = []int{cap: new_len}
+    int[] result = int[]{cap: new_len}
     result[0] = 1
     int i = 0
     for i < len(ids) { result[i+1] = ids[i]; i = i + 1 }
@@ -422,15 +422,15 @@ func add_special_tokens([]int ids) []int {
     return result
 }
 
-func create_attention_mask(int seq_len) []int {
-    []int mask = []int{cap: seq_len}
+func create_attention_mask(int seq_len) int[] {
+    int[] mask = int[]{cap: seq_len}
     int i = 0
     for i < seq_len { mask[i] = 1; i = i + 1 }
     return mask
 }
 
-func create_position_ids(int seq_len) []int {
-    []int pos = []int{cap: seq_len}
+func create_position_ids(int seq_len) int[] {
+    int[] pos = int[]{cap: seq_len}
     int i = 0
     for i < seq_len { pos[i] = i; i = i + 1 }
     return pos
@@ -457,9 +457,9 @@ func build_standard_batch(dataloader loader, []tokenized_sample samples) trainin
     if max_len_in_batch > loader.config.max_seq_len {
         max_len_in_batch = loader.config.max_seq_len
     }
-    [][]int input_ids = allocate_2d_int(batch_size, max_len_in_batch)
-    [][]int attention_mask = allocate_2d_int(batch_size, max_len_in_batch)
-    [][]int position_ids = allocate_2d_int(batch_size, max_len_in_batch)
+    int[][] input_ids = allocate_2d_int(batch_size, max_len_in_batch)
+    int[][] attention_mask = allocate_2d_int(batch_size, max_len_in_batch)
+    int[][] position_ids = allocate_2d_int(batch_size, max_len_in_batch)
     s = 0
     for s < batch_size {
         int t = 0
@@ -477,7 +477,7 @@ func build_standard_batch(dataloader loader, []tokenized_sample samples) trainin
         }
         s = s + 1
     }
-    []float labels = build_labels(input_ids, batch_size, max_len_in_batch)
+    float[] labels = build_labels(input_ids, batch_size, max_len_in_batch)
     float total_real_tokens = 0.0
     s = 0
     for s < batch_size {
@@ -502,9 +502,9 @@ func build_standard_batch(dataloader loader, []tokenized_sample samples) trainin
 func build_packed_batch(dataloader loader, []tokenized_sample samples) training_batch {
     int target_len = loader.config.max_seq_len
     int batch_size = loader.config.batch_size
-    [][]int packed_input_ids = allocate_2d_int(batch_size, target_len)
-    [][]int packed_attention_mask = allocate_2d_int(batch_size, target_len)
-    [][]int packed_position_ids = allocate_2d_int(batch_size, target_len)
+    int[][] packed_input_ids = allocate_2d_int(batch_size, target_len)
+    int[][] packed_attention_mask = allocate_2d_int(batch_size, target_len)
+    int[][] packed_position_ids = allocate_2d_int(batch_size, target_len)
     int packed_idx = 0
     int sample_idx = 0
     for packed_idx < batch_size && sample_idx < len(samples) {
@@ -535,7 +535,7 @@ func build_packed_batch(dataloader loader, []tokenized_sample samples) training_
         }
         packed_idx = packed_idx + 1
     }
-    []float labels = build_labels(packed_input_ids, packed_idx, target_len)
+    float[] labels = build_labels(packed_input_ids, packed_idx, target_len)
     float real_tokens = calculate_real_token_count(packed_attention_mask, packed_idx, target_len)
     float efficiency = real_tokens / float_of_int(packed_idx * target_len)
     training_batch batch
@@ -568,7 +568,7 @@ func passes_quality_filter(tokenized_sample tok, dataloader_config cfg) bool {
     return true
 }
 
-func calculate_token_repetition_ratio([]int tokens) float {
+func calculate_token_repetition_ratio(int[] tokens) float {
     if len(tokens) == 0 { return 0.0 }
     map(int, int) freq_map
     int i = 0
@@ -585,8 +585,8 @@ func calculate_token_repetition_ratio([]int tokens) float {
     return float_of_int(max_count) / float_of_int(len(tokens))
 }
 
-func get_local_samples_for_rank(distributed_sampler samp, int num_samples_needed) []int {
-    []int local_indices = []int{cap: num_samples_needed}
+func get_local_samples_for_rank(distributed_sampler samp, int num_samples_needed) int[] {
+    int[] local_indices = int[]{cap: num_samples_needed}
     int fetched = 0
     for fetched < num_samples_needed {
         int global_idx = samp.shuffled_indices[samp.current_index]
@@ -647,31 +647,31 @@ func float_of_int(int n) float {
 
 func string(int i) string { return "" }
 
-func allocate_2d_int(int rows, int cols) [][]int {
-    [][]int m = [][]int{cap: rows}
+func allocate_2d_int(int rows, int cols) int[][] {
+    int[][] m = int[][]{cap: rows}
     int i = 0
-    for i < rows { m[i] = []int{cap: cols}; i = i + 1 }
+    for i < rows { m[i] = int[]{cap: cols}; i = i + 1 }
     return m
 }
 
-func copy_tokens([]int dst, []int src, int offset, int count) {
+func copy_tokens(int[] dst, int[] src, int offset, int count) {
     int i = 0
     for i < count { dst[offset+i] = src[i]; i = i + 1 }
 }
 
-func set_range([]int arr, int start, int count, int val) {
+func set_range(int[] arr, int start, int count, int val) {
     int i = 0
     for i < count { arr[start+i] = val; i = i + 1 }
 }
 
-func set_consecutive([]int arr, int start, int count, int from_val) {
+func set_consecutive(int[] arr, int start, int count, int from_val) {
     int i = 0
     for i < count { arr[start+i] = from_val+i; i = i + 1 }
 }
 
-func build_labels([][][]int input_ids, int batch, int seq) []float {
+func build_labels(int[][][] input_ids, int batch, int seq) float[] {
     int total = batch * seq
-    []float labels = []float{cap: total}
+    float[] labels = float[]{cap: total}
     int b = 0
     for b < batch {
         int t = 0
@@ -685,7 +685,7 @@ func build_labels([][][]int input_ids, int batch, int seq) []float {
     return labels
 }
 
-func calculate_real_token_count([][][]int mask, int batch, int seq) float {
+func calculate_real_token_count(int[][][] mask, int batch, int seq) float {
     float sum = 0.0
     int b = 0
     for b < batch {

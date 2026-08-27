@@ -83,8 +83,8 @@ struct histogram_metric {
     string name
     int step
     int64 timestamp_ms
-    []float bins
-    []int counts
+    float[] bins
+    int[] counts
     float min_val
     float max_val
     float mean
@@ -205,7 +205,7 @@ struct monitoring_manager {
 }
 
 struct moving_window {
-    []float values
+    float[] values
     int window_size
     int current_index
     bool is_filled_once
@@ -234,7 +234,7 @@ func init_monitoring(monitoring_config cfg) monitoring_manager {
     console_writer cw
     cw.verbose = true
     moving_window lw
-    lw.values = []float{cap: 100}
+    lw.values = float[]{cap: 100}
     lw.window_size = 100
     lw.current_index = 0
     lw.is_filled_once = false
@@ -297,7 +297,7 @@ func log_scalar(
 func log_histogram(
     ref monitoring_manager mgr,
     string name,
-    []float values,
+    float[] values,
     int step
 ) {
     if !mgr.is_running || !should_log_at_step(step, mgr.config.histogram_log_interval) {
@@ -712,7 +712,7 @@ func detect_divergence(moving_window win) bool {
     return recent_avg > early_avg * 2.0 && early_avg > 0.01
 }
 
-func compute_histogram_statistics([]float values, ref histogram_metric hist) {
+func compute_histogram_statistics(float[] values, ref histogram_metric hist) {
     int n = len(values)
     if n == 0 { return }
     float sum = 0.0
@@ -739,8 +739,8 @@ func compute_histogram_statistics([]float values, ref histogram_metric hist) {
     hist.mean = mean
     hist.std_dev = std
     int num_bins = 50
-    hist.bins = []float{cap: num_bins + 1}
-    hist.counts = []int{cap: num_bins}
+    hist.bins = float[]{cap: num_bins + 1}
+    hist.counts = int[]{cap: num_bins}
     float range = max_val - min_val
     if range == 0 { range = 1.0 }
     float bin_width = range / float_of_int(num_bins)
@@ -765,7 +765,7 @@ func compute_histogram_statistics([]float values, ref histogram_metric hist) {
     hist.p99 = values[n * 99 / 100]
 }
 
-func sort_float_array(ref []float arr) {
+func sort_float_array(ref float[] arr) {
     int n = len(arr)
     int i = 0
     for i < n - 1 {

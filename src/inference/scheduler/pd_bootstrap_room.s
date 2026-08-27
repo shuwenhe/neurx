@@ -20,15 +20,15 @@ struct pd_bootstrap_config {
 
 struct pd_bootstrap_state {
     pd_bootstrap_config config
-    []int room_ids
-    []int request_ids
-    []int statuses
-    []int expected_peers
-    []int ready_peers
-    []int reserved_pages
-    []int created_ms
-    []int status_changed_ms
-    []int failure_codes
+    int[] room_ids
+    int[] request_ids
+    int[] statuses
+    int[] expected_peers
+    int[] ready_peers
+    int[] reserved_pages
+    int[] created_ms
+    int[] status_changed_ms
+    int[] failure_codes
     int active_rooms
     int completed_rooms
     int failed_rooms
@@ -41,8 +41,8 @@ struct pd_room_result {
     bool accepted
 }
 
-func pd_room_int_array(int capacity) []int {
-    []int values = []int{cap: capacity}
+func pd_room_int_array(int capacity) int[] {
+    int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

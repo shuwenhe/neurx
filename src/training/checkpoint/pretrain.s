@@ -81,8 +81,8 @@ func pretrain_checkpoint_chr(int c) string {
     string(c)
 }
 
-func pretrain_checkpoint_split_lines(string text) []string {
-    []string lines = []string{cap: 0}
+func pretrain_checkpoint_split_lines(string text) string[] {
+    string[] lines = string[]{cap: 0}
     string current = ""
     bool ends_with_newline = false
     int i = 0
@@ -232,7 +232,7 @@ func pretrain_checkpoint_bundle_text(pretrain_checkpoint_bundle_state state) str
 }
 
 func pretrain_checkpoint_metadata_value(string text, string key, string fallback) string {
-    []string lines = pretrain_checkpoint_split_lines(text)
+    string[] lines = pretrain_checkpoint_split_lines(text)
     string prefix = key + "="
     int i = 0
     for i < len(lines) {

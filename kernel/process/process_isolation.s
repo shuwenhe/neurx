@@ -8,42 +8,42 @@ func PROCESS_INVALID_NAMESPACE() int { 4 }
 
 struct process_isolation {
     int namespace_count
-    [64]int namespace_id
-    [64]int parent_namespace
-    [64]int user_namespace
-    [64]int pid_namespace
-    [64]int mount_namespace
-    [64]int network_namespace
+    int[64] namespace_id
+    int[64] parent_namespace
+    int[64] user_namespace
+    int[64] pid_namespace
+    int[64] mount_namespace
+    int[64] network_namespace
     int next_namespace_component
 
     int process_count
-    [1024]int pid
-    [1024]int parent_pid
-    [1024]int namespace_id_for_process
-    [1024]int uid
-    [1024]int gid
-    [1024]bool cap_sys_admin
-    [1024]bool cap_net_admin
-    [1024]bool cap_accelerator
-    [1024]int resource_domain
-    [1024]int scheduler_task
-    [1024]bool runnable
+    int[1024] pid
+    int[1024] parent_pid
+    int[1024] namespace_id_for_process
+    int[1024] uid
+    int[1024] gid
+    bool[1024] cap_sys_admin
+    bool[1024] cap_net_admin
+    bool[1024] cap_accelerator
+    int[1024] resource_domain
+    int[1024] scheduler_task
+    bool[1024] runnable
     int last_result
 }
 
 func process_isolation_create() process_isolation {
     isolation := process_isolation {
         namespace_count: 1,
-        namespace_id: [64]int{}, parent_namespace: [64]int{},
-        user_namespace: [64]int{}, pid_namespace: [64]int{},
-        mount_namespace: [64]int{}, network_namespace: [64]int{},
+        namespace_id: int[64]{}, parent_namespace: int[64]{},
+        user_namespace: int[64]{}, pid_namespace: int[64]{},
+        mount_namespace: int[64]{}, network_namespace: int[64]{},
         next_namespace_component: 2,
         process_count: 1,
-        pid: [1024]int{}, parent_pid: [1024]int{},
-        namespace_id_for_process: [1024]int{}, uid: [1024]int{}, gid: [1024]int{},
-        cap_sys_admin: [1024]bool{}, cap_net_admin: [1024]bool{},
-        cap_accelerator: [1024]bool{}, resource_domain: [1024]int{},
-        scheduler_task: [1024]int{}, runnable: [1024]bool{},
+        pid: int[1024]{}, parent_pid: int[1024]{},
+        namespace_id_for_process: int[1024]{}, uid: int[1024]{}, gid: int[1024]{},
+        cap_sys_admin: bool[1024]{}, cap_net_admin: bool[1024]{},
+        cap_accelerator: bool[1024]{}, resource_domain: int[1024]{},
+        scheduler_task: int[1024]{}, runnable: bool[1024]{},
         last_result: PROCESS_OK()
     }
     isolation.namespace_id[0] = 1

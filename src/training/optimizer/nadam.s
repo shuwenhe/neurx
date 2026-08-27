@@ -11,8 +11,8 @@ struct nadam_optimizer {
     float momentum_decay
     int step
     float mu_product
-    []float exp_avg
-    []float exp_avg_sq
+    float[] exp_avg
+    float[] exp_avg_sq
 }
 
 func new_nadam(
@@ -47,7 +47,7 @@ func nadam_step(nadam_optimizer optimizer, tensor params, tensor grads) nadam_op
     float mu_next = optimizer.beta1 * (1.0 - 0.5 * nadam_pow_float(0.96, float(optimizer.step + 1) * optimizer.momentum_decay))
     optimizer.mu_product = optimizer.mu_product * mu
     float mu_product_next = optimizer.mu_product * mu_next
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         float grad = grads.data[i]
@@ -73,8 +73,8 @@ struct nadam_optimizer_step_output {
     tensor params
 }
 
-func ensure_nadam_state([]float values, int n) []float {
-    []float out = []float{cap: n}
+func ensure_nadam_state(float[] values, int n) float[] {
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         if i < len(values) {

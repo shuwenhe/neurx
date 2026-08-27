@@ -82,7 +82,7 @@ func (manager ray_manager*) register_actor(actor_name string, actor interface{})
 func (manager ray_manager*) create_placement_group(
     name string,
     strategy string,
-    bundles map[string[]float64],
+    bundles map[stringfloat[]64],
 ) bool {
     if !manager.is_running {
         return false

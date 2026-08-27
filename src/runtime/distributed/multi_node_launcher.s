@@ -163,8 +163,8 @@ func detect_failed_ranks(
     int world_size,
     string shared_storage_path,
     int timeout_sec,
-) []int {
-    []int failed_ranks = []int{cap: 10}
+) int[] {
+    int[] failed_ranks = int[]{cap: 10}
     int failed_count = 0
     int rank = 0
     for rank < world_size {

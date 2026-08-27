@@ -8,12 +8,12 @@ struct tracer_state {
     bool active
     bool linearized
     int op_count
-    []string ops
-    []string params
-    []string inputs
-    []string outputs
+    string[] ops
+    string[] params
+    string[] inputs
+    string[] outputs
     []ir_eqn eqns
-    []string tags
+    string[] tags
 }
 
 func get_op(tracer_state state, int index) string {
@@ -186,7 +186,7 @@ func tracer_has_tag(tracer_state state, string tag) bool {
 }
 
 func tracer_add_op(tracer_state state, string op) tracer_state {
-    []string ops = copy_strings(state.ops)
+    string[] ops = copy_strings(state.ops)
     ops = append(ops, op)
     tracer_state {
         name: state.name,
@@ -203,8 +203,8 @@ func tracer_add_op(tracer_state state, string op) tracer_state {
 }
 
 func tracer_add_op_with_param(tracer_state state, string op, string param) tracer_state {
-    []string ops = copy_strings(state.ops)
-    []string params = copy_strings(state.params)
+    string[] ops = copy_strings(state.ops)
+    string[] params = copy_strings(state.params)
     ops = append(ops, op)
     params = append(params, param)
     tracer_state {
@@ -222,7 +222,7 @@ func tracer_add_op_with_param(tracer_state state, string op, string param) trace
 }
 
 func tracer_add_input(tracer_state state, string input) tracer_state {
-    []string inputs = copy_strings(state.inputs)
+    string[] inputs = copy_strings(state.inputs)
     inputs = append(inputs, input)
     tracer_state {
         name: state.name,
@@ -239,7 +239,7 @@ func tracer_add_input(tracer_state state, string input) tracer_state {
 }
 
 func tracer_add_output(tracer_state state, string output) tracer_state {
-    []string outputs = copy_strings(state.outputs)
+    string[] outputs = copy_strings(state.outputs)
     outputs = append(outputs, output)
     tracer_state {
         name: state.name,
@@ -255,19 +255,19 @@ func tracer_add_output(tracer_state state, string output) tracer_state {
     }
 }
 
-func eqn_inputs([]string inputs) []string {
+func eqn_inputs(string[] inputs) string[] {
     copy_strings(inputs)
 }
 
-func eqn_outputs([]string outputs) []string {
+func eqn_outputs(string[] outputs) string[] {
     copy_strings(outputs)
 }
 
-func tracer_add_eqn_with_io(tracer_state state, string primitive, []string params, []string inputs, []string outputs) tracer_state {
-    []string ops = copy_strings(state.ops)
-    []string param_list = copy_strings(state.params)
-    []string input_list = copy_strings(state.inputs)
-    []string output_list = copy_strings(state.outputs)
+func tracer_add_eqn_with_io(tracer_state state, string primitive, string[] params, string[] inputs, string[] outputs) tracer_state {
+    string[] ops = copy_strings(state.ops)
+    string[] param_list = copy_strings(state.params)
+    string[] input_list = copy_strings(state.inputs)
+    string[] output_list = copy_strings(state.outputs)
     []ir_eqn eqns = copy_eqns(state.eqns)
     ops = append(ops, primitive)
     param_list = append(param_list, join_params(params))
@@ -308,7 +308,7 @@ func tracer_add_eqn(tracer_state state, string primitive) tracer_state {
 }
 
 func tracer_add_eqn_with_param(tracer_state state, string primitive, string param) tracer_state {
-    []string params = []string{cap: 1}
+    string[] params = string[]{cap: 1}
     params[0] = param
     tracer_add_eqn_with_io(state, primitive, params, [], [])
 }
@@ -430,7 +430,7 @@ func tracer_capture_with_param(tracer_state state, string op, string param) trac
     tracer_add_op_with_param(state, op, param)
 }
 
-func tracer_capture_with_io(tracer_state state, string op, []string params, []string inputs, []string outputs) tracer_state {
+func tracer_capture_with_io(tracer_state state, string op, string[] params, string[] inputs, string[] outputs) tracer_state {
     tracer_add_eqn_with_io(state, op, params, inputs, outputs)
 }
 
@@ -455,12 +455,12 @@ func transform_chain_to_tracer(transform_chain chain, string name) tracer_state 
             string step = get_chain_step(chain, i)
             eqns[i] = ir_eqn {
                 primitive: step,
-                params: copy_strings([]string{cap: 0}),
+                params: copy_strings(string[]{cap: 0}),
                 inputs: [],
                 outputs: [],
             }
             if i < len(chain.params) && get_chain_param(chain, i) != "" {
-                []string params = []string{cap: 1}
+                string[] params = string[]{cap: 1}
                 params[0] = get_chain_param(chain, i)
                 eqns[i].params = params
             }

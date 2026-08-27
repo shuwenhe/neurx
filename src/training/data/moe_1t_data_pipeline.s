@@ -10,7 +10,7 @@ struct data_shard_meta {
     int end_byte
     int num_tokens
     int num_documents
-    []int doc_boundaries
+    int[] doc_boundaries
     string checksum
     int processed
 }
@@ -22,7 +22,7 @@ struct data_shard_directory {
     int total_tokens_b
     string sampling_strategy
     int random_seed
-    []float shard_weights
+    float[] shard_weights
     int current_shard_idx
     int tokens_consumed
     int shards_completed
@@ -36,7 +36,7 @@ func moe_1t_load_shard_directory(string manifest_path) data_shard_directory {
         total_tokens_b: 0,
         sampling_strategy: "random",
         random_seed: 42,
-        shard_weights: make([]float, 0),
+        shard_weights: make(float[], 0),
         current_shard_idx: 0,
         tokens_consumed: 0,
         shards_completed: 0,
@@ -46,12 +46,12 @@ func moe_1t_load_shard_directory(string manifest_path) data_shard_directory {
 }
 
 struct token_batch {
-    []int token_ids
+    int[] token_ids
     int batch_size
     int seq_len
     int num_tokens_total
-    []int document_ids
-    []int shard_indices
+    int[] document_ids
+    int[] shard_indices
     float importance_weights
     int epoch
     int batch_idx
@@ -87,23 +87,23 @@ func moe_1t_token_loader_new(
         shard_dir: shard_dir,
         tokenizer: tokenizer,
         current_batch: token_batch {
-            token_ids: make([]int, 0),
+            token_ids: make(int[], 0),
             batch_size: 0,
             seq_len: 0,
             num_tokens_total: 0,
-            document_ids: make([]int, 0),
-            shard_indices: make([]int, 0),
+            document_ids: make(int[], 0),
+            shard_indices: make(int[], 0),
             importance_weights: 1.0,
             epoch: 0,
             batch_idx: 0,
         },
         prefetch_batch: token_batch {
-            token_ids: make([]int, 0),
+            token_ids: make(int[], 0),
             batch_size: 0,
             seq_len: 0,
             num_tokens_total: 0,
-            document_ids: make([]int, 0),
-            shard_indices: make([]int, 0),
+            document_ids: make(int[], 0),
+            shard_indices: make(int[], 0),
             importance_weights: 1.0,
             epoch: 0,
             batch_idx: 0,
@@ -124,7 +124,7 @@ func moe_1t_token_loader_new(
 
 func moe_1t_assign_shard_partition(
     moe_1t_token_loader loader
-) []int {
+) int[] {
     int total_shards = loader.shard_dir.total_shards
     int dp_size = loader.dp_size
     int dp_rank = loader.dp_rank
@@ -137,7 +137,7 @@ func moe_1t_assign_shard_partition(
         start_shard = (total_shards % dp_size) * (shards_per_dp + 1) +
                       (dp_rank - (total_shards % dp_size)) * shards_per_dp
     }
-    []int assigned_shards = make([]int, shards_per_dp)
+    int[] assigned_shards = make(int[], shards_per_dp)
     int i = 0
     for i < shards_per_dp {
         assigned_shards[i] = start_shard + i
@@ -147,7 +147,7 @@ func moe_1t_assign_shard_partition(
 }
 
 func moe_1t_validate_tokens(
-    []int tokens,
+    int[] tokens,
     int vocab_size
 ) int {
     int errors = 0
@@ -162,9 +162,9 @@ func moe_1t_validate_tokens(
 }
 
 func moe_1t_dedup_tokens(
-    []int tokens,
+    int[] tokens,
     float max_dup_ratio
-) []int {
+) int[] {
     int write_idx = 0
     int i = 0
     int consecutive_same = 1
@@ -180,7 +180,7 @@ func moe_1t_dedup_tokens(
         }
         i = i + 1
     }
-    []int result = make([]int, write_idx)
+    int[] result = make(int[], write_idx)
     int j = 0
     for j < write_idx {
         result[j] = tokens[j]
@@ -190,7 +190,7 @@ func moe_1t_dedup_tokens(
 }
 
 func moe_1t_compute_importance_weights(
-    []float per_token_loss,
+    float[] per_token_loss,
     float difficulty_factor
 ) float {
     float avg_loss = 0.0
@@ -218,7 +218,7 @@ func moe_1t_prefetch_next_batch(
 ) token_batch {
     int batch_size = loader.batch_size_tokens
     int seq_len = loader.seq_len
-    []int token_ids = make([]int, batch_size)
+    int[] token_ids = make(int[], batch_size)
     int i = 0
     for i < batch_size {
         token_ids[i] = i % 128000
@@ -229,8 +229,8 @@ func moe_1t_prefetch_next_batch(
         batch_size: batch_size / seq_len,
         seq_len: seq_len,
         num_tokens_total: batch_size,
-        document_ids: make([]int, 0),
-        shard_indices: make([]int, 0),
+        document_ids: make(int[], 0),
+        shard_indices: make(int[], 0),
         importance_weights: 1.0,
         epoch: 0,
         batch_idx: prefetch_id,
@@ -249,12 +249,12 @@ func moe_1t_swap_buffers(
 }
 
 func moe_1t_assemble_context_window(
-    []int token_stream,
+    int[] token_stream,
     int window_len,
     int overlap,
     int stride
-) [][]int {
-    [][]int windows = make([][]int, 0)
+) int[][] {
+    int[][] windows = make(int[][], 0)
     int num_windows = (len(token_stream) - window_len) / stride
     if num_windows < 0 {
         num_windows = 0
@@ -269,7 +269,7 @@ func moe_1t_assemble_context_window(
         if end > len(token_stream) {
             end = len(token_stream)
         }
-        []int window = make([]int, end - start)
+        int[] window = make(int[], end - start)
         int i = start
         int j = 0
         for i < end {
@@ -352,6 +352,6 @@ func chr(int code) string {
     string(code)
 }
 
-func append([][]int arrays, []int arr) [][]int {
+func append(int[][] arrays, int[] arr) int[][] {
     arrays
 }

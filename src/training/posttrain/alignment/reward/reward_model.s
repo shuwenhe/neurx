@@ -6,11 +6,11 @@ use neurx.model.llm.gpt.{
 
 struct reward_model {
     language_model backbone
-    []float head
+    float[] head
     float bias
     int n_embd
-    []float head_m
-    []float head_v
+    float[] head_m
+    float[] head_v
     float bias_m
     float bias_v
     int step
@@ -29,18 +29,18 @@ struct reward_train_result {
 }
 
 struct reward_batch_scores {
-    []float rewards
+    float[] rewards
 }
 
-func rm_alloc(int n, float v) []float {
-    []float arr = []float{cap: n}
+func rm_alloc(int n, float v) float[] {
+    float[] arr = float[]{cap: n}
     int i = 0
     for i < n { arr[i] = v; i = i + 1 }
     arr
 }
 
-func rm_init_head(int n_embd) []float {
-    []float head = rm_alloc(n_embd, 0.0)
+func rm_init_head(int n_embd) float[] {
+    float[] head = rm_alloc(n_embd, 0.0)
     int i = 0
     for i < n_embd {
         float t = (i * 1.0 + 1.0) / (n_embd * 1.0)
@@ -143,8 +143,8 @@ func rm_pow(float base, int exp) float {
     r
 }
 
-func rm_pool_last_hidden([]float last_hidden, int batch_size, int seq_len, int n_embd) []float {
-    []float pooled = rm_alloc(batch_size * n_embd, 0.0)
+func rm_pool_last_hidden(float[] last_hidden, int batch_size, int seq_len, int n_embd) float[] {
+    float[] pooled = rm_alloc(batch_size * n_embd, 0.0)
     int b = 0
     for b < batch_size {
         int last_tok = b * seq_len + (seq_len - 1)
@@ -160,10 +160,10 @@ func rm_pool_last_hidden([]float last_hidden, int batch_size, int seq_len, int n
     pooled
 }
 
-func rm_score_batch(reward_model rm, []int token_ids, int batch_size, int seq_len) reward_batch_scores {
+func rm_score_batch(reward_model rm, int[] token_ids, int batch_size, int seq_len) reward_batch_scores {
     model_output out = gpt_forward(rm.backbone, token_ids, batch_size, seq_len)
-    []float pooled = rm_pool_last_hidden(out.last_hidden, batch_size, seq_len, rm.n_embd)
-    []float rewards = rm_alloc(batch_size, 0.0)
+    float[] pooled = rm_pool_last_hidden(out.last_hidden, batch_size, seq_len, rm.n_embd)
+    float[] rewards = rm_alloc(batch_size, 0.0)
     int b = 0
     for b < batch_size {
         float r = rm.bias
@@ -178,12 +178,12 @@ func rm_score_batch(reward_model rm, []int token_ids, int batch_size, int seq_le
     reward_batch_scores { rewards: rewards }
 }
 
-func reward_model_score(reward_model rm, []int token_ids, int seq_len) float {
+func reward_model_score(reward_model rm, int[] token_ids, int seq_len) float {
     reward_batch_scores scores = rm_score_batch(rm, token_ids, 1, seq_len)
     scores.rewards[0]
 }
 
-func rm_bradley_terry_loss([]float chosen_r, []float rejected_r, int batch_size) float {
+func rm_bradley_terry_loss(float[] chosen_r, float[] rejected_r, int batch_size) float {
     float loss = 0.0
     int i = 0
     for i < batch_size {
@@ -197,17 +197,17 @@ func rm_bradley_terry_loss([]float chosen_r, []float rejected_r, int batch_size)
 
 func reward_model_train_step(
     reward_model rm,
-    []int chosen_ids,
-    []int rejected_ids,
+    int[] chosen_ids,
+    int[] rejected_ids,
     int batch_size,
     int seq_len
 ) reward_train_result {
     model_output out_c = gpt_forward(rm.backbone, chosen_ids, batch_size, seq_len)
     model_output out_r = gpt_forward(rm.backbone, rejected_ids, batch_size, seq_len)
-    []float pooled_c = rm_pool_last_hidden(out_c.last_hidden, batch_size, seq_len, rm.n_embd)
-    []float pooled_r = rm_pool_last_hidden(out_r.last_hidden, batch_size, seq_len, rm.n_embd)
-    []float reward_c = rm_alloc(batch_size, 0.0)
-    []float reward_r = rm_alloc(batch_size, 0.0)
+    float[] pooled_c = rm_pool_last_hidden(out_c.last_hidden, batch_size, seq_len, rm.n_embd)
+    float[] pooled_r = rm_pool_last_hidden(out_r.last_hidden, batch_size, seq_len, rm.n_embd)
+    float[] reward_c = rm_alloc(batch_size, 0.0)
+    float[] reward_r = rm_alloc(batch_size, 0.0)
     int b = 0
     for b < batch_size {
         float rc = rm.bias
@@ -225,7 +225,7 @@ func reward_model_train_step(
     float loss = rm_bradley_terry_loss(reward_c, reward_r, batch_size)
     int correct = 0
     float margin_sum = 0.0
-    []float grad_head = rm_alloc(rm.n_embd, 0.0)
+    float[] grad_head = rm_alloc(rm.n_embd, 0.0)
     b = 0
     for b < batch_size {
         float d_val = reward_c[b] - reward_r[b]
@@ -272,8 +272,8 @@ func reward_model_train_step(
 
 func reward_model_eval_accuracy(
     reward_model rm,
-    []int chosen_ids,
-    []int rejected_ids,
+    int[] chosen_ids,
+    int[] rejected_ids,
     int batch_size,
     int seq_len
 ) float {

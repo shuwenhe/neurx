@@ -9,30 +9,30 @@ struct layer_norm_config {
 struct layer_norm_state {
     int hidden_dim
     float epsilon
-    []float gamma
-    []float beta
+    float[] gamma
+    float[] beta
     bool use_bias
 }
 
 struct rms_norm_state {
     int hidden_dim
     float epsilon
-    []float gamma
+    float[] gamma
 }
 
 struct layer_norm_output {
-    []float normalized
-    []float mean
-    []float variance
+    float[] normalized
+    float[] mean
+    float[] variance
 }
 
 struct rms_norm_output {
-    []float normalized
-    []float variance
+    float[] normalized
+    float[] variance
 }
 
-func allocate_vector(int size, float init_val) []float {
-    []float v = []float{cap: size}
+func allocate_vector(int size, float init_val) float[] {
+    float[] v = float[]{cap: size}
     int i = 0
     for i < size {
         v[i] = init_val
@@ -41,8 +41,8 @@ func allocate_vector(int size, float init_val) []float {
     v
 }
 
-func copy_vector([]float src) []float {
-    []float out = allocate_vector(len(src), 0.0)
+func copy_vector(float[] src) float[] {
+    float[] out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
         out[i] = src[i]
@@ -76,14 +76,14 @@ func new_layer_norm(layer_norm_config cfg) layer_norm_state {
 
 func layer_normalize(
     layer_norm_state ln,
-    []float input,
+    float[] input,
     int batch_size,
     int seq_len
 ) layer_norm_output {
     int hidden_dim = ln.hidden_dim
-    []float output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
-    []float mean_out = allocate_vector(batch_size * seq_len, 0.0)
-    []float var_out = allocate_vector(batch_size * seq_len, 0.0)
+    float[] output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
+    float[] mean_out = allocate_vector(batch_size * seq_len, 0.0)
+    float[] var_out = allocate_vector(batch_size * seq_len, 0.0)
     int b = 0
     for b < batch_size {
         int s = 0
@@ -131,17 +131,17 @@ func layer_normalize(
 
 func layer_norm_backward(
     layer_norm_state ln,
-    []float grad_output,
-    []float input,
-    []float mean,
-    []float variance,
+    float[] grad_output,
+    float[] input,
+    float[] mean,
+    float[] variance,
     int batch_size,
     int seq_len
-) [][]float {
+) float[][] {
     int hidden_dim = ln.hidden_dim
-    []float grad_input = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
-    []float grad_gamma = allocate_vector(hidden_dim, 0.0)
-    []float grad_beta = allocate_vector(hidden_dim, 0.0)
+    float[] grad_input = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
+    float[] grad_gamma = allocate_vector(hidden_dim, 0.0)
+    float[] grad_beta = allocate_vector(hidden_dim, 0.0)
     int b = 0
     for b < batch_size {
         int s = 0
@@ -180,7 +180,7 @@ func layer_norm_backward(
         }
         b = b + 1
     }
-    [][]float result = [][]float{cap: 3}
+    float[][] result = float[][]{cap: 3}
     result[0] = grad_input
     result[1] = grad_gamma
     result[2] = grad_beta
@@ -197,13 +197,13 @@ func new_rms_norm(layer_norm_config cfg) rms_norm_state {
 
 func rms_normalize(
     rms_norm_state rn,
-    []float input,
+    float[] input,
     int batch_size,
     int seq_len
 ) rms_norm_output {
     int hidden_dim = rn.hidden_dim
-    []float output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
-    []float var_out = allocate_vector(batch_size * seq_len, 0.0)
+    float[] output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
+    float[] var_out = allocate_vector(batch_size * seq_len, 0.0)
     int b = 0
     for b < batch_size {
         int s = 0
@@ -237,15 +237,15 @@ func rms_normalize(
 
 func rms_norm_backward(
     rms_norm_state rn,
-    []float grad_output,
-    []float input,
-    []float variance,
+    float[] grad_output,
+    float[] input,
+    float[] variance,
     int batch_size,
     int seq_len
-) [][]float {
+) float[][] {
     int hidden_dim = rn.hidden_dim
-    []float grad_input = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
-    []float grad_gamma = allocate_vector(hidden_dim, 0.0)
+    float[] grad_input = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
+    float[] grad_gamma = allocate_vector(hidden_dim, 0.0)
     int b = 0
     for b < batch_size {
         int s = 0
@@ -277,7 +277,7 @@ func rms_norm_backward(
         }
         b = b + 1
     }
-    [][]float result = [][]float{cap: 2}
+    float[][] result = float[][]{cap: 2}
     result[0] = grad_input
     result[1] = grad_gamma
     result

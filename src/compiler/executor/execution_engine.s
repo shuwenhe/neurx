@@ -5,7 +5,7 @@ struct kernel_launch {
     string kernel_name
     int block_size
     int grid_size
-    []string arg_names
+    string[] arg_names
 }
 
 struct execution_context {

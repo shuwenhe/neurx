@@ -2,18 +2,18 @@ package neurx.transformer
 use neurx.tensor.tensor
 use neurx.tensor.new
 
-func copy_float([]float data) []float {
+func copy_float(float[] data) float[] {
     int n = len(data)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     for i in 0..n {
         out[i] = data[i]
     }
     out
 }
 
-func copy_int([]int data) []int {
+func copy_int(int[] data) int[] {
     int n = len(data)
-    []int out = []int{cap: n}
+    int[] out = int[]{cap: n}
     for i in 0..n {
         out[i] = data[i]
     }
@@ -78,11 +78,11 @@ func transformer_init(cfg transformer_config) transformer {
     []transformer_layer mut_layers = []transformer_layer{cap: transformer_config.num_layers}
     int i = 0
     for i < transformer_config.num_layers {
-        []int shape_dmd = make_int_array_2(transformer_config.d_model, transformer_config.d_model)
-        []int shape_dmff = make_int_array_2(transformer_config.d_model, transformer_config.d_ff)
-        []int shape_ffdm = make_int_array_2(transformer_config.d_ff, transformer_config.d_model)
-        []int shape_ff = make_int_array_1(transformer_config.d_ff)
-        []int shape_dm = make_int_array_1(transformer_config.d_model)
+        int[] shape_dmd = make_int_array_2(transformer_config.d_model, transformer_config.d_model)
+        int[] shape_dmff = make_int_array_2(transformer_config.d_model, transformer_config.d_ff)
+        int[] shape_ffdm = make_int_array_2(transformer_config.d_ff, transformer_config.d_model)
+        int[] shape_ff = make_int_array_1(transformer_config.d_ff)
+        int[] shape_dm = make_int_array_1(transformer_config.d_model)
         transformer_layer layer = transformer_layer {
             w_q: kaiming_uniform(shape_dmd, 0),
             w_k: kaiming_uniform(shape_dmd, 0),
@@ -104,14 +104,14 @@ func transformer_init(cfg transformer_config) transformer {
     }
 }
 
-func make_int_array_1(int v) []int {
-    []out = []int{cap: 1}
+func make_int_array_1(int v) int[] {
+    []out = int[]{cap: 1}
     out[0] = v
     out
 }
 
-func make_int_array_2(int a, int b) []int {
-    []out = []int{cap: 2}
+func make_int_array_2(int a, int b) int[] {
+    []out = int[]{cap: 2}
     out[0] = a
     out[1] = b
     out
@@ -141,7 +141,7 @@ func rng_randn(rng_state state) float {
     r * rope_cos(theta)
 }
 
-func kaiming_uniform([]int shape, int fan_in_mode) tensor {
+func kaiming_uniform(int[] shape, int fan_in_mode) tensor {
     int n = numel(shape)
     int fan_in = 1
     if len(shape) >= 2 {
@@ -155,7 +155,7 @@ func kaiming_uniform([]int shape, int fan_in_mode) tensor {
     }
     float bound = sqrt_approx(6.0 / float(fan_in))
     rng_state rng = new_rng(42)
-    []float data = []float{cap: n}
+    float[] data = float[]{cap: n}
     int i = 0
     for i < n {
         float v = (rng_next(rng) * 2.0 - 1.0) * bound
@@ -165,7 +165,7 @@ func kaiming_uniform([]int shape, int fan_in_mode) tensor {
     new(data, copy_int(shape), true)
 }
 
-func xavier_uniform([]int shape) tensor {
+func xavier_uniform(int[] shape) tensor {
     int n = numel(shape)
     int fan_in = 1
     int fan_out = 1
@@ -178,7 +178,7 @@ func xavier_uniform([]int shape) tensor {
     }
     float bound = sqrt_approx(6.0 / float(fan_in + fan_out))
     rng_state rng = new_rng(42)
-    []float data = []float{cap: n}
+    float[] data = float[]{cap: n}
     int i = 0
     for i < n {
         float v = (rng_next(rng) * 2.0 - 1.0) * bound
@@ -188,7 +188,7 @@ func xavier_uniform([]int shape) tensor {
     new(data, copy_int(shape), true)
 }
 
-func kaiming_normal([]int shape, int fan_in_mode) tensor {
+func kaiming_normal(int[] shape, int fan_in_mode) tensor {
     int n = numel(shape)
     int fan_in = 1
     if len(shape) >= 2 {
@@ -202,7 +202,7 @@ func kaiming_normal([]int shape, int fan_in_mode) tensor {
     }
     float std = sqrt_approx(2.0 / float(fan_in))
     rng_state rng = new_rng(42)
-    []float data = []float{cap: n}
+    float[] data = float[]{cap: n}
     int i = 0
     for i < n {
         float v = rng_randn(rng) * std
@@ -212,11 +212,11 @@ func kaiming_normal([]int shape, int fan_in_mode) tensor {
     new(data, copy_int(shape), true)
 }
 
-func embedding_init([]int shape) tensor {
+func embedding_init(int[] shape) tensor {
     int n = numel(shape)
     float std = 0.02
     rng_state rng = new_rng(42)
-    []float data = []float{cap: n}
+    float[] data = float[]{cap: n}
     int i = 0
     for i < n {
         float v = rng_randn(rng) * std
@@ -314,7 +314,7 @@ func swiglu_ffn(tensor x, transformer_layer layer) tensor {
 
 func silu(tensor input) tensor {
     int n = len(input.data)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         float x = input.data[i]
@@ -361,7 +361,7 @@ func flash_attention_forward(
         }
     }
     float scale = 1.0 / sqrt_approx(float(head_dim))
-    []float output_data = []float{cap: batch_heads * seq_len * head_dim}
+    float[] output_data = float[]{cap: batch_heads * seq_len * head_dim}
     int init_i = 0
     for init_i < batch_heads * seq_len * head_dim {
         output_data[init_i] = 0.0
@@ -371,8 +371,8 @@ func flash_attention_forward(
     for q_block_start < seq_len {
         int q_block_end = min(q_block_start + config.block_size_q, seq_len)
         int q_block_size = q_block_end - q_block_start
-        []float row_max = []float{cap: batch_heads * q_block_size}
-        []float row_sum = []float{cap: batch_heads * q_block_size}
+        float[] row_max = float[]{cap: batch_heads * q_block_size}
+        float[] row_sum = float[]{cap: batch_heads * q_block_size}
         int ri = 0
         for ri < batch_heads * q_block_size {
             row_max[ri] = -1e9
@@ -405,8 +405,8 @@ func compute_flash_scores(
     int q_start, int q_size,
     int kv_start, int kv_size,
     int batch_heads, int head_dim, float scale,
-    []float row_max, []float row_sum,
-    []float output_data, tensor v,
+    float[] row_max, float[] row_sum,
+    float[] output_data, tensor v,
     int total_seq_len
 ) void {
     int h = 0
@@ -457,8 +457,8 @@ func compute_flash_scores(
 }
 
 func normalize_flash_output(
-    []float output_data,
-    []float row_sum,
+    float[] output_data,
+    float[] row_sum,
     int q_start, int q_size,
     int batch_heads, int head_dim,
     int total_seq_len
@@ -513,7 +513,7 @@ func multihead_attention(tensor q, tensor k, tensor v, int num_heads) tensor {
 
 func make_causal_mask(int seq_len) tensor {
     int total = seq_len * seq_len
-    []float data = []float{cap: total}
+    float[] data = float[]{cap: total}
     int r = 0
     for r < seq_len {
         int c = 0
@@ -579,7 +579,7 @@ func softmax_last_dim(tensor input) tensor {
 
 func softmax_1d_tensor(tensor input) tensor {
     int n = len(input.data)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     float max_v = input.data[0]
     int i = 1
     for i < n {
@@ -610,7 +610,7 @@ func softmax_1d_tensor(tensor input) tensor {
 func softmax_2d_last(tensor input) tensor {
     int rows = input.shape[0]
     int cols = input.shape[1]
-    []float out = []float{cap: rows * cols}
+    float[] out = float[]{cap: rows * cols}
     int r = 0
     for r < rows {
         int base = r * cols
@@ -648,7 +648,7 @@ func softmax_3d_last(tensor input) tensor {
     int d1 = input.shape[1]
     int d2 = input.shape[2]
     int stride = d2
-    []float out = []float{cap: d0 * d1 * d2}
+    float[] out = float[]{cap: d0 * d1 * d2}
     int a = 0
     for a < d0 {
         int b = 0
@@ -697,7 +697,7 @@ func precompute_rope(int max_seq_len, int head_dim) rope_cache {
     if half_dim <= 0 {
         half_dim = 1
     }
-    []float freqs = []float{cap: half_dim}
+    float[] freqs = float[]{cap: half_dim}
     int i = 0
     for i < half_dim {
         float exponent = -2.0 * float(i) / float(head_dim)
@@ -706,8 +706,8 @@ func precompute_rope(int max_seq_len, int head_dim) rope_cache {
         freqs[i] = theta_val
         i = i + 1
     }
-    []float cos_data = []float{cap: max_seq_len * half_dim}
-    []float sin_data = []float{cap: max_seq_len * half_dim}
+    float[] cos_data = float[]{cap: max_seq_len * half_dim}
+    float[] sin_data = float[]{cap: max_seq_len * half_dim}
     int pos = 0
     for pos < max_seq_len {
         int j = 0
@@ -749,7 +749,7 @@ func apply_rope(tensor input, rope_cache cache, int start_pos) tensor {
     if half_dim <= 0 {
         half_dim = 1
     }
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     int flat = 0
     for flat < n {
         int local_idx = f(flat - (flat / last_dim) * last_dim)

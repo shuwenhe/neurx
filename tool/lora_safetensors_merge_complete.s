@@ -3,7 +3,7 @@ use std.io.println
 use neurx.runtime.io.{runtime_env_get}
 
 struct tensor_shape {
-    []int dims
+    int[] dims
     int rank
 }
 
@@ -27,7 +27,7 @@ struct lora_tensor {
     string name
     string dtype
     tensor_shape shape
-    []float values
+    float[] values
 }
 
 struct merge_config {
@@ -38,7 +38,7 @@ struct merge_config {
     float rank_override
 }
 
-func shape_numel([]int dims) int {
+func shape_numel(int[] dims) int {
     int count = 1
     for d in dims {
         count = count * d
@@ -203,13 +203,13 @@ func lora_a_to_lora_b_name(string a_name) string {
 }
 
 func compute_lora_merge(
-    []float base_weights,
-    []float lora_a,
-    []float lora_b,
+    float[] base_weights,
+    float[] lora_a,
+    float[] lora_b,
     int out_features,
     int in_features,
     int rank,
-    float alpha) []float {
+    float alpha) float[] {
     float scale = alpha / float(rank)
     for o in 0..out_features {
         for i in 0..in_features {

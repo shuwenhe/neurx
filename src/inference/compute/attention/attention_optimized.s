@@ -3,27 +3,27 @@ package neurx.inference.attention_optimized
 use std.conv.int_to_string
 
 struct attention_state {
-    []float query
-    []float key
-    []float value
-    []float output
+    float[] query
+    float[] key
+    float[] value
+    float[] output
     int seq_len
     int head_dim
 }
 
-func attention_standard([]float query, []float key, []float value, int seq_len, int head_dim) []float {
+func attention_standard(float[] query, float[] key, float[] value, int seq_len, int head_dim) float[] {
 
-    []float scores = matmul_seq(query, key, seq_len, head_dim)
+    float[] scores = matmul_seq(query, key, seq_len, head_dim)
 
-    []float attn_weights = softmax_2d(scores, seq_len)
+    float[] attn_weights = softmax_2d(scores, seq_len)
 
-    []float output = matmul_attn(attn_weights, value, seq_len, head_dim)
+    float[] output = matmul_attn(attn_weights, value, seq_len, head_dim)
 
     output
 }
 
-func attention_fused([]float query, []float key, []float value, int seq_len, int head_dim) []float {
-    []float output = []float{cap: seq_len * head_dim}
+func attention_fused(float[] query, float[] key, float[] value, int seq_len, int head_dim) float[] {
+    float[] output = float[]{cap: seq_len * head_dim}
 
     int i = 0
     for i < seq_len * head_dim {
@@ -31,7 +31,7 @@ func attention_fused([]float query, []float key, []float value, int seq_len, int
         i = i + 1
     }
 
-    []float norm_factor = []float{cap: seq_len}
+    float[] norm_factor = float[]{cap: seq_len}
     i = 0
     for i < seq_len {
         norm_factor[i] = 0.0
@@ -40,7 +40,7 @@ func attention_fused([]float query, []float key, []float value, int seq_len, int
 
     int q_pos = 0
     for q_pos < seq_len {
-        []float exp_scores = []float{cap: seq_len}
+        float[] exp_scores = float[]{cap: seq_len}
         float max_score = -999999.0
 
         int k_pos = 0
@@ -90,9 +90,9 @@ func attention_fused([]float query, []float key, []float value, int seq_len, int
     output
 }
 
-func attention_cached([]float query, []float kv_cache, int seq_len, int kv_cache_len, int head_dim) []float {
+func attention_cached(float[] query, float[] kv_cache, int seq_len, int kv_cache_len, int head_dim) float[] {
 
-    []float output = []float{cap: head_dim}
+    float[] output = float[]{cap: head_dim}
 
     int i = 0
     for i < head_dim {
@@ -101,7 +101,7 @@ func attention_cached([]float query, []float kv_cache, int seq_len, int kv_cache
     }
 
     float max_score = -999999.0
-    []float exp_scores = []float{cap: kv_cache_len}
+    float[] exp_scores = float[]{cap: kv_cache_len}
 
     int cache_pos = 0
     for cache_pos < kv_cache_len {
@@ -147,22 +147,22 @@ func attention_cached([]float query, []float kv_cache, int seq_len, int kv_cache
     output
 }
 
-func attention_gqa([]float query_heads, []float kv_cache, int num_query_heads, int num_kv_heads, int head_dim, int kv_cache_len) []float {
-    []float output = []float{cap: num_query_heads * head_dim}
+func attention_gqa(float[] query_heads, float[] kv_cache, int num_query_heads, int num_kv_heads, int head_dim, int kv_cache_len) float[] {
+    float[] output = float[]{cap: num_query_heads * head_dim}
 
     int q_head = 0
     for q_head < num_query_heads {
 
         int kv_head = q_head / (num_query_heads / num_kv_heads)
 
-        []float query_for_head = []float{cap: head_dim}
+        float[] query_for_head = float[]{cap: head_dim}
         int d = 0
         for d < head_dim {
             query_for_head[d] = query_heads[q_head * head_dim + d]
             d = d + 1
         }
 
-        []float head_output = attention_cached_gqa(query_for_head, kv_cache, kv_head, head_dim, kv_cache_len)
+        float[] head_output = attention_cached_gqa(query_for_head, kv_cache, kv_head, head_dim, kv_cache_len)
 
         d = 0
         for d < head_dim {
@@ -176,8 +176,8 @@ func attention_gqa([]float query_heads, []float kv_cache, int num_query_heads, i
     output
 }
 
-func attention_cached_gqa([]float query, []float kv_cache, int kv_head, int head_dim, int kv_cache_len) []float {
-    []float output = []float{cap: head_dim}
+func attention_cached_gqa(float[] query, float[] kv_cache, int kv_head, int head_dim, int kv_cache_len) float[] {
+    float[] output = float[]{cap: head_dim}
 
     int i = 0
     for i < head_dim {
@@ -186,7 +186,7 @@ func attention_cached_gqa([]float query, []float kv_cache, int kv_head, int head
     }
 
     float max_score = -999999.0
-    []float exp_scores = []float{cap: kv_cache_len}
+    float[] exp_scores = float[]{cap: kv_cache_len}
 
     int cache_pos = 0
     for cache_pos < kv_cache_len {
@@ -253,8 +253,8 @@ func exp_approx(float x) float {
     result
 }
 
-func matmul_seq([]float q, []float k, int seq_len, int head_dim) []float {
-    []float scores = []float{cap: seq_len * seq_len}
+func matmul_seq(float[] q, float[] k, int seq_len, int head_dim) float[] {
+    float[] scores = float[]{cap: seq_len * seq_len}
     int i = 0
     for i < seq_len {
         int j = 0
@@ -273,8 +273,8 @@ func matmul_seq([]float q, []float k, int seq_len, int head_dim) []float {
     scores
 }
 
-func softmax_2d([]float scores, int seq_len) []float {
-    []float result = []float{cap: seq_len * seq_len}
+func softmax_2d(float[] scores, int seq_len) float[] {
+    float[] result = float[]{cap: seq_len * seq_len}
     int i = 0
     for i < seq_len {
         float max_val = -999999.0
@@ -304,8 +304,8 @@ func softmax_2d([]float scores, int seq_len) []float {
     result
 }
 
-func matmul_attn([]float attn, []float value, int seq_len, int head_dim) []float {
-    []float output = []float{cap: seq_len * head_dim}
+func matmul_attn(float[] attn, float[] value, int seq_len, int head_dim) float[] {
+    float[] output = float[]{cap: seq_len * head_dim}
     int i = 0
     for i < seq_len {
         int d = 0

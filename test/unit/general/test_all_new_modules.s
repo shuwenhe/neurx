@@ -19,7 +19,7 @@ func test_trae_moe() bool {
     int seq_len = 4
     int total_tokens = batch_size * seq_len
     int hidden_dim = config.hidden_dim
-    []float hidden_states = math.allocate_float(total_tokens * hidden_dim, 0.1)
+    float[] hidden_states = math.allocate_float(total_tokens * hidden_dim, 0.1)
     trae_forward_result result = trae_moe.trae_moe_forward(layer, hidden_states, batch_size, seq_len)
     bool success = len(result.output) == total_tokens * hidden_dim && result.aux_loss >= 0.0
     if success {
@@ -35,7 +35,7 @@ func test_rl_training() bool {
     config.rollout_length = 10
     config.hidden_dim = 64
     rl_state state = rl_training.new_rl_state(config)
-    []float obs = math.allocate_float(config.hidden_dim, 0.5)
+    float[] obs = math.allocate_float(config.hidden_dim, 0.5)
     state = rl_training.collect_rollout_step(state, obs)
     bool success = state.current_rollout.length > 0 && state.step_count >= 1
     if success {
@@ -56,7 +56,7 @@ func test_vision_encoder() bool {
     int width = 32
     int height = 32
     int num_channels = 3
-    []float image = math.allocate_float(width * height * num_channels, 0.5)
+    float[] image = math.allocate_float(width * height * num_channels, 0.5)
     image_feature feature = vision_encoder.encode_image(encoder, image, width, height)
     int expected_patches = (width / config.patch_size) * (height / config.patch_size) + 1
     bool success = feature.num_tokens == expected_patches && len(feature.tokens) == expected_patches * config.hidden_dim
@@ -77,8 +77,8 @@ func test_long_context() bool {
     long_context_state state = long_context.new_long_context_state(config)
     int seq_len = 100
     int hidden_dim = config.hidden_dim
-    []float hidden_states = math.allocate_float(seq_len * hidden_dim, 0.1)
-    ([]float output, long_context_state new_state) = long_context.long_context_forward(state, hidden_states, seq_len)
+    float[] hidden_states = math.allocate_float(seq_len * hidden_dim, 0.1)
+    (float[] output, long_context_state new_state) = long_context.long_context_forward(state, hidden_states, seq_len)
     bool success = len(output) == seq_len * hidden_dim && new_state.sw_state.current_position == seq_len
     if success {
         print("Long Context test passed")
@@ -93,8 +93,8 @@ func test_speculative_decoding() bool {
     config.max_speculation_steps = 3
     config.beam_width = 2
     speculative_state state = speculative_decoding.new_speculative_state(config)
-    []int context = []int{1, 2, 3, 4, 5}
-    ([]int tokens, speculative_state new_state) = speculative_decoding.speculative_decode_step(state, context)
+    int[] context = int[]{1, 2, 3, 4, 5}
+    (int[] tokens, speculative_state new_state) = speculative_decoding.speculative_decode_step(state, context)
     bool success = len(tokens) > 0 && new_state.speedup_factor >= 1.0
     if success {
         print("Speculative Decoding test passed")
@@ -114,8 +114,8 @@ func test_veomni() bool {
     veomni_state state = veomni.new_veomni_state(config)
     state = veomni.configure_hybrid_parallelism(state, 0)
     int test_size = 16
-    []float test_data = math.allocate_float(test_size, 0.5)
-    []float reduced = veomni.allreduce(state.dp_group, test_data)
+    float[] test_data = math.allocate_float(test_size, 0.5)
+    float[] reduced = veomni.allreduce(state.dp_group, test_data)
     bool success = len(reduced) == test_size
     if success {
         print("VeOmni test passed")
@@ -131,7 +131,7 @@ func test_chain_of_thought() bool {
     config.num_samples = 2
     config.strategy = chain_of_thought.STEP_BY_STEP
     cot_state state = chain_of_thought.new_cot_state(config)
-    []int input_tokens = math.allocate_int(10, 1)
+    int[] input_tokens = math.allocate_int(10, 1)
     reasoning_result result = chain_of_thought.cot_reason(state, input_tokens, 10)
     bool success = len(result.final_tokens) > 0 && result.num_steps > 0
     if success {

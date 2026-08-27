@@ -9,8 +9,8 @@ struct layer_profile {
     layer_type       string
     time_ms          float32
     memory_bytes     int64
-    input_shape      []int32
-    output_shape     []int32
+    input_shape      int[]32
+    output_shape     int[]32
     num_parameters   int64
     flops           int64
 }
@@ -122,7 +122,7 @@ func (profiler* p) record_request_profile(request_id string, prefill_time_ms, de
     p.request_profiles[request_id] = profile
 }
 
-func (profiler* p) record_layer_profile(layer_id, layer_name, layer_type string, time_ms float32, memory_bytes int64, input_shape, output_shape []int32, num_params, flops int64) {
+func (profiler* p) record_layer_profile(layer_id, layer_name, layer_type string, time_ms float32, memory_bytes int64, input_shape, output_shape int[]32, num_params, flops int64) {
     if !p.is_enabled {
         return
     }
@@ -149,7 +149,7 @@ func (profiler* p) get_engine_stats() map[string]interface{} {
         return stats
     }
 
-    latencies := make([]float32, 0)
+    latencies := make(float[]32, 0)
     total_latency := float32(0)
     max_latency := float32(0)
     min_latency := float32(1e9)

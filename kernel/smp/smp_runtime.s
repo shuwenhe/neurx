@@ -23,18 +23,18 @@ struct cpu_context {
 struct smp_runtime {
     int cpu_count
     int online_count
-    [64]int apic_id
-    [64]int state
-    [64]int sipi_attempts
-    [64]int kernel_stack_top
-    [64]int interrupt_stack_top
-    [64]int gdt_address
-    [64]int tss_address
-    [64]int ipi_pending
-    [64]int current_task
-    [64]int next_task
-    [64]int timer_ticks
-    [64]bool need_reschedule
+    int[64] apic_id
+    int[64] state
+    int[64] sipi_attempts
+    int[64] kernel_stack_top
+    int[64] interrupt_stack_top
+    int[64] gdt_address
+    int[64] tss_address
+    int[64] ipi_pending
+    int[64] current_task
+    int[64] next_task
+    int[64] timer_ticks
+    bool[64] need_reschedule
     [64]cpu_context context
     int context_switches
     int ipi_sent
@@ -51,11 +51,11 @@ func cpu_context_create() cpu_context {
 func smp_runtime_create() smp_runtime {
     smp_runtime runtime = smp_runtime {
         cpu_count: 0, online_count: 0,
-        apic_id: [64]int{}, state: [64]int{}, sipi_attempts: [64]int{},
-        kernel_stack_top: [64]int{}, interrupt_stack_top: [64]int{},
-        gdt_address: [64]int{}, tss_address: [64]int{},
-        ipi_pending: [64]int{}, current_task: [64]int{}, next_task: [64]int{},
-        timer_ticks: [64]int{}, need_reschedule: [64]bool{},
+        apic_id: int[64]{}, state: int[64]{}, sipi_attempts: int[64]{},
+        kernel_stack_top: int[64]{}, interrupt_stack_top: int[64]{},
+        gdt_address: int[64]{}, tss_address: int[64]{},
+        ipi_pending: int[64]{}, current_task: int[64]{}, next_task: int[64]{},
+        timer_ticks: int[64]{}, need_reschedule: bool[64]{},
         context: [64]cpu_context{}, context_switches: 0,
         ipi_sent: 0, ipi_received: 0
     }

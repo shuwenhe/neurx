@@ -247,7 +247,7 @@ func (thought_evaluator* e) calculate_consistency(
 
 	thought_lower := e.to_lower(thought)
 
-	contradiction_keywords := []string{
+	contradiction_keywords := string[]{
 		"contradicts",
 		"conflicts",
 		"opposite",

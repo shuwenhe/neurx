@@ -11,7 +11,7 @@ func weight_update_failed() int { 3 }
 struct weight_parameter_metadata {
     string name
     string dtype
-    []int shape
+    int[] shape
     int byte_count
 }
 

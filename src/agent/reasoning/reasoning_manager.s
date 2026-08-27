@@ -155,7 +155,7 @@ func (reasoning_manager* mgr) get_reasoning_summary(string chain_id) string {
 }
 
 func (reasoning_manager* mgr) cleanup_completed_chains() int {
-    to_delete := []string{}
+    to_delete := string[]{}
 
     for chain_id, chain := range mgr.chains {
         if chain.state == chain_state.completed || chain.state == chain_state.failed {
@@ -219,7 +219,7 @@ func (reasoning_manager* mgr) get_statistics() map[string]string {
     stats
 }
 
-func (reasoning_manager* mgr) batch_start_reasoning([]string prompts, cot_config config) []reasoning_chain {
+func (reasoning_manager* mgr) batch_start_reasoning(string[] prompts, cot_config config) []reasoning_chain {
     chains := []reasoning_chain{}
 
     i := 0

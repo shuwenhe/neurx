@@ -250,8 +250,8 @@ func train_sft_epoch(sft_trainer self, data_loader dataloader) {
     return total_loss / max(num_batches, 1)
 func prepare_sft_batch(
     tokenizer_state tokenizer,
-    []string instructions,
-    []string responses,
+    string[] instructions,
+    string[] responses,
     int max_len: int
 ) {
     """
@@ -260,7 +260,7 @@ func prepare_sft_batch(
     Instruction
     Response
     """
-    []string full_texts = []
+    string[] full_texts = []
     for i in range(len(instructions)):
         text = (
             "" + instructions[i] + "\n\n" +
@@ -369,7 +369,7 @@ struct grpo_trainer {
     } state
 func train_grpo_step(
     GRPOTrainer self,
-    []string batch_prompts,
+    string[] batch_prompts,
     data_loader prompt_loader,
     int group_size: int = 8
 ) {
@@ -511,7 +511,7 @@ struct ppotrainer {
     } state
 func train_ppo_iteration(
     ppotrainer self,
-    []string batch_prompts
+    string[] batch_prompts
 ) {
     """
     PPO English textpipeline:

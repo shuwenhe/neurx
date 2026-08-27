@@ -15,26 +15,26 @@ struct inference_config {
 }
 
 struct kv_cache {
-    [][]float keys
-    [][]float values
+    float[][] keys
+    float[][] values
 }
 
 struct model_weights {
-    []float embed_tokens
-    [][]float norm_weight
-    [][]float q_proj_weight
-    [][]float k_proj_weight
-    [][]float v_proj_weight
-    [][]float o_proj_weight
-    [][]float gate_proj_weight
-    [][]float up_proj_weight
-    [][]float down_proj_weight
-    []float final_norm_weight
-    []float lm_head_weight
+    float[] embed_tokens
+    float[][] norm_weight
+    float[][] q_proj_weight
+    float[][] k_proj_weight
+    float[][] v_proj_weight
+    float[][] o_proj_weight
+    float[][] gate_proj_weight
+    float[][] up_proj_weight
+    float[][] down_proj_weight
+    float[] final_norm_weight
+    float[] lm_head_weight
 }
 
-func vec_add([]float a, []float b) []float {
-    []float result
+func vec_add(float[] a, float[] b) float[] {
+    float[] result
     int i = 0
     int min_len = len(a)
     if len(b) < min_len { min_len = len(b) }
@@ -45,8 +45,8 @@ func vec_add([]float a, []float b) []float {
     return result
 }
 
-func vec_mul_scalar([]float v, float scalar) []float {
-    []float result
+func vec_mul_scalar(float[] v, float scalar) float[] {
+    float[] result
     int i = 0
     for i < len(v) {
         result = append(result, v[i] * scalar)
@@ -55,7 +55,7 @@ func vec_mul_scalar([]float v, float scalar) []float {
     return result
 }
 
-func vec_dot([]float a, []float b) float {
+func vec_dot(float[] a, float[] b) float {
     float result = 0.0
     int i = 0
     int min_len = len(a)
@@ -67,7 +67,7 @@ func vec_dot([]float a, []float b) float {
     return result
 }
 
-func vec_norm([]float v) float {
+func vec_norm(float[] v) float {
     float sum = 0.0
     int i = 0
     for i < len(v) {
@@ -77,8 +77,8 @@ func vec_norm([]float v) float {
     return sum
 }
 
-func matvec([]float matrix, []vector float, int rows, int cols) []float {
-    []float result
+func matvec(float[] matrix, []vector float, int rows, int cols) float[] {
+    float[] result
     int i = 0
     for i < rows {
         float dot = 0.0
@@ -95,8 +95,8 @@ func matvec([]float matrix, []vector float, int rows, int cols) []float {
     return result
 }
 
-func softmax([]float logits) []float {
-    []float result
+func softmax(float[] logits) float[] {
+    float[] result
     float max_val = 0.0
     int i = 0
     for i < len(logits) {
@@ -148,8 +148,8 @@ func sqrt_approx(float x) float {
     return guess
 }
 
-func rms_norm([]float x, []float weight, float epsilon) []float {
-    []float result
+func rms_norm(float[] x, float[] weight, float epsilon) float[] {
+    float[] result
     float sum_sq = 0.0
     int i = 0
     for i < len(x) {
@@ -170,8 +170,8 @@ func rms_norm([]float x, []float weight, float epsilon) []float {
     return result
 }
 
-func apply_rope([]float q, int pos, int head_dim, float rope_theta) []float {
-    []float result
+func apply_rope(float[] q, int pos, int head_dim, float rope_theta) float[] {
+    float[] result
     int i = 0
     for i < len(q) {
         int j = (i - (i / head_dim) * head_dim) / 2
@@ -237,13 +237,13 @@ func sin_approx(float x) float {
 }
 
 func attention(
-    []float query,
-    []float key,
-    []float value,
+    float[] query,
+    float[] key,
+    float[] value,
     int num_heads,
     int head_dim
-) []float {
-    []float result
+) float[] {
+    float[] result
     if len(query) == 0 || len(key) == 0 || len(value) == 0 {
         return result
     }
@@ -253,16 +253,16 @@ func attention(
     int head = 0
     for head < num_heads {
         int head_start = head * head_dim
-        []float q_head
+        float[] q_head
         int i = 0
         for i < head_dim && head_start + i < len(query) {
             q_head = append(q_head, query[head_start + i])
             i = i + 1
         }
-        []float scores
+        float[] scores
         i = 0
         for i < kv_len {
-            []float k_head
+            float[] k_head
             int j = 0
             for j < head_dim && i * head_dim + head_start + j < len(key) {
                 k_head = append(k_head, key[i * head_dim + head_start + j])
@@ -272,8 +272,8 @@ func attention(
             scores = append(scores, score)
             i = i + 1
         }
-        []float attn_weights = softmax(scores)
-        []float head_out
+        float[] attn_weights = softmax(scores)
+        float[] head_out
         i = 0
         for i < head_dim {
             float sum = 0.0
@@ -294,17 +294,17 @@ func attention(
 }
 
 func ffn(
-    []float x,
-    []float gate_weight,
-    []float up_weight,
-    []float down_weight,
+    float[] x,
+    float[] gate_weight,
+    float[] up_weight,
+    float[] down_weight,
     int hidden_size,
     int intermediate_size
-) []float {
-    []float result
-    []float gate = matvec(gate_weight, x, intermediate_size, hidden_size)
-    []float up = matvec(up_weight, x, intermediate_size, hidden_size)
-    []float gated
+) float[] {
+    float[] result
+    float[] gate = matvec(gate_weight, x, intermediate_size, hidden_size)
+    float[] up = matvec(up_weight, x, intermediate_size, hidden_size)
+    float[] gated
     int i = 0
     for i < len(up) && i < len(gate) {
         float sigmoid_val = 1.0 / (1.0 + exp_approx(-1.702 * gate[i]))
@@ -315,8 +315,8 @@ func ffn(
     return result
 }
 
-func embedding_lookup([]float embed_weight, int token_id, int hidden_size) []float {
-    []float result
+func embedding_lookup(float[] embed_weight, int token_id, int hidden_size) float[] {
+    float[] result
     int start = token_id * hidden_size
     int i = 0
     for i < hidden_size && start + i < len(embed_weight) {
@@ -327,29 +327,29 @@ func embedding_lookup([]float embed_weight, int token_id, int hidden_size) []flo
 }
 
 func transformer_block_forward(
-    []float hidden,
-    []float norm_w,
-    []float q_w, []float k_w, []float v_w, []float o_w,
-    []float ffn_gate_w, []float ffn_up_w, []float ffn_down_w,
+    float[] hidden,
+    float[] norm_w,
+    float[] q_w, float[] k_w, float[] v_w, float[] o_w,
+    float[] ffn_gate_w, float[] ffn_up_w, float[] ffn_down_w,
     int hidden_size,
     int intermediate_size,
     int num_heads,
     int head_dim,
     float rms_eps,
     int position
-) []float {
-    []float attn_norm = rms_norm(hidden, norm_w, rms_eps)
-    []float q = matvec(q_w, attn_norm, hidden_size, hidden_size)
+) float[] {
+    float[] attn_norm = rms_norm(hidden, norm_w, rms_eps)
+    float[] q = matvec(q_w, attn_norm, hidden_size, hidden_size)
     q = apply_rope(q, position, head_dim, 10000.0)
-    []float k = matvec(k_w, attn_norm, hidden_size, hidden_size)
+    float[] k = matvec(k_w, attn_norm, hidden_size, hidden_size)
     k = apply_rope(k, position, head_dim, 10000.0)
-    []float v = matvec(v_w, attn_norm, hidden_size, hidden_size)
-    []float attn_out = attention(q, k, v, num_heads, head_dim)
+    float[] v = matvec(v_w, attn_norm, hidden_size, hidden_size)
+    float[] attn_out = attention(q, k, v, num_heads, head_dim)
     attn_out = matvec(o_w, attn_out, hidden_size, hidden_size)
-    []float after_attn = vec_add(hidden, attn_out)
-    []float ffn_norm = rms_norm(after_attn, norm_w, rms_eps)
-    []float ffn_out = ffn(ffn_norm, ffn_gate_w, ffn_up_w, ffn_down_w, hidden_size, intermediate_size)
-    []float output = vec_add(after_attn, ffn_out)
+    float[] after_attn = vec_add(hidden, attn_out)
+    float[] ffn_norm = rms_norm(after_attn, norm_w, rms_eps)
+    float[] ffn_out = ffn(ffn_norm, ffn_gate_w, ffn_up_w, ffn_down_w, hidden_size, intermediate_size)
+    float[] output = vec_add(after_attn, ffn_out)
     return output
 }
 
@@ -358,8 +358,8 @@ func model_forward(
     model_weights weights,
     inference_config config,
     int position
-) []float {
-    []float hidden = embedding_lookup(weights.embed_tokens, token_id, config.hidden_size)
+) float[] {
+    float[] hidden = embedding_lookup(weights.embed_tokens, token_id, config.hidden_size)
     int layer = 0
     for layer < config.num_layers {
         hidden = transformer_block_forward(
@@ -382,7 +382,7 @@ func model_forward(
         layer = layer + 1
     }
     hidden = rms_norm(hidden, weights.final_norm_weight, config.rms_norm_eps)
-    []float logits = matvec(weights.lm_head_weight, hidden, config.vocab_size, config.hidden_size)
+    float[] logits = matvec(weights.lm_head_weight, hidden, config.vocab_size, config.hidden_size)
     return logits
 }
 

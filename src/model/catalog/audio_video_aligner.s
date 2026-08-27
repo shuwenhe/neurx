@@ -210,9 +210,9 @@ func (audio_video_aligner* ava) sync_dtw(pair_id string) (*sync_result, error) {
 		video_len = 1000
 	}
 
-	dtw_matrix := make([][]float32, audio_len)
+	dtw_matrix := make(float[][]32, audio_len)
 	for i := 0; i < audio_len; i++ {
-		dtw_matrix[i] = make([]float32, video_len)
+		dtw_matrix[i] = make(float[]32, video_len)
 		for j := 0; j < video_len; j++ {
 			dtw_matrix[i][j] = 999999.0
 		}

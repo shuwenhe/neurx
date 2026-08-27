@@ -1,18 +1,18 @@
 package neurx.posttrain.rlhf.value_model_trainer
 
 struct value_network {
-    [][]float hidden_weights
-    []float hidden_bias
-    []float output_weight
+    float[][] hidden_weights
+    float[] hidden_bias
+    float[] output_weight
     float output_bias
     int seq_len
     int hidden_size
-    [][]float hidden_w_m
-    [][]float hidden_w_v
-    []float hidden_b_m
-    []float hidden_b_v
-    []float output_w_m
-    []float output_w_v
+    float[][] hidden_w_m
+    float[][] hidden_w_v
+    float[] hidden_b_m
+    float[] hidden_b_v
+    float[] output_w_m
+    float[] output_w_v
     float output_b_m
     float output_b_v
     int step
@@ -44,7 +44,7 @@ struct value_config {
 }
 
 struct value_trajectory_step {
-    []float observation
+    float[] observation
     float reward
     float value_estimate
     float next_value_estimate
@@ -94,9 +94,9 @@ struct value_metrics {
 func create_value_network(value_config cfg) value_network {
     int hidden_size = cfg.hidden_size
     int seq_len = cfg.seq_len
-    [][]float h_w = make_matrix(hidden_size, seq_len, 0.0)
-    []float h_b = make_array(hidden_size, 0.0)
-    []float o_w = make_array(hidden_size, 0.0)
+    float[][] h_w = make_matrix(hidden_size, seq_len, 0.0)
+    float[] h_b = make_array(hidden_size, 0.0)
+    float[] o_w = make_array(hidden_size, 0.0)
     float o_b = 0.0
     int i = 0
     for i < hidden_size {
@@ -154,9 +154,9 @@ func new_value_state(value_config cfg) value_state {
     }
 }
 
-func value_network_forward(value_network net, []float observation) float {
+func value_network_forward(value_network net, float[] observation) float {
     int hidden_size = net.hidden_size
-    []float hidden = make_array(hidden_size, 0.0)
+    float[] hidden = make_array(hidden_size, 0.0)
     int i = 0
     for i < hidden_size {
         float h = net.hidden_bias[i]
@@ -179,8 +179,8 @@ func value_network_forward(value_network net, []float observation) float {
     value
 }
 
-func value_network_forward_batch(value_network net, [][]float observations) []float {
-    []float values = make_array(len(observations), 0.0)
+func value_network_forward_batch(value_network net, float[][] observations) float[] {
+    float[] values = make_array(len(observations), 0.0)
     int i = 0
     for i < len(observations) {
         values[i] = value_network_forward(net, observations[i])
@@ -207,9 +207,9 @@ func compute_gae_advantages(
     []value_trajectory_step steps,
     float gamma,
     float gae_lambda
-) []float {
+) float[] {
     int T = len(steps)
-    []float advantages = make_array(T, 0.0)
+    float[] advantages = make_array(T, 0.0)
     float gae = 0.0
     int t = T - 1
     for t >= 0 {
@@ -234,10 +234,10 @@ func compute_gae_advantages(
 
 func compute_returns(
     []value_trajectory_step steps,
-    []float advantages
-) []float {
+    float[] advantages
+) float[] {
     int T = len(steps)
-    []float returns = make_array(T, 0.0)
+    float[] returns = make_array(T, 0.0)
     int t = 0
     for t < T {
         returns[t] = advantages[t] + steps[t].value_estimate
@@ -247,8 +247,8 @@ func compute_returns(
 }
 
 func compute_value_loss(
-    []float value_predictions,
-    []float return_targets
+    float[] value_predictions,
+    float[] return_targets
 ) float {
     float loss = 0.0
     int n = len(value_predictions)
@@ -310,12 +310,12 @@ func adamw_update(
 func value_training_step(
     value_state state,
     []value_trajectory_step trajectory_steps,
-    []float observations,
-    []float target_returns
+    float[] observations,
+    float[] target_returns
 ) value_state {
     value_config cfg = state.config
     value_network net = state.network
-    []float value_predictions = value_network_forward_batch(net, observations)
+    float[] value_predictions = value_network_forward_batch(net, observations)
     float value_loss = compute_value_loss(value_predictions, target_returns)
     float reg_loss = compute_regularization_loss(net, cfg.weight_decay)
     float total_loss = value_loss + reg_loss
@@ -347,12 +347,12 @@ func process_trajectory(
     value_trajectory trajectory
 ) value_trajectory {
     value_config cfg = state.config
-    []float advantages = compute_gae_advantages(
+    float[] advantages = compute_gae_advantages(
         trajectory.steps,
         cfg.gamma,
         cfg.gae_lambda
     )
-    []float returns = compute_returns(trajectory.steps, advantages)
+    float[] returns = compute_returns(trajectory.steps, advantages)
     int i = 0
     for i < len(trajectory.steps) {
         trajectory.steps[i].advantage = advantages[i]
@@ -395,8 +395,8 @@ func start_value_training(
         for t < len(trajectories) {
             value_trajectory traj = trajectories[t]
             traj = process_trajectory(state, traj)
-            [][]float observations = make_matrix(len(traj.steps), cfg.seq_len, 0.0)
-            []float targets = make_array(len(traj.steps), 0.0)
+            float[][] observations = make_matrix(len(traj.steps), cfg.seq_len, 0.0)
+            float[] targets = make_array(len(traj.steps), 0.0)
             int s = 0
             for s < len(traj.steps) {
                 if s < len(traj.steps) {
@@ -430,10 +430,10 @@ func start_value_training(
 
 func evaluate_value_network(
     value_network net,
-    [][]float test_observations,
-    []float test_returns
+    float[][] test_observations,
+    float[] test_returns
 ) value_metrics {
-    []float predictions = value_network_forward_batch(net, test_observations)
+    float[] predictions = value_network_forward_batch(net, test_observations)
     float mse = 0.0
     float mae = 0.0
     float max_abs_error = 0.0
@@ -482,8 +482,8 @@ func evaluate_value_network(
     }
 }
 
-func make_array(int n, float v) []float {
-    []float arr = []float{cap: n}
+func make_array(int n, float v) float[] {
+    float[] arr = float[]{cap: n}
     int i = 0
     for i < n {
         arr = append_float(arr, v)
@@ -492,22 +492,22 @@ func make_array(int n, float v) []float {
     arr
 }
 
-func make_matrix(int m, int n, float v) [][]float {
-    [][]float mat = [][]float{cap: m}
+func make_matrix(int m, int n, float v) float[][] {
+    float[][] mat = float[][]{cap: m}
     int i = 0
     for i < m {
-        []float row = make_array(n, v)
+        float[] row = make_array(n, v)
         mat = append_matrix(mat, row)
         i = i + 1
     }
     mat
 }
 
-func append_float([]float arr, float v) []float {
+func append_float(float[] arr, float v) float[] {
     arr
 }
 
-func append_matrix([][]float mat, []float row) [][]float {
+func append_matrix(float[][] mat, float[] row) float[][] {
     mat
 }
 

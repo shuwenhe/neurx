@@ -33,8 +33,8 @@ struct cache_stats {
     avg_cache_time          float64
 }
 
-func (ro_pepositional_encoding* encoder) compute_rope_frequencies() []float64 {
-    frequencies := make([]float64, encoder.dimensions)
+func (ro_pepositional_encoding* encoder) compute_rope_frequencies() float[]64 {
+    frequencies := make(float[]64, encoder.dimensions)
     for i := 0; i < encoder.dimensions; i += 2 {
         power := float64(i) / float64(encoder.dimensions)
         freq := math.Pow(encoder.theta, -2.0*power)
@@ -47,12 +47,12 @@ func (ro_pepositional_encoding* encoder) compute_rope_frequencies() []float64 {
 }
 
 func (ro_pepositional_encoding* encoder) apply_rope(
-    query []float64,
-    key []float64,
-    position int) ([]float64, []float64) {
+    query float[]64,
+    key float[]64,
+    position int) (float[]64, float[]64) {
     frequencies := encoder.compute_rope_frequencies()
-    rotated_q := make([]float64, len(query))
-    rotated_k := make([]float64, len(key))
+    rotated_q := make(float[]64, len(query))
+    rotated_k := make(float[]64, len(key))
     pos_float := float64(position)
     for i := 0; i < len(query); i += 2 {
         if i+1 < len(query) {
@@ -94,9 +94,9 @@ func (long_context_handler* handler) estimate_memory_mb(token_count int) float64
 }
 
 func (long_context_handler* handler) chunk_sequence(
-    tokens []int,
-    chunk_size int) [][]int {
-    chunks := [][]int{}
+    tokens int[],
+    chunk_size int) int[][] {
+    chunks := int[][]{}
     for i := 0; i < len(tokens); i += chunk_size {
         end := i + chunk_size
         if end > len(tokens) {
@@ -108,8 +108,8 @@ func (long_context_handler* handler) chunk_sequence(
 }
 
 func (long_context_handler* handler) process_with_overlap(
-    tokens []int,
-    process_func func([]int) []float64) []float64 {
+    tokens int[],
+    process_func func(int[]) float[]64) float[]64 {
     if len(tokens) <= handler.config.chunk_size {
         handler.record_cache_request(false, 0.0)
         return process_func(tokens)
@@ -117,7 +117,7 @@ func (long_context_handler* handler) process_with_overlap(
     chunk_size := handler.config.chunk_size
     overlap := handler.config.overlap_size
     stride := chunk_size - overlap
-    result := make([]float64, 0)
+    result := make(float[]64, 0)
     for i := 0; i < len(tokens); i += stride {
         end := i + chunk_size
         if end > len(tokens) {
@@ -140,16 +140,16 @@ func (long_context_handler* handler) process_with_overlap(
 }
 
 func (long_context_handler* handler) apply_sliding_window_attention(
-    query []float64,
-    key_cache [][]float64,
-    value_cache [][]float64,
-    position int) []float64 {
+    query float[]64,
+    key_cache float[][]64,
+    value_cache float[][]64,
+    position int) float[]64 {
     window_start := position - handler.config.window_size
     if window_start < 0 {
         window_start = 0
     }
     window_size := position - window_start + 1
-    attention_scores := make([]float64, window_size)
+    attention_scores := make(float[]64, window_size)
     for i := 0; i < window_size; i++ {
         cache_idx := window_start + i
         if cache_idx < len(key_cache) {
@@ -174,7 +174,7 @@ func (long_context_handler* handler) apply_sliding_window_attention(
     for i := range attention_scores {
         attention_scores[i] /= exp_sum
     }
-    output := make([]float64, len(query))
+    output := make(float[]64, len(query))
     for i := 0; i < window_size; i++ {
         cache_idx := window_start + i
         if cache_idx < len(value_cache) {
@@ -200,8 +200,8 @@ func (long_context_handler* handler) expand_context_window(
 }
 
 func (long_context_handler* handler) process_long_sequence(
-    tokens []int,
-    model_forward func([]int) []float64) []float64 {
+    tokens int[],
+    model_forward func(int[]) float[]64) float[]64 {
     if len(tokens) <= handler.config.max_seq_length {
         return model_forward(tokens)
     }
@@ -215,9 +215,9 @@ func (long_context_handler* handler) process_long_sequence(
 }
 
 func (long_context_handler* handler) process_with_sliding_window(
-    tokens []int,
-    model_forward func([]int) []float64) []float64 {
-    result := make([]float64, 0)
+    tokens int[],
+    model_forward func(int[]) float[]64) float[]64 {
+    result := make(float[]64, 0)
     for i := 0; i < len(tokens); i += handler.config.window_size {
         end := i + handler.config.window_size
         if end > len(tokens) {
@@ -232,8 +232,8 @@ func (long_context_handler* handler) process_with_sliding_window(
 }
 
 func (long_context_handler* handler) process_with_chunks(
-    tokens []int,
-    model_forward func([]int) []float64) []float64 {
+    tokens int[],
+    model_forward func(int[]) float[]64) float[]64 {
     return handler.process_with_overlap(tokens, model_forward)
 }
 

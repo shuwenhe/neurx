@@ -12,21 +12,21 @@ struct ffn_config {
 struct standard_ffn_state {
     int hidden_dim
     int intermediate_dim
-    []float up_weight
-    []float down_weight
-    []float up_bias
-    []float down_bias
+    float[] up_weight
+    float[] down_weight
+    float[] up_bias
+    float[] down_bias
 }
 
 struct glu_ffn_state {
     int hidden_dim
     int intermediate_dim
-    []float gate_weight
-    []float value_weight
-    []float down_weight
-    []float gate_bias
-    []float value_bias
-    []float down_bias
+    float[] gate_weight
+    float[] value_weight
+    float[] down_weight
+    float[] gate_bias
+    float[] value_bias
+    float[] down_bias
 }
 
 struct feed_forward_network {
@@ -41,8 +41,8 @@ struct ffn_layer {
     feed_forward_network network
 }
 
-func allocate_vector(int size, float init_val) []float {
-    []float v = []float{cap: size}
+func allocate_vector(int size, float init_val) float[] {
+    float[] v = float[]{cap: size}
     int i = 0
     for i < size {
         v[i] = init_val
@@ -51,8 +51,8 @@ func allocate_vector(int size, float init_val) []float {
     v
 }
 
-func copy_vector([]float src) []float {
-    []float out = allocate_vector(len(src), 0.0)
+func copy_vector(float[] src) float[] {
+    float[] out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
         out[i] = src[i]
@@ -139,8 +139,8 @@ func new_ffn_layer(int hidden_dim, string activation_type) ffn_layer {
     }
 }
 
-func build_ramp(int size, float scale) []float {
-    []float values = allocate_vector(size, 0.0)
+func build_ramp(int size, float scale) float[] {
+    float[] values = allocate_vector(size, 0.0)
     int i = 0
     for i < size {
         values[i] = scale * ((i + 1) * 1.0) / ((size + 1) * 1.0)
@@ -185,8 +185,8 @@ func new_glu_ffn(ffn_config cfg) feed_forward_network {
     }
 }
 
-func matmul_flat([]float a, []float b, int m, int k, int n) []float {
-    []float result = allocate_vector(m * n, 0.0)
+func matmul_flat(float[] a, float[] b, int m, int k, int n) float[] {
+    float[] result = allocate_vector(m * n, 0.0)
     int i = 0
     for i < m {
         int j = 0
@@ -206,10 +206,10 @@ func matmul_flat([]float a, []float b, int m, int k, int n) []float {
 }
 
 func apply_activation(
-    []float hidden,
+    float[] hidden,
     string activation_type
-) []float {
-    []float out = copy_vector(hidden)
+) float[] {
+    float[] out = copy_vector(hidden)
     int i = 0
     for i < len(out) {
         if activation_type == "relu" {
@@ -228,19 +228,19 @@ func apply_activation(
 
 func forward_standard_ffn(
     feed_forward_network ffn,
-    []float hidden_states,
+    float[] hidden_states,
     int tokens
-) []float {
+) float[] {
     int hidden_dim = ffn.standard_ffn.hidden_dim
     int intermediate_dim = ffn.standard_ffn.intermediate_dim
-    []float up = matmul_flat(hidden_states, ffn.standard_ffn.up_weight, tokens, hidden_dim, intermediate_dim)
+    float[] up = matmul_flat(hidden_states, ffn.standard_ffn.up_weight, tokens, hidden_dim, intermediate_dim)
     int i = 0
     for i < len(up) {
         up[i] = up[i] + ffn.standard_ffn.up_bias[i % intermediate_dim]
         i = i + 1
     }
     up = apply_activation(up, ffn.config.activation_type)
-    []float down = matmul_flat(up, ffn.standard_ffn.down_weight, tokens, intermediate_dim, hidden_dim)
+    float[] down = matmul_flat(up, ffn.standard_ffn.down_weight, tokens, intermediate_dim, hidden_dim)
     i = 0
     for i < len(down) {
         down[i] = down[i] + ffn.standard_ffn.down_bias[i % hidden_dim]
@@ -251,9 +251,9 @@ func forward_standard_ffn(
 
 func forward_ffn_layer(
     ffn_layer layer,
-    []float hidden_states,
+    float[] hidden_states,
     int tokens
-) []float {
+) float[] {
     if layer.config.activation_type == "swiglu" || layer.config.activation_type == "geglu" {
         return forward_swiglu_ffn(layer.network, hidden_states, tokens)
     }
@@ -262,13 +262,13 @@ func forward_ffn_layer(
 
 func forward_glu_ffn(
     feed_forward_network ffn,
-    []float hidden_states,
+    float[] hidden_states,
     int tokens
-) []float {
+) float[] {
     int hidden_dim = ffn.glu_ffn.hidden_dim
     int intermediate_dim = ffn.glu_ffn.intermediate_dim
-    []float gate = matmul_flat(hidden_states, ffn.glu_ffn.gate_weight, tokens, hidden_dim, intermediate_dim)
-    []float value = matmul_flat(hidden_states, ffn.glu_ffn.value_weight, tokens, hidden_dim, intermediate_dim)
+    float[] gate = matmul_flat(hidden_states, ffn.glu_ffn.gate_weight, tokens, hidden_dim, intermediate_dim)
+    float[] value = matmul_flat(hidden_states, ffn.glu_ffn.value_weight, tokens, hidden_dim, intermediate_dim)
     int i = 0
     for i < len(gate) {
         gate[i] = sigmoid(gate[i] + ffn.glu_ffn.gate_bias[i % intermediate_dim])
@@ -276,7 +276,7 @@ func forward_glu_ffn(
         value[i] = value[i] * gate[i]
         i = i + 1
     }
-    []float down = matmul_flat(value, ffn.glu_ffn.down_weight, tokens, intermediate_dim, hidden_dim)
+    float[] down = matmul_flat(value, ffn.glu_ffn.down_weight, tokens, intermediate_dim, hidden_dim)
     i = 0
     for i < len(down) {
         down[i] = down[i] + ffn.glu_ffn.down_bias[i % hidden_dim]
@@ -287,13 +287,13 @@ func forward_glu_ffn(
 
 func forward_swiglu_ffn(
     feed_forward_network ffn,
-    []float hidden_states,
+    float[] hidden_states,
     int tokens
-) []float {
+) float[] {
     int hidden_dim = ffn.glu_ffn.hidden_dim
     int intermediate_dim = ffn.glu_ffn.intermediate_dim
-    []float gate = matmul_flat(hidden_states, ffn.glu_ffn.gate_weight, tokens, hidden_dim, intermediate_dim)
-    []float value = matmul_flat(hidden_states, ffn.glu_ffn.value_weight, tokens, hidden_dim, intermediate_dim)
+    float[] gate = matmul_flat(hidden_states, ffn.glu_ffn.gate_weight, tokens, hidden_dim, intermediate_dim)
+    float[] value = matmul_flat(hidden_states, ffn.glu_ffn.value_weight, tokens, hidden_dim, intermediate_dim)
     int i = 0
     for i < len(gate) {
         gate[i] = swish(gate[i] + ffn.glu_ffn.gate_bias[i % intermediate_dim])
@@ -301,7 +301,7 @@ func forward_swiglu_ffn(
         value[i] = value[i] * gate[i]
         i = i + 1
     }
-    []float down = matmul_flat(value, ffn.glu_ffn.down_weight, tokens, intermediate_dim, hidden_dim)
+    float[] down = matmul_flat(value, ffn.glu_ffn.down_weight, tokens, intermediate_dim, hidden_dim)
     i = 0
     for i < len(down) {
         down[i] = down[i] + ffn.glu_ffn.down_bias[i % hidden_dim]
@@ -311,14 +311,14 @@ func forward_swiglu_ffn(
 }
 
 func apply_dropout(
-    []float hidden,
+    float[] hidden,
     float dropout_rate,
     int seed
-) []float {
+) float[] {
     if dropout_rate <= 0.0 {
         return copy_vector(hidden)
     }
-    []float out = copy_vector(hidden)
+    float[] out = copy_vector(hidden)
     float keep_scale = 1.0 / (1.0 - dropout_rate)
     int i = 0
     for i < len(out) {
@@ -334,13 +334,13 @@ func apply_dropout(
 }
 
 func compute_router_probs(
-    []float router_logits,
+    float[] router_logits,
     int seq_len,
     int num_experts,
     int num_active_experts
-) []float {
+) float[] {
     int total = seq_len * num_experts
-    []float probs = allocate_vector(total, 0.0)
+    float[] probs = allocate_vector(total, 0.0)
     int s = 0
     for s < seq_len {
         int base = s * num_experts
@@ -373,7 +373,7 @@ func compute_router_probs(
 }
 
 func compute_load_balancing_loss(
-    []float router_probs,
+    float[] router_probs,
     int seq_len,
     int num_experts
 ) float {

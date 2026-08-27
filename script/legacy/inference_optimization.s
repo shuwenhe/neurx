@@ -16,15 +16,15 @@ struct inference_config {
 }
 
 struct kvcache {
-    key_cache           [][]float64
-    value_cache         [][]float64
+    key_cache           float[][]64
+    value_cache         float[][]64
     cache_size          int
     max_seq_length      int
 }
 
 struct inference_request {
     request_id          string
-    prompt              []int
+    prompt              int[]
     max_tokens          int
     temperature         float64
     top_p               float64
@@ -34,7 +34,7 @@ struct inference_request {
 
 struct inference_response {
     request_id          string
-    generated_tokens    []int
+    generated_tokens    int[]
     generated_text      string
     finish_reason       string
     latency_ms          float64
@@ -68,20 +68,20 @@ func (inference_engine* engine) initialize_kv_cache() {
                  engine.config.max_seq_length *
                  engine.model.hidden_size
     engine.kv_cache = *kvcache{
-        key_cache: make([][]float64, cache_size),
-        value_cache: make([][]float64, cache_size),
+        key_cache: make(float[][]64, cache_size),
+        value_cache: make(float[][]64, cache_size),
         cache_size: cache_size,
         max_seq_length: engine.config.max_seq_length,
     }
     for i := 0; i < cache_size; i++ {
-        engine.kv_cache.key_cache[i] = make([]float64, engine.model.hidden_size)
-        engine.kv_cache.value_cache[i] = make([]float64, engine.model.hidden_size)
+        engine.kv_cache.key_cache[i] = make(float[]64, engine.model.hidden_size)
+        engine.kv_cache.value_cache[i] = make(float[]64, engine.model.hidden_size)
     }
     cache_memory := float64(cache_size*16) / 1e9
     fmt.Printf("  KV cache size: %.2f GB\n", cache_memory)
 }
 
-func (inference_engine* engine) update_kv_cache(layer_idx int, []int tokens, values []float64) {
+func (inference_engine* engine) update_kv_cache(layer_idx int, int[] tokens, values float[]64) {
     cache_idx := layer_idx * engine.config.max_batch_size * engine.config.max_seq_length
     for i, v := range values {
         if cache_idx+i < len(engine.kv_cache.value_cache) {
@@ -90,10 +90,10 @@ func (inference_engine* engine) update_kv_cache(layer_idx int, []int tokens, val
     }
 }
 
-func (inference_engine* engine) get_cached_kv(layer_idx int, seq_len int) ([][]float64, [][]float64) {
+func (inference_engine* engine) get_cached_kv(layer_idx int, seq_len int) (float[][]64, float[][]64) {
     cache_idx := layer_idx * seq_len
-    keys := [][]float64{}
-    values := [][]float64{}
+    keys := float[][]64{}
+    values := float[][]64{}
     for i := 0; i < seq_len && cache_idx+i < len(engine.kv_cache.key_cache); i++ {
         keys = append(keys, engine.kv_cache.key_cache[cache_idx+i])
         values = append(values, engine.kv_cache.value_cache[cache_idx+i])
@@ -101,8 +101,8 @@ func (inference_engine* engine) get_cached_kv(layer_idx int, seq_len int) ([][]f
     return keys, values
 }
 
-func (inference_engine* engine) create_batch(requests []inference_request) [][]int {
-    batch := [][]int{}
+func (inference_engine* engine) create_batch(requests []inference_request) int[][] {
+    batch := int[][]{}
     max_len := 0
     for _, req := range requests {
         if len(req.prompt) > max_len {
@@ -110,23 +110,23 @@ func (inference_engine* engine) create_batch(requests []inference_request) [][]i
         }
     }
     for _, req := range requests {
-        padded := make([]int, max_len)
+        padded := make(int[], max_len)
         copy(padded, req.prompt)
         batch = append(batch, padded)
     }
     return batch
 }
 
-func (inference_engine* engine) process_batch(batch [][]int) [][]float64 {
+func (inference_engine* engine) process_batch(batch int[][]) float[][]64 {
     batch_size := len(batch)
-    logits := make([][]float64, batch_size)
+    logits := make(float[][]64, batch_size)
     for i := 0; i < batch_size; i++ {
         logits[i] = engine.model_forward(batch[i])
     }
     return logits
 }
 
-func (inference_engine* engine) flash_attention_forward(q []float64, k []float64, v []float64) []float64 {
+func (inference_engine* engine) flash_attention_forward(q float[]64, k float[]64, v float[]64) float[]64 {
     scores := engine.compute_attention_scores(q, k)
     max_score := scores[0]
     for _, s := range scores {
@@ -142,7 +142,7 @@ func (inference_engine* engine) flash_attention_forward(q []float64, k []float64
     for i := range scores {
         scores[i] /= exp_sum
     }
-    output := make([]float64, len(v))
+    output := make(float[]64, len(v))
     for i := range output {
         for j, score := range scores {
             if j < len(v) {
@@ -153,8 +153,8 @@ func (inference_engine* engine) flash_attention_forward(q []float64, k []float64
     return output
 }
 
-func (inference_engine* engine) compute_attention_scores(q []float64, k []float64) []float64 {
-    scores := make([]float64, len(k))
+func (inference_engine* engine) compute_attention_scores(q float[]64, k float[]64) float[]64 {
+    scores := make(float[]64, len(k))
     for i := 0; i < len(k); i++ {
         score := 0.0
         for j := 0; j < len(q) && j < len(k); j++ {
@@ -171,7 +171,7 @@ func (inference_engine* engine) enable_tensor_parallelism(num_replicas int) {
     fmt.Printf("  Heads per replica: %d\n", heads_per_replica)
 }
 
-func (inference_engine* engine) sample_token(logits []float64, temperature float64, top_p float64) int {
+func (inference_engine* engine) sample_token(logits float[]64, temperature float64, top_p float64) int {
     for i := range logits {
         logits[i] /= temperature
     }
@@ -182,7 +182,7 @@ func (inference_engine* engine) sample_token(logits []float64, temperature float
         }
     }
     sum_exp := 0.0
-    probs := make([]float64, len(logits))
+    probs := make(float[]64, len(logits))
     for i, l := range logits {
         exp_l := math.Exp(l - max_logit)
         probs[i] = exp_l
@@ -191,7 +191,7 @@ func (inference_engine* engine) sample_token(logits []float64, temperature float
     for i := range probs {
         probs[i] /= sum_exp
     }
-    sorted_indices := make([]int, len(probs))
+    sorted_indices := make(int[], len(probs))
     for i := range sorted_indices {
         sorted_indices[i] = i
     }
@@ -207,7 +207,7 @@ func (inference_engine* engine) sample_token(logits []float64, temperature float
 
 func (inference_engine* engine) generate(request inference_request) inference_response {
     start_time := time.Now()
-    generated_tokens := []int{}
+    generated_tokens := int[]{}
     current_tokens := request.prompt
     for len(generated_tokens) < request.max_tokens {
         use_cache := engine.config.use_kv_cache
@@ -239,8 +239,8 @@ func (inference_engine* engine) generate(request inference_request) inference_re
     }
 }
 
-func (inference_engine* engine) model_forward(tokens []int) []float64 {
-    logits := make([]float64, 128000)
+func (inference_engine* engine) model_forward(tokens int[]) float[]64 {
+    logits := make(float[]64, 128000)
     for i := range logits {
         logits[i] = math.Sin(float64(i) / 1000.0)
     }
@@ -316,7 +316,7 @@ func (inference_engine* engine) start_serving() {
     for i := 0; i < 5; i++ {
         req := inference_request{
             request_id: fmt.Sprintf("req_%d", i),
-            prompt: []int{1, 2, 3, 4, 5},
+            prompt: int[]{1, 2, 3, 4, 5},
             max_tokens: 128,
             temperature: 0.7,
             top_p: 0.9,

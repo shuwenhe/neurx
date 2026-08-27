@@ -38,9 +38,9 @@ struct scheduler_config {
 }
 
 struct scheduling_decision {
-    []int prefill_request_ids
-    []int decode_request_ids
-    []int preempt_request_ids
+    int[] prefill_request_ids
+    int[] decode_request_ids
+    int[] preempt_request_ids
     int iteration_number
     int total_token_budget_used
 }

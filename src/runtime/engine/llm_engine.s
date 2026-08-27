@@ -36,7 +36,7 @@ struct engine_config {
     enable_prefix           bool
     enable_prefix_cache     bool
     disable_log_probs       bool
-    encoded_token_ids       []int32
+    encoded_token_ids       int[]32
     max_log_probs           int32
     gpu_memory_utilization  float32
     device_type             string
@@ -59,7 +59,7 @@ struct sampling_params {
     presence_penalty        float32
     length_penalty          float32
     early_stop              bool
-    stop                    []string
+    stop                    string[]
     skip_special_tokens     bool
     spaces_between_special  bool
     seed                    int64
@@ -68,14 +68,14 @@ struct sampling_params {
 struct request_output {
     request_id      string
     prompt          string
-    text            []string
-    token_ids       [][]int32
+    text            string[]
+    token_ids       int[][]32
     cumulative      bool
     finish_reason   finish_reason
     error_message   string
     output_tokens   int32
     total_tokens    int32
-    lm_probs        []interface{}
+    lm_probs        int[]erface{}
     created_time    int64
 }
 
@@ -89,7 +89,7 @@ struct request_metadata {
 struct request {
     request_id              string
     prompt                  string
-    tokens                  []int32
+    tokens                  int[]32
     sampling_params         sampling_params
     priority                int32
     status                  request_status
@@ -97,7 +97,7 @@ struct request {
     start_time              int64
     created_time            int64
     updated_time            int64
-    output_tokens           []int32
+    output_tokens           int[]32
     finished_time           int64
     abort_time              int64
     error                   error
@@ -395,11 +395,11 @@ func (llm_engine* e) step() (bool, error) {
             created_time:  core.CurrentTimeMs(),
             output_tokens: 10,
             total_tokens:  len(req.prompt) + 10,
-            text:          []string{"sample output token " + core.IntToString(i)},
+            text:          string[]{"sample output token " + core.IntToString(i)},
         }
 
         e.outputs[req.request_id] = output
-        req.output_tokens = []int32{1, 2, 3, 4, 5}
+        req.output_tokens = int[]32{1, 2, 3, 4, 5}
         req.status = request_status_completed
         req.finished_time = core.CurrentTimeMs()
 

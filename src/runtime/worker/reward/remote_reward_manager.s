@@ -19,14 +19,14 @@ struct remote_reward_state {
 }
 
 struct reward_request {
-    []string prompts
-    []string responses
-    []int request_ids
+    string[] prompts
+    string[] responses
+    int[] request_ids
 }
 
 struct reward_response {
-    []float rewards
-    []int request_ids
+    float[] rewards
+    int[] request_ids
     bool success
     string error_message
 }
@@ -54,10 +54,10 @@ func init_remote_reward_manager(remote_reward_config config) remote_reward_state
 
 func compute_remote_rewards(
     remote_reward_state state,
-    []string prompts,
-    []string responses
-) []float {
-    []int request_ids = make([]int, len(prompts))
+    string[] prompts,
+    string[] responses
+) float[] {
+    int[] request_ids = make(int[], len(prompts))
     for int i = 0; i < len(prompts); i = i + 1 {
         request_ids[i] = state.num_requests + i
     }
@@ -72,7 +72,7 @@ func compute_remote_rewards(
         return resp.rewards
     } else {
         state.num_failures = state.num_failures + 1
-        return make([]float, len(prompts))
+        return make(float[], len(prompts))
     }
 }
 
@@ -80,7 +80,7 @@ func send_reward_request(
     remote_reward_state state,
     reward_request req
 ) reward_response {
-    []float rewards = make([]float, len(req.prompts))
+    float[] rewards = make(float[], len(req.prompts))
     for int i = 0; i < len(req.prompts); i = i + 1 {
         rewards[i] = compute_mock_reward(req.prompts[i], req.responses[i])
     }
@@ -109,7 +109,7 @@ func send_reward_request_with_retry(
         }
     }
     reward_response {
-        rewards: make([]float, len(req.prompts)),
+        rewards: make(float[], len(req.prompts)),
         request_ids: req.request_ids,
         success: false,
         error_message: "max_retries_exceeded",
@@ -118,17 +118,17 @@ func send_reward_request_with_retry(
 
 func batch_compute_remote_rewards(
     remote_reward_state state,
-    []string prompts,
-    []string responses
-) []float {
+    string[] prompts,
+    string[] responses
+) float[] {
     int total = len(prompts)
     int batch_size = state.config.batch_size
-    []float all_rewards = make([]float, total)
+    float[] all_rewards = make(float[], total)
     for int start = 0; start < total; start = start + batch_size {
         int end = min_int(start + batch_size, total)
-        []string batch_prompts = slice_strings(prompts, start, end)
-        []string batch_responses = slice_strings(responses, start, end)
-        []float batch_rewards = compute_remote_rewards(state, batch_prompts, batch_responses)
+        string[] batch_prompts = slice_strings(prompts, start, end)
+        string[] batch_responses = slice_strings(responses, start, end)
+        float[] batch_rewards = compute_remote_rewards(state, batch_prompts, batch_responses)
         for int i = 0; i < len(batch_rewards); i = i + 1 {
             all_rewards[start + i] = batch_rewards[i]
         }
@@ -163,8 +163,8 @@ func min_int(int a, int b) int {
     return b
 }
 
-func slice_strings([]string arr, int start, int end) []string {
-    []string result = make([]string, end - start)
+func slice_strings(string[] arr, int start, int end) string[] {
+    string[] result = make(string[], end - start)
     for int i = start; i < end; i = i + 1 {
         result[i - start] = arr[i]
     }

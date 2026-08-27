@@ -96,7 +96,7 @@ func create_multimodal_system(model_system* model_sys) *multimodal_system {
 	return ms
 }
 
-func (multimodal_system* ms) load_audio(audio_id string, samples []float32, metadata *audio_metadata) error {
+func (multimodal_system* ms) load_audio(audio_id string, samples float[]32, metadata *audio_metadata) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 

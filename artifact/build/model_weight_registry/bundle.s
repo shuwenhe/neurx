@@ -189,8 +189,8 @@ struct device_tensor {
     int device_id
     string backend
     string dtype
-    []int shape
-    []int strides
+    int[] shape
+    int[] strides
     int offset_bytes
     int storage_bytes
     bool owns_storage
@@ -205,7 +205,7 @@ func tensor_dtype_bytes(string dtype) int {
     0
 }
 
-func tensor_numel([]int shape) int {
+func tensor_numel(int[] shape) int {
     if len(shape) == 0 { return 0 }
     int elements = 1
     int i = 0
@@ -217,8 +217,8 @@ func tensor_numel([]int shape) int {
     elements
 }
 
-func tensor_contiguous_strides([]int shape) []int {
-    []int strides = []int{cap: len(shape)}
+func tensor_contiguous_strides(int[] shape) int[] {
+    int[] strides = int[]{cap: len(shape)}
     int stride = 1
     int i = len(shape) - 1
     for i >= 0 {
@@ -233,7 +233,7 @@ func tensor_invalid(string backend, string dtype, string error_message) device_t
     device_tensor {buffer: 0, context: 0, device_id: 0, backend: backend, dtype: dtype, shape: [], strides: [], offset_bytes: 0, storage_bytes: 0, owns_storage: false, valid: false, error_message: error_message}
 }
 
-func tensor_empty(device_context context, []int shape, string dtype) device_tensor {
+func tensor_empty(device_context context, int[] shape, string dtype) device_tensor {
     if !context.valid { return tensor_invalid(context.backend, dtype, "invalid_context") }
     int element_bytes = tensor_dtype_bytes(dtype)
     int elements = tensor_numel(shape)
@@ -244,7 +244,7 @@ func tensor_empty(device_context context, []int shape, string dtype) device_tens
     device_tensor {buffer: buffer, context: context.handle, device_id: context.device_id, backend: context.backend, dtype: dtype, shape: shape, strides: tensor_contiguous_strides(shape), offset_bytes: 0, storage_bytes: bytes, owns_storage: true, valid: true, error_message: ""}
 }
 
-func tensor_view(device_tensor source, []int shape, int offset_elements) device_tensor {
+func tensor_view(device_tensor source, int[] shape, int offset_elements) device_tensor {
     int bytes = tensor_dtype_bytes(source.dtype)
     int view_bytes = tensor_numel(shape) * bytes
     int offset = source.offset_bytes + offset_elements * bytes
@@ -263,9 +263,9 @@ struct model_weight_registry {
     int context
     string backend
     string dtype
-    []string name
-    []int buffer
-    []int element
+    string[] name
+    int[] buffer
+    int[] element
     int count
     int capacity
     bool sealed
@@ -283,7 +283,7 @@ func new_model_weight_registry(int context, string backend, string dtype, int ca
     if context <= 0 || capacity <= 0 || len(backend) == 0 || len(dtype) == 0 {
         return model_weight_registry {context: context, backend: backend, dtype: dtype, name: [], buffer: [], element: [], count: 0, capacity: capacity, sealed: false, valid: false, error_message: "invalid_weight_registry"}
     }
-    model_weight_registry {context: context, backend: backend, dtype: dtype, name: []string{cap: capacity}, buffer: []int{cap: capacity}, element: []int{cap: capacity}, count: 0, capacity: capacity, sealed: false, valid: true, error_message: ""}
+    model_weight_registry {context: context, backend: backend, dtype: dtype, name: string[]{cap: capacity}, buffer: int[]{cap: capacity}, element: int[]{cap: capacity}, count: 0, capacity: capacity, sealed: false, valid: true, error_message: ""}
 }
 
 func model_weight_find(model_weight_registry registry, string name) int {

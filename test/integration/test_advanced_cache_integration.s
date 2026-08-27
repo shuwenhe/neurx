@@ -9,7 +9,7 @@ func test_advanced_cache_basic() {
     print("[✓] Advanced cache initialized\n")
     
     print("\n[TEST] Creating test token sequences...\n")
-    []int tokens_1 = []int{cap: 10}
+    int[] tokens_1 = int[]{cap: 10}
     tokens_1[0] = 101
     tokens_1[1] = 102
     tokens_1[2] = 103
@@ -18,7 +18,7 @@ func test_advanced_cache_basic() {
     print("[✓] Test tokens created: [101, 102, 103, 104, 105]\n")
     
     print("\n[TEST] Querying hash table (O(1) lookup, expect miss on first query)...\n")
-    []int result_1 = advanced_cache_query_kv(tokens_1)
+    int[] result_1 = advanced_cache_query_kv(tokens_1)
     if len(result_1) == 0 {
         print("[✓] Cache miss as expected on first query\n")
     } else {
@@ -26,7 +26,7 @@ func test_advanced_cache_basic() {
     }
     
     print("\n[TEST] Storing KV data in tiered storage...\n")
-    []float kv_data = []float{cap: 100}
+    float[] kv_data = float[]{cap: 100}
     int idx = 0
     for idx < 100 {
         kv_data[idx] = 0.5
@@ -36,7 +36,7 @@ func test_advanced_cache_basic() {
     print("[✓] KV data stored in tiered storage\n")
     
     print("\n[TEST] Querying again (expect hit from L1 memory)...\n")
-    []int result_2 = advanced_cache_query_kv(tokens_1)
+    int[] result_2 = advanced_cache_query_kv(tokens_1)
     if len(result_2) > 0 {
         print("[✓] Cache hit on second query! Retrieved " + int_to_string(len(result_2)) + " blocks\n")
     } else {

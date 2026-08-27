@@ -20,7 +20,7 @@ int DTYPE_BOOL     = 5
 
 struct process_group {
     int pg_id
-    []int ranks
+    int[] ranks
     int world_size
     int my_rank
     int backend
@@ -29,8 +29,8 @@ struct process_group {
 }
 
 struct comm_tensor {
-    []float data
-    []int shape
+    float[] data
+    int[] shape
     int dtype
     int numel
     int device
@@ -66,7 +66,7 @@ struct comm_metrics {
     float bandwidth_efficiency
 }
 
-func new_process_group(int pg_id, []int ranks, int my_rank, int backend) process_group {
+func new_process_group(int pg_id, int[] ranks, int my_rank, int backend) process_group {
     process_group pg
     pg.pg_id = pg_id
     pg.ranks = ranks
@@ -79,7 +79,7 @@ func new_process_group(int pg_id, []int ranks, int my_rank, int backend) process
 }
 
 func create_default_world_group(int world_size, int my_rank) process_group {
-    []int all_ranks = []int{cap: world_size}
+    int[] all_ranks = int[]{cap: world_size}
     int i = 0
     for i < world_size {
         all_ranks[i] = i
@@ -89,7 +89,7 @@ func create_default_world_group(int world_size, int my_rank) process_group {
 }
 
 func split_process_group(process_group parent_pg, int color, int key) process_group {
-    []int subgroup_ranks = []int{cap: parent_pg.world_size}
+    int[] subgroup_ranks = int[]{cap: parent_pg.world_size}
     int count = 0
     int i = 0
     for i < len(parent_pg.ranks) {
@@ -99,7 +99,7 @@ func split_process_group(process_group parent_pg, int color, int key) process_gr
         }
         i = i + 1
     }
-    []int final_ranks = []int{cap: count}
+    int[] final_ranks = int[]{cap: count}
     int j = 0
     for j < count {
         final_ranks[j] = subgroup_ranks[j]
@@ -131,7 +131,7 @@ func dtype_bytes(int dtype) int {
     return 4
 }
 
-func make_comm_tensor([]float data, []int shape, int dtype) comm_tensor {
+func make_comm_tensor(float[] data, int[] shape, int dtype) comm_tensor {
     comm_tensor t
     t.data = data
     t.shape = shape
@@ -181,11 +181,11 @@ func p2p_recv(
     int src_rank,
     int tag) comm_tensor {
     comm_tensor result
-    result.shape = []int{expected_numel}
+    result.shape = int[]{expected_numel}
     result.numel = expected_numel
     result.dtype = expected_dtype
     result.device = -1
-    result.data = []float{cap: expected_numel}
+    result.data = float[]{cap: expected_numel}
     return result
 }
 
@@ -210,10 +210,10 @@ func p2p_irecv(
     req.is_completed = false
     req.error_code = 0
     comm_tensor placeholder
-    placeholder.shape = []int{expected_numel}
+    placeholder.shape = int[]{expected_numel}
     placeholder.numel = expected_numel
     placeholder.dtype = expected_dtype
-    placeholder.data = []float{cap: expected_numel}
+    placeholder.data = float[]{cap: expected_numel}
     p2p_irecv_result result
     result.request = req
     result.tensor = placeholder
@@ -248,7 +248,7 @@ func broadcast(
     float start_time = 0.0
     if pg.my_rank == root_rank {
     } else {
-        tensor.data = []float{cap: tensor.numel}
+        tensor.data = float[]{cap: tensor.numel}
     }
     float elapsed = 0.0005
     metrics.total_comm_time_ms = metrics.total_comm_time_ms + elapsed
@@ -279,7 +279,7 @@ func local_identical_allreduce(process_group pg, comm_tensor tensor, int reduce_
     if world_size <= 1 {
         return tensor
     }
-    []float out = []float{cap: tensor.numel}
+    float[] out = float[]{cap: tensor.numel}
     int i = 0
     for i < tensor.numel {
         float v = tensor.data[i]
@@ -317,7 +317,7 @@ func ring_allreduce_impl(
     }
     int base_chunk_size = numel / world_size
     int remainder = c_mod_nonneg(numel, world_size)
-    []int chunk_sizes = []int{cap: world_size}
+    int[] chunk_sizes = int[]{cap: world_size}
     int offset = 0
     int i = 0
     for i < world_size {
@@ -327,7 +327,7 @@ func ring_allreduce_impl(
         offset = offset + sz
         i = i + 1
     }
-    []float output_data = []float{cap: numel}
+    float[] output_data = float[]{cap: numel}
     int k = 0
     for k < numel {
         output_data[k] = tensor.data[k]
@@ -376,7 +376,7 @@ func tree_allreduce_impl(
     int rank = pg.my_rank
     int numel = tensor.numel
     if world_size <= 1 { return tensor }
-    []float output_data = []float{cap: numel}
+    float[] output_data = float[]{cap: numel}
     int k = 0
     for k < numel {
         output_data[k] = tensor.data[k]
@@ -420,7 +420,7 @@ func allgather(
     int numel = tensor.numel
     int dtype_sz = dtype_bytes(tensor.dtype)
     int total_numel = numel * world_size
-    []float gathered_data = []float{cap: total_numel}
+    float[] gathered_data = float[]{cap: total_numel}
     int local_start = rank * numel
     int i = 0
     for i < numel {
@@ -441,7 +441,7 @@ func allgather(
     }
     comm_tensor result
     result.data = gathered_data
-    result.shape = []int{world_size}
+    result.shape = int[]{world_size}
     if len(tensor.shape) > 0 {
         result.shape[0] = tensor.shape[0] * world_size
         int s = 1
@@ -475,7 +475,7 @@ func reducescatter(
     int my_end = my_start + chunk_size
     if my_end > total_numel { my_end = total_numel }
     int my_count = my_end - my_start
-    []float scattered_data = []float{cap: my_count}
+    float[] scattered_data = float[]{cap: my_count}
     comm_tensor reduced = local_identical_allreduce(pg, tensor, reduce_op)
     int i = 0
     for i < my_count {
@@ -486,7 +486,7 @@ func reducescatter(
     }
     comm_tensor result
     result.data = scattered_data
-    result.shape = []int{my_count}
+    result.shape = int[]{my_count}
     result.numel = my_count
     result.dtype = tensor.dtype
     result.device = tensor.device
@@ -509,7 +509,7 @@ func scatter(
     int my_end = my_start + chunk_size
     if my_end > total_numel { my_end = total_numel }
     int my_count = my_end - my_start
-    []float my_data = []float{cap: my_count}
+    float[] my_data = float[]{cap: my_count}
     int i = 0
     for i < my_count {
         my_data[i] = tensor.data[my_start + i]
@@ -517,7 +517,7 @@ func scatter(
     }
     comm_tensor result
     result.data = my_data
-    result.shape = []int{my_count}
+    result.shape = int[]{my_count}
     result.numel = my_count
     result.dtype = tensor.dtype
     return result
@@ -534,7 +534,7 @@ func gather(
     int dtype_sz = dtype_bytes(tensor.dtype)
     if rank == root_rank {
         int total_numel = numel * world_size
-        []float gathered = []float{cap: total_numel}
+        float[] gathered = float[]{cap: total_numel}
         int r = 0
         for r < world_size {
             int offset = r * numel
@@ -551,7 +551,7 @@ func gather(
         }
         comm_tensor result
         result.data = gathered
-        []int gathered_shape = []int{cap: 1}
+        int[] gathered_shape = int[]{cap: 1}
         gathered_shape[0] = world_size * numel
         result.shape = gathered_shape
         result.numel = total_numel
@@ -571,7 +571,7 @@ func alltoall(
     int total_numel = tensor.numel
     int chunk_size = total_numel / world_size
     int dtype_sz = dtype_bytes(tensor.dtype)
-    []float out_data = []float{cap: total_numel}
+    float[] out_data = float[]{cap: total_numel}
     int j = 0
     for j < world_size {
         int src_start = j * chunk_size
@@ -658,7 +658,7 @@ func apply_reduce_op(float a, float b, int op) float {
     return a + b
 }
 
-func compute_chunk_offset([]int chunk_sizes, int chunk_idx) int {
+func compute_chunk_offset(int[] chunk_sizes, int chunk_idx) int {
     int offset = 0
     int i = 0
     for i < chunk_idx {

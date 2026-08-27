@@ -3,7 +3,7 @@ package neurx.distributed
 struct tensor_parallel_config {
     int tp_degree
     int tp_rank
-    []int tp_group
+    int[] tp_group
     string communication_backend
     bool use_sequence_parallel
 }
@@ -30,7 +30,7 @@ func tp_mod_nonneg(int value, int divisor) int {
     current
 }
 
-func new_tensor_parallel_config(int tp_degree, int tp_rank, []int tp_group) tensor_parallel_config {
+func new_tensor_parallel_config(int tp_degree, int tp_rank, int[] tp_group) tensor_parallel_config {
     tensor_parallel_config cfg
     cfg.tp_degree = tp_degree
     cfg.tp_rank = tp_rank

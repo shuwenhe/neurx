@@ -8,12 +8,12 @@ struct adamw_state_s {
     float epsilon
     float weight_decay
     int step_count
-    [][]float first_moment
-    [][]float second_moment
+    float[][] first_moment
+    float[][] second_moment
 }
 
 struct param_update_s {
-    [][]float updated_params
+    float[][] updated_params
     float norm
     float ratio
 }
@@ -26,18 +26,18 @@ func new_adamw_state_s(float lr) adamw_state_s {
         epsilon: 1e-8,
         weight_decay: 0.01,
         step_count: 0,
-        first_moment: make([][]float, 0),
-        second_moment: make([][]float, 0),
+        first_moment: make(float[][], 0),
+        second_moment: make(float[][], 0),
     }
 }
 
-func initialize_optimizer_state_s([][]float params, adamw_state_s state) adamw_state_s {
-    [][]float m = make([][]float, 0)
-    [][]float v = make([][]float, 0)
+func initialize_optimizer_state_s(float[][] params, adamw_state_s state) adamw_state_s {
+    float[][] m = make(float[][], 0)
+    float[][] v = make(float[][], 0)
     int i = 0
     for i < len(params) {
-        []float m_i = make([]float, 0)
-        []float v_i = make([]float, 0)
+        float[] m_i = make(float[], 0)
+        float[] v_i = make(float[], 0)
         int j = 0
         for j < len(params[i]) {
             m_i = append(m_i, 0.0)
@@ -71,23 +71,23 @@ func compute_bias_correction_s(float beta, int step) float {
 }
 
 func adamw_step_s(
-    [][]float params,
-    [][]float gradients,
+    float[][] params,
+    float[][] gradients,
     adamw_state_s state
 ) param_update_s {
     int step = state.step_count + 1
     float bias_corr_1 = compute_bias_correction_s(state.beta1, step)
     float bias_corr_2 = compute_bias_correction_s(state.beta2, step)
-    [][]float updated = make([][]float, 0)
+    float[][] updated = make(float[][], 0)
     float grad_norm = 0.0
     float param_norm = 0.0
     int i = 0
     for i < len(params) {
-        []float param_i = params[i]
-        []float grad_i = gradients[i]
-        []float m_i = state.first_moment[i]
-        []float v_i = state.second_moment[i]
-        []float updated_param = make([]float, 0)
+        float[] param_i = params[i]
+        float[] grad_i = gradients[i]
+        float[] m_i = state.first_moment[i]
+        float[] v_i = state.second_moment[i]
+        float[] updated_param = make(float[], 0)
         int j = 0
         for j < len(param_i) {
             float param = param_i[j]
@@ -122,7 +122,7 @@ func adamw_step_s(
     }
 }
 
-func clip_grad_norm_s([][]float gradients, float max_norm) [][]float {
+func clip_grad_norm_s(float[][] gradients, float max_norm) float[][] {
     float grad_norm = 0.0
     int i = 0
     for i < len(gradients) {
@@ -141,11 +141,11 @@ func clip_grad_norm_s([][]float gradients, float max_norm) [][]float {
     if clip_coef >= 1.0 {
         return gradients
     }
-    [][]float clipped = make([][]float, 0)
+    float[][] clipped = make(float[][], 0)
     i = 0
     for i < len(gradients) {
-        []float grad_i = gradients[i]
-        []float clipped_grad = make([]float, 0)
+        float[] grad_i = gradients[i]
+        float[] clipped_grad = make(float[], 0)
         int j = 0
         for j < len(grad_i) {
             clipped_grad = append(clipped_grad, grad_i[j] * clip_coef)

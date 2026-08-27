@@ -416,7 +416,7 @@ func quantization_config_text(quantization_config config) string {
 
 func quantization_config_from_text(string text, quantization_config fallback) quantization_config {
     quantization_config config = fallback
-    []string lines = split_lines(text)
+    string[] lines = split_lines(text)
     int i = 0
     for i < length(lines) {
         string line = lines[i]
@@ -446,7 +446,7 @@ func quantization_config_from_text(string text, quantization_config fallback) qu
 }
 
 func quantization_manifest_layer_count(string text) int {
-    []string lines = split_lines(text)
+    string[] lines = split_lines(text)
     int i = 0
     for i < length(lines) {
         string line = lines[i]
@@ -583,8 +583,8 @@ func float_text(float value) string {
     neurx.strings.format("%.6f", value)
 }
 
-func split_lines(string text) []string {
-    []string lines = []string{cap: 0}
+func split_lines(string text) string[] {
+    string[] lines = string[]{cap: 0}
     string current = ""
     int i = 0
     for i < length(text) {

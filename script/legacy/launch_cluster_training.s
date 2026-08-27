@@ -5,7 +5,7 @@ use neurx.strings.{string_concat}
 
 struct cluster_config {
     int num_nodes
-    []string node_addresses
+    string[] node_addresses
     int gpus_per_node
     string master_node_address
     int master_port
@@ -31,7 +31,7 @@ func parse_cluster_config() cluster_config {
     string ssh_user = runtime_env_get("NEURX_SSH_USER", "root")
     string working_dir = runtime_env_get("NEURX_WORKING_DIR", "/home/neurx")
     string log_dir = runtime_env_get("NEURX_LOG_DIR", "/mnt/nccl_shared/logs")
-    []string nodes = split_string(node_list, ",")
+    string[] nodes = split_string(node_list, ",")
     cluster_config {
         num_nodes: num_nodes,
         node_addresses: nodes,
@@ -218,8 +218,8 @@ func main() {
     print("[MAIN] Multi-node training completed!")
 }
 
-func split_string(string s, string sep) []string {
-    []string parts = []string{cap: 10}
+func split_string(string s, string sep) string[] {
+    string[] parts = string[]{cap: 10}
     int part_idx = 0
     int i = 0
     string current = ""
@@ -245,7 +245,7 @@ func split_string(string s, string sep) []string {
     parts
 }
 
-func string_join([]string parts, string sep) string {
+func string_join(string[] parts, string sep) string {
     string result = ""
     int i = 0
     for i < len(parts) {

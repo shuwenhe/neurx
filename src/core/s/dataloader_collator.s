@@ -11,13 +11,13 @@ struct collator_config {
 }
 
 struct batch {
-    []int input_ids
-    []int attention_mask
-    []int labels
-    []int position_ids
+    int[] input_ids
+    int[] attention_mask
+    int[] labels
+    int[] position_ids
     int batch_size
     int seq_length
-    []int original_lengths
+    int[] original_lengths
     map[string]any extra
 }
 
@@ -42,16 +42,16 @@ func collate_fn(
     int max_len = find_max_length(samples)
     int target_len = determine_target_length(max_len, cfg)
     int batch_size = len(samples)
-    []int input_ids = create_2d_array(batch_size, target_len, cfg.pad_token_id)
-    []int attention_mask = create_2d_array(batch_size, target_len, 0)
-    []int labels = []
+    int[] input_ids = create_2d_array(batch_size, target_len, cfg.pad_token_id)
+    int[] attention_mask = create_2d_array(batch_size, target_len, 0)
+    int[] labels = []
     if cfg.include_labels {
         labels = create_2d_array(batch_size, target_len, -100)
     }
-    []int original_lengths = []int{cap: batch_size}
+    int[] original_lengths = int[]{cap: batch_size}
     for i in 0..batch_size {
         sample s = samples[i]
-        []int token_ids = s.token_ids
+        int[] token_ids = s.token_ids
         if len(token_ids) > target_len {
             token_ids = apply_truncation(token_ids, target_len, cfg.truncation_strategy)
         }
@@ -110,27 +110,27 @@ func determine_target_length(int batch_max, collator_config cfg) int {
     }
 }
 
-func create_2d_array(int rows, int cols, int fill_value) []int {
-    []int arr = []int{cap: rows * cols}
+func create_2d_array(int rows, int cols, int fill_value) int[] {
+    int[] arr = int[]{cap: rows * cols}
     for i in 0..rows * cols {
         arr[i] = fill_value
     }
     arr
 }
 
-func ones(int n) []int {
-    []int arr = []int{cap: n}
+func ones(int n) int[] {
+    int[] arr = int[]{cap: n}
     for i in 0..n {
         arr[i] = 1
     }
     arr
 }
 
-func apply_truncation([]int tokens, int max_len, string strategy) []int {
+func apply_truncation(int[] tokens, int max_len, string strategy) int[] {
     if strategy == "only_first" || strategy == "" || len(tokens) <= max_len {
         return truncate(tokens, max_len)
     } else if strategy == "only_second" {
-        []int result = []int{cap: max_len}
+        int[] result = int[]{cap: max_len}
         for i in 0..max_len {
             result[i] = tokens[i]
         }
@@ -139,7 +139,7 @@ func apply_truncation([]int tokens, int max_len, string strategy) []int {
         int excess = len(tokens) - max_len
         int left_truncate = excess / 2
         int right_truncate = excess - left_truncate
-        []int result = []int{cap: max_len}
+        int[] result = int[]{cap: max_len}
         for i in 0..max_len {
             result[i] = tokens[left_truncate + i]
         }
@@ -148,8 +148,8 @@ func apply_truncation([]int tokens, int max_len, string strategy) []int {
 }
 
 func copy_with_padding(
-    []int dst,
-    []int src,
+    int[] dst,
+    int[] src,
     int row,
     int row_len,
     string padding_side,

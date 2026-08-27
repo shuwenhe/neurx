@@ -15,9 +15,9 @@ struct transformer_model {
 }
 
 struct forward_pass_result {
-    [][]float hidden_states
-    []float logits
-    []float loss_per_token
+    float[][] hidden_states
+    float[] logits
+    float[] loss_per_token
 }
 
 func create_transformer_model(int num_layers, int hidden_size, int vocab_size, int intermediate_size, int num_heads) transformer_model {
@@ -40,23 +40,23 @@ func create_transformer_model(int num_layers, int hidden_size, int vocab_size, i
     return model
 }
 
-func transformer_model_forward(transformer_model model, []int token_ids) forward_pass_result {
+func transformer_model_forward(transformer_model model, int[] token_ids) forward_pass_result {
     forward_pass_result result
-    result.hidden_states = [][]float{}
+    result.hidden_states = float[][]{}
     result.logits = fill_model_tensor(model.vocab_size, 0.0)
     result.loss_per_token = fill_model_tensor(len(token_ids), 0.0)
-    [][]float embeddings = embedding_forward(model.embedding, token_ids)
+    float[][] embeddings = embedding_forward(model.embedding, token_ids)
     if len(embeddings) == 0 {
         return result
     }
-    [][]float hidden_states = embeddings
+    float[][] hidden_states = embeddings
     result.hidden_states = append(result.hidden_states, embeddings[0])
     int layer_idx = 0
     for layer_idx < model.num_layers && layer_idx < len(model.layers) {
-        [][]float new_hidden_states = [][]float{}
+        float[][] new_hidden_states = float[][]{}
         int seq_idx = 0
         for seq_idx < len(hidden_states) {
-            []float block_output = transformer_block_forward(model.layers[layer_idx], hidden_states[seq_idx])
+            float[] block_output = transformer_block_forward(model.layers[layer_idx], hidden_states[seq_idx])
             new_hidden_states = append(new_hidden_states, block_output)
             seq_idx = seq_idx + 1
         }
@@ -67,13 +67,13 @@ func transformer_model_forward(transformer_model model, []int token_ids) forward
         layer_idx = layer_idx + 1
     }
     if len(hidden_states) > 0 {
-        []float final_hidden = rms_norm_forward(model.final_norm, hidden_states[len(hidden_states) - 1])
+        float[] final_hidden = rms_norm_forward(model.final_norm, hidden_states[len(hidden_states) - 1])
         result.logits = linear_forward(model.lm_head, final_hidden)
     }
     return result
 }
 
-func transformer_model_forward_with_loss(transformer_model model, []int input_ids, []int target_ids) forward_pass_result {
+func transformer_model_forward_with_loss(transformer_model model, int[] input_ids, int[] target_ids) forward_pass_result {
     forward_pass_result result = transformer_model_forward(model, input_ids)
     int i = 0
     for i < len(result.logits) && i < len(target_ids) {

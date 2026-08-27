@@ -147,7 +147,7 @@ func (env ray_env*) initialize_ray(config ray_config*) bool {
 func (env ray_env*) create_placement_group(
     name string,
     strategy string,
-    bundles map[string[]float64],
+    bundles map[stringfloat[]64],
 ) placement_group* {
     pg := new(placement_group)
     pg.id = name

@@ -33,7 +33,7 @@ struct kv_cache_config {
 
 struct kv_transfer_plan {
     int32 plan_id
-    []int32 block_ids_to_transfer
+    int[]32 block_ids_to_transfer
     []kv_cache_location src_locations
     []kv_cache_location dst_locations
     int64 total_bytes
@@ -120,7 +120,7 @@ func (kv_cache_manager* kcm) get_block(int32 block_id) kv_cache_block* {
 func (kv_cache_manager* kcm) create_transfer_plan() kv_transfer_plan* {
     return *kv_transfer_plan{
         plan_id: 0,
-        block_ids_to_transfer: make([]int32, 0),
+        block_ids_to_transfer: make(int[]32, 0),
         src_locations: make([]kv_cache_location, 0),
         dst_locations: make([]kv_cache_location, 0),
         total_bytes: 0,

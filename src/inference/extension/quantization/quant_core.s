@@ -28,9 +28,9 @@ struct quantized_tensor {
     string granularity
     int element_count
     int group_size
-    []int values
-    []float scales
-    []int zero_points
+    int[] values
+    float[] scales
+    int[] zero_points
     bool packed
 }
 
@@ -104,7 +104,7 @@ func quant_clamp(int value, int minimum, int maximum) int {
     value
 }
 
-func compute_tensor_stats([]float values) quantization_stats {
+func compute_tensor_stats(float[] values) quantization_stats {
     quantization_stats stats
     stats.minimum = 0.0
     stats.maximum = 0.0
@@ -140,7 +140,7 @@ func quantization_config_valid(quantization_config config) bool {
     false
 }
 
-func quantize_int8([]float values) quantization_result {
+func quantize_int8(float[] values) quantization_result {
     if len(values) == 0 {
         return new_quantization_result(empty_quantized_tensor(), false, "tensor is empty")
     }
@@ -163,7 +163,7 @@ func quantize_int8([]float values) quantization_result {
     new_quantization_result(tensor, true, "")
 }
 
-func quantize_int4_groupwise([]float values, int group_size) quantization_result {
+func quantize_int4_groupwise(float[] values, int group_size) quantization_result {
     if len(values) == 0 {
         return new_quantization_result(empty_quantized_tensor(), false, "tensor is empty")
     }
@@ -205,7 +205,7 @@ func quantize_int4_groupwise([]float values, int group_size) quantization_result
     new_quantization_result(tensor, true, "")
 }
 
-func quantize_tensor([]float values, quantization_config config) quantization_result {
+func quantize_tensor(float[] values, quantization_config config) quantization_result {
     if !quantization_config_valid(config) {
         return new_quantization_result(empty_quantized_tensor(), false, "unsupported quantization configuration")
     }
@@ -213,8 +213,8 @@ func quantize_tensor([]float values, quantization_config config) quantization_re
     quantize_int4_groupwise(values, config.group_size)
 }
 
-func dequantize_tensor(quantized_tensor tensor) []float {
-    []float output = []
+func dequantize_tensor(quantized_tensor tensor) float[] {
+    float[] output = []
     if tensor.element_count <= 0 || len(tensor.scales) == 0 { return output }
     if tensor.quant_type == quant_type_int8() {
         int i = 0
@@ -257,8 +257,8 @@ func quantization_compression_milli(quantized_tensor tensor) int {
     original_bytes * 1000 / compressed_bytes
 }
 
-func quantization_mean_squared_error([]float original, quantized_tensor tensor) float {
-    []float restored = dequantize_tensor(tensor)
+func quantization_mean_squared_error(float[] original, quantized_tensor tensor) float {
+    float[] restored = dequantize_tensor(tensor)
     if len(original) == 0 || len(restored) != len(original) { return -1.0 }
     float error = 0.0
     int i = 0

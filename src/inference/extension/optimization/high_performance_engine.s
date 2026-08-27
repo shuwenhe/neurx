@@ -76,10 +76,10 @@ func NewHighPerformanceOptimizationEngine(config optimization_config) *high_perf
 }
 
 func (high_performance_optimization_engine* hpe) OptimizeAttention(
-    q []float32,
-    k []float32,
-    v []float32,
-) []float32 {
+    q float[]32,
+    k float[]32,
+    v float[]32,
+) float[]32 {
     if !hpe.config.enable_flash_attention || hpe.flash_attention == nil {
         return hpe.basicAttention(q, k, v)
     }
@@ -87,17 +87,17 @@ func (high_performance_optimization_engine* hpe) OptimizeAttention(
 }
 
 func (high_performance_optimization_engine* hpe) OptimizeGEMM(
-    a []float32,
-    b []float32,
-    bias []float32,
-) []float32 {
+    a float[]32,
+    b float[]32,
+    bias float[]32,
+) float[]32 {
     if !hpe.config.enable_gemm_fusion || hpe.gemm_kernel == nil {
         return hpe.basicGEMM(a, b)
     }
     gemm := gemm_operation{
         a:         a,
         b:         b,
-        c:         make([]float32, 0),
+        c:         make(float[]32, 0),
         bias:      bias,
         has_bias:  len(bias) > 0,
     }
@@ -109,11 +109,11 @@ func (high_performance_optimization_engine* hpe) OptimizeGEMM(
 }
 
 func (high_performance_optimization_engine* hpe) OptimizeWithCUDAGraph(
-    kernels []string,
-    dependencies [][]int32,
-) map[int32][]float32 {
+    kernels string[],
+    dependencies int[][]32,
+) map[int32]float[]32 {
     if !hpe.config.enable_cuda_graphs || hpe.cuda_graph == nil {
-        return make(map[int32][]float32)
+        return make(map[int32]float[]32)
     }
     for i, kernel := range kernels {
         hpe.cuda_graph.AddNode(kernel, dependencies[i], map[string]int32{})
@@ -122,11 +122,11 @@ func (high_performance_optimization_engine* hpe) OptimizeWithCUDAGraph(
 }
 
 func (high_performance_optimization_engine* hpe) ApplyRuntimeFusion(
-    operations []string,
-    shapes [][]int32,
-) [][]float32 {
+    operations string[],
+    shapes int[][]32,
+) float[][]32 {
     if !hpe.config.enable_runtime_fusion || hpe.runtime_fusion == nil {
-        return make([][]float32, 0)
+        return make(float[][]32, 0)
     }
     for i, op := range operations {
         params := make(map[string]float32)
@@ -136,11 +136,11 @@ func (high_performance_optimization_engine* hpe) ApplyRuntimeFusion(
 }
 
 func (high_performance_optimization_engine* hpe) basicAttention(
-    q []float32,
-    k []float32,
-    v []float32,
-) []float32 {
-    output := make([]float32, len(q))
+    q float[]32,
+    k float[]32,
+    v float[]32,
+) float[]32 {
+    output := make(float[]32, len(q))
     for i := int32(0); i < int32(len(q)); i++ {
         output[int(i)] = 0.1 * q[int(i)]
     }
@@ -148,10 +148,10 @@ func (high_performance_optimization_engine* hpe) basicAttention(
 }
 
 func (high_performance_optimization_engine* hpe) basicGEMM(
-    a []float32,
-    b []float32,
-) []float32 {
-    output := make([]float32, len(a))
+    a float[]32,
+    b float[]32,
+) float[]32 {
+    output := make(float[]32, len(a))
     for i := int32(0); i < int32(len(a)); i++ {
         output[int(i)] = 0.1 * a[int(i)]
     }

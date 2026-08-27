@@ -16,7 +16,7 @@ func create_comm_context(int world_size, int rank, string backend) comm_context 
     return ctx
 }
 
-func all_reduce(comm_context ctx, []float data, string op) []float {
+func all_reduce(comm_context ctx, float[] data, string op) float[] {
     if !ctx.initialized {
         println("[ERROR] Communication context not initialized")
         return data
@@ -31,7 +31,7 @@ func all_reduce(comm_context ctx, []float data, string op) []float {
     return data
 }
 
-func all_gather(comm_context ctx, []float local_data) []float {
+func all_gather(comm_context ctx, float[] local_data) float[] {
     if !ctx.initialized {
         println("[ERROR] Communication context not initialized")
         return local_data
@@ -43,7 +43,7 @@ func all_gather(comm_context ctx, []float local_data) []float {
             " world_size=" + int_to_string(ctx.world_size) +
             " local_size=" + int_to_string(len(local_data)))
     int total_size = len(local_data) * ctx.world_size
-    []float gathered_data = []
+    float[] gathered_data = []
     int i = 0
     for i < total_size {
         gathered_data = append(gathered_data, 0.0)
@@ -58,7 +58,7 @@ func all_gather(comm_context ctx, []float local_data) []float {
     return gathered_data
 }
 
-func reduce_scatter(comm_context ctx, []float data) []float {
+func reduce_scatter(comm_context ctx, float[] data) float[] {
     if !ctx.initialized {
         println("[ERROR] Communication context not initialized")
         return data
@@ -70,7 +70,7 @@ func reduce_scatter(comm_context ctx, []float data) []float {
             " world_size=" + int_to_string(ctx.world_size) +
             " total_size=" + int_to_string(len(data)))
     int chunk_size = len(data) / ctx.world_size
-    []float local_chunk = []
+    float[] local_chunk = []
     int start = ctx.rank * chunk_size
     int end = start + chunk_size
     int i = start
@@ -81,7 +81,7 @@ func reduce_scatter(comm_context ctx, []float data) []float {
     return local_chunk
 }
 
-func broadcast(comm_context ctx, []float data, int root) []float {
+func broadcast(comm_context ctx, float[] data, int root) float[] {
     if !ctx.initialized {
         println("[ERROR] Communication context not initialized")
         return data

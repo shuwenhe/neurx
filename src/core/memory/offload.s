@@ -10,7 +10,7 @@ struct offload_config {
 
 struct tensor_metadata {
     string tensor_name
-    []int shape
+    int[] shape
     string dtype
     int size_bytes
     bool on_gpu
@@ -58,7 +58,7 @@ func new_offload_memory_pool(offload_config config) offload_memory_pool {
 
 func create_tensor_metadata(
     string name,
-    []int shape,
+    int[] shape,
     string dtype,
 ) tensor_metadata {
     size := compute_tensor_size(shape, dtype)
@@ -199,7 +199,7 @@ func print_memory_stats(offload_memory_pool pool) string {
     "GPU: " + float_to_str(gpu_usage) + "% | CPU: " + float_to_str(cpu_usage) + "%"
 }
 
-func compute_tensor_size([]int shape, string dtype) int {
+func compute_tensor_size(int[] shape, string dtype) int {
     size := 1
     i := 0
     for i < shape.len {

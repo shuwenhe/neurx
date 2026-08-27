@@ -135,7 +135,7 @@ func dapo_trainer_train(
             rewards: []tensor{},
             log_probs: []tensor{},
             values: []tensor{},
-            dones: []bool{},
+            dones: bool[]{},
             avg_reward: 0.0,
             max_reward: 0.0,
             num_correct: 0,

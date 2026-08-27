@@ -4,7 +4,7 @@ struct zero_optimizer_config {
     int zero_stage
     int dp_degree
     int dp_rank
-    []int dp_group
+    int[] dp_group
     bool use_cpu_offload
     int memory_limit_mb
     bool use_gradient_accumulation
@@ -12,16 +12,16 @@ struct zero_optimizer_config {
 
 struct zero_stage_1_state {
     int local_param_count
-    []float local_params
-    []float local_m
-    []float local_v
-    []float local_param_grads
+    float[] local_params
+    float[] local_m
+    float[] local_v
+    float[] local_param_grads
     int step
 }
 
 struct zero_stage_2_state {
     zero_stage_1_state stage_1
-    []float gradient_buffer
+    float[] gradient_buffer
     int gradient_buffer_size
 }
 
@@ -54,10 +54,10 @@ func new_zero_stage_1_optimizer(
     } else {
         state.local_param_count = total_params / dp_degree
     }
-    state.local_params = []float{cap: state.local_param_count}
-    state.local_m = []float{cap: state.local_param_count}
-    state.local_v = []float{cap: state.local_param_count}
-    state.local_param_grads = []float{cap: state.local_param_count}
+    state.local_params = float[]{cap: state.local_param_count}
+    state.local_m = float[]{cap: state.local_param_count}
+    state.local_v = float[]{cap: state.local_param_count}
+    state.local_param_grads = float[]{cap: state.local_param_count}
     int i = 0
     for i < state.local_param_count {
         state.local_params[i] = 0.0
@@ -71,11 +71,11 @@ func new_zero_stage_1_optimizer(
 }
 
 func zero_stage_1_all_reduce_grads(
-    []float local_grads,
+    float[] local_grads,
     int local_param_count,
     int dp_degree,
-    []int dp_group) []float {
-    []float full_grads = []float{cap: len(local_grads)}
+    int[] dp_group) float[] {
+    float[] full_grads = float[]{cap: len(local_grads)}
     int i = 0
     for i < len(local_grads) {
         full_grads[i] = local_grads[i]
@@ -112,7 +112,7 @@ func zero_sqrt(float x) float {
 
 func zero_stage_1_optimizer_step(
     zero_stage_1_state state,
-    []float full_grads,
+    float[] full_grads,
     float learning_rate,
     float beta1,
     float beta2,
@@ -149,10 +149,10 @@ func new_zero_stage_2_optimizer(
 }
 
 func zero_stage_2_reduce_scatter_grads(
-    []float full_grads,
+    float[] full_grads,
     int dp_degree,
     int dp_rank,
-    []int dp_group) []float {
+    int[] dp_group) float[] {
     int total_size = len(full_grads)
     int chunk_size = (total_size + dp_degree - 1) / dp_degree
     int start = dp_rank * chunk_size
@@ -164,7 +164,7 @@ func zero_stage_2_reduce_scatter_grads(
     if count < 0 {
         count = 0
     }
-    []float local_grads = []float{cap: count}
+    float[] local_grads = float[]{cap: count}
     int i = 0
     for i < count {
         local_grads[i] = full_grads[start + i]
@@ -178,7 +178,7 @@ func zero_stage_2_reduce_scatter_grads(
 
 func zero_stage_2_optimizer_step(
     zero_stage_2_state state,
-    []float local_grads,
+    float[] local_grads,
     float learning_rate,
     float beta1,
     float beta2,
@@ -214,11 +214,11 @@ func new_zero_stage_3_optimizer(
 }
 
 func zero_stage_3_all_gather_params(
-    [][]float local_params,
+    float[][] local_params,
     int dp_degree,
     int dp_rank,
-    []int dp_group) []float {
-    []float full_params = []float{cap: 0}
+    int[] dp_group) float[] {
+    float[] full_params = float[]{cap: 0}
     int r = 0
     for r < dp_degree {
         int row = 0
@@ -236,13 +236,13 @@ func zero_stage_3_all_gather_params(
 }
 
 func zero_stage_3_forward(
-    []float input,
-    [][]float local_params,
+    float[] input,
+    float[][] local_params,
     int dp_degree,
     int dp_rank,
-    []int dp_group) []float {
-    []float full_params = zero_stage_3_all_gather_params(local_params, dp_degree, dp_rank, dp_group)
-    []float output = []float{cap: len(input)}
+    int[] dp_group) float[] {
+    float[] full_params = zero_stage_3_all_gather_params(local_params, dp_degree, dp_rank, dp_group)
+    float[] output = float[]{cap: len(input)}
     int i = 0
     for i < len(input) {
         output[i] = input[i]
@@ -252,20 +252,20 @@ func zero_stage_3_forward(
 }
 
 func zero_stage_3_backward(
-    []float output_grad,
-    [][]float local_params,
+    float[] output_grad,
+    float[][] local_params,
     int dp_degree,
     int dp_rank,
-    []int dp_group,
-    []float input) []float {
-    []float full_params = zero_stage_3_all_gather_params(local_params, dp_degree, dp_rank, dp_group)
-    []float input_grad = []float{cap: len(output_grad)}
+    int[] dp_group,
+    float[] input) float[] {
+    float[] full_params = zero_stage_3_all_gather_params(local_params, dp_degree, dp_rank, dp_group)
+    float[] input_grad = float[]{cap: len(output_grad)}
     int i = 0
     for i < len(output_grad) {
         input_grad[i] = output_grad[i]
         i = i + 1
     }
-    []float local_grads = input_grad
+    float[] local_grads = input_grad
     return local_grads
 }
 

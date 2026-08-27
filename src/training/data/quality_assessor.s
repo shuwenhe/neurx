@@ -19,7 +19,7 @@ struct quality_metrics {
     language_detected: map<string, i64>
     length_distribution: map<string, i64>
     quality_distribution: map<string, i64>
-    issues: []string
+    issues: string[]
 }
 
 struct quality_assessor {
@@ -40,7 +40,7 @@ func new_quality_assessor(i64 sample_size) quality_assessor {
             language_detected: make(map<string, i64>),
             length_distribution: make(map<string, i64>),
             quality_distribution: make(map<string, i64>),
-            issues: []string{},
+            issues: string[]{},
         },
         seen_hashes: make(set<string>),
     }

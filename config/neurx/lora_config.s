@@ -12,7 +12,7 @@ struct lora_config {
     bool enable_lora
 
     string lora_base_model_name_or_path
-    []string lora_model_paths
+    string[] lora_model_paths
 
     int32 lora_r
     int32 lora_alpha
@@ -46,7 +46,7 @@ func create_default_lora_config() lora_config {
     return lora_config{
         enable_lora: false,
         lora_base_model_name_or_path: "",
-        lora_model_paths: make([]string, 0),
+        lora_model_paths: make(string[], 0),
         lora_r: 8,
         lora_alpha: 16,
         lora_dropout: 0.05,
@@ -115,5 +115,5 @@ func (lora_config* cfg) add_lora_model(string lora_path) {
 }
 
 func (lora_config* cfg) clear_lora_models() {
-    cfg.lora_model_paths = make([]string, 0)
+    cfg.lora_model_paths = make(string[], 0)
 }

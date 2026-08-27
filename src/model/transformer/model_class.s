@@ -131,7 +131,7 @@ func new_foundation_model(string size_label, string position_embedding_type) fou
 
 func foundation_model_forward(
     foundation_model model,
-    []float hidden_states,
+    float[] hidden_states,
     int batch_size,
     int seq_len
 ) transformer_output {

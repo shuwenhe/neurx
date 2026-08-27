@@ -4,7 +4,7 @@ struct backend_info {
     string name
     string path
     string description
-    []string supported_architectures
+    string[] supported_architectures
 }
 
 func get_all_backends() []backend_info {
@@ -105,7 +105,7 @@ func backend_is_available(string name) bool {
     false
 }
 
-func list_backend_paths() []string {
+func list_backend_paths() string[] {
     [
         "neurx.platform.cuda",
         "neurx.platform.rocm",
@@ -119,7 +119,7 @@ func get_backend_description(string name) string {
     info.description
 }
 
-func get_supported_architectures(string backend_name) []string {
+func get_supported_architectures(string backend_name) string[] {
     info = get_backend_by_name(backend_name)
     info.supported_architectures
 }

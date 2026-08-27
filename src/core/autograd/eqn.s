@@ -3,9 +3,9 @@ use neurx.strings
 
 struct ir_eqn {
     string primitive
-    []string params
-    []string inputs
-    []string outputs
+    string[] params
+    string[] inputs
+    string[] outputs
 }
 
 func copy_eqn(ir_eqn eqn) ir_eqn {

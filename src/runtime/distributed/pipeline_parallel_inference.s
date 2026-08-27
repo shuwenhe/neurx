@@ -17,15 +17,15 @@ struct pipeline_parallel_config {
 
 struct pipeline_stage {
     stage_rank          int32
-    layers              []string
+    layers              string[]
     start_layer         int32
     end_layer           int32
 }
 
 struct micro_batch {
     batch_id            int32
-    input_data          []float32
-    output_data         []float32
+    input_data          float[]32
+    output_data         float[]32
     loss                float32
     processed           bool
 }
@@ -48,7 +48,7 @@ struct pipeline_parallel_inference {
     stage               *pipeline_stage
     micro_batches       []*micro_batch
     schedule            *pipeline_schedule
-    recv_buffer         map[int32][]float32
+    recv_buffer         map[int32]float[]32
 }
 
 func NewPipelineParallelInference(config pipeline_parallel_config) *pipeline_parallel_inference {
@@ -61,7 +61,7 @@ func NewPipelineParallelInference(config pipeline_parallel_config) *pipeline_par
     engine := *pipeline_parallel_inference{
         config:        config,
         micro_batches: []*micro_batch{},
-        recv_buffer:   make(map[int32][]float32),
+        recv_buffer:   make(map[int32]float[]32),
     }
     layers_per_stage := config.num_layers / config.pp_size
     start_layer := config.rank * layers_per_stage
@@ -155,9 +155,9 @@ func (pipeline_parallel_inference* pp) generateGPipeSchedule() *pipeline_schedul
 }
 
 func (pipeline_parallel_inference* pp) ForwardPass(
-    input []float32,
+    input float[]32,
     micro_batch_id int32,
-) []float32 {
+) float[]32 {
     output := input
     for layer_id := pp.stage.start_layer; layer_id < pp.stage.end_layer; layer_id++ {
         _ = layer_id
@@ -167,15 +167,15 @@ func (pipeline_parallel_inference* pp) ForwardPass(
 
 func (pipeline_parallel_inference* pp) ReceiveActivation(
     layer_id int32,
-) []float32 {
+) float[]32 {
     if data, exists := pp.recv_buffer[layer_id]; exists {
         return data
     }
-    return []float32{}
+    return float[]32{}
 }
 
 func (pipeline_parallel_inference* pp) SendActivation(
-    activations []float32,
+    activations float[]32,
     layer_id int32,
 ) bool {
     if pp.config.rank < pp.config.pp_size-1 {
@@ -187,12 +187,12 @@ func (pipeline_parallel_inference* pp) SendActivation(
 }
 
 func (pipeline_parallel_inference* pp) ProcessMicroBatches(
-    input [][]float32,
-) [][]float32 {
+    input float[][]32,
+) float[][]32 {
     if len(input) != int(pp.config.num_micro_batches) {
-        return [][]float32{}
+        return float[][]32{}
     }
-    results := make([][]float32, len(input))
+    results := make(float[][]32, len(input))
     for _, op := range pp.schedule.forward_ops {
         if op.stage_rank == pp.config.rank {
             if op.op_type == "forward" {

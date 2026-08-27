@@ -23,8 +23,8 @@ func create_lora_config(
         r_init_std: 0.02,
         use_rslora: false,
         use_dora: false,
-        modules_to_save: []string{},
-        target_modules: []string{"q_proj", "v_proj", "k_proj", "o_proj"},
+        modules_to_save: string[]{},
+        target_modules: string[]{"q_proj", "v_proj", "k_proj", "o_proj"},
     }
 }
 
@@ -36,7 +36,7 @@ func initialize_lora_weights(
     int input_dim = config.input_dim
     int output_dim = config.output_dim
 
-    []float lora_a = make([]float, input_dim * rank)
+    float[] lora_a = make(float[], input_dim * rank)
     int i = 0
     for i < len(lora_a) {
         if config.initialization == "random" {
@@ -49,7 +49,7 @@ func initialize_lora_weights(
         i = i + 1
     }
 
-    []float lora_b = make([]float, rank * output_dim)
+    float[] lora_b = make(float[], rank * output_dim)
     i = 0
     for i < len(lora_b) {
         lora_b[i] = 0.0
@@ -186,7 +186,7 @@ func int_to_str(n int) string {
         return "0"
     }
 
-    []string digits = make([]string, 20)
+    string[] digits = make(string[], 20)
     int idx = 0
     int temp = n
 
@@ -201,7 +201,7 @@ func int_to_str(n int) string {
         idx = idx + 1
     }
 
-    []string result = make([]string, idx)
+    string[] result = make(string[], idx)
     int i = idx - 1
     int j = 0
     for i >= 0 {
@@ -244,7 +244,7 @@ func make_digit_str(d int) string {
     }
 }
 
-func print_array(name string, arr []float, limit int) {
+func print_array(name string, arr float[], limit int) {
     print(name + " [" + int_to_str(len(arr)) + " elements]:")
     int i = 0
     for i < limit && i < len(arr) {
@@ -291,14 +291,14 @@ struct lora_adapter_config {
     float r_init_std
     bool use_rslora
     bool use_dora
-    []string modules_to_save
-    []string target_modules
+    string[] modules_to_save
+    string[] target_modules
 }
 
 struct lora_weights {
     int rank
-    []float lora_a
-    []float lora_b
+    float[] lora_a
+    float[] lora_b
     float scaling
     bool use_dropout
 }
@@ -323,7 +323,7 @@ struct adaptive_batch_config {
 struct lora_request {
     string request_id
     string adapter_id
-    []float input_hidden
+    float[] input_hidden
     int batch_size
     int seq_len
     int hidden_dim
@@ -334,7 +334,7 @@ struct lora_request {
 struct lora_inference_result {
     string request_id
     bool success
-    []float output_hidden
+    float[] output_hidden
     int64 inference_time_ms
 }
 

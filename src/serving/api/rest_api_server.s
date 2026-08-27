@@ -17,7 +17,7 @@ struct api_response {
 
 struct chat_completion_request {
     string model
-    []string messages
+    string[] messages
     int max_tokens
     float temperature
     float top_p
@@ -30,7 +30,7 @@ struct chat_completion_response {
     int created
     string model
     string finish_reason
-    []string choices
+    string[] choices
     int prompt_tokens
     int completion_tokens
     int total_tokens

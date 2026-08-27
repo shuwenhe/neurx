@@ -191,7 +191,7 @@ func generate_text(transformer_model model, string prompt, i32 max_tokens) infer
     println("Prompt: " + prompt)
     start_time := time.now()
     generated := prompt
-    token_map := []string{
+    token_map := string[]{
         "the", "of", "to", "in", "a", "is", "and", "it", "for", "that",
         "you", "as", "this", "be", "was", "on", "are", "by", "from", "at"
     }

@@ -41,7 +41,7 @@ struct model_registry {
 	map[string]*model_registration_info models
 	map[model_type][]*model_registration_info models_by_type
 	map[model_capability][]*model_registration_info models_by_capability
-	map[string][]string model_dependencies
+	map[string]string[] model_dependencies
 	int64 total_registered
 	int64 total_active
 	time.Time created_at
@@ -52,7 +52,7 @@ func create_model_registry() *model_registry {
 		models: make(map[string]*model_registration_info),
 		models_by_type: make(map[model_type][]*model_registration_info),
 		models_by_capability: make(map[model_capability][]*model_registration_info),
-		model_dependencies: make(map[string][]string),
+		model_dependencies: make(map[string]string[]),
 		created_at: time.Now(),
 	}
 }
@@ -288,7 +288,7 @@ func (model_registry* registry) add_dependency(package_id string, dep_id string)
 
 	deps, exists := registry.model_dependencies[package_id]
 	if !exists {
-		deps = []string{}
+		deps = string[]{}
 	}
 
 	for _, dep := range deps {
@@ -300,7 +300,7 @@ func (model_registry* registry) add_dependency(package_id string, dep_id string)
 	registry.model_dependencies[package_id] = append(deps, dep_id)
 }
 
-func (model_registry* registry) get_dependencies(package_id string) []string {
+func (model_registry* registry) get_dependencies(package_id string) string[] {
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 

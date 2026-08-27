@@ -6,7 +6,7 @@ extern "intrinsic" func __sys_accept(int sockfd) int
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __sys_write_string(int fd, string data) int
 extern "intrinsic" func __sys_close(int fd) int
-extern "intrinsic" func __host_read_binary_file_range(string path, int offset, int size) []int
+extern "intrinsic" func __host_read_binary_file_range(string path, int offset, int size) int[]
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern func runtime_env_get(string key, string default_value) string
 extern func runtime_file_exists(string path) bool
@@ -204,7 +204,7 @@ func generate_response_for_prompt(string prompt) string {
     string response = prefix + prompt + ". [GPU-based processing completed successfully]"
     return response
 func handle_client_gpu(int client_fd, string model_path, string device_type) {
-    []int input_buffer = []int{cap: 4096}
+    int[] input_buffer = int[]{cap: 4096}
     string request = __sys_read_string(client_fd, 4096)
     int slice_end = len(request)
     if slice_end > 100 {

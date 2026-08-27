@@ -254,7 +254,7 @@ func new_prime_reward_manager(
 func (prime_reward_manager* manager) compute_reward(
     tensor prompt,
     tensor response,
-    []string steps
+    string[] steps
 ) . (f32, []f32) {
     step_rewards := []
     for step_text in steps {

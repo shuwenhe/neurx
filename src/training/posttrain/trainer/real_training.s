@@ -67,8 +67,8 @@ func run_real_training() int {
     eprintln("[Step 1/6] ✓ Real model weights loaded successfully")
     eprintln("")
     eprintln("[Step 2/6] Creating LoRA adapters")
-    [][]float lora_a_matrices = [][]float{cap: 7}
-    [][]float lora_b_matrices = [][]float{cap: 7}
+    float[][] lora_a_matrices = float[][]{cap: 7}
+    float[][] lora_b_matrices = float[][]{cap: 7}
     int adapter_i = 0
     for adapter_i < 7 {
         lora_a_matrices[adapter_i] = init_gaussian(config.hidden_size * config.lora_rank, 0.02)
@@ -80,12 +80,12 @@ func run_real_training() int {
     eprintln("[Step 3/6] Creating tokenizer and preparing data")
     simple_tokenizer tokenizer = create_simple_tokenizer()
     string sample_text = "What are the symptoms of diabetes The symptoms include increased thirst."
-    []int input_ids = tokenize(tokenizer, sample_text, config.seq_len)
-    []int labels = create_labels(input_ids, config.seq_len)
+    int[] input_ids = tokenize(tokenizer, sample_text, config.seq_len)
+    int[] labels = create_labels(input_ids, config.seq_len)
     eprintln("[Step 3/6] ✓ Tokenizer ready (vocab_size=" + int_to_str(tokenizer.vocab_size) + ")")
     eprintln("")
-    []float loss_history = []float{cap: config.num_epochs * config.steps_per_epoch}
-    []float eval_loss_history = []float{cap: config.num_epochs * config.steps_per_epoch}
+    float[] loss_history = float[]{cap: config.num_epochs * config.steps_per_epoch}
+    float[] eval_loss_history = float[]{cap: config.num_epochs * config.steps_per_epoch}
     eprintln("[Step 4/6] Starting REAL training loop with LM loss")
     int epoch = 0
     int total_steps = 0
@@ -95,7 +95,7 @@ func run_real_training() int {
         for step < config.steps_per_epoch {
             eprintln("  [Step " + int_to_str(step + 1) + "/" + int_to_str(config.steps_per_epoch) + "]")
             eprintln("    Forward pass (real model forward)...")
-            []float logits = model_forward(
+            float[] logits = model_forward(
                 input_ids,
                 weights,
                 config.batch_size,
@@ -119,7 +119,7 @@ func run_real_training() int {
             float ppl = perplexity_from_loss(loss)
             eprintln("    Loss: " + float_to_str(loss, 6) + ", Perplexity: " + float_to_str(ppl, 2))
             eprintln("    Computing gradients for backprop...")
-            []float grad_logits = cross_entropy_gradient(
+            float[] grad_logits = cross_entropy_gradient(
                 logits,
                 labels,
                 config.batch_size,
@@ -136,7 +136,7 @@ func run_real_training() int {
     }
     eprintln("")
     eprintln("[Step 5/6] Saving adapter checkpoints")
-    []string target_modules = []string{cap: 7}
+    string[] target_modules = string[]{cap: 7}
     target_modules[0] = "q_proj"
     target_modules[1] = "k_proj"
     target_modules[2] = "v_proj"
@@ -160,7 +160,7 @@ func run_real_training() int {
     }
     eprintln("")
     eprintln("[Step 6/6] Loading and verifying checkpoints")
-    [][]float loaded_adapters = load_checkpoint(
+    float[][] loaded_adapters = load_checkpoint(
         config.output_dir,
         config.lora_rank,
         config.hidden_size
@@ -189,7 +189,7 @@ func run_real_training() int {
     0
 }
 
-func mean([]float arr) float {
+func mean(float[] arr) float {
     if len(arr) == 0 { return 0.0 }
     float sum = 0.0
     int i = 0

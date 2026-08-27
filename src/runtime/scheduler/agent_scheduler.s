@@ -1,9 +1,9 @@
 package neurx.scheduler.agent_scheduler
 
 struct agent_scheduler_state {
-    []string tasks
-    []int priorities
-    []string statuses
+    string[] tasks
+    int[] priorities
+    string[] statuses
     int count
 }
 
@@ -30,9 +30,9 @@ func get_status(agent_scheduler_state state, int index) string {
 
 func agent_scheduler_enqueue(agent_scheduler_state state, string task, int priority) agent_scheduler_state {
     int n = state.count
-    []string new_tasks = []string{cap: n + 1}
-    []int new_priorities = []int{cap: n + 1}
-    []string new_statuses = []string{cap: n + 1}
+    string[] new_tasks = string[]{cap: n + 1}
+    int[] new_priorities = int[]{cap: n + 1}
+    string[] new_statuses = string[]{cap: n + 1}
     int i = 0
     for i < n {
         new_tasks[i] = state.tasks[i]
@@ -68,7 +68,7 @@ func agent_scheduler_find_task(agent_scheduler_state state, string task) int {
 
 func agent_scheduler_mark_status(agent_scheduler_state state, string task, string status) agent_scheduler_state {
     int idx = agent_scheduler_find_task(state, task)
-    []string new_statuses = []string{cap: state.count}
+    string[] new_statuses = string[]{cap: state.count}
     int i = 0
     for i < state.count {
         new_statuses[i] = get_status(state, i)

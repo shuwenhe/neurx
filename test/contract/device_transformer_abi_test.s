@@ -11,7 +11,7 @@ func require(bool condition, string message) {
 func main() {
     require(tensor_dtype_bytes("bf16") == 2, "bf16 width")
     require(tensor_numel([2, 3, 4]) == 24, "tensor numel")
-    []int strides = tensor_contiguous_strides([2, 3, 4])
+    int[] strides = tensor_contiguous_strides([2, 3, 4])
     require(strides[0] == 12 && strides[1] == 4 && strides[2] == 1, "contiguous strides")
     transformer_device_config config = transformer_device_config {layers: 2, hidden: 8, intermediate: 16, query_heads: 2, kv_heads: 1, head_dim: 4, vocabulary: 32, dtype: "bf16", rms_epsilon: "0.000001", rope_theta: "1000000", attention_bias: true}
     transformer_schedule cuda_prefill = transformer_prefill_schedule("cuda", true, config)

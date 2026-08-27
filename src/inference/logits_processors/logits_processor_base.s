@@ -8,18 +8,18 @@ struct logits_processor_config {
 }
 
 struct logits_processing_result {
-    []float processed_logits
-    []int masked_tokens
+    float[] processed_logits
+    int[] masked_tokens
     bool modification_applied
     string processor_name
 }
 
 func process_logits(
-    []float logits,
+    float[] logits,
     int vocab_size,
     string processor_type,
     map[string]float params
-) []float {
+) float[] {
 
     if processor_type == "temperature" {
         return apply_temperature(logits, params)
@@ -36,14 +36,14 @@ func process_logits(
     return logits
 }
 
-func apply_temperature([]float logits, map[string]float params) []float {
+func apply_temperature(float[] logits, map[string]float params) float[] {
 
     float temperature = params["temperature"]
     if temperature <= 0.0 {
         temperature = 1.0
     }
 
-    []float result = make([]float, len(logits))
+    float[] result = make(float[], len(logits))
     int i = 0
     for i < len(logits) {
         result[i] = logits[i] / temperature
@@ -53,7 +53,7 @@ func apply_temperature([]float logits, map[string]float params) []float {
     return result
 }
 
-func apply_top_k([]float logits, map[string]float params) []float {
+func apply_top_k(float[] logits, map[string]float params) float[] {
 
     int k = int(params["k"])
     if k <= 0 {
@@ -64,10 +64,10 @@ func apply_top_k([]float logits, map[string]float params) []float {
         return logits
     }
 
-    []float top_k_values = get_top_k_values(logits, k)
+    float[] top_k_values = get_top_k_values(logits, k)
     float threshold = top_k_values[k - 1]
 
-    []float result = make([]float, len(logits))
+    float[] result = make(float[], len(logits))
     int i = 0
     for i < len(logits) {
         if logits[i] >= threshold {
@@ -81,9 +81,9 @@ func apply_top_k([]float logits, map[string]float params) []float {
     return result
 }
 
-func get_top_k_values([]float logits, int k) []float {
+func get_top_k_values(float[] logits, int k) float[] {
 
-    []float sorted_logits = make([]float, len(logits))
+    float[] sorted_logits = make(float[], len(logits))
     int i = 0
     for i < len(logits) {
         sorted_logits[i] = logits[i]
@@ -92,7 +92,7 @@ func get_top_k_values([]float logits, int k) []float {
 
     sort_descending(sorted_logits)
 
-    []float result = make([]float, k)
+    float[] result = make(float[], k)
     i = 0
     for i < k && i < len(sorted_logits) {
         result[i] = sorted_logits[i]
@@ -102,7 +102,7 @@ func get_top_k_values([]float logits, int k) []float {
     return result
 }
 
-func sort_descending([]float arr) {
+func sort_descending(float[] arr) {
     int n = len(arr)
     int i = 0
     for i < n {
@@ -120,18 +120,18 @@ func sort_descending([]float arr) {
     }
 }
 
-func apply_top_p([]float logits, map[string]float params) []float {
+func apply_top_p(float[] logits, map[string]float params) float[] {
 
     float p = params["p"]
     if p <= 0.0 || p > 1.0 {
         p = 0.9
     }
 
-    []float probs = softmax(logits)
+    float[] probs = softmax(logits)
 
-    []int sorted_indices = get_sorted_indices_descending(probs)
+    int[] sorted_indices = get_sorted_indices_descending(probs)
 
-    []float result = make([]float, len(logits))
+    float[] result = make(float[], len(logits))
     int i = 0
     for i < len(logits) {
         result[i] = -10000.0
@@ -154,7 +154,7 @@ func apply_top_p([]float logits, map[string]float params) []float {
     return result
 }
 
-func softmax([]float logits) []float {
+func softmax(float[] logits) float[] {
 
     float max_logit = logits[0]
     int i = 1
@@ -165,7 +165,7 @@ func softmax([]float logits) []float {
         i = i + 1
     }
 
-    []float exp_logits = make([]float, len(logits))
+    float[] exp_logits = make(float[], len(logits))
     float sum_exp = 0.0
     i = 0
     for i < len(logits) {
@@ -174,7 +174,7 @@ func softmax([]float logits) []float {
         i = i + 1
     }
 
-    []float probs = make([]float, len(logits))
+    float[] probs = make(float[], len(logits))
     i = 0
     for i < len(logits) {
         if sum_exp > 0.0 {
@@ -188,9 +188,9 @@ func softmax([]float logits) []float {
     return probs
 }
 
-func get_sorted_indices_descending([]float arr) []int {
+func get_sorted_indices_descending(float[] arr) int[] {
 
-    []int indices = make([]int, len(arr))
+    int[] indices = make(int[], len(arr))
     int i = 0
     for i < len(arr) {
         indices[i] = i
@@ -202,7 +202,7 @@ func get_sorted_indices_descending([]float arr) []int {
     return indices
 }
 
-func sort_indices_by_values([]int indices, []float values, bool descending) {
+func sort_indices_by_values(int[] indices, float[] values, bool descending) {
     int n = len(indices)
     int i = 0
     for i < n {
@@ -229,14 +229,14 @@ func sort_indices_by_values([]int indices, []float values, bool descending) {
     }
 }
 
-func apply_min_p([]float logits, map[string]float params) []float {
+func apply_min_p(float[] logits, map[string]float params) float[] {
 
     float min_p = params["min_p"]
     if min_p <= 0.0 {
         min_p = 0.0
     }
 
-    []float probs = softmax(logits)
+    float[] probs = softmax(logits)
 
     float max_prob = probs[0]
     int i = 1
@@ -249,7 +249,7 @@ func apply_min_p([]float logits, map[string]float params) []float {
 
     float threshold = min_p * max_prob
 
-    []float result = make([]float, len(logits))
+    float[] result = make(float[], len(logits))
     i = 0
     for i < len(logits) {
         if probs[i] >= threshold {
@@ -263,14 +263,14 @@ func apply_min_p([]float logits, map[string]float params) []float {
     return result
 }
 
-func apply_repetition_penalty([]float logits, map[string]float params) []float {
+func apply_repetition_penalty(float[] logits, map[string]float params) float[] {
 
     float penalty = params["penalty"]
     if penalty <= 0.0 {
         penalty = 1.0
     }
 
-    []float result = make([]float, len(logits))
+    float[] result = make(float[], len(logits))
     int i = 0
     for i < len(logits) {
         if penalty != 1.0 {
@@ -326,14 +326,14 @@ func (logits_processor_manager* mgr) add_processor(config logits_processor_confi
     mgr.sorting_by_priority = true
 }
 
-func (logits_processor_manager* mgr) process([]float logits) []float {
+func (logits_processor_manager* mgr) process(float[] logits) float[] {
 
     if mgr.sorting_by_priority {
         sort_processors_by_priority(mgr.processors)
         mgr.sorting_by_priority = false
     }
 
-    []float result = logits
+    float[] result = logits
     int i = 0
     for i < len(mgr.processors) {
         if mgr.processors[i].enabled {

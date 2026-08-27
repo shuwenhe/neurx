@@ -5,7 +5,7 @@ use neurx.inference.lora.adapter_manager
 struct lora_request {
     string request_id
     string adapter_id
-    []float input_hidden
+    float[] input_hidden
     int batch_size
     int seq_len
     int hidden_dim
@@ -15,7 +15,7 @@ struct lora_request {
 
 struct lora_inference_result {
     string request_id
-    []float output
+    float[] output
     string adapter_id
     long inference_time_ms
     bool success
@@ -132,7 +132,7 @@ func (lora_request_router* router) process_single_request(req lora_request) lora
     if !router.adapter_mgr.switch_adapter(req.adapter_id) {
         return lora_inference_result{
             request_id: req.request_id,
-            output: []float{},
+            output: float[]{},
             adapter_id: req.adapter_id,
             inference_time_ms: 0,
             success: false,
@@ -145,7 +145,7 @@ func (lora_request_router* router) process_single_request(req lora_request) lora
     if lora.rank <= 0 {
         return lora_inference_result{
             request_id: req.request_id,
-            output: []float{},
+            output: float[]{},
             adapter_id: req.adapter_id,
             inference_time_ms: 0,
             success: false,
@@ -164,7 +164,7 @@ func (lora_request_router* router) process_single_request(req lora_request) lora
     if len(output) != len(req.input_hidden) {
         return lora_inference_result{
             request_id: req.request_id,
-            output: []float{},
+            output: float[]{},
             adapter_id: req.adapter_id,
             inference_time_ms: 0,
             success: false,
@@ -282,7 +282,7 @@ struct load_balance_strategy {
 }
 
 func (lora_request_router* router) get_best_adapter_for_loading(
-    []string candidate_adapters
+    string[] candidate_adapters
 ) string {
 
     if len(candidate_adapters) == 0 {

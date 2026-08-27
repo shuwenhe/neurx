@@ -42,7 +42,7 @@ struct mm_cache_statistics {
 struct multimodal_cache {
 	sync.Mutex mu
 	map[string]*mm_cache_entry entries
-	map[string][]string modality_index
+	map[string]string[] modality_index
 	*mm_cache_statistics stats
 	int64 max_cache_size
 	int64 current_cache_size
@@ -55,7 +55,7 @@ struct multimodal_cache {
 func create_multimodal_cache(max_size int64) *multimodal_cache {
 	cache := *multimodal_cache{
 		entries:          make(map[string]*mm_cache_entry),
-		modality_index:   make(map[string][]string),
+		modality_index:   make(map[string]string[]),
 		stats: *mm_cache_statistics{
 			total_cache_size: 0,
 			num_entries:      0,
@@ -75,11 +75,11 @@ func create_multimodal_cache(max_size int64) *multimodal_cache {
 		created_at:       time.Now(),
 	}
 
-	cache.modality_index["text"] = make([]string, 0)
-	cache.modality_index["image"] = make([]string, 0)
-	cache.modality_index["audio"] = make([]string, 0)
-	cache.modality_index["video"] = make([]string, 0)
-	cache.modality_index["fused"] = make([]string, 0)
+	cache.modality_index["text"] = make(string[], 0)
+	cache.modality_index["image"] = make(string[], 0)
+	cache.modality_index["audio"] = make(string[], 0)
+	cache.modality_index["video"] = make(string[], 0)
+	cache.modality_index["fused"] = make(string[], 0)
 
 	return cache
 }
@@ -283,7 +283,7 @@ func (multimodal_cache* mc) cleanup_expired_entries() int32 {
 	defer mc.mu.Unlock()
 
 	removed_count := int32(0)
-	entries_to_remove := make([]string, 0)
+	entries_to_remove := make(string[], 0)
 
 	for entry_id, entry := range mc.entries {
 		if entry.expires_at.Before(time.Now()) {
@@ -302,7 +302,7 @@ func (multimodal_cache* mc) cleanup_expired_entries() int32 {
 	return removed_count
 }
 
-func (multimodal_cache* mc) get_entries_by_modality(modality modality_type) []string {
+func (multimodal_cache* mc) get_entries_by_modality(modality modality_type) string[] {
 	mc.mu.Lock()
 	defer mc.mu.Unlock()
 
@@ -322,7 +322,7 @@ func (multimodal_cache* mc) get_entries_by_modality(modality modality_type) []st
 
 	ids, exists := mc.modality_index[modality_name]
 	if !exists {
-		return make([]string, 0)
+		return make(string[], 0)
 	}
 
 	return ids
@@ -348,18 +348,18 @@ func (multimodal_cache* mc) clear_cache() {
 	defer mc.mu.Unlock()
 
 	mc.entries = make(map[string]*mm_cache_entry)
-	mc.modality_index = make(map[string][]string)
+	mc.modality_index = make(map[string]string[])
 	mc.current_cache_size = 0
 	mc.stats.num_entries = 0
 	mc.stats.cache_hits = 0
 	mc.stats.cache_misses = 0
 	mc.update_hit_rate()
 
-	mc.modality_index["text"] = make([]string, 0)
-	mc.modality_index["image"] = make([]string, 0)
-	mc.modality_index["audio"] = make([]string, 0)
-	mc.modality_index["video"] = make([]string, 0)
-	mc.modality_index["fused"] = make([]string, 0)
+	mc.modality_index["text"] = make(string[], 0)
+	mc.modality_index["image"] = make(string[], 0)
+	mc.modality_index["audio"] = make(string[], 0)
+	mc.modality_index["video"] = make(string[], 0)
+	mc.modality_index["fused"] = make(string[], 0)
 }
 
 func (multimodal_cache* mc) set_eviction_policy(policy mm_cache_policy) {

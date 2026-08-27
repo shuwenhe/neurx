@@ -14,7 +14,7 @@ struct instruction_example {
     string category
     int difficulty
     float64 quality_score
-    []int tokens
+    int[] tokens
 }
 
 struct instruction_dataset {
@@ -62,7 +62,7 @@ struct sft_metric {
 
 func (sft_trainer* trainer) load_instruction_data(data_path string) {
     fmt.Printf("[SFT] Loading instruction data from %s\n", data_path)
-    categories := []string{"math", "writing", "coding", "qa", "reasoning"}
+    categories := string[]{"math", "writing", "coding", "qa", "reasoning"}
     for i := 0; i < 2000; i++ {
         category := categories[i%len(categories)]
         example := instruction_example{
@@ -86,9 +86,9 @@ func (sft_trainer* trainer) load_instruction_data(data_path string) {
     fmt.Printf("  Total tokens: %d\n", trainer.dataset.total_tokens)
 }
 
-func (sft_trainer* trainer) tokenize(text string) []int {
+func (sft_trainer* trainer) tokenize(text string) int[] {
     words := strings.Split(text, " ")
-    tokens := []int{}
+    tokens := int[]{}
     for i, word := range words {
         token := (len(word) + i*73) % 128000
         tokens = append(tokens, token)
@@ -96,7 +96,7 @@ func (sft_trainer* trainer) tokenize(text string) []int {
     return tokens
 }
 
-func (sft_trainer* trainer) causal_language_modeling_loss(logits [][]float64, []int labels) float64 {
+func (sft_trainer* trainer) causal_language_modeling_loss(logits float[][]64, int[] labels) float64 {
     loss := 0.0
     for i := 0; i < len(labels)-1; i++ {
         target_token := labels[i+1]
@@ -120,9 +120,9 @@ func (sft_trainer* trainer) perplexity(loss float64) float64 {
     return math.Exp(loss)
 }
 
-func (sft_trainer* trainer) create_batch(examples []instruction_example) ([][]int, [][]int) {
-    inputs := [][]int{}
-    labels := [][]int{}
+func (sft_trainer* trainer) create_batch(examples []instruction_example) (int[][], int[][]) {
+    inputs := int[][]{}
+    labels := int[][]{}
     for _, example := range examples {
         if len(example.tokens) < trainer.config.max_seq_length {
             input := example.tokens
@@ -138,7 +138,7 @@ func (sft_trainer* trainer) create_batch(examples []instruction_example) ([][]in
     return inputs, labels
 }
 
-func (sft_trainer* trainer) train_step(batch_inputs [][]int, [][]int batch_labels) float64 {
+func (sft_trainer* trainer) train_step(batch_inputs int[][], int[][] batch_labels) float64 {
     total_loss := 0.0
     for i := 0; i < len(batch_inputs); i++ {
         logits := trainer.model_forward(batch_inputs[i])
@@ -152,13 +152,13 @@ func (sft_trainer* trainer) train_step(batch_inputs [][]int, [][]int batch_label
     return total_loss / float64(len(batch_inputs))
 }
 
-func (sft_trainer* trainer) model_forward(tokens []int) [][]float64 {
+func (sft_trainer* trainer) model_forward(tokens int[]) float[][]64 {
     batch_size := 1
     vocab_size := 128000
     seq_len := len(tokens)
-    logits := make([][]float64, seq_len)
+    logits := make(float[][]64, seq_len)
     for i := 0; i < seq_len; i++ {
-        logits[i] = make([]float64, vocab_size)
+        logits[i] = make(float[]64, vocab_size)
         for j := 0; j < vocab_size; j++ {
             logits[i][j] = math.Sin(float64(tokens[i]) / float64(vocab_size)) *
                           math.Cos(float64(j) / float64(seq_len))
@@ -202,7 +202,7 @@ func (sft_trainer* trainer) get_learning_rate() float64 {
     }
 }
 
-func (sft_trainer* trainer) calculate_bleu(reference []int, []int generated, int n_gram) float64 {
+func (sft_trainer* trainer) calculate_bleu(reference int[], int[] generated, int n_gram) float64 {
     if len(generated) == 0 {
         return 0.0
     }
@@ -231,7 +231,7 @@ func (sft_trainer* trainer) calculate_bleu(reference []int, []int generated, int
     return float64(matches) / float64(total)
 }
 
-func (sft_trainer* trainer) calculate_rouge_l(reference []int, []int generated) float64 {
+func (sft_trainer* trainer) calculate_rouge_l(reference int[], int[] generated) float64 {
     if len(reference) == 0 || len(generated) == 0 {
         return 0.0
     }
@@ -245,10 +245,10 @@ func (sft_trainer* trainer) calculate_rouge_l(reference []int, []int generated) 
     return f1
 }
 
-func (sft_trainer* trainer) compute_lcs(a []int, []int b) int {
-    dp := make([][]int, len(a)+1)
+func (sft_trainer* trainer) compute_lcs(a int[], int[] b) int {
+    dp := make(int[][], len(a)+1)
     for i := range dp {
-        dp[i] = make([]int, len(b)+1)
+        dp[i] = make(int[], len(b)+1)
     }
     for i := 1; i <= len(a); i++ {
         for j := 1; j <= len(b); j++ {

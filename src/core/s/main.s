@@ -5,9 +5,9 @@ use neurx.tensor.tensor
 use neurx.transformer.{transformer_config, transformer_init, transformer_forward}
 use neurx.checkpoint.{checkpoint, new_checkpoint, checkpoint_state_dict, checkpoint_load_state_dict, save_checkpoint, load_checkpoint}
 
-func copy_float([]float data) []float {
+func copy_float(float[] data) float[] {
     int n = len(data)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -16,9 +16,9 @@ func copy_float([]float data) []float {
     out
 }
 
-func copy_int([]int data) []int {
+func copy_int(int[] data) int[] {
     int n = len(data)
-    []int out = []int{cap: n}
+    int[] out = int[]{cap: n}
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -184,8 +184,8 @@ func load_trainer_session_checkpoint(string path) trainer_snapshot {
         config: new_config(0, 0, 0.0, 0.0),
         state: new_state(),
         sample: example {
-            data: []float{cap: 0},
-            shape: []int{cap: 0},
+            data: float[]{cap: 0},
+            shape: int[]{cap: 0},
         },
     }
     trainer_snapshot {
@@ -352,13 +352,13 @@ func apply_rmsprop(trainer_state state, tensor params, tensor grads) trainer_ste
 }
 
 struct example {
-    []float data
-    []int shape
+    float[] data
+    int[] shape
 }
 
-func new_example([]float data, []int shape) example {
+func new_example(float[] data, int[] shape) example {
     int n = len(data)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     for i in 0..n {
         out[i] = data[i]
     }
@@ -370,7 +370,7 @@ func new_example([]float data, []int shape) example {
 
 func process_example(example ex) example {
     int n = len(ex.data)
-    []float processed = []float{cap: n}
+    float[] processed = float[]{cap: n}
     for i in 0..n {
         processed[i] = ex.data[i] * 2.0
     }

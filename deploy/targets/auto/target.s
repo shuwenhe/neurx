@@ -4,7 +4,7 @@ struct auto_target_config {
     int     max_latency_ms
     bool    secure_boot
     string  os_base
-    []string sensors
+    string[] sensors
     bool    v2x_enabled
 }
 

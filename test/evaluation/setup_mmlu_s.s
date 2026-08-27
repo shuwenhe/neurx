@@ -10,8 +10,8 @@ use neurx.runtime.io.{
     runtime_run_command_output,
 }
 
-func all_mmlu_stem_tasks() []string {
-    []string{
+func all_mmlu_stem_tasks() string[] {
+    string[]{
         "abstract_algebra",
         "anatomy",
         "astronomy",
@@ -34,8 +34,8 @@ func all_mmlu_stem_tasks() []string {
     }
 }
 
-func all_mmlu_social_tasks() []string {
-    []string{
+func all_mmlu_social_tasks() string[] {
+    string[]{
         "econometrics",
         "high_school_government_and_politics",
         "high_school_macroeconomics",
@@ -51,8 +51,8 @@ func all_mmlu_social_tasks() []string {
     }
 }
 
-func all_mmlu_humanities_tasks() []string {
-    []string{
+func all_mmlu_humanities_tasks() string[] {
+    string[]{
         "formal_logic",
         "global_facts",
         "human_sexuality",
@@ -64,8 +64,8 @@ func all_mmlu_humanities_tasks() []string {
     }
 }
 
-func all_mmlu_other_tasks() []string {
-    []string{
+func all_mmlu_other_tasks() string[] {
+    string[]{
         "business_ethics",
         "clinical_knowledge",
         "college_medicine",
@@ -138,26 +138,26 @@ func setup_mmlu_data_s(string data_root) mmlu_download_stats {
 }
 
 func download_all_mmlu_tasks(string data_root, mmlu_download_stats stats) mmlu_download_stats {
-    []string all_tasks = []string{}
-    []string stem_tasks = all_mmlu_stem_tasks()
+    string[] all_tasks = string[]{}
+    string[] stem_tasks = all_mmlu_stem_tasks()
     int idx = 0
     for idx < len(stem_tasks) {
         all_tasks = append(all_tasks, stem_tasks[idx])
         idx = idx + 1
     }
-    []string social_tasks = all_mmlu_social_tasks()
+    string[] social_tasks = all_mmlu_social_tasks()
     idx = 0
     for idx < len(social_tasks) {
         all_tasks = append(all_tasks, social_tasks[idx])
         idx = idx + 1
     }
-    []string humanities_tasks = all_mmlu_humanities_tasks()
+    string[] humanities_tasks = all_mmlu_humanities_tasks()
     idx = 0
     for idx < len(humanities_tasks) {
         all_tasks = append(all_tasks, humanities_tasks[idx])
         idx = idx + 1
     }
-    []string other_tasks = all_mmlu_other_tasks()
+    string[] other_tasks = all_mmlu_other_tasks()
     idx = 0
     for idx < len(other_tasks) {
         all_tasks = append(all_tasks, other_tasks[idx])
@@ -199,7 +199,7 @@ func download_file_curl(string url, string output_path) bool {
 }
 
 func get_task_category(string task) string {
-    []string stem_tasks = all_mmlu_stem_tasks()
+    string[] stem_tasks = all_mmlu_stem_tasks()
     int idx = 0
     for idx < len(stem_tasks) {
         if stem_tasks[idx] == task {
@@ -207,7 +207,7 @@ func get_task_category(string task) string {
         }
         idx = idx + 1
     }
-    []string social_tasks = all_mmlu_social_tasks()
+    string[] social_tasks = all_mmlu_social_tasks()
     idx = 0
     for idx < len(social_tasks) {
         if social_tasks[idx] == task {
@@ -215,7 +215,7 @@ func get_task_category(string task) string {
         }
         idx = idx + 1
     }
-    []string humanities_tasks = all_mmlu_humanities_tasks()
+    string[] humanities_tasks = all_mmlu_humanities_tasks()
     idx = 0
     for idx < len(humanities_tasks) {
         if humanities_tasks[idx] == task {

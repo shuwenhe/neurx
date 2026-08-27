@@ -1,8 +1,8 @@
 package neurx.linalg
 
 struct tensor {
-    []float data
-    []int shape
+    float[] data
+    int[] shape
     bool requires_grad
     option[tensor] grad
 }
@@ -16,18 +16,18 @@ func clone(tensor a) tensor {
     }
 }
 
-func copy_int([]int data) []int {
+func copy_int(int[] data) int[] {
     int n = len(data)
-    []int out = []int{cap: n}
+    int[] out = int[]{cap: n}
     for i in 0..n {
         out[i] = data[i]
     }
     out
 }
 
-func copy_float([]float data) []float {
+func copy_float(float[] data) float[] {
     int n = len(data)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -36,21 +36,21 @@ func copy_float([]float data) []float {
     out
 }
 
-func shape1(int n) []int {
-    []int shape = []int{cap: 1}
+func shape1(int n) int[] {
+    int[] shape = int[]{cap: 1}
     shape[0] = n
     shape
 }
 
-func shape2(int m, int n) []int {
-    []int shape = []int{cap: 2}
+func shape2(int m, int n) int[] {
+    int[] shape = int[]{cap: 2}
     shape[0] = m
     shape[1] = n
     shape
 }
 
 func identity(int n) tensor {
-    []float out = []float{cap: n * n}
+    float[] out = float[]{cap: n * n}
     int i = 0
     for i < n {
         out[i * n + i] = 1.0
@@ -68,7 +68,7 @@ func matmul2d(tensor a, tensor b) tensor {
     int rows = a.shape[0]
     int inner = a.shape[1]
     int cols = b.shape[1]
-    []float out = []float{cap: rows * cols}
+    float[] out = float[]{cap: rows * cols}
     int r = 0
     for r < rows {
         int c = 0
@@ -132,7 +132,7 @@ func inv(tensor a) tensor {
         if v == 0.0 {
             v = 1.0
         }
-        []float out = []float{cap: 1}
+        float[] out = float[]{cap: 1}
         out[0] = 1.0 / v
         tensor {
             data: out,
@@ -149,7 +149,7 @@ func inv(tensor a) tensor {
         if det2 == 0.0 {
             det2 = 1.0
         }
-        []float out = []float{cap: 4}
+        float[] out = float[]{cap: 4}
         out[0] = a11 / det2
         out[1] = -a01 / det2
         out[2] = -a10 / det2
@@ -172,7 +172,7 @@ func det(tensor a) tensor {
     } else if len(a.shape) == 2 && a.shape[0] == 2 && a.shape[1] == 2 {
         value = a.data[0] * a.data[3] - a.data[1] * a.data[2]
     }
-    []float out = []float{cap: 1}
+    float[] out = float[]{cap: 1}
     out[0] = value
     tensor {
         data: out,
@@ -208,7 +208,7 @@ func solve(tensor a, tensor b) tensor {
         if denom == 0.0 {
             denom = 1.0
         }
-        []float out = []float{cap: len(b.data)}
+        float[] out = float[]{cap: len(b.data)}
         int i = 0
         for i < len(b.data) {
             out[i] = b.data[i] / denom
@@ -234,7 +234,7 @@ func lstsq(tensor a, tensor b) tensor {
 
 func cross(tensor a, tensor b) tensor {
     if len(a.data) == 3 && len(b.data) == 3 {
-        []float out = []float{cap: 3}
+        float[] out = float[]{cap: 3}
         out[0] = a.data[1] * b.data[2] - a.data[2] * b.data[1]
         out[1] = a.data[2] * b.data[0] - a.data[0] * b.data[2]
         out[2] = a.data[0] * b.data[1] - a.data[1] * b.data[0]
@@ -252,7 +252,7 @@ func cross(tensor a, tensor b) tensor {
 func outer(tensor a, tensor b) tensor {
     int n = len(a.data)
     int m = len(b.data)
-    []float out = []float{cap: n * m}
+    float[] out = float[]{cap: n * m}
     int i = 0
     for i < n {
         int j = 0
@@ -278,7 +278,7 @@ func inner(tensor a, tensor b) tensor {
         acc = acc + a.data[i] * b.data[i]
         i = i + 1
     }
-    []float out = []float{cap: 1}
+    float[] out = float[]{cap: 1}
     out[0] = acc
     tensor {
         data: out,

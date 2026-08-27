@@ -5,8 +5,8 @@ use neurx::lib::tensor
 use neurx::lib::safetensors
 
 struct tensor_2 {
-    []float data
-    []int shape
+    float[] data
+    int[] shape
     int dtype
 }
 
@@ -36,7 +36,7 @@ struct training_state {
     int total_steps
     float total_loss
     float best_loss
-    []float loss_history
+    float[] loss_history
 }
 
 func load_model_config(string model_path) training_config {

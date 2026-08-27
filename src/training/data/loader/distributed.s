@@ -6,7 +6,7 @@ struct data_shard {
     string shard_id
     int shard_index
     int total_shards
-    []string file_paths
+    string[] file_paths
     int num_samples
     int byte_size
 }
@@ -32,7 +32,7 @@ struct distributed_dataloader {
 }
 
 func new_training_data_shard(string dataset_path) data_shard {
-    []string paths = []string{cap: 1}
+    string[] paths = string[]{cap: 1}
     paths = append(paths, dataset_path)
     data_shard {
         shard_id: dataset_path,
@@ -75,7 +75,7 @@ func create_data_shards(string dataset_dir, int num_ranks, int rank_id) []data_s
         shards
     } else {
         []data_shard shards = []data_shard{cap: 100}
-        []string shard_files = list_data_shard_files(dataset_dir)
+        string[] shard_files = list_data_shard_files(dataset_dir)
         if len(shard_files) == 0 {
             data_shard shard = new_training_data_shard(dataset_dir + "/training_data.jsonl")
             shard.shard_index = 0
@@ -86,7 +86,7 @@ func create_data_shards(string dataset_dir, int num_ranks, int rank_id) []data_s
             int i = 0
             for i < len(shard_files) {
                 data_shard shard
-                []string paths = []string{cap: 1}
+                string[] paths = string[]{cap: 1}
                 paths = append(paths, shard_files[i])
                 shard.shard_id = shard_files[i]
                 shard.shard_index = i
@@ -102,8 +102,8 @@ func create_data_shards(string dataset_dir, int num_ranks, int rank_id) []data_s
     }
 }
 
-func list_data_shard_files(string dataset_dir) []string {
-    []string files = []string{cap: 100}
+func list_data_shard_files(string dataset_dir) string[] {
+    string[] files = string[]{cap: 100}
     string gz_scan_cmd = "find " + dataset_dir + " -maxdepth 1 -name '*.jsonl.gz' | sort"
     string raw_gz = runtime_run_command_output(gz_scan_cmd)
     int i = 0
@@ -146,16 +146,16 @@ func list_data_shard_files(string dataset_dir) []string {
     files
 }
 
-func next_batch_prefetch(distributed_dataloader loader) []int {
-    []int{cap: 2048}
+func next_batch_prefetch(distributed_dataloader loader) int[] {
+    int[]{cap: 2048}
 }
 
 func deduplicate_samples(distributed_dataloader loader) distributed_dataloader {
     loader
 }
 
-func filter_by_quality(distributed_dataloader loader, []string quality_scores) []int {
-    []int{cap: 1000}
+func filter_by_quality(distributed_dataloader loader, string[] quality_scores) int[] {
+    int[]{cap: 1000}
 }
 
 func shuffle_global(distributed_dataloader loader) distributed_dataloader {

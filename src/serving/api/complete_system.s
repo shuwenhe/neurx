@@ -19,8 +19,8 @@ struct system_status {
         bool alignment_system
         bool inference_optimization
     } modules
-    []string warnings
-    []string errors
+    string[] warnings
+    string[] errors
 }
 
 func check_system_status() {

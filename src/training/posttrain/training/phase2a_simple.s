@@ -176,8 +176,8 @@ func run_phase2a_training(training_config config) training_state {
             if loss_value < 0.5 { loss_value = 0.5 }
             state.current_loss = loss_value
             state.total_tokens_seen = state.total_tokens_seen + 512
-            []float layer1_grad
-            []float layer2_grad
+            float[] layer1_grad
+            float[] layer2_grad
             int grad_idx = 0
             for grad_idx < 10 {
                 float grad_val = 0.5 + ((state.current_step + grad_idx) as float) * 0.01
@@ -188,7 +188,7 @@ func run_phase2a_training(training_config config) training_state {
                 layer2_grad = append(layer2_grad, grad_val * 0.8)
                 grad_idx = grad_idx + 1
             }
-            [][]float simulated_grads
+            float[][] simulated_grads
             simulated_grads = append(simulated_grads, layer1_grad)
             simulated_grads = append(simulated_grads, layer2_grad)
             bool grads_healthy = check_grads_healthy(simulated_grads)

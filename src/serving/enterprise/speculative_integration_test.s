@@ -16,7 +16,7 @@ func test_speculative_system_initialization() bool {
 func test_speculative_single_inference() bool {
     cfg := speculative_inference.new_speculative_inference_config()
     sys := speculative_inference.init_speculative_inference_system(cfg)
-    input_ids := []int{1, 2, 3, 4, 5}
+    input_ids := int[]{1, 2, 3, 4, 5}
     updated_sys, output := speculative_inference.speculative_inference_single(sys, input_ids, 10)
     updated_sys.is_initialized && output.len > 0
 }
@@ -24,10 +24,10 @@ func test_speculative_single_inference() bool {
 func test_speculative_batch_inference() bool {
     cfg := speculative_inference.new_speculative_inference_config()
     sys := speculative_inference.init_speculative_inference_system(cfg)
-    batch_inputs := [][]int{
-        []int{1, 2, 3},
-        []int{4, 5, 6},
-        []int{7, 8, 9},
+    batch_inputs := int[][]{
+        int[]{1, 2, 3},
+        int[]{4, 5, 6},
+        int[]{7, 8, 9},
     }
     updated_sys, outputs := speculative_inference.speculative_inference_batch(sys, batch_inputs, 5)
     outputs.len == 3
@@ -44,7 +44,7 @@ func test_adaptive_speculative_params() bool {
 func test_speculative_statistics_tracking() bool {
     cfg := speculative_inference.new_speculative_inference_config()
     sys := speculative_inference.init_speculative_inference_system(cfg)
-    input_ids := []int{1, 2, 3}
+    input_ids := int[]{1, 2, 3}
     updated_sys, _ := speculative_inference.speculative_inference_single(sys, input_ids, 5)
     stats_str := speculative_inference.get_speculative_performance_stats(updated_sys)
     stats_str.len > 0
@@ -76,7 +76,7 @@ func test_enhanced_single_inference() bool {
 func test_enhanced_batch_inference() bool {
     cfg := inference_system_enhanced.new_inference_config()
     sys := inference_system_enhanced.init_enhanced_inference_system(cfg)
-    prompts := []string{"Hello", "World", "Test"}
+    prompts := string[]{"Hello", "World", "Test"}
     updated_sys, outputs := inference_system_enhanced.inference_enhanced_batch(
         sys,
         prompts,
@@ -134,7 +134,7 @@ func test_config_update() bool {
 func run_all_speculative_integration_tests() {
     tests_passed := 0
     tests_total := 0
-    tests := []bool{
+    tests := bool[]{
         test_speculative_inference_config_creation(),
         test_speculative_system_initialization(),
         test_speculative_single_inference(),

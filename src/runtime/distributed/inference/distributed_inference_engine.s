@@ -18,23 +18,23 @@ struct distributed_inference_config {
 
 struct distributed_inference_state {
     distributed_inference_config config
-    [][]float model_weights
-    []int layer_mapping
+    float[][] model_weights
+    int[] layer_mapping
     int local_num_layers
-    [][]float kv_cache_local
+    float[][] kv_cache_local
     int kv_cache_head_size
 }
 
 struct inference_request {
-    []int input_ids
+    int[] input_ids
     int seq_len
     string request_id
     int batch_idx
 }
 
 struct inference_response {
-    []int output_ids
-    []float logits
+    int[] output_ids
+    float[] logits
     int generated_len
     string request_id
 }
@@ -90,20 +90,20 @@ func init_distributed_inference_state(
         int layers_per_rank = cfg.num_layers / cfg.pipeline_parallel_degree
         state.local_num_layers = layers_per_rank
     }
-    state.model_weights = [][]float{}
-    state.layer_mapping = []int{}
+    state.model_weights = float[][]{}
+    state.layer_mapping = int[]{}
     state.kv_cache_head_size = cfg.hidden_dim / 8
     state
 }
 
 func forward_tensor_parallel(
     distributed_inference_state state,
-    []float input
-) []float {
+    float[] input
+) float[] {
     int local_hidden_dim = state.config.hidden_dim
     int rows = len(input)
     int cols = local_hidden_dim
-    []float local_output = []float{}
+    float[] local_output = float[]{}
     for i = 0; i < rows; i = i + 1 {
         float sum = 0.0
         for j = 0; j < cols; j = j + 1 {
@@ -118,14 +118,14 @@ func forward_tensor_parallel(
 
 func forward_pipeline_parallel(
     distributed_inference_state state,
-    []float input
-) []float {
+    float[] input
+) float[] {
     int rank = state.config.rank
     int num_layers = state.local_num_layers
     int hidden_dim = state.config.hidden_dim
-    []float hidden = input
+    float[] hidden = input
     for layer_idx = 0; layer_idx < num_layers; layer_idx = layer_idx + 1 {
-        []float output = []float{}
+        float[] output = float[]{}
         for i = 0; i < len(hidden); i = i + 1 {
             float x = hidden[i]
             float activated = x * 0.9
@@ -140,10 +140,10 @@ func forward_pipeline_parallel(
 
 func forward_hybrid_parallel(
     distributed_inference_state state,
-    []float input
-) []float {
-    []float tp_output = forward_tensor_parallel(state, input)
-    []float pp_output = forward_pipeline_parallel(state, tp_output)
+    float[] input
+) float[] {
+    float[] tp_output = forward_tensor_parallel(state, input)
+    float[] pp_output = forward_pipeline_parallel(state, tp_output)
     pp_output
 }
 
@@ -153,11 +153,11 @@ func forward_inference(
 ) inference_response {
     inference_response resp
     resp.request_id = req.request_id
-    []float input_embedding = []float{}
+    float[] input_embedding = float[]{}
     for i = 0; i < req.seq_len; i = i + 1 {
         input_embedding.append(0.5)
     }
-    []float hidden_state = []float{}
+    float[] hidden_state = float[]{}
     if state.config.sharding_strategy == "tensor_parallel" {
         hidden_state = forward_tensor_parallel(state, input_embedding)
     }
@@ -168,7 +168,7 @@ func forward_inference(
         hidden_state = forward_hybrid_parallel(state, input_embedding)
     }
     resp.logits = hidden_state
-    resp.output_ids = []int{}
+    resp.output_ids = int[]{}
     resp.generated_len = 1
     resp
 }
@@ -176,8 +176,8 @@ func forward_inference(
 func update_kv_cache(
     distributed_inference_state state,
     int layer_idx,
-    []float key,
-    []float value
+    float[] key,
+    float[] value
 ) {
     if layer_idx >= state.local_num_layers {
         return
@@ -225,7 +225,7 @@ func main() {
         cfg.pipeline_parallel_degree)
     distributed_inference_state state = init_distributed_inference_state(cfg)
     inference_request req
-    req.input_ids = []int{1, 2, 3, 4}
+    req.input_ids = int[]{1, 2, 3, 4}
     req.seq_len = 4
     req.request_id = "req-001"
     req.batch_idx = 0

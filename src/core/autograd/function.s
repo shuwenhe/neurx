@@ -9,15 +9,15 @@ struct function_record {
     bool apply_enabled
     bool linearized
     int arity
-    []string params
-    []string tags
+    string[] params
+    string[] tags
 }
 
 struct transform_chain {
-    []string steps
-    []string params
-    []string inputs
-    []string outputs
+    string[] steps
+    string[] params
+    string[] inputs
+    string[] outputs
     []jaxpr_eqn eqns
     bool ready
     bool linearized
@@ -37,7 +37,7 @@ func copy_eqns([]jaxpr_eqn values) []jaxpr_eqn {
     neurx.autograd.eqn.copy_eqns(values)
 }
 
-func join_strings([]string values) string {
+func join_strings(string[] values) string {
     string out = ""
     int i = 0
     for i < len(values) {
@@ -199,7 +199,7 @@ func backward_rule_mean(tensor a, tensor upstream) backward_rule {
     }
 }
 
-func copy_transform_steps([]string steps) []string {
+func copy_transform_steps(string[] steps) string[] {
     copy_strings(steps)
 }
 
@@ -236,7 +236,7 @@ func transform_chain_is_linearized(transform_chain chain) bool {
 }
 
 func transform_chain_add_step(transform_chain chain, string step) transform_chain {
-    []string steps = copy_transform_steps(chain.steps)
+    string[] steps = copy_transform_steps(chain.steps)
     steps = append(steps, step)
     transform_chain {
         steps: steps,
@@ -250,8 +250,8 @@ func transform_chain_add_step(transform_chain chain, string step) transform_chai
 }
 
 func transform_chain_add_step_with_param(transform_chain chain, string step, string param) transform_chain {
-    []string steps = copy_transform_steps(chain.steps)
-    []string params = copy_transform_steps(chain.params)
+    string[] steps = copy_transform_steps(chain.steps)
+    string[] params = copy_transform_steps(chain.params)
     steps = append(steps, step)
     params = append(params, param)
     transform_chain {
@@ -402,7 +402,7 @@ func function_has_param(function_record f, string param) bool {
 }
 
 func add_function_tag(function_record f, string tag) function_record {
-    []string tags = copy_strings(f.tags)
+    string[] tags = copy_strings(f.tags)
     tags = append(tags, tag)
     function_record {
         name: f.name,
@@ -417,7 +417,7 @@ func add_function_tag(function_record f, string tag) function_record {
 }
 
 func add_function_param(function_record f, string param) function_record {
-    []string params = copy_strings(f.params)
+    string[] params = copy_strings(f.params)
     params = append(params, param)
     function_record {
         name: f.name,
@@ -538,10 +538,10 @@ func function_transform_chain(function_record f) transform_chain {
     []jaxpr_eqn eqns = []jaxpr_eqn{cap: len(f.tags)}
     int i = 0
     for i < len(f.tags) {
-        []string params = []string{cap: 0}
+        string[] params = string[]{cap: 0}
         string param_val = get_function_param(f, i)
         if i < len(f.params) && param_val != "" {
-            params = []string{cap: 1}
+            params = string[]{cap: 1}
             params[0] = param_val
         }
         string tag_val = get_function_tag(f, i)
@@ -565,11 +565,11 @@ func function_transform_chain(function_record f) transform_chain {
 }
 
 func transform_chain_to_function(transform_chain chain, string name, int arity) function_record {
-    []string params = copy_strings(chain.params)
-    []string tags = copy_strings(chain.steps)
+    string[] params = copy_strings(chain.params)
+    string[] tags = copy_strings(chain.steps)
     if len(chain.eqns) > 0 {
-        params = []string{cap: len(chain.eqns)}
-        tags = []string{cap: len(chain.eqns)}
+        params = string[]{cap: len(chain.eqns)}
+        tags = string[]{cap: len(chain.eqns)}
         int i = 0
         for i < len(chain.eqns) {
             tags[i] = chain.eqns[i].primitive

@@ -188,8 +188,8 @@ struct device_tensor {
     int device_id
     string backend
     string dtype
-    []int shape
-    []int strides
+    int[] shape
+    int[] strides
     int offset_bytes
     int storage_bytes
     bool owns_storage
@@ -204,7 +204,7 @@ func tensor_dtype_bytes(string dtype) int {
     0
 }
 
-func tensor_numel([]int shape) int {
+func tensor_numel(int[] shape) int {
     if len(shape) == 0 { return 0 }
     int elements = 1
     int i = 0
@@ -216,8 +216,8 @@ func tensor_numel([]int shape) int {
     elements
 }
 
-func tensor_contiguous_strides([]int shape) []int {
-    []int strides = []int{cap: len(shape)}
+func tensor_contiguous_strides(int[] shape) int[] {
+    int[] strides = int[]{cap: len(shape)}
     int stride = 1
     int i = len(shape) - 1
     for i >= 0 {
@@ -232,7 +232,7 @@ func tensor_invalid(string backend, string dtype, string error_message) device_t
     device_tensor {buffer: 0, context: 0, device_id: 0, backend: backend, dtype: dtype, shape: [], strides: [], offset_bytes: 0, storage_bytes: 0, owns_storage: false, valid: false, error_message: error_message}
 }
 
-func tensor_empty(device_context context, []int shape, string dtype) device_tensor {
+func tensor_empty(device_context context, int[] shape, string dtype) device_tensor {
     if !context.valid { return tensor_invalid(context.backend, dtype, "invalid_context") }
     int element_bytes = tensor_dtype_bytes(dtype)
     int elements = tensor_numel(shape)
@@ -243,7 +243,7 @@ func tensor_empty(device_context context, []int shape, string dtype) device_tens
     device_tensor {buffer: buffer, context: context.handle, device_id: context.device_id, backend: context.backend, dtype: dtype, shape: shape, strides: tensor_contiguous_strides(shape), offset_bytes: 0, storage_bytes: bytes, owns_storage: true, valid: true, error_message: ""}
 }
 
-func tensor_view(device_tensor source, []int shape, int offset_elements) device_tensor {
+func tensor_view(device_tensor source, int[] shape, int offset_elements) device_tensor {
     int bytes = tensor_dtype_bytes(source.dtype)
     int view_bytes = tensor_numel(shape) * bytes
     int offset = source.offset_bytes + offset_elements * bytes
@@ -441,7 +441,7 @@ struct transformer_device_config {
 struct transformer_schedule {
     string backend
     []lowered_op operations
-    []string vendor_operations
+    string[] vendor_operations
     int layer_operations
     bool valid
     string error_message
@@ -453,7 +453,7 @@ func transformer_schedule_build(string backend, bool available, transformer_devi
         return transformer_schedule {backend: backend, operations: [], vendor_operations: [], layer_operations: 0, valid: false, error_message: "invalid_transformer_config"}
     }
     []lowered_op operations = []lowered_op{cap: config.layers * 14 + 3}
-    []string vendor_operations = []string{cap: config.layers * 14 + 3}
+    string[] vendor_operations = string[]{cap: config.layers * 14 + 3}
     int operation_index = 0
     operations[operation_index] = lower_device_op(backend, available, op_embedding(config.dtype, config.hidden)); operation_index = operation_index + 1
     int layer = 0
@@ -517,7 +517,7 @@ func transformer_vendor_at(transformer_schedule schedule, int index) string {
 struct transformer_execution_plan {
     int context_handle
     int stream_handle
-    []int operation_handle
+    int[] operation_handle
     int operation_count
     string backend
     bool valid
@@ -535,7 +535,7 @@ func transformer_plan_invalid(string backend, string message) transformer_execut
     transformer_execution_plan {context_handle: 0, stream_handle: 0, operation_handle: [], operation_count: 0, backend: backend, valid: false, error_message: message}
 }
 
-func transformer_descriptor_plan_compile(device_context context, string backend, []string descriptor, int stream_priority) transformer_execution_plan {
+func transformer_descriptor_plan_compile(device_context context, string backend, string[] descriptor, int stream_priority) transformer_execution_plan {
     if !context.valid { return transformer_plan_invalid(backend, "invalid_device_context") }
     if len(descriptor) <= 0 { return transformer_plan_invalid(backend, "empty_descriptor_plan") }
     if context.backend != backend && !(context.backend == "cann" && backend == "ascend") {
@@ -544,7 +544,7 @@ func transformer_descriptor_plan_compile(device_context context, string backend,
     int stream_handle = device_stream_open_handle(context.handle, stream_priority)
     if stream_handle <= 0 { return transformer_plan_invalid(backend, "stream_create_failed") }
     int count = len(descriptor)
-    []int compiled = []int{cap: count}
+    int[] compiled = int[]{cap: count}
     int index = 0
     for index < count {
         if len(descriptor[index]) == 0 {
@@ -566,11 +566,11 @@ func transformer_descriptor_plan_compile(device_context context, string backend,
     transformer_execution_plan {context_handle: context.handle, stream_handle: stream_handle, operation_handle: compiled, operation_count: count, backend: backend, valid: true, error_message: ""}
 }
 
-func transformer_plan_binding_valid(transformer_execution_plan plan, []string binding) bool {
+func transformer_plan_binding_valid(transformer_execution_plan plan, string[] binding) bool {
     plan.valid && plan.operation_count > 0 && len(binding) == plan.operation_count
 }
 
-func transformer_plan_execute(transformer_execution_plan plan, []string binding, bool synchronize) transformer_execution_result {
+func transformer_plan_execute(transformer_execution_plan plan, string[] binding, bool synchronize) transformer_execution_result {
     if !plan.valid { return transformer_execution_result {success: false, completed_operations: 0, failed_operation: -1, error_message: plan.error_message} }
     if len(binding) != plan.operation_count {
         return transformer_execution_result {success: false, completed_operations: 0, failed_operation: -1, error_message: "binding_count_mismatch"}
@@ -623,10 +623,10 @@ func main() {
         tensor_release(output); tensor_release(right); tensor_release(left); device_close(context); return
     }
     lowered_op lowered = lower_device_op("cuda", true, op_residual_add("bf16", 1024))
-    []string descriptor = []string{cap: 1}
+    string[] descriptor = string[]{cap: 1}
     descriptor[0] = lowered.descriptor
     transformer_execution_plan plan = transformer_descriptor_plan_compile(context, "cuda", descriptor, 0)
-    []string binding = []string{cap: 1}
+    string[] binding = string[]{cap: 1}
     binding[0] = residual_add_binding(left.buffer, right.buffer, output.buffer, 1024)
     transformer_execution_result result = transformer_plan_execute(plan, binding, true)
     if result.success { print("PASS: S Transformer Executor launched CUDA BF16 Kernel\n") }

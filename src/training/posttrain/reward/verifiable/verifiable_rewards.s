@@ -18,7 +18,7 @@ struct verification_result {
     bool correct
     float reward
     string error_message
-    []string intermediate_steps
+    string[] intermediate_steps
 }
 
 func verify_math_solution(
@@ -35,7 +35,7 @@ func verify_math_solution(
     if is_correct {
         reward = 1.0
     }
-    []string steps = extract_reasoning_steps(cleaned_solution)
+    string[] steps = extract_reasoning_steps(cleaned_solution)
     float step_reward = evaluate_reasoning_steps(steps, problem)
     float total_reward = 0.5 * reward + 0.5 * step_reward
     verification_result {
@@ -60,7 +60,7 @@ func verify_code_solution(
             correct: false,
             reward: 0.0,
             error_message: error,
-            intermediate_steps: []string{},
+            intermediate_steps: string[]{},
         }
     }
     bool correct = output == problem.expected_output
@@ -74,7 +74,7 @@ func verify_code_solution(
         correct: correct,
         reward: reward,
         error_message: "",
-        intermediate_steps: []string{},
+        intermediate_steps: string[]{},
     }
 }
 
@@ -128,9 +128,9 @@ func normalize_math_expression(string expr) string {
     result
 }
 
-func extract_reasoning_steps(string solution) []string {
-    []string steps = []string{}
-    []string lines = split(solution, "\n")
+func extract_reasoning_steps(string solution) string[] {
+    string[] steps = string[]{}
+    string[] lines = split(solution, "\n")
     int i = 0
     for i < lines.len {
         string line = trim_whitespace(lines[i])
@@ -143,7 +143,7 @@ func extract_reasoning_steps(string solution) []string {
 }
 
 func evaluate_reasoning_steps(
-    []string steps,
+    string[] steps,
     math_problem problem
 ) float {
     if steps.len == 0 {
@@ -210,7 +210,7 @@ func to_lower(string s) string { s }
 
 func replace_all(string s, string old, string new) string { s }
 
-func split(string s, string delim) []string { []string{} }
+func split(string s, string delim) string[] { string[]{} }
 
 func len(string s) int { 0 }
 

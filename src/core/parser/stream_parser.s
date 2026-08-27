@@ -204,7 +204,7 @@ func finalize_stream(IncrementalParseState state) ParseResult {
     return result
 }
 
-func extract_lines_from_stream(IncrementalParseState state, int max_lines) []string {
+func extract_lines_from_stream(IncrementalParseState state, int max_lines) string[] {
     partial := get_partial_output(state)
     lines := split_lines(partial)
 
@@ -212,7 +212,7 @@ func extract_lines_from_stream(IncrementalParseState state, int max_lines) []str
         return lines
     }
 
-    result := []string{}
+    result := string[]{}
     i := 0
     for i < max_lines && i < len(lines) {
         result = append(result, lines[i])

@@ -51,14 +51,14 @@ func demo_format_detection() {
     print("Example 2: Automatic Format Detection\n")
     print("="*60 + "\n\n")
 
-    test_cases := []string{
+    test_cases := string[]{
         "{\"key\": \"value\"}",
         "<root><name>Alice</name></root>",
         "# Hello World\n\nThis is **bold** text",
         "name: Alice\nage: 30",
     }
 
-    format_names := []string{"JSON", "XML", "Markdown", "YAML"}
+    format_names := string[]{"JSON", "XML", "Markdown", "YAML"}
     i := 0
 
     for i < len(test_cases) {
@@ -104,7 +104,7 @@ func demo_stream_parsing() {
 
     parser := create_default_parser()
 
-    chunks := []string{
+    chunks := string[]{
         "{\"name\": ",
         "\"Alice\", ",
         "\"age\": 30, ",
@@ -136,7 +136,7 @@ func demo_batch_parsing() {
 
     parser := create_default_parser()
 
-    outputs := []string{
+    outputs := string[]{
         "{\"id\": 1, \"status\": \"success\"}",
         "<response><code>200</code></response>",
         "# Result\n\nProcessing completed",

@@ -3,7 +3,7 @@ package neurx.tool.safetensors
 struct tensor_metadata {
     string name
     string dtype
-    []int shape
+    int[] shape
     int data_offset
     int data_length
 }
@@ -32,7 +32,7 @@ func dtype_element_size(string dtype) int {
     0
 }
 
-func tensor_element_count([]int shape) int {
+func tensor_element_count(int[] shape) int {
     int count = 1
     int i = 0
     for i < len(shape) {
@@ -42,7 +42,7 @@ func tensor_element_count([]int shape) int {
     count
 }
 
-func tensor_byte_size(string dtype, []int shape) int {
+func tensor_byte_size(string dtype, int[] shape) int {
     int elem_size = dtype_element_size(dtype)
     if elem_size == 0 {
         return 0
@@ -78,16 +78,16 @@ func load_safetensors_header(string filepath) safetensors_archive {
 struct tensor_data {
     string name
     string dtype
-    []int shape
-    []float as_f32
+    int[] shape
+    float[] as_f32
 }
 
 func read_tensor(safetensors_archive archive, string tensor_name) tensor_data {
     tensor_data {
         name: tensor_name,
         dtype: "",
-        shape: []int{},
-        as_f32: []float{},
+        shape: int[]{},
+        as_f32: float[]{},
     }
 }
 

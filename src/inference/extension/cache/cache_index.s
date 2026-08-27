@@ -1,6 +1,6 @@
 struct cache_index_entry {
     string prefix_hash
-    []int block_ids
+    int[] block_ids
     int num_blocks
     int64 created_time
     int64 last_access_time
@@ -25,7 +25,7 @@ func create_cache_index(int max_entries_count) cache_index {
     return idx
 }
 
-func compute_prefix_hash([]int tokens, int max_tokens) string {
+func compute_prefix_hash(int[] tokens, int max_tokens) string {
     if len(tokens) == 0 {
         return "empty"
     }
@@ -56,11 +56,11 @@ func cache_index_find_entry(cache_index idx, string prefix_hash) int {
     return -1
 }
 
-func cache_index_get_blocks(cache_index idx, string prefix_hash) []int {
+func cache_index_get_blocks(cache_index idx, string prefix_hash) int[] {
     int entry_idx = cache_index_find_entry(idx, prefix_hash)
     if entry_idx == -1 {
         print("[CacheIndex] Miss for prefix " + prefix_hash + "\n")
-        return []int{cap: 0}
+        return int[]{cap: 0}
     }
     
     cache_index_entry entry = idx.entries[entry_idx]
@@ -72,7 +72,7 @@ func cache_index_get_blocks(cache_index idx, string prefix_hash) []int {
     return entry.block_ids
 }
 
-func cache_index_store_blocks(cache_index idx, string prefix_hash, []int block_ids) int {
+func cache_index_store_blocks(cache_index idx, string prefix_hash, int[] block_ids) int {
     if idx.num_entries >= idx.max_entries {
         print("[CacheIndex] Index full, cannot store prefix " + prefix_hash + "\n")
         return 0

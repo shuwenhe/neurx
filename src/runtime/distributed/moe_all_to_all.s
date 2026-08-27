@@ -4,8 +4,8 @@ use neurx.runtime.io.{io_println}
 use neurx.distributed.collective.{collective_state, alltoall_async}
 
 struct routing_decision {
-    []int expert_indices
-    []float expert_weights
+    int[] expert_indices
+    float[] expert_weights
     int num_experts_selected
 }
 
@@ -23,7 +23,7 @@ struct moe_routing_state {
     int num_tokens
     int batch_size
     int hidden_dim
-    []float router_logits
+    float[] router_logits
     []routing_decision routing_decisions
     []expert_capacity_stats expert_stats
     long tokens_sent_per_expert
@@ -32,13 +32,13 @@ struct moe_routing_state {
 }
 
 func compute_router_logits(
-    []float hidden_states,
-    []float router_weight,
+    float[] hidden_states,
+    float[] router_weight,
     int num_tokens,
     int hidden_dim,
     int num_experts
-) []float {
-    []float logits = make([]float, num_tokens * num_experts)
+) float[] {
+    float[] logits = make(float[], num_tokens * num_experts)
     int t = 0
     for t < num_tokens {
         int e = 0
@@ -59,7 +59,7 @@ func compute_router_logits(
 }
 
 func select_top_k_experts(
-    []float logits,
+    float[] logits,
     int num_tokens,
     int num_experts,
     int top_k,
@@ -68,8 +68,8 @@ func select_top_k_experts(
     []routing_decision decisions = make([]routing_decision, num_tokens)
     int t = 0
     for t < num_tokens {
-        []int indices = make([]int, num_experts)
-        []float values = make([]float, num_experts)
+        int[] indices = make(int[], num_experts)
+        float[] values = make(float[], num_experts)
         int e = 0
         for e < num_experts {
             indices[e] = e
@@ -96,8 +96,8 @@ func select_top_k_experts(
             values[best_idx] = tmp_val
             k = k + 1
         }
-        []int selected_experts = make([]int, top_k)
-        []float weights = make([]float, top_k)
+        int[] selected_experts = make(int[], top_k)
+        float[] weights = make(float[], top_k)
         float max_logit = values[0]
         float sum_exp = 0.0
         int j = 0
@@ -127,14 +127,14 @@ func select_top_k_experts(
 
 func create_send_buffers(
     moe_routing_state state,
-    []float hidden_states,
+    float[] hidden_states,
     int ep_rank,
     int ep_size
-) [][]float {
-    [][]float send_buffers = make([][]float, ep_size)
+) float[][] {
+    float[][] send_buffers = make(float[][], ep_size)
     int i = 0
     for i < ep_size {
-        send_buffers[i] = make([]float, 0)
+        send_buffers[i] = make(float[], 0)
         i = i + 1
     }
     int t = 0
@@ -165,12 +165,12 @@ func moe_alltoall_exchange(
     collective_state comm,
     int ep_rank,
     int ep_size,
-    [][]float send_buffers
-) [][]float {
-    [][]float recv_buffers = make([][]float, ep_size)
+    float[][] send_buffers
+) float[][] {
+    float[][] recv_buffers = make(float[][], ep_size)
     int i = 0
     for i < ep_size {
-        recv_buffers[i] = make([]float, 0)
+        recv_buffers[i] = make(float[], 0)
         i = i + 1
     }
     recv_buffers
@@ -178,26 +178,26 @@ func moe_alltoall_exchange(
 
 func process_local_experts(
     moe_routing_state state,
-    [][]float token_batches,
-    [][]float expert_weights,
+    float[][] token_batches,
+    float[][] expert_weights,
     int ep_rank,
     int ep_size
-) [][]float {
-    [][]float expert_outputs = make([][]float, 0)
+) float[][] {
+    float[][] expert_outputs = make(float[][], 0)
     expert_outputs
 }
 
 func reconstruct_token_order(
     moe_routing_state state,
-    [][]float expert_outputs,
+    float[][] expert_outputs,
     int num_tokens,
     int hidden_dim
-) []float {
-    []float output = make([]float, num_tokens * hidden_dim)
+) float[] {
+    float[] output = make(float[], num_tokens * hidden_dim)
     int t = 0
     for t < num_tokens {
         routing_decision decision = state.routing_decisions[t]
-        []float combined_output = make([]float, hidden_dim)
+        float[] combined_output = make(float[], hidden_dim)
         int k = 0
         for k < decision.num_experts_selected {
             int expert_id = decision.expert_indices[k]
@@ -217,7 +217,7 @@ func reconstruct_token_order(
 func compute_load_balancing_loss(
     moe_routing_state state
 ) float {
-    []int expert_token_count = make([]int, state.num_experts)
+    int[] expert_token_count = make(int[], state.num_experts)
     int t = 0
     for t < state.num_tokens {
         routing_decision decision = state.routing_decisions[t]
@@ -267,16 +267,16 @@ func compute_expert_utilization(
 func moe_alltoall_forward(
     moe_routing_state state,
     collective_state comm,
-    []float hidden_states,
-    []float router_weight,
-    [][]float expert_weights,
+    float[] hidden_states,
+    float[] router_weight,
+    float[][] expert_weights,
     int ep_rank,
     int ep_size,
     int batch_size,
     int seq_len
-) ([]float, float) {
+) (float[], float) {
     state.num_tokens = batch_size * seq_len
-    []float logits = compute_router_logits(
+    float[] logits = compute_router_logits(
         hidden_states, router_weight, state.num_tokens,
         state.hidden_dim, state.num_experts
     )
@@ -284,12 +284,12 @@ func moe_alltoall_forward(
     state.routing_decisions = select_top_k_experts(
         logits, state.num_tokens, state.num_experts, state.top_k, state.num_experts
     )
-    [][]float send_buffers = create_send_buffers(state, hidden_states, ep_rank, ep_size)
-    [][]float recv_buffers = moe_alltoall_exchange(state, comm, ep_rank, ep_size, send_buffers)
-    [][]float expert_outputs = process_local_experts(state, recv_buffers, expert_weights, ep_rank, ep_size)
-    [][]float return_send_buffers = make([][]float, ep_size)
-    [][]float return_recv_buffers = moe_alltoall_exchange(state, comm, ep_rank, ep_size, return_send_buffers)
-    []float output = reconstruct_token_order(state, return_recv_buffers, state.num_tokens, state.hidden_dim)
+    float[][] send_buffers = create_send_buffers(state, hidden_states, ep_rank, ep_size)
+    float[][] recv_buffers = moe_alltoall_exchange(state, comm, ep_rank, ep_size, send_buffers)
+    float[][] expert_outputs = process_local_experts(state, recv_buffers, expert_weights, ep_rank, ep_size)
+    float[][] return_send_buffers = make(float[][], ep_size)
+    float[][] return_recv_buffers = moe_alltoall_exchange(state, comm, ep_rank, ep_size, return_send_buffers)
+    float[] output = reconstruct_token_order(state, return_recv_buffers, state.num_tokens, state.hidden_dim)
     float aux_loss = compute_load_balancing_loss(state)
     (output, aux_loss)
 }

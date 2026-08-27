@@ -32,11 +32,11 @@ struct device_communicator {
 
 struct transfer_plan {
     int32 plan_id
-    []interface{} source_tensors
-    []interface{} dest_tensors
-    []int32 src_devices
-    []int32 dst_devices
-    []int64 transfer_sizes
+    int[]erface{} source_tensors
+    int[]erface{} dest_tensors
+    int[]32 src_devices
+    int[]32 dst_devices
+    int[]64 transfer_sizes
     float32 estimated_time_ms
 }
 
@@ -121,14 +121,14 @@ func (device_communicator* dc) get_nccl_comm() interface{} {
     return dc.nccl_comm
 }
 
-func (device_communicator* dc) create_transfer_plan([]interface{} src_tensors, []interface{} dst_tensors, []int32 src_devs, []int32 dst_devs) transfer_plan* {
+func (device_communicator* dc) create_transfer_plan(int[]erface{} src_tensors, int[]erface{} dst_tensors, int[]32 src_devs, int[]32 dst_devs) transfer_plan* {
     return *transfer_plan{
         plan_id: 0,
         source_tensors: src_tensors,
         dest_tensors: dst_tensors,
         src_devices: src_devs,
         dst_devices: dst_devs,
-        transfer_sizes: make([]int64, len(src_tensors)),
+        transfer_sizes: make(int[]64, len(src_tensors)),
         estimated_time_ms: 0.0,
     }
 }

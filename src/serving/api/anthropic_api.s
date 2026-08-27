@@ -20,7 +20,7 @@ struct message_input {
     string model
     []content_block* messages
     int32 max_tokens
-    []interface{} system
+    int[]erface{} system
     float32 temperature
     bool stream
     map[string]interface{} metadata

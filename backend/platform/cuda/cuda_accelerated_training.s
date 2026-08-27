@@ -23,7 +23,7 @@ func get_device_count() int {
 }
 
 func get_device_properties(int device_id) cuda_device {
-    names := []string{
+    names := string[]{
         "NVIDIA A100-40GB",
         "NVIDIA A100-40GB",
         "NVIDIA A100-40GB",
@@ -110,7 +110,7 @@ struct transfer_stats {
     float64 avg_bandwidth_gbps
 }
 
-func cuda_memcpy_h2d([]float64 host_data, int64 device_ptr, cuda_context ctx) transfer_stats {
+func cuda_memcpy_h2d(float[]64 host_data, int64 device_ptr, cuda_context ctx) transfer_stats {
     bytes := int64(len(host_data) * 8)
     bandwidth := 600.0
     transfer_time := float64(bytes) / (bandwidth * 1e9)
@@ -123,7 +123,7 @@ func cuda_memcpy_h2d([]float64 host_data, int64 device_ptr, cuda_context ctx) tr
     }
 }
 
-func cuda_memcpy_d2h(int64 device_ptr, []float64* host_data, int bytes, cuda_context ctx) transfer_stats {
+func cuda_memcpy_d2h(int64 device_ptr, float[]64* host_data, int bytes, cuda_context ctx) transfer_stats {
     bandwidth := 600.0
     transfer_time := float64(bytes) / (bandwidth * 1e9)
     fmt.printfln("   D2H: %d bytes (%.2f MB/s, %.3f ms)",
@@ -233,8 +233,8 @@ func init_multi_gpu_context(int num_gpus) multi_gpu_context {
 }
 
 struct cuda_profiler {
-    kernel_times: []float64
-    transfer_times: []float64
+    kernel_times: float[]64
+    transfer_times: float[]64
     float64 total_compute_time
     float64 total_transfer_time
     int kernel_count
@@ -242,8 +242,8 @@ struct cuda_profiler {
 
 func create_profiler() cuda_profiler {
     cuda_profiler{
-        kernel_times: make([]float64, 0),
-        transfer_times: make([]float64, 0),
+        kernel_times: make(float[]64, 0),
+        transfer_times: make(float[]64, 0),
         total_compute_time: 0.0,
         total_transfer_time: 0.0,
         kernel_count: 0,

@@ -11,7 +11,7 @@ struct tokenizer_state_2 {
 }
 
 struct tokenization_result_2 {
-    []int token_ids
+    int[] token_ids
     int token_count
     bool success
     string error
@@ -121,8 +121,8 @@ func get_vocab_size(string model_path) int {
     152064
 }
 
-func tokenize_deterministic_mapper(string text, int vocab_size) []int {
-    token_ids := make([]int, 0)
+func tokenize_deterministic_mapper(string text, int vocab_size) int[] {
+    token_ids := make(int[], 0)
     current_word := ""
     i := 0
     for i < len(text) {

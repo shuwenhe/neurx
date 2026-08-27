@@ -8,9 +8,9 @@ struct seqlen_balance_config {
 }
 
 struct batch_assignment {
-    [][]int sample_indices
-    []int batch_sizes
-    []int total_tokens_per_batch
+    int[][] sample_indices
+    int[] batch_sizes
+    int[] total_tokens_per_batch
     float balance_score
 }
 
@@ -23,12 +23,12 @@ func default_seqlen_balance_config() seqlen_balance_config {
 }
 
 func largest_differencing_method(
-    []int sequence_lengths,
+    int[] sequence_lengths,
     int num_batches
 ) batch_assignment {
-    [][]int batches = make([][]int, num_batches)
-    []int batch_totals = make([]int, num_batches)
-    []int sorted_indices = argsort_descending(sequence_lengths)
+    int[][] batches = make(int[][], num_batches)
+    int[] batch_totals = make(int[], num_batches)
+    int[] sorted_indices = argsort_descending(sequence_lengths)
     for int i = 0; i < len(sorted_indices); i = i + 1 {
         int sample_idx = sorted_indices[i]
         int seq_len = sequence_lengths[sample_idx]
@@ -36,7 +36,7 @@ func largest_differencing_method(
         batches[min_batch_idx] = append(batches[min_batch_idx], sample_idx)
         batch_totals[min_batch_idx] = batch_totals[min_batch_idx] + seq_len
     }
-    []int batch_sizes = make([]int, num_batches)
+    int[] batch_sizes = make(int[], num_batches)
     for int i = 0; i < num_batches; i = i + 1 {
         batch_sizes[i] = len(batches[i])
     }
@@ -49,8 +49,8 @@ func largest_differencing_method(
     }
 }
 
-func argsort_descending([]int values) []int {
-    []int indices = make([]int, len(values))
+func argsort_descending(int[] values) int[] {
+    int[] indices = make(int[], len(values))
     for int i = 0; i < len(values); i = i + 1 {
         indices[i] = i
     }
@@ -66,7 +66,7 @@ func argsort_descending([]int values) []int {
     return indices
 }
 
-func find_min_batch([]int batch_totals) int {
+func find_min_batch(int[] batch_totals) int {
     int min_idx = 0
     int min_val = batch_totals[0]
     for int i = 1; i < len(batch_totals); i = i + 1 {
@@ -78,7 +78,7 @@ func find_min_batch([]int batch_totals) int {
     return min_idx
 }
 
-func compute_balance_score([]int batch_totals) float {
+func compute_balance_score(int[] batch_totals) float {
     if len(batch_totals) == 0 {
         return 0.0
     }
@@ -100,12 +100,12 @@ func compute_balance_score([]int batch_totals) float {
 }
 
 func greedy_bin_packing(
-    []int sequence_lengths,
+    int[] sequence_lengths,
     int max_tokens_per_batch
 ) batch_assignment {
-    [][]int batches = make([][]int, 0)
-    []int batch_totals = make([]int, 0)
-    []int sorted_indices = argsort_descending(sequence_lengths)
+    int[][] batches = make(int[][], 0)
+    int[] batch_totals = make(int[], 0)
+    int[] sorted_indices = argsort_descending(sequence_lengths)
     for int i = 0; i < len(sorted_indices); i = i + 1 {
         int sample_idx = sorted_indices[i]
         int seq_len = sequence_lengths[sample_idx]
@@ -119,13 +119,13 @@ func greedy_bin_packing(
             }
         }
         if !placed {
-            []int new_batch = make([]int, 0)
+            int[] new_batch = make(int[], 0)
             new_batch = append(new_batch, sample_idx)
             batches = append(batches, new_batch)
             batch_totals = append(batch_totals, seq_len)
         }
     }
-    []int batch_sizes = make([]int, len(batches))
+    int[] batch_sizes = make(int[], len(batches))
     for int i = 0; i < len(batches); i = i + 1 {
         batch_sizes[i] = len(batches[i])
     }
@@ -139,7 +139,7 @@ func greedy_bin_packing(
 }
 
 func balance_sequences(
-    []int sequence_lengths,
+    int[] sequence_lengths,
     seqlen_balance_config config
 ) batch_assignment {
     return largest_differencing_method(sequence_lengths, config.target_num_batches)
@@ -147,12 +147,12 @@ func balance_sequences(
 
 func compute_padding_savings(
     batch_assignment assignment,
-    []int sequence_lengths
+    int[] sequence_lengths
 ) float {
     int total_tokens_with_padding = 0
     int total_actual_tokens = 0
     for int b = 0; b < len(assignment.sample_indices); b = b + 1 {
-        []int batch_samples = assignment.sample_indices[b]
+        int[] batch_samples = assignment.sample_indices[b]
         int max_len_in_batch = 0
         for int i = 0; i < len(batch_samples); i = i + 1 {
             int sample_idx = batch_samples[i]

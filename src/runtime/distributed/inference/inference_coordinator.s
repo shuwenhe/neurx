@@ -135,7 +135,7 @@ func schedule_request(
 
 func broadcast_request_to_ranks(
     inference_request req,
-    []int target_ranks
+    int[] target_ranks
 ) {
     printf("Broadcasting request %s to %d ranks\n", req.request_id, len(target_ranks))
     for i = 0; i < len(target_ranks); i = i + 1 {
@@ -144,11 +144,11 @@ func broadcast_request_to_ranks(
 }
 
 func collect_results_from_ranks(
-    []int source_ranks,
+    int[] source_ranks,
     string reduce_op
-) []float {
+) float[] {
     printf("Collecting results from %d ranks with %s\n", len(source_ranks), reduce_op)
-    []float result = []float{}
+    float[] result = float[]{}
     for i = 0; i < 10; i = i + 1 {
         result = append(result, 0.5)
     }

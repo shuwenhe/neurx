@@ -36,7 +36,7 @@ func main() {
         println("Failed to create output dir: " + output_dir)
         return 1
     }
-    []string samples = load_sft_samples(data_path)
+    string[] samples = load_sft_samples(data_path)
     if len(samples) == 0 {
         samples = builtin_sft_samples()
     }
@@ -189,8 +189,8 @@ func main() {
     0
 }
 
-func builtin_sft_samples() []string {
-    []string samples = []string{cap: 4}
+func builtin_sft_samples() string[] {
+    string[] samples = string[]{cap: 4}
     samples[0] = format_sft_text("Explain gradient descent", "", "Gradient descent updates parameters by following the negative loss gradient.")
     samples[1] = format_sft_text("Write a short apology", "late delivery", "Sorry for the late delivery. I will fix it immediately.")
     samples[2] = format_sft_text("Summarize the task", "train a model", "The task is to train a model on the given data.")
@@ -198,9 +198,9 @@ func builtin_sft_samples() []string {
     samples
 }
 
-func load_sft_samples(string data_path) []string {
+func load_sft_samples(string data_path) string[] {
     if !runtime_file_exists(data_path) {
-        []string empty = []string{cap: 0}
+        string[] empty = string[]{cap: 0}
         return empty
     }
     println("SFT data file detected; using built-in sample set in this minimal S implementation.")

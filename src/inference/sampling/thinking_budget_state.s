@@ -10,11 +10,11 @@ struct thinking_budget_config {
 
 struct thinking_budget_state {
     thinking_budget_config config
-    []int request_ids
-    []int budgets
-    []int used_tokens
-    []int in_thinking
-    []int force_end
+    int[] request_ids
+    int[] budgets
+    int[] used_tokens
+    int[] in_thinking
+    int[] force_end
     int tracked_requests
     int forced_end_count
     bool initialized
@@ -27,8 +27,8 @@ struct thinking_budget_update {
     int forced_token_id
 }
 
-func thinking_zero_array(int capacity) []int {
-    []int values = []int{cap: capacity}
+func thinking_zero_array(int capacity) int[] {
+    int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values

@@ -2,7 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
 
 struct tensor {
-    []float data
+    float[] data
     int size
 }
 
@@ -254,7 +254,7 @@ func parse_pair_right(string text) int {
 }
 
 func parse_csv_floats_fixed(string text, int expected_count) tensor {
-    []float data = []float{cap: expected_count}
+    float[] data = float[]{cap: expected_count}
     string current = ""
     int i = 0
     int out_i = 0

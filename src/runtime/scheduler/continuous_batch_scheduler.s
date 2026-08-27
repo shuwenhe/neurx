@@ -3,8 +3,8 @@ package neurx.scheduler.continuous_batch_scheduler
 struct batch_request {
     int request_id
     int status
-    []int input_ids
-    []int output_ids
+    int[] input_ids
+    int[] output_ids
     int num_prefill_tokens
     int num_decode_steps
     int max_tokens
@@ -14,13 +14,13 @@ struct batch_request {
 }
 
 struct prefill_batch {
-    []int request_ids
+    int[] request_ids
     int total_tokens
     int num_requests
 }
 
 struct decode_batch {
-    []int request_ids
+    int[] request_ids
     int num_requests
 }
 
@@ -41,12 +41,12 @@ struct continuous_batch_scheduler {
 func new_continuous_batch_scheduler(int batch_capacity) continuous_batch_scheduler {
     []batch_request requests = make([]batch_request, 0)
     prefill_batch prefill = prefill_batch {
-        request_ids: make([]int, 0),
+        request_ids: make(int[], 0),
         total_tokens: 0,
         num_requests: 0,
     }
     decode_batch decode = decode_batch {
-        request_ids: make([]int, 0),
+        request_ids: make(int[], 0),
         num_requests: 0,
     }
     continuous_batch_scheduler {
@@ -67,7 +67,7 @@ func new_continuous_batch_scheduler(int batch_capacity) continuous_batch_schedul
 func add_request(
     continuous_batch_scheduler sched,
     int request_id,
-    []int input_ids,
+    int[] input_ids,
     int max_tokens,
     float temperature,
     float top_p,
@@ -77,7 +77,7 @@ func add_request(
         request_id: request_id,
         status: REQUEST_WAITING,
         input_ids: input_ids,
-        output_ids: make([]int, 0),
+        output_ids: make(int[], 0),
         num_prefill_tokens: len(input_ids),
         num_decode_steps: 0,
         max_tokens: max_tokens,
@@ -95,12 +95,12 @@ func schedule_batch(
     continuous_batch_scheduler sched
 ) continuous_batch_scheduler {
     sched.prefill_batch = prefill_batch {
-        request_ids: make([]int, 0),
+        request_ids: make(int[], 0),
         total_tokens: 0,
         num_requests: 0,
     }
     sched.decode_batch = decode_batch {
-        request_ids: make([]int, 0),
+        request_ids: make(int[], 0),
         num_requests: 0,
     }
     prefill_capacity := sched.batch_capacity
@@ -189,8 +189,8 @@ func get_request(
     empty := batch_request {
         request_id: -1,
         status: REQUEST_WAITING,
-        input_ids: make([]int, 0),
-        output_ids: make([]int, 0),
+        input_ids: make(int[], 0),
+        output_ids: make(int[], 0),
         num_prefill_tokens: 0,
         num_decode_steps: 0,
         max_tokens: 0,
@@ -253,12 +253,12 @@ func reset_scheduler(continuous_batch_scheduler sched) continuous_batch_schedule
     continuous_batch_scheduler {
         requests: make([]batch_request, 0),
         prefill_batch: prefill_batch {
-            request_ids: make([]int, 0),
+            request_ids: make(int[], 0),
             total_tokens: 0,
             num_requests: 0,
         },
         decode_batch: decode_batch {
-            request_ids: make([]int, 0),
+            request_ids: make(int[], 0),
             num_requests: 0,
         },
         batch_capacity: sched.batch_capacity,

@@ -1,8 +1,8 @@
 module main
 
 struct tensor_2 {
-    []float data
-    []int shape
+    float[] data
+    int[] shape
 }
 
 struct lora_weights {

@@ -30,7 +30,7 @@ struct chat_completion_request {
     float32 frequency_penalty
     float32 presence_penalty
     bool stream
-    []string stop
+    string[] stop
     map[string]interface{} logit_bias
     bool logprobs
     int32 top_logprobs
@@ -71,7 +71,7 @@ struct chat_completion_stream_response {
     string object
     int64 created
     string model
-    []interface{} choices
+    int[]erface{} choices
 }
 
 struct completion_request {
@@ -82,7 +82,7 @@ struct completion_request {
     float32 top_p
     int32 n
     bool stream
-    []string stop
+    string[] stop
     float32 frequency_penalty
     float32 presence_penalty
     int64 seed
@@ -93,7 +93,7 @@ struct completion_response {
     string object
     int64 created
     string model
-    []interface{} choices
+    int[]erface{} choices
     usage token_usage
 }
 
@@ -203,7 +203,7 @@ func (openai_api_server* srv) create_completion(completion_request* req) (comple
         object: "text_completion",
         created: core.current_time_ms() / 1000,
         model: req.model,
-        choices: make([]interface{}, 0),
+        choices: make(int[]erface{}, 0),
         token_usage: usage{
             prompt_tokens: resp.input_tokens,
             completion_tokens: resp.output_tokens,
@@ -214,8 +214,8 @@ func (openai_api_server* srv) create_completion(completion_request* req) (comple
     return openai_resp, nil
 }
 
-func (openai_api_server* srv) list_models() ([]interface{}, error) {
-    models := make([]interface{}, 0)
+func (openai_api_server* srv) list_models() (int[]erface{}, error) {
+    models := make(int[]erface{}, 0)
     return models, nil
 }
 

@@ -19,7 +19,7 @@ func main() {
         println("error: missing adapter file: " + adapter_file)
         return
     }
-    []int adapter_bytes = runtime_read_binary_file(adapter_file)
+    int[] adapter_bytes = runtime_read_binary_file(adapter_file)
     if len(adapter_bytes) < 16 {
         println("error: adapter file too small")
         return
@@ -34,7 +34,7 @@ func main() {
         println("error: missing training_state.json: " + training_state_file)
         return
     }
-    []float loss_history = extract_json_array_values(state_text, "loss_history")
+    float[] loss_history = extract_json_array_values(state_text, "loss_history")
     if len(loss_history) < 2 {
         println("error: loss_history must contain at least two points")
         return
@@ -121,8 +121,8 @@ func extract_json_number_field(string json_text, string field_name, string fallb
     token
 }
 
-func extract_json_array_values(string json_text, string field_name) []float {
-    []float values = []float{}
+func extract_json_array_values(string json_text, string field_name) float[] {
+    float[] values = float[]{}
     string needle = "\"" + field_name + "\""
     int pos = find_substring(json_text, needle)
     if pos < 0 {
@@ -261,7 +261,7 @@ func find_substring(string text, string pattern) int {
     -1
 }
 
-func read_u64_le([]int bytes, int offset) int {
+func read_u64_le(int[] bytes, int offset) int {
     int value = 0
     int i = 0
     int shift = 1

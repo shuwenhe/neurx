@@ -49,7 +49,7 @@ struct video_frame {
 	float32 motion_score
 	float32 content_importance
 	bool is_keyframe
-	[]float32 features
+	float[]32 features
 }
 
 struct video_data {
@@ -89,7 +89,7 @@ struct video_analysis_result {
 	int32 num_keyframes
 	[]scene_change_detection scene_changes
 	float32 average_motion_magnitude
-	[]float32 frame_importance_scores
+	float[]32 frame_importance_scores
 	time.Time analyzed_at
 }
 
@@ -397,7 +397,7 @@ func (video_processor* vp) analyze_video(video_id string) (*video_analysis_resul
 
 	scenes, _ := vp.detect_scene_changes(video_id)
 
-	importance_scores := make([]float32, len(video.frames))
+	importance_scores := make(float[]32, len(video.frames))
 	avg_motion := float32(0)
 
 	for i := 0; i < len(video.frames); i++ {
@@ -434,11 +434,11 @@ func (video_processor* vp) get_video(video_id string) (*video_data, error) {
 	return video, nil
 }
 
-func (video_processor* vp) list_loaded_videos() []string {
+func (video_processor* vp) list_loaded_videos() string[] {
 	vp.mu.Lock()
 	defer vp.mu.Unlock()
 
-	ids := make([]string, 0, len(vp.loaded_videos))
+	ids := make(string[], 0, len(vp.loaded_videos))
 	for id := range vp.loaded_videos {
 		ids = append(ids, id)
 	}

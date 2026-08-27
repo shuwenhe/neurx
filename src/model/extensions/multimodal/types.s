@@ -143,6 +143,6 @@ struct ProcessingState {
     stage: string,
     start_time: i64,
     processing_times: map[string, f32],
-    error_messages: []string,
+    error_messages: string[],
     bool is_cached
 }

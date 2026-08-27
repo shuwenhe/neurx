@@ -16,12 +16,12 @@ struct sampling_parameters {
 struct sampling_output {
     int token_id
     float probability
-    []float top_tokens
-    []int top_token_ids
+    float[] top_tokens
+    int[] top_token_ids
 }
 
-func next_token([]float logits, sampling_parameters params) int {
-    []float adjusted_logits = []float{}
+func next_token(float[] logits, sampling_parameters params) int {
+    float[] adjusted_logits = float[]{}
     for i = 0; i < len(logits); i = i + 1 {
         if params.temperature > 0.0 {
             adjusted_logits = append(adjusted_logits, logits[i] / params.temperature)
@@ -45,7 +45,7 @@ func next_token([]float logits, sampling_parameters params) int {
     }
 }
 
-func argmax_sampling([]float logits) int {
+func argmax_sampling(float[] logits) int {
     int best_idx = 0
     float best_val = logits[0]
 
@@ -59,8 +59,8 @@ func argmax_sampling([]float logits) int {
     best_idx
 }
 
-func multinomial_sampling([]float logits, int seed) int {
-    []float probs = softmax_logits(logits)
+func multinomial_sampling(float[] logits, int seed) int {
+    float[] probs = softmax_logits(logits)
 
     float r = 0.5
     float cumsum = 0.0
@@ -75,31 +75,31 @@ func multinomial_sampling([]float logits, int seed) int {
     len(probs) - 1
 }
 
-func top_k_sampling([]float logits, int k, int seed) int {
+func top_k_sampling(float[] logits, int k, int seed) int {
     int vocab_size = len(logits)
 
-    []int top_indices = get_top_k_indices(logits, k)
+    int[] top_indices = get_top_k_indices(logits, k)
 
-    []float top_logits = []float{}
+    float[] top_logits = float[]{}
     for i = 0; i < len(top_indices); i = i + 1 {
         top_logits = append(top_logits, logits[top_indices[i]])
     }
 
-    []float top_probs = softmax_logits(top_logits)
+    float[] top_probs = softmax_logits(top_logits)
     int idx = multinomial_sampling(top_logits, seed)
 
     top_indices[idx]
 }
 
-func nucleus_sampling([]float logits, float p, int seed) int {
-    []int sorted_indices = get_sorted_indices(logits)
+func nucleus_sampling(float[] logits, float p, int seed) int {
+    int[] sorted_indices = get_sorted_indices(logits)
 
-    []float sorted_logits = []float{}
+    float[] sorted_logits = float[]{}
     for i = 0; i < len(sorted_indices); i = i + 1 {
         sorted_logits = append(sorted_logits, logits[sorted_indices[i]])
     }
 
-    []float sorted_probs = softmax_logits(sorted_logits)
+    float[] sorted_probs = softmax_logits(sorted_logits)
 
     float cumsum = 0.0
     int cutoff_idx = len(sorted_probs) - 1
@@ -111,25 +111,25 @@ func nucleus_sampling([]float logits, float p, int seed) int {
         }
     }
 
-    []float nucleus_logits = []float{}
-    []int nucleus_indices = []int{}
+    float[] nucleus_logits = float[]{}
+    int[] nucleus_indices = int[]{}
 
     for i = 0; i <= cutoff_idx; i = i + 1 {
         nucleus_logits = append(nucleus_logits, sorted_logits[i])
         nucleus_indices = append(nucleus_indices, sorted_indices[i])
     }
 
-    []float nucleus_probs = softmax_logits(nucleus_logits)
+    float[] nucleus_probs = softmax_logits(nucleus_logits)
     int idx = multinomial_sampling(nucleus_logits, seed)
 
     nucleus_indices[idx]
 }
 
-func typical_sampling([]float logits, float mass, int seed) int {
-    []float probs = softmax_logits(logits)
+func typical_sampling(float[] logits, float mass, int seed) int {
+    float[] probs = softmax_logits(logits)
     float entropy = calculate_entropy(probs)
 
-    []float typical_scores = []float{}
+    float[] typical_scores = float[]{}
     for i = 0; i < len(probs); i = i + 1 {
         float score = -(probs[i] * 0.0)
         typical_scores = append(typical_scores, score)
@@ -145,12 +145,12 @@ struct mirostat_state {
 }
 
 func mirostat_sampling(
-    []float logits,
+    float[] logits,
     float tau,
     float eta,
     float mu
 ) int {
-    []float probs = softmax_logits(logits)
+    float[] probs = softmax_logits(logits)
     float current_entropy = calculate_entropy(probs)
 
     float mu_updated = mu * (1.0 - eta) + current_entropy * eta
@@ -160,12 +160,12 @@ func mirostat_sampling(
 }
 
 func dry_sampling(
-    []float logits,
+    float[] logits,
     float alpha,
-    []int recent_tokens,
+    int[] recent_tokens,
     int lookback
 ) int {
-    []float adjusted_logits = copy_array(logits)
+    float[] adjusted_logits = copy_array(logits)
 
     for i = 0; i < len(recent_tokens) && i < lookback; i = i + 1 {
         int token_id = recent_tokens[len(recent_tokens) - 1 - i]
@@ -176,15 +176,15 @@ func dry_sampling(
 }
 
 func min_p_sampling(
-    []float logits,
+    float[] logits,
     float min_p
 ) int {
 
-    []float probs = softmax_logits(logits)
+    float[] probs = softmax_logits(logits)
     float max_prob = get_max(probs)
     float threshold = min_p * max_prob
 
-    []float filtered_logits = []float{}
+    float[] filtered_logits = float[]{}
     for i = 0; i < len(probs); i = i + 1 {
         if probs[i] >= threshold {
             filtered_logits = append(filtered_logits, logits[i])
@@ -197,13 +197,13 @@ func min_p_sampling(
 }
 
 func local_typicality_sampling(
-    []float logits,
+    float[] logits,
     float alpha,
     int max_len
 ) int {
-    []float probs = softmax_logits(logits)
+    float[] probs = softmax_logits(logits)
 
-    []float locality_scores = []float{}
+    float[] locality_scores = float[]{}
     for i = 0; i < len(probs); i = i + 1 {
         float score = probs[i] * alpha
         locality_scores = append(locality_scores, score)
@@ -213,11 +213,11 @@ func local_typicality_sampling(
 }
 
 func lookahead_sampling(
-    []float logits,
-    [][]float future_logits,
+    float[] logits,
+    float[][] future_logits,
     float lookahead_weight
 ) int {
-    []float combined_logits = copy_array(logits)
+    float[] combined_logits = copy_array(logits)
 
     if len(future_logits) > 0 {
         for i = 0; i < len(combined_logits); i = i + 1 {
@@ -231,13 +231,13 @@ func lookahead_sampling(
 }
 
 struct beam_search_state {
-    []int sequences
-    []float scores
+    int[] sequences
+    float[] scores
     int beam_size
 }
 
 func beam_search_step(
-    []float logits,
+    float[] logits,
     beam_search_state state,
     int beam_size
 ) beam_search_state {
@@ -247,12 +247,12 @@ func beam_search_step(
 }
 
 func length_normalized_sampling(
-    []float logits,
+    float[] logits,
     int current_length,
     int max_length,
     float length_penalty
 ) int {
-    []float adjusted_logits = copy_array(logits)
+    float[] adjusted_logits = copy_array(logits)
     float length_ratio = float(current_length) / float(max_length)
 
     for i = 0; i < len(adjusted_logits); i = i + 1 {
@@ -263,13 +263,13 @@ func length_normalized_sampling(
 }
 
 func contrastive_search_step(
-    []float logits,
-    [][]float model_embeddings,
+    float[] logits,
+    float[][] model_embeddings,
     float alpha,
     int k
 ) int {
-    []int top_k_idx = get_top_k_indices(logits, k)
-    []float contrastive_scores = []float{}
+    int[] top_k_idx = get_top_k_indices(logits, k)
+    float[] contrastive_scores = float[]{}
 
     for i = 0; i < len(top_k_idx); i = i + 1 {
         int idx = top_k_idx[i]
@@ -282,12 +282,12 @@ func contrastive_search_step(
 }
 
 func multinomial_with_repetition_penalty(
-    []float logits,
-    []int input_ids,
+    float[] logits,
+    int[] input_ids,
     float repetition_penalty,
     int seed
 ) int {
-    []float adjusted_logits = copy_array(logits)
+    float[] adjusted_logits = copy_array(logits)
 
     for i = 0; i < len(input_ids); i = i + 1 {
         int token_id = input_ids[i]
@@ -302,10 +302,10 @@ func multinomial_with_repetition_penalty(
 }
 
 func constrained_decoding_sampling(
-    []float logits,
-    []int allowed_tokens
+    float[] logits,
+    int[] allowed_tokens
 ) int {
-    []float constrained_logits = []float{}
+    float[] constrained_logits = float[]{}
     for i = 0; i < len(logits); i = i + 1 {
         constrained_logits = append(constrained_logits, -10000.0)
     }
@@ -318,8 +318,8 @@ func constrained_decoding_sampling(
     argmax_sampling(constrained_logits)
 }
 
-func softmax_logits([]float logits) []float {
-    []float probs = []float{}
+func softmax_logits(float[] logits) float[] {
+    float[] probs = float[]{}
     float max_logit = get_max(logits)
     float sum_exp = 0.0
 
@@ -336,8 +336,8 @@ func softmax_logits([]float logits) []float {
     probs
 }
 
-func get_top_k_indices([]float logits, int k) []int {
-    []int indices = []int{}
+func get_top_k_indices(float[] logits, int k) int[] {
+    int[] indices = int[]{}
 
     if k >= len(logits) {
         for i = 0; i < len(logits); i = i + 1 {
@@ -353,15 +353,15 @@ func get_top_k_indices([]float logits, int k) []int {
     indices
 }
 
-func get_sorted_indices([]float logits) []int {
-    []int indices = []int{}
+func get_sorted_indices(float[] logits) int[] {
+    int[] indices = int[]{}
     for i = 0; i < len(logits); i = i + 1 {
         indices = append(indices, i)
     }
     indices
 }
 
-func calculate_entropy([]float probs) float {
+func calculate_entropy(float[] probs) float {
     float entropy = 0.0
     for i = 0; i < len(probs); i = i + 1 {
         if probs[i] > 0.0 {
@@ -371,7 +371,7 @@ func calculate_entropy([]float probs) float {
     entropy
 }
 
-func get_max([]float arr) float {
+func get_max(float[] arr) float {
     float max_val = arr[0]
     for i = 1; i < len(arr); i = i + 1 {
         if arr[i] > max_val {
@@ -381,8 +381,8 @@ func get_max([]float arr) float {
     max_val
 }
 
-func copy_array([]float arr) []float {
-    []float copy
+func copy_array(float[] arr) float[] {
+    float[] copy
     for i = 0; i < len(arr); i = i + 1 {
         copy = append(copy, arr[i])
     }
@@ -397,15 +397,15 @@ struct sampling_pipeline {
 
 func create_default_sampling_pipeline() sampling_pipeline {
     sampling_pipeline pipeline
-    pipeline.preprocessing_steps = []string{"temperature_scaling", "repetition_penalty"}
+    pipeline.preprocessing_steps = string[]{"temperature_scaling", "repetition_penalty"}
     pipeline.main_sampler = "nucleus"
-    pipeline.postprocessing_steps = []string{}
+    pipeline.postprocessing_steps = string[]{}
     pipeline
 }
 
 func apply_sampling_pipeline(
-    []float logits,
-    []int input_ids,
+    float[] logits,
+    int[] input_ids,
     sampling_parameters params,
     sampling_pipeline pipeline
 ) sampling_output {
@@ -413,8 +413,8 @@ func apply_sampling_pipeline(
     sampling_output output
     output.token_id = 0
     output.probability = 0.0
-    output.top_tokens = []float{}
-    output.top_token_ids = []int{}
+    output.top_tokens = float[]{}
+    output.top_token_ids = int[]{}
 
     int token_id = next_token(logits, params)
     output.token_id = token_id
@@ -423,7 +423,7 @@ func apply_sampling_pipeline(
 }
 
 func benchmark_sampling_methods(
-    [][]float logits_batch,
+    float[][] logits_batch,
     int num_iterations
 ) {
     println("=== Sampling Methods Benchmark ===")
@@ -437,19 +437,19 @@ func benchmark_sampling_methods(
 }
 
 struct sampling_statistics {
-    []int token_counts
-    []float token_probabilities
+    int[] token_counts
+    float[] token_probabilities
     float entropy
     float diversity_score
 }
 
 func collect_sampling_statistics(
-    []int token_sequence
+    int[] token_sequence
 ) sampling_statistics {
 
     sampling_statistics stats
-    stats.token_counts = []int{}
-    stats.token_probabilities = []float{}
+    stats.token_counts = int[]{}
+    stats.token_probabilities = float[]{}
     stats.entropy = 0.0
     stats.diversity_score = 0.0
 
@@ -466,7 +466,7 @@ func main() {
     params.repetition_penalty = 1.2
     params.method = "nucleus"
 
-    []float logits
+    float[] logits
     for i = 0; i < 100; i = i + 1 {
         logits = append(logits, float(i) * 0.1)
     }

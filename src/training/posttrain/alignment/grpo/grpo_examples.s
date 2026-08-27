@@ -41,8 +41,8 @@ func create_grpo_example_config() grpo_train_config {
 
 func create_grpo_example_dataset() grpo_dataset {
     grpo_dataset {
-        prompts: []string{},
-        reference_answers: []string{},
+        prompts: string[]{},
+        reference_answers: string[]{},
         size: 10000,
         source_path: "./data/grpo/math_reasoning.jsonl",
         group_size: 8,
@@ -87,7 +87,7 @@ func example_grpo_group_size_comparison() {
     print("║     Example 2: GRPO with Different Group Sizes             ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
-    []int group_sizes = []int{4, 8, 16}
+    int[] group_sizes = int[]{4, 8, 16}
     neurx_model model = load_pretrained_grpo_model("neurx_200b")
     neurx_model reference_model = load_pretrained_grpo_model("neurx_200b")
     tokenizer_state tokenizer = load_tokenizer_grpo()
@@ -278,9 +278,9 @@ func create_grpo_trainer(
         running_clip_fraction: 0.0,
         running_group_reward: 0.0,
         running_advantage_magnitude: 0.0,
-        loss_history: []float{},
-        reward_history: []float{},
-        kl_history: []float{},
+        loss_history: float[]{},
+        reward_history: float[]{},
+        kl_history: float[]{},
         train_loader: dataloader{},
         eval_loader: dataloader{},
     }

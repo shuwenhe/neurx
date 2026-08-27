@@ -86,7 +86,7 @@ func test_cuda_support() {
 
 func test_quantization_system() {
     print("1. Prepare test weights...\n")
-    []float weights = []float{0.1, 0.2, 0.3, 0.4, 0.5, -0.1, -0.2, -0.3}
+    float[] weights = float[]{0.1, 0.2, 0.3, 0.4, 0.5, -0.1, -0.2, -0.3}
     print("   ✓ Test tensor: 8 elements\n")
     print("   ✓ Value range: [-0.3, 0.5]\n")
     print("2. Compute statistics...\n")
@@ -113,7 +113,7 @@ func test_quantization_system() {
     print("   ✓ Compression Ratio: 8x (float32 . int4)\n")
     print("   ✓ Per-group scaling: Enabled\n")
     print("6. Dequantization & Accuracy Check...\n")
-    []float dequant = quant_core.dequantize_int8(qt_int8)
+    float[] dequant = quant_core.dequantize_int8(qt_int8)
     print("   ✓ Dequantized values: 8 float32\n")
     print("   ✓ Max error: ~0.004 (0.4% of range)\n")
     print("   ✓ Status: PASSED\n")
@@ -235,12 +235,12 @@ func test_complete_pipeline() {
     print("   ✓ Latency: ~120ms (with quantization)\n")
     print("   ✓ Status: GENERATED\n")
     print("3. Batch Inference...\n")
-    []string prompts = []string{
+    string[] prompts = string[]{
         "Explain machine learning",
         "What is deep learning",
         "Define neural networks",
     }
-    []string outputs = inference_system.inference_batch(sys, prompts, 50)
+    string[] outputs = inference_system.inference_batch(sys, prompts, 50)
     print("   ✓ Batch size: " + int_to_str(prompts.len) + "\n")
     print("   ✓ Total latency: ~300ms\n")
     print("   ✓ Throughput: ~10 req/sec\n")
@@ -258,7 +258,7 @@ func test_complete_pipeline() {
         frequency_penalty: 0.0,
         presence_penalty: 0.0,
         stream: false,
-        stop: []string{},
+        stop: string[]{},
     }
     openai_compatible.chat_completion_response api_resp = inference_system.handle_openai_request(sys, api_req)
     print("   ✓ API Request: chat/completions\n")

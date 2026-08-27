@@ -39,9 +39,9 @@ func (comprehensive_test_suite* cts) TestFlashAttentionBasic() {
         enable_dropout:  false,
     }
     fa := NewFlashAttentionOptimized(config)
-    q := make([]float32, 1*2*16*8)
-    k := make([]float32, 1*2*16*8)
-    v := make([]float32, 1*2*16*8)
+    q := make(float[]32, 1*2*16*8)
+    k := make(float[]32, 1*2*16*8)
+    v := make(float[]32, 1*2*16*8)
     for i := 0; i < len(q); i++ {
         q[i] = 0.1 * float32(i)
         k[i] = 0.1 * float32(i)
@@ -89,8 +89,8 @@ func (comprehensive_test_suite* cts) TestCUDAGraphExecution() {
         enable_coarsening:  true,
     }
     g := NewCUDAGraph(config)
-    n1 := g.AddNode("matmul", []int32{}, map[string]int32{"m": 32, "n": 32, "k": 32})
-    n2 := g.AddNode("activation", []int32{n1}, map[string]int32{"size": 1024, "type": 1})
+    n1 := g.AddNode("matmul", int[]32{}, map[string]int32{"m": 32, "n": 32, "k": 32})
+    n2 := g.AddNode("activation", int[]32{n1}, map[string]int32{"size": 1024, "type": 1})
     results := g.ExecuteGraph()
     passed := len(results) == 2
     result := test_result{
@@ -110,8 +110,8 @@ func (comprehensive_test_suite* cts) TestRuntimeFusion() {
         fusion_ratio:   0.7,
     }
     optimizer := NewRuntimeFusionOptimizer(config)
-    optimizer.QueueOperation("matmul", []int32{32, 32}, []int32{32, 32}, map[string]float32{})
-    optimizer.QueueOperation("activation", []int32{32, 32}, []int32{32, 32}, map[string]float32{})
+    optimizer.QueueOperation("matmul", int[]32{32, 32}, int[]32{32, 32}, map[string]float32{})
+    optimizer.QueueOperation("activation", int[]32{32, 32}, int[]32{32, 32}, map[string]float32{})
     opportunities := optimizer.GetFusionOpportunities()
     passed := opportunities > 0
     result := test_result{
@@ -165,7 +165,7 @@ func (comprehensive_test_suite* cts) TestSpeculativeDecoding() {
 func (comprehensive_test_suite* cts) TestVisionLanguageAdapter() {
     test_name := "Vision-Language Adapter"
     vlm := NewVisionLanguageModelAdapter(768, 4096)
-    image_features := make([]float32, 768*196)
+    image_features := make(float[]32, 768*196)
     for i := 0; i < len(image_features); i++ {
         image_features[i] = 0.1 * float32(i%10)
     }
@@ -186,13 +186,13 @@ func (comprehensive_test_suite* cts) TestLoRAAdapter() {
     config := lo_ra_config{
         rank:           8,
         alpha:          16.0,
-        target_modules: []string{"q_proj", "v_proj"},
+        target_modules: string[]{"q_proj", "v_proj"},
     }
     lora := NewLoRAAdapter(config)
-    weight_a := make([]float32, 4096*8)
-    weight_b := make([]float32, 8*4096)
+    weight_a := make(float[]32, 4096*8)
+    weight_b := make(float[]32, 8*4096)
     lora.AddLoRAWeight("q_proj", weight_a, weight_b)
-    x := make([]float32, 4096)
+    x := make(float[]32, 4096)
     for i := 0; i < len(x); i++ {
         x[i] = 0.1 * float32(i%100)
     }
@@ -210,7 +210,7 @@ func (comprehensive_test_suite* cts) TestLoRAAdapter() {
 func (comprehensive_test_suite* cts) TestMultiModelServer() {
     test_name := "Multi-Model Serving"
     mms := NewMultiModelServingManager(8000)
-    model_data := make([]float32, 100000)
+    model_data := make(float[]32, 100000)
     for i := 0; i < len(model_data); i++ {
         model_data[i] = 0.01 * float32(i%100)
     }

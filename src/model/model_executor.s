@@ -44,8 +44,8 @@ struct forward_output {
 
 func (model_executor* executor) forward_pass(
     model_name: string,
-    input_ids: *[]int,
-    attention_mask: option[&[]int]
+    input_ids: *int[],
+    attention_mask: option[&int[]]
 ) forward_output {
     batch_size := 1
     seq_len := len(input_ids)

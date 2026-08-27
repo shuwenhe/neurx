@@ -295,7 +295,7 @@ func diffusion_noise_step(float beta_start, float beta_end, int t, int timesteps
     diffusion_noise_step(beta_start, beta_end, t, timesteps)
 }
 
-func diffusion_denoise_stub([]float noisy_sample, int t, float scale) []float {
+func diffusion_denoise_stub(float[] noisy_sample, int t, float scale) float[] {
     diffusion_denoise_stub(noisy_sample, t, scale)
 }
 

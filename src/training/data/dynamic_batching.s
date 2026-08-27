@@ -38,25 +38,25 @@ func default_2t_packing_config() packing_config:
     return cfg
 
 struct packed_batch:
-    []int input_ids
-    []int attention_masks
-    []int position_ids
-    []int sample_boundaries
-    []float loss_weights
+    int[] input_ids
+    int[] attention_masks
+    int[] position_ids
+    int[] sample_boundaries
+    float[] loss_weights
     int num_sequences
     int total_tokens
     int total_slots
     float utilization_ratio
     int max_sequence_in_batch
-    []int original_lengths
-    []int sequence_indices
+    int[] original_lengths
+    int[] sequence_indices
     float avg_quality_score
     int batch_id
     bool is_final_in_epoch
 
 struct sequence_buffer:
     int sequence_id
-    []int token_ids
+    int[] token_ids
     int original_length
     float quality_score
     bool should_truncate
@@ -174,13 +174,13 @@ func finalize_current_bin(bin_packer_state packer) packed_batch:
         if max_len > packer.config.max_seq_len:
             max_len = packer.config.max_seq_len
     int total_slots = num_seqs * max_len
-    []int input_ids = []int{cap: total_slots}
-    []int attention_masks = []int{cap: total_slots}
-    []int position_ids = []int{cap: total_slots}
-    []int sample_boundaries = []int{cap: num_seqs + 1}
-    []float loss_weights = []float{cap: num_seqs}
-    []int original_lengths = []int{cap: num_seqs}
-    []int sequence_indices = []int{cap: num_seqs}
+    int[] input_ids = int[]{cap: total_slots}
+    int[] attention_masks = int[]{cap: total_slots}
+    int[] position_ids = int[]{cap: total_slots}
+    int[] sample_boundaries = int[]{cap: num_seqs + 1}
+    float[] loss_weights = float[]{cap: num_seqs}
+    int[] original_lengths = int[]{cap: num_seqs}
+    int[] sequence_indices = int[]{cap: num_seqs}
     int boundary_pos = 0
     sample_boundaries[0] = boundary_pos
     float total_quality = 0.0
@@ -259,11 +259,11 @@ func calculate_current_utilization(bin_packer_state packer) float:
     return float(packer.current_bin_used_tokens) / float(estimated_total_slots)
 
 struct cross_packed_batch:
-    []int input_ids
-    []int attention_masks
-    []int segment_ids
-    []int sample_boundaries
-    []float loss_weights
+    int[] input_ids
+    int[] attention_masks
+    int[] segment_ids
+    int[] sample_boundaries
+    float[] loss_weights
     int num_original_samples
     int total_tokens
     int total_allocated
@@ -275,11 +275,11 @@ func pack_samples_crosswise(
     int max_combined_length
 ) cross_packed_batch:
     cross_packed_batch result
-    result.input_ids = []int{cap: max_combined_length}
-    result.attention_masks = []int{cap: max_combined_length}
-    result.segment_ids = []int{cap: max_combined_length}
-    result.sample_boundaries = []int{cap: len(sequences) + 1}
-    result.loss_weights = []float{cap: len(sequences)}
+    result.input_ids = int[]{cap: max_combined_length}
+    result.attention_masks = int[]{cap: max_combined_length}
+    result.segment_ids = int[]{cap: max_combined_length}
+    result.sample_boundaries = int[]{cap: len(sequences) + 1}
+    result.loss_weights = float[]{cap: len(sequences)}
     int current_pos = 0
     int sample_idx = 0
     int total_real = 0
@@ -374,18 +374,18 @@ func print_packing_report(packing_statistics stats) void:
 
 func empty_packed_batch() packed_batch:
     return packed_batch{
-        input_ids: []int{cap: 0},
-        attention_masks: []int{cap: 0},
-        position_ids: []int{cap: 0},
-        sample_boundaries: []int{cap: 0},
-        loss_weights: []float{cap: 0},
+        input_ids: int[]{cap: 0},
+        attention_masks: int[]{cap: 0},
+        position_ids: int[]{cap: 0},
+        sample_boundaries: int[]{cap: 0},
+        loss_weights: float[]{cap: 0},
         num_sequences: 0,
         total_tokens: 0,
         total_slots: 0,
         utilization_ratio: 0.0,
         max_sequence_in_batch: 0,
-        original_lengths: []int{cap: 0},
-        sequence_indices: []int{cap: 0},
+        original_lengths: int[]{cap: 0},
+        sequence_indices: int[]{cap: 0},
         avg_quality_score: 0.0,
         batch_id: -1,
         false is_final_in_epoch

@@ -87,7 +87,7 @@ func remax_step(
     []tensor rewards,
     []tensor old_log_probs,
     []tensor old_values,
-    []bool dones,
+    bool[] dones,
     remax_config cfg
 ) remax_state {
     int T = rewards.len

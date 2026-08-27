@@ -25,25 +25,25 @@ struct transformer_layer_config {
 }
 
 struct transformer_layer_weights {
-    []float input_norm_weight
-    []float post_attention_norm_weight
-    []float w_q
-    []float w_k
-    []float w_v
-    []float w_o
-    []float gate_proj_weight
-    []float up_proj_weight
-    []float down_proj_weight
-    []float moe_gate_weight
-    [][]float expert_gate_weights
-    [][]float expert_up_weights
-    [][]float expert_down_weights
+    float[] input_norm_weight
+    float[] post_attention_norm_weight
+    float[] w_q
+    float[] w_k
+    float[] w_v
+    float[] w_o
+    float[] gate_proj_weight
+    float[] up_proj_weight
+    float[] down_proj_weight
+    float[] moe_gate_weight
+    float[][] expert_gate_weights
+    float[][] expert_up_weights
+    float[][] expert_down_weights
     bool use_moe
 }
 
 struct moe_routing_result {
-    []int selected_experts
-    []float weights
+    int[] selected_experts
+    float[] weights
     int num_selected
 }
 
@@ -102,8 +102,8 @@ func math_cos(float x) float {
     result
 }
 
-func rms_norm([]float hidden, []float weight, int hidden_size, float eps) []float {
-    []float output = make([]float, hidden_size)
+func rms_norm(float[] hidden, float[] weight, int hidden_size, float eps) float[] {
+    float[] output = make(float[], hidden_size)
     float sum_sq = 0.0
     int i = 0
     for i < hidden_size {
@@ -124,8 +124,8 @@ func rms_norm([]float hidden, []float weight, int hidden_size, float eps) []floa
     output
 }
 
-func matmul_vec([]float x, []float w, int in_dim, int out_dim) []float {
-    []float output = make([]float, out_dim)
+func matmul_vec(float[] x, float[] w, int in_dim, int out_dim) float[] {
+    float[] output = make(float[], out_dim)
     int o = 0
     for o < out_dim {
         float acc = 0.0
@@ -140,8 +140,8 @@ func matmul_vec([]float x, []float w, int in_dim, int out_dim) []float {
     output
 }
 
-func apply_rope([]float qk, int num_heads, int head_size, int position, float theta) []float {
-    []float output = make([]float, len(qk))
+func apply_rope(float[] qk, int num_heads, int head_size, int position, float theta) float[] {
+    float[] output = make(float[], len(qk))
     int h = 0
     for h < num_heads {
         int base = h * head_size
@@ -197,10 +197,10 @@ func math_exp_neg(float x) float {
     result
 }
 
-func swiglu_ffn([]float hidden, []float gate_w, []float up_w, []float down_w, int hidden_size, int inter_dim) []float {
-    []float gate = matmul_vec(hidden, gate_w, hidden_size, inter_dim)
-    []float up = matmul_vec(hidden, up_w, hidden_size, inter_dim)
-    []float act = make([]float, inter_dim)
+func swiglu_ffn(float[] hidden, float[] gate_w, float[] up_w, float[] down_w, int hidden_size, int inter_dim) float[] {
+    float[] gate = matmul_vec(hidden, gate_w, hidden_size, inter_dim)
+    float[] up = matmul_vec(hidden, up_w, hidden_size, inter_dim)
+    float[] act = make(float[], inter_dim)
     int i = 0
     for i < inter_dim {
         act[i] = silu(gate[i]) * up[i]
@@ -209,11 +209,11 @@ func swiglu_ffn([]float hidden, []float gate_w, []float up_w, []float down_w, in
     matmul_vec(act, down_w, inter_dim, hidden_size)
 }
 
-func moe_route([]float hidden, []float gate_weight, int hidden_size, int num_experts, int top_k) moe_routing_result {
-    []float logits = matmul_vec(hidden, gate_weight, hidden_size, num_experts)
-    []int selected = make([]int, top_k)
-    []float weights = make([]float, top_k)
-    bool[] used = make([]bool, num_experts)
+func moe_route(float[] hidden, float[] gate_weight, int hidden_size, int num_experts, int top_k) moe_routing_result {
+    float[] logits = matmul_vec(hidden, gate_weight, hidden_size, num_experts)
+    int[] selected = make(int[], top_k)
+    float[] weights = make(float[], top_k)
+    bool[] used = make(bool[], num_experts)
     int k = 0
     for k < top_k {
         float best = -1.0e30
@@ -257,9 +257,9 @@ func moe_route([]float hidden, []float gate_weight, int hidden_size, int num_exp
     moe_routing_result{selected_experts: selected, weights: weights, num_selected: top_k}
 }
 
-func moe_ffn([]float hidden, transformer_layer_weights weights, transformer_layer_config config, moe_routing_result route) []float {
+func moe_ffn(float[] hidden, transformer_layer_weights weights, transformer_layer_config config, moe_routing_result route) float[] {
     int inter = config.intermediate_size
-    []float output = make([]float, config.hidden_size)
+    float[] output = make(float[], config.hidden_size)
     int k = 0
     for k < route.num_selected {
         int expert_idx = route.selected_experts[k]
@@ -268,18 +268,18 @@ func moe_ffn([]float hidden, transformer_layer_weights weights, transformer_laye
             k = k + 1
             continue
         }
-        []float gate_w = weights.expert_gate_weights[expert_idx]
-        []float up_w = weights.expert_up_weights[expert_idx]
-        []float down_w = weights.expert_down_weights[expert_idx]
-        []float gate = matmul_vec(hidden, gate_w, config.hidden_size, inter)
-        []float up = matmul_vec(hidden, up_w, config.hidden_size, inter)
-        []float act = make([]float, inter)
+        float[] gate_w = weights.expert_gate_weights[expert_idx]
+        float[] up_w = weights.expert_up_weights[expert_idx]
+        float[] down_w = weights.expert_down_weights[expert_idx]
+        float[] gate = matmul_vec(hidden, gate_w, config.hidden_size, inter)
+        float[] up = matmul_vec(hidden, up_w, config.hidden_size, inter)
+        float[] act = make(float[], inter)
         int i = 0
         for i < inter {
             act[i] = silu(gate[i]) * up[i]
             i = i + 1
         }
-        []float expert_out = matmul_vec(act, down_w, inter, config.hidden_size)
+        float[] expert_out = matmul_vec(act, down_w, inter, config.hidden_size)
         int j = 0
         for j < config.hidden_size {
             output[j] = output[j] + weight * expert_out[j]
@@ -291,31 +291,31 @@ func moe_ffn([]float hidden, transformer_layer_weights weights, transformer_laye
 }
 
 func transformer_layer_forward(
-    []float hidden,
+    float[] hidden,
     transformer_layer_weights weights,
     transformer_layer_config config,
     paged_kv_cache cache,
     []slot_mapping slots,
     int position
-) ([]float, paged_kv_cache) {
+) (float[], paged_kv_cache) {
     int hidden_size = config.hidden_size
     int num_heads = config.num_heads
     int num_kv_heads = config.num_kv_heads
     int head_size = config.head_size
     float scale = 1.0 / sqrt_approx(float(head_size))
-    []float normed = rms_norm(hidden, weights.input_norm_weight, hidden_size, config.rms_eps)
-    []float q = matmul_vec(normed, weights.w_q, hidden_size, num_heads * head_size)
-    []float k = matmul_vec(normed, weights.w_k, hidden_size, num_kv_heads * head_size)
-    []float v = matmul_vec(normed, weights.w_v, hidden_size, num_kv_heads * head_size)
+    float[] normed = rms_norm(hidden, weights.input_norm_weight, hidden_size, config.rms_eps)
+    float[] q = matmul_vec(normed, weights.w_q, hidden_size, num_heads * head_size)
+    float[] k = matmul_vec(normed, weights.w_k, hidden_size, num_kv_heads * head_size)
+    float[] v = matmul_vec(normed, weights.w_v, hidden_size, num_kv_heads * head_size)
     q = apply_rope(q, num_heads, head_size, position, config.rope_theta)
     k = apply_rope(k, num_kv_heads, head_size, position, config.rope_theta)
     cache = write_kv_to_cache(cache, k, v, position)
-    []float attn_out = make([]float, num_heads * head_size)
+    float[] attn_out = make(float[], num_heads * head_size)
     []slot_mapping single_slot = []slot_mapping{}
     if position < len(slots) {
         single_slot = append(single_slot, slots[position])
     }
-    []float local_slots_kv = slots
+    float[] local_slots_kv = slots
     if position + 1 < len(slots) {
         local_slots_kv = slots[0:position+1]
     }
@@ -324,22 +324,22 @@ func transformer_layer_forward(
     } else {
         attn_out = compute_paged_attention(cache, q, attn_out, local_slots_kv, num_heads, head_size, scale)
     }
-    []float attn_proj = matmul_vec(attn_out, weights.w_o, num_heads * head_size, hidden_size)
-    []float residual = make([]float, hidden_size)
+    float[] attn_proj = matmul_vec(attn_out, weights.w_o, num_heads * head_size, hidden_size)
+    float[] residual = make(float[], hidden_size)
     int i = 0
     for i < hidden_size {
         residual[i] = hidden[i] + attn_proj[i]
         i = i + 1
     }
-    []float normed2 = rms_norm(residual, weights.post_attention_norm_weight, hidden_size, config.rms_eps)
-    []float ffn_out
+    float[] normed2 = rms_norm(residual, weights.post_attention_norm_weight, hidden_size, config.rms_eps)
+    float[] ffn_out
     if weights.use_moe && config.num_experts > 0 {
         moe_routing_result route = moe_route(normed2, weights.moe_gate_weight, hidden_size, config.num_experts, config.num_experts_per_tok)
         ffn_out = moe_ffn(normed2, weights, config, route)
     } else {
         ffn_out = swiglu_ffn(normed2, weights.gate_proj_weight, weights.up_proj_weight, weights.down_proj_weight, hidden_size, config.intermediate_size)
     }
-    []float output = make([]float, hidden_size)
+    float[] output = make(float[], hidden_size)
     i = 0
     for i < hidden_size {
         output[i] = residual[i] + ffn_out[i]
@@ -357,20 +357,20 @@ func make_identity_weights(transformer_layer_config config) transformer_layer_we
     if total_experts <= 0 {
         total_experts = 1
     }
-    []float norm_w = make([]float, hidden)
+    float[] norm_w = make(float[], hidden)
     int i = 0
     for i < hidden {
         norm_w[i] = 1.0
         i = i + 1
     }
-    []float w_q = identity_matrix(hidden, q_dim)
-    []float w_k = identity_matrix(hidden, kv_dim)
-    []float w_v = identity_matrix(hidden, kv_dim)
-    []float w_o = identity_matrix(q_dim, hidden)
-    []float gate_w = identity_matrix(hidden, inter)
-    []float up_w = identity_matrix(hidden, inter)
-    []float down_w = identity_matrix(inter, hidden)
-    []float moe_gate = make([]float, hidden * total_experts)
+    float[] w_q = identity_matrix(hidden, q_dim)
+    float[] w_k = identity_matrix(hidden, kv_dim)
+    float[] w_v = identity_matrix(hidden, kv_dim)
+    float[] w_o = identity_matrix(q_dim, hidden)
+    float[] gate_w = identity_matrix(hidden, inter)
+    float[] up_w = identity_matrix(hidden, inter)
+    float[] down_w = identity_matrix(inter, hidden)
+    float[] moe_gate = make(float[], hidden * total_experts)
     int e = 0
     for e < total_experts {
         int j = 0
@@ -382,9 +382,9 @@ func make_identity_weights(transformer_layer_config config) transformer_layer_we
         }
         e = e + 1
     }
-    [][]float expert_gate = make([][]float, total_experts)
-    [][]float expert_up = make([][]float, total_experts)
-    [][]float expert_down = make([][]float, total_experts)
+    float[][] expert_gate = make(float[][], total_experts)
+    float[][] expert_up = make(float[][], total_experts)
+    float[][] expert_down = make(float[][], total_experts)
     e = 0
     for e < total_experts {
         expert_gate[e] = identity_matrix(hidden, inter)
@@ -410,8 +410,8 @@ func make_identity_weights(transformer_layer_config config) transformer_layer_we
     }
 }
 
-func identity_matrix(int in_dim, int out_dim) []float {
-    []float w = make([]float, out_dim * in_dim)
+func identity_matrix(int in_dim, int out_dim) float[] {
+    float[] w = make(float[], out_dim * in_dim)
     int i = 0
     for i < out_dim && i < in_dim {
         w[i * in_dim + i] = 1.0

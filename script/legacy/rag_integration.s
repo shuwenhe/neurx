@@ -15,7 +15,7 @@ struct document {
 struct embedding {
     embedding_id        string
     document_id         string
-    vector              []float64
+    vector              float[]64
     dimension           int
     model               string
 }
@@ -84,7 +84,7 @@ func (ragintegration* rag) load_knowledge_base(
     fmt.Printf("\n[KnowledgeBase] Loading knowledge base\n")
     fmt.Printf("  Documents: %d\n", doc_count)
     fmt.Printf("  Avg Length: %d words\n", avg_doc_length)
-    sources := []string{"wikipedia", "arXiv", "news", "documentation"}
+    sources := string[]{"wikipedia", "arXiv", "news", "documentation"}
     for i := 0; i < doc_count; i++ {
         doc_id := fmt.Sprintf("doc_%d", i)
         doc := document{
@@ -110,7 +110,7 @@ func (ragintegration* rag) generate_embeddings() {
     fmt.Printf("  Dimension: 768\n")
     for doc_id := range rag.vector_db.documents {
         embedding_id := fmt.Sprintf("emb_%s", doc_id)
-        vector := make([]float64, 768)
+        vector := make(float[]64, 768)
         for j := 0; j < 768; j++ {
             vector[j] = math.Sin(float64(j)*0.01) * 0.5
         }
@@ -127,7 +127,7 @@ func (ragintegration* rag) generate_embeddings() {
     fmt.Printf("  ✓ Embeddings generated: %d\n", len(rag.vector_db.embeddings))
 }
 
-func (ragintegration* rag) cosine_similarity(vec1 []float64, vec2 []float64) float64 {
+func (ragintegration* rag) cosine_similarity(vec1 float[]64, vec2 float[]64) float64 {
     if len(vec1) != len(vec2) {
         return 0.0
     }
@@ -149,7 +149,7 @@ func (ragintegration* rag) cosine_similarity(vec1 []float64, vec2 []float64) flo
 
 func (ragintegration* rag) retrieve_relevant_documents(
     query string,
-    query_embedding []float64) []retrieval_result {
+    query_embedding float[]64) []retrieval_result {
     if rag.config.cache_enabled {
         if cached, exists := rag.cache[query]; exists {
             fmt.Printf("  cache hit for query\n")
@@ -293,13 +293,13 @@ func (ragintegration* rag) run_complete_rag_cycle() {
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Processing Queries                    │")
     fmt.Println("└────────────────────────────────────────┘")
-    queries := []string{
+    queries := string[]{
         "What is machine learning",
         "How to train LLMs",
         "What is RAG",
     }
     for _, query := range queries {
-        query_embedding := make([]float64, 768)
+        query_embedding := make(float[]64, 768)
         for i := 0; i < 768; i++ {
             query_embedding[i] = math.Cos(float64(i)*0.01) * 0.5
         }

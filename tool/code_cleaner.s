@@ -1,7 +1,7 @@
 package main
 
-func read_file_lines(string filepath) []string {
-    []string lines
+func read_file_lines(string filepath) string[] {
+    string[] lines
     return lines
 }
 
@@ -35,8 +35,8 @@ func is_blank_line(string line) bool {
     return trim_right(line) == ""
 }
 
-func clean_file_lines([]string lines) []string {
-    []string result
+func clean_file_lines(string[] lines) string[] {
+    string[] result
     bool last_was_blank = false
     for i := 0; i < len(lines); i = i + 1 {
         string line = lines[i]

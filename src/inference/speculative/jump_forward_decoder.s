@@ -1,24 +1,24 @@
 package neurx.inference.speculative.jump_forward_decoder
 
 struct jump_forward_fsm {
-    []int from_states
-    []int to_states
-    []int byte_values
-    []int final_states
+    int[] from_states
+    int[] to_states
+    int[] byte_values
+    int[] final_states
     int edge_count
     int final_count
     int max_jump_steps
 }
 
 struct jump_forward_result {
-    []int bytes
+    int[] bytes
     int next_state
     int step_count
     bool jumped
 }
 
-func jump_forward_int_array(int capacity) []int {
-    []int values = []int{cap: capacity}
+func jump_forward_int_array(int capacity) int[] {
+    int[] values = int[]{cap: capacity}
     int i = 0
     for i < capacity { values[i] = 0; i = i + 1 }
     values
@@ -73,7 +73,7 @@ func jump_forward_unique_edge(jump_forward_fsm fsm, int state) int {
     0 - 1
 }
 
-func jump_forward_contains_state([]int states, int count, int state) bool {
+func jump_forward_contains_state(int[] states, int count, int state) bool {
     int i = 0
     for i < count {
         if states[i] == state { return true }
@@ -83,8 +83,8 @@ func jump_forward_contains_state([]int states, int count, int state) bool {
 }
 
 func jump_forward_try(jump_forward_fsm fsm, int initial_state) jump_forward_result {
-    []int bytes = jump_forward_int_array(fsm.max_jump_steps)
-    []int visited = jump_forward_int_array(fsm.max_jump_steps + 1)
+    int[] bytes = jump_forward_int_array(fsm.max_jump_steps)
+    int[] visited = jump_forward_int_array(fsm.max_jump_steps + 1)
     int visited_count = 0
     int current = initial_state
     int steps = 0
@@ -97,7 +97,7 @@ func jump_forward_try(jump_forward_fsm fsm, int initial_state) jump_forward_resu
         current = fsm.to_states[edge_index]
         steps = steps + 1
     }
-    []int result_bytes = jump_forward_int_array(steps)
+    int[] result_bytes = jump_forward_int_array(steps)
     int i = 0
     for i < steps { result_bytes[i] = bytes[i]; i = i + 1 }
     jump_forward_result {bytes: result_bytes, next_state: current, step_count: steps, jumped: steps > 1}

@@ -47,11 +47,11 @@ struct dataset_splits {
 func new_clean_config_from_env() clean_config {
     neurx_home := get_env("NEURX_HOME", ".")
     clean_config{
-        raw_dir: get_env("RAW_DIR", path_join([]string{neurx_home, "dataset", "pretrain", "raw"})),
-        cleaned_dir: get_env("CLEANED_DIR", path_join([]string{neurx_home, "dataset", "pretrain", "cleaned"})),
-        output_file: get_env("OUTPUT_FILE", path_join([]string{neurx_home, "dataset", "pretrain", "cleaned", "pretrain_data_cleaned.jsonl"})),
-        manifest_file: get_env("MANIFEST_FILE", path_join([]string{neurx_home, "dataset", "pretrain", "manifest.json"})),
-        checkpoint_file: get_env("CHECKPOINT_FILE", path_join([]string{neurx_home, "dataset", "pretrain", "cleaned", ".cleaning_checkpoint.json"})),
+        raw_dir: get_env("RAW_DIR", path_join(string[]{neurx_home, "dataset", "pretrain", "raw"})),
+        cleaned_dir: get_env("CLEANED_DIR", path_join(string[]{neurx_home, "dataset", "pretrain", "cleaned"})),
+        output_file: get_env("OUTPUT_FILE", path_join(string[]{neurx_home, "dataset", "pretrain", "cleaned", "pretrain_data_cleaned.jsonl"})),
+        manifest_file: get_env("MANIFEST_FILE", path_join(string[]{neurx_home, "dataset", "pretrain", "manifest.json"})),
+        checkpoint_file: get_env("CHECKPOINT_FILE", path_join(string[]{neurx_home, "dataset", "pretrain", "cleaned", ".cleaning_checkpoint.json"})),
         checkpoint_interval: 200,
     }
 }
@@ -109,8 +109,8 @@ pub func clean_data(clean_config config) bool {
     true
 }
 
-func find_source_files(string raw_dir) []string {
-    supported := []string{".jsonl", ".txt", ".xml", ".xml.bz2"}
+func find_source_files(string raw_dir) string[] {
+    supported := string[]{".jsonl", ".txt", ".xml", ".xml.bz2"}
     dir_list_files(raw_dir, supported)
 }
 
@@ -188,7 +188,7 @@ func process_text(clean_config config, string content, *clean_stats stats, map s
 }
 
 func process_xml(clean_config config, string content, *clean_stats stats, map seen_hashes[string]bool) bool {
-    text_blocks := []string{}
+    text_blocks := string[]{}
     lines := string_split(content, "\n")
     in_tag := false
     current_text := ""
@@ -306,9 +306,9 @@ func finalize_dataset(clean_config config, *clean_stats stats) bool {
     log_info("  • Val split: " + i64_to_string(val_size) + " (" + i64_to_string(val_size * 100 / total_lines) + "%)")
     log_info("  • Test split: " + i64_to_string(test_size) + " (" + i64_to_string(test_size * 100 / total_lines) + "%)")
     splits := dataset_splits{
-        train_file: path_join([]string{config.cleaned_dir, "train.jsonl"}),
-        val_file: path_join([]string{config.cleaned_dir, "val.jsonl"}),
-        test_file: path_join([]string{config.cleaned_dir, "test.jsonl"}),
+        train_file: path_join(string[]{config.cleaned_dir, "train.jsonl"}),
+        val_file: path_join(string[]{config.cleaned_dir, "val.jsonl"}),
+        test_file: path_join(string[]{config.cleaned_dir, "test.jsonl"}),
     }
     if !split_dataset(config.output_file, splits, train_size, val_size) {
         log_error("Failed to split dataset")

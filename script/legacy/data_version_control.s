@@ -42,7 +42,7 @@ struct dataset_version {
     quality_metrics     data_quality_metrics
     provenance          data_provenance
     compliance_checks   map[string]bool
-    lineage             []string
+    lineage             string[]
 }
 
 struct data_version_control {
@@ -55,7 +55,7 @@ struct data_version_control {
 struct data_governance_report {
     dataset_name        string
     total_versions      int
-    quality_trend       []float64
+    quality_trend       float[]64
     compliance_status   string
     audit_summary       string
 }
@@ -103,7 +103,7 @@ func (data_version_control* dvc) register_dataset_version(
             format:       format,
         },
         compliance_checks: make(map[string]bool),
-        lineage:           make([]string, 0),
+        lineage:           make(string[], 0),
     }
     if _, exists := dvc.datasets[dataset_name]; !exists {
         dvc.datasets[dataset_name] = make([]dataset_version, 0)
@@ -161,7 +161,7 @@ func (data_version_control* dvc) run_compliance_checks(
     version_number int) {
     version_id := fmt.Sprintf("%s-v%d", dataset_name, version_number)
     fmt.Printf("\n[Compliance] Running compliance checks for %s:\n", version_id)
-    compliance_checks := []string{
+    compliance_checks := string[]{
         "PII_Detection",
         "Data_Diversity",
         "Bias_Assessment",
@@ -190,7 +190,7 @@ func (data_version_control* dvc) run_compliance_checks(
 func (data_version_control* dvc) add_to_lineage(
     dataset_name string,
     version_number int,
-    parent_versions []string) {
+    parent_versions string[]) {
     version_id := fmt.Sprintf("%s-v%d", dataset_name, version_number)
     fmt.Printf("\n[Lineage] Tracking lineage for %s:\n", version_id)
     fmt.Printf("  Parents: %d\n", len(parent_versions))
@@ -264,7 +264,7 @@ func (data_version_control* dvc) generate_governance_report(
         fmt.Println("Version History:")
         fmt.Println("  V   Created      Samples    Quality    Compliance")
         fmt.Println("  ──────────────────────────────────────────────────")
-        var quality_trend []float64
+        var quality_trend float[]64
         for _, version := range versions {
             quality := version.quality_metrics.quality_score * 100
             quality_trend = append(quality_trend, quality)
@@ -338,8 +338,8 @@ func (data_version_control* dvc) run_complete_version_control_cycle() {
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Tracking Data Lineage                 │")
     fmt.Println("└────────────────────────────────────────┘")
-    dvc.add_to_lineage("wikitext", 2, []string{"wikitext-v1"})
-    dvc.add_to_lineage("wikitext", 3, []string{"wikitext-v1", "wikitext-v2"})
+    dvc.add_to_lineage("wikitext", 2, string[]{"wikitext-v1"})
+    dvc.add_to_lineage("wikitext", 3, string[]{"wikitext-v1", "wikitext-v2"})
     dvc.get_data_provenance("wikitext", 1)
     dvc.get_audit_trail("wikitext")
     dvc.generate_governance_report("wikitext")

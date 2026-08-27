@@ -8,7 +8,7 @@ func load_text_dataset(dataset ds) (dataset, error) {
     if len(ds.config.path) == 0 {
         return ds, error{message: "No path specified for text dataset"}
     }
-    []string lines = read_lines(ds.config.path)
+    string[] lines = read_lines(ds.config.path)
     int max_samples = ds.config.max_samples
     if max_samples <= 0 || max_samples > len(lines) {
         max_samples = len(lines)
@@ -21,7 +21,7 @@ func load_text_dataset(dataset ds) (dataset, error) {
         if len(line) == 0 {
             continue
         }
-        []int tokens = tokenize_text(line)
+        int[] tokens = tokenize_text(line)
         if ds.config.max_length > 0  len(tokens) > ds.config.max_length {
             tokens = truncate(tokens, ds.config.max_length)
         }
@@ -50,16 +50,16 @@ func load_text_dataset(dataset ds) (dataset, error) {
     (ds, nil)
 }
 
-func tokenize_text(string text) []int {
-    []int tokens = []int{cap: len(text)}
+func tokenize_text(string text) int[] {
+    int[] tokens = int[]{cap: len(text)}
     for i in 0..len(text) {
         tokens[i] = int(text[i])
     }
     tokens
 }
 
-func truncate([]int tokens, int max_len) []int {
-    []int result = []int{cap: max_len}
+func truncate(int[] tokens, int max_len) int[] {
+    int[] result = int[]{cap: max_len}
     for i in 0..min(max_len, len(tokens)) {
         result[i] = tokens[i]
     }
@@ -79,8 +79,8 @@ func is_space(byte c) bool {
     c == 32 || c == 9 || c == 10 || c == 13
 }
 
-func read_lines(string path) []string {
-    []string{
+func read_lines(string path) string[] {
+    string[]{
         "Hello world",
         "This is a sample sentence",
         "Machine learning is fascinating",

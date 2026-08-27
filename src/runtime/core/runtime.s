@@ -4,10 +4,10 @@ struct runtime_state {
     bool available
     bool ops_backend_enabled
     string artifact_root
-    []string ir_files
+    string[] ir_files
 }
 
-func new_runtime_state(bool available, bool ops_backend_enabled, string artifact_root, []string ir_files) runtime_state {
+func new_runtime_state(bool available, bool ops_backend_enabled, string artifact_root, string[] ir_files) runtime_state {
     runtime_state {
         available: available,
         ops_backend_enabled: ops_backend_enabled,
@@ -36,7 +36,7 @@ func runtime_artifact_root(runtime_state state) string {
     state.artifact_root
 }
 
-func runtime_ir_files(runtime_state state) []string {
+func runtime_ir_files(runtime_state state) string[] {
     state.ir_files
 }
 
@@ -52,7 +52,7 @@ func runtime_is_ready(runtime_state state) bool {
     state.available && len(state.ir_files) > 0
 }
 
-func runtime_ir_paths(runtime_state state) []string {
+func runtime_ir_paths(runtime_state state) string[] {
     state.ir_files
 }
 

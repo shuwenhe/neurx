@@ -4,8 +4,8 @@ use neurx.util.logger
 struct cuda_graph_node {
     int node_id
     string operation
-    []int input_ids
-    []int output_ids
+    int[] input_ids
+    int[] output_ids
     bool is_executed
 }
 
@@ -23,7 +23,7 @@ struct cuda_graph_manager {
     []cuda_graph graphs
     int next_graph_id
     int max_graphs
-    []string kernel_cache
+    string[] kernel_cache
     int cache_size
 }
 
@@ -32,7 +32,7 @@ func new_cuda_graph_manager(int max_graphs) cuda_graph_manager {
         graphs: []cuda_graph{},
         next_graph_id: 0,
         max_graphs: max_graphs,
-        kernel_cache: []string{},
+        kernel_cache: string[]{},
         cache_size: 0,
     }
 }
@@ -63,8 +63,8 @@ func create_cuda_graph(
 func add_operation_to_graph(
     cuda_graph graph,
     string operation,
-    []int inputs,
-    []int outputs
+    int[] inputs,
+    int[] outputs
 ) cuda_graph {
     node = cuda_graph_node {
         node_id: graph.total_nodes,
@@ -86,12 +86,12 @@ func freeze_cuda_graph(cuda_graph graph) cuda_graph {
     return new_graph
 }
 
-func execute_cuda_graph(cuda_graph graph, []float input_data) (cuda_graph, []float) {
+func execute_cuda_graph(cuda_graph graph, float[] input_data) (cuda_graph, float[]) {
     if !graph.is_frozen {
         logger.warning("Cannot execute non-frozen graph")
-        return graph, []float{}
+        return graph, float[]{}
     }
-    output_data = []float{}
+    output_data = float[]{}
     new_graph = graph
     i = 0
     for i < len(graph.nodes) {
@@ -218,13 +218,13 @@ func main() {
     println("Created graph with ID: " + string(graph_id))
     if graph_id >= 0 && graph_id < len(manager.graphs) {
         graph = manager.graphs[graph_id]
-        graph = add_operation_to_graph(graph, "gemm", []int{0, 1}, []int{2})
-        graph = add_operation_to_graph(graph, "activation", []int{2}, []int{3})
-        graph = add_operation_to_graph(graph, "softmax", []int{3}, []int{4})
+        graph = add_operation_to_graph(graph, "gemm", int[]{0, 1}, int[]{2})
+        graph = add_operation_to_graph(graph, "activation", int[]{2}, int[]{3})
+        graph = add_operation_to_graph(graph, "softmax", int[]{3}, int[]{4})
         graph = optimize_cuda_graph(graph)
         graph = freeze_cuda_graph(graph)
         println(get_graph_stats(graph))
-        input_data = []float{1.0, 2.0, 3.0, 4.0}
+        input_data = float[]{1.0, 2.0, 3.0, 4.0}
         graph, output = execute_cuda_graph(graph, input_data)
         println("Graph execution completed")
         println("Output size: " + string(len(output)))

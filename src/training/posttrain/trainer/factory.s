@@ -141,7 +141,7 @@ func int_to_str(int n) string {
         negative = true
         n = 0 - n
     }
-    []string digits = []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
+    string[] digits = string[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
     for n > 0 {
         int digit = n - (n / 10) * 10
         result = digits[digit] + result

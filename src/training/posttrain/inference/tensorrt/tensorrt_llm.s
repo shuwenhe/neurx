@@ -16,7 +16,7 @@ struct tensorrt_config {
     f32 kv_cache_free_gpu_memory_fraction
     bool use_paged_kv_cache
     string lora_dir
-    lora_target_modules: []string
+    lora_target_modules: string[]
 }
 
 struct tensorrt_engine {
@@ -48,8 +48,8 @@ struct tensorrt_model_engine {
 struct tensorrt_decoder {
     tensorrt_config config
     SamplingConfig sampling_config
-    stop_words: []string
-    bad_words: []string
+    stop_words: string[]
+    bad_words: string[]
 }
 
 func new_tensorrt_engine(tensorrt_config config) . tensorrt_engine {

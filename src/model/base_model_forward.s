@@ -6,7 +6,7 @@ use neurx.model.transformer_ops.{
 use std.io.eprintln
 
 func model_forward(
-    []int input_ids,
+    int[] input_ids,
     model_weights weights,
     int batch_size,
     int seq_len,
@@ -15,13 +15,13 @@ func model_forward(
     int num_heads,
     int intermediate_size,
     int vocab_size
-) []float {
+) float[] {
     eprintln("[Model Forward] Starting forward pass")
     eprintln("[Model Forward] Batch=" + int_to_str(batch_size) +
              " Seq=" + int_to_str(seq_len) +
              " Hidden=" + int_to_str(hidden_size))
     eprintln("[Model Forward] Step 1/4: Embedding lookup")
-    []float hidden_states = embedding_lookup(
+    float[] hidden_states = embedding_lookup(
         input_ids, weights.embed_tokens,
         batch_size, seq_len, hidden_size, vocab_size
     )
@@ -62,7 +62,7 @@ func model_forward(
     )
     eprintln("[Model Forward] Step 4/4: LM head projection")
     int total_tokens = batch_size * seq_len
-    []float logits = matmul(
+    float[] logits = matmul(
         hidden_states,
         weights.embed_tokens,
         total_tokens,
@@ -74,7 +74,7 @@ func model_forward(
 }
 
 func model_forward_with_lora(
-    []int input_ids,
+    int[] input_ids,
     model_weights weights,
     []lora_adapter lora_adapters,
     int batch_size,
@@ -84,7 +84,7 @@ func model_forward_with_lora(
     int num_heads,
     int intermediate_size,
     int vocab_size
-) []float {
+) float[] {
     model_forward(
         input_ids, weights,
         batch_size, seq_len, hidden_size,
@@ -94,8 +94,8 @@ func model_forward_with_lora(
 
 struct lora_adapter {
     string name
-    []float lora_a
-    []float lora_b
+    float[] lora_a
+    float[] lora_b
     int rank
     float scaling
 }

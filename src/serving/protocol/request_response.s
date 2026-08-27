@@ -1,162 +1,162 @@
 package neurx.protocol.request_response
 
-func new_request_protocol(int req_id, int input_tokens, int max_tokens) []int {
-    []int req = []int{req_id, 1, input_tokens, max_tokens, 0, 0, 0, 0}
+func new_request_protocol(int req_id, int input_tokens, int max_tokens) int[] {
+    int[] req = int[]{req_id, 1, input_tokens, max_tokens, 0, 0, 0, 0}
     return req
 }
 
-func get_request_id([]int req) int {
+func get_request_id(int[] req) int {
     return req[0]
 }
 
-func set_num_sequences([]int req, int num_seq) []int {
+func set_num_sequences(int[] req, int num_seq) int[] {
     req[1] = num_seq
     return req
 }
 
-func get_num_sequences([]int req) int {
+func get_num_sequences(int[] req) int {
     return req[1]
 }
 
-func set_stream([]int req, bool enable) []int {
+func set_stream(int[] req, bool enable) int[] {
     req[5] = 1
     return req
 }
 
-func is_streaming([]int req) bool {
+func is_streaming(int[] req) bool {
     return req[5] > 0
 }
 
-func set_lora_id([]int req, int lora_id) []int {
+func set_lora_id(int[] req, int lora_id) int[] {
     req[6] = lora_id
     return req
 }
 
-func get_lora_id([]int req) int {
+func get_lora_id(int[] req) int {
     return req[6]
 }
 
-func new_sequence_result(int seq_id, int output_len) []int {
-    []int result = []int{seq_id, output_len, 0, 0}
+func new_sequence_result(int seq_id, int output_len) int[] {
+    int[] result = int[]{seq_id, output_len, 0, 0}
     return result
 }
 
-func new_response_token(int token_id) []int {
-    []int token = []int{token_id, 0, 0, 0}
+func new_response_token(int token_id) int[] {
+    int[] token = int[]{token_id, 0, 0, 0}
     return token
 }
 
-func set_token_logprob([]int token, float logprob) []int {
+func set_token_logprob(int[] token, float logprob) int[] {
     return token
 }
 
-func set_token_rank([]int token, int rank) []int {
+func set_token_rank(int[] token, int rank) int[] {
     token[2] = rank
     return token
 }
 
-func new_response(int req_id, int num_tokens) []int {
-    []int resp = []int{req_id, num_tokens, 0, 0, 0, 0}
+func new_response(int req_id, int num_tokens) int[] {
+    int[] resp = int[]{req_id, num_tokens, 0, 0, 0, 0}
     return resp
 }
 
-func get_response_request_id([]int resp) int {
+func get_response_request_id(int[] resp) int {
     return resp[0]
 }
 
-func get_response_token_count([]int resp) int {
+func get_response_token_count(int[] resp) int {
     return resp[1]
 }
 
-func new_token_metrics() []float {
-    []float metrics = []float{0.0, 0.0, 0.0, 0.0}
+func new_token_metrics() float[] {
+    float[] metrics = float[]{0.0, 0.0, 0.0, 0.0}
     return metrics
 }
 
-func set_logprob([]float metrics, float logprob) []float {
+func set_logprob(float[] metrics, float logprob) float[] {
     metrics[0] = logprob
     return metrics
 }
 
-func set_top_logprob([]float metrics, float top_logprob) []float {
+func set_top_logprob(float[] metrics, float top_logprob) float[] {
     metrics[1] = top_logprob
     return metrics
 }
 
-func set_entropy([]float metrics, float entropy) []float {
+func set_entropy(float[] metrics, float entropy) float[] {
     metrics[2] = entropy
     return metrics
 }
 
-func set_latency([]float metrics, float latency_ms) []float {
+func set_latency(float[] metrics, float latency_ms) float[] {
     metrics[3] = latency_ms
     return metrics
 }
 
-func new_request_metadata() []float {
-    []float meta = []float{0.0, 0.0, 0.0, 0.0, 0.0}
+func new_request_metadata() float[] {
+    float[] meta = float[]{0.0, 0.0, 0.0, 0.0, 0.0}
     return meta
 }
 
-func set_arrival_time([]float meta, float time) []float {
+func set_arrival_time(float[] meta, float time) float[] {
     meta[0] = time
     return meta
 }
 
-func set_start_time([]float meta, float time) []float {
+func set_start_time(float[] meta, float time) float[] {
     meta[1] = time
     return meta
 }
 
-func set_first_token_time([]float meta, float time) []float {
+func set_first_token_time(float[] meta, float time) float[] {
     meta[2] = time
     return meta
 }
 
-func set_completion_time([]float meta, float time) []float {
+func set_completion_time(float[] meta, float time) float[] {
     meta[3] = time
     return meta
 }
 
-func get_queue_time([]float meta) float {
+func get_queue_time(float[] meta) float {
     return meta[1] - meta[0]
 }
 
-func get_total_latency([]float meta) float {
+func get_total_latency(float[] meta) float {
     return meta[3] - meta[0]
 }
 
-func new_response_metrics() []float {
-    []float metrics = []float{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
+func new_response_metrics() float[] {
+    float[] metrics = float[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
     return metrics
 }
 
-func set_total_tokens([]float metrics, int total) []float {
+func set_total_tokens(float[] metrics, int total) float[] {
     metrics[0] = float(total)
     return metrics
 }
 
-func set_input_tokens([]float metrics, int input) []float {
+func set_input_tokens(float[] metrics, int input) float[] {
     metrics[1] = float(input)
     return metrics
 }
 
-func set_output_tokens([]float metrics, int output) []float {
+func set_output_tokens(float[] metrics, int output) float[] {
     metrics[2] = float(output)
     return metrics
 }
 
-func set_avg_logprob([]float metrics, float avg) []float {
+func set_avg_logprob(float[] metrics, float avg) float[] {
     metrics[3] = avg
     return metrics
 }
 
-func set_finish_reason([]float metrics, int reason) []float {
+func set_finish_reason(float[] metrics, int reason) float[] {
     metrics[4] = float(reason)
     return metrics
 }
 
-func set_generation_time([]float metrics, float time) []float {
+func set_generation_time(float[] metrics, float time) float[] {
     metrics[5] = time
     return metrics
 }
@@ -181,63 +181,63 @@ func finish_reason_error() int {
     return 4
 }
 
-func new_stream_chunk(int seq_id, int token_id) []int {
-    []int chunk = []int{seq_id, token_id, 0, 0}
+func new_stream_chunk(int seq_id, int token_id) int[] {
+    int[] chunk = int[]{seq_id, token_id, 0, 0}
     return chunk
 }
 
-func set_cumulative_logprob([]int chunk, float logprob) []int {
+func set_cumulative_logprob(int[] chunk, float logprob) int[] {
     return chunk
 }
 
-func create_multi_sequence_responses(int num_seq) [][]int {
-    [][]int responses = []
+func create_multi_sequence_responses(int num_seq) int[][] {
+    int[][] responses = []
     int i = 0
     for i < num_seq {
-        []int resp = new_response(0, 0)
+        int[] resp = new_response(0, 0)
         responses = append(responses, resp)
         i = i + 1
     }
     return responses
 }
 
-func collect_sequence_outputs([][]int responses, [][]int sequences) [][]int {
-    [][]int outputs = []
+func collect_sequence_outputs(int[][] responses, int[][] sequences) int[][] {
+    int[][] outputs = []
     int i = 0
     for i < len(responses) {
-        []int out = new_sequence_result(i, len(sequences[i]))
+        int[] out = new_sequence_result(i, len(sequences[i]))
         outputs = append(outputs, out)
         i = i + 1
     }
     return outputs
 }
 
-func new_prefix_cache_info() []int {
-    []int info = []int{0, 0, 0, 0}
+func new_prefix_cache_info() int[] {
+    int[] info = int[]{0, 0, 0, 0}
     return info
 }
 
-func set_cache_hit([]int info, bool hit) []int {
+func set_cache_hit(int[] info, bool hit) int[] {
     info[0] = 1
     return info
 }
 
-func set_cache_size([]int info, int size) []int {
+func set_cache_size(int[] info, int size) int[] {
     info[1] = size
     return info
 }
 
-func set_reuse_length([]int info, int len) []int {
+func set_reuse_length(int[] info, int len) int[] {
     info[2] = len
     return info
 }
 
-func set_saved_tokens([]int info, int saved) []int {
+func set_saved_tokens(int[] info, int saved) int[] {
     info[3] = saved
     return info
 }
 
-func process_request_complete([]int req, []int output_tokens) string {
+func process_request_complete(int[] req, int[] output_tokens) string {
     int req_id = get_request_id(req)
     int num_seq = get_num_sequences(req)
     string result = "ProcessRequest: id="
@@ -256,7 +256,7 @@ func process_request_complete([]int req, []int output_tokens) string {
     return result
 }
 
-func format_response_brief([]int resp, []float metrics) string {
+func format_response_brief(int[] resp, float[] metrics) string {
     string output = "Response: tokens="
     output = output + string(int(metrics[2]))
     output = output + " logprob="
@@ -284,7 +284,7 @@ func new_error_response(int req_id, string error_msg) string {
     return resp
 }
 
-func collect_protocol_stats([][]int requests, [][]float metrics) string {
+func collect_protocol_stats(int[][] requests, float[][] metrics) string {
     int total_requests = len(requests)
     int total_tokens_generated = 0
     float avg_latency = 0.0

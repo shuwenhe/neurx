@@ -10,7 +10,7 @@ struct gpu_device {
 
 struct gpu_tensor {
     int gpu_id
-    []float host_data
+    float[] host_data
     int size
     string dtype
 }
@@ -26,11 +26,11 @@ func allocate_gpu_memory(int gpu_id, int size_mb) gpu_tensor {
 func free_gpu_memory(gpu_tensor tensor) {
 }
 
-func gpu_to_host(gpu_tensor tensor) []float {
-    return []float{}
+func gpu_to_host(gpu_tensor tensor) float[] {
+    return float[]{}
 }
 
-func host_to_gpu(gpu_tensor tensor, []float host_data) gpu_tensor {
+func host_to_gpu(gpu_tensor tensor, float[] host_data) gpu_tensor {
     return tensor
 }
 
@@ -57,10 +57,10 @@ struct inference_checkpoint {
     int checkpoint_id
     int tokens_generated
     int current_position
-    []float kv_cache_keys
-    []float kv_cache_values
-    []float temperature_history
-    []int top_k_history
+    float[] kv_cache_keys
+    float[] kv_cache_values
+    float[] temperature_history
+    int[] top_k_history
     float top_p_value
     int64 timestamp_ms
     string model_id
@@ -136,19 +136,19 @@ struct tp_config {
 struct tp_weight_shard {
     int rank
     int world_size
-    []float weight_shard
+    float[] weight_shard
     string shard_type
 }
 
 func shard_linear_weight(
-    []float weight,
+    float[] weight,
     int rank,
     int world_size,
     string shard_type
 ) tp_weight_shard {
     cols = len(weight[0])
     cols_per_rank = cols / world_size
-    shard = make([]float, 4096 * cols_per_rank)
+    shard = make(float[], 4096 * cols_per_rank)
     for i < len(weight) {
         for j < cols_per_rank {
             shard[i * cols_per_rank + j] =
@@ -164,20 +164,20 @@ func shard_linear_weight(
 }
 
 func allgather_output(
-    []float local_output,
+    float[] local_output,
     int rank,
     int world_size
-) []float {
-    global_output = make([]float, len(local_output) * world_size)
+) float[] {
+    global_output = make(float[], len(local_output) * world_size)
     return global_output
 }
 
 func reduce_scatter(
-    []float global_gradient,
+    float[] global_gradient,
     int rank,
     int world_size
-) []float {
-    local_gradient = make([]float, len(global_gradient) / world_size)
+) float[] {
+    local_gradient = make(float[], len(global_gradient) / world_size)
     return local_gradient
 }
 
@@ -189,36 +189,36 @@ struct quantization_config {
 }
 
 struct quantized_tensor {
-    []int8 data
-    []float scales
+    int[]8 data
+    float[] scales
     quantization_config config
 }
 
 func quantize_kv_cache(
-    []float kv_cache,
+    float[] kv_cache,
     quantization_config config
 ) quantized_tensor {
     min_val = min(kv_cache)
     max_val = max(kv_cache)
     scale = (max_val - min_val) / 255.0
-    quantized = make([]int8, len(kv_cache))
+    quantized = make(int[]8, len(kv_cache))
     for i < len(kv_cache) {
         scaled = (kv_cache[i] - min_val) / scale
         quantized[i] = int8(scaled)
     }
     return quantized_tensor{
         data: quantized,
-        scales: []float{scale, min_val},
+        scales: float[]{scale, min_val},
         config: config,
     }
 }
 
 func dequantize_for_attention(
     quantized_tensor q_tensor
-) []float {
+) float[] {
     scale = q_tensor.scales[0]
     min_val = q_tensor.scales[1]
-    output = make([]float, len(q_tensor.data))
+    output = make(float[], len(q_tensor.data))
     for i < len(q_tensor.data) {
         output[i] = f(q_tensor.data[i]) * scale + min_val
     }
@@ -232,21 +232,21 @@ struct multimodal_input {
 }
 
 struct vision_features {
-    []float embedding
+    float[] embedding
     int num_patches
     int feature_dim
 }
 
-func extract_image_patches([]uint8 image) [][]float {
-    patches = [][]float{}
+func extract_image_patches([]uint8 image) float[][] {
+    patches = float[][]{}
     return patches
 }
 
 func vision_transformer_encode(
-    [][]float patches,
-    []float vit_weights
+    float[][] patches,
+    float[] vit_weights
 ) vision_features {
-    features = make([]float, len(patches) * len(patches[0]))
+    features = make(float[], len(patches) * len(patches[0]))
     return vision_features{
         embedding: features,
         num_patches: len(patches),
@@ -255,10 +255,10 @@ func vision_transformer_encode(
 }
 
 func fuse_text_and_vision(
-    []float text_embedding,
+    float[] text_embedding,
     vision_features vis_feat
-) []float {
-    fused = []float{}
+) float[] {
+    fused = float[]{}
     fused = append(fused, text_embedding[0:])
     fused = append(fused, vis_feat.embedding)
     return fused
@@ -269,12 +269,12 @@ struct json_schema {
 }
 
 struct constrained_generation_state {
-    []string valid_tokens
+    string[] valid_tokens
     bool is_complete
 }
 
-func build_json_vocabulary(json_schema schema) []string {
-    vocab = []string{
+func build_json_vocabulary(json_schema schema) string[] {
+    vocab = string[]{
         "{", "}",
         "[", "]",
         "\"", ":",
@@ -285,7 +285,7 @@ func build_json_vocabulary(json_schema schema) []string {
 }
 
 func constrained_sample_next_token(
-    []float logits,
+    float[] logits,
     json_schema schema,
     string current_output
 ) int {
@@ -318,8 +318,8 @@ func is_valid_json_prefix(string json_str, json_schema schema) bool {
 
 struct lora_adapter {
     string adapter_id
-    []float lora_a
-    []float lora_b
+    float[] lora_a
+    float[] lora_b
     float scale
     int rank
 }
@@ -362,10 +362,10 @@ func switch_lora_adapter(
 }
 
 func apply_lora_to_linear(
-    []float weight,
+    float[] weight,
     lora_adapter adapter,
-    []float input
-) []float {
+    float[] input
+) float[] {
     standard_output = matmul(input, transpose(weight))
     lora_input = matmul(input, transpose(adapter.lora_a))
     lora_output = matmul(lora_input, transpose(adapter.lora_b))
@@ -374,8 +374,8 @@ func apply_lora_to_linear(
 }
 
 struct beam_search_state {
-    []float hypothesis
-    []float scores
+    float[] hypothesis
+    float[] scores
     int beam_size
 }
 
@@ -415,7 +415,7 @@ func f(int x) float {
     return float(x)
 }
 
-func contains([]string arr, string elem) bool {
+func contains(string[] arr, string elem) bool {
     for i < len(arr) {
         if arr[i] == elem {
             return true
@@ -425,7 +425,7 @@ func contains([]string arr, string elem) bool {
     return false
 }
 
-func min([]float arr) float {
+func min(float[] arr) float {
     if len(arr) == 0 {
         return 0.0
     }
@@ -439,7 +439,7 @@ func min([]float arr) float {
     return result
 }
 
-func max([]float arr) float {
+func max(float[] arr) float {
     if len(arr) == 0 {
         return 0.0
     }

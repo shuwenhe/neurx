@@ -1,9 +1,9 @@
 package neurx.inference.scheduler.queue.request_queue
 
 struct neurx_request_queue_state {
-    []string request_ids
-    []int prefill_tokens
-    []int remaining_tokens
+    string[] request_ids
+    int[] prefill_tokens
+    int[] remaining_tokens
 }
 
 struct neurx_queue_pop_result {
@@ -31,9 +31,9 @@ func neurx_queue_empty(neurx_request_queue_state state) bool {
 }
 
 func neurx_queue_enqueue(neurx_request_queue_state state, string request_id, int prefill_tokens, int remaining_tokens) neurx_request_queue_state {
-    []string ids = []string{cap: len(state.request_ids) + 1}
-    []int prefill = []int{cap: len(state.prefill_tokens) + 1}
-    []int remain = []int{cap: len(state.remaining_tokens) + 1}
+    string[] ids = string[]{cap: len(state.request_ids) + 1}
+    int[] prefill = int[]{cap: len(state.prefill_tokens) + 1}
+    int[] remain = int[]{cap: len(state.remaining_tokens) + 1}
     int i = 0
     for i < len(state.request_ids) {
         ids[i] = state.request_ids[i]
@@ -74,9 +74,9 @@ func neurx_queue_remove_at(neurx_request_queue_state state, int index) neurx_que
     int removed_prefill = state.prefill_tokens[index]
     int removed_remaining = state.remaining_tokens[index]
     int next_len = len(state.request_ids) - 1
-    []string ids = []string{cap: next_len}
-    []int prefill = []int{cap: next_len}
-    []int remain = []int{cap: next_len}
+    string[] ids = string[]{cap: next_len}
+    int[] prefill = int[]{cap: next_len}
+    int[] remain = int[]{cap: next_len}
     int i = 0
     int j = 0
     for i < len(state.request_ids) {

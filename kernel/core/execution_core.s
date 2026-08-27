@@ -16,20 +16,20 @@ struct highres_clock {
 struct execution_core {
     int possible_cpus
     int online_cpus
-    [64]bool cpu_online
-    [64]int apic_id
-    [64]int running_task
-    [64]int cpu_runtime_ns
-    [64]bool need_reschedule
+    bool[64] cpu_online
+    int[64] apic_id
+    int[64] running_task
+    int[64] cpu_runtime_ns
+    bool[64] need_reschedule
 
     int task_count
-    [1024]int task_id
-    [1024]int task_priority
-    [1024]int task_affinity
-    [1024]int task_deadline_ns
-    [1024]int task_runtime_ns
-    [1024]int task_slice_ns
-    [1024]bool task_runnable
+    int[1024] task_id
+    int[1024] task_priority
+    int[1024] task_affinity
+    int[1024] task_deadline_ns
+    int[1024] task_runtime_ns
+    int[1024] task_slice_ns
+    bool[1024] task_runnable
     int context_switches
     int migrations
 }
@@ -61,19 +61,19 @@ func execution_core_create(int possible_cpus) execution_core {
     execution_core core = execution_core {
         possible_cpus: possible_cpus,
         online_cpus: 0,
-        cpu_online: [64]bool{},
-        apic_id: [64]int{},
-        running_task: [64]int{},
-        cpu_runtime_ns: [64]int{},
-        need_reschedule: [64]bool{},
+        cpu_online: bool[64]{},
+        apic_id: int[64]{},
+        running_task: int[64]{},
+        cpu_runtime_ns: int[64]{},
+        need_reschedule: bool[64]{},
         task_count: 0,
-        task_id: [1024]int{},
-        task_priority: [1024]int{},
-        task_affinity: [1024]int{},
-        task_deadline_ns: [1024]int{},
-        task_runtime_ns: [1024]int{},
-        task_slice_ns: [1024]int{},
-        task_runnable: [1024]bool{},
+        task_id: int[1024]{},
+        task_priority: int[1024]{},
+        task_affinity: int[1024]{},
+        task_deadline_ns: int[1024]{},
+        task_runtime_ns: int[1024]{},
+        task_slice_ns: int[1024]{},
+        task_runnable: bool[1024]{},
         context_switches: 0,
         migrations: 0
     }

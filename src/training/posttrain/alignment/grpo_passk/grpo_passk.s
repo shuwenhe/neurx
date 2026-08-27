@@ -160,7 +160,7 @@ func (grpo_pass_k_trainer* trainer) normalize_advantages(
 }
 
 func (grpo_pass_k_trainer* trainer) train_step(
-    []string prompts,
+    string[] prompts,
     [][]test_case test_cases
 ) . (f32, f32, f32) {
     batch_size := len(prompts)

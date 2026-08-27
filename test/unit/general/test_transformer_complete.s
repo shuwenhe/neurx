@@ -30,8 +30,8 @@ use neurx.model.transformer.transformer_backward.{
     backward_pass_output
 }
 
-func allocate_vector(int size, float init_val) []float {
-    []float v = []float{cap: size}
+func allocate_vector(int size, float init_val) float[] {
+    float[] v = float[]{cap: size}
     int i = 0
     for i < size {
         v[i] = init_val
@@ -40,8 +40,8 @@ func allocate_vector(int size, float init_val) []float {
     v
 }
 
-func copy_vector([]float src) []float {
-    []float out = allocate_vector(len(src), 0.0)
+func copy_vector(float[] src) float[] {
+    float[] out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
         out[i] = src[i]
@@ -74,7 +74,7 @@ func test_layer_norm_forward_basic() {
         use_bias: true,
     }
     ln := new_layer_norm(cfg)
-    []float input = []float{cap: 16}
+    float[] input = float[]{cap: 16}
     int i = 0
     for i < 16 {
         input[i] = 1.0 + (i * 1.0) / 16.0
@@ -98,15 +98,15 @@ func test_layer_norm_with_gamma_beta() {
         use_bias: true,
     }
     ln := new_layer_norm(cfg)
-    ln.gamma = []float{cap: 4}
-    ln.beta = []float{cap: 4}
+    ln.gamma = float[]{cap: 4}
+    ln.beta = float[]{cap: 4}
     int i = 0
     for i < 4 {
         ln.gamma[i] = 2.0
         ln.beta[i] = 0.5
         i = i + 1
     }
-    []float input = allocate_vector(4, 1.0)
+    float[] input = allocate_vector(4, 1.0)
     output := layer_normalize(ln, input, 1, 1)
     assert_equal("layer_norm_gamma", output.normalized[0], 0.5, 0.1)
 }
@@ -149,8 +149,8 @@ func test_embed_tokens_basic() {
     int hidden_dim = 8
     int batch_size = 2
     int seq_len = 4
-    []float embedding = allocate_vector(vocab_size * hidden_dim, 0.1)
-    []int token_ids = []int{cap: batch_size * seq_len}
+    float[] embedding = allocate_vector(vocab_size * hidden_dim, 0.1)
+    int[] token_ids = int[]{cap: batch_size * seq_len}
     int i = 0
     for i < batch_size * seq_len {
         token_ids[i] = i % vocab_size
@@ -165,14 +165,14 @@ func test_embed_tokens_correct_values() {
     int hidden_dim = 4
     int batch_size = 1
     int seq_len = 2
-    []float embedding = allocate_vector(vocab_size * hidden_dim, 0.0)
+    float[] embedding = allocate_vector(vocab_size * hidden_dim, 0.0)
     int i = 0
     for i < hidden_dim {
         embedding[i] = 1.0 + (i * 1.0)
         embedding[hidden_dim + i] = 2.0 + (i * 1.0)
         i = i + 1
     }
-    []int token_ids = []int{cap: 2}
+    int[] token_ids = int[]{cap: 2}
     token_ids[0] = 0
     token_ids[1] = 1
     embedded := embed_tokens(embedding, token_ids, batch_size, seq_len, hidden_dim)
@@ -205,7 +205,7 @@ func test_feed_forward_forward_basic() {
         norm1: new_layer_norm(layer_norm_config { hidden_dim: hidden_dim, epsilon: 1e-6, use_bias: true }),
         norm2: new_layer_norm(layer_norm_config { hidden_dim: hidden_dim, epsilon: 1e-6, use_bias: true }),
     }
-    []float hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.1)
+    float[] hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.1)
     output := feed_forward_forward(layer, hidden, batch_size, seq_len, hidden_dim, intermediate_dim)
     assert_equal("ffn_output_shape", (0.0 + len(output)), (0.0 + batch_size * seq_len * hidden_dim), 1.0)
 }
@@ -214,15 +214,15 @@ func test_cross_entropy_loss_gradient() {
     int batch_size = 2
     int seq_len = 2
     int vocab_size = 10
-    []float logits = allocate_vector(batch_size * seq_len * vocab_size, 0.1)
-    []int targets = []int{cap: batch_size * seq_len}
+    float[] logits = allocate_vector(batch_size * seq_len * vocab_size, 0.1)
+    int[] targets = int[]{cap: batch_size * seq_len}
     targets[0] = 1
     targets[1] = 2
     targets[2] = 3
     targets[3] = 0
     result := compute_cross_entropy_loss_with_gradient(logits, targets, batch_size, seq_len, vocab_size)
-    []float loss = result[0]
-    []float grad = result[1]
+    float[] loss = result[0]
+    float[] grad = result[1]
     assert_equal("loss_shape", (0.0 + len(loss)), (0.0 + batch_size * seq_len), 1.0)
     assert_equal("grad_shape", (0.0 + len(grad)), (0.0 + batch_size * seq_len * vocab_size), 1.0)
 }
@@ -232,12 +232,12 @@ func test_lm_head_backward() {
     int seq_len = 2
     int hidden_dim = 8
     int vocab_size = 10
-    []float grad_logits = allocate_vector(batch_size * seq_len * vocab_size, 0.1)
-    []float hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.1)
-    []float lm_head_weight = allocate_vector(vocab_size * hidden_dim, 0.1)
+    float[] grad_logits = allocate_vector(batch_size * seq_len * vocab_size, 0.1)
+    float[] hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.1)
+    float[] lm_head_weight = allocate_vector(vocab_size * hidden_dim, 0.1)
     result := lm_head_backward(grad_logits, hidden, lm_head_weight, batch_size, seq_len, hidden_dim, vocab_size)
-    []float grad_hidden = result[0]
-    []float grad_weight = result[1]
+    float[] grad_hidden = result[0]
+    float[] grad_weight = result[1]
     assert_equal("lm_head_grad_hidden_shape", (0.0 + len(grad_hidden)), (0.0 + batch_size * seq_len * hidden_dim), 1.0)
     assert_equal("lm_head_grad_weight_shape", (0.0 + len(grad_weight)), (0.0 + vocab_size * hidden_dim), 1.0)
 }
@@ -247,14 +247,14 @@ func test_feed_forward_backward() {
     int seq_len = 2
     int hidden_dim = 8
     int intermediate_dim = 32
-    []float grad_output = allocate_vector(batch_size * seq_len * hidden_dim, 0.1)
-    []float hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.1)
-    []float w_up = allocate_vector(intermediate_dim * hidden_dim, 0.1)
-    []float w_down = allocate_vector(hidden_dim * intermediate_dim, 0.1)
+    float[] grad_output = allocate_vector(batch_size * seq_len * hidden_dim, 0.1)
+    float[] hidden = allocate_vector(batch_size * seq_len * hidden_dim, 0.1)
+    float[] w_up = allocate_vector(intermediate_dim * hidden_dim, 0.1)
+    float[] w_down = allocate_vector(hidden_dim * intermediate_dim, 0.1)
     result := feed_forward_backward(grad_output, hidden, w_up, w_down, batch_size, seq_len, hidden_dim, intermediate_dim)
-    []float grad_hidden_out = result[0]
-    []float grad_w_up = result[1]
-    []float grad_w_down = result[2]
+    float[] grad_hidden_out = result[0]
+    float[] grad_w_up = result[1]
+    float[] grad_w_down = result[2]
     assert_equal("ffn_backward_grad_hidden", (0.0 + len(grad_hidden_out)), (0.0 + batch_size * seq_len * hidden_dim), 1.0)
     assert_equal("ffn_backward_grad_w_up", (0.0 + len(grad_w_up)), (0.0 + intermediate_dim * hidden_dim), 1.0)
 }
@@ -281,7 +281,7 @@ func test_transformer_layer_forward_backward() {
         norm1: new_layer_norm(layer_norm_config { hidden_dim: hidden_dim, epsilon: 1e-6, use_bias: true }),
         norm2: new_layer_norm(layer_norm_config { hidden_dim: hidden_dim, epsilon: 1e-6, use_bias: true }),
     }
-    []float hidden_in = allocate_vector(batch_size * seq_len * hidden_dim, 0.1)
+    float[] hidden_in = allocate_vector(batch_size * seq_len * hidden_dim, 0.1)
     hidden_out := transformer_layer_forward(layer, hidden_in, batch_size, seq_len, hidden_dim, num_heads, intermediate_dim, false, false)
     assert_equal("transformer_layer_output", (0.0 + len(hidden_out)), (0.0 + batch_size * seq_len * hidden_dim), 1.0)
 }
@@ -293,13 +293,13 @@ func test_complete_forward_backward_cycle() {
     int vocab_size = 32
     int num_heads = 2
     int num_layers = 2
-    []int input_ids = allocate_vector(batch_size * seq_len, 1)
+    int[] input_ids = allocate_vector(batch_size * seq_len, 1)
     int i = 0
     for i < batch_size * seq_len {
         input_ids[i] = i % vocab_size
         i = i + 1
     }
-    []int target_ids = allocate_vector(batch_size * seq_len, 2)
+    int[] target_ids = allocate_vector(batch_size * seq_len, 2)
     i = 0
     for i < batch_size * seq_len {
         target_ids[i] = (i + 1) % vocab_size

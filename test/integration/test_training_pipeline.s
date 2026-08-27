@@ -15,8 +15,8 @@ func test_forward_pass_basic() bool {
     model_state.intermediate_dim = 3072
     model_state.vocab_size = 50257
     model_state.max_sequence_length = 512
-    model_state.weight_matrices = [][]float(100 * 768)
-    var []int input_ids = []int(32 * 512)
+    model_state.weight_matrices = float[][](100 * 768)
+    var int[] input_ids = int[](32 * 512)
     i := 0
     for i < 16384 {
         input_ids[i] = 1000 + i % 50000
@@ -44,8 +44,8 @@ func test_forward_pass_logits_shape() bool {
     model_state.hidden_dim = 768
     model_state.num_layers = 2
     model_state.vocab_size = 50257
-    model_state.weight_matrices = [][]float(100 * 768)
-    var []int input_ids = []int(8 * 256)
+    model_state.weight_matrices = float[][](100 * 768)
+    var int[] input_ids = int[](8 * 256)
     result := 
         training_pipeline.forward_pass(model_state, input_ids, 8, 256)
     if len(result.logits) < 8 * 256 {
@@ -59,8 +59,8 @@ func test_forward_pass_different_batch_sizes() bool {
     model_state.hidden_dim = 768
     model_state.num_layers = 1
     model_state.vocab_size = 50257
-    model_state.weight_matrices = [][]float(100 * 768)
-    var []int batch_sizes = []int(4)
+    model_state.weight_matrices = float[][](100 * 768)
+    var int[] batch_sizes = int[](4)
     batch_sizes[0] = 4
     batch_sizes[1] = 8
     batch_sizes[2] = 16
@@ -68,7 +68,7 @@ func test_forward_pass_different_batch_sizes() bool {
     b := 0
     for b < 4 {
         batch_size := batch_sizes[b]
-        var []int input_ids = []int(batch_size * 512)
+        var int[] input_ids = int[](batch_size * 512)
         result := 
             training_pipeline.forward_pass(model_state, input_ids, batch_size, 512)
         if result.batch_size != batch_size {
@@ -84,14 +84,14 @@ func test_backward_pass_basic() bool {
     model_state.hidden_dim = 768
     model_state.num_layers = 2
     model_state.vocab_size = 50257
-    model_state.weight_matrices = [][]float(100 * 768)
+    model_state.weight_matrices = float[][](100 * 768)
     forward_result := training_pipeline.forward_pass_result
-    forward_result.logits = [][]float(32 * 512 * 50257)
+    forward_result.logits = float[][](32 * 512 * 50257)
     forward_result.batch_size = 32
     forward_result.sequence_length = 512
     forward_result.vocab_size = 50257
     forward_result.loss_value = 5.5
-    var []int target_ids = []int(32 * 512)
+    var int[] target_ids = int[](32 * 512)
     result := 
         training_pipeline.backward_pass(forward_result, model_state, target_ids, 65536.0)
     if result.gradient_norm < 0.0 {
@@ -108,14 +108,14 @@ func test_backward_pass_gradient_overflow_detection() bool {
     model_state.hidden_dim = 768
     model_state.num_layers = 2
     model_state.vocab_size = 50257
-    model_state.weight_matrices = [][]float(100 * 768)
+    model_state.weight_matrices = float[][](100 * 768)
     forward_result := training_pipeline.forward_pass_result
-    forward_result.logits = [][]float(32 * 512 * 50257)
+    forward_result.logits = float[][](32 * 512 * 50257)
     forward_result.batch_size = 32
     forward_result.sequence_length = 512
     forward_result.vocab_size = 50257
     forward_result.loss_value = 5.5
-    var []int target_ids = []int(32 * 512)
+    var int[] target_ids = int[](32 * 512)
     result := 
         training_pipeline.backward_pass(forward_result, model_state, target_ids, 0.0001)
     return true
@@ -126,14 +126,14 @@ func test_gradient_clipping() bool {
     model_state.hidden_dim = 768
     model_state.num_layers = 1
     model_state.vocab_size = 50257
-    model_state.weight_matrices = [][]float(100 * 768)
+    model_state.weight_matrices = float[][](100 * 768)
     forward_result := training_pipeline.forward_pass_result
-    forward_result.logits = [][]float(32 * 512 * 50257)
+    forward_result.logits = float[][](32 * 512 * 50257)
     forward_result.batch_size = 32
     forward_result.sequence_length = 512
     forward_result.vocab_size = 50257
     forward_result.loss_value = 5.5
-    var []int target_ids = []int(32 * 512)
+    var int[] target_ids = int[](32 * 512)
     result := 
         training_pipeline.backward_pass(forward_result, model_state, target_ids, 65536.0)
     if result.gradient_clipped {
@@ -143,10 +143,10 @@ func test_gradient_clipping() bool {
 }
 
 func test_gradient_scaling_basic() bool {
-    gradients := [][]float(10 * 768)
+    gradients := float[][](10 * 768)
     i := 0
     for i < 10 {
-        gradients[i] = []float(768)
+        gradients[i] = float[](768)
         j := 0
         for j < 768 {
             gradients[i][j] = 0.001
@@ -265,7 +265,7 @@ func test_checkpoint_creation() bool {
     model_state := model.transformer_state
     model_state.hidden_dim = 768
     model_state.num_layers = 12
-    model_state.weight_matrices = [][]float(100 * 768)
+    model_state.weight_matrices = float[][](100 * 768)
     training_state := training_pipeline.training_state
     training_state.current_step = 1000
     training_state.current_epoch = 5
@@ -326,15 +326,15 @@ func test_training_step_complete_pipeline() bool {
     model_state.intermediate_dim = 3072
     model_state.vocab_size = 50257
     model_state.max_sequence_length = 512
-    model_state.weight_matrices = [][]float(100 * 768)
+    model_state.weight_matrices = float[][](100 * 768)
     training_state := training_pipeline.training_state
     training_state.loss_scale = 65536.0
     config := training_pipeline.training_config
     config.batch_size = 32
     config.learning_rate = 0.0001
     config.gradient_accumulation_steps = 4
-    var []int input_ids = []int(32 * 512)
-    var []int target_ids = []int(32 * 512)
+    var int[] input_ids = int[](32 * 512)
+    var int[] target_ids = int[](32 * 512)
     result := 
         training_pipeline.training_step(
             input_ids,
@@ -360,7 +360,7 @@ func test_mixed_precision_integration() bool {
     model_state := model.transformer_state
     model_state.hidden_dim = 768
     model_state.vocab_size = 50257
-    model_state.weight_matrices = [][]float(100 * 768)
+    model_state.weight_matrices = float[][](100 * 768)
     mp_state := mixed_precision.mixed_precision_state
     mp_state.loss_scale = 65536.0
     mp_state.master_weights = model_state.weight_matrices

@@ -6,7 +6,7 @@ use neurx.strings
 
 func relu(tensor x) tensor {
     int n = len(x.data)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         float val = x.data[i]
@@ -22,7 +22,7 @@ func relu(tensor x) tensor {
 
 func relu_backward(tensor x, tensor grad_output) tensor {
     int n = len(x.data)
-    []float grad_input = []float{cap: n}
+    float[] grad_input = float[]{cap: n}
     int i = 0
     for i < n {
         if x.data[i] > 0.0 {
@@ -37,7 +37,7 @@ func relu_backward(tensor x, tensor grad_output) tensor {
 
 func softmax_last_dim(tensor logits) tensor {
     int n = len(logits.data)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     float max_val = logits.data[0]
     int i = 0
     for i < n {
@@ -84,7 +84,7 @@ func matmul(tensor A, tensor B) tensor {
     int m = A.shape[0]
     int k = A.shape[1]
     int n = B.shape[1]
-    []float c_data = []float{cap: m * n}
+    float[] c_data = float[]{cap: m * n}
     int i = 0
     for i < m {
         int j = 0
@@ -102,7 +102,7 @@ func matmul(tensor A, tensor B) tensor {
         }
         i = i + 1
     }
-    []int shape = []int{cap: 2}
+    int[] shape = int[]{cap: 2}
     shape[0] = m
     shape[1] = n
     new(c_data, shape, true)
@@ -114,7 +114,7 @@ func transpose(tensor A, int dim1, int dim2) tensor {
     }
     int rows = A.shape[0]
     int cols = A.shape[1]
-    []float trans_data = []float{cap: rows * cols}
+    float[] trans_data = float[]{cap: rows * cols}
     int i = 0
     for i < rows {
         int j = 0
@@ -124,7 +124,7 @@ func transpose(tensor A, int dim1, int dim2) tensor {
         }
         i = i + 1
     }
-    []int shape = []int{cap: 2}
+    int[] shape = int[]{cap: 2}
     shape[0] = cols
     shape[1] = rows
     new(trans_data, shape, true)
@@ -133,7 +133,7 @@ func transpose(tensor A, int dim1, int dim2) tensor {
 func sum_first_dim(tensor x, bool keepdim) tensor {
     int rows = x.shape[0]
     int cols = x.shape[1]
-    []float out = []float{cap: cols}
+    float[] out = float[]{cap: cols}
     int j = 0
     for j < cols {
         float sum = 0.0
@@ -145,7 +145,7 @@ func sum_first_dim(tensor x, bool keepdim) tensor {
         out[j] = sum
         j = j + 1
     }
-    []int shape = []int{cap: 1}
+    int[] shape = int[]{cap: 1}
     shape[0] = cols
     new(out, shape, true)
 }
@@ -170,7 +170,7 @@ func adamw_update(adamw_state state) tensor {
     float eps = state.eps
     float wd = state.weight_decay
     int n = len(state.params.data)
-    []float new_params = []float{cap: n}
+    float[] new_params = float[]{cap: n}
     int i = 0
     for i < n {
         float g = state.grad.data[i]
@@ -190,7 +190,7 @@ func adamw_update(adamw_state state) tensor {
 func grad_logits(tensor logits, tensor targets) tensor {
     tensor probs = softmax_last_dim(logits)
     int n = len(probs.data)
-    []float grad = []float{cap: n}
+    float[] grad = float[]{cap: n}
     int i = 0
     for i < n {
         grad[i] = probs.data[i] - targets.data[i]

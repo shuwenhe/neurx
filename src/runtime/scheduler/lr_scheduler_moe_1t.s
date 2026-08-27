@@ -18,8 +18,8 @@ struct lr_scheduler_state {
     int current_step
     float current_lr
     float current_base_lr
-    []float lr_history
-    []int step_history
+    float[] lr_history
+    int[] step_history
     int num_schedules
     float avg_lr
     float max_lr
@@ -46,8 +46,8 @@ func lr_scheduler_new(
         current_step: 0,
         current_lr: 0.0,
         current_base_lr: base_lr,
-        lr_history: make([]float, 0),
-        step_history: make([]int, 0),
+        lr_history: make(float[], 0),
+        step_history: make(int[], 0),
         num_schedules: 0,
         avg_lr: 0.0,
         max_lr: 0.0,

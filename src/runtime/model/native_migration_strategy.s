@@ -68,9 +68,9 @@ func (native_tokenizer_handle* t) cleanup() {
 
 struct compilation_strategy {
     string name
-    []string pure_s_modules     
-    []string native_modules      
-    []string external_modules    
+    string[] pure_s_modules     
+    string[] native_modules      
+    string[] external_modules    
     int estimated_compile_time_sec
 }
 
@@ -123,7 +123,7 @@ struct evolution_roadmap {
     float pure_s_percentage_start
     float pure_s_percentage_end
     int months_duration
-    []string migration_targets
+    string[] migration_targets
 }
 
 func get_pure_s_evolution_roadmap() {

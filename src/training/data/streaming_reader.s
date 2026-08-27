@@ -58,7 +58,7 @@ struct streaming_reader_state {
     int num_chunks
     int current_chunk_idx
     int max_loaded_chunks
-    []int loaded_chunk_indices
+    int[] loaded_chunk_indices
     int64 current_byte_pos
     int current_line_in_chunk
     int total_lines_processed
@@ -150,7 +150,7 @@ func divide_into_chunks(streaming_reader_state reader) streaming_reader_state {
         reader.chunks[c] = chunk
         current_offset = end_offset
         c = c + 1
-    reader.loaded_chunk_indices = []int{cap: reader.max_loaded_chunks}
+    reader.loaded_chunk_indices = int[]{cap: reader.max_loaded_chunks}
     return reader
 struct line_read_result {
     string line_content
@@ -252,7 +252,7 @@ func unload_chunk(streaming_reader_state reader, int chunk_idx) streaming_reader
     remove_from_lru(reader.loaded_chunk_indices, chunk_idx)
     return reader
 struct batch_read_result {
-    []string lines
+    string[] lines
     int count
     bool end_of_file
     streaming_reader_state updated_reader
@@ -261,7 +261,7 @@ func read_batch_of_lines(
     streaming_reader_state reader,
     int batch_size
 ) batch_read_result {
-    []string batch_lines = []string{cap: batch_size}
+    string[] batch_lines = string[]{cap: batch_size}
     int count = 0
     bool eof = false
     for count < batch_size and !eof {
@@ -351,11 +351,11 @@ func unmap_region([]byte mapped_data) void:
     return
 func read_file_range(string path, int64 offset, int64 size) []byte:
     return []byte{cap: 0}
-func move_to_front_of_lru([]int lru_list, int item) void:
+func move_to_front_of_lru(int[] lru_list, int item) void:
     return
-func insert_at_front_of_lru([]int lru_list, int item) void:
+func insert_at_front_of_lru(int[] lru_list, int item) void:
     return
-func remove_from_lru([]int lru_list, int item) void:
+func remove_from_lru(int[] lru_list, int item) void:
     return
 func get_current_time_ms() int:
     return 0

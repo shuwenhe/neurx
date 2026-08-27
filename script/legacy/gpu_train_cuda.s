@@ -170,7 +170,7 @@ func main() {
 func gpu_forward_backward_pass(int64 cublas_handle, gpu_model model,
                                int batch_size, int seq_len,
                                string document) float {
-    []int tokens = new int[seq_len]
+    int[] tokens = new int[seq_len]
     int token_count = 0
     int i = 0
     for i < str_len(document) && token_count < seq_len {
@@ -202,7 +202,7 @@ func gpu_forward_backward_pass(int64 cublas_handle, gpu_model model,
                                       model.embeddings_layernorm_gpu)
     int64 probs_gpu = softmax_forward(batch_size * seq_len, 50000, logits_gpu)
     float loss = 0.0
-    []int target_tokens = tokens
+    int[] target_tokens = tokens
     int64 dlogits_gpu = cuda_malloc(batch_size * seq_len * 50000 * 4)
     cross_entropy_backward(batch_size * seq_len, 50000,
                            probs_gpu, target_tokens, dlogits_gpu)

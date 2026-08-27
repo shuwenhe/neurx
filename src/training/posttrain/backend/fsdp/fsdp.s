@@ -12,7 +12,7 @@ struct fsdp_config {
     int backward_prefetch
     int forward_prefetch
     bool use_orig_params
-    []string ignored_modules
+    string[] ignored_modules
 }
 
 struct fsdp_state {
@@ -41,7 +41,7 @@ func new_fsdp_config() fsdp_config {
         backward_prefetch: 1,
         forward_prefetch: 1,
         use_orig_params: false,
-        ignored_modules: []string{},
+        ignored_modules: string[]{},
     }
 }
 

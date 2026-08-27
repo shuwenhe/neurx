@@ -4,7 +4,7 @@ use neurx.posttrain.model.model_loader.{fill_model_tensor}
 struct medical_sample {
     string question
     string answer
-    []string options
+    string[] options
     int correct_option
     string subject
     string explanation
@@ -19,8 +19,8 @@ struct medical_dataset {
 }
 
 struct tokenized_sample {
-    []int input_ids
-    []int target_ids
+    int[] input_ids
+    int[] target_ids
     int seq_len
 }
 
@@ -28,7 +28,7 @@ func parse_medical_sample_json(string json_line) medical_sample {
     medical_sample sample
     sample.question = ""
     sample.answer = ""
-    sample.options = []string{}
+    sample.options = string[]{}
     sample.correct_option = 0
     sample.subject = ""
     sample.explanation = ""
@@ -45,8 +45,8 @@ func load_medical_dataset_from_json(string file_path, int max_samples) medical_d
     return dataset
 }
 
-func tokenize_text(string text, int vocab_size) []int {
-    []int token_ids = []int{}
+func tokenize_text(string text, int vocab_size) int[] {
+    int[] token_ids = int[]{}
     int i = 0
     for i < len(text) && len(token_ids) < 512 {
         string ch = substring(text, i, i + 1)
@@ -57,13 +57,13 @@ func tokenize_text(string text, int vocab_size) []int {
     return token_ids
 }
 
-func create_batch_from_samples([]medical_sample samples, int batch_size, int seq_len, int vocab_size) [][]int {
-    [][]int batches = [][]int{}
+func create_batch_from_samples([]medical_sample samples, int batch_size, int seq_len, int vocab_size) int[][] {
+    int[][] batches = int[][]{}
     int batch_count = 0
-    []int current_batch = []int{}
+    int[] current_batch = int[]{}
     int sample_idx = 0
     for sample_idx < len(samples) {
-        []int input_ids = tokenize_text(samples[sample_idx].question + " " + samples[sample_idx].answer, vocab_size)
+        int[] input_ids = tokenize_text(samples[sample_idx].question + " " + samples[sample_idx].answer, vocab_size)
         int pos = 0
         for pos < len(input_ids) && len(current_batch) < batch_size * seq_len {
             current_batch = append(current_batch, input_ids[pos])
@@ -71,7 +71,7 @@ func create_batch_from_samples([]medical_sample samples, int batch_size, int seq
         }
         if len(current_batch) >= batch_size * seq_len {
             batches = append(batches, current_batch)
-            current_batch = []int{}
+            current_batch = int[]{}
             batch_count = batch_count + 1
         }
         sample_idx = sample_idx + 1

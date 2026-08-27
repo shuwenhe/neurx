@@ -15,8 +15,8 @@ struct json_value {
 }
 
 struct json_object {
-    []string keys
-    []string values
+    string[] keys
+    string[] values
     int count
 }
 

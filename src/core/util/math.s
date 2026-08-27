@@ -104,9 +104,9 @@ func sin_approx(float x) float {
     result
 }
 
-func softmax_1d([]float values) []float {
+func softmax_1d(float[] values) float[] {
     int n = len(values)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     float max_v = values[0]
     int i = 1
     for i < n {
@@ -140,8 +140,8 @@ func gelu_approx(float x) float {
     0.5 * x * (1.0 + tanh_approx(inner))
 }
 
-func allocate_float(int size, float init_val) []float {
-    []float v = []float{cap: size}
+func allocate_float(int size, float init_val) float[] {
+    float[] v = float[]{cap: size}
     int i = 0
     for i < size {
         v[i] = init_val
@@ -150,8 +150,8 @@ func allocate_float(int size, float init_val) []float {
     v
 }
 
-func allocate_int(int size, int init_val) []int {
-    []int v = []int{cap: size}
+func allocate_int(int size, int init_val) int[] {
+    int[] v = int[]{cap: size}
     int i = 0
     for i < size {
         v[i] = init_val
@@ -160,8 +160,8 @@ func allocate_int(int size, int init_val) []int {
     v
 }
 
-func allocate_bool(int size, bool init_val) []bool {
-    []bool v = []bool{cap: size}
+func allocate_bool(int size, bool init_val) bool[] {
+    bool[] v = bool[]{cap: size}
     int i = 0
     for i < size {
         v[i] = init_val
@@ -170,9 +170,9 @@ func allocate_bool(int size, bool init_val) []bool {
     v
 }
 
-func copy_float([]float data) []float {
+func copy_float(float[] data) float[] {
     int n = len(data)
-    []float out = []float{cap: n}
+    float[] out = float[]{cap: n}
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -181,9 +181,9 @@ func copy_float([]float data) []float {
     out
 }
 
-func copy_int([]int data) []int {
+func copy_int(int[] data) int[] {
     int n = len(data)
-    []int out = []int{cap: n}
+    int[] out = int[]{cap: n}
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -231,7 +231,7 @@ func clamp_float(float x, float min_val, float max_val) float {
     v
 }
 
-func sum_float([]float data) float {
+func sum_float(float[] data) float {
     float acc = 0.0
     int i = 0
     for i < len(data) {
@@ -241,7 +241,7 @@ func sum_float([]float data) float {
     acc
 }
 
-func mean_float([]float data) float {
+func mean_float(float[] data) float {
     int n = len(data)
     if n == 0 {
         return 0.0
@@ -249,8 +249,8 @@ func mean_float([]float data) float {
     sum_float(data) / float(n)
 }
 
-func matmul_flat([]float a, []float b, int m, int n, int p) []float {
-    []float result = allocate_float(m * p, 0.0)
+func matmul_flat(float[] a, float[] b, int m, int n, int p) float[] {
+    float[] result = allocate_float(m * p, 0.0)
     int i = 0
     for i < m {
         int j = 0
@@ -267,7 +267,7 @@ func matmul_flat([]float a, []float b, int m, int n, int p) []float {
     result
 }
 
-func apply_bias([]float input, []float bias, int batch_size, int dim) []float {
+func apply_bias(float[] input, float[] bias, int batch_size, int dim) float[] {
     int i = 0
     for i < batch_size {
         int j = 0
@@ -280,8 +280,8 @@ func apply_bias([]float input, []float bias, int batch_size, int dim) []float {
     input
 }
 
-func matmul_bias([]float a, []float w, []float b, int m, int n, int p) []float {
-    []float result = allocate_float(m * p, 0.0)
+func matmul_bias(float[] a, float[] w, float[] b, int m, int n, int p) float[] {
+    float[] result = allocate_float(m * p, 0.0)
     int i = 0
     for i < m {
         int j = 0
@@ -299,10 +299,10 @@ func matmul_bias([]float a, []float w, []float b, int m, int n, int p) []float {
     result
 }
 
-func top_k_select([]float probs, int size, int k) ([]int, []float) {
-    []int indices = allocate_int(k, -1)
-    []float values = allocate_float(k, 0.0)
-    []bool selected = allocate_bool(size, false)
+func top_k_select(float[] probs, int size, int k) (int[], float[]) {
+    int[] indices = allocate_int(k, -1)
+    float[] values = allocate_float(k, 0.0)
+    bool[] selected = allocate_bool(size, false)
     int idx = 0
     for idx < k {
         float max_val = -1.0
@@ -325,7 +325,7 @@ func top_k_select([]float probs, int size, int k) ([]int, []float) {
     (indices, values)
 }
 
-func compute_entropy([]float probs, int size) float {
+func compute_entropy(float[] probs, int size) float {
     float entropy = 0.0
     int i = 0
     for i < size {
@@ -337,7 +337,7 @@ func compute_entropy([]float probs, int size) float {
     entropy
 }
 
-func compute_variance([]float data, int size) float {
+func compute_variance(float[] data, int size) float {
     float mean = mean_float(data)
     float variance = 0.0
     int i = 0

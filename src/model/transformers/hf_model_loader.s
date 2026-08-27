@@ -171,7 +171,7 @@ func generate_text(
     print("Top-p: " + float_to_string(config.top_p) + "\n")
     print("Top-k: " + int_to_string(config.top_k) + "\n\n")
 
-    []string tokens = hf_tokenizer.tokenize_text(prompt, model.tokenizer)
+    string[] tokens = hf_tokenizer.tokenize_text(prompt, model.tokenizer)
 
     print("✓ Tokenized to " + int_to_string(len(tokens)) + " tokens\n")
 

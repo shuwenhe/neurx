@@ -24,10 +24,10 @@ func create_temperature_processor(float temperature) temperature_processor {
 }
 
 func apply_temperature(
-    logits: []float,
+    logits: float[],
     temperature_processor processor
-) []float {
-    []float scaled_logits
+) float[] {
+    float[] scaled_logits
 
     for logit in logits {
         scaled := logit / processor.temperature
@@ -38,9 +38,9 @@ func apply_temperature(
 }
 
 func apply_temperature_minmax(
-    logits: []float,
+    logits: float[],
     float temperature
-) []float {
+) float[] {
 
     float min_logit = logits[0]
     float max_logit = logits[0]
@@ -56,7 +56,7 @@ func apply_temperature_minmax(
 
     float range = max_logit - min_logit
 
-    []float normalized
+    float[] normalized
     if range > 0.0 {
         for logit in logits {
             float norm = (logit - min_logit) / range * 2.0 - 1.0
@@ -68,7 +68,7 @@ func apply_temperature_minmax(
         }
     }
 
-    []float scaled
+    float[] scaled
     for norm_logit in normalized {
         scaled.append(norm_logit / temperature)
     }
@@ -77,10 +77,10 @@ func apply_temperature_minmax(
 }
 
 func apply_temperature_batch(
-    logits_batch: [][]float,
+    logits_batch: float[][],
     temperature_processor processor
-) [][]float {
-    [][]float scaled_batch
+) float[][] {
+    float[][] scaled_batch
 
     for batch_logits in logits_batch {
         scaled := apply_temperature(batch_logits, processor)
@@ -91,13 +91,13 @@ func apply_temperature_batch(
 }
 
 func sample_with_temperature(
-    logits: []float,
+    logits: float[],
     temperature_processor processor
 ) int {
 
-    []float scaled = apply_temperature(logits, processor)
+    float[] scaled = apply_temperature(logits, processor)
 
-    []float probs = processor_utils.softmax(scaled)
+    float[] probs = processor_utils.softmax(scaled)
 
     int best_token = 0
     float best_prob = probs[0]
@@ -113,11 +113,11 @@ func sample_with_temperature(
 }
 
 func adaptive_temperature_by_entropy(
-    logits: []float,
+    logits: float[],
     base_temperature: float,
     float target_entropy
 ) float {
-    []float probs = processor_utils.softmax(logits)
+    float[] probs = processor_utils.softmax(logits)
 
     float entropy = 0.0
     for prob in probs {
@@ -150,16 +150,16 @@ func adaptive_temperature_by_entropy(
 }
 
 func measure_distribution_diversity(
-    logits: []float,
+    logits: float[],
     float temperature
 ) float {
 
-    []float scaled_logits
+    float[] scaled_logits
     for logit in logits {
         scaled_logits.append(logit / temperature)
     }
 
-    []float probs = processor_utils.softmax(scaled_logits)
+    float[] probs = processor_utils.softmax(scaled_logits)
 
     float entropy = 0.0
     for prob in probs {
@@ -173,20 +173,20 @@ func measure_distribution_diversity(
 }
 
 func apply_temperature_top_k(
-    logits: []float,
+    logits: float[],
     temperature: float,
     int k
-) []float {
+) float[] {
     int vocab_size = len(logits)
 
-    []float scaled_logits
+    float[] scaled_logits
     for logit in logits {
         scaled_logits.append(logit / temperature)
     }
 
-    []float probs = processor_utils.softmax(scaled_logits)
+    float[] probs = processor_utils.softmax(scaled_logits)
 
-    []int sorted_indices
+    int[] sorted_indices
     for i = 0; i < vocab_size; i = i + 1 {
         sorted_indices.append(i)
     }
@@ -201,7 +201,7 @@ func apply_temperature_top_k(
         }
     }
 
-    []bool mask
+    bool[] mask
     for i = 0; i < vocab_size; i = i + 1 {
         bool in_top_k = false
 
@@ -222,15 +222,15 @@ struct temperature_stats {
     float temperature
     float entropy_before
     float entropy_after
-    []float prob_top_5
+    float[] prob_top_5
 }
 
 func analyze_temperature_effect(
-    logits: []float,
+    logits: float[],
     float temperature
 ) temperature_stats {
 
-    []float original_probs = processor_utils.softmax(logits)
+    float[] original_probs = processor_utils.softmax(logits)
     float entropy_before = 0.0
     for prob in original_probs {
         if prob > 0.0 {
@@ -238,12 +238,12 @@ func analyze_temperature_effect(
         }
     }
 
-    []float scaled_logits
+    float[] scaled_logits
     for logit in logits {
         scaled_logits.append(logit / temperature)
     }
 
-    []float scaled_probs = processor_utils.softmax(scaled_logits)
+    float[] scaled_probs = processor_utils.softmax(scaled_logits)
     float entropy_after = 0.0
     for prob in scaled_probs {
         if prob > 0.0 {
@@ -251,7 +251,7 @@ func analyze_temperature_effect(
         }
     }
 
-    []float top_5_probs
+    float[] top_5_probs
     for i = 0; i < 5 && i < len(scaled_probs); i = i + 1 {
         float max_prob = 0.0
         for prob in scaled_probs {

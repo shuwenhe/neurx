@@ -58,7 +58,7 @@ func estimate_full_layer_memory(int layer_id) int {
     base_size * 5
 }
 
-func size_of_dimensions([]int shape) int {
+func size_of_dimensions(int[] shape) int {
     if len(shape) == 0 { return 1 }
     int size = 1
     for s in shape { size = size * s }

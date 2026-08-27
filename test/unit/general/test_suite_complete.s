@@ -263,7 +263,7 @@ func test_transformer_forward_pass() test_result {
     model := create_transformer_model(cfg, ctx)
     batch_size := 2
     seq_length := 16
-    input_ids := make([][]int, batch_size)
+    input_ids := make(int[][], batch_size)
     logits := model.forward(input_ids)
     passed := logits != nil
     cleanup_cuda_context(ctx)
@@ -469,7 +469,7 @@ func benchmark_model_inference() {
     }
     ctx, _ := init_cuda_context(0)
     model := create_transformer_model(cfg, ctx)
-    input_ids := make([][]int, 1)
+    input_ids := make(int[][], 1)
     for i := 0; i < 3; i += 1 {
         model.forward(input_ids)
     }

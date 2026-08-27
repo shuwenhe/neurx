@@ -314,8 +314,8 @@ func agent_skill_registry_load_state_dict(agent_skill_registry_state state, agen
     }
 }
 
-func agent_skill_registry_names(agent_skill_registry_state state) []string {
-    []string names = []string{cap: len(state.records)}
+func agent_skill_registry_names(agent_skill_registry_state state) string[] {
+    string[] names = string[]{cap: len(state.records)}
     int i = 0
     for i < len(state.records) {
         names[i] = state.records[i].spec.name
@@ -337,7 +337,7 @@ func agent_skill_registry_success_rate(agent_skill_registry_state state, string 
     float(rec.success_count) / float(total)
 }
 
-func agent_skill_registry_promoted_names(agent_skill_registry_state state) []string {
+func agent_skill_registry_promoted_names(agent_skill_registry_state state) string[] {
     int count = 0
     int i = 0
     for i < len(state.records) {
@@ -346,7 +346,7 @@ func agent_skill_registry_promoted_names(agent_skill_registry_state state) []str
         }
         i = i + 1
     }
-    []string names = []string{cap: count}
+    string[] names = string[]{cap: count}
     i = 0
     int out_i = 0
     for i < len(state.records) {

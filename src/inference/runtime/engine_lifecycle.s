@@ -44,8 +44,8 @@ struct engine_lifecycle_state {
     int pending_sleep_level
     int transition_id
     []engine_memory_segment segments
-    []string sleeping_tags
-    []string active_request_ids
+    string[] sleeping_tags
+    string[] active_request_ids
     int device_bytes
     int host_bytes
     int reclaimed_bytes
@@ -60,7 +60,7 @@ struct engine_lifecycle_state {
 struct engine_lifecycle_result {
     engine_lifecycle_state state
     []engine_memory_transfer transfers
-    []string aborted_request_ids
+    string[] aborted_request_ids
     bool accepted
     bool pending
     int transition_id
@@ -103,7 +103,7 @@ func new_engine_lifecycle(bool enabled, string backend_name, bool preserves_comm
     state
 }
 
-func engine_string_contains([]string values, string expected) bool {
+func engine_string_contains(string[] values, string expected) bool {
     int i = 0
     for i < len(values) {
         if values[i] == expected { return true }
@@ -112,13 +112,13 @@ func engine_string_contains([]string values, string expected) bool {
     false
 }
 
-func engine_string_append_unique([]string values, string value) []string {
+func engine_string_append_unique(string[] values, string value) string[] {
     if value == "" || engine_string_contains(values, value) { return values }
     append(values, value)
 }
 
-func engine_string_remove([]string values, string expected) []string {
-    []string result = []string{cap: len(values)}
+func engine_string_remove(string[] values, string expected) string[] {
+    string[] result = string[]{cap: len(values)}
     int i = 0
     for i < len(values) {
         if values[i] != expected { result = append(result, values[i]) }
@@ -257,11 +257,11 @@ func engine_begin_sleep(engine_lifecycle_state state, int level, string mode) en
     result
 }
 
-func engine_tag_selected([]string tags, string tag) bool {
+func engine_tag_selected(string[] tags, string tag) bool {
     len(tags) == 0 || engine_string_contains(tags, tag)
 }
 
-func engine_begin_wake(engine_lifecycle_state state, []string tags) engine_lifecycle_result {
+func engine_begin_wake(engine_lifecycle_state state, string[] tags) engine_lifecycle_result {
     engine_lifecycle_result result = new_engine_lifecycle_result(state, false, false, "")
     if state.status == engine_awake_status() { return new_engine_lifecycle_result(state, true, false, "") }
     if state.status != engine_asleep_status() { return new_engine_lifecycle_result(state, false, false, "engine lifecycle transition is active") }

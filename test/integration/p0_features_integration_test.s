@@ -1,45 +1,45 @@
 package main
 
 func test_sampling_complete() bool {
-    []float logits = []float{2.0, 1.5, 1.0, 0.5, 0.1, -0.5, -1.0, -2.0}
-    []float temp_scaled = apply_temperature(logits, 1.5)
+    float[] logits = float[]{2.0, 1.5, 1.0, 0.5, 0.1, -0.5, -1.0, -2.0}
+    float[] temp_scaled = apply_temperature(logits, 1.5)
     if len(temp_scaled) != 8 {
         return false
     }
-    []float top_k_filtered = top_k_filter(logits, 5)
+    float[] top_k_filtered = top_k_filter(logits, 5)
     if len(top_k_filtered) != 8 {
         return false
     }
-    []float top_p_filtered = top_p_filter(logits, 0.9)
+    float[] top_p_filtered = top_p_filter(logits, 0.9)
     if len(top_p_filtered) != 8 {
         return false
     }
-    []int prev_tokens = []int{42, 43, 44}
-    []float rep_penalized = apply_repetition_penalty(logits, prev_tokens, 1.2)
+    int[] prev_tokens = int[]{42, 43, 44}
+    float[] rep_penalized = apply_repetition_penalty(logits, prev_tokens, 1.2)
     if len(rep_penalized) != 8 {
         return false
     }
-    []float freq_penalized = apply_frequency_penalty(logits, prev_tokens, 0.1)
+    float[] freq_penalized = apply_frequency_penalty(logits, prev_tokens, 0.1)
     if len(freq_penalized) != 8 {
         return false
     }
-    []int stop_seq = []int{2}
-    []int tokens_with_stop = []int{100, 101, 2, 103}
+    int[] stop_seq = int[]{2}
+    int[] tokens_with_stop = int[]{100, 101, 2, 103}
     bool has_stop = contains_stop_sequence(tokens_with_stop, stop_seq)
     if has_stop == false {
         return false
     }
-    []int bad_tokens = []int{999, 1000}
-    []float bad_filtered = filter_bad_words(logits, bad_tokens)
+    int[] bad_tokens = int[]{999, 1000}
+    float[] bad_filtered = filter_bad_words(logits, bad_tokens)
     if len(bad_filtered) != 8 {
         return false
     }
-    []float config = new_sampling_config(0.7, 50, 0.95)
+    float[] config = new_sampling_config(0.7, 50, 0.95)
     config = set_repetition_penalty(config, 1.2)
     config = set_frequency_penalty(config, 0.1)
-    []float final_logits = apply_all_sampling(logits, config, prev_tokens, bad_tokens)
+    float[] final_logits = apply_all_sampling(logits, config, prev_tokens, bad_tokens)
     if len(final_logits) > 0 {
-        []float probs = softmax_logits(final_logits)
+        float[] probs = softmax_logits(final_logits)
         int selected = select_token_by_probability(probs)
         if selected < 0 {
             return false
@@ -49,30 +49,30 @@ func test_sampling_complete() bool {
 }
 
 func test_advanced_scheduler() bool {
-    []int req1 = new_request(1, 10, 100)
-    []int req2 = new_request(2, 50, 200)
-    []int req3 = new_request(3, 30, 150)
-    []int fifo_state = new_scheduler_state(32, 64, 0)
-    [][]int dummy_requests = append([][]int{}, req1)
+    int[] req1 = new_request(1, 10, 100)
+    int[] req2 = new_request(2, 50, 200)
+    int[] req3 = new_request(3, 30, 150)
+    int[] fifo_state = new_scheduler_state(32, 64, 0)
+    int[][] dummy_requests = append(int[][]{}, req1)
     if len(fifo_batch) == 0 {
         return false
     }
-    []int sjf_state = new_scheduler_state(32, 64, 1)
-    []int sjf_batch = select_requests_for_prefill(requests_arr, sjf_state, 0)
+    int[] sjf_state = new_scheduler_state(32, 64, 1)
+    int[] sjf_batch = select_requests_for_prefill(requests_arr, sjf_state, 0)
     if len(sjf_batch) == 0 {
         return false
     }
-    []int pri_state = new_scheduler_state(32, 64, 2)
-    []int pri_batch = select_requests_for_prefill(requests_arr, pri_state, 0)
+    int[] pri_state = new_scheduler_state(32, 64, 2)
+    int[] pri_batch = select_requests_for_prefill(requests_arr, pri_state, 0)
     if len(pri_batch) == 0 {
         return false
     }
-    []int len_state = new_scheduler_state(32, 64, 3)
-    []int len_batch = select_requests_for_prefill(requests_arr, len_state, 0)
+    int[] len_state = new_scheduler_state(32, 64, 3)
+    int[] len_batch = select_requests_for_prefill(requests_arr, len_state, 0)
     if len(len_batch) == 0 {
         return false
     }
-    []int decode_batch = select_requests_for_decode(requests_arr, fifo_state)
+    int[] decode_batch = select_requests_for_decode(requests_arr, fifo_state)
     string metrics = get_scheduler_metrics()
     if len(metrics) == 0 {
         return false
@@ -81,29 +81,29 @@ func test_advanced_scheduler() bool {
 }
 
 func test_request_response_protocol() bool {
-    []int req = new_request_protocol(1, 128, 256)
+    int[] req = new_request_protocol(1, 128, 256)
     if len(req) == 0 {
         return false
     }
     req = set_num_sequences(req, 3)
     req = set_stream(req, true)
     req = set_lora_id(req, 1)
-    []int response = new_response()
+    int[] response = new_response()
     if len(response) == 0 {
         return false
     }
     int i = 0
     for i < 3 {
-        []int tokens = []int{100, 101, 102}
-        []float logprobs = []float{-0.5, -0.3, -0.8}
-        []int seq_result = new_sequence_result(tokens, logprobs, 0)
+        int[] tokens = int[]{100, 101, 102}
+        float[] logprobs = float[]{-0.5, -0.3, -0.8}
+        int[] seq_result = new_sequence_result(tokens, logprobs, 0)
         i = i + 1
     }
-    []int resp_token = new_response_token(105, -0.4, 50)
+    int[] resp_token = new_response_token(105, -0.4, 50)
     if len(resp_token) == 0 {
         return false
     }
-    []int metrics = new_token_metrics(-0.4, 5, 2.1, 12)
+    int[] metrics = new_token_metrics(-0.4, 5, 2.1, 12)
     if len(metrics) == 0 {
         return false
     }
@@ -111,11 +111,11 @@ func test_request_response_protocol() bool {
     if len(chunk) == 0 {
         return false
     }
-    []int error_resp = new_error_response(400, "Invalid request")
+    int[] error_resp = new_error_response(400, "Invalid request")
     if len(error_resp) == 0 {
         return false
     }
-    []int cache_info = new_prefix_cache_info(true, 512, 100, 50)
+    int[] cache_info = new_prefix_cache_info(true, 512, 100, 50)
     if len(cache_info) == 0 {
         return false
     }
@@ -133,28 +133,28 @@ func test_bpe_tokenizer() bool {
     if eos_id <= 0 || sos_id <= 0 || pad_id < 0 {
         return false
     }
-    []int tokens = tokenize_text("Hello world", 128)
+    int[] tokens = tokenize_text("Hello world", 128)
     if len(tokens) == 0 {
         return false
     }
-    []int with_special = tokenize_add_special_tokens(tokens)
+    int[] with_special = tokenize_add_special_tokens(tokens)
     if len(with_special) < len(tokens) {
         return false
     }
-    []int padded = tokenize_with_padding(tokens, 128)
+    int[] padded = tokenize_with_padding(tokens, 128)
     if len(padded) != 128 {
         return false
     }
     string text1 = "First text"
     string text2 = "Second text"
     string text3 = "Third text"
-    []string batch = []string{text1, text2, text3}
-    []int demo_tokens = []int{100, 101, 102}
+    string[] batch = string[]{text1, text2, text3}
+    int[] demo_tokens = int[]{100, 101, 102}
     string reconstructed = tokens_to_text(demo_tokens)
     if len(reconstructed) == 0 {
         return false
     }
-    []int oov_test = []int{vocab_size + 100, 101, 102}
+    int[] oov_test = int[]{vocab_size + 100, 101, 102}
     int oov_count = 0
     if oov_test[0] >= vocab_size {
         oov_count = oov_count + 1
@@ -171,27 +171,27 @@ func test_bpe_tokenizer() bool {
 }
 
 func test_integrated_pipeline() bool {
-    []int input_tokens = tokenize_text("What is machine learning", 256)
+    int[] input_tokens = tokenize_text("What is machine learning", 256)
     if len(input_tokens) == 0 {
         return false
     }
-    []int req = new_request_protocol(1, len(input_tokens), 256)
+    int[] req = new_request_protocol(1, len(input_tokens), 256)
     req = set_stream(req, true)
-    [][]int requests = [][]int{}
+    int[][] requests = int[][]{}
     requests = append(requests, new_request(1, len(input_tokens), 256))
-    []int scheduler_state = new_scheduler_state(32, 64, 1)
-    []int prefill_batch = select_requests_for_prefill(requests, scheduler_state, 0)
+    int[] scheduler_state = new_scheduler_state(32, 64, 1)
+    int[] prefill_batch = select_requests_for_prefill(requests, scheduler_state, 0)
     if len(prefill_batch) == 0 {
         return false
     }
-    []float logits = []float{2.5, 1.8, 1.2, 0.5, -0.5, -1.5, -2.0}
-    []float sampling_config = new_sampling_config(0.8, 40, 0.92)
+    float[] logits = float[]{2.5, 1.8, 1.2, 0.5, -0.5, -1.5, -2.0}
+    float[] sampling_config = new_sampling_config(0.8, 40, 0.92)
     sampling_config = set_repetition_penalty(sampling_config, 1.1)
-    []float processed_logits = apply_all_sampling(logits, sampling_config, [], [])
+    float[] processed_logits = apply_all_sampling(logits, sampling_config, [], [])
     if len(processed_logits) != len(logits) {
         return false
     }
-    []float probs = softmax_logits(processed_logits)
+    float[] probs = softmax_logits(processed_logits)
     int next_token = select_token_by_probability(probs)
     if next_token < 0 {
         return false
@@ -200,8 +200,8 @@ func test_integrated_pipeline() bool {
     if len(stream_chunk) == 0 {
         return false
     }
-    []int prev_tokens = []int{next_token}
-    []int stop_sequence = []int{2}
+    int[] prev_tokens = int[]{next_token}
+    int[] stop_sequence = int[]{2}
     bool should_stop = contains_stop_sequence(prev_tokens, stop_sequence)
     string output_text = tokens_to_text(prev_tokens)
     if len(output_text) == 0 {
@@ -211,17 +211,17 @@ func test_integrated_pipeline() bool {
 }
 
 func test_large_batch_handling() bool {
-    [][]int large_batch = [][]int{}
+    int[][] large_batch = int[][]{}
     int i = 0
     for i < 100 {
-        []int req = new_request(i, 10 + i % 50, 128 + i % 100)
+        int[] req = new_request(i, 10 + i % 50, 128 + i % 100)
         large_batch = append(large_batch, req)
         i = i + 1
     }
     int policy = 0
     for policy < 3 {
-        []int scheduler = new_scheduler_state(32, 64, policy)
-        []int selected = select_requests_for_prefill(large_batch, scheduler, 0)
+        int[] scheduler = new_scheduler_state(32, 64, policy)
+        int[] selected = select_requests_for_prefill(large_batch, scheduler, 0)
         if len(selected) == 0 {
             return false
         }
@@ -230,7 +230,7 @@ func test_large_batch_handling() bool {
     i = 0
     int total_tokens = 0
     for i < 10 {
-        []int toks = tokenize_text("This is a long text for scale testing", 256)
+        int[] toks = tokenize_text("This is a long text for scale testing", 256)
         total_tokens = total_tokens + len(toks)
         i = i + 1
     }
@@ -241,17 +241,17 @@ func test_large_batch_handling() bool {
 }
 
 func test_error_handling() bool {
-    []int empty_toks = tokenize_text("", 256)
-    []float tiny_logits = []float{1.0}
-    []float filtered = top_k_filter(tiny_logits, 100)
+    int[] empty_toks = tokenize_text("", 256)
+    float[] tiny_logits = float[]{1.0}
+    float[] filtered = top_k_filter(tiny_logits, 100)
     int eos = get_eos_token()
-    []int with_eos = []int{1, 2, 3, eos}
-    bool has_eos = contains_stop_sequence(with_eos, []int{eos})
+    int[] with_eos = int[]{1, 2, 3, eos}
+    bool has_eos = contains_stop_sequence(with_eos, int[]{eos})
     if has_eos == false {
         return false
     }
-    []int short_seq = []int{1, 2}
-    []int padded = tokenize_with_padding(short_seq, 1024)
+    int[] short_seq = int[]{1, 2}
+    int[] padded = tokenize_with_padding(short_seq, 1024)
     if len(padded) != 1024 {
         return false
     }

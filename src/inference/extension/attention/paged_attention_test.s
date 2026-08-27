@@ -70,8 +70,8 @@ func test_runtime_prefill() {
     assert(runtime.current_seq_len == 0)
     assert(runtime.prefill_tokens == 0)
     assert(runtime.decode_steps == 0)
-    embeddings = make([]float, 32 * 8 * 128)
-    runtime = run_prefill(runtime, embeddings, []float{}, []float{}, []float{})
+    embeddings = make(float[], 32 * 8 * 128)
+    runtime = run_prefill(runtime, embeddings, float[]{}, float[]{}, float[]{})
     assert(runtime.current_seq_len == 32)
     assert(runtime.prefill_tokens == 32)
     println("✓ test_runtime_prefill PASSED")
@@ -85,12 +85,12 @@ func test_runtime_decode() {
         16,
         64,
     )
-    embeddings = make([]float, 32 * 8 * 128)
-    runtime = run_prefill(runtime, embeddings, []float{}, []float{}, []float{})
+    embeddings = make(float[], 32 * 8 * 128)
+    runtime = run_prefill(runtime, embeddings, float[]{}, float[]{}, float[]{})
     initial_seq_len = runtime.current_seq_len
     initial_decode_steps = runtime.decode_steps
-    token_emb = make([]float, 1 * 8 * 128)
-    runtime = run_decode_step(runtime, token_emb, []float{}, []float{}, []float{})
+    token_emb = make(float[], 1 * 8 * 128)
+    runtime = run_decode_step(runtime, token_emb, float[]{}, float[]{}, float[]{})
     assert(runtime.current_seq_len == initial_seq_len + 1)
     assert(runtime.decode_steps == initial_decode_steps + 1)
     println("✓ test_runtime_decode PASSED")
@@ -104,8 +104,8 @@ func test_cache_memory_usage() {
         16,
         64,
     )
-    embeddings = make([]float, 32 * 8 * 128)
-    runtime = run_prefill(runtime, embeddings, []float{}, []float{}, []float{})
+    embeddings = make(float[], 32 * 8 * 128)
+    runtime = run_prefill(runtime, embeddings, float[]{}, float[]{}, float[]{})
     memory = get_cache_memory_usage(runtime)
     expected = 32 * 8192
     assert(memory > 0)
@@ -122,7 +122,7 @@ func test_batched_runtime() {
         64,
     )
     assert(batched.num_sequences == 4)
-    embeddings = make([]float, 32 * 8 * 128)
+    embeddings = make(float[], 32 * 8 * 128)
     batched = update_batched_prefill(batched, 0, embeddings)
     assert(batched.runtimes[0].current_seq_len == 32)
     assert(batched.runtimes[1].current_seq_len == 0)
@@ -141,8 +141,8 @@ func test_cache_utilization() {
     )
     util = get_cache_utilization(runtime)
     assert(util == 0.0)
-    embeddings = make([]float, 256 * 8 * 128)
-    runtime = run_prefill(runtime, embeddings, []float{}, []float{}, []float{})
+    embeddings = make(float[], 256 * 8 * 128)
+    runtime = run_prefill(runtime, embeddings, float[]{}, float[]{}, float[]{})
     util = get_cache_utilization(runtime)
     assert(util > 0.0)
     assert(util < 100.0)

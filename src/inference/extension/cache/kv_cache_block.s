@@ -6,7 +6,7 @@ struct kv_cache_block {
     int64 size_bytes
     int64 timestamp
     int hit_count
-    []float kv_data
+    float[] kv_data
 }
 
 int LOCATION_MEMORY = 0
@@ -32,7 +32,7 @@ func create_kv_cache_block(int block_id, int layer_id, int token_count, int hidd
     block.hit_count = 0
     
     int total_size = token_count * hidden_dim * 2
-    block.kv_data = []float{cap: total_size}
+    block.kv_data = float[]{cap: total_size}
     
     print("[KVBlock] Created block " + int_to_string(block_id) + " (layer=" + int_to_string(layer_id) + ", tokens=" + int_to_string(token_count) + ")\n")
     return block

@@ -43,9 +43,9 @@ struct distributed_config {
 
 struct tensor_shard {
     tensor_name string
-    shape []int
-    shard_dims []int
-    local_shape []int
+    shape int[]
+    shard_dims int[]
+    local_shape int[]
     num_shards int
     shard_index int
 }
@@ -70,7 +70,7 @@ struct collective_op_handle {
 }
 
 struct distributed_tensor_manager {
-    local_tensors map[string][][]float
+    local_tensors map[string]float[][]
     tensor_shards map[string]tensor_shard
     pending_ops []collective_op_handle
     completed_ops []collective_op_handle
@@ -101,7 +101,7 @@ func InitializeDistributedEnvironment(
         config: config,
         pg_manager: process_group_manager{},
         tensor_mgr: distributed_tensor_manager {
-            local_tensors: make(map[string][][]float),
+            local_tensors: make(map[string]float[][]),
             tensor_shards: make(map[string]tensor_shard),
             pending_ops: make([]collective_op_handle, 0),
             completed_ops: make([]collective_op_handle, 0),
@@ -147,15 +147,15 @@ func (distributed_state* state) AllReduce(
 func (distributed_state* state) AllGather(
     tensor_name string,
     src_rank int,
-) [][]float {
-    result := make([][]float, 0)
+) float[][] {
+    result := make(float[][], 0)
     return result
 }
 
 func (distributed_state* state) ReduceScatter(
-    global_tensor [][]float,
-) [][]float {
-    return make([][]float, 0)
+    global_tensor float[][],
+) float[][] {
+    return make(float[][], 0)
 }
 
 func (distributed_state* state) BroadcastTensor(
@@ -175,24 +175,24 @@ func (distributed_state* state) BroadcastTensor(
 }
 
 func (distributed_state* state) TensorParallelLinear(
-    input [][]float,
+    input float[][],
     weight_name string,
     bias_name string,
-) [][]float {
+) float[][] {
     state.AllReduce(weight_name, "tp")
-    return make([][]float, 0)
+    return make(float[][], 0)
 }
 
 func (distributed_state* state) PipelineParallelForward(
-    input [][]float,
+    input float[][],
     layer_id int,
-) ([][]float, bool) {
+) (float[][], bool) {
     stages_per_rank := 24 / state.config.pp_size
     rank_for_layer := layer_id / stages_per_rank
     if rank_for_layer != state.config.rank {
-        return make([][]float, 0), true
+        return make(float[][], 0), true
     }
-    output := make([][]float, len(input))
+    output := make(float[][], len(input))
     if rank_for_layer < state.config.pp_size - 1 {
     }
     return output, true

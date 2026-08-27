@@ -29,7 +29,7 @@ struct parallel_config {
 struct group_info {
     string name
     int32 group_id
-    []int32 ranks
+    int[]32 ranks
     int32 world_size
     int32 rank_in_group
     string backend

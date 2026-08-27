@@ -65,11 +65,11 @@ struct transformer_layer_optimizer_state {
     adamw_optimizer b_up
 }
 
-func copy_float([]float values) []float {
+func copy_float(float[] values) float[] {
     values
 }
 
-func copy_int([]int values) []int {
+func copy_int(int[] values) int[] {
     values
 }
 
@@ -193,7 +193,7 @@ func transformer_layer_set([]transformer_layer layers, int index, transformer_la
     layers
 }
 
-func tensor_numel([]int shape) int {
+func tensor_numel(int[] shape) int {
     int n = 1
     int i = 0
     for i < len(shape) {
@@ -203,9 +203,9 @@ func tensor_numel([]int shape) int {
     n
 }
 
-func tensor_from_ints([]int values, []int shape) tensor {
+func tensor_from_ints(int[] values, int[] shape) tensor {
     int n = len(values)
-    []float data = []float{cap: n}
+    float[] data = float[]{cap: n}
     int i = 0
     for i < n {
         data[i] = values[i]
@@ -218,9 +218,9 @@ func tensor_from_float_value(float value) tensor {
     new([value], [1], false)
 }
 
-func zero_tensor([]int shape) tensor {
+func zero_tensor(int[] shape) tensor {
     int n = tensor_numel(shape)
-    []float data = []float{cap: n}
+    float[] data = float[]{cap: n}
     int i = 0
     for i < n {
         data[i] = 0.0
@@ -229,9 +229,9 @@ func zero_tensor([]int shape) tensor {
     new(data, copy_int(shape), true)
 }
 
-func ramp_tensor([]int shape, float scale) tensor {
+func ramp_tensor(int[] shape, float scale) tensor {
     int n = tensor_numel(shape)
-    []float data = []float{cap: n}
+    float[] data = float[]{cap: n}
     if n <= 0 {
         return new(data, copy_int(shape), true)
     }
@@ -243,7 +243,7 @@ func ramp_tensor([]int shape, float scale) tensor {
     new(data, copy_int(shape), true)
 }
 
-func join_documents([]string documents) string {
+func join_documents(string[] documents) string {
     string out = ""
     int i = 0
     for i < len(documents) {
@@ -293,7 +293,7 @@ func normalize_token_id(int token_id, int vocab_size) int {
 
 func one_hot_tensor(tensor ids, int vocab_size) tensor {
     int n = len(ids.data)
-    []float data = []float{cap: n * vocab_size}
+    float[] data = float[]{cap: n * vocab_size}
     int i = 0
     for i < n {
         int token_id = normalize_token_id(ids.data[i] as int, vocab_size)
@@ -308,7 +308,7 @@ func one_hot_tensor(tensor ids, int vocab_size) tensor {
 
 func scale_tensor(tensor value, float scale) tensor {
     int n = len(value.data)
-    []float data = []float{cap: n}
+    float[] data = float[]{cap: n}
     int i = 0
     for i < n {
         data[i] = value.data[i] * scale
@@ -511,7 +511,7 @@ func backward_swiglu_ffn(
 
 func relu_backward_mask(tensor input) tensor {
     int n = len(input.data)
-    []float data = []float{cap: n}
+    float[] data = float[]{cap: n}
     int i = 0
     for i < n {
         if input.data[i] > 0.0 {
@@ -526,7 +526,7 @@ func relu_backward_mask(tensor input) tensor {
 
 func tensor_ones_like(tensor input) tensor {
     int n = len(input.data)
-    []float data = []float{cap: n}
+    float[] data = float[]{cap: n}
     int i = 0
     for i < n {
         data[i] = 1.0
@@ -612,7 +612,7 @@ func embedding_apply_grad(tensor embedding, tensor token_ids, tensor grad_hidden
     next
 }
 
-func gpt_large_training_corpus([]string documents) string {
+func gpt_large_training_corpus(string[] documents) string {
     string corpus = join_documents(documents)
     if trim(corpus) != "" {
         return corpus
@@ -620,8 +620,8 @@ func gpt_large_training_corpus([]string documents) string {
     "neurx trains a decoder only transformer for language modeling.\nneurx uses s to build the full training pipeline.\n"
 }
 
-func gpt_large_training_tokens_from_text(string text) []int {
-    []string vocab = build_vocab(text)
+func gpt_large_training_tokens_from_text(string text) int[] {
+    string[] vocab = build_vocab(text)
     encode_text(text, vocab)
 }
 
@@ -702,13 +702,13 @@ func gpt_large_training_load_state_dict(gpt_large_training_state state, gpt_larg
     }
 }
 
-func new_gpt_large_training_state([]string documents, gpt_large_training_config config) gpt_large_training_state {
+func new_gpt_large_training_state(string[] documents, gpt_large_training_config config) gpt_large_training_state {
     string corpus = gpt_large_training_corpus(documents)
-    []int token_ids = gpt_large_training_tokens_from_text(corpus)
+    int[] token_ids = gpt_large_training_tokens_from_text(corpus)
     return new_gpt_large_training_state_from_token_ids(token_ids, config)
 }
 
-func new_gpt_large_training_state_from_token_ids([]int token_ids, gpt_large_training_config config) gpt_large_training_state {
+func new_gpt_large_training_state_from_token_ids(int[] token_ids, gpt_large_training_config config) gpt_large_training_state {
     gpt_large_state model = new_gpt_large_state()
     transformer_config backbone_config = transformer_config {
         num_layers: model.num_layers,

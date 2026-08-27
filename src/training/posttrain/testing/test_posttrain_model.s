@@ -16,7 +16,7 @@ struct test_result {
     string status
     float duration
     string message
-    []string details
+    string[] details
 }
 
 struct test_results {

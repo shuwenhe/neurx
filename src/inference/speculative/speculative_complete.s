@@ -11,9 +11,9 @@ struct speculative_decoding_config {
 }
 
 struct speculative_decoding_output {
-    []int output_tokens
-    []int draft_tokens
-    []bool accepted_flags
+    int[] output_tokens
+    int[] draft_tokens
+    bool[] accepted_flags
     int num_accepted
     int num_drafted
     float acceptance_rate
@@ -21,7 +21,7 @@ struct speculative_decoding_output {
 }
 
 struct speculative_draft_model {
-    [][]float weights
+    float[][] weights
     int hidden_dim
     int num_layers
     int vocab_size
@@ -35,7 +35,7 @@ struct medusa_config {
 }
 
 struct medusa_head {
-    [][]float weights
+    float[][] weights
     int output_dim
     int num_tokens
 }
@@ -43,18 +43,18 @@ struct medusa_head {
 struct medusa_model {
     medusa_config config
     []medusa_head heads
-    [][]float base_model_weights
+    float[][] base_model_weights
 }
 
 func new_medusa_model(medusa_config cfg) medusa_model {
     medusa_model model
     model.config = cfg
     model.heads = []medusa_head{}
-    model.base_model_weights = [][]float{}
+    model.base_model_weights = float[][]{}
 
     for i = 0; i < cfg.num_speculative_heads; i = i + 1 {
         medusa_head head
-        head.weights = [][]float{}
+        head.weights = float[][]{}
         head.output_dim = cfg.hidden_dim
         head.num_tokens = cfg.num_tokens_per_head
         model.heads = append(model.heads, head)
@@ -64,17 +64,17 @@ func new_medusa_model(medusa_config cfg) medusa_model {
 }
 
 func medusa_generate_draft_tokens(
-    []float input_hidden_state,
+    float[] input_hidden_state,
     medusa_model model,
     int num_tokens
-) [][]int {
+) int[][] {
 
-    [][]int draft_tokens = [][]int{}
+    int[][] draft_tokens = int[][]{}
 
     for head_idx = 0; head_idx < len(model.heads); head_idx = head_idx + 1 {
         medusa_head head = model.heads[head_idx]
 
-        []int head_tokens = []int{}
+        int[] head_tokens = int[]{}
         for t = 0; t < num_tokens && t < head.num_tokens; t = t + 1 {
 
             int token = t % 100
@@ -88,16 +88,16 @@ func medusa_generate_draft_tokens(
 }
 
 func medusa_verify_and_accept(
-    [][]int draft_tokens,
-    []float main_model_logits,
+    int[][] draft_tokens,
+    float[] main_model_logits,
     medusa_model model,
     float acceptance_threshold
 ) speculative_decoding_output {
 
     speculative_decoding_output output
-    output.output_tokens = []int{}
-    output.draft_tokens = []int{}
-    output.accepted_flags = []bool{}
+    output.output_tokens = int[]{}
+    output.draft_tokens = int[]{}
+    output.accepted_flags = bool[]{}
     output.num_accepted = 0
     output.num_drafted = 0
     output.acceptance_rate = 0.0
@@ -106,7 +106,7 @@ func medusa_verify_and_accept(
     output.num_drafted = len(draft_tokens)
 
     for i = 0; i < len(draft_tokens); i = i + 1 {
-        []int head_tokens = draft_tokens[i]
+        int[] head_tokens = draft_tokens[i]
         for j = 0; j < len(head_tokens); j = j + 1 {
             output.output_tokens = append(output.output_tokens, head_tokens[j])
             output.accepted_flags = append(output.accepted_flags, true)
@@ -131,18 +131,18 @@ struct eagle_config {
 
 struct eagle_model {
     eagle_config config
-    [][]float layer_weights
-    [][]float vocabulary_projection
+    float[][] layer_weights
+    float[][] vocabulary_projection
 }
 
 func new_eagle_model(eagle_config cfg) eagle_model {
     eagle_model model
     model.config = cfg
-    model.layer_weights = [][]float{}
-    model.vocabulary_projection = [][]float{}
+    model.layer_weights = float[][]{}
+    model.vocabulary_projection = float[][]{}
 
     for i = 0; i < cfg.num_layers; i = i + 1 {
-        []float layer = []float{}
+        float[] layer = float[]{}
         model.layer_weights = append(model.layer_weights, layer)
     }
 
@@ -150,14 +150,14 @@ func new_eagle_model(eagle_config cfg) eagle_model {
 }
 
 func eagle_generate_draft_tokens(
-    []float input_hidden_state,
+    float[] input_hidden_state,
     eagle_model model,
     int num_tokens
-) []int {
+) int[] {
 
-    []int draft_tokens = []int{}
+    int[] draft_tokens = int[]{}
 
-    []float current_hidden = input_hidden_state
+    float[] current_hidden = input_hidden_state
 
     for t = 0; t < num_tokens; t = t + 1 {
 
@@ -173,16 +173,16 @@ func eagle_generate_draft_tokens(
 }
 
 func eagle_verify(
-    []int draft_tokens,
-    [][]float main_model_logits_sequence,
+    int[] draft_tokens,
+    float[][] main_model_logits_sequence,
     eagle_model model,
     float threshold
 ) speculative_decoding_output {
 
     speculative_decoding_output output
-    output.output_tokens = []int{}
+    output.output_tokens = int[]{}
     output.draft_tokens = draft_tokens
-    output.accepted_flags = []bool{}
+    output.accepted_flags = bool[]{}
     output.num_drafted = len(draft_tokens)
     output.num_accepted = 0
 
@@ -218,8 +218,8 @@ struct lookahead_config {
 }
 
 struct lookahead_branch {
-    []int tokens
-    []float scores
+    int[] tokens
+    float[] scores
     float branch_score
 }
 
@@ -236,12 +236,12 @@ func new_lookahead_decoder(lookahead_config cfg) lookahead_decoder {
 }
 
 func lookahead_decode(
-    []float input_hidden_state,
+    float[] input_hidden_state,
     lookahead_decoder decoder,
     int target_length
-) []int {
+) int[] {
 
-    []int final_tokens = []int{}
+    int[] final_tokens = int[]{}
 
     for step = 0; step < target_length; step = step + 1 {
 
@@ -249,8 +249,8 @@ func lookahead_decode(
 
         for branch_idx = 0; branch_idx < decoder.config.num_branches; branch_idx = branch_idx + 1 {
             lookahead_branch branch
-            branch.tokens = []int{}
-            branch.scores = []float{}
+            branch.tokens = int[]{}
+            branch.scores = float[]{}
             branch.branch_score = 0.0
 
             for inner_step = 0; inner_step < decoder.config.num_steps_per_branch; inner_step = inner_step + 1 {
@@ -281,16 +281,16 @@ func lookahead_decode(
 }
 
 func speculative_decoding_step(
-    []float current_hidden,
+    float[] current_hidden,
     speculative_decoding_config cfg,
     interface{} draft_model,
-    []float main_model_logits
+    float[] main_model_logits
 ) speculative_decoding_output {
 
     speculative_decoding_output output
-    output.output_tokens = []int{}
-    output.draft_tokens = []int{}
-    output.accepted_flags = []bool{}
+    output.output_tokens = int[]{}
+    output.draft_tokens = int[]{}
+    output.accepted_flags = bool[]{}
     output.num_accepted = 0
     output.num_drafted = 0
     output.acceptance_rate = 0.0
@@ -333,9 +333,9 @@ func get_cached_output(
 ) speculative_decoding_output {
 
     speculative_decoding_output output
-    output.output_tokens = []int{}
-    output.draft_tokens = []int{}
-    output.accepted_flags = []bool{}
+    output.output_tokens = int[]{}
+    output.draft_tokens = int[]{}
+    output.accepted_flags = bool[]{}
     output.num_accepted = 0
     output.num_drafted = 0
     output.acceptance_rate = 0.0
@@ -390,7 +390,7 @@ struct adaptive_speculative_config {
 }
 
 func adaptive_speculative_decoding(
-    []float hidden_state,
+    float[] hidden_state,
     speculative_decoding_output last_output,
     adaptive_speculative_config cfg
 ) int {
@@ -409,16 +409,16 @@ func adaptive_speculative_decoding(
 }
 
 func joint_speculative_decoding(
-    []float hidden_state,
+    float[] hidden_state,
     medusa_model medusa,
     eagle_model eagle,
     speculative_decoding_config cfg
 ) speculative_decoding_output {
 
     speculative_decoding_output output
-    output.output_tokens = []int{}
-    output.draft_tokens = []int{}
-    output.accepted_flags = []bool{}
+    output.output_tokens = int[]{}
+    output.draft_tokens = int[]{}
+    output.accepted_flags = bool[]{}
     output.num_accepted = 0
     output.num_drafted = 0
     output.acceptance_rate = 0.0

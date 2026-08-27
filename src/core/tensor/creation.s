@@ -1,13 +1,13 @@
 package neurx.creation
 
 struct tensor {
-    []float data
-    []int shape
+    float[] data
+    int[] shape
     bool requires_grad
     option[tensor] grad
 }
 
-func numel([]int shape) int {
+func numel(int[] shape) int {
     int n = 1
     for i in 0..len(shape) {
         n = n * shape[i]
@@ -15,9 +15,9 @@ func numel([]int shape) int {
     n
 }
 
-func make([]int shape, float value, bool requires_grad) tensor {
+func make(int[] shape, float value, bool requires_grad) tensor {
     int n = numel(shape)
-    []float data = []float{cap: n}
+    float[] data = float[]{cap: n}
     for i in 0..n {
         data[i] = value
     }
@@ -29,9 +29,9 @@ func make([]int shape, float value, bool requires_grad) tensor {
     }
 }
 
-func copy_int([]int data) []int {
+func copy_int(int[] data) int[] {
     int n = len(data)
-    []int out = []int{cap: n}
+    int[] out = int[]{cap: n}
     int i = 0
     for i < n {
         out[i] = data[i]
@@ -58,15 +58,15 @@ func fill_ramp(tensor out, float low, float high) tensor {
     out
 }
 
-func zeros([]int shape) tensor {
+func zeros(int[] shape) tensor {
     make(shape, 0.0, false)
 }
 
-func ones([]int shape) tensor {
+func ones(int[] shape) tensor {
     make(shape, 1.0, false)
 }
 
-func full([]int shape, float value) tensor {
+func full(int[] shape, float value) tensor {
     make(shape, value, false)
 }
 
@@ -83,7 +83,7 @@ func full_like(tensor like, float value) tensor {
 }
 
 func eye(int n, int m) tensor {
-    []int shape = []int{cap: 2}
+    int[] shape = int[]{cap: 2}
     shape[0] = n
     shape[1] = m
     tensor out = make(shape, 0.0, false)
@@ -116,7 +116,7 @@ func arange(int start, int end, int step) tensor {
             value = value + step
         }
     }
-    []int shape = []int{cap: 1}
+    int[] shape = int[]{cap: 1}
     shape[0] = count
     tensor out = make(shape, 0.0, false)
     value = start
@@ -138,7 +138,7 @@ func arange(int start, int end, int step) tensor {
 }
 
 func linspace(float start, float end, int steps) tensor {
-    []int shape = []int{cap: 1}
+    int[] shape = int[]{cap: 1}
     shape[0] = steps
     tensor out = make(shape, 0.0, false)
     if steps <= 0 {
@@ -161,7 +161,7 @@ func logspace(float start, float end, int steps, float base) tensor {
     linspace(start, end, steps)
 }
 
-func rand([]int shape) tensor {
+func rand(int[] shape) tensor {
     tensor out = make(shape, 0.0, false)
     int n = len(out.data)
     int i = 0
@@ -172,7 +172,7 @@ func rand([]int shape) tensor {
     out
 }
 
-func randn([]int shape) tensor {
+func randn(int[] shape) tensor {
     tensor out = make(shape, 0.0, false)
     int n = len(out.data)
     int i = 0
@@ -191,7 +191,7 @@ func randn([]int shape) tensor {
     out
 }
 
-func randint(int low, int high, []int shape) tensor {
+func randint(int low, int high, int[] shape) tensor {
     tensor out = make(shape, 0.0, false)
     int n = len(out.data)
     int span = high - low
@@ -211,7 +211,7 @@ func randint(int low, int high, []int shape) tensor {
 }
 
 func randperm(int n) tensor {
-    []int shape = []int{cap: 1}
+    int[] shape = int[]{cap: 1}
     shape[0] = n
     tensor out = make(shape, 0.0, false)
     int i = 0
@@ -222,7 +222,7 @@ func randperm(int n) tensor {
     out
 }
 
-func normal(float mean, float std, []int shape) tensor {
+func normal(float mean, float std, int[] shape) tensor {
     tensor out = make(shape, 0.0, false)
     int n = len(out.data)
     if n <= 0 {
@@ -240,12 +240,12 @@ func normal(float mean, float std, []int shape) tensor {
     out
 }
 
-func uniform(float low, float high, []int shape) tensor {
+func uniform(float low, float high, int[] shape) tensor {
     tensor out = make(shape, 0.0, false)
     fill_ramp(out, low, high)
 }
 
-func empty([]int shape) tensor {
+func empty(int[] shape) tensor {
     make(shape, 0.0, false)
 }
 

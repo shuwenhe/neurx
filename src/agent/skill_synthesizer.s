@@ -24,7 +24,7 @@ func agent_skill_signal_action(string signal) string {
     lower(trim(out))
 }
 
-func agent_skill_append_unique([]string items, string value) []string {
+func agent_skill_append_unique(string[] items, string value) string[] {
     string v = trim(value)
     if v == "" {
         return items
@@ -37,7 +37,7 @@ func agent_skill_append_unique([]string items, string value) []string {
         }
         i = i + 1
     }
-    []string out = []string{cap: size + 1}
+    string[] out = string[]{cap: size + 1}
     i = 0
     for i < size {
         out[i] = items[i]
@@ -47,8 +47,8 @@ func agent_skill_append_unique([]string items, string value) []string {
     out
 }
 
-func agent_skill_required_tools(agent_skill_feedback_state feedback, string action) []string {
-    []string tools = []string{}
+func agent_skill_required_tools(agent_skill_feedback_state feedback, string action) string[] {
+    string[] tools = string[]{}
     tools = agent_skill_append_unique(tools, action)
     if feedback.skill_name != "" && feedback.skill_name != "general" && feedback.skill_name != action {
         tools = agent_skill_append_unique(tools, feedback.skill_name)
@@ -70,8 +70,8 @@ func agent_skill_required_tools(agent_skill_feedback_state feedback, string acti
     tools
 }
 
-func agent_skill_steps_for_feedback(agent_skill_feedback_state feedback, string action) []string {
-    []string steps = []string{}
+func agent_skill_steps_for_feedback(agent_skill_feedback_state feedback, string action) string[] {
+    string[] steps = string[]{}
     if feedback.task == "code" || action == "write" || action == "write_file" || action == "apply_patch" || action == "patch" || action == "code" {
         steps = agent_skill_append_unique(steps, "inspect_workspace")
         if action == "apply_patch" || action == "patch" {
@@ -169,21 +169,21 @@ func agent_skill_synthesize(agent_skill_feedback_state feedback) agent_skill_rec
         status = "promoted"
     }
     string action = agent_skill_signal_action(feedback.signal)
-    []string triggers = []string{}
+    string[] triggers = string[]{}
     triggers = agent_skill_append_unique(triggers, feedback.task)
     triggers = agent_skill_append_unique(triggers, action)
     triggers = agent_skill_append_unique(triggers, feedback.signal)
-    []string required_tools = agent_skill_required_tools(feedback, action)
-    []string preconditions = []string{cap: 1}
+    string[] required_tools = agent_skill_required_tools(feedback, action)
+    string[] preconditions = string[]{cap: 1}
     preconditions[0] = "trace_available"
-    []string steps = agent_skill_steps_for_feedback(feedback, action)
-    []string success_signals = []string{cap: 1}
+    string[] steps = agent_skill_steps_for_feedback(feedback, action)
+    string[] success_signals = string[]{cap: 1}
     if feedback.task == "finalize" {
         success_signals[0] = "status=done"
     } else {
         success_signals[0] = "status=ok"
     }
-    []string failure_signals = []string{cap: 2}
+    string[] failure_signals = string[]{cap: 2}
     failure_signals[0] = "status=blocked"
     failure_signals[1] = "status=failed"
     agent_skill_spec spec = agent_skill_spec {

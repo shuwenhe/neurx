@@ -6,7 +6,7 @@ struct minimal_cnn_state {
     string dataset
     int input_channels
     int num_classes
-    []float weight
+    float[] weight
     float bias
     int training_steps
     float train_loss
@@ -15,7 +15,7 @@ struct minimal_cnn_state {
 }
 
 func new_minimal_cnn_state() minimal_cnn_state {
-    []float weight = []float{cap: 3}
+    float[] weight = float[]{cap: 3}
     weight[0] = 0.5
     weight[1] = 0.5
     weight[2] = 0.5
@@ -34,7 +34,7 @@ func new_minimal_cnn_state() minimal_cnn_state {
     }
 }
 
-func minimal_cnn_score(minimal_cnn_state state, []float input) float {
+func minimal_cnn_score(minimal_cnn_state state, float[] input) float {
     float score = state.bias
     int i = 0
     int limit = len(input)

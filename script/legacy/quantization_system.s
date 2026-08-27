@@ -24,11 +24,11 @@ struct quantization_stats {
 
 struct quantized_layer {
     name                string
-    weights_int         [][]int
-    bias_fp32           []float64
-    scales              []float64
-    zero_points         []int
-    original_shape      []int
+    weights_int         int[][]
+    bias_fp32           float[]64
+    scales              float[]64
+    zero_points         int[]
+    original_shape      int[]
     quantization_type   string
 }
 
@@ -36,12 +36,12 @@ struct quantization_framework {
     config              quantization_config
     original_model      policy_model
     quantized_layers    map[string]*quantized_layer
-    calibration_data    [][]float64
+    calibration_data    float[][]64
     compression_ratio   float64
     accuracy_loss       float64
 }
 
-func (quantization_framework* framework) calculate_stats(data [][]float64) quantization_stats {
+func (quantization_framework* framework) calculate_stats(data float[][]64) quantization_stats {
     if len(data) == 0 {
         return quantization_stats{}
     }
@@ -87,12 +87,12 @@ func (quantization_framework* framework) calculate_stats(data [][]float64) quant
     }
 }
 
-func (quantization_framework* framework) quantize_weights(weights [][]float64, string layer_name) *quantized_layer {
+func (quantization_framework* framework) quantize_weights(weights float[][]64, string layer_name) *quantized_layer {
     fmt.Printf("[Quantization] Quantizing layer %s\n", layer_name)
     stats := framework.calculate_stats(weights)
-    quantized := make([][]int, len(weights))
+    quantized := make(int[][], len(weights))
     for i := 0; i < len(weights); i++ {
-        quantized[i] = make([]int, len(weights[i]))
+        quantized[i] = make(int[], len(weights[i]))
         for j := 0; j < len(weights[i]); j++ {
             scaled := (weights[i][j] - stats.min_val) / stats.scale
             quantized[i][j] = int(scaled + 0.5)
@@ -107,18 +107,18 @@ func (quantization_framework* framework) quantize_weights(weights [][]float64, s
     layer := *quantized_layer{
         name: layer_name,
         weights_int: quantized,
-        []int original_shape{len(weights), len(weights[0])},
-        scales: []float64{stats.scale},
-        zero_points: []int{stats.zero_point},
+        int[] original_shape{len(weights), len(weights[0])},
+        scales: float[]64{stats.scale},
+        zero_points: int[]{stats.zero_point},
         quantization_type: framework.config.quantization_type,
     }
     return layer
 }
 
-func (quantized_layer* layer) dequantize() [][]float64 {
-    result := make([][]float64, len(layer.weights_int))
+func (quantized_layer* layer) dequantize() float[][]64 {
+    result := make(float[][]64, len(layer.weights_int))
     for i := 0; i < len(layer.weights_int); i++ {
-        result[i] = make([]float64, len(layer.weights_int[i]))
+        result[i] = make(float[]64, len(layer.weights_int[i]))
         for j := 0; j < len(layer.weights_int[i]); j++ {
             val := float64(layer.weights_int[i][j]) * layer.scales[0]
             result[i][j] = val
@@ -127,12 +127,12 @@ func (quantized_layer* layer) dequantize() [][]float64 {
     return result
 }
 
-func (quantization_framework* framework) fake_quantize(weights [][]float64, string layer_name) [][]float64 {
+func (quantization_framework* framework) fake_quantize(weights float[][]64, string layer_name) float[][]64 {
     quantized_layer := framework.quantize_weights(weights, layer_name)
     return quantized_layer.dequantize()
 }
 
-func (quantization_framework* framework) qat_train_step(weights [][]float64, loss float64) float64 {
+func (quantization_framework* framework) qat_train_step(weights float[][]64, loss float64) float64 {
     quantized_weights := framework.fake_quantize(weights, "temp")
     kl_div := 0.0
     for i := 0; i < len(weights); i++ {
@@ -144,7 +144,7 @@ func (quantization_framework* framework) qat_train_step(weights [][]float64, los
     return loss + 0.1*kl_div / float64(len(weights)*len(weights[0]))
 }
 
-func (quantization_framework* framework) calibrate(data [][]float64) {
+func (quantization_framework* framework) calibrate(data float[][]64) {
     fmt.Printf("[Quantization] Calibrating on %d samples\n", len(data))
     num_samples := framework.config.num_calibration
     if num_samples > len(data) {
@@ -223,13 +223,13 @@ func new_quantization_framework(config quantization_config, model policy_model) 
         config: config,
         original_model: model,
         quantized_layers: make(map[string]*quantized_layer),
-        calibration_data: [][]float64{},
+        calibration_data: float[][]64{},
         compression_ratio: 0.0,
         accuracy_loss: 0.0,
     }
 }
 
-func (quantization_framework* framework) quantize_model(calibration_data [][]float64) {
+func (quantization_framework* framework) quantize_model(calibration_data float[][]64) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  model Quantization (INT8/INT4 Compression)           ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")

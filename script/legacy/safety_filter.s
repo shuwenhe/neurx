@@ -6,7 +6,7 @@ import (
 )
 
 struct safety_config {
-    harmful_keywords        []string
+    harmful_keywords        string[]
     toxicity_threshold      float64
     safety_threshold        float64
     use_model_based         bool
@@ -17,7 +17,7 @@ struct safety_check_result {
     is_safe                 bool
     toxicity_score          float64
     safety_score            float64
-    harmful_categories      []string
+    harmful_categories      string[]
     confidence              float64
     reason                  string
 }
@@ -44,8 +44,8 @@ struct safety_stats {
     blocked_generation      int64
 }
 
-func (safety_filter* filter) detect_harmful_keywords(text string) []string {
-    harmful := []string{}
+func (safety_filter* filter) detect_harmful_keywords(text string) string[] {
+    harmful := string[]{}
     text_lower := strings.ToLower(text)
     for _, keyword := range filter.config.harmful_keywords {
         if strings.Contains(text_lower, strings.ToLower(keyword)) {
@@ -94,8 +94,8 @@ func (safety_filter* filter) calculate_toxicity_score(text string) float64 {
     return score
 }
 
-func (safety_filter* filter) model_based_safety_check(text string) (float64, []string) {
-    logits := make([]float64, 10)
+func (safety_filter* filter) model_based_safety_check(text string) (float64, string[]) {
+    logits := make(float[]64, 10)
     for i := range logits {
         logits[i] = math.Sin(float64(i) + float64(len(text))/100.0)
     }
@@ -106,7 +106,7 @@ func (safety_filter* filter) model_based_safety_check(text string) (float64, []s
         }
     }
     exp_sum := 0.0
-    probs := make([]float64, len(logits))
+    probs := make(float[]64, len(logits))
     for i, l := range logits {
         exp_l := math.Exp(l - max_logit)
         probs[i] = exp_l
@@ -116,8 +116,8 @@ func (safety_filter* filter) model_based_safety_check(text string) (float64, []s
         probs[i] /= exp_sum
     }
     safety_score := probs[0]
-    categories := []string{}
-    category_names := []string{
+    categories := string[]{}
+    category_names := string[]{
         "hate_speech", "violence", "sexual",
         "harassment", "illegal", "self_harm",
         "deception", "privacy", "profanity", "other",
@@ -144,7 +144,7 @@ func (safety_filter* filter) check_safety(text string) safety_check_result {
     filter.safety_stats.total_checks++
     result := safety_check_result{
         is_safe: true,
-        harmful_categories: []string{},
+        harmful_categories: string[]{},
     }
     harmful := filter.detect_harmful_keywords(text)
     if len(harmful) > 0 {
@@ -153,7 +153,7 @@ func (safety_filter* filter) check_safety(text string) safety_check_result {
     toxicity := filter.calculate_toxicity_score(text)
     result.toxicity_score = toxicity
     safety_score := float64()
-    var categories []string
+    var categories string[]
     if filter.config.use_model_based {
         safety_score, categories = filter.model_based_safety_check(text)
         result.harmful_categories = append(result.harmful_categories, categories...)
@@ -205,9 +205,9 @@ func (safety_filter* filter) filter_generation(text string) (string, bool) {
     }
 }
 
-func (safety_filter* filter) filter_batch(texts []string) ([]string, []bool) {
-    results := make([]string, len(texts))
-    flags := make([]bool, len(texts))
+func (safety_filter* filter) filter_batch(texts string[]) (string[], bool[]) {
+    results := make(string[], len(texts))
+    flags := make(bool[], len(texts))
     for i, text := range texts {
         results[i], flags[i] = filter.filter_generation(text)
     }
@@ -264,7 +264,7 @@ func (safety_filter* filter) print_stats() {
 func new_safety_filter(model policy_model) *safety_filter {
     return *safety_filter{
         config: safety_config{
-            harmful_keywords: []string{
+            harmful_keywords: string[]{
                 "violence", "illegal", "abuse",
                 "hate", "harm", "dangerous",
             },
@@ -283,7 +283,7 @@ func (safety_filter* filter) demonstrate() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Safety Filter System - Content Protection            ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝\n")
-    test_texts := []string{
+    test_texts := string[]{
         "I love this product! Highly recommend.",
         "This is VERY BAD and DANGEROUS!!!",
         "How to help someone in need",

@@ -5,7 +5,7 @@ use std.math
 
 struct tokenizer {
     int vocab_size
-    vocab: []string
+    vocab: string[]
     map[string]int token_to_id
     int bos_token_id
     int eos_token_id
@@ -14,9 +14,9 @@ struct tokenizer {
 }
 
 func create_tokenizer(int vocab_size) tokenizer {
-    vocab := make([]string, vocab_size)
+    vocab := make(string[], vocab_size)
     token_to_id := make(map[string]int)
-    special_tokens := []string{"<pad>", "<unk>", "<bos>", "<eos>", "<cls>", "<sep>"}
+    special_tokens := string[]{"<pad>", "<unk>", "<bos>", "<eos>", "<cls>", "<sep>"}
     for i := 0; i < len(special_tokens); i += 1 {
         vocab[i] = special_tokens[i]
         token_to_id[special_tokens[i]] = i
@@ -37,9 +37,9 @@ func create_tokenizer(int vocab_size) tokenizer {
     }
 }
 
-func encode(tokenizer tok, string text) []int {
+func encode(tokenizer tok, string text) int[] {
     words := strings.split(text, " ")
-    token_ids := make([]int, len(words))
+    token_ids := make(int[], len(words))
     for i := 0; i < len(words); i += 1 {
         word := words[i]
         if id, exists := tok.token_to_id[word]; exists {
@@ -56,16 +56,16 @@ struct wikitext_dataset {
     string split
     int max_seq_len
     tokenizer tokenizer
-    samples: [][]int
+    samples: int[][]
     int num_samples
 }
 
 func load_wikitext_dataset(string file_path, string split, int max_seq_len, tokenizer tok) wikitext_dataset {
     fmt.printfln("📚 Loading WikiText dataset from: %s (split: %s)", file_path, split)
     num_samples := 1000
-    samples := make([][]int, num_samples)
+    samples := make(int[][], num_samples)
     for i := 0; i < num_samples; i += 1 {
-        sample := make([]int, max_seq_len)
+        sample := make(int[], max_seq_len)
         for j := 0; j < max_seq_len; j += 1 {
             sample[j] = (i + j) % tok.vocab_size
         }
@@ -82,11 +82,11 @@ func load_wikitext_dataset(string file_path, string split, int max_seq_len, toke
     }
 }
 
-func get_wikitext_batch(wikitext_dataset dataset, int batch_start, int batch_size, int seq_len) [][]int {
-    batch := make([][]int, batch_size)
+func get_wikitext_batch(wikitext_dataset dataset, int batch_start, int batch_size, int seq_len) int[][] {
+    batch := make(int[][], batch_size)
     for b := 0; b < batch_size; b += 1 {
         sample_idx := (batch_start + b) % dataset.num_samples
-        batch[b] = make([]int, seq_len)
+        batch[b] = make(int[], seq_len)
         for t := 0; t < seq_len; t += 1 {
             if t < len(dataset.samples[sample_idx]) {
                 batch[b][t] = dataset.samples[sample_idx][t]
@@ -103,16 +103,16 @@ struct c4_dataset {
     string split
     int max_seq_len
     tokenizer tokenizer
-    samples: [][]int
+    samples: int[][]
     int num_samples
 }
 
 func load_c4_dataset(string file_path, string split, int max_seq_len, tokenizer tok) c4_dataset {
     fmt.printfln("🌐 Loading C4 dataset from: %s (split: %s)", file_path, split)
     num_samples := 10000
-    samples := make([][]int, num_samples)
+    samples := make(int[][], num_samples)
     for i := 0; i < num_samples; i += 1 {
-        sample := make([]int, max_seq_len)
+        sample := make(int[], max_seq_len)
         for j := 0; j < max_seq_len; j += 1 {
             sample[j] = ((i * 73 + j * 37) ^ (i + j)) % tok.vocab_size
         }
@@ -129,11 +129,11 @@ func load_c4_dataset(string file_path, string split, int max_seq_len, tokenizer 
     }
 }
 
-func get_c4_batch(c4_dataset dataset, int batch_start, int batch_size, int seq_len) [][]int {
-    batch := make([][]int, batch_size)
+func get_c4_batch(c4_dataset dataset, int batch_start, int batch_size, int seq_len) int[][] {
+    batch := make(int[][], batch_size)
     for b := 0; b < batch_size; b += 1 {
         sample_idx := (batch_start + b) % dataset.num_samples
-        batch[b] = make([]int, seq_len)
+        batch[b] = make(int[], seq_len)
         for t := 0; t < seq_len; t += 1 {
             if t < len(dataset.samples[sample_idx]) {
                 batch[b][t] = dataset.samples[sample_idx][t]
@@ -181,16 +181,16 @@ func create_c4_loader(int batch_size, int seq_len, int vocab_size, string split)
     }
 }
 
-func next_batch(data_loader* loader, int batch_idx) [][]int {
+func next_batch(data_loader* loader, int batch_idx) int[][] {
     batch_start := (batch_idx * loader.batch_size) % 1000
     if loader.dataset_type == "wikitext" {
         get_wikitext_batch(loader.wikitext, batch_start, loader.batch_size, loader.seq_len)
     } else if loader.dataset_type == "c4" {
         get_c4_batch(loader.c4, batch_start, loader.batch_size, loader.seq_len)
     } else {
-        batch := make([][]int, loader.batch_size)
+        batch := make(int[][], loader.batch_size)
         for b := 0; b < loader.batch_size; b += 1 {
-            batch[b] = make([]int, loader.seq_len)
+            batch[b] = make(int[], loader.seq_len)
             for t := 0; t < loader.seq_len; t += 1 {
                 batch[b][t] = (batch_idx + b + t) % loader.tokenizer.vocab_size
             }

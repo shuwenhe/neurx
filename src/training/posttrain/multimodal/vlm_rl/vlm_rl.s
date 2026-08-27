@@ -15,9 +15,9 @@ struct vlm_config {
 
 struct multimodal_input {
     tensor image
-    []int text_tokens
-    []int attention_mask
-    []int image_positions
+    int[] text_tokens
+    int[] attention_mask
+    int[] image_positions
 }
 
 struct vlm_output {
@@ -62,7 +62,7 @@ func encode_image(
 func fuse_vision_text_features(
     tensor vision_features,
     tensor text_embeddings,
-    []int image_positions,
+    int[] image_positions,
     int seq_len
 ) tensor {
     int batch_size = text_embeddings.shape[0]
@@ -125,7 +125,7 @@ func vlm_grpo_step(
     module policy,
     module reference_policy,
     []multimodal_input inputs,
-    [][]int actions,
+    int[][] actions,
     []tensor rewards,
     int group_size,
     float kl_coef

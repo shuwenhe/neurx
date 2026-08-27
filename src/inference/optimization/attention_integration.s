@@ -10,7 +10,7 @@ struct attention_layer_manager {
     string current_method
     int total_forward_calls
     int total_skipped_calls
-    []float method_timings
+    float[] method_timings
 }
 
 func new_attention_layer_manager(
@@ -71,15 +71,15 @@ func new_attention_layer_manager(
         current_method: method,
         total_forward_calls: 0,
         total_skipped_calls: 0,
-        method_timings: []float{},
+        method_timings: float[]{},
     }
 }
 
 func (attention_layer_manager* mgr) forward(
-    []float queries,
-    []float keys,
-    []float values
-) []float {
+    float[] queries,
+    float[] keys,
+    float[] values
+) float[] {
     mgr.total_forward_calls = mgr.total_forward_calls + 1
 
     if mgr.current_method == "flash" {
@@ -139,11 +139,11 @@ struct layer_attention_config {
 
 struct transformer_layer_with_optimized_attention {
     layer_attention_config attn_config
-    []float layer_norm_weight
-    []float layer_norm_bias
-    []float attention_output_proj
-    []float mlp_weight1
-    []float mlp_weight2
+    float[] layer_norm_weight
+    float[] layer_norm_bias
+    float[] attention_output_proj
+    float[] mlp_weight1
+    float[] mlp_weight2
 }
 
 func create_layer_with_optimized_attention(
@@ -204,18 +204,18 @@ func create_layer_with_optimized_attention(
 
     transformer_layer_with_optimized_attention{
         attn_config: layer_attn_cfg,
-        layer_norm_weight: make([]float, hidden_dim),
-        layer_norm_bias: make([]float, hidden_dim),
-        attention_output_proj: make([]float, hidden_dim * hidden_dim),
-        mlp_weight1: make([]float, hidden_dim * 4 * hidden_dim),
-        mlp_weight2: make([]float, 4 * hidden_dim * hidden_dim),
+        layer_norm_weight: make(float[], hidden_dim),
+        layer_norm_bias: make(float[], hidden_dim),
+        attention_output_proj: make(float[], hidden_dim * hidden_dim),
+        mlp_weight1: make(float[], hidden_dim * 4 * hidden_dim),
+        mlp_weight2: make(float[], 4 * hidden_dim * hidden_dim),
     }
 }
 
 func (transformer_layer_with_optimized_attention* layer) forward(
-    []float hidden_states,
-    []float position_ids
-) []float {
+    float[] hidden_states,
+    float[] position_ids
+) float[] {
 
     normalized := apply_layer_norm(
         hidden_states,
@@ -223,7 +223,7 @@ func (transformer_layer_with_optimized_attention* layer) forward(
         layer.layer_norm_bias
     )
 
-    var attn_output []float
+    var attn_output float[]
 
     if layer.attn_config.attention_type == "flash" {
         attn_output = flash_attention_forward(
@@ -266,7 +266,7 @@ struct attention_optimized_model_config {
     int vocab_size
     int max_seq_len
     string attention_strategy
-    []string per_layer_attention
+    string[] per_layer_attention
 }
 
 func new_attention_optimized_config(
@@ -278,7 +278,7 @@ func new_attention_optimized_config(
 
     int head_dim = hidden_dim / num_heads
 
-    []string per_layer = make([]string, num_layers)
+    string[] per_layer = make(string[], num_layers)
 
     int i = 0
     for i < num_layers {
@@ -319,9 +319,9 @@ struct attention_performance_report {
 }
 
 func benchmark_attention_methods(
-    []float queries,
-    []float keys,
-    []float values,
+    float[] queries,
+    float[] keys,
+    float[] values,
     int num_iterations
 ) []attention_performance_report {
 
@@ -386,16 +386,16 @@ func append([]attention_performance_report arr, attention_performance_report val
 }
 
 func apply_layer_norm(
-    []float x,
-    []float weight,
-    []float bias
-) []float {
+    float[] x,
+    float[] weight,
+    float[] bias
+) float[] {
     int dim = len(weight)
     if dim <= 0 {
         return x
     }
 
-    []float output = make([]float, len(x))
+    float[] output = make(float[], len(x))
     int seq_len = len(x) / dim
 
     float eps = 1e-5

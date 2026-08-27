@@ -18,7 +18,7 @@ struct model_spec {
     bool use_cache
     bool tie_word_embeddings
     f32 initializer_range
-    architectures: []string
+    architectures: string[]
 }
 
 func create_llama_7b() model_spec {
@@ -662,7 +662,7 @@ func get_model_by_type(string model_type) []model_spec {
     result
 }
 
-func list_all_model_names() []string {
+func list_all_model_names() string[] {
     models := get_all_models()
     names := []()
     for model in models.iter() {

@@ -10,8 +10,8 @@ struct attention_config {
 }
 
 struct attention_cache {
-    []float key_cache
-    []float value_cache
+    float[] key_cache
+    float[] value_cache
     int cache_len
 }
 
@@ -20,17 +20,17 @@ struct multi_head_attention_module {
     int head_dim
     int q_proj_dim
     int kv_proj_dim
-    []float wq
-    []float wk
-    []float wv
-    []float wo
+    float[] wq
+    float[] wk
+    float[] wv
+    float[] wo
     int num_query_groups
 }
 
 struct project_qkv_result {
-    []float query
-    []float key
-    []float value
+    float[] query
+    float[] key
+    float[] value
 }
 
 func new_multi_head_attention(attention_config cfg) multi_head_attention_module {
@@ -52,13 +52,13 @@ func new_multi_head_attention(attention_config cfg) multi_head_attention_module 
 
 func project_qkv(
     multi_head_attention_module attn,
-    []float hidden_states,
+    float[] hidden_states,
     int seq_len,
     int hidden_dim
 ) project_qkv_result {
-    []float query = matrix_multiply(hidden_states, attn.wq, seq_len, hidden_dim, hidden_dim)
-    []float key = matrix_multiply(hidden_states, attn.wk, seq_len, hidden_dim, hidden_dim)
-    []float value = matrix_multiply(hidden_states, attn.wv, seq_len, hidden_dim, hidden_dim)
+    float[] query = matrix_multiply(hidden_states, attn.wq, seq_len, hidden_dim, hidden_dim)
+    float[] key = matrix_multiply(hidden_states, attn.wk, seq_len, hidden_dim, hidden_dim)
+    float[] value = matrix_multiply(hidden_states, attn.wv, seq_len, hidden_dim, hidden_dim)
     project_qkv_result {
         query: query,
         key: key,
@@ -67,13 +67,13 @@ func project_qkv(
 }
 
 func reshape_for_attention(
-    []float x,
+    float[] x,
     int seq_len,
     int num_heads,
     int head_dim
-) []float {
+) float[] {
     int total_size = seq_len * num_heads * head_dim
-    []float reshaped = allocate_vector(total_size, 0.0)
+    float[] reshaped = allocate_vector(total_size, 0.0)
     int idx = 0
     int i = 0
     for i < seq_len * num_heads * head_dim {
@@ -85,17 +85,17 @@ func reshape_for_attention(
 }
 
 func scaled_dot_product_attention(
-    []float query,
-    []float key,
-    []float value,
+    float[] query,
+    float[] key,
+    float[] value,
     int seq_len,
     int num_heads,
     int head_dim,
     bool use_causal_mask
-) []float {
+) float[] {
     int size_per_head = seq_len * head_dim
     int total_size = seq_len * num_heads * head_dim
-    []float output = allocate_vector(total_size, 0.0)
+    float[] output = allocate_vector(total_size, 0.0)
     float scale = 1.0 / sqrt_float(head_dim * 1.0)
     int h = 0
     for h < num_heads {
@@ -104,7 +104,7 @@ func scaled_dot_product_attention(
         int v_offset = h * size_per_head
         int i = 0
         for i < seq_len {
-            []float scores = allocate_vector(seq_len, 0.0)
+            float[] scores = allocate_vector(seq_len, 0.0)
             int j = 0
             for j < seq_len {
                 if use_causal_mask && j > i {
@@ -122,7 +122,7 @@ func scaled_dot_product_attention(
                 }
                 j = j + 1
             }
-            []float attn_weights = softmax_stable(scores, seq_len)
+            float[] attn_weights = softmax_stable(scores, seq_len)
             int d = 0
             for d < head_dim {
                 float sum_val = 0.0
@@ -145,20 +145,20 @@ func scaled_dot_product_attention(
 
 func forward_attention(
     multi_head_attention_module attn,
-    []float hidden_states,
+    float[] hidden_states,
     int seq_len
-) []float {
+) float[] {
     int hidden_dim = attn.config.hidden_dim
     int num_heads = attn.config.num_attention_heads
     int head_dim = attn.head_dim
     project_qkv_result projected = project_qkv(attn, hidden_states, seq_len, hidden_dim)
-    []float query = projected.query
-    []float key = projected.key
-    []float value = projected.value
-    []float query_reshaped = reshape_for_attention(query, seq_len, num_heads, head_dim)
-    []float key_reshaped = reshape_for_attention(key, seq_len, num_heads, head_dim)
-    []float value_reshaped = reshape_for_attention(value, seq_len, num_heads, head_dim)
-    []float attn_output = scaled_dot_product_attention(
+    float[] query = projected.query
+    float[] key = projected.key
+    float[] value = projected.value
+    float[] query_reshaped = reshape_for_attention(query, seq_len, num_heads, head_dim)
+    float[] key_reshaped = reshape_for_attention(key, seq_len, num_heads, head_dim)
+    float[] value_reshaped = reshape_for_attention(value, seq_len, num_heads, head_dim)
+    float[] attn_output = scaled_dot_product_attention(
         query_reshaped,
         key_reshaped,
         value_reshaped,
@@ -167,13 +167,13 @@ func forward_attention(
         head_dim,
         attn.config.use_causal_mask
     )
-    []float concatenated = reshape_from_heads(attn_output, seq_len, num_heads, head_dim)
-    []float output = matrix_multiply(concatenated, attn.wo, seq_len, hidden_dim, hidden_dim)
+    float[] concatenated = reshape_from_heads(attn_output, seq_len, num_heads, head_dim)
+    float[] output = matrix_multiply(concatenated, attn.wo, seq_len, hidden_dim, hidden_dim)
     return output
 }
 
-func softmax_stable([]float scores, int size) []float {
-    []float probs = allocate_vector(size, 0.0)
+func softmax_stable(float[] scores, int size) float[] {
+    float[] probs = allocate_vector(size, 0.0)
     float max_score = scores[0]
     int i = 1
     for i < size {
@@ -198,8 +198,8 @@ func softmax_stable([]float scores, int size) []float {
     return probs
 }
 
-func matrix_multiply([]float a, []float b, int m, int k, int n) []float {
-    []float result = allocate_vector(m * n, 0.0)
+func matrix_multiply(float[] a, float[] b, int m, int k, int n) float[] {
+    float[] result = allocate_vector(m * n, 0.0)
     int i = 0
     for i < m {
         int j = 0
@@ -221,9 +221,9 @@ func matrix_multiply([]float a, []float b, int m, int k, int n) []float {
     return result
 }
 
-func reshape_from_heads([]float x, int seq_len, int num_heads, int head_dim) []float {
+func reshape_from_heads(float[] x, int seq_len, int num_heads, int head_dim) float[] {
     int hidden_dim = num_heads * head_dim
-    []float reshaped = allocate_vector(seq_len * hidden_dim, 0.0)
+    float[] reshaped = allocate_vector(seq_len * hidden_dim, 0.0)
     int i = 0
     for i < seq_len * hidden_dim {
         reshaped[i] = x[i]
@@ -232,9 +232,9 @@ func reshape_from_heads([]float x, int seq_len, int num_heads, int head_dim) []f
     return reshaped
 }
 
-func allocate_weights(int rows, int cols) []float {
+func allocate_weights(int rows, int cols) float[] {
     int size = rows * cols
-    []float w = allocate_vector(size, 0.0)
+    float[] w = allocate_vector(size, 0.0)
     float limit = sqrt_float(6.0 / (rows + cols * 1.0))
     int i = 0
     for i < size {
@@ -244,8 +244,8 @@ func allocate_weights(int rows, int cols) []float {
     return w
 }
 
-func allocate_vector(int size, float init_val) []float {
-    []float v = []float{cap: size}
+func allocate_vector(int size, float init_val) float[] {
+    float[] v = float[]{cap: size}
     int i = 0
     for i < size {
         v = append(v, init_val)
@@ -285,6 +285,6 @@ func sqrt_float(float x) float {
     return guess
 }
 
-func len_float([]float v) int {
+func len_float(float[] v) int {
     return len(v)
 }

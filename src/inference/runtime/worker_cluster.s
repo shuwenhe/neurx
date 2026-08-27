@@ -34,7 +34,7 @@ struct inference_worker {
     int generation
     int last_heartbeat_ms
     int restart_count
-    []string request_ids
+    string[] request_ids
     string failure_reason
 }
 
@@ -52,7 +52,7 @@ struct worker_cluster_state {
 struct worker_cluster_result {
     worker_cluster_state state
     inference_worker worker
-    []string affected_request_ids
+    string[] affected_request_ids
     bool success
     string error_message
 }
@@ -141,7 +141,7 @@ func worker_find_rank(worker_cluster_state state, int global_rank) int {
     -1
 }
 
-func worker_string_contains([]string values, string value) bool {
+func worker_string_contains(string[] values, string value) bool {
     int i = 0
     for i < len(values) {
         if values[i] == value { return true }
@@ -150,12 +150,12 @@ func worker_string_contains([]string values, string value) bool {
     false
 }
 
-func worker_string_at([]string values, int index) string {
+func worker_string_at(string[] values, int index) string {
     values[index]
 }
 
-func worker_string_remove([]string values, string value) []string {
-    []string filtered = []string{cap: len(values)}
+func worker_string_remove(string[] values, string value) string[] {
+    string[] filtered = string[]{cap: len(values)}
     int i = 0
     for i < len(values) {
         if values[i] != value { filtered = append(filtered, values[i]) }

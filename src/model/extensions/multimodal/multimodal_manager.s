@@ -70,7 +70,7 @@ func (MultimodalManager* m) ProcessMultimodalInput(
         stage: "preprocessing",
         start_time: GetCurrentTime(),
         processing_times: make(map[string, f32),
-        error_messages: make([]string, 0),
+        error_messages: make(string[], 0),
         false is_cached
     }
 
@@ -233,7 +233,7 @@ func (MultimodalManager* m) GetProcessingState(
         stage: "unknown",
         start_time: 0,
         processing_times: make(map[string, f32),
-        error_messages: make([]string, 0),
+        error_messages: make(string[], 0),
         false is_cached
     }
 }

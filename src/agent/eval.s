@@ -1,10 +1,10 @@
 package neurx.agent.eval
 
 struct agent_eval_state {
-    []string tasks
-    []string actuals
-    []string expecteds
-    []int steps_used
+    string[] tasks
+    string[] actuals
+    string[] expecteds
+    int[] steps_used
     int count
     int passed
     int failed
@@ -61,10 +61,10 @@ func agent_eval_text_match(string actual, string expected) bool {
 
 func agent_eval_add_result(agent_eval_state state, string task, string actual, string expected, int steps) agent_eval_state {
     int n = state.count
-    []string new_tasks = []string{cap: n + 1}
-    []string new_actuals = []string{cap: n + 1}
-    []string new_expecteds = []string{cap: n + 1}
-    []int new_steps = []int{cap: n + 1}
+    string[] new_tasks = string[]{cap: n + 1}
+    string[] new_actuals = string[]{cap: n + 1}
+    string[] new_expecteds = string[]{cap: n + 1}
+    int[] new_steps = int[]{cap: n + 1}
     int i = 0
     for i < n {
         new_tasks[i] = state.tasks[i]

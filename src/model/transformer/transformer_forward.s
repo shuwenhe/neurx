@@ -37,18 +37,18 @@ struct transformer_forward_config {
 }
 
 struct transformer_layer_state {
-    []float wq
-    []float wk
-    []float wv
-    []float wo
-    []float query_bias
-    []float key_bias
-    []float value_bias
-    []float output_bias
-    []float w_up
-    []float w_down
-    []float up_bias
-    []float down_bias
+    float[] wq
+    float[] wk
+    float[] wv
+    float[] wo
+    float[] query_bias
+    float[] key_bias
+    float[] value_bias
+    float[] output_bias
+    float[] w_up
+    float[] w_down
+    float[] up_bias
+    float[] down_bias
     layer_norm_state norm1
     layer_norm_state norm2
 }
@@ -60,8 +60,8 @@ struct transformer_forward_state {
     int num_heads
     int head_dim
     int intermediate_dim
-    []float token_embedding
-    []float lm_head_weight
+    float[] token_embedding
+    float[] lm_head_weight
     []transformer_layer_state layers
     layer_norm_state final_norm
     absolute_position_encoding pos_encoding_abs
@@ -71,18 +71,18 @@ struct transformer_forward_state {
 }
 
 struct forward_pass_output {
-    []float logits
-    []float hidden_states
-    []float layer_outputs
+    float[] logits
+    float[] hidden_states
+    float[] layer_outputs
 }
 
 struct forward_pass_cache {
-    [][]float attention_scores
-    [][]float ffn_outputs
-    [][]float layer_norms
+    float[][] attention_scores
+    float[][] ffn_outputs
+    float[][] layer_norms
 }
 
-func write_slice([]float dst, int dst_offset, []float src) {
+func write_slice(float[] dst, int dst_offset, float[] src) {
     int i = 0
     for i < len(src) {
         dst[dst_offset + i] = src[i]
@@ -92,26 +92,26 @@ func write_slice([]float dst, int dst_offset, []float src) {
 
 func apply_rope_batch(
     rope_position_encoding rope_encoding,
-    []float q,
-    []float k,
+    float[] q,
+    float[] k,
     int batch_size,
     int seq_len,
     int hidden_dim
-) [][]float {
-    []float q_out = copy_vector(q)
-    []float k_out = copy_vector(k)
+) float[][] {
+    float[] q_out = copy_vector(q)
+    float[] k_out = copy_vector(k)
     int b = 0
     for b < batch_size {
         int offset = b * seq_len * hidden_dim
-        []float q_slice = allocate_vector(seq_len * hidden_dim, 0.0)
-        []float k_slice = allocate_vector(seq_len * hidden_dim, 0.0)
+        float[] q_slice = allocate_vector(seq_len * hidden_dim, 0.0)
+        float[] k_slice = allocate_vector(seq_len * hidden_dim, 0.0)
         int i = 0
         for i < seq_len * hidden_dim {
             q_slice[i] = q_out[offset + i]
             k_slice[i] = k_out[offset + i]
             i = i + 1
         }
-        [][]float rope_applied = apply_rope_position(rope_encoding, q_slice, k_slice, seq_len, 0)
+        float[][] rope_applied = apply_rope_position(rope_encoding, q_slice, k_slice, seq_len, 0)
         i = 0
         for i < seq_len * hidden_dim {
             q_out[offset + i] = rope_applied[0][i]
@@ -120,14 +120,14 @@ func apply_rope_batch(
         }
         b = b + 1
     }
-    [][]float result = [][]float{cap: 2}
+    float[][] result = float[][]{cap: 2}
     result[0] = q_out
     result[1] = k_out
     result
 }
 
-func allocate_vector(int size, float init_val) []float {
-    []float v = []float{cap: size}
+func allocate_vector(int size, float init_val) float[] {
+    float[] v = float[]{cap: size}
     int i = 0
     for i < size {
         v[i] = init_val
@@ -136,8 +136,8 @@ func allocate_vector(int size, float init_val) []float {
     v
 }
 
-func copy_vector([]float src) []float {
-    []float out = allocate_vector(len(src), 0.0)
+func copy_vector(float[] src) float[] {
+    float[] out = allocate_vector(len(src), 0.0)
     int i = 0
     for i < len(src) {
         out[i] = src[i]
@@ -190,8 +190,8 @@ func exp_approx(float x) float {
     result
 }
 
-func softmax([]float scores, int seq_len) []float {
-    []float output = copy_vector(scores)
+func softmax(float[] scores, int seq_len) float[] {
+    float[] output = copy_vector(scores)
     float max_score = scores[0]
     int i = 1
     for i < seq_len {
@@ -223,14 +223,14 @@ func gelu(float x) float {
 }
 
 func project_rows(
-    []float input,
-    []float weight,
-    []float bias,
+    float[] input,
+    float[] weight,
+    float[] bias,
     int token_count,
     int in_dim,
     int out_dim
-) []float {
-    []float output = allocate_vector(token_count * out_dim, 0.0)
+) float[] {
+    float[] output = allocate_vector(token_count * out_dim, 0.0)
     int token = 0
     for token < token_count {
         int input_base = token * in_dim
@@ -255,13 +255,13 @@ func project_rows(
 }
 
 func embed_tokens(
-    []float token_embedding,
-    []int token_ids,
+    float[] token_embedding,
+    int[] token_ids,
     int batch_size,
     int seq_len,
     int hidden_dim
-) []float {
-    []float output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
+) float[] {
+    float[] output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     int b = 0
     for b < batch_size {
         int s = 0
@@ -285,7 +285,7 @@ func embed_tokens(
 
 func multi_head_attention_forward(
     transformer_layer_state layer,
-    []float hidden_states,
+    float[] hidden_states,
     int batch_size,
     int seq_len,
     int hidden_dim,
@@ -293,22 +293,22 @@ func multi_head_attention_forward(
     bool use_causal_mask,
     bool use_rope,
     rope_position_encoding rope_encoding
-) []float {
+) float[] {
     int head_dim = hidden_dim / num_heads
     int token_count = batch_size * seq_len
     if head_dim <= 0 || token_count <= 0 {
         return copy_vector(hidden_states)
     }
-    []float q = project_rows(hidden_states, layer.wq, layer.query_bias, token_count, hidden_dim, hidden_dim)
-    []float k = project_rows(hidden_states, layer.wk, layer.key_bias, token_count, hidden_dim, hidden_dim)
-    []float v = project_rows(hidden_states, layer.wv, layer.value_bias, token_count, hidden_dim, hidden_dim)
+    float[] q = project_rows(hidden_states, layer.wq, layer.query_bias, token_count, hidden_dim, hidden_dim)
+    float[] k = project_rows(hidden_states, layer.wk, layer.key_bias, token_count, hidden_dim, hidden_dim)
+    float[] v = project_rows(hidden_states, layer.wv, layer.value_bias, token_count, hidden_dim, hidden_dim)
     if use_rope {
-        [][]float rope_applied = apply_rope_batch(rope_encoding, q, k, batch_size, seq_len, hidden_dim)
+        float[][] rope_applied = apply_rope_batch(rope_encoding, q, k, batch_size, seq_len, hidden_dim)
         q = rope_applied[0]
         k = rope_applied[1]
     }
-    []float context = allocate_vector(token_count * hidden_dim, 0.0)
-    []float output = allocate_vector(token_count * hidden_dim, 0.0)
+    float[] context = allocate_vector(token_count * hidden_dim, 0.0)
+    float[] output = allocate_vector(token_count * hidden_dim, 0.0)
     float scale = 1.0 / sqrt_approx(head_dim * 1.0)
     int b = 0
     for b < batch_size {
@@ -319,7 +319,7 @@ func multi_head_attention_forward(
             int h = 0
             for h < num_heads {
                 int head_offset = h * head_dim
-                []float scores = allocate_vector(seq_len, -1.0e9)
+                float[] scores = allocate_vector(seq_len, -1.0e9)
                 int t = 0
                 for t < seq_len {
                     if !use_causal_mask || t <= s {
@@ -335,7 +335,7 @@ func multi_head_attention_forward(
                     }
                     t = t + 1
                 }
-                []float probs = softmax(scores, seq_len)
+                float[] probs = softmax(scores, seq_len)
                 int d = 0
                 for d < head_dim {
                     float acc = 0.0
@@ -363,13 +363,13 @@ func multi_head_attention_forward(
 
 func feed_forward_forward(
     transformer_layer_state layer,
-    []float hidden_states,
+    float[] hidden_states,
     int batch_size,
     int seq_len,
     int hidden_dim,
     int intermediate_dim
-) []float {
-    []float output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
+) float[] {
+    float[] output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     int b = 0
     for b < batch_size {
         int s = 0
@@ -399,7 +399,7 @@ func feed_forward_forward(
 
 func transformer_layer_forward(
     transformer_layer_state layer,
-    []float hidden_states,
+    float[] hidden_states,
     int batch_size,
     int seq_len,
     int hidden_dim,
@@ -409,8 +409,8 @@ func transformer_layer_forward(
     bool pre_norm,
     bool use_rope,
     rope_position_encoding rope_encoding
-) []float {
-    []float output = copy_vector(hidden_states)
+) float[] {
+    float[] output = copy_vector(hidden_states)
     if pre_norm {
         normalized := layer_normalize(layer.norm1, hidden_states, batch_size, seq_len)
         attn_output := multi_head_attention_forward(
@@ -483,7 +483,7 @@ func transformer_layer_forward(
 
 func transformer_forward_pass(
     transformer_forward_state model_state,
-    []int input_ids,
+    int[] input_ids,
     int batch_size,
     int seq_len
 ) forward_pass_output {
@@ -511,7 +511,7 @@ func transformer_forward_pass(
             hidden_dim
         )
     }
-    []float layer_outputs = allocate_vector(num_layers * 2 * batch_size * seq_len * hidden_dim, 0.0)
+    float[] layer_outputs = allocate_vector(num_layers * 2 * batch_size * seq_len * hidden_dim, 0.0)
     int layer_output_offset = 0
     int layer_idx = 0
     for layer_idx < num_layers {
@@ -542,7 +542,7 @@ func transformer_forward_pass(
         seq_len
     )
     hidden_states = copy_vector(final_norm_output.normalized)
-    []float logits = allocate_vector(batch_size * seq_len * model_state.vocab_size, 0.0)
+    float[] logits = allocate_vector(batch_size * seq_len * model_state.vocab_size, 0.0)
     int b = 0
     for b < batch_size {
         int s = 0

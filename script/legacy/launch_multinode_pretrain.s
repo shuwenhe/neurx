@@ -12,13 +12,13 @@ struct multi_node_config_2 {
     shared_id string
     output string
     resume_enabled bool
-    hosts []string
+    hosts string[]
 }
 
-func parse_host_file(string hostfile) []string {
+func parse_host_file(string hostfile) string[] {
     content, _ := os.ReadFile(hostfile)
     lines := strings.Split(string(content), "\n")
-    hosts := []string{}
+    hosts := string[]{}
     for _, line := range lines {
         trimmed := strings.TrimSpace(line)
         if trimmed != "" && !strings.HasPrefix(trimmed, "#") {

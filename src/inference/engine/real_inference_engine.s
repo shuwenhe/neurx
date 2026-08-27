@@ -19,7 +19,7 @@ func forward_through_transformer(int token_id) string {
     print("\nSTEP 1: Embedding Layer\n")
     print("  Token ID: " + int_to_string(token_id) + "\n")
     print("  Lookup embedding[" + int_to_string(token_id) + "] → [1, 896]\n")
-    []float hidden_state
+    float[] hidden_state
     int i = 0
     for i < 10 {
         hidden_state

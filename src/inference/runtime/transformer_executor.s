@@ -5,7 +5,7 @@ use neurx.runtime.device.device_abi.{device_context, device_operation_launch, de
 struct transformer_execution_plan {
     int context_handle
     int stream_handle
-    []int operation_handle
+    int[] operation_handle
     int operation_count
     string backend
     bool valid
@@ -23,7 +23,7 @@ func transformer_plan_invalid(string backend, string message) transformer_execut
     transformer_execution_plan {context_handle: 0, stream_handle: 0, operation_handle: [], operation_count: 0, backend: backend, valid: false, error_message: message}
 }
 
-func transformer_descriptor_plan_compile(device_context context, string backend, []string descriptor, int stream_priority) transformer_execution_plan {
+func transformer_descriptor_plan_compile(device_context context, string backend, string[] descriptor, int stream_priority) transformer_execution_plan {
     if !context.valid { return transformer_plan_invalid(backend, "invalid_device_context") }
     if len(descriptor) <= 0 { return transformer_plan_invalid(backend, "empty_descriptor_plan") }
     if context.backend != backend && !(context.backend == "cann" && backend == "ascend") {
@@ -32,7 +32,7 @@ func transformer_descriptor_plan_compile(device_context context, string backend,
     int stream_handle = device_stream_open_handle(context.handle, stream_priority)
     if stream_handle <= 0 { return transformer_plan_invalid(backend, "stream_create_failed") }
     int count = len(descriptor)
-    []int compiled = []int{cap: count}
+    int[] compiled = int[]{cap: count}
     int index = 0
     for index < count {
         if len(descriptor[index]) == 0 {
@@ -54,11 +54,11 @@ func transformer_descriptor_plan_compile(device_context context, string backend,
     transformer_execution_plan {context_handle: context.handle, stream_handle: stream_handle, operation_handle: compiled, operation_count: count, backend: backend, valid: true, error_message: ""}
 }
 
-func transformer_plan_binding_valid(transformer_execution_plan plan, []string binding) bool {
+func transformer_plan_binding_valid(transformer_execution_plan plan, string[] binding) bool {
     plan.valid && plan.operation_count > 0 && len(binding) == plan.operation_count
 }
 
-func transformer_plan_execute(transformer_execution_plan plan, []string binding, bool synchronize) transformer_execution_result {
+func transformer_plan_execute(transformer_execution_plan plan, string[] binding, bool synchronize) transformer_execution_result {
     if !plan.valid { return transformer_execution_result {success: false, completed_operations: 0, failed_operation: -1, error_message: plan.error_message} }
     if len(binding) != plan.operation_count {
         return transformer_execution_result {success: false, completed_operations: 0, failed_operation: -1, error_message: "binding_count_mismatch"}

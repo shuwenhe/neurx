@@ -6,12 +6,12 @@ struct agent_skill_spec {
     string version
     string intent
     string status
-    []string triggers
-    []string required_tools
-    []string preconditions
-    []string steps
-    []string success_signals
-    []string failure_signals
+    string[] triggers
+    string[] required_tools
+    string[] preconditions
+    string[] steps
+    string[] success_signals
+    string[] failure_signals
 }
 
 struct agent_skill_metrics {

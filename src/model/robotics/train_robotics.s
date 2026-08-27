@@ -55,8 +55,8 @@ func new_robotics_training_metrics() robotics_training_metrics {
     }
 }
 
-func robotics_training_corpus() []int {
-    []int token_ids = []int{cap: 16}
+func robotics_training_corpus() int[] {
+    int[] token_ids = int[]{cap: 16}
     int i = 0
     for i < 16 {
         token_ids[i] = i - (i / 8) * 8
@@ -76,7 +76,7 @@ func new_robotics_training_state(robotics_training_config task) robotics_trainin
     pretrain_config cfg = new_pretrain_config()
     cfg = with_max_steps(cfg, task.max_steps)
     cfg = with_lr(cfg, task.learning_rate)
-    []int token_ids = robotics_training_corpus()
+    int[] token_ids = robotics_training_corpus()
     dataloader_state loader = new_state(token_ids, task.batch_size, task.seq_len)
     robotics_training_state {
         cfg: cfg,

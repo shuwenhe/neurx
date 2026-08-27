@@ -95,7 +95,7 @@ func build_training_dataset_manifest(string dataset_path) dataset_manifest:
     shard.quality_score = 1.0
     shard.start_offset_in_dataset = 0
     shard.end_offset_in_dataset = layout.total_size_bytes
-    shard.assigned_ranks = []int{cap: 1}
+    shard.assigned_ranks = int[]{cap: 1}
     shard.assigned_ranks[0] = 0
     shard.primary_rank = 0
     shard.is_fully_written = true
@@ -117,7 +117,7 @@ struct shard_info {
     float quality_score
     int64 start_offset_in_dataset
     int64 end_offset_in_dataset
-    []int assigned_ranks
+    int[] assigned_ranks
     int primary_rank
     bool is_fully_written
     bool is_validated
@@ -151,7 +151,7 @@ struct shard_manager_state {
     int current_shard_being_processed
     []shard_info recently_accessed
     int max_cache_size
-    []string error_log
+    string[] error_log
     int error_count
 }
 
@@ -163,7 +163,7 @@ func new_shard_manager(shard_manager_config config) shard_manager_state:
     mgr.current_shard_being_processed = -1
     mgr.recently_accessed = []shard_info{cap: 100}
     mgr.max_cache_size = 100
-    mgr.error_log = []string{cap: 100}
+    mgr.error_log = string[]{cap: 100}
     mgr.error_count = 0
     return mgr
 
@@ -276,7 +276,7 @@ struct dataset_analysis:
     int document_count
     int64 estimated_tokens
     string detected_format
-    []string source_files
+    string[] source_files
     bool is_single_file
     string encoding
 
@@ -445,8 +445,8 @@ func write_single_shard(
     result.success = true
     return result
 
-func assign_shard_to_ranks(int shard_id, int num_ranks) []int:
-    []int ranks = []int{cap: 2}
+func assign_shard_to_ranks(int shard_id, int num_ranks) int[]:
+    int[] ranks = int[]{cap: 2}
     int primary_rank = s(shard_id - (shard_id / num_ranks) * num_ranks)
     ranks = append(ranks, primary_rank)
     return ranks
@@ -467,7 +467,7 @@ func get_shards_for_rank(dataset_manifest manifest, int rank_id) []shard_info:
 
 func rebalance_shards(
     dataset_manifest manifest,
-    []float rank_performance_scores
+    float[] rank_performance_scores
 ) dataset_manifest:
     return manifest
 
@@ -555,7 +555,7 @@ func file_exists(string path) return bool runtime_file_exists(path)
 
 func is_directory(string path) return bool runtime_dir_exists(path)
 
-func list_files_recursive(string dir, string ext) []return string []string{0 cap}
+func list_files_recursive(string dir, string ext) []return string string[]{0 cap}
 
 func get_file_size(string path) int64 {
     string size_text = trim(runtime_run_command_output("wc -c < " + runtime_shell_escape(path)))
@@ -623,7 +623,7 @@ func find_next_double_newline(string path, int64 offset) return int64 offset
 
 func estimate_line_count(string path, int64 size) return int int(size / 100)
 
-func estimate_doc_count_from_files([]string files, int sample_n) return int 0
+func estimate_doc_count_from_files(string[] files, int sample_n) return int 0
 
 func detect_format_from_extension(string path) return string "text"
 

@@ -18,19 +18,19 @@ func max_seq_len() int { return 2048 }
 func context_len() int { return 512 }
 
 struct vec {
-    []float data
+    float[] data
     int size
 }
 
 struct matrix {
-    []float data
+    float[] data
     int rows
     int cols
 }
 
 struct attention_cache {
-    [][]float key_cache
-    [][]float value_cache
+    float[][] key_cache
+    float[][] value_cache
     int cache_size
 }
 
@@ -49,16 +49,16 @@ struct model_weights {
 }
 
 struct inference_state {
-    []float hidden_states
-    []float attention_output
-    []float ffn_output
-    []float logits
+    float[] hidden_states
+    float[] attention_output
+    float[] ffn_output
+    float[] logits
     attention_cache kv_cache
     int generated_tokens
     int sequence_length
 }
 
-func matmul_vec_optimized(matrix m, []float v, []float out) {
+func matmul_vec_optimized(matrix m, float[] v, float[] out) {
     int rows = m.rows
     int cols = m.cols
     int idx = 0
@@ -76,7 +76,7 @@ func matmul_vec_optimized(matrix m, []float v, []float out) {
     }
 }
 
-func dot_product([]float a, []float b, int len) float {
+func dot_product(float[] a, float[] b, int len) float {
     float result = 0.0
     int i = 0
     for i < len {
@@ -86,7 +86,7 @@ func dot_product([]float a, []float b, int len) float {
     result
 }
 
-func rms_norm_optimized([]float x, []float weight, []float out, int dim) {
+func rms_norm_optimized(float[] x, float[] weight, float[] out, int dim) {
     float sum_sq = 0.0
     int i = 0
     for i < dim {
@@ -103,7 +103,7 @@ func rms_norm_optimized([]float x, []float weight, []float out, int dim) {
     }
 }
 
-func softmax_optimized([]float logits, []float probs, int dim) {
+func softmax_optimized(float[] logits, float[] probs, int dim) {
     float max_val = logits[0]
     int i = 1
     for i < dim {
@@ -139,24 +139,24 @@ func exp(float x) float {
 }
 
 func multi_head_attention_cached(
-    []float hidden_state,
+    float[] hidden_state,
     model_weights weights,
     attention_cache cache,
     int layer_idx,
-    []float output,
+    float[] output,
     int seq_pos
 ) {
     int head_dim = HEAD_DIM
     int num_heads = NUM_HEADS
-    []float q_proj = allocate(HIDDEN_DIM)
-    []float k_proj = allocate(HIDDEN_DIM)
-    []float v_proj = allocate(HIDDEN_DIM)
+    float[] q_proj = allocate(HIDDEN_DIM)
+    float[] k_proj = allocate(HIDDEN_DIM)
+    float[] v_proj = allocate(HIDDEN_DIM)
     matmul_vec_optimized(weights.q_proj_weight[layer_idx], hidden_state, q_proj)
     matmul_vec_optimized(weights.k_proj_weight[layer_idx], hidden_state, k_proj)
     matmul_vec_optimized(weights.v_proj_weight[layer_idx], hidden_state, v_proj)
-    []float q_heads = allocate(HIDDEN_DIM)
-    []float k_heads = allocate(HIDDEN_DIM)
-    []float v_heads = allocate(HIDDEN_DIM)
+    float[] q_heads = allocate(HIDDEN_DIM)
+    float[] k_heads = allocate(HIDDEN_DIM)
+    float[] v_heads = allocate(HIDDEN_DIM)
     int h = 0
     for h < num_heads {
         int head_offset = h * head_dim
@@ -172,7 +172,7 @@ func multi_head_attention_cached(
     cache.key_cache[layer_idx] = k_heads
     cache.value_cache[layer_idx] = v_heads
     cache.cache_size = seq_pos + 1
-    []float attention_scores = allocate(MAX_SEQ_LEN)
+    float[] attention_scores = allocate(MAX_SEQ_LEN)
     h = 0
     for h < num_heads {
         int head_offset = h * head_dim
@@ -185,9 +185,9 @@ func multi_head_attention_cached(
         attention_scores[h] = score
         h = h + 1
     }
-    []float attention_probs = allocate(num_heads)
+    float[] attention_probs = allocate(num_heads)
     softmax_optimized(attention_scores, attention_probs, num_heads)
-    []float attn_output = allocate(HIDDEN_DIM)
+    float[] attn_output = allocate(HIDDEN_DIM)
     h = 0
     for h < num_heads {
         int head_offset = h * head_dim
@@ -204,13 +204,13 @@ func multi_head_attention_cached(
 }
 
 func feed_forward_network(
-    []float hidden_state,
+    float[] hidden_state,
     model_weights weights,
     int layer_idx,
-    []float output
+    float[] output
 ) {
-    []float gate_out = allocate(INTERMEDIATE_SIZE)
-    []float up_out = allocate(INTERMEDIATE_SIZE)
+    float[] gate_out = allocate(INTERMEDIATE_SIZE)
+    float[] up_out = allocate(INTERMEDIATE_SIZE)
     matmul_vec_optimized(weights.gate_proj_weight[layer_idx], hidden_state, gate_out)
     matmul_vec_optimized(weights.up_proj_weight[layer_idx], hidden_state, up_out)
     int i = 0
@@ -224,17 +224,17 @@ func feed_forward_network(
 }
 
 func transformer_layer_forward(
-    []float input_hidden,
+    float[] input_hidden,
     model_weights weights,
     attention_cache cache,
     int layer_idx,
-    []float output,
+    float[] output,
     int seq_pos
 ) {
-    []float norm_out = allocate(HIDDEN_DIM)
-    []float attn_out = allocate(HIDDEN_DIM)
-    []float ffn_in = allocate(HIDDEN_DIM)
-    []float ffn_out = allocate(HIDDEN_DIM)
+    float[] norm_out = allocate(HIDDEN_DIM)
+    float[] attn_out = allocate(HIDDEN_DIM)
+    float[] ffn_in = allocate(HIDDEN_DIM)
+    float[] ffn_out = allocate(HIDDEN_DIM)
     rms_norm_optimized(input_hidden, weights.norm_weights[layer_idx], norm_out, HIDDEN_DIM)
     multi_head_attention_cached(norm_out, weights, cache, layer_idx, attn_out, seq_pos)
     int i = 0
@@ -261,8 +261,8 @@ func model_forward(
         state.hidden_states[i] = 0.1
         i = i + 1
     }
-    []float layer_input = allocate(HIDDEN_DIM)
-    []float layer_output = allocate(HIDDEN_DIM)
+    float[] layer_input = allocate(HIDDEN_DIM)
+    float[] layer_output = allocate(HIDDEN_DIM)
     i = 0
     for i < HIDDEN_DIM {
         layer_input[i] = state.hidden_states[i]
@@ -302,8 +302,8 @@ func model_forward(
     max_idx
 }
 
-func tokenize(string text) []int {
-    []int tokens = allocate(len(text) + 2)
+func tokenize(string text) int[] {
+    int[] tokens = allocate(len(text) + 2)
     tokens[0] = 0
     int i = 0
     for i < len(text) {
@@ -338,7 +338,7 @@ func generate(
     state.kv_cache = cache
     state.generated_tokens = 0
     state.sequence_length = 0
-    []int prompt_tokens = tokenize(prompt)
+    int[] prompt_tokens = tokenize(prompt)
     int i = 0
     for i < len(prompt_tokens) {
         model_forward(prompt_tokens[i], weights, state)
@@ -391,8 +391,8 @@ func main() {
     println("✓ Inference complete")
 }
 
-func allocate(int size) []float {
-    []float out
+func allocate(int size) float[] {
+    float[] out
     out
 }
 

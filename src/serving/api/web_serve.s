@@ -57,7 +57,7 @@ struct web_server_config {
     string host
     int32 port
     bool enable_cors
-    []string cors_origins
+    string[] cors_origins
     bool enable_compression
     bool enable_auth
     string auth_header
@@ -215,7 +215,7 @@ func (web_server* ws) get_host() string {
     return ws.config.host
 }
 
-func (web_server* ws) enable_cors([]string origins) {
+func (web_server* ws) enable_cors(string[] origins) {
     ws.config.enable_cors = true
     ws.config.cors_origins = origins
 }

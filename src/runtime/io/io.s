@@ -58,9 +58,9 @@ func runtime_read_text_file(string path) string {
     }
     ""
 }
-extern "intrinsic" func __host_read_binary_file(string path) []int
+extern "intrinsic" func __host_read_binary_file(string path) int[]
 
-func runtime_read_binary_file(string path) []int {
+func runtime_read_binary_file(string path) int[] {
     __host_read_binary_file(path)
 }
 
@@ -139,7 +139,7 @@ func runtime_run_command(string command) runtime_command_result {
             error: "empty_command",
         }
     }
-    []string argv = []string{cap: 3}
+    string[] argv = string[]{cap: 3}
     argv[0] = "sh"
     argv[1] = "-c"
     argv[2] = cmd
@@ -163,7 +163,7 @@ func runtime_run_command_output(string command) string {
     if cmd == "" {
         return ""
     }
-    []string argv = []string{cap: 3}
+    string[] argv = string[]{cap: 3}
     argv[0] = "sh"
     argv[1] = "-c"
     argv[2] = cmd
@@ -195,8 +195,8 @@ func runtime_write_json_file(string path, json_value value) () {
 struct tensor {
     string name
     string dtype
-    []int shape
-    []float data
+    int[] shape
+    float[] data
 }
 
 struct tensor_buffer {

@@ -10,36 +10,36 @@ func RESOURCE_DOMAIN_LIMIT() int { 6 }
 
 struct resource_controller {
     int domain_count
-    [64]int domain_id
-    [64]int parent_id
-    [64]int cpu_quota_us
-    [64]int cpu_used_us
-    [64]int memory_limit_pages
-    [64]int memory_used_pages
-    [64]int accelerator_limit
-    [64]int accelerator_used
-    [64]int realtime_budget_ns
-    [64]int realtime_used_ns
-    [64]int admitted_tasks
-    [64]int rejected_tasks
+    int[64] domain_id
+    int[64] parent_id
+    int[64] cpu_quota_us
+    int[64] cpu_used_us
+    int[64] memory_limit_pages
+    int[64] memory_used_pages
+    int[64] accelerator_limit
+    int[64] accelerator_used
+    int[64] realtime_budget_ns
+    int[64] realtime_used_ns
+    int[64] admitted_tasks
+    int[64] rejected_tasks
     int binding_count
-    [1024]int bound_pid
-    [1024]int bound_domain
-    [1024]int bound_scheduler_task
+    int[1024] bound_pid
+    int[1024] bound_domain
+    int[1024] bound_scheduler_task
     int last_result
 }
 
 func resource_controller_create() resource_controller {
     controller := resource_controller {
         domain_count: 1,
-        domain_id: [64]int{}, parent_id: [64]int{},
-        cpu_quota_us: [64]int{}, cpu_used_us: [64]int{},
-        memory_limit_pages: [64]int{}, memory_used_pages: [64]int{},
-        accelerator_limit: [64]int{}, accelerator_used: [64]int{},
-        realtime_budget_ns: [64]int{}, realtime_used_ns: [64]int{},
-        admitted_tasks: [64]int{}, rejected_tasks: [64]int{},
-        binding_count: 0, bound_pid: [1024]int{},
-        bound_domain: [1024]int{}, bound_scheduler_task: [1024]int{},
+        domain_id: int[64]{}, parent_id: int[64]{},
+        cpu_quota_us: int[64]{}, cpu_used_us: int[64]{},
+        memory_limit_pages: int[64]{}, memory_used_pages: int[64]{},
+        accelerator_limit: int[64]{}, accelerator_used: int[64]{},
+        realtime_budget_ns: int[64]{}, realtime_used_ns: int[64]{},
+        admitted_tasks: int[64]{}, rejected_tasks: int[64]{},
+        binding_count: 0, bound_pid: int[1024]{},
+        bound_domain: int[1024]{}, bound_scheduler_task: int[1024]{},
         last_result: RESOURCE_OK()
     }
     controller.domain_id[0] = 0

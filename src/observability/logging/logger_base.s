@@ -28,8 +28,8 @@ struct metric_entry {
     string name
     metric_type type
     float scalar_value
-    []float histogram_values
-    []float scalar_list
+    float[] histogram_values
+    float[] scalar_list
     map<string]string tags
     float wall_time
 }

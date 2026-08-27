@@ -33,9 +33,9 @@ func create_validator() s_mainchain_validator {
     }
 }
 
-func tokenize_input(prompt string) []int {
+func tokenize_input(prompt string) int[] {
     int i = 0
-    []int token_ids = []
+    int[] token_ids = []
     for i < len(prompt) {
         token_ids = append(token_ids, int(prompt[i]))
         i = i + 1
@@ -43,11 +43,11 @@ func tokenize_input(prompt string) []int {
     return token_ids
 }
 
-func embed_tokens([]int token_ids) [][]float {
-    [][]float embeddings = []
+func embed_tokens(int[] token_ids) float[][] {
+    float[][] embeddings = []
     int i = 0
     for i < len(token_ids) {
-        []float emb = []
+        float[] emb = []
         int j = 0
         for j < 512 {
             emb = append(emb, float(token_ids[i]) * 0.001)
@@ -59,14 +59,14 @@ func embed_tokens([]int token_ids) [][]float {
     return embeddings
 }
 
-func transformer_forward([][]float embeddings, int num_layers) [][]float {
-    [][]float output = []
+func transformer_forward(float[][] embeddings, int num_layers) float[][] {
+    float[][] output = []
     int layer = 0
     for layer < num_layers {
         int i = 0
-        [][]float layer_output = []
+        float[][] layer_output = []
         for i < len(embeddings) {
-            []float hidden = []
+            float[] hidden = []
             int j = 0
             for j < len(embeddings[i]) {
                 hidden = append(hidden, embeddings[i][j] * (1.0 - float(layer) * 0.01))
@@ -81,7 +81,7 @@ func transformer_forward([][]float embeddings, int num_layers) [][]float {
     return output
 }
 
-func sample_next_token([]float logits, float temperature, float top_p) int {
+func sample_next_token(float[] logits, float temperature, float top_p) int {
     float max_logit = 0.0
     int max_idx = 0
     int i = 0
@@ -95,7 +95,7 @@ func sample_next_token([]float logits, float temperature, float top_p) int {
     return max_idx
 }
 
-func detokenize_output([]int token_ids) string {
+func detokenize_output(int[] token_ids) string {
     string result = ""
     int i = 0
     for i < len(token_ids) {
@@ -111,23 +111,23 @@ func execute_inference_pipeline(inference_request request) inference_response {
     print("📍 [PIPELINE] Executing inference request: " + request.request_id + "\n")
     
     print("  1️⃣  Tokenizing prompt...\n")
-    []int tokens = tokenize_input(request.prompt)
+    int[] tokens = tokenize_input(request.prompt)
     print("     ✓ Tokenized " + int_to_string(len(tokens)) + " tokens\n")
     
     print("  2️⃣  Embedding tokens...\n")
-    [][]float embeddings = embed_tokens(tokens)
+    float[][] embeddings = embed_tokens(tokens)
     print("     ✓ Created embeddings [" + int_to_string(len(embeddings)) + " x 512]\n")
     
     print("  3️⃣  Running transformer layers...\n")
-    [][]float transformer_out = transformer_forward(embeddings, 28)
+    float[][] transformer_out = transformer_forward(embeddings, 28)
     print("     ✓ Completed 28-layer transformer\n")
     
     print("  4️⃣  Generating tokens...\n")
-    []int output_tokens = []
+    int[] output_tokens = []
     int gen_count = 0
     for gen_count < request.max_tokens {
         if len(embeddings) > 0 && len(embeddings[0]) > 0 {
-            []float last_hidden = embeddings[len(embeddings) - 1]
+            float[] last_hidden = embeddings[len(embeddings) - 1]
             int next_token = sample_next_token(last_hidden, request.temperature, request.top_p)
             output_tokens = append(output_tokens, next_token)
             gen_count = gen_count + 1
@@ -156,7 +156,7 @@ func validate_mainchain_step_1(s_mainchain_validator validator) {
     print("═══════════════════════════════════════════════════════════\n")
     
     string prompt = "What is AI"
-    []int tokens = tokenize_input(prompt)
+    int[] tokens = tokenize_input(prompt)
     
     if len(tokens) > 0 {
         print("✅ PASS Tokenization working\n")
@@ -175,12 +175,12 @@ func validate_mainchain_step_2(s_mainchain_validator validator) {
     print("🧪 VALIDATION STEP 2 Embedding\n")
     print("═══════════════════════════════════════════════════════════\n")
     
-    []int tokens = []
+    int[] tokens = []
     tokens = append(tokens, 72)
     tokens = append(tokens, 101)
     tokens = append(tokens, 108)
     
-    [][]float embeddings = embed_tokens(tokens)
+    float[][] embeddings = embed_tokens(tokens)
     
     if len(embeddings) == 3 && len(embeddings[0]) == 512 {
         print("✅ PASS Embedding working\n")
@@ -199,7 +199,7 @@ func validate_mainchain_step_4(s_mainchain_validator validator) {
     print("🧪 VALIDATION STEP 3 Sampling\n")
     print("═══════════════════════════════════════════════════════════\n")
     
-    []float logits = []
+    float[] logits = []
     int i = 0
     for i < 50 {
         logits = append(logits, float(i) * 0.1)
@@ -224,7 +224,7 @@ func validate_mainchain_step_4(s_mainchain_validator validator) {
     print("🧪 VALIDATION STEP 4 Detokenization\n")
     print("═══════════════════════════════════════════════════════════\n")
     
-    []int token_ids = []
+    int[] token_ids = []
     token_ids = append(token_ids, 72)
     token_ids = append(token_ids, 101)
     token_ids = append(token_ids, 108)

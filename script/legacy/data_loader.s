@@ -72,6 +72,6 @@ func main() {
     io.println("PythonEnglish textexample: implementationEnglish textLRUcache.class LRUCache:")
 }
 package os {
-    extern func args() []string
+    extern func args() string[]
     extern func exit(i64 code)
 }

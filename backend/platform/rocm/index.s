@@ -3,7 +3,7 @@ package neurx.platform.rocm.index
 struct rocm_module_info {
     string module_name
     string description
-    []string exports
+    string[] exports
     string status
 }
 
@@ -66,7 +66,7 @@ func get_rocm_modules_info() []rocm_module_info {
     ]
 }
 
-func get_rocm_architecture_support() []string {
+func get_rocm_architecture_support() string[] {
     [
         "CDNA: MI250, MI250X, MI300, MI300X, MI325X",
         "RDNA 3: RX 7900 XTX, RX 9070 XT (early)",
@@ -75,7 +75,7 @@ func get_rocm_architecture_support() []string {
     ]
 }
 
-func get_rocm_feature_matrix() []string {
+func get_rocm_feature_matrix() string[] {
     [
         "✓ Multi-device support",
         "✓ HIP Memory Management",
@@ -100,7 +100,7 @@ func get_rocm_feature_matrix() []string {
     ]
 }
 
-func get_comparison_with_vllm_sglang() []string {
+func get_comparison_with_vllm_sglang() string[] {
     [
         "NeurX ROCm vs vLLM:",
         "  - NeurX: Compile-time optimization, S language, direct hardware access",
@@ -131,7 +131,7 @@ func print_rocm_setup_guide() string {
     guide + "6. Install: make -f Makefile.rocm install"
 }
 
-func rocm_deployment_checklist() []string {
+func rocm_deployment_checklist() string[] {
     [
         "Pre-deployment:",
         "  [ ] ROCm 5.7+ installed",

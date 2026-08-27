@@ -1,10 +1,10 @@
 package neurx.model.integration
 
 struct training_batch {
-    [][]int token_ids
-    [][]int input_ids
-    [][]int labels
-    [][]int attention_mask
+    int[][] token_ids
+    int[][] input_ids
+    int[][] labels
+    int[][] attention_mask
     int batch_size
     int seq_len
     long long num_tokens
@@ -42,16 +42,16 @@ struct model_trainer {
 }
 
 func create_training_batch(
-    []string texts,
+    string[] texts,
     int batch_size,
     int max_seq_len
 ) training_batch {
     int num_sequences = len(texts)
     training_batch {
-        token_ids: [][]int{cap: batch_size},
-        input_ids: [][]int{cap: batch_size},
-        labels: [][]int{cap: batch_size},
-        attention_mask: [][]int{cap: batch_size},
+        token_ids: int[][]{cap: batch_size},
+        input_ids: int[][]{cap: batch_size},
+        labels: int[][]{cap: batch_size},
+        attention_mask: int[][]{cap: batch_size},
         batch_size: num_sequences,
         seq_len: max_seq_len,
         num_tokens: long(num_sequences * max_seq_len),
@@ -92,8 +92,8 @@ func training_step(
 
 func eval_step(
     model_trainer trainer,
-    [][]int eval_ids,
-    [][]int eval_labels
+    int[][] eval_ids,
+    int[][] eval_labels
 ) double {
     double eval_loss = 0.0
     trainer.state.eval_count = trainer.state.eval_count + 1

@@ -150,12 +150,12 @@ func collect_gpt_parameters(gptmodel model) []auto_grad_tensor {
     params
 }
 
-func forward(gptmodel self, []int token_ids) auto_grad_tensor {
+func forward(gptmodel self, int[] token_ids) auto_grad_tensor {
     int batch_size = self.config.batch_size
     int seq_len = self.config.seq_len
     int d_model = self.config.embed_dim
     auto_grad_tensor token_emb = forward(self.token_embed, token_ids, batch_size, seq_len)
-    []int pos_ids = new int[batch_size * seq_len]
+    int[] pos_ids = new int[batch_size * seq_len]
     int idx = 0
     for idx < batch_size * seq_len {
         pos_ids[idx] = mod(idx, seq_len)
@@ -225,7 +225,7 @@ struct training_state {
     int current_epoch
     float best_loss
     int best_step
-    []float loss_history
+    float[] loss_history
     []training_metrics metrics_history
     bool trained
 }
@@ -236,21 +236,21 @@ func new_training_state() training_state {
         current_epoch: 0,
         best_loss: INF,
         best_step: 0,
-        loss_history: []float{cap: 1000},
+        loss_history: float[]{cap: 1000},
         metrics_history: []training_metrics{cap: 100},
         trained: false,
     }
 }
 
 struct data_loader {
-    []int tokens
+    int[] tokens
     int total_tokens
     int current_position
     int batch_size
     int seq_len
 }
 
-func new_data_loader([]int tokens, int batch_size, int seq_len) data_loader {
+func new_data_loader(int[] tokens, int batch_size, int seq_len) data_loader {
     data_loader {
         tokens: tokens,
         total_tokens: len(tokens),
@@ -260,9 +260,9 @@ func new_data_loader([]int tokens, int batch_size, int seq_len) data_loader {
     }
 }
 
-func generate_synthetic_data(int n_tokens, int vocab_size) []int {
-    []int data = new int[n_tokens]
-    []int pattern = [1, 23, 45, 67, 89, 12, 34, 56]
+func generate_synthetic_data(int n_tokens, int vocab_size) int[] {
+    int[] data = new int[n_tokens]
+    int[] pattern = [1, 23, 45, 67, 89, 12, 34, 56]
     int pattern_len = 8
     int seed = 42
     int i = 0
@@ -279,14 +279,14 @@ func generate_synthetic_data(int n_tokens, int vocab_size) []int {
 }
 
 struct batch_2 {
-    []int input_ids
-    []int target_ids
+    int[] input_ids
+    int[] target_ids
 }
 
 func next_batch(data_loader loader) int {
 }
 
-func compute_cross_entropy_loss(auto_grad_tensor logits, []int targets) auto_grad_tensor {
+func compute_cross_entropy_loss(auto_grad_tensor logits, int[] targets) auto_grad_tensor {
     cross_entropy_loss(logits, targets)
 }
 
@@ -296,12 +296,12 @@ struct checkpoint_info {
     float loss
     int timestamp
     int param_count
-    []float model_weights_hash
+    float[] model_weights_hash
 }
 
 func format_checkpoint_v2(int step, float loss, float best_loss, int best_step,
                            int param_count, gptconfig config,
-                           []float loss_window) string {
+                           float[] loss_window) string {
     string content = ""
     content = content + "# ============================================\n"
     content = content + "# NeurX GPT checkpoint v2\n"
@@ -340,7 +340,7 @@ func get_timestamp() string {
 
 func save_checkpoint_v2(string output_dir, int step, float loss, float best_loss,
                           int best_step, gptmodel model, gptconfig config,
-                          []float loss_window) string {
+                          float[] loss_window) string {
     string filename = "step_" + string(step) + ".neurx"
     string filepath = output_dir + "/" + filename
     int param_count = count_params(model)
@@ -360,7 +360,7 @@ struct training_result {
     float final_loss
     float best_loss
     int total_time_ms
-    []string saved_checkpoints
+    string[] saved_checkpoints
 }
 
 func run_training(gptconfig config) training_result {
@@ -401,14 +401,14 @@ func run_training(gptconfig config) training_result {
     println("")
     println("[3/5] Preparing training data...")
     int total_train_tokens = config.max_steps * config.batch_size * config.seq_len * 2
-    []int train_data = generate_synthetic_data(total_train_tokens, config.vocab_size)
+    int[] train_data = generate_synthetic_data(total_train_tokens, config.vocab_size)
     data_loader dataloader = new_data_loader(train_data, config.batch_size, config.seq_len)
     println("  Synthetic data generated: ", len(train_data), " tokens")
     println("  Effective epochs per step: ~1")
     println("")
     training_state state = new_training_state()
-    []string checkpoints_saved = new []string
-    []float recent_losses = new float[10]
+    string[] checkpoints_saved = new string[]
+    float[] recent_losses = new float[10]
     println("[4/5] Starting training loop...")
     println("")
     println("Step |   Loss   |  Best   | GradNorm | LR       | Time(ms)")
@@ -418,8 +418,8 @@ func run_training(gptconfig config) training_result {
     for step < config.max_steps {
         int step_start = get_time_ms()
         next_batch(dataloader)
-        []int input_ids = []int{}
-        []int target_ids = []int{}
+        int[] input_ids = int[]{}
+        int[] target_ids = int[]{}
         auto_grad_tensor logits = forward(model, input_ids)
         auto_grad_tensor loss_tensor = compute_cross_entropy_loss(logits, target_ids)
         float loss_val = item(loss_tensor.data)
@@ -518,7 +518,7 @@ func check_should_save(int step, int every_n) bool {
     if every_n <= 0 { return true }
     return mod(step, every_n) == 0 && step > 0
 }
-func save_manifest(string manifest_path, []string checkpoints) void:
+func save_manifest(string manifest_path, string[] checkpoints) void:
     content = "# NeurX checkpoint manifest\n"
     content += "# Generated: " + get_timestamp() + "\n\n"
     content += "[checkpoints]\n"

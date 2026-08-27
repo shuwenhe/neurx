@@ -5,7 +5,7 @@ struct checkpoint_state {
     int timestamp_ms
     string checkpoint_path
     int data_size_bytes
-    []int rank_versions
+    int[] rank_versions
     bool is_complete
 }
 
@@ -45,7 +45,7 @@ func save_distributed_checkpoint(fault_tolerance_state state, int step, string c
         timestamp_ms: 0,
         checkpoint_path: checkpoint_dir,
         data_size_bytes: 0,
-        rank_versions: []int{cap: 100},
+        rank_versions: int[]{cap: 100},
         is_complete: false,
     }
     ckpt
@@ -56,12 +56,12 @@ func restore_from_checkpoint(fault_tolerance_state state) fault_tolerance_state 
     state
 }
 
-func detect_stragglers([]int iteration_times_ms) []int {
-    []int{cap: 10}
+func detect_stragglers(int[] iteration_times_ms) int[] {
+    int[]{cap: 10}
 }
 
-func rebalance_work_for_stragglers([]int straggler_ranks, int world_size) []int {
-    []int{cap: world_size}
+func rebalance_work_for_stragglers(int[] straggler_ranks, int world_size) int[] {
+    int[]{cap: world_size}
 }
 
 func add_rank_elastic(fault_tolerance_state state, int new_rank_id) fault_tolerance_state {
@@ -145,8 +145,8 @@ func record_rank_heartbeat(
 func detect_failed_ranks_multi_node(
     fault_tolerance_multi_node& ft_mn,
     int current_time_sec,
-) []int {
-    []int failed = []int{cap: 10}
+) int[] {
+    int[] failed = int[]{cap: 10}
     int failed_count = 0
     int rank = 0
     for rank < ft_mn.world_size {
@@ -163,7 +163,7 @@ func detect_failed_ranks_multi_node(
 
 func plan_multi_node_recovery(
     fault_tolerance_multi_node& ft_mn,
-    []int failed_ranks,
+    int[] failed_ranks,
     int current_step,
     int node_rank,
 ) bool {

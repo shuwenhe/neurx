@@ -19,7 +19,7 @@ func main() {
         println("Known keys: human-eval mbpp apps codexglue code-search-net codeparrot")
         return 1
     }
-    []string items = split_commas(keys)
+    string[] items = split_commas(keys)
     int rc = 0
     int i = 0
     for i < len(items) {
@@ -59,7 +59,7 @@ func dataset_root() string {
 
 func clone_from_file(string root, string list_file, bool force) int {
     string list_text = runtime_run_command_output("cat " + runtime_shell_escape(list_file))
-    []string lines = split_lines(list_text)
+    string[] lines = split_lines(list_text)
     int i = 0
     for i < len(lines) {
         string line = trim(lines[i])
@@ -83,8 +83,8 @@ func clone_from_file(string root, string list_file, bool force) int {
     0
 }
 
-func split_commas(string text) []string {
-    []string out = []string{cap: 0}
+func split_commas(string text) string[] {
+    string[] out = string[]{cap: 0}
     string current = ""
     int i = 0
     for i < len(text) {
@@ -174,8 +174,8 @@ func basename(string path) string {
     out
 }
 
-func split_lines(string text) []string {
-    []string lines = []string{cap: 0}
+func split_lines(string text) string[] {
+    string[] lines = string[]{cap: 0}
     string current = ""
     int i = 0
     for i < len(text) {
