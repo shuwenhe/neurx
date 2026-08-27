@@ -6,7 +6,7 @@ struct signal_manager {
     int64 active_signals
 }
 
-var global_signal_manager signal_manager
+signal_manager global_signal_manager
 
 func signal_manager_init() bool {
     int32 i = 0

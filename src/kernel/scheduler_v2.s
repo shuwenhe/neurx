@@ -32,7 +32,7 @@ struct rq {
     int timestamp
 }
 
-var g_runqueues rq[]
+rq g_runqueues[]
 
 func init_scheduler(int nr_cpus) int {
     g_runqueues = new rq[nr_cpus]

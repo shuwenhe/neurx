@@ -46,10 +46,10 @@ struct ext4_superblock {
     int magic
 }
 
-var g_superblock ext4_superblock
-var g_block_groups ext4_block_group[]
-var g_inode_cache ext4_inode[]
-var g_nr_block_groups int
+ext4_superblock g_superblock
+ext4_block_group g_block_groups[]
+ext4_inode g_inode_cache[]
+int g_nr_block_groups
 
 func ext4_init_superblock(int total_blocks, int total_inodes) int {
     var block_size = 4096

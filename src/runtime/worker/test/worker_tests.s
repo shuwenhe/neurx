@@ -14,8 +14,8 @@ struct TestResult {
 }
 
 var test_results []TestResult
-var total_tests i32 = 0
-var passed_tests i32 = 0
+i32 total_tests = 0
+i32 passed_tests = 0
 
 func LogTest(test_name string, condition i32, error_msg string) {
     total_tests++

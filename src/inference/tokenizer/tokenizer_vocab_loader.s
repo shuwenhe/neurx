@@ -16,7 +16,7 @@ struct vocab_database {
     bool loaded
 }
 
-var global_vocab vocab_database = vocab_database{entries: []vocab_entry{}, total_count: 0, loaded: false}
+vocab_database global_vocab = vocab_database{entries: []vocab_entry{}, total_count: 0, loaded: false}
 
 func binary_search_vocab([]vocab_entry entries, int token_id) vocab_entry {
     int left = 0

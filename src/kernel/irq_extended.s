@@ -27,9 +27,9 @@ struct irq_chip {
     int eoi
 }
 
-var g_irq_descriptors irq_desc[]
-var g_irq_chips irq_chip[]
-var g_nr_irqs int
+irq_desc g_irq_descriptors[]
+irq_chip g_irq_chips[]
+int g_nr_irqs
 
 func init_irq_system(int nr_irqs) int {
     g_nr_irqs = nr_irqs

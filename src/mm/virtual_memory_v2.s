@@ -35,10 +35,10 @@ struct mm_struct {
     int nr_vmas
 }
 
-var g_page_structures page_struct[]
-var g_lru_head int
-var g_lru_tail int
-var g_total_pages int
+page_struct g_page_structures[]
+int g_lru_head
+int g_lru_tail
+int g_total_pages
 
 func init_vm(int total_pages) int {
     g_total_pages = total_pages

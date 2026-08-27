@@ -11,7 +11,7 @@ struct vocabulary_cache {
     int num_tokens
 }
 
-var global_vocab vocabulary_cache = vocabulary_cache{
+vocabulary_cache global_vocab = vocabulary_cache{
     vocab_map: map[string]string{},
     loaded: false,
     num_tokens: 0,

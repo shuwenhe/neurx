@@ -33,7 +33,7 @@ struct model_registry_state {
     configs map[string]architecture_config
     is_initialized bool
 }
-var global_registry model_registry_state = model_registry_state {
+model_registry_state global_registry = model_registry_state {
     factories: make(map[string]model_factory),
     configs: make(map[string]architecture_config),
     is_initialized: false,
